@@ -68,20 +68,33 @@ class LivePhoto
                 //
                 // The video is then located at the end of the file, so we can get the offset.
                 // Match each DirectoryItemSemantic to find MotionPhoto, then get the length.
+                //
+                // There are cases where Google decided to completely screw up and not include
+                // the length for one of the *earlier* DirectoryItemSemantic; in this case we still
+                // hope that the video is located at the end, and thus the last DirectoryItemLength
+                // seen before the DirectoryItemSemantic of MotionPhoto is the length of the video.
+                // https://github.com/pulsejet/memories/issues/965
                 $path = $file->getStorage()->getLocalFile($file->getInternalPath())
                     ?: throw new \Exception('[BUG][LivePhoto] Failed to get local file path');
                 $extExif = Exif::getExifWithDuplicates($path);
+                $lastLength = null; // last DirectoryItemLength seen
 
                 foreach ($extExif as $key => $value) {
                     if (str_ends_with($key, ':DirectoryItemSemantic')) {
                         if ('MotionPhoto' === $value) {
-                            $videoLength = $extExif[str_replace('Semantic', 'Length', $key)];
+                            // Found the video, try to find the corresponding semantic length
+                            // If we can't find it, use the last length seen
+                            $videoLength = $extExif[str_replace('Semantic', 'Length', $key)] ?? $lastLength;
                             if (\is_int($videoLength) && $videoLength > 0) {
                                 $videoOffset = $file->getSize() - $videoLength;
 
                                 return "self__traileroffset={$videoOffset}";
                             }
                         }
+                    }
+
+                    if (str_ends_with($key, ':DirectoryItemLength')) {
+                        $lastLength = $value;
                     }
                 }
 

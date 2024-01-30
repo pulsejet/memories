@@ -255,6 +255,8 @@ OC.L10N.register(
     "Failed to download files" : "Kunne ikke laste ned filer",
     "Failed to favorite files." : "Kunne ikke velge favorittfiler.",
     "Failed to favorite some files." : "Kunne ikke favoritt noen filer.",
-    "Failed to favorite {fileName}." : "Kunne ikke favoritt {fileName}."
+    "Failed to favorite {fileName}." : "Kunne ikke favoritt {fileName}.",
+    "Yes" : "Ja",
+    "No" : "Nei"
 },
 "nplurals=2; plural=(n != 1);");

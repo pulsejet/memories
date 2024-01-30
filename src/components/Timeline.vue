@@ -1065,11 +1065,23 @@ export default defineComponent({
         res1.push(photo);
 
         // Remove extension
-        const basename = utils.removeExtension(photo.basename ?? String());
+        let basename = utils.removeExtension(photo.basename ?? String());
         if (!basename) continue; // huh?
 
         // Store RAW files for stacking
         if (this.config.stack_raw_files && photo.mimetype === this.c.MIME_RAW) {
+          // Google's RAW naming is inconsistent and retarded.
+          // We will handle this on a case-to-case basis, unless there's
+          // a strong argument to always take the basename only upto the
+          // first dot.
+          // https://github.com/pulsejet/memories/issues/927
+          // https://github.com/pulsejet/memories/issues/1006
+          if (basename.includes('.ORIGINAL')) {
+            // Consider basename only upto the first dot
+            basename = basename.split('.', 1)[0];
+          }
+
+          // Store the RAW file for stacking with the usable basename
           const files = toStack.get(basename);
           if (!files) {
             toStack.set(basename, [photo]);
@@ -1095,10 +1107,12 @@ export default defineComponent({
         const basename = utils.removeExtension(photo.basename ?? String());
         const files = toStack.get(basename) ?? [];
 
-        // Also allow *one* more extension in the filename
+        // If a second dot is present in the name, then split till the first dot
         // https://github.com/pulsejet/memories/issues/927
+        // https://github.com/pulsejet/memories/issues/1006
         if (basename.includes('.')) {
-          const subname = utils.removeExtension(basename);
+          // Consider basename only upto the first dot
+          const subname = basename.split('.', 1)[0];
           files.push(...(toStack.get(subname) ?? []));
         }
 
