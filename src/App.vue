@@ -60,7 +60,7 @@
     </NcAppContent>
 
     <Settings :open.sync="settingsOpen" />
-    <UploadModal :open.sync="uploadOpen" @onClose="hideUploadModal" />
+    <UploadModal :opened.sync="uploadOpen" @onClose="hideUploadModal" />
 
     <Viewer />
     <Sidebar />

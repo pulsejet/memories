@@ -3,12 +3,8 @@
     <XLoadingIcon v-if="loadingAlbums" class="loading-icon centered" />
 
     <div class="search">
-      <NcTextField
-        :autofocus="true"
-        :value.sync="search"
-        :label="t('memories', 'Search')"
-        :placeholder="t('memories', 'Search')"
-      >
+      <NcTextField :autofocus="true" :value.sync="search" :label="t('memories', 'Search')"
+        :placeholder="t('memories', 'Search')">
         <MagnifyIcon :size="16" />
       </NcTextField>
     </div>
@@ -16,12 +12,9 @@
     <ul class="albums-container">
       <AlbumsList ref="albumsList" :albums="filteredList" :link="false" @click="toggleAlbumSelection">
         <template #extra="{ album }">
-          <div
-            class="check-circle-icon"
-            :class="{
-              'check-circle-icon--active': selection.has(album),
-            }"
-          >
+          <div class="check-circle-icon" :class="{
+            'check-circle-icon--active': selection.has(album),
+          }">
             <CheckIcon :size="20" />
           </div>
         </template>
@@ -29,27 +22,17 @@
     </ul>
 
     <div class="actions">
-      <NcButton
-        :aria-label="t('memories', 'Create new album.')"
-        :disabled="disabled"
-        class="new-album-button"
-        type="tertiary"
-        @click="showAlbumCreationForm = true"
-      >
+      <NcButton :aria-label="t('memories', 'Create new album.')" :disabled="disabled" class="new-album-button"
+        type="tertiary" @click="showAlbumCreationForm = true">
         <template #icon>
           <PlusIcon />
         </template>
         {{ t('memories', 'Create new album') }}
       </NcButton>
 
-      <div class="submit-btn-wrapper">
-        <NcButton
-          class="new-album-button"
-          type="primary"
-          :aria-label="t('memories', 'Save changes')"
-          :disabled="disabled"
-          @click="submit"
-        >
+      <div class="submit-btn-wrapper" v-if="!hideSaveBtn">
+        <NcButton class="new-album-button" type="primary" :aria-label="t('memories', 'Save changes')" :disabled="disabled"
+          @click="submit">
           {{ t('memories', 'Save changes') }}
         </NcButton>
         <span class="remove-notice" v-if="deselection.size > 0">
@@ -63,13 +46,8 @@
     </div>
   </div>
 
-  <AlbumForm
-    v-else
-    :display-back-button="true"
-    :title="t('memories', 'New album')"
-    @back="showAlbumCreationForm = false"
-    @done="albumCreatedHandler"
-  />
+  <AlbumForm v-else :display-back-button="true" :title="t('memories', 'New album')" @back="showAlbumCreationForm = false"
+    @done="albumCreatedHandler" />
 </template>
 
 <script lang="ts">
@@ -106,10 +84,16 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+
+    hideSaveBtn: {
+      type: Boolean,
+      default: false,
+    }
   },
 
   emits: {
     select: (selection: IAlbum[], deselection: IAlbum[]) => true,
+    toggleAlbum: (selection: IAlbum[], deselection: IAlbum[]) => true,
   },
 
   components: {
@@ -225,6 +209,7 @@ export default defineComponent({
         this.deselection.delete(album);
       }
 
+      this.$emit('toggleAlbum', Array.from(this.selection), Array.from(this.deselection));
       this.forceUpdate();
     },
 
