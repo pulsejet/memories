@@ -3,17 +3,35 @@
         <template #title>
             {{ t('memories', 'Upload') }}
         </template>
+        <div class="photos">
+            <NcButton @click="select" class="button" :disabled="processing">
+                {{ t('memories', 'Select photos') }}
+            </NcButton>
+        </div>
         <div class="subtitle" @click="showAlbums">
+            <div class="icon">
+                <ChevronDown :size="20" v-if="!albumsShown" />
+                <ChevronUp :size="20" v-if="albumsShown" />
+            </div>
             {{ t('memories', 'Add to albums') }}
         </div>
         <div v-bind:class="{ spoiler: true, opened: albumsShown }">
-            <AlbumPicker hideSaveBtn @toggleAlbum="toggleAlbum" :photos="photos" :disabled="!!opsTotal" />
+            <AlbumPicker hideSaveBtn @toggleAlbum="toggleAlbum" :photos="photos" :disabled="processing" />
         </div>
         <div class="subtitle" @click="showTags">
+            <div class="icon">
+                <ChevronDown :size="20" v-if="!tagsShown" />
+                <ChevronUp :size="20" v-if="tagsShown" />
+            </div>
             {{ t('memories', 'Assign tags') }}
         </div>
         <div v-bind:class="{ spoiler: true, opened: tagsShown }">
-            TAGS
+            <EditTags ref="tags" :photos="photos" :disabled="processing" />
+        </div>
+        <div class="actions">
+            <NcButton @click="upload" class="button" type="error" v-if="photos" :disabled="processing">
+                {{ t('memories', 'Upload') }}
+            </NcButton>
         </div>
     </Modal>
 </template>
@@ -24,6 +42,12 @@ import { defineComponent, type PropType } from 'vue';
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
 import AlbumPicker from './AlbumPicker.vue';
+import EditTags from './EditTags.vue';
+
+import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+import ChevronDown from 'vue-material-design-icons/ChevronDown.vue';
+import ChevronUp from 'vue-material-design-icons/ChevronUp.vue';
+
 import type { IAlbum, IPhoto } from '@typings';
 
 export default defineComponent({
@@ -42,6 +66,10 @@ export default defineComponent({
     components: {
         Modal,
         AlbumPicker,
+        EditTags,
+        ChevronDown,
+        ChevronUp,
+        NcButton,
     },
     mixins: [
         ModalMixin,
@@ -50,8 +78,10 @@ export default defineComponent({
     data: () => ({
         photos: [] as IPhoto[],
         opsTotal: 0,
-        albumsShown: false,
-        tagsShown: false,
+        albumsShown: true,
+        tagsShown: true,
+        processing: false,
+        selectedAlbums: [] as IAlbum[],
     }),
 
     mounted() {
@@ -63,6 +93,11 @@ export default defineComponent({
     },
 
     computed: {
+        refs() {
+            return this.$refs as {
+                tags?: InstanceType<typeof EditTags>;
+            };
+        },
     },
 
     methods: {
@@ -76,7 +111,7 @@ export default defineComponent({
         },
 
         toggleAlbum(selectedAlbums: IAlbum[]) {
-            console.log({ selectedAlbums });
+            this.selectedAlbums = selectedAlbums;
         },
 
         showAlbums() {
@@ -85,9 +120,23 @@ export default defineComponent({
 
         showTags() {
             this.tagsShown = !this.tagsShown;
+        },
+
+        select() {
 
         },
-    },
+
+        async upload() {
+            // Tags may be created which might throw
+            let tagsResult: { add: number[]; remove: number[] } | null = null;
+            try {
+                tagsResult = (await this.refs.tags?.result?.()) ?? null;
+            } catch (e) {
+            }
+
+            console.log({ tagsResult, albums: this.selectedAlbums });
+        },
+    }
 });
 </script>
 
@@ -95,11 +144,8 @@ export default defineComponent({
 .subtitle {
     font-weight: 700;
     margin: 1rem 0 0.5rem;
-
-    &::after {
-        content: 'TOGGLE';
-        cursor: pointer;
-    }
+    cursor: pointer;
+    display: flex;
 }
 
 .spoiler {
@@ -110,6 +156,12 @@ export default defineComponent({
     &.opened {
         height: auto;
     }
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.5rem 0 0;
 }
 </style>
   
