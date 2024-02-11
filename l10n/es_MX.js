@@ -4,6 +4,7 @@ OC.L10N.register(
     "Download" : "Descargar",
     "Memories" : "Recuerdos",
     "Settings" : "Ajustes",
+    "People" : "Personas",
     "Folders" : "Carpetas",
     "Favorites" : "Favoritos",
     "Videos" : "Videos",

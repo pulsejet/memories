@@ -96,6 +96,7 @@ OC.L10N.register(
     "Contrast" : "Contraste",
     "Flip X" : "Voltiar la exa X",
     "Flip Y" : "Voltiar la exa Y",
+    "HSV" : "HSV",
     "Hue" : "Tonu",
     "Saturation" : "Saturación",
     "Value" : "Valor",
