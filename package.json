@@ -55,6 +55,7 @@
     "vue": "^2.7.15",
     "vue-material-design-icons": "^5.2.0",
     "vue-router": "^3.6.5",
+    "vue-upload-component": "^2.8.23",
     "vue-virtual-scroller": "1.1.2",
     "vue2-leaflet": "^2.7.1",
     "webdav": "^5.3.1",
