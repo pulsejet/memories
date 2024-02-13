@@ -4,7 +4,8 @@
             {{ t('memories', 'Upload') }}
         </template>
         <div class="photos">
-            <VueUploadComponent :multiple="true" ref="upload" v-model="dummy" @input-file="select" @input-filter="filter">
+            <VueUploadComponent accept="image/*" :multiple="true" ref="upload" v-model="dummy" @input-file="select"
+                @input-filter="filter">
                 <NcButton @click="select" class="button" :disabled="processing">
                     {{ t('memories', 'Select photos') }}
                 </NcButton>
@@ -12,7 +13,7 @@
             <div class="previews">
                 <div v-for="photo in photos">
                     <div class="preview">
-                        <img :src=photo.preview width="50" height="50" />
+                        <img :src=photo.preview />
                         <div class="deleteIcon" @click="removePhoto" :data-id=photo.id>
                             <Delete />
                         </div>
@@ -41,7 +42,7 @@
             <EditTags ref="tags" :photos="dummy" :disabled="processing" />
         </div>
         <div class="actions">
-            <div class="progress-bar" v-if="processing">
+            <div class="progress-bar" v-if="progress > 0">
                 <NcProgressBar :value="progress" :error="true" />
             </div>
             <NcButton @click="upload" class="button" type="error" v-if="photos" :disabled="processing">
@@ -178,23 +179,29 @@ export default defineComponent({
             }
         },
 
-        removePhoto(e: MouseEvent) {
-            console.log(e.currentTarget);
-            // this.photos = this.photos.filter((photo) => photo.id === e.target.dataset.id);
+        removePhoto(e: any) {
+            // @ts-ignore
+            const id = e.currentTarget?.getAttribute('data-id');
+            this.photos = this.photos.filter((photo) => photo.id != id);
         },
 
         filter() {
         },
 
         async upload() {
+            this.progress = 0;
+            this.processing = true;
             // Tags may be created which might throw
             let tagsResult: { add: number[]; remove: number[] } | null = null;
             try {
                 tagsResult = (await this.refs.tags?.result?.()) ?? null;
+                
+                console.log({ tagsResult, albums: this.selectedAlbums, photos: this.photos });
             } catch (e) {
+            } finally {
+                this.progress = 0;
+                this.processing = false;
             }
-
-            console.log({ tagsResult, albums: this.selectedAlbums });
         },
     }
 });
@@ -222,6 +229,12 @@ export default defineComponent({
     display: flex;
     justify-content: flex-end;
     padding: 0.5rem 0 0;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.progress-bar {
+    width: 100%;
 }
 
 .previews {
@@ -231,7 +244,14 @@ export default defineComponent({
 
 .preview {
     position: relative;
-    margin: 0 5px;
+    margin: 5px;
+    width: 50px;
+    height: 50px;
+
+    img {
+        width: 100%;
+        height: 100%;
+    }
 }
 
 .deleteIcon {
@@ -241,7 +261,11 @@ export default defineComponent({
     background: #ffffff99;
     border-radius: 50%;
     padding: 5px;
-    cursor: pointer;
+
+    &,
+    & svg {
+        cursor: pointer;
+    }
 }
 </style>
   
