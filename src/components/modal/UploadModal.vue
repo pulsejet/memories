@@ -10,6 +10,12 @@
                     {{ t('memories', 'Select photos') }}
                 </NcButton>
             </VueUploadComponent>
+            <div class="upload-path">
+                Photos will be uploaded to <strong>{{ currentRouteName }}</strong>
+            </div>
+            <div class="upload-note">
+                Navigate to desired folder to upload files there
+            </div>
             <div class="previews">
                 <div v-for="photo in photos">
                     <div class="preview">
@@ -45,7 +51,7 @@
             <div class="progress-bar" v-if="progress > 0">
                 <NcProgressBar :value="progress" :error="true" />
             </div>
-            <NcButton @click="upload" class="button" type="error" v-if="photos" :disabled="processing">
+            <NcButton @click="upload" class="button" type="error" v-if="photos" :disabled="processing || !photos.length">
                 {{ t('memories', 'Upload') }}
             </NcButton>
         </div>
@@ -127,6 +133,10 @@ export default defineComponent({
                 tags?: InstanceType<typeof EditTags>;
             };
         },
+        currentRouteName() {
+            const route = this.$route.name;
+            return route?.startsWith('folders') ? '/' + route.split('/').slice(1).join('/') : '/';
+        }
     },
 
     methods: {
@@ -195,7 +205,7 @@ export default defineComponent({
             let tagsResult: { add: number[]; remove: number[] } | null = null;
             try {
                 tagsResult = (await this.refs.tags?.result?.()) ?? null;
-                
+
                 console.log({ tagsResult, albums: this.selectedAlbums, photos: this.photos });
             } catch (e) {
             } finally {
@@ -266,6 +276,12 @@ export default defineComponent({
     & svg {
         cursor: pointer;
     }
+}
+
+.upload-note {
+    color: #00000088;
+    font-style: italic;
+    font-size: small;
 }
 </style>
   
