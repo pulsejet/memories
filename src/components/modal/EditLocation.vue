@@ -9,31 +9,25 @@
         <NcActions :inline="2">
           <NcActionButton v-if="dirty" :aria-label="t('memories', 'Reset')" @click="reset()" :disabled="disabled">
             {{ t('memories', 'Reset') }}
-            <template #icon> <UndoIcon :size="20" /> </template>
+            <template #icon>
+              <UndoIcon :size="20" />
+            </template>
           </NcActionButton>
 
-          <NcActionButton
-            v-if="lat && lon"
-            :aria-label="t('memories', 'Remove location')"
-            @click="clear()"
-            :disabled="disabled"
-          >
+          <NcActionButton v-if="lat && lon" :aria-label="t('memories', 'Remove location')" @click="clear()"
+            :disabled="disabled">
             {{ t('memories', 'Remove location') }}
-            <template #icon> <CloseIcon :size="20" /> </template>
+            <template #icon>
+              <CloseIcon :size="20" />
+            </template>
           </NcActionButton>
         </NcActions>
       </div>
     </div>
 
-    <NcTextField
-      :value.sync="searchBar"
-      :placeholder="t('memories', 'Search location / landmark')"
-      :disabled="disabled"
-      trailing-button-icon="arrowRight"
-      :show-trailing-button="searchBar.length > 0 && !loading"
-      @trailing-button-click="search"
-      @keypress.enter="search"
-    >
+    <NcTextField :value.sync="searchBar" :placeholder="t('memories', 'Search location / landmark')" :disabled="disabled"
+      trailing-button-icon="arrowRight" :show-trailing-button="searchBar.length > 0 && !loading"
+      @trailing-button-click="search" @keypress.enter="search">
       <MagnifyIcon :size="16" />
     </NcTextField>
 
@@ -48,14 +42,8 @@
     <XLoadingIcon class="loading-spinner" v-if="loading" />
 
     <ul v-if="options.length > 0">
-      <li
-        v-for="option in options"
-        :key="option.osm_id"
-        :disabled="disabled"
-        @click="select(option)"
-        @keypress.enter="select(option)"
-        tabindex="0"
-      >
+      <li v-for="option in options" :key="option.osm_id" :disabled="disabled" @click="select(option)"
+        @keypress.enter="select(option)" tabindex="0">
         {{ option.display_name }}
       </li>
     </ul>
@@ -68,10 +56,10 @@ import { defineComponent } from 'vue';
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
 
 import type { IPhoto } from '@typings';
 
@@ -238,20 +226,21 @@ export default defineComponent({
     padding: 4px;
     margin-bottom: -10px;
 
-    > .coords {
+    >.coords {
       display: inline-block;
       flex-grow: 1;
       min-height: 36px;
 
-      > span {
+      >span {
         user-select: all;
       }
     }
 
-    > .action {
+    >.action {
       margin-top: -10px;
       margin-left: 2px;
-      > * {
+
+      >* {
         cursor: pointer;
       }
     }
@@ -260,6 +249,7 @@ export default defineComponent({
   .osm-attribution {
     margin: -3px 4px;
     font-size: 0.65em;
+
     a {
       color: var(--color-primary);
     }

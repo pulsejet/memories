@@ -3,31 +3,16 @@
 
   <FirstStart v-else-if="isFirstStart" />
 
-  <NcContent
-    app-name="memories"
-    v-else-if="!isConfigUnknown"
-    :class="{
-      'has-nav': showNavigation,
-    }"
-  >
+  <NcContent app-name="memories" v-else-if="!isConfigUnknown" :class="{
+    'has-nav': showNavigation,
+  }">
     <NcAppNavigation v-if="showNavigation">
       <template #list>
-        <NcAppNavigationItem
-          v-for="item in navLinks"
-          :key="item.name"
-          :to="{ name: item.name }"
-          :name="item.title"
-          @click="linkClick"
-          exact
-        >
+        <NcAppNavigationItem v-for="item in navLinks" :key="item.name" :to="{ name: item.name }" :name="item.title"
+          @click="linkClick" exact>
           <component :is="item.icon" slot="icon" :size="20" />
         </NcAppNavigationItem>
-        <NcAppNavigationItem
-          v-for="item in menuButtons"
-          :key="item.name"
-          :name="item.title"
-          @click="item.onClick"
-        >
+        <NcAppNavigationItem v-for="item in menuButtons" :key="item.name" :name="item.title" @click="item.onClick">
           <component :is="item.icon" slot="icon" :size="20" />
         </NcAppNavigationItem>
       </template>
@@ -42,16 +27,14 @@
     </NcAppNavigation>
 
     <NcAppContent :allowSwipeNavigation="false">
-      <div
-        :class="{
-          outer: true,
-          'router-outlet': true,
-          'remove-gap': removeNavGap,
-          'has-nav': showNavigation,
-          'has-mobile-header': hasMobileHeader,
-          'is-native': native,
-        }"
-      >
+      <div :class="{
+        outer: true,
+        'router-outlet': true,
+        'remove-gap': removeNavGap,
+        'has-nav': showNavigation,
+        'has-mobile-header': hasMobileHeader,
+        'is-native': native,
+      }">
         <router-view />
       </div>
 
@@ -78,10 +61,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcContent from '@nextcloud/vue/dist/Components/NcContent';
-import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
-import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation';
-const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNavigationItem');
+import NcContent from '@nextcloud/vue/dist/Components/NcContent.js';
+import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent.js';
+import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation.js';
+const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNavigationItem.js');
 
 import { generateUrl } from '@nextcloud/router';
 

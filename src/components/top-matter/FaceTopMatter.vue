@@ -3,7 +3,9 @@
     <NcActions v-if="name">
       <NcActionButton :aria-label="t('memories', 'Back')" @click="back()">
         {{ t('memories', 'Back') }}
-        <template #icon> <BackIcon :size="20" /> </template>
+        <template #icon>
+          <BackIcon :size="20" />
+        </template>
       </NcActionButton>
     </NcActions>
 
@@ -19,7 +21,9 @@
         <template v-if="!name && routeIsRecognize && !routeIsRecognizeUnassigned">
           <NcActionButton :aria-label="t('memories', 'Unassigned faces')" @click="openUnassigned" close-after-click>
             {{ t('memories', 'Unassigned faces') }}
-            <template #icon> <UnassignedIcon :size="20" /> </template>
+            <template #icon>
+              <UnassignedIcon :size="20" />
+            </template>
           </NcActionButton>
         </template>
 
@@ -27,30 +31,26 @@
         <template v-if="isReal">
           <NcActionButton :aria-label="t('memories', 'Rename person')" @click="rename" close-after-click>
             {{ t('memories', 'Rename person') }}
-            <template #icon> <EditIcon :size="20" /> </template>
+            <template #icon>
+              <EditIcon :size="20" />
+            </template>
           </NcActionButton>
-          <NcActionButton
-            :aria-label="t('memories', 'Merge with different person')"
-            @click="refs.mergeModal.open()"
-            close-after-click
-          >
+          <NcActionButton :aria-label="t('memories', 'Merge with different person')" @click="refs.mergeModal.open()"
+            close-after-click>
             {{ t('memories', 'Merge with different person') }}
-            <template #icon> <MergeIcon :size="20" /> </template>
+            <template #icon>
+              <MergeIcon :size="20" />
+            </template>
           </NcActionButton>
-          <NcActionCheckbox
-            :aria-label="t('memories', 'Mark person in preview')"
-            :checked.sync="config.show_face_rect"
-            @change="changeShowFaceRect"
-          >
+          <NcActionCheckbox :aria-label="t('memories', 'Mark person in preview')" :checked.sync="config.show_face_rect"
+            @change="changeShowFaceRect">
             {{ t('memories', 'Mark person in preview') }}
           </NcActionCheckbox>
-          <NcActionButton
-            :aria-label="t('memories', 'Remove person')"
-            @click="refs.deleteModal.open()"
-            close-after-click
-          >
+          <NcActionButton :aria-label="t('memories', 'Remove person')" @click="refs.deleteModal.open()" close-after-click>
             {{ t('memories', 'Remove person') }}
-            <template #icon> <DeleteIcon :size="20" /> </template>
+            <template #icon>
+              <DeleteIcon :size="20" />
+            </template>
           </NcActionButton>
         </template>
       </NcActions>
@@ -67,9 +67,9 @@ import { defineComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
-import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox.js';
 
 import FaceEditModal from '@components/modal/FaceEditModal.vue';
 import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';

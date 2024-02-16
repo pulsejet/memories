@@ -57,9 +57,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
-const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
 
 import UserConfig from '@mixins/UserConfig';
 

@@ -1,24 +1,15 @@
 <template>
   <div class="outer">
-    <NcSelectTags
-      ref="selectTags"
-      class="nc-comp"
-      v-model="tagSelection"
-      :disabled="disabled"
-      :limit="null"
-      :options-filter="tagFilter"
-      :get-option-label="tagLabel"
-      :create-option="createOption"
-      :taggable="true"
-      @option:created="handleCreate"
-    />
+    <NcSelectTags ref="selectTags" class="nc-comp" v-model="tagSelection" :disabled="disabled" :limit="null"
+      :options-filter="tagFilter" :get-option-label="tagLabel" :create-option="createOption" :taggable="true"
+      @option:created="handleCreate" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-const NcSelectTags = () => import('@nextcloud/vue/dist/Components/NcSelectTags');
+const NcSelectTags = () => import('@nextcloud/vue/dist/Components/NcSelectTags.js');
 
 import * as dav from '@services/dav';
 

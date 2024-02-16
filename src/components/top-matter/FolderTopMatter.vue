@@ -24,14 +24,12 @@
             <TimelineIcon v-else :size="20" />
           </template>
         </NcActionButton>
-        <NcActionButton
-          v-if="!routeIsPublic"
-          :aria-label="t('memories', 'Share folder')"
-          @click="share()"
-          close-after-click
-        >
+        <NcActionButton v-if="!routeIsPublic" :aria-label="t('memories', 'Share folder')" @click="share()"
+          close-after-click>
           {{ t('memories', 'Share folder') }}
-          <template #icon> <ShareIcon :size="20" /> </template>
+          <template #icon>
+            <ShareIcon :size="20" />
+          </template>
         </NcActionButton>
       </NcActions>
     </div>
@@ -43,10 +41,10 @@ import { defineComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
 
-const NcBreadcrumbs = () => import('@nextcloud/vue/dist/Components/NcBreadcrumbs');
-const NcBreadcrumb = () => import('@nextcloud/vue/dist/Components/NcBreadcrumb');
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+const NcBreadcrumbs = () => import('@nextcloud/vue/dist/Components/NcBreadcrumbs.js');
+const NcBreadcrumb = () => import('@nextcloud/vue/dist/Components/NcBreadcrumb.js');
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import * as utils from '@services/utils';
 
@@ -129,6 +127,7 @@ export default defineComponent({
   .breadcrumb {
     min-width: 0;
     height: unset;
+
     .share-name {
       margin-left: 0.75em;
     }

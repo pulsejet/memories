@@ -3,7 +3,9 @@
     <NcActions v-if="name">
       <NcActionButton :aria-label="t('memories', 'Back')" @click="back()">
         {{ t('memories', 'Back') }}
-        <template #icon> <BackIcon :size="20" /> </template>
+        <template #icon>
+          <BackIcon :size="20" />
+        </template>
       </NcActionButton>
     </NcActions>
     <span class="name">{{ name || viewname }}</span>
@@ -13,8 +15,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import * as strings from '@services/strings';
 

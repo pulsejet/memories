@@ -1,16 +1,12 @@
 <template>
-  <NcModal
-    class="memories-modal"
-    ref="modal"
-    :size="size"
-    :outTransition="true"
-    :style="{ width: isSidebarShown ? `calc(100% - ${sidebarWidth}px)` : null }"
-    :additionalTrapElements="trapElements"
-    @close="cleanup"
-  >
+  <NcModal class="memories-modal" ref="modal" :size="size" :outTransition="true"
+    :style="{ width: isSidebarShown ? `calc(100% - ${sidebarWidth}px)` : null }" :additionalTrapElements="trapElements"
+    @close="cleanup">
     <div class="container" @keydown.stop="0">
       <div class="head">
-        <span> <slot name="title"></slot> </span>
+        <span>
+          <slot name="title"></slot>
+        </span>
       </div>
 
       <slot></slot>
@@ -26,7 +22,7 @@
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 
-const NcModal = () => import('@nextcloud/vue/dist/Components/NcModal');
+const NcModal = () => import('@nextcloud/vue/dist/Components/NcModal.js');
 
 import * as utils from '@services/utils';
 
@@ -147,7 +143,7 @@ export default defineComponent({
     margin-top: 10px;
     text-align: right;
 
-    > button {
+    >button {
       display: inline-block !important;
     }
   }
@@ -159,7 +155,7 @@ export default defineComponent({
       display: none !important;
     }
 
-    .modal-wrapper > .modal-container {
+    .modal-wrapper>.modal-container {
       max-height: calc(99% - env(keyboard-inset-height, 0px));
       height: unset;
       top: unset;
@@ -168,6 +164,7 @@ export default defineComponent({
       // Hide scrollbar
       scrollbar-width: none;
       -ms-overflow-style: none;
+
       &::-webkit-scrollbar {
         display: none;
         width: 0 !important;

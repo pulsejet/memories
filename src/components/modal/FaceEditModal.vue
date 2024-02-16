@@ -5,15 +5,8 @@
     </template>
 
     <div class="fields">
-      <NcTextField
-        class="field"
-        :autofocus="true"
-        :value.sync="input"
-        :label="t('memories', 'Name')"
-        :label-visible="false"
-        :placeholder="t('memories', 'Name')"
-        @keypress.enter="save()"
-      />
+      <NcTextField class="field" :autofocus="true" :value.sync="input" :label="t('memories', 'Name')"
+        :label-visible="false" :placeholder="t('memories', 'Name')" @keypress.enter="save()" />
     </div>
 
     <template #buttons>
@@ -29,8 +22,8 @@ import { defineComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';

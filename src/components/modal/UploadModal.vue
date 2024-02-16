@@ -66,12 +66,12 @@ import ModalMixin from './ModalMixin';
 import AlbumPicker from './AlbumPicker.vue';
 import EditTags from './EditTags.vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 import ChevronDown from 'vue-material-design-icons/ChevronDown.vue';
 import ChevronUp from 'vue-material-design-icons/ChevronUp.vue';
 import Delete from 'vue-material-design-icons/Delete.vue';
 import VueUploadComponent from 'vue-upload-component';
-const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
+const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
 
 import type { IAlbum, IPhoto } from '@typings';
 
@@ -201,6 +201,7 @@ export default defineComponent({
         async upload() {
             this.progress = 0;
             this.processing = true;
+            // console.log(this.$store)
             // Tags may be created which might throw
             let tagsResult: { add: number[]; remove: number[] } | null = null;
             try {

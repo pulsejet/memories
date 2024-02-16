@@ -7,65 +7,16 @@
     </div>
 
     <div class="fields">
-      <NcTextField
-        class="field"
-        type="number"
-        min="0"
-        max="5000"
-        :value.sync="year"
-        :label="t('memories', 'Year')"
-        :label-visible="true"
-        :placeholder="t('memories', 'Year')"
-        :disabled="disabled"
-        @input="newestChange()"
-      />
-      <NcTextField
-        class="field"
-        type="number"
-        min="1"
-        max="12"
-        :value.sync="month"
-        :label="t('memories', 'Month')"
-        :label-visible="true"
-        :placeholder="t('memories', 'Month')"
-        :disabled="disabled"
-        @input="newestChange()"
-      />
-      <NcTextField
-        class="field"
-        type="number"
-        min="1"
-        max="31"
-        :value.sync="day"
-        :label="t('memories', 'Day')"
-        :label-visible="true"
-        :placeholder="t('memories', 'Day')"
-        :disabled="disabled"
-        @input="newestChange()"
-      />
-      <NcTextField
-        class="field"
-        type="number"
-        min="0"
-        max="23"
-        :value.sync="hour"
-        :label="t('memories', 'Time')"
-        :label-visible="true"
-        :placeholder="t('memories', 'Hour')"
-        :disabled="disabled"
-        @input="newestChange(true)"
-      />
-      <NcTextField
-        class="field"
-        type="number"
-        min="0"
-        max="59"
-        :value.sync="minute"
-        :label="t('memories', 'Minute')"
-        :placeholder="t('memories', 'Minute')"
-        :disabled="disabled"
-        @input="newestChange(true)"
-      />
+      <NcTextField class="field" type="number" min="0" max="5000" :value.sync="year" :label="t('memories', 'Year')"
+        :label-visible="true" :placeholder="t('memories', 'Year')" :disabled="disabled" @input="newestChange()" />
+      <NcTextField class="field" type="number" min="1" max="12" :value.sync="month" :label="t('memories', 'Month')"
+        :label-visible="true" :placeholder="t('memories', 'Month')" :disabled="disabled" @input="newestChange()" />
+      <NcTextField class="field" type="number" min="1" max="31" :value.sync="day" :label="t('memories', 'Day')"
+        :label-visible="true" :placeholder="t('memories', 'Day')" :disabled="disabled" @input="newestChange()" />
+      <NcTextField class="field" type="number" min="0" max="23" :value.sync="hour" :label="t('memories', 'Time')"
+        :label-visible="true" :placeholder="t('memories', 'Hour')" :disabled="disabled" @input="newestChange(true)" />
+      <NcTextField class="field" type="number" min="0" max="59" :value.sync="minute" :label="t('memories', 'Minute')"
+        :placeholder="t('memories', 'Minute')" :disabled="disabled" @input="newestChange(true)" />
     </div>
 
     <div v-if="photos.length > 1" class="oldest">
@@ -76,65 +27,17 @@
       </div>
 
       <div class="fields">
-        <NcTextField
-          class="field"
-          type="number"
-          min="0"
-          max="5000"
-          :value.sync="yearLast"
-          :label="t('memories', 'Year')"
-          :label-visible="true"
-          :placeholder="t('memories', 'Year')"
-          :disabled="disabled"
-          @input="oldestChange()"
-        />
-        <NcTextField
-          class="field"
-          type="number"
-          min="1"
-          max="12"
-          :value.sync="monthLast"
-          :label="t('memories', 'Month')"
-          :label-visible="true"
-          :placeholder="t('memories', 'Month')"
-          :disabled="disabled"
-          @input="oldestChange()"
-        />
-        <NcTextField
-          class="field"
-          type="number"
-          min="1"
-          max="31"
-          :value.sync="dayLast"
-          :label="t('memories', 'Day')"
-          :label-visible="true"
-          :placeholder="t('memories', 'Day')"
-          :disabled="disabled"
-          @input="oldestChange()"
-        />
-        <NcTextField
-          class="field"
-          type="number"
-          min="0"
-          max="23"
-          :value.sync="hourLast"
-          :label="t('memories', 'Time')"
-          :label-visible="true"
-          :placeholder="t('memories', 'Hour')"
-          :disabled="disabled"
-          @input="oldestChange()"
-        />
-        <NcTextField
-          class="field"
-          type="number"
-          min="0"
-          max="59"
-          :value.sync="minuteLast"
-          :label="t('memories', 'Minute')"
-          :placeholder="t('memories', 'Minute')"
-          :disabled="disabled"
-          @input="oldestChange()"
-        />
+        <NcTextField class="field" type="number" min="0" max="5000" :value.sync="yearLast" :label="t('memories', 'Year')"
+          :label-visible="true" :placeholder="t('memories', 'Year')" :disabled="disabled" @input="oldestChange()" />
+        <NcTextField class="field" type="number" min="1" max="12" :value.sync="monthLast" :label="t('memories', 'Month')"
+          :label-visible="true" :placeholder="t('memories', 'Month')" :disabled="disabled" @input="oldestChange()" />
+        <NcTextField class="field" type="number" min="1" max="31" :value.sync="dayLast" :label="t('memories', 'Day')"
+          :label-visible="true" :placeholder="t('memories', 'Day')" :disabled="disabled" @input="oldestChange()" />
+        <NcTextField class="field" type="number" min="0" max="23" :value.sync="hourLast" :label="t('memories', 'Time')"
+          :label-visible="true" :placeholder="t('memories', 'Hour')" :disabled="disabled" @input="oldestChange()" />
+        <NcTextField class="field" type="number" min="0" max="59" :value.sync="minuteLast"
+          :label="t('memories', 'Minute')" :placeholder="t('memories', 'Minute')" :disabled="disabled"
+          @input="oldestChange()" />
       </div>
     </div>
   </div>
@@ -143,7 +46,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import * as utils from '@services/utils';
 
@@ -330,7 +233,7 @@ export default defineComponent({
           this.minuteLast = dateLastNew.getUTCMinutes().toString();
           this.secondLast = dateLastNew.getUTCSeconds().toString();
         }
-      } catch (error) {}
+      } catch (error) { }
     },
 
     oldestChange() {

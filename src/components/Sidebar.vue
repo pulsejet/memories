@@ -6,7 +6,9 @@
       <NcActions :inline="1">
         <NcActionButton :aria-label="t('memories', 'Close')" @click="close()">
           {{ t('memories', 'Close') }}
-          <template #icon> <CloseIcon :size="20" /> </template>
+          <template #icon>
+            <CloseIcon :size="20" />
+          </template>
         </NcActionButton>
       </NcActions>
     </div>
@@ -18,8 +20,8 @@
 <script lang="ts">
 import Vue, { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import Metadata from '@components/Metadata.vue';
 
@@ -280,9 +282,11 @@ export default defineComponent({
 #tab-memories-metadata,
 .app-sidebar.reduced {
   scrollbar-width: thin;
+
   &::-webkit-scrollbar {
     width: 5px;
   }
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }

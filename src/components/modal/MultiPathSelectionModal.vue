@@ -11,7 +11,9 @@
         <NcActions :inline="1">
           <NcActionButton :aria-label="t('memories', 'Remove')" @click="remove(index)">
             {{ t('memories', 'Remove') }}
-            <template #icon> <CloseIcon :size="20" /> </template>
+            <template #icon>
+              <CloseIcon :size="20" />
+            </template>
           </NcActionButton>
         </NcActions>
       </li>
@@ -31,9 +33,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';

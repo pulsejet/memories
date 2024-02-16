@@ -3,8 +3,8 @@
     {{
       t(
         'memories',
-        'This feature rotates images losslessly by updating the EXIF metadata. This approach is known to sometimes not work correctly on certain image types such as HEIC. Make sure you do a test run before using it on multiple images.',
-      )
+        'This feature rotates images losslessly by updating the EXIF metadata. This approach is known to sometimes not work correctly on certain image types such as HEIC.Make sure you do a test run before using it on multiple images.',
+        )
     }}
 
     <div class="samples">
@@ -16,13 +16,19 @@
 
     <NcActions :inline="3" class="actions">
       <NcActionButton :aria-label="t('memories', 'Rotate Left')" :disabled="disabled" @click="doleft">
-        <template #icon> <RotateLeftIcon :size="22" /> </template>
+        <template #icon>
+          <RotateLeftIcon :size="22" />
+        </template>
       </NcActionButton>
       <NcActionButton :aria-label="t('memories', 'Rotate Right')" :disabled="disabled" @click="doright">
-        <template #icon> <RotateRightIcon :size="22" /> </template>
+        <template #icon>
+          <RotateRightIcon :size="22" />
+        </template>
       </NcActionButton>
       <NcActionButton :aria-label="t('memories', 'Flip')" :disabled="disabled" @click="doflip">
-        <template #icon> <FlipHorizontalIcon :size="22" /> </template>
+        <template #icon>
+          <FlipHorizontalIcon :size="22" />
+        </template>
       </NcActionButton>
     </NcActions>
   </div>
@@ -33,8 +39,8 @@ import { defineComponent } from 'vue';
 
 import * as utils from '@services/utils';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
 import RotateRightIcon from 'vue-material-design-icons/RotateRight.vue';
@@ -253,7 +259,7 @@ export default defineComponent({
       align-items: center;
       background-color: var(--color-background-dark);
 
-      > span {
+      >span {
         font-size: 1.3em;
         font-weight: 500;
         transform: translate(-3px, -3px);
@@ -264,5 +270,4 @@ export default defineComponent({
   .actions {
     justify-content: center;
   }
-}
-</style>
+}</style>

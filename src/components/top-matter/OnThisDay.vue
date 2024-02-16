@@ -14,7 +14,9 @@
       <NcActions>
         <NcActionButton :aria-label="t('memories', 'Move left')" @click="moveLeft">
           {{ t('memories', 'Move left') }}
-          <template #icon> <LeftMoveIcon v-once :size="28" /> </template>
+          <template #icon>
+            <LeftMoveIcon v-once :size="28" />
+          </template>
         </NcActionButton>
       </NcActions>
     </div>
@@ -22,7 +24,9 @@
       <NcActions>
         <NcActionButton :aria-label="t('memories', 'Move right')" @click="moveRight">
           {{ t('memories', 'Move right') }}
-          <template #icon> <RightMoveIcon v-once :size="28" /> </template>
+          <template #icon>
+            <RightMoveIcon v-once :size="28" />
+          </template>
         </NcActionButton>
       </NcActions>
     </div>
@@ -32,8 +36,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
@@ -256,14 +260,17 @@ $mobHeight: 165px;
   @media (max-width: 768px) {
     width: 100%;
     padding: 0;
+
     .inner {
       padding: 0 8px;
       border-radius: 0;
     }
+
     .dir-btn {
       display: none;
     }
   }
+
   @media (max-width: 600px) {
     height: $mobHeight;
   }
@@ -309,9 +316,9 @@ $mobHeight: 165px;
   @media (max-width: 600px) {
     aspect-ratio: 3/4;
     height: $mobHeight;
+
     .overlay {
       font-size: 1.1em;
     }
   }
-}
-</style>
+}</style>

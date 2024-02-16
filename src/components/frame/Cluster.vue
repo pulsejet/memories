@@ -1,14 +1,6 @@
 <template>
-  <component
-    :is="link ? 'router-link' : 'div'"
-    draggable="false"
-    tabindex="1"
-    :aria-label="title"
-    class="cluster fill-block"
-    :class="{ error }"
-    :to="target"
-    @click="click"
-  >
+  <component :is="link ? 'router-link' : 'div'" draggable="false" tabindex="1" :aria-label="title"
+    class="cluster fill-block" :class="{ error }" :to="target" @click="click">
     <div class="count-bubble" v-if="counters && data.count">
       <NcCounterBubble> {{ data.count }} </NcCounterBubble>
     </div>
@@ -19,15 +11,8 @@
 
     <div class="previews fill-block" ref="previews" @click="clickPreview">
       <div class="img-outer" :class="{ plus }">
-        <XImg
-          draggable="false"
-          class="fill-block"
-          :class="{ error }"
-          :key="data.cluster_id"
-          :src="previewUrl"
-          :svg-tag="plus"
-          @error="failed"
-        />
+        <XImg draggable="false" class="fill-block" :class="{ error }" :key="data.cluster_id" :src="previewUrl"
+          :svg-tag="plus" @error="failed" />
         <div v-if="title || subtitle" class="overlay top-left fill-block" />
       </div>
     </div>
@@ -37,7 +22,7 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 
-import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble';
+import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble.js';
 
 import type { IAlbum, ICluster, IFace, IPhoto } from '@typings';
 import { getPreviewUrl } from '@services/utils/helpers';
@@ -198,6 +183,7 @@ img {
 }
 
 .cluster {
+
   // Get rid of color of the bubble
   .count-bubble :deep .counter-bubble__counter {
     color: unset !important;
@@ -210,6 +196,7 @@ img {
 }
 
 $namemargin: 10px;
+
 .name {
   position: absolute;
   bottom: 0;
@@ -226,7 +213,7 @@ $namemargin: 10px;
   line-height: 1.1em;
 
   // multiline ellipsis
-  > .title {
+  >.title {
     display: -webkit-box;
     -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
@@ -248,7 +235,7 @@ $namemargin: 10px;
   .cluster.error & {
     color: unset;
 
-    > .title {
+    >.title {
       -webkit-line-clamp: 2;
     }
   }
@@ -259,16 +246,17 @@ $namemargin: 10px;
     padding: 0 12px;
 
     min-height: 50px; // align to top of space
+
     @media (max-width: 768px) {
       min-height: 54px; // mark#2147915
       padding: 0 6px;
     }
 
-    > .title {
+    >.title {
       font-weight: 500;
     }
 
-    > .subtitle {
+    >.subtitle {
       color: var(--color-text-lighter);
     }
   }
@@ -277,7 +265,7 @@ $namemargin: 10px;
     font-size: 0.9em;
   }
 
-  > .subtitle {
+  >.subtitle {
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -314,7 +302,7 @@ $namemargin: 10px;
     }
   }
 
-  > .img-outer {
+  >.img-outer {
     position: relative;
     background-color: var(--color-background-dark);
     padding: 0;
@@ -329,11 +317,13 @@ $namemargin: 10px;
     .cluster--album & {
       border-radius: 12px; // rounded corners
     }
+
     .cluster--album &,
     .cluster--circle & {
       height: unset;
       aspect-ratio: 1; // force square
     }
+
     .cluster--circle & {
       border-radius: 50%; // circle image
     }
@@ -347,13 +337,13 @@ $namemargin: 10px;
       }
     }
 
-    > img {
+    >img {
       object-fit: cover;
       padding: 0;
       cursor: pointer;
     }
 
-    > .overlay {
+    >.overlay {
       pointer-events: none;
       overflow: hidden;
       background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 10%, transparent 40%);

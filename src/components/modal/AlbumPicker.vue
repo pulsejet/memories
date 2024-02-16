@@ -55,9 +55,9 @@ import { defineComponent, type PropType } from 'vue';
 
 import Fuse from 'fuse.js';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import AlbumForm from './AlbumForm.vue';
 import AlbumsList from './AlbumsList.vue';

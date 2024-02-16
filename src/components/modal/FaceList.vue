@@ -1,25 +1,14 @@
 <template>
   <div class="outer">
     <div class="search">
-      <NcTextField
-        :autofocus="true"
-        :value.sync="search"
-        :label="t('memories', 'Search')"
-        :placeholder="t('memories', 'Search')"
-      >
+      <NcTextField :autofocus="true" :value.sync="search" :label="t('memories', 'Search')"
+        :placeholder="t('memories', 'Search')">
         <MagnifyIcon :size="16" />
       </NcTextField>
     </div>
 
-    <ClusterGrid
-      v-if="list"
-      :items="filteredList"
-      :maxSize="120"
-      :link="false"
-      :plus="plus"
-      @click="click"
-      @plus="addFace"
-    />
+    <ClusterGrid v-if="list" :items="filteredList" :maxSize="120" :link="false" :plus="plus" @click="click"
+      @plus="addFace" />
     <div v-else>
       {{ t('memories', 'Loading …') }}
     </div>
@@ -32,7 +21,7 @@ import Fuse from 'fuse.js';
 
 import { showError } from '@nextcloud/dialogs';
 
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import ClusterGrid from '@components/ClusterGrid.vue';
 

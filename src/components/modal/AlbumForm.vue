@@ -1,43 +1,23 @@
 <template>
   <form v-if="!showCollaboratorView" class="album-form" @submit.prevent>
     <div class="form-inputs">
-      <NcTextField
-        ref="nameInput"
-        :value.sync="albumName"
-        type="text"
-        name="name"
-        :required="true"
-        autofocus="true"
-        :placeholder="t('memories', 'Name of the album')"
-      />
+      <NcTextField ref="nameInput" :value.sync="albumName" type="text" name="name" :required="true" autofocus="true"
+        :placeholder="t('memories', 'Name of the album')" />
       <label>
-        <NcTextField
-          :value.sync="albumLocation"
-          name="location"
-          type="text"
-          :placeholder="t('memories', 'Location of the album')"
-        />
+        <NcTextField :value.sync="albumLocation" name="location" type="text"
+          :placeholder="t('memories', 'Location of the album')" />
       </label>
     </div>
     <div class="form-buttons">
       <span class="left-buttons">
-        <NcButton
-          v-if="displayBackButton"
-          :aria-label="t('memories', 'Go back to the previous view.')"
-          type="tertiary"
-          @click="back"
-        >
+        <NcButton v-if="displayBackButton" :aria-label="t('memories', 'Go back to the previous view.')" type="tertiary"
+          @click="back">
           {{ t('memories', 'Back') }}
         </NcButton>
       </span>
       <span class="right-buttons">
-        <NcButton
-          v-if="sharingEnabled && !editMode"
-          :aria-label="t('memories', 'Go to the add collaborators view.')"
-          type="secondary"
-          :disabled="albumName.trim() === '' || loading"
-          @click="showCollaboratorView = true"
-        >
+        <NcButton v-if="sharingEnabled && !editMode" :aria-label="t('memories', 'Go to the add collaborators view.')"
+          type="secondary" :disabled="albumName.trim() === '' || loading" @click="showCollaboratorView = true">
           <template #icon>
             <AccountMultiplePlus />
           </template>
@@ -54,29 +34,17 @@
     </div>
   </form>
 
-  <AlbumCollaborators
-    v-else
-    :album-name="albumName"
-    :allow-public-link="false"
-    :collaborators="[]"
-    v-slot="{ collaborators }"
-  >
+  <AlbumCollaborators v-else :album-name="albumName" :allow-public-link="false" :collaborators="[]"
+    v-slot="{ collaborators }">
     <span class="left-buttons">
-      <NcButton
-        :aria-label="t('memories', 'Back to the new album form.')"
-        type="tertiary"
-        @click="showCollaboratorView = false"
-      >
+      <NcButton :aria-label="t('memories', 'Back to the new album form.')" type="tertiary"
+        @click="showCollaboratorView = false">
         {{ t('memories', 'Back') }}
       </NcButton>
     </span>
     <span class="right-buttons">
-      <NcButton
-        :aria-label="saveText"
-        type="primary"
-        :disabled="albumName.trim() === '' || loading"
-        @click="submit(collaborators)"
-      >
+      <NcButton :aria-label="saveText" type="primary" :disabled="albumName.trim() === '' || loading"
+        @click="submit(collaborators)">
         <template #icon>
           <XLoadingIcon v-if="loading" />
           <Send v-else />
@@ -91,8 +59,8 @@
 import { defineComponent, type PropType } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import AlbumCollaborators from './AlbumCollaborators.vue';
 
@@ -254,42 +222,53 @@ export default defineComponent({
   flex-direction: column;
   height: 350px;
   padding: 16px;
+
   .form-title {
     font-weight: bold;
   }
+
   .form-subtitle {
     color: var(--color-text-lighter);
   }
+
   .form-inputs {
     flex-grow: 1;
     justify-items: flex-end;
+
     input {
       width: 100%;
     }
+
     label {
       display: flex;
       margin-top: 16px;
+
       :deep svg {
         margin-right: 12px;
       }
     }
   }
+
   .form-buttons {
     display: flex;
     justify-content: space-between;
     flex-direction: column;
+
     .left-buttons,
     .right-buttons {
       display: flex;
     }
+
     .right-buttons {
       justify-content: flex-end;
     }
+
     button {
       margin-right: 16px;
     }
   }
 }
+
 .left-buttons {
   flex-grow: 1;
 }

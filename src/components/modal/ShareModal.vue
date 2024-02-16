@@ -9,12 +9,8 @@
     </div>
 
     <ul class="options" v-else>
-      <NcListItem
-        v-if="canShareNative && canShareLowRes"
-        :title="t('memories', 'Reduced Size')"
-        :bold="false"
-        @click.prevent="shareLowRes()"
-      >
+      <NcListItem v-if="canShareNative && canShareLowRes" :title="t('memories', 'Reduced Size')" :bold="false"
+        @click.prevent="shareLowRes()">
         <template #icon>
           <PhotoIcon class="avatar" :size="24" />
         </template>
@@ -23,12 +19,8 @@
         </template>
       </NcListItem>
 
-      <NcListItem
-        v-if="canShareNative && canShareHighRes"
-        :title="t('memories', 'High Resolution')"
-        :bold="false"
-        @click.prevent="shareHighRes()"
-      >
+      <NcListItem v-if="canShareNative && canShareHighRes" :title="t('memories', 'High Resolution')" :bold="false"
+        @click.prevent="shareHighRes()">
         <template #icon>
           <LargePhotoIcon class="avatar" :size="24" />
         </template>
@@ -37,12 +29,8 @@
         </template>
       </NcListItem>
 
-      <NcListItem
-        v-if="canShareNative"
-        :title="t('memories', 'Original File')"
-        :bold="false"
-        @click.prevent="shareOriginal()"
-      >
+      <NcListItem v-if="canShareNative" :title="t('memories', 'Original File')" :bold="false"
+        @click.prevent="shareOriginal()">
         <template #icon>
           <FileIcon class="avatar" :size="24" />
         </template>
@@ -69,7 +57,7 @@ import { defineComponent } from 'vue';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
 
 import UserConfig from '@mixins/UserConfig';
 

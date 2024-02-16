@@ -9,31 +9,14 @@
         {{ t('memories', 'Name of the album') }}
       </span>
 
-      <NcTextField
-        :value.sync="albumName"
-        type="text"
-        name="name"
-        :required="true"
-        autofocus="true"
-        :placeholder="t('memories', 'Name of the album')"
-      />
+      <NcTextField :value.sync="albumName" type="text" name="name" :required="true" autofocus="true"
+        :placeholder="t('memories', 'Name of the album')" />
     </template>
 
-    <AlbumCollaborators
-      v-if="album"
-      ref="collaborators"
-      :album-name="album.basename"
-      :collaborators="album.collaborators"
-      :public-link="album.publicLink"
-      :allow-public-link="true"
-      v-slot="{ collaborators }"
-    >
-      <NcButton
-        :aria-label="t('memories', 'Save collaborators for this album.')"
-        type="primary"
-        :disabled="loadingAddCollaborators"
-        @click="save(collaborators)"
-      >
+    <AlbumCollaborators v-if="album" ref="collaborators" :album-name="album.basename" :collaborators="album.collaborators"
+      :public-link="album.publicLink" :allow-public-link="true" v-slot="{ collaborators }">
+      <NcButton :aria-label="t('memories', 'Save collaborators for this album.')" type="primary"
+        :disabled="loadingAddCollaborators" @click="save(collaborators)">
         <template #icon>
           <XLoadingIcon v-if="loadingAddCollaborators" />
         </template>
@@ -50,8 +33,8 @@ import { defineComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';

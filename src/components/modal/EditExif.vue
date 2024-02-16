@@ -4,19 +4,10 @@
       <label :for="'exif-field-' + field.field">
         {{ label(field) }}
       </label>
-      <NcTextField
-        class="field"
-        :id="'exif-field-' + field.field"
-        :disabled="disabled"
-        :label-outside="true"
-        :value.sync="exif[field.field]"
-        :placeholder="placeholder(field)"
-        @input="dirty[field.field] = true"
-        trailing-button-icon="close"
-        :show-trailing-button="dirty[field.field]"
-        @trailing-button-click="reset(field)"
-        @keypress.enter="$emit('save')"
-      />
+      <NcTextField class="field" :id="'exif-field-' + field.field" :disabled="disabled" :label-outside="true"
+        :value.sync="exif[field.field]" :placeholder="placeholder(field)" @input="dirty[field.field] = true"
+        trailing-button-icon="close" :show-trailing-button="dirty[field.field]" @trailing-button-click="reset(field)"
+        @keypress.enter="$emit('save')" />
     </div>
   </div>
 </template>
@@ -24,7 +15,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import { translate as t } from '@services/l10n';
 
@@ -141,6 +132,7 @@ export default defineComponent({
   .field {
     margin-bottom: 8px;
   }
+
   :deep label {
     font-size: 0.8em;
     padding: 0 !important;

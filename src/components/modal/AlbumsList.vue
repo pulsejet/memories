@@ -1,15 +1,7 @@
 <template>
   <ul class="albums-container">
-    <NcListItem
-      v-for="album in albums"
-      class="album"
-      :key="album.album_id"
-      :title="album.name"
-      :aria-label="album.name"
-      :to="link ? linkTarget(album) : null"
-      :exact="true"
-      @click="click($event, album)"
-    >
+    <NcListItem v-for="album in albums" class="album" :key="album.album_id" :title="album.name" :aria-label="album.name"
+      :to="link ? linkTarget(album) : null" :exact="true" @click="click($event, album)">
       <template #icon>
         <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album)" />
         <div v-else class="album__image album__image--placeholder">
@@ -33,8 +25,8 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
 
 import * as utils from '@services/utils';
 

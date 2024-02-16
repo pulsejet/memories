@@ -7,8 +7,8 @@
     <span>
       {{
         owned
-          ? t('memories', 'Are you sure you want to permanently remove album "{name}"?', { name })
-          : t('memories', 'Are you sure you want to leave the shared album "{name}"?', { name })
+        ? t('memories', 'Are you sure you want to permanently remove album "{name}"?', { name })
+        : t('memories', 'Are you sure you want to leave the shared album "{name}"?', { name })
       }}
     </span>
 
@@ -24,8 +24,8 @@
 import { defineComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
