@@ -72,8 +72,10 @@ import ChevronUp from 'vue-material-design-icons/ChevronUp.vue';
 import Delete from 'vue-material-design-icons/Delete.vue';
 import VueUploadComponent from 'vue-upload-component';
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
+import { getUploader } from '@nextcloud/upload';
 
 import type { IAlbum, IPhoto } from '@typings';
+import { showError } from '@nextcloud/dialogs';
 
 interface Photo extends VUFile {
     preview: string;
@@ -201,14 +203,20 @@ export default defineComponent({
         async upload() {
             this.progress = 0;
             this.processing = true;
-            // console.log(this.$store)
+            const uploader = getUploader();
             // Tags may be created which might throw
             let tagsResult: { add: number[]; remove: number[] } | null = null;
             try {
+                for (const photo of this.photos) {
+                    const { file, name } = photo;
+                    await uploader.upload(`${this.currentRouteName}${name}`, file);
+                }
                 tagsResult = (await this.refs.tags?.result?.()) ?? null;
 
                 console.log({ tagsResult, albums: this.selectedAlbums, photos: this.photos });
             } catch (e) {
+                showError('Some photos have not been uploaded.');
+                console.error(e);
             } finally {
                 this.progress = 0;
                 this.processing = false;
