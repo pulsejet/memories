@@ -56,6 +56,7 @@ OC.L10N.register(
     "Unsaved changes" : "Cambios no guardados",
     "Previous" : "Previo",
     "Next" : "Siguiente",
+    "Synchronizing local files ({n} done)." : "Sincronizando archivos locales ({n} listo).",
     "Finish" : "Terminar",
     "Undo" : "Deshacer",
     "Redo" : "Rehacer",
