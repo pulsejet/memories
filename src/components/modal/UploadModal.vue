@@ -73,6 +73,7 @@ import Delete from 'vue-material-design-icons/Delete.vue';
 import VueUploadComponent from 'vue-upload-component';
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
 import { getUploader } from '@nextcloud/upload';
+import * as dav from '@services/dav';
 
 import type { IAlbum, IPhoto } from '@typings';
 import { showError } from '@nextcloud/dialogs';
@@ -202,6 +203,10 @@ export default defineComponent({
 
         async upload() {
             this.progress = 0;
+            // upload each photo
+            // plus add to each album
+            // plus tags (assign tags to each photo)
+            const maxProgress = this.photos.length + this.selectedAlbums.length + this.photos.length;
             this.processing = true;
             const uploader = getUploader();
             // Tags may be created which might throw
@@ -210,8 +215,20 @@ export default defineComponent({
                 for (const photo of this.photos) {
                     const { file, name } = photo;
                     await uploader.upload(`${this.currentRouteName}${name}`, file);
+                    this.progress = (this.progress + 1) * 100 / maxProgress;
                 }
                 tagsResult = (await this.refs.tags?.result?.()) ?? null;
+                const photos: IPhoto[] = this.photos.map(photo => ({
+                    fileid: photo.id, // get file somewhere?                    
+                    mimetype: photo.file.type,
+                    flag: 0,
+                    dayid: 0,
+                }) as IPhoto);
+                for (const album of this.selectedAlbums) {
+                    for await (const fileIds of dav.addToAlbum(album.user, album.name, photos)) {
+                        this.progress = (this.progress + 1) * 100 / maxProgress;
+                    }
+                }
 
                 console.log({ tagsResult, albums: this.selectedAlbums, photos: this.photos });
             } catch (e) {
