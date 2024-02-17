@@ -145,6 +145,7 @@ OC.L10N.register(
     "Unassigned faces" : "Ej tilldelade ansikten",
     "Merge with different person" : "Slå ihop med en annan person",
     "Share folder" : "Dela mapp",
+    "Home" : "Hem",
     "Error saving image" : "Det gick inte att spara bilden",
     "Unsaved changes" : "Ej sparade ändringar",
     "Drop changes" : "Släng ändringar",
