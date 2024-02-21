@@ -74,9 +74,11 @@ import VueUploadComponent from 'vue-upload-component';
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
 import { getUploader } from '@nextcloud/upload';
 import * as dav from '@services/dav';
+import axios from '@nextcloud/axios';
 
 import type { IAlbum, IPhoto } from '@typings';
 import { showError } from '@nextcloud/dialogs';
+import { API } from '@services/API';
 
 interface Photo extends VUFile {
     preview: string;
@@ -215,7 +217,7 @@ export default defineComponent({
                 for (const photo of this.photos) {
                     const { file, name } = photo;
                     await uploader.upload(`${this.currentRouteName}${name}`, file);
-                    this.progress = (this.progress + 1) * 100 / maxProgress;
+                    this.updateProgress(1, maxProgress);
                 }
                 tagsResult = (await this.refs.tags?.result?.()) ?? null;
                 const photos: IPhoto[] = this.photos.map(photo => ({
@@ -226,11 +228,15 @@ export default defineComponent({
                 }) as IPhoto);
                 for (const album of this.selectedAlbums) {
                     for await (const fileIds of dav.addToAlbum(album.user, album.name, photos)) {
-                        this.progress = (this.progress + 1) * 100 / maxProgress;
+                        this.updateProgress(1, maxProgress);
+                        for await (const fileId of fileIds) {
+                            await axios.patch<null>(API.TAG_SET(fileId), tagsResult);
+                            this.updateProgress(1, maxProgress);
+                        }
                     }
                 }
 
-                console.log({ tagsResult, albums: this.selectedAlbums, photos: this.photos });
+                this.onClose();
             } catch (e) {
                 showError('Some photos have not been uploaded.');
                 console.error(e);
@@ -238,6 +244,10 @@ export default defineComponent({
                 this.progress = 0;
                 this.processing = false;
             }
+        },
+
+        updateProgress(delta: number, maxProgress: number) {
+            this.progress = (this.progress + delta) * 100 / maxProgress;
         },
     }
 });

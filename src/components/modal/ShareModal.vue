@@ -9,7 +9,7 @@
     </div>
 
     <ul class="options" v-else>
-      <NcListItem v-if="canShareNative && canShareLowRes" :title="t('memories', 'Reduced Size')" :bold="false"
+      <NcListItem v-if="canShareNative && canShareLowRes" :name="t('memories', 'Reduced Size')" :bold="false"
         @click.prevent="shareLowRes()">
         <template #icon>
           <PhotoIcon class="avatar" :size="24" />
@@ -19,7 +19,7 @@
         </template>
       </NcListItem>
 
-      <NcListItem v-if="canShareNative && canShareHighRes" :title="t('memories', 'High Resolution')" :bold="false"
+      <NcListItem v-if="canShareNative && canShareHighRes" :name="t('memories', 'High Resolution')" :bold="false"
         @click.prevent="shareHighRes()">
         <template #icon>
           <LargePhotoIcon class="avatar" :size="24" />
@@ -29,7 +29,7 @@
         </template>
       </NcListItem>
 
-      <NcListItem v-if="canShareNative" :title="t('memories', 'Original File')" :bold="false"
+      <NcListItem v-if="canShareNative" :name="t('memories', 'Original File')" :bold="false"
         @click.prevent="shareOriginal()">
         <template #icon>
           <FileIcon class="avatar" :size="24" />
@@ -39,7 +39,7 @@
         </template>
       </NcListItem>
 
-      <NcListItem v-if="canShareLink" :title="t('memories', 'Public Link')" :bold="false" @click.prevent="shareLink()">
+      <NcListItem v-if="canShareLink" :name="t('memories', 'Public Link')" :bold="false" @click.prevent="shareLink()">
         <template #icon>
           <LinkIcon class="avatar" :size="24" />
         </template>

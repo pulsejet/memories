@@ -1,6 +1,6 @@
 <template>
   <ul class="albums-container">
-    <NcListItem v-for="album in albums" class="album" :key="album.album_id" :title="album.name" :aria-label="album.name"
+    <NcListItem v-for="album in albums" class="album" :key="album.album_id" :name="album.name" :aria-label="album.name"
       :to="link ? linkTarget(album) : null" :exact="true" @click="click($event, album)">
       <template #icon>
         <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album)" />
@@ -52,6 +52,10 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+  },
+
+  created() {
+    console.log(this.albums)
   },
 
   emits: {

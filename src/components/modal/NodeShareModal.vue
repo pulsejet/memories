@@ -17,7 +17,7 @@
 
     <div class="links">
       <ul>
-        <NcListItem v-for="share of shares" :title="share.label || t('memories', 'Share link')" :key="share.id"
+        <NcListItem v-for="share of shares" :name="share.label || t('memories', 'Share link')" :key="share.id"
           :bold="false" :href="share.url" :compact="true" @click.prevent="shareOrCopy(share.url)">
           <template #icon>
             <LinkIcon class="avatar" :size="20" />
