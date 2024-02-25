@@ -2,7 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Download" : "Iscàrriga",
-    "Settings" : "Impostatziones",
+    "Settings" : "Cunfiguratzione",
     "People" : "Gente",
     "Timeline" : "Lìnia de tempus",
     "Folders" : "Cartellas",
@@ -70,7 +70,7 @@ OC.L10N.register(
     "Original" : "Originale",
     "Custom" : "Personaliza",
     "Value" : "Balore",
-    "Image" : "Imàgine",
+    "Image" : "Immàgine",
     "Text" : "Testu",
     "Size" : "Mannària",
     "Position" : "Positzione",
