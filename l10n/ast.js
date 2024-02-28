@@ -17,6 +17,7 @@ OC.L10N.register(
     "Photos" : "Semeyes",
     "Cancel" : "Encaboxar",
     "Delete" : "Desaniciar",
+    "Share" : "Compartir",
     "Favorite" : "Meter en Favoritos",
     "View in folder" : "Ver na carpeta",
     "Account" : "Cuenta",
