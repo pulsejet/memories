@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Download" : "Elŝuti",
     "Settings" : "Agordoj",
+    "People" : "Homoj",
     "Timeline" : "Kronologio",
     "Folders" : "Dosierujoj",
     "Favorites" : "Plej ŝatataj",

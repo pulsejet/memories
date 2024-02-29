@@ -1,6 +1,6 @@
 { "translations": {
     "Download" : "Iscàrriga",
-    "Settings" : "Impostatziones",
+    "Settings" : "Cunfiguratzione",
     "People" : "Gente",
     "Timeline" : "Lìnia de tempus",
     "Folders" : "Cartellas",
@@ -68,7 +68,7 @@
     "Original" : "Originale",
     "Custom" : "Personaliza",
     "Value" : "Balore",
-    "Image" : "Imàgine",
+    "Image" : "Immàgine",
     "Text" : "Testu",
     "Size" : "Mannària",
     "Position" : "Positzione",
