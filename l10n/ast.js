@@ -4,6 +4,7 @@ OC.L10N.register(
     "Download" : "Baxar",
     "Settings" : "Configuración",
     "People" : "Persones",
+    "Timeline" : "Llinia de tiempu",
     "Folders" : "Carpetes",
     "Favorites" : "Favoritos",
     "Videos" : "Vídeos",
