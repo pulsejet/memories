@@ -26,7 +26,7 @@
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 
-const NcModal = () => import('@nextcloud/vue/dist/Components/NcModal');
+const NcModal = () => import('@nextcloud/vue/dist/Components/NcModal.js');
 
 import * as utils from '@services/utils';
 

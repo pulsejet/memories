@@ -44,7 +44,7 @@ import type { Component } from 'vue';
 
 import ClusterHList from '@components/ClusterHList.vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';

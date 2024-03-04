@@ -69,10 +69,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcContent from '@nextcloud/vue/dist/Components/NcContent';
-import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
-import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation';
-const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNavigationItem');
+import NcContent from '@nextcloud/vue/dist/Components/NcContent.js';
+import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent.js';
+import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation.js';
+const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNavigationItem.js');
 
 import { generateUrl } from '@nextcloud/router';
 

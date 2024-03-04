@@ -6,7 +6,7 @@ declare module '*.svg' {
 declare module '*.vue';
 
 // External components cannot be imported with .vue extension
-declare module '@nextcloud/vue/dist/Components/*' {
+declare module '@nextcloud/vue/dist/Components/*.js' {
   import type { defineComponent } from 'vue';
   const Component: ReturnType<typeof defineComponent>;
   export default Component;

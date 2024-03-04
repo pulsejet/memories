@@ -86,7 +86,7 @@ import { defineComponent } from 'vue';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
 
 import UserConfig from '@mixins/UserConfig';
 

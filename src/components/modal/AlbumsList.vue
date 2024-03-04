@@ -35,8 +35,8 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
 
 import * as utils from '@services/utils';
 

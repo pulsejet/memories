@@ -37,7 +37,7 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 
-import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble';
+import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble.js';
 
 import type { IAlbum, ICluster, IFace, IPhoto } from '@typings';
 import { getPreviewUrl } from '@services/utils/helpers';

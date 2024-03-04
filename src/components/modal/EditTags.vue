@@ -19,7 +19,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-const NcSelectTags = () => import('@nextcloud/vue/dist/Components/NcSelectTags');
+const NcSelectTags = () => import('@nextcloud/vue/dist/Components/NcSelectTags.js');
 
 import * as dav from '@services/dav';
 

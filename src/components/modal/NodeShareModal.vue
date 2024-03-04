@@ -67,9 +67,9 @@ import { defineComponent } from 'vue';
 import axios from '@nextcloud/axios';
 import { showError, showSuccess } from '@nextcloud/dialogs';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import UserConfig from '@mixins/UserConfig';
 

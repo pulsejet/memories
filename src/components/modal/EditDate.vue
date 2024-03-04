@@ -143,7 +143,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import * as utils from '@services/utils';
 

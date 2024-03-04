@@ -10,7 +10,7 @@
 import { defineComponent } from 'vue';
 
 import axios from '@nextcloud/axios';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 
 import { API } from '@services/API';
 

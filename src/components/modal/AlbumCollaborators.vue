@@ -142,11 +142,11 @@ import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import { generateOcsUrl, generateUrl } from '@nextcloud/router';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-import NcPopover from '@nextcloud/vue/dist/Components/NcPopover';
-import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
-const NcListItemIcon = () => import('@nextcloud/vue/dist/Components/NcListItemIcon');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+import NcPopover from '@nextcloud/vue/dist/Components/NcPopover.js';
+import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+const NcListItemIcon = () => import('@nextcloud/vue/dist/Components/NcListItemIcon.js');
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';

@@ -46,9 +46,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcContent from '@nextcloud/vue/dist/Components/NcContent';
-import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+import NcContent from '@nextcloud/vue/dist/Components/NcContent.js';
+import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent.js';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 
 import UserConfig from '@mixins/UserConfig';
 
