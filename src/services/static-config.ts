@@ -151,6 +151,7 @@ class StaticConfig {
       high_res_cond: null,
       show_face_rect: false,
       album_list_sort: 1,
+      album_list_search: '',
     };
 
     const set = <K extends keyof IConfig, V extends IConfig[K]>(key: K, value: string | null) => {

@@ -38,6 +38,12 @@ export async function getAlbums(fileid?: number) {
     data = data.filter((a) => !a.name.startsWith('.'));
   }
 
+  // Filter the response for the search term
+  const searchTerm = await staticConfig.get('album_list_search');
+  if (searchTerm) {
+    data = data.filter((a) => a.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  }
+
   // Sort the response
   switch (await staticConfig.get('album_list_sort')) {
     case 2:
