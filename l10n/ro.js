@@ -36,6 +36,7 @@ OC.L10N.register(
     "Month" : "Luna",
     "Day" : "Zi",
     "Time" : "Timp",
+    "Minute" : "minute",
     "Oldest" : "Cele mai vechi",
     "Title" : "Titlu",
     "Description" : "Descriere",
