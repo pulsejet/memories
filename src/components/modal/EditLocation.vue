@@ -27,6 +27,7 @@
 
     <NcTextField
       :value.sync="searchBar"
+      :label="t('memories', 'Search')"
       :placeholder="t('memories', 'Search location / landmark')"
       :disabled="disabled"
       trailing-button-icon="arrowRight"

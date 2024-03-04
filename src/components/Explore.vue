@@ -184,8 +184,10 @@ export default defineComponent({
 
   .link-list {
     padding: 6px 7px;
+    line-height: 0;
 
     > .link {
+      line-height: initial;
       display: inline-block;
       width: calc(50% - 6px);
       margin: 3px;

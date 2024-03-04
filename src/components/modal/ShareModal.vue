@@ -12,12 +12,15 @@
       <NcListItem
         v-if="canShareNative && canShareLowRes"
         :title="t('memories', 'Reduced Size')"
+        :name="t('memories', 'Reduced Size')"
         :bold="false"
         @click.prevent="shareLowRes()"
       >
         <template #icon>
           <PhotoIcon class="avatar" :size="24" />
         </template>
+
+        <!-- NC_VUE: these slots have changed in v8 -->
         <template #subtitle>
           {{ t('memories', 'Share in lower quality (small file size)') }}
         </template>
@@ -26,12 +29,15 @@
       <NcListItem
         v-if="canShareNative && canShareHighRes"
         :title="t('memories', 'High Resolution')"
+        :name="t('memories', 'High Resolution')"
         :bold="false"
         @click.prevent="shareHighRes()"
       >
         <template #icon>
           <LargePhotoIcon class="avatar" :size="24" />
         </template>
+
+        <!-- NC_VUE: these slots have changed in v8 -->
         <template #subtitle>
           {{ t('memories', 'Share in high quality (large file size)') }}
         </template>
@@ -40,21 +46,32 @@
       <NcListItem
         v-if="canShareNative"
         :title="t('memories', 'Original File')"
+        :name="t('memories', 'Original File')"
         :bold="false"
         @click.prevent="shareOriginal()"
       >
         <template #icon>
           <FileIcon class="avatar" :size="24" />
         </template>
+
+        <!-- NC_VUE: these slots have changed in v8 -->
         <template #subtitle>
           {{ n('memories', 'Share the original file', 'Share the original files', photos?.length ?? 0) }}
         </template>
       </NcListItem>
 
-      <NcListItem v-if="canShareLink" :title="t('memories', 'Public Link')" :bold="false" @click.prevent="shareLink()">
+      <NcListItem
+        v-if="canShareLink"
+        :title="t('memories', 'Public Link')"
+        :name="t('memories', 'Public Link')"
+        :bold="false"
+        @click.prevent="shareLink"
+      >
         <template #icon>
           <LinkIcon class="avatar" :size="24" />
         </template>
+
+        <!-- NC_VUE: these slots have changed in v8 -->
         <template #subtitle>
           {{ t('memories', 'Share an external Nextcloud link') }}
         </template>

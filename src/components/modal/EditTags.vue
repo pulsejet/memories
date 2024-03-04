@@ -4,6 +4,7 @@
       ref="selectTags"
       class="nc-comp"
       v-model="tagSelection"
+      labelOutside="true"
       :disabled="disabled"
       :limit="null"
       :options-filter="tagFilter"

@@ -26,10 +26,11 @@
       id="memories-settings"
       :open="open"
       :show-navigation="true"
-      :title="t('memories', 'Memories Settings')"
+      :title="names.header"
+      :name="names.header"
       @update:open="onClose"
     >
-      <NcAppSettingsSection id="general-settings" :title="t('memories', 'General')">
+      <NcAppSettingsSection id="general-settings" :name="names.general" :title="names.general">
         <label for="timeline-path">{{ t('memories', 'Timeline Path') }}</label>
         <input id="timeline-path" @click="chooseTimelinePath" v-model="config.timeline_path" type="text" readonly />
 
@@ -54,7 +55,7 @@
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="viewer-settings" :title="t('memories', 'Photo Viewer')">
+      <NcAppSettingsSection id="viewer-settings" :name="names.viewer" :title="names.viewer">
         <NcCheckboxRadioSwitch
           :checked.sync="config.livephoto_autoplay"
           @update:checked="updateLivephotoAutoplay"
@@ -100,14 +101,14 @@
         </div>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="account-settings" :title="t('memories', 'Account')" v-if="isNative">
+      <NcAppSettingsSection id="account-settings" :name="names.account" :title="names.account" v-if="isNative">
         {{ t('memories', 'Logged in as {user}', { user }) }}
         <NcButton @click="logout" id="sign-out">
           {{ t('memories', 'Sign out') }}
         </NcButton>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="device-settings" :title="t('memories', 'Device Folders')" v-if="isNative">
+      <NcAppSettingsSection id="device-settings" :name="t('memories', 'Device Folders')" v-if="isNative">
         {{ t('memories', 'Local folders to include in the timeline view') }}
         <NcCheckboxRadioSwitch
           v-for="folder in localFolders"
@@ -124,7 +125,7 @@
         </NcButton>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="folders-settings" :title="t('memories', 'Folders')">
+      <NcAppSettingsSection id="folders-settings" :name="names.folders" :title="names.folders">
         <label for="folders-path">{{ t('memories', 'Folders Path') }}</label>
         <input id="folders-path" @click="chooseFoldersPath" v-model="config.folders_path" type="text" />
 
@@ -145,7 +146,7 @@
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="albums-settings" :title="t('memories', 'Albums')">
+      <NcAppSettingsSection id="albums-settings" :name="names.albums" :title="names.albums">
         <NcCheckboxRadioSwitch
           :checked.sync="config.sort_album_month"
           @update:checked="updateSortAlbumMonth"
@@ -178,6 +179,7 @@ input[type='text'] {
 import { defineComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
+import { translate as t } from '@services/l10n';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 
@@ -209,6 +211,14 @@ export default defineComponent({
 
   data: () => ({
     localFolders: [] as nativex.LocalFolderConfig[],
+    names: {
+      header: t('memories', 'Memories Settings'),
+      general: t('memories', 'General'),
+      viewer: t('memories', 'Photo Viewer'),
+      account: t('memories', 'Account'),
+      folders: t('memories', 'Folders'),
+      albums: t('memories', 'Albums'),
+    },
   }),
 
   props: {

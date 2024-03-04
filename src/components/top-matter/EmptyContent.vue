@@ -1,5 +1,9 @@
 <template>
-  <NcEmptyContent :title="t('memories', 'Nothing to show here')" :description="emptyViewDescription">
+  <NcEmptyContent
+    :title="t('memories', 'Nothing to show here')"
+    :name="t('memories', 'Nothing to show here')"
+    :description="emptyViewDescription"
+  >
     <template #icon>
       <PeopleIcon v-if="routeIsPeople" />
       <ArchiveIcon v-else-if="routeIsArchive" />
