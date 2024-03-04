@@ -199,9 +199,10 @@ export async function extendWithStack(photos: IPhoto[]) {
   // Combine all files
   const combined = photos.concat(livePhotos, stackRaw);
 
-  // De-duplicate
-  const unique = new Map<number, IPhoto>(combined.map((p) => [p.fileid, p]));
-  return Array.from(unique.values());
+  // De-duplicate keeping the order same as before
+  // https://github.com/pulsejet/memories/issues/1056
+  const cIds = new Set(combined.map((p) => p.fileid));
+  return combined.filter((p) => cIds.delete(p.fileid));
 }
 
 /**
