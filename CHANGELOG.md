@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- Hide files starting with `.` in the timeline
+
 ## [v6.2.2] - 2024-01-10
 
 - Hotfix for a bug in request pipelining.
