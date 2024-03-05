@@ -19,8 +19,7 @@
         "muuvmuuv.vscode-just-php-cs-fixer",
         "getpsalm.psalm-vscode-plugin",
         "esbenp.prettier-vscode",
-        "Vue.volar",
-        "Vue.vscode-typescript-vue-plugin"
+        "Vue.volar"
       ],
       "settings": {
         "terminal.integrated.shell.linux": "/bin/bash"
