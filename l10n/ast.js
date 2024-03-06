@@ -47,6 +47,7 @@ OC.L10N.register(
     "Create album" : "Crear un álbum",
     "Search" : "Buscar",
     "Year" : "Añu",
+    "Time" : "Data",
     "Hour" : "Hora",
     "Minute" : "Minutu",
     "Title" : "Tñitulu",
