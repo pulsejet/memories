@@ -87,12 +87,12 @@ class TimelineWrite
 
         // Check if EXIF is blank, which is probably wrong
         if (0 === \count($exif)) {
-            throw new \Exception('No EXIF data could be read: '.$file->getPath());
+            throw new \Exception('No EXIF data could be read');
         }
 
         // Check if MIMEType was not detected
         if (empty($exif['MIMEType'] ?? null)) {
-            throw new \Exception('No MIMEType in EXIF data: '.$file->getPath());
+            throw new \Exception('No MIMEType in EXIF data');
         }
 
         // Hand off if Live Photo video part

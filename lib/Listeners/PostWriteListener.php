@@ -74,6 +74,7 @@ class PostWriteListener implements IEventListener
         } catch (\Exception $e) {
             $this->logger->error('Failed to process file EXIF data', [
                 'app' => 'memories',
+                'path' => $node->getPath(),
                 'message' => $e->getMessage(),
             ]);
         }
