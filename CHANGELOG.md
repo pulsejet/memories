@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - Hide files starting with `.` in the timeline
+- Prevent automatically retrying failed indexing jobs
 
 ## [v6.2.2] - 2024-01-10
 

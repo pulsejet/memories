@@ -11,7 +11,7 @@ use OCP\Files\File;
 use OCP\IDBConnection;
 use OCP\Lock\ILockingProvider;
 
-const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places'];
+const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places', 'memories_failures'];
 const TRUNCATE_TABLES = ['memories_mapclusters'];
 
 class TimelineWrite
@@ -19,6 +19,7 @@ class TimelineWrite
     use TimelineWriteMap;
     use TimelineWriteOrphans;
     use TimelineWritePlaces;
+    use TimelineWriteFailures;
 
     public function __construct(
         protected IDBConnection $connection,
@@ -182,7 +183,15 @@ class TimelineWrite
             $query->insert('memories')->values($params);
         }
 
-        return $query->executeStatement() > 0;
+        // Execute query
+        $updated = $query->executeStatement() > 0;
+
+        // Clear failures if successful
+        if ($updated) {
+            $this->clearFailures($file);
+        }
+
+        return $updated;
     }
 
     /**

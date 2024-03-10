@@ -85,6 +85,7 @@ class AdminController extends GenericApiController
         return Util::guardEx(function () {
             $config = \OC::$server->get(\OCP\IConfig::class);
             $index = \OC::$server->get(\OCA\Memories\Service\Index::class);
+            $tw = \OC::$server->get(\OCA\Memories\Db\TimelineWrite::class);
 
             // Build status array
             $status = [];
@@ -107,6 +108,7 @@ class AdminController extends GenericApiController
 
             // Check number of indexed files
             $status['indexed_count'] = $index->getIndexedCount();
+            $status['failure_count'] = $tw->countFailures();
 
             // Automatic indexing stats
             $jobStart = (int) $config->getAppValue(Application::APPNAME, 'last_index_job_start', (string) 0);
@@ -175,6 +177,29 @@ class AdminController extends GenericApiController
             $status['action_token'] = $this->actionToken(true);
 
             return new JSONResponse($status, Http::STATUS_OK);
+        });
+    }
+
+    /**
+     * @AdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function getFailureLogs(): Http\Response {
+        return Util::guardExDirect(static function (Http\IOutput $out) {
+            $tw = \OC::$server->get(\OCA\Memories\Db\TimelineWrite::class);
+
+            $out->setHeader('Content-Type: text/plain');
+            $out->setHeader('X-Accel-Buffering: no');
+            $out->setHeader('Cache-Control: no-cache');
+
+            foreach ($tw->listFailures() as $log) {
+                $fileid = str_pad((string) $log['fileid'], 12, ' ', STR_PAD_RIGHT); // size
+                $mtime = $log['mtime'];
+                $reason = $log['reason'];
+
+                $out->setOutput("{$fileid}[{$mtime}]\t{$reason}\n");
+            }
         });
     }
 

@@ -13,9 +13,7 @@
         >
           {{
             status.gis_count > 0
-              ? t('memories', 'Database is populated with {n} geometries.', {
-                  n: status.gis_count,
-                })
+              ? t('memories', 'Database is populated with {n} geometries.', { n: status.gis_count })
               : t('memories', 'Geometry table has not been created.')
           }}
           {{
