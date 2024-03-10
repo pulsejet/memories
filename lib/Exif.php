@@ -93,8 +93,14 @@ class Exif
             throw new \Exception('Failed to get local file: '.$ex->getMessage());
         }
 
+        // Check if path is valid
         if (!\is_string($path)) {
             throw new \Exception('Failed to get local file path');
+        }
+
+        // Check if file is readable
+        if (!is_readable($path)) {
+            throw new \Exception('File is not readable');
         }
 
         $exif = self::getExifFromLocalPath($path);
