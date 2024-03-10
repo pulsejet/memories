@@ -437,7 +437,7 @@ class Places
                 poly_id varchar(32) NOT NULL,
                 type_id int NOT NULL,
                 osm_id int NOT NULL,
-                geometry polygon NOT NULL ${srid}
+                geometry polygon NOT NULL {$srid}
             );";
             $this->connection->executeQuery($sql);
 

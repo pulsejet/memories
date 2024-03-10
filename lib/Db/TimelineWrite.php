@@ -16,10 +16,10 @@ const TRUNCATE_TABLES = ['memories_mapclusters'];
 
 class TimelineWrite
 {
+    use TimelineWriteFailures;
     use TimelineWriteMap;
     use TimelineWriteOrphans;
     use TimelineWritePlaces;
-    use TimelineWriteFailures;
 
     public function __construct(
         protected IDBConnection $connection,

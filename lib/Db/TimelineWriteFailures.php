@@ -16,7 +16,7 @@ trait TimelineWriteFailures
      * Mark a file as failed indexing.
      * The file will not be re-indexed until it changes.
      *
-     * @param File $file The file that failed indexing
+     * @param File   $file   The file that failed indexing
      * @param string $reason The reason for the failure
      */
     public function markFailed(File $file, string $reason): void
@@ -65,6 +65,7 @@ trait TimelineWriteFailures
         $query->select($query->createFunction('COUNT(fileid)'))
             ->from('memories_failures')
         ;
+
         return (int) $query->executeQuery()->fetchOne();
     }
 
@@ -77,7 +78,7 @@ trait TimelineWriteFailures
             ->select('*')
             ->from('memories_failures')
             ->executeQuery()
-            ->fetchAll();
+            ->fetchAll()
         ;
     }
 
@@ -88,6 +89,7 @@ trait TimelineWriteFailures
     {
         // Delete all entries and reset autoincrement counter
         $this->connection->executeStatement(
-            $this->connection->getDatabasePlatform()->getTruncateTableSQL('*PREFIX*memories_failures', false));
+            $this->connection->getDatabasePlatform()->getTruncateTableSQL('*PREFIX*memories_failures', false),
+        );
     }
 }

@@ -180,16 +180,17 @@ class Index extends Command
             return;
         }
 
-        $this->output->writeln("<info>Retrying indexing of failed files</info>");
+        $this->output->writeln('<info>Retrying indexing of failed files</info>');
         $this->tw->clearAllFailures();
     }
 
     /**
      * Warn about skipped files (called at the end of indexing).
      */
-    protected function warnRetry(): void {
+    protected function warnRetry(): void
+    {
         if ($count = $this->tw->countFailures()) {
-            $this->output->writeln("Indexing skipped for ${count} failed files, use --retry to try again");
+            $this->output->writeln("Indexing skipped for {$count} failed files, use --retry to try again");
         }
     }
 

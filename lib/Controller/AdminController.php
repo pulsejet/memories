@@ -185,7 +185,8 @@ class AdminController extends GenericApiController
      *
      * @NoCSRFRequired
      */
-    public function getFailureLogs(): Http\Response {
+    public function getFailureLogs(): Http\Response
+    {
         return Util::guardExDirect(static function (Http\IOutput $out) {
             $tw = \OC::$server->get(\OCA\Memories\Db\TimelineWrite::class);
 

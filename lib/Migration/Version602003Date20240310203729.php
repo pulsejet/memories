@@ -57,7 +57,7 @@ class Version602003Date20240310203729 extends SimpleMigrationStep
                 'notnull' => true,
                 'length' => 20,
             ]);
-			$table->addColumn('reason', 'text', [
+            $table->addColumn('reason', 'text', [
                 'notnull' => false,
             ]);
 
