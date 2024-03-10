@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+- **Important**: It is recommended to run `occ memories:places-setup` again if you use MySQL or MariaDB
 - Hide files starting with `.` in the timeline
 - Prevent automatically retrying failed indexing jobs
-- MySQL fixes: run `occ places-setup` again if you use MySQL (not MariaDB)
 
 ## [v6.2.2] - 2024-01-10
 
