@@ -43,12 +43,12 @@ class Places
         }
 
         // Detect database type
-        $platform = strtolower($this->connection->getDatabasePlatform()::class);
+        $platform = $this->getDbName();
 
         // Test MySQL-like support in databse
         if (str_contains($platform, 'mysql') || str_contains($platform, 'mariadb')) {
             try {
-                $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)')")->fetch();
+                $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)', 4326)")->fetch();
                 if (0 === \count($res)) {
                     throw new \Exception('Invalid result');
                 }
@@ -98,9 +98,9 @@ class Places
 
         // Construct WHERE clause depending on GIS type
         $where = null;
-        if (1 === $gisType) {
-            $where = "ST_Contains(geometry, ST_GeomFromText('POINT({$lon} {$lat})'))";
-        } elseif (2 === $gisType) {
+        if (GIS_TYPE_MYSQL === $gisType) {
+            $where = "ST_Contains(geometry, ST_GeomFromText('POINT({$lon} {$lat})', 4326))";
+        } elseif (GIS_TYPE_POSTGRES === $gisType) {
             $where = "POINT('{$lon},{$lat}') <@ geometry";
         } else {
             return [];
@@ -223,7 +223,7 @@ class Places
         $query = $this->connection->getQueryBuilder();
         $geomParam = (string) $query->createParameter('geometry');
         if (GIS_TYPE_MYSQL === $gis) {
-            $geomParam = "ST_GeomFromText({$geomParam})";
+            $geomParam = "ST_GeomFromText({$geomParam}, 4326)";
         } elseif (GIS_TYPE_POSTGRES === $gis) {
             $geomParam = "POLYGON({$geomParam}::text)";
         }
@@ -427,14 +427,18 @@ class Places
             // Drop the table if it exists
             $this->connection->executeStatement('DROP TABLE IF EXISTS memories_planet_geometry');
 
+            // MySQL requires an SRID definition
+            // https://github.com/pulsejet/memories/issues/1067
+            $srid = str_contains($this->getDbName(), 'mysql') ? 'SRID 4326' : '';
+
             // Create table
-            $sql = 'CREATE TABLE memories_planet_geometry (
+            $sql = "CREATE TABLE memories_planet_geometry (
                 id varchar(32) NOT NULL PRIMARY KEY,
                 poly_id varchar(32) NOT NULL,
                 type_id int NOT NULL,
                 osm_id int NOT NULL,
-                geometry polygon NOT NULL
-            );';
+                geometry polygon NOT NULL ${srid}
+            );";
             $this->connection->executeQuery($sql);
 
             // Add indexes
@@ -449,5 +453,13 @@ class Places
         } catch (\Exception $e) {
             throw new \Exception('Failed to create database tables: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Get the database platform name.
+     */
+    private function getDbName(): string
+    {
+        return strtolower($this->connection->getDatabasePlatform()::class);
     }
 }
