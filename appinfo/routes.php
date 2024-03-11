@@ -2,17 +2,13 @@
 
 declare(strict_types=1);
 
-function getWildcard($param)
-{
-    return [
-        'requirements' => [$param => '.*'],
-        'defaults' => [$param => ''],
-    ];
-}
-
+/** Helper function to add a wildcard parameter to the route */
 function w($base, $param)
 {
-    return array_merge($base, getWildcard($param));
+    return array_merge($base, [
+        'requirements' => [$param => '.*'],
+        'defaults' => [$param => ''],
+    ]);
 }
 
 return [
@@ -36,16 +32,8 @@ return [
         w(['name' => 'Page#tags', 'url' => '/tags/{name}', 'verb' => 'GET'], 'name'),
 
         // Public folder share
-        [
-            'name' => 'Public#showAuthenticate',
-            'url' => '/s/{token}/authenticate/{redirect}',
-            'verb' => 'GET',
-        ],
-        [
-            'name' => 'Public#authenticate',
-            'url' => '/s/{token}/authenticate/{redirect}',
-            'verb' => 'POST',
-        ],
+        ['name' => 'Public#showAuthenticate', 'url' => '/s/{token}/authenticate/{redirect}', 'verb' => 'GET'],
+        ['name' => 'Public#authenticate', 'url' => '/s/{token}/authenticate/{redirect}', 'verb' => 'POST'],
         w(['name' => 'Public#showShare', 'url' => '/s/{token}/{path}', 'verb' => 'GET'], 'path'),
 
         // Public album share

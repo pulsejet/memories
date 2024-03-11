@@ -17,9 +17,7 @@
         {{
           httpVerOk
             ? t('memories', 'HTTP/2 or HTTP/3 is enabled')
-            : t('memories', 'HTTP/2 or HTTP/3 is strongly recommended ({httpVer} detected)', {
-                httpVer,
-              })
+            : t('memories', 'HTTP/2 or HTTP/3 is strongly recommended ({httpVer} detected)', { httpVer })
         }}
       </NcNoteCard>
     </p>

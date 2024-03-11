@@ -19,7 +19,7 @@
           {{
             status.gis_count > 0 && status.gis_count <= 500000
               ? t('memories', 'Looks like the planet data is incomplete.')
-              : ''
+              : String()
           }}
         </NcNoteCard>
         <NcNoteCard
