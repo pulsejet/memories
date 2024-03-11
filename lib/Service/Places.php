@@ -101,7 +101,9 @@ class Places
         if (GIS_TYPE_MYSQL === $gisType) {
             $where = "ST_Contains(geometry, ST_GeomFromText('POINT({$lat} {$lon})', 4326))";
         } elseif (GIS_TYPE_POSTGRES === $gisType) {
-            $where = "POINT('{$lat},{$lon}') <@ geometry";
+            // Postgres does not support using an index with POINT <@ POLYGON
+            // https://www.postgresql.org/docs/current/gist-builtin-opclasses.html
+            $where = "POLYGON('{$lat},{$lon}') <@ geometry";
         } else {
             return [];
         }
@@ -456,7 +458,8 @@ class Places
             if (GIS_TYPE_MYSQL === $gis) {
                 $this->connection->executeQuery('CREATE SPATIAL INDEX planet_osm_polygon_geometry_idx ON memories_planet_geometry (geometry);');
             } elseif (GIS_TYPE_POSTGRES === $gis) {
-                $this->connection->executeQuery('CREATE INDEX planet_osm_polygon_geometry_idx ON memories_planet_geometry USING GIST (geometry);');
+                // https://www.postgresql.org/docs/current/gist-builtin-opclasses.html
+                $this->connection->executeQuery('CREATE INDEX planet_osm_polygon_geometry_idx ON memories_planet_geometry USING GIST (geometry poly_ops);');
             }
         } catch (\Exception $e) {
             throw new \Exception('Failed to create database tables: '.$e->getMessage());

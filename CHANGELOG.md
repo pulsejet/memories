@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 
 - **Important**: You must run `occ memories:places-setup` again after this update
+    - Reverse geocoding lookups with Postgres/MySQL (not MariaDB) are now 100x faster
 - Hide files starting with `.` in the timeline
 - Prevent automatically retrying failed indexing jobs
 - Support for 3GP videos ([#1055](https://github.com/pulsejet/memories/issues/1055))
