@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Prevent automatically retrying failed indexing jobs
 - Support for 3GP videos ([#1055](https://github.com/pulsejet/memories/issues/1055))
 - Option to show metadata in slideshow ([#819](https://github.com/pulsejet/memories/issues/819))
+- Improve UX of image editor especially on mobile
 
 ## [v6.2.2] - 2024-01-10
 
