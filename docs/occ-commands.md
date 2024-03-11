@@ -46,7 +46,8 @@ Usage:
   memories:places-setup [options]
 
 Options:
-  -r, --recalculate     Only recalculate places for existing files
+  -r, --recalculate          Only recalculate places for existing files
+      --transaction-size=50  Reduce this value if your database crashes [default: 50]
 ```
 
 ## `memories:migrate-google-takeout`
