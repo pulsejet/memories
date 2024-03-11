@@ -20,7 +20,7 @@
       @pointermove.passive="setUiVisible"
       @pointerdown.passive="setUiVisible"
     >
-      <div class="top-bar" v-if="photoswipe" :class="{ showControls }">
+      <div class="top-bar" v-if="photoswipe" :class="{ visible: showControls }">
         <NcActions :inline="numInlineActions" container=".memories_viewer .pswp">
           <NcActionButton
             v-for="action of actions"
@@ -37,7 +37,7 @@
         </NcActions>
       </div>
 
-      <div class="bottom-bar" v-if="photoswipe" :class="{ showControls, showBottomBar }">
+      <div class="bottom-bar" v-if="photoswipe" :class="{ visible: showBottomBar }">
         <div class="exif title" v-if="currentPhoto?.imageInfo?.exif?.Title">
           {{ currentPhoto.imageInfo.exif.Title }}
         </div>
@@ -374,7 +374,7 @@ export default defineComponent({
 
     /** Show bottom bar info such as date taken */
     showBottomBar(): boolean {
-      return !this.isVideo && this.fullyOpened && Boolean(this.currentPhoto?.imageInfo);
+      return this.showControls && !this.isVideo && this.fullyOpened && Boolean(this.currentPhoto?.imageInfo);
     },
 
     /** Allow closing the viewer */
@@ -1004,6 +1004,10 @@ export default defineComponent({
       if (e.key === 'Delete') {
         this.deleteCurrent();
       }
+
+      if (e.key === 'Tab') {
+        this.photoswipe?.element?.classList.add('pswp--ui-visible');
+      }
     },
 
     /** Delete this photo and refresh */
@@ -1248,7 +1252,7 @@ export default defineComponent({
         this.stopSlideshow();
       }
       this.photoswipe?.updateSize();
-      this.refs.outer?.focus();
+      this.photoswipe?.template?.focus();
     },
 
     /**
@@ -1298,7 +1302,7 @@ export default defineComponent({
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
   pointer-events: none;
-  &.showControls {
+  &.visible {
     opacity: 1;
     pointer-events: auto;
   }
@@ -1316,7 +1320,7 @@ export default defineComponent({
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
-  &.showControls.showBottomBar {
+  &.visible {
     opacity: 1;
   }
 
