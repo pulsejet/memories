@@ -104,9 +104,9 @@ class TimelineWrite
         }
 
         // If control reaches here, it's not a Live Photo video part
-        // But if prevRow exists and mapcluster is not set, it *was* a live video part
+        // But if prevRow exists and dayid is not set, it *was* a live video part
         // In this case delete that entry (very rare edge case)
-        if ($prevRow && !\array_key_exists('mapcluster', $prevRow)) {
+        if ($prevRow && !\array_key_exists('dayid', $prevRow)) {
             $this->livePhoto->deleteVideoPart($file);
             $prevRow = null;
         }
