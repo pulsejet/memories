@@ -111,11 +111,8 @@ class Util
         }
 
         $v = $appManager->getAppVersion('recognize');
-        if (!version_compare($v, '3.8.0', '>=')) {
-            return false;
-        }
 
-        return true;
+        return version_compare($v, '3.8.0', '>=');
     }
 
     /**
@@ -149,7 +146,7 @@ class Util
             return false;
         }
 
-        $v = $appManager->getAppInfo('facerecognition')['version'];
+        $v = $appManager->getAppVersion('facerecognition');
 
         return version_compare($v, '0.9.10-beta.2', '>=');
     }
