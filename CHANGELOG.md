@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - **Important**: It is recommended to run `occ memories:places-setup` again if you use MySQL or MariaDB
 - Hide files starting with `.` in the timeline
 - Prevent automatically retrying failed indexing jobs
+- Support for 3GP videos ([#1055](https://github.com/pulsejet/memories/issues/1055))
 
 ## [v6.2.2] - 2024-01-10
 
