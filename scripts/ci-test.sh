@@ -24,7 +24,6 @@ make bin-ext
 cd ../..
 
 # Enable apps
-php occ app:enable --force viewer
 php occ app:enable --force memories
 
 # Run repair steps
