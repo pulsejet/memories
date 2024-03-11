@@ -1,7 +1,8 @@
 <template>
   <div
-    class="memories_viewer outer"
     v-if="show"
+    ref="outer"
+    class="memories_viewer outer"
     :class="{ fullyOpened, slideshowTimer }"
     :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"
@@ -13,8 +14,8 @@
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
 
     <div
-      class="inner"
       ref="inner"
+      class="inner"
       v-show="!editorOpen"
       @pointermove.passive="setUiVisible"
       @pointerdown.passive="setUiVisible"
@@ -201,6 +202,7 @@ export default defineComponent({
   computed: {
     refs() {
       return this.$refs as {
+        outer: HTMLDivElement;
         inner: HTMLDivElement;
       };
     },
@@ -377,7 +379,7 @@ export default defineComponent({
 
     /** Allow closing the viewer */
     allowClose(): boolean {
-      return !this.editorOpen && !dav.isSingleItem();
+      return !this.editorOpen && !dav.isSingleItem() && !this.slideshowTimer;
     },
 
     /** Get date taken string */
@@ -417,6 +419,12 @@ export default defineComponent({
   watch: {
     fullyOpened(val) {
       document.body.classList.toggle(BODY_VIEWER_FULLY_OPENED, val);
+    },
+
+    allowClose(val) {
+      if (!this.photoswipe) return;
+      this.photoswipe.options.pinchToClose = val;
+      this.photoswipe.options.closeOnVerticalDrag = val;
     },
   },
 
@@ -609,7 +617,8 @@ export default defineComponent({
         if (this.photoswipe?.template) {
           new MutationObserver((mutations) => {
             mutations.forEach((mutationRecord) => {
-              this.showControls = (<HTMLElement>mutationRecord.target)?.classList.contains('pswp--ui-visible');
+              const pswp = mutationRecord.target as HTMLElement;
+              this.showControls = pswp?.classList.contains('pswp--ui-visible') && !this.slideshowTimer;
             });
           }).observe(this.photoswipe.template, {
             attributes: true,
@@ -1171,13 +1180,11 @@ export default defineComponent({
      * Start a slideshow
      */
     async startSlideshow() {
-      // Full screen the pswp element
-      const pswp = this.photoswipe?.element;
-      if (!pswp) return;
-      pswp.requestFullscreen();
+      // Full screen the outer element
+      if (!this.refs.outer?.requestFullscreen()) return;
 
       // Hide controls
-      this.setUiVisible(false);
+      setTimeout(() => this.setUiVisible(false), 1);
 
       // Start slideshow
       this.slideshowTimer = window.setTimeout(this.slideshowTimerFired, SLIDESHOW_MS);
@@ -1241,6 +1248,7 @@ export default defineComponent({
         this.stopSlideshow();
       }
       this.photoswipe?.updateSize();
+      this.refs.outer?.focus();
     },
 
     /**
