@@ -65,6 +65,11 @@ class Version602003Date20240310203729 extends SimpleMigrationStep
             $table->addIndex(['fileid', 'mtime'], 'memories_fail_fid_mt_idx');
         }
 
+        // This version changes the geometry of planet
+        \OC::$server->get(\OCA\Memories\Settings\SystemConfig::class)
+            ->set('memories.gis_type', -1)
+        ;
+
         return $schema;
     }
 

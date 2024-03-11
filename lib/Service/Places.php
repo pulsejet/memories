@@ -99,9 +99,9 @@ class Places
         // Construct WHERE clause depending on GIS type
         $where = null;
         if (GIS_TYPE_MYSQL === $gisType) {
-            $where = "ST_Contains(geometry, ST_GeomFromText('POINT({$lon} {$lat})', 4326))";
+            $where = "ST_Contains(geometry, ST_GeomFromText('POINT({$lat} {$lon})', 4326))";
         } elseif (GIS_TYPE_POSTGRES === $gisType) {
-            $where = "POINT('{$lon},{$lat}') <@ geometry";
+            $where = "POINT('{$lat},{$lon}') <@ geometry";
         } else {
             return [];
         }
@@ -325,27 +325,35 @@ class Places
                     ++$idx;
                     $geometry = '';
 
+                    // Every polygon must have at least 3 points
                     if (\count($coords) < 3) {
                         echo "ERROR: Invalid polygon {$polyid}\n";
 
                         continue;
                     }
 
+                    // Check if coordinates are valid
+                    foreach ($coords as [$lon, $lat]) {
+                        if ($lon < -180 || $lon > 180 || $lat < -90 || $lat > 90) {
+                            echo "ERROR: Invalid coordinates for polygon {$polyid}\n";
+
+                            continue 2;
+                        }
+                    }
+
                     if (GIS_TYPE_MYSQL === $gis) {
                         $points = implode(',', array_map(static function (array $point) {
-                            $x = $point[0];
-                            $y = $point[1];
+                            [$lon, $lat] = $point;
 
-                            return "{$x} {$y}";
+                            return "{$lat} {$lon}";
                         }, $coords));
 
                         $geometry = "POLYGON(({$points}))";
                     } elseif (GIS_TYPE_POSTGRES === $gis) {
                         $geometry = implode(',', array_map(static function (array $point) {
-                            $x = $point[0];
-                            $y = $point[1];
+                            [$lon, $lat] = $point;
 
-                            return "({$x},{$y})";
+                            return "({$lat},{$lon})";
                         }, $coords));
                     }
 
@@ -382,7 +390,7 @@ class Places
         // Mark success
         echo "Planet database imported successfully!\n";
         flush();
-        $this->config->setSystemValue('memories.gis_type', $gis);
+        SystemConfig::set('memories.gis_type', $gis);
 
         // Delete data file
         @unlink($datafile);

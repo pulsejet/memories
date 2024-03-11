@@ -10,6 +10,7 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
 use OCP\Lock\ILockingProvider;
+use Psr\Log\LoggerInterface;
 
 const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places', 'memories_failures'];
 const TRUNCATE_TABLES = ['memories_mapclusters'];
@@ -25,6 +26,7 @@ class TimelineWrite
         protected IDBConnection $connection,
         protected LivePhoto $livePhoto,
         protected ILockingProvider $lockingProvider,
+        protected LoggerInterface $logger,
     ) {}
 
     /**
