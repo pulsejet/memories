@@ -54,24 +54,43 @@ export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
     options ?? {},
   );
 
-  // Observer to focus the confirm button when the dialog is shown
-  let observer: MutationObserver;
+  // Callback when dialog is created for initializations
+  const onCreate = (dialog: HTMLDivElement) => {
+    const confirmBtn = dialog.querySelector(`button.${opts.confirmClasses}`) as HTMLButtonElement;
+    const closeButton = dialog.querySelector('button.oc-dialog-close') as HTMLButtonElement;
 
-  // In case the dialog did not show for whatever reason, cancel after 5 seconds
+    // Focus the confirm button
+    confirmBtn?.focus?.();
+
+    // Handle keyboard actions
+    dialog.addEventListener('keydown', (e) => {
+      // Trap keydown events inside the dialog
+      e.stopPropagation();
+
+      // Override the default behavior of the escape key
+      if (e.key === 'Escape') {
+        e.stopImmediatePropagation();
+        closeButton?.click();
+      }
+    });
+  };
+
+  // Look for new dialog to be created with a 5s timeout
+  let observer: MutationObserver;
   const timeout = setTimeout(() => observer?.disconnect(), 5000);
 
-  // Look for new dialog to be created
-  observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutationRecord) => {
-      mutationRecord.addedNodes.forEach((node) => {
+  // Observer for new dialogs
+  observer = new MutationObserver((mutations) =>
+    mutations.forEach((record) => {
+      record.addedNodes.forEach((node) => {
         if (node instanceof HTMLDivElement && node.classList.contains('oc-dialog')) {
-          (node.querySelector(`button.${opts.confirmClasses}`) as HTMLElement)?.focus?.();
           observer.disconnect();
           clearTimeout(timeout);
+          onCreate(node);
         }
       });
-    });
-  });
+    }),
+  );
 
   // Watch changes to body
   observer.observe(document.body, { childList: true });
