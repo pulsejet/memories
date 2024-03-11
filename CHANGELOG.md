@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Hide files starting with `.` in the timeline
 - Prevent automatically retrying failed indexing jobs
 - Support for 3GP videos ([#1055](https://github.com/pulsejet/memories/issues/1055))
+- Option to show metadata in slideshow ([#819](https://github.com/pulsejet/memories/issues/819))
 
 ## [v6.2.2] - 2024-01-10
 

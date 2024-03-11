@@ -374,7 +374,12 @@ export default defineComponent({
 
     /** Show bottom bar info such as date taken */
     showBottomBar(): boolean {
-      return this.showControls && !this.isVideo && this.fullyOpened && Boolean(this.currentPhoto?.imageInfo);
+      return (
+        (this.showControls || (!!this.slideshowTimer && this.config.metadata_in_slideshow)) &&
+        !this.isVideo &&
+        this.fullyOpened &&
+        Boolean(this.currentPhoto?.imageInfo)
+      );
     },
 
     /** Allow closing the viewer */
