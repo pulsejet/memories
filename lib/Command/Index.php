@@ -84,7 +84,7 @@ class Index extends Command
             ->addOption('folder', null, InputOption::VALUE_REQUIRED, 'Index only the specified folder (relative to the user\'s root)')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force refresh of existing index entries')
             ->addOption('clear', null, InputOption::VALUE_NONE, 'Clear all existing index entries')
-            ->addOption('retry', 'r', InputOption::VALUE_NONE, 'Retry indexing of failed files')
+            ->addOption('retry', null, InputOption::VALUE_NONE, 'Retry indexing of failed files')
             ->addOption('skip-cleanup', null, InputOption::VALUE_NONE, 'Skip cleanup step (removing index entries with missing files)')
         ;
     }

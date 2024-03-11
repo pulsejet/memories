@@ -28,6 +28,7 @@ Options:
       --folder=FOLDER   Index only the specified folder (relative to the user's root)
   -f, --force           Force refresh of existing index entries
       --clear           Clear all existing index entries
+      --retry           Retry indexing of failed files
       --skip-cleanup    Skip cleanup step (removing index entries with missing files)
 ```
 
