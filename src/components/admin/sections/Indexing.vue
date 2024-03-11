@@ -6,6 +6,19 @@
       <NcNoteCard :type="status.indexed_count > 0 ? 'success' : 'warning'">
         {{ t('memories', '{n} media files have been indexed', { n: status.indexed_count }) }}
       </NcNoteCard>
+
+      <div v-if="status.failure_count > 0">
+        <NcNoteCard type="warning">
+          {{ t('memories', '{n} media files failed indexing and were skipped.', { n: status.failure_count }) }}
+          <a :href="API.FAILURE_LOGS()" target="_blank">{{ t('memories', 'View failure logs.') }}</a>
+        </NcNoteCard>
+
+        {{ t('memories', 'Files that failed indexing will not be indexed again unless they change.') }}
+        {{ t('memories', 'You can manually retry files that failed indexing.') }}
+        <br />
+        <code>occ memories:index --retry</code>
+      </div>
+
       <NcNoteCard :type="status.last_index_job_status_type">
         {{ t('memories', 'Automatic Indexing status: {status}', { status: status.last_index_job_status }) }}
       </NcNoteCard>
@@ -106,21 +119,6 @@
       <br />
       <code>occ memories:index --clear</code>
     </div>
-
-    <div v-if="status && status.failure_count > 0">
-      <NcNoteCard type="warning">
-        {{ t('memories', '{n} media files failed indexing and were skipped', { n: status.failure_count }) }}
-      </NcNoteCard>
-
-      {{ t('memories', 'Files that failed indexing will not be indexed again unless they change.') }}
-      {{ t('memories', 'You can manually retry files that failed indexing.') }}
-      <br />
-      <code>occ memories:index --retry</code>
-
-      <NcButton @click="openFailureLogs()" style="margin-top: 4px">
-        {{ t('memories', 'View failure logs') }}
-      </NcButton>
-    </div>
   </div>
 </template>
 
@@ -137,10 +135,6 @@ export default defineComponent({
   title: t('memories', 'Media Indexing'),
   mixins: [AdminMixin],
 
-  methods: {
-    openFailureLogs() {
-      return window.open(API.FAILURE_LOGS());
-    },
-  },
+  data: () => ({ API }),
 });
 </script>
