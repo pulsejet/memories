@@ -237,6 +237,9 @@ abstract class Backend
      * @param string        $objectTable          Table name for the object mapping
      * @param string        $objectTableObjectId  Column name for the object ID in objectTable
      * @param string        $objectTableClusterId Column name for the cluster ID in objectTable
+     * @param bool          $validateCluster      Whether to validate the cluster
+     * @param bool          $validateFilecache    Whether to validate the filecache
+     * @param mixed         $user                 Query expression for user ID to use for the covers
      */
     final protected function joinCovers(
         IQueryBuilder &$query,
@@ -247,12 +250,21 @@ abstract class Backend
         string $objectTableClusterId,
         bool $validateCluster = true,
         bool $validateFilecache = true,
+        string $field = 'cover',
+        mixed $user = null,
     ): void {
+        // Create aliases for the tables
+        $mcov = "m_cov_{$field}";
+        $mcov_f = "{$mcov}_f";
+
+        // Default to current user
+        $user = $user ?? $query->expr()->literal(Util::getUser()->getUID());
+
         // Clauses for the JOIN
         $joinClauses = [
-            $query->expr()->eq('m_cov.uid', $query->expr()->literal(Util::getUser()->getUID())),
-            $query->expr()->eq('m_cov.clustertype', $query->expr()->literal($this->clusterType())),
-            $query->expr()->eq('m_cov.clusterid', "{$clusterTable}.{$clusterTableId}"),
+            $query->expr()->eq("{$mcov}.uid", $user),
+            $query->expr()->eq("{$mcov}.clustertype", $query->expr()->literal($this->clusterType())),
+            $query->expr()->eq("{$mcov}.clusterid", "{$clusterTable}.{$clusterTableId}"),
         ];
 
         // Subquery if the preview is still valid for this cluster
@@ -260,7 +272,7 @@ abstract class Backend
             $validSq = $query->getConnection()->getQueryBuilder();
             $validSq->select($validSq->expr()->literal(1))
                 ->from($objectTable, 'cov_objs')
-                ->where($validSq->expr()->eq($query->expr()->castColumn("cov_objs.{$objectTableObjectId}", IQueryBuilder::PARAM_INT), 'm_cov.objectid'))
+                ->where($validSq->expr()->eq($query->expr()->castColumn("cov_objs.{$objectTableObjectId}", IQueryBuilder::PARAM_INT), "{$mcov}.objectid"))
                 ->andWhere($validSq->expr()->eq("cov_objs.{$objectTableClusterId}", "{$clusterTable}.{$clusterTableId}"))
             ;
 
@@ -276,21 +288,21 @@ abstract class Backend
                     $treeSq->expr()->eq('cov_cte_f.fileid', 'cov_f.parent'),
                     $treeSq->expr()->eq('cov_cte_f.hidden', $treeSq->expr()->literal(0, \PDO::PARAM_INT)),
                 ))
-                ->where($treeSq->expr()->eq('cov_f.fileid', 'm_cov.fileid'))
+                ->where($treeSq->expr()->eq('cov_f.fileid', "{$mcov}.fileid"))
             ;
 
             $joinClauses[] = $query->createFunction("EXISTS ({$treeSq->getSQL()})");
         }
 
         // LEFT JOIN to get all the covers that we can
-        $query->leftJoin($clusterTable, 'memories_covers', 'm_cov', $query->expr()->andX(...$joinClauses));
+        $query->leftJoin($clusterTable, 'memories_covers', $mcov, $query->expr()->andX(...$joinClauses));
 
         // JOIN with filecache to get the etag
-        $query->leftJoin('m_cov', 'filecache', 'm_cov_f', $query->expr()->eq('m_cov_f.fileid', 'm_cov.fileid'));
+        $query->leftJoin($mcov, 'filecache', $mcov_f, $query->expr()->eq("{$mcov_f}.fileid", "{$mcov}.fileid"));
 
         // SELECT the cover
-        $query->selectAlias($query->createFunction('MAX(m_cov.objectid)'), 'cover');
-        $query->selectAlias($query->createFunction('MAX(m_cov_f.etag)'), 'cover_etag');
+        $query->selectAlias($query->createFunction("MAX({$mcov}.objectid)"), $field);
+        $query->selectAlias($query->createFunction("MAX({$mcov_f}.etag)"), "{$field}_etag");
     }
 
     /**

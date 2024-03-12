@@ -83,14 +83,38 @@ class AlbumsBackend extends Backend
     public function getClustersInternal(int $fileid = 0): array
     {
         // Transformation to add covers
-        $transform = function (IQueryBuilder &$query): void {
-            $this->joinCovers($query, 'pa', 'album_id', 'photos_albums_files', 'file_id', 'album_id', true, false);
+        $transformOwned = function (IQueryBuilder &$query): void {
+            $this->joinCovers(
+                query: $query,
+                clusterTable: 'pa',
+                clusterTableId: 'album_id',
+                objectTable: 'photos_albums_files',
+                objectTableObjectId: 'file_id',
+                objectTableClusterId: 'album_id',
+                validateFilecache: false,
+            );
+        };
+
+        // Transformation for shared albums
+        $transformShared = function (IQueryBuilder &$query) use ($transformOwned): void {
+            $transformOwned($query);
+            $this->joinCovers(
+                query: $query,
+                clusterTable: 'pa',
+                clusterTableId: 'album_id',
+                objectTable: 'photos_albums_files',
+                objectTableObjectId: 'file_id',
+                objectTableClusterId: 'album_id',
+                validateFilecache: false,
+                field: 'cover_owner',
+                user: 'pa.user',
+            );
         };
 
         // Get personal and shared albums
         $list = array_merge(
-            $this->albumsQuery->getList(Util::getUID(), false, $fileid, $transform),
-            $this->albumsQuery->getList(Util::getUID(), true, $fileid, $transform),
+            $this->albumsQuery->getList(Util::getUID(), false, $fileid, $transformOwned),
+            $this->albumsQuery->getList(Util::getUID(), true, $fileid, $transformShared),
         );
 
         // Remove elements with duplicate album_id
@@ -102,6 +126,15 @@ class AlbumsBackend extends Backend
             $seenIds[] = $item['album_id'];
 
             return true;
+        });
+
+        // Fall back cover to cover_owner if available
+        array_walk($list, static function (array &$item) {
+            if (empty($item['cover']) && !empty($item['cover_owner'] ?? null)) {
+                $item['cover'] = $item['cover_owner'];
+                $item['cover_etag'] = $item['cover_owner_etag'];
+            }
+            unset($item['cover_owner'], $item['cover_owner_etag']);
         });
 
         // Add display names for users
