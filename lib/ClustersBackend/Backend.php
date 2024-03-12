@@ -250,7 +250,10 @@ abstract class Backend
         $validSq = $query->getConnection()->getQueryBuilder();
         $validSq->select($validSq->expr()->literal(1))
             ->from($objectTable, 'cov_objs')
-            ->where($validSq->expr()->eq("cov_objs.{$objectTableObjectId}", 'm_cov.objectid'))
+            ->where($validSq->expr()->eq(
+                $query->createFunction("CAST(cov_objs.{$objectTableObjectId} AS INTEGER)"),
+                'm_cov.objectid',
+            ))
             ->andWhere($validSq->expr()->eq("cov_objs.{$objectTableClusterId}", "{$clusterTable}.{$clusterTableId}"))
         ;
 
@@ -286,6 +289,7 @@ abstract class Backend
         // SELECT the cover
         $query->selectAlias('m_cov.objectid', 'cover');
         $query->selectAlias('m_cov_f.etag', 'cover_etag');
+        $query->addGroupBy('m_cov.objectid', 'm_cov_f.etag');
     }
 
     /**
