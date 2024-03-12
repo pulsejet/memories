@@ -82,13 +82,16 @@ class AlbumsBackend extends Backend
 
     public function getClustersInternal(int $fileid = 0): array
     {
-        // Run actual queries
-        $list = [];
+        // Transformation to add covers
+        $transform = function (IQueryBuilder &$query): void {
+            $this->joinCovers($query, 'pa', 'album_id', 'photos_albums_files', 'file_id', 'album_id');
+        };
 
-        // Personal albums
-        $list = array_merge($list, $this->albumsQuery->getList(Util::getUID(), false, $fileid));
-        // Shared albums
-        $list = array_merge($list, $this->albumsQuery->getList(Util::getUID(), true, $fileid));
+        // Get personal and shared albums
+        $list = array_merge(
+            $this->albumsQuery->getList(Util::getUID(), false, $fileid, $transform),
+            $this->albumsQuery->getList(Util::getUID(), true, $fileid, $transform),
+        );
 
         // Remove elements with duplicate album_id
         $seenIds = [];

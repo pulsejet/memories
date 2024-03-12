@@ -171,6 +171,9 @@ class RecognizeBackend extends Backend
         $query->addOrderBy('count', 'DESC');
         $query->addOrderBy('rfc.id'); // tie-breaker
 
+        // JOIN to get all covers
+        $this->joinCovers($query, 'rfc', 'id', 'recognize_face_detections', 'id', 'cluster_id');
+
         // FETCH all faces
         $faces = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
 
@@ -217,7 +220,9 @@ class RecognizeBackend extends Backend
         $query = $this->tq->joinFilecache($query);
 
         // LIMIT results
-        if (null !== $limit) {
+        if (-6 === $limit) {
+            $this->filterCover($query, 'rfd', 'id', 'cluster_id');
+        } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
 

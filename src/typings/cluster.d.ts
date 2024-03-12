@@ -17,6 +17,8 @@ declare module '@typings' {
     count: number;
     /** Name of cluster */
     name: string;
+    /** Object ID of cover object */
+    cover: number;
 
     /** Display name, e.g. translated */
     display_name?: string;

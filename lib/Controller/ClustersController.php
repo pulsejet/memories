@@ -67,11 +67,17 @@ class ClustersController extends GenericApiController
         return Util::guardEx(function () use ($backend, $name) {
             $this->init($backend);
 
-            // Get list of some photos in this cluster
-            $photos = $this->backend->getPhotos($name, 8);
+            // Attempt to get the cover preview (-6 magic)
+            $photos = $this->backend->getPhotos($name, -6);
+            $hasCover = !empty($photos);
+
+            // Fall back to some random photos in the cluster
+            if (!$hasCover) {
+                $photos = $this->backend->getPhotos($name, 8);
+            }
 
             // If no photos found then return 404
-            if (0 === \count($photos)) {
+            if (empty($photos)) {
                 return new JSONResponse([
                     'message' => 'No photos found in this cluster',
                 ], Http::STATUS_NOT_FOUND);

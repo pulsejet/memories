@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\SimpleFS\ISimpleFile;
 
@@ -78,6 +79,9 @@ abstract class Backend
      *
      * @param string $name  Identifier for the cluster
      * @param int    $limit Maximum number of photos to return
+     *
+     * Setting $limit to -6 will attempt to fetch the cover photo for the cluster
+     * This will be returned as an array with a single element if found
      */
     abstract public function getPhotos(string $name, ?int $limit = null): array;
 
@@ -151,5 +155,83 @@ abstract class Backend
     final public static function register(): void
     {
         Manager::register(static::clusterType(), static::class);
+    }
+
+    /**
+     * Join the list query to get covers.
+     *
+     * @param IQueryBuilder $query                Query builder
+     * @param string        $clusterTable         Alias name for the cluster list
+     * @param string        $clusterTableId       Column name for the cluster ID in clusterTable
+     * @param string        $objectTable          Table name for the object mapping
+     * @param string        $objectTableObjectId  Column name for the object ID in objectTable
+     * @param string        $objectTableClusterId Column name for the cluster ID in objectTable
+     */
+    final protected function joinCovers(
+        IQueryBuilder &$query,
+        string $clusterTable,
+        string $clusterTableId,
+        string $objectTable,
+        string $objectTableObjectId,
+        string $objectTableClusterId,
+    ): void {
+        // Subquery if the preview is still valid for this cluster
+        $validSq = $query->getConnection()->getQueryBuilder();
+        $validSq->select($validSq->expr()->literal(1))
+            ->from($objectTable, 'cov_objs')
+            ->where($validSq->expr()->eq("cov_objs.{$objectTableObjectId}", 'm_cov.objectid'))
+            ->andWhere($validSq->expr()->eq("cov_objs.{$objectTableClusterId}", "{$clusterTable}.{$clusterTableId}"))
+        ;
+
+        // Subquery if the file is still in the user's timeline tree
+        $treeSq = $query->getConnection()->getQueryBuilder();
+        $treeSq->select($treeSq->expr()->literal(1));
+
+        // Join only if the CTE is already joined
+        if ($query->getParameter('topFolderIds')) {
+            $treeSq->from('filecache', 'cov_f')
+                ->innerJoin('cov_f', 'cte_folders', 'cov_cte_f', $treeSq->expr()->andX(
+                    $treeSq->expr()->eq('cov_cte_f.fileid', 'cov_f.parent'),
+                    $treeSq->expr()->eq('cov_cte_f.hidden', $treeSq->expr()->literal(0, \PDO::PARAM_INT)),
+                ))
+                ->where($treeSq->expr()->eq('cov_f.fileid', 'm_cov.fileid'))
+            ;
+        }
+
+        // LEFT JOIN to get all the covers that we can
+        $query->leftJoin($clusterTable, 'memories_covers', 'm_cov', $query->expr()->andX(
+            $query->expr()->eq('m_cov.uid', $query->createNamedParameter(Util::getUser()->getUID())),
+            $query->expr()->eq('m_cov.clustertype', $query->createNamedParameter($this->clusterType())),
+            $query->expr()->eq('m_cov.clusterid', "{$clusterTable}.{$clusterTableId}"),
+
+            // Check validity
+            $query->createFunction("EXISTS ({$validSq->getSQL()})"),
+            $query->createFunction("EXISTS ({$treeSq->getSQL()})"),
+        ));
+
+        // SELECT the cover
+        $query->selectAlias('m_cov.objectid', 'cover');
+    }
+
+    /**
+     * Filter the photos query to get only the cover for this user.
+     *
+     * @param IQueryBuilder $query                Query builder
+     * @param string        $objectTable          Table name for the object mapping
+     * @param string        $objectTableObjectId  Column name for the object ID in objectTable
+     * @param string        $objectTableClusterId Column name for the cluster ID in objectTable
+     */
+    final protected function filterCover(
+        IQueryBuilder &$query,
+        string $objectTable,
+        string $objectTableObjectId,
+        string $objectTableClusterId,
+    ): void {
+        $query->innerJoin($objectTable, 'memories_covers', 'm_cov', $query->expr()->andX(
+            $query->expr()->eq('m_cov.uid', $query->expr()->literal(Util::getUser()->getUID())),
+            $query->expr()->eq('m_cov.clustertype', $query->expr()->literal($this->clusterType())),
+            $query->expr()->eq('m_cov.clusterid', "{$objectTable}.{$objectTableClusterId}"),
+            $query->expr()->eq("{$objectTable}.{$objectTableObjectId}", 'm_cov.objectid'),
+        ));
     }
 }

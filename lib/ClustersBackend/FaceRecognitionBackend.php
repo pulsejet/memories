@@ -86,15 +86,20 @@ class FaceRecognitionBackend extends Backend
             $query->expr()->eq($nameField, $query->createNamedParameter($personName)),
         ));
 
-        // Add face rect
-        if (!$aggregate && $this->request->getParam('facerect')) {
-            $query->selectAlias('frf.x', 'face_x')
-                ->selectAlias('frf.y', 'face_y')
-                ->selectAlias('frf.width', 'face_width')
-                ->selectAlias('frf.height', 'face_height')
-                ->selectAlias('m.w', 'image_width')
-                ->selectAlias('m.h', 'image_height')
-            ;
+        if (!$aggregate) {
+            // Multiple detections for the same image
+            $query->selectAlias('frf.id', 'faceid');
+
+            // Face Rect
+            if ($this->request->getParam('facerect')) {
+                $query->selectAlias('frf.x', 'face_x')
+                    ->selectAlias('frf.y', 'face_y')
+                    ->selectAlias('frf.width', 'face_width')
+                    ->selectAlias('frf.height', 'face_height')
+                    ->selectAlias('m.w', 'image_width')
+                    ->selectAlias('m.h', 'image_height')
+                ;
+            }
         }
     }
 
@@ -173,7 +178,9 @@ class FaceRecognitionBackend extends Backend
         $query = $this->tq->joinFilecache($query);
 
         // LIMIT results
-        if (null !== $limit) {
+        if (-6 === $limit) {
+            $this->filterCover($query, 'frf', 'id', 'person');
+        } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
 
@@ -266,6 +273,9 @@ class FaceRecognitionBackend extends Backend
         // It is not worth displaying all unnamed clusters. We show 15 to name them progressively,
         $query->setMaxResults(15);
 
+        // JOIN to get all covers
+        $this->joinCovers($query, 'frp', 'id', 'facerecog_faces', 'id', 'person');
+
         // FETCH all faces
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
@@ -309,6 +319,9 @@ class FaceRecognitionBackend extends Backend
         // ORDER by number of faces in cluster
         $query->orderBy('count', 'DESC');
         $query->addOrderBy('frp.name', 'ASC');
+
+        // JOIN to get all covers
+        $this->joinCovers($query, 'frp', 'id', 'facerecog_faces', 'id', 'person');
 
         // FETCH all faces
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];

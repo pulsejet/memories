@@ -153,6 +153,9 @@ class PlacesBackend extends Backend
         $query->addOrderBy('e.name');
         $query->addOrderBy('e.osm_id'); // tie-breaker
 
+        // JOIN to get all covers
+        $this->joinCovers($query, 'e', 'osm_id', 'memories_places', 'fileid', 'osm_id');
+
         // FETCH all tags
         $places = $this->tq->executeQueryWithCTEs($query)->fetchAll();
 
@@ -179,7 +182,8 @@ class PlacesBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT all photos with this tag
-        $query->select('f.fileid', 'f.etag')->from('memories_places', 'mp')
+        $query->select('f.fileid', 'f.etag')
+            ->from('memories_places', 'mp')
             ->where($query->expr()->eq('mp.osm_id', $query->createNamedParameter((int) $name)))
         ;
 
@@ -190,7 +194,9 @@ class PlacesBackend extends Backend
         $query = $this->tq->joinFilecache($query);
 
         // MAX number of photos
-        if (null !== $limit) {
+        if (-6 === $limit) {
+            $this->filterCover($query, 'mp', 'fileid', 'osm_id');
+        } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
 

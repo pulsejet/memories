@@ -73,9 +73,10 @@ class TagsBackend extends Backend
 
         // SELECT visible tag name and count of photos
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
-        $query->select('st.id', 'st.name', $count)->from('systemtag', 'st')->where(
-            $query->expr()->eq('visibility', $query->expr()->literal(1, \PDO::PARAM_INT)),
-        );
+        $query->select('st.id', 'st.name', $count)
+            ->from('systemtag', 'st')
+            ->where($query->expr()->eq('st.visibility', $query->expr()->literal(1, \PDO::PARAM_INT)))
+        ;
 
         // WHERE there are items with this tag
         $query->innerJoin('st', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
@@ -93,6 +94,9 @@ class TagsBackend extends Backend
         $query->groupBy('st.id');
         $query->orderBy($query->createFunction('LOWER(st.name)'), 'ASC');
         $query->addOrderBy('st.id'); // tie-breaker
+
+        // JOIN to get all covers
+        $this->joinCovers($query, 'st', 'id', 'systemtag_object_mapping', 'objectid', 'systemtagid');
 
         // FETCH all tags
         $tags = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
@@ -117,13 +121,13 @@ class TagsBackend extends Backend
         $tagId = $this->getSystemTagId($query, $name);
 
         // SELECT all photos with this tag
-        $query->select('f.fileid', 'f.etag', 'stom.systemtagid')->from(
-            'systemtag_object_mapping',
-            'stom',
-        )->where(
-            $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
-            $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
-        );
+        $query->select('f.fileid', 'f.etag', 'stom.systemtagid')
+            ->from('systemtag_object_mapping', 'stom')
+            ->where(
+                $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
+                $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
+            )
+        ;
 
         // WHERE these items are memories indexed photos
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
@@ -132,7 +136,9 @@ class TagsBackend extends Backend
         $query = $this->tq->joinFilecache($query);
 
         // MAX number of files
-        if (null !== $limit) {
+        if (-6 === $limit) {
+            $this->filterCover($query, 'stom', 'objectid', 'systemtagid');
+        } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
 

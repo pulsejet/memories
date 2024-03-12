@@ -14,11 +14,17 @@ class AlbumsQuery
     /**
      * Get list of albums.
      *
-     * @param bool $shared Whether to get shared albums
-     * @param int  $fileid File to filter by
+     * @param string   $uid         User ID
+     * @param bool     $shared      Whether to get shared albums
+     * @param int      $fileid      File to filter by
+     * @param \Closure $transformCb Callback to transform the query
      */
-    public function getList(string $uid, bool $shared = false, int $fileid = 0): array
-    {
+    public function getList(
+        string $uid,
+        bool $shared = false,
+        int $fileid = 0,
+        ?\Closure $transformCb = null,
+    ): array {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT everything from albums
@@ -72,6 +78,11 @@ class AlbumsQuery
                 ->getSQL()
             ;
             $query->andWhere($query->createFunction("EXISTS ({$fSq})"));
+        }
+
+        // Apply further transformations
+        if (null !== $transformCb) {
+            $transformCb($query);
         }
 
         // FETCH all albums
@@ -252,7 +263,10 @@ class AlbumsQuery
         $query->orderBy('paf.album_file_id', 'DESC');
 
         // LIMIT the results
-        if (null !== $limit) {
+        if (-6 === $limit) {
+            // not implemented -- should return the cover photo
+            $query->setMaxResults(1);
+        } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
 
