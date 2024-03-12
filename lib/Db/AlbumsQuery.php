@@ -80,6 +80,10 @@ class AlbumsQuery
             $query->andWhere($query->createFunction("EXISTS ({$fSq})"));
         }
 
+        // Get the etag of the last added photo
+        $query->leftJoin('pa', 'filecache', 'pa_fc', $query->expr()->eq('pa.last_added_photo', 'pa_fc.fileid'));
+        $query->selectAlias($query->createFunction('MAX(pa_fc.etag)'), 'last_added_photo_etag');
+
         // Apply further transformations
         if (null !== $transformCb) {
             $transformCb($query);

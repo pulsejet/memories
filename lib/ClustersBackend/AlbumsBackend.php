@@ -85,10 +85,6 @@ class AlbumsBackend extends Backend
         // Transformation to add covers
         $transform = function (IQueryBuilder &$query): void {
             $this->joinCovers($query, 'pa', 'album_id', 'photos_albums_files', 'file_id', 'album_id', true, false);
-
-            // Get the etag of the last added photo
-            $query->leftJoin('pa', 'filecache', 'pa_fc', $query->expr()->eq('pa.last_added_photo', 'pa_fc.fileid'));
-            $query->selectAlias($query->createFunction('MAX(pa_fc.etag)'), 'last_added_photo_etag');
         };
 
         // Get personal and shared albums
