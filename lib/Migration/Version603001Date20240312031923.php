@@ -70,6 +70,7 @@ class Version603001Date20240312031923 extends SimpleMigrationStep
                 'length' => 20,
             ]);
             $table->addColumn('auto', Types::BOOLEAN, [
+                'notnull' => false,
                 'default' => true,
             ]);
             $table->addColumn('timestamp', Types::BIGINT, [
