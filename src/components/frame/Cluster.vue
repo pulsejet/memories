@@ -101,7 +101,7 @@ export default defineComponent({
       if (this.album) {
         // Always fall back to last update for albums
         // Never go to CLUSTER_PREVIEW since it is not fully implemented
-        return preview(this.album.last_added_photo, this.album.album_id);
+        return preview(this.album.last_added_photo, this.album.last_added_photo_etag ?? this.album.album_id);
       }
 
       // Force a cover if not set

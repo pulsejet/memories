@@ -42,6 +42,8 @@ declare module '@typings' {
     location: string;
     /** File ID of last added photo */
     last_added_photo: number;
+    /** Etag of last added photo */
+    last_added_photo_etag: string;
   }
 
   export interface IFace extends ICluster {
