@@ -73,9 +73,10 @@ class TagsBackend extends Backend
 
         // SELECT visible tag name and count of photos
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
-        $query->select('st.id', 'st.name', $count)->from('systemtag', 'st')->where(
-            $query->expr()->eq('visibility', $query->expr()->literal(1, \PDO::PARAM_INT)),
-        );
+        $query->select('st.id', 'st.name', $count)
+            ->from('systemtag', 'st')
+            ->where($query->expr()->eq('st.visibility', $query->expr()->literal(1, \PDO::PARAM_INT)))
+        ;
 
         // WHERE there are items with this tag
         $query->innerJoin('st', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
@@ -90,9 +91,19 @@ class TagsBackend extends Backend
         $query = $this->tq->joinFilecache($query);
 
         // GROUP and ORDER by tag name
-        $query->groupBy('st.id');
+        $query->addGroupBy('st.id');
         $query->orderBy($query->createFunction('LOWER(st.name)'), 'ASC');
         $query->addOrderBy('st.id'); // tie-breaker
+
+        // JOIN to get all covers
+        $this->joinCovers(
+            query: $query,
+            clusterTable: 'st',
+            clusterTableId: 'id',
+            objectTable: 'systemtag_object_mapping',
+            objectTableObjectId: 'objectid',
+            objectTableClusterId: 'systemtagid',
+        );
 
         // FETCH all tags
         $tags = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
@@ -111,19 +122,19 @@ class TagsBackend extends Backend
         return $cluster['name'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null): array
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         $query = $this->tq->getBuilder();
         $tagId = $this->getSystemTagId($query, $name);
 
         // SELECT all photos with this tag
-        $query->select('f.fileid', 'f.etag', 'stom.systemtagid')->from(
-            'systemtag_object_mapping',
-            'stom',
-        )->where(
-            $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
-            $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
-        );
+        $query->select('f.fileid', 'f.etag', 'stom.systemtagid')
+            ->from('systemtag_object_mapping', 'stom')
+            ->where(
+                $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
+                $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
+            )
+        ;
 
         // WHERE these items are memories indexed photos
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
@@ -132,12 +143,24 @@ class TagsBackend extends Backend
         $query = $this->tq->joinFilecache($query);
 
         // MAX number of files
-        if (null !== $limit) {
+        if (-6 === $limit) {
+            $this->filterCover($query, 'stom', 'objectid', 'systemtagid');
+        } elseif (null !== $limit) {
             $query->setMaxResults($limit);
+        }
+
+        // Filter by fileid if specified
+        if (null !== $fileid) {
+            $query->andWhere($query->expr()->eq('f.fileid', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         // FETCH tag photos
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+    }
+
+    public function getClusterIdFrom(array $photo): int
+    {
+        return (int) $photo['systemtagid'];
     }
 
     private function getSystemTagId(IQueryBuilder $query, string $tagName): int

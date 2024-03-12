@@ -9,11 +9,7 @@
       </NcActions>
 
       <div class="text">
-        {{
-          n('memories', '{n} selected', '{n} selected', size, {
-            n: size,
-          })
-        }}
+        {{ n('memories', '{n} selected', '{n} selected', size, { n: size }) }}
       </div>
 
       <NcActions :inline="1">
@@ -64,6 +60,7 @@ import AlbumsIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import FolderMoveIcon from 'vue-material-design-icons/FolderMove.vue';
 import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
+import ImageCheckIcon from 'vue-material-design-icons/ImageCheck.vue';
 
 import type { IDay, IHeadRow, IPhoto, IRow } from '@typings';
 
@@ -250,6 +247,12 @@ export default defineComponent({
         icon: OpenInNewIcon,
         callback: this.viewInFolder.bind(this),
         if: () => this.selection.size === 1 && !this.routeIsAlbums,
+      },
+      {
+        name: t('memories', 'Set as cover image'),
+        icon: ImageCheckIcon,
+        callback: this.setClusterCover.bind(this),
+        if: () => this.selection.size === 1 && this.routeIsCluster && !this.routeIsRecognizeUnassigned,
       },
       {
         name: t('memories', 'Move to folder'),
@@ -889,6 +892,16 @@ export default defineComponent({
     async viewInFolder(selection: Selection) {
       if (selection.size !== 1) return;
       dav.viewInFolder(selection.values().next().value);
+    },
+
+    /**
+     * Set the cover image for the current cluster
+     */
+    async setClusterCover(selection: Selection) {
+      if (selection.size !== 1 || !this.routeIsCluster) return;
+      if (await dav.setClusterCover(selection.values().next().value)) {
+        this.clear();
+      }
     },
 
     /**

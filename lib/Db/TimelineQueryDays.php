@@ -231,10 +231,7 @@ trait TimelineQueryDays
             $pathOp = $query->expr()->eq('f.parent', $query->createNamedParameter($root->getOneId(), IQueryBuilder::PARAM_INT));
         }
 
-        return $query->innerJoin('m', 'filecache', 'f', $query->expr()->andX(
-            $baseOp,
-            $pathOp,
-        ));
+        return $query->innerJoin('m', 'filecache', 'f', $query->expr()->andX($baseOp, $pathOp));
     }
 
     /**

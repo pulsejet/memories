@@ -14,11 +14,17 @@ class AlbumsQuery
     /**
      * Get list of albums.
      *
-     * @param bool $shared Whether to get shared albums
-     * @param int  $fileid File to filter by
+     * @param string   $uid         User ID
+     * @param bool     $shared      Whether to get shared albums
+     * @param int      $fileid      File to filter by
+     * @param \Closure $transformCb Callback to transform the query
      */
-    public function getList(string $uid, bool $shared = false, int $fileid = 0): array
-    {
+    public function getList(
+        string $uid,
+        bool $shared = false,
+        int $fileid = 0,
+        ?\Closure $transformCb = null,
+    ): array {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT everything from albums
@@ -58,7 +64,7 @@ class AlbumsQuery
         $query->leftJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
 
         // GROUP and ORDER by
-        $query->groupBy('pa.album_id');
+        $query->addGroupBy('pa.album_id');
 
         // WHERE these albums contain fileid if specified
         if ($fileid) {
@@ -72,6 +78,15 @@ class AlbumsQuery
                 ->getSQL()
             ;
             $query->andWhere($query->createFunction("EXISTS ({$fSq})"));
+        }
+
+        // Get the etag of the last added photo
+        $query->leftJoin('pa', 'filecache', 'pa_fc', $query->expr()->eq('pa.last_added_photo', 'pa_fc.fileid'));
+        $query->selectAlias($query->createFunction('MAX(pa_fc.etag)'), 'last_added_photo_etag');
+
+        // Apply further transformations
+        if (null !== $transformCb) {
+            $transformCb($query);
         }
 
         // FETCH all albums
@@ -230,12 +245,12 @@ class AlbumsQuery
     /**
      * Get list of photos in album.
      */
-    public function getAlbumPhotos(int $albumId, ?int $limit): array
+    public function getAlbumPhotos(int $albumId, ?int $limit, ?int $fileid): array
     {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all files
-        $query->select('file_id')->from('photos_albums_files', 'paf');
+        $query->select('file_id', 'album_id')->from('photos_albums_files', 'paf');
 
         // WHERE they are in this album
         $query->where($query->expr()->eq('album_id', $query->createNamedParameter($albumId, IQueryBuilder::PARAM_INT)));
@@ -252,8 +267,16 @@ class AlbumsQuery
         $query->orderBy('paf.album_file_id', 'DESC');
 
         // LIMIT the results
-        if (null !== $limit) {
+        if (-6 === $limit) {
+            // not implemented -- should return the cover photo
+            $query->setMaxResults(1);
+        } elseif (null !== $limit) {
             $query->setMaxResults($limit);
+        }
+
+        // Filter by fileid if specified
+        if (null !== $fileid) {
+            $query->andWhere($query->expr()->eq('paf.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         $result = $query->executeQuery()->fetchAll();

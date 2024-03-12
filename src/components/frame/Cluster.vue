@@ -80,16 +80,40 @@ export default defineComponent({
       if (this.error) return errorsvg;
       if (this.plus) return plussvg;
 
-      if (this.album) {
-        const mock = {
-          fileid: this.album.last_added_photo,
-          etag: this.album.album_id,
-          flag: 0,
-        } as unknown as IPhoto;
-        return getPreviewUrl({ photo: mock, sqsize: 512 });
+      // Helper to get preview URL from fileid and etag
+      const preview = (fileid: number, etag: string | number) =>
+        getPreviewUrl({
+          photo: {
+            fileid: fileid,
+            etag: etag.toString(),
+            flag: 0,
+            dayid: 0,
+          },
+          sqsize: 512,
+        });
+
+      // If a cover is fileid, directly use it if we don't need crop
+      // Use the cover etag here since we forced a random cover below
+      if (this.data.cover && this.data.cover_etag && (this.album || this.place || this.tag)) {
+        return preview(this.data.cover, this.data.cover_etag);
       }
 
-      return API.CLUSTER_PREVIEW(this.data.cluster_type, this.data.cluster_id);
+      if (this.album) {
+        // Always fall back to last update for albums
+        // Never go to CLUSTER_PREVIEW since it is not fully implemented
+        return preview(this.album.last_added_photo, this.album.last_added_photo_etag ?? this.album.album_id);
+      }
+
+      // Force a cover if not set
+      this.data.cover ??= Math.random();
+
+      // Use a random cover ID to bust local cache
+      return API.CLUSTER_PREVIEW(
+        this.data.cluster_type,
+        this.data.cluster_id,
+        this.data.cover,
+        this.data.cover_etag ?? 'null',
+      );
     },
 
     title() {
