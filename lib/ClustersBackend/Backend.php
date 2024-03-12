@@ -260,7 +260,7 @@ abstract class Backend
             $validSq = $query->getConnection()->getQueryBuilder();
             $validSq->select($validSq->expr()->literal(1))
                 ->from($objectTable, 'cov_objs')
-                ->where($validSq->expr()->eq($query->createFunction("CAST(cov_objs.{$objectTableObjectId} AS INTEGER)"), 'm_cov.objectid'))
+                ->where($validSq->expr()->eq($query->expr()->castColumn("cov_objs.{$objectTableObjectId}", IQueryBuilder::PARAM_INT), 'm_cov.objectid'))
                 ->andWhere($validSq->expr()->eq("cov_objs.{$objectTableClusterId}", "{$clusterTable}.{$clusterTableId}"))
             ;
 
@@ -311,7 +311,7 @@ abstract class Backend
             $query->expr()->eq('m_cov.uid', $query->expr()->literal(Util::getUser()->getUID())),
             $query->expr()->eq('m_cov.clustertype', $query->expr()->literal($this->clusterType())),
             $query->expr()->eq('m_cov.clusterid', "{$objectTable}.{$objectTableClusterId}"),
-            $query->expr()->eq('m_cov.objectid', $query->createFunction("CAST({$objectTable}.{$objectTableObjectId} AS INTEGER)")),
+            $query->expr()->eq('m_cov.objectid', $query->expr()->castColumn("{$objectTable}.{$objectTableObjectId}", IQueryBuilder::PARAM_INT)),
         ));
     }
 }
