@@ -157,14 +157,19 @@ class ClustersController extends GenericApiController
                 ]);
 
                 if ($isCover) {
-                    // Longer cache duration for cover previews
-                    $response->cacheFor(3600 * 7 * 24, false, false);
+                    if ((int) $this->request->getParam('cover') === $this->backend->getCoverObjId($img)) {
+                        // Longer cache duration for cover previews that were correctly requested
+                        $response->cacheFor(3600 * 7 * 24, false, false);
+                    } else {
+                        // This was likely requested with a random or wrong cover ID
+                        $response->cacheFor(0, false, false);
+                    }
                 } else {
-                    // Cache this regardless, since a refresh is requried to get new clusters
-                    $response->cacheFor(3600 * 24, false, false);
-
                     // If this is not a cover preview, set this as the auto-picked cover
                     $this->backend->setCover($img);
+
+                    // Disable caching for non-cover previews
+                    $response->cacheFor(0, false, false);
                 }
 
                 return $response;

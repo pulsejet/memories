@@ -89,7 +89,8 @@ export default defineComponent({
         return getPreviewUrl({ photo: mock, sqsize: 512 });
       }
 
-      return API.CLUSTER_PREVIEW(this.data.cluster_type, this.data.cluster_id);
+      // Use a random cover ID to bust local cache
+      return API.CLUSTER_PREVIEW(this.data.cluster_type, this.data.cluster_id, this.data.cover ?? Math.random());
     },
 
     title() {

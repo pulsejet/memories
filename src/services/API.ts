@@ -112,8 +112,8 @@ export class API {
     return gen(`${BASE}/clusters/${app}`);
   }
 
-  static CLUSTER_PREVIEW(backend: ClusterTypes, name: string | number) {
-    return API.Q(gen(`${BASE}/clusters/${backend}/preview`), { name });
+  static CLUSTER_PREVIEW(backend: ClusterTypes, name: string | number, cover: number) {
+    return API.Q(gen(`${BASE}/clusters/${backend}/preview`), { name, cover });
   }
 
   static ARCHIVE(fileid: number) {
