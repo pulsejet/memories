@@ -90,7 +90,12 @@ export default defineComponent({
       }
 
       // Use a random cover ID to bust local cache
-      return API.CLUSTER_PREVIEW(this.data.cluster_type, this.data.cluster_id, this.data.cover ?? Math.random());
+      return API.CLUSTER_PREVIEW(
+        this.data.cluster_type,
+        this.data.cluster_id,
+        this.data.cover ?? Math.random(),
+        this.data.cover_etag ?? 'null',
+      );
     },
 
     title() {
