@@ -182,7 +182,7 @@ class PlacesBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT all photos with this tag
-        $query->select('f.fileid', 'f.etag')
+        $query->select('f.fileid', 'f.etag', 'mp.osm_id')
             ->from('memories_places', 'mp')
             ->where($query->expr()->eq('mp.osm_id', $query->createNamedParameter((int) $name)))
         ;
@@ -202,6 +202,11 @@ class PlacesBackend extends Backend
 
         // FETCH tag photos
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+    }
+
+    public function getClusterIdFrom(array $photo): int
+    {
+        return (int) $photo['osm_id'];
     }
 
     /**

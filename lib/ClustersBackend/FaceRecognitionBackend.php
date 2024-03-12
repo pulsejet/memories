@@ -148,6 +148,8 @@ class FaceRecognitionBackend extends Backend
 
         // SELECT face detections
         $query->select(
+            'frf.id as faceid',         // Face ID
+            'frp.id as cluster_id',     // Cluster ID
             'fri.file as file_id',      // Get actual file
             'frf.x',                    // Image cropping
             'frf.y',
@@ -213,6 +215,16 @@ class FaceRecognitionBackend extends Backend
     public function getPreviewQuality(): int
     {
         return 2048;
+    }
+
+    public function getCoverObjId(array $photo): int
+    {
+        return (int) $photo['faceid'];
+    }
+
+    public function getClusterIdFrom(array $photo): int
+    {
+        return (int) $photo['cluster_id'];
     }
 
     private function model(): int

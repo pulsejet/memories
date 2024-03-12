@@ -146,6 +146,11 @@ class TagsBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
+    public function getClusterIdFrom(array $photo): int
+    {
+        return (int) $photo['systemtagid'];
+    }
+
     private function getSystemTagId(IQueryBuilder $query, string $tagName): int
     {
         $sqb = $query->getConnection()->getQueryBuilder();

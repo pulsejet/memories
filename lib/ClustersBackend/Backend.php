@@ -132,6 +132,22 @@ abstract class Backend
     }
 
     /**
+     * Get the cover object ID for a photo object.
+     */
+    public function getCoverObjId(array $photo): int
+    {
+        return $this->getFileId($photo);
+    }
+
+    /**
+     * Get the cluster ID for a photo object.
+     */
+    public function getClusterIdFrom(array $photo): int
+    {
+        throw new \Exception('Not implemented');
+    }
+
+    /**
      * Calls the getClusters implementation and appends the
      * result with the cluster_id and cluster_type values.
      *
@@ -155,6 +171,52 @@ abstract class Backend
     final public static function register(): void
     {
         Manager::register(static::clusterType(), static::class);
+    }
+
+    /**
+     * Set the cover photo for the given cluster.
+     *
+     * @param array $photo  Photo object
+     * @param bool  $manual Whether this is a manual selection
+     */
+    final public function setCover(array $photo, bool $manual = false): void
+    {
+        $connection = \OC::$server->get(\OCP\IDBConnection::class);
+
+        try {
+            // Replace the cover object in database
+            $connection->beginTransaction();
+
+            $query = $connection->getQueryBuilder();
+            $query->delete('memories_covers')
+                ->where($query->expr()->eq('uid', $query->createNamedParameter(Util::getUser()->getUID())))
+                ->andWhere($query->expr()->eq('clustertype', $query->createNamedParameter($this->clusterType())))
+                ->andWhere($query->expr()->eq('clusterid', $query->createNamedParameter($this->getClusterIdFrom($photo))))
+                ->executeStatement()
+            ;
+
+            $query = $connection->getQueryBuilder();
+            $query->insert('memories_covers')
+                ->values([
+                    'uid' => $query->createNamedParameter(Util::getUser()->getUID()),
+                    'clustertype' => $query->createNamedParameter($this->clusterType()),
+                    'clusterid' => $query->createNamedParameter($this->getClusterIdFrom($photo)),
+                    'objectid' => $query->createNamedParameter($this->getCoverObjId($photo)),
+                    'fileid' => $query->createNamedParameter($this->getFileId($photo)),
+                    'auto' => $query->createNamedParameter($manual ? 0 : 1, \PDO::PARAM_INT),
+                    'timestamp' => $query->createNamedParameter(time(), \PDO::PARAM_INT),
+                ])
+                ->executeStatement()
+            ;
+
+            $connection->commit();
+        } catch (\Exception $e) {
+            $connection->rollBack();
+
+            \OC::$server->get(\Psr\Log\LoggerInterface::class)
+                ->error('Failed to set cover', ['app' => 'memories', 'exception' => $e->getMessage()])
+            ;
+        }
     }
 
     /**

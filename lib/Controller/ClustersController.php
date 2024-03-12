@@ -69,10 +69,10 @@ class ClustersController extends GenericApiController
 
             // Attempt to get the cover preview (-6 magic)
             $photos = $this->backend->getPhotos($name, -6);
-            $hasCover = !empty($photos);
+            $isCover = !empty($photos);
 
             // Fall back to some random photos in the cluster
-            if (!$hasCover) {
+            if (!$isCover) {
                 $photos = $this->backend->getPhotos($name, 8);
             }
 
@@ -87,7 +87,7 @@ class ClustersController extends GenericApiController
             $this->backend->sortPhotosForPreview($photos);
 
             // Get preview from image list
-            return $this->getPreviewFromPhotoList($photos);
+            return $this->getPreviewFromPhotoList($photos, $isCover);
         });
     }
 
@@ -132,8 +132,11 @@ class ClustersController extends GenericApiController
 
     /**
      * Given a list of photo objects, return the first preview image possible.
+     *
+     * @param array $photos  List of photo objects
+     * @param bool  $isCover Whether this is a cover preview from database
      */
-    private function getPreviewFromPhotoList(array $photos): Http\Response
+    private function getPreviewFromPhotoList(array $photos, bool $isCover): Http\Response
     {
         // Get preview manager
         $previewManager = \OC::$server->get(\OCP\IPreview::class);
@@ -152,7 +155,17 @@ class ClustersController extends GenericApiController
                 $response = new DataDisplayResponse($blob, Http::STATUS_OK, [
                     'Content-Type' => $mimetype,
                 ]);
-                $response->cacheFor(3600 * 24, false, false);
+
+                if ($isCover) {
+                    // Longer cache duration for cover previews
+                    $response->cacheFor(3600 * 7 * 24, false, false);
+                } else {
+                    // Cache this regardless, since a refresh is requried to get new clusters
+                    $response->cacheFor(3600 * 24, false, false);
+
+                    // If this is not a cover preview, set this as the auto-picked cover
+                    $this->backend->setCover($img);
+                }
 
                 return $response;
             } catch (\Exception $e) {
