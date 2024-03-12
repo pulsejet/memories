@@ -245,51 +245,55 @@ abstract class Backend
         string $objectTable,
         string $objectTableObjectId,
         string $objectTableClusterId,
+        bool $validateCluster = true,
+        bool $validateFilecache = true,
     ): void {
+        // Clauses for the JOIN
+        $joinClauses = [
+            $query->expr()->eq('m_cov.uid', $query->expr()->literal(Util::getUser()->getUID())),
+            $query->expr()->eq('m_cov.clustertype', $query->expr()->literal($this->clusterType())),
+            $query->expr()->eq('m_cov.clusterid', "{$clusterTable}.{$clusterTableId}"),
+        ];
+
         // Subquery if the preview is still valid for this cluster
-        $validSq = $query->getConnection()->getQueryBuilder();
-        $validSq->select($validSq->expr()->literal(1))
-            ->from($objectTable, 'cov_objs')
-            ->where($validSq->expr()->eq(
-                $query->createFunction("CAST(cov_objs.{$objectTableObjectId} AS INTEGER)"),
-                'm_cov.objectid',
-            ))
-            ->andWhere($validSq->expr()->eq("cov_objs.{$objectTableClusterId}", "{$clusterTable}.{$clusterTableId}"))
-        ;
+        if ($validateCluster) {
+            $validSq = $query->getConnection()->getQueryBuilder();
+            $validSq->select($validSq->expr()->literal(1))
+                ->from($objectTable, 'cov_objs')
+                ->where($validSq->expr()->eq(
+                    $query->createFunction("CAST(cov_objs.{$objectTableObjectId} AS INTEGER)"),
+                    'm_cov.objectid',
+                ))
+                ->andWhere($validSq->expr()->eq("cov_objs.{$objectTableClusterId}", "{$clusterTable}.{$clusterTableId}"))
+            ;
+
+            $joinClauses[] = $query->createFunction("EXISTS ({$validSq->getSQL()})");
+        }
 
         // Subquery if the file is still in the user's timeline tree
-        $treeSq = $query->getConnection()->getQueryBuilder();
-        $treeSq->select($treeSq->expr()->literal(1));
-
-        // Join only if the CTE is already joined
-        if ($query->getParameter('topFolderIds')) {
-            $treeSq->from('filecache', 'cov_f')
+        if ($validateFilecache) {
+            $treeSq = $query->getConnection()->getQueryBuilder();
+            $treeSq->select($treeSq->expr()->literal(1))
+                ->from('filecache', 'cov_f')
                 ->innerJoin('cov_f', 'cte_folders', 'cov_cte_f', $treeSq->expr()->andX(
                     $treeSq->expr()->eq('cov_cte_f.fileid', 'cov_f.parent'),
                     $treeSq->expr()->eq('cov_cte_f.hidden', $treeSq->expr()->literal(0, \PDO::PARAM_INT)),
                 ))
                 ->where($treeSq->expr()->eq('cov_f.fileid', 'm_cov.fileid'))
             ;
+
+            $joinClauses[] = $query->createFunction("EXISTS ({$treeSq->getSQL()})");
         }
 
         // LEFT JOIN to get all the covers that we can
-        $query->leftJoin($clusterTable, 'memories_covers', 'm_cov', $query->expr()->andX(
-            $query->expr()->eq('m_cov.uid', $query->createNamedParameter(Util::getUser()->getUID())),
-            $query->expr()->eq('m_cov.clustertype', $query->createNamedParameter($this->clusterType())),
-            $query->expr()->eq('m_cov.clusterid', "{$clusterTable}.{$clusterTableId}"),
-
-            // Check validity
-            $query->createFunction("EXISTS ({$validSq->getSQL()})"),
-            $query->createFunction("EXISTS ({$treeSq->getSQL()})"),
-        ));
+        $query->leftJoin($clusterTable, 'memories_covers', 'm_cov', $query->expr()->andX(...$joinClauses));
 
         // JOIN with filecache to get the etag
         $query->leftJoin('m_cov', 'filecache', 'm_cov_f', $query->expr()->eq('m_cov_f.fileid', 'm_cov.fileid'));
 
         // SELECT the cover
-        $query->selectAlias('m_cov.objectid', 'cover');
-        $query->selectAlias('m_cov_f.etag', 'cover_etag');
-        $query->addGroupBy('m_cov.objectid', 'm_cov_f.etag');
+        $query->selectAlias($query->createFunction('MAX(m_cov.objectid)'), 'cover');
+        $query->selectAlias($query->createFunction('MAX(m_cov_f.etag)'), 'cover_etag');
     }
 
     /**

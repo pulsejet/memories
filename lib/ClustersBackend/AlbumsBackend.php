@@ -84,7 +84,7 @@ class AlbumsBackend extends Backend
     {
         // Transformation to add covers
         $transform = function (IQueryBuilder &$query): void {
-            $this->joinCovers($query, 'pa', 'album_id', 'photos_albums_files', 'file_id', 'album_id');
+            $this->joinCovers($query, 'pa', 'album_id', 'photos_albums_files', 'file_id', 'album_id', true, false);
         };
 
         // Get personal and shared albums

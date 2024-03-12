@@ -163,7 +163,7 @@ class RecognizeBackend extends Backend
         }
 
         // GROUP by ID of face cluster
-        $query->groupBy('rfc.id');
+        $query->addGroupBy('rfc.id');
 
         // ORDER by number of faces in cluster
         $query->orderBy($query->createFunction("rfc.title <> ''"), 'DESC');

@@ -266,8 +266,7 @@ class FaceRecognitionBackend extends Backend
         $query = $this->tq->joinFilecache($query);
 
         // GROUP by ID of face cluster
-        $query->groupBy('frp.id');
-        $query->addGroupBy('frp.user');
+        $query->addGroupBy('frp.id', 'frp.user');
         $query->where($query->expr()->isNull('frp.name'));
 
         // The query change if we want the people in an fileid, or the unnamed clusters
@@ -328,8 +327,7 @@ class FaceRecognitionBackend extends Backend
             $query->andWhere($query->expr()->eq('fri.file', $query->createNamedParameter($fileid)));
         }
 
-        $query->groupBy('frp.user');
-        $query->addGroupBy('frp.name');
+        $query->addGroupBy('frp.name', 'frp.user');
 
         // ORDER by number of faces in cluster
         $query->orderBy('count', 'DESC');

@@ -64,7 +64,7 @@ class AlbumsQuery
         $query->leftJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
 
         // GROUP and ORDER by
-        $query->groupBy('pa.album_id');
+        $query->addGroupBy('pa.album_id');
 
         // WHERE these albums contain fileid if specified
         if ($fileid) {

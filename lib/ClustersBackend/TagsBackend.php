@@ -91,7 +91,7 @@ class TagsBackend extends Backend
         $query = $this->tq->joinFilecache($query);
 
         // GROUP and ORDER by tag name
-        $query->groupBy('st.id');
+        $query->addGroupBy('st.id');
         $query->orderBy($query->createFunction('LOWER(st.name)'), 'ASC');
         $query->addOrderBy('st.id'); // tie-breaker
 

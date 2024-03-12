@@ -153,8 +153,11 @@ class PlacesBackend extends Backend
         $query->addOrderBy('e.name');
         $query->addOrderBy('e.osm_id'); // tie-breaker
 
+        // GROUP BY everything
+        $query->addGroupBy('sub.osm_id', 'e.osm_id', 'sub.count', 'e.name', 'e.other_names');
+
         // JOIN to get all covers
-        $this->joinCovers($query, 'e', 'osm_id', 'memories_places', 'fileid', 'osm_id');
+        $this->joinCovers($query, 'sub', 'osm_id', 'memories_places', 'fileid', 'osm_id');
 
         // FETCH all tags
         $places = $this->tq->executeQueryWithCTEs($query)->fetchAll();
