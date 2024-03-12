@@ -165,6 +165,7 @@ export type GlobalRouteCheckers = {
   routeIsPublic: boolean;
   routeIsPeople: boolean;
   routeIsRecognizeUnassigned: boolean;
+  routeIsCluster: boolean;
 };
 
 // Implement getters for route checkers
@@ -189,4 +190,13 @@ defineRouteChecker('routeIsPeople', (route) =>
 defineRouteChecker(
   'routeIsRecognizeUnassigned',
   (route) => route?.name === routes.Recognize.name && route!.params.name === c.FACE_NULL,
+);
+defineRouteChecker('routeIsCluster', (route) =>
+  [
+    routes.Albums.name,
+    routes.Recognize.name,
+    routes.FaceRecognition.name,
+    routes.Places.name,
+    routes.Tags.name,
+  ].includes(route?.name ?? ''),
 );

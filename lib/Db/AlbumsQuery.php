@@ -241,12 +241,12 @@ class AlbumsQuery
     /**
      * Get list of photos in album.
      */
-    public function getAlbumPhotos(int $albumId, ?int $limit): array
+    public function getAlbumPhotos(int $albumId, ?int $limit, ?int $fileid): array
     {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all files
-        $query->select('file_id')->from('photos_albums_files', 'paf');
+        $query->select('file_id', 'album_id')->from('photos_albums_files', 'paf');
 
         // WHERE they are in this album
         $query->where($query->expr()->eq('album_id', $query->createNamedParameter($albumId, IQueryBuilder::PARAM_INT)));
@@ -268,6 +268,11 @@ class AlbumsQuery
             $query->setMaxResults(1);
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
+        }
+
+        // Filter by fileid if specified
+        if (null !== $fileid) {
+            $query->andWhere($query->expr()->eq('paf.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         $result = $query->executeQuery()->fetchAll();

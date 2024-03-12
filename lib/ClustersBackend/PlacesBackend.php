@@ -177,7 +177,7 @@ class PlacesBackend extends Backend
         return $cluster['osm_id'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null): array
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         $query = $this->tq->getBuilder();
 
@@ -198,6 +198,11 @@ class PlacesBackend extends Backend
             $this->filterCover($query, 'mp', 'fileid', 'osm_id');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
+        }
+
+        // Filter by fileid if specified
+        if (null !== $fileid) {
+            $query->andWhere($query->expr()->eq('f.fileid', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         // FETCH tag photos

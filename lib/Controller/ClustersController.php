@@ -94,6 +94,27 @@ class ClustersController extends GenericApiController
     /**
      * @NoAdminRequired
      *
+     * Set the cover image for a cluster
+     */
+    public function setCover(string $backend, string $name, int $fileid): Http\Response
+    {
+        return Util::guardEx(function () use ($backend, $name, $fileid) {
+            $this->init($backend);
+
+            $photos = $this->backend->getPhotos($name, 1, $fileid);
+            if (empty($photos)) {
+                throw Exceptions::NotFound('photo');
+            }
+
+            $this->backend->setCover($photos[0], true);
+
+            return new JSONResponse([], Http::STATUS_OK);
+        });
+    }
+
+    /**
+     * @NoAdminRequired
+     *
      * @UseSession
      *
      * Download a cluster as a zip file
@@ -142,22 +163,22 @@ class ClustersController extends GenericApiController
         $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
         // Try to get a preview
-        foreach ($photos as $img) {
+        foreach ($photos as $photo) {
             // Get preview image
             try {
                 $quality = $this->backend->getPreviewQuality();
 
-                $file = $this->fs->getUserFile($this->backend->getFileId($img));
+                $file = $this->fs->getUserFile($this->backend->getFileId($photo));
                 $file = $previewManager->getPreview($file, $quality, $quality, false);
 
-                [$blob, $mimetype] = $this->backend->getPreviewBlob($file, $img);
+                [$blob, $mimetype] = $this->backend->getPreviewBlob($file, $photo);
 
                 $response = new DataDisplayResponse($blob, Http::STATUS_OK, [
                     'Content-Type' => $mimetype,
                 ]);
 
                 if ($isCover) {
-                    if ((int) $this->request->getParam('cover') === $this->backend->getCoverObjId($img)) {
+                    if ((int) $this->request->getParam('cover') === $this->backend->getCoverObjId($photo)) {
                         // Longer cache duration for cover previews that were correctly requested
                         $response->cacheFor(3600 * 7 * 24, false, false);
                     } else {
@@ -166,7 +187,7 @@ class ClustersController extends GenericApiController
                     }
                 } else {
                     // If this is not a cover preview, set this as the auto-picked cover
-                    $this->backend->setCover($img);
+                    $this->backend->setCover($photo);
 
                     // Disable caching for non-cover previews
                     $response->cacheFor(0, false, false);

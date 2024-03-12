@@ -65,9 +65,7 @@ class FaceRecognitionBackend extends Backend
         if (2 !== \count($personNames)) {
             throw new \Exception('Invalid person query');
         }
-
-        $personUid = $personNames[0];
-        $personName = $personNames[1];
+        [$personUid, $personName] = $personNames;
 
         // Join with images
         $query->innerJoin('m', 'facerecog_images', 'fri', $query->expr()->andX(
@@ -142,7 +140,7 @@ class FaceRecognitionBackend extends Backend
         return $cluster['id'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null): array
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         $query = $this->tq->getBuilder();
 
@@ -184,6 +182,11 @@ class FaceRecognitionBackend extends Backend
             $this->filterCover($query, 'frf', 'id', 'person');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
+        }
+
+        // Filter by fileid if specified
+        if (null !== $fileid) {
+            $query->andWhere($query->expr()->eq('fri.file', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         // Sort by date taken so we get recent photos

@@ -116,6 +116,10 @@ export class API {
     return API.Q(gen(`${BASE}/clusters/${backend}/preview`), { name, cover, cover_etag });
   }
 
+  static CLUSTER_SET_COVER(backend: ClusterTypes) {
+    return gen(`${BASE}/clusters/${backend}/set-cover`);
+  }
+
   static ARCHIVE(fileid: number) {
     return gen(`${BASE}/archive/{fileid}`, { fileid });
   }

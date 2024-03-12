@@ -77,13 +77,18 @@ abstract class Backend
      * Get a list of photos with any extra parameters for the given cluster
      * Used for preview generation and download.
      *
-     * @param string $name  Identifier for the cluster
-     * @param int    $limit Maximum number of photos to return
+     * @param string $name   Identifier for the cluster
+     * @param int    $limit  Maximum number of photos to return (optional)
+     * @param int    $fileid Filter photos by file ID (optional)
      *
      * Setting $limit to -6 will attempt to fetch the cover photo for the cluster
      * This will be returned as an array with a single element if found
      */
-    abstract public function getPhotos(string $name, ?int $limit = null): array;
+    abstract public function getPhotos(
+        string $name,
+        ?int $limit = null,
+        ?int $fileid = null,
+    ): array;
 
     /**
      * Human readable name for the cluster.
@@ -144,7 +149,7 @@ abstract class Backend
      */
     public function getClusterIdFrom(array $photo): int
     {
-        throw new \Exception('Not implemented');
+        throw new \Exception('getClusterIdFrom not implemented by '.$this::class);
     }
 
     /**
@@ -212,6 +217,10 @@ abstract class Backend
             $connection->commit();
         } catch (\Exception $e) {
             $connection->rollBack();
+
+            if ($manual) {
+                throw $e;
+            }
 
             \OC::$server->get(\Psr\Log\LoggerInterface::class)
                 ->error('Failed to set cover', ['app' => 'memories', 'exception' => $e->getMessage()])

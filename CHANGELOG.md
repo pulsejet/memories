@@ -10,10 +10,12 @@ All notable changes to this project will be documented in this file.
 - **Breaking**: Prevent automatically retrying files that failed to index
     - The list of files that could not be indexed can be found in the admin panel
     - To retry indexing, you can run `occ memories:index --retry`
-- Hide files starting with `.` in the timeline
-- Support for 3GP videos ([#1055](https://github.com/pulsejet/memories/issues/1055))
-- Option to show metadata in slideshow ([#819](https://github.com/pulsejet/memories/issues/819))
-- Improve UX of image editor especially on mobile
+- **Feature**: Allow changing cover photos of albums, tags, places and people
+- **Feature**: Hide files starting with `.` in the timeline
+- **Feature**: Support for 3GP videos ([#1055](https://github.com/pulsejet/memories/issues/1055))
+- **Feature**: Option to show metadata in slideshow ([#819](https://github.com/pulsejet/memories/issues/819))
+- **Feature**: Improve UX of image editor especially on mobile
+- **Fix**: The cover photo of clusters will now update automatically when files are moved
 
 ## [v6.2.2] - 2024-01-10
 

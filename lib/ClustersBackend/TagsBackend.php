@@ -115,7 +115,7 @@ class TagsBackend extends Backend
         return $cluster['name'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null): array
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         $query = $this->tq->getBuilder();
         $tagId = $this->getSystemTagId($query, $name);
@@ -140,6 +140,11 @@ class TagsBackend extends Backend
             $this->filterCover($query, 'stom', 'objectid', 'systemtagid');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
+        }
+
+        // Filter by fileid if specified
+        if (null !== $fileid) {
+            $query->andWhere($query->expr()->eq('f.fileid', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         // FETCH tag photos

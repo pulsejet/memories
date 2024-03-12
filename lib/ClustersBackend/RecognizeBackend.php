@@ -60,7 +60,8 @@ class RecognizeBackend extends Backend
             throw \OCA\Memories\Exceptions::NotEnabled('Recognize');
         }
 
-        // Get name and uid of face user
+        // Note: all of this is duplicated in nameToClusterId since we want to avoid
+        // making two queries for the getting the cluster_id and the actual clusters
         $faceStr = (string) $this->request->getParam('recognize');
         $faceNames = explode('/', $faceStr);
         if (2 !== \count($faceNames)) {
@@ -70,9 +71,7 @@ class RecognizeBackend extends Backend
         // Starting with Recognize v3.6, the detections are duplicated for each user
         // So we don't need to use the user ID provided by the user, but retain
         // this here for backwards compatibility + API consistency with Face Recognition
-        // $faceUid = $faceNames[0];
-
-        $faceName = $faceNames[1];
+        [$faceUid, $faceName] = $faceNames;
 
         if (!$aggregate) {
             // Multiple detections for the same image
@@ -193,8 +192,13 @@ class RecognizeBackend extends Backend
         return $cluster['id'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null): array
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
+        $name = $this->nameToClusterId($name);
+        if (!$name) {
+            return [];
+        }
+
         $query = $this->tq->getBuilder();
 
         // SELECT face detections for ID
@@ -228,6 +232,11 @@ class RecognizeBackend extends Backend
             $query->setMaxResults($limit);
         }
 
+        // Filter by fileid if specified
+        if (null !== $fileid) {
+            $query->andWhere($query->expr()->eq('rfd.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
+        }
+
         // Sort by date taken so we get recent photos
         $query->orderBy('m.datetaken', 'DESC');
         $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
@@ -259,5 +268,34 @@ class RecognizeBackend extends Backend
     public function getClusterIdFrom(array $photo): int
     {
         return (int) $photo['cluster_id'];
+    }
+
+    /**
+     * Get the numeric cluster ID for a non-numeric string
+     * This runs the actual query to find the cluster
+     * See the definition of transformDayQuery for more details.
+     */
+    private function nameToClusterId(string $name): false|int
+    {
+        if (!is_numeric($name)) {
+            $faceNames = explode('/', $name);
+            if (2 !== \count($faceNames)) {
+                return false;
+            }
+
+            [$faceUid, $faceName] = $faceNames;
+
+            // Get cluster ID
+            $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';
+            $query = $this->tq->getBuilder();
+            $query->select('id')
+                ->from('recognize_face_clusters', 'rfc')
+                ->where($query->expr()->eq($nameField, $query->createNamedParameter($faceName)))
+            ;
+
+            return $query->executeQuery()->fetchOne();
+        }
+
+        return (int) $name;
     }
 }
