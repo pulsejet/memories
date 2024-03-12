@@ -80,6 +80,10 @@ export default defineComponent({
       if (this.error) return errorsvg;
       if (this.plus) return plussvg;
 
+      // Force a cover if not set
+      this.data.cover ??= Math.random();
+      this.data.cover_etag ??= 'null';
+
       if (this.album) {
         const mock = {
           fileid: this.album.last_added_photo,
@@ -93,7 +97,7 @@ export default defineComponent({
       return API.CLUSTER_PREVIEW(
         this.data.cluster_type,
         this.data.cluster_id,
-        this.data.cover ?? Math.random(),
+        this.data.cover,
         this.data.cover_etag ?? 'null',
       );
     },
