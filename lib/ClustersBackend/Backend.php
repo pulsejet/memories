@@ -272,7 +272,7 @@ abstract class Backend
         ));
 
         // JOIN with filecache to get the etag
-        $query->leftJoin('m_cov', 'filecache', 'm_cov_f',$query->expr()->eq('m_cov_f.fileid', 'm_cov.fileid'));
+        $query->leftJoin('m_cov', 'filecache', 'm_cov_f', $query->expr()->eq('m_cov_f.fileid', 'm_cov.fileid'));
 
         // SELECT the cover
         $query->selectAlias('m_cov.objectid', 'cover');
