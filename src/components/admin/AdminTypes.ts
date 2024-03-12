@@ -48,6 +48,7 @@ export type ISystemStatus = {
 
   bad_encryption: boolean;
   indexed_count: number;
+  failure_count: number;
   mimes: string[];
   imagick: string | false;
   gis_type: number;

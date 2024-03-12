@@ -89,7 +89,7 @@
   },
   "[markdown]": {
     "files.trimTrailingWhitespace": false,
-    "editor.formatOnSave": false,
+    "editor.formatOnSave": false
   },
   "search.exclude": {
     "**/l10n": true,
@@ -98,7 +98,5 @@
   },
   "git.alwaysSignOff": true,
   "editor.formatOnSave": true,
-  "psalm.configPaths": [
-    "psalm-ls.xml"
-  ],
+  "psalm.configPaths": ["psalm-ls.xml"]
 }

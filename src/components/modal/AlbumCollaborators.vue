@@ -28,8 +28,13 @@
                 " @click="selectEntity(collaboratorKey)" />
           </li>
         </ul>
-        <NcEmptyContent v-else key="emptycontent" class="manage-collaborators__form__list--empty"
-          :title="t('memories', 'No collaborators available')">
+        <NcEmptyContent
+          v-else
+          key="emptycontent"
+          class="manage-collaborators__form__list--empty"
+          :title="t('memories', 'No collaborators available')"
+          :name="t('memories', 'No collaborators available')"
+        >
           <AccountGroup slot="icon" />
         </NcEmptyContent>
       </NcPopover>

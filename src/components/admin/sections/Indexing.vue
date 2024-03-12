@@ -4,30 +4,29 @@
 
     <template v-if="status">
       <NcNoteCard :type="status.indexed_count > 0 ? 'success' : 'warning'">
-        {{
-          t('memories', '{n} media files have been indexed', {
-            n: status.indexed_count,
-          })
-        }}
+        {{ t('memories', '{n} media files have been indexed', { n: status.indexed_count }) }}
       </NcNoteCard>
+
+      <div v-if="status.failure_count > 0">
+        <NcNoteCard type="warning">
+          {{ t('memories', '{n} media files failed indexing and were skipped.', { n: status.failure_count }) }}
+          <a :href="API.FAILURE_LOGS()" target="_blank">{{ t('memories', 'View failure logs.') }}</a>
+        </NcNoteCard>
+
+        {{ t('memories', 'Files that failed indexing will not be indexed again unless they change.') }}
+        {{ t('memories', 'You can manually retry files that failed indexing.') }}
+        <br />
+        <code>occ memories:index --retry</code>
+      </div>
+
       <NcNoteCard :type="status.last_index_job_status_type">
-        {{
-          t('memories', 'Automatic Indexing status: {status}', {
-            status: status.last_index_job_status,
-          })
-        }}
+        {{ t('memories', 'Automatic Indexing status: {status}', { status: status.last_index_job_status }) }}
       </NcNoteCard>
       <NcNoteCard v-if="status.last_index_job_start" :type="status.last_index_job_duration ? 'success' : 'warning'">
-        {{
-          t('memories', 'Last index job was run {t} seconds ago.', {
-            t: status.last_index_job_start,
-          })
-        }}
+        {{ t('memories', 'Last index job was run {t} seconds ago.', { t: status.last_index_job_start }) }}
         {{
           status.last_index_job_duration
-            ? t('memories', 'It took {t} seconds to complete.', {
-                t: status.last_index_job_duration,
-              })
+            ? t('memories', 'It took {t} seconds to complete.', { t: status.last_index_job_duration })
             : t('memories', 'It is still running or was interrupted.')
         }}
       </NcNoteCard>
@@ -99,25 +98,27 @@
       />
     </p>
 
-    {{ t('memories', 'For advanced usage, perform a run of indexing by running:') }}
-    <br />
-    <code>occ memories:index</code>
-    <br />
-    {{ t('memories', 'Run index in parallel with 4 threads:') }}
-    <br />
-    <code>bash -c 'for i in {1..4}; do (occ memories:index &amp;); done'</code>
-    <br />
-    {{ t('memories', 'Force re-indexing of all files:') }}
-    <br />
-    <code>occ memories:index --force</code>
-    <br />
-    {{ t('memories', 'You can limit indexing by user and/or folder:') }}
-    <br />
-    <code>occ memories:index --user=admin --folder=/Photos/</code>
-    <br />
-    {{ t('memories', 'Clear all existing index tables:') }}
-    <br />
-    <code>occ memories:index --clear</code>
+    <div>
+      {{ t('memories', 'For advanced usage, perform a run of indexing by running:') }}
+      <br />
+      <code>occ memories:index</code>
+      <br />
+      {{ t('memories', 'Run index in parallel with 4 threads:') }}
+      <br />
+      <code>bash -c 'for i in {1..4}; do (occ memories:index &amp;); done'</code>
+      <br />
+      {{ t('memories', 'Force re-indexing of all files:') }}
+      <br />
+      <code>occ memories:index --force</code>
+      <br />
+      {{ t('memories', 'You can limit indexing by user and/or folder:') }}
+      <br />
+      <code>occ memories:index --user=admin --folder=/Photos/</code>
+      <br />
+      {{ t('memories', 'Clear all existing index tables:') }}
+      <br />
+      <code>occ memories:index --clear</code>
+    </div>
   </div>
 </template>
 
@@ -125,6 +126,7 @@
 import { defineComponent } from 'vue';
 
 import { translate as t } from '@services/l10n';
+import { API } from '@services/API';
 
 import AdminMixin from '../AdminMixin';
 
@@ -132,5 +134,7 @@ export default defineComponent({
   name: 'Indexing',
   title: t('memories', 'Media Indexing'),
   mixins: [AdminMixin],
+
+  data: () => ({ API }),
 });
 </script>

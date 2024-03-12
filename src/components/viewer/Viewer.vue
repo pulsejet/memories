@@ -1,14 +1,26 @@
 <template>
-  <div class="memories_viewer outer" v-if="show" :class="{ fullyOpened, slideshowTimer }" :style="{ width: outerWidth }"
-    @fullscreenchange="fullscreenChange" @keydown="keydown">
+  <div
+    v-if="show"
+    ref="outer"
+    class="memories_viewer outer"
+    :class="{ fullyOpened, slideshowTimer }"
+    :style="{ width: outerWidth }"
+    @fullscreenchange="fullscreenChange"
+    @keydown="keydown"
+  >
     <ImageEditor v-if="editorOpen && currentPhoto" :photo="currentPhoto" @close="editorOpen = false" />
 
     <!-- Loading indicator -->
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
 
-    <div class="inner" ref="inner" v-show="!editorOpen" @pointermove.passive="setUiVisible"
-      @pointerdown.passive="setUiVisible">
-      <div class="top-bar" v-if="photoswipe" :class="{ showControls }">
+    <div
+      ref="inner"
+      class="inner"
+      v-show="!editorOpen"
+      @pointermove.passive="setUiVisible"
+      @pointerdown.passive="setUiVisible"
+    >
+      <div class="top-bar" v-if="photoswipe" :class="{ visible: showControls }">
         <NcActions :inline="numInlineActions" container=".memories_viewer .pswp">
           <NcActionButton v-for="action of actions" :key="action.id" :aria-label="action.name" close-after-click
             @click="action.callback()">
@@ -20,7 +32,7 @@
         </NcActions>
       </div>
 
-      <div class="bottom-bar" v-if="photoswipe" :class="{ showControls, showBottomBar }">
+      <div class="bottom-bar" v-if="photoswipe" :class="{ visible: showBottomBar }">
         <div class="exif title" v-if="currentPhoto?.imageInfo?.exif?.Title">
           {{ currentPhoto.imageInfo.exif.Title }}
         </div>
@@ -185,6 +197,7 @@ export default defineComponent({
   computed: {
     refs() {
       return this.$refs as {
+        outer: HTMLDivElement;
         inner: HTMLDivElement;
       };
     },
@@ -356,12 +369,17 @@ export default defineComponent({
 
     /** Show bottom bar info such as date taken */
     showBottomBar(): boolean {
-      return !this.isVideo && this.fullyOpened && Boolean(this.currentPhoto?.imageInfo);
+      return (
+        (this.showControls || (!!this.slideshowTimer && this.config.metadata_in_slideshow)) &&
+        !this.isVideo &&
+        this.fullyOpened &&
+        Boolean(this.currentPhoto?.imageInfo)
+      );
     },
 
     /** Allow closing the viewer */
     allowClose(): boolean {
-      return !this.editorOpen && !dav.isSingleItem();
+      return !this.editorOpen && !dav.isSingleItem() && !this.slideshowTimer;
     },
 
     /** Get date taken string */
@@ -401,6 +419,12 @@ export default defineComponent({
   watch: {
     fullyOpened(val) {
       document.body.classList.toggle(BODY_VIEWER_FULLY_OPENED, val);
+    },
+
+    allowClose(val) {
+      if (!this.photoswipe) return;
+      this.photoswipe.options.pinchToClose = val;
+      this.photoswipe.options.closeOnVerticalDrag = val;
     },
   },
 
@@ -593,7 +617,8 @@ export default defineComponent({
         if (this.photoswipe?.template) {
           new MutationObserver((mutations) => {
             mutations.forEach((mutationRecord) => {
-              this.showControls = (<HTMLElement>mutationRecord.target)?.classList.contains('pswp--ui-visible');
+              const pswp = mutationRecord.target as HTMLElement;
+              this.showControls = pswp?.classList.contains('pswp--ui-visible') && !this.slideshowTimer;
             });
           }).observe(this.photoswipe.template, {
             attributes: true,
@@ -979,6 +1004,10 @@ export default defineComponent({
       if (e.key === 'Delete') {
         this.deleteCurrent();
       }
+
+      if (e.key === 'Tab') {
+        this.photoswipe?.element?.classList.add('pswp--ui-visible');
+      }
     },
 
     /** Delete this photo and refresh */
@@ -1155,13 +1184,11 @@ export default defineComponent({
      * Start a slideshow
      */
     async startSlideshow() {
-      // Full screen the pswp element
-      const pswp = this.photoswipe?.element;
-      if (!pswp) return;
-      pswp.requestFullscreen();
+      // Full screen the outer element
+      if (!this.refs.outer?.requestFullscreen()) return;
 
       // Hide controls
-      this.setUiVisible(false);
+      setTimeout(() => this.setUiVisible(false), 1);
 
       // Start slideshow
       this.slideshowTimer = window.setTimeout(this.slideshowTimerFired, SLIDESHOW_MS);
@@ -1225,6 +1252,7 @@ export default defineComponent({
         this.stopSlideshow();
       }
       this.photoswipe?.updateSize();
+      this.photoswipe?.template?.focus();
     },
 
     /**
@@ -1274,8 +1302,7 @@ export default defineComponent({
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
   pointer-events: none;
-
-  &.showControls {
+  &.visible {
     opacity: 1;
     pointer-events: auto;
   }
@@ -1293,8 +1320,7 @@ export default defineComponent({
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
-
-  &.showControls.showBottomBar {
+  &.visible {
     opacity: 1;
   }
 

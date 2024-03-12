@@ -25,9 +25,16 @@
       </div>
     </div>
 
-    <NcTextField :value.sync="searchBar" :placeholder="t('memories', 'Search location / landmark')" :disabled="disabled"
-      trailing-button-icon="arrowRight" :show-trailing-button="searchBar.length > 0 && !loading"
-      @trailing-button-click="search" @keypress.enter="search">
+    <NcTextField
+      :value.sync="searchBar"
+      :label="t('memories', 'Search')"
+      :placeholder="t('memories', 'Search location / landmark')"
+      :disabled="disabled"
+      trailing-button-icon="arrowRight"
+      :show-trailing-button="searchBar.length > 0 && !loading"
+      @trailing-button-click="search"
+      @keypress.enter="search"
+    >
       <MagnifyIcon :size="16" />
     </NcTextField>
 

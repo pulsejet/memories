@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+
+- **Breaking**: You must run `occ memories:places-setup` again after this update
+    - Reverse geocoding lookups with Postgres/MySQL (not MariaDB) are now 100x faster
+- **Breaking**: Prevent automatically retrying files that failed to index
+    - The list of files that could not be indexed can be found in the admin panel
+    - To retry indexing, you can run `occ memories:index --retry`
+- Hide files starting with `.` in the timeline
+- Support for 3GP videos ([#1055](https://github.com/pulsejet/memories/issues/1055))
+- Option to show metadata in slideshow ([#819](https://github.com/pulsejet/memories/issues/819))
+- Improve UX of image editor especially on mobile
+
 ## [v6.2.2] - 2024-01-10
 
 - Hotfix for a bug in request pipelining.

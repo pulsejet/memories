@@ -1,0 +1,14 @@
+name: 'nextcloud-with-memories'
+services:
+  nextcloud:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./custom_apps:/var/www/html/custom_apps
+      - ../:/var/www/html/custom_apps/memories
+      - ./config:/var/www/html/config
+      - ./data:/var/www/html/data
+    ports:
+      - 9080:80
+    image: nextcloud

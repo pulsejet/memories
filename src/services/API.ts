@@ -198,6 +198,10 @@ export class API {
     return gen(`${BASE}/system-status`);
   }
 
+  static FAILURE_LOGS() {
+    return gen(`${BASE}/failure-logs`);
+  }
+
   static OCC_PLACES_SETUP() {
     return gen(`${BASE}/occ/places-setup`);
   }

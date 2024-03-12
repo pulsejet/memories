@@ -56,7 +56,7 @@ export default defineComponent({
 }
 
 @media (max-width: 768px) {
-  #app-navigation-vue {
+  #content-vue > .app-navigation {
     display: none;
   }
 

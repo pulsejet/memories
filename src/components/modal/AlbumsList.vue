@@ -1,7 +1,16 @@
 <template>
   <ul class="albums-container">
-    <NcListItem v-for="album in albums" class="album" :key="album.album_id" :name="album.name" :aria-label="album.name"
-      :to="link ? linkTarget(album) : null" :exact="true" @click="click($event, album)">
+    <NcListItem
+      v-for="album in albums"
+      class="album"
+      :key="album.album_id"
+      :title="album.name"
+      :name="album.name"
+      :aria-label="album.name"
+      :to="link ? linkTarget(album) : null"
+      :exact="true"
+      @click="click($event, album)"
+    >
       <template #icon>
         <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album)" />
         <div v-else class="album__image album__image--placeholder">
@@ -9,6 +18,7 @@
         </div>
       </template>
 
+      <!-- NC_VUE: these slots have changed in v8 -->
       <template #subtitle>
         <div>
           {{ getSubtitle(album) }}

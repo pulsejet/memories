@@ -10,12 +10,14 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
 use OCP\Lock\ILockingProvider;
+use Psr\Log\LoggerInterface;
 
-const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places'];
+const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places', 'memories_failures'];
 const TRUNCATE_TABLES = ['memories_mapclusters'];
 
 class TimelineWrite
 {
+    use TimelineWriteFailures;
     use TimelineWriteMap;
     use TimelineWriteOrphans;
     use TimelineWritePlaces;
@@ -24,6 +26,7 @@ class TimelineWrite
         protected IDBConnection $connection,
         protected LivePhoto $livePhoto,
         protected ILockingProvider $lockingProvider,
+        protected LoggerInterface $logger,
     ) {}
 
     /**
@@ -87,12 +90,12 @@ class TimelineWrite
 
         // Check if EXIF is blank, which is probably wrong
         if (0 === \count($exif)) {
-            throw new \Exception('No EXIF data could be read: '.$file->getPath());
+            throw new \Exception('No EXIF data could be read');
         }
 
         // Check if MIMEType was not detected
         if (empty($exif['MIMEType'] ?? null)) {
-            throw new \Exception('No MIMEType in EXIF data: '.$file->getPath());
+            throw new \Exception('No MIMEType in EXIF data');
         }
 
         // Hand off if Live Photo video part
@@ -101,9 +104,9 @@ class TimelineWrite
         }
 
         // If control reaches here, it's not a Live Photo video part
-        // But if prevRow exists and mapcluster is not set, it *was* a live video part
+        // But if prevRow exists and dayid is not set, it *was* a live video part
         // In this case delete that entry (very rare edge case)
-        if ($prevRow && !\array_key_exists('mapcluster', $prevRow)) {
+        if ($prevRow && !\array_key_exists('dayid', $prevRow)) {
             $this->livePhoto->deleteVideoPart($file);
             $prevRow = null;
         }
@@ -182,7 +185,15 @@ class TimelineWrite
             $query->insert('memories')->values($params);
         }
 
-        return $query->executeStatement() > 0;
+        // Execute query
+        $updated = $query->executeStatement() > 0;
+
+        // Clear failures if successful
+        if ($updated) {
+            $this->clearFailures($file);
+        }
+
+        return $updated;
     }
 
     /**

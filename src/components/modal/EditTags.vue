@@ -1,8 +1,18 @@
 <template>
   <div class="outer">
-    <NcSelectTags ref="selectTags" class="nc-comp" v-model="tagSelection" :disabled="disabled" :limit="null"
-      :options-filter="tagFilter" :get-option-label="tagLabel" :create-option="createOption" :taggable="true"
-      @option:created="handleCreate" />
+    <NcSelectTags
+      ref="selectTags"
+      class="nc-comp"
+      v-model="tagSelection"
+      labelOutside="true"
+      :disabled="disabled"
+      :limit="null"
+      :options-filter="tagFilter"
+      :get-option-label="tagLabel"
+      :create-option="createOption"
+      :taggable="true"
+      @option:created="handleCreate"
+    />
   </div>
 </template>
 

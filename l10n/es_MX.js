@@ -26,6 +26,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Unknown" : "Desconocido",
     "Continue" : "Continuar",
+    "No items" : "No hay elementos",
     "Copy public link" : "Copiar enlace público",
     "Public link" : "Liga pública",
     "Back" : "Atrás",
