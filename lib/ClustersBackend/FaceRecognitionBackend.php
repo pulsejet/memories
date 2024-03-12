@@ -288,7 +288,14 @@ class FaceRecognitionBackend extends Backend
         $query->setMaxResults(15);
 
         // JOIN to get all covers
-        $this->joinCovers($query, 'frp', 'id', 'facerecog_faces', 'id', 'person');
+        $this->joinCovers(
+            query: $query,
+            clusterTable: 'frp',
+            clusterTableId: 'id',
+            objectTable: 'facerecog_faces',
+            objectTableObjectId: 'id',
+            objectTableClusterId: 'person',
+        );
 
         // FETCH all faces
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
@@ -334,7 +341,14 @@ class FaceRecognitionBackend extends Backend
         $query->addOrderBy('frp.name', 'ASC');
 
         // JOIN to get all covers
-        $this->joinCovers($query, 'frp', 'id', 'facerecog_faces', 'id', 'person');
+        $this->joinCovers(
+            query: $query,
+            clusterTable: 'frp',
+            clusterTableId: 'id',
+            objectTable: 'facerecog_faces',
+            objectTableObjectId: 'id',
+            objectTableClusterId: 'person',
+        );
 
         // FETCH all faces
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];

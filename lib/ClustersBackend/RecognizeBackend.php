@@ -171,7 +171,14 @@ class RecognizeBackend extends Backend
         $query->addOrderBy('rfc.id'); // tie-breaker
 
         // JOIN to get all covers
-        $this->joinCovers($query, 'rfc', 'id', 'recognize_face_detections', 'id', 'cluster_id');
+        $this->joinCovers(
+            query: $query,
+            clusterTable: 'rfc',
+            clusterTableId: 'id',
+            objectTable: 'recognize_face_detections',
+            objectTableObjectId: 'id',
+            objectTableClusterId: 'cluster_id',
+        );
 
         // FETCH all faces
         $faces = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];

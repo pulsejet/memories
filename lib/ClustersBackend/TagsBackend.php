@@ -96,7 +96,14 @@ class TagsBackend extends Backend
         $query->addOrderBy('st.id'); // tie-breaker
 
         // JOIN to get all covers
-        $this->joinCovers($query, 'st', 'id', 'systemtag_object_mapping', 'objectid', 'systemtagid');
+        $this->joinCovers(
+            query: $query,
+            clusterTable: 'st',
+            clusterTableId: 'id',
+            objectTable: 'systemtag_object_mapping',
+            objectTableObjectId: 'objectid',
+            objectTableClusterId: 'systemtagid',
+        );
 
         // FETCH all tags
         $tags = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];

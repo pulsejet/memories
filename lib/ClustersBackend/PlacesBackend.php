@@ -157,7 +157,14 @@ class PlacesBackend extends Backend
         $query->addGroupBy('sub.osm_id', 'e.osm_id', 'sub.count', 'e.name', 'e.other_names');
 
         // JOIN to get all covers
-        $this->joinCovers($query, 'sub', 'osm_id', 'memories_places', 'fileid', 'osm_id');
+        $this->joinCovers(
+            query: $query,
+            clusterTable: 'sub',
+            clusterTableId: 'osm_id',
+            objectTable: 'memories_places',
+            objectTableObjectId: 'fileid',
+            objectTableClusterId: 'osm_id',
+        );
 
         // FETCH all tags
         $places = $this->tq->executeQueryWithCTEs($query)->fetchAll();
