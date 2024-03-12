@@ -92,8 +92,6 @@ OC.L10N.register(
     "Previous" : "Предходна",
     "Next" : "Следна",
     "Save as" : "Зачувај како",
-    "All changes will be lost." : "Сите промени ќе се изгубат.",
-    "Are you sure you want to continue?" : "Дали си сигурен дека сакаш да продолжиш?",
     "Undo" : "Назад",
     "Redo" : "Напред",
     "Show original image" : "Прикажи ја оргиналната слика",

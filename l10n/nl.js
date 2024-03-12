@@ -125,8 +125,6 @@ OC.L10N.register(
     "Previous" : "Vorige",
     "Next" : "Volgende",
     "Finish" : "Afronden",
-    "All changes will be lost." : "Alle aanpassingen zullen verloren gaan.",
-    "Are you sure you want to continue?" : "Weet je zeker dat je wilt doorgaan?",
     "Undo" : "Ongedaan maken",
     "Redo" : "Opnieuw doen",
     "Show original image" : "Toon originele afbeelding",
