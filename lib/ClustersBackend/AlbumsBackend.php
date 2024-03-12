@@ -128,18 +128,17 @@ class AlbumsBackend extends Backend
             return true;
         });
 
-        // Fall back cover to cover_owner if available
-        array_walk($list, static function (array &$item) {
+        $userManager = \OC::$server->get(\OCP\IUserManager::class);
+
+        array_walk($list, static function (array &$item) use ($userManager) {
+            // Fall back cover to cover_owner if available
             if (empty($item['cover']) && !empty($item['cover_owner'] ?? null)) {
                 $item['cover'] = $item['cover_owner'];
                 $item['cover_etag'] = $item['cover_owner_etag'];
             }
             unset($item['cover_owner'], $item['cover_owner_etag']);
-        });
 
-        // Add display names for users
-        $userManager = \OC::$server->get(\OCP\IUserManager::class);
-        array_walk($list, static function (array &$item) use ($userManager) {
+            // Add display names for users
             $user = $userManager->get($item['user']);
             $item['user_display'] = $user ? $user->getDisplayName() : null;
         });
