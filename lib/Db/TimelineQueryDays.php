@@ -8,12 +8,14 @@ use OCA\Memories\ClustersBackend;
 use OCA\Memories\Exif;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use OCP\IRequest;
 
 trait TimelineQueryDays
 {
     use TimelineQueryCTE;
 
     protected IDBConnection $connection;
+    protected IRequest $request;
 
     /**
      * Get the days response from the database for the timeline.
@@ -168,7 +170,23 @@ trait TimelineQueryDays
 
         // Add WITH clause if needed
         if (str_contains($sql, 'cte_folders')) {
-            $sql = $CTE_SQL.' '.$sql;
+            $sql = "{$CTE_SQL} {$sql}";
+        }
+
+        // Add database specific optimizations
+        // TODO: figure out what is actually happening in the optimizer here
+        $platform = $this->connection->getDatabasePlatform();
+
+        // STRAIGHT_JOIN is a MySQL/MariaDB hint that forces the optimizer to
+        // join the tables in the order they are listed in the query.
+        // The likely reason it helps here is since the optimizer doesn't know
+        // that our CTE is just a list of folders, and thus is very small in size.
+        if (preg_match('/mysql|mariadb/i', $platform::class)) {
+            // From measurement, the DAYS API seems to be the only one that
+            // is slower with a forced join order; just exclude that for now
+            if (!preg_match('/\/api\/days$/', $this->request->getRequestUri())) {
+                $sql = preg_replace('/\bINNER\s+JOIN\s+(`?\*PREFIX\*cte_folders`?\s)/', 'STRAIGHT_JOIN $1', $sql) ?? $sql;
+            }
         }
 
         return $this->connection->executeQuery($sql, $params, $types);
