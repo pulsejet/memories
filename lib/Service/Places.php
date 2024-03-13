@@ -43,10 +43,10 @@ class Places
         }
 
         // Detect database type
-        $platform = $this->getDbName();
+        $platform = $this->connection->getDatabasePlatform();
 
         // Test MySQL-like support in databse
-        if (str_contains($platform, 'mysql') || str_contains($platform, 'mariadb')) {
+        if (preg_match('/mysql|mariadb/i', $platform::class)) {
             try {
                 $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)', 4326)")->fetch();
                 if (0 === \count($res)) {
@@ -60,7 +60,7 @@ class Places
         }
 
         // Test Postgres native geometry like support in database
-        if (str_contains($platform, 'postgres')) {
+        if (preg_match('/postgres/i', $platform::class)) {
             try {
                 $res = $this->connection->executeQuery("SELECT POINT('1,1')")->fetch();
                 if (0 === \count($res)) {
@@ -434,12 +434,15 @@ class Places
     protected function setupDatabase(int $gis): void
     {
         try {
+            // Detect database type
+            $platform = $this->connection->getDatabasePlatform();
+
             // Drop the table if it exists
             $this->connection->executeStatement('DROP TABLE IF EXISTS memories_planet_geometry');
 
             // MySQL requires an SRID definition
             // https://github.com/pulsejet/memories/issues/1067
-            $srid = str_contains($this->getDbName(), 'mysql') ? 'SRID 4326' : '';
+            $srid = preg_match('/mysql/i', $platform::class) ? 'SRID 4326' : '';
 
             // Create table
             $sql = "CREATE TABLE memories_planet_geometry (
@@ -464,13 +467,5 @@ class Places
         } catch (\Exception $e) {
             throw new \Exception('Failed to create database tables: '.$e->getMessage());
         }
-    }
-
-    /**
-     * Get the database platform name.
-     */
-    private function getDbName(): string
-    {
-        return strtolower($this->connection->getDatabasePlatform()::class);
     }
 }

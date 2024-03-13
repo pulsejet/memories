@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Option to show metadata in slideshow ([#819](https://github.com/pulsejet/memories/issues/819))
 - **Feature**: Improve UX of image editor especially on mobile
 - **Fix**: The cover photo of clusters will now update automatically when files are moved ([#1071](https://github.com/pulsejet/memories/issues/1071))
+- **Fix**: Query performance improvements for MySQL and MariaDB with very large folders
 
 ## [v6.2.2] - 2024-01-10
 
