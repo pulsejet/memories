@@ -52,6 +52,7 @@ OC.L10N.register(
     "Edit metadata" : "Editar metadados",
     "Rotate / Flip" : "Girar / Inverter",
     "View in folder" : "Exibir na pasta",
+    "Set as cover image" : "Definir como imagem de capa",
     "Move to folder" : "Move to folder",
     "Add to album" : "Adicionar a álbum",
     "Move to person" : "Move to person",
