@@ -3,15 +3,31 @@
     <XLoadingIcon v-if="loading" class="fill-block" />
 
     <div v-else>
-      <ClusterHList v-if="recognize.length" :title="t('memories', 'Recognize')" link="/recognize" :clusters="recognize" />
-      <ClusterHList v-if="facerecognition.length" :title="t('memories', 'Face Recognition')" link="/facerecognition"
-        :clusters="facerecognition" />
+      <ClusterHList
+        v-if="recognize.length"
+        :title="t('memories', 'Recognize')"
+        link="/recognize"
+        :clusters="recognize"
+      />
+      <ClusterHList
+        v-if="facerecognition.length"
+        :title="t('memories', 'Face Recognition')"
+        link="/facerecognition"
+        :clusters="facerecognition"
+      />
       <ClusterHList v-if="places.length" :title="t('memories', 'Places')" link="/places" :clusters="places" />
       <ClusterHList v-if="tags.length" :title="t('memories', 'Tags')" link="/tags" :clusters="tags" />
 
       <div class="link-list">
-        <NcButton class="link" v-for="category of categories" :ariaLabel="category.name" :key="category.name"
-          :to="category.link" @click="category.click?.()" type="secondary">
+        <NcButton
+          class="link"
+          v-for="category of categories"
+          :ariaLabel="category.name"
+          :key="category.name"
+          :to="category.link"
+          @click="category.click?.()"
+          type="secondary"
+        >
           <template #icon>
             <component :is="category.icon" />
           </template>

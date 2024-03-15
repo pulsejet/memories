@@ -3,13 +3,23 @@
 
   <FirstStart v-else-if="isFirstStart" />
 
-  <NcContent app-name="memories" v-else-if="!isConfigUnknown" :class="{
-    'has-nav': showNavigation,
-  }">
+  <NcContent
+    app-name="memories"
+    v-else-if="!isConfigUnknown"
+    :class="{
+      'has-nav': showNavigation,
+    }"
+  >
     <NcAppNavigation v-if="showNavigation">
       <template #list>
-        <NcAppNavigationItem v-for="item in navLinks" :key="item.name" :to="{ name: item.name }" :name="item.title"
-          @click="linkClick" exact>
+        <NcAppNavigationItem
+          v-for="item in navLinks"
+          :key="item.name"
+          :to="{ name: item.name }"
+          :name="item.title"
+          @click="linkClick"
+          exact
+        >
           <component :is="item.icon" slot="icon" :size="20" />
         </NcAppNavigationItem>
         <NcAppNavigationItem v-for="item in menuButtons" :key="item.name" :name="item.title" @click="item.onClick">
@@ -27,14 +37,16 @@
     </NcAppNavigation>
 
     <NcAppContent :allowSwipeNavigation="false">
-      <div :class="{
-        outer: true,
-        'router-outlet': true,
-        'remove-gap': removeNavGap,
-        'has-nav': showNavigation,
-        'has-mobile-header': hasMobileHeader,
-        'is-native': native,
-      }">
+      <div
+        :class="{
+          outer: true,
+          'router-outlet': true,
+          'remove-gap': removeNavGap,
+          'has-nav': showNavigation,
+          'has-mobile-header': hasMobileHeader,
+          'is-native': native,
+        }"
+      >
         <router-view />
       </div>
 
@@ -366,7 +378,8 @@ export default defineComponent({
           if: this.config.systemtags_enabled,
         },
       ];
-      const menuButtons = [{
+      const menuButtons = [
+        {
           name: 'upload',
           icon: UploadIcon,
           title: t('memories', 'Upload'),
