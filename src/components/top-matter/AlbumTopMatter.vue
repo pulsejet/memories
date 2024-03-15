@@ -11,7 +11,9 @@
 
     <div class="right-actions">
       <NcActions :forceMenu="true" v-if="isAlbumList">
-        <template #icon> <SortIcon :size="20" /> </template>
+        <template #icon>
+          <SortIcon :size="20" />
+        </template>
 
         <NcActionRadio
           name="sort"

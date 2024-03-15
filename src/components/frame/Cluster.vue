@@ -324,6 +324,7 @@ $namemargin: 10px;
   position: absolute;
   padding: 2px;
   box-sizing: border-box;
+
   .cluster--album & {
     padding: 12px;
 
@@ -352,7 +353,6 @@ $namemargin: 10px;
     .cluster--album & {
       border-radius: 12px; // rounded corners
     }
-
     .cluster--album &,
     .cluster--circle & {
       height: unset;

@@ -52,7 +52,7 @@
       <EditTags ref="tags" :photos="dummy" :disabled="processing" />
     </div>
     <div class="actions">
-      <div class="progress-bar" v-if="progress > 0">
+      <div class="progress-bar" v-if="processing">
         <NcProgressBar :value="progress" :error="true" />
       </div>
       <NcButton @click="upload" class="button" type="error" v-if="photos" :disabled="processing || !photos.length">

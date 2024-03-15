@@ -4,9 +4,7 @@
       <NcActions :inline="1">
         <NcActionButton :aria-label="t('memories', 'Cancel')" @click="clear()">
           {{ t('memories', 'Cancel') }}
-          <template #icon>
-            <CloseIcon :size="20" />
-          </template>
+          <template #icon> <CloseIcon :size="20" /> </template>
         </NcActionButton>
       </NcActions>
 
@@ -24,7 +22,9 @@
           @click="click(action)"
         >
           {{ action.name }}
-          <template #icon> <component :is="action.icon" :size="20" /> </template>
+          <template #icon>
+            <component :is="action.icon" :size="20" />
+          </template>
         </NcActionButton>
       </NcActions>
     </div>

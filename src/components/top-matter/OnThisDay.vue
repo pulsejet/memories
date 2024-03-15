@@ -14,9 +14,7 @@
       <NcActions>
         <NcActionButton :aria-label="t('memories', 'Move left')" @click="moveLeft">
           {{ t('memories', 'Move left') }}
-          <template #icon>
-            <LeftMoveIcon v-once :size="28" />
-          </template>
+          <template #icon> <LeftMoveIcon v-once :size="28" /> </template>
         </NcActionButton>
       </NcActions>
     </div>
@@ -24,9 +22,7 @@
       <NcActions>
         <NcActionButton :aria-label="t('memories', 'Move right')" @click="moveRight">
           {{ t('memories', 'Move right') }}
-          <template #icon>
-            <RightMoveIcon v-once :size="28" />
-          </template>
+          <template #icon> <RightMoveIcon v-once :size="28" /> </template>
         </NcActionButton>
       </NcActions>
     </div>

@@ -129,7 +129,6 @@ export default defineComponent({
   .breadcrumb {
     min-width: 0;
     height: unset;
-
     .share-name {
       margin-left: 0.75em;
     }
