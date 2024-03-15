@@ -18,6 +18,11 @@ declare module '@typings' {
     /** Name of cluster */
     name: string;
 
+    /** Object ID of cover object */
+    cover?: number | null;
+    /** ETag of cover object */
+    cover_etag?: string;
+
     /** Display name, e.g. translated */
     display_name?: string;
     /** Preview loading failed */
@@ -37,6 +42,8 @@ declare module '@typings' {
     location: string;
     /** File ID of last added photo */
     last_added_photo: number;
+    /** Etag of last added photo */
+    last_added_photo_etag: string;
   }
 
   export interface IFace extends ICluster {

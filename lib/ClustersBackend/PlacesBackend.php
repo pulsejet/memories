@@ -149,9 +149,22 @@ class PlacesBackend extends Backend
         }
 
         // ORDER BY name and osm_id
-        $query->orderBy($query->createFunction('sub.count'), 'DESC');
+        $query->orderBy('sub.count', 'DESC');
         $query->addOrderBy('e.name');
         $query->addOrderBy('e.osm_id'); // tie-breaker
+
+        // GROUP BY everything
+        $query->addGroupBy('sub.osm_id', 'e.osm_id', 'sub.count', 'e.name', 'e.other_names');
+
+        // JOIN to get all covers
+        $this->joinCovers(
+            query: $query,
+            clusterTable: 'sub',
+            clusterTableId: 'osm_id',
+            objectTable: 'memories_places',
+            objectTableObjectId: 'fileid',
+            objectTableClusterId: 'osm_id',
+        );
 
         // FETCH all tags
         $places = $this->tq->executeQueryWithCTEs($query)->fetchAll();
@@ -174,12 +187,13 @@ class PlacesBackend extends Backend
         return $cluster['osm_id'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null): array
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         $query = $this->tq->getBuilder();
 
         // SELECT all photos with this tag
-        $query->select('f.fileid', 'f.etag')->from('memories_places', 'mp')
+        $query->select('f.fileid', 'f.etag', 'mp.osm_id')
+            ->from('memories_places', 'mp')
             ->where($query->expr()->eq('mp.osm_id', $query->createNamedParameter((int) $name)))
         ;
 
@@ -190,12 +204,24 @@ class PlacesBackend extends Backend
         $query = $this->tq->joinFilecache($query);
 
         // MAX number of photos
-        if (null !== $limit) {
+        if (-6 === $limit) {
+            $this->filterCover($query, 'mp', 'fileid', 'osm_id');
+        } elseif (null !== $limit) {
             $query->setMaxResults($limit);
+        }
+
+        // Filter by fileid if specified
+        if (null !== $fileid) {
+            $query->andWhere($query->expr()->eq('f.fileid', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         // FETCH tag photos
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+    }
+
+    public function getClusterIdFrom(array $photo): int
+    {
+        return (int) $photo['osm_id'];
     }
 
     /**
