@@ -11,9 +11,7 @@
         <NcActions :inline="1">
           <NcActionButton :aria-label="t('memories', 'Remove')" @click="remove(index)">
             {{ t('memories', 'Remove') }}
-            <template #icon>
-              <CloseIcon :size="20" />
-            </template>
+            <template #icon> <CloseIcon :size="20" /> </template>
           </NcActionButton>
         </NcActions>
       </li>

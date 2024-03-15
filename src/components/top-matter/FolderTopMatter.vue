@@ -24,12 +24,14 @@
             <TimelineIcon v-else :size="20" />
           </template>
         </NcActionButton>
-        <NcActionButton v-if="!routeIsPublic" :aria-label="t('memories', 'Share folder')" @click="share()"
-          close-after-click>
+        <NcActionButton
+          v-if="!routeIsPublic"
+          :aria-label="t('memories', 'Share folder')"
+          @click="share()"
+          close-after-click
+        >
           {{ t('memories', 'Share folder') }}
-          <template #icon>
-            <ShareIcon :size="20" />
-          </template>
+          <template #icon> <ShareIcon :size="20" /> </template>
         </NcActionButton>
       </NcActions>
     </div>

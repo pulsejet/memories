@@ -3,9 +3,7 @@
     <NcActions v-if="name">
       <NcActionButton :aria-label="t('memories', 'Back')" @click="back()">
         {{ t('memories', 'Back') }}
-        <template #icon>
-          <BackIcon :size="20" />
-        </template>
+        <template #icon> <BackIcon :size="20" /> </template>
       </NcActionButton>
     </NcActions>
 
@@ -21,9 +19,7 @@
         <template v-if="!name && routeIsRecognize && !routeIsRecognizeUnassigned">
           <NcActionButton :aria-label="t('memories', 'Unassigned faces')" @click="openUnassigned" close-after-click>
             {{ t('memories', 'Unassigned faces') }}
-            <template #icon>
-              <UnassignedIcon :size="20" />
-            </template>
+            <template #icon> <UnassignedIcon :size="20" /> </template>
           </NcActionButton>
         </template>
 
@@ -31,9 +27,7 @@
         <template v-if="isReal">
           <NcActionButton :aria-label="t('memories', 'Rename person')" @click="rename" close-after-click>
             {{ t('memories', 'Rename person') }}
-            <template #icon>
-              <EditIcon :size="20" />
-            </template>
+            <template #icon> <EditIcon :size="20" /> </template>
           </NcActionButton>
           <NcActionButton
             :aria-label="t('memories', 'Merge with different person')"
@@ -41,9 +35,7 @@
             close-after-click
           >
             {{ t('memories', 'Merge with different person') }}
-            <template #icon>
-              <MergeIcon :size="20" />
-            </template>
+            <template #icon> <MergeIcon :size="20" /> </template>
           </NcActionButton>
           <NcActionCheckbox
             :aria-label="t('memories', 'Mark person in preview')"
@@ -58,9 +50,7 @@
             close-after-click
           >
             {{ t('memories', 'Remove person') }}
-            <template #icon>
-              <DeleteIcon :size="20" />
-            </template>
+            <template #icon> <DeleteIcon :size="20" /> </template>
           </NcActionButton>
         </template>
       </NcActions>

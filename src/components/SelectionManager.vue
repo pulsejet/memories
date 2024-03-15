@@ -24,9 +24,7 @@
           @click="click(action)"
         >
           {{ action.name }}
-          <template #icon>
-            <component :is="action.icon" :size="20" />
-          </template>
+          <template #icon> <component :is="action.icon" :size="20" /> </template>
         </NcActionButton>
       </NcActions>
     </div>

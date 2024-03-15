@@ -197,25 +197,20 @@ export default defineComponent({
   background-color: var(--color-background-plain);
   color: var(--color-primary-text);
   text-align: center;
-
   .setup-section {
     margin: 0 auto;
     width: 90%;
     max-width: 500px;
   }
-
   .banner {
     padding: 30px 20px;
-
     :deep > svg {
       width: 60%;
       max-width: 400px;
     }
   }
-
   .buttons {
     margin-top: 20px;
-
     .button {
       margin: 10px auto;
     }
@@ -227,10 +222,8 @@ export default defineComponent({
     padding: 10px;
     margin-top: 15px;
     border-radius: 20px;
-
     .checkbox-radio-switch {
       margin-left: 10px;
-
       :deep .checkbox-radio-switch__label {
         min-height: unset;
       }

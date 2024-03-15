@@ -3,9 +3,7 @@
     <NcActions v-if="!isAlbumList">
       <NcActionButton :aria-label="t('memories', 'Back')" @click="back()">
         {{ t('memories', 'Back') }}
-        <template #icon>
-          <BackIcon :size="20" />
-        </template>
+        <template #icon> <BackIcon :size="20" /> </template>
       </NcActionButton>
     </NcActions>
 
@@ -13,9 +11,7 @@
 
     <div class="right-actions">
       <NcActions :forceMenu="true" v-if="isAlbumList">
-        <template #icon>
-          <SortIcon :size="20" />
-        </template>
+        <template #icon> <SortIcon :size="20" /> </template>
 
         <NcActionRadio
           name="sort"
@@ -25,9 +21,7 @@
           close-after-click
         >
           {{ t('memories', 'Sort by date') }}
-          <template #icon>
-            <SortDateIcon :size="20" />
-          </template>
+          <template #icon> <SortDateIcon :size="20" /> </template>
         </NcActionRadio>
 
         <NcActionRadio
@@ -38,9 +32,7 @@
           close-after-click
         >
           {{ t('memories', 'Sort by name') }}
-          <template #icon>
-            <SlotAlphabeticalIcon :size="20" />
-          </template>
+          <template #icon> <SlotAlphabeticalIcon :size="20" /> </template>
         </NcActionRadio>
       </NcActions>
 
@@ -52,9 +44,7 @@
           v-if="isAlbumList"
         >
           {{ t('memories', 'Create new album') }}
-          <template #icon>
-            <PlusIcon :size="20" />
-          </template>
+          <template #icon> <PlusIcon :size="20" /> </template>
         </NcActionButton>
         <NcActionButton
           :aria-label="t('memories', 'Share album')"
@@ -63,9 +53,7 @@
           v-if="canEditAlbum"
         >
           {{ t('memories', 'Share album') }}
-          <template #icon>
-            <ShareIcon :size="20" />
-          </template>
+          <template #icon> <ShareIcon :size="20" /> </template>
         </NcActionButton>
         <NcActionButton
           :aria-label="t('memories', 'Download album')"
@@ -74,9 +62,7 @@
           v-if="!isAlbumList"
         >
           {{ t('memories', 'Download album') }}
-          <template #icon>
-            <DownloadIcon :size="20" />
-          </template>
+          <template #icon> <DownloadIcon :size="20" /> </template>
         </NcActionButton>
         <NcActionButton
           :aria-label="t('memories', 'Edit album details')"
@@ -85,9 +71,7 @@
           v-if="canEditAlbum"
         >
           {{ t('memories', 'Edit album details') }}
-          <template #icon>
-            <EditIcon :size="20" />
-          </template>
+          <template #icon> <EditIcon :size="20" /> </template>
         </NcActionButton>
         <NcActionButton
           :aria-label="t('memories', 'Remove album')"
@@ -96,9 +80,7 @@
           v-if="!isAlbumList"
         >
           {{ t('memories', 'Remove album') }}
-          <template #icon>
-            <DeleteIcon :size="20" />
-          </template>
+          <template #icon> <DeleteIcon :size="20" /> </template>
         </NcActionButton>
       </NcActions>
     </div>

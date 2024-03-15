@@ -234,7 +234,6 @@ img {
 }
 
 $namemargin: 10px;
-
 .name {
   position: absolute;
   bottom: 0;
@@ -284,7 +283,6 @@ $namemargin: 10px;
     padding: 0 12px;
 
     min-height: 50px; // align to top of space
-
     @media (max-width: 768px) {
       min-height: 54px; // mark#2147915
       padding: 0 6px;
@@ -326,7 +324,6 @@ $namemargin: 10px;
   position: absolute;
   padding: 2px;
   box-sizing: border-box;
-
   .cluster--album & {
     padding: 12px;
 
@@ -361,7 +358,6 @@ $namemargin: 10px;
       height: unset;
       aspect-ratio: 1; // force square
     }
-
     .cluster--circle & {
       border-radius: 50%; // circle image
     }

@@ -254,53 +254,42 @@ export default defineComponent({
   flex-direction: column;
   height: 350px;
   padding: 16px;
-
   .form-title {
     font-weight: bold;
   }
-
   .form-subtitle {
     color: var(--color-text-lighter);
   }
-
   .form-inputs {
     flex-grow: 1;
     justify-items: flex-end;
-
     input {
       width: 100%;
     }
-
     label {
       display: flex;
       margin-top: 16px;
-
       :deep svg {
         margin-right: 12px;
       }
     }
   }
-
   .form-buttons {
     display: flex;
     justify-content: space-between;
     flex-direction: column;
-
     .left-buttons,
     .right-buttons {
       display: flex;
     }
-
     .right-buttons {
       justify-content: flex-end;
     }
-
     button {
       margin-right: 16px;
     }
   }
 }
-
 .left-buttons {
   flex-grow: 1;
 }

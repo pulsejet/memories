@@ -10,9 +10,7 @@
   >
     <div class="container" @keydown.stop="0">
       <div class="head">
-        <span>
-          <slot name="title"></slot>
-        </span>
+        <span> <slot name="title"></slot> </span>
       </div>
 
       <slot></slot>
@@ -170,7 +168,6 @@ export default defineComponent({
       // Hide scrollbar
       scrollbar-width: none;
       -ms-overflow-style: none;
-
       &::-webkit-scrollbar {
         display: none;
         width: 0 !important;

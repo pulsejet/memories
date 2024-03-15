@@ -9,9 +9,7 @@
         <NcActions :inline="2">
           <NcActionButton v-if="dirty" :aria-label="t('memories', 'Reset')" @click="reset()" :disabled="disabled">
             {{ t('memories', 'Reset') }}
-            <template #icon>
-              <UndoIcon :size="20" />
-            </template>
+            <template #icon> <UndoIcon :size="20" /> </template>
           </NcActionButton>
 
           <NcActionButton
@@ -21,9 +19,7 @@
             :disabled="disabled"
           >
             {{ t('memories', 'Remove location') }}
-            <template #icon>
-              <CloseIcon :size="20" />
-            </template>
+            <template #icon> <CloseIcon :size="20" /> </template>
           </NcActionButton>
         </NcActions>
       </div>
@@ -256,7 +252,6 @@ export default defineComponent({
     > .action {
       margin-top: -10px;
       margin-left: 2px;
-
       > * {
         cursor: pointer;
       }
@@ -266,7 +261,6 @@ export default defineComponent({
   .osm-attribution {
     margin: -3px 4px;
     font-size: 0.65em;
-
     a {
       color: var(--color-primary);
     }

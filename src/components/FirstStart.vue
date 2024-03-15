@@ -149,7 +149,6 @@ export default defineComponent({
 
   transition: opacity 1s ease;
   opacity: 0;
-
   &.show {
     opacity: 1;
   }

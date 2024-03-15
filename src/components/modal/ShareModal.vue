@@ -59,6 +59,7 @@
           {{ n('memories', 'Share the original file', 'Share the original files', photos?.length ?? 0) }}
         </template>
       </NcListItem>
+
       <NcListItem
         v-if="canShareLink"
         :title="t('memories', 'Public Link')"

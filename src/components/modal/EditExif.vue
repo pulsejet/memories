@@ -141,7 +141,6 @@ export default defineComponent({
   .field {
     margin-bottom: 8px;
   }
-
   :deep label {
     font-size: 0.8em;
     padding: 0 !important;

@@ -1334,7 +1334,6 @@ export default defineComponent({
       font-weight: bold;
       font-size: 0.9em;
     }
-
     &.description {
       margin-top: -2px;
       margin-bottom: 2px;
@@ -1415,7 +1414,6 @@ export default defineComponent({
   // Prevent the popper from overlapping with the sidebar
   > div > .v-popper__wrapper {
     overflow: visible !important;
-
     > .v-popper__inner {
       transform: translateX(-20px);
     }

@@ -3,9 +3,7 @@
     <NcActions v-if="name">
       <NcActionButton :aria-label="t('memories', 'Back')" @click="back()">
         {{ t('memories', 'Back') }}
-        <template #icon>
-          <BackIcon :size="20" />
-        </template>
+        <template #icon> <BackIcon :size="20" /> </template>
       </NcActionButton>
     </NcActions>
     <span class="name">{{ name || viewname }}</span>
