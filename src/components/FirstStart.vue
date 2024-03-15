@@ -164,7 +164,7 @@ export default defineComponent({
     margin-bottom: 20px;
     width: 100%;
 
-    >.img {
+    > .img {
       margin: 0 auto;
       width: 60vw;
       max-width: 400px;

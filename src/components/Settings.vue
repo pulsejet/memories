@@ -16,12 +16,19 @@
           {{ t('memories', 'Square grid mode') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch :checked.sync="config.enable_top_memories" @update:checked="updateEnableTopMemories"
-          type="switch">
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.enable_top_memories"
+          @update:checked="updateEnableTopMemories"
+          type="switch"
+        >
           {{ t('memories', 'Show past photos on top of timeline') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch :checked.sync="config.stack_raw_files" @update:checked="updateStackRawFiles" type="switch">
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.stack_raw_files"
+          @update:checked="updateStackRawFiles"
+          type="switch"
+        >
           {{ t('memories', 'Stack RAW files with same name') }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
@@ -35,8 +42,11 @@
           {{ t('memories', 'Autoplay Live Photos') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch :checked.sync="config.sidebar_filepath" @update:checked="updateSidebarFilepath"
-          type="switch">
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.sidebar_filepath"
+          @update:checked="updateSidebarFilepath"
+          type="switch"
+        >
           {{ t('memories', 'Show full file path in sidebar') }}
         </NcCheckboxRadioSwitch>
 
@@ -50,14 +60,29 @@
 
         <div class="radio-group">
           <div class="title">{{ t('memories', 'High resolution image loading behavior') }}</div>
-          <NcCheckboxRadioSwitch :checked="highResCond" value="zoom" name="vhrc_radio" type="radio"
-            @update:checked="updateHighResCond($event)">{{ t('memories', 'Load high resolution image on zoom') }}
+          <NcCheckboxRadioSwitch
+            :checked="highResCond"
+            value="zoom"
+            name="vhrc_radio"
+            type="radio"
+            @update:checked="updateHighResCond($event)"
+            >{{ t('memories', 'Load high resolution image on zoom') }}
           </NcCheckboxRadioSwitch>
-          <NcCheckboxRadioSwitch :checked="highResCond" value="always" name="vhrc_radio" type="radio"
-            @update:checked="updateHighResCond($event)">{{ t('memories', 'Always load high resolution image (not recommended)') }}
+          <NcCheckboxRadioSwitch
+            :checked="highResCond"
+            value="always"
+            name="vhrc_radio"
+            type="radio"
+            @update:checked="updateHighResCond($event)"
+            >{{ t('memories', 'Always load high resolution image (not recommended)') }}
           </NcCheckboxRadioSwitch>
-          <NcCheckboxRadioSwitch :checked="highResCond" value="never" name="vhrc_radio" type="radio"
-            @update:checked="updateHighResCond($event)">{{ t('memories', 'Never load high resolution image') }}
+          <NcCheckboxRadioSwitch
+            :checked="highResCond"
+            value="never"
+            name="vhrc_radio"
+            type="radio"
+            @update:checked="updateHighResCond($event)"
+            >{{ t('memories', 'Never load high resolution image') }}
           </NcCheckboxRadioSwitch>
         </div>
       </NcAppSettingsSection>
@@ -71,8 +96,13 @@
 
       <NcAppSettingsSection id="device-settings" :name="t('memories', 'Device Folders')" v-if="isNative">
         {{ t('memories', 'Local folders to include in the timeline view') }}
-        <NcCheckboxRadioSwitch v-for="folder in localFolders" :key="folder.id" :checked.sync="folder.enabled"
-          @update:checked="updateDeviceFolders" type="switch">
+        <NcCheckboxRadioSwitch
+          v-for="folder in localFolders"
+          :key="folder.id"
+          :checked.sync="folder.enabled"
+          @update:checked="updateDeviceFolders"
+          type="switch"
+        >
           {{ folder.name }}
         </NcCheckboxRadioSwitch>
 
@@ -85,13 +115,19 @@
         <label for="folders-path">{{ t('memories', 'Folders Path') }}</label>
         <input id="folders-path" @click="chooseFoldersPath" v-model="config.folders_path" type="text" />
 
-        <NcCheckboxRadioSwitch :checked.sync="config.show_hidden_folders" @update:checked="updateShowHidden"
-          type="switch">
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.show_hidden_folders"
+          @update:checked="updateShowHidden"
+          type="switch"
+        >
           {{ t('memories', 'Show hidden folders') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch :checked.sync="config.sort_folder_month" @update:checked="updateSortFolderMonth"
-          type="switch">
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.sort_folder_month"
+          @update:checked="updateSortFolderMonth"
+          type="switch"
+        >
           {{ t('memories', 'Sort folders oldest-first') }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
@@ -105,7 +141,11 @@
           {{ t('memories', 'Sort albums oldest-first') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch :checked.sync="config.show_hidden_albums" @update:checked="updateShowHidden" type="switch">
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.show_hidden_albums"
+          @update:checked="updateShowHidden"
+          type="switch"
+        >
           {{ t('memories', 'Show hidden albums') }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>

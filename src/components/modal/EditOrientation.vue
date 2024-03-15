@@ -4,7 +4,7 @@
       t(
         'memories',
         'This feature rotates images losslessly by updating the EXIF metadata. This approach is known to sometimes not work correctly on certain image types such as HEIC.Make sure you do a test run before using it on multiple images.',
-        )
+      )
     }}
 
     <div class="samples">
@@ -259,7 +259,7 @@ export default defineComponent({
       align-items: center;
       background-color: var(--color-background-dark);
 
-      >span {
+      > span {
         font-size: 1.3em;
         font-weight: 500;
         transform: translate(-3px, -3px);
@@ -270,4 +270,5 @@ export default defineComponent({
   .actions {
     justify-content: center;
   }
-}</style>
+}
+</style>

@@ -7,8 +7,8 @@
     <span>
       {{
         owned
-        ? t('memories', 'Are you sure you want to permanently remove album "{name}"?', { name })
-        : t('memories', 'Are you sure you want to leave the shared album "{name}"?', { name })
+          ? t('memories', 'Are you sure you want to permanently remove album "{name}"?', { name })
+          : t('memories', 'Are you sure you want to leave the shared album "{name}"?', { name })
       }}
     </span>
 

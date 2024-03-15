@@ -22,8 +22,13 @@
     >
       <div class="top-bar" v-if="photoswipe" :class="{ visible: showControls }">
         <NcActions :inline="numInlineActions" container=".memories_viewer .pswp">
-          <NcActionButton v-for="action of actions" :key="action.id" :aria-label="action.name" close-after-click
-            @click="action.callback()">
+          <NcActionButton
+            v-for="action of actions"
+            :key="action.id"
+            :aria-label="action.name"
+            close-after-click
+            @click="action.callback()"
+          >
             {{ action.name }}
             <template #icon>
               <component :is="action.icon" :size="24" v-bind="action.iconArgs ?? {}" />
@@ -1283,7 +1288,7 @@ export default defineComponent({
   overflow: hidden;
   color: white;
 
-  >.loading-icon {
+  > .loading-icon {
     z-index: 1000000;
   }
 }
@@ -1370,7 +1375,6 @@ export default defineComponent({
 }
 
 :deep .plyr__volume {
-
   // Cannot be vertical yet :(
   @media (max-width: 768px) {
     display: none;
@@ -1409,10 +1413,10 @@ export default defineComponent({
   }
 
   // Prevent the popper from overlapping with the sidebar
-  >div>.v-popper__wrapper {
+  > div > .v-popper__wrapper {
     overflow: visible !important;
 
-    >.v-popper__inner {
+    > .v-popper__inner {
       transform: translateX(-20px);
     }
   }

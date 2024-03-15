@@ -4,10 +4,19 @@
       <label :for="'exif-field-' + field.field">
         {{ label(field) }}
       </label>
-      <NcTextField class="field" :id="'exif-field-' + field.field" :disabled="disabled" :label-outside="true"
-        :value.sync="exif[field.field]" :placeholder="placeholder(field)" @input="dirty[field.field] = true"
-        trailing-button-icon="close" :show-trailing-button="dirty[field.field]" @trailing-button-click="reset(field)"
-        @keypress.enter="$emit('save')" />
+      <NcTextField
+        class="field"
+        :id="'exif-field-' + field.field"
+        :disabled="disabled"
+        :label-outside="true"
+        :value.sync="exif[field.field]"
+        :placeholder="placeholder(field)"
+        @input="dirty[field.field] = true"
+        trailing-button-icon="close"
+        :show-trailing-button="dirty[field.field]"
+        @trailing-button-click="reset(field)"
+        @keypress.enter="$emit('save')"
+      />
     </div>
   </div>
 </template>

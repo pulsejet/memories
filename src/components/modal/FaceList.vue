@@ -1,14 +1,25 @@
 <template>
   <div class="outer">
     <div class="search">
-      <NcTextField :autofocus="true" :value.sync="search" :label="t('memories', 'Search')"
-        :placeholder="t('memories', 'Search')">
+      <NcTextField
+        :autofocus="true"
+        :value.sync="search"
+        :label="t('memories', 'Search')"
+        :placeholder="t('memories', 'Search')"
+      >
         <MagnifyIcon :size="16" />
       </NcTextField>
     </div>
 
-    <ClusterGrid v-if="list" :items="filteredList" :maxSize="120" :link="false" :plus="plus" @click="click"
-      @plus="addFace" />
+    <ClusterGrid
+      v-if="list"
+      :items="filteredList"
+      :maxSize="120"
+      :link="false"
+      :plus="plus"
+      @click="click"
+      @plus="addFace"
+    />
     <div v-else>
       {{ t('memories', 'Loading …') }}
     </div>

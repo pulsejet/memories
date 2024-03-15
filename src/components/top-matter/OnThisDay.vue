@@ -321,4 +321,5 @@ $mobHeight: 165px;
       font-size: 1.1em;
     }
   }
-}</style>
+}
+</style>

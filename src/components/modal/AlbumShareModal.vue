@@ -9,14 +9,31 @@
         {{ t('memories', 'Name of the album') }}
       </span>
 
-      <NcTextField :value.sync="albumName" type="text" name="name" :required="true" autofocus="true"
-        :placeholder="t('memories', 'Name of the album')" />
+      <NcTextField
+        :value.sync="albumName"
+        type="text"
+        name="name"
+        :required="true"
+        autofocus="true"
+        :placeholder="t('memories', 'Name of the album')"
+      />
     </template>
 
-    <AlbumCollaborators v-if="album" ref="collaborators" :album-name="album.basename" :collaborators="album.collaborators"
-      :public-link="album.publicLink" :allow-public-link="true" v-slot="{ collaborators }">
-      <NcButton :aria-label="t('memories', 'Save collaborators for this album.')" type="primary"
-        :disabled="loadingAddCollaborators" @click="save(collaborators)">
+    <AlbumCollaborators
+      v-if="album"
+      ref="collaborators"
+      :album-name="album.basename"
+      :collaborators="album.collaborators"
+      :public-link="album.publicLink"
+      :allow-public-link="true"
+      v-slot="{ collaborators }"
+    >
+      <NcButton
+        :aria-label="t('memories', 'Save collaborators for this album.')"
+        type="primary"
+        :disabled="loadingAddCollaborators"
+        @click="save(collaborators)"
+      >
         <template #icon>
           <XLoadingIcon v-if="loadingAddCollaborators" />
         </template>

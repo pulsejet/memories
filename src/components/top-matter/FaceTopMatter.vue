@@ -35,18 +35,28 @@
               <EditIcon :size="20" />
             </template>
           </NcActionButton>
-          <NcActionButton :aria-label="t('memories', 'Merge with different person')" @click="refs.mergeModal.open()"
-            close-after-click>
+          <NcActionButton
+            :aria-label="t('memories', 'Merge with different person')"
+            @click="refs.mergeModal.open()"
+            close-after-click
+          >
             {{ t('memories', 'Merge with different person') }}
             <template #icon>
               <MergeIcon :size="20" />
             </template>
           </NcActionButton>
-          <NcActionCheckbox :aria-label="t('memories', 'Mark person in preview')" :checked.sync="config.show_face_rect"
-            @change="changeShowFaceRect">
+          <NcActionCheckbox
+            :aria-label="t('memories', 'Mark person in preview')"
+            :checked.sync="config.show_face_rect"
+            @change="changeShowFaceRect"
+          >
             {{ t('memories', 'Mark person in preview') }}
           </NcActionCheckbox>
-          <NcActionButton :aria-label="t('memories', 'Remove person')" @click="refs.deleteModal.open()" close-after-click>
+          <NcActionButton
+            :aria-label="t('memories', 'Remove person')"
+            @click="refs.deleteModal.open()"
+            close-after-click
+          >
             {{ t('memories', 'Remove person') }}
             <template #icon>
               <DeleteIcon :size="20" />

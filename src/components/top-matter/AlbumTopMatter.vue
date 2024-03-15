@@ -17,16 +17,26 @@
           <SortIcon :size="20" />
         </template>
 
-        <NcActionRadio name="sort" :aria-label="t('memories', 'Sort by date')" :checked="config.album_list_sort === 1"
-          @change="changeSort(1)" close-after-click>
+        <NcActionRadio
+          name="sort"
+          :aria-label="t('memories', 'Sort by date')"
+          :checked="config.album_list_sort === 1"
+          @change="changeSort(1)"
+          close-after-click
+        >
           {{ t('memories', 'Sort by date') }}
           <template #icon>
             <SortDateIcon :size="20" />
           </template>
         </NcActionRadio>
 
-        <NcActionRadio name="sort" :aria-label="t('memories', 'Sort by name')" :checked="config.album_list_sort === 2"
-          @change="changeSort(2)" close-after-click>
+        <NcActionRadio
+          name="sort"
+          :aria-label="t('memories', 'Sort by name')"
+          :checked="config.album_list_sort === 2"
+          @change="changeSort(2)"
+          close-after-click
+        >
           {{ t('memories', 'Sort by name') }}
           <template #icon>
             <SlotAlphabeticalIcon :size="20" />
@@ -35,36 +45,56 @@
       </NcActions>
 
       <NcActions :inline="isMobile ? 1 : 3">
-        <NcActionButton :aria-label="t('memories', 'Create new album')" @click="refs.createModal.open(false)"
-          close-after-click v-if="isAlbumList">
+        <NcActionButton
+          :aria-label="t('memories', 'Create new album')"
+          @click="refs.createModal.open(false)"
+          close-after-click
+          v-if="isAlbumList"
+        >
           {{ t('memories', 'Create new album') }}
           <template #icon>
             <PlusIcon :size="20" />
           </template>
         </NcActionButton>
-        <NcActionButton :aria-label="t('memories', 'Share album')" @click="openShareModal()" close-after-click
-          v-if="canEditAlbum">
+        <NcActionButton
+          :aria-label="t('memories', 'Share album')"
+          @click="openShareModal()"
+          close-after-click
+          v-if="canEditAlbum"
+        >
           {{ t('memories', 'Share album') }}
           <template #icon>
             <ShareIcon :size="20" />
           </template>
         </NcActionButton>
-        <NcActionButton :aria-label="t('memories', 'Download album')" @click="downloadAlbum()" close-after-click
-          v-if="!isAlbumList">
+        <NcActionButton
+          :aria-label="t('memories', 'Download album')"
+          @click="downloadAlbum()"
+          close-after-click
+          v-if="!isAlbumList"
+        >
           {{ t('memories', 'Download album') }}
           <template #icon>
             <DownloadIcon :size="20" />
           </template>
         </NcActionButton>
-        <NcActionButton :aria-label="t('memories', 'Edit album details')" @click="refs.createModal.open(true)"
-          close-after-click v-if="canEditAlbum">
+        <NcActionButton
+          :aria-label="t('memories', 'Edit album details')"
+          @click="refs.createModal.open(true)"
+          close-after-click
+          v-if="canEditAlbum"
+        >
           {{ t('memories', 'Edit album details') }}
           <template #icon>
             <EditIcon :size="20" />
           </template>
         </NcActionButton>
-        <NcActionButton :aria-label="t('memories', 'Remove album')" @click="refs.deleteModal.open()" close-after-click
-          v-if="!isAlbumList">
+        <NcActionButton
+          :aria-label="t('memories', 'Remove album')"
+          @click="refs.deleteModal.open()"
+          close-after-click
+          v-if="!isAlbumList"
+        >
           {{ t('memories', 'Remove album') }}
           <template #icon>
             <DeleteIcon :size="20" />

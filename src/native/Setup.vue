@@ -9,13 +9,16 @@
         t(
           'memories',
           'You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue.',
-            )
+        )
       }}
       <br />
 
       <div class="buttons">
-        <NcButton type="secondary" class="button"
-          href="https://play.google.com/store/apps/details?id=com.nextcloud.client">
+        <NcButton
+          type="secondary"
+          class="button"
+          href="https://play.google.com/store/apps/details?id=com.nextcloud.client"
+        >
           {{ t('memories', 'Set up automatic upload') }}
         </NcButton>
 
@@ -35,11 +38,11 @@
       <br /><br />
       {{
         hasMediaPermission
-        ? t('memories', 'Access to media has been granted.')
-        : t(
-          'memories',
-          'Access to media is not available yet. If the button below does not work, grant the permission through settings.',
-        )
+          ? t('memories', 'Access to media has been granted.')
+          : t(
+              'memories',
+              'Access to media is not available yet. If the button below does not work, grant the permission through settings.',
+            )
       }}
 
       <div class="buttons">
@@ -47,8 +50,11 @@
           {{ t('memories', 'Grant permissions') }}
         </NcButton>
 
-        <NcButton :type="hasMediaPermission ? 'secondary' : 'primary'" class="button"
-          @click="step += hasMediaPermission ? 1 : 2">
+        <NcButton
+          :type="hasMediaPermission ? 'secondary' : 'primary'"
+          class="button"
+          @click="step += hasMediaPermission ? 1 : 2"
+        >
           {{ hasMediaPermission ? t('memories', 'Continue') : t('memories', 'Skip this step') }}
         </NcButton>
       </div>
@@ -73,8 +79,13 @@
           {{ t('memories', 'This may take a while. Do not close this window.') }}
         </div>
         <template v-else>
-          <NcCheckboxRadioSwitch v-for="folder in localFolders" :key="folder.id" :checked.sync="folder.enabled"
-            @update:checked="updateDeviceFolders" type="switch">
+          <NcCheckboxRadioSwitch
+            v-for="folder in localFolders"
+            :key="folder.id"
+            :checked.sync="folder.enabled"
+            @update:checked="updateDeviceFolders"
+            type="switch"
+          >
             {{ folder.name }}
           </NcCheckboxRadioSwitch>
         </template>
@@ -196,7 +207,7 @@ export default defineComponent({
   .banner {
     padding: 30px 20px;
 
-    :deep>svg {
+    :deep > svg {
       width: 60%;
       max-width: 400px;
     }

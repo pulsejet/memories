@@ -1,7 +1,13 @@
 <template>
-  <NcModal class="memories-modal" ref="modal" :size="size" :outTransition="true"
-    :style="{ width: isSidebarShown ? `calc(100% - ${sidebarWidth}px)` : null }" :additionalTrapElements="trapElements"
-    @close="cleanup">
+  <NcModal
+    class="memories-modal"
+    ref="modal"
+    :size="size"
+    :outTransition="true"
+    :style="{ width: isSidebarShown ? `calc(100% - ${sidebarWidth}px)` : null }"
+    :additionalTrapElements="trapElements"
+    @close="cleanup"
+  >
     <div class="container" @keydown.stop="0">
       <div class="head">
         <span>
@@ -143,7 +149,7 @@ export default defineComponent({
     margin-top: 10px;
     text-align: right;
 
-    >button {
+    > button {
       display: inline-block !important;
     }
   }
@@ -155,7 +161,7 @@ export default defineComponent({
       display: none !important;
     }
 
-    .modal-wrapper>.modal-container {
+    .modal-wrapper > .modal-container {
       max-height: calc(99% - env(keyboard-inset-height, 0px));
       height: unset;
       top: unset;

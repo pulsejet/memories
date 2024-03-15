@@ -7,25 +7,43 @@
     <form class="manage-collaborators__form" @submit.prevent>
       <NcPopover ref="popover" :auto-size="true" :distance="0">
         <label slot="trigger" class="manage-collaborators__form__input">
-          <NcTextField :value.sync="searchText" autocomplete="off" type="search" name="search" aria-autocomplete="list"
-            :label="t('memories', 'Search for collaborators')" :aria-label="t('memories', 'Search for collaborators')"
+          <NcTextField
+            :value.sync="searchText"
+            autocomplete="off"
+            type="search"
+            name="search"
+            aria-autocomplete="list"
+            :label="t('memories', 'Search for collaborators')"
+            :aria-label="t('memories', 'Search for collaborators')"
             :aria-controls="`manage-collaborators__form__selection-${randomId} manage-collaborators__form__list-${randomId}`"
-            :placeholder="t('memories', 'Search people or groups')" @input="searchCollaborators">
+            :placeholder="t('memories', 'Search people or groups')"
+            @input="searchCollaborators"
+          >
             <Magnify :size="16" />
           </NcTextField>
           <XLoadingIcon v-if="loadingCollaborators" />
         </label>
 
-        <ul v-if="searchResults.length !== 0" :id="`manage-collaborators__form__list-${randomId}`"
-          class="manage-collaborators__form__list">
+        <ul
+          v-if="searchResults.length !== 0"
+          :id="`manage-collaborators__form__list-${randomId}`"
+          class="manage-collaborators__form__list"
+        >
           <li v-for="collaboratorKey of searchResults" :key="collaboratorKey">
-            <NcListItemIcon :id="availableCollaborators[collaboratorKey].id"
-              class="manage-collaborators__form__list__result" :title="availableCollaborators[collaboratorKey].label"
-              :search="searchText" :user="availableCollaborators[collaboratorKey].id"
-              :display-name="availableCollaborators[collaboratorKey].label" :aria-label="t('memories', 'Add {collaboratorLabel} to the collaborators list', {
-                collaboratorLabel: availableCollaborators[collaboratorKey].label,
-              })
-                " @click="selectEntity(collaboratorKey)" />
+            <NcListItemIcon
+              :id="availableCollaborators[collaboratorKey].id"
+              class="manage-collaborators__form__list__result"
+              :title="availableCollaborators[collaboratorKey].label"
+              :search="searchText"
+              :user="availableCollaborators[collaboratorKey].id"
+              :display-name="availableCollaborators[collaboratorKey].label"
+              :aria-label="
+                t('memories', 'Add {collaboratorLabel} to the collaborators list', {
+                  collaboratorLabel: availableCollaborators[collaboratorKey].label,
+                })
+              "
+              @click="selectEntity(collaboratorKey)"
+            />
           </li>
         </ul>
         <NcEmptyContent
@@ -41,15 +59,26 @@
     </form>
 
     <ul class="manage-collaborators__selection">
-      <li v-for="collaboratorKey of listableSelectedCollaboratorsKeys" :key="collaboratorKey"
-        class="manage-collaborators__selection__item">
-        <NcListItemIcon :id="availableCollaborators[collaboratorKey].id"
+      <li
+        v-for="collaboratorKey of listableSelectedCollaboratorsKeys"
+        :key="collaboratorKey"
+        class="manage-collaborators__selection__item"
+      >
+        <NcListItemIcon
+          :id="availableCollaborators[collaboratorKey].id"
           :display-name="availableCollaborators[collaboratorKey].label"
-          :title="availableCollaborators[collaboratorKey].label" :user="availableCollaborators[collaboratorKey].id">
-          <NcButton type="tertiary" :aria-label="t('memories', 'Remove {collaboratorLabel} from the collaborators list', {
-            collaboratorLabel: availableCollaborators[collaboratorKey].label,
-          })
-            " @click="unselectEntity(collaboratorKey)">
+          :title="availableCollaborators[collaboratorKey].label"
+          :user="availableCollaborators[collaboratorKey].id"
+        >
+          <NcButton
+            type="tertiary"
+            :aria-label="
+              t('memories', 'Remove {collaboratorLabel} from the collaborators list', {
+                collaboratorLabel: availableCollaborators[collaboratorKey].label,
+              })
+            "
+            @click="unselectEntity(collaboratorKey)"
+          >
             <Close slot="icon" :size="20" />
           </NcButton>
         </NcListItemIcon>
@@ -59,8 +88,12 @@
     <div class="actions">
       <div v-if="allowPublicLink" class="actions__public-link">
         <template v-if="isPublicLinkSelected">
-          <NcButton class="manage-collaborators__public-link-button" :aria-label="t('memories', 'Copy the public link')"
-            :disabled="publicLink.id === ''" @click="copyPublicLink">
+          <NcButton
+            class="manage-collaborators__public-link-button"
+            :aria-label="t('memories', 'Copy the public link')"
+            :disabled="publicLink.id === ''"
+            @click="copyPublicLink"
+          >
             <template v-if="publicLinkCopied">
               {{ t('memories', 'Public link copied!') }}
             </template>
@@ -72,8 +105,12 @@
               <ContentCopy v-else />
             </template>
           </NcButton>
-          <NcButton type="tertiary" :aria-label="t('memories', 'Delete the public link')" :disabled="publicLink.id === ''"
-            @click="deletePublicLink">
+          <NcButton
+            type="tertiary"
+            :aria-label="t('memories', 'Delete the public link')"
+            :disabled="publicLink.id === ''"
+            @click="deletePublicLink"
+          >
             <XLoadingIcon v-if="publicLink.id === ''" slot="icon" />
             <Close v-else slot="icon" />
           </NcButton>
@@ -291,8 +328,9 @@ export default defineComponent({
     indexCollaborators(collaborators: { [s: string]: Collaborator }, collaborator: Collaborator) {
       return {
         ...collaborators,
-        [`${collaborator.type}${collaborator.type === Type.SHARE_TYPE_LINK ? '' : ':'}${collaborator.type === Type.SHARE_TYPE_LINK ? '' : collaborator.id
-          }`]: collaborator,
+        [`${collaborator.type}${collaborator.type === Type.SHARE_TYPE_LINK ? '' : ':'}${
+          collaborator.type === Type.SHARE_TYPE_LINK ? '' : collaborator.id
+        }`]: collaborator,
       };
     },
 

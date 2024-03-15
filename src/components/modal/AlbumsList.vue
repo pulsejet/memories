@@ -64,10 +64,6 @@ export default defineComponent({
     },
   },
 
-  created() {
-    console.log(this.albums)
-  },
-
   emits: {
     click: (item: IAlbum) => true,
   },

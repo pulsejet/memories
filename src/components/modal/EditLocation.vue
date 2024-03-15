@@ -14,8 +14,12 @@
             </template>
           </NcActionButton>
 
-          <NcActionButton v-if="lat && lon" :aria-label="t('memories', 'Remove location')" @click="clear()"
-            :disabled="disabled">
+          <NcActionButton
+            v-if="lat && lon"
+            :aria-label="t('memories', 'Remove location')"
+            @click="clear()"
+            :disabled="disabled"
+          >
             {{ t('memories', 'Remove location') }}
             <template #icon>
               <CloseIcon :size="20" />
@@ -49,8 +53,14 @@
     <XLoadingIcon class="loading-spinner" v-if="loading" />
 
     <ul v-if="options.length > 0">
-      <li v-for="option in options" :key="option.osm_id" :disabled="disabled" @click="select(option)"
-        @keypress.enter="select(option)" tabindex="0">
+      <li
+        v-for="option in options"
+        :key="option.osm_id"
+        :disabled="disabled"
+        @click="select(option)"
+        @keypress.enter="select(option)"
+        tabindex="0"
+      >
         {{ option.display_name }}
       </li>
     </ul>
@@ -233,21 +243,21 @@ export default defineComponent({
     padding: 4px;
     margin-bottom: -10px;
 
-    >.coords {
+    > .coords {
       display: inline-block;
       flex-grow: 1;
       min-height: 36px;
 
-      >span {
+      > span {
         user-select: all;
       }
     }
 
-    >.action {
+    > .action {
       margin-top: -10px;
       margin-left: 2px;
 
-      >* {
+      > * {
         cursor: pointer;
       }
     }

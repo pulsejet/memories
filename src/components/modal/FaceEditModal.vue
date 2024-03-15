@@ -5,8 +5,15 @@
     </template>
 
     <div class="fields">
-      <NcTextField class="field" :autofocus="true" :value.sync="input" :label="t('memories', 'Name')"
-        :label-visible="false" :placeholder="t('memories', 'Name')" @keypress.enter="save()" />
+      <NcTextField
+        class="field"
+        :autofocus="true"
+        :value.sync="input"
+        :label="t('memories', 'Name')"
+        :label-visible="false"
+        :placeholder="t('memories', 'Name')"
+        @keypress.enter="save()"
+      />
     </div>
 
     <template #buttons>
