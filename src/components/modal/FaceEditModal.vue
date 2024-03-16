@@ -8,7 +8,7 @@
       <NcTextField
         class="field"
         :autofocus="true"
-        :value.sync="input"
+        :value.sync="rawInput"
         :label="t('memories', 'Name')"
         :label-visible="false"
         :placeholder="t('memories', 'Name')"
@@ -51,7 +51,7 @@ export default defineComponent({
   emits: [],
 
   data: () => ({
-    input: String(),
+    rawInput: String(),
   }),
 
   computed: {
@@ -66,6 +66,12 @@ export default defineComponent({
     canSave() {
       return this.input && this.name !== this.input && isNaN(Number(this.input));
     },
+
+    input() {
+      // Prevent leading and trailing spaces in name
+      // https://github.com/pulsejet/memories/issues/1074
+      return this.rawInput.trim();
+    },
   },
 
   methods: {
@@ -75,7 +81,7 @@ export default defineComponent({
         return;
       }
 
-      this.input = isNaN(Number(this.name)) ? this.name : String();
+      this.rawInput = isNaN(Number(this.name)) ? this.name : String();
       this.show = true;
     },
 
