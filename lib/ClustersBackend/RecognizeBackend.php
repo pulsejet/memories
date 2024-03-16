@@ -300,7 +300,11 @@ class RecognizeBackend extends Backend
                 ->where($query->expr()->eq($nameField, $query->createNamedParameter($faceName)))
             ;
 
-            return $query->executeQuery()->fetchOne();
+            if ($id = $query->executeQuery()->fetchOne()) {
+                return (int) $id;
+            }
+
+            return false;
         }
 
         return (int) $name;
