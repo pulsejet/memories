@@ -10,12 +10,12 @@ All notable changes to this project will be documented in this file.
 - **Breaking**: Prevent automatically retrying files that failed to index
     - The list of files that could not be indexed can be found in the admin panel
     - To retry indexing, you can run `occ memories:index --retry`
-- **Feature**: Allow changing cover photos of albums, tags, places and people ([#1071](https://github.com/pulsejet/memories/issues/1071))
+- **Feature**: Allow changing cover photos of albums, tags, places and people ([#1071](https://github.com/pulsejet/memories/issues/1071), [#125](https://github.com/pulsejet/memories/issues/125), [#557](https://github.com/pulsejet/memories/issues/557), [#764](https://github.com/pulsejet/memories/issues/764), [#1032](https://github.com/pulsejet/memories/issues/1032))
 - **Feature**: Hide files starting with `.` in the timeline
 - **Feature**: Support for 3GP videos ([#1055](https://github.com/pulsejet/memories/issues/1055))
 - **Feature**: Option to show metadata in slideshow ([#819](https://github.com/pulsejet/memories/issues/819))
 - **Feature**: Improve UX of image editor especially on mobile
-- **Fix**: The cover photo of clusters will now update automatically when files are moved ([#1071](https://github.com/pulsejet/memories/issues/1071))
+- **Fix**: The cover photo of clusters will now update automatically when files are moved ([#1071](https://github.com/pulsejet/memories/issues/1071), [#458](https://github.com/pulsejet/memories/issues/458))
 - **Fix**: Query performance improvements for MySQL and MariaDB with very large folders
 
 ## [v6.2.2] - 2024-01-10
