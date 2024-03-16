@@ -92,6 +92,7 @@
       :rows="list"
       :isreverse="isMonthView"
       :recycler="refs.recycler?.$el"
+      :scrollerManager="refs.scrollerManager"
       @updateLoading="updateLoading"
     />
   </SwipeRefresh>

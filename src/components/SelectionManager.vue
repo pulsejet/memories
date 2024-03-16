@@ -63,6 +63,7 @@ import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
 import ImageCheckIcon from 'vue-material-design-icons/ImageCheck.vue';
 
 import type { IDay, IHeadRow, IPhoto, IRow } from '@typings';
+import type ScrollerManager from './ScrollerManager.vue';
 
 /**
  * The distance for which the touch selection is clamped.
@@ -160,6 +161,11 @@ export default defineComponent({
     /** Recycler element to scroll during touch multi-select */
     recycler: {
       type: HTMLDivElement,
+      required: false,
+    },
+    /** Scroller manager associated with the timeline */
+    scrollerManager: {
+      type: Object as PropType<InstanceType<typeof ScrollerManager>>,
       required: false,
     },
   },
@@ -390,6 +396,13 @@ export default defineComponent({
     /** Tap on */
     touchstartPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
       if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
+
+      // Bail if the user was scrolling the recycler recently
+      // https://github.com/pulsejet/memories/issues/1066
+      if (this.scrollerManager?.scrollingRecyclerNowTimer) return;
+
+      // Prevent this element from being removed from the DOM
+      // If it gets removed then subsequent touch events are not triggered
       this.rows[rowIdx].virtualSticky = true;
 
       this.resetTouchParams();
