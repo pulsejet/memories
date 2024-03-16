@@ -372,7 +372,7 @@ OC.L10N.register(
     "Share album" : "Дели албум",
     "Download album" : "Преузми албум",
     "Remove album" : "Уклони албум",
-    "Nothing to show here" : "Овде нема ништа да се прикаже",
+    "Nothing to show here" : "Овде нема шта да се прикаже",
     "Unassigned faces" : "Недодељена лица",
     "Merge with different person" : "Споји са другом особом",
     "Mark person in preview" : "Означи особу у прегледу",

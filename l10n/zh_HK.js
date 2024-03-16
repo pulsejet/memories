@@ -52,6 +52,7 @@ OC.L10N.register(
     "Edit metadata" : "編輯元數據",
     "Rotate / Flip" : "旋轉/翻轉",
     "View in folder" : "在資料夾中檢視",
+    "Set as cover image" : "設定為封面圖像",
     "Move to folder" : "移動到資料夾",
     "Add to album" : "添加至相簿",
     "Move to person" : "移動到人",
