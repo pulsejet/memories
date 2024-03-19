@@ -257,7 +257,7 @@ export default defineComponent({
   }
 
   .albums-container {
-    height: 400px;
+    height: 350px;
 
     .check-circle-icon {
       border-radius: 50%;

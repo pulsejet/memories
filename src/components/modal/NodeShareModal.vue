@@ -19,7 +19,6 @@
       <ul>
         <NcListItem
           v-for="share of shares"
-          :title="share.label || t('memories', 'Share link')"
           :name="share.label || t('memories', 'Share link')"
           :key="share.id"
           :bold="false"
@@ -31,8 +30,7 @@
             <LinkIcon class="avatar" :size="20" />
           </template>
 
-          <!-- NC_VUE: these slots have changed in v8 -->
-          <template #subtitle>
+          <template #subname>
             {{ getShareLabels(share) }}
           </template>
           <template #actions>

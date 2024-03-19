@@ -1,8 +1,8 @@
 <template>
   <div class="places-dtm">
-    <NcButton class="place" :key="place.cluster_id" v-for="place of places" :to="route(place)">
-      {{ place.name }}
-    </NcButton>
+    <div class="place-btn" v-for="place of places" :key="place.cluster_id">
+      <NcButton class="place" :to="route(place)">{{ place.name }}</NcButton>
+    </div>
   </div>
 </template>
 
@@ -63,12 +63,16 @@ export default defineComponent({
 .places-dtm {
   margin: 0 0.3em;
 
-  button.place {
-    font-size: 0.85em;
-    min-height: unset;
+  div.place-btn {
     display: inline-block;
-    margin: 3px 2px;
-    padding: 1px 6px;
+
+    > a,
+    > button {
+      font-size: 0.85em;
+      min-height: unset;
+      margin: 3px 2px;
+      padding: 0px 6px;
+    }
   }
 
   @media (min-width: 769px) {

@@ -3,18 +3,22 @@
     <div class="form-inputs">
       <NcTextField
         ref="nameInput"
-        :value.sync="albumName"
         type="text"
         name="name"
-        :required="true"
         autofocus="true"
+        :value.sync="albumName"
+        :required="true"
+        :label="t('memories', 'Name')"
+        :label-visible="true"
         :placeholder="t('memories', 'Name of the album')"
       />
       <label>
         <NcTextField
-          :value.sync="albumLocation"
           name="location"
           type="text"
+          :value.sync="albumLocation"
+          :label="t('memories', 'Location')"
+          :label-visible="true"
           :placeholder="t('memories', 'Location of the album')"
         />
       </label>
@@ -252,7 +256,7 @@ export default defineComponent({
 .album-form {
   display: flex;
   flex-direction: column;
-  height: 350px;
+  height: 230px;
   padding: 16px;
   .form-title {
     font-weight: bold;

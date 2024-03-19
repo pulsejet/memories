@@ -5,11 +5,10 @@
       class="memories-modal"
       :open="open"
       :show-navigation="true"
-      :title="names.header"
       :name="names.header"
       @update:open="onClose"
     >
-      <NcAppSettingsSection id="general-settings" :name="names.general" :title="names.general">
+      <NcAppSettingsSection id="general-settings" :name="names.general">
         <label for="timeline-path">{{ t('memories', 'Timeline Path') }}</label>
         <input id="timeline-path" @click="chooseTimelinePath" v-model="config.timeline_path" type="text" readonly />
 
@@ -34,7 +33,7 @@
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="viewer-settings" :name="names.viewer" :title="names.viewer">
+      <NcAppSettingsSection id="viewer-settings" :name="names.viewer">
         <NcCheckboxRadioSwitch
           :checked.sync="config.livephoto_autoplay"
           @update:checked="updateLivephotoAutoplay"
@@ -88,7 +87,7 @@
         </div>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="account-settings" :name="names.account" :title="names.account" v-if="isNative">
+      <NcAppSettingsSection id="account-settings" :name="names.account" v-if="isNative">
         {{ t('memories', 'Logged in as {user}', { user }) }}
         <NcButton @click="logout" id="sign-out">
           {{ t('memories', 'Sign out') }}
@@ -112,7 +111,7 @@
         </NcButton>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="folders-settings" :name="names.folders" :title="names.folders">
+      <NcAppSettingsSection id="folders-settings" :name="names.folders">
         <label for="folders-path">{{ t('memories', 'Folders Path') }}</label>
         <input id="folders-path" @click="chooseFoldersPath" v-model="config.folders_path" type="text" />
 
@@ -133,7 +132,7 @@
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="albums-settings" :name="names.albums" :title="names.albums">
+      <NcAppSettingsSection id="albums-settings" :name="names.albums">
         <NcCheckboxRadioSwitch
           :checked.sync="config.sort_album_month"
           @update:checked="updateSortAlbumMonth"

@@ -4,7 +4,6 @@
       v-for="album in albums"
       class="album"
       :key="album.album_id"
-      :title="album.name"
       :name="album.name"
       :aria-label="album.name"
       :to="link ? linkTarget(album) : null"
@@ -18,8 +17,7 @@
         </div>
       </template>
 
-      <!-- NC_VUE: these slots have changed in v8 -->
-      <template #subtitle>
+      <template #subname>
         <div>
           {{ getSubtitle(album) }}
         </div>

@@ -17,6 +17,7 @@
           :key="item.name"
           :to="{ name: item.name }"
           :name="item.title"
+          :active="$route.name === item.name"
           @click="linkClick"
           exact
         >

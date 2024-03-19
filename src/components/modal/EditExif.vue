@@ -141,10 +141,11 @@ export default defineComponent({
 <style scoped lang="scss">
 .fields {
   .field {
+    margin-top: 0;
     margin-bottom: 8px;
   }
   :deep label {
-    font-size: 0.8em;
+    font-size: 0.9em;
     padding: 0 !important;
     padding-left: 5px !important;
   }
