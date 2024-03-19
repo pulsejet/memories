@@ -1,12 +1,12 @@
 <template>
   <div class="fields" v-if="exif">
     <div v-for="field of fields" :key="field.field">
-      <label :for="'exif-field-' + field.field">
+      <label :for="`exif-field-${field.field}`">
         {{ label(field) }}
       </label>
       <NcTextField
         class="field"
-        :id="'exif-field-' + field.field"
+        :id="`exif-field-${field.field}`"
         :disabled="disabled"
         :label-outside="true"
         :value.sync="exif[field.field]"
@@ -95,15 +95,7 @@ export default defineComponent({
     const exif = {} as NonNullable<typeof this.exif>;
 
     for (const field of this.fields) {
-      this.dirty[field.field] = false;
-
-      // Check if all photos have the same value for this field
-      const first = this.photos[0]?.imageInfo?.exif?.[field.field];
-      if (this.photos.every((p) => p.imageInfo?.exif?.[field.field] === first)) {
-        exif[field.field] = String(first ?? String());
-      } else {
-        exif[field.field] = String();
-      }
+      this.reset(field, exif);
     }
 
     this.exif = exif;
@@ -128,9 +120,19 @@ export default defineComponent({
       return this.dirty[field.field] ? t('memories', 'Empty') : t('memories', 'Unchanged');
     },
 
-    reset(field: IField) {
-      this.exif![field.field] = '';
+    reset(field: IField, exif: typeof this.exif = null) {
       this.dirty[field.field] = false;
+
+      // We use this to pass an object during initialization
+      exif ??= this.exif!;
+
+      // Check if all photos have the same value for this field
+      const first = this.photos[0]?.imageInfo?.exif?.[field.field];
+      if (this.photos.every((p) => p.imageInfo?.exif?.[field.field] === first)) {
+        exif[field.field] = String(first ?? String());
+      } else {
+        exif[field.field] = String();
+      }
     },
   },
 });
