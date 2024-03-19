@@ -18,7 +18,19 @@ li.list-item__wrapper {
   }
 }
 
-// Make OC dialogs larger to a minimum width
 div.oc-dialog[role='dialog'] {
+  // Make OC dialogs larger to a minimum width
   min-width: min(400px, 90vw);
+
+  // Hide icon and label in prompts
+  &.dialog-prompt {
+    .ui-icon,
+    label {
+      display: none;
+    }
+
+    input[type='text'] {
+      width: 100%;
+    }
+  }
 }

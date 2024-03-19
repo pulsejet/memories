@@ -41,26 +41,15 @@ bus.on('memories:fragment:pop:dialog', () => {
   button.click();
 });
 
-export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
-  const opts: ConfirmOptions = Object.assign(
-    {
-      title: '',
-      message: '',
-      type: oc_dialogs.YES_NO_BUTTONS,
-      confirm: t('memories', 'Yes'),
-      confirmClasses: 'error',
-      cancel: t('memories', 'No'),
-    },
-    options ?? {},
-  );
-
+/**
+ * Wait for a dialog to be created with a timeout.
+ *
+ * @param callback Callback to run when the dialog is created
+ */
+function waitForDialog(callback: (dialog: HTMLDivElement) => void) {
   // Callback when dialog is created for initializations
   const onCreate = (dialog: HTMLDivElement) => {
-    const confirmBtn = dialog.querySelector(`button.${opts.confirmClasses}`) as HTMLButtonElement;
-    const closeButton = dialog.querySelector('button.oc-dialog-close') as HTMLButtonElement;
-
-    // Focus the confirm button
-    confirmBtn?.focus?.();
+    const closeButton = dialog.querySelector<HTMLButtonElement>('button.oc-dialog-close');
 
     // Handle keyboard actions
     dialog.addEventListener('keydown', (e) => {
@@ -73,6 +62,9 @@ export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
         closeButton?.click();
       }
     });
+
+    // Run the callback
+    callback(dialog);
   };
 
   // Look for new dialog to be created with a 5s timeout
@@ -94,6 +86,25 @@ export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
 
   // Watch changes to body
   observer.observe(document.body, { childList: true });
+}
+
+export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
+  const opts: ConfirmOptions = Object.assign(
+    {
+      title: '',
+      message: '',
+      type: oc_dialogs.YES_NO_BUTTONS,
+      confirm: t('memories', 'Yes'),
+      confirmClasses: 'error',
+      cancel: t('memories', 'No'),
+    },
+    options ?? {},
+  );
+
+  waitForDialog((dialog) => {
+    // Focus the confirm button
+    dialog.querySelector<HTMLButtonElement>(`button.${opts.confirmClasses}`)?.focus();
+  });
 
   return fragment.wrap(
     new Promise((resolve) => oc_dialogs.confirmDestructive(opts.message, opts.title, opts, resolve)),
@@ -115,16 +126,27 @@ type PromptOptions = {
 };
 
 export async function prompt(opts: PromptOptions): Promise<string | null> {
-  return new Promise((resolve) => {
-    oc_dialogs.prompt(
-      opts.message ?? '',
-      opts.title ?? '',
-      (success: boolean, value: string) => resolve(success ? value : null),
-      opts.modal,
-      opts.name,
-      opts.password,
-    );
+  waitForDialog((dialog) => {
+    // Add class for patch.scss
+    dialog.classList.add('dialog-prompt');
+
+    // Focus the input field
+    dialog.querySelector<HTMLInputElement>('input[type="text"]')?.focus();
   });
+
+  return fragment.wrap(
+    new Promise((resolve) =>
+      oc_dialogs.prompt(
+        opts.message ?? '',
+        opts.title ?? '',
+        (success: boolean, value: string) => resolve(success ? value : null),
+        opts.modal,
+        opts.name,
+        opts.password,
+      ),
+    ),
+    fragment.types.dialog,
+  );
 }
 
 /**
