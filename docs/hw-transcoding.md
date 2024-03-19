@@ -108,7 +108,7 @@ On the Nextcloud machine, you need to make sure that the `www-data` user has acc
 ## Ubuntu
 sudo apt-get update
 sudo apt-get install -y intel-media-va-driver-non-free ffmpeg # install VA-API drivers
-sudo usermod -aG video www-data # add www-data to the video group (may be different)
+sudo usermod -aG render www-data # add www-data to the render group (may be different)
 
 ## Alpine
 apk update
