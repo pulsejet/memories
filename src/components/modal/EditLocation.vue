@@ -158,6 +158,8 @@ export default defineComponent({
       if (count > 0) {
         this.lat = lat / count;
         this.lon = lon / count;
+      } else {
+        this.lat = this.lon = null;
       }
     },
 
