@@ -42,9 +42,9 @@
     {{ t('memories', 'The following MIME types are configured for preview generation.') }}
 
     <br />
-    <code v-if="status"
-      ><template v-for="mime in status.mimes">{{ mime }}<br :key="mime" /></template
-    ></code>
+    <code v-if="status">
+      <span v-for="mime in status.mimes" :key="mime">{{ mime }}<br /></span>
+    </code>
 
     <br />
 
