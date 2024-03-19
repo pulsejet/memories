@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Improve UX of image editor especially on mobile
 - **Fix**: The cover photo of clusters will now update automatically when files are moved ([#1071](https://github.com/pulsejet/memories/issues/1071), [#458](https://github.com/pulsejet/memories/issues/458), [#661](https://github.com/pulsejet/memories/issues/661), [#1025](https://github.com/pulsejet/memories/issues/1025), [#761](https://github.com/pulsejet/memories/issues/761), [#665](https://github.com/pulsejet/memories/issues/665))
 - **Fix**: Query performance improvements for MySQL and MariaDB with very large folders
+- **Fix**: Allow face creation on Android ([#934](https://github.com/pulsejet/memories/issues/934))
 
 ## [v6.2.2] - 2024-01-10
 
