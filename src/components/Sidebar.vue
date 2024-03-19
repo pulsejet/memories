@@ -216,6 +216,9 @@ export default defineComponent({
           },
         }),
       );
+
+      // NC29+ disable tags in sidebar by default
+      globalThis.OCA?.Files?.Sidebar?.setShowTagsDefault?.(false);
     },
   },
 });
