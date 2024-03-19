@@ -86,9 +86,7 @@ export default defineComponent({
           photo: {
             fileid: fileid,
             etag: etag.toString(),
-            flag: 0,
-            dayid: 0,
-          },
+          } as IPhoto,
           sqsize: 512,
         });
 

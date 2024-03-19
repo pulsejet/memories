@@ -11,7 +11,7 @@
       @click="click($event, album)"
     >
       <template #icon>
-        <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album)" />
+        <XImg v-if="toCoverUrl(album)" class="album__image" :src="toCoverUrl(album)" />
         <div v-else class="album__image album__image--placeholder">
           <ImageMultipleIcon :size="32" />
         </div>
@@ -84,13 +84,26 @@ export default defineComponent({
       };
     },
 
-    toCoverUrl(album: IAlbum) {
-      return utils.getPreviewUrl({
-        photo: {
-          fileid: Number(album.last_added_photo),
-        } as IPhoto,
-        sqsize: 256,
-      });
+    toCoverUrl(album: IAlbum): string | null {
+      // See Cluster.vue for the original implementation
+      const preview = (fileid: number, etag: string | number) =>
+        utils.getPreviewUrl({
+          photo: {
+            fileid: fileid,
+            etag: etag.toString(),
+          } as IPhoto,
+          sqsize: 512,
+        });
+
+      if (album.cover && album.cover_etag) {
+        return preview(album.cover, album.cover_etag);
+      }
+
+      if (album.last_added_photo && album.last_added_photo !== -1) {
+        return preview(album.last_added_photo, album.last_added_photo_etag ?? album.album_id);
+      }
+
+      return null;
     },
 
     getSubtitle(album: IAlbum) {
