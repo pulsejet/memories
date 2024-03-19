@@ -2,6 +2,7 @@
   <div>
     <NcAppSettingsDialog
       id="memories-settings"
+      class="memories-modal"
       :open="open"
       :show-navigation="true"
       :title="names.header"
