@@ -71,6 +71,8 @@ import axios from '@nextcloud/axios';
 import { getUploader } from '@nextcloud/upload';
 import { showError } from '@nextcloud/dialogs';
 
+import UserConfig from '@mixins/UserConfig';
+
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 import { API } from '@services/API';
@@ -90,7 +92,7 @@ export default defineComponent({
     EditTags,
   },
 
-  mixins: [ModalMixin],
+  mixins: [ModalMixin, UserConfig],
 
   data: () => ({
     files: [] as File[],
@@ -140,6 +142,11 @@ export default defineComponent({
       this.uploadPath = '/';
       this.processing = false;
       this.progress = 0;
+
+      // choose current folder if in folders view
+      if (this.routeIsFolders) {
+        this.uploadPath = utils.getFolderRoutePath(this.config.folders_path);
+      }
 
       // prompt the user to select the files
       const input = document.createElement('input');
@@ -299,6 +306,11 @@ export default defineComponent({
             addProgress(OP_FAC);
           }
         }
+      }
+
+      // Refresh if anything was uploaded
+      if (uploaded.length) {
+        utils.bus.emit('memories:timeline:soft-refresh', null);
       }
 
       // Throw if all files were not uploaded
