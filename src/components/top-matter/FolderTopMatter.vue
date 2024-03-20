@@ -1,6 +1,6 @@
 <template>
   <div class="top-matter">
-    <NcBreadcrumbs>
+    <NcBreadcrumbs :key="$route.path">
       <NcBreadcrumb :name="rootFolderName" :to="getRoute([])">
         <template #icon>
           <template v-if="routeIsPublic">
