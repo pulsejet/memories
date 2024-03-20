@@ -1,15 +1,10 @@
 <template>
   <div class="top-matter">
     <NcBreadcrumbs :key="$route.path">
-      <NcBreadcrumb :name="rootFolderName" :to="getRoute([])">
+      <NcBreadcrumb :name="rootFolderName" :to="getRoute([])" :force-icon-text="routeIsPublic">
         <template #icon>
-          <template v-if="routeIsPublic">
-            <ShareIcon :size="20" />
-            <span class="share-name">{{ rootFolderName }}</span>
-          </template>
-          <template v-else>
-            <HomeIcon :size="20" />
-          </template>
+          <ShareIcon v-if="routeIsPublic" :size="20" />
+          <HomeIcon v-else :size="20" />
         </template>
       </NcBreadcrumb>
       <NcBreadcrumb v-for="folder in list" :key="folder.idx" :name="folder.text" :to="getRoute(folder.path)" />
