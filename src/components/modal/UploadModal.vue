@@ -113,7 +113,7 @@ export default defineComponent({
 
     // create right header button
     const header = document.querySelector<HTMLDivElement>('.header-right');
-    if (header) {
+    if (header && utils.uid) {
       const div = document.createElement('div');
       header.prepend(div);
       const component = new Vue({ render: (h) => h(UploadMenuItem) });
