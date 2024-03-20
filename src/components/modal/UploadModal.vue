@@ -103,7 +103,6 @@ export default defineComponent({
     processing: false,
     progress: 0,
     progressNote: String(),
-
     currentUpload: null as null | PCancelable<any>,
   }),
 
@@ -125,11 +124,6 @@ export default defineComponent({
       }
 
       return this.albums.map((album) => album.name).join(', ');
-    },
-
-    currentRouteName() {
-      const route = this.$route.name;
-      return route?.startsWith('folders') ? '/' + route.split('/').slice(1).join('/') : '/';
     },
   },
 

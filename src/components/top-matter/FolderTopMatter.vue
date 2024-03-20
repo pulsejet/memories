@@ -16,14 +16,7 @@
     </NcBreadcrumbs>
 
     <div class="right-actions">
-      <NcActions :inline="2">
-        <NcActionButton @click="toggleRecursive" close-after-click>
-          {{ recursive ? t('memories', 'Folder View') : t('memories', 'Timeline View') }}
-          <template #icon>
-            <FoldersIcon v-if="recursive" :size="20" />
-            <TimelineIcon v-else :size="20" />
-          </template>
-        </NcActionButton>
+      <NcActions :inline="1">
         <NcActionButton
           v-if="!routeIsPublic"
           :aria-label="t('memories', 'Share folder')"
@@ -32,6 +25,24 @@
         >
           {{ t('memories', 'Share folder') }}
           <template #icon> <ShareIcon :size="20" /> </template>
+        </NcActionButton>
+
+        <NcActionButton
+          v-if="!routeIsPublic && !isNative"
+          :aria-label="t('memories', 'Upload files')"
+          @click="upload()"
+          close-after-click
+        >
+          {{ t('memories', 'Upload files') }}
+          <template #icon> <UploadIcon :size="20" /> </template>
+        </NcActionButton>
+
+        <NcActionButton @click="toggleRecursive" close-after-click>
+          {{ recursive ? t('memories', 'Folder view') : t('memories', 'Timeline view') }}
+          <template #icon>
+            <FoldersIcon v-if="recursive" :size="20" />
+            <TimelineIcon v-else :size="20" />
+          </template>
         </NcActionButton>
       </NcActions>
     </div>
@@ -49,11 +60,13 @@ import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import * as utils from '@services/utils';
+import * as nativex from '@native';
 
 import HomeIcon from 'vue-material-design-icons/Home.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import TimelineIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import FoldersIcon from 'vue-material-design-icons/FolderMultiple.vue';
+import UploadIcon from 'vue-material-design-icons/Upload.vue';
 
 export default defineComponent({
   name: 'FolderTopMatter',
@@ -67,6 +80,7 @@ export default defineComponent({
     ShareIcon,
     TimelineIcon,
     FoldersIcon,
+    UploadIcon,
   },
 
   mixins: [UserConfig],
@@ -97,11 +111,19 @@ export default defineComponent({
     rootFolderName(): string {
       return this.routeIsPublic ? this.initstate.shareTitle : this.t('memories', 'Home');
     },
+
+    isNative(): boolean {
+      return nativex.has();
+    },
   },
 
   methods: {
     share() {
       _m.modals.shareNodeLink(utils.getFolderRoutePath(this.config.folders_path));
+    },
+
+    upload() {
+      _m.modals.upload();
     },
 
     toggleRecursive() {
