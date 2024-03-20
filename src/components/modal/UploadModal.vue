@@ -7,7 +7,13 @@
     <div class="inner">
       <template v-if="pane === 0">
         <div>
-          <NcTextField :label="t('memories', 'Destination path')" :label-visible="true" v-model="uploadPath" readonly />
+          <NcTextField
+            :label="t('memories', 'Destination path')"
+            :label-visible="true"
+            v-model="uploadPath"
+            @click="chooseUploadPath"
+            readonly
+          />
         </div>
 
         <div class="options">
@@ -66,6 +72,7 @@ import { getUploader } from '@nextcloud/upload';
 import { showError } from '@nextcloud/dialogs';
 
 import * as dav from '@services/dav';
+import * as utils from '@services/utils';
 import { API } from '@services/API';
 
 import type { IAlbum, IPhoto } from '@typings';
@@ -153,6 +160,14 @@ export default defineComponent({
       this.files = [];
       this.processing = false;
       this.currentUpload?.cancel('Modal closed');
+    },
+
+    async chooseUploadPath() {
+      this.uploadPath =
+        (await utils.chooseNcFolder(
+          this.t('memories', 'Choose the destination folder for the upload'),
+          this.uploadPath,
+        )) || this.uploadPath;
     },
 
     selectAlbums(selection: IAlbum[]) {
