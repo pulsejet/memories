@@ -102,17 +102,31 @@ Memories ships with an internal transcoder binary that you can directly use. In 
 
 If you are running Nextcloud on bare metal, you can install the drivers and ffmpeg directly on the host. If you are running nextcloud in a Virtual Magine or LXC container configuration, you will also need to pass through the hardware resource to the nextcloud machine. Some helpful guides can be found for [Proxmox VM](https://pve.proxmox.com/wiki/PCI_Passthrough) / [LXC Container](https://gist.github.com/packerdl/a4887c30c38a0225204f451103d82ac5?permalink_comment_id=4471564). 
 
-On the Nextcloud machine, you need to make sure that the `www-data` user has access to the `/dev/dri` devices. You can do this by adding the `www-data` user to the appropriate groups.
+On the Nextcloud machine, you will need to install the required drivers
 
 ```bash
 ## Ubuntu
 sudo apt-get update
 sudo apt-get install -y intel-media-va-driver-non-free ffmpeg # install VA-API drivers
-sudo usermod -aG video www-data # add www-data to the video group (may be different)
+
 
 ## Alpine
 apk update
 apk add --no-cache bash ffmpeg libva-utils libva-vdpau-driver libva-intel-driver intel-media-driver mesa-va-gallium
+```
+
+And make sure that the `www-data` user has access to the `/dev/dri` devices. You can do this by adding the `www-data` user to the appropriate groups. First see to which group `/dev/dri/renderD128` belongs to with `sudo ls -l /dev/dri/`. I will return something similar to:
+
+```
+$ sudo ls -l /dev/dri/
+crw-rw---- 1 root video  226,   0 Mar 19 20:38 card0
+crw-rw---- 1 root video  226,   1 Mar 19 20:38 card1
+crw-rw-rw- 1 root render 226, 128 Mar 19 20:38 renderD128   
+```
+Here, the `renderD128` device belongs to the `render` group. you have to `www-data` to that group with:
+
+```
+sudo usermod -aG render www-data # add www-data to the render group (in other cases it can belong to `video` for example)
 ```
 
 In some cases, along with adding `www-data` to the appropriate groups, you may also need to set the permissions of the device manually:
