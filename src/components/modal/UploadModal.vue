@@ -147,9 +147,11 @@ export default defineComponent({
       this.files = [];
       this.albums = [];
       this.tagsShown = false;
-      this.uploadPath = '/';
       this.processing = false;
       this.progress = 0;
+
+      // choose first path of timeline path
+      this.uploadPath = this.config.timeline_path.split(';')?.[0] ?? '/';
 
       // choose current folder if in folders view
       if (this.routeIsFolders) {
