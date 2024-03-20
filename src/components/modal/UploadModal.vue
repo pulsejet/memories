@@ -55,12 +55,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import Vue, { defineComponent } from 'vue';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
 import AlbumPicker from './AlbumPicker.vue';
 import EditTags from './EditTags.vue';
+import UploadMenuItem from './UploadMenuItem.vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
@@ -109,6 +110,15 @@ export default defineComponent({
   created() {
     console.assert(!_m.modals.upload, 'UploadModal created twice');
     _m.modals.upload = this.open;
+
+    // create right header button
+    const header = document.querySelector<HTMLDivElement>('.header-right');
+    if (header) {
+      const div = document.createElement('div');
+      header.prepend(div);
+      const component = new Vue({ render: (h) => h(UploadMenuItem) });
+      component.$mount(div);
+    }
   },
 
   computed: {
@@ -129,6 +139,10 @@ export default defineComponent({
 
   methods: {
     open() {
+      // cannot upload to public shares
+      if (this.routeIsPublic) return;
+
+      // reset everything
       this.pane = 0;
       this.files = [];
       this.albums = [];
