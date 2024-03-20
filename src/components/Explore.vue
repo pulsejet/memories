@@ -44,7 +44,7 @@ import type { Component } from 'vue';
 
 import ClusterHList from '@components/ClusterHList.vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
@@ -184,8 +184,10 @@ export default defineComponent({
 
   .link-list {
     padding: 6px 7px;
+    line-height: 0;
 
     > .link {
+      line-height: initial;
       display: inline-block;
       width: calc(50% - 6px);
       margin: 3px;

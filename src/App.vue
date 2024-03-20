@@ -17,6 +17,7 @@
           :key="item.name"
           :to="{ name: item.name }"
           :name="item.title"
+          :active="$route.name === item.name"
           @click="linkClick"
           exact
         >
@@ -63,16 +64,17 @@
     <MoveToFolderModal />
     <FaceMoveModal />
     <AlbumShareModal />
+    <UploadModal />
   </NcContent>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcContent from '@nextcloud/vue/dist/Components/NcContent';
-import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
-import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation';
-const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNavigationItem');
+import NcContent from '@nextcloud/vue/dist/Components/NcContent.js';
+import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent.js';
+import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation.js';
+const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNavigationItem.js');
 
 import { generateUrl } from '@nextcloud/router';
 
@@ -93,6 +95,7 @@ import ShareModal from '@components/modal/ShareModal.vue';
 import MoveToFolderModal from '@components/modal/MoveToFolderModal.vue';
 import FaceMoveModal from '@components/modal/FaceMoveModal.vue';
 import AlbumShareModal from '@components/modal/AlbumShareModal.vue';
+import UploadModal from '@components/modal/UploadModal.vue';
 
 import * as utils from '@services/utils';
 import * as nativex from '@native';
@@ -142,6 +145,7 @@ export default defineComponent({
     MoveToFolderModal,
     FaceMoveModal,
     AlbumShareModal,
+    UploadModal,
 
     ImageMultiple,
     FolderIcon,

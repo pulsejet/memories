@@ -1,10 +1,9 @@
 {
-	"recommendations": [
-		"bmewburn.vscode-intelephense-client",
-		"muuvmuuv.vscode-just-php-cs-fixer",
-		"getpsalm.psalm-vscode-plugin",
-		"esbenp.prettier-vscode",
-		"Vue.volar",
-		"Vue.vscode-typescript-vue-plugin"
-	]
+  "recommendations": [
+    "bmewburn.vscode-intelephense-client",
+    "muuvmuuv.vscode-just-php-cs-fixer",
+    "getpsalm.psalm-vscode-plugin",
+    "esbenp.prettier-vscode",
+    "Vue.volar"
+  ]
 }

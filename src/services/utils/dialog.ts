@@ -41,6 +41,53 @@ bus.on('memories:fragment:pop:dialog', () => {
   button.click();
 });
 
+/**
+ * Wait for a dialog to be created with a timeout.
+ *
+ * @param callback Callback to run when the dialog is created
+ */
+function waitForDialog(callback: (dialog: HTMLDivElement) => void) {
+  // Callback when dialog is created for initializations
+  const onCreate = (dialog: HTMLDivElement) => {
+    const closeButton = dialog.querySelector<HTMLButtonElement>('button.oc-dialog-close');
+
+    // Handle keyboard actions
+    dialog.addEventListener('keydown', (e) => {
+      // Trap keydown events inside the dialog
+      e.stopPropagation();
+
+      // Override the default behavior of the escape key
+      if (e.key === 'Escape') {
+        e.stopImmediatePropagation();
+        closeButton?.click();
+      }
+    });
+
+    // Run the callback
+    callback(dialog);
+  };
+
+  // Look for new dialog to be created with a 5s timeout
+  let observer: MutationObserver;
+  const timeout = setTimeout(() => observer?.disconnect(), 5000);
+
+  // Observer for new dialogs
+  observer = new MutationObserver((mutations) =>
+    mutations.forEach((record) => {
+      record.addedNodes.forEach((node) => {
+        if (node instanceof HTMLDivElement && node.classList.contains('oc-dialog')) {
+          observer.disconnect();
+          clearTimeout(timeout);
+          onCreate(node);
+        }
+      });
+    }),
+  );
+
+  // Watch changes to body
+  observer.observe(document.body, { childList: true });
+}
+
 export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
   const opts: ConfirmOptions = Object.assign(
     {
@@ -54,27 +101,10 @@ export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
     options ?? {},
   );
 
-  // Observer to focus the confirm button when the dialog is shown
-  let observer: MutationObserver;
-
-  // In case the dialog did not show for whatever reason, cancel after 5 seconds
-  const timeout = setTimeout(() => observer?.disconnect(), 5000);
-
-  // Look for new dialog to be created
-  observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutationRecord) => {
-      mutationRecord.addedNodes.forEach((node) => {
-        if (node instanceof HTMLDivElement && node.classList.contains('oc-dialog')) {
-          (node.querySelector(`button.${opts.confirmClasses}`) as HTMLElement)?.focus?.();
-          observer.disconnect();
-          clearTimeout(timeout);
-        }
-      });
-    });
+  waitForDialog((dialog) => {
+    // Focus the confirm button
+    dialog.querySelector<HTMLButtonElement>(`button.${opts.confirmClasses}`)?.focus();
   });
-
-  // Watch changes to body
-  observer.observe(document.body, { childList: true });
 
   return fragment.wrap(
     new Promise((resolve) => oc_dialogs.confirmDestructive(opts.message, opts.title, opts, resolve)),
@@ -96,16 +126,27 @@ type PromptOptions = {
 };
 
 export async function prompt(opts: PromptOptions): Promise<string | null> {
-  return new Promise((resolve) => {
-    oc_dialogs.prompt(
-      opts.message ?? '',
-      opts.title ?? '',
-      (success: boolean, value: string) => resolve(success ? value : null),
-      opts.modal,
-      opts.name,
-      opts.password,
-    );
+  waitForDialog((dialog) => {
+    // Add class for patch.scss
+    dialog.classList.add('dialog-prompt');
+
+    // Focus the input field
+    dialog.querySelector<HTMLInputElement>('input[type="text"]')?.focus();
   });
+
+  return fragment.wrap(
+    new Promise((resolve) =>
+      oc_dialogs.prompt(
+        opts.message ?? '',
+        opts.title ?? '',
+        (success: boolean, value: string) => resolve(success ? value : null),
+        opts.modal,
+        opts.name,
+        opts.password,
+      ),
+    ),
+    fragment.types.dialog,
+  );
 }
 
 /**

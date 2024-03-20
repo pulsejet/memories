@@ -96,10 +96,10 @@
 import { defineComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
-import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox';
-import NcActionRadio from '@nextcloud/vue/dist/Components/NcActionRadio';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox.js';
+import NcActionRadio from '@nextcloud/vue/dist/Components/NcActionRadio.js';
 
 import axios from '@nextcloud/axios';
 

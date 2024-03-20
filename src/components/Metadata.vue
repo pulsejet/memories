@@ -69,8 +69,8 @@
 import { defineComponent } from 'vue';
 import type { Component } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import axios from '@nextcloud/axios';
 import { getCanonicalLocale } from '@nextcloud/l10n';

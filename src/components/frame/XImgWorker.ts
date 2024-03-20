@@ -256,6 +256,9 @@ async function fetchImage(url: string): Promise<Blob> {
 
 function cacheResponse(url: string, res: Response) {
   try {
+    // Skip if no-cache is present
+    if (res.headers.get('cache-control')?.toLowerCase().includes('no-cache')) return;
+
     // Cache valid responses
     if (res.status === 200) {
       imageCache?.put(url, res.clone());

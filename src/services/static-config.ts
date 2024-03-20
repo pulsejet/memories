@@ -136,6 +136,7 @@ class StaticConfig {
       high_res_cond_default: 'zoom',
       livephoto_autoplay: true,
       sidebar_filepath: false,
+      metadata_in_slideshow: false,
 
       // folder settings
       folders_path: '',

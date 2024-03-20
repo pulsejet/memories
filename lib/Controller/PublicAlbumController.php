@@ -120,7 +120,7 @@ class PublicAlbumController extends Controller
 
         // Get list of files
         $albumId = (int) $album['album_id'];
-        $files = $this->albumsQuery->getAlbumPhotos($albumId, null);
+        $files = $this->albumsQuery->getAlbumPhotos($albumId, null, null);
         $fileIds = array_map(static fn ($file) => (int) $file['file_id'], $files);
 
         // Get download handle

@@ -68,9 +68,7 @@ class OtherController extends GenericApiController
     {
         return Util::guardEx(function () {
             // get memories version
-            $version = \OC::$server->get(\OCP\App\IAppManager::class)
-                ->getAppInfo('memories')['version']
-            ;
+            $version = \OC::$server->get(\OCP\App\IAppManager::class)->getAppVersion('memories');
 
             // get user if logged in
             try {
@@ -136,7 +134,7 @@ class OtherController extends GenericApiController
             $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
 
             $info = [
-                'version' => $appManager->getAppInfo('memories')['version'],
+                'version' => $appManager->getAppVersion('memories'),
                 'baseUrl' => $urlGenerator->linkToRouteAbsolute('memories.Page.main'),
                 'loginFlowUrl' => $urlGenerator->linkToRouteAbsolute('core.ClientFlowLoginV2.init'),
             ];

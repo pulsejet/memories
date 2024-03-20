@@ -49,7 +49,7 @@
         min="0"
         max="23"
         :value.sync="hour"
-        :label="t('memories', 'Time')"
+        :label="t('memories', 'Hour')"
         :label-visible="true"
         :placeholder="t('memories', 'Hour')"
         :disabled="disabled"
@@ -118,7 +118,7 @@
           min="0"
           max="23"
           :value.sync="hourLast"
-          :label="t('memories', 'Time')"
+          :label="t('memories', 'Hour')"
           :label-visible="true"
           :placeholder="t('memories', 'Hour')"
           :disabled="disabled"
@@ -143,7 +143,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import * as utils from '@services/utils';
 

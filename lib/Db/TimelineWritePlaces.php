@@ -15,6 +15,7 @@ const LON_KEY = 'GPSLongitude';
 trait TimelineWritePlaces
 {
     protected IDBConnection $connection;
+    protected LoggerInterface $logger;
 
     /**
      * Add places data for a file.
@@ -48,7 +49,15 @@ trait TimelineWritePlaces
         }
 
         // Get places
-        $rows = \OC::$server->get(\OCA\Memories\Service\Places::class)->queryPoint($lat, $lon);
+        try {
+            $rows = \OC::$server->get(\OCA\Memories\Service\Places::class)
+                ->queryPoint($lat, $lon)
+            ;
+        } catch (\Exception $e) {
+            $this->logger->error("Error querying places: {$e->getMessage()}", ['app' => 'memories']);
+
+            return [];
+        }
 
         // Get last ID, i.e. the ID with highest admin_level but <= 8
         $crows = array_filter($rows, static fn ($row) => $row['admin_level'] <= 8);

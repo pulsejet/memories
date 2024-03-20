@@ -92,6 +92,7 @@
       :rows="list"
       :isreverse="isMonthView"
       :recycler="refs.recycler?.$el"
+      :scrollerManager="refs.scrollerManager"
       @updateLoading="updateLoading"
     />
   </SwipeRefresh>
@@ -1060,6 +1061,7 @@ export default defineComponent({
       for (const photo of data) {
         // Skip hidden files
         if (photo.ishidden) continue;
+        if (photo.basename?.startsWith('.')) continue;
 
         // Add to first pass result
         res1.push(photo);

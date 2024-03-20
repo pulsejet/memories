@@ -21,8 +21,8 @@ import { defineComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import Cluster from '@components/frame/Cluster.vue';
 import FaceList from './FaceList.vue';

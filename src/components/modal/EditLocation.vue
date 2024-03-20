@@ -27,6 +27,7 @@
 
     <NcTextField
       :value.sync="searchBar"
+      :label="t('memories', 'Search')"
       :placeholder="t('memories', 'Search location / landmark')"
       :disabled="disabled"
       trailing-button-icon="arrowRight"
@@ -68,10 +69,10 @@ import { defineComponent } from 'vue';
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
 
 import type { IPhoto } from '@typings';
 
@@ -157,6 +158,8 @@ export default defineComponent({
       if (count > 0) {
         this.lat = lat / count;
         this.lon = lon / count;
+      } else {
+        this.lat = this.lon = null;
       }
     },
 

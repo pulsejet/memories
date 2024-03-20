@@ -9,11 +9,7 @@
       </NcActions>
 
       <div class="text">
-        {{
-          n('memories', '{n} selected', '{n} selected', size, {
-            n: size,
-          })
-        }}
+        {{ n('memories', '{n} selected', '{n} selected', size, { n: size }) }}
       </div>
 
       <NcActions :inline="1">
@@ -40,8 +36,8 @@ import { defineComponent, type PropType } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import UserConfig from '@mixins/UserConfig';
 
@@ -64,8 +60,10 @@ import AlbumsIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import FolderMoveIcon from 'vue-material-design-icons/FolderMove.vue';
 import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
+import ImageCheckIcon from 'vue-material-design-icons/ImageCheck.vue';
 
 import type { IDay, IHeadRow, IPhoto, IRow } from '@typings';
+import type ScrollerManager from './ScrollerManager.vue';
 
 /**
  * The distance for which the touch selection is clamped.
@@ -165,6 +163,11 @@ export default defineComponent({
       type: HTMLDivElement,
       required: false,
     },
+    /** Scroller manager associated with the timeline */
+    scrollerManager: {
+      type: Object as PropType<InstanceType<typeof ScrollerManager>>,
+      required: false,
+    },
   },
 
   emits: {
@@ -250,6 +253,12 @@ export default defineComponent({
         icon: OpenInNewIcon,
         callback: this.viewInFolder.bind(this),
         if: () => this.selection.size === 1 && !this.routeIsAlbums,
+      },
+      {
+        name: t('memories', 'Set as cover image'),
+        icon: ImageCheckIcon,
+        callback: this.setClusterCover.bind(this),
+        if: () => this.selection.size === 1 && this.routeIsCluster && !this.routeIsRecognizeUnassigned,
       },
       {
         name: t('memories', 'Move to folder'),
@@ -387,6 +396,13 @@ export default defineComponent({
     /** Tap on */
     touchstartPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
       if (photo.flag & this.c.FLAG_PLACEHOLDER) return;
+
+      // Bail if the user was scrolling the recycler recently
+      // https://github.com/pulsejet/memories/issues/1066
+      if (this.scrollerManager?.scrollingRecyclerNowTimer) return;
+
+      // Prevent this element from being removed from the DOM
+      // If it gets removed then subsequent touch events are not triggered
       this.rows[rowIdx].virtualSticky = true;
 
       this.resetTouchParams();
@@ -889,6 +905,16 @@ export default defineComponent({
     async viewInFolder(selection: Selection) {
       if (selection.size !== 1) return;
       dav.viewInFolder(selection.values().next().value);
+    },
+
+    /**
+     * Set the cover image for the current cluster
+     */
+    async setClusterCover(selection: Selection) {
+      if (selection.size !== 1 || !this.routeIsCluster) return;
+      if (await dav.setClusterCover(selection.values().next().value)) {
+        this.clear();
+      }
     },
 
     /**

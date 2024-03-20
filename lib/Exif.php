@@ -90,11 +90,17 @@ class Exif
             $path = $file->getStorage()->getLocalFile($file->getInternalPath());
         } catch (\Throwable $ex) {
             // https://github.com/pulsejet/memories/issues/820
-            throw new \Exception('Failed to get local file: '.$ex->getMessage());
+            throw new \Exception("Failed to get local file: {$ex->getMessage()}");
         }
 
+        // Check if path is valid
         if (!\is_string($path)) {
             throw new \Exception('Failed to get local file path');
+        }
+
+        // Check if file is readable
+        if (!is_readable($path)) {
+            throw new \Exception("File is not readable: {$path}");
         }
 
         $exif = self::getExifFromLocalPath($path);

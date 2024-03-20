@@ -42,7 +42,7 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 
 ## 📱 Mobile Apps
 
-- An Android client for Memories is available in early access on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories) or [GitHub Releases](https://github.com/pulsejet/memories/releases?q=android).
+- An Android client for Memories is available in early access on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories), [F-Droid](https://f-droid.org/packages/gallery.memories/) or [GitHub Releases](https://github.com/pulsejet/memories/releases?q=android).
 - For automatic uploads, you can use the official Nextcloud mobile apps. 
    - Android: [Google Play](https://play.google.com/store/apps/details?id=com.nextcloud.client), [F-Droid](https://f-droid.org/en/packages/com.nextcloud.client/)
    - iOS: [App Store](https://apps.apple.com/us/app/nextcloud/id1125420102).
@@ -60,7 +60,6 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
    - [Psalm](https://marketplace.visualstudio.com/items?itemName=getpsalm.psalm-vscode-plugin): For PHP static analysis (alternatively, `make psalm`)
    - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode): For autoformatting Vue and Typescript
    - [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar): For Vue intellisense and static analysis
-   - [Volar Typescript](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin): For Vue Typescript support
 
 This monorepo is organized into the following packages:
 - [lib](lib): Backend and database migrations (PHP).

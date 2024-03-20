@@ -176,17 +176,24 @@ class Index
             ;
 
             // Filter out files that are already indexed
-            $addFilter = static function (string $table, string $alias) use (&$query): void {
+            $addFilter = static function (
+                string $table,
+                string $alias,
+                bool $orphan = true,
+            ) use (&$query): void {
                 $query->leftJoin('f', $table, $alias, $query->expr()->andX(
                     $query->expr()->eq('f.fileid', "{$alias}.fileid"),
                     $query->expr()->eq('f.mtime', "{$alias}.mtime"),
-                    $query->expr()->eq("{$alias}.orphan", $query->expr()->literal(0)),
+                    $orphan
+                        ? $query->expr()->eq("{$alias}.orphan", $query->expr()->literal(0))
+                        : $query->expr()->literal(1),
                 ));
 
                 $query->andWhere($query->expr()->isNull("{$alias}.fileid"));
             };
             $addFilter('memories', 'm');
             $addFilter('memories_livephoto', 'lp');
+            $addFilter('memories_failures', 'fail', false);
 
             // Get file IDs to actually index
             $fileIds = $query->executeQuery()->fetchAll(\PDO::FETCH_COLUMN);
@@ -227,6 +234,7 @@ class Index
             $this->log("Skipping file {$path} due to lock", true);
         } catch (\Exception $e) {
             $this->error("Failed to index file {$path}: {$e->getMessage()}");
+            $this->tw->markFailed($file, $e->getMessage());
         } finally {
             $this->tempManager->clean();
         }

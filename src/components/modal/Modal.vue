@@ -6,6 +6,7 @@
     :outTransition="true"
     :style="{ width: isSidebarShown ? `calc(100% - ${sidebarWidth}px)` : null }"
     :additionalTrapElements="trapElements"
+    :canClose="canClose"
     @close="cleanup"
   >
     <div class="container" @keydown.stop="0">
@@ -26,7 +27,7 @@
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 
-const NcModal = () => import('@nextcloud/vue/dist/Components/NcModal');
+const NcModal = () => import('@nextcloud/vue/dist/Components/NcModal.js');
 
 import * as utils from '@services/utils';
 
@@ -44,6 +45,10 @@ export default defineComponent({
     sidebar: {
       type: String as PropType<string | null>,
       default: null,
+    },
+    canClose: {
+      type: Boolean,
+      default: true,
     },
   },
 
