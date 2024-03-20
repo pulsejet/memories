@@ -115,18 +115,20 @@ apk update
 apk add --no-cache bash ffmpeg libva-utils libva-vdpau-driver libva-intel-driver intel-media-driver mesa-va-gallium
 ```
 
-And make sure that the `www-data` user has access to the `/dev/dri` devices. You can do this by adding the `www-data` user to the appropriate groups. First see to which group `/dev/dri/renderD128` belongs to with `sudo ls -l /dev/dri/`. I will return something similar to:
+And make sure that the `www-data` user has access to the `/dev/dri` devices. You can do this by adding the `www-data` user to the appropriate groups. First see to which group `/dev/dri/renderD128` belongs to with `sudo ls -l /dev/dri/`.
 
-```
+```bash
 $ sudo ls -l /dev/dri/
 crw-rw---- 1 root video  226,   0 Mar 19 20:38 card0
 crw-rw---- 1 root video  226,   1 Mar 19 20:38 card1
 crw-rw-rw- 1 root render 226, 128 Mar 19 20:38 renderD128   
 ```
-Here, the `renderD128` device belongs to the `render` group. you have to `www-data` to that group with:
 
-```
-sudo usermod -aG render www-data # add www-data to the render group (in other cases it can belong to `video` for example)
+Here, the `renderD128` device belongs to the `render` group. You can add `www-data` to that group as follows.
+
+```bash
+sudo usermod -aG render www-data
+# in other cases the group may also be `video`, for example
 ```
 
 In some cases, along with adding `www-data` to the appropriate groups, you may also need to set the permissions of the device manually:
