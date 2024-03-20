@@ -46,6 +46,7 @@ declare global {
       moveToFace: (photos: IPhoto[]) => void;
       albumShare: (user: string, name: string, link?: boolean) => Promise<void>;
       showSettings: () => void;
+      upload: () => void;
     };
 
     sidebar: {

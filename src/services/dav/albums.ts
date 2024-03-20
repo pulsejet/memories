@@ -75,12 +75,7 @@ export async function* addToAlbum(user: string, name: string, photos: IPhoto[]) 
         return f.fileid;
       }
 
-      showError(
-        t('memories', 'Failed to add {filename} to album.', {
-          filename: f.filename,
-        }),
-      );
-
+      showError(t('memories', 'Failed to add {filename} to album.', { filename: f.filename }));
       console.error('DAV COPY error', e.response?.data);
       return 0;
     }
