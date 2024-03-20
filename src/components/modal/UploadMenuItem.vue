@@ -1,5 +1,5 @@
 <template>
-  <NcButton :aria-label="t('memories', 'Favorite')" type="primary" @click="upload">
+  <NcButton class="memories-upload-menu" :aria-label="t('memories', 'Upload')" type="primary" @click="upload">
     <template #icon> <UploadIcon :size="20" /> </template>
   </NcButton>
 </template>
@@ -24,3 +24,14 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped lang="scss">
+.memories-upload-menu {
+  background-color: transparent !important;
+  color: var(--color-primary-text) !important;
+  opacity: 0.85;
+  &:hover {
+    opacity: 1;
+  }
+}
+</style>
