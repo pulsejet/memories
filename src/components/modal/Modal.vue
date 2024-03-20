@@ -6,6 +6,7 @@
     :outTransition="true"
     :style="{ width: isSidebarShown ? `calc(100% - ${sidebarWidth}px)` : null }"
     :additionalTrapElements="trapElements"
+    :canClose="canClose"
     @close="cleanup"
   >
     <div class="container" @keydown.stop="0">
@@ -44,6 +45,10 @@ export default defineComponent({
     sidebar: {
       type: String as PropType<string | null>,
       default: null,
+    },
+    canClose: {
+      type: Boolean,
+      default: true,
     },
   },
 

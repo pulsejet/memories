@@ -106,6 +106,12 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+
+    /** Initial album selection */
+    initialSelection: {
+      type: Array as PropType<IAlbum[]>,
+      required: false,
+    },
   },
 
   emits: {
@@ -185,18 +191,23 @@ export default defineComponent({
         // create search provider
         this.fuse = new Fuse(this.albums, { keys: ['name'] });
 
-        // reset selection
-        this.initSelection = new Set();
-        this.selection = new Set();
-        this.deselection = new Set();
+        // get initial selection
+        let initSelIds: number[] = [];
+        const singleFileId = this.photos.length === 1 ? this.photos[0].fileid : 0;
 
-        // if only one photo is selected, get the albums of that photo
-        const fileid = this.photos.length === 1 ? this.photos[0].fileid : 0;
-        if (fileid) {
-          const selIds = new Set((await dav.getAlbums(fileid)).map((a) => a.album_id));
-          this.initSelection = new Set(this.albums.filter((a) => selIds.has(a.album_id)));
-          this.selection = new Set(this.initSelection);
+        if (this.initialSelection) {
+          // check if selection was passed as a prop
+          initSelIds = this.initialSelection.map((a) => a.album_id);
+        } else if (singleFileId) {
+          // if only one photo is selected, get the albums of that photo
+          const pAlbums = await dav.getAlbums(singleFileId);
+          initSelIds = pAlbums.map((a) => a.album_id);
         }
+
+        // initialize all sets
+        this.initSelection = new Set(this.albums.filter((a) => initSelIds.includes(a.album_id)));
+        this.selection = new Set(this.initSelection);
+        this.deselection = new Set();
 
         // restore selection
         if (preserveSelection) {

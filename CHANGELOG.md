@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
     - The list of files that could not be indexed can be found in the admin panel
     - To retry indexing, you can run `occ memories:index --retry`
 - **Feature**: Allow changing cover photos of albums, tags, places and people ([#1071](https://github.com/pulsejet/memories/issues/1071), [#125](https://github.com/pulsejet/memories/issues/125), [#557](https://github.com/pulsejet/memories/issues/557), [#764](https://github.com/pulsejet/memories/issues/764), [#1032](https://github.com/pulsejet/memories/issues/1032))
+- **Feature**: Allow direct file upload from web interface ([#69](https://github.com/pulsejet/memories/issues/69))
 - **Feature**: Hide files starting with `.` in the timeline
 - **Feature**: Support for 3GP videos ([#1055](https://github.com/pulsejet/memories/issues/1055))
 - **Feature**: Option to show metadata in slideshow ([#819](https://github.com/pulsejet/memories/issues/819))

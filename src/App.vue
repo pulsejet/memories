@@ -64,6 +64,7 @@
     <MoveToFolderModal />
     <FaceMoveModal />
     <AlbumShareModal />
+    <UploadModal />
   </NcContent>
 </template>
 
@@ -94,6 +95,7 @@ import ShareModal from '@components/modal/ShareModal.vue';
 import MoveToFolderModal from '@components/modal/MoveToFolderModal.vue';
 import FaceMoveModal from '@components/modal/FaceMoveModal.vue';
 import AlbumShareModal from '@components/modal/AlbumShareModal.vue';
+import UploadModal from '@components/modal/UploadModal.vue';
 
 import * as utils from '@services/utils';
 import * as nativex from '@native';
@@ -143,6 +145,7 @@ export default defineComponent({
     MoveToFolderModal,
     FaceMoveModal,
     AlbumShareModal,
+    UploadModal,
 
     ImageMultiple,
     FolderIcon,
