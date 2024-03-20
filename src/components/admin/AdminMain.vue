@@ -191,6 +191,11 @@ export default defineComponent({
       display: inline-block;
     }
 
+    .input-field {
+      // Prevent overlapping label with another input
+      margin-top: 0.8em;
+    }
+
     h2 {
       font-size: 1.6em;
       font-weight: 500;
