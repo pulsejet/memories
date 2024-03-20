@@ -9,8 +9,13 @@
       @update:open="onClose"
     >
       <NcAppSettingsSection id="general-settings" :name="names.general">
-        <label for="timeline-path">{{ t('memories', 'Timeline Path') }}</label>
-        <input id="timeline-path" @click="chooseTimelinePath" v-model="config.timeline_path" type="text" readonly />
+        <NcTextField
+          :label="t('memories', 'Timeline Path')"
+          :label-visible="true"
+          v-model="config.timeline_path"
+          @click="chooseTimelinePath"
+          readonly
+        />
 
         <NcCheckboxRadioSwitch :checked.sync="config.square_thumbs" @update:checked="updateSquareThumbs" type="switch">
           {{ t('memories', 'Square grid mode') }}
@@ -112,8 +117,13 @@
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="folders-settings" :name="names.folders">
-        <label for="folders-path">{{ t('memories', 'Folders Path') }}</label>
-        <input id="folders-path" @click="chooseFoldersPath" v-model="config.folders_path" type="text" />
+        <NcTextField
+          :label="t('memories', 'Folders Path')"
+          :label-visible="true"
+          v-model="config.folders_path"
+          @click="chooseFoldersPath"
+          readonly
+        />
 
         <NcCheckboxRadioSwitch
           :checked.sync="config.show_hidden_folders"
@@ -170,6 +180,7 @@ import * as utils from '@services/utils';
 import * as nativex from '@native';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 const NcAppSettingsDialog = () => import('@nextcloud/vue/dist/Components/NcAppSettingsDialog.js');
 const NcAppSettingsSection = () => import('@nextcloud/vue/dist/Components/NcAppSettingsSection.js');
 const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js');
@@ -183,6 +194,7 @@ export default defineComponent({
 
   components: {
     NcButton,
+    NcTextField,
     NcAppSettingsDialog,
     NcAppSettingsSection,
     NcCheckboxRadioSwitch,
@@ -370,6 +382,11 @@ export default defineComponent({
   .app-settings__content {
     // Fix weirdness when focusing on toggle input on mobile
     position: relative;
+  }
+
+  input[readonly] {
+    cursor: pointer;
+    user-select: none;
   }
 
   .app-settings-section {
