@@ -2,8 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
-
+## [v7.0.0] - 2024-03-19
 
 - **Breaking**: You must run `occ memories:places-setup` again after this update
     - Reverse geocoding lookups with Postgres/MySQL (not MariaDB) are now 100x faster
