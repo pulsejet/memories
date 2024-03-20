@@ -111,6 +111,14 @@ init_connect='SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci'
 
 Restart your database server after making this change.
 
+### General error: 2006 MySQL server has gone away
+
+You may encounter this error where MySQL crashes during planet DB insertion. In this case, use a smaller transaction size for insertion.
+
+```bash
+occ memories:places-setup --transaction-size=10
+```
+
 ## Transcoding
 
 Memories transcodes videos on the fly per-user. This saves space, but requires reasonably good hardware, preferably with hardware acceleration. Check the troubleshooting section [here](/hw-transcoding/#troubleshooting).
