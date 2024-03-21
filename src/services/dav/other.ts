@@ -1,6 +1,6 @@
 import { getFiles } from './base';
 import { generateUrl } from '@nextcloud/router';
-import { showError, showInfo } from '@nextcloud/dialogs';
+import { showError, showSuccess } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
 import { API } from '@services/API';
@@ -60,7 +60,7 @@ export async function setClusterCover(photo: IPhoto): Promise<boolean> {
 
   try {
     await axios.post(API.CLUSTER_SET_COVER(clusterType), { name, fileid });
-    showInfo(t('memories', 'Cover image set successfully'));
+    showSuccess(t('memories', 'Cover image set successfully'));
     return true;
   } catch (err) {
     showError(t('memories', 'Failed to set cover image'));
