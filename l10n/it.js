@@ -96,6 +96,8 @@ OC.L10N.register(
     "Expires" : "Scade",
     "Read only" : "Sola lettura",
     "Link copied to clipboard" : "Collegamento copiato negli appunti",
+    "Upload" : "Carica",
+    "Add tags" : "Aggiungi etichette",
     "Sort by date" : "Ordina per data",
     "Sort by name" : "Ordina per nome",
     "Unassigned faces" : "Facce non assegnate",

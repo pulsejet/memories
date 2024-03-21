@@ -45,6 +45,7 @@ OC.L10N.register(
     "Refresh" : "Rifresko",
     "Password protected" : "Mbrojtur me fjalëkalim",
     "Read only" : "Vetëm i lexueshëm",
+    "Upload" : "Ngarkoni",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Home" : "Kryefaqja",

@@ -56,6 +56,7 @@ OC.L10N.register(
     "New album" : "Àlbum nou",
     "Name" : "Cognom",
     "Name of the album" : "Nom de l'àlbum",
+    "Location" : "Ubicació",
     "Location of the album" : "Localització de l'àlbum",
     "Go back to the previous view." : "Torneu a la vista anterior.",
     "Back" : "Torna",

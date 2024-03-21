@@ -17,6 +17,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Continue" : "Davam et",
     "Name" : "Ad",
+    "Location" : "Yerləşdiyiniz ünvan",
     "Back" : "Geri",
     "Save" : "Saxla",
     "Search" : "Axtarış",

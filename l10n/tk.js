@@ -24,6 +24,8 @@ OC.L10N.register(
     "Share link" : "Baglanyşyk paýlaş",
     "Refresh" : "Täzelemek",
     "Read only" : "Diňe okaň",
+    "Upload" : "Ýüklemek",
+    "Upload files" : "Faýllary ýükläň",
     "Home" : "Baş sahypa",
     "Setup" : "Gurmak",
     "Yes" : "Hawa",

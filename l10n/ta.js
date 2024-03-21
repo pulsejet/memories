@@ -30,6 +30,7 @@ OC.L10N.register(
     "Remove" : "அகற்றுக",
     "Share link" : "இணைப்பைப் பகிரவும்",
     "Refresh" : "மீள் ஏற்றுக",
+    "Upload" : "பதிவேற்றுக",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Home" : "அகம்",

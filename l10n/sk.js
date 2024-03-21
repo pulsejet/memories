@@ -114,6 +114,8 @@ OC.L10N.register(
     "Link copied to clipboard" : "Odkaz bol skopírovaný do schránky",
     "Reduced Size" : "Zmenšená veľkosť",
     "Original File" : "Pôvodný súbor",
+    "Upload" : "Nahrať",
+    "Add tags" : "Pridať štítky",
     "Sort by date" : "Zoradiť podľa dátumu",
     "Sort by name" : "Zoradiť podľa mena",
     "Share album" : "Zdieľať album",

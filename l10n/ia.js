@@ -32,6 +32,7 @@ OC.L10N.register(
     "Share link" : "Compartir ligamine",
     "Refresh" : "Refrescar",
     "Password protected" : "Protegite per contrasigno",
+    "Upload" : "Incargar",
     "Sort by date" : "Ordinar per data",
     "Sort by name" : "Ordinar per nomine",
     "Home" : "Initio",

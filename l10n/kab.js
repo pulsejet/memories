@@ -28,6 +28,8 @@ OC.L10N.register(
     "Remove" : "Kkes",
     "Share link" : "Fren aseɣwen",
     "Refresh" : "Sismeḍ",
+    "Upload" : "Sili",
+    "Upload files" : "Azen ifuyla",
     "Home" : "Asnubeg",
     "Previous" : "Ɣer deffir",
     "Next" : "Uḍfir",

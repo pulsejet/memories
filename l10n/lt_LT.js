@@ -109,6 +109,7 @@ OC.L10N.register(
     "Expires" : "Baigia galioti",
     "Read only" : "Tik skaitymui",
     "Link copied to clipboard" : "Nuoroda nukopijuota į iškarpinę",
+    "Upload" : "Įkelti",
     "Sort by date" : "Rikiuoti pagal datą",
     "Sort by name" : "Rikiuoti pagal pavadinimą",
     "Share album" : "Bendrinti albumą",

@@ -22,6 +22,7 @@ OC.L10N.register(
     "Copy public link" : "Eilañ al liamm foran",
     "Public link" : "Liamm publik",
     "Name" : "Anv",
+    "Location" : "Lec'hiadur",
     "Back" : "Distro",
     "Save" : "Enrollañ",
     "Search" : "Klask",

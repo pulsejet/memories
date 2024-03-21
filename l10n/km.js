@@ -29,6 +29,7 @@ OC.L10N.register(
     "Remove" : "ដកចេញ",
     "Share link" : "Share link",
     "Password protected" : "បាន​ការ​ពារ​ដោយ​ពាក្យ​សម្ងាត់",
+    "Upload" : "ផ្ទុក​ឡើង",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Home" : "ទំព័រដើម",

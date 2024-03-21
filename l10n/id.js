@@ -80,6 +80,7 @@ OC.L10N.register(
     "Refresh" : "Muat ulang",
     "Password protected" : "Kata sandi dilindungi",
     "Read only" : "Hanya baca",
+    "Upload" : "Unggah",
     "Sort by date" : "Urutkan berdasarkan tanggal",
     "Sort by name" : "Urutkan berdasarkan nama",
     "Unassigned faces" : "Wajah yang belum ditetapkan",

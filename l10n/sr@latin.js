@@ -27,8 +27,10 @@ OC.L10N.register(
     "Share link" : "Podeli vezu",
     "Refresh" : "Osveži",
     "Password protected" : "Zaštćeno lozinkom",
+    "Upload" : "Otpremi",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
+    "Upload files" : "Otpremi fajlove",
     "Home" : "Početak",
     "Undo" : "Opozovi",
     "Setup" : "Podesi"

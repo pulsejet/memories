@@ -23,6 +23,8 @@ OC.L10N.register(
     "Share link" : "Ceangal co-roinnidh",
     "Refresh" : "Ath-nuadhaich",
     "Read only" : "Ri leughadh a-mhàin",
+    "Upload" : "Luchdaich suas",
+    "Upload files" : "Luchdaich suas faidhlichean",
     "Home" : "Dachaigh",
     "Undo" : "Neo-dhèan",
     "Setup" : "Suidhich",

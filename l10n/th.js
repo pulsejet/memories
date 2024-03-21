@@ -51,6 +51,7 @@ OC.L10N.register(
     "Share link" : "แชร์ลิงก์",
     "Refresh" : "รีเฟรช",
     "Password protected" : "ใส่รหัสผ่านไว้",
+    "Upload" : "อัปโหลด",
     "Sort by date" : "เรียงตามวันที่",
     "Sort by name" : "เรียงตามชื่อ",
     "Share folder" : "แชร์โฟลเดอร์",

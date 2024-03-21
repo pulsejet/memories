@@ -25,6 +25,7 @@ OC.L10N.register(
     "Remove" : "Buang",
     "Share link" : "Share link",
     "Refresh" : "Refresh",
+    "Upload" : "Muat naik",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Home" : "Rumah",

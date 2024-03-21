@@ -34,6 +34,7 @@ OC.L10N.register(
     "Share link" : "Del lenkje",
     "Refresh" : "Last inn på nytt",
     "Password protected" : "Passordverna",
+    "Upload" : "Last opp",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Home" : "Heim",
