@@ -50,6 +50,7 @@ OC.L10N.register(
     "Refresh" : "Actualizar",
     "Password protected" : "Protegit per senhal",
     "Read only" : "Lectura sola",
+    "Upload" : "Telecargament",
     "Sort by date" : "Triar per data",
     "Sort by name" : "Triar per nom",
     "Unsaved changes" : "Modificacions pas enregistradas",

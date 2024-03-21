@@ -14,6 +14,7 @@ OC.L10N.register(
     "Unknown" : "Nepoznato",
     "Continue" : "Nastavi",
     "Name" : "Ime",
+    "Location" : "Lokacija",
     "Save" : "Spremi",
     "Search" : "Search",
     "Month" : "Mjesec",

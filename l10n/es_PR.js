@@ -44,6 +44,7 @@ OC.L10N.register(
     "Password protected" : "Protegido con contraseña",
     "Expires" : "Expira",
     "Read only" : "Sólo lectura",
+    "Upload" : "Cargar",
     "Sort by date" : "Ordenar por fecha",
     "Sort by name" : "Ordenar por nombre",
     "Home" : "Inicio",

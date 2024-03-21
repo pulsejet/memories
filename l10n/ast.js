@@ -48,6 +48,7 @@ OC.L10N.register(
     "New album" : "Álbum nuevu",
     "Name" : "Nome",
     "Name of the album" : "Nome del álbum",
+    "Location" : "Llocalización",
     "Location of the album" : "Llocalización el álbu,",
     "Back" : "Atrás",
     "Add collaborators" : "Amestar collaboradores",

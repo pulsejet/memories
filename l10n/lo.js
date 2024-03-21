@@ -27,6 +27,8 @@ OC.L10N.register(
     "Share link" : "ແບ່ງປັນລິງ",
     "Refresh" : "Refresh",
     "Read only" : "ອ່ານຢ່າງດຽວ",
+    "Upload" : "ອັບໂຫຼດ",
+    "Upload files" : "ອັບໂຫຼດຟາຍ",
     "Home" : "ໜ້າຫຼັກ",
     "Previous" : "ກ່ອນໜ້າ",
     "Next" : "ທັດໄປ",

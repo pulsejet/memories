@@ -35,6 +35,7 @@ OC.L10N.register(
     "Share link" : "Link deelen",
     "Refresh" : "Opfrëschen",
     "Password protected" : "Passwuertgeschützt",
+    "Upload" : "Eroplueden",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Home" : "Doheem",

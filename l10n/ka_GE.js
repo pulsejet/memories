@@ -46,6 +46,7 @@ OC.L10N.register(
     "Password protected" : "პაროლით დაცული",
     "Expires" : "უქმდება",
     "Read only" : "მხოლოდ-კითხვადი",
+    "Upload" : "ატვირთვა",
     "Sort by date" : "დალაგება თარიღის მიხედვით",
     "Sort by name" : "დალაგება სახელის მიხედვით",
     "Home" : "სახლი",

@@ -16,6 +16,7 @@ OC.L10N.register(
     "Unknown" : "অজানা",
     "Continue" : "চালিয়ে যাও",
     "Name" : "নাম",
+    "Location" : "অবস্থান",
     "Back" : "পেছনে যাও",
     "Save" : "সংরক্ষণ",
     "Search" : "Search",

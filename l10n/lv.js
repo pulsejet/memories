@@ -54,6 +54,7 @@ OC.L10N.register(
     "Password protected" : "Aizsargāts ar paroli",
     "Expires" : "Beidzas",
     "Read only" : "Tikai lasāms",
+    "Upload" : "Augšupielādēt",
     "Sort by date" : "Kārtot pēc datuma",
     "Sort by name" : "Kārtot pēc nosaukuma",
     "Home" : "Sākums",

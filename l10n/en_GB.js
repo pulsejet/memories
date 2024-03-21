@@ -376,8 +376,6 @@ OC.L10N.register(
     "Merge with different person" : "Merge with different person",
     "Mark person in preview" : "Mark person in preview",
     "Unnamed person" : "Unnamed person",
-    "Folder View" : "Folder View",
-    "Timeline View" : "Timeline View",
     "Share folder" : "Share folder",
     "Home" : "Home",
     "Move left" : "Move left",
