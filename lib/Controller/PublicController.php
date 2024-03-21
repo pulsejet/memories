@@ -143,8 +143,8 @@ class PublicController extends AuthPublicShareController
 
     protected function getPasswordHash(): string
     {
-        /// TODO: return type has changed to ?string with 29
-        /// Change this when dropping support for 28
+        // TODO: return type has changed to ?string with 29
+        // Change this when dropping support for 28
         return $this->share->getPassword() ?? '';
     }
 
