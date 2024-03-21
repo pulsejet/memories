@@ -116,7 +116,7 @@ Restart your database server after making this change.
 You may encounter this error where MySQL crashes during planet DB insertion. In this case, use a smaller transaction size for insertion.
 
 ```bash
-occ memories:places-setup --transaction-size=10
+occ memories:places-setup --transaction-size=5
 ```
 
 ## Transcoding

@@ -48,7 +48,7 @@ Usage:
 Options:
   -f, --force                Ignore existing setup and re-download planet
   -r, --recalculate          Only recalculate places for existing files
-      --transaction-size=50  Reduce this value if your database crashes [default: 50]
+      --transaction-size=10  Reduce this value if your database crashes [default: 10]
 ```
 
 ## `memories:migrate-google-takeout`

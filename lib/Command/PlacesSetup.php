@@ -45,7 +45,7 @@ class PlacesSetup extends Command
             ->setDescription('Setup reverse geocoding')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Ignore existing setup and re-download planet')
             ->addOption('recalculate', 'r', InputOption::VALUE_NONE, 'Only recalculate places for existing files')
-            ->addOption('transaction-size', null, InputOption::VALUE_REQUIRED, 'Reduce this value if your database crashes', 50)
+            ->addOption('transaction-size', null, InputOption::VALUE_REQUIRED, 'Reduce this value if your database crashes', 10)
         ;
     }
 
