@@ -36,6 +36,7 @@ OC.L10N.register(
     "Share link" : "Rhannu dolen",
     "Refresh" : "Ail-lwytho",
     "Password protected" : "Diogelwyd â chyfrinair",
+    "Upload" : "Llwytho i fyny",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Home" : "Cartref",
