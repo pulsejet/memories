@@ -28,7 +28,7 @@ trait TimelineQueryCTE
         // Select 1 if there is a .nomedia file in the folder
         $SEL_NOMEDIA = "SELECT 1 FROM *PREFIX*filecache f2
             WHERE (f2.parent = f.fileid)
-            AND (f2.name = '.nomedia' OR f2.name = '.nomemories')";
+            AND (f2.name = '.nomedia' OR f2.name = '.noimage' OR f2.name = '.nomemories')";
 
         // Check no nomedia file exists in the folder
         $CLS_NOMEDIA = "NOT EXISTS ({$SEL_NOMEDIA})";

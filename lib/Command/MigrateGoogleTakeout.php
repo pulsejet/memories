@@ -153,7 +153,7 @@ class MigrateGoogleTakeout extends Command
     protected function migrateFolder(Folder $folder): void
     {
         // Check for .nomedia
-        if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.nomemories')) {
+        if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.noimage') || $folder->nodeExists('.nomemories')) {
             return;
         }
 

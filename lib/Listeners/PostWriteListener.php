@@ -60,7 +60,7 @@ class PostWriteListener implements IEventListener
 
             /** @psalm-suppress RedundantConditionGivenDocblockType */
             while ($parent = $parent->getParent()) {
-                if ($parent->nodeExists('.nomedia') || $parent->nodeExists('.nomemories')) {
+                if ($parent->nodeExists('.nomedia') || $parent->nodeExists('.noimage') || $parent->nodeExists('.nomemories')) {
                     return;
                 }
             }

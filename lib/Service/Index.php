@@ -118,8 +118,8 @@ class Index
         $path = $folder->getPath();
         $this->log("Indexing folder {$path}", true);
 
-        if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.nomemories')) {
-            $this->log("Skipping folder {$path} (.nomedia / .nomemories)".PHP_EOL, true);
+        if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.noimage') || $folder->nodeExists('.nomemories')) {
+            $this->log("Skipping folder {$path}".PHP_EOL, true);
 
             return;
         }
