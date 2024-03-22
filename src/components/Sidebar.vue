@@ -178,8 +178,9 @@ export default defineComponent({
 
     /** Register the Nextcloud Sidebar component */
     async registerNative() {
-      // Wait just in case the sidebar isn't avaialble yet
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Sidebar script is loaded only after the main script
+      // so we need to wait for it to be available
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       // Pass router to the component
       const router = this.$router;
