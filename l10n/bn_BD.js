@@ -32,6 +32,7 @@ OC.L10N.register(
     "Share link" : "লিংক ভাগাভাগি করেন",
     "Refresh" : "নবোদ্যম",
     "Password protected" : "কূটশব্দদ্বারা সুরক্ষিত",
+    "Upload" : "আপলোড",
     "Sort by date" : "Order by date",
     "Sort by name" : "Order by name",
     "Home" : "বাড়ি",

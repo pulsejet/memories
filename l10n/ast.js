@@ -75,6 +75,7 @@ OC.L10N.register(
     "High Resolution" : "Resolución alta",
     "Original File" : "FIcheru orixinal",
     "Public Link" : "Enllaz públicu",
+    "Upload" : "Xunir",
     "Merge with different person" : "Mecer con otra persona",
     "Home" : "Aniciu",
     "Unsaved changes" : "Cambeos ensin guardar",

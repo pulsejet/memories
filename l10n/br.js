@@ -39,6 +39,8 @@ OC.L10N.register(
     "Share link" : "Lodañ al liamm",
     "Refresh" : "Freskaat",
     "Read only" : "Da lenn nemetken",
+    "Upload" : "Pellkas",
+    "Upload files" : "Pellkas restr",
     "Home" : "Degemer",
     "Unsaved changes" : "Kemmoù n'int ket bet enrollet",
     "Next" : "Da heul",

@@ -367,6 +367,8 @@
     "_Share File_::_Share Files_" : ["Partager un fichier","Partager des fichiers","Partager des fichiers"],
     "_Share the original file_::_Share the original files_" : ["Partager le fichier original","Partager les fichiers originaux","Partager les fichiers originaux"],
     "Upload" : "Téléverser",
+    "Add tags" : "Ajouter des étiquettes",
+    "Attach collaborative tags to all uploads" : "Joindre des étiquettes collaboratives à tous les téléversements",
     "Sort by date" : "Trier par date",
     "Sort by name" : "Trier par nom",
     "Share album" : "Partager l'album",

@@ -39,6 +39,7 @@ OC.L10N.register(
     "Share link" : "Deel skakel",
     "Refresh" : "Verfris",
     "Read only" : "Leesalleen",
+    "Upload" : "Oplaai",
     "Home" : "Tuis",
     "Unsaved changes" : "Onbewaarde veranderinge",
     "Previous" : "Vorige",
