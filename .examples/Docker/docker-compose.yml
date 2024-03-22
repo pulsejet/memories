@@ -5,15 +5,18 @@
 # This file is provided as an example only and is not intended to be used as-is.
 # You will need all files in this directory for the example to work.
 #
+# The example assumes the existence of two disks, hdd and ssd.
+# You can replace both with a single mount point if you don't have separate disks.
+#
 # 1. Make sure all placeholders are replaced with the correct values.
-# 2. Choose a strong password for the database.
-# 3. Use an appropriate nginx.conf, and adjust it according to your needs.
+#    Choose a strong password for the database.
+# 2. Use an appropriate nginx.conf, and adjust it according to your needs.
 #    If you intend to use a second reverse proxy for TLS, you can use this example:
 #    https://github.com/nextcloud/docker/blob/master/.examples/docker-compose/insecure/mariadb/fpm/web/nginx.conf
 #    In the example below, Nextcloud will be exposed on port 8500
-# 4. Make sure the Dockerfile uses the Nextcloud version you want to see (first line)
-# 5. Tune the PHP-FPM parameters in the Dockerfile according to your hardware
-# 6. The preview generator cron job is pre-configured, but you still need to install the app
+# 3. Make sure the Dockerfile uses the Nextcloud version you want to see
+#    To update Nextcloud, you can simply change the version and run `docker compose build`
+# 4. The preview generator cron job is pre-configured, but you still need to install the app
 #    and do the initial generation run. https://github.com/nextcloud/previewgenerator
 # ===================================================================================================================
 

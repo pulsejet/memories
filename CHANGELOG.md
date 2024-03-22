@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- A Docker Compose example using the community Nextcloud image is now available in the repo.
+
 ## [v7.0.2] - 2024-03-19
 
 - **Breaking**: You must run `occ memories:places-setup` again after this update
