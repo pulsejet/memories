@@ -209,9 +209,9 @@ export function isNetworkError(error: any) {
  * callback immediately if the event has already fired.
  */
 export function onDOMLoaded(callback: () => void) {
-  if (document.readyState !== 'complete') {
+  if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', callback);
   } else {
-    callback();
+    setTimeout(callback, 0);
   }
 }
