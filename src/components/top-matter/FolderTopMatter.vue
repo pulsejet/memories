@@ -23,7 +23,7 @@
         </NcActionButton>
 
         <NcActionButton
-          v-if="!routeIsPublic && !isNative"
+          v-if="!routeIsPublic"
           :aria-label="t('memories', 'Upload files')"
           @click="upload()"
           close-after-click
