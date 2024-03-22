@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - A Docker Compose example using the community Nextcloud image is now available in the repo.
+- **Feature**: Manual upload to folder is now available in the Android app.
 
 ## [v7.0.2] - 2024-03-19
 
