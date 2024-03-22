@@ -158,6 +158,20 @@ sudo -u www-data \
 
     Some package repositories distribute old ffmpeg versions that do not support some modern hardware. (e.g., the VA-API driver installed by `apt` in the current debian image used by Nextcloud only supports up to 10th generation Intel Ice Lake CPUs). To ensure you have a compatible version, you may want to remove your existing ffmpeg version and build the drivers and ffmpeg from source.  [This script](https://github.com/pulsejet/memories/blob/master/go-vod/build-ffmpeg.sh) for VA-API or [this one](https://github.com/pulsejet/memories/blob/master/go-vod/build-ffmpeg-nvidia.sh) for NVENC might be useful.
 
+### Unraid
+
+On Unraid, you can follow [these steps](https://github.com/pulsejet/memories/issues/936) to set up hardware transcoding with an external trancoder.
+
+1. Search for `go-vod` in community apps and click the link in the upper right to get results from DockerHub
+1. Select the option from `radialapps` and do a test install to generate a template
+1. Enable `Advanced View` in the upper right
+1. Add the `:latest` tag to the repository to ensure you have the latest version of `go-vod`
+1. Under `Extra parameters`, add `--runtime=nvidia` (if using NVENC)
+1. Add missing variables/paths as needed (see the screenshot at [this report](https://github.com/pulsejet/memories/issues/936)).
+1. Make sure all volumes are mounted at the same location as the Nextcloud container, and are read-only.
+
+Once the container is running, configure the external transcoder in the Memories admin section of the Nextcloud interface.
+
 ### Docker
 
 !!! danger "Use an external transcoder"
