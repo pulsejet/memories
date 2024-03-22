@@ -49,6 +49,6 @@ To build the app from source, you need to have [node.js](https://nodejs.org/) in
 
 ## Mobile Apps
 
-An Android client for Memories is available in early access on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories) or [GitHub Releases](https://github.com/pulsejet/memories/releases?q=android).
+An Android client for Memories is available in early access on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories), [F-Droid](https://f-droid.org/packages/gallery.memories/) and [GitHub Releases](https://github.com/pulsejet/memories/releases?q=android).
 
 For automatic uploads, you can use the official Nextcloud mobile apps. These are available for [Android](https://play.google.com/store/apps/details?id=com.nextcloud.client) ([F-Droid](https://f-droid.org/en/packages/com.nextcloud.client/)) and [iOS](https://apps.apple.com/us/app/nextcloud/id1125420102).
