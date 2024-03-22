@@ -15,11 +15,17 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.webkit.CookieManager
+import android.webkit.PermissionRequest
 import android.webkit.SslErrorHandler
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
@@ -61,6 +67,9 @@ class MainActivity : AppCompatActivity() {
     private val memoriesRegex = Regex("/apps/memories/.*$")
     private var host: String? = null
 
+    private var chooseFileCallback: ValueCallback<Array<Uri>>? = null
+    private lateinit var chooseFileIntentLauncher: ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -73,6 +82,9 @@ class MainActivity : AppCompatActivity() {
 
         // Sync if permission is available
         nativex.doMediaSync(false)
+
+        // Initialize handlers
+        initializeIntentHandlers()
 
         // Load JavaScript
         initializeWebView()
@@ -134,6 +146,27 @@ class MainActivity : AppCompatActivity() {
         return super.onKeyDown(keyCode, event)
     }
 
+    private fun initializeIntentHandlers() {
+        // File chooser
+        chooseFileIntentLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result: ActivityResult ->
+            val intent = result.data
+
+            // Attempt to parse URIs from result
+            var uris = WebChromeClient.FileChooserParams.parseResult(result.resultCode, intent)
+
+            // Use clipData if nothing found in uris
+            if (uris.isNullOrEmpty() && intent?.clipData != null) {
+                uris =
+                    Array(intent.clipData!!.itemCount) { i -> intent.clipData!!.getItemAt(i).uri }
+            }
+
+            chooseFileCallback?.onReceiveValue(uris)
+            chooseFileCallback = null
+        }
+    }
+
     @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
     private fun initializeWebView() {
         // Intercept local APIs
@@ -174,6 +207,31 @@ class MainActivity : AppCompatActivity() {
                     nativex.toast("Failed to load due to SSL error: ${error?.primaryError}", true)
                     super.onReceivedSslError(view, handler, error)
                 }
+            }
+        }
+
+        // Use the web chrome client to handle file uploads
+        binding.webview.webChromeClient = object : WebChromeClient() {
+            override fun onPermissionRequest(request: PermissionRequest) {
+                request.grant(request.resources)
+            }
+
+            override fun onShowFileChooser(
+                vw: WebView,
+                filePathCallback: ValueCallback<Array<Uri>>,
+                fileChooserParams: FileChooserParams
+            ): Boolean {
+                chooseFileCallback?.onReceiveValue(null)
+                chooseFileCallback = filePathCallback
+                val intent = fileChooserParams.createIntent()
+
+                // This is a very ugly hack to prevent the photo picker from opening.
+                // The photo picker strips  off the metadata and filename; passing
+                // text as a mime opens the original file picker
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*", "text/*"))
+
+                chooseFileIntentLauncher.launch(intent)
+                return true
             }
         }
 
@@ -328,7 +386,8 @@ class MainActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 window.insetsController?.apply {
                     hide(WindowInsets.Type.statusBars())
-                    systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    systemBarsBehavior =
+                        WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
                 }
             } else {
                 @Suppress("Deprecation")
