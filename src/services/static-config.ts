@@ -149,12 +149,12 @@ class StaticConfig {
       // album settings
       sort_album_month: true,
       show_hidden_albums: false,
+      album_list_sort: ALBUM_SORT_FLAGS.CREATED | ALBUM_SORT_FLAGS.DESCENDING, // also in OtherController.php
 
       // local settings
       square_thumbs: false,
       high_res_cond: null,
       show_face_rect: false,
-      album_list_sort: ALBUM_SORT_FLAGS.CREATED | ALBUM_SORT_FLAGS.DESCENDING,
     };
 
     const set = <K extends keyof IConfig, V extends IConfig[K]>(key: K, value: string | null) => {
