@@ -15,6 +15,12 @@ export const constants = Object.freeze({
 
   MIME_RAW: 'image/x-dcraw',
   FORBIDDEN_EDIT_MIMES: ['image/bmp', 'image/x-dcraw', 'video/MP2T'], // Exif.php
+
+  ALBUM_SORT_FLAGS: {
+    DESCENDING: 1 << 0,
+    CREATED: 1 << 1,
+    NAME: 1 << 2,
+  },
 });
 
 /**

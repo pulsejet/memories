@@ -39,13 +39,17 @@ export async function getAlbums(fileid?: number) {
   }
 
   // Sort the response
-  switch (await staticConfig.get('album_list_sort')) {
-    case 2:
-      data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
-      break;
-    case 1:
-    default:
-      data.sort((a, b) => b.created - a.created);
+  const sort = await staticConfig.get('album_list_sort');
+  if (sort & utils.constants.ALBUM_SORT_FLAGS.NAME) {
+    data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
+  } else {
+    // fall back to created date
+    data.sort((a, b) => a.created - b.created);
+  }
+
+  // Sort descending if needed
+  if (sort & utils.constants.ALBUM_SORT_FLAGS.DESCENDING) {
+    data.reverse();
   }
 
   return data;

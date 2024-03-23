@@ -111,6 +111,9 @@ class StaticConfig {
       return this.default;
     }
 
+    // get constants for easier access
+    const { ALBUM_SORT_FLAGS } = utils.constants;
+
     const config: IConfig = {
       // general stuff
       version: '',
@@ -151,7 +154,7 @@ class StaticConfig {
       square_thumbs: false,
       high_res_cond: null,
       show_face_rect: false,
-      album_list_sort: 1,
+      album_list_sort: ALBUM_SORT_FLAGS.CREATED | ALBUM_SORT_FLAGS.DESCENDING,
     };
 
     const set = <K extends keyof IConfig, V extends IConfig[K]>(key: K, value: string | null) => {

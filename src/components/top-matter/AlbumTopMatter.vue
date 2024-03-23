@@ -10,33 +10,70 @@
     <div class="name">{{ name }}</div>
 
     <div class="right-actions">
-      <NcActions :forceMenu="true" v-if="isAlbumList">
-        <template #icon>
-          <SortIcon :size="20" />
-        </template>
+      <!-- Sorting options -->
+      <template v-if="isAlbumList">
+        <NcActions :forceMenu="true">
+          <template #icon>
+            <SortIcon :size="20" />
+          </template>
 
-        <NcActionRadio
-          name="sort"
-          :aria-label="t('memories', 'Sort by date')"
-          :checked="config.album_list_sort === 1"
-          @change="changeSort(1)"
-          close-after-click
-        >
-          {{ t('memories', 'Sort by date') }}
-          <template #icon> <SortDateIcon :size="20" /> </template>
-        </NcActionRadio>
+          <NcActionRadio
+            name="sort"
+            :aria-label="t('memories', 'Creation date')"
+            :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.CREATED)"
+            @change="changeSort(c.ALBUM_SORT_FLAGS.CREATED)"
+            close-after-click
+          >
+            {{ t('memories', 'Creation date') }}
+          </NcActionRadio>
 
-        <NcActionRadio
-          name="sort"
-          :aria-label="t('memories', 'Sort by name')"
-          :checked="config.album_list_sort === 2"
-          @change="changeSort(2)"
-          close-after-click
-        >
-          {{ t('memories', 'Sort by name') }}
-          <template #icon> <SlotAlphabeticalIcon :size="20" /> </template>
-        </NcActionRadio>
-      </NcActions>
+          <NcActionRadio
+            name="sort"
+            :aria-label="t('memories', 'Album name')"
+            :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.NAME)"
+            @change="changeSort(c.ALBUM_SORT_FLAGS.NAME)"
+            close-after-click
+          >
+            {{ t('memories', 'Album name') }}
+          </NcActionRadio>
+        </NcActions>
+
+        <NcActions :forceMenu="true">
+          <template #icon>
+            <template v-if="config.album_list_sort & c.ALBUM_SORT_FLAGS.CREATED">
+              <SortDateDIcon v-if="config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING" :size="20" />
+              <SortDateAIcon v-else :size="20" />
+            </template>
+            <template v-else-if="config.album_list_sort & c.ALBUM_SORT_FLAGS.NAME">
+              <SlotAlphabeticalDIcon v-if="config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING" :size="20" />
+              <SlotAlphabeticalAIcon v-else :size="20" />
+            </template>
+            <template v-else>
+              <SortIcon :size="20" />
+            </template>
+          </template>
+
+          <NcActionRadio
+            name="sort-dir"
+            :aria-label="t('memories', 'Ascending')"
+            :checked="!(config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING)"
+            @change="setDescending(false)"
+            close-after-click
+          >
+            {{ t('memories', 'Ascending') }}
+          </NcActionRadio>
+
+          <NcActionRadio
+            name="sort-dir"
+            :aria-label="t('memories', 'Descending')"
+            :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING)"
+            @change="setDescending(true)"
+            close-after-click
+          >
+            {{ t('memories', 'Descending') }}
+          </NcActionRadio>
+        </NcActions>
+      </template>
 
       <NcActions :inline="isMobile ? 1 : 3">
         <NcActionButton
@@ -106,7 +143,7 @@ import axios from '@nextcloud/axios';
 import AlbumCreateModal from '@components/modal/AlbumCreateModal.vue';
 import AlbumDeleteModal from '@components/modal/AlbumDeleteModal.vue';
 
-import { downloadWithHandle } from '@services/dav/download';
+import { downloadWithHandle } from '@services/dav';
 import { API } from '@services/API';
 import * as utils from '@services/utils';
 
@@ -117,8 +154,10 @@ import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';
 import PlusIcon from 'vue-material-design-icons/Plus.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import SortIcon from 'vue-material-design-icons/SortVariant.vue';
-import SlotAlphabeticalIcon from 'vue-material-design-icons/SortAlphabeticalAscending.vue';
-import SortDateIcon from 'vue-material-design-icons/SortCalendarDescending.vue';
+import SlotAlphabeticalAIcon from 'vue-material-design-icons/SortAlphabeticalAscending.vue';
+import SlotAlphabeticalDIcon from 'vue-material-design-icons/SortAlphabeticalDescending.vue';
+import SortDateAIcon from 'vue-material-design-icons/SortCalendarAscending.vue';
+import SortDateDIcon from 'vue-material-design-icons/SortCalendarDescending.vue';
 
 export default defineComponent({
   name: 'AlbumTopMatter',
@@ -138,8 +177,10 @@ export default defineComponent({
     PlusIcon,
     ShareIcon,
     SortIcon,
-    SlotAlphabeticalIcon,
-    SortDateIcon,
+    SlotAlphabeticalAIcon,
+    SlotAlphabeticalDIcon,
+    SortDateAIcon,
+    SortDateDIcon,
   },
 
   mixins: [UserConfig],
@@ -186,12 +227,20 @@ export default defineComponent({
       }
     },
 
-    /**
-     * Change the sorting order
-     * 1 = date, 2 = name
-     */
-    changeSort(order: 1 | 2) {
-      this.config.album_list_sort = order;
+    /** Set sort choice */
+    changeSort(flag: number) {
+      const dir = this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.DESCENDING;
+      this.config.album_list_sort = flag | dir;
+      this.updateSetting('album_list_sort');
+    },
+
+    /** Set sort direction */
+    setDescending(val: boolean) {
+      if (val) {
+        this.config.album_list_sort |= this.c.ALBUM_SORT_FLAGS.DESCENDING;
+      } else {
+        this.config.album_list_sort &= ~this.c.ALBUM_SORT_FLAGS.DESCENDING;
+      }
       this.updateSetting('album_list_sort');
     },
   },
