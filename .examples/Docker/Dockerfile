@@ -26,6 +26,9 @@ RUN { \
         echo 'opcache.jit_buffer_size=256M'; \
     } >> "${PHP_INI_DIR}/conf.d/opcache-recommended.ini";
 
+# Add Nextcloud cron job
+RUN echo '*/5 * * * * php -f /var/www/html/cron.php' >> /var/spool/cron/crontabs/www-data
+
 # Add preview generation cron job
 RUN echo '*/6 * * * * php -f /var/www/html/occ preview:pre-generate' >> /var/spool/cron/crontabs/www-data
 
