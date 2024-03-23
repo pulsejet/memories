@@ -49,6 +49,7 @@ OC.L10N.register(
     "Expires" : "Senvalidiĝo",
     "Read only" : "Nurlega",
     "Link copied to clipboard" : "Ligilo kopiita al tondujo",
+    "Upload" : "Alŝuti",
     "Sort by date" : "Ordigi laŭ dato",
     "Sort by name" : "Ordigi laŭ nomo",
     "Home" : "Hejmo",
