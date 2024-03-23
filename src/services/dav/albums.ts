@@ -25,6 +25,22 @@ export function getAlbumPath(user: string, name: string) {
 }
 
 /**
+ * Helper function to sort by name
+ */
+function sortByName(data: any[], reverse: boolean = false) {
+  const direction = reverse ? -1 : 1;
+  data.sort((a, b) => direction * a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
+}
+
+/**
+ * Helper function to sort by creation date
+ */
+function sortByCreated(data: any[], reverse: boolean = false) {
+  const direction = reverse ? -1 : 1;
+  data.sort((a, b) => direction * (a.created - b.created));
+}
+
+/**
  * Get list of albums.
  * @param fileid Optional file ID to get albums for
  */
@@ -40,12 +56,23 @@ export async function getAlbums(fileid?: number) {
 
   // Sort the response
   switch (await staticConfig.get('album_list_sort')) {
+    case 3:
+      // Sort by name in reverse (descending)
+      sortByName(data, true);
+      break;
     case 2:
-      data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
+      // Sort by name (ascending)
+      sortByName(data);
+      break;
+    case 0:
+      // Sort by date album was created (ascending)
+      sortByCreated(data);
       break;
     case 1:
     default:
-      data.sort((a, b) => b.created - a.created);
+      // Sort by date album was created in reverse (descending)
+      sortByCreated(data, true);
+      break;
   }
 
   return data;

@@ -15,25 +15,51 @@
           <SortIcon :size="20" />
         </template>
 
+        <!-- Sort by date descending -->
         <NcActionRadio
           name="sort"
-          :aria-label="t('memories', 'Sort by date')"
+          :aria-label="t('memories', 'Sort by date (descending)')"
           :checked="config.album_list_sort === 1"
           @change="changeSort(1)"
           close-after-click
         >
-          {{ t('memories', 'Sort by date') }}
+          {{ t('memories', 'Sort by date') }} ▼
           <template #icon> <SortDateIcon :size="20" /> </template>
         </NcActionRadio>
 
+        <!-- Sort by date ascending -->
         <NcActionRadio
           name="sort"
-          :aria-label="t('memories', 'Sort by name')"
+          :aria-label="t('memories', 'Sort by date (ascending)')"
+          :checked="config.album_list_sort === 0"
+          @change="changeSort(0)"
+          close-after-click
+        >
+          {{ t('memories', 'Sort by date') }} ▲
+          <template #icon> <SortDateIcon :size="20" /> </template>
+        </NcActionRadio>
+
+        <!-- Sort by name ascending -->
+        <NcActionRadio
+          name="sort"
+          :aria-label="t('memories', 'Sort by name (ascending)')"
           :checked="config.album_list_sort === 2"
           @change="changeSort(2)"
           close-after-click
         >
-          {{ t('memories', 'Sort by name') }}
+          {{ t('memories', 'Sort by name') }} ▲
+          <template #icon> <SlotAlphabeticalIcon :size="20" /> </template>
+        </NcActionRadio>
+
+        <!-- Sort by name descending -->
+        <NcActionRadio
+          name="sort"
+          :aria-label="t('memories', 'Sort by name (descending)')"
+          :checked="config.album_list_sort === 3"
+          @change="changeSort(3)"
+          close-after-click
+        >
+          {{ t('memories', 'Sort by name') }} ▼
           <template #icon> <SlotAlphabeticalIcon :size="20" /> </template>
         </NcActionRadio>
       </NcActions>
@@ -188,9 +214,9 @@ export default defineComponent({
 
     /**
      * Change the sorting order
-     * 1 = date, 2 = name
+     * 0 = date ascending, 1 = date descending, 2 = name ascending, 3 = name descending
      */
-    changeSort(order: 1 | 2) {
+    changeSort(order: 0 | 1 | 2 | 3) {
       this.config.album_list_sort = order;
       this.updateSetting('album_list_sort');
     },
