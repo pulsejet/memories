@@ -69,7 +69,21 @@ class Index
      */
     public function indexUser(string $uid, ?string $folder = null): void
     {
-        $this->log("<info>Indexing user {$uid}</info>".PHP_EOL, true);
+        $regexPattern = $this->getFilterRegex();
+
+        if (null !== $regexPattern && !empty($regexPattern)) {
+            $isValidPattern = \is_int(preg_match($regexPattern, ''));
+
+            if (!$isValidPattern) {
+                $this->error("Invalid regex pattern given in Memories Config!: {$regexPattern}");
+
+                return;
+            }
+
+            $this->log(PHP_EOL."<info>Indexing user {$uid} (Using {$regexPattern} as ignore regex) </info> ".PHP_EOL, true);
+        } else {
+            $this->log(PHP_EOL."<info>Indexing user {$uid}</info>".PHP_EOL, true);
+        }
 
         \OC_Util::tearDownFS();
         \OC_Util::setupFS($uid);
@@ -108,31 +122,6 @@ class Index
         }
     }
 
-    public function resolveValidFiles(array $nodes, array $mimes): array
-    {
-        return array_filter($nodes, static function ($node) use ($mimes) {
-            if (!$node instanceof File) {
-                return false;
-            }
-
-            if (!\in_array($node->getMimeType(), $mimes, true)) {
-                return false;
-            }
-
-            $fistChar = mb_substr($node->getName(), 0, 1);
-
-            if (SystemConfig::get('memories.index.ignore_file_with_starting_dot') && '.' === $fistChar) {
-                return false;
-            }
-
-            if (SystemConfig::get('memories.index.ignore_file_with_starting_at') && '@' === $fistChar) {
-                return false;
-            }
-
-            return true;
-        });
-    }
-
     /**
      * Index all files in a folder.
      *
@@ -151,6 +140,7 @@ class Index
 
         // Get all files and folders in this folders
         $nodes = $folder->getDirectoryListing();
+        $nodes = $this->resolveValidNodes($nodes);
 
         // Filter files that are supported
         $mimes = self::getMimeList();
@@ -308,6 +298,57 @@ class Index
     public static function isVideo(File $file): bool
     {
         return \in_array($file->getMimeType(), Application::VIDEO_MIMES, true);
+    }
+
+    private function resolveValidFiles(array $nodes, array $mimes): array
+    {
+        return array_filter($nodes, static function ($node) use ($mimes) {
+            if (!$node instanceof File) {
+                return false;
+            }
+
+            if (!\in_array($node->getMimeType(), $mimes, true)) {
+                return false;
+            }
+
+            return true;
+        });
+    }
+
+    private function getFilterRegex(): ?string
+    {
+        if (!SystemConfig::get('memories.index.ignore_files_and_folders')) {
+            return null;
+        }
+
+        return trim(SystemConfig::get('memories.index.ignore_files_and_folders_regex'));
+    }
+
+    private function resolveValidNodes(array $nodes): array
+    {
+        if (!SystemConfig::get('memories.index.ignore_files_and_folders')) {
+            return $nodes;
+        }
+
+        $regexPattern = trim(SystemConfig::get('memories.index.ignore_files_and_folders_regex'));
+
+        if (empty($regexPattern)) {
+            return $nodes;
+        }
+
+        $localThis = $this;
+
+        return array_filter($nodes, static function ($node) use ($regexPattern, $localThis) {
+            if (preg_match($regexPattern, $node->getName())) {
+                $localThis->log("Ignoring {$node->getType()} {$node->getPath()} due to regex match: {$regexPattern}");
+
+                return false;
+            }
+
+            return true;
+        });
+
+        return $nodes;
     }
 
     /**
