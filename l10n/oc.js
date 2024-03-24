@@ -51,8 +51,6 @@ OC.L10N.register(
     "Password protected" : "Protegit per senhal",
     "Read only" : "Lectura sola",
     "Upload" : "Telecargament",
-    "Sort by date" : "Triar per data",
-    "Sort by name" : "Triar per nom",
     "Unsaved changes" : "Modificacions pas enregistradas",
     "Previous" : "Precedent",
     "Next" : "Seguent",

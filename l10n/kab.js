@@ -29,6 +29,8 @@ OC.L10N.register(
     "Share link" : "Fren aseɣwen",
     "Refresh" : "Sismeḍ",
     "Upload" : "Sili",
+    "Oldest first" : "Iqbuṛen d imezwura",
+    "Newest first" : "Imaynuten d imezwura",
     "Upload files" : "Azen ifuyla",
     "Home" : "Asnubeg",
     "Previous" : "Ɣer deffir",

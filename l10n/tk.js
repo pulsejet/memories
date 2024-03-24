@@ -25,6 +25,8 @@ OC.L10N.register(
     "Refresh" : "Täzelemek",
     "Read only" : "Diňe okaň",
     "Upload" : "Ýüklemek",
+    "Oldest first" : "Ilki bilen iň köne",
+    "Newest first" : "Täze ilkinji",
     "Upload files" : "Faýllary ýükläň",
     "Home" : "Baş sahypa",
     "Setup" : "Gurmak",

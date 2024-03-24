@@ -31,8 +31,6 @@ OC.L10N.register(
     "Share link" : "இணைப்பைப் பகிரவும்",
     "Refresh" : "மீள் ஏற்றுக",
     "Upload" : "பதிவேற்றுக",
-    "Sort by date" : "Order by date",
-    "Sort by name" : "Order by name",
     "Home" : "அகம்",
     "Previous" : "முன்தைய",
     "Next" : "அடுத்த",

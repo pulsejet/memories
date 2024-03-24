@@ -28,6 +28,8 @@ OC.L10N.register(
     "Refresh" : "Refresh",
     "Read only" : "ອ່ານຢ່າງດຽວ",
     "Upload" : "ອັບໂຫຼດ",
+    "Oldest first" : "ເກົ່າທີ່ສຸດກ່ອນ",
+    "Newest first" : "ໃໝ່ທີ່ສຸດກ່ອນ",
     "Upload files" : "ອັບໂຫຼດຟາຍ",
     "Home" : "ໜ້າຫຼັກ",
     "Previous" : "ກ່ອນໜ້າ",

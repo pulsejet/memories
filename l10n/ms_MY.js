@@ -26,8 +26,6 @@ OC.L10N.register(
     "Share link" : "Share link",
     "Refresh" : "Refresh",
     "Upload" : "Muat naik",
-    "Sort by date" : "Order by date",
-    "Sort by name" : "Order by name",
     "Home" : "Rumah",
     "Previous" : "Sebelum",
     "Next" : "Seterus",

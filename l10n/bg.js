@@ -249,8 +249,6 @@ OC.L10N.register(
     "Share an external Nextcloud link" : "Споделяне на външна връзка на Nextcloud",
     "Cannot share this type of data" : "Този тип данни не може да се споделят",
     "Upload" : "Качване",
-    "Sort by date" : "Сортирай по дата",
-    "Sort by name" : "Сортирай по име",
     "Share album" : "Споделяне на албум",
     "Download album" : "Изтегляне на албум",
     "Nothing to show here" : "Тук няма нищо за показване",

@@ -34,8 +34,6 @@ OC.L10N.register(
     "Refresh" : "Yenilə",
     "Read only" : "Oxumaq üçün",
     "Upload" : "Serverə yüklə",
-    "Sort by date" : "Order by date",
-    "Sort by name" : "Order by name",
     "Home" : "Ev",
     "Slideshow" : "Slayd şou",
     "Previous" : "Əvvələ",
