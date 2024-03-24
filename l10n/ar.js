@@ -383,8 +383,6 @@ OC.L10N.register(
     "Failed to attach tags to {file}" : "تعذّر إرفاق سِمَات بالملف {file}",
     "Some files have not been uploaded." : "تعذّر رفع بعض الملفات.",
     "_Upload {n} file_::_Upload {n} files_" : ["رفع {n} ملف","رفع {n} ملف","رفع {n} ملف","رفع {n} ملفات","رفع {n} ملف","رفع {n} ملف"],
-    "Sort by date" : "Order by date",
-    "Sort by name" : "Order by name",
     "Share album" : "مشاركة الألبوم",
     "Download album" : "تنزيل الألبوم",
     "Remove album" : "إحذِف الألبُوم",

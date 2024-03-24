@@ -26,8 +26,6 @@ OC.L10N.register(
     "Share link" : "Share link",
     "Refresh" : "يېڭىلا",
     "Upload" : "يۈكلە",
-    "Sort by date" : "Order by date",
-    "Sort by name" : "Order by name",
     "Home" : "ئۆي",
     "Previous" : "ئالدىنقى",
     "Next" : "كېيىنكى",

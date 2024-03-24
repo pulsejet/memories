@@ -26,8 +26,6 @@ OC.L10N.register(
     "Share link" : "Podijelite vezu",
     "Password protected" : "Zaštićeno lozinkom",
     "Upload" : "Učitaj",
-    "Sort by date" : "Order by date",
-    "Sort by name" : "Order by name",
     "Home" : "Početna stranica",
     "Previous" : "Prethodno",
     "Next" : "Sljedeće",

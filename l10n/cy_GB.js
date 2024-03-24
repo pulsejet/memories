@@ -37,8 +37,6 @@ OC.L10N.register(
     "Refresh" : "Ail-lwytho",
     "Password protected" : "Diogelwyd â chyfrinair",
     "Upload" : "Llwytho i fyny",
-    "Sort by date" : "Order by date",
-    "Sort by name" : "Order by name",
     "Home" : "Cartref",
     "Previous" : "Blaenorol",
     "Next" : "Nesaf",

@@ -36,8 +36,6 @@ OC.L10N.register(
     "Refresh" : "Opfrëschen",
     "Password protected" : "Passwuertgeschützt",
     "Upload" : "Eroplueden",
-    "Sort by date" : "Order by date",
-    "Sort by name" : "Order by name",
     "Home" : "Doheem",
     "Previous" : "Zeréck",
     "Next" : "Weider",
