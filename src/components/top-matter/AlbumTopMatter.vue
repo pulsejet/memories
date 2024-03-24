@@ -19,6 +19,16 @@
 
           <NcActionRadio
             name="sort"
+            :aria-label="t('memories', 'Last updated')"
+            :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.LAST_UPDATE)"
+            @change="changeSort(c.ALBUM_SORT_FLAGS.LAST_UPDATE)"
+            close-after-click
+          >
+            {{ t('memories', 'Last updated') }}
+          </NcActionRadio>
+
+          <NcActionRadio
+            name="sort"
             :aria-label="t('memories', 'Creation date')"
             :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.CREATED)"
             @change="changeSort(c.ALBUM_SORT_FLAGS.CREATED)"
@@ -40,12 +50,12 @@
 
         <NcActions :forceMenu="true">
           <template #icon>
-            <template v-if="config.album_list_sort & c.ALBUM_SORT_FLAGS.CREATED">
-              <SortDateDIcon v-if="config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING" :size="20" />
+            <template v-if="isDateSort">
+              <SortDateDIcon v-if="isDescending" :size="20" />
               <SortDateAIcon v-else :size="20" />
             </template>
             <template v-else-if="config.album_list_sort & c.ALBUM_SORT_FLAGS.NAME">
-              <SlotAlphabeticalDIcon v-if="config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING" :size="20" />
+              <SlotAlphabeticalDIcon v-if="isDescending" :size="20" />
               <SlotAlphabeticalAIcon v-else :size="20" />
             </template>
             <template v-else>
@@ -55,22 +65,22 @@
 
           <NcActionRadio
             name="sort-dir"
-            :aria-label="t('memories', 'Ascending')"
-            :checked="!(config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING)"
+            :aria-label="isDateSort ? t('memories', 'Oldest first') : t('memories', 'Ascending')"
+            :checked="!isDescending"
             @change="setDescending(false)"
             close-after-click
           >
-            {{ t('memories', 'Ascending') }}
+            {{ isDateSort ? t('memories', 'Oldest first') : t('memories', 'Ascending') }}
           </NcActionRadio>
 
           <NcActionRadio
             name="sort-dir"
-            :aria-label="t('memories', 'Descending')"
-            :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING)"
+            :aria-label="isDateSort ? t('memories', 'Newest first') : t('memories', 'Descending')"
+            :checked="isDescending"
             @change="setDescending(true)"
             close-after-click
           >
-            {{ t('memories', 'Descending') }}
+            {{ isDateSort ? t('memories', 'Newest first') : t('memories', 'Descending') }}
           </NcActionRadio>
         </NcActions>
       </template>
@@ -208,6 +218,17 @@ export default defineComponent({
 
     isMobile(): boolean {
       return utils.isMobile();
+    },
+
+    isDateSort(): boolean {
+      return (
+        !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.CREATED) ||
+        !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.LAST_UPDATE)
+      );
+    },
+
+    isDescending(): boolean {
+      return !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.DESCENDING);
     },
   },
 

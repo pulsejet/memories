@@ -42,6 +42,8 @@ export async function getAlbums(fileid?: number) {
   const sort = await staticConfig.get('album_list_sort');
   if (sort & utils.constants.ALBUM_SORT_FLAGS.NAME) {
     data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
+  } else if (sort & utils.constants.ALBUM_SORT_FLAGS.LAST_UPDATE) {
+    data.sort((a, b) => (a.update_id ?? Number.MAX_SAFE_INTEGER) - (b.update_id ?? Number.MAX_SAFE_INTEGER));
   } else {
     // fall back to created date
     data.sort((a, b) => a.created - b.created);
