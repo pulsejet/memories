@@ -10,84 +10,78 @@
     <div class="name">{{ name }}</div>
 
     <div class="right-actions">
-      <!-- Sorting options -->
-      <template v-if="isAlbumList">
-        <NcActions :forceMenu="true">
-          <template #icon>
+      <NcActions v-if="isAlbumList" :title="t('memories', 'Sorting order')" :forceMenu="true">
+        <template #icon>
+          <template v-if="isDateSort">
+            <SortDateDIcon v-if="isDescending" :size="20" />
+            <SortDateAIcon v-else :size="20" />
+          </template>
+          <template v-else-if="config.album_list_sort & c.ALBUM_SORT_FLAGS.NAME">
+            <SlotAlphabeticalDIcon v-if="isDescending" :size="20" />
+            <SlotAlphabeticalAIcon v-else :size="20" />
+          </template>
+          <template v-else>
             <SortIcon :size="20" />
           </template>
+        </template>
 
-          <NcActionRadio
-            name="sort"
-            :aria-label="t('memories', 'Last updated')"
-            :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.LAST_UPDATE)"
-            @change="changeSort(c.ALBUM_SORT_FLAGS.LAST_UPDATE)"
-            close-after-click
-          >
-            {{ t('memories', 'Last updated') }}
-          </NcActionRadio>
+        <NcActionRadio
+          name="sort"
+          :aria-label="t('memories', 'Last updated')"
+          :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.LAST_UPDATE)"
+          @change="changeSort(c.ALBUM_SORT_FLAGS.LAST_UPDATE)"
+          close-after-click
+        >
+          {{ t('memories', 'Last updated') }}
+        </NcActionRadio>
 
-          <NcActionRadio
-            name="sort"
-            :aria-label="t('memories', 'Creation date')"
-            :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.CREATED)"
-            @change="changeSort(c.ALBUM_SORT_FLAGS.CREATED)"
-            close-after-click
-          >
-            {{ t('memories', 'Creation date') }}
-          </NcActionRadio>
+        <NcActionRadio
+          name="sort"
+          :aria-label="t('memories', 'Creation date')"
+          :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.CREATED)"
+          @change="changeSort(c.ALBUM_SORT_FLAGS.CREATED)"
+          close-after-click
+        >
+          {{ t('memories', 'Creation date') }}
+        </NcActionRadio>
 
-          <NcActionRadio
-            name="sort"
-            :aria-label="t('memories', 'Album name')"
-            :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.NAME)"
-            @change="changeSort(c.ALBUM_SORT_FLAGS.NAME)"
-            close-after-click
-          >
-            {{ t('memories', 'Album name') }}
-          </NcActionRadio>
-        </NcActions>
+        <NcActionRadio
+          name="sort"
+          :aria-label="t('memories', 'Album name')"
+          :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.NAME)"
+          @change="changeSort(c.ALBUM_SORT_FLAGS.NAME)"
+          close-after-click
+        >
+          {{ t('memories', 'Album name') }}
+        </NcActionRadio>
 
-        <NcActions :forceMenu="true">
-          <template #icon>
-            <template v-if="isDateSort">
-              <SortDateDIcon v-if="isDescending" :size="20" />
-              <SortDateAIcon v-else :size="20" />
-            </template>
-            <template v-else-if="config.album_list_sort & c.ALBUM_SORT_FLAGS.NAME">
-              <SlotAlphabeticalDIcon v-if="isDescending" :size="20" />
-              <SlotAlphabeticalAIcon v-else :size="20" />
-            </template>
-            <template v-else>
-              <SortIcon :size="20" />
-            </template>
-          </template>
+        <NcActionSeparator />
 
-          <NcActionRadio
-            name="sort-dir"
-            :aria-label="isDateSort ? t('memories', 'Oldest first') : t('memories', 'Ascending')"
-            :checked="!isDescending"
-            @change="setDescending(false)"
-            close-after-click
-          >
-            {{ isDateSort ? t('memories', 'Oldest first') : t('memories', 'Ascending') }}
-          </NcActionRadio>
+        <NcActionRadio
+          name="sort-dir"
+          :aria-label="isDateSort ? t('memories', 'Oldest first') : t('memories', 'Ascending')"
+          :checked="!isDescending"
+          @change="setDescending(false)"
+          close-after-click
+        >
+          {{ isDateSort ? t('memories', 'Oldest first') : t('memories', 'Ascending') }}
+        </NcActionRadio>
 
-          <NcActionRadio
-            name="sort-dir"
-            :aria-label="isDateSort ? t('memories', 'Newest first') : t('memories', 'Descending')"
-            :checked="isDescending"
-            @change="setDescending(true)"
-            close-after-click
-          >
-            {{ isDateSort ? t('memories', 'Newest first') : t('memories', 'Descending') }}
-          </NcActionRadio>
-        </NcActions>
-      </template>
+        <NcActionRadio
+          name="sort-dir"
+          :aria-label="isDateSort ? t('memories', 'Newest first') : t('memories', 'Descending')"
+          :checked="isDescending"
+          @change="setDescending(true)"
+          close-after-click
+        >
+          {{ isDateSort ? t('memories', 'Newest first') : t('memories', 'Descending') }}
+        </NcActionRadio>
+      </NcActions>
 
       <NcActions :inline="isMobile ? 1 : 3">
         <NcActionButton
           :aria-label="t('memories', 'Create new album')"
+          :title="t('memories', 'Create new album')"
           @click="refs.createModal.open(false)"
           close-after-click
           v-if="isAlbumList"
@@ -97,6 +91,7 @@
         </NcActionButton>
         <NcActionButton
           :aria-label="t('memories', 'Share album')"
+          :title="t('memories', 'Share album')"
           @click="openShareModal()"
           close-after-click
           v-if="canEditAlbum"
@@ -106,6 +101,7 @@
         </NcActionButton>
         <NcActionButton
           :aria-label="t('memories', 'Download album')"
+          :title="t('memories', 'Download album')"
           @click="downloadAlbum()"
           close-after-click
           v-if="!isAlbumList"
@@ -115,6 +111,7 @@
         </NcActionButton>
         <NcActionButton
           :aria-label="t('memories', 'Edit album details')"
+          :title="t('memories', 'Edit album details')"
           @click="refs.createModal.open(true)"
           close-after-click
           v-if="canEditAlbum"
@@ -124,6 +121,7 @@
         </NcActionButton>
         <NcActionButton
           :aria-label="t('memories', 'Remove album')"
+          :title="t('memories', 'Remove album')"
           @click="refs.deleteModal.open()"
           close-after-click
           v-if="!isAlbumList"
@@ -147,6 +145,7 @@ import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox.js';
 import NcActionRadio from '@nextcloud/vue/dist/Components/NcActionRadio.js';
+import NcActionSeparator from '@nextcloud/vue/dist/Components/NcActionSeparator.js';
 
 import axios from '@nextcloud/axios';
 
@@ -176,6 +175,7 @@ export default defineComponent({
     NcActionButton,
     NcActionCheckbox,
     NcActionRadio,
+    NcActionSeparator,
 
     AlbumCreateModal,
     AlbumDeleteModal,

@@ -1,5 +1,11 @@
 <template>
-  <NcButton class="memories-upload-menu" :aria-label="t('memories', 'Upload')" type="primary" @click="upload">
+  <NcButton
+    class="memories-upload-menu"
+    :title="t('memories', 'Upload')"
+    :aria-label="t('memories', 'Upload')"
+    type="primary"
+    @click="upload"
+  >
     <template #icon> <UploadIcon :size="20" /> </template>
   </NcButton>
 </template>

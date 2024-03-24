@@ -15,13 +15,28 @@
     </div>
 
     <NcActions :inline="3" class="actions">
-      <NcActionButton :aria-label="t('memories', 'Rotate Left')" :disabled="disabled" @click="doleft">
+      <NcActionButton
+        :aria-label="t('memories', 'Rotate Left')"
+        :title="t('memories', 'Rotate Left')"
+        :disabled="disabled"
+        @click="doleft"
+      >
         <template #icon> <RotateLeftIcon :size="22" /> </template>
       </NcActionButton>
-      <NcActionButton :aria-label="t('memories', 'Rotate Right')" :disabled="disabled" @click="doright">
+      <NcActionButton
+        :aria-label="t('memories', 'Rotate Right')"
+        :title="t('memories', 'Rotate Right')"
+        :disabled="disabled"
+        @click="doright"
+      >
         <template #icon> <RotateRightIcon :size="22" /> </template>
       </NcActionButton>
-      <NcActionButton :aria-label="t('memories', 'Flip')" :disabled="disabled" @click="doflip">
+      <NcActionButton
+        :aria-label="t('memories', 'Flip')"
+        :title="t('memories', 'Flip')"
+        :disabled="disabled"
+        @click="doflip"
+      >
         <template #icon> <FlipHorizontalIcon :size="22" /> </template>
       </NcActionButton>
     </NcActions>
