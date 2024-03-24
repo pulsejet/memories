@@ -54,7 +54,7 @@ class TagsBackend extends Backend
     {
         $tagName = (string) $this->request->getParam('tags');
 
-        $tagId = $this->getSystemTagId($query, $tagName);
+        $tagId = $this->getSystemTagIds($query, [$tagName])[$tagName];
 
         $query->innerJoin('m', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
             $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
@@ -125,7 +125,7 @@ class TagsBackend extends Backend
     public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         $query = $this->tq->getBuilder();
-        $tagId = $this->getSystemTagId($query, $name);
+        $tagId = $this->getSystemTagIds($query, [$name])[$name];
 
         // SELECT all photos with this tag
         $query->select('f.fileid', 'f.etag', 'stom.systemtagid')
@@ -163,21 +163,36 @@ class TagsBackend extends Backend
         return (int) $photo['systemtagid'];
     }
 
-    private function getSystemTagId(IQueryBuilder $query, string $tagName): int
+    /**
+     * Get the systemtag id for a given tag name
+     * @param IQueryBuilder $query Query builder
+     * @param string[] $tagNames List of tag names
+     * @return array Map from tag name to tag id
+     */
+    private function getSystemTagIds(IQueryBuilder $query, array $tagNames): array
     {
         $sqb = $query->getConnection()->getQueryBuilder();
 
-        $res = $sqb->select('id')->from('systemtag')->where(
+        $res = $sqb->select('id', 'name')->from('systemtag')->where(
             $sqb->expr()->andX(
-                $sqb->expr()->eq('name', $sqb->createNamedParameter($tagName)),
-                $sqb->expr()->eq('visibility', $sqb->expr()->literal(1, \PDO::PARAM_INT)),
+                $sqb->expr()->in('name', $sqb->createNamedParameter($tagNames, IQueryBuilder::PARAM_STR_ARRAY)),
+                $sqb->expr()->eq('visibility', $sqb->expr()->literal(1, IQueryBuilder::PARAM_INT)),
             ),
-        )->executeQuery()->fetchOne();
+        )->executeQuery()->fetchAll();
 
-        if (false === $res) {
-            throw new \Exception("Tag {$tagName} not found");
+        // Create result map
+        $map = array_fill_keys($tagNames, 0);
+        foreach ($res as $row) {
+            $map[$row['name']] = (int) $row['id'];
         }
 
-        return (int) $res;
+        // Required to have all tags in the result
+        foreach ($tagNames as $tagName) {
+            if (0 === $map[$tagName]) {
+                throw new \Exception("Tag {$tagName} not found");
+            }
+        }
+
+        return $map;
     }
 }
