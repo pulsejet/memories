@@ -87,7 +87,9 @@ export default defineComponent({
 
     createOption(newDisplayName: string): dav.ITag {
       // do not create tags that already exist
-      const existing = this.getAvailable().find((x) => x.displayName === newDisplayName);
+      const existing = this.getAvailable().find(
+        (x) => x.displayName.toLocaleLowerCase() === newDisplayName.toLocaleLowerCase(),
+      );
       if (existing) {
         return existing;
       }
