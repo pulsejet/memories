@@ -1119,7 +1119,10 @@ export default defineComponent({
         async () => {
           if (abort()) return;
 
-          _m.sidebar.setTab('memories-metadata');
+          if (!_m.sidebar.isOpen()) {
+            _m.sidebar.setTab('memories-metadata');
+          }
+
           if (this.routeIsPublic || this.isLocal) {
             _m.sidebar.open(photo);
           } else {

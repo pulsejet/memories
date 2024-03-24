@@ -52,6 +52,7 @@ declare global {
     sidebar: {
       open: (photo: IPhoto | number, filename?: string, forceNative?: boolean) => void;
       close: () => void;
+      isOpen: () => boolean;
       setTab: (tab: string) => void;
       invalidateUnless: (fileid: number) => void;
       getWidth: () => number;

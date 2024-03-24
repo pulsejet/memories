@@ -67,6 +67,7 @@ export default defineComponent({
     _m.sidebar = {
       open: this.open.bind(this),
       close: this.close.bind(this),
+      isOpen: this.isOpen.bind(this),
       setTab: this.setTab.bind(this),
       invalidateUnless: this.invalidateUnless.bind(this),
       getWidth: this.getWidth.bind(this),
@@ -112,6 +113,10 @@ export default defineComponent({
         }
         this.handleClose();
       }
+    },
+
+    isOpen() {
+      return this.reducedOpen || this.nativeOpen;
     },
 
     setTab(tab: string) {
