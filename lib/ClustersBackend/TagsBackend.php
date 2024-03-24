@@ -164,9 +164,11 @@ class TagsBackend extends Backend
     }
 
     /**
-     * Get the systemtag id for a given tag name
-     * @param IQueryBuilder $query Query builder
-     * @param string[] $tagNames List of tag names
+     * Get the systemtag id for a given tag name.
+     *
+     * @param IQueryBuilder $query    Query builder
+     * @param string[]      $tagNames List of tag names
+     *
      * @return array Map from tag name to tag id
      */
     private function getSystemTagIds(IQueryBuilder $query, array $tagNames): array
