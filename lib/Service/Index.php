@@ -99,7 +99,9 @@ class Index
                     throw new \Exception('Not a folder');
                 }
             } catch (\Exception $e) {
-                $this->error("The specified folder {$path} does not exist for {$uid}");
+                // Only log this if we're on the CLI, do not put an error in the logs
+                // https://github.com/pulsejet/memories/issues/1091
+                $this->log("<error>The specified folder {$path} does not exist for {$uid}</error>".PHP_EOL);
 
                 continue;
             }
