@@ -98,6 +98,8 @@ OC.L10N.register(
     "Upload" : "Puja",
     "Last updated" : "Darrera actualització",
     "Creation date" : "Data de creació",
+    "Oldest first" : "Més antic primer",
+    "Newest first" : "Més nou primer",
     "Unassigned faces" : "Cares sense assignar",
     "Merge with different person" : "Fusiona amb una persona diferent",
     "Share folder" : "Comparteix la carpeta",
