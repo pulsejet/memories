@@ -196,6 +196,7 @@ class MainActivity : AppCompatActivity() {
                 } else null
             }
 
+            @SuppressLint("WebViewClientOnReceivedSslError")
             override fun onReceivedSslError(
                 view: WebView?,
                 handler: SslErrorHandler?,
@@ -293,6 +294,11 @@ class MainActivity : AppCompatActivity() {
         // Prevent re-creating
         playerUris = uris
         playerUid = uid
+
+        // Set insecure TLS if enabled
+        if (nativex.http.isTrustingAllCertificates) {
+            nativex.http.setDefaultInsecureTLS()
+        }
 
         // Build exoplayer
         player = ExoPlayer.Builder(this)
