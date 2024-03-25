@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Allow sorting albums by most recently updated.
 - **Feature**: Allow sorting albums in ascending and descending direction.
 - **Feature**: Manual upload to folder is now available in the Android app.
+- **Fix**: Prevent turning off screen when playing videos.
 
 ## [v7.0.2] - 2024-03-19
 
