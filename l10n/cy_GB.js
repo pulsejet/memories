@@ -37,6 +37,8 @@ OC.L10N.register(
     "Refresh" : "Ail-lwytho",
     "Password protected" : "Diogelwyd â chyfrinair",
     "Upload" : "Llwytho i fyny",
+    "Oldest first" : "Hynaf gyntaf",
+    "Newest first" : "Diweddaraf gyntaf",
     "Home" : "Cartref",
     "Previous" : "Blaenorol",
     "Next" : "Nesaf",

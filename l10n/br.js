@@ -40,6 +40,8 @@ OC.L10N.register(
     "Refresh" : "Freskaat",
     "Read only" : "Da lenn nemetken",
     "Upload" : "Pellkas",
+    "Oldest first" : "An hini kozhoñ da gentañ",
+    "Newest first" : "An hini nevesañ da gentañ",
     "Upload files" : "Pellkas restr",
     "Home" : "Degemer",
     "Unsaved changes" : "Kemmoù n'int ket bet enrollet",

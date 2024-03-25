@@ -40,6 +40,8 @@ OC.L10N.register(
     "Refresh" : "Verfris",
     "Read only" : "Leesalleen",
     "Upload" : "Oplaai",
+    "Oldest first" : "Oudste eerste",
+    "Newest first" : "Nuutste eerste",
     "Home" : "Tuis",
     "Unsaved changes" : "Onbewaarde veranderinge",
     "Previous" : "Vorige",

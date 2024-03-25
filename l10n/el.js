@@ -87,6 +87,7 @@ OC.L10N.register(
     "Creation date" : "Ημερομηνία δημιουργίας",
     "Oldest first" : "Παλαιότερο πρώτα",
     "Ascending" : "Αύξουσα",
+    "Newest first" : "Νεότερο πρώτα",
     "Descending" : "Φθίνουσα",
     "Share album" : "Διαμοιρασμός άλμπουμ",
     "Download album" : "Λήψη άλμπουμ",
