@@ -38,6 +38,9 @@ class VideoContentSetup {
   /** Last known quality that was set */
   lastQuality: number | null = null;
 
+  /** Current wake lock */
+  wakeLock: WakeLockSentinel | null = null;
+
   constructor(
     lightbox: PhotoSwipe,
     private options: {
@@ -130,6 +133,9 @@ class VideoContentSetup {
     if (!isVideoContent(content) || content.videojs) {
       return;
     }
+
+    // Prevent screen from sleeping
+    this.getWakeLock();
 
     // Sources list
     const sources: { src: string; type: string }[] = [];
@@ -253,6 +259,9 @@ class VideoContentSetup {
 
   destroyVideo(content: VideoContent) {
     if (isVideoContent(content)) {
+      // Release wake lock
+      this.releaseWakeLock();
+
       // Destroy exoplayer
       if (nativex.has()) {
         // Add a timeout in case another video initializes
@@ -545,6 +554,23 @@ class VideoContentSetup {
 
   useContentPlaceholder(usePlaceholder: boolean, content: PsContent) {
     return isVideoContent(content) || usePlaceholder;
+  }
+
+  async getWakeLock() {
+    try {
+      await this.releaseWakeLock();
+      this.wakeLock = await navigator.wakeLock?.request('screen');
+    } catch (e) {
+      console.warn('PsVideo: Failed to get wake lock', e);
+    }
+  }
+
+  async releaseWakeLock() {
+    try {
+      await this.wakeLock?.release();
+    } finally {
+      this.wakeLock = null;
+    }
   }
 }
 
