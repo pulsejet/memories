@@ -94,7 +94,10 @@
   "search.exclude": {
     "**/l10n": true,
     "**/.vscode": true,
-    "**/patches": true
+    "**/patches": true,
+    "*.lock": true,
+    "package-lock.json": true,
+    "COPYING": true
   },
   "git.alwaysSignOff": true,
   "editor.formatOnSave": true,
