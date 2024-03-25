@@ -3,7 +3,7 @@
     <h2>{{ $options.title }}</h2>
 
     <p>
-      <NcNoteCard :type="isHttps ? 'success' : 'warning'">
+      <NcNoteCard :type="isHttps ? 'success' : 'error'">
         {{
           isHttps
             ? t('memories', 'HTTPS is enabled')
