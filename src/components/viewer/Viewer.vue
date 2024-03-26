@@ -291,21 +291,21 @@ export default defineComponent({
           name: this.t('memories', 'Download'),
           icon: DownloadIcon,
           callback: this.downloadCurrent,
-          if: !this.initstate.noDownload && !this.isLocal,
+          if: this.canDownload,
         },
         {
           id: 'download-video',
           name: this.t('memories', 'Download Video'),
           icon: DownloadIcon,
           callback: this.downloadCurrentLiveVideo,
-          if: !this.initstate.noDownload && !!this.currentPhoto?.liveid,
+          if: this.canDownload && !!this.currentPhoto?.liveid,
         },
         ...this.stackedRaw.map((raw) => ({
           id: `download-raw-${raw.fileid}`,
           name: this.t('memories', 'Download {ext}', { ext: raw.extension }),
           icon: DownloadIcon,
           callback: () => this.downloadByFileId(raw.fileid),
-          if: true,
+          if: this.canDownload,
         })),
         {
           id: 'view-in-folder',
@@ -406,7 +406,12 @@ export default defineComponent({
 
     /** Show share button and add to album button */
     canShare(): boolean {
-      return Boolean(this.currentPhoto);
+      return !!this.currentPhoto;
+    },
+
+    /** Show download button */
+    canDownload(): boolean {
+      return !this.currentPhoto?.imageInfo?.permissions?.includes('L') && !this.initstate.noDownload && !this.isLocal;
     },
 
     /** Stacked RAW photos */

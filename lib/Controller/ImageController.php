@@ -202,6 +202,11 @@ class ImageController extends GenericApiController
             // Inject permissions and convert to string
             $info['permissions'] = Util::permissionsToStr($file->getPermissions());
 
+            // Check if download has been disabled
+            if (!$this->fs->canDownload($file)) {
+                $info['permissions'] .= 'L';
+            }
+
             // Inject other file parameters that are cheap to get now
             $info['mimetype'] = $file->getMimeType();
             $info['size'] = $file->getSize();

@@ -220,6 +220,9 @@ class Util
             $str .= 'S';
         }
 
+        // Other permissions that are set elsewhere
+        // L - Disable download (negative permission)
+
         return $str;
     }
 

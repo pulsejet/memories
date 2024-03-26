@@ -40,7 +40,7 @@
       </NcListItem>
 
       <NcListItem
-        v-if="canShareNative"
+        v-if="canShareNative && canDownload"
         :name="t('memories', 'Original File')"
         :bold="false"
         @click.prevent="shareOriginal()"
@@ -124,6 +124,10 @@ export default defineComponent({
 
     hasVideos(): boolean {
       return Boolean(this.photos?.some(utils.isVideo));
+    },
+
+    canDownload(): boolean {
+      return this.photos?.every((p) => !p.imageInfo?.permissions?.includes('L')) ?? true;
     },
 
     canShareNative(): boolean {
