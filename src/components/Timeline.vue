@@ -1455,7 +1455,7 @@ export default defineComponent({
   &.empty {
     opacity: 0;
     transition: none;
-    width: 0;
+    height: 0 !important;
   }
 
   &:focus {
