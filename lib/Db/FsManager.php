@@ -180,6 +180,7 @@ class FsManager
 
         $comp = new SearchBinaryOperator(ISearchBinaryOperator::OPERATOR_OR, [
             new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomedia'),
+            new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.noimage'),
             new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomemories'),
         ]);
         $search = $root->search(new SearchQuery($comp, 0, 0, [], Util::getUser()));
