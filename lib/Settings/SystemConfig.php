@@ -34,6 +34,10 @@ class SystemConfig
         // Path to index (only used if indexing mode is 3)
         'memories.index.path' => '/',
 
+        // To Ignore Files and Folders from indexing with a regex
+        'memories.index.ignore_files_and_folders' => false,
+        'memories.index.ignore_files_and_folders_regex' => '',
+
         // Places database type identifier
         'memories.gis_type' => -1,
 

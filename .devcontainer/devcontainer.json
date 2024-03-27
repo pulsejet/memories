@@ -3,14 +3,15 @@
 {
   "name": "Nextcloud DevContainer",
   "dockerComposeFile": ["./docker-compose.yml"],
-  "service": "nextcloud",
+  "service": "nextcloud-server",
   "workspaceFolder": "/var/www/html/custom_apps/memories",
   // Features to add to the dev container. More info: https://containers.dev/features.
   "features": {},
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
-  "postCreateCommand": "echo 'Container Created'",
+  "postCreateCommand": "make dev-setup && npx playwright install && npx playwright install-deps",
+  "postStartCommand": "make watch-js",
   // Configure tool-specific properties.
   "customizations": {
     "vscode": {

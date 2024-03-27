@@ -119,6 +119,28 @@
       <br />
       <code>occ memories:index --clear</code>
     </div>
+    <div>
+      <h3>Ignore:</h3>
+
+      <NcCheckboxRadioSwitch
+        :checked.sync="config['memories.index.ignore_files_and_folders']"
+        @update:checked="update('memories.index.ignore_files_and_folders')"
+        type="switch"
+      >
+        {{ t('memories', `Ignore Files and Folders using Regex`) }}
+      </NcCheckboxRadioSwitch>
+      <div>
+        <small><a href="https://regex101.com/" target="_blank">External Regex Checker/Generator</a></small>
+      </div>
+
+      <NcTextField
+        :label="t('memories', 'Ignore Regex - Example: /^@/')"
+        :label-visible="true"
+        :value="config['memories.index.ignore_files_and_folders_regex']"
+        @change="update('memories.index.ignore_files_and_folders_regex', $event.target.value)"
+        :disabled="!config['memories.index.ignore_files_and_folders']"
+      />
+    </div>
   </div>
 </template>
 
