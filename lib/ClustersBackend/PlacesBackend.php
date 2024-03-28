@@ -69,6 +69,7 @@ class PlacesBackend extends Backend
 
         $inside = (int) $this->request->getParam('inside', 0);
         $marked = (int) $this->request->getParam('mark', 1);
+        $covers = (bool) $this->request->getParam('covers', 1);
 
         $query = $this->tq->getBuilder();
 
@@ -157,14 +158,16 @@ class PlacesBackend extends Backend
         $query->addGroupBy('sub.osm_id', 'e.osm_id', 'sub.count', 'e.name', 'e.other_names');
 
         // JOIN to get all covers
-        $this->joinCovers(
-            query: $query,
-            clusterTable: 'sub',
-            clusterTableId: 'osm_id',
-            objectTable: 'memories_places',
-            objectTableObjectId: 'fileid',
-            objectTableClusterId: 'osm_id',
-        );
+        if ($covers) {
+            $this->joinCovers(
+                query: $query,
+                clusterTable: 'sub',
+                clusterTableId: 'osm_id',
+                objectTable: 'memories_places',
+                objectTableObjectId: 'fileid',
+                objectTableClusterId: 'osm_id',
+            );
+        }
 
         // FETCH all tags
         $places = $this->tq->executeQueryWithCTEs($query)->fetchAll();
