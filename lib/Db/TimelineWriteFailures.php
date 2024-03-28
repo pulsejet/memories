@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
@@ -25,20 +26,20 @@ trait TimelineWriteFailures
         $reason .= " ({$file->getPath()})";
 
         // Remove all previous failures for this file
-        $this->connection->beginTransaction();
-        $this->clearFailures($file);
+        Util::transaction(function () use ($file, $reason): void {
+            $this->clearFailures($file);
 
-        // Add the failure to the database
-        $query = $this->connection->getQueryBuilder();
-        $query->insert('memories_failures')
-            ->values([
-                'fileid' => $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT),
-                'mtime' => $query->createNamedParameter($file->getMtime(), IQueryBuilder::PARAM_INT),
-                'reason' => $query->createNamedParameter($reason, IQueryBuilder::PARAM_STR),
-            ])
-            ->executeStatement()
-        ;
-        $this->connection->commit();
+            // Add the failure to the database
+            $query = $this->connection->getQueryBuilder();
+            $query->insert('memories_failures')
+                ->values([
+                    'fileid' => $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT),
+                    'mtime' => $query->createNamedParameter($file->getMtime(), IQueryBuilder::PARAM_INT),
+                    'reason' => $query->createNamedParameter($reason, IQueryBuilder::PARAM_STR),
+                ])
+                ->executeStatement()
+            ;
+        });
     }
 
     /**

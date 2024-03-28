@@ -22,7 +22,7 @@ trait TimelineWriteOrphans
     public function orphanAll(bool $value = true, ?array $fileIds = null, bool $livephoto = true): void
     {
         // Helper function to update a table.
-        $update = function (string $table) use ($value, $fileIds): int {
+        $update = fn (string $table) => Util::transaction(function () use ($table, $value, $fileIds): int {
             $query = $this->connection->getQueryBuilder();
             $query->update($table)
                 ->set('orphan', $query->createNamedParameter($value, IQueryBuilder::PARAM_BOOL))
@@ -33,7 +33,7 @@ trait TimelineWriteOrphans
             }
 
             return $query->executeStatement();
-        };
+        });
 
         // Mark all files as orphaned.
         $update('memories');
@@ -93,14 +93,16 @@ trait TimelineWriteOrphans
      */
     private function getSomeOrphans(int $count, array $fields): array
     {
-        $query = $this->connection->getQueryBuilder();
+        return Util::transaction(function () use ($count, $fields): array {
+            $query = $this->connection->getQueryBuilder();
 
-        return $query->select(...$fields)
-            ->from('memories')
-            ->where($query->expr()->eq('orphan', $query->expr()->literal(1)))
-            ->setMaxResults($count)
-            ->executeQuery()
-            ->fetchAll()
-        ;
+            return $query->select(...$fields)
+                ->from('memories')
+                ->where($query->expr()->eq('orphan', $query->expr()->literal(1)))
+                ->setMaxResults($count)
+                ->executeQuery()
+                ->fetchAll()
+            ;
+        });
     }
 }

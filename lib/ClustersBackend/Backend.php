@@ -186,38 +186,32 @@ abstract class Backend
      */
     final public function setCover(array $photo, bool $manual = false): void
     {
-        $connection = \OC::$server->get(\OCP\IDBConnection::class);
-
         try {
-            // Replace the cover object in database
-            $connection->beginTransaction();
+            Util::transaction(function () use ($photo, $manual): void {
+                $connection = \OC::$server->get(\OCP\IDBConnection::class);
+                $query = $connection->getQueryBuilder();
+                $query->delete('memories_covers')
+                    ->where($query->expr()->eq('uid', $query->createNamedParameter(Util::getUser()->getUID())))
+                    ->andWhere($query->expr()->eq('clustertype', $query->createNamedParameter($this->clusterType())))
+                    ->andWhere($query->expr()->eq('clusterid', $query->createNamedParameter($this->getClusterIdFrom($photo))))
+                    ->executeStatement()
+                ;
 
-            $query = $connection->getQueryBuilder();
-            $query->delete('memories_covers')
-                ->where($query->expr()->eq('uid', $query->createNamedParameter(Util::getUser()->getUID())))
-                ->andWhere($query->expr()->eq('clustertype', $query->createNamedParameter($this->clusterType())))
-                ->andWhere($query->expr()->eq('clusterid', $query->createNamedParameter($this->getClusterIdFrom($photo))))
-                ->executeStatement()
-            ;
-
-            $query = $connection->getQueryBuilder();
-            $query->insert('memories_covers')
-                ->values([
-                    'uid' => $query->createNamedParameter(Util::getUser()->getUID()),
-                    'clustertype' => $query->createNamedParameter($this->clusterType()),
-                    'clusterid' => $query->createNamedParameter($this->getClusterIdFrom($photo)),
-                    'objectid' => $query->createNamedParameter($this->getCoverObjId($photo)),
-                    'fileid' => $query->createNamedParameter($this->getFileId($photo)),
-                    'auto' => $query->createNamedParameter($manual ? 0 : 1, \PDO::PARAM_INT),
-                    'timestamp' => $query->createNamedParameter(time(), \PDO::PARAM_INT),
-                ])
-                ->executeStatement()
-            ;
-
-            $connection->commit();
+                $query = $connection->getQueryBuilder();
+                $query->insert('memories_covers')
+                    ->values([
+                        'uid' => $query->createNamedParameter(Util::getUser()->getUID()),
+                        'clustertype' => $query->createNamedParameter($this->clusterType()),
+                        'clusterid' => $query->createNamedParameter($this->getClusterIdFrom($photo)),
+                        'objectid' => $query->createNamedParameter($this->getCoverObjId($photo)),
+                        'fileid' => $query->createNamedParameter($this->getFileId($photo)),
+                        'auto' => $query->createNamedParameter($manual ? 0 : 1, \PDO::PARAM_INT),
+                        'timestamp' => $query->createNamedParameter(time(), \PDO::PARAM_INT),
+                    ])
+                    ->executeStatement()
+                ;
+            });
         } catch (\Exception $e) {
-            $connection->rollBack();
-
             if ($manual) {
                 throw $e;
             }

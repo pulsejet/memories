@@ -322,6 +322,33 @@ class Util
     }
 
     /**
+     * Run a callback in a transaction.
+     * It returns the same type as the return type of the closure.
+     *
+     * @template T
+     *
+     * @psalm-param \Closure(): T $callback
+     *
+     * @psalm-return T
+     */
+    public static function transaction(\Closure $callback): mixed
+    {
+        $connection = \OC::$server->get(\OCP\IDBConnection::class);
+        $connection->beginTransaction();
+
+        try {
+            $val = $callback();
+            $connection->commit();
+
+            return $val;
+        } catch (\Throwable $e) {
+            $connection->rollBack();
+
+            throw $e;
+        }
+    }
+
+    /**
      * Sanitize a path to keep only ASCII characters and special characters.
      * Null will be returned on error.
      */
