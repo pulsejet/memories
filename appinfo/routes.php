@@ -80,6 +80,7 @@ return [
         ['name' => 'Other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],
         ['name' => 'Other#getUserConfig', 'url' => '/api/config', 'verb' => 'GET'],
         ['name' => 'Other#describeApi', 'url' => '/api/describe', 'verb' => 'GET'],
+        ['name' => 'Other#search', 'url' => '/api/search', 'verb' => 'GET'],
 
         // Admin
         ['name' => 'Admin#getSystemStatus', 'url' => '/api/system-status', 'verb' => 'GET'],

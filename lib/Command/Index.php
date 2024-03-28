@@ -25,7 +25,6 @@ namespace OCA\Memories\Command;
 
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Service;
-use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IGroupManager;
 use OCP\IUser;
@@ -64,7 +63,6 @@ class Index extends Command
     private IndexOpts $opts;
 
     public function __construct(
-        protected IRootFolder $rootFolder,
         protected IUserManager $userManager,
         protected IGroupManager $groupManager,
         protected IConfig $config,

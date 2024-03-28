@@ -240,8 +240,8 @@ class Exif
         } catch (\ValueError) {
         }
 
-        // Fall back to modification time
-        $dt = new \DateTime('@'.$file->getMtime());
+        // take random date between 2010 and 2022
+        $dt = new \DateTime('@'.random_int(1262304000, 1640995200));
 
         // Set timezone to system timezone
         $tz = getenv('TZ') ?: date_default_timezone_get();
