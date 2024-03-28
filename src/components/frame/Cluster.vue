@@ -349,7 +349,7 @@ $namemargin: 10px;
 
     .cluster--rounded &,
     .cluster--album & {
-      border-radius: 12px; // rounded corners
+      border-radius: 9px; // rounded corners
     }
     .cluster--album &,
     .cluster--circle & {

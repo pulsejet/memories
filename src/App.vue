@@ -129,6 +129,7 @@ import MarkerIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagsIcon from 'vue-material-design-icons/Tag.vue';
 import MapIcon from 'vue-material-design-icons/Map.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
+import SearchIcon from 'vue-material-design-icons/Magnify.vue';
 
 type NavItem = {
   name: string;
@@ -321,6 +322,11 @@ export default defineComponent({
           title: t('memories', 'Timeline'),
         },
         {
+          name: 'explore',
+          icon: SearchIcon,
+          title: t('memories', 'Explore'),
+        },
+        {
           name: 'folders',
           icon: FolderIcon,
           title: t('memories', 'Folders'),
@@ -329,11 +335,6 @@ export default defineComponent({
           name: 'favorites',
           icon: Star,
           title: t('memories', 'Favorites'),
-        },
-        {
-          name: 'videos',
-          icon: Video,
-          title: t('memories', 'Videos'),
         },
         {
           name: 'albums',

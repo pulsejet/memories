@@ -1,8 +1,10 @@
 <template>
-  <div class="explore-outer hide-scrollbar">
+  <div class="explore-outer">
     <XLoadingIcon v-if="loading" class="fill-block" />
 
     <div v-else>
+      <div class="title">{{ t('memories', 'Explore') }}</div>
+
       <ClusterHList
         v-if="recognize.length"
         :title="t('memories', 'Recognize')"
@@ -26,7 +28,7 @@
           :key="category.name"
           :to="category.link"
           @click="category.click?.()"
-          type="secondary"
+          type="tertiary-no-background"
         >
           <template #icon>
             <component :is="category.icon" />
@@ -57,6 +59,7 @@ import CogIcon from 'vue-material-design-icons/Cog.vue';
 import { translate as t } from '@services/l10n';
 import config from '@services/static-config';
 import * as dav from '@services/dav';
+import * as utils from '@services/utils';
 
 import type { ICluster, IConfig } from '@typings';
 
@@ -108,12 +111,14 @@ export default defineComponent({
         icon: CogIcon,
         link: undefined,
         click: _m.modals.showSettings,
+        if: () => utils.isMobile(),
       },
     ] as {
       name: string;
       icon: Component;
       link?: string;
       click?: () => void;
+      if?: () => boolean;
     }[],
   }),
 
@@ -143,6 +148,9 @@ export default defineComponent({
     if (this.config.systemtags_enabled) {
       this.load(this.getTags);
     }
+
+    // Remove categories that should not be shown
+    this.categories = this.categories.filter((c) => !c.if || c.if());
   },
 
   methods: {
@@ -179,19 +187,52 @@ export default defineComponent({
 <style lang="scss" scoped>
 .explore-outer {
   height: 100%;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding-top: 8px;
 
+  .title {
+    margin: 0 14px;
+    padding-bottom: 2px;
+    font-size: 1.3em;
+    font-weight: 400;
+    line-height: 42px;
+    border-bottom: 1px solid var(--color-border-dark);
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  .cluster-hlist {
+    margin-top: 20px;
+    width: calc(100% - 24px);
+
+    @media (max-width: 768px) {
+      margin-top: 0;
+      width: 100%;
+    }
+  }
+
   .link-list {
-    padding: 6px 7px;
+    padding: 10px 4px;
     line-height: 0;
+
+    @media (max-width: 768px) {
+      padding: 6px 7px;
+      margin-bottom: 6px;
+    }
 
     > .link {
       line-height: initial;
       display: inline-block;
-      width: calc(50% - 6px);
       margin: 3px;
-      border-radius: 10px;
+      opacity: 0.8;
+      @media (max-width: 768px) {
+        width: calc(50% - 6px);
+        border-radius: 10px;
+        opacity: 1;
+      }
     }
   }
 }
