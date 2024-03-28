@@ -124,6 +124,26 @@ class OtherController extends GenericApiController
     /**
      * @NoAdminRequired
      *
+     * @NoCSRFRequired
+     */
+    public function search(?string $q): Http\Response
+    {
+        return Util::guardEx(static function () use ($q) {
+            if (null === $q) {
+                throw Exceptions::BadRequest('Missing query parameter');
+            }
+
+            $response = \OC::$server->get(\OCA\Memories\Command\AI::class)
+                ->search($q)
+            ;
+
+            return new JSONResponse($response, Http::STATUS_OK);
+        });
+    }
+
+    /**
+     * @NoAdminRequired
+     *
      * @PublicPage
      *
      * @NoCSRFRequired
