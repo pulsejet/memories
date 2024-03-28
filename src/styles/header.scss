@@ -1,10 +1,10 @@
 // Top bar is above everything else on mobile
-body.has-top-bar header {
+body:has(.memories-top-bar) > header {
   @media (max-width: 1024px) {
     z-index: 0 !important;
   }
 }
-body.has-viewer header {
+body:has(.memories_viewer) > header {
   z-index: 0 !important;
 }
 

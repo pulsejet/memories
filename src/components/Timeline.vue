@@ -1,6 +1,6 @@
 <template>
   <SwipeRefresh
-    class="container no-user-select"
+    class="memories-timeline container no-user-select"
     ref="container"
     match=".recycler"
     :refresh="softRefreshSync"

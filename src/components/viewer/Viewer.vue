@@ -108,7 +108,6 @@ type IViewerAction = {
 
 const SLIDESHOW_MS = 5000;
 const SIDEBAR_DEBOUNCE_MS = 350;
-const BODY_HAS_VIEWER = 'has-viewer';
 const BODY_VIEWER_VIDEO = 'viewer-video';
 const BODY_VIEWER_FULLY_OPENED = 'viewer-fully-opened';
 
@@ -573,7 +572,6 @@ export default defineComponent({
       // Put viewer over everything else
       const navElem = document.getElementById('app-navigation-vue');
       this.photoswipe.on('beforeOpen', () => {
-        document.body.classList.add(BODY_HAS_VIEWER);
         if (navElem) navElem.style.zIndex = '0';
       });
       this.photoswipe.on('openingAnimationStart', () => {
@@ -598,7 +596,6 @@ export default defineComponent({
         document.body.classList.remove(BODY_VIEWER_VIDEO);
       });
       this.photoswipe.on('destroy', () => {
-        document.body.classList.remove(BODY_HAS_VIEWER);
         if (navElem) navElem.style.zIndex = '';
 
         // reset everything
