@@ -61,7 +61,7 @@ OC.L10N.register(
     "Only user \"{user}\" can update this person" : "Nur der Benutzer \"{user}\" kann diese Person aktualisieren",
     "_{n} selected_::_{n} selected_" : ["{n} ausgewählt","{n} ausgewählt"],
     "Timeline Path" : "Pfad der Zeitleiste",
-    "Square grid mode" : "Quadratischer Gittermodus",
+    "Square grid mode" : "Quadratischer Rastermodus",
     "Show past photos on top of timeline" : "Vergangene Fotos oben auf der Zeitleiste anzeigen",
     "Stack RAW files with same name" : "RAW-Dateien mit demselben Namen stapeln",
     "Autoplay Live Photos" : "Live-Fotos automatisch abspielen",
