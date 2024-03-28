@@ -66,6 +66,7 @@ OC.L10N.register(
     "Search" : "検索",
     "Save changes" : "変更を保存",
     "Save collaborators for this album." : "このアルバムの共同作業者を保存。",
+    "Newest" : "最新",
     "Year" : "年",
     "Month" : "月",
     "Day" : "日",
