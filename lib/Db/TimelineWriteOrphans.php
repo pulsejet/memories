@@ -71,17 +71,15 @@ trait TimelineWriteOrphans
         $this->orphanAll(true, null, false);
 
         while (\count($orphans = $this->getSomeOrphans($txnSize, $fields))) {
-            $this->connection->beginTransaction();
+            Util::transaction(function () use ($callback, $orphans): void {
+                foreach ($orphans as $row) {
+                    $callback($row);
+                }
 
-            foreach ($orphans as $row) {
-                $callback($row);
-            }
-
-            // Mark all files as not orphaned.
-            $fileIds = array_map(static fn ($row): int => (int) $row['fileid'], $orphans);
-            $this->orphanAll(false, $fileIds, false);
-
-            $this->connection->commit();
+                // Mark all files as not orphaned.
+                $fileIds = array_map(static fn ($row): int => (int) $row['fileid'], $orphans);
+                $this->orphanAll(false, $fileIds, false);
+            });
         }
     }
 
