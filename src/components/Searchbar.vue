@@ -16,17 +16,19 @@
         </template>
 
         <div class="searchbar-results">
-          <div class="row" v-for="cluster of clustersResult" tabindex="1">
-            <div class="icon">
-              <AlbumIcon v-if="clusterIs.album(cluster)" :size="22" />
-              <LocationIcon v-else-if="clusterIs.place(cluster)" :size="22" />
-              <TagIcon v-else-if="clusterIs.tag(cluster)" :size="22" />
-              <XImg v-else-if="clusterIs.face(cluster)" :src="clusterPreview(cluster)" class="preview-image" />
-              <MagnifyIcon v-else :size="22" />
-            </div>
+          <template v-for="cluster of clustersResult">
+            <router-link class="cluster" :to="clusterTarget(cluster)" @click.native="reset()">
+              <div class="icon">
+                <AlbumIcon v-if="clusterIs.album(cluster)" :size="22" />
+                <LocationIcon v-else-if="clusterIs.place(cluster)" :size="22" />
+                <TagIcon v-else-if="clusterIs.tag(cluster)" :size="22" />
+                <XImg v-else-if="clusterIs.face(cluster)" :src="clusterPreview(cluster)" class="preview-image" />
+                <MagnifyIcon v-else :size="22" />
+              </div>
 
-            {{ cluster.display_name ?? cluster.name }}
-          </div>
+              {{ cluster.display_name ?? cluster.name }}
+            </router-link>
+          </template>
         </div>
       </NcPopover>
     </div>
@@ -75,14 +77,16 @@ export default defineComponent({
     clustersLoad: false,
     clusterIs: dav.clusterIs,
     clusterPreview: dav.getClusterPreview,
+    clusterTarget: dav.getClusterLinkTarget,
   }),
 
   computed: {
-    shown(): boolean {
+    shown() {
       return this.clustersResult.length > 0;
     },
 
     clustersResult(): ICluster[] {
+      if (!this.prompt) return [];
       return this.clustersFuse.search(this.prompt, { limit: 6 }).map((r) => r.item);
     },
 
@@ -99,6 +103,10 @@ export default defineComponent({
   },
 
   methods: {
+    reset() {
+      this.prompt = String();
+    },
+
     async load() {
       // Load all clusters that we can search in
       if (!this.clustersLoad) {
@@ -147,7 +155,8 @@ export default defineComponent({
   width: 400px;
   max-width: calc(100vw - 20px);
 
-  .row {
+  .cluster {
+    display: block;
     padding: 8px 14px;
     cursor: pointer;
 
