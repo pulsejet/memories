@@ -29,6 +29,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Nun se puen cargar delles semeyes",
     "Failed to update setting" : "Nun se pue anovar la opción",
     "External Link" : "Enllaz esternu",
+    "Performance" : "Rindimientu",
     "Continue" : "Siguir",
     "Template" : "Plantía",
     "Add people or groups who can edit your album" : "Amiesta a persones u grupos que puedan editar l'álbum",
