@@ -277,9 +277,12 @@ abstract class Backend
         if ($validateFilecache) {
             $treeSq = $query->getConnection()->getQueryBuilder();
             $treeSq->select($treeSq->expr()->literal(1))
-                ->from('memories', 'cov_m')
-                ->innerJoin('cov_m', 'cte_folders', 'cov_cte_m', $treeSq->expr()->eq('cov_m.parent', 'cov_cte_m.fileid'))
-                ->where($treeSq->expr()->eq('cov_m.fileid', "{$mcov}.fileid"))
+                ->from('filecache', 'cov_f')
+                ->innerJoin('cov_f', 'cte_folders', 'cov_cte_f', $treeSq->expr()->andX(
+                    $treeSq->expr()->eq('cov_cte_f.fileid', 'cov_f.parent'),
+                    $treeSq->expr()->eq('cov_cte_f.hidden', $treeSq->expr()->literal(0, \PDO::PARAM_INT)),
+                ))
+                ->where($treeSq->expr()->eq('cov_f.fileid', "{$mcov}.fileid"))
             ;
 
             $joinClauses[] = $query->createFunction("EXISTS ({$treeSq->getSQL()})");
