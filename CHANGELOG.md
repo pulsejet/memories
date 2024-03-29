@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- **Breaking change**: SQLite is no longer fully supported and is now expected to break or be very slow.
+- **Important**: SQLite is no longer fully supported and is now expected to break in the future or be very slow.
 - **Feature**: Allow sorting albums by most recently updated.
 - **Feature**: Allow sorting albums in ascending and descending direction.
 - **Feature**: Manual upload to folder is now available in the Android app.

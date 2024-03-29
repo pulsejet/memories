@@ -6,6 +6,7 @@ namespace OCA\Memories\Db;
 
 use OCA\Memories\ClustersBackend;
 use OCA\Memories\Exif;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -222,6 +223,16 @@ trait TimelineQueryDays
             return $query;
         }
 
+        // Which field is the parent field for the record
+        $parent = 'm.parent';
+
+        // Check if triggers are properly set up
+        if (!SystemConfig::get('memories.db.triggers.fcu')) {
+            // Compatibility mode - JOIN filecache and use the parent from there (this is slow)
+            $query->innerJoin('m', 'filecache', 'ff_f', $query->expr()->eq('m.fileid', 'ff_f.fileid'));
+            $parent = 'ff_f.parent';
+        }
+
         // Filter by folder (recursive or otherwise)
         if ($recursive) {
             // This are used later by the execution function
@@ -231,14 +242,14 @@ trait TimelineQueryDays
             $sq = $query->getConnection()->getQueryBuilder();
             $sq->select($sq->expr()->literal(1))
                 ->from('cte_folders', 'cte_f')
-                ->where($sq->expr()->eq('m.parent', 'cte_f.fileid'))
+                ->where($sq->expr()->eq($parent, 'cte_f.fileid'))
             ;
 
             // Filter files in one of the timeline folders
             $query->andWhere($query->createFunction("EXISTS ({$sq->getSQL()})"));
         } else {
             // If getting non-recursively folder only check for parent
-            $query->andWhere($query->expr()->eq('m.parent', $query->createNamedParameter($root->getOneId(), IQueryBuilder::PARAM_INT)));
+            $query->andWhere($query->expr()->eq($parent, $query->createNamedParameter($root->getOneId(), IQueryBuilder::PARAM_INT)));
         }
 
         return $query;

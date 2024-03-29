@@ -94,6 +94,9 @@ class SystemConfig
         // 1080 => 1080p (and so on)
         'memories.video_default_quality' => '0',
 
+        // Availability of database features, e.g. triggers
+        'memories.db.triggers.fcu' => false,
+
         // Memories only provides an admin interface for these
         'enabledPreviewProviders' => [],
         'preview_max_x' => 4096,

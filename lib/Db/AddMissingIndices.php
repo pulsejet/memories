@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OC\DB\SchemaWrapper;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 
@@ -126,8 +127,10 @@ class AddMissingIndices
             }
 
             $output->info('Recreated filecache trigger with: '.$platform::class);
+            SystemConfig::set('memories.db.triggers.fcu', true);
         } catch (\Throwable $e) {
-            $output->warning('Failed to create filecache trigger: '.$e->getMessage());
+            $output->warning('Failed to create filecache trigger (compatibility mode will be used): '.$e->getMessage());
+            SystemConfig::set('memories.db.triggers.fcu', false);
         }
     }
 }

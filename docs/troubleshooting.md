@@ -72,6 +72,18 @@ app:
     occ config:system:set memories.exiftool.tmp --value /path/to/temp/dir
     ```
 
+## Trigger compatibility mode
+
+Memories utilizes database triggers for certain functionality and if these triggers cannot be used then the app will run in trigger compatibility mode. This mode is much slower especially on larger databases. Note that SQLite only supports compatibility mode, and is not recommended for production use.
+
+If your admin panel shows that Memories is running in trigger compatibility mode, try the following steps.
+
+1. Run `occ maintenance:repair` to attempt to create the triggers. This will print any errors that occur.
+2. Restart the PHP server.
+3. If you are using MySQL (not applicable to MariaDB), set the `log_bin_trust_function_creators` option is set to `1` in your `my.cnf` file. If you are using docker, you can add `--log_bin_trust_function_creators=true` to your command line. Repeat steps 1 and 2 after making this change.
+
+If none of the above work or are applicable, and you are not running SQLite, file a bug at the repository including the output of `occ maintenance:repair`.
+
 ## Issues with NixOS
 
 ### Background index fails
