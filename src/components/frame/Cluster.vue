@@ -46,7 +46,7 @@ import * as nativex from '@native';
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
 
-import type { IAlbum, ICluster, IFace, IPhoto } from '@typings';
+import type { ICluster } from '@typings';
 
 export default defineComponent({
   name: 'Cluster',
@@ -106,39 +106,14 @@ export default defineComponent({
       return String();
     },
 
-    type() {
-      return this.data.cluster_type;
-    },
-
     plus() {
-      return this.type === 'plus';
+      return this.data.cluster_type === 'plus';
     },
 
     /** Target URL to navigate to */
     target() {
       if (!this.link || this.plus) return {};
-
-      if (dav.clusterIs.album(this.data)) {
-        const { user, name } = this.data;
-        return { name: 'albums', params: { user, name } };
-      }
-
-      if (dav.clusterIs.face(this.data)) {
-        const name = String(this.data.name || this.data.cluster_id);
-        const user = this.data.user_id;
-        return { name: this.data.cluster_type, params: { name, user } };
-      }
-
-      if (dav.clusterIs.place(this.data)) {
-        const id = this.data.cluster_id;
-        const placeName = this.data.name || id;
-        const name = `${id}-${placeName}`;
-        return { name: 'places', params: { name } };
-      }
-
-      if (dav.clusterIs.tag(this.data)) {
-        return { name: 'tags', params: { name: this.data.name } };
-      }
+      return dav.getClusterLinkTarget(this.data);
     },
 
     error() {

@@ -46,3 +46,34 @@ export function getClusterPreview(cluster: ICluster, size = 512) {
   // Use a random cover ID to bust local cache
   return API.CLUSTER_PREVIEW(cluster.cluster_type, cluster.cluster_id, cluster.cover, cluster.cover_etag ?? 'null');
 }
+
+/**
+ * Get the target route name and params for the cluster
+ * @param cluster Cluster object
+ * @returns {string} The target route name and params for the cluster
+ */
+export function getClusterLinkTarget(cluster: ICluster) {
+  if (clusterIs.album(cluster)) {
+    const { user, name } = cluster;
+    return { name: _m.routes.Albums.name, params: { user, name } };
+  }
+
+  if (clusterIs.face(cluster)) {
+    const name = String(cluster.name || cluster.cluster_id);
+    const user = cluster.user_id;
+    return { name: cluster.cluster_type, params: { name, user } };
+  }
+
+  if (clusterIs.place(cluster)) {
+    const id = cluster.cluster_id;
+    const placeName = cluster.name || id;
+    const name = `${id}-${placeName}`;
+    return { name: _m.routes.Places.name, params: { name } };
+  }
+
+  if (clusterIs.tag(cluster)) {
+    return { name: _m.routes.Tags.name, params: { name: cluster.name } };
+  }
+
+  return {};
+}
