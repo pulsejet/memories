@@ -53,6 +53,14 @@ declare module '@typings' {
     user_id: string;
   }
 
+  export interface IPlace extends ICluster {
+    __p: never; // cannot have empty interface
+  }
+
+  export interface ITag extends ICluster {
+    __t: never; // cannot have empty interface
+  }
+
   export interface IFaceRect {
     w: number;
     h: number;
