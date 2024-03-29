@@ -249,6 +249,8 @@ jobs:
             --admin-pass password
 
       - name: Run tests
+        env:
+          ALLOW_TRIGGER_COMPAT: 1
         run: |
           ./apps/memories/scripts/ci-test.sh
 

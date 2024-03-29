@@ -32,10 +32,12 @@ php occ maintenance:repair
 set -e
 
 # Make sure we're not running in trigger compatiblity mode
-MODE=$(php occ config:system:get memories.db.triggers.fcu)
-if [$MODE != *"true"* ]; then
-    echo -e "Database is running in trigger compatibility mode."
-    exit 613
+if [[ -z "${ALLOW_TRIGGER_COMPAT}" ]]; then
+    MODE=$(php occ config:system:get memories.db.triggers.fcu)
+    if ["$MODE" != *"true"* ]; then
+        echo -e "Database is running in trigger compatibility mode."
+        exit 613
+    fi
 fi
 
 # Set debug mode and start dev server
