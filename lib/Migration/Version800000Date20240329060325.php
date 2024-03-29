@@ -72,10 +72,10 @@ class Version800000Date20240329060325 extends SimpleMigrationStep
      */
     public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
     {
-		// create database triggers; this will never throw
-		\OCA\Memories\Db\AddMissingIndices::createFilecacheTriggers($output);
+        // create database triggers; this will never throw
+        \OCA\Memories\Db\AddMissingIndices::createFilecacheTriggers($output);
 
-		// migrate parent values from filecache
+        // migrate parent values from filecache
         try {
             $output->info('Migrating values for parent from filecache');
 

@@ -86,11 +86,11 @@ class AddMissingIndices
         // Trigger to update parent from filecache
         try {
             if (preg_match('/mysql|mariadb/i', $platform::class)) {
-                $connection->executeQuery(
-                    // MySQL has no upsert for triggers
-                    'DROP TRIGGER IF EXISTS memories_fcu_trg;'.
+                // MySQL has no upsert for triggers
+                $connection->executeQuery('DROP TRIGGER IF EXISTS memories_fcu_trg;');
 
-                    // Create the trigger again
+                // Create the trigger again
+                $connection->executeQuery(
                     'CREATE TRIGGER memories_fcu_trg
                     AFTER UPDATE ON *PREFIX*filecache
                     FOR EACH ROW
@@ -99,10 +99,10 @@ class AddMissingIndices
                         WHERE fileid = NEW.fileid;',
                 );
             } elseif (preg_match('/postgres/i', $platform::class)) {
+                // Postgres requres a function to do the update
+                // Note: when dropping, the function should be dropped
+                // with CASCADE to remove the trigger as well
                 $connection->executeQuery(
-                    // Postgres requres a function to do the update
-                    // Note: when dropping, the function should be dropped
-                    // with CASCADE to remove the trigger as well
                     'CREATE OR REPLACE FUNCTION memories_fcu_fun()
                     RETURNS TRIGGER AS $$
                     BEGIN
@@ -111,9 +111,12 @@ class AddMissingIndices
                         WHERE fileid = NEW.fileid;
                         RETURN NEW;
                     END;
-                    $$ LANGUAGE plpgsql;
+                    $$ LANGUAGE plpgsql;',
+                );
 
-                    CREATE OR REPLACE TRIGGER memories_fcu_trg
+                // Create the trigger for the function
+                $connection->executeQuery(
+                    'CREATE OR REPLACE TRIGGER memories_fcu_trg
                     AFTER UPDATE ON *PREFIX*filecache
                     FOR EACH ROW
                     EXECUTE FUNCTION memories_fcu_fun();',
