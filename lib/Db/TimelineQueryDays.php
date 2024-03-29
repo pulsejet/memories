@@ -49,8 +49,8 @@ trait TimelineQueryDays
         // Apply all transformations
         $this->applyAllTransforms($queryTransforms, $query, true);
 
-        // JOIN with filecache for existing files
-        $query = $this->joinFilecache($query, null, $recursive, $archive);
+        // FILTER with filecache for timeline path
+        $query = $this->filterFilecache($query, null, $recursive, $archive);
 
         // FETCH all days
         $rows = $this->executeQueryWithCTEs($query)->fetchAll();
@@ -136,8 +136,11 @@ trait TimelineQueryDays
         // Apply all transformations
         $this->applyAllTransforms($queryTransforms, $query, false);
 
-        // JOIN with filecache for existing files
-        $query = $this->joinFilecache($query, null, $recursive, $archive, $hidden);
+        // JOIN with filecache to get the basename etc
+        $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
+
+        // Filter for files in the timeline path
+        $query = $this->filterFilecache($query, null, $recursive, $archive, $hidden);
 
         // FETCH all photos in this day
         $day = $this->executeQueryWithCTEs($query)->fetchAll();
@@ -183,7 +186,7 @@ trait TimelineQueryDays
      * @param bool          $archive   Whether to get the days only from the archive folder
      * @param bool          $hidden    Whether to include hidden files
      */
-    public function joinFilecache(
+    public function filterFilecache(
         IQueryBuilder $query,
         ?TimelineRoot $root = null,
         bool $recursive = true,
@@ -208,8 +211,6 @@ trait TimelineQueryDays
             $root = $this->_root;
         }
 
-        // Join with memories
-        $baseOp = $query->expr()->eq('f.fileid', 'm.fileid');
         if ($root->isEmpty()) {
             // This is illegal in most cases except albums,
             // which don't have a folder associated.
@@ -217,21 +218,30 @@ trait TimelineQueryDays
                 throw new \Exception('No valid root folder found (.nomedia?)');
             }
 
-            return $query->innerJoin('m', 'filecache', 'f', $baseOp);
+            // Nothing to do here
+            return $query;
         }
 
         // Filter by folder (recursive or otherwise)
-        $pathOp = null;
         if ($recursive) {
-            // Join with folders CTE
+            // This are used later by the execution function
             $this->addSubfolderJoinParams($query, $root, $archive, $hidden);
-            $query->innerJoin('f', 'cte_folders', 'cte_f', $query->expr()->eq('f.parent', 'cte_f.fileid'));
+
+            // Subquery to test parent folder
+            $sq = $query->getConnection()->getQueryBuilder();
+            $sq->select($sq->expr()->literal(1))
+                ->from('cte_folders', 'cte_f')
+                ->where($sq->expr()->eq('m.parent', 'cte_f.fileid'))
+            ;
+
+            // Filter files in one of the timeline folders
+            $query->andWhere($query->createFunction("EXISTS ({$sq->getSQL()})"));
         } else {
             // If getting non-recursively folder only check for parent
-            $pathOp = $query->expr()->eq('f.parent', $query->createNamedParameter($root->getOneId(), IQueryBuilder::PARAM_INT));
+            $query->andWhere($query->expr()->eq('m.parent', $query->createNamedParameter($root->getOneId(), IQueryBuilder::PARAM_INT)));
         }
 
-        return $query->innerJoin('m', 'filecache', 'f', $query->expr()->andX($baseOp, $pathOp));
+        return $query;
     }
 
     /**

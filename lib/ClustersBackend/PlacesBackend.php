@@ -120,7 +120,7 @@ class PlacesBackend extends Backend
         $query->innerJoin('mp', 'memories', 'm', $query->expr()->eq('m.fileid', 'mp.fileid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // GROUP and ORDER by tag name
         $query->groupBy('e.osm_id');
@@ -192,7 +192,7 @@ class PlacesBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT all photos with this tag
-        $query->select('f.fileid', 'f.etag', 'mp.osm_id')
+        $query->select('m.fileid', 'f.etag', 'mp.osm_id')
             ->from('memories_places', 'mp')
             ->where($query->expr()->eq('mp.osm_id', $query->createNamedParameter((int) $name)))
         ;
@@ -200,8 +200,11 @@ class PlacesBackend extends Backend
         // WHERE these items are memories indexed photos
         $query->innerJoin('mp', 'memories', 'm', $query->expr()->eq('m.fileid', 'mp.fileid'));
 
+        // JOIN with the filecache table
+        $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
+
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // MAX number of photos
         if (-6 === $limit) {
@@ -212,7 +215,7 @@ class PlacesBackend extends Backend
 
         // Filter by fileid if specified
         if (null !== $fileid) {
-            $query->andWhere($query->expr()->eq('f.fileid', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
+            $query->andWhere($query->expr()->eq('m.fileid', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         // FETCH tag photos

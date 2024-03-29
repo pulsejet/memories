@@ -55,7 +55,7 @@ trait TimelineQueryMap
         $query->innerJoin('c', 'memories', 'm', $query->expr()->eq('c.id', 'm.mapcluster'));
 
         // JOIN with filecache for existing files
-        $query = $this->joinFilecache($query);
+        $query = $this->filterFilecache($query);
 
         // Bound the query to the map bounds
         $this->transformMapBoundsFilter($query, false, $bounds, 'c');
@@ -93,7 +93,7 @@ trait TimelineQueryMap
         ;
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query);
+        $query = $this->filterFilecache($query);
 
         // GROUP BY the cluster
         $query->groupBy('m.mapcluster');
@@ -104,12 +104,13 @@ trait TimelineQueryMap
 
         // SELECT these files from the filecache
         $query = $this->connection->getQueryBuilder();
-        $query->select('m.fileid', 'm.dayid', 'm.mapcluster', 'm.h', 'm.w', 'f.etag')
+        $files = $query->select('m.fileid', 'm.dayid', 'm.mapcluster', 'm.h', 'm.w', 'f.etag')
             ->from('memories', 'm')
             ->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'))
             ->where($query->expr()->in('m.fileid', $query->createNamedParameter($fileIds, IQueryBuilder::PARAM_INT_ARRAY)))
+            ->executeQuery()
+            ->fetchAll()
         ;
-        $files = $query->executeQuery()->fetchAll();
 
         // Post-process
         foreach ($files as &$row) {
@@ -137,7 +138,7 @@ trait TimelineQueryMap
         $query->select('m.lat', 'm.lon')->from('memories', 'm');
 
         // WHERE this photo is in the user's requested folder recursively
-        $query = $this->joinFilecache($query);
+        $query = $this->filterFilecache($query);
 
         // WHERE this photo has coordinates
         $query->where($query->expr()->andX(

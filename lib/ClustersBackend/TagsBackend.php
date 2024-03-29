@@ -88,7 +88,7 @@ class TagsBackend extends Backend
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // GROUP and ORDER by tag name
         $query->addGroupBy('st.id');
@@ -140,7 +140,10 @@ class TagsBackend extends Backend
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
+
+        // JOIN with the filecache table
+        $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('f.fileid', 'm.fileid'));
 
         // MAX number of files
         if (-6 === $limit) {
