@@ -4,11 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- A Docker Compose example using the community Nextcloud image is now available in the repo.
+- **Breaking change**: SQLite is no longer fully supported and is now expected to break or be very slow.
 - **Feature**: Allow sorting albums by most recently updated.
 - **Feature**: Allow sorting albums in ascending and descending direction.
 - **Feature**: Manual upload to folder is now available in the Android app.
+- **Documentation**: A Docker Compose example using the community Nextcloud image is now available in the repo.
 - **Fix**: Prevent turning off screen when playing videos.
+- Support for Nextcloud 29
 
 ## [v7.0.2] - 2024-03-19
 
