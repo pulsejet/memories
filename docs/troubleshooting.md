@@ -135,14 +135,18 @@ DROP TABLE IF EXISTS oc_memories_mapclusters;
 DROP TABLE IF EXISTS oc_memories_places;
 DROP TABLE IF EXISTS oc_memories_planet;
 DROP TABLE IF EXISTS memories_planet_geometry;
-DROP INDEX IF EXISTS memories_parent_mimetype ON oc_filecache; /* MySQL */
 DELETE FROM oc_migrations WHERE app='memories';
+
+/* The following statements are specific to MySQL / MariaDB */
+DROP INDEX IF EXISTS memories_parent_mimetype ON oc_filecache;
+DROP INDEX IF EXISTS memories_type_tagid ON systemtag_object_mapping;
 ```
 
 On Postgres, the syntax for dropping the index is:
 
 ```sql
 DROP INDEX IF EXISTS memories_parent_mimetype;
+DROP INDEX IF EXISTS memories_type_tagid;
 ```
 
 !!! warning "Reinstallation"
