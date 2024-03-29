@@ -171,6 +171,7 @@ class TimelineWrite
             'mapcluster' => $query->createNamedParameter($mapCluster, IQueryBuilder::PARAM_INT),
             'orphan' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
             'buid' => $query->createNamedParameter($buid, IQueryBuilder::PARAM_STR),
+            'parent' => $query->createNamedParameter($file->getParent()->getId(), IQueryBuilder::PARAM_INT),
         ];
 
         // There is no easy way to UPSERT in standard SQL
