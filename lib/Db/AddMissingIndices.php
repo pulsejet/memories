@@ -122,6 +122,19 @@ class AddMissingIndices
                     FOR EACH ROW
                     EXECUTE FUNCTION memories_fcu_fun();',
                 );
+            } elseif (preg_match('/sqlite/i', $platform::class)) {
+                // Exactly the same as MySQL except for the BEGIN and END
+                $connection->executeQuery('DROP TRIGGER IF EXISTS memories_fcu_trg;');
+                $connection->executeQuery(
+                    'CREATE TRIGGER memories_fcu_trg
+                    AFTER UPDATE ON *PREFIX*filecache
+                    FOR EACH ROW
+                    BEGIN
+                        UPDATE *PREFIX*memories
+                        SET parent = NEW.parent
+                        WHERE fileid = NEW.fileid;
+                    END;',
+                );
             } else {
                 throw new \Exception('Unsupported database platform: '.$platform::class);
             }

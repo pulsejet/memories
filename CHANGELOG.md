@@ -5,7 +5,6 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - **Notice**: This release significantly overhauls the core querying infrastructure for better performance. If you run into any regressions (including performance), please [file a bug report](https://github.com/pulsejet/memories/issues)
-- **Breaking**: SQLite is no longer fully supported and is expected to be much slower.
 - **Breaking**: If you are running MySQL (not applicable to MariaDB), you may need some extra configuration for setting up database triggers. Check the admin panel for any errors in the performance section and refer to the documentation [here](https://memories.gallery/troubleshooting/#trigger-compatibility-mode).
 - **Feature**: Allow sorting albums by most recently updated.
 - **Feature**: Allow sorting albums in ascending and descending direction.

@@ -95,6 +95,13 @@ class Version800000Date20240329060325 extends SimpleMigrationStep
 					FROM *PREFIX*filecache AS f
 					WHERE f.fileid = m.fileid',
                 );
+            } elseif (preg_match('/sqlite/i', $platform::class)) {
+                $this->dbc->executeQuery(
+                    'UPDATE memories
+                    SET parent = (
+                        SELECT parent FROM filecache
+                        WHERE fileid = memories.fileid)',
+                );
             } else {
                 throw new \Exception('Unsupported '.$platform::class);
             }
