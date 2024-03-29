@@ -22,13 +22,13 @@ trait TimelineQueryFolders
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all photos
-        $query->select('f.fileid', 'f.etag')->from('memories', 'm');
+        $query->select('m.fileid', 'f.etag')->from('memories', 'm');
+
+        // JOIN with the filecache table
+        $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $root, true, false);
-
-        // ORDER descending by fileid
-        $query->orderBy('f.fileid', 'DESC');
+        $query = $this->filterFilecache($query, $root, true, false);
 
         // MAX 4
         $query->setMaxResults(4);

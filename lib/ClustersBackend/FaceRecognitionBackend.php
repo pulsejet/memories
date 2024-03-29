@@ -175,7 +175,7 @@ class FaceRecognitionBackend extends Backend
         $query->where($query->expr()->eq($nameField, $query->createNamedParameter($name)));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // LIMIT results
         if (-6 === $limit) {
@@ -263,7 +263,7 @@ class FaceRecognitionBackend extends Backend
         ));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // GROUP by ID of face cluster
         $query->addGroupBy('frp.id', 'frp.user');
@@ -324,7 +324,7 @@ class FaceRecognitionBackend extends Backend
         ));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // GROUP by name of face clusters
         $query->where($query->expr()->isNotNull('frp.name'));

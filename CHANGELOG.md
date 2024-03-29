@@ -4,11 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- A Docker Compose example using the community Nextcloud image is now available in the repo.
+- **Notice**: This release significantly overhauls the core querying infrastructure for better performance. If you run into any regressions (including performance), please [file a bug report](https://github.com/pulsejet/memories/issues)
+- **Breaking**: If you are running MySQL (not applicable to MariaDB), you may need some extra configuration for setting up database triggers. Check the admin panel for any errors in the performance section and refer to the documentation [here](https://memories.gallery/troubleshooting/#trigger-compatibility-mode).
 - **Feature**: Allow sorting albums by most recently updated.
 - **Feature**: Allow sorting albums in ascending and descending direction.
 - **Feature**: Manual upload to folder is now available in the Android app.
+- **Documentation**: A Docker Compose example using the community Nextcloud image is now available in the repo.
 - **Fix**: Prevent turning off screen when playing videos.
+- Support for Nextcloud 29
 
 ## [v7.0.2] - 2024-03-19
 

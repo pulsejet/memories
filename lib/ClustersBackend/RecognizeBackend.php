@@ -143,7 +143,7 @@ class RecognizeBackend extends Backend
         $query->innerJoin('rfd', 'memories', 'm', $query->expr()->eq('m.fileid', 'rfd.file_id'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // WHERE this cluster belongs to the user
         $query->where($query->expr()->eq('rfc.user_id', $query->createNamedParameter(Util::getUID())));
@@ -230,7 +230,7 @@ class RecognizeBackend extends Backend
         $query->innerJoin('rfd', 'memories', 'm', $query->expr()->eq('m.fileid', 'rfd.file_id'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // LIMIT results
         if (-6 === $limit) {
