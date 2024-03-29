@@ -5,7 +5,7 @@
     </div>
 
     <form class="manage-collaborators__form" @submit.prevent>
-      <NcPopover ref="popover" :auto-size="true" :distance="0" :focus-trap="false">
+      <NcPopover :shown="showPopover" :auto-size="true" :distance="0" :focus-trap="false">
         <template #trigger="{ attrs }">
           <label slot="trigger" class="manage-collaborators__form__input" v-bind="attrs">
             <NcTextField
@@ -144,8 +144,8 @@ import { showError } from '@nextcloud/dialogs';
 import { generateOcsUrl, generateUrl } from '@nextcloud/router';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-import NcPopover from '@nextcloud/vue/dist/Components/NcPopover.js';
 import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js';
+const NcPopover = () => import('@nextcloud/vue/dist/Components/NcPopover.js');
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 const NcListItemIcon = () => import('@nextcloud/vue/dist/Components/NcListItemIcon.js');
 
@@ -194,6 +194,7 @@ export default defineComponent({
 
   data: () => ({
     searchText: '',
+    showPopover: false,
     availableCollaborators: {} as { [key: string]: Collaborator },
     selectedCollaboratorsKeys: [] as string[],
     currentSearchResults: [] as Collaborator[],
@@ -209,12 +210,6 @@ export default defineComponent({
   }),
 
   computed: {
-    refs() {
-      return this.$refs as {
-        popover?: VueNcPopover;
-      };
-    },
-
     searchResults(): string[] {
       return this.currentSearchResults
         .filter(({ id }) => id !== utils.uid)
@@ -257,7 +252,7 @@ export default defineComponent({
      */
     async searchCollaborators() {
       if (this.searchText.length >= 1) {
-        this.refs.popover?.$refs.popover.show();
+        this.showPopover = true;
       }
 
       try {
@@ -408,8 +403,8 @@ export default defineComponent({
 
     selectEntity(collaboratorKey: string) {
       if (this.selectedCollaboratorsKeys.includes(collaboratorKey)) return;
-      this.refs.popover?.$refs.popover.hide();
       this.selectedCollaboratorsKeys.push(collaboratorKey);
+      this.showPopover = false;
     },
 
     unselectEntity(collaboratorKey: string) {
