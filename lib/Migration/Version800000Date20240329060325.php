@@ -85,15 +85,15 @@ class Version800000Date20240329060325 extends SimpleMigrationStep
             if (preg_match('/mysql|mariadb/i', $platform::class)) {
                 $this->dbc->executeQuery(
                     'UPDATE *PREFIX*memories m
-					JOIN *PREFIX*filecache f ON m.fileid = f.fileid
-					SET m.parent = f.parent',
+                    JOIN *PREFIX*filecache f ON m.fileid = f.fileid
+                    SET m.parent = f.parent',
                 );
             } elseif (preg_match('/postgres/i', $platform::class)) {
                 $this->dbc->executeQuery(
                     'UPDATE *PREFIX*memories AS m
-					SET parent = f.parent
-					FROM *PREFIX*filecache AS f
-					WHERE f.fileid = m.fileid',
+                    SET parent = f.parent
+                    FROM *PREFIX*filecache AS f
+                    WHERE f.fileid = m.fileid',
                 );
             } elseif (preg_match('/sqlite/i', $platform::class)) {
                 $this->dbc->executeQuery(
