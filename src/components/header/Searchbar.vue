@@ -116,7 +116,7 @@ export default defineComponent({
 
   methods: {
     reset() {
-      this.prompt = String();
+      // nothing for now; the behavior is weird
     },
 
     async load() {
