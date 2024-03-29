@@ -1,38 +1,46 @@
 <template>
-  <div class="search-overlay">
-    <div class="search-bar">
-      <NcPopover :shown="shown" :focus-trap="false">
-        <template #trigger="{ attrs }">
-          <NcTextField
-            v-bind="attrs"
-            :autofocus="true"
-            :value.sync="prompt"
-            :label-outside="true"
-            :label="t('memories', 'Search photos and albums')"
-            :placeholder="t('memories', 'Search photos and albums')"
-          >
-            <MagnifyIcon :size="16" />
-          </NcTextField>
-        </template>
+  <NcPopover :shown="shown" :focus-trap="false" @after-hide="pHidden = true">
+    <template #trigger="{ attrs }">
+      <div v-bind="attrs">
+        <NcTextField
+          class="memories-searchbar"
+          :autofocus="true"
+          :value.sync="prompt"
+          :label-outside="true"
+          :label="t('memories', 'Search your photos …')"
+          :placeholder="t('memories', 'Search your photos …')"
+        >
+          <MagnifyIcon :size="16" />
+        </NcTextField>
+      </div>
+    </template>
 
-        <div class="searchbar-results">
-          <template v-for="cluster of clustersResult">
-            <router-link class="cluster" :to="clusterTarget(cluster)" @click.native="reset()">
-              <div class="icon">
-                <AlbumIcon v-if="clusterIs.album(cluster)" :size="22" />
-                <LocationIcon v-else-if="clusterIs.place(cluster)" :size="22" />
-                <TagIcon v-else-if="clusterIs.tag(cluster)" :size="22" />
-                <XImg v-else-if="clusterIs.face(cluster)" :src="clusterPreview(cluster)" class="preview-image" />
-                <MagnifyIcon v-else :size="22" />
-              </div>
+    <div class="searchbar-results">
+      <div class="empty" v-if="prompt.length === 0">
+        {{ t('memories', 'Start typing to find photos and albums …') }}
+      </div>
+      <div class="empty" v-else-if="!clusters && clustersLoad">
+        <XLoadingIcon class="fill-block" />
+      </div>
+      <div class="empty" v-else-if="clustersResult.length === 0">
+        {{ t('memories', 'No results found') }}
+      </div>
 
-              {{ cluster.display_name ?? cluster.name }}
-            </router-link>
-          </template>
-        </div>
-      </NcPopover>
+      <template v-for="cluster of clustersResult">
+        <router-link class="cluster" :to="clusterTarget(cluster)" @click.native="reset()">
+          <div class="icon">
+            <AlbumIcon v-if="clusterIs.album(cluster)" :size="22" />
+            <LocationIcon v-else-if="clusterIs.place(cluster)" :size="22" />
+            <TagIcon v-else-if="clusterIs.tag(cluster)" :size="22" />
+            <XImg v-else-if="clusterIs.face(cluster)" :src="clusterPreview(cluster)" class="preview-image" />
+            <MagnifyIcon v-else :size="22" />
+          </div>
+
+          {{ cluster.display_name ?? cluster.name }}
+        </router-link>
+      </template>
     </div>
-  </div>
+  </NcPopover>
 </template>
 
 <script lang="ts">
@@ -53,7 +61,6 @@ import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
 
 import type { ICluster } from '@typings';
-import XImg from './frame/XImg.vue';
 
 export default defineComponent({
   name: 'Searchbar',
@@ -71,9 +78,13 @@ export default defineComponent({
 
   data: () => ({
     prompt: String(),
-    showPopover: false,
 
-    clusters: [] as ICluster[],
+    // Popover can be hidden by clicking outside and
+    // so subsequent changes to prompt do not trigger
+    // it to show again. This flag is used to force it.
+    pHidden: false,
+
+    clusters: null as ICluster[] | null,
     clustersLoad: false,
     clusterIs: dav.clusterIs,
     clusterPreview: dav.getClusterPreview,
@@ -82,7 +93,7 @@ export default defineComponent({
 
   computed: {
     shown() {
-      return this.clustersResult.length > 0;
+      return !this.pHidden && this.clustersResult.length > 0;
     },
 
     clustersResult(): ICluster[] {
@@ -91,12 +102,13 @@ export default defineComponent({
     },
 
     clustersFuse() {
-      return new Fuse(this.clusters, { keys: ['name', 'display_name'], threshold: 0.3 });
+      return new Fuse(this.clusters ?? [], { keys: ['name', 'display_name'], threshold: 0.3 });
     },
   },
 
   watch: {
     prompt(val: string) {
+      this.pHidden = false;
       if (!val) return;
       this.load(); // load clusters
     },
@@ -133,27 +145,39 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.search-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.85);
-  z-index: 100000000;
-}
-
-.search-bar {
-  position: relative;
-  margin: 10vh auto;
-  width: 400px;
-  max-width: calc(100vw - 20px);
+header .memories-searchbar {
+  margin: 5px 0 !important;
+  > * {
+    margin: 0 !important;
+  }
+  :deep input {
+    // header is 50px; 5px gap on each side
+    height: 40px !important;
+    border: none !important;
+    background-color: color-mix(in srgb, var(--color-primary-text) 12%, transparent);
+    backdrop-filter: blur(2px);
+  }
+  :deep .input-field__icon {
+    height: 46px !important; // hack to center the icon
+  }
+  :deep *,
+  :deep input::placeholder {
+    color: var(--color-primary-text);
+  }
 }
 
 .searchbar-results {
   padding: 10px 0;
   width: 400px;
   max-width: calc(100vw - 20px);
+
+  .empty {
+    padding: 8px 14px;
+
+    &:has(.loading-icon) {
+      margin: 12px;
+    }
+  }
 
   .cluster {
     display: block;

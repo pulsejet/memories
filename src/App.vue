@@ -79,6 +79,7 @@
       <FaceMoveModal />
       <AlbumShareModal />
       <UploadModal />
+      <SearchModal />
     </template>
   </NcContent>
 </template>
@@ -111,6 +112,7 @@ import MoveToFolderModal from '@components/modal/MoveToFolderModal.vue';
 import FaceMoveModal from '@components/modal/FaceMoveModal.vue';
 import AlbumShareModal from '@components/modal/AlbumShareModal.vue';
 import UploadModal from '@components/modal/UploadModal.vue';
+import SearchModal from '@components/modal/SearchModal.vue';
 
 import * as utils from '@services/utils';
 import * as nativex from '@native';
@@ -153,6 +155,7 @@ export default defineComponent({
     Sidebar,
     MobileNav,
     MobileHeader,
+    SearchModal,
 
     EditMetadataModal,
     AddToAlbumModal,
