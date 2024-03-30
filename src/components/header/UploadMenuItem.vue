@@ -17,7 +17,7 @@ import { defineComponent } from 'vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 
-import UploadIcon from 'vue-material-design-icons/Upload.vue';
+import UploadIcon from 'vue-material-design-icons/CloudUpload.vue';
 import PlusIcon from 'vue-material-design-icons/Plus.vue';
 
 export default defineComponent({
