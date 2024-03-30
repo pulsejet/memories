@@ -247,6 +247,9 @@ header .memories-searchbar .text-field {
     display: block;
     padding: 8px 14px;
     cursor: pointer;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 
     &:hover {
       background-color: var(--color-background-hover);
