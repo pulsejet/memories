@@ -6,8 +6,7 @@
     @click="upload"
   >
     <template #icon>
-      <PlusIcon :size="20" v-if="plusIcon" />
-      <UploadIcon :size="20" v-else />
+      <UploadIcon :size="20" />
     </template>
   </NcButton>
 </template>
@@ -18,14 +17,12 @@ import { defineComponent } from 'vue';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 
 import UploadIcon from 'vue-material-design-icons/CloudUpload.vue';
-import PlusIcon from 'vue-material-design-icons/Plus.vue';
 
 export default defineComponent({
   name: 'UploadMenuItem',
   components: {
     NcButton,
     UploadIcon,
-    PlusIcon,
   },
 
   props: {

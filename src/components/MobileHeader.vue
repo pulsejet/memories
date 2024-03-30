@@ -11,7 +11,7 @@
     </div>
 
     <div class="actions">
-      <UploadMenuItem plus-icon />
+      <UploadMenuItem />
       <SearchbarMenuItem />
     </div>
   </div>
