@@ -70,7 +70,7 @@ export default defineComponent({
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 1000;
   backdrop-filter: blur(2px);
-  padding-top: 58px;
+  padding-top: 20px;
   transition: opacity 0.15s ease-out;
 
   opacity: 0;
