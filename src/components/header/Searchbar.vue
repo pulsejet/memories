@@ -1,46 +1,48 @@
 <template>
-  <NcPopover :shown="shown" :focus-trap="false" @after-hide="pHidden = true">
-    <template #trigger="{ attrs }">
-      <div v-bind="attrs">
-        <NcTextField
-          class="memories-searchbar"
-          :autofocus="true"
-          :value.sync="prompt"
-          :label-outside="true"
-          :label="t('memories', 'Search your photos …')"
-          :placeholder="t('memories', 'Search your photos …')"
-        >
-          <MagnifyIcon :size="16" />
-        </NcTextField>
-      </div>
-    </template>
-
-    <div class="searchbar-results">
-      <div class="empty" v-if="prompt.length === 0">
-        {{ t('memories', 'Start typing to find photos and albums …') }}
-      </div>
-      <div class="empty" v-else-if="!clusters && clustersLoad">
-        <XLoadingIcon class="fill-block" />
-      </div>
-      <div class="empty" v-else-if="clustersResult.length === 0">
-        {{ t('memories', 'No results found') }}
-      </div>
-
-      <template v-for="cluster of clustersResult">
-        <router-link class="cluster" :to="clusterTarget(cluster)" @click.native="reset()">
-          <div class="icon">
-            <AlbumIcon v-if="clusterIs.album(cluster)" :size="22" />
-            <LocationIcon v-else-if="clusterIs.place(cluster)" :size="22" />
-            <TagIcon v-else-if="clusterIs.tag(cluster)" :size="22" />
-            <XImg v-else-if="clusterIs.face(cluster)" :src="clusterPreview(cluster)" class="preview-image" />
-            <MagnifyIcon v-else :size="22" />
-          </div>
-
-          {{ cluster.display_name ?? cluster.name }}
-        </router-link>
+  <div ref="outer" class="memories-searchbar">
+    <NcPopover :shown="shown" :focus-trap="false" @after-hide="pHidden = true">
+      <template #trigger="{ attrs }">
+        <div v-bind="attrs">
+          <NcTextField
+            class="text-field"
+            :autofocus="true"
+            :value.sync="prompt"
+            :label-outside="true"
+            :label="t('memories', 'Search your photos …')"
+            :placeholder="t('memories', 'Search your photos …')"
+          >
+            <MagnifyIcon :size="16" />
+          </NcTextField>
+        </div>
       </template>
-    </div>
-  </NcPopover>
+
+      <div class="searchbar-results">
+        <div class="empty" v-if="prompt.length === 0">
+          {{ t('memories', 'Start typing to find photos and albums …') }}
+        </div>
+        <div class="empty" v-else-if="!clusters && clustersLoad">
+          <XLoadingIcon class="fill-block" />
+        </div>
+        <div class="empty" v-else-if="clustersResult.length === 0">
+          {{ t('memories', 'No results found') }}
+        </div>
+
+        <template v-for="cluster of clustersResult">
+          <router-link class="cluster" :to="clusterTarget(cluster)" @click.native="reset()">
+            <div class="icon">
+              <AlbumIcon v-if="clusterIs.album(cluster)" :size="22" />
+              <LocationIcon v-else-if="clusterIs.place(cluster)" :size="22" />
+              <TagIcon v-else-if="clusterIs.tag(cluster)" :size="22" />
+              <XImg v-else-if="clusterIs.face(cluster)" :src="clusterPreview(cluster)" class="preview-image" />
+              <MagnifyIcon v-else :size="22" />
+            </div>
+
+            {{ cluster.display_name ?? cluster.name }}
+          </router-link>
+        </template>
+      </div>
+    </NcPopover>
+  </div>
 </template>
 
 <script lang="ts">
@@ -91,7 +93,35 @@ export default defineComponent({
     clusterTarget: dav.getClusterLinkTarget,
   }),
 
+  mounted() {
+    // Add mutation observer to disable box shadow on input
+    // This is really unfortunate since the input uses !important
+    // to add a ugly white box shadow on hover and focus.
+    // Hopefully that changes at some point.
+    let observer: MutationObserver;
+    observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof HTMLElement) {
+            const input = node.querySelector<HTMLInputElement>('input[type="text"]');
+            if (input) {
+              input?.style.setProperty('box-shadow', 'none', 'important');
+              observer.disconnect();
+            }
+          }
+        });
+      });
+    });
+    observer.observe(this.refs.outer, { childList: true, subtree: true });
+  },
+
   computed: {
+    refs() {
+      return {
+        outer: this.$refs.outer as HTMLDivElement,
+      };
+    },
+
     shown() {
       return !this.pHidden && this.clustersResult.length > 0;
     },
@@ -145,7 +175,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-header .memories-searchbar {
+header .memories-searchbar .text-field {
   margin: 5px 0 !important;
   > * {
     margin: 0 !important;
