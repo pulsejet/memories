@@ -109,7 +109,14 @@ trait TimelineQueryDays
 
         // Add hidden field
         if ($hidden) {
-            $query->addSelect('cte_f.hidden');
+            // we join with filecache anyway in this case, so just use the parent there
+            // this means this will work directly in trigger compatibility mode
+            $hSq = $this->connection->getQueryBuilder();
+            $hSq->select($hSq->expr()->literal(1))
+                ->from('cte_folders', 'cte_f')
+                ->andWhere($hSq->expr()->eq('cte_f.fileid', 'f.parent'))
+                ->andWhere($hSq->expr()->eq('cte_f.hidden', $hSq->expr()->literal(1)));
+            $query->addSelect($query->createFunction("({$hSq->getSql()}) as hidden"));
         }
 
         // JOIN with mimetypes to get the mimetype
