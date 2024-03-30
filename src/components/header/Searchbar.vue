@@ -114,7 +114,7 @@ export default defineComponent({
 
       // If the input is in the main header, disable
       // the box shadow permanently
-      if (this.refs.outer.closest('header')) {
+      if (this.refs.outer.closest('header, #mobile-header')) {
         input?.style.setProperty('box-shadow', 'none', 'important');
       }
 
@@ -198,28 +198,37 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-header .memories-searchbar .text-field {
-  margin: 5px 0 !important;
-  > * {
-    margin: 0 !important;
-  }
-  :deep input {
-    // header is 50px; 5px gap on each side
-    height: 40px !important;
-    border: none !important;
-    background-color: color-mix(in srgb, var(--color-primary-text) 12%, transparent);
-    backdrop-filter: blur(2px);
-  }
-  :deep .input-field__icon {
-    height: 46px !important; // hack to center the icon
-  }
-  :deep *,
-  :deep input::placeholder {
-    color: var(--color-primary-text);
-  }
-}
-
 .memories-searchbar .text-field {
+  header & {
+    --searchbar-color: var(--color-primary-text);
+  }
+
+  #mobile-header & {
+    --searchbar-color: var(--color-main-text);
+  }
+
+  header &,
+  #mobile-header & {
+    margin: 5px 0 !important;
+    > * {
+      margin: 0 !important;
+    }
+    :deep input {
+      // header is 50px; 5px gap on each side
+      height: 40px !important;
+      border: none !important;
+      background-color: color-mix(in srgb, var(--searchbar-color) 12%, transparent);
+      backdrop-filter: blur(2px);
+    }
+    :deep .input-field__icon {
+      height: 46px !important; // hack to center the icon
+    }
+    :deep *,
+    :deep input::placeholder {
+      color: var(--searchbar-color);
+    }
+  }
+
   width: 220px;
   max-width: calc(100vw - 20px);
   margin: 0 auto;

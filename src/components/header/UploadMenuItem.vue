@@ -1,12 +1,14 @@
 <template>
   <NcButton
-    class="memories-upload-menu"
+    class="memories-menu-item upload-menu"
     :title="t('memories', 'Upload')"
     :aria-label="t('memories', 'Upload')"
-    type="primary"
     @click="upload"
   >
-    <template #icon> <UploadIcon :size="20" /> </template>
+    <template #icon>
+      <PlusIcon :size="20" v-if="plusIcon" />
+      <UploadIcon :size="20" v-else />
+    </template>
   </NcButton>
 </template>
 
@@ -14,13 +16,23 @@
 import { defineComponent } from 'vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+
 import UploadIcon from 'vue-material-design-icons/Upload.vue';
+import PlusIcon from 'vue-material-design-icons/Plus.vue';
 
 export default defineComponent({
   name: 'UploadMenuItem',
   components: {
     NcButton,
     UploadIcon,
+    PlusIcon,
+  },
+
+  props: {
+    plusIcon: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   methods: {

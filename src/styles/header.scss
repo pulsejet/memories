@@ -17,10 +17,13 @@ header#header .header-appname {
 }
 
 // Our menu buttons
-.memories-upload-menu,
-.memories-search-menu {
+.memories-menu-item {
   background-color: transparent !important;
-  color: var(--color-primary-text) !important;
+
+  header#header & {
+    color: var(--color-primary-text) !important;
+  }
+
   opacity: 0.85;
   &:hover {
     opacity: 1;

@@ -1,10 +1,9 @@
 <template>
   <NcButton
     v-if="isMobile"
-    class="memories-search-menu"
+    class="memories-menu-item search-menu"
     :title="t('memories', 'Search')"
     :aria-label="t('memories', 'Search')"
-    type="primary"
     @click="search"
   >
     <template #icon> <MagnifyIcon :size="20" /> </template>
