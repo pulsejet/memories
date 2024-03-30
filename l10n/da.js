@@ -12,6 +12,7 @@ OC.L10N.register(
     "Albums" : "Album",
     "Archive" : "Arkivér",
     "On this day" : "På denne dag",
+    "Places" : "Steder",
     "Tags" : "Mærker",
     "Metadata" : "Metadata",
     "Edit" : "Redigér",
