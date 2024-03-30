@@ -25,13 +25,16 @@ trait TimelineQueryCTE
         // Filter out folder MIME types
         $FOLDER_MIME_QUERY = "SELECT MAX(id) FROM *PREFIX*mimetypes WHERE mimetype = 'httpd/unix-directory'";
 
-        // Select 1 if there is a .nomedia file in the folder
-        $SEL_NOMEDIA = "SELECT 1 FROM *PREFIX*filecache f2
+        // Select 1 if there is a file in the folder with the specified name
+        $SEL_FILE = static fn (string $name) => "SELECT 1 FROM *PREFIX*filecache f2
             WHERE (f2.parent = f.fileid)
-            AND (f2.name = '.nomedia' OR f2.name = '.nomemories')";
+            AND (f2.name = '{$name}')";
 
-        // Check no nomedia file exists in the folder
-        $CLS_NOMEDIA = "NOT EXISTS ({$SEL_NOMEDIA})";
+        // Check for nomedia and nomemories files
+        // Two separate subqueries can actually be faster here (upto 10x on MariaDB)
+        $SEL_NOMEDIA = $SEL_FILE('.nomedia');
+        $SEL_NOMEMORIES = $SEL_FILE('.nomemories');
+        $CLS_NOMEDIA = "NOT EXISTS ({$SEL_NOMEDIA}) AND NOT EXISTS ({$SEL_NOMEMORIES})";
 
         // Whether to filter out hidden folders
         $CLS_HIDDEN_JOIN = $hidden ? '1 = 1' : "f.name NOT LIKE '.%'";
