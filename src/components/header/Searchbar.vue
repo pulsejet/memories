@@ -5,7 +5,6 @@
         <div v-bind="attrs">
           <NcTextField
             class="text-field"
-            :autofocus="true"
             :value.sync="prompt"
             :label-outside="true"
             :label="t('memories', 'Search your photos …')"
@@ -18,7 +17,7 @@
 
       <div class="searchbar-results">
         <div class="empty" v-if="prompt.length === 0">
-          {{ t('memories', 'Start typing to find photos and albums …') }}
+          {{ t('memories', 'Start typing to find photos and albums') }}
         </div>
         <div class="empty" v-else-if="!clusters && clustersLoad">
           <XLoadingIcon class="fill-block" />
@@ -202,6 +201,7 @@ header .memories-searchbar .text-field {
   max-width: calc(100vw - 20px);
 
   .empty {
+    text-align: center;
     padding: 8px 14px;
 
     &:has(.loading-icon) {
