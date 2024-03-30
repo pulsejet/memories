@@ -1,5 +1,5 @@
 <template>
-  <div class="explore-outer">
+  <div class="explore-outer hide-scrollbar-mobile">
     <XLoadingIcon v-if="loading" class="fill-block" />
 
     <div v-else>
