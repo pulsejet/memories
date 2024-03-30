@@ -122,7 +122,7 @@ export default defineComponent({
     },
 
     shown() {
-      return !this.pHidden && this.clustersResult.length > 0;
+      return !this.pHidden && !!this.prompt.length;
     },
 
     clustersResult(): ICluster[] {
