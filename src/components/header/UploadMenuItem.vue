@@ -25,13 +25,6 @@ export default defineComponent({
     UploadIcon,
   },
 
-  props: {
-    plusIcon: {
-      type: Boolean,
-      default: false,
-    },
-  },
-
   methods: {
     upload() {
       _m.modals.upload();
