@@ -199,16 +199,27 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .memories-searchbar .text-field {
+  width: 220px;
+  max-width: calc(100% - 20px);
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    width: 400px;
+  }
+
   header & {
     --searchbar-color: var(--color-primary-text);
   }
 
-  #mobile-header & {
+  #mobile-header &,
+  .explore-outer & {
     --searchbar-color: var(--color-main-text);
   }
 
+  // Size styles for header only
   header &,
   #mobile-header & {
+    max-width: 100%;
     margin: 5px 0 !important;
     > * {
       margin: 0 !important;
@@ -216,26 +227,42 @@ export default defineComponent({
     :deep input {
       // header is 50px; 5px gap on each side
       height: 40px !important;
-      border: none !important;
-      background-color: color-mix(in srgb, var(--searchbar-color) 12%, transparent);
-      backdrop-filter: blur(2px);
     }
     :deep .input-field__icon {
       height: 46px !important; // hack to center the icon
     }
+  }
+
+  // Styling for flat input
+  header &,
+  #mobile-header &,
+  .explore-outer & {
+    :deep input {
+      border: none !important;
+      background-color: color-mix(in srgb, var(--searchbar-color) 12%, transparent);
+      backdrop-filter: blur(2px);
+    }
+
     :deep *,
     :deep input::placeholder {
       color: var(--searchbar-color);
     }
   }
 
-  width: 220px;
-  max-width: calc(100vw - 20px);
-  margin: 0 auto;
-
-  @media (max-width: 768px) {
-    width: 400px;
+  .explore-outer & {
+    width: 100%;
   }
+
+  .explore-outer &,
+  .search-overlay & {
+    :deep input {
+      border-radius: 40px;
+    }
+  }
+}
+
+.memories-searchbar.full-width .text-field {
+  width: 100%;
 }
 
 .searchbar-results {

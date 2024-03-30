@@ -5,6 +5,8 @@
     <div v-else>
       <div class="title">{{ t('memories', 'Explore') }}</div>
 
+      <Searchbar v-if="isNative" class="searchbar" />
+
       <ClusterHList
         v-if="recognize.length"
         :title="t('memories', 'Recognize')"
@@ -44,6 +46,7 @@
 import { defineComponent } from 'vue';
 import type { Component } from 'vue';
 
+import Searchbar from '@components/header/Searchbar.vue';
 import ClusterHList from '@components/ClusterHList.vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
@@ -60,14 +63,23 @@ import { translate as t } from '@services/l10n';
 import config from '@services/static-config';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
+import * as nativex from '@native';
 
 import type { ICluster, IConfig } from '@typings';
 
 export default defineComponent({
   name: 'Explore',
 
+  components: {
+    Searchbar,
+    ClusterHList,
+    NcButton,
+    StarIcon,
+  },
+
   data: () => ({
     loading: 0,
+    isNative: nativex.has(),
 
     config: {} as IConfig,
     recognize: [] as ICluster[],
@@ -121,12 +133,6 @@ export default defineComponent({
       if?: () => boolean;
     }[],
   }),
-
-  components: {
-    ClusterHList,
-    NcButton,
-    StarIcon,
-  },
 
   async mounted() {
     const res: IConfig | undefined = await this.load(config.getAll.bind(config));
@@ -202,6 +208,11 @@ export default defineComponent({
     @media (max-width: 768px) {
       display: none;
     }
+  }
+
+  .searchbar {
+    margin-top: 5px;
+    margin-bottom: 10px;
   }
 
   .cluster-hlist {
