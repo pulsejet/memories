@@ -27,7 +27,7 @@
         </div>
 
         <template v-for="cluster of clustersResult">
-          <router-link class="cluster" :to="clusterTarget(cluster)" @click.native="reset()">
+          <router-link class="cluster" :to="clusterTarget(cluster)" @click.native="select()">
             <div class="icon">
               <AlbumIcon v-if="clusterIs.album(cluster)" :size="22" />
               <LocationIcon v-else-if="clusterIs.place(cluster)" :size="22" />
@@ -77,6 +77,17 @@ export default defineComponent({
 
   mixins: [UserConfig],
 
+  emits: {
+    select: () => true,
+  },
+
+  props: {
+    autoFocus: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
   data: () => ({
     prompt: String(),
 
@@ -97,21 +108,33 @@ export default defineComponent({
     // This is really unfortunate since the input uses !important
     // to add a ugly white box shadow on hover and focus.
     // Hopefully that changes at some point.
-    let observer: MutationObserver;
-    observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node instanceof HTMLElement) {
-            const input = node.querySelector<HTMLInputElement>('input[type="text"]');
-            if (input) {
-              input?.style.setProperty('box-shadow', 'none', 'important');
-              observer.disconnect();
-            }
-          }
-        });
-      });
-    });
-    observer.observe(this.refs.outer, { childList: true, subtree: true });
+    const processInput = () => {
+      const input = this.refs.outer.querySelector<HTMLInputElement>('input[type="text"]');
+      if (!input) return false;
+
+      // If the input is in the main header, disable
+      // the box shadow permanently
+      if (this.refs.outer.closest('header')) {
+        input?.style.setProperty('box-shadow', 'none', 'important');
+      }
+
+      // Also focus the input if needed
+      if (this.autoFocus) {
+        setTimeout(() => input.focus(), 0);
+      }
+
+      return true;
+    };
+
+    // Try to process immediately, but if the input is not
+    // loaded yet (lazy loaded component), use a observer
+    if (!processInput()) {
+      let observer: MutationObserver;
+      observer = new MutationObserver((m) =>
+        m.forEach((m) => m.addedNodes.forEach(() => processInput() && observer.disconnect())),
+      );
+      observer.observe(this.refs.outer, { childList: true, subtree: true });
+    }
   },
 
   computed: {
@@ -144,8 +167,9 @@ export default defineComponent({
   },
 
   methods: {
-    reset() {
+    select() {
       this.prompt = String();
+      this.$emit('select');
     },
 
     async load() {
@@ -192,6 +216,16 @@ header .memories-searchbar .text-field {
   :deep *,
   :deep input::placeholder {
     color: var(--color-primary-text);
+  }
+}
+
+.memories-searchbar .text-field {
+  width: 220px;
+  max-width: calc(100vw - 20px);
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    width: 400px;
   }
 }
 

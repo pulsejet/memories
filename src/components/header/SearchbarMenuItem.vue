@@ -42,7 +42,7 @@ export default defineComponent({
 
   methods: {
     search() {
-      _m.modals.upload();
+      _m.modals.search();
     },
   },
 });

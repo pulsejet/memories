@@ -47,6 +47,7 @@ declare global {
       albumShare: (user: string, name: string, link?: boolean) => Promise<void>;
       showSettings: () => void;
       upload: () => void;
+      search: () => void;
     };
 
     sidebar: {

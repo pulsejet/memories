@@ -4,7 +4,7 @@ body:has(.memories-top-bar) > header {
     z-index: 0 !important;
   }
 }
-body:has(.memories_viewer) > header {
+body:has(.memories_viewer, .search-overlay) > header {
   z-index: 0 !important;
 }
 
