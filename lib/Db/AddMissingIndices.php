@@ -42,23 +42,24 @@ class AddMissingIndices
             }
         }
 
-        // Add index on recognize detections for file id to speed up joins
-        if ($schema->hasTable('recognize_face_detections')) {
-            $table = $schema->getTable('recognize_face_detections');
+        // Add missing name index on filecache
+        // https://github.com/nextcloud/server/pull/44586
+        if ($schema->hasTable('filecache')) {
+            $table = $schema->getTable('filecache');
 
-            // Starting at some version, recognize ships an index on file_id
-            // In that case, we *remove* the memories index if it exists
-            $hasOwn = $table->hasIndex('recognize_facedet_file');
-            $hasOur = $table->hasIndex('memories_file_id');
+            // If the PR is merged, remove the index we created
+            // In that case remove this block after some time
+            $hasOwn = $table->hasIndex('fs_name_hash');
+            $hasOur = $table->hasIndex('memories_name_hash');
 
             if (!$hasOwn && !$hasOur) {
                 // Add our index because none exists
-                $table->addIndex(['file_id'], 'memories_file_id');
-                $ops[] = 'recognize_face_detections::memories_file_id';
+                $table->addIndex(['name'], 'memories_name_hash');
+                $ops[] = 'filecache::memories_name_hash';
             } elseif ($hasOwn && $hasOur) {
-                // Remove our index because recognize has one
-                $table->dropIndex('memories_file_id');
-                $ops[] = '-recognize_face_detections::memories_file_id';
+                // Remove our index because filecache has one
+                $table->dropIndex('memories_name_hash');
+                $ops[] = '-filecache::memories_name_hash';
             }
         }
 
