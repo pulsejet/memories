@@ -30,14 +30,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped lang="scss">
-.memories-upload-menu {
-  background-color: transparent !important;
-  color: var(--color-primary-text) !important;
-  opacity: 0.85;
-  &:hover {
-    opacity: 1;
-  }
-}
-</style>

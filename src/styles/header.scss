@@ -15,3 +15,14 @@ header#header .header-appname {
     opacity: 0 !important;
   }
 }
+
+// Our menu buttons
+.memories-upload-menu,
+.memories-search-menu {
+  background-color: transparent !important;
+  color: var(--color-primary-text) !important;
+  opacity: 0.85;
+  &:hover {
+    opacity: 1;
+  }
+}

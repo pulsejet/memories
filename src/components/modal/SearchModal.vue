@@ -5,7 +5,7 @@
 <script lang="ts">
 import Vue, { defineComponent } from 'vue';
 
-import Searchbar from '@components/header/Searchbar.vue';
+import SearchbarMenuItem from '@components/header/SearchbarMenuItem.vue';
 
 import * as utils from '@services/utils';
 
@@ -19,7 +19,7 @@ export default defineComponent({
       const div = document.createElement('div');
       header.prepend(div);
       const component = new Vue({
-        render: (h) => h(Searchbar),
+        render: (h) => h(SearchbarMenuItem),
         router: this.$router,
       });
       component.$mount(div);
