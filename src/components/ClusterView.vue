@@ -91,6 +91,9 @@ export default defineComponent({
 
   methods: {
     async refresh() {
+      await this.$nextTick();
+      if (!this.noParams || !!this.loading) return;
+
       try {
         this.items = [];
         this.loading++;
