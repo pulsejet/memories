@@ -182,8 +182,15 @@ class RecognizeBackend extends Backend
         );
 
         // SELECT etag for the cover
+        // Since the "cover" is the face detection, we need the actual file for etag
         $query = $this->tq->materialize($query, 'rfc');
-        $this->tq->selectEtag($query, 'cover', 'cover_etag');
+        $cfSq = $this->tq->getBuilder();
+        $cfSq->select('file_id')
+            ->from('recognize_face_detections', 'rfd')
+            ->where($cfSq->expr()->eq('rfd.id', 'cover'))
+            ->setMaxResults(1)
+        ;
+        $this->tq->selectEtag($query, $this->tq->subquery($query, $cfSq), 'cover_etag');
 
         // FETCH all faces
         $faces = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];

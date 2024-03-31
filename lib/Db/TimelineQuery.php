@@ -114,10 +114,10 @@ class TimelineQuery
      * Add etag for a field in a query.
      *
      * @param IQueryBuilder $query The query to add the etag to
-     * @param string        $field The field to add the etag for
+     * @param mixed         $field The field to add the etag for
      * @param string        $alias The alias to use for the etag
      */
-    public static function selectEtag(IQueryBuilder &$query, string $field, string $alias): void
+    public static function selectEtag(IQueryBuilder &$query, mixed $field, string $alias): void
     {
         $sub = $query->getConnection()->getQueryBuilder();
         $sub->select('etag')
