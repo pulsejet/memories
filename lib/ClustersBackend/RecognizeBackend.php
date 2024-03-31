@@ -187,7 +187,7 @@ class RecognizeBackend extends Backend
         $cfSq = $this->tq->getBuilder();
         $cfSq->select('file_id')
             ->from('recognize_face_detections', 'rfd')
-            ->where($cfSq->expr()->eq('rfd.id', 'cover'))
+            ->where($cfSq->expr()->eq('rfd.id', 'rfc.cover'))
             ->setMaxResults(1)
         ;
         $this->tq->selectEtag($query, $this->tq->subquery($query, $cfSq), 'cover_etag');

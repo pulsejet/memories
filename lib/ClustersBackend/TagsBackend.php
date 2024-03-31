@@ -108,7 +108,7 @@ class TagsBackend extends Backend
 
         // SELECT etag for the cover
         $query = $this->tq->materialize($query, 'st');
-        $this->tq->selectEtag($query, 'cover', 'cover_etag');
+        $this->tq->selectEtag($query, 'st.cover', 'cover_etag');
 
         // FETCH all tags
         $tags = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];

@@ -87,7 +87,7 @@ class AlbumsBackend extends Backend
 
         // Function to add etag
         $etag = static fn (string $name): \Closure => static function (IQueryBuilder &$query) use ($name): void {
-            TimelineQuery::selectEtag($query, $name, "{$name}_etag");
+            TimelineQuery::selectEtag($query, "pa.$name", "{$name}_etag");
         };
 
         // Add cover from self user

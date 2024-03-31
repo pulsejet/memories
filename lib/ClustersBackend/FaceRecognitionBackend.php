@@ -358,7 +358,7 @@ class FaceRecognitionBackend extends Backend
 
         // SELECT etag for the cover
         $query = $this->tq->materialize($query, 'frp');
-        $this->tq->selectEtag($query, 'cover', 'cover_etag');
+        $this->tq->selectEtag($query, 'frp.cover', 'cover_etag');
 
         // FETCH all faces
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
