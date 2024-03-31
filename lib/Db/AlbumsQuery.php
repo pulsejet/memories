@@ -76,9 +76,8 @@ class AlbumsQuery
                     $query->expr()->eq('paf.album_id', 'pa.album_id'),
                     $query->expr()->eq('paf.file_id', $query->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)),
                 ))
-                ->getSQL()
             ;
-            $query->andWhere($query->createFunction("EXISTS ({$fSq})"));
+            $query->andWhere(SQL::exists($query, $fSq));
         }
 
         // Apply further transformations

@@ -236,17 +236,15 @@ class TimelineWrite
     {
         // Delete all stale records
         foreach (DELETE_TABLES as $table) {
-            $query = $this->connection->getQueryBuilder();
-            $clause = $query
-                ->select($query->expr()->literal('1'))
+            $clause = $this->connection->getQueryBuilder();
+            $clause->select($clause->expr()->literal(1))
                 ->from('filecache', 'f')
-                ->where($query->expr()->eq('f.fileid', "*PREFIX*{$table}.fileid"))
-                ->getSQL()
+                ->where($clause->expr()->eq('f.fileid', "*PREFIX*{$table}.fileid"))
             ;
 
             $query = $this->connection->getQueryBuilder();
             $query->delete($table)
-                ->where($query->createFunction("NOT EXISTS({$clause})"))
+                ->where(SQL::notExists($query, $clause))
                 ->executeStatement()
             ;
         }

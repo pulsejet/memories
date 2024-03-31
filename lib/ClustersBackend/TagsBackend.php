@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -96,7 +97,7 @@ class TagsBackend extends Backend
         $query->addOrderBy('st.id'); // tie-breaker
 
         // SELECT cover photo
-        $query = $this->tq->materialize($query, 'st');
+        $query = SQL::materialize($query, 'st');
         $this->selectCover(
             query: $query,
             clusterTable: 'st',
@@ -107,7 +108,7 @@ class TagsBackend extends Backend
         );
 
         // SELECT etag for the cover
-        $query = $this->tq->materialize($query, 'st');
+        $query = SQL::materialize($query, 'st');
         $this->tq->selectEtag($query, 'st.cover', 'cover_etag');
 
         // FETCH all tags

@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\AlbumsQuery;
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
@@ -83,7 +84,7 @@ class AlbumsBackend extends Backend
     public function getClustersInternal(int $fileid = 0): array
     {
         // Materialize the query
-        $materialize = static fn (IQueryBuilder & $query): IQueryBuilder => TimelineQuery::materialize($query, 'pa');
+        $materialize = static fn (IQueryBuilder & $query): IQueryBuilder => SQL::materialize($query, 'pa');
 
         // Function to add etag
         $etag = static fn (string $name): \Closure => static function (IQueryBuilder &$query) use ($name): void {

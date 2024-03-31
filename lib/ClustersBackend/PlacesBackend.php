@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
@@ -90,7 +91,7 @@ class PlacesBackend extends Backend
                 ->where($sub->expr()->eq('mp_sq.osm_id', $query->createNamedParameter($inside, \PDO::PARAM_INT)))
                 ->andWhere($sub->expr()->eq('mp_sq.fileid', 'mp.fileid'))
             ;
-            $mpJoinOn[] = $query->createFunction("EXISTS ({$sub->getSQL()})");
+            $mpJoinOn[] = SQL::exists($query, $sub);
 
             // Add WHERE clauses to main query to filter out admin_levels
             $sub = $this->tq->getBuilder();
@@ -129,7 +130,7 @@ class PlacesBackend extends Backend
         // We use this as the subquery for the main query, where we also re-join with
         // oc_memories_planet to the the names from the IDS
         // If we just AGGREGATE+GROUP with the name in one query, then it can't use indexes
-        $query = $this->tq->materialize($query, 'sub');
+        $query = SQL::materialize($query, 'sub');
 
         // INNER JOIN back on the planet table to get the names
         $query->innerJoin('sub', 'memories_planet', 'e', $query->expr()->eq('e.osm_id', 'sub.osm_id'));
@@ -150,7 +151,7 @@ class PlacesBackend extends Backend
 
         // SELECT to get all covers
         if ($covers) {
-            $query = $this->tq->materialize($query, 'sub');
+            $query = SQL::materialize($query, 'sub');
             $this->selectCover(
                 query: $query,
                 clusterTable: 'sub',
@@ -161,7 +162,7 @@ class PlacesBackend extends Backend
             );
 
             // SELECT etag for the cover
-            $query = $this->tq->materialize($query, 'sub');
+            $query = SQL::materialize($query, 'sub');
             $this->tq->selectEtag($query, 'sub.cover', 'cover_etag');
         }
 

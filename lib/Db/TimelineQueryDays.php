@@ -117,7 +117,7 @@ trait TimelineQueryDays
                 ->andWhere($hSq->expr()->eq('cte_f.fileid', 'f.parent'))
                 ->andWhere($hSq->expr()->eq('cte_f.hidden', $hSq->expr()->literal(1)))
             ;
-            $query->addSelect($query->createFunction("({$hSq->getSql()}) as hidden"));
+            $query->selectAlias(SQL::subquery($query, $hSq), 'hidden');
         }
 
         // JOIN with mimetypes to get the mimetype
@@ -254,7 +254,7 @@ trait TimelineQueryDays
             ;
 
             // Filter files in one of the timeline folders
-            $query->andWhere($query->createFunction("EXISTS ({$sq->getSQL()})"));
+            $query->andWhere(SQL::exists($query, $sq));
         } else {
             // If getting non-recursively folder only check for parent
             $query->andWhere($query->expr()->eq($parent, $query->createNamedParameter($root->getOneId(), IQueryBuilder::PARAM_INT)));

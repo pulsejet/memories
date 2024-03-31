@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -288,7 +289,7 @@ class FaceRecognitionBackend extends Backend
         $query->setMaxResults(15);
 
         // SELECT covers
-        $query = $this->tq->materialize($query, 'frp');
+        $query = SQL::materialize($query, 'frp');
         $this->selectCover(
             query: $query,
             clusterTable: 'frp',
@@ -299,7 +300,7 @@ class FaceRecognitionBackend extends Backend
         );
 
         // SELECT etag for the cover
-        $query = $this->tq->materialize($query, 'frp');
+        $query = SQL::materialize($query, 'frp');
         $this->tq->selectEtag($query, 'cover', 'cover_etag');
 
         // FETCH all faces
@@ -346,7 +347,7 @@ class FaceRecognitionBackend extends Backend
         $query->addOrderBy('frp.name', 'ASC');
 
         // SELECT to get all covers
-        $query = $this->tq->materialize($query, 'frp');
+        $query = SQL::materialize($query, 'frp');
         $this->selectCover(
             query: $query,
             clusterTable: 'frp',
@@ -357,7 +358,7 @@ class FaceRecognitionBackend extends Backend
         );
 
         // SELECT etag for the cover
-        $query = $this->tq->materialize($query, 'frp');
+        $query = SQL::materialize($query, 'frp');
         $this->tq->selectEtag($query, 'frp.cover', 'cover_etag');
 
         // FETCH all faces

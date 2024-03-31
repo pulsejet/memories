@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
-use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\SimpleFS\ISimpleFile;
@@ -264,7 +264,7 @@ abstract class Backend
                 ->andWhere($validSq->expr()->eq("cov_objs.{$objectTableClusterId}", "{$clusterTable}.{$clusterTableId}"))
             ;
 
-            $clauses[] = $query->createFunction("EXISTS ({$validSq->getSQL()})");
+            $clauses[] = SQL::exists($query, $validSq);
         }
 
         // Subquery if the file is still in the user's timeline tree
@@ -279,7 +279,7 @@ abstract class Backend
                 ->where($treeSq->expr()->eq('cov_f.fileid', 'mcov.fileid'))
             ;
 
-            $clauses[] = $query->createFunction("EXISTS ({$treeSq->getSQL()})");
+            $clauses[] = SQL::exists($query, $treeSq);
         }
 
         // Make subquery to select the cover
@@ -291,7 +291,7 @@ abstract class Backend
         ;
 
         // SELECT the cover
-        $query->selectAlias(TimelineQuery::subquery($query, $cvQ), $field);
+        $query->selectAlias(SQL::subquery($query, $cvQ), $field);
     }
 
     /**
