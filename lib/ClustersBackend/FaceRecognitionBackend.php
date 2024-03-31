@@ -312,7 +312,7 @@ class FaceRecognitionBackend extends Backend
 
         // SELECT all face clusters
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'));
-        $query->select('frp.name')->from('facerecog_persons', 'frp');
+        $query->select('frp.id', 'frp.name')->from('facerecog_persons', 'frp');
         $query->selectAlias($count, 'count');
         $query->selectAlias('frp.user', 'user_id');
 
