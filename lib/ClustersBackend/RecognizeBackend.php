@@ -170,8 +170,9 @@ class RecognizeBackend extends Backend
         $query->addOrderBy('count', 'DESC');
         $query->addOrderBy('rfc.id'); // tie-breaker
 
-        // JOIN to get all covers
-        $this->joinCovers(
+        // SELECT to get all covers
+        $query = $this->tq->materialize($query, 'rfc');
+        $this->selectCover(
             query: $query,
             clusterTable: 'rfc',
             clusterTableId: 'id',
@@ -179,6 +180,10 @@ class RecognizeBackend extends Backend
             objectTableObjectId: 'id',
             objectTableClusterId: 'cluster_id',
         );
+
+        // SELECT etag for the cover
+        $query = $this->tq->materialize($query, 'rfc');
+        $this->tq->selectEtag($query, 'cover', 'cover_etag');
 
         // FETCH all faces
         $faces = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];

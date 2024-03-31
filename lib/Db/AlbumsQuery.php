@@ -14,16 +14,16 @@ class AlbumsQuery
     /**
      * Get list of albums.
      *
-     * @param string   $uid         User ID
-     * @param bool     $shared      Whether to get shared albums
-     * @param int      $fileid      File to filter by
-     * @param \Closure $transformCb Callback to transform the query
+     * @param string $uid        User ID
+     * @param bool   $shared     Whether to get shared albums
+     * @param int    $fileid     File to filter by
+     * @param ?array $transforms Callbacks to transform the query
      */
     public function getList(
         string $uid,
         bool $shared = false,
         int $fileid = 0,
-        ?\Closure $transformCb = null,
+        ?array $transforms = null,
     ): array {
         $query = $this->connection->getQueryBuilder();
 
@@ -34,7 +34,6 @@ class AlbumsQuery
             'pa.album_id',
             'pa.name',
             'pa.user',
-            'pa.created',
             'pa.created',
             'pa.location',
             'pa.last_added_photo',
@@ -82,13 +81,9 @@ class AlbumsQuery
             $query->andWhere($query->createFunction("EXISTS ({$fSq})"));
         }
 
-        // Get the etag of the last added photo
-        $query->leftJoin('pa', 'filecache', 'pa_fc', $query->expr()->eq('pa.last_added_photo', 'pa_fc.fileid'));
-        $query->selectAlias($query->createFunction('MAX(pa_fc.etag)'), 'last_added_photo_etag');
-
         // Apply further transformations
-        if (null !== $transformCb) {
-            $transformCb($query);
+        foreach ($transforms ?? [] as $cb) {
+            $query = $cb($query) ?? $query;
         }
 
         // FETCH all albums

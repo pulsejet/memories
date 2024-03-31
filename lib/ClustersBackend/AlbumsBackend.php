@@ -82,9 +82,17 @@ class AlbumsBackend extends Backend
 
     public function getClustersInternal(int $fileid = 0): array
     {
-        // Transformation to add covers
-        $transformOwned = function (IQueryBuilder &$query): void {
-            $this->joinCovers(
+        // Materialize the query
+        $materialize = static fn (IQueryBuilder & $query): IQueryBuilder => TimelineQuery::materialize($query, 'pa');
+
+        // Function to add etag
+        $etag = static fn (string $name): \Closure => static function (IQueryBuilder &$query) use ($name): void {
+            TimelineQuery::selectEtag($query, $name, "{$name}_etag");
+        };
+
+        // Add cover from self user
+        $ownCover = function (IQueryBuilder &$query): void {
+            $this->selectCover(
                 query: $query,
                 clusterTable: 'pa',
                 clusterTableId: 'album_id',
@@ -96,9 +104,8 @@ class AlbumsBackend extends Backend
         };
 
         // Transformation for shared albums
-        $transformShared = function (IQueryBuilder &$query) use ($transformOwned): void {
-            $transformOwned($query);
-            $this->joinCovers(
+        $shareCover = function (IQueryBuilder &$query): void {
+            $this->selectCover(
                 query: $query,
                 clusterTable: 'pa',
                 clusterTableId: 'album_id',
@@ -110,6 +117,18 @@ class AlbumsBackend extends Backend
                 user: 'pa.user',
             );
         };
+
+        // Transformations to apply to own albums
+        $transformOwned = [
+            $materialize, $ownCover,
+            $materialize, $etag('last_added_photo'), $etag('cover'),
+        ];
+
+        // Transformations to apply to shared albums
+        $transformShared = [
+            $materialize, $ownCover, $shareCover,
+            $materialize, $etag('last_added_photo'), $etag('cover'), $etag('cover_owner'),
+        ];
 
         // Get personal and shared albums
         $list = array_merge(

@@ -287,8 +287,9 @@ class FaceRecognitionBackend extends Backend
         // It is not worth displaying all unnamed clusters. We show 15 to name them progressively,
         $query->setMaxResults(15);
 
-        // JOIN to get all covers
-        $this->joinCovers(
+        // SELECT covers
+        $query = $this->tq->materialize($query, 'frp');
+        $this->selectCover(
             query: $query,
             clusterTable: 'frp',
             clusterTableId: 'id',
@@ -296,6 +297,10 @@ class FaceRecognitionBackend extends Backend
             objectTableObjectId: 'id',
             objectTableClusterId: 'person',
         );
+
+        // SELECT etag for the cover
+        $query = $this->tq->materialize($query, 'frp');
+        $this->tq->selectEtag($query, 'cover', 'cover_etag');
 
         // FETCH all faces
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
@@ -340,8 +345,9 @@ class FaceRecognitionBackend extends Backend
         $query->orderBy('count', 'DESC');
         $query->addOrderBy('frp.name', 'ASC');
 
-        // JOIN to get all covers
-        $this->joinCovers(
+        // SELECT to get all covers
+        $query = $this->tq->materialize($query, 'frp');
+        $this->selectCover(
             query: $query,
             clusterTable: 'frp',
             clusterTableId: 'id',
@@ -349,6 +355,10 @@ class FaceRecognitionBackend extends Backend
             objectTableObjectId: 'id',
             objectTableClusterId: 'person',
         );
+
+        // SELECT etag for the cover
+        $query = $this->tq->materialize($query, 'frp');
+        $this->tq->selectEtag($query, 'cover', 'cover_etag');
 
         // FETCH all faces
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];

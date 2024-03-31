@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\SimpleFS\ISimpleFile;
@@ -223,7 +224,7 @@ abstract class Backend
     }
 
     /**
-     * Join the list query to get covers.
+     * Select the list query to get covers.
      *
      * @param IQueryBuilder $query                Query builder
      * @param string        $clusterTable         Alias name for the cluster list
@@ -235,7 +236,7 @@ abstract class Backend
      * @param bool          $validateFilecache    Whether to validate the filecache
      * @param mixed         $user                 Query expression for user ID to use for the covers
      */
-    final protected function joinCovers(
+    final protected function selectCover(
         IQueryBuilder &$query,
         string $clusterTable,
         string $clusterTableId,
@@ -247,18 +248,11 @@ abstract class Backend
         string $field = 'cover',
         mixed $user = null,
     ): void {
-        // Create aliases for the tables
-        $mcov = "m_cov_{$field}";
-        $mcov_f = "{$mcov}_f";
-
-        // Default to current user
-        $user = $user ?? $query->expr()->literal(Util::getUser()->getUID());
-
-        // Clauses for the JOIN
-        $joinClauses = [
-            $query->expr()->eq("{$mcov}.uid", $user),
-            $query->expr()->eq("{$mcov}.clustertype", $query->expr()->literal($this->clusterType())),
-            $query->expr()->eq("{$mcov}.clusterid", "{$clusterTable}.{$clusterTableId}"),
+        // Clauses for the WHERE
+        $clauses = [
+            $query->expr()->eq('mcov.uid', $user ?? $query->expr()->literal(Util::getUser()->getUID())),
+            $query->expr()->eq('mcov.clustertype', $query->expr()->literal($this->clusterType())),
+            $query->expr()->eq('mcov.clusterid', "{$clusterTable}.{$clusterTableId}"),
         ];
 
         // Subquery if the preview is still valid for this cluster
@@ -266,11 +260,11 @@ abstract class Backend
             $validSq = $query->getConnection()->getQueryBuilder();
             $validSq->select($validSq->expr()->literal(1))
                 ->from($objectTable, 'cov_objs')
-                ->where($validSq->expr()->eq($query->expr()->castColumn("cov_objs.{$objectTableObjectId}", IQueryBuilder::PARAM_INT), "{$mcov}.objectid"))
+                ->where($validSq->expr()->eq($query->expr()->castColumn("cov_objs.{$objectTableObjectId}", IQueryBuilder::PARAM_INT), 'mcov.objectid'))
                 ->andWhere($validSq->expr()->eq("cov_objs.{$objectTableClusterId}", "{$clusterTable}.{$clusterTableId}"))
             ;
 
-            $joinClauses[] = $query->createFunction("EXISTS ({$validSq->getSQL()})");
+            $clauses[] = $query->createFunction("EXISTS ({$validSq->getSQL()})");
         }
 
         // Subquery if the file is still in the user's timeline tree
@@ -282,21 +276,22 @@ abstract class Backend
                     $treeSq->expr()->eq('cov_cte_f.fileid', 'cov_f.parent'),
                     $treeSq->expr()->eq('cov_cte_f.hidden', $treeSq->expr()->literal(0, \PDO::PARAM_INT)),
                 ))
-                ->where($treeSq->expr()->eq('cov_f.fileid', "{$mcov}.fileid"))
+                ->where($treeSq->expr()->eq('cov_f.fileid', 'mcov.fileid'))
             ;
 
-            $joinClauses[] = $query->createFunction("EXISTS ({$treeSq->getSQL()})");
+            $clauses[] = $query->createFunction("EXISTS ({$treeSq->getSQL()})");
         }
 
-        // LEFT JOIN to get all the covers that we can
-        $query->leftJoin($clusterTable, 'memories_covers', $mcov, $query->expr()->andX(...$joinClauses));
-
-        // JOIN with filecache to get the etag
-        $query->leftJoin($mcov, 'filecache', $mcov_f, $query->expr()->eq("{$mcov_f}.fileid", "{$mcov}.fileid"));
+        // Make subquery to select the cover
+        $cvQ = $query->getConnection()->getQueryBuilder();
+        $cvQ->select('mcov.objectid')
+            ->from('memories_covers', 'mcov')
+            ->where($cvQ->expr()->andX(...$clauses))
+            ->setMaxResults(1)
+        ;
 
         // SELECT the cover
-        $query->selectAlias($query->createFunction("MAX({$mcov}.objectid)"), $field);
-        $query->selectAlias($query->createFunction("MAX({$mcov_f}.etag)"), "{$field}_etag");
+        $query->selectAlias(TimelineQuery::subquery($query, $cvQ), $field);
     }
 
     /**

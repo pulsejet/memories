@@ -95,8 +95,9 @@ class TagsBackend extends Backend
         $query->orderBy($query->createFunction('LOWER(st.name)'), 'ASC');
         $query->addOrderBy('st.id'); // tie-breaker
 
-        // JOIN to get all covers
-        $this->joinCovers(
+        // SELECT cover photo
+        $query = $this->tq->materialize($query, 'st');
+        $this->selectCover(
             query: $query,
             clusterTable: 'st',
             clusterTableId: 'id',
@@ -104,6 +105,10 @@ class TagsBackend extends Backend
             objectTableObjectId: 'objectid',
             objectTableClusterId: 'systemtagid',
         );
+
+        // SELECT etag for the cover
+        $query = $this->tq->materialize($query, 'st');
+        $this->tq->selectEtag($query, 'cover', 'cover_etag');
 
         // FETCH all tags
         $tags = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];

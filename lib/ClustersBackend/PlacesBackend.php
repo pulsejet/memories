@@ -148,9 +148,10 @@ class PlacesBackend extends Backend
         // GROUP BY everything
         $query->addGroupBy('sub.osm_id', 'e.osm_id', 'sub.count', 'e.name', 'e.other_names');
 
-        // JOIN to get all covers
+        // SELECT to get all covers
         if ($covers) {
-            $this->joinCovers(
+            $query = $this->tq->materialize($query, 'sub');
+            $this->selectCover(
                 query: $query,
                 clusterTable: 'sub',
                 clusterTableId: 'osm_id',
@@ -158,6 +159,10 @@ class PlacesBackend extends Backend
                 objectTableObjectId: 'fileid',
                 objectTableClusterId: 'osm_id',
             );
+
+            // SELECT etag for the cover
+            $query = $this->tq->materialize($query, 'sub');
+            $this->tq->selectEtag($query, 'cover', 'cover_etag');
         }
 
         // FETCH all tags
