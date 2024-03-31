@@ -78,4 +78,24 @@ class TimelineQuery
 
         return $sql;
     }
+
+    /**
+     * Materialize a query as a subquery and select everything from it.
+     * This is very useful for optimization.
+     *
+     * @param IQueryBuilder $query The query to materialize
+     * @param string        $alias The alias to use for the subquery
+     */
+    public static function materialize(IQueryBuilder $query, string $alias): IQueryBuilder
+    {
+        // Create new query and copy over parameters (and types)
+        $outer = $query->getConnection()->getQueryBuilder();
+        $outer->setParameters($query->getParameters(), $query->getParameterTypes());
+
+        // Create the subquery function for selecting from it
+        $sqf = $outer->createFunction("({$query->getSQL()})");
+        $outer->select("{$alias}.*")->from($sqf, $alias);
+
+        return $outer;
+    }
 }

@@ -129,20 +129,11 @@ class PlacesBackend extends Backend
         // We use this as the subquery for the main query, where we also re-join with
         // oc_memories_planet to the the names from the IDS
         // If we just AGGREGATE+GROUP with the name in one query, then it can't use indexes
-        $sub = $query;
-
-        // Create new query and copy over parameters (and types)
-        $query = $this->tq->getBuilder();
-        $query->setParameters($sub->getParameters(), $sub->getParameterTypes());
-
-        // Create the subquery function for selecting from it
-        $sqf = $query->createFunction("({$sub->getSQL()})");
-
-        // SELECT osm_id
-        $query->select('sub.osm_id', 'sub.count', 'e.name', 'e.other_names')->from($sqf, 'sub');
+        $query = $this->tq->materialize($query, 'sub');
 
         // INNER JOIN back on the planet table to get the names
         $query->innerJoin('sub', 'memories_planet', 'e', $query->expr()->eq('e.osm_id', 'sub.osm_id'));
+        $query->addSelect('e.name', 'e.other_names');
 
         // WHERE at least 3 photos if want marked clusters
         if ($marked) {
