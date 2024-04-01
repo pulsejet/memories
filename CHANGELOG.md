@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v7.1.0]
+## [v7.1.0] - 2024-04-01
 
 - **Notice**: This release significantly overhauls the core querying infrastructure for better performance. If you run into any regressions (including performance), please [file a bug report](https://github.com/pulsejet/memories/issues)
 - **Breaking**: If you are running MySQL (not applicable to MariaDB), you may need some extra configuration for setting up database triggers. Check the admin panel for any errors in the performance section and refer to the documentation [here](https://memories.gallery/troubleshooting/#trigger-compatibility-mode).
