@@ -40,7 +40,8 @@ export default defineComponent({
       component.$mount(div);
 
       // remove unified search button
-      document.querySelector<HTMLDivElement>('.unified-search-menu')?.remove(); // 28+
+      document.querySelector<HTMLDivElement>('.unified-search-menu')?.remove(); // 29+
+      document.querySelector<HTMLDivElement>('.unified-search__button')?.remove(); // 28
       document.querySelector<HTMLDivElement>('.header-menu.unified-search')?.remove(); // 27
     }
   },
