@@ -233,6 +233,8 @@ OC.L10N.register(
     "No items" : "Keine Elemente",
     "Shared by {user}" : "Geteilt von {user}",
     "_{n} item_::_{n} items_" : ["{n} Element","{n} Elemente"],
+    "Search your photos …" : "Ihre Fotos durchsuchen …",
+    "Start typing to find photos and albums" : "Beginnen Sie mit der Eingabe, um Fotos und Alben zu finden",
     "No results found" : "Keine Ergebnisse gefunden",
     "Search" : "Suche",
     "Upload" : "Hochladen",

@@ -145,6 +145,7 @@ OC.L10N.register(
     "Template" : "Шаблон",
     "No items" : "Без/няма елементи",
     "Shared by {user}" : "Споделен от {user}",
+    "No results found" : "Няма намерени резултати",
     "Search" : "Търсене",
     "Upload" : "Качване",
     "Add people or groups who can edit your album" : "Добавяне на хора или групи, които могат да редактират вашият албум",
