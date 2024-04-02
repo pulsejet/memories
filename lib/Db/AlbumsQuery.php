@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCA\Memories\ClustersBackend\AlbumsBackend;
+use OCA\Memories\ClustersBackend\Covers;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -227,13 +229,29 @@ class AlbumsQuery
     public function getAlbumByLink(string $token): ?array
     {
         $query = $this->connection->getQueryBuilder();
-        $query->select('*')->from('photos_albums', 'pa')
+        $query->select('pa.*')
+            ->from('photos_albums', 'pa')
             ->innerJoin('pa', $this->collaboratorsTable(), 'pc', $query->expr()->andX(
                 $query->expr()->eq('pc.album_id', 'pa.album_id'),
                 $query->expr()->eq('collaborator_id', $query->createNamedParameter($token)),
                 $query->expr()->eq('collaborator_type', $query->expr()->literal(3, \PDO::PARAM_INT)), // = TYPE_LINK
             ))
         ;
+
+        // Get the cover image of the owner of the album
+        // See AlbumsBackend::getClustersInternal
+        Covers::selectCover(
+            query: $query,
+            type: AlbumsBackend::clusterType(),
+            clusterTable: 'pa',
+            clusterTableId: 'album_id',
+            objectTable: 'photos_albums_files',
+            objectTableObjectId: 'file_id',
+            objectTableClusterId: 'album_id',
+            validateFilecache: false,
+            field: 'cover_owner',
+            user: 'pa.user',
+        );
 
         return $query->executeQuery()->fetch() ?: null;
     }
