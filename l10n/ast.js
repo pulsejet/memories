@@ -33,6 +33,7 @@ OC.L10N.register(
     "Performance" : "Rindimientu",
     "Continue" : "Siguir",
     "Template" : "Plantía",
+    "No results found" : "Nun s'atopó nengún resultáu",
     "Search" : "Buscar",
     "Upload" : "Xunir",
     "Add people or groups who can edit your album" : "Amiesta a persones u grupos que puedan editar l'álbum",
