@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
-use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\SimpleFS\ISimpleFile;
 
@@ -186,38 +185,15 @@ abstract class Backend
      */
     final public function setCover(array $photo, bool $manual = false): void
     {
-        $connection = \OC::$server->get(\OCP\IDBConnection::class);
-
         try {
-            // Replace the cover object in database
-            $connection->beginTransaction();
-
-            $query = $connection->getQueryBuilder();
-            $query->delete('memories_covers')
-                ->where($query->expr()->eq('uid', $query->createNamedParameter(Util::getUser()->getUID())))
-                ->andWhere($query->expr()->eq('clustertype', $query->createNamedParameter($this->clusterType())))
-                ->andWhere($query->expr()->eq('clusterid', $query->createNamedParameter($this->getClusterIdFrom($photo))))
-                ->executeStatement()
-            ;
-
-            $query = $connection->getQueryBuilder();
-            $query->insert('memories_covers')
-                ->values([
-                    'uid' => $query->createNamedParameter(Util::getUser()->getUID()),
-                    'clustertype' => $query->createNamedParameter($this->clusterType()),
-                    'clusterid' => $query->createNamedParameter($this->getClusterIdFrom($photo)),
-                    'objectid' => $query->createNamedParameter($this->getCoverObjId($photo)),
-                    'fileid' => $query->createNamedParameter($this->getFileId($photo)),
-                    'auto' => $query->createNamedParameter($manual ? 0 : 1, \PDO::PARAM_INT),
-                    'timestamp' => $query->createNamedParameter(time(), \PDO::PARAM_INT),
-                ])
-                ->executeStatement()
-            ;
-
-            $connection->commit();
+            Covers::setCover(
+                type: $this->clusterType(),
+                clusterId: $this->getClusterIdFrom($photo),
+                objectId: $this->getCoverObjId($photo),
+                fileid: $this->getFileId($photo),
+                manual: $manual,
+            );
         } catch (\Exception $e) {
-            $connection->rollBack();
-
             if ($manual) {
                 throw $e;
             }
@@ -226,104 +202,5 @@ abstract class Backend
                 ->error('Failed to set cover', ['app' => 'memories', 'exception' => $e->getMessage()])
             ;
         }
-    }
-
-    /**
-     * Join the list query to get covers.
-     *
-     * @param IQueryBuilder $query                Query builder
-     * @param string        $clusterTable         Alias name for the cluster list
-     * @param string        $clusterTableId       Column name for the cluster ID in clusterTable
-     * @param string        $objectTable          Table name for the object mapping
-     * @param string        $objectTableObjectId  Column name for the object ID in objectTable
-     * @param string        $objectTableClusterId Column name for the cluster ID in objectTable
-     * @param bool          $validateCluster      Whether to validate the cluster
-     * @param bool          $validateFilecache    Whether to validate the filecache
-     * @param mixed         $user                 Query expression for user ID to use for the covers
-     */
-    final protected function joinCovers(
-        IQueryBuilder &$query,
-        string $clusterTable,
-        string $clusterTableId,
-        string $objectTable,
-        string $objectTableObjectId,
-        string $objectTableClusterId,
-        bool $validateCluster = true,
-        bool $validateFilecache = true,
-        string $field = 'cover',
-        mixed $user = null,
-    ): void {
-        // Create aliases for the tables
-        $mcov = "m_cov_{$field}";
-        $mcov_f = "{$mcov}_f";
-
-        // Default to current user
-        $user = $user ?? $query->expr()->literal(Util::getUser()->getUID());
-
-        // Clauses for the JOIN
-        $joinClauses = [
-            $query->expr()->eq("{$mcov}.uid", $user),
-            $query->expr()->eq("{$mcov}.clustertype", $query->expr()->literal($this->clusterType())),
-            $query->expr()->eq("{$mcov}.clusterid", "{$clusterTable}.{$clusterTableId}"),
-        ];
-
-        // Subquery if the preview is still valid for this cluster
-        if ($validateCluster) {
-            $validSq = $query->getConnection()->getQueryBuilder();
-            $validSq->select($validSq->expr()->literal(1))
-                ->from($objectTable, 'cov_objs')
-                ->where($validSq->expr()->eq($query->expr()->castColumn("cov_objs.{$objectTableObjectId}", IQueryBuilder::PARAM_INT), "{$mcov}.objectid"))
-                ->andWhere($validSq->expr()->eq("cov_objs.{$objectTableClusterId}", "{$clusterTable}.{$clusterTableId}"))
-            ;
-
-            $joinClauses[] = $query->createFunction("EXISTS ({$validSq->getSQL()})");
-        }
-
-        // Subquery if the file is still in the user's timeline tree
-        if ($validateFilecache) {
-            $treeSq = $query->getConnection()->getQueryBuilder();
-            $treeSq->select($treeSq->expr()->literal(1))
-                ->from('filecache', 'cov_f')
-                ->innerJoin('cov_f', 'cte_folders', 'cov_cte_f', $treeSq->expr()->andX(
-                    $treeSq->expr()->eq('cov_cte_f.fileid', 'cov_f.parent'),
-                    $treeSq->expr()->eq('cov_cte_f.hidden', $treeSq->expr()->literal(0, \PDO::PARAM_INT)),
-                ))
-                ->where($treeSq->expr()->eq('cov_f.fileid', "{$mcov}.fileid"))
-            ;
-
-            $joinClauses[] = $query->createFunction("EXISTS ({$treeSq->getSQL()})");
-        }
-
-        // LEFT JOIN to get all the covers that we can
-        $query->leftJoin($clusterTable, 'memories_covers', $mcov, $query->expr()->andX(...$joinClauses));
-
-        // JOIN with filecache to get the etag
-        $query->leftJoin($mcov, 'filecache', $mcov_f, $query->expr()->eq("{$mcov_f}.fileid", "{$mcov}.fileid"));
-
-        // SELECT the cover
-        $query->selectAlias($query->createFunction("MAX({$mcov}.objectid)"), $field);
-        $query->selectAlias($query->createFunction("MAX({$mcov_f}.etag)"), "{$field}_etag");
-    }
-
-    /**
-     * Filter the photos query to get only the cover for this user.
-     *
-     * @param IQueryBuilder $query                Query builder
-     * @param string        $objectTable          Table name for the object mapping
-     * @param string        $objectTableObjectId  Column name for the object ID in objectTable
-     * @param string        $objectTableClusterId Column name for the cluster ID in objectTable
-     */
-    final protected function filterCover(
-        IQueryBuilder &$query,
-        string $objectTable,
-        string $objectTableObjectId,
-        string $objectTableClusterId,
-    ): void {
-        $query->innerJoin($objectTable, 'memories_covers', 'm_cov', $query->expr()->andX(
-            $query->expr()->eq('m_cov.uid', $query->expr()->literal(Util::getUser()->getUID())),
-            $query->expr()->eq('m_cov.clustertype', $query->expr()->literal($this->clusterType())),
-            $query->expr()->eq('m_cov.clusterid', "{$objectTable}.{$objectTableClusterId}"),
-            $query->expr()->eq('m_cov.objectid', $query->expr()->castColumn("{$objectTable}.{$objectTableObjectId}", IQueryBuilder::PARAM_INT)),
-        ));
     }
 }

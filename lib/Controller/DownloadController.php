@@ -128,6 +128,11 @@ class DownloadController extends GenericApiController
         return Util::guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable) {
             $file = $this->fs->getUserFile($fileid);
 
+            // Check if we're allowed to download the file
+            if (!$this->fs->canDownload($file)) {
+                throw new \Exception("Download forbidden: {$file->getName()}");
+            }
+
             // check if http_range is sent by browser
             $range = $this->request->getHeader('Range');
             if (!empty($range)) {
@@ -289,6 +294,11 @@ class DownloadController extends GenericApiController
                     // This checks permissions
                     $file = $this->fs->getUserFile($fileId);
                     $name = $file->getName();
+
+                    // Check if we're allowed to download the file
+                    if (!$this->fs->canDownload($file)) {
+                        throw new \Exception("Download forbidden: {$file->getName()}");
+                    }
 
                     // Open file
                     $handle = $file->fopen('rb');

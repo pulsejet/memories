@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -143,7 +144,7 @@ class RecognizeBackend extends Backend
         $query->innerJoin('rfd', 'memories', 'm', $query->expr()->eq('m.fileid', 'rfd.file_id'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // WHERE this cluster belongs to the user
         $query->where($query->expr()->eq('rfc.user_id', $query->createNamedParameter(Util::getUID())));
@@ -157,9 +158,8 @@ class RecognizeBackend extends Backend
                     $query->expr()->eq('rfd.cluster_id', 'rfc.id'),
                     $query->expr()->eq('rfd.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)),
                 ))
-                ->getSQL()
             ;
-            $query->andWhere($query->createFunction("EXISTS ({$fSq})"));
+            $query->andWhere(SQL::exists($query, $fSq));
         }
 
         // GROUP by ID of face cluster
@@ -170,15 +170,28 @@ class RecognizeBackend extends Backend
         $query->addOrderBy('count', 'DESC');
         $query->addOrderBy('rfc.id'); // tie-breaker
 
-        // JOIN to get all covers
-        $this->joinCovers(
+        // SELECT to get all covers
+        $query = SQL::materialize($query, 'rfc');
+        Covers::selectCover(
             query: $query,
+            type: self::clusterType(),
             clusterTable: 'rfc',
             clusterTableId: 'id',
             objectTable: 'recognize_face_detections',
             objectTableObjectId: 'id',
             objectTableClusterId: 'cluster_id',
         );
+
+        // SELECT etag for the cover
+        // Since the "cover" is the face detection, we need the actual file for etag
+        $query = SQL::materialize($query, 'rfc');
+        $cfSq = $this->tq->getBuilder();
+        $cfSq->select('file_id')
+            ->from('recognize_face_detections', 'rfd')
+            ->where($cfSq->expr()->eq('rfd.id', 'rfc.cover'))
+            ->setMaxResults(1)
+        ;
+        $this->tq->selectEtag($query, SQL::subquery($query, $cfSq), 'cover_etag');
 
         // FETCH all faces
         $faces = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
@@ -230,11 +243,11 @@ class RecognizeBackend extends Backend
         $query->innerJoin('rfd', 'memories', 'm', $query->expr()->eq('m.fileid', 'rfd.file_id'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // LIMIT results
         if (-6 === $limit) {
-            $this->filterCover($query, 'rfd', 'id', 'cluster_id');
+            Covers::filterCover($query, self::clusterType(), 'rfd', 'id', 'cluster_id');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }

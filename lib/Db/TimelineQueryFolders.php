@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 trait TimelineQueryFolders
@@ -22,13 +23,13 @@ trait TimelineQueryFolders
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all photos
-        $query->select('f.fileid', 'f.etag')->from('memories', 'm');
+        $query->select('m.fileid', 'f.etag')->from('memories', 'm');
+
+        // JOIN with the filecache table
+        $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->joinFilecache($query, $root, true, false);
-
-        // ORDER descending by fileid
-        $query->orderBy('f.fileid', 'DESC');
+        $query = $this->filterFilecache($query, $root, true, false);
 
         // MAX 4
         $query->setMaxResults(4);
@@ -42,5 +43,23 @@ trait TimelineQueryFolders
         }
 
         return $rows;
+    }
+
+    /**
+     * Add etag for a field in a query.
+     *
+     * @param IQueryBuilder $query The query to add the etag to
+     * @param mixed         $field The field to add the etag for
+     * @param string        $alias The alias to use for the etag
+     */
+    public static function selectEtag(IQueryBuilder &$query, mixed $field, string $alias): void
+    {
+        $sub = $query->getConnection()->getQueryBuilder();
+        $sub->select('etag')
+            ->from('filecache', 'etag_f')
+            ->where($sub->expr()->eq('etag_f.fileid', $field))
+            ->setMaxResults(1)
+        ;
+        $query->selectAlias(SQL::subquery($query, $sub), $alias);
     }
 }

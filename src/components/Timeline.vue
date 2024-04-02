@@ -1,6 +1,6 @@
 <template>
   <SwipeRefresh
-    class="container no-user-select"
+    class="memories-timeline container no-user-select"
     ref="container"
     match=".recycler"
     :refresh="softRefreshSync"
@@ -31,7 +31,6 @@
       type-field="type"
       :updateInterval="100"
       @update="scrollChangeRecycler"
-      @resize="handleResizeWithDelay"
     >
       <template #before>
         <!-- Dynamic top matter, e.g. album or view name -->
@@ -180,6 +179,8 @@ export default defineComponent({
     currentEnd: 0,
     /** Current physical scroll position */
     currentScroll: 0,
+    /** Resize observer on the outer container */
+    resizeObserver: null as ResizeObserver | null,
     /** Resizing timer */
     resizeTimer: null as number | null,
     /** Height of the scroller */
@@ -199,7 +200,18 @@ export default defineComponent({
   }),
 
   mounted() {
+    // Trigger initial state load
     this.routeChange(this.$route);
+
+    // Start resize observer on container
+    if (this.refs.container?.$el) {
+      this.resizeObserver = new ResizeObserver(() => this.handleResizeWithDelay());
+      this.resizeObserver.observe(this.refs.container.$el);
+    }
+  },
+
+  unmounted() {
+    this.resizeObserver?.disconnect();
   },
 
   watch: {
@@ -410,10 +422,13 @@ export default defineComponent({
 
     /** Recompute static sizes of containers */
     recomputeSizes() {
+      // Get the container element
+      const container = this.refs.container?.$el;
+      if (!container) return;
+
       // Size of outer container
-      const e = this.refs.container!.$el;
-      const height = e.clientHeight;
-      const width = e.clientWidth;
+      const height = container.clientHeight;
+      const width = container.clientWidth;
       this.containerSize = [width, height];
 
       // Scroller spans the container height
@@ -1455,7 +1470,7 @@ export default defineComponent({
   &.empty {
     opacity: 0;
     transition: none;
-    width: 0;
+    height: 0 !important;
   }
 
   &:focus {

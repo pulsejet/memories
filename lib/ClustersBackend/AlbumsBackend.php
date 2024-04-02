@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\AlbumsQuery;
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
@@ -82,10 +83,19 @@ class AlbumsBackend extends Backend
 
     public function getClustersInternal(int $fileid = 0): array
     {
-        // Transformation to add covers
-        $transformOwned = function (IQueryBuilder &$query): void {
-            $this->joinCovers(
+        // Materialize the query
+        $materialize = static fn (IQueryBuilder & $query): IQueryBuilder => SQL::materialize($query, 'pa');
+
+        // Function to add etag
+        $etag = static fn (string $name): \Closure => static function (IQueryBuilder &$query) use ($name): void {
+            TimelineQuery::selectEtag($query, "pa.{$name}", "{$name}_etag");
+        };
+
+        // Add cover from self user
+        $ownCover = static function (IQueryBuilder &$query): void {
+            Covers::selectCover(
                 query: $query,
+                type: self::clusterType(),
                 clusterTable: 'pa',
                 clusterTableId: 'album_id',
                 objectTable: 'photos_albums_files',
@@ -96,10 +106,10 @@ class AlbumsBackend extends Backend
         };
 
         // Transformation for shared albums
-        $transformShared = function (IQueryBuilder &$query) use ($transformOwned): void {
-            $transformOwned($query);
-            $this->joinCovers(
+        $shareCover = static function (IQueryBuilder &$query): void {
+            Covers::selectCover(
                 query: $query,
+                type: self::clusterType(),
                 clusterTable: 'pa',
                 clusterTableId: 'album_id',
                 objectTable: 'photos_albums_files',
@@ -110,6 +120,18 @@ class AlbumsBackend extends Backend
                 user: 'pa.user',
             );
         };
+
+        // Transformations to apply to own albums
+        $transformOwned = [
+            $materialize, $ownCover,
+            $materialize, $etag('last_added_photo'), $etag('cover'),
+        ];
+
+        // Transformations to apply to shared albums
+        $transformShared = [
+            $materialize, $ownCover, $shareCover,
+            $materialize, $etag('last_added_photo'), $etag('cover'), $etag('cover_owner'),
+        ];
 
         // Get personal and shared albums
         $list = array_merge(

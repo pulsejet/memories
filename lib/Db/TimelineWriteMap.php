@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -43,7 +44,7 @@ trait TimelineWriteMap
             ->andWhere($query->expr()->gte('lon', $query->createNamedParameter($lon - CLUSTER_DEG, IQueryBuilder::PARAM_STR)))
             ->andWhere($query->expr()->lte('lon', $query->createNamedParameter($lon + CLUSTER_DEG, IQueryBuilder::PARAM_STR)))
         ;
-        $rows = $query->executeQuery()->fetchAll();
+        $rows = Util::transaction(static fn () => $query->executeQuery()->fetchAll());
 
         // Find cluster closest to the point
         $minDist = PHP_INT_MAX;
@@ -91,20 +92,18 @@ trait TimelineWriteMap
             return;
         }
 
-        $this->connection->beginTransaction();
+        Util::transaction(function () use ($clusterId, $lat, $lon): void {
+            $query = $this->connection->getQueryBuilder();
+            $query->update('memories_mapclusters')
+                ->set('point_count', $query->createFunction('point_count + 1'))
+                ->set('lat_sum', $query->createFunction("lat_sum + {$lat}"))
+                ->set('lon_sum', $query->createFunction("lon_sum + {$lon}"))
+                ->where($query->expr()->eq('id', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT)))
+                ->executeStatement()
+            ;
 
-        $query = $this->connection->getQueryBuilder();
-        $query->update('memories_mapclusters')
-            ->set('point_count', $query->createFunction('point_count + 1'))
-            ->set('lat_sum', $query->createFunction("lat_sum + {$lat}"))
-            ->set('lon_sum', $query->createFunction("lon_sum + {$lon}"))
-            ->where($query->expr()->eq('id', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT)))
-        ;
-        $query->executeStatement();
-
-        $this->mapUpdateAggregates($clusterId);
-
-        $this->connection->commit();
+            $this->mapUpdateAggregates($clusterId);
+        });
     }
 
     /**
@@ -117,24 +116,22 @@ trait TimelineWriteMap
      */
     private function mapCreateCluster(float $lat, float $lon): int
     {
-        $this->connection->beginTransaction();
+        return Util::transaction(function () use ($lat, $lon): int {
+            $query = $this->connection->getQueryBuilder();
+            $query->insert('memories_mapclusters')
+                ->values([
+                    'point_count' => $query->expr()->literal(1, IQueryBuilder::PARAM_INT),
+                    'lat_sum' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),
+                    'lon_sum' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
+                ])
+            ;
+            $query->executeStatement();
 
-        $query = $this->connection->getQueryBuilder();
-        $query->insert('memories_mapclusters')
-            ->values([
-                'point_count' => $query->expr()->literal(1, IQueryBuilder::PARAM_INT),
-                'lat_sum' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),
-                'lon_sum' => $query->createNamedParameter($lon, IQueryBuilder::PARAM_STR),
-            ])
-        ;
-        $query->executeStatement();
+            $clusterId = $query->getLastInsertId();
+            $this->mapUpdateAggregates($clusterId);
 
-        $clusterId = $query->getLastInsertId();
-        $this->mapUpdateAggregates($clusterId);
-
-        $this->connection->commit();
-
-        return $clusterId;
+            return $clusterId;
+        });
     }
 
     /**
@@ -150,20 +147,18 @@ trait TimelineWriteMap
             return;
         }
 
-        $this->connection->beginTransaction();
+        Util::transaction(function () use ($clusterId, $lat, $lon): void {
+            $query = $this->connection->getQueryBuilder();
+            $query->update('memories_mapclusters')
+                ->set('point_count', $query->createFunction('point_count - 1'))
+                ->set('lat_sum', $query->createFunction("lat_sum - {$lat}"))
+                ->set('lon_sum', $query->createFunction("lon_sum - {$lon}"))
+                ->where($query->expr()->eq('id', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT)))
+            ;
+            $query->executeStatement();
 
-        $query = $this->connection->getQueryBuilder();
-        $query->update('memories_mapclusters')
-            ->set('point_count', $query->createFunction('point_count - 1'))
-            ->set('lat_sum', $query->createFunction("lat_sum - {$lat}"))
-            ->set('lon_sum', $query->createFunction("lon_sum - {$lon}"))
-            ->where($query->expr()->eq('id', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT)))
-        ;
-        $query->executeStatement();
-
-        $this->mapUpdateAggregates($clusterId);
-
-        $this->connection->commit();
+            $this->mapUpdateAggregates($clusterId);
+        });
     }
 
     /**
@@ -184,7 +179,7 @@ trait TimelineWriteMap
             ->set('last_update', $query->createNamedParameter(time(), IQueryBuilder::PARAM_INT))
             ->where($query->expr()->eq('id', $query->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT)))
             ->andWhere($query->expr()->gt('point_count', $query->createNamedParameter(0, IQueryBuilder::PARAM_INT)))
+            ->executeStatement()
         ;
-        $query->executeStatement();
     }
 }

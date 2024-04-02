@@ -123,7 +123,7 @@ export default defineComponent({
      * Hide the actions when the selection manager is open.
      * Having two action bars is confusing.
      */
-    body.has-top-bar & {
+    .memories-timeline:has(.memories-top-bar) & {
       visibility: hidden;
     }
 

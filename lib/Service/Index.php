@@ -172,7 +172,7 @@ class Index
             $addFilter('memories_failures', 'fail', false);
 
             // Get file IDs to actually index
-            $fileIds = $query->executeQuery()->fetchAll(\PDO::FETCH_COLUMN);
+            $fileIds = Util::transaction(static fn () => $query->executeQuery()->fetchAll(\PDO::FETCH_COLUMN));
 
             // Index files
             foreach ($fileIds as $fileId) {

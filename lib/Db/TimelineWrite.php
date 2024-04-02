@@ -6,6 +6,7 @@ namespace OCA\Memories\Db;
 
 use OCA\Memories\Exif;
 use OCA\Memories\Service\Index;
+use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
@@ -100,7 +101,7 @@ class TimelineWrite
 
         // Hand off if Live Photo video part
         if ($isvideo && $this->livePhoto->isVideoPart($exif)) {
-            return $this->livePhoto->processVideoPart($file, $exif);
+            return Util::transaction(fn () => $this->livePhoto->processVideoPart($file, $exif));
         }
 
         // If control reaches here, it's not a Live Photo video part
@@ -170,6 +171,7 @@ class TimelineWrite
             'mapcluster' => $query->createNamedParameter($mapCluster, IQueryBuilder::PARAM_INT),
             'orphan' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
             'buid' => $query->createNamedParameter($buid, IQueryBuilder::PARAM_STR),
+            'parent' => $query->createNamedParameter($file->getParent()->getId(), IQueryBuilder::PARAM_INT),
         ];
 
         // There is no easy way to UPSERT in standard SQL
@@ -186,7 +188,7 @@ class TimelineWrite
         }
 
         // Execute query
-        $updated = $query->executeStatement() > 0;
+        $updated = Util::transaction(static fn () => $query->executeStatement() > 0);
 
         // Clear failures if successful
         if ($updated) {
@@ -201,34 +203,30 @@ class TimelineWrite
      */
     public function deleteFile(File $file): void
     {
-        // Get full record
-        $query = $this->connection->getQueryBuilder();
-        $record = $query->select('*')
-            ->from('memories')
-            ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
-            ->executeQuery()
-            ->fetch()
-        ;
-
-        // Begin transaction
-        $this->connection->beginTransaction();
-
-        // Delete all records regardless of existence
-        foreach (DELETE_TABLES as $table) {
+        Util::transaction(function () use ($file): void {
+            // Get full record
             $query = $this->connection->getQueryBuilder();
-            $query->delete($table)
+            $record = $query->select('*')
+                ->from('memories')
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
-                ->executeStatement()
+                ->executeQuery()
+                ->fetch()
             ;
-        }
 
-        // Delete from map cluster
-        if ($record && ($cid = (int) $record['mapcluster']) > 0) {
-            $this->mapRemoveFromCluster($cid, (float) $record['lat'], (float) $record['lon']);
-        }
+            // Delete all records regardless of existence
+            foreach (DELETE_TABLES as $table) {
+                $query = $this->connection->getQueryBuilder();
+                $query->delete($table)
+                    ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
+                    ->executeStatement()
+                ;
+            }
 
-        // Commit transaction
-        $this->connection->commit();
+            // Delete from map cluster
+            if ($record && ($cid = (int) $record['mapcluster']) > 0) {
+                $this->mapRemoveFromCluster($cid, (float) $record['lat'], (float) $record['lon']);
+            }
+        });
     }
 
     /**
@@ -238,17 +236,15 @@ class TimelineWrite
     {
         // Delete all stale records
         foreach (DELETE_TABLES as $table) {
-            $query = $this->connection->getQueryBuilder();
-            $clause = $query
-                ->select($query->expr()->literal('1'))
+            $clause = $this->connection->getQueryBuilder();
+            $clause->select($clause->expr()->literal(1))
                 ->from('filecache', 'f')
-                ->where($query->expr()->eq('f.fileid', "*PREFIX*{$table}.fileid"))
-                ->getSQL()
+                ->where($clause->expr()->eq('f.fileid', "*PREFIX*{$table}.fileid"))
             ;
 
             $query = $this->connection->getQueryBuilder();
             $query->delete($table)
-                ->where($query->createFunction("NOT EXISTS({$clause})"))
+                ->where(SQL::notExists($query, $clause))
                 ->executeStatement()
             ;
         }
@@ -281,7 +277,7 @@ class TimelineWrite
             ;
         };
 
-        return $fetch('memories') ?: $fetch('memories_livephoto') ?: null;
+        return Util::transaction(static fn () => $fetch('memories') ?: $fetch('memories_livephoto') ?: null);
     }
 
     /**

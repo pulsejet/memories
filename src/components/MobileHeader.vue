@@ -7,9 +7,12 @@
     }"
   >
     <div class="logo">
-      <a :href="homeUrl">
-        <XImg v-if="logo" :src="logo" :svg-tag="true" />
-      </a>
+      <a :href="homeUrl"><XImg :src="banner" :svg-tag="true" /></a>
+    </div>
+
+    <div class="actions">
+      <UploadMenuItem />
+      <SearchbarMenuItem />
     </div>
   </div>
 </template>
@@ -17,16 +20,23 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { generateUrl } from '@nextcloud/router';
-import axios from '@nextcloud/axios';
+
+import UploadMenuItem from '@components/header/UploadMenuItem.vue';
+import SearchbarMenuItem from '@components/header/SearchbarMenuItem.vue';
 
 import * as utils from '@services/utils';
 
-import nextcloudsvg from '@assets/nextcloud.svg';
+import banner from '@assets/banner.svg';
 
 export default defineComponent({
   name: 'MobileHeader',
+  components: {
+    UploadMenuItem,
+    SearchbarMenuItem,
+  },
 
   data: () => ({
+    banner,
     isScrollDown: false,
     logo: null as string | null,
   }),
@@ -39,7 +49,6 @@ export default defineComponent({
 
   mounted() {
     utils.bus.on('memories.recycler.scroll', this.onScroll);
-    this.getLogo();
   },
 
   beforeDestroy() {
@@ -49,40 +58,6 @@ export default defineComponent({
   methods: {
     onScroll({ current, previous }: utils.BusEvent['memories.recycler.scroll']) {
       this.isScrollDown = (this.isScrollDown && previous - current < 40) || current - previous > 40; // momentum scroll
-    },
-
-    async getLogo() {
-      // try to get the logo
-      try {
-        const style = getComputedStyle(document.body);
-        const override = style.getPropertyValue('--image-logoheader') || style.getPropertyValue('--image-logo');
-        if (override) {
-          // Extract URL from CSS url
-          const url = override.match(/url\(["']?([^"']*)["']?\)/i)?.[1];
-          if (!url) throw new Error('No URL found');
-
-          // Fetch image
-          const blob = (await axios.get(url, { responseType: 'blob' })).data;
-          console.log('Loaded logo', blob);
-
-          // Convert to data URI and pass to logo
-          const reader = new FileReader();
-          reader.readAsDataURL(blob);
-          this.logo = await new Promise<string>((resolve, reject) => {
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.onabort = reject;
-          });
-
-          return;
-        }
-      } catch (e) {
-        // Go to fallback
-        console.warn('Could not load logo', e);
-      }
-
-      // Fallback to default
-      this.logo = nextcloudsvg;
     },
   },
 });
@@ -107,23 +82,34 @@ export default defineComponent({
   width: 100%;
   z-index: 10;
   height: 50px;
-  transform: translateY(-55px);
-  transition: transform 0.3s ease-in-out;
   background-color: var(--color-main-background);
 
+  transform: translateY(-55px);
+  transition: transform 0.3s ease-in-out;
   &.visible {
     transform: translateY(0);
   }
 
-  .logo {
-    width: 62px;
-    height: 90%;
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
+  display: flex;
+  flex-direction: row;
+
+  > .logo {
+    height: 100%;
+    flex: 1;
 
     > a {
+      display: inline-block;
+      height: 100%;
+      padding: 12px 12px;
+
+      padding: 8px 64px; // desktop
+      @media (max-width: 768px) {
+        padding: 8px 30px; // tablet
+      }
+      @media (max-width: 600px) {
+        padding: 12px 12px; // mobile
+      }
+
       :deep svg {
         color: var(--color-primary) !important;
       }
@@ -133,6 +119,19 @@ export default defineComponent({
         height: 100%;
         object-fit: contain;
       }
+    }
+  }
+
+  > .actions {
+    display: flex;
+
+    margin-right: 10px; // desktop
+    @media (max-width: 768px) {
+      margin-right: 0;
+    }
+
+    > button {
+      height: 100%;
     }
   }
 }

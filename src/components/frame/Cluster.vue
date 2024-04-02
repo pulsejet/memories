@@ -35,20 +35,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import Vue, { defineComponent, type PropType } from 'vue';
 
 import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble.js';
 
-import type { IAlbum, ICluster, IFace, IPhoto } from '@typings';
-import { getPreviewUrl } from '@services/utils/helpers';
 import errorsvg from '@assets/error.svg';
 import plussvg from '@assets/plus.svg';
 
 import * as nativex from '@native';
 import * as utils from '@services/utils';
-import { API } from '@services/API';
+import * as dav from '@services/dav';
 
-import Vue from 'vue';
+import type { ICluster } from '@typings';
 
 export default defineComponent({
   name: 'Cluster',
@@ -79,39 +77,7 @@ export default defineComponent({
     previewUrl() {
       if (this.error) return errorsvg;
       if (this.plus) return plussvg;
-
-      // Helper to get preview URL from fileid and etag
-      const preview = (fileid: number, etag: string | number) =>
-        getPreviewUrl({
-          photo: {
-            fileid: fileid,
-            etag: etag.toString(),
-          } as IPhoto,
-          sqsize: 512,
-        });
-
-      // If a cover is fileid, directly use it if we don't need crop
-      // Use the cover etag here since we forced a random cover below
-      if (this.data.cover && this.data.cover_etag && (this.album || this.place || this.tag)) {
-        return preview(this.data.cover, this.data.cover_etag);
-      }
-
-      if (this.album) {
-        // Always fall back to last update for albums
-        // Never go to CLUSTER_PREVIEW since it is not fully implemented
-        return preview(this.album.last_added_photo, this.album.last_added_photo_etag ?? this.album.album_id);
-      }
-
-      // Force a cover if not set
-      this.data.cover ??= Math.random();
-
-      // Use a random cover ID to bust local cache
-      return API.CLUSTER_PREVIEW(
-        this.data.cluster_type,
-        this.data.cluster_id,
-        this.data.cover,
-        this.data.cover_etag ?? 'null',
-      );
+      return dav.getClusterPreview(this.data);
     },
 
     title() {
@@ -119,80 +85,39 @@ export default defineComponent({
     },
 
     subtitle() {
-      if (this.album) {
+      if (dav.clusterIs.album(this.data)) {
         let text: string;
-        if (this.album.count === 0) {
+        if (this.data.count === 0) {
           text = this.t('memories', 'No items');
         } else {
-          text = this.n('memories', '{n} item', '{n} items', this.album.count, { n: this.album.count });
+          text = this.n('memories', '{n} item', '{n} items', this.data.count, { n: this.data.count });
         }
 
-        if (this.album.user !== utils.uid) {
-          text +=
-            ' / ' +
-            this.t('memories', 'Shared by {user}', {
-              user: this.album.user_display || this.album.user,
-            });
+        if (this.data.user !== utils.uid) {
+          const sharer = this.t('memories', 'Shared by {user}', {
+            user: this.data.user_display || this.data.user,
+          });
+          text = `${text} / ${sharer}`;
         }
 
         return text;
       }
 
-      return '';
-    },
-
-    type() {
-      return this.data.cluster_type;
+      return String();
     },
 
     plus() {
-      return this.type === 'plus';
-    },
-
-    tag() {
-      return this.type === 'tags' && this.data;
-    },
-
-    face() {
-      return (this.type === 'recognize' || this.type === 'facerecognition') && (this.data as IFace);
-    },
-
-    place() {
-      return this.type === 'places' && this.data;
-    },
-
-    album() {
-      return this.type === 'albums' && (this.data as IAlbum);
+      return this.data.cluster_type === 'plus';
     },
 
     /** Target URL to navigate to */
     target() {
       if (!this.link || this.plus) return {};
-
-      if (this.album) {
-        const user = this.album.user;
-        const name = this.album.name;
-        return { name: 'albums', params: { user, name } };
-      }
-
-      if (this.face) {
-        const name = String(this.face.name || this.face.cluster_id);
-        const user = this.face.user_id;
-        return { name: this.data.cluster_type, params: { name, user } };
-      }
-
-      if (this.place) {
-        const id = this.place.cluster_id;
-        const placeName = this.place.name || id;
-        const name = `${id}-${placeName}`;
-        return { name: 'places', params: { name } };
-      }
-
-      return { name: 'tags', params: { name: this.data.name } };
+      return dav.getClusterLinkTarget(this.data);
     },
 
     error() {
-      return Boolean(this.data.previewError) || Boolean(this.album && this.album.last_added_photo <= 0);
+      return !!this.data.previewError || (dav.clusterIs.album(this.data) && this.data.last_added_photo <= 0);
     },
   },
 
@@ -349,7 +274,7 @@ $namemargin: 10px;
 
     .cluster--rounded &,
     .cluster--album & {
-      border-radius: 12px; // rounded corners
+      border-radius: 9px; // rounded corners
     }
     .cluster--album &,
     .cluster--circle & {

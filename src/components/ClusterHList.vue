@@ -68,8 +68,12 @@ export default defineComponent({
   width: 100%;
 
   > .title {
-    padding: 4px 16px 8px 14px;
     display: flex;
+
+    padding: 4px 16px 14px 14px;
+    @media (max-width: 768px) {
+      padding-bottom: 8px;
+    }
 
     > .name {
       font-size: 1.1em;
@@ -85,24 +89,48 @@ export default defineComponent({
   }
 
   > .hlist {
+    $clusterSize: 140px;
+    $circleHeight: 176px;
+    $clusterSizeM: 120px;
+    $circleHeightM: 152px;
+
     width: 100%;
-    overflow-x: auto;
-    white-space: nowrap;
     padding: 0 6px;
+
+    @media (min-width: 769px) {
+      overflow: hidden;
+      display: grid;
+      grid-gap: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(calc(min(50%, $clusterSize) - 5px), 1fr));
+
+      max-height: $clusterSize;
+      &:has(.cluster--circle) {
+        max-height: $circleHeight;
+      }
+    }
+
+    @media (max-width: 768px) {
+      overflow-x: auto;
+      white-space: nowrap;
+    }
 
     > .item {
       display: inline-block;
       margin: 0 2px;
-      width: 120px;
       aspect-ratio: 1;
       position: relative;
 
+      width: $clusterSize;
+      @media (max-width: 768px) {
+        width: $clusterSizeM;
+      }
+
       &.cluster--circle {
-        height: 156px;
+        height: $circleHeight;
         aspect-ratio: unset;
 
         @media (max-width: 768px) {
-          height: 152px; // font-size: 0.9em;
+          height: $circleHeightM; // font-size: 0.9em;
         }
       }
     }

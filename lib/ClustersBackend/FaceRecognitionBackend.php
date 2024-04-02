@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -175,11 +176,11 @@ class FaceRecognitionBackend extends Backend
         $query->where($query->expr()->eq($nameField, $query->createNamedParameter($name)));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // LIMIT results
         if (-6 === $limit) {
-            $this->filterCover($query, 'frf', 'id', 'person');
+            Covers::filterCover($query, self::clusterType(), 'frf', 'id', 'person');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
@@ -263,7 +264,7 @@ class FaceRecognitionBackend extends Backend
         ));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // GROUP by ID of face cluster
         $query->addGroupBy('frp.id', 'frp.user');
@@ -287,15 +288,21 @@ class FaceRecognitionBackend extends Backend
         // It is not worth displaying all unnamed clusters. We show 15 to name them progressively,
         $query->setMaxResults(15);
 
-        // JOIN to get all covers
-        $this->joinCovers(
+        // SELECT covers
+        $query = SQL::materialize($query, 'frp');
+        Covers::selectCover(
             query: $query,
+            type: self::clusterType(),
             clusterTable: 'frp',
             clusterTableId: 'id',
             objectTable: 'facerecog_faces',
             objectTableObjectId: 'id',
             objectTableClusterId: 'person',
         );
+
+        // SELECT etag for the cover
+        $query = SQL::materialize($query, 'frp');
+        $this->tq->selectEtag($query, 'cover', 'cover_etag');
 
         // FETCH all faces
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
@@ -307,7 +314,7 @@ class FaceRecognitionBackend extends Backend
 
         // SELECT all face clusters
         $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'));
-        $query->select('frp.name')->from('facerecog_persons', 'frp');
+        $query->select('frp.id', 'frp.name')->from('facerecog_persons', 'frp');
         $query->selectAlias($count, 'count');
         $query->selectAlias('frp.user', 'user_id');
 
@@ -324,7 +331,7 @@ class FaceRecognitionBackend extends Backend
         ));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // GROUP by name of face clusters
         $query->where($query->expr()->isNotNull('frp.name'));
@@ -340,15 +347,21 @@ class FaceRecognitionBackend extends Backend
         $query->orderBy('count', 'DESC');
         $query->addOrderBy('frp.name', 'ASC');
 
-        // JOIN to get all covers
-        $this->joinCovers(
+        // SELECT to get all covers
+        $query = SQL::materialize($query, 'frp');
+        Covers::selectCover(
             query: $query,
+            type: self::clusterType(),
             clusterTable: 'frp',
             clusterTableId: 'id',
             objectTable: 'facerecog_faces',
             objectTableObjectId: 'id',
             objectTableClusterId: 'person',
         );
+
+        // SELECT etag for the cover
+        $query = SQL::materialize($query, 'frp');
+        $this->tq->selectEtag($query, 'frp.cover', 'cover_etag');
 
         // FETCH all faces
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];

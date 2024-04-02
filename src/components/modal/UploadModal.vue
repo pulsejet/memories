@@ -57,11 +57,11 @@
 <script lang="ts">
 import Vue, { defineComponent } from 'vue';
 
-import Modal from './Modal.vue';
-import ModalMixin from './ModalMixin';
-import AlbumPicker from './AlbumPicker.vue';
-import EditTags from './EditTags.vue';
-import UploadMenuItem from './UploadMenuItem.vue';
+import Modal from '@components/modal/Modal.vue';
+import ModalMixin from '@components/modal/ModalMixin';
+import AlbumPicker from '@components/modal/AlbumPicker.vue';
+import EditTags from '@components/modal/EditTags.vue';
+import UploadMenuItem from '@components/header/UploadMenuItem.vue';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');

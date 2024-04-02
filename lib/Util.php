@@ -220,6 +220,9 @@ class Util
             $str .= 'S';
         }
 
+        // Other permissions that are set elsewhere
+        // L - Disable download (negative permission)
+
         return $str;
     }
 
@@ -316,6 +319,33 @@ class Util
                 ?? throw new \InvalidArgumentException("Invalid timeline path: {$path}"),
             explode(';', $paths),
         );
+    }
+
+    /**
+     * Run a callback in a transaction.
+     * It returns the same type as the return type of the closure.
+     *
+     * @template T
+     *
+     * @psalm-param \Closure(): T $callback
+     *
+     * @psalm-return T
+     */
+    public static function transaction(\Closure $callback): mixed
+    {
+        $connection = \OC::$server->get(\OCP\IDBConnection::class);
+        $connection->beginTransaction();
+
+        try {
+            $val = $callback();
+            $connection->commit();
+
+            return $val;
+        } catch (\Throwable $e) {
+            $connection->rollBack();
+
+            throw $e;
+        }
     }
 
     /**

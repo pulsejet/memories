@@ -43,39 +43,4 @@ class TimelineQuery
     {
         return $this->connection->getQueryBuilder();
     }
-
-    /**
-     * @return never
-     */
-    public static function debugQuery(IQueryBuilder &$query, string $sql = '')
-    {
-        // Print the query and exit
-        $sql = empty($sql) ? $query->getSQL() : $sql;
-        $sql = str_replace('*PREFIX*', 'oc_', $sql);
-        $sql = self::replaceQueryParams($query, $sql);
-        echo "{$sql}";
-
-        exit; // only for debugging, so this is okay
-    }
-
-    public static function replaceQueryParams(IQueryBuilder &$query, string $sql): string
-    {
-        $params = $query->getParameters();
-        $platform = $query->getConnection()->getDatabasePlatform();
-        foreach ($params as $key => $value) {
-            if (\is_array($value)) {
-                $value = implode(',', array_map(static fn ($v) => $platform->quoteStringLiteral($v), $value));
-            } elseif (\is_bool($value)) {
-                $value = $platform->quoteStringLiteral($value ? '1' : '0');
-            } elseif (null === $value) {
-                $value = $platform->quoteStringLiteral('NULL');
-            } else {
-                $value = $platform->quoteStringLiteral((string) $value);
-            }
-
-            $sql = str_replace(':'.$key, $value, $sql);
-        }
-
-        return $sql;
-    }
 }

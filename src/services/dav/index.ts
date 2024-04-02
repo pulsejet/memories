@@ -1,6 +1,7 @@
 export * from './base';
 export * from './albums';
 export * from './archive';
+export * from './clusters';
 export * from './download';
 export * from './face';
 export * from './favorites';

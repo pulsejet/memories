@@ -72,6 +72,18 @@ app:
     occ config:system:set memories.exiftool.tmp --value /path/to/temp/dir
     ```
 
+## Trigger compatibility mode
+
+Memories utilizes database triggers for certain functionality and if these triggers cannot be used then the app will run in trigger compatibility mode. This mode is much slower especially on larger databases.
+
+If your admin panel shows that Memories is running in trigger compatibility mode, try the following steps.
+
+1. Run `occ maintenance:repair` to attempt to create the triggers. This will print any errors that occur.
+2. Restart the PHP server.
+3. If you are using MySQL / MariaDB, set the `log_bin_trust_function_creators` option is set to `1` in your `my.cnf` file. If you are using docker, you can add `--log_bin_trust_function_creators=true` to your command line. Repeat steps 1 and 2 after making this change.
+
+If none of the above work or are applicable, file a bug at the repository including the output of `occ maintenance:repair`.
+
 ## Issues with NixOS
 
 ### Background index fails
@@ -128,21 +140,28 @@ Memories transcodes videos on the fly per-user. This saves space, but requires r
 If you want to completely reset Memories (e.g. for database trouble), uninstall it from the app store, then run the following SQL on your database to clean up any data.
 Note that this can have unintended consequences such as some files appearing as duplicates in the mobile app when you reinstall Memories.
 
+Note: this assumes the default prefix `oc_`. If you have a different prefix, replace `oc_` with your prefix.
+
 ```sql
 DROP TABLE IF EXISTS oc_memories;
+DROP TABLE IF EXISTS oc_memories_covers;
+DROP TABLE IF EXISTS oc_memories_failures;
 DROP TABLE IF EXISTS oc_memories_livephoto;
 DROP TABLE IF EXISTS oc_memories_mapclusters;
 DROP TABLE IF EXISTS oc_memories_places;
 DROP TABLE IF EXISTS oc_memories_planet;
 DROP TABLE IF EXISTS memories_planet_geometry;
-DROP INDEX IF EXISTS memories_parent_mimetype ON oc_filecache; /* MySQL */
 DELETE FROM oc_migrations WHERE app='memories';
-```
 
-On Postgres, the syntax for dropping the index is:
+/* The following statements are ONLY for MySQL / MariaDB */
+DROP INDEX IF EXISTS memories_parent_mimetype ON oc_filecache;
+DROP INDEX IF EXISTS memories_type_tagid ON systemtag_object_mapping;
+DROP TRIGGER IF EXISTS memories_fcu_trg;
 
-```sql
+/* The following statements are ONLY for Postgres */
 DROP INDEX IF EXISTS memories_parent_mimetype;
+DROP INDEX IF EXISTS memories_type_tagid;
+DROP FUNCTION IF EXISTS memories_fcu_fun CASCADE;
 ```
 
 !!! warning "Reinstallation"

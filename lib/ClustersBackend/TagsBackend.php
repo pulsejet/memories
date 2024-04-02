@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -88,22 +89,28 @@ class TagsBackend extends Backend
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // GROUP and ORDER by tag name
         $query->addGroupBy('st.id');
         $query->orderBy($query->createFunction('LOWER(st.name)'), 'ASC');
         $query->addOrderBy('st.id'); // tie-breaker
 
-        // JOIN to get all covers
-        $this->joinCovers(
+        // SELECT cover photo
+        $query = SQL::materialize($query, 'st');
+        Covers::selectCover(
             query: $query,
+            type: self::clusterType(),
             clusterTable: 'st',
             clusterTableId: 'id',
             objectTable: 'systemtag_object_mapping',
             objectTableObjectId: 'objectid',
             objectTableClusterId: 'systemtagid',
         );
+
+        // SELECT etag for the cover
+        $query = SQL::materialize($query, 'st');
+        $this->tq->selectEtag($query, 'st.cover', 'cover_etag');
 
         // FETCH all tags
         $tags = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
@@ -140,11 +147,14 @@ class TagsBackend extends Backend
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
+
+        // JOIN with the filecache table
+        $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('f.fileid', 'm.fileid'));
 
         // MAX number of files
         if (-6 === $limit) {
-            $this->filterCover($query, 'stom', 'objectid', 'systemtagid');
+            Covers::filterCover($query, self::clusterType(), 'stom', 'objectid', 'systemtagid');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }

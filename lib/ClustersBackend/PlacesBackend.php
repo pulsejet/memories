@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
@@ -69,6 +70,7 @@ class PlacesBackend extends Backend
 
         $inside = (int) $this->request->getParam('inside', 0);
         $marked = (int) $this->request->getParam('mark', 1);
+        $covers = (bool) $this->request->getParam('covers', 1);
 
         $query = $this->tq->getBuilder();
 
@@ -89,7 +91,7 @@ class PlacesBackend extends Backend
                 ->where($sub->expr()->eq('mp_sq.osm_id', $query->createNamedParameter($inside, \PDO::PARAM_INT)))
                 ->andWhere($sub->expr()->eq('mp_sq.fileid', 'mp.fileid'))
             ;
-            $mpJoinOn[] = $query->createFunction("EXISTS ({$sub->getSQL()})");
+            $mpJoinOn[] = SQL::exists($query, $sub);
 
             // Add WHERE clauses to main query to filter out admin_levels
             $sub = $this->tq->getBuilder();
@@ -120,7 +122,7 @@ class PlacesBackend extends Backend
         $query->innerJoin('mp', 'memories', 'm', $query->expr()->eq('m.fileid', 'mp.fileid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // GROUP and ORDER by tag name
         $query->groupBy('e.osm_id');
@@ -128,20 +130,11 @@ class PlacesBackend extends Backend
         // We use this as the subquery for the main query, where we also re-join with
         // oc_memories_planet to the the names from the IDS
         // If we just AGGREGATE+GROUP with the name in one query, then it can't use indexes
-        $sub = $query;
-
-        // Create new query and copy over parameters (and types)
-        $query = $this->tq->getBuilder();
-        $query->setParameters($sub->getParameters(), $sub->getParameterTypes());
-
-        // Create the subquery function for selecting from it
-        $sqf = $query->createFunction("({$sub->getSQL()})");
-
-        // SELECT osm_id
-        $query->select('sub.osm_id', 'sub.count', 'e.name', 'e.other_names')->from($sqf, 'sub');
+        $query = SQL::materialize($query, 'sub');
 
         // INNER JOIN back on the planet table to get the names
         $query->innerJoin('sub', 'memories_planet', 'e', $query->expr()->eq('e.osm_id', 'sub.osm_id'));
+        $query->addSelect('e.name', 'e.other_names');
 
         // WHERE at least 3 photos if want marked clusters
         if ($marked) {
@@ -156,15 +149,23 @@ class PlacesBackend extends Backend
         // GROUP BY everything
         $query->addGroupBy('sub.osm_id', 'e.osm_id', 'sub.count', 'e.name', 'e.other_names');
 
-        // JOIN to get all covers
-        $this->joinCovers(
-            query: $query,
-            clusterTable: 'sub',
-            clusterTableId: 'osm_id',
-            objectTable: 'memories_places',
-            objectTableObjectId: 'fileid',
-            objectTableClusterId: 'osm_id',
-        );
+        // SELECT to get all covers
+        if ($covers) {
+            $query = SQL::materialize($query, 'sub');
+            Covers::selectCover(
+                query: $query,
+                type: self::clusterType(),
+                clusterTable: 'sub',
+                clusterTableId: 'osm_id',
+                objectTable: 'memories_places',
+                objectTableObjectId: 'fileid',
+                objectTableClusterId: 'osm_id',
+            );
+
+            // SELECT etag for the cover
+            $query = SQL::materialize($query, 'sub');
+            $this->tq->selectEtag($query, 'sub.cover', 'cover_etag');
+        }
 
         // FETCH all tags
         $places = $this->tq->executeQueryWithCTEs($query)->fetchAll();
@@ -192,7 +193,7 @@ class PlacesBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT all photos with this tag
-        $query->select('f.fileid', 'f.etag', 'mp.osm_id')
+        $query->select('m.fileid', 'f.etag', 'mp.osm_id')
             ->from('memories_places', 'mp')
             ->where($query->expr()->eq('mp.osm_id', $query->createNamedParameter((int) $name)))
         ;
@@ -200,19 +201,22 @@ class PlacesBackend extends Backend
         // WHERE these items are memories indexed photos
         $query->innerJoin('mp', 'memories', 'm', $query->expr()->eq('m.fileid', 'mp.fileid'));
 
+        // JOIN with the filecache table
+        $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
+
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // MAX number of photos
         if (-6 === $limit) {
-            $this->filterCover($query, 'mp', 'fileid', 'osm_id');
+            Covers::filterCover($query, self::clusterType(), 'mp', 'fileid', 'osm_id');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
 
         // Filter by fileid if specified
         if (null !== $fileid) {
-            $query->andWhere($query->expr()->eq('f.fileid', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
+            $query->andWhere($query->expr()->eq('m.fileid', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         // FETCH tag photos

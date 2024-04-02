@@ -31,6 +31,8 @@ export type ISystemConfig = {
   'memories.vod.use_transpose': boolean;
   'memories.vod.use_gop_size': boolean;
 
+  'memories.db.triggers.fcu': boolean;
+
   enabledPreviewProviders: string[];
   preview_max_x: number;
   preview_max_y: number;

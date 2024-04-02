@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCA\Memories\ClustersBackend\AlbumsBackend;
+use OCA\Memories\ClustersBackend\Covers;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -14,16 +16,16 @@ class AlbumsQuery
     /**
      * Get list of albums.
      *
-     * @param string   $uid         User ID
-     * @param bool     $shared      Whether to get shared albums
-     * @param int      $fileid      File to filter by
-     * @param \Closure $transformCb Callback to transform the query
+     * @param string $uid        User ID
+     * @param bool   $shared     Whether to get shared albums
+     * @param int    $fileid     File to filter by
+     * @param ?array $transforms Callbacks to transform the query
      */
     public function getList(
         string $uid,
         bool $shared = false,
         int $fileid = 0,
-        ?\Closure $transformCb = null,
+        ?array $transforms = null,
     ): array {
         $query = $this->connection->getQueryBuilder();
 
@@ -34,7 +36,6 @@ class AlbumsQuery
             'pa.album_id',
             'pa.name',
             'pa.user',
-            'pa.created',
             'pa.created',
             'pa.location',
             'pa.last_added_photo',
@@ -77,18 +78,13 @@ class AlbumsQuery
                     $query->expr()->eq('paf.album_id', 'pa.album_id'),
                     $query->expr()->eq('paf.file_id', $query->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)),
                 ))
-                ->getSQL()
             ;
-            $query->andWhere($query->createFunction("EXISTS ({$fSq})"));
+            $query->andWhere(SQL::exists($query, $fSq));
         }
 
-        // Get the etag of the last added photo
-        $query->leftJoin('pa', 'filecache', 'pa_fc', $query->expr()->eq('pa.last_added_photo', 'pa_fc.fileid'));
-        $query->selectAlias($query->createFunction('MAX(pa_fc.etag)'), 'last_added_photo_etag');
-
         // Apply further transformations
-        if (null !== $transformCb) {
-            $transformCb($query);
+        foreach ($transforms ?? [] as $cb) {
+            $query = $cb($query) ?? $query;
         }
 
         // FETCH all albums
@@ -233,13 +229,29 @@ class AlbumsQuery
     public function getAlbumByLink(string $token): ?array
     {
         $query = $this->connection->getQueryBuilder();
-        $query->select('*')->from('photos_albums', 'pa')
+        $query->select('pa.*')
+            ->from('photos_albums', 'pa')
             ->innerJoin('pa', $this->collaboratorsTable(), 'pc', $query->expr()->andX(
                 $query->expr()->eq('pc.album_id', 'pa.album_id'),
                 $query->expr()->eq('collaborator_id', $query->createNamedParameter($token)),
                 $query->expr()->eq('collaborator_type', $query->expr()->literal(3, \PDO::PARAM_INT)), // = TYPE_LINK
             ))
         ;
+
+        // Get the cover image of the owner of the album
+        // See AlbumsBackend::getClustersInternal
+        Covers::selectCover(
+            query: $query,
+            type: AlbumsBackend::clusterType(),
+            clusterTable: 'pa',
+            clusterTableId: 'album_id',
+            objectTable: 'photos_albums_files',
+            objectTableObjectId: 'file_id',
+            objectTableClusterId: 'album_id',
+            validateFilecache: false,
+            field: 'cover_owner',
+            user: 'pa.user',
+        );
 
         return $query->executeQuery()->fetch() ?: null;
     }

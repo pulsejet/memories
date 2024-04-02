@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="show" class="top-bar">
+    <div v-if="show" class="memories-top-bar top-bar">
       <NcActions :inline="1">
         <NcActionButton :aria-label="t('memories', 'Cancel')" @click="clear()">
           {{ t('memories', 'Cancel') }}
@@ -299,8 +299,6 @@ export default defineComponent({
   },
 
   beforeDestroy() {
-    this.setHasTopBar(false);
-
     // Unsubscribe from global events
     utils.bus.off('memories:albums:update', this.clear);
     utils.bus.off('memories:fragment:pop:selection', this.clear);
@@ -308,7 +306,6 @@ export default defineComponent({
 
   watch: {
     show(value: boolean, from: boolean) {
-      this.setHasTopBar(value);
       utils.fragment.if(value, utils.fragment.types.selection);
     },
   },
@@ -342,11 +339,6 @@ export default defineComponent({
     selectionChanged() {
       this.show = this.selection.size > 0;
       this.size = this.selection.size;
-    },
-
-    /** Set the has-top-bar class on the body */
-    setHasTopBar(has: boolean) {
-      document.body.classList.toggle('has-top-bar', has);
     },
 
     /** Is the selection empty */
