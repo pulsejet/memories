@@ -92,9 +92,10 @@ class AlbumsBackend extends Backend
         };
 
         // Add cover from self user
-        $ownCover = function (IQueryBuilder &$query): void {
-            $this->selectCover(
+        $ownCover = static function (IQueryBuilder &$query): void {
+            Covers::selectCover(
                 query: $query,
+                type: self::clusterType(),
                 clusterTable: 'pa',
                 clusterTableId: 'album_id',
                 objectTable: 'photos_albums_files',
@@ -105,9 +106,10 @@ class AlbumsBackend extends Backend
         };
 
         // Transformation for shared albums
-        $shareCover = function (IQueryBuilder &$query): void {
-            $this->selectCover(
+        $shareCover = static function (IQueryBuilder &$query): void {
+            Covers::selectCover(
                 query: $query,
+                type: self::clusterType(),
                 clusterTable: 'pa',
                 clusterTableId: 'album_id',
                 objectTable: 'photos_albums_files',

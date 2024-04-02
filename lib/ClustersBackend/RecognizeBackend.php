@@ -172,8 +172,9 @@ class RecognizeBackend extends Backend
 
         // SELECT to get all covers
         $query = SQL::materialize($query, 'rfc');
-        $this->selectCover(
+        Covers::selectCover(
             query: $query,
+            type: self::clusterType(),
             clusterTable: 'rfc',
             clusterTableId: 'id',
             objectTable: 'recognize_face_detections',
@@ -246,7 +247,7 @@ class RecognizeBackend extends Backend
 
         // LIMIT results
         if (-6 === $limit) {
-            $this->filterCover($query, 'rfd', 'id', 'cluster_id');
+            Covers::filterCover($query, self::clusterType(), 'rfd', 'id', 'cluster_id');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }

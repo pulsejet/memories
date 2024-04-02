@@ -180,7 +180,7 @@ class FaceRecognitionBackend extends Backend
 
         // LIMIT results
         if (-6 === $limit) {
-            $this->filterCover($query, 'frf', 'id', 'person');
+            Covers::filterCover($query, self::clusterType(), 'frf', 'id', 'person');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
@@ -290,8 +290,9 @@ class FaceRecognitionBackend extends Backend
 
         // SELECT covers
         $query = SQL::materialize($query, 'frp');
-        $this->selectCover(
+        Covers::selectCover(
             query: $query,
+            type: self::clusterType(),
             clusterTable: 'frp',
             clusterTableId: 'id',
             objectTable: 'facerecog_faces',
@@ -348,8 +349,9 @@ class FaceRecognitionBackend extends Backend
 
         // SELECT to get all covers
         $query = SQL::materialize($query, 'frp');
-        $this->selectCover(
+        Covers::selectCover(
             query: $query,
+            type: self::clusterType(),
             clusterTable: 'frp',
             clusterTableId: 'id',
             objectTable: 'facerecog_faces',

@@ -152,8 +152,9 @@ class PlacesBackend extends Backend
         // SELECT to get all covers
         if ($covers) {
             $query = SQL::materialize($query, 'sub');
-            $this->selectCover(
+            Covers::selectCover(
                 query: $query,
+                type: self::clusterType(),
                 clusterTable: 'sub',
                 clusterTableId: 'osm_id',
                 objectTable: 'memories_places',
@@ -208,7 +209,7 @@ class PlacesBackend extends Backend
 
         // MAX number of photos
         if (-6 === $limit) {
-            $this->filterCover($query, 'mp', 'fileid', 'osm_id');
+            Covers::filterCover($query, self::clusterType(), 'mp', 'fileid', 'osm_id');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
