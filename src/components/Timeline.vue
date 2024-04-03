@@ -16,6 +16,9 @@
     <!-- No content found and nothing is loading -->
     <EmptyContent v-if="showEmpty" />
 
+    <!-- Top overlay showing date -->
+    <TimelineTopOverlay ref="topOverlay" :heads="heads" :container="refs.container?.$el" />
+
     <!-- Main recycler view for rows -->
     <RecycleScroller
       ref="recycler"
@@ -82,7 +85,10 @@
       :recycler="refs.recycler"
       :recyclerBefore="refs.recyclerBefore"
       @interactend="loadScrollView"
-      @scroll="currentScroll = $event.current"
+      @scroll="
+        currentScroll = $event.current;
+        refs.topOverlay?.refresh();
+      "
     />
 
     <SelectionManager
@@ -117,6 +123,7 @@ import SwipeRefresh from './SwipeRefresh.vue';
 import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import TopMatter from '@components/top-matter/TopMatter.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
+import TimelineTopOverlay from '@components/top-matter/TimelineTopOverlay.vue';
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
@@ -140,6 +147,7 @@ export default defineComponent({
     EmptyContent,
     TopMatter,
     DynamicTopMatter,
+    TimelineTopOverlay,
     SelectionManager,
     ScrollerManager,
     Viewer,
@@ -248,6 +256,7 @@ export default defineComponent({
         container?: InstanceType<typeof SwipeRefresh>;
         topmatter?: InstanceType<typeof TopMatter>;
         dtm?: InstanceType<typeof DynamicTopMatter>;
+        topOverlay?: InstanceType<typeof TimelineTopOverlay>;
         recycler?: VueRecyclerType;
         recyclerBefore?: HTMLDivElement;
         selectionManager: InstanceType<typeof SelectionManager>;
