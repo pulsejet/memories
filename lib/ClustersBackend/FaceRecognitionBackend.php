@@ -313,9 +313,10 @@ class FaceRecognitionBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT all face clusters
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'));
-        $query->select('frp.id', 'frp.name')->from('facerecog_persons', 'frp');
-        $query->selectAlias($count, 'count');
+        $query->select('frp.name')
+            ->from('facerecog_persons', 'frp');
+        $query->selectAlias($query->func()->count($query->createFunction('DISTINCT m.fileid')), 'count');
+        $query->selectAlias($query->func()->min('frp.id'), 'id');
         $query->selectAlias('frp.user', 'user_id');
 
         // WHERE there are faces with this cluster
