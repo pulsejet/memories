@@ -63,7 +63,7 @@ trait TimelineWriteFailures
     public function countFailures(): int
     {
         $query = $this->connection->getQueryBuilder();
-        $query->select($query->createFunction('COUNT(fileid)'))
+        $query->select($query->func()->count('fileid'))
             ->from('memories_failures')
         ;
 

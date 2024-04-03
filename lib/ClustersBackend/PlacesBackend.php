@@ -75,7 +75,7 @@ class PlacesBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT location name and count of photos
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
+        $count = $query->func()->count(SQL::distinct($query, 'm.fileid'), 'count');
         $query->select('e.osm_id', $count)->from('memories_planet', 'e');
 
         // WHERE these are not special clusters (e.g. timezone)

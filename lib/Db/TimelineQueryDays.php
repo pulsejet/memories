@@ -37,8 +37,8 @@ trait TimelineQueryDays
         $query = $this->connection->getQueryBuilder();
 
         // Get all entries also present in filecache
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
-        $query->select('m.dayid', $count)
+        $query->select('m.dayid')
+            ->selectAlias($query->func()->count(SQL::distinct($query, 'm.fileid')), 'count')
             ->from('memories', 'm')
         ;
 
@@ -97,13 +97,10 @@ trait TimelineQueryDays
         // Make new query
         $query = $this->connection->getQueryBuilder();
 
-        // Get all entries also present in filecache
-        $fileid = $query->createFunction('DISTINCT m.fileid');
-
         // We don't actually use m.datetaken here, but postgres
         // needs that all fields in ORDER BY are also in SELECT
         // when using DISTINCT on selected fields
-        $query->select($fileid, ...TimelineQuery::TIMELINE_SELECT)
+        $query->select(SQL::distinct($query, 'm.fileid'), ...TimelineQuery::TIMELINE_SELECT)
             ->from('memories', 'm')
         ;
 

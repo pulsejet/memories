@@ -70,7 +70,7 @@ class Version505000Date20230821044807 extends SimpleMigrationStep
             // get count of rows to update
             $query = $this->dbc->getQueryBuilder();
             $maxCount = $query
-                ->select($query->createFunction('COUNT(m.fileid)'))
+                ->select($query->func()->count('m.fileid'))
                 ->from('memories', 'm')
                 ->executeQuery()
                 ->fetchOne()

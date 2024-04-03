@@ -73,7 +73,7 @@ class TagsBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT visible tag name and count of photos
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
+        $count = $query->func()->count(SQL::distinct($query, 'm.fileid'), 'count');
         $query->select('st.id', 'st.name', $count)
             ->from('systemtag', 'st')
             ->where($query->expr()->eq('st.visibility', $query->expr()->literal(1, \PDO::PARAM_INT)))
@@ -93,7 +93,7 @@ class TagsBackend extends Backend
 
         // GROUP and ORDER by tag name
         $query->addGroupBy('st.id');
-        $query->orderBy($query->createFunction('LOWER(st.name)'), 'ASC');
+        $query->orderBy($query->func()->lower('st.name'), 'ASC');
         $query->addOrderBy('st.id'); // tie-breaker
 
         // SELECT cover photo

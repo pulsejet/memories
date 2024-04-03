@@ -103,4 +103,26 @@ class SQL
 
         return $query->createFunction("NOT EXISTS ({$clause})");
     }
+
+    /**
+     * Create a DISTINCT expression.
+     *
+     * @param IQueryBuilder $query The query to create the function on
+     * @param string        $field The field to select distinct values from
+     */
+    public static function distinct(IQueryBuilder &$query, string $field): IQueryFunction
+    {
+        return $query->createFunction("DISTINCT {$field}");
+    }
+
+    /**
+     * Create a AVG expression.
+     *
+     * @param IQueryBuilder $query The query to create the function on
+     * @param string        $field The field to average
+     */
+    public static function average(IQueryBuilder &$query, string $field): IQueryFunction
+    {
+        return $query->createFunction("AVG({$field})");
+    }
 }

@@ -38,10 +38,10 @@ trait TimelineQueryMap
         $query = $this->connection->getQueryBuilder();
 
         // Get the average location of each cluster
-        $query->selectAlias($query->createFunction('MAX(c.id)'), 'id')
-            ->selectAlias($query->createFunction('COUNT(m.fileid)'), 'count')
-            ->selectAlias($query->createFunction('AVG(c.lat)'), 'lat')
-            ->selectAlias($query->createFunction('AVG(c.lon)'), 'lon')
+        $query->selectAlias($query->func()->max('c.id'), 'id')
+            ->selectAlias($query->func()->count('m.fileid'), 'count')
+            ->selectAlias(SQL::average($query, 'c.lat'), 'lat')
+            ->selectAlias(SQL::average($query, 'c.lon'), 'lon')
             ->from('memories_mapclusters', 'c')
         ;
 
@@ -84,7 +84,7 @@ trait TimelineQueryMap
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all photos with this tag
-        $query->selectAlias($query->createFunction('MAX(m.fileid)'), 'fileid')
+        $query->selectAlias($query->func()->max('m.fileid'), 'fileid')
             ->from('memories', 'm')
             ->where($query->expr()->in('m.mapcluster', $query->createNamedParameter(
                 $clusterIds,

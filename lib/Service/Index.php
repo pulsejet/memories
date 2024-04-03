@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Service;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
@@ -231,7 +232,7 @@ class Index
     public function getIndexedCount(): int
     {
         $query = $this->db->getQueryBuilder();
-        $query->select($query->createFunction('COUNT(DISTINCT fileid)'))
+        $query->select($query->func()->count(SQL::distinct($query, 'fileid')))
             ->from('memories')
         ;
 

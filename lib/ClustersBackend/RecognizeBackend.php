@@ -134,7 +134,7 @@ class RecognizeBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT all face clusters
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
+        $count = $query->func()->count(SQL::distinct($query, 'm.fileid'), 'count');
         $query->select('rfc.id', 'rfc.user_id', 'rfc.title', $count)->from('recognize_face_clusters', 'rfc');
 
         // WHERE there are faces with this cluster

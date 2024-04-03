@@ -246,7 +246,7 @@ class FaceRecognitionBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT all face clusters
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'));
+        $count = $query->func()->count(SQL::distinct($query, 'm.fileid'));
         $query->select('frp.id')->from('facerecog_persons', 'frp');
         $query->selectAlias($count, 'count');
         $query->selectAlias('frp.user', 'user_id');
@@ -314,10 +314,11 @@ class FaceRecognitionBackend extends Backend
 
         // SELECT all face clusters
         $query->select('frp.name')
-            ->from('facerecog_persons', 'frp');
-        $query->selectAlias($query->func()->count($query->createFunction('DISTINCT m.fileid')), 'count');
-        $query->selectAlias($query->func()->min('frp.id'), 'id');
-        $query->selectAlias('frp.user', 'user_id');
+            ->selectAlias($query->func()->count(SQL::distinct($query, 'm.fileid')), 'count')
+            ->selectAlias($query->func()->min('frp.id'), 'id')
+            ->selectAlias('frp.user', 'user_id')
+            ->from('facerecog_persons', 'frp')
+        ;
 
         // WHERE there are faces with this cluster
         $query->innerJoin('frp', 'facerecog_faces', 'frf', $query->expr()->eq('frp.id', 'frf.person'));

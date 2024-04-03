@@ -30,8 +30,6 @@ class AlbumsQuery
         $query = $this->connection->getQueryBuilder();
 
         // SELECT everything from albums
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
-        $maxPafId = $query->createFunction('MAX(paf.album_file_id) AS update_id');
         $query->select(
             'pa.album_id',
             'pa.name',
@@ -39,9 +37,11 @@ class AlbumsQuery
             'pa.created',
             'pa.location',
             'pa.last_added_photo',
-            $maxPafId,
-            $count,
         )->from('photos_albums', 'pa');
+
+        $query->selectAlias($query->func()->count(SQL::distinct($query, 'm.fileid')), 'count')
+            ->selectAlias($query->func()->max('paf.album_file_id'), 'update_id')
+        ;
 
         if ($shared) {
             $ids = $this->getSelfCollaborators($uid);

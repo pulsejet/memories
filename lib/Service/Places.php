@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Service;
 
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Settings\SystemConfig;
 use OCP\IConfig;
@@ -110,7 +111,7 @@ class Places
 
         // Make query to memories_planet table
         $query = $this->connection->getQueryBuilder();
-        $query->select($query->createFunction('DISTINCT(osm_id)'))
+        $query->select(SQL::distinct($query, 'osm_id'))
             ->from('memories_planet_geometry')
             ->where($query->createFunction($where))
         ;
