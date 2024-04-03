@@ -3,6 +3,7 @@ package gallery.memories.service
 import android.annotation.SuppressLint
 import android.net.Uri
 import android.util.Base64
+import android.webkit.CookieManager
 import android.webkit.WebView
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -106,6 +107,10 @@ class HttpService {
 
             // Clear webview history
             webView.clearHistory()
+
+            // Set cookie with auth header
+            val authCookie = "nx_auth=$authHeader; Path=/; Domain=$host; HttpOnly"
+            CookieManager.getInstance().setCookie(url, authCookie)
 
             // Set authorization header
             webView.loadUrl(url!!, mapOf("Authorization" to authHeader))
