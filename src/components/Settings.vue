@@ -36,6 +36,14 @@
         >
           {{ t('memories', 'Stack RAW files with same name') }}
         </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.dedup_identical"
+          @update:checked="updateDedupIdentical"
+          type="switch"
+        >
+          {{ t('memories', 'De-duplicate identical files') }}
+        </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="viewer-settings" :name="names.viewer">
@@ -312,6 +320,10 @@ export default defineComponent({
 
     async updateStackRawFiles() {
       await this.updateSetting('stack_raw_files', 'stackRawFiles');
+    },
+
+    async updateDedupIdentical() {
+      await this.updateSetting('dedup_identical', 'dedupIdentical');
     },
 
     // Viewer settings

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Feature**: Add option to de-duplicate identical files ([#1112](https://github.com/pulsejet/memories/issues/1112)).
+
 ## [v7.1.0] - 2024-04-01
 
 - **Notice**: This release significantly overhauls the core querying infrastructure for better performance. If you run into any regressions (including performance), please [file a bug report](https://github.com/pulsejet/memories/issues)

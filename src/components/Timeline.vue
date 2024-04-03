@@ -1071,12 +1071,19 @@ export default defineComponent({
       // Set of basenames without extension
       const res1: IPhoto[] = [];
       const toStack = new Map<string, IPhoto[]>();
+      const auids = new Set<string>();
 
       // First pass -- remove hidden and prepare
       for (const photo of data) {
         // Skip hidden files
         if (photo.ishidden) continue;
         if (photo.basename?.startsWith('.')) continue;
+
+        // Skip identical duplicates
+        if (this.config.dedup_identical && photo.auid) {
+          if (auids.has(photo.auid)) continue;
+          auids.add(photo.auid);
+        }
 
         // Add to first pass result
         res1.push(photo);
