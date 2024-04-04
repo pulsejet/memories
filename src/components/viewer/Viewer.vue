@@ -6,7 +6,6 @@
     :class="{ fullyOpened, slideshowTimer }"
     :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"
-    @keydown="keydown"
   >
     <ImageEditor v-if="editorOpen && currentPhoto" :photo="currentPhoto" @close="editorOpen = false" />
 
@@ -557,6 +556,11 @@ export default defineComponent({
         }
       });
 
+      // Handle keydown
+      this.photoswipe.on('keydown', (e) => {
+        this.keydown(e.originalEvent);
+      });
+
       // Make sure buttons are styled properly
       this.photoswipe.addFilter('uiElement', (element, data) => {
         // add button-vue class if button
@@ -1008,6 +1012,8 @@ export default defineComponent({
 
     /** Key press events */
     keydown(e: KeyboardEvent) {
+      if (e.defaultPrevented) return;
+
       if (e.key === 'Delete') {
         this.deleteCurrent();
       }

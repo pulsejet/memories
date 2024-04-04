@@ -143,7 +143,16 @@ export default defineComponent({
       // Stop sidebar typing from leaking outside
       const sidebar = document.getElementById('app-sidebar-vue');
       sidebar?.addEventListener('keydown', (e) => {
-        if (e.key.length === 1) e.stopPropagation();
+        if (e.key === 'Enter' || e.key === 'Tab') {
+          e.stopPropagation();
+          return;
+        }
+
+        const element = e.target as HTMLElement;
+        if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable) {
+          e.stopPropagation();
+          return;
+        }
       });
 
       // Emit event
