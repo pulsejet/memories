@@ -80,7 +80,7 @@ If your admin panel shows that Memories is running in trigger compatibility mode
 
 1. Run `occ maintenance:repair` to attempt to create the triggers. This will print any errors that occur.
 2. Restart the PHP server.
-3. If you are using MySQL / MariaDB, set the `log_bin_trust_function_creators` option is set to `1` in your `my.cnf` file. If you are using docker, you can add `--log_bin_trust_function_creators=true` to your command line. Repeat steps 1 and 2 after making this change.
+3. If you are using MySQL / MariaDB, set the `log_bin_trust_function_creators` option is set to `1` in your `my.cnf` file. If you are using docker, you can add `--log_bin_trust_function_creators=true` to your database container's command line. Restart the database after this and repeat steps 1 and 2.
 
 If none of the above work or are applicable, file a bug at the repository including the output of `occ maintenance:repair`.
 
