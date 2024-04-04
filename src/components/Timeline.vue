@@ -17,7 +17,12 @@
     <EmptyContent v-if="showEmpty" />
 
     <!-- Top overlay showing date -->
-    <TimelineTopOverlay ref="topOverlay" :heads="heads" :container="refs.container?.$el" />
+    <TimelineTopOverlay
+      ref="topOverlay"
+      :heads="heads"
+      :container="refs.container?.$el"
+      :recycler="refs.recycler?.$el"
+    />
 
     <!-- Main recycler view for rows -->
     <RecycleScroller

@@ -1,5 +1,5 @@
 <template>
-  <div class="top-overlay" :class="{ show: !!text }">{{ text }}</div>
+  <div class="top-overlay" :style="{ top }" :class="{ show: !!text }">{{ text }}</div>
 </template>
 
 <script lang="ts">
@@ -12,6 +12,7 @@ export default defineComponent({
 
   data: () => ({
     text: String(),
+    top: String(),
   }),
 
   props: {
@@ -24,6 +25,11 @@ export default defineComponent({
       type: Element,
       required: false,
     },
+
+    recycler: {
+      type: Element,
+      required: false,
+    },
   },
 
   methods: {
@@ -32,13 +38,18 @@ export default defineComponent({
     },
 
     getText() {
+      // Get position of recycler
+      const rrect = this.recycler?.getBoundingClientRect();
+      if (!rrect) return; // ??
+
       // Get position of container
       const crect = this.container?.getBoundingClientRect();
       if (!crect) return; // ??
+      this.top = `${rrect.top - crect.top}px`;
 
       // Get photo just below the top of the container
       const elem: any = document
-        .elementsFromPoint(crect.left + 5, crect.top + 50)
+        .elementsFromPoint(rrect.left + 5, rrect.top + 50)
         .find((e) => e.classList.contains('p-outer-super'));
       const overPhoto: IPhoto | null = elem?.__vue__?.data;
 
