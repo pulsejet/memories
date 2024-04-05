@@ -87,6 +87,7 @@ OC.L10N.register(
     "Newest first" : "Más reciente primero",
     "Unassigned faces" : "Caras sin asignar",
     "Merge with different person" : "Mezclar con una persona diferente",
+    "Share folder" : "Compartir carpeta",
     "Home" : "Inicio",
     "Unsaved changes" : "Cambios no guardados",
     "Previous" : "Previo",

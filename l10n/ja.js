@@ -93,6 +93,8 @@ OC.L10N.register(
     "Expires" : "有効期限",
     "Read only" : "読み込み専用",
     "Link copied to clipboard" : "クリップボードにリンクをコピーしました",
+    "Some files have not been uploaded." : "いくつかのファイルがアップロードできませんでした",
+    "_Upload {n} file_::_Upload {n} files_" : ["{n} 個のファイルをアップロードする"],
     "Last updated" : "最終更新",
     "Creation date" : "作成日時",
     "Oldest first" : "日付（昇順）",
