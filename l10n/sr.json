@@ -62,6 +62,7 @@
     "Square grid mode" : "Режим квадратне мреже",
     "Show past photos on top of timeline" : "Прикажи фотографије из прошлости на врху временске линије",
     "Stack RAW files with same name" : "Наслажи RAW фајлове са истим именом",
+    "De-duplicate identical files" : "Остави један примерак идентичних фајлова",
     "Autoplay Live Photos" : "Аутоприказ Live Photo",
     "Show full file path in sidebar" : "Прикажи пуну путању фајла у бочној траци",
     "Show metadata in slideshow" : "Прикажи метаподатке у пројектору слајдова",
