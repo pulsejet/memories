@@ -142,7 +142,7 @@ class PlacesBackend extends Backend
         }
 
         // ORDER BY name and osm_id
-        $query->orderBy('sub.count', 'DESC');
+        $query->addOrderBy('sub.count', 'DESC');
         $query->addOrderBy('e.name');
         $query->addOrderBy('e.osm_id'); // tie-breaker
 

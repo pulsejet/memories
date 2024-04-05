@@ -147,7 +147,7 @@ class RecognizeBackend extends Backend
         $query = $this->tq->filterFilecache($query);
 
         // WHERE this cluster belongs to the user
-        $query->where($query->expr()->eq('rfc.user_id', $query->createNamedParameter(Util::getUID())));
+        $query->andWhere($query->expr()->eq('rfc.user_id', $query->createNamedParameter(Util::getUID())));
 
         // WHERE these clusters contain fileid if specified
         if ($fileid > 0) {
@@ -166,7 +166,7 @@ class RecognizeBackend extends Backend
         $query->addGroupBy('rfc.id');
 
         // ORDER by number of faces in cluster
-        $query->orderBy($query->createFunction("rfc.title <> ''"), 'DESC');
+        $query->addOrderBy($query->createFunction("rfc.title <> ''"), 'DESC');
         $query->addOrderBy('count', 'DESC');
         $query->addOrderBy('rfc.id'); // tie-breaker
 
@@ -258,7 +258,7 @@ class RecognizeBackend extends Backend
         }
 
         // Sort by date taken so we get recent photos
-        $query->orderBy('m.datetaken', 'DESC');
+        $query->addOrderBy('m.datetaken', 'DESC');
         $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
 
         // FETCH face detections

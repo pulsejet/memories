@@ -191,7 +191,7 @@ class FaceRecognitionBackend extends Backend
         }
 
         // Sort by date taken so we get recent photos
-        $query->orderBy('m.datetaken', 'DESC');
+        $query->addOrderBy('m.datetaken', 'DESC');
         $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
 
         // FETCH face detections
@@ -268,7 +268,7 @@ class FaceRecognitionBackend extends Backend
 
         // GROUP by ID of face cluster
         $query->addGroupBy('frp.id', 'frp.user');
-        $query->where($query->expr()->isNull('frp.name'));
+        $query->andWhere($query->expr()->isNull('frp.name'));
 
         // The query change if we want the people in an fileid, or the unnamed clusters
         if ($fileid > 0) {
@@ -282,7 +282,7 @@ class FaceRecognitionBackend extends Backend
         }
 
         // ORDER by number of faces in cluster and id for response stability.
-        $query->orderBy('count', 'DESC');
+        $query->addOrderBy('count', 'DESC');
         $query->addOrderBy('frp.id', 'DESC');
 
         // It is not worth displaying all unnamed clusters. We show 15 to name them progressively,
@@ -336,7 +336,7 @@ class FaceRecognitionBackend extends Backend
         $query = $this->tq->filterFilecache($query);
 
         // GROUP by name of face clusters
-        $query->where($query->expr()->isNotNull('frp.name'));
+        $query->andWhere($query->expr()->isNotNull('frp.name'));
 
         // WHERE these clusters contain fileid if specified
         if ($fileid > 0) {
@@ -346,7 +346,7 @@ class FaceRecognitionBackend extends Backend
         $query->addGroupBy('frp.name', 'frp.user');
 
         // ORDER by number of faces in cluster
-        $query->orderBy('count', 'DESC');
+        $query->addOrderBy('count', 'DESC');
         $query->addOrderBy('frp.name', 'ASC');
 
         // SELECT to get all covers

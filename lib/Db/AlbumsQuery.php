@@ -275,10 +275,10 @@ class AlbumsQuery
         // Do not check if these files are indexed in memories
         // This is since this function is called for downloads
         // so funky things might happen if non-indexed files were
-        // added throught the Photos app
+        // added through the Photos app
 
         // ORDER by the id of the paf i.e. the order in which they were added
-        $query->orderBy('paf.album_file_id', 'DESC');
+        $query->addOrderBy('paf.album_file_id', 'DESC');
 
         // LIMIT the results
         if (-6 === $limit) {

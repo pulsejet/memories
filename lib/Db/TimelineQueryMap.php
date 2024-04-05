@@ -135,19 +135,21 @@ trait TimelineQueryMap
         $query = $this->connection->getQueryBuilder();
 
         // SELECT coordinates
-        $query->select('m.lat', 'm.lon')->from('memories', 'm');
+        $query->select('m.lat', 'm.lon')
+            ->from('memories', 'm')
+        ;
 
         // WHERE this photo is in the user's requested folder recursively
         $query = $this->filterFilecache($query);
 
         // WHERE this photo has coordinates
-        $query->where($query->expr()->andX(
+        $query->andWhere($query->expr()->andX(
             $query->expr()->isNotNull('m.lat'),
             $query->expr()->isNotNull('m.lon'),
         ));
 
         // ORDER BY datetaken DESC
-        $query->orderBy('m.datetaken', 'DESC');
+        $query->addOrderBy('m.datetaken', 'DESC');
 
         // LIMIT 1
         $query->setMaxResults(1);

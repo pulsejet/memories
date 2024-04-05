@@ -128,7 +128,7 @@ class Places
         $query->select('sub.osm_id', 'mp.admin_level')
             ->from($query->createFunction("({$sql})"), 'sub')
             ->innerJoin('sub', 'memories_planet', 'mp', $query->expr()->eq('sub.osm_id', 'mp.osm_id'))
-            ->orderBy('mp.admin_level', 'ASC')
+            ->addOrderBy('mp.admin_level', 'ASC')
         ;
 
         // Run query

@@ -93,7 +93,7 @@ class TagsBackend extends Backend
 
         // GROUP and ORDER by tag name
         $query->addGroupBy('st.id');
-        $query->orderBy($query->func()->lower('st.name'), 'ASC');
+        $query->addOrderBy($query->func()->lower('st.name'), 'ASC');
         $query->addOrderBy('st.id'); // tie-breaker
 
         // SELECT cover photo
