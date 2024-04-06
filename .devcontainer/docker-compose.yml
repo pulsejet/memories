@@ -1,14 +1,44 @@
-version: '3'
+version: '3.5'
 name: memories
+
 services:
-  nextcloud-server:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  nextcloud:
+    build: .
+    depends_on:
+      - db
+      - redis
     volumes:
-      - ./custom_apps:/var/www/html/custom_apps:rw
       - ../:/var/www/html/custom_apps/memories:rw
       - ./config:/var/www/html/config:rw
       - ./data:/var/www/html/data:rw
-    ports:
-      - 9080:80
+    environment:
+      - TZ=America/Los_Angeles
+      - MYSQL_PASSWORD=nextcloud
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=db
+      - REDIS_HOST=redis
+      - OVERWRITEPROTOCOL=https
+      - PHP_MEMORY_LIMIT=1G
+      - PHP_UPLOAD_LIMIT=1G
+      - DEBIAN_FRONTEND=noninteractive
+
+  db:
+    image: mariadb:11
+    restart: always
+    pull_policy: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --log_bin_trust_function_creators=1
+    volumes:
+      - /ssd/nextcloud_mariadb:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=nextcloud
+      - MYSQL_PASSWORD=nextcloud
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MARIADB_AUTO_UPGRADE=1
+      - MARIADB_INITDB_SKIP_TZINFO=1
+
+  redis:
+    image: redis:alpine
+    pull_policy: always
+    restart: always

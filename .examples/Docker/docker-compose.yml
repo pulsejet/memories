@@ -27,7 +27,7 @@ services:
     image: mariadb:11
     restart: always
     pull_policy: always
-    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --log_bin_trust_function_creators=1
     volumes:
       - /ssd/nextcloud_mariadb:/var/lib/mysql
     environment:

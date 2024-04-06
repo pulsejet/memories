@@ -3,14 +3,14 @@
 {
   "name": "Memories DevContainer",
   "dockerComposeFile": ["./docker-compose.yml"],
-  "service": "nextcloud-server",
+  "service": "nextcloud",
   "workspaceFolder": "/var/www/html/custom_apps/memories",
   // Features to add to the dev container. More info: https://containers.dev/features.
   "features": {},
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  // "forwardPorts": [],
-  "postCreateCommand": "make dev-setup && npx playwright install && npx playwright install-deps",
+  "forwardPorts": [80],
+  "postCreateCommand": "make dev-setup",
   "postStartCommand": "make watch-js",
   // Configure tool-specific properties.
   "customizations": {
@@ -24,7 +24,6 @@
       ],
       "settings": {
         "terminal.integrated.shell.linux": "/bin/bash"
-        // Add any other VS Code settings you need for your project
       }
     }
   },
