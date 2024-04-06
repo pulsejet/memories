@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/alpine
 {
-  "name": "Nextcloud DevContainer",
+  "name": "Memories DevContainer",
   "dockerComposeFile": ["./docker-compose.yml"],
   "service": "nextcloud-server",
   "workspaceFolder": "/var/www/html/custom_apps/memories",
