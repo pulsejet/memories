@@ -84,6 +84,30 @@ Your external transcoder should now be functional. You can check the transcoding
 
     You can run a similar setup without `docker-compose`. Make sure that the Nextcloud and go-vod containers are in the same network and that the Nextcloud data directories are mounted at the same locations in both containers.
 
+### Running as non-root
+
+Depending on your setup, you may need to run the external transcoder container as non-root (e.g. if your files aren't accessible from the root user). If you do need to run as non-root, you can add the following to the `docker-compose.yml` file to your `go-vod` service.
+
+**In most cases, this is not required.**
+
+```yaml
+services:
+  go-vod:
+    ...
+
+    # Replace www-data with the user that you want to run the container as.
+    # This user must have access to your Nextcloud files volume as set up above.
+    user: www-data:www-data
+    working_dir: /tmp
+
+    # The following line is required if you are using VA-API acceleration.
+    # The GID should match the group of the /dev/dri/renderD128 device
+    # on the host machine. You can get it by running this on the host:
+    #   stat -c "%g" /dev/dri/renderD128
+    # Replace 109 with the GID you get from the above command
+    group_add: [109]
+```
+
 ## Internal Transcoder
 
 Memories ships with an internal transcoder binary that you can directly use. In this case, you must install the drivers and ffmpeg on the same host as Nextcloud, and Memories will automatically handle starting and communicating with go-vod. This is also the default setup when you enable transcoding without hardware acceleration.
