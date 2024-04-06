@@ -1,6 +1,7 @@
-name: 'nextcloud-with-memories'
+version: '3'
+name: memories
 services:
-  nextcloud:
+  nextcloud-server:
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,4 +12,3 @@ services:
       - ./data:/var/www/html/data:rw
     ports:
       - 9080:80
-    image: nextcloud
