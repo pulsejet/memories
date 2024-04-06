@@ -5,10 +5,10 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./custom_apps:/var/www/html/custom_apps
-      - ../:/var/www/html/custom_apps/memories
-      - ./config:/var/www/html/config
-      - ./data:/var/www/html/data
+      - ./custom_apps:/var/www/html/custom_apps:rw
+      - ../:/var/www/html/custom_apps/memories:rw
+      - ./config:/var/www/html/config:rw
+      - ./data:/var/www/html/data:rw
     ports:
       - 9080:80
     image: nextcloud
