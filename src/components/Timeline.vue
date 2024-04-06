@@ -52,12 +52,7 @@
       </template>
 
       <template v-slot="{ item, index }">
-        <RowHead
-          v-if="item.type === 0"
-          :item="item"
-          :monthView="isMonthView"
-          @click="refs.selectionManager.selectHead(item)"
-        />
+        <RowHead v-if="item.type === 0" :item="item" @click="refs.selectionManager.selectHead(item)" />
 
         <template v-else>
           <Photo
@@ -828,6 +823,9 @@ export default defineComponent({
           dayId: day.dayid,
           day: day,
         };
+
+        // Mark month view to change the header title
+        if (this.isMonthView) head.ismonth = true;
 
         // Special headers
         if (this.routeIsThisDay && (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)) {

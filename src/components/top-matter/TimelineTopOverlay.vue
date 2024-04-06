@@ -5,6 +5,8 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 
+import * as utils from '@services/utils';
+
 import type { IHeadRow, IPhoto } from '@typings';
 
 export default defineComponent({
@@ -69,7 +71,7 @@ export default defineComponent({
         return;
       }
 
-      return head.name;
+      return utils.getHeadRowName(head);
     },
   },
 });
