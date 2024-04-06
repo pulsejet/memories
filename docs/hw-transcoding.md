@@ -93,7 +93,7 @@ Depending on your setup, you may need to run the external transcoder container a
 ```yaml
 services:
   go-vod:
-    ...
+    # [use the same configuration as above]
 
     # Replace www-data with the user that you want to run the container as.
     # This user must have access to your Nextcloud files volume as set up above.
