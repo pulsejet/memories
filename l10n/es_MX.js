@@ -62,6 +62,7 @@ OC.L10N.register(
     "Back to the new album form." : "Volver al formulario de nuevo álbum.",
     "Save" : "Guardar",
     "Create album" : "Crear álbum",
+    "Save changes" : "Guardar cambios",
     "Save collaborators for this album." : "Guardar los colaboradores para este álbum.",
     "Year" : "Año",
     "Month" : "Mes",
