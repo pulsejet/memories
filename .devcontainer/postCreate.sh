@@ -31,4 +31,5 @@ sudo -E -u www-data php /var/www/html/occ memories:index
 make build-js
 
 # Fix permissions (again)
-chown -R www-data:www-data /var/www/html
+chown -R www-data:www-data /var/www/html/config
+chown -R www-data:www-data /var/www/html/custom_apps
