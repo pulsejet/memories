@@ -29,3 +29,6 @@ sudo -E -u www-data php /var/www/html/occ memories:index
 
 # Build JavaScript
 make build-js
+
+# Fix permissions (again)
+chown -R www-data:www-data /var/www/html

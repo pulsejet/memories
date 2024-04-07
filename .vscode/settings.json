@@ -74,8 +74,6 @@
     "zlib",
     "imagick"
   ],
-  "intelephense.environment.phpVersion": "8.0.0",
-  "intelephense.environment.documentRoot": "${workspaceFolder}/../../",
   "php-cs-fixer.allow-risky": true,
   "psalm.disableAutoComplete": true,
   "[php]": {
@@ -101,5 +99,25 @@
   },
   "git.alwaysSignOff": true,
   "editor.formatOnSave": true,
-  "psalm.configPaths": ["psalm-ls.xml"]
+  "psalm.configPaths": ["psalm-ls.xml"],
+
+  "intelephense.environment.phpVersion": "8.1.0",
+  "intelephense.environment.documentRoot": "../..",
+  "intelephense.environment.includePaths": ["../.."],
+  "intelephense.files.exclude": [
+    "**/.git/**",
+    "**/.svn/**",
+    "**/.hg/**",
+    "**/CVS/**",
+    "**/.DS_Store/**",
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**/{Tests,tests}/**",
+    "**/.history/**",
+    "**/vendor/**/vendor/**",
+    "**/.devcontainer/**",
+    "**/.cache/**",
+    "**/apps/**/vendor/**",
+    "**/memories/vendor/**"
+  ]
 }
