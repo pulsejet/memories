@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "Setting up Memories development environment..."
+
+# Install dependencies
+make dev-setup
+
+# Fix permissions
+chown -R www-data:www-data /var/www/html/custom_apps
+git config --global --add safe.directory /var/www/html/custom_apps/memories
+
+# Enable debug mode in Nextcloud
+sudo -E -u www-data php /var/www/html/occ config:system:set --type bool --value true debug
+
+# Enable Memories
+sudo -E -u www-data php /var/www/html/occ app:enable memories
+sudo -E -u www-data php /var/www/html/occ memories:index

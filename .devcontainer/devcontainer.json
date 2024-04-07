@@ -10,8 +10,8 @@
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [80],
-  "postCreateCommand": "make dev-setup",
-  "postStartCommand": "make watch-js",
+  "postCreateCommand": "bash .devcontainer/postCreate.sh",
+  // "postStartCommand": "make watch-js",
   // Configure tool-specific properties.
   "customizations": {
     "vscode": {
