@@ -2,12 +2,18 @@
 
 This is a Nextcloud development container with Memories pre-installed.
 
-Username: `admin`
-Password: `admin`
+After the container starts up, follow these steps:
 
-Database: MariaDB (db=`nextcloud`, user=`nextcloud`, password=`nextcloud`)
+1. Disable the built-in PHP extension of VS Code. Search for `@builtin php-language-features` in the extensions tab and disable it.
+1. Run the following to fix the permissions of the config directory.
+   ```bash
+   chown -R www-data:www-data /var/www/html/config
+   ```
+1. Then you can log in to Nextcloud using the following credentials:
+   - Username: `admin`
+   - Password: `admin`
 
-After the container starts up, make sure to disable the built-in PHP extension of VS Code. Search for `@builtin php-language-features` in the extensions tab and disable it.
+Note: MariaDB is set up automatically (db=`nextcloud`, user=`nextcloud`, password=`nextcloud`)
 
 To run OCC commands in the container, use the following command:
 
