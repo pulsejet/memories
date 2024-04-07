@@ -44,6 +44,9 @@ class AdminController extends GenericApiController
                 $config[$key] = SystemConfig::get($key);
             }
 
+            // Convert array types from map
+            $config['enabledPreviewProviders'] = array_values($config['enabledPreviewProviders']);
+
             return new JSONResponse($config, Http::STATUS_OK);
         });
     }
