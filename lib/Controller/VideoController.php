@@ -360,7 +360,7 @@ class VideoController extends GenericApiController
         }
     }
 
-    private static function postFileInternal(string $client, mixed $blob): mixed
+    private static function postFileInternal(string $client, string $blob): mixed
     {
         $url = BinExt::getGoVodUrl($client, '/create', 'ignore');
 

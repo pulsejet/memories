@@ -22,7 +22,7 @@ trait TimelineWriteOrphans
     public function orphanAll(bool $value = true, ?array $fileIds = null, bool $livephoto = true): void
     {
         // Helper function to update a table.
-        $update = fn (string $table) => Util::transaction(function () use ($table, $value, $fileIds): int {
+        $update = fn (string $table): int => Util::transaction(function () use ($table, $value, $fileIds): int {
             $query = $this->connection->getQueryBuilder();
             $query->update($table)
                 ->set('orphan', $query->createNamedParameter($value, IQueryBuilder::PARAM_BOOL))

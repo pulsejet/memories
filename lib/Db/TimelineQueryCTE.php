@@ -26,7 +26,7 @@ trait TimelineQueryCTE
         $FOLDER_MIME_QUERY = "SELECT MAX(id) FROM *PREFIX*mimetypes WHERE mimetype = 'httpd/unix-directory'";
 
         // Select 1 if there is a file in the folder with the specified name
-        $SEL_FILE = static fn (string $name) => "SELECT 1 FROM *PREFIX*filecache f2
+        $SEL_FILE = static fn (string $name): string => "SELECT 1 FROM *PREFIX*filecache f2
             WHERE (f2.parent = f.fileid)
             AND (f2.name = '{$name}')";
 
