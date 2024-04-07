@@ -97,6 +97,9 @@ class SystemConfig
         // Availability of database features, e.g. triggers
         'memories.db.triggers.fcu' => false,
 
+        // Run in read-only config mode
+        'memories.readonly' => false,
+
         // Memories only provides an admin interface for these
         'enabledPreviewProviders' => [],
         'preview_max_x' => 4096,
@@ -121,9 +124,20 @@ class SystemConfig
             throw new \InvalidArgumentException("Invalid system config key: {$key}");
         }
 
-        return \OC::$server->get(\OCP\IConfig::class)
-            ->getSystemValue($key, $default ?? self::DEFAULTS[$key])
+        // Use the default value if not provided
+        $default = $default ?? self::DEFAULTS[$key];
+
+        // Get the value from the config
+        $value = \OC::$server->get(\OCP\IConfig::class)
+            ->getSystemValue($key, $default)
         ;
+
+        // Check if the value has the correct type
+        if (($got = \gettype($value)) !== ($exp = \gettype($default))) {
+            throw new \InvalidArgumentException("Invalid type for system config {$key}, expected {$exp}, got {$got}");
+        }
+
+        return $value;
     }
 
     /**
@@ -145,11 +159,8 @@ class SystemConfig
         $isAppKey = str_starts_with($key, Application::APPNAME.'.');
 
         // Check if the value has the correct type
-        if (null !== $value && \gettype($value) !== \gettype(self::DEFAULTS[$key])) {
-            $expected = \gettype(self::DEFAULTS[$key]);
-            $got = \gettype($value);
-
-            throw new \InvalidArgumentException("Invalid type for system config {$key}, expected {$expected}, got {$got}");
+        if (null !== $value && ($got = \gettype($value)) !== ($exp = \gettype(self::DEFAULTS[$key]))) {
+            throw new \InvalidArgumentException("Invalid type for system config {$key}, expected {$exp}, got {$got}");
         }
 
         // Do not allow null for non-app keys

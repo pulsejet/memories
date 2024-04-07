@@ -38,10 +38,10 @@ class AdminController extends GenericApiController
      */
     public function getSystemConfig(): Http\Response
     {
-        return Util::guardEx(function () {
+        return Util::guardEx(static function () {
             $config = [];
             foreach (SystemConfig::DEFAULTS as $key => $default) {
-                $config[$key] = $this->config->getSystemValue($key, $default);
+                $config[$key] = SystemConfig::get($key);
             }
 
             return new JSONResponse($config, Http::STATUS_OK);
@@ -53,9 +53,9 @@ class AdminController extends GenericApiController
      */
     public function setSystemConfig(string $key, mixed $value): Http\Response
     {
-        return Util::guardEx(function () use ($key, $value) {
+        return Util::guardEx(static function () use ($key, $value) {
             // Make sure not running in read-only mode
-            if ($this->config->getSystemValue('memories.readonly', false)) {
+            if (SystemConfig::get('memories.readonly')) {
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
             }
 

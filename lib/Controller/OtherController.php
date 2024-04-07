@@ -49,7 +49,7 @@ class OtherController extends GenericApiController
     {
         return Util::guardEx(function () use ($key, $value) {
             // Make sure not running in read-only mode
-            if ($this->config->getSystemValue('memories.readonly', false)) {
+            if (SystemConfig::get('memories.readonly', false)) {
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
             }
 

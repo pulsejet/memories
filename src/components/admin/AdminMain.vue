@@ -83,7 +83,8 @@ export default defineComponent({
         const res = await axios.get<ISystemConfig>(API.SYSTEM_CONFIG(null));
         this.config = res.data;
       } catch (e) {
-        showError(JSON.stringify(e));
+        showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
+        console.error(e);
       } finally {
         this.loading--;
       }
@@ -95,7 +96,8 @@ export default defineComponent({
         const res = await axios.get<ISystemStatus>(API.SYSTEM_STATUS());
         this.status = res.data;
       } catch (e) {
-        showError(JSON.stringify(e));
+        showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
+        console.error(e);
       } finally {
         this.loading--;
       }
@@ -106,7 +108,8 @@ export default defineComponent({
         this.loading++;
         this.sconfig = await staticConfig.getAll();
       } catch (e) {
-        showError(JSON.stringify(e));
+        showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
+        console.error(e);
       } finally {
         this.loading--;
       }
