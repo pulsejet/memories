@@ -1,10 +1,10 @@
 version: '3.5'
-name: memories
+name: memories_dev
 
 volumes:
-  memories_dev_config:
-  memories_dev_data:
-  memories_dev_mariadb:
+  config:
+  data:
+  database:
 
 services:
   nextcloud:
@@ -14,8 +14,8 @@ services:
       - redis
     volumes:
       - ../:/var/www/html/custom_apps/memories:rw
-      - memories_dev_config:/var/www/html/config:rw
-      - memories_dev_data:/var/www/html/data:rw
+      - config:/var/www/html/config:rw
+      - data:/var/www/html/data:rw
     environment:
       - TZ=America/Los_Angeles
       - MYSQL_PASSWORD=nextcloud
@@ -34,7 +34,7 @@ services:
     pull_policy: always
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --log_bin_trust_function_creators=1
     volumes:
-      - memories_dev_mariadb:/var/lib/mysql:rw
+      - database:/var/lib/mysql:rw
     environment:
       - MYSQL_ROOT_PASSWORD=nextcloud
       - MYSQL_PASSWORD=nextcloud
