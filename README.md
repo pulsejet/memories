@@ -67,6 +67,7 @@ To set up a development instance manually, follow these steps:
    - [Psalm](https://marketplace.visualstudio.com/items?itemName=getpsalm.psalm-vscode-plugin): For PHP static analysis (alternatively, `make psalm`)
    - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode): For autoformatting Vue and Typescript
    - [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar): For Vue intellisense and static analysis
+1. If using PHP Intelephense, search for `@builtin php-language-features` in the extensions tab and disable it.
 
 This monorepo is organized into the following packages:
 - [lib](lib): Backend and database migrations (PHP).
