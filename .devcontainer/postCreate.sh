@@ -6,7 +6,7 @@ echo "Setting up Memories development environment..."
 make dev-setup
 
 # Fix permissions
-chown -R www-data:www-data /var/www/html/custom_apps
+chown -R www-data:www-data /var/www/html
 git config --global --add safe.directory /var/www/html/custom_apps/memories
 
 # Install Nextcloud
@@ -26,3 +26,6 @@ sudo -E -u www-data php /var/www/html/occ config:system:set --type bool --value 
 # Enable Memories
 sudo -E -u www-data php /var/www/html/occ app:enable memories
 sudo -E -u www-data php /var/www/html/occ memories:index
+
+# Build JavaScript
+make build-js

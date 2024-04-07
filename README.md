@@ -49,6 +49,13 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 
 ## 🏗 Development Setup
 
+You can use the dev container to quickly fire up an instance of Nextcloud with Memories pre-installed.
+See [`.devcontainer/README.md`](.devcontainer/README.md) for more information.
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/pulsejet/memories?quickstart=1)
+
+To set up a development instance manually, follow these steps:
+
 1. ☁ Clone this monorepo into the `custom_apps` folder of your Nextcloud.
 1. 📥 Install [Composer](https://getcomposer.org/) and [Node.js 18](https://nodejs.org)
 1. 👩‍💻 In a terminal, run the command `make dev-setup` to install the dependencies.
