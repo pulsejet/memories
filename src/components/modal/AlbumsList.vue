@@ -84,7 +84,7 @@ export default defineComponent({
       };
     },
 
-    toCoverUrl(album: IAlbum): string | null {
+    toCoverUrl(album: IAlbum): string | undefined {
       // See Cluster.vue for the original implementation
       const preview = (fileid: number, etag: string | number) =>
         utils.getPreviewUrl({
@@ -103,7 +103,7 @@ export default defineComponent({
         return preview(album.last_added_photo, album.last_added_photo_etag ?? album.album_id);
       }
 
-      return null;
+      return undefined;
     },
 
     getSubtitle(album: IAlbum) {
