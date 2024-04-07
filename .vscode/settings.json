@@ -118,6 +118,7 @@
     "**/.devcontainer/**",
     "**/.cache/**",
     "**/apps/**/vendor/**",
-    "**/memories/vendor/**"
+    "**/memories/vendor/**",
+    "**/vendor-bin/**"
   ]
 }
