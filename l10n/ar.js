@@ -64,6 +64,7 @@ OC.L10N.register(
     "Square grid mode" : "وضع المربع الشبكي ",
     "Show past photos on top of timeline" : "أظهِِر الصِّوَر السابقة أعلى الخط الزمني",
     "Stack RAW files with same name" : "تكويم الملفات الخام التي تحمل نفس الاسم",
+    "De-duplicate identical files" : "إلغاء تكرار الملفات المتطابقة",
     "Autoplay Live Photos" : "التشغيل التلقائي للصور الحيّة",
     "Show full file path in sidebar" : "أظهِر المسار الكامل للملف في الشريط الجانبي",
     "Show metadata in slideshow" : "أعرُض البيانات الوصفية في عرض الشرائح",
