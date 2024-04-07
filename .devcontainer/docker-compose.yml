@@ -29,7 +29,7 @@ services:
     pull_policy: always
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --log_bin_trust_function_creators=1
     volumes:
-      - /ssd/nextcloud_mariadb:/var/lib/mysql
+      - ./mariadb:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=nextcloud
       - MYSQL_PASSWORD=nextcloud
