@@ -120,5 +120,7 @@
     "**/apps/**/vendor/**",
     "**/memories/vendor/**",
     "**/vendor-bin/**"
-  ]
+  ],
+  "php.validate.enable": false,
+  "php.suggest.basic": false
 }
