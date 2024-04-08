@@ -151,15 +151,9 @@ class RecognizeBackend extends Backend
 
         // WHERE these clusters contain fileid if specified
         if ($fileid > 0) {
-            $fSq = $this->tq->getBuilder()
-                ->select('rfd.file_id')
-                ->from('recognize_face_detections', 'rfd')
-                ->where($query->expr()->andX(
-                    $query->expr()->eq('rfd.cluster_id', 'rfc.id'),
-                    $query->expr()->eq('rfd.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)),
-                ))
-            ;
-            $query->andWhere(SQL::exists($query, $fSq));
+            // This screws up the count but we don't use it right now
+            // and scanning the parent of each file is too expensive
+            $query->andWhere($query->expr()->eq('rfd.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         // GROUP by ID of face cluster
