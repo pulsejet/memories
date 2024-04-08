@@ -45,6 +45,7 @@ class Application extends App implements IBootstrap
 {
     public const APPNAME = 'memories';
 
+    // Remember to update IMAGICK_SAFE if this is updated
     public const IMAGE_MIMES = [
         'image/png',
         'image/jpeg',
@@ -56,7 +57,7 @@ class Application extends App implements IBootstrap
         'image/bmp',
         'image/x-dcraw',        // RAW
         // 'image/x-xbitmap',   // too rarely used for photos
-        // 'image/svg+xml',     // too rarely used for photos
+        // 'image/svg+xml',     // unsafe
     ];
 
     public const VIDEO_MIMES = [

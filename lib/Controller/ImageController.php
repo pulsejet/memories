@@ -32,6 +32,8 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\IRootFolder;
 
+const IMAGICK_SAFE = '/^image\/(x-)?(png|jpeg|gif|bmp|tiff|webp|hei(f|c)|avif|dcraw)$/';
+
 class ImageController extends GenericApiController
 {
     /**
@@ -312,7 +314,7 @@ class ImageController extends GenericApiController
             $name = $file->getName();
 
             // Convert image to JPEG if required
-            if (!\in_array($mimetype, ['image/png', 'image/webp', 'image/jpeg', 'image/gif'], true)) {
+            if (!preg_match('/^image\/(png|webp|jpeg|gif)$/', $mimetype)) {
                 [$blob, $mimetype] = $this->getImageJPEG($blob, $mimetype);
                 $name .= '.jpg';
             }
@@ -354,14 +356,8 @@ class ImageController extends GenericApiController
                 throw Exceptions::ForbiddenFileUpdate($name);
             }
 
-            // Check if we have imagick
-            if (!class_exists('Imagick')) {
-                throw Exceptions::Forbidden('Imagick extension is not available');
-            }
-
             // Read the image
-            $image = new \Imagick();
-            $image->readImageBlob($file->getContent());
+            $image = self::getImagick($file->getContent());
 
             // Due to a bug in filerobot, the provided width and height may be swapped
             // 1. If the user does not rotate the image, we're fine
@@ -420,20 +416,10 @@ class ImageController extends GenericApiController
      */
     private function getImageJPEG($blob, $mimetype): array
     {
-        // TODO: Use imaginary if available
+        // TODO: Use imaginary if available (once HEIC isn't broken)
 
-        // Check if Imagick is available
-        if (!class_exists('Imagick')) {
-            throw Exceptions::Forbidden('Imagick extension is not available');
-        }
-
-        // Read original image
-        try {
-            $image = new \Imagick();
-            $image->readImageBlob($blob);
-        } catch (\ImagickException $e) {
-            throw Exceptions::Forbidden('Imagick failed to read image: '.$e->getMessage());
-        }
+        // Get an instance of Imagick
+        $image = self::getImagick($blob);
 
         // Convert to JPEG
         try {
@@ -499,6 +485,38 @@ class ImageController extends GenericApiController
             $previewManager->getPreview($file, 32, 32, true, \OCP\IPreview::MODE_FILL);
         } catch (\Exception $e) {
             return;
+        }
+    }
+
+    /**
+     * Get an instance of Imagick for the given blob.
+     *
+     * @param string $blob Blob of image data
+     *
+     * @return \Imagick
+     */
+    private static function getImagick(string $blob)
+    {
+        // Check if Imagick is available
+        if (!class_exists('Imagick')) {
+            throw Exceptions::Forbidden('Imagick extension is not available');
+        }
+
+        try {
+            $image = new \Imagick();
+
+            // Check if image is safe
+            $image->pingImageBlob($blob);
+            if (!preg_match(IMAGICK_SAFE, $mime = $image->getImageMimeType())) {
+                throw Exceptions::Forbidden("Image type {$mime} not allowed");
+            }
+
+            // Read the image blob
+            $image->readImageBlob($blob);
+
+            return $image;
+        } catch (\ImagickException $e) {
+            throw Exceptions::Forbidden('Imagick failed to read image: '.$e->getMessage());
         }
     }
 }
