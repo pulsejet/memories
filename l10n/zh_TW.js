@@ -64,6 +64,7 @@ OC.L10N.register(
     "Square grid mode" : "方形網格模式",
     "Show past photos on top of timeline" : "在時間軸頂部顯示過去的照片",
     "Stack RAW files with same name" : "堆疊同名的 RAW 檔案",
+    "De-duplicate identical files" : "刪除重複的相同檔案",
     "Autoplay Live Photos" : "自動播放 Live Photos",
     "Show full file path in sidebar" : "在側邊欄顯示完整檔案路徑",
     "Show metadata in slideshow" : "在投影片中顯示詮釋資料",
