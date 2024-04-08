@@ -56,9 +56,7 @@ class AlbumsQuery
         }
 
         // WHERE these are items with this album
-        $query->leftJoin('pa', 'photos_albums_files', 'paf', $query->expr()->andX(
-            $query->expr()->eq('paf.album_id', 'pa.album_id'),
-        ));
+        $query->leftJoin('pa', 'photos_albums_files', 'paf', $query->expr()->eq('paf.album_id', 'pa.album_id'));
 
         // WHERE these items are memories indexed photos
         $query->leftJoin('paf', 'memories', 'm', $query->expr()->eq('m.fileid', 'paf.file_id'));
