@@ -131,6 +131,22 @@ You may encounter this error where MySQL crashes during planet DB insertion. In 
 occ memories:places-setup --transaction-size=5
 ```
 
+### Database table prefix
+
+```
+Database table prefix is not set. Cannot use database extensions (dbtableprefix).
+```
+
+If you do not have a database table prefix set, you cannot use the Places feature. This is a limitation of the Doctrine ORM, and no workaround is available for this. You can migrate your database to use a prefix, or disable the Places feature.
+
+If your database does use a prefix (e.g. all tables are prefixed with `oc_`) and you still get this error, try setting `dbtableprefix` explicitly in your `config.php`:
+
+```php
+'dbtableprefix' => 'oc_',
+```
+
+After this, run `occ memories:places-setup` again. More discussion on this issue can be found at [#648](https://github.com/pulsejet/memories/issues/648).
+
 ## Transcoding
 
 Memories transcodes videos on the fly per-user. This saves space, but requires reasonably good hardware, preferably with hardware acceleration. Check the troubleshooting section [here](/hw-transcoding/#troubleshooting).
