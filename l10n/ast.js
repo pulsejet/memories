@@ -91,6 +91,7 @@ OC.L10N.register(
     "High Resolution" : "Resolución alta",
     "Original File" : "FIcheru orixinal",
     "Public Link" : "Enllaz públicu",
+    "Last updated" : "Últimu anovamientu",
     "Creation date" : "Data de creación",
     "Oldest first" : "Lo más vieyo",
     "Ascending" : "Ascendente",
