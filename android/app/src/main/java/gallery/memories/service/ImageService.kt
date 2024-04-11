@@ -7,6 +7,7 @@ import android.graphics.ImageDecoder
 import android.os.Build
 import android.provider.MediaStore
 import androidx.media3.common.util.UnstableApi
+import gallery.memories.mapper.SystemImage
 import java.io.ByteArrayOutputStream
 
 @UnstableApi class ImageService(private val mCtx: Context, private val query: TimelineQuery) {
@@ -19,11 +20,15 @@ import java.io.ByteArrayOutputStream
     fun getPreview(id: Long): ByteArray {
         val bitmap =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val sysImgs = SystemImage.getByIds(mCtx, listOf(id))
+                if (sysImgs.isEmpty()) {
+                    throw Exception("Image not found")
+                }
+
+                val uri = sysImgs[0].uri
+
                 mCtx.contentResolver.loadThumbnail(
-                    ContentUris.withAppendedId(
-                        MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL),
-                        id
-                    ),
+                    uri,
                     android.util.Size(2048, 2048),
                     null
                 )
