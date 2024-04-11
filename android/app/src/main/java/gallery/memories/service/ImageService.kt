@@ -9,14 +9,15 @@ import androidx.media3.common.util.UnstableApi
 import gallery.memories.mapper.SystemImage
 import java.io.ByteArrayOutputStream
 
-@UnstableApi class ImageService(private val mCtx: Context, private val query: TimelineQuery) {
+@UnstableApi
+class ImageService(private val mCtx: Context, private val query: TimelineQuery) {
     /**
      * Get a preview image for a given image ID
      * @param id The image ID
      * @return The preview image as a JPEG byte array
      */
     @Throws(Exception::class)
-    fun getPreview(id: Long): ByteArray {
+    fun getPreview(id: Long, x: Int?, y: Int?): ByteArray {
         val sysImgs = SystemImage.getByIds(mCtx, listOf(id))
         if (sysImgs.isEmpty()) {
             throw Exception("Image not found")
@@ -26,14 +27,20 @@ import java.io.ByteArrayOutputStream
         var h = sysImgs[0].height.toInt()
         var w = sysImgs[0].width.toInt()
 
-        // cap to 1024x1024
-        if (h > 1024 || w > 1024) {
-            val scale = 1024.0 / Math.max(h, w)
-            h = (h * scale).toInt()
-            w = (w * scale).toInt()
+        // cap to x/y if provided, keeping aspect ratio
+        if (x != null && y != null) {
+            // calculate the aspect ratio
+            val aspect = w.toFloat() / h.toFloat()
+            if (x.toFloat() / y.toFloat() < aspect) {
+                w = x
+                h = (x.toFloat() / aspect).toInt()
+            } else {
+                w = (y.toFloat() * aspect).toInt()
+                h = y
+            }
         }
 
-        val bitmap =
+        var bitmap =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val uri = sysImgs[0].uri
                 mCtx.contentResolver.loadThumbnail(
@@ -45,19 +52,19 @@ import java.io.ByteArrayOutputStream
                 MediaStore.Images.Thumbnails.getThumbnail(
                     mCtx.contentResolver, id, MediaStore.Images.Thumbnails.FULL_SCREEN_KIND, null
                 )
-                ?: MediaStore.Video.Thumbnails.getThumbnail(
-                    mCtx.contentResolver, id, MediaStore.Video.Thumbnails.FULL_SCREEN_KIND, null
-                )
-                ?: throw Exception("Thumbnail not found")
+                    ?: MediaStore.Video.Thumbnails.getThumbnail(
+                        mCtx.contentResolver, id, MediaStore.Video.Thumbnails.FULL_SCREEN_KIND, null
+                    )
+                    ?: throw Exception("Thumbnail not found")
             }
 
         val stream = ByteArrayOutputStream()
 
         // resize to the desired dimensions
-        val resized = Bitmap.createScaledBitmap(bitmap, w, h, true)
+        bitmap = Bitmap.createScaledBitmap(bitmap, w, h, true)
 
         // compress to JPEG
-        resized.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
 
         return stream.toByteArray()
     }
@@ -68,7 +75,7 @@ import java.io.ByteArrayOutputStream
      * @return The full image as a JPEG byte array
      */
     @Throws(Exception::class)
-    fun getFull(auid: String): ByteArray {
+    fun getFull(auid: String, size: Int?): ByteArray {
         val sysImgs = query.getSystemImagesByAUIDs(listOf(auid))
         if (sysImgs.isEmpty()) {
             throw Exception("Image not found")
@@ -76,14 +83,26 @@ import java.io.ByteArrayOutputStream
 
         val uri = sysImgs[0].uri
 
-        val bitmap =
+        var bitmap =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 ImageDecoder.decodeBitmap(ImageDecoder.createSource(mCtx.contentResolver, uri))
             } else {
                 MediaStore.Images.Media.getBitmap(mCtx.contentResolver, uri)
                     ?: throw Exception("Image not found")
             }
+
         val stream = ByteArrayOutputStream()
+
+        // resize to the desired dimensions if provided, keeping aspect ratio
+        if (size != null) {
+            val scale = size.toFloat() / Math.max(bitmap.width, bitmap.height)
+            if (scale < 1) {
+                val w = (bitmap.width * scale).toInt()
+                val h = (bitmap.height * scale).toInt()
+                bitmap = Bitmap.createScaledBitmap(bitmap, w, h, true)
+            }
+        }
+
         bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
         return stream.toByteArray()
     }
