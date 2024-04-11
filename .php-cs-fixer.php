@@ -36,6 +36,7 @@ $config
         'return_assignment' => true,
         'declare_strict_types' => true,
         'strict_param' => true,
+        'fully_qualified_strict_types' => false, // work with missing files
     ])
     ->setFinder($finder)
 ;
