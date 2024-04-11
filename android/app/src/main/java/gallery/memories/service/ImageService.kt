@@ -1,6 +1,5 @@
 package gallery.memories.service
 
-import android.content.ContentUris
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
@@ -18,15 +17,25 @@ import java.io.ByteArrayOutputStream
      */
     @Throws(Exception::class)
     fun getPreview(id: Long): ByteArray {
+        val sysImgs = SystemImage.getByIds(mCtx, listOf(id))
+        if (sysImgs.isEmpty()) {
+            throw Exception("Image not found")
+        }
+
+        // get the image dimensions
+        var h = sysImgs[0].height.toInt()
+        var w = sysImgs[0].width.toInt()
+
+        // cap to 2048x2048
+        if (h > 1024 || w > 1024) {
+            val scale = 1024.0 / Math.max(h, w)
+            h = (h * scale).toInt()
+            w = (w * scale).toInt()
+        }
+
         val bitmap =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val sysImgs = SystemImage.getByIds(mCtx, listOf(id))
-                if (sysImgs.isEmpty()) {
-                    throw Exception("Image not found")
-                }
-
                 val uri = sysImgs[0].uri
-
                 mCtx.contentResolver.loadThumbnail(
                     uri,
                     android.util.Size(2048, 2048),
@@ -43,7 +52,13 @@ import java.io.ByteArrayOutputStream
             }
 
         val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+
+        // resize to the desired dimensions
+        val resized = Bitmap.createScaledBitmap(bitmap, w, h, true)
+
+        // compress to JPEG
+        resized.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+
         return stream.toByteArray()
     }
 
