@@ -28,6 +28,7 @@ use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\App\IAppManager;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\Files\Folder;
@@ -36,6 +37,7 @@ use OCP\Files\Node;
 use OCP\IDBConnection;
 use OCP\IPreview;
 use OCP\ITempManager;
+use OCP\IUser;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\ConsoleSectionOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -63,13 +65,20 @@ class Index
         protected IDBConnection $db,
         protected ITempManager $tempManager,
         protected LoggerInterface $logger,
+        protected IAppManager $appManager,
     ) {}
 
     /**
      * Index all files for a user.
      */
-    public function indexUser(string $uid, ?string $folder = null): void
+    public function indexUser(IUser $user, ?string $folder = null): void
     {
+        if (!$this->appManager->isEnabledForUser('memories', $user)) {
+            return;
+        }
+
+        $uid = $user->getUID();
+
         $this->log("<info>Indexing user {$uid}</info>".PHP_EOL, true);
 
         \OC_Util::tearDownFS();

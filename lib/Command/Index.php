@@ -201,7 +201,7 @@ class Index extends Command
     {
         $this->runForUsers(function (IUser $user) {
             try {
-                $this->indexer->indexUser($user->getUID(), $this->opts->folder);
+                $this->indexer->indexUser($user, $this->opts->folder);
             } catch (\Exception $e) {
                 $this->output->writeln("<error>{$e->getMessage()}</error>".PHP_EOL);
             }

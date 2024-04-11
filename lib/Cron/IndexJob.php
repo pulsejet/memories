@@ -89,7 +89,7 @@ class IndexJob extends TimedJob
     {
         $this->userManager->callForSeenUsers(function ($user) {
             try {
-                $this->service->indexUser($user->getUID());
+                $this->service->indexUser($user);
             } catch (Service\ProcessClosedException $e) {
                 throw $e;
             } catch (\Exception $e) {
