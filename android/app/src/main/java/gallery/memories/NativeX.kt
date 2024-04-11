@@ -249,9 +249,12 @@ class NativeX(private val mCtx: MainActivity) {
                 )
             )
         } else if (path.matches(API.IMAGE_PREVIEW)) {
-            makeResponse(image.getPreview(parts[3].toLong()), "image/jpeg")
+            val x = request.url.getQueryParameter("x")?.toInt()
+            val y = request.url.getQueryParameter("y")?.toInt()
+            makeResponse(image.getPreview(parts[3].toLong(), x, y), "image/jpeg")
         } else if (path.matches(API.IMAGE_FULL)) {
-            makeResponse(image.getFull(parts[3]), "image/jpeg")
+            val size = request.url.getQueryParameter("size")?.toInt()
+            makeResponse(image.getFull(parts[3], size), "image/jpeg")
         } else if (path.matches(API.SHARE_URL)) {
             makeResponse(dlService!!.shareUrl(URLDecoder.decode(parts[4], "UTF-8")))
         } else if (path.matches(API.SHARE_BLOB)) {
