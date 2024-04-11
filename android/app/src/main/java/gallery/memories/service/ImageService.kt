@@ -26,7 +26,7 @@ import java.io.ByteArrayOutputStream
         var h = sysImgs[0].height.toInt()
         var w = sysImgs[0].width.toInt()
 
-        // cap to 2048x2048
+        // cap to 1024x1024
         if (h > 1024 || w > 1024) {
             val scale = 1024.0 / Math.max(h, w)
             h = (h * scale).toInt()
@@ -38,17 +38,17 @@ import java.io.ByteArrayOutputStream
                 val uri = sysImgs[0].uri
                 mCtx.contentResolver.loadThumbnail(
                     uri,
-                    android.util.Size(2048, 2048),
+                    android.util.Size(w, h),
                     null
                 )
             } else {
                 MediaStore.Images.Thumbnails.getThumbnail(
                     mCtx.contentResolver, id, MediaStore.Images.Thumbnails.FULL_SCREEN_KIND, null
                 )
-                    ?: MediaStore.Video.Thumbnails.getThumbnail(
-                        mCtx.contentResolver, id, MediaStore.Video.Thumbnails.FULL_SCREEN_KIND, null
-                    )
-                    ?: throw Exception("Thumbnail not found")
+                ?: MediaStore.Video.Thumbnails.getThumbnail(
+                    mCtx.contentResolver, id, MediaStore.Video.Thumbnails.FULL_SCREEN_KIND, null
+                )
+                ?: throw Exception("Thumbnail not found")
             }
 
         val stream = ByteArrayOutputStream()
