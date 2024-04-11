@@ -394,7 +394,7 @@ OC.L10N.register(
     "are not images" : "не є зображеннями",
     "is not an image" : "не є зображенням",
     "to be uploaded" : "для завантаження",
-    "Crop" : "Урожай",
+    "Crop" : "Обрізати",
     "Original" : "Оригінал",
     "Custom" : "Користувацьке",
     "Square" : "Майдан",
