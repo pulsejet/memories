@@ -157,6 +157,18 @@ export async function prompt(opts: PromptOptions): Promise<string | null> {
   );
 }
 
+function chooseButtonFactory(nodes: Node[]): IFilePickerButton[] {
+  const fileName = nodes?.[0]?.attributes?.displayName || nodes?.[0]?.basename;
+  let label = nodes.length === 1 ? t('memories', 'Choose {file}', { file: fileName }) : t('memories', 'Choose');
+  return [
+    {
+      callback: () => {},
+      type: 'primary',
+      label: label,
+    },
+  ];
+}
+
 /**
  * Choose a folder using the NC file picker
  *
@@ -169,17 +181,7 @@ export async function prompt(opts: PromptOptions): Promise<string | null> {
 export async function chooseNcFolder(
   title: string,
   initial: string = '/',
-  buttonFactory: IFilePickerButtonFactory = (i, _) => {
-    const r = i?.[0]?.attributes?.displayName || i?.[0]?.basename;
-    let a = i.length === 1 ? t('memories', 'Choose {file}', { file: r }) : t('memories', 'Choose');
-    return [
-      {
-        callback: () => {},
-        type: 'primary',
-        label: a,
-      },
-    ];
-  },
+  buttonFactory: IFilePickerButtonFactory = chooseButtonFactory,
 ): Promise<string> {
   const picker = getFilePickerBuilder(title)
     .setMultiSelect(false)

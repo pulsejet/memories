@@ -66,26 +66,44 @@ export default defineComponent({
       let destination = await utils.chooseNcFolder(
         this.t('memories', 'Choose a folder'),
         this.config.folders_path,
-        (selectedNodes: Node[], currentPath: string, currentView: string) => [
+        () => [
           {
             label: 'Move',
             type: 'primary',
-            callback: (_) => null,
+            callback: () => null,
           },
           {
             label: 'Move and organize',
-            callback: (_) => (moveByDate = true),
+            callback: () => (moveByDate = true),
           },
         ],
       );
 
-      // Fails if the target exists, same behavior with Nextcloud files implementation.
-      const gen = dav.movePhotos(this.photos, destination, false);
-      this.show = true;
+      if (moveByDate) {
+        const grouped: Map<string, IPhoto[]> = new Map();
+        for (const photo of this.photos) {
+          const date = utils.dayIdToDate(photo.dayid);
+          const datePath = `/${date.getFullYear()}/${date.getMonth() + 1}`;
+          if (grouped.has(datePath)) {
+            grouped.get(datePath)?.push(photo);
+          } else {
+            grouped.set(datePath, [photo]);
+          }
+        }
 
-      for await (const fids of gen) {
-        this.photosDone += fids.filter(Boolean).length;
-        utils.bus.emit('memories:timeline:soft-refresh', null);
+        for (const group of grouped) {
+          
+          console.log(`Move ${group[1].length} photos to ${destination}${group[0]}`);
+        }
+      } else {
+        // Fails if the target exists, same behavior with Nextcloud files implementation.
+        const gen = dav.movePhotos(this.photos, destination, false);
+        this.show = true;
+
+        for await (const fids of gen) {
+          this.photosDone += fids.filter(Boolean).length;
+          utils.bus.emit('memories:timeline:soft-refresh', null);
+        }
       }
 
       const n = this.photosDone;

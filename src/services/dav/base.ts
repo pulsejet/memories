@@ -1,13 +1,13 @@
-import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
+import { showError } from '@nextcloud/dialogs';
 
 import { getAlbumFileInfos } from './albums';
 import client, { remotePath } from './client';
 
+import * as nativex from '@native';
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
 import * as utils from '@services/utils';
-import * as nativex from '@native';
 
 import type { IFileInfo, IImageInfo, IPhoto } from '@typings';
 import type { ResponseDataDetailed, SearchResult } from 'webdav';
@@ -298,30 +298,61 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
     return;
   }
 
-  // Set absolute target path
-  const prefixPath = `files/${utils.uid}`;
-  let targetPath = prefixPath + destination;
-  if (!targetPath.endsWith('/')) {
-    targetPath += '/';
+  const destinations = new Map();
+  destinations.set(destination, photos);
+  yield* movePhotosToMultiplePaths(destinations, overwrite)
+}
+
+/**
+ * Move multiple files in given lists of Ids to corresponding destinations
+ *
+ * @param destinations to move photos into
+ * @param overwrite behaviour if the target exists. `true` overwrites, `false` fails.
+ * @returns list of file ids that were moved
+ */
+export async function* movePhotosToMultiplePaths(destinations: Map<string, IPhoto[]>, overwrite: boolean) {
+  const filteredEntries = Array.from(destinations.entries()).filter(([_, value]) => {
+    return value.length > 0;
+  });
+  if (filteredEntries.length === 0) {
+    return;
   }
 
-  // Also move the stack files
-  photos = await extendWithStack(photos);
-  const fileIdsSet = new Set(photos.map((p) => p.fileid));
+  const prefixPath = `files/${utils.uid}`;
 
-  // Get files data
-  let fileInfos: IFileInfo[] = [];
+  let fileInfosByPath: [string, IFileInfo[]][];
   try {
-    fileInfos = await getFiles(photos);
+    fileInfosByPath = await Promise.all(filteredEntries.map(async ([path, photos]) => {
+      let targetPath = prefixPath + path;
+      if (!targetPath.endsWith('/')) {
+        targetPath += '/';
+      }
+
+      photos = await extendWithStack(photos);
+      // Also move the stack files
+      const fileIdsSet = new Set(photos.map((p) => p.fileid));
+
+      // Get files data
+      let fileInfos: IFileInfo[] = [];
+
+      // This can thrown some errors
+      fileInfos = await getFiles(photos);
+      fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
+      
+      return [targetPath, fileInfos]
+    }))
   } catch (e) {
-    console.error('Failed to get file info for files to move', photos, e);
+    console.error('Failed to get file info for files to move', filteredEntries, e);
     showError(t('memories', 'Failed to move files.'));
     return;
   }
 
+  let flattened: [string, IFileInfo][] = fileInfosByPath.flatMap(([key, values]) =>
+    values.map(value => [key, value] as [string, IFileInfo])
+  );
+
   // Move each file
-  fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
-  const calls = fileInfos.map((fileInfo) => async () => {
+  const calls = flattened.map(([targetPath, fileInfo]) => async () => {
     try {
       await client.moveFile(
         fileInfo.originalFilename,
