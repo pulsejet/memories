@@ -26,6 +26,7 @@ import ModalMixin from './ModalMixin';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 
+import type { Node } from '@nextcloud/files';
 import type { IPhoto } from '@typings';
 
 export default defineComponent({
@@ -61,11 +62,23 @@ export default defineComponent({
     },
 
     async chooseFolderPath() {
+      let moveByDate = false;
       let destination = await utils.chooseNcFolder(
         this.t('memories', 'Choose a folder'),
         this.config.folders_path,
-        FilePickerType.Move,
+        (selectedNodes: Node[], currentPath: string, currentView: string) => [
+          {
+            label: 'Move',
+            type: 'primary',
+            callback: (_) => null,
+          },
+          {
+            label: 'Move and organize',
+            callback: (_) => (moveByDate = true),
+          },
+        ],
       );
+
       // Fails if the target exists, same behavior with Nextcloud files implementation.
       const gen = dav.movePhotos(this.photos, destination, false);
       this.show = true;
