@@ -62,6 +62,7 @@ OC.L10N.register(
     "Go back to the previous view." : "Volver a la vista anterior",
     "Back" : "Atrás",
     "Add collaborators" : "Amestar collaboradores",
+    "Back to the new album form." : "Volver al formulariu del álbum nuevu.",
     "Save" : "Guardar",
     "Create album" : "Crear un álbum",
     "Save changes" : "Guardar los cambeos",
