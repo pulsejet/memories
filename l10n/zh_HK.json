@@ -62,6 +62,7 @@
     "Square grid mode" : "方形網格模式",
     "Show past photos on top of timeline" : "在時間軸頂部顯示過去的照片",
     "Stack RAW files with same name" : "堆叠同名的 RAW 文件",
+    "De-duplicate identical files" : "刪除重複的相同檔案",
     "Autoplay Live Photos" : "自動播放 Live Photos",
     "Show full file path in sidebar" : "於側邊欄顯示檔案途徑全名",
     "Show metadata in slideshow" : "在幻燈片放映中顯示元數據",
