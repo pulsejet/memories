@@ -10,6 +10,7 @@ import { translate as t } from '@services/l10n';
 import * as utils from '@services/utils';
 
 import type { IFileInfo, IImageInfo, IPhoto } from '@typings';
+import path from 'path';
 import type { ResponseDataDetailed, SearchResult } from 'webdav';
 
 const GET_FILE_CHUNK_SIZE = 50;
@@ -298,65 +299,138 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
     return;
   }
 
-  const destinations = new Map();
-  destinations.set(destination, photos);
-  yield* movePhotosToMultiplePaths(destinations, overwrite)
-}
-
-/**
- * Move multiple files in given lists of Ids to corresponding destinations
- *
- * @param destinations to move photos into
- * @param overwrite behaviour if the target exists. `true` overwrites, `false` fails.
- * @returns list of file ids that were moved
- */
-export async function* movePhotosToMultiplePaths(destinations: Map<string, IPhoto[]>, overwrite: boolean) {
-  const filteredEntries = Array.from(destinations.entries()).filter(([_, value]) => {
-    return value.length > 0;
-  });
-  if (filteredEntries.length === 0) {
-    return;
+  // Set absolute target path
+  const prefixPath = `files/${utils.uid}`;
+  let targetPath = prefixPath + destination;
+  if (!targetPath.endsWith('/')) {
+    targetPath += '/';
   }
 
-  const prefixPath = `files/${utils.uid}`;
+  // Also move the stack files
+  photos = await extendWithStack(photos);
+  const fileIdsSet = new Set(photos.map((p) => p.fileid));
 
-  let fileInfosByPath: [string, IFileInfo[]][];
+  // Get files data
+  let fileInfos: IFileInfo[] = [];
   try {
-    fileInfosByPath = await Promise.all(filteredEntries.map(async ([path, photos]) => {
-      let targetPath = prefixPath + path;
-      if (!targetPath.endsWith('/')) {
-        targetPath += '/';
-      }
-
-      photos = await extendWithStack(photos);
-      // Also move the stack files
-      const fileIdsSet = new Set(photos.map((p) => p.fileid));
-
-      // Get files data
-      let fileInfos: IFileInfo[] = [];
-
-      // This can thrown some errors
-      fileInfos = await getFiles(photos);
-      fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
-      
-      return [targetPath, fileInfos]
-    }))
+    fileInfos = await getFiles(photos);
   } catch (e) {
-    console.error('Failed to get file info for files to move', filteredEntries, e);
+    console.error('Failed to get file info for files to move', photos, e);
     showError(t('memories', 'Failed to move files.'));
     return;
   }
 
-  let flattened: [string, IFileInfo][] = fileInfosByPath.flatMap(([key, values]) =>
-    values.map(value => [key, value] as [string, IFileInfo])
-  );
-
   // Move each file
-  const calls = flattened.map(([targetPath, fileInfo]) => async () => {
+  fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
+  const calls = fileInfos.map((fileInfo) => async () => {
     try {
       await client.moveFile(
         fileInfo.originalFilename,
         targetPath + fileInfo.basename,
+        // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
+        { headers: { Overwrite: overwrite ? 'T' : 'F' } },
+      );
+      return fileInfo.fileid;
+    } catch (error) {
+      console.error('Failed to move', fileInfo, error);
+      if (error.response?.status === 412) {
+        // Precondition failed (only if `overwrite` flag set to false)
+        showError(
+          t('memories', 'Could not move {fileName}, target exists.', {
+            fileName: fileInfo.filename,
+          }),
+        );
+        return 0;
+      }
+
+      showError(
+        t('memories', 'Failed to move {fileName}.', {
+          fileName: fileInfo.filename,
+        }),
+      );
+      return 0;
+    }
+  });
+
+  yield* runInParallel(calls, 10);
+}
+
+/**
+ * Move multiple files in given lists of Ids to corresponding destinations in a year/month folder structure.
+ *
+ * @param photos list of photos to move
+ * @param destination to move photos into
+ * @param overwrite behaviour if the target exists. `true` overwrites, `false` fails.
+ * @returns list of file ids that were moved
+ */
+export async function* movePhotosByDate(photos: IPhoto[], destination: string, overwrite: boolean) {
+  if (photos.length === 0) {
+    return;
+  }
+
+  // Set absolute target path
+  const prefixPath = `files/${utils.uid}`;
+  destination = path.join(prefixPath, destination);
+  const datePaths: Map<string, Set<string>> = new Map();  // {'year': {'month1', 'month2'}}
+
+  photos = await extendWithStack(photos);
+  const fileIdsSet = new Set(photos.map((p) => p.fileid));
+
+  let fileInfos: IFileInfo[] = [];
+
+  try {
+    fileInfos = await getFiles(photos);
+  } catch (e) {
+    console.error('Failed to get file info for files to move', photos, e);
+    showError(t('memories', 'Failed to move files.'));
+    return;
+  }
+
+  const moveDirectives: Array<[string, IFileInfo]> = new Array();
+
+  photos.forEach((photo, i) => {
+    if (!fileIdsSet.has(fileInfos[i].fileid)) {
+      return;
+    }
+
+    const date = utils.dayIdToDate(photo.dayid);
+
+    const year = date.getFullYear().toString()
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+
+    const months = datePaths.get(year) || new Set();
+    months.add(month);
+    datePaths.set(year, months);
+
+    const datePath = path.join(destination,`/${year}/${month}`);
+
+    moveDirectives.push([datePath, fileInfos[i]])
+  })
+
+  async function createIfNotExist(directory: string, subDirectories: Iterable<string>) {
+    let existing = (await client.getDirectoryContents(directory));
+    if ('data' in existing) {
+      existing = existing.data
+    }
+    existing = existing.filter((f) => f.type === 'directory');
+    for (const subDirectory of subDirectories) {
+      if (!existing.some((f) => f.basename === subDirectory)) {
+        await client.createDirectory(path.join(directory, subDirectory));
+      }
+    }
+  }
+
+  await createIfNotExist(destination, datePaths.keys())
+  for (const [year, months] of datePaths) {
+    await createIfNotExist(path.join(destination, year), months)
+  }
+
+  // Move each file
+  const calls = moveDirectives.map(([targetPath, fileInfo]) => async () => {
+    try {
+      await client.moveFile(
+        fileInfo.originalFilename,
+        path.join(targetPath, fileInfo.basename),
         // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
         { headers: { Overwrite: overwrite ? 'T' : 'F' } },
       );

@@ -13,7 +13,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { FilePickerType } from '@nextcloud/dialogs';
 import { showInfo } from '@nextcloud/dialogs';
 
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
@@ -26,7 +25,8 @@ import ModalMixin from './ModalMixin';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 
-import type { Node } from '@nextcloud/files';
+import path from 'path';
+
 import type { IPhoto } from '@typings';
 
 export default defineComponent({
@@ -62,48 +62,49 @@ export default defineComponent({
     },
 
     async chooseFolderPath() {
-      let moveByDate = false;
+      let mode = 'move' as 'move' | 'organise' | 'copy';
       let destination = await utils.chooseNcFolder(
         this.t('memories', 'Choose a folder'),
         this.config.folders_path,
         () => [
           {
-            label: 'Move',
-            type: 'primary',
-            callback: () => null,
+            label: 'Move and organise',
+            callback: () => (mode = 'organise'),
           },
           {
-            label: 'Move and organize',
-            callback: () => (moveByDate = true),
+            label: 'Copy',
+            callback: () => (mode = 'copy'),
+          },
+          {
+            label: 'Move',
+            type: 'primary',
+            callback: () => (mode = 'move'),
           },
         ],
       );
+      console.log(mode);
 
-      if (moveByDate) {
-        const grouped: Map<string, IPhoto[]> = new Map();
-        for (const photo of this.photos) {
-          const date = utils.dayIdToDate(photo.dayid);
-          const datePath = `/${date.getFullYear()}/${date.getMonth() + 1}`;
-          if (grouped.has(datePath)) {
-            grouped.get(datePath)?.push(photo);
-          } else {
-            grouped.set(datePath, [photo]);
-          }
+      let gen;
+      switch (mode) {
+        case 'organise' : {
+          gen = dav.movePhotosByDate(this.photos, destination, false);
+          break;
         }
+        case 'copy' : {
+          gen = dav.movePhotos(this.photos, destination, false);
+          break;
+        }
+        case 'move' : {
+          gen = dav.movePhotos(this.photos, destination, false);
+          break;
+        }
+      }
 
-        for (const group of grouped) {
-          
-          console.log(`Move ${group[1].length} photos to ${destination}${group[0]}`);
-        }
-      } else {
-        // Fails if the target exists, same behavior with Nextcloud files implementation.
-        const gen = dav.movePhotos(this.photos, destination, false);
-        this.show = true;
+      this.show = true;
 
-        for await (const fids of gen) {
-          this.photosDone += fids.filter(Boolean).length;
-          utils.bus.emit('memories:timeline:soft-refresh', null);
-        }
+      for await (const fids of gen) {
+        this.photosDone += fids.filter(Boolean).length;
+        utils.bus.emit('memories:timeline:soft-refresh', null);
       }
 
       const n = this.photosDone;
