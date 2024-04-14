@@ -8,6 +8,7 @@ import { defineComponent } from 'vue';
 import UserMixin from '@mixins/UserConfig';
 
 import axios from '@nextcloud/axios';
+import { getLanguage } from '@nextcloud/l10n';
 
 import FolderGrid from './FolderGrid.vue';
 
@@ -61,6 +62,9 @@ export default defineComponent({
       if (!this.config.show_hidden_folders) {
         this.folders = this.folders.filter((f) => !f.name.startsWith('.') && f.previews?.length);
       }
+
+      // Sort folders by name, case insensitive and natural
+      this.folders.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
 
       return this.folders.length > 0;
     },
