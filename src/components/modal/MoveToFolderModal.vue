@@ -114,7 +114,7 @@ export default defineComponent({
       if (mode === Mode.Copy) {
         showInfo(this.n('memories', '{n} item copied to folder', '{n} items copied to folder', n, { n }));
       } else {
-        showInfo(this.n('memories', '{n} item copied to folder', '{n} items copied to folder', n, { n }));
+        showInfo(this.n('memories', '{n} item moved to folder', '{n} items moved to folder', n, { n }));
       }
       this.close();
     },
