@@ -25,8 +25,6 @@ import ModalMixin from './ModalMixin';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 
-import path from 'path';
-
 import type { IPhoto } from '@typings';
 
 export default defineComponent({

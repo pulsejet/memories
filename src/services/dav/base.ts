@@ -1,3 +1,5 @@
+import path from 'path';
+
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 
@@ -10,7 +12,6 @@ import { translate as t } from '@services/l10n';
 import * as utils from '@services/utils';
 
 import type { IFileInfo, IImageInfo, IPhoto } from '@typings';
-import path from 'path';
 import type { ResponseDataDetailed, SearchResult } from 'webdav';
 
 const GET_FILE_CHUNK_SIZE = 50;
