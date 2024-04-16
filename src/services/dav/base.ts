@@ -441,7 +441,7 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
   // Set absolute target path
   const prefixPath = `files/${utils.uid}`;
   destination = path.join(prefixPath, destination);
-  const datePaths: Map<string, Set<string>> = new Map();  // {'year': {'month1', 'month2'}}
+  const datePaths: Map<string, Set<string>> = new Map(); // {'year': {'month1', 'month2'}}
 
   photos = await extendWithStack(photos);
   const fileIdsSet = new Set(photos.map((p) => p.fileid));
@@ -465,22 +465,22 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
 
     const date = utils.dayIdToDate(photo.dayid);
 
-    const year = date.getFullYear().toString()
+    const year = date.getFullYear().toString();
     const month = String(date.getMonth() + 1).padStart(2, '0');
 
     const months = datePaths.get(year) || new Set();
     months.add(month);
     datePaths.set(year, months);
 
-    const datePath = path.join(destination,`/${year}/${month}`);
+    const datePath = path.join(destination, `/${year}/${month}`);
 
-    moveDirectives.push([datePath, fileInfos[i]])
-  })
+    moveDirectives.push([datePath, fileInfos[i]]);
+  });
 
   async function createIfNotExist(directory: string, subDirectories: Iterable<string>) {
-    let existing = (await client.getDirectoryContents(directory));
+    let existing = await client.getDirectoryContents(directory);
     if ('data' in existing) {
-      existing = existing.data
+      existing = existing.data;
     }
     existing = existing.filter((f) => f.type === 'directory');
     for (const subDirectory of subDirectories) {
@@ -490,9 +490,9 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
     }
   }
 
-  await createIfNotExist(destination, datePaths.keys())
+  await createIfNotExist(destination, datePaths.keys());
   for (const [year, months] of datePaths) {
-    await createIfNotExist(path.join(destination, year), months)
+    await createIfNotExist(path.join(destination, year), months);
   }
 
   // Move each file

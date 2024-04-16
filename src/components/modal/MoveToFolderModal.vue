@@ -60,23 +60,28 @@ export default defineComponent({
     },
 
     async chooseFolderPath() {
-      let mode = 'move' as 'move' | 'organise' | 'copy';
+      enum Mode {
+        Move = 1,
+        Copy = 2,
+        Organise = 3,
+      }
+      let mode: Mode = Mode.Move as Mode;
       let destination = await utils.chooseNcFolder(
         this.t('memories', 'Choose a folder'),
         this.config.folders_path,
         () => [
           {
             label: 'Move and organise',
-            callback: () => (mode = 'organise'),
+            callback: () => (mode = Mode.Organise),
           },
           {
             label: 'Copy',
-            callback: () => (mode = 'copy'),
+            callback: () => (mode = Mode.Copy),
           },
           {
             label: 'Move',
             type: 'primary',
-            callback: () => (mode = 'move'),
+            callback: () => (mode = Mode.Move),
           },
         ],
       );
@@ -84,15 +89,15 @@ export default defineComponent({
       let gen;
       // Fails if the target exists, same behavior with Nextcloud files implementation.
       switch (mode) {
-        case 'organise' : {
+        case Mode.Organise: {
           gen = dav.movePhotosByDate(this.photos, destination, false);
           break;
         }
-        case 'copy' : {
+        case Mode.Copy: {
           gen = dav.copyPhotos(this.photos, destination, false);
           break;
         }
-        case 'move' : {
+        case Mode.Move: {
           gen = dav.movePhotos(this.photos, destination, false);
           break;
         }
@@ -106,7 +111,7 @@ export default defineComponent({
       }
 
       const n = this.photosDone;
-      if (mode === 'copy') {
+      if (mode === Mode.Copy) {
         showInfo(this.n('memories', '{n} item copied to folder', '{n} items copied to folder', n, { n }));
       } else {
         showInfo(this.n('memories', '{n} item copied to folder', '{n} items copied to folder', n, { n }));
