@@ -287,6 +287,75 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
 }
 
 /**
+ * copy all files in a given list of Ids to given destination
+ *
+ * @param photos list of photos to copy
+ * @param destination to copy photos into
+ * @param overwrite behaviour if the target exists. `true` overwrites, `false` fails.
+ * @returns list of file ids that were copied
+ */
+export async function* copyPhotos(photos: IPhoto[], destination: string, overwrite: boolean) {
+  if (photos.length === 0) {
+    return;
+  }
+
+  // Set absolute target path
+  const prefixPath = `files/${utils.uid}`;
+  let targetPath = prefixPath + destination;
+  if (!targetPath.endsWith('/')) {
+    targetPath += '/';
+  }
+
+  // Also copy the stack files
+  photos = await extendWithStack(photos);
+  const fileIdsSet = new Set(photos.map((p) => p.fileid));
+
+  // Get files data
+  let fileInfos: IFileInfo[] = [];
+  try {
+    fileInfos = await getFiles(photos);
+  } catch (e) {
+    console.error('Failed to get file info for files to copy', photos, e);
+    showError(t('memories', 'Failed to copy files.'));
+    return;
+  }
+
+  // Copy each file
+  fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
+  const calls = fileInfos.map((fileInfo) => async () => {
+    try {
+      await client.copyFile(
+        fileInfo.originalFilename,
+        targetPath + fileInfo.basename,
+        // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
+        { headers: { Overwrite: overwrite ? 'T' : 'F' } },
+      );
+      return fileInfo.fileid;
+    } catch (error) {
+      console.error('Failed to copy', fileInfo, error);
+      if (error.response?.status === 412) {
+        // Precondition failed (only if `overwrite` flag set to false)
+        showError(
+          t('memories', 'Could not copy {fileName}, target exists.', {
+            fileName: fileInfo.filename,
+          }),
+        );
+        return 0;
+      }
+
+      showError(
+        t('memories', 'Failed to copy {fileName}.', {
+          fileName: fileInfo.filename,
+        }),
+      );
+      return 0;
+    }
+  });
+
+  yield* runInParallel(calls, 10);
+}
+
+/**
  * Move all files in a given list of Ids to given destination
  *
  * @param photos list of photos to move

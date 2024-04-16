@@ -91,7 +91,7 @@ export default defineComponent({
           break;
         }
         case 'copy' : {
-          gen = dav.movePhotos(this.photos, destination, false);
+          gen = dav.copyPhotos(this.photos, destination, false);
           break;
         }
         case 'move' : {
@@ -108,7 +108,11 @@ export default defineComponent({
       }
 
       const n = this.photosDone;
-      showInfo(this.n('memories', '{n} item moved to folder', '{n} items moved to folder', n, { n }));
+      if (mode === 'copy') {
+        showInfo(this.n('memories', '{n} item copied to folder', '{n} items copied to folder', n, { n }));
+      } else {
+        showInfo(this.n('memories', '{n} item copied to folder', '{n} items copied to folder', n, { n }));
+      }
       this.close();
     },
   },
