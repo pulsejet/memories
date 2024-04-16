@@ -82,9 +82,9 @@ export default defineComponent({
           },
         ],
       );
-      console.log(mode);
 
       let gen;
+      // Fails if the target exists, same behavior with Nextcloud files implementation.
       switch (mode) {
         case 'organise' : {
           gen = dav.movePhotosByDate(this.photos, destination, false);

@@ -1,9 +1,8 @@
-import { getFilePickerBuilder } from '@nextcloud/dialogs';
-import { showError } from '@nextcloud/dialogs';
 import type { IFilePickerButton } from '@nextcloud/dialogs';
+import { getFilePickerBuilder, showError } from '@nextcloud/dialogs';
 import type { Node } from '@nextcloud/files';
 
-import { translate as t, translatePlural as n } from '@services/l10n';
+import { translatePlural as n, translate as t } from '@services/l10n';
 import { bus } from './event-bus';
 import { fragment } from './fragment';
 
