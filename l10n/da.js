@@ -78,6 +78,7 @@ OC.L10N.register(
     "Expires" : "Udløber",
     "Read only" : "Skrivebeskyttet",
     "Link copied to clipboard" : "Link kopieret til udklipsholder",
+    "Last updated" : "Sidst opdateret",
     "Creation date" : "Oprettelsesdato",
     "Oldest first" : "Ældste først",
     "Newest first" : "Nyeste først",
