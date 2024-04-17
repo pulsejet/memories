@@ -91,6 +91,7 @@ OC.L10N.register(
     "Share link" : "Compartir l'enllaz",
     "Refresh" : "Anovar",
     "Password protected" : "Proteición con contraseña",
+    "Read only" : "Namás llectura",
     "Link copied to clipboard" : "L'enllaz copióse nel cartafueyu",
     "Failed to copy link to clipboard" : "Nun se pue copiar l'enllaz nel cartfaueyu",
     "High Resolution" : "Resolución alta",
