@@ -34,8 +34,9 @@ body {
   overflow: visible;
 
   > div.app-navigation {
-    // Reduce size of navigation. NC <25 doesn't like this on mobile.
-    max-width: 250px;
+    // Reduce size of navigation bar
+    --app-navigation-max-width: 250px !important;
+    max-width: var(--app-navigation-max-width); // NC <29
 
     // Rounded corners only on left
     border-top-left-radius: var(--body-container-radius);
