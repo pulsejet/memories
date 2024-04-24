@@ -131,8 +131,9 @@ class Index
         $this->log("Indexing folder {$path}", true);
 
         // Check if path is blacklisted
-        if (!$this->isPathAllowed($path . '/')) {
+        if (!$this->isPathAllowed($path.'/')) {
             $this->log("Skipping folder {$path} (path excluded)".PHP_EOL, true);
+
             return;
         }
 
