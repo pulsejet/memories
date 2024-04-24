@@ -28,6 +28,7 @@ OC.L10N.register(
     "Account" : "Cuenta",
     "Close" : "Cerrar",
     "Info" : "Info",
+    "Performance" : "Desempeño",
     "Unknown" : "Desconocido",
     "Continue" : "Continuar",
     "No items" : "No hay elementos",

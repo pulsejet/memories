@@ -35,6 +35,7 @@ OC.L10N.register(
     "Performance" : "Rindimientu",
     "Continue" : "Siguir",
     "Template" : "Plantía",
+    "No items" : "Nun hai nengún elementu",
     "No results found" : "Nun s'atopó nengún resultáu",
     "Search" : "Buscar",
     "Upload" : "Xunir",
