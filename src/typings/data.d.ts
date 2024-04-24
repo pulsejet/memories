@@ -112,6 +112,7 @@ declare module '@typings' {
     basename: string;
     mimetype: string;
     size: number;
+    uploadtime: number;
 
     filename?: string;
     address?: string;

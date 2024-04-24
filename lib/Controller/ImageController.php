@@ -213,6 +213,7 @@ class ImageController extends GenericApiController
             $info['mimetype'] = $file->getMimeType();
             $info['size'] = $file->getSize();
             $info['basename'] = $file->getName();
+            $info['uploadtime'] = $file->getUploadTime() ?: $file->getMTime();
 
             // Allow these ony for logged in users
             if ($user = $this->userSession->getUser()) {

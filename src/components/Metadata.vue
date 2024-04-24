@@ -534,7 +534,8 @@ export default defineComponent({
 }
 
 .top-field {
-  margin: 10px;
+  margin-left: 10px;
+  margin-top: 10px;
   margin-bottom: 25px;
   display: flex;
   align-items: center;
