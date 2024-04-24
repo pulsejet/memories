@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - **Important**: This release has multiple hotfixes. If you are running v7.1.0, please upgrade as soon as possible.
 - **Feature**: Add option to de-duplicate identical files ([#1112](https://github.com/pulsejet/memories/issues/1112)).
 - **Feature**: Show current date at top of timeline ([#1116](https://github.com/pulsejet/memories/issues/1116))
+- **Feature**: Allow excluding files and folders from indexing with regex pattern
 
 ## [v7.1.0] - 2024-04-01
 

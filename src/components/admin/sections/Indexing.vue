@@ -48,14 +48,13 @@
       </NcNoteCard>
     </template>
 
-    <p>
+    <div>
       {{
         t(
           'memories',
           'The EXIF indexes are built and checked in a periodic background task. Be careful when selecting anything other than automatic indexing. For example, setting the indexing to only timeline folders may cause delays before media becomes available to users, since the user configures the timeline only after logging in.',
         )
       }}
-      {{ t('memories', 'Folders with a ".nomedia" or a ".nomemories" file are always excluded from indexing.') }}
       <NcCheckboxRadioSwitch
         :checked.sync="config['memories.index.mode']"
         value="1"
@@ -96,7 +95,35 @@
         @change="update('memories.index.path', $event.target.value)"
         v-if="config['memories.index.mode'] === '3'"
       />
-    </p>
+    </div>
+
+    <div>
+      {{ t('memories', 'Folders with a ".nomedia" or a ".nomemories" file are always excluded from indexing.') }}
+      {{ t('memories', 'You can optionally use a regular expression to exclude matching paths from being indexed.') }}
+      {{ t('memories', 'For example, to exclude special QNAP folders:') }}
+      <br />
+      <code>\/@(Recycle|eaDir)\/</code>
+      <br />
+      {{ t('memories', 'Or, exclude all files starting with "private-" or "backup-":') }}
+      <br />
+      <code>\/(private|backup)-[^\/]*$</code>
+      <br />
+      {{ t('memories', 'You can use the regex101 website to validate and test the pattern:') }}
+      <a target="_blank" href="https://regex101.com/">
+        {{ t('memories', 'External Link') }}
+      </a>
+
+      <NcTextField
+        class="regex-field"
+        :label="t('memories', 'Exclude paths matching regular expression')"
+        :label-visible="true"
+        :value.sync="config['memories.index.path.blacklist']"
+        :error="!blacklistRegexValid"
+        @change="blacklistRegexValid && update('memories.index.path.blacklist', $event.target.value)"
+      />
+    </div>
+
+    <br />
 
     <div>
       {{ t('memories', 'For advanced usage, perform a run of indexing by running:') }}
@@ -136,5 +163,24 @@ export default defineComponent({
   mixins: [AdminMixin],
 
   data: () => ({ API }),
+
+  computed: {
+    blacklistRegexValid(): boolean {
+      console.log(this.config['memories.index.path.blacklist']);
+      try {
+        return !!new RegExp(this.config['memories.index.path.blacklist']);
+      } catch {
+        return false;
+      }
+    },
+  },
 });
 </script>
+
+<style scoped lang="scss">
+.regex-field {
+  :deep input {
+    font-family: monospace;
+  }
+}
+</style>

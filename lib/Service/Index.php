@@ -130,6 +130,13 @@ class Index
         $path = $folder->getPath();
         $this->log("Indexing folder {$path}", true);
 
+        // Check if path is blacklisted
+        if (!$this->isPathAllowed($path . '/')) {
+            $this->log("Skipping folder {$path} (path excluded)".PHP_EOL, true);
+            return;
+        }
+
+        // Check if folder contains exclusion file
         if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.nomemories')) {
             $this->log("Skipping folder {$path} (.nomedia / .nomemories)".PHP_EOL, true);
 
@@ -141,7 +148,9 @@ class Index
 
         // Filter files that are supported
         $mimes = self::getMimeList();
-        $files = array_filter($nodes, static fn ($n) => $n instanceof File && \in_array($n->getMimeType(), $mimes, true));
+        $files = array_filter($nodes, static fn ($n): bool => $n instanceof File
+            && \in_array($n->getMimeType(), $mimes, true)
+            && self::isPathAllowed($n->getPath()));
 
         // Create an associative array with file ID as key
         $files = array_combine(array_map(static fn ($n) => $n->getId(), $files), $files);
@@ -282,6 +291,8 @@ class Index
 
     /**
      * Check if a file is supported.
+     *
+     * @param Node $file file to check
      */
     public static function isSupported(Node $file): bool
     {
@@ -290,10 +301,30 @@ class Index
 
     /**
      * Check if a file is a video.
+     *
+     * @param Node $file file to check
      */
-    public static function isVideo(File $file): bool
+    public static function isVideo(Node $file): bool
     {
         return \in_array($file->getMimeType(), Application::VIDEO_MIMES, true);
+    }
+
+    /**
+     * Checks if the specified node's path is allowed to be indexed.
+     */
+    public static function isPathAllowed(string $path): bool
+    {
+        /** @var ?string $pattern */
+        static $pattern = null;
+
+        if (null === $pattern) {
+            $pattern = trim(SystemConfig::get('memories.index.path.blacklist') ?: '');
+            if (!empty($pattern) && !\is_int(preg_match("/{$pattern}/", ''))) {
+                throw new \Exception('Invalid regex pattern in memories.index.path.blacklist');
+            }
+        }
+
+        return empty($pattern) || !preg_match("/{$pattern}/", $path);
     }
 
     /**

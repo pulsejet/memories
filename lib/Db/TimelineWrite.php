@@ -49,7 +49,7 @@ class TimelineWrite
     ): bool {
         // Check if we want to process this file
         // https://github.com/pulsejet/memories/issues/933 (zero-byte files)
-        if ($file->getSize() <= 0 || !Index::isSupported($file)) {
+        if ($file->getSize() <= 0 || !Index::isSupported($file) || !Index::isPathAllowed($file->getPath())) {
             return false;
         }
 

@@ -34,6 +34,9 @@ class SystemConfig
         // Path to index (only used if indexing mode is 3)
         'memories.index.path' => '/',
 
+        // Blacklist file or folder paths by regex
+        'memories.index.path.blacklist' => '\/@(Recycle|eaDir)\/',
+
         // Places database type identifier
         'memories.gis_type' => -1,
 
