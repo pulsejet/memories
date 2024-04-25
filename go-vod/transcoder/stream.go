@@ -16,6 +16,8 @@ import (
 )
 
 const (
+	BLANK = ""
+
 	ENCODER_COPY  = "copy"
 	ENCODER_X264  = "libx264"
 	ENCODER_VAAPI = "h264_vaapi"
@@ -437,13 +439,34 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 				transposer = fmt.Sprintf("transpose_%s", s.c.NVENCScale)
 			}
 
-			if transposer != "transpose_cuda" { // does not exist
-				if s.m.probe.Rotation == -90 {
-					filter = fmt.Sprintf("%s,%s=1", filter, transposer)
-				} else if s.m.probe.Rotation == 90 {
-					filter = fmt.Sprintf("%s,%s=2", filter, transposer)
-				} else if s.m.probe.Rotation == 180 || s.m.probe.Rotation == -180 {
-					filter = fmt.Sprintf("%s,%s=1,%s=1", filter, transposer, transposer)
+			// Force rotation in software instead.
+			// For example, if we desire not to use transpose_vaapi for some reason.
+			forceSwTranspose := transposer != "transpose" && (false || transposer == "transpose_cuda")
+
+			// If we are forcing software, download the video and rotate it
+			if forceSwTranspose {
+				transposer = "transpose"
+			}
+
+			// Get the transpose to apply
+			transpose := BLANK
+			if s.m.probe.Rotation == -90 {
+				transpose = fmt.Sprintf("%s=1", transposer)
+			} else if s.m.probe.Rotation == 90 {
+				transpose = fmt.Sprintf("%s=2", transposer)
+			} else if s.m.probe.Rotation == 180 || s.m.probe.Rotation == -180 {
+				transpose = fmt.Sprintf("%s=1,%s=1", transposer, transposer)
+			}
+
+			// Apply transpose filter if needed
+			if transpose != BLANK {
+				if forceSwTranspose {
+					// Download and rotate, then upload back for encoding
+					pre := "hwdownload,format=nv12"
+					post := format // includes hwupload
+					filter = fmt.Sprintf("%s,%s,%s,%s", filter, pre, transpose, post)
+				} else {
+					filter = fmt.Sprintf("%s,%s", filter, transpose)
 				}
 			}
 		}
