@@ -441,9 +441,9 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 
 			// Force rotation in software instead.
 			// For example, if we desire not to use transpose_vaapi for some reason.
-			forceSwTranspose := transposer != "transpose" && (false || transposer == "transpose_cuda")
+			forceSwTranspose := transposer != "transpose" && (s.c.ForceSwTranspose || transposer == "transpose_cuda")
 
-			// If we are forcing software, download the video and rotate it
+			// Use CPU transpose if forcing software
 			if forceSwTranspose {
 				transposer = "transpose"
 			}

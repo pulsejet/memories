@@ -30,6 +30,7 @@ export type ISystemConfig = {
   'memories.vod.nvenc.scale': string;
 
   'memories.vod.use_transpose': boolean;
+  'memories.vod.use_transpose.force_sw': boolean;
   'memories.vod.use_gop_size': boolean;
 
   'memories.db.triggers.fcu': boolean;

@@ -112,6 +112,12 @@
           'Due to a bug in certain hardware drivers, videos may appear in incorrect orientations when streaming. This can be resolved in some cases by rotating the video on the accelerator.',
         )
       }}
+      {{
+        t(
+          'memories',
+          'Some drivers (e.g. AMD and older Intel) do not support hardware accelerated rotation. You can attempt to force software-based transpose in this case.',
+        )
+      }}
       <br />
       <b>
         {{ t('memories', 'Try this option only if you have incorrectly oriented videos during playback.') }}
@@ -124,6 +130,15 @@
         type="switch"
       >
         {{ t('memories', 'Enable streaming transpose workaround') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding || !config['memories.vod.use_transpose']"
+        :checked.sync="config['memories.vod.use_transpose.force_sw']"
+        @update:checked="update('memories.vod.use_transpose.force_sw')"
+        type="switch"
+      >
+        {{ t('memories', 'Force transpose in software') }}
       </NcCheckboxRadioSwitch>
 
       {{ t('memories', 'Some NVENC devices have issues with force_key_frames.') }}

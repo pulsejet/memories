@@ -58,6 +58,8 @@ type Config struct {
 
 	// Use transpose workaround for streaming (VA-API)
 	UseTranspose bool `json:"useTranspose"`
+	// Force tranpose in software
+	ForceSwTranspose bool `json:"forceSwTranspose"`
 
 	// Use GOP size workaround for streaming (NVENC)
 	UseGopSize bool `json:"useGopSize"`

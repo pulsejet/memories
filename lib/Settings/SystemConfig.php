@@ -62,6 +62,7 @@ class SystemConfig
 
         // Extra streaming configuration
         'memories.vod.use_transpose' => false,
+        'memories.vod.use_transpose.force_sw' => false,
         'memories.vod.use_gop_size' => false,
 
         // Paths to ffmpeg and ffprobe binaries
