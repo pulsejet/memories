@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - **Feature**: Allow excluding files and folders from indexing with regex pattern ([#1015](https://github.com/pulsejet/memories/pull/1015))
+- **Feature**: Allow forcing software-based transpose for transcoding ([#794](https://github.com/pulsejet/memories/issues/794))
 
 ## [v7.2.0] - 2024-04-05
 
