@@ -478,7 +478,7 @@ OC.L10N.register(
     "Failed to create tag {name}: {error}" : "Не вдалося створити тег {name}: {error}",
     "Memories has been updated to {version}. Reload to get the new version." : "Memories було оновлено до {version}. Перезавантажте, щоб отримати нову версію.",
     "Upload some photos and make sure the timeline path is configured" : "Завантажте кілька світлин і переконайтеся, що шлях до стрічки налаштовано правильно",
-    "Mark photos as favorite to find them easily" : "Позначайте світлини як улюблені, щоб легко їх знаходити",
+    "Mark photos as favorite to find them easily" : "Позначайте світлини зірочкою, щоби їх було легко знаходити",
     "Memories from past years will appear here" : "Тут з'являться спогади з минулих років",
     "Recognize is still working on your photos" : "Застосунок розпізнавання все ще працює над вашими фотографіями",
     "You will find your friends soon. Please be patient" : "Незабаром ви знайдете своїх друзів. Будь ласка, будьте терплячі",
