@@ -41,7 +41,7 @@ class PageController extends Controller
         \OCP\Util::addScript(Application::APPNAME, 'memories-main');
 
         // Extra translations
-        if (Util::recognizeIsEnabled()) {
+        if (Util::recognizeIsInstalled()) {
             // Auto translation for tags
             \OCP\Util::addTranslations('recognize');
         }
