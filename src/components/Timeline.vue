@@ -734,7 +734,7 @@ export default defineComponent({
           data = await dav.getOnThisDayData();
         } else if (dav.isSingleItem()) {
           data = await dav.getSingleItemData();
-          _m.viewer.open(data[0]!.detail![0]);
+          setTimeout(() => _m.viewer.open(data[0]!.detail![0]), 0);
         } else {
           // Try the cache
           if (!noCache) {
