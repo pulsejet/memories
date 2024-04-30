@@ -244,9 +244,11 @@ class MainActivity : AppCompatActivity() {
             false
         }
 
+        // Mark this is the native app in user agent
         val userAgent =
             getString(R.string.ua_app_prefix) + BuildConfig.VERSION_NAME + " " + getString(R.string.ua_chrome)
 
+        // Set up webview settings
         val webSettings = binding.webview.settings
         webSettings.javaScriptEnabled = true
         webSettings.javaScriptCanOpenWindowsAutomatically = true
@@ -260,8 +262,12 @@ class MainActivity : AppCompatActivity() {
         binding.webview.addJavascriptInterface(nativex, "nativex")
         binding.webview.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         binding.webview.setBackgroundColor(Color.TRANSPARENT)
-        // binding.webview.clearCache(true)
-        // WebView.setWebContentsDebuggingEnabled(true);
+
+        // Enable debugging in debug builds
+        if (BuildConfig.DEBUG) {
+             binding.webview.clearCache(true)
+             WebView.setWebContentsDebuggingEnabled(true);
+        }
 
         // Welcome page or actual app
         nativex.account.refreshCredentials()
