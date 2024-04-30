@@ -20,8 +20,6 @@
 #    and do the initial generation run. https://github.com/nextcloud/previewgenerator
 # ===================================================================================================================
 
-version: '3.5'
-
 services:
   db:
     image: mariadb:11

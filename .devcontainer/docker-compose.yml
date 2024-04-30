@@ -1,4 +1,3 @@
-version: '3.5'
 name: memories_dev
 
 volumes:
