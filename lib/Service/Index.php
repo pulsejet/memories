@@ -315,6 +315,12 @@ class Index
      */
     public static function isPathAllowed(string $path): bool
     {
+        // Always exclude some predefined patterns
+        //   .trashed-<file> (https://github.com/nextcloud/android/issues/10645)
+        if (preg_match('/\/.trashed-[^\/]*$/', $path)) {
+            return false;
+        }
+
         /** @var ?string $pattern */
         static $pattern = null;
 
