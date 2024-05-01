@@ -9,6 +9,7 @@ import android.webkit.CookieManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArrayMap
 import androidx.media3.common.util.UnstableApi
+import gallery.memories.mapper.Fields
 import org.json.JSONArray
 import java.util.concurrent.CountDownLatch
 
@@ -92,6 +93,7 @@ class DownloadService(private val mActivity: AppCompatActivity, private val quer
 
         // All URIs to share including remote and local files
         val files = ArrayList<DlFile>()
+        val dlHref = ArrayList<String>()
         val dlIds = ArrayList<Long>()
 
         // Process all objects to share
@@ -99,8 +101,8 @@ class DownloadService(private val mActivity: AppCompatActivity, private val quer
             val obj = mShareBlobs!!.getJSONObject(i)
 
             // If AUID is found, then look for local file
-            val auid = obj.getString("auid")
-            if (auid != "") {
+            val auid = obj.getString(Fields.Photo.AUID)
+            if (auid.isNotEmpty()) {
                 val sysImgs = query.getSystemImagesByAUIDs(listOf(auid))
                 if (sysImgs.isNotEmpty()) {
                     files.add(DlFile().apply {
@@ -112,15 +114,22 @@ class DownloadService(private val mActivity: AppCompatActivity, private val quer
                 }
             }
 
-            // Queue a download for remote files
-            dlIds.add(queue(obj.getString("href"), ""))
+            // Mark that we need to download this file
+            // Don't start the download yet since we haven't latched
+            val href = obj.getString(Fields.Other.HREF)
+            if (href.isNotEmpty()) {
+                dlHref.add(href)
+            }
         }
+
+        // Queue all downloads
+        dlHref.forEach { dlIds.add(queue(it, "")) }
 
         // Wait for all downloads to complete
         val latch = CountDownLatch(dlIds.size)
         synchronized(mDownloads) {
             dlIds.forEach { dlId ->
-                mDownloads.put(dlId, fun() { latch.countDown() })
+                mDownloads[dlId] = fun() { latch.countDown() }
             }
         }
         latch.await()
@@ -182,8 +191,8 @@ class DownloadService(private val mActivity: AppCompatActivity, private val quer
             mActivity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val query = DownloadManager.Query()
         query.setFilterById(downloadId)
-        val cursor = downloadManager.query(query)
-        cursor.use { cursor ->
+        val cursor_ = downloadManager.query(query)
+        cursor_.use { cursor ->
             if (cursor.moveToFirst()) {
                 val uriIdx = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
                 val nameIdx = cursor.getColumnIndex(DownloadManager.COLUMN_TITLE)

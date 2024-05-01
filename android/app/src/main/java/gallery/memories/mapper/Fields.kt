@@ -56,4 +56,8 @@ class Fields {
         const val NAME = "name"
         const val ENABLED = "enabled"
     }
+
+    object Other {
+        const val HREF = "href"
+    }
 }
