@@ -30,6 +30,7 @@ use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\App\IAppManager;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\DB\QueryBuilder\IQueryFunction;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -172,24 +173,28 @@ class Index
             ;
 
             // Filter out files that are already indexed
-            $addFilter = static function (
-                string $table,
-                string $alias,
-                bool $orphan = true,
-            ) use (&$query): void {
-                $query->leftJoin('f', $table, $alias, $query->expr()->andX(
-                    $query->expr()->eq('f.fileid', "{$alias}.fileid"),
-                    $query->expr()->eq('f.mtime', "{$alias}.mtime"),
-                    $orphan
-                        ? $query->expr()->eq("{$alias}.orphan", $query->expr()->literal(0))
-                        : $query->expr()->literal(1),
-                ));
+            $getFilter = function (string $table, bool $notOrpaned) use (&$query): IQueryFunction {
+                // Make subquery to check if file exists in table
+                $clause = $this->db->getQueryBuilder();
+                $clause->select($clause->expr()->literal(1))
+                    ->from($table, 'a')
+                    ->andWhere($clause->expr()->eq('f.fileid', 'a.fileid'))
+                    ->andWhere($clause->expr()->eq('f.mtime', 'a.mtime'))
+                ;
 
-                $query->andWhere($query->expr()->isNull("{$alias}.fileid"));
+                // Filter only non-orphaned files
+                if ($notOrpaned) {
+                    $clause->andWhere($clause->expr()->eq('a.orphan', $clause->expr()->literal(0)));
+                }
+
+                // Add the clause to the main query
+                return SQL::notExists($query, $clause);
             };
-            $addFilter('memories', 'm');
-            $addFilter('memories_livephoto', 'lp');
-            $addFilter('memories_failures', 'fail', false);
+
+            // Filter out files that are already indexed or failed
+            $query->andWhere($getFilter('memories', true));
+            $query->andWhere($getFilter('memories_livephoto', true));
+            $query->andWhere($getFilter('memories_failures', false));
 
             // Get file IDs to actually index
             $fileIds = Util::transaction(static fn (): array => $query->executeQuery()->fetchAll(\PDO::FETCH_COLUMN));
