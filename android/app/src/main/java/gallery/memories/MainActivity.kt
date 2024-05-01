@@ -23,6 +23,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -265,8 +266,9 @@ class MainActivity : AppCompatActivity() {
 
         // Enable debugging in debug builds
         if (BuildConfig.DEBUG) {
-             binding.webview.clearCache(true)
-             WebView.setWebContentsDebuggingEnabled(true);
+            Toast.makeText(this, "Debugging enabled", Toast.LENGTH_SHORT).show()
+            binding.webview.clearCache(true)
+            WebView.setWebContentsDebuggingEnabled(true);
         }
 
         // Welcome page or actual app
