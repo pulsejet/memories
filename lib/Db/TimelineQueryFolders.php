@@ -46,6 +46,28 @@ trait TimelineQueryFolders
     }
 
     /**
+     * Get list of all folders inside a timeline root.
+     *
+     * @param TimelineRoot $root   The root to use for the query
+     * @param bool         $hidden Whether to include hidden folders
+     */
+    public function getRootFolders(TimelineRoot $root, bool $hidden): array
+    {
+        $query = $this->connection->getQueryBuilder();
+
+        // SELECT all folders
+        $query->select('cte_f.fileid')->from('cte_folders', 'cte_f');
+
+        // Set CTE parameters
+        $this->addSubfolderJoinParams($query, $root, false, $hidden);
+
+        // FETCH tag previews
+        $fileIds = $this->executeQueryWithCTEs($query)->fetchAll(\PDO::FETCH_COLUMN);
+
+        return array_map(static fn ($a) => (int) $a, $fileIds);
+    }
+
+    /**
      * Add etag for a field in a query.
      *
      * @param IQueryBuilder $query The query to add the etag to

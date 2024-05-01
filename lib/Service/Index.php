@@ -25,6 +25,8 @@ namespace OCA\Memories\Service;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\SQL;
+use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
@@ -59,9 +61,13 @@ class Index
     /** @var string[] */
     private static ?array $mimeList = null;
 
+    /** @var int[] */
+    private static ?array $mimeIds = null;
+
     public function __construct(
         protected IRootFolder $rootFolder,
         protected TimelineWrite $tw,
+        protected TimelineQuery $tq,
         protected IDBConnection $db,
         protected ITempManager $tempManager,
         protected LoggerInterface $logger,
@@ -85,7 +91,7 @@ class Index
         \OC_Util::setupFS($uid);
 
         // Get the root folder of the user
-        $root = $this->rootFolder->getUserFolder($uid);
+        $rootFolder = $this->rootFolder->getUserFolder($uid);
 
         // Get paths of folders to index
         $mode = SystemConfig::get('memories.index.mode');
@@ -101,10 +107,15 @@ class Index
             throw new \Exception('Invalid index mode');
         }
 
+        // Build timeline root for getting folders
+        $_root = new TimelineRoot();
+        $_root->addFolder($rootFolder);
+        $_root->addMountPoints();
+
         // If a folder is specified, traverse only that folder
         foreach ($paths as $path) {
             try {
-                $node = $root->get($path);
+                $node = $rootFolder->get($path);
                 if (!$node instanceof Folder) {
                     throw new \Exception('Not a folder');
                 }
@@ -116,12 +127,47 @@ class Index
                 continue;
             }
 
-            $this->indexFolder($node);
+            // Make a root with this folder only
+            $root = clone $_root;
+            $root->addFolder($node);
+            $root->baseChange($node->getPath());
+
+            // Get all subfolders for this root
+            $subIds = $this->tq->getRootFolders($root, true);
+
+            // Index all subfolders
+            foreach ($subIds as $subId) {
+                $this->ensureContinueOk();
+
+                try {
+                    $subfolder = $rootFolder->getById($subId);
+                    if (empty($subfolder)) {
+                        throw new \Exception('getById returned empty array');
+                    }
+
+                    $subfolder = $subfolder[0];
+                    if (!$subfolder instanceof Folder) {
+                        throw new \Exception('Not a folder');
+                    }
+                } catch (\Exception $e) {
+                    $this->log("<error>Error during indexing subfolder {$subId}: {$e->getMessage()}</error>".PHP_EOL);
+
+                    continue;
+                }
+
+                try {
+                    $this->indexFolder($subfolder);
+                } catch (ProcessClosedException $e) {
+                    throw $e;
+                } catch (\Exception $e) {
+                    $this->error("Failed to index folder {$subfolder->getPath()}: {$e->getMessage()}");
+                }
+            }
         }
     }
 
     /**
-     * Index all files in a folder.
+     * Index all files in a folder (non-recursive).
      *
      * @param Folder $folder folder to index
      */
@@ -138,81 +184,71 @@ class Index
         }
 
         // Check if folder contains exclusion file
-        if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.nomemories')) {
-            $this->log("Skipping folder {$path} (.nomedia / .nomemories)".PHP_EOL, true);
+        // if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.nomemories')) {
+        //     $this->log("Skipping folder {$path} (.nomedia / .nomemories)".PHP_EOL, true);
 
-            return;
-        }
+        //     return;
+        // }
 
-        // Get all files and folders in this folders
-        $nodes = $folder->getDirectoryListing();
+        // Select all files in filecache
+        $query = $this->db->getQueryBuilder();
+        $query->select('f.fileid', 'f.name')
+            ->from('filecache', 'f')
+            ->andWhere($query->expr()->eq('f.parent', $query->createNamedParameter($folder->getId())))
+            ->andWhere($query->expr()->in('f.mimetype', $query->createNamedParameter($this->getMimeIds(), IQueryBuilder::PARAM_INT_ARRAY)))
+            ->andWhere($query->expr()->gt('f.size', $query->expr()->literal(0)))
+        ;
 
-        // Filter files that are supported
-        $mimes = self::getMimeList();
-        $files = array_filter($nodes, static fn ($n): bool => $n instanceof File
-            && \in_array($n->getMimeType(), $mimes, true)
-            && self::isPathAllowed($n->getPath()));
+        // Filter out files that are already indexed
+        $addFilter = static function (
+            string $table,
+            string $alias,
+            bool $orphan = true,
+        ) use (&$query): void {
+            $query->leftJoin('f', $table, $alias, $query->expr()->andX(
+                $query->expr()->eq('f.fileid', "{$alias}.fileid"),
+                $query->expr()->eq('f.mtime', "{$alias}.mtime"),
+                $orphan
+                    ? $query->expr()->eq("{$alias}.orphan", $query->expr()->literal(0))
+                    : $query->expr()->literal(1),
+            ));
 
-        // Create an associative array with file ID as key
-        $files = array_combine(array_map(static fn ($n) => $n->getId(), $files), $files);
+            $query->andWhere($query->expr()->isNull("{$alias}.fileid"));
+        };
+        $addFilter('memories', 'm');
+        $addFilter('memories_livephoto', 'lp');
+        $addFilter('memories_failures', 'fail', false);
 
-        // Chunk array into some files each (DBs have limitations on IN clause)
-        $chunks = array_chunk($files, 250, true);
+        // Get file IDs to actually index
+        $fcObjs = Util::transaction(static fn (): array => $query->executeQuery()->fetchAll());
 
-        // Check files in each chunk
-        foreach ($chunks as $chunk) {
-            $fileIds = array_keys($chunk);
-
-            // Select all files in filecache
-            $query = $this->db->getQueryBuilder();
-            $query->select('f.fileid')
-                ->from('filecache', 'f')
-                ->where($query->expr()->in('f.fileid', $query->createNamedParameter($fileIds, IQueryBuilder::PARAM_INT_ARRAY)))
-                ->andWhere($query->expr()->gt('f.size', $query->expr()->literal(0)))
-            ;
-
-            // Filter out files that are already indexed
-            $addFilter = static function (
-                string $table,
-                string $alias,
-                bool $orphan = true,
-            ) use (&$query): void {
-                $query->leftJoin('f', $table, $alias, $query->expr()->andX(
-                    $query->expr()->eq('f.fileid', "{$alias}.fileid"),
-                    $query->expr()->eq('f.mtime', "{$alias}.mtime"),
-                    $orphan
-                        ? $query->expr()->eq("{$alias}.orphan", $query->expr()->literal(0))
-                        : $query->expr()->literal(1),
-                ));
-
-                $query->andWhere($query->expr()->isNull("{$alias}.fileid"));
-            };
-            $addFilter('memories', 'm');
-            $addFilter('memories_livephoto', 'lp');
-            $addFilter('memories_failures', 'fail', false);
-
-            // Get file IDs to actually index
-            $fileIds = Util::transaction(static fn (): array => $query->executeQuery()->fetchAll(\PDO::FETCH_COLUMN));
-
-            // Index files
-            foreach ($fileIds as $fileId) {
-                $this->ensureContinueOk();
-                $this->indexFile($chunk[$fileId]);
-            }
-        }
-
-        // All folders
-        $folders = array_filter($nodes, static fn ($n) => $n instanceof Folder);
-        foreach ($folders as $folder) {
+        // Index files
+        foreach ($fcObjs as $fcObj) {
             $this->ensureContinueOk();
 
-            try {
-                $this->indexFolder($folder);
-            } catch (ProcessClosedException $e) {
-                throw $e;
-            } catch (\Exception $e) {
-                $this->error("Failed to index folder {$folder->getPath()}: {$e->getMessage()}");
+            // Get fields in result
+            $fileid = (int) $fcObj['fileid'];
+            $name = $fcObj['name'];
+
+            // Check if path is allowed
+            if (!$this->isPathAllowed("{$path}/{$name}")) {
+                continue;
             }
+
+            // Get file object
+            try {
+                $file = $folder->getById($fileid);
+                $file = !empty($file) ? $file[0] : null;
+            } catch (\Exception) {
+                continue;
+            }
+
+            // Ensure file is valid
+            if (!$file instanceof File) {
+                continue;
+            }
+
+            $this->indexFile($file);
         }
     }
 
@@ -332,6 +368,25 @@ class Index
         }
 
         return empty($pattern) || !preg_match("/{$pattern}/", $path);
+    }
+
+    /**
+     * Get list of internal MIME type IDs to process.
+     */
+    private function getMimeIds(): array
+    {
+        if (self::$mimeIds) {
+            return self::$mimeIds;
+        }
+
+        // Get IDs of all supported MIME types
+        $query = $this->tq->getBuilder();
+        $query->select('id')
+            ->from('mimetypes')
+            ->where($query->expr()->in('mimetype', $query->createNamedParameter(self::getMimeList(), IQueryBuilder::PARAM_STR_ARRAY)))
+        ;
+
+        return self::$mimeIds = $query->executeQuery()->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     /**
