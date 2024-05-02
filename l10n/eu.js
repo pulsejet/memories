@@ -226,6 +226,7 @@ OC.L10N.register(
     "Editable" : "Editagarria",
     "Read only" : "Irakurtzeko soilik",
     "Link copied to clipboard" : "Arbelara kopiatutako esteka",
+    "Failed to copy link to clipboard" : "Ezin izan da esteka arbelera kopiatu",
     "Reduced Size" : "Tamaina murriztua",
     "High Resolution" : "Bereizmen handikoa",
     "Original File" : "Jatorrizko fitxategia",
