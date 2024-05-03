@@ -126,6 +126,7 @@ OC.L10N.register(
     "HEIC (Imagick)" : "HEIC (Imagick)",
     "TIFF (Imagick)" : "TIFF (Imagick)",
     "Videos (ffmpeg)" : "Görüntüler (ffmpeg)",
+    "Imaginary (not recommended)" : "Imaginary (önerilmez)",
     "Thank you for choosing Nextcloud and Memories to store your precious data!" : "Önemli verilerinizi saklamak için Nextcloud ve Anılar uygulamasını seçtiğiniz için teşekkürler!",
     "Memories is very feature rich and setting it up properly can take some time." : "Anılar uygulamasında pek çok özellik bulunur ve doğru şekilde kurmak biraz zaman alabilir.",
     "If you just installed Memories, make sure you read the getting started guide:" : "Anılar uygulamasını yeni kurduysanız kullanmaya başlama rehberini okuduğunuzdan emin olun:",
