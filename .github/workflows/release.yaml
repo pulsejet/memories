@@ -22,12 +22,23 @@ jobs:
         with:
           node-version: 20.x
 
+      - name: Set up php
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
+          coverage: none
+
       - name: Build
         run: |
           make dev-setup
           make patch-external
           make build-js-production
-          ./scripts/bundle.sh
+
+      - name: Bundle app
+        run: bash scripts/bundle.sh
+        env:
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Upload app tarball to release
         uses: svenstaro/upload-release-action@v2
