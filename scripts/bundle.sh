@@ -13,13 +13,13 @@ cp -R appinfo l10n img js lib templates COPYING README.md CHANGELOG.md exiftest*
 sudo chown -R www-data:www-data /tmp/memories
 
 # Cleanup
-pushd /tmp
+cd /tmp
 rm -rf memories.tar.gz
 
 # Get exiftool and other binaries
-pushd memories
+cd memories
 sh "$src/scripts/get-bin-ext.sh"
-popd
+cd ..
 
 # Get certificate and key
 wget -O memories.crt https://raw.githubusercontent.com/nextcloud/app-certificate-requests/master/memories/memories.crt
@@ -40,5 +40,5 @@ tar --no-same-owner -p -zcf memories.tar.gz memories/
 rm -rf memories/
 
 # Move bundle to source
-popd
+cd "$src"
 mv /tmp/memories.tar.gz .
