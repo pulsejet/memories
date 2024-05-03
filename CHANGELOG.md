@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v7.3.1] - 2024-05-03
+
+- **Security**: Enable code signing and integrity checking
+- **Fix**: Always exclude `.trashed-` files from index
+- **Fix**: Auto-correct some bad preview settings in `config.php` ([#1168](https://github.com/pulsejet/memories/pull/1168))
+
 ## [v7.3.0] - 2024-04-30
 
 - **Feature**: Allow excluding files and folders from indexing with regex pattern ([#1015](https://github.com/pulsejet/memories/pull/1015))
