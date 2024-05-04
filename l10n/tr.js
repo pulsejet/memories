@@ -117,6 +117,7 @@ OC.L10N.register(
     "Thumbnail generation may not work for some formats (HEIC, TIFF)." : "Küçük görseller bazı biçimlerde (HEIC, TIFF) oluşturulamayabilir.",
     "Thumbnails for videos will be generated with this binary." : "Görüntülerin küçük görselleri bu binary dosyasıyla oluşturulur.",
     "Thumbnail generation may not work for videos." : "Görüntülerin küçük görselleri oluşturulamayabilir.",
+    "Imaginary is enabled for preview generation. This will override other preview providers. We currently recommend against using Imaginary due to multiple bugs in handling of HEIC and GIF files." : "Ön izlemeleri oluşturmak için Imaginary kullanılıyor. Bu durum, diğer ön izleme hizmeti sağlayıcılarını kullanımdan kaldırır. HEIC ve GIF dosyalarının işlenmesindeki birden fazla sorun nedeniyle şu anda Imaginary kullanılmasını önermiyoruz.",
     "The following MIME types are configured for preview generation." : "Aşağıdaki MIME türleri, ön izleme için yapılandırılmış.",
     "Max preview size (trade-off between quality and storage requirements)." : "En fazla ön izleme boyutu (kalite ile depolama alanı dengesi için)",
     "Max memory for preview generation (MB)" : "Ön izleme için kullanılacak en fazla bellek (MB)",
