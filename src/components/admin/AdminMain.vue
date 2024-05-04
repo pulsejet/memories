@@ -127,9 +127,7 @@ export default defineComponent({
 
       try {
         this.loading++;
-        await axios.put(API.SYSTEM_CONFIG(key), {
-          value: value,
-        });
+        await axios.put(API.SYSTEM_CONFIG(key), { value });
 
         utils.setRenewingTimeout(this, '_refreshTimer', this.refreshStatus.bind(this), 500);
       } catch (err) {
