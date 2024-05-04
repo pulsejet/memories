@@ -1004,8 +1004,11 @@ export default defineComponent({
         //
         // These loops cannot be combined because processDay
         // creates circular references which cannot be stringified
+        //
+        // The day is cached regardless of whether it is empty.
+        // Empty days might be fetched e.g. on NativeX. In this case,
+        // empty caches will not be processed if the view is fresh.
         for (const [dayId, photos] of dayMap) {
-          if (photos.length === 0) continue;
           utils.cacheData(this.getDayUrl([dayId]), photos);
         }
 
