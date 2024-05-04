@@ -10,16 +10,26 @@ import { API } from '@services/API';
 
 import type { PsContent, PsEvent } from './types';
 
-import type Player from 'video.js/dist/types/player';
-import type { QualityLevelList } from 'videojs-contrib-quality-levels';
+import type _Player from 'video.js/dist/types/player';
+import type _qualityLevels from 'videojs-contrib-quality-levels';
+
+// The return type of the qualityLevels function is not right
+type qualityLevels = (...args: Parameters<typeof _qualityLevels>) => ReturnType<typeof _qualityLevels> &
+  {
+    height: number | null;
+    width: number | null;
+    label: string | null;
+    enabled: boolean;
+  }[];
+
+// Augment player with plugins
+type Player = _Player & {
+  qualityLevels?: qualityLevels;
+};
 
 type VideoContent = PsContent & {
   videoElement: HTMLVideoElement | null;
-  videojs:
-    | (Player & {
-        qualityLevels?: () => QualityLevelList;
-      })
-    | null;
+  videojs: Player | null;
   plyr: globalThis.Plyr | null;
 };
 
@@ -245,7 +255,7 @@ class VideoContentSetup {
       playWithDelay();
     });
 
-    content.videojs.qualityLevels?.()?.on('addqualitylevel', (e: any) => {
+    content.videojs.qualityLevels?.({})?.on('addqualitylevel', (e: any) => {
       if (e.qualityLevel?.label?.includes('max.m3u8')) {
         // This is the highest quality level
         // and guaranteed to be the last one
@@ -306,12 +316,12 @@ class VideoContentSetup {
     // Populate quality list
     const qualityNums: number[] = [];
     let hasOriginal = false;
-    const qualityList = content.videojs?.qualityLevels?.();
+    const qualityList = content.videojs?.qualityLevels?.({});
     if (qualityList?.length) {
       for (let i = 0; i < qualityList.length; i++) {
         const { width, height, label } = qualityList[i];
         qualityNums.push(Math.min(width!, height!));
-        hasOriginal ||= label?.includes('max.m3u8');
+        hasOriginal ||= label?.includes('max.m3u8') ?? false;
       }
     }
 
@@ -436,7 +446,7 @@ class VideoContentSetup {
     // Plyr from being constructed altogether.
     // https://github.com/videojs/http-streaming/pull/1439
     try {
-      const qualityList = content.videojs?.qualityLevels?.();
+      const qualityList = content.videojs?.qualityLevels?.({});
       if (!qualityList || !content.videojs) return;
 
       const isHLS = content.videojs.src(undefined)?.includes('m3u8');
@@ -467,7 +477,7 @@ class VideoContentSetup {
         qualityList[i].enabled =
           !quality || // auto
           pixels === quality || // exact match
-          (label?.includes('max.m3u8') && quality === -1); // max
+          ((label?.includes('max.m3u8') ?? false) && quality === -1); // max
       }
     } catch (e) {
       console.warn(e);
