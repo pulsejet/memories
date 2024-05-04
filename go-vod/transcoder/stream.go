@@ -531,8 +531,23 @@ func (s *Stream) transcode(startId int) {
 		"-start_number", fmt.Sprintf("%d", startId),
 		"-avoid_negative_ts", "disabled",
 		"-f", "hls",
+
+		// We force a keyframe at the start of each segment.
+		// By default, ffmpeg will split only on keyframes, so
+		// theoretically we should have perfectly sized chunks.
+		//
+		// However, the keyframes can be misaligned with the
+		// segment start even after forcing. To get around this,
+		// we chop the segments by time instead of keyframes.
+		//
+		// Technically this doesn't work with MSE (at least on Chrome),
+		// but video.js can work around this by fusing the
+		// segment with the previous GOP if no keyframe is found
+		// at the start of the segment.
+		// https://github.com/videojs/mux.js/pull/138
 		"-hls_flags", "split_by_time",
 		"-hls_time", fmt.Sprintf("%d", s.c.ChunkSize),
+
 		"-hls_segment_type", "mpegts",
 		"-hls_segment_filename", s.getTsPath(-1),
 	}...)
