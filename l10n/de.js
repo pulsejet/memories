@@ -24,7 +24,7 @@ OC.L10N.register(
     "Recognize" : "Erkennen",
     "Face Recognition" : "Gesichtserkennung",
     "Videos" : "Videos",
-    "A better photos experience awaits you" : "Ein besseres Fotoerlebnis erwartet dicht",
+    "A better photos experience awaits you" : "Ein besseres Fotoerlebnis erwartet dich",
     "Choose the root folder of your timeline to begin" : "Wähle den Quellordner deiner Zeitleiste um zu beginnen",
     "Continue to Memories" : "Weiter zu Memories",
     "Choose again" : "Erneut auswählen",
