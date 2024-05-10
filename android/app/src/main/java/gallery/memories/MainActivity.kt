@@ -75,6 +75,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        // Set fullscreen mode if in landscape
+        val orientation = resources.configuration.orientation
+        setFullscreen(orientation == Configuration.ORIENTATION_LANDSCAPE)
+
         // Restore last known look
         restoreTheme()
 
