@@ -356,6 +356,7 @@ OC.L10N.register(
     "Previous" : "Poprzednie",
     "Next" : "Następna",
     "Editing is currently disabled for Live Photos" : "Edytowanie Live Photo jest obecnie niedostępne",
+    "You are now logged in to the server!" : "Jesteś teraz zalogowany na serwerze!",
     "Finish" : "Koniec",
     "{name} binary exists and is executable." : "Plik binarny {name} istnieje i jest wykonywalny.",
     "{name} binary not found." : "Nie znaleziono pliku binarnego {name}.",
