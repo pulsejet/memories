@@ -91,27 +91,14 @@ class MainActivity : AppCompatActivity() {
         // Initialize handlers
         initializeIntentHandlers()
 
-        val url = savedInstanceState?.getString("currentUrl")
-
         // Load JavaScript
-        if (url != null) { // Restore previous state
-            initializeWebView(url)
-
-        } else {
-            initializeWebView()
-
-        }
+        initializeWebView()
 
         // Destroy video after 1 seconds (workaround for video not showing on first load)
         binding.videoView.postDelayed({
             binding.videoView.alpha = 1.0f
             binding.videoView.visibility = View.GONE
         }, 1000)
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString("currentUrl", binding.webview.url)
     }
 
     override fun onDestroy() {
@@ -186,7 +173,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
-    private fun initializeWebView(url: String? = null) {
+    private fun initializeWebView() {
         // Intercept local APIs
         binding.webview.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
@@ -290,15 +277,7 @@ class MainActivity : AppCompatActivity() {
 
         // Welcome page or actual app
         nativex.account.refreshCredentials()
-
-        val isApp: Boolean
-        // Load given URL if provided, should be from previous state, no error expected
-        if (url != null) {
-            binding.webview.loadUrl(url)
-            isApp = false
-        } else {
-            isApp = loadDefaultUrl()
-        }
+        val isApp = loadDefaultUrl()
 
         // Start version check if loaded account
         if (isApp) {
