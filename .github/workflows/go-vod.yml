@@ -58,7 +58,7 @@ jobs:
 
       - name: Get image label
         id: image_label
-        run: echo "label=${GITHUB_REF#refs/tags/go-vod/}" >> $GITHUB_OUTPUT
+        run: echo "label=${GITHUB_SHA}" >> $GITHUB_OUTPUT
 
       - name: Build container image
         uses: docker/build-push-action@v5
