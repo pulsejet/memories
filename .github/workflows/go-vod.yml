@@ -4,11 +4,13 @@ on:
   push:
     tags:
       - "go-vod/*"
+  workflow_dispatch:
 
 jobs:
   binary:
     name: Binary
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/go-vod/')
 
     container:
       image: golang:1.20-bullseye
