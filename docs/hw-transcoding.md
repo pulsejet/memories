@@ -46,6 +46,7 @@ NVIDIA GPUs support hardware transcoding using NVENC.
       go-vod:
         image: radialapps/go-vod
         restart: always
+        init: true
         depends_on:
           - server
         environment:

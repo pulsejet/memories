@@ -9,8 +9,9 @@ FROM scratch
 ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
 COPY --from=base / /
-COPY run.sh /go-vod.sh
+COPY entrypoint.sh /app/entrypoint.sh
+WORKDIR /app
 
 EXPOSE 47788
 
-ENTRYPOINT ["/go-vod.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]

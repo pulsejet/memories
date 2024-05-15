@@ -48,10 +48,10 @@ fi
 # fetch binary, sleeping 10 seconds between retries
 function fetch_binary {
     while true; do
-        rm -f go-vod
-        curl $EXTRA_CURL_ARGS -L -f -m 10 -s -o go-vod $URL
+        rm -f go-vod.bin
+        curl $EXTRA_CURL_ARGS -L -f -m 10 -s -o go-vod.bin $URL
         if [[ $? == 0 ]]; then
-            chmod +x go-vod
+            chmod +x go-vod.bin
             echo "Fetched $URL successfully!"
             break
         fi
@@ -65,7 +65,7 @@ function fetch_binary {
 # infinite loop
 while true; do
     fetch_binary
-    ./go-vod -version-monitor
+    ./go-vod.bin -version-monitor
     if [[ $? != 12 ]]; then
         break
     fi
