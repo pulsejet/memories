@@ -12,7 +12,7 @@ class Exif
 {
     private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'image/x-dcraw', 'video/MP2T']; // also update const.ts
     private const EXIFTOOL_TIMEOUT = 30000;
-    private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-n', '-json'];
+    private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-api', 'LargeFileSupport=1', '-n', '-json'];
 
     /** Opened instance of exiftool when running in command mode */
     /** @var null|resource */
