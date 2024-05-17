@@ -75,6 +75,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        // Set fullscreen mode if in landscape
+        val orientation = resources.configuration.orientation
+        setFullscreen(orientation == Configuration.ORIENTATION_LANDSCAPE)
+
         // Restore last known look
         restoreTheme()
 
@@ -99,9 +103,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.webview.removeAllViews();
+        binding.webview.removeAllViews()
         binding.coordinator.removeAllViews()
-        binding.webview.destroy();
+        binding.webview.destroy()
         nativex.destroy()
     }
 
@@ -132,7 +136,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+        if (event.action == KeyEvent.ACTION_DOWN) {
             when (keyCode) {
                 KeyEvent.KEYCODE_BACK -> {
                     if (binding.webview.canGoBack()) {
@@ -268,7 +272,7 @@ class MainActivity : AppCompatActivity() {
         if (BuildConfig.DEBUG) {
             Toast.makeText(this, "Debugging enabled", Toast.LENGTH_SHORT).show()
             binding.webview.clearCache(true)
-            WebView.setWebContentsDebuggingEnabled(true);
+            WebView.setWebContentsDebuggingEnabled(true)
         }
 
         // Welcome page or actual app
@@ -288,7 +292,7 @@ class MainActivity : AppCompatActivity() {
         if (host != null) return true
 
         // Load welcome page
-        binding.webview.loadUrl("file:///android_asset/welcome.html");
+        binding.webview.loadUrl("file:///android_asset/welcome.html")
         return false
     }
 
