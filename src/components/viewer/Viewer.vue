@@ -751,8 +751,11 @@ export default defineComponent({
 
             // If the anchor shifts to the left, we need to shift the index
             // by the same amount. This happens synchronously, so update first.
-            if (globals.anchor < this.globalAnchor) {
+            // Also check if the current position is invalid here
+            if (globals.anchor != this.globalAnchor) {
               goTo = this.photoswipe.currIndex - (this.globalAnchor - globals.anchor);
+            } else if (this.photoswipe.currIndex >= globals.count || this.photoswipe.currIndex < 0) {
+              goTo = this.photoswipe.currIndex; // equivalent to above
             }
 
             // Update the global anchor and count
@@ -762,12 +765,14 @@ export default defineComponent({
             // Go to the new index if needed
             if (goTo === null) {
               // no change
-            } else if (this.photoswipe.currIndex >= this.globalCount) {
-              this.photoswipe.goTo(this.globalCount - 1);
-            } else if (goTo < 0) {
-              this.photoswipe.goTo(0);
             } else {
+              // Change the index to the new one with clamp
+              goTo = utils.clamp(goTo, 0, globals.count - 1);
               this.photoswipe.goTo(goTo);
+
+              // Make sure the slide is current, since this call is deferred
+              // https://github.com/pulsejet/memories/issues/1194
+              this.photoswipe.refreshSlideContent(goTo);
             }
           },
           0,

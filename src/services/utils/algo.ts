@@ -116,6 +116,11 @@ export function isNumber<T>(num: T): boolean {
   return !isNaN(cast) && isFinite(cast);
 }
 
+/** Clamp number between two numbers */
+export function clamp(num: number, min: number, max: number): number {
+  return Math.min(Math.max(num, min), max);
+}
+
 /** Check if a value is truthy */
 export function truthy<T>(value: T): value is NonNullable<T> {
   return !!value;
