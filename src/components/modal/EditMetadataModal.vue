@@ -15,7 +15,7 @@
         <div class="title-text">
           {{ t('memories', 'Date / Time') }}
         </div>
-        <EditDate ref="editDate" :photos="photos" :disabled="processing" />
+        <EditDate ref="editDate" :photos="photos" :disabled="processing" @save="save" />
       </div>
 
       <div v-if="config.systemtags_enabled && sections.includes(2)">
