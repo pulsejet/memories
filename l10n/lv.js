@@ -10,7 +10,7 @@ OC.L10N.register(
     "Tags" : "Birkas",
     "Videos" : "Video",
     "Metadata" : "Metadati",
-    "Edit" : "Rediģēt",
+    "Edit" : "Labot",
     "Photos" : "Fotoattēli",
     "Cancel" : "Atcelt",
     "Delete" : "Dzēst",
