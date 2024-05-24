@@ -17,6 +17,7 @@ OC.L10N.register(
     "Upload" : "Uaslódáil",
     "Public link" : "Nasc poiblí",
     "Name" : "Ainm",
+    "Location" : "Suíomh",
     "Back" : "Ar ais",
     "Save" : "Sábháil",
     "Save changes" : "Sabháil na hathruithe",
