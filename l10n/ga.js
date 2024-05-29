@@ -28,6 +28,7 @@ OC.L10N.register(
     "Back" : "Ar ais",
     "Save" : "Sábháil",
     "Save changes" : "Sabháil na hathruithe",
+    "Year" : "Bliain",
     "Title" : "Teideal",
     "Description" : "Cur síos",
     "Label" : "Lipéad",
@@ -40,6 +41,7 @@ OC.L10N.register(
     "Refresh" : "Athnuaigh",
     "Oldest first" : "Is sine ar dtús",
     "Newest first" : "Is nua ar dtús",
+    "Upload files" : "Uaslódáil comhaid",
     "Home" : "Baile",
     "Unsaved changes" : "Athruithe gan sábháil",
     "Drop changes" : "Athruithe titim",
@@ -125,6 +127,7 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Tabhair faoi deara go bhfuil an t-achar barr roghnaithe níos ísle ná an t-athrú méide a cuireadh i bhfeidhm, rud a d'fhéadfadh a bheith ina chúis le laghdú cáilíochta",
     "Actual size (100%)" : "Méid iarbhír (100%)",
     "Fit size" : "Méid oiriúnach",
+    "Setup" : "Socrú",
     "Yes" : "Tá",
     "No" : "Níl"
 },

@@ -74,6 +74,7 @@ OC.L10N.register(
     "Day" : "日",
     "Hour" : "時",
     "Minute" : "分",
+    "Oldest" : "最古",
     "Title" : "タイトル",
     "Description" : "説明",
     "Label" : "ラベル",
