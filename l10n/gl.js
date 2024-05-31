@@ -63,7 +63,7 @@ OC.L10N.register(
     "Square grid mode" : "Modo de cuadrícula",
     "Show past photos on top of timeline" : "Amosar as fotos anteriores na parte superior da cronoloxía",
     "Stack RAW files with same name" : " Rimar os ficheiros RAW co mesmo nome",
-    "Autoplay Live Photos" : "Reproducir Live Photo",
+    "Autoplay Live Photos" : "Reproducir automáticamente Live Photo",
     "Show full file path in sidebar" : "Amosar a ruta completa do ficheiro na barra lateral",
     "High resolution image loading behavior" : "Comportamento na carga de imaxes de alta resolución",
     "Load high resolution image on zoom" : "Cargar a imaxe de alta resolución no zoom",

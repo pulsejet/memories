@@ -14,6 +14,7 @@ OC.L10N.register(
     "Delete" : "Scrios",
     "Share" : "Comhroinn",
     "Favorite" : "is fearr leat",
+    "View in folder" : "Amharc san fhillteán",
     "General" : "Ginearálta",
     "Account" : "Cuntas",
     "Close" : "Dún",
