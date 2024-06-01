@@ -8,6 +8,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
+import gallery.memories.network.AdvancedX509KeyManager
 import gallery.memories.service.AccountService
 import gallery.memories.service.DownloadService
 import gallery.memories.service.HttpService
@@ -180,6 +181,18 @@ class NativeX(private val mCtx: MainActivity) {
                 List(buidArray.length()) { buidArray.getString(it) },
                 value
             )
+        }
+    }
+
+    @JavascriptInterface
+    fun requestClientCertFor(url: String) {
+        Log.v(TAG, "requestClientCertFor: url=$url")
+        // TODO: URL sanity check! (no script, etc.)
+        // drop old certificate
+//        AdvancedX509KeyManager(mCtx).removeKeys(url)
+        AdvancedX509KeyManager(mCtx).removeAllKeys()
+        mCtx.runOnUiThread {
+            mCtx.binding.webview.loadUrl(url)
         }
     }
 
