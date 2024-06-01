@@ -29,7 +29,8 @@ class HttpService {
         val TAG = HttpService::class.java.simpleName
     }
 
-    private var client = OkHttpClient()
+    val client = OkHttpClient()
+
     private var authHeader: String? = null
     private var mBaseUrl: String? = null
     private var mTrustAll = false

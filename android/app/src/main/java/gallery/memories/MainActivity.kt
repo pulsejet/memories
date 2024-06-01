@@ -35,7 +35,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
@@ -365,9 +365,9 @@ class MainActivity : AppCompatActivity() {
                         // Add cookies from webview to data source
                         val cookies = CookieManager.getInstance().getCookie(uri.toString())
                         val httpDataSourceFactory =
-                            DefaultHttpDataSource.Factory()
+                            OkHttpDataSource.Factory(nativex.http.client)
                                 .setDefaultRequestProperties(mapOf("cookie" to cookies))
-                                .setAllowCrossProtocolRedirects(true)
+//                                .setAllowCrossProtocolRedirects(true)
                         val dataSourceFactory =
                             DefaultDataSource.Factory(this, httpDataSourceFactory)
 

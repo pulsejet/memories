@@ -48,6 +48,7 @@ dependencies {
     implementation "androidx.media3:media3-exoplayer:$media_version"
     implementation "androidx.media3:media3-ui:$media_version"
     implementation "androidx.media3:media3-exoplayer-hls:$media_version"
+    implementation "androidx.media3:media3-datasource-okhttp:$media_version"
 
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
