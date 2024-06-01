@@ -1,10 +1,12 @@
 package gallery.memories.service
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.net.Uri
 import android.util.Base64
 import android.webkit.CookieManager
 import android.webkit.WebView
+import gallery.memories.network.AdvancedX509KeyManager
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -12,11 +14,13 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.KeyStore
 import java.security.SecureRandom
 import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 
 
@@ -50,7 +54,7 @@ class HttpService {
      * @param url The URL to use
      * @param trustAll Whether to trust all certificates
      */
-    fun build(url: String?, trustAll: Boolean) {
+    fun build(context: Context, url: String?, trustAll: Boolean) {
         mBaseUrl = url
         mTrustAll = trustAll
         client = if (trustAll) {
@@ -60,8 +64,32 @@ class HttpService {
                 .hostnameVerifier { _, _ -> true }
                 .build()
         } else {
-            OkHttpClient()
+            val standardX509TrustManager = findStandardX509TrustManager()
+            if (standardX509TrustManager != null) {
+                val sslContext = SSLContext.getInstance("TLS")
+                val keyManager = AdvancedX509KeyManager(context)
+                sslContext.init(arrayOf(keyManager), arrayOf(standardX509TrustManager), null)
+                OkHttpClient.Builder()
+                    .sslSocketFactory(sslContext.socketFactory, standardX509TrustManager)
+                    .build()
+            } else {
+                // when there is no X509TrustManager available, we cannot perform TLS client authorization
+                OkHttpClient()
+            }
         }
+    }
+
+    private fun findStandardX509TrustManager() : X509TrustManager? {
+        val factory = TrustManagerFactory
+            .getInstance(TrustManagerFactory.getDefaultAlgorithm())
+        factory.init(null as KeyStore?)
+        val tms = factory.trustManagers
+        for (tm in tms) {
+            if (tm is X509TrustManager) {
+                return tm
+            }
+        }
+        return null
     }
 
     /**

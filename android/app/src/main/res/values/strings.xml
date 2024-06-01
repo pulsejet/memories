@@ -17,4 +17,10 @@
     <string name="err_no_ver">Your server does not have the minimum required version of Memories</string>
     <string name="err_logged_out">Logged out from server</string>
     <string name="err_no_describe">Failed to connect to server. Reset app data if this persists.</string>
+
+    <string name="notification_channel_name"></string>
+    <string name="notification_title_select_client_cert"></string>
+    <string name="notification_message_select_client_cert"></string>
+    <string name="title_no_client_cert"></string>
+    <string name="message_install_client_cert"></string>
 </resources>

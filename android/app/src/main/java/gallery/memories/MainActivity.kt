@@ -14,6 +14,7 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
+import android.webkit.ClientCertRequest
 import android.webkit.CookieManager
 import android.webkit.PermissionRequest
 import android.webkit.SslErrorHandler
@@ -39,6 +40,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import gallery.memories.databinding.ActivityMainBinding
+import gallery.memories.network.AdvancedX509KeyManager
 import java.util.concurrent.Executors
 
 
@@ -212,6 +214,38 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     nativex.toast("Failed to load due to SSL error: ${error?.primaryError}", true)
                     super.onReceivedSslError(view, handler, error)
+                }
+            }
+
+            /**
+             * Handle request for a TLS client certificate.
+             */
+            override fun onReceivedClientCertRequest(view: WebView?, request: ClientCertRequest?) {
+                if (view == null || request == null) {
+                    return
+                }
+                AdvancedX509KeyManager(view.context).handleWebViewClientCertRequest(request)
+            }
+
+            /**
+             * Handle HTTP errors.
+             *
+             * We might receive an HTTP status code 400 (bad request), which probably tells us that our certificate
+             * is not valid (anymore), e.g. because it expired. In that case we forget the selected client certificate,
+             * so it can be re-selected.
+             */
+            override fun onReceivedHttpError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                errorResponse: WebResourceResponse?
+            ) {
+                val errorCode = errorResponse?.statusCode ?: return
+                if (errorCode == 400) {
+                    Log.w(TAG, "WebView failed with error code $errorCode; remove key chain aliases")
+                    // chosen client certificate alias does not seem to work -> discard it
+                    val failingUrl = request?.url ?: return
+                    val context = view?.context ?: return
+                    AdvancedX509KeyManager(context).removeKeys(failingUrl)
                 }
             }
         }
