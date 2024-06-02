@@ -28,3 +28,6 @@ memories.tar.gz
 .cache/
 
 bin-ext/
+
+.devcontainer/config/
+.devcontainer/data/
