@@ -1,0 +1,73 @@
+---
+name: Bug report
+description: Create a report to help us improve
+labels: [needs triage]
+body:
+- type: markdown
+  attributes:
+    value: |
+      🛑 READ THE FOLLOWING BEFORE YOU CONTINUE! 🛑
+      All bug reports *must* follow the issue template below.
+
+       If it is a help request, you might want to try the [Discord community](https://discord.gg/7Dr9f9vNjJ) first.
+
+      Make the following items are true before filing a bug:
+
+       - You are using the latest version of the app.
+       - You tried and can replicate the bug.
+       - You have followed the [configuration steps](https://memories.gallery/config/).
+       - You have looked at the [troubleshooting](https://memories.gallery/troubleshooting/) documentation.
+       - You have searched the [open issues](https://github.com/pulsejet/memories/issues)
+- type: textarea
+  attributes:
+    label: Describe the bug
+    description: A clear and concise description of what the bug is.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Steps To Reproduce
+    description: Steps to reproduce the behavior.
+    placeholder: |
+      1. Go to '...'
+      2. Click on '....'
+      3. Scroll down to '....'
+      4. See error
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Platform
+    description: |
+      Example:
+      - OS: iOS
+      - Browser: Chrome, Safari
+      - Memories Version: 4.1.0
+      - Nextcloud Version: 25.0.6
+      - PHP Version: 8.1
+    value: |
+      - OS:
+      - Browser:
+      - Memories Version:
+      - Nextcloud Version:
+      - PHP Version:
+    render: markdown
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Screenshots
+    description: |
+      If applicable, add screenshots to help explain your problem.
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Additional context
+    description: |
+      Add any other context about the problem here.
+    value: |
+      - Any errors in the JS console?
+      - Any errors in the Nextcloud server logs?
+  validations:
+    required: false
