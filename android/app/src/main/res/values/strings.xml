@@ -18,9 +18,9 @@
     <string name="err_logged_out">Logged out from server</string>
     <string name="err_no_describe">Failed to connect to server. Reset app data if this persists.</string>
 
-    <string name="notification_channel_name"></string>
-    <string name="notification_title_select_client_cert"></string>
-    <string name="notification_message_select_client_cert"></string>
-    <string name="title_no_client_cert"></string>
-    <string name="message_install_client_cert"></string>
+    <string name="notification_channel_name">Connection</string>
+    <string name="notification_title_select_client_cert">Select client certificate</string>
+    <string name="notification_message_select_client_cert">Select client certificate for %1$s:%2$d</string>
+    <string name="title_no_client_cert">No client certificate was found</string>
+    <string name="message_install_client_cert">Do you want to install a TLS client certificate?</string>
 </resources>
