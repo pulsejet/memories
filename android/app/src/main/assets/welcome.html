@@ -136,9 +136,8 @@
       clientCertButton.addEventListener("click", async () => {
         try {
           const url = getUrl();
-          // go to URL to have AdvancedX509KeyManager handle certificate selection
-          // window.location.href = url;
-          // window.location.replace(url);
+          // go to URL to have WebView and AdvancedX509KeyManager
+          // handle certificate selection
           globalThis.nativex?.requestClientCertFor(url)
         } catch (e) {
         }
