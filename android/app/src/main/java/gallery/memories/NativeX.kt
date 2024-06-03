@@ -189,8 +189,9 @@ class NativeX(private val mCtx: MainActivity) {
         Log.v(TAG, "requestClientCertFor: url=$url")
         // TODO: URL sanity check! (no script, etc.)
         // drop old certificate
-//        AdvancedX509KeyManager(mCtx).removeKeys(url)
-        AdvancedX509KeyManager(mCtx).removeAllKeys()
+        AdvancedX509KeyManager(mCtx).removeKeys(url)
+        // navigate WebView to given URL to handle requests for
+        // TLS client certificate
         mCtx.runOnUiThread {
             mCtx.binding.webview.loadUrl(url)
         }
