@@ -177,6 +177,7 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Tabhair faoi deara go bhfuil an t-achar barr roghnaithe níos ísle ná an t-athrú méide a cuireadh i bhfeidhm, rud a d'fhéadfadh a bheith ina chúis le laghdú cáilíochta",
     "Actual size (100%)" : "Méid iarbhír (100%)",
     "Fit size" : "Méid oiriúnach",
+    "Auto" : "Auto",
     "Setup" : "Socrú",
     "Failed to create {albumName}." : "Theip ar {albumName} a chruthú.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Theip ar {currentAlbumName} a athainmniú go {newAlbumName}.",
