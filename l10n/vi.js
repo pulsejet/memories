@@ -66,6 +66,7 @@ OC.L10N.register(
     "Line" : "Hàng",
     "Text" : "Văn bản",
     "Size" : "Kích cỡ",
+    "Extension" : "Tiện ích",
     "Name is required." : "Tên là bắt buộc.",
     "Auto" : "Tự động",
     "Setup" : "Cài đặt",
