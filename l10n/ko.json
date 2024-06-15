@@ -401,7 +401,7 @@
     "Move left" : "왼쪽으로 이동",
     "Move right" : "오른쪽으로 이동",
     "Image saved successfully" : "이미지를 성공적으로 저장했습니다.",
-    "Error saving image: {error}" : "파일 저장 에러: {error}",
+    "Error saving image: {error}" : "파일 저장 오류: {error}",
     "Unsaved changes" : "저장하지 않은 변경 사항",
     "Drop changes" : "변경 사항 버리기",
     "Play Live Photo" : "라이브 사진 재생",
