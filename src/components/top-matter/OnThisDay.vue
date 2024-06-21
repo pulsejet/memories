@@ -124,6 +124,14 @@ export default defineComponent({
       let currentText = '';
 
       for (const photo of photos) {
+        // Skip hidden files
+        if (photo.ishidden) continue;
+        if (photo.basename?.startsWith('.')) continue;
+
+        // Skip videos for now (strange bugs)
+        if (photo.isvideo) continue;
+
+        // Get year and text for this photo
         const dateTaken = utils.dayIdToDate(photo.dayid);
         const year = dateTaken.getUTCFullYear();
         photo.key = `${photo.fileid}`;
