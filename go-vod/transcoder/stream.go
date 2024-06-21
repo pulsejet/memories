@@ -510,7 +510,6 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 	args = append(args, []string{
 		"-map", "0:a:0?",
 		"-c:a", "aac",
-		"-ac", "1",
 	}...)
 
 	return args
