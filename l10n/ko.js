@@ -383,6 +383,7 @@ OC.L10N.register(
     "Failed to attach tags to {file}" : "{file}에 태그 지정 실패",
     "Some files have not been uploaded." : "일부 파일이 업로드 되지 않았습니다.",
     "_Upload {n} file_::_Upload {n} files_" : ["{n}개 파일 업로드"],
+    "Creation date" : "생성일",
     "Oldest first" : "오래된순",
     "Ascending" : "오름차순",
     "Newest first" : "최신순",
