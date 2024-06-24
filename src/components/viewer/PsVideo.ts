@@ -1,5 +1,3 @@
-import PhotoSwipe from 'photoswipe';
-
 import { showError } from '@nextcloud/dialogs';
 
 import { translate as t } from '@services/l10n';
@@ -8,6 +6,7 @@ import * as utils from '@services/utils';
 import * as nativex from '@native';
 import { API } from '@services/API';
 
+import type PhotoSwipe from 'photoswipe';
 import type { PsContent, PsEvent } from './types';
 
 import type _Player from 'video.js/dist/types/player';

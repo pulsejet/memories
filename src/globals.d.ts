@@ -1,4 +1,4 @@
-import Router, { type Route } from 'vue-router';
+import type Router, { type Route } from 'vue-router';
 import type { ComponentPublicInstance } from 'vue';
 
 import type PlyrType from 'plyr';
