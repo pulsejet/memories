@@ -180,7 +180,8 @@ function defineRouteChecker(key: keyof GlobalRouteCheckers, condition: (route?: 
 
 // Build basic route checkers
 for (const [key, value] of Object.entries(routes)) {
-  defineRouteChecker(`routeIs${<keyof typeof routes>key}`, (route) => route?.name === value.name);
+  const key_ = key as RouteId;
+  defineRouteChecker(`routeIs${key_}`, (route) => route?.name === value.name);
 }
 
 // Extra route checkers
