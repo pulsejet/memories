@@ -12,6 +12,7 @@ export const constants = Object.freeze({
   FLAG_IS_LOCAL: 1 << 6,
 
   FACE_NULL: 'NULL',
+  PLACES_NULL: 'NULL',
 
   MIME_RAW: 'image/x-dcraw',
   FORBIDDEN_EDIT_MIMES: ['image/bmp', 'image/x-dcraw', 'video/MP2T'], // Exif.php

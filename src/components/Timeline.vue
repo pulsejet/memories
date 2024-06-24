@@ -661,12 +661,14 @@ export default defineComponent({
 
       // Places
       if (this.routeIsPlaces) {
-        if (!name || !name.includes('-')) {
+        if (name?.includes('-')) {
+          const id = name.split('-', 1)[0];
+          set(DaysFilterType.PLACE, id);
+        } else if (name === this.c.PLACES_NULL) {
+          set(DaysFilterType.PLACE, this.c.PLACES_NULL);
+        } else {
           throw new Error('Invalid place route');
         }
-
-        const id = name.split('-', 1)[0];
-        set(DaysFilterType.PLACE, id);
       }
 
       // Tags

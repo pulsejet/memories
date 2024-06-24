@@ -29,14 +29,17 @@ export default defineComponent({
 
   methods: {
     async refresh(): Promise<boolean> {
-      // Clear folders
+      // Clear subplaces
       this.places = [];
+
+      // Skip if unidentified location view
+      if (this.routeIsPlacesUnassigned) return false;
 
       // Get ID of place from URL
       const placeId = Number(this.$route.params.name?.split('-')[0]) || -1;
       const url = API.Q(API.PLACE_LIST(), { inside: placeId });
 
-      // Make API call to get subfolders
+      // Make API call to get subplaces
       try {
         this.places = (await axios.get<ICluster[]>(url)).data;
       } catch (e) {
@@ -49,7 +52,7 @@ export default defineComponent({
 
     route(place: ICluster) {
       return {
-        name: 'places',
+        name: _m.routes.Places.name,
         params: {
           name: place.cluster_id + '-' + place.name,
         },

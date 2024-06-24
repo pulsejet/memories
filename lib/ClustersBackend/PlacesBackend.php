@@ -54,11 +54,21 @@ class PlacesBackend extends Backend
 
     public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
     {
-        $locationId = (int) $this->request->getParam('places');
+        $locId = $this->request->getParam('places');
+
+        // Files that have no GPS coordinates set
+        if ('NULL' === $locId) {
+            $query->andWhere($query->expr()->orX(
+                $query->expr()->isNull('m.lat'),
+                $query->expr()->isNull('m.lon'),
+            ));
+
+            return;
+        }
 
         $query->innerJoin('m', 'memories_places', 'mp', $query->expr()->andX(
             $query->expr()->eq('mp.fileid', 'm.fileid'),
-            $query->expr()->eq('mp.osm_id', $query->createNamedParameter($locationId)),
+            $query->expr()->eq('mp.osm_id', $query->createNamedParameter((int) $locId)),
         ));
     }
 

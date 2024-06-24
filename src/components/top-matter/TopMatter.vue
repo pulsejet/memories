@@ -17,6 +17,7 @@ import FolderTopMatter from './FolderTopMatter.vue';
 import ClusterTopMatter from './ClusterTopMatter.vue';
 import FaceTopMatter from './FaceTopMatter.vue';
 import AlbumTopMatter from './AlbumTopMatter.vue';
+import PlacesTopMatter from './PlacesTopMatter.vue';
 
 import * as utils from '@services/utils';
 
@@ -50,8 +51,9 @@ export default defineComponent({
           return this.initstate.shareType === 'folder' ? FolderTopMatter : null;
         case _m.routes.Albums.name:
           return AlbumTopMatter;
-        case _m.routes.Tags.name:
         case _m.routes.Places.name:
+          return PlacesTopMatter;
+        case _m.routes.Tags.name:
           return ClusterTopMatter;
         case _m.routes.Recognize.name:
         case _m.routes.FaceRecognition.name:

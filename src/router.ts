@@ -165,6 +165,7 @@ export type GlobalRouteCheckers = {
   routeIsPublic: boolean;
   routeIsPeople: boolean;
   routeIsRecognizeUnassigned: boolean;
+  routeIsPlacesUnassigned: boolean;
   routeIsCluster: boolean;
 };
 
@@ -190,6 +191,10 @@ defineRouteChecker('routeIsPeople', (route) =>
 defineRouteChecker(
   'routeIsRecognizeUnassigned',
   (route) => route?.name === routes.Recognize.name && route!.params.name === c.FACE_NULL,
+);
+defineRouteChecker(
+  'routeIsPlacesUnassigned',
+  (route) => route?.name === routes.Places.name && route!.params.name === c.PLACES_NULL,
 );
 defineRouteChecker('routeIsCluster', (route) =>
   [
