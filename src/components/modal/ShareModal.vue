@@ -252,7 +252,7 @@ export default defineComponent({
       await this.l(async () => {
         // Create album using WebDAV
         try {
-          await dav.createAlbum(name);
+          await dav.createAlbum(name, { rethrow: true });
         } catch (e) {
           showError(this.t('memories', 'Failed to create album for public link'));
           return null;

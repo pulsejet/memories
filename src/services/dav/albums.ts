@@ -124,10 +124,11 @@ export async function* removeFromAlbum(user: string, name: string, photos: IPhot
 /**
  * Create an album.
  */
-export async function createAlbum(albumName: string) {
+export async function createAlbum(albumName: string, opts?: { rethrow: boolean }) {
   try {
     await client.createDirectory(`/photos/${utils.uid}/albums/${albumName}`);
   } catch (error) {
+    if (opts?.rethrow) throw error;
     console.error(error);
     showError(t('memories', 'Failed to create {albumName}.', { albumName }));
   }
