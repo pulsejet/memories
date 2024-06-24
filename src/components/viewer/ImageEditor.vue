@@ -25,11 +25,6 @@ import * as utils from '@services/utils';
 
 import type { IImageInfo, IPhoto } from '@typings';
 
-// Crop preset icons
-import LandscapeIcon from '@scaleflex/icons/landscape';
-import PortraitIcon from '@scaleflex/icons/portrait';
-import SquareIcon from '@scaleflex/icons/square';
-
 let TABS: any, TOOLS: any;
 type FilerobotImageEditor = import('filerobot-image-editor').default;
 let FilerobotImageEditor: typeof import('filerobot-image-editor').default;
@@ -97,29 +92,6 @@ export default defineComponent({
         Rotate: {
           angle: 90,
           componentType: 'buttons',
-        },
-
-        Crop: {
-          presetsItems: [
-            {
-              titleKey: 'landscape',
-              descriptionKey: '4:3',
-              ratio: 4 / 3,
-              icon: LandscapeIcon,
-            },
-            {
-              titleKey: 'portrait',
-              descriptionKey: '3:4',
-              ratio: 3 / 4,
-              icon: PortraitIcon,
-            },
-            {
-              titleKey: 'square',
-              descriptionKey: '1:1',
-              ratio: 1,
-              icon: SquareIcon,
-            },
-          ],
         },
 
         // Translations

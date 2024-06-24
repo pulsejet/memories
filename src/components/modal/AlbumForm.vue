@@ -164,7 +164,7 @@ export default defineComponent({
      * @return Whether sharing is enabled.
      */
     sharingEnabled(): boolean {
-      return window.OC.Share !== undefined;
+      return true; // todo
     },
   },
 
