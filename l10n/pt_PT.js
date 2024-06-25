@@ -8,6 +8,7 @@ OC.L10N.register(
     "Explore" : "Explorar",
     "Folders" : "Pastas",
     "Favorites" : "Favoritos",
+    "Albums" : "Álbuns",
     "Archive" : "Arquivar",
     "Tags" : "Etiquetas",
     "Recognize" : "Reconhecer",

@@ -422,6 +422,8 @@ OC.L10N.register(
     "Home" : "الرئيسية",
     "Move left" : "نقُل لجهة اليسار",
     "Move right" : "نقل لجهة اليمين",
+    "Files without location" : "ملفات بدون موقع",
+    "Unidentified location" : "موقع غير معروف",
     "Image saved successfully" : "تم حفظ الصورة بنجاح",
     "Error saving image: {error}" : "خطأ في حفظ الصورة: {error}",
     "Unsaved changes" : "تغييرات لم يتم حفظها",

@@ -422,6 +422,8 @@ OC.L10N.register(
     "Home" : "Baile",
     "Move left" : "Bog ar chlé",
     "Move right" : "Bog ar dheis",
+    "Files without location" : "Comhaid gan suíomh",
+    "Unidentified location" : "Suíomh anaithnid",
     "Image saved successfully" : "Sábháladh an íomhá go rathúil",
     "Error saving image: {error}" : "Earráid agus íomhá á sábháil: {error}",
     "Unsaved changes" : "Athruithe gan sábháil",
