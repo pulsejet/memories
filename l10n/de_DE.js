@@ -422,7 +422,7 @@ OC.L10N.register(
     "Home" : "Startseite",
     "Move left" : "Nach links verschieben",
     "Move right" : "Nach rechts verschieben",
-    "Files without location" : "Dateien ohne Speicherort",
+    "Files without location" : "Dateien ohne Standort",
     "Unidentified location" : "Unbekannter Standort",
     "Image saved successfully" : "Bild gespeichert",
     "Error saving image: {error}" : "Fehler beim Speichern des Bildes: {error}",

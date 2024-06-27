@@ -422,6 +422,8 @@ OC.L10N.register(
     "Home" : "主頁",
     "Move left" : "向左移動",
     "Move right" : "向右移動",
+    "Files without location" : "沒有位置的檔案",
+    "Unidentified location" : "未知位置",
     "Image saved successfully" : "圖像保存成功",
     "Error saving image: {error}" : "儲存圖像時發生錯誤：{error}",
     "Unsaved changes" : "未儲存變更",

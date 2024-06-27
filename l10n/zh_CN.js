@@ -422,6 +422,8 @@ OC.L10N.register(
     "Home" : "家",
     "Move left" : "向左移动",
     "Move right" : "向右移动",
+    "Files without location" : "无位置信息的文件",
+    "Unidentified location" : "无法识别的位置",
     "Image saved successfully" : "图片保存成功",
     "Error saving image: {error}" : "保存图像失败：{error}",
     "Unsaved changes" : "未保存的更改",

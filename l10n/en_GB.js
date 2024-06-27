@@ -422,6 +422,8 @@ OC.L10N.register(
     "Home" : "Home",
     "Move left" : "Move left",
     "Move right" : "Move right",
+    "Files without location" : "Files without location",
+    "Unidentified location" : "Unidentified location",
     "Image saved successfully" : "Image saved successfully",
     "Error saving image: {error}" : "Error saving image: {error}",
     "Unsaved changes" : "Unsaved changes",
