@@ -422,6 +422,8 @@ OC.L10N.register(
     "Home" : "Почетна",
     "Move left" : "Помери улево",
     "Move right" : "Помери удесно",
+    "Files without location" : "Фајлови без локације",
+    "Unidentified location" : "Неидентификована локација",
     "Image saved successfully" : "Слика је успешно сачувана",
     "Error saving image: {error}" : "Грешка прикиком чувања слике: {error}",
     "Unsaved changes" : "Несачуване измене",
