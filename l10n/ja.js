@@ -106,6 +106,7 @@ OC.L10N.register(
     "Merge with different person" : "別人と統合",
     "Share folder" : "フォルダーを共有",
     "Upload files" : "アップロードファイル",
+    "Home" : "ホーム",
     "Unsaved changes" : "保存していない変更点",
     "Drop changes" : "変更を破棄する",
     "Previous" : "前へ",
