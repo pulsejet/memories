@@ -53,7 +53,7 @@ OC.L10N.register(
     "Rotate / Flip" : "Rotar / Voltear",
     "View in folder" : "Ver no cartafol",
     "Set as cover image" : "Definir como imaxe de portada",
-    "Move to folder" : "Move to folder",
+    "Move to folder" : "Mover ao cartafol",
     "Add to album" : "Engadir ao álbum",
     "Move to person" : "Mover a persona",
     "Remove from person" : "Retirar da persoa",
