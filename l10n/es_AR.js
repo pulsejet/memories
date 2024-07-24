@@ -50,6 +50,7 @@ OC.L10N.register(
     "Refresh" : "Recargar",
     "Password protected" : "Protegido con contraseña",
     "Read only" : "Solo lectura",
+    "Link copied to clipboard" : "Enlace copiado al portapapeles",
     "Oldest first" : "Los más viejos primero",
     "Newest first" : "El más reciente primero",
     "Upload files" : "Subiendo archivos",
