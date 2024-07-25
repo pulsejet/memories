@@ -70,6 +70,7 @@ OC.L10N.register(
     "Name is required." : "Tên là bắt buộc.",
     "Auto" : "Tự động",
     "Setup" : "Cài đặt",
-    "Yes" : "Có"
+    "Yes" : "Có",
+    "No" : "Không"
 },
 "nplurals=1; plural=0;");
