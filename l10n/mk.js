@@ -85,6 +85,7 @@ OC.L10N.register(
     "Refresh" : "Освежи",
     "Password protected" : "Заштитено со лозинка",
     "Read only" : "Само читај",
+    "Link copied to clipboard" : "Линкот е копиран во клипборд",
     "Oldest first" : "Старите прво",
     "Newest first" : "Новите прво",
     "Merge with different person" : "Спој со друга личност",
