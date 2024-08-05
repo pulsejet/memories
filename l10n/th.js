@@ -66,6 +66,8 @@ OC.L10N.register(
     "Size" : "ขนาด",
     "Position" : "ตำแหน่ง",
     "Setup" : "ตั้งค่า",
+    "Memories from past years will appear here" : "ความทรงจำของปีที่ผ่านมาจะปรากฎอยู่ตรงนี้",
+    "Your videos will appear here" : "วิดีโอของคุณจะปรากฎอยู่ตรงนี้",
     "Yes" : "ใช่",
     "No" : "ไม่ตกลง"
 },
