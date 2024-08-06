@@ -10,6 +10,7 @@ OC.L10N.register(
     "Albums" : "อัลบั้ม",
     "Archive" : "เก็บถาวร",
     "On this day" : "วันนี้ในอดีต",
+    "Places" : "สถานที่",
     "Tags" : "แท็ก",
     "Videos" : "วิดีโอ",
     "Edit" : "แก้ไข",
