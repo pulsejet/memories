@@ -46,6 +46,8 @@ declare module '@typings' {
     last_added_photo_etag: string;
     /** Record ID of the latest update */
     update_id: number;
+    /** Album is shared with other users */
+    shared: boolean;
   }
 
   export interface IFace extends ICluster {
