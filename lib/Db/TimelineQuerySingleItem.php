@@ -45,7 +45,7 @@ trait TimelineQuerySingleItem
     public function getInfoById(int $id, bool $basic): array
     {
         $qb = $this->connection->getQueryBuilder();
-        $qb->select('fileid', 'dayid', 'datetaken', 'w', 'h')
+        $qb->select('fileid', 'dayid', 'datetaken', 'w', 'h', 'uid')
             ->from('memories')
             ->where($qb->expr()->eq('fileid', $qb->createNamedParameter($id, \PDO::PARAM_INT)))
         ;
@@ -63,6 +63,7 @@ trait TimelineQuerySingleItem
             'w' => (int) $row['w'],
             'h' => (int) $row['h'],
             'datetaken' => Util::sqlUtcToTimestamp($row['datetaken']),
+            'uid' => $row['uid'],
         ];
 
         // Return if only basic info is needed

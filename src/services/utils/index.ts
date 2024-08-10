@@ -6,3 +6,4 @@ export * from './helpers';
 export * from './dialog';
 export * from './event-bus';
 export * from './fragment';
+export * from './user';

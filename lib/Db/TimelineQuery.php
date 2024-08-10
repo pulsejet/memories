@@ -25,6 +25,7 @@ class TimelineQuery
         'f.etag', 'f.name AS basename',
         'f.size', 'm.epoch', // auid
         'mimetypes.mimetype',
+        'm.uid',
     ];
 
     protected ?TimelineRoot $_root = null; // cache

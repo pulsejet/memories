@@ -7,6 +7,7 @@ namespace OCA\Memories\Db;
 use OCA\Memories\ClustersBackend;
 use OCA\Memories\Exif;
 use OCA\Memories\Settings\SystemConfig;
+use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -313,6 +314,10 @@ trait TimelineQueryDays
         }
         if (!$row['liveid']) {
             unset($row['liveid']);
+        }
+
+        if ($row['uid'] === Util::getUID()) {
+            unset($row['uid']);
         }
 
         // Favorite field, may not be present

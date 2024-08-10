@@ -99,6 +99,8 @@ declare module '@typings' {
 
     /** Stacked RAW photos */
     stackraw?: IPhoto[];
+
+    uid?: string;
   };
 
   export interface IImageInfo {
@@ -125,6 +127,8 @@ declare module '@typings' {
       recognize?: IFace[];
       facerecognition?: IFace[];
     };
+
+    uid?: string;
   }
 
   export interface IExif {
