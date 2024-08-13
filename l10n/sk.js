@@ -246,7 +246,7 @@ OC.L10N.register(
     "No collaborators available" : "Nie sú dostupný žiadny spolupracovníci",
     "Remove {collaboratorLabel} from the collaborators list" : "Odobrať {collaboratorLabel} zo zoznamu spolupracovníkov",
     "Copy the public link" : "Kopírovať verejný odkaz",
-    "Public link copied!" : "Verejný odkaz skopírovaný!",
+    "Public link copied!" : "Verejný odkaz bol skopírovaný!",
     "Copy public link" : "Kopírovať verejný odkaz",
     "Delete the public link" : "Zmazať verejný odkaz",
     "Share via public link" : "Zdieľať ako verejný odkaz",
