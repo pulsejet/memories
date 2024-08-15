@@ -69,6 +69,8 @@ NVIDIA GPUs support hardware transcoding using NVENC.
     !!! tip "Setup for NVENC"
         If you want to use NVENC instead of VA-API, uncomment the `runtime` line and remove the `devices` section above. You will need to install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) on your host. You may also need to switch to the CUDA scaler in the Memories admin panel.
 
+        If you are running on Windows WSL 2, you can choose to use Docker's native support by adding resources to the container using [`docker run`](https://docs.docker.com/desktop/gpu/) or in [`docker-compose`](https://docs.docker.com/compose/gpu-support/). Alternatively, you can choose to [install the NVIDIA Container Toolkit meta-version in WSL](https://docs.nvidia.com/cuda/wsl-user-guide/index.html#cuda-support-for-wsl-2), then use `runtime: nvidia` to enable GPU support inside the container.
+
 1. You can now configure the go-vod connect address in the Memories admin panel to point to the external container. go-vod uses port `47788` by default, so in our example the **connection address** would be set to **`go-vod:47788`**.
 
 1. Finally, turn on **enable external transcoder** in the admin panel. This will initiate a test of the transcoder and show the result.
