@@ -446,6 +446,8 @@ OC.L10N.register(
     "Create an album to get started" : "Create an album to get started",
     "Archive photos you don't want to see in your timeline" : "Archive photos you don't want to see in your timeline",
     "Tag photos to find them easily" : "Tag photos to find them easily",
-    "Places you have been to will appear here" : "Places you have been to will appear here"
+    "Places you have been to will appear here" : "Places you have been to will appear here",
+    "Yes" : "بله",
+    "No" : "خیر"
 },
 "nplurals=2; plural=(n > 1);");
