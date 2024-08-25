@@ -228,7 +228,7 @@ OC.L10N.register(
     "VA-API device ({dev}) not found" : "VA-API aygıtı ({dev}) bulunamadı",
     "VA-API device ({dev}) has incorrect permissions" : "VA-API aygıtının ({dev}) izinleri doğru değil",
     "VA-API device status: {status}" : "VA-API aygıtının durumu: {status}",
-    "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "Anılar, go-vod kod çözücüsünü kullanır. Go-vod dışarıdan çalıştırılabilir (örneğin, donanım hızlandırması için ayrı bir Docker kapsayıcısında) ya da yerleşik kod çözücü kullanılabilir. Bir dış kod çözücü kullanmak için aşağıdaki seçeneği etkinleştirin ve belgelerdeki yönergeleri izleyin:",
+    "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "Anılar, go-vod kod çözücüsünü kullanır. Go-vod dışarıdan çalıştırılabilir (örneğin, donanım hızlandırması için ayrı bir Docker kapsayıcısında) ya da yerleşik kod çözücü kullanılabilir. Bir dış kod çözücü kullanmak için aşağıdaki seçeneği etkinleştirin ve belgelerdeki yönergeyi izleyin:",
     "Enable external transcoder" : "Dış dönüştürücü kullanılsın",
     "Binary path (local only)" : "Dosya yolu (yalnızca yerel)",
     "Bind address (local only)" : "Bağlanma adresi (yalnızca yerel)",
