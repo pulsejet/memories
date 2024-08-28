@@ -410,7 +410,7 @@ OC.L10N.register(
     "Share album" : "Compartir álbum",
     "Download album" : "Descargar album",
     "Remove album" : "Retirar o álbum",
-    "Nothing to show here" : "Non hai nada que amosar aquí",
+    "Nothing to show here" : "Non hai ren que amosar aquí",
     "Unassigned faces" : "Facianas sen asignar",
     "Merge with different person" : "Combinar cunha persoa diferente",
     "Mark person in preview" : "Marcar persoa na vista previa",
