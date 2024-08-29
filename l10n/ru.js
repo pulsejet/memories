@@ -280,6 +280,7 @@ OC.L10N.register(
     "Original File" : "Исходный файл",
     "Public Link" : "Общедоступная ссылка",
     "Cannot share this type of data" : "Невозможно опубликовать такой тип данных",
+    "Choose the destination folder for the upload" : "Выберите папку назначения для загрузки",
     "Last updated" : "Последнее обновление:",
     "Creation date" : "Дата создания",
     "Oldest first" : "Самый старый первый",

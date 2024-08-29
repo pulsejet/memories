@@ -164,7 +164,7 @@
     "Clear all existing index tables:" : "Limpar todas as táboas de índice existentes:",
     "Media Indexing" : "Indexación de medios",
     "HTTPS is enabled" : "HTTPS está activado",
-    "You are accessing this page over an insecure context. Several browser APIs are not available, which will make Memories very slow. Enable HTTPS on your server to improve performance." : "Está a acceder a esta páxina nun contexto non seguro. Varias API do navegador non están dispoñíbeis, o que fará que Lembranzas sexa moi lento. Active HTTPS no seu servidor para mellorar o rendemento.",
+    "You are accessing this page over an insecure context. Several browser APIs are not available, which will make Memories very slow. Enable HTTPS on your server to improve performance." : "Está a acceder a esta páxina nun contexto inseguro. Varias API do navegador non están dispoñíbeis, o que fará que Lembranzas sexa moi lento. Active HTTPS no seu servidor para mellorar o rendemento.",
     "HTTP/2 or HTTP/3 is enabled" : "HTTP/2 ou HTTP/3 está activado",
     "HTTP/2 or HTTP/3 is strongly recommended ({httpVer} detected)" : "Recoméndase encarecidamente HTTP/2 ou HTTP/3 (detectouse {httpVer})",
     "Database triggers are set up correctly." : "Os disparadores da base de datos están definidos correctamente.",
