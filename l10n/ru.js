@@ -267,6 +267,7 @@ OC.L10N.register(
     "Remove" : "Удалить",
     "Add Path" : "Добавть путь",
     "You cannot share the root folder" : "Корневая папка не может быть опубликована",
+    "Public link shares are available to people outside Nextcloud." : "Общие ссылки доступны для пользователей за пределами Nextcloud.",
     "Click a link to copy to clipboard." : "Нажмите, чтобы скопировать ссылку.",
     "Share link" : "Поделиться ссылкой",
     "Create Link" : "Создать ссылку",
