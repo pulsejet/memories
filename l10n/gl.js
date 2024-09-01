@@ -370,7 +370,7 @@ OC.L10N.register(
     "Expires" : "Caduca",
     "Editable" : "Editábel",
     "Read only" : "Só lectura",
-    "Link copied to clipboard" : "A ligazón foi copiada no portapapeis.",
+    "Link copied to clipboard" : "A ligazón foi copiada no portapapeis",
     "Failed to copy link to clipboard" : "Produciuse un fallo ao copiar a ligazón no portapapeis:",
     "Reduced Size" : "Tamaño reducido",
     "Share in lower quality (small file size)" : "Compartir en baixa calidade (menor tamaño de ficheiro)",
