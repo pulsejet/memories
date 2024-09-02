@@ -34,7 +34,7 @@ OC.L10N.register(
     "Choose the root of your timeline" : "Escoller a raíz da súa cronoloxía",
     "The selected folder does not seem to be valid. Try again." : "O cartafol seleccionado non parece ser válido. Ténteo de novo.",
     "No photos were found in the selected folder." : "Non se atopou ningunha foto no cartafol seleccionado.",
-    "This can happen because your media is still indexing." : "Isto pode ocorrer porque os seus medios aínda se están a indexar.",
+    "This can happen because your media is still indexing." : "Isto pode ocorrer porque os seus medios aínda se están a indexaren.",
     "Visit the admin panel to make sure Memories is configured correctly." : "Vexa o panel de administración para asegurarse de que Lembranzas está configurado correctamente.",
     "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["Atopouse {n} elemento en {path}","Atopáronse {n} elementos en {path}"],
     "Metadata" : "Metadatos",
