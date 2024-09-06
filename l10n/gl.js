@@ -320,7 +320,7 @@ OC.L10N.register(
     "Geolocation" : "Xeolocalización",
     "Orientation (EXIF)" : "Orientación (EXIF)",
     "Cannot edit {name} of type {type}" : "Non é posíbel editar {name} do tipo {type}",
-    "Cannot edit rotation on videos ({name})" : "Non é posíbel pode editar a rotación nos vídeos ({name})",
+    "Cannot edit rotation on videos ({name})" : "Non é posíbel editar a rotación nos vídeos ({name})",
     "Cannot edit rotation on Live Photos ({name})" : "Non é posíbel editar a rotación en Live Photos ({name})",
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Algúns elementos seleccionados teñen ficheiros RAW rimados.\nOs ficheiros RAW non se editarán.",
     "Missing date metadata" : "Faltan os metadatos da data",
