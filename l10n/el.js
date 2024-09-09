@@ -71,6 +71,7 @@ OC.L10N.register(
     "Copyright" : "Δικαιώματα",
     "Empty" : "Κενό",
     "Reset" : "Επαναφορά",
+    "Date / Time" : "Ημερομηνία / Ωρα",
     "Geolocation" : "Γεωεντοπισμός",
     "Remove person" : "Αφαίρεση ατόμου",
     "Rename person" : "Μετονομασία ατόμου",
