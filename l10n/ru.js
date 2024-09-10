@@ -260,6 +260,8 @@ OC.L10N.register(
     "Update" : "Обновить",
     "Failed to rename {oldName} to {name}." : "Не удалось переименовать «{oldName}» в «{name}».",
     "Loading …" : "Загрузка …",
+    "Create a new face with this name?" : " Создать новое лицо с таким именем?",
+    "Create new face" : "Создать новое лицо",
     "Too many failures, aborting" : "Произошло множество ошибок, действие прервано",
     "Failed to move {name}." : "Не удалось переместить «{name}».",
     "Move" : "Переместить",
