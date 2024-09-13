@@ -3,7 +3,7 @@
     <h2>{{ $options.title }}</h2>
 
     <p>
-      <NcNoteCard :type="isHttps ? 'success' : 'warning'">
+      <NcNoteCard :type="isHttps ? 'success' : 'error'">
         {{
           isHttps
             ? t('memories', 'HTTPS is enabled')
@@ -17,10 +17,25 @@
         {{
           httpVerOk
             ? t('memories', 'HTTP/2 or HTTP/3 is enabled')
-            : t('memories', 'HTTP/2 or HTTP/3 is strongly recommended ({httpVer} detected)', {
-                httpVer,
-              })
+            : t('memories', 'HTTP/2 or HTTP/3 is strongly recommended ({httpVer} detected)', { httpVer })
         }}
+      </NcNoteCard>
+    </p>
+
+    <p>
+      <NcNoteCard :type="config['memories.db.triggers.fcu'] ? 'success' : 'error'">
+        {{
+          config['memories.db.triggers.fcu']
+            ? t('memories', 'Database triggers are set up correctly.')
+            : t('memories', 'Database triggers not set up; {m} mode in use.', { m: 'trigger compatibility' })
+        }}
+        <br />
+        <template v-if="!config['memories.db.triggers.fcu']">
+          {{ t('memories', 'See the documentation for information on how to resolve this.') }}
+          <a target="_blank" href="https://memories.gallery/troubleshooting/#trigger-compatibility-mode">{{
+            t('memories', 'External Link')
+          }}</a>
+        </template>
       </NcNoteCard>
     </p>
   </div>

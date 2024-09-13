@@ -1,6 +1,6 @@
 <template>
   <SwipeRefresh
-    class="container no-user-select"
+    class="memories-timeline container no-user-select"
     ref="container"
     match=".recycler"
     :refresh="softRefreshSync"
@@ -15,6 +15,14 @@
 
     <!-- No content found and nothing is loading -->
     <EmptyContent v-if="showEmpty" />
+
+    <!-- Top overlay showing date -->
+    <TimelineTopOverlay
+      ref="topOverlay"
+      :heads="heads"
+      :container="refs.container?.$el"
+      :recycler="refs.recycler?.$el"
+    />
 
     <!-- Main recycler view for rows -->
     <RecycleScroller
@@ -31,7 +39,6 @@
       type-field="type"
       :updateInterval="100"
       @update="scrollChangeRecycler"
-      @resize="handleResizeWithDelay"
     >
       <template #before>
         <!-- Dynamic top matter, e.g. album or view name -->
@@ -45,12 +52,7 @@
       </template>
 
       <template v-slot="{ item, index }">
-        <RowHead
-          v-if="item.type === 0"
-          :item="item"
-          :monthView="isMonthView"
-          @click="refs.selectionManager.selectHead(item)"
-        />
+        <RowHead v-if="item.type === 0" :item="item" @click="refs.selectionManager.selectHead(item)" />
 
         <template v-else>
           <Photo
@@ -83,7 +85,10 @@
       :recycler="refs.recycler"
       :recyclerBefore="refs.recyclerBefore"
       @interactend="loadScrollView"
-      @scroll="currentScroll = $event.current"
+      @scroll="
+        currentScroll = $event.current;
+        refs.topOverlay?.refresh();
+      "
     />
 
     <SelectionManager
@@ -92,6 +97,7 @@
       :rows="list"
       :isreverse="isMonthView"
       :recycler="refs.recycler?.$el"
+      :scrollerManager="refs.scrollerManager"
       @updateLoading="updateLoading"
     />
   </SwipeRefresh>
@@ -117,6 +123,7 @@ import SwipeRefresh from './SwipeRefresh.vue';
 import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import TopMatter from '@components/top-matter/TopMatter.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
+import TimelineTopOverlay from '@components/top-matter/TimelineTopOverlay.vue';
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
@@ -140,6 +147,7 @@ export default defineComponent({
     EmptyContent,
     TopMatter,
     DynamicTopMatter,
+    TimelineTopOverlay,
     SelectionManager,
     ScrollerManager,
     Viewer,
@@ -179,6 +187,8 @@ export default defineComponent({
     currentEnd: 0,
     /** Current physical scroll position */
     currentScroll: 0,
+    /** Resize observer on the outer container */
+    resizeObserver: null as ResizeObserver | null,
     /** Resizing timer */
     resizeTimer: null as number | null,
     /** Height of the scroller */
@@ -198,7 +208,18 @@ export default defineComponent({
   }),
 
   mounted() {
+    // Trigger initial state load
     this.routeChange(this.$route);
+
+    // Start resize observer on container
+    if (this.refs.container?.$el) {
+      this.resizeObserver = new ResizeObserver(() => this.handleResizeWithDelay());
+      this.resizeObserver.observe(this.refs.container.$el);
+    }
+  },
+
+  unmounted() {
+    this.resizeObserver?.disconnect();
   },
 
   watch: {
@@ -235,6 +256,7 @@ export default defineComponent({
         container?: InstanceType<typeof SwipeRefresh>;
         topmatter?: InstanceType<typeof TopMatter>;
         dtm?: InstanceType<typeof DynamicTopMatter>;
+        topOverlay?: InstanceType<typeof TimelineTopOverlay>;
         recycler?: VueRecyclerType;
         recyclerBefore?: HTMLDivElement;
         selectionManager: InstanceType<typeof SelectionManager>;
@@ -409,10 +431,13 @@ export default defineComponent({
 
     /** Recompute static sizes of containers */
     recomputeSizes() {
+      // Get the container element
+      const container = this.refs.container?.$el;
+      if (!container) return;
+
       // Size of outer container
-      const e = this.refs.container!.$el;
-      const height = e.clientHeight;
-      const width = e.clientWidth;
+      const height = container.clientHeight;
+      const width = container.clientWidth;
       this.containerSize = [width, height];
 
       // Scroller spans the container height
@@ -636,12 +661,14 @@ export default defineComponent({
 
       // Places
       if (this.routeIsPlaces) {
-        if (!name || !name.includes('-')) {
+        if (name?.includes('-')) {
+          const id = name.split('-', 1)[0];
+          set(DaysFilterType.PLACE, id);
+        } else if (name === this.c.PLACES_NULL) {
+          set(DaysFilterType.PLACE, this.c.PLACES_NULL);
+        } else {
           throw new Error('Invalid place route');
         }
-
-        const id = name.split('-', 1)[0];
-        set(DaysFilterType.PLACE, id);
       }
 
       // Tags
@@ -709,7 +736,7 @@ export default defineComponent({
           data = await dav.getOnThisDayData();
         } else if (dav.isSingleItem()) {
           data = await dav.getSingleItemData();
-          _m.viewer.open(data[0]!.detail![0]);
+          setTimeout(() => _m.viewer.open(data[0]!.detail![0]), 0);
         } else {
           // Try the cache
           if (!noCache) {
@@ -798,6 +825,9 @@ export default defineComponent({
           dayId: day.dayid,
           day: day,
         };
+
+        // Mark month view to change the header title
+        if (this.isMonthView) head.ismonth = true;
 
         // Special headers
         if (this.routeIsThisDay && (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)) {
@@ -976,8 +1006,11 @@ export default defineComponent({
         //
         // These loops cannot be combined because processDay
         // creates circular references which cannot be stringified
+        //
+        // The day is cached regardless of whether it is empty.
+        // Empty days might be fetched e.g. on NativeX. In this case,
+        // empty caches will not be processed if the view is fresh.
         for (const [dayId, photos] of dayMap) {
-          if (photos.length === 0) continue;
           utils.cacheData(this.getDayUrl([dayId]), photos);
         }
 
@@ -1055,11 +1088,19 @@ export default defineComponent({
       // Set of basenames without extension
       const res1: IPhoto[] = [];
       const toStack = new Map<string, IPhoto[]>();
+      const auids = new Set<string>();
 
       // First pass -- remove hidden and prepare
       for (const photo of data) {
         // Skip hidden files
         if (photo.ishidden) continue;
+        if (photo.basename?.startsWith('.')) continue;
+
+        // Skip identical duplicates
+        if (this.config.dedup_identical && photo.auid) {
+          if (auids.has(photo.auid)) continue;
+          auids.add(photo.auid);
+        }
 
         // Add to first pass result
         res1.push(photo);
@@ -1453,7 +1494,7 @@ export default defineComponent({
   &.empty {
     opacity: 0;
     transition: none;
-    width: 0;
+    height: 0 !important;
   }
 
   &:focus {

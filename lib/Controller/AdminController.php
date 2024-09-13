@@ -38,11 +38,14 @@ class AdminController extends GenericApiController
      */
     public function getSystemConfig(): Http\Response
     {
-        return Util::guardEx(function () {
+        return Util::guardEx(static function () {
             $config = [];
             foreach (SystemConfig::DEFAULTS as $key => $default) {
-                $config[$key] = $this->config->getSystemValue($key, $default);
+                $config[$key] = SystemConfig::get($key);
             }
+
+            // Convert array types from map
+            $config['enabledPreviewProviders'] = array_values($config['enabledPreviewProviders']);
 
             return new JSONResponse($config, Http::STATUS_OK);
         });
@@ -53,9 +56,9 @@ class AdminController extends GenericApiController
      */
     public function setSystemConfig(string $key, mixed $value): Http\Response
     {
-        return Util::guardEx(function () use ($key, $value) {
+        return Util::guardEx(static function () use ($key, $value) {
             // Make sure not running in read-only mode
-            if ($this->config->getSystemValue('memories.readonly', false)) {
+            if (SystemConfig::get('memories.readonly')) {
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
             }
 
@@ -85,6 +88,7 @@ class AdminController extends GenericApiController
         return Util::guardEx(function () {
             $config = \OC::$server->get(\OCP\IConfig::class);
             $index = \OC::$server->get(\OCA\Memories\Service\Index::class);
+            $tw = \OC::$server->get(\OCA\Memories\Db\TimelineWrite::class);
 
             // Build status array
             $status = [];
@@ -107,6 +111,7 @@ class AdminController extends GenericApiController
 
             // Check number of indexed files
             $status['indexed_count'] = $index->getIndexedCount();
+            $status['failure_count'] = $tw->countFailures();
 
             // Automatic indexing stats
             $jobStart = (int) $config->getAppValue(Application::APPNAME, 'last_index_job_start', (string) 0);
@@ -175,6 +180,30 @@ class AdminController extends GenericApiController
             $status['action_token'] = $this->actionToken(true);
 
             return new JSONResponse($status, Http::STATUS_OK);
+        });
+    }
+
+    /**
+     * @AdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function getFailureLogs(): Http\Response
+    {
+        return Util::guardExDirect(static function (Http\IOutput $out) {
+            $tw = \OC::$server->get(\OCA\Memories\Db\TimelineWrite::class);
+
+            $out->setHeader('Content-Type: text/plain');
+            $out->setHeader('X-Accel-Buffering: no');
+            $out->setHeader('Cache-Control: no-cache');
+
+            foreach ($tw->listFailures() as $log) {
+                $fileid = str_pad((string) $log['fileid'], 12, ' ', STR_PAD_RIGHT); // size
+                $mtime = $log['mtime'];
+                $reason = $log['reason'];
+
+                $out->setOutput("{$fileid}[{$mtime}]\t{$reason}\n");
+            }
         });
     }
 

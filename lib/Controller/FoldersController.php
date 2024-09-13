@@ -69,6 +69,11 @@ class FoldersController extends GenericApiController
 
             // Process to response type
             $list = array_map(function ($node) use ($root) {
+                // Base changes permanently remove any mounts outside the
+                // target folder, so we need to use a clone for each subfolder
+                $root = clone $root;
+
+                // Switch the cloned root to use only this folder
                 $root->addFolder($node);
                 $root->baseChange($node->getPath());
 

@@ -111,11 +111,8 @@ class Util
         }
 
         $v = $appManager->getAppVersion('recognize');
-        if (!version_compare($v, '3.8.0', '>=')) {
-            return false;
-        }
 
-        return true;
+        return version_compare($v, '3.8.0', '>=');
     }
 
     /**
@@ -149,7 +146,7 @@ class Util
             return false;
         }
 
-        $v = $appManager->getAppInfo('facerecognition')['version'];
+        $v = $appManager->getAppVersion('facerecognition');
 
         return version_compare($v, '0.9.10-beta.2', '>=');
     }
@@ -222,6 +219,9 @@ class Util
         if ($permissions & \OCP\Constants::PERMISSION_SHARE) {
             $str .= 'S';
         }
+
+        // Other permissions that are set elsewhere
+        // L - Disable download (negative permission)
 
         return $str;
     }
@@ -319,6 +319,33 @@ class Util
                 ?? throw new \InvalidArgumentException("Invalid timeline path: {$path}"),
             explode(';', $paths),
         );
+    }
+
+    /**
+     * Run a callback in a transaction.
+     * It returns the same type as the return type of the closure.
+     *
+     * @template T
+     *
+     * @psalm-param \Closure(): T $callback
+     *
+     * @psalm-return T
+     */
+    public static function transaction(\Closure $callback): mixed
+    {
+        $connection = \OC::$server->get(\OCP\IDBConnection::class);
+        $connection->beginTransaction();
+
+        try {
+            $val = $callback();
+            $connection->commit();
+
+            return $val;
+        } catch (\Throwable $e) {
+            $connection->rollBack();
+
+            throw $e;
+        }
     }
 
     /**

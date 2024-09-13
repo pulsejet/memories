@@ -120,6 +120,8 @@ class LivePhoto
 
     /**
      * Process video part of Live Photo.
+     *
+     * This function should be run in a separate transaction.
      */
     public function processVideoPart(File $file, array $exif): bool
     {

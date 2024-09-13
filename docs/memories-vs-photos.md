@@ -6,6 +6,8 @@ description: Comparison of Memories and Nextcloud Photos
 
 Nextcloud comes bundled with an official [Photos](https://github.com/nextcloud/photos) app. This page provides a brief feature comparison between Memories and Photos, and links some relevant issues in the Photos repository.
 
+Note: this article is outdated and needs to be updated.
+
 ## Features in Memories missing in Photos
 
 1. **Sorting by Date Taken**: The Photos app sorts images and videos by the file modification time. Memories uses the EXIF data to get the Date Taken, providing for the correct sort order regardless if the files are edited / touched later ([issue](https://github.com/nextcloud/photos/issues/87)).
@@ -23,6 +25,5 @@ Nextcloud comes bundled with an official [Photos](https://github.com/nextcloud/p
 
 ## Features in Photos missing in Memories
 
-1. Photos supports uploading photos directly, Memories does not ([issue](https://github.com/pulsejet/memories/issues/69)).
 1. Photos supports drawing on photos, Memories does not ([issue](https://github.com/pulsejet/memories/issues/785)).
 1. Photos shows which photos have been `Shared with you`. Memories does not ([issue](https://github.com/pulsejet/memories/issues/787)).

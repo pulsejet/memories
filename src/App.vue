@@ -1,78 +1,96 @@
 <template>
-  <router-view v-if="onlyRouterView" />
-
-  <FirstStart v-else-if="isFirstStart" />
-
+  <!--
+    The outer content wrapper must be static and not change
+    since other components might be mounted onto it (e.g. Sidebar)
+  -->
   <NcContent
     app-name="memories"
-    v-else-if="!isConfigUnknown"
     :class="{
       'has-nav': showNavigation,
     }"
   >
-    <NcAppNavigation v-if="showNavigation">
-      <template #list>
-        <NcAppNavigationItem
-          v-for="item in navItems"
-          :key="item.name"
-          :to="{ name: item.name }"
-          :name="item.title"
-          @click="linkClick"
-          exact
-        >
-          <component :is="item.icon" slot="icon" :size="20" />
-        </NcAppNavigationItem>
-      </template>
+    <!--
+      Some routes may desire to skip everything inside and only show their
+      own content view. Enlist these routes here.
+    -->
+    <router-view v-if="routeIsNxSetup" />
 
-      <template #footer>
-        <ul class="app-navigation__settings">
-          <NcAppNavigationItem :name="t('memories', 'Settings')" @click="showSettings" href="#ss">
-            <CogIcon slot="icon" :size="20" />
+    <!--
+      Timline path is not set: short circuit and only show the first start.
+      There are some assumptions in the app that timeline path always exists.
+      This is not the same as above since FirstStart is not a route.
+    -->
+    <FirstStart v-else-if="isFirstStart" />
+
+    <!-- Render the actual app when configuration has been loaded -->
+    <template v-else-if="!isConfigUnknown">
+      <NcAppNavigation v-if="showNavigation">
+        <template #list>
+          <NcAppNavigationItem
+            v-for="item in navItems"
+            :key="item.name"
+            :to="{ name: item.name }"
+            :name="item.title"
+            :active="$route.name === item.name"
+            @click="linkClick"
+            exact
+          >
+            <component :is="item.icon" slot="icon" :size="20" />
           </NcAppNavigationItem>
-        </ul>
-      </template>
-    </NcAppNavigation>
+        </template>
 
-    <NcAppContent :allowSwipeNavigation="false">
-      <div
-        :class="{
-          outer: true,
-          'router-outlet': true,
-          'remove-gap': removeNavGap,
-          'has-nav': showNavigation,
-          'has-mobile-header': hasMobileHeader,
-          'is-native': native,
-        }"
-      >
-        <router-view />
-      </div>
+        <template #footer>
+          <ul class="app-navigation__settings">
+            <NcAppNavigationItem :name="t('memories', 'Settings')" @click="showSettings" href="#ss">
+              <CogIcon slot="icon" :size="20" />
+            </NcAppNavigationItem>
+          </ul>
+        </template>
+      </NcAppNavigation>
 
-      <MobileHeader v-if="hasMobileHeader" />
-      <MobileNav v-if="showNavigation" />
-    </NcAppContent>
+      <NcAppContent :allowSwipeNavigation="false">
+        <div
+          :class="{
+            outer: true,
+            'router-outlet': true,
+            'remove-gap': removeNavGap,
+            'has-nav': showNavigation,
+            'has-mobile-header': hasMobileHeader,
+            'is-native': native,
+          }"
+        >
+          <router-view />
+        </div>
 
-    <Settings :open.sync="settingsOpen" />
+        <MobileHeader v-if="hasMobileHeader" />
+        <MobileNav v-if="showNavigation" />
+      </NcAppContent>
 
-    <Viewer />
-    <Sidebar />
+      <Settings :open.sync="settingsOpen" />
 
-    <EditMetadataModal />
-    <AddToAlbumModal />
-    <NodeShareModal />
-    <ShareModal />
-    <MoveToFolderModal />
-    <FaceMoveModal />
-    <AlbumShareModal />
+      <Viewer />
+      <Sidebar />
+
+      <EditMetadataModal />
+      <AddToAlbumModal />
+      <NodeShareModal />
+      <ShareModal />
+      <MoveToFolderModal />
+      <FaceMoveModal />
+      <AlbumShareModal />
+      <UploadModal />
+      <SearchModal />
+    </template>
   </NcContent>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcContent from '@nextcloud/vue/dist/Components/NcContent';
-import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
-import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation';
-const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNavigationItem');
+import NcContent from '@nextcloud/vue/dist/Components/NcContent.js';
+import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent.js';
+import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation.js';
+const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNavigationItem.js');
 
 import { generateUrl } from '@nextcloud/router';
 
@@ -93,6 +111,8 @@ import ShareModal from '@components/modal/ShareModal.vue';
 import MoveToFolderModal from '@components/modal/MoveToFolderModal.vue';
 import FaceMoveModal from '@components/modal/FaceMoveModal.vue';
 import AlbumShareModal from '@components/modal/AlbumShareModal.vue';
+import UploadModal from '@components/modal/UploadModal.vue';
+import SearchModal from '@components/modal/SearchModal.vue';
 
 import * as utils from '@services/utils';
 import * as nativex from '@native';
@@ -111,6 +131,7 @@ import MarkerIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagsIcon from 'vue-material-design-icons/Tag.vue';
 import MapIcon from 'vue-material-design-icons/Map.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
+import SearchIcon from 'vue-material-design-icons/Magnify.vue';
 
 type NavItem = {
   name: string;
@@ -134,6 +155,7 @@ export default defineComponent({
     Sidebar,
     MobileNav,
     MobileHeader,
+    SearchModal,
 
     EditMetadataModal,
     AddToAlbumModal,
@@ -142,6 +164,7 @@ export default defineComponent({
     MoveToFolderModal,
     FaceMoveModal,
     AlbumShareModal,
+    UploadModal,
 
     ImageMultiple,
     FolderIcon,
@@ -193,10 +216,6 @@ export default defineComponent({
       return t('memories', 'People');
     },
 
-    onlyRouterView(): boolean {
-      return this.routeIsNxSetup;
-    },
-
     isFirstStart(): boolean {
       return this.config.timeline_path === '_empty_' && !this.routeIsPublic && !this.$route.query.noinit;
     },
@@ -210,11 +229,16 @@ export default defineComponent({
     },
 
     showNavigation(): boolean {
+      if (this.routeIsPublic || this.isFirstStart) {
+        return false;
+      }
+
       if (this.native) {
+        // Only show navigation on "main" tabs
         return this.routeIsBase || this.routeIsExplore || (this.routeIsAlbums && !this.$route.params.name);
       }
 
-      return !this.routeIsPublic;
+      return true;
     },
 
     hasMobileHeader(): boolean {
@@ -301,6 +325,11 @@ export default defineComponent({
           title: t('memories', 'Timeline'),
         },
         {
+          name: 'explore',
+          icon: SearchIcon,
+          title: t('memories', 'Explore'),
+        },
+        {
           name: 'folders',
           icon: FolderIcon,
           title: t('memories', 'Folders'),
@@ -309,11 +338,6 @@ export default defineComponent({
           name: 'favorites',
           icon: Star,
           title: t('memories', 'Favorites'),
-        },
-        {
-          name: 'videos',
-          icon: Video,
-          title: t('memories', 'Videos'),
         },
         {
           name: 'albums',

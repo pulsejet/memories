@@ -11,51 +11,55 @@
     <ul class="options" v-else>
       <NcListItem
         v-if="canShareNative && canShareLowRes"
-        :title="t('memories', 'Reduced Size')"
+        :name="t('memories', 'Reduced Size')"
         :bold="false"
         @click.prevent="shareLowRes()"
       >
         <template #icon>
           <PhotoIcon class="avatar" :size="24" />
         </template>
-        <template #subtitle>
+
+        <template #subname>
           {{ t('memories', 'Share in lower quality (small file size)') }}
         </template>
       </NcListItem>
 
       <NcListItem
         v-if="canShareNative && canShareHighRes"
-        :title="t('memories', 'High Resolution')"
+        :name="t('memories', 'High Resolution')"
         :bold="false"
         @click.prevent="shareHighRes()"
       >
         <template #icon>
           <LargePhotoIcon class="avatar" :size="24" />
         </template>
-        <template #subtitle>
+
+        <template #subname>
           {{ t('memories', 'Share in high quality (large file size)') }}
         </template>
       </NcListItem>
 
       <NcListItem
-        v-if="canShareNative"
-        :title="t('memories', 'Original File')"
+        v-if="canShareNative && canDownload"
+        :name="t('memories', 'Original File')"
         :bold="false"
         @click.prevent="shareOriginal()"
       >
         <template #icon>
           <FileIcon class="avatar" :size="24" />
         </template>
-        <template #subtitle>
+
+        <template #subname>
           {{ n('memories', 'Share the original file', 'Share the original files', photos?.length ?? 0) }}
         </template>
       </NcListItem>
 
-      <NcListItem v-if="canShareLink" :title="t('memories', 'Public Link')" :bold="false" @click.prevent="shareLink()">
+      <NcListItem v-if="canShareLink" :name="t('memories', 'Public Link')" :bold="false" @click.prevent="shareLink">
         <template #icon>
           <LinkIcon class="avatar" :size="24" />
         </template>
-        <template #subtitle>
+
+        <template #subname>
           {{ t('memories', 'Share an external Nextcloud link') }}
         </template>
       </NcListItem>
@@ -69,7 +73,7 @@ import { defineComponent } from 'vue';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
 
 import UserConfig from '@mixins/UserConfig';
 
@@ -120,6 +124,10 @@ export default defineComponent({
 
     hasVideos(): boolean {
       return Boolean(this.photos?.some(utils.isVideo));
+    },
+
+    canDownload(): boolean {
+      return this.photos?.every((p) => !p.imageInfo?.permissions?.includes('L')) ?? true;
     },
 
     canShareNative(): boolean {
@@ -244,7 +252,7 @@ export default defineComponent({
       await this.l(async () => {
         // Create album using WebDAV
         try {
-          await dav.createAlbum(name);
+          await dav.createAlbum(name, { rethrow: true });
         } catch (e) {
           showError(this.t('memories', 'Failed to create album for public link'));
           return null;

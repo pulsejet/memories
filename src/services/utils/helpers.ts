@@ -66,16 +66,16 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
   const square = sqsize !== undefined;
   if (square) size = sqsize as any;
 
-  // Native preview
-  if (isLocalPhoto(photo)) {
-    return API.Q(NAPI.IMAGE_PREVIEW(photo.fileid), { c: photo.etag });
-  }
-
   // Screen-appropriate size
   if (size === 'screen') {
     const sw = Math.floor(screen.width * devicePixelRatio);
     const sh = Math.floor(screen.height * devicePixelRatio);
     size = [sw, sh];
+
+    // Use capped full image if NativeX is used
+    if (isLocalPhoto(photo)) {
+      return API.Q(NAPI.IMAGE_FULL(photo.auid!), { size: Math.max(sw, sh) });
+    }
   }
 
   // Base size conversion
@@ -90,13 +90,16 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
 
   // Convert to array
   const [x, y] = typeof size === 'number' ? [size, size] : size!;
+  const a = square ? '0' : '1';
+  const c = photo.etag;
 
-  return API.Q(API.IMAGE_PREVIEW(photo.fileid), {
-    c: photo.etag,
-    x,
-    y,
-    a: square ? '0' : '1',
-  });
+  // NativeX preview
+  if (isLocalPhoto(photo)) {
+    return API.Q(NAPI.IMAGE_PREVIEW(photo.fileid), { c, x, y });
+  }
+
+  // Preview from server
+  return API.Q(API.IMAGE_PREVIEW(photo.fileid), { c, x, y, a });
 }
 
 /**
@@ -209,9 +212,9 @@ export function isNetworkError(error: any) {
  * callback immediately if the event has already fired.
  */
 export function onDOMLoaded(callback: () => void) {
-  if (document.readyState !== 'complete') {
+  if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', callback);
   } else {
-    callback();
+    setTimeout(callback, 0);
   }
 }

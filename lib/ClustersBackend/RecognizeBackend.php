@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -60,7 +61,8 @@ class RecognizeBackend extends Backend
             throw \OCA\Memories\Exceptions::NotEnabled('Recognize');
         }
 
-        // Get name and uid of face user
+        // Note: all of this is duplicated in nameToClusterId since we want to avoid
+        // making two queries for the getting the cluster_id and the actual clusters
         $faceStr = (string) $this->request->getParam('recognize');
         $faceNames = explode('/', $faceStr);
         if (2 !== \count($faceNames)) {
@@ -70,9 +72,7 @@ class RecognizeBackend extends Backend
         // Starting with Recognize v3.6, the detections are duplicated for each user
         // So we don't need to use the user ID provided by the user, but retain
         // this here for backwards compatibility + API consistency with Face Recognition
-        // $faceUid = $faceNames[0];
-
-        $faceName = $faceNames[1];
+        [$faceUid, $faceName] = $faceNames;
 
         if (!$aggregate) {
             // Multiple detections for the same image
@@ -134,7 +134,7 @@ class RecognizeBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT all face clusters
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
+        $count = $query->func()->count(SQL::distinct($query, 'm.fileid'), 'count');
         $query->select('rfc.id', 'rfc.user_id', 'rfc.title', $count)->from('recognize_face_clusters', 'rfc');
 
         // WHERE there are faces with this cluster
@@ -144,32 +144,48 @@ class RecognizeBackend extends Backend
         $query->innerJoin('rfd', 'memories', 'm', $query->expr()->eq('m.fileid', 'rfd.file_id'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // WHERE this cluster belongs to the user
-        $query->where($query->expr()->eq('rfc.user_id', $query->createNamedParameter(Util::getUID())));
+        $query->andWhere($query->expr()->eq('rfc.user_id', $query->createNamedParameter(Util::getUID())));
 
         // WHERE these clusters contain fileid if specified
         if ($fileid > 0) {
-            $fSq = $this->tq->getBuilder()
-                ->select('rfd.file_id')
-                ->from('recognize_face_detections', 'rfd')
-                ->where($query->expr()->andX(
-                    $query->expr()->eq('rfd.cluster_id', 'rfc.id'),
-                    $query->expr()->eq('rfd.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)),
-                ))
-                ->getSQL()
-            ;
-            $query->andWhere($query->createFunction("EXISTS ({$fSq})"));
+            // This screws up the count but we don't use it right now
+            // and scanning the parent of each file is too expensive
+            $query->andWhere($query->expr()->eq('rfd.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         // GROUP by ID of face cluster
-        $query->groupBy('rfc.id');
+        $query->addGroupBy('rfc.id');
 
         // ORDER by number of faces in cluster
-        $query->orderBy($query->createFunction("rfc.title <> ''"), 'DESC');
+        $query->addOrderBy($query->createFunction("rfc.title <> ''"), 'DESC');
         $query->addOrderBy('count', 'DESC');
         $query->addOrderBy('rfc.id'); // tie-breaker
+
+        // SELECT to get all covers
+        $query = SQL::materialize($query, 'rfc');
+        Covers::selectCover(
+            query: $query,
+            type: self::clusterType(),
+            clusterTable: 'rfc',
+            clusterTableId: 'id',
+            objectTable: 'recognize_face_detections',
+            objectTableObjectId: 'id',
+            objectTableClusterId: 'cluster_id',
+        );
+
+        // SELECT etag for the cover
+        // Since the "cover" is the face detection, we need the actual file for etag
+        $query = SQL::materialize($query, 'rfc');
+        $cfSq = $this->tq->getBuilder();
+        $cfSq->select('file_id')
+            ->from('recognize_face_detections', 'rfd')
+            ->where($cfSq->expr()->eq('rfd.id', 'rfc.cover'))
+            ->setMaxResults(1)
+        ;
+        $this->tq->selectEtag($query, SQL::subquery($query, $cfSq), 'cover_etag');
 
         // FETCH all faces
         $faces = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
@@ -190,12 +206,19 @@ class RecognizeBackend extends Backend
         return $cluster['id'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null): array
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
+        $name = $this->nameToClusterId($name);
+        if (!$name) {
+            return [];
+        }
+
         $query = $this->tq->getBuilder();
 
         // SELECT face detections for ID
         $query->select(
+            'rfd.id AS faceid',
+            'rfd.cluster_id',
             'rfd.file_id',              // Get actual file
             'rfd.x',                    // Image cropping
             'rfd.y',
@@ -214,15 +237,22 @@ class RecognizeBackend extends Backend
         $query->innerJoin('rfd', 'memories', 'm', $query->expr()->eq('m.fileid', 'rfd.file_id'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // LIMIT results
-        if (null !== $limit) {
+        if (-6 === $limit) {
+            Covers::filterCover($query, self::clusterType(), 'rfd', 'id', 'cluster_id');
+        } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
 
+        // Filter by fileid if specified
+        if (null !== $fileid) {
+            $query->andWhere($query->expr()->eq('rfd.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
+        }
+
         // Sort by date taken so we get recent photos
-        $query->orderBy('m.datetaken', 'DESC');
+        $query->addOrderBy('m.datetaken', 'DESC');
         $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
 
         // FETCH face detections
@@ -242,5 +272,48 @@ class RecognizeBackend extends Backend
     public function getPreviewQuality(): int
     {
         return 2048;
+    }
+
+    public function getCoverObjId(array $photo): int
+    {
+        return (int) $photo['faceid'];
+    }
+
+    public function getClusterIdFrom(array $photo): int
+    {
+        return (int) $photo['cluster_id'];
+    }
+
+    /**
+     * Get the numeric cluster ID for a non-numeric string
+     * This runs the actual query to find the cluster
+     * See the definition of transformDayQuery for more details.
+     */
+    private function nameToClusterId(string $name): false|int
+    {
+        if (!is_numeric($name)) {
+            $faceNames = explode('/', $name);
+            if (2 !== \count($faceNames)) {
+                return false;
+            }
+
+            [$faceUid, $faceName] = $faceNames;
+
+            // Get cluster ID
+            $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';
+            $query = $this->tq->getBuilder();
+            $query->select('id')
+                ->from('recognize_face_clusters', 'rfc')
+                ->where($query->expr()->eq($nameField, $query->createNamedParameter($faceName)))
+            ;
+
+            if ($id = $query->executeQuery()->fetchOne()) {
+                return (int) $id;
+            }
+
+            return false;
+        }
+
+        return (int) $name;
     }
 }

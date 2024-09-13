@@ -393,6 +393,41 @@ class FsManager
     }
 
     /**
+     * Check if the user is allowed to download a node.
+     *
+     * @param Node $node Node to check
+     */
+    public function canDownload(Node $node): bool
+    {
+        // Check if the file is readable
+        if (!$node->isReadable()) {
+            return false;
+        }
+
+        // Share-specific properties
+        // https://github.com/nextcloud/server/blob/024f689c97beca74f64db8d25fe82dcb9ef8441d/apps/dav/lib/Connector/Sabre/Node.php#L337-L345
+        try {
+            if (!class_exists('\OCA\Files_Sharing\SharedStorage')) {
+                throw new \Exception('SharedStorage not installed');
+            }
+
+            if (($storage = $node->getStorage()) && $storage->instanceOfStorage(\OCA\Files_Sharing\SharedStorage::class)) {
+                /** @var \OCA\Files_Sharing\SharedStorage $storage */
+                $attributes = $storage->getShare()->getAttributes();
+
+                // Check if download is disabled
+                if (false === $attributes?->getAttribute('permissions', 'download')) {
+                    return false;
+                }
+            }
+        } catch (\Exception) {
+            // Ignore
+        }
+
+        return true;
+    }
+
+    /**
      * Helper to get one file or null from a fiolder.
      *
      * @param Folder $folder Folder to search in

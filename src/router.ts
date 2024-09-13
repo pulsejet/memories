@@ -165,6 +165,8 @@ export type GlobalRouteCheckers = {
   routeIsPublic: boolean;
   routeIsPeople: boolean;
   routeIsRecognizeUnassigned: boolean;
+  routeIsPlacesUnassigned: boolean;
+  routeIsCluster: boolean;
 };
 
 // Implement getters for route checkers
@@ -178,7 +180,8 @@ function defineRouteChecker(key: keyof GlobalRouteCheckers, condition: (route?: 
 
 // Build basic route checkers
 for (const [key, value] of Object.entries(routes)) {
-  defineRouteChecker(`routeIs${<keyof typeof routes>key}`, (route) => route?.name === value.name);
+  const key_ = key as RouteId;
+  defineRouteChecker(`routeIs${key_}`, (route) => route?.name === value.name);
 }
 
 // Extra route checkers
@@ -189,4 +192,17 @@ defineRouteChecker('routeIsPeople', (route) =>
 defineRouteChecker(
   'routeIsRecognizeUnassigned',
   (route) => route?.name === routes.Recognize.name && route!.params.name === c.FACE_NULL,
+);
+defineRouteChecker(
+  'routeIsPlacesUnassigned',
+  (route) => route?.name === routes.Places.name && route!.params.name === c.PLACES_NULL,
+);
+defineRouteChecker('routeIsCluster', (route) =>
+  [
+    routes.Albums.name,
+    routes.Recognize.name,
+    routes.FaceRecognition.name,
+    routes.Places.name,
+    routes.Tags.name,
+  ].includes(route?.name ?? ''),
 );

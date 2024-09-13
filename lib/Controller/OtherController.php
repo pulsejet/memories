@@ -49,7 +49,7 @@ class OtherController extends GenericApiController
     {
         return Util::guardEx(function () use ($key, $value) {
             // Make sure not running in read-only mode
-            if ($this->config->getSystemValue('memories.readonly', false)) {
+            if (SystemConfig::get('memories.readonly', false)) {
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
             }
 
@@ -68,9 +68,7 @@ class OtherController extends GenericApiController
     {
         return Util::guardEx(function () {
             // get memories version
-            $version = \OC::$server->get(\OCP\App\IAppManager::class)
-                ->getAppInfo('memories')['version']
-            ;
+            $version = \OC::$server->get(\OCP\App\IAppManager::class)->getAppVersion('memories');
 
             // get user if logged in
             try {
@@ -118,6 +116,7 @@ class OtherController extends GenericApiController
                 // album settings
                 'sort_album_month' => 'true' === $getAppConfig('sortAlbumMonth', 'true'),
                 'show_hidden_albums' => 'true' === $getAppConfig('showHiddenAlbums', false),
+                'album_list_sort' => $getAppConfig('album_list_sort', 3),
             ], Http::STATUS_OK);
         });
     }
@@ -136,7 +135,7 @@ class OtherController extends GenericApiController
             $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
 
             $info = [
-                'version' => $appManager->getAppInfo('memories')['version'],
+                'version' => $appManager->getAppVersion('memories'),
                 'baseUrl' => $urlGenerator->linkToRouteAbsolute('memories.Page.main'),
                 'loginFlowUrl' => $urlGenerator->linkToRouteAbsolute('core.ClientFlowLoginV2.init'),
             ];

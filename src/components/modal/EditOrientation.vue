@@ -15,13 +15,28 @@
     </div>
 
     <NcActions :inline="3" class="actions">
-      <NcActionButton :aria-label="t('memories', 'Rotate Left')" :disabled="disabled" @click="doleft">
+      <NcActionButton
+        :aria-label="t('memories', 'Rotate Left')"
+        :title="t('memories', 'Rotate Left')"
+        :disabled="disabled"
+        @click="doleft"
+      >
         <template #icon> <RotateLeftIcon :size="22" /> </template>
       </NcActionButton>
-      <NcActionButton :aria-label="t('memories', 'Rotate Right')" :disabled="disabled" @click="doright">
+      <NcActionButton
+        :aria-label="t('memories', 'Rotate Right')"
+        :title="t('memories', 'Rotate Right')"
+        :disabled="disabled"
+        @click="doright"
+      >
         <template #icon> <RotateRightIcon :size="22" /> </template>
       </NcActionButton>
-      <NcActionButton :aria-label="t('memories', 'Flip')" :disabled="disabled" @click="doflip">
+      <NcActionButton
+        :aria-label="t('memories', 'Flip')"
+        :title="t('memories', 'Flip')"
+        :disabled="disabled"
+        @click="doflip"
+      >
         <template #icon> <FlipHorizontalIcon :size="22" /> </template>
       </NcActionButton>
     </NcActions>
@@ -33,8 +48,8 @@ import { defineComponent } from 'vue';
 
 import * as utils from '@services/utils';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
 import RotateRightIcon from 'vue-material-design-icons/RotateRight.vue';

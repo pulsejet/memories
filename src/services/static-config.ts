@@ -111,6 +111,9 @@ class StaticConfig {
       return this.default;
     }
 
+    // get constants for easier access
+    const { ALBUM_SORT_FLAGS } = utils.constants;
+
     const config: IConfig = {
       // general stuff
       version: '',
@@ -131,11 +134,13 @@ class StaticConfig {
       timeline_path: '_unknown_',
       enable_top_memories: true,
       stack_raw_files: true,
+      dedup_identical: false,
 
       // viewer settings
       high_res_cond_default: 'zoom',
       livephoto_autoplay: true,
       sidebar_filepath: false,
+      metadata_in_slideshow: false,
 
       // folder settings
       folders_path: '',
@@ -145,12 +150,12 @@ class StaticConfig {
       // album settings
       sort_album_month: true,
       show_hidden_albums: false,
+      album_list_sort: ALBUM_SORT_FLAGS.CREATED | ALBUM_SORT_FLAGS.DESCENDING, // also in OtherController.php
 
       // local settings
       square_thumbs: false,
       high_res_cond: null,
       show_face_rect: false,
-      album_list_sort: 1,
     };
 
     const set = <K extends keyof IConfig, V extends IConfig[K]>(key: K, value: string | null) => {

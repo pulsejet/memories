@@ -1,7 +1,9 @@
 package gallery.memories.service
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.util.Base64
+import android.webkit.CookieManager
 import android.webkit.WebView
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -13,8 +15,8 @@ import org.json.JSONObject
 import java.security.SecureRandom
 import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
+import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 
@@ -27,6 +29,8 @@ class HttpService {
     private var authHeader: String? = null
     private var mBaseUrl: String? = null
     private var mTrustAll = false
+
+    private var mTrustAllDefault = false
 
     /**
      * Check if all certificates are trusted
@@ -50,38 +54,27 @@ class HttpService {
         mBaseUrl = url
         mTrustAll = trustAll
         client = if (trustAll) {
-            val trustAllCerts = arrayOf<TrustManager>(
-                object : X509TrustManager {
-                    @Throws(CertificateException::class)
-                    override fun checkClientTrusted(
-                        chain: Array<X509Certificate>,
-                        authType: String
-                    ) {
-                    }
-
-                    @Throws(CertificateException::class)
-                    override fun checkServerTrusted(
-                        chain: Array<X509Certificate>,
-                        authType: String
-                    ) {
-                    }
-
-                    override fun getAcceptedIssuers(): Array<X509Certificate> {
-                        return arrayOf()
-                    }
-                }
-            )
-
-            val sslContext = SSLContext.getInstance("SSL")
-            sslContext.init(null, trustAllCerts, SecureRandom())
-
+            val (sc, tm) = getInsecureTLSContext()
             OkHttpClient.Builder()
-                .sslSocketFactory(sslContext.socketFactory, trustAllCerts[0] as X509TrustManager)
-                .hostnameVerifier({ hostname, session -> true })
+                .sslSocketFactory(sc.socketFactory, tm)
+                .hostnameVerifier { _, _ -> true }
                 .build()
         } else {
             OkHttpClient()
         }
+    }
+
+    /**
+     * Set the default HTTPS connection factory to insecure
+     */
+    fun setDefaultInsecureTLS() {
+        // do this only once in the application's lifetime
+        if (mTrustAllDefault) return
+        mTrustAllDefault = true
+
+        val (sc, tm) = getInsecureTLSContext()
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.socketFactory)
+        HttpsURLConnection.setDefaultHostnameVerifier { _, _ -> true }
     }
 
     /**
@@ -114,6 +107,10 @@ class HttpService {
 
             // Clear webview history
             webView.clearHistory()
+
+            // Set cookie with auth header
+            val authCookie = "nx_auth=$authHeader; Path=/; Domain=$host; HttpOnly"
+            CookieManager.getInstance().setCookie(url, authCookie)
 
             // Set authorization header
             webView.loadUrl(url!!, mapOf("Authorization" to authHeader))
@@ -191,4 +188,42 @@ class HttpService {
 
         return builder.build()
     }
+
+    /**
+     * Get a SSL Context that trusts all certificates
+     */
+    private fun getInsecureTLSContext(): Pair<SSLContext, X509TrustManager> {
+        val trustAllCerts = getInsecureTrustManager()
+        val sslContext = SSLContext.getInstance("SSL")
+        sslContext.init(null, arrayOf(trustAllCerts), SecureRandom())
+        return Pair(sslContext, trustAllCerts)
+    }
+
+    /**
+     * Get a trust manager that trusts all certificates
+     */
+    private fun getInsecureTrustManager(): X509TrustManager {
+        return object : X509TrustManager {
+            @SuppressLint("TrustAllX509TrustManager")
+            @Throws(CertificateException::class)
+            override fun checkClientTrusted(
+                chain: Array<X509Certificate>,
+                authType: String
+            ) {
+            }
+
+            @SuppressLint("TrustAllX509TrustManager")
+            @Throws(CertificateException::class)
+            override fun checkServerTrusted(
+                chain: Array<X509Certificate>,
+                authType: String
+            ) {
+            }
+
+            override fun getAcceptedIssuers(): Array<X509Certificate> {
+                return arrayOf()
+            }
+        }
+    }
+
 }

@@ -31,7 +31,7 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 - **📹 Video Transcoding**: Transcode videos and use HLS for maximal performance.
 - **🗺️ Map**: View your photos on a map, tagged with accurate reverse geocoding.
 - **📦 Migration**: Migrate easily from Nextcloud Photos and Google Takeout.
-- **⚡️ Performance**: Do all this very fast.
+- **⚡️ Performance**: Do all this very fast. Tested on instances with over a million photos.
 
 ## 🚀 Installation
 
@@ -42,12 +42,19 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 
 ## 📱 Mobile Apps
 
-- An Android client for Memories is available in early access on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories) or [GitHub Releases](https://github.com/pulsejet/memories/releases?q=android).
+- An Android client for Memories is available in early access on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories), [F-Droid](https://f-droid.org/packages/gallery.memories/) or [GitHub Releases](https://github.com/pulsejet/memories/releases?q=android).
 - For automatic uploads, you can use the official Nextcloud mobile apps. 
    - Android: [Google Play](https://play.google.com/store/apps/details?id=com.nextcloud.client), [F-Droid](https://f-droid.org/en/packages/com.nextcloud.client/)
    - iOS: [App Store](https://apps.apple.com/us/app/nextcloud/id1125420102).
 
 ## 🏗 Development Setup
+
+You can use the dev container to quickly fire up an instance of Nextcloud with Memories pre-installed.
+See [`.devcontainer/README.md`](.devcontainer/README.md) for more information.
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/pulsejet/memories?quickstart=1)
+
+To set up a development instance manually, follow these steps:
 
 1. ☁ Clone this monorepo into the `custom_apps` folder of your Nextcloud.
 1. 📥 Install [Composer](https://getcomposer.org/) and [Node.js 18](https://nodejs.org)
@@ -60,7 +67,7 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
    - [Psalm](https://marketplace.visualstudio.com/items?itemName=getpsalm.psalm-vscode-plugin): For PHP static analysis (alternatively, `make psalm`)
    - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode): For autoformatting Vue and Typescript
    - [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar): For Vue intellisense and static analysis
-   - [Volar Typescript](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin): For Vue Typescript support
+1. If using PHP Intelephense, search for `@builtin php-language-features` in the extensions tab and disable it.
 
 This monorepo is organized into the following packages:
 - [lib](lib): Backend and database migrations (PHP).

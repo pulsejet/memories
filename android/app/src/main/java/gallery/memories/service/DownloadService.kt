@@ -9,12 +9,20 @@ import android.webkit.CookieManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArrayMap
 import androidx.media3.common.util.UnstableApi
+import gallery.memories.mapper.Fields
 import org.json.JSONArray
 import java.util.concurrent.CountDownLatch
 
-@UnstableApi class DownloadService(private val mActivity: AppCompatActivity, private val query: TimelineQuery) {
+@UnstableApi
+class DownloadService(private val mActivity: AppCompatActivity, private val query: TimelineQuery) {
     private val mDownloads: MutableMap<Long, () -> Unit> = ArrayMap()
     private var mShareBlobs: JSONArray? = null
+
+    class DlFile {
+        var uri: Uri? = null
+        var name: String? = null
+        var mimeType: String? = null
+    }
 
     /**
      * Callback when download is complete
@@ -84,7 +92,8 @@ import java.util.concurrent.CountDownLatch
         if (mShareBlobs == null) throw Exception("No blobs to share")
 
         // All URIs to share including remote and local files
-        val uris = ArrayList<Uri>()
+        val files = ArrayList<DlFile>()
+        val dlHref = ArrayList<String>()
         val dlIds = ArrayList<Long>()
 
         // Process all objects to share
@@ -92,39 +101,72 @@ import java.util.concurrent.CountDownLatch
             val obj = mShareBlobs!!.getJSONObject(i)
 
             // If AUID is found, then look for local file
-            val auid = obj.getString("auid")
-            if (auid != "") {
+            val auid = obj.getString(Fields.Photo.AUID)
+            if (auid.isNotEmpty()) {
                 val sysImgs = query.getSystemImagesByAUIDs(listOf(auid))
                 if (sysImgs.isNotEmpty()) {
-                    uris.add(sysImgs[0].uri)
+                    files.add(DlFile().apply {
+                        uri = sysImgs[0].uri
+                        name = sysImgs[0].baseName
+                        mimeType = sysImgs[0].mimeType
+                    })
                     continue
                 }
             }
 
-            // Queue a download for remote files
-            dlIds.add(queue(obj.getString("href"), ""))
+            // Mark that we need to download this file
+            // Don't start the download yet since we haven't latched
+            val href = obj.getString(Fields.Other.HREF)
+            if (href.isNotEmpty()) {
+                dlHref.add(href)
+            }
         }
+
+        // Queue all downloads
+        dlHref.forEach { dlIds.add(queue(it, "")) }
 
         // Wait for all downloads to complete
         val latch = CountDownLatch(dlIds.size)
         synchronized(mDownloads) {
-            for (dlId in dlIds) {
-                mDownloads.put(dlId, fun() { latch.countDown() })
+            dlIds.forEach { dlId ->
+                mDownloads[dlId] = fun() { latch.countDown() }
             }
         }
         latch.await()
 
         // Get the URI of the downloaded file
-        for (id in dlIds) {
-            val sUri = getDownloadedFileURI(id) ?: throw Exception("Failed to download file")
-            uris.add(Uri.parse(sUri))
+        dlIds.forEach { id ->
+            files.add(getDownloadedFile(id) ?: throw Exception("Failed to download file"))
         }
 
         // Create sharing intent
-        val intent = Intent(Intent.ACTION_SEND_MULTIPLE)
-        intent.type = "*/*"
-        intent.putExtra(Intent.EXTRA_STREAM, uris)
-        mActivity.startActivity(Intent.createChooser(intent, null))
+        if (files.size > 1) {
+            val intent = Intent(Intent.ACTION_SEND_MULTIPLE)
+
+            // get uris as list
+            val uris = files.map { it.uri }.toCollection(ArrayList())
+
+            // check if all mimetypes have the same first part
+            // in that case use that part, otherwise use */*
+            val firstMime = files[0].mimeType?.split("/")?.get(0) ?: "*"
+            intent.type =
+                if (files.all { it.mimeType?.startsWith(firstMime) == true }) "$firstMime/*"
+                else "*/*"
+
+            // populate intent
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            intent.putExtra(Intent.EXTRA_STREAM, uris)
+            mActivity.startActivity(Intent.createChooser(intent, null))
+        } else if (files.size == 1) {
+            val file = files[0]
+
+            // create intent
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.type = file.mimeType
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            intent.putExtra(Intent.EXTRA_STREAM, file.uri)
+            mActivity.startActivity(Intent.createChooser(intent, file.name))
+        }
 
         // Reset the blobs
         mShareBlobs = null
@@ -143,19 +185,27 @@ import java.util.concurrent.CountDownLatch
     /**
      * Get the URI of a downloaded file from download ID
      * @param downloadId The download ID
-     * @return The URI of the downloaded file
      */
-    private fun getDownloadedFileURI(downloadId: Long): String? {
+    private fun getDownloadedFile(downloadId: Long): DlFile? {
         val downloadManager =
             mActivity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val query = DownloadManager.Query()
         query.setFilterById(downloadId)
-        val cursor = downloadManager.query(query)
-        if (cursor.moveToFirst()) {
-            val columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
-            return cursor.getString(columnIndex)
+        val cursor_ = downloadManager.query(query)
+        cursor_.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val uriIdx = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
+                val nameIdx = cursor.getColumnIndex(DownloadManager.COLUMN_TITLE)
+                val mimeTypeIdx = cursor.getColumnIndex(DownloadManager.COLUMN_MEDIA_TYPE)
+
+                return DlFile().apply {
+                    uri = Uri.parse(cursor.getString(uriIdx))
+                    name = cursor.getString(nameIdx)
+                    mimeType = cursor.getString(mimeTypeIdx)
+                }
+            }
         }
-        cursor.close()
+
         return null
     }
 }

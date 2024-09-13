@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCA\Memories\Settings\SystemConfig;
+use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use Psr\Log\LoggerInterface;
@@ -15,6 +16,7 @@ const LON_KEY = 'GPSLongitude';
 trait TimelineWritePlaces
 {
     protected IDBConnection $connection;
+    protected LoggerInterface $logger;
 
     /**
      * Add places data for a file.
@@ -36,11 +38,13 @@ trait TimelineWritePlaces
         }
 
         // Delete previous records
-        $query = $this->connection->getQueryBuilder();
-        $query->delete('memories_places')
-            ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
-        ;
-        $query->executeStatement();
+        Util::transaction(function () use ($fileId): void {
+            $query = $this->connection->getQueryBuilder();
+            $query->delete('memories_places')
+                ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
+                ->executeStatement()
+            ;
+        });
 
         // Just remove from if the point is no longer valid
         if (null === $lat || null === $lon) {
@@ -48,31 +52,36 @@ trait TimelineWritePlaces
         }
 
         // Get places
-        $rows = \OC::$server->get(\OCA\Memories\Service\Places::class)->queryPoint($lat, $lon);
+        try {
+            $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
+            $rows = Util::transaction(static fn () => $places->queryPoint($lat, $lon));
+        } catch (\Exception $e) {
+            $this->logger->error("Error querying places: {$e->getMessage()}", ['app' => 'memories']);
+
+            return [];
+        }
 
         // Get last ID, i.e. the ID with highest admin_level but <= 8
         $crows = array_filter($rows, static fn ($row) => $row['admin_level'] <= 8);
         $markRow = array_pop($crows);
 
         // Insert records in transaction
-        $this->connection->beginTransaction();
+        Util::transaction(function () use ($fileId, $rows, $markRow): void {
+            foreach ($rows as $row) {
+                $isMark = $markRow && $row['osm_id'] === $markRow['osm_id'];
 
-        foreach ($rows as $row) {
-            $isMark = $markRow && $row['osm_id'] === $markRow['osm_id'];
-
-            // Insert the place
-            $query = $this->connection->getQueryBuilder();
-            $query->insert('memories_places')
-                ->values([
-                    'fileid' => $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT),
-                    'osm_id' => $query->createNamedParameter($row['osm_id'], IQueryBuilder::PARAM_INT),
-                    'mark' => $query->createNamedParameter($isMark, IQueryBuilder::PARAM_BOOL),
-                ])
-            ;
-            $query->executeStatement();
-        }
-
-        $this->connection->commit();
+                // Insert the place
+                $query = $this->connection->getQueryBuilder();
+                $query->insert('memories_places')
+                    ->values([
+                        'fileid' => $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT),
+                        'osm_id' => $query->createNamedParameter($row['osm_id'], IQueryBuilder::PARAM_INT),
+                        'mark' => $query->createNamedParameter($isMark, IQueryBuilder::PARAM_BOOL),
+                    ])
+                    ->executeStatement()
+                ;
+            }
+        });
 
         // Return list of osm_id
         return array_map(static fn ($row) => (int) $row['osm_id'], $rows);

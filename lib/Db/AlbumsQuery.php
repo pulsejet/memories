@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCA\Memories\ClustersBackend\AlbumsBackend;
+use OCA\Memories\ClustersBackend\Covers;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -14,25 +16,32 @@ class AlbumsQuery
     /**
      * Get list of albums.
      *
-     * @param bool $shared Whether to get shared albums
-     * @param int  $fileid File to filter by
+     * @param string $uid        User ID
+     * @param bool   $shared     Whether to get shared albums
+     * @param int    $fileid     File to filter by
+     * @param ?array $transforms Callbacks to transform the query
      */
-    public function getList(string $uid, bool $shared = false, int $fileid = 0): array
-    {
+    public function getList(
+        string $uid,
+        bool $shared = false,
+        int $fileid = 0,
+        ?array $transforms = null,
+    ): array {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT everything from albums
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
         $query->select(
             'pa.album_id',
             'pa.name',
             'pa.user',
             'pa.created',
-            'pa.created',
             'pa.location',
             'pa.last_added_photo',
-            $count,
         )->from('photos_albums', 'pa');
+
+        $query->selectAlias($query->func()->count(SQL::distinct($query, 'm.fileid')), 'count')
+            ->selectAlias($query->func()->max('paf.album_file_id'), 'update_id')
+        ;
 
         if ($shared) {
             $ids = $this->getSelfCollaborators($uid);
@@ -47,9 +56,7 @@ class AlbumsQuery
         }
 
         // WHERE these are items with this album
-        $query->leftJoin('pa', 'photos_albums_files', 'paf', $query->expr()->andX(
-            $query->expr()->eq('paf.album_id', 'pa.album_id'),
-        ));
+        $query->leftJoin('pa', 'photos_albums_files', 'paf', $query->expr()->eq('paf.album_id', 'pa.album_id'));
 
         // WHERE these items are memories indexed photos
         $query->leftJoin('paf', 'memories', 'm', $query->expr()->eq('m.fileid', 'paf.file_id'));
@@ -58,7 +65,7 @@ class AlbumsQuery
         $query->leftJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
 
         // GROUP and ORDER by
-        $query->groupBy('pa.album_id');
+        $query->addGroupBy('pa.album_id');
 
         // WHERE these albums contain fileid if specified
         if ($fileid) {
@@ -69,9 +76,13 @@ class AlbumsQuery
                     $query->expr()->eq('paf.album_id', 'pa.album_id'),
                     $query->expr()->eq('paf.file_id', $query->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)),
                 ))
-                ->getSQL()
             ;
-            $query->andWhere($query->createFunction("EXISTS ({$fSq})"));
+            $query->andWhere(SQL::exists($query, $fSq));
+        }
+
+        // Apply further transformations
+        foreach ($transforms ?? [] as $cb) {
+            $query = $cb($query) ?? $query;
         }
 
         // FETCH all albums
@@ -216,7 +227,8 @@ class AlbumsQuery
     public function getAlbumByLink(string $token): ?array
     {
         $query = $this->connection->getQueryBuilder();
-        $query->select('*')->from('photos_albums', 'pa')
+        $query->select('pa.*')
+            ->from('photos_albums', 'pa')
             ->innerJoin('pa', $this->collaboratorsTable(), 'pc', $query->expr()->andX(
                 $query->expr()->eq('pc.album_id', 'pa.album_id'),
                 $query->expr()->eq('collaborator_id', $query->createNamedParameter($token)),
@@ -224,18 +236,33 @@ class AlbumsQuery
             ))
         ;
 
+        // Get the cover image of the owner of the album
+        // See AlbumsBackend::getClustersInternal
+        Covers::selectCover(
+            query: $query,
+            type: AlbumsBackend::clusterType(),
+            clusterTable: 'pa',
+            clusterTableId: 'album_id',
+            objectTable: 'photos_albums_files',
+            objectTableObjectId: 'file_id',
+            objectTableClusterId: 'album_id',
+            validateFilecache: false,
+            field: 'cover_owner',
+            user: 'pa.user',
+        );
+
         return $query->executeQuery()->fetch() ?: null;
     }
 
     /**
      * Get list of photos in album.
      */
-    public function getAlbumPhotos(int $albumId, ?int $limit): array
+    public function getAlbumPhotos(int $albumId, ?int $limit, ?int $fileid): array
     {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all files
-        $query->select('file_id')->from('photos_albums_files', 'paf');
+        $query->select('file_id', 'album_id')->from('photos_albums_files', 'paf');
 
         // WHERE they are in this album
         $query->where($query->expr()->eq('album_id', $query->createNamedParameter($albumId, IQueryBuilder::PARAM_INT)));
@@ -246,14 +273,22 @@ class AlbumsQuery
         // Do not check if these files are indexed in memories
         // This is since this function is called for downloads
         // so funky things might happen if non-indexed files were
-        // added throught the Photos app
+        // added through the Photos app
 
         // ORDER by the id of the paf i.e. the order in which they were added
-        $query->orderBy('paf.album_file_id', 'DESC');
+        $query->addOrderBy('paf.album_file_id', 'DESC');
 
         // LIMIT the results
-        if (null !== $limit) {
+        if (-6 === $limit) {
+            // not implemented -- should return the cover photo
+            $query->setMaxResults(1);
+        } elseif (null !== $limit) {
             $query->setMaxResults($limit);
+        }
+
+        // Filter by fileid if specified
+        if (null !== $fileid) {
+            $query->andWhere($query->expr()->eq('paf.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         $result = $query->executeQuery()->fetchAll();

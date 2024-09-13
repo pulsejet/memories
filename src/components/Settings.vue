@@ -1,37 +1,21 @@
-<!--
- - @copyright Copyright (c) 2019 John Molakvoæ <skjnldsv@protonmail.com>
- -
- - @author John Molakvoæ <skjnldsv@protonmail.com>
- -
- - @license AGPL-3.0-or-later
- -
- - This program is free software: you can redistribute it and/or modify
- - it under the terms of the GNU Affero General Public License as
- - published by the Free Software Foundation, either version 3 of the
- - License, or (at your option) any later version.
- -
- - This program is distributed in the hope that it will be useful,
- - but WITHOUT ANY WARRANTY; without even the implied warranty of
- - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- - GNU Affero General Public License for more details.
- -
- - You should have received a copy of the GNU Affero General Public License
- - along with this program. If not, see <http://www.gnu.org/licenses/>.
- -
- -->
-
 <template>
   <div>
     <NcAppSettingsDialog
       id="memories-settings"
+      class="memories-modal"
       :open="open"
       :show-navigation="true"
-      :title="t('memories', 'Memories Settings')"
+      :name="names.header"
       @update:open="onClose"
     >
-      <NcAppSettingsSection id="general-settings" :title="t('memories', 'General')">
-        <label for="timeline-path">{{ t('memories', 'Timeline Path') }}</label>
-        <input id="timeline-path" @click="chooseTimelinePath" v-model="config.timeline_path" type="text" readonly />
+      <NcAppSettingsSection id="general-settings" :name="names.general">
+        <NcTextField
+          :label="t('memories', 'Timeline Path')"
+          :label-visible="true"
+          v-model="config.timeline_path"
+          @click="chooseTimelinePath"
+          readonly
+        />
 
         <NcCheckboxRadioSwitch :checked.sync="config.square_thumbs" @update:checked="updateSquareThumbs" type="switch">
           {{ t('memories', 'Square grid mode') }}
@@ -52,9 +36,17 @@
         >
           {{ t('memories', 'Stack RAW files with same name') }}
         </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.dedup_identical"
+          @update:checked="updateDedupIdentical"
+          type="switch"
+        >
+          {{ t('memories', 'De-duplicate identical files') }}
+        </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="viewer-settings" :title="t('memories', 'Photo Viewer')">
+      <NcAppSettingsSection id="viewer-settings" :name="names.viewer">
         <NcCheckboxRadioSwitch
           :checked.sync="config.livephoto_autoplay"
           @update:checked="updateLivephotoAutoplay"
@@ -69,6 +61,14 @@
           type="switch"
         >
           {{ t('memories', 'Show full file path in sidebar') }}
+        </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.metadata_in_slideshow"
+          @update:checked="updateMetadataInSlideshow"
+          type="switch"
+        >
+          {{ t('memories', 'Show metadata in slideshow') }}
         </NcCheckboxRadioSwitch>
 
         <div class="radio-group">
@@ -100,14 +100,14 @@
         </div>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="account-settings" :title="t('memories', 'Account')" v-if="isNative">
+      <NcAppSettingsSection id="account-settings" :name="names.account" v-if="isNative">
         {{ t('memories', 'Logged in as {user}', { user }) }}
         <NcButton @click="logout" id="sign-out">
           {{ t('memories', 'Sign out') }}
         </NcButton>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="device-settings" :title="t('memories', 'Device Folders')" v-if="isNative">
+      <NcAppSettingsSection id="device-settings" :name="t('memories', 'Device Folders')" v-if="isNative">
         {{ t('memories', 'Local folders to include in the timeline view') }}
         <NcCheckboxRadioSwitch
           v-for="folder in localFolders"
@@ -124,9 +124,14 @@
         </NcButton>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="folders-settings" :title="t('memories', 'Folders')">
-        <label for="folders-path">{{ t('memories', 'Folders Path') }}</label>
-        <input id="folders-path" @click="chooseFoldersPath" v-model="config.folders_path" type="text" />
+      <NcAppSettingsSection id="folders-settings" :name="names.folders">
+        <NcTextField
+          :label="t('memories', 'Folders Path')"
+          :label-visible="true"
+          v-model="config.folders_path"
+          @click="chooseFoldersPath"
+          readonly
+        />
 
         <NcCheckboxRadioSwitch
           :checked.sync="config.show_hidden_folders"
@@ -145,7 +150,7 @@
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
-      <NcAppSettingsSection id="albums-settings" :title="t('memories', 'Albums')">
+      <NcAppSettingsSection id="albums-settings" :name="names.albums">
         <NcCheckboxRadioSwitch
           :checked.sync="config.sort_album_month"
           @update:checked="updateSortAlbumMonth"
@@ -178,13 +183,15 @@ input[type='text'] {
 import { defineComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
+import { translate as t } from '@services/l10n';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcAppSettingsDialog = () => import('@nextcloud/vue/dist/Components/NcAppSettingsDialog');
-const NcAppSettingsSection = () => import('@nextcloud/vue/dist/Components/NcAppSettingsSection');
-const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+const NcAppSettingsDialog = () => import('@nextcloud/vue/dist/Components/NcAppSettingsDialog.js');
+const NcAppSettingsSection = () => import('@nextcloud/vue/dist/Components/NcAppSettingsSection.js');
+const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js');
 
 import MultiPathSelectionModal from '@components/modal/MultiPathSelectionModal.vue';
 
@@ -195,6 +202,7 @@ export default defineComponent({
 
   components: {
     NcButton,
+    NcTextField,
     NcAppSettingsDialog,
     NcAppSettingsSection,
     NcCheckboxRadioSwitch,
@@ -209,6 +217,14 @@ export default defineComponent({
 
   data: () => ({
     localFolders: [] as nativex.LocalFolderConfig[],
+    names: {
+      header: t('memories', 'Memories Settings'),
+      general: t('memories', 'General'),
+      viewer: t('memories', 'Photo Viewer'),
+      account: t('memories', 'Account'),
+      folders: t('memories', 'Folders'),
+      albums: t('memories', 'Albums'),
+    },
   }),
 
   props: {
@@ -306,6 +322,10 @@ export default defineComponent({
       await this.updateSetting('stack_raw_files', 'stackRawFiles');
     },
 
+    async updateDedupIdentical() {
+      await this.updateSetting('dedup_identical', 'dedupIdentical');
+    },
+
     // Viewer settings
     async updateHighResCond(val: IConfig['high_res_cond']) {
       this.config.high_res_cond = val;
@@ -318,6 +338,10 @@ export default defineComponent({
 
     async updateSidebarFilepath() {
       await this.updateSetting('sidebar_filepath', 'sidebarFilepath');
+    },
+
+    async updateMetadataInSlideshow() {
+      await this.updateSetting('metadata_in_slideshow', 'metadataInSlideshow');
     },
 
     // Folders settings
@@ -370,6 +394,11 @@ export default defineComponent({
   .app-settings__content {
     // Fix weirdness when focusing on toggle input on mobile
     position: relative;
+  }
+
+  input[readonly] {
+    cursor: pointer;
+    user-select: none;
   }
 
   .app-settings-section {

@@ -43,15 +43,17 @@ class PlacesSetup extends Command
         $this
             ->setName('memories:places-setup')
             ->setDescription('Setup reverse geocoding')
+            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Ignore existing setup and re-download planet')
             ->addOption('recalculate', 'r', InputOption::VALUE_NONE, 'Only recalculate places for existing files')
-            ->addOption('transaction-size', null, InputOption::VALUE_REQUIRED, 'Reduce this value if your database crashes', 50)
+            ->addOption('transaction-size', null, InputOption::VALUE_REQUIRED, 'Reduce this value if your database crashes', 10)
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->output = $output;
-        $recalculate = $input->getOption('recalculate');
+        $recalculate = (bool) $input->getOption('recalculate');
+        $force = (bool) $input->getOption('force');
 
         if (($this->places->txnSize = (int) $input->getOption('transaction-size')) < 1) {
             $this->output->writeln('<error>Transaction size must be at least 1</error>');
@@ -70,7 +72,7 @@ class PlacesSetup extends Command
         $this->output->writeln('<info>Database support was detected</info>');
 
         // Check if database is already set up
-        if ($this->places->geomCount() > 0 && !$recalculate && !$this->warnDownloaded()) {
+        if (!$recalculate && !$force && $this->places->geomCount() > 0 && !$this->warnDownloaded()) {
             return 1;
         }
 

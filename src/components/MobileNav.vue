@@ -1,18 +1,8 @@
 <template>
   <div id="mobile-nav">
-    <router-link to="/" @click.native="linkClick" replace exact-path>
-      <ImageMultipleIcon :size="22" />
-      {{ t('memories', 'Photos') }}
-    </router-link>
-
-    <router-link to="/explore" @click.native="linkClick" replace exact-path>
-      <SearchIcon :size="22" />
-      {{ t('memories', 'Explore') }}
-    </router-link>
-
-    <router-link to="/albums" @click.native="linkClick" replace exact-path>
-      <AlbumIcon :size="22" />
-      {{ t('memories', 'Albums') }}
+    <router-link v-for="link in links" :key="link.to" :to="link.to" @click.native="linkClick" replace exact-path>
+      <component :is="link.icon" :size="22" />
+      {{ link.text }}
     </router-link>
   </div>
 </template>
@@ -21,6 +11,8 @@
 import { defineComponent } from 'vue';
 
 import * as nativex from '@native';
+
+import { translate as t } from '@services/l10n';
 
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import SearchIcon from 'vue-material-design-icons/Magnify.vue';
@@ -33,6 +25,16 @@ export default defineComponent({
     ImageMultipleIcon,
     SearchIcon,
     AlbumIcon,
+  },
+
+  computed: {
+    links() {
+      return [
+        { to: '/', icon: ImageMultipleIcon, text: t('memories', 'Photos') },
+        { to: '/explore', icon: SearchIcon, text: t('memories', 'Explore') },
+        { to: '/albums', icon: AlbumIcon, text: t('memories', 'Albums') },
+      ];
+    },
   },
 
   methods: {
@@ -56,7 +58,7 @@ export default defineComponent({
 }
 
 @media (max-width: 768px) {
-  #app-navigation-vue {
+  #content-vue > .app-navigation {
     display: none;
   }
 

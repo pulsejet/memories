@@ -1,5 +1,6 @@
 import { getCanonicalLocale } from '@nextcloud/l10n';
 import { DateTime } from 'luxon';
+import type { IHeadRow } from '@typings';
 
 // Memoize the result of short date conversions
 // These operations are surprisingly expensive
@@ -103,17 +104,24 @@ export function getDurationStr(sec: number) {
 }
 
 /**
- * Returns a hash code from a string
- * @param  {String} str The string to hash.
- * @return {Number}    A 32bit integer
- * @see http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+ * Get the header text from a row header
+ * @param head Head row object
  */
-export function hashCode(str: string): number {
-  let hash = 0;
-  for (let i = 0, len = str.length; i < len; i++) {
-    let chr = str.charCodeAt(i);
-    hash = (hash << 5) - hash + chr;
-    hash |= 0; // Convert to 32bit integer
+export function getHeadRowName(head: IHeadRow): string {
+  // Check cache
+  if (head.name) return head.name;
+
+  // Make date string
+  // The reason this function is separate from processDays is
+  // because this call is terribly slow even on desktop
+  const dateTaken = dayIdToDate(head.dayId);
+  let name: string;
+  if (head.ismonth) {
+    name = getMonthDateStr(dateTaken);
+  } else {
+    name = getLongDateStr(dateTaken, true);
   }
-  return hash;
+
+  // Cache and return
+  return (head.name = name);
 }

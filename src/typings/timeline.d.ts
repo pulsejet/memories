@@ -55,6 +55,8 @@ declare module '@typings' {
     type: 0;
     /** Title of the header */
     name?: string;
+    /** Header is for a month instead of day */
+    ismonth?: boolean;
     /**  Boolean if the entire day is selected */
     selected: boolean;
     /** Bigger header text */

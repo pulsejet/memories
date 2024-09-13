@@ -19,7 +19,7 @@
       <ul>
         <NcListItem
           v-for="share of shares"
-          :title="share.label || t('memories', 'Share link')"
+          :name="share.label || t('memories', 'Share link')"
           :key="share.id"
           :bold="false"
           :href="share.url"
@@ -29,7 +29,8 @@
           <template #icon>
             <LinkIcon class="avatar" :size="20" />
           </template>
-          <template #subtitle>
+
+          <template #subname>
             {{ getShareLabels(share) }}
           </template>
           <template #actions>
@@ -64,9 +65,9 @@ import { defineComponent } from 'vue';
 import axios from '@nextcloud/axios';
 import { showError, showSuccess } from '@nextcloud/dialogs';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import UserConfig from '@mixins/UserConfig';
 

@@ -72,6 +72,18 @@ app:
     occ config:system:set memories.exiftool.tmp --value /path/to/temp/dir
     ```
 
+## Trigger compatibility mode
+
+Memories utilizes database triggers for certain functionality and if these triggers cannot be used then the app will run in trigger compatibility mode. This mode is much slower especially on larger databases.
+
+If your admin panel shows that Memories is running in trigger compatibility mode, try the following steps.
+
+1. Run `occ maintenance:repair` to attempt to create the triggers. This will print any errors that occur.
+2. Restart the PHP server.
+3. If you are using MySQL / MariaDB, set the `log_bin_trust_function_creators` option is set to `1` in your `my.cnf` file. If you are using docker, you can add `--log_bin_trust_function_creators=true` to your database container's command line. Restart the database after this and repeat steps 1 and 2.
+
+If none of the above work or are applicable, file a bug at the repository including the output of `occ maintenance:repair`.
+
 ## Issues with NixOS
 
 ### Background index fails
@@ -111,6 +123,30 @@ init_connect='SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci'
 
 Restart your database server after making this change.
 
+### General error: 2006 MySQL server has gone away
+
+You may encounter this error where MySQL crashes during planet DB insertion. In this case, use a smaller transaction size for insertion.
+
+```bash
+occ memories:places-setup --transaction-size=5
+```
+
+### Database table prefix
+
+```
+Database table prefix is not set. Cannot use database extensions (dbtableprefix).
+```
+
+If you do not have a database table prefix set, you cannot use the Places feature. This is a limitation of the Doctrine ORM, and no workaround is available for this. You can migrate your database to use a prefix, or disable the Places feature.
+
+If your database does use a prefix (e.g. all tables are prefixed with `oc_`) and you still get this error, try setting `dbtableprefix` explicitly in your `config.php`:
+
+```php
+'dbtableprefix' => 'oc_',
+```
+
+After this, run `occ memories:places-setup` again. More discussion on this issue can be found at [#648](https://github.com/pulsejet/memories/issues/648).
+
 ## Transcoding
 
 Memories transcodes videos on the fly per-user. This saves space, but requires reasonably good hardware, preferably with hardware acceleration. Check the troubleshooting section [here](/hw-transcoding/#troubleshooting).
@@ -120,21 +156,28 @@ Memories transcodes videos on the fly per-user. This saves space, but requires r
 If you want to completely reset Memories (e.g. for database trouble), uninstall it from the app store, then run the following SQL on your database to clean up any data.
 Note that this can have unintended consequences such as some files appearing as duplicates in the mobile app when you reinstall Memories.
 
+Note: this assumes the default prefix `oc_`. If you have a different prefix, replace `oc_` with your prefix.
+
 ```sql
 DROP TABLE IF EXISTS oc_memories;
+DROP TABLE IF EXISTS oc_memories_covers;
+DROP TABLE IF EXISTS oc_memories_failures;
 DROP TABLE IF EXISTS oc_memories_livephoto;
 DROP TABLE IF EXISTS oc_memories_mapclusters;
 DROP TABLE IF EXISTS oc_memories_places;
 DROP TABLE IF EXISTS oc_memories_planet;
 DROP TABLE IF EXISTS memories_planet_geometry;
-DROP INDEX IF EXISTS memories_parent_mimetype ON oc_filecache; /* MySQL */
 DELETE FROM oc_migrations WHERE app='memories';
-```
 
-On Postgres, the syntax for dropping the index is:
+/* The following statements are ONLY for MySQL / MariaDB */
+DROP INDEX IF EXISTS memories_parent_mimetype ON oc_filecache;
+DROP INDEX IF EXISTS memories_type_tagid ON systemtag_object_mapping;
+DROP TRIGGER IF EXISTS memories_fcu_trg;
 
-```sql
+/* The following statements are ONLY for Postgres */
 DROP INDEX IF EXISTS memories_parent_mimetype;
+DROP INDEX IF EXISTS memories_type_tagid;
+DROP FUNCTION IF EXISTS memories_fcu_fun CASCADE;
 ```
 
 !!! warning "Reinstallation"

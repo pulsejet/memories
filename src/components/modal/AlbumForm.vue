@@ -3,18 +3,22 @@
     <div class="form-inputs">
       <NcTextField
         ref="nameInput"
-        :value.sync="albumName"
         type="text"
         name="name"
-        :required="true"
         autofocus="true"
+        :value.sync="albumName"
+        :required="true"
+        :label="t('memories', 'Name')"
+        :label-visible="true"
         :placeholder="t('memories', 'Name of the album')"
       />
       <label>
         <NcTextField
-          :value.sync="albumLocation"
           name="location"
           type="text"
+          :value.sync="albumLocation"
+          :label="t('memories', 'Location')"
+          :label-visible="true"
           :placeholder="t('memories', 'Location of the album')"
         />
       </label>
@@ -91,8 +95,8 @@
 import { defineComponent, type PropType } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import AlbumCollaborators from './AlbumCollaborators.vue';
 
@@ -160,7 +164,7 @@ export default defineComponent({
      * @return Whether sharing is enabled.
      */
     sharingEnabled(): boolean {
-      return window.OC.Share !== undefined;
+      return true; // todo
     },
   },
 
@@ -252,7 +256,7 @@ export default defineComponent({
 .album-form {
   display: flex;
   flex-direction: column;
-  height: 350px;
+  height: 230px;
   padding: 16px;
   .form-title {
     font-weight: bold;

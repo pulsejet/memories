@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -65,9 +66,7 @@ class FaceRecognitionBackend extends Backend
         if (2 !== \count($personNames)) {
             throw new \Exception('Invalid person query');
         }
-
-        $personUid = $personNames[0];
-        $personName = $personNames[1];
+        [$personUid, $personName] = $personNames;
 
         // Join with images
         $query->innerJoin('m', 'facerecog_images', 'fri', $query->expr()->andX(
@@ -86,15 +85,20 @@ class FaceRecognitionBackend extends Backend
             $query->expr()->eq($nameField, $query->createNamedParameter($personName)),
         ));
 
-        // Add face rect
-        if (!$aggregate && $this->request->getParam('facerect')) {
-            $query->selectAlias('frf.x', 'face_x')
-                ->selectAlias('frf.y', 'face_y')
-                ->selectAlias('frf.width', 'face_width')
-                ->selectAlias('frf.height', 'face_height')
-                ->selectAlias('m.w', 'image_width')
-                ->selectAlias('m.h', 'image_height')
-            ;
+        if (!$aggregate) {
+            // Multiple detections for the same image
+            $query->selectAlias('frf.id', 'faceid');
+
+            // Face Rect
+            if ($this->request->getParam('facerect')) {
+                $query->selectAlias('frf.x', 'face_x')
+                    ->selectAlias('frf.y', 'face_y')
+                    ->selectAlias('frf.width', 'face_width')
+                    ->selectAlias('frf.height', 'face_height')
+                    ->selectAlias('m.w', 'image_width')
+                    ->selectAlias('m.h', 'image_height')
+                ;
+            }
         }
     }
 
@@ -137,12 +141,14 @@ class FaceRecognitionBackend extends Backend
         return $cluster['id'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null): array
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         $query = $this->tq->getBuilder();
 
         // SELECT face detections
         $query->select(
+            'frf.id as faceid',         // Face ID
+            'frp.id as cluster_id',     // Cluster ID
             'fri.file as file_id',      // Get actual file
             'frf.x',                    // Image cropping
             'frf.y',
@@ -170,15 +176,22 @@ class FaceRecognitionBackend extends Backend
         $query->where($query->expr()->eq($nameField, $query->createNamedParameter($name)));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // LIMIT results
-        if (null !== $limit) {
+        if (-6 === $limit) {
+            Covers::filterCover($query, self::clusterType(), 'frf', 'id', 'person');
+        } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
 
+        // Filter by fileid if specified
+        if (null !== $fileid) {
+            $query->andWhere($query->expr()->eq('fri.file', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
+        }
+
         // Sort by date taken so we get recent photos
-        $query->orderBy('m.datetaken', 'DESC');
+        $query->addOrderBy('m.datetaken', 'DESC');
         $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
 
         // FETCH face detections
@@ -208,6 +221,16 @@ class FaceRecognitionBackend extends Backend
         return 2048;
     }
 
+    public function getCoverObjId(array $photo): int
+    {
+        return (int) $photo['faceid'];
+    }
+
+    public function getClusterIdFrom(array $photo): int
+    {
+        return (int) $photo['cluster_id'];
+    }
+
     private function model(): int
     {
         return (int) $this->config->getAppValue('facerecognition', 'model', (string) -1);
@@ -223,7 +246,7 @@ class FaceRecognitionBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT all face clusters
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'));
+        $count = $query->func()->count(SQL::distinct($query, 'm.fileid'));
         $query->select('frp.id')->from('facerecog_persons', 'frp');
         $query->selectAlias($count, 'count');
         $query->selectAlias('frp.user', 'user_id');
@@ -241,12 +264,11 @@ class FaceRecognitionBackend extends Backend
         ));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // GROUP by ID of face cluster
-        $query->groupBy('frp.id');
-        $query->addGroupBy('frp.user');
-        $query->where($query->expr()->isNull('frp.name'));
+        $query->addGroupBy('frp.id', 'frp.user');
+        $query->andWhere($query->expr()->isNull('frp.name'));
 
         // The query change if we want the people in an fileid, or the unnamed clusters
         if ($fileid > 0) {
@@ -260,11 +282,27 @@ class FaceRecognitionBackend extends Backend
         }
 
         // ORDER by number of faces in cluster and id for response stability.
-        $query->orderBy('count', 'DESC');
+        $query->addOrderBy('count', 'DESC');
         $query->addOrderBy('frp.id', 'DESC');
 
         // It is not worth displaying all unnamed clusters. We show 15 to name them progressively,
         $query->setMaxResults(15);
+
+        // SELECT covers
+        $query = SQL::materialize($query, 'frp');
+        Covers::selectCover(
+            query: $query,
+            type: self::clusterType(),
+            clusterTable: 'frp',
+            clusterTableId: 'id',
+            objectTable: 'facerecog_faces',
+            objectTableObjectId: 'id',
+            objectTableClusterId: 'person',
+        );
+
+        // SELECT etag for the cover
+        $query = SQL::materialize($query, 'frp');
+        $this->tq->selectEtag($query, 'cover', 'cover_etag');
 
         // FETCH all faces
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
@@ -275,10 +313,12 @@ class FaceRecognitionBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT all face clusters
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'));
-        $query->select('frp.name')->from('facerecog_persons', 'frp');
-        $query->selectAlias($count, 'count');
-        $query->selectAlias('frp.user', 'user_id');
+        $query->select('frp.name')
+            ->selectAlias($query->func()->count(SQL::distinct($query, 'm.fileid')), 'count')
+            ->selectAlias($query->func()->min('frp.id'), 'id')
+            ->selectAlias('frp.user', 'user_id')
+            ->from('facerecog_persons', 'frp')
+        ;
 
         // WHERE there are faces with this cluster
         $query->innerJoin('frp', 'facerecog_faces', 'frf', $query->expr()->eq('frp.id', 'frf.person'));
@@ -293,22 +333,37 @@ class FaceRecognitionBackend extends Backend
         ));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // GROUP by name of face clusters
-        $query->where($query->expr()->isNotNull('frp.name'));
+        $query->andWhere($query->expr()->isNotNull('frp.name'));
 
         // WHERE these clusters contain fileid if specified
         if ($fileid > 0) {
             $query->andWhere($query->expr()->eq('fri.file', $query->createNamedParameter($fileid)));
         }
 
-        $query->groupBy('frp.user');
-        $query->addGroupBy('frp.name');
+        $query->addGroupBy('frp.name', 'frp.user');
 
         // ORDER by number of faces in cluster
-        $query->orderBy('count', 'DESC');
+        $query->addOrderBy('count', 'DESC');
         $query->addOrderBy('frp.name', 'ASC');
+
+        // SELECT to get all covers
+        $query = SQL::materialize($query, 'frp');
+        Covers::selectCover(
+            query: $query,
+            type: self::clusterType(),
+            clusterTable: 'frp',
+            clusterTableId: 'id',
+            objectTable: 'facerecog_faces',
+            objectTableObjectId: 'id',
+            objectTableClusterId: 'person',
+        );
+
+        // SELECT etag for the cover
+        $query = SQL::materialize($query, 'frp');
+        $this->tq->selectEtag($query, 'frp.cover', 'cover_etag');
 
         // FETCH all faces
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];

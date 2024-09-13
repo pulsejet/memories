@@ -24,13 +24,19 @@ make bin-ext
 cd ../..
 
 # Enable apps
-php occ app:enable --force viewer
 php occ app:enable --force memories
 
 # Run repair steps
 php occ maintenance:repair
 
 set -e
+
+# Make sure we're not running in trigger compatiblity mode
+MODE=$(php occ config:system:get memories.db.triggers.fcu)
+if ["$MODE" != *"true"* ]; then
+    echo -e "Database is running in trigger compatibility mode."
+    exit 613
+fi
 
 # Set debug mode and start dev server
 php occ config:system:set --type bool --value true debug

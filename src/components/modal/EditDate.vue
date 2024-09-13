@@ -18,6 +18,7 @@
         :placeholder="t('memories', 'Year')"
         :disabled="disabled"
         @input="newestChange()"
+        @keypress.enter="$emit('save')"
       />
       <NcTextField
         class="field"
@@ -30,6 +31,7 @@
         :placeholder="t('memories', 'Month')"
         :disabled="disabled"
         @input="newestChange()"
+        @keypress.enter="$emit('save')"
       />
       <NcTextField
         class="field"
@@ -42,6 +44,7 @@
         :placeholder="t('memories', 'Day')"
         :disabled="disabled"
         @input="newestChange()"
+        @keypress.enter="$emit('save')"
       />
       <NcTextField
         class="field"
@@ -49,11 +52,12 @@
         min="0"
         max="23"
         :value.sync="hour"
-        :label="t('memories', 'Time')"
+        :label="t('memories', 'Hour')"
         :label-visible="true"
         :placeholder="t('memories', 'Hour')"
         :disabled="disabled"
         @input="newestChange(true)"
+        @keypress.enter="$emit('save')"
       />
       <NcTextField
         class="field"
@@ -65,6 +69,7 @@
         :placeholder="t('memories', 'Minute')"
         :disabled="disabled"
         @input="newestChange(true)"
+        @keypress.enter="$emit('save')"
       />
     </div>
 
@@ -87,6 +92,7 @@
           :placeholder="t('memories', 'Year')"
           :disabled="disabled"
           @input="oldestChange()"
+          @keypress.enter="$emit('save')"
         />
         <NcTextField
           class="field"
@@ -99,6 +105,7 @@
           :placeholder="t('memories', 'Month')"
           :disabled="disabled"
           @input="oldestChange()"
+          @keypress.enter="$emit('save')"
         />
         <NcTextField
           class="field"
@@ -111,6 +118,7 @@
           :placeholder="t('memories', 'Day')"
           :disabled="disabled"
           @input="oldestChange()"
+          @keypress.enter="$emit('save')"
         />
         <NcTextField
           class="field"
@@ -118,11 +126,12 @@
           min="0"
           max="23"
           :value.sync="hourLast"
-          :label="t('memories', 'Time')"
+          :label="t('memories', 'Hour')"
           :label-visible="true"
           :placeholder="t('memories', 'Hour')"
           :disabled="disabled"
           @input="oldestChange()"
+          @keypress.enter="$emit('save')"
         />
         <NcTextField
           class="field"
@@ -134,6 +143,7 @@
           :placeholder="t('memories', 'Minute')"
           :disabled="disabled"
           @input="oldestChange()"
+          @keypress.enter="$emit('save')"
         />
       </div>
     </div>
@@ -143,7 +153,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import * as utils from '@services/utils';
 
@@ -164,6 +174,10 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+  },
+
+  emits: {
+    save: () => true,
   },
 
   data: () => ({

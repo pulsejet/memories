@@ -110,7 +110,7 @@ module.exports = {
     // @nextcloud/dialogs depends on path
     // This is really frustrating, but it's the only way
     new NodePolyfillPlugin({
-      includeAliases: ['path', 'process'],
+      onlyAliases: ['path', 'process'],
     }),
 
     // Bundle service worker

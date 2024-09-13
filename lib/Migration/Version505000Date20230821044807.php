@@ -34,13 +34,7 @@ use OCP\Migration\SimpleMigrationStep;
  */
 class Version505000Date20230821044807 extends SimpleMigrationStep
 {
-    /** @var IDBConnection */
-    private $dbc;
-
-    public function __construct(IDBConnection $dbc)
-    {
-        $this->dbc = $dbc;
-    }
+    public function __construct(private IDBConnection $dbc) {}
 
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
@@ -76,7 +70,7 @@ class Version505000Date20230821044807 extends SimpleMigrationStep
             // get count of rows to update
             $query = $this->dbc->getQueryBuilder();
             $maxCount = $query
-                ->select($query->createFunction('COUNT(m.fileid)'))
+                ->select($query->func()->count('m.fileid'))
                 ->from('memories', 'm')
                 ->executeQuery()
                 ->fetchOne()

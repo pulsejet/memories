@@ -1,11 +1,11 @@
 :root {
   // https://github.com/nextcloud/server/blob/0cd536786b9df555e2e6110f98b41856f0d51313/core/css/apps.scss#L29
+  // This is only used for #content and not actually for the body element
   --body-height: calc(100% - 50px - var(--body-container-margin));
 }
 
 body {
   overflow: hidden;
-  height: var(--body-height) !important;
 
   * {
     -webkit-tap-highlight-color: transparent;
@@ -16,7 +16,7 @@ body {
 // Nextcloud 25+: get rid of gap and border radius at right
 #content-vue {
   // was var(--body-container-radius)
-  // now set on #app-navigation-vue
+  // now set on .app-navigation
   border-radius: 0;
   width: calc(100% - var(--body-container-margin) * 1); // was *2
   margin-right: 0;
@@ -27,19 +27,18 @@ body {
     margin-left: 0;
   }
 
-  // Reduce size of navigation. NC <25 doesn't like this on mobile.
-  #app-navigation-vue {
-    max-width: 250px;
-  }
-}
-
-// Prevent content overflow on NC <25
-#content-vue {
+  // Prevent content overflow on NC <25
   max-height: 100vh;
 
   // https://bugs.webkit.org/show_bug.cgi?id=160953
   overflow: visible;
-  #app-navigation-vue {
+
+  > div.app-navigation {
+    // Reduce size of navigation bar
+    --app-navigation-max-width: 250px !important;
+    max-width: var(--app-navigation-max-width); // NC <29
+
+    // Rounded corners only on left
     border-top-left-radius: var(--body-container-radius);
     border-bottom-left-radius: var(--body-container-radius);
 
@@ -47,6 +46,7 @@ body {
       // Move up to align with back button of top matter
       top: 2px;
       transition: opacity 0.1s ease-in-out;
+      background-color: transparent;
       opacity: 0.2; // It's ugly
       &:hover {
         opacity: 1;

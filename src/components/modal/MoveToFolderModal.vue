@@ -16,7 +16,7 @@ import { defineComponent } from 'vue';
 import { FilePickerType } from '@nextcloud/dialogs';
 import { showInfo } from '@nextcloud/dialogs';
 
-const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
+const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
 
 import UserConfig from '@mixins/UserConfig';
 

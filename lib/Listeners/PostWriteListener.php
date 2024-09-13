@@ -72,8 +72,9 @@ class PostWriteListener implements IEventListener
         try {
             $this->tw->processFile($node);
         } catch (\Exception $e) {
-            $this->logger->error('Failed to process file EXIF data', [
+            $this->logger->error('Write hook failed to index file', [
                 'app' => 'memories',
+                'path' => $node->getPath(),
                 'message' => $e->getMessage(),
             ]);
         }

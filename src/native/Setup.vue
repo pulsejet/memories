@@ -103,8 +103,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js');
 
 import * as util from '@services/utils';
 import * as nativex from '@native';

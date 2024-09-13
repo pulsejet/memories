@@ -32,8 +32,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
@@ -124,6 +124,14 @@ export default defineComponent({
       let currentText = '';
 
       for (const photo of photos) {
+        // Skip hidden files
+        if (photo.ishidden) continue;
+        if (photo.basename?.startsWith('.')) continue;
+
+        // Skip videos for now (strange bugs)
+        if (photo.isvideo) continue;
+
+        // Get year and text for this photo
         const dateTaken = utils.dayIdToDate(photo.dayid);
         const year = dateTaken.getUTCFullYear();
         photo.key = `${photo.fileid}`;

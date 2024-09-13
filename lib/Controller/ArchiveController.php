@@ -179,8 +179,9 @@ class ArchiveController extends GenericApiController
 
         // Attempt to create the folder
         if (!$parent->nodeExists($name)) {
+            $pathHash = md5($finalPath);
             $lockingProvider = \OC::$server->get(ILockingProvider::class);
-            $lockKey = "memories/create/{$finalPath}";
+            $lockKey = "memories/create/{$pathHash}";
             $lockType = ILockingProvider::LOCK_EXCLUSIVE;
             $locked = false;
 

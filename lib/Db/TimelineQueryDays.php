@@ -6,6 +6,7 @@ namespace OCA\Memories\Db;
 
 use OCA\Memories\ClustersBackend;
 use OCA\Memories\Exif;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -36,21 +37,21 @@ trait TimelineQueryDays
         $query = $this->connection->getQueryBuilder();
 
         // Get all entries also present in filecache
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
-        $query->select('m.dayid', $count)
+        $query->select('m.dayid')
+            ->selectAlias($query->func()->count(SQL::distinct($query, 'm.fileid')), 'count')
             ->from('memories', 'm')
         ;
 
         // Group and sort by dayid
-        $query->groupBy('m.dayid')
-            ->orderBy('m.dayid', 'DESC')
+        $query->addGroupBy('m.dayid')
+            ->addOrderBy('m.dayid', 'DESC')
         ;
 
         // Apply all transformations
         $this->applyAllTransforms($queryTransforms, $query, true);
 
-        // JOIN with filecache for existing files
-        $query = $this->joinFilecache($query, null, $recursive, $archive);
+        // FILTER with filecache for timeline path
+        $query = $this->filterFilecache($query, null, $recursive, $archive);
 
         // FETCH all days
         $rows = $this->executeQueryWithCTEs($query)->fetchAll();
@@ -96,19 +97,24 @@ trait TimelineQueryDays
         // Make new query
         $query = $this->connection->getQueryBuilder();
 
-        // Get all entries also present in filecache
-        $fileid = $query->createFunction('DISTINCT m.fileid');
-
         // We don't actually use m.datetaken here, but postgres
         // needs that all fields in ORDER BY are also in SELECT
         // when using DISTINCT on selected fields
-        $query->select($fileid, ...TimelineQuery::TIMELINE_SELECT)
+        $query->select(SQL::distinct($query, 'm.fileid'), ...TimelineQuery::TIMELINE_SELECT)
             ->from('memories', 'm')
         ;
 
         // Add hidden field
         if ($hidden) {
-            $query->addSelect('cte_f.hidden');
+            // we join with filecache anyway in this case, so just use the parent there
+            // this means this will work directly in trigger compatibility mode
+            $hSq = $this->connection->getQueryBuilder();
+            $hSq->select($hSq->expr()->literal(1))
+                ->from('cte_folders', 'cte_f')
+                ->andWhere($hSq->expr()->eq('cte_f.fileid', 'f.parent'))
+                ->andWhere($hSq->expr()->eq('cte_f.hidden', $hSq->expr()->literal(1)))
+            ;
+            $query->selectAlias(SQL::subquery($query, $hSq), 'hidden');
         }
 
         // JOIN with mimetypes to get the mimetype
@@ -129,15 +135,18 @@ trait TimelineQueryDays
         $this->addFavoriteTag($query);
 
         // Group and sort by date taken
-        $query->orderBy('m.datetaken', 'DESC');
+        $query->addOrderBy('m.datetaken', 'DESC');
         $query->addOrderBy('basename', 'DESC'); // https://github.com/pulsejet/memories/issues/985
         $query->addOrderBy('m.fileid', 'DESC'); // unique tie-breaker
 
         // Apply all transformations
         $this->applyAllTransforms($queryTransforms, $query, false);
 
-        // JOIN with filecache for existing files
-        $query = $this->joinFilecache($query, null, $recursive, $archive, $hidden);
+        // JOIN with filecache to get the basename etc
+        $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
+
+        // Filter for files in the timeline path
+        $query = $this->filterFilecache($query, null, $recursive, $archive, $hidden);
 
         // FETCH all photos in this day
         $day = $this->executeQueryWithCTEs($query)->fetchAll();
@@ -163,8 +172,8 @@ trait TimelineQueryDays
 
         // Get SQL
         $CTE_SQL = \array_key_exists('cteFoldersArchive', $params)
-            ? self::CTE_FOLDERS_ARCHIVE()
-            : self::CTE_FOLDERS(\array_key_exists('cteIncludeHidden', $params));
+            ? $this->CTE_FOLDERS_ARCHIVE()
+            : $this->CTE_FOLDERS(\array_key_exists('cteIncludeHidden', $params));
 
         // Add WITH clause if needed
         if (str_contains($sql, 'cte_folders')) {
@@ -183,7 +192,7 @@ trait TimelineQueryDays
      * @param bool          $archive   Whether to get the days only from the archive folder
      * @param bool          $hidden    Whether to include hidden files
      */
-    public function joinFilecache(
+    public function filterFilecache(
         IQueryBuilder $query,
         ?TimelineRoot $root = null,
         bool $recursive = true,
@@ -208,8 +217,6 @@ trait TimelineQueryDays
             $root = $this->_root;
         }
 
-        // Join with memories
-        $baseOp = $query->expr()->eq('f.fileid', 'm.fileid');
         if ($root->isEmpty()) {
             // This is illegal in most cases except albums,
             // which don't have a folder associated.
@@ -217,24 +224,40 @@ trait TimelineQueryDays
                 throw new \Exception('No valid root folder found (.nomedia?)');
             }
 
-            return $query->innerJoin('m', 'filecache', 'f', $baseOp);
+            // Nothing to do here
+            return $query;
+        }
+
+        // Which field is the parent field for the record
+        $parent = 'm.parent';
+
+        // Check if triggers are properly set up
+        if (!SystemConfig::get('memories.db.triggers.fcu')) {
+            // Compatibility mode - JOIN filecache and use the parent from there (this is slow)
+            $query->innerJoin('m', 'filecache', 'ff_f', $query->expr()->eq('m.fileid', 'ff_f.fileid'));
+            $parent = 'ff_f.parent';
         }
 
         // Filter by folder (recursive or otherwise)
-        $pathOp = null;
         if ($recursive) {
-            // Join with folders CTE
+            // This are used later by the execution function
             $this->addSubfolderJoinParams($query, $root, $archive, $hidden);
-            $query->innerJoin('f', 'cte_folders', 'cte_f', $query->expr()->eq('f.parent', 'cte_f.fileid'));
+
+            // Subquery to test parent folder
+            $sq = $query->getConnection()->getQueryBuilder();
+            $sq->select($sq->expr()->literal(1))
+                ->from('cte_folders', 'cte_f')
+                ->where($sq->expr()->eq($parent, 'cte_f.fileid'))
+            ;
+
+            // Filter files in one of the timeline folders
+            $query->andWhere(SQL::exists($query, $sq));
         } else {
             // If getting non-recursively folder only check for parent
-            $pathOp = $query->expr()->eq('f.parent', $query->createNamedParameter($root->getOneId(), IQueryBuilder::PARAM_INT));
+            $query->andWhere($query->expr()->eq($parent, $query->createNamedParameter($root->getOneId(), IQueryBuilder::PARAM_INT)));
         }
 
-        return $query->innerJoin('m', 'filecache', 'f', $query->expr()->andX(
-            $baseOp,
-            $pathOp,
-        ));
+        return $query;
     }
 
     /**

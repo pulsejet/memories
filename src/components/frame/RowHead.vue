@@ -31,10 +31,6 @@ export default defineComponent({
       type: Object as PropType<IHeadRow>,
       required: true,
     },
-    monthView: {
-      type: Boolean,
-      required: true,
-    },
   },
 
   emits: {
@@ -43,25 +39,7 @@ export default defineComponent({
 
   computed: {
     name() {
-      // Check cache
-      if (this.item.name) {
-        return this.item.name;
-      }
-
-      // Make date string
-      // The reason this function is separate from processDays is
-      // because this call is terribly slow even on desktop
-      const dateTaken = utils.dayIdToDate(this.item.dayId);
-      let name: string;
-      if (this.monthView) {
-        name = utils.getMonthDateStr(dateTaken);
-      } else {
-        name = utils.getLongDateStr(dateTaken, true);
-      }
-
-      // Cache and return
-      this.item.name = name;
-      return name;
+      return utils.getHeadRowName(this.item);
     },
   },
 

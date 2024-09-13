@@ -1,5 +1,5 @@
 <template>
-  <NcEmptyContent :title="t('memories', 'Nothing to show here')" :description="emptyViewDescription">
+  <NcEmptyContent :name="t('memories', 'Nothing to show here')" :description="emptyViewDescription">
     <template #icon>
       <PeopleIcon v-if="routeIsPeople" />
       <ArchiveIcon v-else-if="routeIsArchive" />
@@ -13,7 +13,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent';
+import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js';
 
 import * as strings from '@services/strings';
 

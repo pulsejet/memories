@@ -39,7 +39,7 @@ class TagsController extends GenericApiController
      *
      * Set tags for a file
      */
-    public function set(int $id, array $add, array $remove): Http\Response
+    public function set(int $id, ?array $add, ?array $remove): Http\Response
     {
         return Util::guardEx(function () use ($id, $add, $remove) {
             // Check tags enabled for this user
@@ -58,9 +58,15 @@ class TagsController extends GenericApiController
             // Get mapper from tags to objects
             $om = \OC::$server->get(\OCP\SystemTag\ISystemTagObjectMapper::class);
 
-            // Add and remove tags
-            $om->assignTags((string) $id, 'files', $add);
-            $om->unassignTags((string) $id, 'files', $remove);
+            // Add tags
+            if (null !== $add && \count($add) > 0) {
+                $om->assignTags((string) $id, 'files', $add);
+            }
+
+            // Remove tags
+            if (null !== $remove && \count($remove) > 0) {
+                $om->unassignTags((string) $id, 'files', $remove);
+            }
 
             return new JSONResponse([], Http::STATUS_OK);
         });

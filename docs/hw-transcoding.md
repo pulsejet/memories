@@ -46,6 +46,7 @@ NVIDIA GPUs support hardware transcoding using NVENC.
       go-vod:
         image: radialapps/go-vod
         restart: always
+        init: true
         depends_on:
           - server
         environment:
@@ -84,6 +85,30 @@ Your external transcoder should now be functional. You can check the transcoding
 
     You can run a similar setup without `docker-compose`. Make sure that the Nextcloud and go-vod containers are in the same network and that the Nextcloud data directories are mounted at the same locations in both containers.
 
+### Running as non-root
+
+Depending on your setup, you may need to run the external transcoder container as non-root (e.g. if your files aren't accessible from the root user). If you do need to run as non-root, you can add the following to the `docker-compose.yml` file to your `go-vod` service.
+
+**In most cases, this is not required.**
+
+```yaml
+services:
+  go-vod:
+    # [use the same configuration as above]
+
+    # Replace www-data with the user that you want to run the container as.
+    # This user must have access to your Nextcloud files volume as set up above.
+    user: www-data:www-data
+    working_dir: /tmp
+
+    # The following line is required if you are using VA-API acceleration.
+    # The GID should match the group of the /dev/dri/renderD128 device
+    # on the host machine. You can get it by running this on the host:
+    #   stat -c "%g" /dev/dri/renderD128
+    # Replace 109 with the GID you get from the above command
+    group_add: [109]
+```
+
 ## Internal Transcoder
 
 Memories ships with an internal transcoder binary that you can directly use. In this case, you must install the drivers and ffmpeg on the same host as Nextcloud, and Memories will automatically handle starting and communicating with go-vod. This is also the default setup when you enable transcoding without hardware acceleration.
@@ -102,17 +127,33 @@ Memories ships with an internal transcoder binary that you can directly use. In 
 
 If you are running Nextcloud on bare metal, you can install the drivers and ffmpeg directly on the host. If you are running nextcloud in a Virtual Magine or LXC container configuration, you will also need to pass through the hardware resource to the nextcloud machine. Some helpful guides can be found for [Proxmox VM](https://pve.proxmox.com/wiki/PCI_Passthrough) / [LXC Container](https://gist.github.com/packerdl/a4887c30c38a0225204f451103d82ac5?permalink_comment_id=4471564). 
 
-On the Nextcloud machine, you need to make sure that the `www-data` user has access to the `/dev/dri` devices. You can do this by adding the `www-data` user to the appropriate groups.
+On the Nextcloud machine, you will need to install the required drivers
 
 ```bash
 ## Ubuntu
 sudo apt-get update
 sudo apt-get install -y intel-media-va-driver-non-free ffmpeg # install VA-API drivers
-sudo usermod -aG video www-data # add www-data to the video group (may be different)
+
 
 ## Alpine
 apk update
 apk add --no-cache bash ffmpeg libva-utils libva-vdpau-driver libva-intel-driver intel-media-driver mesa-va-gallium
+```
+
+And make sure that the `www-data` user has access to the `/dev/dri` devices. You can do this by adding the `www-data` user to the appropriate groups. First see to which group `/dev/dri/renderD128` belongs to with `sudo ls -l /dev/dri/`.
+
+```bash
+$ sudo ls -l /dev/dri/
+crw-rw---- 1 root video  226,   0 Mar 19 20:38 card0
+crw-rw---- 1 root video  226,   1 Mar 19 20:38 card1
+crw-rw-rw- 1 root render 226, 128 Mar 19 20:38 renderD128   
+```
+
+Here, the `renderD128` device belongs to the `render` group. You can add `www-data` to that group as follows.
+
+```bash
+sudo usermod -aG render www-data
+# in other cases the group may also be `video`, for example
 ```
 
 In some cases, along with adding `www-data` to the appropriate groups, you may also need to set the permissions of the device manually:
@@ -141,6 +182,20 @@ sudo -u www-data \
 !!! warning "Beware of old ffmpeg and driver versions"
 
     Some package repositories distribute old ffmpeg versions that do not support some modern hardware. (e.g., the VA-API driver installed by `apt` in the current debian image used by Nextcloud only supports up to 10th generation Intel Ice Lake CPUs). To ensure you have a compatible version, you may want to remove your existing ffmpeg version and build the drivers and ffmpeg from source.  [This script](https://github.com/pulsejet/memories/blob/master/go-vod/build-ffmpeg.sh) for VA-API or [this one](https://github.com/pulsejet/memories/blob/master/go-vod/build-ffmpeg-nvidia.sh) for NVENC might be useful.
+
+### Unraid
+
+On Unraid, you can follow [these steps](https://github.com/pulsejet/memories/issues/936) to set up hardware transcoding with an external trancoder.
+
+1. Search for `go-vod` in community apps and click the link in the upper right to get results from DockerHub
+1. Select the option from `radialapps` and do a test install to generate a template
+1. Enable `Advanced View` in the upper right
+1. Add the `:latest` tag to the repository to ensure you have the latest version of `go-vod`
+1. Under `Extra parameters`, add `--runtime=nvidia` (if using NVENC)
+1. Add missing variables/paths as needed (see the screenshot at [this report](https://github.com/pulsejet/memories/issues/936)).
+1. Make sure all volumes are mounted at the same location as the Nextcloud container, and are read-only.
+
+Once the container is running, configure the external transcoder in the Memories admin section of the Nextcloud interface.
 
 ### Docker
 

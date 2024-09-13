@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\AlbumsQuery;
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
@@ -82,13 +83,61 @@ class AlbumsBackend extends Backend
 
     public function getClustersInternal(int $fileid = 0): array
     {
-        // Run actual queries
-        $list = [];
+        // Materialize the query
+        $materialize = static fn (IQueryBuilder & $query): IQueryBuilder => SQL::materialize($query, 'pa');
 
-        // Personal albums
-        $list = array_merge($list, $this->albumsQuery->getList(Util::getUID(), false, $fileid));
-        // Shared albums
-        $list = array_merge($list, $this->albumsQuery->getList(Util::getUID(), true, $fileid));
+        // Function to add etag
+        $etag = static fn (string $name): \Closure => static function (IQueryBuilder &$query) use ($name): void {
+            TimelineQuery::selectEtag($query, "pa.{$name}", "{$name}_etag");
+        };
+
+        // Add cover from self user
+        $ownCover = static function (IQueryBuilder &$query): void {
+            Covers::selectCover(
+                query: $query,
+                type: self::clusterType(),
+                clusterTable: 'pa',
+                clusterTableId: 'album_id',
+                objectTable: 'photos_albums_files',
+                objectTableObjectId: 'file_id',
+                objectTableClusterId: 'album_id',
+                validateFilecache: false,
+            );
+        };
+
+        // Transformation for shared albums
+        $shareCover = static function (IQueryBuilder &$query): void {
+            Covers::selectCover(
+                query: $query,
+                type: self::clusterType(),
+                clusterTable: 'pa',
+                clusterTableId: 'album_id',
+                objectTable: 'photos_albums_files',
+                objectTableObjectId: 'file_id',
+                objectTableClusterId: 'album_id',
+                validateFilecache: false,
+                field: 'cover_owner',
+                user: 'pa.user',
+            );
+        };
+
+        // Transformations to apply to own albums
+        $transformOwned = [
+            $materialize, $ownCover,
+            $materialize, $etag('last_added_photo'), $etag('cover'),
+        ];
+
+        // Transformations to apply to shared albums
+        $transformShared = [
+            $materialize, $ownCover, $shareCover,
+            $materialize, $etag('last_added_photo'), $etag('cover'), $etag('cover_owner'),
+        ];
+
+        // Get personal and shared albums
+        $list = array_merge(
+            $this->albumsQuery->getList(Util::getUID(), false, $fileid, $transformOwned),
+            $this->albumsQuery->getList(Util::getUID(), true, $fileid, $transformShared),
+        );
 
         // Remove elements with duplicate album_id
         $seenIds = [];
@@ -101,9 +150,17 @@ class AlbumsBackend extends Backend
             return true;
         });
 
-        // Add display names for users
         $userManager = \OC::$server->get(\OCP\IUserManager::class);
+
         array_walk($list, static function (array &$item) use ($userManager) {
+            // Fall back cover to cover_owner if available
+            if (empty($item['cover']) && !empty($item['cover_owner'] ?? null)) {
+                $item['cover'] = $item['cover_owner'];
+                $item['cover_etag'] = $item['cover_owner_etag'];
+            }
+            unset($item['cover_owner'], $item['cover_owner_etag']);
+
+            // Add display names for users
             $user = $userManager->get($item['user']);
             $item['user_display'] = $user ? $user->getDisplayName() : null;
         });
@@ -117,7 +174,7 @@ class AlbumsBackend extends Backend
         return $cluster['cluster_id'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null): array
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         // Get album
         $album = $this->albumsQuery->getIfAllowed($this->getUID(), $name);
@@ -128,12 +185,17 @@ class AlbumsBackend extends Backend
         // Get files
         $id = (int) $album['album_id'];
 
-        return $this->albumsQuery->getAlbumPhotos($id, $limit);
+        return $this->albumsQuery->getAlbumPhotos($id, $limit, $fileid);
     }
 
     public function sortPhotosForPreview(array &$photos): void
     {
         // Do nothing, the photos are already sorted by added date desc
+    }
+
+    public function getClusterIdFrom(array $photo): int
+    {
+        return (int) $photo['album_id'];
     }
 
     private function getUID(): string

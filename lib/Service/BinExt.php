@@ -9,7 +9,7 @@ use OCA\Memories\Settings\SystemConfig;
 class BinExt
 {
     public const EXIFTOOL_VER = '12.70';
-    public const GOVOD_VER = '0.2.4';
+    public const GOVOD_VER = '0.2.5';
     public const NX_VER_MIN = '1.1';
 
     /** Get the path to the temp directory */
@@ -186,6 +186,7 @@ class BinExt
             'nvencScale' => SystemConfig::get('memories.vod.nvenc.scale'),
 
             'useTranspose' => SystemConfig::get('memories.vod.use_transpose'),
+            'forceSwTranspose' => SystemConfig::get('memories.vod.use_transpose.force_sw'),
             'useGopSize' => SystemConfig::get('memories.vod.use_gop_size'),
         ];
 

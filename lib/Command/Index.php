@@ -42,6 +42,7 @@ class IndexOpts
     public ?string $user = null;
     public ?string $folder = null;
     public ?string $group = null;
+    public bool $retry = false;
     public bool $skipCleanup = false;
 
     public function __construct(InputInterface $input)
@@ -50,7 +51,8 @@ class IndexOpts
         $this->clear = (bool) $input->getOption('clear');
         $this->user = $input->getOption('user');
         $this->folder = $input->getOption('folder');
-        $this->skipCleanup = $input->getOption('skip-cleanup');
+        $this->retry = (bool) $input->getOption('retry');
+        $this->skipCleanup = (bool) $input->getOption('skip-cleanup');
         $this->group = $input->getOption('group');
     }
 }
@@ -82,6 +84,7 @@ class Index extends Command
             ->addOption('folder', null, InputOption::VALUE_REQUIRED, 'Index only the specified folder (relative to the user\'s root)')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force refresh of existing index entries')
             ->addOption('clear', null, InputOption::VALUE_NONE, 'Clear all existing index entries')
+            ->addOption('retry', null, InputOption::VALUE_NONE, 'Retry indexing of failed files')
             ->addOption('skip-cleanup', null, InputOption::VALUE_NONE, 'Skip cleanup step (removing index entries with missing files)')
         ;
     }
@@ -109,6 +112,7 @@ class Index extends Command
             // Perform steps based on opts
             $this->checkClear();
             $this->checkForce();
+            $this->checkRetry();
 
             // Run the indexer
             $this->runIndex();
@@ -117,6 +121,9 @@ class Index extends Command
             if (!$this->opts->skipCleanup) {
                 $this->indexer->cleanupStale();
             }
+
+            // Warn about skipped files
+            $this->warnRetry();
 
             return 0;
         } catch (\Exception $e) {
@@ -161,8 +168,30 @@ class Index extends Command
         }
 
         $this->output->writeln('Forcing refresh of existing index entries');
-
         $this->tw->orphanAll();
+    }
+
+    /**
+     * Check and act on the retry option if set.
+     */
+    protected function checkRetry(): void
+    {
+        if (!$this->opts->retry) {
+            return;
+        }
+
+        $this->output->writeln('<info>Retrying indexing of failed files</info>');
+        $this->tw->clearAllFailures();
+    }
+
+    /**
+     * Warn about skipped files (called at the end of indexing).
+     */
+    protected function warnRetry(): void
+    {
+        if ($count = $this->tw->countFailures()) {
+            $this->output->writeln("Indexing skipped for {$count} failed files, use --retry to try again");
+        }
     }
 
     /**
@@ -172,7 +201,7 @@ class Index extends Command
     {
         $this->runForUsers(function (IUser $user) {
             try {
-                $this->indexer->indexUser($user->getUID(), $this->opts->folder);
+                $this->indexer->indexUser($user, $this->opts->folder);
             } catch (\Exception $e) {
                 $this->output->writeln("<error>{$e->getMessage()}</error>".PHP_EOL);
             }

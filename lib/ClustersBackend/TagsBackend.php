@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -54,7 +55,7 @@ class TagsBackend extends Backend
     {
         $tagName = (string) $this->request->getParam('tags');
 
-        $tagId = $this->getSystemTagId($query, $tagName);
+        $tagId = $this->getSystemTagIds($query, [$tagName])[$tagName];
 
         $query->innerJoin('m', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
             $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
@@ -72,10 +73,11 @@ class TagsBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT visible tag name and count of photos
-        $count = $query->func()->count($query->createFunction('DISTINCT m.fileid'), 'count');
-        $query->select('st.id', 'st.name', $count)->from('systemtag', 'st')->where(
-            $query->expr()->eq('visibility', $query->expr()->literal(1, \PDO::PARAM_INT)),
-        );
+        $count = $query->func()->count(SQL::distinct($query, 'm.fileid'), 'count');
+        $query->select('st.id', 'st.name', $count)
+            ->from('systemtag', 'st')
+            ->where($query->expr()->eq('st.visibility', $query->expr()->literal(1, \PDO::PARAM_INT)))
+        ;
 
         // WHERE there are items with this tag
         $query->innerJoin('st', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
@@ -87,12 +89,28 @@ class TagsBackend extends Backend
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
 
         // GROUP and ORDER by tag name
-        $query->groupBy('st.id');
-        $query->orderBy($query->createFunction('LOWER(st.name)'), 'ASC');
+        $query->addGroupBy('st.id');
+        $query->addOrderBy($query->func()->lower('st.name'), 'ASC');
         $query->addOrderBy('st.id'); // tie-breaker
+
+        // SELECT cover photo
+        $query = SQL::materialize($query, 'st');
+        Covers::selectCover(
+            query: $query,
+            type: self::clusterType(),
+            clusterTable: 'st',
+            clusterTableId: 'id',
+            objectTable: 'systemtag_object_mapping',
+            objectTableObjectId: 'objectid',
+            objectTableClusterId: 'systemtagid',
+        );
+
+        // SELECT etag for the cover
+        $query = SQL::materialize($query, 'st');
+        $this->tq->selectEtag($query, 'st.cover', 'cover_etag');
 
         // FETCH all tags
         $tags = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
@@ -111,50 +129,82 @@ class TagsBackend extends Backend
         return $cluster['name'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null): array
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         $query = $this->tq->getBuilder();
-        $tagId = $this->getSystemTagId($query, $name);
+        $tagId = $this->getSystemTagIds($query, [$name])[$name];
 
         // SELECT all photos with this tag
-        $query->select('f.fileid', 'f.etag', 'stom.systemtagid')->from(
-            'systemtag_object_mapping',
-            'stom',
-        )->where(
-            $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
-            $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
-        );
+        $query->select('f.fileid', 'f.etag', 'stom.systemtagid')
+            ->from('systemtag_object_mapping', 'stom')
+            ->where(
+                $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
+                $query->expr()->eq('stom.systemtagid', $query->createNamedParameter($tagId)),
+            )
+        ;
 
         // WHERE these items are memories indexed photos
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
 
         // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->joinFilecache($query);
+        $query = $this->tq->filterFilecache($query);
+
+        // JOIN with the filecache table
+        $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('f.fileid', 'm.fileid'));
 
         // MAX number of files
-        if (null !== $limit) {
+        if (-6 === $limit) {
+            Covers::filterCover($query, self::clusterType(), 'stom', 'objectid', 'systemtagid');
+        } elseif (null !== $limit) {
             $query->setMaxResults($limit);
+        }
+
+        // Filter by fileid if specified
+        if (null !== $fileid) {
+            $query->andWhere($query->expr()->eq('f.fileid', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         // FETCH tag photos
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
-    private function getSystemTagId(IQueryBuilder $query, string $tagName): int
+    public function getClusterIdFrom(array $photo): int
+    {
+        return (int) $photo['systemtagid'];
+    }
+
+    /**
+     * Get the systemtag id for a given tag name.
+     *
+     * @param IQueryBuilder $query    Query builder
+     * @param string[]      $tagNames List of tag names
+     *
+     * @return array Map from tag name to tag id
+     */
+    private function getSystemTagIds(IQueryBuilder $query, array $tagNames): array
     {
         $sqb = $query->getConnection()->getQueryBuilder();
 
-        $res = $sqb->select('id')->from('systemtag')->where(
+        $res = $sqb->select('id', 'name')->from('systemtag')->where(
             $sqb->expr()->andX(
-                $sqb->expr()->eq('name', $sqb->createNamedParameter($tagName)),
-                $sqb->expr()->eq('visibility', $sqb->expr()->literal(1, \PDO::PARAM_INT)),
+                $sqb->expr()->in('name', $sqb->createNamedParameter($tagNames, IQueryBuilder::PARAM_STR_ARRAY)),
+                $sqb->expr()->eq('visibility', $sqb->expr()->literal(1, IQueryBuilder::PARAM_INT)),
             ),
-        )->executeQuery()->fetchOne();
+        )->executeQuery()->fetchAll();
 
-        if (false === $res) {
-            throw new \Exception("Tag {$tagName} not found");
+        // Create result map
+        $map = array_fill_keys($tagNames, 0);
+        foreach ($res as $row) {
+            $map[$row['name']] = (int) $row['id'];
         }
 
-        return (int) $res;
+        // Required to have all tags in the result
+        foreach ($tagNames as $tagName) {
+            if (0 === $map[$tagName]) {
+                throw new \Exception("Tag {$tagName} not found");
+            }
+        }
+
+        return $map;
     }
 }

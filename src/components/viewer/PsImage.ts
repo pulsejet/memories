@@ -1,8 +1,8 @@
-import PhotoSwipe from 'photoswipe';
-
 import { isVideoContent } from './PsVideo';
 import { isLiveContent } from './PsLivePhoto';
 import { fetchImage } from '../frame/XImgCache';
+
+import type PhotoSwipe from 'photoswipe';
 import type { PsContent, PsEvent, PsSlide } from './types';
 
 import errorsvg from '@assets/error.svg';
@@ -88,9 +88,9 @@ export default class ImageContentSetup {
   }
 
   slideActivate() {
-    const slide = this.lightbox.currSlide;
+    const slide = this.lightbox.currSlide as unknown as PsSlide | undefined;
     if (slide?.data.highSrcCond === 'always') {
-      this.loadFullImage(slide as PsSlide);
+      this.loadFullImage(slide);
     }
   }
 

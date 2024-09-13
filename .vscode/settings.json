@@ -74,8 +74,6 @@
     "zlib",
     "imagick"
   ],
-  "intelephense.environment.phpVersion": "8.0.0",
-  "intelephense.environment.documentRoot": "${workspaceFolder}/../../",
   "php-cs-fixer.allow-risky": true,
   "psalm.disableAutoComplete": true,
   "[php]": {
@@ -89,16 +87,40 @@
   },
   "[markdown]": {
     "files.trimTrailingWhitespace": false,
-    "editor.formatOnSave": false,
+    "editor.formatOnSave": false
   },
   "search.exclude": {
     "**/l10n": true,
     "**/.vscode": true,
-    "**/patches": true
+    "**/patches": true,
+    "*.lock": true,
+    "package-lock.json": true,
+    "COPYING": true
   },
   "git.alwaysSignOff": true,
   "editor.formatOnSave": true,
-  "psalm.configPaths": [
-    "psalm-ls.xml"
+  "psalm.configPaths": ["psalm-ls.xml"],
+
+  "intelephense.environment.phpVersion": "8.1.0",
+  "intelephense.environment.documentRoot": "../..",
+  "intelephense.environment.includePaths": ["../.."],
+  "intelephense.files.exclude": [
+    "**/.git/**",
+    "**/.svn/**",
+    "**/.hg/**",
+    "**/CVS/**",
+    "**/.DS_Store/**",
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**/{Tests,tests}/**",
+    "**/.history/**",
+    "**/vendor/**/vendor/**",
+    "**/.devcontainer/**",
+    "**/.cache/**",
+    "**/apps/**/vendor/**",
+    "**/memories/vendor/**",
+    "**/vendor-bin/**"
   ],
+  "php.validate.enable": false,
+  "php.suggest.basic": false
 }

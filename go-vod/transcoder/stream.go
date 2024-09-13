@@ -16,6 +16,8 @@ import (
 )
 
 const (
+	BLANK = ""
+
 	ENCODER_COPY  = "copy"
 	ENCODER_X264  = "libx264"
 	ENCODER_VAAPI = "h264_vaapi"
@@ -437,13 +439,34 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 				transposer = fmt.Sprintf("transpose_%s", s.c.NVENCScale)
 			}
 
-			if transposer != "transpose_cuda" { // does not exist
-				if s.m.probe.Rotation == -90 {
-					filter = fmt.Sprintf("%s,%s=1", filter, transposer)
-				} else if s.m.probe.Rotation == 90 {
-					filter = fmt.Sprintf("%s,%s=2", filter, transposer)
-				} else if s.m.probe.Rotation == 180 || s.m.probe.Rotation == -180 {
-					filter = fmt.Sprintf("%s,%s=1,%s=1", filter, transposer, transposer)
+			// Force rotation in software instead.
+			// For example, if we desire not to use transpose_vaapi for some reason.
+			forceSwTranspose := transposer != "transpose" && (s.c.ForceSwTranspose || transposer == "transpose_cuda")
+
+			// Use CPU transpose if forcing software
+			if forceSwTranspose {
+				transposer = "transpose"
+			}
+
+			// Get the transpose to apply
+			transpose := BLANK
+			if s.m.probe.Rotation == -90 {
+				transpose = fmt.Sprintf("%s=1", transposer)
+			} else if s.m.probe.Rotation == 90 {
+				transpose = fmt.Sprintf("%s=2", transposer)
+			} else if s.m.probe.Rotation == 180 || s.m.probe.Rotation == -180 {
+				transpose = fmt.Sprintf("%s=1,%s=1", transposer, transposer)
+			}
+
+			// Apply transpose filter if needed
+			if transpose != BLANK {
+				if forceSwTranspose {
+					// Download and rotate, then upload back for encoding
+					pre := "hwdownload,format=nv12"
+					post := format // includes hwupload
+					filter = fmt.Sprintf("%s,%s,%s,%s", filter, pre, transpose, post)
+				} else {
+					filter = fmt.Sprintf("%s,%s", filter, transpose)
 				}
 			}
 		}
@@ -487,7 +510,6 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 	args = append(args, []string{
 		"-map", "0:a:0?",
 		"-c:a", "aac",
-		"-ac", "1",
 	}...)
 
 	return args
@@ -508,8 +530,23 @@ func (s *Stream) transcode(startId int) {
 		"-start_number", fmt.Sprintf("%d", startId),
 		"-avoid_negative_ts", "disabled",
 		"-f", "hls",
+
+		// We force a keyframe at the start of each segment.
+		// By default, ffmpeg will split only on keyframes, so
+		// theoretically we should have perfectly sized chunks.
+		//
+		// However, the keyframes can be misaligned with the
+		// segment start even after forcing. To get around this,
+		// we chop the segments by time instead of keyframes.
+		//
+		// Technically this doesn't work with MSE (at least on Chrome),
+		// but video.js can work around this by fusing the
+		// segment with the previous GOP if no keyframe is found
+		// at the start of the segment.
+		// https://github.com/videojs/mux.js/pull/138
 		"-hls_flags", "split_by_time",
 		"-hls_time", fmt.Sprintf("%d", s.c.ChunkSize),
+
 		"-hls_segment_type", "mpegts",
 		"-hls_segment_filename", s.getTsPath(-1),
 	}...)

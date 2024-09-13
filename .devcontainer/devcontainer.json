@@ -1,0 +1,33 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/alpine
+{
+  "name": "Memories DevContainer",
+  "dockerComposeFile": ["./docker-compose.yml"],
+  "service": "nextcloud",
+  "workspaceFolder": "/var/www/html/custom_apps/memories",
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  "features": {},
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [80],
+  "postCreateCommand": "bash .devcontainer/postCreate.sh",
+  // "postStartCommand": "make watch-js",
+  // Configure tool-specific properties.
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "muuvmuuv.vscode-just-php-cs-fixer",
+        "getpsalm.psalm-vscode-plugin",
+        "esbenp.prettier-vscode",
+        "Vue.volar"
+      ],
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+      }
+    }
+  },
+
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  "remoteUser": "root"
+}

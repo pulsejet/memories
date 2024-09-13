@@ -1,11 +1,11 @@
 <template>
   <div
-    class="memories_viewer outer"
     v-if="show"
+    ref="outer"
+    class="memories_viewer outer"
     :class="{ fullyOpened, slideshowTimer }"
     :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"
-    @keydown="keydown"
   >
     <ImageEditor v-if="editorOpen && currentPhoto" :photo="currentPhoto" @close="editorOpen = false" />
 
@@ -13,13 +13,13 @@
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
 
     <div
-      class="inner"
       ref="inner"
+      class="inner"
       v-show="!editorOpen"
       @pointermove.passive="setUiVisible"
       @pointerdown.passive="setUiVisible"
     >
-      <div class="top-bar" v-if="photoswipe" :class="{ showControls }">
+      <div class="top-bar" v-if="photoswipe" :class="{ visible: showControls }">
         <NcActions :inline="numInlineActions" container=".memories_viewer .pswp">
           <NcActionButton
             v-for="action of actions"
@@ -36,7 +36,7 @@
         </NcActions>
       </div>
 
-      <div class="bottom-bar" v-if="photoswipe" :class="{ showControls, showBottomBar }">
+      <div class="bottom-bar" v-if="photoswipe" :class="{ visible: showBottomBar }">
         <div class="exif title" v-if="currentPhoto?.imageInfo?.exif?.Title">
           {{ currentPhoto.imageInfo.exif.Title }}
         </div>
@@ -55,8 +55,8 @@
 import { defineComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
@@ -107,7 +107,6 @@ type IViewerAction = {
 
 const SLIDESHOW_MS = 5000;
 const SIDEBAR_DEBOUNCE_MS = 350;
-const BODY_HAS_VIEWER = 'has-viewer';
 const BODY_VIEWER_VIDEO = 'viewer-video';
 const BODY_VIEWER_FULLY_OPENED = 'viewer-fully-opened';
 
@@ -201,6 +200,7 @@ export default defineComponent({
   computed: {
     refs() {
       return this.$refs as {
+        outer: HTMLDivElement;
         inner: HTMLDivElement;
       };
     },
@@ -289,21 +289,21 @@ export default defineComponent({
           name: this.t('memories', 'Download'),
           icon: DownloadIcon,
           callback: this.downloadCurrent,
-          if: !this.initstate.noDownload && !this.isLocal,
+          if: this.canDownload,
         },
         {
           id: 'download-video',
           name: this.t('memories', 'Download Video'),
           icon: DownloadIcon,
           callback: this.downloadCurrentLiveVideo,
-          if: !this.initstate.noDownload && !!this.currentPhoto?.liveid,
+          if: this.canDownload && !!this.currentPhoto?.liveid,
         },
         ...this.stackedRaw.map((raw) => ({
           id: `download-raw-${raw.fileid}`,
           name: this.t('memories', 'Download {ext}', { ext: raw.extension }),
           icon: DownloadIcon,
           callback: () => this.downloadByFileId(raw.fileid),
-          if: true,
+          if: this.canDownload,
         })),
         {
           id: 'view-in-folder',
@@ -372,12 +372,17 @@ export default defineComponent({
 
     /** Show bottom bar info such as date taken */
     showBottomBar(): boolean {
-      return !this.isVideo && this.fullyOpened && Boolean(this.currentPhoto?.imageInfo);
+      return (
+        (this.showControls || (!!this.slideshowTimer && this.config.metadata_in_slideshow)) &&
+        !this.isVideo &&
+        this.fullyOpened &&
+        Boolean(this.currentPhoto?.imageInfo)
+      );
     },
 
     /** Allow closing the viewer */
     allowClose(): boolean {
-      return !this.editorOpen && !dav.isSingleItem();
+      return !this.editorOpen && !dav.isSingleItem() && !this.slideshowTimer;
     },
 
     /** Get date taken string */
@@ -399,7 +404,12 @@ export default defineComponent({
 
     /** Show share button and add to album button */
     canShare(): boolean {
-      return Boolean(this.currentPhoto);
+      return !!this.currentPhoto;
+    },
+
+    /** Show download button */
+    canDownload(): boolean {
+      return !this.currentPhoto?.imageInfo?.permissions?.includes('L') && !this.initstate.noDownload && !this.isLocal;
     },
 
     /** Stacked RAW photos */
@@ -417,6 +427,12 @@ export default defineComponent({
   watch: {
     fullyOpened(val) {
       document.body.classList.toggle(BODY_VIEWER_FULLY_OPENED, val);
+    },
+
+    allowClose(val) {
+      if (!this.photoswipe) return;
+      this.photoswipe.options.pinchToClose = val;
+      this.photoswipe.options.closeOnVerticalDrag = val;
     },
   },
 
@@ -540,6 +556,11 @@ export default defineComponent({
         }
       });
 
+      // Handle keydown
+      this.photoswipe.on('keydown', (e) => {
+        this.keydown(e.originalEvent);
+      });
+
       // Make sure buttons are styled properly
       this.photoswipe.addFilter('uiElement', (element, data) => {
         // add button-vue class if button
@@ -555,7 +576,6 @@ export default defineComponent({
       // Put viewer over everything else
       const navElem = document.getElementById('app-navigation-vue');
       this.photoswipe.on('beforeOpen', () => {
-        document.body.classList.add(BODY_HAS_VIEWER);
         if (navElem) navElem.style.zIndex = '0';
       });
       this.photoswipe.on('openingAnimationStart', () => {
@@ -580,7 +600,6 @@ export default defineComponent({
         document.body.classList.remove(BODY_VIEWER_VIDEO);
       });
       this.photoswipe.on('destroy', () => {
-        document.body.classList.remove(BODY_HAS_VIEWER);
         if (navElem) navElem.style.zIndex = '';
 
         // reset everything
@@ -609,7 +628,8 @@ export default defineComponent({
         if (this.photoswipe?.template) {
           new MutationObserver((mutations) => {
             mutations.forEach((mutationRecord) => {
-              this.showControls = (<HTMLElement>mutationRecord.target)?.classList.contains('pswp--ui-visible');
+              const pswp = mutationRecord.target as HTMLElement;
+              this.showControls = pswp?.classList.contains('pswp--ui-visible') && !this.slideshowTimer;
             });
           }).observe(this.photoswipe.template, {
             attributes: true,
@@ -731,8 +751,11 @@ export default defineComponent({
 
             // If the anchor shifts to the left, we need to shift the index
             // by the same amount. This happens synchronously, so update first.
-            if (globals.anchor < this.globalAnchor) {
+            // Also check if the current position is invalid here
+            if (globals.anchor != this.globalAnchor) {
               goTo = this.photoswipe.currIndex - (this.globalAnchor - globals.anchor);
+            } else if (this.photoswipe.currIndex >= globals.count || this.photoswipe.currIndex < 0) {
+              goTo = this.photoswipe.currIndex; // equivalent to above
             }
 
             // Update the global anchor and count
@@ -742,12 +765,14 @@ export default defineComponent({
             // Go to the new index if needed
             if (goTo === null) {
               // no change
-            } else if (this.photoswipe.currIndex >= this.globalCount) {
-              this.photoswipe.goTo(this.globalCount - 1);
-            } else if (goTo < 0) {
-              this.photoswipe.goTo(0);
             } else {
+              // Change the index to the new one with clamp
+              goTo = utils.clamp(goTo, 0, globals.count - 1);
               this.photoswipe.goTo(goTo);
+
+              // Make sure the slide is current, since this call is deferred
+              // https://github.com/pulsejet/memories/issues/1194
+              this.photoswipe.refreshSlideContent(goTo);
             }
           },
           0,
@@ -992,8 +1017,14 @@ export default defineComponent({
 
     /** Key press events */
     keydown(e: KeyboardEvent) {
+      if (e.defaultPrevented) return;
+
       if (e.key === 'Delete') {
         this.deleteCurrent();
+      }
+
+      if (e.key === 'Tab') {
+        this.photoswipe?.element?.classList.add('pswp--ui-visible');
       }
     },
 
@@ -1101,7 +1132,10 @@ export default defineComponent({
         async () => {
           if (abort()) return;
 
-          _m.sidebar.setTab('memories-metadata');
+          if (!_m.sidebar.isOpen()) {
+            _m.sidebar.setTab('memories-metadata');
+          }
+
           if (this.routeIsPublic || this.isLocal) {
             _m.sidebar.open(photo);
           } else {
@@ -1171,13 +1205,11 @@ export default defineComponent({
      * Start a slideshow
      */
     async startSlideshow() {
-      // Full screen the pswp element
-      const pswp = this.photoswipe?.element;
-      if (!pswp) return;
-      pswp.requestFullscreen();
+      // Full screen the outer element
+      if (!this.refs.outer?.requestFullscreen()) return;
 
       // Hide controls
-      this.setUiVisible(false);
+      setTimeout(() => this.setUiVisible(false), 1);
 
       // Start slideshow
       this.slideshowTimer = window.setTimeout(this.slideshowTimerFired, SLIDESHOW_MS);
@@ -1241,6 +1273,7 @@ export default defineComponent({
         this.stopSlideshow();
       }
       this.photoswipe?.updateSize();
+      this.photoswipe?.template?.focus();
     },
 
     /**
@@ -1290,7 +1323,7 @@ export default defineComponent({
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
   pointer-events: none;
-  &.showControls {
+  &.visible {
     opacity: 1;
     pointer-events: auto;
   }
@@ -1308,7 +1341,7 @@ export default defineComponent({
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
-  &.showControls.showBottomBar {
+  &.visible {
     opacity: 1;
   }
 

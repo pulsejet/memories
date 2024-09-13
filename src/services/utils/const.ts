@@ -12,9 +12,17 @@ export const constants = Object.freeze({
   FLAG_IS_LOCAL: 1 << 6,
 
   FACE_NULL: 'NULL',
+  PLACES_NULL: 'NULL',
 
   MIME_RAW: 'image/x-dcraw',
   FORBIDDEN_EDIT_MIMES: ['image/bmp', 'image/x-dcraw', 'video/MP2T'], // Exif.php
+
+  ALBUM_SORT_FLAGS: {
+    DESCENDING: 1 << 0, // default true
+    LAST_UPDATE: 1 << 1, // default
+    CREATED: 1 << 2,
+    NAME: 1 << 3,
+  },
 });
 
 /**

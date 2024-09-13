@@ -58,14 +58,16 @@ trait TimelineQueryFilters
 
     private function getFavoriteVCategoryFun(IQueryBuilder &$query): IQueryFunction
     {
-        return $query->createFunction(
-            $query->getConnection()->getQueryBuilder()->select('id')->from('vcategory', 'vc')->where(
-                $query->expr()->andX(
-                    $query->expr()->eq('type', $query->expr()->literal('files')),
-                    $query->expr()->eq('uid', $query->createNamedParameter(Util::getUID())),
-                    $query->expr()->eq('category', $query->expr()->literal(ITags::TAG_FAVORITE)),
-                ),
-            )->getSQL(),
-        );
+        $sub = $query->getConnection()->getQueryBuilder();
+        $sub->select('id')
+            ->from('vcategory', 'vc')
+            ->where($sub->expr()->andX(
+                $sub->expr()->eq('type', $sub->expr()->literal('files')),
+                $sub->expr()->eq('uid', $query->createNamedParameter(Util::getUID())),
+                $sub->expr()->eq('category', $sub->expr()->literal(ITags::TAG_FAVORITE)),
+            ))
+        ;
+
+        return SQL::subquery($query, $sub);
     }
 }

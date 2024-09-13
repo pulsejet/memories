@@ -1,54 +1,51 @@
 <template>
-  <NcContent app-name="memories">
-    <NcAppContent :allowSwipeNavigation="false">
-      <div class="outer fill-block" :class="{ show }">
-        <div class="title">
-          <XImg class="img" :src="banner" :svg-tag="true" />
-        </div>
-
-        <div class="text">
-          {{ t('memories', 'A better photos experience awaits you') }} <br />
-          {{ t('memories', 'Choose the root folder of your timeline to begin') }}
-        </div>
-
-        <div class="error" v-if="error">
-          {{ error }}
-        </div>
-
-        <div class="info" v-if="info">
-          {{ info }} <br />
-
-          <NcButton @click="finish" class="button" type="primary">
-            {{ t('memories', 'Continue to Memories') }}
-          </NcButton>
-        </div>
-
-        <NcButton @click="begin" class="button" v-if="info">
-          {{ t('memories', 'Choose again') }}
-        </NcButton>
-        <NcButton @click="begin" class="button" type="primary" v-else>
-          {{ t('memories', 'Click here to start') }}
-        </NcButton>
-
-        <div class="footer">
-          {{ t('memories', 'You can always change this later in settings') }}
-
-          <span class="admin-text" v-if="isAdmin">
-            <br />
-            {{ t('memories', 'If you just installed Memories, visit the admin panel first.') }}
-          </span>
-        </div>
+  <NcAppContent :allowSwipeNavigation="false">
+    <div class="outer fill-block" :class="{ show }">
+      <div class="title">
+        <XImg class="img" :src="banner" :svg-tag="true" />
       </div>
-    </NcAppContent>
-  </NcContent>
+
+      <div class="text">
+        {{ t('memories', 'A better photos experience awaits you') }} <br />
+        {{ t('memories', 'Choose the root folder of your timeline to begin') }}
+      </div>
+
+      <div class="error" v-if="error">
+        {{ error }}
+      </div>
+
+      <div class="info" v-if="info">
+        {{ info }} <br />
+
+        <NcButton @click="finish" class="button" type="primary">
+          {{ t('memories', 'Continue to Memories') }}
+        </NcButton>
+      </div>
+
+      <NcButton @click="begin" class="button" v-if="info">
+        {{ t('memories', 'Choose again') }}
+      </NcButton>
+      <NcButton @click="begin" class="button" type="primary" v-else>
+        {{ t('memories', 'Click here to start') }}
+      </NcButton>
+
+      <div class="footer">
+        {{ t('memories', 'You can always change this later in settings') }}
+
+        <span class="admin-text" v-if="isAdmin">
+          <br />
+          {{ t('memories', 'If you just installed Memories, visit the admin panel first.') }}
+        </span>
+      </div>
+    </div>
+  </NcAppContent>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcContent from '@nextcloud/vue/dist/Components/NcContent';
-import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
+import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent.js';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 
 import UserConfig from '@mixins/UserConfig';
 
@@ -64,7 +61,6 @@ import type { IDay } from '@typings';
 export default defineComponent({
   name: 'FirstStart',
   components: {
-    NcContent,
     NcAppContent,
     NcButton,
   },

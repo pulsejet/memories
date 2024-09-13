@@ -2,6 +2,60 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Feature**: Add filter to view all files without location data in places ([#1124](https://github.com/pulsejet/memories/issues/1124))
+- **Fix**: Broken indexing of large video files. If you have improperly indexed large files, run `occ memories:index -f` ([#1195](https://github.com/pulsejet/memories/issues/1195))
+
+## [v7.3.1] - 2024-05-03
+
+- **Security**: Enable code signing and integrity checking
+- **Fix**: Always exclude `.trashed-` files from index
+- **Fix**: Auto-correct some bad preview settings in `config.php` ([#1168](https://github.com/pulsejet/memories/pull/1168))
+
+## [v7.3.0] - 2024-04-30
+
+- **Feature**: Allow excluding files and folders from indexing with regex pattern ([#1015](https://github.com/pulsejet/memories/pull/1015))
+- **Feature**: Allow forcing software-based transpose for transcoding ([#794](https://github.com/pulsejet/memories/issues/794))
+- **Note**: Using Imaginary is now discouraged for now due to multiple bugs. The admin panel will show a warning if Imaginary is enabled.
+- Various bug fixes.
+
+## [v7.2.0] - 2024-04-05
+
+- **Important**: This release has multiple hotfixes. If you are running v7.1.0, please upgrade as soon as possible.
+- **Feature**: Add option to de-duplicate identical files ([#1112](https://github.com/pulsejet/memories/issues/1112)).
+- **Feature**: Show current date at top of timeline ([#1116](https://github.com/pulsejet/memories/issues/1116))
+
+## [v7.1.0] - 2024-04-01
+
+- **Notice**: This release significantly overhauls the core querying infrastructure for better performance. If you run into any regressions (including performance), please [file a bug report](https://github.com/pulsejet/memories/issues)
+- **Breaking**: If you are running MySQL / MariaDB, you may need some extra configuration for setting up database triggers. Check the admin panel for any errors in the performance section and refer to the documentation [here](https://memories.gallery/troubleshooting/#trigger-compatibility-mode).
+- **Feature**: Basic search functionality.
+- **Feature**: Allow sorting albums by most recently updated.
+- **Feature**: Allow sorting albums in ascending and descending direction.
+- **Feature**: Manual upload to folder is now available in the Android app.
+- **Documentation**: A Docker Compose example using the community Nextcloud image is now available in the repo.
+- **Fix**: Prevent turning off screen when playing videos.
+- Support for Nextcloud 29
+
+## [v7.0.2] - 2024-03-19
+
+- **Breaking**: You must run `occ memories:places-setup` again after this update
+    - Reverse geocoding lookups with Postgres/MySQL (not MariaDB) are now 100x faster
+- **Breaking**: Prevent automatically retrying files that failed to index ([#917](https://github.com/pulsejet/memories/issues/917))
+    - The list of files that could not be indexed can be found in the admin panel
+    - To retry indexing, you can run `occ memories:index --retry`
+- **Feature**: Allow changing cover photos of albums, tags, places and people ([#1071](https://github.com/pulsejet/memories/issues/1071), [#125](https://github.com/pulsejet/memories/issues/125), [#557](https://github.com/pulsejet/memories/issues/557), [#764](https://github.com/pulsejet/memories/issues/764), [#1032](https://github.com/pulsejet/memories/issues/1032))
+- **Feature**: Allow direct file upload from web interface ([#69](https://github.com/pulsejet/memories/issues/69))
+- **Feature**: Hide files starting with `.` in the timeline
+- **Feature**: Support for 3GP videos ([#1055](https://github.com/pulsejet/memories/issues/1055))
+- **Feature**: Option to show metadata in slideshow ([#819](https://github.com/pulsejet/memories/issues/819))
+- **Feature**: Improve UX of image editor especially on mobile
+- **Fix**: The cover photo of clusters will now update automatically when files are moved ([#1071](https://github.com/pulsejet/memories/issues/1071), [#458](https://github.com/pulsejet/memories/issues/458), [#661](https://github.com/pulsejet/memories/issues/661), [#1025](https://github.com/pulsejet/memories/issues/1025), [#761](https://github.com/pulsejet/memories/issues/761), [#665](https://github.com/pulsejet/memories/issues/665))
+- **Fix**: Query performance improvements for MySQL and MariaDB with very large folders
+- **Fix**: Allow face creation on Android ([#934](https://github.com/pulsejet/memories/issues/934))
+- Android app is now available on [F-Droid](https://f-droid.org/packages/gallery.memories/) ([#852](https://github.com/pulsejet/memories/issues/852))
+
 ## [v6.2.2] - 2024-01-10
 
 - Hotfix for a bug in request pipelining.

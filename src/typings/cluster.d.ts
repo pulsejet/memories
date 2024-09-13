@@ -18,6 +18,11 @@ declare module '@typings' {
     /** Name of cluster */
     name: string;
 
+    /** Object ID of cover object */
+    cover?: number | null;
+    /** ETag of cover object */
+    cover_etag?: string;
+
     /** Display name, e.g. translated */
     display_name?: string;
     /** Preview loading failed */
@@ -37,11 +42,23 @@ declare module '@typings' {
     location: string;
     /** File ID of last added photo */
     last_added_photo: number;
+    /** Etag of last added photo */
+    last_added_photo_etag: string;
+    /** Record ID of the latest update */
+    update_id: number;
   }
 
   export interface IFace extends ICluster {
     /** User for face */
     user_id: string;
+  }
+
+  export interface IPlace extends ICluster {
+    __p: never; // cannot have empty interface
+  }
+
+  export interface ITag extends ICluster {
+    __t: never; // cannot have empty interface
   }
 
   export interface IFaceRect {

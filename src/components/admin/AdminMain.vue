@@ -83,7 +83,8 @@ export default defineComponent({
         const res = await axios.get<ISystemConfig>(API.SYSTEM_CONFIG(null));
         this.config = res.data;
       } catch (e) {
-        showError(JSON.stringify(e));
+        showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
+        console.error(e);
       } finally {
         this.loading--;
       }
@@ -95,7 +96,8 @@ export default defineComponent({
         const res = await axios.get<ISystemStatus>(API.SYSTEM_STATUS());
         this.status = res.data;
       } catch (e) {
-        showError(JSON.stringify(e));
+        showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
+        console.error(e);
       } finally {
         this.loading--;
       }
@@ -106,7 +108,8 @@ export default defineComponent({
         this.loading++;
         this.sconfig = await staticConfig.getAll();
       } catch (e) {
-        showError(JSON.stringify(e));
+        showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
+        console.error(e);
       } finally {
         this.loading--;
       }
@@ -124,9 +127,7 @@ export default defineComponent({
 
       try {
         this.loading++;
-        await axios.put(API.SYSTEM_CONFIG(key), {
-          value: value,
-        });
+        await axios.put(API.SYSTEM_CONFIG(key), { value });
 
         utils.setRenewingTimeout(this, '_refreshTimer', this.refreshStatus.bind(this), 500);
       } catch (err) {
@@ -189,6 +190,11 @@ export default defineComponent({
 
     .m-radio {
       display: inline-block;
+    }
+
+    .input-field {
+      // Prevent overlapping label with another input
+      margin-top: 0.8em;
     }
 
     h2 {

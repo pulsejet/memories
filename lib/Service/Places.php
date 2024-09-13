@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Service;
 
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Settings\SystemConfig;
 use OCP\IConfig;
@@ -43,12 +44,12 @@ class Places
         }
 
         // Detect database type
-        $platform = strtolower($this->connection->getDatabasePlatform()::class);
+        $platform = $this->connection->getDatabasePlatform();
 
         // Test MySQL-like support in databse
-        if (str_contains($platform, 'mysql') || str_contains($platform, 'mariadb')) {
+        if (preg_match('/mysql|mariadb/i', $platform::class)) {
             try {
-                $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)')")->fetch();
+                $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)', 4326)")->fetch();
                 if (0 === \count($res)) {
                     throw new \Exception('Invalid result');
                 }
@@ -60,7 +61,7 @@ class Places
         }
 
         // Test Postgres native geometry like support in database
-        if (str_contains($platform, 'postgres')) {
+        if (preg_match('/postgres/i', $platform::class)) {
             try {
                 $res = $this->connection->executeQuery("SELECT POINT('1,1')")->fetch();
                 if (0 === \count($res)) {
@@ -98,17 +99,19 @@ class Places
 
         // Construct WHERE clause depending on GIS type
         $where = null;
-        if (1 === $gisType) {
-            $where = "ST_Contains(geometry, ST_GeomFromText('POINT({$lon} {$lat})'))";
-        } elseif (2 === $gisType) {
-            $where = "POINT('{$lon},{$lat}') <@ geometry";
+        if (GIS_TYPE_MYSQL === $gisType) {
+            $where = "ST_Contains(geometry, ST_GeomFromText('POINT({$lat} {$lon})', 4326))";
+        } elseif (GIS_TYPE_POSTGRES === $gisType) {
+            // Postgres does not support using an index with POINT <@ POLYGON
+            // https://www.postgresql.org/docs/current/gist-builtin-opclasses.html
+            $where = "POLYGON('{$lat},{$lon}') <@ geometry";
         } else {
             return [];
         }
 
         // Make query to memories_planet table
         $query = $this->connection->getQueryBuilder();
-        $query->select($query->createFunction('DISTINCT(osm_id)'))
+        $query->select(SQL::distinct($query, 'osm_id'))
             ->from('memories_planet_geometry')
             ->where($query->createFunction($where))
         ;
@@ -125,7 +128,7 @@ class Places
         $query->select('sub.osm_id', 'mp.admin_level')
             ->from($query->createFunction("({$sql})"), 'sub')
             ->innerJoin('sub', 'memories_planet', 'mp', $query->expr()->eq('sub.osm_id', 'mp.osm_id'))
-            ->orderBy('mp.admin_level', 'ASC')
+            ->addOrderBy('mp.admin_level', 'ASC')
         ;
 
         // Run query
@@ -223,7 +226,7 @@ class Places
         $query = $this->connection->getQueryBuilder();
         $geomParam = (string) $query->createParameter('geometry');
         if (GIS_TYPE_MYSQL === $gis) {
-            $geomParam = "ST_GeomFromText({$geomParam})";
+            $geomParam = "ST_GeomFromText({$geomParam}, 4326)";
         } elseif (GIS_TYPE_POSTGRES === $gis) {
             $geomParam = "POLYGON({$geomParam}::text)";
         }
@@ -325,27 +328,35 @@ class Places
                     ++$idx;
                     $geometry = '';
 
+                    // Every polygon must have at least 3 points
                     if (\count($coords) < 3) {
                         echo "ERROR: Invalid polygon {$polyid}\n";
 
                         continue;
                     }
 
+                    // Check if coordinates are valid
+                    foreach ($coords as [$lon, $lat]) {
+                        if ($lon < -180 || $lon > 180 || $lat < -90 || $lat > 90) {
+                            echo "ERROR: Invalid coordinates for polygon {$polyid}\n";
+
+                            continue 2;
+                        }
+                    }
+
                     if (GIS_TYPE_MYSQL === $gis) {
                         $points = implode(',', array_map(static function (array $point) {
-                            $x = $point[0];
-                            $y = $point[1];
+                            [$lon, $lat] = $point;
 
-                            return "{$x} {$y}";
+                            return "{$lat} {$lon}";
                         }, $coords));
 
                         $geometry = "POLYGON(({$points}))";
                     } elseif (GIS_TYPE_POSTGRES === $gis) {
                         $geometry = implode(',', array_map(static function (array $point) {
-                            $x = $point[0];
-                            $y = $point[1];
+                            [$lon, $lat] = $point;
 
-                            return "({$x},{$y})";
+                            return "({$lat},{$lon})";
                         }, $coords));
                     }
 
@@ -382,7 +393,7 @@ class Places
         // Mark success
         echo "Planet database imported successfully!\n";
         flush();
-        $this->config->setSystemValue('memories.gis_type', $gis);
+        SystemConfig::set('memories.gis_type', $gis);
 
         // Delete data file
         @unlink($datafile);
@@ -424,17 +435,24 @@ class Places
     protected function setupDatabase(int $gis): void
     {
         try {
+            // Detect database type
+            $platform = $this->connection->getDatabasePlatform();
+
             // Drop the table if it exists
             $this->connection->executeStatement('DROP TABLE IF EXISTS memories_planet_geometry');
 
+            // MySQL requires an SRID definition
+            // https://github.com/pulsejet/memories/issues/1067
+            $srid = preg_match('/mysql/i', $platform::class) ? 'SRID 4326' : '';
+
             // Create table
-            $sql = 'CREATE TABLE memories_planet_geometry (
+            $sql = "CREATE TABLE memories_planet_geometry (
                 id varchar(32) NOT NULL PRIMARY KEY,
                 poly_id varchar(32) NOT NULL,
                 type_id int NOT NULL,
                 osm_id int NOT NULL,
-                geometry polygon NOT NULL
-            );';
+                geometry polygon NOT NULL {$srid}
+            );";
             $this->connection->executeQuery($sql);
 
             // Add indexes
@@ -444,7 +462,8 @@ class Places
             if (GIS_TYPE_MYSQL === $gis) {
                 $this->connection->executeQuery('CREATE SPATIAL INDEX planet_osm_polygon_geometry_idx ON memories_planet_geometry (geometry);');
             } elseif (GIS_TYPE_POSTGRES === $gis) {
-                $this->connection->executeQuery('CREATE INDEX planet_osm_polygon_geometry_idx ON memories_planet_geometry USING GIST (geometry);');
+                // https://www.postgresql.org/docs/current/gist-builtin-opclasses.html
+                $this->connection->executeQuery('CREATE INDEX planet_osm_polygon_geometry_idx ON memories_planet_geometry USING GIST (geometry poly_ops);');
             }
         } catch (\Exception $e) {
             throw new \Exception('Failed to create database tables: '.$e->getMessage());

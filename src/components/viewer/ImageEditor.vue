@@ -25,11 +25,6 @@ import * as utils from '@services/utils';
 
 import type { IImageInfo, IPhoto } from '@typings';
 
-// Crop preset icons
-import LandscapeIcon from '@scaleflex/icons/landscape';
-import PortraitIcon from '@scaleflex/icons/portrait';
-import SquareIcon from '@scaleflex/icons/square';
-
 let TABS: any, TOOLS: any;
 type FilerobotImageEditor = import('filerobot-image-editor').default;
 let FilerobotImageEditor: typeof import('filerobot-image-editor').default;
@@ -91,37 +86,12 @@ export default defineComponent({
           .filter((tab) => ![TABS.WATERMARK, TABS.ANNOTATE].includes(tab))
           .sort((a: string, b: string) => a.localeCompare(b, getLanguage())) as any[],
 
-        // onBeforeSave: this.onBeforeSave,
         onClose: this.onClose,
-        // onModify: this.onModify,
         onSave: this.onSave,
 
         Rotate: {
           angle: 90,
           componentType: 'buttons',
-        },
-
-        Crop: {
-          presetsItems: [
-            {
-              titleKey: 'landscape',
-              descriptionKey: '4:3',
-              ratio: 4 / 3,
-              icon: LandscapeIcon,
-            },
-            {
-              titleKey: 'portrait',
-              descriptionKey: '3:4',
-              ratio: 3 / 4,
-              icon: PortraitIcon,
-            },
-            {
-              titleKey: 'square',
-              descriptionKey: '1:1',
-              ratio: 1,
-              icon: SquareIcon,
-            },
-          ],
         },
 
         // Translations
@@ -131,16 +101,16 @@ export default defineComponent({
           palette: {
             'bg-secondary': 'var(--color-main-background)',
             'bg-primary': 'var(--color-background-dark)',
-            // Accent
+            'bg-hover': 'var(--color-background-hover)',
+            'bg-stateless': 'var(--color-background-dark)',
+
             'accent-primary': 'var(--color-primary)',
-            // Use by the slider
+            'accent-stateless': 'var(--color-primary-element)',
             'border-active-bottom': 'var(--color-primary)',
-            'icons-primary': 'var(--color-main-text)',
-            // Active state
+
             'bg-primary-active': 'var(--color-background-dark)',
             'bg-primary-hover': 'var(--color-background-hover)',
             'accent-primary-active': 'var(--color-main-text)',
-            // Used by the save button
             'accent-primary-hover': 'var(--color-primary)',
 
             warning: 'var(--color-error)',
@@ -195,6 +165,20 @@ export default defineComponent({
     const source = await this.getImage();
     const config = { ...this.config, source };
 
+    // Add observer to update nodes as added
+    new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (!(node instanceof Element)) return;
+
+          node.querySelectorAll('.FIE_tools-bar button').forEach((node) => {
+            // Do not apply parent styles
+            node.classList.add('button-vue');
+          });
+        });
+      });
+    }).observe(div, { childList: true, subtree: true });
+
     // Create the editor
     this.imageEditor = new FilerobotImageEditor(div, config);
     this.imageEditor.render();
@@ -204,7 +188,7 @@ export default defineComponent({
 
     // Fragment navigation
     utils.fragment.push(utils.fragment.types.editor);
-    utils.bus.on('memories:fragment:pop:editor', this.close);
+    utils.bus.on('memories:fragment:pop:editor', this.warnUnsaved);
   },
 
   beforeDestroy() {
@@ -216,7 +200,7 @@ export default defineComponent({
 
     // Fragment navigation
     utils.fragment.pop(utils.fragment.types.editor);
-    utils.bus.off('memories:fragment:pop:editor', this.close);
+    utils.bus.off('memories:fragment:pop:editor', this.warnUnsaved);
   },
 
   methods: {
@@ -238,10 +222,12 @@ export default defineComponent({
     },
 
     onClose(closingReason: any, haveNotSavedChanges: boolean) {
-      if (haveNotSavedChanges) {
-        this.onExitWithoutSaving();
-        return;
-      }
+      // Prevent the hook from being called again since we
+      // are going to quit now
+      utils.bus.off('memories:fragment:pop:editor', this.warnUnsaved);
+
+      // Cleanup
+      this.imageEditor?.terminate();
       window.removeEventListener('keydown', this.handleKeydown, true);
       this.$emit('close');
     },
@@ -264,7 +250,7 @@ export default defineComponent({
       state: any,
     ): Promise<void> {
       // Copy state
-      state = JSON.parse(JSON.stringify(state));
+      state = structuredClone(state);
 
       // Convert crop to relative values
       if (state?.adjustments?.crop) {
@@ -308,23 +294,32 @@ export default defineComponent({
         }
         this.onClose(undefined, false);
       } catch (err) {
-        showError(this.t('memories', 'Error saving image'));
+        showError(
+          this.t('memories', 'Error saving image: {error}', {
+            error: err?.response?.data?.message ?? err?.message ?? this.t('memories', 'Unknown'),
+          }),
+        );
         console.error(err);
       }
     },
 
-    /**
-     * Show warning if unsaved changes
-     */
-    async onExitWithoutSaving() {
+    /** Show warning for unsaved changes */
+    async warnUnsaved() {
+      // This method is only used when pressing the back button
+
+      // To find whether there are unsaved changes, just check
+      // if the reset button is enabled
+      const noChanges = this.refs.editor?.querySelector('button[title="Reset"]')?.hasAttribute('disabled');
+
       if (
-        await utils.confirmDestructive({
+        noChanges ||
+        (await utils.confirmDestructive({
           title: this.t('memories', 'Unsaved changes'),
-          message: translations.changesLoseConfirmation + '\n\n' + translations.changesLoseConfirmationHint,
+          message: translations.discardChangesWarningHint,
           confirm: this.t('memories', 'Drop changes'),
           confirmClasses: 'error',
           cancel: translations.cancel,
-        })
+        }))
       ) {
         this.onClose('warning-ignored', false);
       } else {
@@ -382,54 +377,47 @@ export default defineComponent({
   z-index: 10102 !important;
 }
 
-// Default styling
-.viewer__image-editor,
-.SfxModal-Wrapper,
-.SfxPopper-wrapper {
-  * {
-    // Fix font size for the entire image editor
-    font-size: var(--default-font-size) !important;
-  }
-
+.viewer__image-editor {
   label,
   button {
     color: var(--color-main-text);
-    > span {
-      font-size: var(--default-font-size) !important;
-    }
   }
+}
 
-  // Fix button ratio and center content
-  button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 44px;
-    min-height: 44px;
-    padding: 6px 12px;
-  }
+.FIE_canvas-node {
+  background: none !important;
 }
 
 // Input styling
 .SfxInput-root {
   height: auto !important;
   padding: 0 !important;
+  background: none !important;
+  border: none !important;
   .SfxInput-Base {
     margin: 0 !important;
+    min-height: 0 !important;
+    height: 28px !important;
+    font-size: 0.85em !important;
+
+    .FIE_tool-options-wrapper & {
+      padding: 0 !important;
+    }
   }
 }
 
 // Select styling
 .SfxSelect-root {
   padding: 8px !important;
+  line-height: initial !important;
 }
 
-// Global buttons
 .SfxButton-root {
-  min-height: 44px !important;
-  margin: 0 !important;
-  border: transparent !important;
-  &[color='error'] {
+  min-height: 0 !important;
+  border: none !important;
+
+  &[color='error'],
+  &[color='warning-primary'] {
     color: white !important;
     background-color: var(--color-error) !important;
     &:hover,
@@ -438,6 +426,7 @@ export default defineComponent({
       background-color: var(--color-error-hover) !important;
     }
   }
+
   &[color='primary'] {
     color: var(--color-primary-text) !important;
     background-color: var(--color-primary-element) !important;
@@ -450,49 +439,30 @@ export default defineComponent({
 
 // Menu items
 .SfxMenuItem-root {
-  height: 44px;
-  padding-left: 8px !important;
-  // Center the menu entry icon and fix width
-  > div {
-    margin-right: 0;
-    padding: 14px;
-    // Minus the parent padding-left
-    padding: calc(14px - 8px);
-    cursor: pointer;
-  }
-
-  // Disable jpeg saving (jpg is already here)
   &[value='jpeg'] {
+    // Disable jpeg saving (jpg is already here)
     display: none;
   }
 }
 
-// Modal
 .SfxModal-Container {
-  min-height: 300px;
-  padding: 22px;
-
-  // Fill height
-  .SfxModal-root,
   .SfxModalTitle-root {
-    flex: 1 1 100%;
-    justify-content: center;
-    color: var(--color-main-text);
+    color: var(--color-main-text) !important;
   }
+
   .SfxModalTitle-Icon {
-    margin-bottom: 22px !important;
     background: none !important;
-    // Fit EmptyContent styling
+    padding: 0 !important;
+
     svg {
       width: 64px;
       height: 64px;
       opacity: 0.4;
-      // Override all coloured icons
-
       --color-primary: var(--color-main-text);
       --color-error: var(--color-main-text);
     }
   }
+
   // Hide close icon (use cancel button)
   .SfxModalTitle-Close {
     display: none !important;
@@ -501,39 +471,17 @@ export default defineComponent({
   .SfxModalActions-root {
     justify-content: space-evenly !important;
   }
+
+  .SfxSlider-root {
+    margin-top: 10px;
+  }
 }
 
-// Header buttons
-.FIE_topbar-center-options > button,
-.FIE_topbar-center-options > label {
-  margin-left: 6px !important;
-}
-
-// Tabs
 .FIE_tabs {
-  padding: 6px !important;
-  overflow: hidden;
-  overflow-y: auto;
+  box-shadow: none !important;
 }
 
 .FIE_tab {
-  width: 80px !important;
-  height: 80px !important;
-  padding: 8px;
-  border-radius: var(--border-radius-large) !important;
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-  &-label {
-    margin-top: 8px !important;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    white-space: nowrap;
-    display: block !important;
-  }
-
   &:hover,
   &:focus {
     background-color: var(--color-background-hover) !important;
@@ -546,36 +494,11 @@ export default defineComponent({
   }
 }
 
-// Tools bar
-.FIE_tools-bar {
-  &-wrapper {
-    max-height: max-content !important;
-  }
-
-  // Matching buttons tools
-  & > div[class$='-tool-button'],
-  & > div[class$='-tool'] {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 44px;
-    height: 44px;
-    padding: 6px 16px;
-    border-radius: var(--border-radius-pill);
-  }
+[data-phone='true'] .FIE_topbar {
+  padding-top: 8px !important;
+  padding-bottom: 6px !important;
 }
 
-// Crop preset select button
-.FIE_crop-presets-opener-button {
-  // override default button width
-  min-width: 0 !important;
-  padding: 5px !important;
-  padding-left: 10px !important;
-  border: none !important;
-  background-color: transparent !important;
-}
-
-// Force icon-only style
 .FIE_topbar-history-buttons button,
 .FIE_topbar-close-button,
 .FIE_resize-ratio-locker {
@@ -585,24 +508,6 @@ export default defineComponent({
   &:hover,
   &:focus {
     background-color: var(--color-background-hover) !important;
-  }
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-}
-
-// Left top bar buttons
-.FIE_topbar-history-buttons button {
-  &.FIE_topbar-reset-button {
-    &::before {
-      content: attr(title);
-      font-weight: normal;
-    }
-    svg {
-      display: none;
-    }
   }
 }
 
@@ -617,77 +522,32 @@ export default defineComponent({
   }
 }
 
-// Save Modal fixes
-.FIE_resize-tool-options {
-  .FIE_resize-width-option,
-  .FIE_resize-height-option {
-    flex: 1 1;
-    min-width: 0;
+.FIE_filters-item {
+  cursor: pointer;
+  .FIE_filters-item-preview,
+  .konvajs-content {
+    pointer-events: none;
   }
-}
 
-// Resize lock
-.FIE_resize-ratio-locker {
-  margin-right: 8px !important;
-  // Icon is very thin
-  svg {
-    width: 20px;
-    height: 20px;
-    path {
-      stroke-width: 1;
-      stroke: var(--color-main-text);
-      fill: var(--color-main-text);
-    }
+  &[aria-selected='true'] .FIE_filters-item-preview {
+    padding: 0 !important;
+    border: none !important;
+    outline: 1px solid var(--color-main-text) !important;
   }
-}
-
-// Close editor button fixes
-.FIE_topbar-close-button {
-  svg path {
-    // The path viewbox is weird and
-    // not correct, this fixes it
-    transform: scale(1.6);
-  }
-}
-
-// Canvas container
-.FIE_canvas-container {
-  background-color: var(--color-main-background) !important;
-}
-
-// Loader
-.FIE_spinner::after,
-.FIE_spinner-label {
-  display: none !important;
-}
-
-.FIE_spinner-wrapper {
-  background-color: transparent !important;
-}
-
-.FIE_spinner::before {
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  left: 50%;
-  width: 28px;
-  height: 28px;
-  margin: -16px 0 0 -16px;
-  content: '';
-  -webkit-transform-origin: center;
-  -ms-transform-origin: center;
-  transform-origin: center;
-  -webkit-animation: rotate 0.8s infinite linear;
-  animation: rotate 0.8s infinite linear;
-  border: 2px solid var(--color-loading-light);
-  border-top-color: var(--color-loading-dark);
-  border-radius: 100%;
-
-  filter: var(--background-invert-if-dark);
 }
 
 .FIE_carousel-prev-button,
 .FIE_carousel-next-button {
-  background: none !important;
+  width: 30px !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  padding: 5px !important;
+  svg {
+    color: white !important;
+    transform: scale(1.25) !important;
+  }
+}
+
+.FIE_spinner-wrapper {
+  background-color: var(--color-main-background) !important;
 }
 </style>

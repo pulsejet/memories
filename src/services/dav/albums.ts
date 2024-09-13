@@ -39,13 +39,19 @@ export async function getAlbums(fileid?: number) {
   }
 
   // Sort the response
-  switch (await staticConfig.get('album_list_sort')) {
-    case 2:
-      data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
-      break;
-    case 1:
-    default:
-      data.sort((a, b) => b.created - a.created);
+  const sort = await staticConfig.get('album_list_sort');
+  if (sort & utils.constants.ALBUM_SORT_FLAGS.NAME) {
+    data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
+  } else if (sort & utils.constants.ALBUM_SORT_FLAGS.LAST_UPDATE) {
+    data.sort((a, b) => (a.update_id ?? Number.MAX_SAFE_INTEGER) - (b.update_id ?? Number.MAX_SAFE_INTEGER));
+  } else {
+    // fall back to created date
+    data.sort((a, b) => a.created - b.created);
+  }
+
+  // Sort descending if needed
+  if (sort & utils.constants.ALBUM_SORT_FLAGS.DESCENDING) {
+    data.reverse();
   }
 
   return data;
@@ -75,12 +81,7 @@ export async function* addToAlbum(user: string, name: string, photos: IPhoto[]) 
         return f.fileid;
       }
 
-      showError(
-        t('memories', 'Failed to add {filename} to album.', {
-          filename: f.filename,
-        }),
-      );
-
+      showError(t('memories', 'Failed to add {filename} to album.', { filename: f.filename }));
       console.error('DAV COPY error', e.response?.data);
       return 0;
     }
@@ -123,10 +124,11 @@ export async function* removeFromAlbum(user: string, name: string, photos: IPhot
 /**
  * Create an album.
  */
-export async function createAlbum(albumName: string) {
+export async function createAlbum(albumName: string, opts?: { rethrow: boolean }) {
   try {
     await client.createDirectory(`/photos/${utils.uid}/albums/${albumName}`);
   } catch (error) {
+    if (opts?.rethrow) throw error;
     console.error(error);
     showError(t('memories', 'Failed to create {albumName}.', { albumName }));
   }

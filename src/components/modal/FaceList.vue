@@ -32,11 +32,12 @@ import Fuse from 'fuse.js';
 
 import { showError } from '@nextcloud/dialogs';
 
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
 
 import ClusterGrid from '@components/ClusterGrid.vue';
 
 import * as dav from '@services/dav';
+import * as utils from '@services/utils';
 
 import type { ICluster, IFace } from '@typings';
 
@@ -107,8 +108,13 @@ export default defineComponent({
       let name = String();
 
       try {
-        // TODO: use a proper dialog
-        name = window.prompt(this.t('memories', 'Enter name of the new face'), String()) ?? String();
+        const input = await utils.prompt({
+          message: this.t('memories', 'Create a new face with this name?'),
+          title: this.t('memories', 'Create new face'),
+          name: this.t('memories', 'Name'),
+        });
+
+        name = input?.trim() ?? String();
         if (!name) return;
 
         // Create new directory in WebDAV

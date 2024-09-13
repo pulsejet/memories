@@ -44,5 +44,8 @@ export function downloadFromUrl(url: string) {
   if (nativex.has()) return nativex.downloadFromUrl(url);
 
   // Fallback to browser download
-  window.location.href = url;
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = '';
+  link.click();
 }

@@ -6,6 +6,7 @@ export type ISystemConfig = {
   'memories.exiftool_no_local': boolean;
   'memories.index.mode': string;
   'memories.index.path': string;
+  'memories.index.path.blacklist': string;
 
   'memories.gis_type': number;
 
@@ -29,7 +30,10 @@ export type ISystemConfig = {
   'memories.vod.nvenc.scale': string;
 
   'memories.vod.use_transpose': boolean;
+  'memories.vod.use_transpose.force_sw': boolean;
   'memories.vod.use_gop_size': boolean;
+
+  'memories.db.triggers.fcu': boolean;
 
   enabledPreviewProviders: string[];
   preview_max_x: number;
@@ -48,6 +52,7 @@ export type ISystemStatus = {
 
   bad_encryption: boolean;
   indexed_count: number;
+  failure_count: number;
   mimes: string[];
   imagick: string | false;
   gis_type: number;

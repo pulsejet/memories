@@ -2,17 +2,13 @@
 
 declare(strict_types=1);
 
-function getWildcard($param)
-{
-    return [
-        'requirements' => [$param => '.*'],
-        'defaults' => [$param => ''],
-    ];
-}
-
+/** Helper function to add a wildcard parameter to the route */
 function w($base, $param)
 {
-    return array_merge($base, getWildcard($param));
+    return array_merge($base, [
+        'requirements' => [$param => '.*'],
+        'defaults' => [$param => ''],
+    ]);
 }
 
 return [
@@ -36,16 +32,8 @@ return [
         w(['name' => 'Page#tags', 'url' => '/tags/{name}', 'verb' => 'GET'], 'name'),
 
         // Public folder share
-        [
-            'name' => 'Public#showAuthenticate',
-            'url' => '/s/{token}/authenticate/{redirect}',
-            'verb' => 'GET',
-        ],
-        [
-            'name' => 'Public#authenticate',
-            'url' => '/s/{token}/authenticate/{redirect}',
-            'verb' => 'POST',
-        ],
+        ['name' => 'Public#showAuthenticate', 'url' => '/s/{token}/authenticate/{redirect}', 'verb' => 'GET'],
+        ['name' => 'Public#authenticate', 'url' => '/s/{token}/authenticate/{redirect}', 'verb' => 'POST'],
         w(['name' => 'Public#showShare', 'url' => '/s/{token}/{path}', 'verb' => 'GET'], 'path'),
 
         // Public album share
@@ -60,6 +48,7 @@ return [
 
         ['name' => 'Clusters#list', 'url' => '/api/clusters/{backend}', 'verb' => 'GET'],
         ['name' => 'Clusters#preview', 'url' => '/api/clusters/{backend}/preview', 'verb' => 'GET'],
+        ['name' => 'Clusters#setCover', 'url' => '/api/clusters/{backend}/set-cover', 'verb' => 'POST'],
         ['name' => 'Clusters#download', 'url' => '/api/clusters/{backend}/download', 'verb' => 'POST'],
 
         ['name' => 'Tags#set', 'url' => '/api/tags/set/{id}', 'verb' => 'PATCH'],
@@ -96,6 +85,7 @@ return [
         ['name' => 'Admin#getSystemStatus', 'url' => '/api/system-status', 'verb' => 'GET'],
         ['name' => 'Admin#getSystemConfig', 'url' => '/api/system-config', 'verb' => 'GET'],
         ['name' => 'Admin#setSystemConfig', 'url' => '/api/system-config/{key}', 'verb' => 'PUT'],
+        ['name' => 'Admin#getFailureLogs', 'url' => '/api/failure-logs', 'verb' => 'GET'],
         ['name' => 'Admin#placesSetup', 'url' => '/api/occ/places-setup', 'verb' => 'POST'],
 
         // Service worker and assets

@@ -199,9 +199,10 @@ export async function extendWithStack(photos: IPhoto[]) {
   // Combine all files
   const combined = photos.concat(livePhotos, stackRaw);
 
-  // De-duplicate
-  const unique = new Map<number, IPhoto>(combined.map((p) => [p.fileid, p]));
-  return Array.from(unique.values());
+  // De-duplicate keeping the order same as before
+  // https://github.com/pulsejet/memories/issues/1056
+  const cIds = new Set(combined.map((p) => p.fileid));
+  return combined.filter((p) => cIds.delete(p.fileid));
 }
 
 /**
@@ -362,11 +363,15 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
  * @param progress callback to report progress
  */
 export async function fillImageInfo(photos: IPhoto[], query?: { tags?: number }, progress?: (count: number) => void) {
+  // Filter out photos that are local only
+  const remote = photos.filter((p) => !utils.isLocalPhoto(p));
+
   // Number of photos done
-  let done = 0;
+  let done = photos.length - remote.length;
+  if (done > 0) progress?.(done);
 
   // Load metadata for all photos
-  const calls = photos.map((p) => async () => {
+  const calls = remote.map((p) => async () => {
     try {
       const url = API.Q(API.IMAGE_INFO(p.fileid), query ?? {});
       const res = await axios.get<IImageInfo>(url);

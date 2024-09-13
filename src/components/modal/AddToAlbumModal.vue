@@ -18,7 +18,7 @@
 import { defineComponent } from 'vue';
 
 import { showInfo } from '@nextcloud/dialogs';
-const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar');
+const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';

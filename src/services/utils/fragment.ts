@@ -90,6 +90,9 @@ export const fragment = {
    * @param frag Fragment to add to route
    */
   async push(type: FragmentType, ...args: string[]) {
+    // Skip if no route (e.g. admin)
+    if (!_m.route) return;
+
     const frag: Fragment = { type, args };
     const list = this.list;
 
@@ -137,6 +140,9 @@ export const fragment = {
    * @param type Fragment identifier
    */
   async pop(type: FragmentType) {
+    // Skip if no route (e.g. admin)
+    if (!_m.route) return;
+
     // Get the index of this fragment from the end
     const frag = this.get(type);
     if (!frag) return;

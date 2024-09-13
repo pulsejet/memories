@@ -1,0 +1,104 @@
+# ===================================================================================================================
+# READ THIS NOTICE BEFORE YOU PROCEED
+# ===================================================================================================================
+# This is an example docker compose file for running Nextcloud with Memories.
+# This file is provided as an example only and is not intended to be used as-is.
+# You will need all files in this directory for the example to work.
+#
+# The example assumes the existence of two disks, hdd and ssd.
+# You can replace both with a single mount point if you don't have separate disks.
+#
+# 1. Make sure all placeholders are replaced with the correct values.
+#    Choose a strong password for the database.
+# 2. Use an appropriate nginx.conf, and adjust it according to your needs.
+#    If you intend to use a second reverse proxy for TLS, you can use this example:
+#    https://github.com/nextcloud/docker/blob/master/.examples/docker-compose/insecure/mariadb/fpm/web/nginx.conf
+#    In the example below, Nextcloud will be exposed on port 8500
+# 3. Make sure the Dockerfile uses the Nextcloud version you want to see
+#    To update Nextcloud, you can simply change the version and run `docker compose build`
+# 4. The preview generator cron job is pre-configured, but you still need to install the app
+#    and do the initial generation run. https://github.com/nextcloud/previewgenerator
+# ===================================================================================================================
+
+services:
+  db:
+    image: mariadb:11
+    restart: always
+    pull_policy: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --log_bin_trust_function_creators=1
+    volumes:
+      - /ssd/nextcloud_mariadb:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=my_root_password
+      - MYSQL_PASSWORD=my_password
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MARIADB_AUTO_UPGRADE=1
+      - MARIADB_INITDB_SKIP_TZINFO=1
+
+  redis:
+    image: redis:alpine
+    pull_policy: always
+    restart: always
+
+  app:
+    build: .
+    restart: always
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - /ssd/nextcloud:/var/www/html
+      - /hdd/nextcloud_data:/var/www/html/data
+
+      # Once Nextcloud is installed, you may move the app data folder to a faster storage
+      # and mount it here. This is optional, but recommended for better performance.
+      # The <instanceid> will depend on the particular Nextcloud instance.
+      # You will then need to make the same change in the cron service below.
+      # - /ssd/nc_appdata_<instanceid>:/var/www/html/data/appdata_<instanceid>
+    environment:
+      - NEXTCLOUD_TRUSTED_DOMAINS=my.nextcloud.domain
+      - TZ=America/Los_Angeles
+      - MYSQL_PASSWORD=my_password
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=db
+      - REDIS_HOST=redis
+      - OVERWRITEPROTOCOL=https
+      - PHP_MEMORY_LIMIT=1G
+      - PHP_UPLOAD_LIMIT=12G
+      - DEBIAN_FRONTEND=noninteractive
+
+  web:
+    image: nginx:alpine
+    pull_policy: always
+    restart: always
+    depends_on:
+      - app
+    ports:
+      - 127.0.0.1:8500:80
+    volumes:
+      - /ssd/nextcloud:/var/www/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+  go-vod:
+    image: radialapps/go-vod
+    pull_policy: always
+    restart: always
+    init: true
+    depends_on:
+      - app
+    environment:
+      - NEXTCLOUD_HOST=https://your-nextcloud-url
+      # - NEXTCLOUD_ALLOW_INSECURE=1 # (self-signed certs or no HTTPS)
+      - NVIDIA_VISIBLE_DEVICES=all
+
+    volumes:
+      - /hdd/nextcloud_data:/var/www/html/data:ro
+
+    # Uncomment the following lines for QSV / VA-API:
+    # devices:
+    #  - /dev/dri:/dev/dri
+
+    # Uncomment the following lines for NVENC
+    # runtime: nvidia

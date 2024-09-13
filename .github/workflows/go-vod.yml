@@ -4,11 +4,13 @@ on:
   push:
     tags:
       - "go-vod/*"
+  workflow_dispatch:
 
 jobs:
   binary:
     name: Binary
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/go-vod/')
 
     container:
       image: golang:1.20-bullseye
@@ -56,7 +58,7 @@ jobs:
 
       - name: Get image label
         id: image_label
-        run: echo "label=${GITHUB_REF#refs/tags/go-vod/}" >> $GITHUB_OUTPUT
+        run: echo "label=${GITHUB_SHA}" >> $GITHUB_OUTPUT
 
       - name: Build container image
         uses: docker/build-push-action@v5

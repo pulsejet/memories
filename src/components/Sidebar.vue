@@ -1,14 +1,21 @@
 <template>
   <aside id="app-sidebar-vue" class="app-sidebar reduced" v-if="reducedOpen">
-    <div class="title">
-      <h2>{{ basename }}</h2>
+    <div class="top-info" v-if="info">
+      <div class="title">
+        <h2>{{ info.basename }}</h2>
 
-      <NcActions :inline="1">
-        <NcActionButton :aria-label="t('memories', 'Close')" @click="close()">
-          {{ t('memories', 'Close') }}
-          <template #icon> <CloseIcon :size="20" /> </template>
-        </NcActionButton>
-      </NcActions>
+        <NcActions :inline="1">
+          <NcActionButton :aria-label="t('memories', 'Close')" @click="close()">
+            {{ t('memories', 'Close') }}
+            <template #icon> <CloseIcon :size="20" /> </template>
+          </NcActionButton>
+        </NcActions>
+      </div>
+
+      <div class="subtitle">
+        <span v-if="info.size">{{ utils.humanFileSize(info.size) }}</span>
+        <span v-if="info.uploadtime">{{ utils.getFromNowStr(new Date(info.uploadtime * 1000)) }}</span>
+      </div>
     </div>
 
     <Metadata ref="metadata" />
@@ -18,14 +25,14 @@
 <script lang="ts">
 import Vue, { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import Metadata from '@components/Metadata.vue';
 
 import * as utils from '@services/utils';
 
-import type { IPhoto } from '@typings';
+import type { IImageInfo, IPhoto } from '@typings';
 
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 import InfoSvg from '@assets/info.svg';
@@ -42,9 +49,10 @@ export default defineComponent({
   data: () => ({
     nativeOpen: false,
     reducedOpen: false,
-    basename: String(),
+    info: null as null | IImageInfo,
     lastKnownWidth: 0,
     nativeMetadata: null as null | InstanceType<typeof Metadata>,
+    utils: Object.freeze(utils),
   }),
 
   computed: {
@@ -67,6 +75,7 @@ export default defineComponent({
     _m.sidebar = {
       open: this.open.bind(this),
       close: this.close.bind(this),
+      isOpen: this.isOpen.bind(this),
       setTab: this.setTab.bind(this),
       invalidateUnless: this.invalidateUnless.bind(this),
       getWidth: this.getWidth.bind(this),
@@ -95,9 +104,8 @@ export default defineComponent({
         await this.$nextTick();
 
         // Update metadata compoenent
-        const info = await this.refs.metadata?.update(photo);
-        if (!info) return; // failure or state change
-        this.basename = info.basename;
+        this.info = (await this.refs.metadata?.update(photo)) ?? null;
+        if (!this.info) return; // failure or state change
         this.handleOpen();
       }
     },
@@ -112,6 +120,10 @@ export default defineComponent({
         }
         this.handleClose();
       }
+    },
+
+    isOpen() {
+      return this.reducedOpen || this.nativeOpen;
     },
 
     setTab(tab: string) {
@@ -138,7 +150,16 @@ export default defineComponent({
       // Stop sidebar typing from leaking outside
       const sidebar = document.getElementById('app-sidebar-vue');
       sidebar?.addEventListener('keydown', (e) => {
-        if (e.key.length === 1) e.stopPropagation();
+        if (e.key === 'Enter' || e.key === 'Tab') {
+          e.stopPropagation();
+          return;
+        }
+
+        const element = e.target as HTMLElement;
+        if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable) {
+          e.stopPropagation();
+          return;
+        }
       });
 
       // Emit event
@@ -178,8 +199,9 @@ export default defineComponent({
 
     /** Register the Nextcloud Sidebar component */
     async registerNative() {
-      // Wait just in case the sidebar isn't avaialble yet
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Sidebar script is loaded only after the main script
+      // so we need to wait for it to be available
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       // Pass router to the component
       const router = this.$router;
@@ -216,6 +238,9 @@ export default defineComponent({
           },
         }),
       );
+
+      // NC29+ disable tags in sidebar by default
+      globalThis.OCA?.Files?.Sidebar?.setShowTagsDefault?.(false);
     },
   },
 });
@@ -239,17 +264,28 @@ export default defineComponent({
     min-width: unset;
   }
 
+  .top-info {
+    padding: 10px;
+    padding-right: 0;
+  }
+
   .title {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px;
 
     h2 {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       margin: 0;
+    }
+  }
+
+  .subtitle {
+    color: var(--color-text-lighter);
+    > span {
+      margin-right: 4px;
     }
   }
 }

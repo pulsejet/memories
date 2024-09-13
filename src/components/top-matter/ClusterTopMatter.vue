@@ -13,15 +13,15 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton';
+import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
+import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import * as strings from '@services/strings';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 
 export default defineComponent({
-  name: 'TagTopMatter',
+  name: 'ClusterTopMatter',
   components: {
     NcActions,
     NcActionButton,
@@ -37,8 +37,6 @@ export default defineComponent({
       switch (this.$route.name) {
         case _m.routes.Tags.name:
           return this.t('recognize', this.$route.params.name);
-        case _m.routes.Places.name:
-          return this.$route.params.name?.split('-').slice(1).join('-');
         default:
           return null;
       }

@@ -28,6 +28,7 @@ Options:
       --folder=FOLDER   Index only the specified folder (relative to the user's root)
   -f, --force           Force refresh of existing index entries
       --clear           Clear all existing index entries
+      --retry           Retry indexing of failed files
       --skip-cleanup    Skip cleanup step (removing index entries with missing files)
 ```
 
@@ -45,7 +46,9 @@ Usage:
   memories:places-setup [options]
 
 Options:
-  -r, --recalculate     Only recalculate places for existing files
+  -f, --force                Ignore existing setup and re-download planet
+  -r, --recalculate          Only recalculate places for existing files
+      --transaction-size=10  Reduce this value if your database crashes [default: 10]
 ```
 
 ## `memories:migrate-google-takeout`

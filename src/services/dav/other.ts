@@ -1,9 +1,12 @@
 import { getFiles } from './base';
 import { generateUrl } from '@nextcloud/router';
+import { showError, showSuccess } from '@nextcloud/dialogs';
+import axios from '@nextcloud/axios';
 
 import { API } from '@services/API';
+import { translate as t } from '@services/l10n';
 
-import type { IPhoto } from '@typings';
+import type { ClusterTypes, IPhoto } from '@typings';
 
 /**
  * Open the files app with the given photo
@@ -34,4 +37,34 @@ export function viewInFolderUrl({ filename, fileid }: { filename: string; fileid
     scrollto: fileid,
     openfile: fileid,
   });
+}
+
+/**
+ * Set the cluster cover image
+ *
+ * @param photo The photo to set as the cover
+ */
+export async function setClusterCover(photo: IPhoto): Promise<boolean> {
+  if (!photo) return false;
+
+  // Get cluster type from route name (fragile)
+  const clusterType = _m.route.name as ClusterTypes;
+
+  // Get other parameters
+  const { fileid } = photo;
+  let { user, name } = _m.route.params;
+
+  if ([_m.routes.Recognize.name, _m.routes.Albums.name].includes(_m.route.name ?? String())) {
+    name = `${user}/${name}`;
+  }
+
+  try {
+    await axios.post(API.CLUSTER_SET_COVER(clusterType), { name, fileid });
+    showSuccess(t('memories', 'Cover image set successfully'));
+    return true;
+  } catch (err) {
+    showError(t('memories', 'Failed to set cover image'));
+    console.error(err);
+    return false;
+  }
 }

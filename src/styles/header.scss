@@ -1,10 +1,10 @@
 // Top bar is above everything else on mobile
-body.has-top-bar header {
+body:has(.memories-top-bar) > header {
   @media (max-width: 1024px) {
     z-index: 0 !important;
   }
 }
-body.has-viewer header {
+body:has(.memories_viewer, .search-overlay) > header {
   z-index: 0 !important;
 }
 
@@ -13,5 +13,19 @@ header#header .header-appname {
   transition: opacity 0.2s ease-in-out;
   &.hidden {
     opacity: 0 !important;
+  }
+}
+
+// Our menu buttons
+.memories-menu-item {
+  background-color: transparent !important;
+
+  header#header & {
+    color: var(--color-primary-text) !important;
+  }
+
+  opacity: 0.85;
+  &:hover {
+    opacity: 1;
   }
 }

@@ -21,6 +21,7 @@
         <directory name="lib" />
         <directory name="../../lib" />
         <directory name="../../apps/files/lib/Event" />
+        <directory name="../../apps/files_sharing" />
         <directory name="../../3rdparty/doctrine" />
         <directory name="../../3rdparty/psr" />
         <directory name="../../3rdparty/guzzlehttp" />

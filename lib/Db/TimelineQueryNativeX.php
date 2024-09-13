@@ -11,7 +11,7 @@ trait TimelineQueryNativeX
     public function transformNativeQuery(IQueryBuilder &$query, bool $aggregate): void
     {
         if (!$aggregate) {
-            $query->addSelect('m.epoch', 'f.size', 'm.buid');
+            $query->addSelect('m.buid');
         }
     }
 }

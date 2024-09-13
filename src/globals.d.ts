@@ -1,4 +1,4 @@
-import Router, { type Route } from 'vue-router';
+import type Router, { type Route } from 'vue-router';
 import type { ComponentPublicInstance } from 'vue';
 
 import type PlyrType from 'plyr';
@@ -46,11 +46,14 @@ declare global {
       moveToFace: (photos: IPhoto[]) => void;
       albumShare: (user: string, name: string, link?: boolean) => Promise<void>;
       showSettings: () => void;
+      upload: () => void;
+      search: () => void;
     };
 
     sidebar: {
       open: (photo: IPhoto | number, filename?: string, forceNative?: boolean) => void;
       close: () => void;
+      isOpen: () => boolean;
       setTab: (tab: string) => void;
       invalidateUnless: (fileid: number) => void;
       getWidth: () => number;
@@ -110,6 +113,11 @@ declare module 'vue' {
 
     c: typeof constants;
     initstate: typeof initstate;
+  }
+
+  export interface GlobalComponents {
+    XLoadingIcon: typeof import('@components/XLoadingIcon.vue').default;
+    XImg: typeof import('@components/frame/XImg.vue').default;
   }
 }
 

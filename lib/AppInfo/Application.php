@@ -45,6 +45,7 @@ class Application extends App implements IBootstrap
 {
     public const APPNAME = 'memories';
 
+    // Remember to update IMAGICK_SAFE if this is updated
     public const IMAGE_MIMES = [
         'image/png',
         'image/jpeg',
@@ -56,7 +57,7 @@ class Application extends App implements IBootstrap
         'image/bmp',
         'image/x-dcraw',        // RAW
         // 'image/x-xbitmap',   // too rarely used for photos
-        // 'image/svg+xml',     // too rarely used for photos
+        // 'image/svg+xml',     // unsafe
     ];
 
     public const VIDEO_MIMES = [
@@ -67,6 +68,7 @@ class Application extends App implements IBootstrap
         'video/x-matroska',
         'video/MP2T',
         'video/x-msvideo',
+        'video/3gpp',
         // 'video/x-m4v',       // too rarely used for photos
         // 'video/ogg',         // too rarely used for photos
     ];
@@ -96,12 +98,46 @@ class Application extends App implements IBootstrap
 
         // Extra hooks for native extension calls
         if (Util::callerIsNative()) {
-            // Android webview sends an empty Authorization header which screws up DAV
-            if (isset($_SERVER[AUTH_HEADER]) && empty($_SERVER[AUTH_HEADER])) {
-                unset($_SERVER[AUTH_HEADER]);
-            }
+            $this->handleNativeHeaders();
         }
     }
 
     public function boot(IBootContext $context): void {}
+
+    private function handleNativeHeaders(): void
+    {
+        // Android webview sends an empty Authorization header which screws up DAV
+        if (isset($_SERVER[AUTH_HEADER]) && empty($_SERVER[AUTH_HEADER])) {
+            unset($_SERVER[AUTH_HEADER]);
+        }
+
+        // Use the nx_auth cookie if no auth header is found
+        // It is impossible to add headers to the webview requests but we can
+        // add a cookie instead
+        if (!isset($_SERVER[AUTH_HEADER]) && isset($_COOKIE['nx_auth'])) {
+            $_SERVER[AUTH_HEADER] = $_COOKIE['nx_auth'];
+
+            // This method translates the authentication
+            // header into individual variables for user and password
+            // Call it again since it gets called before app registration
+            $oc = new \ReflectionClass(\OC::class);
+            $method = $oc->getMethod('handleAuthHeaders');
+            $method->setAccessible(true);
+            $method->invoke(null);
+
+            // Patch the existing request object with the new auth data
+            // and hope that nobody has already used it yet.
+            // This is truly horrible.
+            if (!empty($_SERVER['PHP_AUTH_USER']) && !empty($_SERVER['PHP_AUTH_PW'])) {
+                $request = \OC::$server->get(\OCP\IRequest::class);
+                $prop = new \ReflectionProperty(\OC\AppFramework\Http\Request::class, 'items');
+                $prop->setAccessible(true);
+
+                $items = $prop->getValue($request);
+                $items['server']['PHP_AUTH_USER'] = $_SERVER['PHP_AUTH_USER'];
+                $items['server']['PHP_AUTH_PW'] = $_SERVER['PHP_AUTH_PW'];
+                $prop->setValue($request, $items);
+            }
+        }
+    }
 }

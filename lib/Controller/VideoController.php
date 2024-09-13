@@ -27,6 +27,7 @@ use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
 use OCA\Memories\HttpResponseException;
 use OCA\Memories\Service\BinExt;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataDisplayResponse;
@@ -47,8 +48,8 @@ class VideoController extends GenericApiController
     public function transcode(string $client, int $fileid, string $profile): Http\Response
     {
         return Util::guardEx(function () use ($client, $fileid, $profile) {
-            // Make sure not running in read-only mode
-            if (false !== $this->config->getSystemValue('memories.vod.disable', 'UNSET')) {
+            // Make sure transcoding is enabled
+            if (SystemConfig::get('memories.vod.disable')) {
                 throw Exceptions::Forbidden('Transcoding disabled');
             }
 
@@ -205,7 +206,7 @@ class VideoController extends GenericApiController
             }
 
             // Transcode video if allowed
-            if ($transcode && !$this->config->getSystemValue('memories.vod.disable', true)) {
+            if ($transcode && !SystemConfig::get('memories.vod.disable')) {
                 // If video path not given, write to temp file
                 if (!$liveVideoPath) {
                     $liveVideoPath = self::postFile($transcode, $blob)['path'];
@@ -360,7 +361,7 @@ class VideoController extends GenericApiController
         }
     }
 
-    private static function postFileInternal(string $client, mixed $blob): mixed
+    private static function postFileInternal(string $client, string $blob): mixed
     {
         $url = BinExt::getGoVodUrl($client, '/create', 'ignore');
 

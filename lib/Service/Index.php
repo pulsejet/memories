@@ -24,10 +24,13 @@ declare(strict_types=1);
 namespace OCA\Memories\Service;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\App\IAppManager;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\DB\QueryBuilder\IQueryFunction;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -35,6 +38,7 @@ use OCP\Files\Node;
 use OCP\IDBConnection;
 use OCP\IPreview;
 use OCP\ITempManager;
+use OCP\IUser;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\ConsoleSectionOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -62,13 +66,20 @@ class Index
         protected IDBConnection $db,
         protected ITempManager $tempManager,
         protected LoggerInterface $logger,
+        protected IAppManager $appManager,
     ) {}
 
     /**
      * Index all files for a user.
      */
-    public function indexUser(string $uid, ?string $folder = null): void
+    public function indexUser(IUser $user, ?string $folder = null): void
     {
+        if (!$this->appManager->isEnabledForUser('memories', $user)) {
+            return;
+        }
+
+        $uid = $user->getUID();
+
         $this->log("<info>Indexing user {$uid}</info>".PHP_EOL, true);
 
         \OC_Util::tearDownFS();
@@ -99,7 +110,9 @@ class Index
                     throw new \Exception('Not a folder');
                 }
             } catch (\Exception $e) {
-                $this->error("The specified folder {$path} does not exist for {$uid}");
+                // Only log this if we're on the CLI, do not put an error in the logs
+                // https://github.com/pulsejet/memories/issues/1091
+                $this->log("<error>The specified folder {$path} does not exist for {$uid}</error>".PHP_EOL);
 
                 continue;
             }
@@ -118,6 +131,14 @@ class Index
         $path = $folder->getPath();
         $this->log("Indexing folder {$path}", true);
 
+        // Check if path is blacklisted
+        if (!$this->isPathAllowed($path.'/')) {
+            $this->log("Skipping folder {$path} (path excluded)".PHP_EOL, true);
+
+            return;
+        }
+
+        // Check if folder contains exclusion file
         if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.nomemories')) {
             $this->log("Skipping folder {$path} (.nomedia / .nomemories)".PHP_EOL, true);
 
@@ -129,7 +150,9 @@ class Index
 
         // Filter files that are supported
         $mimes = self::getMimeList();
-        $files = array_filter($nodes, static fn ($n) => $n instanceof File && \in_array($n->getMimeType(), $mimes, true));
+        $files = array_filter($nodes, static fn ($n): bool => $n instanceof File
+            && \in_array($n->getMimeType(), $mimes, true)
+            && self::isPathAllowed($n->getPath()));
 
         // Create an associative array with file ID as key
         $files = array_combine(array_map(static fn ($n) => $n->getId(), $files), $files);
@@ -150,20 +173,31 @@ class Index
             ;
 
             // Filter out files that are already indexed
-            $addFilter = static function (string $table, string $alias) use (&$query): void {
-                $query->leftJoin('f', $table, $alias, $query->expr()->andX(
-                    $query->expr()->eq('f.fileid', "{$alias}.fileid"),
-                    $query->expr()->eq('f.mtime', "{$alias}.mtime"),
-                    $query->expr()->eq("{$alias}.orphan", $query->expr()->literal(0)),
-                ));
+            $getFilter = function (string $table, bool $notOrpaned) use (&$query): IQueryFunction {
+                // Make subquery to check if file exists in table
+                $clause = $this->db->getQueryBuilder();
+                $clause->select($clause->expr()->literal(1))
+                    ->from($table, 'a')
+                    ->andWhere($clause->expr()->eq('f.fileid', 'a.fileid'))
+                    ->andWhere($clause->expr()->eq('f.mtime', 'a.mtime'))
+                ;
 
-                $query->andWhere($query->expr()->isNull("{$alias}.fileid"));
+                // Filter only non-orphaned files
+                if ($notOrpaned) {
+                    $clause->andWhere($clause->expr()->eq('a.orphan', $clause->expr()->literal(0)));
+                }
+
+                // Add the clause to the main query
+                return SQL::notExists($query, $clause);
             };
-            $addFilter('memories', 'm');
-            $addFilter('memories_livephoto', 'lp');
+
+            // Filter out files that are already indexed or failed
+            $query->andWhere($getFilter('memories', true));
+            $query->andWhere($getFilter('memories_livephoto', true));
+            $query->andWhere($getFilter('memories_failures', false));
 
             // Get file IDs to actually index
-            $fileIds = $query->executeQuery()->fetchAll(\PDO::FETCH_COLUMN);
+            $fileIds = Util::transaction(static fn (): array => $query->executeQuery()->fetchAll(\PDO::FETCH_COLUMN));
 
             // Index files
             foreach ($fileIds as $fileId) {
@@ -201,6 +235,7 @@ class Index
             $this->log("Skipping file {$path} due to lock", true);
         } catch (\Exception $e) {
             $this->error("Failed to index file {$path}: {$e->getMessage()}");
+            $this->tw->markFailed($file, $e->getMessage());
         } finally {
             $this->tempManager->clean();
         }
@@ -221,7 +256,7 @@ class Index
     public function getIndexedCount(): int
     {
         $query = $this->db->getQueryBuilder();
-        $query->select($query->createFunction('COUNT(DISTINCT fileid)'))
+        $query->select($query->func()->count(SQL::distinct($query, 'fileid')))
             ->from('memories')
         ;
 
@@ -262,6 +297,8 @@ class Index
 
     /**
      * Check if a file is supported.
+     *
+     * @param Node $file file to check
      */
     public static function isSupported(Node $file): bool
     {
@@ -270,10 +307,36 @@ class Index
 
     /**
      * Check if a file is a video.
+     *
+     * @param Node $file file to check
      */
-    public static function isVideo(File $file): bool
+    public static function isVideo(Node $file): bool
     {
         return \in_array($file->getMimeType(), Application::VIDEO_MIMES, true);
+    }
+
+    /**
+     * Checks if the specified node's path is allowed to be indexed.
+     */
+    public static function isPathAllowed(string $path): bool
+    {
+        // Always exclude some predefined patterns
+        //   .trashed-<file> (https://github.com/nextcloud/android/issues/10645)
+        if (preg_match('/\/.trashed-[^\/]*$/', $path)) {
+            return false;
+        }
+
+        /** @var ?string $pattern */
+        static $pattern = null;
+
+        if (null === $pattern) {
+            $pattern = trim(SystemConfig::get('memories.index.path.blacklist') ?: '');
+            if (!empty($pattern) && !\is_int(preg_match("/{$pattern}/", ''))) {
+                throw new \Exception('Invalid regex pattern in memories.index.path.blacklist');
+            }
+        }
+
+        return empty($pattern) || !preg_match("/{$pattern}/", $path);
     }
 
     /**

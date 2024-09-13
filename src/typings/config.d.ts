@@ -21,11 +21,13 @@ declare module '@typings' {
     timeline_path: string;
     enable_top_memories: boolean;
     stack_raw_files: boolean;
+    dedup_identical: boolean;
 
     // viewer settings
     high_res_cond_default: HighResCond;
     livephoto_autoplay: boolean;
     sidebar_filepath: boolean;
+    metadata_in_slideshow: boolean;
 
     // folder settings
     folders_path: string;
@@ -40,6 +42,6 @@ declare module '@typings' {
     square_thumbs: boolean;
     high_res_cond: HighResCond | null;
     show_face_rect: boolean;
-    album_list_sort: 1 | 2;
+    album_list_sort: number;
   };
 }

@@ -34,9 +34,14 @@ export async function playTouchSound() {
  * Log out from Nextcloud and pass ahead.
  */
 export async function logout() {
-  await axios.get(generateUrl('logout'));
-  if (!has()) window.location.reload();
-  nativex?.logout();
+  try {
+    await axios.get(generateUrl('logout'));
+  } catch (error) {
+    // weird ...
+  } finally {
+    if (!has()) window.location.reload();
+    nativex?.logout();
+  }
 }
 
 /**

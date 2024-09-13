@@ -15,11 +15,18 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.webkit.CookieManager
+import android.webkit.PermissionRequest
 import android.webkit.SslErrorHandler
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
@@ -61,9 +68,16 @@ class MainActivity : AppCompatActivity() {
     private val memoriesRegex = Regex("/apps/memories/.*$")
     private var host: String? = null
 
+    private var chooseFileCallback: ValueCallback<Array<Uri>>? = null
+    private lateinit var chooseFileIntentLauncher: ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        // Set fullscreen mode if in landscape
+        val orientation = resources.configuration.orientation
+        setFullscreen(orientation == Configuration.ORIENTATION_LANDSCAPE)
 
         // Restore last known look
         restoreTheme()
@@ -73,6 +87,9 @@ class MainActivity : AppCompatActivity() {
 
         // Sync if permission is available
         nativex.doMediaSync(false)
+
+        // Initialize handlers
+        initializeIntentHandlers()
 
         // Load JavaScript
         initializeWebView()
@@ -86,9 +103,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.webview.removeAllViews();
+        binding.webview.removeAllViews()
         binding.coordinator.removeAllViews()
-        binding.webview.destroy();
+        binding.webview.destroy()
         nativex.destroy()
     }
 
@@ -119,7 +136,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+        if (event.action == KeyEvent.ACTION_DOWN) {
             when (keyCode) {
                 KeyEvent.KEYCODE_BACK -> {
                     if (binding.webview.canGoBack()) {
@@ -132,6 +149,27 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    private fun initializeIntentHandlers() {
+        // File chooser
+        chooseFileIntentLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result: ActivityResult ->
+            val intent = result.data
+
+            // Attempt to parse URIs from result
+            var uris = WebChromeClient.FileChooserParams.parseResult(result.resultCode, intent)
+
+            // Use clipData if nothing found in uris
+            if (uris.isNullOrEmpty() && intent?.clipData != null) {
+                uris =
+                    Array(intent.clipData!!.itemCount) { i -> intent.clipData!!.getItemAt(i).uri }
+            }
+
+            chooseFileCallback?.onReceiveValue(uris)
+            chooseFileCallback = null
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
@@ -163,6 +201,7 @@ class MainActivity : AppCompatActivity() {
                 } else null
             }
 
+            @SuppressLint("WebViewClientOnReceivedSslError")
             override fun onReceivedSslError(
                 view: WebView?,
                 handler: SslErrorHandler?,
@@ -177,6 +216,31 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // Use the web chrome client to handle file uploads
+        binding.webview.webChromeClient = object : WebChromeClient() {
+            override fun onPermissionRequest(request: PermissionRequest) {
+                request.grant(request.resources)
+            }
+
+            override fun onShowFileChooser(
+                vw: WebView,
+                filePathCallback: ValueCallback<Array<Uri>>,
+                fileChooserParams: FileChooserParams
+            ): Boolean {
+                chooseFileCallback?.onReceiveValue(null)
+                chooseFileCallback = filePathCallback
+                val intent = fileChooserParams.createIntent()
+
+                // This is a very ugly hack to prevent the photo picker from opening.
+                // The photo picker strips  off the metadata and filename; passing
+                // text as a mime opens the original file picker
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*", "text/*"))
+
+                chooseFileIntentLauncher.launch(intent)
+                return true
+            }
+        }
+
         // Pass through touch events
         binding.webview.setOnTouchListener { _, event ->
             if (player != null) {
@@ -185,9 +249,11 @@ class MainActivity : AppCompatActivity() {
             false
         }
 
+        // Mark this is the native app in user agent
         val userAgent =
             getString(R.string.ua_app_prefix) + BuildConfig.VERSION_NAME + " " + getString(R.string.ua_chrome)
 
+        // Set up webview settings
         val webSettings = binding.webview.settings
         webSettings.javaScriptEnabled = true
         webSettings.javaScriptCanOpenWindowsAutomatically = true
@@ -201,8 +267,13 @@ class MainActivity : AppCompatActivity() {
         binding.webview.addJavascriptInterface(nativex, "nativex")
         binding.webview.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         binding.webview.setBackgroundColor(Color.TRANSPARENT)
-        // binding.webview.clearCache(true)
-        // WebView.setWebContentsDebuggingEnabled(true);
+
+        // Enable debugging in debug builds
+        if (BuildConfig.DEBUG) {
+            Toast.makeText(this, "Debugging enabled", Toast.LENGTH_SHORT).show()
+            binding.webview.clearCache(true)
+            WebView.setWebContentsDebuggingEnabled(true)
+        }
 
         // Welcome page or actual app
         nativex.account.refreshCredentials()
@@ -221,7 +292,7 @@ class MainActivity : AppCompatActivity() {
         if (host != null) return true
 
         // Load welcome page
-        binding.webview.loadUrl("file:///android_asset/welcome.html");
+        binding.webview.loadUrl("file:///android_asset/welcome.html")
         return false
     }
 
@@ -235,6 +306,11 @@ class MainActivity : AppCompatActivity() {
         // Prevent re-creating
         playerUris = uris
         playerUid = uid
+
+        // Set insecure TLS if enabled
+        if (nativex.http.isTrustingAllCertificates) {
+            nativex.http.setDefaultInsecureTLS()
+        }
 
         // Build exoplayer
         player = ExoPlayer.Builder(this)
@@ -328,7 +404,8 @@ class MainActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 window.insetsController?.apply {
                     hide(WindowInsets.Type.statusBars())
-                    systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    systemBarsBehavior =
+                        WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
                 }
             } else {
                 @Suppress("Deprecation")

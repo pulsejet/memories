@@ -3,13 +3,18 @@ declare module '*.svg' {
   export default content;
 }
 
-declare module '*.vue';
+// Vue components can be imported with .vue extension
+declare module '*.vue' {
+  import type { DefineComponent } from 'vue';
+  const component: DefineComponent<{}, {}, any>;
+  export default component;
+}
 
 // External components cannot be imported with .vue extension
-declare module '@nextcloud/vue/dist/Components/*' {
-  import type { defineComponent } from 'vue';
-  const Component: ReturnType<typeof defineComponent>;
-  export default Component;
+declare module '@nextcloud/vue/dist/Components/*.js' {
+  import type { DefineComponent } from 'vue';
+  const component: DefineComponent<{}, {}, any>;
+  export default component;
 }
 
 declare module 'vue-virtual-scroller';

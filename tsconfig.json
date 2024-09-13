@@ -1,13 +1,9 @@
 {
   "compilerOptions": {
-    "lib": [
-      "DOM",
-      "ES2017",
-      "WebWorker"
-    ],
+    "lib": ["DOM", "ES2017", "WebWorker"],
     "target": "ES2017",
     "module": "ES2020",
-    "moduleResolution": "node",
+    "moduleResolution": "Bundler",
     "sourceMap": true,
     "noImplicitThis": true,
     "noImplicitAny": true,
@@ -17,26 +13,13 @@
     "incremental": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "paths": {
-      "@services/*": [
-        "./src/services/*"
-      ],
-      "@assets": [
-        "./src/assets"
-      ],
-      "@components/*": [
-        "./src/components/*"
-      ],
-      "@mixins/*": [
-        "./src/mixins/*"
-      ],
-      "@native": [
-        "./src/native",
-        "./src/native/*"
-      ]
+      "@services/*": ["./src/services/*"],
+      "@assets": ["./src/assets"],
+      "@components/*": ["./src/components/*"],
+      "@mixins/*": ["./src/mixins/*"],
+      "@native": ["./src/native", "./src/native/*"]
     }
   },
   "vueCompilerOptions": {

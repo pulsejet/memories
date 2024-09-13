@@ -116,6 +116,11 @@ export function isNumber<T>(num: T): boolean {
   return !isNaN(cast) && isFinite(cast);
 }
 
+/** Clamp number between two numbers */
+export function clamp(num: number, min: number, max: number): number {
+  return Math.min(Math.max(num, min), max);
+}
+
 /** Check if a value is truthy */
 export function truthy<T>(value: T): value is NonNullable<T> {
   return !!value;
@@ -124,4 +129,11 @@ export function truthy<T>(value: T): value is NonNullable<T> {
 /** Check if a property is truthy */
 export function truthyProp<T, K extends keyof T>(obj: T, prop: K): obj is T & { [P in K]-?: T[K] } {
   return truthy(obj[prop]);
+}
+
+/** Convert a size in bytes to human readable */
+export function humanFileSize(size: number): string {
+  if (size === 0) return '0 B';
+  const i = Math.floor(Math.log(size) / Math.log(1024));
+  return (size / Math.pow(1024, i)).toFixed(2) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }

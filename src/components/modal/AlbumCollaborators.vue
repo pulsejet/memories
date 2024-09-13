@@ -5,24 +5,26 @@
     </div>
 
     <form class="manage-collaborators__form" @submit.prevent>
-      <NcPopover ref="popover" :auto-size="true" :distance="0">
-        <label slot="trigger" class="manage-collaborators__form__input">
-          <NcTextField
-            :value.sync="searchText"
-            autocomplete="off"
-            type="search"
-            name="search"
-            aria-autocomplete="list"
-            :label="t('memories', 'Search for collaborators')"
-            :aria-label="t('memories', 'Search for collaborators')"
-            :aria-controls="`manage-collaborators__form__selection-${randomId} manage-collaborators__form__list-${randomId}`"
-            :placeholder="t('memories', 'Search people or groups')"
-            @input="searchCollaborators"
-          >
-            <Magnify :size="16" />
-          </NcTextField>
-          <XLoadingIcon v-if="loadingCollaborators" />
-        </label>
+      <NcPopover :shown="showPopover" :auto-size="true" :distance="0" :focus-trap="false">
+        <template #trigger="{ attrs }">
+          <label slot="trigger" class="manage-collaborators__form__input" v-bind="attrs">
+            <NcTextField
+              :value.sync="searchText"
+              autocomplete="off"
+              type="search"
+              name="search"
+              aria-autocomplete="list"
+              :label="t('memories', 'Search for collaborators')"
+              :aria-label="t('memories', 'Search for collaborators')"
+              :aria-controls="`manage-collaborators__form__selection-${randomId} manage-collaborators__form__list-${randomId}`"
+              :placeholder="t('memories', 'Search people or groups')"
+              @input="searchCollaborators"
+            >
+              <Magnify :size="16" />
+            </NcTextField>
+            <XLoadingIcon v-if="loadingCollaborators" />
+          </label>
+        </template>
 
         <ul
           v-if="searchResults.length !== 0"
@@ -33,7 +35,7 @@
             <NcListItemIcon
               :id="availableCollaborators[collaboratorKey].id"
               class="manage-collaborators__form__list__result"
-              :title="availableCollaborators[collaboratorKey].label"
+              :name="availableCollaborators[collaboratorKey].label"
               :search="searchText"
               :user="availableCollaborators[collaboratorKey].id"
               :display-name="availableCollaborators[collaboratorKey].label"
@@ -50,7 +52,7 @@
           v-else
           key="emptycontent"
           class="manage-collaborators__form__list--empty"
-          :title="t('memories', 'No collaborators available')"
+          :name="t('memories', 'No collaborators available')"
         >
           <AccountGroup slot="icon" />
         </NcEmptyContent>
@@ -66,7 +68,7 @@
         <NcListItemIcon
           :id="availableCollaborators[collaboratorKey].id"
           :display-name="availableCollaborators[collaboratorKey].label"
-          :title="availableCollaborators[collaboratorKey].label"
+          :name="availableCollaborators[collaboratorKey].label"
           :user="availableCollaborators[collaboratorKey].id"
         >
           <NcButton
@@ -141,11 +143,11 @@ import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import { generateOcsUrl, generateUrl } from '@nextcloud/router';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-import NcPopover from '@nextcloud/vue/dist/Components/NcPopover';
-import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField');
-const NcListItemIcon = () => import('@nextcloud/vue/dist/Components/NcListItemIcon');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js';
+const NcPopover = () => import('@nextcloud/vue/dist/Components/NcPopover.js');
+const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+const NcListItemIcon = () => import('@nextcloud/vue/dist/Components/NcListItemIcon.js');
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
@@ -192,6 +194,7 @@ export default defineComponent({
 
   data: () => ({
     searchText: '',
+    showPopover: false,
     availableCollaborators: {} as { [key: string]: Collaborator },
     selectedCollaboratorsKeys: [] as string[],
     currentSearchResults: [] as Collaborator[],
@@ -207,12 +210,6 @@ export default defineComponent({
   }),
 
   computed: {
-    refs() {
-      return this.$refs as {
-        popover?: VueNcPopover;
-      };
-    },
-
     searchResults(): string[] {
       return this.currentSearchResults
         .filter(({ id }) => id !== utils.uid)
@@ -255,7 +252,7 @@ export default defineComponent({
      */
     async searchCollaborators() {
       if (this.searchText.length >= 1) {
-        this.refs.popover?.$refs.popover.show();
+        this.showPopover = true;
       }
 
       try {
@@ -406,8 +403,8 @@ export default defineComponent({
 
     selectEntity(collaboratorKey: string) {
       if (this.selectedCollaboratorsKeys.includes(collaboratorKey)) return;
-      this.refs.popover?.$refs.popover.hide();
       this.selectedCollaboratorsKeys.push(collaboratorKey);
+      this.showPopover = false;
     },
 
     unselectEntity(collaboratorKey: string) {

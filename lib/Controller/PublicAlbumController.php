@@ -120,7 +120,7 @@ class PublicAlbumController extends Controller
 
         // Get list of files
         $albumId = (int) $album['album_id'];
-        $files = $this->albumsQuery->getAlbumPhotos($albumId, null);
+        $files = $this->albumsQuery->getAlbumPhotos($albumId, null, null);
         $fileIds = array_map(static fn ($file) => (int) $file['file_id'], $files);
 
         // Get download handle
@@ -133,7 +133,7 @@ class PublicAlbumController extends Controller
 
     private function addOgMetadata(array $album, string $title, string $token): void
     {
-        $fileId = (int) $album['last_added_photo'];
+        $fileId = (int) ($album['cover_owner'] ?? $album['last_added_photo']);
         $albumId = (int) $album['album_id'];
         $owner = $this->albumsQuery->hasFile($albumId, $fileId);
         if (!$owner) {

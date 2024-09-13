@@ -4,20 +4,20 @@
       v-for="album in albums"
       class="album"
       :key="album.album_id"
-      :title="album.name"
+      :name="album.name"
       :aria-label="album.name"
       :to="link ? linkTarget(album) : null"
       :exact="true"
       @click="click($event, album)"
     >
       <template #icon>
-        <XImg v-if="album.last_added_photo !== -1" class="album__image" :src="toCoverUrl(album)" />
+        <XImg v-if="toCoverUrl(album)" class="album__image" :src="toCoverUrl(album)" />
         <div v-else class="album__image album__image--placeholder">
           <ImageMultipleIcon :size="32" />
         </div>
       </template>
 
-      <template #subtitle>
+      <template #subname>
         <div>
           {{ getSubtitle(album) }}
         </div>
@@ -33,8 +33,8 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton';
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem');
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
 
 import * as utils from '@services/utils';
 
@@ -84,13 +84,26 @@ export default defineComponent({
       };
     },
 
-    toCoverUrl(album: IAlbum) {
-      return utils.getPreviewUrl({
-        photo: {
-          fileid: Number(album.last_added_photo),
-        } as IPhoto,
-        sqsize: 256,
-      });
+    toCoverUrl(album: IAlbum): string | undefined {
+      // See Cluster.vue for the original implementation
+      const preview = (fileid: number, etag: string | number) =>
+        utils.getPreviewUrl({
+          photo: {
+            fileid: fileid,
+            etag: etag.toString(),
+          } as IPhoto,
+          sqsize: 512,
+        });
+
+      if (album.cover && album.cover_etag) {
+        return preview(album.cover, album.cover_etag);
+      }
+
+      if (album.last_added_photo && album.last_added_photo !== -1) {
+        return preview(album.last_added_photo, album.last_added_photo_etag ?? album.album_id);
+      }
+
+      return undefined;
     },
 
     getSubtitle(album: IAlbum) {

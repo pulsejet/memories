@@ -1,1 +1,1 @@
-Memories is a batteries-included photo management solution for Nextcloud with advanced features
+Fast, modern and advanced photo management suite. Runs as a Nextcloud app.
