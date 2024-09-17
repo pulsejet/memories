@@ -183,6 +183,7 @@ OC.L10N.register(
     "You must first make sure the correct drivers are installed before configuring acceleration." : "Прежде чем настраивать ускорение, необходимо убедиться, что установлены правильные драйверы.",
     "Make sure you test hardware acceleration with various options after enabling." : "После включения обязательно протестируйте аппаратное ускорение с различными опциями.",
     "Do not enable multiple types of hardware acceleration simultaneously." : "Не включайте одновременно несколько типов аппаратного ускорения.",
+    "For more details on driver installation, check the documentation:" : "Более подробную информацию об установке драйвера смотрите в документации:",
     "Template" : "Шаблон",
     "No items" : "Нет ни одного объекта",
     "Shared by {user}" : "Опубликовано пользователем {user} ",
