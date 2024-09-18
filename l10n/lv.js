@@ -77,6 +77,7 @@ OC.L10N.register(
     "Password protected" : "Aizsargāts ar paroli",
     "Expires" : "Beidzas",
     "Read only" : "Tikai lasāms",
+    "Last updated" : "Pēdējoreiz atjaunināta",
     "Oldest first" : "Vecākie pirms",
     "Newest first" : "Jaunākie pirms",
     "Remove album" : "Noņemt albumu",

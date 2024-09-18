@@ -187,6 +187,7 @@ OC.L10N.register(
     "Template" : "Шаблон",
     "No items" : "Нет ни одного объекта",
     "Shared by {user}" : "Опубликовано пользователем {user} ",
+    "Search your photos …" : "Поиск по фотографиям…",
     "No results found" : "Результаты отсутствуют",
     "Search" : "Поиск",
     "Upload" : "Отправить",

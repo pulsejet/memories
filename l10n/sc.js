@@ -49,7 +49,7 @@ OC.L10N.register(
     "Label" : "Eticheta",
     "Copyright" : "Deretos de autoria",
     "Empty" : "Bòidu",
-    "Reset" : "Torra a impostare",
+    "Reset" : "Riprìstinu",
     "Update" : "Agiorna",
     "Loading …" : "Carrigamentu …",
     "Move" : "Tràmuda",
