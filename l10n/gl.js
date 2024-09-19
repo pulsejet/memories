@@ -196,7 +196,7 @@ OC.L10N.register(
     "Enable Transcoding" : "Activar a transcodificación",
     "ffmpeg path" : "Ruta a FFmpeg",
     "ffprobe path" : "Ruta a FFprobe",
-    "Global default video quality (user may override)" : "Calidade de vídeo predeterminada global (o usuario pode cambiala)",
+    "Global default video quality (user may override)" : "Calidade de vídeo predeterminada global (o usuario pode anulala)",
     "Auto (adaptive transcode)" : "Automático (transcodificación adaptábel)",
     "Original (transcode with max quality)" : "Orixinal (transcodificación coa máxima calidade)",
     "Direct (original video file without transcode)" : "Directo (ficheiro de vídeo orixinal sen transcodificación)",
