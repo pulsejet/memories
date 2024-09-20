@@ -57,6 +57,7 @@ import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
 import AlbumCollaborators from './AlbumCollaborators.vue';
 
+import * as utils from '@services/utils';
 import * as dav from '@services/dav';
 
 export default defineComponent({
@@ -150,6 +151,9 @@ export default defineComponent({
             });
           }
         }
+
+        // Refresh timeline for metadata changes
+        utils.bus.emit('memories:timeline:soft-refresh', null);
 
         // Close modal
         await this.close();
