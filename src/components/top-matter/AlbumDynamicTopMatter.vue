@@ -1,19 +1,26 @@
 <template>
   <div class="album-dtm">
-    <div v-if="viewsubTitle" class="subtitle">
+    <div v-if="album?.location" class="subtitle">
       <MapMarkerOutlineIcon class="icon"></MapMarkerOutlineIcon>
-      <span>{{ viewsubTitle }}</span>
+      <span>{{ album.location }}</span>
     </div>
 
-    <div class="avatars">
-      <NcAvatar
-        v-for="c of collaborators"
-        :key="c"
-        :user="c"
-        :displayName="c"
-        :showUserStatus="false"
-        :disableMenu="false"
-      />
+    <div class="avatars" v-if="album && (album?.collaborators.length ?? 0 > 1)">
+      <!-- Show own user only if we have other collaborators -->
+      <NcAvatar :user="$route.params.user" :showUserStatus="false" />
+
+      <!-- Other collaborators -->
+      <template v-for="c of album.collaborators">
+        <!-- Links -->
+        <NcAvatar v-if="c.type === 3" :isNoUser="true">
+          <template #icon>
+            <LinkIcon :size="20" />
+          </template>
+        </NcAvatar>
+
+        <!-- Users and groups -->
+        <NcAvatar v-else :key="c.id" :user="c.id" :showUserStatus="false" />
+      </template>
     </div>
   </div>
 </template>
@@ -23,43 +30,23 @@ import { defineComponent } from 'vue';
 
 import * as dav from '@services/dav';
 
-import MapMarkerOutlineIcon from 'vue-material-design-icons/MapMarkerOutline.vue';
 const NcAvatar = () => import('@nextcloud/vue/dist/Components/NcAvatar.js');
 
-type Collaborator = {
-  id: string;
-  label: string;
-};
+import MapMarkerOutlineIcon from 'vue-material-design-icons/MapMarkerOutline.vue';
+import LinkIcon from 'vue-material-design-icons/Link.vue';
 
 export default defineComponent({
   name: 'AlbumDynamicTopMatter',
 
   components: {
-    MapMarkerOutlineIcon,
     NcAvatar,
+    MapMarkerOutlineIcon,
+    LinkIcon,
   },
 
   data: () => ({
-    album: null as any,
+    album: null as dav.IDavAlbum | null,
   }),
-
-  computed: {
-
-    collaborators(): string[] {
-      if (this.album) {
-        return [this.$route.params.user, ...this.album.collaborators.map((c: Collaborator) => c.id)];
-      }
-      return [];
-    },
-
-    /** Get view subtitle for dynamic top matter */
-    viewsubTitle(): string {
-      if (this.album) {
-        return this.album.location ?? String();
-      }
-      return String();
-    },
-  },
 
   methods: {
     async refresh(): Promise<boolean> {
@@ -93,6 +80,11 @@ export default defineComponent({
     line-height: 1.2em;
     margin-top: 0.5em;
     padding-left: 10px;
+
+    :deep .avatardiv {
+      margin-right: 2px;
+      vertical-align: bottom;
+    }
   }
 }
 </style>

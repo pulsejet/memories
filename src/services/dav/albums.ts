@@ -12,6 +12,15 @@ import * as utils from '@services/utils';
 
 import type { IAlbum, IFileInfo, IPhoto } from '@typings';
 
+export type IDavAlbum = {
+  location: string;
+  collaborators: {
+    id: string;
+    label: string;
+    type: number;
+  }[];
+};
+
 /**
  * Get DAV path for album
  */
@@ -190,7 +199,7 @@ export async function updateAlbum(album: any, { albumName, properties }: any) {
  * @param user Owner of album
  * @param name Name of album (or ID)
  */
-export async function getAlbum(user: string, name: string, extraProps = {}) {
+export async function getAlbum(user: string, name: string, extraProps = {}): Promise<IDavAlbum> {
   const req = `<?xml version="1.0"?>
         <d:propfind xmlns:d="DAV:"
             xmlns:oc="http://owncloud.org/ns"
@@ -217,6 +226,12 @@ export async function getAlbum(user: string, name: string, extraProps = {}) {
   };
   const c = album?.collaborators?.collaborator;
   album.collaborators = c ? (Array.isArray(c) ? c : [c]) : [];
+
+  // Sort collaborators by type
+  album.collaborators.sort((a: any, b: any) => {
+    return (a.type ?? -1) - (b.type ?? -1);
+  });
+
   return album;
 }
 
