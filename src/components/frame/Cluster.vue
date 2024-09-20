@@ -98,6 +98,8 @@ export default defineComponent({
             user: this.data.user_display || this.data.user,
           });
           text = `${text} / ${sharer}`;
+        } else if (this.data.shared) {
+          text += ' | ' + this.t('memories', 'Shared Album');
         }
 
         return text;
