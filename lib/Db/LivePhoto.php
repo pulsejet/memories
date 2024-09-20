@@ -52,6 +52,22 @@ class LivePhoto
             return "self__traileroffset={$videoOffset}";
         }
 
+        // Samsung JPEG (tested w/ S24)
+        // https://github.com/pulsejet/memories/issues/1265
+        if (($embedType = $exif['EmbeddedVideoType'] ?? null)
+            && \in_array($embedType, ['MotionPhoto_Data'], true)
+            && ($exif['EmbeddedVideoFile'] ?? null)
+        ) {
+            // Binary exif field, decode when the user requests it
+            // While this is the most reliable way, it is slow
+            return 'self__exifbin=EmbeddedVideoFile';
+        }
+
+        // Samsung HEIC (tested w/ S21)
+        if (!empty($exif['MotionPhotoVideo'] ?? null)) {
+            return 'self__exifbin=MotionPhotoVideo';
+        }
+
         // Google JPEG and Samsung HEIC / JPEG (Apple?)
         if ($exif['MotionPhoto'] ?? null) {
             if ('image/jpeg' === ($exif['MIMEType'] ?? null)) {
@@ -107,12 +123,6 @@ class LivePhoto
                 // The reason this is above the MotionPhotoVideo check is because extracting binary
                 // EXIF fields on the fly is extremely expensive compared to trailer extraction.
             }
-        }
-
-        // Samsung HEIC (at least S21)
-        if (!empty($exif['MotionPhotoVideo'] ?? null)) {
-            // It's a binary exif field, decode when the user requests it
-            return 'self__exifbin=MotionPhotoVideo';
         }
 
         return '';
