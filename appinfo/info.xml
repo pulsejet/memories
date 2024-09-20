@@ -29,7 +29,7 @@ Memories is a *batteries-included* photo management solution for Nextcloud with 
 1. Run `php occ memories:index` to generate metadata indices for existing photos.
 1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos.
 ]]></description>
-    <version>7.3.1</version>
+    <version>7.4.0</version>
     <licence>agpl</licence>
     <author mail="radialapps@gmail.com">Varun Patil</author>
     <namespace>Memories</namespace>
@@ -39,7 +39,7 @@ Memories is a *batteries-included* photo management solution for Nextcloud with 
     <repository>https://github.com/pulsejet/memories</repository>
     <screenshot>https://raw.githubusercontent.com/pulsejet/memories/master/appinfo/screenshot.jpg</screenshot>
     <dependencies>
-        <nextcloud min-version="26" max-version="29"/>
+        <nextcloud min-version="26" max-version="30"/>
     </dependencies>
     <commands>
         <command>OCA\Memories\Command\Index</command>
