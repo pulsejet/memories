@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v7.4.0] - 2024-09-19
+## [v7.4.1] - 2024-09-19
 
 - **Feature**: Add filter to view all files without location data in places ([#1124](https://github.com/pulsejet/memories/issues/1124))
 - **Fix**: Broken indexing of large video files. If you have improperly indexed large files, run `occ memories:index -f` ([#1195](https://github.com/pulsejet/memories/issues/1195))
