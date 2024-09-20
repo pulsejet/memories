@@ -4,13 +4,22 @@ import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import { getLanguage } from '@nextcloud/l10n';
 
-import { translate as t } from '@services/l10n';
+import { translate as t, translatePlural as n } from '@services/l10n';
 import { API } from '@services/API';
 import client from '@services/dav/client';
 import staticConfig from '@services/static-config';
 import * as utils from '@services/utils';
 
 import type { IAlbum, IFileInfo, IPhoto } from '@typings';
+
+export type IDavAlbum = {
+  location: string;
+  collaborators: {
+    id: string;
+    label: string;
+    type: number;
+  }[];
+};
 
 /**
  * Get DAV path for album
@@ -190,7 +199,7 @@ export async function updateAlbum(album: any, { albumName, properties }: any) {
  * @param user Owner of album
  * @param name Name of album (or ID)
  */
-export async function getAlbum(user: string, name: string, extraProps = {}) {
+export async function getAlbum(user: string, name: string, extraProps = {}): Promise<IDavAlbum> {
   const req = `<?xml version="1.0"?>
         <d:propfind xmlns:d="DAV:"
             xmlns:oc="http://owncloud.org/ns"
@@ -205,7 +214,7 @@ export async function getAlbum(user: string, name: string, extraProps = {}) {
                 ${extraProps}
             </d:prop>
         </d:propfind>`;
-  let album = (await client.stat(`/photos/${user}/albums/${name}`, {
+  let album = (await client.stat(getAlbumPath(user, name), {
     data: req,
     details: true,
   })) as any;
@@ -217,6 +226,12 @@ export async function getAlbum(user: string, name: string, extraProps = {}) {
   };
   const c = album?.collaborators?.collaborator;
   album.collaborators = c ? (Array.isArray(c) ? c : [c]) : [];
+
+  // Sort collaborators by type
+  album.collaborators.sort((a: any, b: any) => {
+    return (a.type ?? -1) - (b.type ?? -1);
+  });
+
   return album;
 }
 
@@ -257,4 +272,25 @@ export function getAlbumFileInfos(photos: IPhoto[], albumUser: string, albumName
       basename: basename,
     } as IFileInfo;
   });
+}
+
+export function getAlbumSubtitle(album: IAlbum) {
+  let text: string;
+  if (album.count === 0) {
+    text = t('memories', 'No items');
+  } else {
+    text = n('memories', '{n} item', '{n} items', album.count, { n: album.count });
+  }
+
+  if (album.user !== utils.uid) {
+    const sharer = t('memories', 'Shared by {user}', {
+      user: album.user_display || album.user,
+    });
+    text = `${text} | ${sharer}`;
+  } else if (album.shared) {
+    const shared = t('memories', 'Shared Album');
+    text = `${text} | ${shared}`;
+  }
+
+  return text;
 }

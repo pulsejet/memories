@@ -24,6 +24,7 @@ import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
 import AlbumForm from './AlbumForm.vue';
 
+import * as utils from '@services/utils';
 import * as dav from '@services/dav';
 
 export default defineComponent({
@@ -81,6 +82,9 @@ export default defineComponent({
         } else {
           await this.$router.replace(route);
         }
+      } else {
+        // refresh timeline for metadata changes
+        utils.bus.emit('memories:timeline:soft-refresh', null);
       }
     },
   },
