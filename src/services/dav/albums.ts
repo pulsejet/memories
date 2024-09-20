@@ -4,7 +4,7 @@ import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import { getLanguage } from '@nextcloud/l10n';
 
-import { translate as t } from '@services/l10n';
+import { translate as t, translatePlural as n } from '@services/l10n';
 import { API } from '@services/API';
 import client from '@services/dav/client';
 import staticConfig from '@services/static-config';
@@ -257,4 +257,25 @@ export function getAlbumFileInfos(photos: IPhoto[], albumUser: string, albumName
       basename: basename,
     } as IFileInfo;
   });
+}
+
+export function getAlbumSubtitle(album: IAlbum) {
+  let text: string;
+  if (album.count === 0) {
+    text = t('memories', 'No items');
+  } else {
+    text = n('memories', '{n} item', '{n} items', album.count, { n: album.count });
+  }
+
+  if (album.user !== utils.uid) {
+    const sharer = t('memories', 'Shared by {user}', {
+      user: album.user_display || album.user,
+    });
+    text = `${text} | ${sharer}`;
+  } else if (album.shared) {
+    const shared = t('memories', 'Shared Album');
+    text = `${text} | ${shared}`;
+  }
+
+  return text;
 }

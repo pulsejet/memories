@@ -88,20 +88,12 @@ class AlbumsQuery
         // FETCH all albums
         $albums = $query->executeQuery()->fetchAll();
 
-        // Additionally fetch all shared album ids
-        $queryShared = $this->connection->getQueryBuilder();
-        $queryShared->select('album_id')->from($this->collaboratorsTable());
-        $shared_ids = array_map(function($row) {
-            return (int)$row['album_id'];
-        }, $queryShared->executeQuery()->fetchAll());
-
         // Post process
         foreach ($albums as &$row) {
             $row['cluster_id'] = $row['user'].'/'.$row['name'];
             $row['album_id'] = (int) $row['album_id'];
             $row['created'] = (int) $row['created'];
             $row['last_added_photo'] = (int) $row['last_added_photo'];
-            $row['shared'] = in_array($row['album_id'], $shared_ids, true);
         }
 
         return $albums;
@@ -306,6 +298,20 @@ class AlbumsQuery
         }
 
         return $result;
+    }
+
+    /**
+     * Query transformation to add a "shared" flag to the list
+     * of albums (whether the album has any shared collaborators).
+     */
+    public function transformSharedFlag(IQueryBuilder &$query): void
+    {
+        $sSq = $query->getConnection()->getQueryBuilder();
+        $sSq->select($sSq->expr()->literal(1))
+            ->from($this->collaboratorsTable(), 'pc')
+            ->where($sSq->expr()->eq('pc.album_id', 'pa.album_id'))
+        ;
+        $query->selectAlias(SQL::exists($query, $sSq), 'shared');
     }
 
     /**

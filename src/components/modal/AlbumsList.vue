@@ -37,6 +37,7 @@ import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
 
 import * as utils from '@services/utils';
+import * as dav from '@services/dav';
 
 import type { IAlbum, IPhoto } from '@typings';
 
@@ -107,19 +108,7 @@ export default defineComponent({
     },
 
     getSubtitle(album: IAlbum) {
-      let text = this.n('memories', '%n item', '%n items', album.count);
-
-      if (album.user !== utils.uid) {
-        text +=
-          ' / ' +
-          this.t('memories', 'Shared by {user}', {
-            user: album.user_display || album.user,
-          });
-      } else if (album.shared) {
-        text += ' | ' + this.t('memories', 'Shared Album');
-      }
-
-      return text;
+      return dav.getAlbumSubtitle(album);
     },
   },
 });

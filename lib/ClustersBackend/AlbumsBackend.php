@@ -121,8 +121,14 @@ class AlbumsBackend extends Backend
             );
         };
 
+        // Transformation to select the shared flag
+        $sharedFlag = function (IQueryBuilder &$query): void {
+            $this->albumsQuery->transformSharedFlag($query);
+        };
+
         // Transformations to apply to own albums
         $transformOwned = [
+            $sharedFlag,
             $materialize, $ownCover,
             $materialize, $etag('last_added_photo'), $etag('cover'),
         ];
