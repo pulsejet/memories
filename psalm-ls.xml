@@ -9,7 +9,7 @@
     cacheDirectory=".cache/psalm-ls"
     findUnusedBaselineEntry="true"
     findUnusedCode="false"
-    phpVersion="8.0"
+    phpVersion="8.1"
 >
     <!--
         Duplication is due to differences in language server and CLI

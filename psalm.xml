@@ -9,7 +9,7 @@
     cacheDirectory=".cache/psalm"
     findUnusedBaselineEntry="true"
     findUnusedCode="false"
-    phpVersion="8.0"
+    phpVersion="8.1"
 >
     <!-- The language server works slightly differently and has a different file -->
     <projectFiles>
