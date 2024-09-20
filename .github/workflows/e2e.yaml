@@ -35,7 +35,7 @@ jobs:
           make build-js-production
           zip -r vue.zip js/
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: vue.zip
           path: vue.zip
@@ -78,7 +78,7 @@ jobs:
         with:
           node-version: 20.x
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: vue.zip
 
@@ -110,7 +110,7 @@ jobs:
         run: |
           ./apps/memories/scripts/ci-test.sh
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: report-mysql-${{ matrix.php-versions }}-${{ matrix.server-versions }}
@@ -159,7 +159,7 @@ jobs:
         with:
           node-version: 20.x
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: vue.zip
 
@@ -191,7 +191,7 @@ jobs:
         run: |
           ./apps/memories/scripts/ci-test.sh
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: report-pgsql-${{ matrix.php-versions }}-${{ matrix.server-versions }}
@@ -226,7 +226,7 @@ jobs:
         with:
           node-version: 20.x
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: vue.zip
 
@@ -252,7 +252,7 @@ jobs:
         run: |
           ./apps/memories/scripts/ci-test.sh
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: report-sqlite-${{ matrix.php-versions }}-${{ matrix.server-versions }}
