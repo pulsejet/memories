@@ -317,15 +317,20 @@ export default defineComponent({
 <style lang="scss" scoped>
 /* Container and selection */
 .p-outer {
-  padding: 2px;
-  @media (max-width: 768px) {
-    padding: 1px;
+  & {
+    padding: 2px;
+    --icon-dist: 8px;
+
+    transition:
+      background-color 0.15s ease,
+      opacity 0.2s ease-in,
+      transform 0.2s ease-in;
   }
 
-  transition:
-    background-color 0.15s ease,
-    opacity 0.2s ease-in,
-    transform 0.2s ease-in;
+  @media (max-width: 768px) {
+    padding: 1px;
+    --icon-dist: 4px;
+  }
 
   &.leaving {
     transform: scale(0.9);
@@ -335,11 +340,6 @@ export default defineComponent({
   &.selected {
     background-color: var(--color-primary-select-light);
     background-clip: content-box;
-  }
-
-  --icon-dist: 8px;
-  @media (max-width: 768px) {
-    --icon-dist: 4px;
   }
 }
 
@@ -370,7 +370,10 @@ $icon-size: $icon-half-size * 2;
     }
   }
 
-  filter: invert(1) brightness(100);
+  & {
+    filter: invert(1) brightness(100);
+  }
+
   .p-outer.selected > & {
     @include visible;
     filter: invert(0);

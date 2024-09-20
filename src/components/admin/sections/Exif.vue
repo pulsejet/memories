@@ -13,7 +13,7 @@
       :label-visible="true"
       :value="config['memories.exiftool']"
       @change="update('memories.exiftool', $event.target.value)"
-      disabled
+      readonly
     />
 
     <template v-if="status">
