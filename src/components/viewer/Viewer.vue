@@ -535,17 +535,18 @@ export default defineComponent({
       // Debugging only
       _m.viewer.photoswipe = this.photoswipe;
 
+      // Check if someone else is trapping focus
+      const hasNestedTrap = (e: Event) => {
+        const selectors = ['#app-sidebar-vue', '.v-popper__popper', '.modal-mask', '.oc-dialog'];
+        return e.target instanceof HTMLElement && e.target.closest(selectors.join(','));
+      };
+
       // Monkey patch for focus trapping in sidebar
       const psKeyboard = this.photoswipe.keyboard as any;
       const _onFocusIn = psKeyboard['_onFocusIn'];
       console.assert(_onFocusIn, 'Missing _onFocusIn for monkey patch');
       psKeyboard['_onFocusIn'] = (e: FocusEvent) => {
-        if (
-          e.target instanceof HTMLElement &&
-          e.target.closest(['#app-sidebar-vue', '.v-popper__popper', '.modal-mask', '.oc-dialog'].join(','))
-        ) {
-          return;
-        }
+        if (hasNestedTrap(e)) return;
         _onFocusIn.call(this.photoswipe!.keyboard, e);
       };
 
@@ -558,6 +559,11 @@ export default defineComponent({
 
       // Handle keydown
       this.photoswipe.on('keydown', (e) => {
+        if (e.defaultPrevented || hasNestedTrap(e.originalEvent)) {
+          e.preventDefault();
+          return;
+        }
+
         this.keydown(e.originalEvent);
       });
 
