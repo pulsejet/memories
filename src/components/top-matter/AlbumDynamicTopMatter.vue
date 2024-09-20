@@ -28,6 +28,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import * as utils from '@services/utils';
 import * as dav from '@services/dav';
 
 const NcAvatar = () => import('@nextcloud/vue/dist/Components/NcAvatar.js');
@@ -50,8 +51,16 @@ export default defineComponent({
 
   methods: {
     async refresh(): Promise<boolean> {
+      // Skip everything if user is not logged in
+      if (!utils.uid) return false;
+
+      // Skip if we are not on an album (e.g. on the list)
+      const { user, name } = this.$route.params;
+      if (!user || !name) return false;
+
+      // Get DAV album for collaborators
       try {
-        this.album = await dav.getAlbum(this.$route.params.user, this.$route.params.name);
+        this.album = await dav.getAlbum(user, name);
         return true;
       } catch (e) {
         return false;
