@@ -214,7 +214,7 @@ export async function getAlbum(user: string, name: string, extraProps = {}): Pro
                 ${extraProps}
             </d:prop>
         </d:propfind>`;
-  let album = (await client.stat(`/photos/${user}/albums/${name}`, {
+  let album = (await client.stat(getAlbumPath(user, name), {
     data: req,
     details: true,
   })) as any;

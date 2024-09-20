@@ -7,7 +7,7 @@
 
     <div class="avatars" v-if="album && (album?.collaborators.length ?? 0 > 1)">
       <!-- Show own user only if we have other collaborators -->
-      <NcAvatar :user="$route.params.user" :showUserStatus="false" />
+      <NcAvatar :user="utils.uid" :showUserStatus="false" />
 
       <!-- Other collaborators -->
       <template v-for="c of album.collaborators">
@@ -47,6 +47,7 @@ export default defineComponent({
 
   data: () => ({
     album: null as dav.IDavAlbum | null,
+    utils: utils,
   }),
 
   methods: {
