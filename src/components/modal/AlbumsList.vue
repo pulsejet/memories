@@ -1,5 +1,5 @@
 <template>
-  <ul class="albums-container">
+  <ul class="albums-list">
     <NcListItem
       v-for="album in albums"
       class="album"
@@ -124,9 +124,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.albums-container {
+.albums-list {
   overflow-x: hidden;
-  overflow-y: scroll;
   padding: 2px;
 
   .album {

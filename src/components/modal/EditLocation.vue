@@ -239,7 +239,7 @@ export default defineComponent({
   .lat-lon {
     display: flex;
     padding: 4px;
-    margin-bottom: -10px;
+    margin-bottom: -14px;
 
     > .coords {
       display: inline-block;
@@ -261,7 +261,7 @@ export default defineComponent({
   }
 
   .osm-attribution {
-    margin: -3px 4px;
+    margin: 0 4px;
     font-size: 0.65em;
     a {
       color: var(--color-primary);

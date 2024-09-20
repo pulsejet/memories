@@ -2,6 +2,7 @@
   <NcModal
     class="memories-modal"
     ref="modal"
+    :name="t('memories', 'Modal')"
     :size="size"
     :outTransition="true"
     :style="{ width: isSidebarShown ? `calc(100% - ${sidebarWidth}px)` : null }"

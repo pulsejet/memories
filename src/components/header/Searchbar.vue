@@ -220,17 +220,9 @@ export default defineComponent({
   header &,
   #mobile-header & {
     max-width: 100%;
+    // header is 50px; 5px gap on each side
     margin: 5px 0 !important;
-    > * {
-      margin: 0 !important;
-    }
-    :deep input {
-      // header is 50px; 5px gap on each side
-      height: 40px !important;
-    }
-    :deep .input-field__icon {
-      height: 46px !important; // hack to center the icon
-    }
+    --default-clickable-area: 40px;
   }
 
   // Styling for flat input

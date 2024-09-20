@@ -1318,6 +1318,7 @@ export default defineComponent({
   :deep .button-vue--icon-only {
     color: white;
     background-color: transparent !important;
+    margin: 5px 2px; // NC 30
   }
 
   transition: opacity 0.2s ease-in-out;
