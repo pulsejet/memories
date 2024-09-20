@@ -83,7 +83,7 @@
     "typescript": "5.6.2",
     "vue-loader": "^15.11.1",
     "vue-template-compiler": "^2.7.16",
-    "vue-tsc": "1.8.27",
+    "vue-tsc": "2.1.6",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4",
     "workbox-webpack-plugin": "^7.1.0"
