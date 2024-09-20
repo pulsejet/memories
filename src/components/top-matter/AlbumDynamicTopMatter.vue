@@ -1,7 +1,7 @@
 <template>
   <div class="album-dtm">
     <div v-if="album?.location" class="subtitle">
-      <MapMarkerOutlineIcon class="icon"></MapMarkerOutlineIcon>
+      <MapMarkerOutlineIcon class="icon" :size="18" />
       <span>{{ album.location }}</span>
     </div>
 
@@ -80,10 +80,10 @@ export default defineComponent({
     color: var(--color-text-lighter);
     display: flex;
     padding-left: 10px;
-  }
 
-  .icon {
-    margin-right: 5px;
+    .icon {
+      margin-right: 5px;
+    }
   }
 
   > .avatars {
