@@ -32,6 +32,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class PlacesSetup extends Command
 {
     protected OutputInterface $output;
+    protected InputInterface $input;
 
     public function __construct(protected Places $places)
     {
@@ -52,6 +53,8 @@ class PlacesSetup extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->output = $output;
+        $this->input = $input;
+
         $recalculate = (bool) $input->getOption('recalculate');
         $force = (bool) $input->getOption('force');
 
@@ -104,6 +107,18 @@ class PlacesSetup extends Command
         $this->output->writeln('');
         $this->output->writeln('Are you sure you want to download the planet database?');
         $this->output->write('Proceed? [y/N] ');
+
+        // Redirect -n users to --force
+        if (!$this->input->isInteractive()) {
+            $this->output->writeln(
+                "\n<error>Non-interactive mode with -n is not supported. ".
+                'You can use --force instead.</error>',
+            );
+
+            return false;
+        }
+
+        // Read user input
         $handle = fopen('php://stdin', 'r');
         $line = fgets($handle);
         if (false === $line) {
@@ -111,6 +126,8 @@ class PlacesSetup extends Command
 
             return false;
         }
+
+        // Check if user wants to proceed
         if ('y' !== trim($line)) {
             $this->output->writeln('Aborting');
 
