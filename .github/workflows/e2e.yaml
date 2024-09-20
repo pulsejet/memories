@@ -48,8 +48,8 @@ jobs:
       # do not stop on another job's failure
       fail-fast: false
       matrix:
-        php-versions: ['8.2']
-        server-versions: ['stable28']
+        php-versions: ['8.2', '8.3']
+        server-versions: ['stable29', 'stable30']
 
     services:
       mysql:
@@ -124,8 +124,8 @@ jobs:
       # do not stop on another job's failure
       fail-fast: false
       matrix:
-        php-versions: ['8.2']
-        server-versions: ['stable28']
+        php-versions: ['8.3']
+        server-versions: ['stable30']
 
     services:
       postgres:
@@ -205,8 +205,8 @@ jobs:
       # do not stop on another job's failure
       fail-fast: false
       matrix:
-        php-versions: ['8.2']
-        server-versions: ['stable28']
+        php-versions: ['8.3']
+        server-versions: ['stable30']
 
     steps:
       - name: Checkout server
