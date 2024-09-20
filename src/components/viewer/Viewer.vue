@@ -1314,11 +1314,12 @@ export default defineComponent({
   position: absolute;
   top: 8px;
   right: 50px;
+  --default-clickable-area: 44px;
 
   :deep .button-vue--icon-only {
     color: white;
     background-color: transparent !important;
-    margin: 5px 2px; // NC 30
+    margin-right: 1px;
   }
 
   transition: opacity 0.2s ease-in-out;
