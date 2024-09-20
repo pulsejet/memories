@@ -108,21 +108,15 @@ class PlacesSetup extends Command
         $this->output->writeln('Are you sure you want to download the planet database?');
         $this->output->write('Proceed? [y/N] ');
 
-        // Redirect -n users to --force
-        if (!$this->input->isInteractive()) {
-            $this->output->writeln(
-                "\n<error>Non-interactive mode with -n is not supported. ".
-                'You can use --force instead.</error>',
-            );
-
-            return false;
-        }
-
         // Read user input
         $handle = fopen('php://stdin', 'r');
-        $line = fgets($handle);
+        $line = $this->input->isInteractive() ? fgets($handle) : false;
         if (false === $line) {
-            $this->output->writeln('<error>You need an interactive terminal to run this command</error>');
+            // Redirect any -n users to --force
+            $this->output->writeln(
+                "\n<error>You need an interactive terminal to run this command, ".
+                'or use --force for non-interactive mode.</error>',
+            );
 
             return false;
         }
