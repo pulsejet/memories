@@ -68,10 +68,11 @@ class SQL
      *
      * @param IQueryBuilder $query    The query to create the function on
      * @param IQueryBuilder $subquery The subquery to use
+     * @param string        $alias    The alias to use for the subquery
      */
-    public static function subquery(IQueryBuilder &$query, IQueryBuilder &$subquery): IQueryFunction
+    public static function subquery(IQueryBuilder &$query, IQueryBuilder &$subquery, string $alias = ''): IQueryFunction
     {
-        return $query->createFunction("({$subquery->getSQL()})");
+        return $query->createFunction("({$subquery->getSQL()}) {$alias}");
     }
 
     /**

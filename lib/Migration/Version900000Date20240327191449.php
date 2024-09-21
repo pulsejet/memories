@@ -28,12 +28,16 @@ use OCP\DB\Types;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
-class Version800000Date20240327191449 extends SimpleMigrationStep
+class Version900000Date20240327191449 extends SimpleMigrationStep
 {
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
+    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
+    {
+        // Patch doctrine to use float instead of double
+        \Doctrine\DBAL\Types\Type::overrideType(Types::FLOAT, RealFloatType::class);
+    }
 
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
@@ -58,10 +62,6 @@ class Version800000Date20240327191449 extends SimpleMigrationStep
                 'notnull' => true,
                 'length' => 20,
             ]);
-            $table->addColumn('lsh', Types::INTEGER, [
-                'notnull' => true,
-                'default' => 0,
-            ]);
 
             // Create embedding columns
             $size = 768;
@@ -74,7 +74,6 @@ class Version800000Date20240327191449 extends SimpleMigrationStep
 
             $table->setPrimaryKey(['id']);
             $table->addIndex(['fileid', 'mtime'], 'memories_ss_vec_fileid');
-            $table->addIndex(['lsh'], 'memories_ss_vec_lsh');
         }
 
         return $schema;
@@ -83,5 +82,26 @@ class Version800000Date20240327191449 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
+    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
+    {
+        // Revert doctrine patch
+        \Doctrine\DBAL\Types\Type::overrideType(Types::FLOAT, \Doctrine\DBAL\Types\FloatType::class);
+    }
+}
+
+class RealFloatType extends \Doctrine\DBAL\Types\FloatType
+{
+    public function getSQLDeclaration(array $column, \Doctrine\DBAL\Platforms\AbstractPlatform $platform)
+    {
+        if (preg_match('/mysql|mariadb/i', $platform::class)) {
+            return 'FLOAT';
+        }
+
+        // https://www.postgresql.org/docs/current/datatype-numeric.html
+        if (preg_match('/postgres/i', $platform::class)) {
+            return 'REAL';
+        }
+
+        return parent::getSQLDeclaration($column, $platform);
+    }
 }
