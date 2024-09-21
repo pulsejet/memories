@@ -25,7 +25,6 @@ OC.L10N.register(
     "Performance" : "Performanța",
     "Unknown" : "Necunoscut",
     "Continue" : "Continuă",
-    "No items" : "Nu există elemente",
     "No results found" : "Nu s-a găsit nimic",
     "Search" : "Caută",
     "Upload" : "Încărcare",
@@ -136,6 +135,7 @@ OC.L10N.register(
     "Fit size" : "Potrivește mărimea",
     "Auto" : "Auto",
     "Setup" : "Configurare",
+    "No items" : "Nu există elemente",
     "Yes" : "Da",
     "No" : "Nu"
 },

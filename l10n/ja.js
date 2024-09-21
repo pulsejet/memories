@@ -32,8 +32,6 @@ OC.L10N.register(
     "Unknown" : "不明",
     "Continue" : "続ける",
     "Template" : "テンプレート",
-    "No items" : "アイテムがありません",
-    "Shared by {user}" : "{user} から共有されました",
     "No results found" : "結果が見つかりません",
     "Search" : "検索",
     "Upload" : "アップロード",
@@ -197,6 +195,8 @@ OC.L10N.register(
     "Setup" : "設定",
     "Failed to create {albumName}." : "{albumName} の作成に失敗しました。",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "{currentAlbumName} から {newAlbumName} への名前の変更に失敗しました。",
+    "No items" : "アイテムがありません",
+    "Shared by {user}" : "{user} から共有されました",
     "Failed to delete {fileName}." : "{fileName} の削除に失敗しました。",
     "Yes" : "はい",
     "No" : "いいえ"

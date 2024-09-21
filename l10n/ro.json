@@ -23,7 +23,6 @@
     "Performance" : "Performanța",
     "Unknown" : "Necunoscut",
     "Continue" : "Continuă",
-    "No items" : "Nu există elemente",
     "No results found" : "Nu s-a găsit nimic",
     "Search" : "Caută",
     "Upload" : "Încărcare",
@@ -134,6 +133,7 @@
     "Fit size" : "Potrivește mărimea",
     "Auto" : "Auto",
     "Setup" : "Configurare",
+    "No items" : "Nu există elemente",
     "Yes" : "Da",
     "No" : "Nu"
 },"pluralForm" :"nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));"

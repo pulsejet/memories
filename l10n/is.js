@@ -33,8 +33,6 @@ OC.L10N.register(
     "Unknown" : "Óþekkt",
     "Continue" : "Halda áfram",
     "Template" : "Sniðmát",
-    "No items" : "Engin atriði",
-    "Shared by {user}" : "Deilt af {user}",
     "Search" : "Search",
     "Upload" : "Senda inn",
     "Add people or groups who can edit your album" : "Bættu við fólki eða hópum sem geta breytt albúminu þínu",
@@ -188,6 +186,8 @@ OC.L10N.register(
     "Setup" : "Uppsetning",
     "Failed to create {albumName}." : "Gat ekki búið til {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Mistókst að endurnefna {currentAlbumName} sem {newAlbumName}.",
+    "No items" : "Engin atriði",
+    "Shared by {user}" : "Deilt af {user}",
     "Failed to delete {fileName}." : "Tókst ekki að eyða {fileName}."
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");

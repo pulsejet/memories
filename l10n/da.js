@@ -36,8 +36,6 @@ OC.L10N.register(
     "Unknown" : "Ukendt",
     "Continue" : "Fortsæt",
     "Template" : "Skabelon",
-    "No items" : "Ingen elementer",
-    "Shared by {user}" : "Delt af {user}",
     "Search" : "Søg",
     "Upload" : "Send",
     "Public link copied!" : "Offentlig link kopieret!",
@@ -104,6 +102,8 @@ OC.L10N.register(
     "Name is required." : "Navn er påkrævet.",
     "Auto" : "Auto",
     "Setup" : "Opsætning",
+    "No items" : "Ingen elementer",
+    "Shared by {user}" : "Delt af {user}",
     "Failed to delete {fileName}." : "Kunne ikke slette {fileName}.",
     "Failed to favorite files." : "Kunne ikke vælge favorit filer.",
     "Failed to favorite {fileName}." : "Kunne ikke vælge favorit {fileName}"

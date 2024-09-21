@@ -36,8 +36,6 @@ OC.L10N.register(
     "Continue" : "Continua",
     "You must first make sure the correct drivers are installed before configuring acceleration." : "Assicurati di avere installato i driver appropriati, prima di configurare l'accelerazione.",
     "Template" : "Modello",
-    "No items" : "Nessun elemento",
-    "Shared by {user}" : "Condiviso da {user}",
     "No results found" : "Nessun risultato trovato",
     "Search" : "Cerca",
     "Upload" : "Carica",
@@ -198,6 +196,8 @@ OC.L10N.register(
     "Setup" : "Configurazione",
     "Failed to create {albumName}." : "Creazione di {albumName} non riuscita",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Rinominazione di {currentAlbumName} in {newAlbumName} non riuscita.",
+    "No items" : "Nessun elemento",
+    "Shared by {user}" : "Condiviso da {user}",
     "Failed to delete {fileName}." : "Eliminazione di {fileName} non riuscita.",
     "Yes" : "Sì",
     "No" : "No"

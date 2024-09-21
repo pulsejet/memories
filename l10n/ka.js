@@ -25,7 +25,6 @@ OC.L10N.register(
     "Unknown" : "Unknown",
     "Continue" : "Continue",
     "Template" : "Template",
-    "No items" : "No items",
     "No results found" : "No results found",
     "Search" : "Search",
     "Upload" : "Upload",
@@ -69,6 +68,7 @@ OC.L10N.register(
     "Position" : "Position",
     "Auto" : "Auto",
     "Setup" : "Setup",
+    "No items" : "No items",
     "Yes" : "Yes",
     "No" : "No"
 },

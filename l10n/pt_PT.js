@@ -30,7 +30,6 @@ OC.L10N.register(
     "Failed to load some photos" : "Não foi possível carregar algumas fotografias",
     "Unknown" : "Desconhecido",
     "Continue" : "Continuar",
-    "No items" : "No items",
     "Search" : "Pesquisa sobre",
     "Upload" : "Enviar",
     "Copy public link" : "Copiar ligação publica",
@@ -81,6 +80,7 @@ OC.L10N.register(
     "Direct" : "Directo",
     "Auto" : "Auto",
     "Setup" : "Configurar",
+    "No items" : "No items",
     "Failed to delete {fileName}." : "Não foi possível eliminar {fileName}.",
     "Failed to favorite files." : "Não foi possível colocar os ficheiros nos favoritos.",
     "Failed to favorite {fileName}." : "Não foi possível colocar {fileName} nos favoritos."

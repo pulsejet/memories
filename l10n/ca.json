@@ -32,8 +32,6 @@
     "Unknown" : "Desconegut",
     "Continue" : "Continua",
     "Template" : "Plantilla",
-    "No items" : "No hi ha cap element",
-    "Shared by {user}" : "Compartit per {user}",
     "No results found" : "No s'han trobat resultats",
     "Search" : "Cercar",
     "Upload" : "Puja",
@@ -194,6 +192,8 @@
     "Setup" : "Configuració",
     "Failed to create {albumName}." : "No s'ha pogut crear {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "No s'ha pogut reanomenar {currentAlbumName} a {newAlbumName}.",
+    "No items" : "No hi ha cap element",
+    "Shared by {user}" : "Compartit per {user}",
     "Failed to delete {fileName}." : "No s'ha pogut suprimir {fileName}.",
     "Yes" : "Sí",
     "No" : "No"

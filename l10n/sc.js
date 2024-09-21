@@ -28,7 +28,6 @@ OC.L10N.register(
     "Unknown" : "Disconnotu",
     "Continue" : "Sighi",
     "Template" : "Modellu",
-    "Shared by {user}" : "Cumpartzidu dae {user}",
     "No results found" : "Perunu resurtadu agatadu",
     "Search" : "Chirca",
     "Upload" : "Càrriga",
@@ -84,6 +83,7 @@ OC.L10N.register(
     "Direct" : "Deretu",
     "Auto" : "Auto",
     "Setup" : "Cunfigura",
+    "Shared by {user}" : "Cumpartzidu dae {user}",
     "Yes" : "Si",
     "No" : "No"
 },

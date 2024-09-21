@@ -30,8 +30,6 @@ OC.L10N.register(
     "Performance" : "Performa",
     "Unknown" : "Tidak diketahui",
     "Continue" : "Lanjutkan",
-    "No items" : "Tak ada item",
-    "Shared by {user}" : "Dibagikan oleh {user}",
     "Search" : "Cari",
     "Upload" : "Unggah",
     "Add people or groups who can edit your album" : "Tambahkan orang atau grup yang dapat menyunting album Anda",
@@ -100,6 +98,8 @@ OC.L10N.register(
     "Setup" : "Pengaturan",
     "Failed to create {albumName}." : "Gagal membuat {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Gagal mengubah nama {currentAlbumName} to {newAlbumName}.",
+    "No items" : "Tak ada item",
+    "Shared by {user}" : "Dibagikan oleh {user}",
     "Failed to delete {fileName}." : "Gagal menghapus {fileName}."
 },
 "nplurals=1; plural=0;");

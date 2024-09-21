@@ -28,7 +28,6 @@ OC.L10N.register(
     "Unknown" : "Nepoznata pogreška",
     "Continue" : "Nastavi",
     "Template" : "Predložak",
-    "Shared by {user}" : "Dijeli {user}",
     "No results found" : "Nema rezultata",
     "Search" : "Traži",
     "Upload" : "Otpremi",
@@ -84,6 +83,7 @@ OC.L10N.register(
     "Direct" : "Izravno",
     "Auto" : "Auto",
     "Setup" : "Podesi",
+    "Shared by {user}" : "Dijeli {user}",
     "Yes" : "Da",
     "No" : "Ne"
 },

@@ -30,7 +30,6 @@ OC.L10N.register(
     "Unknown" : "לא ידוע",
     "Continue" : "להמשך",
     "Template" : "תבנית",
-    "Shared by {user}" : "שותפה על ידי {user}",
     "Search" : "חיפוש",
     "Upload" : "העלאה",
     "Add people or groups who can edit your album" : "הוסף משתמשים וקבוצות שיכולו לערוך אלבום זה",
@@ -100,6 +99,7 @@ OC.L10N.register(
     "Quality" : "איכות",
     "Direct" : "ישיר",
     "Auto" : "אוטומטי",
-    "Setup" : "הגדרות"
+    "Setup" : "הגדרות",
+    "Shared by {user}" : "שותפה על ידי {user}"
 },
 "nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: 2;");

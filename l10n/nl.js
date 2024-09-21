@@ -45,8 +45,6 @@ OC.L10N.register(
     "Unknown" : "Onbekend",
     "Continue" : "Doorgaan",
     "Template" : "Sjabloon",
-    "No items" : "Geen items",
-    "Shared by {user}" : "Gedeeld door {user}",
     "No results found" : "Geen resultaten gevonden",
     "Search" : "Zoeken",
     "Upload" : "Upload",
@@ -182,6 +180,8 @@ OC.L10N.register(
     "Setup" : "Configureren",
     "Failed to create {albumName}." : "Het maken van {albumName} is mislukt.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Hernoemen van {currentAlbumName} naar {newAlbumName} mislukt.",
+    "No items" : "Geen items",
+    "Shared by {user}" : "Gedeeld door {user}",
     "Failed to delete {fileName}." : "Verwijderen van {fileName} mislukt.",
     "Yes" : "Ja",
     "No" : "Nee"
