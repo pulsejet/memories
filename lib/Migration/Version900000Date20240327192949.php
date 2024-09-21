@@ -28,7 +28,7 @@ use OCP\DB\Types;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
-class Version800000Date20240327192949 extends SimpleMigrationStep
+class Version900000Date20240327192949 extends SimpleMigrationStep
 {
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
@@ -60,6 +60,10 @@ class Version800000Date20240327192949 extends SimpleMigrationStep
             $table->addColumn('score', Types::INTEGER, [
                 'notnull' => true,
                 'default' => 0,
+            ]);
+            $table->addColumn('word', Types::STRING, [
+                'notnull' => false,
+                'length' => 64,
             ]);
 
             $table->setPrimaryKey(['id']);
