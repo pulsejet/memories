@@ -400,7 +400,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Фактический размер (100%)",
     "Fit size" : "По размеру окна",
     "Transcoding failed, check Nextcloud logs." : "Не удалось перекодировать, проверьте журналы Nextcloud.",
-    "Direct" : "Личное",
+    "Direct" : "Без перекодирования",
     "Auto" : "Автоматически",
     "Shared Folder" : "Опубликованная Папка",
     "Shared Album" : "Опубликованный альбом",
