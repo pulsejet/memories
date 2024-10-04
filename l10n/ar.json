@@ -220,7 +220,7 @@
     "Force transpose in software" : "فرض النقل transpose في البرمجيات",
     "Some NVENC devices have issues with force_key_frames." : "بعض نظم \"التكويد لكروت إنفيديا الرسومية\" NVENC فيها إشكاليات في التعامل مع force_key_frames.",
     "Try this option only if you use NVENC and have issues with video playback." : "جرّب هذا الخيار فقط في حالة كنت تستعمل نظم \"التكويد لكروت إنفيديا الرسومية\" NVENC و كان لديك إشكاليات في تشغيل الفيديو.",
-    "Enable streaming GOP size workaround" : "تمكين الحل البديل لحجم الدفق الصِّوَري GOP streaming",
+    "Enable streaming GOP size workaround" : "تمكين الحل البديل لحجم الصور GOP streaming",
     "HW Acceleration" : "التسريع العتادي HW Acceleration",
     "VA-API device ({dev}) is readable" : "جهاز VA-API ({dev}) قابل للقراءة",
     "VA-API device ({dev}) not found" : "لم يتم العثور علي جهاز VA-API ({dev})",
