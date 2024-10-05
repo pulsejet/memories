@@ -9,7 +9,7 @@ After the container starts up, follow these steps:
    - Username: `admin`
    - Password: `admin`
 
-Note: MariaDB is set up automatically (db=`nextcloud`, user=`nextcloud`, password=`nextcloud`)
+Note: MariaDB is set up automatically (db=`nextcloud`, user=`nextcloud`, password=`nextcloud`); Adminer for graphical database management is available on port 8080.
 
 To run OCC commands in the container, use the following command:
 

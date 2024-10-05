@@ -9,7 +9,7 @@
   "features": {},
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  "forwardPorts": [80],
+  "forwardPorts": [80,8080],
   "postCreateCommand": "bash .devcontainer/postCreate.sh",
   // "postStartCommand": "make watch-js",
   // Configure tool-specific properties.
