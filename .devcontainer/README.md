@@ -22,3 +22,9 @@ To watch changes in UI build:
 ```bash
 make watch-js
 ```
+
+Note: Nextcloud automatically caches app assets (including javascript) based on the version number, so you'll have to force-reload your browser window. Alternatively, to ensure caches are invalidated, you can:
+
+1. Change the version number in `appinfo/info.xml`
+2. Build the app using `make watch-js` (or `make build-js`/`make build-js-production` for a static build)
+3. Inform nextcloud of the upgrade via `sudo -E -u www-data php /var/www/html/occ upgrade`
