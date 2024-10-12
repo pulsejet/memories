@@ -26,6 +26,9 @@ services:
       - PHP_MEMORY_LIMIT=1G
       - PHP_UPLOAD_LIMIT=1G
       - DEBIAN_FRONTEND=noninteractive
+    ports:
+      - 80:80
+      - 8080:8080
 
   db:
     image: mariadb:11
@@ -41,6 +44,11 @@ services:
       - MYSQL_USER=nextcloud
       - MARIADB_AUTO_UPGRADE=1
       - MARIADB_INITDB_SKIP_TZINFO=1
+
+  adminer:
+    image: adminer
+    restart: always
+    network_mode: service:nextcloud
 
   redis:
     image: redis:alpine
