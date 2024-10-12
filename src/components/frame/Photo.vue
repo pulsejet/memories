@@ -29,9 +29,14 @@
         </div>
       </div>
 
-      <div class="flag bottom-left">
+      <div class="flag bottom-right">
         <StarIcon :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
         <LocalIcon :size="22" v-if="data.flag & c.FLAG_IS_LOCAL" />
+      </div>
+
+      <div class="flag bottom-left">
+        <AccountMultipleIcon :size="22" v-if="data.owner" />
+        <span class="username" v-if="data.owner" >{{ owner }}</span>
       </div>
 
       <div
@@ -81,6 +86,7 @@ import StarIcon from 'vue-material-design-icons/Star.vue';
 import VideoIcon from 'vue-material-design-icons/PlayCircleOutline.vue';
 import LocalIcon from 'vue-material-design-icons/CloudOff.vue';
 import RawIcon from 'vue-material-design-icons/Raw.vue';
+import AccountMultipleIcon from 'vue-material-design-icons/AccountMultiple.vue'
 
 import type { IDay, IPhoto } from '@typings';
 import type XImg from '@components/XImg.vue';
@@ -96,6 +102,7 @@ export default defineComponent({
     StarIcon,
     LocalIcon,
     RawIcon,
+    AccountMultipleIcon
   },
 
   props: {
@@ -172,6 +179,11 @@ export default defineComponent({
       }
       return null;
     },
+
+    owner(): string | null {
+      return this.data.owner || null;
+    },
+
 
     videoUrl(): string | null {
       if (this.data.liveid) {
@@ -415,6 +427,19 @@ $icon-size: $icon-half-size * 2;
     .p-outer.selected > & {
       transform: translate($icon-size, -$icon-size);
     }
+  }
+
+  &.bottom-right {
+    bottom: var(--icon-dist);
+    right: var(--icon-dist);
+    .p-outer.selected > & {
+      transform: translate($icon-size, -$icon-size);
+    }
+  }
+
+  > .username {
+    font-size: 0.75em;
+    margin-left: 3px;
   }
 
   > .video {
