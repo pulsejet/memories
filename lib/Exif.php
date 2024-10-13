@@ -344,20 +344,31 @@ class Exif
             '-api', 'LargeFileSupport=1',
             '-json=-', $path,
         ]);
+
+        $pipes = [];
         $proc = proc_open($cmd, [
             0 => ['pipe', 'r'],
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
         ], $pipes);
+        stream_set_blocking($pipes[1], false);
 
         fwrite($pipes[0], $raw);
         fclose($pipes[0]);
 
-        $stdout = self::readOrTimeout($pipes[1], self::EXIFTOOL_TIMEOUT);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_terminate($proc);
-        proc_close($proc);
+        try {
+            $stdout = self::readOrTimeout($pipes[1], self::EXIFTOOL_TIMEOUT);
+        } catch (\Exception $ex) {
+            error_log("Timeout reading from exiftool: [{$path}]");
+
+            throw $ex;
+        } finally {
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            proc_terminate($proc);
+            proc_close($proc);
+        }
+
         if (str_contains($stdout, 'error')) {
             error_log("Exiftool error: {$stdout}");
 
@@ -402,9 +413,9 @@ class Exif
         try {
             return self::readOrTimeout($pipes[1], self::EXIFTOOL_TIMEOUT);
         } catch (\Exception $ex) {
-            error_log("Exiftool timeout: [{$path}]");
+            error_log("Timeout reading from exiftool: [{$path}]");
 
-            throw new \Exception('Could not read from Exiftool');
+            throw $ex;
         } finally {
             fclose($pipes[1]);
             fclose($pipes[2]);
