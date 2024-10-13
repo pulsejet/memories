@@ -431,8 +431,6 @@ class Exif
 
     private static function getExiftool(): array
     {
-        putenv('LANG=C'); // set perl lang to suppress warning
-
         return BinExt::getExiftool();
     }
 

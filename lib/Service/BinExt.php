@@ -12,6 +12,9 @@ class BinExt
     public const GOVOD_VER = '0.2.5';
     public const NX_VER_MIN = '1.1';
 
+    /** Exiftool environment is initialized in this process */
+    private static bool $hasExiftoolEnv = false;
+
     /** Get the path to the temp directory */
     public static function getTmpPath(): string
     {
@@ -117,6 +120,11 @@ class BinExt
      */
     public static function getExiftool(): array
     {
+        if (!self::$hasExiftoolEnv) {
+            self::$hasExiftoolEnv = true;
+            putenv('LANG=C'); // set perl lang to suppress warning
+        }
+
         if (SystemConfig::get('memories.exiftool_no_local')) {
             return ['perl', realpath(__DIR__.'/../../bin-ext/exiftool/exiftool')];
         }
