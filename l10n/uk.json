@@ -166,7 +166,7 @@
     "MySQL-like geometry support was detected " : "Виявлено підтримку геометрії, подібної до MySQL",
     "Postgres native geometry support was detected" : "Виявлено підтримку нативної геометрії Postgres",
     "Looks like the database is already setup. Are you sure you want to redownload planet data?" : "Схоже, база даних вже налаштована. Ви впевнені, що хочете повторно звантажити дані про планету?",
-    "You are about to download the planet database. This may take a while." : "Ви збираєтеся завантажити базу даних планети. Це може зайняти деякий час.",
+    "You are about to download the planet database. This may take a while." : "Ви збираєтеся звантажити базу даних планети. Це може зайняти деякий час.",
     "This may also cause all photos to be re-indexed!" : "Це також може призвести до переіндексації всіх світлин!",
     "Continue" : "Продовжити",
     "Live transcoding provides for adaptive streaming of videos using HLS." : "Транскодування в реальному часі забезпечує адаптивну трансляцію відео за допомогою HLS.",
