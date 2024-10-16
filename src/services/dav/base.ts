@@ -1,13 +1,15 @@
-import { showError } from '@nextcloud/dialogs';
+import path from 'path';
+
 import axios from '@nextcloud/axios';
+import { showError } from '@nextcloud/dialogs';
 
 import { getAlbumFileInfos } from './albums';
 import client, { remotePath } from './client';
 
+import * as nativex from '@native';
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
 import * as utils from '@services/utils';
-import * as nativex from '@native';
 
 import type { IFileInfo, IImageInfo, IPhoto } from '@typings';
 import type { ResponseDataDetailed, SearchResult } from 'webdav';
@@ -286,6 +288,75 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
 }
 
 /**
+ * copy all files in a given list of Ids to given destination
+ *
+ * @param photos list of photos to copy
+ * @param destination to copy photos into
+ * @param overwrite behaviour if the target exists. `true` overwrites, `false` fails.
+ * @returns list of file ids that were copied
+ */
+export async function* copyPhotos(photos: IPhoto[], destination: string, overwrite: boolean) {
+  if (photos.length === 0) {
+    return;
+  }
+
+  // Set absolute target path
+  const prefixPath = `files/${utils.uid}`;
+  let targetPath = prefixPath + destination;
+  if (!targetPath.endsWith('/')) {
+    targetPath += '/';
+  }
+
+  // Also copy the stack files
+  photos = await extendWithStack(photos);
+  const fileIdsSet = new Set(photos.map((p) => p.fileid));
+
+  // Get files data
+  let fileInfos: IFileInfo[] = [];
+  try {
+    fileInfos = await getFiles(photos);
+  } catch (e) {
+    console.error('Failed to get file info for files to copy', photos, e);
+    showError(t('memories', 'Failed to copy files.'));
+    return;
+  }
+
+  // Copy each file
+  fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
+  const calls = fileInfos.map((fileInfo) => async () => {
+    try {
+      await client.copyFile(
+        fileInfo.originalFilename,
+        targetPath + fileInfo.basename,
+        // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
+        { headers: { Overwrite: overwrite ? 'T' : 'F' } },
+      );
+      return fileInfo.fileid;
+    } catch (error) {
+      console.error('Failed to copy', fileInfo, error);
+      if (error.response?.status === 412) {
+        // Precondition failed (only if `overwrite` flag set to false)
+        showError(
+          t('memories', 'Could not copy {fileName}, target exists.', {
+            fileName: fileInfo.filename,
+          }),
+        );
+        return 0;
+      }
+
+      showError(
+        t('memories', 'Failed to copy {fileName}.', {
+          fileName: fileInfo.filename,
+        }),
+      );
+      return 0;
+    }
+  });
+
+  yield* runInParallel(calls, 10);
+}
+
+/**
  * Move all files in a given list of Ids to given destination
  *
  * @param photos list of photos to move
@@ -326,6 +397,110 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
       await client.moveFile(
         fileInfo.originalFilename,
         targetPath + fileInfo.basename,
+        // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
+        { headers: { Overwrite: overwrite ? 'T' : 'F' } },
+      );
+      return fileInfo.fileid;
+    } catch (error) {
+      console.error('Failed to move', fileInfo, error);
+      if (error.response?.status === 412) {
+        // Precondition failed (only if `overwrite` flag set to false)
+        showError(
+          t('memories', 'Could not move {fileName}, target exists.', {
+            fileName: fileInfo.filename,
+          }),
+        );
+        return 0;
+      }
+
+      showError(
+        t('memories', 'Failed to move {fileName}.', {
+          fileName: fileInfo.filename,
+        }),
+      );
+      return 0;
+    }
+  });
+
+  yield* runInParallel(calls, 10);
+}
+
+/**
+ * Move multiple files in given lists of Ids to corresponding destinations in a year/month folder structure.
+ *
+ * @param photos list of photos to move
+ * @param destination to move photos into
+ * @param overwrite behaviour if the target exists. `true` overwrites, `false` fails.
+ * @returns list of file ids that were moved
+ */
+export async function* movePhotosByDate(photos: IPhoto[], destination: string, overwrite: boolean) {
+  if (photos.length === 0) {
+    return;
+  }
+
+  // Set absolute target path
+  const prefixPath = `files/${utils.uid}`;
+  destination = path.join(prefixPath, destination);
+  const datePaths: Map<string, Set<string>> = new Map(); // {'year': {'month1', 'month2'}}
+
+  photos = await extendWithStack(photos);
+  const fileIdsSet = new Set(photos.map((p) => p.fileid));
+
+  let fileInfos: IFileInfo[] = [];
+
+  try {
+    fileInfos = await getFiles(photos);
+  } catch (e) {
+    console.error('Failed to get file info for files to move', photos, e);
+    showError(t('memories', 'Failed to move files.'));
+    return;
+  }
+
+  const moveDirectives: Array<[string, IFileInfo]> = new Array();
+
+  photos.forEach((photo, i) => {
+    if (!fileIdsSet.has(fileInfos[i].fileid)) {
+      return;
+    }
+
+    const date = utils.dayIdToDate(photo.dayid);
+
+    const year = date.getFullYear().toString();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+
+    const months = datePaths.get(year) || new Set();
+    months.add(month);
+    datePaths.set(year, months);
+
+    const datePath = path.join(destination, `/${year}/${month}`);
+
+    moveDirectives.push([datePath, fileInfos[i]]);
+  });
+
+  async function createIfNotExist(directory: string, subDirectories: Iterable<string>) {
+    let existing = await client.getDirectoryContents(directory);
+    if ('data' in existing) {
+      existing = existing.data;
+    }
+    existing = existing.filter((f) => f.type === 'directory');
+    for (const subDirectory of subDirectories) {
+      if (!existing.some((f) => f.basename === subDirectory)) {
+        await client.createDirectory(path.join(directory, subDirectory));
+      }
+    }
+  }
+
+  await createIfNotExist(destination, datePaths.keys());
+  for (const [year, months] of datePaths) {
+    await createIfNotExist(path.join(destination, year), months);
+  }
+
+  // Move each file
+  const calls = moveDirectives.map(([targetPath, fileInfo]) => async () => {
+    try {
+      await client.moveFile(
+        fileInfo.originalFilename,
+        path.join(targetPath, fileInfo.basename),
         // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
         { headers: { Overwrite: overwrite ? 'T' : 'F' } },
       );

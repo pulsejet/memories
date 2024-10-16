@@ -1,12 +1,19 @@
-import { FilePickerType, getFilePickerBuilder } from '@nextcloud/dialogs';
-import { showError } from '@nextcloud/dialogs';
+import type { IFilePickerButton } from '@nextcloud/dialogs';
+import { getFilePickerBuilder, showError } from '@nextcloud/dialogs';
+import type { Node } from '@nextcloud/files';
 
-import { translate as t, translatePlural as n } from '@services/l10n';
+import { translatePlural as n, translate as t } from '@services/l10n';
 import { bus } from './event-bus';
 import { fragment } from './fragment';
 
 // https://github.com/nextcloud/server/blob/4b7ec0a0c18d4e2007565dc28ee214814940161e/core/src/OC/dialogs.js
 const oc_dialogs = (<any>OC).dialogs;
+
+type IFilePickerButtonFactory = (
+  selectedNodes: Node[],
+  currentPath: string,
+  currentView: string,
+) => IFilePickerButton[];
 
 type ConfirmOptions = {
   /** Title of dialog */
@@ -149,23 +156,35 @@ export async function prompt(opts: PromptOptions): Promise<string | null> {
   );
 }
 
+function chooseButtonFactory(nodes: Node[]): IFilePickerButton[] {
+  const fileName = nodes?.[0]?.attributes?.displayName || nodes?.[0]?.basename;
+  let label = nodes.length === 1 ? t('memories', 'Choose {file}', { file: fileName }) : t('memories', 'Choose');
+  return [
+    {
+      callback: () => {},
+      type: 'primary',
+      label: label,
+    },
+  ];
+}
+
 /**
  * Choose a folder using the NC file picker
  *
  * @param title Title of the file picker
  * @param initial Initial path
- * @param type Type of the file picker
+ * @param buttonFactory Buttons factory
  *
  * @returns The path of the chosen folder
  */
 export async function chooseNcFolder(
   title: string,
   initial: string = '/',
-  type: FilePickerType = FilePickerType.Choose,
+  buttonFactory: IFilePickerButtonFactory = chooseButtonFactory,
 ): Promise<string> {
   const picker = getFilePickerBuilder(title)
     .setMultiSelect(false)
-    .setType(type)
+    .setButtonFactory(buttonFactory)
     .addMimeTypeFilter('httpd/unix-directory')
     .allowDirectories()
     .startAt(initial)
