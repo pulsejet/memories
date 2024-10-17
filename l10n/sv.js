@@ -221,6 +221,7 @@ OC.L10N.register(
     "Choose watermark type" : "Välj typ av vattenstämpel",
     "Upload watermark" : "Ladda upp vattenstämpel",
     "Add as text" : "Lägg till som text",
+    "Padding" : "Utfyllnad",
     "Shadow" : "Skugga",
     "Horizontal" : "Horisontell",
     "Vertical" : "Vertikal",
