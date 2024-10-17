@@ -24,7 +24,7 @@ Before installing Memories, make sure that the following requirements are met:
 
 1. Nextcloud 26 or later.
 1. PHP 8.0 or later.
-1. MySQL, MariaDB, or PostgreSQL database.
+1. MySQL, MariaDB, or PostgreSQL (>=v15) database.
 1. [Imagick](https://www.php.net/manual/en/book.imagick.php) PHP extension.
 1. [ffmpeg](https://ffmpeg.org/) and [ffprobe](https://ffmpeg.org/ffprobe.html) binaries.
 
