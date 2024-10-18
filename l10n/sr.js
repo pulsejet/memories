@@ -513,7 +513,7 @@ OC.L10N.register(
     "Letter spacing" : "Размак слова",
     "Line height" : "Висина линије",
     "Warmth" : "Топлина",
-    "+ Add watermark" : "+ Додај бодени жиг",
+    "+ Add watermark" : "+ Додај водени жиг",
     "Choose watermark type" : "Изаберите тип воденог жига",
     "Upload watermark" : "Отпреми водени жи",
     "Add as text" : "Додај као текст",
