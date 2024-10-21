@@ -241,7 +241,7 @@ OC.L10N.register(
     "Always load high resolution image (not recommended if using HEIC/TIFF)" : "总是加载高清图像（如果使用HEIC/TIFF格式则不建议启用该选项）",
     "Template" : "模板",
     "Search your photos …" : "查找你的图片 ...",
-    "Start typing to find photos and albums" : "开始输入以查找图片以及相册",
+    "Start typing to find photos and albums" : "开始输入以查找图片和相册",
     "No results found" : "未找到结果",
     "Search" : "搜索",
     "Upload" : "上传",

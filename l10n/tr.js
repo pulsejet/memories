@@ -363,7 +363,7 @@ OC.L10N.register(
     "Create Link" : "Bağlantı oluştur",
     "Refresh" : "Yenlle",
     "Password protected" : "Parola korumalı",
-    "Expires" : "Sona erme",
+    "Expires" : "Geçerlilik sonu",
     "Editable" : "Düzenlenebilir",
     "Read only" : "Salt okunur",
     "Link copied to clipboard" : "Bağlantı panoya kopyalandı",
