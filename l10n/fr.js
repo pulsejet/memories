@@ -418,6 +418,8 @@ OC.L10N.register(
     "Home" : "Personnel",
     "Move left" : "Vers la gauche",
     "Move right" : "Vers la droite",
+    "Files without location" : "Fichiers sans emplacement",
+    "Unidentified location" : "Localisation non identifiée",
     "Image saved successfully" : "Image enregistrée avec succès",
     "Error saving image: {error}" : "Erreur lors de l'enregistrement de l'image : {error}",
     "Unsaved changes" : "Modifications non enregistrées",
