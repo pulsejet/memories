@@ -9,6 +9,7 @@ OC.L10N.register(
     "Folders" : "Director",
     "Favorites" : "Favorite",
     "Archive" : "Arhivă",
+    "Places" : "Locuri",
     "Tags" : "Etichete",
     "Videos" : "Fișiere video",
     "Edit" : "Editează",

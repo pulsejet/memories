@@ -327,6 +327,8 @@
     "Share an external Nextcloud link" : "Udostępnij zewnętrzny link Nextcloud",
     "Cannot share this type of data" : "Nie można udostępnić tego typu danych",
     "Add tags" : "Dodaj etykiety",
+    "Choose the destination folder for the upload" : "Wybierz folder docelowy dla przesłania",
+    "Some files have not been uploaded." : "Niektóre pliki nie zostały przesłane.",
     "Last updated" : "Ostatnio zaktualizowane",
     "Creation date" : "Data utworzenia",
     "Oldest first" : "Od najstarszych",
