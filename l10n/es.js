@@ -418,7 +418,7 @@ OC.L10N.register(
     "Home" : "Inicio",
     "Move left" : "Mover a la izquierda",
     "Move right" : "Mover a la derecha",
-    "Image saved successfully" : "La imagen se guardó exitósamente",
+    "Image saved successfully" : "La imagen se ha guardado correctamente",
     "Error saving image: {error}" : "Error guardando imagen: {error}",
     "Unsaved changes" : "Cambios sin guardar",
     "Drop changes" : "Descartar cambios",
