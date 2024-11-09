@@ -384,7 +384,7 @@ OC.L10N.register(
     "Destination path" : "مسار الوجهة",
     "Add to albums" : "إضافة إلى الألبومات",
     "Add tags" : "إضافة سِمَاتٍ",
-    "Attach collaborative tags to all uploads" : "قم بإرفاق سمات تعاونية لجميع الملفات المرفوعة",
+    "Attach collaborative tags to all uploads" : "قم بإرفاق وسوم تعاونية لجميع الملفات المرفوعة",
     "No albums selected" : "لم يتم تحديد أيّ  ألبومات",
     "Choose the destination folder for the upload" : "تحديد المجلد الوجهة للرفع",
     "Creating tags" : "إنشاء سِمَاتٍ",
