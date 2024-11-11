@@ -52,7 +52,7 @@ OC.L10N.register(
     "Edit metadata" : "تحرير بيانات التعريف الوصفية",
     "Rotate / Flip" : "أدِر / إقلِب",
     "View in folder" : "اعرض في المجلد",
-    "Set as cover image" : "عيِّن كصورة غلاف",
+    "Set as cover image" : "تعيين كصورة غلاف",
     "Move to folder" : "انتقل إلى المجلد",
     "Add to album" : "إضِف إلى ألبوم",
     "Move to person" : "نقل إلى فئة شخص",
