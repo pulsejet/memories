@@ -15,7 +15,7 @@ OC.L10N.register(
     "Folders" : "Mappar",
     "Favorites" : "Favoriter",
     "Albums" : "Album",
-    "Archive" : "Arkivera",
+    "Archive" : "Arkiv",
     "On this day" : "På den här dagen",
     "Places" : "Platser",
     "Map" : "Karta",
