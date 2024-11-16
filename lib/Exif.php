@@ -6,6 +6,8 @@ namespace OCA\Memories;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Service\BinExt;
+use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Files\Events\Node\NodeWrittenEvent;
 use OCP\Files\File;
 
 class Exif
@@ -395,6 +397,14 @@ class Exif
         // Update remote file if not local
         if (!$file->getStorage()->isLocal()) {
             $file->putContent(fopen($path, 'r')); // closes the handler
+        }
+
+        // Dispatch NodeWrittenEvent to trigger processing by other apps
+        try {
+            $eventDispatcher = \OCP\Server::get(IEventDispatcher::class);
+            $eventDispatcher->dispatchTyped(new NodeWrittenEvent($file));
+        } catch (\Exception) {
+            // Not our problem
         }
 
         // Touch the file, triggering a reprocess through the hook
