@@ -56,6 +56,7 @@
         min="15"
         max="45"
         placeholder="25"
+        :disabled="!enableTranscoding"
         :label="t('memories', 'Quality Factor (15 - 45) (default 25)')"
         :label-visible="true"
         :value="String(config['memories.vod.qf'])"
