@@ -399,11 +399,13 @@ class Exif
             $file->putContent(fopen($path, 'r')); // closes the handler
         }
 
-		// dispatch NodeWrittenEvent to trigger processing by other apps
-		try {
-			$eventDispatcher = \OCP\Server::get(IEventDispatcher::class);
-			$eventDispatcher->dispatchTyped(new NodeWrittenEvent($file));
-		} catch (\Exception) {}
+        // Dispatch NodeWrittenEvent to trigger processing by other apps
+        try {
+            $eventDispatcher = \OCP\Server::get(IEventDispatcher::class);
+            $eventDispatcher->dispatchTyped(new NodeWrittenEvent($file));
+        } catch (\Exception) {
+            // Not our problem
+        }
 
         // Touch the file, triggering a reprocess through the hook
         $file->touch();
