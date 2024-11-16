@@ -24,7 +24,13 @@
           <span class="time" v-if="data.video_duration">{{ videoDuration }}</span>
           <VideoIcon :size="22" />
         </div>
-        <div class="livephoto" v-if="data.liveid" @mouseenter.passive="playVideo" @mouseleave.passive="stopVideo">
+        <div
+          class="livephoto"
+          v-if="data.liveid"
+          @mouseenter.passive="playVideo"
+          @mouseleave.passive="stopVideo"
+          @touchstart.passive="touchVideo"
+        >
           <LivePhotoIcon :size="22" :spin="liveState.waiting" :playing="liveState.playing" />
         </div>
       </div>
@@ -292,6 +298,7 @@ export default defineComponent({
           try {
             this.liveState.requested = true;
             video.currentTime = 0;
+            video.loop = true;
             await video.play();
           } catch (e) {
             // ignore, pause was probably called too soon
@@ -309,6 +316,12 @@ export default defineComponent({
       window.clearTimeout(this.liveState.playTimer);
       this.liveState.playTimer = 0;
       this.liveState.waiting = false;
+    },
+
+    /** Start/stop preview video for touchscreens */
+    touchVideo() {
+      if (this.liveState.playing) this.stopVideo();
+      else this.playVideo();
     },
   },
 });
