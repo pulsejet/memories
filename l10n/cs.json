@@ -339,6 +339,7 @@
     "Merge faces" : "Sloučit obličeje",
     "Merge {name} with {newName}?" : "Sloučit {name} s {newName}?",
     "unnamed person" : "bezejmenná osoba",
+    "You can only merge with a person with name" : "Sloučit je možné pouze s pojmenovanou osobou",
     "Too many failures, aborting" : "Příliš mnoho nezdarů – přerušuje se",
     "Error while moving {basename}" : "Chyba při přesouvání {basename}",
     "Failed to move {name}." : "Nepodařilo se přesunout {name}.",

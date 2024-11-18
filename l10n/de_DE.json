@@ -340,6 +340,7 @@
     "Merge faces" : "Gesichter vereinen",
     "Merge {name} with {newName}?" : "{name} mit {newName} vereinen?",
     "unnamed person" : "Unbenannte Person",
+    "You can only merge with a person with name" : "Sie können nur mit einer Person mit Namen zusammenführen",
     "Too many failures, aborting" : "Zu viele Fehler, Abbruch",
     "Error while moving {basename}" : "Fehler beim Verschieben von {basename}",
     "Failed to move {name}." : "{name} konnte nicht verschoben werden.",

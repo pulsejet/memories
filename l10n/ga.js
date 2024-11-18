@@ -342,6 +342,7 @@ OC.L10N.register(
     "Merge faces" : "Cumaisc aghaidheanna",
     "Merge {name} with {newName}?" : "An bhfuil fonn ort {name} a chumasc le {newName}?",
     "unnamed person" : "duine gan ainm",
+    "You can only merge with a person with name" : "Ní féidir leat ach cumasc le duine leis an ainm",
     "Too many failures, aborting" : "An iomarca teipeanna, ginmhilleadh",
     "Error while moving {basename}" : "Earráid agus {basename} á bhogadh",
     "Failed to move {name}." : "Theip ar {name} a bhogadh.",
