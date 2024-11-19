@@ -342,6 +342,7 @@ OC.L10N.register(
     "Merge faces" : "دمج الوجوه",
     "Merge {name} with {newName}?" : "دمج {name} مع {newName}؟",
     "unnamed person" : "شخصٌ لم بُعطَ اسمه",
+    "You can only merge with a person with name" : "لايمكنك الدمج إلا مع شخص يحمل اسماً",
     "Too many failures, aborting" : "حالات فشل كثيرة، سيتم الإلغاء",
     "Error while moving {basename}" : "خطأٌ أثناء نقل {basename}",
     "Failed to move {name}." : "فشل في نقل {name}.",
