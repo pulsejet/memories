@@ -32,7 +32,7 @@ class LivePhotoContentSetup {
     const video = content.element?.querySelector('video');
     if (!video) return;
 
-    if (this.liveState.playing) {
+    if (!video.paused) {
       video.pause();
       return;
     }
