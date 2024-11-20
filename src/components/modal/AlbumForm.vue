@@ -8,9 +8,9 @@
         autofocus="true"
         :value.sync="albumName"
         :required="true"
-        :label="t('memories', 'Name')"
+        :label="t('memories', 'Album Name')"
         :label-visible="true"
-        :placeholder="t('memories', 'Name of the album')"
+        :placeholder="t('memories', 'Album Name')"
       />
       <label>
         <NcTextField
