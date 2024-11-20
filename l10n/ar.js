@@ -232,7 +232,7 @@ OC.L10N.register(
     "Enable external transcoder" : "تمكين مُحوِّل خارجي ",
     "Binary path (local only)" : "المسار الثنائي (محلي فقط)",
     "Bind address (local only)" : "عنوان الاقتران/ الربط (محلي فقط)",
-    "Connection address (same as bind if local)" : "عنوان الاتصال (نفس عنوان الاقتران إذا كان محليّاً)",
+    "Connection address (same as bind if local)" : "عنوان الاتصال (نفس عنوان الاقتران إذا كان محلياً)",
     "Quality Factor (15 - 45) (default 25)" : "عامل الكفاءة (15 - 45) (التلقائي 25)",
     "Transcoder" : "مُحوِّل Transcoder",
     "Default high resolution image loading behavior of the photo viewer." : "السلوك التلقائي لتحميل الصور عالية الدقة في \"عارض الصور\"",

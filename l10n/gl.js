@@ -342,6 +342,7 @@ OC.L10N.register(
     "Merge faces" : "Combinar faciana",
     "Merge {name} with {newName}?" : "Combinar {nome} con {newName}?",
     "unnamed person" : "persoa sen nome",
+    "You can only merge with a person with name" : "Só se pode combinar cunha persoa con nome",
     "Too many failures, aborting" : "Demasiados fallos, interrompendo",
     "Error while moving {basename}" : "Produciuse un erro ao mover {basename}",
     "Failed to move {name}." : "Produciuse un fallo ao mover {name}.",

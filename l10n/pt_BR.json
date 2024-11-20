@@ -340,6 +340,7 @@
     "Merge faces" : "Mesclar rostos",
     "Merge {name} with {newName}?" : "Mesclar {name} com {newName}?",
     "unnamed person" : "pessoa sem nome",
+    "You can only merge with a person with name" : "Você só pode fazer a fusão com uma pessoa com um nome ",
     "Too many failures, aborting" : "Abortando, falhas demais",
     "Error while moving {basename}" : "Erro ao mover {basename}",
     "Failed to move {name}." : "Falha ao mover {name}.",

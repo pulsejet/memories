@@ -342,6 +342,7 @@ OC.L10N.register(
     "Merge faces" : "合併面孔",
     "Merge {name} with {newName}?" : "將 {name} 與 {newName} 合併?",
     "unnamed person" : "未命名的人",
+    "You can only merge with a person with name" : "您只能與下列名字的人合併：",
     "Too many failures, aborting" : "失敗次數過多，中止",
     "Error while moving {basename}" : "移動 {basename} 時出錯",
     "Failed to move {name}." : "移動 {name} 失敗。",
