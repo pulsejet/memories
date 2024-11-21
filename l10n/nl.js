@@ -1,7 +1,7 @@
 OC.L10N.register(
     "memories",
     {
-    "Shared Link" : "Gedeeld link",
+    "Shared Link" : "Gedeelde link",
     "Download" : "Download",
     "Memories" : "Herinneringen",
     "Fast, modern and advanced photo management suite" : "Snelle, moderne en geavanceerde suite voor fotobeheer",
@@ -86,8 +86,6 @@ OC.L10N.register(
     "Could not load the selected album" : "Kon het geselecteerde album niet laden",
     "Remove Album" : "Verwijder album",
     "Failed to delete {name}." : "Verwijderen van {name} mislukt.",
-    "Name" : "Naam",
-    "Name of the album" : "Naam van het album",
     "Location" : "Locatie",
     "Location of the album" : "Locatie van het album",
     "Go back to the previous view." : "Ga terug naar de vorige weergave.",
@@ -98,6 +96,7 @@ OC.L10N.register(
     "Save" : "Opslaan",
     "Create album" : "Maak album",
     "Save changes" : "Wijzigingen opslaan",
+    "Name of the album" : "Naam van het album",
     "Save collaborators for this album." : "Bewaar bijdragers voor dit album.",
     "Year" : "Jaar",
     "Month" : "Maand",
@@ -115,6 +114,7 @@ OC.L10N.register(
     "Reset" : "Herstellen",
     "Remove person" : "Verwijder persoon",
     "Rename person" : "Hernoem persoon",
+    "Name" : "Naam",
     "Update" : "Update",
     "Loading …" : "Laden …",
     "Move" : "Verplaatsen",
