@@ -1,9 +1,9 @@
 OC.L10N.register(
     "memories",
     {
-    "Shared Link" : "Shared Link",
+    "Shared Link" : "رابط مشاركة",
     "Download" : "تنزيل",
-    "Memories" : "ذكريات Memories",
+    "Memories" : "تطبيق \"ذكريات\" Memories",
     "Fast, modern and advanced photo management suite" : "حزمة إدارة صور سريعة وحديثة ومتقدمة",
     "# Memories: Photo Management for Nextcloud\n\nMemories is a *batteries-included* photo management solution for Nextcloud with advanced features including:\n\n- **📸 Timeline**: Sort photos and videos by date taken, parsed from Exif data.\n- **⏪ Rewind**: Jump to any time in the past instantly and relive your memories.\n- **🤖 AI Tagging**: Group photos by people and objects, powered by [recognize](https://github.com/nextcloud/recognize) and [facerecognition](https://github.com/matiasdelellis/facerecognition).\n- **🖼️ Albums**: Create albums to group photos and videos together. Then share these albums with others.\n- **🫱🏻‍🫲🏻 External Sharing**: Share photos and videos with people outside of your Nextcloud instance.\n- **📱 Mobile Support**: Work from any device, of any shape and size through the web app.\n- **✏️ Edit Metadata**: Edit dates and other metadata on photos quickly and in bulk.\n- **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.\n- **📹 Video Transcoding**: Transcode videos and use HLS for maximal performance.\n- **🗺️ Map**: View your photos on a map, tagged with accurate reverse geocoding.\n- **📦 Migration**: Migrate easily from Nextcloud Photos and Google Takeout.\n- **⚡️ Performance**: Do all this very fast.\n\n## 🚀 Installation\n\n1. Install the app from the Nextcloud app store (try a demo [here](https://demo.memories.gallery/apps/memories/)).\n1. Perform the recommended [configuration steps](https://memories.gallery/config/).\n1. Run `php occ memories:index` to generate metadata indices for existing photos.\n1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos." : "# تطبيق Memories: تطبيق إدارة الصور بنكست كلود\n\nتطبيق Memories هو حل إدارة الصور * مع مجموعة عناصر مدمجة * بنكست كلود مع ميزات متقدمة تشمل:\n\n- ** 📸 التسلسل الزمني **: ترتيب الصور ومقاطع الفيديو حسب تاريخ الالتقاط ، وتحليلها بواسطة بيانات Exif.\n- ** ⏪ الرجوع للخلف**: انتقل إلى أي وقت في الماضي على الفور واسترجع ذكرياتك.\n- ** 🤖 الوسم بالذكاء الأصطناعي **: جمع الصور جماعية الأشخاص والأشياء، مدعومة من قبل [recognize] (https://github.com/nextcloud/recognize) و [facerecognition] (https://github.com/matiasdelellis/facerecognition ).\n- ** 🖼️ الألبومات **: أنشئ ألبومات لتجميع الصور ومقاطع الفيديو معًا. ثم شارك هذه الألبومات مع الآخرين.\n- ** 🫱🏻‍🫲🏻 المشاركة الخارجية **: شارك الصور ومقاطع الفيديو مع أشخاص خارج مثيل نكست كلود الخاص بك.\n- ** 📱 دعم الهاتف **: العمل من أي جهاز، من أي شكل وحجم من خلال تطبيق الويب.\n- ** ✏️ تحرير البيانات الوصفية **: تحرير التواريخ والبيانات الوصفية الأخرى على الصور بسرعة وبشكل مجمّع.\n- ** 📦 الأرشفة **: قم بتخزين الصور التي لا تريد أن تراها في تسلسلك الزمني في مجلد منفصل.\n- ** 📹 تحويل ترميز الفيديو **: تحويل مقاطع الفيديو واستخدام بروتوكول HLS لتحقيق أقصى أداء.\n- ** 🗺️ الخريطة **: اعرض صورك على الخريطة، مع تمييزها بترميز جغرافي عكسي دقيق.\n- ** 📦 الانتقال**: الانتقال بسهولة من Nextcloud Photos و Google Takeout.\n- ** ⚡️ الأداء **: قم بفعل كل هذا بسرعة كبيرة.\n\n## 🚀 التثبيت\n\n1. قم بتثبيت التطبيق من متجر تطبيقات نكست كلود(جرب نسخة تجريبية[هنا] (https://demo.memories.gallery/apps/memories/)).\n1. نفذ [خطوات التكوين] الموصى بها (https://memories.gallery/config/).\n1. قم بتشغيل \"php occ memories:index\" لإنشاء فهارس بيانات وصفية للصور الموجودة.\n1. افتح 📷 تطبيق Memories في نكست كلاود وقم بتعيين الدليل الذي يحتوي على صورك.",
     "Settings" : "الإعدادات",
@@ -26,18 +26,18 @@ OC.L10N.register(
     "Videos" : "مقاطع الفيديو",
     "A better photos experience awaits you" : "تجربة صور أفضل في انتظارك",
     "Choose the root folder of your timeline to begin" : "اختر مجلد جذر لبدء تسلسلك الزمني",
-    "Continue to Memories" : "تابع إلى Memories",
+    "Continue to Memories" : "تابع إلى تطبيق \"الذكريات\" Memories",
     "Choose again" : "اختر مرة أخرى",
-    "Click here to start" : "اضغط هنا للبدأ",
+    "Click here to start" : "إضغَط هنا للبدء",
     "You can always change this later in settings" : "يمكنك دائمًا تغيير هذا لاحقًا من الإعدادات",
-    "If you just installed Memories, visit the admin panel first." : "إذا كنت علي وشك القيام بتثبيت تطبيق Memories، فقم بالرجوع إلي لوحة المسئول أولاً.",
-    "Choose the root of your timeline" : "إختَر الدليل الأساسي لتسلسلك الزمني ",
+    "If you just installed Memories, visit the admin panel first." : "إذا كنت علي وشك القيام بتثبيت تطبيق Memories، فقم بالرجوع إلي لوحة المشرف أولاً.",
+    "Choose the root of your timeline" : "إختَر الدليل الأساسي لخطك الزمني ",
     "The selected folder does not seem to be valid. Try again." : "يبدو أن المجلد المحدد غير صالح. حاول ثانية.",
-    "No photos were found in the selected folder." : "لم يتم إيجاد صور فى المجلد المختار.",
+    "No photos were found in the selected folder." : "لا توجد صور فى المجلد المحدد.",
     "This can happen because your media is still indexing." : "يمكن أن يحدث هذا لأن الوسائط الخاصة بك لا تزال قيد الفهرسة.",
-    "Visit the admin panel to make sure Memories is configured correctly." : "انتقل إلي لوحة المسئول للتأكد من ضبط وتهيئة الذكريات بشكل صحيح.",
+    "Visit the admin panel to make sure Memories is configured correctly." : "إنتقِل إلي لوحة المشرف للتأكد من ضبط وتهيئة تطبيق \"الذكريات\" بالشكل الصحيح.",
     "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["تم العثور على {n} عناصر في {path}","تم العثور على {n} عنصر في {path}","تم العثور على {n} عناصر في {path}","تم العثور على {n} عناصر في {path}","تم العثور على {n} عناصر في {path}","تم العثور على {n} عناصر في {path}"],
-    "Metadata" : "البيانات الوصفية metadata",
+    "Metadata" : "البيانات الوصفية  ",
     "Edit" : "تعديل",
     "Failed to load metadata" : "تعذّر تحميل البيانات الوصفية",
     "No coordinates" : "لا توجد إحداثيات",
@@ -51,12 +51,12 @@ OC.L10N.register(
     "Unarchive" : "غير مؤرشفة",
     "Edit metadata" : "تحرير بيانات التعريف الوصفية",
     "Rotate / Flip" : "أدِر / إقلِب",
-    "View in folder" : "اعرض في المجلد",
+    "View in folder" : "أعرُض في المجلد",
     "Set as cover image" : "تعيين كصورة غلاف",
-    "Move to folder" : "انتقل إلى المجلد",
+    "Move to folder" : "أنقُل إلى المجلد",
     "Add to album" : "إضِف إلى ألبوم",
-    "Move to person" : "نقل إلى فئة شخص",
-    "Remove from person" : "إزالة من شخصٍ",
+    "Move to person" : "أنقُل إلى شخص",
+    "Remove from person" : "أزِل من شخصٍ",
     "You must enable \"Mark person in preview\" to use this feature" : "يجب عليك تمكين \"تمييز شخص في المعاينة\" لاستخدام هذه الميزة",
     "Only user \"{user}\" can update this person" : "يمكن للمستخدم \"{user}\" فقط تحديث هذا الشخص",
     "_{n} selected_::_{n} selected_" : ["تم تحديد {n}","تم تحديد {n}","تم تحديد {n}","تم تحديد {n}","تم تحديد {n}","تم تحديد {n}"],
@@ -236,7 +236,7 @@ OC.L10N.register(
     "Quality Factor (15 - 45) (default 25)" : "عامل الكفاءة (15 - 45) (التلقائي 25)",
     "Transcoder" : "مُحوِّل Transcoder",
     "Default high resolution image loading behavior of the photo viewer." : "السلوك التلقائي لتحميل الصور عالية الدقة في \"عارض الصور\"",
-    "The configuration here also applies to public link shares." : "هذا الإعداد ينطبق كذلك على المشاركات عبر الروابط العامة",
+    "The configuration here also applies to public link shares." : "هذا الإعداد ينطبق كذلك على المشاركات عبر الروابط العمومية",
     "Users may override this setting." : "يُمكن للمستخدِمين تجاوز هذا الإعداد.",
     "Always load high resolution image (not recommended if using HEIC/TIFF)" : "قُم دائماً بتحميل الصور عالية الدِّقّة (لا يُنصح به في حالة استعمال HEIC/TIFF)",
     "Template" : "قالب",
@@ -252,9 +252,9 @@ OC.L10N.register(
     "Add {collaboratorLabel} to the collaborators list" : "إضافة {collaboratorLabel} إلى قائمة المتعاونين",
     "No collaborators available" : "لا يوجد أي متعاونين",
     "Remove {collaboratorLabel} from the collaborators list" : "حذف {collaboratorLabel} من قائمة المتعاونين",
-    "Copy the public link" : "إنسخ الرابط العمومي",
-    "Public link copied!" : "تم نسخ الرابط العام",
-    "Copy public link" : "نسخ الرابط العام",
+    "Copy the public link" : "إنسَخ الرابط العمومي",
+    "Public link copied!" : "تم نسخ الرابط العمومي",
+    "Copy public link" : "نسخ الرابط العمومي",
     "Delete the public link" : "حذف الرابط العمومي",
     "Share via public link" : "شارك عبر الرابط العمومي",
     "Failed to fetch collaborators list." : "تعذّر جلب قائمة المتعاونين.",
@@ -270,6 +270,7 @@ OC.L10N.register(
     "Are you sure you want to permanently remove album \"{name}\"?" : "هل أنت متأكد أنك تريد حذف الألبوم \"{name}\" نهائيًا؟",
     "Are you sure you want to leave the shared album \"{name}\"?" : "هل أنت متأكد أنك تريد مغادرة الألبُوم المشترك  \"{name}\"؟",
     "Failed to delete {name}." : "فشل في حذف {name}.",
+    "Album Name" : "اسم الألبوم",
     "Location" : "الموقع",
     "Location of the album" : "موقع الألبوم",
     "Go back to the previous view." : "عُد إلى العرض السابق.",
@@ -358,7 +359,7 @@ OC.L10N.register(
     "Link Sharing" : "مشاركة الرابط",
     "You cannot share the root folder" : "لا يمكنك مشاركة مجلد الدليل الأساسي",
     "Public link shares are available to people outside Nextcloud." : "المشاركات عبر الرابط العام متاحة للأشخاص من خارج نكست كلاود",
-    "You may create or update permissions on public links using the sidebar." : "يمكنك إنشاء و تحديث أذونات الروابط العامة باستخدام الشريط الجانبي.",
+    "You may create or update permissions on public links using the sidebar." : "يمكنك إنشاء و تحديث أذونات الروابط العمومية باستخدام الشريط الجانبي.",
     "Click a link to copy to clipboard." : "أنقُر علي الرابط لنسخه إلى الحافظة.",
     "Share link" : "مشاركة الرابط",
     "Create Link" : "إنشاء رابط",
@@ -374,10 +375,10 @@ OC.L10N.register(
     "High Resolution" : "دقة عالية",
     "Share in high quality (large file size)" : "Share in high quality (large file size)",
     "Original File" : "الملف الأصلي",
-    "Public Link" : "رابط عام",
+    "Public Link" : "رابط عمومي",
     "Share an external Nextcloud link" : "شارك رابط نكست كلاود خارجي",
     "Not allowed to share file: {name}" : "Not allowed to share file: {name}",
-    "Failed to create album for public link" : "Failed to create album for public link",
+    "Failed to create album for public link" : "تعذّر إنشاء ألبوم للرابط العمومي",
     "Failed to download file {href}" : "Failed to download file {href}",
     "Cannot share this type of data" : "لا يمكن مشاركة هذا النوع من البيانات",
     "_Share File_::_Share Files_" : ["Share Files","Share File","Share Files","Share Files","Share Files","Share Files"],

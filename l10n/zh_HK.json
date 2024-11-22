@@ -268,6 +268,7 @@
     "Are you sure you want to permanently remove album \"{name}\"?" : "您確定要永久刪除相冊 “{name}” 嗎？",
     "Are you sure you want to leave the shared album \"{name}\"?" : "您確定要離開分享相簿 “{name}” 嗎？",
     "Failed to delete {name}." : "刪除 {name} 失敗。",
+    "Album Name" : "相簿名字",
     "Location" : "地點",
     "Location of the album" : "相簿位置",
     "Go back to the previous view." : "回到前一個檢視。",

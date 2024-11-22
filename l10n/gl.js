@@ -270,6 +270,7 @@ OC.L10N.register(
     "Are you sure you want to permanently remove album \"{name}\"?" : "Confirma que quere retirar definitivamente o album «{name}»?",
     "Are you sure you want to leave the shared album \"{name}\"?" : "Confirma que quere deixar o álbum compartido «{name}»?",
     "Failed to delete {name}." : "Produciuse un fallo ao eliminar {name}.",
+    "Album Name" : "Nome do álbum",
     "Location" : "Localización",
     "Location of the album" : "Localización do álbum",
     "Go back to the previous view." : "Volver á vista anterior.",
