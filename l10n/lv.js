@@ -52,7 +52,7 @@ OC.L10N.register(
     "Could not load the selected album" : "Nevarēja ielādēt izvēlēto albumu",
     "Remove Album" : "Noņemt albumu",
     "Leave Album" : "Pamest albumu",
-    "Location" : "Vieta",
+    "Location" : "Atrašanās vieta",
     "Location of the album" : "Albuma atrašanās vieta",
     "Back" : "Atpakaļ",
     "Save" : "Saglabāt",
