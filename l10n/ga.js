@@ -270,6 +270,7 @@ OC.L10N.register(
     "Are you sure you want to permanently remove album \"{name}\"?" : "An bhfuil tú cinnte gur mhaith leat albam \"{name}\" a bhaint go buan?",
     "Are you sure you want to leave the shared album \"{name}\"?" : "An bhfuil tú cinnte gur mhaith leat an t-albam roinnte \"{name}\" a fhágáil?",
     "Failed to delete {name}." : "Theip ar scriosadh {name}.",
+    "Album Name" : "Ainm Albam",
     "Location" : "Suíomh",
     "Location of the album" : "Suíomh a ar an albam",
     "Go back to the previous view." : "Téigh ar ais go dtí an radharc roimhe seo.",
