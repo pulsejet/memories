@@ -8,6 +8,7 @@
     @fullscreenchange="fullscreenChange"
   >
     <ImageEditor v-if="editorOpen && currentPhoto" :photo="currentPhoto" @close="editorOpen = false" />
+    <PhotoSphere v-if="sphereOpen && currentPhoto" :photo="currentPhoto" @close="sphereOpen = false" />
 
     <!-- Loading indicator -->
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
@@ -15,7 +16,7 @@
     <div
       ref="inner"
       class="inner"
-      v-show="!editorOpen"
+      v-show="!editorOpen && !sphereOpen"
       @pointermove.passive="setUiVisible"
       @pointerdown.passive="setUiVisible"
     >
@@ -66,6 +67,7 @@ import * as utils from '@services/utils';
 import * as nativex from '@native';
 
 import ImageEditor from './ImageEditor.vue';
+import PhotoSphere from './PhotoSphere.vue';
 import PhotoSwipe, { type PhotoSwipeOptions } from 'photoswipe';
 import 'photoswipe/style.css';
 import PsImage from './PsImage';
@@ -84,6 +86,7 @@ import DownloadIcon from 'vue-material-design-icons/Download.vue';
 import InfoIcon from 'vue-material-design-icons/InformationOutline.vue';
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 import TuneIcon from 'vue-material-design-icons/Tune.vue';
+import PanoramaSphereOutlineIcon from 'vue-material-design-icons/PanoramaSphereOutline.vue';
 import SlideshowIcon from 'vue-material-design-icons/PlayBox.vue';
 import EditFileIcon from 'vue-material-design-icons/FileEdit.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
@@ -116,6 +119,7 @@ export default defineComponent({
     NcActions,
     NcActionButton,
     ImageEditor,
+    PhotoSphere,
   },
 
   mixins: [UserConfig],
@@ -125,6 +129,7 @@ export default defineComponent({
     isOpen: false,
     originalTitle: null as string | null,
     editorOpen: false,
+    sphereOpen: false,
     editorSrc: '',
 
     show: false,
@@ -278,6 +283,13 @@ export default defineComponent({
           if: true,
         },
         {
+          id: 'sphere',
+          name: this.t('memories', 'Open in PhotoSphere'),
+          icon: PanoramaSphereOutlineIcon,
+          callback: this.openSphere,
+          if: !this.isVideo,
+        },
+        {
           id: 'edit',
           name: this.t('memories', 'Edit'),
           icon: TuneIcon,
@@ -382,7 +394,7 @@ export default defineComponent({
 
     /** Allow closing the viewer */
     allowClose(): boolean {
-      return !this.editorOpen && !dav.isSingleItem() && !this.slideshowTimer;
+      return !this.editorOpen && !this.sphereOpen && !dav.isSingleItem() && !this.slideshowTimer;
     },
 
     /** Get date taken string */
@@ -1014,6 +1026,10 @@ export default defineComponent({
 
       // Open editor
       this.editorOpen = true;
+    },
+
+    async openSphere() {
+      this.sphereOpen = true;
     },
 
     /** Share the current photo externally */
