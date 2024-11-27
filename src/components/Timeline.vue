@@ -620,6 +620,16 @@ export default defineComponent({
         set(DaysFilterType.VIDEOS);
       }
 
+      // Live photos
+      if (this.routeIsLivePhotos) {
+        set(DaysFilterType.LIVE);
+      }
+
+      // Panoramas
+      if (this.routeIsPanoramas) {
+        set(DaysFilterType.PANO);
+      }
+
       // Folder
       if (this.routeIsFolders || this.routeIsFolderShare) {
         const path = utils.getFolderRoutePath(this.config.folders_path);

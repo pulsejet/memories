@@ -20,6 +20,8 @@ function tok(url: string) {
 export const enum DaysFilterType {
   FAVORITES = 'fav',
   VIDEOS = 'vid',
+  LIVE = 'live',
+  PANO = 'pano',
   FOLDER = 'folder',
   ARCHIVE = 'archive',
   ALBUM = 'albums',
