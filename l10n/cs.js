@@ -269,6 +269,7 @@ OC.L10N.register(
     "Are you sure you want to permanently remove album \"{name}\"?" : "Opravdu chcete album „{name}“ nevratně odebrat?",
     "Are you sure you want to leave the shared album \"{name}\"?" : "Opravdu chcete sdílené album „{name}“ opustit?",
     "Failed to delete {name}." : "Nepodařilo se smazat {name}.",
+    "Album Name" : "Název alba",
     "Location" : "Poloha",
     "Location of the album" : "Umístění alba",
     "Go back to the previous view." : "Jít zpět na předchozí pohled.",
