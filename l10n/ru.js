@@ -263,6 +263,7 @@ OC.L10N.register(
     "Create a new face with this name?" : " Создать новое лицо с таким именем?",
     "Create new face" : "Создать новое лицо",
     "Too many failures, aborting" : "Произошло множество ошибок, действие прервано",
+    "Error while moving {basename}" : "Ошибка при перемещении {basename}",
     "Failed to move {name}." : "Не удалось переместить «{name}».",
     "Move" : "Переместить",
     "An error occurred while moving photos from {name}." : "Произошла ошибка при перемещении фотографий из {name}.",
