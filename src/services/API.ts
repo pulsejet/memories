@@ -221,4 +221,8 @@ export class API {
   static MAP_INIT() {
     return tok(gen(`${BASE}/map/init`));
   }
+
+  static UID_NAME(uid: string) {
+    return tok(gen(`${BASE}/uid/name/{uid}`, { uid }));
+  }
 }

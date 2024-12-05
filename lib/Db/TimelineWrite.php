@@ -72,6 +72,7 @@ class TimelineWrite
         // Get parameters
         $mtime = $file->getMtime();
         $fileId = $file->getId();
+        $uid = $file->getOwner()?->getUID();
         $isvideo = Index::isVideo($file);
 
         // Get previous row
@@ -172,6 +173,7 @@ class TimelineWrite
             'orphan' => $query->createNamedParameter(false, IQueryBuilder::PARAM_BOOL),
             'buid' => $query->createNamedParameter($buid, IQueryBuilder::PARAM_STR),
             'parent' => $query->createNamedParameter($file->getParent()->getId(), IQueryBuilder::PARAM_INT),
+            'uid' => $query->createNamedParameter($uid, IQueryBuilder::PARAM_STR),
         ];
 
         // There is no easy way to UPSERT in standard SQL
