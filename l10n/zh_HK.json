@@ -318,7 +318,7 @@
     "Cannot edit rotation on Live Photos ({name})" : "無法編輯原況照片（{name}）的旋轉",
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "某些選定的項目有堆疊的 RAW 檔案。\nRAW 檔案不會被編輯。",
     "Missing date metadata" : "找不到日期元數據",
-    "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "有些項目可能缺少日期元數據。您想嘗試將目前已知的時間戳複製到元數據（建議）嗎？ 否則，時間戳可能會重設為當前時間。",
+    "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "有些項目可能缺少日期元數據。您想嘗試將目前已知的時間戳複製到元數據（建議）嗎？ 否則，時間戳可能會重設為目前時間。",
     "Failed to load metadata for {n} photos." : "為 {n} 張照片載入元數據失敗。",
     "{n} photos cannot be edited (permissions error)." : "{n} 張照片無法編輯（權限錯誤）。",
     "This feature rotates images losslessly by updating the EXIF metadata. This approach is known to sometimes not work correctly on certain image types such as HEIC. Make sure you do a test run before using it on multiple images." : "此功能透過更新 EXIF 詮釋資料來無損旋轉影像。眾所周知，此方法有時候無法在某些影像類型（例如 HEIC）上正常運作。確保在對多個影像使用此功能前先行測試。",
