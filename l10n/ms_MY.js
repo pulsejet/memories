@@ -29,6 +29,7 @@ OC.L10N.register(
     "Home" : "Rumah",
     "Previous" : "Sebelum",
     "Next" : "Seterus",
+    "Value" : "Nilai",
     "Size" : "Saiz",
     "Yes" : "Ya",
     "No" : "Tidak"
