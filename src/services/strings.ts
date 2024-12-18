@@ -41,6 +41,10 @@ export function viewName(routeName: string): string {
       return t('memories', 'People');
     case _m.routes.Videos.name:
       return t('memories', 'Videos');
+    case _m.routes.LivePhotos.name:
+      return t('memories', 'Live photos');
+    case _m.routes.Panoramas.name:
+      return t('memories', 'Panoramas');
     case _m.routes.Albums.name:
       return t('memories', 'Albums');
     case _m.routes.Archive.name:
