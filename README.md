@@ -54,6 +54,8 @@ See [`.devcontainer/README.md`](.devcontainer/README.md) for more information.
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/pulsejet/memories?quickstart=1)
 
+[![Open in Codeanywhere](https://codeanywhere.com/img/open-in-codeanywhere-btn.svg)](https://app.codeanywhere.com/#https://github.com/pulsejet/memories)
+
 To set up a development instance manually, follow these steps:
 
 1. ☁ Clone this monorepo into the `custom_apps` folder of your Nextcloud.
