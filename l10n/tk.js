@@ -20,6 +20,7 @@ OC.L10N.register(
     "Back" : "Yzyna",
     "Save" : "Saklamak",
     "Name" : "Ady",
+    "Update" : "Täzelemek",
     "Move" : "Göçüriň",
     "Remove" : "Aýyrmak",
     "Share link" : "Baglanyşyk paýlaş",

@@ -144,7 +144,7 @@
     "It took {t} seconds to complete." : "耗时{t}秒完成",
     "It is still running or was interrupted." : "它仍在运行或被中断。",
     "Looks like it has been more than an hour since the last index job was run. Make sure Nextcloud cron is configured correctly." : "自上次运行索引作业以来已经一个多小时了。 确保 Nextcloud cron 配置正确。",
-    "Only server-side encryption (OC_DEFAULT_MODULE) is supported, but another encryption module is enabled." : "仅支持服务器端加密(OC_DEFAULT_MODULE)，但已启用另一个加密模块。",
+    "Only server-side encryption (OC_DEFAULT_MODULE) is supported, but another encryption module is enabled." : "仅支持服务端加密 (OC_DEFAULT_MODULE)，但已启用另一个加密模块。",
     "The EXIF indexes are built and checked in a periodic background task. Be careful when selecting anything other than automatic indexing. For example, setting the indexing to only timeline folders may cause delays before media becomes available to users, since the user configures the timeline only after logging in." : "EXIF索引是在定期后台任务中构建和检查的。在选择自动索引以外的其他选项时要小心。例如，将索引仅设置为时间线文件夹可能会导致媒体对用户可用之前的延迟，因为用户只有在登录后才能配置时间线。",
     "Index all media automatically (recommended)" : "自动索引所有媒体（推荐）",
     "Index per-user timeline folders (not recommended)" : "索引每个用户的时间线文件夹（不推荐）",
