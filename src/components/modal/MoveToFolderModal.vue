@@ -13,7 +13,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { FilePickerType } from '@nextcloud/dialogs';
 import { showInfo } from '@nextcloud/dialogs';
 
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
@@ -61,13 +60,49 @@ export default defineComponent({
     },
 
     async chooseFolderPath() {
+      enum Mode {
+        Move = 1,
+        Copy = 2,
+        Organise = 3,
+      }
+      let mode: Mode = Mode.Move as Mode;
       let destination = await utils.chooseNcFolder(
         this.t('memories', 'Choose a folder'),
         this.config.folders_path,
-        FilePickerType.Move,
+        () => [
+          {
+            label: 'Move and organise',
+            callback: () => (mode = Mode.Organise),
+          },
+          {
+            label: 'Copy',
+            callback: () => (mode = Mode.Copy),
+          },
+          {
+            label: 'Move',
+            type: 'primary',
+            callback: () => (mode = Mode.Move),
+          },
+        ],
       );
+
+      let gen;
       // Fails if the target exists, same behavior with Nextcloud files implementation.
-      const gen = dav.movePhotos(this.photos, destination, false);
+      switch (mode) {
+        case Mode.Organise: {
+          gen = dav.movePhotosByDate(this.photos, destination, false);
+          break;
+        }
+        case Mode.Copy: {
+          gen = dav.copyPhotos(this.photos, destination, false);
+          break;
+        }
+        case Mode.Move: {
+          gen = dav.movePhotos(this.photos, destination, false);
+          break;
+        }
+      }
+
       this.show = true;
 
       for await (const fids of gen) {
@@ -76,7 +111,11 @@ export default defineComponent({
       }
 
       const n = this.photosDone;
-      showInfo(this.n('memories', '{n} item moved to folder', '{n} items moved to folder', n, { n }));
+      if (mode === Mode.Copy) {
+        showInfo(this.n('memories', '{n} item copied to folder', '{n} items copied to folder', n, { n }));
+      } else {
+        showInfo(this.n('memories', '{n} item moved to folder', '{n} items moved to folder', n, { n }));
+      }
       this.close();
     },
   },
