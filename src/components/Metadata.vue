@@ -17,6 +17,19 @@
       <AlbumsList class="albums" :albums="albums" />
     </div>
 
+    <div v-if="uid">
+      <div class="section-title">{{ t('memories', 'Shared By') }}</div>
+      <div class="top-field">
+        <div class="icon">
+          <NcAvatar key="uid" :user="uid" :showUserStatus="false" :size="24" />
+        </div>
+
+        <div class="text">
+          <span class="title">{{ userDisplay }}</span>
+        </div>
+      </div>
+    </div>
+
     <div class="section-title">{{ t('memories', 'Metadata') }}</div>
     <div v-for="field of topFields" :key="field.title" :class="`top-field top-field--${field.id}`">
       <div class="icon">
@@ -90,8 +103,9 @@ import TagIcon from 'vue-material-design-icons/Tag.vue';
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
 import { API } from '@services/API';
-
 import type { IAlbum, IFace, IImageInfo, IPhoto, IExif } from '@typings';
+
+const NcAvatar = () => import('@nextcloud/vue/dist/Components/NcAvatar.js');
 
 interface TopField {
   id?: string;
@@ -110,6 +124,7 @@ export default defineComponent({
     AlbumsList,
     Cluster,
     EditIcon,
+    NcAvatar,
   },
 
   mixins: [UserConfig],
@@ -120,6 +135,8 @@ export default defineComponent({
     exif: {} as IExif,
     baseInfo: {} as IImageInfo,
     error: false,
+    uid: null as string | null,
+    userDisplay: '',
 
     loading: 0,
     state: 0,
@@ -418,6 +435,11 @@ export default defineComponent({
       this.fileid = this.baseInfo.fileid;
       this.filename = this.baseInfo.basename;
       this.exif = this.baseInfo.exif ?? {};
+
+      // set user info
+      this.uid = this.baseInfo.uid ?? null;
+      if (this.uid == utils.uid) this.uid = null;
+      this.userDisplay = await utils.getUserDisplayName(this.uid);
 
       return this.baseInfo;
     },
