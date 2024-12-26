@@ -310,7 +310,7 @@ export default defineComponent({
           name: this.t('memories', 'View in folder'),
           icon: OpenInNewIcon,
           callback: this.viewInFolder,
-          if: !this.routeIsPublic && !this.routeIsAlbums && !this.isLocal,
+          if: !this.routeIsPublic && !this.routeIsAlbums && !this.isLocal && !this.currentPhoto?.src,
         },
         {
           id: 'slideshow',

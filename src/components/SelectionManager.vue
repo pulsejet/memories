@@ -200,7 +200,7 @@ export default defineComponent({
         name: t('memories', 'Delete'),
         icon: DeleteIcon,
         callback: this.deleteSelection.bind(this),
-        if: () => !this.routeIsAlbums,
+        if: () => !this.routeIsAlbums && this.selectionInTimelinePath(),
       },
       {
         name: t('memories', 'Remove from album'),
@@ -212,7 +212,7 @@ export default defineComponent({
         name: t('memories', 'Share'),
         icon: ShareIcon,
         callback: this.shareSelection.bind(this),
-        if: () => !this.routeIsAlbums,
+        if: () => !this.routeIsAlbums && this.selectionInTimelinePath(),
       },
       {
         name: t('memories', 'Download'),
@@ -230,7 +230,7 @@ export default defineComponent({
         name: t('memories', 'Archive'),
         icon: ArchiveIcon,
         callback: this.archiveSelection.bind(this),
-        if: () => !this.routeIsArchiveFolder() && !this.routeIsAlbums,
+        if: () => !this.routeIsArchiveFolder() && !this.routeIsAlbums && this.selectionInTimelinePath(),
       },
       {
         name: t('memories', 'Unarchive'),
@@ -242,17 +242,19 @@ export default defineComponent({
         name: t('memories', 'Edit metadata'),
         icon: EditFileIcon,
         callback: this.editMetadataSelection.bind(this),
+        if: () => !this.routeIsAlbums && this.selectionInTimelinePath(),
       },
       {
         name: t('memories', 'Rotate / Flip'),
         icon: RotateLeftIcon,
         callback: () => this.editMetadataSelection(this.selection, [5]),
+        if: () => !this.routeIsAlbums && this.selectionInTimelinePath(),
       },
       {
         name: t('memories', 'View in folder'),
         icon: OpenInNewIcon,
         callback: this.viewInFolder.bind(this),
-        if: () => this.selection.size === 1 && !this.routeIsAlbums,
+        if: () => this.selection.size === 1 && !this.routeIsAlbums && this.selectionInTimelinePath(),
       },
       {
         name: t('memories', 'Set as cover image'),
@@ -264,13 +266,13 @@ export default defineComponent({
         name: t('memories', 'Move to folder'),
         icon: FolderMoveIcon,
         callback: this.moveToFolder.bind(this),
-        if: () => !this.routeIsAlbums && !this.routeIsArchiveFolder(),
+        if: () => !this.routeIsAlbums && !this.routeIsArchiveFolder() && this.selectionInTimelinePath(),
       },
       {
         name: t('memories', 'Add to album'),
         icon: AlbumsIcon,
         callback: this.addToAlbum.bind(this),
-        if: (self: any) => self.config.albums_enabled && !self.routeIsAlbums,
+        if: (self: any) => self.config.albums_enabled && !self.routeIsAlbums && this.selectionInTimelinePath(),
       },
       {
         id: 'face-move',
@@ -333,6 +335,10 @@ export default defineComponent({
       }
 
       return false;
+    },
+
+    selectionInTimelinePath() {
+      return !Array.from(this.selection.values()).some((photo) => photo.src);
     },
 
     /** Trigger to update props from selection set */

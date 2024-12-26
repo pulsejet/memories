@@ -17,6 +17,14 @@
           readonly
         />
 
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.timeline_include_shared_albums"
+          @update:checked="updateTimelineIncludeSharedAlbums"
+          type="switch"
+        >
+          {{ t('memories', 'Include shared albums in timeline') }}
+        </NcCheckboxRadioSwitch>
+
         <NcCheckboxRadioSwitch :checked.sync="config.square_thumbs" @update:checked="updateSquareThumbs" type="switch">
           {{ t('memories', 'Square grid mode') }}
         </NcCheckboxRadioSwitch>
@@ -310,6 +318,10 @@ export default defineComponent({
     },
 
     // General settings
+    async updateTimelineIncludeSharedAlbums() {
+      await this.updateSetting('timeline_include_shared_albums', 'timelineIncludeSharedAlbums');
+    },
+
     async updateSquareThumbs() {
       await this.updateSetting('square_thumbs');
     },
