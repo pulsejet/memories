@@ -56,6 +56,8 @@ return [
         ['name' => 'Map#clusters', 'url' => '/api/map/clusters', 'verb' => 'GET'],
         ['name' => 'Map#init', 'url' => '/api/map/init', 'verb' => 'GET'],
 
+        ['name' => 'Uid#name', 'url' => '/api/uid/name/{id}', 'verb' => 'GET'],
+
         ['name' => 'Archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
 
         ['name' => 'Image#preview', 'url' => '/api/image/preview/{id}', 'verb' => 'GET'],
