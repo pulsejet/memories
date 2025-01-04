@@ -5,6 +5,14 @@
       <div class="description" v-if="description">{{ description }}</div>
     </div>
 
+    <div v-if="isShared" class="shared-by">
+      <div class="section-title">{{ t('memories', 'Shared By') }}</div>
+      <div class="top-field">
+        <NcAvatar key="uid" :user="baseInfo.owneruid" :showUserStatus="false" :size="24" />
+        <span class="name">{{ baseInfo.ownername }}</span>
+      </div>
+    </div>
+
     <div v-if="people.length" class="people">
       <div class="section-title">{{ t('memories', 'People') }}</div>
       <div class="container" v-for="face of people" :key="face.cluster_id">
@@ -71,6 +79,7 @@ import type { Component } from 'vue';
 
 import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+const NcAvatar = () => import('@nextcloud/vue/dist/Components/NcAvatar.js');
 
 import axios from '@nextcloud/axios';
 import { getCanonicalLocale } from '@nextcloud/l10n';
@@ -107,6 +116,7 @@ export default defineComponent({
   components: {
     NcActions,
     NcActionButton,
+    NcAvatar,
     AlbumsList,
     Cluster,
     EditIcon,
@@ -388,6 +398,10 @@ export default defineComponent({
 
       return clusters?.recognize ?? [];
     },
+
+    isShared(): boolean {
+      return !!this.baseInfo.owneruid && this.baseInfo.owneruid !== utils.uid;
+    },
   },
 
   methods: {
@@ -504,6 +518,16 @@ export default defineComponent({
       text-decoration-color: #ddd;
       text-underline-offset: 4px;
     }
+  }
+}
+
+.shared-by {
+  > .top-field {
+    margin-top: 6px;
+    margin-bottom: 10px;
+  }
+  .name {
+    margin-left: 8px;
   }
 }
 

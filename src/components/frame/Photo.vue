@@ -35,9 +35,13 @@
         </div>
       </div>
 
-      <div class="flag bottom-left">
+      <div class="flag bottom-right">
         <StarIcon :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
         <LocalIcon :size="22" v-if="data.flag & c.FLAG_IS_LOCAL" />
+      </div>
+
+      <div class="flag bottom-left">
+        <span class="shared-by" v-if="sharedBy">{{ sharedBy }}</span>
       </div>
 
       <div
@@ -202,6 +206,15 @@ export default defineComponent({
 
     isRaw(): boolean {
       return !!this.data.stackraw || this.data.mimetype === this.c.MIME_RAW;
+    },
+
+    sharedBy(): string | null {
+      if (this.data.shared_by == '[unknown]') {
+        return this.t('memories', 'Shared');
+      } else if (this.data.shared_by) {
+        return this.data.shared_by;
+      }
+      return null;
     },
   },
 
@@ -428,6 +441,20 @@ $icon-size: $icon-half-size * 2;
     .p-outer.selected > & {
       transform: translate($icon-size, -$icon-size);
     }
+  }
+
+  &.bottom-right {
+    bottom: var(--icon-dist);
+    right: var(--icon-dist);
+    .p-outer.selected > & {
+      transform: translate(-$icon-size, -$icon-size);
+    }
+  }
+
+  > .shared-by {
+    font-size: 0.75em;
+    line-height: 0.75em;
+    font-weight: 400;
   }
 
   > .video {

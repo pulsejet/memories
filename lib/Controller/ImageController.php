@@ -215,6 +215,12 @@ class ImageController extends GenericApiController
             $info['basename'] = $file->getName();
             $info['uploadtime'] = $file->getUploadTime() ?: $file->getMTime();
 
+            // Get file owner name for shared files
+            if ($owner = $file->getOwner()) {
+                $info['owneruid'] = $owner->getUID();
+                $info['ownername'] = $owner->getDisplayName();
+            }
+
             // Allow these ony for logged in users
             if ($user = $this->userSession->getUser()) {
                 // Get the path of the file relative to current user

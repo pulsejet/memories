@@ -7,6 +7,7 @@ namespace OCA\Memories\Db;
 use OCA\Memories\ClustersBackend;
 use OCA\Memories\Exif;
 use OCA\Memories\Settings\SystemConfig;
+use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -147,6 +148,10 @@ trait TimelineQueryDays
 
         // Filter for files in the timeline path
         $query = $this->filterFilecache($query, null, $recursive, $archive, $hidden);
+
+        // SELECT storage ID to check if this photo is shared
+        $query->leftJoin('f', 'storages', 's', $query->expr()->eq('f.storage', 's.numeric_id'));
+        $query->selectAlias('s.id', 'storage_id');
 
         // FETCH all photos in this day
         $day = $this->executeQueryWithCTEs($query)->fetchAll();
@@ -345,6 +350,23 @@ trait TimelineQueryDays
         if ($monthView) {
             $row['dayid'] = $this->dayIdToMonthId($row['dayid']);
         }
+
+        // Convert storage_id to user display name
+        if ($storage = $row['storage_id'] ?? null) {
+            unset($row['storage_id']);
+
+            /** @var array<string,string> */
+            static $userMemo = [];
+            if ($user = $userMemo[$storage] ?? null) {
+                $row['shared_by'] = $user;
+            } elseif ($user = $this->storageIdToUserName($storage)) {
+                $row['shared_by'] = $userMemo[$storage] = $user;
+            }
+
+            if ('[self]' === $row['shared_by']) {
+                unset($row['shared_by']);
+            }
+        }
     }
 
     /**
@@ -381,5 +403,30 @@ trait TimelineQueryDays
         }
 
         return $memoize[$dayId] = strtotime(date('Ym', $dayId * 86400).'01') / 86400;
+    }
+
+    private function storageIdToUserName(string $storage): string
+    {
+        // Storage ID looks like "home::{uid}" or "local::{/path}" etc
+        $pos = strpos($storage, '::');
+        if (false === $pos) {
+            return '[unknown]';
+        }
+        $uid = substr($storage, $pos + 2);
+
+        // Check if self
+        if (Util::isLoggedIn() && $uid === Util::getUID()) {
+            return '[self]';
+        }
+
+        // If there are slashes, it's not a user (could be group folder)
+        if (str_contains($uid, '/')) {
+            return '[unknown]';
+        }
+
+        // Otherwise it *may* be a user
+        $user = $this->userManager->get($uid);
+
+        return $user ? $user->getDisplayName() : '[unknown]';
     }
 }
