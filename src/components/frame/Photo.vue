@@ -455,6 +455,7 @@ $icon-size: $icon-half-size * 2;
     font-size: 0.75em;
     line-height: 0.75em;
     font-weight: 400;
+    margin: 2px;
   }
 
   > .video {
