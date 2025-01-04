@@ -1,15 +1,13 @@
-import path from 'path';
-
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 
 import { getAlbumFileInfos } from './albums';
 import client, { remotePath } from './client';
 
-import * as nativex from '@native';
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
 import * as utils from '@services/utils';
+import * as nativex from '@native';
 
 import type { IFileInfo, IImageInfo, IPhoto } from '@typings';
 import type { ResponseDataDetailed, SearchResult } from 'webdav';
@@ -440,7 +438,7 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
 
   // Set absolute target path
   const prefixPath = `files/${utils.uid}`;
-  destination = path.join(prefixPath, destination);
+  destination = `${prefixPath}/${destination}`;
   const datePaths: Map<string, Set<string>> = new Map(); // {'year': {'month1', 'month2'}}
 
   photos = await extendWithStack(photos);
@@ -472,7 +470,7 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
     months.add(month);
     datePaths.set(year, months);
 
-    const datePath = path.join(destination, `/${year}/${month}`);
+    const datePath = `${destination}/${year}/${month}`;
 
     moveDirectives.push([datePath, fileInfos[i]]);
   });
@@ -483,16 +481,16 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
       existing = existing.data;
     }
     existing = existing.filter((f) => f.type === 'directory');
-    for (const subDirectory of subDirectories) {
-      if (!existing.some((f) => f.basename === subDirectory)) {
-        await client.createDirectory(path.join(directory, subDirectory));
+    for (const sub of subDirectories) {
+      if (!existing.some((f) => f.basename === sub)) {
+        await client.createDirectory(`${directory}/${sub}`);
       }
     }
   }
 
   await createIfNotExist(destination, datePaths.keys());
   for (const [year, months] of datePaths) {
-    await createIfNotExist(path.join(destination, year), months);
+    await createIfNotExist(`${destination}/${year}`, months);
   }
 
   // Move each file
@@ -500,7 +498,7 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
     try {
       await client.moveFile(
         fileInfo.originalFilename,
-        path.join(targetPath, fileInfo.basename),
+        `${targetPath}/${fileInfo.basename}`,
         // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
         { headers: { Overwrite: overwrite ? 'T' : 'F' } },
       );

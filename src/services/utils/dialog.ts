@@ -156,6 +156,7 @@ export async function prompt(opts: PromptOptions): Promise<string | null> {
   );
 }
 
+/** Default button factory for the file picker */
 function chooseButtonFactory(nodes: Node[]): IFilePickerButton[] {
   const fileName = nodes?.[0]?.attributes?.displayName || nodes?.[0]?.basename;
   let label = nodes.length === 1 ? t('memories', 'Choose {file}', { file: fileName }) : t('memories', 'Choose');

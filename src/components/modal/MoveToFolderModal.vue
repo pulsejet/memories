@@ -86,22 +86,20 @@ export default defineComponent({
         ],
       );
 
-      let gen;
       // Fails if the target exists, same behavior with Nextcloud files implementation.
-      switch (mode) {
-        case Mode.Organise: {
-          gen = dav.movePhotosByDate(this.photos, destination, false);
-          break;
+      let gen = (() => {
+        switch (mode) {
+          case Mode.Organise: {
+            return dav.movePhotosByDate(this.photos, destination, false);
+          }
+          case Mode.Copy: {
+            return dav.copyPhotos(this.photos, destination, false);
+          }
+          case Mode.Move: {
+            return dav.movePhotos(this.photos, destination, false);
+          }
         }
-        case Mode.Copy: {
-          gen = dav.copyPhotos(this.photos, destination, false);
-          break;
-        }
-        case Mode.Move: {
-          gen = dav.movePhotos(this.photos, destination, false);
-          break;
-        }
-      }
+      })();
 
       this.show = true;
 
