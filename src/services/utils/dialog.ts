@@ -1,19 +1,14 @@
-import type { IFilePickerButton } from '@nextcloud/dialogs';
 import { getFilePickerBuilder, showError } from '@nextcloud/dialogs';
-import type { Node } from '@nextcloud/files';
 
 import { translatePlural as n, translate as t } from '@services/l10n';
 import { bus } from './event-bus';
 import { fragment } from './fragment';
 
+import type { Node } from '@nextcloud/files';
+import type { IFilePickerButton } from '@nextcloud/dialogs';
+
 // https://github.com/nextcloud/server/blob/4b7ec0a0c18d4e2007565dc28ee214814940161e/core/src/OC/dialogs.js
 const oc_dialogs = (<any>OC).dialogs;
-
-type IFilePickerButtonFactory = (
-  selectedNodes: Node[],
-  currentPath: string,
-  currentView: string,
-) => IFilePickerButton[];
 
 type ConfirmOptions = {
   /** Title of dialog */
@@ -181,7 +176,7 @@ function chooseButtonFactory(nodes: Node[]): IFilePickerButton[] {
 export async function chooseNcFolder(
   title: string,
   initial: string = '/',
-  buttonFactory: IFilePickerButtonFactory = chooseButtonFactory,
+  buttonFactory = chooseButtonFactory,
 ): Promise<string> {
   const picker = getFilePickerBuilder(title)
     .setMultiSelect(false)
