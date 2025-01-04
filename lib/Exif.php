@@ -347,28 +347,12 @@ class Exif
             '-json=-', $path,
         ]);
 
-        $pipes = [];
-        $proc = proc_open($cmd, [
-            0 => ['pipe', 'r'],
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ], $pipes);
-        stream_set_blocking($pipes[1], false);
-
-        fwrite($pipes[0], $raw);
-        fclose($pipes[0]);
-
         try {
-            $stdout = self::readOrTimeout($pipes[1], self::EXIFTOOL_TIMEOUT);
+            $stdout = Util::execSafe($cmd, $raw, self::EXIFTOOL_TIMEOUT);
         } catch (\Exception $ex) {
             error_log("Timeout reading from exiftool: [{$path}]");
 
             throw $ex;
-        } finally {
-            fclose($pipes[1]);
-            fclose($pipes[2]);
-            proc_terminate($proc);
-            proc_close($proc);
         }
 
         if (str_contains($stdout, 'error')) {
@@ -413,24 +397,14 @@ class Exif
 
     public static function getBinaryExifProp(string $path, string $prop): string
     {
-        $pipes = [];
-        $proc = proc_open(array_merge(self::getExiftool(), [$prop, '-n', '-b', $path]), [
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ], $pipes);
-        stream_set_blocking($pipes[1], false);
+        $cmd = array_merge(self::getExiftool(), [$prop, '-n', '-b', $path]);
 
         try {
-            return self::readOrTimeout($pipes[1], self::EXIFTOOL_TIMEOUT);
+            return Util::execSafe($cmd, null, self::EXIFTOOL_TIMEOUT);
         } catch (\Exception $ex) {
             error_log("Timeout reading from exiftool: [{$path}]");
 
             throw $ex;
-        } finally {
-            fclose($pipes[1]);
-            fclose($pipes[2]);
-            proc_terminate($proc);
-            proc_close($proc);
         }
     }
 
@@ -459,48 +433,6 @@ class Exif
         stream_set_blocking(self::$staticPipes[1], false);
     }
 
-    /**
-     * Read from non blocking handle or throw timeout.
-     *
-     * @param resource $handle
-     * @param int      $timeout   milliseconds
-     * @param string   $delimiter null for eof
-     */
-    private static function readOrTimeout($handle, int $timeout, ?string $delimiter = null): string
-    {
-        $buffer = '';
-
-        // Absolute time to wait until
-        $timeEnd = microtime(true) + $timeout / 1000;
-
-        // Select expects variables
-        $read = [$handle];
-        $write = $except = null;
-
-        while (microtime(true) < $timeEnd) {
-            // Check if we have delimiter or eof
-            if (feof($handle) || ($delimiter && str_ends_with($buffer, $delimiter))) {
-                return $buffer;
-            }
-
-            // Wait for data to read
-            $ready = stream_select($read, $write, $except, 1, 0);
-            if (false === $ready) {
-                throw new \Exception('Stream select error');
-            }
-
-            // No data is available yet
-            if (0 === $ready) {
-                continue;
-            }
-
-            // Append to buffer
-            $buffer .= stream_get_contents($handle);
-        }
-
-        throw new \Exception('Timeout');
-    }
-
     private static function getExifFromLocalPathWithStaticProc(string $path): array
     {
         // This function should not be called if there is no static process
@@ -517,7 +449,7 @@ class Exif
         $readyToken = "\n{ready}\n";
 
         try {
-            $buf = self::readOrTimeout(self::$staticPipes[1], self::EXIFTOOL_TIMEOUT, $readyToken);
+            $buf = Util::readOrTimeout(self::$staticPipes[1], self::EXIFTOOL_TIMEOUT, $readyToken);
 
             // The output buffer should always contain the ready token
             // (this is the point of readOrTimeout)
@@ -540,24 +472,14 @@ class Exif
 
     private static function getExifFromLocalPathWithSeparateProc(string $path, array $extraArgs = []): array
     {
-        $pipes = [];
-        $proc = proc_open(array_merge(self::getExiftool(), self::EXIFTOOL_ARGS, $extraArgs, [$path]), [
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ], $pipes);
-        stream_set_blocking($pipes[1], false);
+        $cmd = array_merge(self::getExiftool(), self::EXIFTOOL_ARGS, $extraArgs, [$path]);
 
         try {
-            $stdout = self::readOrTimeout($pipes[1], self::EXIFTOOL_TIMEOUT);
+            $stdout = Util::execSafe($cmd, null, self::EXIFTOOL_TIMEOUT);
         } catch (\Exception $ex) {
             error_log("Timeout reading from exiftool: [{$path}]");
 
             throw $ex;
-        } finally {
-            fclose($pipes[1]);
-            fclose($pipes[2]);
-            proc_terminate($proc);
-            proc_close($proc);
         }
 
         return self::processStdout($stdout);
