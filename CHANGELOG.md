@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Feature**: Move to folder can now also copy files ([#1143](https://github.com/pulsejet/memories/pull/1143))
+- **Feature**: Move to folder can now organize files by year-month ([#1143](https://github.com/pulsejet/memories/pull/1143))
+
 ## [v7.4.1] - 2024-09-19
 
 - **Feature**: Add filter to view all files without location data in places ([#1124](https://github.com/pulsejet/memories/issues/1124))
