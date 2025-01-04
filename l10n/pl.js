@@ -282,6 +282,7 @@ OC.L10N.register(
     "Collaborative Tags" : "Wspólne tagi",
     "EXIF Fields" : "Pola EXIF",
     "Geolocation" : "Geolokalizacja",
+    "Cannot edit rotation on Live Photos ({name})" : "Nie można edytować obrotu zdjęć na żywo ({name})",
     "Failed to load metadata for {n} photos." : "Nie udało się wczytać metadanych dla {n} zdjęć.",
     "{n} photos cannot be edited (permissions error)." : "{n} zdjęć nie może być edytowanych (brak uprawnień).",
     "Remove person" : "Usuń osobę",
