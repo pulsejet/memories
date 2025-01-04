@@ -46,8 +46,13 @@ class Util
      */
     public static function getLibc(): ?string
     {
-        /** @psalm-suppress ForbiddenCode */
-        $ldd = strtolower(shell_exec('ldd --version 2>&1') ?: 'unknown');
+        // glibc -> stdout, musl -> stderr
+        $output = self::execSafe2(['ldd', '--version'], 3000, null, true, true);
+
+        // check in either
+        $ldd = strtolower($output[0] ?? '').
+            strtolower($output[1] ?? '');
+
         if (str_contains($ldd, 'musl')) {
             return 'musl';
         }
@@ -457,14 +462,20 @@ class Util
      * Execute a command safely.
      *
      * @param string[] $cmd     command to execute
-     * @param string   $stdin   standard input
      * @param int      $timeout milliseconds
+     * @param ?string  $stdin   standard input
      *
      * @return string standard output
      *
      * @throws \Exception on error
      */
-    public static function execSafe(array $cmd, ?string $stdin, int $timeout): string
+    public static function execSafe(array $cmd, int $timeout, ?string $stdin = null): ?string
+    {
+        return self::execSafe2($cmd, $timeout, $stdin, true, false)[0];
+    }
+
+    /** Exec safe with extra options */
+    public static function execSafe2(array $cmd, int $timeout, ?string $stdin, bool $rstdout, bool $rstderr): array
     {
         $pipes = [];
         $proc = proc_open($cmd, [
@@ -480,7 +491,16 @@ class Util
         fclose($pipes[0]);
 
         try {
-            return self::readOrTimeout($pipes[1], $timeout);
+            $output = [null, null];
+
+            if ($rstdout) {
+                $output[0] = self::readOrTimeout($pipes[1], $timeout);
+            }
+            if ($rstderr) {
+                $output[1] = self::readOrTimeout($pipes[2], $timeout);
+            }
+
+            return $output;
         } catch (\Exception $ex) {
             throw $ex;
         } finally {

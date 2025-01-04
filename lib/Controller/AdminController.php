@@ -103,9 +103,8 @@ class AdminController extends GenericApiController
             );
 
             // Check for system perl
-            /** @psalm-suppress ForbiddenCode */
             $status['perl'] = $this->getExecutableStatus(
-                trim(shell_exec('which perl') ?: '/bin/perl'),
+                trim(Util::execSafe(['which', 'perl'], 3000) ?: '/bin/perl'),
                 static fn (string $p) => BinExt::testSystemPerl($p),
             );
 
@@ -140,10 +139,9 @@ class AdminController extends GenericApiController
             }
 
             // Check for FFmpeg for preview generation
-            /** @psalm-suppress ForbiddenCode */
             $status['ffmpeg_preview'] = $this->getExecutableStatus(
                 SystemConfig::get('preview_ffmpeg_path')
-                    ?: trim(shell_exec('which ffmpeg') ?: ''),
+                    ?: trim(Util::execSafe(['which', 'ffmpeg'], 3000) ?: ''),
                 static fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
             );
 

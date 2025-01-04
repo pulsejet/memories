@@ -348,7 +348,7 @@ class Exif
         ]);
 
         try {
-            $stdout = Util::execSafe($cmd, $raw, self::EXIFTOOL_TIMEOUT);
+            $stdout = Util::execSafe($cmd, self::EXIFTOOL_TIMEOUT, $raw) ?? 'error: cmd fail';
         } catch (\Exception $ex) {
             error_log("Timeout reading from exiftool: [{$path}]");
 
@@ -400,7 +400,7 @@ class Exif
         $cmd = array_merge(self::getExiftool(), [$prop, '-n', '-b', $path]);
 
         try {
-            return Util::execSafe($cmd, null, self::EXIFTOOL_TIMEOUT);
+            return Util::execSafe($cmd, self::EXIFTOOL_TIMEOUT) ?? '';
         } catch (\Exception $ex) {
             error_log("Timeout reading from exiftool: [{$path}]");
 
@@ -475,7 +475,7 @@ class Exif
         $cmd = array_merge(self::getExiftool(), self::EXIFTOOL_ARGS, $extraArgs, [$path]);
 
         try {
-            $stdout = Util::execSafe($cmd, null, self::EXIFTOOL_TIMEOUT);
+            $stdout = Util::execSafe($cmd, self::EXIFTOOL_TIMEOUT) ?? '';
         } catch (\Exception $ex) {
             error_log("Timeout reading from exiftool: [{$path}]");
 
