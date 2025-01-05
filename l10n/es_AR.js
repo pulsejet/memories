@@ -24,6 +24,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Unknown" : "Desconocido",
     "Continue" : "Continuar",
+    "Shared" : "Compartido",
     "Search" : "Buscar",
     "Upload" : "Cargar",
     "Copy public link" : "Copiar link publico",
@@ -67,6 +68,7 @@ OC.L10N.register(
     "Direct" : "Directo",
     "Setup" : "Ajustes",
     "No items" : "No hay elementos",
-    "Yes" : "Sí"
+    "Yes" : "Sí",
+    "Choose" : "Elige"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

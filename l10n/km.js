@@ -13,6 +13,7 @@ OC.L10N.register(
     "Close" : "បិទ",
     "Info" : "Info",
     "Continue" : "បន្ត",
+    "Shared" : "បាន​ចែក​រំលែក",
     "Search" : "ស្វែងរក",
     "Upload" : "ផ្ទុក​ឡើង",
     "Location" : "ទីតាំង",
@@ -38,6 +39,7 @@ OC.L10N.register(
     "Size" : "ទំហំ",
     "Setup" : "ដំឡើង",
     "Yes" : "បាទ ឬចាស",
-    "No" : "ទេ"
+    "No" : "ទេ",
+    "Choose" : "ជ្រើស"
 },
 "nplurals=1; plural=0;");

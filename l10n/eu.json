@@ -30,6 +30,7 @@
     "Choose the root of your timeline" : "Aukeratu zure denbora-lerroaren erroa",
     "The selected folder does not seem to be valid. Try again." : "Aukeratutako karpetak ez dirudi baliozkoa denik. Saiatu berriro.",
     "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["{n} elementu aurkitu dira {path}-n","{n} elementu aurkitu dira {path}-n"],
+    "Shared By" : "Nork partekatua",
     "Metadata" : "Metadatuak",
     "Edit" : "Aldatu",
     "No coordinates" : "Koordenaturik ez",
@@ -138,6 +139,7 @@
     "Connection address (same as bind if local)" : "Konexio helbidea (berdina lotura lokala bada)",
     "Transcoder" : "Transkodetzailea",
     "Template" : "Txantiloia",
+    "Shared" : "Partekatuta",
     "No results found" : "Ez da emaitzarik aurkitu",
     "Search" : "Bilatu",
     "Upload" : "Igo",
@@ -402,6 +404,8 @@
     "Tag photos to find them easily" : "Etiketatu argazkiak modu errazean aurkitzeko",
     "Places you have been to will appear here" : "Hemen egon zaren tokiak agertuko dira",
     "Yes" : "Bai",
-    "No" : "Ez"
+    "No" : "Ez",
+    "Choose {file}" : "Aukeratu {file}",
+    "Choose" : "Aukeratu"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

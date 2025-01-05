@@ -15,6 +15,7 @@
     "Recognize" : "Αναγνώριση",
     "Face Recognition" : "Αναγνώριση προσώπου",
     "Videos" : "Βίντεο",
+    "Shared By" : "Διαμοιράστηκε από",
     "Metadata" : "Μεταδεδομένα",
     "Edit" : "Επεξεργασία",
     "Photos" : "Φωτογραφίες",
@@ -37,6 +38,7 @@
     "Unknown" : "Άγνωστο",
     "Continue" : "Συνεχίστε",
     "Template" : "Πρότυπο",
+    "Shared" : "Κοινόχρηστα",
     "No results found" : "Δεν βρέθηκαν αποτελέσματα",
     "Search" : "Αναζήτηση",
     "Upload" : "Μεταφόρτωση",
@@ -149,6 +151,7 @@
     "Error: {msg}" : "Σφάλμα: {msg}",
     "Failed to delete {fileName}." : "Απέτυχε η διαγραφή {fileName}.",
     "Yes" : "Ναι",
-    "No" : "Όχι"
+    "No" : "Όχι",
+    "Choose {file}" : "Επιλέξτε {file}"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

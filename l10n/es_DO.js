@@ -22,6 +22,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Unknown" : "Desconocido",
     "Continue" : "Continuar",
+    "Shared" : "Compartido",
     "Search" : "Buscar",
     "Upload" : "Cargar",
     "Public link" : "Liga pública",
@@ -58,6 +59,7 @@ OC.L10N.register(
     "Text" : "Texto",
     "Size" : "Tamaño",
     "Position" : "Posición",
-    "Setup" : "Ajustes"
+    "Setup" : "Ajustes",
+    "Choose" : "Seleccionar"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

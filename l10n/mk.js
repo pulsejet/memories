@@ -15,6 +15,7 @@ OC.L10N.register(
     "Tags" : "Ознаки",
     "Recognize" : "Препознавање",
     "Videos" : "Видеа",
+    "Shared By" : "Споделено од",
     "Metadata" : "Метаподатоци",
     "Edit" : "Уреди",
     "Photos" : "Фотографии",
@@ -31,6 +32,7 @@ OC.L10N.register(
     "Info" : "Инфо",
     "Unknown" : "Непознат",
     "Continue" : "Продолжи",
+    "Shared" : "Споделено",
     "No results found" : "Нема пронајдено резултати",
     "Search" : "Барај",
     "Upload" : "Прикачи",
@@ -142,6 +144,8 @@ OC.L10N.register(
     "Failed to create {albumName}." : "Неуспешно креирање {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Неуспешно преименување на {currentAlbumName} во {newAlbumName}.",
     "Failed to delete {fileName}." : "Неуспешно бришење на {fileName}.",
-    "Failed to favorite {fileName}." : "Неуспешно додавање во омилени {fileName}."
+    "Failed to favorite {fileName}." : "Неуспешно додавање во омилени {fileName}.",
+    "Choose {file}" : "Избери {file}",
+    "Choose" : "Избери"
 },
 "nplurals=2; plural=(n % 10 == 1 && n % 100 != 11) ? 0 : 1;");

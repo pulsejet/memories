@@ -26,6 +26,7 @@ OC.L10N.register(
     "Performance" : "Performanța",
     "Unknown" : "Necunoscut",
     "Continue" : "Continuă",
+    "Shared" : "Partajat",
     "No results found" : "Nu s-a găsit nimic",
     "Search" : "Caută",
     "Upload" : "Încărcare",
@@ -138,6 +139,8 @@ OC.L10N.register(
     "Setup" : "Configurare",
     "No items" : "Nu există elemente",
     "Yes" : "Da",
-    "No" : "Nu"
+    "No" : "Nu",
+    "Choose {file}" : "Selectați {file}",
+    "Choose" : "Alege"
 },
 "nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));");

@@ -34,6 +34,7 @@ OC.L10N.register(
     "No photos were found in the selected folder." : "Er werden geen foto's gevonden in de gekozen map.",
     "This can happen because your media is still indexing." : "Dit kan gebeuren omdat je media nog geïndexeerd wordt.",
     "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["{n} items gevonden in {path}","{n} items gevonden in {path}"],
+    "Shared By" : "Gedeeld door",
     "Metadata" : "Metadata",
     "Edit" : "Bewerk",
     "No coordinates" : "Geen coördinaten.",
@@ -62,6 +63,7 @@ OC.L10N.register(
     "Unknown" : "Onbekend",
     "Continue" : "Doorgaan",
     "Template" : "Sjabloon",
+    "Shared" : "Gedeeld",
     "No results found" : "Geen resultaten gevonden",
     "Search" : "Zoeken",
     "Upload" : "Upload",
@@ -202,6 +204,8 @@ OC.L10N.register(
     "Shared by {user}" : "Gedeeld door {user}",
     "Failed to delete {fileName}." : "Verwijderen van {fileName} mislukt.",
     "Yes" : "Ja",
-    "No" : "Nee"
+    "No" : "Nee",
+    "Choose {file}" : "Kies {file}",
+    "Choose" : "Kies"
 },
 "nplurals=2; plural=(n != 1);");

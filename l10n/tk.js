@@ -15,6 +15,7 @@ OC.L10N.register(
     "General" : "Esasy",
     "Close" : "Ýap",
     "Unknown" : "Näbelli",
+    "Shared" : "Paýlaşyldy",
     "Search" : "Gözlemek",
     "Upload" : "Ýüklemek",
     "Back" : "Yzyna",
@@ -32,6 +33,7 @@ OC.L10N.register(
     "Home" : "Baş sahypa",
     "Setup" : "Gurmak",
     "Yes" : "Hawa",
-    "No" : "Ýok"
+    "No" : "Ýok",
+    "Choose" : "saýlamak"
 },
 "nplurals=2; plural=(n != 1);");

@@ -21,6 +21,7 @@
     "Info" : "ინფორმაცია",
     "Unknown" : "უცნობია",
     "Continue" : "გაგრძელება",
+    "Shared" : "გაზიარებული",
     "Search" : "ძიება",
     "Upload" : "ატვირთვა",
     "Location" : "ადგილმდებარეობა",
@@ -59,6 +60,7 @@
     "Size" : "ზომა",
     "Position" : "პოზიცია",
     "Setup" : "დაყენება",
-    "Yes" : "დიახ"
+    "Yes" : "დიახ",
+    "Choose" : "აირჩიეთ"
 },"pluralForm" :"nplurals=2; plural=(n!=1);"
 }

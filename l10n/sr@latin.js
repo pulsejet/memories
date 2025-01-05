@@ -15,6 +15,7 @@ OC.L10N.register(
     "General" : "Opšte",
     "Close" : "Zatvori",
     "Info" : "Info",
+    "Shared" : "Deljeno",
     "Search" : "Traži",
     "Upload" : "Otpremi",
     "Back" : "Nazad",
@@ -36,6 +37,7 @@ OC.L10N.register(
     "Undo" : "Opozovi",
     "Setup" : "Podesi",
     "Yes" : "Da",
-    "No" : "Ne"
+    "No" : "Ne",
+    "Choose" : "Odaberi"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);");

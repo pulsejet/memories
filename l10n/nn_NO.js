@@ -17,6 +17,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Unknown" : "Ukjend",
     "Continue" : "Gå vidare",
+    "Shared" : "Delt",
     "Search" : "Søk",
     "Upload" : "Last opp",
     "Location" : "Stad",
@@ -42,6 +43,7 @@ OC.L10N.register(
     "Next" : "Neste",
     "Value" : "Verdi",
     "Size" : "Storleik",
-    "Setup" : "Oppsett"
+    "Setup" : "Oppsett",
+    "Choose" : "Vel"
 },
 "nplurals=2; plural=(n != 1);");

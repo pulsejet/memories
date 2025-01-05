@@ -14,6 +14,7 @@ OC.L10N.register(
     "General" : "Coitcheann",
     "Close" : "Dùin",
     "Unknown" : "Chan eil fhios",
+    "Shared" : "Co-roinnte",
     "Search" : "Lorg",
     "Upload" : "Luchdaich suas",
     "Back" : "Air ais",
@@ -31,6 +32,7 @@ OC.L10N.register(
     "Undo" : "Neo-dhèan",
     "Setup" : "Suidhich",
     "Yes" : "Tha",
-    "No" : "Chan eil"
+    "No" : "Chan eil",
+    "Choose" : "Tagh"
 },
 "nplurals=4; plural=(n==1 || n==11) ? 0 : (n==2 || n==12) ? 1 : (n > 2 && n < 20) ? 2 : 3;");

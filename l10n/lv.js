@@ -39,6 +39,7 @@ OC.L10N.register(
     "Unknown" : "Nezināms",
     "Continue" : "Turpināt",
     "Video Streaming" : "Video straumēšana",
+    "Shared" : "Koplietots",
     "Search" : "Meklēt",
     "Upload" : "Augšupielādēt",
     "Copy the public link" : "Kopējiet publisko saiti",
@@ -118,6 +119,7 @@ OC.L10N.register(
     "Setup" : "Iestatīt",
     "Face Recognition is disabled. Enable in settings to find your friends" : "Seju atpazīšana ir atspējota. Tā ir iespējojama iestatījumos, lai atrastu savus draugus",
     "Yes" : "Jā",
-    "No" : "Nē"
+    "No" : "Nē",
+    "Choose" : "Izvēlies"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");

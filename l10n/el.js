@@ -17,6 +17,7 @@ OC.L10N.register(
     "Recognize" : "Αναγνώριση",
     "Face Recognition" : "Αναγνώριση προσώπου",
     "Videos" : "Βίντεο",
+    "Shared By" : "Διαμοιράστηκε από",
     "Metadata" : "Μεταδεδομένα",
     "Edit" : "Επεξεργασία",
     "Photos" : "Φωτογραφίες",
@@ -39,6 +40,7 @@ OC.L10N.register(
     "Unknown" : "Άγνωστο",
     "Continue" : "Συνεχίστε",
     "Template" : "Πρότυπο",
+    "Shared" : "Κοινόχρηστα",
     "No results found" : "Δεν βρέθηκαν αποτελέσματα",
     "Search" : "Αναζήτηση",
     "Upload" : "Μεταφόρτωση",
@@ -151,6 +153,7 @@ OC.L10N.register(
     "Error: {msg}" : "Σφάλμα: {msg}",
     "Failed to delete {fileName}." : "Απέτυχε η διαγραφή {fileName}.",
     "Yes" : "Ναι",
-    "No" : "Όχι"
+    "No" : "Όχι",
+    "Choose {file}" : "Επιλέξτε {file}"
 },
 "nplurals=2; plural=(n != 1);");

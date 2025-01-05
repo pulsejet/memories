@@ -11,6 +11,7 @@ OC.L10N.register(
     "Archive" : "Arhiva",
     "Tags" : "Oznake",
     "Videos" : "Videozapisi",
+    "Shared By" : "Dijeli",
     "Metadata" : "Metapodaci",
     "Edit" : "Uredi",
     "Photos" : "Fotografije",
@@ -28,6 +29,7 @@ OC.L10N.register(
     "Unknown" : "Nepoznata pogreška",
     "Continue" : "Nastavi",
     "Template" : "Predložak",
+    "Shared" : "Dijeljeno",
     "No results found" : "Nema rezultata",
     "Search" : "Traži",
     "Upload" : "Otpremi",
@@ -85,6 +87,7 @@ OC.L10N.register(
     "Setup" : "Podesi",
     "Shared by {user}" : "Dijeli {user}",
     "Yes" : "Da",
-    "No" : "Ne"
+    "No" : "Ne",
+    "Choose" : "Odaberite"
 },
 "nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;");

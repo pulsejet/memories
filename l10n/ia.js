@@ -16,6 +16,7 @@ OC.L10N.register(
     "Close" : "Clauder",
     "Info" : "Info",
     "Unknown" : "Incognite",
+    "Shared" : "Compartite",
     "Search" : "Cercar",
     "Upload" : "Incargar",
     "Location" : "Loco",

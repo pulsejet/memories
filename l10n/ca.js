@@ -16,6 +16,7 @@ OC.L10N.register(
     "Tags" : "Etiquetes",
     "Recognize" : "Reconeix",
     "Videos" : "Vídeos",
+    "Shared By" : "Compartit per",
     "Metadata" : "Metadades",
     "Edit" : "Edita",
     "Photos" : "Fotografies",

@@ -17,6 +17,7 @@ OC.L10N.register(
     "Info" : "ຂໍ້ມຸນ",
     "Unknown" : "ບໍ່ຮູ້",
     "Continue" : "ສືບຕໍ່",
+    "Shared" : "ແບ່ງປັນ",
     "Search" : "ຄົ້ນຫາ",
     "Upload" : "ອັບໂຫຼດ",
     "Back" : "ຫຼັງ",
@@ -37,6 +38,7 @@ OC.L10N.register(
     "Original" : "ຕົ້ນສະບັບ",
     "Size" : "ຂະຫນາດ",
     "Setup" : "ການຕັ້ງຄ່າ",
-    "No" : "ບໍ່"
+    "No" : "ບໍ່",
+    "Choose" : "ເລືອກ"
 },
 "nplurals=1; plural=0;");

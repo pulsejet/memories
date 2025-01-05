@@ -30,6 +30,7 @@ OC.L10N.register(
     "Click here to start" : "Kliknite za začetek",
     "You can always change this later in settings" : "Možnosti lahko vedno prilagodite kasneje med nastavitvami programa.",
     "Choose the root of your timeline" : "Izberite koren časovnice",
+    "Shared By" : "Souporabo omogoča:",
     "Metadata" : "Metapodatki",
     "Edit" : "Uredi",
     "No coordinates" : "Ni koordinat",
@@ -82,6 +83,7 @@ OC.L10N.register(
     "ffprobe path" : "pot do ffprobe",
     "Enable acceleration with VA-API" : "Omogoči pospeševanje z VA-API",
     "Template" : "Predloga",
+    "Shared" : "V souporabi",
     "No results found" : "Ni najdenih zadetkov",
     "Search" : "Poišči",
     "Upload" : "Pošlji",
@@ -285,6 +287,8 @@ OC.L10N.register(
     "Failed to move {fileName}." : "Premikanje datoteke {fileName} je spodletelo.",
     "Failed to download files" : "Prejemanje datotek je spodletelo.",
     "Yes" : "Da",
-    "No" : "Ne"
+    "No" : "Ne",
+    "Choose {file}" : "Izberite datoteko {file}",
+    "Choose" : "Izbor"
 },
 "nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);");

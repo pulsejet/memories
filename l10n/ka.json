@@ -8,6 +8,7 @@
     "Archive" : "Archive",
     "Tags" : "Tags",
     "Videos" : "Videos",
+    "Shared By" : "Shared By",
     "Metadata" : "Metadata",
     "Edit" : "Edit",
     "Cancel" : "Cancel",
@@ -23,6 +24,7 @@
     "Unknown" : "Unknown",
     "Continue" : "Continue",
     "Template" : "Template",
+    "Shared" : "Shared",
     "No results found" : "No results found",
     "Search" : "Search",
     "Upload" : "Upload",
@@ -68,6 +70,8 @@
     "Setup" : "Setup",
     "No items" : "No items",
     "Yes" : "Yes",
-    "No" : "No"
+    "No" : "No",
+    "Choose {file}" : "Choose {file}",
+    "Choose" : "Choose"
 },"pluralForm" :"nplurals=2; plural=(n!=1);"
 }

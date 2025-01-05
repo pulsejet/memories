@@ -10,6 +10,7 @@ OC.L10N.register(
     "Archive" : "Arĥivujo",
     "Tags" : "Etikedoj",
     "Videos" : "Videaĵoj",
+    "Shared By" : "Kunhavigita de",
     "Edit" : "Modifi",
     "Photos" : "Fotoj",
     "Cancel" : "Nuligi",
@@ -24,6 +25,7 @@ OC.L10N.register(
     "Performance" : "Rendimento",
     "Unknown" : "Nekonata",
     "Continue" : "Daŭrigi",
+    "Shared" : "Kunhavigita",
     "Search" : "Serĉi",
     "Upload" : "Alŝuti",
     "Public link" : "Publika ligilo",
@@ -67,6 +69,8 @@ OC.L10N.register(
     "Auto" : "Aŭtomate",
     "Setup" : "Agordi",
     "Yes" : "Jes",
-    "No" : "Ne"
+    "No" : "Ne",
+    "Choose {file}" : "Elekti {file}",
+    "Choose" : "Elekti"
 },
 "nplurals=2; plural=(n != 1);");

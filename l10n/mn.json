@@ -21,6 +21,7 @@
     "Info" : "Info",
     "Unknown" : "Үл танигдах зүйл",
     "Continue" : "үргэлжлүүлэх",
+    "Shared" : "Түгээсэн",
     "Search" : "Хайх",
     "Upload" : "байршуулах",
     "Location" : "Байршил",
@@ -54,6 +55,7 @@
     "Value" : "Үнийн дүн",
     "Size" : "Хэмжээ",
     "Position" : "Байр",
-    "Setup" : "Тохируулах"
+    "Setup" : "Тохируулах",
+    "Choose" : "Сонгох"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

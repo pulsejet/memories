@@ -13,6 +13,7 @@
     "General" : "Esasy",
     "Close" : "Ýap",
     "Unknown" : "Näbelli",
+    "Shared" : "Paýlaşyldy",
     "Search" : "Gözlemek",
     "Upload" : "Ýüklemek",
     "Back" : "Yzyna",
@@ -30,6 +31,7 @@
     "Home" : "Baş sahypa",
     "Setup" : "Gurmak",
     "Yes" : "Hawa",
-    "No" : "Ýok"
+    "No" : "Ýok",
+    "Choose" : "saýlamak"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

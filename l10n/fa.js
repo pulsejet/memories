@@ -36,6 +36,7 @@ OC.L10N.register(
     "This can happen because your media is still indexing." : "This can happen because your media is still indexing.",
     "Visit the admin panel to make sure Memories is configured correctly." : "Visit the admin panel to make sure Memories is configured correctly.",
     "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["Found {n} item in {path}","Found {n} items in {path}"],
+    "Shared By" : "اشتراک گذاشته شده توسط",
     "Metadata" : "ابرداده",
     "Edit" : "ویرایش",
     "Failed to load metadata" : "Failed to load metadata",
@@ -188,6 +189,7 @@ OC.L10N.register(
     "Connection address (same as bind if local)" : "Connection address (same as bind if local)",
     "Transcoder" : "Transcoder",
     "Template" : "Template",
+    "Shared" : "به اشتراک گذاشته شده ",
     "Search" : "جستجو",
     "Upload" : "بارگذاری",
     "_{n} photo updated_::_{n} photos updated_" : ["{n} photo updated","{n} photos updated"],
@@ -446,6 +448,8 @@ OC.L10N.register(
     "Tag photos to find them easily" : "Tag photos to find them easily",
     "Places you have been to will appear here" : "Places you have been to will appear here",
     "Yes" : "بله",
-    "No" : "خیر"
+    "No" : "خیر",
+    "Choose {file}" : "انتخاب {file}",
+    "Choose" : "انتخاب کنید"
 },
 "nplurals=2; plural=(n > 1);");

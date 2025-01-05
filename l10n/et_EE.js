@@ -59,6 +59,7 @@ OC.L10N.register(
     "Continue" : "Jätka",
     "ffmpeg path" : "ffmpeg asukoht",
     "ffprobe path" : "ffprobe asukoht",
+    "Shared" : "Jagatud",
     "Search" : "Otsi",
     "Upload" : "Laadi üles",
     "Add people or groups who can edit your album" : "Lisa inimesi ja gruppe, kes võivad su albumit muuta",
@@ -126,6 +127,7 @@ OC.L10N.register(
     "Position" : "Asukoht",
     "Setup" : "Seadista",
     "Failed to create {albumName}." : "Albumi {albumName} loomine ebaõnnestus.",
-    "Failed to delete {fileName}." : "{fileName} kustutamine ebaõnnestus."
+    "Failed to delete {fileName}." : "{fileName} kustutamine ebaõnnestus.",
+    "Choose" : "Vali"
 },
 "nplurals=2; plural=(n != 1);");

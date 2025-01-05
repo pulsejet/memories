@@ -23,6 +23,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Unknown" : "Үл танигдах зүйл",
     "Continue" : "үргэлжлүүлэх",
+    "Shared" : "Түгээсэн",
     "Search" : "Хайх",
     "Upload" : "байршуулах",
     "Location" : "Байршил",
@@ -56,6 +57,7 @@ OC.L10N.register(
     "Value" : "Үнийн дүн",
     "Size" : "Хэмжээ",
     "Position" : "Байр",
-    "Setup" : "Тохируулах"
+    "Setup" : "Тохируулах",
+    "Choose" : "Сонгох"
 },
 "nplurals=2; plural=(n != 1);");

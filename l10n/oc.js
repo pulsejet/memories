@@ -24,6 +24,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Unknown" : "Desconegut",
     "Continue" : "Contunhar",
+    "Shared" : "Partejat",
     "Search" : "Recercar",
     "Upload" : "Telecargament",
     "Copy public link" : "Copiar lo ligam public",
@@ -66,6 +67,7 @@ OC.L10N.register(
     "Extension" : "Extension",
     "Setup" : "Configuracion",
     "Yes" : "Òc",
-    "No" : "Non"
+    "No" : "Non",
+    "Choose" : "Causir"
 },
 "nplurals=2; plural=(n > 1);");

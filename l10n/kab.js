@@ -38,6 +38,7 @@ OC.L10N.register(
     "Size" : "Teɣzi",
     "Setup" : "Sbadu",
     "Yes" : "Oui",
-    "No" : "Uhu"
+    "No" : "Uhu",
+    "Choose" : "Fren"
 },
 "nplurals=2; plural=(n != 1);");

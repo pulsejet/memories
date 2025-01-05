@@ -34,6 +34,7 @@
     "This can happen because your media is still indexing." : "Toto se může stát protože teprve stále ještě probíhá vytváření rejstříku vašich médií.",
     "Visit the admin panel to make sure Memories is configured correctly." : "Jděte na panel pro správu a ověřte, že jsou Vzpomínky správně nastavené.",
     "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["Nalezena {n} položka v {path}","Nalezeny {n} položky v {path}","Nalezeno {n} položek v {path}","Nalezeny {n} položky v {path}"],
+    "Shared By" : "Sdílí",
     "Metadata" : "Metadata",
     "Edit" : "Upravit",
     "Failed to load metadata" : "Metadata se nepodařilo načíst",

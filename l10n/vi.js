@@ -24,6 +24,7 @@ OC.L10N.register(
     "Info" : "Thông tin",
     "Unknown" : "Không xác định",
     "Continue" : "Tiếp tục",
+    "Shared" : "Đã chia sẻ",
     "No results found" : "Không tìm thấy kết quả",
     "Search" : "Tìm kiếm",
     "Upload" : "Tải lên",
@@ -74,6 +75,8 @@ OC.L10N.register(
     "Auto" : "Tự động",
     "Setup" : "Cài đặt",
     "Yes" : "Có",
-    "No" : "Không"
+    "No" : "Không",
+    "Choose {file}" : "Chọn {file}",
+    "Choose" : "Chọn"
 },
 "nplurals=1; plural=0;");

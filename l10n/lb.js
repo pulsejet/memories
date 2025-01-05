@@ -17,6 +17,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Unknown" : "Onbekannt",
     "Continue" : "Weider",
+    "Shared" : "Gedeelt",
     "Search" : "Search",
     "Upload" : "Eroplueden",
     "Location" : "Uert",
@@ -43,6 +44,7 @@ OC.L10N.register(
     "Size" : "Gréisst",
     "Setup" : "Setup",
     "Yes" : "Jo",
-    "No" : "Nee"
+    "No" : "Nee",
+    "Choose" : "Auswielen"
 },
 "nplurals=2; plural=(n != 1);");

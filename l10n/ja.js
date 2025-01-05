@@ -15,6 +15,7 @@ OC.L10N.register(
     "Map" : "地図",
     "Tags" : "タグ",
     "Videos" : "動画",
+    "Shared By" : "共有者: ",
     "Metadata" : "メタデータ",
     "Edit" : "編集",
     "Cancel" : "キャンセル",
@@ -32,6 +33,7 @@ OC.L10N.register(
     "Unknown" : "不明",
     "Continue" : "続ける",
     "Template" : "テンプレート",
+    "Shared" : "共有中",
     "No results found" : "結果が見つかりません",
     "Search" : "検索",
     "Upload" : "アップロード",
@@ -199,6 +201,8 @@ OC.L10N.register(
     "Shared by {user}" : "{user} から共有されました",
     "Failed to delete {fileName}." : "{fileName} の削除に失敗しました。",
     "Yes" : "はい",
-    "No" : "いいえ"
+    "No" : "いいえ",
+    "Choose {file}" : "{file}を選択",
+    "Choose" : "選択"
 },
 "nplurals=1; plural=0;");

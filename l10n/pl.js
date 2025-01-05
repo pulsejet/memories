@@ -36,6 +36,7 @@ OC.L10N.register(
     "This can happen because your media is still indexing." : "To może się stać jeśli twoje pliki są jeszcze indeksowane.",
     "Visit the admin panel to make sure Memories is configured correctly." : "Odwiedź panel administracyjny, aby upewnić się, że Wspomnienia są poprawnie skonfigurowane.",
     "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["Znaleziono {n} element w {path}","Znaleziono {n} elementy w {path}","Znaleziono {n} elementów w {path}","Znaleziono {n} elementów w {path}"],
+    "Shared By" : "Udostępnione przez",
     "Metadata" : "Metadane",
     "Edit" : "Edytuj",
     "Failed to load metadata" : "Nie udało się załadować metadanych",
@@ -210,6 +211,7 @@ OC.L10N.register(
     "Users may override this setting." : "Użytkownicy mogą zmienić to ustawienie.",
     "Always load high resolution image (not recommended if using HEIC/TIFF)" : "Zawsze ładuj obraz w wysokiej rozdzielczości (niezalecane w przypadku korzystania z HEIC/TIFF).",
     "Template" : "Szablon",
+    "Shared" : "Udostępnione",
     "Search your photos …" : "Szukaj swoich zdjęć…",
     "Start typing to find photos and albums" : "Zacznij pisać, aby znaleźć zdjęcia i albumy",
     "No results found" : "Nie znaleziono wyników",
@@ -487,6 +489,8 @@ OC.L10N.register(
     "Tag photos to find them easily" : "Oznacz zdjęcia, aby łatwo je odnajdywać",
     "Places you have been to will appear here" : "Odwiedzone miejsca pokażą się tutaj",
     "Yes" : "Tak",
-    "No" : "Nie"
+    "No" : "Nie",
+    "Choose {file}" : "Wybierz {file}",
+    "Choose" : "Wybierz"
 },
 "nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);");

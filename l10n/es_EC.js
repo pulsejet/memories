@@ -36,6 +36,7 @@ OC.L10N.register(
     "This can happen because your media is still indexing." : "Esto puede suceder porque tus medios aún se están indexando.",
     "Visit the admin panel to make sure Memories is configured correctly." : "Visita el panel de administración para asegurarte de que Memories esté configurado correctamente.",
     "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["Encontrado {n} elemento en {path}","Encontrados {n} elementos en {path}","Encontrados {n} elementos en {path}"],
+    "Shared By" : "Compartido por",
     "Metadata" : "Metadatos",
     "Edit" : "Editar",
     "No coordinates" : "Sin coordenadas",
@@ -168,6 +169,7 @@ OC.L10N.register(
     "Bind address (local only)" : "Dirección de enlace (solo local)",
     "Connection address (same as bind if local)" : "Dirección de conexión (misma que enlace si es local)",
     "Template" : "Plantilla",
+    "Shared" : "Compartido",
     "No results found" : "No se encontraron resultados",
     "Search" : "Buscar",
     "Upload" : "Cargar",
@@ -414,6 +416,7 @@ OC.L10N.register(
     "Create an album to get started" : "Crea un álbum para empezar",
     "Archive photos you don't want to see in your timeline" : "Archiva las fotos que no desees ver en tu línea de tiempo",
     "Tag photos to find them easily" : "Etiqueta las fotos para encontrarlas fácilmente",
-    "Places you have been to will appear here" : "Aquí aparecerán los lugares que has visitado"
+    "Places you have been to will appear here" : "Aquí aparecerán los lugares que has visitado",
+    "Choose" : "Seleccionar"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

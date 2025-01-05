@@ -17,6 +17,7 @@ OC.L10N.register(
     "Videos" : "Vaizdo įrašai",
     "A better photos experience awaits you" : "Jūsų laukia geresnis nuotraukų patyrimas",
     "Click here to start" : "Spustelėkite čia, norėdami pradėti",
+    "Shared By" : "Bendrina",
     "Metadata" : "Metaduomenys",
     "Edit" : "Taisyti",
     "Failed to load metadata" : "Nepavyko įkelti metaduomenų",
@@ -50,6 +51,7 @@ OC.L10N.register(
     "Continue" : "Tęsti",
     "HW Acceleration" : "Aparatinės įrangos spartinimas",
     "Template" : "Šablonas",
+    "Shared" : "Bendrinama",
     "No results found" : "Nerasta jokių rezultatų",
     "Search" : "Ieškoti",
     "Upload" : "Įkelti",
@@ -167,6 +169,7 @@ OC.L10N.register(
     "Places you have been to will appear here" : "Čia bus rodomos vietos, kuriose esate buvę",
     "Yes" : "Taip",
     "No" : "Ne",
+    "Choose" : "Pasirinkite",
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Perkelti {count} elementą į šiukšlinę?","Perkelti {count} elementus į šiukšlinę?","Perkelti {count} elementų į šiukšlinę?","Perkelti {count} elementą į šiukšlinę?"]
 },
 "nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);");

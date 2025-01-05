@@ -15,6 +15,7 @@ OC.L10N.register(
     "Map" : "Landakort",
     "Tags" : "Merki",
     "Videos" : "Myndskeið",
+    "Shared By" : "Deilt af",
     "Metadata" : "Lýsigögn",
     "Edit" : "Breyta",
     "Photos" : "Ljósmyndir",
@@ -33,6 +34,7 @@ OC.L10N.register(
     "Unknown" : "Óþekkt",
     "Continue" : "Halda áfram",
     "Template" : "Sniðmát",
+    "Shared" : "Sameiginlegt",
     "Search" : "Search",
     "Upload" : "Senda inn",
     "Add people or groups who can edit your album" : "Bættu við fólki eða hópum sem geta breytt albúminu þínu",
@@ -188,6 +190,8 @@ OC.L10N.register(
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Mistókst að endurnefna {currentAlbumName} sem {newAlbumName}.",
     "No items" : "Engin atriði",
     "Shared by {user}" : "Deilt af {user}",
-    "Failed to delete {fileName}." : "Tókst ekki að eyða {fileName}."
+    "Failed to delete {fileName}." : "Tókst ekki að eyða {fileName}.",
+    "Choose {file}" : "Veldu {file}",
+    "Choose" : "Velja"
 },
 "nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);");

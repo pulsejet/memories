@@ -23,6 +23,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Unknown" : "I panjohur",
     "Continue" : "Vazhdo",
+    "Shared" : "Ndarë",
     "Search" : "Kërko",
     "Upload" : "Ngarkoni",
     "Location" : "Vendndodhje",
@@ -62,6 +63,7 @@ OC.L10N.register(
     "Position" : "Pozicion",
     "Name is required." : "Emri është i domosdoshëm",
     "Setup" : "Rregullim",
-    "Yes" : "Po"
+    "Yes" : "Po",
+    "Choose" : "Zgjidhni"
 },
 "nplurals=2; plural=(n != 1);");

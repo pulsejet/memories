@@ -18,6 +18,7 @@ OC.L10N.register(
     "Close" : "Cau",
     "Info" : "Info",
     "Unknown" : "Anhysbys",
+    "Shared" : "Rhannwyd",
     "Search" : "Chwilio",
     "Upload" : "Llwytho i fyny",
     "Copy public link" : "Copïo dolen gyhoeddus",

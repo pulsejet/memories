@@ -38,6 +38,7 @@ OC.L10N.register(
     "Undo" : "පෙරසේ",
     "Value" : "අගය",
     "Size" : "ප්‍රමාණය",
-    "No" : "නැහැ"
+    "No" : "නැහැ",
+    "Choose" : "තෝරන්න"
 },
 "nplurals=2; plural=(n != 1);");

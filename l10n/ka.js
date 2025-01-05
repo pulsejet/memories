@@ -10,6 +10,7 @@ OC.L10N.register(
     "Archive" : "Archive",
     "Tags" : "Tags",
     "Videos" : "Videos",
+    "Shared By" : "Shared By",
     "Metadata" : "Metadata",
     "Edit" : "Edit",
     "Cancel" : "Cancel",
@@ -25,6 +26,7 @@ OC.L10N.register(
     "Unknown" : "Unknown",
     "Continue" : "Continue",
     "Template" : "Template",
+    "Shared" : "Shared",
     "No results found" : "No results found",
     "Search" : "Search",
     "Upload" : "Upload",
@@ -70,6 +72,8 @@ OC.L10N.register(
     "Setup" : "Setup",
     "No items" : "No items",
     "Yes" : "Yes",
-    "No" : "No"
+    "No" : "No",
+    "Choose {file}" : "Choose {file}",
+    "Choose" : "Choose"
 },
 "nplurals=2; plural=(n!=1);");

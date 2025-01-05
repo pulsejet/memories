@@ -23,6 +23,7 @@ OC.L10N.register(
     "Info" : "ინფორმაცია",
     "Unknown" : "უცნობია",
     "Continue" : "გაგრძელება",
+    "Shared" : "გაზიარებული",
     "Search" : "ძიება",
     "Upload" : "ატვირთვა",
     "Location" : "ადგილმდებარეობა",
@@ -61,6 +62,7 @@ OC.L10N.register(
     "Size" : "ზომა",
     "Position" : "პოზიცია",
     "Setup" : "დაყენება",
-    "Yes" : "დიახ"
+    "Yes" : "დიახ",
+    "Choose" : "აირჩიეთ"
 },
 "nplurals=2; plural=(n!=1);");

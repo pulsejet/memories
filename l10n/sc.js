@@ -12,6 +12,7 @@ OC.L10N.register(
     "Archive" : "Cartella",
     "Tags" : "Etichetas",
     "Videos" : "Vìdeos",
+    "Shared By" : "Cumpartzidu dae",
     "Metadata" : "Metadatos",
     "Edit" : "Modìfica",
     "Photos" : "Fotos",
@@ -28,6 +29,7 @@ OC.L10N.register(
     "Unknown" : "Disconnotu",
     "Continue" : "Sighi",
     "Template" : "Modellu",
+    "Shared" : "Cumpartziduras",
     "No results found" : "Perunu resurtadu agatadu",
     "Search" : "Chirca",
     "Upload" : "Càrriga",
@@ -90,6 +92,8 @@ OC.L10N.register(
     "Setup" : "Cunfigura",
     "Shared by {user}" : "Cumpartzidu dae {user}",
     "Yes" : "Si",
-    "No" : "No"
+    "No" : "No",
+    "Choose {file}" : "Sèbera {file}",
+    "Choose" : "Sèbera"
 },
 "nplurals=2; plural=(n != 1);");

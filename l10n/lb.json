@@ -15,6 +15,7 @@
     "Info" : "Info",
     "Unknown" : "Onbekannt",
     "Continue" : "Weider",
+    "Shared" : "Gedeelt",
     "Search" : "Search",
     "Upload" : "Eroplueden",
     "Location" : "Uert",
@@ -41,6 +42,7 @@
     "Size" : "Gréisst",
     "Setup" : "Setup",
     "Yes" : "Jo",
-    "No" : "Nee"
+    "No" : "Nee",
+    "Choose" : "Auswielen"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

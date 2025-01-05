@@ -26,6 +26,7 @@ OC.L10N.register(
     "Info" : "ข้อมูล",
     "Unknown" : "ไม่ทราบ",
     "Continue" : "ดำเนินการต่อ",
+    "Shared" : "ถูกแชร์",
     "Search" : "ค้นหา",
     "Upload" : "อัปโหลด",
     "Public link" : "ลิงก์สาธารณะ",
@@ -70,6 +71,8 @@ OC.L10N.register(
     "Memories from past years will appear here" : "ความทรงจำของปีที่ผ่านมาจะปรากฎอยู่ตรงนี้",
     "Your videos will appear here" : "วิดีโอของคุณจะปรากฎอยู่ตรงนี้",
     "Yes" : "ใช่",
-    "No" : "ไม่ตกลง"
+    "No" : "ไม่ตกลง",
+    "Choose {file}" : "เลือก {file}",
+    "Choose" : "เลือก"
 },
 "nplurals=1; plural=0;");

@@ -18,6 +18,7 @@ OC.L10N.register(
     "Tags" : "Etichette",
     "Recognize" : "Riconosci",
     "Videos" : "Video",
+    "Shared By" : "Condiviso da",
     "Metadata" : "Metadati",
     "Edit" : "Modifica",
     "Cancel" : "Annulla",
@@ -36,6 +37,7 @@ OC.L10N.register(
     "Continue" : "Continua",
     "You must first make sure the correct drivers are installed before configuring acceleration." : "Assicurati di avere installato i driver appropriati, prima di configurare l'accelerazione.",
     "Template" : "Modello",
+    "Shared" : "Condiviso",
     "No results found" : "Nessun risultato trovato",
     "Search" : "Cerca",
     "Upload" : "Carica",
@@ -200,6 +202,8 @@ OC.L10N.register(
     "Shared by {user}" : "Condiviso da {user}",
     "Failed to delete {fileName}." : "Eliminazione di {fileName} non riuscita.",
     "Yes" : "Sì",
-    "No" : "No"
+    "No" : "No",
+    "Choose {file}" : "Scegli {file}",
+    "Choose" : "Scegli"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

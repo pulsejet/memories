@@ -10,6 +10,7 @@
     "Archive" : "Cartella",
     "Tags" : "Etichetas",
     "Videos" : "Vìdeos",
+    "Shared By" : "Cumpartzidu dae",
     "Metadata" : "Metadatos",
     "Edit" : "Modìfica",
     "Photos" : "Fotos",
@@ -26,6 +27,7 @@
     "Unknown" : "Disconnotu",
     "Continue" : "Sighi",
     "Template" : "Modellu",
+    "Shared" : "Cumpartziduras",
     "No results found" : "Perunu resurtadu agatadu",
     "Search" : "Chirca",
     "Upload" : "Càrriga",
@@ -88,6 +90,8 @@
     "Setup" : "Cunfigura",
     "Shared by {user}" : "Cumpartzidu dae {user}",
     "Yes" : "Si",
-    "No" : "No"
+    "No" : "No",
+    "Choose {file}" : "Sèbera {file}",
+    "Choose" : "Sèbera"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

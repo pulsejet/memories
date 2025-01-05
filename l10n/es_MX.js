@@ -31,6 +31,7 @@ OC.L10N.register(
     "Performance" : "Desempeño",
     "Unknown" : "Desconocido",
     "Continue" : "Continuar",
+    "Shared" : "Compartido",
     "Search" : "Buscar",
     "Upload" : "Cargar",
     "Add people or groups who can edit your album" : "Añadir personas o grupos que puedan editar su álbum",
@@ -186,6 +187,8 @@ OC.L10N.register(
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "No se pudo renombrar {currentAlbumName} a {newAlbumName}.",
     "No items" : "No hay elementos",
     "Shared by {user}" : "Compartido por {user}",
-    "Failed to delete {fileName}." : "No se pudo eliminar {fileName}."
+    "Failed to delete {fileName}." : "No se pudo eliminar {fileName}.",
+    "Choose {file}" : "Elegir {file}",
+    "Choose" : "Elegir"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

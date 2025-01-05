@@ -16,6 +16,7 @@ OC.L10N.register(
     "Tags" : "Etiquetas",
     "Recognize" : "Reconhecer",
     "Videos" : "Vídeos",
+    "Shared By" : "Partilhado por",
     "Metadata" : "Metadados",
     "Edit" : "Editar",
     "Photos" : "Fotos",
@@ -33,6 +34,7 @@ OC.L10N.register(
     "Failed to load some photos" : "Não foi possível carregar algumas fotografias",
     "Unknown" : "Desconhecido",
     "Continue" : "Continuar",
+    "Shared" : "Partilhados",
     "Search" : "Pesquisa sobre",
     "Upload" : "Enviar",
     "Copy public link" : "Copiar ligação publica",
@@ -86,6 +88,7 @@ OC.L10N.register(
     "No items" : "No items",
     "Failed to delete {fileName}." : "Não foi possível eliminar {fileName}.",
     "Failed to favorite files." : "Não foi possível colocar os ficheiros nos favoritos.",
-    "Failed to favorite {fileName}." : "Não foi possível colocar {fileName} nos favoritos."
+    "Failed to favorite {fileName}." : "Não foi possível colocar {fileName} nos favoritos.",
+    "Choose" : "Escolher"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

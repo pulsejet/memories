@@ -14,6 +14,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Unknown" : "Անհայտ",
     "Continue" : "Շարունակել",
+    "Shared" : "Տարածած",
     "Search" : "Search",
     "Upload" : "Բեռնել",
     "Location" : "Տեղակայություն",
@@ -32,6 +33,7 @@ OC.L10N.register(
     "Next" : "Հաջորդ",
     "Size" : "Չափս",
     "Yes" : "Այո",
-    "No" : "Ոչ"
+    "No" : "Ոչ",
+    "Choose" : "Ընտրել"
 },
 "nplurals=2; plural=(n != 1);");

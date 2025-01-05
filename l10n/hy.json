@@ -12,6 +12,7 @@
     "Info" : "Info",
     "Unknown" : "Անհայտ",
     "Continue" : "Շարունակել",
+    "Shared" : "Տարածած",
     "Search" : "Search",
     "Upload" : "Բեռնել",
     "Location" : "Տեղակայություն",
@@ -30,6 +31,7 @@
     "Next" : "Հաջորդ",
     "Size" : "Չափս",
     "Yes" : "Այո",
-    "No" : "Ոչ"
+    "No" : "Ոչ",
+    "Choose" : "Ընտրել"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

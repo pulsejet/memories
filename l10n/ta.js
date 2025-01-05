@@ -38,6 +38,7 @@ OC.L10N.register(
     "Size" : "அளவு",
     "Setup" : "அமைப்பு",
     "Yes" : "ஆம்",
-    "No" : "இல்லை"
+    "No" : "இல்லை",
+    "Choose" : "தெரிவுசெய்க "
 },
 "nplurals=2; plural=(n != 1);");

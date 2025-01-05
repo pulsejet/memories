@@ -34,6 +34,7 @@
     "This can happen because your media is still indexing." : "Причиной этого может являться выполняющееся индексирование файлов.",
     "Visit the admin panel to make sure Memories is configured correctly." : "Перейдите панель администрирования, чтобы убедиться, что приложение настроено верно.",
     "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["В размещении «{path}» найден {n} объект.","В размещении «{path}» найдено {n} объекта.","В размещении «{path}» найдено {n} объектов.","В размещении «{path}» найдено {n} объекта."],
+    "Shared By" : "Доступ предоставлен",
     "Metadata" : "Метаданные",
     "Edit" : "Редактировать",
     "Failed to load metadata" : "Ошибка загрузки метаданных",
@@ -183,6 +184,7 @@
     "Do not enable multiple types of hardware acceleration simultaneously." : "Не включайте одновременно несколько типов аппаратного ускорения.",
     "For more details on driver installation, check the documentation:" : "Более подробную информацию об установке драйвера смотрите в документации:",
     "Template" : "Шаблон",
+    "Shared" : "Опубликованное",
     "Search your photos …" : "Поиск по фотографиям…",
     "No results found" : "Результаты отсутствуют",
     "Search" : "Поиск",
@@ -433,6 +435,8 @@
     "Tag photos to find them easily" : "Помечайте фотографии тегами, чтобы легко их находить",
     "Places you have been to will appear here" : "Места, где вы побывали, появятся здесь",
     "Yes" : "Да",
-    "No" : "Нет"
+    "No" : "Нет",
+    "Choose {file}" : "Выбран «{file}»",
+    "Choose" : "Выберите"
 },"pluralForm" :"nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);"
 }
