@@ -29,6 +29,7 @@ OC.L10N.register(
     "Choose the root of your timeline" : "Изберете основата /началото/ на вашата времева линия ",
     "The selected folder does not seem to be valid. Try again." : "Избраната папка изглежда не е валидна. Опитайте отново.",
     "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["Намерени са {n} елементa в {path}","Намерени са {n} елемента в {path}"],
+    "Shared By" : "Споделено От ",
     "Metadata" : "Метаданни",
     "Edit" : "Редактиране",
     "No coordinates" : "Няма координати",
@@ -143,6 +144,7 @@ OC.L10N.register(
     "Bind address (local only)" : "Обвързващ адрес (само локален)",
     "Connection address (same as bind if local)" : "Адрес на връзката (същият като адреса на обвързване ако е локален)",
     "Template" : "Шаблон",
+    "Shared" : "Споделен",
     "No results found" : "Няма намерени резултати",
     "Search" : "Търсене",
     "Upload" : "Качване",
@@ -387,6 +389,7 @@ OC.L10N.register(
     "Tag photos to find them easily" : "Поставете етикет на снимките, за да ги намирате лесно",
     "Places you have been to will appear here" : "Местата, на които сте били, ще се появят тук",
     "Yes" : "Да",
-    "No" : "Не"
+    "No" : "Не",
+    "Choose" : "Изберете"
 },
 "nplurals=2; plural=(n != 1);");

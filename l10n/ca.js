@@ -35,6 +35,7 @@ OC.L10N.register(
     "Unknown" : "Desconegut",
     "Continue" : "Continua",
     "Template" : "Plantilla",
+    "Shared" : "S'ha compartit",
     "No results found" : "No s'han trobat resultats",
     "Search" : "Cercar",
     "Upload" : "Puja",
@@ -199,6 +200,8 @@ OC.L10N.register(
     "Shared by {user}" : "Compartit per {user}",
     "Failed to delete {fileName}." : "No s'ha pogut suprimir {fileName}.",
     "Yes" : "Sí",
-    "No" : "No"
+    "No" : "No",
+    "Choose {file}" : "Tria {file}",
+    "Choose" : "Tria"
 },
 "nplurals=2; plural=(n != 1);");

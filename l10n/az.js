@@ -41,6 +41,8 @@ OC.L10N.register(
     "Size" : "Həcm",
     "Setup" : "Qurulum",
     "Yes" : "Bəli",
-    "No" : "Xeyir"
+    "No" : "Xeyir",
+    "Choose {file}" : "{file} seçin",
+    "Choose" : "Seç"
 },
 "nplurals=2; plural=(n != 1);");

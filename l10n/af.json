@@ -7,6 +7,7 @@
     "Archive" : "Argief",
     "Tags" : "Etikette",
     "Videos" : "Video's ",
+    "Shared By" : "Gedeel Deur",
     "Edit" : "Wysig",
     "Cancel" : "Kanselleer",
     "Delete" : "Skrap",
@@ -18,6 +19,7 @@
     "Close" : "Sluit",
     "Info" : "Inligting",
     "Continue" : "Gaan voort",
+    "Shared" : "Gedeel",
     "Search" : "Soek",
     "Upload" : "Oplaai",
     "Public link" : "Openbare skakel",
@@ -51,6 +53,7 @@
     "Size" : "Grootte",
     "Position" : "Posisie",
     "Quality" : "Kwaliteit",
-    "Setup" : "Opstelling"
+    "Setup" : "Opstelling",
+    "Choose" : "Kies"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

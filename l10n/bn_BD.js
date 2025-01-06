@@ -15,6 +15,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Unknown" : "অজানা",
     "Continue" : "চালিয়ে যাও",
+    "Shared" : "ভাগাভাগিকৃত",
     "Search" : "Search",
     "Upload" : "আপলোড",
     "Location" : "অবস্থান",
@@ -39,6 +40,7 @@ OC.L10N.register(
     "Size" : "আকার",
     "Setup" : "সেট-আপ",
     "Yes" : "হ্যাঁ",
-    "No" : "না"
+    "No" : "না",
+    "Choose" : "বেছে নিন"
 },
 "nplurals=2; plural=(n != 1);");

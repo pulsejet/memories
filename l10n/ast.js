@@ -46,6 +46,7 @@ OC.L10N.register(
     "Performance" : "Rindimientu",
     "Continue" : "Siguir",
     "Template" : "Plantía",
+    "Shared" : "Compartióse",
     "No results found" : "Nun s'atopó nengún resultáu",
     "Search" : "Buscar",
     "Upload" : "Xunir",
@@ -208,6 +209,8 @@ OC.L10N.register(
     "Failed to move files." : "Nun se puen mover los ficheros",
     "Failed to download files" : "Nun se puen baxar los ficheros",
     "Yes" : "Sí",
-    "No" : "Non"
+    "No" : "Non",
+    "Choose {file}" : "Escoyer «{file}»",
+    "Choose" : "Escoyer"
 },
 "nplurals=2; plural=(n != 1);");

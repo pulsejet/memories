@@ -13,6 +13,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Unknown" : "Nepoznato",
     "Continue" : "Nastavi",
+    "Shared" : "Podijeljen",
     "Search" : "Search",
     "Upload" : "Učitaj",
     "Location" : "Lokacija",
@@ -31,6 +32,7 @@ OC.L10N.register(
     "Next" : "Sljedeće",
     "Size" : "Veličina",
     "Yes" : "Da",
-    "No" : "Ne"
+    "No" : "Ne",
+    "Choose" : "Izaberite"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);");

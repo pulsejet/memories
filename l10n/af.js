@@ -9,6 +9,7 @@ OC.L10N.register(
     "Archive" : "Argief",
     "Tags" : "Etikette",
     "Videos" : "Video's ",
+    "Shared By" : "Gedeel Deur",
     "Edit" : "Wysig",
     "Cancel" : "Kanselleer",
     "Delete" : "Skrap",
@@ -20,6 +21,7 @@ OC.L10N.register(
     "Close" : "Sluit",
     "Info" : "Inligting",
     "Continue" : "Gaan voort",
+    "Shared" : "Gedeel",
     "Search" : "Soek",
     "Upload" : "Oplaai",
     "Public link" : "Openbare skakel",
@@ -53,6 +55,7 @@ OC.L10N.register(
     "Size" : "Grootte",
     "Position" : "Posisie",
     "Quality" : "Kwaliteit",
-    "Setup" : "Opstelling"
+    "Setup" : "Opstelling",
+    "Choose" : "Kies"
 },
 "nplurals=2; plural=(n != 1);");
