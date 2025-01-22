@@ -87,7 +87,7 @@ OC.L10N.register(
     "General" : "Général",
     "Photo Viewer" : "Visionneuse de photos",
     "Account" : "Compte",
-    "Choose Timeline Paths" : "Choisir les chemins de la ligne du temps",
+    "Choose Timeline Paths" : "Choisir les chemins du fil chronologique",
     "Choose the root for the folders view" : "Choisissez la racine pour la vue des dossiers",
     "Are you sure you want to log out {user}?" : "Êtes-vous sûr de vouloir déconnecter {user} ?",
     "Close" : "Fermer",
