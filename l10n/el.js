@@ -154,6 +154,7 @@ OC.L10N.register(
     "Failed to delete {fileName}." : "Απέτυχε η διαγραφή {fileName}.",
     "Yes" : "Ναι",
     "No" : "Όχι",
-    "Choose {file}" : "Επιλέξτε {file}"
+    "Choose {file}" : "Επιλέξτε {file}",
+    "Choose" : "Επιλογή"
 },
 "nplurals=2; plural=(n != 1);");

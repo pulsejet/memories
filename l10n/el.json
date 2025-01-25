@@ -152,6 +152,7 @@
     "Failed to delete {fileName}." : "Απέτυχε η διαγραφή {fileName}.",
     "Yes" : "Ναι",
     "No" : "Όχι",
-    "Choose {file}" : "Επιλέξτε {file}"
+    "Choose {file}" : "Επιλέξτε {file}",
+    "Choose" : "Επιλογή"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

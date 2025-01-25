@@ -109,6 +109,7 @@ OC.L10N.register(
     "Failed to delete {fileName}." : "Kunne ikke slette {fileName}.",
     "Failed to favorite files." : "Kunne ikke vælge favorit filer.",
     "Failed to favorite {fileName}." : "Kunne ikke vælge favorit {fileName}",
-    "Choose {file}" : "Vælg {file}"
+    "Choose {file}" : "Vælg {file}",
+    "Choose" : "Vælg"
 },
 "nplurals=2; plural=(n != 1);");

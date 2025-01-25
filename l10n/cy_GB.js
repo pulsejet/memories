@@ -49,6 +49,7 @@ OC.L10N.register(
     "Auto" : "Awto",
     "Setup" : "Gosod",
     "Yes" : "Ie",
-    "No" : "Na"
+    "No" : "Na",
+    "Choose" : "Dewisa"
 },
 "nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3;");

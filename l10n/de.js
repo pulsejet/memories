@@ -354,6 +354,7 @@ OC.L10N.register(
     "Move" : "Verschieben",
     "An error occurred while moving photos from {name}." : "Beim Verschieben der Fotos von {name} ist ein Fehler aufgetreten.",
     "Choose a folder" : "Ordner auswählen",
+    "_{n} item copied to folder_::_{n} items copied to folder_" : ["{n} Element in Ordner kopiert","{n} Elemente in Ordner kopiert"],
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["{n} Element in den Ordner verschoben","{n} Elementen in den Ordner verschoben"],
     "Remove" : "Entfernen",
     "Add Path" : "Pfad hinzufügen",
