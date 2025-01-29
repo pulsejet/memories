@@ -64,6 +64,7 @@ OC.L10N.register(
     "Back to the new album form." : "Aftur á innfyllingarformið fyrir ný albúm.",
     "Save" : "Vista",
     "Create album" : "Búa til albúm",
+    "Save changes" : "Vista breytingar",
     "Name of the album" : "Heiti á albúminu",
     "Save collaborators for this album." : "Vista samstarfsfólk fyrir þetta albúm.",
     "Year" : "Ár",
