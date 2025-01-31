@@ -100,6 +100,7 @@ class OtherController extends GenericApiController
 
                 // general settings
                 'timeline_path' => $getAppConfig('timelinePath', SystemConfig::get('memories.timeline.default_path')),
+                'timeline_include_shared_albums' => $getAppConfig('timelineHasSharedAlbums', SystemConfig::get('memories.timeline.default_include_shared_albums')),
                 'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
                 'stack_raw_files' => 'true' === $getAppConfig('stackRawFiles', 'true'),
 
