@@ -190,6 +190,7 @@ OC.L10N.register(
     "Failed to create {albumName}." : "Gat ekki búið til {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Mistókst að endurnefna {currentAlbumName} sem {newAlbumName}.",
     "No items" : "Engin atriði",
+    "_{n} item_::_{n} items_" : ["{n} atriði","{n} atriði"],
     "Shared by {user}" : "Deilt af {user}",
     "Failed to delete {fileName}." : "Tókst ekki að eyða {fileName}.",
     "Choose {file}" : "Veldu {file}",
