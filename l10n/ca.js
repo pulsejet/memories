@@ -27,6 +27,7 @@ OC.L10N.register(
     "Unarchive" : "Desbloquejar",
     "View in folder" : "Visualitza-ho a la carpeta",
     "Add to album" : "Afegeix a l'àlbum",
+    "Logged in as {user}" : "S'ha iniciat la sessió com a {user}",
     "General" : "General",
     "Account" : "Compte",
     "Close" : "Tanca",
