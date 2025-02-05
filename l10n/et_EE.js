@@ -123,6 +123,7 @@ OC.L10N.register(
     "Next" : "Järgmine",
     "Undo" : "Tühista",
     "Custom" : "Kohandatud",
+    "Value" : "Väärtus",
     "Size" : "Suurus",
     "Position" : "Asukoht",
     "Setup" : "Seadista",
