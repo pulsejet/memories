@@ -130,6 +130,7 @@ OC.L10N.register(
     "Help & Support" : "Справка и поддержка",
     "{n} media files have been indexed" : "Проиндексировано файлов: {n}",
     "View failure logs." : "Открыть журнал ошибок.",
+    "Files that failed indexing will not be indexed again unless they change." : "Файлы, не прошедшие индексацию, не будут индексироваться повторно, если они не изменятся.",
     "Automatic Indexing status: {status}" : "Состояние автоматического индексирования: {status}",
     "Last index job was run {t} seconds ago." : "Последнее задание индексирования было выполнено {t} секунд назад.",
     "It took {t} seconds to complete." : "На выполнение ушло {t} секунд",

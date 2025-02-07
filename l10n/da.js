@@ -31,6 +31,7 @@ OC.L10N.register(
     "Account" : "Konto",
     "Close" : "Luk",
     "Info" : "Info",
+    "{photoCount} photos" : "{photoCount} billeder",
     "Failed to load some photos" : "Kunne ikke indlæse nogle billeder",
     "Last index job was run {t} seconds ago." : "Seneste indekserings job kørte for {t} sekunder siden",
     "Performance" : "Ydelse",
