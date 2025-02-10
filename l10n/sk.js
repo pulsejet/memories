@@ -459,7 +459,7 @@ OC.L10N.register(
     "Save as" : "Uložiť ako",
     "Are you sure you want to discard the changes?" : "Naozaj chcete zahodiť zmeny?",
     "Undo" : "Vrátiť",
-    "Redo" : "Opraviť",
+    "Redo" : "Vrátiť",
     "Show original image" : "Zobraziť originálny obrázok",
     "Zoom in" : "Priblížiť",
     "Zoom out" : "Oddialiť",
