@@ -83,7 +83,7 @@ OC.L10N.register(
     "Size" : "Altura",
     "Name is required." : "Nome é obrigatório.",
     "Quality" : "Qualidade",
-    "Direct" : "Directo",
+    "Direct" : "Direto",
     "Auto" : "Auto",
     "Setup" : "Configurar",
     "No items" : "No items",
