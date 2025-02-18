@@ -99,6 +99,7 @@ OC.L10N.register(
     "Newest first" : "Nýjast fyrst",
     "Unassigned faces" : "Óúthlutuð andlit",
     "Merge with different person" : "Sameina við annan einstakling",
+    "Share folder" : "Deila möppu",
     "Upload files" : "Hlaða inn skrám",
     "Home" : "Heim",
     "Unsaved changes" : "Óvistaðar breytingar",

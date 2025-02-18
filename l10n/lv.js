@@ -120,6 +120,6 @@ OC.L10N.register(
     "Face Recognition is disabled. Enable in settings to find your friends" : "Seju atpazīšana ir atspējota. Tā ir iespējojama iestatījumos, lai atrastu savus draugus",
     "Yes" : "Jā",
     "No" : "Nē",
-    "Choose" : "Izvēlies"
+    "Choose" : "Izvēlēties"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");
