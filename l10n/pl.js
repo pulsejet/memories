@@ -95,7 +95,7 @@ OC.L10N.register(
     "Face Recognition is installed and enabled" : "Rozpoznawanie twarzy jest zainstalowane i włączone",
     "Preview generator is installed and enabled. Additional configuration may still be required." : "Generator miniatur jest zainstalowany i włączony. Może być wymagana dodatkowa konfiguracja.",
     "Preview generator is not installed and configured. This may make Memories very slow." : "Generator miniatur nie jest zainstalowany i skonfigurowany. Może to sprawić, że Wspomnienia będą działać bardzo wolno.",
-    "Recommended Apps" : "Polecane Aplikacje",
+    "Recommended Apps" : "Polecane aplikacje",
     "Path to packaged exiftool binary" : "Ścieżka do spakowanego pliku binarnego exiftool",
     "You need perl only if the packaged exiftool binary does not work for some reason." : "Perl jest potrzebny tylko wtedy, gdy spakowany plik binarny exiftool z jakiegoś powodu nie działa.",
     "Use system perl (only if exiftool binary does not work)" : "Użyj perla systemowego (tylko jeśli binarny exiftool nie działa)",
