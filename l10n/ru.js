@@ -422,6 +422,7 @@ OC.L10N.register(
     "Failed to create {albumName}." : "Не удалось создать альбом «{albumName}».",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Не удалось переименовать альбом «{currentAlbumName}» в «{newAlbumName}».",
     "No items" : "Нет ни одного объекта",
+    "_{n} item_::_{n} items_" : ["{n} объект","{n} объекта","{n} объектов","{n} объектов"],
     "Shared by {user}" : "Опубликовано пользователем {user} ",
     "General Failure" : "Общий сбой",
     "Error: {msg}" : "Ошибка: {msg}",
