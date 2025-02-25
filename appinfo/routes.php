@@ -17,6 +17,8 @@ return [
         ['name' => 'Page#main', 'url' => '/', 'verb' => 'GET'],
         ['name' => 'Page#favorites', 'url' => '/favorites', 'verb' => 'GET'],
         ['name' => 'Page#videos', 'url' => '/videos', 'verb' => 'GET'],
+        ['name' => 'Page#livephotos', 'url' => '/livephotos', 'verb' => 'GET'],
+        ['name' => 'Page#panoramas', 'url' => '/panoramas', 'verb' => 'GET'],
         ['name' => 'Page#archive', 'url' => '/archive', 'verb' => 'GET'],
         ['name' => 'Page#thisday', 'url' => '/thisday', 'verb' => 'GET'],
         ['name' => 'Page#map', 'url' => '/map', 'verb' => 'GET'],

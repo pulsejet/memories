@@ -9,6 +9,11 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\DB\QueryBuilder\IQueryFunction;
 use OCP\ITags;
 
+// Wikipedia defines a panoramic image as having an aspect ratio of at least 2:1,
+// but some phones approach this with regular photos. Hence, we conservatively set
+// the threshold to 3:1 for true panoramas.
+const PANOROMA_ASPECT_RATIO = 3;
+
 trait TimelineQueryFilters
 {
     public function transformFavoriteFilter(IQueryBuilder &$query, bool $aggregate): void
@@ -35,6 +40,16 @@ trait TimelineQueryFilters
     public function transformVideoFilter(IQueryBuilder &$query, bool $aggregate): void
     {
         $query->andWhere($query->expr()->eq('m.isvideo', $query->expr()->literal(1)));
+    }
+
+    public function transformLivePhotoFilter(IQueryBuilder &$query, bool $aggregate): void
+    {
+        $query->andWhere($query->expr()->neq('m.liveid', $query->expr()->literal('')));
+    }
+
+    public function transformPanoFilter(IQueryBuilder &$query, bool $aggregate): void
+    {
+        $query->andWhere('m.w >= '.PANOROMA_ASPECT_RATIO.' * m.h');
     }
 
     public function transformLimit(IQueryBuilder &$query, bool $aggregate, int $limit): void

@@ -41,6 +41,8 @@
     "@nextcloud/sharing": "^0.2.3",
     "@nextcloud/upload": "1.6.0",
     "@nextcloud/vue": "^8.19.0",
+    "@photo-sphere-viewer/autorotate-plugin": "^5.11.1",
+    "@photo-sphere-viewer/core": "^5.11.1",
     "filerobot-image-editor": "^4.8.1",
     "fuse.js": "^7.0.0",
     "hammerjs": "^2.0.8",
