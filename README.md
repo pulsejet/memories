@@ -91,12 +91,6 @@ Releases are organized with these tags:
 
 A shout out to the current and past financial backers of Memories! See the sponsors page for a full list.
 
-[<img src="https://github.com/mpodshivalin.png" width="42" />](https://github.com/mpodshivalin)
-[<img src="https://github.com/k1l1.png" width="42" />](https://github.com/k1l1)
-[<img src="https://github.com/ChickenTarm.png" width="42" />](https://github.com/ChickenTarm)
-[<img src="https://github.com/ChildLearningClub.png" width="42" />](https://github.com/ChildLearningClub)
-[<img src="https://github.com/mpanhans.png" width="42" />](https://github.com/mpanhans)
-
 ## 📝 Changelog
 
 For the full changelog, see [CHANGELOG.md](CHANGELOG.md).
