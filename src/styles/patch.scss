@@ -1,7 +1,6 @@
 // Make popper menus full height
 .v-popper--theme-dropdown .v-popper__inner {
   max-height: calc(90vh - 86px) !important; // was 50vh
-  margin: 0 10px; // was unset
 }
 
 // Make sure empty content is full width

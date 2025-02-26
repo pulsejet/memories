@@ -27,6 +27,7 @@ import Vue, { defineComponent } from 'vue';
 
 import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import { registerDavProperty } from '@nextcloud/files/dav';
 
 import Metadata from '@components/Metadata.vue';
 
@@ -83,6 +84,9 @@ export default defineComponent({
 
     // Register native tab after DOMContentLoaded
     utils.onDOMLoaded(this.registerNative.bind(this));
+
+    // Remove after https://github.com/nextcloud/server/pull/51077
+    registerDavProperty('nc:share-attributes');
   },
 
   beforeDestroy() {

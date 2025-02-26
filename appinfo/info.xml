@@ -39,7 +39,7 @@ Memories is a *batteries-included* photo management solution for Nextcloud with 
     <repository>https://github.com/pulsejet/memories</repository>
     <screenshot>https://raw.githubusercontent.com/pulsejet/memories/master/appinfo/screenshot.jpg</screenshot>
     <dependencies>
-        <nextcloud min-version="26" max-version="30"/>
+        <nextcloud min-version="29" max-version="31"/>
     </dependencies>
     <commands>
         <command>OCA\Memories\Command\Index</command>

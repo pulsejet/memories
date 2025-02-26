@@ -122,5 +122,7 @@
     "**/vendor-bin/**"
   ],
   "php.validate.enable": false,
-  "php.suggest.basic": false
+  "php.suggest.basic": false,
+  "prettier.configPath": ".prettierrc",
+  "prettier.prettierPath": "node_modules/prettier"
 }

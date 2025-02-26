@@ -101,6 +101,12 @@ module.exports = {
         ],
         exclude: /node_modules/,
       },
+      {
+        test: /\.m?js/, // https://github.com/webpack/webpack/issues/11467
+        resolve: {
+          fullySpecified: false,
+        },
+      },
     ],
   },
 

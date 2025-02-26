@@ -12,16 +12,14 @@
         :label-visible="true"
         :placeholder="t('memories', 'Album Name')"
       />
-      <label>
-        <NcTextField
-          name="location"
-          type="text"
-          :value.sync="albumLocation"
-          :label="t('memories', 'Location')"
-          :label-visible="true"
-          :placeholder="t('memories', 'Location of the album')"
-        />
-      </label>
+      <NcTextField
+        name="location"
+        type="text"
+        :value.sync="albumLocation"
+        :label="t('memories', 'Location')"
+        :label-visible="true"
+        :placeholder="t('memories', 'Location of the album')"
+      />
     </div>
     <div class="form-buttons">
       <span class="left-buttons">
