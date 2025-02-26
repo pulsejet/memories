@@ -49,7 +49,7 @@ import type { IPhoto } from '@typings';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-edgebuffer';
 
-const OSM_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const OSM_ATTRIBUTION = '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors';
 
 // CSS transition time for zooming in/out cluster animation
