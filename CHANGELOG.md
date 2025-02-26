@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [v7.5.0] - 2025-02-26
 
 - **Feature**: Move to folder can now also copy files ([#1143](https://github.com/pulsejet/memories/pull/1143))
 - **Feature**: Move to folder can now organize files by year-month ([#1143](https://github.com/pulsejet/memories/pull/1143))
