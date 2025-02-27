@@ -2,8 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v7.5.0] - 2025-02-26
+## [v7.5.1] - 2025-02-26
 
+- **Upgrade**: Please run `occ maintenance:repair` after the upgrade is complete.
 - **Feature**: Move to folder can now also copy files ([#1143](https://github.com/pulsejet/memories/pull/1143))
 - **Feature**: Move to folder can now organize files by year-month ([#1143](https://github.com/pulsejet/memories/pull/1143))
 - **Feature**: Mark shared files with the owner's name ([#1266](https://github.com/pulsejet/memories/pull/1266))

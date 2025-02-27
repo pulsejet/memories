@@ -21,6 +21,14 @@ class Repair implements IRepairStep
 
     public function run(IOutput $output): void
     {
+        // Mitigation for https://github.com/pulsejet/memories/issues/1401
+        // Remove this a few releases down the line.
+        if (!method_exists(\OCA\Memories\Util::class, 'execSafe')) {
+            $output->warning('Upgrade in progress, temporarily skipping Memories repair steps');
+
+            return;
+        }
+
         AddMissingIndices::run($output);
         $this->configureBinExt($output);
         $this->fixSystemConfigTypes($output);
