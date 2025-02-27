@@ -4,7 +4,6 @@
     "Memories" : "تطبيق \"ذكريات\" Memories",
     "Fast, modern and advanced photo management suite" : "حزمة إدارة صور سريعة وحديثة ومتقدمة",
     "# Memories: Photo Management for Nextcloud\n\nMemories is a *batteries-included* photo management solution for Nextcloud with advanced features including:\n\n- **📸 Timeline**: Sort photos and videos by date taken, parsed from Exif data.\n- **⏪ Rewind**: Jump to any time in the past instantly and relive your memories.\n- **🤖 AI Tagging**: Group photos by people and objects, powered by [recognize](https://github.com/nextcloud/recognize) and [facerecognition](https://github.com/matiasdelellis/facerecognition).\n- **🖼️ Albums**: Create albums to group photos and videos together. Then share these albums with others.\n- **🫱🏻‍🫲🏻 External Sharing**: Share photos and videos with people outside of your Nextcloud instance.\n- **📱 Mobile Support**: Work from any device, of any shape and size through the web app.\n- **✏️ Edit Metadata**: Edit dates and other metadata on photos quickly and in bulk.\n- **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.\n- **📹 Video Transcoding**: Transcode videos and use HLS for maximal performance.\n- **🗺️ Map**: View your photos on a map, tagged with accurate reverse geocoding.\n- **📦 Migration**: Migrate easily from Nextcloud Photos and Google Takeout.\n- **⚡️ Performance**: Do all this very fast.\n\n## 🚀 Installation\n\n1. Install the app from the Nextcloud app store (try a demo [here](https://demo.memories.gallery/apps/memories/)).\n1. Perform the recommended [configuration steps](https://memories.gallery/config/).\n1. Run `php occ memories:index` to generate metadata indices for existing photos.\n1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos." : "# تطبيق Memories: تطبيق إدارة الصور بنكست كلود\n\nتطبيق Memories هو حل إدارة الصور * مع مجموعة عناصر مدمجة * بنكست كلود مع ميزات متقدمة تشمل:\n\n- ** 📸 التسلسل الزمني **: ترتيب الصور ومقاطع الفيديو حسب تاريخ الالتقاط ، وتحليلها بواسطة بيانات Exif.\n- ** ⏪ الرجوع للخلف**: انتقل إلى أي وقت في الماضي على الفور واسترجع ذكرياتك.\n- ** 🤖 الوسم بالذكاء الأصطناعي **: جمع الصور جماعية الأشخاص والأشياء، مدعومة من قبل [recognize] (https://github.com/nextcloud/recognize) و [facerecognition] (https://github.com/matiasdelellis/facerecognition ).\n- ** 🖼️ الألبومات **: أنشئ ألبومات لتجميع الصور ومقاطع الفيديو معًا. ثم شارك هذه الألبومات مع الآخرين.\n- ** 🫱🏻‍🫲🏻 المشاركة الخارجية **: شارك الصور ومقاطع الفيديو مع أشخاص خارج مثيل نكست كلود الخاص بك.\n- ** 📱 دعم الهاتف **: العمل من أي جهاز، من أي شكل وحجم من خلال تطبيق الويب.\n- ** ✏️ تحرير البيانات الوصفية **: تحرير التواريخ والبيانات الوصفية الأخرى على الصور بسرعة وبشكل مجمّع.\n- ** 📦 الأرشفة **: قم بتخزين الصور التي لا تريد أن تراها في تسلسلك الزمني في مجلد منفصل.\n- ** 📹 تحويل ترميز الفيديو **: تحويل مقاطع الفيديو واستخدام بروتوكول HLS لتحقيق أقصى أداء.\n- ** 🗺️ الخريطة **: اعرض صورك على الخريطة، مع تمييزها بترميز جغرافي عكسي دقيق.\n- ** 📦 الانتقال**: الانتقال بسهولة من Nextcloud Photos و Google Takeout.\n- ** ⚡️ الأداء **: قم بفعل كل هذا بسرعة كبيرة.\n\n## 🚀 التثبيت\n\n1. قم بتثبيت التطبيق من متجر تطبيقات نكست كلود(جرب نسخة تجريبية[هنا] (https://demo.memories.gallery/apps/memories/)).\n1. نفذ [خطوات التكوين] الموصى بها (https://memories.gallery/config/).\n1. قم بتشغيل \"php occ memories:index\" لإنشاء فهارس بيانات وصفية للصور الموجودة.\n1. افتح 📷 تطبيق Memories في نكست كلاود وقم بتعيين الدليل الذي يحتوي على صورك.",
-    "Settings" : "الإعدادات",
     "People (Recognize)" : "الأشخاص (التعرف)",
     "People" : "أشخاص",
     "People (Face Recognition)" : "الأشخاص (التعرف على الوجه)",
@@ -18,10 +17,17 @@
     "Places" : "أماكن",
     "Map" : "خريطة",
     "Tags" : "الوسوم",
+    "Settings" : "الإعدادات",
     "View all" : "عرض الكل",
+    "Videos" : "مقاطع الفيديو",
     "Recognize" : "التعرف على",
     "Face Recognition" : "التعرُّف علي الوجوه",
-    "Videos" : "مقاطع الفيديو",
+    "Choose the root of your timeline" : "إختَر الدليل الأساسي لخطك الزمني ",
+    "The selected folder does not seem to be valid. Try again." : "يبدو أن المجلد المحدد غير صالح. حاول ثانية.",
+    "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["تم العثور على {n} عناصر في {path}","تم العثور على {n} عنصر في {path}","تم العثور على {n} عناصر في {path}","تم العثور على {n} عناصر في {path}","تم العثور على {n} عناصر في {path}","تم العثور على {n} عناصر في {path}"],
+    "No photos were found in the selected folder." : "لا توجد صور فى المجلد المحدد.",
+    "This can happen because your media is still indexing." : "يمكن أن يحدث هذا لأن الوسائط الخاصة بك لا تزال قيد الفهرسة.",
+    "Visit the admin panel to make sure Memories is configured correctly." : "إنتقِل إلي لوحة المشرف للتأكد من ضبط وتهيئة تطبيق \"الذكريات\" بالشكل الصحيح.",
     "A better photos experience awaits you" : "تجربة صور أفضل في انتظارك",
     "Choose the root folder of your timeline to begin" : "اختر مجلد جذر لبدء تسلسلك الزمني",
     "Continue to Memories" : "تابع إلى تطبيق \"الذكريات\" Memories",
@@ -29,20 +35,13 @@
     "Click here to start" : "إضغَط هنا للبدء",
     "You can always change this later in settings" : "يمكنك دائمًا تغيير هذا لاحقًا من الإعدادات",
     "If you just installed Memories, visit the admin panel first." : "إذا كنت علي وشك القيام بتثبيت تطبيق Memories، فقم بالرجوع إلي لوحة المشرف أولاً.",
-    "Choose the root of your timeline" : "إختَر الدليل الأساسي لخطك الزمني ",
-    "The selected folder does not seem to be valid. Try again." : "يبدو أن المجلد المحدد غير صالح. حاول ثانية.",
-    "No photos were found in the selected folder." : "لا توجد صور فى المجلد المحدد.",
-    "This can happen because your media is still indexing." : "يمكن أن يحدث هذا لأن الوسائط الخاصة بك لا تزال قيد الفهرسة.",
-    "Visit the admin panel to make sure Memories is configured correctly." : "إنتقِل إلي لوحة المشرف للتأكد من ضبط وتهيئة تطبيق \"الذكريات\" بالشكل الصحيح.",
-    "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["تم العثور على {n} عناصر في {path}","تم العثور على {n} عنصر في {path}","تم العثور على {n} عناصر في {path}","تم العثور على {n} عناصر في {path}","تم العثور على {n} عناصر في {path}","تم العثور على {n} عناصر في {path}"],
+    "No coordinates" : "لا توجد إحداثيات",
+    "Click edit to set location" : "إضغط \"تحرير\" لتعيين الموقع",
     "Shared By" : "تمت مشاركته مِن طرف",
     "Metadata" : "البيانات الوصفية  ",
     "Edit" : "تعديل",
     "Failed to load metadata" : "تعذّر تحميل البيانات الوصفية",
-    "No coordinates" : "لا توجد إحداثيات",
-    "Click edit to set location" : "إضغط \"تحرير\" لتعيين الموقع",
     "Photos" : "الصور",
-    "Cancel" : "إلغاء",
     "Delete" : "إزالة",
     "Remove from album" : "إزالة من الألبوم",
     "Share" : "مشاركة",
@@ -58,7 +57,16 @@
     "Remove from person" : "أزِل من شخصٍ",
     "You must enable \"Mark person in preview\" to use this feature" : "يجب عليك تمكين \"تمييز شخص في المعاينة\" لاستخدام هذه الميزة",
     "Only user \"{user}\" can update this person" : "يمكن للمستخدم \"{user}\" فقط تحديث هذا الشخص",
+    "Cancel" : "إلغاء",
     "_{n} selected_::_{n} selected_" : ["تم تحديد {n}","تم تحديد {n}","تم تحديد {n}","تم تحديد {n}","تم تحديد {n}","تم تحديد {n}"],
+    "Memories Settings" : "إعدادات \"الذكريات\" Memories",
+    "General" : "العامة",
+    "Photo Viewer" : "عارض الصور",
+    "Account" : "الحساب",
+    "Choose Timeline Paths" : "اختر مسارات التسلسل الزمني",
+    "Choose the root for the folders view" : "إختَر الدليل الأساسي لعرض المجلدات",
+    "Sign out" : "تسجيل الخروج",
+    "Are you sure you want to log out {user}?" : "هل أنت متأكد من أنك تريد تسجيل الخروج {user}؟",
     "Timeline Path" : "مسار الخط الزمني timeline",
     "Square grid mode" : "وضع المربع الشبكي ",
     "Show past photos on top of timeline" : "أظهِِر الصِّوَر السابقة أعلى الخط الزمني",
@@ -72,7 +80,6 @@
     "Always load high resolution image (not recommended)" : "قُم دائماً بتحميل الصور عالية الدِّقّة (لا يُنصح به)",
     "Never load high resolution image" : "لا تقُم أبداً بتحميل الصِّوَر عالية الدِّقّة",
     "Logged in as {user}" : "تسجيل الدخول بصفته {مستخدم}",
-    "Sign out" : "تسجيل الخروج",
     "Device Folders" : "مجلدات الجهاز",
     "Local folders to include in the timeline view" : "المجلدات المحلية التي يتم تضمينها في عرض الجدول الزمني",
     "Run initial device setup" : "قم بتشغيل الإعداد المبدئي للجهاز",
@@ -81,18 +88,12 @@
     "Sort folders oldest-first" : "رتّب المجلدات من الأقدم للأحدث",
     "Sort albums oldest-first" : "رتِّب الألبومات من الأقدم إلى الأحدث",
     "Show hidden albums" : "Show hidden albums",
-    "Memories Settings" : "إعدادات \"الذكريات\" Memories",
-    "General" : "العامة",
-    "Photo Viewer" : "عارض الصور",
-    "Account" : "الحساب",
-    "Choose Timeline Paths" : "اختر مسارات التسلسل الزمني",
-    "Choose the root for the folders view" : "إختَر الدليل الأساسي لعرض المجلدات",
-    "Are you sure you want to log out {user}?" : "هل أنت متأكد من أنك تريد تسجيل الخروج {user}؟",
-    "Close" : "إغلاق",
     "Info" : "معلومات",
+    "Close" : "إغلاق",
     "{photoCount} photos" : "{photoCount} صور",
     "Failed to load some photos" : "تعذّر تحميل بعض الصِّور",
     "Failed to update setting" : "تعذّر تحديث الإعدادات",
+    "Recommended Apps" : "تطبيقات مُوصىً بها",
     "Albums support is enabled through the Photos app." : "دعم الألبومات مُمَكَّنٌ عن طريق تطبيق الصور Photos app.",
     "Albums are disabled because the Photos app is not available." : "الألبومات مُعطّلة بسبب أن تطبيق الصور غير موجود.",
     "Recognize is installed and enabled for face recognition." : "تطبيق \"التعرُّف\" Recognize للتعرٌّف على الوجوه مُثبّت و مُمكّن .",
@@ -101,11 +102,16 @@
     "Face Recognition is installed and enabled" : "تطبيق \"التعرُّف على الوجوه\" Face Recognition مُثبّت و مُمكّن",
     "Preview generator is installed and enabled. Additional configuration may still be required." : "\"مولد المعاينات Preview generator مُثبّت و مُمكّن. بعض الإعدادات الإضافية يمكن أن تكون مطلوبة.",
     "Preview generator is not installed and configured. This may make Memories very slow." : "\"مُولِّد المعاينات Preview generator غير مُثبّت و لا مُهيّأ. هذا قد يتسبب في تبطئة \"تطبيق الذكريات\" Mempries بشكل كبير.",
-    "Recommended Apps" : "تطبيقات مُوصىً بها",
+    "EXIF Extraction" : "استخراج EXIF",
     "Path to packaged exiftool binary" : "مسار الحزمة الثنائية exiftool",
     "You need perl only if the packaged exiftool binary does not work for some reason." : "أنت بحاجة فقط إلى لغة البرمجة perl إذا كانت حزمة exiftool الثنائية لا تعمل لسبب ما.",
     "Use system perl (only if exiftool binary does not work)" : "استخدام نظام perl (فقط إذا لم تعمل حزمة exiftool الثنائية)",
-    "EXIF Extraction" : "استخراج EXIF",
+    "File Support" : "دعم الملف",
+    "Images (JPEG, PNG, GIF, BMP)" : "الصور (تسيق JPEG, PNG, GIF, BMP)",
+    "HEIC (Imagick)" : "تنسيق الصور HEIC (Imagick) ",
+    "TIFF (Imagick)" : "تنسيق ملف الصور TIFF ( Imagick) ",
+    "Videos (ffmpeg)" : "مقاطع الفيديو (ffmpeg)",
+    "Imaginary (not recommended)" : "تخيُّلي imaginary (لا يُوصى به)",
     "You can configure the enabled Nextcloud preview providers below." : "يمكنك ضبط مزودي معاينة نكست كلود الممكّنة أدناه.",
     "If you are using Imaginary for preview generation, you can ignore this section." : "إذا كنت تستخدم تطبيق Imaginary لإنشاء المعاينة فيمكنك تجاهل هذا الجزء.",
     "To enable RAW support, install the Camera RAW Previews app." : "لتمكين دعم تنسيق RAW، قم بتثبيت تطبيق Camera RAW Previews.",
@@ -121,12 +127,7 @@
     "Max preview size (trade-off between quality and storage requirements)." : "أقصى حجم للمعاينة (الأولوية النسبية بين متطلبات الجودة والتخزين).",
     "Max memory for preview generation (MB)" : "الحد الأقصى للذاكرة لإنشاء المعاينة (ميغا بايت)",
     "Max size of file to generate previews for (MB)" : "الحد الأقصى للملف (بالميقا بايت) ليمكن توليد معاينة له ",
-    "File Support" : "دعم الملف",
-    "Images (JPEG, PNG, GIF, BMP)" : "الصور (تسيق JPEG, PNG, GIF, BMP)",
-    "HEIC (Imagick)" : "تنسيق الصور HEIC (Imagick) ",
-    "TIFF (Imagick)" : "تنسيق ملف الصور TIFF ( Imagick) ",
-    "Videos (ffmpeg)" : "مقاطع الفيديو (ffmpeg)",
-    "Imaginary (not recommended)" : "تخيُّلي imaginary (لا يُوصى به)",
+    "Help & Support" : "عون  و دعم",
     "Thank you for choosing Nextcloud and Memories to store your precious data!" : "شكراً لاختياركم منصة نكست كلاود و تطبيق الذكريات Memories لحفظ بياناتكم الثمينة. ",
     "Memories is very feature rich and setting it up properly can take some time." : "تطبيق الذكريات Memories يحوي الكثير من الخصائص و قد يستغرق إعداده بالشكل الصحيح بعض الوقت.",
     "If you just installed Memories, make sure you read the getting started guide:" : "إذا كنت قد قمت لتوِّك بتنصيب تطبيق الذكريات Memories فلا تنسَ أن تقرأ دليل بدء العمل getting started guide:",
@@ -134,7 +135,7 @@
     "In case you run into any issues or bugs, you can get help through several channels." : "في حال صادفت أي إشكال أو خطأ، يمكنك الحصول على العون و الدعم عبر عدة قنوات.",
     "Memories is a completely free and open source app under active development." : "تطبيق الذكريات Memories هو تطبيق مجاني و مفتوح المصدر بالكامل و هو تحت التطوير المستمر.",
     "You can contribute in several ways. See the project page for more details:" : "يمكنك المساهمة بعدة طرق. طالع صفحة المشروع لمزيد التفاصيل:",
-    "Help & Support" : "عون  و دعم",
+    "Media Indexing" : "فهرسة الوسائط",
     "{n} media files have been indexed" : "تمّت فهرسة {n} ملفات وسائط",
     "{n} media files failed indexing and were skipped." : "{n} ملف وسائط أخفقت عملية فهرستها و تمّ تخطِّيها.",
     "View failure logs." : "عرض سجل الفشل.",
@@ -163,7 +164,8 @@
     "Force re-indexing of all files:" : "فرض إعادة فهرسة جميع الملفات:",
     "You can limit indexing by user and/or folder:" : "يمكنك تقييد الفهرسة حسب المستخدم و/أو المجلد:",
     "Clear all existing index tables:" : "محو كافة جداول الفهرس الموجودة:",
-    "Media Indexing" : "فهرسة الوسائط",
+    "Performance" : "سرعة الأداء",
+    "Unknown" : "غير معروف",
     "HTTPS is enabled" : "تمّ تمكين HTTPS",
     "You are accessing this page over an insecure context. Several browser APIs are not available, which will make Memories very slow. Enable HTTPS on your server to improve performance." : "أنت تدخل إلى هذه الصفحة من خلال سياق غير آمن. لا تتوفر العديد من واجهات برمجة التطبيقات للمتصفح، مما سيجعل تطبيق Memories بطيئاً للغاية. قم بتمكين HTTPS على خادومك لتحسين الأداء.",
     "HTTP/2 or HTTP/3 is enabled" : "تمّ تمكين HTTP/2 أو HTTP/3",
@@ -171,8 +173,15 @@
     "Database triggers are set up correctly." : "قادحات triggers قاعدة البيانات تمّ إعدادها بالشكل الصحيح.",
     "Database triggers not set up; {m} mode in use." : "قادحات قاعدة البيانات لم يتم إعدادها; الوضعية {m} قيد التشغيل.",
     "See the documentation for information on how to resolve this." : "أنظُر الوثائق حول كيفية حل هذه المسألة.",
-    "Performance" : "سرعة الأداء",
-    "Unknown" : "غير معروف",
+    "Reverse Geocoding" : "الترميز الجغرافي العكسي",
+    "Geometry support was not detected in your database" : "لم يتم اكتشاف دعم الهندسة في قاعدة البيانات الخاصة بك",
+    "MySQL-like geometry support was detected " : "تم اكتشاف الدعم الهندسي MySQL-like",
+    "Postgres native geometry support was detected" : "تمّ اكتشاف نظام إدارة قواعد البيانات Postgres  للدعم المحلي للهندسة ",
+    "Looks like the database is already setup. Are you sure you want to redownload planet data?" : "قاعدة البيانات قد تم إعدادها بالفعل. هل أنت متأكد أنك تريد إعادة تنزيل بيانات الكوكب؟",
+    "You are about to download the planet database. This may take a while." : "أنت على وشك تنزيل قاعدة بيانات الكوكب. هذا قد يستغرق بعض الوقت.",
+    "This may also cause all photos to be re-indexed!" : "قد يتسبب هذا أيضًا في إعادة فهرسة جميع الصور!",
+    "Download planet database" : "تنزيل قاعدة بيانات الكوكب planet database",
+    "Continue" : "متابعة",
     "Database is populated with {n} geometries." : "يتم ملء قاعدة البيانات بـ {n} أشكال الهندسية.",
     "Geometry table has not been created." : "لم يتم إنشاء جدول الهندسة.",
     "Looks like the planet data is incomplete." : "يبدو أن بيانات الكوكب غير كاملة.",
@@ -181,15 +190,7 @@
     "You need to download the planet data into your database. This is highly recommended and has low overhead." : "تحتاج إلى تنزيل بيانات الكوكب في قاعدة البيانات الخاصة بك. هذا موصى به للغاية حيث أنها منخفضة العبء ",
     "If the button below does not work for importing the planet data, use the following command:" : "إذا كان الزر أدناه لا يعمل لاستيراد بيانات الكوكب، فاستخدم الأمر التالي:",
     "Note: the geometry data is stored in the memories_planet_geometry table, with no prefix." : "ملاحظة: يتم تخزين البيانات الهندسية في جدول memories_planet_geometry، بدون بادئة.",
-    "Download planet database" : "تنزيل قاعدة بيانات الكوكب planet database",
-    "Reverse Geocoding" : "الترميز الجغرافي العكسي",
-    "Geometry support was not detected in your database" : "لم يتم اكتشاف دعم الهندسة في قاعدة البيانات الخاصة بك",
-    "MySQL-like geometry support was detected " : "تم اكتشاف الدعم الهندسي MySQL-like",
-    "Postgres native geometry support was detected" : "تمّ اكتشاف نظام إدارة قواعد البيانات Postgres  للدعم المحلي للهندسة ",
-    "Looks like the database is already setup. Are you sure you want to redownload planet data?" : "قاعدة البيانات قد تم إعدادها بالفعل. هل أنت متأكد أنك تريد إعادة تنزيل بيانات الكوكب؟",
-    "You are about to download the planet database. This may take a while." : "أنت على وشك تنزيل قاعدة بيانات الكوكب. هذا قد يستغرق بعض الوقت.",
-    "This may also cause all photos to be re-indexed!" : "قد يتسبب هذا أيضًا في إعادة فهرسة جميع الصور!",
-    "Continue" : "متابعة",
+    "Video Streaming" : "بث الفيديو ",
     "Live transcoding provides for adaptive streaming of videos using HLS." : "يوفر تحويل الترميز المباشر بث متكيف لمقاطع الفيديو باستخدام بروتوكول HLS.",
     "Note that this may be very CPU intensive without hardware acceleration, and transcoding will not be used for external storage." : "لاحظ أن هذا قد يكون بالغ الحدة علي وحدة المعالجة المركزية دون تسريع الأجهزة، ولن يتم استخدام تحويل الترميز للتخزين الخارجي.",
     "Enable Transcoding" : "تمكين تحويل الترميز",
@@ -199,7 +200,11 @@
     "Auto (adaptive transcode)" : "تلقائي (تحويل ترميز متكيف)",
     "Original (transcode with max quality)" : "أصلي (تحويل الترميز بأقصى جودة)",
     "Direct (original video file without transcode)" : "مباشر (ملف فيديو أصلي بدون تحويل الترميز)",
-    "Video Streaming" : "بث الفيديو ",
+    "HW Acceleration" : "التسريع العتادي HW Acceleration",
+    "VA-API device ({dev}) is readable" : "جهاز VA-API ({dev}) قابل للقراءة",
+    "VA-API device ({dev}) not found" : "لم يتم العثور علي جهاز VA-API ({dev})",
+    "VA-API device ({dev}) has incorrect permissions" : "جهاز VA-API ({dev}) لديه أذونات غير صحيحة",
+    "VA-API device status: {status}" : "حالة جهاز VA-API: {status}",
     "You must first make sure the correct drivers are installed before configuring acceleration." : "يجب عليك التأكد أولاً من تثبيت برامج التشغيل الصحيحة قبل تهيئة التسريع.",
     "Make sure you test hardware acceleration with various options after enabling." : "تأكد من اختبار تسريع الأجهزة بخيارات متنوعة بعد التمكين.",
     "Do not enable multiple types of hardware acceleration simultaneously." : "لا تقم بتمكين أنواع متعددة من تسريع الأجهزة في وقت واحد.",
@@ -222,18 +227,13 @@
     "Some NVENC devices have issues with force_key_frames." : "بعض نظم \"التكويد لكروت إنفيديا الرسومية\" NVENC فيها إشكاليات في التعامل مع force_key_frames.",
     "Try this option only if you use NVENC and have issues with video playback." : "جرّب هذا الخيار فقط في حالة كنت تستعمل نظم \"التكويد لكروت إنفيديا الرسومية\" NVENC و كان لديك إشكاليات في تشغيل الفيديو.",
     "Enable streaming GOP size workaround" : "تمكين الحل البديل لحجم الصور GOP streaming",
-    "HW Acceleration" : "التسريع العتادي HW Acceleration",
-    "VA-API device ({dev}) is readable" : "جهاز VA-API ({dev}) قابل للقراءة",
-    "VA-API device ({dev}) not found" : "لم يتم العثور علي جهاز VA-API ({dev})",
-    "VA-API device ({dev}) has incorrect permissions" : "جهاز VA-API ({dev}) لديه أذونات غير صحيحة",
-    "VA-API device status: {status}" : "حالة جهاز VA-API: {status}",
+    "Transcoder" : "مُحوِّل Transcoder",
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "يستخدم تطبيق Memories محول الترميز transcoder ـ go-vod. ويمكنك تشغيل محول الترميز go-vod خارجيًا (على سبيل المثال في حاوية دوكر Docker منفصلة لتسريع الأجهزة) أو استخدام محول الترميز المدمج. لاستخدام محول ترميز خارجي، قم بتمكين الخيار التالي واتبع التعليمات الواردة في الوثائق:",
     "Enable external transcoder" : "تمكين مُحوِّل خارجي ",
     "Binary path (local only)" : "المسار الثنائي (محلي فقط)",
     "Bind address (local only)" : "عنوان الاقتران/ الربط (محلي فقط)",
     "Connection address (same as bind if local)" : "عنوان الاتصال (نفس عنوان الاقتران إذا كان محلياً)",
     "Quality Factor (15 - 45) (default 25)" : "عامل الكفاءة (15 - 45) (التلقائي 25)",
-    "Transcoder" : "مُحوِّل Transcoder",
     "Default high resolution image loading behavior of the photo viewer." : "السلوك التلقائي لتحميل الصور عالية الدقة في \"عارض الصور\"",
     "The configuration here also applies to public link shares." : "هذا الإعداد ينطبق كذلك على المشاركات عبر الروابط العمومية",
     "Users may override this setting." : "يُمكن للمستخدِمين تجاوز هذا الإعداد.",
@@ -246,6 +246,10 @@
     "Search" : "البحث",
     "Upload" : "إرفَع",
     "_{n} photo updated_::_{n} photos updated_" : ["{n} صورة تمّ تعديلها","{n} صورة تمّ تعديلها","{n} صورة تمّ تعديلها","{n} صورة تمّ تعديلها","{n} صورة تمّ تعديلها","{n} صورة تمّ تعديلها"],
+    "Failed to fetch collaborators list." : "تعذّر جلب قائمة المتعاونين.",
+    "Public link" : "رابط عمومي",
+    "Failed to fetch album." : "تعذّر جلب الألبوم",
+    "Failed to update album." : "تعذّر تحديث الألبوم.",
     "Add people or groups who can edit your album" : "إضِف الأشخاص أو المجموعات التي يحق لها تعديل ألبومك",
     "Search for collaborators" : "البحث عن متعاونين",
     "Search people or groups" : "البحث عن أشخاص أو مجموعات",
@@ -257,19 +261,18 @@
     "Copy public link" : "نسخ الرابط العمومي",
     "Delete the public link" : "حذف الرابط العمومي",
     "Share via public link" : "شارك عبر الرابط العمومي",
-    "Failed to fetch collaborators list." : "تعذّر جلب قائمة المتعاونين.",
-    "Public link" : "رابط عمومي",
-    "Failed to fetch album." : "تعذّر جلب الألبوم",
-    "Failed to update album." : "تعذّر تحديث الألبوم.",
+    "Could not load the selected album" : "تعذر تحميل الألبوم المحدد",
     "Create new album" : "إنشاء ألبوم جديد",
     "Edit album details" : "تعديل تفاصيل الألبوم",
     "New album" : "ألبوم جديد",
-    "Could not load the selected album" : "تعذر تحميل الألبوم المحدد",
+    "Failed to delete {name}." : "فشل في حذف {name}.",
     "Remove Album" : "إزالة الألبوم",
     "Leave Album" : "غَادِر الألبُوم",
     "Are you sure you want to permanently remove album \"{name}\"?" : "هل أنت متأكد أنك تريد حذف الألبوم \"{name}\" نهائيًا؟",
     "Are you sure you want to leave the shared album \"{name}\"?" : "هل أنت متأكد أنك تريد مغادرة الألبُوم المشترك  \"{name}\"؟",
-    "Failed to delete {name}." : "فشل في حذف {name}.",
+    "Save" : "حفظ",
+    "Create album" : "إنشاء ألبوم",
+    "Invalid album name; should not contain any slashes." : "اسم الألبوم غير صالح. يجب ألا يحتوي على أي خطوط مائلة.",
     "Album Name" : "اسم الألبوم",
     "Location" : "الموقع",
     "Location of the album" : "موقع الألبوم",
@@ -278,16 +281,15 @@
     "Go to the add collaborators view." : "إذهب إلى عرض إضافة المتعاونين",
     "Add collaborators" : "أضف المتعاونين",
     "Back to the new album form." : "عُد إلى نموذج الألبوم الجديد.",
-    "Save" : "حفظ",
-    "Create album" : "إنشاء ألبوم",
-    "Invalid album name; should not contain any slashes." : "اسم الألبوم غير صالح. يجب ألا يحتوي على أي خطوط مائلة.",
     "Create new album." : "إنشاء ألبوم جديد",
     "Save changes" : "حفظ التعديلات",
     "_Removed from {n} album_::_Removed from {n} albums_" : ["تمّ حذفها من {n} ألبوم","تمّ حذفها من {n} ألبوم","تمّ حذفها من {n} ألبوم","تمّ حذفها من {n} ألبوم","تمّ حذفها من {n} ألبوم","تمّ حذفها من  {n} ألبوم"],
+    "Failed to load album info: {name}" : "Failed to load album info: {name}",
     "Share Album" : "مشاركة الألبوم",
     "Name of the album" : "اسم الألبوم",
     "Save collaborators for this album." : "حفظ المتعاونين لهذا الألبوم",
-    "Failed to load album info: {name}" : "Failed to load album info: {name}",
+    "Invalid Date" : "تاريخ غير صحيح",
+    "Newest date is older than oldest date" : "أحدث تاريخ هو أقدم من أقدم تاريخ",
     "Newest" : "الأحدث",
     "Year" : "السنة",
     "Month" : "شهر",
@@ -295,8 +297,6 @@
     "Hour" : "الساعة",
     "Minute" : "دقيقة",
     "Oldest" : "الأقدم",
-    "Invalid Date" : "تاريخ غير صحيح",
-    "Newest date is older than oldest date" : "أحدث تاريخ هو أقدم من أقدم تاريخ",
     "Title" : "العنوان",
     "Description" : "الوصف",
     "Label" : "تسمية",
@@ -306,15 +306,10 @@
     "Copyright" : "حقوق التأليف",
     "Empty" : "فارغ",
     "Unchanged" : "دون تغيير",
+    "Failed to search for location with Nominatim." : "فشل البحث عن الموقع باستخدام تطبيق الخرائط Nominatim.",
     "Reset" : "إعادة تعيين",
     "Remove location" : "إزالة الموقع",
     "Search location / landmark" : "البحث عن مواقع / معالم",
-    "Failed to search for location with Nominatim." : "فشل البحث عن الموقع باستخدام تطبيق الخرائط Nominatim.",
-    "Date / Time" : "التاريخ / الوقت",
-    "Collaborative Tags" : "وسوم تشاركية",
-    "EXIF Fields" : "حقول EXIF",
-    "Geolocation" : "الموقع الجغرافي",
-    "Orientation (EXIF)" : "وضعية (EXIF)",
     "Cannot edit {name} of type {type}" : "تعذّر تعديل {name} من نوع {type}",
     "Cannot edit rotation on videos ({name})" : "تعذّر تعديل وضعية الصورة أو الفيديو ({name})",
     "Cannot edit rotation on Live Photos ({name})" : "تعذّر تعديل وضعية الصور الحيّة ({name})",
@@ -323,40 +318,51 @@
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "قد تفتقد بعض العناصر للبيانات الوصفية للتاريخ date metadata. هل ترغب في محاولة نسخ الختم الزمني timestamp المعروف حاليًا إلى البيانات الوصفية (مستحسن)؟ بخلاف ذلك، قد تتم إعادة ضبط الختم الزمني على الوقت الحالي.",
     "Failed to load metadata for {n} photos." : "تعذّر تحميل البيانات الوصفية لـ {n} صور.",
     "{n} photos cannot be edited (permissions error)." : "{n} صور لا يمكن تحريرها (حطأ في الأذونات).",
+    "Date / Time" : "التاريخ / الوقت",
+    "Collaborative Tags" : "وسوم تشاركية",
+    "EXIF Fields" : "حقول EXIF",
+    "Geolocation" : "الموقع الجغرافي",
+    "Orientation (EXIF)" : "وضعية (EXIF)",
     "This feature rotates images losslessly by updating the EXIF metadata. This approach is known to sometimes not work correctly on certain image types such as HEIC. Make sure you do a test run before using it on multiple images." : "تسمح هذه الخاصية بتدوير الصور بدون فاقد من خلال تعديل البيانات الوصفية لـ EXIF. هذه الطريقة قد لا تعمل بشكل صحيح على بعض أنواع الصور مثل HEIC. إحرص على تجربتها قبل تطبيقها على عدد كبير من الصور.",
     "Rotate Left" : "أدِر لليسار",
     "Rotate Right" : "أدِر لليمين",
     "Flip" : "إقلِب",
+    "Only user \"{user}\" can delete this person" : "يمكن للمستخدم \"{user}\" فقط حذف هذا الشخص",
     "Remove person" : "حذف شخص",
     "Are you sure you want to remove {name}?" : "هل أنت متأكد أنك تريد إزالة {name}؟",
-    "Only user \"{user}\" can delete this person" : "يمكن للمستخدم \"{user}\" فقط حذف هذا الشخص",
+    "Failed to rename {oldName} to {name}." : "فشل في تغيير تسمية {oldName} إلى {name}.",
     "Rename person" : "تغيير اسم شخص",
     "Name" : "الاسم",
     "Update" : "تحديث",
-    "Failed to rename {oldName} to {name}." : "فشل في تغيير تسمية {oldName} إلى {name}.",
-    "Loading …" : "التحميل جارٍ ...",
     "Failed to load faces" : "تعذّر تحميل الوجوه",
     "Create a new face with this name?" : "أنشِئْ وجهاً جديداً بهذا الاسم؟",
     "Create new face" : "إنشاء وجه جديد",
     "Failed to create face" : "فشل في إنشاء الوجه",
-    "Merge {name} with person" : "إدمِج {name}  في شخصٍ",
+    "Loading …" : "التحميل جارٍ ...",
     "Merge faces" : "دمج الوجوه",
-    "Merge {name} with {newName}?" : "دمج {name} مع {newName}؟",
     "unnamed person" : "شخصٌ لم بُعطَ اسمه",
+    "Merge {name} with {newName}?" : "دمج {name} مع {newName}؟",
     "You can only merge with a person with name" : "لايمكنك الدمج إلا مع شخص يحمل اسماً",
     "Too many failures, aborting" : "حالات فشل كثيرة، سيتم الإلغاء",
     "Error while moving {basename}" : "خطأٌ أثناء نقل {basename}",
     "Failed to move {name}." : "فشل في نقل {name}.",
-    "Move selected photos to person" : "نقُل الصور المحددة إلى فئة شخص",
+    "Merge {name} with person" : "إدمِج {name}  في شخصٍ",
     "Move the selected photos to {target}?" : "نقل الصور المحددة إلى {target}؟",
     "Move" : "نقل",
     "An error occurred while moving photos from {name}." : "حدث خطأ أثناء نقل الصور من {name}.",
+    "Move selected photos to person" : "نقُل الصور المحددة إلى فئة شخص",
     "Choose a folder" : "اختر مجلدًا",
     "_{n} item copied to folder_::_{n} items copied to folder_" : ["{n} عناصر تمّ نسخها في المجلد","{n} عنصر تمّ نسخه في المجلد","{n} عنصر تمّ نسخه في المجلد","{n} عناصر تمّ نسخها في المجلد","{n} عنصر تمّ نسخه في المجلد","{n} عنصر تمّ نسخه في المجلد"],
     "_{n} item moved to folder_::_{n} items moved to folder_" : ["تم نقل {n} عناصر إلى المجلد","تم نقل {n} عنصر إلى المجلد","تم نقل {n} عناصر إلى المجلد","تم نقل {n} عناصر إلى المجلد","تم نقل {n} عناصر إلى المجلد","تم نقل {n} عناصر إلى المجلد"],
+    "Add a root to your timeline" : "أضف دليل أساسي إلى تسلسلك الزمني",
     "Remove" : "حذف",
     "Add Path" : "إضافة مسار",
-    "Add a root to your timeline" : "أضف دليل أساسي إلى تسلسلك الزمني",
+    "Password protected" : "محمي بكلمة المرور",
+    "Expires" : "تنتهي صلاحيته فى",
+    "Editable" : "قابل للتعديل",
+    "Read only" : "القراءة فقط",
+    "Link copied to clipboard" : "تمّ نسخ الرابط إلى الحافظة",
+    "Failed to copy link to clipboard" : "تعذّر نسخ الرابط إلى الحافظة",
     "Link Sharing" : "مشاركة الرابط",
     "You cannot share the root folder" : "لا يمكنك مشاركة مجلد الدليل الأساسي",
     "Public link shares are available to people outside Nextcloud." : "المشاركات عبر الرابط العام متاحة للأشخاص من خارج نكست كلاود",
@@ -365,12 +371,10 @@
     "Share link" : "مشاركة الرابط",
     "Create Link" : "إنشاء رابط",
     "Refresh" : "إنعاش",
-    "Password protected" : "محمي بكلمة المرور",
-    "Expires" : "تنتهي صلاحيته فى",
-    "Editable" : "قابل للتعديل",
-    "Read only" : "القراءة فقط",
-    "Link copied to clipboard" : "تمّ نسخ الرابط إلى الحافظة",
-    "Failed to copy link to clipboard" : "تعذّر نسخ الرابط إلى الحافظة",
+    "Not allowed to share file: {name}" : "Not allowed to share file: {name}",
+    "Failed to create album for public link" : "تعذّر إنشاء ألبوم للرابط العمومي",
+    "Failed to download file {href}" : "Failed to download file {href}",
+    "Cannot share this type of data" : "لا يمكن مشاركة هذا النوع من البيانات",
     "Reduced Size" : "حجم مصغر",
     "Share in lower quality (small file size)" : "Share in lower quality (small file size)",
     "High Resolution" : "دقة عالية",
@@ -378,16 +382,8 @@
     "Original File" : "الملف الأصلي",
     "Public Link" : "رابط عمومي",
     "Share an external Nextcloud link" : "شارك رابط نكست كلاود خارجي",
-    "Not allowed to share file: {name}" : "Not allowed to share file: {name}",
-    "Failed to create album for public link" : "تعذّر إنشاء ألبوم للرابط العمومي",
-    "Failed to download file {href}" : "Failed to download file {href}",
-    "Cannot share this type of data" : "لا يمكن مشاركة هذا النوع من البيانات",
     "_Share File_::_Share Files_" : ["Share Files","Share File","Share Files","Share Files","Share Files","Share Files"],
     "_Share the original file_::_Share the original files_" : ["Share the original files","Share the original file","Share the original files","Share the original files","Share the original files","Share the original files"],
-    "Destination path" : "مسار الوجهة",
-    "Add to albums" : "إضافة إلى الألبومات",
-    "Add tags" : "إضافة سِمَاتٍ",
-    "Attach collaborative tags to all uploads" : "قم بإرفاق وسوم تعاونية لجميع الملفات المرفوعة",
     "No albums selected" : "لم يتم تحديد أيّ  ألبومات",
     "Choose the destination folder for the upload" : "تحديد المجلد الوجهة للرفع",
     "Creating tags" : "إنشاء سِمَاتٍ",
@@ -397,6 +393,10 @@
     "Attaching tags to {file}" : "إرفاق سِمَات بالملف {file}",
     "Failed to attach tags to {file}" : "تعذّر إرفاق سِمَات بالملف {file}",
     "Some files have not been uploaded." : "تعذّر رفع بعض الملفات.",
+    "Destination path" : "مسار الوجهة",
+    "Add to albums" : "إضافة إلى الألبومات",
+    "Add tags" : "إضافة سِمَاتٍ",
+    "Attach collaborative tags to all uploads" : "قم بإرفاق وسوم تعاونية لجميع الملفات المرفوعة",
     "_Upload {n} file_::_Upload {n} files_" : ["رفع {n} ملف","رفع {n} ملف","رفع {n} ملف","رفع {n} ملفات","رفع {n} ملف","رفع {n} ملف"],
     "Sorting order" : "ترتيب الفرز",
     "Last updated" : "آخر تحديث",
@@ -411,18 +411,18 @@
     "Remove album" : "إحذِف الألبُوم",
     "Nothing to show here" : "لا يوجد شيء لِيُعرَض هُنا",
     "Unassigned faces" : "أوجه غير معينة",
+    "Unnamed person" : "شخص لم يذكر اسمه",
     "Merge with different person" : "الدمج مع شخص آخر",
     "Mark person in preview" : "وضع علامة على الشخص في المعاينة",
-    "Unnamed person" : "شخص لم يذكر اسمه",
+    "Home" : "الرئيسية",
     "Share folder" : "مشاركة مُجلّد",
     "Upload files" : "رفع ملفات",
     "Folder view" : "منظور المجلدات",
     "Timeline view" : "منظور الخط الزمني",
-    "Home" : "الرئيسية",
     "Move left" : "نقُل لجهة اليسار",
     "Move right" : "نقل لجهة اليمين",
-    "Files without location" : "ملفات بدون موقع",
     "Unidentified location" : "موقع غير معروف",
+    "Files without location" : "ملفات بدون موقع",
     "Image saved successfully" : "تم حفظ الصورة بنجاح",
     "Error saving image: {error}" : "خطأ في حفظ الصورة: {error}",
     "Unsaved changes" : "تغييرات لم يتم حفظها",
