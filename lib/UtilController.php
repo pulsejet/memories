@@ -21,6 +21,9 @@ trait UtilController
         } catch (\OCA\Memories\HttpResponseException $e) {
             return $e->response;
         } catch (\Exception $e) {
+            $logger = \OC::$server->get(\Psr\Log\LoggerInterface::class);
+            $logger->error($e->getMessage(), ['trace' => $e->getTrace()]);
+
             return new DataResponse([
                 'message' => $e->getMessage(),
             ], Http::STATUS_INTERNAL_SERVER_ERROR);
