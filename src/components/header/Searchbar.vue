@@ -208,7 +208,7 @@ export default defineComponent({
   }
 
   header & {
-    --searchbar-color: var(--color-primary-text);
+    --searchbar-color: var(--color-background-plain-text, var(--color-primary-text));
   }
 
   #mobile-header &,
