@@ -487,6 +487,9 @@ class Util
 
         $pipes = [];
         $proc = proc_open($cmd, $config, $pipes);
+        if (!\is_resource($proc)) {
+            throw new \Exception('proc_open failed: '.implode(' ', $cmd));
+        }
         stream_set_blocking($pipes[1], false);
 
         if (null !== $stdin) {
