@@ -477,18 +477,22 @@ class Util
     /** Exec safe with extra options */
     public static function execSafe2(array $cmd, int $timeout, ?string $stdin, bool $rstdout, bool $rstderr): array
     {
-        $pipes = [];
-        $proc = proc_open($cmd, [
-            0 => ['pipe', 'r'],
+        $config = [
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
-        ], $pipes);
+        ];
+        if (null !== $stdin) {
+            $config[0] = ['pipe', 'r'];
+        }
+
+        $pipes = [];
+        $proc = proc_open($cmd, $config, $pipes);
         stream_set_blocking($pipes[1], false);
 
         if (null !== $stdin) {
             fwrite($pipes[0], $stdin);
+            fclose($pipes[0]);
         }
-        fclose($pipes[0]);
 
         try {
             $output = [null, null];
@@ -520,6 +524,11 @@ class Util
      */
     public static function readOrTimeout($handle, int $timeout, ?string $delimiter = null): string
     {
+        /** @psalm-suppress DocblockTypeContradiction */
+        if (!\is_resource($handle)) {
+            throw new \Exception('No resource read handle');
+        }
+
         $buffer = '';
 
         // Absolute time to wait until
