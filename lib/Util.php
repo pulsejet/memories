@@ -491,6 +491,7 @@ class Util
             throw new \Exception('proc_open failed: '.implode(' ', $cmd));
         }
         stream_set_blocking($pipes[1], false);
+        stream_set_blocking($pipes[2], false);
 
         if (null !== $stdin) {
             fwrite($pipes[0], $stdin);
