@@ -537,10 +537,6 @@ class Util
         // Absolute time to wait until
         $timeEnd = microtime(true) + $timeout / 1000;
 
-        // Select expects variables
-        $read = [$handle];
-        $write = $except = null;
-
         while (microtime(true) < $timeEnd) {
             // Check if we have delimiter or eof
             if (feof($handle) || ($delimiter && str_ends_with($buffer, $delimiter))) {
@@ -548,6 +544,8 @@ class Util
             }
 
             // Wait for data to read
+            $read = [$handle];
+            $write = $except = null;
             $ready = stream_select($read, $write, $except, 1, 0);
             if (false === $ready) {
                 throw new \Exception('Stream select error');
