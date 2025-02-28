@@ -363,7 +363,7 @@ trait TimelineQueryDays
                 $row['shared_by'] = $userMemo[$storage] = $user;
             }
 
-            if ('[self]' === $row['shared_by']) {
+            if ('' === $row['shared_by']) {
                 unset($row['shared_by']);
             }
         }
@@ -410,23 +410,26 @@ trait TimelineQueryDays
         // Storage ID looks like "home::{uid}" or "local::{/path}" etc
         $pos = strpos($storage, '::');
         if (false === $pos) {
-            return '[unknown]';
+            return '';
         }
         $uid = substr($storage, $pos + 2);
 
-        // Check if self
-        if (Util::isLoggedIn() && $uid === Util::getUID()) {
-            return '[self]';
+        // If there are slashes, it's not a user.
+        // Could be external storage or a group folder.
+        // We should handle these cases in the future.
+        // https://github.com/pulsejet/memories/issues/1402
+        if (str_contains($uid, '/')) {
+            return '';
         }
 
-        // If there are slashes, it's not a user (could be group folder)
-        if (str_contains($uid, '/')) {
-            return '[unknown]';
+        // Check if self
+        if (Util::isLoggedIn() && $uid === Util::getUID()) {
+            return '';
         }
 
         // Otherwise it *may* be a user
         $user = $this->userManager->get($uid);
 
-        return $user ? $user->getDisplayName() : '[unknown]';
+        return $user ? $user->getDisplayName() : '';
     }
 }
