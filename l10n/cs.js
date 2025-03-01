@@ -73,7 +73,7 @@ OC.L10N.register(
     "Show past photos on top of timeline" : "Minulé fotky zobrazovat nad časovou osou",
     "Stack RAW files with same name" : "Navrstvit RAW soubory se stejným názvem",
     "De-duplicate identical files" : "Deduplikovat identické soubory",
-    "Autoplay Live Photos" : "Automaticky přhrávat živé fotky",
+    "Autoplay Live Photos" : "Automaticky přehrávat živé fotky",
     "Show full file path in sidebar" : "Zobrazit úplný popis umístění souboru v postranním panelu",
     "Show metadata in slideshow" : "Zobrazit v promítání metadata",
     "High resolution image loading behavior" : "Chování při načítání obrázku s vysokým rozlišením",
