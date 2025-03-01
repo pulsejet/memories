@@ -1,6 +1,7 @@
 OC.L10N.register(
     "memories",
     {
+    "Shared Link" : "Link condivisi",
     "Download" : "Scarica",
     "Memories" : "Ricordi",
     "Fast, modern and advanced photo management suite" : "Soluzione efficiente, moderna e avanzata per la gestione delle foto",
@@ -16,8 +17,11 @@ OC.L10N.register(
     "Map" : "Mappa",
     "Tags" : "Etichette",
     "Settings" : "Impostazioni",
+    "View all" : "Vedi tutto",
     "Videos" : "Video",
     "Recognize" : "Riconosci",
+    "Face Recognition" : "Riconoscimento Facciale",
+    "The selected folder does not seem to be valid. Try again." : "La cartella selezionata non sembra essere valida. Riprova.",
     "Shared By" : "Condiviso da",
     "Metadata" : "Metadati",
     "Edit" : "Modifica",
