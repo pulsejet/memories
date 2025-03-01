@@ -29,6 +29,9 @@ use OCA\Memories\Exif;
 use OCA\Memories\Service;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\IRootFolder;
 
@@ -37,14 +40,11 @@ const IMAGICK_SAFE = '/^image\/(x-)?(png|jpeg|gif|bmp|tiff|webp|hei(f|c)|avif|dc
 class ImageController extends GenericApiController
 {
     /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     *
-     * @PublicPage
-     *
-     * Get preview of image
+     * Get preview of image.
      */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
+    #[PublicPage]
     public function preview(
         int $id,
         int $x = 32,
@@ -80,14 +80,11 @@ class ImageController extends GenericApiController
     }
 
     /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     *
-     * @PublicPage
-     *
-     * Get preview of many images
+     * Get preview of many images.
      */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
+    #[PublicPage]
     public function multipreview(array $files): Http\Response
     {
         return Util::guardExDirect(function (Http\IOutput $out) use ($files) {
@@ -176,14 +173,12 @@ class ImageController extends GenericApiController
     }
 
     /**
-     * @NoAdminRequired
-     *
-     * @PublicPage
-     *
-     * Get EXIF info for an image with file id
+     * Get EXIF info for an image with file id.
      *
      * @param string fileid
      */
+    #[NoAdminRequired]
+    #[PublicPage]
     public function info(
         int $id,
         bool $basic = false,
@@ -258,10 +253,9 @@ class ImageController extends GenericApiController
     }
 
     /**
-     * @NoAdminRequired
-     *
      * Set the exif data for a file.
      */
+    #[NoAdminRequired]
     public function setExif(int $id, array $raw): Http\Response
     {
         return Util::guardEx(function () use ($id, $raw) {
@@ -293,16 +287,13 @@ class ImageController extends GenericApiController
     }
 
     /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     *
-     * @PublicPage
-     *
      * Get a full resolution decodable image for editing from a file.
      * The returned image may be png / webp / jpeg / gif.
      * These formats are supported by all browsers.
      */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
+    #[PublicPage]
     public function decodable(string $id): Http\Response
     {
         return Util::guardEx(function () use ($id) {
@@ -334,9 +325,7 @@ class ImageController extends GenericApiController
         });
     }
 
-    /**
-     * @NoAdminRequired
-     */
+    #[NoAdminRequired]
     public function editImage(
         int $id,
         string $name,

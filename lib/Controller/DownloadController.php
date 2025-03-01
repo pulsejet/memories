@@ -26,6 +26,10 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
+use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\ISession;
 use OCP\ITempManager;
@@ -34,16 +38,13 @@ use OCP\Security\ISecureRandom;
 class DownloadController extends GenericApiController
 {
     /**
-     * @NoAdminRequired
-     *
-     * @PublicPage
-     *
-     * @UseSession
-     *
-     * Request to download one or more files
+     * Request to download one or more files.
      *
      * @param int[] $files List of file IDs
      */
+    #[NoAdminRequired]
+    #[PublicPage]
+    #[UseSession]
     public function request(array $files): Http\Response
     {
         return Util::guardEx(static function () use ($files) {
@@ -70,14 +71,11 @@ class DownloadController extends GenericApiController
     }
 
     /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     *
-     * @PublicPage
-     *
-     * Download one or more files
+     * Download one or more files.
      */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
+    #[PublicPage]
     public function file(string $handle): Http\Response
     {
         return Util::guardEx(function () use ($handle) {
@@ -116,13 +114,9 @@ class DownloadController extends GenericApiController
         });
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     *
-     * @PublicPage
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
+    #[PublicPage]
     public function one(int $fileid, bool $resumable = true): Http\Response
     {
         return Util::guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable) {

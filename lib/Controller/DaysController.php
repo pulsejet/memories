@@ -26,15 +26,14 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\ClustersBackend;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
 
 class DaysController extends GenericApiController
 {
-    /**
-     * @NoAdminRequired
-     *
-     * @PublicPage
-     */
+    #[NoAdminRequired]
+    #[PublicPage]
     public function days(): Http\Response
     {
         return Util::guardEx(function () {
@@ -54,12 +53,10 @@ class DaysController extends GenericApiController
     }
 
     /**
-     * @NoAdminRequired
-     *
-     * @PublicPage
-     *
      * @param int[] $dayIds
      */
+    #[NoAdminRequired]
+    #[PublicPage]
     public function day(array $dayIds): Http\Response
     {
         return Util::guardEx(function () use ($dayIds) {
@@ -78,11 +75,8 @@ class DaysController extends GenericApiController
         });
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @PublicPage
-     */
+    #[NoAdminRequired]
+    #[PublicPage]
     public function dayGet(string $id): Http\Response
     {
         // Split at commas and convert all parts to int

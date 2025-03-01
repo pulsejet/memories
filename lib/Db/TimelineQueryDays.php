@@ -363,7 +363,7 @@ trait TimelineQueryDays
                 $row['shared_by'] = $userMemo[$storage] = $user;
             }
 
-            if ('' === $row['shared_by']) {
+            if ('' === ($row['shared_by'] ?? null)) {
                 unset($row['shared_by']);
             }
         }

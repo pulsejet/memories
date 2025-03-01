@@ -9,7 +9,7 @@ use OCA\Memories\Service;
 use OCA\Memories\Settings\SystemConfig;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
-use OCP\IConfig;
+use OCP\IAppConfig;
 use OCP\IUserManager;
 use Psr\Log\LoggerInterface;
 
@@ -25,7 +25,7 @@ class IndexJob extends TimedJob
         private Service\Index $service,
         private IUserManager $userManager,
         private LoggerInterface $logger,
-        private IConfig $config,
+        private IAppConfig $appConfig,
     ) {
         parent::__construct($time);
 
@@ -43,8 +43,8 @@ class IndexJob extends TimedJob
         }
 
         // Store the last run time
-        $this->config->setAppValue(Application::APPNAME, 'last_index_job_start', (string) time());
-        $this->config->setAppValue(Application::APPNAME, 'last_index_job_duration', (string) 0);
+        $this->appConfig->setValueString(Application::APPNAME, 'last_index_job_start', (string) time());
+        $this->appConfig->setValueString(Application::APPNAME, 'last_index_job_duration', (string) 0);
 
         // Run for a maximum of 5 minutes
         $startTime = microtime(true);
@@ -77,7 +77,7 @@ class IndexJob extends TimedJob
 
         // Store the last run duration
         $duration = round(microtime(true) - $startTime, 2);
-        $this->config->setAppValue(Application::APPNAME, 'last_index_job_duration', (string) $duration);
+        $this->appConfig->setValueString(Application::APPNAME, 'last_index_job_duration', (string) $duration);
     }
 
     /**
@@ -112,8 +112,8 @@ class IndexJob extends TimedJob
             return;
         }
 
-        $this->config->setAppValue(Application::APPNAME, 'last_index_job_status', $msg);
-        $this->config->setAppValue(Application::APPNAME, 'last_index_job_status_type', $type);
+        $this->appConfig->setValueString(Application::APPNAME, 'last_index_job_status', $msg);
+        $this->appConfig->setValueString(Application::APPNAME, 'last_index_job_status_type', $type);
 
         if ('warning' === $type) {
             $this->logger->warning($msg, ['app' => Application::APPNAME]);

@@ -13,6 +13,7 @@ use OCP\App\IAppManager;
 use OCP\Files\Node;
 use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
+use OCP\IAppConfig;
 use OCP\IConfig;
 
 class Util
@@ -96,8 +97,8 @@ class Util
             return false;
         }
 
-        $config = \OC::$server->get(IConfig::class);
-        if ('true' !== $config->getAppValue('recognize', 'faces.enabled', 'false')) {
+        $appConfig = \OC::$server->get(IAppConfig::class);
+        if ('true' !== $appConfig->getValueString('recognize', 'faces.enabled', 'false')) {
             return false;
         }
 
@@ -173,15 +174,15 @@ class Util
      */
     public static function isLinkSharingEnabled(): bool
     {
-        $config = \OC::$server->get(IConfig::class);
+        $appConfig = \OC::$server->get(IAppConfig::class);
 
         // Check if the shareAPI is enabled
-        if ('yes' !== $config->getAppValue('core', 'shareapi_enabled', 'yes')) {
+        if ('yes' !== $appConfig->getValueString('core', 'shareapi_enabled', 'yes')) {
             return false;
         }
 
         // Check whether public sharing is enabled
-        if ('yes' !== $config->getAppValue('core', 'shareapi_allow_links', 'yes')) {
+        if ('yes' !== $appConfig->getValueString('core', 'shareapi_allow_links', 'yes')) {
             return false;
         }
 

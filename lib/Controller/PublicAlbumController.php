@@ -8,6 +8,8 @@ use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\AlbumsQuery;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\RedirectResponse;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Template\LinkMenuAction;
@@ -40,11 +42,8 @@ class PublicAlbumController extends Controller
         parent::__construct(Application::APPNAME, $request);
     }
 
-    /**
-     * @PublicPage
-     *
-     * @NoCSRFRequired
-     */
+    #[PublicPage]
+    #[NoCSRFRequired]
     public function showShare(string $token): Response
     {
         // Validate token exists
@@ -106,11 +105,8 @@ class PublicAlbumController extends Controller
         return $response;
     }
 
-    /**
-     * @PublicPage
-     *
-     * @NoCSRFRequired
-     */
+    #[PublicPage]
+    #[NoCSRFRequired]
     public function download(string $token): Response
     {
         $album = $this->albumsQuery->getAlbumByLink($token);

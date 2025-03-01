@@ -26,13 +26,12 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 
 class MapController extends GenericApiController
 {
-    /**
-     * @NoAdminRequired
-     */
+    #[NoAdminRequired]
     public function clusters(string $bounds, string $zoom): Http\Response
     {
         return Util::guardEx(function () use ($bounds, $zoom) {
@@ -66,9 +65,7 @@ class MapController extends GenericApiController
         });
     }
 
-    /**
-     * @NoAdminRequired
-     */
+    #[NoAdminRequired]
     public function init(): Http\Response
     {
         return Util::guardEx(function () {

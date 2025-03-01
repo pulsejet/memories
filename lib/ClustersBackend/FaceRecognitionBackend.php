@@ -28,7 +28,7 @@ use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\SimpleFS\ISimpleFile;
-use OCP\IConfig;
+use OCP\IAppConfig;
 use OCP\IRequest;
 
 class FaceRecognitionBackend extends Backend
@@ -38,7 +38,7 @@ class FaceRecognitionBackend extends Backend
     public function __construct(
         protected IRequest $request,
         protected TimelineQuery $tq,
-        protected IConfig $config,
+        protected IAppConfig $appConfig,
     ) {}
 
     public static function appName(): string
@@ -233,12 +233,12 @@ class FaceRecognitionBackend extends Backend
 
     private function model(): int
     {
-        return (int) $this->config->getAppValue('facerecognition', 'model', (string) -1);
+        return (int) $this->appConfig->getValueString('facerecognition', 'model', (string) -1);
     }
 
     private function minFaceInClusters(): int
     {
-        return (int) $this->config->getAppValue('facerecognition', 'min_faces_in_cluster', (string) 5);
+        return (int) $this->appConfig->getValueString('facerecognition', 'min_faces_in_cluster', (string) 5);
     }
 
     private function getFaceRecognitionClusters(int $fileid = 0): array

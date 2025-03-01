@@ -26,6 +26,7 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\Folder;
 use OCP\Lock\ILockingProvider;
@@ -33,12 +34,11 @@ use OCP\Lock\ILockingProvider;
 class ArchiveController extends GenericApiController
 {
     /**
-     * @NoAdminRequired
-     *
-     * Move one file to the archive folder
+     * Move one file to the archive folder.
      *
      * @param string $id File ID to archive / unarchive
      */
+    #[NoAdminRequired]
     public function archive(string $id): Http\Response
     {
         return Util::guardEx(function () use ($id) {

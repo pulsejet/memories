@@ -8,16 +8,15 @@ use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\Files\FileInfo;
 use OCP\Files\Folder;
 
 class FoldersController extends GenericApiController
 {
-    /**
-     * @NoAdminRequired
-     *
-     * @PublicPage
-     */
+    #[NoAdminRequired]
+    #[PublicPage]
     public function sub(string $folder): Http\Response
     {
         return Util::guardEx(function () use ($folder) {
