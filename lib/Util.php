@@ -327,6 +327,18 @@ class Util
         );
     }
 
+    public static function getTimelineIncludeSharedAlbums(string $uid): bool
+    {
+        return 'true' === \OC::$server->get(IConfig::class)
+            ->getUserValue(
+                $uid,
+                Application::APPNAME,
+                'timelineIncludeSharedAlbums',
+                SystemConfig::get('memories.timeline.default_include_shared_albums') ? 'true' : 'false',
+            )
+        ;
+    }
+
     /**
      * Run a callback in a transaction.
      * It returns the same type as the return type of the closure.
