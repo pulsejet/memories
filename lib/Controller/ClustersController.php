@@ -43,7 +43,7 @@ class ClustersController extends GenericApiController
     protected ClustersBackend\Backend $backend;
 
     /**
-     * Get list of clusters
+     * Get list of clusters.
      */
     #[NoAdminRequired]
     public function list(string $backend, int $fileid = 0): Http\Response
@@ -58,7 +58,7 @@ class ClustersController extends GenericApiController
     }
 
     /**
-     * Get preview for a cluster
+     * Get preview for a cluster.
      */
     #[NoAdminRequired]
     #[NoCSRFRequired]
@@ -92,7 +92,7 @@ class ClustersController extends GenericApiController
     }
 
     /**
-     * Set the cover image for a cluster
+     * Set the cover image for a cluster.
      */
     #[NoAdminRequired]
     public function setCover(string $backend, string $name, int $fileid): Http\Response
@@ -112,7 +112,7 @@ class ClustersController extends GenericApiController
     }
 
     /**
-     * Download a cluster as a zip file
+     * Download a cluster as a zip file.
      */
     #[NoAdminRequired]
     #[UseSession]
