@@ -208,7 +208,7 @@ class ImageController extends GenericApiController
             $info['mimetype'] = $file->getMimeType();
             $info['size'] = $file->getSize();
             $info['basename'] = $file->getName();
-            $info['uploadtime'] = $file->getUploadTime() ?: $file->getMTime();
+            $info['mtime'] = $file->getMTime();
 
             // Get file owner name for shared files
             if ($owner = $file->getOwner()) {

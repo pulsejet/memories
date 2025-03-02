@@ -114,7 +114,7 @@ declare module '@typings' {
     basename: string;
     mimetype: string;
     size: number;
-    uploadtime: number;
+    mtime: number;
 
     owneruid: string;
     ownername: string;

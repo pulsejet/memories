@@ -139,7 +139,7 @@ export default defineComponent({
         // DateTime calls are expensive, so check if the year
         // itself is different first, then also check the text
         if (year !== currentYear) {
-          const text = utils.getFromNowStr(dateTaken);
+          const text = utils.getFromNowStr(dateTaken, { padding: 10 });
           if (text !== currentText) {
             this.years.push({
               year,

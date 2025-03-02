@@ -14,7 +14,7 @@
 
       <div class="subtitle">
         <span v-if="info.size">{{ utils.humanFileSize(info.size) }}</span>
-        <span v-if="info.uploadtime">{{ utils.getFromNowStr(new Date(info.uploadtime * 1000)) }}</span>
+        <span v-if="info.mtime">{{ utils.getFromNowStr(new Date(info.mtime * 1000)) }}</span>
       </div>
     </div>
 
