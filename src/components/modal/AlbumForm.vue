@@ -229,12 +229,12 @@ export default defineComponent({
       try {
         this.loading = true;
         let album = { ...this.album };
-        if (this.album.basename !== this.albumName) {
-          album = await dav.renameAlbum(this.album, this.album.basename, this.albumName);
+        if (album.basename !== this.albumName) {
+          album = await dav.renameAlbum(album, album.basename, this.albumName);
         }
-        if (this.album.location !== this.albumLocation) {
-          album.location = await dav.updateAlbum(this.album, {
-            albumName: this.albumName,
+        if (album.location !== this.albumLocation) {
+          album.location = await dav.updateAlbum(album, {
+            albumName: album.basename,
             properties: { location: this.albumLocation },
           });
         }

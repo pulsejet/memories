@@ -239,10 +239,10 @@ export async function getAlbum(user: string, name: string, extraProps = {}): Pro
 export async function renameAlbum(album: any, currentAlbumName: string, newAlbumName: string) {
   const newAlbum = { ...album, basename: newAlbumName };
   try {
-    await client.moveFile(
-      `/photos/${utils.uid}/albums/${currentAlbumName}`,
-      `/photos/${utils.uid}/albums/${newAlbumName}`,
-    );
+    const filenameBefore = `/photos/${utils.uid}/albums/${currentAlbumName}`;
+    const filenameAfter = `/photos/${utils.uid}/albums/${newAlbumName}`;
+    await client.moveFile(filenameBefore, filenameAfter);
+    newAlbum.filename = filenameAfter;
     return newAlbum;
   } catch (error) {
     console.error(error);
