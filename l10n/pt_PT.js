@@ -63,6 +63,7 @@ OC.L10N.register(
     "Link copied to clipboard" : "Ligação copiada para a área de transferência",
     "Share link" : "Partilhar ligação",
     "Refresh" : "Atualizar",
+    "Last updated" : "Atualizado recentemente",
     "Creation date" : "Data de criação",
     "Oldest first" : "Antigos primeiro",
     "Newest first" : "Recentes primeiro",
