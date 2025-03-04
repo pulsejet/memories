@@ -78,6 +78,7 @@ OC.L10N.register(
     "Update" : "Ενημέρωση",
     "Loading …" : "Φόρτωση …",
     "Move" : "Μετακίνηση",
+    "Choose a folder" : "Επιλογή φακέλου",
     "Remove" : "Αφαίρεση",
     "Password protected" : "Προστασία με συνθηματικό",
     "Expires" : "Λήγει",
