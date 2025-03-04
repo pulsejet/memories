@@ -537,9 +537,12 @@ export default defineComponent({
       _m.viewer.photoswipe = this.photoswipe;
 
       // Check if someone else is trapping focus
-      const hasNestedTrap = (e: Event) => {
+      const hasNestedTrap = (e: Event): Element | null => {
         const selectors = ['#app-sidebar-vue', '.v-popper__popper', '.modal-mask', '.oc-dialog'];
-        return e.target instanceof HTMLElement && e.target.closest(selectors.join(','));
+        if (e.target instanceof Element) {
+          return e.target.closest(selectors.join(','));
+        }
+        return null;
       };
 
       // Monkey patch for focus trapping in sidebar
@@ -560,7 +563,13 @@ export default defineComponent({
 
       // Handle keydown
       this.photoswipe.on('keydown', (e) => {
-        if (e.defaultPrevented || hasNestedTrap(e.originalEvent)) {
+        if (e.defaultPrevented) return;
+
+        // Check if someone else is trapping focus.
+        // For the sidebar, however, we want to continue executing our actions.
+        // https://github.com/pulsejet/memories/issues/1414
+        const nested = hasNestedTrap(e.originalEvent);
+        if (nested && nested.id !== 'app-sidebar-vue') {
           e.preventDefault();
           return;
         }
