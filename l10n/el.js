@@ -84,6 +84,7 @@ OC.L10N.register(
     "Expires" : "Λήγει",
     "Read only" : "Μόνο για ανάγνωση",
     "Link copied to clipboard" : "Ο σύνδεσμος αντιγράφηκε στο πρόχειρο",
+    "Failed to copy link to clipboard" : "Αποτυχία αντιγραφής συνδέσμου στο πρόχειρο",
     "Share link" : "Διαμοιρασμός συνδέσμου",
     "Create Link" : "Δημιουργία συνδέσμου",
     "Refresh" : "Ανανέωση",
