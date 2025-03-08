@@ -132,6 +132,7 @@ class StaticConfig {
 
       // general settings
       timeline_path: '_unknown_',
+      timeline_include_shared_albums: true,
       enable_top_memories: true,
       stack_raw_files: true,
       dedup_identical: false,

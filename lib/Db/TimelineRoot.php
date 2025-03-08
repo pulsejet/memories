@@ -14,6 +14,8 @@ class TimelineRoot
     /** @var array<int, string> */
     protected array $folderPaths = [];
 
+    protected bool $sharedAlbums = false;
+
     /**
      * Add a folder to the root.
      *
@@ -33,6 +35,11 @@ class TimelineRoot
 
         // Add top level folder
         $this->setFolder($info->getId() ?? 0, $info, $path);
+    }
+
+    public function addSharedAlbums(bool $include = true): void
+    {
+        $this->sharedAlbums = $include;
     }
 
     /**
@@ -111,6 +118,11 @@ class TimelineRoot
     public function isEmpty(): bool
     {
         return empty($this->folderPaths);
+    }
+
+    public function includeSharedAlbums(): bool
+    {
+        return $this->sharedAlbums;
     }
 
     private function setFolder(int $id, ?FileInfo $fileInfo, ?string $path): void
