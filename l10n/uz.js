@@ -2,7 +2,9 @@ OC.L10N.register(
     "memories",
     {
     "Download" : "Download",
+    "People" : "Shaxs",
     "Favorites" : "Favorites",
+    "Places" : "Joylar",
     "Tags" : "Tags",
     "Settings" : "Sozlamalar",
     "Videos" : "Videos",
@@ -36,9 +38,12 @@ OC.L10N.register(
     "Share link" : "Share link",
     "Refresh" : "Refresh",
     "Home" : "Home",
+    "Previous" : "Oldingi",
+    "Custom" : "Boshqa",
     "Size" : "Size",
     "Yes" : "Yes",
     "No" : "No",
+    "Choose {file}" : " {file}ta tanlash",
     "Choose" : "Choose"
 },
 "nplurals=1; plural=0;");
