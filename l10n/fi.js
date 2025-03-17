@@ -39,6 +39,7 @@ OC.L10N.register(
     "If you just installed Memories, visit the admin panel first." : "Jos olet juuri asentanut sovelluksen, käy ensin ylläpitoasetuksissa.",
     "No coordinates" : "Ei koordinaatteja",
     "Click edit to set location" : "Napsauta muokataksesi sijaintia",
+    "Shared By" : "Jakaja",
     "Metadata" : "Metatieto",
     "Edit" : "Muokkaa",
     "Failed to load metadata" : "Metatietojen lataaminen epäonnistui",

@@ -203,6 +203,15 @@
     "Failed to delete {fileName}." : "Não foi possível eliminar {fileName}.",
     "Failed to favorite files." : "Não foi possível colocar os ficheiros nos favoritos.",
     "Failed to favorite {fileName}." : "Não foi possível colocar {fileName} nos favoritos.",
-    "Choose" : "Escolher"
+    "Yes" : "Sim",
+    "No" : "Não",
+    "Choose {file}" : "Escolher {file}",
+    "Choose" : "Escolher",
+    "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Mover {count} itens para a lixeira?","Mover {count} itens para a lixeira?","Mover {count} itens para o lixo?"],
+    "Files in trash may be automatically deleted after a fixed period of time." : "apagadoOs ficheiros no lixo podem ser excluídos automaticamente após um período de tempo fixo.",
+    "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Remover {count} itens do álbum?","Remover {count} itens do álbum?","Remover {count} itens do álbum?"],
+    "This will not delete your original files." : "Isto não apagará os ficheiros originais.",
+    "You are about to download {count} items." : "Está prestes a transferir {count} itens.",
+    "You are about to move {count} items." : "Está prestes a mover {count} itens."
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }
