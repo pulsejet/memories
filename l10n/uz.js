@@ -30,6 +30,7 @@ OC.L10N.register(
     "Year" : "Yil",
     "Month" : "Oy",
     "Day" : "Kun",
+    "Title" : "Sarlavha",
     "Description" : "Tavsif",
     "Name" : "Name",
     "Update" : "Update",
