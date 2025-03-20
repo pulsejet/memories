@@ -16,6 +16,23 @@
     <!-- No content found and nothing is loading -->
     <EmptyContent v-if="showEmpty" />
 
+    <!-- Trip Slideshow Button (only show for trip views) -->
+    <button
+      v-if="showSlideshowButton"
+      class="action-button slideshow-button"
+      @click="openSlideshow">
+      <span class="icon icon-toggle-pictures"></span>
+      <span>Slideshow</span>
+    </button>
+
+    <!-- Trip Slideshow Component -->
+    <TripSlideshow
+      v-if="showingSlideshow"
+      :tripId="currentTripId"
+      :maxVideoDuration="10"
+      @close="closeSlideshow"
+    />
+
     <!-- Top overlay showing date -->
     <TimelineTopOverlay
       ref="topOverlay"
@@ -105,10 +122,12 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { translate as t } from '@nextcloud/l10n';
+import { showError } from '@nextcloud/dialogs';
+
 import type { Route } from 'vue-router';
 
 import axios from '@nextcloud/axios';
-import { showError } from '@nextcloud/dialogs';
 
 import { getLayout } from '@services/layout';
 
@@ -119,6 +138,7 @@ import ScrollerManager from '@components/ScrollerManager.vue';
 import SelectionManager from '@components/SelectionManager.vue';
 import Viewer from '@components/viewer/Viewer.vue';
 import SwipeRefresh from './SwipeRefresh.vue';
+import TripSlideshow from '@components/TripSlideshow.vue';
 
 import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import TopMatter from '@components/top-matter/TopMatter.vue';
@@ -152,6 +172,7 @@ export default defineComponent({
     ScrollerManager,
     Viewer,
     SwipeRefresh,
+    TripSlideshow,
   },
 
   mixins: [UserConfig],
@@ -205,6 +226,9 @@ export default defineComponent({
 
     /** State for request cancellations */
     state: Math.random(),
+    /** Showing slideshow */
+    showingSlideshow: false,
+    currentTripId: 0,
   }),
 
   mounted() {
@@ -289,7 +313,35 @@ export default defineComponent({
 
     /** Whether to allow swipe refresh */
     allowSwipe(): boolean {
-      return !this.loading && this.currentScroll === 0;
+      const sel = this.refs.selectionManager;
+      if (!sel) return false;
+      return !sel.selection?.size && !this.showingSlideshow;
+    },
+
+    /** Whether to show the slideshow button (only for trip views) */
+    showSlideshowButton(): boolean {
+      // Only show for trip views
+      if (!this.routeIsTrips) return false;
+
+      // Don't show if empty
+      if (this.empty) return false;
+
+      // Make sure we have some content to show
+      return this.list.length > 0;
+    },
+
+    /** Get the trip ID from the route */
+    getTripId(): number | null {
+      if (!this.routeIsTrips) return null;
+
+      // Extract ID from route (format: id-tripName)
+      const name = this.$route.params.name;
+      if (!name) return null;
+
+      const parts = String(name).split('-', 1);
+      if (!parts.length) return null;
+
+      return parseInt(parts[0], 10);
     },
   },
 
@@ -386,6 +438,9 @@ export default defineComponent({
       this.fetchDayQueue = [];
       window.clearTimeout(this.fetchDayTimer ?? 0);
       window.clearTimeout(this.resizeTimer ?? 0);
+      this.scrollerHeight = 100;
+      this.showingSlideshow = false;
+      this.currentTripId = 0;
     },
 
     /** Recreate everything */
@@ -668,6 +723,16 @@ export default defineComponent({
           set(DaysFilterType.PLACE, this.c.PLACES_NULL);
         } else {
           throw new Error('Invalid place route');
+        }
+      }
+
+      // Trips
+      if (this.routeIsTrips) {
+        if (name?.includes('-')) {
+          const id = name.split('-', 1)[0];
+          set(DaysFilterType.TRIP, id);
+        } else {
+          throw new Error('Invalid trip route');
         }
       }
 
@@ -1452,6 +1517,32 @@ export default defineComponent({
         this.processDay(day.dayid, newDetail!);
       }
     },
+
+    /** Open the slideshow for the current trip */
+    openSlideshow() {
+      const tripId = this.getTripId;
+      if (tripId === null) {
+        console.error('No trip ID available for slideshow');
+        showError(this.t('memories', 'No trip ID available for slideshow'));
+        return;
+      }
+
+      // Convert to number to ensure proper type for the component
+      const numericTripId = Number(tripId);
+      if (isNaN(numericTripId)) {
+        console.error('Invalid trip ID format:', tripId);
+        showError(this.t('memories', 'Invalid trip ID format'));
+        return;
+      }
+
+      this.currentTripId = numericTripId;
+      this.showingSlideshow = true;
+    },
+
+    /** Close the slideshow */
+    closeSlideshow() {
+      this.showingSlideshow = false;
+    },
   },
 });
 </script>
@@ -1463,6 +1554,33 @@ export default defineComponent({
   width: 100%;
   overflow: hidden;
   position: relative;
+}
+
+.slideshow-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: var(--color-primary, #0082c9);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+
+  &:hover {
+    background-color: var(--color-primary-element-light, #00a2ff);
+    transform: translateY(-2px);
+  }
+
+  .icon {
+    font-size: 16px;
+  }
 
   @media (max-width: 768px) {
     // Get rid of padding on img-outer (1px on mobile)

@@ -194,6 +194,20 @@ class PageController extends Controller
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
+    public function trips(): Response
+    {
+        return $this->main();
+    }
+
+    #[NoCSRFRequired]
+    #[NoAdminRequired]
+    public function tripVideos(): Response
+    {
+        return $this->main();
+    }
+
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function nxsetup(): Response
     {
         return $this->main();

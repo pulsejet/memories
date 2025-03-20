@@ -22,6 +22,7 @@ return [
         ['name' => 'Page#map', 'url' => '/map', 'verb' => 'GET'],
         ['name' => 'Page#explore', 'url' => '/explore', 'verb' => 'GET'],
         ['name' => 'Page#nxsetup', 'url' => '/nxsetup', 'verb' => 'GET'],
+        ['name' => 'Page#tripVideos', 'url' => '/trip-videos', 'verb' => 'GET'],
 
         // Routes with params
         w(['name' => 'Page#folder', 'url' => '/folders/{path}', 'verb' => 'GET'], 'path'),
@@ -30,6 +31,7 @@ return [
         w(['name' => 'Page#facerecognition', 'url' => '/facerecognition/{name}', 'verb' => 'GET'], 'name'),
         w(['name' => 'Page#places', 'url' => '/places/{id}', 'verb' => 'GET'], 'id'),
         w(['name' => 'Page#tags', 'url' => '/tags/{name}', 'verb' => 'GET'], 'name'),
+        w(['name' => 'Page#trips', 'url' => '/trips/{name}', 'verb' => 'GET'], 'name'),
 
         // Public folder share
         ['name' => 'Public#showAuthenticate', 'url' => '/s/{token}/authenticate/{redirect}', 'verb' => 'GET'],
@@ -50,6 +52,29 @@ return [
         ['name' => 'Clusters#preview', 'url' => '/api/clusters/{backend}/preview', 'verb' => 'GET'],
         ['name' => 'Clusters#setCover', 'url' => '/api/clusters/{backend}/set-cover', 'verb' => 'POST'],
         ['name' => 'Clusters#download', 'url' => '/api/clusters/{backend}/download', 'verb' => 'POST'],
+        ['name' => 'Clusters#tripInfo', 'url' => '/api/trip/{id}', 'verb' => 'GET'],
+
+        // Trip Videos 
+        ['name' => 'TripVideo#list', 'url' => '/api/trip-videos', 'verb' => 'GET'],
+        ['name' => 'TripVideo#get', 'url' => '/api/trip-videos/{id}', 'verb' => 'GET'],
+        [
+          'name' => 'TripVideo#getSlideshowMedia',
+          'url' => '/api/trip-slideshow/{id}',
+          'verb' => 'GET',
+          'requirements' => ['id' => '\d+']
+        ],
+        [
+          'name' => 'TripVideo#debugTrip',
+          'url' => '/api/trip-debug/{id}',
+          'verb' => 'GET',
+          'requirements' => ['id' => '\d+']
+        ],
+        [
+          'name' => 'TripVideo#testEndpoint',
+          'url' => '/api/trip-test/{id}',
+          'verb' => 'GET',
+          'requirements' => ['id' => '\d+']
+        ],
 
         ['name' => 'Tags#set', 'url' => '/api/tags/set/{id}', 'verb' => 'PATCH'],
 

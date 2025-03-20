@@ -18,6 +18,7 @@ import ClusterTopMatter from './ClusterTopMatter.vue';
 import FaceTopMatter from './FaceTopMatter.vue';
 import AlbumTopMatter from './AlbumTopMatter.vue';
 import PlacesTopMatter from './PlacesTopMatter.vue';
+import TripsTopMatter from './TripsTopMatter.vue';
 
 import * as utils from '@services/utils';
 
@@ -28,6 +29,7 @@ export default defineComponent({
     ClusterTopMatter,
     FaceTopMatter,
     AlbumTopMatter,
+    TripsTopMatter,
   },
 
   data: () => ({
@@ -53,6 +55,8 @@ export default defineComponent({
           return AlbumTopMatter;
         case _m.routes.Places.name:
           return PlacesTopMatter;
+        case _m.routes.Trips.name:
+          return TripsTopMatter;
         case _m.routes.Tags.name:
           return ClusterTopMatter;
         case _m.routes.Recognize.name:

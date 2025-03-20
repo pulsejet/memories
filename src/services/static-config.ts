@@ -152,6 +152,9 @@ class StaticConfig {
       show_hidden_albums: false,
       album_list_sort: ALBUM_SORT_FLAGS.CREATED | ALBUM_SORT_FLAGS.DESCENDING, // also in OtherController.php
 
+      // trips settings
+      enable_trips: false,
+
       // local settings
       square_thumbs: false,
       high_res_cond: null,

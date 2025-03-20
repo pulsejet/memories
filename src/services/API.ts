@@ -27,6 +27,7 @@ export const enum DaysFilterType {
   FACERECOGNITION = 'facerecognition',
   PLACE = 'places',
   TAG = 'tags',
+  TRIP = 'trips',
   MAP_BOUNDS = 'mapbounds',
 
   FACE_RECT = 'facerect',
@@ -98,6 +99,14 @@ export class API {
 
   static PLACE_LIST() {
     return gen(`${BASE}/clusters/places`);
+  }
+
+  static TRIP_LIST() {
+    return gen(`${BASE}/clusters/trips`);
+  }
+
+  static TRIP_INFO(id: string | number) {
+    return gen(`${BASE}/trip/${id}`);
   }
 
   static TAG_LIST() {

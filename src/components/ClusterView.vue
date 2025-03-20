@@ -111,6 +111,8 @@ export default defineComponent({
           this.items = await dav.getFaceList('facerecognition');
         } else if (this.routeIsPlaces) {
           this.items = await dav.getPlaces();
+        } else if (this.routeIsTrips) {
+          this.items = await dav.getTrips();
         }
       } finally {
         this.loading--;

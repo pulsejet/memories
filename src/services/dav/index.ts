@@ -10,3 +10,4 @@ export * from './tags';
 export * from './other';
 export * from './places';
 export * from './single-item';
+export * from './trips';

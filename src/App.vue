@@ -130,8 +130,10 @@ import PeopleIcon from 'vue-material-design-icons/AccountBoxMultiple.vue';
 import MarkerIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagsIcon from 'vue-material-design-icons/Tag.vue';
 import MapIcon from 'vue-material-design-icons/Map.vue';
+import TripIcon from 'vue-material-design-icons/BagSuitcase.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
 import SearchIcon from 'vue-material-design-icons/Magnify.vue';
+import VideoIcon from 'vue-material-design-icons/Video.vue';
 
 type NavItem = {
   name: string;
@@ -177,7 +179,10 @@ export default defineComponent({
     MarkerIcon,
     TagsIcon,
     MapIcon,
+    TripIcon,
     CogIcon,
+    SearchIcon,
+    VideoIcon,
   },
 
   mixins: [UserConfig],
@@ -372,6 +377,18 @@ export default defineComponent({
           icon: MarkerIcon,
           title: t('memories', 'Places'),
           if: this.config.places_gis > 0,
+        },
+        {
+          name: 'trips',
+          icon: TripIcon,
+          title: t('memories', 'Trips'),
+          if: this.config.enable_trips,
+        },
+        {
+          name: 'trip-videos',
+          icon: VideoIcon,
+          title: t('memories', 'Trip Videos'),
+          if: this.config.enable_trips,
         },
         {
           name: 'map',

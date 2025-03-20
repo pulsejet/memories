@@ -28,6 +28,8 @@ use OCA\Memories\Listeners\BeforeTemplateListener;
 use OCA\Memories\Listeners\PostDeleteListener;
 use OCA\Memories\Listeners\PostLogoutListener;
 use OCA\Memories\Listeners\PostWriteListener;
+use OCA\Memories\Notification\Notifier;
+use OCA\Memories\Service\DirectTripDetectionService;
 use OCA\Memories\Util;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -89,10 +91,14 @@ class Application extends App implements IBootstrap
         $context->registerEventListener(BeforeTemplateRenderedEvent::class, BeforeTemplateListener::class);
         $context->registerEventListener(UserLoggedOutEvent::class, PostLogoutListener::class);
 
+        // Register notification notifier
+        $context->registerNotifierService(Notifier::class);
+
         // Register clusters backends
         ClustersBackend\AlbumsBackend::register();
         ClustersBackend\TagsBackend::register();
         ClustersBackend\PlacesBackend::register();
+        ClustersBackend\TripsBackend::register();
         ClustersBackend\RecognizeBackend::register();
         ClustersBackend\FaceRecognitionBackend::register();
 

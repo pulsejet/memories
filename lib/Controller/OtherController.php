@@ -116,6 +116,9 @@ class OtherController extends GenericApiController
                 'sort_album_month' => 'true' === $getAppConfig('sortAlbumMonth', 'true'),
                 'show_hidden_albums' => 'true' === $getAppConfig('showHiddenAlbums', false),
                 'album_list_sort' => $getAppConfig('album_list_sort', 3),
+
+                // trips settings
+                'enable_trips' => 'true' === $getAppConfig('enableTrips', false),
             ], Http::STATUS_OK);
         });
     }
