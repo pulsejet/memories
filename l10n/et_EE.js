@@ -119,6 +119,7 @@ OC.L10N.register(
     "Unassigned faces" : "Määramata näod",
     "Merge with different person" : "Ühenda teise isikuga",
     "Home" : "Avaleht",
+    "Share folder" : "Jaga kausta",
     "Upload files" : "Failide üleslaadimine",
     "Unsaved changes" : "Salvestamata muutused",
     "Drop changes" : "Tühista muudatused",
@@ -206,6 +207,7 @@ OC.L10N.register(
     "Fit size" : "Mahuta suurus",
     "Setup" : "Seadista",
     "Failed to create {albumName}." : "Albumi {albumName} loomine ebaõnnestus.",
+    "Shared by {user}" : "Jagaja: {user}",
     "Failed to delete {fileName}." : "{fileName} kustutamine ebaõnnestus.",
     "Choose" : "Vali"
 },
