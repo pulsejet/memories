@@ -209,6 +209,8 @@ OC.L10N.register(
     "Failed to create {albumName}." : "Albumi {albumName} loomine ebaõnnestus.",
     "Shared by {user}" : "Jagaja: {user}",
     "Failed to delete {fileName}." : "{fileName} kustutamine ebaõnnestus.",
+    "Yes" : "Ja",
+    "No" : "Ei",
     "Choose" : "Vali"
 },
 "nplurals=2; plural=(n != 1);");
