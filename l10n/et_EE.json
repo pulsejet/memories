@@ -112,6 +112,7 @@
     "Link copied to clipboard" : "Link on lõikelauale kopeeritud",
     "Share link" : "Jaga link",
     "Refresh" : "Värskenda",
+    "Last updated" : "Viimati uuendatud",
     "Oldest first" : "Vanemad eespool",
     "Newest first" : "Uuemad eespool",
     "Unassigned faces" : "Määramata näod",
@@ -186,7 +187,7 @@
     "Warmth" : "Soojus",
     "+ Add watermark" : "+ Lisa vesimärk",
     "Choose watermark type" : "Vali vesimärgi tüüp",
-    "Upload watermark" : "Lae vesimärk üles",
+    "Upload watermark" : "Laadi vesimärk üles",
     "Add as text" : "Lisa tekstina",
     "Padding" : "Küljendus",
     "Shadow" : "Varjud",
@@ -203,12 +204,15 @@
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Pane tähele, et valitud kärpimisala on väiksem kui rakendatud suuruse muutmine, mis võib põhjustada kvaliteedi langust",
     "Actual size (100%)" : "Tegelik suurus (100%)",
     "Fit size" : "Mahuta suurus",
+    "Shared Folder" : "Jagatud kaust",
+    "Shared Album" : "Jagatud album",
     "Setup" : "Seadista",
     "Failed to create {albumName}." : "Albumi {albumName} loomine ebaõnnestus.",
     "Shared by {user}" : "Jagaja: {user}",
     "Failed to delete {fileName}." : "{fileName} kustutamine ebaõnnestus.",
     "Yes" : "Ja",
     "No" : "Ei",
+    "Choose {file}" : "Vali „{file}“",
     "Choose" : "Vali"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
