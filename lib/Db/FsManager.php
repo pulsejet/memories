@@ -120,6 +120,7 @@ class FsManager
             $paths = [$path];
         } else {
             $paths = Util::getTimelinePaths($uid);
+            $root->addSharedAlbums(Util::getTimelineIncludeSharedAlbums($uid));
         }
 
         // Combined etag, for cache invalidation.
