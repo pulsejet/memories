@@ -60,6 +60,7 @@ OC.L10N.register(
     "ffmpeg path" : "ffmpeg asukoht",
     "ffprobe path" : "ffprobe asukoht",
     "Shared" : "Jagatud",
+    "No results found" : "Otsingutulemusi ei leidu",
     "Search" : "Otsi",
     "Upload" : "Laadi üles",
     "Failed to fetch collaborators list." : "Kaastööliste loendi laadimine ebaõnnestus.",
