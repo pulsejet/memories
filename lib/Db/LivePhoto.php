@@ -52,6 +52,17 @@ class LivePhoto
             return "self__traileroffset={$videoOffset}";
         }
 
+        // Samsung HEIC (tested w/ S21 and S25+)
+        // https://github.com/pulsejet/memories/issues/1432
+        //
+        // For some reason the HEIC seems to have both MotionPhotoVideo and EmbeddedVideoType
+        // but only MotionPhotoVideo is valid (EmbeddedVideoType is tiny ~12B).
+        // So this one has the priority here - but this may need an explicit check if
+        // something else breaks.
+        if (!empty($exif['MotionPhotoVideo'] ?? null)) {
+            return 'self__exifbin=MotionPhotoVideo';
+        }
+
         // Samsung JPEG (tested w/ S24)
         // https://github.com/pulsejet/memories/issues/1265
         if (($embedType = $exif['EmbeddedVideoType'] ?? null)
@@ -61,11 +72,6 @@ class LivePhoto
             // Binary exif field, decode when the user requests it
             // While this is the most reliable way, it is slow
             return 'self__exifbin=EmbeddedVideoFile';
-        }
-
-        // Samsung HEIC (tested w/ S21)
-        if (!empty($exif['MotionPhotoVideo'] ?? null)) {
-            return 'self__exifbin=MotionPhotoVideo';
         }
 
         // Google JPEG and Samsung HEIC / JPEG (Apple?)
