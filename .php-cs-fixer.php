@@ -24,7 +24,6 @@ $config
     ->setRiskyAllowed(true)
     ->setRules([
         '@PhpCsFixer' => true,
-        '@PhpCsFixer:risky' => true,
         'array_syntax' => ['syntax' => 'short'],
         'declare_strict_types' => true,
         'fully_qualified_strict_types' => false,
