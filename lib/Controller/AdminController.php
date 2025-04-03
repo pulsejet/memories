@@ -252,7 +252,7 @@ class AdminController extends GenericApiController
      */
     private function getExecutableStatus(
         \Closure|string $path,
-        null|\Closure $testFunction = null,
+        ?\Closure $testFunction = null,
         bool $testIfFile = true,
         bool $testIfExecutable = true,
     ): string {

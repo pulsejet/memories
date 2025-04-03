@@ -51,8 +51,8 @@ class Util
         $output = self::execSafe2(['ldd', '--version'], 3000, null, true, true);
 
         // check in either
-        $ldd = strtolower($output[0] ?? '').
-            strtolower($output[1] ?? '');
+        $ldd = strtolower($output[0] ?? '')
+            .strtolower($output[1] ?? '');
 
         if (str_contains($ldd, 'musl')) {
             return 'musl';

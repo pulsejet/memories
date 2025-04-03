@@ -123,7 +123,7 @@ class FileRobotImageState
         }
     }
 
-    private function _set(array $parent, string $key, string $ckey = null): void
+    private function _set(array $parent, string $key, ?string $ckey = null): void
     {
         $ckey ??= $key;
         if (\array_key_exists($key, $parent)) {

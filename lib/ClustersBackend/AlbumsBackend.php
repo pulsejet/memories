@@ -84,7 +84,7 @@ class AlbumsBackend extends Backend
     public function getClustersInternal(int $fileid = 0): array
     {
         // Materialize the query
-        $materialize = static fn (IQueryBuilder & $query): IQueryBuilder => SQL::materialize($query, 'pa');
+        $materialize = static fn (IQueryBuilder &$query): IQueryBuilder => SQL::materialize($query, 'pa');
 
         // Function to add etag
         $etag = static fn (string $name): \Closure => static function (IQueryBuilder &$query) use ($name): void {
