@@ -9,50 +9,45 @@ use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\Settings\IIconSection;
 
-class AdminSection implements IIconSection
-{
+class AdminSection implements IIconSection {
     public function __construct(
         private IL10N $l,
         private IURLGenerator $urlGenerator,
-    ) {}
+    ) {
+    }
 
     /**
      * @return TemplateResponse
      */
-    public function getForm()
-    {
+    public function getForm() {
         return new TemplateResponse('memories', 'admin', []);
     }
 
     /**
      * @return string
      */
-    public function getID()
-    {
+    public function getID() {
         return 'memories';
     }
 
     /**
      * @return string
      */
-    public function getName()
-    {
+    public function getName() {
         return $this->l->t('Memories');
     }
 
     /**
      * @return int
      */
-    public function getPriority()
-    {
+    public function getPriority() {
         return 75;
     }
 
     /**
      * @return string
      */
-    public function getIcon()
-    {
+    public function getIcon() {
         return $this->urlGenerator->imagePath('memories', 'app-dark.svg');
     }
 }

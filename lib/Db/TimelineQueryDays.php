@@ -11,8 +11,7 @@ use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
-trait TimelineQueryDays
-{
+trait TimelineQueryDays {
     use TimelineQueryCTE;
 
     protected IDBConnection $connection;
@@ -20,10 +19,10 @@ trait TimelineQueryDays
     /**
      * Get the days response from the database for the timeline.
      *
-     * @param bool  $recursive       Whether to get the days recursively
-     * @param bool  $archive         Whether to get the days only from the archive folder
-     * @param bool  $monthView       Whether the response should be in month view
-     * @param bool  $reverse         Whether the response should be in reverse order
+     * @param bool $recursive Whether to get the days recursively
+     * @param bool $archive Whether to get the days only from the archive folder
+     * @param bool $monthView Whether the response should be in month view
+     * @param bool $reverse Whether the response should be in reverse order
      * @param array $queryTransforms An array of query transforms to apply to the query
      *
      * @return array The days response
@@ -71,12 +70,12 @@ trait TimelineQueryDays
     /**
      * Get the day response from the database for the timeline.
      *
-     * @param int[] $dayIds          The day ids to fetch
-     * @param bool  $recursive       If the query should be recursive
-     * @param bool  $archive         If the query should include only the archive folder
-     * @param bool  $hidden          If the query should include hidden files
-     * @param bool  $monthView       If the query should be in month view (dayIds are monthIds)
-     * @param bool  $reverse         If the query should be in reverse order
+     * @param int[] $dayIds The day ids to fetch
+     * @param bool $recursive If the query should be recursive
+     * @param bool $archive If the query should include only the archive folder
+     * @param bool $hidden If the query should include hidden files
+     * @param bool $monthView If the query should be in month view (dayIds are monthIds)
+     * @param bool $reverse If the query should be in reverse order
      * @param array $queryTransforms The query transformations to apply
      *
      * @return array An array of day responses
@@ -169,8 +168,7 @@ trait TimelineQueryDays
         return $day;
     }
 
-    public function executeQueryWithCTEs(IQueryBuilder $query, string $psql = ''): \OCP\DB\IResult
-    {
+    public function executeQueryWithCTEs(IQueryBuilder $query, string $psql = ''): \OCP\DB\IResult {
         $sql = empty($psql) ? $query->getSQL() : $psql;
         $params = $query->getParameters();
         $types = $query->getParameterTypes();
@@ -182,7 +180,7 @@ trait TimelineQueryDays
 
         // Add WITH clause if needed
         if (str_contains($sql, 'cte_folders')) {
-            $sql = $CTE_SQL.' '.$sql;
+            $sql = $CTE_SQL . ' ' . $sql;
         }
 
         return $this->connection->executeQuery($sql, $params, $types);
@@ -191,11 +189,11 @@ trait TimelineQueryDays
     /**
      * Inner join with oc_filecache.
      *
-     * @param IQueryBuilder $query     Query builder
-     * @param TimelineRoot  $root      Either the top folder or null for all
-     * @param bool          $recursive Whether to get the days recursively
-     * @param bool          $archive   Whether to get the days only from the archive folder
-     * @param bool          $hidden    Whether to include hidden files
+     * @param IQueryBuilder $query Query builder
+     * @param TimelineRoot $root Either the top folder or null for all
+     * @param bool $recursive Whether to get the days recursively
+     * @param bool $archive Whether to get the days only from the archive folder
+     * @param bool $hidden Whether to include hidden files
      */
     public function filterFilecache(
         IQueryBuilder $query,
@@ -205,12 +203,12 @@ trait TimelineQueryDays
         bool $hidden = false,
     ): IQueryBuilder {
         // Get the timeline root object
-        if (null === $root) {
+        if ($root === null) {
             // Cache the root object. This is fast when there are
             // multiple queries such as days-day preloading BUT that
             // means that any subsequent requests that don't match the
             // same root MUST specify a separate root this function
-            if (null === $this->_root) {
+            if ($this->_root === null) {
                 $this->_root = new TimelineRoot();
 
                 // Populate the root using parameters from the request
@@ -268,14 +266,13 @@ trait TimelineQueryDays
     /**
      * Process the days response.
      *
-     * @param array $rows      the days response
-     * @param bool  $monthView Whether the response is in month view
+     * @param array $rows the days response
+     * @param bool $monthView Whether the response is in month view
      */
-    private function postProcessDays(array $rows, bool $monthView): array
-    {
+    private function postProcessDays(array $rows, bool $monthView): array {
         foreach ($rows as &$row) {
-            $row['dayid'] = (int) $row['dayid'];
-            $row['count'] = (int) $row['count'];
+            $row['dayid'] = (int)$row['dayid'];
+            $row['count'] = (int)$row['count'];
         }
 
         // Convert to months if needed
@@ -299,18 +296,17 @@ trait TimelineQueryDays
     /**
      * Process the single day response.
      *
-     * @param array $row       A photo in the day response
-     * @param bool  $monthView Whether the response is in month view
+     * @param array $row A photo in the day response
+     * @param bool $monthView Whether the response is in month view
      */
-    private function postProcessDayPhoto(array &$row, bool $monthView = false): void
-    {
+    private function postProcessDayPhoto(array &$row, bool $monthView = false): void {
         // Convert field types
-        $row['fileid'] = (int) $row['fileid'];
-        $row['isvideo'] = (int) $row['isvideo'];
-        $row['video_duration'] = (int) $row['video_duration'];
-        $row['dayid'] = (int) $row['dayid'];
-        $row['w'] = (int) $row['w'];
-        $row['h'] = (int) $row['h'];
+        $row['fileid'] = (int)$row['fileid'];
+        $row['isvideo'] = (int)$row['isvideo'];
+        $row['video_duration'] = (int)$row['video_duration'];
+        $row['dayid'] = (int)$row['dayid'];
+        $row['w'] = (int)$row['w'];
+        $row['h'] = (int)$row['h'];
 
         // Optional fields
         if (!$row['isvideo']) {
@@ -342,7 +338,7 @@ trait TimelineQueryDays
         if (($epoch = $row['epoch'] ?? null) && ($size = $row['size'] ?? null)) {
             // compute AUID and discard size
             // epoch is used for ordering, so we keep it
-            $row['auid'] = Exif::getAUID((int) $epoch, (int) $size);
+            $row['auid'] = Exif::getAUID((int)$epoch, (int)$size);
             unset($row['size']);
         }
 
@@ -390,26 +386,23 @@ trait TimelineQueryDays
         }
     }
 
-    private function dayIdMonthEnd(int $monthId): int
-    {
-        return (int) (strtotime(date('Ymt', $monthId * 86400)) / 86400);
+    private function dayIdMonthEnd(int $monthId): int {
+        return (int)(strtotime(date('Ymt', $monthId * 86400)) / 86400);
     }
 
-    private function dayIdToMonthId(int $dayId): int
-    {
+    private function dayIdToMonthId(int $dayId): int {
         static $memoize = [];
         if ($cache = $memoize[$dayId] ?? null) {
             return $cache;
         }
 
-        return $memoize[$dayId] = strtotime(date('Ym', $dayId * 86400).'01') / 86400;
+        return $memoize[$dayId] = strtotime(date('Ym', $dayId * 86400) . '01') / 86400;
     }
 
-    private function storageIdToUserName(string $storage): string
-    {
+    private function storageIdToUserName(string $storage): string {
         // Storage ID looks like "home::{uid}" or "local::{/path}" etc
         $pos = strpos($storage, '::');
-        if (false === $pos) {
+        if ($pos === false) {
             return '';
         }
         $uid = substr($storage, $pos + 2);

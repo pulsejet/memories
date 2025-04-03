@@ -7,15 +7,13 @@ namespace OCA\Memories;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 
-trait UtilController
-{
+trait UtilController {
     /**
      * Run a function and catch exceptions to return HTTP response.
      *
      * @param \Closure(): Http\Response $closure
      */
-    public static function guardEx(\Closure $closure): Http\Response
-    {
+    public static function guardEx(\Closure $closure): Http\Response {
         try {
             return $closure();
         } catch (\OCA\Memories\HttpResponseException $e) {
@@ -35,20 +33,17 @@ trait UtilController
      *
      * @param \Closure(Http\IOutput): void $closure
      */
-    public static function guardExDirect(\Closure $closure): Http\Response
-    {
+    public static function guardExDirect(\Closure $closure): Http\Response {
         /** @psalm-suppress MissingTemplateParam */
         return new class($closure) extends Http\Response implements Http\ICallbackResponse {
             /**
              * @param \Closure(Http\IOutput): void $closure
              */
-            public function __construct(private \Closure $closure)
-            {
+            public function __construct(private \Closure $closure) {
                 parent::__construct();
             }
 
-            public function callback(Http\IOutput $output): void
-            {
+            public function callback(Http\IOutput $output): void {
                 try {
                     ($this->closure)($output);
                 } catch (\OCA\Memories\HttpResponseException $e) {
@@ -76,8 +71,7 @@ trait UtilController
      *
      * @throws \OCA\Memories\HttpResponseException if the user is not logged in
      */
-    public static function getUser(): \OCP\IUser
-    {
+    public static function getUser(): \OCP\IUser {
         return \OC::$server->get(\OCP\IUserSession::class)->getUser()
             ?? throw Exceptions::NotLoggedIn();
     }
@@ -87,17 +81,15 @@ trait UtilController
      *
      * @throws \OCA\Memories\HttpResponseException if the user is not logged in
      */
-    public static function getUID(): string
-    {
+    public static function getUID(): string {
         return self::getUser()->getUID();
     }
 
     /**
      * Check if the user is logged in.
      */
-    public static function isLoggedIn(): bool
-    {
-        return null !== \OC::$server->get(\OCP\IUserSession::class)->getUser();
+    public static function isLoggedIn(): bool {
+        return \OC::$server->get(\OCP\IUserSession::class)->getUser() !== null;
     }
 
     /**
@@ -107,8 +99,7 @@ trait UtilController
      *
      * @throws \OCA\Memories\HttpResponseException if the user is not logged in
      */
-    public static function getUserFolder(?string $uid = null): \OCP\Files\Folder
-    {
+    public static function getUserFolder(?string $uid = null): \OCP\Files\Folder {
         return \OC::$server->get(\OCP\Files\IRootFolder::class)
             ->getUserFolder($uid ?? self::getUID())
         ;
@@ -117,8 +108,7 @@ trait UtilController
     /**
      * Get the language code for the current user.
      */
-    public static function getUserLang(): string
-    {
+    public static function getUserLang(): string {
         // Default language
         $config = \OC::$server->get(\OCP\IConfig::class);
         $default = $config->getSystemValue('default_language', 'en');

@@ -17,8 +17,7 @@ use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IRequest;
 
-class PageController extends Controller
-{
+class PageController extends Controller {
     public function __construct(
         IRequest $request,
         protected IEventDispatcher $eventDispatcher,
@@ -28,11 +27,10 @@ class PageController extends Controller
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function main(): Response
-    {
+    public function main(): Response {
         // Check native version if available
         $nativeVer = Util::callerNativeVersion();
-        if (null !== $nativeVer && version_compare($nativeVer, BinExt::NX_VER_MIN, '<')) {
+        if ($nativeVer !== null && version_compare($nativeVer, BinExt::NX_VER_MIN, '<')) {
             return new PublicTemplateResponse(Application::APPNAME, 'native-old');
         }
 
@@ -58,8 +56,7 @@ class PageController extends Controller
     }
 
     /** Get the common content security policy */
-    public static function getCSP(): ContentSecurityPolicy
-    {
+    public static function getCSP(): ContentSecurityPolicy {
         // Image domains MUST be added to the connect domain list
         // because of the service worker fetch() call
         $addImageDomain = static function (string $url) use (&$policy): void {
@@ -101,8 +98,7 @@ class PageController extends Controller
     /**
      * Get params for main.php template.
      */
-    public static function getMainParams(): array
-    {
+    public static function getMainParams(): array {
         return [
             'native' => Util::callerIsNative(),
         ];
@@ -110,92 +106,79 @@ class PageController extends Controller
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function folder(): Response
-    {
+    public function folder(): Response {
         return $this->main();
     }
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function favorites(): Response
-    {
+    public function favorites(): Response {
         return $this->main();
     }
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function albums(): Response
-    {
+    public function albums(): Response {
         return $this->main();
     }
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function videos(): Response
-    {
+    public function videos(): Response {
         return $this->main();
     }
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function archive(): Response
-    {
+    public function archive(): Response {
         return $this->main();
     }
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function thisday(): Response
-    {
+    public function thisday(): Response {
         return $this->main();
     }
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function recognize(): Response
-    {
+    public function recognize(): Response {
         return $this->main();
     }
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function facerecognition(): Response
-    {
+    public function facerecognition(): Response {
         return $this->main();
     }
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function places(): Response
-    {
+    public function places(): Response {
         return $this->main();
     }
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function tags(): Response
-    {
+    public function tags(): Response {
         return $this->main();
     }
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function map(): Response
-    {
+    public function map(): Response {
         return $this->main();
     }
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function explore(): Response
-    {
+    public function explore(): Response {
         return $this->main();
     }
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function nxsetup(): Response
-    {
+    public function nxsetup(): Response {
         return $this->main();
     }
 }

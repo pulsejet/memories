@@ -10,8 +10,7 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\Events\Node\NodeWrittenEvent;
 use OCP\Files\File;
 
-class Exif
-{
+class Exif {
     private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'image/x-dcraw', 'video/MP2T']; // also update const.ts
     private const EXIFTOOL_TIMEOUT = 30000;
     private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-api', 'LargeFileSupport=1', '-n', '-json'];
@@ -26,8 +25,7 @@ class Exif
     /** Disable uisage of static process */
     private static bool $noStaticProc = false;
 
-    public static function closeStaticExiftoolProc(): void
-    {
+    public static function closeStaticExiftoolProc(): void {
         try {
             // Close I/O pipes
             if (self::$staticPipes) {
@@ -47,14 +45,12 @@ class Exif
         }
     }
 
-    public static function restartStaticExiftoolProc(): void
-    {
+    public static function restartStaticExiftoolProc(): void {
         self::closeStaticExiftoolProc();
         self::ensureStaticExiftoolProc();
     }
 
-    public static function ensureStaticExiftoolProc(): void
-    {
+    public static function ensureStaticExiftoolProc(): void {
         if (self::$noStaticProc) {
             return;
         }
@@ -86,8 +82,7 @@ class Exif
      *
      * @return array<string, mixed>
      */
-    public static function getExifFromFile(File $file): array
-    {
+    public static function getExifFromFile(File $file): array {
         try {
             $path = $file->getStorage()->getLocalFile($file->getInternalPath());
         } catch (\Throwable $ex) {
@@ -135,9 +130,8 @@ class Exif
      *
      * @return array<string, mixed>
      */
-    public static function getExifFromLocalPath(string $path): array
-    {
-        if (null !== self::$staticProc) {
+    public static function getExifFromLocalPath(string $path): array {
+        if (self::$staticProc !== null) {
             self::ensureStaticExiftoolProc();
 
             return self::getExifFromLocalPathWithStaticProc($path);
@@ -151,18 +145,17 @@ class Exif
      *
      * @param array<string, mixed> $exif
      */
-    public static function parseExifDate(array $exif): \DateTime
-    {
+    public static function parseExifDate(array $exif): \DateTime {
         // Get date from exif
         $exifDate = $exif['DateTimeOriginal'] ?? $exif['CreateDate'] ?? null;
 
         // For videos, prefer CreateDate for timezone (QuickTimeUTC=1)
-        if (preg_match('/^video\/\w+/', (string) ($exif['MIMEType'] ?? null))) {
+        if (preg_match('/^video\/\w+/', (string)($exif['MIMEType'] ?? null))) {
             $exifDate = $exif['CreateDate'] ?? $exifDate;
         }
 
         // Check if we have a date
-        if (null === $exifDate || empty($exifDate) || !\is_string($exifDate)) {
+        if ($exifDate === null || empty($exifDate) || !\is_string($exifDate)) {
             throw new \Exception('No date found in exif');
         }
 
@@ -172,7 +165,7 @@ class Exif
                 ?? $exif['OffsetTime']
                 ?? $exif['LocationTZID']
                 ?? throw new \Exception();
-            $exifTz = new \DateTimeZone((string) $tzStr);
+            $exifTz = new \DateTimeZone((string)$tzStr);
         } catch (\Exception) {
             $exifTz = null;
         }
@@ -217,7 +210,7 @@ class Exif
         // Filter out January 1, 1904 12:00:00 AM UTC
         // Exiftool returns this as the date when QuickTimeUTC is set and
         // the date is set to 0000:00:00 00:00:00
-        if (-2082844800 === $timestamp) {
+        if ($timestamp === -2082844800) {
             throw new \Exception("Blacklisted date: {$exifDate}");
         }
 
@@ -234,8 +227,7 @@ class Exif
      *
      * @param array<string, mixed> $exif
      */
-    public static function getDateTaken(File $file, array $exif): \DateTime
-    {
+    public static function getDateTaken(File $file, array $exif): \DateTime {
         try {
             return self::parseExifDate($exif);
         } catch (\Exception) {
@@ -243,7 +235,7 @@ class Exif
         }
 
         // Fall back to modification time
-        $dt = new \DateTime('@'.$file->getMtime());
+        $dt = new \DateTime('@' . $file->getMtime());
 
         // Set timezone to system timezone
         $tz = getenv('TZ') ?: date_default_timezone_get();
@@ -260,8 +252,7 @@ class Exif
     /**
      * Convert time to local date in UTC.
      */
-    public static function forgetTimezone(\DateTime $date): \DateTime
-    {
+    public static function forgetTimezone(\DateTime $date): \DateTime {
         return new \DateTime($date->format('Y-m-d H:i:s'), new \DateTimeZone('UTC'));
     }
 
@@ -274,8 +265,7 @@ class Exif
      *
      * @psalm-return list{int, int}
      */
-    public static function getDimensions(array $exif): array
-    {
+    public static function getDimensions(array $exif): array {
         $width = $exif['ImageWidth'] ?? 0;
         $height = $exif['ImageHeight'] ?? 0;
 
@@ -297,48 +287,44 @@ class Exif
      * Get the Approximate Unique ID (AUID) from parameters.
      *
      * @param int $epoch the date taken as a unix timestamp (seconds)
-     * @param int $size  the file size in bytes
+     * @param int $size the file size in bytes
      */
-    public static function getAUID(int $epoch, int $size): string
-    {
-        return md5($epoch.$size);
+    public static function getAUID(int $epoch, int $size): string {
+        return md5($epoch . $size);
     }
 
     /**
      * Get the Basename approximate Unique ID (BUID) from parameters.
      *
-     * @param string $basename      the basename of the file
-     * @param mixed  $imageUniqueID EXIF field
-     * @param int    $size          the file size in bytes (fallback)
+     * @param string $basename the basename of the file
+     * @param mixed $imageUniqueID EXIF field
+     * @param int $size the file size in bytes (fallback)
      */
-    public static function getBUID(string $basename, mixed $imageUniqueID, int $size): string
-    {
+    public static function getBUID(string $basename, mixed $imageUniqueID, int $size): string {
         $sfx = "size={$size}";
-        if (null !== $imageUniqueID && \strlen((string) $imageUniqueID) >= 4) {
+        if ($imageUniqueID !== null && \strlen((string)$imageUniqueID) >= 4) {
             $sfx = "iuid={$imageUniqueID}";
         }
 
-        return md5($basename.$sfx);
+        return md5($basename . $sfx);
     }
 
     /**
      * Get the list of MIME Types that are allowed to be edited.
      */
-    public static function allowedEditMimetypes(): array
-    {
+    public static function allowedEditMimetypes(): array {
         return array_diff(array_merge(Application::IMAGE_MIMES, Application::VIDEO_MIMES), self::FORBIDDEN_EDIT_MIMES);
     }
 
     /**
      * Set exif data using raw json.
      *
-     * @param string               $path to local file
+     * @param string $path to local file
      * @param array<string, mixed> $data exif data
      *
      * @throws \Exception on failure
      */
-    public static function setExif(string $path, array $data): void
-    {
+    public static function setExif(string $path, array $data): void {
         $data['SourceFile'] = $path;
         $raw = json_encode([$data], JSON_UNESCAPED_UNICODE);
         $cmd = array_merge(self::getExiftool(), [
@@ -358,7 +344,7 @@ class Exif
         if (str_contains($stdout, 'error')) {
             error_log("Exiftool error: {$stdout}");
 
-            throw new \Exception('Could not set exif data: '.$stdout);
+            throw new \Exception('Could not set exif data: ' . $stdout);
         }
     }
 
@@ -367,8 +353,7 @@ class Exif
      *
      * @param array<string, mixed> $data exif data
      */
-    public static function setFileExif(File $file, array $data): void
-    {
+    public static function setFileExif(File $file, array $data): void {
         // Get path to local file so we can skip reading
         $path = $file->getStorage()->getLocalFile($file->getInternalPath());
         if (!$path) {
@@ -395,8 +380,7 @@ class Exif
         $file->touch();
     }
 
-    public static function getBinaryExifProp(string $path, string $prop): string
-    {
+    public static function getBinaryExifProp(string $path, string $prop): string {
         $cmd = array_merge(self::getExiftool(), [$prop, '-n', '-b', $path]);
 
         try {
@@ -408,21 +392,18 @@ class Exif
         }
     }
 
-    public static function getExifWithDuplicates(string $path): array
-    {
+    public static function getExifWithDuplicates(string $path): array {
         return self::getExifFromLocalPathWithSeparateProc($path, ['-U', '-G4']);
     }
 
-    private static function getExiftool(): array
-    {
+    private static function getExiftool(): array {
         return BinExt::getExiftool();
     }
 
     /**
      * Initialize static exiftool process for local reads.
      */
-    private static function initializeStaticExiftoolProc(): void
-    {
+    private static function initializeStaticExiftoolProc(): void {
         self::closeStaticExiftoolProc();
         self::$staticPipes = [];
         self::$staticProc = proc_open(array_merge(self::getExiftool(), ['-stay_open', 'true', '-@', '-']), [
@@ -433,8 +414,7 @@ class Exif
         stream_set_blocking(self::$staticPipes[1], false);
     }
 
-    private static function getExifFromLocalPathWithStaticProc(string $path): array
-    {
+    private static function getExifFromLocalPathWithStaticProc(string $path): array {
         // This function should not be called if there is no static process
         if (!self::$staticPipes) {
             throw new \Error('[BUG] No static pipes found');
@@ -454,7 +434,7 @@ class Exif
             // The output buffer should always contain the ready token
             // (this is the point of readOrTimeout)
             $tokPos = strrpos($buf, $readyToken);
-            if (false === $tokPos) {
+            if ($tokPos === false) {
                 throw new \Error('[BUG] No ready token found in output buffer');
             }
 
@@ -470,8 +450,7 @@ class Exif
         }
     }
 
-    private static function getExifFromLocalPathWithSeparateProc(string $path, array $extraArgs = []): array
-    {
+    private static function getExifFromLocalPathWithSeparateProc(string $path, array $extraArgs = []): array {
         $cmd = array_merge(self::getExiftool(), self::EXIFTOOL_ARGS, $extraArgs, [$path]);
 
         try {
@@ -486,8 +465,7 @@ class Exif
     }
 
     /** Get json array from stdout of exiftool */
-    private static function processStdout(string $stdout): array
-    {
+    private static function processStdout(string $stdout): array {
         $json = json_decode($stdout, true);
         if (!$json) {
             throw new \Exception('Failed to parse exiftool output as JSON');

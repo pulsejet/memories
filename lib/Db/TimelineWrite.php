@@ -16,8 +16,7 @@ use Psr\Log\LoggerInterface;
 const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places', 'memories_failures'];
 const TRUNCATE_TABLES = ['memories_mapclusters'];
 
-class TimelineWrite
-{
+class TimelineWrite {
     use TimelineWriteFailures;
     use TimelineWriteMap;
     use TimelineWriteOrphans;
@@ -28,19 +27,20 @@ class TimelineWrite
         protected LivePhoto $livePhoto,
         protected ILockingProvider $lockingProvider,
         protected LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     /**
      * Process a file to insert Exif data into the database.
      *
-     * @param File $file  File node to process
-     * @param bool $lock  Lock the file before processing
+     * @param File $file File node to process
+     * @param bool $lock Lock the file before processing
      * @param bool $force Update the record even if the file has not changed
      *
      * @return bool True if the file was processed
      *
      * @throws \OCP\Lock\LockedException If the file is locked
-     * @throws \OCP\DB\Exception         If the database query fails
+     * @throws \OCP\DB\Exception If the database query fails
      */
     public function processFile(
         File $file,
@@ -55,7 +55,7 @@ class TimelineWrite
 
         // Check if we need to lock the file
         if ($lock) {
-            $lockKey = 'memories/'.$file->getId();
+            $lockKey = 'memories/' . $file->getId();
             $lockType = ILockingProvider::LOCK_EXCLUSIVE;
 
             // Throw directly to caller if we can't get the lock
@@ -82,7 +82,7 @@ class TimelineWrite
         // - the record exists
         // - the file has not changed
         // - the record is not an orphan
-        if (!$force && $prevRow && ((int) $prevRow['mtime'] === $mtime) && (!(bool) $prevRow['orphan'])) {
+        if (!$force && $prevRow && ((int)$prevRow['mtime'] === $mtime) && (!(bool)$prevRow['orphan'])) {
             return false;
         }
 
@@ -90,7 +90,7 @@ class TimelineWrite
         $exif = Exif::getExifFromFile($file);
 
         // Check if EXIF is blank, which is probably wrong
-        if (0 === \count($exif)) {
+        if (\count($exif) === 0) {
             throw new \Exception('No EXIF data could be read');
         }
 
@@ -113,7 +113,7 @@ class TimelineWrite
         }
 
         // Video parameters
-        $videoDuration = round((float) ($isvideo ? ($exif['Duration'] ?? $exif['TrackDuration'] ?? 0) : 0));
+        $videoDuration = round((float)($isvideo ? ($exif['Duration'] ?? $exif['TrackDuration'] ?? 0) : 0));
 
         // Process location data
         // This also modifies the exif array in-place to set the LocationTZID
@@ -145,7 +145,7 @@ class TimelineWrite
         // Get BUID from ImageUniqueId if not present
         $buid = $prevRow ? $prevRow['buid'] : '';
         if (empty($buid)) {
-            $buid = Exif::getBUID($file->getName(), $exif['ImageUniqueID'] ?? null, (int) $file->getSize());
+            $buid = Exif::getBUID($file->getName(), $exif['ImageUniqueID'] ?? null, (int)$file->getSize());
         }
 
         // Get exif json
@@ -155,7 +155,7 @@ class TimelineWrite
         $query = $this->connection->getQueryBuilder();
         $params = [
             'fileid' => $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT),
-            'objectid' => $query->createNamedParameter((string) $fileId, IQueryBuilder::PARAM_STR),
+            'objectid' => $query->createNamedParameter((string)$fileId, IQueryBuilder::PARAM_STR),
             'dayid' => $query->createNamedParameter($dayId, IQueryBuilder::PARAM_INT),
             'datetaken' => $query->createNamedParameter($dateTakenStr, IQueryBuilder::PARAM_STR),
             'epoch' => $query->createNamedParameter($epoch, IQueryBuilder::PARAM_INT),
@@ -201,8 +201,7 @@ class TimelineWrite
     /**
      * Remove a file from the exif database.
      */
-    public function deleteFile(File $file): void
-    {
+    public function deleteFile(File $file): void {
         Util::transaction(function () use ($file): void {
             // Get full record
             $query = $this->connection->getQueryBuilder();
@@ -223,8 +222,8 @@ class TimelineWrite
             }
 
             // Delete from map cluster
-            if ($record && ($cid = (int) $record['mapcluster']) > 0) {
-                $this->mapRemoveFromCluster($cid, (float) $record['lat'], (float) $record['lon']);
+            if ($record && ($cid = (int)$record['mapcluster']) > 0) {
+                $this->mapRemoveFromCluster($cid, (float)$record['lat'], (float)$record['lon']);
             }
         });
     }
@@ -232,8 +231,7 @@ class TimelineWrite
     /**
      * Clean up the table for entries not present in filecache.
      */
-    public function cleanupStale(): void
-    {
+    public function cleanupStale(): void {
         // Delete all stale records
         foreach (DELETE_TABLES as $table) {
             $clause = $this->connection->getQueryBuilder();
@@ -253,19 +251,17 @@ class TimelineWrite
     /**
      * Clear the entire index. Does not need confirmation!
      */
-    public function clear(): void
-    {
+    public function clear(): void {
         $p = $this->connection->getDatabasePlatform();
         foreach (array_merge(DELETE_TABLES, TRUNCATE_TABLES) as $table) {
-            $this->connection->executeStatement($p->getTruncateTableSQL('*PREFIX*'.$table, false));
+            $this->connection->executeStatement($p->getTruncateTableSQL('*PREFIX*' . $table, false));
         }
     }
 
     /**
      * Get the current row for a file_id, from either table.
      */
-    private function getCurrentRow(int $fileId): ?array
-    {
+    private function getCurrentRow(int $fileId): ?array {
         $fetch = function (string $table) use ($fileId): false|null|array {
             $query = $this->connection->getQueryBuilder();
 
@@ -285,8 +281,7 @@ class TimelineWrite
      *
      * @param array<string, mixed> $exif EXIF data
      */
-    private function getExifJson(array $exif): string
-    {
+    private function getExifJson(array $exif): string {
         // Clean up EXIF to keep only useful metadata
         $filteredExif = [];
         foreach ($exif as $key => $value) {

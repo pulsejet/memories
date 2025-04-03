@@ -29,18 +29,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class PlacesSetup extends Command
-{
+class PlacesSetup extends Command {
     protected OutputInterface $output;
     protected InputInterface $input;
 
-    public function __construct(protected Places $places)
-    {
+    public function __construct(protected Places $places) {
         parent::__construct();
     }
 
-    protected function configure(): void
-    {
+    protected function configure(): void {
         $this
             ->setName('memories:places-setup')
             ->setDescription('Setup reverse geocoding')
@@ -50,15 +47,14 @@ class PlacesSetup extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    protected function execute(InputInterface $input, OutputInterface $output): int {
         $this->output = $output;
         $this->input = $input;
 
-        $recalculate = (bool) $input->getOption('recalculate');
-        $force = (bool) $input->getOption('force');
+        $recalculate = (bool)$input->getOption('recalculate');
+        $force = (bool)$input->getOption('force');
 
-        if (($this->places->txnSize = (int) $input->getOption('transaction-size')) < 1) {
+        if (($this->places->txnSize = (int)$input->getOption('transaction-size')) < 1) {
             $this->output->writeln('<error>Transaction size must be at least 1</error>');
 
             return 1;
@@ -96,8 +92,7 @@ class PlacesSetup extends Command
         return 0;
     }
 
-    protected function warnDownloaded(): bool
-    {
+    protected function warnDownloaded(): bool {
         $this->output->writeln('');
         $this->output->writeln('<error>Database is already set up</error>');
         $this->output->writeln('<error>This will drop and re-download the planet database</error>');
@@ -111,18 +106,18 @@ class PlacesSetup extends Command
         // Read user input
         $handle = fopen('php://stdin', 'r');
         $line = $this->input->isInteractive() ? fgets($handle) : false;
-        if (false === $line) {
+        if ($line === false) {
             // Redirect any -n users to --force
             $this->output->writeln(
                 "\n<error>You need an interactive terminal to run this command, "
-                .'or use --force for non-interactive mode.</error>',
+                . 'or use --force for non-interactive mode.</error>',
             );
 
             return false;
         }
 
         // Check if user wants to proceed
-        if ('y' !== trim($line)) {
+        if (trim($line) !== 'y') {
             $this->output->writeln('Aborting');
 
             return false;

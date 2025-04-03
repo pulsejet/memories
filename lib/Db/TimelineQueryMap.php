@@ -7,22 +7,20 @@ namespace OCA\Memories\Db;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
-trait TimelineQueryMap
-{
+trait TimelineQueryMap {
     use TimelineQueryDays;
 
     protected IDBConnection $connection;
 
-    public function transformMapBoundsFilter(IQueryBuilder &$query, bool $aggregate, string $bounds, string $table = 'm'): void
-    {
+    public function transformMapBoundsFilter(IQueryBuilder &$query, bool $aggregate, string $bounds, string $table = 'm'): void {
         $bounds = explode(',', $bounds);
         $bounds = array_map('floatval', $bounds);
-        if (4 !== \count($bounds)) {
+        if (\count($bounds) !== 4) {
             return;
         }
 
-        $latCol = $table.'.lat';
-        $lonCol = $table.'.lon';
+        $latCol = $table . '.lat';
+        $lonCol = $table . '.lon';
         $query->andWhere(
             $query->expr()->andX(
                 $query->expr()->gte($latCol, $query->createNamedParameter($bounds[0], IQueryBuilder::PARAM_STR)),
@@ -33,8 +31,7 @@ trait TimelineQueryMap
         );
     }
 
-    public function getMapClusters(float $gridLen, string $bounds): array
-    {
+    public function getMapClusters(float $gridLen, string $bounds): array {
         $query = $this->connection->getQueryBuilder();
 
         // Get the average location of each cluster
@@ -65,12 +62,12 @@ trait TimelineQueryMap
 
         // Post-process results
         return array_map(static fn ($row) => [
-            'id' => (int) $row['id'],
+            'id' => (int)$row['id'],
             'center' => [
-                (float) $row['lat'],
-                (float) $row['lon'],
+                (float)$row['lat'],
+                (float)$row['lon'],
             ],
-            'count' => (float) $row['count'],
+            'count' => (float)$row['count'],
         ], $res);
     }
 
@@ -79,8 +76,7 @@ trait TimelineQueryMap
      *
      * @param int[] $clusterIds
      */
-    public function getMapClusterPreviews(array $clusterIds): array
-    {
+    public function getMapClusterPreviews(array $clusterIds): array {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all photos with this tag
@@ -114,11 +110,11 @@ trait TimelineQueryMap
 
         // Post-process
         foreach ($files as &$row) {
-            $row['fileid'] = (int) $row['fileid'];
-            $row['mapcluster'] = (int) $row['mapcluster'];
-            $row['dayid'] = (int) $row['dayid'];
-            $row['h'] = (int) $row['h'];
-            $row['w'] = (int) $row['w'];
+            $row['fileid'] = (int)$row['fileid'];
+            $row['mapcluster'] = (int)$row['mapcluster'];
+            $row['dayid'] = (int)$row['dayid'];
+            $row['h'] = (int)$row['h'];
+            $row['w'] = (int)$row['w'];
         }
 
         return $files;
@@ -130,8 +126,7 @@ trait TimelineQueryMap
      *
      * @psalm-return array{lat: float, lon: float}|null
      */
-    public function getMapInitialPosition(): ?array
-    {
+    public function getMapInitialPosition(): ?array {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT coordinates

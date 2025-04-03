@@ -29,13 +29,12 @@ use OCP\ISession;
 /**
  * @template-implements IEventListener<Event>
  */
-class BeforeTemplateListener implements IEventListener
-{
-    public function __construct(private ISession $session) {}
+class BeforeTemplateListener implements IEventListener {
+    public function __construct(private ISession $session) {
+    }
 
-    public function handle(Event $event): void
-    {
-        if (null !== $this->session->get(PostLogoutListener::CLEAR_CACHE_KEY)) {
+    public function handle(Event $event): void {
+        if ($this->session->get(PostLogoutListener::CLEAR_CACHE_KEY) !== null) {
             $this->session->remove(PostLogoutListener::CLEAR_CACHE_KEY);
             \OCP\Util::addScript(Application::APPNAME, 'memories-hooks-clear-cache');
         }

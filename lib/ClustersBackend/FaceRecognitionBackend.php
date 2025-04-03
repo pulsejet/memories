@@ -31,39 +31,35 @@ use OCP\Files\SimpleFS\ISimpleFile;
 use OCP\IAppConfig;
 use OCP\IRequest;
 
-class FaceRecognitionBackend extends Backend
-{
+class FaceRecognitionBackend extends Backend {
     use PeopleBackendUtils;
 
     public function __construct(
         protected IRequest $request,
         protected TimelineQuery $tq,
         protected IAppConfig $appConfig,
-    ) {}
+    ) {
+    }
 
-    public static function appName(): string
-    {
+    public static function appName(): string {
         return 'Face Recognition';
     }
 
-    public static function clusterType(): string
-    {
+    public static function clusterType(): string {
         return 'facerecognition';
     }
 
-    public function isEnabled(): bool
-    {
+    public function isEnabled(): bool {
         return Util::facerecognitionIsInstalled()
                && Util::facerecognitionIsEnabled();
     }
 
-    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
-    {
-        $personStr = (string) $this->request->getParam('facerecognition');
+    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void {
+        $personStr = (string)$this->request->getParam('facerecognition');
 
         // Get title and uid of face user
         $personNames = explode('/', $personStr);
-        if (2 !== \count($personNames)) {
+        if (\count($personNames) !== 2) {
             throw new \Exception('Invalid person query');
         }
         [$personUid, $personName] = $personNames;
@@ -102,8 +98,7 @@ class FaceRecognitionBackend extends Backend
         }
     }
 
-    public function transformDayPost(array &$row): void
-    {
+    public function transformDayPost(array &$row): void {
         // Differentiate Recognize queries from Face Recognition
         if (!isset($row['face_width']) || !isset($row['image_width'])) {
             return;
@@ -111,17 +106,16 @@ class FaceRecognitionBackend extends Backend
 
         // Get percentage position and size
         $row['facerect'] = [
-            'w' => (float) $row['face_width'] / $row['image_width'],
-            'h' => (float) $row['face_height'] / $row['image_height'],
-            'x' => (float) $row['face_x'] / $row['image_width'],
-            'y' => (float) $row['face_y'] / $row['image_height'],
+            'w' => (float)$row['face_width'] / $row['image_width'],
+            'h' => (float)$row['face_height'] / $row['image_height'],
+            'x' => (float)$row['face_x'] / $row['image_width'],
+            'y' => (float)$row['face_y'] / $row['image_height'],
         ];
 
         unset($row['face_x'], $row['face_y'], $row['face_width'], $row['face_height'], $row['image_height'], $row['image_width']);
     }
 
-    public function getClustersInternal(int $fileid = 0): array
-    {
+    public function getClustersInternal(int $fileid = 0): array {
         $faces = array_merge(
             $this->getFaceRecognitionPersons($fileid),
             $this->getFaceRecognitionClusters($fileid),
@@ -129,20 +123,18 @@ class FaceRecognitionBackend extends Backend
 
         // Post process
         foreach ($faces as &$row) {
-            $row['id'] = $row['name'] ?? (int) $row['id'];
-            $row['count'] = (int) $row['count'];
+            $row['id'] = $row['name'] ?? (int)$row['id'];
+            $row['count'] = (int)$row['count'];
         }
 
         return $faces;
     }
 
-    public static function getClusterId(array $cluster): int|string
-    {
+    public static function getClusterId(array $cluster): int|string {
         return $cluster['id'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
-    {
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array {
         $query = $this->tq->getBuilder();
 
         // SELECT face detections
@@ -179,14 +171,14 @@ class FaceRecognitionBackend extends Backend
         $query = $this->tq->filterFilecache($query);
 
         // LIMIT results
-        if (-6 === $limit) {
+        if ($limit === -6) {
             Covers::filterCover($query, self::clusterType(), 'frf', 'id', 'person');
-        } elseif (null !== $limit) {
+        } elseif ($limit !== null) {
             $query->setMaxResults($limit);
         }
 
         // Filter by fileid if specified
-        if (null !== $fileid) {
+        if ($fileid !== null) {
             $query->andWhere($query->expr()->eq('fri.file', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
@@ -198,51 +190,43 @@ class FaceRecognitionBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
-    public function sortPhotosForPreview(array &$photos): void
-    {
+    public function sortPhotosForPreview(array &$photos): void {
         // Convert to recognize format (percentage position-size)
         foreach ($photos as &$p) {
-            $p['x'] = (float) $p['x'] / (float) $p['image_width'];
-            $p['y'] = (float) $p['y'] / (float) $p['image_height'];
-            $p['width'] = (float) $p['width'] / (float) $p['image_width'];
-            $p['height'] = (float) $p['height'] / (float) $p['image_height'];
+            $p['x'] = (float)$p['x'] / (float)$p['image_width'];
+            $p['y'] = (float)$p['y'] / (float)$p['image_height'];
+            $p['width'] = (float)$p['width'] / (float)$p['image_width'];
+            $p['height'] = (float)$p['height'] / (float)$p['image_height'];
         }
 
         $this->sortByScores($photos);
     }
 
-    public function getPreviewBlob(ISimpleFile $file, array $photo): array
-    {
+    public function getPreviewBlob(ISimpleFile $file, array $photo): array {
         return $this->cropFace($file, $photo, 1.8);
     }
 
-    public function getPreviewQuality(): int
-    {
+    public function getPreviewQuality(): int {
         return 2048;
     }
 
-    public function getCoverObjId(array $photo): int
-    {
-        return (int) $photo['faceid'];
+    public function getCoverObjId(array $photo): int {
+        return (int)$photo['faceid'];
     }
 
-    public function getClusterIdFrom(array $photo): int
-    {
-        return (int) $photo['cluster_id'];
+    public function getClusterIdFrom(array $photo): int {
+        return (int)$photo['cluster_id'];
     }
 
-    private function model(): int
-    {
-        return (int) $this->appConfig->getValueString('facerecognition', 'model', (string) -1);
+    private function model(): int {
+        return (int)$this->appConfig->getValueString('facerecognition', 'model', (string)-1);
     }
 
-    private function minFaceInClusters(): int
-    {
-        return (int) $this->appConfig->getValueString('facerecognition', 'min_faces_in_cluster', (string) 5);
+    private function minFaceInClusters(): int {
+        return (int)$this->appConfig->getValueString('facerecognition', 'min_faces_in_cluster', (string)5);
     }
 
-    private function getFaceRecognitionClusters(int $fileid = 0): array
-    {
+    private function getFaceRecognitionClusters(int $fileid = 0): array {
         $query = $this->tq->getBuilder();
 
         // SELECT all face clusters
@@ -308,8 +292,7 @@ class FaceRecognitionBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
-    private function getFaceRecognitionPersons(int $fileid = 0): array
-    {
+    private function getFaceRecognitionPersons(int $fileid = 0): array {
         $query = $this->tq->getBuilder();
 
         // SELECT all face clusters

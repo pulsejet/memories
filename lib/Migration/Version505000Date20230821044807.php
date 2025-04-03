@@ -32,20 +32,20 @@ use OCP\Migration\SimpleMigrationStep;
 /**
  * Auto-generated migration step: Please modify to your needs!
  */
-class Version505000Date20230821044807 extends SimpleMigrationStep
-{
-    public function __construct(private IDBConnection $dbc) {}
+class Version505000Date20230821044807 extends SimpleMigrationStep {
+    public function __construct(private IDBConnection $dbc) {
+    }
 
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
+    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {
+    }
 
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
-    {
+    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
@@ -63,8 +63,7 @@ class Version505000Date20230821044807 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
-    {
+    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {
         // extracts the epoch value from the EXIF json and stores it in the epoch column
         try {
             // get count of rows to update
@@ -75,7 +74,7 @@ class Version505000Date20230821044807 extends SimpleMigrationStep
                 ->executeQuery()
                 ->fetchOne()
             ;
-            $output->startProgress((int) $maxCount);
+            $output->startProgress((int)$maxCount);
 
             // get the required records
             $result = $this->dbc->getQueryBuilder()
@@ -101,12 +100,12 @@ class Version505000Date20230821044807 extends SimpleMigrationStep
                     }
 
                     // get epoch from exif if available
-                    if ($epoch = (int) $exif['DateTimeEpoch']) {
+                    if ($epoch = (int)$exif['DateTimeEpoch']) {
                         // update the epoch column
                         $query = $this->dbc->getQueryBuilder();
                         $query->update('memories')
                             ->set('epoch', $query->createNamedParameter($epoch))
-                            ->where($query->expr()->eq('id', $query->createNamedParameter((int) $row['id'], \PDO::PARAM_INT)))
+                            ->where($query->expr()->eq('id', $query->createNamedParameter((int)$row['id'], \PDO::PARAM_INT)))
                             ->executeStatement()
                         ;
 
@@ -120,7 +119,7 @@ class Version505000Date20230821044807 extends SimpleMigrationStep
                 }
 
                 // commit every 50 rows
-                if (0 === $count % 50) {
+                if ($count % 50 === 0) {
                     $this->dbc->commit();
                     $this->dbc->beginTransaction();
                 }
@@ -132,7 +131,7 @@ class Version505000Date20230821044807 extends SimpleMigrationStep
             // close the cursor
             $result->closeCursor();
         } catch (\Exception $e) {
-            $output->warning('Automatic migration failed: '.$e->getMessage());
+            $output->warning('Automatic migration failed: ' . $e->getMessage());
             $output->warning('Please run occ memories:index -f');
         }
     }

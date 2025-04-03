@@ -25,8 +25,7 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCP\Files\SimpleFS\ISimpleFile;
 
-trait PeopleBackendUtils
-{
+trait PeopleBackendUtils {
     /**
      * Sort a list of faces by the score.
      *
@@ -41,22 +40,21 @@ trait PeopleBackendUtils
      *
      * A score is calculated for each face, and the list is sorted by that score.
      */
-    private function sortByScores(array &$list): void
-    {
+    private function sortByScores(array &$list): void {
         // Score the face detections
         foreach ($list as &$p) {
             // Make sure we have integers
-            $p['fileid'] = (int) $p['fileid'];
+            $p['fileid'] = (int)$p['fileid'];
 
             // Get actual pixel size of face
-            $iw = min((int) ($p['image_width'] ?: 512), 2048);
-            $ih = min((int) ($p['image_height'] ?: 512), 2048);
-            $w = (float) $p['width'];
-            $h = (float) $p['height'];
+            $iw = min((int)($p['image_width'] ?: 512), 2048);
+            $ih = min((int)($p['image_height'] ?: 512), 2048);
+            $w = (float)$p['width'];
+            $h = (float)$p['height'];
 
             // Get center of face
-            $x = (float) $p['x'] + (float) $p['width'] / 2;
-            $y = (float) $p['y'] + (float) $p['height'] / 2;
+            $x = (float)$p['x'] + (float)$p['width'] / 2;
+            $y = (float)$p['y'] + (float)$p['height'] / 2;
 
             // 3D normal distribution - if the face is closer to the center, it's better
             $positionScore = exp(-($x - 0.5) ** 2 * 4) * exp(-($y - 0.5) ** 2 * 4);
@@ -85,9 +83,9 @@ trait PeopleBackendUtils
      * - width: width of the face in the image (percentage)
      * - height: height of the face in the image (percentage)
      *
-     * @param ISimpleFile $file    Actual file containing the image
-     * @param array       $photo   The face object
-     * @param float       $padding The padding to add around the face
+     * @param ISimpleFile $file Actual file containing the image
+     * @param array $photo The face object
+     * @param float $padding The padding to add around the face
      *
      * @return string[] [Blob, mimetype] of resulting image
      *
@@ -95,8 +93,7 @@ trait PeopleBackendUtils
      *
      * @psalm-return list{string, string}
      */
-    private function cropFace(ISimpleFile $file, array $photo, float $padding): array
-    {
+    private function cropFace(ISimpleFile $file, array $photo, float $padding): array {
         $img = new \OCP\Image();
         $img->loadFromData($file->getContent());
 
@@ -108,18 +105,18 @@ trait PeopleBackendUtils
         }
 
         // Get target dimensions
-        $dw = (float) $photo['width'];
-        $dh = (float) $photo['height'];
-        $dcx = (float) $photo['x'] + (float) $photo['width'] / 2;
-        $dcy = (float) $photo['y'] + (float) $photo['height'] / 2;
+        $dw = (float)$photo['width'];
+        $dh = (float)$photo['height'];
+        $dcx = (float)$photo['x'] + (float)$photo['width'] / 2;
+        $dcy = (float)$photo['y'] + (float)$photo['height'] / 2;
         $faceDim = max($dw * $iw, $dh * $ih) * $padding;
 
         // Crop image
         $img->crop(
-            (int) ($dcx * $iw - $faceDim / 2),
-            (int) ($dcy * $ih - $faceDim / 2),
-            (int) $faceDim,
-            (int) $faceDim,
+            (int)($dcx * $iw - $faceDim / 2),
+            (int)($dcy * $ih - $faceDim / 2),
+            (int)$faceDim,
+            (int)$faceDim,
         );
 
         // Max 512x512

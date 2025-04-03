@@ -43,8 +43,7 @@ use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Share\IShare;
 
-class FsManager
-{
+class FsManager {
     private ICache $nomediaCache;
 
     public function __construct(
@@ -61,16 +60,15 @@ class FsManager
     /**
      * Populate TimelineRoot object relevant to the request.
      *
-     * @param TimelineRoot $root      Root object to populate (by reference)
-     * @param bool         $recursive Whether to get the folders recursively
+     * @param TimelineRoot $root Root object to populate (by reference)
+     * @param bool $recursive Whether to get the folders recursively
      */
-    public function populateRoot(TimelineRoot &$root, bool $recursive = true): TimelineRoot
-    {
+    public function populateRoot(TimelineRoot &$root, bool $recursive = true): TimelineRoot {
         $user = $this->userSession->getUser();
 
         // Albums have no folder
         if ($this->hasAlbumToken() && Util::albumsIsEnabled()) {
-            if (null !== $user) {
+            if ($user !== null) {
                 return $root;
             }
             if (($token = $this->getShareToken()) && $this->albumsQuery->getAlbumByLink($token)) {
@@ -87,7 +85,7 @@ class FsManager
             // Folder inside shared folder
             if ($path = $this->getRequestFolder()) {
                 $sanitized = Util::sanitizePath($path);
-                if (null === $sanitized) {
+                if ($sanitized === null) {
                     throw new \Exception("Invalid parameter path: {$path}");
                 }
 
@@ -106,7 +104,7 @@ class FsManager
         }
 
         // Anything else needs a user
-        if (null === $user) {
+        if ($user === null) {
             throw Exceptions::NotLoggedIn();
         }
 
@@ -168,12 +166,11 @@ class FsManager
      * Get list of folders with .nomedia file.
      *
      * @param Folder $root root folder
-     * @param string $key  cache key
+     * @param string $key cache key
      *
      * @return string[] List of paths
      */
-    public function getNoMediaFolders(Folder $root, string $key): array
-    {
+    public function getNoMediaFolders(Folder $root, string $key): array {
         if (null !== ($paths = $this->nomediaCache->get($key))) {
             return $paths;
         }
@@ -195,10 +192,9 @@ class FsManager
      *
      * @throws \OCA\Memories\HttpResponseException
      */
-    public function getUserFile(int $fileId): File
-    {
+    public function getUserFile(int $fileId): File {
         $file = $this->getUserFileOrNull($fileId);
-        if (null === $file) {
+        if ($file === null) {
             throw Exceptions::NotFoundFile($fileId);
         }
 
@@ -208,8 +204,7 @@ class FsManager
     /**
      * Get a file with ID for the current user.
      */
-    public function getUserFileOrNull(int $fileId): ?File
-    {
+    public function getUserFileOrNull(int $fileId): ?File {
         // Don't check self for share token
         if ($this->getShareToken()) {
             return $this->getShareFile($fileId);
@@ -223,10 +218,9 @@ class FsManager
     /**
      * Get a file with ID from user's folder.
      */
-    public function getUserFolderFile(int $id): ?File
-    {
+    public function getUserFolderFile(int $id): ?File {
         $user = $this->userSession->getUser();
-        if (null === $user) {
+        if ($user === null) {
             return null;
         }
         $userFolder = $this->rootFolder->getUserFolder($user->getUID());
@@ -242,10 +236,9 @@ class FsManager
      *
      * @param int $id FileID
      */
-    public function getAlbumFile(int $id): ?File
-    {
+    public function getAlbumFile(int $id): ?File {
         $user = $this->userSession->getUser();
-        if (null === $user) {
+        if ($user === null) {
             return null;
         }
         $uid = $user->getUID();
@@ -268,17 +261,16 @@ class FsManager
      *
      * @param int $id FileID
      */
-    public function getShareFile(int $id): ?File
-    {
+    public function getShareFile(int $id): ?File {
         try {
             // Album share
             if ($this->hasAlbumToken() && ($token = $this->getShareToken())) {
                 $album = $this->albumsQuery->getAlbumByLink($token);
-                if (null === $album) {
+                if ($album === null) {
                     return null;
                 }
 
-                $owner = $this->albumsQuery->hasFile((int) $album['album_id'], $id);
+                $owner = $this->albumsQuery->hasFile((int)$album['album_id'], $id);
                 if (!$owner) {
                     return null;
                 }
@@ -308,11 +300,10 @@ class FsManager
         return null;
     }
 
-    public function getShareObject(): ?IShare
-    {
+    public function getShareObject(): ?IShare {
         // Get token from request
         $token = $this->getShareToken();
-        if (null === $token) {
+        if ($token === null) {
             return null;
         }
 
@@ -341,10 +332,9 @@ class FsManager
     /**
      * Get the share node from the request.
      */
-    public function getShareNode(): ?Node
-    {
+    public function getShareNode(): ?Node {
         $share = $this->getShareObject();
-        if (null === $share) {
+        if ($share === null) {
             return null;
         }
 
@@ -363,9 +353,8 @@ class FsManager
     /**
      * Validate the permissions of the share.
      */
-    public static function validateShare(?IShare $share): bool
-    {
-        if (null === $share) {
+    public static function validateShare(?IShare $share): bool {
+        if ($share === null) {
             return false;
         }
 
@@ -379,13 +368,13 @@ class FsManager
 
         // If the owner is disabled no access to the linke is granted
         $owner = $userManager->get($share->getShareOwner());
-        if (null === $owner || !$owner->isEnabled()) {
+        if ($owner === null || !$owner->isEnabled()) {
             return false;
         }
 
         // If the initiator of the share is disabled no access is granted
         $initiator = $userManager->get($share->getSharedBy());
-        if (null === $initiator || !$initiator->isEnabled()) {
+        if ($initiator === null || !$initiator->isEnabled()) {
             return false;
         }
 
@@ -397,8 +386,7 @@ class FsManager
      *
      * @param Node $node Node to check
      */
-    public function canDownload(Node $node): bool
-    {
+    public function canDownload(Node $node): bool {
         // Check if the file is readable
         if (!$node->isReadable()) {
             return false;
@@ -416,7 +404,7 @@ class FsManager
                 $attributes = $storage->getShare()->getAttributes();
 
                 // Check if download is disabled
-                if (false === $attributes?->getAttribute('permissions', 'download')) {
+                if ($attributes?->getAttribute('permissions', 'download') === false) {
                     return false;
                 }
             }
@@ -431,14 +419,13 @@ class FsManager
      * Helper to get one file or null from a fiolder.
      *
      * @param Folder $folder Folder to search in
-     * @param int    $id     Id of the file
-     * @param int    $perm   Permissions to force on the file
+     * @param int $id Id of the file
+     * @param int $perm Permissions to force on the file
      */
-    private function getOneFileFromFolder(Folder $folder, int $id, int $perm = -1): ?File
-    {
+    private function getOneFileFromFolder(Folder $folder, int $id, int $perm = -1): ?File {
         // Check for permissions and get numeric Id
         $file = $folder->getById($id);
-        if (0 === \count($file)) {
+        if (\count($file) === 0) {
             return null;
         }
         $file = $file[0];
@@ -462,18 +449,15 @@ class FsManager
         return $file;
     }
 
-    private function hasAlbumToken(): bool
-    {
-        return null !== $this->request->getParam(ClustersBackend\AlbumsBackend::clusterType(), null);
+    private function hasAlbumToken(): bool {
+        return $this->request->getParam(ClustersBackend\AlbumsBackend::clusterType(), null) !== null;
     }
 
-    private function getShareToken(): ?string
-    {
+    private function getShareToken(): ?string {
         return $this->request->getParam('token', null);
     }
 
-    private function getRequestFolder(): ?string
-    {
+    private function getRequestFolder(): ?string {
         return $this->request->getParam('folder', null);
     }
 }

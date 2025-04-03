@@ -13,15 +13,13 @@ use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\Files\FileInfo;
 use OCP\Files\Folder;
 
-class FoldersController extends GenericApiController
-{
+class FoldersController extends GenericApiController {
     #[NoAdminRequired]
     #[PublicPage]
-    public function sub(string $folder): Http\Response
-    {
+    public function sub(string $folder): Http\Response {
         return Util::guardEx(function () use ($folder) {
             $folder = Util::sanitizePath($folder);
-            if (null === $folder) {
+            if ($folder === null) {
                 throw Exceptions::BadRequest('Invalid parameter folder');
             }
 

@@ -31,22 +31,20 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\Folder;
 use OCP\Lock\ILockingProvider;
 
-class ArchiveController extends GenericApiController
-{
+class ArchiveController extends GenericApiController {
     /**
      * Move one file to the archive folder.
      *
      * @param string $id File ID to archive / unarchive
      */
     #[NoAdminRequired]
-    public function archive(string $id): Http\Response
-    {
+    public function archive(string $id): Http\Response {
         return Util::guardEx(function () use ($id) {
             $userFolder = Util::getUserFolder();
 
             // Check for permissions and get numeric Id
-            $file = $userFolder->getById((int) $id);
-            if (0 === \count($file)) {
+            $file = $userFolder->getById((int)$id);
+            if (\count($file) === 0) {
                 throw Exceptions::NotFound("file id {$id}");
             }
             $file = $file[0];
@@ -76,7 +74,7 @@ class ArchiveController extends GenericApiController
             $depth = 0;
             while (true) {
                 /** @psalm-suppress DocblockTypeContradiction */
-                if (null === $parent) {
+                if ($parent === null) {
                     throw new \Exception('Cannot get correct parent of file');
                 }
 
@@ -100,7 +98,7 @@ class ArchiveController extends GenericApiController
                 }
 
                 // Hit an archive folder root
-                if (Util::ARCHIVE_FOLDER === $parent->getName()) {
+                if ($parent->getName() === Util::ARCHIVE_FOLDER) {
                     $isArchived = true;
 
                     break;
@@ -122,7 +120,7 @@ class ArchiveController extends GenericApiController
 
             // Check if we want to archive or unarchive
             $body = $this->request->getParams();
-            $unarchive = isset($body['archive']) && false === $body['archive'];
+            $unarchive = isset($body['archive']) && $body['archive'] === false;
             if ($isArchived && !$unarchive) {
                 throw Exceptions::BadRequest('File already archived');
             }
@@ -140,8 +138,8 @@ class ArchiveController extends GenericApiController
                 $parent = $parent->getParent();
             } else {
                 // file not in archive, put it in there
-                $destinationPath = Util::sanitizePath(Util::ARCHIVE_FOLDER.$relativeFilePath);
-                if (null === $destinationPath) {
+                $destinationPath = Util::sanitizePath(Util::ARCHIVE_FOLDER . $relativeFilePath);
+                if ($destinationPath === null) {
                     throw Exceptions::BadRequest('Invalid archive destination path');
                 }
             }
@@ -157,7 +155,7 @@ class ArchiveController extends GenericApiController
             }
 
             // Move file to archive folder
-            $file->move($folder->getPath().'/'.$file->getName());
+            $file->move($folder->getPath() . '/' . $file->getName());
 
             return new JSONResponse([], Http::STATUS_OK);
         });
@@ -167,15 +165,14 @@ class ArchiveController extends GenericApiController
      * Get or create a folder in the given parent folder.
      *
      * @param Folder $parent Parent folder
-     * @param string $name   Folder name
-     * @param int    $tries  Number of tries to create the folder
+     * @param string $name Folder name
+     * @param int $tries Number of tries to create the folder
      *
      * @throws \OCA\Memories\HttpResponseException
      */
-    private function getOrCreateFolder(Folder $parent, string $name, int $tries = 3): Folder
-    {
+    private function getOrCreateFolder(Folder $parent, string $name, int $tries = 3): Folder {
         // Path of the folder we want to create (for error messages)
-        $finalPath = $parent->getPath().'/'.$name;
+        $finalPath = $parent->getPath() . '/' . $name;
 
         // Attempt to create the folder
         if (!$parent->nodeExists($name)) {

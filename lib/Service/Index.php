@@ -43,8 +43,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\ConsoleSectionOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Index
-{
+class Index {
     public ?OutputInterface $output = null;
     public ?ConsoleSectionOutput $section = null;
     public bool $verbose = false;
@@ -67,20 +66,20 @@ class Index
         protected ITempManager $tempManager,
         protected LoggerInterface $logger,
         protected IAppManager $appManager,
-    ) {}
+    ) {
+    }
 
     /**
      * Index all files for a user.
      */
-    public function indexUser(IUser $user, ?string $folder = null): void
-    {
+    public function indexUser(IUser $user, ?string $folder = null): void {
         if (!$this->appManager->isEnabledForUser('memories', $user)) {
             return;
         }
 
         $uid = $user->getUID();
 
-        $this->log("<info>Indexing user {$uid}</info>".PHP_EOL, true);
+        $this->log("<info>Indexing user {$uid}</info>" . PHP_EOL, true);
 
         \OC_Util::tearDownFS();
         \OC_Util::setupFS($uid);
@@ -90,13 +89,13 @@ class Index
 
         // Get paths of folders to index
         $mode = SystemConfig::get('memories.index.mode');
-        if (null !== $folder) {
+        if ($folder !== null) {
             $paths = [$folder];
-        } elseif ('1' === $mode || '0' === $mode) { // everything (or nothing)
+        } elseif ($mode === '1' || $mode === '0') { // everything (or nothing)
             $paths = ['/'];
-        } elseif ('2' === $mode) { // timeline
+        } elseif ($mode === '2') { // timeline
             $paths = Util::getTimelinePaths($uid);
-        } elseif ('3' === $mode) { // custom
+        } elseif ($mode === '3') { // custom
             $paths = [SystemConfig::get('memories.index.path')];
         } else {
             throw new \Exception('Invalid index mode');
@@ -112,7 +111,7 @@ class Index
             } catch (\Exception $e) {
                 // Only log this if we're on the CLI, do not put an error in the logs
                 // https://github.com/pulsejet/memories/issues/1091
-                $this->log("<error>The specified folder {$path} does not exist for {$uid}</error>".PHP_EOL);
+                $this->log("<error>The specified folder {$path} does not exist for {$uid}</error>" . PHP_EOL);
 
                 continue;
             }
@@ -126,21 +125,20 @@ class Index
      *
      * @param Folder $folder folder to index
      */
-    public function indexFolder(Folder $folder): void
-    {
+    public function indexFolder(Folder $folder): void {
         $path = $folder->getPath();
         $this->log("Indexing folder {$path}", true);
 
         // Check if path is blacklisted
-        if (!$this->isPathAllowed($path.'/')) {
-            $this->log("Skipping folder {$path} (path excluded)".PHP_EOL, true);
+        if (!$this->isPathAllowed($path . '/')) {
+            $this->log("Skipping folder {$path} (path excluded)" . PHP_EOL, true);
 
             return;
         }
 
         // Check if folder contains exclusion file
         if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.nomemories')) {
-            $this->log("Skipping folder {$path} (.nomedia / .nomemories)".PHP_EOL, true);
+            $this->log("Skipping folder {$path} (.nomedia / .nomemories)" . PHP_EOL, true);
 
             return;
         }
@@ -224,8 +222,7 @@ class Index
     /**
      * Index a single file.
      */
-    public function indexFile(File $file): void
-    {
+    public function indexFile(File $file): void {
         $path = $file->getPath();
 
         try {
@@ -244,8 +241,7 @@ class Index
     /**
      * Cleanup all stale entries (passthrough to timeline write).
      */
-    public function cleanupStale(): void
-    {
+    public function cleanupStale(): void {
         $this->log('<info>Cleaning up stale index entries</info>');
         $this->tw->cleanupStale();
     }
@@ -253,21 +249,19 @@ class Index
     /**
      * Get total number of files that are indexed.
      */
-    public function getIndexedCount(): int
-    {
+    public function getIndexedCount(): int {
         $query = $this->db->getQueryBuilder();
         $query->select($query->func()->count(SQL::distinct($query, 'fileid')))
             ->from('memories')
         ;
 
-        return (int) $query->executeQuery()->fetchOne();
+        return (int)$query->executeQuery()->fetchOne();
     }
 
     /**
      * Get list of MIME types to process.
      */
-    public static function getMimeList(): array
-    {
+    public static function getMimeList(): array {
         return self::$mimeList ??= array_merge(
             self::getPreviewMimes(Application::IMAGE_MIMES),
             Application::VIDEO_MIMES,
@@ -277,8 +271,7 @@ class Index
     /**
      * Get list of MIME types that have a preview.
      */
-    public static function getPreviewMimes(array $source): array
-    {
+    public static function getPreviewMimes(array $source): array {
         $preview = \OC::$server->get(IPreview::class);
 
         return array_filter($source, static fn ($m) => $preview->isMimeSupported($m));
@@ -287,8 +280,7 @@ class Index
     /**
      * Get list of all supported MIME types.
      */
-    public static function getAllMimes(): array
-    {
+    public static function getAllMimes(): array {
         return array_merge(
             Application::IMAGE_MIMES,
             Application::VIDEO_MIMES,
@@ -300,8 +292,7 @@ class Index
      *
      * @param Node $file file to check
      */
-    public static function isSupported(Node $file): bool
-    {
+    public static function isSupported(Node $file): bool {
         return \in_array($file->getMimeType(), self::getMimeList(), true);
     }
 
@@ -310,16 +301,14 @@ class Index
      *
      * @param Node $file file to check
      */
-    public static function isVideo(Node $file): bool
-    {
+    public static function isVideo(Node $file): bool {
         return \in_array($file->getMimeType(), Application::VIDEO_MIMES, true);
     }
 
     /**
      * Checks if the specified node's path is allowed to be indexed.
      */
-    public static function isPathAllowed(string $path): bool
-    {
+    public static function isPathAllowed(string $path): bool {
         // Always exclude some predefined patterns
         //   .trashed-<file> (https://github.com/nextcloud/android/issues/10645)
         if (preg_match('/\/.trashed-[^\/]*$/', $path)) {
@@ -329,7 +318,7 @@ class Index
         /** @var ?string $pattern */
         static $pattern = null;
 
-        if (null === $pattern) {
+        if ($pattern === null) {
             $pattern = trim(SystemConfig::get('memories.index.path.blacklist') ?: '');
             if (!empty($pattern) && !\is_int(preg_match("/{$pattern}/", ''))) {
                 throw new \Exception('Invalid regex pattern in memories.index.path.blacklist');
@@ -342,17 +331,15 @@ class Index
     /**
      * Log error to console if CLI or logger.
      */
-    private function error(string $message): void
-    {
+    private function error(string $message): void {
         $this->logger->error($message, ['app' => 'memories']);
-        $this->output?->writeln("<error>{$message}</error>".PHP_EOL);
+        $this->output?->writeln("<error>{$message}</error>" . PHP_EOL);
     }
 
     /**
      * Log to console if CLI.
      */
-    private function log(string $message, bool $overwrite = false): void
-    {
+    private function log(string $message, bool $overwrite = false): void {
         if ($this->section) {
             if ($overwrite && !$this->verbose) {
                 $this->section->clear(1);
@@ -364,9 +351,8 @@ class Index
     /**
      * Ensure that the process should go on.
      */
-    private function ensureContinueOk(): void
-    {
-        if (null !== $this->continueCheck && !($this->continueCheck)()) {
+    private function ensureContinueOk(): void {
+        if ($this->continueCheck !== null && !($this->continueCheck)()) {
             throw new ProcessClosedException();
         }
     }

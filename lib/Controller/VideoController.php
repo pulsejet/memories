@@ -37,16 +37,14 @@ use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\File;
 
-class VideoController extends GenericApiController
-{
+class VideoController extends GenericApiController {
     /**
      * Transcode a video to HLS by proxy.
      */
     #[NoAdminRequired]
     #[PublicPage]
     #[NoCSRFRequired]
-    public function transcode(string $client, int $fileid, string $profile): Http\Response
-    {
+    public function transcode(string $client, int $fileid, string $profile): Http\Response {
         return Util::guardEx(function () use ($client, $fileid, $profile) {
             // Make sure transcoding is enabled
             if (SystemConfig::get('memories.vod.disable')) {
@@ -82,22 +80,22 @@ class VideoController extends GenericApiController
             return Util::guardExDirect(function (Http\IOutput $out) use ($client, $path, $profile) {
                 try {
                     $status = $this->getUpstream($client, $path, $profile);
-                    if (409 === $status || -1 === $status) {
+                    if ($status === 409 || $status === -1) {
                         // Just a conflict (transcoding process changed)
                         $response = new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
 
                         throw new HttpResponseException($response);
                     }
-                    if (200 !== $status) {
+                    if ($status !== 200) {
                         throw new \Exception("Transcoder returned {$status}");
                     }
                 } catch (\Exception $e) {
-                    if ($e instanceof HttpResponseException && Http::STATUS_CONFLICT === $e->response->getStatus()) {
+                    if ($e instanceof HttpResponseException && $e->response->getStatus() === Http::STATUS_CONFLICT) {
                         throw $e; // Logging this is noise
                     }
 
                     // We cannot show this error in the user interface, so log it
-                    $this->logger->error('Transcode failed: '.$e->getMessage(), ['app' => 'memories']);
+                    $this->logger->error('Transcode failed: ' . $e->getMessage(), ['app' => 'memories']);
 
                     throw $e;
                 }
@@ -137,11 +135,11 @@ class VideoController extends GenericApiController
                 $path = $file->getStorage()->getLocalFile($file->getInternalPath())
                     ?: throw Exceptions::BadRequest('[Video] File path missing (self__*)');
                 $mime = 'video/mp4';
-                $name = $file->getName().'.mp4';
+                $name = $file->getName() . '.mp4';
             }
 
             // Different manufacurers have different formats
-            if ('self__trailer' === $liveid) {
+            if ($liveid === 'self__trailer') {
                 try { // Get trailer
                     $blob = Exif::getBinaryExifProp($path, '-trailer');
                 } catch (\Exception) {
@@ -162,7 +160,7 @@ class VideoController extends GenericApiController
                 }
             } elseif (str_starts_with($liveid, 'self__traileroffset=')) {
                 // Remove prefix
-                $offset = (int) substr($liveid, \strlen('self__traileroffset='));
+                $offset = (int)substr($liveid, \strlen('self__traileroffset='));
                 if ($offset <= 0) {
                     throw Exceptions::BadRequest('Invalid offset');
                 }
@@ -171,12 +169,12 @@ class VideoController extends GenericApiController
                 $blob = file_get_contents($path, false, null, $offset);
             } else {
                 $liveFile = $this->getClosestLiveVideo($file);
-                if (null === $liveFile) {
+                if ($liveFile === null) {
                     throw Exceptions::NotFound('live video file');
                 }
 
                 // Requested only JSON info
-                if ('json' === $format) {
+                if ($format === 'json') {
                     // IPhoto object for the live video
                     return new JSONResponse([
                         'fileid' => $liveFile->getId(),
@@ -198,7 +196,7 @@ class VideoController extends GenericApiController
             }
 
             // Cannot return JSON if it is not a file
-            if ('json' === $format) {
+            if ($format === 'json') {
                 throw Exceptions::BadRequest('Invalid format');
             }
 
@@ -229,13 +227,12 @@ class VideoController extends GenericApiController
         });
     }
 
-    private function getUpstream(string $client, string $path, string $profile): int
-    {
+    private function getUpstream(string $client, string $path, string $profile): int {
         $returnCode = $this->getUpstreamInternal($client, $path, $profile);
 
         // If status code was 0, it's likely the server is down
         // Make one attempt to start after killing whatever is there
-        if (0 !== $returnCode && 503 !== $returnCode) {
+        if ($returnCode !== 0 && $returnCode !== 503) {
             return $returnCode;
         }
 
@@ -243,15 +240,14 @@ class VideoController extends GenericApiController
         $logFile = BinExt::startGoVod();
 
         $returnCode = $this->getUpstreamInternal($client, $path, $profile);
-        if (0 === $returnCode) {
+        if ($returnCode === 0) {
             throw new \Exception("Transcoder could not be started, check {$logFile}");
         }
 
         return $returnCode;
     }
 
-    private function getUpstreamInternal(string $client, string $path, string $profile): int
-    {
+    private function getUpstreamInternal(string $client, string $path, string $profile): int {
         // Make sure query params are repeated
         // For example, in folder sharing, we need the params on every request
         $url = BinExt::getGoVodUrl($client, $path, $profile);
@@ -266,7 +262,7 @@ class VideoController extends GenericApiController
         curl_setopt($ch, CURLOPT_HEADER, 0);
 
         // Add header for expected go-vod version
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['X-Go-Vod-Version: '.BinExt::GOVOD_VER]);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['X-Go-Vod-Version: ' . BinExt::GOVOD_VER]);
 
         // Catch connection abort here
         ignore_user_abort(true);
@@ -280,7 +276,7 @@ class VideoController extends GenericApiController
             $headerswritten = true;
 
             // Pass ahead response code
-            http_response_code((int) curl_getinfo($curl, CURLINFO_HTTP_CODE));
+            http_response_code((int)curl_getinfo($curl, CURLINFO_HTTP_CODE));
 
             // Pass ahead content type
             $contentType = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
@@ -304,9 +300,9 @@ class VideoController extends GenericApiController
         if (!$isSafari) {
             // Stream the response to the browser without reading it into memory
             curl_setopt($ch, CURLOPT_WRITEFUNCTION, static function (\CurlHandle $curl, string $data) use (&$sendheaders) {
-                $code = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+                $code = (int)curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-                if (200 === $code) {
+                if ($code === 200) {
                     // Write headers if not done yet
                     $sendheaders($curl);
 
@@ -330,11 +326,11 @@ class VideoController extends GenericApiController
         // Send the entire response if Safari
         if ($isSafari && \is_string($response)) {
             $sendheaders($ch);
-            header('Content-Length: '.\strlen($response)); // critical
+            header('Content-Length: ' . \strlen($response)); // critical
             echo $response;
         }
 
-        $returnCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $returnCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         return $returnCode;
@@ -345,8 +341,7 @@ class VideoController extends GenericApiController
      *
      * @return mixed The response from upstream
      */
-    private static function postFile(string $client, string $blob): mixed
-    {
+    private static function postFile(string $client, string $blob): mixed {
         try {
             return self::postFileInternal($client, $blob);
         } catch (\Exception $e) {
@@ -358,8 +353,7 @@ class VideoController extends GenericApiController
         }
     }
 
-    private static function postFileInternal(string $client, string $blob): mixed
-    {
+    private static function postFileInternal(string $client, string $blob): mixed {
         $url = BinExt::getGoVodUrl($client, '/create', 'ignore');
 
         $ch = curl_init($url);
@@ -370,26 +364,25 @@ class VideoController extends GenericApiController
         curl_setopt($ch, CURLOPT_POSTFIELDS, $blob);
 
         $response = curl_exec($ch);
-        $returnCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $returnCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if (200 !== $returnCode) {
+        if ($returnCode !== 200) {
             throw new \Exception("Could not create temporary file ({$returnCode})");
         }
 
-        return json_decode((string) $response, true);
+        return json_decode((string)$response, true);
     }
 
     /**
      * Get the closest live video to the given file.
      */
-    private function getClosestLiveVideo(File $file): ?File
-    {
+    private function getClosestLiveVideo(File $file): ?File {
         // Get stored video file (Apple MOV)
         $liveRecords = $this->tq->getLivePhotos($file->getId());
 
         // Get file paths for all live photos
-        $liveFiles = array_map(fn ($r) => $this->rootFolder->getById((int) $r['fileid']), $liveRecords);
+        $liveFiles = array_map(fn ($r) => $this->rootFolder->getById((int)$r['fileid']), $liveRecords);
         $liveFiles = array_filter($liveFiles, static fn ($files) => \count($files) > 0 && $files[0] instanceof File);
 
         /** @var File[] (checked above) */

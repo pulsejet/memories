@@ -6,8 +6,7 @@ namespace OCA\Memories\Db;
 
 use OCP\Files\FileInfo;
 
-class TimelineRoot
-{
+class TimelineRoot {
     /** @var array<int, \OCP\Files\FileInfo> */
     protected array $folders = [];
 
@@ -19,11 +18,10 @@ class TimelineRoot
      *
      * @throws \Exception if node is not valid readable folder
      */
-    public function addFolder(FileInfo $info): void
-    {
+    public function addFolder(FileInfo $info): void {
         $path = $info->getPath();
 
-        if (FileInfo::MIMETYPE_FOLDER !== $info->getMimetype()) {
+        if ($info->getMimetype() !== FileInfo::MIMETYPE_FOLDER) {
             throw new \Exception("Not a folder: {$path}");
         }
 
@@ -38,8 +36,7 @@ class TimelineRoot
     /**
      * Add mountpoints recursively.
      */
-    public function addMountPoints(): void
-    {
+    public function addMountPoints(): void {
         $manager = \OC\Files\Filesystem::getMountManager();
         foreach ($this->folderPaths as $id => $folderPath) {
             $mounts = $manager->findIn($folderPath);
@@ -63,14 +60,13 @@ class TimelineRoot
      *
      * @param string[] $paths The paths to exclude
      */
-    public function excludePaths(array $paths): void
-    {
+    public function excludePaths(array $paths): void {
         foreach ($paths as $path) {
             foreach ($this->folderPaths as $id => $folderPath) {
                 // dirname strips the trailing slash, so we can directly add a
                 // trailing slash to folderPath and path to prevent false matches.
                 // https://github.com/pulsejet/memories/issues/668
-                if (str_starts_with($folderPath.'/', $path.'/')) {
+                if (str_starts_with($folderPath . '/', $path . '/')) {
                     unset($this->folderPaths[$id], $this->folders[$id]);
                 }
             }
@@ -83,43 +79,37 @@ class TimelineRoot
      *
      * @param string $path The new base path
      */
-    public function baseChange(string $path): void
-    {
+    public function baseChange(string $path): void {
         foreach ($this->folderPaths as $id => $folderPath) {
-            if (!str_starts_with($folderPath.'/', $path.'/')) {
+            if (!str_starts_with($folderPath . '/', $path . '/')) {
                 unset($this->folderPaths[$id], $this->folders[$id]);
             }
         }
     }
 
     /** @return int[] */
-    public function getIds(): array
-    {
+    public function getIds(): array {
         return array_keys($this->folderPaths);
     }
 
-    public function getOneId(): ?int
-    {
+    public function getOneId(): ?int {
         return array_key_first($this->folders);
     }
 
-    public function getFolder(int $id): ?FileInfo
-    {
+    public function getFolder(int $id): ?FileInfo {
         return $this->folders[$id];
     }
 
-    public function isEmpty(): bool
-    {
+    public function isEmpty(): bool {
         return empty($this->folderPaths);
     }
 
-    private function setFolder(int $id, ?FileInfo $fileInfo, ?string $path): void
-    {
-        if (null !== $path) {
+    private function setFolder(int $id, ?FileInfo $fileInfo, ?string $path): void {
+        if ($path !== null) {
             $this->folderPaths[$id] = $path;
         }
 
-        if (null !== $fileInfo) {
+        if ($fileInfo !== null) {
             $this->folders[$id] = $fileInfo;
         }
     }

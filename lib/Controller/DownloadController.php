@@ -35,8 +35,7 @@ use OCP\ISession;
 use OCP\ITempManager;
 use OCP\Security\ISecureRandom;
 
-class DownloadController extends GenericApiController
-{
+class DownloadController extends GenericApiController {
     /**
      * Request to download one or more files.
      *
@@ -45,8 +44,7 @@ class DownloadController extends GenericApiController
     #[NoAdminRequired]
     #[PublicPage]
     #[UseSession]
-    public function request(array $files): Http\Response
-    {
+    public function request(array $files): Http\Response {
         return Util::guardEx(static function () use ($files) {
             $handle = self::createHandle('memories', $files);
 
@@ -59,11 +57,10 @@ class DownloadController extends GenericApiController
      *
      * The calling controller must have the UseSession annotation.
      *
-     * @param string $name  Name of zip file
-     * @param int[]  $files List of file IDs
+     * @param string $name Name of zip file
+     * @param int[] $files List of file IDs
      */
-    public static function createHandle(string $name, array $files): string
-    {
+    public static function createHandle(string $name, array $files): string {
         $handle = \OC::$server->get(ISecureRandom::class)->generate(16, ISecureRandom::CHAR_ALPHANUMERIC);
         \OC::$server->get(ISession::class)->set("memories_download_{$handle}", [$name, $files]);
 
@@ -76,8 +73,7 @@ class DownloadController extends GenericApiController
     #[NoAdminRequired]
     #[NoCSRFRequired]
     #[PublicPage]
-    public function file(string $handle): Http\Response
-    {
+    public function file(string $handle): Http\Response {
         return Util::guardEx(function () use ($handle) {
             // Get ids from request
             $session = \OC::$server->get(ISession::class);
@@ -85,27 +81,27 @@ class DownloadController extends GenericApiController
             $info = $session->get($key);
 
             // Remove handle from session unless HEAD request
-            if ('HEAD' !== $this->request->getMethod()) {
+            if ($this->request->getMethod() !== 'HEAD') {
                 $session->remove($key);
             }
 
-            if (null === $info) {
+            if ($info === null) {
                 throw Exceptions::NotFound('handle');
             }
 
-            $name = $info[0].'-'.date('YmdHis');
+            $name = $info[0] . '-' . date('YmdHis');
             $fileIds = $info[1];
 
             /** @var int[] $fileIds */
             $fileIds = array_filter(array_map('intval', $fileIds), static fn ($id) => $id > 0);
 
             // Check if we have any valid ids
-            if (0 === \count($fileIds)) {
+            if (\count($fileIds) === 0) {
                 throw Exceptions::NotFound('file IDs');
             }
 
             // Download single file
-            if (1 === \count($fileIds)) {
+            if (\count($fileIds) === 1) {
                 return $this->one($fileIds[0], false);
             }
 
@@ -117,8 +113,7 @@ class DownloadController extends GenericApiController
     #[NoAdminRequired]
     #[NoCSRFRequired]
     #[PublicPage]
-    public function one(int $fileid, bool $resumable = true): Http\Response
-    {
+    public function one(int $fileid, bool $resumable = true): Http\Response {
         return Util::guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable) {
             $file = $this->fs->getUserFile($fileid);
 
@@ -131,7 +126,7 @@ class DownloadController extends GenericApiController
             $range = $this->request->getHeader('Range');
             if (!empty($range)) {
                 [$sizeUnit, $rangeOrig] = Util::explode_exact('=', $range, 2);
-                if ('bytes' === $sizeUnit) {
+                if ($sizeUnit === 'bytes') {
                     // http://tools.ietf.org/id/draft-ietf-http-range-retrieval-00.txt
                     [$range, $extra] = Util::explode_exact(',', $rangeOrig, 2);
                 }
@@ -145,8 +140,8 @@ class DownloadController extends GenericApiController
             // Get file reading parameters
             $size = $file->getSize();
             [$seekStart, $seekEnd] = Util::explode_exact('-', $range, 2);
-            $seekEnd = (empty($seekEnd)) ? ($size - 1) : min(abs((int) $seekEnd), $size - 1);
-            $seekStart = (empty($seekStart) || $seekEnd < abs((int) $seekStart)) ? 0 : max(abs((int) $seekStart), 0);
+            $seekEnd = (empty($seekEnd)) ? ($size - 1) : min(abs((int)$seekEnd), $size - 1);
+            $seekStart = (empty($seekStart) || $seekEnd < abs((int)$seekStart)) ? 0 : max(abs((int)$seekStart), 0);
 
             // Only send partial content header if downloading a piece of the file
             if ($seekStart > 0 || $seekEnd < ($size - 1)) {
@@ -160,12 +155,12 @@ class DownloadController extends GenericApiController
             }
 
             // Set headers
-            $out->setHeader('Content-Length: '.($seekEnd - $seekStart + 1));
-            $out->setHeader('Content-Type: '.$file->getMimeType());
+            $out->setHeader('Content-Length: ' . ($seekEnd - $seekStart + 1));
+            $out->setHeader('Content-Type: ' . $file->getMimeType());
 
             // Make sure the browser downloads the file
             $filename = str_replace('"', '\"', $file->getName());
-            $out->setHeader('Content-Disposition: attachment; filename="'.$filename.'"');
+            $out->setHeader('Content-Disposition: attachment; filename="' . $filename . '"');
 
             // Prevent output from being buffered
             $out->setHeader('Content-Encoding: none');
@@ -173,13 +168,13 @@ class DownloadController extends GenericApiController
             $out->setHeader('X-Accel-Buffering: no');
 
             // Quit if HEAD request
-            if ('HEAD' === $this->request->getMethod()) {
+            if ($this->request->getMethod() === 'HEAD') {
                 return;
             }
 
             // Open file to send
             $res = $file->fopen('rb');
-            if (false === $res) {
+            if ($res === false) {
                 throw new \Exception('Failed to open file on disk');
             }
 
@@ -203,8 +198,8 @@ class DownloadController extends GenericApiController
 
             while (!feof($res) && $seekStart <= $seekEnd) {
                 $lenLeft = $seekEnd - $seekStart + 1;
-                $buffer = fread($res, (int) min(1024 * 1024, $lenLeft));
-                if (false === $buffer) {
+                $buffer = fread($res, (int)min(1024 * 1024, $lenLeft));
+                if ($buffer === false) {
                     break;
                 }
                 $seekStart += \strlen($buffer);
@@ -216,7 +211,7 @@ class DownloadController extends GenericApiController
                 // Flush output if chunk is large enough
                 if ($chunkRead > 1024 * 512) {
                     // Check if client disconnected
-                    if (CONNECTION_NORMAL !== connection_status() || connection_aborted()) {
+                    if (connection_status() !== CONNECTION_NORMAL || connection_aborted()) {
                         break;
                     }
 
@@ -237,11 +232,10 @@ class DownloadController extends GenericApiController
     /**
      * Download multiple files.
      *
-     * @param string $name    Name of zip file
-     * @param int[]  $fileIds
+     * @param string $name Name of zip file
+     * @param int[] $fileIds
      */
-    private function multiple(string $name, array $fileIds): Http\Response
-    {
+    private function multiple(string $name, array $fileIds): Http\Response {
         return Util::guardExDirect(function ($out) use ($name, $fileIds) {
             // Disable time limit
             @set_time_limit(0);
@@ -258,7 +252,7 @@ class DownloadController extends GenericApiController
             $streamer->sendHeaders($name);
 
             // Quit if HEAD request
-            if ('HEAD' === $this->request->getMethod()) {
+            if ($this->request->getMethod() === 'HEAD') {
                 return;
             }
 
@@ -282,7 +276,7 @@ class DownloadController extends GenericApiController
                 $file = null;
 
                 /** @var ?string */
-                $name = (string) $fileId;
+                $name = (string)$fileId;
 
                 try {
                     // This checks permissions
@@ -296,7 +290,7 @@ class DownloadController extends GenericApiController
 
                     // Open file
                     $handle = $file->fopen('rb');
-                    if (false === $handle) {
+                    if ($handle === false) {
                         throw new \Exception('Failed to open file');
                     }
 
@@ -306,10 +300,10 @@ class DownloadController extends GenericApiController
 
                         // add count before extension
                         $extpos = strrpos($name, '.');
-                        if (false === $extpos) {
+                        if ($extpos === false) {
                             $name .= " ({$nameCounts[$name]})";
                         } else {
-                            $name = substr($name, 0, $extpos)." ({$nameCounts[$name]})".substr($name, $extpos);
+                            $name = substr($name, 0, $extpos) . " ({$nameCounts[$name]})" . substr($name, $extpos);
                         }
                     } else {
                         $nameCounts[$name] = 0;
@@ -340,7 +334,7 @@ class DownloadController extends GenericApiController
                     // close the dummy file
                     fclose($dummy);
                 } finally {
-                    if (false !== $handle) {
+                    if ($handle !== false) {
                         fclose($handle);
                     }
 

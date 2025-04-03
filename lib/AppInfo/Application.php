@@ -41,8 +41,7 @@ use OCP\User\Events\UserLoggedOutEvent;
 
 const AUTH_HEADER = 'HTTP_AUTHORIZATION';
 
-class Application extends App implements IBootstrap
-{
+class Application extends App implements IBootstrap {
     public const APPNAME = 'memories';
 
     // Remember to update IMAGICK_SAFE if this is updated
@@ -73,13 +72,11 @@ class Application extends App implements IBootstrap
         // 'video/ogg',         // too rarely used for photos
     ];
 
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct(self::APPNAME);
     }
 
-    public function register(IRegistrationContext $context): void
-    {
+    public function register(IRegistrationContext $context): void {
         // Register file hooks
         $context->registerEventListener(NodeWrittenEvent::class, PostWriteListener::class);
         $context->registerEventListener(NodeTouchedEvent::class, PostWriteListener::class);
@@ -102,10 +99,10 @@ class Application extends App implements IBootstrap
         }
     }
 
-    public function boot(IBootContext $context): void {}
+    public function boot(IBootContext $context): void {
+    }
 
-    private function handleNativeHeaders(): void
-    {
+    private function handleNativeHeaders(): void {
         // Android webview sends an empty Authorization header which screws up DAV
         if (isset($_SERVER[AUTH_HEADER]) && empty($_SERVER[AUTH_HEADER])) {
             unset($_SERVER[AUTH_HEADER]);

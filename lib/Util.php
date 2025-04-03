@@ -16,8 +16,7 @@ use OCP\Files\Search\ISearchComparison;
 use OCP\IAppConfig;
 use OCP\IConfig;
 
-class Util
-{
+class Util {
     use UtilController;
 
     public const ARCHIVE_FOLDER = '.archive';
@@ -27,8 +26,7 @@ class Util
      *
      * @psalm-return 'aarch64'|'amd64'|null
      */
-    public static function getArch(): ?string
-    {
+    public static function getArch(): ?string {
         $uname = strtolower(php_uname('m') ?: 'unknown');
         if (str_contains($uname, 'aarch64') || str_contains($uname, 'arm64')) {
             return 'aarch64';
@@ -45,14 +43,13 @@ class Util
      *
      * @psalm-return 'glibc'|'musl'|null
      */
-    public static function getLibc(): ?string
-    {
+    public static function getLibc(): ?string {
         // glibc -> stdout, musl -> stderr
         $output = self::execSafe2(['ldd', '--version'], 3000, null, true, true);
 
         // check in either
         $ldd = strtolower($output[0] ?? '')
-            .strtolower($output[1] ?? '');
+            . strtolower($output[1] ?? '');
 
         if (str_contains($ldd, 'musl')) {
             return 'musl';
@@ -67,8 +64,7 @@ class Util
     /**
      * Check if albums are enabled for this user.
      */
-    public static function albumsIsEnabled(): bool
-    {
+    public static function albumsIsEnabled(): bool {
         $appManager = \OC::$server->get(IAppManager::class);
 
         if (!$appManager->isEnabledForUser('photos')) {
@@ -83,22 +79,20 @@ class Util
     /**
      * Check if tags is enabled for this user.
      */
-    public static function tagsIsEnabled(): bool
-    {
+    public static function tagsIsEnabled(): bool {
         return \OC::$server->get(IAppManager::class)->isEnabledForUser('systemtags');
     }
 
     /**
      * Check if recognize is enabled for this user.
      */
-    public static function recognizeIsEnabled(): bool
-    {
+    public static function recognizeIsEnabled(): bool {
         if (!self::recognizeIsInstalled()) {
             return false;
         }
 
         $appConfig = \OC::$server->get(IAppConfig::class);
-        if ('true' !== $appConfig->getValueString('recognize', 'faces.enabled', 'false')) {
+        if ($appConfig->getValueString('recognize', 'faces.enabled', 'false') !== 'true') {
             return false;
         }
 
@@ -108,8 +102,7 @@ class Util
     /**
      * Check if recognize is installed.
      */
-    public static function recognizeIsInstalled(): bool
-    {
+    public static function recognizeIsInstalled(): bool {
         $appManager = \OC::$server->get(IAppManager::class);
 
         if (!$appManager->isEnabledForUser('recognize')) {
@@ -124,15 +117,14 @@ class Util
     /**
      * Check if Face Recognition is enabled by the user.
      */
-    public static function facerecognitionIsEnabled(): bool
-    {
+    public static function facerecognitionIsEnabled(): bool {
         if (!self::facerecognitionIsInstalled()) {
             return false;
         }
 
         try {
-            return 'true' === \OC::$server->get(IConfig::class)
-                ->getUserValue(self::getUID(), 'facerecognition', 'enabled', 'false')
+            return \OC::$server->get(IConfig::class)
+                ->getUserValue(self::getUID(), 'facerecognition', 'enabled', 'false') === 'true'
             ;
         } catch (\Exception) {
             // not logged in
@@ -144,8 +136,7 @@ class Util
     /**
      * Check if Face Recognition is installed and enabled for this user.
      */
-    public static function facerecognitionIsInstalled(): bool
-    {
+    public static function facerecognitionIsInstalled(): bool {
         $appManager = \OC::$server->get(IAppManager::class);
 
         if (!$appManager->isEnabledForUser('facerecognition')) {
@@ -160,8 +151,7 @@ class Util
     /**
      * Check if preview generator is installed.
      */
-    public static function previewGeneratorIsEnabled(): bool
-    {
+    public static function previewGeneratorIsEnabled(): bool {
         return \OC::$server->get(IAppManager::class)->isEnabledForUser('previewgenerator');
     }
 
@@ -172,17 +162,16 @@ class Util
      *
      * @psalm-suppress PossiblyUnusedMethod
      */
-    public static function isLinkSharingEnabled(): bool
-    {
+    public static function isLinkSharingEnabled(): bool {
         $appConfig = \OC::$server->get(IAppConfig::class);
 
         // Check if the shareAPI is enabled
-        if ('yes' !== $appConfig->getValueString('core', 'shareapi_enabled', 'yes')) {
+        if ($appConfig->getValueString('core', 'shareapi_enabled', 'yes') !== 'yes') {
             return false;
         }
 
         // Check whether public sharing is enabled
-        if ('yes' !== $appConfig->getValueString('core', 'shareapi_allow_links', 'yes')) {
+        if ($appConfig->getValueString('core', 'shareapi_allow_links', 'yes') !== 'yes') {
             return false;
         }
 
@@ -192,11 +181,10 @@ class Util
     /**
      * Force permissions on a node.
      *
-     * @param Node $node        File to patch
-     * @param int  $permissions Permissions to set
+     * @param Node $node File to patch
+     * @param int $permissions Permissions to set
      */
-    public static function forcePermissions(Node &$node, int $permissions): void
-    {
+    public static function forcePermissions(Node &$node, int $permissions): void {
         /** @var \OC\Files\Node\Node $node */
         $fileInfo = $node->getFileInfo();
 
@@ -207,8 +195,7 @@ class Util
     /**
      * Convert permissions to string.
      */
-    public static function permissionsToStr(int $permissions): string
-    {
+    public static function permissionsToStr(int $permissions): string {
         $str = '';
         if ($permissions & \OCP\Constants::PERMISSION_CREATE) {
             $str .= 'C';
@@ -235,13 +222,12 @@ class Util
     /**
      * Add OG metadata to a page for a node.
      *
-     * @param Node   $node        Node to get metadata from
-     * @param string $title       Title of the page
-     * @param string $url         URL of the page
-     * @param array  $previewArgs Preview arguments (e.g. token)
+     * @param Node $node Node to get metadata from
+     * @param string $title Title of the page
+     * @param string $url URL of the page
+     * @param array $previewArgs Preview arguments (e.g. token)
      */
-    public static function addOgMetadata(Node $node, string $title, string $url, array $previewArgs): void
-    {
+    public static function addOgMetadata(Node $node, string $title, string $url, array $previewArgs): void {
         // Add title
         \OCP\Util::addHeader('meta', ['property' => 'og:title', 'content' => $title]);
 
@@ -279,15 +265,14 @@ class Util
     /**
      * Get a random image or video from a given folder.
      */
-    public static function getAnyMedia(\OCP\Files\Folder $folder): ?Node
-    {
+    public static function getAnyMedia(\OCP\Files\Folder $folder): ?Node {
         $query = new SearchQuery(new SearchBinaryOperator(ISearchBinaryOperator::OPERATOR_OR, [
             new SearchComparison(ISearchComparison::COMPARE_LIKE, 'mimetype', 'image/%'),
             new SearchComparison(ISearchComparison::COMPARE_LIKE, 'mimetype', 'video/%'),
         ]), 1, 0, [], null);
 
         $nodes = $folder->search($query);
-        if (0 === \count($nodes)) {
+        if (\count($nodes) === 0) {
             return null;
         }
 
@@ -298,12 +283,11 @@ class Util
      * Check if any encryption is enabled that we can not cope with
      * such as end-to-end encryption.
      */
-    public static function isEncryptionEnabled(): bool
-    {
+    public static function isEncryptionEnabled(): bool {
         $encryptionManager = \OC::$server->get(\OCP\Encryption\IManager::class);
         if ($encryptionManager->isEnabled()) {
             // Server-side encryption (OC_DEFAULT_MODULE) is okay, others like e2e are not
-            return 'OC_DEFAULT_MODULE' !== $encryptionManager->getDefaultEncryptionModuleId();
+            return $encryptionManager->getDefaultEncryptionModuleId() !== 'OC_DEFAULT_MODULE';
         }
 
         return false;
@@ -314,8 +298,7 @@ class Util
      *
      * @return string[] List of paths
      */
-    public static function getTimelinePaths(string $uid): array
-    {
+    public static function getTimelinePaths(string $uid): array {
         $paths = \OC::$server->get(IConfig::class)
             ->getUserValue($uid, Application::APPNAME, 'timelinePath', null)
                 ?: SystemConfig::get('memories.timeline.default_path');
@@ -337,8 +320,7 @@ class Util
      *
      * @psalm-return T
      */
-    public static function transaction(\Closure $callback): mixed
-    {
+    public static function transaction(\Closure $callback): mixed {
         $connection = \OC::$server->get(\OCP\IDBConnection::class);
         $connection->beginTransaction();
 
@@ -358,8 +340,7 @@ class Util
      * Sanitize a path to keep only ASCII characters and special characters.
      * Null will be returned on error.
      */
-    public static function sanitizePath(string $path): ?string
-    {
+    public static function sanitizePath(string $path): ?string {
         // remove double slashes and such
         $normalized = \OC\Files\Filesystem::normalizePath($path, false);
 
@@ -374,8 +355,7 @@ class Util
     /**
      * Convert SQL UTC date to timestamp.
      */
-    public static function sqlUtcToTimestamp(string $sqlDate): int
-    {
+    public static function sqlUtcToTimestamp(string $sqlDate): int {
         try {
             return (new \DateTime($sqlDate, new \DateTimeZone('UTC')))->getTimestamp();
         } catch (\Throwable) {
@@ -387,21 +367,19 @@ class Util
      * Explode a string into fixed number of components.
      *
      * @param non-empty-string $delimiter Delimiter
-     * @param string           $string    String to explode
-     * @param int              $count     Number of components
+     * @param string $string String to explode
+     * @param int $count Number of components
      *
      * @return string[] Array of components
      */
-    public static function explode_exact(string $delimiter, string $string, int $count): array
-    {
+    public static function explode_exact(string $delimiter, string $string, int $count): array {
         return array_pad(explode($delimiter, $string, $count), $count, '');
     }
 
     /**
      * Checks if the API call was made from a native interface.
      */
-    public static function callerIsNative(): bool
-    {
+    public static function callerIsNative(): bool {
         // Should not use IRequest here since this method is called during registration
         return 'gallery.memories' === ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')
         || str_contains($_SERVER['HTTP_USER_AGENT'] ?? '', 'MemoriesNative');
@@ -410,8 +388,7 @@ class Util
     /**
      * Get the version of the native caller.
      */
-    public static function callerNativeVersion(): ?string
-    {
+    public static function callerNativeVersion(): ?string {
         $userAgent = \OC::$server->get(\OCP\IRequest::class)->getHeader('User-Agent');
 
         $matches = [];
@@ -425,8 +402,7 @@ class Util
     /**
      * Register a signal handler with pcntl for SIGINT.
      */
-    public static function registerInterruptHandler(string $name, callable $callback): void
-    {
+    public static function registerInterruptHandler(string $name, callable $callback): void {
         // Only register signal handlers in CLI mode
         if (!\OC::$CLI || !\extension_loaded('pcntl')) {
             return;
@@ -462,39 +438,37 @@ class Util
     /**
      * Execute a command safely.
      *
-     * @param string[] $cmd     command to execute
-     * @param int      $timeout milliseconds
-     * @param ?string  $stdin   standard input
+     * @param string[] $cmd command to execute
+     * @param int $timeout milliseconds
+     * @param ?string $stdin standard input
      *
      * @return string standard output
      *
      * @throws \Exception on error
      */
-    public static function execSafe(array $cmd, int $timeout, ?string $stdin = null): ?string
-    {
+    public static function execSafe(array $cmd, int $timeout, ?string $stdin = null): ?string {
         return self::execSafe2($cmd, $timeout, $stdin, true, false)[0];
     }
 
     /** Exec safe with extra options */
-    public static function execSafe2(array $cmd, int $timeout, ?string $stdin, bool $rstdout, bool $rstderr): array
-    {
+    public static function execSafe2(array $cmd, int $timeout, ?string $stdin, bool $rstdout, bool $rstderr): array {
         $config = [
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
         ];
-        if (null !== $stdin) {
+        if ($stdin !== null) {
             $config[0] = ['pipe', 'r'];
         }
 
         $pipes = [];
         $proc = proc_open($cmd, $config, $pipes);
         if (!\is_resource($proc)) {
-            throw new \Exception('proc_open failed: '.implode(' ', $cmd));
+            throw new \Exception('proc_open failed: ' . implode(' ', $cmd));
         }
         stream_set_blocking($pipes[1], false);
         stream_set_blocking($pipes[2], false);
 
-        if (null !== $stdin) {
+        if ($stdin !== null) {
             fwrite($pipes[0], $stdin);
             fclose($pipes[0]);
         }
@@ -524,11 +498,10 @@ class Util
      * Read from non blocking handle or throw timeout.
      *
      * @param resource $handle
-     * @param int      $timeout   milliseconds
-     * @param string   $delimiter null for eof
+     * @param int $timeout milliseconds
+     * @param string $delimiter null for eof
      */
-    public static function readOrTimeout($handle, int $timeout, ?string $delimiter = null): string
-    {
+    public static function readOrTimeout($handle, int $timeout, ?string $delimiter = null): string {
         /** @psalm-suppress DocblockTypeContradiction */
         if (!\is_resource($handle)) {
             throw new \Exception('No resource read handle');
@@ -549,12 +522,12 @@ class Util
             $read = [$handle];
             $write = $except = null;
             $ready = stream_select($read, $write, $except, 1, 0);
-            if (false === $ready) {
+            if ($ready === false) {
                 throw new \Exception('Stream select error');
             }
 
             // No data is available yet
-            if (0 === $ready) {
+            if ($ready === 0) {
                 continue;
             }
 

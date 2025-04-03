@@ -31,14 +31,12 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\Share\IManager;
 use OCP\Share\IShare;
 
-class ShareController extends GenericApiController
-{
+class ShareController extends GenericApiController {
     /**
      * Get the tokens of a node shared using an external link.
      */
     #[NoAdminRequired]
-    public function links(?int $id, ?string $path): Http\Response
-    {
+    public function links(?int $id, ?string $path): Http\Response {
         return Util::guardEx(function () use ($id, $path) {
             $file = $this->getNodeByIdOrPath($id, $path);
 
@@ -60,8 +58,7 @@ class ShareController extends GenericApiController
      * Share a node using an external link.
      */
     #[NoAdminRequired]
-    public function createNode(?int $id, ?string $path): Http\Response
-    {
+    public function createNode(?int $id, ?string $path): Http\Response {
         return Util::guardEx(function () use ($id, $path) {
             $file = $this->getNodeByIdOrPath($id, $path);
 
@@ -83,8 +80,7 @@ class ShareController extends GenericApiController
      * Delete an external link share.
      */
     #[NoAdminRequired]
-    public function deleteShare(string $id): Http\Response
-    {
+    public function deleteShare(string $id): Http\Response {
         return Util::guardEx(static function () use ($id) {
             $uid = Util::getUID();
 
@@ -102,8 +98,7 @@ class ShareController extends GenericApiController
         });
     }
 
-    private function getNodeByIdOrPath(?int $id, ?string $path): \OCP\Files\Node
-    {
+    private function getNodeByIdOrPath(?int $id, ?string $path): \OCP\Files\Node {
         $uid = Util::getUID();
 
         try {
@@ -124,8 +119,7 @@ class ShareController extends GenericApiController
         return $file;
     }
 
-    private function makeShareResponse(IShare $share): array
-    {
+    private function makeShareResponse(IShare $share): array {
         $token = $share->getToken();
         $url = \OC::$server->get(\OCP\IURLGenerator::class)
             ->linkToRouteAbsolute('memories.Public.showShare', ['token' => $token])

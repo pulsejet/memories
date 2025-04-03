@@ -6,8 +6,7 @@ namespace OCA\Memories\Db;
 
 use OCP\IDBConnection;
 
-trait TimelineQueryCTE
-{
+trait TimelineQueryCTE {
     protected IDBConnection $connection;
 
     /**
@@ -18,8 +17,7 @@ trait TimelineQueryCTE
      *                     If the top folder is hidden, the files in it will still be returned
      *                     Hidden files are marked as such in the "hidden" field
      */
-    protected function CTE_FOLDERS_ALL(bool $hidden): string
-    {
+    protected function CTE_FOLDERS_ALL(bool $hidden): string {
         $provider = $this->connection->getDatabaseProvider();
 
         // Filter out folder MIME types
@@ -42,7 +40,7 @@ trait TimelineQueryCTE
         // On MySQL or MariaDB, provide the hint to use the index
         // The index is not used sometimes since the table is unbalanced
         // and fs_parent is used instead
-        $UNION_INDEX_HINT = IDBConnection::PLATFORM_MYSQL === $provider
+        $UNION_INDEX_HINT = $provider === IDBConnection::PLATFORM_MYSQL
             ? 'USE INDEX (memories_parent_mimetype)'
             : '';
 
@@ -79,8 +77,7 @@ trait TimelineQueryCTE
      *
      * @param bool $hidden Whether to include files in hidden folders
      */
-    protected function CTE_FOLDERS(bool $hidden): string
-    {
+    protected function CTE_FOLDERS(bool $hidden): string {
         $CLS_HIDDEN = $hidden ? 'MIN(hidden)' : '0';
 
         $cte = "*PREFIX*cte_folders AS (
@@ -98,8 +95,7 @@ trait TimelineQueryCTE
     /**
      * CTE to get all archive folders recursively in the given top folders.
      */
-    protected function CTE_FOLDERS_ARCHIVE(): string
-    {
+    protected function CTE_FOLDERS_ARCHIVE(): string {
         $cte = "*PREFIX*cte_folders(fileid) AS (
             SELECT
                 cfa.fileid
@@ -124,8 +120,7 @@ trait TimelineQueryCTE
     /**
      * @param string[] $ctes The CTEs to bundle
      */
-    protected static function bundleCTEs(array $ctes): string
-    {
-        return 'WITH RECURSIVE '.implode(',', $ctes);
+    protected static function bundleCTEs(array $ctes): string {
+        return 'WITH RECURSIVE ' . implode(',', $ctes);
     }
 }

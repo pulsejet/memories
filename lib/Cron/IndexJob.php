@@ -16,8 +16,7 @@ use Psr\Log\LoggerInterface;
 const MAX_RUN_TIME = 300; // seconds
 const INTERVAL = 900; // seconds (don't set this too low)
 
-class IndexJob extends TimedJob
-{
+class IndexJob extends TimedJob {
     private bool $_hasError = false;
 
     public function __construct(
@@ -35,16 +34,15 @@ class IndexJob extends TimedJob
     /**
      * Run the background indexing job.
      */
-    protected function run(mixed $argument): void
-    {
+    protected function run(mixed $argument): void {
         // Check if indexing is enabled
-        if ('0' === SystemConfig::get('memories.index.mode')) {
+        if (SystemConfig::get('memories.index.mode') === '0') {
             return;
         }
 
         // Store the last run time
-        $this->appConfig->setValueString(Application::APPNAME, 'last_index_job_start', (string) time());
-        $this->appConfig->setValueString(Application::APPNAME, 'last_index_job_duration', (string) 0);
+        $this->appConfig->setValueString(Application::APPNAME, 'last_index_job_start', (string)time());
+        $this->appConfig->setValueString(Application::APPNAME, 'last_index_job_duration', (string)0);
 
         // Run for a maximum of 5 minutes
         $startTime = microtime(true);
@@ -69,7 +67,7 @@ class IndexJob extends TimedJob
         } catch (Service\ProcessClosedException $e) {
             $this->log('Indexing process stopped before completion. Will continue on next run', 'info');
         } catch (\Exception $e) {
-            $this->log('Indexing exception: '.$e->getMessage());
+            $this->log('Indexing exception: ' . $e->getMessage());
         } finally {
             // Close the static exiftool process
             \OCA\Memories\Exif::closeStaticExiftoolProc();
@@ -77,7 +75,7 @@ class IndexJob extends TimedJob
 
         // Store the last run duration
         $duration = round(microtime(true) - $startTime, 2);
-        $this->appConfig->setValueString(Application::APPNAME, 'last_index_job_duration', (string) $duration);
+        $this->appConfig->setValueString(Application::APPNAME, 'last_index_job_duration', (string)$duration);
     }
 
     /**
@@ -85,29 +83,27 @@ class IndexJob extends TimedJob
      *
      * @throws Service\ProcessClosedException if the process was closed before completion
      */
-    private function indexAllUsers(): void
-    {
+    private function indexAllUsers(): void {
         $this->userManager->callForSeenUsers(function ($user) {
             try {
                 $this->service->indexUser($user);
             } catch (Service\ProcessClosedException $e) {
                 throw $e;
             } catch (\Exception $e) {
-                $this->log('Indexing failed for user '.$user->getUID().': '.$e->getMessage());
+                $this->log('Indexing failed for user ' . $user->getUID() . ': ' . $e->getMessage());
             } catch (\Throwable $e) {
-                $this->log('[BUG] uncaught exception: '.$e->getMessage());
+                $this->log('[BUG] uncaught exception: ' . $e->getMessage());
             }
         });
     }
 
-    private function log(string $msg, string $type = 'error'): void
-    {
-        if ('success' === $type || 'info' === $type) {
+    private function log(string $msg, string $type = 'error'): void {
+        if ($type === 'success' || $type === 'info') {
             // If this is just an informational message, we log it with level info
             $this->logger->info($msg, ['app' => Application::APPNAME]);
         }
 
-        if ($this->_hasError && 'success' === $type) {
+        if ($this->_hasError && $type === 'success') {
             // Don't overwrite an error with a success
             return;
         }
@@ -115,9 +111,9 @@ class IndexJob extends TimedJob
         $this->appConfig->setValueString(Application::APPNAME, 'last_index_job_status', $msg);
         $this->appConfig->setValueString(Application::APPNAME, 'last_index_job_status_type', $type);
 
-        if ('warning' === $type) {
+        if ($type === 'warning') {
             $this->logger->warning($msg, ['app' => Application::APPNAME]);
-        } elseif ('error' === $type) {
+        } elseif ($type === 'error') {
             $this->_hasError = true;
             $this->logger->error($msg, ['app' => Application::APPNAME]);
         }

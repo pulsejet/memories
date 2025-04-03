@@ -25,8 +25,7 @@ use OCP\IURLGenerator;
 use OCP\IUserSession;
 use OCP\Util;
 
-class PublicAlbumController extends Controller
-{
+class PublicAlbumController extends Controller {
     public function __construct(
         IRequest $request,
         protected IEventDispatcher $eventDispatcher,
@@ -44,8 +43,7 @@ class PublicAlbumController extends Controller
 
     #[PublicPage]
     #[NoCSRFRequired]
-    public function showShare(string $token): Response
-    {
+    public function showShare(string $token): Response {
         // Validate token exists
         $album = $this->albumsQuery->getAlbumByLink($token);
         if (!$album) {
@@ -56,10 +54,10 @@ class PublicAlbumController extends Controller
         // Just redirect to the user's page if the user is the owner or a collaborator
         if ($user = $this->userSession->getUser()) {
             $uid = $user->getUID();
-            $albumId = (int) $album['album_id'];
+            $albumId = (int)$album['album_id'];
 
             if ($uid === $album['user'] || $this->albumsQuery->userIsCollaborator($uid, $albumId)) {
-                $idStr = $album['user'].'/'.$album['name'];
+                $idStr = $album['user'] . '/' . $album['name'];
                 $url = $this->urlGenerator->linkToRoute('memories.Page.albums', [
                     'id' => $idStr, // id of album
                     'noinit' => 1, // prevent showing first-start page
@@ -107,17 +105,16 @@ class PublicAlbumController extends Controller
 
     #[PublicPage]
     #[NoCSRFRequired]
-    public function download(string $token): Response
-    {
+    public function download(string $token): Response {
         $album = $this->albumsQuery->getAlbumByLink($token);
         if (!$album) {
             return new TemplateResponse('core', '404', [], 'guest');
         }
 
         // Get list of files
-        $albumId = (int) $album['album_id'];
+        $albumId = (int)$album['album_id'];
         $files = $this->albumsQuery->getAlbumPhotos($albumId, null, null);
-        $fileIds = array_map(static fn ($file) => (int) $file['file_id'], $files);
+        $fileIds = array_map(static fn ($file) => (int)$file['file_id'], $files);
 
         // Get download handle
         $downloadController = \OC::$server->get(\OCA\Memories\Controller\DownloadController::class);
@@ -127,17 +124,16 @@ class PublicAlbumController extends Controller
         return $downloadController->file($handle);
     }
 
-    private function addOgMetadata(array $album, string $title, string $token): void
-    {
-        $fileId = (int) ($album['cover_owner'] ?? $album['last_added_photo']);
-        $albumId = (int) $album['album_id'];
+    private function addOgMetadata(array $album, string $title, string $token): void {
+        $fileId = (int)($album['cover_owner'] ?? $album['last_added_photo']);
+        $albumId = (int)$album['album_id'];
         $owner = $this->albumsQuery->hasFile($albumId, $fileId);
         if (!$owner) {
             return;
         }
 
         $nodes = $this->rootFolder->getUserFolder($owner)->getById($fileId);
-        if (0 === \count($nodes)) {
+        if (\count($nodes) === 0) {
             return;
         }
         $node = $nodes[0];

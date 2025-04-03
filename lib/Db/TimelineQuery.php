@@ -9,8 +9,7 @@ use OCP\IDBConnection;
 use OCP\IRequest;
 use OCP\IUserManager;
 
-class TimelineQuery
-{
+class TimelineQuery {
     use TimelineQueryDays;
     use TimelineQueryFilters;
     use TimelineQueryFolders;
@@ -35,15 +34,14 @@ class TimelineQuery
         protected IDBConnection $connection,
         protected IRequest $request,
         protected IUserManager $userManager,
-    ) {}
+    ) {
+    }
 
-    public function allowEmptyRoot(bool $value = true): void
-    {
+    public function allowEmptyRoot(bool $value = true): void {
         $this->_rootEmptyAllowed = $value;
     }
 
-    public function getBuilder(): IQueryBuilder
-    {
+    public function getBuilder(): IQueryBuilder {
         return $this->connection->getQueryBuilder();
     }
 }

@@ -9,13 +9,11 @@ use OCA\Memories\Settings\SystemConfig;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 
-class AddMissingIndices
-{
+class AddMissingIndices {
     /**
      * Add missing indices to the database schema.
      */
-    public static function run(IOutput $output): SchemaWrapper
-    {
+    public static function run(IOutput $output): SchemaWrapper {
         $connection = \OC::$server->get(\OC\DB\Connection::class);
         $schema = new SchemaWrapper($connection);
 
@@ -65,7 +63,7 @@ class AddMissingIndices
 
         // Migrate
         if (\count($ops) > 0) {
-            $output->info('Updating external table schema: '.implode(', ', $ops));
+            $output->info('Updating external table schema: ' . implode(', ', $ops));
             $connection->migrateToSchema($schema->getWrappedSchema());
         } else {
             $output->info('External table schema seem up to date');
@@ -80,14 +78,13 @@ class AddMissingIndices
     /**
      * Create filecache triggers.
      */
-    public static function createFilecacheTriggers(IOutput $output): void
-    {
+    public static function createFilecacheTriggers(IOutput $output): void {
         $connection = \OC::$server->get(IDBConnection::class);
         $provider = $connection->getDatabaseProvider();
 
         // Trigger to update parent from filecache
         try {
-            if (IDBConnection::PLATFORM_MYSQL === $provider) {
+            if ($provider === IDBConnection::PLATFORM_MYSQL) {
                 // MySQL has no upsert for triggers
                 $connection->executeQuery('DROP TRIGGER IF EXISTS memories_fcu_trg;');
 
@@ -100,7 +97,7 @@ class AddMissingIndices
                         SET parent = NEW.parent
                         WHERE fileid = NEW.fileid;',
                 );
-            } elseif (IDBConnection::PLATFORM_POSTGRES === $provider) {
+            } elseif ($provider === IDBConnection::PLATFORM_POSTGRES) {
                 // Postgres requres a function to do the update
                 // Note: when dropping, the function should be dropped
                 // with CASCADE to remove the trigger as well
@@ -123,7 +120,7 @@ class AddMissingIndices
                     FOR EACH ROW
                     EXECUTE FUNCTION memories_fcu_fun();',
                 );
-            } elseif (IDBConnection::PLATFORM_SQLITE === $provider) {
+            } elseif ($provider === IDBConnection::PLATFORM_SQLITE) {
                 // Exactly the same as MySQL except for the BEGIN and END
                 $connection->executeQuery('DROP TRIGGER IF EXISTS memories_fcu_trg;');
                 $connection->executeQuery(
@@ -137,13 +134,13 @@ class AddMissingIndices
                     END;',
                 );
             } else {
-                throw new \Exception('Unsupported database platform: '.$provider);
+                throw new \Exception('Unsupported database platform: ' . $provider);
             }
 
-            $output->info('Recreated filecache trigger with: '.$provider);
+            $output->info('Recreated filecache trigger with: ' . $provider);
             SystemConfig::set('memories.db.triggers.fcu', true);
         } catch (\Throwable $e) {
-            $output->warning('Failed to create filecache trigger (compatibility mode will be used): '.$e->getMessage());
+            $output->warning('Failed to create filecache trigger (compatibility mode will be used): ' . $e->getMessage());
             SystemConfig::set('memories.db.triggers.fcu', false);
         }
     }

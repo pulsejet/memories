@@ -29,18 +29,16 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 
-class TagsController extends GenericApiController
-{
+class TagsController extends GenericApiController {
     /**
-     * @param int   $id     File ID
-     * @param int[] $add    Tags to add
+     * @param int $id File ID
+     * @param int[] $add Tags to add
      * @param int[] $remove Tags to remove
      *
      * Set tags for a file
      */
     #[NoAdminRequired]
-    public function set(int $id, ?array $add, ?array $remove): Http\Response
-    {
+    public function set(int $id, ?array $add, ?array $remove): Http\Response {
         return Util::guardEx(function () use ($id, $add, $remove) {
             // Check tags enabled for this user
             if (!Util::tagsIsEnabled()) {
@@ -59,13 +57,13 @@ class TagsController extends GenericApiController
             $om = \OC::$server->get(\OCP\SystemTag\ISystemTagObjectMapper::class);
 
             // Add tags
-            if (null !== $add && \count($add) > 0) {
-                $om->assignTags((string) $id, 'files', $add);
+            if ($add !== null && \count($add) > 0) {
+                $om->assignTags((string)$id, 'files', $add);
             }
 
             // Remove tags
-            if (null !== $remove && \count($remove) > 0) {
-                $om->unassignTags((string) $id, 'files', $remove);
+            if ($remove !== null && \count($remove) > 0) {
+                $om->unassignTags((string)$id, 'files', $remove);
             }
 
             return new JSONResponse([], Http::STATUS_OK);

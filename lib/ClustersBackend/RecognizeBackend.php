@@ -30,32 +30,28 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\SimpleFS\ISimpleFile;
 use OCP\IRequest;
 
-class RecognizeBackend extends Backend
-{
+class RecognizeBackend extends Backend {
     use PeopleBackendUtils;
 
     public function __construct(
         protected TimelineQuery $tq,
         protected IRequest $request,
-    ) {}
+    ) {
+    }
 
-    public static function appName(): string
-    {
+    public static function appName(): string {
         return 'Recognize';
     }
 
-    public static function clusterType(): string
-    {
+    public static function clusterType(): string {
         return 'recognize';
     }
 
-    public function isEnabled(): bool
-    {
+    public function isEnabled(): bool {
         return Util::recognizeIsEnabled();
     }
 
-    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
-    {
+    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void {
         // Check if Recognize is enabled
         if (!$this->isEnabled()) {
             throw \OCA\Memories\Exceptions::NotEnabled('Recognize');
@@ -63,9 +59,9 @@ class RecognizeBackend extends Backend
 
         // Note: all of this is duplicated in nameToClusterId since we want to avoid
         // making two queries for the getting the cluster_id and the actual clusters
-        $faceStr = (string) $this->request->getParam('recognize');
+        $faceStr = (string)$this->request->getParam('recognize');
         $faceNames = explode('/', $faceStr);
-        if (2 !== \count($faceNames)) {
+        if (\count($faceNames) !== 2) {
             throw new \Exception('Invalid face query');
         }
 
@@ -90,7 +86,7 @@ class RecognizeBackend extends Backend
 
         // Join with cluster
         $clusterQuery = null;
-        if ('NULL' === $faceName) {
+        if ($faceName === 'NULL') {
             $clusterQuery = $query->expr()->andX(
                 $query->expr()->eq('rfd.user_id', $query->createNamedParameter(Util::getUID())),
                 $query->expr()->eq('rfd.cluster_id', $query->expr()->literal(-1)),
@@ -111,8 +107,7 @@ class RecognizeBackend extends Backend
         ));
     }
 
-    public function transformDayPost(array &$row): void
-    {
+    public function transformDayPost(array &$row): void {
         // Differentiate Recognize queries from Face Recognition
         if (!isset($row['face_w'])) {
             return;
@@ -120,17 +115,16 @@ class RecognizeBackend extends Backend
 
         // Convert face rect to object
         $row['facerect'] = [
-            'w' => (float) $row['face_w'],
-            'h' => (float) $row['face_h'],
-            'x' => (float) $row['face_x'],
-            'y' => (float) $row['face_y'],
+            'w' => (float)$row['face_w'],
+            'h' => (float)$row['face_h'],
+            'x' => (float)$row['face_x'],
+            'y' => (float)$row['face_y'],
         ];
 
         unset($row['face_w'], $row['face_h'], $row['face_x'], $row['face_y']);
     }
 
-    public function getClustersInternal(int $fileid = 0): array
-    {
+    public function getClustersInternal(int $fileid = 0): array {
         $query = $this->tq->getBuilder();
 
         // SELECT all face clusters
@@ -192,8 +186,8 @@ class RecognizeBackend extends Backend
 
         // Post process
         foreach ($faces as &$row) {
-            $row['id'] = (int) $row['id'];
-            $row['count'] = (int) $row['count'];
+            $row['id'] = (int)$row['id'];
+            $row['count'] = (int)$row['count'];
             $row['name'] = $row['title'];
             unset($row['title']);
         }
@@ -201,13 +195,11 @@ class RecognizeBackend extends Backend
         return $faces;
     }
 
-    public static function getClusterId(array $cluster): int|string
-    {
+    public static function getClusterId(array $cluster): int|string {
         return $cluster['id'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
-    {
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array {
         $name = $this->nameToClusterId($name);
         if (!$name) {
             return [];
@@ -240,14 +232,14 @@ class RecognizeBackend extends Backend
         $query = $this->tq->filterFilecache($query);
 
         // LIMIT results
-        if (-6 === $limit) {
+        if ($limit === -6) {
             Covers::filterCover($query, self::clusterType(), 'rfd', 'id', 'cluster_id');
-        } elseif (null !== $limit) {
+        } elseif ($limit !== null) {
             $query->setMaxResults($limit);
         }
 
         // Filter by fileid if specified
-        if (null !== $fileid) {
+        if ($fileid !== null) {
             $query->andWhere($query->expr()->eq('rfd.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
@@ -259,29 +251,24 @@ class RecognizeBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
-    public function sortPhotosForPreview(array &$photos): void
-    {
+    public function sortPhotosForPreview(array &$photos): void {
         $this->sortByScores($photos);
     }
 
-    public function getPreviewBlob(ISimpleFile $file, array $photo): array
-    {
+    public function getPreviewBlob(ISimpleFile $file, array $photo): array {
         return $this->cropFace($file, $photo, 1.5);
     }
 
-    public function getPreviewQuality(): int
-    {
+    public function getPreviewQuality(): int {
         return 2048;
     }
 
-    public function getCoverObjId(array $photo): int
-    {
-        return (int) $photo['faceid'];
+    public function getCoverObjId(array $photo): int {
+        return (int)$photo['faceid'];
     }
 
-    public function getClusterIdFrom(array $photo): int
-    {
-        return (int) $photo['cluster_id'];
+    public function getClusterIdFrom(array $photo): int {
+        return (int)$photo['cluster_id'];
     }
 
     /**
@@ -289,11 +276,10 @@ class RecognizeBackend extends Backend
      * This runs the actual query to find the cluster
      * See the definition of transformDayQuery for more details.
      */
-    private function nameToClusterId(string $name): false|int
-    {
+    private function nameToClusterId(string $name): false|int {
         if (!is_numeric($name)) {
             $faceNames = explode('/', $name);
-            if (2 !== \count($faceNames)) {
+            if (\count($faceNames) !== 2) {
                 return false;
             }
 
@@ -308,12 +294,12 @@ class RecognizeBackend extends Backend
             ;
 
             if ($id = $query->executeQuery()->fetchOne()) {
-                return (int) $id;
+                return (int)$id;
             }
 
             return false;
         }
 
-        return (int) $name;
+        return (int)$name;
     }
 }

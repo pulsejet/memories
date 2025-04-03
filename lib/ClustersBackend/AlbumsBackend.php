@@ -31,43 +31,38 @@ use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
-class AlbumsBackend extends Backend
-{
+class AlbumsBackend extends Backend {
     public function __construct(
         protected AlbumsQuery $albumsQuery,
         protected IRequest $request,
         protected TimelineQuery $tq,
-    ) {}
+    ) {
+    }
 
-    public static function appName(): string
-    {
+    public static function appName(): string {
         return 'Albums';
     }
 
-    public static function clusterType(): string
-    {
+    public static function clusterType(): string {
         return 'albums';
     }
 
-    public function isEnabled(): bool
-    {
+    public function isEnabled(): bool {
         return Util::albumsIsEnabled();
     }
 
-    public function clusterName(string $name): string
-    {
+    public function clusterName(string $name): string {
         return explode('/', $name)[1];
     }
 
-    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
-    {
-        $albumId = (string) $this->request->getParam(self::clusterType());
+    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void {
+        $albumId = (string)$this->request->getParam(self::clusterType());
 
         // Get album object
         $album = $this->albumsQuery->getIfAllowed($this->getUID(), $albumId);
 
         // Check permission
-        if (null === $album) {
+        if ($album === null) {
             throw new \Exception("Album {$albumId} not found");
         }
 
@@ -81,8 +76,7 @@ class AlbumsBackend extends Backend
         $this->tq->allowEmptyRoot();
     }
 
-    public function getClustersInternal(int $fileid = 0): array
-    {
+    public function getClustersInternal(int $fileid = 0): array {
         // Materialize the query
         $materialize = static fn (IQueryBuilder &$query): IQueryBuilder => SQL::materialize($query, 'pa');
 
@@ -175,37 +169,32 @@ class AlbumsBackend extends Backend
         return array_values($list);
     }
 
-    public static function getClusterId(array $cluster): int|string
-    {
+    public static function getClusterId(array $cluster): int|string {
         return $cluster['cluster_id'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
-    {
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array {
         // Get album
         $album = $this->albumsQuery->getIfAllowed($this->getUID(), $name);
-        if (null === $album) {
+        if ($album === null) {
             throw Exceptions::NotFound("album {$name}");
         }
 
         // Get files
-        $id = (int) $album['album_id'];
+        $id = (int)$album['album_id'];
 
         return $this->albumsQuery->getAlbumPhotos($id, $limit, $fileid);
     }
 
-    public function sortPhotosForPreview(array &$photos): void
-    {
+    public function sortPhotosForPreview(array &$photos): void {
         // Do nothing, the photos are already sorted by added date desc
     }
 
-    public function getClusterIdFrom(array $photo): int
-    {
-        return (int) $photo['album_id'];
+    public function getClusterIdFrom(array $photo): int {
+        return (int)$photo['album_id'];
     }
 
-    private function getUID(): string
-    {
+    private function getUID(): string {
         return Util::isLoggedIn() ? Util::getUID() : '---';
     }
 }

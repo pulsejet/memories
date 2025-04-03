@@ -31,26 +31,24 @@ use OCP\Migration\SimpleMigrationStep;
 /**
  * Auto-generated migration step: Please modify to your needs!
  */
-class Version400503Date20221101033144 extends SimpleMigrationStep
-{
+class Version400503Date20221101033144 extends SimpleMigrationStep {
     /** @var IDBConnection */
     private $dbc;
 
-    public function __construct(IDBConnection $dbc)
-    {
+    public function __construct(IDBConnection $dbc) {
         $this->dbc = $dbc;
     }
 
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
+    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {
+    }
 
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
-    {
+    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
@@ -78,8 +76,7 @@ class Version400503Date20221101033144 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
-    {
+    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {
         // Update oc_memories to set objectid equal to fileid for all rows
         $this->dbc->executeQuery('UPDATE *PREFIX*memories SET objectid = CAST(fileid AS CHAR(64))');
     }

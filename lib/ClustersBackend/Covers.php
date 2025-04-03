@@ -8,21 +8,20 @@ use OCA\Memories\Db\SQL;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
-class Covers
-{
+class Covers {
     /**
      * Select the list query to get covers.
      *
-     * @param IQueryBuilder $query                Query builder
-     * @param string        $type                 Cluster type
-     * @param string        $clusterTable         Alias name for the cluster list
-     * @param string        $clusterTableId       Column name for the cluster ID in clusterTable
-     * @param string        $objectTable          Table name for the object mapping
-     * @param string        $objectTableObjectId  Column name for the object ID in objectTable
-     * @param string        $objectTableClusterId Column name for the cluster ID in objectTable
-     * @param bool          $validateCluster      Whether to validate the cluster
-     * @param bool          $validateFilecache    Whether to validate the filecache
-     * @param mixed         $user                 Query expression for user ID to use for the covers
+     * @param IQueryBuilder $query Query builder
+     * @param string $type Cluster type
+     * @param string $clusterTable Alias name for the cluster list
+     * @param string $clusterTableId Column name for the cluster ID in clusterTable
+     * @param string $objectTable Table name for the object mapping
+     * @param string $objectTableObjectId Column name for the object ID in objectTable
+     * @param string $objectTableClusterId Column name for the cluster ID in objectTable
+     * @param bool $validateCluster Whether to validate the cluster
+     * @param bool $validateFilecache Whether to validate the filecache
+     * @param mixed $user Query expression for user ID to use for the covers
      */
     final public static function selectCover(
         IQueryBuilder &$query,
@@ -86,11 +85,11 @@ class Covers
     /**
      * Filter the photos query to get only the cover for this user.
      *
-     * @param IQueryBuilder $query                Query builder
-     * @param string        $type                 Cluster type
-     * @param string        $objectTable          Table name for the object mapping
-     * @param string        $objectTableObjectId  Column name for the object ID in objectTable
-     * @param string        $objectTableClusterId Column name for the cluster ID in objectTable
+     * @param IQueryBuilder $query Query builder
+     * @param string $type Cluster type
+     * @param string $objectTable Table name for the object mapping
+     * @param string $objectTableObjectId Column name for the object ID in objectTable
+     * @param string $objectTableClusterId Column name for the cluster ID in objectTable
      */
     final public static function filterCover(
         IQueryBuilder &$query,
@@ -110,14 +109,13 @@ class Covers
     /**
      * Set the cover photo for the given cluster.
      *
-     * @param string $type      Cluster type
-     * @param int    $clusterId Cluster ID
-     * @param int    $objectId  Object ID
-     * @param int    $fileid    File ID
-     * @param bool   $manual    Whether this is a manual selection
+     * @param string $type Cluster type
+     * @param int $clusterId Cluster ID
+     * @param int $objectId Object ID
+     * @param int $fileid File ID
+     * @param bool $manual Whether this is a manual selection
      */
-    final public static function setCover(string $type, int $clusterId, int $objectId, int $fileid, bool $manual): void
-    {
+    final public static function setCover(string $type, int $clusterId, int $objectId, int $fileid, bool $manual): void {
         Util::transaction(static function () use ($type, $clusterId, $objectId, $fileid, $manual): void {
             $connection = \OC::$server->get(\OCP\IDBConnection::class);
             $query = $connection->getQueryBuilder();

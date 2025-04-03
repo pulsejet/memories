@@ -9,19 +9,17 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
 
-trait TimelineWriteFailures
-{
+trait TimelineWriteFailures {
     protected IDBConnection $connection;
 
     /**
      * Mark a file as failed indexing.
      * The file will not be re-indexed until it changes.
      *
-     * @param File   $file   The file that failed indexing
+     * @param File $file The file that failed indexing
      * @param string $reason The reason for the failure
      */
-    public function markFailed(File $file, string $reason): void
-    {
+    public function markFailed(File $file, string $reason): void {
         // Add file path to reason
         $reason .= " ({$file->getPath()})";
 
@@ -48,8 +46,7 @@ trait TimelineWriteFailures
      *
      * @param File $file The file that was successfully indexed
      */
-    public function clearFailures(File $file): void
-    {
+    public function clearFailures(File $file): void {
         $query = $this->connection->getQueryBuilder();
         $query->delete('memories_failures')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
@@ -60,21 +57,19 @@ trait TimelineWriteFailures
     /**
      * Get the count of failed files.
      */
-    public function countFailures(): int
-    {
+    public function countFailures(): int {
         $query = $this->connection->getQueryBuilder();
         $query->select($query->func()->count('fileid'))
             ->from('memories_failures')
         ;
 
-        return (int) $query->executeQuery()->fetchOne();
+        return (int)$query->executeQuery()->fetchOne();
     }
 
     /**
      * Get the list of failures.
      */
-    public function listFailures(): array
-    {
+    public function listFailures(): array {
         return $this->connection->getQueryBuilder()
             ->select('*')
             ->from('memories_failures')
@@ -86,8 +81,7 @@ trait TimelineWriteFailures
     /**
      * Clear all failures from the database.
      */
-    public function clearAllFailures(): void
-    {
+    public function clearAllFailures(): void {
         // Delete all entries and reset autoincrement counter
         $this->connection->executeStatement(
             $this->connection->getDatabasePlatform()->getTruncateTableSQL('*PREFIX*memories_failures', false),

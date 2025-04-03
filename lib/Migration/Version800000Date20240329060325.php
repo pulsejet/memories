@@ -29,20 +29,20 @@ use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
-class Version800000Date20240329060325 extends SimpleMigrationStep
-{
-    public function __construct(private IDBConnection $dbc) {}
+class Version800000Date20240329060325 extends SimpleMigrationStep {
+    public function __construct(private IDBConnection $dbc) {
+    }
 
     /**
      * @param Closure(): ISchemaWrapper $schemaClosure
      */
-    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
+    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {
+    }
 
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
-    {
+    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
@@ -70,8 +70,7 @@ class Version800000Date20240329060325 extends SimpleMigrationStep
     /**
      * @param Closure(): ISchemaWrapper $schemaClosure
      */
-    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
-    {
+    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {
         // create database triggers; this will never throw
         \OCA\Memories\Db\AddMissingIndices::createFilecacheTriggers($output);
 
@@ -103,12 +102,12 @@ class Version800000Date20240329060325 extends SimpleMigrationStep
                         WHERE fileid = memories.fileid)',
                 );
             } else {
-                throw new \Exception('Unsupported '.$platform::class);
+                throw new \Exception('Unsupported ' . $platform::class);
             }
 
             $output->info('Values for parent migrated successfully');
         } catch (\Exception $e) {
-            $output->warning('Failed to copy parent values from filecache: '.$e->getMessage());
+            $output->warning('Failed to copy parent values from filecache: ' . $e->getMessage());
             $output->warning('Please run occ memories:index -f');
         }
     }

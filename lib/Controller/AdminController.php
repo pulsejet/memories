@@ -33,13 +33,11 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\JSONResponse;
 
-class AdminController extends GenericApiController
-{
+class AdminController extends GenericApiController {
     /**
      * @AdminRequired
      */
-    public function getSystemConfig(): Http\Response
-    {
+    public function getSystemConfig(): Http\Response {
         return Util::guardEx(static function () {
             $config = [];
             foreach (SystemConfig::DEFAULTS as $key => $default) {
@@ -56,8 +54,7 @@ class AdminController extends GenericApiController
     /**
      * @AdminRequired
      */
-    public function setSystemConfig(string $key, mixed $value): Http\Response
-    {
+    public function setSystemConfig(string $key, mixed $value): Http\Response {
         return Util::guardEx(static function () use ($key, $value) {
             // Make sure not running in read-only mode
             if (SystemConfig::get('memories.readonly')) {
@@ -72,7 +69,7 @@ class AdminController extends GenericApiController
                 try {
                     BinExt::startGoVod();
                 } catch (\Exception $e) {
-                    error_log('Failed to start go-vod: '.$e->getMessage());
+                    error_log('Failed to start go-vod: ' . $e->getMessage());
                 }
             }
 
@@ -84,8 +81,7 @@ class AdminController extends GenericApiController
      * @AdminRequired
      */
     #[UseSession]
-    public function getSystemStatus(): Http\Response
-    {
+    public function getSystemStatus(): Http\Response {
         return Util::guardEx(function () {
             $appConfig = \OC::$server->get(\OCP\IAppConfig::class);
             $index = \OC::$server->get(\OCA\Memories\Service\Index::class);
@@ -114,9 +110,9 @@ class AdminController extends GenericApiController
             $status['failure_count'] = $tw->countFailures();
 
             // Automatic indexing stats
-            $jobStart = (int) $appConfig->getValueString(Application::APPNAME, 'last_index_job_start', (string) 0);
+            $jobStart = (int)$appConfig->getValueString(Application::APPNAME, 'last_index_job_start', (string)0);
             $status['last_index_job_start'] = $jobStart ? time() - $jobStart : 0; // Seconds ago
-            $status['last_index_job_duration'] = (float) $appConfig->getValueString(Application::APPNAME, 'last_index_job_duration', (string) 0);
+            $status['last_index_job_duration'] = (float)$appConfig->getValueString(Application::APPNAME, 'last_index_job_duration', (string)0);
             $status['last_index_job_status'] = $appConfig->getValueString(Application::APPNAME, 'last_index_job_status', 'Indexing has not been run yet');
             $status['last_index_job_status_type'] = $appConfig->getValueString(Application::APPNAME, 'last_index_job_status_type', 'warning');
 
@@ -186,8 +182,7 @@ class AdminController extends GenericApiController
      * @AdminRequired
      */
     #[NoCSRFRequired]
-    public function getFailureLogs(): Http\Response
-    {
+    public function getFailureLogs(): Http\Response {
         return Util::guardExDirect(static function (Http\IOutput $out) {
             $tw = \OC::$server->get(\OCA\Memories\Db\TimelineWrite::class);
 
@@ -196,7 +191,7 @@ class AdminController extends GenericApiController
             $out->setHeader('Cache-Control: no-cache');
 
             foreach ($tw->listFailures() as $log) {
-                $fileid = str_pad((string) $log['fileid'], 12, ' ', STR_PAD_RIGHT); // size
+                $fileid = str_pad((string)$log['fileid'], 12, ' ', STR_PAD_RIGHT); // size
                 $mtime = $log['mtime'];
                 $reason = $log['reason'];
 
@@ -209,8 +204,7 @@ class AdminController extends GenericApiController
      * @AdminRequired
      */
     #[UseSession]
-    public function placesSetup(?string $actiontoken): Http\Response
-    {
+    public function placesSetup(?string $actiontoken): Http\Response {
         if (!$actiontoken || $this->actionToken() !== $actiontoken) {
             return new JSONResponse(['error' => 'Invalid action token. Refresh the memories admin page.'], Http::STATUS_BAD_REQUEST);
         }
@@ -237,7 +231,7 @@ class AdminController extends GenericApiController
 
                 $out->setOutput("Places set up successfully.\n");
             } catch (\Exception $e) {
-                $out->setOutput('Failed: '.$e->getMessage()."\n");
+                $out->setOutput('Failed: ' . $e->getMessage() . "\n");
             }
         });
     }
@@ -245,10 +239,10 @@ class AdminController extends GenericApiController
     /**
      * Get the status of an executable.
      *
-     * @param (\Closure():string)|string     $path             Path to the executable
-     * @param null|(\Closure(string):string) $testFunction     Function to test the executable
-     * @param bool                           $testIfFile       Test if the path is a file
-     * @param bool                           $testIfExecutable Test if the path is executable
+     * @param (\Closure():string)|string $path Path to the executable
+     * @param null|(\Closure(string):string) $testFunction Function to test the executable
+     * @param bool $testIfFile Test if the path is a file
+     * @param bool $testIfExecutable Test if the path is executable
      */
     private function getExecutableStatus(
         \Closure|string $path,
@@ -260,7 +254,7 @@ class AdminController extends GenericApiController
             try {
                 $path = $path();
             } catch (\Exception $e) {
-                return 'test_fail:'.$e->getMessage();
+                return 'test_fail:' . $e->getMessage();
             }
         }
 
@@ -274,17 +268,16 @@ class AdminController extends GenericApiController
 
         if ($testFunction) {
             try {
-                return 'test_ok:'.$testFunction($path);
+                return 'test_ok:' . $testFunction($path);
             } catch (\Exception $e) {
-                return 'test_fail:'.$e->getMessage();
+                return 'test_fail:' . $e->getMessage();
             }
         }
 
         return 'ok';
     }
 
-    private function actionToken(bool $set = false): string
-    {
+    private function actionToken(bool $set = false): string {
         $session = \OC::$server->get(\OCP\ISession::class);
         if (!$set) {
             return $session->get('memories_action_token');

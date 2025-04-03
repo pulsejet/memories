@@ -36,8 +36,7 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
 use OCP\IRequest;
 
-class OtherController extends GenericApiController
-{
+class OtherController extends GenericApiController {
     /**
      * update preferences (user setting).
      *
@@ -47,8 +46,7 @@ class OtherController extends GenericApiController
      * @return Http\Response empty JSONResponse with respective http status code
      */
     #[NoAdminRequired]
-    public function setUserConfig(string $key, string $value): Http\Response
-    {
+    public function setUserConfig(string $key, string $value): Http\Response {
         return Util::guardEx(function () use ($key, $value) {
             // Make sure not running in read-only mode
             if (SystemConfig::get('memories.readonly', false)) {
@@ -63,8 +61,7 @@ class OtherController extends GenericApiController
 
     #[NoAdminRequired]
     #[PublicPage]
-    public function getUserConfig(): Http\Response
-    {
+    public function getUserConfig(): Http\Response {
         return Util::guardEx(function () {
             // get memories version
             $version = \OC::$server->get(\OCP\App\IAppManager::class)->getAppVersion('memories');
@@ -99,22 +96,22 @@ class OtherController extends GenericApiController
 
                 // general settings
                 'timeline_path' => $getAppConfig('timelinePath', SystemConfig::get('memories.timeline.default_path')),
-                'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
-                'stack_raw_files' => 'true' === $getAppConfig('stackRawFiles', 'true'),
+                'enable_top_memories' => $getAppConfig('enableTopMemories', 'true') === 'true',
+                'stack_raw_files' => $getAppConfig('stackRawFiles', 'true') === 'true',
 
                 // viewer settings
                 'high_res_cond_default' => SystemConfig::get('memories.viewer.high_res_cond_default'),
-                'livephoto_autoplay' => 'true' === $getAppConfig('livephotoAutoplay', 'false'),
-                'sidebar_filepath' => 'true' === $getAppConfig('sidebarFilepath', false),
+                'livephoto_autoplay' => $getAppConfig('livephotoAutoplay', 'false') === 'true',
+                'sidebar_filepath' => $getAppConfig('sidebarFilepath', false) === 'true',
 
                 // folder settings
                 'folders_path' => $getAppConfig('foldersPath', '/'),
-                'show_hidden_folders' => 'true' === $getAppConfig('showHidden', false),
-                'sort_folder_month' => 'true' === $getAppConfig('sortFolderMonth', false),
+                'show_hidden_folders' => $getAppConfig('showHidden', false) === 'true',
+                'sort_folder_month' => $getAppConfig('sortFolderMonth', false) === 'true',
 
                 // album settings
-                'sort_album_month' => 'true' === $getAppConfig('sortAlbumMonth', 'true'),
-                'show_hidden_albums' => 'true' === $getAppConfig('showHiddenAlbums', false),
+                'sort_album_month' => $getAppConfig('sortAlbumMonth', 'true') === 'true',
+                'show_hidden_albums' => $getAppConfig('showHiddenAlbums', false) === 'true',
                 'album_list_sort' => $getAppConfig('album_list_sort', 3),
             ], Http::STATUS_OK);
         });
@@ -123,8 +120,7 @@ class OtherController extends GenericApiController
     #[NoAdminRequired]
     #[PublicPage]
     #[NoCSRFRequired]
-    public function describeApi(): Http\Response
-    {
+    public function describeApi(): Http\Response {
         return Util::guardEx(static function () {
             $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
             $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
@@ -152,8 +148,7 @@ class OtherController extends GenericApiController
     #[NoAdminRequired]
     #[PublicPage]
     #[NoCSRFRequired]
-    public function static(string $name): Http\Response
-    {
+    public function static(string $name): Http\Response {
         return Util::guardEx(static function () use ($name) {
             switch ($name) {
                 case 'service-worker.js':
@@ -167,11 +162,11 @@ class OtherController extends GenericApiController
                     $prefix = preg_replace('/memories-main\.js.*$/', '', $prefix);
 
                     // Make sure prefix starts and ends with a slash
-                    $prefix = '/'.ltrim($prefix, '/');
-                    $prefix = rtrim($prefix, '/').'/';
+                    $prefix = '/' . ltrim($prefix, '/');
+                    $prefix = rtrim($prefix, '/') . '/';
 
                     // Replace relative URLs to have correct prefix
-                    $sw = file_get_contents(__DIR__.'/../../js/memories-service-worker.js');
+                    $sw = file_get_contents(__DIR__ . '/../../js/memories-service-worker.js');
                     $sw = str_replace('/apps/memories/js/', $prefix, $sw);
 
                     // Return processed service worker
@@ -186,11 +181,11 @@ class OtherController extends GenericApiController
                     switch (\OC::$server->get(IRequest::class)->getParam('arch')) {
                         case 'x86_64':
                         case 'amd64':
-                            return new StreamResponse(__DIR__.'/../../bin-ext/go-vod-amd64');
+                            return new StreamResponse(__DIR__ . '/../../bin-ext/go-vod-amd64');
 
                         case 'aarch64':
                         case 'arm64':
-                            return new StreamResponse(__DIR__.'/../../bin-ext/go-vod-aarch64');
+                            return new StreamResponse(__DIR__ . '/../../bin-ext/go-vod-aarch64');
                     }
 
                     // no break
