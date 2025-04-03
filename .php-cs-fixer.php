@@ -25,17 +25,23 @@ $config
     ->setRules([
         '@PhpCsFixer' => true,
         '@PhpCsFixer:risky' => true,
+        'array_syntax' => ['syntax' => 'short'],
+        'declare_strict_types' => true,
+        'fully_qualified_strict_types' => false,
         'general_phpdoc_annotation_remove' => ['annotations' => ['expectedDeprecation']], // one should use PHPUnit built-in method instead
-        'phpdoc_to_comment' => ['ignored_tags' => ['psalm-suppress', 'template-implements', 'var']],
-        'trailing_comma_in_multiline' => ['elements' => ['arrays', 'parameters', 'arguments']],
         'modernize_strpos' => true,
         'no_alias_functions' => true,
-        'array_syntax' => ['syntax' => 'short'],
+        'nullable_type_declaration_for_default_null_value' => true,
+        'nullable_type_declaration' => ['syntax' => 'question_mark'],
+        'operator_linebreak' => [
+            'position' => 'beginning',
+        ],
+        'phpdoc_to_comment' => ['ignored_tags' => ['psalm-suppress', 'template-implements', 'var']],
+        'return_assignment' => true,
+        'strict_param' => true,
         'ternary_to_elvis_operator' => true,
         'ternary_to_null_coalescing' => true,
-        'return_assignment' => true,
-        'declare_strict_types' => true,
-        'strict_param' => true,
+        'trailing_comma_in_multiline' => ['elements' => ['arrays', 'parameters', 'arguments']],
     ])
     ->setFinder($finder)
 ;
