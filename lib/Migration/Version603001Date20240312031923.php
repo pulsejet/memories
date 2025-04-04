@@ -28,18 +28,17 @@ use OCP\DB\Types;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
-class Version603001Date20240312031923 extends SimpleMigrationStep
-{
+class Version603001Date20240312031923 extends SimpleMigrationStep {
     /**
      * @param Closure(): ISchemaWrapper $schemaClosure
      */
-    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
+    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {
+    }
 
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
-    {
+    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
@@ -88,5 +87,6 @@ class Version603001Date20240312031923 extends SimpleMigrationStep
     /**
      * @param Closure(): ISchemaWrapper $schemaClosure
      */
-    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
+    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {
+    }
 }

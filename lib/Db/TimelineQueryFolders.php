@@ -7,8 +7,7 @@ namespace OCA\Memories\Db;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
-trait TimelineQueryFolders
-{
+trait TimelineQueryFolders {
     protected IDBConnection $connection;
 
     /**
@@ -18,8 +17,7 @@ trait TimelineQueryFolders
      *
      * @param TimelineRoot $root The root to use for the query
      */
-    public function getRootPreviews(TimelineRoot $root): array
-    {
+    public function getRootPreviews(TimelineRoot $root): array {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all photos
@@ -39,7 +37,7 @@ trait TimelineQueryFolders
 
         // Post-process
         foreach ($rows as &$row) {
-            $row['fileid'] = (int) $row['fileid'];
+            $row['fileid'] = (int)$row['fileid'];
         }
 
         return $rows;
@@ -49,11 +47,10 @@ trait TimelineQueryFolders
      * Add etag for a field in a query.
      *
      * @param IQueryBuilder $query The query to add the etag to
-     * @param mixed         $field The field to add the etag for
-     * @param string        $alias The alias to use for the etag
+     * @param mixed $field The field to add the etag for
+     * @param string $alias The alias to use for the etag
      */
-    public static function selectEtag(IQueryBuilder &$query, mixed $field, string $alias): void
-    {
+    public static function selectEtag(IQueryBuilder &$query, mixed $field, string $alias): void {
         $sub = $query->getConnection()->getQueryBuilder();
         $sub->select('etag')
             ->from('filecache', 'etag_f')

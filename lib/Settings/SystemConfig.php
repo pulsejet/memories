@@ -6,8 +6,7 @@ namespace OCA\Memories\Settings;
 
 use OCA\Memories\AppInfo\Application;
 
-class SystemConfig
-{
+class SystemConfig {
     // Do not change the next line, it's used by the docs
     // to generate the default config page
     public const DEFAULTS = [
@@ -119,11 +118,10 @@ class SystemConfig
     /**
      * Get a system config key with the correct default.
      *
-     * @param string $key     System config key
-     * @param mixed  $default Default value
+     * @param string $key System config key
+     * @param mixed $default Default value
      */
-    public static function get(string $key, mixed $default = null): mixed
-    {
+    public static function get(string $key, mixed $default = null): mixed {
         if (!\array_key_exists($key, self::DEFAULTS)) {
             throw new \InvalidArgumentException("Invalid system config key: {$key}");
         }
@@ -147,33 +145,32 @@ class SystemConfig
     /**
      * Set a system config key.
      *
-     * @param string $key   System config key
-     * @param mixed  $value Value to set
+     * @param string $key System config key
+     * @param mixed $value Value to set
      *
      * @throws \InvalidArgumentException
      */
-    public static function set(string $key, mixed $value): void
-    {
+    public static function set(string $key, mixed $value): void {
         // Check if the key is valid
         if (!\array_key_exists($key, self::DEFAULTS)) {
             throw new \InvalidArgumentException("Invalid system config key: {$key}");
         }
 
         // Key belongs to memories namespace
-        $isAppKey = str_starts_with($key, Application::APPNAME.'.');
+        $isAppKey = str_starts_with($key, Application::APPNAME . '.');
 
         // Check if the value has the correct type
-        if (null !== $value && ($got = \gettype($value)) !== ($exp = \gettype(self::DEFAULTS[$key]))) {
+        if ($value !== null && ($got = \gettype($value)) !== ($exp = \gettype(self::DEFAULTS[$key]))) {
             throw new \InvalidArgumentException("Invalid type for system config {$key}, expected {$exp}, got {$got}");
         }
 
         // Do not allow null for non-app keys
-        if (!$isAppKey && null === $value) {
+        if (!$isAppKey && $value === null) {
             throw new \InvalidArgumentException("Invalid value for system config {$key}, null is not allowed");
         }
 
         $config = \OC::$server->get(\OCP\IConfig::class);
-        if ($isAppKey && ($value === self::DEFAULTS[$key] || null === $value)) {
+        if ($isAppKey && ($value === self::DEFAULTS[$key] || $value === null)) {
             $config->deleteSystemValue($key);
         } else {
             $config->setSystemValue($key, $value);
@@ -184,8 +181,7 @@ class SystemConfig
      * Check if geolocation (places) is enabled and available.
      * Returns the type of the GIS.
      */
-    public static function gisType(): int
-    {
+    public static function gisType(): int {
         return self::get('memories.gis_type');
     }
 }

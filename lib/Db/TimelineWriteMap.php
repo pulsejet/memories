@@ -10,26 +10,24 @@ use OCP\IDBConnection;
 
 const CLUSTER_DEG = 0.0003;
 
-trait TimelineWriteMap
-{
+trait TimelineWriteMap {
     protected IDBConnection $connection;
 
     /**
      * Get the cluster ID for a given point.
      * If the cluster ID changes, update the old cluster and the new cluster.
      *
-     * @param int    $prevCluster The current cluster ID of the point
-     * @param ?float $lat         The latitude of the point
-     * @param ?float $lon         The longitude of the point
-     * @param ?float $oldLat      The old latitude of the point
-     * @param ?float $oldLon      The old longitude of the point
+     * @param int $prevCluster The current cluster ID of the point
+     * @param ?float $lat The latitude of the point
+     * @param ?float $lon The longitude of the point
+     * @param ?float $oldLat The old latitude of the point
+     * @param ?float $oldLon The old longitude of the point
      *
      * @return int The new cluster ID
      */
-    protected function mapGetCluster(int $prevCluster, ?float $lat, ?float $lon, ?float $oldLat, ?float $oldLon): int
-    {
+    protected function mapGetCluster(int $prevCluster, ?float $lat, ?float $lon, ?float $oldLat, ?float $oldLon): int {
         // Just remove from old cluster if the point is no longer valid
-        if (null === $lat || null === $lon) {
+        if ($lat === null || $lon === null) {
             $this->mapRemoveFromCluster($prevCluster, $oldLat, $oldLon);
 
             return -1;
@@ -50,12 +48,12 @@ trait TimelineWriteMap
         $minDist = PHP_INT_MAX;
         $minId = -1;
         foreach ($rows as &$r) {
-            $clusterLat = (float) $r['lat'];
-            $clusterLon = (float) $r['lon'];
+            $clusterLat = (float)$r['lat'];
+            $clusterLon = (float)$r['lon'];
             $dist = ($lat - $clusterLat) ** 2 + ($lon - $clusterLon) ** 2;
             if ($dist < $minDist) {
                 $minDist = $dist;
-                $minId = (int) $r['id'];
+                $minId = (int)$r['id'];
             }
         }
 
@@ -82,12 +80,11 @@ trait TimelineWriteMap
     /**
      * Add a point to a cluster.
      *
-     * @param int   $clusterId The ID of the cluster
-     * @param float $lat       The latitude of the point
-     * @param float $lon       The longitude of the point
+     * @param int $clusterId The ID of the cluster
+     * @param float $lat The latitude of the point
+     * @param float $lon The longitude of the point
      */
-    protected function mapAddToCluster(int $clusterId, float $lat, float $lon): void
-    {
+    protected function mapAddToCluster(int $clusterId, float $lat, float $lon): void {
         if ($clusterId <= 0) {
             return;
         }
@@ -114,8 +111,7 @@ trait TimelineWriteMap
      *
      * @return int The ID of the new cluster
      */
-    private function mapCreateCluster(float $lat, float $lon): int
-    {
+    private function mapCreateCluster(float $lat, float $lon): int {
         return Util::transaction(function () use ($lat, $lon): int {
             $query = $this->connection->getQueryBuilder();
             $query->insert('memories_mapclusters')
@@ -137,13 +133,12 @@ trait TimelineWriteMap
     /**
      * Remove a point from a cluster.
      *
-     * @param int    $clusterId The ID of the cluster
-     * @param ?float $lat       The latitude of the point
-     * @param ?float $lon       The longitude of the point
+     * @param int $clusterId The ID of the cluster
+     * @param ?float $lat The latitude of the point
+     * @param ?float $lon The longitude of the point
      */
-    private function mapRemoveFromCluster(int $clusterId, ?float $lat, ?float $lon): void
-    {
-        if ($clusterId <= 0 || null === $lat || null === $lon) {
+    private function mapRemoveFromCluster(int $clusterId, ?float $lat, ?float $lon): void {
+        if ($clusterId <= 0 || $lat === null || $lon === null) {
             return;
         }
 
@@ -166,8 +161,7 @@ trait TimelineWriteMap
      *
      * @param int $clusterId The ID of the cluster
      */
-    private function mapUpdateAggregates(int $clusterId): void
-    {
+    private function mapUpdateAggregates(int $clusterId): void {
         if ($clusterId <= 0) {
             return;
         }

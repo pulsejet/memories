@@ -9,16 +9,16 @@ use OCA\Memories\ClustersBackend\Covers;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
-class AlbumsQuery
-{
-    public function __construct(private IDBConnection $connection) {}
+class AlbumsQuery {
+    public function __construct(private IDBConnection $connection) {
+    }
 
     /**
      * Get list of albums.
      *
-     * @param string $uid        User ID
-     * @param bool   $shared     Whether to get shared albums
-     * @param int    $fileid     File to filter by
+     * @param string $uid User ID
+     * @param bool $shared Whether to get shared albums
+     * @param int $fileid File to filter by
      * @param ?array $transforms Callbacks to transform the query
      */
     public function getList(
@@ -90,10 +90,10 @@ class AlbumsQuery
 
         // Post process
         foreach ($albums as &$row) {
-            $row['cluster_id'] = $row['user'].'/'.$row['name'];
-            $row['album_id'] = (int) $row['album_id'];
-            $row['created'] = (int) $row['created'];
-            $row['last_added_photo'] = (int) $row['last_added_photo'];
+            $row['cluster_id'] = $row['user'] . '/' . $row['name'];
+            $row['album_id'] = (int)$row['album_id'];
+            $row['created'] = (int)$row['created'];
+            $row['last_added_photo'] = (int)$row['last_added_photo'];
         }
 
         return $albums;
@@ -104,8 +104,7 @@ class AlbumsQuery
      *
      * @return false|string owner of file if found
      */
-    public function hasFile(int $albumId, int $fileId): false|string
-    {
+    public function hasFile(int $albumId, int $fileId): false|string {
         $query = $this->connection->getQueryBuilder();
         $query->select('owner')->from('photos_albums_files')->where(
             $query->expr()->andX(
@@ -122,8 +121,7 @@ class AlbumsQuery
      *
      * @return false|string owner of file if found
      */
-    public function userHasFile(string $uid, int $fileId): false|string
-    {
+    public function userHasFile(string $uid, int $fileId): false|string {
         $query = $this->connection->getQueryBuilder();
         $query->select('paf.owner')->from('photos_albums_files', 'paf')->where(
             $query->expr()->andX(
@@ -154,17 +152,16 @@ class AlbumsQuery
     /**
      * Get album if allowed. Also check if album is shared with user.
      *
-     * @param string $uid     UID of CURRENT user
+     * @param string $uid UID of CURRENT user
      * @param string $albumId $user/$name where $user is the OWNER of the album
      */
-    public function getIfAllowed(string $uid, string $albumId): ?array
-    {
+    public function getIfAllowed(string $uid, string $albumId): ?array {
         $album = null;
         $albumUid = null;
 
         // Split name and uid
         $parts = explode('/', $albumId);
-        if (2 === \count($parts)) {
+        if (\count($parts) === 2) {
             $albumUid = $parts[0];
             $albumName = $parts[1];
 
@@ -190,7 +187,7 @@ class AlbumsQuery
         }
 
         // Check in collaborators instead
-        $albumNumId = (int) $album['album_id'];
+        $albumNumId = (int)$album['album_id'];
         if ($this->userIsCollaborator($uid, $albumNumId)) {
             return $album;
         }
@@ -203,11 +200,10 @@ class AlbumsQuery
      * Also checks if a group is a collaborator.
      * Does not check if the user is the owner.
      *
-     * @param string $uid     User ID
-     * @param int    $albumId Album ID (numeric)
+     * @param string $uid User ID
+     * @param int $albumId Album ID (numeric)
      */
-    public function userIsCollaborator(string $uid, int $albumId): bool
-    {
+    public function userIsCollaborator(string $uid, int $albumId): bool {
         $query = $this->connection->getQueryBuilder();
         $ids = $this->getSelfCollaborators($uid);
         $query->select('album_id')->from($this->collaboratorsTable())->where(
@@ -217,15 +213,14 @@ class AlbumsQuery
             ),
         );
 
-        return false !== $query->executeQuery()->fetchOne();
+        return $query->executeQuery()->fetchOne() !== false;
     }
 
     /**
      * Get album object by token.
      * Returns false if album link does not exist.
      */
-    public function getAlbumByLink(string $token): ?array
-    {
+    public function getAlbumByLink(string $token): ?array {
         $query = $this->connection->getQueryBuilder();
         $query->select('pa.*')
             ->from('photos_albums', 'pa')
@@ -257,8 +252,7 @@ class AlbumsQuery
     /**
      * Get list of photos in album.
      */
-    public function getAlbumPhotos(int $albumId, ?int $limit, ?int $fileid): array
-    {
+    public function getAlbumPhotos(int $albumId, ?int $limit, ?int $fileid): array {
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all files
@@ -279,22 +273,22 @@ class AlbumsQuery
         $query->addOrderBy('paf.album_file_id', 'DESC');
 
         // LIMIT the results
-        if (-6 === $limit) {
+        if ($limit === -6) {
             // not implemented -- should return the cover photo
             $query->setMaxResults(1);
-        } elseif (null !== $limit) {
+        } elseif ($limit !== null) {
             $query->setMaxResults($limit);
         }
 
         // Filter by fileid if specified
-        if (null !== $fileid) {
+        if ($fileid !== null) {
             $query->andWhere($query->expr()->eq('paf.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
         $result = $query->executeQuery()->fetchAll();
 
         foreach ($result as &$row) {
-            $row['fileid'] = (int) $row['file_id'];
+            $row['fileid'] = (int)$row['file_id'];
         }
 
         return $result;
@@ -304,8 +298,7 @@ class AlbumsQuery
      * Query transformation to add a "shared" flag to the list
      * of albums (whether the album has any shared collaborators).
      */
-    public function transformSharedFlag(IQueryBuilder &$query): void
-    {
+    public function transformSharedFlag(IQueryBuilder &$query): void {
         $sSq = $query->getConnection()->getQueryBuilder();
         $sSq->select($sSq->expr()->literal(1))
             ->from($this->collaboratorsTable(), 'pc')
@@ -320,8 +313,7 @@ class AlbumsQuery
      *
      * @return string[] List of collaborator IDs
      */
-    private function getSelfCollaborators(string $uid)
-    {
+    private function getSelfCollaborators(string $uid) {
         // Get the user in question
         $user = \OC::$server->get(\OCP\IUserManager::class)->get($uid)
             ?: throw new \Exception('User not found');
@@ -337,8 +329,7 @@ class AlbumsQuery
     /**
      * Get the name of the collaborators table.
      */
-    private function collaboratorsTable(): string
-    {
+    private function collaboratorsTable(): string {
         // https://github.com/nextcloud/photos/commit/20e3e61ad577014e5f092a292c90a8476f630355
         $photosVersion = \OC::$server->get(\OCP\App\IAppManager::class)->getAppVersion('photos');
         if (version_compare($photosVersion, '2.0.1', '>=')) {

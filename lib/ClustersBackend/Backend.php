@@ -26,8 +26,7 @@ namespace OCA\Memories\ClustersBackend;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\SimpleFS\ISimpleFile;
 
-abstract class Backend
-{
+abstract class Backend {
     /**
      * A human-readable name for the app.
      * Used for error messages.
@@ -47,15 +46,16 @@ abstract class Backend
     /**
      * Apply query transformations for days query.
      *
-     * @param IQueryBuilder $query     Query builder
-     * @param bool          $aggregate Whether this is an aggregate query
+     * @param IQueryBuilder $query Query builder
+     * @param bool $aggregate Whether this is an aggregate query
      */
     abstract public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void;
 
     /**
      * Apply post-query transformations for the given photo object.
      */
-    public function transformDayPost(array &$row): void {}
+    public function transformDayPost(array &$row): void {
+    }
 
     /**
      * Get the cluster list for the current user.
@@ -76,9 +76,9 @@ abstract class Backend
      * Get a list of photos with any extra parameters for the given cluster
      * Used for preview generation and download.
      *
-     * @param string $name   Identifier for the cluster
-     * @param int    $limit  Maximum number of photos to return (optional)
-     * @param int    $fileid Filter photos by file ID (optional)
+     * @param string $name Identifier for the cluster
+     * @param int $limit Maximum number of photos to return (optional)
+     * @param int $fileid Filter photos by file ID (optional)
      *
      * Setting $limit to -6 will attempt to fetch the cover photo for the cluster
      * This will be returned as an array with a single element if found
@@ -92,8 +92,7 @@ abstract class Backend
     /**
      * Human readable name for the cluster.
      */
-    public function clusterName(string $name): string
-    {
+    public function clusterName(string $name): string {
         return $name;
     }
 
@@ -101,54 +100,48 @@ abstract class Backend
      * Put the photo objects in priority list.
      * Works on the array in place.
      */
-    public function sortPhotosForPreview(array &$photos): void
-    {
+    public function sortPhotosForPreview(array &$photos): void {
         shuffle($photos);
     }
 
     /**
      * Quality to use for the preview file.
      */
-    public function getPreviewQuality(): int
-    {
+    public function getPreviewQuality(): int {
         return 512;
     }
 
     /**
      * Perform any post processing and get the blob from the preview file.
      *
-     * @param ISimpleFile $file  Preview file
-     * @param array       $photo Photo object
+     * @param ISimpleFile $file Preview file
+     * @param array $photo Photo object
      *
      * @return array [Blob, mimetype] of data
      */
-    public function getPreviewBlob(ISimpleFile $file, array $photo): array
-    {
+    public function getPreviewBlob(ISimpleFile $file, array $photo): array {
         return [$file->getContent(), $file->getMimeType()];
     }
 
     /**
      * Get the file ID for a photo object.
      */
-    public function getFileId(array $photo): int
-    {
-        return (int) $photo['fileid'];
+    public function getFileId(array $photo): int {
+        return (int)$photo['fileid'];
     }
 
     /**
      * Get the cover object ID for a photo object.
      */
-    public function getCoverObjId(array $photo): int
-    {
+    public function getCoverObjId(array $photo): int {
         return $this->getFileId($photo);
     }
 
     /**
      * Get the cluster ID for a photo object.
      */
-    public function getClusterIdFrom(array $photo): int
-    {
-        throw new \Exception('getClusterIdFrom not implemented by '.$this::class);
+    public function getClusterIdFrom(array $photo): int {
+        throw new \Exception('getClusterIdFrom not implemented by ' . $this::class);
     }
 
     /**
@@ -157,8 +150,7 @@ abstract class Backend
      *
      * @param int $fileid Filter clusters by file ID (optional)
      */
-    final public function getClusters(int $fileid): array
-    {
+    final public function getClusters(int $fileid): array {
         $list = $this->getClustersInternal($fileid);
 
         foreach ($list as &$cluster) {
@@ -172,19 +164,17 @@ abstract class Backend
     /**
      * Register the backend. Do not override.
      */
-    final public static function register(): void
-    {
+    final public static function register(): void {
         Manager::register(static::clusterType(), static::class);
     }
 
     /**
      * Set the cover photo for the given cluster.
      *
-     * @param array $photo  Photo object
-     * @param bool  $manual Whether this is a manual selection
+     * @param array $photo Photo object
+     * @param bool $manual Whether this is a manual selection
      */
-    final public function setCover(array $photo, bool $manual = false): void
-    {
+    final public function setCover(array $photo, bool $manual = false): void {
         try {
             Covers::setCover(
                 type: $this->clusterType(),

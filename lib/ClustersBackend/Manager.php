@@ -25,8 +25,7 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCP\IRequest;
 
-class Manager
-{
+class Manager {
     /**
      * Mapping of backend name to className.
      *
@@ -41,8 +40,7 @@ class Manager
      *
      * @throws \Exception If the backend is not registered
      */
-    public static function get(string $name): Backend
-    {
+    public static function get(string $name): Backend {
         if ($className = self::$backends[$name] ?? null) {
             /** @var Backend */
             return \OC::$server->get($className);
@@ -56,16 +54,14 @@ class Manager
      *
      * @param class-string $className
      */
-    public static function register(string $name, string $className): void
-    {
+    public static function register(string $name, string $className): void {
         self::$backends[$name] = $className;
     }
 
     /**
      * Apply all query transformations for the given request.
      */
-    public static function getTransforms(IRequest $request): array
-    {
+    public static function getTransforms(IRequest $request): array {
         $transforms = [];
         foreach (array_keys(self::$backends) as $backendName) {
             if ($request->getParam($backendName)) {
@@ -82,8 +78,7 @@ class Manager
     /**
      * Apply all post-query transformations for the given day object.
      */
-    public static function applyDayPostTransforms(IRequest $request, array &$row): void
-    {
+    public static function applyDayPostTransforms(IRequest $request, array &$row): void {
         foreach (array_keys(self::$backends) as $backendName) {
             if ($request->getParam($backendName)) {
                 $backend = self::get($backendName);

@@ -25,8 +25,7 @@ use OCP\IUserSession;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
 
-class PublicController extends AuthPublicShareController
-{
+class PublicController extends AuthPublicShareController {
     /** @psalm-suppress PropertyNotSetInConstructor */
     protected IShare $share;
 
@@ -51,8 +50,7 @@ class PublicController extends AuthPublicShareController
      */
     #[PublicPage]
     #[NoCSRFRequired]
-    public function showAuthenticate(): TemplateResponse
-    {
+    public function showAuthenticate(): TemplateResponse {
         $this->redirectIfOwned($this->share);
 
         $templateParameters = ['share' => $this->share];
@@ -60,8 +58,7 @@ class PublicController extends AuthPublicShareController
         return new TemplateResponse('core', 'publicshareauth', $templateParameters, 'guest');
     }
 
-    public function isValidToken(): bool
-    {
+    public function isValidToken(): bool {
         try {
             $this->share = $this->shareManager->getShareByToken($this->getToken());
 
@@ -73,8 +70,7 @@ class PublicController extends AuthPublicShareController
 
     #[PublicPage]
     #[NoCSRFRequired]
-    public function showShare(): TemplateResponse
-    {
+    public function showShare(): TemplateResponse {
         // Check whether share exists
         try {
             $share = $this->shareManager->getShareByToken($this->getToken());
@@ -126,33 +122,28 @@ class PublicController extends AuthPublicShareController
         return $response;
     }
 
-    protected function showAuthFailed(): TemplateResponse
-    {
+    protected function showAuthFailed(): TemplateResponse {
         $templateParameters = ['share' => $this->share, 'wrongpw' => true];
 
         return new TemplateResponse('core', 'publicshareauth', $templateParameters, 'guest');
     }
 
-    protected function verifyPassword(string $password): bool
-    {
+    protected function verifyPassword(string $password): bool {
         return $this->shareManager->checkPassword($this->share, $password);
     }
 
-    protected function getPasswordHash(): string
-    {
+    protected function getPasswordHash(): string {
         // TODO: return type has changed to ?string with 29
         // Change this when dropping support for 28
         return $this->share->getPassword() ?? '';
     }
 
-    protected function isPasswordProtected(): bool
-    {
+    protected function isPasswordProtected(): bool {
         /** @psalm-suppress RedundantConditionGivenDocblockType */
-        return null !== $this->share->getPassword();
+        return $this->share->getPassword() !== null;
     }
 
-    protected function redirectIfOwned(IShare $share): void
-    {
+    protected function redirectIfOwned(IShare $share): void {
         $user = $this->userSession->getUser();
         if (!$user) {
             return;
@@ -168,7 +159,7 @@ class PublicController extends AuthPublicShareController
         try {
             $userFolder = $this->rootFolder->getUserFolder($user->getUID());
             $nodes = $userFolder->getById($share->getNodeId());
-            if (0 === \count($nodes)) {
+            if (\count($nodes) === 0) {
                 return;
             }
             $node = $nodes[0];
@@ -188,7 +179,7 @@ class PublicController extends AuthPublicShareController
         $foldersPath = $this->config->getUserValue($user->getUID(), Application::APPNAME, 'foldersPath', null) ?: '/';
 
         // Sanitize folders path ensuring leading and trailing slashes
-        $foldersPath = Util::sanitizePath('/'.$foldersPath.'/');
+        $foldersPath = Util::sanitizePath('/' . $foldersPath . '/');
 
         // Check if relPath starts with foldersPath
         if (empty($foldersPath) || !str_starts_with($relPath, $foldersPath)) {
@@ -208,7 +199,7 @@ class PublicController extends AuthPublicShareController
         // Cannot send a redirect response here because the return
         // type is a template response for the base class
         header('HTTP/1.1 302 Found');
-        header('Location: '.$url);
+        header('Location: ' . $url);
 
         exit; // no other way to do this due to typing of super class
     }
@@ -218,8 +209,7 @@ class PublicController extends AuthPublicShareController
      *
      * @throws NotFoundException if file not found in index
      */
-    private function getSingleItemInitialState(\OCP\Files\File $file): array
-    {
+    private function getSingleItemInitialState(\OCP\Files\File $file): array {
         return $this->tq->getSingleItem($file->getId())
             ?? throw new NotFoundException();
     }

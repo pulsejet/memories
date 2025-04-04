@@ -31,21 +31,18 @@ use OCP\Migration\SimpleMigrationStep;
 /**
  * Auto-generated migration step: Please modify to your needs!
  */
-class Version200000Date20220924015634 extends SimpleMigrationStep
-{
+class Version200000Date20220924015634 extends SimpleMigrationStep {
     /** @var IDBConnection */
     private $dbc;
 
-    public function __construct(IDBConnection $dbc)
-    {
+    public function __construct(IDBConnection $dbc) {
         $this->dbc = $dbc;
     }
 
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
-    {
+    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
         if ($schema->hasTable('memories')) {
@@ -60,8 +57,7 @@ class Version200000Date20220924015634 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
-    {
+    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
@@ -104,5 +100,6 @@ class Version200000Date20220924015634 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
+    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {
+    }
 }
