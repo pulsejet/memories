@@ -35,8 +35,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class IndexOpts
-{
+class IndexOpts {
     public bool $force = false;
     public bool $clear = false;
     public ?string $user = null;
@@ -45,20 +44,18 @@ class IndexOpts
     public bool $retry = false;
     public bool $skipCleanup = false;
 
-    public function __construct(InputInterface $input)
-    {
-        $this->force = (bool) $input->getOption('force');
-        $this->clear = (bool) $input->getOption('clear');
+    public function __construct(InputInterface $input) {
+        $this->force = (bool)$input->getOption('force');
+        $this->clear = (bool)$input->getOption('clear');
         $this->user = $input->getOption('user');
         $this->folder = $input->getOption('folder');
-        $this->retry = (bool) $input->getOption('retry');
-        $this->skipCleanup = (bool) $input->getOption('skip-cleanup');
+        $this->retry = (bool)$input->getOption('retry');
+        $this->skipCleanup = (bool)$input->getOption('skip-cleanup');
         $this->group = $input->getOption('group');
     }
 }
 
-class Index extends Command
-{
+class Index extends Command {
     private InputInterface $input;
     private OutputInterface $output;
     private IndexOpts $opts;
@@ -74,8 +71,7 @@ class Index extends Command
         parent::__construct();
     }
 
-    protected function configure(): void
-    {
+    protected function configure(): void {
         $this
             ->setName('memories:index')
             ->setDescription('Index the metadata in files')
@@ -89,8 +85,7 @@ class Index extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    protected function execute(InputInterface $input, OutputInterface $output): int {
         /** @var \Symfony\Component\Console\Output\ConsoleOutputInterface $output */
         $output = $output;
 
@@ -127,7 +122,7 @@ class Index extends Command
 
             return 0;
         } catch (\Exception $e) {
-            $this->output->writeln("<error>{$e->getMessage()}</error>".PHP_EOL);
+            $this->output->writeln("<error>{$e->getMessage()}</error>" . PHP_EOL);
 
             return 1;
         } finally {
@@ -138,8 +133,7 @@ class Index extends Command
     /**
      * Check and act on the clear option if set.
      */
-    protected function checkClear(): void
-    {
+    protected function checkClear(): void {
         if (!$this->opts->clear) {
             return;
         }
@@ -149,7 +143,7 @@ class Index extends Command
             $this->output->writeln('duplicates for some files appearing on the mobile app.');
             $this->output->writeln('Using --force instead of --clear is recommended in most cases.</error>');
             $this->output->write('Are you sure you want to clear the existing index? (y/N): ');
-            if ('y' !== trim(fgets(STDIN))) {
+            if (trim(fgets(STDIN)) !== 'y') {
                 throw new \Exception('Aborting');
             }
         }
@@ -161,8 +155,7 @@ class Index extends Command
     /**
      * Check and act on the force option if set.
      */
-    protected function checkForce(): void
-    {
+    protected function checkForce(): void {
         if (!$this->opts->force) {
             return;
         }
@@ -174,8 +167,7 @@ class Index extends Command
     /**
      * Check and act on the retry option if set.
      */
-    protected function checkRetry(): void
-    {
+    protected function checkRetry(): void {
         if (!$this->opts->retry) {
             return;
         }
@@ -187,8 +179,7 @@ class Index extends Command
     /**
      * Warn about skipped files (called at the end of indexing).
      */
-    protected function warnRetry(): void
-    {
+    protected function warnRetry(): void {
         if ($count = $this->tw->countFailures()) {
             $this->output->writeln("Indexing skipped for {$count} failed files, use --retry to try again");
         }
@@ -197,13 +188,12 @@ class Index extends Command
     /**
      * Run the indexer.
      */
-    protected function runIndex(): void
-    {
+    protected function runIndex(): void {
         $this->runForUsers(function (IUser $user) {
             try {
                 $this->indexer->indexUser($user, $this->opts->folder);
             } catch (\Exception $e) {
-                $this->output->writeln("<error>{$e->getMessage()}</error>".PHP_EOL);
+                $this->output->writeln("<error>{$e->getMessage()}</error>" . PHP_EOL);
             }
         });
     }
@@ -213,13 +203,12 @@ class Index extends Command
      *
      * @param \Closure(IUser $user): void $closure
      */
-    private function runForUsers(\Closure $closure): void
-    {
+    private function runForUsers(\Closure $closure): void {
         if ($uid = $this->opts->user) {
             if ($user = $this->userManager->get($uid)) {
                 $closure($user);
             } else {
-                $this->output->writeln("<error>User {$uid} not found</error>".PHP_EOL);
+                $this->output->writeln("<error>User {$uid} not found</error>" . PHP_EOL);
             }
         } elseif ($gid = $this->opts->group) {
             if ($group = $this->groupManager->get($gid)) {
@@ -227,7 +216,7 @@ class Index extends Command
                     $closure($user);
                 }
             } else {
-                $this->output->writeln("<error>Group {$gid} not found</error>".PHP_EOL);
+                $this->output->writeln("<error>Group {$gid} not found</error>" . PHP_EOL);
             }
         } else {
             $this->userManager->callForSeenUsers($closure);

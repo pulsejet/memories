@@ -7,8 +7,7 @@ namespace OCA\Memories\Service;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 
-class BinExt
-{
+class BinExt {
     public const EXIFTOOL_VER = '12.70';
     public const GOVOD_VER = '0.2.6';
     public const NX_VER_MIN = '1.1';
@@ -17,19 +16,17 @@ class BinExt
     private static bool $hasExiftoolEnv = false;
 
     /** Get the path to the temp directory */
-    public static function getTmpPath(): string
-    {
+    public static function getTmpPath(): string {
         return SystemConfig::get('memories.exiftool.tmp') ?: sys_get_temp_dir();
     }
 
     /** Copy a binary to temp dir for execution */
-    public static function getTempBin(string $path, string $name, bool $copy = true): string
-    {
+    public static function getTempBin(string $path, string $name, bool $copy = true): string {
         // Bust cache if the path changes
         $suffix = hash('crc32', $path);
 
         // Check target temp file
-        $target = self::getTmpPath().'/'.$name.'-'.$suffix;
+        $target = self::getTmpPath() . '/' . $name . '-' . $suffix;
         if (file_exists($target)) {
             if (!is_writable($target)) {
                 throw new \Exception("{$name} temp binary path is not writable: {$target}");
@@ -58,21 +55,19 @@ class BinExt
     }
 
     /** Get the name for a binary */
-    public static function getName(string $name, string $version = ''): string
-    {
+    public static function getName(string $name, string $version = ''): string {
         $id = SystemConfig::get('instanceid');
 
         return empty($version) ? "{$name}-{$id}" : "{$name}-{$id}-{$version}";
     }
 
     /** Test configured exiftool binary */
-    public static function testExiftool(): string
-    {
+    public static function testExiftool(): string {
         $cmd = array_merge(self::getExiftool(), ['-ver']);
 
         $out = Util::execSafe($cmd, 3000);
         if (!$out) {
-            throw new \Exception('failed to run exiftool: '.implode(' ', $cmd));
+            throw new \Exception('failed to run exiftool: ' . implode(' ', $cmd));
         }
 
         // Check version
@@ -83,7 +78,7 @@ class BinExt
         }
 
         // Test with actual file
-        $file = realpath(__DIR__.'/../../exiftest.jpg');
+        $file = realpath(__DIR__ . '/../../exiftest.jpg');
         if (!$file) {
             throw new \Exception('Could not find EXIF test file');
         }
@@ -91,7 +86,7 @@ class BinExt
         try {
             $exif = \OCA\Memories\Exif::getExifFromLocalPath($file);
         } catch (\Exception $e) {
-            throw new \Exception("Couldn't read Exif data from test file: ".$e->getMessage());
+            throw new \Exception("Couldn't read Exif data from test file: " . $e->getMessage());
         }
 
         if (!$exif) {
@@ -106,8 +101,7 @@ class BinExt
     }
 
     /** Get path to exiftool binary */
-    public static function getExiftoolPBin(): string
-    {
+    public static function getExiftoolPBin(): string {
         $path = SystemConfig::get('memories.exiftool');
 
         return self::getTempBin($path, self::getName('exiftool', self::EXIFTOOL_VER));
@@ -118,15 +112,14 @@ class BinExt
      *
      * @return string[]
      */
-    public static function getExiftool(): array
-    {
+    public static function getExiftool(): array {
         if (!self::$hasExiftoolEnv) {
             self::$hasExiftoolEnv = true;
             putenv('LANG=C'); // set perl lang to suppress warning
         }
 
         if (SystemConfig::get('memories.exiftool_no_local')) {
-            return ['perl', realpath(__DIR__.'/../../bin-ext/exiftool/exiftool')];
+            return ['perl', realpath(__DIR__ . '/../../bin-ext/exiftool/exiftool')];
         }
 
         return [self::getExiftoolPBin()];
@@ -135,8 +128,7 @@ class BinExt
     /**
      * Detect the exiftool binary to use.
      */
-    public static function detectExiftool(): false|string
-    {
+    public static function detectExiftool(): false|string {
         if (!empty($path = SystemConfig::get('memories.exiftool')) && file_exists($path)) {
             return $path;
         }
@@ -152,7 +144,7 @@ class BinExt
         // Get static binary if available
         if ($arch && $libc) {
             // get target file path
-            $path = realpath(__DIR__."/../../bin-ext/exiftool-{$arch}-{$libc}");
+            $path = realpath(__DIR__ . "/../../bin-ext/exiftool-{$arch}-{$libc}");
 
             // make sure it exists
             if ($path && file_exists($path)) {
@@ -170,8 +162,7 @@ class BinExt
     /**
      * Get the upstream URL for a video.
      */
-    public static function getGoVodUrl(string $client, string $path, string $profile): string
-    {
+    public static function getGoVodUrl(string $client, string $path, string $profile): string {
         $path = rawurlencode($path);
 
         $bind = SystemConfig::get('memories.vod.bind');
@@ -180,8 +171,7 @@ class BinExt
         return "http://{$connect}/{$client}{$path}/{$profile}";
     }
 
-    public static function getGoVodConfig(bool $local = false): array
-    {
+    public static function getGoVodConfig(bool $local = false): array {
         // Get config from system values
         $env = [
             'qf' => SystemConfig::get('memories.vod.qf'),
@@ -203,10 +193,10 @@ class BinExt
         }
 
         // Get temp directory
-        $tmpPath = SystemConfig::get('memories.vod.tempdir', sys_get_temp_dir().'/go-vod/');
+        $tmpPath = SystemConfig::get('memories.vod.tempdir', sys_get_temp_dir() . '/go-vod/');
 
         // Make sure path ends with slash
-        if ('/' !== substr($tmpPath, -1)) {
+        if (substr($tmpPath, -1) !== '/') {
             $tmpPath .= '/';
         }
 
@@ -224,8 +214,7 @@ class BinExt
     /**
      * Get temp binary for go-vod.
      */
-    public static function getGoVodBin(): string
-    {
+    public static function getGoVodBin(): string {
         $path = SystemConfig::get('memories.vod.path');
 
         return self::getTempBin($path, self::getName('go-vod', self::GOVOD_VER));
@@ -235,8 +224,7 @@ class BinExt
      * If local, restart the go-vod instance.
      * If external, configure the go-vod instance.
      */
-    public static function startGoVod(): ?string
-    {
+    public static function startGoVod(): ?string {
         // Check if disabled
         if (SystemConfig::get('memories.vod.disable')) {
             // Make sure it's dead, in case the user just disabled it
@@ -277,8 +265,8 @@ class BinExt
         }
 
         // Write config to file
-        $logFile = $tmpPath.'.log';
-        $configFile = $tmpPath.'.json';
+        $logFile = $tmpPath . '.log';
+        $configFile = $tmpPath . '.json';
         file_put_contents($configFile, json_encode($env, JSON_PRETTY_PRINT));
 
         // Kill the transcoder in case it's running
@@ -302,8 +290,7 @@ class BinExt
     /**
      * Test go-vod and (re)-start if it is not external.
      */
-    public static function testStartGoVod(): string
-    {
+    public static function testStartGoVod(): string {
         try {
             return self::testGoVod();
         } catch (\Exception $e) {
@@ -319,15 +306,14 @@ class BinExt
     }
 
     /** Test the go-vod instance that is running */
-    public static function testGoVod(): string
-    {
+    public static function testGoVod(): string {
         // Check if disabled
         if (SystemConfig::get('memories.vod.disable')) {
             throw new \Exception('Transcoding is disabled');
         }
 
         // TODO: check data mount; ignoring the result of the file for now
-        $testfile = realpath(__DIR__.'/../../exiftest.jpg');
+        $testfile = realpath(__DIR__ . '/../../exiftest.jpg');
 
         // Make request
         $url = self::getGoVodUrl('test', $testfile, 'test');
@@ -339,11 +325,11 @@ class BinExt
                 'connect_timeout' => 1,
             ]);
         } catch (\Exception $e) {
-            throw new \Exception('failed to connect to go-vod: '.$e->getMessage());
+            throw new \Exception('failed to connect to go-vod: ' . $e->getMessage());
         }
 
         // Parse body
-        $json = json_decode((string) $res->getBody(), true);
+        $json = json_decode((string)$res->getBody(), true);
         if (!$json) {
             throw new \Exception('failed to parse go-vod response');
         }
@@ -361,8 +347,7 @@ class BinExt
     /**
      * POST a new configuration to go-vod.
      */
-    public static function configureGoVod(): bool
-    {
+    public static function configureGoVod(): bool {
         // Get config
         $config = self::getGoVodConfig();
 
@@ -377,7 +362,7 @@ class BinExt
                 'connect_timeout' => 1,
             ]);
         } catch (\Exception $e) {
-            throw new \Exception('failed to connect to go-vod: '.$e->getMessage());
+            throw new \Exception('failed to connect to go-vod: ' . $e->getMessage());
         }
 
         return true;
@@ -386,14 +371,13 @@ class BinExt
     /**
      * Detect the go-vod binary to use.
      */
-    public static function detectGoVod(): false|string
-    {
+    public static function detectGoVod(): false|string {
         $goVodPath = SystemConfig::get('memories.vod.path');
 
         if (empty($goVodPath) || !file_exists($goVodPath)) {
             // Detect architecture
             $arch = \OCA\Memories\Util::getArch();
-            $path = __DIR__."/../../bin-ext/go-vod-{$arch}";
+            $path = __DIR__ . "/../../bin-ext/go-vod-{$arch}";
             $goVodPath = realpath($path);
 
             if (!$goVodPath) {
@@ -412,8 +396,7 @@ class BinExt
         return $goVodPath;
     }
 
-    public static function detectFFmpeg(): ?string
-    {
+    public static function detectFFmpeg(): ?string {
         $ffmpegPath = SystemConfig::get('memories.vod.ffmpeg');
         $ffprobePath = SystemConfig::get('memories.vod.ffprobe');
 
@@ -442,8 +425,7 @@ class BinExt
         return $ffmpegPath;
     }
 
-    public static function testFFmpeg(string $path, string $name): string
-    {
+    public static function testFFmpeg(string $path, string $name): string {
         $version = Util::execSafe([$path, '-version'], 3000) ?: '';
         if (!preg_match("/{$name} version \\S*/", $version, $matches)) {
             throw new \Exception("failed to detect version, found {$version}");
@@ -452,10 +434,9 @@ class BinExt
         return explode(' ', $matches[0])[2];
     }
 
-    public static function testSystemPerl(string $path): string
-    {
+    public static function testSystemPerl(string $path): string {
         if (($out = Util::execSafe([$path, '-e', 'print "OK";'], 3000)) !== 'OK') {
-            throw new \Exception('Failed to run test perl script: '.(string) $out);
+            throw new \Exception('Failed to run test perl script: ' . (string)$out);
         }
 
         return Util::execSafe([$path, '-e', 'print $^V;'], 3000) ?: 'unknown version';
@@ -467,8 +448,7 @@ class BinExt
      *
      * @param string $name Process name (only the first 12 characters are used)
      */
-    public static function pkill(string $name): void
-    {
+    public static function pkill(string $name): void {
         // don't kill everything
         if (empty($name)) {
             return;
@@ -492,7 +472,7 @@ class BinExt
         $procs = explode("\n", $procs);
 
         $matches = array_filter($procs, static fn ($l) => str_contains($l, $name));
-        $pids = array_map(static fn ($l) => (int) explode(' ', trim($l))[0], $matches);
+        $pids = array_map(static fn ($l) => (int)explode(' ', trim($l))[0], $matches);
         if (empty($pids)) {
             return;
         }
