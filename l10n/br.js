@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Download" : "Pellgargañ",
+    "People" : "Tud",
     "Favorites" : "Pennrolloù",
     "Tags" : "Klavioù",
     "Settings" : "Arventennoù",
@@ -33,6 +34,7 @@ OC.L10N.register(
     "Title" : "Titl",
     "Description" : "Deskrivadur",
     "Label" : "Tiketenn",
+    "Copyright" : "Copyright",
     "Name" : "Anv",
     "Update" : "Hizivaat",
     "Loading …" : "O Kargañ ...",
@@ -48,6 +50,7 @@ OC.L10N.register(
     "Unsaved changes" : "Kemmoù n'int ket bet enrollet",
     "Next" : "Da heul",
     "Original" : "Orin",
+    "Text" : "Testenn",
     "Size" : "Ment",
     "Setup" : "Neuziadur",
     "No" : "Nann",

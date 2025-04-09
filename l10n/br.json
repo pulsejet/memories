@@ -1,5 +1,6 @@
 { "translations": {
     "Download" : "Pellgargañ",
+    "People" : "Tud",
     "Favorites" : "Pennrolloù",
     "Tags" : "Klavioù",
     "Settings" : "Arventennoù",
@@ -31,6 +32,7 @@
     "Title" : "Titl",
     "Description" : "Deskrivadur",
     "Label" : "Tiketenn",
+    "Copyright" : "Copyright",
     "Name" : "Anv",
     "Update" : "Hizivaat",
     "Loading …" : "O Kargañ ...",
@@ -46,6 +48,7 @@
     "Unsaved changes" : "Kemmoù n'int ket bet enrollet",
     "Next" : "Da heul",
     "Original" : "Orin",
+    "Text" : "Testenn",
     "Size" : "Ment",
     "Setup" : "Neuziadur",
     "No" : "Nann",
