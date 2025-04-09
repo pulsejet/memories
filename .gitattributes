@@ -1,1 +1,2 @@
 l10n/** linguist-vendored
+*.sh text eol=lf
