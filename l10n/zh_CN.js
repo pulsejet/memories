@@ -144,7 +144,7 @@ OC.L10N.register(
     "Files that failed indexing will not be indexed again unless they change." : "索引失败的文件除非被修改，否则不再会被重新引索。",
     "You can manually retry files that failed indexing." : "你可以手动重试引索文件。",
     "Automatic Indexing status: {status}" : "自动索引状态: {status}",
-    "Last index job was run {t} seconds ago." : "最后一个索引作业在{t}秒前运行。",
+    "Last index job was run {t} seconds ago." : "最近索引作业在 {t} 秒前运行。",
     "It took {t} seconds to complete." : "耗时{t}秒完成",
     "It is still running or was interrupted." : "它仍在运行或被中断。",
     "Looks like it has been more than an hour since the last index job was run. Make sure Nextcloud cron is configured correctly." : "自上次运行索引作业以来已经一个多小时了。 确保 Nextcloud cron 配置正确。",
