@@ -7,6 +7,7 @@ OC.L10N.register(
     "Explore" : "Explore",
     "Favorites" : "Favorites",
     "Archive" : "Archive",
+    "Places" : "ადგილები",
     "Tags" : "Tags",
     "Settings" : "Settings",
     "Videos" : "Videos",
