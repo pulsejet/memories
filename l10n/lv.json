@@ -17,7 +17,7 @@
     "Metadata" : "Metadati",
     "Edit" : "Labot",
     "Photos" : "Fotoattēli",
-    "Delete" : "Dzēst",
+    "Delete" : "Izdzēst",
     "Share" : "Koplietot",
     "Favorite" : "Izlasē",
     "View in folder" : "Skatīt mapē",
@@ -44,7 +44,7 @@
     "Copy the public link" : "Kopējiet publisko saiti",
     "Public link copied!" : "Publiskā saite nokopēta!",
     "Copy public link" : "Kopējiet publisko saiti",
-    "Delete the public link" : "Dzēst publisko saiti",
+    "Delete the public link" : "Izdzēst publisko saiti",
     "Share via public link" : "Kopīgojiet, izmantojot publisko saiti",
     "Could not load the selected album" : "Nevarēja ielādēt izvēlēto albumu",
     "Edit album details" : "Labot albuma datus",
@@ -118,6 +118,8 @@
     "Face Recognition is disabled. Enable in settings to find your friends" : "Seju atpazīšana ir atspējota. Tā ir iespējojama iestatījumos, lai atrastu savus draugus",
     "Yes" : "Jā",
     "No" : "Nē",
-    "Choose" : "Izvēlēties"
+    "Choose" : "Izvēlēties",
+    "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Pārvietot {count} vienumu uz atkritni?","Pārvietot {count} vienumu uz atkritni?","Pārvietot {count} vienumus uz atkritni?"],
+    "Files in trash may be automatically deleted after a fixed period of time." : "Atkritnē esošās datnes var automātiski izdzēst pēc noteikta laika posma."
 },"pluralForm" :"nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);"
 }
