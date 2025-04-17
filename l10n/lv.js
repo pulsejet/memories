@@ -22,6 +22,7 @@ OC.L10N.register(
     "Delete" : "Izdzēst",
     "Share" : "Koplietot",
     "Favorite" : "Izlasē",
+    "Edit metadata" : "Labot metadatus",
     "View in folder" : "Skatīt mapē",
     "Cancel" : "Atcelt",
     "General" : "Vispārīgs",

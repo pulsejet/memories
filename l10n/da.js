@@ -70,6 +70,7 @@ OC.L10N.register(
     "Go to the add collaborators view." : "Gå til visningen Tilføj samarbejdspartnere.",
     "Add collaborators" : "Tilføj samarbejdspartnere",
     "Back to the new album form." : "Tilbage til den nye albumformular.",
+    "Save changes" : "Gem ændringer",
     "Name of the album" : "Albummets navn",
     "Save collaborators for this album." : "Gem samarbejdspartnere for dette album.",
     "Year" : "År",
