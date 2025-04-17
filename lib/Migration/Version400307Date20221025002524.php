@@ -30,18 +30,17 @@ use OCP\Migration\SimpleMigrationStep;
 /**
  * Auto-generated migration step: Please modify to your needs!
  */
-class Version400307Date20221025002524 extends SimpleMigrationStep
-{
+class Version400307Date20221025002524 extends SimpleMigrationStep {
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
+    public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {
+    }
 
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
-    {
+    public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
@@ -58,5 +57,6 @@ class Version400307Date20221025002524 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
-    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
+    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {
+    }
 }

@@ -30,12 +30,10 @@ use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
 
-class DaysController extends GenericApiController
-{
+class DaysController extends GenericApiController {
     #[NoAdminRequired]
     #[PublicPage]
-    public function days(): Http\Response
-    {
+    public function days(): Http\Response {
         return Util::guardEx(function () {
             $list = $this->tq->getDays(
                 $this->isRecursive(),
@@ -57,8 +55,7 @@ class DaysController extends GenericApiController
      */
     #[NoAdminRequired]
     #[PublicPage]
-    public function day(array $dayIds): Http\Response
-    {
+    public function day(array $dayIds): Http\Response {
         return Util::guardEx(function () use ($dayIds) {
             // Run actual query
             $list = $this->tq->getDay(
@@ -77,17 +74,15 @@ class DaysController extends GenericApiController
 
     #[NoAdminRequired]
     #[PublicPage]
-    public function dayGet(string $id): Http\Response
-    {
+    public function dayGet(string $id): Http\Response {
         // Split at commas and convert all parts to int
-        return $this->day(array_map(static fn ($p) => (int) $p, explode(',', $id)));
+        return $this->day(array_map(static fn ($p) => (int)$p, explode(',', $id)));
     }
 
     /**
      * Get transformations depending on the request.
      */
-    private function getTransformations(): array
-    {
+    private function getTransformations(): array {
         $transforms = [];
 
         // Add clustering transforms
@@ -116,7 +111,7 @@ class DaysController extends GenericApiController
 
         // Limit number of responses for day query
         if ($limit = $this->request->getParam('limit')) {
-            $transforms[] = [$this->tq, 'transformLimit', (int) $limit];
+            $transforms[] = [$this->tq, 'transformLimit', (int)$limit];
         }
 
         // Add extra fields for native callers
@@ -132,8 +127,7 @@ class DaysController extends GenericApiController
      *
      * @param array $days the days array (modified in place)
      */
-    private function preloadDays(array &$days): void
-    {
+    private function preloadDays(array &$days): void {
         // Do not preload anything for native clients.
         // Since the contents of preloads are trusted, clients will not load locals.
         if (Util::callerIsNative() || $this->noPreload()) {
@@ -144,11 +138,11 @@ class DaysController extends GenericApiController
         $totalCount = 0;
         $drefMap = [];
         foreach ($days as &$day) {
-            if ($count = (int) $day['count']) {
+            if ($count = (int)$day['count']) {
                 $totalCount += max($count, 10); // max 5 days
             }
 
-            $dayId = (int) $day['dayid'];
+            $dayId = (int)$day['dayid'];
             $drefMap[$dayId] = &$day;
 
             if ($totalCount >= 50) { // should be enough
@@ -173,7 +167,7 @@ class DaysController extends GenericApiController
 
         // Load details into map byref
         foreach ($details as $photo) {
-            $dayId = (int) $photo['dayid'];
+            $dayId = (int)$photo['dayid'];
             if (!($drefMap[$dayId] ?? null)) {
                 continue;
             }
@@ -186,33 +180,27 @@ class DaysController extends GenericApiController
         }
     }
 
-    private function isRecursive(): bool
-    {
-        return null === $this->request->getParam('folder') || $this->request->getParam('recursive');
+    private function isRecursive(): bool {
+        return $this->request->getParam('folder') === null || $this->request->getParam('recursive');
     }
 
-    private function isArchive(): bool
-    {
-        return null !== $this->request->getParam('archive');
+    private function isArchive(): bool {
+        return $this->request->getParam('archive') !== null;
     }
 
-    private function isHidden(): bool
-    {
-        return null !== $this->request->getParam('hidden');
+    private function isHidden(): bool {
+        return $this->request->getParam('hidden') !== null;
     }
 
-    private function noPreload(): bool
-    {
-        return null !== $this->request->getParam('nopreload');
+    private function noPreload(): bool {
+        return $this->request->getParam('nopreload') !== null;
     }
 
-    private function isMonthView(): bool
-    {
-        return null !== $this->request->getParam('monthView');
+    private function isMonthView(): bool {
+        return $this->request->getParam('monthView') !== null;
     }
 
-    private function isReverse(): bool
-    {
-        return null !== $this->request->getParam('reverse');
+    private function isReverse(): bool {
+        return $this->request->getParam('reverse') !== null;
     }
 }

@@ -37,8 +37,7 @@ use OCP\Files\IRootFolder;
 
 const IMAGICK_SAFE = '/^image\/(x-)?(png|jpeg|gif|bmp|tiff|webp|hei(f|c)|avif|dcraw)$/';
 
-class ImageController extends GenericApiController
-{
+class ImageController extends GenericApiController {
     /**
      * Get preview of image.
      */
@@ -53,7 +52,7 @@ class ImageController extends GenericApiController
         string $mode = 'fill',
     ): Http\Response {
         return Util::guardEx(function () use ($id, $x, $y, $a, $mode) {
-            if (-1 === $id || 0 === $x || 0 === $y) {
+            if ($id === -1 || $x === 0 || $y === 0) {
                 throw Exceptions::MissingParameter('id, x, y');
             }
 
@@ -66,8 +65,8 @@ class ImageController extends GenericApiController
             // Do the comparison case-insensitive
             $filename = $file->getName();
             if ($ext = pathinfo($preview->getName(), PATHINFO_EXTENSION)) {
-                if (!str_ends_with(strtolower($filename), strtolower('.'.$ext))) {
-                    $filename .= '.'.$ext;
+                if (!str_ends_with(strtolower($filename), strtolower('.' . $ext))) {
+                    $filename .= '.' . $ext;
                 }
             }
 
@@ -85,21 +84,20 @@ class ImageController extends GenericApiController
     #[NoAdminRequired]
     #[NoCSRFRequired]
     #[PublicPage]
-    public function multipreview(array $files): Http\Response
-    {
+    public function multipreview(array $files): Http\Response {
         return Util::guardExDirect(function (Http\IOutput $out) use ($files) {
             // Filter files with valid parameters
             $files = array_filter($files, static function (array $file) {
                 return isset($file['reqid'], $file['fileid'], $file['x'], $file['y'], $file['a'])
-                    && (int) $file['fileid'] > 0
-                    && (int) $file['x'] > 0
-                    && (int) $file['y'] > 0;
+                    && (int)$file['fileid'] > 0
+                    && (int)$file['x'] > 0
+                    && (int)$file['y'] > 0;
             });
 
             // Sort files by size, ascending
             usort($files, static function (array $a, array $b) {
-                $aArea = (int) $a['x'] * (int) $a['y'];
-                $bArea = (int) $b['x'] * (int) $b['y'];
+                $aArea = (int)$a['x'] * (int)$a['y'];
+                $bArea = (int)$b['x'] * (int)$b['y'];
 
                 return $aArea <=> $bArea;
             });
@@ -118,15 +116,15 @@ class ImageController extends GenericApiController
 
             foreach ($files as $bodyFile) {
                 $reqid = $bodyFile['reqid'];
-                $fileid = (int) $bodyFile['fileid'];
-                $x = (int) $bodyFile['x'];
-                $y = (int) $bodyFile['y'];
-                $a = '1' === $bodyFile['a'];
+                $fileid = (int)$bodyFile['fileid'];
+                $x = (int)$bodyFile['x'];
+                $y = (int)$bodyFile['y'];
+                $a = $bodyFile['a'] === '1';
 
                 try {
                     // Make sure max preview exists
                     $file = $this->fs->getUserFile($fileid);
-                    $fileId = (string) $file->getId();
+                    $fileId = (string)$file->getId();
                     $folder = $previewRoot->getFolder($fileId);
                     $hasMax = false;
                     foreach ($folder->getDirectoryListing() as $preview) {
@@ -221,8 +219,8 @@ class ImageController extends GenericApiController
                 // Get the path of the file relative to current user
                 // "/admin/files/Photos/Camera/20230821_135017.jpg" => "/Photos/..."
                 $parts = explode('/', $file->getPath());
-                if (\count($parts) > 3 && 'files' === $parts[2] && $parts[1] === $user->getUID()) {
-                    $info['filename'] = '/'.implode('/', \array_slice($parts, 3));
+                if (\count($parts) > 3 && $parts[2] === 'files' && $parts[1] === $user->getUID()) {
+                    $info['filename'] = '/' . implode('/', \array_slice($parts, 3));
                 }
 
                 // Get list of tags for this file
@@ -256,8 +254,7 @@ class ImageController extends GenericApiController
      * Set the exif data for a file.
      */
     #[NoAdminRequired]
-    public function setExif(int $id, array $raw): Http\Response
-    {
+    public function setExif(int $id, array $raw): Http\Response {
         return Util::guardEx(function () use ($id, $raw) {
             $file = $this->fs->getUserFile($id);
 
@@ -294,10 +291,9 @@ class ImageController extends GenericApiController
     #[NoAdminRequired]
     #[NoCSRFRequired]
     #[PublicPage]
-    public function decodable(string $id): Http\Response
-    {
+    public function decodable(string $id): Http\Response {
         return Util::guardEx(function () use ($id) {
-            $file = $this->fs->getUserFile((int) $id);
+            $file = $this->fs->getUserFile((int)$id);
 
             // Check if valid image
             $mimetype = $file->getMimeType();
@@ -379,8 +375,8 @@ class ImageController extends GenericApiController
             $image->setImageFormat($extension);
 
             // Set quality if specified
-            if (null !== $quality && $quality >= 0 && $quality <= 1) {
-                $image->setImageCompressionQuality((int) round(100 * $quality));
+            if ($quality !== null && $quality >= 0 && $quality <= 1) {
+                $image->setImageCompressionQuality((int)round(100 * $quality));
             }
 
             // Save the image
@@ -403,15 +399,14 @@ class ImageController extends GenericApiController
     /**
      * Given a blob of image data, return a JPEG blob.
      *
-     * @param string $blob     Blob of image data in any format
+     * @param string $blob Blob of image data in any format
      * @param string $mimetype Mimetype of image data
      *
      * @return string[] [blob, mimetype]
      *
      * @psalm-return list{string, string}
      */
-    private function getImageJPEG($blob, $mimetype): array
-    {
+    private function getImageJPEG($blob, $mimetype): array {
         // TODO: Use imaginary if available (once HEIC isn't broken)
 
         // Get an instance of Imagick
@@ -425,7 +420,7 @@ class ImageController extends GenericApiController
             $blob = $image->getImageBlob();
             $mimetype = $image->getImageMimeType();
         } catch (\ImagickException $e) {
-            throw Exceptions::Forbidden('Imagick failed to convert image: '.$e->getMessage());
+            throw Exceptions::Forbidden('Imagick failed to convert image: ' . $e->getMessage());
         } finally {
             $image->clear();
         }
@@ -438,8 +433,7 @@ class ImageController extends GenericApiController
      *
      * @return string[]
      */
-    private function getTags(int $fileId): array
-    {
+    private function getTags(int $fileId): array {
         // Make sure tags are enabled
         if (!Util::tagsIsEnabled()) {
             return [];
@@ -447,7 +441,7 @@ class ImageController extends GenericApiController
 
         // Get the tag ids for this file
         $objectMapper = \OC::$server->get(\OCP\SystemTag\ISystemTagObjectMapper::class);
-        $tagIds = $objectMapper->getTagIdsForObjects([$fileId], 'files')[(string) $fileId];
+        $tagIds = $objectMapper->getTagIdsForObjects([$fileId], 'files')[(string)$fileId];
 
         // Get all matching tag objects
         $tags = \OC::$server->get(\OCP\SystemTag\ISystemTagManager::class)->getTagsByIds($tagIds);
@@ -464,8 +458,7 @@ class ImageController extends GenericApiController
      *
      * @param \OCP\Files\File $file File to invalidate previews for
      */
-    private function refreshPreviews(\OCP\Files\File $file): void
-    {
+    private function refreshPreviews(\OCP\Files\File $file): void {
         try {
             $previewRoot = new \OC\Preview\Storage\Root(
                 \OC::$server->get(IRootFolder::class),
@@ -473,7 +466,7 @@ class ImageController extends GenericApiController
             );
 
             // Delete the preview folder
-            $fileId = (string) $file->getId();
+            $fileId = (string)$file->getId();
             $previewRoot->getFolder($fileId)->delete();
 
             // Get the preview to regenerate
@@ -491,8 +484,7 @@ class ImageController extends GenericApiController
      *
      * @return \Imagick
      */
-    private static function getImagick(string $blob)
-    {
+    private static function getImagick(string $blob) {
         // Check if Imagick is available
         if (!class_exists('Imagick')) {
             throw Exceptions::Forbidden('Imagick extension is not available');
@@ -512,7 +504,7 @@ class ImageController extends GenericApiController
 
             return $image;
         } catch (\ImagickException $e) {
-            throw Exceptions::Forbidden('Imagick failed to read image: '.$e->getMessage());
+            throw Exceptions::Forbidden('Imagick failed to read image: ' . $e->getMessage());
         }
     }
 }

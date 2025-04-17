@@ -17,8 +17,7 @@ const APPROX_PLACES = 635189;
 
 const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.3/planet_coarse_boundaries.zip';
 
-class Places
-{
+class Places {
     /**
      * Number of places to process in a single transaction.
      */
@@ -28,18 +27,18 @@ class Places
         protected IConfig $config,
         protected IDBConnection $connection,
         protected TimelineWrite $tw,
-    ) {}
+    ) {
+    }
 
     /**
      * Make SQL query to detect GIS type.
      *
      * @psalm-return 0|1|2|3
      */
-    public function detectGisType(): int
-    {
+    public function detectGisType(): int {
         // Make sure database prefix is set
         $prefix = $this->config->getSystemValue('dbtableprefix', '') ?: '';
-        if ('' === $prefix) {
+        if ($prefix === '') {
             throw new \Exception('Database table prefix is not set. Cannot use database extensions (dbtableprefix).');
         }
 
@@ -50,7 +49,7 @@ class Places
         if (preg_match('/mysql|mariadb/i', $platform::class)) {
             try {
                 $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)', 4326)")->fetch();
-                if (0 === \count($res)) {
+                if (\count($res) === 0) {
                     throw new \Exception('Invalid result');
                 }
 
@@ -64,7 +63,7 @@ class Places
         if (preg_match('/postgres/i', $platform::class)) {
             try {
                 $res = $this->connection->executeQuery("SELECT POINT('1,1')")->fetch();
-                if (0 === \count($res)) {
+                if (\count($res) === 0) {
                     throw new \Exception('Invalid result');
                 }
 
@@ -80,10 +79,9 @@ class Places
     /**
      * Check if DB is already setup and return number of entries.
      */
-    public function geomCount(): int
-    {
+    public function geomCount(): int {
         try {
-            return (int) $this->connection->executeQuery('SELECT COUNT(osm_id) as c FROM memories_planet_geometry')->fetchOne();
+            return (int)$this->connection->executeQuery('SELECT COUNT(osm_id) as c FROM memories_planet_geometry')->fetchOne();
         } catch (\Exception $e) {
             return 0;
         }
@@ -92,16 +90,15 @@ class Places
     /**
      * Get list of osm IDs for a given point.
      */
-    public function queryPoint(float $lat, float $lon): array
-    {
+    public function queryPoint(float $lat, float $lon): array {
         // Get GIS type
         $gisType = SystemConfig::gisType();
 
         // Construct WHERE clause depending on GIS type
         $where = null;
-        if (GIS_TYPE_MYSQL === $gisType) {
+        if ($gisType === GIS_TYPE_MYSQL) {
             $where = "ST_Contains(geometry, ST_GeomFromText('POINT({$lat} {$lon})', 4326))";
-        } elseif (GIS_TYPE_POSTGRES === $gisType) {
+        } elseif ($gisType === GIS_TYPE_POSTGRES) {
             // Postgres does not support using an index with POINT <@ POLYGON
             // https://www.postgresql.org/docs/current/gist-builtin-opclasses.html
             $where = "POLYGON('{$lat},{$lon}') <@ geometry";
@@ -138,17 +135,16 @@ class Places
     /**
      * Download planet database file and return path to it.
      */
-    public function downloadPlanet(): string
-    {
+    public function downloadPlanet(): string {
         echo "Download planet data to temporary file...\n";
         flush();
 
-        $filename = BinExt::getTmpPath().'/planet_coarse_boundaries.zip';
+        $filename = BinExt::getTmpPath() . '/planet_coarse_boundaries.zip';
         if (file_exists($filename) && !unlink($filename)) {
             throw new \Exception("Failed to delete old planet zip file: {$filename}");
         }
 
-        $txtfile = BinExt::getTmpPath().'/planet_coarse_boundaries.txt';
+        $txtfile = BinExt::getTmpPath() . '/planet_coarse_boundaries.txt';
         if (file_exists($txtfile) && !unlink($txtfile)) {
             throw new \Exception("Failed to delete old planet data file: {$txtfile}");
         }
@@ -168,7 +164,7 @@ class Places
         // Unzip
         $zip = new \ZipArchive();
         $res = $zip->open($filename);
-        if (true === $res) {
+        if ($res === true) {
             $zip->extractTo(BinExt::getTmpPath());
             $zip->close();
         } else {
@@ -189,8 +185,7 @@ class Places
     /**
      * Insert planet into database from file.
      */
-    public function importPlanet(string $datafile): void
-    {
+    public function importPlanet(string $datafile): void {
         echo "Inserting planet data into database...\n";
         flush();
 
@@ -198,7 +193,7 @@ class Places
         $gis = $this->detectGisType();
 
         // Make sure we support something
-        if (GIS_TYPE_NONE === $gis) {
+        if ($gis === GIS_TYPE_NONE) {
             throw new \Exception('No GIS support detected');
         }
 
@@ -224,10 +219,10 @@ class Places
 
         // Create geometry insertion statement
         $query = $this->connection->getQueryBuilder();
-        $geomParam = (string) $query->createParameter('geometry');
-        if (GIS_TYPE_MYSQL === $gis) {
+        $geomParam = (string)$query->createParameter('geometry');
+        if ($gis === GIS_TYPE_MYSQL) {
             $geomParam = "ST_GeomFromText({$geomParam}, 4326)";
-        } elseif (GIS_TYPE_POSTGRES === $gis) {
+        } elseif ($gis === GIS_TYPE_POSTGRES) {
             $geomParam = "POLYGON({$geomParam}::text)";
         }
         $query->insert('memories_planet_geometry')
@@ -263,7 +258,7 @@ class Places
             $count = 0;
             while (($line = fgets($handle)) !== false) {
                 // Skip empty lines
-                if ('' === trim($line)) {
+                if (trim($line) === '') {
                     continue;
                 }
 
@@ -271,7 +266,7 @@ class Places
 
                 // Decode JSON
                 $data = json_decode($line, true);
-                if (null === $data) {
+                if ($data === null) {
                     echo "ERROR: Failed to decode JSON\n";
 
                     continue;
@@ -344,7 +339,7 @@ class Places
                         }
                     }
 
-                    if (GIS_TYPE_MYSQL === $gis) {
+                    if ($gis === GIS_TYPE_MYSQL) {
                         $points = implode(',', array_map(static function (array $point) {
                             [$lon, $lat] = $point;
 
@@ -352,7 +347,7 @@ class Places
                         }, $coords));
 
                         $geometry = "POLYGON(({$points}))";
-                    } elseif (GIS_TYPE_POSTGRES === $gis) {
+                    } elseif ($gis === GIS_TYPE_POSTGRES) {
                         $geometry = implode(',', array_map(static function (array $point) {
                             [$lon, $lat] = $point;
 
@@ -375,7 +370,7 @@ class Places
                     }
                 }
 
-                if (0 === $count % 500) {
+                if ($count % 500 === 0) {
                     // Print progress
                     $total = APPROX_PLACES;
                     $pct = round($count / $total * 100, 1);
@@ -402,8 +397,7 @@ class Places
     /**
      * Recalculate all places for all users.
      */
-    public function recalculateAll(): void
-    {
+    public function recalculateAll(): void {
         echo "Recalculating places for all files (do not interrupt this process)...\n";
         flush();
 
@@ -412,9 +406,9 @@ class Places
             ++$count;
 
             // Only proceed if we have a valid location
-            $fileid = (int) $row['fileid'];
-            $lat = (float) $row['lat'];
-            $lon = (float) $row['lon'];
+            $fileid = (int)$row['fileid'];
+            $lat = (float)$row['lat'];
+            $lon = (float)$row['lon'];
 
             // Update places
             if ($lat || $lon) {
@@ -422,7 +416,7 @@ class Places
             }
 
             // Print every 500 files
-            if (0 === $count % 500) {
+            if ($count % 500 === 0) {
                 echo "Updated places data for {$count} files\n";
                 flush();
             }
@@ -432,8 +426,7 @@ class Places
     /**
      * Create database tables and indices.
      */
-    protected function setupDatabase(int $gis): void
-    {
+    protected function setupDatabase(int $gis): void {
         try {
             // Detect database type
             $platform = $this->connection->getDatabasePlatform();
@@ -459,14 +452,14 @@ class Places
             $this->connection->executeQuery('CREATE INDEX planet_osm_id_idx ON memories_planet_geometry (osm_id);');
 
             // Add spatial index
-            if (GIS_TYPE_MYSQL === $gis) {
+            if ($gis === GIS_TYPE_MYSQL) {
                 $this->connection->executeQuery('CREATE SPATIAL INDEX planet_osm_polygon_geometry_idx ON memories_planet_geometry (geometry);');
-            } elseif (GIS_TYPE_POSTGRES === $gis) {
+            } elseif ($gis === GIS_TYPE_POSTGRES) {
                 // https://www.postgresql.org/docs/current/gist-builtin-opclasses.html
                 $this->connection->executeQuery('CREATE INDEX planet_osm_polygon_geometry_idx ON memories_planet_geometry USING GIST (geometry poly_ops);');
             }
         } catch (\Exception $e) {
-            throw new \Exception('Failed to create database tables: '.$e->getMessage());
+            throw new \Exception('Failed to create database tables: ' . $e->getMessage());
         }
     }
 }
