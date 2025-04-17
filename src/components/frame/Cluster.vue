@@ -46,7 +46,7 @@ import * as nativex from '@native';
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
 
-import type { ICluster } from '@typings';
+import type { ICluster, ITrip } from '@typings';
 
 export default defineComponent({
   name: 'Cluster',
@@ -87,6 +87,23 @@ export default defineComponent({
     subtitle() {
       if (dav.clusterIs.album(this.data)) {
         return dav.getAlbumSubtitle(this.data);
+      }
+
+      if (dav.clusterIs.trip(this.data)) {
+        const trip = this.data as ITrip;
+        const parts = [];
+
+        // Add timeframe if available
+        if (trip.timeframe) {
+          parts.push(trip.timeframe);
+        }
+
+        // Add location if available
+        if (trip.location && trip.location !== 'Unknown Location') {
+          parts.push(trip.location);
+        }
+
+        return parts.join(' · ');
       }
 
       return String();

@@ -19,6 +19,7 @@ Memories is a *batteries-included* photo management solution for Nextcloud with 
 - **📦 Archive**: Store photos you don't want to see in your timeline in a separate folder.
 - **📹 Video Transcoding**: Transcode videos and use HLS for maximal performance.
 - **🗺️ Map**: View your photos on a map, tagged with accurate reverse geocoding.
+- **🧳 Trips (Beta)**: Automatically detect trips from your photos and create beautiful highlight videos.
 - **📦 Migration**: Migrate easily from Nextcloud Photos and Google Takeout.
 - **⚡️ Performance**: Do all this very fast.
 
@@ -28,8 +29,18 @@ Memories is a *batteries-included* photo management solution for Nextcloud with 
 1. Perform the recommended [configuration steps](https://memories.gallery/config/).
 1. Run `php occ memories:index` to generate metadata indices for existing photos.
 1. Open the 📷 Memories app in Nextcloud and set the directory containing your photos.
+
+## 🧳 Trips Feature (Beta)
+
+Memories automatically detects trips from your photos based on time and location data. To use this feature:
+
+1. Run `php occ memories:trips:direct-detect --user <username>` to detect trips for a specific user.
+2. Generate highlight videos with `php occ memories:trips:generate-video <username> --trip-id <id>`.
+3. View your trips in the Trips tab and enjoy the automatically generated highlight videos.
+
+**Note**: The trip detection feature is currently in beta. The clustering algorithms (TimeGap and HDBSCAN) are still being refined and may benefit from expert attention to improve accuracy. Results may vary depending on your photo collection's metadata quality and distribution patterns.
 ]]></description>
-    <version>7.5.2</version>
+    <version>9.0.0</version>
     <licence>agpl</licence>
     <author mail="radialapps@gmail.com">Varun Patil</author>
     <namespace>Memories</namespace>
@@ -45,6 +56,9 @@ Memories is a *batteries-included* photo management solution for Nextcloud with 
         <command>OCA\Memories\Command\Index</command>
         <command>OCA\Memories\Command\PlacesSetup</command>
         <command>OCA\Memories\Command\MigrateGoogleTakeout</command>
+        <command>OCA\Memories\Command\TripsDirectDetect</command>
+        <command>OCA\Memories\Command\TripVideoGenerate</command>
+        <command>OCA\Memories\Command\TripsCleanup</command>
     </commands>
     <settings>
         <admin>OCA\Memories\Settings\Admin</admin>
@@ -67,4 +81,7 @@ Memories is a *batteries-included* photo management solution for Nextcloud with 
     <background-jobs>
         <job>OCA\Memories\Cron\IndexJob</job>
     </background-jobs>
+    <notifications>
+        <notification>OCA\Memories\Notification\Notifier</notification>
+    </notifications>
 </info>
