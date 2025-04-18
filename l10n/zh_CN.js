@@ -57,7 +57,7 @@ OC.L10N.register(
     "Add to album" : "添加至相册",
     "Move to person" : "移动到人",
     "Remove from person" : "从人中移除",
-    "You must enable \"Mark person in preview\" to use this feature" : "您必须启用 \"在预览中标记人物 \"才能使用此功能",
+    "You must enable \"Mark person in preview\" to use this feature" : "你必须启用“在预览中标记人物”才能使用此功能",
     "Only user \"{user}\" can update this person" : "仅用户“{user}”可以更新此人",
     "Cancel" : "取消",
     "_{n} selected_::_{n} selected_" : ["已选择 {n} 个"],
