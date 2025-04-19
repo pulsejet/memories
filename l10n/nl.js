@@ -202,6 +202,7 @@ OC.L10N.register(
     "Failed to create {albumName}." : "Het maken van {albumName} is mislukt.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Hernoemen van {currentAlbumName} naar {newAlbumName} mislukt.",
     "No items" : "Geen items",
+    "_{n} item_::_{n} items_" : ["{n} object","{n} objecten"],
     "Shared by {user}" : "Gedeeld door {user}",
     "Failed to delete {fileName}." : "Verwijderen van {fileName} mislukt.",
     "Yes" : "Ja",
