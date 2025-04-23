@@ -65,7 +65,8 @@ export const bus = {
    * @param data arguments
    */
   emit<T extends keyof BusEvent>(name: T, data: BusEvent[T]): void {
-    emit(name, data as any);
+    // @ts-expect-error - legacy
+    emit(name, data);
   },
 
   /**
