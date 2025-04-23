@@ -31,7 +31,7 @@ test.describe('Open', () => {
 
     // click move button
     await page.locator('text=Move to folder').click();
-    await page.waitForTimeout(2000); // slow
+    await page.waitForTimeout(5000); // slow
     await page.locator('tr[data-filename="Photos"]').click();
 
     // Action button
