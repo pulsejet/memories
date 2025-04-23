@@ -186,15 +186,13 @@ class MigrateGoogleTakeout extends Command
         $path = $file->getPath();
         $json = [];
 
-        /** @var \OCP\Files\File */
+        /** @var ?\OCP\Files\File */
         $jsonFile = null;
 
         try {
             // the JSON file may contain the "supplemental-metadata" string, fully or partially
             // https://github.com/pulsejet/memories/pull/1441
-            // see: https://regex101.com/r/rXUYj4/1
             $partial_re = '\.?[supplemental\-metadata]*\.json$';
-            $jsonPath = '';
             foreach ($nodes as $node) {
                 if (!$node instanceof File) {
                     continue;
@@ -202,23 +200,15 @@ class MigrateGoogleTakeout extends Command
 
                 // check if the current file matches our $path . $partial_re RegExp
                 $current = $node->getPath();
-                $re = preg_quote($path).$partial_re;
+                $re = preg_quote($path, '/').$partial_re;
                 if (preg_match("/{$re}/", $current)) {
-                    $jsonPath = $path;
+                    $jsonFile = $node;
 
                     break;
                 }
             }
 
-            if (!$jsonPath) {
-                $this->output->writeln("<error>JSON metadata for {$path} not found, skipping</error>");
-
-                return;
-            }
-
-            /** @var \OCP\Files\File */
-            $jsonFile = $this->rootFolder->get($jsonPath);
-            if (!$jsonFile->isReadable() || \OCP\Files\FileInfo::TYPE_FOLDER === $jsonFile->getType()) {
+            if (null === $jsonFile || !$jsonFile->isReadable()) {
                 return;
             }
 
