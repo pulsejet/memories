@@ -167,7 +167,7 @@ class MigrateGoogleTakeout extends Command
                 $this->migrateFolder($node);
             } elseif ($node instanceof File) {
                 try {
-                    $this->migrateFile($node);
+                    $this->migrateFile($node, $nodes);
                 } catch (\Exception $e) {
                     $this->output->writeln("<error>Error migrating file {$node->getPath()}: {$e->getMessage()}</error>");
                 }
@@ -175,7 +175,7 @@ class MigrateGoogleTakeout extends Command
         }
     }
 
-    protected function migrateFile(File $file): void
+    protected function migrateFile(File $file, array $nodes): void
     {
         // Check if this is a supported file
         if (!\in_array($file->getMimeType(), $this->mimeTypes, true)) {
@@ -190,7 +190,28 @@ class MigrateGoogleTakeout extends Command
         $jsonFile = null;
 
         try {
-            $jsonPath = $path.'.json';
+            /* the JSON file may contain the "supplemental-metadata" string, fully or partially */
+            /* see: https://regex101.com/r/rXUYj4/1 */
+            $partial_re = '\.?[supplemental\-metadata]*\.json$';
+            $jsonPath = '';
+            foreach ($nodes as $node) {
+                if (!$node instanceof File) {
+                    continue;
+                }
+
+                /* check if the current file matches our $path . $partial_re RegExp */
+                $current = $node->getPath();
+                $re = preg_quote($path) . $partial_re;
+                if (preg_match("/{$re}/", $current)) {
+                    $jsonPath = $path;
+                    break;
+                }
+            }
+
+            if (!$jsonPath) {
+                $this->output->writeln("<error>JSON metadata for {$path} not found, skipping</error>");
+                return;
+            }
 
             /** @var \OCP\Files\File */
             $jsonFile = $this->rootFolder->get($jsonPath);
@@ -251,7 +272,7 @@ class MigrateGoogleTakeout extends Command
         if (isset($txf['GPSLatitude'], $txf['GPSLongitude'])) {
             $txf['GPSLatitudeRef'] = $txf['GPSLatitude'];
             $txf['GPSLongitudeRef'] = $txf['GPSLongitude'];
-            $txf['GPSCoordinates'] = $txf['GPSLatitude'].', '.$txf['GPSLongitude'];
+            $txf['GPSCoordinates'] = $txf['GPSLatitude'] . ', ' . $txf['GPSLongitude'];
         }
 
         // Check if there is anything to write
@@ -335,6 +356,6 @@ class MigrateGoogleTakeout extends Command
         $txf['GPSAltitude'] = $get('geoData.altitude');
 
         // Remove all null values
-        return array_filter($txf, static fn (mixed $value) => null !== $value);
+        return array_filter($txf, static fn(mixed $value) => null !== $value);
     }
 }
