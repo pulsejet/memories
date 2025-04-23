@@ -35,8 +35,7 @@ use OCP\IRequest;
 use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
 
-abstract class GenericApiController extends ApiController
-{
+abstract class GenericApiController extends ApiController {
     public function __construct(
         IRequest $request,
         protected IConfig $config,

@@ -29,11 +29,9 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 
-class MapController extends GenericApiController
-{
+class MapController extends GenericApiController {
     #[NoAdminRequired]
-    public function clusters(string $bounds, string $zoom): Http\Response
-    {
+    public function clusters(string $bounds, string $zoom): Http\Response {
         return Util::guardEx(function () use ($bounds, $zoom) {
             // Make sure we have bounds and zoom level
             // Zoom level is used to determine the grid length
@@ -49,7 +47,7 @@ class MapController extends GenericApiController
             $clusters = $this->tq->getMapClusters($gridLen, $bounds);
 
             // Get previews for each cluster
-            $clusterIds = array_map(static fn ($cluster) => (int) $cluster['id'], $clusters);
+            $clusterIds = array_map(static fn ($cluster) => (int)$cluster['id'], $clusters);
             $previews = $this->tq->getMapClusterPreviews($clusterIds);
 
             // Merge the responses
@@ -66,8 +64,7 @@ class MapController extends GenericApiController
     }
 
     #[NoAdminRequired]
-    public function init(): Http\Response
-    {
+    public function init(): Http\Response {
         return Util::guardEx(function () {
             return new JSONResponse([
                 'pos' => $this->tq->getMapInitialPosition(),

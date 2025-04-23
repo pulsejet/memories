@@ -7,10 +7,8 @@ namespace OCA\Memories\Controller;
 use OCP\AppFramework\Http\TemplateResponse;
 
 /** @psalm-suppress MissingTemplateParam */
-class TemplateResponsePatch extends TemplateResponse
-{
-    public function render()
-    {
+class TemplateResponsePatch extends TemplateResponse {
+    public function render() {
         $content = parent::render();
 
         // Patch the render response to replace the viewport meta tag

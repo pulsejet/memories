@@ -9,25 +9,23 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
 
-class LivePhoto
-{
-    public function __construct(private IDBConnection $connection) {}
+class LivePhoto {
+    public function __construct(private IDBConnection $connection) {
+    }
 
     /**
      * Check if a given Exif data is the video part of a Live Photo.
      */
-    public function isVideoPart(array $exif): bool
-    {
+    public function isVideoPart(array $exif): bool {
         return 'video/quicktime' === ($exif['MIMEType'] ?? null)
                && !empty($exif['ContentIdentifier'] ?? null);
     }
 
     /** Get liveid from photo part */
-    public function getLivePhotoId(File $file, array $exif): string
-    {
+    public function getLivePhotoId(File $file, array $exif): string {
         // Apple JPEG (MOV has ContentIdentifier)
         if ($uuid = ($exif['ContentIdentifier'] ?? $exif['MediaGroupUUID'] ?? null)) {
-            return (string) $uuid;
+            return (string)$uuid;
         }
 
         // Google MVIMG and Samsung JPEG
@@ -103,7 +101,7 @@ class LivePhoto
 
                 foreach ($extExif as $key => $value) {
                     if (str_ends_with($key, ':DirectoryItemSemantic')) {
-                        if ('MotionPhoto' === $value) {
+                        if ($value === 'MotionPhoto') {
                             // Found the video, try to find the corresponding semantic length
                             // If we can't find it, use the last length seen
                             $videoLength = $extExif[str_replace('Semantic', 'Length', $key)] ?? $lastLength;
@@ -139,8 +137,7 @@ class LivePhoto
      *
      * This function should be run in a separate transaction.
      */
-    public function processVideoPart(File $file, array $exif): bool
-    {
+    public function processVideoPart(File $file, array $exif): bool {
         $fileId = $file->getId();
         $mtime = $file->getMTime();
         $liveid = $exif['ContentIdentifier'] ?? null;
@@ -184,8 +181,7 @@ class LivePhoto
     /**
      * Delete entry from memories_livephoto table.
      */
-    public function deleteVideoPart(File $file): void
-    {
+    public function deleteVideoPart(File $file): void {
         $query = $this->connection->getQueryBuilder();
         $query->delete('memories_livephoto')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))

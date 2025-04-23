@@ -33,8 +33,7 @@ use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 
-class ClustersController extends GenericApiController
-{
+class ClustersController extends GenericApiController {
     /**
      * Current backend for this instance.
      *
@@ -46,8 +45,7 @@ class ClustersController extends GenericApiController
      * Get list of clusters.
      */
     #[NoAdminRequired]
-    public function list(string $backend, int $fileid = 0): Http\Response
-    {
+    public function list(string $backend, int $fileid = 0): Http\Response {
         return Util::guardEx(function () use ($backend, $fileid) {
             $this->init($backend);
 
@@ -62,8 +60,7 @@ class ClustersController extends GenericApiController
      */
     #[NoAdminRequired]
     #[NoCSRFRequired]
-    public function preview(string $backend, string $name): Http\Response
-    {
+    public function preview(string $backend, string $name): Http\Response {
         return Util::guardEx(function () use ($backend, $name) {
             $this->init($backend);
 
@@ -95,8 +92,7 @@ class ClustersController extends GenericApiController
      * Set the cover image for a cluster.
      */
     #[NoAdminRequired]
-    public function setCover(string $backend, string $name, int $fileid): Http\Response
-    {
+    public function setCover(string $backend, string $name, int $fileid): Http\Response {
         return Util::guardEx(function () use ($backend, $name, $fileid) {
             $this->init($backend);
 
@@ -116,8 +112,7 @@ class ClustersController extends GenericApiController
      */
     #[NoAdminRequired]
     #[UseSession]
-    public function download(string $backend, string $name): Http\Response
-    {
+    public function download(string $backend, string $name): Http\Response {
         return Util::guardEx(function () use ($backend, $name) {
             $this->init($backend);
 
@@ -137,8 +132,7 @@ class ClustersController extends GenericApiController
      * Initialize and check if the app is enabled.
      * Gets the root node if required.
      */
-    protected function init(string $backend): void
-    {
+    protected function init(string $backend): void {
         Util::getUser();
 
         $this->backend = ClustersBackend\Manager::get($backend);
@@ -151,11 +145,10 @@ class ClustersController extends GenericApiController
     /**
      * Given a list of photo objects, return the first preview image possible.
      *
-     * @param array $photos  List of photo objects
-     * @param bool  $isCover Whether this is a cover preview from database
+     * @param array $photos List of photo objects
+     * @param bool $isCover Whether this is a cover preview from database
      */
-    private function getPreviewFromPhotoList(array $photos, bool $isCover): Http\Response
-    {
+    private function getPreviewFromPhotoList(array $photos, bool $isCover): Http\Response {
         // Get preview manager
         $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
@@ -175,7 +168,7 @@ class ClustersController extends GenericApiController
                 ]);
 
                 if ($isCover) {
-                    if ((int) $this->request->getParam('cover') === $this->backend->getCoverObjId($photo)) {
+                    if ((int)$this->request->getParam('cover') === $this->backend->getCoverObjId($photo)) {
                         // Longer cache duration for cover previews that were correctly requested
                         $response->cacheFor(3600 * 7 * 24, false, false);
                     } else {

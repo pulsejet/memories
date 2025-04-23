@@ -29,31 +29,27 @@ use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
-class TagsBackend extends Backend
-{
+class TagsBackend extends Backend {
     public function __construct(
         protected TimelineQuery $tq,
         protected IRequest $request,
-    ) {}
+    ) {
+    }
 
-    public static function appName(): string
-    {
+    public static function appName(): string {
         return 'Tags';
     }
 
-    public static function clusterType(): string
-    {
+    public static function clusterType(): string {
         return 'tags';
     }
 
-    public function isEnabled(): bool
-    {
+    public function isEnabled(): bool {
         return Util::tagsIsEnabled();
     }
 
-    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
-    {
-        $tagName = (string) $this->request->getParam('tags');
+    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void {
+        $tagName = (string)$this->request->getParam('tags');
 
         $tagId = $this->getSystemTagIds($query, [$tagName])[$tagName];
 
@@ -64,8 +60,7 @@ class TagsBackend extends Backend
         ));
     }
 
-    public function getClustersInternal(int $fileid = 0): array
-    {
+    public function getClustersInternal(int $fileid = 0): array {
         if ($fileid) {
             throw new \Exception('TagsBackend: fileid filter not implemented');
         }
@@ -117,20 +112,18 @@ class TagsBackend extends Backend
 
         // Post process
         foreach ($tags as &$row) {
-            $row['id'] = (int) $row['id'];
-            $row['count'] = (int) $row['count'];
+            $row['id'] = (int)$row['id'];
+            $row['count'] = (int)$row['count'];
         }
 
         return $tags;
     }
 
-    public static function getClusterId(array $cluster): int|string
-    {
+    public static function getClusterId(array $cluster): int|string {
         return $cluster['name'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
-    {
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array {
         $query = $this->tq->getBuilder();
         $tagId = $this->getSystemTagIds($query, [$name])[$name];
 
@@ -153,14 +146,14 @@ class TagsBackend extends Backend
         $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('f.fileid', 'm.fileid'));
 
         // MAX number of files
-        if (-6 === $limit) {
+        if ($limit === -6) {
             Covers::filterCover($query, self::clusterType(), 'stom', 'objectid', 'systemtagid');
-        } elseif (null !== $limit) {
+        } elseif ($limit !== null) {
             $query->setMaxResults($limit);
         }
 
         // Filter by fileid if specified
-        if (null !== $fileid) {
+        if ($fileid !== null) {
             $query->andWhere($query->expr()->eq('f.fileid', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
@@ -168,21 +161,19 @@ class TagsBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
-    public function getClusterIdFrom(array $photo): int
-    {
-        return (int) $photo['systemtagid'];
+    public function getClusterIdFrom(array $photo): int {
+        return (int)$photo['systemtagid'];
     }
 
     /**
      * Get the systemtag id for a given tag name.
      *
-     * @param IQueryBuilder $query    Query builder
-     * @param string[]      $tagNames List of tag names
+     * @param IQueryBuilder $query Query builder
+     * @param string[] $tagNames List of tag names
      *
      * @return array Map from tag name to tag id
      */
-    private function getSystemTagIds(IQueryBuilder $query, array $tagNames): array
-    {
+    private function getSystemTagIds(IQueryBuilder $query, array $tagNames): array {
         $sqb = $query->getConnection()->getQueryBuilder();
 
         $res = $sqb->select('id', 'name')->from('systemtag')->where(
@@ -195,12 +186,12 @@ class TagsBackend extends Backend
         // Create result map
         $map = array_fill_keys($tagNames, 0);
         foreach ($res as $row) {
-            $map[$row['name']] = (int) $row['id'];
+            $map[$row['name']] = (int)$row['id'];
         }
 
         // Required to have all tags in the result
         foreach ($tagNames as $tagName) {
-            if (0 === $map[$tagName]) {
+            if ($map[$tagName] === 0) {
                 throw new \Exception("Tag {$tagName} not found");
             }
         }

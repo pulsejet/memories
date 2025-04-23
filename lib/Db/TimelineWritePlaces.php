@@ -13,22 +13,20 @@ use Psr\Log\LoggerInterface;
 const LAT_KEY = 'GPSLatitude';
 const LON_KEY = 'GPSLongitude';
 
-trait TimelineWritePlaces
-{
+trait TimelineWritePlaces {
     protected IDBConnection $connection;
     protected LoggerInterface $logger;
 
     /**
      * Add places data for a file.
      *
-     * @param int    $fileId The file ID
-     * @param ?float $lat    The latitude of the file
-     * @param ?float $lon    The longitude of the file
+     * @param int $fileId The file ID
+     * @param ?float $lat The latitude of the file
+     * @param ?float $lon The longitude of the file
      *
      * @return int[] The list of osm_id of the places
      */
-    public function updatePlacesData(int $fileId, ?float $lat, ?float $lon): array
-    {
+    public function updatePlacesData(int $fileId, ?float $lat, ?float $lon): array {
         // Get GIS type
         $gisType = SystemConfig::gisType();
 
@@ -47,7 +45,7 @@ trait TimelineWritePlaces
         });
 
         // Just remove from if the point is no longer valid
-        if (null === $lat || null === $lon) {
+        if ($lat === null || $lon === null) {
             return [];
         }
 
@@ -84,7 +82,7 @@ trait TimelineWritePlaces
         });
 
         // Return list of osm_id
-        return array_map(static fn ($row) => (int) $row['osm_id'], $rows);
+        return array_map(static fn ($row) => (int)$row['osm_id'], $rows);
     }
 
     /**
@@ -93,19 +91,18 @@ trait TimelineWritePlaces
      * Also update the exif data with the tzid from location (LocationTZID)
      * Performs an in-place update of the exif data.
      *
-     * @param int    $fileId  The file ID
-     * @param array  $exif    The exif data (will change)
+     * @param int $fileId The file ID
+     * @param array $exif The exif data (will change)
      * @param ?array $prevRow The previous row of data
      *
      * @return array Update values
      */
-    protected function processExifLocation(int $fileId, array &$exif, ?array $prevRow): array
-    {
+    protected function processExifLocation(int $fileId, array &$exif, ?array $prevRow): array {
         // Store location data
         [$lat, $lon] = self::readCoord($exif);
-        $oldLat = $prevRow ? (float) $prevRow['lat'] : null;
-        $oldLon = $prevRow ? (float) $prevRow['lon'] : null;
-        $mapCluster = $prevRow ? (int) $prevRow['mapcluster'] : -1;
+        $oldLat = $prevRow ? (float)$prevRow['lat'] : null;
+        $oldLon = $prevRow ? (float)$prevRow['lon'] : null;
+        $mapCluster = $prevRow ? (int)$prevRow['mapcluster'] : -1;
         $osmIds = [];
 
         if ($lat || $lon || $oldLat || $oldLon) {
@@ -113,14 +110,14 @@ trait TimelineWritePlaces
                 $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon, $oldLat, $oldLon);
             } catch (\Exception $e) {
                 $logger = \OC::$server->get(LoggerInterface::class);
-                $logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
+                $logger->log(3, 'Error updating map cluster data: ' . $e->getMessage(), ['app' => 'memories']);
             }
 
             try {
                 $osmIds = $this->updatePlacesData($fileId, $lat, $lon);
             } catch (\Exception $e) {
                 $logger = \OC::$server->get(LoggerInterface::class);
-                $logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
+                $logger->log(3, 'Error updating places data: ' . $e->getMessage(), ['app' => 'memories']);
             }
         }
 
@@ -137,11 +134,10 @@ trait TimelineWritePlaces
     /**
      * Set timezone offset from location if not present.
      *
-     * @param array $exif   The exif data
+     * @param array $exif The exif data
      * @param array $osmIds The list of osm_id of the places
      */
-    private function setTzidFromLocation(array &$exif, array $osmIds): void
-    {
+    private function setTzidFromLocation(array &$exif, array $osmIds): void {
         // Make sure we have some places
         if (empty($osmIds)) {
             return;
@@ -171,23 +167,22 @@ trait TimelineWritePlaces
      *
      * @psalm-return list{float|null, float|null}
      */
-    private static function readCoord(array &$exif): array
-    {
-        $lat = \array_key_exists(LAT_KEY, $exif) ? round((float) $exif[LAT_KEY], 6) : null;
-        $lon = \array_key_exists(LON_KEY, $exif) ? round((float) $exif[LON_KEY], 6) : null;
+    private static function readCoord(array &$exif): array {
+        $lat = \array_key_exists(LAT_KEY, $exif) ? round((float)$exif[LAT_KEY], 6) : null;
+        $lon = \array_key_exists(LON_KEY, $exif) ? round((float)$exif[LON_KEY], 6) : null;
 
         // Make sure we have valid coordinates
-        if (null === $lat || null === $lon
+        if ($lat === null || $lon === null
         || abs($lat) > 90 || abs($lon) > 180
         || (abs($lat) < 0.00001 && abs($lon) < 0.00001)) {
             $lat = $lon = null;
         }
 
         // Remove invalid coordinates
-        if (null === $lat && \array_key_exists(LAT_KEY, $exif)) {
+        if ($lat === null && \array_key_exists(LAT_KEY, $exif)) {
             unset($exif[LAT_KEY]);
         }
-        if (null === $lon && \array_key_exists(LON_KEY, $exif)) {
+        if ($lon === null && \array_key_exists(LON_KEY, $exif)) {
             unset($exif[LON_KEY]);
         }
 

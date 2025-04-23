@@ -9,10 +9,8 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\DB\QueryBuilder\IQueryFunction;
 use OCP\ITags;
 
-trait TimelineQueryFilters
-{
-    public function transformFavoriteFilter(IQueryBuilder &$query, bool $aggregate): void
-    {
+trait TimelineQueryFilters {
+    public function transformFavoriteFilter(IQueryBuilder &$query, bool $aggregate): void {
         if (Util::isLoggedIn()) {
             $query->innerJoin('m', 'vcategory_to_object', 'vcoi', $query->expr()->andX(
                 $query->expr()->eq('vcoi.objid', 'm.fileid'),
@@ -21,8 +19,7 @@ trait TimelineQueryFilters
         }
     }
 
-    public function addFavoriteTag(IQueryBuilder &$query): void
-    {
+    public function addFavoriteTag(IQueryBuilder &$query): void {
         if (Util::isLoggedIn()) {
             $query->leftJoin('m', 'vcategory_to_object', 'vco', $query->expr()->andX(
                 $query->expr()->eq('vco.objid', 'm.fileid'),
@@ -32,21 +29,18 @@ trait TimelineQueryFilters
         }
     }
 
-    public function transformVideoFilter(IQueryBuilder &$query, bool $aggregate): void
-    {
+    public function transformVideoFilter(IQueryBuilder &$query, bool $aggregate): void {
         $query->andWhere($query->expr()->eq('m.isvideo', $query->expr()->literal(1)));
     }
 
-    public function transformLimit(IQueryBuilder &$query, bool $aggregate, int $limit): void
-    {
+    public function transformLimit(IQueryBuilder &$query, bool $aggregate, int $limit): void {
         /** @psalm-suppress RedundantCondition */
         if ($limit >= 1 || $limit <= 100) {
             $query->setMaxResults($limit);
         }
     }
 
-    private function applyAllTransforms(array $transforms, IQueryBuilder &$query, bool $aggregate): void
-    {
+    private function applyAllTransforms(array $transforms, IQueryBuilder &$query, bool $aggregate): void {
         foreach ($transforms as &$transform) {
             $fun = \array_slice($transform, 0, 2);
             $params = \array_slice($transform, 2);
@@ -56,8 +50,7 @@ trait TimelineQueryFilters
         }
     }
 
-    private function getFavoriteVCategoryFun(IQueryBuilder &$query): IQueryFunction
-    {
+    private function getFavoriteVCategoryFun(IQueryBuilder &$query): IQueryFunction {
         $sub = $query->getConnection()->getQueryBuilder();
         $sub->select('id')
             ->from('vcategory', 'vc')

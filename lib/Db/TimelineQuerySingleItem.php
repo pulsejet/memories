@@ -10,12 +10,10 @@ use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
-trait TimelineQuerySingleItem
-{
+trait TimelineQuerySingleItem {
     protected IDBConnection $connection;
 
-    public function getSingleItem(int $fileId): ?array
-    {
+    public function getSingleItem(int $fileId): ?array {
         $query = $this->connection->getQueryBuilder();
         $query->select('m.fileid', ...TimelineQuery::TIMELINE_SELECT)
             ->from('memories', 'm')
@@ -32,7 +30,7 @@ trait TimelineQuerySingleItem
         $photo = $query->executeQuery()->fetch();
 
         // Check if photo was found
-        if (false === $photo) {
+        if ($photo === false) {
             return null;
         }
 
@@ -42,8 +40,7 @@ trait TimelineQuerySingleItem
         return $photo;
     }
 
-    public function getInfoById(int $id, bool $basic): array
-    {
+    public function getInfoById(int $id, bool $basic): array {
         $qb = $this->connection->getQueryBuilder();
         $qb->select('fileid', 'dayid', 'datetaken', 'w', 'h')
             ->from('memories')
@@ -58,10 +55,10 @@ trait TimelineQuerySingleItem
 
         // Basic information to return
         $info = [
-            'fileid' => (int) $row['fileid'],
-            'dayid' => (int) $row['dayid'],
-            'w' => (int) $row['w'],
-            'h' => (int) $row['h'],
+            'fileid' => (int)$row['fileid'],
+            'dayid' => (int)$row['dayid'],
+            'w' => (int)$row['w'],
+            'h' => (int)$row['h'],
             'datetaken' => Util::sqlUtcToTimestamp($row['datetaken']),
         ];
 

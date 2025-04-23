@@ -30,34 +30,30 @@ use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
-class PlacesBackend extends Backend
-{
+class PlacesBackend extends Backend {
     public function __construct(
         protected TimelineQuery $tq,
         protected IRequest $request,
-    ) {}
+    ) {
+    }
 
-    public static function appName(): string
-    {
+    public static function appName(): string {
         return 'Places';
     }
 
-    public static function clusterType(): string
-    {
+    public static function clusterType(): string {
         return 'places';
     }
 
-    public function isEnabled(): bool
-    {
+    public function isEnabled(): bool {
         return SystemConfig::gisType() > 0;
     }
 
-    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
-    {
+    public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void {
         $locId = $this->request->getParam('places');
 
         // Files that have no GPS coordinates set
-        if ('NULL' === $locId) {
+        if ($locId === 'NULL') {
             $query->andWhere($query->expr()->orX(
                 $query->expr()->isNull('m.lat'),
                 $query->expr()->isNull('m.lon'),
@@ -68,19 +64,18 @@ class PlacesBackend extends Backend
 
         $query->innerJoin('m', 'memories_places', 'mp', $query->expr()->andX(
             $query->expr()->eq('mp.fileid', 'm.fileid'),
-            $query->expr()->eq('mp.osm_id', $query->createNamedParameter((int) $locId)),
+            $query->expr()->eq('mp.osm_id', $query->createNamedParameter((int)$locId)),
         ));
     }
 
-    public function getClustersInternal(int $fileid = 0): array
-    {
+    public function getClustersInternal(int $fileid = 0): array {
         if ($fileid) {
             throw new \Exception('PlacesBackend: fileid filter not implemented');
         }
 
-        $inside = (int) $this->request->getParam('inside', 0);
-        $marked = (int) $this->request->getParam('mark', 1);
-        $covers = (bool) $this->request->getParam('covers', 1);
+        $inside = (int)$this->request->getParam('inside', 0);
+        $marked = (int)$this->request->getParam('mark', 1);
+        $covers = (bool)$this->request->getParam('covers', 1);
 
         $query = $this->tq->getBuilder();
 
@@ -116,7 +111,7 @@ class PlacesBackend extends Backend
         }
 
         // Else if we are looking for countries
-        elseif (-1 === $inside) {
+        elseif ($inside === -1) {
             $query->andWhere($query->expr()->eq('e.admin_level', $query->expr()->literal(2, \PDO::PARAM_INT)));
         }
 
@@ -183,8 +178,8 @@ class PlacesBackend extends Backend
         // Post process
         $lang = Util::getUserLang();
         foreach ($places as &$row) {
-            $row['osm_id'] = (int) $row['osm_id'];
-            $row['count'] = (int) $row['count'];
+            $row['osm_id'] = (int)$row['osm_id'];
+            $row['count'] = (int)$row['count'];
 
             $row['name'] = self::translateName($lang, $row['name'], $row['other_names']);
             unset($row['other_names']);
@@ -193,19 +188,17 @@ class PlacesBackend extends Backend
         return $places;
     }
 
-    public static function getClusterId(array $cluster): int|string
-    {
+    public static function getClusterId(array $cluster): int|string {
         return $cluster['osm_id'];
     }
 
-    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
-    {
+    public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array {
         $query = $this->tq->getBuilder();
 
         // SELECT all photos with this tag
         $query->select('m.fileid', 'f.etag', 'mp.osm_id')
             ->from('memories_places', 'mp')
-            ->where($query->expr()->eq('mp.osm_id', $query->createNamedParameter((int) $name)))
+            ->where($query->expr()->eq('mp.osm_id', $query->createNamedParameter((int)$name)))
         ;
 
         // WHERE these items are memories indexed photos
@@ -218,14 +211,14 @@ class PlacesBackend extends Backend
         $query = $this->tq->filterFilecache($query);
 
         // MAX number of photos
-        if (-6 === $limit) {
+        if ($limit === -6) {
             Covers::filterCover($query, self::clusterType(), 'mp', 'fileid', 'osm_id');
-        } elseif (null !== $limit) {
+        } elseif ($limit !== null) {
             $query->setMaxResults($limit);
         }
 
         // Filter by fileid if specified
-        if (null !== $fileid) {
+        if ($fileid !== null) {
             $query->andWhere($query->expr()->eq('m.fileid', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
@@ -233,16 +226,14 @@ class PlacesBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
-    public function getClusterIdFrom(array $photo): int
-    {
-        return (int) $photo['osm_id'];
+    public function getClusterIdFrom(array $photo): int {
+        return (int)$photo['osm_id'];
     }
 
     /**
      * Choose the best name for the place.
      */
-    public static function translateName(string $lang, string $name, ?string $otherNames): string
-    {
+    public static function translateName(string $lang, string $name, ?string $otherNames): string {
         if (empty($otherNames)) {
             return $name;
         }
@@ -253,7 +244,7 @@ class PlacesBackend extends Backend
 
             // Check if the language is available
             if ($translated = ($json[$lang] ?? null)) {
-                return (string) $translated;
+                return (string)$translated;
             }
         } catch (\Error) {
             // Ignore errors, just use original name

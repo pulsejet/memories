@@ -33,15 +33,14 @@ use Psr\Log\LoggerInterface;
 /**
  * @template-implements IEventListener<Event>
  */
-class PostWriteListener implements IEventListener
-{
+class PostWriteListener implements IEventListener {
     public function __construct(
         private TimelineWrite $tw,
         private LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
-    public function handle(Event $event): void
-    {
+    public function handle(Event $event): void {
         if (!($event instanceof NodeWrittenEvent)
             && !($event instanceof NodeTouchedEvent)) {
             return;

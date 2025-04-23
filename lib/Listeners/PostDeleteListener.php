@@ -30,12 +30,11 @@ use OCP\Files\File;
 /**
  * @template-implements IEventListener<Event>
  */
-class PostDeleteListener implements IEventListener
-{
-    public function __construct(private TimelineWrite $tw) {}
+class PostDeleteListener implements IEventListener {
+    public function __construct(private TimelineWrite $tw) {
+    }
 
-    public function handle(Event $event): void
-    {
+    public function handle(Event $event): void {
         if (!$event instanceof NodeDeletedEvent) {
             return;
         }

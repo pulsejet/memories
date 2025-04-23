@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-trait TimelineQueryLivePhoto
-{
-    public function getLivePhotos(int $fileid): array
-    {
+trait TimelineQueryLivePhoto {
+    public function getLivePhotos(int $fileid): array {
         $qb = $this->connection->getQueryBuilder();
         $qb->select('lp.fileid', 'lp.liveid')
             ->from('memories', 'm')

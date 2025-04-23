@@ -39,8 +39,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class MigrateGoogleTakeout extends Command
-{
+class MigrateGoogleTakeout extends Command {
     protected const MIGRATOR_VERSION = 3;
     protected const MIGRATED_KEY = 'memoriesMigratorVersion';
 
@@ -63,8 +62,7 @@ class MigrateGoogleTakeout extends Command
         parent::__construct();
     }
 
-    protected function configure(): void
-    {
+    protected function configure(): void {
         $this
             ->setName('memories:migrate-google-takeout')
             ->setDescription('Migrate JSON metadata from Google Takeout')
@@ -74,8 +72,7 @@ class MigrateGoogleTakeout extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    protected function execute(InputInterface $input, OutputInterface $output): int {
         $this->output = $output;
         $this->input = $input;
         $this->mimeTypes = Exif::allowedEditMimetypes();
@@ -89,7 +86,7 @@ class MigrateGoogleTakeout extends Command
             $output->writeln('Also make sure exiftool is working beforehand by running memories:index on some files.');
             $output->write('Are you sure you want to continue? (y/N): ');
             $answer = trim(fgets(STDIN));
-            if ('y' !== $answer) {
+            if ($answer !== 'y') {
                 $output->writeln('Aborting');
 
                 return 1;
@@ -122,8 +119,7 @@ class MigrateGoogleTakeout extends Command
         return 0;
     }
 
-    protected function migrateUser(IUser $user): void
-    {
+    protected function migrateUser(IUser $user): void {
         $uid = $user->getUID();
         $this->output->writeln("Migrating user {$uid}");
 
@@ -150,8 +146,7 @@ class MigrateGoogleTakeout extends Command
         $this->migrateFolder($folder);
     }
 
-    protected function migrateFolder(Folder $folder): void
-    {
+    protected function migrateFolder(Folder $folder): void {
         // Check for .nomedia
         if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.nomemories')) {
             return;
@@ -175,8 +170,7 @@ class MigrateGoogleTakeout extends Command
         }
     }
 
-    protected function migrateFile(File $file): void
-    {
+    protected function migrateFile(File $file): void {
         // Check if this is a supported file
         if (!\in_array($file->getMimeType(), $this->mimeTypes, true)) {
             return;
@@ -190,11 +184,11 @@ class MigrateGoogleTakeout extends Command
         $jsonFile = null;
 
         try {
-            $jsonPath = $path.'.json';
+            $jsonPath = $path . '.json';
 
             /** @var \OCP\Files\File */
             $jsonFile = $this->rootFolder->get($jsonPath);
-            if (!$jsonFile->isReadable() || \OCP\Files\FileInfo::TYPE_FOLDER === $jsonFile->getType()) {
+            if (!$jsonFile->isReadable() || $jsonFile->getType() === \OCP\Files\FileInfo::TYPE_FOLDER) {
                 return;
             }
 
@@ -227,14 +221,14 @@ class MigrateGoogleTakeout extends Command
         $exif = Exif::getExifFromFile($file);
 
         // Check if EXIF is blank, which is probably wrong
-        if (0 === \count($exif)) {
+        if (\count($exif) === 0) {
             $this->output->writeln("<error>EXIF metadata for {$path} is blank, probably an error</error>");
 
             return;
         }
 
         // Keep keys that are not in EXIF unless --override is specified
-        if (!((bool) $this->input->getOption('override'))) {
+        if (!((bool)$this->input->getOption('override'))) {
             $txf = array_filter($txf, static function ($value, $key) use ($exif) {
                 return !isset($exif[$key]);
             }, ARRAY_FILTER_USE_BOTH);
@@ -251,7 +245,7 @@ class MigrateGoogleTakeout extends Command
         if (isset($txf['GPSLatitude'], $txf['GPSLongitude'])) {
             $txf['GPSLatitudeRef'] = $txf['GPSLatitude'];
             $txf['GPSLongitudeRef'] = $txf['GPSLongitude'];
-            $txf['GPSCoordinates'] = $txf['GPSLatitude'].', '.$txf['GPSLongitude'];
+            $txf['GPSCoordinates'] = $txf['GPSLatitude'] . ', ' . $txf['GPSLongitude'];
         }
 
         // Check if there is anything to write
@@ -286,8 +280,7 @@ class MigrateGoogleTakeout extends Command
         ++$this->nProcessed;
     }
 
-    protected function takeoutToExiftoolJson(array $json): array
-    {
+    protected function takeoutToExiftoolJson(array $json): array {
         // Helper to get a value from nested JSON
         $get = static function (string $source) use ($json): mixed {
             $keys = array_reverse(explode('.', $source));
@@ -300,17 +293,17 @@ class MigrateGoogleTakeout extends Command
             }
 
             // Check if empty string
-            if (\is_string($json) && '' === $json) {
+            if (\is_string($json) && $json === '') {
                 return null;
             }
 
             // Check if numeric and zero
             if (is_numeric($json)) {
-                if (0.0 === (float) $json) {
+                if ((float)$json === 0.0) {
                     return null;
                 }
 
-                return (float) $json;
+                return (float)$json;
             }
 
             return $json;
@@ -325,7 +318,7 @@ class MigrateGoogleTakeout extends Command
         $epoch = $get('photoTakenTime.timestamp');
         if (is_numeric($epoch)) {
             $date = new \DateTime();
-            $date->setTimestamp((int) $epoch);
+            $date->setTimestamp((int)$epoch);
             $txf['AllDates'] = $date->format('Y:m:d H:i:sO');
         }
 
@@ -335,6 +328,6 @@ class MigrateGoogleTakeout extends Command
         $txf['GPSAltitude'] = $get('geoData.altitude');
 
         // Remove all null values
-        return array_filter($txf, static fn (mixed $value) => null !== $value);
+        return array_filter($txf, static fn (mixed $value) => $value !== null);
     }
 }
