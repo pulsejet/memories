@@ -114,8 +114,8 @@ class PlacesSetup extends Command
         if (false === $line) {
             // Redirect any -n users to --force
             $this->output->writeln(
-                "\n<error>You need an interactive terminal to run this command, ".
-                'or use --force for non-interactive mode.</error>',
+                "\n<error>You need an interactive terminal to run this command, "
+                .'or use --force for non-interactive mode.</error>',
             );
 
             return false;

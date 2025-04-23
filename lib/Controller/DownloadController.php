@@ -164,7 +164,7 @@ class DownloadController extends GenericApiController
             $out->setHeader('Content-Type: '.$file->getMimeType());
 
             // Make sure the browser downloads the file
-            $filename = str_replace('"', '\\"', $file->getName());
+            $filename = str_replace('"', '\"', $file->getName());
             $out->setHeader('Content-Disposition: attachment; filename="'.$filename.'"');
 
             // Prevent output from being buffered

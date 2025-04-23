@@ -216,8 +216,8 @@ class FsManager
         }
 
         // Check both user folder and album
-        return $this->getUserFolderFile($fileId) ??
-            $this->getAlbumFile($fileId);
+        return $this->getUserFolderFile($fileId)
+            ?? $this->getAlbumFile($fileId);
     }
 
     /**
