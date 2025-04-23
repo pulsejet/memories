@@ -172,6 +172,8 @@ class Exif
                 ?? $exif['OffsetTime']
                 ?? $exif['LocationTZID']
                 ?? throw new \Exception();
+
+            /** @psalm-suppress ArgumentTypeCoercion */
             $exifTz = new \DateTimeZone((string) $tzStr);
         } catch (\Exception) {
             $exifTz = null;

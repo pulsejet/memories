@@ -50,6 +50,11 @@
                 <directory name="lib/Command" />
             </errorLevel>
         </PropertyNotSetInConstructor>
+        <RiskyTruthyFalsyComparison>
+            <errorLevel type="suppress">
+                <directory name="lib/" />
+            </errorLevel>
+        </RiskyTruthyFalsyComparison>
     </issueHandlers>
     <forbiddenFunctions>
         <function name="var_dump" />

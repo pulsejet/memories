@@ -60,6 +60,8 @@ class PageController extends Controller
     /** Get the common content security policy */
     public static function getCSP(): ContentSecurityPolicy
     {
+        $policy = new ContentSecurityPolicy();
+
         // Image domains MUST be added to the connect domain list
         // because of the service worker fetch() call
         $addImageDomain = static function (string $url) use (&$policy): void {
@@ -68,7 +70,6 @@ class PageController extends Controller
         };
 
         // Create base policy
-        $policy = new ContentSecurityPolicy();
         $policy->addAllowedWorkerSrcDomain("'self'");
         $policy->addAllowedScriptDomain("'self'");
         $policy->addAllowedFrameDomain("'self'");
