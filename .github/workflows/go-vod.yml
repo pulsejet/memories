@@ -61,7 +61,7 @@ jobs:
         run: echo "label=${GITHUB_SHA}" >> $GITHUB_OUTPUT
 
       - name: Build container image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           push: true
           platforms: linux/amd64,linux/arm64
