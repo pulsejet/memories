@@ -167,7 +167,7 @@ class MigrateGoogleTakeout extends Command
                 $this->migrateFolder($node);
             } elseif ($node instanceof File) {
                 try {
-                    $this->migrateFile($node);
+                    $this->migrateFile($node, $nodes);
                 } catch (\Exception $e) {
                     $this->output->writeln("<error>Error migrating file {$node->getPath()}: {$e->getMessage()}</error>");
                 }
@@ -175,7 +175,7 @@ class MigrateGoogleTakeout extends Command
         }
     }
 
-    protected function migrateFile(File $file): void
+    protected function migrateFile(File $file, array $nodes): void
     {
         // Check if this is a supported file
         if (!\in_array($file->getMimeType(), $this->mimeTypes, true)) {
@@ -191,7 +191,6 @@ class MigrateGoogleTakeout extends Command
 
         try {
             /* the JSON file may contain the "supplemental-metadata" string, fully or partially */
-            $nodes = $this->rootFolder->getDirectoryListing();
             /* see: https://regex101.com/r/rXUYj4/1 */
             $partial_re = '\.?[supplemental\-metadata]*\.json$';
             $jsonPath = '';
