@@ -27,6 +27,7 @@ OC.L10N.register(
     "You can always change this later in settings" : "Saad seda alati hiljem seadetes muuta",
     "No coordinates" : "Koordinaate pole",
     "Click edit to set location" : "Asukoha seadmiseks redigeeri",
+    "Shared By" : "Jagaja:",
     "Metadata" : "Metaandmed",
     "Edit" : "Redigeeri",
     "Failed to load metadata" : "Metaandmete laadimine ebaõnnestus",
