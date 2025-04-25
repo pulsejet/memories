@@ -172,6 +172,7 @@ OC.L10N.register(
     "Places you have been to will appear here" : "Čia bus rodomos vietos, kuriose esate buvę",
     "Yes" : "Taip",
     "No" : "Ne",
+    "Choose {file}" : "Pasirinkti{file}",
     "Choose" : "Pasirinkite",
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Perkelti {count} elementą į šiukšlinę?","Perkelti {count} elementus į šiukšlinę?","Perkelti {count} elementų į šiukšlinę?","Perkelti {count} elementą į šiukšlinę?"]
 },
