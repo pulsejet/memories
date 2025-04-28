@@ -178,6 +178,7 @@ OC.L10N.register(
     "Descending" : "Padajoče",
     "Download album" : "Prejmi album",
     "Nothing to show here" : "Ni vsebine za prikaz",
+    "Unassigned faces" : "Nedodeljeni obrazi",
     "Merge with different person" : "Združi z obstoječo osebo",
     "Mark person in preview" : "Označi osebo v predogledu",
     "Home" : "Začetna stran",

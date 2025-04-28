@@ -12,7 +12,7 @@ OC.L10N.register(
     "Archive" : "Archyvas",
     "On this day" : "Šią dieną",
     "Map" : "Žemėlapis",
-    "Tags" : "Žymės",
+    "Tags" : "Žymos",
     "Settings" : "Nustatymai",
     "Videos" : "Vaizdo įrašai",
     "A better photos experience awaits you" : "Jūsų laukia geresnis nuotraukų patyrimas",
