@@ -206,7 +206,7 @@ OC.L10N.register(
     "Transcoder" : "Транскодер",
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "Memories використовує транскодер go-vod. Ви можете запустити go-vod ззовні (наприклад, в окремому Docker-контейнері для апаратного прискорення) або скористатися вбудованим транскодером. Щоб використовувати зовнішній транскодер, увімкніть наступну опцію і дотримуйтесь інструкцій у документації:",
     "Enable external transcoder" : "Увімкнути зовнішній транскодер",
-    "The configuration here also applies to public link shares." : "Наведена тут конфігурація також застосовується до загальнодоступних посилань.",
+    "The configuration here also applies to public link shares." : "Наведена тут конфігурація також застосовується до публічних посилань.",
     "Users may override this setting." : "Користувачі можуть змінити це налаштування.",
     "Always load high resolution image (not recommended if using HEIC/TIFF)" : "Завжди завантажуйте зображення з високою роздільною здатністю (не рекомендується, якщо ви використовуєте HEIC/TIFF)",
     "Template" : "Шаблон",
