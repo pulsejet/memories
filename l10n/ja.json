@@ -223,6 +223,7 @@
     "Failed to create {albumName}." : "{albumName} の作成に失敗しました。",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "{currentAlbumName} から {newAlbumName} への名前の変更に失敗しました。",
     "No items" : "アイテムがありません",
+    "_{n} item_::_{n} items_" : ["{n}アイテム"],
     "Shared by {user}" : "{user} から共有されました",
     "Failed to delete {fileName}." : "{fileName} の削除に失敗しました。",
     "Failed to copy files." : "ファイルのコピーに失敗しました。",
