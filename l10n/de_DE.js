@@ -38,7 +38,7 @@ OC.L10N.register(
     "You can always change this later in settings" : "Sie können das auch noch später in den Einstellungen ändern",
     "If you just installed Memories, visit the admin panel first." : "Wenn Sie Memories gerade erst installiert haben, navigieren Sie bitte zunächst zum Administrationsmenü.",
     "No coordinates" : "Keine Koordinaten",
-    "Click edit to set location" : "Auf Bearbeiten klicken um den Ort festzulegen",
+    "Click edit to set location" : "Auf Bearbeiten klicken, um den Ort festzulegen",
     "Shared By" : "Geteilt von",
     "Metadata" : "Metadaten",
     "Edit" : "Bearbeiten",
