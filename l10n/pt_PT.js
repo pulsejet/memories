@@ -189,6 +189,7 @@ OC.L10N.register(
     "Next" : "Seguinte",
     "Undo" : "Desfazer",
     "Redo" : "Repetir",
+    "Filters" : "Filtros",
     "Original" : "Original",
     "Custom" : "Personalizado",
     "Value" : "Valor",
