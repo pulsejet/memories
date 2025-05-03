@@ -33,6 +33,7 @@ OC.L10N.register(
     "General" : "Vispārīgs",
     "Account" : "Konts",
     "Show metadata in slideshow" : "Slīdrādē rādīt metadatus",
+    "Logged in as {user}" : "Pieteicies kā {user}",
     "Info" : "Info",
     "Close" : "Aizvērt",
     "Failed to load some photos" : "Neizdevās ielādēt dažus fotoattēlus",
