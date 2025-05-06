@@ -25,7 +25,7 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
      */
     fun login(url: String, trustAll: Boolean) {
         try {
-            mHttp.build(url, trustAll)
+            mHttp.build(mCtx, url, trustAll)
 
             val res = mHttp.getApiDescription()
             if (res.code != 200) {
@@ -200,7 +200,7 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
     fun deleteCredentials() {
         store.deleteCredentials()
         mHttp.setAuthHeader(null)
-        mHttp.build(null, false)
+        mHttp.build(mCtx, null, false)
     }
 
     /**
@@ -208,7 +208,7 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
      */
     fun refreshCredentials() {
         val cred = store.getCredentials() ?: return
-        mHttp.build(cred.url, cred.trustAll)
+        mHttp.build(mCtx, cred.url, cred.trustAll)
         mHttp.setAuthHeader(Pair(cred.username, cred.token))
     }
 
