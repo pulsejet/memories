@@ -125,6 +125,7 @@ OC.L10N.register(
     "Link copied to clipboard" : "Link on lõikelauale kopeeritud",
     "Share link" : "Jaga link",
     "Refresh" : "Värskenda",
+    "Failed to upload {file}" : "„{file}“ üleslaadimine ei õnnestunud",
     "Last updated" : "Viimati uuendatud",
     "Oldest first" : "Vanemad eespool",
     "Ascending" : "Kasvavalt",
