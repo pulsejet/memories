@@ -44,6 +44,7 @@ OC.L10N.register(
     "File Support" : "Datņ atbalsts",
     "Documentation." : "Dokumentācija",
     "Help & Support" : "Palīdzība un atbalsts",
+    "Last index job was run {t} seconds ago." : "Pēdējais indeksēšanas darbs tika izpildīts pirms {t} sekundēm.",
     "Unknown" : "Nezināms",
     "Continue" : "Turpināt",
     "Video Streaming" : "Video straumēšana",
@@ -141,6 +142,6 @@ OC.L10N.register(
     "No" : "Nē",
     "Choose" : "Izvēlēties",
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Pārvietot {count} vienumu uz atkritni?","Pārvietot {count} vienumu uz atkritni?","Pārvietot {count} vienumus uz atkritni?"],
-    "Files in trash may be automatically deleted after a fixed period of time." : "Atkritnē esošās datnes var automātiski izdzēst pēc noteikta laika posma."
+    "Files in trash may be automatically deleted after a fixed period of time." : "Atkritnē esošās datnes var tikt automātiski izdzēstas pēc noteikta laika posma."
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");
