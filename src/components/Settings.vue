@@ -150,6 +150,19 @@
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
+      <NcAppSettingsSection id="trips-settings" :name="names.trips">
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.enable_trips"
+          @update:checked="updateEnableTrips"
+          type="switch"
+        >
+          {{ t('memories', 'Enable trips feature') }}
+        </NcCheckboxRadioSwitch>
+        <div class="setting-hint">
+          {{ t('memories', 'Automatically organize photos into trips based on time and location data') }}
+        </div>
+      </NcAppSettingsSection>
+
       <NcAppSettingsSection id="albums-settings" :name="names.albums">
         <NcCheckboxRadioSwitch
           :checked.sync="config.sort_album_month"
@@ -224,6 +237,7 @@ export default defineComponent({
       account: t('memories', 'Account'),
       folders: t('memories', 'Folders'),
       albums: t('memories', 'Albums'),
+      trips: t('memories', 'Trips'),
     },
   }),
 
@@ -357,6 +371,11 @@ export default defineComponent({
     // Albums settings
     async updateSortAlbumMonth() {
       await this.updateSetting('sort_album_month', 'sortAlbumMonth');
+    },
+
+    // Trips settings
+    async updateEnableTrips() {
+      await this.updateSetting('enable_trips', 'enableTrips');
     },
 
     // --------------- Native APIs start -----------------------------

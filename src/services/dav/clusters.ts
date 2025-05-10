@@ -11,6 +11,7 @@ export const clusterIs = {
   facerecognition: (cluster: ICluster): cluster is IFace => cluster.cluster_type === 'facerecognition',
   face: (cluster: ICluster): cluster is IFace =>
     cluster.cluster_type === 'recognize' || cluster.cluster_type === 'facerecognition',
+  trip: (cluster: ICluster): cluster is ICluster => cluster.cluster_type === 'trips',
 };
 
 /**
@@ -73,6 +74,13 @@ export function getClusterLinkTarget(cluster: ICluster) {
 
   if (clusterIs.tag(cluster)) {
     return { name: _m.routes.Tags.name, params: { name: cluster.name } };
+  }
+
+  if (clusterIs.trip(cluster)) {
+    const id = cluster.cluster_id;
+    const tripName = cluster.name || id;
+    const name = `${id}-${tripName}`;
+    return { name: _m.routes.Trips.name, params: { name } };
   }
 
   return {};

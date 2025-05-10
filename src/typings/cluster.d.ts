@@ -6,7 +6,7 @@ declare module '@typings' {
     name: string;
   }
 
-  export type ClusterTypes = 'tags' | 'albums' | 'places' | 'recognize' | 'facerecognition' | 'plus';
+  export type ClusterTypes = 'tags' | 'albums' | 'places' | 'recognize' | 'facerecognition' | 'plus' | 'trips';
 
   export interface ICluster {
     /** A unique identifier for the cluster */
@@ -61,6 +61,19 @@ declare module '@typings' {
 
   export interface ITag extends ICluster {
     __t: never; // cannot have empty interface
+  }
+
+  export interface ITrip extends ICluster {
+    /** Start date of the trip */
+    startDate: number;
+    /** End date of the trip */
+    endDate: number;
+    /** Timeframe of the trip (season, holiday, etc.) */
+    timeframe?: string;
+    /** Location of the trip */
+    location?: string;
+    /** Places in the trip */
+    places?: string[];
   }
 
   export interface IFaceRect {
