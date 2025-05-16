@@ -8,9 +8,12 @@ import Explore from '@components/Explore.vue';
 import SplitTimeline from '@components/SplitTimeline.vue';
 import ClusterView from '@components/ClusterView.vue';
 import NativeXSetup from '@native/Setup.vue';
+import TripVideosList from '@components/TripVideosList.vue';
 
 import { translate as t } from '@services/l10n';
 import { constants as c } from '@services/utils';
+import staticConfig from '@services/static-config';
+import { showError } from '@nextcloud/dialogs';
 
 // Routes are defined here
 export type RouteId =
@@ -25,6 +28,8 @@ export type RouteId =
   | 'FaceRecognition'
   | 'Places'
   | 'Tags'
+  | 'Trips'
+  | 'TripVideos'
   | 'FolderShare'
   | 'AlbumShare'
   | 'Map'
@@ -109,6 +114,20 @@ export const routes: { [key in RouteId]: RouteConfig } = {
     props: (route: Route) => ({ rootTitle: t('memories', 'Tags') }),
   },
 
+  Trips: {
+    path: '/trips/:name*',
+    component: ClusterView,
+    name: 'trips',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Trips') }),
+  },
+
+  TripVideos: {
+    path: '/trip-videos',
+    component: TripVideosList,
+    name: 'trip-videos',
+    props: (route: Route) => ({ rootTitle: t('memories', 'Trip Videos') }),
+  },
+
   FolderShare: {
     path: '/s/:token/:path*',
     component: Timeline,
@@ -147,7 +166,8 @@ export const routes: { [key in RouteId]: RouteConfig } = {
 
 Vue.use(Router);
 
-export default new Router({
+// Create the router instance
+const router = new Router({
   mode: 'history',
   // if index.php is in the url AND we got this far, then it's working:
   // let's keep using index.php in the url
@@ -156,8 +176,32 @@ export default new Router({
   routes: Object.values(routes),
 });
 
+// Helper function to check if trips feature is enabled
+async function tripsAllowed() {
+  const config = await staticConfig.getAll();
+  return config.enable_trips;
+}
+
+// Add navigation guard to prevent access to trips when feature is disabled
+router.beforeEach(async (to, from, next) => {
+  // Check if trying to access trip-related routes
+  if (to.name === routes.Trips.name || to.name === routes.TripVideos.name) {
+    // Check if trips feature is enabled
+    if (!(await tripsAllowed())) {
+      showError(t('memories', 'Trips feature is disabled. You can enable it in Settings.'));
+      // Redirect to home if coming from external link, otherwise go back
+      if (!from.name) {
+        next({ name: routes.Base.name });
+      } else {
+        next(false);
+      }
+      return;
+    }
+  }
+  next();
+});
+
 // Define global route checkers
-// Injected through globals.d.ts
 export type GlobalRouteCheckers = {
   [key in `routeIs${RouteId}`]: boolean;
 } & {
@@ -204,5 +248,9 @@ defineRouteChecker('routeIsCluster', (route) =>
     routes.FaceRecognition.name,
     routes.Places.name,
     routes.Tags.name,
+    routes.Trips.name,
+    routes.TripVideos.name,
   ].includes(route?.name ?? ''),
 );
+
+export default router;
