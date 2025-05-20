@@ -13,6 +13,7 @@ import UserMixin from '@mixins/UserConfig';
 import AlbumDynamicTopMatter from './AlbumDynamicTopMatter.vue';
 import FolderDynamicTopMatter from './FolderDynamicTopMatter.vue';
 import PlacesDynamicTopMatterVue from './PlacesDynamicTopMatter.vue';
+import TripsDynamicTopMatterVue from './TripsDynamicTopMatter.vue';
 import OnThisDay from './OnThisDay.vue';
 import * as strings from '@services/strings';
 
@@ -40,6 +41,8 @@ export default defineComponent({
         return FolderDynamicTopMatter;
       } else if (this.routeIsPlaces) {
         return PlacesDynamicTopMatterVue;
+      } else if (this.routeIsTrips) {
+        return TripsDynamicTopMatterVue;
       } else if (this.routeIsAlbums) {
         return AlbumDynamicTopMatter;
       } else if (this.routeIsBase && this.config.enable_top_memories) {
@@ -63,7 +66,7 @@ export default defineComponent({
       }
 
       // Only static top matter for these routes
-      if (this.routeIsTags || this.routeIsPeople || this.routeIsPlaces) {
+      if (this.routeIsTags || this.routeIsPeople || this.routeIsPlaces || this.routeIsTrips) {
         return String();
       }
 
