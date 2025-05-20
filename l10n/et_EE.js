@@ -105,6 +105,7 @@ OC.L10N.register(
     "Month" : "Kuu",
     "Day" : "Päev",
     "Hour" : "Tund",
+    "Minute" : "Minut",
     "Oldest" : "Vanim",
     "Title" : "Pealkiri",
     "Description" : "Kirjeldus",
