@@ -309,6 +309,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Tegelik suurus (100%)",
     "Fit size" : "Mahuta suurus",
     "Transcoding failed, check Nextcloud logs." : "Vormingu teisendamine ei õnnestunud, lisateavet saad Nextcloudi logidest.",
+    "Auto" : "Automaatne",
     "Shared Folder" : "Jagatud kaust",
     "Shared Album" : "Jagatud album",
     "Setup" : "Seadista",
