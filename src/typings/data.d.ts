@@ -51,6 +51,8 @@ declare module '@typings' {
     h?: number;
     /** Live Photo identifier */
     liveid?: string;
+    /** File owner display name */
+    shared_by?: string;
 
     /** Grid display width px */
     dispW?: number;
@@ -112,7 +114,10 @@ declare module '@typings' {
     basename: string;
     mimetype: string;
     size: number;
-    uploadtime: number;
+    mtime: number;
+
+    owneruid: string;
+    ownername: string;
 
     filename?: string;
     address?: string;

@@ -9,7 +9,7 @@
     cacheDirectory=".cache/psalm-ls"
     findUnusedBaselineEntry="true"
     findUnusedCode="false"
-    phpVersion="8.0"
+    phpVersion="8.2"
 >
     <!--
         Duplication is due to differences in language server and CLI
@@ -50,6 +50,11 @@
                 <directory name="lib/Command" />
             </errorLevel>
         </PropertyNotSetInConstructor>
+        <RiskyTruthyFalsyComparison>
+            <errorLevel type="suppress">
+                <directory name="lib/" />
+            </errorLevel>
+        </RiskyTruthyFalsyComparison>
     </issueHandlers>
     <forbiddenFunctions>
         <function name="var_dump" />

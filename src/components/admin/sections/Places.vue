@@ -55,7 +55,7 @@
       {{ t('memories', 'Note: the geometry data is stored in the memories_planet_geometry table, with no prefix.') }}
     </p>
 
-    <form :action="placesSetupUrl" method="post" @submit="placesSetup" target="_blank">
+    <form :action="placesSetupUrl" method="post" @submit.prevent.stop="placesSetup" target="_blank">
       <input name="requesttoken" type="hidden" :value="requestToken" />
       <input name="actiontoken" type="hidden" :value="actionToken" />
       <NcButton nativeType="submit" type="warning" style="margin-top: 8px">
@@ -106,11 +106,7 @@ export default defineComponent({
   },
 
   methods: {
-    async placesSetup(event: React.FormEvent<HTMLFormElement>) {
-      // prevent the submit event
-      event.preventDefault();
-      event.stopPropagation();
-
+    async placesSetup(event: Event) {
       // construct warning
       const warnSetup = this.t(
         'memories',

@@ -26,19 +26,19 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 
 class TagsController extends GenericApiController
 {
     /**
-     * @NoAdminRequired
-     *
      * @param int   $id     File ID
      * @param int[] $add    Tags to add
      * @param int[] $remove Tags to remove
      *
      * Set tags for a file
      */
+    #[NoAdminRequired]
     public function set(int $id, ?array $add, ?array $remove): Http\Response
     {
         return Util::guardEx(function () use ($id, $add, $remove) {

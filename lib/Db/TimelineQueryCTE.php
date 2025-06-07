@@ -20,7 +20,7 @@ trait TimelineQueryCTE
      */
     protected function CTE_FOLDERS_ALL(bool $hidden): string
     {
-        $platform = $this->connection->getDatabasePlatform();
+        $provider = $this->connection->getDatabaseProvider();
 
         // Filter out folder MIME types
         $FOLDER_MIME_QUERY = "SELECT MAX(id) FROM *PREFIX*mimetypes WHERE mimetype = 'httpd/unix-directory'";
@@ -42,7 +42,7 @@ trait TimelineQueryCTE
         // On MySQL or MariaDB, provide the hint to use the index
         // The index is not used sometimes since the table is unbalanced
         // and fs_parent is used instead
-        $UNION_INDEX_HINT = preg_match('/mysql|mariadb/i', $platform::class)
+        $UNION_INDEX_HINT = IDBConnection::PLATFORM_MYSQL === $provider
             ? 'USE INDEX (memories_parent_mimetype)'
             : '';
 

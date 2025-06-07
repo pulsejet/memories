@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace OCA\Memories\Service;
 
 use OCA\Memories\Settings\SystemConfig;
+use OCA\Memories\Util;
 
 class BinExt
 {
     public const EXIFTOOL_VER = '12.70';
-    public const GOVOD_VER = '0.2.5';
+    public const GOVOD_VER = '0.2.6';
     public const NX_VER_MIN = '1.1';
+
+    /** Exiftool environment is initialized in this process */
+    private static bool $hasExiftoolEnv = false;
 
     /** Get the path to the temp directory */
     public static function getTmpPath(): string
@@ -64,12 +68,11 @@ class BinExt
     /** Test configured exiftool binary */
     public static function testExiftool(): string
     {
-        $cmd = implode(' ', array_merge(self::getExiftool(), ['-ver']));
+        $cmd = array_merge(self::getExiftool(), ['-ver']);
 
-        /** @psalm-suppress ForbiddenCode */
-        $out = shell_exec($cmd);
+        $out = Util::execSafe($cmd, 3000);
         if (!$out) {
-            throw new \Exception("failed to run exiftool: {$cmd}");
+            throw new \Exception('failed to run exiftool: '.implode(' ', $cmd));
         }
 
         // Check version
@@ -117,6 +120,11 @@ class BinExt
      */
     public static function getExiftool(): array
     {
+        if (!self::$hasExiftoolEnv) {
+            self::$hasExiftoolEnv = true;
+            putenv('LANG=C'); // set perl lang to suppress warning
+        }
+
         if (SystemConfig::get('memories.exiftool_no_local')) {
             return ['perl', realpath(__DIR__.'/../../bin-ext/exiftool/exiftool')];
         }
@@ -255,8 +263,8 @@ class BinExt
         $tmpPath = $env['tempdir'];
 
         // (Re-)create temp dir
-        /** @psalm-suppress ForbiddenCode */
-        shell_exec("rm -rf '{$tmpPath}' && mkdir -p '{$tmpPath}' && chmod 755 '{$tmpPath}'");
+        Util::execSafe(['rm', '-rf', $tmpPath], 3000);
+        mkdir($tmpPath, 0755, true);
 
         // Check temp directory exists
         if (!is_dir($tmpPath)) {
@@ -277,8 +285,13 @@ class BinExt
         self::pkill(self::getName('go-vod'));
 
         // Start transcoder
-        /** @psalm-suppress ForbiddenCode */
-        shell_exec("nohup {$transcoder} {$configFile} >> '{$logFile}' 2>&1 & > /dev/null");
+        // We need init to own this process, there's no easy way to do this
+        $pipes = [];
+        proc_open(['sh', '-c', "nohup {$transcoder} {$configFile} &"], [
+            0 => ['file', '/dev/null', 'r'],
+            1 => ['file', $logFile, 'a'],
+            2 => ['file', $logFile, 'a'],
+        ], $pipes);
 
         // wait for 500ms
         usleep(500000);
@@ -406,12 +419,8 @@ class BinExt
 
         if (empty($ffmpegPath) || !file_exists($ffmpegPath) || empty($ffprobePath) || !file_exists($ffprobePath)) {
             // Use PATH environment variable to find ffmpeg
-
-            /** @psalm-suppress ForbiddenCode */
-            $ffmpegPath = shell_exec('which ffmpeg');
-
-            /** @psalm-suppress ForbiddenCode */
-            $ffprobePath = shell_exec('which ffprobe');
+            $ffmpegPath = Util::execSafe(['which', 'ffmpeg'], 3000);
+            $ffprobePath = Util::execSafe(['which', 'ffprobe'], 3000);
             if (!$ffmpegPath || !$ffprobePath) {
                 return null;
             }
@@ -435,8 +444,7 @@ class BinExt
 
     public static function testFFmpeg(string $path, string $name): string
     {
-        /** @psalm-suppress ForbiddenCode */
-        $version = shell_exec("{$path} -version") ?: '';
+        $version = Util::execSafe([$path, '-version'], 3000) ?: '';
         if (!preg_match("/{$name} version \\S*/", $version, $matches)) {
             throw new \Exception("failed to detect version, found {$version}");
         }
@@ -446,13 +454,11 @@ class BinExt
 
     public static function testSystemPerl(string $path): string
     {
-        /** @psalm-suppress ForbiddenCode */
-        if (($out = shell_exec("{$path} -e 'print \"OK\";'")) !== 'OK') {
+        if (($out = Util::execSafe([$path, '-e', 'print "OK";'], 3000)) !== 'OK') {
             throw new \Exception('Failed to run test perl script: '.(string) $out);
         }
 
-        /** @psalm-suppress ForbiddenCode */
-        return shell_exec("{$path} -e 'print $^V;'") ?: 'unknown version';
+        return Util::execSafe([$path, '-e', 'print $^V;'], 3000) ?: 'unknown version';
     }
 
     /**
@@ -472,28 +478,27 @@ class BinExt
         $name = substr($name, 0, 12);
 
         // check if ps or busybox is available
-        $ps = 'ps';
+        $ps = ['ps'];
 
-        /** @psalm-suppress ForbiddenCode */
-        if (!shell_exec('which ps')) {
-            if (!shell_exec('which busybox')) {
+        if (!Util::execSafe(['which', 'ps'], 1000)) {
+            if (!Util::execSafe(['which', 'busybox'], 1000)) {
                 return;
             }
 
-            $ps = 'busybox ps';
+            $ps = ['busybox', 'ps'];
         }
 
-        // get pids using ps as array
-        /** @psalm-suppress ForbiddenCode */
-        $pids = shell_exec("{$ps} -eao pid,comm | grep {$name} | awk '{print $1}'");
-        if (null === $pids || empty($pids)) {
+        $procs = Util::execSafe(array_merge($ps, ['-eao', 'pid,comm']), 1000) ?: '';
+        $procs = explode("\n", $procs);
+
+        $matches = array_filter($procs, static fn ($l) => str_contains($l, $name));
+        $pids = array_map(static fn ($l) => (int) explode(' ', trim($l))[0], $matches);
+        if (empty($pids)) {
             return;
         }
-        $pids = array_filter(explode("\n", $pids));
 
-        // kill all pids
         foreach ($pids as $pid) {
-            posix_kill((int) $pid, 9); // SIGKILL
+            posix_kill($pid, 9); // SIGKILL
         }
     }
 }

@@ -301,6 +301,20 @@ class AlbumsQuery
     }
 
     /**
+     * Query transformation to add a "shared" flag to the list
+     * of albums (whether the album has any shared collaborators).
+     */
+    public function transformSharedFlag(IQueryBuilder &$query): void
+    {
+        $sSq = $query->getConnection()->getQueryBuilder();
+        $sSq->select($sSq->expr()->literal(1))
+            ->from($this->collaboratorsTable(), 'pc')
+            ->where($sSq->expr()->eq('pc.album_id', 'pa.album_id'))
+        ;
+        $query->selectAlias(SQL::exists($query, $sSq), 'shared');
+    }
+
+    /**
      * Get the various collaborator IDs that a user has.
      * This includes the groups the user is in and the user itself.
      *

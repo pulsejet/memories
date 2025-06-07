@@ -1,6 +1,8 @@
 <?php
 
 declare(strict_types=1);
+use PhpCsFixer\Config;
+use PhpCsFixer\Finder;
 
 /*
  * This file is part of PHP CS Fixer.
@@ -12,13 +14,13 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-$finder = PhpCsFixer\Finder::create()
+$finder = Finder::create()
     ->ignoreDotFiles(false)
     ->ignoreVCSIgnored(true)
     ->in(__DIR__.'/lib')
 ;
 
-$config = new PhpCsFixer\Config();
+$config = new Config();
 $config
     ->setUsingCache(true)
     ->setRiskyAllowed(true)
@@ -36,6 +38,7 @@ $config
         'return_assignment' => true,
         'declare_strict_types' => true,
         'strict_param' => true,
+        'fully_qualified_strict_types' => false,
     ])
     ->setFinder($finder)
 ;

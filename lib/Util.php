@@ -13,6 +13,7 @@ use OCP\App\IAppManager;
 use OCP\Files\Node;
 use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
+use OCP\IAppConfig;
 use OCP\IConfig;
 
 class Util
@@ -46,8 +47,13 @@ class Util
      */
     public static function getLibc(): ?string
     {
-        /** @psalm-suppress ForbiddenCode */
-        $ldd = strtolower(shell_exec('ldd --version 2>&1') ?: 'unknown');
+        // glibc -> stdout, musl -> stderr
+        $output = self::execSafe2(['ldd', '--version'], 3000, null, true, true);
+
+        // check in either
+        $ldd = strtolower($output[0] ?? '')
+            .strtolower($output[1] ?? '');
+
         if (str_contains($ldd, 'musl')) {
             return 'musl';
         }
@@ -91,8 +97,8 @@ class Util
             return false;
         }
 
-        $config = \OC::$server->get(IConfig::class);
-        if ('true' !== $config->getAppValue('recognize', 'faces.enabled', 'false')) {
+        $appConfig = \OC::$server->get(IAppConfig::class);
+        if ('true' !== $appConfig->getValueString('recognize', 'faces.enabled', 'false')) {
             return false;
         }
 
@@ -168,15 +174,15 @@ class Util
      */
     public static function isLinkSharingEnabled(): bool
     {
-        $config = \OC::$server->get(IConfig::class);
+        $appConfig = \OC::$server->get(IAppConfig::class);
 
         // Check if the shareAPI is enabled
-        if ('yes' !== $config->getAppValue('core', 'shareapi_enabled', 'yes')) {
+        if ('yes' !== $appConfig->getValueString('core', 'shareapi_enabled', 'yes')) {
             return false;
         }
 
         // Check whether public sharing is enabled
-        if ('yes' !== $config->getAppValue('core', 'shareapi_allow_links', 'yes')) {
+        if ('yes' !== $appConfig->getValueString('core', 'shareapi_allow_links', 'yes')) {
             return false;
         }
 
@@ -451,5 +457,111 @@ class Util
 
             exit(1);
         });
+    }
+
+    /**
+     * Execute a command safely.
+     *
+     * @param string[] $cmd     command to execute
+     * @param int      $timeout milliseconds
+     * @param ?string  $stdin   standard input
+     *
+     * @return string standard output
+     *
+     * @throws \Exception on error
+     */
+    public static function execSafe(array $cmd, int $timeout, ?string $stdin = null): ?string
+    {
+        return self::execSafe2($cmd, $timeout, $stdin, true, false)[0];
+    }
+
+    /** Exec safe with extra options */
+    public static function execSafe2(array $cmd, int $timeout, ?string $stdin, bool $rstdout, bool $rstderr): array
+    {
+        $config = [
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+        if (null !== $stdin) {
+            $config[0] = ['pipe', 'r'];
+        }
+
+        $pipes = [];
+        $proc = proc_open($cmd, $config, $pipes);
+        if (!\is_resource($proc)) {
+            throw new \Exception('proc_open failed: '.implode(' ', $cmd));
+        }
+        stream_set_blocking($pipes[1], false);
+        stream_set_blocking($pipes[2], false);
+
+        if (null !== $stdin) {
+            fwrite($pipes[0], $stdin);
+            fclose($pipes[0]);
+        }
+
+        try {
+            $output = [null, null];
+
+            if ($rstdout) {
+                $output[0] = self::readOrTimeout($pipes[1], $timeout);
+            }
+            if ($rstderr) {
+                $output[1] = self::readOrTimeout($pipes[2], $timeout);
+            }
+
+            return $output;
+        } catch (\Exception $ex) {
+            throw $ex;
+        } finally {
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            proc_terminate($proc);
+            proc_close($proc);
+        }
+    }
+
+    /**
+     * Read from non blocking handle or throw timeout.
+     *
+     * @param resource $handle
+     * @param int      $timeout   milliseconds
+     * @param string   $delimiter null for eof
+     */
+    public static function readOrTimeout($handle, int $timeout, ?string $delimiter = null): string
+    {
+        /** @psalm-suppress DocblockTypeContradiction */
+        if (!\is_resource($handle)) {
+            throw new \Exception('No resource read handle');
+        }
+
+        $buffer = '';
+
+        // Absolute time to wait until
+        $timeEnd = microtime(true) + $timeout / 1000;
+
+        while (microtime(true) < $timeEnd) {
+            // Check if we have delimiter or eof
+            if (feof($handle) || ($delimiter && str_ends_with($buffer, $delimiter))) {
+                return $buffer;
+            }
+
+            // Wait for data to read
+            $read = [$handle];
+            $write = $except = null;
+            $ready = stream_select($read, $write, $except, 1, 0);
+            if (false === $ready) {
+                throw new \Exception('Stream select error');
+            }
+
+            // No data is available yet
+            if (0 === $ready) {
+                continue;
+            }
+
+            // Append to buffer
+            $buffer .= stream_get_contents($handle);
+        }
+
+        throw new \Exception('Timeout');
     }
 }

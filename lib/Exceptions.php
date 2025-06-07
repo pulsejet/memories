@@ -11,6 +11,7 @@ class Exceptions
 {
     public static function Generic(\Exception $e, int $status = Http::STATUS_INTERNAL_SERVER_ERROR): HttpResponseException
     {
+        /** @psalm-suppress ArgumentTypeCoercion */
         return new HttpResponseException(new DataResponse([
             'message' => $e->getMessage(),
         ], $status));

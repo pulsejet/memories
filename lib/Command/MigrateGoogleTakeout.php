@@ -167,7 +167,7 @@ class MigrateGoogleTakeout extends Command
                 $this->migrateFolder($node);
             } elseif ($node instanceof File) {
                 try {
-                    $this->migrateFile($node);
+                    $this->migrateFile($node, $nodes);
                 } catch (\Exception $e) {
                     $this->output->writeln("<error>Error migrating file {$node->getPath()}: {$e->getMessage()}</error>");
                 }
@@ -175,7 +175,7 @@ class MigrateGoogleTakeout extends Command
         }
     }
 
-    protected function migrateFile(File $file): void
+    protected function migrateFile(File $file, array $nodes): void
     {
         // Check if this is a supported file
         if (!\in_array($file->getMimeType(), $this->mimeTypes, true)) {
@@ -186,15 +186,29 @@ class MigrateGoogleTakeout extends Command
         $path = $file->getPath();
         $json = [];
 
-        /** @var \OCP\Files\File */
+        /** @var ?\OCP\Files\File */
         $jsonFile = null;
 
         try {
-            $jsonPath = $path.'.json';
+            // the JSON file may contain the "supplemental-metadata" string, fully or partially
+            // https://github.com/pulsejet/memories/pull/1441
+            $partial_re = '\.?[supplemental\-metadata]*\.json$';
+            foreach ($nodes as $node) {
+                if (!$node instanceof File) {
+                    continue;
+                }
 
-            /** @var \OCP\Files\File */
-            $jsonFile = $this->rootFolder->get($jsonPath);
-            if (!$jsonFile->isReadable() || \OCP\Files\FileInfo::TYPE_FOLDER === $jsonFile->getType()) {
+                // check if the current file matches our $path . $partial_re RegExp
+                $current = $node->getPath();
+                $re = preg_quote($path, '/').$partial_re;
+                if (preg_match("/{$re}/", $current)) {
+                    $jsonFile = $node;
+
+                    break;
+                }
+            }
+
+            if (null === $jsonFile || !$jsonFile->isReadable()) {
                 return;
             }
 

@@ -30,6 +30,9 @@ use OCA\Memories\Service\BinExt;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\File;
@@ -37,14 +40,11 @@ use OCP\Files\File;
 class VideoController extends GenericApiController
 {
     /**
-     * @NoAdminRequired
-     *
-     * @PublicPage
-     *
-     * @NoCSRFRequired
-     *
-     * Transcode a video to HLS by proxy
+     * Transcode a video to HLS by proxy.
      */
+    #[NoAdminRequired]
+    #[PublicPage]
+    #[NoCSRFRequired]
     public function transcode(string $client, int $fileid, string $profile): Http\Response
     {
         return Util::guardEx(function () use ($client, $fileid, $profile) {
@@ -106,14 +106,11 @@ class VideoController extends GenericApiController
     }
 
     /**
-     * @NoAdminRequired
-     *
-     * @PublicPage
-     *
-     * @NoCSRFRequired
-     *
-     * Return the live video part of a Live Photo
+     * Return the live video part of a Live Photo.
      */
+    #[NoAdminRequired]
+    #[PublicPage]
+    #[NoCSRFRequired]
     public function livephoto(
         int $fileid,
         string $liveid = '',

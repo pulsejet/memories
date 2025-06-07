@@ -26,6 +26,7 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Share\IManager;
 use OCP\Share\IShare;
@@ -33,10 +34,9 @@ use OCP\Share\IShare;
 class ShareController extends GenericApiController
 {
     /**
-     * @NoAdminRequired
-     *
-     * Get the tokens of a node shared using an external link
+     * Get the tokens of a node shared using an external link.
      */
+    #[NoAdminRequired]
     public function links(?int $id, ?string $path): Http\Response
     {
         return Util::guardEx(function () use ($id, $path) {
@@ -57,10 +57,9 @@ class ShareController extends GenericApiController
     }
 
     /**
-     * @NoAdminRequired
-     *
-     * Share a node using an external link
+     * Share a node using an external link.
      */
+    #[NoAdminRequired]
     public function createNode(?int $id, ?string $path): Http\Response
     {
         return Util::guardEx(function () use ($id, $path) {
@@ -81,10 +80,9 @@ class ShareController extends GenericApiController
     }
 
     /**
-     * @NoAdminRequired
-     *
-     * Delete an external link share
+     * Delete an external link share.
      */
+    #[NoAdminRequired]
     public function deleteShare(string $id): Http\Response
     {
         return Util::guardEx(static function () use ($id) {

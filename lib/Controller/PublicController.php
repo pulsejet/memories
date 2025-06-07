@@ -9,6 +9,8 @@ use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
 use OCP\AppFramework\AuthPublicShareController;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
@@ -44,13 +46,11 @@ class PublicController extends AuthPublicShareController
     }
 
     /**
-     * @PublicPage
-     *
-     * @NoCSRFRequired
-     *
      * Show the authentication page
-     * The form has to submit to the authenticate method route
+     * The form has to submit to the authenticate method route.
      */
+    #[PublicPage]
+    #[NoCSRFRequired]
     public function showAuthenticate(): TemplateResponse
     {
         $this->redirectIfOwned($this->share);
@@ -71,11 +71,8 @@ class PublicController extends AuthPublicShareController
         }
     }
 
-    /**
-     * @PublicPage
-     *
-     * @NoCSRFRequired
-     */
+    #[PublicPage]
+    #[NoCSRFRequired]
     public function showShare(): TemplateResponse
     {
         // Check whether share exists

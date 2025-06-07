@@ -21,7 +21,7 @@ header#header .header-appname {
   background-color: transparent !important;
 
   header#header & {
-    color: var(--color-primary-text) !important;
+    color: var(--color-background-plain-text, var(--color-primary-text)) !important;
   }
 
   opacity: 0.85;

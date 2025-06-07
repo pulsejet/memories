@@ -29,7 +29,7 @@ export default defineComponent({
     _m.modals.search = this.open;
 
     // create right header button
-    const header = document.querySelector<HTMLDivElement>('.header-right');
+    const header = document.querySelector<HTMLDivElement>('.header-right, .header-end');
     if (header && utils.uid) {
       const div = document.createElement('div');
       header.prepend(div);

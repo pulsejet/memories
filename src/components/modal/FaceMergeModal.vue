@@ -99,6 +99,20 @@ export default defineComponent({
         return;
       }
 
+      if (this.routeIsFaceRecognition) {
+        if (Number.isInteger(Number(newName))) {
+          showError(this.t('memories', 'You can only merge with a person with name'));
+          return;
+        }
+        await dav.faceRecognitionRenamePerson(name, newName);
+        await this.close();
+        await this.$router.replace({
+          name: 'facerecognition',
+          params: { user: face.user_id, name: newName },
+        });
+        return;
+      }
+
       try {
         // Get all files for current face
         let res = (await client.getDirectoryContents(`/recognize/${user}/faces/${name}`, { details: true })) as any;

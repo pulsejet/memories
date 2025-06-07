@@ -2,10 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [v7.5.1] - 2025-02-26
+
+- **Upgrade**: Please run `occ maintenance:repair` after the upgrade is complete.
+- **Feature**: Move to folder can now also copy files ([#1143](https://github.com/pulsejet/memories/pull/1143))
+- **Feature**: Move to folder can now organize files by year-month ([#1143](https://github.com/pulsejet/memories/pull/1143))
+- **Feature**: Mark shared files with the owner's name ([#1266](https://github.com/pulsejet/memories/pull/1266))
+- Compatibility with Nextcloud 31
+
+## [v7.4.1] - 2024-09-19
 
 - **Feature**: Add filter to view all files without location data in places ([#1124](https://github.com/pulsejet/memories/issues/1124))
 - **Fix**: Broken indexing of large video files. If you have improperly indexed large files, run `occ memories:index -f` ([#1195](https://github.com/pulsejet/memories/issues/1195))
+- Compatibility with Nextcloud 30
 
 ## [v7.3.1] - 2024-05-03
 

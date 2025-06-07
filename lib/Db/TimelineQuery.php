@@ -7,6 +7,7 @@ namespace OCA\Memories\Db;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use OCP\IRequest;
+use OCP\IUserManager;
 
 class TimelineQuery
 {
@@ -33,6 +34,7 @@ class TimelineQuery
     public function __construct(
         protected IDBConnection $connection,
         protected IRequest $request,
+        protected IUserManager $userManager,
     ) {}
 
     public function allowEmptyRoot(bool $value = true): void

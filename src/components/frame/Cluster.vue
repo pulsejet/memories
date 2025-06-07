@@ -86,21 +86,7 @@ export default defineComponent({
 
     subtitle() {
       if (dav.clusterIs.album(this.data)) {
-        let text: string;
-        if (this.data.count === 0) {
-          text = this.t('memories', 'No items');
-        } else {
-          text = this.n('memories', '{n} item', '{n} items', this.data.count, { n: this.data.count });
-        }
-
-        if (this.data.user !== utils.uid) {
-          const sharer = this.t('memories', 'Shared by {user}', {
-            user: this.data.user_display || this.data.user,
-          });
-          text = `${text} / ${sharer}`;
-        }
-
-        return text;
+        return dav.getAlbumSubtitle(this.data);
       }
 
       return String();

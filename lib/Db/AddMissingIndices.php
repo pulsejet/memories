@@ -83,11 +83,11 @@ class AddMissingIndices
     public static function createFilecacheTriggers(IOutput $output): void
     {
         $connection = \OC::$server->get(IDBConnection::class);
-        $platform = $connection->getDatabasePlatform();
+        $provider = $connection->getDatabaseProvider();
 
         // Trigger to update parent from filecache
         try {
-            if (preg_match('/mysql|mariadb/i', $platform::class)) {
+            if (IDBConnection::PLATFORM_MYSQL === $provider) {
                 // MySQL has no upsert for triggers
                 $connection->executeQuery('DROP TRIGGER IF EXISTS memories_fcu_trg;');
 
@@ -100,7 +100,7 @@ class AddMissingIndices
                         SET parent = NEW.parent
                         WHERE fileid = NEW.fileid;',
                 );
-            } elseif (preg_match('/postgres/i', $platform::class)) {
+            } elseif (IDBConnection::PLATFORM_POSTGRES === $provider) {
                 // Postgres requres a function to do the update
                 // Note: when dropping, the function should be dropped
                 // with CASCADE to remove the trigger as well
@@ -123,7 +123,7 @@ class AddMissingIndices
                     FOR EACH ROW
                     EXECUTE FUNCTION memories_fcu_fun();',
                 );
-            } elseif (preg_match('/sqlite/i', $platform::class)) {
+            } elseif (IDBConnection::PLATFORM_SQLITE === $provider) {
                 // Exactly the same as MySQL except for the BEGIN and END
                 $connection->executeQuery('DROP TRIGGER IF EXISTS memories_fcu_trg;');
                 $connection->executeQuery(
@@ -137,10 +137,10 @@ class AddMissingIndices
                     END;',
                 );
             } else {
-                throw new \Exception('Unsupported database platform: '.$platform::class);
+                throw new \Exception('Unsupported database platform: '.$provider);
             }
 
-            $output->info('Recreated filecache trigger with: '.$platform::class);
+            $output->info('Recreated filecache trigger with: '.$provider);
             SystemConfig::set('memories.db.triggers.fcu', true);
         } catch (\Throwable $e) {
             $output->warning('Failed to create filecache trigger (compatibility mode will be used): '.$e->getMessage());

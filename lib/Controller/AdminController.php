@@ -29,6 +29,8 @@ use OCA\Memories\Service\BinExt;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\JSONResponse;
 
 class AdminController extends GenericApiController
@@ -80,13 +82,12 @@ class AdminController extends GenericApiController
 
     /**
      * @AdminRequired
-     *
-     * @UseSession
      */
+    #[UseSession]
     public function getSystemStatus(): Http\Response
     {
         return Util::guardEx(function () {
-            $config = \OC::$server->get(\OCP\IConfig::class);
+            $appConfig = \OC::$server->get(\OCP\IAppConfig::class);
             $index = \OC::$server->get(\OCA\Memories\Service\Index::class);
             $tw = \OC::$server->get(\OCA\Memories\Db\TimelineWrite::class);
 
@@ -103,9 +104,8 @@ class AdminController extends GenericApiController
             );
 
             // Check for system perl
-            /** @psalm-suppress ForbiddenCode */
             $status['perl'] = $this->getExecutableStatus(
-                trim(shell_exec('which perl') ?: '/bin/perl'),
+                trim(Util::execSafe(['which', 'perl'], 3000) ?: '/bin/perl'),
                 static fn (string $p) => BinExt::testSystemPerl($p),
             );
 
@@ -114,11 +114,11 @@ class AdminController extends GenericApiController
             $status['failure_count'] = $tw->countFailures();
 
             // Automatic indexing stats
-            $jobStart = (int) $config->getAppValue(Application::APPNAME, 'last_index_job_start', (string) 0);
+            $jobStart = (int) $appConfig->getValueString(Application::APPNAME, 'last_index_job_start', (string) 0);
             $status['last_index_job_start'] = $jobStart ? time() - $jobStart : 0; // Seconds ago
-            $status['last_index_job_duration'] = (float) $config->getAppValue(Application::APPNAME, 'last_index_job_duration', (string) 0);
-            $status['last_index_job_status'] = $config->getAppValue(Application::APPNAME, 'last_index_job_status', 'Indexing has not been run yet');
-            $status['last_index_job_status_type'] = $config->getAppValue(Application::APPNAME, 'last_index_job_status_type', 'warning');
+            $status['last_index_job_duration'] = (float) $appConfig->getValueString(Application::APPNAME, 'last_index_job_duration', (string) 0);
+            $status['last_index_job_status'] = $appConfig->getValueString(Application::APPNAME, 'last_index_job_status', 'Indexing has not been run yet');
+            $status['last_index_job_status_type'] = $appConfig->getValueString(Application::APPNAME, 'last_index_job_status_type', 'warning');
 
             // Check supported preview mimes
             $status['mimes'] = $index->getPreviewMimes($index->getAllMimes());
@@ -140,10 +140,9 @@ class AdminController extends GenericApiController
             }
 
             // Check for FFmpeg for preview generation
-            /** @psalm-suppress ForbiddenCode */
             $status['ffmpeg_preview'] = $this->getExecutableStatus(
                 SystemConfig::get('preview_ffmpeg_path')
-                    ?: trim(shell_exec('which ffmpeg') ?: ''),
+                    ?: trim(Util::execSafe(['which', 'ffmpeg'], 3000) ?: ''),
                 static fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
             );
 
@@ -185,9 +184,8 @@ class AdminController extends GenericApiController
 
     /**
      * @AdminRequired
-     *
-     * @NoCSRFRequired
      */
+    #[NoCSRFRequired]
     public function getFailureLogs(): Http\Response
     {
         return Util::guardExDirect(static function (Http\IOutput $out) {
@@ -209,9 +207,8 @@ class AdminController extends GenericApiController
 
     /**
      * @AdminRequired
-     *
-     * @UseSession
      */
+    #[UseSession]
     public function placesSetup(?string $actiontoken): Http\Response
     {
         if (!$actiontoken || $this->actionToken() !== $actiontoken) {
@@ -255,7 +252,7 @@ class AdminController extends GenericApiController
      */
     private function getExecutableStatus(
         \Closure|string $path,
-        null|\Closure $testFunction = null,
+        ?\Closure $testFunction = null,
         bool $testIfFile = true,
         bool $testIfExecutable = true,
     ): string {

@@ -32,6 +32,11 @@ class LivePhotoContentSetup {
     const video = content.element?.querySelector('video');
     if (!video) return;
 
+    if (!video.paused) {
+      video.pause();
+      return;
+    }
+
     try {
       this.liveState.waiting = true;
       video.currentTime = 0;
@@ -57,6 +62,7 @@ class LivePhotoContentSetup {
     video.playsInline = true;
     video.disableRemotePlayback = true;
     video.autoplay = false;
+    video.loop = true;
     video.src = utils.getLivePhotoVideoUrl(photo, true);
 
     const div = document.createElement('div');

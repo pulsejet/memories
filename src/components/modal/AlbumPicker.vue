@@ -13,20 +13,21 @@
       </NcTextField>
     </div>
 
-    <ul class="albums-container">
+    <div class="albums-container">
       <AlbumsList ref="albumsList" :albums="filteredList" :link="false" @click="toggleAlbumSelection">
         <template #extra="{ album }">
           <div
-            class="check-circle-icon"
             :class="{
+              'check-circle-icon': true,
               'check-circle-icon--active': selection.has(album),
             }"
+            @click="toggleAlbumSelection(album)"
           >
             <CheckIcon :size="20" />
           </div>
         </template>
       </AlbumsList>
-    </ul>
+    </div>
 
     <div class="actions">
       <NcButton
@@ -269,6 +270,7 @@ export default defineComponent({
 
   .albums-container {
     height: 350px;
+    overflow-y: scroll;
 
     .check-circle-icon {
       border-radius: 50%;
@@ -282,7 +284,7 @@ export default defineComponent({
 
       &--active {
         border: 1px solid var(--color-primary);
-        background-color: var(--color-primary-default);
+        background-color: var(--color-primary);
         color: var(--color-primary-text);
       }
     }

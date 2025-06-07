@@ -24,14 +24,24 @@
           <span class="time" v-if="data.video_duration">{{ videoDuration }}</span>
           <VideoIcon :size="22" />
         </div>
-        <div class="livephoto" v-if="data.liveid" @mouseenter.passive="playVideo" @mouseleave.passive="stopVideo">
+        <div
+          class="livephoto"
+          v-if="data.liveid"
+          @mouseenter.passive="playVideo"
+          @mouseleave.passive="stopVideo"
+          @touchstart.passive="touchVideo"
+        >
           <LivePhotoIcon :size="22" :spin="liveState.waiting" :playing="liveState.playing" />
         </div>
       </div>
 
-      <div class="flag bottom-left">
+      <div class="flag bottom-right">
         <StarIcon :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
         <LocalIcon :size="22" v-if="data.flag & c.FLAG_IS_LOCAL" />
+      </div>
+
+      <div class="flag bottom-left">
+        <span class="shared-by" v-if="sharedBy">{{ sharedBy }}</span>
       </div>
 
       <div
@@ -197,6 +207,15 @@ export default defineComponent({
     isRaw(): boolean {
       return !!this.data.stackraw || this.data.mimetype === this.c.MIME_RAW;
     },
+
+    sharedBy(): string | null {
+      if (this.data.shared_by == '[unknown]') {
+        return this.t('memories', 'Shared');
+      } else if (this.data.shared_by) {
+        return this.data.shared_by;
+      }
+      return null;
+    },
   },
 
   methods: {
@@ -292,6 +311,7 @@ export default defineComponent({
           try {
             this.liveState.requested = true;
             video.currentTime = 0;
+            video.loop = true;
             await video.play();
           } catch (e) {
             // ignore, pause was probably called too soon
@@ -310,6 +330,12 @@ export default defineComponent({
       this.liveState.playTimer = 0;
       this.liveState.waiting = false;
     },
+
+    /** Start/stop preview video for touchscreens */
+    touchVideo() {
+      if (this.liveState.playing) this.stopVideo();
+      else this.playVideo();
+    },
   },
 });
 </script>
@@ -317,15 +343,20 @@ export default defineComponent({
 <style lang="scss" scoped>
 /* Container and selection */
 .p-outer {
-  padding: 2px;
-  @media (max-width: 768px) {
-    padding: 1px;
+  & {
+    padding: 2px;
+    --icon-dist: 8px;
+
+    transition:
+      background-color 0.15s ease,
+      opacity 0.2s ease-in,
+      transform 0.2s ease-in;
   }
 
-  transition:
-    background-color 0.15s ease,
-    opacity 0.2s ease-in,
-    transform 0.2s ease-in;
+  @media (max-width: 768px) {
+    padding: 1px;
+    --icon-dist: 4px;
+  }
 
   &.leaving {
     transform: scale(0.9);
@@ -335,11 +366,6 @@ export default defineComponent({
   &.selected {
     background-color: var(--color-primary-select-light);
     background-clip: content-box;
-  }
-
-  --icon-dist: 8px;
-  @media (max-width: 768px) {
-    --icon-dist: 4px;
   }
 }
 
@@ -370,7 +396,10 @@ $icon-size: $icon-half-size * 2;
     }
   }
 
-  filter: invert(1) brightness(100);
+  & {
+    filter: invert(1) brightness(100);
+  }
+
   .p-outer.selected > & {
     @include visible;
     filter: invert(0);
@@ -412,6 +441,21 @@ $icon-size: $icon-half-size * 2;
     .p-outer.selected > & {
       transform: translate($icon-size, -$icon-size);
     }
+  }
+
+  &.bottom-right {
+    bottom: var(--icon-dist);
+    right: var(--icon-dist);
+    .p-outer.selected > & {
+      transform: translate(-$icon-size, -$icon-size);
+    }
+  }
+
+  > .shared-by {
+    font-size: 0.75em;
+    line-height: 0.75em;
+    font-weight: 400;
+    margin: 2px;
   }
 
   > .video {

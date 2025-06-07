@@ -119,7 +119,7 @@ export default defineComponent({
 
   computed: {
     isSingle(): boolean {
-      return this.photos?.length === 1 ?? false;
+      return this.photos?.length === 1;
     },
 
     hasVideos(): boolean {

@@ -35,7 +35,7 @@ test.describe('Open', () => {
     await page.locator('tr[data-filename="Photos"]').click();
 
     // Action button
-    await page.locator('.dialog button[aria-label^="Move"]').click();
+    await page.locator('.dialog button[aria-label="Move"]').click();
     await page.waitForTimeout(2000);
 
     // Check if the file is moved

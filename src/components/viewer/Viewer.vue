@@ -6,6 +6,7 @@
     :class="{ fullyOpened, slideshowTimer }"
     :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"
+    @contextmenu.stop.prevent=""
   >
     <ImageEditor v-if="editorOpen && currentPhoto" :photo="currentPhoto" @close="editorOpen = false" />
 
@@ -535,17 +536,21 @@ export default defineComponent({
       // Debugging only
       _m.viewer.photoswipe = this.photoswipe;
 
+      // Check if someone else is trapping focus
+      const hasNestedTrap = (e: Event): Element | null => {
+        const selectors = ['#app-sidebar-vue', '.v-popper__popper', '.modal-mask', '.oc-dialog'];
+        if (e.target instanceof Element) {
+          return e.target.closest(selectors.join(','));
+        }
+        return null;
+      };
+
       // Monkey patch for focus trapping in sidebar
       const psKeyboard = this.photoswipe.keyboard as any;
       const _onFocusIn = psKeyboard['_onFocusIn'];
       console.assert(_onFocusIn, 'Missing _onFocusIn for monkey patch');
       psKeyboard['_onFocusIn'] = (e: FocusEvent) => {
-        if (
-          e.target instanceof HTMLElement &&
-          e.target.closest(['#app-sidebar-vue', '.v-popper__popper', '.modal-mask', '.oc-dialog'].join(','))
-        ) {
-          return;
-        }
+        if (hasNestedTrap(e)) return;
         _onFocusIn.call(this.photoswipe!.keyboard, e);
       };
 
@@ -558,6 +563,17 @@ export default defineComponent({
 
       // Handle keydown
       this.photoswipe.on('keydown', (e) => {
+        if (e.defaultPrevented) return;
+
+        // Check if someone else is trapping focus.
+        // For the sidebar, however, we want to continue executing our actions.
+        // https://github.com/pulsejet/memories/issues/1414
+        const nested = hasNestedTrap(e.originalEvent);
+        if (nested && nested.id !== 'app-sidebar-vue') {
+          e.preventDefault();
+          return;
+        }
+
         this.keydown(e.originalEvent);
       });
 
@@ -1314,10 +1330,12 @@ export default defineComponent({
   position: absolute;
   top: 8px;
   right: 50px;
+  --default-clickable-area: 44px;
 
   :deep .button-vue--icon-only {
     color: white;
     background-color: transparent !important;
+    margin-right: 1px;
   }
 
   transition: opacity 0.2s ease-in-out;

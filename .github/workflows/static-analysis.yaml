@@ -20,13 +20,20 @@ jobs:
   php-lint:
     name: PHP Lint
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['8.2']
+        server-versions: ['stable29', 'stable30', 'stable31']
+
     steps:
       - name: Checkout server
         uses: actions/checkout@v4
         with:
           submodules: true
           repository: nextcloud/server
-          ref: stable28
+          ref: ${{ matrix.server-versions }}
 
       - name: Checkout the app
         uses: actions/checkout@v4
@@ -36,10 +43,7 @@ jobs:
       - name: Set up php ${{ matrix.php-versions }}
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.1
-          tools: phpunit
-          extensions: mbstring, iconv, fileinfo, intl
-          coverage: none
+          php-version: ${{ matrix.php-versions }}
 
       - name: Install dependencies
         working-directory: apps/memories

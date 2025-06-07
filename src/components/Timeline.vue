@@ -833,7 +833,7 @@ export default defineComponent({
         if (this.routeIsThisDay && (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)) {
           // thisday view with new year title
           head.size = 67;
-          head.super = utils.getFromNowStr(utils.dayIdToDate(day.dayid));
+          head.super = utils.getFromNowStr(utils.dayIdToDate(day.dayid), { padding: 10 });
         }
 
         // Add header to list

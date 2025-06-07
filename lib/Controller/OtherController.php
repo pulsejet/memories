@@ -28,6 +28,9 @@ use OCA\Memories\Exceptions;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
@@ -36,15 +39,14 @@ use OCP\IRequest;
 class OtherController extends GenericApiController
 {
     /**
-     * @NoAdminRequired
-     *
-     * update preferences (user setting)
+     * update preferences (user setting).
      *
      * @param string key the identifier to change
      * @param string value the value to set
      *
      * @return Http\Response empty JSONResponse with respective http status code
      */
+    #[NoAdminRequired]
     public function setUserConfig(string $key, string $value): Http\Response
     {
         return Util::guardEx(function () use ($key, $value) {
@@ -59,11 +61,8 @@ class OtherController extends GenericApiController
         });
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @PublicPage
-     */
+    #[NoAdminRequired]
+    #[PublicPage]
     public function getUserConfig(): Http\Response
     {
         return Util::guardEx(function () {
@@ -105,7 +104,7 @@ class OtherController extends GenericApiController
 
                 // viewer settings
                 'high_res_cond_default' => SystemConfig::get('memories.viewer.high_res_cond_default'),
-                'livephoto_autoplay' => 'true' === $getAppConfig('livephotoAutoplay', 'true'),
+                'livephoto_autoplay' => 'true' === $getAppConfig('livephotoAutoplay', 'false'),
                 'sidebar_filepath' => 'true' === $getAppConfig('sidebarFilepath', false),
 
                 // folder settings
@@ -121,13 +120,9 @@ class OtherController extends GenericApiController
         });
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @PublicPage
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[PublicPage]
+    #[NoCSRFRequired]
     public function describeApi(): Http\Response
     {
         return Util::guardEx(static function () {
@@ -154,13 +149,9 @@ class OtherController extends GenericApiController
         });
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @PublicPage
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[PublicPage]
+    #[NoCSRFRequired]
     public function static(string $name): Http\Response
     {
         return Util::guardEx(static function () use ($name) {

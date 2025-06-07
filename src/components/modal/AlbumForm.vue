@@ -8,20 +8,18 @@
         autofocus="true"
         :value.sync="albumName"
         :required="true"
-        :label="t('memories', 'Name')"
+        :label="t('memories', 'Album Name')"
         :label-visible="true"
-        :placeholder="t('memories', 'Name of the album')"
+        :placeholder="t('memories', 'Album Name')"
       />
-      <label>
-        <NcTextField
-          name="location"
-          type="text"
-          :value.sync="albumLocation"
-          :label="t('memories', 'Location')"
-          :label-visible="true"
-          :placeholder="t('memories', 'Location of the album')"
-        />
-      </label>
+      <NcTextField
+        name="location"
+        type="text"
+        :value.sync="albumLocation"
+        :label="t('memories', 'Location')"
+        :label-visible="true"
+        :placeholder="t('memories', 'Location of the album')"
+      />
     </div>
     <div class="form-buttons">
       <span class="left-buttons">
@@ -231,12 +229,12 @@ export default defineComponent({
       try {
         this.loading = true;
         let album = { ...this.album };
-        if (this.album.basename !== this.albumName) {
-          album = await dav.renameAlbum(this.album, this.album.basename, this.albumName);
+        if (album.basename !== this.albumName) {
+          album = await dav.renameAlbum(album, album.basename, this.albumName);
         }
-        if (this.album.location !== this.albumLocation) {
-          album.location = await dav.updateAlbum(this.album, {
-            albumName: this.albumName,
+        if (album.location !== this.albumLocation) {
+          album.location = await dav.updateAlbum(album, {
+            albumName: album.basename,
             properties: { location: this.albumLocation },
           });
         }

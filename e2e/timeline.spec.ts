@@ -33,7 +33,14 @@ test.describe('Open', () => {
 
     await page.locator('[aria-label="Delete"]').click();
     await page.waitForTimeout(1000);
-    await page.locator('.oc-dialog button.error').click();
+    await page
+      .locator(
+        [
+          '.oc-dialog button.error', // NC <=29
+          '.dialog .button-vue--vue-primary', // NC >=30
+        ].join(', '),
+      )
+      .click();
     await page.waitForTimeout(2000);
     expect(await page.locator(`img[src="${src1}"]`).count()).toBe(0);
     expect(await page.locator(`img[src="${src2}"]`).count()).toBe(0);

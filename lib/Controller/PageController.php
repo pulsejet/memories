@@ -9,6 +9,8 @@ use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Service\BinExt;
 use OCA\Memories\Util;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
@@ -24,11 +26,8 @@ class PageController extends Controller
         parent::__construct(Application::APPNAME, $request);
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function main(): Response
     {
         // Check native version if available
@@ -61,6 +60,8 @@ class PageController extends Controller
     /** Get the common content security policy */
     public static function getCSP(): ContentSecurityPolicy
     {
+        $policy = new ContentSecurityPolicy();
+
         // Image domains MUST be added to the connect domain list
         // because of the service worker fetch() call
         $addImageDomain = static function (string $url) use (&$policy): void {
@@ -69,7 +70,6 @@ class PageController extends Controller
         };
 
         // Create base policy
-        $policy = new ContentSecurityPolicy();
         $policy->addAllowedWorkerSrcDomain("'self'");
         $policy->addAllowedScriptDomain("'self'");
         $policy->addAllowedFrameDomain("'self'");
@@ -87,7 +87,7 @@ class PageController extends Controller
 
         // Allow OSM
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
-        $addImageDomain('https://*.tile.openstreetmap.org');
+        $addImageDomain('https://tile.openstreetmap.org');
         $addImageDomain('https://*.a.ssl.fastly.net');
 
         // Native communication
@@ -109,131 +109,92 @@ class PageController extends Controller
         ];
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function folder(): Response
     {
         return $this->main();
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function favorites(): Response
     {
         return $this->main();
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function albums(): Response
     {
         return $this->main();
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function videos(): Response
     {
         return $this->main();
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function archive(): Response
     {
         return $this->main();
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function thisday(): Response
     {
         return $this->main();
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function recognize(): Response
     {
         return $this->main();
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function facerecognition(): Response
     {
         return $this->main();
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function places(): Response
     {
         return $this->main();
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function tags(): Response
     {
         return $this->main();
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function map(): Response
     {
         return $this->main();
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function explore(): Response
     {
         return $this->main();
     }
 
-    /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function nxsetup(): Response
     {
         return $this->main();

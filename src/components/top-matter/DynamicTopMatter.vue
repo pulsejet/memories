@@ -10,10 +10,10 @@ import { defineComponent, type Component } from 'vue';
 
 import UserMixin from '@mixins/UserConfig';
 
+import AlbumDynamicTopMatter from './AlbumDynamicTopMatter.vue';
 import FolderDynamicTopMatter from './FolderDynamicTopMatter.vue';
 import PlacesDynamicTopMatterVue from './PlacesDynamicTopMatter.vue';
 import OnThisDay from './OnThisDay.vue';
-
 import * as strings from '@services/strings';
 
 // Auto-hide top header on public shares if redundant
@@ -40,6 +40,8 @@ export default defineComponent({
         return FolderDynamicTopMatter;
       } else if (this.routeIsPlaces) {
         return PlacesDynamicTopMatterVue;
+      } else if (this.routeIsAlbums) {
+        return AlbumDynamicTopMatter;
       } else if (this.routeIsBase && this.config.enable_top_memories) {
         return OnThisDay;
       }

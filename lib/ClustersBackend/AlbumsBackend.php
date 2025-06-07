@@ -84,7 +84,7 @@ class AlbumsBackend extends Backend
     public function getClustersInternal(int $fileid = 0): array
     {
         // Materialize the query
-        $materialize = static fn (IQueryBuilder & $query): IQueryBuilder => SQL::materialize($query, 'pa');
+        $materialize = static fn (IQueryBuilder &$query): IQueryBuilder => SQL::materialize($query, 'pa');
 
         // Function to add etag
         $etag = static fn (string $name): \Closure => static function (IQueryBuilder &$query) use ($name): void {
@@ -121,8 +121,14 @@ class AlbumsBackend extends Backend
             );
         };
 
+        // Transformation to select the shared flag
+        $sharedFlag = function (IQueryBuilder &$query): void {
+            $this->albumsQuery->transformSharedFlag($query);
+        };
+
         // Transformations to apply to own albums
         $transformOwned = [
+            $sharedFlag,
             $materialize, $ownCover,
             $materialize, $etag('last_added_photo'), $etag('cover'),
         ];

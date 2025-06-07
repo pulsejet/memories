@@ -70,13 +70,20 @@ export function getExifDateStr(date: Date) {
   return `${year}:${month}:${day} ${hour}:${minute}:${second}`;
 }
 
-/** Get text like "5 years ago" from a date */
-export function getFromNowStr(date: Date) {
+/**
+ * Get text like "5 years ago" from a date.
+ *
+ * @param date The date to convert
+ * @param opts.padding The number of *days* to pad
+ *
+ * @returns A string like "5 years ago"
+ */
+export function getFromNowStr(date: Date, opts?: { padding?: number }) {
   // Get fromNow in correct locale
   const text =
     DateTime.fromJSDate(date).toRelative({
       locale: getCanonicalLocale(),
-      padding: 10 * 24 * 60 * 60 * 1000, // 10 days
+      padding: (opts?.padding ?? 0) * 24 * 60 * 60 * 1000, // 10 days
     }) ?? 'Unknown';
 
   // Title case

@@ -2,6 +2,7 @@
   <NcModal
     class="memories-modal"
     ref="modal"
+    labelId="modal-title"
     :size="size"
     :outTransition="true"
     :style="{ width: isSidebarShown ? `calc(100% - ${sidebarWidth}px)` : null }"
@@ -11,7 +12,9 @@
   >
     <div class="container" @keydown.stop="0">
       <div class="head">
-        <span> <slot name="title"></slot> </span>
+        <span id="modal-title">
+          <slot name="title"></slot>
+        </span>
       </div>
 
       <slot></slot>

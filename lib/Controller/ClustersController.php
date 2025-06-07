@@ -27,6 +27,9 @@ use OCA\Memories\ClustersBackend;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 
@@ -40,10 +43,9 @@ class ClustersController extends GenericApiController
     protected ClustersBackend\Backend $backend;
 
     /**
-     * @NoAdminRequired
-     *
-     * Get list of clusters
+     * Get list of clusters.
      */
+    #[NoAdminRequired]
     public function list(string $backend, int $fileid = 0): Http\Response
     {
         return Util::guardEx(function () use ($backend, $fileid) {
@@ -56,12 +58,10 @@ class ClustersController extends GenericApiController
     }
 
     /**
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     *
-     * Get preview for a cluster
+     * Get preview for a cluster.
      */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function preview(string $backend, string $name): Http\Response
     {
         return Util::guardEx(function () use ($backend, $name) {
@@ -92,10 +92,9 @@ class ClustersController extends GenericApiController
     }
 
     /**
-     * @NoAdminRequired
-     *
-     * Set the cover image for a cluster
+     * Set the cover image for a cluster.
      */
+    #[NoAdminRequired]
     public function setCover(string $backend, string $name, int $fileid): Http\Response
     {
         return Util::guardEx(function () use ($backend, $name, $fileid) {
@@ -113,12 +112,10 @@ class ClustersController extends GenericApiController
     }
 
     /**
-     * @NoAdminRequired
-     *
-     * @UseSession
-     *
-     * Download a cluster as a zip file
+     * Download a cluster as a zip file.
      */
+    #[NoAdminRequired]
+    #[UseSession]
     public function download(string $backend, string $name): Http\Response
     {
         return Util::guardEx(function () use ($backend, $name) {
