@@ -249,6 +249,7 @@ OC.L10N.register(
     "Original File" : "Оригинален файл",
     "Public Link" : "Публична връзка",
     "Share an external Nextcloud link" : "Споделяне на външна връзка на Nextcloud",
+    "Last updated" : "Последна актуализация",
     "Creation date" : "Дата на създаване",
     "Oldest first" : "Първо най-старият",
     "Newest first" : "Първо най-новият",
