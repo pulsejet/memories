@@ -155,7 +155,7 @@ OC.L10N.register(
     "Saturation" : "Mætning",
     "Value" : "Værdi",
     "Image" : "Billede",
-    "Importing …" : "Importerer..",
+    "Importing …" : "Importerer ...",
     "+ Add image" : "+ Tilføj billede",
     "Line" : "Linje",
     "Pen" : "Pen",
