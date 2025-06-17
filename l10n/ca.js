@@ -101,6 +101,7 @@ OC.L10N.register(
     "Last updated" : "Darrera actualització",
     "Creation date" : "Data de creació",
     "Oldest first" : "Més antic primer",
+    "Ascending" : "Ascendent",
     "Newest first" : "Més nou primer",
     "Unassigned faces" : "Cares sense assignar",
     "Merge with different person" : "Fusiona amb una persona diferent",

@@ -27,6 +27,7 @@ OC.L10N.register(
     "Description" : "Maelezo",
     "Name" : "Jina",
     "Update" : "Sasisha",
+    "Move" : "Hamisha",
     "Share link" : "Shirikisha kiungo",
     "Failed to upload {file}" : "Imeshindwa kupakia {file}",
     "Home" : "Nyumbani",
