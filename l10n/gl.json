@@ -578,7 +578,7 @@
     "Places you have been to will appear here" : "Os lugares nos que estivo aparecerán aquí",
     "Yes" : "Si",
     "No" : "Non",
-    "Choose {file}" : "Escoller  {file}",
+    "Choose {file}" : "Escoller {file}",
     "Choose" : "Escoller",
     "The folder name \"{folder}\" has a leading or trailing whitespace. This may lead to errors and should be corrected." : "O nome do cartafol «{folder}» ten un espazo en branco ao principio ou ao final. Isto pode provocar erros e debe ser corrixido.",
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Quere mover {count} elemento ao lixo?","Quere mover {count} elementos ao lixo?"],
