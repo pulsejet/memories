@@ -2,8 +2,10 @@ OC.L10N.register(
     "memories",
     {
     "Download" : "Pakua",
+    "People" : "Watu",
     "Folders" : "Visanduku",
     "Favorites" : "Vipendwa",
+    "Places" : "Maeneo",
     "Tags" : "Maoni",
     "Settings" : "Mipangilio",
     "Videos" : "Picha mjongeo",
@@ -11,9 +13,12 @@ OC.L10N.register(
     "Delete" : "Futa",
     "Share" : "Shirikisha",
     "Favorite" : "Kipendwa",
+    "View in folder" : "Angalia ndani ya kisanduku",
     "Cancel" : "Cancel",
+    "_{n} selected_::_{n} selected_" : ["{n} selected","{n} selected"],
     "Close" : "Funga",
     "Unknown" : "Haijulikani",
+    "Continue" : "Endelea",
     "Shared" : "Shirikisha",
     "No results found" : "Hakuna matokeo yaliyopatikana",
     "Search" : "Tafuta",
@@ -38,6 +43,7 @@ OC.L10N.register(
     "Shared by {user}" : "Imeshirikishwa na{user}",
     "Yes" : "Ndiyo",
     "No" : "Hapana",
-    "Choose {file}" : "Chagua {file}"
+    "Choose {file}" : "Chagua {file}",
+    "Choose" : "Chagua"
 },
 "nplurals=2; plural=(n != 1);");
