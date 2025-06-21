@@ -30,6 +30,7 @@ OC.L10N.register(
     "View in folder" : "フォルダー内で表示",
     "Add to album" : "アルバムに追加",
     "Cancel" : "キャンセル",
+    "_{n} selected_::_{n} selected_" : ["{n}選択されています"],
     "General" : "一般",
     "Account" : "アカウント",
     "Info" : "情報",

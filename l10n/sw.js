@@ -36,6 +36,7 @@ OC.L10N.register(
     "Share link" : "Shirikisha kiungo",
     "Failed to upload {file}" : "Imeshindwa kupakia {file}",
     "Home" : "Nyumbani",
+    "Previous" : "Iliyopita",
     "Undo" : "Tendua",
     "Image" : "Picha",
     "Text" : "Maandishi",
