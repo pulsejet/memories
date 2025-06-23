@@ -66,6 +66,7 @@ OC.L10N.register(
     "Move" : "Hamisha",
     "Share link" : "Shirikisha kiungo",
     "Failed to upload {file}" : "Imeshindwa kupakia {file}",
+    "Unassigned faces" : "Unassigned faces",
     "Merge with different person" : "Ungana na mtu tofauti",
     "Home" : "Nyumbani",
     "Unsaved changes" : "Mabadiliko yasiyohifadhiwa",

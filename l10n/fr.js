@@ -551,6 +551,7 @@ OC.L10N.register(
     "General Failure" : "Échec général",
     "Error: {msg}" : "Erreur : {msg}",
     "Failed to delete {fileName}." : "Échec de la suppression de {fileName}.",
+    "Failed to copy files." : "Impossible de copier les fichiers",
     "Failed to move files." : "Échec de déplacement des fichiers.",
     "Could not move {fileName}, target exists." : "Impossible de déplacer {fileName}, la cible existe.",
     "Failed to move {fileName}." : "Impossible de déplacer {fileName}.",
