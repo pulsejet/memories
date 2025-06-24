@@ -206,6 +206,7 @@ OC.L10N.register(
     "No items" : "Geen items",
     "_{n} item_::_{n} items_" : ["{n} object","{n} objecten"],
     "Shared by {user}" : "Gedeeld door {user}",
+    "Error: {msg}" : "Fout: {msg}",
     "Failed to delete {fileName}." : "Verwijderen van {fileName} mislukt.",
     "Yes" : "Ja",
     "No" : "Nee",
