@@ -15,10 +15,10 @@ OC.L10N.register(
     "General" : "General",
     "Info" : "Info",
     "Close" : "Clauder",
-    "Name" : "Nomine",
     "Save" : "Salveguardar",
     "Back" : "Retro",
     "Reset" : "Re-fixar",
+    "Name" : "Nomine",
     "Undo" : "Disfacer",
     "Custom" : "Personalisate",
     "Size" : "Dimension"

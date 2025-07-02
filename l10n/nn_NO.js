@@ -15,10 +15,10 @@ OC.L10N.register(
     "General" : "Generelt",
     "Info" : "Info",
     "Close" : "Lat att",
-    "Name" : "Namn",
+    "Continue" : "Gå vidare",
     "Save" : "Lagre",
     "Back" : "Tilbake",
-    "Continue" : "Gå vidare",
+    "Name" : "Namn",
     "Value" : "Verdi",
     "Size" : "Storleik",
     "Setup" : "Oppsett"

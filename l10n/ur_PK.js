@@ -10,10 +10,10 @@ OC.L10N.register(
     "Cancel" : "منسوخ کریں",
     "Info" : "Info",
     "Close" : "بند ",
-    "Name" : "اسم",
+    "Continue" : "جاری",
     "Save" : "حفظ",
     "Reset" : "ری سیٹ",
-    "Continue" : "جاری",
+    "Name" : "اسم",
     "Yes" : "ہاں",
     "No" : "نہیں"
 },

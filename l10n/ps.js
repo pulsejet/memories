@@ -11,9 +11,9 @@ OC.L10N.register(
     "View in folder" : "په فولډر کې کتل",
     "Cancel" : "پرېښول",
     "Close" : "بندول",
-    "Name" : "نوم",
-    "Save" : "ساتل",
     "Continue" : "وړاندې تګ",
+    "Save" : "ساتل",
+    "Name" : "نوم",
     "Size" : "کچه"
 },
 "nplurals=2; plural=(n != 1);");

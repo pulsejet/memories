@@ -12,9 +12,9 @@ OC.L10N.register(
     "General" : "Ընդհանուր",
     "Info" : "Info",
     "Close" : "Փակել",
-    "Name" : "Անուն",
-    "Save" : "Պահպանել",
     "Continue" : "Շարունակել",
+    "Save" : "Պահպանել",
+    "Name" : "Անուն",
     "Size" : "Չափս",
     "Yes" : "Այո",
     "No" : "Ոչ"

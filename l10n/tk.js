@@ -14,9 +14,12 @@ OC.L10N.register(
     "Cancel" : "ýatyrmak",
     "General" : "Esasy",
     "Close" : "Ýap",
-    "Name" : "Ady",
     "Save" : "Saklamak",
     "Back" : "Yzyna",
+    "Name" : "Ady",
+    "Refresh" : "Täzelemek",
+    "Newest first" : "Täze ilkinji",
+    "Upload files" : "Faýllary ýükläň",
     "Setup" : "Gurmak",
     "Yes" : "Hawa",
     "No" : "Ýok"

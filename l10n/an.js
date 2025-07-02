@@ -10,9 +10,9 @@ OC.L10N.register(
     "Favorite" : "Favorito",
     "Cancel" : "Cancelar",
     "Close" : "Zarrar",
-    "Name" : "Nombre",
-    "Back" : "Ta zaga",
     "Continue" : "Continar",
+    "Back" : "Ta zaga",
+    "Name" : "Nombre",
     "Size" : "Grandaria",
     "Yes" : "Si",
     "No" : "No"
