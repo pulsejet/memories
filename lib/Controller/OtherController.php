@@ -105,6 +105,7 @@ class OtherController extends GenericApiController
                 // viewer settings
                 'high_res_cond_default' => SystemConfig::get('memories.viewer.high_res_cond_default'),
                 'livephoto_autoplay' => 'true' === $getAppConfig('livephotoAutoplay', 'false'),
+                'livephoto_loop' => 'true' === $getAppConfig('livephotoLoop', 'false'),
                 'sidebar_filepath' => 'true' === $getAppConfig('sidebarFilepath', false),
 
                 // folder settings

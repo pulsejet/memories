@@ -62,7 +62,7 @@ class LivePhotoContentSetup {
     video.playsInline = true;
     video.disableRemotePlayback = true;
     video.autoplay = false;
-    video.loop = true;
+    video.loop = !!staticConfig.getSync('livephoto_loop');
     video.src = utils.getLivePhotoVideoUrl(photo, true);
 
     const div = document.createElement('div');

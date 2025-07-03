@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- **Feature**: Looping of live photos is now gated behind a user setting ([[#1457](https://github.com/pulsejet/memories/issues/1457)])
+
 ## [v7.5.1] - 2025-02-26
 
 - **Upgrade**: Please run `occ maintenance:repair` after the upgrade is complete.

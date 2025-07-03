@@ -56,6 +56,14 @@
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
+          :checked.sync="config.livephoto_loop"
+          @update:checked="updateLivephotoLoop"
+          type="switch"
+        >
+          {{ t('memories', 'Loop Live Photos') }}
+        </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
           :checked.sync="config.sidebar_filepath"
           @update:checked="updateSidebarFilepath"
           type="switch"
@@ -334,6 +342,10 @@ export default defineComponent({
 
     async updateLivephotoAutoplay() {
       await this.updateSetting('livephoto_autoplay', 'livephotoAutoplay');
+    },
+
+    async updateLivephotoLoop() {
+      await this.updateSetting('livephoto_loop', 'livephotoLoop');
     },
 
     async updateSidebarFilepath() {
