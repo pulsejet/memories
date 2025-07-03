@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Looping of live photos is now gated behind a user setting ([[#1457](https://github.com/pulsejet/memories/issues/1457)])
 - **Feature**: Option to hide sharing user from timeline ([#1452](https://github.com/pulsejet/memories/issues/1452))
 - **Fix**: Hide sharing user from public links ([#1452](https://github.com/pulsejet/memories/issues/1452))
+- **Performance**: Fix broken album loading ([#1446](https://github.com/pulsejet/memories/issues/1446), [#1459](https://github.com/pulsejet/memories/issues/1459))
 
 ## [v7.5.1] - 2025-02-26
 

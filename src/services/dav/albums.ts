@@ -199,19 +199,15 @@ export async function updateAlbum(album: any, { albumName, properties }: any) {
  * @param user Owner of album
  * @param name Name of album (or ID)
  */
-export async function getAlbum(user: string, name: string, extraProps = {}): Promise<IDavAlbum> {
+export async function getAlbum(user: string, name: string): Promise<IDavAlbum> {
   const req = `<?xml version="1.0"?>
         <d:propfind xmlns:d="DAV:"
             xmlns:oc="http://owncloud.org/ns"
             xmlns:nc="http://nextcloud.org/ns"
             xmlns:ocs="http://open-collaboration-services.org/ns">
             <d:prop>
-                <nc:last-photo />
-                <nc:nbItems />
                 <nc:location />
-                <nc:dateRange />
                 <nc:collaborators />
-                ${extraProps}
             </d:prop>
         </d:propfind>`;
   let album = (await client.stat(getAlbumPath(user, name), {
