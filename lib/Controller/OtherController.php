@@ -101,6 +101,8 @@ class OtherController extends GenericApiController
                 'timeline_path' => $getAppConfig('timelinePath', SystemConfig::get('memories.timeline.default_path')),
                 'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
                 'stack_raw_files' => 'true' === $getAppConfig('stackRawFiles', 'true'),
+                'dedup_identical' => 'true' === $getAppConfig('dedupIdentical', 'false'),
+                'show_owner_name_timeline' => 'true' === $getAppConfig('showOwnerNameTimeline', 'false'),
 
                 // viewer settings
                 'high_res_cond_default' => SystemConfig::get('memories.viewer.high_res_cond_default'),

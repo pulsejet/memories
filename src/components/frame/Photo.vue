@@ -41,7 +41,7 @@
       </div>
 
       <div class="flag bottom-left">
-        <span class="shared-by" v-if="sharedBy">{{ sharedBy }}</span>
+        <span class="shared-by" v-if="showOwnerName && sharedBy">{{ sharedBy }}</span>
       </div>
 
       <div
@@ -84,6 +84,7 @@
 import { defineComponent, type PropType } from 'vue';
 
 import * as utils from '@services/utils';
+import staticConfig from '@services/static-config';
 
 import LivePhotoIcon from '@components/icons/LivePhoto.vue';
 import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue';
@@ -206,6 +207,13 @@ export default defineComponent({
 
     isRaw(): boolean {
       return !!this.data.stackraw || this.data.mimetype === this.c.MIME_RAW;
+    },
+
+    showOwnerName(): boolean {
+      if (this.routeIsBase && !staticConfig.getSync('show_owner_name_timeline')) {
+        return false;
+      }
+      return true;
     },
 
     sharedBy(): string | null {

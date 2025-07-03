@@ -44,6 +44,14 @@
         >
           {{ t('memories', 'De-duplicate identical files') }}
         </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.show_owner_name_timeline"
+          @update:checked="updateShowOwnerNameTimeline"
+          type="switch"
+        >
+          {{ t('memories', 'Show photo owner name on timeline') }}
+        </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="viewer-settings" :name="names.viewer">
@@ -332,6 +340,10 @@ export default defineComponent({
 
     async updateDedupIdentical() {
       await this.updateSetting('dedup_identical', 'dedupIdentical');
+    },
+
+    async updateShowOwnerNameTimeline() {
+      await this.updateSetting('show_owner_name_timeline', 'showOwnerNameTimeline');
     },
 
     // Viewer settings

@@ -22,6 +22,7 @@ declare module '@typings' {
     enable_top_memories: boolean;
     stack_raw_files: boolean;
     dedup_identical: boolean;
+    show_owner_name_timeline: boolean;
 
     // viewer settings
     high_res_cond_default: HighResCond;

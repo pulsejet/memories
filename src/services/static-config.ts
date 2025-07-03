@@ -135,6 +135,7 @@ class StaticConfig {
       enable_top_memories: true,
       stack_raw_files: true,
       dedup_identical: false,
+      show_owner_name_timeline: false,
 
       // viewer settings
       high_res_cond_default: 'zoom',
