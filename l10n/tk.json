@@ -12,14 +12,26 @@
     "Cancel" : "ýatyrmak",
     "General" : "Esasy",
     "Close" : "Ýap",
+    "Unknown" : "Näbelli",
+    "Shared" : "Paýlaşyldy",
+    "Search" : "Gözlemek",
+    "Upload" : "Ýüklemek",
     "Save" : "Saklamak",
     "Back" : "Yzyna",
     "Name" : "Ady",
+    "Update" : "Täzelemek",
+    "Move" : "Göçüriň",
+    "Remove" : "Aýyrmak",
+    "Read only" : "Diňe okaň",
+    "Share link" : "Baglanyşyk paýlaş",
     "Refresh" : "Täzelemek",
+    "Oldest first" : "Ilki bilen iň köne",
     "Newest first" : "Täze ilkinji",
+    "Home" : "Baş sahypa",
     "Upload files" : "Faýllary ýükläň",
     "Setup" : "Gurmak",
     "Yes" : "Hawa",
-    "No" : "Ýok"
+    "No" : "Ýok",
+    "Choose" : "saýlamak"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
