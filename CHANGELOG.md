@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## [v7.6.0] - 2025-07-03
 
 - **Feature**: Looping of live photos is now gated behind a user setting ([[#1457](https://github.com/pulsejet/memories/issues/1457)])
 - **Feature**: Option to hide sharing user from timeline ([#1452](https://github.com/pulsejet/memories/issues/1452))
