@@ -41,7 +41,7 @@
             {{ progressNote }}
             <NcProgressBar :value="progress" :error="true" />
           </div>
-          <NcButton @click="upload" type="error" :disabled="processing">
+          <NcButton @click="upload" type="primary" :disabled="processing">
             {{ t('memories', 'Upload') }}
           </NcButton>
         </div>
