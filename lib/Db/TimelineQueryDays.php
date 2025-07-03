@@ -150,8 +150,11 @@ trait TimelineQueryDays
         $query = $this->filterFilecache($query, null, $recursive, $archive, $hidden);
 
         // SELECT storage ID to check if this photo is shared
-        $query->leftJoin('f', 'storages', 's', $query->expr()->eq('f.storage', 's.numeric_id'));
-        $query->selectAlias('s.id', 'storage_id');
+        // Do not expose storage to anonymous users (link shares)
+        if (\OCA\Memories\Util::isLoggedIn()) {
+            $query->leftJoin('f', 'storages', 's', $query->expr()->eq('f.storage', 's.numeric_id'));
+            $query->selectAlias('s.id', 'storage_id');
+        }
 
         // FETCH all photos in this day
         $day = $this->executeQueryWithCTEs($query)->fetchAll();
