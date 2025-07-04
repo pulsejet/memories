@@ -301,7 +301,7 @@ OC.L10N.register(
     "Oldest" : "Mais antigo",
     "Title" : "Título",
     "Description" : "Descrição",
-    "Label" : "Selo",
+    "Label" : "Rótulo",
     "Camera Make" : "Marca da Câmera",
     "Camera Model" : "Modelo da Câmera",
     "Lens Model" : "Modelo da Lente",

@@ -275,6 +275,7 @@ OC.L10N.register(
     "Next" : "Järgmine",
     "Editing is currently disabled for Live Photos" : "„Live Photo“ meedia (videoklipp+foto) muutmine pole hetkel võimalik",
     "You are now logged in to the server!" : "Sa oled nüüd serverisse sisse loginud!",
+    "Finish" : "Lõpeta",
     "Save as" : "Salvesta kui",
     "Are you sure you want to discard the changes?" : "Kas sa oled kindel, et soovid muudatustest loobuda?",
     "Undo" : "Tühista",
