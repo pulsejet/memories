@@ -25,6 +25,7 @@ OC.L10N.register(
     "View in folder" : "Погледни во папката",
     "Add to album" : "Додади во албум",
     "Cancel" : "Откажи",
+    "_{n} selected_::_{n} selected_" : ["{n} означена","{n} означени"],
     "General" : "Општо",
     "Account" : "Сметка",
     "Logged in as {user}" : "Најавени сте како {user}",
