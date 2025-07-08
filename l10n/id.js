@@ -86,7 +86,9 @@ OC.L10N.register(
     "Last updated" : "Terakhir diperbarui",
     "Creation date" : "Tanggal pembuatan",
     "Oldest first" : "Paling lama",
+    "Ascending" : "Naik",
     "Newest first" : "Terbaru",
+    "Descending" : "Menurun",
     "Unassigned faces" : "Wajah yang belum ditetapkan",
     "Merge with different person" : "Gabungkan dengan orang yang berbeda",
     "Home" : "Beranda",
@@ -167,6 +169,7 @@ OC.L10N.register(
     "Failed to create {albumName}." : "Gagal membuat {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Gagal mengubah nama {currentAlbumName} to {newAlbumName}.",
     "No items" : "Tak ada item",
+    "_{n} item_::_{n} items_" : ["{n} barang"],
     "Shared by {user}" : "Dibagikan oleh {user}",
     "Failed to delete {fileName}." : "Gagal menghapus {fileName}.",
     "Choose" : "Pilih"
