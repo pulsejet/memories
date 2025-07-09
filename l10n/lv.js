@@ -102,7 +102,7 @@ OC.L10N.register(
     "Update" : "Atjaunināt",
     "Loading …" : "Ielādē…",
     "Move" : "Pārvietot",
-    "Remove" : "Izņemt",
+    "Remove" : "Noņemt",
     "Password protected" : "Aizsargāts ar paroli",
     "Expires" : "Beidzas",
     "Read only" : "Tikai lasāms",
