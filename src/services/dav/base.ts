@@ -40,7 +40,7 @@ export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<I
   photos = photos.filter((photo) => !utils.isLocalPhoto(photo));
 
   // Cache and uncached photos
-  const cache: IFileInfo[] = [];
+  var cache: IFileInfo[] = [];
   const rest: IPhoto[] = [];
 
   // Partition photos with and without cache
@@ -61,8 +61,22 @@ export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<I
     }
   }
 
+  // Handle any photos from shared albums
+  const sharedAlbumPhotos: { [key: string]: IPhoto[] } = {};
+  for (const photo of rest) {
+    if (photo.src) {
+      if (!sharedAlbumPhotos[photo.src]) {
+        sharedAlbumPhotos[photo.src] = [];
+      }
+      sharedAlbumPhotos[photo.src].push(photo);
+    }
+  }
+  for (const [album, album_photos] of Object.entries(sharedAlbumPhotos)) {
+    cache.push(...getAlbumFileInfos(album_photos, album.split('/')[0], album.split('/')[1]));
+  }
+
   // Get file infos for the rest
-  return cache.concat(await getFilesInternal1(rest));
+  return cache.concat(await getFilesInternal1(rest.filter((photo) => photo.src == null)));
 }
 
 async function getFilesInternal1(photos: IPhoto[]): Promise<IFileInfo[]> {
