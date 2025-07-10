@@ -1,7 +1,7 @@
 OC.L10N.register(
     "memories",
     {
-    "Shared Link" : "Partilhar Hiperligação",
+    "Shared Link" : "Hiperligação Partilhada",
     "Download" : "Transferir",
     "Memories" : "Memories",
     "Fast, modern and advanced photo management suite" : "Rápida, moderna e avançada suíte de gestão de fotos.",
@@ -23,7 +23,7 @@ OC.L10N.register(
     "View all" : "Ver tudo",
     "Videos" : "Vídeos",
     "Recognize" : "Reconhecer",
-    "Face Recognition" : "Reconhecimento facial",
+    "Face Recognition" : "Reconhecimento Facial",
     "Choose the root of your timeline" : "Escolha o início da sua linha cronológica",
     "The selected folder does not seem to be valid. Try again." : "A pasta selecionada não parece ser válida. Tente novamente.",
     "_Found {n} item in {path}_::_Found {n} items in {path}_" : ["Foi encontrado {n} item em {path}","Foram encontrados {n} itens em {path}","Foram encontrados {n} itens em {path}"],
