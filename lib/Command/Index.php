@@ -40,7 +40,7 @@ class IndexOpts
     public bool $force = false;
     public bool $clear = false;
     public ?string $user = null;
-    public ?string $folder = null;
+    public ?string $path = null;
     public ?string $group = null;
     public bool $retry = false;
     public bool $skipCleanup = false;
@@ -50,7 +50,7 @@ class IndexOpts
         $this->force = (bool) $input->getOption('force');
         $this->clear = (bool) $input->getOption('clear');
         $this->user = $input->getOption('user');
-        $this->folder = $input->getOption('folder');
+        $this->path = $input->getOption('path');
         $this->retry = (bool) $input->getOption('retry');
         $this->skipCleanup = (bool) $input->getOption('skip-cleanup');
         $this->group = $input->getOption('group');
@@ -81,7 +81,7 @@ class Index extends Command
             ->setDescription('Index the metadata in files')
             ->addOption('user', 'u', InputOption::VALUE_REQUIRED, 'Index only the specified user')
             ->addOption('group', 'g', InputOption::VALUE_REQUIRED, 'Index only specified group')
-            ->addOption('folder', null, InputOption::VALUE_REQUIRED, 'Index only the specified folder (relative to the user\'s root)')
+            ->addOption('path', null, InputOption::VALUE_REQUIRED, 'Index only the specified folder or file (relative to the user\'s root)')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force refresh of existing index entries')
             ->addOption('clear', null, InputOption::VALUE_NONE, 'Clear all existing index entries')
             ->addOption('retry', null, InputOption::VALUE_NONE, 'Retry indexing of failed files')
@@ -201,7 +201,7 @@ class Index extends Command
     {
         $this->runForUsers(function (IUser $user) {
             try {
-                $this->indexer->indexUser($user, $this->opts->folder);
+                $this->indexer->indexUser($user, $this->opts->path);
             } catch (\Exception $e) {
                 $this->output->writeln("<error>{$e->getMessage()}</error>".PHP_EOL);
             }

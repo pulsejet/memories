@@ -72,7 +72,7 @@ class Index
     /**
      * Index all files for a user.
      */
-    public function indexUser(IUser $user, ?string $folder = null): void
+    public function indexUser(IUser $user, ?string $path = null): void
     {
         if (!$this->appManager->isEnabledForUser('memories', $user)) {
             return;
@@ -90,8 +90,8 @@ class Index
 
         // Get paths of folders to index
         $mode = SystemConfig::get('memories.index.mode');
-        if (null !== $folder) {
-            $paths = [$folder];
+        if (null !== $path) {
+            $paths = [$path];
         } elseif ('1' === $mode || '0' === $mode) { // everything (or nothing)
             $paths = ['/'];
         } elseif ('2' === $mode) { // timeline
@@ -106,9 +106,6 @@ class Index
         foreach ($paths as $path) {
             try {
                 $node = $root->get($path);
-                if (!$node instanceof Folder) {
-                    throw new \Exception('Not a folder');
-                }
             } catch (\Exception $e) {
                 // Only log this if we're on the CLI, do not put an error in the logs
                 // https://github.com/pulsejet/memories/issues/1091
@@ -117,7 +114,13 @@ class Index
                 continue;
             }
 
-            $this->indexFolder($node);
+            if ($node instanceof Folder) {
+                $this->indexFolder($node);
+            } elseif ($node instanceof File) {
+                $this->indexFile($node);
+            } else {
+                throw new \Exception('Not a file or folder');
+            }
         }
     }
 
