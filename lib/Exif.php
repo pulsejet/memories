@@ -236,7 +236,7 @@ class Exif
      *
      * @param array<string, mixed> $exif
      */
-    public static function getDateTaken(File $file, array $exif): \DateTime
+    public static function getDateTaken(File $file, array $exif, string $timezone): \DateTime
     {
         try {
             return self::parseExifDate($exif);
@@ -248,7 +248,7 @@ class Exif
         $dt = new \DateTime('@'.$file->getMtime());
 
         // Set timezone to system timezone
-        $tz = getenv('TZ') ?: date_default_timezone_get();
+        $tz = $timezone ?: getenv('TZ') ?: date_default_timezone_get();
 
         try {
             $dt->setTimezone(new \DateTimeZone($tz));

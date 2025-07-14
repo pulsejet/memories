@@ -9,6 +9,7 @@ use OCA\Memories\Service\Index;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
+use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\Lock\ILockingProvider;
 use Psr\Log\LoggerInterface;
@@ -28,6 +29,7 @@ class TimelineWrite
         protected LivePhoto $livePhoto,
         protected ILockingProvider $lockingProvider,
         protected LoggerInterface $logger,
+        protected IConfig $config,
     ) {}
 
     /**
@@ -121,7 +123,7 @@ class TimelineWrite
         [$lat, $lon, $mapCluster] = $this->processExifLocation($fileId, $exif, $prevRow);
 
         // Get date parameters (after setting timezone offset)
-        $dateTaken = Exif::getDateTaken($file, $exif);
+        $dateTaken = Exif::getDateTaken($file, $exif, $this->config->getSystemValue('default_timezone', 'UTC'));
 
         // Store the acutal epoch with the EXIF data
         $epoch = $exif['DateTimeEpoch'] = $dateTaken->getTimestamp();
