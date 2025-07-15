@@ -6,7 +6,6 @@
     :class="{ fullyOpened, slideshowTimer }"
     :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"
-    @contextmenu.stop.prevent=""
   >
     <ImageEditor v-if="editorOpen && currentPhoto" :photo="currentPhoto" @close="editorOpen = false" />
 
