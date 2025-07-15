@@ -71,6 +71,7 @@ OC.L10N.register(
     "Choose a folder" : "Choose a folder",
     "Remove" : "Ondoa",
     "Read only" : "Read only",
+    "Link copied to clipboard" : "Kiungo kimenakiliwa kwenye ubao wakunakilia",
     "Share link" : "Shirikisha kiungio",
     "Failed to upload {file}" : "Imeshindwa kupakia {file}",
     "Oldest first" : "Ya zamani kwanza",
