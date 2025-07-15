@@ -351,14 +351,22 @@ class Exif
         ]);
 
         try {
-            $stdout = Util::execSafe($cmd, self::EXIFTOOL_TIMEOUT, $raw) ?? 'error: cmd fail';
+            $output = Util::execSafe2($cmd, self::EXIFTOOL_TIMEOUT, $raw, true, true);
+            $stdout = $output[0];
+            $stderr = $output[1];
         } catch (\Exception $ex) {
             error_log("Timeout reading from exiftool: [{$path}]");
 
             throw $ex;
         }
 
-        if (str_contains($stdout, 'error')) {
+        if (null !== $stderr && str_contains($stderr, 'Error')) {
+            error_log("Exiftool error: {$stderr}");
+
+            throw new \Exception('Could not set exif data: '.$stderr);
+        }
+        if (null === $stdout || str_contains($stdout, 'Error')) {
+            $stdout = $stdout ?? $stderr ?? 'Error: Unknown cmd fail';
             error_log("Exiftool error: {$stdout}");
 
             throw new \Exception('Could not set exif data: '.$stdout);
