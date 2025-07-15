@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [v7.6.1] - 2025-07-14
 
 - **Breaking**: The `--folder` argument to the `occ memories:index` has been changed to `--path`
 - **Feature**: Allow right-click on image in viewer ([#1479](https://github.com/pulsejet/memories/issues/1479), [#993](https://github.com/pulsejet/memories/issues/993), [#1398](https://github.com/pulsejet/memories/issues/1398))
