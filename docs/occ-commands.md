@@ -25,7 +25,7 @@ Usage:
 Options:
   -u, --user=USER       Index only the specified user
   -g, --group=GROUP     Index only specified group
-      --folder=FOLDER   Index only the specified folder (relative to the user's root)
+      --path=PATH       Index only the specified folder or file (relative to the user's root)
   -f, --force           Force refresh of existing index entries
       --clear           Clear all existing index entries
       --retry           Retry indexing of failed files

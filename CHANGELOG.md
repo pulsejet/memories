@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Breaking**: The `--folder` argument to the `occ memories:index` has been changed to `--path`
+
 ## [v7.6.0] - 2025-07-03
 
 - **Feature**: Looping of live photos is now gated behind a user setting ([[#1457](https://github.com/pulsejet/memories/issues/1457)])

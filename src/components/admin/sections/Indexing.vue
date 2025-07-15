@@ -140,7 +140,7 @@
       <br />
       {{ t('memories', 'You can limit indexing by user and/or folder:') }}
       <br />
-      <code>occ memories:index --user=admin --folder=/Photos/</code>
+      <code>occ memories:index --user=admin --path=/Photos/</code>
       <br />
       {{ t('memories', 'Clear all existing index tables:') }}
       <br />
