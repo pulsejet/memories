@@ -111,6 +111,7 @@ class SystemConfig
         'preview_max_memory' => 128,
         'preview_max_filesize_image' => 50,
         'preview_ffmpeg_path' => '',
+        'default_timezone' => '',
 
         // Placeholders only; these are not touched by the app
         'instanceid' => 'default',
