@@ -6,6 +6,7 @@ namespace OCA\Memories;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Service\BinExt;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\Events\Node\NodeWrittenEvent;
 use OCP\Files\File;
@@ -236,7 +237,7 @@ class Exif
      *
      * @param array<string, mixed> $exif
      */
-    public static function getDateTaken(File $file, array $exif, string $timezone): \DateTime
+    public static function getDateTaken(File $file, array $exif): \DateTime
     {
         try {
             return self::parseExifDate($exif);
@@ -248,7 +249,7 @@ class Exif
         $dt = new \DateTime('@'.$file->getMtime());
 
         // Set timezone to system timezone
-        $tz = $timezone ?: getenv('TZ') ?: date_default_timezone_get();
+        $tz = SystemConfig::get('default_timezone') ?: getenv('TZ') ?: date_default_timezone_get();
 
         try {
             $dt->setTimezone(new \DateTimeZone($tz));
