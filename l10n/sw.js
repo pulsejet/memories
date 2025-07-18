@@ -70,6 +70,7 @@ OC.L10N.register(
     "Move" : "Hamisha",
     "Choose a folder" : "Choose a folder",
     "Remove" : "Ondoa",
+    "Password protected" : "Password protected",
     "Read only" : "Read only",
     "Link copied to clipboard" : "Kiungo kimenakiliwa kwenye ubao wakunakilia",
     "Share link" : "Shirikisha kiungio",
