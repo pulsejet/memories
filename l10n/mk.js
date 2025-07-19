@@ -69,6 +69,7 @@ OC.L10N.register(
     "Save changes" : "Зачувај ги промените",
     "Name of the album" : "Име на албумот",
     "Save collaborators for this album." : "Зачувај соработници за овој албум.",
+    "Newest" : "Најнови",
     "Year" : "Година",
     "Month" : "Месец",
     "Day" : "Ден",
