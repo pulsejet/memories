@@ -83,6 +83,7 @@ OC.L10N.register(
     "Share folder" : "Shirikisha folda",
     "Unsaved changes" : "Mabadiliko yasiyohifadhiwa",
     "Previous" : "Iliyopita",
+    "Next" : "Next",
     "Save as" : "Hifadhi kama",
     "Undo" : "Tendua",
     "Redo" : "Redo",
