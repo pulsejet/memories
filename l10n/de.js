@@ -145,7 +145,7 @@ OC.L10N.register(
     "View failure logs." : "Fehlerprotokolle anzeigen.",
     "Files that failed indexing will not be indexed again unless they change." : "Dateien, deren Indizierung fehlgeschlagen ist, werden erst bei einer Änderung neu indiziert.",
     "You can manually retry files that failed indexing." : "Du kannst Dateien, deren Indizierung fehlgeschlagen ist, manuell erneut indizieren.",
-    "Automatic Indexing status: {status}" : "Status automatische Indizierung: {status}",
+    "Automatic Indexing status: {status}" : "Status der automatischen Indizierung: {status}",
     "Last index job was run {t} seconds ago." : "Die letzte Indizierungsaufgabe wurde vor {t} Sekunden ausgeführt.",
     "It took {t} seconds to complete." : "Die Fertigstellung dauerte {t} Sekunden.",
     "It is still running or was interrupted." : "Läuft noch oder wurde unterbrochen.",
