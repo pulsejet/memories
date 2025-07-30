@@ -68,7 +68,7 @@ class AddMissingIndices
             $output->info('Updating external table schema: '.implode(', ', $ops));
             $connection->migrateToSchema($schema->getWrappedSchema());
         } else {
-            $output->info('External table schema seem up to date');
+            $output->info('External table schema seems up to date');
         }
 
         // Create triggers in this step too
