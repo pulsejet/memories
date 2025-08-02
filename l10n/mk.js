@@ -83,6 +83,7 @@ OC.L10N.register(
     "Year" : "Година",
     "Month" : "Месец",
     "Day" : "Ден",
+    "Oldest" : "Најстари",
     "Label" : "Ознака",
     "Copyright" : "Авторско право",
     "Empty" : "Празно",
