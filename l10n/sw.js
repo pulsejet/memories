@@ -26,6 +26,7 @@ OC.L10N.register(
     "General" : "Kuu",
     "Account" : "Akaunti",
     "Logged in as {user}" : "Logged in as {user}",
+    "Info" : "Info",
     "Close" : "Funga",
     "{photoCount} photos" : "{photoCount} photos",
     "Unknown" : "Haijulikani",
