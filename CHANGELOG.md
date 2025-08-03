@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Update**: New reverse geocoding boundaries are available. Run `occ memories:places-setup` to update.
+- **Bugfix**: Failing location searches in metadata editor
+
 ## [v7.6.1] - 2025-07-14
 
 - **Breaking**: The `--folder` argument to the `occ memories:index` has been changed to `--path`
