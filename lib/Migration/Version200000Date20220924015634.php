@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Migration;
 
+use OCA\Memories\Db\SQL;
 use OCP\DB\ISchemaWrapper;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
@@ -51,8 +52,7 @@ class Version200000Date20220924015634 extends SimpleMigrationStep
         if ($schema->hasTable('memories')) {
             $table = $schema->getTable('memories');
             if ($table->hasColumn('uid')) {
-                $sql = $this->dbc->getDatabasePlatform()->getTruncateTableSQL('`*PREFIX*memories`', false);
-                $this->dbc->executeStatement($sql);
+                SQL::truncate($this->dbc, '*PREFIX*memories');
             }
         }
     }

@@ -79,31 +79,39 @@ class Version800000Date20240329060325 extends SimpleMigrationStep
         try {
             $output->info('Migrating values for parent from filecache');
 
-            $platform = $this->dbc->getDatabasePlatform();
-
             // copy existing parent values from filecache
-            if (preg_match('/mysql|mariadb/i', $platform::class)) {
-                $this->dbc->executeQuery(
-                    'UPDATE *PREFIX*memories m
-                    JOIN *PREFIX*filecache f ON m.fileid = f.fileid
-                    SET m.parent = f.parent',
-                );
-            } elseif (preg_match('/postgres/i', $platform::class)) {
-                $this->dbc->executeQuery(
-                    'UPDATE *PREFIX*memories AS m
-                    SET parent = f.parent
-                    FROM *PREFIX*filecache AS f
-                    WHERE f.fileid = m.fileid',
-                );
-            } elseif (preg_match('/sqlite/i', $platform::class)) {
-                $this->dbc->executeQuery(
-                    'UPDATE memories
-                    SET parent = (
-                        SELECT parent FROM filecache
-                        WHERE fileid = memories.fileid)',
-                );
-            } else {
-                throw new \Exception('Unsupported '.$platform::class);
+            switch ($this->dbc->getDatabaseProvider()) {
+                case IDBConnection::PLATFORM_MYSQL: // includes MariaDB
+                    $this->dbc->executeQuery(
+                        'UPDATE *PREFIX*memories m
+                        JOIN *PREFIX*filecache f ON m.fileid = f.fileid
+                        SET m.parent = f.parent',
+                    );
+
+                    break;
+
+                case IDBConnection::PLATFORM_POSTGRES:
+                    $this->dbc->executeQuery(
+                        'UPDATE *PREFIX*memories AS m
+                        SET parent = f.parent
+                        FROM *PREFIX*filecache AS f
+                        WHERE f.fileid = m.fileid',
+                    );
+
+                    break;
+
+                case IDBConnection::PLATFORM_SQLITE:
+                    $this->dbc->executeQuery(
+                        'UPDATE memories
+                        SET parent = (
+                            SELECT parent FROM filecache
+                            WHERE fileid = memories.fileid)',
+                    );
+
+                    break;
+
+                default:
+                    throw new \Exception('Unsupported database provider');
             }
 
             $output->info('Values for parent migrated successfully');

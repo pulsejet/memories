@@ -6,6 +6,7 @@ namespace OCA\Memories\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\DB\QueryBuilder\IQueryFunction;
+use OCP\IDBConnection;
 
 class SQL
 {
@@ -25,17 +26,17 @@ class SQL
 
     public static function replaceQueryParams(IQueryBuilder &$query, string $sql): string
     {
-        $params = $query->getParameters();
-        $platform = $query->getConnection()->getDatabasePlatform();
-        foreach ($params as $key => $value) {
+        $conn = $query->getConnection();
+
+        foreach ($query->getParameters() as $key => $value) {
             if (\is_array($value)) {
-                $value = implode(',', array_map(static fn ($v) => $platform->quoteStringLiteral($v), $value));
+                $value = implode(',', array_map(static fn ($v): string => $conn->quote($v), $value));
             } elseif (\is_bool($value)) {
-                $value = $platform->quoteStringLiteral($value ? '1' : '0');
+                $value = $conn->quote($value ? '1' : '0');
             } elseif (null === $value) {
-                $value = $platform->quoteStringLiteral('NULL');
+                $value = $conn->quote('NULL');
             } else {
-                $value = $platform->quoteStringLiteral((string) $value);
+                $value = $conn->quote((string) $value);
             }
 
             $sql = str_replace(':'.$key, $value, $sql);
@@ -124,5 +125,22 @@ class SQL
     public static function average(IQueryBuilder &$query, string $field): IQueryFunction
     {
         return $query->createFunction("AVG({$field})");
+    }
+
+    /**
+     * TRUNCATE a table (remove all rows and reset auto-increment).
+     *
+     * @param IDBConnection $connection The database connection
+     * @param string        $table      The table to truncate
+     */
+    public static function truncate(IDBConnection &$connection, string $table): int
+    {
+        switch ($connection->getDatabaseProvider()) {
+            case IDBConnection::PLATFORM_SQLITE:
+                return $connection->executeStatement("DELETE FROM {$table}");
+
+            default:
+                return $connection->executeStatement("TRUNCATE TABLE {$table}");
+        }
     }
 }

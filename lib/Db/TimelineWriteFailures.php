@@ -88,9 +88,6 @@ trait TimelineWriteFailures
      */
     public function clearAllFailures(): void
     {
-        // Delete all entries and reset autoincrement counter
-        $this->connection->executeStatement(
-            $this->connection->getDatabasePlatform()->getTruncateTableSQL('*PREFIX*memories_failures', false),
-        );
+        SQL::truncate($this->connection, '*PREFIX*memories_failures');
     }
 }

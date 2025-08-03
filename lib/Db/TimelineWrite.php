@@ -255,9 +255,8 @@ class TimelineWrite
      */
     public function clear(): void
     {
-        $p = $this->connection->getDatabasePlatform();
         foreach (array_merge(DELETE_TABLES, TRUNCATE_TABLES) as $table) {
-            $this->connection->executeStatement($p->getTruncateTableSQL('*PREFIX*'.$table, false));
+            SQL::truncate($this->connection, "*PREFIX*{$table}");
         }
     }
 
