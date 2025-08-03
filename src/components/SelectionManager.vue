@@ -191,9 +191,14 @@ export default defineComponent({
     touchScrollDelta: 0,
     touchMoveSelFrame: 0,
     multiSelectDelta: null as 1 | -1 | null,
+    shouldPersistSelections: false,
   }),
 
   mounted() {
+    _m.selectionManager = {
+      selectPhoto: this.selectPhoto.bind(this) as typeof this.selectPhoto,
+    };
+
     // Make default actions
     this.defaultActions = [
       {
@@ -643,10 +648,12 @@ export default defineComponent({
         photo.flag |= this.c.FLAG_SELECTED;
         this.selection.addBy(photo);
         this.selectionChanged();
+        console.log('added photo', this.selection);
       } else {
         photo.flag &= ~this.c.FLAG_SELECTED;
         this.selection.deleteBy(photo);
         this.selectionChanged();
+        console.log('removed photo', this.selection);
       }
 
       if (!noUpdate) {

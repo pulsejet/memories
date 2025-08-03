@@ -50,6 +50,10 @@ declare global {
       search: () => void;
     };
 
+    selectionManager: {
+      selectPhoto: (photo: IPhoto, val?: boolean, noUpdate?: boolean) => void;
+    };
+
     sidebar: {
       open: (photo: IPhoto | number, filename?: string, forceNative?: boolean) => void;
       close: () => void;
