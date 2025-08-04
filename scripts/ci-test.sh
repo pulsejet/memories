@@ -55,6 +55,10 @@ php occ memories:index
 # Set admin timeline path
 php occ user:setting admin memories timelinePath "/Photos"
 
+# This is needed for the file picker to work correctly
+# Who knows why ¯\_(ツ)_/¯
+php occ user:setting admin files lastSeenQuotaUsage 0.05
+
 # Run e2e tests
 cd apps/memories
 npm run e2e
