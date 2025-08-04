@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - **Update**: New reverse geocoding boundaries are available. Run `occ memories:places-setup` to update.
+- **Feature**: Shift+F in the viewer on desktop will enter fullscreen ([#1469](https://github.com/pulsejet/memories/issues/1469))
 - **Bugfix**: Failing location searches in metadata editor
 
 ## [v7.6.1] - 2025-07-14

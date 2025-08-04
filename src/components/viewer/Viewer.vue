@@ -1041,6 +1041,10 @@ export default defineComponent({
       if (e.key === 'Tab') {
         this.photoswipe?.element?.classList.add('pswp--ui-visible');
       }
+
+      if (e.key === 'F' && e.shiftKey) {
+        this.refs.outer?.requestFullscreen();
+      }
     },
 
     /** Delete this photo and refresh */
