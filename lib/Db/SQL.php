@@ -130,6 +130,9 @@ class SQL
     /**
      * TRUNCATE a table (remove all rows and reset auto-increment).
      *
+     * This is NOT a wrapper around IDBConnection::truncateTable
+     * primarily so that it can be used with non-prefixed tables.
+     *
      * @param IDBConnection $connection The database connection
      * @param string        $table      The table to truncate
      */
