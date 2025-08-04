@@ -4,6 +4,7 @@
       <template #trigger="{ attrs }">
         <div v-bind="attrs">
           <NcTextField
+            ref="textField"
             class="text-field"
             :value.sync="prompt"
             :label-outside="true"
@@ -104,36 +105,10 @@ export default defineComponent({
   }),
 
   mounted() {
-    // Add mutation observer to disable box shadow on input
-    // This is really unfortunate since the input uses !important
-    // to add a ugly white box shadow on hover and focus.
-    // Hopefully that changes at some point.
-    const processInput = () => {
-      const input = this.refs.outer.querySelector<HTMLInputElement>('input[type="text"]');
-      if (!input) return false;
-
-      // If the input is in the main header, disable
-      // the box shadow permanently
-      if (this.refs.outer.closest('header, #mobile-header')) {
-        input?.style.setProperty('box-shadow', 'none', 'important');
-      }
-
-      // Also focus the input if needed
-      if (this.autoFocus) {
-        setTimeout(() => input.focus(), 0);
-      }
-
-      return true;
-    };
-
-    // Try to process immediately, but if the input is not
-    // loaded yet (lazy loaded component), use a observer
-    if (!processInput()) {
-      let observer: MutationObserver;
-      observer = new MutationObserver((m) =>
-        m.forEach((m) => m.addedNodes.forEach(() => processInput() && observer.disconnect())),
-      );
-      observer.observe(this.refs.outer, { childList: true, subtree: true });
+    if (this.autoFocus) {
+      setTimeout(() => {
+        (<any>this.$refs.textField)?.focus();
+      }, 100); // wait for opacity transition
     }
   },
 
@@ -229,27 +204,27 @@ export default defineComponent({
   header &,
   #mobile-header &,
   .explore-outer & {
-    :deep input {
+    :deep input[type='text'] {
       border: none !important;
       background-color: color-mix(in srgb, var(--searchbar-color) 12%, transparent);
       backdrop-filter: blur(2px);
+
+      // input[type='text'] has an ugly border on hover and focus
+      // with !important, we need to override it with more specificity
+      box-shadow: none !important;
+
+      // Prevent jumping text on hover / focus
+      --input-border-width-offset: 0px;
     }
 
     :deep *,
-    :deep input::placeholder {
+    :deep input[type='text']::placeholder {
       color: var(--searchbar-color);
     }
   }
 
   .explore-outer & {
     width: 100%;
-  }
-
-  .explore-outer &,
-  .search-overlay & {
-    :deep input {
-      border-radius: 40px;
-    }
   }
 }
 
