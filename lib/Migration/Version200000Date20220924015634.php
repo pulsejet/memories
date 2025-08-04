@@ -52,7 +52,7 @@ class Version200000Date20220924015634 extends SimpleMigrationStep
         if ($schema->hasTable('memories')) {
             $table = $schema->getTable('memories');
             if ($table->hasColumn('uid')) {
-                SQL::truncate($this->dbc, '*PREFIX*memories');
+                SQL::truncate($this->dbc, 'memories', false);
             }
         }
     }

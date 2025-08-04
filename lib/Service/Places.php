@@ -203,11 +203,11 @@ class Places
         }
 
         // Setup the database
+        // This drops and recreates memories_planet_geometry
         $this->setupDatabase($gis);
 
-        // Truncate tables
-        SQL::truncate($this->connection, '*PREFIX*memories_planet');
-        SQL::truncate($this->connection, 'memories_planet_geometry');
+        // Truncate planet table
+        SQL::truncate($this->connection, 'memories_planet', false);
 
         // Create place insertion statement
         $query = $this->connection->getQueryBuilder();

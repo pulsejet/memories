@@ -129,21 +129,20 @@ class SQL
 
     /**
      * TRUNCATE a table (remove all rows and reset auto-increment).
-     *
-     * This is NOT a wrapper around IDBConnection::truncateTable
-     * primarily so that it can be used with non-prefixed tables.
+     * This wrapper should be removed when support for Nextcloud <32 is dropped.
      *
      * @param IDBConnection $connection The database connection
      * @param string        $table      The table to truncate
+     * @param bool          $cascade    Whether to cascade the truncate operation
      */
-    public static function truncate(IDBConnection &$connection, string $table): int
+    public static function truncate(IDBConnection &$connection, string $table, bool $cascade): void
     {
-        switch ($connection->getDatabaseProvider()) {
-            case IDBConnection::PLATFORM_SQLITE:
-                return $connection->executeStatement("DELETE FROM {$table}");
-
-            default:
-                return $connection->executeStatement("TRUNCATE TABLE {$table}");
+        // getDatabasePlatform is deprecated on Nextcloud 32
+        if (method_exists($connection, 'truncateTable')) {
+            $connection->truncateTable($table, $cascade);
+        } else {
+            $sql = $connection->getDatabasePlatform()->getTruncateTableSQL('*PREFIX*'.$table, $cascade);
+            $connection->executeStatement($sql);
         }
     }
 }
