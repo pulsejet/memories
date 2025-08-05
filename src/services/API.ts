@@ -38,7 +38,7 @@ export const enum DaysFilterType {
 }
 
 export class API {
-  static Q(url: string, query: Record<string, string | number | undefined | boolean | null>): string {
+  static Q(url: string, query: Record<string, string | string[] | number | undefined | boolean | null>): string {
     if (!query) return url;
 
     // Get everything as strings

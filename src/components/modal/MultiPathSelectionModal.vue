@@ -31,9 +31,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
+import NcButton from '@nextcloud/vue/components/NcButton';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';

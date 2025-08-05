@@ -1,5 +1,7 @@
-import type Router, { type Route } from 'vue-router';
 import type { ComponentPublicInstance } from 'vue';
+
+import type { RouteLocation } from 'vue-router';
+import type Router, { type GlobalRouteCheckers, type routes } from './router';
 
 import type PlyrType from 'plyr';
 import type videojsType from 'video.js';
@@ -7,7 +9,6 @@ import type videojsType from 'video.js';
 import type { IPhoto, TimelineState } from '@typings';
 import type { constants, initstate } from '@services/utils';
 import type { translate, translatePlural } from '@services/l10n';
-import type { GlobalRouteCheckers, routes } from './router';
 
 // Global exposed variables
 declare global {
@@ -33,8 +34,8 @@ declare global {
    */
   var _m: {
     mode: 'admin' | 'user';
-    route: Route;
-    router: Router;
+    route: RouteLocation;
+    router: typeof Router;
     routes: typeof routes;
 
     modals: {
@@ -113,6 +114,9 @@ declare module 'vue' {
 
     c: typeof constants;
     initstate: typeof initstate;
+
+    $router: typeof Router;
+    $route: RouteLocation;
   }
 
   export interface GlobalComponents {

@@ -37,7 +37,7 @@
 <script lang="ts">
 import Vue, { defineComponent, type PropType } from 'vue';
 
-import NcCounterBubble from '@nextcloud/vue/dist/Components/NcCounterBubble.js';
+import NcCounterBubble from '@nextcloud/vue/components/NcCounterBubble';
 
 import errorsvg from '@assets/error.svg';
 import plussvg from '@assets/plus.svg';

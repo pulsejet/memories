@@ -74,12 +74,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 import type { Component } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
-const NcAvatar = () => import('@nextcloud/vue/dist/Components/NcAvatar.js');
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
+const NcAvatar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAvatar'));
 
 import axios from '@nextcloud/axios';
 import { getCanonicalLocale } from '@nextcloud/l10n';

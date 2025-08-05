@@ -23,10 +23,10 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent } from 'vue';
+import { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import { registerDavProperty } from '@nextcloud/files/dav';
 
 import Metadata from '@components/Metadata.vue';
@@ -223,9 +223,9 @@ export default defineComponent({
           iconSvg: window.atob(InfoSvg.split(',')[1]), // base64 to svg
 
           mount(el: HTMLElement, fileInfo: { id: string | number }, context: any) {
-            component?.$destroy?.();
-            component = new Vue({ render: (h) => h(Metadata), router });
-            component.$mount(el);
+            // component?.$destroy?.();
+            // component = new Vue({ render: (h) => h(Metadata), router });
+            // component.$mount(el);
 
             self.nativeMetadata = component.$children[0];
             self.nativeMetadata?.update(Number(fileInfo.id));

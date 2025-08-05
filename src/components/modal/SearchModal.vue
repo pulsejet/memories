@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent } from 'vue';
+import { defineComponent } from 'vue';
 
 import Searchbar from '@components/header/Searchbar.vue';
 import SearchbarMenuItem from '@components/header/SearchbarMenuItem.vue';
@@ -33,11 +33,11 @@ export default defineComponent({
     if (header && utils.uid) {
       const div = document.createElement('div');
       header.prepend(div);
-      const component = new Vue({
-        render: (h) => h(SearchbarMenuItem),
-        router: this.$router,
-      });
-      component.$mount(div);
+      // const component = new Vue({
+      //   render: (h) => h(SearchbarMenuItem),
+      //   router: this.$router,
+      // });
+      // component.$mount(div);
 
       // remove unified search button
       document.querySelector<HTMLDivElement>('.unified-search-menu')?.remove(); // 29+

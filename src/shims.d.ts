@@ -11,11 +11,11 @@ declare module '*.vue' {
 }
 
 // External components cannot be imported with .vue extension
-declare module '@nextcloud/vue/dist/Components/*.js' {
-  import type { DefineComponent } from 'vue';
-  const component: DefineComponent<{}, {}, any>;
-  export default component;
-}
+// declare module '@nextcloud/vue/dist/Components/*.js' {
+//   import type { DefineComponent } from 'vue';
+//   const component: DefineComponent<{}, {}, any>;
+//   export default component;
+// }
 
 declare module 'vue-virtual-scroller';
 

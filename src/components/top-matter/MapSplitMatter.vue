@@ -36,7 +36,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { LMap, LTileLayer, LMarker, LPopup, LIcon } from 'vue2-leaflet';
+import { LMap, LTileLayer, LMarker, LPopup, LIcon } from '@vue-leaflet/vue-leaflet';
 import { latLngBounds, Icon } from 'leaflet';
 
 import axios from '@nextcloud/axios';
@@ -94,7 +94,7 @@ export default defineComponent({
 
   mounted() {
     // Make sure the zoom control doesn't overlap with the navbar
-    this.refs.map.mapObject.zoomControl.setPosition('topright');
+    // this.refs.map.mapObject.zoomControl.setPosition('topright');
 
     // Initialize
     this.initialize();
@@ -111,7 +111,7 @@ export default defineComponent({
   computed: {
     refs() {
       return this.$refs as {
-        map: LMap;
+        map: InstanceType<typeof LMap>;
       };
     },
 

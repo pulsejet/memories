@@ -28,9 +28,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 import Timeline from './Timeline.vue';
-const MapSplitMatter = () => import('./top-matter/MapSplitMatter.vue');
+const MapSplitMatter = defineAsyncComponent(() => import('./top-matter/MapSplitMatter.vue'));
 import Hammer from 'hammerjs';
 
 import * as utils from '@services/utils';

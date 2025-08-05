@@ -130,7 +130,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, defineAsyncComponent, type PropType } from 'vue';
 
 import Magnify from 'vue-material-design-icons/Magnify.vue';
 import Close from 'vue-material-design-icons/Close.vue';
@@ -143,11 +143,11 @@ import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import { generateOcsUrl, generateUrl } from '@nextcloud/router';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js';
-const NcPopover = () => import('@nextcloud/vue/dist/Components/NcPopover.js');
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
-const NcListItemIcon = () => import('@nextcloud/vue/dist/Components/NcListItemIcon.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent';
+const NcPopover = defineAsyncComponent(() => import('@nextcloud/vue/components/NcPopover'));
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+const NcListItemIcon = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItemIcon'));
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';

@@ -13,7 +13,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js';
+import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent';
 
 import * as strings from '@services/strings';
 
@@ -38,7 +38,7 @@ export default defineComponent({
 
   computed: {
     emptyViewDescription(): string {
-      return strings.emptyDescription(this.$route.name!);
+      return strings.emptyDescription(String(this.$route.name));
     },
   },
 });

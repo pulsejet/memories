@@ -67,9 +67,9 @@ import { defineComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
-import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
+import NcActionCheckbox from '@nextcloud/vue/components/NcActionCheckbox';
 
 import FaceEditModal from '@components/modal/FaceEditModal.vue';
 import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';

@@ -17,9 +17,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
-const NcSelectTags = () => import('@nextcloud/vue/dist/Components/NcSelectTags.js');
+const NcSelectTags = defineAsyncComponent(() => import('@nextcloud/vue/components/NcSelectTags'));
 
 import * as dav from '@services/dav';
 

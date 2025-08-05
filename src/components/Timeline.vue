@@ -20,8 +20,8 @@
     <TimelineTopOverlay
       ref="topOverlay"
       :heads="heads"
-      :container="refs.container?.$el"
-      :recycler="refs.recycler?.$el"
+      :container="$refs.container?.$el"
+      :recycler="$refs.recycler?.$el"
     />
 
     <!-- Main recycler view for rows -->
@@ -47,12 +47,12 @@
           <div class="mobile-header-top-gap"></div>
 
           <!-- Route-specific top matter -->
-          <DynamicTopMatter ref="dtm" @load="refs.scrollerManager.adjust()" />
+          <DynamicTopMatter ref="dtm" @load="$refs.scrollerManager.adjust()" />
         </div>
       </template>
 
       <template v-slot="{ item, index }">
-        <RowHead v-if="item.type === 0" :item="item" @click="refs.selectionManager.selectHead(item)" />
+        <RowHead v-if="item.type === 0" :item="item" @click="$refs.selectionManager.selectHead(item)" />
 
         <template v-else>
           <Photo
@@ -66,11 +66,11 @@
             }"
             :data="photo"
             :day="item.day"
-            @select="refs.selectionManager.clickSelectionIcon(photo, $event, index)"
-            @pointerdown="refs.selectionManager.clickPhoto(photo, $event, index)"
-            @touchstart="refs.selectionManager.touchstartPhoto(photo, $event, index)"
-            @touchend="refs.selectionManager.touchendPhoto(photo, $event, index)"
-            @touchmove="refs.selectionManager.touchmovePhoto(photo, $event, index)"
+            @select="$refs.selectionManager.clickSelectionIcon(photo, $event, index)"
+            @pointerdown="$refs.selectionManager.clickPhoto(photo, $event, index)"
+            @touchstart="$refs.selectionManager.touchstartPhoto(photo, $event, index)"
+            @touchend="$refs.selectionManager.touchendPhoto(photo, $event, index)"
+            @touchmove="$refs.selectionManager.touchmovePhoto(photo, $event, index)"
           />
         </template>
       </template>
@@ -82,12 +82,12 @@
       v-show="!showEmpty"
       :rows="list"
       :fullHeight="scrollerHeight"
-      :recycler="refs.recycler"
-      :recyclerBefore="refs.recyclerBefore"
+      :recycler="$refs.recycler"
+      :recyclerBefore="$refs.recyclerBefore"
       @interactend="loadScrollView"
       @scroll="
         currentScroll = $event.current;
-        refs.topOverlay?.refresh();
+        $refs.topOverlay?.refresh();
       "
     />
 
@@ -96,8 +96,8 @@
       :heads="heads"
       :rows="list"
       :isreverse="isMonthView"
-      :recycler="refs.recycler?.$el"
-      :scrollerManager="refs.scrollerManager"
+      :recycler="$refs.recycler?.$el"
+      :scrollerManager="$refs.scrollerManager"
       @updateLoading="updateLoading"
     />
   </SwipeRefresh>
@@ -105,7 +105,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import type { Route } from 'vue-router';
+import type { RouteLocation } from 'vue-router';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
@@ -223,7 +223,7 @@ export default defineComponent({
   },
 
   watch: {
-    async $route(to: Route, from?: Route) {
+    async $route(to: RouteLocation, from?: RouteLocation) {
       await this.routeChange(to, from);
     },
   },
@@ -294,7 +294,7 @@ export default defineComponent({
   },
 
   methods: {
-    async routeChange(to: Route, from?: Route) {
+    async routeChange(to: RouteLocation, from?: RouteLocation) {
       // Always do a hard refresh if the path changes
       if (from?.path !== to.path) {
         await this.refresh();

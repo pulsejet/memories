@@ -1,10 +1,10 @@
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, defineAsyncComponent, type PropType } from 'vue';
 import axios from '@nextcloud/axios';
 
-const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js');
-const NcNoteCard = () => import('@nextcloud/vue/dist/Components/NcNoteCard.js');
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
+const NcNoteCard = defineAsyncComponent(() => import('@nextcloud/vue/components/NcNoteCard'));
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcButton from '@nextcloud/vue/components/NcButton';
 
 import type { ISystemStatus, ISystemConfig, IBinaryStatus } from './AdminTypes';
 import type { IConfig } from '@typings';

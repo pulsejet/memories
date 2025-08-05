@@ -30,8 +30,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import * as strings from '@services/strings';
 
@@ -49,7 +49,7 @@ export default defineComponent({
 
   computed: {
     viewname(): string {
-      return strings.viewName(this.$route.name!);
+      return strings.viewName(String(this.$route.name!));
     },
 
     name(): string | null {
@@ -57,7 +57,8 @@ export default defineComponent({
         return this.t('memories', 'Unidentified location');
       }
 
-      return this.$route.params.name?.split('-').slice(1).join('-');
+      const name = this.$route.params.name;
+      return typeof name === 'string' ? name.split('-').slice(1).join('-') : null;
     },
   },
 

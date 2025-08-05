@@ -85,12 +85,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent, markRaw } from 'vue';
 
-import NcContent from '@nextcloud/vue/dist/Components/NcContent.js';
-import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent.js';
-import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation.js';
-const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNavigationItem.js');
+import NcContent from '@nextcloud/vue/components/NcContent';
+import NcAppContent from '@nextcloud/vue/components/NcAppContent';
+import NcAppNavigation from '@nextcloud/vue/components/NcAppNavigation';
+const NcAppNavigationItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAppNavigationItem'));
 
 import { generateUrl } from '@nextcloud/router';
 
@@ -321,66 +321,66 @@ export default defineComponent({
       const navItems = [
         {
           name: 'timeline',
-          icon: ImageMultiple,
+          icon: markRaw(ImageMultiple),
           title: t('memories', 'Timeline'),
         },
         {
           name: 'explore',
-          icon: SearchIcon,
+          icon: markRaw(SearchIcon),
           title: t('memories', 'Explore'),
         },
         {
           name: 'folders',
-          icon: FolderIcon,
+          icon: markRaw(FolderIcon),
           title: t('memories', 'Folders'),
         },
         {
           name: 'favorites',
-          icon: Star,
+          icon: markRaw(Star),
           title: t('memories', 'Favorites'),
         },
         {
           name: 'albums',
-          icon: AlbumIcon,
+          icon: markRaw(AlbumIcon),
           title: t('memories', 'Albums'),
           if: this.showAlbums,
         },
         {
           name: 'recognize',
-          icon: PeopleIcon,
+          icon: markRaw(PeopleIcon),
           title: this.recognize || '',
           if: this.recognize,
         },
         {
           name: 'facerecognition',
-          icon: PeopleIcon,
+          icon: markRaw(PeopleIcon),
           title: this.facerecognition || '',
           if: this.facerecognition,
         },
         {
           name: 'archive',
-          icon: ArchiveIcon,
+          icon: markRaw(ArchiveIcon),
           title: t('memories', 'Archive'),
         },
         {
           name: 'thisday',
-          icon: CalendarIcon,
+          icon: markRaw(CalendarIcon),
           title: t('memories', 'On this day'),
         },
         {
           name: 'places',
-          icon: MarkerIcon,
+          icon: markRaw(MarkerIcon),
           title: t('memories', 'Places'),
           if: this.config.places_gis > 0,
         },
         {
           name: 'map',
-          icon: MapIcon,
+          icon: markRaw(MapIcon),
           title: t('memories', 'Map'),
         },
         {
           name: 'tags',
-          icon: TagsIcon,
+          icon: markRaw(TagsIcon),
           title: t('memories', 'Tags'),
           if: this.config.systemtags_enabled,
         },

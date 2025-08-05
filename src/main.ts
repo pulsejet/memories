@@ -1,8 +1,8 @@
-import './bootstrap';
+import { createApp } from 'vue';
+import { bootstrapVueApp } from './bootstrap';
 
-import Vue from 'vue';
 import App from './App.vue';
-import router, { routes } from './router';
+import router, { routes, defineAllRouteCheckers } from './router';
 
 // Global components
 import XImg from '@components/frame/XImg.vue';
@@ -17,7 +17,7 @@ globalThis._m = {
   mode: 'user',
 
   get route() {
-    return router.currentRoute;
+    return router.currentRoute.value;
   },
   router: router,
   routes: routes,
@@ -40,11 +40,15 @@ _m.video.clientIdPersistent = localStorage.getItem('videoClientIdPersistent') ??
 localStorage.setItem('videoClientIdPersistent', _m.video.clientIdPersistent);
 
 // Register global components and plugins
-Vue.use(VueVirtualScroller);
-Vue.component('XImg', XImg);
+const app = createApp(App);
+app.use(router);
+defineAllRouteCheckers(app);
 
-export default new Vue({
-  el: '#content',
-  router,
-  render: (h) => h(App),
-});
+// Register global components
+app.component('XImg', XImg);
+app.use(VueVirtualScroller);
+
+// Bootstrap Vue app
+bootstrapVueApp(app);
+
+app.mount('#content');

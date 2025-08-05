@@ -48,8 +48,8 @@ import { defineComponent } from 'vue';
 
 import * as utils from '@services/utils';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
 import RotateRightIcon from 'vue-material-design-icons/RotateRight.vue';

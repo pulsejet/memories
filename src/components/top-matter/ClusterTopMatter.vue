@@ -13,8 +13,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import * as strings from '@services/strings';
 
@@ -30,13 +30,13 @@ export default defineComponent({
 
   computed: {
     viewname(): string {
-      return strings.viewName(this.$route.name!);
+      return strings.viewName(String(this.$route.name));
     },
 
     name(): string | null {
       switch (this.$route.name) {
         case _m.routes.Tags.name:
-          return this.t('recognize', this.$route.params.name);
+          return this.t('recognize', String(this.$route.params.name));
         default:
           return null;
       }

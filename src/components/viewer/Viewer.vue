@@ -55,8 +55,8 @@
 import { defineComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 

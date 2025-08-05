@@ -45,14 +45,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
 
-const NcBreadcrumbs = () => import('@nextcloud/vue/dist/Components/NcBreadcrumbs.js');
-const NcBreadcrumb = () => import('@nextcloud/vue/dist/Components/NcBreadcrumb.js');
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+const NcBreadcrumbs = defineAsyncComponent(() => import('@nextcloud/vue/components/NcBreadcrumbs'));
+const NcBreadcrumb = defineAsyncComponent(() => import('@nextcloud/vue/components/NcBreadcrumb'));
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import * as utils from '@services/utils';
 import * as nativex from '@native';
@@ -124,7 +124,7 @@ export default defineComponent({
     toggleRecursive() {
       this.$router.replace({
         query: {
-          ...this.$router.currentRoute.query,
+          ...this.$router.currentRoute.value.query,
           recursive: this.recursive ? undefined : String(1),
         },
       });

@@ -26,12 +26,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
 
-const NcAvatar = () => import('@nextcloud/vue/dist/Components/NcAvatar.js');
+const NcAvatar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAvatar'));
 
 import MapMarkerOutlineIcon from 'vue-material-design-icons/MapMarkerOutline.vue';
 import LinkIcon from 'vue-material-design-icons/Link.vue';

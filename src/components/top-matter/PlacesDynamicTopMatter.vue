@@ -10,7 +10,7 @@
 import { defineComponent } from 'vue';
 
 import axios from '@nextcloud/axios';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+import NcButton from '@nextcloud/vue/components/NcButton';
 
 import { API } from '@services/API';
 
@@ -36,7 +36,8 @@ export default defineComponent({
       if (this.routeIsPlacesUnassigned) return false;
 
       // Get ID of place from URL
-      const placeId = Number(this.$route.params.name?.split('-')[0]) || -1;
+      const name = this.$route.params.name;
+      const placeId = typeof name === 'string' ? Number(name.split('-')[0]) || -1 : -1;
       const url = API.Q(API.PLACE_LIST(), { inside: placeId });
 
       // Make API call to get subplaces

@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent } from 'vue';
+import Vue, { defineComponent, defineAsyncComponent } from 'vue';
 
 import Modal from '@components/modal/Modal.vue';
 import ModalMixin from '@components/modal/ModalMixin';
@@ -63,10 +63,10 @@ import AlbumPicker from '@components/modal/AlbumPicker.vue';
 import EditTags from '@components/modal/EditTags.vue';
 import UploadMenuItem from '@components/header/UploadMenuItem.vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
-const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
-const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
+const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
 
 import axios from '@nextcloud/axios';
 import { getUploader } from '@nextcloud/upload';
@@ -114,10 +114,10 @@ export default defineComponent({
     // create right header button
     const header = document.querySelector<HTMLDivElement>('.header-right, .header-end');
     if (header && utils.uid) {
-      const div = document.createElement('div');
-      header.prepend(div);
-      const component = new Vue({ render: (h) => h(UploadMenuItem) });
-      component.$mount(div);
+      // const div = document.createElement('div');
+      // header.prepend(div);
+      // const component = new Vue({ render: (h) => h(UploadMenuItem) });
+      // component.$mount(div);
     }
   },
 

@@ -68,12 +68,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
+const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
 
 import UserConfig from '@mixins/UserConfig';
 

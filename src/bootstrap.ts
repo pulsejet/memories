@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import { type App } from 'vue';
 
 import { generateFilePath } from '@nextcloud/router';
 import { getRequestToken } from '@nextcloud/auth';
@@ -27,11 +27,14 @@ if ('virtualKeyboard' in navigator) {
   (<any>navigator.virtualKeyboard).overlaysContent = true;
 }
 
-// Register global components and plugins
-Vue.component('XLoadingIcon', XLoadingIcon);
+// Initialize Vue 3 app
+export function bootstrapVueApp(app: App) {
+  // Register global components and plugins
+  app.component('XLoadingIcon', XLoadingIcon);
 
-// Register global constants and functions
-Vue.prototype.c = constants;
-Vue.prototype.initstate = initstate;
-Vue.prototype.t = translate;
-Vue.prototype.n = translatePlural;
+  // Register global constants and functions
+  app.config.globalProperties.c = constants;
+  app.config.globalProperties.initstate = initstate;
+  app.config.globalProperties.t = translate;
+  app.config.globalProperties.n = translatePlural;
+}
