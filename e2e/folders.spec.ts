@@ -25,18 +25,24 @@ test.describe('Open', () => {
     await page.locator('.p-outer:visible > .select').nth(1).click();
     await page.waitForTimeout(500);
 
-    // click selection menu button
-    await page.locator('.top-bar button[aria-label="Actions"]').click();
-    await page.waitForTimeout(500);
+    // Click selection menu button
+    const actionButton = page.locator('.top-bar button[aria-label="Actions"]');
+    await actionButton.waitFor();
+    await actionButton.click();
+    await page.waitForTimeout(200);
 
-    // click move button
-    await page.locator('text=Move to folder').click();
-    await page.waitForTimeout(2000); // slow
-    await page.locator('tr[data-filename="Photos"]').click();
+    // Move to folder
+    const moveButton = page.locator('text=Move to folder');
+    await moveButton.waitFor();
+    await moveButton.click();
+    const photosFolder = page.locator('tr[data-filename="Photos"]');
+    await photosFolder.waitFor();
+    await photosFolder.click();
 
     // Action button
     await page.locator('.dialog button[aria-label="Move"]').click();
-    await page.waitForTimeout(2000);
+    await page.waitForSelector('.dialog', { state: 'detached' });
+    await page.waitForTimeout(2000); // animation to move the file away
 
     // Check if the file is moved
     elems = await page.locator('.img-outer:visible').all();
