@@ -13,6 +13,7 @@ OC.L10N.register(
     "Tags" : "Maoni",
     "Settings" : "Mipangilio",
     "Videos" : "Picha mjongeo",
+    "Shared By" : "Imeshirikiwa na",
     "Metadata" : "Metadata",
     "Edit" : "Hariri",
     "Photos" : "Picha",
