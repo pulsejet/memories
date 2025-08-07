@@ -559,6 +559,8 @@ OC.L10N.register(
     "Failed to favorite files." : "Fallo al marcar archivos como favoritos.",
     "Failed to favorite some files." : "Fallo al marcar algunos archivos como favoritos.",
     "Failed to favorite {fileName}." : "Fallo al marcar como favorito {fileName}.",
+    "Cover image set successfully" : "Se estableció la imagen de la portada exitosamente",
+    "Failed to set cover image" : "Fallo al establecer la imagen de la portada",
     "No content-location header found" : "No se encontró el encabezado content-location",
     "Failed to create tag {name}: {error}" : "Fallo al crear la etiqueta {name}: {error}",
     "Memories has been updated to {version}. Reload to get the new version." : "Memories ha sido actualizada a {version}. Recargue para obtener la versión nueva.",
