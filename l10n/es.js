@@ -238,7 +238,7 @@ OC.L10N.register(
     "Quality Factor (15 - 45) (default 25)" : "Factor de calidad (15 - 45) (25 por defecto)",
     "Default high resolution image loading behavior of the photo viewer." : "Comportamiento por defecto para la carga de imágenes de alta resolución del visor de fotos.",
     "The configuration here also applies to public link shares." : "La configuración aquí también aplica para los enlaces públicos compartidos.",
-    "Users may override this setting." : "Los usuarios podrían anular este ajuste.",
+    "Users may override this setting." : "Los usuarios podrían reemplazar este ajuste.",
     "Always load high resolution image (not recommended if using HEIC/TIFF)" : "Siempre cargar imagen en alta resolución (no se recomienda si está usando HEIC/TIFF)",
     "Template" : "Plantilla",
     "Shared" : "Compartido",
