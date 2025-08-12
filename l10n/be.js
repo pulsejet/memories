@@ -53,6 +53,7 @@ OC.L10N.register(
     "Read only" : "Толькі для чытання",
     "Link copied to clipboard" : "Спасылка скапіявана ў буфер абмену",
     "Share link" : "Абагуліць спасылку",
+    "Refresh" : "Абнавіць",
     "Last updated" : "Апошняе абнаўленне",
     "Oldest first" : "Спачатку старыя",
     "Newest first" : "Спачатку новыя",
