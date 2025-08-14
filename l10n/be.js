@@ -19,6 +19,7 @@ OC.L10N.register(
     "Favorite" : "Абранае",
     "Add to album" : "Дадаць у альбом",
     "Cancel" : "Скасаваць",
+    "General" : "Агульныя",
     "Account" : "Уліковы запіс",
     "Sign out" : "Выйсці",
     "Info" : "Інфармацыя",
