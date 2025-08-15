@@ -56,6 +56,7 @@ OC.L10N.register(
     "Location of the album" : "Eneo la albamu",
     "Back" : "Rudi",
     "Add collaborators" : "Add collaborators",
+    "Save changes" : "Save changes",
     "Name of the album" : "Jina la albamu",
     "Save collaborators for this album." : "Hifadhi washiriki kwa albamu hii ",
     "Year" : "Mwaka",

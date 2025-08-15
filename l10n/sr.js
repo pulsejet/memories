@@ -261,7 +261,7 @@ OC.L10N.register(
     "No collaborators available" : "Нема достуоних сарадника",
     "Remove {collaboratorLabel} from the collaborators list" : "Уклони {collaboratorLabel} из листе сарадника",
     "Copy the public link" : "Копирај јавни линк",
-    "Public link copied!" : "Јавни линк је корипан!",
+    "Public link copied!" : "Јавни линк је копиран!",
     "Copy public link" : "Копирај јавни линк",
     "Delete the public link" : "Обриши јавни линк",
     "Share via public link" : "Подели путем јавног линка",
