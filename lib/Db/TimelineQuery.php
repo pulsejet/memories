@@ -23,6 +23,7 @@ class TimelineQuery
         'm.datetaken', 'm.dayid',
         'm.w', 'm.h', 'm.liveid',
         'm.isvideo', 'm.video_duration',
+        'm.exif',
         'f.etag', 'f.name AS basename',
         'f.size', 'm.epoch', // auid
         'mimetypes.mimetype',
