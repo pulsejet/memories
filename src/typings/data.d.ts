@@ -161,6 +161,8 @@ declare module '@typings' {
     FNumber?: number;
     FocalLength?: number;
 
+    Rating?: number;
+
     TagsList?: string[];
     Keywords?: string[];
     Subject?: string[];
