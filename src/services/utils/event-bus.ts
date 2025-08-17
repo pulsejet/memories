@@ -27,6 +27,12 @@ export type BusEvent = {
     value: IConfig[keyof IConfig];
   } | null;
 
+  /** Filters have been updated */
+  'memories:filters:changed': {
+    minRating: number;
+    tags: string[];
+  };
+
   /**
    * Remove these photos from the timeline.
    * Each photo object is required to have the `d` (day) property.
