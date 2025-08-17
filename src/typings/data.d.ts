@@ -172,4 +172,10 @@ declare module '@typings' {
     GPSLatitude?: number;
     GPSLongitude?: number;
   }
+
+
+  export type IFilters = {
+    minRating: number;
+    tags: string[];
+  }
 }
