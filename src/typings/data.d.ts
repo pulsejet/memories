@@ -161,6 +161,11 @@ declare module '@typings' {
     FNumber?: number;
     FocalLength?: number;
 
+    TagsList?: string[];
+    Keywords?: string[];
+    Subject?: string[];
+    HierarchicalSubject?: string[];
+
     GPSAltitude?: number;
     GPSLatitude?: number;
     GPSLongitude?: number;
