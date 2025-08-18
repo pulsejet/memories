@@ -25,7 +25,6 @@
         </template>
         <template #default>
           <FilterComponent
-            :initial-filters="currentFilters"
           />
         </template>
       </NcPopover>
@@ -66,41 +65,18 @@ export default defineComponent({
   },
 
   emits: {
-    click: (item: IHeadRow) => true,
-    'filter-change': (filters: any) => true,
-  },
-
-  data() {
-    return {
-      currentFilters: {
-        minRating: 0,
-        tags: [],
-      },
-    };
+    click: (item: IHeadRow) => true
   },
 
   computed: {
     name() {
       return utils.getHeadRowName(this.item);
-    },
-
-    hasActiveFilters() {
-      return this.currentFilters.minRating > 0 || this.currentFilters.tags.length > 0;
-    },
+    }
   },
 
   methods: {
     click() {
       this.$emit('click', this.item);
-    },
-
-    onFilterChange(filters: any) {
-      this.currentFilters = { ...filters };
-      this.$emit('filter-change', filters);
-    },
-
-    t(app: string, text: string, vars?: any) {
-      return t('memories', text, vars);
     },
   },
 });
