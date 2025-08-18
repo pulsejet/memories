@@ -40,7 +40,21 @@
           :options-filter="tagFilter"
           :get-option-label="tagLabel"
           :placeholder="t('memories', 'Select tags...')"
-          @update:value="onTagsChange"
+        />
+      </div>
+
+      <!-- Embedded Tags Filter -->
+      <div class="filter-section">
+        <label class="filter-label">
+          {{ t('memories', 'Filter by Embedded Tags') }}
+        </label>
+        <EmbeddedTagSelector
+          v-model="filters.embeddedTags"
+          class="embedded-tags-filter"
+          :disabled="disabled"
+          :placeholder="t('memories', 'Select embedded tags...')"
+          :show-full-path="true"
+          @update:value="onEmbeddedTagsChange"
         />
       </div>
 
@@ -69,6 +83,7 @@ import * as utils from '@services/utils';
 
 import RatingStars from './RatingStars.vue';
 import { defineComponent, type PropType } from 'vue';
+import EmbeddedTagSelector from './EmbeddedTagSelector.vue';
 
 export default defineComponent({
   name: 'FilterComponent',
@@ -78,6 +93,7 @@ export default defineComponent({
     NcSelectTags,
     RatingStars,
     CloseIcon,
+    EmbeddedTagSelector,
   },
 
   props: {
@@ -91,7 +107,8 @@ export default defineComponent({
       type: Object as PropType<IFilters>,
       default: () => ({
         minRating: 0,
-        tags: []
+        tags: [],
+        embeddedTags: [],
       } as IFilters),
     },
   },
@@ -103,13 +120,14 @@ export default defineComponent({
       filters: {
         minRating: this.initialFilters.minRating || 0,
         tags: this.initialFilters.tags || [],
+        embeddedTags: this.initialFilters.embeddedTags || [],
       } as IFilters,
     };
   },
 
   computed: {
     hasActiveFilters() {
-      return this.filters.minRating > 0 || this.filters.tags.length > 0;
+      return this.filters.minRating > 0 || this.filters.tags.length > 0 || this.filters.embeddedTags.length > 0;
     },
   },
 
@@ -119,6 +137,7 @@ export default defineComponent({
         this.filters = {
           minRating: newFilters.minRating || 0,
           tags: newFilters.tags || [],
+          embeddedTags: newFilters.embeddedTags || [],
         };
       },
       deep: true,
@@ -142,6 +161,11 @@ export default defineComponent({
       (this as any).emitFilterChange();
     },
 
+    onEmbeddedTagsChange(tags: string[]) {
+      this.filters.embeddedTags = tags;
+      (this as any).emitFilterChange();
+    },
+
     clearRating() {
       this.filters.minRating = 0;
       (this as any).emitFilterChange();
@@ -151,6 +175,7 @@ export default defineComponent({
       this.filters = {
         minRating: 0,
         tags: [],
+        embeddedTags: [],
       };
       (this as any).emitFilterChange();
     },
@@ -207,6 +232,10 @@ export default defineComponent({
   :deep ul {
     max-height: 150px;
   }
+}
+
+.embedded-tags-filter {
+  width: 100%;
 }
 
 .filter-actions {
