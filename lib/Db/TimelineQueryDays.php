@@ -90,6 +90,7 @@ trait TimelineQueryDays
         bool $monthView,
         bool $reverse,
         int $minRating = 0,
+        array $embeddedTags = [],
         array $queryTransforms = [],
     ): array {
         // Check if we have any dayIds
@@ -174,6 +175,11 @@ trait TimelineQueryDays
         // Filter by rating
         if ($minRating > 0) {
             $day = array_filter($day, fn ($photo) => $photo['rating'] >= $minRating);
+        }
+
+        // Filter by embedded tags
+        if ($embeddedTags && count($embeddedTags) > 0) {
+            $day = array_filter($day, fn ($photo) => count(array_intersect($embeddedTags, $photo['embedded_tags'])) > 0);
         }
 
         return $day;
@@ -325,6 +331,7 @@ trait TimelineQueryDays
         if ($row['exif'] ?? null) {
             $row['exif'] = json_decode($row['exif'], true);
             $row['rating'] = (int) $row['exif']['Rating'] ?? 0;
+            $row['embedded_tags'] = Exif::extractEmbeddedTags($row['exif'], true);
         }
 
 
