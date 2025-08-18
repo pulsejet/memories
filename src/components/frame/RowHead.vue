@@ -26,8 +26,6 @@
         <template #default>
           <FilterComponent
             :initial-filters="currentFilters"
-            @filter-change="onFilterChange"
-            @apply-filters="onApplyFilters"
           />
         </template>
       </NcPopover>
