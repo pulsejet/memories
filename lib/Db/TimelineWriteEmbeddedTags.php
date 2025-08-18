@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCA\Memories\Exif;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
@@ -22,7 +23,7 @@ trait TimelineWriteEmbeddedTags
         $userId = $file->getOwner()->getUID();
         
         // Extract embedded tags from EXIF data
-        $embeddedTags = $this->extractEmbeddedTags($exif);
+        $embeddedTags = Exif::extractEmbeddedTags($exif);
         
         if (empty($embeddedTags)) {
             return;
@@ -34,58 +35,7 @@ trait TimelineWriteEmbeddedTags
         }
     }
     
-    /**
-     * Extract embedded tags from EXIF data
-     * 
-     * @param array $exif EXIF data
-     * @return array Array of tag paths
-     */
-    private function extractEmbeddedTags(array $exif): array
-    {
-        $embeddedTags = [];
-        
-        // Helper function to ensure we have an array
-        $ensureArray = function ($value) {
-            if (empty($value)) {
-                return [];
-            }
-            return is_array($value) ? $value : [$value];
-        };
-        
-        // Extract from TagsList (split by '/')
-        if (!empty($exif['TagsList'])) {
-            $tagsList = $ensureArray($exif['TagsList']);
-            foreach ($tagsList as $tag) {
-                $embeddedTags[] = explode('/', $tag);
-            }
-        }
-        
-        // Extract from HierarchicalSubject (split by '|')
-        if (empty($embeddedTags) && !empty($exif['HierarchicalSubject'])) {
-            $hierarchicalSubject = $ensureArray($exif['HierarchicalSubject']);
-            foreach ($hierarchicalSubject as $tag) {
-                $embeddedTags[] = explode('|', $tag);
-            }
-        }
-        
-        // Extract from Keywords (as individual tags)
-        if (empty($embeddedTags) && !empty($exif['Keywords'])) {
-            $keywords = $ensureArray($exif['Keywords']);
-            foreach ($keywords as $tag) {
-                $embeddedTags[] = [$tag];
-            }
-        }
-        
-        // Extract from Subject (as individual tags)
-        if (empty($embeddedTags) && !empty($exif['Subject'])) {
-            $subject = $ensureArray($exif['Subject']);
-            foreach ($subject as $tag) {
-                $embeddedTags[] = [$tag];
-            }
-        }
-        
-        return $embeddedTags;
-    }
+
     
     /**
      * Ensure a tag exists in the database

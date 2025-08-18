@@ -325,6 +325,66 @@ class Exif
     }
 
     /**
+     * Extract embedded tags from EXIF data
+     * 
+     * @param array $exif EXIF data
+     * @param bool $flatten Whether to flatten the tags into a single array (hierarchy is represented by /)
+     * @return array Array of tag paths
+     */
+    public static function extractEmbeddedTags(array $exif, bool $flatten = false): array
+    {
+        $embeddedTags = [];
+        
+        // Helper function to ensure we have an array
+        $ensureArray = function ($value) {
+            if (empty($value)) {
+                return [];
+            }
+            return is_array($value) ? $value : [$value];
+        };
+        
+        // Extract from TagsList (split by '/')
+        if (!empty($exif['TagsList'])) {
+            $tagsList = $ensureArray($exif['TagsList']);
+            foreach ($tagsList as $tag) {
+                $embeddedTags[] = explode('/', $tag);
+            }
+        }
+        
+        // Extract from HierarchicalSubject (split by '|')
+        if (empty($embeddedTags) && !empty($exif['HierarchicalSubject'])) {
+            $hierarchicalSubject = $ensureArray($exif['HierarchicalSubject']);
+            foreach ($hierarchicalSubject as $tag) {
+                $embeddedTags[] = explode('|', $tag);
+            }
+        }
+        
+        // Extract from Keywords (as individual tags)
+        if (empty($embeddedTags) && !empty($exif['Keywords'])) {
+            $keywords = $ensureArray($exif['Keywords']);
+            foreach ($keywords as $tag) {
+                $embeddedTags[] = [$tag];
+            }
+        }
+        
+        // Extract from Subject (as individual tags)
+        if (empty($embeddedTags) && !empty($exif['Subject'])) {
+            $subject = $ensureArray($exif['Subject']);
+            foreach ($subject as $tag) {
+                $embeddedTags[] = [$tag];
+            }
+        }
+
+        if ($flatten) {
+            $embeddedTags = array_map(function ($tag) {
+                return implode('/', $tag);
+            }, $embeddedTags);
+        }
+        
+        return $embeddedTags;
+    }
+
+    /**
      * Get the list of MIME Types that are allowed to be edited.
      */
     public static function allowedEditMimetypes(): array
