@@ -30,6 +30,7 @@ OC.L10N.register(
     "Info" : "Info",
     "Close" : "Funga",
     "{photoCount} photos" : "{photoCount} photos",
+    "Performance" : "Performance",
     "Unknown" : "Haijulikani",
     "Continue" : "Endelea",
     "Shared" : "Shirikisha",
