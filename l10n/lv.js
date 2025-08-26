@@ -35,7 +35,7 @@ OC.L10N.register(
     "Account" : "Konts",
     "Show metadata in slideshow" : "Slīdrādē rādīt metadatus",
     "Logged in as {user}" : "Pieteicies kā {user}",
-    "Info" : "Info",
+    "Info" : "Informācija",
     "Close" : "Aizvērt",
     "Failed to load some photos" : "Neizdevās ielādēt dažus fotoattēlus",
     "Recognize is installed and enabled for face recognition." : "Atpazīšana ir uzstādīta un iespējota seju atpazīšanai.",
