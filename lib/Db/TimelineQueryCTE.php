@@ -83,7 +83,7 @@ trait TimelineQueryCTE
     {
         $CLS_HIDDEN = $hidden ? 'MIN(hidden)' : '0';
 
-        $cte = "*PREFIX*cte_folders AS (
+        return "*PREFIX*cte_folders AS (
             SELECT
                 fileid, ({$CLS_HIDDEN}) AS hidden
             FROM
@@ -91,8 +91,6 @@ trait TimelineQueryCTE
             GROUP BY
                 fileid
         )";
-
-        return self::bundleCTEs([$this->CTE_FOLDERS_ALL($hidden), $cte]);
     }
 
     /**
@@ -100,7 +98,7 @@ trait TimelineQueryCTE
      */
     protected function CTE_FOLDERS_ARCHIVE(): string
     {
-        $cte = "*PREFIX*cte_folders(fileid) AS (
+        return "*PREFIX*cte_folders(fileid) AS (
             SELECT
                 cfa.fileid
             FROM
@@ -117,8 +115,46 @@ trait TimelineQueryCTE
             INNER JOIN *PREFIX*cte_folders c
                 ON (f.parent = c.fileid)
         )";
+    }
 
-        return self::bundleCTEs([$this->CTE_FOLDERS_ALL(true), $cte]);
+    protected function CTE_SHARED_ALBUM_FILES(): string
+    {
+        // Detect database type
+        $platform = $this->connection->getDatabasePlatform()::class;
+        $DISTINCT_ON = '';
+        $GROUP_BY = '';
+
+        if (preg_match('/mysql|mariadb/i', $platform)) {
+            $GROUP_BY = 'GROUP BY paf.file_id';
+        } elseif (preg_match('/postgres/i', $platform)) {
+            $DISTINCT_ON = 'DISTINCT ON (paf.file_id)';
+        } else {
+            throw new \Exception("Unsupported database detected: {$platform}");
+        }
+
+        return "*PREFIX*cte_shared_album_files(fileid, album_path) AS (
+            SELECT {$DISTINCT_ON}
+                paf.file_id AS fileid,
+                CONCAT(pa.user, '/', pa.name) AS album_path
+            FROM
+                *PREFIX*photos_albums_files paf
+            INNER JOIN
+                *PREFIX*photos_albums pa ON pa.album_id = paf.album_id
+            INNER JOIN
+                *PREFIX*photos_albums_collabs pac ON pac.album_id = paf.album_id
+            WHERE
+                pac.collaborator_id = :uid OR pa.user = :uid
+            {$GROUP_BY}
+        )";
+    }
+
+    protected function CTE_SHARED_ALBUM_FILES_EMPTY(): string
+    {
+        return '*PREFIX*cte_shared_album_files(fileid, album_path) AS (
+            SELECT
+                0 AS fileid,
+                NULL AS album_path
+        )';
     }
 
     /**
