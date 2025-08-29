@@ -52,7 +52,7 @@
           @change="changeSort(c.ALBUM_SORT_FLAGS.OLDEST)"
           close-after-click
         >
-          {{ t('memories', 'Album name') }}
+          {{ t('memories', 'Oldest photo') }}
         </NcActionRadio>
 
         <NcActionRadio
@@ -62,7 +62,7 @@
           @change="changeSort(c.ALBUM_SORT_FLAGS.NEWEST)"
           close-after-click
         >
-          {{ t('memories', 'Album name') }}
+          {{ t('memories', 'Newest photo') }}
         </NcActionRadio>
 
         <NcActionRadio
