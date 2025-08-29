@@ -243,7 +243,9 @@ export default defineComponent({
     isDateSort(): boolean {
       return (
         !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.CREATED) ||
-        !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.LAST_UPDATE)
+        !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.LAST_UPDATE) ||
+        !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.OLDEST) ||
+        !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.NEWEST)
       );
     },
 
