@@ -44,6 +44,8 @@ OC.L10N.register(
     "Read only" : "Faqat o'qing",
     "Share link" : "Havolani ulashing",
     "Refresh" : "Yangilash",
+    "Ascending" : "Ko'tarilish",
+    "Descending" : "Kamaytirish",
     "Home" : "Uy",
     "Unsaved changes" : "Saqlanmagan o'zgarishlar",
     "Previous" : "Oldingi",
