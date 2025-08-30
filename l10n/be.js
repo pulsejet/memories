@@ -41,6 +41,7 @@ OC.L10N.register(
     "HTTPS is enabled" : "HTTPS уключаны",
     "Continue" : "Працягнуць",
     "Template" : "Шаблон",
+    "Shared" : "Абагуленыя",
     "Search" : "Пошук",
     "Upload" : "Запампаваць",
     "Failed to fetch collaborators list." : "Не ўдалося атрымаць спіс суаўтараў.",
