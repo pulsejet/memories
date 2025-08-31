@@ -314,6 +314,12 @@ class AlbumsQuery
         $query->selectAlias(SQL::exists($query, $sSq), 'shared');
     }
 
+    public function transformDateRange(IQueryBuilder &$query): void
+    {
+        $query->selectAlias($query->func()->min('m.datetaken'), 'oldest_date');
+        $query->selectAlias($query->func()->max('m.datetaken'), 'newest_date');
+    }
+
     /**
      * Get the various collaborator IDs that a user has.
      * This includes the groups the user is in and the user itself.

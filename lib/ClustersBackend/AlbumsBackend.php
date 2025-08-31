@@ -126,15 +126,22 @@ class AlbumsBackend extends Backend
             $this->albumsQuery->transformSharedFlag($query);
         };
 
+        // Transformation to get the date range of photos in the album
+        $dateRange = function (IQueryBuilder &$query): void {
+            $this->albumsQuery->transformDateRange($query);
+        }
+
         // Transformations to apply to own albums
         $transformOwned = [
             $sharedFlag,
+            $materialize, $dateRange,
             $materialize, $ownCover,
             $materialize, $etag('last_added_photo'), $etag('cover'),
         ];
 
         // Transformations to apply to shared albums
         $transformShared = [
+            $materialize, $dateRange,
             $materialize, $ownCover, $shareCover,
             $materialize, $etag('last_added_photo'), $etag('cover'), $etag('cover_owner'),
         ];
