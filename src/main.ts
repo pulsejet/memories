@@ -23,6 +23,7 @@ globalThis._m = {
   routes: routes,
 
   modals: {} as any,
+  selectionManager: {} as any,
   sidebar: {} as any,
   viewer: {} as any,
   video: {} as any,
