@@ -94,6 +94,8 @@ class AlbumsQuery
             $row['album_id'] = (int) $row['album_id'];
             $row['created'] = (int) $row['created'];
             $row['last_added_photo'] = (int) $row['last_added_photo'];
+            $row['oldest_date'] = strtotime($row['oldest_date']);
+            $row['newest_date'] = strtotime($row['newest_date']);
         }
 
         return $albums;
@@ -291,6 +293,8 @@ class AlbumsQuery
             $query->andWhere($query->expr()->eq('paf.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
+        
+        
         $result = $query->executeQuery()->fetchAll();
 
         foreach ($result as &$row) {
