@@ -51,7 +51,6 @@ declare module '@typings' {
     /** Date range of photos in album */
     oldest_date: number;
     newest_date: number;
-    }
   }
 
   export interface IFace extends ICluster {
