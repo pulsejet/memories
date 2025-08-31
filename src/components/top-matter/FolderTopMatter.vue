@@ -104,31 +104,22 @@ export default defineComponent({
 
   data() {
     return {
-      isUploading: false,
-      uploadProgress: 0,
-      uploadStatus: '',
-      uploadCount: 0,
-      uploadFailures: 0,
+      isUploading: false as boolean,
+      uploadProgress: 0 as number,
+      uploadStatus: '' as string,
+      uploadCount: 0 as number,
+      uploadFailures: 0 as number,
     };
   },
 
   computed: {
-    list(): {
-      text: string;
-      path: string[];
-      idx: number;
-    }[] {
+    list(): { text: string; path: string[]; idx: number }[] {
       let path: string[] | string = this.$route.params.path || '';
-      if (typeof path === 'string') {
-        path = path.split('/');
-      }
+      if (typeof path === 'string') path = path.split('/');
 
       return path
-        .filter(Boolean) // non-empty
-        .map((text, idx, arr) => {
-          const path = arr.slice(0, idx + 1);
-          return { text, path, idx };
-        });
+        .filter(Boolean)
+        .map((text, idx, arr) => ({ text, path: arr.slice(0, idx + 1), idx }));
     },
 
     recursive(): boolean {
@@ -142,22 +133,23 @@ export default defineComponent({
     isNative(): boolean {
       return nativex.has();
     },
-    
+
     allowUpload(): boolean {
-      return this.initstate.allow_upload === true;
+      // allow uploads only for editable folder shares
+      return this.routeIsPublic && this.initstate.shareType === 'folder' && !this.initstate.noDownload;
     },
   },
 
   methods: {
-    share() {
+    share(): void {
       _m.modals.shareNodeLink(utils.getFolderRoutePath(this.config.folders_path));
     },
 
-    upload() {
+    upload(): void {
       _m.modals.upload();
     },
 
-    toggleRecursive() {
+    toggleRecursive(): void {
       this.$router.replace({
         query: {
           ...this.$router.currentRoute.query,
@@ -166,7 +158,7 @@ export default defineComponent({
       });
     },
 
-    getRoute(path: string[]) {
+    getRoute(path: string[]): object {
       return {
         ...this.$route,
         params: { path },
@@ -174,34 +166,30 @@ export default defineComponent({
       };
     },
 
-    // --- NEW UPLOAD LOGIC ---
-    triggerFileUpload() {
+    triggerFileUpload(): void {
       (this.$refs.fileInput as HTMLInputElement).click();
     },
 
-    handleFileSelection(event: Event) {
+    handleFileSelection(this: any, event: Event): void {
       const target = event.target as HTMLInputElement;
       const files = target.files;
-      if (!files || files.length === 0) {
-        return;
-      }
+      if (!files || files.length === 0) return;
 
       this.uploadCount = files.length;
       this.uploadFailures = 0;
       this.isUploading = true;
       this.uploadProgress = 0;
 
-      for (const file of files) {
-        this.uploadFile(file);
+      for (const file of Array.from(files)) {
+        this.uploadFile(file); // TS now sees uploadFile because of this: any
       }
 
       target.value = '';
     },
 
-    uploadFile(file: File) {
+    uploadFile(this: any, file: File): void {
       const token = this.$route.params.token as string;
       const url = generateUrl(`/apps/memories/s/${token}/upload`);
-
       const formData = new FormData();
       formData.append('file', file);
 
@@ -210,28 +198,24 @@ export default defineComponent({
 
       this.uploadStatus = t('memories', 'Uploading {file}...', { file: file.name });
 
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          this.uploadProgress = (e.loaded / e.total) * 100;
-        }
+      xhr.upload.onprogress = (e: ProgressEvent) => {
+        if (e.lengthComputable) this.uploadProgress = (e.loaded / e.total) * 100;
       };
 
       const onFinish = (success: boolean) => {
-        if (!success) {
-            this.uploadFailures++;
-        }
+        if (!success) this.uploadFailures++;
         this.uploadCount--;
 
         if (this.uploadCount <= 0) {
-            this.isUploading = false;
-            this.uploadProgress = 0;
-            
-            if (this.uploadFailures > 0) {
-                this.uploadStatus = t('memories', '{count} files failed to upload.', { count: this.uploadFailures });
-            } else {
-                this.uploadStatus = t('memories', 'All files uploaded successfully.');
-                window.location.reload();
-            }
+          this.isUploading = false;
+          this.uploadProgress = 0;
+
+          if (this.uploadFailures > 0) {
+            this.uploadStatus = t('memories', '{count} files failed to upload.', { count: this.uploadFailures });
+          } else {
+            this.uploadStatus = t('memories', 'All files uploaded successfully.');
+            window.location.reload();
+          }
         }
       };
 
@@ -241,9 +225,15 @@ export default defineComponent({
         } else {
           try {
             const response = JSON.parse(xhr.responseText);
-            this.uploadStatus = t('memories', 'Upload of {file} failed: {error}', { file: file.name, error: response.error || xhr.statusText });
-          } catch (e) {
-            this.uploadStatus = t('memories', 'Upload of {file} failed: {error}', { file: file.name, error: xhr.statusText });
+            this.uploadStatus = t('memories', 'Upload of {file} failed: {error}', {
+              file: file.name,
+              error: response.error || xhr.statusText,
+            });
+          } catch {
+            this.uploadStatus = t('memories', 'Upload of {file} failed: {error}', {
+              file: file.name,
+              error: xhr.statusText,
+            });
           }
           onFinish(false);
         }
@@ -256,33 +246,6 @@ export default defineComponent({
 
       xhr.send(formData);
     },
-    // --- END OF NEW UPLOAD LOGIC ---
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.top-matter {
-  .breadcrumb {
-    min-width: 0;
-    height: unset;
-    .share-name {
-      margin-left: 0.75em;
-    }
-  }
-}
-
-.upload-progress {
-  grid-column: 1 / -1;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 0;
-}
-
-.upload-progress progress {
-  flex-grow: 1;
-}
-</style>
-
