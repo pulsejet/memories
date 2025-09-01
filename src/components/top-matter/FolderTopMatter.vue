@@ -180,7 +180,7 @@ export default defineComponent({
       this.uploadProgress = 0;
 
       for (const file of Array.from(files)) {
-        this.uploadFile(file); // TS now sees uploadFile because of this: any
+        this.uploadFile(file);
       }
 
       target.value = '';
