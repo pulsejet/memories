@@ -94,8 +94,12 @@ class AlbumsQuery
             $row['album_id'] = (int) $row['album_id'];
             $row['created'] = (int) $row['created'];
             $row['last_added_photo'] = (int) $row['last_added_photo'];
-            $row['oldest_date'] = strtotime($row['oldest_date']);
-            $row['newest_date'] = strtotime($row['newest_date']);
+            if (null !== $row['oldest_date']) {
+                $row['oldest_date'] = strtotime($row['oldest_date']);
+            }
+            if (null !== $row['newest_date']) {
+                $row['newest_date'] = strtotime($row['newest_date']);
+            }
         }
 
         return $albums;
