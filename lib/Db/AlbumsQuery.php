@@ -293,8 +293,6 @@ class AlbumsQuery
             $query->andWhere($query->expr()->eq('paf.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
-        
-        
         $result = $query->executeQuery()->fetchAll();
 
         foreach ($result as &$row) {
