@@ -135,8 +135,7 @@ export default defineComponent({
     },
 
     allowUpload(): boolean {
-      // allow uploads only for editable folder shares
-      return this.routeIsPublic && this.initstate.shareType === 'folder' && !this.initstate.noDownload;
+      return this.initstate.allow_upload === true;
     },
   },
 
