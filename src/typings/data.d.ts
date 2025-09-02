@@ -70,6 +70,9 @@ declare module '@typings' {
     /** Reference to exif object */
     imageInfo?: IImageInfo | null;
 
+    /** Reference to exif object */
+    exif?: IExif;
+
     /** Face detection ID */
     faceid?: number;
     /** Face dimensions */
