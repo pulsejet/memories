@@ -1,7 +1,7 @@
 <template>
   <div class="rating-tags" :class="{ compact, slideshow }">
     <!-- Rating -->
-    <div v-if="rating && rating > 0" class="rating-section">
+    <div v-if="rating && rating > 0 && !hideStars" class="rating-section">
       <RatingStars 
         :rating="rating" 
         :size="starSize" 
@@ -72,6 +72,12 @@ export default defineComponent({
     maxTags: {
       type: Number,
       default: 5,
+    },
+    
+    /** Hide the rating stars (show only tags) */
+    hideStars: {
+      type: Boolean,
+      default: false,
     },
   },
 
