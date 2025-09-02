@@ -409,12 +409,12 @@ export default defineComponent({
     },
 
     rating(): number | null {
-      return typeof this.exif.Rating === 'number' ? this.exif.Rating : null;
+      const rating = utils.getRatingFromExif(this.exif);
+      return rating > 0 ? rating : null;
     },
 
     embeddedTags(): string[][]  {
-      const ensureArray = (v: string | string[] | undefined | null) => v ? (Array.isArray(v) ? v : [v]) : undefined;
-      return ensureArray(this.exif.TagsList)?.map((tag) => tag.split('/')) || ensureArray(this.exif.HierarchicalSubject)?.map((tag) => tag.split('|')) || ensureArray(this.exif.Keywords)?.map((tag) => [tag]) || ensureArray(this.exif.Subject)?.map((tag) => [tag]) || [];
+      return utils.getTagsFromExif(this.exif);
     },
 
     tagNames(): string[] {
