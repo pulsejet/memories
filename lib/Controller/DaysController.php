@@ -116,6 +116,18 @@ class DaysController extends GenericApiController
             $transforms[] = [$this->tq, 'transformMapBoundsFilter', $bounds];
         }
 
+        // Min rating filter - only if SQL filtering is enabled
+        if ($this->tq->shouldFilterExifBySQL() && ($minRating = $this->getMinRating())) {
+            $transforms[] = [$this->tq, 'transformMinRatingFilter', $minRating];
+        }
+
+        // Embedded tags filter - only if SQL filtering is enabled
+        if ($this->tq->shouldFilterExifBySQL() && ($embeddedTags = $this->getEmbeddedTags())) {
+            if (!empty($embeddedTags)) {
+                $transforms[] = [$this->tq, 'transformEmbeddedTagsFilter', $embeddedTags];
+            }
+        }
+
         // Limit number of responses for day query
         if ($limit = $this->request->getParam('limit')) {
             $transforms[] = [$this->tq, 'transformLimit', (int) $limit];
