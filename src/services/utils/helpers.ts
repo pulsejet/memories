@@ -218,3 +218,30 @@ export function onDOMLoaded(callback: () => void) {
     setTimeout(callback, 0);
   }
 }
+
+/**
+ * Extract rating from EXIF data
+ * @param exif EXIF data object
+ * @returns Rating as number (0-5) or 0 if not found
+ */
+export function getRatingFromExif(exif: any): number {
+  const rating = exif?.Rating;
+  return typeof rating === 'number' ? rating : 0;
+}
+
+/**
+ * Extract tags from EXIF data
+ * @param exif EXIF data object
+ * @returns Array of tag arrays (hierarchical paths)
+ */
+export function getTagsFromExif(exif: any): string[][] {
+  if (!exif) return [];
+  
+  const ensureArray = (v: string | string[] | undefined | null) => v ? (Array.isArray(v) ? v : [v]) : undefined;
+  
+  return ensureArray(exif.TagsList)?.map((tag) => tag.split('/')) || 
+         ensureArray(exif.HierarchicalSubject)?.map((tag) => tag.split('|')) || 
+         ensureArray(exif.Keywords)?.map((tag) => [tag]) || 
+         ensureArray(exif.Subject)?.map((tag) => [tag]) || 
+         [];
+}
