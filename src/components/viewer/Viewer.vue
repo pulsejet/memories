@@ -437,21 +437,14 @@ export default defineComponent({
 
     /** Get current photo rating */
     currentRating(): number {
-      const rating = this.currentPhoto?.imageInfo?.exif?.Rating;
-      return typeof rating === 'number' ? rating : 0;
+      const exif = this.currentPhoto?.imageInfo?.exif;
+      return utils.getRatingFromExif(exif);
     },
 
     /** Get current photo embedded tags */
     currentTags(): string[][] {
       const exif = this.currentPhoto?.imageInfo?.exif;
-      if (!exif) return [];
-
-      const ensureArray = (v: string | string[] | undefined | null) => v ? (Array.isArray(v) ? v : [v]) : undefined;
-      return ensureArray(exif.TagsList)?.map((tag) => tag.split('/')) || 
-             ensureArray(exif.HierarchicalSubject)?.map((tag) => tag.split('|')) || 
-             ensureArray(exif.Keywords)?.map((tag) => [tag]) || 
-             ensureArray(exif.Subject)?.map((tag) => [tag]) || 
-             [];
+      return utils.getTagsFromExif(exif);
     },
   },
 
