@@ -143,6 +143,8 @@ class StaticConfig {
       livephoto_loop: false,
       sidebar_filepath: false,
       metadata_in_slideshow: false,
+      metadata_in_gallery: false,
+      enable_exif_photo_rating_in_gallery: false,
 
       // folder settings
       folders_path: '',
