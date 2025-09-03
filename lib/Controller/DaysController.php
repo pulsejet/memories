@@ -194,6 +194,15 @@ class DaysController extends GenericApiController
                 continue;
             }
 
+            // Only include photos that are in the fileIds array (if it exists)
+            $dayData = $drefMap[$dayId];
+            if (isset($dayData['fileIds']) && !empty($dayData['fileIds'])) {
+                $photoFileId = (int) $photo['fileid'];
+                if (!in_array($photoFileId, $dayData['fileIds'], true)) {
+                    continue;
+                }
+            }
+
             if (!($drefMap[$dayId]['detail'] ?? null)) {
                 $drefMap[$dayId]['detail'] = [];
             }

@@ -346,6 +346,7 @@ trait TimelineQueryDays
                 $filteredRows[] = [
                     'dayid' => $dayId,
                     'count' => $filteredCount,
+                    'fileIds' => array_map(fn ($photo) => $photo['fileid'], $dayPhotos),
                 ];
             }
         }
@@ -431,7 +432,7 @@ trait TimelineQueryDays
         //parse json of exif if exif exists
         if ($row['exif'] ?? null) {
             $row['exif'] = json_decode($row['exif'], true);
-            $row['rating'] = (int) $row['exif']['Rating'] ?? 0;
+            $row['rating'] = isset($row['exif']['Rating']) ? (int) $row['exif']['Rating'] : null;
             $row['embedded_tags'] = Exif::extractEmbeddedTags($row['exif'], true);
         }
 
