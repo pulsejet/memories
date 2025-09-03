@@ -25,6 +25,7 @@
     "View in folder" : "Vis i mappe",
     "Add to album" : "Tilføj til album",
     "Cancel" : "Annuller",
+    "_{n} selected_::_{n} selected_" : ["{n} valgt","{n} valgt"],
     "General" : "Generelt",
     "Account" : "Konto",
     "Timeline Path" : "Tidslinjesti",

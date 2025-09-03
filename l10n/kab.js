@@ -21,6 +21,9 @@ OC.L10N.register(
     "Location" : "Adig",
     "Back" : "Retour",
     "Save changes" : "Sekles asnifel",
+    "Year" : "Aseggas",
+    "Month" : "Ayyur",
+    "Day" : "Ass",
     "Hour" : "Asrag",
     "Title" : "Azwel",
     "Name" : "Nom",
@@ -39,6 +42,7 @@ OC.L10N.register(
     "Setup" : "Sbadu",
     "Yes" : "Oui",
     "No" : "Uhu",
+    "Choose {file}" : "Fren {file}",
     "Choose" : "Fren"
 },
 "nplurals=2; plural=(n != 1);");
