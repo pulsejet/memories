@@ -26,7 +26,7 @@
       </div>
 
       <!-- Tags Filter -->
-      <div class="filter-section">
+      <div v-if="showCollaborativeTagsFilter" class="filter-section">
         <label class="filter-label">
           {{ t('memories', 'Filter by Tags') }}
         </label>
@@ -111,6 +111,11 @@ export default defineComponent({
         embeddedTags: [],
       } as IFilters),
     },
+    /** Whether to show collaborative tags filter (false = only embedded tags supported) */
+    showCollaborativeTagsFilter: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   emits: ['filter-change'],
@@ -127,7 +132,10 @@ export default defineComponent({
 
   computed: {
     hasActiveFilters() {
-      return this.filters.minRating > 0 || this.filters.tags.length > 0 || this.filters.embeddedTags.length > 0;
+      const hasRatingFilter = this.filters.minRating > 0;
+      const hasTagsFilter = this.showCollaborativeTagsFilter && this.filters.tags.length > 0;
+      const hasEmbeddedTagsFilter = this.filters.embeddedTags.length > 0;
+      return hasRatingFilter || hasTagsFilter || hasEmbeddedTagsFilter;
     },
   },
 
