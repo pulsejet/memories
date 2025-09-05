@@ -77,6 +77,7 @@ trait TimelineQueryDays
      * @param bool  $hidden          If the query should include hidden files
      * @param bool  $monthView       If the query should be in month view (dayIds are monthIds)
      * @param bool  $reverse         If the query should be in reverse order
+     * @param int   $minRating       The minimum rating to include
      * @param array $queryTransforms The query transformations to apply
      *
      * @return array An array of day responses
@@ -88,6 +89,8 @@ trait TimelineQueryDays
         bool $hidden,
         bool $monthView,
         bool $reverse,
+        int $minRating = 0,
+        array $embeddedTags = [],
         array $queryTransforms = [],
     ): array {
         // Check if we have any dayIds
@@ -167,6 +170,16 @@ trait TimelineQueryDays
         // Reverse order if needed
         if ($reverse) {
             $day = array_reverse($day);
+        }
+
+        // Filter by rating
+        if ($minRating > 0) {
+            $day = array_filter($day, fn ($photo) => $photo['rating'] >= $minRating);
+        }
+
+        // Filter by embedded tags
+        if ($embeddedTags && count($embeddedTags) > 0) {
+            $day = array_filter($day, fn ($photo) => count(array_intersect($embeddedTags, $photo['embedded_tags'])) > 0);
         }
 
         return $day;
@@ -314,6 +327,13 @@ trait TimelineQueryDays
         $row['dayid'] = (int) $row['dayid'];
         $row['w'] = (int) $row['w'];
         $row['h'] = (int) $row['h'];
+        //parse json of exif if exif exists
+        if ($row['exif'] ?? null) {
+            $row['exif'] = json_decode($row['exif'], true);
+            $row['rating'] = (int) $row['exif']['Rating'] ?? 0;
+            $row['embedded_tags'] = Exif::extractEmbeddedTags($row['exif'], true);
+        }
+
 
         // Optional fields
         if (!$row['isvideo']) {
