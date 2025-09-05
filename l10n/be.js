@@ -21,6 +21,7 @@ OC.L10N.register(
     "Favorite" : "Абранае",
     "Add to album" : "Дадаць у альбом",
     "Cancel" : "Скасаваць",
+    "_{n} selected_::_{n} selected_" : ["Выбраны {n}","Выбраны {n}","Выбрана {n}","Выбрана {n}"],
     "General" : "Агульныя",
     "Account" : "Уліковы запіс",
     "Sign out" : "Выйсці",
