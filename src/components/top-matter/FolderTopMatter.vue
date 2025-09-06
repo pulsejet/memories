@@ -32,6 +32,17 @@
           <template #icon> <UploadIcon :size="20" /> </template>
         </NcActionButton>
 
+        <!-- NEW PUBLIC UPLOAD BUTTON -->
+        <NcActionButton
+          v-if="routeIsPublic && allowUpload"
+          :aria-label="t('memories', 'Upload files')"
+          :disabled="isUploading"
+          @click="triggerFileUpload"
+        >
+          {{ isUploading ? t('memories', 'Uploading...') : t('memories', 'Upload files') }}
+          <template #icon> <UploadIcon :size="20" /> </template>
+        </NcActionButton>
+
         <NcActionButton @click="toggleRecursive" close-after-click>
           {{ recursive ? t('memories', 'Folder view') : t('memories', 'Timeline view') }}
           <template #icon>
@@ -41,11 +52,22 @@
         </NcActionButton>
       </NcActions>
     </div>
+
+    <!-- Hidden file input that we trigger programmatically -->
+    <input ref="fileInput" type="file" style="display: none" multiple @change="handleFileSelection" />
+
+    <!-- NEW UPLOAD PROGRESS DISPLAY -->
+    <div v-if="isUploading" class="upload-progress">
+      <progress :value="uploadProgress" max="100"></progress>
+      <span>{{ uploadStatus }}</span>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { generateUrl } from '@nextcloud/router';
+import { t } from '@nextcloud/l10n';
 
 import UserConfig from '@mixins/UserConfig';
 
@@ -80,23 +102,24 @@ export default defineComponent({
 
   mixins: [UserConfig],
 
+  data() {
+    return {
+      isUploading: false as boolean,
+      uploadProgress: 0 as number,
+      uploadStatus: '' as string,
+      uploadCount: 0 as number,
+      uploadFailures: 0 as number,
+    };
+  },
+
   computed: {
-    list(): {
-      text: string;
-      path: string[];
-      idx: number;
-    }[] {
+    list(): { text: string; path: string[]; idx: number }[] {
       let path: string[] | string = this.$route.params.path || '';
-      if (typeof path === 'string') {
-        path = path.split('/');
-      }
+      if (typeof path === 'string') path = path.split('/');
 
       return path
-        .filter(Boolean) // non-empty
-        .map((text, idx, arr) => {
-          const path = arr.slice(0, idx + 1);
-          return { text, path, idx };
-        });
+        .filter(Boolean)
+        .map((text, idx, arr) => ({ text, path: arr.slice(0, idx + 1), idx }));
     },
 
     recursive(): boolean {
@@ -110,18 +133,22 @@ export default defineComponent({
     isNative(): boolean {
       return nativex.has();
     },
+
+    allowUpload(): boolean {
+      return this.initstate.allow_upload === true;
+    },
   },
 
   methods: {
-    share() {
+    share(): void {
       _m.modals.shareNodeLink(utils.getFolderRoutePath(this.config.folders_path));
     },
 
-    upload() {
+    upload(): void {
       _m.modals.upload();
     },
 
-    toggleRecursive() {
+    toggleRecursive(): void {
       this.$router.replace({
         query: {
           ...this.$router.currentRoute.query,
@@ -130,25 +157,94 @@ export default defineComponent({
       });
     },
 
-    getRoute(path: string[]) {
+    getRoute(path: string[]): object {
       return {
         ...this.$route,
         params: { path },
         hash: undefined,
       };
     },
+
+    triggerFileUpload(): void {
+      (this.$refs.fileInput as HTMLInputElement).click();
+    },
+
+    handleFileSelection(this: any, event: Event): void {
+      const target = event.target as HTMLInputElement;
+      const files = target.files;
+      if (!files || files.length === 0) return;
+
+      this.uploadCount = files.length;
+      this.uploadFailures = 0;
+      this.isUploading = true;
+      this.uploadProgress = 0;
+
+      for (const file of Array.from(files)) {
+        this.uploadFile(file);
+      }
+
+      target.value = '';
+    },
+
+    uploadFile(this: any, file: File): void {
+      const token = this.$route.params.token as string;
+      const url = generateUrl(`/apps/memories/s/${token}/upload`);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', url, true);
+
+      this.uploadStatus = t('memories', 'Uploading {file}...', { file: file.name });
+
+      xhr.upload.onprogress = (e: ProgressEvent) => {
+        if (e.lengthComputable) this.uploadProgress = (e.loaded / e.total) * 100;
+      };
+
+      const onFinish = (success: boolean) => {
+        if (!success) this.uploadFailures++;
+        this.uploadCount--;
+
+        if (this.uploadCount <= 0) {
+          this.isUploading = false;
+          this.uploadProgress = 0;
+
+          if (this.uploadFailures > 0) {
+            this.uploadStatus = t('memories', '{count} files failed to upload.', { count: this.uploadFailures });
+          } else {
+            this.uploadStatus = t('memories', 'All files uploaded successfully.');
+            window.location.reload();
+          }
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          onFinish(true);
+        } else {
+          try {
+            const response = JSON.parse(xhr.responseText);
+            this.uploadStatus = t('memories', 'Upload of {file} failed: {error}', {
+              file: file.name,
+              error: response.error || xhr.statusText,
+            });
+          } catch {
+            this.uploadStatus = t('memories', 'Upload of {file} failed: {error}', {
+              file: file.name,
+              error: xhr.statusText,
+            });
+          }
+          onFinish(false);
+        }
+      };
+
+      xhr.onerror = () => {
+        this.uploadStatus = t('memories', 'An error occurred during the upload of {file}', { file: file.name });
+        onFinish(false);
+      };
+
+      xhr.send(formData);
+    },
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.top-matter {
-  .breadcrumb {
-    min-width: 0;
-    height: unset;
-    .share-name {
-      margin-left: 0.75em;
-    }
-  }
-}
-</style>
