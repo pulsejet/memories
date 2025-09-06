@@ -79,6 +79,7 @@ OC.L10N.register(
     "Password protected" : "Password protected",
     "Read only" : "Read only",
     "Link copied to clipboard" : "Kiungo kimenakiliwa kwenye ubao wakunakilia",
+    "Failed to copy link to clipboard" : "Failed to copy link to clipboard",
     "Share link" : "Shirikisha kiungio",
     "Refresh" : "Refresh",
     "Failed to upload {file}" : "Imeshindwa kupakia {file}",
