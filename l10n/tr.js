@@ -57,7 +57,7 @@ OC.L10N.register(
     "Add to album" : "Albüme ekle",
     "Move to person" : "Kişiye taşı",
     "Remove from person" : "Kişiden kaldır",
-    "You must enable \"Mark person in preview\" to use this feature" : "Bu özelliği kullanabilmek için \"Kişi ön izlemede işaretlensin\" seçeneğini açmalısını",
+    "You must enable \"Mark person in preview\" to use this feature" : "Bu özelliği kullanabilmek için \"Kişi ön izlemede işaretlensin\" seçeneğini açmalısınız",
     "Only user \"{user}\" can update this person" : "Bu kişiyi yalnızca \"{user}\" kullanıcısı güncelleyebilir",
     "Cancel" : "İptal",
     "_{n} selected_::_{n} selected_" : ["{n} seçilmiş","{n} seçilmiş"],
