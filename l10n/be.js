@@ -19,6 +19,7 @@ OC.L10N.register(
     "Delete" : "Выдаліць",
     "Share" : "Падзяліцца",
     "Favorite" : "Абранае",
+    "View in folder" : "Праглядзець у папцы",
     "Add to album" : "Дадаць у альбом",
     "Cancel" : "Скасаваць",
     "_{n} selected_::_{n} selected_" : ["Выбраны {n}","Выбраны {n}","Выбрана {n}","Выбрана {n}"],

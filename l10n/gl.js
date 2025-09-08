@@ -239,7 +239,7 @@ OC.L10N.register(
     "Connection address (same as bind if local)" : "Enderezo de conexión (o mesmo que a ligazón se é local)",
     "Quality Factor (15 - 45) (default 25)" : "Factor de calidade (15 - 45) (predeterminado 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Comportamento predeterminado de carga de imaxes de alta resolución no visor de fotos.",
-    "The configuration here also applies to public link shares." : "A configuración aquí tamén se aplica ás ligazóns compartidas públicas.",
+    "The configuration here also applies to public link shares." : "A configuración aquí tamén se aplica ás ligazóns para compartir públicas.",
     "Users may override this setting." : "Os usuarios poden anular esta configuración.",
     "Always load high resolution image (not recommended if using HEIC/TIFF)" : "Cargar sempre a imaxe de alta resolución (non recomendábel se usa HEIC/TIFF)",
     "Template" : "Modelo",
