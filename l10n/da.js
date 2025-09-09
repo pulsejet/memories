@@ -105,7 +105,7 @@ OC.L10N.register(
     "Last updated" : "Sidst opdateret",
     "Creation date" : "Oprettelsesdato",
     "Oldest first" : "Ældste først",
-    "Ascending" : "stigende",
+    "Ascending" : "Stigende",
     "Newest first" : "Nyeste først",
     "Descending" : "Faldende",
     "Unassigned faces" : "Ikke tildelte ansigter",
