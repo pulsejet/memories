@@ -257,21 +257,20 @@ export default defineComponent({
 .top-matter {
   .upload-progress {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 1em;
-    padding-right: 1.5em;
-    box-sizing: border-box;
     margin-top: 0.5em;
+    padding-right: 1.5em;
 
     progress {
-      flex-grow: 1;
+      display: block;
+      width: 100%;
     }
 
     span {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
       font-size: 0.9em;
+      white-space: nowrap;
     }
   }
 }
