@@ -109,6 +109,7 @@ export default defineComponent({
       uploadStatus: '' as string,
       uploadCount: 0 as number,
       uploadFailures: 0 as number,
+      totalUploadCount: 0 as number,
     };
   },
 
@@ -175,6 +176,7 @@ export default defineComponent({
       if (!files || files.length === 0) return;
 
       this.uploadCount = files.length;
+      this.totalUploadCount = files.length;
       this.uploadFailures = 0;
       this.isUploading = true;
       this.uploadProgress = 0;
@@ -195,16 +197,29 @@ export default defineComponent({
       const xhr = new XMLHttpRequest();
       xhr.open('POST', url, true);
 
-      this.uploadStatus = t('memories', 'Uploading {file}...', { file: file.name });
+      this.uploadStatus = t('memories', 'Starting upload...');
 
       xhr.upload.onprogress = (e: ProgressEvent) => {
         if (e.lengthComputable) this.uploadProgress = (e.loaded / e.total) * 100;
       };
 
       const onFinish = (success: boolean) => {
-        if (!success) this.uploadFailures++;
+        if (!success) {
+          this.uploadFailures++;
+        }
+
         this.uploadCount--;
 
+        // Update progress based on completed files
+        const finishedCount = this.totalUploadCount - this.uploadCount;
+        this.uploadProgress = (finishedCount / this.totalUploadCount) * 100;
+        this.uploadStatus = t('memories', 'Uploaded {finished} of {total} files ({progress}%)', {
+          finished: finishedCount,
+          total: this.totalUploadCount,
+          progress: Math.round(this.uploadProgress),
+        });
+
+        // Check if all uploads are finished
         if (this.uploadCount <= 0) {
           this.isUploading = false;
           this.uploadProgress = 0;
@@ -213,8 +228,13 @@ export default defineComponent({
             this.uploadStatus = t('memories', '{count} files failed to upload.', { count: this.uploadFailures });
           } else {
             this.uploadStatus = t('memories', 'All files uploaded successfully.');
-            utils.bus.emit('memories:timeline:hard-refresh', null);
           }
+
+          // Hide status message after a few seconds
+          setTimeout(() => { this.uploadStatus = ''; }, 4000);
+          
+          // reload the view of the images
+          utils.bus.emit('memories:timeline:hard-refresh', null);
         }
       };
 
@@ -222,26 +242,10 @@ export default defineComponent({
         if (xhr.status >= 200 && xhr.status < 300) {
           onFinish(true);
         } else {
-          try {
-            const response = JSON.parse(xhr.responseText);
-            this.uploadStatus = t('memories', 'Upload of {file} failed: {error}', {
-              file: file.name,
-              error: response.error || xhr.statusText,
-            });
-          } catch {
-            this.uploadStatus = t('memories', 'Upload of {file} failed: {error}', {
-              file: file.name,
-              error: xhr.statusText,
-            });
-          }
           onFinish(false);
         }
       };
-
-      xhr.onerror = () => {
-        this.uploadStatus = t('memories', 'An error occurred during the upload of {file}', { file: file.name });
-        onFinish(false);
-      };
+      xhr.onerror = () => onFinish(false);
 
       xhr.send(formData);
     },
