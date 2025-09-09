@@ -248,3 +248,27 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.top-matter {
+  .upload-progress {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    padding-right: 1.5em;
+    box-sizing: border-box;
+    margin-top: 0.5em;
+
+    progress {
+      flex-grow: 1;
+    }
+
+    span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.9em;
+    }
+  }
+}
+</style>
