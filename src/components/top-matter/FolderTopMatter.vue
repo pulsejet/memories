@@ -213,7 +213,7 @@ export default defineComponent({
             this.uploadStatus = t('memories', '{count} files failed to upload.', { count: this.uploadFailures });
           } else {
             this.uploadStatus = t('memories', 'All files uploaded successfully.');
-            window.location.reload();
+            utils.bus.emit('memories:timeline:hard-refresh', null);
           }
         }
       };
