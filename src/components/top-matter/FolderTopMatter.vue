@@ -32,7 +32,7 @@
           <template #icon> <UploadIcon :size="20" /> </template>
         </NcActionButton>
 
-        <!-- NEW PUBLIC UPLOAD BUTTON -->
+        <!-- Public upload button -->
         <NcActionButton
           v-if="routeIsPublic && allowUpload"
           :aria-label="t('memories', 'Upload files')"
@@ -56,7 +56,7 @@
     <!-- Hidden file input that we trigger programmatically -->
     <input ref="fileInput" type="file" style="display: none" multiple @change="handleFileSelection" />
 
-    <!-- NEW UPLOAD PROGRESS DISPLAY -->
+    <!-- Upload progress display -->
     <div v-if="isUploading" class="upload-progress">
       <progress :value="uploadProgress" max="100"></progress>
       <span>{{ uploadStatus }}</span>
