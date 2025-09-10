@@ -234,7 +234,7 @@ export default defineComponent({
           setTimeout(() => { this.uploadStatus = ''; }, 4000);
           
           // reload the view of the images
-          utils.bus.emit('memories:timeline:hard-refresh', null);
+          utils.bus.emit('memories:timeline:soft-refresh', null);
         }
       };
 
