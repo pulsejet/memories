@@ -68,6 +68,8 @@ class DaysController extends GenericApiController
                 $this->isHidden(),
                 $this->isMonthView(),
                 $this->isReverse(),
+                $this->getMinRating(),
+                $this->getEmbeddedTags(),
                 $this->getTransformations(),
             );
 
@@ -168,6 +170,8 @@ class DaysController extends GenericApiController
             $this->isHidden(),
             $this->isMonthView(),
             $this->isReverse(),
+            $this->getMinRating(),
+            $this->getEmbeddedTags(),
             $this->getTransformations(),
         );
 
@@ -214,5 +218,21 @@ class DaysController extends GenericApiController
     private function isReverse(): bool
     {
         return null !== $this->request->getParam('reverse');
+    }
+
+    private function getMinRating(): int
+    {
+        return (int) $this->request->getParam('minRating') ?? 0;
+    }
+
+    private function getEmbeddedTags(): array
+    {
+        $embeddedTagsParam = $this->request->getParam('embeddedTags');
+        if ($embeddedTagsParam) {
+            // Decode URI-encoded string before splitting
+            $decoded = urldecode($embeddedTagsParam);
+            return explode(',', $decoded);
+        }
+        return [];
     }
 }

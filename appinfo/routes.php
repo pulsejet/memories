@@ -53,6 +53,10 @@ return [
 
         ['name' => 'Tags#set', 'url' => '/api/tags/set/{id}', 'verb' => 'PATCH'],
 
+        ['name' => 'EmbeddedTags#flat', 'url' => '/api/embedded-tags/flat', 'verb' => 'GET'],
+        ['name' => 'EmbeddedTags#hierarchical', 'url' => '/api/embedded-tags/hierarchical', 'verb' => 'GET'],
+        ['name' => 'EmbeddedTags#count', 'url' => '/api/embedded-tags/count', 'verb' => 'GET'],
+
         ['name' => 'Map#clusters', 'url' => '/api/map/clusters', 'verb' => 'GET'],
         ['name' => 'Map#init', 'url' => '/api/map/init', 'verb' => 'GET'],
 
