@@ -19,6 +19,7 @@ declare module '@typings' {
 
     // general settings
     timeline_path: string;
+    timeline_include_shared_albums: boolean;
     enable_top_memories: boolean;
     stack_raw_files: boolean;
     dedup_identical: boolean;
