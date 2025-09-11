@@ -18,7 +18,7 @@ OC.L10N.register(
     "Videos" : "Videoer",
     "Shared By" : "Delt af",
     "Metadata" : "Metadata",
-    "Edit" : "Rediger",
+    "Edit" : "Redigér",
     "Photos" : "Billeder",
     "Delete" : "Slet",
     "Share" : "Del",
