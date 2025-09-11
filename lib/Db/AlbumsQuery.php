@@ -94,6 +94,12 @@ class AlbumsQuery
             $row['album_id'] = (int) $row['album_id'];
             $row['created'] = (int) $row['created'];
             $row['last_added_photo'] = (int) $row['last_added_photo'];
+            if (null !== $row['oldest_date']) {
+                $row['oldest_date'] = strtotime($row['oldest_date']);
+            }
+            if (null !== $row['newest_date']) {
+                $row['newest_date'] = strtotime($row['newest_date']);
+            }
         }
 
         return $albums;
@@ -312,6 +318,12 @@ class AlbumsQuery
             ->where($sSq->expr()->eq('pc.album_id', 'pa.album_id'))
         ;
         $query->selectAlias(SQL::exists($query, $sSq), 'shared');
+    }
+
+    public function transformDateRange(IQueryBuilder &$query): void
+    {
+        $query->selectAlias($query->func()->min('m.datetaken'), 'oldest_date');
+        $query->selectAlias($query->func()->max('m.datetaken'), 'newest_date');
     }
 
     /**
