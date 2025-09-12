@@ -124,6 +124,8 @@ OC.L10N.register(
     "Are you sure you want to discard the changes?" : "Вы ўпэўнены, што хочаце адхіліць змены?",
     "Undo" : "Адрабіць",
     "Redo" : "Узнавіць",
+    "Zoom in" : "Павялічыць",
+    "Zoom out" : "Паменшыць",
     "Filters" : "Фільтры",
     "Crop" : "Абрэзаць",
     "Custom" : "Карыстальніцкі",
