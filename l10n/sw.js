@@ -33,6 +33,7 @@ OC.L10N.register(
     "Performance" : "Performance",
     "Unknown" : "Haijulikani",
     "Continue" : "Endelea",
+    "Template" : "Template",
     "Shared" : "Shirikisha",
     "No results found" : "Hakuna matokeo yaliyopatikana",
     "Search" : "Tafuta",
