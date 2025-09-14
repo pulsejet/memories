@@ -35,7 +35,9 @@
             @click="linkClick"
             exact
           >
-            <component :is="item.icon" slot="icon" :size="20" />
+            <template #icon>
+              <component :is="item.icon" slot="icon" :size="20" />
+            </template>
           </NcAppNavigationItem>
         </template>
 
