@@ -95,7 +95,7 @@ class PublicAlbumController extends Controller
         $response->setContentSecurityPolicy(PageController::getCSP());
 
         // Add download link
-        $dlUrl = $this->urlGenerator->linkToRoute('memories.PublicAlbum.download', [
+        $dlUrl = $this->urlGenerator->linkToRouteAbsolute('memories.PublicAlbum.download', [
             'token' => $token, // share identification
             'albums' => 1, // identify backend for share
         ]);
