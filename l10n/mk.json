@@ -232,6 +232,8 @@
     "Previous" : "Предходна",
     "Next" : "Следна",
     "Editing is currently disabled for Live Photos" : "Уредувањето моментално е оневозможено за живи фотографии",
+    "You are now logged in to the server!" : "Сега сте поврзани со серверот!",
+    "You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue." : "Може да поставите автоматско прикачување со Nextcloud мобилната апликација. Кликнете на копчето подолу за да ја преземете апликацијата, или прескокнете го овој чекор за да продолжите.",
     "Set up automatic upload" : "Постави автоматско прикачување",
     "Memories can show local media on your device alongside the media on your server. This requires access to the media on this device." : "Мемориите можат да прикажуваат локални медиуми на вашиот уред заедно со медиумите на вашиот сервер. Ова бара пристап до медиумите на овој уред.",
     "Choose the folders on this device to show on your timeline." : "Изберете ги папките на овој уред што ќе се прикажуваат на вашиот времеплов.",
