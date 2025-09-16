@@ -7,6 +7,11 @@
       <MapIcon v-else-if="routeIsMap" />
       <ImageMultipleIcon v-else />
     </template>
+    <template #action>
+      <NcButton variant="primary" @click="resetFilters" v-if="hasFilters">
+        {{ t('memories', 'Reset filters') }}
+      </NcButton>
+    </template>
   </NcEmptyContent>
 </template>
 
@@ -14,6 +19,7 @@
 import { defineComponent } from 'vue';
 
 import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js';
+import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 
 import * as strings from '@services/strings';
 
@@ -28,7 +34,7 @@ export default defineComponent({
 
   components: {
     NcEmptyContent,
-
+    NcButton,
     PeopleIcon,
     ArchiveIcon,
     ImageMultipleIcon,
@@ -36,9 +42,25 @@ export default defineComponent({
     MapIcon,
   },
 
+  emits: ['reset-filters'],
+
+  props: {
+    hasFilters: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
   computed: {
     emptyViewDescription(): string {
       return strings.emptyDescription(this.$route.name!);
+    },
+
+  },
+
+  methods: {
+    resetFilters() {
+      this.$emit('reset-filters');
     },
   },
 });
