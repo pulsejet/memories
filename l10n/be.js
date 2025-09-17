@@ -118,6 +118,7 @@ OC.L10N.register(
     "Unassigned faces" : "Непрызначаныя твары",
     "Merge with different person" : "Аб'яднаць з іншым чалавекам",
     "Home" : "Дадому",
+    "Unsaved changes" : "Незахаваныя змены",
     "Download Video" : "Спампаваць відэа",
     "Download {ext}" : "Спампаваць {ext}",
     "Save as" : "Захаваць як",
