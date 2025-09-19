@@ -44,6 +44,7 @@ OC.L10N.register(
     "Continue" : "Працягнуць",
     "Template" : "Шаблон",
     "Shared" : "Абагуленыя",
+    "No results found" : "Вынікаў не знойдзена",
     "Search" : "Пошук",
     "Upload" : "Запампаваць",
     "Failed to fetch collaborators list." : "Не ўдалося атрымаць спіс суаўтараў.",

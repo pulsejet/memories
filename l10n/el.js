@@ -28,6 +28,7 @@ OC.L10N.register(
     "View in folder" : "Προβολή στον φάκελο",
     "Add to album" : "Προσθήκη στο άλμπουμ",
     "Cancel" : "Ακύρωση",
+    "_{n} selected_::_{n} selected_" : ["{n} επιλεγμένο","{n} επιλεγμένα"],
     "General" : "Γενικά",
     "Account" : "Λογαριασμός",
     "Sign out" : "Αποσύνδεση",

@@ -85,6 +85,7 @@ OC.L10N.register(
     "Share link" : "Shirikisha kiungio",
     "Refresh" : "Refresh",
     "Failed to upload {file}" : "Imeshindwa kupakia {file}",
+    "Creation date" : "Tarehe ya uundaji",
     "Oldest first" : "Ya zamani kwanza",
     "Ascending" : "Ascending",
     "Newest first" : "Mpya kwanza",
