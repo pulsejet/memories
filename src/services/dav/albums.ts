@@ -53,6 +53,10 @@ export async function getAlbums(fileid?: number) {
     data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
   } else if (sort & utils.constants.ALBUM_SORT_FLAGS.LAST_UPDATE) {
     data.sort((a, b) => (a.update_id ?? Number.MAX_SAFE_INTEGER) - (b.update_id ?? Number.MAX_SAFE_INTEGER));
+  } else if (sort & utils.constants.ALBUM_SORT_FLAGS.NEWEST) {
+    data.sort((a, b) => (a.newest_date ?? Number.MAX_SAFE_INTEGER) - (b.newest_date ?? Number.MAX_SAFE_INTEGER));
+  } else if (sort & utils.constants.ALBUM_SORT_FLAGS.OLDEST) {
+    data.sort((a, b) => (a.oldest_date ?? Number.MAX_SAFE_INTEGER) - (b.oldest_date ?? Number.MAX_SAFE_INTEGER));
   } else {
     // fall back to created date
     data.sort((a, b) => a.created - b.created);
