@@ -161,8 +161,22 @@ declare module '@typings' {
     FNumber?: number;
     FocalLength?: number;
 
+    Rating?: number;
+
+    TagsList?: string[];
+    Keywords?: string[];
+    Subject?: string[];
+    HierarchicalSubject?: string[];
+
     GPSAltitude?: number;
     GPSLatitude?: number;
     GPSLongitude?: number;
+  }
+
+
+  export type IFilters = {
+    minRating: number;
+    tags: string[];
+    embeddedTags: string[];
   }
 }
