@@ -145,6 +145,7 @@ OC.L10N.register(
     "Extension" : "Пашырэнне",
     "Quality" : "Якасць",
     "_{n} item_::_{n} items_" : ["{n} элемент","{n} элементы","{n} элементаў","{n} элементаў"],
+    "Shared by {user}" : "Абагуліў(-ла) {user}",
     "Error: {msg}" : "Памылка: {msg}",
     "Failed to delete {fileName}." : "Не ўдалося выдаліць {fileName}.",
     "Yes" : "Так",
