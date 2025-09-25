@@ -2,6 +2,8 @@ OC.L10N.register(
     "memories",
     {
     "Download" : "Sider",
+    "People" : "Imdanen",
+    "Folders" : "Ikaramen",
     "Favorites" : "Imenyafen",
     "Tags" : "Tibzimin",
     "Settings" : "Iɣewwaṛen",
