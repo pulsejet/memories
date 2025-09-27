@@ -32,6 +32,17 @@
           <template #icon> <UploadIcon :size="20" /> </template>
         </NcActionButton>
 
+        <!-- Public upload button -->
+        <NcActionButton
+          v-if="routeIsPublic && allowUpload"
+          :aria-label="t('memories', 'Upload files')"
+          :disabled="isUploading"
+          @click="triggerFileUpload"
+        >
+          {{ isUploading ? t('memories', 'Uploading...') : t('memories', 'Upload files') }}
+          <template #icon> <UploadIcon :size="20" /> </template>
+        </NcActionButton>
+
         <NcActionButton @click="toggleRecursive" close-after-click>
           {{ recursive ? t('memories', 'Folder view') : t('memories', 'Timeline view') }}
           <template #icon>
@@ -41,11 +52,22 @@
         </NcActionButton>
       </NcActions>
     </div>
+
+    <!-- Hidden file input that we trigger programmatically -->
+    <input ref="fileInput" type="file" style="display: none" multiple @change="handleFileSelection" />
+
+    <!-- Upload progress display -->
+    <div v-if="isUploading" class="upload-progress">
+      <progress :value="uploadProgress" max="100"></progress>
+      <span>{{ uploadStatus }}</span>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { generateUrl } from '@nextcloud/router';
+import { t } from '@nextcloud/l10n';
 
 import UserConfig from '@mixins/UserConfig';
 
@@ -80,23 +102,25 @@ export default defineComponent({
 
   mixins: [UserConfig],
 
+  data() {
+    return {
+      isUploading: false as boolean,
+      uploadProgress: 0 as number,
+      uploadStatus: '' as string,
+      uploadCount: 0 as number,
+      uploadFailures: 0 as number,
+      totalUploadCount: 0 as number,
+    };
+  },
+
   computed: {
-    list(): {
-      text: string;
-      path: string[];
-      idx: number;
-    }[] {
+    list(): { text: string; path: string[]; idx: number }[] {
       let path: string[] | string = this.$route.params.path || '';
-      if (typeof path === 'string') {
-        path = path.split('/');
-      }
+      if (typeof path === 'string') path = path.split('/');
 
       return path
-        .filter(Boolean) // non-empty
-        .map((text, idx, arr) => {
-          const path = arr.slice(0, idx + 1);
-          return { text, path, idx };
-        });
+        .filter(Boolean)
+        .map((text, idx, arr) => ({ text, path: arr.slice(0, idx + 1), idx }));
     },
 
     recursive(): boolean {
@@ -110,18 +134,22 @@ export default defineComponent({
     isNative(): boolean {
       return nativex.has();
     },
+
+    allowUpload(): boolean {
+      return this.initstate.allow_upload === true;
+    },
   },
 
   methods: {
-    share() {
+    share(): void {
       _m.modals.shareNodeLink(utils.getFolderRoutePath(this.config.folders_path));
     },
 
-    upload() {
+    upload(): void {
       _m.modals.upload();
     },
 
-    toggleRecursive() {
+    toggleRecursive(): void {
       this.$router.replace({
         query: {
           ...this.$router.currentRoute.query,
@@ -130,12 +158,96 @@ export default defineComponent({
       });
     },
 
-    getRoute(path: string[]) {
+    getRoute(path: string[]): object {
       return {
         ...this.$route,
         params: { path },
         hash: undefined,
       };
+    },
+
+    triggerFileUpload(): void {
+      (this.$refs.fileInput as HTMLInputElement).click();
+    },
+
+    handleFileSelection(this: any, event: Event): void {
+      const target = event.target as HTMLInputElement;
+      const files = target.files;
+      if (!files || files.length === 0) return;
+
+      this.uploadCount = files.length;
+      this.totalUploadCount = files.length;
+      this.uploadFailures = 0;
+      this.isUploading = true;
+      this.uploadProgress = 0;
+
+      for (const file of Array.from(files)) {
+        this.uploadFile(file);
+      }
+
+      target.value = '';
+    },
+
+    uploadFile(this: any, file: File): void {
+      const token = this.$route.params.token as string;
+      const url = generateUrl(`/apps/memories/s/${token}/upload`);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', url, true);
+
+      this.uploadStatus = t('memories', 'Starting upload...');
+
+      xhr.upload.onprogress = (e: ProgressEvent) => {
+        if (e.lengthComputable) this.uploadProgress = (e.loaded / e.total) * 100;
+      };
+
+      const onFinish = (success: boolean) => {
+        if (!success) {
+          this.uploadFailures++;
+        }
+
+        this.uploadCount--;
+
+        // Update progress based on completed files
+        const finishedCount = this.totalUploadCount - this.uploadCount;
+        this.uploadProgress = (finishedCount / this.totalUploadCount) * 100;
+        this.uploadStatus = t('memories', 'Uploaded {finished} of {total} files ({progress}%)', {
+          finished: finishedCount,
+          total: this.totalUploadCount,
+          progress: Math.round(this.uploadProgress),
+        });
+
+        // Check if all uploads are finished
+        if (this.uploadCount <= 0) {
+          this.isUploading = false;
+          this.uploadProgress = 0;
+
+          if (this.uploadFailures > 0) {
+            this.uploadStatus = t('memories', '{count} files failed to upload.', { count: this.uploadFailures });
+          } else {
+            this.uploadStatus = t('memories', 'All files uploaded successfully.');
+          }
+
+          // Hide status message after a few seconds
+          setTimeout(() => { this.uploadStatus = ''; }, 4000);
+          
+          // reload the view of the images
+          utils.bus.emit('memories:timeline:soft-refresh', null);
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          onFinish(true);
+        } else {
+          onFinish(false);
+        }
+      };
+      xhr.onerror = () => onFinish(false);
+
+      xhr.send(formData);
     },
   },
 });
@@ -143,11 +255,22 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .top-matter {
-  .breadcrumb {
-    min-width: 0;
-    height: unset;
-    .share-name {
-      margin-left: 0.75em;
+  .upload-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1em;
+    margin-top: 0.5em;
+    padding-right: 1.5em;
+
+    progress {
+      display: block;
+      width: 100%;
+    }
+
+    span {
+      font-size: 0.9em;
+      white-space: nowrap;
     }
   }
 }

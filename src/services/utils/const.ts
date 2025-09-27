@@ -33,6 +33,7 @@ export const initstate = Object.freeze({
   shareTitle: loadState('memories', 'share_title', '') as string,
   shareType: loadState('memories', 'share_type', null) as 'file' | 'folder' | 'album' | null,
   singleItem: loadState('memories', 'single_item', null) as IPhoto | null,
+  allow_upload: loadState('memories', 'allow_upload', false) as boolean,
 });
 
 /**
