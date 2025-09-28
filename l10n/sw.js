@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Download" : "Pakua",
     "People" : "Watu",
+    "Timeline" : "Timeline",
     "Explore" : "Gundua",
     "Folders" : "Visanduku",
     "Favorites" : "Vipendwa",
