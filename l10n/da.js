@@ -101,6 +101,7 @@ OC.L10N.register(
     "Share link" : "Del link",
     "Create Link" : "Opret link",
     "Refresh" : "Opdatér",
+    "Choose the destination folder for the upload" : "Vælg destinationsmappen til upload",
     "Uploading {file}" : "Uploader {file}",
     "Failed to upload {file}" : "Kunne ikke uploade {file}",
     "Last updated" : "Sidst opdateret",
