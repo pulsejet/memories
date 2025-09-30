@@ -16,7 +16,7 @@ class Admin implements ISettings
     /**
      * @return TemplateResponse
      */
-    public function getForm()
+    public function getForm(): TemplateResponse
     {
         \OCP\Util::addScript(Application::APPNAME, 'memories-admin');
 
@@ -26,7 +26,7 @@ class Admin implements ISettings
     /**
      * @return string
      */
-    public function getSection()
+    public function getSection(): string
     {
         return Application::APPNAME;
     }
@@ -34,7 +34,7 @@ class Admin implements ISettings
     /**
      * @return int
      */
-    public function getPriority()
+    public function getPriority(): int
     {
         return 50;
     }
