@@ -9,7 +9,7 @@ use OCP\AppFramework\Http\TemplateResponse;
 /** @psalm-suppress MissingTemplateParam */
 class TemplateResponsePatch extends TemplateResponse
 {
-    public function render()
+    public function render(): string
     {
         $content = parent::render();
 

@@ -19,7 +19,7 @@ class AdminSection implements IIconSection
     /**
      * @return TemplateResponse
      */
-    public function getForm()
+    public function getForm(): TemplateResponse
     {
         return new TemplateResponse('memories', 'admin', []);
     }
@@ -27,7 +27,7 @@ class AdminSection implements IIconSection
     /**
      * @return string
      */
-    public function getID()
+    public function getID(): string
     {
         return 'memories';
     }
@@ -35,7 +35,7 @@ class AdminSection implements IIconSection
     /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->l->t('Memories');
     }
@@ -43,7 +43,7 @@ class AdminSection implements IIconSection
     /**
      * @return int
      */
-    public function getPriority()
+    public function getPriority(): int
     {
         return 75;
     }
@@ -51,7 +51,7 @@ class AdminSection implements IIconSection
     /**
      * @return string
      */
-    public function getIcon()
+    public function getIcon(): string
     {
         return $this->urlGenerator->imagePath('memories', 'app-dark.svg');
     }
