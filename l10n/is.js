@@ -26,6 +26,7 @@ OC.L10N.register(
     "View in folder" : "Skoða í möppu",
     "Add to album" : "Bæta í albúm",
     "Cancel" : "Hætta við",
+    "_{n} selected_::_{n} selected_" : ["{n} valið","{n} valið"],
     "General" : "Almennt",
     "Account" : "Aðgangur",
     "Info" : "Upplýsingar",
