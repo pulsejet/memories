@@ -42,6 +42,7 @@
     "@nextcloud/upload": "1.11.0",
     "@nextcloud/vue": "^8.30.0",
     "filerobot-image-editor": "^4.8.1",
+    "focus-trap": "^7.6.5",
     "fuse.js": "^7.1.0",
     "hammerjs": "^2.0.8",
     "justified-layout": "^4.1.0",
