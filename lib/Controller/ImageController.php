@@ -59,7 +59,16 @@ class ImageController extends GenericApiController
 
             // Get preview for this file
             $file = $this->fs->getUserFile($id);
-            $preview = \OC::$server->get(\OCP\IPreview::class)->getPreview($file, $x, $y, !$a, $mode);
+
+            try {
+                $preview = \OC::$server->get(\OCP\IPreview::class)
+                    ->getPreview($file, $x, $y, !$a, $mode)
+                ;
+            } catch (\OCP\Files\NotFoundException $e) {
+                // This exception is thrown if no generator is found,
+                // throw an HTTP exception to prevent spamming admin log.
+                throw Exceptions::NotFound($e->getMessage());
+            }
 
             // Get the filename. We need to move the extension from
             // the preview file to the filename's end if it's not there
