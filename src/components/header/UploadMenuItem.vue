@@ -1,6 +1,7 @@
 <template>
   <NcButton
     class="memories-menu-item upload-menu"
+    variant="tertiary-no-background"
     :title="t('memories', 'Upload')"
     :aria-label="t('memories', 'Upload')"
     @click="upload"
