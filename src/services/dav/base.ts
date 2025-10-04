@@ -437,15 +437,13 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
   }
 
   // Set absolute target path
-  const prefixPath = `files/${utils.uid}`;
-  destination = `${prefixPath}/${destination}`;
-  const datePaths: Map<string, Set<string>> = new Map(); // {'year': {'month1', 'month2'}}
+  destination = `files/${utils.uid}/${destination}`;
 
+  // Add the stacked photos
   photos = await extendWithStack(photos);
-  const fileIdsSet = new Set(photos.map((p) => p.fileid));
+  const photosMap = new Map(photos.map((p) => [p.fileid, p]));
 
   let fileInfos: IFileInfo[] = [];
-
   try {
     fileInfos = await getFiles(photos);
   } catch (e) {
@@ -454,47 +452,47 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
     return;
   }
 
-  const moveDirectives: Array<[string, IFileInfo]> = new Array();
-
-  photos.forEach((photo, i) => {
-    if (!fileIdsSet.has(fileInfos[i].fileid)) {
-      return;
-    }
+  // Create the list of operations
+  const operations = new Array<[string, IFileInfo]>();
+  fileInfos.forEach((info) => {
+    const photo = photosMap.get(info.fileid);
+    if (!photo || !photo.dayid) return;
 
     const date = utils.dayIdToDate(photo.dayid);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
 
-    const year = date.getFullYear().toString();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-
-    const months = datePaths.get(year) || new Set();
-    months.add(month);
-    datePaths.set(year, months);
-
-    const datePath = `${destination}/${year}/${month}`;
-
-    moveDirectives.push([datePath, fileInfos[i]]);
+    const path = `${destination}/${year}/${month}`;
+    operations.push([path, info]);
   });
 
-  async function createIfNotExist(directory: string, subDirectories: Iterable<string>) {
-    let existing = await client.getDirectoryContents(directory);
-    if ('data' in existing) {
-      existing = existing.data;
-    }
-    existing = existing.filter((f) => f.type === 'directory');
-    for (const sub of subDirectories) {
-      if (!existing.some((f) => f.basename === sub)) {
-        await client.createDirectory(`${directory}/${sub}`);
-      }
-    }
-  }
+  // Cache confirmed existing directories
+  const existingDirCache = new Set<string>();
 
-  await createIfNotExist(destination, datePaths.keys());
-  for (const [year, months] of datePaths) {
-    await createIfNotExist(`${destination}/${year}`, months);
+  // Create all the folders first
+  for (const op of operations) {
+    let folderPath = op[0];
+    const createPaths = new Array<string>();
+
+    while (folderPath !== destination && folderPath.includes('/')) {
+      if (existingDirCache.has(folderPath) || (await client.exists(folderPath))) {
+        // No need to check further up. Go to creation.
+        existingDirCache.add(folderPath);
+        break;
+      }
+
+      createPaths.push(folderPath);
+      folderPath = folderPath.substring(0, folderPath.lastIndexOf('/'));
+    }
+
+    // Create from top to bottom
+    for (const path of createPaths.reverse()) {
+      await client.createDirectory(path);
+    }
   }
 
   // Move each file
-  const calls = moveDirectives.map(([targetPath, fileInfo]) => async () => {
+  const calls = operations.map(([targetPath, fileInfo]) => async () => {
     try {
       await client.moveFile(
         fileInfo.originalFilename,
