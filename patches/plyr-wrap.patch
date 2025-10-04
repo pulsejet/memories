@@ -1,6 +1,6 @@
---- ./node_modules/plyr/dist/plyr.mjs	2023-10-27 01:22:58.553986870 -0700
-+++ ./node_modules/plyr/dist/plyr.mjs	2023-10-27 01:22:47.333523678 -0700
-@@ -3024,6 +3024,8 @@
+--- ./node_modules/plyr/src/js/captions.js	2025-10-03 18:57:23.246204381 -0700
++++ ./node_modules/plyr/src/js/captions.js	2025-10-03 18:57:38.550835823 -0700
+@@ -25,6 +25,8 @@
  const captions = {
    // Setup captions
    setup() {
@@ -9,8 +9,11 @@
      // Requires UI support
      if (!this.supported.ui) {
        return;
-@@ -6224,8 +6226,8 @@
-         class: this.config.classNames.video
+
+--- ./node_modules/plyr/src/js/media.js	2025-10-03 18:57:55.047516350 -0700
++++ ./node_modules/plyr/src/js/media.js	2025-10-03 18:58:14.504318863 -0700
+@@ -35,8 +35,8 @@
+         class: this.config.classNames.video,
        });
 
 -      // Wrap the video in a container
@@ -20,7 +23,10 @@
 
        // Poster image container
        this.elements.poster = createElement('div', {
-@@ -7937,11 +7939,6 @@
+
+--- ./node_modules/plyr/src/js/plyr.js	2025-10-03 18:58:36.737235720 -0700
++++ ./node_modules/plyr/src/js/plyr.js	2025-10-03 18:59:10.634633295 -0700
+@@ -146,11 +146,6 @@
        return;
      }
 
@@ -31,8 +37,8 @@
 -
      // Set media type based on tag or data attribute
      // Supported: video, audio, vimeo, youtube
-     const _type = this.media.tagName.toLowerCase();
-@@ -8053,7 +8050,6 @@
+     const type = this.media.tagName.toLowerCase();
+@@ -270,7 +265,6 @@
      // Wrap media
      if (!is.element(this.elements.container)) {
        this.elements.container = createElement('div');
