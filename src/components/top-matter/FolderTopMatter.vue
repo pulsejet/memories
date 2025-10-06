@@ -51,23 +51,15 @@
           </template>
         </NcActionButton>
       </NcActions>
-    </div>
 
-    <!-- Hidden file input that we trigger programmatically -->
-    <input ref="fileInput" type="file" style="display: none" multiple @change="handleFileSelection" />
-
-    <!-- Upload progress display -->
-    <div v-if="isUploading" class="upload-progress">
-      <progress :value="uploadProgress" max="100"></progress>
-      <span>{{ uploadStatus }}</span>
+      <!-- Progress bar for PublicUploadHandler -->
+      <PublicUploadHandler ref="uploadHandler" v-if="routeIsPublic && allowUpload" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { generateUrl } from '@nextcloud/router';
-import { t } from '@nextcloud/l10n';
 
 import UserConfig from '@mixins/UserConfig';
 
@@ -75,6 +67,7 @@ const NcBreadcrumbs = () => import('@nextcloud/vue/dist/Components/NcBreadcrumbs
 const NcBreadcrumb = () => import('@nextcloud/vue/dist/Components/NcBreadcrumb.js');
 import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import PublicUploadHandler from '@components/upload/PublicUploadHandler.vue';
 
 import * as utils from '@services/utils';
 import * as nativex from '@native';
@@ -93,6 +86,7 @@ export default defineComponent({
     NcBreadcrumb,
     NcActions,
     NcActionButton,
+    PublicUploadHandler,
     HomeIcon,
     ShareIcon,
     TimelineIcon,
@@ -101,17 +95,6 @@ export default defineComponent({
   },
 
   mixins: [UserConfig],
-
-  data() {
-    return {
-      isUploading: false as boolean,
-      uploadProgress: 0 as number,
-      uploadStatus: '' as string,
-      uploadCount: 0 as number,
-      uploadFailures: 0 as number,
-      totalUploadCount: 0 as number,
-    };
-  },
 
   computed: {
     list(): { text: string; path: string[]; idx: number }[] {
@@ -137,6 +120,12 @@ export default defineComponent({
 
     allowUpload(): boolean {
       return this.initstate.allow_upload === true;
+    },
+
+    // Check if PublicUploadHandler is currently uploading
+    isUploading(): boolean {
+      const handler = this.$refs.uploadHandler as any;
+      return handler?.processing || false;
     },
   },
 
@@ -166,88 +155,14 @@ export default defineComponent({
       };
     },
 
+    // Trigger upload via PublicUploadHandler
     triggerFileUpload(): void {
-      (this.$refs.fileInput as HTMLInputElement).click();
-    },
-
-    handleFileSelection(this: any, event: Event): void {
-      const target = event.target as HTMLInputElement;
-      const files = target.files;
-      if (!files || files.length === 0) return;
-
-      this.uploadCount = files.length;
-      this.totalUploadCount = files.length;
-      this.uploadFailures = 0;
-      this.isUploading = true;
-      this.uploadProgress = 0;
-
-      for (const file of Array.from(files)) {
-        this.uploadFile(file);
+      const handler = this.$refs.uploadHandler as any;
+      if (handler && typeof handler.startUpload === 'function') {
+        handler.startUpload();
+      } else {
+        console.error('PublicUploadHandler not properly initialized');
       }
-
-      target.value = '';
-    },
-
-    uploadFile(this: any, file: File): void {
-      const token = this.$route.params.token as string;
-      const url = generateUrl(`/apps/memories/s/${token}/upload`);
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', url, true);
-
-      this.uploadStatus = t('memories', 'Starting upload...');
-
-      xhr.upload.onprogress = (e: ProgressEvent) => {
-        if (e.lengthComputable) this.uploadProgress = (e.loaded / e.total) * 100;
-      };
-
-      const onFinish = (success: boolean) => {
-        if (!success) {
-          this.uploadFailures++;
-        }
-
-        this.uploadCount--;
-
-        // Update progress based on completed files
-        const finishedCount = this.totalUploadCount - this.uploadCount;
-        this.uploadProgress = (finishedCount / this.totalUploadCount) * 100;
-        this.uploadStatus = t('memories', 'Uploaded {finished} of {total} files ({progress}%)', {
-          finished: finishedCount,
-          total: this.totalUploadCount,
-          progress: Math.round(this.uploadProgress),
-        });
-
-        // Check if all uploads are finished
-        if (this.uploadCount <= 0) {
-          this.isUploading = false;
-          this.uploadProgress = 0;
-
-          if (this.uploadFailures > 0) {
-            this.uploadStatus = t('memories', '{count} files failed to upload.', { count: this.uploadFailures });
-          } else {
-            this.uploadStatus = t('memories', 'All files uploaded successfully.');
-          }
-
-          // Hide status message after a few seconds
-          setTimeout(() => { this.uploadStatus = ''; }, 4000);
-          
-          // reload the view of the images
-          utils.bus.emit('memories:timeline:hard-refresh', null);
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          onFinish(true);
-        } else {
-          onFinish(false);
-        }
-      };
-      xhr.onerror = () => onFinish(false);
-
-      xhr.send(formData);
     },
   },
 });
@@ -255,23 +170,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .top-matter {
-  .upload-progress {
+  .right-actions {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1em;
-    margin-top: 0.5em;
-    padding-right: 1.5em;
-
-    progress {
-      display: block;
-      width: 100%;
-    }
-
-    span {
-      font-size: 0.9em;
-      white-space: nowrap;
-    }
+    align-items: center;
+    gap: 10px; // Add spacing between actions and progress bar
   }
 }
 </style>

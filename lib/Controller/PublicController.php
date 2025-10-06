@@ -11,7 +11,6 @@ use OCA\Memories\Util;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
-use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
@@ -128,49 +127,6 @@ class PublicController extends AuthPublicShareController
 
         return $response;
     }
-
-    /**
-     * Handles the file upload to a public share.
-     */
-    #[PublicPage]
-    #[NoCSRFRequired]
-    public function upload(string $token): DataResponse
-    {
-        try {
-            $share = $this->shareManager->getShareByToken($token);
-        } catch (\Exception) {
-            return new DataResponse(['error' => 'Invalid share token'], 404);
-        }
-
-        if (($share->getPermissions() & \OCP\Constants::PERMISSION_CREATE) === 0) {
-            return new DataResponse(['error' => 'Permission denied'], 403);
-        }
-
-        $node = $share->getNode();
-        if (!$node instanceof \OCP\Files\Folder) {
-            return new DataResponse(['error' => 'Share is not a folder'], 400);
-        }
-
-        $uploadedFile = $this->request->getUploadedFile('file');
-        if ($uploadedFile === null || $uploadedFile['error'] !== UPLOAD_ERR_OK) {
-            return new DataResponse(['error' => 'No file uploaded or upload error'], 400);
-        }
-
-        $fileName = basename($uploadedFile['name']);
-        if ($node->nodeExists($fileName)) {
-            return new DataResponse(['error' => 'File already exists'], 409);
-        }
-
-        $content = file_get_contents($uploadedFile['tmp_name']);
-        if ($content === false) {
-            return new DataResponse(['error' => 'Could not read uploaded file'], 500);
-        }
-
-        $node->newFile($fileName, $content);
-
-        return new DataResponse(['success' => true], 201);
-    }
-
 
     protected function showAuthFailed(): TemplateResponse
     {

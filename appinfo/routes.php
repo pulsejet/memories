@@ -35,8 +35,6 @@ return [
         ['name' => 'Public#showAuthenticate', 'url' => '/s/{token}/authenticate/{redirect}', 'verb' => 'GET'],
         ['name' => 'Public#authenticate', 'url' => '/s/{token}/authenticate/{redirect}', 'verb' => 'POST'],
         w(['name' => 'Public#showShare', 'url' => '/s/{token}/{path}', 'verb' => 'GET'], 'path'),
-        // Public uploads
-        ['name' => 'Public#upload', 'url' => '/s/{token}/upload', 'verb' => 'POST'],
 
         // Public album share
         ['name' => 'PublicAlbum#showShare', 'url' => '/a/{token}', 'verb' => 'GET'],
