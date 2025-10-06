@@ -106,6 +106,7 @@ export default defineComponent({
       if (typeof path === 'string') {
         path = path.split('/');
       }
+
       return path
         .filter(Boolean) // non-empty
         .map((text, idx, arr) => {
