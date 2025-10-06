@@ -97,13 +97,21 @@ export default defineComponent({
   mixins: [UserConfig],
 
   computed: {
-    list(): { text: string; path: string[]; idx: number }[] {
+    list(): {
+      text: string;
+      path: string[];
+      idx: number;
+    }[] {
       let path: string[] | string = this.$route.params.path || '';
-      if (typeof path === 'string') path = path.split('/');
-
+      if (typeof path === 'string') {
+        path = path.split('/');
+      }
       return path
-        .filter(Boolean)
-        .map((text, idx, arr) => ({ text, path: arr.slice(0, idx + 1), idx }));
+        .filter(Boolean) // non-empty
+        .map((text, idx, arr) => {
+          const path = arr.slice(0, idx + 1);
+          return { text, path, idx };
+        });
     },
 
     recursive(): boolean {
