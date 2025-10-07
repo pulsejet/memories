@@ -125,6 +125,7 @@ OC.L10N.register(
     "Merge with different person" : "Sulieti su kitu žmogumi",
     "Home" : "Namai",
     "Share folder" : "Bendrinti aplanką",
+    "Upload files" : "Įkelti failus",
     "Move left" : "Perkelti kairėn",
     "Move right" : "Perkelti dešinėn",
     "Image saved successfully" : "Paveikslas sėkmingai įrašytas",
