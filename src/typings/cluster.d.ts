@@ -63,6 +63,45 @@ declare module '@typings' {
     __t: never; // cannot have empty interface
   }
 
+  export interface IEmbeddedTag {
+    /** Unique identifier for the tag */
+    id: number;
+    /** User ID who owns the tag */
+    user_id: string;
+    /** Tag name (leaf node) */
+    tag: string;
+    /** Parent tag ID for hierarchy */
+    parent_tag_id?: number | null;
+    /** Full path of the tag */
+    path: string;
+    /** Level in hierarchy (0 for root) */
+    level: number;
+    /** Creation timestamp */
+    created_at: string;
+    /** Children tags (for hierarchical structure) */
+    children?: IEmbeddedTag[];
+  }
+
+  export interface IEmbeddedTagsResponse {
+    /** Array of tags */
+    tags: IEmbeddedTag[];
+    /** Structure type indicator */
+    structure?: 'flat' | 'hierarchical';
+    /** Pagination info for flat responses */
+    pagination?: {
+      total: number;
+      limit: number | null;
+      offset: number;
+    };
+  }
+
+  export interface IEmbeddedTagsCountResponse {
+    /** Count of matching tags */
+    count: number;
+    /** Pattern used for filtering */
+    pattern: string | null;
+  }
+
   export interface IFaceRect {
     w: number;
     h: number;
