@@ -326,6 +326,7 @@ class ImageController extends GenericApiController
     }
 
     #[NoAdminRequired]
+    #[PublicPage]
     public function editImage(
         int $id,
         string $name,

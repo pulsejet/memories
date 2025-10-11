@@ -145,7 +145,7 @@ export class API {
   }
 
   static IMAGE_EDIT(id: number) {
-    return gen(`${BASE}/image/edit/{id}`, { id });
+    return tok(gen(`${BASE}/image/edit/{id}`, { id }));
   }
 
   static VIDEO_TRANSCODE(fileid: number, file = 'index.m3u8') {
