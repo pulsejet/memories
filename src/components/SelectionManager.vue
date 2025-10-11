@@ -200,7 +200,8 @@ export default defineComponent({
         name: t('memories', 'Delete'),
         icon: DeleteIcon,
         callback: this.deleteSelection.bind(this),
-        if: () => !this.routeIsAlbums,
+        allowPublic: true,
+        if: () => !this.routeIsAlbums && (!this.routeIsPublic || this.initstate.allow_delete),
       },
       {
         name: t('memories', 'Remove from album'),

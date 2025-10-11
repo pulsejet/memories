@@ -148,6 +148,10 @@ export class API {
     return tok(gen(`${BASE}/image/edit/{id}`, { id }));
   }
 
+  static IMAGE_DELETE(id: number) {
+    return tok(gen(`${BASE}/image/delete/{id}`, { id }));
+  }
+
   static VIDEO_TRANSCODE(fileid: number, file = 'index.m3u8') {
     return tok(
       gen(`${BASE}/video/transcode/{client}/{fileid}/{file}`, {
