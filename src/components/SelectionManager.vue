@@ -12,7 +12,7 @@
         {{ n('memories', '{n} selected', '{n} selected', size, { n: size }) }}
       </div>
 
-      <NcActions :inline="1">
+      <NcActions :inline="3">
         <NcActionButton
           v-for="action of getActions()"
           :key="action.name"

@@ -11,7 +11,7 @@
     </NcBreadcrumbs>
 
     <div class="right-actions">
-      <NcActions :inline="1">
+      <NcActions :inline="3">
         <NcActionButton
           v-if="!routeIsPublic"
           :aria-label="t('memories', 'Share folder')"
