@@ -265,9 +265,10 @@ class ImageController extends GenericApiController
     }
 
     /**
-     * Set the exif data for a file.
+     * Set the exif data for a file (supports public shares).
      */
     #[NoAdminRequired]
+    #[PublicPage]
     public function setExif(int $id, array $raw): Http\Response
     {
         return Util::guardEx(function () use ($id, $raw) {

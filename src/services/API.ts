@@ -137,7 +137,7 @@ export class API {
   }
 
   static IMAGE_SETEXIF(id: number) {
-    return gen(`${BASE}/image/set-exif/{id}`, { id });
+    return tok(gen(`${BASE}/image/set-exif/{id}`, { id }));
   }
 
   static IMAGE_DECODABLE(id: number, etag?: string) {
