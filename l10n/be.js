@@ -122,6 +122,7 @@ OC.L10N.register(
     "Unsaved changes" : "Незахаваныя змены",
     "Download Video" : "Спампаваць відэа",
     "Download {ext}" : "Спампаваць {ext}",
+    "Previous" : "Папярэдняя",
     "Save as" : "Захаваць як",
     "Are you sure you want to discard the changes?" : "Вы ўпэўнены, што хочаце адхіліць змены?",
     "Undo" : "Адрабіць",
