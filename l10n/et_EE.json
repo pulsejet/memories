@@ -127,6 +127,7 @@
     "Last index job was run {t} seconds ago." : "Viimane indekseerimine toimus {t} sekundi eest.",
     "It took {t} seconds to complete." : "Selleks kulus {t} sekundit.",
     "It is still running or was interrupted." : "Protsess kas jätkuvalt töötab või on katkestatud.",
+    "Disable background indexing" : "Lülita taustateenusega indekseerimine välja",
     "Folders with a \".nomedia\" or a \".nomemories\" file are always excluded from indexing." : "Kasutad, kus on „.nomedia“ või „.nomemories“ failid jäävad alati indekseerimata.",
     "Run index in parallel with 4 threads:" : "Käivita indekseerimine rööptöötlusena 4 lõimega:",
     "Force re-indexing of all files:" : "Indekseeri kõik failid sundkorras uuesti:",
