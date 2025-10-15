@@ -11,7 +11,7 @@
     </NcBreadcrumbs>
 
     <div class="right-actions">
-      <NcActions :inline="1">
+      <NcActions :inline="3">
         <NcActionButton
           v-if="!routeIsPublic"
           :aria-label="t('memories', 'Share folder')"
@@ -30,6 +30,17 @@
         >
           {{ t('memories', 'Upload files') }}
           <template #icon> <UploadIcon :size="20" /> </template>
+        </NcActionButton>
+
+        <!-- Download folder button for public shares -->
+        <NcActionButton
+          v-if="routeIsPublic && !initstate.noDownload"
+          :aria-label="t('memories', 'Download folder')"
+          @click="downloadFolder()"
+          close-after-click
+        >
+          {{ t('memories', 'Download folder') }}
+          <template #icon> <DownloadIcon :size="20" /> </template>
         </NcActionButton>
 
         <NcActionButton @click="toggleRecursive" close-after-click>
@@ -62,6 +73,7 @@ import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import TimelineIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import FoldersIcon from 'vue-material-design-icons/FolderMultiple.vue';
 import UploadIcon from 'vue-material-design-icons/Upload.vue';
+import DownloadIcon from 'vue-material-design-icons/Download.vue';
 
 export default defineComponent({
   name: 'FolderTopMatter',
@@ -76,6 +88,7 @@ export default defineComponent({
     TimelineIcon,
     FoldersIcon,
     UploadIcon,
+    DownloadIcon,
   },
 
   mixins: [UserConfig],
@@ -136,6 +149,19 @@ export default defineComponent({
         params: { path },
         hash: undefined,
       };
+    },
+
+    // Download entire shared folder for public shares
+    downloadFolder() {
+      const token = this.$route.params.token;
+      if (!token) {
+        console.error('No share token available');
+        return;
+      }
+
+      // Use Nextcloud's native public share download endpoint
+      // This downloads the entire shared folder as a zip file
+      window.location.href = `${window.location.origin}/index.php/s/${token}/download`;
     },
   },
 });
