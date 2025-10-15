@@ -44,15 +44,26 @@ export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<I
   const rest: IPhoto[] = [];
 
   // Partition photos with and without cache
-  if (utils.uid && opts?.cache !== false) {
+  if (opts?.cache !== false) {
     for (const photo of photos) {
       const filename = photo.imageInfo?.filename;
       if (filename) {
+        // For public shares, use files/{token} path (WebDAV path for public shares)
+        // For logged in users, use files/{uid} path
+        let originalFilename: string;
+        if (utils.uid) {
+          originalFilename = `/files/${utils.uid}${filename}`;
+        } else {
+          // Public share: use token-based WebDAV path
+          const token = _m.route.params.token;
+          originalFilename = `/files/${token}${filename}`;
+        }
+
         cache.push({
           id: photo.fileid,
           fileid: photo.fileid,
           basename: photo.basename ?? filename.split('/').pop() ?? '',
-          originalFilename: `/files/${utils.uid}${filename}`,
+          originalFilename: originalFilename,
           filename: filename,
         });
       } else {
@@ -66,6 +77,11 @@ export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<I
 }
 
 async function getFilesInternal1(photos: IPhoto[]): Promise<IFileInfo[]> {
+  // For public shares, use API instead of WebDAV SEARCH (which requires user auth)
+  if (!utils.uid) {
+    return getFilesViaAPI(photos);
+  }
+
   // Get file IDs array
   const fileIds = photos.map((photo) => photo.fileid);
 
@@ -79,7 +95,41 @@ async function getFilesInternal1(photos: IPhoto[]): Promise<IFileInfo[]> {
   return (await Promise.all(chunks.map(getFilesInternal2))).flat();
 }
 
+/**
+ * Get file infos for public shares via API (instead of WebDAV SEARCH)
+ * This is needed because WebDAV SEARCH requires user authentication
+ */
+async function getFilesViaAPI(photos: IPhoto[]): Promise<IFileInfo[]> {
+  const fileInfos: IFileInfo[] = [];
+  const token = _m.route.params.token;
+
+  for (const photo of photos) {
+    try {
+      const url = API.IMAGE_INFO(photo.fileid);
+      const res = await axios.get<IImageInfo>(url);
+      const filename = res.data.filename;
+
+      if (filename) {
+        // Use token-based WebDAV path for public shares
+        fileInfos.push({
+          id: photo.fileid,
+          fileid: photo.fileid,
+          basename: photo.basename ?? filename.split('/').pop() ?? '',
+          originalFilename: `/files/${token}${filename}`,
+          filename: filename,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to get file info via API', photo.fileid, error);
+    }
+  }
+
+  return fileInfos;
+}
+
 async function getFilesInternal2(fileIds: number[]): Promise<IFileInfo[]> {
+  // This function is only called for authenticated users (not public shares)
+  // Public shares use getFilesViaAPI instead to avoid WebDAV SEARCH auth issues
   const prefixPath = `/files/${utils.uid}`;
 
   // IMPORTANT: if this isn't there, then a blank
@@ -267,9 +317,16 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   }
 
   // Delete each file
+  // For public shares, use API endpoint; for authenticated users, use WebDAV
   const calls = fileInfos.map((fileInfo) => async () => {
     try {
-      await client.deleteFile(fileInfo.originalFilename);
+      if (!utils.uid) {
+        // Public share: use API endpoint which supports token authentication
+        await axios.delete(API.IMAGE_DELETE(fileInfo.fileid));
+      } else {
+        // Authenticated user: use WebDAV
+        await client.deleteFile(fileInfo.originalFilename);
+      }
       return fileInfo.fileid;
     } catch (error) {
       console.error('Failed to delete', fileInfo, error);
