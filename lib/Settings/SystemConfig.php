@@ -44,6 +44,9 @@ class SystemConfig
         // If set to '_empty_', the user is prompted to select a path
         'memories.timeline.default_path' => '_empty_',
 
+        // Whether to include files accessible via shared albums in the timeline by default
+        'memories.timeline.default_include_shared_albums' => true,
+
         // Default viewer high resolution image loading condition
         // Valid values: 'always' | 'zoom' | 'never'
         'memories.viewer.high_res_cond_default' => 'zoom',
