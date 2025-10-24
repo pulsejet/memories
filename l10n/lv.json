@@ -40,7 +40,7 @@
     "Recognize is installed but not enabled for face recognition." : "Atpazīšana ir uzstādīta, bet nav iespējota seju atpazīšanai.",
     "Recognize is not installed. Face recognition and object tagging may be unavailable." : "Atpazīšana nav uzstādīta. Seju atpazīšana un objektu atzīmēšana ar birkām var nebūt pieejama.",
     "Face Recognition is installed and enabled" : "Seju atpazīšana ir uzstādīta un iespējota",
-    "File Support" : "Datņ atbalsts",
+    "File Support" : "Datņu atbalsts",
     "Documentation." : "Dokumentācija",
     "Help & Support" : "Palīdzība un atbalsts",
     "Last index job was run {t} seconds ago." : "Pēdējais indeksēšanas darbs tika izpildīts pirms {t} sekundēm.",
