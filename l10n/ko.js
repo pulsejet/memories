@@ -69,7 +69,7 @@ OC.L10N.register(
     "Sign out" : "로그아웃",
     "Are you sure you want to log out {user}?" : "{user}에서 로그아웃 하시겠습니까?",
     "Timeline Path" : "타임라인 경로",
-    "Square grid mode" : "사각 그리드 모드",
+    "Square grid mode" : "정사각형 그리드 모드",
     "Show past photos on top of timeline" : "과거 사진을 타임라인의 위쪽에 표시",
     "Stack RAW files with same name" : "같은 이름의 RAW 파일을 쌓기",
     "De-duplicate identical files" : "동일한 파일 중복 제거",
