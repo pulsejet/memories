@@ -56,6 +56,7 @@ OC.L10N.register(
     "Line" : "Chiziq",
     "Text" : "Matn",
     "Size" : "Size",
+    "Error: {msg}" : "Xato: {msg}",
     "Yes" : "Yes",
     "No" : "No",
     "Choose {file}" : " {file}ta tanlash",
