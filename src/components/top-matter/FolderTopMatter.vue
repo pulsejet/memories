@@ -39,10 +39,10 @@
         <NcActionButton
           v-if="allowPublicUpload"
           :aria-label="t('memories', 'Upload files')"
-          :disabled="isPublicUploading"
-          @click="triggerPublicFileUpload"
+          :disabled="uploadHandler()?.processing"
+          @click="uploadHandler()?.startUpload()"
         >
-          {{ isPublicUploading ? t('memories', 'Uploading files') : t('memories', 'Upload files') }}
+          {{ t('memories', 'Upload files') }}
           <template #icon> <UploadIcon :size="20" /> </template>
         </NcActionButton>
 
@@ -130,11 +130,6 @@ export default defineComponent({
     allowPublicUpload(): boolean {
       return this.routeIsPublic && this.initstate.allow_upload === true;
     },
-
-    isPublicUploading(): boolean {
-      const handler = this.$refs.uploadHandler as InstanceType<typeof PublicUploadHandler> | null;
-      return !!handler?.processing;
-    },
   },
 
   methods: {
@@ -163,13 +158,8 @@ export default defineComponent({
       };
     },
 
-    triggerPublicFileUpload(): void {
-      const handler = this.$refs.uploadHandler as any;
-      if (handler && typeof handler.startUpload === 'function') {
-        handler.startUpload();
-      } else {
-        console.error('PublicUploadHandler not properly initialized');
-      }
+    uploadHandler(): InstanceType<typeof PublicUploadHandler> | null {
+      return (this.$refs.uploadHandler as InstanceType<typeof PublicUploadHandler>) || null;
     },
   },
 });

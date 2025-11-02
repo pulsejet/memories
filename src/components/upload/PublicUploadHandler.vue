@@ -21,28 +21,20 @@ export default defineComponent({
     NcProgressBar,
   },
 
-  data() {
-    return {
-      processing: false,
-      progress: 0,
-      progressNote: '',
-      hasError: false,
-      currentUploads: [] as any[],
-      existingFiles: new Set<string>(), // Track existing files in current directory
-    };
-  },
+  data: () => ({
+    processing: false,
+    progress: 0,
+    progressNote: String(),
+    hasError: false,
+    currentUploads: [] as any[],
+    existingFiles: new Set<string>(), // Track existing files in current directory
+  }),
 
   beforeDestroy() {
-    (this as any).cancelAllUploads();
+    this.cancelAllUploads();
   },
 
   computed: {
-    routeIsPublic(): boolean {
-      return (
-        this.$route.name === 'folder-share' || this.$route.name === 'public' || window.location.pathname.includes('/s/')
-      );
-    },
-
     canUpload(): boolean {
       return this.routeIsPublic && this.initstate.allow_upload === true;
     },
@@ -67,7 +59,7 @@ export default defineComponent({
       input.addEventListener('change', async () => {
         const files = Array.from(input.files ?? []);
         if (files.length > 0) {
-          await (this as any).uploadFiles(files);
+          await this.uploadFiles(files);
         }
         input.remove();
       });
@@ -81,8 +73,8 @@ export default defineComponent({
      */
     async fetchExistingFiles(): Promise<Set<string>> {
       try {
-        const token = this.$route.params.token as string;
-        const uploadPath = (this as any).getCurrentPath();
+        const token = this.$route.params.token;
+        const uploadPath = this.getCurrentPath();
 
         const baseUrl = window.location.origin;
         const publicDavPath = `${baseUrl}/public.php/dav/files/${token}${uploadPath}`;
@@ -111,10 +103,10 @@ export default defineComponent({
         this.hasError = false;
 
         const token = this.$route.params.token as string;
-        const uploadPath = (this as any).getCurrentPath();
+        const uploadPath = this.getCurrentPath();
 
         // Fetch existing files to check for duplicates
-        this.existingFiles = await (this as any).fetchExistingFiles();
+        this.existingFiles = await this.fetchExistingFiles();
 
         // Filter out files that already exist
         const filesToUpload = files.filter((file) => !this.existingFiles.has(file.name));
@@ -189,7 +181,7 @@ export default defineComponent({
           }
         }
 
-        (this as any).showUploadResults(successful, failed);
+        this.showUploadResults(successful, failed);
 
         // Refresh timeline to show new uploads
         if (successful.length > 0) {
