@@ -10,10 +10,11 @@ import { defineComponent } from 'vue';
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
 
 import { Uploader } from '@nextcloud/upload';
-import { Folder, Permission, davGetClient } from '@nextcloud/files';
+import { Folder, Permission } from '@nextcloud/files';
 import { showError, showSuccess } from '@nextcloud/dialogs';
 
 import * as utils from '@services/utils';
+import { createClient, type FileStat } from 'webdav';
 
 export default defineComponent({
   name: 'PublicUploadHandler',
@@ -26,7 +27,7 @@ export default defineComponent({
     progress: 0,
     progressNote: String(),
     hasError: false,
-    currentUploads: [] as any[],
+    currentUploads: [] as { cancel(): void }[],
     existingFiles: new Set<string>(), // Track existing files in current directory
   }),
 
@@ -75,16 +76,12 @@ export default defineComponent({
       try {
         const token = this.$route.params.token;
         const uploadPath = this.getCurrentPath();
+        const publicDavPath = `${window.location.origin}/public.php/dav/files/${token}${uploadPath}`;
 
-        const baseUrl = window.location.origin;
-        const publicDavPath = `${baseUrl}/public.php/dav/files/${token}${uploadPath}`;
+        const client = createClient(publicDavPath);
+        const contents = (await client.getDirectoryContents('/', { details: false })) as Array<FileStat>;
 
-        const client = davGetClient(publicDavPath);
-        const contents = (await client.getDirectoryContents('/', {
-          details: false,
-        })) as any[];
-
-        return new Set(contents.map((item: any) => item.basename));
+        return new Set(contents.map((item) => item.basename));
       } catch (error) {
         console.error('Failed to fetch existing files:', error);
         return new Set();
@@ -101,9 +98,6 @@ export default defineComponent({
         this.processing = true;
         this.progress = 0;
         this.hasError = false;
-
-        const token = this.$route.params.token as string;
-        const uploadPath = this.getCurrentPath();
 
         // Fetch existing files to check for duplicates
         this.existingFiles = await this.fetchExistingFiles();
@@ -130,19 +124,17 @@ export default defineComponent({
         }
 
         // Setup WebDAV destination
-        const baseUrl = window.location.origin;
-        const remoteURL = `${baseUrl}/public.php/dav`;
+        const token = this.$route.params.token as string;
+        const remoteURL = `${window.location.origin}/public.php/dav`;
         const rootPath = `/files/${token}`;
-        const destinationPath = uploadPath === '/' ? rootPath : `${rootPath}${uploadPath}`;
 
         const destination = new Folder({
           id: 0,
-          source: `${remoteURL}${destinationPath}`,
+          source: remoteURL + rootPath + this.getCurrentPath(),
           root: rootPath,
           owner: null,
           permissions: Permission.CREATE,
         });
-
         const uploader = new Uploader(true, destination);
 
         // Track upload progress
@@ -165,7 +157,6 @@ export default defineComponent({
 
             const uploadPromise = uploader.upload(file.name, file);
             this.currentUploads.push(uploadPromise);
-
             await uploadPromise;
 
             successful.push(file.name);
@@ -196,10 +187,10 @@ export default defineComponent({
         setTimeout(() => {
           this.processing = false;
           this.progress = 0;
-          this.progressNote = '';
+          this.progressNote = String();
           this.hasError = false;
           this.currentUploads = [];
-        }, 2000);
+        }, 1000);
       }
     },
 
@@ -236,18 +227,14 @@ export default defineComponent({
      * @returns Normalized path string (e.g., "/" or "/subfolder")
      */
     getCurrentPath(): string {
-      if (this.routeIsPublic) {
-        const routePath = this.$route.params.path;
-
-        if (Array.isArray(routePath)) {
-          const pathStr = routePath.join('/');
-          return pathStr ? `/${pathStr}` : '/';
-        } else if (typeof routePath === 'string') {
-          return routePath ? `/${routePath}` : '/';
-        }
+      const routePath = this.$route.params.path || String();
+      if (Array.isArray(routePath)) {
+        return '/' + (routePath.join('/') || String());
+      } else if (typeof routePath === 'string') {
+        return '/' + (routePath || String());
+      } else {
+        return '/';
       }
-
-      return '/';
     },
 
     /**
@@ -257,9 +244,7 @@ export default defineComponent({
       this.currentUploads.forEach((upload) => {
         try {
           upload.cancel();
-        } catch (error) {
-          // Ignore cancellation errors
-        }
+        } catch (error) {}
       });
       this.currentUploads = [];
       this.processing = false;
