@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- **Feature**: Add download link to folders ([#1552](https://github.com/pulsejet/memories/pull/1552))
+
 ## [v7.7.0] - 2025-10-03
 
 - **Update**: Compatibility with Nextcloud 32 ([#1545](https://github.com/pulsejet/memories/issues/1545))
