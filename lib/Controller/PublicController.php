@@ -104,6 +104,9 @@ class PublicController extends AuthPublicShareController
         // Share info
         $this->initialState->provideInitialState('no_download', $share->getHideDownload());
         $this->initialState->provideInitialState('share_title', $node->getName());
+        $this->initialState->provideInitialState('allow_upload', ($share->getPermissions() & \OCP\Constants::PERMISSION_CREATE) === \OCP\Constants::PERMISSION_CREATE);
+        $this->initialState->provideInitialState('allow_delete', ($share->getPermissions() & \OCP\Constants::PERMISSION_DELETE) === \OCP\Constants::PERMISSION_DELETE);
+
 
         if ($node instanceof \OCP\Files\File) {
             $this->initialState->provideInitialState('single_item', $this->getSingleItemInitialState($node));
