@@ -48,6 +48,9 @@ declare module '@typings' {
     update_id: number;
     /** Album is shared with other users */
     shared: boolean;
+    /** Date range of photos in album */
+    oldest_date: number;
+    newest_date: number;
   }
 
   export interface IFace extends ICluster {

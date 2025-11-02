@@ -47,6 +47,26 @@
 
         <NcActionRadio
           name="sort"
+          :aria-label="t('memories', 'Oldest photo')"
+          :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.OLDEST)"
+          @change="changeSort(c.ALBUM_SORT_FLAGS.OLDEST)"
+          close-after-click
+        >
+          {{ t('memories', 'Oldest photo') }}
+        </NcActionRadio>
+
+        <NcActionRadio
+          name="sort"
+          :aria-label="t('memories', 'Newest photo')"
+          :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.NEWEST)"
+          @change="changeSort(c.ALBUM_SORT_FLAGS.NEWEST)"
+          close-after-click
+        >
+          {{ t('memories', 'Newest photo') }}
+        </NcActionRadio>
+
+        <NcActionRadio
+          name="sort"
           :aria-label="t('memories', 'Album name')"
           :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.NAME)"
           @change="changeSort(c.ALBUM_SORT_FLAGS.NAME)"
@@ -223,7 +243,9 @@ export default defineComponent({
     isDateSort(): boolean {
       return (
         !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.CREATED) ||
-        !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.LAST_UPDATE)
+        !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.LAST_UPDATE) ||
+        !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.OLDEST) ||
+        !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.NEWEST)
       );
     },
 
