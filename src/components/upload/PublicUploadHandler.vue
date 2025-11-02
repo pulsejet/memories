@@ -7,7 +7,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-
 const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
 
 import { Uploader } from '@nextcloud/upload';
@@ -39,13 +38,13 @@ export default defineComponent({
 
   computed: {
     routeIsPublic(): boolean {
-      return this.$route.name === 'folder-share' || 
-             this.$route.name === 'public' ||
-             window.location.pathname.includes('/s/');
+      return (
+        this.$route.name === 'folder-share' || this.$route.name === 'public' || window.location.pathname.includes('/s/')
+      );
     },
 
     canUpload(): boolean {
-      return this.routeIsPublic ? ((this.$parent as any)?.allowUpload || false) : true;
+      return this.routeIsPublic && this.initstate.allow_upload === true;
     },
   },
 
@@ -63,7 +62,7 @@ export default defineComponent({
       input.type = 'file';
       input.multiple = true;
       input.accept = 'image/*,image/heic,image/tiff,video/*';
-      
+
       input.addEventListener('cancel', () => input.remove());
       input.addEventListener('change', async () => {
         const files = Array.from(input.files ?? []);
@@ -84,14 +83,14 @@ export default defineComponent({
       try {
         const token = this.$route.params.token as string;
         const uploadPath = (this as any).getCurrentPath();
-        
+
         const baseUrl = window.location.origin;
         const publicDavPath = `${baseUrl}/public.php/dav/files/${token}${uploadPath}`;
-        
+
         const client = davGetClient(publicDavPath);
-        const contents = await client.getDirectoryContents('/', {
+        const contents = (await client.getDirectoryContents('/', {
           details: false,
-        }) as any[];
+        })) as any[];
 
         return new Set(contents.map((item: any) => item.basename));
       } catch (error) {
@@ -118,17 +117,18 @@ export default defineComponent({
         this.existingFiles = await (this as any).fetchExistingFiles();
 
         // Filter out files that already exist
-        const filesToUpload = files.filter(file => !this.existingFiles.has(file.name));
-        const skippedFiles = files.filter(file => this.existingFiles.has(file.name));
+        const filesToUpload = files.filter((file) => !this.existingFiles.has(file.name));
+        const skippedFiles = files.filter((file) => this.existingFiles.has(file.name));
 
         if (skippedFiles.length > 0) {
           showError(
-            this.n('memories',
+            this.n(
+              'memories',
               'Skipped {n} file that already exists',
               'Skipped {n} files that already exist',
               skippedFiles.length,
-              { n: skippedFiles.length }
-            )
+              { n: skippedFiles.length },
+            ),
           );
         }
 
@@ -168,7 +168,7 @@ export default defineComponent({
             this.progressNote = this.t('memories', 'Uploading {file} ({current}/{total})', {
               file: file.name,
               current: index + 1,
-              total: filesToUpload.length
+              total: filesToUpload.length,
             });
 
             const uploadPromise = uploader.upload(file.name, file);
@@ -179,12 +179,11 @@ export default defineComponent({
             successful.push(file.name);
             uploadedSize += file.size;
             this.progress = (uploadedSize / totalSize) * 100;
-
           } catch (error) {
             console.error('Upload failed for file:', file.name, error);
             failed.push(file.name);
             this.hasError = true;
-            
+
             uploadedSize += file.size;
             this.progress = (uploadedSize / totalSize) * 100;
           }
@@ -196,7 +195,6 @@ export default defineComponent({
         if (successful.length > 0) {
           utils.bus.emit('memories:timeline:soft-refresh', null);
         }
-
       } catch (error) {
         console.error('Upload process failed:', error);
         showError(this.t('memories', 'Upload failed'));
@@ -221,28 +219,22 @@ export default defineComponent({
     showUploadResults(successful: string[], failed: string[]) {
       if (successful.length > 0 && failed.length === 0) {
         showSuccess(
-          this.n('memories', 
-            'Successfully uploaded {n} file', 
-            'Successfully uploaded {n} files', 
-            successful.length, 
-            { n: successful.length }
-          )
+          this.n('memories', 'Successfully uploaded {n} file', 'Successfully uploaded {n} files', successful.length, {
+            n: successful.length,
+          }),
         );
       } else if (successful.length > 0 && failed.length > 0) {
         showError(
           this.t('memories', 'Uploaded {success} files, {failed} failed', {
             success: successful.length,
-            failed: failed.length
-          })
+            failed: failed.length,
+          }),
         );
       } else if (failed.length > 0) {
         showError(
-          this.n('memories', 
-            'Failed to upload {n} file', 
-            'Failed to upload {n} files', 
-            failed.length, 
-            { n: failed.length }
-          )
+          this.n('memories', 'Failed to upload {n} file', 'Failed to upload {n} files', failed.length, {
+            n: failed.length,
+          }),
         );
       }
     },
@@ -254,7 +246,7 @@ export default defineComponent({
     getCurrentPath(): string {
       if (this.routeIsPublic) {
         const routePath = this.$route.params.path;
-        
+
         if (Array.isArray(routePath)) {
           const pathStr = routePath.join('/');
           return pathStr ? `/${pathStr}` : '/';
@@ -262,7 +254,7 @@ export default defineComponent({
           return routePath ? `/${routePath}` : '/';
         }
       }
-      
+
       return '/';
     },
 
@@ -270,7 +262,7 @@ export default defineComponent({
      * Cancels all ongoing uploads and resets state
      */
     cancelAllUploads() {
-      this.currentUploads.forEach(upload => {
+      this.currentUploads.forEach((upload) => {
         try {
           upload.cancel();
         } catch (error) {

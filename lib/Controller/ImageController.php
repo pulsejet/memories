@@ -257,15 +257,12 @@ class ImageController extends GenericApiController
                     }
                     $info['clusters'] = $clist;
                 }
-            } else {
+            } elseif ($shareNode = $this->fs->getShareNode()) {
                 // For public shares, get path relative to share root
-                $shareNode = $this->fs->getShareNode();
-                if ($shareNode) {
-                    $sharePath = $shareNode->getPath();
-                    $filePath = $file->getPath();
-                    if (str_starts_with($filePath, $sharePath)) {
-                        $info['filename'] = substr($filePath, \strlen($sharePath));
-                    }
+                $sharePath = $shareNode->getPath();
+                $filePath = $file->getPath();
+                if (str_starts_with($filePath, $sharePath)) {
+                    $info['filename'] = substr($filePath, \strlen($sharePath));
                 }
             }
 

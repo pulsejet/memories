@@ -11,6 +11,9 @@
     </NcBreadcrumbs>
 
     <div class="right-actions">
+      <!-- Progress bar for upload -->
+      <PublicUploadHandler ref="uploadHandler" v-if="allowPublicUpload" />
+
       <NcActions :inline="3">
         <NcActionButton
           v-if="!routeIsPublic"
@@ -34,12 +37,12 @@
 
         <!-- Public upload button -->
         <NcActionButton
-          v-if="routeIsPublic && allowUpload"
+          v-if="allowPublicUpload"
           :aria-label="t('memories', 'Upload files')"
-          :disabled="isUploading"
-          @click="triggerFileUpload"
+          :disabled="isPublicUploading"
+          @click="triggerPublicFileUpload"
         >
-          {{ isUploading ? t('memories', 'Uploading...') : t('memories', 'Upload files') }}
+          {{ isPublicUploading ? t('memories', 'Uploading files') : t('memories', 'Upload files') }}
           <template #icon> <UploadIcon :size="20" /> </template>
         </NcActionButton>
 
@@ -51,9 +54,6 @@
           </template>
         </NcActionButton>
       </NcActions>
-
-      <!-- Progress bar for PublicUploadHandler -->
-      <PublicUploadHandler ref="uploadHandler" v-if="routeIsPublic && allowUpload" />
     </div>
   </div>
 </template>
@@ -127,14 +127,13 @@ export default defineComponent({
       return nativex.has();
     },
 
-    allowUpload(): boolean {
-      return this.initstate.allow_upload === true;
+    allowPublicUpload(): boolean {
+      return this.routeIsPublic && this.initstate.allow_upload === true;
     },
 
-    // Check if PublicUploadHandler is currently uploading
-    isUploading(): boolean {
-      const handler = this.$refs.uploadHandler as any;
-      return handler?.processing || false;
+    isPublicUploading(): boolean {
+      const handler = this.$refs.uploadHandler as InstanceType<typeof PublicUploadHandler> | null;
+      return !!handler?.processing;
     },
   },
 
@@ -164,8 +163,7 @@ export default defineComponent({
       };
     },
 
-    // Trigger upload via PublicUploadHandler
-    triggerFileUpload(): void {
+    triggerPublicFileUpload(): void {
       const handler = this.$refs.uploadHandler as any;
       if (handler && typeof handler.startUpload === 'function') {
         handler.startUpload();
@@ -179,6 +177,14 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .top-matter {
+  .breadcrumb {
+    min-width: 0;
+    height: unset;
+    .share-name {
+      margin-left: 0.75em;
+    }
+  }
+
   .right-actions {
     display: flex;
     align-items: center;
