@@ -137,7 +137,7 @@ export class API {
   }
 
   static IMAGE_SETEXIF(id: number) {
-    return gen(`${BASE}/image/set-exif/{id}`, { id });
+    return tok(gen(`${BASE}/image/set-exif/{id}`, { id }));
   }
 
   static IMAGE_DECODABLE(id: number, etag?: string) {
@@ -145,7 +145,11 @@ export class API {
   }
 
   static IMAGE_EDIT(id: number) {
-    return gen(`${BASE}/image/edit/{id}`, { id });
+    return tok(gen(`${BASE}/image/edit/{id}`, { id }));
+  }
+
+  static IMAGE_DELETE(id: number) {
+    return tok(gen(`${BASE}/image/delete/{id}`, { id }));
   }
 
   static VIDEO_TRANSCODE(fileid: number, file = 'index.m3u8') {

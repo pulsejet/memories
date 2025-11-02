@@ -1049,7 +1049,6 @@ export default defineComponent({
 
     /** Delete this photo and refresh */
     async deleteCurrent() {
-      if (this.routeIsPublic) return;
 
       let idx = this.photoswipe!.currIndex - this.globalAnchor;
       const photo = this.list[idx];

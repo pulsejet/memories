@@ -11,7 +11,7 @@
     </NcBreadcrumbs>
 
     <div class="right-actions">
-      <NcActions :inline="1">
+      <NcActions :inline="3">
         <NcActionButton
           v-if="!routeIsPublic"
           :aria-label="t('memories', 'Share folder')"
@@ -32,6 +32,17 @@
           <template #icon> <UploadIcon :size="20" /> </template>
         </NcActionButton>
 
+        <!-- Public upload button -->
+        <NcActionButton
+          v-if="routeIsPublic && allowUpload"
+          :aria-label="t('memories', 'Upload files')"
+          :disabled="isUploading"
+          @click="triggerFileUpload"
+        >
+          {{ isUploading ? t('memories', 'Uploading...') : t('memories', 'Upload files') }}
+          <template #icon> <UploadIcon :size="20" /> </template>
+        </NcActionButton>
+
         <NcActionButton @click="toggleRecursive" close-after-click>
           {{ recursive ? t('memories', 'Folder view') : t('memories', 'Timeline view') }}
           <template #icon>
@@ -40,6 +51,9 @@
           </template>
         </NcActionButton>
       </NcActions>
+
+      <!-- Progress bar for PublicUploadHandler -->
+      <PublicUploadHandler ref="uploadHandler" v-if="routeIsPublic && allowUpload" />
     </div>
   </div>
 </template>
@@ -53,6 +67,7 @@ const NcBreadcrumbs = () => import('@nextcloud/vue/dist/Components/NcBreadcrumbs
 const NcBreadcrumb = () => import('@nextcloud/vue/dist/Components/NcBreadcrumb.js');
 import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import PublicUploadHandler from '@components/upload/PublicUploadHandler.vue';
 
 import * as utils from '@services/utils';
 import * as nativex from '@native';
@@ -71,6 +86,7 @@ export default defineComponent({
     NcBreadcrumb,
     NcActions,
     NcActionButton,
+    PublicUploadHandler,
     HomeIcon,
     ShareIcon,
     TimelineIcon,
@@ -110,18 +126,28 @@ export default defineComponent({
     isNative(): boolean {
       return nativex.has();
     },
+
+    allowUpload(): boolean {
+      return this.initstate.allow_upload === true;
+    },
+
+    // Check if PublicUploadHandler is currently uploading
+    isUploading(): boolean {
+      const handler = this.$refs.uploadHandler as any;
+      return handler?.processing || false;
+    },
   },
 
   methods: {
-    share() {
+    share(): void {
       _m.modals.shareNodeLink(utils.getFolderRoutePath(this.config.folders_path));
     },
 
-    upload() {
+    upload(): void {
       _m.modals.upload();
     },
 
-    toggleRecursive() {
+    toggleRecursive(): void {
       this.$router.replace({
         query: {
           ...this.$router.currentRoute.query,
@@ -130,12 +156,22 @@ export default defineComponent({
       });
     },
 
-    getRoute(path: string[]) {
+    getRoute(path: string[]): object {
       return {
         ...this.$route,
         params: { path },
         hash: undefined,
       };
+    },
+
+    // Trigger upload via PublicUploadHandler
+    triggerFileUpload(): void {
+      const handler = this.$refs.uploadHandler as any;
+      if (handler && typeof handler.startUpload === 'function') {
+        handler.startUpload();
+      } else {
+        console.error('PublicUploadHandler not properly initialized');
+      }
     },
   },
 });
@@ -143,12 +179,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .top-matter {
-  .breadcrumb {
-    min-width: 0;
-    height: unset;
-    .share-name {
-      margin-left: 0.75em;
-    }
+  .right-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px; // Add spacing between actions and progress bar
   }
 }
 </style>
