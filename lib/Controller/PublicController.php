@@ -11,6 +11,7 @@ use OCA\Memories\Util;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
+use OCP\AppFramework\Http\Template\LinkMenuAction;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
@@ -18,6 +19,7 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\IRootFolder;
 use OCP\Files\NotFoundException;
 use OCP\IConfig;
+use OCP\IL10N;
 use OCP\IRequest;
 use OCP\ISession;
 use OCP\IURLGenerator;
@@ -41,6 +43,7 @@ class PublicController extends AuthPublicShareController
         protected IShareManager $shareManager,
         protected IConfig $config,
         protected TimelineQuery $tq,
+        protected IL10N $l10n,
     ) {
         parent::__construct(Application::APPNAME, $request, $session, $urlGenerator);
     }
@@ -122,6 +125,16 @@ class PublicController extends AuthPublicShareController
         $response->setFooterVisible(false); // wth is that anyway?
         $response->setContentSecurityPolicy(PageController::getCSP());
         $response->cacheFor(0);
+
+        // Add download link
+        if (!$share->getHideDownload()) {
+            $dlUrl = $this->urlGenerator->linkToRouteAbsolute('files_sharing.sharecontroller.downloadShare', [
+                'token' => $this->getToken(),
+                'filename' => null,
+            ]);
+            $dlAction = new LinkMenuAction($this->l10n->t('Download'), 'icon-download', $dlUrl);
+            $response->setHeaderActions([$dlAction]);
+        }
 
         return $response;
     }
