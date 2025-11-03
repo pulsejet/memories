@@ -38,6 +38,7 @@ OC.L10N.register(
     "Oldest first" : "Hynaf gyntaf",
     "Newest first" : "Diweddaraf gyntaf",
     "Home" : "Cartref",
+    "Upload failed" : "Methwyd llwytho i fyny",
     "Previous" : "Blaenorol",
     "Undo" : "Dadwneud",
     "Custom" : "Cyfaddas",

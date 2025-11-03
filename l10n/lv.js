@@ -119,6 +119,7 @@ OC.L10N.register(
     "Remove album" : "Noņemt albumu",
     "Home" : "Sākums",
     "Upload files" : "Augšupielādēt datnes",
+    "Upload failed" : "Augšupielāde neizdevās",
     "Unsaved changes" : "Nesaglabātas izmaiņas",
     "Download {ext}" : "Lejupielādēt {ext}",
     "Slideshow" : "Slīdrāde",

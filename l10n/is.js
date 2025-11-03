@@ -106,6 +106,7 @@ OC.L10N.register(
     "Home" : "Heim",
     "Share folder" : "Deila möppu",
     "Upload files" : "Hlaða inn skrám",
+    "Upload failed" : "Innsending mistókst",
     "Unsaved changes" : "Óvistaðar breytingar",
     "Drop changes" : "Henda breytingum",
     "Download {ext}" : "Sækja {ext}",

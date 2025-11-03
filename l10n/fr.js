@@ -427,6 +427,7 @@ OC.L10N.register(
     "Move right" : "Vers la droite",
     "Unidentified location" : "Localisation non identifiée",
     "Files without location" : "Fichiers sans emplacement",
+    "Upload failed" : "Échec du téléversement",
     "Image saved successfully" : "Image enregistrée avec succès",
     "Error saving image: {error}" : "Erreur lors de l'enregistrement de l'image : {error}",
     "Unsaved changes" : "Modifications non enregistrées",

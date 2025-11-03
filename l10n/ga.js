@@ -427,6 +427,7 @@ OC.L10N.register(
     "Move right" : "Bog ar dheis",
     "Unidentified location" : "Suíomh anaithnid",
     "Files without location" : "Comhaid gan suíomh",
+    "Upload failed" : "Theip ar an uaslódáil",
     "Image saved successfully" : "Sábháladh an íomhá go rathúil",
     "Error saving image: {error}" : "Earráid agus íomhá á sábháil: {error}",
     "Unsaved changes" : "Athruithe gan sábháil",

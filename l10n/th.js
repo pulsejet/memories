@@ -58,6 +58,7 @@ OC.L10N.register(
     "Home" : "หน้าหลัก",
     "Share folder" : "แชร์โฟลเดอร์",
     "Upload files" : "อัพโหลดไฟล์จากเครื่อง",
+    "Upload failed" : "อัปโหลดล้มเหลว",
     "Download {ext}" : "ดาวน์โหลด {ext}",
     "Previous" : "ก่อนหน้า",
     "Next" : "ถัดไป",

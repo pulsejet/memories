@@ -424,6 +424,7 @@
     "Move right" : "Přesunout doprava",
     "Unidentified location" : "Neurčené umístění",
     "Files without location" : "Soubory bez umístění",
+    "Upload failed" : "Nahrání se nezdařilo",
     "Image saved successfully" : "Obrázek úspěšně uložen",
     "Error saving image: {error}" : "Chyba při ukládání obrázku: {error}",
     "Unsaved changes" : "Neuložené změny",

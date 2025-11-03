@@ -425,6 +425,7 @@ OC.L10N.register(
     "Move right" : "Переместить вправо",
     "Unidentified location" : "Неустановленное местоположение",
     "Files without location" : "Файлы без местоположения",
+    "Upload failed" : "Ошибка передачи на сервер",
     "Image saved successfully" : "Изображение сохранено",
     "Error saving image: {error}" : "Не удалось сохранить изображение: {error}",
     "Unsaved changes" : "Несохранённые изменения",

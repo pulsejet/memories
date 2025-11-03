@@ -427,6 +427,7 @@ OC.L10N.register(
     "Move right" : "Sağa taşı",
     "Unidentified location" : "Konum belirlenemedi",
     "Files without location" : "Konumu olmayan dosyalar",
+    "Upload failed" : "Yükleme başarısız",
     "Image saved successfully" : "Görsel kaydedildi",
     "Error saving image: {error}" : "Görsel kaydedilirken sorun çıktı: {error}",
     "Unsaved changes" : "Kaydedilmemiş değişiklikler",

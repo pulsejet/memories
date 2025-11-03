@@ -149,6 +149,7 @@ OC.L10N.register(
     "Home" : "Startpagina",
     "Share folder" : "Map delen",
     "Upload files" : "Bestanden uploaden",
+    "Upload failed" : "Upload mislukt",
     "Unsaved changes" : "Niet opgeslagen veranderingen",
     "Download {ext}" : "Download {ext}",
     "Slideshow" : "Diavoorstelling",

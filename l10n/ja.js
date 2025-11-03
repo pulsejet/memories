@@ -141,6 +141,7 @@ OC.L10N.register(
     "Share folder" : "フォルダーを共有",
     "Upload files" : "アップロードファイル",
     "Unidentified location" : "未識別の場所",
+    "Upload failed" : "アップロードに失敗",
     "Unsaved changes" : "未保存の変更点",
     "Drop changes" : "変更を破棄する",
     "Download {ext}" : "{ext}をダウンロード",

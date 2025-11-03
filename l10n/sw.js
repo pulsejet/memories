@@ -96,6 +96,7 @@ OC.L10N.register(
     "Home" : "Nyumbani",
     "Share folder" : "Shirikisha folda",
     "Upload files" : "Upload files",
+    "Upload failed" : "Imeshindwa kupakia",
     "Unsaved changes" : "Mabadiliko yasiyohifadhiwa",
     "Previous" : "Iliyopita",
     "Next" : "Next",

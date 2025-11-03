@@ -290,6 +290,7 @@ OC.L10N.register(
     "Share folder" : "Compartir carpeta",
     "Move left" : "Mover a la izquierda",
     "Move right" : "Mover a la derecha",
+    "Upload failed" : "Falla en la carga",
     "Image saved successfully" : "Imagen guardada exitosamente",
     "Unsaved changes" : "Cambios no guardados",
     "Drop changes" : "Descartar cambios",

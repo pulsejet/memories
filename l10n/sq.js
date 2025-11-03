@@ -50,6 +50,7 @@ OC.L10N.register(
     "Oldest first" : "Më i vjetri i pari",
     "Newest first" : "Më i riu i pari",
     "Home" : "Kryefaqja",
+    "Upload failed" : "Ngarkimi dështoi",
     "Unsaved changes" : "Ndryshime të paruajtura",
     "Download {ext}" : "Shkarko {ext}",
     "Previous" : "I mëparshëm",

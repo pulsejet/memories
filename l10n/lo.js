@@ -33,6 +33,7 @@ OC.L10N.register(
     "Newest first" : "ໃໝ່ທີ່ສຸດກ່ອນ",
     "Home" : "ໜ້າຫຼັກ",
     "Upload files" : "ອັບໂຫຼດຟາຍ",
+    "Upload failed" : "ອັບໂຫຼດບໍ່ສຳເລັດ",
     "Previous" : "ກ່ອນໜ້າ",
     "Original" : "ຕົ້ນສະບັບ",
     "Size" : "ຂະຫນາດ",

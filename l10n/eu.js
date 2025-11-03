@@ -283,6 +283,7 @@ OC.L10N.register(
     "Timeline view" : "Denbora-lerro ikuspegia",
     "Move left" : "Mugitu ezkerrera",
     "Move right" : "Mugitu eskuinera",
+    "Upload failed" : "igotzeak huts egin du",
     "Image saved successfully" : "Irudia ondo gorde da",
     "Unsaved changes" : "Gorde gabeko aldaketak",
     "Drop changes" : "Jaregin aldaketak",

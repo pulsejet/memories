@@ -422,6 +422,7 @@ OC.L10N.register(
     "Move right" : "Flytt til høyre",
     "Unidentified location" : "Uidentifisert plassering",
     "Files without location" : "Filer uten plassering",
+    "Upload failed" : "Opplasting mislyktes",
     "Image saved successfully" : "Bildet er lagret",
     "Error saving image: {error}" : "Feil under lagring av bilde: {error}",
     "Unsaved changes" : "Ulagrede endringer",

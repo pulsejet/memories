@@ -317,6 +317,7 @@ OC.L10N.register(
     "Upload files" : "بارگذاری فایل ها",
     "Move left" : "Move left",
     "Move right" : "Move right",
+    "Upload failed" : "آپلود ناموفق",
     "Image saved successfully" : "Image saved successfully",
     "Unsaved changes" : "Unsaved changes",
     "Drop changes" : "Drop changes",

@@ -52,6 +52,7 @@ OC.L10N.register(
     "Read only" : "Lectura sola",
     "Share link" : "Partejar via ligam",
     "Refresh" : "Refrescar",
+    "Upload failed" : "Fracàs del mandadís",
     "Unsaved changes" : "Modificacions pas enregistradas",
     "Download {ext}" : "Telecargar {ext}",
     "Previous" : "Precedent",

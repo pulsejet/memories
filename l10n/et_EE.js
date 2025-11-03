@@ -304,6 +304,7 @@ OC.L10N.register(
     "Move right" : "Nihuta paremale",
     "Unidentified location" : "Määratlemata asukoht",
     "Files without location" : "Ilma asukohata failid",
+    "Upload failed" : "Üleslaadimine ei õnnestunud",
     "Image saved successfully" : "Pildi salvestamine õnnestus",
     "Error saving image: {error}" : "Viga pildi salvestamisel: {error}",
     "Unsaved changes" : "Salvestamata muutused",

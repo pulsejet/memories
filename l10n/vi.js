@@ -60,6 +60,7 @@ OC.L10N.register(
     "Home" : "Trang nhà",
     "Share folder" : "Chia sẻ thư mục",
     "Upload files" : "Tải lên tập tin",
+    "Upload failed" : "Tải lên thất bại",
     "Unsaved changes" : "Thay đổi chưa được lưu",
     "Download {ext}" : "Tải xuống {ext}",
     "Previous" : "Trước",

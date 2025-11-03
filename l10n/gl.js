@@ -427,6 +427,7 @@ OC.L10N.register(
     "Move right" : "Move á dereita",
     "Unidentified location" : "Localización non identificada",
     "Files without location" : "Ficheiros sen localización",
+    "Upload failed" : "Produciuse unha falla no envío",
     "Image saved successfully" : "A imaxe foi gardada satisfactoriamente",
     "Error saving image: {error}" : "Produciuse un erro ao gardar a imaxe: {error}",
     "Unsaved changes" : "Cambios sen gardar",

@@ -117,6 +117,7 @@ OC.L10N.register(
     "Home" : "Hjem",
     "Share folder" : "Del mappe",
     "Upload files" : "Upload filer",
+    "Upload failed" : "Upload fejlede",
     "Unsaved changes" : "Ikke gemte ændringer",
     "Drop changes" : "Fortryd ændringer",
     "Download {ext}" : "Hent {ext}",

@@ -380,6 +380,7 @@ OC.L10N.register(
     "Move right" : "Flytta höger",
     "Unidentified location" : "Oidentifierad position",
     "Files without location" : "Filer utan platsdata",
+    "Upload failed" : "Misslyckad uppladdning",
     "Image saved successfully" : "Bild sparad",
     "Error saving image: {error}" : "Det gick inte spara bild: {error}",
     "Unsaved changes" : "Ej sparade ändringar",

@@ -128,6 +128,7 @@ OC.L10N.register(
     "Upload files" : "Įkelti failus",
     "Move left" : "Perkelti kairėn",
     "Move right" : "Perkelti dešinėn",
+    "Upload failed" : "Nusiuntimas nepavyko",
     "Image saved successfully" : "Paveikslas sėkmingai įrašytas",
     "Unsaved changes" : "Neįrašyti pakeitimai",
     "Drop changes" : "Atmesti pakeitimus",

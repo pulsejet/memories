@@ -31,6 +31,7 @@ OC.L10N.register(
     "Share link" : "இணைப்பைப் பகிரவும்",
     "Refresh" : "மீள் ஏற்றுக",
     "Home" : "அகம்",
+    "Upload failed" : "பதிவேற்றல் தோல்வியுற்றது",
     "Previous" : "முன்தைய",
     "Value" : "Value",
     "Size" : "அளவு",

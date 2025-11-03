@@ -60,6 +60,7 @@ OC.L10N.register(
     "Newest first" : "Newest first",
     "Home" : "მთავარი",
     "Upload files" : "Upload files",
+    "Upload failed" : "Upload failed",
     "Previous" : "Previous",
     "Next" : "Next",
     "Undo" : "Undo",

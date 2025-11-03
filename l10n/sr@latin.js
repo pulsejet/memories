@@ -30,6 +30,7 @@ OC.L10N.register(
     "Newest first" : "Prvo novije",
     "Home" : "Početak",
     "Upload files" : "Otpremi fajlove",
+    "Upload failed" : "Otpremanje neuspešno",
     "Undo" : "Opozovi",
     "Setup" : "Podesi",
     "Yes" : "Da",

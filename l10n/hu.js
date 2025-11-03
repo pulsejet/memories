@@ -340,6 +340,7 @@ OC.L10N.register(
     "Upload files" : "Fájlok feltöltése",
     "Move left" : "Mozgatás balra",
     "Move right" : "Mozgatás jobbra",
+    "Upload failed" : "A feltöltés nem sikerült",
     "Image saved successfully" : "A kép sikeresen mentve",
     "Unsaved changes" : "Mentetlen változtatások",
     "Drop changes" : "Változtatások elvetése",

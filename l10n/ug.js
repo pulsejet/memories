@@ -414,6 +414,7 @@ OC.L10N.register(
     "Move right" : "ئوڭغا يۆتكەڭ",
     "Unidentified location" : "نامەلۇم ئورۇن",
     "Files without location" : "ئورنى يوق ھۆججەتلەر",
+    "Upload failed" : "يۈكلەش مەغلۇپ بولدى",
     "Image saved successfully" : "رەسىم مۇۋەپپەقىيەتلىك ساقلاندى",
     "Error saving image: {error}" : "رەسىم تېجەشتە خاتالىق: {error}",
     "Unsaved changes" : "ساقلانمىغان ئۆزگەرتىش",

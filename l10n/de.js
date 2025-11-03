@@ -427,6 +427,7 @@ OC.L10N.register(
     "Move right" : "Nach rechts verschieben",
     "Unidentified location" : "Unbekannter Standort",
     "Files without location" : "Dateien ohne Standort",
+    "Upload failed" : "Benötigt keine Übersetzung. Hier wird nur die formelle Übersetzung verwendet (de_DE).",
     "Image saved successfully" : "Bild gespeichert",
     "Error saving image: {error}" : "Fehler beim Speichern des Bildes: {error}",
     "Unsaved changes" : "Benötigt keine Übersetzung. Hier wird nur die formelle Übersetzung verwendet (de_DE).",

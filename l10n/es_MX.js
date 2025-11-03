@@ -97,6 +97,7 @@ OC.L10N.register(
     "Merge with different person" : "Mezclar con una persona diferente",
     "Home" : "Inicio",
     "Share folder" : "Compartir carpeta",
+    "Upload failed" : "Falla en la carga",
     "Unsaved changes" : "Cambios no guardados",
     "Drop changes" : "Descartar cambios",
     "Download {ext}" : "Descargar {ext}",

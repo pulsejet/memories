@@ -92,6 +92,7 @@ OC.L10N.register(
     "Unassigned faces" : "Wajah yang belum ditetapkan",
     "Merge with different person" : "Gabungkan dengan orang yang berbeda",
     "Home" : "Beranda",
+    "Upload failed" : "Gagal mengunggah",
     "Unsaved changes" : "Perubahan belum disimpan",
     "Drop changes" : "Buang perubahan",
     "Download {ext}" : "Unduh {ext}",

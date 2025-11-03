@@ -83,6 +83,7 @@ OC.L10N.register(
     "Oldest first" : "הישן ביותר ראשון",
     "Newest first" : "החדש ביותר ראשון",
     "Upload files" : "העלאת קבצים",
+    "Upload failed" : "ההעלאה נכשלה",
     "Unsaved changes" : "שינויים שלא נשמרו",
     "Download {ext}" : "הורדת {ext}",
     "Previous" : "הקודם",

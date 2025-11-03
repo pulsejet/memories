@@ -51,6 +51,7 @@ OC.L10N.register(
     "Oldest first" : "Más antiguo primero",
     "Newest first" : "Más reciente primero",
     "Home" : "Inicio",
+    "Upload failed" : "Falla en la carga",
     "Unsaved changes" : "Cambios no guardados",
     "Download {ext}" : "Descargar {ext}",
     "Previous" : "Previo",

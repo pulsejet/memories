@@ -50,6 +50,7 @@ OC.L10N.register(
     "Oldest first" : "ჯერ ძველი",
     "Newest first" : "ჯერ ახალი",
     "Home" : "სახლი",
+    "Upload failed" : "ატვირთვა ვერ განხორციელდა",
     "Unsaved changes" : "შეუნახავი ცვლილებები",
     "Download {ext}" : "{ext}-ის ჩამოტვირთვა",
     "Previous" : "წინა",

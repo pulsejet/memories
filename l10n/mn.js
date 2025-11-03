@@ -45,6 +45,7 @@ OC.L10N.register(
     "Newest first" : "Шинийг урд нь",
     "Home" : "Нүүр",
     "Upload files" : "Файл оруулах",
+    "Upload failed" : "upload амжилтгүй болсон",
     "Previous" : "өмнөх",
     "Next" : "Даараах",
     "Finish" : "Бариа",
