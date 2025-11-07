@@ -39,6 +39,7 @@ OC.L10N.register(
     "Reset" : "Qayta tiklash",
     "Name" : "Name",
     "Update" : "Yangilash",
+    "Loading …" : "Yuklanmoqda…",
     "Move" : "Ko'chirish",
     "Remove" : "O'chirish",
     "Read only" : "Faqat o'qing",
