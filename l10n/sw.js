@@ -80,6 +80,7 @@ OC.L10N.register(
     "Choose a folder" : "Choose a folder",
     "Remove" : "Ondoa",
     "Password protected" : "Password protected",
+    "Expires" : "Expires",
     "Read only" : "Read only",
     "Link copied to clipboard" : "Kiungo kimenakiliwa kwenye ubao wakunakilia",
     "Failed to copy link to clipboard" : "Failed to copy link to clipboard",
