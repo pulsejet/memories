@@ -44,6 +44,7 @@ OC.L10N.register(
     "Face Recognition is installed and enabled" : "顔認識がインストールされていて、使える状態です。",
     "Preview generator is installed and enabled. Additional configuration may still be required." : "プレビュー生成ツールがインストールされ、有効になっています。追加の設定がまだ必要かもしれません。",
     "Preview generator is not installed and configured. This may make Memories very slow." : "プレビュー生成ツールがインストールされておらず、設定もされていません。これにより、メモリーが非常に遅くなる可能性があります。",
+    "You can configure the enabled Nextcloud preview providers below." : "以下の有効なNextcloudプレビュープロバイダーを設定できます。",
     "Imaginary is enabled for preview generation. This will override other preview providers. We currently recommend against using Imaginary due to multiple bugs in handling of HEIC and GIF files." : "Imaginaryはプレビュー生成のために有効化されています。これにより、他のプレビュープロバイダーが上書きされます。現在、HEICおよびGIFファイルの処理に複数のバグがあるため、Imaginaryの使用は推奨しません。",
     "Help & Support" : "ヘルプとサポート",
     "Thank you for choosing Nextcloud and Memories to store your precious data!" : "貴重なデータを保存するためにNextcloudとMemoriesを選んでいただき、ありがとうございます！",
