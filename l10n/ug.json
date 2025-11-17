@@ -57,6 +57,7 @@
     "You must enable \"Mark person in preview\" to use this feature" : "بۇ ئىقتىدارنى ئىشلىتىش ئۈچۈن چوقۇم «ئالدىن كۆرۈشنى بەلگە قىلىش» نى قوزغىتىشىڭىز كېرەك",
     "Only user \"{user}\" can update this person" : "پەقەت «{user}» ئىشلەتكۈچىلا بۇ ئادەمنى يېڭىلىيالايدۇ",
     "Cancel" : "ۋاز كەچ",
+    "_{n} selected_::_{n} selected_" : ["{n} تاللاندى","{n} تاللاندى"],
     "Memories Settings" : "ئەسلىمە تەڭشىكى",
     "General" : "ئادەتتىكى",
     "Photo Viewer" : "رەسىم كۆرگۈچى",
