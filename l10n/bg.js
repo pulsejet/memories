@@ -397,6 +397,7 @@ OC.L10N.register(
     "Places you have been to will appear here" : "Местата, на които сте били, ще се появят тук",
     "Yes" : "Да",
     "No" : "Не",
+    "Choose {file}" : "Изберете {file}",
     "Choose" : "Изберете"
 },
 "nplurals=2; plural=(n != 1);");
