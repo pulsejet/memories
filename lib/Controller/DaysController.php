@@ -68,6 +68,8 @@ class DaysController extends GenericApiController
                 $this->isHidden(),
                 $this->isMonthView(),
                 $this->isReverse(),
+                $this->getMinRating(),
+                $this->getEmbeddedTags(),
                 $this->getTransformations(),
             );
 
@@ -112,6 +114,18 @@ class DaysController extends GenericApiController
         // Filter geological bounds
         if ($bounds = $this->request->getParam('mapbounds')) {
             $transforms[] = [$this->tq, 'transformMapBoundsFilter', $bounds];
+        }
+
+        // Min rating filter - only if SQL filtering is enabled
+        if ($this->tq->shouldFilterExifBySQL() && ($minRating = $this->getMinRating())) {
+            $transforms[] = [$this->tq, 'transformMinRatingFilter', $minRating];
+        }
+
+        // Embedded tags filter - only if SQL filtering is enabled
+        if ($this->tq->shouldFilterExifBySQL() && ($embeddedTags = $this->getEmbeddedTags())) {
+            if (!empty($embeddedTags)) {
+                $transforms[] = [$this->tq, 'transformEmbeddedTagsFilter', $embeddedTags];
+            }
         }
 
         // Limit number of responses for day query
@@ -168,6 +182,8 @@ class DaysController extends GenericApiController
             $this->isHidden(),
             $this->isMonthView(),
             $this->isReverse(),
+            $this->getMinRating(),
+            $this->getEmbeddedTags(),
             $this->getTransformations(),
         );
 
@@ -176,6 +192,15 @@ class DaysController extends GenericApiController
             $dayId = (int) $photo['dayid'];
             if (!($drefMap[$dayId] ?? null)) {
                 continue;
+            }
+
+            // Only include photos that are in the fileIds array (if it exists)
+            $dayData = $drefMap[$dayId];
+            if (isset($dayData['fileIds']) && !empty($dayData['fileIds'])) {
+                $photoFileId = (int) $photo['fileid'];
+                if (!in_array($photoFileId, $dayData['fileIds'], true)) {
+                    continue;
+                }
             }
 
             if (!($drefMap[$dayId]['detail'] ?? null)) {
@@ -214,5 +239,21 @@ class DaysController extends GenericApiController
     private function isReverse(): bool
     {
         return null !== $this->request->getParam('reverse');
+    }
+
+    private function getMinRating(): int
+    {
+        return (int) $this->request->getParam('minRating') ?? 0;
+    }
+
+    private function getEmbeddedTags(): array
+    {
+        $embeddedTagsParam = $this->request->getParam('embeddedTags');
+        if ($embeddedTagsParam) {
+            // Decode URI-encoded string before splitting
+            $decoded = urldecode($embeddedTagsParam);
+            return explode(',', $decoded);
+        }
+        return [];
     }
 }
