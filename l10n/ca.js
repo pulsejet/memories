@@ -112,6 +112,7 @@ OC.L10N.register(
     "Home" : "Casa",
     "Share folder" : "Comparteix la carpeta",
     "Upload files" : "Pujada de fitxers",
+    "Upload failed" : "S'ha produït un error durant la pujada",
     "Unsaved changes" : "Hi ha canvis sense desar",
     "Drop changes" : "Suprimeix els canvis",
     "Download {ext}" : "Baixa {ext}",

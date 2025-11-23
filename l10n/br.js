@@ -46,6 +46,7 @@ OC.L10N.register(
     "Newest first" : "An hini nevesañ da gentañ",
     "Home" : "Degemer",
     "Upload files" : "Pellkas restr",
+    "Upload failed" : "Pellkasaden c'hwitet",
     "Unsaved changes" : "Kemmoù n'int ket bet enrollet",
     "Next" : "War-lerc'h",
     "Original" : "Orin",

@@ -32,6 +32,7 @@ OC.L10N.register(
     "Password protected" : "কূটশব্দদ্বারা সুরক্ষিত",
     "Refresh" : "নবোদ্যম",
     "Home" : "বাড়ি",
+    "Upload failed" : "আপলোড হয়নি",
     "Download {ext}" : "ডাউনলোড  {ext}",
     "Previous" : "পূর্ববর্তী",
     "Size" : "আকার",
