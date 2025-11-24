@@ -326,6 +326,7 @@ OC.L10N.register(
     "Download {ext}" : "بارگیری {ext}",
     "Slideshow" : "Slideshow",
     "Previous" : "پیشین",
+    "Next" : "بعدی",
     "Editing is currently disabled for Live Photos" : "Editing is currently disabled for Live Photos",
     "{name} binary exists and is executable." : "{name} binary exists and is executable.",
     "{name} binary not found." : "{name} binary not found.",

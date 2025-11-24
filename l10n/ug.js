@@ -425,6 +425,7 @@ OC.L10N.register(
     "Download {ext}" : "Download {ext}",
     "Slideshow" : "تام تەسۋىر",
     "Previous" : "ئالدىنقى",
+    "Next" : "كېيىنكى",
     "Editing is currently disabled for Live Photos" : "نەق مەيدان رەسىملىرى ئۈچۈن تەھرىرلەش ھازىرچە چەكلەنگەن",
     "You are now logged in to the server!" : "سىز ھازىر مۇلازىمېتىرغا كىردىڭىز!",
     "You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue." : "Nextcloud كۆچمە ئەپى ئارقىلىق بۇ ئۈسكۈنىدىن ئاپتوماتىك يۈكلەشنى تەڭشىيەلەيسىز. تۆۋەندىكى كۇنۇپكىنى بېسىپ ئەپنى چۈشۈرۈڭ ياكى بۇ باسقۇچتىن ئاتلاپ داۋاملاشتۇرۇڭ.",
