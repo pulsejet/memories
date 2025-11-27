@@ -82,6 +82,7 @@ OC.L10N.register(
     "Creation date" : "מועד יצירה",
     "Oldest first" : "הישן ביותר ראשון",
     "Newest first" : "החדש ביותר ראשון",
+    "Home" : "בית",
     "Upload files" : "העלאת קבצים",
     "Upload failed" : "ההעלאה נכשלה",
     "Unsaved changes" : "שינויים שלא נשמרו",
