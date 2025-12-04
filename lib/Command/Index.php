@@ -415,11 +415,11 @@ class Index extends Command
         \OCA\Memories\Exif::ensureStaticExiftoolProc();
 
         $numFiles = \count($fileIds);
-        fwrite(STDERR, "[Worker {$workerIndex}] Processing {$numFiles} file(s)\n");
+        fwrite(STDERR, "[Worker {$workerIndex}] Starting with {$numFiles} file(s)\n");
 
         try {
-            // Process files directly by ID - no folder traversal needed
-            $this->indexer->indexByIds($fileIds);
+            // Process files directly by ID - batched progress reporting
+            $this->indexer->indexByIds($fileIds, $workerIndex);
         } catch (\Exception $e) {
             fwrite(STDERR, "[Worker {$workerIndex}] Error: {$e->getMessage()}\n");
         } finally {

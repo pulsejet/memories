@@ -329,17 +329,43 @@ class Index
      * Index files by their IDs directly (no folder traversal).
      *
      * @param array<int> $fileIds File IDs to index
+     * @param int        $batchId Optional batch/worker ID for progress reporting (-1 = single mode)
      */
-    public function indexByIds(array $fileIds): void
+    public function indexByIds(array $fileIds, int $batchId = -1): void
     {
         $total = \count($fileIds);
         $processed = 0;
+        $indexed = 0;
+        $startTime = time();
+        $lastReport = $startTime;
+
+        // In parallel mode: report every 5% or 30 seconds, whichever comes first
+        // In single mode: report every file (overwrite mode)
+        $parallelMode = $batchId >= 0;
+        $reportInterval = max(1, (int) ($total * 0.05)); // 5% of total
 
         foreach ($fileIds as $fileId) {
             $this->ensureContinueOk();
-
             ++$processed;
-            $this->log("Indexing file {$processed}/{$total} (ID: {$fileId})", true);
+
+            // Progress reporting
+            $now = time();
+            $shouldReport = $parallelMode
+                ? ($processed % $reportInterval === 0 || $now - $lastReport >= 30)
+                : true;
+
+            if ($shouldReport) {
+                $elapsed = max(1, $now - $startTime);
+                $rate = round($processed / $elapsed, 1);
+                $pct = round($processed / $total * 100, 1);
+
+                if ($parallelMode) {
+                    fwrite(STDERR, "[Worker {$batchId}] Progress: {$processed}/{$total} ({$pct}%) - {$rate} files/sec\n");
+                    $lastReport = $now;
+                } else {
+                    $this->log("Indexing file {$processed}/{$total} (ID: {$fileId})", true);
+                }
+            }
 
             try {
                 // Look up file by ID
@@ -359,11 +385,22 @@ class Index
                 }
 
                 $this->indexFile($file);
+                ++$indexed;
             } catch (\OCP\Lock\LockedException $e) {
-                $this->log("Skipping file {$fileId} due to lock", true);
+                // Skip silently in parallel mode
+                if (!$parallelMode) {
+                    $this->log("Skipping file {$fileId} due to lock", true);
+                }
             } catch (\Exception $e) {
                 $this->error("Failed to index file {$fileId}: {$e->getMessage()}");
             }
+        }
+
+        // Final summary for parallel workers
+        if ($parallelMode) {
+            $elapsed = max(1, time() - $startTime);
+            $rate = round($processed / $elapsed, 1);
+            fwrite(STDERR, "[Worker {$batchId}] Completed: {$indexed}/{$total} indexed ({$rate} files/sec)\n");
         }
     }
 
