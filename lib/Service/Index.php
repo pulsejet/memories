@@ -57,6 +57,7 @@ class Index
      */
     public ?\Closure $continueCheck = null;
 
+
     /** @var string[] */
     private static ?array $mimeList = null;
 
@@ -122,6 +123,276 @@ class Index
                 throw new \Exception('Not a file or folder');
             }
         }
+    }
+
+    /**
+     * Get all file IDs that need indexing from the database directly.
+     * This is much faster than folder traversal for parallel processing.
+     *
+     * @return array<int> List of file IDs
+     */
+    public function getFilesNeedingIndex(): array
+    {
+        $mimes = self::getMimeList();
+
+        // Get mime type IDs
+        $mimeQuery = $this->db->getQueryBuilder();
+        $mimeQuery->select('id')
+            ->from('mimetypes')
+            ->where($mimeQuery->expr()->in('mimetype', $mimeQuery->createNamedParameter($mimes, IQueryBuilder::PARAM_STR_ARRAY)))
+        ;
+        $mimeIds = $mimeQuery->executeQuery()->fetchAll(\PDO::FETCH_COLUMN);
+
+        if (empty($mimeIds)) {
+            return [];
+        }
+
+        // Build main query for files needing indexing
+        $query = $this->db->getQueryBuilder();
+        $query->select('f.fileid')
+            ->from('filecache', 'f')
+            ->where($query->expr()->in('f.mimetype', $query->createNamedParameter($mimeIds, IQueryBuilder::PARAM_INT_ARRAY)))
+            ->andWhere($query->expr()->gt('f.size', $query->expr()->literal(0)))
+        ;
+
+        // Apply path blacklist pattern if configured
+        $blacklist = trim(SystemConfig::get('memories.index.path.blacklist') ?: '');
+        if (!empty($blacklist)) {
+            // Note: This is a basic filter; complex regex patterns may need post-filtering
+            $query->andWhere($query->expr()->notLike('f.path', $query->createNamedParameter('%/.trashed-%')));
+        } else {
+            // Always exclude trashed files
+            $query->andWhere($query->expr()->notLike('f.path', $query->createNamedParameter('%/.trashed-%')));
+        }
+
+        // Exclude files in .nomedia/.nomemories folders (approximate - check path contains)
+        // Full check happens during indexing
+
+        // Filter out already indexed (non-orphaned, same mtime)
+        $getFilter = function (string $table, bool $notOrphaned) use (&$query): IQueryFunction {
+            $clause = $this->db->getQueryBuilder();
+            $clause->select($clause->expr()->literal(1))
+                ->from($table, 'a')
+                ->andWhere($clause->expr()->eq('f.fileid', 'a.fileid'))
+                ->andWhere($clause->expr()->eq('f.mtime', 'a.mtime'))
+            ;
+            if ($notOrphaned) {
+                $clause->andWhere($clause->expr()->eq('a.orphan', $clause->expr()->literal(0)));
+            }
+
+            return SQL::notExists($query, $clause);
+        };
+
+        $query->andWhere($getFilter('memories', true));
+        $query->andWhere($getFilter('memories_livephoto', true));
+        $query->andWhere($getFilter('memories_failures', false));
+
+        return Util::transaction(static fn (): array => $query->executeQuery()->fetchAll(\PDO::FETCH_COLUMN));
+    }
+
+    /**
+     * Get file IDs needing indexing for a specific user via folder traversal.
+     * Used when user/path filters are specified.
+     *
+     * @return array<int> List of file IDs
+     */
+    public function getFilesForUser(IUser $user, ?string $path = null): array
+    {
+        if (!$this->appManager->isEnabledForUser('memories', $user)) {
+            return [];
+        }
+
+        $uid = $user->getUID();
+
+        \OC_Util::tearDownFS();
+        \OC_Util::setupFS($uid);
+
+        $root = $this->rootFolder->getUserFolder($uid);
+
+        // Get paths to scan
+        $mode = SystemConfig::get('memories.index.mode');
+        if (null !== $path) {
+            $paths = [$path];
+        } elseif ('1' === $mode || '0' === $mode) {
+            $paths = ['/'];
+        } elseif ('2' === $mode) {
+            $paths = Util::getTimelinePaths($uid);
+        } elseif ('3' === $mode) {
+            $paths = [SystemConfig::get('memories.index.path')];
+        } else {
+            throw new \Exception('Invalid index mode');
+        }
+
+        $fileIds = [];
+        foreach ($paths as $scanPath) {
+            try {
+                $node = $root->get($scanPath);
+            } catch (\Exception $e) {
+                continue;
+            }
+
+            if ($node instanceof Folder) {
+                $this->collectFolderFiles($node, $fileIds);
+            } elseif ($node instanceof File && self::isSupported($node)) {
+                $fileIds[] = $node->getId();
+            }
+        }
+
+        // Filter to only files needing indexing
+        if (empty($fileIds)) {
+            return [];
+        }
+
+        return $this->filterFilesNeedingIndex($fileIds);
+    }
+
+    /**
+     * Collect file IDs from a folder recursively.
+     *
+     * @param Folder     $folder  Folder to scan
+     * @param array<int> $fileIds Array to populate
+     */
+    private function collectFolderFiles(Folder $folder, array &$fileIds): void
+    {
+        $path = $folder->getPath();
+
+        if (!$this->isPathAllowed($path.'/')) {
+            return;
+        }
+
+        if ($folder->nodeExists('.nomedia') || $folder->nodeExists('.nomemories')) {
+            return;
+        }
+
+        $nodes = $folder->getDirectoryListing();
+        $mimes = self::getMimeList();
+
+        foreach ($nodes as $node) {
+            if ($node instanceof File
+                && \in_array($node->getMimeType(), $mimes, true)
+                && self::isPathAllowed($node->getPath())) {
+                $fileIds[] = $node->getId();
+            } elseif ($node instanceof Folder) {
+                $this->collectFolderFiles($node, $fileIds);
+            }
+        }
+    }
+
+    /**
+     * Filter file IDs to only those needing indexing.
+     *
+     * @param array<int> $fileIds File IDs to check
+     *
+     * @return array<int> File IDs that need indexing
+     */
+    private function filterFilesNeedingIndex(array $fileIds): array
+    {
+        $result = [];
+        $chunks = array_chunk($fileIds, 250);
+
+        foreach ($chunks as $chunk) {
+            $query = $this->db->getQueryBuilder();
+            $query->select('f.fileid')
+                ->from('filecache', 'f')
+                ->where($query->expr()->in('f.fileid', $query->createNamedParameter($chunk, IQueryBuilder::PARAM_INT_ARRAY)))
+                ->andWhere($query->expr()->gt('f.size', $query->expr()->literal(0)))
+            ;
+
+            $getFilter = function (string $table, bool $notOrphaned) use (&$query): IQueryFunction {
+                $clause = $this->db->getQueryBuilder();
+                $clause->select($clause->expr()->literal(1))
+                    ->from($table, 'a')
+                    ->andWhere($clause->expr()->eq('f.fileid', 'a.fileid'))
+                    ->andWhere($clause->expr()->eq('f.mtime', 'a.mtime'))
+                ;
+                if ($notOrphaned) {
+                    $clause->andWhere($clause->expr()->eq('a.orphan', $clause->expr()->literal(0)));
+                }
+
+                return SQL::notExists($query, $clause);
+            };
+
+            $query->andWhere($getFilter('memories', true));
+            $query->andWhere($getFilter('memories_livephoto', true));
+            $query->andWhere($getFilter('memories_failures', false));
+
+            $ids = Util::transaction(static fn (): array => $query->executeQuery()->fetchAll(\PDO::FETCH_COLUMN));
+            foreach ($ids as $id) {
+                $result[] = (int) $id;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Index files by their IDs directly (no folder traversal).
+     *
+     * @param array<int> $fileIds File IDs to index
+     */
+    public function indexByIds(array $fileIds): void
+    {
+        $total = \count($fileIds);
+        $processed = 0;
+
+        foreach ($fileIds as $fileId) {
+            $this->ensureContinueOk();
+
+            ++$processed;
+            $this->log("Indexing file {$processed}/{$total} (ID: {$fileId})", true);
+
+            try {
+                // Look up file by ID
+                $nodes = $this->rootFolder->getById($fileId);
+                if (empty($nodes)) {
+                    continue; // File no longer exists
+                }
+
+                $file = $nodes[0];
+                if (!($file instanceof File)) {
+                    continue;
+                }
+
+                // Check path exclusions (.nomedia, .nomemories, blacklist)
+                if (!$this->isFileAllowed($file)) {
+                    continue;
+                }
+
+                $this->indexFile($file);
+            } catch (\OCP\Lock\LockedException $e) {
+                $this->log("Skipping file {$fileId} due to lock", true);
+            } catch (\Exception $e) {
+                $this->error("Failed to index file {$fileId}: {$e->getMessage()}");
+            }
+        }
+    }
+
+    /**
+     * Check if a file is allowed to be indexed (path checks).
+     */
+    private function isFileAllowed(File $file): bool
+    {
+        $path = $file->getPath();
+
+        // Check path blacklist
+        if (!self::isPathAllowed($path)) {
+            return false;
+        }
+
+        // Check for .nomedia/.nomemories in parent folders
+        $parent = $file->getParent();
+        while ($parent instanceof Folder) {
+            try {
+                if ($parent->nodeExists('.nomedia') || $parent->nodeExists('.nomemories')) {
+                    return false;
+                }
+                $parent = $parent->getParent();
+            } catch (\Exception $e) {
+                break;
+            }
+        }
+
+        return true;
     }
 
     /**
