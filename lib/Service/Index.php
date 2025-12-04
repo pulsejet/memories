@@ -328,43 +328,51 @@ class Index
     /**
      * Index files by their IDs directly (no folder traversal).
      *
-     * @param array<int> $fileIds File IDs to index
-     * @param int        $batchId Optional batch/worker ID for progress reporting (-1 = single mode)
+     * @param array<int> $fileIds    File IDs to index
+     * @param int        $workerId   Worker ID for display (-1 = single mode)
+     * @param int        $lineOffset Line offset for ANSI cursor positioning (0 = no positioning)
      */
-    public function indexByIds(array $fileIds, int $batchId = -1): void
+    public function indexByIds(array $fileIds, int $workerId = -1, int $lineOffset = 0): void
     {
         $total = \count($fileIds);
         $processed = 0;
         $indexed = 0;
-        $startTime = time();
-        $lastReport = $startTime;
+        $errors = 0;
+        $startTime = microtime(true);
+        $lastUpdate = $startTime;
 
-        // In parallel mode: report every 5% or 30 seconds, whichever comes first
-        // In single mode: report every file (overwrite mode)
-        $parallelMode = $batchId >= 0;
-        $reportInterval = max(1, (int) ($total * 0.05)); // 5% of total
+        $parallelMode = $workerId >= 0;
+
+        // Update display helper
+        $updateStatus = function (bool $final = false) use ($workerId, $lineOffset, $parallelMode, &$processed, &$indexed, &$errors, $total, $startTime): void {
+            $elapsed = max(0.1, microtime(true) - $startTime);
+            $rate = round($processed / $elapsed, 1);
+            $pct = $total > 0 ? round($processed / $total * 100, 1) : 0;
+
+            if ($parallelMode && $lineOffset > 0) {
+                // Update specific line using ANSI codes
+                $status = $final ? 'Done' : 'Working';
+                $errStr = $errors > 0 ? " ({$errors} errors)" : '';
+                $content = "[Worker {$workerId}] {$status}: {$processed}/{$total} ({$pct}%) | {$indexed} indexed | {$rate}/s{$errStr}";
+                $this->updateLine($lineOffset, $content);
+            } elseif (!$parallelMode) {
+                $this->log("Indexing file {$processed}/{$total}", true);
+            }
+        };
 
         foreach ($fileIds as $fileId) {
             $this->ensureContinueOk();
             ++$processed;
 
-            // Progress reporting
-            $now = time();
-            $shouldReport = $parallelMode
-                ? ($processed % $reportInterval === 0 || $now - $lastReport >= 30)
-                : true;
-
-            if ($shouldReport) {
-                $elapsed = max(1, $now - $startTime);
-                $rate = round($processed / $elapsed, 1);
-                $pct = round($processed / $total * 100, 1);
-
-                if ($parallelMode) {
-                    fwrite(STDERR, "[Worker {$batchId}] Progress: {$processed}/{$total} ({$pct}%) - {$rate} files/sec\n");
-                    $lastReport = $now;
-                } else {
-                    $this->log("Indexing file {$processed}/{$total} (ID: {$fileId})", true);
+            // Update display every 100ms or every 100 files in parallel mode
+            $now = microtime(true);
+            if ($parallelMode) {
+                if ($now - $lastUpdate >= 0.1 || $processed % 100 === 0) {
+                    $updateStatus();
+                    $lastUpdate = $now;
                 }
+            } else {
+                $updateStatus();
             }
 
             try {
@@ -392,16 +400,24 @@ class Index
                     $this->log("Skipping file {$fileId} due to lock", true);
                 }
             } catch (\Exception $e) {
-                $this->error("Failed to index file {$fileId}: {$e->getMessage()}");
+                ++$errors;
+                if (!$parallelMode) {
+                    $this->error("Failed to index file {$fileId}: {$e->getMessage()}");
+                }
             }
         }
 
-        // Final summary for parallel workers
-        if ($parallelMode) {
-            $elapsed = max(1, time() - $startTime);
-            $rate = round($processed / $elapsed, 1);
-            fwrite(STDERR, "[Worker {$batchId}] Completed: {$indexed}/{$total} indexed ({$rate} files/sec)\n");
-        }
+        // Final status update
+        $updateStatus(true);
+    }
+
+    /**
+     * Update a specific terminal line using ANSI escape codes.
+     */
+    private function updateLine(int $lineOffset, string $content): void
+    {
+        // Save position, move up N lines, clear line, write, restore position
+        fwrite(STDERR, "\033[s\033[{$lineOffset}A\r\033[K{$content}\033[u");
     }
 
     /**

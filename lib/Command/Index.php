@@ -252,12 +252,19 @@ class Index extends Command
         $partitions = $this->partitionArray($allFileIds, $numJobs);
         $actualJobs = \count(array_filter($partitions, static fn ($p) => !empty($p)));
 
-        $this->output->writeln("<info>Found {$numFiles} file(s) to index, using {$actualJobs} parallel job(s)</info>".PHP_EOL);
+        $this->output->writeln("<info>Found {$numFiles} file(s) to index, using {$actualJobs} parallel job(s)</info>");
+        $this->output->writeln('');
+
+        // Reserve lines for worker status display
+        for ($i = 0; $i < $actualJobs; ++$i) {
+            $this->output->writeln("[Worker {$i}] Starting...");
+        }
 
         // Close exiftool before forking - each child will create its own
         \OCA\Memories\Exif::closeStaticExiftoolProc();
 
         $pids = [];
+        $workerNum = 0;
 
         foreach ($partitions as $workerIndex => $fileIdPartition) {
             if (empty($fileIdPartition)) {
@@ -274,12 +281,15 @@ class Index extends Command
 
             if (0 === $pid) {
                 // Child process - directly index assigned file IDs
-                $this->runWorker($workerIndex, $fileIdPartition);
+                // Pass the line offset for display (count from bottom of reserved area)
+                $lineOffset = $actualJobs - $workerNum;
+                $this->runWorker($workerNum, $fileIdPartition, $lineOffset);
                 exit(0);
             }
 
             // Parent process
             $pids[] = $pid;
+            ++$workerNum;
         }
 
         // Wait for all children to complete
@@ -289,14 +299,19 @@ class Index extends Command
             $exitCodes[] = pcntl_wexitstatus($status);
         }
 
+        // Move cursor below the status area
+        $this->output->writeln('');
+
         // Re-initialize exiftool for cleanup phase
         \OCA\Memories\Exif::ensureStaticExiftoolProc();
 
         // Report results
         $failed = \count(array_filter($exitCodes, static fn ($code) => 0 !== $code));
         if ($failed > 0) {
-            $this->output->writeln("<comment>{$failed} worker(s) exited with errors</comment>".PHP_EOL);
+            $this->output->writeln("<comment>{$failed} worker(s) exited with errors</comment>");
         }
+
+        $this->output->writeln('<info>All workers finished</info>'.PHP_EOL);
     }
 
     /**
@@ -339,11 +354,19 @@ class Index extends Command
         $partitions = $this->partitionArray($fileIdList, $numJobs);
         $actualJobs = \count(array_filter($partitions, static fn ($p) => !empty($p)));
 
-        $this->output->writeln("<info>Found {$numFiles} file(s) to index, using {$actualJobs} parallel job(s)</info>".PHP_EOL);
+        $this->output->writeln("<info>Found {$numFiles} file(s) to index, using {$actualJobs} parallel job(s)</info>");
+        $this->output->writeln('');
+
+        // Reserve lines for worker status display
+        for ($i = 0; $i < $actualJobs; ++$i) {
+            $this->output->writeln("[Worker {$i}] Starting...");
+        }
 
         \OCA\Memories\Exif::closeStaticExiftoolProc();
 
         $pids = [];
+        $workerNum = 0;
+
         foreach ($partitions as $workerIndex => $fileIdPartition) {
             if (empty($fileIdPartition)) {
                 continue;
@@ -357,11 +380,13 @@ class Index extends Command
             }
 
             if (0 === $pid) {
-                $this->runWorker($workerIndex, $fileIdPartition);
+                $lineOffset = $actualJobs - $workerNum;
+                $this->runWorker($workerNum, $fileIdPartition, $lineOffset);
                 exit(0);
             }
 
             $pids[] = $pid;
+            ++$workerNum;
         }
 
         $exitCodes = [];
@@ -370,12 +395,15 @@ class Index extends Command
             $exitCodes[] = pcntl_wexitstatus($status);
         }
 
+        $this->output->writeln('');
         \OCA\Memories\Exif::ensureStaticExiftoolProc();
 
         $failed = \count(array_filter($exitCodes, static fn ($code) => 0 !== $code));
         if ($failed > 0) {
-            $this->output->writeln("<comment>{$failed} worker(s) exited with errors</comment>".PHP_EOL);
+            $this->output->writeln("<comment>{$failed} worker(s) exited with errors</comment>");
         }
+
+        $this->output->writeln('<info>All workers finished</info>'.PHP_EOL);
     }
 
     /**
@@ -408,23 +436,33 @@ class Index extends Command
      *
      * @param int        $workerIndex Worker identifier
      * @param array<int> $fileIds     File IDs to process
+     * @param int        $lineOffset  Line offset from cursor for status updates
      */
-    private function runWorker(int $workerIndex, array $fileIds): void
+    private function runWorker(int $workerIndex, array $fileIds, int $lineOffset): void
     {
         // Each worker needs its own exiftool process
         \OCA\Memories\Exif::ensureStaticExiftoolProc();
 
-        $numFiles = \count($fileIds);
-        fwrite(STDERR, "[Worker {$workerIndex}] Starting with {$numFiles} file(s)\n");
-
         try {
-            // Process files directly by ID - batched progress reporting
-            $this->indexer->indexByIds($fileIds, $workerIndex);
+            // Process files directly by ID - real-time line updates
+            $this->indexer->indexByIds($fileIds, $workerIndex, $lineOffset);
         } catch (\Exception $e) {
-            fwrite(STDERR, "[Worker {$workerIndex}] Error: {$e->getMessage()}\n");
+            $this->updateWorkerLine($lineOffset, "[Worker {$workerIndex}] Error: {$e->getMessage()}");
         } finally {
             \OCA\Memories\Exif::closeStaticExiftoolProc();
         }
+    }
+
+    /**
+     * Update a specific line in the terminal using ANSI escape codes.
+     *
+     * @param int    $lineOffset Lines up from current cursor position
+     * @param string $content    Content to display
+     */
+    private function updateWorkerLine(int $lineOffset, string $content): void
+    {
+        // Move up, clear line, write content, move back down
+        fwrite(STDERR, "\033[{$lineOffset}A\r\033[K{$content}\033[{$lineOffset}B\r");
     }
 
     /**
