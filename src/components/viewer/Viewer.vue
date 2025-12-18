@@ -59,6 +59,8 @@ import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
+import { getCanonicalLocale } from '@nextcloud/l10n';
+import { DateTime } from 'luxon';
 
 import { API } from '@services/API';
 import * as dav from '@services/dav';
@@ -387,9 +389,39 @@ export default defineComponent({
 
     /** Get date taken string */
     currentDateTaken(): string | null {
-      const date = this.currentPhoto?.imageInfo?.datetaken;
-      if (!date) return null;
-      return utils.getLongDateStr(new Date(date * 1000), false, true);
+
+        const info = this.currentPhoto?.imageInfo;
+        if (!info) return null;
+
+        const exif = info.exif;
+        if (!info.exif) return null;
+
+        // Try timezone-aware formatting if EXIF data is available
+        if (exif?.DateTimeEpoch) {
+            const date = DateTime.fromSeconds(exif.DateTimeEpoch, { zone: 'UTC' });
+            if (date.isValid) {
+                const tzOffset = exif.OffsetTimeOriginal || exif.OffsetTime || exif.TimeZone || exif.OffsetTimeDigitized;
+                const tzId = exif.LocationTZID;
+
+                let dateWithTz: DateTime | null = null;
+
+                // Apply timezone offset
+                if (tzOffset) {
+                    dateWithTz = date.setZone('UTC' + tzOffset);
+                } else if (tzId) {
+                    dateWithTz = date.setZone(tzId);
+                }
+
+                // Format with timezone applied
+                if (dateWithTz?.isValid) {
+                    return dateWithTz.toFormat('EEE, LLL d, yyyy, t', { locale: getCanonicalLocale() });
+                }
+            }
+        }
+
+        // Fallback to datetaken without timezone info
+        if (!info.datetaken) return null;
+        return utils.getLongDateStr(new Date(info.datetaken * 1000), false, true);
     },
 
     /** Show edit buttons */
