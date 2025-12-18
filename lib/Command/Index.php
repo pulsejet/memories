@@ -44,6 +44,7 @@ class IndexOpts
     public ?string $group = null;
     public bool $retry = false;
     public bool $skipCleanup = false;
+    public int $jobs = 1;
 
     public function __construct(InputInterface $input)
     {
@@ -54,6 +55,7 @@ class IndexOpts
         $this->retry = (bool) $input->getOption('retry');
         $this->skipCleanup = (bool) $input->getOption('skip-cleanup');
         $this->group = $input->getOption('group');
+        $this->jobs = max(1, (int) ($input->getOption('jobs') ?? 1));
     }
 }
 
@@ -86,6 +88,7 @@ class Index extends Command
             ->addOption('clear', null, InputOption::VALUE_NONE, 'Clear all existing index entries')
             ->addOption('retry', null, InputOption::VALUE_NONE, 'Retry indexing of failed files')
             ->addOption('skip-cleanup', null, InputOption::VALUE_NONE, 'Skip cleanup step (removing index entries with missing files)')
+            ->addOption('jobs', 'j', InputOption::VALUE_REQUIRED, 'Number of parallel indexing jobs (requires pcntl)', '1')
         ;
     }
 
@@ -98,6 +101,13 @@ class Index extends Command
         $this->input = $input;
         $this->output = $output;
         $this->opts = new IndexOpts($input);
+
+        // Check if parallel processing is requested but not available
+        if ($this->opts->jobs > 1 && !\extension_loaded('pcntl')) {
+            $this->output->writeln('<error>Parallel processing requires the pcntl extension</error>');
+            $this->output->writeln('<info>Falling back to single-threaded mode</info>'.PHP_EOL);
+            $this->opts->jobs = 1;
+        }
 
         // Assign to indexer
         $this->indexer->output = $output;
@@ -114,8 +124,12 @@ class Index extends Command
             $this->checkForce();
             $this->checkRetry();
 
-            // Run the indexer
-            $this->runIndex();
+            // Run the indexer (parallel or single-threaded)
+            if ($this->opts->jobs > 1) {
+                $this->runIndexParallel();
+            } else {
+                $this->runIndex();
+            }
 
             // Clean up the index
             if (!$this->opts->skipCleanup) {
@@ -206,6 +220,279 @@ class Index extends Command
                 $this->output->writeln("<error>{$e->getMessage()}</error>".PHP_EOL);
             }
         });
+    }
+
+    /**
+     * Run the indexer in parallel using multiple worker processes.
+     */
+    protected function runIndexParallel(): void
+    {
+        $numJobs = $this->opts->jobs;
+
+        // If user/path specified, use filtered approach; otherwise use fast DB query
+        if ($this->opts->user || $this->opts->path || $this->opts->group) {
+            $this->runIndexParallelFiltered();
+
+            return;
+        }
+
+        $this->output->writeln('<info>Querying database for files needing indexing...</info>');
+
+        // Single database query to find all files needing indexing (fastest)
+        $allFileIds = $this->indexer->getFilesNeedingIndex();
+
+        $numFiles = \count($allFileIds);
+        if (0 === $numFiles) {
+            $this->output->writeln('<info>No files need indexing</info>');
+
+            return;
+        }
+
+        // Partition file IDs among workers
+        $partitions = $this->partitionArray($allFileIds, $numJobs);
+        $actualJobs = \count(array_filter($partitions, static fn ($p) => !empty($p)));
+
+        $this->output->writeln("<info>Found {$numFiles} file(s) to index, using {$actualJobs} parallel job(s)</info>");
+        $this->output->writeln('');
+
+        // Reserve lines for worker status display
+        for ($i = 0; $i < $actualJobs; ++$i) {
+            $this->output->writeln("[Worker {$i}] Starting...");
+        }
+
+        // Close exiftool before forking - each child will create its own
+        \OCA\Memories\Exif::closeStaticExiftoolProc();
+
+        $pids = [];
+        $workerNum = 0;
+
+        foreach ($partitions as $workerIndex => $fileIdPartition) {
+            if (empty($fileIdPartition)) {
+                continue;
+            }
+
+            $pid = pcntl_fork();
+
+            if (-1 === $pid) {
+                $this->output->writeln('<error>Failed to fork worker process</error>');
+
+                continue;
+            }
+
+            if (0 === $pid) {
+                // Child process - directly index assigned file IDs
+                // Pass the line offset for display (count from bottom of reserved area)
+                $lineOffset = $actualJobs - $workerNum;
+                $this->runWorker($workerNum, $fileIdPartition, $lineOffset);
+                exit(0);
+            }
+
+            // Parent process
+            $pids[] = $pid;
+            ++$workerNum;
+        }
+
+        // Wait for all children to complete
+        $exitCodes = [];
+        foreach ($pids as $pid) {
+            pcntl_waitpid($pid, $status);
+            $exitCodes[] = pcntl_wexitstatus($status);
+        }
+
+        // Move cursor below the status area
+        $this->output->writeln('');
+
+        // Re-initialize exiftool for cleanup phase
+        \OCA\Memories\Exif::ensureStaticExiftoolProc();
+
+        // Report results
+        $failed = \count(array_filter($exitCodes, static fn ($code) => 0 !== $code));
+        if ($failed > 0) {
+            $this->output->writeln("<comment>{$failed} worker(s) exited with errors</comment>");
+        }
+
+        $this->output->writeln('<info>All workers finished</info>'.PHP_EOL);
+    }
+
+    /**
+     * Run parallel indexing with user/path filters (uses folder traversal).
+     */
+    protected function runIndexParallelFiltered(): void
+    {
+        $users = $this->collectUsers();
+
+        if (empty($users)) {
+            $this->output->writeln('<info>No users to index</info>');
+
+            return;
+        }
+
+        $numJobs = $this->opts->jobs;
+        $this->output->writeln('<info>Scanning for files to index (filtered mode)...</info>');
+
+        // Collect files by traversing folders (respects user/path filters)
+        $allFileIds = [];
+        foreach ($users as $user) {
+            try {
+                $userFiles = $this->indexer->getFilesForUser($user, $this->opts->path);
+                foreach ($userFiles as $fileId) {
+                    $allFileIds[$fileId] = true;
+                }
+            } catch (\Exception $e) {
+                $this->output->writeln("<error>Error scanning user {$user->getUID()}: {$e->getMessage()}</error>");
+            }
+        }
+
+        $numFiles = \count($allFileIds);
+        if (0 === $numFiles) {
+            $this->output->writeln('<info>No files need indexing</info>');
+
+            return;
+        }
+
+        $fileIdList = array_keys($allFileIds);
+        $partitions = $this->partitionArray($fileIdList, $numJobs);
+        $actualJobs = \count(array_filter($partitions, static fn ($p) => !empty($p)));
+
+        $this->output->writeln("<info>Found {$numFiles} file(s) to index, using {$actualJobs} parallel job(s)</info>");
+        $this->output->writeln('');
+
+        // Reserve lines for worker status display
+        for ($i = 0; $i < $actualJobs; ++$i) {
+            $this->output->writeln("[Worker {$i}] Starting...");
+        }
+
+        \OCA\Memories\Exif::closeStaticExiftoolProc();
+
+        $pids = [];
+        $workerNum = 0;
+
+        foreach ($partitions as $workerIndex => $fileIdPartition) {
+            if (empty($fileIdPartition)) {
+                continue;
+            }
+
+            $pid = pcntl_fork();
+            if (-1 === $pid) {
+                $this->output->writeln('<error>Failed to fork worker process</error>');
+
+                continue;
+            }
+
+            if (0 === $pid) {
+                $lineOffset = $actualJobs - $workerNum;
+                $this->runWorker($workerNum, $fileIdPartition, $lineOffset);
+                exit(0);
+            }
+
+            $pids[] = $pid;
+            ++$workerNum;
+        }
+
+        $exitCodes = [];
+        foreach ($pids as $pid) {
+            pcntl_waitpid($pid, $status);
+            $exitCodes[] = pcntl_wexitstatus($status);
+        }
+
+        $this->output->writeln('');
+        \OCA\Memories\Exif::ensureStaticExiftoolProc();
+
+        $failed = \count(array_filter($exitCodes, static fn ($code) => 0 !== $code));
+        if ($failed > 0) {
+            $this->output->writeln("<comment>{$failed} worker(s) exited with errors</comment>");
+        }
+
+        $this->output->writeln('<info>All workers finished</info>'.PHP_EOL);
+    }
+
+    /**
+     * Partition an array into n roughly equal chunks.
+     *
+     * @param array<int> $array    Array to partition
+     * @param int        $numParts Number of partitions
+     *
+     * @return array<int, array<int>> Partitioned arrays
+     */
+    private function partitionArray(array $array, int $numParts): array
+    {
+        $count = \count($array);
+        if (0 === $count) {
+            return array_fill(0, $numParts, []);
+        }
+
+        $partitions = [];
+        $chunkSize = (int) ceil($count / $numParts);
+
+        for ($i = 0; $i < $numParts; ++$i) {
+            $partitions[$i] = \array_slice($array, $i * $chunkSize, $chunkSize);
+        }
+
+        return $partitions;
+    }
+
+    /**
+     * Run a worker process that indexes assigned files by ID.
+     *
+     * @param int        $workerIndex Worker identifier
+     * @param array<int> $fileIds     File IDs to process
+     * @param int        $lineOffset  Line offset from cursor for status updates
+     */
+    private function runWorker(int $workerIndex, array $fileIds, int $lineOffset): void
+    {
+        // Each worker needs its own exiftool process
+        \OCA\Memories\Exif::ensureStaticExiftoolProc();
+
+        try {
+            // Process files directly by ID - real-time line updates
+            $this->indexer->indexByIds($fileIds, $workerIndex, $lineOffset);
+        } catch (\Exception $e) {
+            $this->updateWorkerLine($lineOffset, "[Worker {$workerIndex}] Error: {$e->getMessage()}");
+        } finally {
+            \OCA\Memories\Exif::closeStaticExiftoolProc();
+        }
+    }
+
+    /**
+     * Update a specific line in the terminal using ANSI escape codes.
+     *
+     * @param int    $lineOffset Lines up from current cursor position
+     * @param string $content    Content to display
+     */
+    private function updateWorkerLine(int $lineOffset, string $content): void
+    {
+        // Move up, clear line, write content, move back down
+        fwrite(STDERR, "\033[{$lineOffset}A\r\033[K{$content}\033[{$lineOffset}B\r");
+    }
+
+    /**
+     * Collect all users that need to be indexed.
+     *
+     * @return IUser[]
+     */
+    private function collectUsers(): array
+    {
+        $users = [];
+
+        if ($uid = $this->opts->user) {
+            if ($user = $this->userManager->get($uid)) {
+                $users[] = $user;
+            } else {
+                $this->output->writeln("<error>User {$uid} not found</error>".PHP_EOL);
+            }
+        } elseif ($gid = $this->opts->group) {
+            if ($group = $this->groupManager->get($gid)) {
+                $users = array_values($group->getUsers());
+            } else {
+                $this->output->writeln("<error>Group {$gid} not found</error>".PHP_EOL);
+            }
+        } else {
+            $this->userManager->callForSeenUsers(static function (IUser $user) use (&$users): void {
+                $users[] = $user;
+            });
+        }
+
+        return $users;
     }
 
     /**
