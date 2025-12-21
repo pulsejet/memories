@@ -11,13 +11,11 @@
     >
       <template #icon>
         <StarIcon 
-          class="star-filled"
-          :class="{ show: star <= rating }"
+          v-if="star <= rating"
           :size="size" 
         />
         <StarOutlineIcon 
-          class="star-outline"
-          :class="{ show: star > rating }"
+          v-else
           :size="size" 
         />
       </template>
@@ -93,19 +91,15 @@ export default {
       }
     }
     
-    // In readonly mode, only show icons with "show" class
-    :deep .star-filled,
-    :deep .star-outline {
-      display: none;
-      
-      &.show {
-        display: inline-block;
-      }
+    // Filled stars: yellow/warning color
+    :deep .material-design-icon.star-icon {
+      color: var(--color-warning);
     }
     
-    // Style filled stars
-    :deep .star-filled.show {
-      color: var(--color-warning);
+    // Outline stars: inherit color (white on dark, dark on light)
+    :deep .material-design-icon.star-outline-icon {
+      color: currentColor;
+      opacity: 0.7;
     }
   }
 
@@ -118,56 +112,35 @@ export default {
       }
     }
 
-    // Default state (not hovering parent): only show icons with "show" class
-    :deep .star-filled,
-    :deep .star-outline {
-      display: none;
-      
-      &.show {
-        display: inline-block;
-      }
+    // Default state (not hovering): show current rating
+    // Filled stars: yellow/warning color
+    :deep .material-design-icon.star-icon {
+      color: var(--color-warning);
     }
     
-    :deep .star-filled.show {
-      color: var(--color-warning);
+    // Outline stars: inherit color (adapts to theme/context)
+    :deep .material-design-icon.star-outline-icon {
+      color: currentColor;
+      opacity: 0.7;
     }
     
     // Hover state: when hovering the parent container, show hover preview
     &:hover {
-      // Hide all icons with "show" class (current rating)
-      :deep .star-filled.show,
-      :deep .star-outline.show {
-        display: none !important;
-      }
-      
-      // Show outline stars by default during hover
-      :deep .star-outline {
-        display: inline-block !important;
-      }
-      
-      :deep .star-filled {
-        display: none !important;
-      }
-      
-      // Show filled icons for hovered star and all following siblings
-      :deep .button-vue:hover {
-        .star-filled { 
-          display: inline-block !important; 
-          color: var(--color-warning);
-        }
-        .star-outline { 
-          display: none !important; 
+      // During hover, show all stars in preview mode
+      // All stars become yellow when hovered or after hovered star
+      :deep .button-vue {
+        .material-design-icon {
+          color: currentColor;
+          opacity: 0.7;
         }
       }
       
-      // When hovering a star, also fill all following siblings (which are visually to the left)
+      // Hovered star and following siblings (visually to the left) become filled/yellow
+      :deep .button-vue:hover,
       :deep .button-vue:hover ~ .button-vue {
-        .star-filled { 
-          display: inline-block !important; 
-          color: var(--color-warning);
-        }
-        .star-outline { 
-          display: none !important; 
+        .material-design-icon {
+          color: var(--color-warning) !important;
+          opacity: 1 !important;
         }
       }
     }

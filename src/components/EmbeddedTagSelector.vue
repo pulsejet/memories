@@ -8,8 +8,10 @@
       :loading="loading"
       :input-label="inputLabel"
       :placeholder="placeholder"
-      :keep-open=true
+      :keep-open="true"
       :disabled="disabled"
+      :taggable="true"
+      @option:created="handleCreate"
     />
   </div>
 </template>
@@ -104,14 +106,22 @@ export default defineComponent({
       try {
         const response = await axios.get(API.EMBEDDED_TAGS_FLAT());
         // Transform tags to simple strings for NcSelect options
-        this.allTags = (response.data.tags || []).map(tag => 
-          this.showFullPath ? tag.path : tag.tag
+        // Each tag object has: { id, user_id, tag, parent_tag_id, path, level, created_at }
+        this.allTags = (response.data.tags || []).map(tagObj => 
+          this.showFullPath ? tagObj.path : tagObj.tag
         );
       } catch (error) {
         console.error('Failed to load embedded tags:', error);
         this.allTags = [];
       } finally {
         this.loading = false;
+      }
+    },
+
+    handleCreate(newTag) {
+      // Add the newly created tag to the options list
+      if (!this.allTags.includes(newTag)) {
+        this.allTags.push(newTag);
       }
     },
   },
@@ -124,6 +134,10 @@ export default defineComponent({
 
   :deep(.vs__dropdown-menu) {
     max-height: 200px;
+  }
+
+  :deep(.v-select) {
+    width: 100%;
   }
 }
 </style> 

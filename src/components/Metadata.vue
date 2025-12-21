@@ -61,14 +61,14 @@
       </div>
     </div>
     
-    <div v-if="embeddedTags.length > 0" class="top-field top-field--embedded-tags">
+    <div v-if="embeddedTags.length > 0 || canEdit" class="top-field top-field--embedded-tags">
       <div class="icon">
         <TagIcon :size="24" />
       </div>
 
       <div class="text">
         <div class="title">{{ t('memories', 'Tags') }} ({{ embeddedTags.length }})</div>
-        <div class="tags-container">
+        <div class="tags-container" v-if="embeddedTags.length > 0">
           <template v-for="(tag, idx) in embeddedTags">
             <NcChip v-if="tag.length === 1" :key="`tag-${idx}`" :text="tag[0]" no-close />
             <div v-else-if="tag.length > 1" :key="`taglist-${idx}`" style="display: inline-block; margin: 2px;">
@@ -90,11 +90,14 @@
             </div>
           </template>
         </div>
+        <div v-else class="subtitle">
+          {{ t('memories', 'Click edit to add tags') }}
+        </div>
       </div>
 
       <div class="edit" v-if="canEdit">
         <NcActions :inline="1">
-          <NcActionButton :aria-label="t('memories', 'Edit')" @click="editTags()">
+          <NcActionButton :aria-label="t('memories', 'Edit')" @click="editEmbeddedTags()">
             {{ t('memories', 'Edit') }}
             <template #icon> <EditIcon :size="20" /> </template>
           </NcActionButton>
@@ -527,6 +530,10 @@ export default defineComponent({
 
     editTags() {
       _m.modals.editMetadata([_m.viewer.currentPhoto!], [2]);
+    },
+
+    editEmbeddedTags() {
+      _m.modals.editMetadata([_m.viewer.currentPhoto!], [6]);
     },
 
     editEXIF() {
