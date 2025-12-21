@@ -39,13 +39,21 @@ trait TimelineQueryFilters
             return;
         }
 
-        $or = $query->expr()->orX();
         $fields = ['Keywords', 'Subject', 'TagsList', 'HierarchicalSubject'];
-        foreach ($fields as $field) {
-            $or->add("JSON_OVERLAPS(JSON_EXTRACT(m.exif, '$.{$field}'), JSON_ARRAY(:tags))");
+        
+        foreach ($embeddedTags as $index => $tag) {
+            $tagParam = "tag_{$index}";
+            $or = $query->expr()->orX();
+            
+            foreach ($fields as $field) {
+                // Check if the field contains this specific tag
+                $or->add("JSON_CONTAINS(JSON_EXTRACT(m.exif, '$.{$field}'), JSON_QUOTE(:{$tagParam}))");
+            }
+            
+            // Add AND condition for this tag
+            $query->andWhere($or);
+            $query->setParameter($tagParam, $tag, IQueryBuilder::PARAM_STR);
         }
-        $query->andWhere($or);
-        $query->setParameter('tags', $embeddedTags, IQueryBuilder::PARAM_STR_ARRAY);
     }
 
     public function transformFavoriteFilter(IQueryBuilder &$query, bool $aggregate): void

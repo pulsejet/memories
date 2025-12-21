@@ -336,7 +336,7 @@ trait TimelineQueryDays
 
             if (!empty($embeddedTags)) {
                 $dayPhotos = array_filter($dayPhotos, fn ($photo) =>
-                    count(array_intersect($embeddedTags, $photo['embedded_tags'] ?? [])) > 0
+                    count(array_intersect($embeddedTags, $photo['embedded_tags'] ?? [])) === count($embeddedTags)
                 );
             }
 
