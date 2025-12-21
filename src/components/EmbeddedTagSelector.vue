@@ -82,6 +82,12 @@ export default defineComponent({
   },
 
   watch: {
+    value: {
+      immediate: true,
+      handler(newValue) {
+        this.selectedTags = newValue || [];
+      },
+    },
 
     selectedTags(newSelection) {
       this.$emit('update:value', newSelection);
