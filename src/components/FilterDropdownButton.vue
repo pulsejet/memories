@@ -17,7 +17,7 @@
       <template #default>
         <FilterComponent
           :disabled="disabled"
-          :initial-filters="initialFilters"
+          :initial-filters="currentFilters"
           @filter-change="onFilterChange"
         />
       </template>
@@ -31,6 +31,7 @@ import { defineComponent, type PropType } from 'vue';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 import NcPopover from '@nextcloud/vue/dist/Components/NcPopover.js';
 import { translate as t } from '@services/l10n';
+import { bus } from '@services/utils';
 
 import type { IFilters } from '@typings';
 
@@ -66,14 +67,34 @@ export default defineComponent({
     'filter-change': (filters: IFilters) => true,
   },
 
+  data: () => ({
+    currentFilters: {
+      minRating: 0,
+      tags: [],
+      embeddedTags: [],
+    } as IFilters,
+  }),
+
+  mounted() {
+    bus.on('memories:filters:changed', this.onFiltersChangedFromBus);
+  },
+
+  beforeUnmount() {
+    bus.off('memories:filters:changed', this.onFiltersChangedFromBus);
+  },
+
   computed: {
     hasActiveFilters() {
-      const filters = this.initialFilters;
+      const filters = this.currentFilters;
       return filters.minRating > 0 || filters.tags.length > 0 || filters.embeddedTags.length > 0;
     },
   },
 
   methods: {
+    onFiltersChangedFromBus(filters: IFilters) {
+      this.currentFilters = { ...filters };
+    },
+
     onFilterChange(filters: IFilters) {
       this.$emit('filter-change', filters);
     },
