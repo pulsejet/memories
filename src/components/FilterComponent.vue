@@ -120,15 +120,13 @@ export default defineComponent({
 
   emits: ['filter-change'],
 
-  data() {
-    return {
-      filters: {
-        minRating: this.initialFilters.minRating || 0,
-        tags: this.initialFilters.tags || [],
-        embeddedTags: this.initialFilters.embeddedTags || [],
-      } as IFilters,
-    };
-  },
+  data: () => ({
+    filters: {
+      minRating: 0,
+      tags: [],
+      embeddedTags: [],
+    } as IFilters,
+  }),
 
   computed: {
     hasActiveFilters() {
@@ -161,22 +159,22 @@ export default defineComponent({
 
     onRatingChange(rating: number) {
       this.filters.minRating = rating;
-      (this as any).emitFilterChange();
+      this.emitFilterChange();
     },
 
     onTagsChange(tags: string[]) {
       this.filters.tags = tags;
-      (this as any).emitFilterChange();
+      this.emitFilterChange();
     },
 
     onEmbeddedTagsChange(tags: string[]) {
       this.filters.embeddedTags = tags;
-      (this as any).emitFilterChange();
+      this.emitFilterChange();
     },
 
     clearRating() {
       this.filters.minRating = 0;
-      (this as any).emitFilterChange();
+      this.emitFilterChange();
     },
 
     clearAllFilters() {
@@ -185,7 +183,7 @@ export default defineComponent({
         tags: [],
         embeddedTags: [],
       };
-      (this as any).emitFilterChange();
+      this.emitFilterChange();
     },
 
     tagFilter(element: any) {
