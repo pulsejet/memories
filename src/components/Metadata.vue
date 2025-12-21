@@ -74,7 +74,14 @@
             <div v-else-if="tag.length > 1" :key="`taglist-${idx}`" style="display: inline-block; margin: 2px;">
               <NcPopover no-focus-trap>
                 <template #trigger>
-                  <NcButton>{{ tag[tag.length - 1] }}</NcButton>
+                  <NcChip
+                    :text="tag[tag.length - 1]"
+                    no-close
+                  >
+                    <template #icon>
+                      <TreeIcon :size="16" />
+                    </template>
+                  </NcChip>
                 </template>
                 <template #default>
                   <div class="tag-path">{{ tag.join(' → ') }}</div>
@@ -138,6 +145,7 @@ import CameraIrisIcon from 'vue-material-design-icons/CameraIris.vue';
 import ImageIcon from 'vue-material-design-icons/Image.vue';
 import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
+import TreeIcon from 'vue-material-design-icons/FileTree.vue';
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
@@ -168,6 +176,7 @@ export default defineComponent({
     Cluster,
     EditIcon,
     TagIcon,
+    TreeIcon,
     RatingStars,
   },
 

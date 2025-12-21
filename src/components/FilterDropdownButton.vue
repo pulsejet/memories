@@ -116,10 +116,20 @@ export default defineComponent({
       opacity: 1;
     }
 
+    // Match header button colors when inside header and not active
+    header#header &:not(.active) {
+      color: var(--color-background-plain-text, var(--color-primary-text)) !important;
+    }
+
     &.active {
       opacity: 1;
       color: var(--color-primary);
       background-color: var(--color-primary-element-light);
+
+      &:hover {
+        opacity: 1;
+        background-color: var(--color-primary-element-hover);
+      }
     }
   }
 }
