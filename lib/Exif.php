@@ -325,6 +325,137 @@ class Exif
     }
 
     /**
+     * Extract embedded tags from EXIF data
+     * 
+     * @param array $exif EXIF data
+     * @param bool $flatten Whether to flatten the tags into a single array (hierarchy is represented by /)
+     * @return array Array of tag paths
+     */
+    public static function extractEmbeddedTags(array $exif, bool $flatten = false): array
+    {
+        $embeddedTags = [];
+        $tagSet = []; // For deduplication
+        
+        // Helper function to ensure we have an array
+        $ensureArray = function ($value) {
+            if (empty($value)) {
+                return [];
+            }
+            return is_array($value) ? $value : [$value];
+        };
+        
+        // Helper function to add tags with normalization and deduplication
+        $addTags = function ($tags, $separator = '/') use (&$embeddedTags, &$tagSet) {
+            foreach ($tags as $tag) {
+                $tagPath = is_array($tag) ? $tag : explode($separator, $tag);
+                // Normalize to '/' and lowercase for deduplication
+                $normalizedKey = strtolower(implode('/', $tagPath));
+                
+                if (!isset($tagSet[$normalizedKey])) {
+                    $tagSet[$normalizedKey] = true;
+                    $embeddedTags[] = $tagPath;
+                }
+            }
+        };
+        
+        // Extract from TagsList (split by '/')
+        if (!empty($exif['TagsList'])) {
+            $tagsList = $ensureArray($exif['TagsList']);
+            $addTags($tagsList, '/');
+        }
+        
+        // Extract from HierarchicalSubject (split by '|')
+        if (!empty($exif['HierarchicalSubject'])) {
+            $hierarchicalSubject = $ensureArray($exif['HierarchicalSubject']);
+            $addTags($hierarchicalSubject, '|');
+        }
+        
+        // Extract from Keywords (might contain paths with '/' or '|')
+        if (!empty($exif['Keywords'])) {
+            $keywords = $ensureArray($exif['Keywords']);
+            foreach ($keywords as $keyword) {
+                // Keywords might contain paths with '/' or '|' separator
+                if (strpos($keyword, '/') !== false) {
+                    $addTags([$keyword], '/');
+                } elseif (strpos($keyword, '|') !== false) {
+                    $addTags([$keyword], '|');
+                } else {
+                    $addTags([[$keyword]], '/');
+                }
+            }
+        }
+        
+        // Extract from Subject (as individual tags)
+        if (!empty($exif['Subject'])) {
+            $subject = $ensureArray($exif['Subject']);
+            foreach ($subject as $tag) {
+                $addTags([[$tag]], '/');
+            }
+        }
+
+        // Filter out component tags
+        $embeddedTags = self::filterComponentTags($embeddedTags);
+
+        if ($flatten) {
+            $embeddedTags = array_map(function ($tag) {
+                return implode('/', $tag);
+            }, $embeddedTags);
+        }
+        
+        return $embeddedTags;
+    }
+
+    /**
+     * Filter out tags that are components of hierarchical tags
+     * For example, if we have "Country/Italy", don't also show "Country" or "Italy"
+     */
+    private static function filterComponentTags(array $tags): array
+    {
+        if (empty($tags)) {
+            return $tags;
+        }
+        
+        // Step 1: Collect all tags into normalized collections
+        $flatTags = []; // Single-part tags (no separator)
+        $hierarchicalTags = []; // Multi-part tags (length > 1)
+        $hierarchicalTagParts = []; // All parts from hierarchical tags
+        
+        foreach ($tags as $tag) {
+            $normalized = array_map('strtolower', $tag);
+            
+            if (count($normalized) === 1) {
+                // Single-part tag
+                $flatTags[$normalized[0]] = $tag;
+            } else {
+                // Multi-part hierarchical tag
+                $hierarchicalTags[] = $tag;
+                
+                // Add all parts to hierarchicalTagParts
+                foreach ($normalized as $part) {
+                    $hierarchicalTagParts[$part] = true;
+                }
+            }
+        }
+        
+        // Step 2: Combination - remove flat tags that are parts of hierarchical tags
+        $result = [];
+        
+        // Add flat tags that are NOT components of hierarchical tags
+        foreach ($flatTags as $flatTagKey => $originalTag) {
+            if (!isset($hierarchicalTagParts[$flatTagKey])) {
+                $result[] = $originalTag;
+            }
+        }
+        
+        // Add all hierarchical tags
+        foreach ($hierarchicalTags as $hierarchicalTag) {
+            $result[] = $hierarchicalTag;
+        }
+        
+        return $result;
+    }
+
+    /**
      * Get the list of MIME Types that are allowed to be edited.
      */
     public static function allowedEditMimetypes(): array

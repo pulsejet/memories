@@ -26,6 +26,13 @@
         <div class="tag-padding" v-if="sections.length === 1"></div>
       </div>
 
+      <div v-if="sections.includes(6)">
+        <div class="title-text">
+          {{ t('memories', 'Embedded Tags') }}
+        </div>
+        <EditEmbeddedTags ref="editEmbeddedTags" :photos="photos" :disabled="processing" />
+      </div>
+
       <div v-if="sections.includes(3)">
         <div class="title-text">
           {{ t('memories', 'EXIF Fields') }}
@@ -68,6 +75,7 @@ import ModalMixin from './ModalMixin';
 
 import EditDate from './EditDate.vue';
 import EditTags from './EditTags.vue';
+import EditEmbeddedTags from './EditEmbeddedTags.vue';
 import EditExif from './EditExif.vue';
 import EditLocation from './EditLocation.vue';
 import EditOrientation from './EditOrientation.vue';
@@ -90,6 +98,7 @@ export default defineComponent({
 
     EditDate,
     EditTags,
+    EditEmbeddedTags,
     EditExif,
     EditLocation,
     EditOrientation,
@@ -110,6 +119,7 @@ export default defineComponent({
       return this.$refs as {
         editDate?: InstanceType<typeof EditDate>;
         editTags?: InstanceType<typeof EditTags>;
+        editEmbeddedTags?: InstanceType<typeof EditEmbeddedTags>;
         editExif?: InstanceType<typeof EditExif>;
         editLocation?: InstanceType<typeof EditLocation>;
         editOrientation?: InstanceType<typeof EditOrientation>;
@@ -123,7 +133,7 @@ export default defineComponent({
   },
 
   methods: {
-    async open(photos: IPhoto[], sections: number[] = [1, 2, 3, 4]) {
+    async open(photos: IPhoto[], sections: number[] = [1, 2, 3, 4, 6]) {
       const state = (this.state = Math.random());
       this.show = true;
       this.processing = true;
@@ -202,10 +212,14 @@ export default defineComponent({
       this.processing = true;
 
       // Get exif fields diff
+      const embeddedTagsResult = this.refs.editEmbeddedTags?.result?.();
       const exifResult = {
         ...(this.refs.editExif?.result?.() || {}),
         ...(this.refs.editLocation?.result?.() || {}),
       };
+
+      // Handle multi-photo embedded tags operation separately
+      const embeddedTagsMultiOp = (embeddedTagsResult as any)?.multiPhotoOperation || null;
 
       // Tags may be created which might throw
       let tagsResult: { add: number[]; remove: number[] } | null = null;
@@ -234,6 +248,32 @@ export default defineComponent({
         const orientation = this.refs.editOrientation?.result?.(p);
         if (orientation !== null && orientation !== undefined) {
           raw.Orientation = orientation;
+        }
+
+        // Embedded tags handling
+        if (embeddedTagsMultiOp) {
+          // Multi-photo operation: add, remove, or override
+          const currentExif = p.imageInfo?.exif;
+          const currentTags = currentExif ? utils.getTagsFromExif(currentExif).map(t => t.join('/')) : [];
+          let newTags: string[] = [];
+
+          if (embeddedTagsMultiOp.mode === 'add') {
+            // Add tags: merge with existing
+            newTags = [...new Set([...currentTags, ...embeddedTagsMultiOp.tags])];
+          } else if (embeddedTagsMultiOp.mode === 'remove') {
+            // Remove tags: filter out specified tags
+            const tagsToRemove = new Set(embeddedTagsMultiOp.tags);
+            newTags = currentTags.filter(t => !tagsToRemove.has(t));
+          } else if (embeddedTagsMultiOp.mode === 'override') {
+            // Override: replace all tags
+            newTags = embeddedTagsMultiOp.tags;
+          }
+
+          // Convert to EXIF fields
+          Object.assign(raw, this.tagsToExifFields(newTags));
+        } else if (embeddedTagsResult && !(embeddedTagsResult as any).multiPhotoOperation) {
+          // Single photo operation: use the result directly
+          Object.assign(raw, embeddedTagsResult);
         }
 
         exifs.set(p.fileid, raw);
@@ -353,6 +393,33 @@ export default defineComponent({
       }
 
       return updatable;
+    },
+
+    tagsToExifFields(tags: string[]) {
+      // Convert tag strings to all four EXIF fields
+      if (tags.length === 0) {
+        return {
+          Keywords: undefined,
+          Subject: undefined,
+          TagsList: undefined,
+          HierarchicalSubject: undefined,
+        };
+      }
+
+      const tagsList = tags.map(tag => tag.replace(/\|/g, '/'));
+      const hierarchicalSubject = tags.map(tag => tag.replace(/\//g, '|'));
+      const keywords = tags.map(tag => tag.replace(/\|/g, '/'));
+      const subject = tags.map(tag => {
+        const parts = tag.split(/[\/|]/);
+        return parts[parts.length - 1];
+      });
+
+      return {
+        Keywords: keywords,
+        Subject: subject,
+        TagsList: tagsList,
+        HierarchicalSubject: hierarchicalSubject,
+      };
     },
   },
 });
