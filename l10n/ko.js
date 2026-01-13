@@ -368,6 +368,7 @@ OC.L10N.register(
     "Public link shares are available to people outside Nextcloud." : "Nextcloud의 바깥 사람들은 공개 링크를 사용할 수 있습니다.",
     "You may create or update permissions on public links using the sidebar." : "사이드바를 사용해 공개 링크의 권한을 만들거나 수정할 수 있습니다.",
     "Click a link to copy to clipboard." : "링크를 클릭해 클립보드로 복사하세요.",
+    "Share link" : "링크 공유",
     "Create Link" : "링크 만들기",
     "Refresh" : "새로 고침",
     "Not allowed to share file: {name}" : "파일을 공유하도록 허가되지 않음: {name}",
