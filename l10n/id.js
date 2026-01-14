@@ -173,6 +173,7 @@ OC.L10N.register(
     "_{n} item_::_{n} items_" : ["{n} barang"],
     "Shared by {user}" : "Dibagikan oleh {user}",
     "Failed to delete {fileName}." : "Gagal menghapus {fileName}.",
+    "Choose {file}" : "Pilih {file}",
     "Choose" : "Pilih"
 },
 "nplurals=1; plural=0;");
