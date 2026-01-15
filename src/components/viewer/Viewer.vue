@@ -89,6 +89,8 @@ import EditFileIcon from 'vue-material-design-icons/FileEdit.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
+import SelectionManager from '@components/SelectionManager.vue';
+import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue';
 
 type IViewerAction = {
   /** Identifier (optional) */
@@ -155,6 +157,9 @@ export default defineComponent({
     globalAnchor: -1,
     currIndex: -1,
 
+    /** Timeline instance for dynamic viewer */
+    timeline: null as TimelineState | null,
+
     /** Timer to move to next photo */
     slideshowTimer: 0,
     /** Timer to debounce changes to sidebar */
@@ -162,6 +167,9 @@ export default defineComponent({
 
     /** Photo keys for which an imageInfo request is currently ongoing */
     imageInfoLoading: new Set<string>(),
+
+    /** Force reactivity for selection changes */
+    selectionChangeCounter: 0,
   }),
 
   mounted() {
@@ -202,6 +210,7 @@ export default defineComponent({
       return this.$refs as {
         outer: HTMLDivElement;
         inner: HTMLDivElement;
+        selectionManager: InstanceType<typeof SelectionManager>;
       };
     },
 
@@ -237,6 +246,16 @@ export default defineComponent({
           icon: ShareIcon,
           callback: this.shareCurrent,
           if: this.canShare,
+        },
+        {
+          id: 'select',
+          name: this.t('memories', 'Select'),
+          icon: CheckCircleIcon,
+          iconArgs: {
+            fillColor: this.isSelected ? 'var(--color-primary-element)' : undefined,
+          },
+          callback: this.selectCurrent,
+          if: true,
         },
         {
           id: 'delete',
@@ -421,6 +440,15 @@ export default defineComponent({
         extension: (raw.basename?.split('.').pop() ?? '?').toUpperCase(),
         fileid: raw.fileid,
       }));
+    },
+
+    /** Is the current photo selected */
+    isSelected(): boolean {
+      // Access counter to make this reactive
+      this.selectionChangeCounter;
+      const photo = this.currentPhoto;
+      if (!photo || !this.timeline) return false;
+      return this.timeline.$refs.selectionManager.selection.hasBy(photo);
     },
   },
 
@@ -626,6 +654,7 @@ export default defineComponent({
         this.list = [];
         this.globalCount = 0;
         this.globalAnchor = -1;
+        this.timeline = null;
         clearTimeout(this.slideshowTimer);
         this.slideshowTimer = 0;
       });
@@ -709,6 +738,9 @@ export default defineComponent({
         console.error('Attempted to open viewer with no detail list!');
         return;
       }
+
+      // Store timeline instance for later use
+      this.timeline = timeline;
 
       // Helper to compute the global anchor and count
       // Anchor is the global index of the first list item
@@ -1045,6 +1077,18 @@ export default defineComponent({
       if (e.key === 'F' && e.shiftKey) {
         this.refs.outer?.requestFullscreen();
       }
+    },
+
+    /** Select this photo and refresh */
+    async selectCurrent() {
+      let idx = this.photoswipe!.currIndex - this.globalAnchor;
+      const photo = this.list[idx];
+      if (!photo || !this.timeline) return;
+
+      this.timeline.$refs.selectionManager.selectPhoto(photo);
+
+      // Force update the components to reflect the change
+      this.selectionChangeCounter++;
     },
 
     /** Delete this photo and refresh */
