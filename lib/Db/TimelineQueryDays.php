@@ -57,8 +57,13 @@ trait TimelineQueryDays
         // FETCH all days
         $rows = $this->executeQueryWithCTEs($query)->fetchAll();
 
-        // Post process the days
-        $rows = $this->postProcessDays($rows, $monthView);
+        // Apply post-filtering if SQL filtering is disabled
+        if (!$this->shouldFilterExifBySQL()) {
+            $rows = $this->postProcessDaysWithFilters($rows, $monthView);
+        } else {
+            // Post process the days normally
+            $rows = $this->postProcessDays($rows, $monthView);
+        }
 
         // Reverse order if needed
         if ($reverse) {
@@ -77,6 +82,7 @@ trait TimelineQueryDays
      * @param bool  $hidden          If the query should include hidden files
      * @param bool  $monthView       If the query should be in month view (dayIds are monthIds)
      * @param bool  $reverse         If the query should be in reverse order
+     * @param int   $minRating       The minimum rating to include
      * @param array $queryTransforms The query transformations to apply
      *
      * @return array An array of day responses
@@ -88,6 +94,8 @@ trait TimelineQueryDays
         bool $hidden,
         bool $monthView,
         bool $reverse,
+        int $minRating = 0,
+        array $embeddedTags = [],
         array $queryTransforms = [],
     ): array {
         // Check if we have any dayIds
@@ -167,6 +175,11 @@ trait TimelineQueryDays
         // Reverse order if needed
         if ($reverse) {
             $day = array_reverse($day);
+        }
+
+        // Filter by embedded tags (if not already filtered in SQL)
+        if ($embeddedTags && count($embeddedTags) > 0) {
+            $day = array_filter($day, fn ($photo) => count(array_intersect($embeddedTags, $photo['embedded_tags'] ?? [])) > 0);
         }
 
         return $day;
@@ -269,6 +282,108 @@ trait TimelineQueryDays
     }
 
     /**
+     * Process the days response with EXIF filtering applied after SQL query.
+     *
+     * @param array $rows      the days response from SQL
+     * @param bool  $monthView Whether the response is in month view
+     */
+    private function postProcessDaysWithFilters(array $rows, bool $monthView): array
+    {
+        if (empty($rows)) {
+            return $rows;
+        }
+
+        // Get filter parameters from request
+        $minRating = (int) $this->request->getParam('minRating') ?: 0;
+        $embeddedTags = $this->getEmbeddedTagsFromRequest();
+
+        // Get day IDs for filtering
+        $dayIds = array_map(fn($row) => (int) $row['dayid'], $rows);
+
+        // Fetch all photos for these days (without EXIF filtering)
+        $allPhotos = $this->getDay(
+            $dayIds,
+            true,
+            false,
+            false,
+            $monthView,
+            false,
+            0, // minRating - don't apply in SQL, do in PHP
+            [], // embeddedTags - don't apply in SQL, do in PHP
+            [] // transforms
+        );
+
+        // Group photos by day
+        $photosByDay = [];
+        foreach ($allPhotos as $photo) {
+            $dayId = (int) $photo['dayid'];
+            if (!isset($photosByDay[$dayId])) {
+                $photosByDay[$dayId] = [];
+            }
+            $photosByDay[$dayId][] = $photo;
+        }
+
+        // Apply PHP filtering and recount
+        $filteredRows = [];
+        foreach ($rows as $row) {
+            $dayId = (int) $row['dayid'];
+            $dayPhotos = $photosByDay[$dayId] ?? [];
+
+            // Apply EXIF filters
+            if ($minRating > 0) {
+                $dayPhotos = array_filter($dayPhotos, fn ($photo) => ($photo['rating'] ?? 0) >= $minRating);
+            }
+
+            if (!empty($embeddedTags)) {
+                $dayPhotos = array_filter($dayPhotos, fn ($photo) =>
+                    count(array_intersect($embeddedTags, $photo['embedded_tags'] ?? [])) === count($embeddedTags)
+                );
+            }
+
+            // Only include days with qualifying photos
+            $filteredCount = count($dayPhotos);
+            if ($filteredCount > 0) {
+                $filteredRows[] = [
+                    'dayid' => $dayId,
+                    'count' => $filteredCount,
+                    'fileIds' => array_map(fn ($photo) => $photo['fileid'], $dayPhotos),
+                ];
+            }
+        }
+
+        // Convert to months if needed
+        if ($monthView) {
+            $filteredRows = array_values(array_reduce($filteredRows, function ($carry, $item) {
+                $monthId = $this->dayIdToMonthId($item['dayid']);
+
+                if (!array_key_exists($monthId, $carry)) {
+                    $carry[$monthId] = ['dayid' => $monthId, 'count' => 0];
+                }
+
+                $carry[$monthId]['count'] += $item['count'];
+
+                return $carry;
+            }, []));
+        }
+
+        return $filteredRows;
+    }
+
+    /**
+     * Extract embedded tags from request parameter.
+     */
+    private function getEmbeddedTagsFromRequest(): array
+    {
+        $embeddedTagsParam = $this->request->getParam('embeddedTags');
+        if ($embeddedTagsParam) {
+            // Decode URI-encoded string before splitting
+            $decoded = urldecode($embeddedTagsParam);
+            return explode(',', $decoded);
+        }
+        return [];
+    }
+
+    /**
      * Process the days response.
      *
      * @param array $rows      the days response
@@ -314,6 +429,13 @@ trait TimelineQueryDays
         $row['dayid'] = (int) $row['dayid'];
         $row['w'] = (int) $row['w'];
         $row['h'] = (int) $row['h'];
+        //parse json of exif if exif exists
+        if ($row['exif'] ?? null) {
+            $row['exif'] = json_decode($row['exif'], true);
+            $row['rating'] = isset($row['exif']['Rating']) ? (int) $row['exif']['Rating'] : null;
+            $row['embedded_tags'] = Exif::extractEmbeddedTags($row['exif'], true);
+        }
+
 
         // Optional fields
         if (!$row['isvideo']) {

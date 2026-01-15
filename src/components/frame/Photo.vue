@@ -17,6 +17,15 @@
       >
         <CheckCircleIcon :size="18" />
       </div>
+      
+      <!-- Interactive rating overlay -->
+      <div class="interactive-rating" v-if="showInteractiveRating">
+        <RatingStars 
+          :rating="currentRating"
+          :size="14"
+          @update:rating="updateRating"
+        />
+      </div>
 
       <div class="flag top-right">
         <RawIcon class="raw" v-if="isRaw" :size="28" />
@@ -76,6 +85,19 @@
         ></video>
         <div class="overlay top-left fill-block"></div>
       </div>
+      
+      <!-- Metadata overlay -->
+      <div class="metadata-overlay" v-if="showMetadataOverlay">
+        <RatingTags 
+          v-if="showRatingTags"
+          :rating="currentRating"
+          :tags="currentTags"
+          :compact="true"
+          :max-tags="3"
+          :hide-stars="config.enable_exif_photo_rating_in_gallery"
+        />
+      </div>
+      
     </div>
   </div>
 </template>
@@ -85,7 +107,13 @@ import { defineComponent, type PropType } from 'vue';
 
 import * as utils from '@services/utils';
 import staticConfig from '@services/static-config';
+import UserConfig from '@mixins/UserConfig';
+import axios from '@nextcloud/axios';
+import { API } from '@services/API';
+import { showError } from '@nextcloud/dialogs';
 
+import RatingTags from '@components/RatingTags.vue';
+import RatingStars from '@components/RatingStars.vue';
 import LivePhotoIcon from '@components/icons/LivePhoto.vue';
 import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
@@ -100,7 +128,12 @@ import errorsvg from '@assets/error.svg';
 
 export default defineComponent({
   name: 'Photo',
+  
+  mixins: [UserConfig],
+  
   components: {
+    RatingTags,
+    RatingStars,
     LivePhotoIcon,
     CheckCircleIcon,
     VideoIcon,
@@ -224,6 +257,33 @@ export default defineComponent({
       }
       return null;
     },
+
+    /** Get current photo rating */
+    currentRating(): number {
+      const exif = this.data.imageInfo?.exif || this.data.exif;
+      return utils.getRatingFromExif(exif);
+    },
+
+    /** Get current photo embedded tags */
+    currentTags(): string[][] {
+      const exif = this.data.imageInfo?.exif || this.data.exif;
+      return utils.getTagsFromExif(exif);
+    },
+
+    /** Whether to show the RatingTags component */
+    showRatingTags(): boolean {
+      return this.config.metadata_in_gallery && (this.currentRating > 0 || this.currentTags.length > 0);
+    },
+
+    /** Whether to show the interactive rating overlay */
+    showInteractiveRating(): boolean {
+      return this.config.enable_exif_photo_rating_in_gallery && (!!this.data.exif || !!this.data.imageInfo?.exif);
+    },
+
+    /** Whether to show the metadata overlay container */
+    showMetadataOverlay(): boolean {
+      return this.showRatingTags || this.showInteractiveRating;
+    },
   },
 
   methods: {
@@ -344,6 +404,44 @@ export default defineComponent({
       if (this.liveState.playing) this.stopVideo();
       else this.playVideo();
     },
+
+    /** Update photo rating */
+    async updateRating(rating: number) {
+      const exif = this.data.imageInfo?.exif || this.data.exif;
+      if (!exif) return;
+      
+      try {
+        const fileid = this.data.fileid;
+        const currentRating = exif.Rating || 0;
+        const newRating = rating === currentRating ? undefined : rating;
+        
+        // Optimistically update the UI
+        if (newRating === undefined) {
+          delete exif.Rating;
+        } else {
+          exif.Rating = newRating;
+        }
+        
+        // Update the server
+        await axios.patch(API.IMAGE_SETEXIF(fileid), { 
+          raw: { Rating: newRating }
+        });
+        
+        // Emit file updated event
+        utils.bus.emit('files:file:updated', { fileid });
+        
+      } catch (e) {
+        console.error('Failed to update rating for', this.data.fileid, e);
+        if (e.response?.data?.message) {
+          showError(e.response.data.message);
+        } else {
+          showError(this.t('memories', 'Failed to update rating'));
+        }
+        
+        // Revert the optimistic update on error
+        this.$forceUpdate();
+      }
+    },
   },
 });
 </script>
@@ -387,7 +485,7 @@ $icon-size: $icon-half-size * 2;
 .select {
   position: absolute;
   top: calc(var(--icon-dist) + 2px);
-  left: calc(var(--icon-dist) + 2px);
+  right: calc(var(--icon-dist) + 2px);
   z-index: 100;
   border-radius: 50%;
   display: none;
@@ -549,6 +647,141 @@ div.img-outer {
         border-radius: $icon-size;
         border-top-left-radius: 0;
       }
+    }
+  }
+}
+
+// Metadata overlay
+.metadata-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+  
+  // Hide on hover to prevent interference with selection
+  @media (hover: hover) and (pointer: fine) {
+    .p-outer:hover > .img-outer > & {
+      opacity: 0.3;
+      transition: opacity 0.2s ease;
+    }
+  }
+  
+  // Hide when selected
+  .p-outer.selected > .img-outer > & {
+    opacity: 0;
+  }
+
+  // Compact styling for gallery
+  :deep .rating-tags {
+    font-size: 0.8em;
+    gap: 6px;
+    
+    .rating-section {
+      :deep .rating-stars {
+        gap: 0;
+        
+        .button-vue {
+          padding: 2px;
+          min-height: unset;
+          min-width: unset;
+        }
+      }
+    }
+    
+    .tags-container {
+      gap: 2px;
+      
+      .chip {
+        font-size: 0.75em;
+        padding: 2px 6px;
+        max-width: 80px;
+        
+        :deep .chip__content {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    }
+    
+    .more-tags {
+      font-size: 0.7em;
+    }
+  }
+
+  @media (max-width: 768px) {
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    padding: 6px 4px 2px;
+    
+    :deep .rating-tags {
+      font-size: 0.75em;
+      gap: 4px;
+    }
+  }
+}
+
+// Interactive rating overlay within metadata
+.interactive-rating {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  padding: 8px 6px 4px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  pointer-events: auto;
+  z-index: 10;
+  
+  // Show on hover or when photo has rating
+  @media (hover: hover) and (pointer: fine) {
+    .p-outer:hover & {
+      opacity: 1;
+    }
+  }
+  
+  // Always show if there's a rating
+  &:has(.rating-stars .button-vue.filled) {
+    opacity: 1;
+  }
+  
+  // Show on touch devices
+  @media (hover: none) {
+    .p-outer:active &,
+    .p-outer.touched & {
+      opacity: 1;
+    }
+  }
+  
+  // Hide when photo is selected
+  .p-outer.selected & {
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  // Compact rating stars styling for gallery
+  :deep .rating-stars {
+    gap: 1px !important;
+    
+    .button-vue {
+      padding: 2px;
+      min-height: 18px;
+      min-width: 18px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 6px 4px 2px;
+    
+    :deep .rating-stars .button-vue {
+      min-height: 16px;
+      min-width: 16px;
     }
   }
 }
