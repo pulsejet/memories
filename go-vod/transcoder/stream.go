@@ -370,7 +370,7 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 	// Check whether hwaccel should be used
 	if s.c.VAAPI {
 		CV = ENCODER_VAAPI
-		extra := "-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi"
+		extra := "-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi -init_hw_device vaapi=memories:/dev/dri/renderD128 -filter_hw_device memories"
 		args = append(args, strings.Split(extra, " ")...)
 	} else if s.c.NVENC {
 		CV = ENCODER_NVENC
