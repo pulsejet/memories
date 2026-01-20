@@ -32,6 +32,10 @@
         </label>
       </div>
 
+      <button class="m-button" id="client-cert">
+        Select client certificate
+      </button>
+
       <button class="m-button login-button" id="login">
         Continue to Login
       </button>
@@ -45,6 +49,8 @@
     <script>
       const urlBox = document.getElementById("server-url");
       const loginButton = document.getElementById("login");
+      const clientCertButton = document.getElementById("client-cert");
+      const trustAllCheckbox = document.getElementById("trust-all");
 
       function validateUrl(url) {
         try {
@@ -66,7 +72,10 @@
       }
 
       function updateLoginEnabled() {
-        loginButton.disabled = !validateUrl(getUrl());
+        const validUrl = validateUrl(getUrl());
+        loginButton.disabled = !validUrl;
+        const trustAll = trustAllCheckbox.checked;
+        clientCertButton.disabled = !validUrl || trustAll;
       }
 
       function getMemoriesUrl() {
@@ -106,7 +115,7 @@
           const encUrl = encodeURIComponent(encodeURIComponent(getMemoriesUrl().toString()));
 
           // Trust all certificates
-          const trustAll = document.getElementById("trust-all").checked ? "1" : "0";
+          const trustAll = trustAllCheckbox.checked ? "1" : "0";
 
           await fetch(`http://127.0.0.1/api/login/${encUrl}?trustAll=${trustAll}`, {
             method: "GET",
@@ -121,6 +130,21 @@
           urlBox.disabled = false;
           loginButton.disabled = false;
         }
+      });
+
+       // ClientCert button click handler
+      clientCertButton.addEventListener("click", async () => {
+        try {
+          const url = getUrl();
+          // go to URL to have WebView and AdvancedX509KeyManager
+          // handle certificate selection
+          globalThis.nativex?.requestClientCertFor(url)
+        } catch (e) {
+        }
+      });
+
+      trustAllCheckbox.addEventListener("click", async() => {
+        updateLoginEnabled();
       });
 
       // Set action bar color

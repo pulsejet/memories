@@ -31,6 +31,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".SelectClientCertificateHelperActivity" />
+
         <receiver
             android:name=".service.DownloadBroadcastReceiver"
             android:exported="true">
