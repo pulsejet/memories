@@ -19,10 +19,355 @@ import java.time.format.ResolverStyle
 import java.time.temporal.ChronoField
 import java.util.Date
 import java.util.TimeZone
+import java.time.temporal.Temporal
 import java.time.temporal.TemporalAccessor
+import java.time.temporal.TemporalField
 import kotlin.math.floor
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
-data class InstantZone(val instant: Instant, val zoneId: ZoneId?)
+data class Pair<K, V>(val key: K, val value: V)
+
+class DateParser {
+    companion object {
+
+        /** utility class to merge multiple TemporalAccessors into one. It queries TemporalAccessors in order 
+         *  until it finds one that supports the requested field (thus preserving priority if needed)
+         */ 
+        class MergedTemporalAccessor(
+            private val parts: List<TemporalAccessor>
+        ) : TemporalAccessor {
+
+            override fun isSupported(field: TemporalField): Boolean =
+                parts.any { it.isSupported(field) }
+
+            override fun getLong(field: TemporalField): Long {
+                val source = parts.firstOrNull { it.isSupported(field) } ?: throw UnsupportedOperationException("Field $field not supported")
+                return source.getLong(field)
+            }
+
+        }
+
+        val TAG = DateParser::class.java.simpleName
+
+        private val VIDEO_MIME_RE = Regex("^video/\\w+", RegexOption.IGNORE_CASE)
+        
+        private val DATETIME_FIELDS = listOf(
+            "SubSecDateTimeOriginal",
+            ExifInterface.TAG_DATETIME_ORIGINAL,
+            ExifInterface.TAG_DATETIME_DIGITIZED,
+            ExifInterface.TAG_DATETIME,
+            "SonyDateTime",
+        )
+
+        private val DATE_FIELDS = listOf(
+            "SubSecCreateDate",
+            "CreationDate",
+            "CreationDateValue",
+            "CreateDate",
+            "TrackCreateDate",
+            "MediaCreateDate",
+            "FileCreateDate",
+        )
+
+        private val PAIRED_DATE_TIME_FIELDS = listOf(
+            Pair(ExifInterface.TAG_GPS_DATESTAMP, ExifInterface.TAG_GPS_TIMESTAMP),
+        )
+
+        private val OFFSET_FIELDS = listOf(
+            ExifInterface.TAG_OFFSET_TIME_ORIGINAL,
+            ExifInterface.TAG_OFFSET_TIME_DIGITIZED,
+            ExifInterface.TAG_OFFSET_TIME,
+            "TimeZone",
+            "LocationTZID"
+        )
+
+        private val DATETIME_FORMATTERS: List<DateTimeFormatter> = listOf(
+            DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss[.SSS][.SS][.S][XXXXX][XXXX][XXX][XX][X]"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS][.SS][.S][XXXXX][XXXX][XXX][XX][X]"),
+            DateTimeFormatter.ISO_DATE_TIME,
+            DateTimeFormatter.ISO_INSTANT,
+            DateTimeFormatter.RFC_1123_DATE_TIME
+        )
+
+        private val DATE_FORMATTERS: List<DateTimeFormatter> = listOf(
+            DateTimeFormatter.ofPattern("yyyy:MM:dd[XXXXX][XXXX][XXX][XX][X]"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd[XXXXX][XXXX][XXX][XX][X]"),
+            DateTimeFormatter.ISO_DATE,
+            DateTimeFormatter.ISO_ORDINAL_DATE,
+            DateTimeFormatter.ISO_WEEK_DATE
+        )
+
+        private val TIME_FORMATTERS: List<DateTimeFormatter> = listOf(
+            DateTimeFormatter.ofPattern("HH:mm:ss[.SSS][.SS][.S][XXXXX][XXXX][XXX][XX][X]"),
+            DateTimeFormatter.ISO_TIME
+        )
+
+        private val ZONE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("[XXXXX][XXXX][XXX][XX][X]")
+
+        private val FILENAME_PATTERNS: List<DatePattern> = listOf(
+            DatePattern(".*?(\\d{8})_(\\d{6}).*", listOf(DateTimeFormatter.BASIC_ISO_DATE, DateTimeFormatter.ofPattern("HHmmss"))), // Standard Camera/Android/Pixel (e.g., IMG_20230520_143055.jpg or 20230520_143055.mp4)
+            DatePattern(".*?(\\d{8}).*", DateTimeFormatter.BASIC_ISO_DATE), // WhatsApp Image/Video (e.g., IMG-20230520-WA0001.jpg)
+            DatePattern(".*?(\\d{4}-\\d{2}-\\d{2}).*?(\\d{2}\\.\\d{2}\\.\\d{2}).*", listOf(DateTimeFormatter.ISO_DATE, DateTimeFormatter.ofPattern("HH.mm.ss"))), // iOS / Screenshot standard (e.g., Screenshot 2023-05-20 at 14.30.55.png)
+            DatePattern(".*?(\\d{4}-\\d{2}-\\d{2}).*?(\\d{2}-\\d{2}-\\d{2}).*", listOf(DateTimeFormatter.ISO_DATE, DateTimeFormatter.ofPattern("HH-mm-ss"))), // Generic Separators (e.g., 2023-05-20 14-30-55.jpg)
+            DatePattern(".*?(\\d{4}-\\d{2}-\\d{2}).*", DateTimeFormatter.ISO_DATE) // 5. ISO Date Only (e.g., Report_2023-05-20.pdf)
+        )
+
+        fun inferEarliestDate(exif: ExifInterface?, mimeType: String?, dateTaken: Long?, filename: String, mtime: Long): ZonedDateTime {
+            // Try to obtain explicit EXIF timezone from dedicated EXIF fields (if any)
+            val exifZone: ZoneId? = exif?.let { e ->
+                OFFSET_FIELDS.mapNotNull { e.getAttribute(it)}
+                                .map { 
+                                    try { parseZoneFromString(it) } 
+                                    catch (_: Exception) { 
+                                        Log.e(TAG, "Unable to parse zone from EXIF field containing: '$it'") 
+                                        null 
+                                    } 
+                                }.firstOrNull { it != null }
+            }
+
+            var candidates: MutableList<Pair<String, TemporalAccessor>> = mutableListOf()
+
+            // try to parse every field and add to the accessor list each successful one
+            if (exif != null) {
+                for (field in DATETIME_FIELDS) {
+                    try {
+                        exif.getAttribute(field)?.let { 
+                            candidates += Pair("Exif $field", parseDateTimeFromString(it)) 
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Unable to parse date time from EXIF field containing: '${exif.getAttribute(field) ?: ""}': ${e.message}")
+                    }
+                }
+
+                for (field in DATE_FIELDS) {
+                    try {
+                        exif.getAttribute(field)?.let { 
+                            candidates += Pair("Exif $field", parseDateFromString(it)) 
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Unable to parse date from EXIF field containing: '${exif.getAttribute(field) ?: ""}': ${e.message}")
+                    }
+                }
+
+                for ((key, v) in PAIRED_DATE_TIME_FIELDS) {
+                    try {
+                        val date = exif.getAttribute(key)
+                        val time = exif.getAttribute(v)
+                        
+                        if (date != null && time != null) {
+                            candidates += Pair("Exif $key and $v", MergedTemporalAccessor(listOf(parseDateFromString(date), parseTimeFromString(time))))
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Unable to parse paired date time from EXIF fields containing: '${exif.getAttribute(key) ?: ""}' and '${exif.getAttribute(v) ?: ""}': ${e.message}")
+                    }
+                }
+            }
+
+            // add the fallback to filename, dateTaken and mtime
+            try {
+                candidates += Pair("Filename", parseDateTimeFromFilename(filename))
+            } catch (e: Exception) {
+                Log.e(TAG, "Unable to parse date time from filename: '${filename}': ${e.message}")
+            }
+
+            if (dateTaken != null) {
+                candidates += Pair("MediaStore dateTaken", Instant.ofEpochSecond(dateTaken))
+            }
+
+            candidates += Pair("MediaStore mtime", Instant.ofEpochSecond(mtime))
+
+            // find out the earliest date (>0) among all candidates by querying INSTANT_SECONDS, or building it from EPOCH_DAY and SECOND_OF_DAY if possible
+            val bestAccessorPair: Pair<String, TemporalAccessor>? = candidates.minByOrNull { 
+                if (it.value.isSupported(ChronoField.INSTANT_SECONDS)) {
+                    val s = it.value.getLong(ChronoField.INSTANT_SECONDS)
+                    if (s>0L) s else Long.MAX_VALUE
+                }
+                else if (it.value.isSupported(ChronoField.EPOCH_DAY)) {
+                    val epochDay = it.value.getLong(ChronoField.EPOCH_DAY)
+
+                    // use end of day for comparison when second of day is not available
+                    // this prioritizes same-day dates with a defined time
+                    val secondOfDay = if (it.value.isSupported(ChronoField.SECOND_OF_DAY)) it.value.getLong(ChronoField.SECOND_OF_DAY) else (86400L) 
+                    val s = (epochDay * 86400L) + secondOfDay
+                    if (s>0L) s else Long.MAX_VALUE
+                } else {
+                    Log.e(TAG, "Could not get or calculate INSTANT_SECONDS from accessor: '${it.key}'='${it.value}' does not support INSTANT_SECONDS or EPOCH_DAY")
+                    Long.MAX_VALUE
+                }
+            }
+
+            // try to cast the bestAccessor to OffsetDateTime, LocalDateTime, LocalDate or Instant and handle each one accordingly
+            if (bestAccessorPair != null) {
+                val zonedDateTime = resolveDateFromAccessor(bestAccessorPair.value, exifZone, mimeType)
+
+                // finally log the best field and return the instant and the zone
+                if (zonedDateTime != null) {
+                    Log.v(TAG, "Date source: ${bestAccessorPair.key}, Correct inferred zone: ${exifZone != null}") 
+                    return zonedDateTime
+                }
+            }
+
+            // fallback that should never happen since mtime is always available
+            Log.v(TAG, "Date source: none") 
+            return ZonedDateTime.ofInstant(Instant.ofEpochSecond(0), ZoneOffset.UTC)
+        }
+
+        fun getDayId(zonedDateTime: ZonedDateTime): Long {
+            // shift the zone to UTC keeping the local clock untouched, then calculate the day id using seconds since UTC epoch
+            val midnightUtc = zonedDateTime.withZoneSameLocal(ZoneOffset.UTC)
+            return floor(midnightUtc.toEpochSecond() / 86400.0).toLong()
+        }
+
+        fun resolveDateFromAccessor(accessor: TemporalAccessor, exifZone: ZoneId?, mimeType: String?): ZonedDateTime? {
+            var zonedDateTime: ZonedDateTime? = null
+            
+            try {
+                // supports both ZoneID and Zone Offset
+                zonedDateTime = ZonedDateTime.from(accessor)
+            } catch (_: Exception) {}
+
+            if (zonedDateTime == null) {
+                try {
+                    // supports combining LocalDate and LocalTime
+                    val localDateTime = LocalDateTime.from(accessor)
+
+                    if (exifZone != null && mimeType?.matches(VIDEO_MIME_RE) == true) {
+                        // videos: treat as UTC then convert to exifZone (shift local clock to keep the instant unchanged)
+                        zonedDateTime = localDateTime.atZone(ZoneOffset.UTC).withZoneSameInstant(exifZone)
+                    } else {
+                        // photos: treat as local time in exifZone (no clock shift), or assume UTC as fallback both for photos and videos
+                        zonedDateTime = localDateTime.atZone(exifZone ?: ZoneOffset.UTC)
+                    }
+                } catch (_: Exception) {}
+            }
+
+            if (zonedDateTime == null) {
+                try {
+                    val localDate = LocalDate.from(accessor)
+                    zonedDateTime = localDate.atStartOfDay(exifZone ?: ZoneOffset.UTC)
+                } catch (_: Exception) {}
+            }
+
+            if (zonedDateTime == null) {
+                try {
+                    val instant = Instant.from(accessor)
+                    zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneOffset.UTC)
+                } catch (_: Exception) {}
+            }
+
+            return zonedDateTime
+        }
+
+        private class DatePattern {
+            val pattern: Pattern
+            val dateFormatters: List<DateTimeFormatter>
+
+            constructor(regex: String, dateFormatters: List<DateTimeFormatter>) {
+                this.pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE)
+                this.dateFormatters = dateFormatters
+            }
+
+            constructor(regex: String, dateFormatter: DateTimeFormatter) {
+                this.pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE)
+                this.dateFormatters = listOf(dateFormatter)
+            }
+
+            fun match_parse(str: String): TemporalAccessor {
+                val matcher = pattern.matcher(str)
+                var accessors: MutableList<TemporalAccessor> = mutableListOf()
+                if (matcher.find()) {
+                    for ((i, formatter) in dateFormatters.withIndex()) {
+                        try {
+                            val match = matcher.group(i+1) // group 0 is the entire sequence
+                            accessors += formatter.parse(match)
+                        } catch(e: Exception) {
+                            if (e is IllegalStateException) throw e
+                            else if (e is IndexOutOfBoundsException) throw IllegalArgumentException("DatePattern object has less capturing groups (${i}) then formatters (${dateFormatters.size})")
+                            else throw IllegalArgumentException("Could not parse a group of string '$str' with formatter '${formatter.toString()}'")
+                        }
+                    }
+                }
+
+                if (accessors.isEmpty()) throw IllegalArgumentException("No date information found in string '$str'")
+
+                // merge the information from all accessors
+                return MergedTemporalAccessor(accessors)
+            }
+        } 
+
+        fun parseDateTimeFromString(str: String): TemporalAccessor {
+            val cleanStr = str.trim().replace("\\0", "")
+            if (cleanStr.isNotEmpty()) {
+                for (formatter in DATETIME_FORMATTERS) {
+                    try {
+                        return formatter.parseBest(cleanStr, 
+                            OffsetDateTime::from, 
+                            LocalDateTime::from
+                        )
+                    } catch(_: Exception) {}
+                }
+            }
+        
+            throw IllegalArgumentException("Unable to parse date time: '$str'")
+        }
+
+        fun parseDateFromString(str: String): TemporalAccessor {
+            val cleanStr = str.trim().replace("\\0", "")
+            if (cleanStr.isNotEmpty()) {
+                for (formatter in DATE_FORMATTERS) {
+                    try {
+                        return LocalDate.parse(cleanStr, formatter)
+                    } catch(_: Exception) {}
+                }
+            }
+        
+            throw IllegalArgumentException("Unable to parse date: '$str'")
+        }
+
+        fun parseTimeFromString(str: String): TemporalAccessor {
+            val cleanStr = str.trim().replace("\\0", "")
+            if (cleanStr.isNotEmpty()) {
+                for (formatter in TIME_FORMATTERS) {
+                    try {
+                        return formatter.parseBest(cleanStr, 
+                            OffsetTime::from, 
+                            LocalTime::from
+                        )
+                    } catch(_: Exception) {}
+                }
+            }
+        
+            throw IllegalArgumentException("Unable to parse time: '$str'")
+        }
+
+        fun parseZoneFromString(str: String): ZoneId {
+            val cleanStr = str.trim().replace("\\0", "")
+            if (cleanStr.isNotEmpty()) {
+                try {
+                    return ZoneId.of(cleanStr)
+                } catch (_: Exception) {}
+
+                try {
+                    return ZoneId.from(ZONE_FORMATTER.parse(cleanStr))
+                } catch (_: Exception) {}
+            }
+        
+            throw IllegalArgumentException("Unable to parse zone: '$str'")
+        }
+
+        fun parseDateTimeFromFilename(str: String): TemporalAccessor {
+            val cleanStr = str.trim().replace("\\0", "")
+            for (dp in FILENAME_PATTERNS) {
+                try {
+                    return dp.match_parse(cleanStr)
+                } catch(_: Exception) {}
+            }
+            
+            throw IllegalArgumentException("Unable to parse date from filename: $str")
+        }
+    }
+}
 
 class SystemImage {
     var fileId = 0L
@@ -53,63 +398,6 @@ class SystemImage {
         val TAG = SystemImage::class.java.simpleName
         val IMAGE_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val VIDEO_URI = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-
-        val DATE_FIELDS = listOf(
-            "SubSecDateTimeOriginal",
-            ExifInterface.TAG_DATETIME_ORIGINAL,
-            ExifInterface.TAG_DATETIME_DIGITIZED,
-            ExifInterface.TAG_DATETIME,
-            "SonyDateTime",
-
-            "SubSecCreateDate",
-            "CreationDate",
-            "CreationDateValue",
-            "CreateDate",
-            "TrackCreateDate",
-            "MediaCreateDate",
-            "FileCreateDate",
-
-            "SubSecModifyDate",
-            "ModifyDate",
-            "TrackModifyDate",
-            "MediaModifyDate",
-            "FileModifyDate",
-        )
-
-        // Flexible formatter: optional seconds and optional offset
-        private val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern(
-            "yyyy-MM-dd['T'HH:mm[:ss][XXX]]"
-        )
-
-        // Precompiled regexes for performance
-        private val OFFSET_RE = Regex("([+-]\\d{2}:?\\d{2}|Z)$")
-        private val FRAC_RE = Regex("""\.\d+""")
-        private val TIME_SEC_RE = Regex("""\d{2}:\d{2}:\d{2}""")
-        private val TRAILING_Z_RE = Regex("Z$")
-        private val OFFSET_NO_COLON_RE = Regex("([+-])(\\d{2})(\\d{2})$")
-        private val DATE_CLEANUP_RE = Regex("""^(\d{4}):(\d{2}):(\d{2})""")
-        private val VIDEO_MIME_RE = Regex("^video/\\w+", RegexOption.IGNORE_CASE)
-
-        /**
-         * Normalize a raw exif date string:
-         *  - Replace trailing Z with +00:00
-         *  - Replace comma decimal separator with dot
-         *  - Normalize +HHMM / -HHMM to +HH:MM / -HH:MM
-         */
-        private fun normalizeRaw(s: String): String {
-            var x = s.trim()
-            if (x.isEmpty()) return x
-            if (TRAILING_Z_RE.containsMatchIn(x)) {
-                x = x.replace(TRAILING_Z_RE, "+00:00")
-            }
-            // comma fractional -> dot
-            x = x.replace(',', '.')
-            // normalize +HHMM / -HHMM -> +HH:MM
-            if (OFFSET_NO_COLON_RE.containsMatchIn(x)) {
-                x = x.replace(OFFSET_NO_COLON_RE, "$1$2:$3")
-            }
-            return x
-        }
 
         /**
          * Create ExifInterface from Uri if possible (prefers InputStream for scoped storage),
@@ -220,17 +508,13 @@ class SystemImage {
 
                     val dateTaken = if (!cursor.isNull(dateTakenColumn)) cursor.getLong(dateTakenColumn) / 1000 else null
 
-                    // Parse EXIF date using ExifInterface, otherwise fallback to MediaStore dateTaken or mtime
-                    var instantZone = parseExifDate(image.exifInterface, image.mimeType, dateTaken, image.mtime)
+                    // Infer the earliest date from any source
+                    var zonedDateTime = DateParser.inferEarliestDate(image.exifInterface, image.mimeType, dateTaken, image.baseName, image.mtime)
 
-                    var dateTakenInstant = instantZone.instant
+                    // store the date taken in seconds since epoch (UTC)
+                    image.dateTaken = zonedDateTime.toEpochSecond()
 
-                    image.dateTaken = dateTakenInstant.getEpochSecond()
-
-                    val dateTakenZdt = instantZone.zoneId.let { dateTakenInstant.atZone(it)  }
-                    val midnightUtc = dateTakenZdt.toLocalDate().atStartOfDay(ZoneOffset.UTC)
-
-                    image.dayId = floor(midnightUtc.toEpochSecond() / 86400.0).toLong()
+                    image.dayId = DateParser.getDayId(zonedDateTime)
 
                     // Swap width/height if orientation is 90 or 270
                     val orientation = cursor.getInt(orientationColumn)
@@ -241,138 +525,6 @@ class SystemImage {
                     yield(image)
                 }
             }
-        }
-
-        fun parseExifDate(exif: ExifInterface?, mimeType: String?, dateTaken: Long?, mtime: Long): InstantZone {
-            val candidates = mutableMapOf<String, String>()
-
-            if (exif != null) {
-                for (field in DATE_FIELDS) {
-                    val v = exif.getAttribute(field)
-                    if (!v.isNullOrEmpty() && !v.startsWith("0000:00:00")) {
-                        candidates[field] = v
-                    }
-                }
-
-                // Add GPS date/time if available
-                val gpsDate = exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP)
-                val gpsTime = exif.getAttribute(ExifInterface.TAG_GPS_TIMESTAMP)
-                if (!gpsDate.isNullOrEmpty() && !gpsTime.isNullOrEmpty()) {
-                    candidates["GPS"] = gpsDate.replace(':', '-') + "T" + gpsTime
-                }
-            }
-
-            var bestAdjustedEpoch: Long? = null   // epochSecond - precision
-            var bestInstant: Instant? = null
-            var bestZone: ZoneId? = null
-
-            // Try to obtain explicit EXIF timezone from dedicated EXIF fields (if any)
-            val exifZone: ZoneId? = exif?.let { e ->
-                try {
-                    val tzStr = e.getAttribute("OffsetTimeOriginal")
-                        ?: e.getAttribute("OffsetTime")
-                        ?: e.getAttribute("OffsetTimeDigitized")
-                        ?: e.getAttribute("TimeZone")
-                        ?: e.getAttribute("LocationTZID")
-                    if (tzStr != null) ZoneId.of(tzStr) else null
-                } catch (_: Exception) {
-                    Log.w(TAG, "Failed to parse EXIF timezone")
-                    null
-                }
-            }
-
-            var bestField: String? = null
-
-            for ((field, raw) in candidates) {
-                var str = normalizeRaw(raw)
-
-                str = str.replaceFirst(DATE_CLEANUP_RE, "$1-$2-$3")
-                str = str.replaceFirst(' ', 'T')
-
-                try {
-                    val parsed: TemporalAccessor = try {
-                        // parseBest tries OffsetDateTime first, then LocalDateTime, then LocalDate
-                        DATE_TIME_FORMATTER.parseBest(
-                            str,
-                            { OffsetDateTime.from(it) },
-                            { LocalDateTime.from(it) },
-                            { LocalDate.from(it) }
-                        )
-                    } catch (e: Exception) {
-                        throw IllegalArgumentException("Failed to parse datetime: $str", e)
-                    }
-
-                    var instant: Instant
-                    var parsedZoneFromString: ZoneId? = null
-
-                    when (parsed) {
-                        is OffsetDateTime -> {
-                            // string had explicit offset
-                            instant = parsed.toInstant()
-                            parsedZoneFromString = parsed.offset
-                        }
-                        is LocalDateTime -> {
-                            instant = when {
-                                exifZone != null && mimeType?.matches(VIDEO_MIME_RE) == true -> {
-                                    // videos: treat as UTC then convert to exifZone (shift clock)
-                                    parsed.atZone(ZoneOffset.UTC).toInstant()
-                                }
-                                exifZone != null -> {
-                                    // photos: treat as local time in exifZone (no clock shift)
-                                    parsed.atZone(exifZone).toInstant()
-                                }
-                                else -> {
-                                    // fallback: assume UTC
-                                    parsed.atZone(ZoneOffset.UTC).toInstant()
-                                }
-                            }
-                        }
-                        is LocalDate -> {
-                            // only a date, assume start of day in exifZone or UTC
-                            instant = (exifZone ?: ZoneOffset.UTC).let { parsed.atStartOfDay(it).toInstant() }
-                        }
-                        else -> throw IllegalArgumentException("Unsupported datetime format: $str")
-                    }
-
-                    // Filter out QuickTime bogus timestamp (1904-01-01) or timestamps way before 1800
-                    val ts = instant.getEpochSecond()
-                    if (ts == -2082844800L || ts <= -5_364_662_400L) {
-                        continue
-                    }
-
-                    // determine precision: fractional seconds > seconds > minutes
-                    val precision = when {
-                        FRAC_RE.containsMatchIn(str) -> 3
-                        TIME_SEC_RE.containsMatchIn(str) -> 2
-                        else -> 1
-                    }
-
-                    val adjusted = ts - precision
-
-                    if (adjusted > 0 && (bestAdjustedEpoch == null || adjusted < bestAdjustedEpoch)) {
-                        bestAdjustedEpoch = adjusted
-                        bestInstant = instant
-                        bestZone = (parsedZoneFromString ?: exifZone)
-                        bestField = field
-                    }
-                } catch (ex: Exception) {
-                    Log.v(TAG, "parse failed for field=$field value=$str: ${ex.message}")
-                    // continue to next candidate
-                }
-            }
-
-            if (bestInstant == null) {
-                if (dateTaken != null && dateTaken > 0) {
-                    Log.v(TAG, "Date source: MediaStore dateTaken")
-                    return InstantZone(Instant.ofEpochSecond(dateTaken), ZoneOffset.UTC)
-                } else {
-                    Log.v(TAG, "Date source: MediaStore mtime")
-                    return InstantZone(Instant.ofEpochSecond(mtime), ZoneOffset.UTC)
-                }
-            }
-
-            Log.v(TAG, "Date source: EXIF $bestField")
-            return InstantZone(bestInstant, bestZone)
         }
 
         /**

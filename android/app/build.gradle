@@ -34,6 +34,19 @@ android {
     buildFeatures {
         viewBinding true
     }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+
+            testLogging {
+                events "skipped", "failed"
+                showStandardStreams = true
+                exceptionFormat = "full"
+            }
+        }
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
