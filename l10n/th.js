@@ -64,6 +64,7 @@ OC.L10N.register(
     "Next" : "ถัดไป",
     "Undo" : "เลิกทำ",
     "Custom" : "กำหนดเอง",
+    "Blur" : "เบลอ",
     "Text" : "ข้อความ",
     "Size" : "ขนาด",
     "Position" : "ตำแหน่ง",
