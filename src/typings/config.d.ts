@@ -30,6 +30,8 @@ declare module '@typings' {
     livephoto_loop: boolean;
     sidebar_filepath: boolean;
     metadata_in_slideshow: boolean;
+    metadata_in_gallery: boolean;
+    enable_exif_photo_rating_in_gallery: boolean;
 
     // folder settings
     folders_path: string;

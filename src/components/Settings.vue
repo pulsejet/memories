@@ -87,6 +87,22 @@
           {{ t('memories', 'Show metadata in slideshow') }}
         </NcCheckboxRadioSwitch>
 
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.metadata_in_gallery"
+          @update:checked="updateMetadataInGallery"
+          type="switch"
+        >
+          {{ t('memories', 'Show metadata in gallery') }}
+        </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch
+          :checked.sync="config.enable_exif_photo_rating_in_gallery"
+          @update:checked="updateEnableExifPhotoRatingInGallery"
+          type="switch"
+        >
+          {{ t('memories', 'Enable photo rating in gallery') }}
+        </NcCheckboxRadioSwitch>
+
         <div class="radio-group">
           <div class="title">{{ t('memories', 'High resolution image loading behavior') }}</div>
           <NcCheckboxRadioSwitch
@@ -366,6 +382,14 @@ export default defineComponent({
 
     async updateMetadataInSlideshow() {
       await this.updateSetting('metadata_in_slideshow', 'metadataInSlideshow');
+    },
+
+    async updateMetadataInGallery() {
+      await this.updateSetting('metadata_in_gallery', 'metadataInGallery');
+    },
+
+    async updateEnableExifPhotoRatingInGallery() {
+      await this.updateSetting('enable_exif_photo_rating_in_gallery', 'enableExifPhotoRatingInGallery');
     },
 
     // Folders settings

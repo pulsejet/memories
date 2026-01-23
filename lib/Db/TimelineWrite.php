@@ -14,6 +14,7 @@ use OCP\Lock\ILockingProvider;
 use Psr\Log\LoggerInterface;
 
 const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places', 'memories_failures'];
+const DELETE_ALL = ['memories_embedded_tags'];
 const TRUNCATE_TABLES = ['memories_mapclusters'];
 
 class TimelineWrite
@@ -22,6 +23,7 @@ class TimelineWrite
     use TimelineWriteMap;
     use TimelineWriteOrphans;
     use TimelineWritePlaces;
+    use TimelineWriteEmbeddedTags;
 
     public function __construct(
         protected IDBConnection $connection,
@@ -193,6 +195,9 @@ class TimelineWrite
         // Clear failures if successful
         if ($updated) {
             $this->clearFailures($file);
+            
+            // Process embedded tags
+            $this->processEmbeddedTags($file, $exif);
         }
 
         return $updated;
@@ -255,7 +260,7 @@ class TimelineWrite
      */
     public function clear(): void
     {
-        foreach (array_merge(DELETE_TABLES, TRUNCATE_TABLES) as $table) {
+        foreach (array_merge(DELETE_TABLES, DELETE_ALL, TRUNCATE_TABLES) as $table) {
             SQL::truncate($this->connection, $table, false);
         }
     }

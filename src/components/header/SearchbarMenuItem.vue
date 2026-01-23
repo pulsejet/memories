@@ -1,15 +1,20 @@
 <template>
-  <NcButton
-    v-if="isMobile"
-    class="memories-menu-item search-menu"
-    :title="t('memories', 'Search')"
-    :aria-label="t('memories', 'Search')"
-    @click="search"
-  >
-    <template #icon> <MagnifyIcon :size="20" /> </template>
-  </NcButton>
+  <div v-if="isMobile" class="mobile-actions">
+    <FilterDropdownButton />
+    <NcButton
+      class="memories-menu-item search-menu"
+      :title="t('memories', 'Search')"
+      :aria-label="t('memories', 'Search')"
+      @click="search"
+    >
+      <template #icon> <MagnifyIcon :size="20" /> </template>
+    </NcButton>
+  </div>
 
-  <Searchbar v-else />
+  <div v-else class="desktop-actions">
+    <FilterDropdownButton />
+    <Searchbar />
+  </div>
 </template>
 
 <script lang="ts">
@@ -18,6 +23,7 @@ import { defineComponent } from 'vue';
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 
 import Searchbar from '@components/header/Searchbar.vue';
+import FilterDropdownButton from '@components/FilterDropdownButton.vue';
 
 import * as utils from '@services/utils';
 
@@ -28,6 +34,7 @@ export default defineComponent({
   components: {
     NcButton,
     Searchbar,
+    FilterDropdownButton,
     MagnifyIcon,
   },
 
@@ -46,3 +53,20 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.mobile-actions,
+.desktop-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-actions {
+  flex-direction: row;
+}
+
+.desktop-actions {
+  flex-direction: row;
+}
+</style>

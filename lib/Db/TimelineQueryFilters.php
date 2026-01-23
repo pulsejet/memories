@@ -11,6 +11,51 @@ use OCP\ITags;
 
 trait TimelineQueryFilters
 {
+
+
+    public function transformMinRatingFilter(IQueryBuilder &$query, bool $aggregate, int $minRating): void
+    {
+        if ($minRating <= 0) {
+            return;
+        }
+
+        // Check if we should filter by SQL based on flag and database provider
+        if (!$this->shouldFilterExifBySQL()) {
+            return;
+        }
+
+        $query->andWhere('JSON_EXTRACT(m.exif, \'$.Rating\') >= :minRating');
+        $query->setParameter('minRating', $minRating, IQueryBuilder::PARAM_INT);
+    }
+
+    public function transformEmbeddedTagsFilter(IQueryBuilder &$query, bool $aggregate, array $embeddedTags): void
+    {
+        if (empty($embeddedTags)) {
+            return;
+        }
+
+        // Check if we should filter by SQL based on flag and database provider
+        if (!$this->shouldFilterExifBySQL()) {
+            return;
+        }
+
+        $fields = ['Keywords', 'Subject', 'TagsList', 'HierarchicalSubject'];
+        
+        foreach ($embeddedTags as $index => $tag) {
+            $tagParam = "tag_{$index}";
+            $or = $query->expr()->orX();
+            
+            foreach ($fields as $field) {
+                // Check if the field contains this specific tag
+                $or->add("JSON_CONTAINS(JSON_EXTRACT(m.exif, '$.{$field}'), JSON_QUOTE(:{$tagParam}))");
+            }
+            
+            // Add AND condition for this tag
+            $query->andWhere($or);
+            $query->setParameter($tagParam, $tag, IQueryBuilder::PARAM_STR);
+        }
+    }
+
     public function transformFavoriteFilter(IQueryBuilder &$query, bool $aggregate): void
     {
         if (Util::isLoggedIn()) {
@@ -71,3 +116,5 @@ trait TimelineQueryFilters
         return SQL::subquery($query, $sub);
     }
 }
+
+

@@ -37,14 +37,24 @@
       </div>
 
       <div class="bottom-bar" v-if="photoswipe" :class="{ visible: showBottomBar }">
-        <div class="exif title" v-if="currentPhoto?.imageInfo?.exif?.Title">
-          {{ currentPhoto.imageInfo.exif.Title }}
+        <div class="bottom-bar-left">
+          <div class="exif title" v-if="currentPhoto?.imageInfo?.exif?.Title">
+            {{ currentPhoto.imageInfo.exif.Title }}
+          </div>
+          <div class="exif description" v-if="currentPhoto?.imageInfo?.exif?.Description">
+            {{ currentPhoto.imageInfo.exif.Description }}
+          </div>
+          <div class="exif date" v-if="currentDateTaken">
+            {{ currentDateTaken }}
+          </div>
         </div>
-        <div class="exif description" v-if="currentPhoto?.imageInfo?.exif?.Description">
-          {{ currentPhoto.imageInfo.exif.Description }}
-        </div>
-        <div class="exif date" v-if="currentDateTaken">
-          {{ currentDateTaken }}
+        <div class="bottom-bar-right" v-if="config.metadata_in_slideshow">
+          <RatingTags 
+            :rating="currentRating"
+            :tags="currentTags"
+            :slideshow="true"
+            :compact="true"
+          />
         </div>
       </div>
     </div>
@@ -66,6 +76,7 @@ import * as utils from '@services/utils';
 import * as nativex from '@native';
 
 import ImageEditor from './ImageEditor.vue';
+import RatingTags from '../RatingTags.vue';
 import PhotoSwipe, { type PhotoSwipeOptions } from 'photoswipe';
 import 'photoswipe/style.css';
 import PsImage from './PsImage';
@@ -116,6 +127,7 @@ export default defineComponent({
     NcActions,
     NcActionButton,
     ImageEditor,
+    RatingTags,
   },
 
   mixins: [UserConfig],
@@ -421,6 +433,18 @@ export default defineComponent({
         extension: (raw.basename?.split('.').pop() ?? '?').toUpperCase(),
         fileid: raw.fileid,
       }));
+    },
+
+    /** Get current photo rating */
+    currentRating(): number {
+      const exif = this.currentPhoto?.imageInfo?.exif;
+      return utils.getRatingFromExif(exif);
+    },
+
+    /** Get current photo embedded tags */
+    currentTags(): string[][] {
+      const exif = this.currentPhoto?.imageInfo?.exif;
+      return utils.getTagsFromExif(exif);
     },
   },
 
@@ -1357,11 +1381,24 @@ export default defineComponent({
   bottom: 0;
   left: 0;
   pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
   &.visible {
     opacity: 1;
+  }
+
+  .bottom-bar-left {
+    flex: 1;
+    min-width: 0; // Allow flex shrinking
+  }
+
+  .bottom-bar-right {
+    flex-shrink: 0;
+    margin-left: 16px;
   }
 
   .exif {
@@ -1376,6 +1413,18 @@ export default defineComponent({
       max-width: 90%;
       word-break: break-word;
       line-height: 1.2em;
+    }
+  }
+
+  // Mobile adjustments
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    .bottom-bar-right {
+      margin-left: 0;
+      align-self: flex-end;
     }
   }
 }
