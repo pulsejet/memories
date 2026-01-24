@@ -1,7 +1,7 @@
 OC.L10N.register(
     "memories",
     {
-    "Shared Link" : "Link condivisi",
+    "Shared Link" : "Collegamento condiviso",
     "Download" : "Scarica",
     "Memories" : "Ricordi",
     "Fast, modern and advanced photo management suite" : "Soluzione efficiente, moderna e avanzata per la gestione delle foto",
