@@ -7,10 +7,12 @@ import android.graphics.Color
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
@@ -25,10 +27,13 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import android.window.OnBackInvokedDispatcher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -74,7 +79,42 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(binding.root)
+
+        // Enable insets for Android 16 or newer
+        if (SDK_INT >= 36) {
+            binding.webview.setOnApplyWindowInsetsListener { v, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                // Apply the insets as a margin to the view. This solution sets
+                // only the bottom, left, and right dimensions, but you can apply whichever
+                // insets are appropriate to your layout. You can also update the view padding
+                // if that's more appropriate.
+                v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = insets.left
+                    rightMargin = insets.right
+                    topMargin = insets.top
+                    bottomMargin = insets.bottom
+                }
+
+                // Return CONSUMED if you don't want the window insets to keep passing
+                // down to descendant views.
+                WindowInsets.CONSUMED
+            }
+        }
+
+        // Handle back gesture on devices with Android 13 or newer
+        if (SDK_INT >= 33) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT
+            ) {
+                if (binding.webview.canGoBack()) {
+                    binding.webview.goBack()
+                } else {
+                    finish()
+                }
+            }
+        }
 
         // Set fullscreen mode if in landscape
         val orientation = resources.configuration.orientation
@@ -136,19 +176,24 @@ class MainActivity : AppCompatActivity() {
         releasePlayer()
     }
 
+    @SuppressLint("GestureBackNavigation")
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (event.action == KeyEvent.ACTION_DOWN) {
-            when (keyCode) {
-                KeyEvent.KEYCODE_BACK -> {
-                    if (binding.webview.canGoBack()) {
-                        binding.webview.goBack()
-                    } else {
-                        finish()
+        // This is only needed for devices with Android 12 or older
+        if (SDK_INT < 33) {
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                when (keyCode) {
+                    KeyEvent.KEYCODE_BACK -> {
+                        if (binding.webview.canGoBack()) {
+                            binding.webview.goBack()
+                        } else {
+                            finish()
+                        }
+                        return true
                     }
-                    return true
                 }
             }
         }
+
         return super.onKeyDown(keyCode, event)
     }
 
