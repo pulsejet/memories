@@ -141,6 +141,7 @@ class StaticConfig {
       high_res_cond_default: 'zoom',
       livephoto_autoplay: true,
       livephoto_loop: false,
+      video_loop: false,
       sidebar_filepath: false,
       metadata_in_slideshow: false,
 

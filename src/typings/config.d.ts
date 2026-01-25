@@ -28,6 +28,7 @@ declare module '@typings' {
     high_res_cond_default: HighResCond;
     livephoto_autoplay: boolean;
     livephoto_loop: boolean;
+    video_loop: boolean;
     sidebar_filepath: boolean;
     metadata_in_slideshow: boolean;
 
