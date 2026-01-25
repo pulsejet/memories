@@ -71,6 +71,10 @@
           {{ t('memories', 'Loop Live Photos') }}
         </NcCheckboxRadioSwitch>
 
+        <NcCheckboxRadioSwitch :checked.sync="config.video_loop" @update:checked="updateVideoLoop" type="switch">
+          {{ t('memories', 'Loop Videos') }}
+        </NcCheckboxRadioSwitch>
+
         <NcCheckboxRadioSwitch
           :checked.sync="config.sidebar_filepath"
           @update:checked="updateSidebarFilepath"
@@ -358,6 +362,10 @@ export default defineComponent({
 
     async updateLivephotoLoop() {
       await this.updateSetting('livephoto_loop', 'livephotoLoop');
+    },
+
+    async updateVideoLoop() {
+      await this.updateSetting('video_loop', 'videoLoop');
     },
 
     async updateSidebarFilepath() {
