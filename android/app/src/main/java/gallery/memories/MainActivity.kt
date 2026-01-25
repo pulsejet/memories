@@ -100,16 +100,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Handle back gesture on devices with Android 13 or newer
-        if (SDK_INT >= 33) {
+        // Handle back gesture on devices with Android 16 or newer
+        if (SDK_INT >= 36) {
             onBackInvokedDispatcher.registerOnBackInvokedCallback(
                 OnBackInvokedDispatcher.PRIORITY_DEFAULT
             ) {
-                if (binding.webview.canGoBack()) {
-                    binding.webview.goBack()
-                } else {
-                    finish()
-                }
+                onGoBack()
             }
         }
 
@@ -175,23 +171,24 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("GestureBackNavigation")
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        // This is only needed for devices with Android 12 or older
-        if (SDK_INT < 33) {
-            if (event.action == KeyEvent.ACTION_DOWN) {
-                when (keyCode) {
-                    KeyEvent.KEYCODE_BACK -> {
-                        if (binding.webview.canGoBack()) {
-                            binding.webview.goBack()
-                        } else {
-                            finish()
-                        }
-                        return true
-                    }
+        if (SDK_INT < 36 && event.action == KeyEvent.ACTION_DOWN) {
+            when (keyCode) {
+                KeyEvent.KEYCODE_BACK -> {
+                    onGoBack()
+                    return true
                 }
             }
         }
 
         return super.onKeyDown(keyCode, event)
+    }
+
+    private fun onGoBack() {
+        if (binding.webview.canGoBack()) {
+            binding.webview.goBack()
+        } else {
+            finish()
+        }
     }
 
     private fun initializeIntentHandlers() {
@@ -493,10 +490,8 @@ class MainActivity : AppCompatActivity() {
         try {
             val parsed = color.trim().toColorInt()
             binding.root.setBackgroundColor(parsed)
-            if (SDK_INT < 35) {
-                window.navigationBarColor = parsed
-                window.statusBarColor = parsed
-            }
+            window.navigationBarColor = parsed
+            window.statusBarColor = parsed
         } catch (_: Exception) {
             Log.w(TAG, "Invalid color: $color")
             return
