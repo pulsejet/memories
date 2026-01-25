@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## [v7.8.0] - 2026-01-25
 
 - **Feature**: Add download link to folders ([#1552](https://github.com/pulsejet/memories/pull/1552))
 - **Feature**: Add upload to public shares ([#1523](https://github.com/pulsejet/memories/pull/1523))
