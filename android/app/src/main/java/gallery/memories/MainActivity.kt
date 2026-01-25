@@ -6,11 +6,12 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
 import android.net.http.SslError
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
@@ -25,10 +26,14 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import android.window.OnBackInvokedDispatcher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
+import androidx.core.graphics.toColorInt
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -40,20 +45,21 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import gallery.memories.databinding.ActivityMainBinding
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
 @UnstableApi
 class MainActivity : AppCompatActivity() {
     companion object {
-        val TAG = MainActivity::class.java.simpleName
+        val TAG: String = MainActivity::class.java.simpleName
     }
 
     val binding by lazy(LazyThreadSafetyMode.NONE) {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    val threadPool = Executors.newFixedThreadPool(4)
+    val threadPool: ExecutorService = Executors.newFixedThreadPool(4)
 
     private lateinit var nativex: NativeX
 
@@ -74,7 +80,38 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(binding.root)
+
+        // Enable insets for Android 16 or newer
+        if (SDK_INT >= 36) {
+            binding.webview.setOnApplyWindowInsetsListener { v, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsets.Type.systemBars())
+                // Apply the insets as a margin to the view.
+                v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = insets.left
+                    rightMargin = insets.right
+                    topMargin = insets.top
+                    bottomMargin = insets.bottom
+                }
+
+                // Don't want the window insets to keep passing down to descendant views.
+                WindowInsets.CONSUMED
+            }
+        }
+
+        // Handle back gesture on devices with Android 13 or newer
+        if (SDK_INT >= 33) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT
+            ) {
+                if (binding.webview.canGoBack()) {
+                    binding.webview.goBack()
+                } else {
+                    finish()
+                }
+            }
+        }
 
         // Set fullscreen mode if in landscape
         val orientation = resources.configuration.orientation
@@ -136,19 +173,24 @@ class MainActivity : AppCompatActivity() {
         releasePlayer()
     }
 
+    @SuppressLint("GestureBackNavigation")
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (event.action == KeyEvent.ACTION_DOWN) {
-            when (keyCode) {
-                KeyEvent.KEYCODE_BACK -> {
-                    if (binding.webview.canGoBack()) {
-                        binding.webview.goBack()
-                    } else {
-                        finish()
+        // This is only needed for devices with Android 12 or older
+        if (SDK_INT < 33) {
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                when (keyCode) {
+                    KeyEvent.KEYCODE_BACK -> {
+                        if (binding.webview.canGoBack()) {
+                            binding.webview.goBack()
+                        } else {
+                            finish()
+                        }
+                        return true
                     }
-                    return true
                 }
             }
         }
+
         return super.onKeyDown(keyCode, event)
     }
 
@@ -260,7 +302,6 @@ class MainActivity : AppCompatActivity() {
         webSettings.javaScriptCanOpenWindowsAutomatically = true
         webSettings.allowContentAccess = true
         webSettings.domStorageEnabled = true
-        webSettings.databaseEnabled = true
         webSettings.userAgentString = userAgent
         webSettings.setSupportZoom(false)
         webSettings.builtInZoomControls = false
@@ -397,39 +438,18 @@ class MainActivity : AppCompatActivity() {
      */
     private fun setFullscreen(value: Boolean) {
         if (value) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                window.attributes.layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                window.insetsController?.apply {
-                    hide(WindowInsets.Type.statusBars())
-                    systemBarsBehavior =
-                        WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                }
-            } else {
-                @Suppress("Deprecation")
-                window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_IMMERSIVE
-                        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+            window.attributes.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            window.insetsController?.apply {
+                hide(WindowInsets.Type.statusBars())
+                systemBarsBehavior =
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                window.attributes.layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                window.insetsController?.apply {
-                    show(WindowInsets.Type.statusBars())
-                }
-            } else {
-                @Suppress("Deprecation")
-                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+            window.attributes.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+            window.insetsController?.apply {
+                show(WindowInsets.Type.statusBars())
             }
         }
     }
@@ -439,10 +459,10 @@ class MainActivity : AppCompatActivity() {
      */
     fun storeTheme(color: String?, isDark: Boolean) {
         if (color == null) return
-        getSharedPreferences(getString(R.string.preferences_key), 0).edit()
-            .putString(getString(R.string.preferences_theme_color), color)
-            .putBoolean(getString(R.string.preferences_theme_dark), isDark)
-            .apply()
+        getSharedPreferences(getString(R.string.preferences_key), 0).edit {
+            putString(getString(R.string.preferences_theme_color), color)
+                .putBoolean(getString(R.string.preferences_theme_dark), isDark)
+        }
     }
 
     /**
@@ -462,24 +482,22 @@ class MainActivity : AppCompatActivity() {
         if (color == null) return
 
         // Set system bars
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val appearance =
-                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-            window.insetsController?.setSystemBarsAppearance(
-                if (isDark) 0 else appearance,
-                appearance
-            )
-        } else {
-            window.decorView.systemUiVisibility =
-                if (isDark) 0 else View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-        }
+        val appearance =
+            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+        window.insetsController?.setSystemBarsAppearance(
+            if (isDark) 0 else appearance,
+            appearance
+        )
 
         // Set colors
         try {
-            val parsed = Color.parseColor(color.trim())
-            window.navigationBarColor = parsed
-            window.statusBarColor = parsed
-        } catch (e: Exception) {
+            val parsed = color.trim().toColorInt()
+            binding.root.setBackgroundColor(parsed)
+            if (SDK_INT < 35) {
+                window.navigationBarColor = parsed
+                window.statusBarColor = parsed
+            }
+        } catch (_: Exception) {
             Log.w(TAG, "Invalid color: $color")
             return
         }
