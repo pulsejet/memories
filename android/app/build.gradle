@@ -40,10 +40,6 @@ dependencies {
     def media_version = "1.9.0"
     def room_version = "2.8.4"
 
-    implementation 'androidx.activity:activity-ktx:1.12.2'
-    implementation 'androidx.activity:activity-compose:1.12.2'
-    implementation 'androidx.compose.foundation:foundation-layout:1.10.1'
-    implementation 'androidx.compose.ui:ui:1.10.1'
     implementation 'androidx.core:core-ktx:1.17.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.7.1'

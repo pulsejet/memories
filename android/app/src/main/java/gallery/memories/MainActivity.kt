@@ -442,12 +442,12 @@ class MainActivity : AppCompatActivity() {
      */
     private fun setFullscreen(value: Boolean) {
         if (value) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            if (SDK_INT >= Build.VERSION_CODES.P) {
                 window.attributes.layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (SDK_INT >= Build.VERSION_CODES.R) {
                 window.insetsController?.apply {
                     hide(WindowInsets.Type.statusBars())
                     systemBarsBehavior =
@@ -463,12 +463,12 @@ class MainActivity : AppCompatActivity() {
                         or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
             }
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            if (SDK_INT >= Build.VERSION_CODES.P) {
                 window.attributes.layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (SDK_INT >= Build.VERSION_CODES.R) {
                 window.insetsController?.apply {
                     show(WindowInsets.Type.statusBars())
                 }
@@ -507,7 +507,7 @@ class MainActivity : AppCompatActivity() {
         if (color == null) return
 
         // Set system bars
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (SDK_INT >= Build.VERSION_CODES.R) {
             val appearance =
                 WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
             window.insetsController?.setSystemBarsAppearance(
