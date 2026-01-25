@@ -8,6 +8,10 @@ android {
     namespace 'gallery.memories'
     compileSdk = 36
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId "gallery.memories"
         minSdk 27
