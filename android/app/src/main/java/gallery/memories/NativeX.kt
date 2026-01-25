@@ -1,6 +1,5 @@
 package gallery.memories
 
-import android.net.Uri
 import android.util.Log
 import android.view.SoundEffectConstants
 import android.webkit.JavascriptInterface
@@ -17,11 +16,10 @@ import gallery.memories.service.TimelineQuery
 import org.json.JSONArray
 import java.io.ByteArrayInputStream
 import java.net.URLDecoder
+import androidx.core.net.toUri
 
 @UnstableApi
 class NativeX(private val mCtx: MainActivity) {
-    val TAG = NativeX::class.java.simpleName
-
     private var themeStored = false
     val query = TimelineQuery(mCtx)
     val image = ImageService(mCtx, query)
@@ -35,6 +33,7 @@ class NativeX(private val mCtx: MainActivity) {
 
     companion object {
         var dlService: DownloadService? = null
+        val TAG: String = NativeX::class.java.simpleName
     }
 
     fun destroy() {
@@ -70,7 +69,7 @@ class NativeX(private val mCtx: MainActivity) {
         // Save for getting it back on next start
         if (!themeStored && http.isLoggedIn()) {
             themeStored = true
-            mCtx.storeTheme(color, isDark);
+            mCtx.storeTheme(color, isDark)
         }
 
         // Apply the theme
@@ -108,13 +107,13 @@ class NativeX(private val mCtx: MainActivity) {
 
     @JavascriptInterface
     fun downloadFromUrl(url: String?, filename: String?) {
-        if (url == null || filename == null) return;
+        if (url == null || filename == null) return
         dlService!!.queue(url, filename)
     }
 
     @JavascriptInterface
     fun setShareBlobs(objects: String?) {
-        if (objects == null) return;
+        if (objects == null) return
         dlService!!.setShareBlobs(JSONArray(objects))
     }
 
@@ -124,7 +123,7 @@ class NativeX(private val mCtx: MainActivity) {
             // Get URI of remote videos
             val urls = JSONArray(urlsArray)
             val list = Array(urls.length()) {
-                Uri.parse(urls.getString(it))
+                urls.getString(it).toUri()
             }
 
             // Get URI of local video
@@ -150,7 +149,7 @@ class NativeX(private val mCtx: MainActivity) {
 
     @JavascriptInterface
     fun configSetLocalFolders(json: String?) {
-        if (json == null) return;
+        if (json == null) return
         query.localFolders = JSONArray(json)
     }
 

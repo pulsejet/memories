@@ -1,10 +1,10 @@
 package gallery.memories.service
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.util.Base64
 import android.webkit.CookieManager
 import android.webkit.WebView
+import androidx.core.net.toUri
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -103,7 +103,7 @@ class HttpService {
             if (subpath != null) url += subpath
 
             // Get host name
-            val host = Uri.parse(url).host
+            val host = url!!.toUri().host
 
             // Clear webview history
             webView.clearHistory()
@@ -113,7 +113,7 @@ class HttpService {
             CookieManager.getInstance().setCookie(url, authCookie)
 
             // Set authorization header
-            webView.loadUrl(url!!, mapOf("Authorization" to authHeader))
+            webView.loadUrl(url, mapOf("Authorization" to authHeader))
 
             return host
         }
@@ -136,8 +136,8 @@ class HttpService {
     /** Get a string from the response body */
     @Throws(Exception::class)
     fun getBody(response: Response): String? {
-        val body = response.body?.string()
-        response.body?.close()
+        val body = response.body.string()
+        response.body.close()
         return body
     }
 
