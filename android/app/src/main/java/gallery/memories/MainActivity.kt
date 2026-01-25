@@ -85,7 +85,10 @@ class MainActivity : AppCompatActivity() {
 
         // Enable insets for Android 15 or newer
         if (SDK_INT >= 35) {
-            binding.webview.setOnApplyWindowInsetsListener { v, windowInsets ->
+            // Apply the insets on the inner coordinator, which is not the root element.
+            // This way we can still set the background of the root and make sure the style
+            // is visible under the status and navigation bars.
+            binding.coordinator.setOnApplyWindowInsetsListener { v, windowInsets ->
                 val insets = windowInsets.getInsets(WindowInsets.Type.systemBars())
                 // Apply the insets as a margin to the view.
                 v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
