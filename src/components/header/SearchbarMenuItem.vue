@@ -2,6 +2,7 @@
   <NcButton
     v-if="isMobile"
     class="memories-menu-item search-menu"
+    variant="tertiary-no-background"
     :title="t('memories', 'Search')"
     :aria-label="t('memories', 'Search')"
     @click="search"
