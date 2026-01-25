@@ -83,8 +83,8 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        // Enable insets for Android 16 or newer
-        if (SDK_INT >= 36) {
+        // Enable insets for Android 15 or newer
+        if (SDK_INT >= 35) {
             binding.webview.setOnApplyWindowInsetsListener { v, windowInsets ->
                 val insets = windowInsets.getInsets(WindowInsets.Type.systemBars())
                 // Apply the insets as a margin to the view.
