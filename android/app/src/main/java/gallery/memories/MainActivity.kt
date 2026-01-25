@@ -493,10 +493,8 @@ class MainActivity : AppCompatActivity() {
         try {
             val parsed = color.trim().toColorInt()
             binding.root.setBackgroundColor(parsed)
-            if (SDK_INT < 35) {
-                window.navigationBarColor = parsed
-                window.statusBarColor = parsed
-            }
+            window.navigationBarColor = parsed
+            window.statusBarColor = parsed
         } catch (_: Exception) {
             Log.w(TAG, "Invalid color: $color")
             return
