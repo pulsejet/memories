@@ -26,6 +26,7 @@ OC.L10N.register(
     "View in folder" : "Lihat dalam folder",
     "Add to album" : "Tambahkan album",
     "Cancel" : "Membatalkan",
+    "_{n} selected_::_{n} selected_" : ["{n} dipilih"],
     "General" : "Umum",
     "Account" : "Akun",
     "Info" : "Info",
