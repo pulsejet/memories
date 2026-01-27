@@ -77,6 +77,7 @@ OC.L10N.register(
     "Show photo owner name on timeline" : "Mostrar o nome do proprietário da foto na linha do tempo",
     "Autoplay Live Photos" : "Reprodução Automática de Fotos ao Vivo",
     "Loop Live Photos" : "Fotos ao Vivo em loop",
+    "Loop Videos" : "Vídeos em loop",
     "Show full file path in sidebar" : "Mostrar caminho completo do arquivo na barra lateral",
     "Show metadata in slideshow" : "Mostrar metadados na apresentação de slides",
     "High resolution image loading behavior" : "Comportamento de carregamento de imagens de alta resolução",
