@@ -110,7 +110,13 @@ class BinExt
     {
         $path = SystemConfig::get('memories.exiftool');
 
-        return self::getTempBin($path, self::getName('exiftool', self::EXIFTOOL_VER));
+        $path = self::getTempBin($path, self::getName('exiftool', self::EXIFTOOL_VER));
+
+        // Explicitly set the PAR directory to avoid cache collisions
+        // https://github.com/pulsejet/memories/issues/1608
+        putenv("PAR_GLOBAL_TEMP={$path}.out");
+
+        return $path;
     }
 
     /**
