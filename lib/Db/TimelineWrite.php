@@ -89,8 +89,14 @@ class TimelineWrite
         // Get exif data
         $exif = Exif::getExifFromFile($file);
 
+        // -n argument breaks how some date strings are returned from exiftool
+        // So we make a separate array to get numeric values only
+        $exifNumeric = Exif::getExifFromFile($file, ['-n']);
+        $exif['GPSLatitude'] = $exifNumeric['GPSLatitude'] ?? null;
+        $exif['GPSLongitude'] = $exifNumeric['GPSLongitude'] ?? null;
+
         // Check if EXIF is blank, which is probably wrong
-        if (0 === \count($exif)) {
+        if (0 === \count($exif) || 0 === \count($exifNumeric)) {
             throw new \Exception('No EXIF data could be read');
         }
 
@@ -115,27 +121,31 @@ class TimelineWrite
         // Video parameters
         $videoDuration = round((float) ($isvideo ? ($exif['Duration'] ?? $exif['TrackDuration'] ?? 0) : 0));
 
-        // Process location data
-        // This also modifies the exif array in-place to set the LocationTZID
+        // Process location data to set the LocationTZID
         // and drop the GPS data if it is not valid
-        [$lat, $lon, $mapCluster] = $this->processExifLocation($fileId, $exif, $prevRow);
+        [$lat, $lon, $mapCluster] = $this->processExifLocation($fileId, $exif, $exifNumeric, $prevRow);
 
         // Get date parameters (after setting timezone offset)
         $dateTaken = Exif::getDateTaken($file, $exif);
-
-        // Store the acutal epoch with the EXIF data
+        
+        // Store the actual epoch with the EXIF data
         $epoch = $exif['DateTimeEpoch'] = $dateTaken->getTimestamp();
 
-        // Store the date taken in the database as UTC (local date) only
-        // Basically, assume everything happens in Greenwich
-        $dateLocalUtc = Exif::forgetTimezone($dateTaken)->getTimestamp();
-        $dateTakenStr = gmdate('Y-m-d H:i:s', $dateLocalUtc);
+        // Extract and store the timezone offset from the $dateTaken object
+        // This preserves the timezone that Exif::getDateTaken() determined
+        $exif['OffsetTimeOriginal'] = $dateTaken->format('P'); // e.g., "-05:00"
 
-        // We need to use the local time in UTC for the dayId
-        // This way two photos in different timezones on the same date locally
-        // end up in the same dayId group
-        $dayId = floor($dateLocalUtc / 86400);
+        // Store the datetaken string in the database as UTC only
+        $dateTakenUtc = clone $dateTaken;
+        $dateTakenUtc->setTimezone(new \DateTimeZone('UTC'));
+        $dateTakenStr = $dateTakenUtc->format('Y-m-d H:i:s');
 
+        // Find midnight for the real date taken, give it UTC without timeshift for use with the floor function
+        $midnight = \DateTime::createFromFormat('Y-m-d H:i:s', $dateTaken->format('Y-m-d') . ' 00:00:00', new \DateTimeZone('UTC'));
+        
+        // Gives a day group based on the timezone the photo was taken in
+        $dayId = (int) floor($midnight->getTimestamp() / 86400);
+                
         // Get size of image
         [$w, $h] = Exif::getDimensions($exif);
 
