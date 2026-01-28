@@ -370,7 +370,7 @@
     "Public link shares are available to people outside Nextcloud." : "Публічні посилання доступні для людей за межами Nextcloud.",
     "You may create or update permissions on public links using the sidebar." : "Ви можете створювати або оновлювати дозволи на публічні посилання за допомогою бічної панелі.",
     "Click a link to copy to clipboard." : "Клацніть на посилання, щоб скопіювати в буфер обміну.",
-    "Share link" : "Передати у публічний доступ",
+    "Share link" : "Надати у публічний доступ",
     "Create Link" : "Створити посилання",
     "Refresh" : "Оновити",
     "Not allowed to share file: {name}" : "Не дозволено надавати спільний доступ до файлу: {name}",

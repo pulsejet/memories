@@ -77,6 +77,7 @@ OC.L10N.register(
     "Show photo owner name on timeline" : "在時間軸顯示照片所有者名字",
     "Autoplay Live Photos" : "自動播放 Live Photos",
     "Loop Live Photos" : "自動播放 Live Photos",
+    "Loop Videos" : "循環影片",
     "Show full file path in sidebar" : "於側邊欄顯示檔案途徑全名",
     "Show metadata in slideshow" : "在幻燈片放映中顯示元數據",
     "High resolution image loading behavior" : "高清晰度圖像加載行為",
