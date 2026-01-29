@@ -63,6 +63,7 @@
     "Show photo owner name on timeline" : "Näita ajajoonel foto omaniku nime",
     "Autoplay Live Photos" : "Esita „Live Photo“ meediat automaatselt (videoklipp+foto)",
     "Loop Live Photos" : "Esita „Live Photo“ meediat silmusena (videoklipp+foto)",
+    "Loop Videos" : "Näita videoid katkematus tsüklis",
     "Show full file path in sidebar" : "Näita külgpaanis täielikku asukohta",
     "Show metadata in slideshow" : "Näita slaidiesitluses metateavet",
     "High resolution image loading behavior" : "Tegevus kõrgresolutsiooniga piltide laadimisel",
