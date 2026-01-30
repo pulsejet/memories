@@ -11,11 +11,32 @@ class ExifFields
      * This is mostly only used for the metadata view.
      */
     public const EXIF_FIELDS_LIST = [
-        // Date/Time
+        // Original date fields
+        'SubSecDateTimeOriginal' => true,
         'DateTimeOriginal' => true,
+        'SonyDateTime' => true,
+
+        // Create date fields
+        'SubSecCreateDate' => true,
+        'CreationDate' => true,
+        'CreationDateValue' => true,
         'CreateDate' => true,
+        'TrackCreateDate' => true,
+        'MediaCreateDate' => true,
+        'FileCreateDate' => true,
+
+        // ModifyDate fields
+        'SubSecModifyDate' => true,
+        'ModifyDate' => true,
+        'TrackModifyDate' => true,
+        'MediaModifyDate' => true,
+        'FileModifyDate' => true,
+
+        // Timezone Offsets
         'OffsetTimeOriginal' => true,
         'OffsetTime' => true,
+        'TimeZone' => true,
+        'OffsetTimeDigitized' => true,
 
         // Generated date fields
         'DateTimeEpoch' => true,
