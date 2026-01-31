@@ -318,6 +318,8 @@
     "Yes" : "Da",
     "No" : "Ne",
     "Choose {file}" : "Izberite datoteko {file}",
-    "Choose" : "Izbor"
+    "Choose" : "Izbor",
+    "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Premakni {count} predmet v koš?","Premakni {count} predmeta v koš?","Premakni {count} predmete v koš?","Premakni {count} predmetov v koš?"],
+    "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Odstrani {count} predmet iz albuma?","Odstrani {count} predmeta iz albuma?","Odstrani {count} predmete iz albuma?","Odstrani {count} predmetov iz albuma?"]
 },"pluralForm" :"nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);"
 }
