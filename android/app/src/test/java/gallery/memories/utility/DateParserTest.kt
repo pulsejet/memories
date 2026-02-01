@@ -1,4 +1,4 @@
-package gallery.memories.mapper
+package gallery.memories.utility
 
 import androidx.exifinterface.media.ExifInterface
 import io.mockk.every
