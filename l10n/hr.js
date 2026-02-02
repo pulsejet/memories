@@ -182,6 +182,7 @@ OC.L10N.register(
     "Auto" : "Auto",
     "Setup" : "Podesi",
     "Shared by {user}" : "Dijeli {user}",
+    "Error: {msg}" : "Pogreška: {msg}",
     "Yes" : "Da",
     "No" : "Ne",
     "Choose {file}" : "Odaberi {file}",

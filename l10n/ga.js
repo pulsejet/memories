@@ -77,6 +77,7 @@ OC.L10N.register(
     "Show photo owner name on timeline" : "Taispeáin ainm úinéir an ghrianghraif ar an amlíne",
     "Autoplay Live Photos" : "Autoplay Grianghraif Beo",
     "Loop Live Photos" : "Lúb Grianghraif Bheo",
+    "Loop Videos" : "Físeáin Lúb",
     "Show full file path in sidebar" : "Taispeáin cosán iomlán an chomhaid sa bharra taoibh",
     "Show metadata in slideshow" : "Taispeáin meiteashonraí sa taispeántas sleamhnán",
     "High resolution image loading behavior" : "Iompar luchtaithe íomhá ardtaifeach",
