@@ -78,6 +78,7 @@ OC.L10N.register(
     "Update" : "Ažuriraj",
     "Loading …" : "Učitavanje…",
     "Move" : "Premjesti",
+    "Choose a folder" : "Choose a folder",
     "Remove" : "Ukloni",
     "Password protected" : "Zaštićeno zaporkom",
     "Expires" : "Istječe",
