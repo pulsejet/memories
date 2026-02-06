@@ -87,6 +87,7 @@ OC.L10N.register(
     "Share link" : "Dijeli poveznicu",
     "Refresh" : "Osvježi",
     "Failed to upload {file}" : "Neuspješno otpremanje {file}",
+    "Add tags" : "Dodaj oznake",
     "Creation date" : "Datum stvaranja",
     "Oldest first" : "Najstariji prvi",
     "Newest first" : "Najnoviji prvi",
