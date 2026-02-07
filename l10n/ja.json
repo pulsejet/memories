@@ -127,6 +127,7 @@
     "Creating tags" : "タグを作成中",
     "Failed to upload {file}" : "{file}アップロードに失敗しました",
     "Some files have not been uploaded." : "一部のファイルはアップロードされていません。",
+    "Add tags" : "タグを追加",
     "_Upload {n} file_::_Upload {n} files_" : ["{n} 個のファイルをアップロードする"],
     "Last updated" : "最終更新",
     "Creation date" : "作成日時",
