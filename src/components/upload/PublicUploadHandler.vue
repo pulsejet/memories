@@ -39,6 +39,14 @@ export default defineComponent({
     canUpload(): boolean {
       return this.routeIsPublic && this.initstate.allow_upload === true;
     },
+
+    /**
+     * Get the base URL including any subdirectory where Nextcloud is installed
+     */
+    baseUrl(): string {
+      const webroot = (window as any).OC?.webroot || '';
+      return window.location.origin + webroot;
+    },
   },
 
   methods: {
@@ -76,7 +84,7 @@ export default defineComponent({
       try {
         const token = this.$route.params.token;
         const uploadPath = this.getCurrentPath();
-        const publicDavPath = `${window.location.origin}/public.php/dav/files/${token}${uploadPath}`;
+        const publicDavPath = `${this.baseUrl}/public.php/dav/files/${token}${uploadPath}`;
 
         const client = createClient(publicDavPath);
         const contents = (await client.getDirectoryContents('/', { details: false })) as Array<FileStat>;
@@ -125,12 +133,25 @@ export default defineComponent({
 
         // Setup WebDAV destination
         const token = this.$route.params.token as string;
-        const remoteURL = `${window.location.origin}/public.php/dav`;
+        const currentPath = this.getCurrentPath();
+
+        // Build the absolute URL properly
+        const protocol = window.location.protocol;
+        const host = window.location.host;
+        const webroot = (window as any).OC?.webroot || '';
+        
+        // Construct the full URL ensuring it's absolute
+        const baseURL = `${protocol}//${host}${webroot}`;
+        const davPath = '/public.php/dav';
         const rootPath = `/files/${token}`;
+        const fullPath = `${rootPath}${currentPath}`;
+        
+        // The source must be a complete URL
+        const folderSource = `${baseURL}${davPath}${fullPath}`;
 
         const destination = new Folder({
           id: 0,
-          source: remoteURL + rootPath + this.getCurrentPath(),
+          source: folderSource,
           root: rootPath,
           owner: null,
           permissions: Permission.CREATE,
