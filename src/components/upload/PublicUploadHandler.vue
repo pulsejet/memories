@@ -139,13 +139,13 @@ export default defineComponent({
         const protocol = window.location.protocol;
         const host = window.location.host;
         const webroot = (window as any).OC?.webroot || '';
-        
+
         // Construct the full URL ensuring it's absolute
         const baseURL = `${protocol}//${host}${webroot}`;
         const davPath = '/public.php/dav';
         const rootPath = `/files/${token}`;
         const fullPath = `${rootPath}${currentPath}`;
-        
+
         // The source must be a complete URL
         const folderSource = `${baseURL}${davPath}${fullPath}`;
 
