@@ -60,6 +60,7 @@ OC.L10N.register(
     "Newest first" : "Cel mai nou mai întâi",
     "Share folder" : "Distribuie dosar",
     "Upload files" : "Încarcă fișiere",
+    "Upload failed" : "Încărcarea a eșuat",
     "Unsaved changes" : "Modificări nesalvate",
     "Drop changes" : "Elimină modificările",
     "Download {ext}" : "Descarcă {ext}",

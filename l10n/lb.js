@@ -35,6 +35,7 @@ OC.L10N.register(
     "Password protected" : "Passwuertgeschützt",
     "Refresh" : "Opfrëschen",
     "Home" : "Doheem",
+    "Upload failed" : "Eropluede feelgeschloen",
     "Previous" : "Zeréck",
     "Custom" : "Individualiséier",
     "Size" : "Gréisst",

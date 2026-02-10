@@ -249,13 +249,11 @@ class DownloadController extends GenericApiController
             // Ensure we can abort the request if user stops it
             ignore_user_abort(true);
 
-            // Pretend the size is huge so forced zip64
-            // Lookup the constructor of \OC\Streamer for more info
-            $size = \count($fileIds) * 1024 * 1024 * 1024 * 8;
-            $streamer = new \OC\Streamer($this->request, $size, \count($fileIds));
+            // Create zip streamer
+            $streamer = new \ZipStreamer\ZipStreamer(['zip64' => true]);
 
             // Create a zip file
-            $streamer->sendHeaders($name);
+            $streamer->sendHeaders("{$name}.zip");
 
             // Quit if HEAD request
             if ('HEAD' === $this->request->getMethod()) {
@@ -316,12 +314,7 @@ class DownloadController extends GenericApiController
                     }
 
                     // Add file to zip
-                    if (!$streamer->addFileFromStream(
-                        $handle,
-                        $name,
-                        $file->getSize(),
-                        $file->getMTime(),
-                    )) {
+                    if (!$streamer->addFileFromStream($handle, $name, [])) {
                         throw new \Exception('Failed to add file to zip');
                     }
                 } catch (\Exception $e) {
@@ -330,12 +323,9 @@ class DownloadController extends GenericApiController
                     fwrite($dummy, $e->getMessage());
                     rewind($dummy);
 
-                    $streamer->addFileFromStream(
-                        $dummy,
-                        "{$name}_error.txt",
-                        \strlen($e->getMessage()),
-                        time(),
-                    );
+                    if (!$streamer->addFileFromStream($dummy, "{$name}_error.txt", [])) {
+                        throw new \Exception('Failed to add file to zip');
+                    }
 
                     // close the dummy file
                     fclose($dummy);

@@ -9,8 +9,8 @@ use OCA\Memories\Util;
 
 class BinExt
 {
-    public const EXIFTOOL_VER = '13.30';
-    public const GOVOD_VER = '0.2.6';
+    public const EXIFTOOL_VER = '13.44';
+    public const GOVOD_VER = '0.2.7';
     public const NX_VER_MIN = '1.1';
 
     /** Exiftool environment is initialized in this process */
@@ -110,7 +110,13 @@ class BinExt
     {
         $path = SystemConfig::get('memories.exiftool');
 
-        return self::getTempBin($path, self::getName('exiftool', self::EXIFTOOL_VER));
+        $path = self::getTempBin($path, self::getName('exiftool', self::EXIFTOOL_VER));
+
+        // Explicitly set the PAR directory to avoid cache collisions
+        // https://github.com/pulsejet/memories/issues/1608
+        putenv("PAR_GLOBAL_TEMP={$path}.out");
+
+        return $path;
     }
 
     /**

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v7.8.0] - 2026-01-25
+
+- **Feature**: Add download link to folders ([#1552](https://github.com/pulsejet/memories/pull/1552))
+- **Feature**: Add upload to public shares ([#1523](https://github.com/pulsejet/memories/pull/1523))
+
+## [v7.7.0] - 2025-10-03
+
+- **Update**: Compatibility with Nextcloud 32 ([#1545](https://github.com/pulsejet/memories/issues/1545))
+- **Fix**: Move and organise moves to wrong folder sometimes ([#1544](https://github.com/pulsejet/memories/issues/1544))
+- **Fix**: Unusable UI when trying to create face ([#1539](https://github.com/pulsejet/memories/issues/1539))
+- **Fix**: Broken album downloading ([#1527](https://github.com/pulsejet/memories/issues/1527))
+
 ## [v7.6.2] - 2025-08-17
 
 - **Update**: New reverse geocoding boundaries are available. Run `occ memories:places-setup` to update.

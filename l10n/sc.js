@@ -72,6 +72,7 @@ OC.L10N.register(
     "Home" : "Pàgina printzipale",
     "Share folder" : "Cumpartzi cartella",
     "Upload files" : "Càrriga archìvios",
+    "Upload failed" : "Carrigamentu faddidu",
     "Unsaved changes" : "Mudas non sarvadas",
     "Download {ext}" : "Iscàrriga {ext}",
     "Previous" : "Pretzedente",

@@ -36,6 +36,7 @@ OC.L10N.register(
     "Oldest first" : "Eldste fyrst",
     "Newest first" : "Nyaste fyrst",
     "Home" : "Heim",
+    "Upload failed" : "Feil ved opplasting",
     "Previous" : "Førre",
     "Value" : "Verdi",
     "Size" : "Storleik",

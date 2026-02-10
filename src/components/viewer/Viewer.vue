@@ -655,7 +655,9 @@ export default defineComponent({
 
       // Video support
       this.psVideo = new PsVideo(<any>this.photoswipe, {
-        preventDragOffset: 40,
+        // Explicity disable dragging to another slide at the bottom of a video,
+        // to allow player controls to work properly.
+        preventDragOffset: 60,
       });
 
       // Image support
@@ -1049,8 +1051,6 @@ export default defineComponent({
 
     /** Delete this photo and refresh */
     async deleteCurrent() {
-      if (this.routeIsPublic) return;
-
       let idx = this.photoswipe!.currIndex - this.globalAnchor;
       const photo = this.list[idx];
       if (!photo) return;

@@ -12,7 +12,7 @@
         {{ n('memories', '{n} selected', '{n} selected', size, { n: size }) }}
       </div>
 
-      <NcActions :inline="1">
+      <NcActions :inline="3">
         <NcActionButton
           v-for="action of getActions()"
           :key="action.name"
@@ -200,7 +200,8 @@ export default defineComponent({
         name: t('memories', 'Delete'),
         icon: DeleteIcon,
         callback: this.deleteSelection.bind(this),
-        if: () => !this.routeIsAlbums,
+        allowPublic: true,
+        if: () => !this.routeIsAlbums && (!this.routeIsPublic || this.initstate.allow_delete),
       },
       {
         name: t('memories', 'Remove from album'),

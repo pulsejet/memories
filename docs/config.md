@@ -11,7 +11,7 @@ description: Steps to configure Memories for the best experience and performance
 
 Memories runs a background indexing job to extract EXIF metadata from photos and videos, as well as immediately on every upload.
 
-If you just installed memories and want to speed up indexing, run the following commands. For usage of the `occ` command line, refer [here](https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/occ_command.html) for more information.
+If you just installed memories and want to speed up indexing, run the following commands. For usage of the `occ` command line, refer [here](https://docs.nextcloud.com/server/latest/admin_manual/occ_command.html) for more information.
 
 ```bash
 occ memories:places-setup    # set up reverse geocoding, will force re-indexing

@@ -29,6 +29,7 @@ OC.L10N.register(
     "Newest first" : "As ùire an toiseach",
     "Home" : "Dachaigh",
     "Upload files" : "Luchdaich suas faidhlichean",
+    "Upload failed" : "Dh'fhàillig leis an luchdadh suas",
     "Undo" : "Neo-dhèan",
     "Setup" : "Suidhich",
     "Yes" : "Tha",

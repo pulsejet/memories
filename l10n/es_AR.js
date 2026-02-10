@@ -54,6 +54,7 @@ OC.L10N.register(
     "Newest first" : "El más reciente primero",
     "Home" : "Casa",
     "Upload files" : "Subiendo archivos",
+    "Upload failed" : "Falla en la carga",
     "Download {ext}" : "Descargar {ext}",
     "Previous" : "Anterior",
     "Finish" : "Terminar",

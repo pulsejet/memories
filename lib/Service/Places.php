@@ -434,11 +434,13 @@ class Places
     protected function setupDatabase(int $gis): void
     {
         try {
-            // Detect database type
-            $platform = $this->connection->getDatabasePlatform();
-
             // Drop the table if it exists
             $this->connection->executeStatement('DROP TABLE IF EXISTS memories_planet_geometry');
+
+            // Detect database type to select the right syntax and geometry types.
+            // getDatabasePlatform is deprecated, and must be replaced by
+            // getDatabaseProvider($strict=true) when support for Nextcloud <32 is dropped.
+            $platform = $this->connection->getDatabasePlatform();
 
             // MySQL requires an SRID definition
             // https://github.com/pulsejet/memories/issues/1067

@@ -347,6 +347,7 @@ OC.L10N.register(
     "Timeline view" : "Aikajananäkymä",
     "Move left" : "Siirry vasemmalle",
     "Move right" : "Siirry oikealle",
+    "Upload failed" : "Lähetys epäonnistui",
     "Image saved successfully" : "Kuva tallennettu",
     "Error saving image: {error}" : "Virhe kuvan tallentamisessa: {error}",
     "Unsaved changes" : "Tallentamattomia muutoksia",

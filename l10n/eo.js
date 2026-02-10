@@ -54,6 +54,7 @@ OC.L10N.register(
     "Oldest first" : "Malpli novaj unue",
     "Newest first" : "Pli novaj unue",
     "Home" : "Hejmo",
+    "Upload failed" : "Alŝuto malsukcesis",
     "Unsaved changes" : "Nekonservitaj ŝanĝoj",
     "Download {ext}" : "Elŝuti {ext}",
     "Previous" : "Antaŭa",

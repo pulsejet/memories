@@ -11,7 +11,10 @@
     </NcBreadcrumbs>
 
     <div class="right-actions">
-      <NcActions :inline="1">
+      <!-- Progress bar for upload -->
+      <PublicUploadHandler ref="uploadHandler" v-if="allowPublicUpload" />
+
+      <NcActions :inline="3">
         <NcActionButton
           v-if="!routeIsPublic"
           :aria-label="t('memories', 'Share folder')"
@@ -27,6 +30,17 @@
           :aria-label="t('memories', 'Upload files')"
           @click="upload()"
           close-after-click
+        >
+          {{ t('memories', 'Upload files') }}
+          <template #icon> <UploadIcon :size="20" /> </template>
+        </NcActionButton>
+
+        <!-- Public upload button -->
+        <NcActionButton
+          v-if="allowPublicUpload"
+          :aria-label="t('memories', 'Upload files')"
+          :disabled="uploadHandler()?.processing"
+          @click="uploadHandler()?.startUpload()"
         >
           {{ t('memories', 'Upload files') }}
           <template #icon> <UploadIcon :size="20" /> </template>
@@ -53,6 +67,7 @@ const NcBreadcrumbs = () => import('@nextcloud/vue/dist/Components/NcBreadcrumbs
 const NcBreadcrumb = () => import('@nextcloud/vue/dist/Components/NcBreadcrumb.js');
 import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import PublicUploadHandler from '@components/upload/PublicUploadHandler.vue';
 
 import * as utils from '@services/utils';
 import * as nativex from '@native';
@@ -71,6 +86,7 @@ export default defineComponent({
     NcBreadcrumb,
     NcActions,
     NcActionButton,
+    PublicUploadHandler,
     HomeIcon,
     ShareIcon,
     TimelineIcon,
@@ -110,18 +126,22 @@ export default defineComponent({
     isNative(): boolean {
       return nativex.has();
     },
+
+    allowPublicUpload(): boolean {
+      return this.routeIsPublic && this.initstate.allow_upload === true;
+    },
   },
 
   methods: {
-    share() {
+    share(): void {
       _m.modals.shareNodeLink(utils.getFolderRoutePath(this.config.folders_path));
     },
 
-    upload() {
+    upload(): void {
       _m.modals.upload();
     },
 
-    toggleRecursive() {
+    toggleRecursive(): void {
       this.$router.replace({
         query: {
           ...this.$router.currentRoute.query,
@@ -130,12 +150,16 @@ export default defineComponent({
       });
     },
 
-    getRoute(path: string[]) {
+    getRoute(path: string[]): object {
       return {
         ...this.$route,
         params: { path },
         hash: undefined,
       };
+    },
+
+    uploadHandler(): InstanceType<typeof PublicUploadHandler> | null {
+      return (this.$refs.uploadHandler as InstanceType<typeof PublicUploadHandler>) || null;
     },
   },
 });
@@ -149,6 +173,12 @@ export default defineComponent({
     .share-name {
       margin-left: 0.75em;
     }
+  }
+
+  .right-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px; // Add spacing between actions and progress bar
   }
 }
 </style>

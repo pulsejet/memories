@@ -44,15 +44,26 @@ export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<I
   const rest: IPhoto[] = [];
 
   // Partition photos with and without cache
-  if (utils.uid && opts?.cache !== false) {
+  if (opts?.cache !== false) {
     for (const photo of photos) {
       const filename = photo.imageInfo?.filename;
       if (filename) {
+        // For public shares, use files/{token} path (WebDAV path for public shares)
+        // For logged in users, use files/{uid} path
+        let originalFilename: string;
+        if (utils.uid) {
+          originalFilename = `/files/${utils.uid}${filename}`;
+        } else {
+          // Public share: use token-based WebDAV path
+          const token = _m.route.params.token;
+          originalFilename = `/files/${token}${filename}`;
+        }
+
         cache.push({
           id: photo.fileid,
           fileid: photo.fileid,
           basename: photo.basename ?? filename.split('/').pop() ?? '',
-          originalFilename: `/files/${utils.uid}${filename}`,
+          originalFilename: originalFilename,
           filename: filename,
         });
       } else {
@@ -66,6 +77,11 @@ export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<I
 }
 
 async function getFilesInternal1(photos: IPhoto[]): Promise<IFileInfo[]> {
+  // For public shares, use API instead of WebDAV SEARCH (which requires user auth)
+  if (!utils.uid) {
+    return getFilesViaAPI(photos);
+  }
+
   // Get file IDs array
   const fileIds = photos.map((photo) => photo.fileid);
 
@@ -79,7 +95,41 @@ async function getFilesInternal1(photos: IPhoto[]): Promise<IFileInfo[]> {
   return (await Promise.all(chunks.map(getFilesInternal2))).flat();
 }
 
+/**
+ * Get file infos for public shares via API (instead of WebDAV SEARCH)
+ * This is needed because WebDAV SEARCH requires user authentication
+ */
+async function getFilesViaAPI(photos: IPhoto[]): Promise<IFileInfo[]> {
+  const fileInfos: IFileInfo[] = [];
+  const token = _m.route.params.token;
+
+  for (const photo of photos) {
+    try {
+      const url = API.IMAGE_INFO(photo.fileid);
+      const res = await axios.get<IImageInfo>(url);
+      const filename = res.data.filename;
+
+      if (filename) {
+        // Use token-based WebDAV path for public shares
+        fileInfos.push({
+          id: photo.fileid,
+          fileid: photo.fileid,
+          basename: photo.basename ?? filename.split('/').pop() ?? '',
+          originalFilename: `/files/${token}${filename}`,
+          filename: filename,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to get file info via API', photo.fileid, error);
+    }
+  }
+
+  return fileInfos;
+}
+
 async function getFilesInternal2(fileIds: number[]): Promise<IFileInfo[]> {
+  // This function is only called for authenticated users (not public shares)
+  // Public shares use getFilesViaAPI instead to avoid WebDAV SEARCH auth issues
   const prefixPath = `/files/${utils.uid}`;
 
   // IMPORTANT: if this isn't there, then a blank
@@ -267,9 +317,16 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   }
 
   // Delete each file
+  // For public shares, use API endpoint; for authenticated users, use WebDAV
   const calls = fileInfos.map((fileInfo) => async () => {
     try {
-      await client.deleteFile(fileInfo.originalFilename);
+      if (!utils.uid) {
+        // Public share: use API endpoint which supports token authentication
+        await axios.delete(API.IMAGE_DELETE(fileInfo.fileid));
+      } else {
+        // Authenticated user: use WebDAV
+        await client.deleteFile(fileInfo.originalFilename);
+      }
       return fileInfo.fileid;
     } catch (error) {
       console.error('Failed to delete', fileInfo, error);
@@ -437,15 +494,13 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
   }
 
   // Set absolute target path
-  const prefixPath = `files/${utils.uid}`;
-  destination = `${prefixPath}/${destination}`;
-  const datePaths: Map<string, Set<string>> = new Map(); // {'year': {'month1', 'month2'}}
+  destination = `files/${utils.uid}/${destination}`;
 
+  // Add the stacked photos
   photos = await extendWithStack(photos);
-  const fileIdsSet = new Set(photos.map((p) => p.fileid));
+  const photosMap = new Map(photos.map((p) => [p.fileid, p]));
 
   let fileInfos: IFileInfo[] = [];
-
   try {
     fileInfos = await getFiles(photos);
   } catch (e) {
@@ -454,47 +509,47 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
     return;
   }
 
-  const moveDirectives: Array<[string, IFileInfo]> = new Array();
-
-  photos.forEach((photo, i) => {
-    if (!fileIdsSet.has(fileInfos[i].fileid)) {
-      return;
-    }
+  // Create the list of operations
+  const operations = new Array<[string, IFileInfo]>();
+  fileInfos.forEach((info) => {
+    const photo = photosMap.get(info.fileid);
+    if (!photo || !photo.dayid) return;
 
     const date = utils.dayIdToDate(photo.dayid);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
 
-    const year = date.getFullYear().toString();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-
-    const months = datePaths.get(year) || new Set();
-    months.add(month);
-    datePaths.set(year, months);
-
-    const datePath = `${destination}/${year}/${month}`;
-
-    moveDirectives.push([datePath, fileInfos[i]]);
+    const path = `${destination}/${year}/${month}`;
+    operations.push([path, info]);
   });
 
-  async function createIfNotExist(directory: string, subDirectories: Iterable<string>) {
-    let existing = await client.getDirectoryContents(directory);
-    if ('data' in existing) {
-      existing = existing.data;
-    }
-    existing = existing.filter((f) => f.type === 'directory');
-    for (const sub of subDirectories) {
-      if (!existing.some((f) => f.basename === sub)) {
-        await client.createDirectory(`${directory}/${sub}`);
-      }
-    }
-  }
+  // Cache confirmed existing directories
+  const existingDirCache = new Set<string>();
 
-  await createIfNotExist(destination, datePaths.keys());
-  for (const [year, months] of datePaths) {
-    await createIfNotExist(`${destination}/${year}`, months);
+  // Create all the folders first
+  for (const op of operations) {
+    let folderPath = op[0];
+    const createPaths = new Array<string>();
+
+    while (folderPath !== destination && folderPath.includes('/')) {
+      if (existingDirCache.has(folderPath) || (await client.exists(folderPath))) {
+        // No need to check further up. Go to creation.
+        existingDirCache.add(folderPath);
+        break;
+      }
+
+      createPaths.push(folderPath);
+      folderPath = folderPath.substring(0, folderPath.lastIndexOf('/'));
+    }
+
+    // Create from top to bottom
+    for (const path of createPaths.reverse()) {
+      await client.createDirectory(path);
+    }
   }
 
   // Move each file
-  const calls = moveDirectives.map(([targetPath, fileInfo]) => async () => {
+  const calls = operations.map(([targetPath, fileInfo]) => async () => {
     try {
       await client.moveFile(
         fileInfo.originalFilename,

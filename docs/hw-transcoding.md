@@ -199,6 +199,43 @@ On Unraid, you can follow [these steps](https://github.com/pulsejet/memories/iss
 
 Once the container is running, configure the external transcoder in the Memories admin section of the Nextcloud interface.
 
+### TrueNAS Scale
+
+On TrueNAS Scale system, you can create a custom docker apps to setup an external transcoder. 
+
+1. Navigate Apps > Discover Apps > Install via YAML
+1. Paste the following docker compose file:
+   ```yaml
+    networks:
+      nextcloud-net:
+        external: True
+        name: ix-nextcloud_default
+    services:
+      go-vod:
+        devices:
+          - /dev/dri:/dev/dri
+        environment:
+          - NEXTCLOUD_HOST=https://your.nextcloud.domain
+          - NVIDIA_VISIBLE_DEVICES=all
+        group_add:
+          - 107
+        image: radialapps/go-vod
+        init: True
+        networks:
+          - nextcloud-net
+        restart: always
+        volumes:
+          - bind:
+              create_host_path: False
+              propagation: rprivate
+            read_only: True
+            source: /path/to/your/userdata
+            target: /var/www/html/data
+            type: bind
+   ```
+   Modify the YAML file as needed. i.e. read other sections for enabling NVENC.
+1. On nextcloud settings, navigate to Memories. Set bind address and connection address to go-vod:47788.
+
 ### Docker
 
 !!! danger "Use an external transcoder"

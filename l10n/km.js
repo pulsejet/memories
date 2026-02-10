@@ -29,6 +29,7 @@ OC.L10N.register(
     "Move" : "Move",
     "Password protected" : "បាន​ការ​ពារ​ដោយ​ពាក្យ​សម្ងាត់",
     "Home" : "ទំព័រដើម",
+    "Upload failed" : "ការផ្ទុកឡើងបាន​បរាជ័យ",
     "Download {ext}" : "ទាញយក {ext}",
     "Previous" : "មុន",
     "Value" : "តម្លៃ",

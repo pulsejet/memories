@@ -1,7 +1,7 @@
 OC.L10N.register(
     "memories",
     {
-    "Shared Link" : "Link condivisi",
+    "Shared Link" : "Collegamento condiviso",
     "Download" : "Scarica",
     "Memories" : "Ricordi",
     "Fast, modern and advanced photo management suite" : "Soluzione efficiente, moderna e avanzata per la gestione delle foto",
@@ -211,6 +211,7 @@ OC.L10N.register(
     "Failed to create {albumName}." : "Creazione di {albumName} non riuscita",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Rinominazione di {currentAlbumName} in {newAlbumName} non riuscita.",
     "No items" : "Nessun elemento",
+    "_{n} item_::_{n} items_" : ["{n} elemento ","{n} file","{n} file"],
     "Shared by {user}" : "Condiviso da {user}",
     "Failed to delete {fileName}." : "Eliminazione di {fileName} non riuscita.",
     "Yes" : "Sì",

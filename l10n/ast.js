@@ -123,6 +123,7 @@ OC.L10N.register(
     "Unassigned faces" : "Cares ensin asignar",
     "Merge with different person" : "Mecer con otra persona",
     "Home" : "Aniciu",
+    "Upload failed" : "Xuba fallida",
     "Unsaved changes" : "Cambeos ensin guardar",
     "Drop changes" : "Escartar los cambeos",
     "Download {ext}" : "Descargar {ext}",

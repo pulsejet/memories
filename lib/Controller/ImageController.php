@@ -59,7 +59,16 @@ class ImageController extends GenericApiController
 
             // Get preview for this file
             $file = $this->fs->getUserFile($id);
-            $preview = \OC::$server->get(\OCP\IPreview::class)->getPreview($file, $x, $y, !$a, $mode);
+
+            try {
+                $preview = \OC::$server->get(\OCP\IPreview::class)
+                    ->getPreview($file, $x, $y, !$a, $mode)
+                ;
+            } catch (\OCP\Files\NotFoundException $e) {
+                // This exception is thrown if no generator is found,
+                // throw an HTTP exception to prevent spamming admin log.
+                throw Exceptions::NotFound($e->getMessage());
+            }
 
             // Get the filename. We need to move the extension from
             // the preview file to the filename's end if it's not there
@@ -216,7 +225,9 @@ class ImageController extends GenericApiController
                 $info['ownername'] = $owner->getDisplayName();
             }
 
-            // Allow these ony for logged in users
+            // Get the path of the file relative to root
+            // For public shares, get path relative to share root
+            // For logged in users, get path relative to user folder
             if ($user = $this->userSession->getUser()) {
                 // Get the path of the file relative to current user
                 // "/admin/files/Photos/Camera/20230821_135017.jpg" => "/Photos/..."
@@ -246,6 +257,13 @@ class ImageController extends GenericApiController
                     }
                     $info['clusters'] = $clist;
                 }
+            } elseif ($shareNode = $this->fs->getShareNode()) {
+                // For public shares, get path relative to share root
+                $sharePath = $shareNode->getPath();
+                $filePath = $file->getPath();
+                if (str_starts_with($filePath, $sharePath)) {
+                    $info['filename'] = substr($filePath, \strlen($sharePath));
+                }
             }
 
             return new JSONResponse($info, Http::STATUS_OK);
@@ -253,9 +271,10 @@ class ImageController extends GenericApiController
     }
 
     /**
-     * Set the exif data for a file.
+     * Set the exif data for a file (supports public shares).
      */
     #[NoAdminRequired]
+    #[PublicPage]
     public function setExif(int $id, array $raw): Http\Response
     {
         return Util::guardEx(function () use ($id, $raw) {
@@ -326,6 +345,7 @@ class ImageController extends GenericApiController
     }
 
     #[NoAdminRequired]
+    #[PublicPage]
     public function editImage(
         int $id,
         string $name,
@@ -397,6 +417,29 @@ class ImageController extends GenericApiController
             \OC::$server->get(\OCP\IPreview::class)->getPreview($file);
 
             return $this->info($file->getId(), true);
+        });
+    }
+
+    /**
+     * Delete a file (supports public shares).
+     */
+    #[NoAdminRequired]
+    #[PublicPage]
+    public function deleteFile(int $id): Http\Response
+    {
+        return Util::guardEx(function () use ($id) {
+            // Get the file
+            $file = $this->fs->getUserFile($id);
+
+            // Check if user has delete permissions
+            if (!$file->isDeletable()) {
+                throw Exceptions::Forbidden('No delete permission for this file');
+            }
+
+            // Delete the file
+            $file->delete();
+
+            return new JSONResponse(['deleted' => true], Http::STATUS_OK);
         });
     }
 

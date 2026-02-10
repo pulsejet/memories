@@ -27,6 +27,7 @@ OC.L10N.register(
     "Move" : "Տեղափոխել",
     "Refresh" : "Թարմացնել",
     "Home" : "Սկիզբ",
+    "Upload failed" : "Բեռնումն ձախողվեց",
     "Download {ext}" : "Ներբեռնել {ext}",
     "Previous" : "Նախորդ",
     "Size" : "Չափս",

@@ -25,6 +25,7 @@
         <directory name="../../3rdparty/doctrine" />
         <directory name="../../3rdparty/psr" />
         <directory name="../../3rdparty/guzzlehttp" />
+        <directory name="../../3rdparty/deepdiver" />
 
         <ignoreFiles>
             <directory name="vendor" />
