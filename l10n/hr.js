@@ -183,6 +183,8 @@ OC.L10N.register(
     "Direct" : "Izravno",
     "Auto" : "Auto",
     "Setup" : "Podesi",
+    "No items" : "Nema stavki",
+    "_{n} item_::_{n} items_" : ["%d datoteka","%d datoteke","%d datoteka"],
     "Shared by {user}" : "Dijeli {user}",
     "Error: {msg}" : "Pogreška: {msg}",
     "Yes" : "Da",
