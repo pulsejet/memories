@@ -111,6 +111,10 @@ class OtherController extends GenericApiController
                 'video_loop' => 'true' === $getAppConfig('videoLoop', 'false'),
                 'sidebar_filepath' => 'true' === $getAppConfig('sidebarFilepath', false),
 
+                // on this day settings
+                'onthisday_day_range' => (int) $getAppConfig('onthisdayDayRange', '0'),
+                'onthisday_photos_per_year' => (int) $getAppConfig('onthisdayPhotosPerYear', '10'),
+
                 // folder settings
                 'folders_path' => $getAppConfig('foldersPath', '/'),
                 'show_hidden_folders' => 'true' === $getAppConfig('showHidden', false),

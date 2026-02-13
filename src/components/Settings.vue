@@ -120,6 +120,46 @@
         </div>
       </NcAppSettingsSection>
 
+      <NcAppSettingsSection id="onthisday-settings" :name="names.onthisday">
+        <div class="setting-row">
+          <label for="onthisday-range">
+            {{ t('memories', 'Day range:') }}
+          </label>
+          <input
+            id="onthisday-range"
+            v-model.number="config.onthisday_day_range"
+            type="number"
+            min="0"
+            max="7"
+            step="1"
+            @change="updateOnThisDayRange"
+          />
+          <span class="hint">{{ t('memories', '(0-7 days)') }}</span>
+        </div>
+        <p class="settings-hint">
+          {{ t('memories', 'Number of days before and after each anniversary to include. For example, 3 means photos from 3 days before to 3 days after.') }}
+        </p>
+
+        <div class="setting-row">
+          <label for="onthisday-photos">
+            {{ t('memories', 'Photos per year:') }}
+          </label>
+          <input
+            id="onthisday-photos"
+            v-model.number="config.onthisday_photos_per_year"
+            type="number"
+            min="1"
+            max="50"
+            step="1"
+            @change="updateOnThisDayPhotos"
+          />
+          <span class="hint">{{ t('memories', '(1-50)') }}</span>
+        </div>
+        <p class="settings-hint">
+          {{ t('memories', 'Maximum number of photos to show per year when opening the viewer.') }}
+        </p>
+      </NcAppSettingsSection>
+
       <NcAppSettingsSection id="account-settings" :name="names.account" v-if="isNative">
         {{ t('memories', 'Logged in as {user}', { user }) }}
         <NcButton @click="logout" id="sign-out">
@@ -197,6 +237,33 @@
 input[type='text'] {
   width: 100%;
 }
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.setting-row label {
+  min-width: 150px;
+}
+
+.setting-row input[type='number'] {
+  width: 80px;
+  padding: 5px;
+}
+
+.setting-row .hint {
+  color: var(--color-text-maxcontrast);
+  font-size: 0.9em;
+}
+
+.settings-hint {
+  margin: 0 0 15px 0;
+  color: var(--color-text-maxcontrast);
+  font-size: 0.9em;
+}
 </style>
 
 <script lang="ts">
@@ -241,6 +308,7 @@ export default defineComponent({
       header: t('memories', 'Memories Settings'),
       general: t('memories', 'General'),
       viewer: t('memories', 'Photo Viewer'),
+      onthisday: t('memories', 'On This Day'),
       account: t('memories', 'Account'),
       folders: t('memories', 'Folders'),
       albums: t('memories', 'Albums'),
@@ -374,6 +442,15 @@ export default defineComponent({
 
     async updateMetadataInSlideshow() {
       await this.updateSetting('metadata_in_slideshow', 'metadataInSlideshow');
+    },
+
+    // On This Day settings
+    async updateOnThisDayRange() {
+      await this.updateSetting('onthisday_day_range', 'onthisdayDayRange');
+    },
+
+    async updateOnThisDayPhotos() {
+      await this.updateSetting('onthisday_photos_per_year', 'onthisdayPhotosPerYear');
     },
 
     // Folders settings
