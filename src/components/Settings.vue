@@ -137,7 +137,12 @@
           <span class="hint">{{ t('memories', '(0-7 days)') }}</span>
         </div>
         <p class="settings-hint">
-          {{ t('memories', 'Number of days before and after each anniversary to include. For example, 3 means photos from 3 days before to 3 days after.') }}
+          {{
+            t(
+              'memories',
+              'Number of days before and after each anniversary to include. For example, 3 means photos from 3 days before to 3 days after.',
+            )
+          }}
         </p>
 
         <div class="setting-row">
