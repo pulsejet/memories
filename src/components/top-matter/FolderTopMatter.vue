@@ -54,22 +54,13 @@
           </template>
         </NcActionButton>
 
-        <NcActionButton
-          :aria-label="t('memories', 'Go to date')"
-          @click="openDatePicker()"
-          close-after-click
-        >
+        <NcActionButton :aria-label="t('memories', 'Go to date')" @click="openDatePicker()" close-after-click>
           {{ t('memories', 'Go to date') }}
           <template #icon> <CalendarSearchIcon :size="20" /> </template>
         </NcActionButton>
       </NcActions>
 
-      <input
-        ref="dateInput"
-        type="date"
-        class="date-input-hidden"
-        @change="onDateSelected"
-      />
+      <input ref="dateInput" type="date" class="date-input-hidden" @change="onDateSelected" />
     </div>
   </div>
 </template>

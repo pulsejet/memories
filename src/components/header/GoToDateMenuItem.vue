@@ -10,13 +10,7 @@
         <CalendarSearchIcon :size="20" />
       </template>
     </NcButton>
-    <input
-      ref="dateInput"
-      type="date"
-      class="date-input-overlay"
-      @click="constrainRange"
-      @change="onDateSelected"
-    />
+    <input ref="dateInput" type="date" class="date-input-overlay" @click="constrainRange" @change="onDateSelected" />
   </div>
 </template>
 
