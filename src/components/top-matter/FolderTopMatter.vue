@@ -53,7 +53,23 @@
             <TimelineIcon v-else :size="20" />
           </template>
         </NcActionButton>
+
+        <NcActionButton
+          :aria-label="t('memories', 'Go to date')"
+          @click="openDatePicker()"
+          close-after-click
+        >
+          {{ t('memories', 'Go to date') }}
+          <template #icon> <CalendarSearchIcon :size="20" /> </template>
+        </NcActionButton>
       </NcActions>
+
+      <input
+        ref="dateInput"
+        type="date"
+        class="date-input-hidden"
+        @change="onDateSelected"
+      />
     </div>
   </div>
 </template>
@@ -77,6 +93,7 @@ import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import TimelineIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import FoldersIcon from 'vue-material-design-icons/FolderMultiple.vue';
 import UploadIcon from 'vue-material-design-icons/Upload.vue';
+import CalendarSearchIcon from 'vue-material-design-icons/CalendarSearch.vue';
 
 export default defineComponent({
   name: 'FolderTopMatter',
@@ -92,6 +109,7 @@ export default defineComponent({
     TimelineIcon,
     FoldersIcon,
     UploadIcon,
+    CalendarSearchIcon,
   },
 
   mixins: [UserConfig],
@@ -161,6 +179,35 @@ export default defineComponent({
     uploadHandler(): InstanceType<typeof PublicUploadHandler> | null {
       return (this.$refs.uploadHandler as InstanceType<typeof PublicUploadHandler>) || null;
     },
+
+    openDatePicker() {
+      const input = this.$refs.dateInput as HTMLInputElement;
+      const event = { result: null as { min: Date; max: Date } | null };
+      utils.bus.emit('memories:timeline:getDateRange', event);
+      if (event.result) {
+        input.min = event.result.min.toISOString().split('T')[0];
+        input.max = event.result.max.toISOString().split('T')[0];
+      }
+
+      // Temporarily make visible for showPicker to work
+      input.style.width = '1px';
+      input.style.height = '1px';
+      try {
+        input.showPicker();
+      } catch {
+        input.click();
+      }
+      input.style.width = '';
+      input.style.height = '';
+    },
+
+    onDateSelected(event: Event) {
+      const input = event.target as HTMLInputElement;
+      if (!input.value) return;
+      const date = new Date(input.value + 'T00:00:00Z');
+      utils.bus.emit('memories:timeline:scrollToDate', date);
+      input.value = '';
+    },
   },
 });
 </script>
@@ -179,6 +226,16 @@ export default defineComponent({
     display: flex;
     align-items: center;
     gap: 10px; // Add spacing between actions and progress bar
+  }
+
+  .date-input-hidden {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    border: 0;
+    padding: 0;
+    margin: 0;
   }
 }
 </style>
