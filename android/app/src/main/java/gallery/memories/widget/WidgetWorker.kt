@@ -42,10 +42,12 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLContext
 import javax.net.ssl.X509TrustManager
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.random.Random
 
 @OptIn(UnstableApi::class)
 class WidgetWorker(
@@ -182,25 +184,16 @@ class WidgetWorker(
             )}"
 
             // Fetch list of days from server
-            val daysResponse = client.newCall(
-                Request.Builder()
-                    .url("${cred.url}api/days")
-                    .header("Authorization", authHeader)
-                    .header("User-Agent", "MemoriesNative/1.0")
-                    .header("OCS-APIRequest", "true")
-                    .header("X-Requested-With", "gallery.memories")
-                    .get()
-                    .build()
-            ).execute()
-
-            if (daysResponse.code != 200) {
-                Log.w(TAG, "Server /api/days returned ${daysResponse.code}")
-                daysResponse.body.close()
-                return false
+            val daysBody = client.newCall(
+                buildApiRequest(cred.url, "api/days", authHeader)
+            ).execute().use { response ->
+                if (response.code != 200) {
+                    Log.w(TAG, "Server /api/days returned ${response.code}")
+                    return false
+                }
+                response.body.string()
             }
 
-            val daysBody = daysResponse.body.string()
-            daysResponse.body.close()
             val daysArray = JSONArray(daysBody)
 
             if (daysArray.length() == 0) {
@@ -229,7 +222,7 @@ class WidgetWorker(
 
             if (onThisDayCandidates.isNotEmpty()) {
                 // Weighted selection: 70% On This Day, 30% random
-                if (Math.random() < OTD_WEIGHT) {
+                if (Random.nextDouble() < OTD_WEIGHT) {
                     chosenDay = onThisDayCandidates.random()
                     isOnThisDay = true
                     Log.d(TAG, "Showing 'On This Day' photo (${onThisDayCandidates.size} candidates)")
@@ -247,25 +240,16 @@ class WidgetWorker(
             val dayId = chosenDay.getLong("dayid")
 
             // Fetch photos for the chosen day
-            val dayResponse = client.newCall(
-                Request.Builder()
-                    .url("${cred.url}api/days/$dayId")
-                    .header("Authorization", authHeader)
-                    .header("User-Agent", "MemoriesNative/1.0")
-                    .header("OCS-APIRequest", "true")
-                    .header("X-Requested-With", "gallery.memories")
-                    .get()
-                    .build()
-            ).execute()
-
-            if (dayResponse.code != 200) {
-                Log.w(TAG, "Server /api/days/$dayId returned ${dayResponse.code}")
-                dayResponse.body.close()
-                return false
+            val dayBody = client.newCall(
+                buildApiRequest(cred.url, "api/days/$dayId", authHeader)
+            ).execute().use { response ->
+                if (response.code != 200) {
+                    Log.w(TAG, "Server /api/days/$dayId returned ${response.code}")
+                    return false
+                }
+                response.body.string()
             }
 
-            val dayBody = dayResponse.body.string()
-            dayResponse.body.close()
             val photosArray = JSONArray(dayBody)
 
             if (photosArray.length() == 0) {
@@ -292,49 +276,30 @@ class WidgetWorker(
             // Try to fetch location/address from server
             var locationText: String? = null
             try {
-                val infoResponse = client.newCall(
-                    Request.Builder()
-                        .url("${cred.url}api/image/info/$fileId")
-                        .header("Authorization", authHeader)
-                        .header("User-Agent", "MemoriesNative/1.0")
-                        .header("OCS-APIRequest", "true")
-                        .header("X-Requested-With", "gallery.memories")
-                        .get()
-                        .build()
-                ).execute()
-
-                if (infoResponse.code == 200) {
-                    val infoBody = infoResponse.body.string()
-                    val infoJson = JSONObject(infoBody)
-                    if (infoJson.has("address") && !infoJson.isNull("address")) {
-                        locationText = infoJson.getString("address")
+                client.newCall(
+                    buildApiRequest(cred.url, "api/image/info/$fileId", authHeader)
+                ).execute().use { infoResponse ->
+                    if (infoResponse.code == 200) {
+                        val infoJson = JSONObject(infoResponse.body.string())
+                        if (infoJson.has("address") && !infoJson.isNull("address")) {
+                            locationText = infoJson.getString("address")
+                        }
                     }
                 }
-                infoResponse.body.close()
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to fetch photo info for location", e)
             }
 
             // Download the preview image
-            val previewResponse = client.newCall(
-                Request.Builder()
-                    .url("${cred.url}api/image/preview/$fileId?x=1024&y=1024")
-                    .header("Authorization", authHeader)
-                    .header("User-Agent", "MemoriesNative/1.0")
-                    .header("OCS-APIRequest", "true")
-                    .header("X-Requested-With", "gallery.memories")
-                    .get()
-                    .build()
-            ).execute()
-
-            if (previewResponse.code != 200) {
-                Log.w(TAG, "Server preview for $fileId returned ${previewResponse.code}")
-                previewResponse.body.close()
-                return false
+            val bytes = client.newCall(
+                buildApiRequest(cred.url, "api/image/preview/$fileId?x=1024&y=1024", authHeader)
+            ).execute().use { previewResponse ->
+                if (previewResponse.code != 200) {
+                    Log.w(TAG, "Server preview for $fileId returned ${previewResponse.code}")
+                    return false
+                }
+                previewResponse.body.bytes()
             }
-
-            val bytes = previewResponse.body.bytes()
-            previewResponse.body.close()
 
             val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             if (bitmap == null) {
@@ -360,21 +325,38 @@ class WidgetWorker(
     }
 
     private fun buildOkHttpClient(trustAll: Boolean): OkHttpClient {
-        return if (trustAll) {
+        val builder = OkHttpClient.Builder()
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+
+        if (trustAll) {
             val tm = object : X509TrustManager {
                 override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
                 override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
                 override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
             }
-            val sc = SSLContext.getInstance("SSL")
+            val sc = SSLContext.getInstance("TLS")
             sc.init(null, arrayOf(tm), SecureRandom())
-            OkHttpClient.Builder()
-                .sslSocketFactory(sc.socketFactory, tm)
+            builder.sslSocketFactory(sc.socketFactory, tm)
                 .hostnameVerifier { _, _ -> true }
-                .build()
-        } else {
-            OkHttpClient()
         }
+
+        return builder.build()
+    }
+
+    /**
+     * Build an authenticated API request for the Memories server.
+     */
+    private fun buildApiRequest(baseUrl: String, path: String, authHeader: String): Request {
+        return Request.Builder()
+            .url("$baseUrl$path")
+            .header("Authorization", authHeader)
+            .header("User-Agent", "MemoriesNative/1.0")
+            .header("OCS-APIRequest", "true")
+            .header("X-Requested-With", "gallery.memories")
+            .get()
+            .build()
     }
 
     // ========================================================================
@@ -412,7 +394,7 @@ class WidgetWorker(
         var isOnThisDay = false
         var photo: Photo? = null
 
-        if (photos.isNotEmpty() && Math.random() < OTD_WEIGHT) {
+        if (photos.isNotEmpty() && Random.nextDouble() < OTD_WEIGHT) {
             // Weighted selection: prioritize On This Day
             photo = photos.random()
             isOnThisDay = true
@@ -515,7 +497,7 @@ class WidgetWorker(
         yearsAgoText: String? = null,
         locationText: String? = null
     ) {
-        val loadSource: Any = systemImage.uri ?: systemImage.dataPath
+        val loadSource: Any = systemImage.uri
         val bitmap = suspendCoroutine<Bitmap?> { continuation ->
             Glide.with(context)
                 .asBitmap()
@@ -653,7 +635,7 @@ class WidgetWorker(
      * and reverse-geocode them to a human-readable location string.
      */
     private fun getLocationFromSystemImage(systemImage: SystemImage): String? {
-        if (systemImage.dataPath.isEmpty()) return null
+        if (systemImage.dataPath.isEmpty() || systemImage.isVideo) return null
         try {
             val exif = ExifInterface(systemImage.dataPath)
             val latLong = exif.latLong ?: return null
