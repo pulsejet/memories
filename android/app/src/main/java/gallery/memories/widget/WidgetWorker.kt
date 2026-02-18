@@ -29,6 +29,9 @@ import android.location.Geocoder
 import androidx.annotation.OptIn
 import androidx.exifinterface.media.ExifInterface
 import androidx.media3.common.util.UnstableApi
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
@@ -64,27 +67,47 @@ class WidgetWorker(
 
         // Try server first (this is where the user's photos live)
         if (tryServerPhoto(appWidgetManager, appWidgetIds)) {
+            scheduleNextUpdate()
             return Result.success()
         }
 
         // Server unreachable — try cached server images
         if (tryCachedPhoto(appWidgetManager, appWidgetIds)) {
             Log.d(TAG, "Showing cached server photo (offline mode)")
+            scheduleNextUpdate()
             return Result.success()
         }
 
         // Fall back to local DB
         if (tryLocalDbPhoto(appWidgetManager, appWidgetIds)) {
+            scheduleNextUpdate()
             return Result.success()
         }
 
         // Fall back to MediaStore
         if (tryMediaStoreFallback(appWidgetManager, appWidgetIds)) {
+            scheduleNextUpdate()
             return Result.success()
         }
 
         updateWidgetError(context.getString(R.string.widget_no_photos))
+        scheduleNextUpdate()
         return Result.success()
+    }
+
+    /**
+     * Schedule the next automatic widget update after the configured interval.
+     */
+    private fun scheduleNextUpdate() {
+        val nextRequest = OneTimeWorkRequestBuilder<WidgetWorker>()
+            .setInitialDelay(MemoriesWidget.UPDATE_INTERVAL_MINUTES, TimeUnit.MINUTES)
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            "MemoriesWidgetAutoUpdate",
+            ExistingWorkPolicy.REPLACE,
+            nextRequest
+        )
     }
 
     // ========================================================================

@@ -35,9 +35,13 @@ class MemoriesWidget : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         if (intent.action == ACTION_REFRESH) {
-            // User tapped refresh — enqueue a one-time immediate update
+            // User tapped refresh — enqueue a one-time immediate update (debounced)
             val oneTimeRequest = OneTimeWorkRequestBuilder<WidgetWorker>().build()
-            WorkManager.getInstance(context).enqueue(oneTimeRequest)
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                WORK_NAME_REFRESH,
+                ExistingWorkPolicy.REPLACE,
+                oneTimeRequest
+            )
         }
     }
 
@@ -70,9 +74,9 @@ class MemoriesWidget : AppWidgetProvider() {
     }
 
     private fun scheduleWidgetUpdate(context: Context) {
-        val workRequest = PeriodicWorkRequestBuilder<WidgetWorker>(
-            30, TimeUnit.MINUTES
-        )
+        // Schedule the next update in UPDATE_INTERVAL_MINUTES minutes
+        val workRequest = OneTimeWorkRequestBuilder<WidgetWorker>()
+            .setInitialDelay(UPDATE_INTERVAL_MINUTES, TimeUnit.MINUTES)
             .setConstraints(
                 Constraints.Builder()
                     .setRequiresBatteryNotLow(true)
@@ -80,19 +84,25 @@ class MemoriesWidget : AppWidgetProvider() {
             )
             .build()
 
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+        WorkManager.getInstance(context).enqueueUniqueWork(
             WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingWorkPolicy.REPLACE,
             workRequest
         )
 
         // Also trigger an immediate one-time update
-        val oneTimeRequest = OneTimeWorkRequestBuilder<WidgetWorker>().build()
-        WorkManager.getInstance(context).enqueue(oneTimeRequest)
+        val immediateRequest = OneTimeWorkRequestBuilder<WidgetWorker>().build()
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            WORK_NAME_REFRESH,
+            ExistingWorkPolicy.REPLACE,
+            immediateRequest
+        )
     }
 
     companion object {
         const val ACTION_REFRESH = "gallery.memories.widget.ACTION_REFRESH"
-        private const val WORK_NAME = "MemoriesWidgetUpdate"
+        private const val WORK_NAME = "MemoriesWidgetAutoUpdate"
+        private const val WORK_NAME_REFRESH = "MemoriesWidgetRefresh"
+        const val UPDATE_INTERVAL_MINUTES = 10L
     }
 }
