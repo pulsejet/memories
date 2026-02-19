@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background">
+
+    <!-- Photo -->
+    <ImageView
+        android:id="@+id/widget_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/widget_description"
+        android:clipToOutline="true"
+        android:background="@drawable/widget_background" />
+
+    <!-- Top gradient scrim for text readability -->
+    <ImageView
+        android:id="@+id/widget_scrim_top"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:layout_gravity="top"
+        android:src="@drawable/widget_gradient_scrim_top"
+        android:scaleType="fitXY"
+        android:contentDescription="@null"
+        android:visibility="gone" />
+
+    <!-- Bottom gradient scrim for text readability -->
+    <ImageView
+        android:id="@+id/widget_scrim"
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        android:layout_gravity="bottom"
+        android:src="@drawable/widget_gradient_scrim"
+        android:scaleType="fitXY"
+        android:contentDescription="@null" />
+
+    <!-- Top bar: location text -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="14dp"
+        android:paddingEnd="52dp"
+        android:paddingTop="10dp">
+
+        <!-- Location text (shown only when location is available) -->
+        <TextView
+            android:id="@+id/widget_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFFFF"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:shadowColor="#80000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="3"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Refresh / next photo button (always top-right) -->
+    <ImageView
+        android:id="@+id/widget_refresh_btn"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/widget_refresh_circle"
+        android:src="@drawable/ic_widget_refresh"
+        android:scaleType="center"
+        android:padding="7dp"
+        android:contentDescription="@string/widget_refresh" />
+
+    <!-- Bottom text overlay: "On this day" label + date -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:id="@+id/widget_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_on_this_day"
+            android:textColor="#FFFFFFFF"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium"
+            android:shadowColor="#80000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="4"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/widget_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="#CCFFFFFF"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif"
+            android:shadowColor="#80000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="4"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Empty state text -->
+    <TextView
+        android:id="@+id/widget_empty_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/app_name"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+</FrameLayout>

@@ -14,4 +14,13 @@
     <string name="err_no_ver">Your server does not have the minimum required version of Memories</string>
     <string name="err_logged_out">Logged out from server</string>
     <string name="err_no_describe">Failed to connect to server. Reset app data if this persists.</string>
+
+    <string name="widget_description">Rediscover your memories from this day</string>
+    <string name="widget_title">Memories</string>
+    <string name="widget_on_this_day">On this day</string>
+    <string name="widget_years_ago">%d years ago</string>
+    <string name="widget_one_year_ago">1 year ago</string>
+    <string name="widget_refresh">Next photo</string>
+    <string name="widget_no_photos">No photos found</string>
+    <string name="widget_no_buckets">No folders selected. Open app to configure.</string>
 </resources>
