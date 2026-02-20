@@ -954,8 +954,8 @@ export default defineComponent({
       const { user, name } = this.$route.params;
       if (!this.routeIsRecognize || !user || !name) return;
 
-      // Check photo ownership
-      if (this.$route.params.user !== utils.uid) {
+      // Check if current user can manage this person's cluster
+      if (!(await utils.canManagePersonCluster(user))) {
         showError(this.t('memories', 'Only user "{user}" can update this person', { user }));
         return;
       }
