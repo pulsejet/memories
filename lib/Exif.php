@@ -15,7 +15,32 @@ class Exif
 {
     private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'image/x-dcraw', 'video/MP2T']; // also update const.ts
     private const EXIFTOOL_TIMEOUT = 30000;
-    private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-api', 'LargeFileSupport=1', '-n', '-json'];
+    private const EXIFTOOL_ARGS = ['-api', 'LargeFileSupport=1', '-a', '-json'];
+
+    // Fields to search for dates in
+    // Should also be set in ExifFields.php if you want them to show up in the metadata view
+    private const DATE_FIELDS = [
+        // Original date fields
+        'SubSecDateTimeOriginal',
+        'DateTimeOriginal',
+        'SonyDateTime',
+
+        // Create date fields
+        'SubSecCreateDate',
+        'CreationDate',
+        'CreationDateValue',
+        'CreateDate',
+        'TrackCreateDate',
+        'MediaCreateDate',
+        'FileCreateDate',
+
+        // ModifyDate fields
+        'SubSecModifyDate',
+        'ModifyDate',
+        'TrackModifyDate',
+        'MediaModifyDate',
+        'FileModifyDate',
+        ];
 
     /** Opened instance of exiftool when running in command mode */
     /** @var null|resource */
@@ -87,7 +112,7 @@ class Exif
      *
      * @return array<string, mixed>
      */
-    public static function getExifFromFile(File $file): array
+    public static function getExifFromFile(File $file, array $extraArgs = []): array
     {
         try {
             $path = $file->getStorage()->getLocalFile($file->getInternalPath());
@@ -106,23 +131,14 @@ class Exif
             throw new \Exception("File is not readable: {$path}");
         }
 
-        $exif = self::getExifFromLocalPath($path);
+        // Get exif data
+        $exif = self::getExifFromLocalPath($path, $extraArgs);
 
         // We need to remove blacklisted fields to prevent leaking info
-        unset($exif['SourceFile'], $exif['FileName'], $exif['ExifToolVersion'], $exif['Directory'], $exif['FileSize'], $exif['FileModifyDate'], $exif['FileAccessDate'], $exif['FileInodeChangeDate'], $exif['FilePermissions'], $exif['ThumbnailImage']);
+        unset($exif['SourceFile'], $exif['FileName'], $exif['ExifToolVersion'], $exif['Directory'], $exif['FileSize'], $exif['FileAccessDate'], $exif['FileInodeChangeDate'], $exif['FilePermissions'], $exif['ThumbnailImage']);
 
         // Ignore zero dates
-        $dateFields = [
-            'DateTimeOriginal',
-            'SubSecDateTimeOriginal',
-            'CreateDate',
-            'ModifyDate',
-            'TrackCreateDate',
-            'TrackModifyDate',
-            'MediaCreateDate',
-            'MediaModifyDate',
-        ];
-        foreach ($dateFields as $field) {
+        foreach (self::DATE_FIELDS as $field) {
             if (\array_key_exists($field, $exif) && \is_string($exif[$field]) && str_starts_with($exif[$field], '0000:00:00')) {
                 unset($exif[$field]);
             }
@@ -136,15 +152,15 @@ class Exif
      *
      * @return array<string, mixed>
      */
-    public static function getExifFromLocalPath(string $path): array
+    public static function getExifFromLocalPath(string $path, array $extraArgs = []): array
     {
         if (null !== self::$staticProc) {
             self::ensureStaticExiftoolProc();
 
-            return self::getExifFromLocalPathWithStaticProc($path);
+            return self::getExifFromLocalPathWithStaticProc($path, $extraArgs);
         }
 
-        return self::getExifFromLocalPathWithSeparateProc($path);
+        return self::getExifFromLocalPathWithSeparateProc($path, $extraArgs);
     }
 
     /**
@@ -154,86 +170,184 @@ class Exif
      */
     public static function parseExifDate(array $exif): \DateTime
     {
-        // Get date from exif
-        $exifDate = $exif['DateTimeOriginal'] ?? $exif['CreateDate'] ?? null;
-
-        // For videos, prefer CreateDate for timezone (QuickTimeUTC=1)
-        if (preg_match('/^video\/\w+/', (string) ($exif['MIMEType'] ?? null))) {
-            $exifDate = $exif['CreateDate'] ?? $exifDate;
-        }
-
-        // Check if we have a date
-        if (null === $exifDate || empty($exifDate) || !\is_string($exifDate)) {
-            throw new \Exception('No date found in exif');
-        }
-
-        // Get timezone from exif
-        try {
-            $tzStr = $exif['OffsetTimeOriginal']
-                ?? $exif['OffsetTime']
-                ?? $exif['LocationTZID']
-                ?? throw new \Exception();
-
-            /** @psalm-suppress ArgumentTypeCoercion */
-            $exifTz = new \DateTimeZone((string) $tzStr);
-        } catch (\Exception) {
-            $exifTz = null;
-        }
-
-        // Force UTC if no timezone found
-        $parseTz = $exifTz ?? new \DateTimeZone('UTC');
-
-        // https://github.com/pulsejet/memories/pull/397
-        // https://github.com/pulsejet/memories/issues/485
-
-        $formats = [
-            'Y:m:d H:i', // 2023:03:05 18:58
-            'Y:m:d H:iO', // 2023:03:05 18:58+05:00
-            'Y:m:d H:i:s', // 2023:03:05 18:58:17
-            'Y:m:d H:i:sO', // 2023:03:05 10:58:17+05:00
-            'Y:m:d H:i:s.u', // 2023:03:05 10:58:17.000
-            'Y:m:d H:i:s.uO', // 2023:03:05 10:58:17.000Z
-        ];
-
-        /** @var \DateTime $dt */
-        $parsedDate = null;
-
-        foreach ($formats as $format) {
-            if ($parsedDate = \DateTime::createFromFormat($format, $exifDate, $parseTz)) {
-                break;
+        // Collect all candidate date strings
+        // Don't prioritize fields blindly because different cameras prioritize different fields
+        // Instead we will be choosing the oldest valid date found in exif
+        $candidates = [];
+        foreach (self::DATE_FIELDS as $field) {
+            if (isset($exif[$field]) && \is_string($exif[$field]) && $exif[$field] !== '') {
+                $val = (string) $exif[$field];
+                if (!str_starts_with($val, '0000:00:00')) {
+                    $candidates[$field] = $val;
+                }
             }
         }
 
-        // If we couldn't parse the date, throw an error
-        if (!$parsedDate) {
-            throw new \Exception("Invalid date: {$exifDate}");
+        // Check if we have any candidates
+        if (empty($candidates)) {
+            throw new \Exception('No date found in exif');
         }
 
-        // Epoch timestamp
-        $timestamp = $parsedDate->getTimestamp();
+        // List of accepted parsing formats in priority order to try
+        // By not using exiftool with -n we can let it get precise subseconds and timezone info for us when available
+        // Prioritize formats with timezone and more precision first
+        $formats = [
+            'Y:m:d H:i:s.uP',
+            'Y:m:d H:i:s.uO',
+            'Y:m:d H:i:sP',
+            'Y:m:d H:i:sO',
+            'Y:m:d H:iP',
+            'Y:m:d H:iO',
+            'Y:m:d H:i:s.u',
+            'Y:m:d H:i:s',
+            'Y:m:d H:i',
+        ];
 
-        // Filter out dates before 1800 A.D.
-        if ($timestamp < -5364662400) { // 1800 A.D.
-            throw new \Exception("Date too old: {$exifDate}");
+        // Loop through candidates, compare them, and get the oldest valid date
+        $exifDate = null;
+        $parsedDate = null;
+        $oldestTimestamp = null;
+        $bestPrecision = -1;
+        $winningField = null;
+        foreach ($candidates as $field => $val) {
+            $parse = null;
+            $matchedFormat = null;
+            
+            // Replace trailing Z (Zulu) with +00:00 so formats using 'p' parse correctly.
+            if (str_ends_with($val, 'Z')) {
+                $val = preg_replace('/Z$/', '+00:00', $val);
+            }
+
+            // If timezone exists in a dedicated exif field get it
+            $exifTz = null;
+            try {
+                $tzStr = $exif['OffsetTimeOriginal']
+                    ?? $exif['OffsetTime']
+                    ?? $exif['OffsetTimeDigitized']
+                    ?? $exif['TimeZone']
+                    ?? $exif['LocationTZID']
+                    ?? throw new \Exception();
+
+                /** @psalm-suppress ArgumentTypeCoercion */
+                $exifTz = new \DateTimeZone((string) $tzStr);
+            } catch (\Exception $e) {
+                $exifTz = null;
+            } catch (\ValueError $e) {
+                $exifTz = null;
+            }
+
+            // Try to get a valid date with timezone from each candidate using accepted formats
+            foreach ($formats as $format) {
+
+                // If format contains timezone offset parse directly without messing with it
+                // Set matchedFormat after any success in this loop so we have the format that succeeded
+                if (strpos($format, 'O') !== false || strpos($format, 'P') !== false) {
+                    $parse = \DateTime::createFromFormat($format, $val);
+                    if ($parse instanceof \DateTime) {
+                        // On success save date string timezone for use on formats lacking timezone if dedicated EXIF timezone doesn't exist
+                        // This can happen if exiftool is able to find a timezone offset in a field that we didn't code for
+                        if ($exifTz === null) {
+                            // Only use string timezones we are sure are original ones because modification date timestamps may break oldest date logic
+                            if ($field == 'SubSecDateTimeOriginal' || $field == 'SubSecCreateDate' || $field == 'CreationDate' || $field == 'CreationDateValue'){
+                                $exifTz = $parse->getTimezone();
+                            }
+                        }
+                        // Stop trying other formats on success
+                        $matchedFormat = $format;
+                        break;
+                    }
+                } else {
+                    // If format lacks timezone offset try to correct it with offset from dedicated EXIF fields
+                    // Dates that are UTC need to be shifted to the local timezone and dates that aren't need to have the timezone appended without shifting the clock time
+
+                    // After examining many samples from different cameras it looks like modern PHOTOS usually have all their dates saved in local time
+                    // For these we will append the EXIF timezone without shifting the clock time
+                    // But when modern VIDEOS have dates that lack a timezone offset these dates are usually in UTC thanks to QuickTime
+                    // So for these we will fully shift the clock time to the EXIF timezone while setting it
+
+                    // This handling should cover the vast majority of cases correctly and should only fail when
+                    // 1. The camera saved a photo with it's oldest date saved in UTC without timezone info
+                    // 2. The camera saved a video with it's oldest date in local time without timezone info
+                    // 3. The camera just saved dates completely wrong
+                    if ($exifTz instanceof \DateTimeZone && preg_match('/^video\/\w+/i', (string) ($exif['MIMEType'] ?? null))) {
+                        
+                        // For videos shift time clock to timezone
+                        $parse = \DateTime::createFromFormat($format, $val, new \DateTimeZone('UTC'));
+                        if ($parse instanceof \DateTime) {
+                            $parse->setTimezone($exifTz);
+                            // Stop trying other formats on success
+                            $matchedFormat = $format;
+                            break;
+                        }
+                    } elseif ($exifTz instanceof \DateTimeZone) {
+                        // For photos append timezone without shifting time clock
+                        $parse = \DateTime::createFromFormat($format, $val, $exifTz);
+                        // Stop trying other formats on success
+                        if ($parse instanceof \DateTime) {
+                            $matchedFormat = $format;
+                            break;
+                        }
+                    } else {
+                        // No timezone found, give up and assume UTC
+                        // This only happens when there is absolutely no timezone info in the file across all fields
+                        $parse = \DateTime::createFromFormat($format, $val, new \DateTimeZone('UTC'));
+                        if ($parse instanceof \DateTime) {
+                            $matchedFormat = $format;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Timestamps are able to compare between different timezones accurately
+            // So we use it to find the oldest date in candidates
+            if ($parse instanceof \DateTime) {
+
+                // Epoch timestamp
+                $timestamp = $parse->getTimestamp();
+
+                // Filter out January 1, 1904 12:00:00 AM UTC
+                // Exiftool returns this as the date when QuickTimeUTC is set and
+                // the date is set to 0000:00:00 00:00:00
+                // Also filter out dates before 1800 A.D.
+                if (-2082844800 !== $timestamp || $timestamp > -5364662400) {
+
+                    // A more precise datetime will always look newer than a less precise datetime even if they are the same general timestamp
+                    // In these scenarios we want to prefer the more precise datetime so we don't lose accuracy
+                    // Determine precision level from the matched format
+                    if ($matchedFormat) {
+                        if (strpos($matchedFormat, 'u') !== false) {
+                            $precision = 3;
+                        } elseif (strpos($matchedFormat, 's') !== false) {
+                            $precision = 2;
+                        } else {
+                            $precision = 1;
+                        }
+                    }
+                    // Drop seconds and subseconds just for comparison, then subtract precision level in seconds to give them the right priority
+                    $ot = (new \DateTime($parse->format('Y-m-d H:iO')))->modify("-{$precision} seconds")->getTimestamp();
+
+                    // While looping through candidates we try to get the oldest datetime with the highest precision
+                    if ($oldestTimestamp === null || $ot < $oldestTimestamp) {
+                        $oldestTimestamp = $ot;
+                        $exifDate = $val;
+                        $winningField = $field;
+                        $parsedDate = $parse;
+                    }
+                }
+            }
         }
 
-        // Filter out January 1, 1904 12:00:00 AM UTC
-        // Exiftool returns this as the date when QuickTimeUTC is set and
-        // the date is set to 0000:00:00 00:00:00
-        if (-2082844800 === $timestamp) {
-            throw new \Exception("Blacklisted date: {$exifDate}");
-        }
-
-        // Force the timezone to be the same as parseTz
-        if ($exifTz) {
-            $parsedDate->setTimezone($exifTz);
+        // Check if we have a date
+        if ($exifDate === null || !$parsedDate instanceof \DateTime) {
+            throw new \Exception('No parsable date found in exif');
         }
 
         return $parsedDate;
     }
 
     /**
-     * Get the date taken from either the file or exif data if available.
+     * Get the date taken and timezone from either the file or exif data if available.
      *
      * @param array<string, mixed> $exif
      */
@@ -241,31 +355,20 @@ class Exif
     {
         try {
             return self::parseExifDate($exif);
-        } catch (\Exception) {
-        } catch (\ValueError) {
+        } catch (\Exception $e) {
+            error_log("parseExifDate failed: " . $e->getMessage());
+        } catch (\ValueError $e) {
+            error_log("parseExifDate ValueError: " . $e->getMessage());
         }
 
-        // Fall back to modification time
-        $dt = new \DateTime('@'.$file->getMtime());
-
-        // Set timezone to system timezone
-        $tz = SystemConfig::get('default_timezone') ?: getenv('TZ') ?: date_default_timezone_get();
-
+        // Fallback to FileModifyDate in UTC to remain consistent with parseExifDate fallback behavior
         try {
-            $dt->setTimezone(new \DateTimeZone($tz));
-        } catch (\Exception) {
-            throw new \Error("FATAL: system timezone is invalid (TZ): {$tz}");
+            $dt = new \DateTime('@'.$file->getMtime());
+        } catch (\Throwable $e) {
+            throw new \Error("FATAL: could not read file modification time: " . $e->getMessage());
         }
-
+        
         return $dt;
-    }
-
-    /**
-     * Convert time to local date in UTC.
-     */
-    public static function forgetTimezone(\DateTime $date): \DateTime
-    {
-        return new \DateTime($date->format('Y-m-d H:i:s'), new \DateTimeZone('UTC'));
     }
 
     /**
@@ -444,7 +547,7 @@ class Exif
         stream_set_blocking(self::$staticPipes[1], false);
     }
 
-    private static function getExifFromLocalPathWithStaticProc(string $path): array
+    private static function getExifFromLocalPathWithStaticProc(string $path, array $extraArgs = []): array
     {
         // This function should not be called if there is no static process
         if (!self::$staticPipes) {
@@ -452,7 +555,9 @@ class Exif
         }
 
         // Create arguments for exiftool
-        $args = implode("\n", self::EXIFTOOL_ARGS);
+        // Merge base args with extra args
+        $allArgs = array_merge(self::EXIFTOOL_ARGS, $extraArgs);
+        $args = implode("\n", $allArgs);
         fwrite(self::$staticPipes[0], "{$path}\n{$args}\n-execute\n");
         fflush(self::$staticPipes[0]);
 
