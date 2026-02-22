@@ -19,6 +19,7 @@ OC.L10N.register(
     "Close" : "Mdel",
     "Unknown" : "Arussin",
     "Continue" : "Continuer",
+    "Shared" : "Yettwabḍa",
     "Search" : "Nadi",
     "Upload" : "Sili",
     "Save" : "Sekles",
