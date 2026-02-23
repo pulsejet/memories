@@ -101,6 +101,8 @@ class MemoriesWidget : AppWidgetProvider() {
 
     companion object {
         const val ACTION_REFRESH = "gallery.memories.widget.ACTION_REFRESH"
+        const val EXTRA_PHOTO_SUBPATH = "gallery.memories.widget.EXTRA_PHOTO_SUBPATH"
+        const val EXTRA_LOCAL_PHOTO_URI = "gallery.memories.widget.EXTRA_LOCAL_PHOTO_URI"
         private const val WORK_NAME = "MemoriesWidgetAutoUpdate"
         private const val WORK_NAME_REFRESH = "MemoriesWidgetRefresh"
         const val UPDATE_INTERVAL_MINUTES = 10L
