@@ -427,6 +427,7 @@ OC.L10N.register(
     "Move right" : "Μετακίνηση προς τα δεξιά",
     "Unidentified location" : "Απροσδιόριστη τοποθεσία",
     "Files without location" : "Αρχεία χωρίς τοποθεσία",
+    "Upload failed" : "Η μεταφόρτωση απέτυχε",
     "Image saved successfully" : "Η εικόνα αποθηκεύτηκε επιτυχώς",
     "Error saving image: {error}" : "Σφάλμα αποθήκευσης εικόνας: {error}",
     "Unsaved changes" : "Μη αποθηκευμένες αλλαγές",
