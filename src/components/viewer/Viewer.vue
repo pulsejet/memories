@@ -89,6 +89,8 @@ import EditFileIcon from 'vue-material-design-icons/FileEdit.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
+import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue';
+import CheckboxBlankCircleOutline from 'vue-material-design-icons/CheckboxBlankCircleOutline.vue';
 
 type IViewerAction = {
   /** Identifier (optional) */
@@ -231,6 +233,13 @@ export default defineComponent({
     /** Get all actions to show */
     actions(): IViewerAction[] {
       return [
+        {
+          id: 'select',
+          name: this.t('memories', 'Select'),
+          icon: (this.currentPhoto?.flag ?? 0) & this.c.FLAG_SELECTED ? CheckCircleIcon : CheckboxBlankCircleOutline,
+          callback: this.toggleSelectCurrent,
+          if: true,
+        },
         {
           id: 'share',
           name: this.t('memories', 'Share'),
@@ -700,6 +709,22 @@ export default defineComponent({
 
       // Remove fragment if closed
       if (!this.isOpen) {
+        const fragments = utils.fragment.list;
+        const hasSelection = fragments.some((f) => f.type === utils.fragment.types.selection);
+
+        // We selected some photos while using the viewer.
+        if (hasSelection) {
+          // Keep the selection by replacing the route.
+          const newFragments = fragments.filter((f) => f.type !== utils.fragment.types.viewer);
+          const hash = utils.fragment.encode(newFragments);
+
+          return _m.router.replace({
+            path: _m.route.path,
+            query: _m.route.query,
+            hash: hash,
+          });
+        }
+
         return utils.fragment.pop(utils.fragment.types.viewer);
       }
     },
@@ -1036,6 +1061,10 @@ export default defineComponent({
     keydown(e: KeyboardEvent) {
       if (e.defaultPrevented) return;
 
+      if (e.key == ' ') {
+        this.toggleSelectCurrent();
+      }
+
       if (e.key === 'Delete') {
         this.deleteCurrent();
       }
@@ -1046,6 +1075,13 @@ export default defineComponent({
 
       if (e.key === 'F' && e.shiftKey) {
         this.refs.outer?.requestFullscreen();
+      }
+    },
+
+    /** Select the current photo */
+    toggleSelectCurrent() {
+      if (this.currentPhoto) {
+        _m.selectionManager.selectPhoto(this.currentPhoto);
       }
     },
 
