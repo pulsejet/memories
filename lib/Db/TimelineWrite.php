@@ -22,6 +22,7 @@ class TimelineWrite
     use TimelineWriteMap;
     use TimelineWriteOrphans;
     use TimelineWritePlaces;
+    use TimelineWriteTags;
 
     public function __construct(
         protected IDBConnection $connection,
@@ -102,6 +103,10 @@ class TimelineWrite
         // Hand off if Live Photo video part
         if ($isvideo && $this->livePhoto->isVideoPart($exif)) {
             return Util::transaction(fn () => $this->livePhoto->processVideoPart($file, $exif));
+        }
+
+        if (!empty($exif['TagsList'])){
+            Util::transaction(fn () => $this->processTags($file, $exif));
         }
 
         // If control reaches here, it's not a Live Photo video part
