@@ -27,4 +27,14 @@
     <string name="widget_refresh">Next photo</string>
     <string name="widget_no_photos">No photos found</string>
     <string name="widget_no_buckets">No folders selected. Open app to configure.</string>
+
+    <string name="widget_config_title">Widget Setup</string>
+    <string name="widget_config_subtitle">Choose how often the photo changes</string>
+    <string name="widget_config_5min">Every 5 minutes</string>
+    <string name="widget_config_15min">Every 15 minutes</string>
+    <string name="widget_config_25min">Every 25 minutes</string>
+    <string name="widget_config_custom">Custom</string>
+    <string name="widget_config_minutes">minutes</string>
+    <string name="widget_config_add">Add Widget</string>
+    <string name="widget_config_invalid">Enter a number (1 or more)</string>
 </resources>

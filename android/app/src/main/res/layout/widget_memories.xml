@@ -15,17 +15,6 @@
         android:clipToOutline="true"
         android:background="@drawable/widget_background" />
 
-    <!-- Top gradient scrim for text readability -->
-    <ImageView
-        android:id="@+id/widget_scrim_top"
-        android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:layout_gravity="top"
-        android:src="@drawable/widget_gradient_scrim_top"
-        android:scaleType="fitXY"
-        android:contentDescription="@null"
-        android:visibility="gone" />
-
     <!-- Bottom gradient scrim for text readability -->
     <ImageView
         android:id="@+id/widget_scrim"
@@ -35,34 +24,6 @@
         android:src="@drawable/widget_gradient_scrim"
         android:scaleType="fitXY"
         android:contentDescription="@null" />
-
-    <!-- Top bar: location text -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="14dp"
-        android:paddingEnd="52dp"
-        android:paddingTop="10dp">
-
-        <!-- Location text (shown only when location is available) -->
-        <TextView
-            android:id="@+id/widget_location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#FFFFFFFF"
-            android:textSize="12sp"
-            android:fontFamily="sans-serif-medium"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:shadowColor="#80000000"
-            android:shadowDx="0"
-            android:shadowDy="1"
-            android:shadowRadius="3"
-            android:visibility="gone" />
-    </LinearLayout>
 
     <!-- Refresh / next photo button (always top-right) -->
     <ImageView
@@ -78,7 +39,7 @@
         android:padding="7dp"
         android:contentDescription="@string/widget_refresh" />
 
-    <!-- Bottom text overlay: "On this day" label + date -->
+    <!-- Bottom text overlay: label, date, location -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -114,6 +75,22 @@
             android:shadowDx="0"
             android:shadowDy="1"
             android:shadowRadius="4"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/widget_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="#B3FFFFFF"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:shadowColor="#80000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="3"
             android:visibility="gone" />
     </LinearLayout>
 

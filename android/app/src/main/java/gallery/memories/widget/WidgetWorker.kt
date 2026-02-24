@@ -107,10 +107,11 @@ class WidgetWorker(
         return Result.success()
     }
 
-    /** Enqueue the next auto-update after [MemoriesWidget.UPDATE_INTERVAL_MINUTES]. */
+    /** Enqueue the next auto-update after the user's chosen interval. */
     private fun scheduleNextUpdate() {
+        val interval = WidgetPrefs.getMinIntervalMinutes(context)
         val request = OneTimeWorkRequestBuilder<WidgetWorker>()
-            .setInitialDelay(MemoriesWidget.UPDATE_INTERVAL_MINUTES, TimeUnit.MINUTES)
+            .setInitialDelay(interval, TimeUnit.MINUTES)
             .build()
 
         WorkManager.getInstance(context).enqueueUniqueWork(
@@ -358,7 +359,8 @@ class WidgetWorker(
             ).execute().use { response ->
                 if (response.code != 200) return null
                 val json = JSONObject(response.body.string())
-                json.optString("address", "").ifBlank { null }
+                val raw = json.optString("address", "").ifBlank { null }
+                raw?.let { simplifyAddress(it) }
             }
         } catch (e: Exception) {
             Log.w(TAG, "Failed to fetch photo location info", e)
@@ -675,7 +677,6 @@ class WidgetWorker(
             views.setViewVisibility(R.id.widget_label, View.GONE)
             views.setViewVisibility(R.id.widget_date, View.GONE)
             views.setViewVisibility(R.id.widget_location, View.GONE)
-            views.setViewVisibility(R.id.widget_scrim_top, View.GONE)
 
             views.setOnClickPendingIntent(
                 R.id.widget_root, buildPhotoPendingIntent(appWidgetId, photoUri = null),
@@ -691,10 +692,8 @@ class WidgetWorker(
         if (!locationText.isNullOrBlank()) {
             views.setTextViewText(R.id.widget_location, "\uD83D\uDCCD $locationText")
             views.setViewVisibility(R.id.widget_location, View.VISIBLE)
-            views.setViewVisibility(R.id.widget_scrim_top, View.VISIBLE)
         } else {
             views.setViewVisibility(R.id.widget_location, View.GONE)
-            views.setViewVisibility(R.id.widget_scrim_top, View.GONE)
         }
     }
 
@@ -822,6 +821,18 @@ class WidgetWorker(
         }
     }
 
+    /**
+     * Simplify a full address to "Area, Country" by taking the first and last parts.
+     * e.g. "Dayeuhkolot, Kabupaten Bandung, West Java, Java, Indonesia" → "Dayeuhkolot, Indonesia"
+     */
+    private fun simplifyAddress(address: String): String {
+        val parts = address.split(",").map { it.trim() }.filter { it.isNotBlank() }
+        return when {
+            parts.size <= 2 -> parts.joinToString(", ")
+            else -> "${parts.first()}, ${parts.last()}"
+        }
+    }
+
     // ════════════════════════════════════════════════════════════════════════
     // Permission helper
     // ════════════════════════════════════════════════════════════════════════
@@ -840,7 +851,7 @@ class WidgetWorker(
     companion object {
         private const val TAG = "MemoriesWidgetWorker"
         private const val CACHE_DIR = "widget_cache"
-        private const val MAX_CACHED = 10
+        private const val MAX_CACHED = 20
         private const val IMAGE_QUALITY = 85
         private const val BITMAP_SIZE = 800
         private const val USER_AGENT = "MemoriesNative/1.0"
