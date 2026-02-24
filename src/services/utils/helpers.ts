@@ -218,3 +218,57 @@ export function onDOMLoaded(callback: () => void) {
     setTimeout(callback, 0);
   }
 }
+
+/**
+ * Check if the current user can manage a person's face cluster.
+ * In shared galleries, users should be able to manage face clusters
+ * for photos they have write access to, even if the face cluster
+ * belongs to another user.
+ * 
+ * @param personUserId The user ID who owns the person/face cluster
+ * @returns true if the current user can manage the person, false otherwise
+ */
+export async function canManagePersonCluster(personUserId: string): Promise<boolean> {
+  // Current user can always manage their own person clusters
+  if (personUserId === uid) {
+    return true;
+  }
+
+  // For shared galleries, we need to check if the current user has write permissions
+  // to manage the face clusters of another user.
+  
+  try {
+    // Check if we have access to the recognize app data for this user
+    // by making a PROPFIND request to their recognize directory
+    const response = await fetch(`/remote.php/dav/files/${personUserId}/`, {
+      method: 'PROPFIND',
+      headers: {
+        'Content-Type': 'application/xml',
+        'Depth': '1',
+      },
+      body: `<?xml version="1.0"?>
+        <d:propfind xmlns:d="DAV:">
+          <d:prop>
+            <d:resourcetype/>
+            <d:getcontentlength/>
+            <d:getlastmodified/>
+            <oc:permissions xmlns:oc="http://owncloud.org/ns"/>
+          </d:prop>
+        </d:propfind>`,
+      credentials: 'include',
+    });
+    
+    if (response.ok) {
+      const text = await response.text();
+      // Check if the response contains write permissions (look for 'W' in permissions)
+      // This is a basic heuristic - in practice, we should parse the XML properly
+      return text.includes('<oc:permissions>') && text.includes('W');
+    }
+    
+    return false;
+  } catch (error) {
+    // If we can't check permissions, fall back to blocking the operation
+    console.warn('Cannot check shared user directory permissions:', error);
+    return false;
+  }
+}

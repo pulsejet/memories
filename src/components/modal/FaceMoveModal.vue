@@ -59,7 +59,7 @@ export default defineComponent({
   },
 
   methods: {
-    open(photos: IPhoto[]) {
+    async open(photos: IPhoto[]) {
       if (this.photos.length) {
         // is processing
         return;
@@ -67,7 +67,7 @@ export default defineComponent({
 
       // check ownership
       const user = this.$route.params.user || '';
-      if (this.$route.params.user !== utils.uid) {
+      if (!(await utils.canManagePersonCluster(user))) {
         showError(
           this.t('memories', 'Only user "{user}" can update this person', {
             user,
