@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@android:color/black">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/config_title"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/input_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/config_url_hint"
+            android:inputType="textUri"
+            android:textColor="@android:color/white"
+            android:textColorHint="#999999"
+            android:textSize="12sp"
+            android:background="#222222"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/input_username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/config_username_hint"
+            android:inputType="text"
+            android:textColor="@android:color/white"
+            android:textColorHint="#999999"
+            android:textSize="12sp"
+            android:background="#222222"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/input_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/config_password_hint"
+            android:inputType="textPassword"
+            android:textColor="@android:color/white"
+            android:textColorHint="#999999"
+            android:textSize="12sp"
+            android:background="#222222"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp" />
+
+        <CheckBox
+            android:id="@+id/check_trust_all"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/config_trust_all"
+            android:textColor="@android:color/white"
+            android:textSize="11sp"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/config_save"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/status_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#999999"
+            android:textSize="11sp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</ScrollView>
