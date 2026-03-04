@@ -49,6 +49,7 @@ OC.L10N.register(
     "Text" : "Aḍris",
     "Size" : "Teɣzi",
     "Setup" : "Sbadu",
+    "No items" : "Ulac iferdisen",
     "Yes" : "Ih",
     "No" : "Uhu",
     "Choose {file}" : "Fren {file}",
