@@ -53,7 +53,6 @@
             <TimelineIcon v-else :size="20" />
           </template>
         </NcActionButton>
-
       </NcActions>
 
       <NcDateTimePicker
@@ -196,6 +195,5 @@ export default defineComponent({
     align-items: center;
     gap: 10px; // Add spacing between actions and progress bar
   }
-
 }
 </style>
