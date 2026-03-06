@@ -1,10 +1,10 @@
 <template>
   <NcDateTimePicker
-    v-model="selectedDate"
+    :value="new Date()"
     type="date"
     :clearable="false"
     :placeholder="t('memories', 'Go to date')"
-    @change="onDateSelected"
+    @update:value="onDateSelected"
   />
 </template>
 
@@ -19,12 +19,6 @@ export default defineComponent({
   name: 'GoToDateMenuItem',
   components: {
     NcDateTimePicker,
-  },
-
-  data() {
-    return {
-      selectedDate: new Date(),
-    };
   },
 
   methods: {

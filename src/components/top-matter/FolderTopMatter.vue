@@ -57,11 +57,11 @@
       </NcActions>
 
       <NcDateTimePicker
-        v-model="goToDate"
+        :value="new Date()"
         type="date"
         :clearable="false"
         :placeholder="t('memories', 'Go to date')"
-        @change="onDateSelected"
+        @update:value="onDateSelected"
       />
     </div>
   </div>
@@ -106,12 +106,6 @@ export default defineComponent({
   },
 
   mixins: [UserConfig],
-
-  data() {
-    return {
-      goToDate: new Date(),
-    };
-  },
 
   computed: {
     list(): {
