@@ -54,13 +54,15 @@
           </template>
         </NcActionButton>
 
-        <NcActionButton :aria-label="t('memories', 'Go to date')" @click="openDatePicker()" close-after-click>
-          {{ t('memories', 'Go to date') }}
-          <template #icon> <CalendarSearchIcon :size="20" /> </template>
-        </NcActionButton>
       </NcActions>
 
-      <input ref="dateInput" type="date" class="date-input-hidden" @change="onDateSelected" />
+      <NcDateTimePicker
+        v-model="goToDate"
+        type="date"
+        :clearable="false"
+        :placeholder="t('memories', 'Go to date')"
+        @change="onDateSelected"
+      />
     </div>
   </div>
 </template>
@@ -74,6 +76,7 @@ const NcBreadcrumbs = () => import('@nextcloud/vue/dist/Components/NcBreadcrumbs
 const NcBreadcrumb = () => import('@nextcloud/vue/dist/Components/NcBreadcrumb.js');
 import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcDateTimePicker from '@nextcloud/vue/dist/Components/NcDateTimePicker.js';
 import PublicUploadHandler from '@components/upload/PublicUploadHandler.vue';
 
 import * as utils from '@services/utils';
@@ -84,7 +87,6 @@ import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import TimelineIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import FoldersIcon from 'vue-material-design-icons/FolderMultiple.vue';
 import UploadIcon from 'vue-material-design-icons/Upload.vue';
-import CalendarSearchIcon from 'vue-material-design-icons/CalendarSearch.vue';
 
 export default defineComponent({
   name: 'FolderTopMatter',
@@ -94,16 +96,22 @@ export default defineComponent({
     NcBreadcrumb,
     NcActions,
     NcActionButton,
+    NcDateTimePicker,
     PublicUploadHandler,
     HomeIcon,
     ShareIcon,
     TimelineIcon,
     FoldersIcon,
     UploadIcon,
-    CalendarSearchIcon,
   },
 
   mixins: [UserConfig],
+
+  data() {
+    return {
+      goToDate: new Date(),
+    };
+  },
 
   computed: {
     list(): {
@@ -171,33 +179,9 @@ export default defineComponent({
       return (this.$refs.uploadHandler as InstanceType<typeof PublicUploadHandler>) || null;
     },
 
-    openDatePicker() {
-      const input = this.$refs.dateInput as HTMLInputElement;
-      const event = { result: null as { min: Date; max: Date } | null };
-      utils.bus.emit('memories:timeline:getDateRange', event);
-      if (event.result) {
-        input.min = event.result.min.toISOString().split('T')[0];
-        input.max = event.result.max.toISOString().split('T')[0];
-      }
-
-      // Temporarily make visible for showPicker to work
-      input.style.width = '1px';
-      input.style.height = '1px';
-      try {
-        input.showPicker();
-      } catch {
-        input.click();
-      }
-      input.style.width = '';
-      input.style.height = '';
-    },
-
-    onDateSelected(event: Event) {
-      const input = event.target as HTMLInputElement;
-      if (!input.value) return;
-      const date = new Date(input.value + 'T00:00:00Z');
+    onDateSelected(date: Date) {
+      if (!date) return;
       utils.bus.emit('memories:timeline:scrollToDate', date);
-      input.value = '';
     },
   },
 });
@@ -219,14 +203,5 @@ export default defineComponent({
     gap: 10px; // Add spacing between actions and progress bar
   }
 
-  .date-input-hidden {
-    position: absolute;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-    border: 0;
-    padding: 0;
-    margin: 0;
-  }
 }
 </style>
