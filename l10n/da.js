@@ -82,7 +82,7 @@ OC.L10N.register(
     "Oldest" : "Ældste",
     "Title" : "Titel",
     "Description" : "Beskrivelse",
-    "Label" : "Label",
+    "Label" : "Mærkat",
     "Copyright" : "Ophavsret",
     "Empty" : "Tom",
     "Reset" : "Nulstil",
