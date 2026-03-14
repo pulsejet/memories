@@ -1,0 +1,52 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'gallery.memories.wear'
+    compileSdk = 36
+
+    defaultConfig {
+        applicationId "gallery.memories.wear"
+        minSdk 30
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+}
+
+dependencies {
+    // Wear OS Tiles
+    implementation 'androidx.wear.tiles:tiles:1.4.1'
+    implementation 'androidx.wear.tiles:tiles-material:1.4.1'
+    implementation 'androidx.wear.protolayout:protolayout:1.2.1'
+    implementation 'androidx.wear.protolayout:protolayout-material:1.2.1'
+    implementation 'androidx.wear.protolayout:protolayout-expression:1.2.1'
+
+    // Kotlin / Coroutines
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.9.0'
+
+    // WorkManager for periodic photo refresh
+    implementation 'androidx.work:work-runtime-ktx:2.9.1'
+
+    // OkHttp for server communication
+    implementation 'com.squareup.okhttp3:okhttp:5.3.2'
+
+    // AndroidX core
+    implementation 'androidx.core:core-ktx:1.17.0'
+}
