@@ -61,9 +61,9 @@ export default defineComponent({
   }),
 
   methods: {
-    open() {
+    async open() {
       const user = this.$route.params.user || '';
-      if (this.$route.params.user !== utils.uid) {
+      if (!(await utils.canManagePersonCluster(user))) {
         showError(
           this.t('memories', 'Only user "{user}" can update this person', {
             user,
