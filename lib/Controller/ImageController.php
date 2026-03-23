@@ -117,10 +117,9 @@ class ImageController extends GenericApiController
             $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
             // For checking max previews
-            $previewRoot = new \OC\Preview\Storage\Root(
-                \OC::$server->get(IRootFolder::class),
-                \OC::$server->get(\OC\SystemConfig::class),
-            );
+
+            /** @var \OC\Preview\PreviewService */
+            $previewService = \OC::$server->get(\OC\Preview\PreviewService::class);
 
             // stream the response
             $out->setHeader('Content-Type: application/octet-stream');
@@ -134,13 +133,9 @@ class ImageController extends GenericApiController
 
                 try {
                     // Make sure max preview exists
-                    $file = $this->fs->getUserFile($fileid);
-                    $fileId = (string) $file->getId();
-                    $folder = $previewRoot->getFolder($fileId);
                     $hasMax = false;
-                    foreach ($folder->getDirectoryListing() as $preview) {
-                        $name = $preview->getName();
-                        if (str_contains($name, '-max')) {
+                    foreach ($previewService->getAvailablePreviewsForFile($fileid) as $preview) {
+                        if ($preview->isMax()) {
                             $hasMax = true;
 
                             break;
@@ -151,6 +146,7 @@ class ImageController extends GenericApiController
                     }
 
                     // Add this preview to the response
+                    $file = $this->fs->getUserFile($fileid);
                     $preview = $previewManager->getPreview($file, $x, $y, !$a, \OCP\IPreview::MODE_FILL);
                     $content = $preview->getContent();
                     if (empty($content)) {
