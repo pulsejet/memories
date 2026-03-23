@@ -37,7 +37,8 @@ test.describe('Open', () => {
       .locator(
         [
           '.oc-dialog button.error', // NC <=29
-          '.dialog .button-vue--vue-primary', // NC >=30
+          '.dialog .button-vue--vue-primary', // NC 30-32
+          '.dialog .button-vue--primary', // NC >=33
         ].join(', '),
       )
       .click();

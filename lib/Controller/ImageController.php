@@ -41,8 +41,7 @@ class ImageController extends GenericApiController
 {
     /**
      * Get preview of image.
-     */
-    /**
+     *
      * @psalm-param 'cover'|'fill' $mode
      */
     #[NoAdminRequired]
