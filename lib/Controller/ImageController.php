@@ -33,7 +33,7 @@ use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\Files\IRootFolder;
+use OCP\Files\AppData\IAppDataFactory;
 
 const IMAGICK_SAFE = '/^image\/(x-)?(png|jpeg|gif|bmp|tiff|webp|hei(f|c)|avif|dcraw)$/';
 
@@ -41,6 +41,8 @@ class ImageController extends GenericApiController
 {
     /**
      * Get preview of image.
+     *
+     * @psalm-param 'cover'|'fill' $mode
      */
     #[NoAdminRequired]
     #[NoCSRFRequired]
@@ -117,10 +119,7 @@ class ImageController extends GenericApiController
             $previewManager = \OC::$server->get(\OCP\IPreview::class);
 
             // For checking max previews
-            $previewRoot = new \OC\Preview\Storage\Root(
-                \OC::$server->get(IRootFolder::class),
-                \OC::$server->get(\OC\SystemConfig::class),
-            );
+            $previewRoot = \OC::$server->get(IAppDataFactory::class)->get('preview');
 
             // stream the response
             $out->setHeader('Content-Type: application/octet-stream');
@@ -510,10 +509,7 @@ class ImageController extends GenericApiController
     private function refreshPreviews(\OCP\Files\File $file): void
     {
         try {
-            $previewRoot = new \OC\Preview\Storage\Root(
-                \OC::$server->get(IRootFolder::class),
-                \OC::$server->get(\OC\SystemConfig::class),
-            );
+            $previewRoot = \OC::$server->get(IAppDataFactory::class)->get('preview');
 
             // Delete the preview folder
             $fileId = (string) $file->getId();
