@@ -509,14 +509,14 @@ class ImageController extends GenericApiController
     private function refreshPreviews(\OCP\Files\File $file): void
     {
         try {
-            $previewRoot = new \OC\Preview\Storage\Root(
-                \OC::$server->get(IRootFolder::class),
-                \OC::$server->get(\OC\SystemConfig::class),
-            );
+            /** @var \OC\Preview\PreviewService */
+            $previewService = \OC::$server->get(\OC\Preview\PreviewService::class);
 
-            // Delete the preview folder
-            $fileId = (string) $file->getId();
-            $previewRoot->getFolder($fileId)->delete();
+            // Delete all available previews
+            $fileId = $file->getId();
+            foreach ($previewService->getAvailablePreviewsForFile($fileId) as $preview) {
+                $previewService->deletePreview($preview);
+            }
 
             // Get the preview to regenerate
             $previewManager = \OC::$server->get(\OCP\IPreview::class);
