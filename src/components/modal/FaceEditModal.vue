@@ -75,8 +75,9 @@ export default defineComponent({
   },
 
   methods: {
-    open() {
-      if (this.user !== utils.uid) {
+    async open() {
+      // Check if current user can manage this person's cluster
+      if (!(await utils.canManagePersonCluster(this.user))) {
         showError(this.t('memories', 'Only user "{user}" can update this person', { user: this.user }));
         return;
       }
