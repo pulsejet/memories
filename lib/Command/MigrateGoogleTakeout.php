@@ -40,12 +40,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class MigrateGoogleTakeout extends Command
+final class MigrateGoogleTakeout extends Command
 {
     protected const MIGRATOR_VERSION = 3;
     protected const MIGRATED_KEY = 'memoriesMigratorVersion';
 
+    /** @psalm-suppress PropertyNotSetInConstructor */
     protected OutputInterface $output;
+
+    /** @psalm-suppress PropertyNotSetInConstructor */
     protected InputInterface $input;
 
     // Stats

@@ -37,21 +37,11 @@
                 <directory name="lib/" />
             </errorLevel>
         </PossiblyFalseArgument>
-        <PropertyNotSetInConstructor>
-            <errorLevel type="suppress">
-                <directory name="lib/Command" />
-            </errorLevel>
-        </PropertyNotSetInConstructor>
         <RiskyTruthyFalsyComparison>
             <errorLevel type="suppress">
                 <directory name="lib/" />
             </errorLevel>
         </RiskyTruthyFalsyComparison>
-        <ClassMustBeFinal>
-            <errorLevel type="suppress">
-                <directory name="lib/" />
-            </errorLevel>
-        </ClassMustBeFinal>
     </issueHandlers>
     <forbiddenFunctions>
         <function name="var_dump" />

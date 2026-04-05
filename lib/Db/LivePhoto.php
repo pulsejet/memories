@@ -9,7 +9,7 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
 
-class LivePhoto
+final class LivePhoto
 {
     public function __construct(private IDBConnection $connection) {}
 

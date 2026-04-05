@@ -9,7 +9,7 @@ use OCA\Memories\Settings\SystemConfig;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 
-class AddMissingIndices
+final class AddMissingIndices
 {
     /**
      * Add missing indices to the database schema.

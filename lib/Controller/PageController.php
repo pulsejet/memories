@@ -17,7 +17,7 @@ use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IRequest;
 
-class PageController extends Controller
+final class PageController extends Controller
 {
     public function __construct(
         IRequest $request,

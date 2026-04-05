@@ -41,7 +41,7 @@ use OCP\User\Events\UserLoggedOutEvent;
 
 const AUTH_HEADER = 'HTTP_AUTHORIZATION';
 
-class Application extends App implements IBootstrap
+final class Application extends App implements IBootstrap
 {
     public const APPNAME = 'memories';
 

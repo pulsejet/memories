@@ -8,7 +8,7 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\DB\QueryBuilder\IQueryFunction;
 use OCP\IDBConnection;
 
-class SQL
+final class SQL
 {
     /**
      * @return never

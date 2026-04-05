@@ -7,7 +7,7 @@ namespace OCA\Memories;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 
-class Exceptions
+final class Exceptions
 {
     public static function Generic(\Exception $e, int $status = Http::STATUS_INTERNAL_SERVER_ERROR): HttpResponseException
     {

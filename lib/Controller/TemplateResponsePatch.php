@@ -7,7 +7,7 @@ namespace OCA\Memories\Controller;
 use OCP\AppFramework\Http\TemplateResponse;
 
 /** @psalm-suppress MissingTemplateParam */
-class TemplateResponsePatch extends TemplateResponse
+final class TemplateResponsePatch extends TemplateResponse
 {
     #[\Override]
     public function render(): string

@@ -31,7 +31,7 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\Share\IManager;
 use OCP\Share\IShare;
 
-class ShareController extends GenericApiController
+final class ShareController extends GenericApiController
 {
     /**
      * Get the tokens of a node shared using an external link.

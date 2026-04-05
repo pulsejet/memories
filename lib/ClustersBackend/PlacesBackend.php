@@ -30,7 +30,7 @@ use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
-class PlacesBackend extends Backend
+final class PlacesBackend extends Backend
 {
     public function __construct(
         protected TimelineQuery $tq,

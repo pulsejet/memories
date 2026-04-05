@@ -29,7 +29,7 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 
-class MapController extends GenericApiController
+final class MapController extends GenericApiController
 {
     #[NoAdminRequired]
     public function clusters(string $bounds, string $zoom): Http\Response

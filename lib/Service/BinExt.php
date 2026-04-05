@@ -7,7 +7,7 @@ namespace OCA\Memories\Service;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 
-class BinExt
+final class BinExt
 {
     public const EXIFTOOL_VER = '13.44';
     public const GOVOD_VER = '0.2.7';

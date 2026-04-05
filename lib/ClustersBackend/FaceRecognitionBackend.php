@@ -31,7 +31,7 @@ use OCP\Files\SimpleFS\ISimpleFile;
 use OCP\IAppConfig;
 use OCP\IRequest;
 
-class FaceRecognitionBackend extends Backend
+final class FaceRecognitionBackend extends Backend
 {
     use PeopleBackendUtils;
 

@@ -31,7 +31,7 @@ use OCP\Migration\SimpleMigrationStep;
 /**
  * Auto-generated migration step: Please modify to your needs!
  */
-class Version401000Date20230118043813 extends SimpleMigrationStep
+final class Version401000Date20230118043813 extends SimpleMigrationStep
 {
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure

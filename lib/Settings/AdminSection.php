@@ -9,7 +9,7 @@ use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\Settings\IIconSection;
 
-class AdminSection implements IIconSection
+final class AdminSection implements IIconSection
 {
     public function __construct(
         private IL10N $l,

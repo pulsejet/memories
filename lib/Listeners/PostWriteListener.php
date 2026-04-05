@@ -33,7 +33,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @template-implements IEventListener<Event>
  */
-class PostWriteListener implements IEventListener
+final class PostWriteListener implements IEventListener
 {
     public function __construct(
         private TimelineWrite $tw,

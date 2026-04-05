@@ -28,7 +28,7 @@ use OCP\IUserSession;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
 
-class PublicController extends AuthPublicShareController
+final class PublicController extends AuthPublicShareController
 {
     /** @psalm-suppress PropertyNotSetInConstructor */
     protected IShare $share;

@@ -25,7 +25,7 @@ use OCP\IURLGenerator;
 use OCP\IUserSession;
 use OCP\Util;
 
-class PublicAlbumController extends Controller
+final class PublicAlbumController extends Controller
 {
     public function __construct(
         IRequest $request,

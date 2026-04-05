@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-class ExifFields
+final class ExifFields
 {
     /**
      * This is the list of fields that will be STORED in the databse as JSON.

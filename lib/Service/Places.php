@@ -17,7 +17,7 @@ const APPROX_PLACES = 726000;
 
 const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.4/planet_coarse_boundaries.zip';
 
-class Places
+final class Places
 {
     /**
      * Number of places to process in a single transaction.
@@ -25,9 +25,9 @@ class Places
     public int $txnSize = 50;
 
     public function __construct(
-        protected IConfig $config,
-        protected IDBConnection $connection,
-        protected TimelineWrite $tw,
+        private IConfig $config,
+        private IDBConnection $connection,
+        private TimelineWrite $tw,
     ) {}
 
     /**
@@ -432,7 +432,7 @@ class Places
     /**
      * Create database tables and indices.
      */
-    protected function setupDatabase(int $gis): void
+    private function setupDatabase(int $gis): void
     {
         try {
             // Drop the table if it exists

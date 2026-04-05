@@ -10,9 +10,9 @@ use OCP\IConfig;
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 
-class Repair implements IRepairStep
+final class Repair implements IRepairStep
 {
-    public function __construct(protected IConfig $config) {}
+    public function __construct(private IConfig $config) {}
 
     #[\Override]
     public function getName(): string

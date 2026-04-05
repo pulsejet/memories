@@ -43,7 +43,7 @@ use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Share\IShare;
 
-class FsManager
+final class FsManager
 {
     private ICache $nomediaCache;
 

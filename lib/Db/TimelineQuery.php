@@ -9,7 +9,7 @@ use OCP\IDBConnection;
 use OCP\IRequest;
 use OCP\IUserManager;
 
-class TimelineQuery
+final class TimelineQuery
 {
     use TimelineQueryDays;
     use TimelineQueryFilters;

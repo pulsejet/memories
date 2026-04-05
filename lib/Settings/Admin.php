@@ -9,7 +9,7 @@ use OCA\Memories\Controller\PageController;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\Settings\ISettings;
 
-class Admin implements ISettings
+final class Admin implements ISettings
 {
     public function __construct() {}
 

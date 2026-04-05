@@ -36,7 +36,7 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
 use OCP\IRequest;
 
-class OtherController extends GenericApiController
+final class OtherController extends GenericApiController
 {
     /**
      * update preferences (user setting).

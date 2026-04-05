@@ -36,7 +36,7 @@ use OCP\AppFramework\Http\JSONResponse;
 
 const IMAGICK_SAFE = '/^image\/(x-)?(png|jpeg|gif|bmp|tiff|webp|hei(f|c)|avif|dcraw)$/';
 
-class ImageController extends GenericApiController
+final class ImageController extends GenericApiController
 {
     /**
      * Get preview of image.

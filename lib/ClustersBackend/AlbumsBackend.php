@@ -31,7 +31,7 @@ use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
-class AlbumsBackend extends Backend
+final class AlbumsBackend extends Backend
 {
     public function __construct(
         protected AlbumsQuery $albumsQuery,

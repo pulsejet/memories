@@ -45,7 +45,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\ConsoleSectionOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Index
+final class Index
 {
     public ?OutputInterface $output = null;
     public ?ConsoleSectionOutput $section = null;
@@ -63,14 +63,14 @@ class Index
     private static ?array $mimeList = null;
 
     public function __construct(
-        protected IRootFolder $rootFolder,
-        protected TimelineWrite $tw,
-        protected IDBConnection $db,
-        protected ITempManager $tempManager,
-        protected LoggerInterface $logger,
-        protected IAppManager $appManager,
-        protected SetupManager $setupManager,
-        protected IUserManager $userManager,
+        private IRootFolder $rootFolder,
+        private TimelineWrite $tw,
+        private IDBConnection $db,
+        private ITempManager $tempManager,
+        private LoggerInterface $logger,
+        private IAppManager $appManager,
+        private SetupManager $setupManager,
+        private IUserManager $userManager,
     ) {}
 
     /**

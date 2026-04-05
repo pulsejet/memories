@@ -15,7 +15,7 @@ use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
 use OCP\IAppConfig;
 
-class Util
+final class Util
 {
     use UtilController;
 

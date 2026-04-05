@@ -6,13 +6,13 @@ namespace OCA\Memories\Db;
 
 use OCP\Files\FileInfo;
 
-class TimelineRoot
+final class TimelineRoot
 {
     /** @var array<int, \OCP\Files\FileInfo> */
-    protected array $folders = [];
+    private array $folders = [];
 
     /** @var array<int, string> */
-    protected array $folderPaths = [];
+    private array $folderPaths = [];
 
     /**
      * Add a folder to the root.

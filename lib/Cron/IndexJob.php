@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 const MAX_RUN_TIME = 300; // seconds
 const INTERVAL = 900; // seconds (don't set this too low)
 
-class IndexJob extends TimedJob
+final class IndexJob extends TimedJob
 {
     private bool $_hasError = false;
 

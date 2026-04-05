@@ -32,7 +32,7 @@ use OCP\Migration\SimpleMigrationStep;
 /**
  * Auto-generated migration step: Please modify to your needs!
  */
-class Version200000Date20220924015634 extends SimpleMigrationStep
+final class Version200000Date20220924015634 extends SimpleMigrationStep
 {
     /** @var IDBConnection */
     private $dbc;

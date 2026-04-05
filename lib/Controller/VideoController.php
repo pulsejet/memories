@@ -37,7 +37,7 @@ use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\File;
 
-class VideoController extends GenericApiController
+final class VideoController extends GenericApiController
 {
     /**
      * Transcode a video to HLS by proxy.

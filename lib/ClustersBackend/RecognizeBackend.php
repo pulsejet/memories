@@ -30,7 +30,7 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\SimpleFS\ISimpleFile;
 use OCP\IRequest;
 
-class RecognizeBackend extends Backend
+final class RecognizeBackend extends Backend
 {
     use PeopleBackendUtils;
 

@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places', 'memories_failures'];
 const TRUNCATE_TABLES = ['memories_mapclusters'];
 
-class TimelineWrite
+final class TimelineWrite
 {
     use TimelineWriteFailures;
     use TimelineWriteMap;

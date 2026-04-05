@@ -29,7 +29,7 @@ use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
-class TagsBackend extends Backend
+final class TagsBackend extends Backend
 {
     public function __construct(
         protected TimelineQuery $tq,

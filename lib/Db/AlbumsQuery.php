@@ -9,7 +9,7 @@ use OCA\Memories\ClustersBackend\Covers;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
-class AlbumsQuery
+final class AlbumsQuery
 {
     public function __construct(private IDBConnection $connection) {}
 

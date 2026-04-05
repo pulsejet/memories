@@ -13,7 +13,7 @@ use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\Files\FileInfo;
 use OCP\Files\Folder;
 
-class FoldersController extends GenericApiController
+final class FoldersController extends GenericApiController
 {
     #[NoAdminRequired]
     #[PublicPage]

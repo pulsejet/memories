@@ -35,7 +35,7 @@ use OCP\ISession;
 use OCP\ITempManager;
 use OCP\Security\ISecureRandom;
 
-class DownloadController extends GenericApiController
+final class DownloadController extends GenericApiController
 {
     /**
      * Request to download one or more files.

@@ -29,7 +29,7 @@ use OCP\ISession;
 /**
  * @template-implements IEventListener<Event>
  */
-class BeforeTemplateListener implements IEventListener
+final class BeforeTemplateListener implements IEventListener
 {
     public function __construct(private ISession $session) {}
 

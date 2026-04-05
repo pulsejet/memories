@@ -29,9 +29,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class PlacesSetup extends Command
+final class PlacesSetup extends Command
 {
+    /** @psalm-suppress PropertyNotSetInConstructor */
     protected OutputInterface $output;
+
+    /** @psalm-suppress PropertyNotSetInConstructor */
     protected InputInterface $input;
 
     public function __construct(protected Places $places)
