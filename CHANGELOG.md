@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v8.0.0] - 2026-04-04
+
+- **Update**: Compatibility with Nextcloud 33
+
 ## [v7.8.0] - 2026-01-25
 
 - **Feature**: Add download link to folders ([#1552](https://github.com/pulsejet/memories/pull/1552))
