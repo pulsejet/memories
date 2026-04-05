@@ -74,6 +74,7 @@ class Index extends Command
         parent::__construct();
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -89,6 +90,7 @@ class Index extends Command
         ;
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         /** @var \Symfony\Component\Console\Output\ConsoleOutputInterface $output */

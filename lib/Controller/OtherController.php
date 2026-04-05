@@ -55,7 +55,7 @@ class OtherController extends GenericApiController
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
             }
 
-            $this->config->setUserValue(Util::getUID(), Application::APPNAME, $key, $value);
+            $this->userConfig->setValueString(Util::getUID(), Application::APPNAME, $key, $value);
 
             return new JSONResponse([], Http::STATUS_OK);
         });
@@ -72,13 +72,13 @@ class OtherController extends GenericApiController
             // get user if logged in
             try {
                 $uid = Util::getUID();
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 $uid = null;
             }
 
             // helper function to get user config values
-            $getAppConfig = function (string $key, mixed $default) use ($uid): mixed {
-                return $this->config->getUserValue($uid, Application::APPNAME, $key, $default);
+            $getAppConfig = function (string $key, string $default) use ($uid): string {
+                return $uid ? $this->userConfig->getValueString($uid, Application::APPNAME, $key, $default) : $default;
             };
 
             return new JSONResponse([
@@ -109,17 +109,17 @@ class OtherController extends GenericApiController
                 'livephoto_autoplay' => 'true' === $getAppConfig('livephotoAutoplay', 'false'),
                 'livephoto_loop' => 'true' === $getAppConfig('livephotoLoop', 'false'),
                 'video_loop' => 'true' === $getAppConfig('videoLoop', 'false'),
-                'sidebar_filepath' => 'true' === $getAppConfig('sidebarFilepath', false),
+                'sidebar_filepath' => 'true' === $getAppConfig('sidebarFilepath', 'false'),
 
                 // folder settings
                 'folders_path' => $getAppConfig('foldersPath', '/'),
-                'show_hidden_folders' => 'true' === $getAppConfig('showHidden', false),
-                'sort_folder_month' => 'true' === $getAppConfig('sortFolderMonth', false),
+                'show_hidden_folders' => 'true' === $getAppConfig('showHidden', 'false'),
+                'sort_folder_month' => 'true' === $getAppConfig('sortFolderMonth', 'false'),
 
                 // album settings
                 'sort_album_month' => 'true' === $getAppConfig('sortAlbumMonth', 'true'),
-                'show_hidden_albums' => 'true' === $getAppConfig('showHiddenAlbums', false),
-                'album_list_sort' => $getAppConfig('album_list_sort', 3),
+                'show_hidden_albums' => 'true' === $getAppConfig('showHiddenAlbums', 'false'),
+                'album_list_sort' => (int) $getAppConfig('album_list_sort', '3'),
             ], Http::STATUS_OK);
         });
     }
@@ -168,7 +168,7 @@ class OtherController extends GenericApiController
 
                     // Get relative URL to JS web root of the app
                     $prefix = \OC::$server->get(\OCP\IURLGenerator::class)->linkTo('memories', 'js/memories-main.js');
-                    $prefix = preg_replace('/memories-main\.js.*$/', '', $prefix);
+                    $prefix = preg_replace('/memories-main\.js.*$/', '', $prefix) ?? $prefix;
 
                     // Make sure prefix starts and ends with a slash
                     $prefix = '/'.ltrim($prefix, '/');

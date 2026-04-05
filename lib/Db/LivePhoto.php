@@ -108,7 +108,7 @@ class LivePhoto
                             // If we can't find it, use the last length seen
                             $videoLength = $extExif[str_replace('Semantic', 'Length', $key)] ?? $lastLength;
                             if (\is_int($videoLength) && $videoLength > 0) {
-                                $videoOffset = $file->getSize() - $videoLength;
+                                $videoOffset = (int) $file->getSize() - $videoLength;
 
                                 return "self__traileroffset={$videoOffset}";
                             }

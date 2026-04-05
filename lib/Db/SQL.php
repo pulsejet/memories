@@ -141,6 +141,7 @@ class SQL
         if (method_exists($connection, 'truncateTable')) {
             $connection->truncateTable($table, $cascade);
         } else {
+            /** @psalm-suppress DeprecatedMethod */
             $sql = $connection->getDatabasePlatform()->getTruncateTableSQL('*PREFIX*'.$table, $cascade);
             $connection->executeStatement($sql);
         }

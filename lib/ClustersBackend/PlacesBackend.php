@@ -37,21 +37,25 @@ class PlacesBackend extends Backend
         protected IRequest $request,
     ) {}
 
+    #[\Override]
     public static function appName(): string
     {
         return 'Places';
     }
 
+    #[\Override]
     public static function clusterType(): string
     {
         return 'places';
     }
 
+    #[\Override]
     public function isEnabled(): bool
     {
         return SystemConfig::gisType() > 0;
     }
 
+    #[\Override]
     public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
     {
         $locId = $this->request->getParam('places');
@@ -72,6 +76,7 @@ class PlacesBackend extends Backend
         ));
     }
 
+    #[\Override]
     public function getClustersInternal(int $fileid = 0): array
     {
         if ($fileid) {
@@ -193,11 +198,13 @@ class PlacesBackend extends Backend
         return $places;
     }
 
+    #[\Override]
     public static function getClusterId(array $cluster): int|string
     {
         return $cluster['osm_id'];
     }
 
+    #[\Override]
     public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         $query = $this->tq->getBuilder();
@@ -233,6 +240,7 @@ class PlacesBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
+    #[\Override]
     public function getClusterIdFrom(array $photo): int
     {
         return (int) $photo['osm_id'];

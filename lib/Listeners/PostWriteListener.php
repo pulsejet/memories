@@ -40,6 +40,7 @@ class PostWriteListener implements IEventListener
         private LoggerInterface $logger,
     ) {}
 
+    #[\Override]
     public function handle(Event $event): void
     {
         if (!($event instanceof NodeWrittenEvent)

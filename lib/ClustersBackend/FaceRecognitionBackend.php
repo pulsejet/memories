@@ -41,22 +41,26 @@ class FaceRecognitionBackend extends Backend
         protected IAppConfig $appConfig,
     ) {}
 
+    #[\Override]
     public static function appName(): string
     {
         return 'Face Recognition';
     }
 
+    #[\Override]
     public static function clusterType(): string
     {
         return 'facerecognition';
     }
 
+    #[\Override]
     public function isEnabled(): bool
     {
         return Util::facerecognitionIsInstalled()
                && Util::facerecognitionIsEnabled();
     }
 
+    #[\Override]
     public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
     {
         $personStr = (string) $this->request->getParam('facerecognition');
@@ -102,6 +106,7 @@ class FaceRecognitionBackend extends Backend
         }
     }
 
+    #[\Override]
     public function transformDayPost(array &$row): void
     {
         // Differentiate Recognize queries from Face Recognition
@@ -120,6 +125,7 @@ class FaceRecognitionBackend extends Backend
         unset($row['face_x'], $row['face_y'], $row['face_width'], $row['face_height'], $row['image_height'], $row['image_width']);
     }
 
+    #[\Override]
     public function getClustersInternal(int $fileid = 0): array
     {
         $faces = array_merge(
@@ -136,11 +142,13 @@ class FaceRecognitionBackend extends Backend
         return $faces;
     }
 
+    #[\Override]
     public static function getClusterId(array $cluster): int|string
     {
         return $cluster['id'];
     }
 
+    #[\Override]
     public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         $query = $this->tq->getBuilder();
@@ -198,6 +206,7 @@ class FaceRecognitionBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
+    #[\Override]
     public function sortPhotosForPreview(array &$photos): void
     {
         // Convert to recognize format (percentage position-size)
@@ -211,21 +220,25 @@ class FaceRecognitionBackend extends Backend
         $this->sortByScores($photos);
     }
 
+    #[\Override]
     public function getPreviewBlob(ISimpleFile $file, array $photo): array
     {
         return $this->cropFace($file, $photo, 1.8);
     }
 
+    #[\Override]
     public function getPreviewQuality(): int
     {
         return 2048;
     }
 
+    #[\Override]
     public function getCoverObjId(array $photo): int
     {
         return (int) $photo['faceid'];
     }
 
+    #[\Override]
     public function getClusterIdFrom(array $photo): int
     {
         return (int) $photo['cluster_id'];

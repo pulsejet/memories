@@ -25,7 +25,7 @@ jobs:
       fail-fast: false
       matrix:
         php-versions: ['8.3']
-        server-versions: ['stable29', 'stable30', 'stable31']
+        server-versions: ['stable29', 'stable30', 'stable31', 'stable32', 'stable33']
 
     steps:
       - name: Checkout server

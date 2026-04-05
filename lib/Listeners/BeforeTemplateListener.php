@@ -33,6 +33,7 @@ class BeforeTemplateListener implements IEventListener
 {
     public function __construct(private ISession $session) {}
 
+    #[\Override]
     public function handle(Event $event): void
     {
         if (null !== $this->session->get(PostLogoutListener::CLEAR_CACHE_KEY)) {

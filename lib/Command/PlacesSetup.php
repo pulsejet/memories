@@ -39,6 +39,7 @@ class PlacesSetup extends Command
         parent::__construct();
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -50,6 +51,7 @@ class PlacesSetup extends Command
         ;
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->output = $output;

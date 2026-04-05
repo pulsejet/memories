@@ -36,11 +36,13 @@ class Version401000Date20230118043813 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
+    #[\Override]
     public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
 
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
+    #[\Override]
     public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
     {
         /** @var ISchemaWrapper $schema */
@@ -61,5 +63,6 @@ class Version401000Date20230118043813 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
+    #[\Override]
     public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
 }

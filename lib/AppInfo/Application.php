@@ -78,6 +78,7 @@ class Application extends App implements IBootstrap
         parent::__construct(self::APPNAME);
     }
 
+    #[\Override]
     public function register(IRegistrationContext $context): void
     {
         // Register file hooks
@@ -102,6 +103,7 @@ class Application extends App implements IBootstrap
         }
     }
 
+    #[\Override]
     public function boot(IBootContext $context): void {}
 
     private function handleNativeHeaders(): void

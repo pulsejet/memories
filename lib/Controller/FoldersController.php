@@ -56,6 +56,7 @@ class FoldersController extends GenericApiController
             $view = $rp->getValue($node);
 
             // Get the subfolders
+            /** @psalm-suppress InternalMethod */
             $folders = $view->getDirectoryContent($node->getPath(), FileInfo::MIMETYPE_FOLDER, $node);
 
             // Sort by name
