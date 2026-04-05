@@ -15,6 +15,7 @@ use OCP\AppFramework\Http\Template\LinkMenuAction;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
+use OCP\Config\IUserConfig;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\IRootFolder;
 use OCP\Files\NotFoundException;
@@ -42,6 +43,7 @@ class PublicController extends AuthPublicShareController
         protected IRootFolder $rootFolder,
         protected IShareManager $shareManager,
         protected IConfig $config,
+        protected IUserConfig $userConfig,
         protected TimelineQuery $tq,
         protected IL10N $l10n,
     ) {
@@ -52,6 +54,7 @@ class PublicController extends AuthPublicShareController
      * Show the authentication page
      * The form has to submit to the authenticate method route.
      */
+    #[\Override]
     #[PublicPage]
     #[NoCSRFRequired]
     public function showAuthenticate(): TemplateResponse
@@ -63,6 +66,7 @@ class PublicController extends AuthPublicShareController
         return new TemplateResponse('core', 'publicshareauth', $templateParameters, 'guest');
     }
 
+    #[\Override]
     public function isValidToken(): bool
     {
         try {
@@ -74,6 +78,7 @@ class PublicController extends AuthPublicShareController
         }
     }
 
+    #[\Override]
     #[PublicPage]
     #[NoCSRFRequired]
     public function showShare(): TemplateResponse
@@ -141,6 +146,7 @@ class PublicController extends AuthPublicShareController
         return $response;
     }
 
+    #[\Override]
     protected function showAuthFailed(): TemplateResponse
     {
         $templateParameters = ['share' => $this->share, 'wrongpw' => true];
@@ -148,11 +154,13 @@ class PublicController extends AuthPublicShareController
         return new TemplateResponse('core', 'publicshareauth', $templateParameters, 'guest');
     }
 
+    #[\Override]
     protected function verifyPassword(string $password): bool
     {
         return $this->shareManager->checkPassword($this->share, $password);
     }
 
+    #[\Override]
     protected function getPasswordHash(): string
     {
         // TODO: return type has changed to ?string with 29
@@ -160,6 +168,7 @@ class PublicController extends AuthPublicShareController
         return $this->share->getPassword() ?? '';
     }
 
+    #[\Override]
     protected function isPasswordProtected(): bool
     {
         /** @psalm-suppress RedundantConditionGivenDocblockType */
@@ -200,7 +209,7 @@ class PublicController extends AuthPublicShareController
         $relPath = substr($node->getPath(), \strlen($userFolder->getPath()));
 
         // Get the user's folders path
-        $foldersPath = $this->config->getUserValue($user->getUID(), Application::APPNAME, 'foldersPath', null) ?: '/';
+        $foldersPath = $this->userConfig->getValueString($user->getUID(), Application::APPNAME, 'foldersPath') ?: '/';
 
         // Sanitize folders path ensuring leading and trailing slashes
         $foldersPath = Util::sanitizePath('/'.$foldersPath.'/');

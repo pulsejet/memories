@@ -35,6 +35,7 @@ class IndexJob extends TimedJob
     /**
      * Run the background indexing job.
      */
+    #[\Override]
     protected function run(mixed $argument): void
     {
         // Check if indexing is enabled

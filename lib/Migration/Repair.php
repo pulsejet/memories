@@ -14,11 +14,13 @@ class Repair implements IRepairStep
 {
     public function __construct(protected IConfig $config) {}
 
+    #[\Override]
     public function getName(): string
     {
         return 'Repair steps for Memories';
     }
 
+    #[\Override]
     public function run(IOutput $output): void
     {
         // Mitigation for https://github.com/pulsejet/memories/issues/1401

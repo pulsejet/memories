@@ -39,21 +39,25 @@ class RecognizeBackend extends Backend
         protected IRequest $request,
     ) {}
 
+    #[\Override]
     public static function appName(): string
     {
         return 'Recognize';
     }
 
+    #[\Override]
     public static function clusterType(): string
     {
         return 'recognize';
     }
 
+    #[\Override]
     public function isEnabled(): bool
     {
         return Util::recognizeIsEnabled();
     }
 
+    #[\Override]
     public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
     {
         // Check if Recognize is enabled
@@ -111,6 +115,7 @@ class RecognizeBackend extends Backend
         ));
     }
 
+    #[\Override]
     public function transformDayPost(array &$row): void
     {
         // Differentiate Recognize queries from Face Recognition
@@ -129,6 +134,7 @@ class RecognizeBackend extends Backend
         unset($row['face_w'], $row['face_h'], $row['face_x'], $row['face_y']);
     }
 
+    #[\Override]
     public function getClustersInternal(int $fileid = 0): array
     {
         $query = $this->tq->getBuilder();
@@ -201,11 +207,13 @@ class RecognizeBackend extends Backend
         return $faces;
     }
 
+    #[\Override]
     public static function getClusterId(array $cluster): int|string
     {
         return $cluster['id'];
     }
 
+    #[\Override]
     public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         $name = $this->nameToClusterId($name);
@@ -259,26 +267,31 @@ class RecognizeBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
+    #[\Override]
     public function sortPhotosForPreview(array &$photos): void
     {
         $this->sortByScores($photos);
     }
 
+    #[\Override]
     public function getPreviewBlob(ISimpleFile $file, array $photo): array
     {
         return $this->cropFace($file, $photo, 1.5);
     }
 
+    #[\Override]
     public function getPreviewQuality(): int
     {
         return 2048;
     }
 
+    #[\Override]
     public function getCoverObjId(array $photo): int
     {
         return (int) $photo['faceid'];
     }
 
+    #[\Override]
     public function getClusterIdFrom(array $photo): int
     {
         return (int) $photo['cluster_id'];

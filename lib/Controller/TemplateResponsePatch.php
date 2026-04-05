@@ -9,7 +9,8 @@ use OCP\AppFramework\Http\TemplateResponse;
 /** @psalm-suppress MissingTemplateParam */
 class TemplateResponsePatch extends TemplateResponse
 {
-    public function render()
+    #[\Override]
+    public function render(): string
     {
         $content = parent::render();
 
@@ -18,6 +19,6 @@ class TemplateResponsePatch extends TemplateResponse
             '/<meta\s+name="viewport"\s+content="[^"]*"\s*\/?>/',
             '<meta name="viewport" content="width=device-width, viewport-fit=cover, initial-scale=1, minimum-scale=1.0, maximum-scale=1, user-scalable=no">',
             $content,
-        );
+        ) ?? $content;
     }
 }

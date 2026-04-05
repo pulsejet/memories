@@ -44,10 +44,11 @@ class Places
         }
 
         // Detect database type
-        $provider = $this->connection->getDatabaseProvider();
+        $provider = $this->connection->getDatabaseProvider(true);
 
         // Test MySQL-like support in databse
-        if (IDBConnection::PLATFORM_MYSQL === $provider) { // MySQL or MariaDB
+        if (IDBConnection::PLATFORM_MYSQL === $provider
+        || IDBConnection::PLATFORM_MARIADB === $provider) {
             try {
                 $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)', 4326)")->fetch();
                 if (0 === \count($res)) {
@@ -377,7 +378,7 @@ class Places
                 if (0 === $count % 500) {
                     // Print progress
                     $total = APPROX_PLACES;
-                    $pct = round($count / $total * 100, 1);
+                    $pct = round((float) $count / (float) $total * 100.0, 1);
                     echo "Inserted {$count} / {$total} places ({$pct}%), Last: {$name}\n";
                     flush();
                 }
@@ -438,13 +439,11 @@ class Places
             $this->connection->executeStatement('DROP TABLE IF EXISTS memories_planet_geometry');
 
             // Detect database type to select the right syntax and geometry types.
-            // getDatabasePlatform is deprecated, and must be replaced by
-            // getDatabaseProvider($strict=true) when support for Nextcloud <32 is dropped.
-            $platform = $this->connection->getDatabasePlatform();
+            $platform = $this->connection->getDatabaseProvider(true);
 
             // MySQL requires an SRID definition
             // https://github.com/pulsejet/memories/issues/1067
-            $srid = preg_match('/mysql/i', $platform::class) ? 'SRID 4326' : '';
+            $srid = IDBConnection::PLATFORM_MYSQL === $platform ? 'SRID 4326' : '';
 
             // Create table
             $sql = "CREATE TABLE memories_planet_geometry (

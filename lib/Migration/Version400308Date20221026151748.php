@@ -35,11 +35,13 @@ class Version400308Date20221026151748 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
+    #[\Override]
     public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
 
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
+    #[\Override]
     public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
     {
         // Addition of memories_parent_mimetype moved to AddMissingIndices
@@ -50,5 +52,6 @@ class Version400308Date20221026151748 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
+    #[\Override]
     public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
 }

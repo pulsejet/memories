@@ -44,7 +44,7 @@ class MapController extends GenericApiController
             // A tweakable parameter to determine the number of boxes in the map
             // Note: these parameters need to be changed in MapSplitMatter.vue as well
             $clusterDensity = 1;
-            $gridLen = 180.0 / (2 ** $zoom * $clusterDensity);
+            $gridLen = 180.0 / (2.0 ** (float) $zoom * (float) $clusterDensity);
 
             $clusters = $this->tq->getMapClusters($gridLen, $bounds);
 

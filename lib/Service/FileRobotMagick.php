@@ -182,13 +182,13 @@ class FileRobotMagick
     protected function applyCrop(): void
     {
         if ($this->state->cropX || $this->state->cropY || $this->state->cropWidth || $this->state->cropHeight) {
-            $iw = $this->image->getImageWidth();
-            $ih = $this->image->getImageHeight();
+            $iw = (float) $this->image->getImageWidth();
+            $ih = (float) $this->image->getImageHeight();
             $this->image->cropImage(
-                (int) (($this->state->cropWidth ?? 1) * $iw),
-                (int) (($this->state->cropHeight ?? 1) * $ih),
-                (int) (($this->state->cropX ?? 0) * $iw),
-                (int) (($this->state->cropY ?? 0) * $ih),
+                (int) (($this->state->cropWidth ?? 1.0) * $iw),
+                (int) (($this->state->cropHeight ?? 1.0) * $ih),
+                (int) (($this->state->cropX ?? 0.0) * $iw),
+                (int) (($this->state->cropY ?? 0.0) * $ih),
             );
         }
     }
@@ -226,7 +226,7 @@ class FileRobotMagick
         }
 
         // https://github.com/konvajs/konva/blob/f0e18b09079175404a1026363689f8f89eae0749/src/filters/Brighten.ts#L15-L29
-        $this->image->evaluateImage(\Imagick::EVALUATE_ADD, $brightness * 255 * 255, \Imagick::CHANNEL_ALL);
+        $this->image->evaluateImage(\Imagick::EVALUATE_ADD, $brightness * 255.0 * 255.0, \Imagick::CHANNEL_ALL);
     }
 
     protected function applyContrast(?float $value = null): void
@@ -240,29 +240,29 @@ class FileRobotMagick
         // m = ((a + 100) / 100) ** 2       // slope
         // y = (x - 0.5) * m + 0.5
         // y = mx + (0.5 * (1 - m))         // simplify
-        $m = (($contrast + 100) / 100) ** 2;
-        $c = 0.5 * (1 - $m);
+        $m = (($contrast + 100.0) / 100.0) ** 2.0;
+        $c = 0.5 * (1.0 - $m);
 
         $this->image->functionImage(\Imagick::FUNCTION_POLYNOMIAL, [$m, $c], \Imagick::CHANNEL_ALL);
     }
 
     protected function applyHSV(?float $hue = null, ?float $saturation = null, ?float $value = null): void
     {
-        $hue ??= $this->state->hue ?? 0;
-        $saturation ??= $this->state->saturation ?? 0;
-        $value ??= $this->state->value ?? 0;
+        $hue ??= $this->state->hue ?? 0.0;
+        $saturation ??= $this->state->saturation ?? 0.0;
+        $value ??= $this->state->value ?? 0.0;
 
-        if (0 === $hue && 0 === $saturation && 0 === $value) {
+        if (0.0 === $hue && 0.0 === $saturation && 0.0 === $value) {
             return;
         }
 
-        $h = abs($hue + 360) % 360;
-        $s = 2 ** $saturation;
-        $v = 2 ** $value;
+        $h = (float) (abs($hue + 360.0) % 360.0);
+        $s = 2.0 ** $saturation;
+        $v = 2.0 ** $value;
 
         // https://github.com/konvajs/konva/blob/f0e18b09079175404a1026363689f8f89eae0749/src/filters/HSV.ts#L17-L63
-        $vsu = $v * $s * cos(($h * M_PI) / 180);
-        $vsw = $v * $s * sin(($h * M_PI) / 180);
+        $vsu = $v * $s * cos(($h * M_PI) / 180.0);
+        $vsw = $v * $s * sin(($h * M_PI) / 180.0);
 
         $rr = 0.299 * $v + 0.701 * $vsu + 0.167 * $vsw;
         $rg = 0.587 * $v - 0.587 * $vsu + 0.33 * $vsw;
@@ -304,8 +304,8 @@ class FileRobotMagick
         }
 
         // Add to red channel, subtract from blue channel
-        $this->image->evaluateImage(\Imagick::EVALUATE_ADD, $warmth * 255, \Imagick::CHANNEL_RED);
-        $this->image->evaluateImage(\Imagick::EVALUATE_SUBTRACT, $warmth * 255, \Imagick::CHANNEL_BLUE);
+        $this->image->evaluateImage(\Imagick::EVALUATE_ADD, $warmth * 255.0, \Imagick::CHANNEL_RED);
+        $this->image->evaluateImage(\Imagick::EVALUATE_SUBTRACT, $warmth * 255.0, \Imagick::CHANNEL_BLUE);
     }
 
     // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/components/tools/Filters/Filters.constants.js#L8
@@ -596,12 +596,12 @@ class FileRobotMagick
     protected function applyBaseFilterContrast(float $value): void
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L14
-        $value *= 255;
+        $value *= 255.0;
 
         // y = m * (x - 128) + 128
         // y = m * x + (128 * (1 - m))
-        $m = (259 * ($value + 255)) / (255 * (259 - $value));
-        $c = 0.5 * (1 - $m);
+        $m = (259.0 * ($value + 255.0)) / (255.0 * (259.0 - $value));
+        $c = 0.5 * (1.0 - $m);
 
         $this->image->functionImage(\Imagick::FUNCTION_POLYNOMIAL, [$m, $c], \Imagick::CHANNEL_ALL);
     }
@@ -631,9 +631,9 @@ class FileRobotMagick
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L46
         /** @psalm-suppress InvalidArgument */
         $this->image->colorMatrixImage([
-            1 - 0.607 * $value, 0.769 * $value, 0.189 * $value, 0, 0,
-            0.349 * $value, 1 - 0.314 * $value, 0.168 * $value, 0, 0,
-            0.272 * $value, 0.534 * $value, 1 - 0.869 * $value, 0, 0,
+            1.0 - 0.607 * $value, 0.769 * $value, 0.189 * $value, 0, 0,
+            0.349 * $value, 1.0 - 0.314 * $value, 0.168 * $value, 0, 0,
+            0.272 * $value, 0.534 * $value, 1.0 - 0.869 * $value, 0, 0,
             0, 0, 0, 1, 0,
             0, 0, 0, 0, 1,
         ]);
@@ -656,9 +656,9 @@ class FileRobotMagick
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L63
         // y = x - (x - k) * v = (1 - v) * x + k * v
-        $this->image->evaluateImage(\Imagick::EVALUATE_MULTIPLY, 1 - $v, \Imagick::CHANNEL_ALL);
-        $this->image->evaluateImage(\Imagick::EVALUATE_ADD, $v * $r * 255, \Imagick::CHANNEL_RED);
-        $this->image->evaluateImage(\Imagick::EVALUATE_ADD, $v * $g * 255, \Imagick::CHANNEL_GREEN);
-        $this->image->evaluateImage(\Imagick::EVALUATE_ADD, $v * $b * 255, \Imagick::CHANNEL_BLUE);
+        $this->image->evaluateImage(\Imagick::EVALUATE_MULTIPLY, 1.0 - $v, \Imagick::CHANNEL_ALL);
+        $this->image->evaluateImage(\Imagick::EVALUATE_ADD, $v * $r * 255.0, \Imagick::CHANNEL_RED);
+        $this->image->evaluateImage(\Imagick::EVALUATE_ADD, $v * $g * 255.0, \Imagick::CHANNEL_GREEN);
+        $this->image->evaluateImage(\Imagick::EVALUATE_ADD, $v * $b * 255.0, \Imagick::CHANNEL_BLUE);
     }
 }

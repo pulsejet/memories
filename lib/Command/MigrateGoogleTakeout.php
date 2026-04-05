@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Command;
 
+use OC\Files\SetupManager;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exif;
 use OCA\Memories\Service;
@@ -54,6 +55,7 @@ class MigrateGoogleTakeout extends Command
 
     public function __construct(
         protected IRootFolder $rootFolder,
+        protected SetupManager $setupManager,
         protected IUserManager $userManager,
         protected IConfig $config,
         protected IDBConnection $connection,
@@ -63,6 +65,7 @@ class MigrateGoogleTakeout extends Command
         parent::__construct();
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -74,6 +77,7 @@ class MigrateGoogleTakeout extends Command
         ;
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->output = $output;
@@ -128,8 +132,9 @@ class MigrateGoogleTakeout extends Command
         $this->output->writeln("Migrating user {$uid}");
 
         // Get user's root folder
-        \OC_Util::tearDownFS();
-        \OC_Util::setupFS($uid);
+        $this->setupManager->tearDown();
+        $this->setupManager->setupForUser($user);
+
         $folder = $this->rootFolder->getUserFolder($uid);
 
         // Check if we need to migrate a specific folder

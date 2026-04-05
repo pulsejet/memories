@@ -31,20 +31,11 @@
         <directory name="../../3rdparty/deepdiver" />
     </extraFiles>
     <issueHandlers>
-        <UndefinedDocblockClass>
+        <PossiblyFalseArgument>
             <errorLevel type="suppress">
-                <referencedClass name="Doctrine\DBAL\Schema\Schema" />
-                <referencedClass name="Doctrine\DBAL\Schema\SchemaException" />
-                <referencedClass name="Doctrine\DBAL\Driver\Statement" />
-                <referencedClass name="Doctrine\DBAL\Schema\Table" />
-                <referencedClass name="Doctrine\DBAL\Platforms\AbstractPlatform" />
+                <directory name="lib/" />
             </errorLevel>
-        </UndefinedDocblockClass>
-        <PossiblyUnusedMethod>
-            <errorLevel type="suppress">
-                <file name="lib/Service/FileRobotMagick.php" />
-            </errorLevel>
-        </PossiblyUnusedMethod>
+        </PossiblyFalseArgument>
         <PropertyNotSetInConstructor>
             <errorLevel type="suppress">
                 <directory name="lib/Command" />
@@ -55,6 +46,11 @@
                 <directory name="lib/" />
             </errorLevel>
         </RiskyTruthyFalsyComparison>
+        <ClassMustBeFinal>
+            <errorLevel type="suppress">
+                <directory name="lib/" />
+            </errorLevel>
+        </ClassMustBeFinal>
     </issueHandlers>
     <forbiddenFunctions>
             <function name="var_dump" />

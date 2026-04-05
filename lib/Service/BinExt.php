@@ -132,7 +132,9 @@ class BinExt
         }
 
         if (SystemConfig::get('memories.exiftool_no_local')) {
-            return ['perl', realpath(__DIR__.'/../../bin-ext/exiftool/exiftool')];
+            $path = realpath(__DIR__.'/../../bin-ext/exiftool/exiftool') ?: '';
+
+            return ['perl', $path];
         }
 
         return [self::getExiftoolPBin()];

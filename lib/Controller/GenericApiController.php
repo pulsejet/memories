@@ -28,6 +28,7 @@ use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\TimelineQuery;
 use OCP\App\IAppManager;
 use OCP\AppFramework\ApiController;
+use OCP\Config\IUserConfig;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IDBConnection;
@@ -40,6 +41,7 @@ abstract class GenericApiController extends ApiController
     public function __construct(
         IRequest $request,
         protected IConfig $config,
+        protected IUserConfig $userConfig,
         protected IUserSession $userSession,
         protected IDBConnection $connection,
         protected IRootFolder $rootFolder,

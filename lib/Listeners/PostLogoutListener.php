@@ -34,6 +34,7 @@ class PostLogoutListener implements IEventListener
 
     public function __construct(private ISession $session) {}
 
+    #[\Override]
     public function handle(Event $event): void
     {
         $this->session->set(self::CLEAR_CACHE_KEY, '1');

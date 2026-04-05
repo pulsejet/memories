@@ -284,7 +284,7 @@ class TimelineWrite
      *
      * @param array<string, mixed> $exif EXIF data
      */
-    private function getExifJson(array $exif): string
+    private function getExifJson(array $exif): false|string
     {
         // Clean up EXIF to keep only useful metadata
         $filteredExif = [];

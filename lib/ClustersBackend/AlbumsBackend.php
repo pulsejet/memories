@@ -39,26 +39,31 @@ class AlbumsBackend extends Backend
         protected TimelineQuery $tq,
     ) {}
 
+    #[\Override]
     public static function appName(): string
     {
         return 'Albums';
     }
 
+    #[\Override]
     public static function clusterType(): string
     {
         return 'albums';
     }
 
+    #[\Override]
     public function isEnabled(): bool
     {
         return Util::albumsIsEnabled();
     }
 
+    #[\Override]
     public function clusterName(string $name): string
     {
         return explode('/', $name)[1];
     }
 
+    #[\Override]
     public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
     {
         $albumId = (string) $this->request->getParam(self::clusterType());
@@ -81,6 +86,7 @@ class AlbumsBackend extends Backend
         $this->tq->allowEmptyRoot();
     }
 
+    #[\Override]
     public function getClustersInternal(int $fileid = 0): array
     {
         // Materialize the query
@@ -175,11 +181,13 @@ class AlbumsBackend extends Backend
         return array_values($list);
     }
 
+    #[\Override]
     public static function getClusterId(array $cluster): int|string
     {
         return $cluster['cluster_id'];
     }
 
+    #[\Override]
     public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         // Get album
@@ -194,11 +202,13 @@ class AlbumsBackend extends Backend
         return $this->albumsQuery->getAlbumPhotos($id, $limit, $fileid);
     }
 
+    #[\Override]
     public function sortPhotosForPreview(array &$photos): void
     {
         // Do nothing, the photos are already sorted by added date desc
     }
 
+    #[\Override]
     public function getClusterIdFrom(array $photo): int
     {
         return (int) $photo['album_id'];

@@ -14,7 +14,6 @@ use OCP\Files\Node;
 use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
 use OCP\IAppConfig;
-use OCP\IConfig;
 
 class Util
 {
@@ -131,8 +130,8 @@ class Util
         }
 
         try {
-            return 'true' === \OC::$server->get(IConfig::class)
-                ->getUserValue(self::getUID(), 'facerecognition', 'enabled', 'false')
+            return 'true' === \OC::$server->get(\OCP\Config\IUserConfig::class)
+                ->getValueString(self::getUID(), 'facerecognition', 'enabled', 'false')
             ;
         } catch (\Exception) {
             // not logged in
@@ -316,8 +315,8 @@ class Util
      */
     public static function getTimelinePaths(string $uid): array
     {
-        $paths = \OC::$server->get(IConfig::class)
-            ->getUserValue($uid, Application::APPNAME, 'timelinePath', null)
+        $paths = \OC::$server->get(\OCP\Config\IUserConfig::class)
+            ->getValueString($uid, Application::APPNAME, 'timelinePath')
                 ?: SystemConfig::get('memories.timeline.default_path');
 
         return array_map(
@@ -537,6 +536,7 @@ class Util
         $buffer = '';
 
         // Absolute time to wait until
+        /** @psalm-suppress InvalidOperand */
         $timeEnd = microtime(true) + $timeout / 1000;
 
         while (microtime(true) < $timeEnd) {
@@ -559,7 +559,9 @@ class Util
             }
 
             // Append to buffer
-            $buffer .= stream_get_contents($handle);
+            if ($contents = stream_get_contents($handle)) {
+                $buffer .= $contents;
+            }
         }
 
         throw new \Exception('Timeout');

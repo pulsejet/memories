@@ -52,7 +52,7 @@ trait TimelineWriteMap
         foreach ($rows as &$r) {
             $clusterLat = (float) $r['lat'];
             $clusterLon = (float) $r['lon'];
-            $dist = ($lat - $clusterLat) ** 2 + ($lon - $clusterLon) ** 2;
+            $dist = ($lat - $clusterLat) ** 2.0 + ($lon - $clusterLon) ** 2.0;
             if ($dist < $minDist) {
                 $minDist = $dist;
                 $minId = (int) $r['id'];

@@ -399,7 +399,7 @@ class ImageController extends GenericApiController
 
             // Set quality if specified
             if (null !== $quality && $quality >= 0 && $quality <= 1) {
-                $image->setImageCompressionQuality((int) round(100 * $quality));
+                $image->setImageCompressionQuality((int) round(100.0 * $quality));
             }
 
             // Save the image

@@ -143,7 +143,7 @@ class DownloadController extends GenericApiController
             }
 
             // Get file reading parameters
-            $size = $file->getSize();
+            $size = (int) $file->getSize();
             [$seekStart, $seekEnd] = Util::explode_exact('-', $range, 2);
             $seekEnd = (empty($seekEnd)) ? ($size - 1) : min(abs((int) $seekEnd), $size - 1);
             $seekStart = (empty($seekStart) || $seekEnd < abs((int) $seekStart)) ? 0 : max(abs((int) $seekStart), 0);
@@ -203,7 +203,7 @@ class DownloadController extends GenericApiController
 
             while (!feof($res) && $seekStart <= $seekEnd) {
                 $lenLeft = $seekEnd - $seekStart + 1;
-                $buffer = fread($res, (int) min(1024 * 1024, $lenLeft));
+                $buffer = fread($res, min(1024 * 1024, $lenLeft));
                 if (false === $buffer) {
                     break;
                 }
