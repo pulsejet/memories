@@ -25,7 +25,7 @@ wget -O memories.crt https://raw.githubusercontent.com/nextcloud/app-certificate
 echo -e "$APP_PRIVATE_KEY" > memories.key
 
 # Sign app
-git clone --recurse-submodules --depth 1 --branch v28.0.5 https://github.com/nextcloud/server nextcloud
+git clone --recurse-submodules --depth 1 --branch stable33 https://github.com/nextcloud/server nextcloud
 php nextcloud/occ integrity:sign-app \
     --privateKey=/tmp/memories.key \
     --certificate=/tmp/memories.crt \
