@@ -28,10 +28,10 @@ jobs:
       - name: Checkout the app
         uses: actions/checkout@v4
 
-      - name: Set up php ${{ matrix.php-versions }}
+      - name: Set up php for tools
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.4"
+          php-version: '8.4'
           tools: phpunit
           extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
           coverage: none
