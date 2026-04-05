@@ -35,6 +35,7 @@ export const initstate = Object.freeze({
   singleItem: loadState('memories', 'single_item', null) as IPhoto | null,
   allow_upload: loadState('memories', 'allow_upload', false) as boolean,
   allow_delete: loadState('memories', 'allow_delete', false) as boolean,
+  recognizeApiKey: loadState('memories', 'recognizeApiKey', '') as string,
 });
 
 /**
