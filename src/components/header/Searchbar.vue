@@ -198,13 +198,15 @@ export default defineComponent({
     // header is 50px; 5px gap on each side
     margin: 5px 0 !important;
     --default-clickable-area: 40px;
-    --border-width-input-focused: 0px;
   }
 
   // Styling for flat input
   header &,
   #mobile-header &,
   .explore-outer & {
+    // Remove padding from text bar
+    --border-width-input-focused: 0px;
+
     :deep input[type='text'] {
       border: none !important;
       background-color: color-mix(in srgb, var(--searchbar-color) 12%, transparent);
