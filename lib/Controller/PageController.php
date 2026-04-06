@@ -17,6 +17,7 @@ use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IRequest;
+use Psr\Log\LoggerInterface;
 
 final class PageController extends Controller
 {
@@ -24,6 +25,7 @@ final class PageController extends Controller
         IRequest $request,
         protected IEventDispatcher $eventDispatcher,
         private IInitialState $initialState,
+        private LoggerInterface $logger,
         private ?\OCA\Recognize\Public\ApiKeyManager $apiKeyManager,
     ) {
         parent::__construct(Application::APPNAME, $request);
@@ -47,7 +49,7 @@ final class PageController extends Controller
             // Auto translation for tags
             \OCP\Util::addTranslations('recognize');
             // Obtain API Key
-            if ($this->apiKeyManager !== null) {
+            if (null !== $this->apiKeyManager) {
                 try {
                     $this->initialState->provideInitialState('recognizeApiKey', $this->apiKeyManager->generateApiKey());
                 } catch (\JsonException $e) {
