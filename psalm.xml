@@ -30,6 +30,9 @@
         <directory name="../../3rdparty/guzzlehttp" />
         <directory name="../../3rdparty/deepdiver" />
     </extraFiles>
+    <stubs>
+        <file name="stubs/recognize.phpstub" />
+    </stubs>
     <issueHandlers>
         <PossiblyFalseArgument>
             <errorLevel type="suppress">

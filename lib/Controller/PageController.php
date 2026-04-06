@@ -14,14 +14,19 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
+use OCP\AppFramework\Services\IInitialState;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IRequest;
+use Psr\Log\LoggerInterface;
 
 final class PageController extends Controller
 {
     public function __construct(
         IRequest $request,
         protected IEventDispatcher $eventDispatcher,
+        private IInitialState $initialState,
+        private LoggerInterface $logger,
+        private ?\OCA\Recognize\Public\ApiKeyManager $apiKeyManager,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -39,10 +44,18 @@ final class PageController extends Controller
         // Scripts
         \OCP\Util::addScript(Application::APPNAME, 'memories-main');
 
-        // Extra translations
+        // Additional setup for Recognize
         if (Util::recognizeIsInstalled()) {
             // Auto translation for tags
             \OCP\Util::addTranslations('recognize');
+            // Obtain API Key
+            if (null !== $this->apiKeyManager) {
+                try {
+                    $this->initialState->provideInitialState('recognizeApiKey', $this->apiKeyManager->generateApiKey());
+                } catch (\JsonException $e) {
+                    $this->logger->error('Failed to generate recognize api key', ['exception' => $e]);
+                }
+            }
         }
 
         $response = new TemplateResponsePatch(Application::APPNAME, 'main', self::getMainParams());

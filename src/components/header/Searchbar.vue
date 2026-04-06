@@ -198,6 +198,7 @@ export default defineComponent({
     // header is 50px; 5px gap on each side
     margin: 5px 0 !important;
     --default-clickable-area: 40px;
+    --border-width-input-focused: 0px;
   }
 
   // Styling for flat input
