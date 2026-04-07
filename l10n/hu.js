@@ -321,6 +321,7 @@ OC.L10N.register(
     "Public Link" : "Nyilvános hivatkozás",
     "Share an external Nextcloud link" : "Külső Nextcloud-hivatkozás megosztása",
     "Failed to upload {file}" : "A(z) {file} feltöltése sikertelen",
+    "Add tags" : "Címkék hozzáadása",
     "Last updated" : "Utolsó frissítés",
     "Creation date" : "Létrehozás dátuma",
     "Oldest first" : "Régebbiek elöl",
