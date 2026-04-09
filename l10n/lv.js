@@ -60,7 +60,7 @@ OC.L10N.register(
     "Public link copied!" : "Publiskā saite nokopēta!",
     "Copy public link" : "Ievietot publisko saiti starpliktuvē",
     "Delete the public link" : "Izdzēst publisko saiti",
-    "Share via public link" : "Kopīgojiet, izmantojot publisko saiti",
+    "Share via public link" : "Kopīgot ar publisku saiti",
     "Could not load the selected album" : "Nevarēja ielādēt izvēlēto albumu",
     "Create new album" : "Izveidot jaunu albumu",
     "Edit album details" : "Labot albuma datus",
