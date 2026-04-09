@@ -131,6 +131,9 @@ class MainActivity : AppCompatActivity() {
         // Load JavaScript
         initializeWebView()
 
+        // Handle widget deep link (open specific photo)
+        handleWidgetDeepLink(intent)
+
         // Destroy video after 1 seconds (workaround for video not showing on first load)
         binding.videoView.postDelayed({
             binding.videoView.alpha = 1.0f
@@ -336,6 +339,44 @@ class MainActivity : AppCompatActivity() {
         // Load welcome page
         binding.webview.loadUrl("file:///android_asset/welcome.html")
         return false
+    }
+
+    /**
+     * Handle a widget deep link: if the intent has a photo subpath,
+     * navigate the webview to show that specific photo.
+     */
+    private fun handleWidgetDeepLink(intent: Intent?) {
+        if (intent == null) return
+
+        // Server photo: navigate webview to the photo viewer
+        val subpath = intent.getStringExtra("gallery.memories.widget.EXTRA_PHOTO_SUBPATH")
+        if (!subpath.isNullOrBlank() && host != null) {
+            binding.webview.postDelayed({
+                nativex.http.loadWebView(binding.webview, subpath)
+            }, 1000) // delay to let the initial page load
+            return
+        }
+
+        // Local photo: open with system viewer
+        val localUri = intent.getStringExtra("gallery.memories.widget.EXTRA_LOCAL_PHOTO_URI")
+        if (!localUri.isNullOrBlank()) {
+            try {
+                val uri = Uri.parse(localUri)
+                val viewIntent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, "image/*")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivity(viewIntent)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to open local photo from widget", e)
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleWidgetDeepLink(intent)
     }
 
     fun initializePlayer(uris: Array<Uri>, uid: Long) {
