@@ -123,6 +123,7 @@ OC.L10N.register(
     "Share link" : "Viešinio nuoroda",
     "Create Link" : "Sukurti nuorodą",
     "Refresh" : "Įkelti iš naujo",
+    "Failed to upload {file}" : "Nepavyko įkelti {file}",
     "Add tags" : "Pridėti žymas",
     "Creation date" : "Sukūrimo data",
     "Oldest first" : "Seniausi pirma",
