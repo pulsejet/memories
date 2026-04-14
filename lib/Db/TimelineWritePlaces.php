@@ -95,14 +95,15 @@ trait TimelineWritePlaces
      *
      * @param int    $fileId  The file ID
      * @param array  $exif    The exif data (will change)
+     * @param array  $exif    The exif numeric data
      * @param ?array $prevRow The previous row of data
      *
      * @return array Update values
      */
-    protected function processExifLocation(int $fileId, array &$exif, ?array $prevRow): array
+    protected function processExifLocation(int $fileId, array &$exif, array &$exifNumeric, ?array $prevRow): array
     {
         // Store location data
-        [$lat, $lon] = self::readCoord($exif);
+        [$lat, $lon] = self::readCoord($exifNumeric);
         $oldLat = $prevRow ? (float) $prevRow['lat'] : null;
         $oldLon = $prevRow ? (float) $prevRow['lon'] : null;
         $mapCluster = $prevRow ? (int) $prevRow['mapcluster'] : -1;
@@ -128,7 +129,7 @@ trait TimelineWritePlaces
         $mapCluster = $mapCluster <= 0 ? null : $mapCluster;
 
         // Set tzid from location if not present
-        $this->setTzidFromLocation($exif, $osmIds);
+        $this->setTzidFromLocation($exif, $exifNumeric, $osmIds, $lat, $lon);
 
         // Return update values
         return [$lat, $lon, $mapCluster, $osmIds];
@@ -138,43 +139,124 @@ trait TimelineWritePlaces
      * Set timezone offset from location if not present.
      *
      * @param array $exif   The exif data
+     * @param array $exif   The exif numeric data
      * @param array $osmIds The list of osm_id of the places
+     * @param ?float $lat    The latitude
+     * @param ?float $lon    The longitude
      */
-    private function setTzidFromLocation(array &$exif, array $osmIds): void
+    private function setTzidFromLocation(array &$exif, array &$exifNumeric, array $osmIds, ?float $lat, ?float $lon): void
     {
         // Make sure we have some places
-        if (empty($osmIds)) {
-            return;
+        if (!empty($osmIds)) {
+
+            // Get timezone offset from places
+            $query = $this->connection->getQueryBuilder();
+            $query->select('name')
+                ->from('memories_planet')
+                ->where($query->expr()->in('osm_id', $query->createNamedParameter($osmIds, IQueryBuilder::PARAM_INT_ARRAY)))
+                ->andWhere($query->expr()->eq('admin_level', $query->expr()->literal(-7, IQueryBuilder::PARAM_INT)))
+            ;
+
+            // Get name of timezone
+            $tzName = $query->executeQuery()->fetchOne();
+            if ($tzName !== false && $tzName !== '') {
+                $exif['LocationTZID'] = $tzName;
+                return;
+            } else {
+                // No values use fallback
+                $tzName = null;
+            }
         }
 
-        // Get timezone offset from places
-        $query = $this->connection->getQueryBuilder();
-        $query->select('name')
-            ->from('memories_planet')
-            ->where($query->expr()->in('osm_id', $query->createNamedParameter($osmIds, IQueryBuilder::PARAM_INT_ARRAY)))
-            ->andWhere($query->expr()->eq('admin_level', $query->expr()->literal(-7, IQueryBuilder::PARAM_INT)))
-        ;
+        // Timezone precheck, will skip unnecessary slow Python timezone lookups in most cases whengetTimezoneFromPython is called
+        // Will still be unnecessarily called occasionally if timezone wasn't in the below fields but was in a date field e.g. 
+        // exiftool found one we didn't check for.
+        $hasTimezone = false;
+        try {
+            $tzStr = $exif['OffsetTimeOriginal']
+                ?? $exif['OffsetTime']
+                ?? $exif['OffsetTimeDigitized']
+                ?? $exif['TimeZone']
+                ?? throw new \Exception();
 
-        // Get name of timezone
-        $tzName = $query->executeQuery()->fetchOne();
-        if ($tzName) {
-            $exif['LocationTZID'] = $tzName;
+            /** @psalm-suppress ArgumentTypeCoercion */
+            $exifTz = new \DateTimeZone((string) $tzStr);
+            $hasTimezone = true;
+        } catch (\Exception $e) {
+            $hasTimezone = false;
+        } catch (\ValueError $e) {
+            $hasTimezone = false;
+        }
+
+        // Fallback to Python timezonefinder if database is unavailable
+        if ($lat !== null && $lon !== null && $hasTimezone === false) {
+            $tzName = $this->getTimezoneFromPython($lat, $lon);
+            if ($tzName !== null) {
+                $exif['LocationTZID'] = $tzName;
+            }
+        }
+    }
+
+        /**
+     * Get timezone using Python timezonefinder as a fallback.
+     *
+     * @param ?float $lat The latitude
+     * @param ?float $lon The longitude
+     *
+     * @return ?string The timezone name or null if not found
+     */
+    private function getTimezoneFromPython(?float $lat, ?float $lon): ?string
+    {
+        // Validate coordinates
+        if (null === $lat || null === $lon) {
+            return null;
+        }
+
+        try {
+            // Get timezone using Python timezonefinder
+            $scriptPath = \dirname(__DIR__, 2) . '/python/findtimezone.py';
+            $command = sprintf('python3 %s %f %f', escapeshellarg($scriptPath), $lat, $lon);
+            $output = shell_exec($command);
+            $trimmedOutput = trim($output);
+            
+            // Retry with python command instead of python3 if not found
+            if (strpos($trimmedOutput, 'not found') !== false) {
+                $command = sprintf('python %s %f %f', escapeshellarg($scriptPath), $lat, $lon);
+                $output = shell_exec($command);
+                $trimmedOutput = trim($output);
+            }
+
+            // Check if output contains error messages
+            if (strpos($trimmedOutput, 'Error:') !== false || strpos($trimmedOutput, 'not found') !== false) {
+                $this->logger->warning("Python timezone script failed: {$trimmedOutput}", ['app' => 'memories']);
+                return null;
+            }
+
+            // Return the trimmed output
+            if ($output && !empty($trimmedOutput)) {
+                return $trimmedOutput;
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            $this->logger->error("Error calling Python timezone script: {$e->getMessage()}", ['app' => 'memories']);
+            return null;
         }
     }
 
     /**
      * Read coordinates from array and round to 6 decimal places.
      *
-     * Modifies the EXIF array to remove invalid coordinates.
+     * Modifies the EXIF Numeric array to remove invalid coordinates.
      *
      * @return (null|float)[]
      *
      * @psalm-return list{float|null, float|null}
      */
-    private static function readCoord(array &$exif): array
+    private static function readCoord(array &$exifNumeric): array
     {
-        $lat = \array_key_exists(LAT_KEY, $exif) ? round((float) $exif[LAT_KEY], 6) : null;
-        $lon = \array_key_exists(LON_KEY, $exif) ? round((float) $exif[LON_KEY], 6) : null;
+        $lat = \array_key_exists(LAT_KEY, $exifNumeric) ? round((float) $exifNumeric[LAT_KEY], 6) : null;
+        $lon = \array_key_exists(LON_KEY, $exifNumeric) ? round((float) $exifNumeric[LON_KEY], 6) : null;
 
         // Make sure we have valid coordinates
         if (null === $lat || null === $lon
@@ -184,11 +266,11 @@ trait TimelineWritePlaces
         }
 
         // Remove invalid coordinates
-        if (null === $lat && \array_key_exists(LAT_KEY, $exif)) {
-            unset($exif[LAT_KEY]);
+        if (null === $lat && \array_key_exists(LAT_KEY, $exifNumeric)) {
+            unset($exifNumeric[LAT_KEY]);
         }
-        if (null === $lon && \array_key_exists(LON_KEY, $exif)) {
-            unset($exif[LON_KEY]);
+        if (null === $lon && \array_key_exists(LON_KEY, $exifNumeric)) {
+            unset($exifNumeric[LON_KEY]);
         }
 
         return [$lat, $lon];
