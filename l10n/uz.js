@@ -42,6 +42,7 @@ OC.L10N.register(
     "Loading …" : "Yuklanmoqda…",
     "Move" : "Ko'chirish",
     "Remove" : "O'chirish",
+    "Password protected" : "Parol bilan himoyalangan",
     "Read only" : "Faqat o'qing",
     "Share link" : "Havolani ulashing",
     "Refresh" : "Yangilash",
