@@ -114,6 +114,7 @@ OC.L10N.register(
     "Error while moving {basename}" : "Klaida perkeliant {basename}",
     "Failed to move {name}." : "Nepavyko perkelti {name}.",
     "Move" : "Perkelti",
+    "Choose a folder" : "Pasirinkti aplanką",
     "Remove" : "Šalinti",
     "Add Path" : "Pridėti kelią",
     "Password protected" : "Apsaugota slaptažodžiu",
