@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Memories</string>
+    <string name="tile_label">Memories Photo</string>
+    <string name="tile_no_photo">No photo yet</string>
+    <string name="tile_tap_refresh">Tap to refresh</string>
+
+    <!-- Labels (same as phone widget) -->
+    <string name="widget_on_this_day">On this day</string>
+    <string name="widget_years_ago">%d years ago</string>
+    <string name="widget_one_year_ago">1 year ago</string>
+    <string name="widget_from_memories">From your memories</string>
+    <string name="widget_throwback">Throwback</string>
+    <string name="widget_remember_this">Remember this?</string>
+    <string name="widget_rediscover">Rediscover</string>
+
+    <string name="config_title">Memories Setup</string>
+    <string name="config_url_hint">Server URL (e.g. https://cloud.example.com/apps/memories/)</string>
+    <string name="config_username_hint">Username</string>
+    <string name="config_password_hint">App password</string>
+    <string name="config_trust_all">Trust all certificates</string>
+    <string name="config_save">Save &amp; Start</string>
+    <string name="config_saved">Saved! Photo loading…</string>
+    <string name="config_error">Please fill all fields</string>
+</resources>
