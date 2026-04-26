@@ -111,6 +111,10 @@ services:
     group_add: [109]
 ```
 
+!!! tip "GPU on a separate machine"
+
+    If your Nextcloud host does not have a GPU, you can also run go-vod on a different machine entirely and mount the Nextcloud data over NFS. A community-maintained setup guide and deploy script for this configuration (NVIDIA GPU with NVENC, NFS mount, external transcoder) is available at [jimnoneill/nextcloud-memories-gpu](https://github.com/jimnoneill/nextcloud-memories-gpu).
+
 ## Internal Transcoder
 
 Memories ships with an internal transcoder binary that you can directly use. In this case, you must install the drivers and ffmpeg on the same host as Nextcloud, and Memories will automatically handle starting and communicating with go-vod. This is also the default setup when you enable transcoding without hardware acceleration.
