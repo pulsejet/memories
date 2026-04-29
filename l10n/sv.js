@@ -134,7 +134,7 @@ OC.L10N.register(
     "Help & Support" : "Hjälp & Support",
     "Thank you for choosing Nextcloud and Memories to store your precious data!" : "Tack för att du har valt Nextcloud och Memories för att lagra din dyrbara data!",
     "Memories is very feature rich and setting it up properly can take some time." : "Memories har mycket funktioner och att konfigurera den kan ta tid.",
-    "If you just installed Memories, make sure you read the getting started guide:" : "Se till att läsa kom igång -guiden om du precis installerade Memories:",
+    "If you just installed Memories, make sure you read the getting started guide:" : "Se till att läsa kom igång-guiden om du precis installerade Memories:",
     "External Link" : "Extern länk",
     "In case you run into any issues or bugs, you can get help through several channels." : "Ifall du stöter på några problem eller buggar kan du få hjälp genom flera kanaler:",
     "Memories is a completely free and open source app under active development." : "Memories är under aktiv utveckling och är helt gratis med öppen källkod.",
