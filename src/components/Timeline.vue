@@ -236,6 +236,8 @@ export default defineComponent({
     utils.bus.on('memories:timeline:deleted', this.deleteFromViewWithAnimation);
     utils.bus.on('memories:timeline:soft-refresh', this.softRefresh);
     utils.bus.on('memories:timeline:hard-refresh', this.refresh);
+    utils.bus.on('memories:timeline:scrollToDate', this.scrollToDate);
+    utils.bus.on('memories:timeline:getDateRange', this.getDateRange);
   },
 
   beforeDestroy() {
@@ -246,6 +248,8 @@ export default defineComponent({
     utils.bus.off('memories:timeline:deleted', this.deleteFromViewWithAnimation);
     utils.bus.off('memories:timeline:soft-refresh', this.softRefresh);
     utils.bus.off('memories:timeline:hard-refresh', this.refresh);
+    utils.bus.off('memories:timeline:scrollToDate', this.scrollToDate);
+    utils.bus.off('memories:timeline:getDateRange', this.getDateRange);
     this.resetState();
     this.state = 0;
   },
@@ -345,6 +349,49 @@ export default defineComponent({
 
     isMobile() {
       return this.containerSize[0] <= 768;
+    },
+
+    /** Scroll to the nearest day matching the given date */
+    scrollToDate(date: Date) {
+      const targetDayId = utils.dateToDayId(date);
+
+      // Find the nearest dayId <= target (closest earlier or exact date)
+      let bestDayId: number | null = null;
+      for (const dayId of this.heads.keys()) {
+        if (dayId <= targetDayId) {
+          if (bestDayId === null || dayId > bestDayId) {
+            bestDayId = dayId;
+          }
+        }
+      }
+
+      // If no earlier date found, use the closest one overall
+      if (bestDayId === null) {
+        for (const dayId of this.heads.keys()) {
+          if (bestDayId === null || Math.abs(dayId - targetDayId) < Math.abs(bestDayId - targetDayId)) {
+            bestDayId = dayId;
+          }
+        }
+      }
+
+      if (bestDayId === null) return;
+
+      const index = this.list.findIndex((r) => r.type === 0 && r.dayId === bestDayId);
+      if (index !== -1) {
+        this.refs.recycler?.scrollToItem(index);
+      }
+    },
+
+    /** Provide the date range of the current view */
+    getDateRange(event: { result: { min: Date; max: Date } | null }) {
+      const dayIds = Array.from(this.heads.keys());
+      if (dayIds.length === 0) return;
+      const min = Math.min(...dayIds);
+      const max = Math.max(...dayIds);
+      event.result = {
+        min: utils.dayIdToDate(min),
+        max: utils.dayIdToDate(max),
+      };
     },
 
     isMobileLayout() {
