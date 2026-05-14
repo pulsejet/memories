@@ -213,6 +213,7 @@ OC.L10N.register(
     "No items" : "Nessun elemento",
     "_{n} item_::_{n} items_" : ["{n} elemento ","{n} file","{n} file"],
     "Shared by {user}" : "Condiviso da {user}",
+    "Error: {msg}" : "Errore: {msg}",
     "Failed to delete {fileName}." : "Eliminazione di {fileName} non riuscita.",
     "Yes" : "Sì",
     "No" : "No",
