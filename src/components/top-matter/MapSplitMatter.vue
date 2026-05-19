@@ -89,7 +89,7 @@ export default defineComponent({
       maxBoundsViscosity: 0.9,
     },
     tileLayerOptions: {
-        referrerPolicy: 'origin',
+      referrerPolicy: 'origin',
     },
     clusters: [] as IMarkerCluster[],
     animMarkers: false,
