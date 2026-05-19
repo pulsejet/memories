@@ -15,7 +15,7 @@
       @zoomend="refreshDebounced"
       :options="mapOptions"
     >
-      <LTileLayer :url="tileurl" :attribution="attribution" :noWrap="true" />
+      <LTileLayer :url="tileurl" :attribution="attribution" :noWrap="true" :options="tileLayerOptions" />
       <LMarker v-for="cluster of clusters" :key="cluster.id" :lat-lng="cluster.center" @click="zoomTo(cluster)">
         <LIcon :icon-anchor="[24, 24]" :className="clusterIconClass(cluster)">
           <div class="preview">
@@ -87,6 +87,9 @@ export default defineComponent({
     mapOptions: {
       maxBounds: latLngBounds([-90, -180], [90, 180]),
       maxBoundsViscosity: 0.9,
+    },
+    tileLayerOptions: {
+        referrerPolicy: 'origin',
     },
     clusters: [] as IMarkerCluster[],
     animMarkers: false,
