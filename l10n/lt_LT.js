@@ -15,6 +15,7 @@ OC.L10N.register(
     "Map" : "Žemėlapis",
     "Tags" : "Žymos",
     "Settings" : "Nustatymai",
+    "View all" : "Žiūrėti viską",
     "Videos" : "Vaizdo įrašai",
     "A better photos experience awaits you" : "Jūsų laukia geresnis nuotraukų patyrimas",
     "Click here to start" : "Spustelėkite čia, norėdami pradėti",

@@ -153,6 +153,8 @@ OC.L10N.register(
     "Setup" : "Iestatīt",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Neizdevās pārdēvēt {currentAlbumName} par {newAlbumName}.",
     "Failed to delete {fileName}." : "Neizdevās izdzēst {fileName}",
+    "Failed to favorite files." : "Neizdevās pievienot datnes izlasei.",
+    "Failed to favorite some files." : "Dažas datnes neizdevās pievienot izlasei.",
     "Face Recognition is disabled. Enable in settings to find your friends" : "Seju atpazīšana ir atspējota. Tā ir iespējojama iestatījumos, lai atrastu savus draugus",
     "Add photos to albums by selecting them on your timeline." : "Fotoattēlus albumiem var pievienot atlasot tos laika līnijā",
     "Yes" : "Jā",
