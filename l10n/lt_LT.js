@@ -127,6 +127,7 @@ OC.L10N.register(
     "Refresh" : "Įkelti iš naujo",
     "Failed to upload {file}" : "Nepavyko įkelti {file}",
     "Add tags" : "Pridėti žymas",
+    "Last updated" : "Paskutinį kartą atnaujinta",
     "Creation date" : "Sukūrimo data",
     "Oldest first" : "Seniausi pirma",
     "Ascending" : "Didėjančia tvarka",
