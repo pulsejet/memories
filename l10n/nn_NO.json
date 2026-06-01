@@ -1,5 +1,7 @@
 { "translations": {
     "Download" : "Last ned",
+    "People" : "Folk",
+    "Folders" : "Mapper",
     "Favorites" : "Favorittar",
     "Tags" : "Emneord",
     "Settings" : "Innstillingar",
@@ -36,9 +38,11 @@
     "Home" : "Heim",
     "Upload failed" : "Feil ved opplasting",
     "Previous" : "Førre",
+    "Filters" : "Filter",
     "Value" : "Verdi",
     "Size" : "Storleik",
     "Setup" : "Oppsett",
+    "Choose {file}" : "Vel {file}",
     "Choose" : "Vel"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

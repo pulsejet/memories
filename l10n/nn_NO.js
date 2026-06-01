@@ -2,6 +2,8 @@ OC.L10N.register(
     "memories",
     {
     "Download" : "Last ned",
+    "People" : "Folk",
+    "Folders" : "Mapper",
     "Favorites" : "Favorittar",
     "Tags" : "Emneord",
     "Settings" : "Innstillingar",
@@ -38,9 +40,11 @@ OC.L10N.register(
     "Home" : "Heim",
     "Upload failed" : "Feil ved opplasting",
     "Previous" : "Førre",
+    "Filters" : "Filter",
     "Value" : "Verdi",
     "Size" : "Storleik",
     "Setup" : "Oppsett",
+    "Choose {file}" : "Vel {file}",
     "Choose" : "Vel"
 },
 "nplurals=2; plural=(n != 1);");
