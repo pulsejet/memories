@@ -119,7 +119,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import axios from '@nextcloud/axios';
-import { showError, showSuccess, getFilePickerBuilder } from '@nextcloud/dialogs';
+import { showError, showInfo, showSuccess, getFilePickerBuilder } from '@nextcloud/dialogs';
 
 import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
 const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
@@ -460,7 +460,7 @@ export default defineComponent({
       }
       this.saving = true;
       try {
-        await faceRecognitionAddManualFace({
+        const result = await faceRecognitionAddManualFace({
           fileId: this.fileId,
           personName: this.rawInput.trim(),
           x: this.rect.x,
@@ -472,6 +472,15 @@ export default defineComponent({
           useForClustering: this.useForClustering,
         });
         showSuccess(t('memories', 'Person "{name}" tagged.', { name: this.rawInput.trim() }));
+        if (this.useForClustering && !result.clusteringQueued) {
+          showInfo(
+            t(
+              'memories',
+              'The face was saved for "{name}". Automatic recognition will consider it once the background scan has processed this photo.',
+              { name: this.rawInput.trim() },
+            ),
+          );
+        }
         this.$emit('added', this.rawInput.trim());
         await this.close();
       } catch (e) {

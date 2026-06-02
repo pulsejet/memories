@@ -183,7 +183,7 @@ export async function faceRecognitionAddManualFace(params: {
 }) {
   const url = generateUrl(`/apps/facerecognition/api/2.0/face/manual`);
   return (
-    await axios.post<{ faceId: number; personId: number; name: string }>(url, {
+    await axios.post<{ faceId: number; personId: number; name: string; clusteringQueued: boolean }>(url, {
       fileId: params.fileId,
       personName: params.personName,
       x: params.x,
