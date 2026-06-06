@@ -472,11 +472,11 @@ export default defineComponent({
           useForClustering: this.useForClustering,
         });
         showSuccess(t('memories', 'Person "{name}" tagged.', { name: this.rawInput.trim() }));
-        if (this.useForClustering && !result.clusteringQueued) {
+        if (this.useForClustering && result.clusteringQueued) {
           showInfo(
             t(
               'memories',
-              'The face was saved for "{name}". Automatic recognition will consider it once the background scan has processed this photo.',
+              'Saved for "{name}". The next background scan will look for a face in the marked area and, if one is found, use it for automatic recognition.',
               { name: this.rawInput.trim() },
             ),
           );
