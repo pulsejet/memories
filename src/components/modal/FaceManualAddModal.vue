@@ -15,6 +15,11 @@
 
       <!-- Step 2: draw rectangle -->
       <div v-else class="draw-step">
+        <!-- Suggestions of already-known person names for the name fields below -->
+        <datalist id="memories-manual-face-names">
+          <option v-for="n in knownNames" :key="n" :value="n" />
+        </datalist>
+
         <p v-if="!rect" class="hint">
           {{ t('memories', 'Drag on the photo to mark the face. Existing detections are shown in green.') }}
         </p>
@@ -68,6 +73,7 @@
             :label="t('memories', 'Name')"
             :label-visible="false"
             :placeholder="t('memories', 'Name')"
+            list="memories-manual-face-names"
             @keypress.enter="save()"
           />
           <label class="checkbox-row">
@@ -87,6 +93,7 @@
             :label="t('memories', 'Name')"
             :label-visible="false"
             :placeholder="t('memories', 'Name')"
+            list="memories-manual-face-names"
             @keypress.enter="saveEdit()"
           />
         </div>
@@ -133,6 +140,7 @@ import {
   faceRecognitionAddManualFace,
   faceRecognitionGetFacesForFile,
   faceRecognitionReassignFace,
+  getFaceList,
   type IFaceRectForFile,
 } from '@services/dav/face';
 
@@ -187,6 +195,7 @@ export default defineComponent({
     saving: false,
     editingFace: null as IFaceRectForFile | null,
     editName: '',
+    knownNames: [] as string[],
   }),
 
   computed: {
@@ -224,11 +233,13 @@ export default defineComponent({
     open() {
       this.resetAll();
       this.show = true;
+      this.loadKnownNames();
     },
 
     async openForFile(info: { fileid: number; etag?: string; w?: number; h?: number }) {
       this.resetAll();
       this.show = true;
+      this.loadKnownNames();
       if (!info?.fileid) return;
       try {
         this.fileId = info.fileid;
@@ -251,6 +262,25 @@ export default defineComponent({
     cleanup() {
       this.show = false;
       this.resetAll();
+    },
+
+    /**
+     * Load the names of already-known persons so the name fields can offer
+     * autocompletion — mirrors how naming an unknown cluster suggests existing names.
+     * Failure is non-fatal: it just means no suggestions are shown.
+     */
+    async loadKnownNames(): Promise<void> {
+      try {
+        const faces = await getFaceList('facerecognition');
+        const names = faces
+          .map((f) => f.name)
+          // Keep only real names; unnamed clusters expose a numeric id as their name.
+          .filter((n): n is string => !!n && Number.isNaN(Number(n)));
+        this.knownNames = Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
+      } catch (e) {
+        console.error(e);
+        this.knownNames = [];
+      }
     },
 
     resetAll() {
