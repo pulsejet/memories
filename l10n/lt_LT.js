@@ -59,6 +59,7 @@ OC.L10N.register(
     "Videos (ffmpeg)" : "Vaizdo įrašai (ffmpeg)",
     "The EXIF indexes are built and checked in a periodic background task. Be careful when selecting anything other than automatic indexing. For example, setting the indexing to only timeline folders may cause delays before media becomes available to users, since the user configures the timeline only after logging in." : "EXIF indeksai kuriami ir tikrinami periodiškai foninėje užduotyje. Būkite atsargūs pasirinkdami bet ką, išskyrus automatinį indeksavimą. Pavyzdžiui, nustačius indeksavimą tik laiko skalės aplankams, gali būti vėluojama, kol medija taps prieinama vartotojams, nes vartotojas laiko skalę konfigūruoja tik prisijungęs.",
     "Index per-user timeline folders (not recommended)" : "Indeksuoti laiko skalės aplankus pagal vartotoją (nerekomenduojama)",
+    "You can use the regex101 website to validate and test the pattern:" : "Galite naudoti „regex101“ svetainę, kad patvirtintumėte ir išbandytumėte šabloną:",
     "Performance" : "Našumas",
     "Unknown" : "Nežinoma",
     "HTTPS is enabled" : "HTTPS yra įjungta",

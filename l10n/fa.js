@@ -301,6 +301,7 @@ OC.L10N.register(
     "Public Link" : "Public Link",
     "Share an external Nextcloud link" : "Share an external Nextcloud link",
     "Failed to upload {file}" : "ناتوانی در بارگذاری {file}",
+    "Add tags" : "افزودن برچسب‌ها",
     "Creation date" : "تاریخ ایجاد",
     "Oldest first" : "نخست قدیمی‌ترین",
     "Ascending" : "Ascending",
