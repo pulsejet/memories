@@ -224,9 +224,11 @@ final class Exif
             throw new \Exception("Blacklisted date: {$exifDate}");
         }
 
-        // Force the timezone to be the same as parseTz
+        // Force the timezone to be the same as parseTz, unless offset is present
         if ($exifTz) {
             $parsedDate->setTimezone($exifTz);
+        } elseif ($parsedDate->getOffset() !== 0) {
+          $parsedDate->setTimezone(new \DateTimeZone($parsedDate->format('O')));
         }
 
         return $parsedDate;
