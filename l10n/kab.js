@@ -45,6 +45,7 @@ OC.L10N.register(
     "Upload files" : "Azen ifuyla",
     "Previous" : "Ɣer deffir",
     "Next" : "Uḍfir",
+    "Filters" : "Imsizdigen",
     "Image" : "Tugna",
     "Text" : "Aḍris",
     "Size" : "Teɣzi",
