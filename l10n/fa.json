@@ -188,6 +188,7 @@
     "Connection address (same as bind if local)" : "Connection address (same as bind if local)",
     "Template" : "Template",
     "Shared" : "به اشتراک گذاشته شده ",
+    "No results found" : "No results found",
     "Search" : "جستجو",
     "Upload" : "بارگذاری",
     "_{n} photo updated_::_{n} photos updated_" : ["{n} photo updated","{n} photos updated"],
