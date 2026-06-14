@@ -461,7 +461,7 @@
     "{name} binary exists and is executable." : "O binario {name} existe e é executábel.",
     "{name} binary not found." : "Non se atopou o binario {name}.",
     "{name} binary is not executable." : "O binario {name} non é executábel",
-    "{name} failed test: {info}." : "Fallou a proba de {name}: {información}.",
+    "{name} failed test: {info}." : "Fallou a proba de {name}: {info}.",
     "{name} binary exists and is usable ({info})." : "O binario {name} existe e pódese usar ({info}).",
     "{name} binary status: {status}." : "Estado do binario {name}: {status}.",
     "Save as" : "Gardar como",
