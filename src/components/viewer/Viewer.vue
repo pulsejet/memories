@@ -1051,6 +1051,10 @@ export default defineComponent({
       if (e.key === 'A' && e.shiftKey) {
         this.updateAlbums();
       }
+
+      if (e.key === 'M' && e.shiftKey) {
+        this.editMetadata();
+      }
     },
 
     /** Delete this photo and refresh */
