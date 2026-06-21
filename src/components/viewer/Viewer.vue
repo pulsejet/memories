@@ -1047,6 +1047,10 @@ export default defineComponent({
       if (e.key === 'F' && e.shiftKey) {
         this.refs.outer?.requestFullscreen();
       }
+
+      if (e.key === 'A' && e.shiftKey) {
+        this.updateAlbums();
+      }
     },
 
     /** Delete this photo and refresh */
