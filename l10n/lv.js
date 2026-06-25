@@ -124,7 +124,7 @@ OC.L10N.register(
     "Download {ext}" : "Lejupielādēt {ext}",
     "Slideshow" : "Slīdrāde",
     "Previous" : "Iepriekšējā",
-    "Synchronizing local files ({n} done)." : "Sinhronizē vietējās datnes ({n} pabeigtas).",
+    "Synchronizing local files ({n} done)." : "Vienādo vietējās datnes ({n} pabeigtas).",
     "Finish" : "Pabeigt",
     "Save as" : "Saglabāt kā",
     "Undo" : "Atsaukt",
