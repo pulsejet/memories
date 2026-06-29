@@ -29,20 +29,31 @@ export async function* archiveFilesByIds(photos: IPhoto[], archive: boolean) {
   if (!photos.length) return;
 
   // Add stack files
-  photos = await base.extendWithStack(photos);
+  const extended = await base.extendWithStack(photos);
+  const livePhotoVideoFileIds = extended.livePhotoVideoFileIds;
+  photos = extended.photos;
 
-  // Archive each file
-  const calls = photos.map((photo) => async () => {
+  /** Archive server file */
+  const _archive_file = async (photo: IPhoto, silenceErrors: boolean = false) => {
     try {
       await archiveFile(photo.fileid, archive);
       return photo.fileid;
     } catch (error) {
+      if (silenceErrors) return 0;
       console.error('Failed to (un)archive', photo.fileid, error);
       const msg = error?.response?.data?.message || t('memories', 'General Failure');
       showError(t('memories', 'Error: {msg}', { msg }));
       return 0;
     }
-  });
+  };
 
+  const regularPhotos = photos.filter((photo) => !livePhotoVideoFileIds.has(photo.fileid));
+  const livePhotoVideoPhotos = photos.filter((photo) => livePhotoVideoFileIds.has(photo.fileid));
+
+  const calls = regularPhotos.map((photo) => () => _archive_file(photo));
   yield* base.runInParallel(calls, 10);
+  const livePhotoVideoCalls = livePhotoVideoPhotos.map((photo) => () => _archive_file(photo, true));
+  for await (const _ of base.runInParallel(livePhotoVideoCalls, 10)) {
+    // ignore results for live photo video operations
+  }
 }
