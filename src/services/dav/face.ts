@@ -143,3 +143,68 @@ export async function recognizeRenameFace(user: string, name: string, target: st
 export async function recognizeCreateFace(user: string, name: string) {
   return await client.createDirectory(`/recognize/${user}/faces/${name}`);
 }
+
+/** One face rectangle on a photo, in original-image pixel coordinates. */
+export type IFaceRectForFile = {
+  id: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  person: number | null;
+  personName: string | null;
+  isManual: boolean;
+};
+
+/**
+ * Fetch all known face rectangles for a single file (face recognition app).
+ * Used by the manual-face dialog to show existing detections as context.
+ */
+export async function faceRecognitionGetFacesForFile(fileId: number) {
+  const url = generateUrl(`/apps/facerecognition/api/2.0/file/${fileId}/faces`);
+  return (await axios.get<IFaceRectForFile[]>(url)).data;
+}
+
+/**
+ * Create a manually drawn face on a photo and attach it to a (possibly new)
+ * named person cluster. Coordinates are fractions 0..1 of the original image.
+ * imageWidth/imageHeight are the natural pixel dimensions of the photo.
+ */
+export async function faceRecognitionAddManualFace(params: {
+  fileId: number;
+  personName: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  imageWidth: number;
+  imageHeight: number;
+  useForClustering?: boolean;
+}) {
+  const url = generateUrl(`/apps/facerecognition/api/2.0/face/manual`);
+  return (
+    await axios.post<{ faceId: number; personId: number; name: string; clusteringQueued: boolean }>(url, {
+      fileId: params.fileId,
+      personName: params.personName,
+      x: params.x,
+      y: params.y,
+      width: params.width,
+      height: params.height,
+      imageWidth: params.imageWidth,
+      imageHeight: params.imageHeight,
+      useForClustering: params.useForClustering ?? false,
+    })
+  ).data;
+}
+
+/**
+ * Reassign a single detected face to a different person cluster.
+ * Affects only THIS face; other faces in the original cluster (on other
+ * photos) stay where they are.
+ */
+export async function faceRecognitionReassignFace(faceId: number, personName: string) {
+  const url = generateUrl(`/apps/facerecognition/api/2.0/face/${faceId}/reassign`);
+  return (
+    await axios.post<{ faceId: number; personId: number; name: string }>(url, { personName })
+  ).data;
+}

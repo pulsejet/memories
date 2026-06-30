@@ -5,6 +5,11 @@
     </template>
 
     <div class="fields">
+      <!-- Suggestions of already-known person names for the name field -->
+      <datalist id="memories-known-person-names">
+        <option v-for="n in knownNames" :key="n" :value="n" />
+      </datalist>
+
       <NcTextField
         class="field"
         :autofocus="true"
@@ -12,6 +17,7 @@
         :label="t('memories', 'Name')"
         :label-visible="false"
         :placeholder="t('memories', 'Name')"
+        list="memories-known-person-names"
         @keypress.enter="save()"
       />
     </div>
@@ -52,6 +58,7 @@ export default defineComponent({
 
   data: () => ({
     rawInput: String(),
+    knownNames: [] as string[],
   }),
 
   computed: {
@@ -83,10 +90,31 @@ export default defineComponent({
 
       this.rawInput = isNaN(Number(this.name)) ? this.name : String();
       this.show = true;
+      this.loadKnownNames();
     },
 
     cleanup() {
       this.show = false;
+    },
+
+    /**
+     * Load already-known person names from the active backend so the name field
+     * can offer them as autocompletion (same comfort as the manual-face modal).
+     * Failure is non-fatal: it just means no suggestions are shown.
+     */
+    async loadKnownNames(): Promise<void> {
+      try {
+        const app = this.routeIsRecognize ? 'recognize' : 'facerecognition';
+        const faces = await dav.getFaceList(app);
+        const names = faces
+          .map((f) => f.name)
+          // Keep only real names; unnamed clusters expose a numeric id as their name.
+          .filter((n): n is string => !!n && Number.isNaN(Number(n)));
+        this.knownNames = Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
+      } catch (e) {
+        console.error(e);
+        this.knownNames = [];
+      }
     },
 
     async save() {

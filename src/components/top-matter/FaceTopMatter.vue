@@ -23,6 +23,14 @@
           </NcActionButton>
         </template>
 
+        <!-- face-recognition root view: add a manually tagged person -->
+        <template v-if="!name && routeIsFaceRecognition">
+          <NcActionButton :aria-label="t('memories', 'Add person')" @click="openManualAdd" close-after-click>
+            {{ t('memories', 'Add person') }}
+            <template #icon> <AddIcon :size="20" /> </template>
+          </NcActionButton>
+        </template>
+
         <!-- real cluster -->
         <template v-if="isReal">
           <NcActionButton :aria-label="t('memories', 'Rename person')" @click="rename" close-after-click>
@@ -59,6 +67,7 @@
     <FaceEditModal ref="editModal" />
     <FaceDeleteModal ref="deleteModal" />
     <FaceMergeModal ref="mergeModal" />
+    <FaceManualAddModal ref="manualAddModal" @added="onManualAdded" />
   </div>
 </template>
 
@@ -74,6 +83,7 @@ import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox.js
 import FaceEditModal from '@components/modal/FaceEditModal.vue';
 import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';
 import FaceMergeModal from '@components/modal/FaceMergeModal.vue';
+import FaceManualAddModal from '@components/modal/FaceManualAddModal.vue';
 
 import * as utils from '@services/utils';
 
@@ -82,6 +92,7 @@ import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import DeleteIcon from 'vue-material-design-icons/Close.vue';
 import MergeIcon from 'vue-material-design-icons/Merge.vue';
 import UnassignedIcon from 'vue-material-design-icons/AccountQuestion.vue';
+import AddIcon from 'vue-material-design-icons/AccountPlus.vue';
 
 export default defineComponent({
   name: 'FaceTopMatter',
@@ -92,11 +103,13 @@ export default defineComponent({
     FaceEditModal,
     FaceDeleteModal,
     FaceMergeModal,
+    FaceManualAddModal,
     BackIcon,
     EditIcon,
     DeleteIcon,
     MergeIcon,
     UnassignedIcon,
+    AddIcon,
   },
 
   mixins: [UserConfig],
@@ -107,6 +120,7 @@ export default defineComponent({
         editModal: InstanceType<typeof FaceEditModal>;
         deleteModal: InstanceType<typeof FaceDeleteModal>;
         mergeModal: InstanceType<typeof FaceMergeModal>;
+        manualAddModal: InstanceType<typeof FaceManualAddModal>;
       };
     },
 
@@ -151,6 +165,14 @@ export default defineComponent({
 
     changeShowFaceRect() {
       this.updateSetting('show_face_rect');
+      utils.bus.emit('memories:timeline:hard-refresh', null);
+    },
+
+    openManualAdd() {
+      this.refs.manualAddModal.open();
+    },
+
+    onManualAdded() {
       utils.bus.emit('memories:timeline:hard-refresh', null);
     },
   },
