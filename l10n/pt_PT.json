@@ -546,6 +546,7 @@
     "Shared Folder" : "Pasta partilhada",
     "Shared Album" : "Álbum partilhado",
     "Setup" : "Configurar",
+    "Failed to add {filename} to album." : "Falha ao adicionar {filename} ao álbum.",
     "Failed to remove {filename}." : "Falha ao remover {filename}.",
     "Failed to create {albumName}." : "Falha ao criar {albumName}.",
     "Failed to update properties of {albumName} with {properties}." : "Falha ao atualizar as propriedades de {albumName} com {properties}.",
