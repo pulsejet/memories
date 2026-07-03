@@ -108,7 +108,7 @@ import { defineComponent } from 'vue';
 import type { Route } from 'vue-router';
 
 import axios from '@nextcloud/axios';
-import { showError } from '@nextcloud/dialogs';
+import { showError, showInfo } from '@nextcloud/dialogs';
 
 import { getLayout } from '@services/layout';
 
@@ -173,6 +173,8 @@ export default defineComponent({
     heads: new Map<number, IHeadRow>(),
     /** Current list (days response) was loaded from cache */
     daysIsCache: false,
+    /** User was already notified of being offline */
+    offlineNotified: false,
 
     /** Size of outer container [w, h] */
     containerSize: [0, 0] as [number, number],
@@ -229,6 +231,7 @@ export default defineComponent({
   },
 
   created() {
+    window.addEventListener('online', this.onWindowOnline);
     utils.bus.on('memories:user-config-changed', this.softRefresh);
     utils.bus.on('files:file:created', this.softRefresh);
     utils.bus.on('memories:window:resize', this.handleResizeWithDelay);
@@ -239,6 +242,7 @@ export default defineComponent({
   },
 
   beforeDestroy() {
+    window.removeEventListener('online', this.onWindowOnline);
     utils.bus.off('memories:user-config-changed', this.softRefresh);
     utils.bus.off('files:file:created', this.softRefresh);
     utils.bus.off('memories:window:resize', this.handleResizeWithDelay);
@@ -748,6 +752,9 @@ export default defineComponent({
 
                 await this.processDays(cache, true);
                 this.updateLoading(-1);
+
+                // Tell the user immediately if we know we are offline
+                if (!navigator.onLine) this.notifyOffline();
               }
             } catch {
               console.warn(`Failed to process days cache: ${cacheUrl}`);
@@ -776,11 +783,31 @@ export default defineComponent({
         if (!utils.isNetworkError(e)) {
           showError(e?.response?.data?.message ?? e.message);
           console.error(e);
+        } else if (cache) {
+          // We are offline but the cached content was shown
+          this.notifyOffline();
         }
       } finally {
         // If cache is set here, loading was already decremented
         if (!cache) this.updateLoading(-1);
       }
+    },
+
+    /**
+     * Tell the user once that cached content is being shown offline.
+     */
+    notifyOffline() {
+      if (this.offlineNotified) return;
+      this.offlineNotified = true;
+      showInfo(this.t('memories', 'You are offline; showing cached content'));
+    },
+
+    /**
+     * Refresh the timeline when connectivity returns.
+     */
+    onWindowOnline() {
+      this.offlineNotified = false;
+      this.softRefresh();
     },
 
     /**

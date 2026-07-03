@@ -22,8 +22,15 @@
     -->
     <FirstStart v-else-if="isFirstStart" />
 
+    <!--
+      The configuration could not be loaded (e.g. offline first start).
+      It is retried in the background, so show a loading indicator
+      instead of nothing at all.
+    -->
+    <XLoadingIcon class="fill-block" v-else-if="isConfigUnknown" />
+
     <!-- Render the actual app when configuration has been loaded -->
-    <template v-else-if="!isConfigUnknown">
+    <template v-else>
       <NcAppNavigation v-if="showNavigation">
         <template #list>
           <NcAppNavigationItem
@@ -296,7 +303,8 @@ export default defineComponent({
 
   async beforeMount() {
     if ('serviceWorker' in navigator) {
-      const registerSW = async () => {
+      // Use the window load event to keep the page load performant
+      window.addEventListener('load', async () => {
         try {
           const url = generateUrl('/apps/memories/static/service-worker.js');
           const registration = await navigator.serviceWorker.register(url, {
@@ -311,16 +319,7 @@ export default defineComponent({
         } catch (error) {
           console.error('SW registration failed: ', error);
         }
-      };
-
-      if (nativex.has()) {
-        // Register immediately in the native app: sessions can be short,
-        // and the service worker is what makes offline startup possible
-        registerSW();
-      } else {
-        // Use the window load event to keep the page load performant
-        window.addEventListener('load', registerSW);
-      }
+      });
     } else {
       console.debug('Service Worker is not enabled on this browser.');
     }
