@@ -430,6 +430,7 @@ OC.L10N.register(
     "Upload not permitted" : "Upload não permitido",
     "Uploading {file} ({current}/{total})" : "Enviando {file} ({current}/{total})",
     "Upload failed" : "Envio falhou",
+    "Uploaded {success} files, {failed} failed" : "{success} arquivos enviados, {failed} falharam",
     "Image saved successfully" : "Imagem guardada com sucesso",
     "Error saving image: {error}" : "Erro ao guardar imagem: {error}",
     "Unsaved changes" : "Modificações não guardadas",
