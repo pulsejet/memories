@@ -120,6 +120,8 @@ import SelectionManager from '@components/SelectionManager.vue';
 import Viewer from '@components/viewer/Viewer.vue';
 import SwipeRefresh from './SwipeRefresh.vue';
 
+import { fetchImage } from '@components/frame/XImgCache';
+
 import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import TopMatter from '@components/top-matter/TopMatter.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
@@ -779,6 +781,9 @@ export default defineComponent({
         // Make sure we're still on the same page
         if (this.state !== startState) return;
         await this.processDays(data, false);
+
+        // Warm the offline caches in the background (native only)
+        this.prefetchOffline(data);
       } catch (e) {
         if (!utils.isNetworkError(e)) {
           showError(e?.response?.data?.message ?? e.message);
@@ -808,6 +813,57 @@ export default defineComponent({
     onWindowOnline() {
       this.offlineNotified = false;
       this.softRefresh();
+    },
+
+    /**
+     * Warm the offline caches for the most recent days in the background,
+     * so that recently synced photos can be browsed offline (#854).
+     *
+     * Runs only on the main timeline of the native app, at most once per
+     * hour. Photos are fetched through the image worker, which is cache
+     * first: anything already cached costs nothing.
+     */
+    async prefetchOffline(days: IDay[]) {
+      if (!nativex.has() || !this.routeIsBase || !navigator.onLine) return;
+
+      // Throttle to once per hour
+      const lsKey = 'memories_offline_prefetch_time';
+      const last = Number(localStorage.getItem(lsKey) ?? 0);
+      if (Date.now() - last < 3600 * 1000) return;
+      localStorage.setItem(lsKey, Date.now().toString());
+
+      // Choose the most recent days up to a total budget of photos
+      const chosen: IDay[] = [];
+      let count = 0;
+      for (const day of days) {
+        if (day.count <= 0) continue;
+        chosen.push(day);
+        if ((count += day.count) >= 500) break;
+      }
+
+      const state = this.state;
+      for (const day of chosen) {
+        // Stop if the user navigated away or went offline
+        if (this.state !== state || !navigator.onLine) return;
+
+        try {
+          // Fetch and cache the day detail (same URL as fetchDay)
+          const url = this.getDayUrl([day.dayid]);
+          const res = await axios.get<IPhoto[]>(url);
+          if (res.status !== 200) continue;
+          utils.cacheData(url, res.data);
+
+          // Warm the preview cache; batched into multipreview by the worker
+          await Promise.allSettled(
+            res.data
+              .filter((photo) => !utils.isLocalPhoto(photo))
+              .map((photo) => fetchImage(utils.getPreviewUrl({ photo, msize: 256 }))),
+          );
+        } catch {
+          // Offline or server error; try again on the next run
+          return;
+        }
+      }
     },
 
     /**
