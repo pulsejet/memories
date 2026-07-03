@@ -32,6 +32,10 @@ declare module '@typings' {
     sidebar_filepath: boolean;
     metadata_in_slideshow: boolean;
 
+    // on this day settings
+    onthisday_day_range: number;
+    onthisday_photos_per_year: number;
+
     // folder settings
     folders_path: string;
     show_hidden_folders: boolean;
