@@ -1,5 +1,5 @@
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
-import { NetworkFirst, CacheFirst } from 'workbox-strategies';
+import { StaleWhileRevalidate, CacheFirst } from 'workbox-strategies';
 import { registerRoute } from 'workbox-routing';
 import { ExpirationPlugin } from 'workbox-expiration';
 
@@ -59,15 +59,16 @@ const netonly = [
   /\/csrftoken/i, // CSRF token (https://github.com/pulsejet/memories/issues/835)
 ];
 
-// Use NetworkFirst for HTML pages for initial state and CSRF token.
-// Fall back to the cached copy if the network takes too long, so that
-// the app still starts (with stale initial state) on slow or dead
-// connections instead of blocking indefinitely.
+// Serve HTML pages from the cache immediately and revalidate in the
+// background, so that startup does not depend on the network at all.
+// The embedded initial state and request token may be one navigation
+// stale: the timeline refreshes itself over the API anyway, and the
+// request token stays valid for the lifetime of the session (the
+// network-only /csrftoken route handles renewal).
 registerRoute(
   ({ url }) => url.origin === self.location.origin && !netonly.some((regex) => regex.test(url.pathname)),
-  new NetworkFirst({
+  new StaleWhileRevalidate({
     cacheName: 'memories-pages',
-    networkTimeoutSeconds: 3,
   }),
 );
 
