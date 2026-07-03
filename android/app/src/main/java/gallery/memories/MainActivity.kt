@@ -85,6 +85,12 @@ class MainActivity : AppCompatActivity() {
     private var mReloadOnceOnLoad = false
 
     private val mNetworkCallback = object : ConnectivityManager.NetworkCallback() {
+        private var mWasLost = false
+
+        override fun onLost(network: Network) {
+            mWasLost = true
+        }
+
         override fun onAvailable(network: Network) {
             // Reload the app if we failed to load it due to being offline
             if (mOfflinePageShowing) {
@@ -94,11 +100,19 @@ class MainActivity : AppCompatActivity() {
 
         override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
             // onAvailable may fire before the network is actually usable
-            // (e.g. DNS through a VPN that is still reconnecting), so also
-            // reload when the network becomes validated
-            if (mOfflinePageShowing && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
+            // (e.g. DNS through a VPN that is still reconnecting), so act
+            // only when the network is validated
+            if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) return
+
+            if (mOfflinePageShowing) {
                 runOnUiThread { loadDefaultUrl() }
+            } else if (mWasLost) {
+                // The web app cannot rely on the online event (e.g. behind
+                // an always-on VPN the browser never sees the network go
+                // away), so refresh the timeline for it
+                refreshTimeline()
             }
+            mWasLost = false
         }
     }
 
