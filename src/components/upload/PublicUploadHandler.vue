@@ -156,7 +156,8 @@ export default defineComponent({
           owner: null,
           permissions: Permission.CREATE,
         });
-        const uploader = new Uploader(true, destination);
+        // TODO: remove the type cast when migrated to new @nextcloud/dialogs (Vue 3 only)
+        const uploader = new Uploader(true, <any>destination);
 
         // Track upload progress
         const totalSize = filesToUpload.reduce((sum, file) => sum + file.size, 0);

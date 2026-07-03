@@ -150,5 +150,8 @@ module.exports = {
       '@mixins': path.resolve(__dirname, 'src', 'mixins'),
       '@native': path.resolve(__dirname, 'src', 'native'),
     },
+    fallback: {
+      stream: require.resolve('stream-browserify'),
+    },
   },
 };
