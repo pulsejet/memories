@@ -296,8 +296,7 @@ export default defineComponent({
 
   async beforeMount() {
     if ('serviceWorker' in navigator) {
-      // Use the window load event to keep the page load performant
-      window.addEventListener('load', async () => {
+      const registerSW = async () => {
         try {
           const url = generateUrl('/apps/memories/static/service-worker.js');
           const registration = await navigator.serviceWorker.register(url, {
@@ -312,7 +311,16 @@ export default defineComponent({
         } catch (error) {
           console.error('SW registration failed: ', error);
         }
-      });
+      };
+
+      if (nativex.has()) {
+        // Register immediately in the native app: sessions can be short,
+        // and the service worker is what makes offline startup possible
+        registerSW();
+      } else {
+        // Use the window load event to keep the page load performant
+        window.addEventListener('load', registerSW);
+      }
     } else {
       console.debug('Service Worker is not enabled on this browser.');
     }

@@ -59,11 +59,15 @@ const netonly = [
   /\/csrftoken/i, // CSRF token (https://github.com/pulsejet/memories/issues/835)
 ];
 
-// Use NetworkFirst for HTML pages for initial state and CSRF token
+// Use NetworkFirst for HTML pages for initial state and CSRF token.
+// Fall back to the cached copy if the network takes too long, so that
+// the app still starts (with stale initial state) on slow or dead
+// connections instead of blocking indefinitely.
 registerRoute(
   ({ url }) => url.origin === self.location.origin && !netonly.some((regex) => regex.test(url.pathname)),
   new NetworkFirst({
     cacheName: 'memories-pages',
+    networkTimeoutSeconds: 3,
   }),
 );
 
