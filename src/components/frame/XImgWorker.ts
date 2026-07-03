@@ -24,7 +24,10 @@ const pendingUrls = new Map<string, BlobCallback[]>();
 // Cache for preview images
 const cacheName = 'memories-images';
 let imageCache: Cache | undefined;
-(async function openCache() {
+// The first image requests arrive before the cache is open, so keep the
+// promise around and await it before matching; otherwise those requests
+// silently skip the cache and always hit the network (offline: forever)
+const imageCachePromise: Promise<void> = (async function openCache() {
   try {
     imageCache = await self.caches?.open(cacheName);
   } catch {
@@ -208,7 +211,8 @@ async function flushPreviewQueue() {
 
 /** Accepts a URL and returns a promise with a blob */
 async function fetchImage(url: string): Promise<Blob> {
-  // Check if in cache
+  // Check if in cache (wait for the cache to open first)
+  await imageCachePromise;
   const cache = await imageCache?.match(url);
   if (cache) return await cache.blob();
 
