@@ -39,6 +39,12 @@ class HttpService {
         get() = mTrustAll
 
     /**
+     * Get the base URL of the server
+     */
+    val baseUrl: String?
+        get() = mBaseUrl
+
+    /**
      * Check if the HTTP service is logged in
      */
     fun isLoggedIn(): Boolean {
