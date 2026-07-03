@@ -37,6 +37,7 @@ import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
+import staticConfig from '@services/static-config';
 import type { IPhoto } from '@typings';
 
 import LeftMoveIcon from 'vue-material-design-icons/ChevronLeft.vue';
@@ -76,6 +77,10 @@ export default defineComponent({
       return this.$refs as {
         inner?: HTMLDivElement;
       };
+    },
+
+    photosPerYear(): number {
+      return staticConfig.getSync('onthisday_photos_per_year');
     },
   },
 
@@ -159,7 +164,7 @@ export default defineComponent({
 
       // For each year, randomly choose 10 photos to display
       for (const year of this.years) {
-        year.photos = utils.randomSubarray(year.photos, 10);
+        year.photos = utils.randomSubarray(year.photos, this.photosPerYear);
       }
 
       // Choose preview photo

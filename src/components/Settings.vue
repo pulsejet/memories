@@ -187,6 +187,36 @@
           {{ t('memories', 'Show hidden albums') }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
+
+      <NcAppSettingsSection id="onthisday-settings" :name="names.onthisday">
+        <NcTextField
+          :label="t('memories', 'Day range (1-7)')"
+          :label-visible="true"
+          v-model="config.onthisday_day_range"
+          type="number"
+          min="1"
+          max="7"
+          step="1"
+          @input="updateOnThisDayRange"
+        />
+        <div class="settings-hint">
+          {{ t('memories', 'Number of days before and after each anniversary to include') }}
+        </div>
+
+        <NcTextField
+          :label="t('memories', 'Photos per year (1-50)')"
+          :label-visible="true"
+          v-model="config.onthisday_photos_per_year"
+          type="number"
+          min="1"
+          max="50"
+          step="1"
+          @input="updateOnThisDayPhotos"
+        />
+        <div class="settings-hint">
+          {{ t('memories', 'Maximum number of photos to include per year') }}
+        </div>
+      </NcAppSettingsSection>
     </NcAppSettingsDialog>
 
     <MultiPathSelectionModal ref="multiPathModal" :title="pathSelTitle" @close="saveTimelinePath" />
@@ -196,6 +226,13 @@
 <style scoped>
 input[type='text'] {
   width: 100%;
+}
+
+div.settings-hint {
+  font-size: 0.8rem;
+  margin-left: 0.6rem;
+  margin-bottom: 0.6rem;
+  color: var(--color-text-lighter);
 }
 </style>
 
@@ -241,6 +278,7 @@ export default defineComponent({
       header: t('memories', 'Memories Settings'),
       general: t('memories', 'General'),
       viewer: t('memories', 'Photo Viewer'),
+      onthisday: t('memories', 'On This Day'),
       account: t('memories', 'Account'),
       folders: t('memories', 'Folders'),
       albums: t('memories', 'Albums'),
@@ -374,6 +412,15 @@ export default defineComponent({
 
     async updateMetadataInSlideshow() {
       await this.updateSetting('metadata_in_slideshow', 'metadataInSlideshow');
+    },
+
+    // On This Day settings
+    async updateOnThisDayRange() {
+      await this.updateSetting('onthisday_day_range', 'onthisdayDayRange');
+    },
+
+    async updateOnThisDayPhotos() {
+      await this.updateSetting('onthisday_photos_per_year', 'onthisdayPhotosPerYear');
     },
 
     // Folders settings
