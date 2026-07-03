@@ -302,11 +302,9 @@ export default defineComponent({
       for await (const responses of dav.runInParallel(calls, 8)) {
         for (const res of responses.filter(Boolean)) {
           const blob = res!.data;
-          // Content-Disposition may be unquoted; an empty file name makes navigator.share()
-          // fail on Safari, which infers the type from the name, so fall back to the MIME type.
-          const ext = (blob.type.split('/').pop() || 'bin').replace('jpeg', 'jpg');
+          const ext = blob.type.split('/').pop() || 'bin';
           const cd = res!.headers['content-disposition'] ?? '';
-          const filename = cd.match(/filename="?([^";]+)"?/)?.[1] ?? `memories.${ext}`;
+          const filename = cd.match(/filename="?([^";]+)"?/)?.[1] ?? `download.${ext}`;
           files.push(new File([blob], filename, { type: blob.type }));
         }
       }
