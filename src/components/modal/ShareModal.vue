@@ -301,8 +301,10 @@ export default defineComponent({
       const files: File[] = [];
       for await (const responses of dav.runInParallel(calls, 8)) {
         for (const res of responses.filter(Boolean)) {
-          const filename = res!.headers['content-disposition']?.match(/filename="(.+)"/)?.[1] ?? '';
           const blob = res!.data;
+          const ext = blob.type.split('/').pop() || 'bin';
+          const cd = res!.headers['content-disposition'] ?? '';
+          const filename = cd.match(/filename="?([^";]+)"?/)?.[1] ?? `download.${ext}`;
           files.push(new File([blob], filename, { type: blob.type }));
         }
       }
