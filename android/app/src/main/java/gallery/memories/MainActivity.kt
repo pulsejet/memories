@@ -343,7 +343,7 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    fun initializePlayer(uris: Array<Uri>, uid: Long) {
+    fun initializePlayer(uris: Array<Uri>, uid: Long, loop: Boolean = false) {
         if (player != null) {
             if (playerUid == uid) return
             player?.release()
@@ -407,6 +407,9 @@ class MainActivity : AppCompatActivity() {
                         exoPlayer.play()
                     }
                 })
+
+
+                exoPlayer.repeatMode = if (loop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
 
                 // Start the player
                 exoPlayer.playWhenReady = playWhenReady
