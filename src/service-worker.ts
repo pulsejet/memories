@@ -10,11 +10,29 @@ type PrecacheEntry = Exclude<(typeof self.__WB_MANIFEST)[number], string>;
 // Paths are updated in PHP. See OtherController.php
 const manifest = self.__WB_MANIFEST as Array<PrecacheEntry>;
 
-// Only include JS files
-const filteredManifest = manifest.filter((entry) => /\.js(\?.*)?$/.test(entry.url));
+// Only include JS files.
+// The webpack output names carry the content hash as a ?v= parameter;
+// move it to the workbox revision so that the cache key is the bare
+// URL. Pages request scripts with a *different* ?v= (the Nextcloud
+// version), so without this normalization no page request would ever
+// match the precache and updates would never reach the browser.
+const filteredManifest = manifest
+  .filter((entry) => /\.js(\?.*)?$/.test(entry.url))
+  .map((entry) => {
+    const [url, query] = entry.url.split('?');
+    return { url, revision: entry.revision ?? new URLSearchParams(query).get('v') };
+  });
 
-precacheAndRoute(filteredManifest);
+precacheAndRoute(filteredManifest, {
+  // Match page requests regardless of the ?v= version parameter
+  ignoreURLParametersMatching: [/^v$/, /^utm_/],
+});
 cleanupOutdatedCaches();
+
+// Activate updated workers immediately instead of waiting for all
+// pages to close: precached URLs are revisioned, so an already-open
+// page keeps working against the refreshed cache.
+self.addEventListener('install', () => self.skipWaiting());
 
 registerRoute(
   /\/apps\/memories\/api\/video\/livephoto\/.*/,
