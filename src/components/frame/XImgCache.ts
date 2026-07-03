@@ -58,9 +58,10 @@ export async function sticky(url: string, delta: number) {
   }
 }
 
-// Whether the worker failed to respond in time; once set, requests are
-// served directly from the main thread instead
-let workerUnresponsive = false;
+// Worker health: null = unknown yet, false = did not answer the ping
+let workerAlive: boolean | null = null;
+let workerPing: Promise<boolean> | null = null;
+let workerPingTime = 0;
 
 /**
  * Fetch an image on the main thread (cache first).
@@ -75,28 +76,36 @@ async function fetchImageDirect(url: string): Promise<string> {
   return URL.createObjectURL(blob);
 }
 
-/** Fetch through the worker, falling back to the main thread on timeout */
-async function fetchImageSafe(url: string): Promise<string> {
-  if (workerUnresponsive) return await fetchImageDirect(url);
-
-  return await new Promise<string>((resolve, reject) => {
-    const timer = window.setTimeout(() => {
-      workerUnresponsive = true;
-      fetchImageDirect(url).then(resolve, reject);
-    }, 5000);
-
-    worker.fetchImageSrc(url).then(
-      (blobUrl) => {
+/** Check once whether the worker actually runs (2s deadline) */
+function pingWorker(): Promise<boolean> {
+  workerPingTime = Date.now();
+  return (workerPing ??= new Promise<boolean>((resolve) => {
+    const timer = window.setTimeout(() => resolve(false), 2000);
+    worker.ping().then(
+      () => {
         window.clearTimeout(timer);
-        workerUnresponsive = false;
-        resolve(blobUrl);
+        resolve(true);
       },
-      (err) => {
+      () => {
         window.clearTimeout(timer);
-        reject(err);
+        resolve(false);
       },
     );
-  });
+  }).then((alive) => (workerAlive = alive)));
+}
+
+/** Fetch through the worker, or on the main thread if it does not run */
+async function fetchImageSafe(url: string): Promise<string> {
+  // Probe again periodically: the worker may become able to start
+  // after connectivity returns
+  if (workerAlive === false && Date.now() - workerPingTime > 30000) {
+    workerAlive = null;
+    workerPing = null;
+  }
+
+  if (workerAlive === null) await pingWorker();
+  if (!workerAlive) return await fetchImageDirect(url);
+  return await worker.fetchImageSrc(url);
 }
 
 export async function fetchImage(url: string) {

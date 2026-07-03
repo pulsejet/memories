@@ -321,5 +321,10 @@ async function fetchImageSrc(url: string) {
   return URL.createObjectURL(await fetchImage(url));
 }
 
+/** Health check: confirms the worker script has loaded and runs */
+async function ping() {
+  return true;
+}
+
 // Exports to main thread
-export default exportWorker({ fetchImageSrc, configure });
+export default exportWorker({ fetchImageSrc, configure, ping });
