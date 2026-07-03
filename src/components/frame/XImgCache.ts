@@ -58,6 +58,47 @@ export async function sticky(url: string, delta: number) {
   }
 }
 
+// Whether the worker failed to respond in time; once set, requests are
+// served directly from the main thread instead
+let workerUnresponsive = false;
+
+/**
+ * Fetch an image on the main thread (cache first).
+ *
+ * The worker cannot start while offline on Android WebView: worker
+ * script requests are not routed through the service worker, so the
+ * fetch of the worker script itself hangs without connectivity.
+ */
+async function fetchImageDirect(url: string): Promise<string> {
+  const cached = await window.caches?.open('memories-images').then((c) => c.match(url));
+  const blob = cached ? await cached.blob() : await (await fetch(url)).blob();
+  return URL.createObjectURL(blob);
+}
+
+/** Fetch through the worker, falling back to the main thread on timeout */
+async function fetchImageSafe(url: string): Promise<string> {
+  if (workerUnresponsive) return await fetchImageDirect(url);
+
+  return await new Promise<string>((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      workerUnresponsive = true;
+      fetchImageDirect(url).then(resolve, reject);
+    }, 5000);
+
+    worker.fetchImageSrc(url).then(
+      (blobUrl) => {
+        window.clearTimeout(timer);
+        workerUnresponsive = false;
+        resolve(blobUrl);
+      },
+      (err) => {
+        window.clearTimeout(timer);
+        reject(err);
+      },
+    );
+  });
+}
+
 export async function fetchImage(url: string) {
   // Start worker
   startWorker();
@@ -67,7 +108,7 @@ export async function fetchImage(url: string) {
   if (entry) return entry[1];
 
   // Fetch image
-  const blobUrl = await worker.fetchImageSrc(url);
+  const blobUrl = await fetchImageSafe(url);
 
   // Check memcache entry again and revoke if it was added in the meantime
   if ((entry = BLOB_CACHE.get(url))) {
