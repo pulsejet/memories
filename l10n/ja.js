@@ -34,6 +34,7 @@ OC.L10N.register(
     "Cancel" : "キャンセル",
     "_{n} selected_::_{n} selected_" : ["{n}選択されています"],
     "General" : "一般",
+    "On This Day" : "この日には",
     "Account" : "アカウント",
     "Info" : "情報",
     "Close" : "閉じる",

@@ -30,6 +30,7 @@ OC.L10N.register(
     "Cancel" : "Annuller",
     "_{n} selected_::_{n} selected_" : ["{n} valgt","{n} valgt"],
     "General" : "Generelt",
+    "On This Day" : "På denne dag",
     "Account" : "Konto",
     "Timeline Path" : "Tidslinjesti",
     "Show hidden folders" : "Vis skjulte mapper",

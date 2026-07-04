@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "Nastavenia aplikácie Spomienky",
     "General" : "Všeobecné",
     "Photo Viewer" : "Prehliadač fotografií",
+    "On This Day" : "V tento deň",
     "Account" : "Účet",
     "Choose Timeline Paths" : "Vybrať cestu pre časovú os",
     "Choose the root for the folders view" : "Vybrať zdrojový adresár pre zobrazenie priečinkov",

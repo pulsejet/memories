@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "回憶設定",
     "General" : "常規",
     "Photo Viewer" : "照片檢視器",
+    "On This Day" : "當年今日",
     "Account" : "帳戶",
     "Choose Timeline Paths" : "選擇時間線途徑",
     "Choose the root for the folders view" : "選擇資料夾檢視的根",

@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "Memories 设置",
     "General" : "常规",
     "Photo Viewer" : "照片浏览器",
+    "On This Day" : "在这一天",
     "Account" : "账号",
     "Choose Timeline Paths" : "选择时间线路径",
     "Choose the root for the folders view" : "为文件夹视图选择根目录",

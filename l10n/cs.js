@@ -63,6 +63,7 @@ OC.L10N.register(
     "Memories Settings" : "Nastavení pro Paměti",
     "General" : "Obecné",
     "Photo Viewer" : "Prohlížeč fotek",
+    "On This Day" : "V tento den",
     "Account" : "Účet",
     "Choose Timeline Paths" : "Zvolte trasy časovou osou",
     "Choose the root for the folders view" : "Zvolte kořen pro zobrazení složek",

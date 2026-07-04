@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "Налаштування Memories",
     "General" : "Загальне",
     "Photo Viewer" : "Перегляд світлин",
+    "On This Day" : "Цього дня",
     "Account" : "Обліковий запис",
     "Choose Timeline Paths" : "Розташування стрічки світлин",
     "Choose the root for the folders view" : "Виберіть кореневий каталог зі світлинами",

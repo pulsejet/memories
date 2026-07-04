@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "Minner-innstillinger",
     "General" : "Generell",
     "Photo Viewer" : "Bildeviser",
+    "On This Day" : "På denne dagen",
     "Account" : "Konto",
     "Choose Timeline Paths" : "Velg tidslinjebaner",
     "Choose the root for the folders view" : "Velg roten for mappevisningen",

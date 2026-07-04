@@ -27,6 +27,7 @@ OC.L10N.register(
     "Add to album" : "Dodaj u album",
     "Cancel" : "Odustani",
     "General" : "Općenito",
+    "On This Day" : "Na današnji dan",
     "Account" : "Račun",
     "Info" : "Informacije",
     "Close" : "Zatvori",

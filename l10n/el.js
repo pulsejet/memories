@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "Ρυθμίσεις Memories",
     "General" : "Γενικά",
     "Photo Viewer" : "Προβολή Φωτογραφιών",
+    "On This Day" : "Σε Αυτήν Την Ημέρα",
     "Account" : "Λογαριασμός",
     "Choose Timeline Paths" : "Επιλογή Διαδρομών Χρονολογίου",
     "Choose the root for the folders view" : "Επιλέξτε τη ρίζα για την προβολή φακέλων",

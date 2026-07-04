@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "تنظیمات خاطرات",
     "General" : "عمومی",
     "Photo Viewer" : "نمایشگر عکس",
+    "On This Day" : "در این روز",
     "Account" : "حساب کاربری",
     "Choose Timeline Paths" : "انتخاب مسیرهای جدول زمانی",
     "Choose the root for the folders view" : "ریشه را برای نمای پوشه‌ها انتخاب کنید",

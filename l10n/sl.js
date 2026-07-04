@@ -62,6 +62,7 @@ OC.L10N.register(
     "Memories Settings" : "Nastavitve programa",
     "General" : "Splošno",
     "Photo Viewer" : "Pregledovalnik slik",
+    "On This Day" : "Na današnji dan",
     "Account" : "Račun",
     "Choose Timeline Paths" : "Izbor poti časovnice",
     "Choose the root for the folders view" : "Izberite korensko mapo za prikaz map",

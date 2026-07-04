@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "Socruithe Cuimhní",
     "General" : "Ginearálta",
     "Photo Viewer" : "Amharcóir Grianghraf",
+    "On This Day" : "Ar an lá seo",
     "Account" : "Cuntas",
     "Choose Timeline Paths" : "Roghnaigh Cosáin Amlíne",
     "Choose the root for the folders view" : "Roghnaigh an fhréamh don amharc fillteáin",

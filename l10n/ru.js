@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "Параметры приложения",
     "General" : "Основные",
     "Photo Viewer" : "Просмотр фотографий",
+    "On This Day" : "В этот день",
     "Account" : "Учётная запись",
     "Choose Timeline Paths" : "Расположения фотографий Ленты",
     "Choose the root for the folders view" : "Выберете корневую папку с фотографиями",

@@ -32,6 +32,7 @@ OC.L10N.register(
     "Cancel" : "Atcelt",
     "_{n} selected_::_{n} selected_" : ["{n} atlasītas","{n} atlasīta","{n} atlasītas"],
     "General" : "Vispārīgs",
+    "On This Day" : "Šajā dienā",
     "Account" : "Konts",
     "Show metadata in slideshow" : "Slīdrādē rādīt metadatus",
     "Logged in as {user}" : "Pieteicies kā {user}",

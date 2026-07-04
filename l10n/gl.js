@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "Axustes de Lembranzas",
     "General" : "Xeral",
     "Photo Viewer" : "Visor de fotos",
+    "On This Day" : "Neste día",
     "Account" : "Conta",
     "Choose Timeline Paths" : "Escoller as rutas da cronoloxía",
     "Choose the root for the folders view" : "Escoller a raíz para a vista de cartafoles",

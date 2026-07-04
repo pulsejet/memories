@@ -33,6 +33,7 @@ OC.L10N.register(
     "Add to album" : "Aggiungi all'album",
     "Cancel" : "Annulla",
     "General" : "Generale",
+    "On This Day" : "In questo giorno",
     "Account" : "Account",
     "Info" : "Informazioni",
     "Close" : "Chiudi",

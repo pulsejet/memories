@@ -28,6 +28,7 @@ OC.L10N.register(
     "Cancel" : "Hætta við",
     "_{n} selected_::_{n} selected_" : ["{n} valið","{n} valið"],
     "General" : "Almennt",
+    "On This Day" : "Á þessum degi",
     "Account" : "Aðgangur",
     "Info" : "Upplýsingar",
     "Close" : "Loka",

@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "„Prisiminimų“ nustatymai",
     "General" : "Bendra",
     "Photo Viewer" : "Nuotraukų žiūryklė",
+    "On This Day" : "Šią dieną",
     "Account" : "Paskyra",
     "Choose Timeline Paths" : "Pasirinkite laiko skalės kelius",
     "Choose the root for the folders view" : "Pasirinkite aplankų rodinio šakninį aplanką",

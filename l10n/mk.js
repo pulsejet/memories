@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "Параметри",
     "General" : "Општо",
     "Photo Viewer" : "Прегледувач на фотографии",
+    "On This Day" : "На денешен ден",
     "Account" : "Сметка",
     "Choose Timeline Paths" : "Избери патека за времеплов",
     "Choose the root for the folders view" : "Изберете го коренот за преглед на папки",

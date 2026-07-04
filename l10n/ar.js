@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "إعدادات \"الذكريات\" Memories",
     "General" : "العامة",
     "Photo Viewer" : "عارض الصور",
+    "On This Day" : "في هذا اليوم",
     "Account" : "الحساب",
     "Choose Timeline Paths" : "اختر مسارات التسلسل الزمني",
     "Choose the root for the folders view" : "إختَر الدليل الأساسي لعرض المجلدات",

@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "Anılar ayarları",
     "General" : "Genel",
     "Photo Viewer" : "Fotoğraf görüntüleyici",
+    "On This Day" : "Şu günde",
     "Account" : "Hesap",
     "Choose Timeline Paths" : "Zaman tüneli yollarını seçin",
     "Choose the root for the folders view" : "Klasörler görünümünün kök klasörünü seçin",

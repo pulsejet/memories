@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "Paramètres de Souvenirs",
     "General" : "Général",
     "Photo Viewer" : "Visionneuse de photos",
+    "On This Day" : "Ce même jour",
     "Account" : "Compte",
     "Choose Timeline Paths" : "Choisir les chemins du fil chronologique",
     "Choose the root for the folders view" : "Choisissez la racine pour la vue des dossiers",
