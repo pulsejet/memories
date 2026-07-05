@@ -92,6 +92,8 @@
     "Sort folders oldest-first" : "Ordenar pastas, itens mais antigos primeiro",
     "Sort albums oldest-first" : "Ordenar álbuns, itens mais antigos primeiro",
     "Show hidden albums" : "Mostrar álbuns ocultos",
+    "Day range (1-7)" : "Intervalo de dias (1-7)",
+    "Photos per year (1-50)" : "Fotos por ano (1-50)",
     "Info" : "Informação",
     "Close" : "Fechar",
     "{photoCount} photos" : "{photoCount} fotos",
