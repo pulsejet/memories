@@ -141,12 +141,34 @@ final class DownloadController extends GenericApiController
             if (!$resumable) {
                 $range = '';
             }
+                // Get file reading parameters
+                $size = (int) $file->getSize();
+                $mimeType = $file->getMimeType();
 
-            // Get file reading parameters
-            $size = (int) $file->getSize();
-            [$seekStart, $seekEnd] = Util::explode_exact('-', $range, 2);
-            $seekEnd = (empty($seekEnd)) ? ($size - 1) : min(abs((int) $seekEnd), $size - 1);
-            $seekStart = (empty($seekStart) || $seekEnd < abs((int) $seekStart)) ? 0 : max(abs((int) $seekStart), 0);
+                [$seekStart, $seekEnd] = Util::explode_exact('-', $range, 2);
+
+                $rangeWasRequested = !empty($range);
+                $openEndedRange = $rangeWasRequested && '' === trim((string) $seekEnd);
+
+                // Workaround for browser video requests like "Range: bytes=0-".
+                // Without this limit, Memories may answer with the whole multi-GB file.
+                // The browser can request the next part or a seek position afterwards.
+                $maxVideoChunk = 32 * 1024 * 1024; // 32 MB
+
+                $seekStart = ('' === trim((string) $seekStart)) ? 0 : max(abs((int) $seekStart), 0);
+
+                if ($openEndedRange && 0 === strpos($mimeType, 'video/')) {
+                    $seekEnd = min($seekStart + $maxVideoChunk - 1, $size - 1);
+                } else {
+                    $seekEnd = ('' === trim((string) $seekEnd)) ? ($size - 1) : min(abs((int) $seekEnd), $size - 1);
+                }
+
+                if ($seekEnd < $seekStart) {
+                    $seekStart = 0;
+                    $seekEnd = $rangeWasRequested && 0 === strpos($mimeType, 'video/')
+                        ? min($maxVideoChunk - 1, $size - 1)
+                        : ($size - 1);
+                }
 
             // Only send partial content header if downloading a piece of the file
             if ($seekStart > 0 || $seekEnd < ($size - 1)) {
@@ -161,7 +183,7 @@ final class DownloadController extends GenericApiController
 
             // Set headers
             $out->setHeader('Content-Length: '.($seekEnd - $seekStart + 1));
-            $out->setHeader('Content-Type: '.$file->getMimeType());
+            $out->setHeader('Content-Type: '.$mimeType);
 
             // Make sure the browser downloads the file
             $filename = str_replace('"', '\"', $file->getName());
