@@ -293,7 +293,7 @@ OC.L10N.register(
     "Share Album" : "Поділитися альбомом",
     "Name of the album" : "Назва альбому",
     "Save collaborators for this album." : "Зберегти співавторів для цього альбому.",
-    "Invalid Date" : "Невірна дата",
+    "Invalid Date" : "Недійсна дата",
     "Newest date is older than oldest date" : "Найновіша дата старша за найстарішу",
     "Newest" : "Найновіший",
     "Year" : "Рік",
