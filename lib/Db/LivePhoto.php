@@ -131,6 +131,57 @@ final class LivePhoto
             }
         }
 
+        // Huawei live photos
+        if ('image/jpeg' === ($exif['MIMEType'] ?? null)) {
+            try {
+                $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+                $fileSize = $file->getSize();
+                // read last 60 bytes (v3_f31_c            0:1477              LIVE_18666740       )
+                $meta_date_length = 60;
+                if ($path && file_exists($path) && $fileSize > $meta_date_length) {
+                    $handle = fopen($path, 'rb');
+                    if ($handle) {
+                        fseek($handle, -$meta_date_length, SEEK_END);
+                        $trailerChunk = stream_get_contents($handle);
+
+                        // Matching features
+                        if (strpos($trailerChunk, 'LIVE_') !== false) {
+
+                            // Use regular dynamic capture: the number after the colon (anchor) and the negative offset after LIVE_
+                            // Matching form: 0:1477              LIVE_18666740
+                            if (preg_match('/(\d+):(\d+)\s+LIVE_(\d+)/', $trailerChunk, $matches, PREG_OFFSET_CAPTURE)) {
+
+                                $negativeOffset = (int)$matches[3][0];
+
+                                if ($negativeOffset > 0) {
+
+                                    // Calculate the absolute position of the beginning of the video according to the test formula.
+                                    $videoOffset = $fileSize - 40 - $negativeOffset + 1;
+
+                                    // Rigorous verification: Check whether the calculated starting point actually exists (MP4 header magic number).
+                                    if ($videoOffset > 0 && ($videoOffset + 16) < $fileSize) {
+                                        fseek($handle, $videoOffset);
+                                        $mp4Header = fread($handle, 16);
+
+                                        // MP4 Start
+                                        $expectedHeader = "\x00\x00\x00\x18\x66\x74\x79\x70\x6D\x70\x34\x32\x00\x00\x00\x00";
+
+                                        if ($mp4Header === $expectedHeader) {
+                                            fclose($handle);
+                                            return "self__traileroffset={$videoOffset}";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        fclose($handle);
+                    }
+                }
+            } catch (\Throwable $e) {
+                echo "Failed parsing/validating Huawei motion photo metadata. ({$e->getMessage()} \n";
+            }
+        }
+
         return '';
     }
 
