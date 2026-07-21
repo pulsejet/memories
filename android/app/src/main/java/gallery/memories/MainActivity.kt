@@ -79,6 +79,8 @@ class MainActivity : AppCompatActivity() {
     private var chooseFileCallback: ValueCallback<Array<Uri>>? = null
     private lateinit var chooseFileIntentLauncher: ActivityResultLauncher<Intent>
 
+    var pendingPhotoHash: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -145,6 +147,22 @@ class MainActivity : AppCompatActivity() {
         binding.coordinator.removeAllViews()
         binding.webview.destroy()
         nativex.destroy()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        // Extract pending photo hash from intent
+        val hash = intent.getStringExtra(ViewerActivity.EXTRA_PENDING_PHOTO_HASH)
+        if (hash != null) {
+            pendingPhotoHash = hash
+
+            // If WebView is already showing Memories app, evaluate JS immediately
+            if (binding.webview.url?.startsWith("http") == true) {
+                binding.webview.evaluateJavascript("window.location.hash = '$hash'", null)
+                pendingPhotoHash = null
+            }
+        }
     }
 
     override fun onConfigurationChanged(config: Configuration) {
@@ -220,6 +238,16 @@ class MainActivity : AppCompatActivity() {
     private fun initializeWebView() {
         // Intercept local APIs
         binding.webview.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+
+                // Apply pending photo hash if available
+                if (pendingPhotoHash != null && view != null) {
+                    view.evaluateJavascript("window.location.hash = '$pendingPhotoHash'", null)
+                    pendingPhotoHash = null
+                }
+            }
+
             override fun shouldOverrideUrlLoading(
                 view: WebView,
                 request: WebResourceRequest
@@ -335,8 +363,11 @@ class MainActivity : AppCompatActivity() {
 
     fun loadDefaultUrl(): Boolean {
         // Load app interface if authenticated
-        host = nativex.http.loadWebView(binding.webview)
-        if (host != null) return true
+        host = nativex.http.loadWebView(binding.webview, pendingPhotoHash)
+        if (host != null) {
+            pendingPhotoHash = null
+            return true
+        }
 
         // Load welcome page
         binding.webview.loadUrl("file:///android_asset/welcome.html")
