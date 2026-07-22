@@ -114,12 +114,26 @@ export default defineComponent({
       if (cache) this.process(cache);
 
       // Network request
-      const photos = await dav.getOnThisDayRaw();
-      utils.cacheData(cacheUrl, photos);
+      const revalidate = async () => {
+        const photos = await dav.getOnThisDayRaw();
+        utils.cacheData(cacheUrl, photos);
 
-      // Check if exactly same as cache
-      if (cache?.length === photos.length && cache.every((p, i) => p.fileid === photos[i].fileid)) return;
-      this.process(photos);
+        // Check if exactly same as cache
+        if (cache?.length === photos.length && cache.every((p, i) => p.fileid === photos[i].fileid)) return;
+        this.process(photos);
+      };
+
+      // If we already rendered from cache, revalidate in the background:
+      // this promise blocks the first render of the whole timeline, which
+      // must not wait on the network (an offline or slow connection would
+      // freeze the app for the duration of the request timeout)
+      if (cache) {
+        revalidate().catch((e) => {
+          if (!utils.isNetworkError(e)) console.error(e);
+        });
+      } else {
+        await revalidate();
+      }
     },
 
     async process(photos: IPhoto[]) {
