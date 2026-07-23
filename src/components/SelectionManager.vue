@@ -194,6 +194,10 @@ export default defineComponent({
   }),
 
   mounted() {
+    _m.selectionManager = {
+      selectPhoto: this.selectPhoto.bind(this) as typeof this.selectPhoto,
+    };
+
     // Make default actions
     this.defaultActions = [
       {
