@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Shared Link" : "共有リンク",
     "Download" : "ダウンロード",
+    "Memories" : "メモリー",
     "Fast, modern and advanced photo management suite" : "高速で、モダンで、高度な写真管理スイート",
     "People (Recognize)" : "人物（認識）",
     "People" : "人間",
