@@ -103,6 +103,7 @@ OC.L10N.register(
     "Create Link" : "Crear link",
     "Refresh" : "Actualitza",
     "Failed to upload {file}" : "No s'ha pogut pujar {file}",
+    "Add tags" : "Afegeix etiquetes",
     "Last updated" : "Darrera actualització",
     "Creation date" : "Data de creació",
     "Oldest first" : "Més antic primer",
