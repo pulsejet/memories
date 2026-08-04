@@ -144,12 +144,23 @@ final class DownloadController extends GenericApiController
 
             // Get file reading parameters
             $size = (int) $file->getSize();
-            [$seekStart, $seekEnd] = Util::explode_exact('-', $range, 2);
-            $seekEnd = (empty($seekEnd)) ? ($size - 1) : min(abs((int) $seekEnd), $size - 1);
-            $seekStart = (empty($seekStart) || $seekEnd < abs((int) $seekStart)) ? 0 : max(abs((int) $seekStart), 0);
+            $mimeType = $file->getMimeType();
+            $isMedia = 0 === strpos($mimeType, 'video/') || 0 === strpos($mimeType, 'audio/');
 
-            // Only send partial content header if downloading a piece of the file
-            if ($seekStart > 0 || $seekEnd < ($size - 1)) {
+            // Whether the client actually asked for a range
+            $rangeWasRequested = $resumable && !empty($range);
+
+            [$seekStart, $seekEnd] = Util::explode_exact('-', $range, 2);
+            $seekEnd = ('' === trim((string) $seekEnd)) ? ($size - 1) : min(abs((int) $seekEnd), $size - 1);
+            $seekStart = ('' === trim((string) $seekStart) || $seekEnd < abs((int) $seekStart))
+                ? 0
+                : max(abs((int) $seekStart), 0);
+
+            // Send partial content whenever a range was requested, even if the
+            // requested range happens to cover the entire file (e.g. "bytes=0-").
+            // Answering such requests with 200 prevents the browser from seeking,
+            // which stalls playback of files whose moov atom is not at the front.
+            if ($rangeWasRequested || $seekStart > 0 || $seekEnd < ($size - 1)) {
                 $out->setHeader('HTTP/1.1 206 Partial Content');
                 $out->setHeader("Content-Range: bytes {$seekStart}-{$seekEnd}/{$size}");
             }
@@ -161,15 +172,30 @@ final class DownloadController extends GenericApiController
 
             // Set headers
             $out->setHeader('Content-Length: '.($seekEnd - $seekStart + 1));
-            $out->setHeader('Content-Type: '.$file->getMimeType());
+            $out->setHeader('Content-Type: '.$mimeType);
 
-            // Make sure the browser downloads the file
+            // Range-seeking media players need a validator and permission to store
+            // the response; without these the browser cannot resume a second range
+            // and is forced to read the first response to completion.
+            if ($etag = $file->getEtag()) {
+                $out->setHeader('ETag: "'.$etag.'"');
+            }
+            if ($mtime = $file->getMTime()) {
+                $out->setHeader('Last-Modified: '.gmdate('D, d M Y H:i:s', $mtime).' GMT');
+            }
+            $out->setHeader('Cache-Control: private, max-age=3600');
+
+            // Play media inline; force a download for everything else.
+            // "attachment" on a <video> source discourages the media stack from
+            // issuing follow-up range requests, so keep it off for media.
             $filename = str_replace('"', '\"', $file->getName());
-            $out->setHeader('Content-Disposition: attachment; filename="'.$filename.'"');
+            $disposition = $isMedia && $resumable ? 'inline' : 'attachment';
+            $out->setHeader("Content-Disposition: {$disposition}; filename=\"{$filename}\"");
 
-            // Prevent output from being buffered
-            $out->setHeader('Content-Encoding: none');
-            $out->setHeader('X-Content-Encoded-By: none');
+            // Prevent output from being buffered.
+            // NB: "Content-Encoding: none" is not a registered content coding and
+            // makes browsers treat the body as an unknown encoding, which breaks
+            // media playback. Use "identity" semantics by omitting the header.
             $out->setHeader('X-Accel-Buffering: no');
 
             // Quit if HEAD request
