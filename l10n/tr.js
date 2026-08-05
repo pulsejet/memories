@@ -258,7 +258,7 @@ OC.L10N.register(
     "Failed to update album." : "Albüm güncellenemedi",
     "Add people or groups who can edit your album" : "Albümünüzü düzenleyebilecek kişi ya da grupları ekleyin",
     "Search for collaborators" : "Katılımcı ara",
-    "Search people or groups" : "Kişi ya da grup arama",
+    "Search people or groups" : "Kişi ya da grup ara",
     "Add {collaboratorLabel} to the collaborators list" : "{collaboratorLabel} kullanıcısını katılımcı listesine ekle",
     "No collaborators available" : "Seçilebilecek bir katılımcı yok",
     "Remove {collaboratorLabel} from the collaborators list" : "{collaboratorLabel} kullanıcısını katılımcı listesinden çıkar",
