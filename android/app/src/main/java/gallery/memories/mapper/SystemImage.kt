@@ -2,26 +2,28 @@ package gallery.memories.mapper
 
 import android.content.ContentUris
 import android.content.Context
-import android.icu.text.SimpleDateFormat
-import android.icu.util.TimeZone
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
 import androidx.exifinterface.media.ExifInterface
 import org.json.JSONObject
 import java.io.IOException
+import java.io.InputStream
 import java.math.BigInteger
 import java.security.MessageDigest
+import gallery.memories.utility.DateParser
 
 class SystemImage {
     var fileId = 0L
     var baseName = ""
     var mimeType = ""
-    var dateTaken = 0L
+    var dateTaken = 0L               // seconds
+    var dayId: Long = 0L
+    var exifInterface: ExifInterface? = null
     var height = 0L
     var width = 0L
     var size = 0L
-    var mtime = 0L
+    var mtime = 0L                   // seconds
     var dataPath = ""
     var bucketId = 0L
     var bucketName = ""
@@ -40,6 +42,31 @@ class SystemImage {
         val TAG = SystemImage::class.java.simpleName
         val IMAGE_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val VIDEO_URI = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+
+        /**
+         * Create ExifInterface from Uri if possible (prefers InputStream for scoped storage),
+         * falls back to dataPath (file path) if provided.
+         */
+        private fun createExifInterfaceFromUri(ctx: Context, uri: Uri, dataPath: String?): ExifInterface? {
+            try {
+                // Try input stream first (works on scoped storage)
+                ctx.contentResolver.openInputStream(uri)?.use { input ->
+                    return ExifInterface(input)
+                }
+            } catch (e: Exception) {
+                Log.v(TAG, "openInputStream failed for $uri: ${e.message}")
+            }
+
+            // Fallback to file path (DATA) if available
+            if (!dataPath.isNullOrEmpty()) {
+                try {
+                    return ExifInterface(dataPath)
+                } catch (e: Exception) {
+                    Log.w(TAG, "ExifInterface(file) failed for $dataPath: ${e.message}")
+                }
+            }
+            return null
+        }
 
         /**
          * Iterate over all images/videos in the given collection
@@ -91,6 +118,7 @@ class SystemImage {
             val dataColumn = projection.indexOf(MediaStore.Images.Media.DATA)
             val bucketIdColumn = projection.indexOf(MediaStore.Images.Media.BUCKET_ID)
             val bucketNameColumn = projection.indexOf(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)
+            val durationColumn = if (collection == VIDEO_URI) projection.indexOf(MediaStore.Video.Media.DURATION) else -1
 
             // Query content resolver
             ctx.contentResolver.query(
@@ -100,22 +128,42 @@ class SystemImage {
                 selectionArgs,
                 sortOrder
             ).use { cursor ->
-                while (cursor!!.moveToNext()) {
+                if (cursor == null) {
+                    Log.w(TAG, "ContentResolver.query returned null for $collection")
+                    return@sequence
+                }
+
+                while (cursor.moveToNext()) {
                     val image = SystemImage()
 
-                    // Common fields
                     image.fileId = cursor.getLong(idColumn)
-                    image.baseName = cursor.getString(nameColumn)
-                    image.mimeType = cursor.getString(mimeColumn)
+                    image.baseName = cursor.getString(nameColumn) ?: ""
+                    image.mimeType = cursor.getString(mimeColumn) ?: ""
                     image.height = cursor.getLong(heightColumn)
                     image.width = cursor.getLong(widthColumn)
                     image.size = cursor.getLong(sizeColumn)
-                    image.dateTaken = cursor.getLong(dateTakenColumn)
                     image.mtime = cursor.getLong(dateModifiedColumn)
-                    image.dataPath = cursor.getString(dataColumn)
+
+                    image.dataPath = cursor.getString(dataColumn) ?: ""
                     image.bucketId = cursor.getLong(bucketIdColumn)
-                    image.bucketName = cursor.getString(bucketNameColumn)
+                    image.bucketName = cursor.getString(bucketNameColumn) ?: ""
                     image.mCollection = collection
+                    image.exifInterface = createExifInterfaceFromUri(ctx, image.uri, image.dataPath)
+
+                    image.isVideo = collection == VIDEO_URI
+                    if (image.isVideo && durationColumn >= 0) {
+                        image.videoDuration = cursor.getLong(durationColumn)
+                    }
+
+                    val dateTaken = if (!cursor.isNull(dateTakenColumn)) cursor.getLong(dateTakenColumn) / 1000 else null
+
+                    // Infer the earliest date from any source
+                    var zonedDateTime = DateParser.inferEarliestDate(image.exifInterface, image.mimeType, dateTaken, image.baseName, image.mtime)
+
+                    // store the date taken in seconds since epoch (UTC)
+                    image.dateTaken = zonedDateTime.toEpochSecond()
+
+                    image.dayId = DateParser.getDayId(zonedDateTime)
 
                     // Swap width/height if orientation is 90 or 270
                     val orientation = cursor.getInt(orientationColumn)
@@ -123,14 +171,6 @@ class SystemImage {
                         image.width = image.height.also { image.height = image.width }
                     }
 
-                    // Video specific fields
-                    image.isVideo = collection == VIDEO_URI
-                    if (image.isVideo) {
-                        val durationColumn = projection.indexOf(MediaStore.Video.Media.DURATION)
-                        image.videoDuration = cursor.getLong(durationColumn)
-                    }
-
-                    // Add to main list
                     yield(image)
                 }
             }
@@ -164,7 +204,7 @@ class SystemImage {
                 .put(Fields.Photo.WIDTH, width)
                 .put(Fields.Photo.SIZE, size)
                 .put(Fields.Photo.ETAG, mtime.toString())
-                .put(Fields.Photo.EPOCH, epoch)
+                .put(Fields.Photo.EPOCH, dateTaken)
 
             if (isVideo) {
                 obj.put(Fields.Photo.ISVIDEO, 1)
@@ -174,46 +214,8 @@ class SystemImage {
             return obj
         }
 
-    /** The epoch timestamp of the image. */
-    val epoch
-        get(): Long {
-            return dateTaken / 1000
-        }
-
-    val exifInterface
-        get() : ExifInterface? {
-            if (isVideo) return null
-            try {
-                return ExifInterface(dataPath)
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to read EXIF data: " + e.message)
-                return null
-            }
-        }
-
-    /** The UTC dateTaken timestamp of the image. */
-    fun utcDate(exif: ExifInterface?): Long {
-        // Get EXIF date using ExifInterface if image
-        if (exif != null) {
-            try {
-                val exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME)
-                    ?: throw IOException()
-                val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
-                sdf.timeZone = TimeZone.GMT_ZONE
-                sdf.parse(exifDate).let {
-                    return it.time / 1000
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to read EXIF datetime: " + e.message)
-            }
-        }
-
-        // No way to get the actual local date, so just assume current timezone
-        return (dateTaken + TimeZone.getDefault().getOffset(dateTaken).toLong()) / 1000
-    }
-
     fun auid(): String {
-        return md5("$epoch$size")
+        return md5("$dateTaken$size")
     }
 
     fun buid(exif: ExifInterface?): String {
@@ -224,11 +226,10 @@ class SystemImage {
                     ?: throw IOException()
                 sfx = "iuid=$iuid"
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to read EXIF unique ID ($baseName): " + e.message)
+                Log.w(TAG, "Failed to read EXIF unique ID ($baseName): ${e.message}")
             }
         }
-
-        return md5("$baseName$sfx");
+        return md5("$baseName$sfx")
     }
 
     /**
@@ -237,16 +238,13 @@ class SystemImage {
      */
     val photo
         get(): Photo {
-            val exif = exifInterface
-            val dateCache = utcDate(exif)
-
             return Photo(
                 localId = fileId,
                 auid = auid(),
-                buid = buid(exif),
+                buid = buid(exifInterface),
                 mtime = mtime,
-                dateTaken = dateCache,
-                dayId = dateCache / 86400,
+                dateTaken = dateTaken,
+                dayId = dayId,
                 baseName = baseName,
                 bucketId = bucketId,
                 bucketName = bucketName,
