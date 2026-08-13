@@ -405,7 +405,7 @@ OC.L10N.register(
     "Some files have not been uploaded." : "某些文件未被上传",
     "Destination path" : "目标路径",
     "Add to albums" : "添加至相册",
-    "Add tags" : "添加多个标签",
+    "Add tags" : "添加标签",
     "Attach collaborative tags to all uploads" : "为所有的上传附上协作标签",
     "_Upload {n} file_::_Upload {n} files_" : ["上传 {n} 个文件"],
     "Sorting order" : "排序",
