@@ -636,6 +636,13 @@ export default defineComponent({
         const photo = e.slide?.data?.photo;
         this.setFragment(photo);
         this.updateTitle(photo);
+
+        // Mark active slide for native video pass-through
+        this.photoswipe?.element?.querySelectorAll('.pswp__item').forEach((el) => el.classList.remove('active'));
+        e.slide.holderElement?.classList.add('active');
+
+        // Add type class to body for native video pass-through
+        document.body.classList.toggle(BODY_VIEWER_VIDEO, !!(photo?.flag & this.c.FLAG_IS_VIDEO));
       });
 
       // Show and hide controls
@@ -872,13 +879,6 @@ export default defineComponent({
             thumb.scrollIntoView({ block: 'center' });
           }
         }
-
-        // Remove active class from others and add to this one
-        photoswipe.element?.querySelectorAll('.pswp__item').forEach((el) => el.classList.remove('active'));
-        e.slide.holderElement?.classList.add('active');
-
-        // Add type class to body
-        document.body.classList.toggle(BODY_VIEWER_VIDEO, !!(e.slide.data?.photo?.flag & this.c.FLAG_IS_VIDEO));
       });
 
       photoswipe.init();
