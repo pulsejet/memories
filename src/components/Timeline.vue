@@ -108,7 +108,7 @@ import { defineComponent } from 'vue';
 import type { Route } from 'vue-router';
 
 import axios from '@nextcloud/axios';
-import { showError } from '@nextcloud/dialogs';
+import { showError, showInfo } from '@nextcloud/dialogs';
 
 import { getLayout } from '@services/layout';
 
@@ -119,6 +119,8 @@ import ScrollerManager from '@components/ScrollerManager.vue';
 import SelectionManager from '@components/SelectionManager.vue';
 import Viewer from '@components/viewer/Viewer.vue';
 import SwipeRefresh from './SwipeRefresh.vue';
+
+import { fetchImage } from '@components/frame/XImgCache';
 
 import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import TopMatter from '@components/top-matter/TopMatter.vue';
@@ -173,6 +175,8 @@ export default defineComponent({
     heads: new Map<number, IHeadRow>(),
     /** Current list (days response) was loaded from cache */
     daysIsCache: false,
+    /** User was already notified of being offline */
+    offlineNotified: false,
 
     /** Size of outer container [w, h] */
     containerSize: [0, 0] as [number, number],
@@ -229,6 +233,7 @@ export default defineComponent({
   },
 
   created() {
+    window.addEventListener('online', this.onWindowOnline);
     utils.bus.on('memories:user-config-changed', this.softRefresh);
     utils.bus.on('files:file:created', this.softRefresh);
     utils.bus.on('memories:window:resize', this.handleResizeWithDelay);
@@ -239,6 +244,7 @@ export default defineComponent({
   },
 
   beforeDestroy() {
+    window.removeEventListener('online', this.onWindowOnline);
     utils.bus.off('memories:user-config-changed', this.softRefresh);
     utils.bus.off('files:file:created', this.softRefresh);
     utils.bus.off('memories:window:resize', this.handleResizeWithDelay);
@@ -748,6 +754,9 @@ export default defineComponent({
 
                 await this.processDays(cache, true);
                 this.updateLoading(-1);
+
+                // Tell the user immediately if we know we are offline
+                if (!navigator.onLine) this.notifyOffline();
               }
             } catch {
               console.warn(`Failed to process days cache: ${cacheUrl}`);
@@ -772,14 +781,88 @@ export default defineComponent({
         // Make sure we're still on the same page
         if (this.state !== startState) return;
         await this.processDays(data, false);
+
+        // Warm the offline caches in the background (native only)
+        this.prefetchOffline(data);
       } catch (e) {
         if (!utils.isNetworkError(e)) {
           showError(e?.response?.data?.message ?? e.message);
           console.error(e);
+        } else if (cache) {
+          // We are offline but the cached content was shown
+          this.notifyOffline();
         }
       } finally {
         // If cache is set here, loading was already decremented
         if (!cache) this.updateLoading(-1);
+      }
+    },
+
+    /**
+     * Tell the user once that cached content is being shown offline.
+     */
+    notifyOffline() {
+      if (this.offlineNotified) return;
+      this.offlineNotified = true;
+      showInfo(this.t('memories', 'You are offline; showing cached content'));
+    },
+
+    /**
+     * Refresh the timeline when connectivity returns.
+     */
+    onWindowOnline() {
+      this.offlineNotified = false;
+      this.softRefresh();
+    },
+
+    /**
+     * Warm the offline caches for the most recent days in the background,
+     * so that recently synced photos can be browsed offline (#854).
+     *
+     * Runs only on the main timeline of the native app, at most once per
+     * hour. Photos are fetched through the image worker, which is cache
+     * first: anything already cached costs nothing.
+     */
+    async prefetchOffline(days: IDay[]) {
+      if (!nativex.has() || !this.routeIsBase || !navigator.onLine) return;
+
+      // Throttle to once per hour
+      const lsKey = 'memories_offline_prefetch_time';
+      const last = Number(localStorage.getItem(lsKey) ?? 0);
+      if (Date.now() - last < 3600 * 1000) return;
+      localStorage.setItem(lsKey, Date.now().toString());
+
+      // Choose the most recent days up to a total budget of photos
+      const chosen: IDay[] = [];
+      let count = 0;
+      for (const day of days) {
+        if (day.count <= 0) continue;
+        chosen.push(day);
+        if ((count += day.count) >= 500) break;
+      }
+
+      const state = this.state;
+      for (const day of chosen) {
+        // Stop if the user navigated away or went offline
+        if (this.state !== state || !navigator.onLine) return;
+
+        try {
+          // Fetch and cache the day detail (same URL as fetchDay)
+          const url = this.getDayUrl([day.dayid]);
+          const res = await axios.get<IPhoto[]>(url);
+          if (res.status !== 200) continue;
+          utils.cacheData(url, res.data);
+
+          // Warm the preview cache; batched into multipreview by the worker
+          await Promise.allSettled(
+            res.data
+              .filter((photo) => !utils.isLocalPhoto(photo))
+              .map((photo) => fetchImage(utils.getPreviewUrl({ photo, msize: 256 }))),
+          );
+        } catch {
+          // Offline or server error; try again on the next run
+          return;
+        }
       }
     },
 

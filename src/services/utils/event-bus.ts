@@ -27,6 +27,9 @@ export type BusEvent = {
     value: IConfig[keyof IConfig];
   } | null;
 
+  /** The remote static configuration was loaded after a failed first attempt */
+  'memories:static-config-loaded': null;
+
   /**
    * Remove these photos from the timeline.
    * Each photo object is required to have the `d` (day) property.
