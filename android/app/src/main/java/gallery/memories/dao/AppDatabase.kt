@@ -33,6 +33,10 @@ abstract class AppDatabase : RoomDatabase() {
             return INSTANCE!!
         }
 
+        fun getInstance(context: Context): AppDatabase {
+            return get(context)
+        }
+
         private fun callbacks(ctx: Context): Callback {
             return object : Callback() {
                 override fun onDestructiveMigration(db: SupportSQLiteDatabase) {
