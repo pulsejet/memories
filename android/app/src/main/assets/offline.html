@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Memories</title>
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div id="main" class="container animatable invisible">
+      <img src="memories.svg" alt="Memories Logo" class="logo" />
+      <p>
+        You are offline and no cached copy of the app is available.
+        Memories will reload automatically when the connection returns.
+      </p>
+
+      <button class="m-button login-button" id="retry">Try again</button>
+    </div>
+
+    <script>
+      const retryButton = document.getElementById("retry");
+
+      retryButton.addEventListener("click", () => {
+        retryButton.disabled = true;
+        globalThis.nativex?.reload();
+      });
+
+      // Retry as soon as the WebView sees the network again
+      window.addEventListener("online", () => globalThis.nativex?.reload());
+
+      // Networks can come back without an event (e.g. VPN or DNS recovers
+      // after the interface is already up), so also retry periodically
+      setInterval(() => globalThis.nativex?.reload(), 8000);
+
+      // Set action bar color
+      const themeColor = getComputedStyle(
+        document.documentElement
+      ).getPropertyValue("--theme-color");
+      globalThis.nativex?.setThemeColor(themeColor, true);
+
+      // Make container visible
+      document.getElementById("main").classList.remove("invisible");
+    </script>
+  </body>
+</html>
