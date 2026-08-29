@@ -130,6 +130,11 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
 
         try {
             val response = mHttp.getApiDescription()
+
+            // The body MUST be parsed before the status check below: a response
+            // that is not JSON did not come from Nextcloud (e.g. a captive portal
+            // or an intercepting proxy) and throws here, so a foreign 401 does
+            // not wipe the stored credentials
             val body = mHttp.bodyJson(response)
 
             // Check status code
