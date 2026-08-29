@@ -191,7 +191,7 @@ OC.L10N.register(
     "You are about to download the planet database. This may take a while." : "Gezegen veri tabanını indirmek üzeresiniz. Bu işlem biraz zaman alabilir.",
     "This may also cause all photos to be re-indexed!" : "Bu işlem aynı zamanda tüm fotoğrafların yeniden dizine eklenmesine neden olabilir!",
     "Download planet database" : "Gezegen verilerini indir",
-    "Continue" : "Sürdür",
+    "Continue" : "İlerle",
     "Database is populated with {n} geometries." : "Veri tabanı {n} geometrileri ile dolduruldu.",
     "Geometry table has not been created." : "Geometri tablosu oluşturulmamış.",
     "Looks like the planet data is incomplete." : "Gezegen verileri eksik gibi görünüyor.",
