@@ -180,6 +180,33 @@ final class ExifExtractTest extends TestCase
         self::assertSame('Galaxy S25+', $res->exif['Model'] ?? null);
     }
 
+    public function testSamsungM2101(): void
+    {
+        // Samsung Galaxy M21 photo taken at Tokyo Haneda Airport
+        $res = $this->extract('samsung_m21_01.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+
+        // Camera Info
+        self::assertSame('samsung', $res->exif['Make'] ?? null);
+        self::assertSame('SM-M215F', $res->exif['Model'] ?? null);
+        self::assertSame(2, $res->exif['FNumber'] ?? null);
+        self::assertSame(4.6, $res->exif['FocalLength'] ?? null);
+        self::assertSame(20, $res->exif['ISO'] ?? null);
+
+        // Geolocation (Tokyo Haneda Airport)
+        self::assertEqualsWithDelta(35.545555, (float) ($res->exif['GPSLatitude'] ?? 0), 0.0001);
+        self::assertEqualsWithDelta(139.769361, (float) ($res->exif['GPSLongitude'] ?? 0), 0.0001);
+
+        // Date and Timezone (JST, +09:00)
+        self::assertSame('2021:03:26 15:53:38', $res->exif['DateTimeOriginal'] ?? null);
+        self::assertSame('+09:00', $res->exif['OffsetTimeOriginal'] ?? null);
+
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2021-03-26 15:53:38 +09:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(32400, $dt->getOffset());
+        self::assertSame(1616741618, $dt->getTimestamp());
+    }
+
     public function testAppleH264Boy01(): void
     {
         $image = $this->extract('apple_h264_boy_01.jpg');
@@ -417,6 +444,35 @@ final class ExifExtractTest extends TestCase
         self::assertSame('2023-03-05 15:21:47 +01:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(3600, $dt->getOffset());
         self::assertSame(1678026107, $dt->getTimestamp());
+    }
+
+    public function testSonyE566301(): void
+    {
+        // Sony Xperia M5 photo with no coordinates and local time only (no timezone info).
+        // It reports the local capture time: Tue, Mar 27, 2018 9:43 AM.
+        $res = $this->extract('sony_e5663_01.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertFalse(LivePhoto::isVideoPart($res->exif));
+        self::assertSame('', $res->livePhotoId);
+
+        // Camera Info
+        self::assertSame('Sony', $res->exif['Make'] ?? null);
+        self::assertSame('E5663', $res->exif['Model'] ?? null);
+        self::assertSame(2.2, $res->exif['FNumber'] ?? null);
+        self::assertSame(4.6, $res->exif['FocalLength'] ?? null);
+        self::assertSame(1919, $res->exif['ISO'] ?? null);
+
+        // Date and Time (defaults to UTC without explicit timezone or coordinates)
+        self::assertSame('2018:03:27 09:43:23', $res->exif['DateTimeOriginal'] ?? null);
+        self::assertArrayNotHasKey('OffsetTimeOriginal', $res->exif);
+        self::assertArrayNotHasKey('GPSLatitude', $res->exif);
+        self::assertArrayNotHasKey('GPSLongitude', $res->exif);
+
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('Tue, Mar 27, 2018 9:43 AM', $dt->format('D, M j, Y g:i A'));
+        self::assertSame('2018-03-27 09:43:23 +00:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(0, $dt->getOffset());
+        self::assertSame(1522143803, $dt->getTimestamp());
     }
 
     private function extract(string $filename): ExtractResult
