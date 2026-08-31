@@ -49,6 +49,10 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           extensions: mbstring, iconv, fileinfo, intl, sqlite, pdo_sqlite
           coverage: none
+          ini-values: >-
+            opcache.enable_cli=1,
+            opcache.jit=tracing,
+            opcache.jit_buffer_size=64M
 
       - name: Set up Nextcloud
         run: |

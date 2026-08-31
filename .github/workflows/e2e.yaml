@@ -49,7 +49,7 @@ jobs:
           make build-js-production
           zip -r vue.zip js/
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: vue.zip
           path: vue.zip
@@ -95,7 +95,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: vue.zip
 
@@ -131,7 +131,7 @@ jobs:
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: report-mysql-${{ matrix.php-versions }}-${{ matrix.server-versions }}
@@ -179,7 +179,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: vue.zip
 
@@ -215,7 +215,7 @@ jobs:
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: report-pgsql-${{ matrix.php-versions }}-${{ matrix.server-versions }}
@@ -249,7 +249,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: vue.zip
 
@@ -281,7 +281,7 @@ jobs:
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: report-sqlite-${{ matrix.php-versions }}-${{ matrix.server-versions }}
