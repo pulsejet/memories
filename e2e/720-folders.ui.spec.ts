@@ -1,16 +1,24 @@
-import { test, expect } from '@playwright/test';
-import { navigate } from './navigation';
-
-test.beforeEach(navigate('/folders'));
+import { test } from '@playwright/test';
+import { appUrl, bootstrap } from './navigation';
+import { getFileId } from './utils';
 
 test.describe('@ui Folder view and navigation', () => {
+  let fileid1: number;
+
+  test.beforeAll(async ({ request }) => {
+    fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
+  });
+
   test.beforeEach(async ({ page }) => {
-    await page.waitForSelector('.big-icon');
-    await page.waitForTimeout(500);
+    await bootstrap(page);
   });
 
   test('Look for Folders', async ({ page }) => {
-    const ct = await page.locator('.big-icon:visible').count();
-    expect(ct, 'Number of folders').toBe(2);
+    await page.goto(`${appUrl}/folders`);
+    await page.waitForSelector('.folder--Local');
+    await page.waitForSelector('.folder--Photos');
+
+    await page.getByRole('link', { name: 'Photos' }).click();
+    await page.waitForSelector(`.p-outer--${fileid1}`);
   });
 });

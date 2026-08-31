@@ -1,20 +1,27 @@
 import { test, expect } from '@playwright/test';
-import { navigate } from './navigation';
+import { appUrl, bootstrap } from './navigation';
+import { getFileId } from './utils';
 
 test.describe('@ui Timeline feed and photo preview', () => {
-  test.beforeEach(navigate('/'));
+  let fileid1: number;
+
+  test.beforeAll(async ({ request }) => {
+    fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
+  });
 
   test.beforeEach(async ({ page }) => {
-    await page.waitForSelector('.img-outer');
-    await page.waitForTimeout(500);
+    await bootstrap(page);
   });
 
   test('Look for Images', async ({ page }) => {
-    expect(await page.locator('.img-outer').count(), 'Number of previews').toBeGreaterThan(4);
+    await page.goto(appUrl);
+    await page.waitForSelector(`.p-outer--${fileid1}`);
+    expect(await page.locator('.p-outer').count()).toBeGreaterThan(4);
   });
 
   test('Open one image', async ({ page }) => {
-    await page.locator('.img-outer').first().click();
+    await page.goto(appUrl);
+    await page.locator(`.p-outer--${fileid1}`).click();
     await page.waitForTimeout(1000);
     await page.locator('button[title="Close"]').first().click();
   });

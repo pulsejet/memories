@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, ocsHeaders } from './navigation';
-import { cleanupPhoto, getFileIdByBasename, getImageInfo } from './utils';
+import { appUrl, ocsHeaders, bootstrap } from './navigation';
+import { cleanupPhoto, getFileId, getImageInfo } from './utils';
 
 import type { IDay, IPhoto } from '@typings';
 
@@ -38,7 +38,7 @@ test.describe.serial('@api Archive file', () => {
   let fileid: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid = await getFileIdByBasename(request, DAY_ID, 'test_05.jpg');
+    fileid = await getFileId(request, FILE_PATH_BASE);
   });
 
   test('Archive file', async ({ request }) => {
@@ -101,8 +101,12 @@ test.describe.serial('@ui Archive', () => {
   let fileid2: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileIdByBasename(request, 20696, 'NKcupJh-Dos.jpg');
-    fileid2 = await getFileIdByBasename(request, 20696, 'CbBbaNTmsAc.jpg');
+    fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
+    fileid2 = await getFileId(request, '/Photos/CbBbaNTmsAc.jpg');
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await bootstrap(page);
   });
 
   test('Archive file', async ({ request, page }) => {
