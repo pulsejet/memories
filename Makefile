@@ -46,7 +46,11 @@ test:
 test-php:
 	vendor/bin/phpunit
 
-.PHONY: test test-php
+e2e:
+	npx playwright install --with-deps
+	bash scripts/ci-test.sh
+
+.PHONY: test test-php e2e
 
 
 # Linting

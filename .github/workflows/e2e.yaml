@@ -115,7 +115,7 @@ jobs:
 
       - name: Run tests
         run: |
-          ./apps/memories/scripts/ci-test.sh
+          make -C apps/${{ env.APP_NAME }} e2e
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -195,7 +195,7 @@ jobs:
 
       - name: Run tests
         run: |
-          ./apps/memories/scripts/ci-test.sh
+          make -C apps/${{ env.APP_NAME }} e2e
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -255,7 +255,7 @@ jobs:
 
       - name: Run tests
         run: |
-          ./apps/memories/scripts/ci-test.sh
+          make -C apps/${{ env.APP_NAME }} e2e
 
       - uses: actions/upload-artifact@v4
         if: always()
