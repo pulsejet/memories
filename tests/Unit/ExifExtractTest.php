@@ -508,6 +508,68 @@ final class ExifExtractTest extends TestCase
         self::assertSame(1522143803, $dt->getTimestamp());
     }
 
+    public function testSetExif(): void
+    {
+        // Copy non-motion Samsung S21 photo to a temporary file
+        $tmpFile = tempnam(sys_get_temp_dir(), 'memories_exif_test_').'.jpg';
+        copy(__DIR__.'/../assets/samsung_s21_01.jpg', $tmpFile);
+
+        try {
+            // Update geolocation, date, title, description, label, artist, copyright, rating
+            $dataToSet = [
+                'DateTimeOriginal' => '2024:06:15 14:30:00',
+                'OffsetTimeOriginal' => '+02:00',
+                'GPSLatitude' => 48.858844,
+                'GPSLongitude' => 2.294351,
+                'GPSLatitudeRef' => 'N',
+                'GPSLongitudeRef' => 'E',
+                'GPSAltitude' => 35,
+                'Description' => 'Vacation photo at Eiffel Tower',
+                'Label' => 'Selected',
+                'Title' => 'Eiffel Tower Visit',
+                'Artist' => 'Memories Tester',
+                'Copyright' => 'Copyright 2024',
+                'Rating' => 5,
+            ];
+
+            Exif::setExif($tmpFile, $dataToSet);
+
+            // Re-read EXIF from updated file
+            $exif = Exif::getExifFromLocalPath($tmpFile);
+
+            // Verify updated date & timezone
+            self::assertSame('2024:06:15 14:30:00', $exif['DateTimeOriginal'] ?? null);
+            self::assertSame('+02:00', $exif['OffsetTimeOriginal'] ?? null);
+            $dt = Exif::parseExifDate($exif);
+            self::assertSame('2024-06-15 14:30:00 +02:00', $dt->format('Y-m-d H:i:s P'));
+            self::assertSame(7200, $dt->getOffset());
+            self::assertSame(1718454600, $dt->getTimestamp());
+
+            // Verify updated geolocation
+            self::assertEqualsWithDelta(48.858844, (float) ($exif['GPSLatitude'] ?? 0), 0.0001);
+            self::assertEqualsWithDelta(2.294351, (float) ($exif['GPSLongitude'] ?? 0), 0.0001);
+            self::assertSame(35, $exif['GPSAltitude'] ?? null);
+
+            // Verify updated metadata fields
+            self::assertSame('Vacation photo at Eiffel Tower', $exif['Description'] ?? null);
+            self::assertSame('Selected', $exif['Label'] ?? null);
+            self::assertSame('Eiffel Tower Visit', $exif['Title'] ?? null);
+            self::assertSame('Memories Tester', $exif['Artist'] ?? null);
+            self::assertSame('Copyright 2024', $exif['Copyright'] ?? null);
+            self::assertSame(5, $exif['Rating'] ?? null);
+
+            // Verify immutable camera info remains unchanged
+            self::assertSame('samsung', $exif['Make'] ?? null);
+            self::assertSame('SM-G991U1', $exif['Model'] ?? null);
+            self::assertSame(2, $exif['FNumber'] ?? null);
+            self::assertSame(5.9, $exif['FocalLength'] ?? null);
+        } finally {
+            if (file_exists($tmpFile)) {
+                unlink($tmpFile);
+            }
+        }
+    }
+
     private function extract(string $filename): ExtractResult
     {
         $path = __DIR__.'/../assets/'.$filename;
