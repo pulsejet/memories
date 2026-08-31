@@ -95,6 +95,16 @@ final class ExifExtractTest extends TestCase
         self::assertSame('2023-01-18 21:18:39 -08:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(-28800, $dt->getOffset());
         self::assertSame(1674105519, $dt->getTimestamp());
+
+        // Even if LocationTZID is hypothetically set to 'America/Chicago',
+        // the explicit OffsetTimeOriginal takes precedence and is not affected.
+        $exifWithTz = $res->exif;
+        $exifWithTz['LocationTZID'] = 'America/Chicago';
+
+        $dtWithTz = Exif::parseExifDate($exifWithTz);
+        self::assertSame('2023-01-18 21:18:39 -08:00', $dtWithTz->format('Y-m-d H:i:s P'));
+        self::assertSame(-28800, $dtWithTz->getOffset());
+        self::assertSame(1674105519, $dtWithTz->getTimestamp());
     }
 
     public function testSamsungS2103(): void
