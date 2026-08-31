@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, authHeaders as auth } from './login';
+import { cleanupPhoto, getImageInfo } from './utils';
+
 import type { IDay, IPhoto } from '@typings';
-import { cleanupPhoto } from './utils';
 
 import assetArchivedApiDays from './assets/primary-api/archived-days.json';
 import assetArchivedApiDay19354 from './assets/primary-api/archived-day-19354.json';
@@ -27,8 +28,11 @@ test.describe('@api Archive', () => {
 });
 
 test.describe.serial('@api Archive file', () => {
-  // Hardcoded: test user day with 1 photo (from generate-golden)
-  const DAY_ID = 18955;
+  // Hardcoded: test user day with 2 photos (from generate-golden).
+  // Contains test_05.jpg which is deeply nested — good for testing archive path resolution.
+  const DAY_ID = 19375;
+  const FILE_PATH_BASE = '/Photos/Nested 1/Nested 1_1/test_05.jpg';
+  const FILE_PATH_ARCH = '/Photos/.archive/Nested 1/Nested 1_1/test_05.jpg';
   let fileid: number;
 
   test('Archive file', async ({ request }) => {
@@ -41,9 +45,17 @@ test.describe.serial('@api Archive file', () => {
     fileid = photos[0].fileid;
     expect(fileid).toBeGreaterThan(0);
 
+    // Verify path before archival
+    const infoBefore = await getImageInfo(request, fileid);
+    expect(infoBefore.filename).toBe(FILE_PATH_BASE);
+
     // Archive
     const patchRes = await request.patch(`${appUrl}/api/archive/${fileid}`, { headers: auth });
     expect(patchRes.ok()).toBeTruthy();
+
+    // Verify path during archival (now in archive)
+    const infoDuring = await getImageInfo(request, fileid);
+    expect(infoDuring.filename).toBe(FILE_PATH_ARCH);
 
     // Verify in archive
     const checkRes = await request.get(`${appUrl}/api/days/${DAY_ID}?archive=1`, { headers: auth });
@@ -67,6 +79,10 @@ test.describe.serial('@api Archive file', () => {
       data: { archive: false },
     });
     expect(patchRes.ok()).toBeTruthy();
+
+    // Verify path after unarchival (back in main)
+    const infoAfter = await getImageInfo(request, fileid);
+    expect(infoAfter.filename).toBe(FILE_PATH_BASE);
 
     // Verify back in main
     const checkRes = await request.get(`${appUrl}/api/days/${DAY_ID}`, { headers: auth });
