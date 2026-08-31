@@ -272,6 +272,8 @@ jobs:
           mkdir data
           php occ maintenance:install \
             --verbose \
+            --database=sqlite \
+            --database-name=nextcloud \
             --admin-user admin \
             --admin-pass password
 
