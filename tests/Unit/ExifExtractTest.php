@@ -44,7 +44,7 @@ final class ExifExtractTest extends TestCase
         $exif = Exif::getExifFromLocalPath($path);
         self::assertSame('image/jpeg', $exif['MIMEType'] ?? null);
 
-        // Date and Timezone
+        // Date and Timezone (DST, -07:00)
         self::assertSame('2023:04:21 19:55:33', $exif['DateTimeOriginal'] ?? null);
         self::assertSame('-07:00', $exif['OffsetTimeOriginal'] ?? null);
 
@@ -65,5 +65,24 @@ final class ExifExtractTest extends TestCase
         self::assertEqualsWithDelta(34.080404, (float) ($exif['GPSLatitude'] ?? 0), 0.0001);
         self::assertEqualsWithDelta(-118.245579, (float) ($exif['GPSLongitude'] ?? 0), 0.0001);
         self::assertSame(182, $exif['GPSAltitude'] ?? null);
+    }
+
+    public function testSamsungS2102(): void
+    {
+        // Samsung S21 HEIC photo in January (standard / non-DST time, -08:00)
+        $path = __DIR__.'/../assets/samsung_s21_02.heic';
+        self::assertFileExists($path);
+
+        $exif = Exif::getExifFromLocalPath($path);
+        self::assertSame('image/heic', $exif['MIMEType'] ?? null);
+
+        // Date and Timezone (Non-DST, -08:00)
+        self::assertSame('2023:01:18 21:18:39', $exif['DateTimeOriginal'] ?? null);
+        self::assertSame('-08:00', $exif['OffsetTimeOriginal'] ?? null);
+
+        $dt = Exif::parseExifDate($exif);
+        self::assertSame('2023-01-18 21:18:39 -08:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(-28800, $dt->getOffset());
+        self::assertSame(1674105519, $dt->getTimestamp());
     }
 }
