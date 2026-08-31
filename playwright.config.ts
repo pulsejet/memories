@@ -6,7 +6,11 @@ const config: PlaywrightTestConfig = {
   timeout: 600 * 1000,
   expect: {
     timeout: 30000,
+    toMatchSnapshot: {
+      maxDiffPixels: 10,
+    },
   },
+  snapshotPathTemplate: '{testDir}/screenshots/{testFilePath}/{arg}{ext}',
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,

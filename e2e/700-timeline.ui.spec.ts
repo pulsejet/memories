@@ -6,7 +6,7 @@ test.describe('@ui Timeline feed and photo preview', () => {
   let fileid1: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
+    fileid1 = await getFileId(request, '/Photos/CbBbaNTmsAc.jpg');
   });
 
   test.beforeEach(async ({ page }) => {
@@ -17,12 +17,14 @@ test.describe('@ui Timeline feed and photo preview', () => {
     await page.goto(appUrl);
     await page.waitForSelector(`.p-outer--${fileid1}`);
     expect(await page.locator('.p-outer').count()).toBeGreaterThan(4);
+    await expect(page).toHaveScreenshot();
   });
 
   test('Open one image', async ({ page }) => {
     await page.goto(appUrl);
     await page.locator(`.p-outer--${fileid1}`).click();
-    await page.waitForTimeout(1000);
-    await page.locator('button[title="Close"]').first().click();
+    await page.waitForTimeout(1000); // animation
+    await expect(page).toHaveScreenshot();
+    await page.getByRole('button', { name: 'Close', exact: true }).click();
   });
 });
