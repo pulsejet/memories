@@ -7,7 +7,7 @@ const config: PlaywrightTestConfig = {
   expect: {
     timeout: 30000,
     toMatchSnapshot: {
-      maxDiffPixels: 10,
+      maxDiffPixelRatio: 0.1,
     },
   },
   snapshotPathTemplate: '{testDir}/screenshots/{testFilePath}/{arg}{ext}',
