@@ -1,17 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { login } from './login';
 
-test.beforeEach(login('/folders'));
+test.describe('Folders - Destructive', () => {
+  test.beforeEach(login('/folders'));
 
-test.describe('Open', () => {
   test.beforeEach(async ({ page }) => {
     await page.waitForSelector('.big-icon');
     await page.waitForTimeout(500);
-  });
-
-  test('Look for Folders', async ({ page }) => {
-    const ct = await page.locator('.big-icon:visible').count();
-    expect(ct, 'Number of folders').toBe(2);
   });
 
   test('Select image and move out of folder', async ({ page }) => {
@@ -47,5 +42,42 @@ test.describe('Open', () => {
     // Check if the file is moved
     elems = await page.locator('.img-outer:visible').all();
     expect(elems.length, 'Number of files').toEqual(2);
+  });
+});
+
+test.describe('Timeline - Destructive', () => {
+  test.beforeEach(login('/'));
+
+  test.beforeEach(async ({ page }) => {
+    await page.waitForSelector('.img-outer');
+    await page.waitForTimeout(500);
+  });
+
+  test('Select two images and delete', async ({ page }) => {
+    const src1 = await page.locator('.img-outer > img').nth(1).getAttribute('src');
+    const src2 = await page.locator('.img-outer > img').nth(2).getAttribute('src');
+
+    expect(await page.locator(`img[src="${src1}"]`).count()).toBe(1);
+    expect(await page.locator(`img[src="${src2}"]`).count()).toBe(1);
+
+    await page.locator('.img-outer').nth(1).hover();
+    await page.locator('.p-outer > .select').nth(1).click();
+    await page.locator('.img-outer').nth(2).click();
+    await page.waitForTimeout(1000);
+
+    await page.locator('[aria-label="Delete"]').click();
+    await page.waitForTimeout(1000);
+    await page
+      .locator(
+        [
+          '.oc-dialog button.error', // NC <=29
+          '.dialog .button-vue--vue-primary', // NC 30-32
+          '.dialog .button-vue--primary', // NC >=33
+        ].join(', '),
+      )
+      .click();
+    await page.waitForTimeout(2000);
+    expect(await page.locator(`img[src="${src1}"]`).count()).toBe(0);
+    expect(await page.locator(`img[src="${src2}"]`).count()).toBe(0);
   });
 });
