@@ -10,6 +10,20 @@ use OCA\Memories\Service\BinExt;
 use PHPUnit\Framework\TestCase;
 
 /**
+ * @internal
+ */
+final class ExtractResult
+{
+    /**
+     * @param array<string, mixed> $exif
+     */
+    public function __construct(
+        public readonly array $exif,
+        public readonly string $livePhotoId,
+    ) {}
+}
+
+/**
  * Tests EXIF extraction and date parsing on real media assets.
  *
  * Asset Naming Convention:
@@ -40,91 +54,181 @@ final class ExifExtractTest extends TestCase
 
     public function testSamsungS2101(): void
     {
-        $path = __DIR__.'/../assets/samsung_s21_01.jpg';
-        self::assertFileExists($path);
-
-        $exif = Exif::getExifFromLocalPath($path);
-        self::assertSame('image/jpeg', $exif['MIMEType'] ?? null);
+        $res = $this->extract('samsung_s21_01.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
 
         // Date and Timezone (DST, -07:00)
-        self::assertSame('2023:04:21 19:55:33', $exif['DateTimeOriginal'] ?? null);
-        self::assertSame('-07:00', $exif['OffsetTimeOriginal'] ?? null);
+        self::assertSame('2023:04:21 19:55:33', $res->exif['DateTimeOriginal'] ?? null);
+        self::assertSame('-07:00', $res->exif['OffsetTimeOriginal'] ?? null);
 
-        $dt = Exif::parseExifDate($exif);
+        $dt = Exif::parseExifDate($res->exif);
         self::assertSame('2023-04-21 19:55:33 -07:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(-25200, $dt->getOffset());
         self::assertSame(1682132133, $dt->getTimestamp());
 
         // Camera Info
-        self::assertSame('samsung', $exif['Make'] ?? null);
-        self::assertSame('SM-G991U1', $exif['Model'] ?? null);
-        self::assertSame(2, $exif['FNumber'] ?? null);
-        self::assertSame(0.25, $exif['ExposureTime'] ?? null);
-        self::assertSame(5.9, $exif['FocalLength'] ?? null);
-        self::assertSame(200, $exif['ISO'] ?? null);
+        self::assertSame('samsung', $res->exif['Make'] ?? null);
+        self::assertSame('SM-G991U1', $res->exif['Model'] ?? null);
+        self::assertSame(2, $res->exif['FNumber'] ?? null);
+        self::assertSame(0.25, $res->exif['ExposureTime'] ?? null);
+        self::assertSame(5.9, $res->exif['FocalLength'] ?? null);
+        self::assertSame(200, $res->exif['ISO'] ?? null);
 
         // Geolocation
-        self::assertEqualsWithDelta(34.080404, (float) ($exif['GPSLatitude'] ?? 0), 0.0001);
-        self::assertEqualsWithDelta(-118.245579, (float) ($exif['GPSLongitude'] ?? 0), 0.0001);
-        self::assertSame(182, $exif['GPSAltitude'] ?? null);
+        self::assertEqualsWithDelta(34.080404, (float) ($res->exif['GPSLatitude'] ?? 0), 0.0001);
+        self::assertEqualsWithDelta(-118.245579, (float) ($res->exif['GPSLongitude'] ?? 0), 0.0001);
+        self::assertSame(182, $res->exif['GPSAltitude'] ?? null);
     }
 
     public function testSamsungS2102(): void
     {
         // Samsung S21 HEIC photo in January (standard / non-DST time, -08:00)
-        $path = __DIR__.'/../assets/samsung_s21_02.heic';
-        self::assertFileExists($path);
-
-        $exif = Exif::getExifFromLocalPath($path);
-        self::assertSame('image/heic', $exif['MIMEType'] ?? null);
+        $res = $this->extract('samsung_s21_02.heic');
+        self::assertSame('image/heic', $res->exif['MIMEType'] ?? null);
 
         // Date and Timezone (Non-DST, -08:00)
-        self::assertSame('2023:01:18 21:18:39', $exif['DateTimeOriginal'] ?? null);
-        self::assertSame('-08:00', $exif['OffsetTimeOriginal'] ?? null);
+        self::assertSame('2023:01:18 21:18:39', $res->exif['DateTimeOriginal'] ?? null);
+        self::assertSame('-08:00', $res->exif['OffsetTimeOriginal'] ?? null);
 
-        $dt = Exif::parseExifDate($exif);
+        $dt = Exif::parseExifDate($res->exif);
         self::assertSame('2023-01-18 21:18:39 -08:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(-28800, $dt->getOffset());
         self::assertSame(1674105519, $dt->getTimestamp());
     }
 
-    public function testAppleH264Boy(): void
+    public function testSamsungS2401(): void
     {
-        $imagePath = __DIR__.'/../assets/apple_h264_boy.jpg';
-        $videoPath = __DIR__.'/../assets/apple_h264_boy.mov';
-        self::assertFileExists($imagePath);
-        self::assertFileExists($videoPath);
+        $res = $this->extract('samsung_s24_01.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertSame('self__exifbin=EmbeddedVideoFile', $res->livePhotoId);
 
-        $imageExif = Exif::getExifFromLocalPath($imagePath);
-        $videoExif = Exif::getExifFromLocalPath($videoPath);
-
-        self::assertFalse(LivePhoto::isVideoPart($imageExif));
-        self::assertTrue(LivePhoto::isVideoPart($videoExif));
-
-        $photoLiveId = LivePhoto::getLivePhotoIdFromPath($imagePath, (int) filesize($imagePath), $imageExif);
-        $videoLiveId = $videoExif['ContentIdentifier'] ?? null;
-
-        self::assertSame('CC7B5EDE-BA2E-4DD5-85EB-50D0E8F94800', $photoLiveId);
-        self::assertSame($photoLiveId, $videoLiveId);
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2024-08-09 21:17:01 +02:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(7200, $dt->getOffset());
+        self::assertSame(1723231021, $dt->getTimestamp());
     }
 
-    public function testAppleH264Girl(): void
+    public function testAppleH264Boy01(): void
     {
-        $imagePath = __DIR__.'/../assets/apple_h264_girl.jpg';
-        $videoPath = __DIR__.'/../assets/apple_h264_girl.mov';
-        self::assertFileExists($imagePath);
-        self::assertFileExists($videoPath);
+        $image = $this->extract('apple_h264_boy_01.jpg');
+        $video = $this->extract('apple_h264_boy_01.mov');
 
-        $imageExif = Exif::getExifFromLocalPath($imagePath);
-        $videoExif = Exif::getExifFromLocalPath($videoPath);
+        self::assertFalse(LivePhoto::isVideoPart($image->exif));
+        self::assertTrue(LivePhoto::isVideoPart($video->exif));
 
-        self::assertFalse(LivePhoto::isVideoPart($imageExif));
-        self::assertTrue(LivePhoto::isVideoPart($videoExif));
+        $videoLiveId = $video->exif['ContentIdentifier'] ?? null;
+        self::assertSame('CC7B5EDE-BA2E-4DD5-85EB-50D0E8F94800', $image->livePhotoId);
+        self::assertSame($image->livePhotoId, $videoLiveId);
+    }
 
-        $photoLiveId = LivePhoto::getLivePhotoIdFromPath($imagePath, (int) filesize($imagePath), $imageExif);
-        $videoLiveId = $videoExif['ContentIdentifier'] ?? null;
+    public function testAppleH264Girl01(): void
+    {
+        $image = $this->extract('apple_h264_girl_01.jpg');
+        $video = $this->extract('apple_h264_girl_01.mov');
 
-        self::assertSame('C135D895-936B-4DF0-BB52-FC7AAF14F49B', $photoLiveId);
-        self::assertSame($photoLiveId, $videoLiveId);
+        self::assertFalse(LivePhoto::isVideoPart($image->exif));
+        self::assertTrue(LivePhoto::isVideoPart($video->exif));
+
+        $videoLiveId = $video->exif['ContentIdentifier'] ?? null;
+        self::assertSame('C135D895-936B-4DF0-BB52-FC7AAF14F49B', $image->livePhotoId);
+        self::assertSame($image->livePhotoId, $videoLiveId);
+    }
+
+    public function testGoogleMotion01(): void
+    {
+        $res = $this->extract('google_motion_01.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
+
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2023-02-10 18:12:21 +01:00', $dt->format('Y-m-d H:i:s P'));
+    }
+
+    public function testGoogleMotion02(): void
+    {
+        $res = $this->extract('google_motion_02.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
+
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2021-08-30 10:37:47 +05:30', $dt->format('Y-m-d H:i:s P'));
+    }
+
+    public function testGoogleMotion03(): void
+    {
+        $res = $this->extract('google_motion_03.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
+
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2022-07-07 20:27:03 +02:00', $dt->format('Y-m-d H:i:s P'));
+    }
+
+    public function testGoogleMotion04Hevc(): void
+    {
+        $res = $this->extract('google_motion_04_hevc.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
+    }
+
+    public function testGoogleMotion05(): void
+    {
+        $res = $this->extract('google_motion_05.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
+
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2022-12-03 18:48:32 +02:00', $dt->format('Y-m-d H:i:s P'));
+    }
+
+    public function testGoogleMvimg01(): void
+    {
+        $res = $this->extract('google_mvimg_01.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertSame('self__traileroffset=4347622', $res->livePhotoId);
+
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2023-03-10 18:39:04 +00:00', $dt->format('Y-m-d H:i:s P'));
+    }
+
+    public function testSamsungMotion01(): void
+    {
+        $res = $this->extract('samsung_motion_01.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertSame('self__traileroffset=3534847', $res->livePhotoId);
+
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2020-03-08 00:51:56 +00:00', $dt->format('Y-m-d H:i:s P'));
+    }
+
+    public function testSamsungMotionS2101Heic(): void
+    {
+        $res = $this->extract('samsung_motion_s21_01.heic');
+        self::assertSame('image/heic', $res->exif['MIMEType'] ?? null);
+        self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
+
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2023-10-04 22:53:36 -07:00', $dt->format('Y-m-d H:i:s P'));
+    }
+
+    public function testSamsungMotionS2101Jpg(): void
+    {
+        $res = $this->extract('samsung_motion_s21_01.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
+
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2023-10-04 22:55:33 -07:00', $dt->format('Y-m-d H:i:s P'));
+    }
+
+    private function extract(string $filename): ExtractResult
+    {
+        $path = __DIR__.'/../assets/'.$filename;
+        self::assertFileExists($path);
+
+        $exif = Exif::getExifFromLocalPath($path);
+        $livePhotoId = LivePhoto::getLivePhotoIdFromPath($path, (int) filesize($path), $exif);
+
+        return new ExtractResult($exif, $livePhotoId);
     }
 }
