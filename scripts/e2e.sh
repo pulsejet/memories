@@ -43,7 +43,7 @@ occ() {
 e2e_install_browsers() {
     cd "$MEMORIES_DIR"
     echo "Installing Playwright browsers..."
-    npx playwright install --with-deps
+    npx playwright install chromium --with-deps
 }
 
 # CI-specific setup
