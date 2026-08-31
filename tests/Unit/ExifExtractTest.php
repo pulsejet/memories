@@ -18,6 +18,7 @@ final class ExtractResult
      * @param array<string, mixed> $exif
      */
     public function __construct(
+        public readonly string $path,
         public readonly array $exif,
         public readonly string $livePhotoId,
     ) {}
@@ -102,6 +103,9 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=EmbeddedVideoFile', $res->livePhotoId);
 
+        $video = Exif::getBinaryExifProp($res->path, '-EmbeddedVideoFile');
+        self::assertSame('ftyp', substr($video, 4, 4));
+
         $dt = Exif::parseExifDate($res->exif);
         self::assertSame('2024-08-09 21:17:01 +02:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(7200, $dt->getOffset());
@@ -140,6 +144,9 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
 
+        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        self::assertSame('ftyp', substr($video, 4, 4));
+
         $dt = Exif::parseExifDate($res->exif);
         self::assertSame('2023-02-10 18:12:21 +01:00', $dt->format('Y-m-d H:i:s P'));
     }
@@ -149,6 +156,9 @@ final class ExifExtractTest extends TestCase
         $res = $this->extract('google_motion_02.jpg');
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
+
+        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        self::assertSame('ftyp', substr($video, 4, 4));
 
         $dt = Exif::parseExifDate($res->exif);
         self::assertSame('2021-08-30 10:37:47 +05:30', $dt->format('Y-m-d H:i:s P'));
@@ -160,6 +170,9 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
 
+        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        self::assertSame('ftyp', substr($video, 4, 4));
+
         $dt = Exif::parseExifDate($res->exif);
         self::assertSame('2022-07-07 20:27:03 +02:00', $dt->format('Y-m-d H:i:s P'));
     }
@@ -169,6 +182,9 @@ final class ExifExtractTest extends TestCase
         $res = $this->extract('google_motion_04_hevc.jpg');
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
+
+        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        self::assertSame('ftyp', substr($video, 4, 4));
     }
 
     public function testGoogleMotion05(): void
@@ -176,6 +192,9 @@ final class ExifExtractTest extends TestCase
         $res = $this->extract('google_motion_05.jpg');
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
+
+        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        self::assertSame('ftyp', substr($video, 4, 4));
 
         $dt = Exif::parseExifDate($res->exif);
         self::assertSame('2022-12-03 18:48:32 +02:00', $dt->format('Y-m-d H:i:s P'));
@@ -207,6 +226,9 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/heic', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
 
+        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        self::assertSame('ftyp', substr($video, 4, 4));
+
         $dt = Exif::parseExifDate($res->exif);
         self::assertSame('2023-10-04 22:53:36 -07:00', $dt->format('Y-m-d H:i:s P'));
     }
@@ -216,6 +238,9 @@ final class ExifExtractTest extends TestCase
         $res = $this->extract('samsung_motion_s21_01.jpg');
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
+
+        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        self::assertSame('ftyp', substr($video, 4, 4));
 
         $dt = Exif::parseExifDate($res->exif);
         self::assertSame('2023-10-04 22:55:33 -07:00', $dt->format('Y-m-d H:i:s P'));
@@ -229,6 +254,6 @@ final class ExifExtractTest extends TestCase
         $exif = Exif::getExifFromLocalPath($path);
         $livePhotoId = LivePhoto::getLivePhotoIdFromPath($path, (int) filesize($path), $exif);
 
-        return new ExtractResult($exif, $livePhotoId);
+        return new ExtractResult($path, $exif, $livePhotoId);
     }
 }
