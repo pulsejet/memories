@@ -149,6 +149,7 @@ e2e_cleanup_user() {
 
 # Main entrypoint orchestrating full execution
 e2e_main() {
+    local test_args=("$@")
     e2e_install_browsers
     e2e_setup_ci
 
@@ -192,13 +193,16 @@ e2e_main() {
 
     # Run playwright tests
     cd "$MEMORIES_DIR"
+    local run_args=()
     if [ "$PERSISTENT_USER" -eq 1 ]; then
-        echo "Running non-destructive tests for persistent user '$TEST_USER'..."
-        npx playwright test --grep-invert @destructive
-    else
-        echo "Running full test suite for ephemeral user '$TEST_USER'..."
-        npm run e2e
+        run_args+=("--grep-invert" "@destructive")
     fi
+    if [ ${#test_args[@]} -gt 0 ]; then
+        run_args+=("${test_args[@]}")
+    fi
+
+    echo "Running Playwright with args: ${run_args[*]}..."
+    npx playwright test "${run_args[@]}"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

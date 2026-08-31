@@ -3,7 +3,7 @@ import { login } from './login';
 
 test.beforeEach(login('/'));
 
-test.describe('Open', () => {
+test.describe('Timeline feed and photo preview', () => {
   test.beforeEach(async ({ page }) => {
     await page.waitForSelector('.img-outer');
     await page.waitForTimeout(500);

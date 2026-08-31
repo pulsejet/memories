@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from './login';
 
-test.describe('Folders - Destructive @destructive', () => {
+test.describe('Folder file operations @destructive', () => {
   test.beforeEach(login('/folders'));
 
   test.beforeEach(async ({ page }) => {
@@ -45,7 +45,7 @@ test.describe('Folders - Destructive @destructive', () => {
   });
 });
 
-test.describe('Timeline - Destructive @destructive', () => {
+test.describe('Timeline photo deletion @destructive', () => {
   test.beforeEach(login('/'));
 
   test.beforeEach(async ({ page }) => {

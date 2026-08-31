@@ -3,7 +3,7 @@ import { login } from './login';
 
 test.beforeEach(login('/folders'));
 
-test.describe('Open', () => {
+test.describe('Folder view and navigation', () => {
   test.beforeEach(async ({ page }) => {
     await page.waitForSelector('.big-icon');
     await page.waitForTimeout(500);
