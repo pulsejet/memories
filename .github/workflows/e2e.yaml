@@ -36,6 +36,11 @@ jobs:
           tools: phpunit
           extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
           coverage: none
+          ini-values: >-
+            opcache.enable_cli=1,
+            opcache.jit=tracing,
+            opcache.jit_buffer_size=64M
+
 
       - name: Build vue app
         run: |
@@ -66,7 +71,11 @@ jobs:
           - 4444:3306/tcp
         env:
           MYSQL_ROOT_PASSWORD: rootpassword
-        options: --health-cmd="mysqladmin ping" --health-interval 5s --health-timeout 2s --health-retries 5
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval 5s
+          --health-timeout 2s
+          --health-retries 5
 
     steps:
       - name: Checkout server
@@ -97,6 +106,10 @@ jobs:
           tools: phpunit
           extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
           coverage: none
+          ini-values: >-
+            opcache.enable_cli=1,
+            opcache.jit=tracing,
+            opcache.jit_buffer_size=64M
 
       - name: Set up Nextcloud
         env:
@@ -177,6 +190,10 @@ jobs:
           tools: phpunit
           extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
           coverage: none
+          ini-values: >-
+            opcache.enable_cli=1,
+            opcache.jit=tracing,
+            opcache.jit_buffer_size=64M
 
       - name: Set up Nextcloud
         env:
@@ -243,6 +260,10 @@ jobs:
           tools: phpunit
           extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
           coverage: none
+          ini-values: >-
+            opcache.enable_cli=1,
+            opcache.jit=tracing,
+            opcache.jit_buffer_size=64M
 
       - name: Set up Nextcloud
         env:
