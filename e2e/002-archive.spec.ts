@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, authHeaders as auth } from './login';
-import { cleanupPhoto, getImageInfo } from './utils';
+import { cleanupPhoto, getFileIdByBasename, getImageInfo } from './utils';
 
 import type { IDay, IPhoto } from '@typings';
 
@@ -35,16 +35,11 @@ test.describe.serial('@api Archive file', () => {
   const FILE_PATH_ARCH = '/Photos/.archive/Nested 1/Nested 1_1/test_05.jpg';
   let fileid: number;
 
+  test.beforeAll(async ({ request }) => {
+    fileid = await getFileIdByBasename(request, DAY_ID, 'test_05.jpg');
+  });
+
   test('Archive file', async ({ request }) => {
-    // Get fileid from main day
-    const getRes = await request.get(`${appUrl}/api/days/${DAY_ID}`, { headers: auth });
-    expect(getRes.ok()).toBeTruthy();
-
-    const photos: IPhoto[] = await getRes.json();
-    expect(photos.length).toBeGreaterThan(0);
-    fileid = photos[0].fileid;
-    expect(fileid).toBeGreaterThan(0);
-
     // Verify path before archival
     const infoBefore = await getImageInfo(request, fileid);
     expect(infoBefore.filename).toBe(FILE_PATH_BASE);
