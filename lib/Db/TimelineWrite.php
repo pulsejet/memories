@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places', 'memories_failures'];
 const TRUNCATE_TABLES = ['memories_mapclusters'];
 
-class TimelineWrite
+final class TimelineWrite
 {
     use TimelineWriteFailures;
     use TimelineWriteMap;
@@ -294,7 +294,7 @@ class TimelineWrite
      *
      * @param array<string, mixed> $exif EXIF data
      */
-    private function getExifJson(array $exif): string
+    private function getExifJson(array $exif): false|string
     {
         // Clean up EXIF to keep only useful metadata
         $filteredExif = [];

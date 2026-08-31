@@ -9,9 +9,6 @@
     <string name="preferences_has_media_permission">hasMediaPermission</string>
     <string name="preferences_allow_media">allowMedia</string>
     <string name="preferences_enabled_local_folders">enabledLocalFolders</string>
-
-    <!-- https://www.whatismybrowser.com/guides/the-latest-user-agent/chrome -->
-    <string name="ua_chrome">"Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.5672.76 Mobile Safari/537.36"</string>
     <string name="ua_app_prefix">MemoriesNative/</string>
 
     <string name="err_no_ver">Your server does not have the minimum required version of Memories</string>

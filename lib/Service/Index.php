@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Service;
 
+use OC\Files\SetupManager;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineWrite;
@@ -39,11 +40,12 @@ use OCP\IDBConnection;
 use OCP\IPreview;
 use OCP\ITempManager;
 use OCP\IUser;
+use OCP\IUserManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\ConsoleSectionOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Index
+final class Index
 {
     public ?OutputInterface $output = null;
     public ?ConsoleSectionOutput $section = null;
@@ -61,12 +63,14 @@ class Index
     private static ?array $mimeList = null;
 
     public function __construct(
-        protected IRootFolder $rootFolder,
-        protected TimelineWrite $tw,
-        protected IDBConnection $db,
-        protected ITempManager $tempManager,
-        protected LoggerInterface $logger,
-        protected IAppManager $appManager,
+        private IRootFolder $rootFolder,
+        private TimelineWrite $tw,
+        private IDBConnection $db,
+        private ITempManager $tempManager,
+        private LoggerInterface $logger,
+        private IAppManager $appManager,
+        private SetupManager $setupManager,
+        private IUserManager $userManager,
     ) {}
 
     /**
@@ -82,8 +86,8 @@ class Index
 
         $this->log("<info>Indexing user {$uid}</info>".PHP_EOL, true);
 
-        \OC_Util::tearDownFS();
-        \OC_Util::setupFS($uid);
+        $this->setupManager->tearDown();
+        $this->setupManager->setupForUser($user);
 
         // Get the root folder of the user
         $root = $this->rootFolder->getUserFolder($uid);

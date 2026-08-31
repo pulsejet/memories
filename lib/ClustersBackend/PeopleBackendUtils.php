@@ -49,24 +49,24 @@ trait PeopleBackendUtils
             $p['fileid'] = (int) $p['fileid'];
 
             // Get actual pixel size of face
-            $iw = min((int) ($p['image_width'] ?: 512), 2048);
-            $ih = min((int) ($p['image_height'] ?: 512), 2048);
+            $iw = (float) min((int) ($p['image_width'] ?: 512), 2048);
+            $ih = (float) min((int) ($p['image_height'] ?: 512), 2048);
             $w = (float) $p['width'];
             $h = (float) $p['height'];
 
             // Get center of face
-            $x = (float) $p['x'] + (float) $p['width'] / 2;
-            $y = (float) $p['y'] + (float) $p['height'] / 2;
+            $x = (float) $p['x'] + (float) $p['width'] / 2.0;
+            $y = (float) $p['y'] + (float) $p['height'] / 2.0;
 
             // 3D normal distribution - if the face is closer to the center, it's better
-            $positionScore = exp(-($x - 0.5) ** 2 * 4) * exp(-($y - 0.5) ** 2 * 4);
+            $positionScore = exp(-($x - 0.5) ** 2.0 * 4.0) * exp(-($y - 0.5) ** 2.0 * 4.0);
 
             // Root size distribution - if the image is bigger, it's better,
             // but it doesn't matter beyond a certain point
-            $imgSizeScore = ($iw * 100) ** (1 / 2) * ($ih * 100) ** (1 / 2);
+            $imgSizeScore = ($iw * 100.0) ** (1.0 / 2.0) * ($ih * 100.0) ** (1.0 / 2.0);
 
             // Faces occupying too much of the image don't look particularly good
-            $faceSizeScore = (-$w ** 2 + $w) * (-$h ** 2 + $h);
+            $faceSizeScore = (-$w ** 2.0 + $w) * (-$h ** 2.0 + $h);
 
             // Combine scores
             $p['score'] = $positionScore * $imgSizeScore * $faceSizeScore;
@@ -91,17 +91,17 @@ trait PeopleBackendUtils
      *
      * @return string[] [Blob, mimetype] of resulting image
      *
-     * @throws \Exception if file could not be used
-     *
      * @psalm-return list{string, string}
+     *
+     * @throws \Exception if file could not be used
      */
     private function cropFace(ISimpleFile $file, array $photo, float $padding): array
     {
         $img = new \OCP\Image();
         $img->loadFromData($file->getContent());
 
-        $iw = $img->width();
-        $ih = $img->height();
+        $iw = (float) $img->width();
+        $ih = (float) $img->height();
 
         if ($iw <= 0 || $ih <= 0) {
             throw new \Exception('Invalid image size');
@@ -110,14 +110,14 @@ trait PeopleBackendUtils
         // Get target dimensions
         $dw = (float) $photo['width'];
         $dh = (float) $photo['height'];
-        $dcx = (float) $photo['x'] + (float) $photo['width'] / 2;
-        $dcy = (float) $photo['y'] + (float) $photo['height'] / 2;
+        $dcx = (float) $photo['x'] + (float) $photo['width'] / 2.0;
+        $dcy = (float) $photo['y'] + (float) $photo['height'] / 2.0;
         $faceDim = max($dw * $iw, $dh * $ih) * $padding;
 
         // Crop image
         $img->crop(
-            (int) ($dcx * $iw - $faceDim / 2),
-            (int) ($dcy * $ih - $faceDim / 2),
+            (int) ($dcx * $iw - $faceDim / 2.0),
+            (int) ($dcy * $ih - $faceDim / 2.0),
             (int) $faceDim,
             (int) $faceDim,
         );

@@ -32,7 +32,7 @@ use OCP\Migration\SimpleMigrationStep;
 /**
  * Auto-generated migration step: Please modify to your needs!
  */
-class Version200000Date20220924015634 extends SimpleMigrationStep
+final class Version200000Date20220924015634 extends SimpleMigrationStep
 {
     /** @var IDBConnection */
     private $dbc;
@@ -45,6 +45,7 @@ class Version200000Date20220924015634 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
+    #[\Override]
     public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
     {
         /** @var ISchemaWrapper $schema */
@@ -60,6 +61,7 @@ class Version200000Date20220924015634 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
+    #[\Override]
     public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
     {
         /** @var ISchemaWrapper $schema */
@@ -104,5 +106,6 @@ class Version200000Date20220924015634 extends SimpleMigrationStep
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
+    #[\Override]
     public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
 }

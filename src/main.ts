@@ -3,6 +3,7 @@ import './bootstrap';
 import Vue from 'vue';
 import App from './App.vue';
 import router, { routes } from './router';
+import * as nativex from '@native';
 
 // Global components
 import XImg from '@components/frame/XImg.vue';
@@ -42,6 +43,9 @@ localStorage.setItem('videoClientIdPersistent', _m.video.clientIdPersistent);
 // Register global components and plugins
 Vue.use(VueVirtualScroller);
 Vue.component('XImg', XImg);
+
+// Initialize NativeX globals
+nativex.initialize();
 
 export default new Vue({
   el: '#content',

@@ -25,7 +25,7 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCP\IRequest;
 
-class Manager
+final class Manager
 {
     /**
      * Mapping of backend name to className.

@@ -687,7 +687,9 @@ export default defineComponent({
 
       // Video support
       this.psVideo = new PsVideo(<any>this.photoswipe, {
-        preventDragOffset: 40,
+        // Explicity disable dragging to another slide at the bottom of a video,
+        // to allow player controls to work properly.
+        preventDragOffset: 60,
       });
 
       // Image support
@@ -1076,6 +1078,14 @@ export default defineComponent({
 
       if (e.key === 'F' && e.shiftKey) {
         this.refs.outer?.requestFullscreen();
+      }
+
+      if (e.key === 'A' && e.shiftKey) {
+        this.updateAlbums();
+      }
+
+      if (e.key === 'M' && e.shiftKey) {
+        this.editMetadata();
       }
     },
 

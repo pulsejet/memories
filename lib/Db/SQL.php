@@ -8,7 +8,7 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\DB\QueryBuilder\IQueryFunction;
 use OCP\IDBConnection;
 
-class SQL
+final class SQL
 {
     /**
      * @return never
@@ -141,6 +141,7 @@ class SQL
         if (method_exists($connection, 'truncateTable')) {
             $connection->truncateTable($table, $cascade);
         } else {
+            /** @psalm-suppress DeprecatedMethod */
             $sql = $connection->getDatabasePlatform()->getTruncateTableSQL('*PREFIX*'.$table, $cascade);
             $connection->executeStatement($sql);
         }

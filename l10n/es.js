@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "Ajustes de Memories",
     "General" : "General",
     "Photo Viewer" : "Visor de Fotos",
+    "On This Day" : "En este día",
     "Account" : "Cuenta",
     "Choose Timeline Paths" : "Escoga las rutas de la línea de tiempo",
     "Choose the root for the folders view" : "Seleccione la raíz de la vista de carpetas",

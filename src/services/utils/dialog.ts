@@ -180,7 +180,8 @@ export async function chooseNcFolder(
 ): Promise<string> {
   const picker = getFilePickerBuilder(title)
     .setMultiSelect(false)
-    .setButtonFactory(buttonFactory)
+    // TODO: remove the type cast when migrated to new @nextcloud/dialogs (Vue 3 only)
+    .setButtonFactory(<any>buttonFactory)
     .addMimeTypeFilter('httpd/unix-directory')
     .allowDirectories()
     .startAt(initial)

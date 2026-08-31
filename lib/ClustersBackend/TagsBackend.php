@@ -29,28 +29,32 @@ use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
-class TagsBackend extends Backend
+final class TagsBackend extends Backend
 {
     public function __construct(
         protected TimelineQuery $tq,
         protected IRequest $request,
     ) {}
 
+    #[\Override]
     public static function appName(): string
     {
         return 'Tags';
     }
 
+    #[\Override]
     public static function clusterType(): string
     {
         return 'tags';
     }
 
+    #[\Override]
     public function isEnabled(): bool
     {
         return Util::tagsIsEnabled();
     }
 
+    #[\Override]
     public function transformDayQuery(IQueryBuilder &$query, bool $aggregate): void
     {
         $tagName = (string) $this->request->getParam('tags');
@@ -64,6 +68,7 @@ class TagsBackend extends Backend
         ));
     }
 
+    #[\Override]
     public function getClustersInternal(int $fileid = 0): array
     {
         if ($fileid) {
@@ -124,11 +129,13 @@ class TagsBackend extends Backend
         return $tags;
     }
 
+    #[\Override]
     public static function getClusterId(array $cluster): int|string
     {
         return $cluster['name'];
     }
 
+    #[\Override]
     public function getPhotos(string $name, ?int $limit = null, ?int $fileid = null): array
     {
         $query = $this->tq->getBuilder();
@@ -168,6 +175,7 @@ class TagsBackend extends Backend
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
+    #[\Override]
     public function getClusterIdFrom(array $photo): int
     {
         return (int) $photo['systemtagid'];

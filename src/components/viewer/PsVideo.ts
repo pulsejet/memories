@@ -351,6 +351,9 @@ class VideoContentSetup {
         // and this container is computed during construction
         // https://github.com/sampotts/plyr/blob/20bf5a883306e9303b325e72c9102d76cc733c47/src/js/fullscreen.js#L30
       },
+      loop: {
+        active: staticConfig.getSync('video_loop'),
+      },
     };
 
     // Add quality options
@@ -421,7 +424,7 @@ class VideoContentSetup {
       });
 
       // Unlock orientation when exiting fullscreen
-      plyr.on('exitfullscreen', async (event) => {
+      plyr.on('exitfullscreen', async (event: Plyr.PlyrEvent) => {
         try {
           if (previousOrientation) {
             await (screen.orientation as any).lock(previousOrientation);

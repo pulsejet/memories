@@ -3,6 +3,7 @@ OC.L10N.register(
     {
     "Shared Link" : "共有リンク",
     "Download" : "ダウンロード",
+    "Memories" : "メモリー",
     "Fast, modern and advanced photo management suite" : "高速で、モダンで、高度な写真管理スイート",
     "People (Recognize)" : "人物（認識）",
     "People" : "人間",
@@ -34,6 +35,7 @@ OC.L10N.register(
     "Cancel" : "キャンセル",
     "_{n} selected_::_{n} selected_" : ["{n}選択されています"],
     "General" : "一般",
+    "On This Day" : "この日には",
     "Account" : "アカウント",
     "Info" : "情報",
     "Close" : "閉じる",
@@ -129,6 +131,7 @@ OC.L10N.register(
     "Creating tags" : "タグを作成中",
     "Failed to upload {file}" : "{file}アップロードに失敗しました",
     "Some files have not been uploaded." : "一部のファイルはアップロードされていません。",
+    "Add tags" : "タグを追加",
     "_Upload {n} file_::_Upload {n} files_" : ["{n} 個のファイルをアップロードする"],
     "Last updated" : "最終更新",
     "Creation date" : "作成日時",

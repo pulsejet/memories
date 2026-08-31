@@ -25,6 +25,7 @@ OC.L10N.register(
     "Add to album" : "Añadir al álbum",
     "Cancel" : "Cancelar",
     "General" : "General",
+    "On This Day" : "En este día",
     "Account" : "Cuenta",
     "Info" : "Info",
     "Close" : "Cerrar",

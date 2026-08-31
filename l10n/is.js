@@ -28,6 +28,7 @@ OC.L10N.register(
     "Cancel" : "Hætta við",
     "_{n} selected_::_{n} selected_" : ["{n} valið","{n} valið"],
     "General" : "Almennt",
+    "On This Day" : "Á þessum degi",
     "Account" : "Aðgangur",
     "Info" : "Upplýsingar",
     "Close" : "Loka",
@@ -202,6 +203,8 @@ OC.L10N.register(
     "_{n} item_::_{n} items_" : ["{n} atriði","{n} atriði"],
     "Shared by {user}" : "Deilt af {user}",
     "Failed to delete {fileName}." : "Tókst ekki að eyða {fileName}.",
+    "Yes" : "Já",
+    "No" : "Nei",
     "Choose {file}" : "Veldu {file}",
     "Choose" : "Velja"
 },

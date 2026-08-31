@@ -395,7 +395,7 @@ trait TimelineQueryDays
 
     private function dayIdMonthEnd(int $monthId): int
     {
-        return (int) (strtotime(date('Ymt', $monthId * 86400)) / 86400);
+        return (int) ((strtotime(date('Ymt', $monthId * 86400)) ?: 0) / 86400);
     }
 
     private function dayIdToMonthId(int $dayId): int
@@ -405,7 +405,7 @@ trait TimelineQueryDays
             return $cache;
         }
 
-        return $memoize[$dayId] = strtotime(date('Ym', $dayId * 86400).'01') / 86400;
+        return $memoize[$dayId] = (strtotime(date('Ym', $dayId * 86400).'01') ?: 0) / 86400;
     }
 
     private function storageIdToUserName(string $storage): string

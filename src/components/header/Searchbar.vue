@@ -204,6 +204,9 @@ export default defineComponent({
   header &,
   #mobile-header &,
   .explore-outer & {
+    // Remove padding from text bar
+    --border-width-input-focused: 0px;
+
     :deep input[type='text'] {
       border: none !important;
       background-color: color-mix(in srgb, var(--searchbar-color) 12%, transparent);

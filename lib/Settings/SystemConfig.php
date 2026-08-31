@@ -6,7 +6,7 @@ namespace OCA\Memories\Settings;
 
 use OCA\Memories\AppInfo\Application;
 
-class SystemConfig
+final class SystemConfig
 {
     // Do not change the next line, it's used by the docs
     // to generate the default config page

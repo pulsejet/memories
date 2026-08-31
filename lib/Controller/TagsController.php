@@ -29,7 +29,7 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 
-class TagsController extends GenericApiController
+final class TagsController extends GenericApiController
 {
     /**
      * @param int   $id     File ID

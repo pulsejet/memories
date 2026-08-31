@@ -33,14 +33,15 @@ use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\Files\IRootFolder;
 
 const IMAGICK_SAFE = '/^image\/(x-)?(png|jpeg|gif|bmp|tiff|webp|hei(f|c)|avif|dcraw)$/';
 
-class ImageController extends GenericApiController
+final class ImageController extends GenericApiController
 {
     /**
      * Get preview of image.
+     *
+     * @psalm-param 'cover'|'fill' $mode
      */
     #[NoAdminRequired]
     #[NoCSRFRequired]
@@ -113,14 +114,11 @@ class ImageController extends GenericApiController
                 return $aArea <=> $bArea;
             });
 
-            /** @var \OCP\IPreview */
             $previewManager = \OC::$server->get(\OCP\IPreview::class);
+            $previewService = \OC::$server->get(\OC\Preview\PreviewService::class);
 
-            // For checking max previews
-            $previewRoot = new \OC\Preview\Storage\Root(
-                \OC::$server->get(IRootFolder::class),
-                \OC::$server->get(\OC\SystemConfig::class),
-            );
+            $requestedFileIds = array_map(static fn ($bodyFile) => (int) $bodyFile['fileid'], $files);
+            $availablePreviews = $previewService->getAvailablePreviews($requestedFileIds);
 
             // stream the response
             $out->setHeader('Content-Type: application/octet-stream');
@@ -134,13 +132,9 @@ class ImageController extends GenericApiController
 
                 try {
                     // Make sure max preview exists
-                    $file = $this->fs->getUserFile($fileid);
-                    $fileId = (string) $file->getId();
-                    $folder = $previewRoot->getFolder($fileId);
                     $hasMax = false;
-                    foreach ($folder->getDirectoryListing() as $preview) {
-                        $name = $preview->getName();
-                        if (str_contains($name, '-max')) {
+                    foreach ($availablePreviews[$fileid] as $preview) {
+                        if ($preview->isMax()) {
                             $hasMax = true;
 
                             break;
@@ -151,6 +145,7 @@ class ImageController extends GenericApiController
                     }
 
                     // Add this preview to the response
+                    $file = $this->fs->getUserFile($fileid);
                     $preview = $previewManager->getPreview($file, $x, $y, !$a, \OCP\IPreview::MODE_FILL);
                     $content = $preview->getContent();
                     if (empty($content)) {
@@ -400,7 +395,7 @@ class ImageController extends GenericApiController
 
             // Set quality if specified
             if (null !== $quality && $quality >= 0 && $quality <= 1) {
-                $image->setImageCompressionQuality((int) round(100 * $quality));
+                $image->setImageCompressionQuality((int) round(100.0 * $quality));
             }
 
             // Save the image
@@ -510,14 +505,13 @@ class ImageController extends GenericApiController
     private function refreshPreviews(\OCP\Files\File $file): void
     {
         try {
-            $previewRoot = new \OC\Preview\Storage\Root(
-                \OC::$server->get(IRootFolder::class),
-                \OC::$server->get(\OC\SystemConfig::class),
-            );
+            $previewService = \OC::$server->get(\OC\Preview\PreviewService::class);
 
-            // Delete the preview folder
-            $fileId = (string) $file->getId();
-            $previewRoot->getFolder($fileId)->delete();
+            // Delete all available previews
+            $fileId = $file->getId();
+            foreach ($previewService->getAvailablePreviewsForFile($fileId) as $preview) {
+                $previewService->deletePreview($preview);
+            }
 
             // Get the preview to regenerate
             $previewManager = \OC::$server->get(\OCP\IPreview::class);

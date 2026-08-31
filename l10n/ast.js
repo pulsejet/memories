@@ -31,6 +31,7 @@ OC.L10N.register(
     "Add to album" : "Amestar al álbum",
     "Cancel" : "Encaboxar",
     "General" : "Xeneral",
+    "On This Day" : "Tal día como güei",
     "Account" : "Cuenta",
     "Info" : "Información",
     "Close" : "Zarrar",

@@ -31,7 +31,7 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\Folder;
 use OCP\Lock\ILockingProvider;
 
-class ArchiveController extends GenericApiController
+final class ArchiveController extends GenericApiController
 {
     /**
      * Move one file to the archive folder.

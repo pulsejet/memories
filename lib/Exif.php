@@ -11,7 +11,7 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\Events\Node\NodeWrittenEvent;
 use OCP\Files\File;
 
-class Exif
+final class Exif
 {
     private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'image/x-dcraw', 'video/MP2T']; // also update const.ts
     private const EXIFTOOL_TIMEOUT = 30000;

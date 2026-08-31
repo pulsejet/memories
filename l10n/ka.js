@@ -59,6 +59,7 @@ OC.L10N.register(
     "Oldest first" : "Oldest first",
     "Newest first" : "Newest first",
     "Home" : "მთავარი",
+    "Share folder" : "საქაღალდის გაზიარება",
     "Upload files" : "Upload files",
     "Upload failed" : "Upload failed",
     "Previous" : "Previous",

@@ -9,7 +9,7 @@ use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\Settings\IIconSection;
 
-class AdminSection implements IIconSection
+final class AdminSection implements IIconSection
 {
     public function __construct(
         private IL10N $l,
@@ -27,6 +27,7 @@ class AdminSection implements IIconSection
     /**
      * @return string
      */
+    #[\Override]
     public function getID()
     {
         return 'memories';
@@ -35,6 +36,7 @@ class AdminSection implements IIconSection
     /**
      * @return string
      */
+    #[\Override]
     public function getName()
     {
         return $this->l->t('Memories');
@@ -43,6 +45,7 @@ class AdminSection implements IIconSection
     /**
      * @return int
      */
+    #[\Override]
     public function getPriority()
     {
         return 75;
@@ -51,6 +54,7 @@ class AdminSection implements IIconSection
     /**
      * @return string
      */
+    #[\Override]
     public function getIcon()
     {
         return $this->urlGenerator->imagePath('memories', 'app-dark.svg');

@@ -33,7 +33,7 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\JSONResponse;
 
-class AdminController extends GenericApiController
+final class AdminController extends GenericApiController
 {
     /**
      * @AdminRequired

@@ -63,6 +63,7 @@ OC.L10N.register(
     "Memories Settings" : "Muistot-sovelluksen asetukset",
     "General" : "Yleiset",
     "Photo Viewer" : "Valokuvien katselin",
+    "On This Day" : "Tänä päivänä",
     "Account" : "Tili",
     "Choose Timeline Paths" : "Valitse aikajanan polut",
     "Choose the root for the folders view" : "Valitse kansionäkymän juurihakemisto",

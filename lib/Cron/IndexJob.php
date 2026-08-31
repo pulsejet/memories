@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 const MAX_RUN_TIME = 300; // seconds
 const INTERVAL = 900; // seconds (don't set this too low)
 
-class IndexJob extends TimedJob
+final class IndexJob extends TimedJob
 {
     private bool $_hasError = false;
 
@@ -35,6 +35,7 @@ class IndexJob extends TimedJob
     /**
      * Run the background indexing job.
      */
+    #[\Override]
     protected function run(mixed $argument): void
     {
         // Check if indexing is enabled

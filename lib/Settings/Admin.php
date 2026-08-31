@@ -9,13 +9,14 @@ use OCA\Memories\Controller\PageController;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\Settings\ISettings;
 
-class Admin implements ISettings
+final class Admin implements ISettings
 {
     public function __construct() {}
 
     /**
      * @return TemplateResponse
      */
+    #[\Override]
     public function getForm()
     {
         \OCP\Util::addScript(Application::APPNAME, 'memories-admin');
@@ -26,6 +27,7 @@ class Admin implements ISettings
     /**
      * @return string
      */
+    #[\Override]
     public function getSection()
     {
         return Application::APPNAME;
@@ -34,6 +36,7 @@ class Admin implements ISettings
     /**
      * @return int
      */
+    #[\Override]
     public function getPriority()
     {
         return 50;

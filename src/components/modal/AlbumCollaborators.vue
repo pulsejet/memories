@@ -153,12 +153,12 @@ import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 
-import { Type } from '@nextcloud/sharing';
+import { ShareType } from '@nextcloud/sharing';
 
 type Collaborator = {
   id: string;
   label: string;
-  type: Type;
+  type: ShareType;
 };
 
 export default defineComponent({
@@ -219,7 +219,7 @@ export default defineComponent({
 
     listableSelectedCollaboratorsKeys(): string[] {
       return this.selectedCollaboratorsKeys.filter(
-        (collaboratorKey) => this.availableCollaborators[collaboratorKey].type !== Type.SHARE_TYPE_LINK,
+        (collaboratorKey) => this.availableCollaborators[collaboratorKey].type !== ShareType.Link,
       );
     },
 
@@ -228,11 +228,11 @@ export default defineComponent({
     },
 
     isPublicLinkSelected(): boolean {
-      return this.selectedCollaboratorsKeys.includes(`${Type.SHARE_TYPE_LINK}`);
+      return this.selectedCollaboratorsKeys.includes(`${ShareType.Link}`);
     },
 
     publicLink(): Collaborator {
-      return this.availableCollaborators[Type.SHARE_TYPE_LINK];
+      return this.availableCollaborators[ShareType.Link];
     },
   },
   watch: {
@@ -265,7 +265,7 @@ export default defineComponent({
           params: {
             search: this.searchText,
             itemType: 'share-recipients',
-            shareTypes: [Type.SHARE_TYPE_USER, Type.SHARE_TYPE_GROUP],
+            shareTypes: [ShareType.User, ShareType.Group],
           },
         });
 
@@ -275,13 +275,13 @@ export default defineComponent({
               return {
                 id: collaborator.id,
                 label: collaborator.label,
-                type: Type.SHARE_TYPE_USER,
+                type: ShareType.User,
               };
             case 'groups':
               return {
                 id: collaborator.id,
                 label: collaborator.label,
-                type: Type.SHARE_TYPE_GROUP,
+                type: ShareType.Group,
               };
             default:
               throw new Error(`Invalid collaborator source ${collaborator.source}`);
@@ -310,7 +310,7 @@ export default defineComponent({
         3: {
           id: '',
           label: this.t('memories', 'Public link'),
-          type: Type.SHARE_TYPE_LINK,
+          type: ShareType.Link,
         },
         ...this.availableCollaborators,
         ...initialCollaborators,
@@ -324,8 +324,8 @@ export default defineComponent({
     indexCollaborators(collaborators: { [s: string]: Collaborator }, collaborator: Collaborator) {
       return {
         ...collaborators,
-        [`${collaborator.type}${collaborator.type === Type.SHARE_TYPE_LINK ? '' : ':'}${
-          collaborator.type === Type.SHARE_TYPE_LINK ? '' : collaborator.id
+        [`${collaborator.type}${collaborator.type === ShareType.Link ? '' : ':'}${
+          collaborator.type === ShareType.Link ? '' : collaborator.id
         }`]: collaborator,
       };
     },
@@ -337,7 +337,7 @@ export default defineComponent({
       }
 
       // Create new link
-      this.selectEntity(`${Type.SHARE_TYPE_LINK}`);
+      this.selectEntity(`${ShareType.Link}`);
       await this.updateAlbumCollaborators();
       try {
         this.loadingAlbum = true;
@@ -361,11 +361,11 @@ export default defineComponent({
     },
 
     async deletePublicLink() {
-      this.unselectEntity(`${Type.SHARE_TYPE_LINK}`);
+      this.unselectEntity(`${ShareType.Link}`);
       this.availableCollaborators[3] = {
         id: '',
         label: this.t('memories', 'Public link'),
-        type: Type.SHARE_TYPE_LINK,
+        type: ShareType.Link,
       };
       this.publicLinkCopied = false;
       await this.updateAlbumCollaborators();

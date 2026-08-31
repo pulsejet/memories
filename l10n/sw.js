@@ -2,6 +2,7 @@ OC.L10N.register(
     "memories",
     {
     "Download" : "Pakua",
+    "Memories" : "Memories",
     "People" : "Watu",
     "Timeline" : "Timeline",
     "Explore" : "Gundua",
@@ -28,6 +29,7 @@ OC.L10N.register(
     "Cancel" : "Cancel",
     "_{n} selected_::_{n} selected_" : ["{n} selected","{n} selected"],
     "General" : "Kuu",
+    "On This Day" : "Katika siku hii",
     "Account" : "Akaunti",
     "Logged in as {user}" : "Logged in as {user}",
     "Info" : "Info",
@@ -90,6 +92,7 @@ OC.L10N.register(
     "Share link" : "Shirikisha kiungio",
     "Refresh" : "Refresh",
     "Failed to upload {file}" : "Imeshindwa kupakia {file}",
+    "Last updated" : "Imesasishwa mara ya mwisho",
     "Creation date" : "Tarehe ya uundaji",
     "Oldest first" : "Ya zamani kwanza",
     "Ascending" : "Ascending",

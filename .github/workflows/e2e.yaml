@@ -21,12 +21,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20.x
+          node-version: 24.x
 
       - name: Checkout the app
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Set up php for tools
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: phpunit
+          extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
+          coverage: none
 
       - name: Build vue app
         run: |
@@ -47,8 +55,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['8.2', '8.3']
-        server-versions: ['stable30', 'stable31']
+        php-versions: ['8.4']
+        server-versions: ['stable33']
 
     services:
       mysql:
@@ -61,21 +69,21 @@ jobs:
 
     steps:
       - name: Checkout server
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: true
           repository: nextcloud/server
           ref: ${{ matrix.server-versions }}
 
       - name: Checkout the app
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: apps/${{ env.APP_NAME }}
 
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20.x
+          node-version: 24.x
 
       - uses: actions/download-artifact@v4
         with:
@@ -122,8 +130,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['8.3']
-        server-versions: ['stable30', 'stable31']
+        php-versions: ['8.4']
+        server-versions: ['stable33']
 
     services:
       postgres:
@@ -141,21 +149,21 @@ jobs:
 
     steps:
       - name: Checkout server
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: true
           repository: nextcloud/server
           ref: ${{ matrix.server-versions }}
 
       - name: Checkout the app
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: apps/${{ env.APP_NAME }}
 
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20.x
+          node-version: 24.x
 
       - uses: actions/download-artifact@v4
         with:
@@ -202,26 +210,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['8.3']
-        server-versions: ['stable30', 'stable31']
+        php-versions: ['8.4']
+        server-versions: ['stable33']
 
     steps:
       - name: Checkout server
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: true
           repository: nextcloud/server
           ref: ${{ matrix.server-versions }}
 
       - name: Checkout the app
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: apps/${{ env.APP_NAME }}
 
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20.x
+          node-version: 24.x
 
       - uses: actions/download-artifact@v4
         with:

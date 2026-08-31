@@ -7,7 +7,7 @@ namespace OCA\Memories;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 
-class Exceptions
+final class Exceptions
 {
     public static function Generic(\Exception $e, int $status = Http::STATUS_INTERNAL_SERVER_ERROR): HttpResponseException
     {
@@ -45,7 +45,7 @@ class Exceptions
         ], Http::STATUS_NOT_FOUND));
     }
 
-    public static function NotFoundFile(null|int|string $identifier): HttpResponseException
+    public static function NotFoundFile(int|string|null $identifier): HttpResponseException
     {
         return new HttpResponseException(new DataResponse([
             'message' => "File not found ({$identifier})",

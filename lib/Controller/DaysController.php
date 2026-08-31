@@ -30,7 +30,7 @@ use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
 
-class DaysController extends GenericApiController
+final class DaysController extends GenericApiController
 {
     #[NoAdminRequired]
     #[PublicPage]

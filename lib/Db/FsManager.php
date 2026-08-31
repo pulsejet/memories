@@ -41,9 +41,10 @@ use OCP\IConfig;
 use OCP\IRequest;
 use OCP\IUserManager;
 use OCP\IUserSession;
+use OCP\Share\Exceptions\ShareNotFound;
 use OCP\Share\IShare;
 
-class FsManager
+final class FsManager
 {
     private ICache $nomediaCache;
 
@@ -317,7 +318,17 @@ class FsManager
         }
 
         // Get share by token
-        $share = \OC::$server->get(\OCP\Share\IManager::class)->getShareByToken($token);
+        $share = null;
+
+        // This might be invoked for public albums, in this case the token parameter
+        // contains the collaborator_id of the album rather than a proper share token.
+        //
+        // Catch the ShareNotFound exception to enable further processing of the request.
+        try {
+            $share = \OC::$server->get(\OCP\Share\IManager::class)->getShareByToken($token);
+        } catch (ShareNotFound $e) {
+            return null;
+        }
         if (!self::validateShare($share)) {
             return null;
         }

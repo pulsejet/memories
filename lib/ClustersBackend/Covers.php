@@ -8,7 +8,7 @@ use OCA\Memories\Db\SQL;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
-class Covers
+final class Covers
 {
     /**
      * Select the list query to get covers.
@@ -24,7 +24,7 @@ class Covers
      * @param bool          $validateFilecache    Whether to validate the filecache
      * @param mixed         $user                 Query expression for user ID to use for the covers
      */
-    final public static function selectCover(
+    public static function selectCover(
         IQueryBuilder &$query,
         string $type,
         string $clusterTable,
@@ -92,7 +92,7 @@ class Covers
      * @param string        $objectTableObjectId  Column name for the object ID in objectTable
      * @param string        $objectTableClusterId Column name for the cluster ID in objectTable
      */
-    final public static function filterCover(
+    public static function filterCover(
         IQueryBuilder &$query,
         string $type,
         string $objectTable,
@@ -116,7 +116,7 @@ class Covers
      * @param int    $fileid    File ID
      * @param bool   $manual    Whether this is a manual selection
      */
-    final public static function setCover(string $type, int $clusterId, int $objectId, int $fileid, bool $manual): void
+    public static function setCover(string $type, int $clusterId, int $objectId, int $fileid, bool $manual): void
     {
         Util::transaction(static function () use ($type, $clusterId, $objectId, $fileid, $manual): void {
             $connection = \OC::$server->get(\OCP\IDBConnection::class);

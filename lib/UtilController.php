@@ -47,6 +47,7 @@ trait UtilController
                 parent::__construct();
             }
 
+            #[\Override]
             public function callback(Http\IOutput $output): void
             {
                 try {
@@ -119,13 +120,15 @@ trait UtilController
      */
     public static function getUserLang(): string
     {
-        // Default language
         $config = \OC::$server->get(\OCP\IConfig::class);
+        $userConfig = \OC::$server->get(\OCP\Config\IUserConfig::class);
+
+        // Get the default language
         $default = $config->getSystemValue('default_language', 'en');
 
         try {
             // Get language of the user
-            return $config->getUserValue(self::getUID(), 'core', 'lang', $default);
+            return $userConfig->getValueString(self::getUID(), 'core', 'lang', $default);
         } catch (\Exception) {
             // Fallback to server language
             return $default;

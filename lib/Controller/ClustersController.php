@@ -33,7 +33,7 @@ use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 
-class ClustersController extends GenericApiController
+final class ClustersController extends GenericApiController
 {
     /**
      * Current backend for this instance.

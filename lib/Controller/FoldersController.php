@@ -13,7 +13,7 @@ use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\Files\FileInfo;
 use OCP\Files\Folder;
 
-class FoldersController extends GenericApiController
+final class FoldersController extends GenericApiController
 {
     #[NoAdminRequired]
     #[PublicPage]
@@ -56,6 +56,7 @@ class FoldersController extends GenericApiController
             $view = $rp->getValue($node);
 
             // Get the subfolders
+            /** @psalm-suppress InternalMethod */
             $folders = $view->getDirectoryContent($node->getPath(), FileInfo::MIMETYPE_FOLDER, $node);
 
             // Sort by name

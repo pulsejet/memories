@@ -28,8 +28,13 @@ declare module '@typings' {
     high_res_cond_default: HighResCond;
     livephoto_autoplay: boolean;
     livephoto_loop: boolean;
+    video_loop: boolean;
     sidebar_filepath: boolean;
     metadata_in_slideshow: boolean;
+
+    // on this day settings
+    onthisday_day_range: number;
+    onthisday_photos_per_year: number;
 
     // folder settings
     folders_path: string;

@@ -28,12 +28,13 @@ use OCP\ISession;
 /**
  * @template-implements IEventListener<Event>
  */
-class PostLogoutListener implements IEventListener
+final class PostLogoutListener implements IEventListener
 {
     public const CLEAR_CACHE_KEY = 'memories_clear_cache';
 
     public function __construct(private ISession $session) {}
 
+    #[\Override]
     public function handle(Event $event): void
     {
         $this->session->set(self::CLEAR_CACHE_KEY, '1');

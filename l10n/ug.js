@@ -64,6 +64,7 @@ OC.L10N.register(
     "Memories Settings" : "ئەسلىمە تەڭشىكى",
     "General" : "ئادەتتىكى",
     "Photo Viewer" : "رەسىم كۆرگۈچى",
+    "On This Day" : "بۇ كۈندە",
     "Account" : "ھېسابات",
     "Choose Timeline Paths" : "ۋاقىت يولىنى تاللاڭ",
     "Choose the root for the folders view" : "ھۆججەت قىسقۇچنىڭ كۆرۈنۈشىنى تاللاڭ",

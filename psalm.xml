@@ -30,26 +30,15 @@
         <directory name="../../3rdparty/guzzlehttp" />
         <directory name="../../3rdparty/deepdiver" />
     </extraFiles>
+    <stubs>
+        <file name="stubs/recognize.phpstub" />
+    </stubs>
     <issueHandlers>
-        <UndefinedDocblockClass>
+        <PossiblyFalseArgument>
             <errorLevel type="suppress">
-                <referencedClass name="Doctrine\DBAL\Schema\Schema" />
-                <referencedClass name="Doctrine\DBAL\Schema\SchemaException" />
-                <referencedClass name="Doctrine\DBAL\Driver\Statement" />
-                <referencedClass name="Doctrine\DBAL\Schema\Table" />
-                <referencedClass name="Doctrine\DBAL\Platforms\AbstractPlatform" />
+                <directory name="lib/" />
             </errorLevel>
-        </UndefinedDocblockClass>
-        <PossiblyUnusedMethod>
-            <errorLevel type="suppress">
-                <file name="lib/Service/FileRobotMagick.php" />
-            </errorLevel>
-        </PossiblyUnusedMethod>
-        <PropertyNotSetInConstructor>
-            <errorLevel type="suppress">
-                <directory name="lib/Command" />
-            </errorLevel>
-        </PropertyNotSetInConstructor>
+        </PossiblyFalseArgument>
         <RiskyTruthyFalsyComparison>
             <errorLevel type="suppress">
                 <directory name="lib/" />
@@ -57,8 +46,8 @@
         </RiskyTruthyFalsyComparison>
     </issueHandlers>
     <forbiddenFunctions>
-            <function name="var_dump" />
-            <function name="print" />
-            <function name="print_r" />
+        <function name="var_dump" />
+        <function name="print" />
+        <function name="print_r" />
     </forbiddenFunctions>
 </psalm>

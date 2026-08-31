@@ -35,7 +35,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class IndexOpts
+final class IndexOpts
 {
     public bool $force = false;
     public bool $clear = false;
@@ -57,10 +57,15 @@ class IndexOpts
     }
 }
 
-class Index extends Command
+final class Index extends Command
 {
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private InputInterface $input;
+
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private OutputInterface $output;
+
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private IndexOpts $opts;
 
     public function __construct(
@@ -74,6 +79,7 @@ class Index extends Command
         parent::__construct();
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -89,6 +95,7 @@ class Index extends Command
         ;
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         /** @var \Symfony\Component\Console\Output\ConsoleOutputInterface $output */
