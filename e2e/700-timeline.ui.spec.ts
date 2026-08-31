@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { navigate } from './navigation';
+import { appUrl, bootstrap } from './navigation';
 
 test.describe('@ui Timeline feed and photo preview', () => {
-  test.beforeEach(navigate('/'));
-
   test.beforeEach(async ({ page }) => {
+    await bootstrap(page);
+    await page.goto(appUrl);
     await page.waitForSelector('.img-outer');
     await page.waitForTimeout(500);
   });

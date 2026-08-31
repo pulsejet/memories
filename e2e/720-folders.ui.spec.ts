@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { navigate } from './navigation';
-
-test.beforeEach(navigate('/folders'));
+import { appUrl, bootstrap } from './navigation';
 
 test.describe('@ui Folder view and navigation', () => {
   test.beforeEach(async ({ page }) => {
+    await bootstrap(page);
+    await page.goto(`${appUrl}/folders`);
     await page.waitForSelector('.big-icon');
     await page.waitForTimeout(500);
   });

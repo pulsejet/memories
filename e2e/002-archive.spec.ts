@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, ocsHeaders } from './navigation';
+import { appUrl, ocsHeaders, bootstrap } from './navigation';
 import { cleanupPhoto, getFileIdByBasename, getImageInfo } from './utils';
 
 import type { IDay, IPhoto } from '@typings';
@@ -103,6 +103,10 @@ test.describe.serial('@ui Archive', () => {
   test.beforeAll(async ({ request }) => {
     fileid1 = await getFileIdByBasename(request, 20696, 'NKcupJh-Dos.jpg');
     fileid2 = await getFileIdByBasename(request, 20696, 'CbBbaNTmsAc.jpg');
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await bootstrap(page);
   });
 
   test('Archive file', async ({ request, page }) => {

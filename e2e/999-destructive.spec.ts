@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { navigate } from './navigation';
+import { appUrl, bootstrap } from './navigation';
 
 test.describe('@ui @destructive Folder file operations', () => {
-  test.beforeEach(navigate('/folders'));
-
   test.beforeEach(async ({ page }) => {
+    await bootstrap(page);
+    await page.goto(`${appUrl}/folders`);
     await page.waitForSelector('.big-icon');
     await page.waitForTimeout(500);
   });
@@ -46,9 +46,9 @@ test.describe('@ui @destructive Folder file operations', () => {
 });
 
 test.describe('@ui @destructive Timeline photo deletion', () => {
-  test.beforeEach(navigate('/'));
-
   test.beforeEach(async ({ page }) => {
+    await bootstrap(page);
+    await page.goto(appUrl);
     await page.waitForSelector('.img-outer');
     await page.waitForTimeout(500);
   });
