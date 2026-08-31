@@ -20,6 +20,9 @@ jobs:
   unit-test:
     name: Unit Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
 
     strategy:
       fail-fast: false
@@ -67,3 +70,11 @@ jobs:
         working-directory: apps/memories
         run: |
           make test
+
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: PHPUnit Tests
+          path: apps/memories/tests/phpunit-junit.xml
+          reporter: java-junit

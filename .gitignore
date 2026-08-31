@@ -26,6 +26,7 @@ memories.tar.gz
 /playwright-report/
 /playwright/.cache/
 .cache/
+tests/phpunit-junit.xml
 
 bin-ext/
 

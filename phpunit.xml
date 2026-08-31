@@ -14,5 +14,8 @@
             <directory suffix=".php">lib</directory>
         </include>
     </source>
+    <logging>
+        <junit outputFile="tests/phpunit-junit.xml"/>
+    </logging>
 </phpunit>
 
