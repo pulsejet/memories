@@ -40,15 +40,13 @@ watch-js:
 
 # Testing
 test:
-	npm run test
+	vendor/bin/phpunit
 
-test-watch:
-	npm run test:watch
+test-php:
+	vendor/bin/phpunit
 
-test-coverage:
-	npm run test:coverage
+.PHONY: test test-php
 
-.PHONY: test test-watch test-coverage
 
 # Linting
 lint:

@@ -17,7 +17,10 @@ use PhpCsFixer\Finder;
 $finder = Finder::create()
     ->ignoreDotFiles(false)
     ->ignoreVCSIgnored(true)
-    ->in(__DIR__.'/lib')
+    ->in([
+        __DIR__.'/lib',
+        __DIR__.'/tests',
+    ])
 ;
 
 $config = new Config();
