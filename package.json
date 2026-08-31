@@ -26,8 +26,7 @@
     "build": "webpack --node-env production --progress",
     "dev": "webpack --node-env development --progress",
     "watch": "webpack --node-env development --progress --watch",
-    "serve": "webpack serve --node-env development --progress",
-    "e2e": "playwright test"
+    "serve": "webpack serve --node-env development --progress"
   },
   "dependencies": {
     "@nextcloud/auth": "^2.5.3",

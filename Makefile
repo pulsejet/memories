@@ -40,16 +40,13 @@ watch-js:
 .PHONY: build-js patch-external watch-js
 
 # Testing
-test:
-	vendor/bin/phpunit
-
 test-php:
 	vendor/bin/phpunit
 
 e2e:
 	bash scripts/e2e.sh
 
-.PHONY: test test-php e2e
+.PHONY: test-php e2e
 
 
 # Linting

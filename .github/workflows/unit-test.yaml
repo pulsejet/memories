@@ -23,7 +23,6 @@ jobs:
     permissions:
       contents: read
       checks: write
-      pull-requests: write # only required if `comment: true` was enabled
 
     strategy:
       fail-fast: false
@@ -71,13 +70,4 @@ jobs:
       - name: Run PHPUnit
         working-directory: apps/memories
         run: |
-          make test
-
-      - name: Publish Test Results
-        uses: mikepenz/action-junit-report@v6
-        if: always()
-        with:
-          report_paths: 'apps/memories/tests/phpunit-junit.xml'
-          check_name: 'PHPUnit Tests'
-          detailed_summary: true
-          include_passed: true
+          make test-php
