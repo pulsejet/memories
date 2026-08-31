@@ -46,7 +46,10 @@ test-php:
 e2e:
 	bash scripts/e2e.sh
 
-.PHONY: test-php e2e
+e2e-headed:
+	npx playwright test --grep-invert @destructive --headed
+
+.PHONY: test-php e2e e2e-headed
 
 
 # Linting
