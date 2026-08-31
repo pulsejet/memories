@@ -2,15 +2,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { expect, type PlaywrightTestArgs } from '@playwright/test';
 
-export const defaultBaseUrl = process.env.CI ? 'http://localhost:8080' : 'http://localhost';
-export const baseUrl = (process.env.E2E_BASE_URL || process.env.BASE_URL || defaultBaseUrl).replace(/\/+$/, '');
 export const username = process.env.E2E_USER || process.env.TEST_USER || 'admin';
 export const password = process.env.E2E_PASSWORD || process.env.TEST_PASSWORD || 'password';
+export const defaultBaseUrl = process.env.CI ? 'http://localhost:8080' : 'http://localhost';
+export const baseUrl = (process.env.E2E_BASE_URL || process.env.BASE_URL || defaultBaseUrl).replace(/\/+$/, '');
 export const appUrl = `${baseUrl}/index.php/apps/memories`;
 
-export const authHeaders = {
+export const ocsHeaders = {
   'OCS-APIREQUEST': 'true',
-  Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
 };
 
 const logDir = process.env.E2E_LOG_DIR || path.resolve(__dirname, '../e2e_logs');
@@ -34,22 +33,15 @@ function getLogStream(): fs.WriteStream {
   return logStream;
 }
 
-export function login(route: string) {
+export function navigate(route: string) {
   return async ({ page }: PlaywrightTestArgs) => {
     page.on('console', (msg) => {
       const tag = tagMap[msg.type()] || msg.type().toUpperCase();
       getLogStream().write(`[${tag}] ${msg.text()}\n`);
     });
 
-    await page.setViewportSize({ width: 800, height: 600 });
-    const targetUrl = `${baseUrl}/index.php/apps/memories${route}`;
+    const targetUrl = appUrl + route;
     await page.goto(targetUrl);
-
-    await page.locator('#user').click();
-    await page.locator('#user').fill(username);
-    await page.locator('#user').press('Tab');
-    await page.locator('#password').fill(password);
-    await page.locator('button[type="submit"]').click();
     await expect(page).toHaveURL(targetUrl);
   };
 }

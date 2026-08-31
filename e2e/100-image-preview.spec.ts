@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, authHeaders } from './login';
+import { appUrl, ocsHeaders } from './navigation';
 import { getFileIdByBasename } from './utils';
 import { imageSize } from 'image-size';
+
+test.use({ extraHTTPHeaders: ocsHeaders });
 
 // We need to run this test serially so that previews are
 // always generated for the last multipreview test.
@@ -18,7 +20,6 @@ test.describe.serial('@api Image preview', () => {
 
   test('Get 32x32 preview', async ({ request }) => {
     const res = await request.get(`${appUrl}/api/image/preview/${fileid1}`, {
-      headers: authHeaders,
       params: { x: 32, y: 32, a: 1 },
     });
     expect(res.ok()).toBeTruthy();
@@ -36,7 +37,6 @@ test.describe.serial('@api Image preview', () => {
 
   test('Get 32x32 square preview', async ({ request }) => {
     const res = await request.get(`${appUrl}/api/image/preview/${fileid2}`, {
-      headers: authHeaders,
       params: { x: 32, y: 32 },
     });
     expect(res.ok()).toBeTruthy();
@@ -52,7 +52,6 @@ test.describe.serial('@api Image preview', () => {
 
   test('Get 1024x1024 square preview', async ({ request }) => {
     const res = await request.get(`${appUrl}/api/image/preview/${fileid2}`, {
-      headers: authHeaders,
       params: { x: 1024, y: 1024 },
     });
     expect(res.ok()).toBeTruthy();
@@ -68,7 +67,6 @@ test.describe.serial('@api Image preview', () => {
 
   test('Get multipreview for two images', async ({ request }) => {
     const res = await request.post(`${appUrl}/api/image/multipreview`, {
-      headers: authHeaders,
       data: {
         files: [
           { reqid: 'f1', fileid: fileid1, x: 32, y: 32, a: '1' },

@@ -1,15 +1,18 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, authHeaders, username } from './login';
-import type { IImageInfo } from '@typings';
+import { appUrl, ocsHeaders, username } from './navigation';
 import { getFileIdByBasename } from './utils';
 
+import type { IImageInfo } from '@typings';
+
 import assetImageInfoTest01 from './assets/primary-api/image-info-test_01.jpg.json';
+
+test.use({ extraHTTPHeaders: ocsHeaders });
 
 test.describe('@api Image info', () => {
   test('Query image info for test_01.jpg', async ({ request }) => {
     const fileid = await getFileIdByBasename(request, 19532, 'test_01.jpg');
 
-    const res = await request.get(`${appUrl}/api/image/info/${fileid}`, { headers: authHeaders });
+    const res = await request.get(`${appUrl}/api/image/info/${fileid}`);
     expect(res.ok()).toBeTruthy();
 
     const data: IImageInfo = await res.json();

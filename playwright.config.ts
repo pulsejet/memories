@@ -16,13 +16,20 @@ const config: PlaywrightTestConfig = {
     actionTimeout: 30000,
     trace: 'on-first-retry',
     screenshot: 'on',
+    viewport: { width: 1280, height: 720 },
   },
   projects: [
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+    },
     {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        storageState: 'e2e/.state/user.json',
       },
+      dependencies: ['setup'],
     },
   ],
 };

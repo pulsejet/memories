@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { login } from './login';
+import { navigate } from './navigation';
 
 test.describe('@ui Timeline feed and photo preview', () => {
-  test.beforeEach(login('/'));
+  test.beforeEach(navigate('/'));
 
   test.beforeEach(async ({ page }) => {
     await page.waitForSelector('.img-outer');

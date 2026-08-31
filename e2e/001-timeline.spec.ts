@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, authHeaders } from './login';
+import { appUrl, ocsHeaders } from './navigation';
 import { cleanupPhoto } from './utils';
 
 import type { IDay, IPhoto } from '@typings';
@@ -19,12 +19,12 @@ const TIMELINE_DAY_MAP: Record<any, IPhoto[]> = {
   '19221': assetPrimaryApiDay19221 satisfies IPhoto[],
 };
 
+test.use({ extraHTTPHeaders: ocsHeaders });
+
 test.describe('@api Timeline', () => {
   // Tests OCA\Memories\Controller\DaysController::days()
   test('Query days endpoint', async ({ request }) => {
-    const res = await request.get(`${appUrl}/api/days?nopreload=1`, {
-      headers: authHeaders,
-    });
+    const res = await request.get(`${appUrl}/api/days?nopreload=1`);
     expect(res.ok()).toBeTruthy();
 
     const data: IDay[] = await res.json();
@@ -33,9 +33,7 @@ test.describe('@api Timeline', () => {
   });
 
   test('Query days preload', async ({ request }) => {
-    const res = await request.get(`${appUrl}/api/days`, {
-      headers: authHeaders,
-    });
+    const res = await request.get(`${appUrl}/api/days`);
     expect(res.ok()).toBeTruthy();
 
     // Maximum of 5 days are preloaded (or 50 photos)
@@ -57,7 +55,6 @@ test.describe('@api Timeline', () => {
   // Tests OCA\Memories\Controller\DaysController::day()
   test(`Query day POST endpoint`, async ({ request }) => {
     const res = await request.post(`${appUrl}/api/days`, {
-      headers: authHeaders,
       data: {
         dayIds: [20696, 18955, 500],
       },
@@ -73,9 +70,7 @@ test.describe('@api Timeline', () => {
   // Tests OCA\Memories\Controller\DaysController::dayGet()
   for (const testDayId of Object.keys(TIMELINE_DAY_MAP)) {
     test(`Query day(${testDayId}) GET endpoint`, async ({ request }) => {
-      const res = await request.get(`${appUrl}/api/days/${testDayId}`, {
-        headers: authHeaders,
-      });
+      const res = await request.get(`${appUrl}/api/days/${testDayId}`);
       expect(res.ok()).toBeTruthy();
 
       const data: IPhoto[] = await res.json();

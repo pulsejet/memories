@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { login } from './login';
+import { navigate } from './navigation';
 
-test.describe('Folder file operations @destructive', () => {
-  test.beforeEach(login('/folders'));
+test.describe('@ui @destructive Folder file operations', () => {
+  test.beforeEach(navigate('/folders'));
 
   test.beforeEach(async ({ page }) => {
     await page.waitForSelector('.big-icon');
@@ -46,7 +46,7 @@ test.describe('Folder file operations @destructive', () => {
 });
 
 test.describe('Timeline photo deletion @destructive', () => {
-  test.beforeEach(login('/'));
+  test.beforeEach(navigate('/'));
 
   test.beforeEach(async ({ page }) => {
     await page.waitForSelector('.img-outer');

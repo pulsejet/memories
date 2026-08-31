@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, authHeaders as auth } from './login';
+import { appUrl, ocsHeaders } from './navigation';
 import { cleanupPhoto, getFileIdByBasename, getImageInfo } from './utils';
 
 import type { IDay, IPhoto } from '@typings';
@@ -7,9 +7,11 @@ import type { IDay, IPhoto } from '@typings';
 import assetArchivedApiDays from './assets/primary-api/archived-days.json';
 import assetArchivedApiDay19354 from './assets/primary-api/archived-day-19354.json';
 
+test.use({ extraHTTPHeaders: ocsHeaders });
+
 test.describe('@api Archive', () => {
   test('Query archived days endpoint', async ({ request }) => {
-    const res = await request.get(`${appUrl}/api/days?nopreload=1&archive=1`, { headers: auth });
+    const res = await request.get(`${appUrl}/api/days?nopreload=1&archive=1`);
     expect(res.ok()).toBeTruthy();
 
     const data: IDay[] = await res.json();
@@ -17,7 +19,7 @@ test.describe('@api Archive', () => {
   });
 
   test('Query archived day endpoint', async ({ request }) => {
-    const res = await request.get(`${appUrl}/api/days/19354?archive=1`, { headers: auth });
+    const res = await request.get(`${appUrl}/api/days/19354?archive=1`);
     expect(res.ok()).toBeTruthy();
 
     const data: IPhoto[] = await res.json();
@@ -45,7 +47,7 @@ test.describe.serial('@api Archive file', () => {
     expect(infoBefore.filename).toBe(FILE_PATH_BASE);
 
     // Archive
-    const patchRes = await request.patch(`${appUrl}/api/archive/${fileid}`, { headers: auth });
+    const patchRes = await request.patch(`${appUrl}/api/archive/${fileid}`);
     expect(patchRes.ok()).toBeTruthy();
 
     // Verify path during archival (now in archive)
@@ -53,14 +55,14 @@ test.describe.serial('@api Archive file', () => {
     expect(infoDuring.filename).toBe(FILE_PATH_ARCH);
 
     // Verify in archive
-    const checkRes = await request.get(`${appUrl}/api/days/${DAY_ID}?archive=1`, { headers: auth });
+    const checkRes = await request.get(`${appUrl}/api/days/${DAY_ID}?archive=1`);
     expect(checkRes.ok()).toBeTruthy();
 
     const archived: IPhoto[] = await checkRes.json();
     expect(archived.some((p) => p.fileid === fileid)).toBeTruthy();
 
     // Verify gone from main
-    const mainRes = await request.get(`${appUrl}/api/days/${DAY_ID}`, { headers: auth });
+    const mainRes = await request.get(`${appUrl}/api/days/${DAY_ID}`);
     expect(mainRes.ok()).toBeTruthy();
 
     const main: IPhoto[] = await mainRes.json();
@@ -70,7 +72,6 @@ test.describe.serial('@api Archive file', () => {
   test('Unarchive file', async ({ request }) => {
     // Unarchive
     const patchRes = await request.patch(`${appUrl}/api/archive/${fileid}`, {
-      headers: auth,
       data: { archive: false },
     });
     expect(patchRes.ok()).toBeTruthy();
@@ -80,14 +81,14 @@ test.describe.serial('@api Archive file', () => {
     expect(infoAfter.filename).toBe(FILE_PATH_BASE);
 
     // Verify back in main
-    const checkRes = await request.get(`${appUrl}/api/days/${DAY_ID}`, { headers: auth });
+    const checkRes = await request.get(`${appUrl}/api/days/${DAY_ID}`);
     expect(checkRes.ok()).toBeTruthy();
 
     const photos: IPhoto[] = await checkRes.json();
     expect(photos.some((p) => p.fileid === fileid)).toBeTruthy();
 
     // Verify gone from archive
-    const archRes = await request.get(`${appUrl}/api/days/${DAY_ID}?archive=1`, { headers: auth });
+    const archRes = await request.get(`${appUrl}/api/days/${DAY_ID}?archive=1`);
     expect(archRes.ok()).toBeTruthy();
 
     const archived: IPhoto[] = await archRes.json();

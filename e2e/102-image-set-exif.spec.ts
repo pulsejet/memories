@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { randomBytes } from 'crypto';
-import { appUrl, authHeaders } from './login';
+import { appUrl, ocsHeaders } from './navigation';
 import { getFileIdByBasename, getImageInfo } from './utils';
+
+test.use({ extraHTTPHeaders: ocsHeaders });
 
 test.describe('@api Image setExif', () => {
   let fileid: number;
@@ -22,7 +24,6 @@ test.describe('@api Image setExif', () => {
 
     // Set description and title using setExif
     const setRes = await request.patch(`${appUrl}/api/image/set-exif/${fileid}`, {
-      headers: authHeaders,
       data: {
         id: fileid,
         raw: {

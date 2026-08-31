@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { login } from './login';
+import { navigate } from './navigation';
 
-test.beforeEach(login('/folders'));
+test.beforeEach(navigate('/folders'));
 
-test.describe('Folder view and navigation', () => {
+test.describe('@ui Folder view and navigation', () => {
   test.beforeEach(async ({ page }) => {
     await page.waitForSelector('.big-icon');
     await page.waitForTimeout(500);

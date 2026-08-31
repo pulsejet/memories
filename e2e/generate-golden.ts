@@ -4,7 +4,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { appUrl, authHeaders } from './login';
+import { appUrl, ocsHeaders, username, password } from './navigation';
 import { cleanupPhoto } from './utils';
 
 import type { IDay, IImageInfo, IPhoto } from '@typings';
@@ -15,7 +15,12 @@ const outDir = path.join(__dirname, 'assets', 'primary-api');
 const mainFileIds = new Map<string, number>();
 
 async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, { headers: authHeaders });
+  const res = await fetch(url, {
+    headers: {
+      Authorization: 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64'),
+      ...ocsHeaders,
+    },
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
   return res.json() as Promise<T>;
 }
