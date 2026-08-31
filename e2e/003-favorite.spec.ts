@@ -38,13 +38,13 @@ test.describe.serial('@ui Favorites', () => {
   test('Unfavorite file', async ({ page }) => {
     await page.goto(appUrl);
 
+    await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).toBeVisible();
+    await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).toBeVisible();
+
     await page.hover(`.p-outer--${fileid1}`);
     await page.locator(`.p-outer--${fileid1} > div.select`).click();
     await page.hover(`.p-outer--${fileid2}`);
     await page.locator(`.p-outer--${fileid2} > div.select`).click();
-
-    await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).toBeVisible();
-    await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).toBeVisible();
 
     await page.getByRole('button', { name: 'Actions' }).click();
     await page.getByRole('menuitem', { name: 'Favorite' }).click();
