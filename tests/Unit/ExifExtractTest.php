@@ -382,6 +382,39 @@ final class ExifExtractTest extends TestCase
         self::assertSame('2023-10-04 22:55:33 -07:00', $dt->format('Y-m-d H:i:s P'));
     }
 
+    public function testSamsungS20Fe01(): void
+    {
+        // Samsung Galaxy S20 FE 5G HEIC Motion Photo
+        $res = $this->extract('samsung_s20_fe_01.heic');
+        self::assertSame('image/heic', $res->exif['MIMEType'] ?? null);
+        self::assertFalse(LivePhoto::isVideoPart($res->exif));
+        self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
+
+        // Binary video extraction
+        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        self::assertSame('ftyp', substr($video, 4, 4));
+
+        // Date and Timezone (+02:00)
+        self::assertSame('2022:04:23 08:59:35', $res->exif['DateTimeOriginal'] ?? null);
+        self::assertSame('+02:00', $res->exif['OffsetTimeOriginal'] ?? null);
+
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2022-04-23 08:59:35 +02:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(7200, $dt->getOffset());
+        self::assertSame(1650697175, $dt->getTimestamp());
+
+        // Camera Info
+        self::assertSame('samsung', $res->exif['Make'] ?? null);
+        self::assertSame('SM-G781B', $res->exif['Model'] ?? null);
+        self::assertSame(1.8, $res->exif['FNumber'] ?? null);
+        self::assertSame(5.4, $res->exif['FocalLength'] ?? null);
+        self::assertSame(40, $res->exif['ISO'] ?? null);
+
+        // Geolocation
+        self::assertEqualsWithDelta(51.433469, (float) ($res->exif['GPSLatitude'] ?? 0), 0.0001);
+        self::assertEqualsWithDelta(12.110732, (float) ($res->exif['GPSLongitude'] ?? 0), 0.0001);
+    }
+
     public function testUnknown01Video(): void
     {
         // MP4 video taken in Berlin, Germany
