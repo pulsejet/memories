@@ -53,6 +53,11 @@ final class ExifExtractTest extends TestCase
         parent::tearDownAfterClass();
     }
 
+    public function testExiftool(): void
+    {
+        self::assertSame(BinExt::EXIFTOOL_VER, BinExt::testExiftool());
+    }
+
     public function testSamsungS2101(): void
     {
         $res = $this->extract('samsung_s21_01.jpg');

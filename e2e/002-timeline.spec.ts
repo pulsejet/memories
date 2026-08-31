@@ -12,7 +12,7 @@ test.describe('Timeline API', () => {
     });
     expect(res.ok()).toBeTruthy();
 
-    const data = (await res.json()) as IDay[];
+    const data: IDay[] = await res.json();
 
     // Validate presence and remove dynamic fields (etag, fileid)
     for (const day of data) {
