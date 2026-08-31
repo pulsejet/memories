@@ -7,6 +7,7 @@
         placeholder: data.flag & c.FLAG_PLACEHOLDER,
         leaving: data.flag & c.FLAG_LEAVING,
         error: data.flag & c.FLAG_LOAD_FAIL,
+        [`p-outer--${data.key}`]: true,
       }"
     >
       <div
