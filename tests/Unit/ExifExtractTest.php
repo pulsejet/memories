@@ -320,6 +320,70 @@ final class ExifExtractTest extends TestCase
         self::assertSame('2023-10-04 22:55:33 -07:00', $dt->format('Y-m-d H:i:s P'));
     }
 
+    public function testUnknown01Video(): void
+    {
+        // MP4 video taken in Berlin, Germany
+        $res = $this->extract('unknown_01.mp4');
+        self::assertSame('video/mp4', $res->exif['MIMEType'] ?? null);
+        self::assertFalse(LivePhoto::isVideoPart($res->exif));
+        self::assertSame('', $res->livePhotoId);
+
+        // Geolocation (Berlin, Germany)
+        self::assertEqualsWithDelta(52.517037, (float) ($res->exif['GPSLatitude'] ?? 0), 0.0001);
+        self::assertEqualsWithDelta(13.38886, (float) ($res->exif['GPSLongitude'] ?? 0), 0.0001);
+
+        // The MP4 container stores date in UTC but contains no explicit timezone offset.
+        // When parsed without a timezone, ExifTool converts the UTC date using the local machine's
+        // timezone, giving the correct epoch timestamp but with the test runner's system timezone.
+        $dtNoTz = Exif::parseExifDate($res->exif);
+        self::assertSame(1678026114, $dtNoTz->getTimestamp());
+
+        // When the timezone is resolved from the geolocation (Europe/Berlin, UTC+1),
+        // both the local capture date and timezone offset are correctly represented.
+        $exifWithTz = $res->exif;
+        $exifWithTz['LocationTZID'] = 'Europe/Berlin';
+
+        $dt = Exif::parseExifDate($exifWithTz);
+        self::assertSame('2023-03-05 15:21:54 +01:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(3600, $dt->getOffset());
+        self::assertSame(1678026114, $dt->getTimestamp());
+    }
+
+    public function testUnknown01Image(): void
+    {
+        // JPEG photo in Berlin, Germany (Samsung S9+ / SM-G965F)
+        // taken ~7 seconds before unknown_01.mp4
+        $res = $this->extract('unknown_01.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertFalse(LivePhoto::isVideoPart($res->exif));
+        self::assertSame('', $res->livePhotoId);
+
+        // Camera Info
+        self::assertSame('samsung', $res->exif['Make'] ?? null);
+        self::assertSame('SM-G965F', $res->exif['Model'] ?? null);
+        self::assertSame(2.4, $res->exif['FNumber'] ?? null);
+        self::assertSame(4.3, $res->exif['FocalLength'] ?? null);
+        self::assertSame(50, $res->exif['ISO'] ?? null);
+
+        // In this photo, DateTimeOriginal contains the local time string ("2023:03:05 15:21:47")
+        // without any timezone offset. When parsed without a timezone, it defaults to UTC (+00:00).
+        // While the formatted time string matches the local time, the resulting epoch timestamp is wrong.
+        $dtNoTz = Exif::parseExifDate($res->exif);
+        self::assertSame('2023-03-05 15:21:47 +00:00', $dtNoTz->format('Y-m-d H:i:s P'));
+        self::assertSame(0, $dtNoTz->getOffset());
+        self::assertSame(1678029707, $dtNoTz->getTimestamp()); // wrong epoch
+
+        // When LocationTZID is set to the capture location's timezone ('Europe/Berlin', UTC+1),
+        // the date is properly interpreted in Berlin time, producing the correct epoch timestamp.
+        $exifWithTz = $res->exif;
+        $exifWithTz['LocationTZID'] = 'Europe/Berlin';
+
+        $dt = Exif::parseExifDate($exifWithTz);
+        self::assertSame('2023-03-05 15:21:47 +01:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(3600, $dt->getOffset());
+        self::assertSame(1678026107, $dt->getTimestamp());
+    }
+
     private function extract(string $filename): ExtractResult
     {
         $path = __DIR__.'/../assets/'.$filename;
