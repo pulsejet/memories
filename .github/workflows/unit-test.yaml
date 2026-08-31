@@ -66,6 +66,7 @@ jobs:
         working-directory: apps/memories
         run: |
           make install-tools
+          make bin-ext
 
       - name: Run PHPUnit
         working-directory: apps/memories
