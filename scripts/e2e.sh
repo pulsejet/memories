@@ -150,8 +150,8 @@ e2e_cleanup_user() {
 # Main entrypoint orchestrating full execution
 e2e_main() {
     local test_args=("$@")
-    e2e_install_browsers
     e2e_setup_ci
+    e2e_install_browsers
 
     # Configure test user and fast iteration flags
     if [ -n "$E2E_USER" ] || [ -n "$TEST_USER" ]; then
