@@ -95,3 +95,49 @@ test.describe.serial('@api Archive file', () => {
     expect(archived.some((p) => p.fileid === fileid)).toBeFalsy();
   });
 });
+
+test.describe.serial('@ui Archive', () => {
+  let fileid1: number;
+  let fileid2: number;
+
+  test.beforeAll(async ({ request }) => {
+    fileid1 = await getFileIdByBasename(request, 20696, 'NKcupJh-Dos.jpg');
+    fileid2 = await getFileIdByBasename(request, 20696, 'CbBbaNTmsAc.jpg');
+  });
+
+  test('Archive file', async ({ request, page }) => {
+    await page.goto(appUrl);
+
+    await page.hover(`.p-outer--${fileid1}`);
+    await page.locator(`.p-outer--${fileid1} > div.select`).click();
+    await page.hover(`.p-outer--${fileid2}`);
+    await page.locator(`.p-outer--${fileid2} > div.select`).click();
+
+    await page.getByRole('button', { name: 'Actions' }).click();
+    await page.getByRole('menuitem', { name: 'Archive' }).click();
+
+    await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
+    await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
+
+    expect((await getImageInfo(request, fileid1)).filename?.includes('archive')).toBeTruthy();
+    expect((await getImageInfo(request, fileid2)).filename?.includes('archive')).toBeTruthy();
+  });
+
+  test('Unarchive file', async ({ page, request }) => {
+    await page.goto(`${appUrl}/archive`);
+
+    await page.hover(`.p-outer--${fileid1}`);
+    await page.locator(`.p-outer--${fileid1} > div.select`).click();
+    await page.hover(`.p-outer--${fileid2}`);
+    await page.locator(`.p-outer--${fileid2} > div.select`).click();
+
+    await page.getByRole('button', { name: 'Actions' }).click();
+    await page.getByRole('menuitem', { name: 'Unarchive' }).click();
+
+    await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
+    await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
+
+    expect((await getImageInfo(request, fileid1)).filename?.includes('archive')).toBeFalsy();
+    expect((await getImageInfo(request, fileid2)).filename?.includes('archive')).toBeFalsy();
+  });
+});
