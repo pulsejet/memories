@@ -4,7 +4,7 @@ import { getFileId } from './utils';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
-test.describe.serial.only('@ui Favorites', () => {
+test.describe.serial('@ui Favorites', () => {
   let fileid1: number;
   let fileid2: number;
 
@@ -51,5 +51,27 @@ test.describe.serial.only('@ui Favorites', () => {
 
     await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).not.toBeVisible();
     await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).not.toBeVisible();
+  });
+
+  test('Favorite through viewer', async ({ page }) => {
+    await page.goto(appUrl);
+    await page.locator(`.p-outer--${fileid1} > .img-outer`).click();
+    await page.waitForSelector('body.viewer-fully-opened');
+    const favBtn = page.getByRole('button', { name: 'Favorite' });
+    await expect(favBtn.locator('.star-outline-icon')).toBeVisible();
+    await favBtn.click();
+    await page.getByRole('button', { name: 'Close', exact: true }).click();
+    await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).toBeVisible();
+  });
+
+  test('Unfavorite through viewer', async ({ page }) => {
+    await page.goto(appUrl);
+    await page.locator(`.p-outer--${fileid1} > .img-outer`).click();
+    await page.waitForSelector('body.viewer-fully-opened');
+    const favBtn = page.getByRole('button', { name: 'Favorite' });
+    await expect(favBtn.locator('.star-icon')).toBeVisible();
+    await favBtn.click();
+    await page.getByRole('button', { name: 'Close', exact: true }).click();
+    await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).not.toBeVisible();
   });
 });

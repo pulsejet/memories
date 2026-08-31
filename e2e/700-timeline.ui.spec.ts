@@ -24,10 +24,10 @@ test.describe('@ui Timeline feed and photo preview', () => {
   test('Open one image', async ({ page }) => {
     await page.goto(appUrl);
     await page.locator(`.p-outer--${fileid1}`).click();
-    await page.waitForTimeout(500); // animation
+    await page.waitForSelector('body.viewer-fully-opened');
     await expect(page).toHaveScreenshot();
     await page.getByRole('button', { name: 'Close', exact: true }).click();
-    await page.waitForTimeout(500); // animation
+    await page.locator('.memories_viewer').waitFor({ state: 'detached' });
     await expect(page).toHaveScreenshot();
   });
 });
