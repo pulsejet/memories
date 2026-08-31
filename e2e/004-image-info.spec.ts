@@ -3,7 +3,7 @@ import { appUrl, authHeaders, username } from './login';
 import type { IImageInfo } from '@typings';
 import { getFileIdByBasename } from './utils';
 
-import assetImageInfoTest01 from './assets/primary-api/image-info-test_01.json';
+import assetImageInfoTest01 from './assets/primary-api/image-info-test_01.jpg.json';
 
 test.describe('@api Image info', () => {
   test('Query image info for test_01.jpg', async ({ request }) => {

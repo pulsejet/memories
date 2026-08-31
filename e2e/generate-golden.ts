@@ -73,9 +73,8 @@ async function generateGoldenFileInfo(basename: string, fileid: number) {
   info.etag = '<etag>';
   info.fileid = 0;
   info.mtime = 0;
-  const name = basename.replace(/\.[^.]+$/, '');
-  console.log(`  image info ${basename}: fileid=${fileid}`);
-  writeJson(`image-info-${name}.json`, info);
+  console.log(`image info ${basename}: fileid=${fileid}`);
+  writeJson(`image-info-${basename}.json`, info);
 }
 
 async function main() {
