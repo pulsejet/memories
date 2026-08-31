@@ -24,6 +24,7 @@ vendor
 memories.tar.gz
 /test-results/
 /playwright-report/
+/e2e_logs/
 /playwright/.cache/
 .cache/
 tests/phpunit-junit.xml

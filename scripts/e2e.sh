@@ -35,6 +35,7 @@ set -e
 E2E_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MEMORIES_DIR="$(cd "$E2E_SCRIPT_DIR/.." && pwd)"
 NC_DIR="$(cd "$MEMORIES_DIR/../.." && pwd)"
+E2E_LOGS_DIR="$MEMORIES_DIR/e2e_logs"
 
 occ() {
     php "$NC_DIR/occ" "$@"
@@ -71,8 +72,9 @@ e2e_setup_ci() {
     occ maintenance:repair
 
     # Set debug mode and start dev server
+    mkdir -p "$E2E_LOGS_DIR"
     occ config:system:set --type bool --value true debug
-    php -S localhost:8080 -t "$NC_DIR" &
+    php -S localhost:8080 -t "$NC_DIR" > "$E2E_LOGS_DIR/php_stdout.log" 2> "$E2E_LOGS_DIR/php_stderr.log" &
     PHP_SERVER_PID=$!
     sleep 2 # wait for server to start
 }
@@ -142,6 +144,8 @@ e2e_cleanup_user() {
 # Main entrypoint orchestrating full execution
 e2e_main() {
     local test_args=("$@")
+    mkdir -p "$E2E_LOGS_DIR"
+
     if [ -n "$CI" ]; then
         e2e_setup_ci
         e2e_install_browsers
@@ -181,7 +185,18 @@ e2e_main() {
         echo "Cleaning up..."
         if [ "$CLEANUP_USER" -eq 1 ]; then
             e2e_cleanup_user "$TEST_USER"
+        elif [ -n "$PHP_SERVER_PID" ]; then
+            echo "Stopping PHP dev server (PID $PHP_SERVER_PID)..."
+            kill "$PHP_SERVER_PID" 2>/dev/null || true
         fi
+
+        if [ -d "$E2E_LOGS_DIR" ]; then
+            echo "Moving e2e logs to playwright-report..."
+            mkdir -p "$MEMORIES_DIR/playwright-report"
+            rm -rf "$MEMORIES_DIR/playwright-report/e2e_logs"
+            mv "$E2E_LOGS_DIR" "$MEMORIES_DIR/playwright-report/"
+        fi
+
         exit $exit_code
     }
     trap cleanup EXIT INT TERM

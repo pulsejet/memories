@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { expect, type PlaywrightTestArgs } from '@playwright/test';
 
 export const defaultBaseUrl = process.env.CI ? 'http://localhost:8080' : 'http://localhost';
@@ -11,19 +13,32 @@ export const authHeaders = {
   Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
 };
 
+const logDir = process.env.E2E_LOG_DIR || path.resolve(__dirname, '../e2e_logs');
+const logFile = path.join(logDir, 'js_console.log');
+
+const tagMap: Record<string, string> = {
+  warning: 'WARN',
+  error: 'ERROR',
+  info: 'INFO',
+  log: 'LOG',
+  debug: 'DEBUG',
+  trace: 'TRACE',
+};
+
+let logStream: fs.WriteStream | null = null;
+function getLogStream(): fs.WriteStream {
+  if (!logStream) {
+    fs.mkdirSync(logDir, { recursive: true });
+    logStream = fs.createWriteStream(logFile, { flags: 'a' });
+  }
+  return logStream;
+}
+
 export function login(route: string) {
   return async ({ page }: PlaywrightTestArgs) => {
     page.on('console', (msg) => {
-      switch (msg.type()) {
-        case 'error':
-          console.error('js_console=' + msg.text());
-          break;
-        case 'warning':
-          console.warn('js_console=' + msg.text());
-          break;
-        default:
-          console.log('js_console=' + msg.text());
-      }
+      const tag = tagMap[msg.type()] || msg.type().toUpperCase();
+      getLogStream().write(`[${tag}] ${msg.text()}\n`);
     });
 
     await page.setViewportSize({ width: 800, height: 600 });
