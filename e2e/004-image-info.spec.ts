@@ -14,11 +14,13 @@ test.describe('@api Image info', () => {
 
     const data: IImageInfo = await res.json();
 
+    // Compare owner with current user.
     expect(data.owneruid).toBe(username);
     data.owneruid = '<uid>';
     expect(data.ownername).toBe(username);
     data.ownername = '<uid>';
 
+    // Replace sentinel values.
     expect(typeof data.etag).toBe('string');
     expect(data.etag.length).toBeGreaterThan(0);
     data.etag = '<etag>';
@@ -26,6 +28,11 @@ test.describe('@api Image info', () => {
     data.fileid = 0;
     expect(data.mtime).toBeGreaterThan(0);
     data.mtime = 0;
+
+    // These depend on reverse geocoding, not setup yet.
+    delete data.address;
+    delete data.exif?.DateTimeEpoch;
+    delete data.exif?.LocationTZID;
 
     expect(data).toStrictEqual(assetImageInfoTest01 satisfies IImageInfo);
   });

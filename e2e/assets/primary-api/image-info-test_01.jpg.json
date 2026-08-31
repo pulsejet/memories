@@ -21,11 +21,8 @@
     "ShutterSpeed": 0.0083,
     "GPSAltitude": 466.168,
     "GPSLatitude": 39.326068,
-    "GPSLongitude": -4.837979,
-    "LocationTZID": "Europe/Madrid",
-    "DateTimeEpoch": 1687572604
+    "GPSLongitude": -4.837979
   },
-  "address": "Helechosa de los Montes, Badajoz, Extremadura, Spain",
   "etag": "<etag>",
   "permissions": "RUDS",
   "mimetype": "image/jpeg",

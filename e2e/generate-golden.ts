@@ -68,11 +68,18 @@ async function generateGoldenDays(prefix: string, params: Record<string, string>
  */
 async function generateGoldenFileInfo(basename: string, fileid: number) {
   const info = await fetchJson<IImageInfo>(`${appUrl}/api/image/info/${fileid}`);
+
   info.owneruid = '<uid>';
   info.ownername = '<uid>';
   info.etag = '<etag>';
   info.fileid = 0;
   info.mtime = 0;
+
+  // These depend on reverse geocoding, not setup yet.
+  delete info.address;
+  delete info.exif?.DateTimeEpoch;
+  delete info.exif?.LocationTZID;
+
   console.log(`image info ${basename}: fileid=${fileid}`);
   writeJson(`image-info-${basename}.json`, info);
 }
