@@ -97,6 +97,44 @@ final class ExifExtractTest extends TestCase
         self::assertSame(1674105519, $dt->getTimestamp());
     }
 
+    public function testSamsungS2103(): void
+    {
+        // Samsung S21 MP4 video
+        $res = $this->extract('samsung_s21_03.mp4');
+        self::assertSame('video/mp4', $res->exif['MIMEType'] ?? null);
+        self::assertFalse(LivePhoto::isVideoPart($res->exif));
+
+        // Video dimensions and rotation
+        self::assertSame(1920, $res->exif['ImageWidth'] ?? null);
+        self::assertSame(1080, $res->exif['ImageHeight'] ?? null);
+        self::assertSame(90, $res->exif['Rotation'] ?? null);
+
+        // Geolocation (Rockville, MD)
+        self::assertEqualsWithDelta(39.0837, (float) ($res->exif['GPSLatitude'] ?? 0), 0.0001);
+        self::assertEqualsWithDelta(-77.1472, (float) ($res->exif['GPSLongitude'] ?? 0), 0.0001);
+
+        // The MP4 metadata does not contain an explicit timezone offset.
+        // Instead, the geolocation is used to resolve the timezone for the capture location.
+        // In this case, LocationTZID is set to 'America/New_York'.
+        $exifWithTz = $res->exif;
+        $exifWithTz['LocationTZID'] = 'America/New_York';
+
+        $dt = Exif::parseExifDate($exifWithTz);
+        self::assertSame('2023-03-05 13:58:17 -05:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(-18000, $dt->getOffset());
+        self::assertSame(1678042697, $dt->getTimestamp());
+
+        // Hypothetically, if this video had been captured in Central Time, the resolved timezone
+        // would be 'America/Chicago' (UTC-6), giving the local capture time as ~12:58 PM.
+        $exifCentral = $res->exif;
+        $exifCentral['LocationTZID'] = 'America/Chicago';
+
+        $dtCentral = Exif::parseExifDate($exifCentral);
+        self::assertSame('2023-03-05 12:58:17 -06:00', $dtCentral->format('Y-m-d H:i:s P'));
+        self::assertSame(-21600, $dtCentral->getOffset());
+        self::assertSame(1678042697, $dtCentral->getTimestamp());
+    }
+
     public function testSamsungS2401(): void
     {
         $res = $this->extract('samsung_s24_01.jpg');
