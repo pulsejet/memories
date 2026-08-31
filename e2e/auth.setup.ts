@@ -1,13 +1,20 @@
 import { test as setup, expect } from '@playwright/test';
-import { appUrl, username, password } from './navigation';
+import { baseUrl, username, password, ocsHeaders } from './navigation';
 
 const authFile = 'e2e/.state/user.json';
 
-setup('authenticate', async ({ page }) => {
-  await page.goto(appUrl);
-  await page.locator('#user').fill(username);
-  await page.locator('#password').fill(password);
-  await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL(appUrl);
-  await page.context().storageState({ path: authFile });
+setup('authenticate', async ({ request }) => {
+  const res = await request.post(`${baseUrl}/index.php/login`, {
+    headers: {
+      ...ocsHeaders,
+      origin: baseUrl,
+    },
+    form: {
+      user: username,
+      password: password,
+    },
+  });
+  expect(res.ok()).toBeTruthy();
+  expect(await res.text()).toContain('data-user-displayname');
+  await request.storageState({ path: authFile });
 });
