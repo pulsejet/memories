@@ -1,0 +1,69 @@
+---
+name: unit test
+on:
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - 'go-vod/**'
+      - 'android/**'
+      - 'mkdocs.yml'
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'go-vod/**'
+      - 'android/**'
+      - 'mkdocs.yml'
+      - '**.md'
+
+jobs:
+  unit-test:
+    name: Unit Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['8.4']
+        server-versions: ['stable33']
+
+    steps:
+      - name: Checkout server
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+          repository: nextcloud/server
+          ref: ${{ matrix.server-versions }}
+
+      - name: Checkout the app
+        uses: actions/checkout@v6
+        with:
+          path: apps/memories
+
+      - name: Set up php ${{ matrix.php-versions }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: mbstring, iconv, fileinfo, intl, sqlite, pdo_sqlite
+          coverage: none
+
+      - name: Set up Nextcloud
+        run: |
+          mkdir data
+          php occ maintenance:install \
+            --verbose \
+            --database=sqlite \
+            --database-name=nextcloud \
+            --admin-user admin \
+            --admin-pass password
+          php occ app:enable memories
+
+      - name: Install dependencies
+        working-directory: apps/memories
+        run: |
+          make install-tools
+
+      - name: Run PHPUnit
+        working-directory: apps/memories
+        run: |
+          make test
