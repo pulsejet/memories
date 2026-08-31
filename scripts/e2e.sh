@@ -40,49 +40,41 @@ occ() {
     php "$NC_DIR/occ" "$@"
 }
 
-# Ensure playwright browsers are installed if not already present
 e2e_install_browsers() {
     cd "$MEMORIES_DIR"
-    if ! node -e 'const { chromium } = require("@playwright/test"); const fs = require("fs"); if (!fs.existsSync(chromium.executablePath())) process.exit(1);' 2>/dev/null; then
-        echo "Installing Playwright browsers..."
-        npx playwright install --with-deps
-    fi
+    echo "Installing Playwright browsers..."
+    npx playwright install --with-deps
 }
 
 # CI-specific setup
 e2e_setup_ci() {
-    if [ -n "$CI" ]; then
-        cd "$MEMORIES_DIR"
-        npm ci
-        if [ -f "$NC_DIR/vue.zip" ]; then
-            cp "$NC_DIR/vue.zip" .
-            unzip -qq -o vue.zip
-        fi
-
-        # Speed up loads by disabling unused default apps
-        for app in comments contactsinteraction dashboard weather_status user_status updatenotification systemtags files_sharing; do
-            occ app:disable "$app" 2>/dev/null || true
-        done
-
-        # Setup binary extensions
-        cd "$MEMORIES_DIR"
-        make bin-ext
-
-        # Enable memories app
-        occ app:enable --force memories
-
-        # Run repair steps
-        occ maintenance:repair
-
-        # Set debug mode and start dev server
-        occ config:system:set --type bool --value true debug
-        php -S localhost:8080 -t "$NC_DIR" &
-        PHP_SERVER_PID=$!
-        export E2E_BASE_URL="http://localhost:8080"
-        sleep 2
-    else
-        export E2E_BASE_URL="${E2E_BASE_URL:-http://localhost}"
+    cd "$MEMORIES_DIR"
+    npm ci
+    if [ -f "$NC_DIR/vue.zip" ]; then
+        cp "$NC_DIR/vue.zip" .
+        unzip -qq -o vue.zip
     fi
+
+    # Speed up loads by disabling unused default apps
+    for app in comments contactsinteraction dashboard weather_status user_status updatenotification systemtags files_sharing; do
+        occ app:disable "$app" 2>/dev/null || true
+    done
+
+    # Setup binary extensions
+    cd "$MEMORIES_DIR"
+    make bin-ext
+
+    # Enable memories app
+    occ app:enable --force memories
+
+    # Run repair steps
+    occ maintenance:repair
+
+    # Set debug mode and start dev server
+    occ config:system:set --type bool --value true debug
+    php -S localhost:8080 -t "$NC_DIR" &
+    PHP_SERVER_PID=$!
+    sleep 2 # wait for server to start
 }
 
 # Check if a user exists
@@ -150,8 +142,13 @@ e2e_cleanup_user() {
 # Main entrypoint orchestrating full execution
 e2e_main() {
     local test_args=("$@")
-    e2e_setup_ci
-    e2e_install_browsers
+    if [ -n "$CI" ]; then
+        e2e_setup_ci
+        e2e_install_browsers
+        export E2E_BASE_URL="http://localhost:8080"
+    else
+        export E2E_BASE_URL="${E2E_BASE_URL:-http://localhost}"
+    fi
 
     # Configure test user and fast iteration flags
     if [ -n "$E2E_USER" ] || [ -n "$TEST_USER" ]; then
