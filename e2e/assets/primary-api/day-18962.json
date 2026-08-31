@@ -1,20 +1,24 @@
 [
   {
     "fileid": 0,
-    "flag": 0,
     "dayid": 18962,
     "w": 100,
     "h": 150,
     "basename": "RD_VnDHL4oM.jpg",
-    "mimetype": "image/jpeg"
+    "epoch": 1638370800,
+    "mimetype": "image/jpeg",
+    "auid": "c2c5308a3762bb77f851398b17c9f2a0",
+    "flag": 0
   },
   {
     "fileid": 0,
-    "flag": 0,
     "dayid": 18962,
     "w": 100,
     "h": 150,
     "basename": "6khIhNYl1HI.jpg",
-    "mimetype": "image/jpeg"
+    "epoch": 1638367200,
+    "mimetype": "image/jpeg",
+    "auid": "15eafbd96e99d79ea6f86990b28929cb",
+    "flag": 0
   }
 ]

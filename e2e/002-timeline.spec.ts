@@ -21,14 +21,6 @@ function cleanupPhoto(item: IPhoto): void {
   expect(item.etag?.length).toBeGreaterThan(0);
   delete item.etag; // randomized
 
-  expect(typeof item.auid).toBe('string');
-  expect(item.auid?.length).toBeGreaterThan(0);
-  delete item.auid; // unpredictable
-
-  expect(typeof item.epoch).toBe('number');
-  expect(item.epoch).toBeGreaterThan(0);
-  delete item.epoch; // unpredictable
-
   expect(typeof item.fileid).toBe('number');
   expect(item.fileid).toBeGreaterThan(0);
   item.fileid = 0; // required
