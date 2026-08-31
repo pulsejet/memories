@@ -43,13 +43,27 @@ final class ExifExtractTest extends TestCase
 
         $exif = Exif::getExifFromLocalPath($path);
         self::assertSame('image/jpeg', $exif['MIMEType'] ?? null);
+
+        // Date and Timezone
         self::assertSame('2023:04:21 19:55:33', $exif['DateTimeOriginal'] ?? null);
         self::assertSame('-07:00', $exif['OffsetTimeOriginal'] ?? null);
 
         $dt = Exif::parseExifDate($exif);
-        self::assertSame('2023-04-21 19:55:33', $dt->format('Y-m-d H:i:s'));
         self::assertSame('2023-04-21 19:55:33 -07:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(-25200, $dt->getOffset());
         self::assertSame(1682132133, $dt->getTimestamp());
+
+        // Camera Info
+        self::assertSame('samsung', $exif['Make'] ?? null);
+        self::assertSame('SM-G991U1', $exif['Model'] ?? null);
+        self::assertSame(2, $exif['FNumber'] ?? null);
+        self::assertSame(0.25, $exif['ExposureTime'] ?? null);
+        self::assertSame(5.9, $exif['FocalLength'] ?? null);
+        self::assertSame(200, $exif['ISO'] ?? null);
+
+        // Geolocation
+        self::assertEqualsWithDelta(34.080404, (float) ($exif['GPSLatitude'] ?? 0), 0.0001);
+        self::assertEqualsWithDelta(-118.245579, (float) ($exif['GPSLongitude'] ?? 0), 0.0001);
+        self::assertSame(182, $exif['GPSAltitude'] ?? null);
     }
 }
