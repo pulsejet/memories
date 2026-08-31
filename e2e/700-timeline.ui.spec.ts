@@ -17,6 +17,7 @@ test.describe('@ui Timeline feed and photo preview', () => {
     await page.goto(appUrl);
     await page.waitForSelector(`.p-outer--${fileid1}`);
     expect(await page.locator('.p-outer').count()).toBeGreaterThan(4);
+    await page.waitForTimeout(1000); // img load
     await expect(page).toHaveScreenshot();
   });
 
