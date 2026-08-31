@@ -47,8 +47,7 @@ test-php:
 	vendor/bin/phpunit
 
 e2e:
-	npx playwright install --with-deps
-	bash scripts/ci-test.sh
+	bash scripts/e2e.sh
 
 .PHONY: test test-php e2e
 

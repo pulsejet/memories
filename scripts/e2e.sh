@@ -15,7 +15,6 @@ PHP_SERVER_PID=""
 if [ -n "$CI" ]; then
     cd "$MEMORIES_DIR"
     npm ci
-    npx playwright install
     if [ -f "$NC_DIR/vue.zip" ]; then
         cp "$NC_DIR/vue.zip" .
         unzip -qq -o vue.zip
@@ -104,6 +103,12 @@ occ user:setting "$TEST_USER" memories timelinePath "/Photos"
 # Who knows why ¯\_(ツ)_/¯
 occ user:setting "$TEST_USER" files lastSeenQuotaUsage 0.05
 
-# Run e2e tests
+# Ensure playwright browsers are installed if not already present
 cd "$MEMORIES_DIR"
+if ! node -e 'const { chromium } = require("@playwright/test"); const fs = require("fs"); if (!fs.existsSync(chromium.executablePath())) process.exit(1);' 2>/dev/null; then
+    echo "Installing Playwright browsers..."
+    npx playwright install --with-deps
+fi
+
+# Run e2e tests
 npm run e2e
