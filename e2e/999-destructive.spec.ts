@@ -45,7 +45,7 @@ test.describe('@ui @destructive Folder file operations', () => {
   });
 });
 
-test.describe('Timeline photo deletion @destructive', () => {
+test.describe('@ui @destructive Timeline photo deletion', () => {
   test.beforeEach(navigate('/'));
 
   test.beforeEach(async ({ page }) => {
