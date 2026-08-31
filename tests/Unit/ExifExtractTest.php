@@ -206,6 +206,41 @@ final class ExifExtractTest extends TestCase
         self::assertSame($image->livePhotoId, $videoLiveId);
     }
 
+    public function testAppleIphone01(): void
+    {
+        // Apple iPhone 12 mini Live Photo pair
+        $image = $this->extract('apple_iphone_01.jpg');
+        $video = $this->extract('apple_iphone_01.mov');
+
+        self::assertFalse(LivePhoto::isVideoPart($image->exif));
+        self::assertTrue(LivePhoto::isVideoPart($video->exif));
+
+        $videoLiveId = $video->exif['ContentIdentifier'] ?? null;
+        self::assertSame('021842E6-D17A-4C62-BC13-B2521961DF0B', $image->livePhotoId);
+        self::assertSame($image->livePhotoId, $videoLiveId);
+
+        // Date and Timezone (EST, -05:00)
+        self::assertSame('2022:11:21 16:49:32', $image->exif['DateTimeOriginal'] ?? null);
+        self::assertSame('-05:00', $image->exif['OffsetTimeOriginal'] ?? null);
+
+        $dt = Exif::parseExifDate($image->exif);
+        self::assertSame('2022-11-21 16:49:32 -05:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(-18000, $dt->getOffset());
+        self::assertSame(1669067372, $dt->getTimestamp());
+
+        // Camera Info
+        self::assertSame('Apple', $image->exif['Make'] ?? null);
+        self::assertSame('iPhone 12 mini', $image->exif['Model'] ?? null);
+        self::assertSame(1.6, $image->exif['FNumber'] ?? null);
+        self::assertSame(4.2, $image->exif['FocalLength'] ?? null);
+        self::assertSame(125, $image->exif['ISO'] ?? null);
+
+        // Geolocation
+        self::assertEqualsWithDelta(42.421803, (float) ($image->exif['GPSLatitude'] ?? 0), 0.0001);
+        self::assertEqualsWithDelta(-75.591911, (float) ($image->exif['GPSLongitude'] ?? 0), 0.0001);
+        self::assertEqualsWithDelta(453.0998, (float) ($image->exif['GPSAltitude'] ?? 0), 0.0001);
+    }
+
     public function testGoogleMotion01(): void
     {
         $res = $this->extract('google_motion_01.jpg');
