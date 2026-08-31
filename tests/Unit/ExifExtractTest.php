@@ -206,6 +206,9 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__traileroffset=4347622', $res->livePhotoId);
 
+        $video = file_get_contents($res->path, false, null, 4347622);
+        self::assertSame('ftyp', substr($video, 4, 4));
+
         $dt = Exif::parseExifDate($res->exif);
         self::assertSame('2023-03-10 18:39:04 +00:00', $dt->format('Y-m-d H:i:s P'));
     }
@@ -215,6 +218,9 @@ final class ExifExtractTest extends TestCase
         $res = $this->extract('samsung_motion_01.jpg');
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__traileroffset=3534847', $res->livePhotoId);
+
+        $video = file_get_contents($res->path, false, null, 3534847);
+        self::assertSame('ftyp', substr($video, 4, 4));
 
         $dt = Exif::parseExifDate($res->exif);
         self::assertSame('2020-03-08 00:51:56 +00:00', $dt->format('Y-m-d H:i:s P'));
