@@ -1,9 +1,15 @@
 import { expect, type PlaywrightTestArgs } from '@playwright/test';
 
-const defaultBaseUrl = process.env.CI ? 'http://localhost:8080' : 'http://localhost';
-const baseUrl = (process.env.E2E_BASE_URL || process.env.BASE_URL || defaultBaseUrl).replace(/\/+$/, '');
-const username = process.env.E2E_USER || process.env.TEST_USER || 'admin';
-const password = process.env.E2E_PASSWORD || process.env.TEST_PASSWORD || 'password';
+export const defaultBaseUrl = process.env.CI ? 'http://localhost:8080' : 'http://localhost';
+export const baseUrl = (process.env.E2E_BASE_URL || process.env.BASE_URL || defaultBaseUrl).replace(/\/+$/, '');
+export const username = process.env.E2E_USER || process.env.TEST_USER || 'admin';
+export const password = process.env.E2E_PASSWORD || process.env.TEST_PASSWORD || 'password';
+export const appUrl = `${baseUrl}/index.php/apps/memories`;
+
+export const authHeaders = {
+  'OCS-APIREQUEST': 'true',
+  Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+};
 
 export function login(route: string) {
   return async ({ page }: PlaywrightTestArgs) => {
