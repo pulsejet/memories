@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { appUrl, bootstrap } from './navigation';
 import { getFileIdByBasename } from './utils';
 
-test.describe.only('@ui Timeline feed and photo preview', () => {
+test.describe('@ui Timeline feed and photo preview', () => {
   let fileid1: number;
 
   test.beforeAll(async ({ request }) => {
