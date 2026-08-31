@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Tests\Unit;
 
+use OCA\Memories\Db\LivePhoto;
 use OCA\Memories\Exif;
 use OCA\Memories\Service\BinExt;
 use PHPUnit\Framework\TestCase;
@@ -19,6 +20,7 @@ use PHPUnit\Framework\TestCase;
  *
  * @internal
  *
+ * @covers \OCA\Memories\Db\LivePhoto
  * @covers \OCA\Memories\Exif
  */
 final class ExifExtractTest extends TestCase
@@ -84,5 +86,45 @@ final class ExifExtractTest extends TestCase
         self::assertSame('2023-01-18 21:18:39 -08:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(-28800, $dt->getOffset());
         self::assertSame(1674105519, $dt->getTimestamp());
+    }
+
+    public function testAppleH264Boy(): void
+    {
+        $imagePath = __DIR__.'/../assets/apple_h264_boy.jpg';
+        $videoPath = __DIR__.'/../assets/apple_h264_boy.mov';
+        self::assertFileExists($imagePath);
+        self::assertFileExists($videoPath);
+
+        $imageExif = Exif::getExifFromLocalPath($imagePath);
+        $videoExif = Exif::getExifFromLocalPath($videoPath);
+
+        self::assertFalse(LivePhoto::isVideoPart($imageExif));
+        self::assertTrue(LivePhoto::isVideoPart($videoExif));
+
+        $photoLiveId = LivePhoto::getLivePhotoIdFromPath($imagePath, (int) filesize($imagePath), $imageExif);
+        $videoLiveId = $videoExif['ContentIdentifier'] ?? null;
+
+        self::assertSame('CC7B5EDE-BA2E-4DD5-85EB-50D0E8F94800', $photoLiveId);
+        self::assertSame($photoLiveId, $videoLiveId);
+    }
+
+    public function testAppleH264Girl(): void
+    {
+        $imagePath = __DIR__.'/../assets/apple_h264_girl.jpg';
+        $videoPath = __DIR__.'/../assets/apple_h264_girl.mov';
+        self::assertFileExists($imagePath);
+        self::assertFileExists($videoPath);
+
+        $imageExif = Exif::getExifFromLocalPath($imagePath);
+        $videoExif = Exif::getExifFromLocalPath($videoPath);
+
+        self::assertFalse(LivePhoto::isVideoPart($imageExif));
+        self::assertTrue(LivePhoto::isVideoPart($videoExif));
+
+        $photoLiveId = LivePhoto::getLivePhotoIdFromPath($imagePath, (int) filesize($imagePath), $imageExif);
+        $videoLiveId = $videoExif['ContentIdentifier'] ?? null;
+
+        self::assertSame('C135D895-936B-4DF0-BB52-FC7AAF14F49B', $photoLiveId);
+        self::assertSame($photoLiveId, $videoLiveId);
     }
 }

@@ -16,14 +16,24 @@ final class LivePhoto
     /**
      * Check if a given Exif data is the video part of a Live Photo.
      */
-    public function isVideoPart(array $exif): bool
+    public static function isVideoPart(array $exif): bool
     {
         return 'video/quicktime' === ($exif['MIMEType'] ?? null)
                && !empty($exif['ContentIdentifier'] ?? null);
     }
 
     /** Get liveid from photo part */
-    public function getLivePhotoId(File $file, array $exif): string
+    public static function getLivePhotoId(File $file, array $exif): string
+    {
+        $path = $file->getStorage()->getLocalFile($file->getInternalPath())
+            ?: throw new \Exception('[BUG][LivePhoto] Failed to get local file path');
+        $size = (int) $file->getSize();
+
+        return self::getLivePhotoIdFromPath($path, $size, $exif);
+    }
+
+    /** Get liveid from photo local file path */
+    public static function getLivePhotoIdFromPath(string $path, int $size, array $exif): string
     {
         // Apple JPEG (MOV has ContentIdentifier)
         if ($uuid = ($exif['ContentIdentifier'] ?? $exif['MediaGroupUUID'] ?? null)) {
@@ -47,7 +57,7 @@ final class LivePhoto
             // and subsequently extract the video file using the
             // EmbeddedVideoFile binary prop, but setting the offset
             // is faster for the same reason mentioned above.
-            $videoOffset = $file->getSize() - $offset;
+            $videoOffset = $size - $offset;
 
             return "self__traileroffset={$videoOffset}";
         }
@@ -96,8 +106,6 @@ final class LivePhoto
                 // hope that the video is located at the end, and thus the last DirectoryItemLength
                 // seen before the DirectoryItemSemantic of MotionPhoto is the length of the video.
                 // https://github.com/pulsejet/memories/issues/965
-                $path = $file->getStorage()->getLocalFile($file->getInternalPath())
-                    ?: throw new \Exception('[BUG][LivePhoto] Failed to get local file path');
                 $extExif = Exif::getExifWithDuplicates($path);
                 $lastLength = null; // last DirectoryItemLength seen
 
@@ -108,7 +116,7 @@ final class LivePhoto
                             // If we can't find it, use the last length seen
                             $videoLength = $extExif[str_replace('Semantic', 'Length', $key)] ?? $lastLength;
                             if (\is_int($videoLength) && $videoLength > 0) {
-                                $videoOffset = (int) $file->getSize() - $videoLength;
+                                $videoOffset = $size - $videoLength;
 
                                 return "self__traileroffset={$videoOffset}";
                             }
