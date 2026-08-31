@@ -1,6 +1,6 @@
 import type { APIRequestContext } from '@playwright/test';
 import type { IImageInfo, IPhoto } from '@typings';
-import { appUrl, authHeaders } from './navigation';
+import { appUrl } from './navigation';
 
 // Cleanup unpredictable values from photo object.
 export function cleanupPhoto(item: IPhoto): void {
@@ -18,7 +18,7 @@ export function cleanupPhoto(item: IPhoto): void {
 
 // Get image info by fileid from the image info endpoint.
 export async function getImageInfo(request: APIRequestContext, fileid: number): Promise<IImageInfo> {
-  const res = await request.get(`${appUrl}/api/image/info/${fileid}`, { headers: authHeaders });
+  const res = await request.get(`${appUrl}/api/image/info/${fileid}`);
   if (!res.ok()) throw new Error(`getImageInfo failed: ${res.status()}`);
   return res.json();
 }
@@ -29,7 +29,7 @@ export async function getFileIdByBasename(
   dayid: number,
   basename: string,
 ): Promise<number> {
-  const dayRes = await request.get(`${appUrl}/api/days/${dayid}`, { headers: authHeaders });
+  const dayRes = await request.get(`${appUrl}/api/days/${dayid}`);
   if (!dayRes.ok()) throw new Error(`getFileIdByBasename day ${dayid} failed: ${dayRes.status()}`);
   const photos: IPhoto[] = await dayRes.json();
   const match = photos.find((p) => p.basename === basename);
