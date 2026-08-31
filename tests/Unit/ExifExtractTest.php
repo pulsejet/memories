@@ -112,6 +112,26 @@ final class ExifExtractTest extends TestCase
         self::assertSame(1723231021, $dt->getTimestamp());
     }
 
+    public function testSamsungS2501(): void
+    {
+        $res = $this->extract('samsung_s25_01.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertSame('self__exifbin=EmbeddedVideoFile', $res->livePhotoId);
+
+        $video = Exif::getBinaryExifProp($res->path, '-EmbeddedVideoFile');
+        self::assertSame('ftyp', substr($video, 4, 4));
+
+        // Date and Timezone (DST, -04:00)
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2025-04-03 09:11:42 -04:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(-14400, $dt->getOffset());
+        self::assertSame(1743685902, $dt->getTimestamp());
+
+        // Camera Info
+        self::assertSame('samsung', $res->exif['Make'] ?? null);
+        self::assertSame('Galaxy S25+', $res->exif['Model'] ?? null);
+    }
+
     public function testAppleH264Boy01(): void
     {
         $image = $this->extract('apple_h264_boy_01.jpg');
