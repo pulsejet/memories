@@ -3,6 +3,7 @@ all: dev-setup lint build-js-production test
 # Dev env management
 dev-setup: clean clean-dev npm-init bin-ext install-tools
 
+# Download external binaries (exiftool and go-vod) to bin-ext/
 bin-ext:
 	sh scripts/get-bin-ext.sh
 
