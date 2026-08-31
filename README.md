@@ -11,8 +11,10 @@
 [![GitHub issues](https://img.shields.io/github/issues/pulsejet/memories)](https://github.com/pulsejet/memories/issues)
 [![GitHub Sponsor](https://img.shields.io/github/sponsors/pulsejet?logo=GitHub)](https://github.com/sponsors/pulsejet)
 
+[![unit test](https://github.com/pulsejet/memories/actions/workflows/unit-test.yaml/badge.svg)](https://github.com/pulsejet/memories/actions/workflows/unit-test.yaml)
 [![e2e](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml/badge.svg)](https://github.com/pulsejet/memories/actions/workflows/e2e.yaml)
 [![static analysis](https://github.com/pulsejet/memories/actions/workflows/static-analysis.yaml/badge.svg)](https://github.com/pulsejet/memories/actions/workflows/static-analysis.yaml)
+
 [![Shepherd](https://shepherd.dev/github/pulsejet/memories/coverage.svg)](https://shepherd.dev/github/pulsejet/memories)
 [![go-vod](https://github.com/pulsejet/memories/actions/workflows/go-vod.yml/badge.svg)](https://github.com/pulsejet/memories/actions/workflows/go-vod.yml)
 
