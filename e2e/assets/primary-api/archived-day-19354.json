@@ -1,0 +1,24 @@
+[
+  {
+    "fileid": 0,
+    "dayid": 19354,
+    "w": 640,
+    "h": 360,
+    "basename": "archived_01.jpg",
+    "epoch": 1672259303,
+    "mimetype": "image/jpeg",
+    "auid": "0b788b8dd50330cbd45a69fbd773f68d",
+    "flag": 0
+  },
+  {
+    "fileid": 0,
+    "dayid": 19354,
+    "w": 640,
+    "h": 360,
+    "basename": "archived_02.jpg",
+    "epoch": 1672259290,
+    "mimetype": "image/jpeg",
+    "auid": "47183316a639dfd5fa0fa0a9cb96b825",
+    "flag": 0
+  }
+]

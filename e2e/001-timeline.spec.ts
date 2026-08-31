@@ -1,13 +1,15 @@
 import { test, expect } from '@playwright/test';
-import { login, appUrl, authHeaders } from './login';
+import { appUrl, authHeaders } from './login';
+import { cleanupPhoto } from './utils';
+
 import type { IDay, IPhoto } from '@typings';
 
-import assetPrimaryApiDays from './assets/primary-api/days.json';
-import assetPrimaryApiDay20696 from './assets/primary-api/day-20696.json';
-import assetPrimaryApiDay18962 from './assets/primary-api/day-18962.json';
-import assetPrimaryApiDay18955 from './assets/primary-api/day-18955.json';
-import assetPrimaryApiDay19221 from './assets/primary-api/day-19221.json';
-import assetPrimaryApiDay19468 from './assets/primary-api/day-19468.json';
+import assetPrimaryApiDays from './assets/primary-api/main-days.json';
+import assetPrimaryApiDay20696 from './assets/primary-api/main-day-20696.json';
+import assetPrimaryApiDay18962 from './assets/primary-api/main-day-18962.json';
+import assetPrimaryApiDay18955 from './assets/primary-api/main-day-18955.json';
+import assetPrimaryApiDay19221 from './assets/primary-api/main-day-19221.json';
+import assetPrimaryApiDay19468 from './assets/primary-api/main-day-19468.json';
 
 const TIMELINE_DAY_MAP: Record<any, IPhoto[]> = {
   '20696': assetPrimaryApiDay20696 satisfies IPhoto[],
@@ -17,19 +19,7 @@ const TIMELINE_DAY_MAP: Record<any, IPhoto[]> = {
   '19221': assetPrimaryApiDay19221 satisfies IPhoto[],
 };
 
-// Cleanup unpredictable values from photo object.
-function cleanupPhoto(item: IPhoto): void {
-  expect(typeof item.etag).toBe('string');
-  expect(item.etag?.length).toBeGreaterThan(0);
-  delete item.etag; // randomized
-
-  expect(typeof item.fileid).toBe('number');
-  expect(item.fileid).toBeGreaterThan(0);
-  item.fileid = 0; // required
-  item.flag = 0; // required
-}
-
-test.describe('Timeline API', () => {
+test.describe('@api Timeline', () => {
   // Tests OCA\Memories\Controller\DaysController::days()
   test('Query days endpoint', async ({ request }) => {
     const res = await request.get(`${appUrl}/api/days?nopreload=1`, {
@@ -94,23 +84,4 @@ test.describe('Timeline API', () => {
       expect(data).toStrictEqual(TIMELINE_DAY_MAP[testDayId]);
     });
   }
-});
-
-test.describe('Timeline feed and photo preview', () => {
-  test.beforeEach(login('/'));
-
-  test.beforeEach(async ({ page }) => {
-    await page.waitForSelector('.img-outer');
-    await page.waitForTimeout(500);
-  });
-
-  test('Look for Images', async ({ page }) => {
-    expect(await page.locator('.img-outer').count(), 'Number of previews').toBeGreaterThan(4);
-  });
-
-  test('Open one image', async ({ page }) => {
-    await page.locator('.img-outer').first().click();
-    await page.waitForTimeout(1000);
-    await page.locator('button[title="Close"]').first().click();
-  });
 });
