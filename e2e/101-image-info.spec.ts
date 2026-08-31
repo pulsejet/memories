@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders, username } from './navigation';
-import { getFileIdByBasename } from './utils';
+import { getFileId } from './utils';
 
 import type { IImageInfo } from '@typings';
 
@@ -10,7 +10,7 @@ test.use({ extraHTTPHeaders: ocsHeaders });
 
 test.describe('@api Image info', () => {
   test('Query image info for test_01.jpg', async ({ request }) => {
-    const fileid = await getFileIdByBasename(request, 19532, 'test_01.jpg');
+    const fileid = await getFileId(request, '/Photos/Nested 1/test_01.jpg');
 
     const res = await request.get(`${appUrl}/api/image/info/${fileid}`);
     expect(res.ok()).toBeTruthy();

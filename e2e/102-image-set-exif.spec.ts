@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { randomBytes } from 'crypto';
 import { appUrl, ocsHeaders } from './navigation';
-import { getFileIdByBasename, getImageInfo } from './utils';
+import { getFileId, getImageInfo } from './utils';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
@@ -9,7 +9,7 @@ test.describe('@api Image setExif', () => {
   let fileid: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid = await getFileIdByBasename(request, 19421, 'test_03.jpg');
+    fileid = await getFileId(request, '/Photos/Nested 2/test_03.jpg');
   });
 
   test('Set and verify description via setExif', async ({ request }) => {

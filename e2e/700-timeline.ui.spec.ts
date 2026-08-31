@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, bootstrap } from './navigation';
-import { getFileIdByBasename } from './utils';
+import { getFileId } from './utils';
 
 test.describe('@ui Timeline feed and photo preview', () => {
   let fileid1: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileIdByBasename(request, 20696, 'NKcupJh-Dos.jpg');
+    fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
   });
 
   test.beforeEach(async ({ page }) => {

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders } from './navigation';
-import { getFileIdByBasename } from './utils';
+import { getFileId } from './utils';
 import { imageSize } from 'image-size';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
@@ -13,9 +13,9 @@ test.describe.serial('@api Image preview', () => {
 
   test.beforeAll(async ({ request }) => {
     // JPEG 640x360 test image
-    fileid1 = await getFileIdByBasename(request, 19532, 'test_01.jpg');
+    fileid1 = await getFileId(request, '/Photos/Nested 1/test_01.jpg');
     // JPEG 640x480 test image
-    fileid2 = await getFileIdByBasename(request, 19468, 'test_02.jpg');
+    fileid2 = await getFileId(request, '/Photos/Nested 1/test_02.jpg');
   });
 
   test('Get 32x32 preview', async ({ request }) => {
