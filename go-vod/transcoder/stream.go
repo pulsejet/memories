@@ -374,7 +374,9 @@ func (s *Stream) transcodeArgs(startAt float64, isHls bool) []string {
 		args = append(args, strings.Split(extra, " ")...)
 	} else if s.c.NVENC {
 		CV = ENCODER_NVENC
-		extra := "-hwaccel cuda"
+		// ffmpeg >= 8 requires an explicit device for hwupload; without it the
+		// filter chain fails with "A hardware device reference is required".
+		extra := "-hwaccel cuda -hwaccel_output_format cuda -init_hw_device cuda=memories -filter_hw_device memories"
 		args = append(args, strings.Split(extra, " ")...)
 	}
 
