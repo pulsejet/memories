@@ -44,6 +44,10 @@ export type BusEvent = {
     previous: number;
     dynTopMatterVisible: boolean;
   };
+  /** Scroll timeline to a specific date */
+  'memories:timeline:scrollToDate': Date;
+  /** Request the date range of the current view (handler fills in result) */
+  'memories:timeline:getDateRange': { result: { min: Date; max: Date } | null };
 
   /** Albums were updated for these photos */
   'memories:albums:update': IPhoto[];
