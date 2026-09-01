@@ -2,13 +2,15 @@ import { test, expect } from '@playwright/test';
 import { appUrl, bootstrap } from './navigation';
 import { getFileId } from './utils';
 
-test.describe('@ui @destructive Timeline photo deletion', () => {
+test.describe.serial('@ui @destructive Timeline photo deletion', () => {
   let fileid1: number;
   let fileid2: number;
+  let fileid3: number;
 
   test.beforeAll(async ({ request }) => {
     fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
     fileid2 = await getFileId(request, '/Photos/CbBbaNTmsAc.jpg');
+    fileid3 = await getFileId(request, '/Photos/ipZPm7u6aPA.jpg');
   });
 
   test.beforeEach(async ({ page }) => {
@@ -28,5 +30,28 @@ test.describe('@ui @destructive Timeline photo deletion', () => {
 
     await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
     await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
+  });
+
+  test('Delete image from viewer', async ({ page }) => {
+    await page.goto(appUrl);
+
+    await page.locator(`.p-outer.fill-block.p-outer--${fileid3} > .img-outer`).click();
+    await page.waitForSelector('body.viewer-fully-opened');
+
+    const activeBefore = await page.locator('.pswp__item.active img.ximg--full').getAttribute('src');
+
+    await page.getByRole('button', { name: 'Actions' }).click();
+    await page.getByRole('button', { name: 'Delete' }).click();
+    await page.getByRole('button', { name: 'Yes' }).click();
+
+    await page.waitForFunction(async (activeBefore) => {
+      const activeAfter = document.querySelector('.pswp__item.active img.ximg--full')?.getAttribute('src');
+      return activeBefore !== activeAfter;
+    }, activeBefore);
+
+    await page.getByRole('button', { name: 'Close', exact: true }).click();
+    await page.locator('.memories_viewer').waitFor({ state: 'detached' });
+
+    await expect(page.locator(`.p-outer--${fileid3}`)).not.toBeVisible();
   });
 });
