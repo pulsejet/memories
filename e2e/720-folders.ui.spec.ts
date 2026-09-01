@@ -20,14 +20,14 @@ test.describe('@ui Folder view and navigation', () => {
     await page.waitForSelector('.folder--Local');
     await page.waitForSelector('.folder--Photos');
 
-    await page.getByRole('link', { name: 'Photos' }).click();
+    await page.locator('.folder--Photos').click();
     await page.waitForSelector(`.p-outer--${fileid1}`);
   });
 
   test('Folders timeline view', async ({ page }) => {
     await page.goto(`${appUrl}/folders`);
 
-    await page.getByRole('link', { name: 'Photos' }).click();
+    await page.locator('.folder--Photos').click();
     await expect(page.locator('.folder--Nested1')).toBeInViewport();
     await expect(page.locator('.folder--Nested2')).toBeInViewport();
     await expect(page.locator(`.p-outer--${fileid2}`)).not.toBeInViewport();

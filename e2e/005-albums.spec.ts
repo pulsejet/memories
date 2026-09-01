@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, ocsHeaders, bootstrap } from './navigation';
+import { appUrl, ocsHeaders, bootstrap, username } from './navigation';
 import { getFileId } from './utils';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
@@ -52,6 +52,7 @@ test.describe.serial('@ui Albums', () => {
 
     await page.getByRole('link', { name: albumName }).click();
 
+    await expect(page).toHaveURL(`${appUrl}/albums/${username}/${encodeURIComponent(albumName)}`);
     await expect(page.locator('.dtm-container .header')).toHaveText(albumName);
     await expect(page.locator('.p-outer')).toHaveCount(3);
     await expect(page.locator(`.p-outer--${fileid1}`)).toBeVisible();
@@ -63,6 +64,9 @@ test.describe.serial('@ui Albums', () => {
 
     await page.getByRole('button', { name: 'Close', exact: true }).click();
     await page.locator('.memories_viewer').waitFor({ state: 'detached' });
+
+    await page.goto(`${appUrl}/albums/${username}/${encodeURIComponent(albumName)}`);
+    await expect(page.locator('.dtm-container .header')).toHaveText(albumName);
   });
 
   test('Add image to existing album', async ({ page }) => {
