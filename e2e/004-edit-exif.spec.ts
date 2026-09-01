@@ -4,7 +4,7 @@ import { getFileId } from './utils';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
-test.describe.serial.only('@ui Favorites', () => {
+test.describe.serial('@ui Favorites', () => {
   let fileid1: number;
 
   test.beforeAll(async ({ request }) => {
