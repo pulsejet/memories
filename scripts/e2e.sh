@@ -61,11 +61,19 @@ e2e_setup_ci() {
         occ app:disable "$app" 2>/dev/null || true
     done
 
+    # Clone photos app with depth 1
+    if [ ! -d "$NC_DIR/apps/photos" ]; then
+        local photos_ref="${NC_VERSION:-master}"
+        git clone --depth 1 -b "$photos_ref" https://github.com/nextcloud/photos.git "$NC_DIR/apps/photos"
+        (cd "$NC_DIR/apps/photos" && composer install --no-dev)
+    fi
+
     # Setup binary extensions
     cd "$MEMORIES_DIR"
     make bin-ext
 
-    # Enable memories app
+    # Enable memories and photos apps
+    occ app:enable --force photos
     occ app:enable --force memories
 
     # Run repair steps

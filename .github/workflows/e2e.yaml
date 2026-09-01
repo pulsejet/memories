@@ -41,7 +41,6 @@ jobs:
             opcache.jit=tracing,
             opcache.jit_buffer_size=64M
 
-
       - name: Build vue app
         run: |
           make dev-setup
@@ -128,6 +127,8 @@ jobs:
             --admin-pass password
 
       - name: Run tests
+        env:
+          NC_VERSION: ${{ matrix.server-versions }}
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
 
@@ -212,6 +213,8 @@ jobs:
             --admin-pass password
 
       - name: Run tests
+        env:
+          NC_VERSION: ${{ matrix.server-versions }}
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
 
@@ -278,6 +281,8 @@ jobs:
             --admin-pass password
 
       - name: Run tests
+        env:
+          NC_VERSION: ${{ matrix.server-versions }}
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
 
