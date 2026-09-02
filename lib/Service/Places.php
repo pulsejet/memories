@@ -22,11 +22,6 @@ const PLANET_POSTGRES_CHECKSUM = '5c391e56fcee95f207a6ed5fe1450b96e848cccd8fad70
 
 final class Places
 {
-    /**
-     * Number of places to process in a single transaction.
-     */
-    public int $txnSize = 50;
-
     public function __construct(
         private IConfig $config,
         private IDBConnection $connection,

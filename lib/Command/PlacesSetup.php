@@ -50,7 +50,6 @@ final class PlacesSetup extends Command
             ->setDescription('Setup reverse geocoding')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Ignore existing setup and re-download planet')
             ->addOption('recalculate', 'r', InputOption::VALUE_NONE, 'Only recalculate places for existing files')
-            ->addOption('transaction-size', null, InputOption::VALUE_REQUIRED, 'Reduce this value if your database crashes', 10)
         ;
     }
 
@@ -62,12 +61,6 @@ final class PlacesSetup extends Command
 
         $recalculate = (bool) $input->getOption('recalculate');
         $force = (bool) $input->getOption('force');
-
-        if (($this->places->txnSize = (int) $input->getOption('transaction-size')) < 1) {
-            $this->output->writeln('<error>Transaction size must be at least 1</error>');
-
-            return 1;
-        }
 
         $this->output->writeln('Attempting to set up reverse geocoding');
 

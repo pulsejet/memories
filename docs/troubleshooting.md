@@ -123,13 +123,6 @@ init_connect='SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci'
 
 Restart your database server after making this change.
 
-### General error: 2006 MySQL server has gone away
-
-You may encounter this error where MySQL crashes during planet DB insertion. In this case, use a smaller transaction size for insertion.
-
-```bash
-occ memories:places-setup --transaction-size=5
-```
 
 ### Database table prefix
 
