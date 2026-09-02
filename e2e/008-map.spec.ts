@@ -3,7 +3,7 @@ import { appUrl, ocsHeaders } from './navigation';
 import { getImageInfo } from './utils';
 import { GEO_DATASET_FILES } from './generate-geo-dataset';
 
-import type { IMapCluster } from '@typings';
+import type { IMapCluster, IDay, IPhoto } from '@typings';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
@@ -120,5 +120,34 @@ test.describe('@api Map', () => {
 
     expect(sfCluster).toBeDefined();
     expect(sfCluster!.count).toBe(10);
+  });
+
+  // Query timeline photos filtered by map bounds.
+  test('Query timeline days filtered by map bounds', async ({ request }) => {
+    // Match the test data from the New York area
+    const mapbounds = '40.621510,40.820565,-74.106216,-73.915672';
+    const url = new URL(`${appUrl}/api/days`);
+    url.searchParams.set('mapbounds', mapbounds);
+    url.searchParams.set('nopreload', '1');
+
+    const res = await request.get(url.toString());
+    expect(res.ok()).toBeTruthy();
+
+    const days: IDay[] = await res.json();
+    expect(days).toStrictEqual([
+      { dayid: 19550, count: 3 },
+      { dayid: 19549, count: 3 },
+      { dayid: 19548, count: 4 },
+    ]);
+
+    // Query single day details filtered by the same map bounds.
+    const dayUrl = new URL(`${appUrl}/api/days/19550`);
+    dayUrl.searchParams.set('mapbounds', mapbounds);
+
+    const dayRes = await request.get(dayUrl.toString());
+    expect(dayRes.ok()).toBeTruthy();
+
+    const photos: IPhoto[] = await dayRes.json();
+    expect(photos).toHaveLength(3);
   });
 });
