@@ -53,13 +53,23 @@ e2e_generate_datasets() {
 e2e_install_browsers() {
     cd "$MEMORIES_DIR"
     echo "Installing Playwright browsers..."
+    export PLAYWRIGHT_SKIP_FFMPEG_INSTALL=1
     npx playwright install chromium --with-deps --only-shell
 }
 
-# CI-specific setup
-e2e_setup_ci() {
+# CI-specific setup: JS
+e2e_setup_ci_js() {
     cd "$MEMORIES_DIR"
     npm ci
+    e2e_install_browsers & local browser_pid=$!
+    e2e_generate_datasets & local dataset_pid=$!
+    wait "$browser_pid" &&
+    wait "$dataset_pid"
+}
+
+# CI-specific setup: PHP
+e2e_setup_ci_php() {
+    cd "$MEMORIES_DIR"
     if [ -f "$NC_DIR/vue.zip" ]; then
         cp "$NC_DIR/vue.zip" .
         unzip -qq -o vue.zip
@@ -98,6 +108,7 @@ e2e_setup_ci() {
     occ config:system:set --type bool --value true debug
     php -S localhost:8080 -t "$NC_DIR" > "$E2E_LOGS_DIR/php_stdout.log" 2> "$E2E_LOGS_DIR/php_stderr.log" &
     PHP_SERVER_PID=$!
+    echo "$PHP_SERVER_PID" > "$E2E_LOGS_DIR/php_server.pid"
     sleep 2 # wait for server to start
 }
 
@@ -169,8 +180,14 @@ e2e_main() {
     mkdir -p "$E2E_LOGS_DIR"
 
     if [ -n "$CI" ]; then
-        e2e_setup_ci
-        e2e_install_browsers
+        e2e_setup_ci_php & local php_pid=$!
+        e2e_setup_ci_js & local js_pid=$!
+        wait "$php_pid" &&
+        wait "$js_pid"
+
+        if [ -f "$E2E_LOGS_DIR/php_server.pid" ]; then
+            PHP_SERVER_PID=$(cat "$E2E_LOGS_DIR/php_server.pid")
+        fi
         export E2E_BASE_URL="http://localhost:8080"
     else
         export E2E_BASE_URL="${E2E_BASE_URL:-http://localhost}"
