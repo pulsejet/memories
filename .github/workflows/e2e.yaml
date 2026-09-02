@@ -50,13 +50,28 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        databases: ['mysql', 'pgsql', 'sqlite']
+        databases: ['mysql', 'mariadb', 'pgsql', 'sqlite']
         php-versions: ['8.4']
         server-versions: ['stable34']
 
     services:
       mysql:
-        image: ${{ matrix.databases == 'mysql' && 'mariadb:lts' || '' }}
+        image: ${{ matrix.databases == 'mysql' && 'mysql:lts' || '' }}
+        ports:
+          - 4444:3306/tcp
+        env:
+          MYSQL_DATABASE: nextcloud
+          MYSQL_USER: db_user
+          MYSQL_PASSWORD: db_password
+          MYSQL_ROOT_PASSWORD: root_password
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval 5s
+          --health-timeout 2s
+          --health-retries 5
+
+      mariadb:
+        image: ${{ matrix.databases == 'mariadb' && 'mariadb:lts' || '' }}
         ports:
           - 4444:3306/tcp
         env:

@@ -61,7 +61,10 @@ e2e_install_browsers() {
 e2e_setup_ci() {
     # Fresh install of Nextcloud.
     cd "$NC_DIR"
-    mkdir data/
+    mkdir data/ # fail on existing
+    if [ "$NC_DB_TYPE" = "mariadb" ]; then
+        NC_DB_TYPE="mysql"
+    fi
     if [ "$NC_DB_TYPE" = "sqlite" ]; then
         php occ maintenance:install \
             --verbose \
