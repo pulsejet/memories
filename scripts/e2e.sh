@@ -46,7 +46,7 @@ e2e_generate_datasets() {
     cd "$MEMORIES_DIR"
     if [ ! -f "$MEMORIES_DIR/e2e/.dataset-cache/primary/geo-test/geo-test-001.jpg" ]; then
         echo "Generating image dataset..."
-        npx tsx e2e/generate-dataset.ts
+        npx tsx e2e/dataset-gen.ts
     fi
 }
 

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders, username } from './navigation';
 import { getFileId } from './utils';
-import { goldImageInfo } from './golden-measurements';
+import { goldImageInfo } from './dataset-measurements';
 
 import type { IImageInfo } from '@typings';
 

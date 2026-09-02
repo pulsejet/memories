@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders, bootstrap } from './navigation';
 import { cleanupPhoto, getFileId, getImageInfo } from './utils';
-import { goldDays, goldDayPhotos } from './golden-measurements';
+import { goldDays, goldDayPhotos } from './dataset-measurements';
 
 import type { IDay, IPhoto } from '@typings';
 

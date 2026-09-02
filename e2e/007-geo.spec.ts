@@ -4,11 +4,7 @@ import { getFileId, getImageInfo } from './utils';
 import { imageSize } from 'image-size';
 
 import type { ICluster, IDay } from '@typings';
-import type { IDatasetMap } from './generate-dataset';
-
-import datasetJson from './dataset.json';
-
-const dataset: IDatasetMap = datasetJson satisfies IDatasetMap;
+import { DATASET } from './dataset';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
@@ -116,7 +112,7 @@ test.describe('@api Geo', () => {
       const info = await getImageInfo(request, cluster.cover as number, { basic: '1' });
       expect(info.basename).toBeDefined();
 
-      const entry = dataset[`primary/geo-test/${info.basename!}`];
+      const entry = DATASET[`primary/geo-test/${info.basename!}`];
       expect(entry).toBeDefined();
 
       // Ensure the cover image belongs to the cluster's expected location.
@@ -159,7 +155,7 @@ test.describe('@api Geo', () => {
 
       for (const photo of day.detail!) {
         expect(photo.basename).toBeDefined();
-        const entry = dataset[`primary/geo-test/${photo.basename!}`];
+        const entry = DATASET[`primary/geo-test/${photo.basename!}`];
         expect(entry).toBeDefined();
         expect(entry.params?.city).toBe(targetPlace);
       }

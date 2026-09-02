@@ -1,35 +1,24 @@
-// Generic synthetic dataset generator for e2e tests.
-// Usage: npx tsx e2e/generate-dataset.ts [dataset.json]
+/**
+ * Generic Synthetic Dataset Generator for E2E Tests.
+ *
+ * This script generates synthetic JPEG images and attaches EXIF metadata defined in
+ * `e2e/dataset.ts`. Each image is procedurally drawn using `@napi-rs/canvas` with:
+ *   - A deterministic pastel background and colored border based on the filename hash.
+ *   - Visual text labels for the filename, date, and (if present) place/city/GPS coordinates.
+ *   - EXIF metadata (DateTimeOriginal, CreateDate, OffsetTime, GPS coordinates) written
+ *     in bulk using exiftool.
+ *
+ * Usage:
+ *   npx tsx e2e/dataset-gen.ts              # Generate all images in dataset.ts into .dataset-cache
+ *   npx tsx e2e/dataset-gen.ts <file.json>  # Generate custom dataset from JSON map file
+ */
 
 import * as fs from 'fs';
 import * as path from 'path';
 import { execFileSync } from 'child_process';
 import { createCanvas } from '@napi-rs/canvas';
 
-import defaultDatasetJson from './dataset.json';
-
-export interface IDatasetExif {
-  DateTimeOriginal?: string;
-  GPSLatitude?: number;
-  GPSLongitude?: number;
-  [key: string]: unknown;
-}
-
-export interface IDatasetParams {
-  place?: string;
-  city?: string;
-  [key: string]: unknown;
-}
-
-export interface IDatasetEntry {
-  size: number[]; // [width, height]
-  exif: IDatasetExif;
-  params?: IDatasetParams;
-}
-
-export type IDatasetMap = Record<string, IDatasetEntry>;
-
-export const DEFAULT_DATASET = defaultDatasetJson satisfies IDatasetMap;
+import { DATASET, type IDatasetEntry, type IDatasetMap } from './dataset';
 
 /**
  * Generate a JPEG image buffer based on dataset entry specifications.
@@ -176,7 +165,7 @@ async function main() {
   if (datasetFile) {
     dataset = JSON.parse(fs.readFileSync(datasetFile, 'utf-8'));
   } else {
-    dataset = DEFAULT_DATASET;
+    dataset = DATASET;
   }
 
   console.log(`Generating ${Object.keys(dataset).length} dataset images in ${baseAssetsDir}...`);

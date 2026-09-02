@@ -3,11 +3,7 @@ import { appUrl, ocsHeaders } from './navigation';
 import { getImageInfo } from './utils';
 
 import type { IMapCluster, IDay, IPhoto } from '@typings';
-import type { IDatasetMap } from './generate-dataset';
-
-import datasetJson from './dataset.json';
-
-const dataset: IDatasetMap = datasetJson satisfies IDatasetMap;
+import { DATASET } from './dataset';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
@@ -80,7 +76,7 @@ test.describe('@api Map', () => {
         const info = await getImageInfo(request, cluster.preview.fileid, { basic: '1' });
         expect(info.basename).toBeDefined();
 
-        const entry = dataset[`primary/geo-test/${info.basename!}`];
+        const entry = DATASET[`primary/geo-test/${info.basename!}`];
         expect(entry).toBeDefined();
         expect(entry.params?.city).toBe(expectedCity);
       }),

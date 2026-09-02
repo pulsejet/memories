@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders } from './navigation';
 import { cleanupPhoto } from './utils';
-import { goldDays, goldDayPhotos } from './golden-measurements';
+import { goldDays, goldDayPhotos } from './dataset-measurements';
 
 import type { IDay, IPhoto } from '@typings';
 
@@ -50,10 +50,7 @@ test.describe('@api Timeline', () => {
     const data: IPhoto[] = await res.json();
     data.forEach(cleanupPhoto);
 
-    expect(data).toStrictEqual([
-      ...goldDayPhotos(TIMELINE_PATH, 20696),
-      ...goldDayPhotos(TIMELINE_PATH, 18955),
-    ]);
+    expect(data).toStrictEqual([...goldDayPhotos(TIMELINE_PATH, 20696), ...goldDayPhotos(TIMELINE_PATH, 18955)]);
   });
 
   // Tests OCA\Memories\Controller\DaysController::dayGet()

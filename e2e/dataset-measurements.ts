@@ -1,13 +1,25 @@
+/**
+ * Golden measurements and expected API response derivation library.
+ *
+ * This module computes expected API responses (such as `/api/days`, `/api/days/{id}`,
+ * and `/api/image/info/{id}`) deterministically on the fly from `e2e/dataset.ts`.
+ *
+ * Exported utilities:
+ *   - `goldDays(timelinePath, isArchive?)`: Derives expected list of timeline days with counts.
+ *   - `goldDayPhotos(timelinePath, dayid, isArchive?)`: Derives photos for a specific day.
+ *   - `goldDayMap(timelinePath, isArchive?)`: Derives dayid -> photo array mapping.
+ *   - `goldImageInfo(relPath)`: Derives expected metadata for a specific photo.
+ *   - `parseExifDate(dateStr)`: Computes epoch and day ID from EXIF date string.
+ *   - `getAUID(epoch, size)`: Derives Approximate Unique ID (MD5 hash).
+ */
+
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 
 import type { IDay, IImageInfo, IPhoto } from '@typings';
-import type { IDatasetEntry, IDatasetMap } from './generate-dataset';
+import { DATASET, type IDatasetEntry } from './dataset';
 
-import datasetJson from './dataset.json';
-
-const dataset: IDatasetMap = datasetJson satisfies IDatasetMap;
 const baseAssetsDir = path.join(__dirname, '.dataset-cache');
 
 export function parseExifDate(dateStr: string): { epoch: number; dayid: number } {
@@ -32,7 +44,7 @@ export function goldDayMap(timelinePath: string, isArchive: boolean = false): Ma
   const normTimelinePath = timelinePath.endsWith('/') ? timelinePath : `${timelinePath}/`;
   const dayMap = new Map<number, IPhoto[]>();
 
-  for (const [relPath, entry] of Object.entries(dataset)) {
+  for (const [relPath, entry] of Object.entries(DATASET)) {
     if (!relPath.startsWith(normTimelinePath)) {
       continue;
     }
@@ -96,7 +108,7 @@ export function goldDayPhotos(timelinePath: string, dayid: number, isArchive: bo
  * Get golden image info object for a dataset entry.
  */
 export function goldImageInfo(relPath: string): IImageInfo {
-  const entry = dataset[relPath] as IDatasetEntry | undefined;
+  const entry = DATASET[relPath] as IDatasetEntry | undefined;
   if (!entry) {
     throw new Error(`Entry not found in dataset: ${relPath}`);
   }
