@@ -42,8 +42,9 @@ test.describe.serial('@ui Albums', () => {
     await page.getByRole('textbox', { name: 'Album Name' }).click();
     await page.getByRole('textbox', { name: 'Album Name' }).fill(albumName);
     await page.getByRole('button', { name: 'Create album' }).click();
-    await page.getByRole('button', { name: 'Save changes' }).click();
+    await page.waitForSelector(`.album[aria-label="${albumName}"] div.album-selected`);
 
+    await page.getByRole('button', { name: 'Save changes' }).click();
     await page.locator('.memories-modal').waitFor({ state: 'detached' });
   });
 
