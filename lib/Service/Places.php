@@ -14,37 +14,11 @@ const GIS_TYPE_NONE = 0;
 const GIS_TYPE_MYSQL = 1;
 const GIS_TYPE_POSTGRES = 2;
 
-const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.4/planet_coarse_boundaries.zip';
-const PLANET_CHECKSUM = 'b443fc32dfdd26dd27b3c2def96da865841b6210473e3360da191f725f14dc55';
+const PLANET_MYSQL_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.5/planet_mysql.zip';
+const PLANET_MYSQL_CHECKSUM = '8406ef261c5c7f940bf7b40bdb5024d3955a96b45d92fec0964af1d27051fae2';
 
-/**
- * @psalm-suppress MissingConstructor
- */
-final class PlanetPolygon
-{
-    public string $i;
-    public int $t;
-    public string $k;
-
-    /** @var list<array{0: float, 1: float}> */
-    public array $c;
-}
-
-/**
- * @psalm-suppress MissingConstructor
- */
-final class PlanetPlace
-{
-    public int $osm_id;
-    public int $admin_level;
-    public string $name;
-
-    /** @var null|array<string, string> */
-    public ?array $other_names = null;
-
-    /** @var list<PlanetPolygon> */
-    public array $geometry;
-}
+const PLANET_POSTGRES_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.5/planet_postgres.zip';
+const PLANET_POSTGRES_CHECKSUM = '515e72c9b5a42c1df423a93f0fe9b31d9ce8f3ee5611c832dfbdad4acfdd90fa';
 
 final class Places
 {
@@ -166,26 +140,66 @@ final class Places
     }
 
     /**
-     * Download planet database file and return path to it.
+     * Download and import planet database.
      */
-    public function downloadPlanet(): string
+    public function downloadImportPlanet(): void
     {
+        $gis = $this->detectGisType();
+        if (GIS_TYPE_NONE === $gis) {
+            throw new \Exception('No supported GIS type detected');
+        }
+
+        $files = [];
+
+        try {
+            $files = $this->downloadPlanet($gis);
+            [$planetFile, $geomFile] = $files;
+            $this->importPlanetBulk($gis, $planetFile, $geomFile);
+        } finally {
+            foreach ($files as $file) {
+                @unlink($file);
+            }
+        }
+    }
+
+    /**
+     * Download planet database file and return paths to unzipped files.
+     *
+     * @return array{0: string, 1: string}
+     */
+    public function downloadPlanet(int $gis): array
+    {
+        if (GIS_TYPE_MYSQL === $gis) {
+            $url = PLANET_MYSQL_URL;
+            $checksum = PLANET_MYSQL_CHECKSUM;
+        } elseif (GIS_TYPE_POSTGRES === $gis) {
+            $url = PLANET_POSTGRES_URL;
+            $checksum = PLANET_POSTGRES_CHECKSUM;
+        } else {
+            throw new \Exception('No supported GIS type detected');
+        }
+
         $this->logToStdout('Download planet data to temporary file...');
 
-        $filename = BinExt::getTmpPath().'/planet_coarse_boundaries.zip';
-        if (file_exists($filename) && !unlink($filename)) {
-            throw new \Exception("Failed to delete old planet zip file: {$filename}");
+        $zipFile = BinExt::getTmpPath().'/planet_data.zip';
+        if (file_exists($zipFile) && !unlink($zipFile)) {
+            throw new \Exception("Failed to delete old planet zip file: {$zipFile}");
         }
 
-        $txtfile = BinExt::getTmpPath().'/planet_coarse_boundaries.txt';
-        if (file_exists($txtfile) && !unlink($txtfile)) {
-            throw new \Exception("Failed to delete old planet data file: {$txtfile}");
+        $planetFile = BinExt::getTmpPath().'/planet.tsv';
+        if (file_exists($planetFile) && !unlink($planetFile)) {
+            throw new \Exception("Failed to delete old planet data file: {$planetFile}");
         }
 
-        $fp = fopen($filename, 'w+');
+        $geomFile = BinExt::getTmpPath().'/planet_geometry.tsv';
+        if (file_exists($geomFile) && !unlink($geomFile)) {
+            throw new \Exception("Failed to delete old planet geometry file: {$geomFile}");
+        }
+
+        $fp = fopen($zipFile, 'w+');
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, PLANET_URL);
+        curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_FILE, $fp);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 3600);
@@ -195,8 +209,8 @@ final class Places
         fclose($fp);
 
         $this->logToStdout('Verifying planet data checksum...');
-        if (PLANET_CHECKSUM !== hash_file('sha256', $filename)) {
-            @unlink($filename);
+        if ($checksum !== hash_file('sha256', $zipFile)) {
+            @unlink($zipFile);
 
             throw new \Exception('Failed to verify checksum for planet data file');
         }
@@ -205,7 +219,7 @@ final class Places
         // Unzip
         $this->logToStdout('Extracting planet data...');
         $zip = new \ZipArchive();
-        $res = $zip->open($filename);
+        $res = $zip->open($zipFile);
         if (true === $res) {
             $zip->extractTo(BinExt::getTmpPath());
             $zip->close();
@@ -214,30 +228,26 @@ final class Places
         }
         $this->logToStdout('Planet data extracted successfully');
 
-        // Check if file exists
-        if (!file_exists($txtfile)) {
-            throw new \Exception('Failed to find planet data file after unzip');
+        // Check if files exist
+        if (!file_exists($planetFile) || !file_exists($geomFile)) {
+            throw new \Exception('Failed to find planet data files after unzip');
         }
 
         // Delete zip file
-        @unlink($filename);
+        @unlink($zipFile);
 
-        return $txtfile;
+        return [$planetFile, $geomFile];
     }
 
     /**
-     * Insert planet into database from file
-     * using bulk loading (MySQL / MariaDB and PostgreSQL).
+     * Insert planet into database from files using bulk loading.
      */
-    public function importPlanetBulk(string $datafile): void
+    public function importPlanetBulk(int $gis, string $planetFile, string $geomFile): void
     {
         $this->logToStdout('Preparing planet data for bulk import...');
 
-        // Detect the GIS type
-        $gis = $this->detectGisType();
-
         if (GIS_TYPE_NONE === $gis) {
-            throw new \Exception('No GIS support detected');
+            throw new \Exception('No supported GIS type detected');
         }
 
         // Setup the database tables
@@ -250,116 +260,8 @@ final class Places
         // Table prefix
         $prefix = $this->config->getSystemValue('dbtableprefix', '') ?: '';
 
-        // Create temporary files for bulk insertion
-        $tmpPlanet = tempnam(BinExt::getTmpPath(), 'bulk_planet_');
-        $tmpGeom = tempnam(BinExt::getTmpPath(), 'bulk_geom_');
-        if (false === $tmpPlanet || false === $tmpGeom) {
-            throw new \Exception('Failed to create temporary files for bulk import');
-        }
-
-        $fpPlanet = fopen($tmpPlanet, 'w');
-        $fpGeom = fopen($tmpGeom, 'w');
-        $handle = fopen($datafile, 'r');
-
-        if (!$fpPlanet || !$fpGeom || !$handle) {
-            $fpPlanet && fclose($fpPlanet);
-            $fpGeom && fclose($fpGeom);
-            $handle && fclose($handle);
-            @unlink($tmpPlanet);
-            @unlink($tmpGeom);
-
-            throw new \Exception('Failed to open planet data file or temporary files for bulk import');
-        }
-
-        try {
-            while (($line = fgets($handle)) !== false) {
-                if ('' === trim($line)) {
-                    continue;
-                }
-
-                /** @var null|PlanetPlace $data */
-                $data = json_decode($line);
-                if (null === $data) {
-                    $this->logToStdout('ERROR: Failed to decode JSON');
-
-                    continue;
-                }
-
-                $osmId = $data->osm_id;
-                $adminLevel = $data->admin_level;
-                $boundaries = $data->geometry;
-
-                // Explicitly convert all names to UTF-8
-                $name = mb_convert_encoding($data->name, 'UTF-8');
-
-                $otherNames = [];
-                foreach ($data->other_names ?? [] as $lang => $val) {
-                    $otherNames[$lang] = mb_convert_encoding($val, 'UTF-8');
-                }
-                $otherNamesJson = (string) json_encode($otherNames, JSON_UNESCAPED_UNICODE);
-
-                // Skip some places
-                if ($adminLevel > -2 && ($adminLevel <= 1 || $adminLevel >= 10)) {
-                    // <=1: These are too general, e.g. "Earth"? or invalid
-                    // >=10: These are too specific, e.g. "Community Board"
-                    // <-1: These are special, e.g. "Timezone" = -7
-                    continue;
-                }
-
-                // Escape for MySQL / PostgreSQL TSV LOAD DATA
-                $cleanName = SQL::escapeTsv($name);
-                $cleanOther = SQL::escapeTsv($otherNamesJson);
-                fwrite($fpPlanet, "{$osmId}\t{$adminLevel}\t{$cleanName}\t{$cleanOther}\n");
-
-                // Write polygons
-                foreach ($boundaries as $polygon) {
-                    $polyid = $polygon->i;
-                    $typeid = $polygon->t;
-                    $pkey = $polygon->k;
-                    $coords = $polygon->c;
-
-                    // Every polygon must have at least 3 points
-                    if (\count($coords) < 3) {
-                        $this->logToStdout("ERROR: Invalid polygon {$polyid}");
-
-                        continue;
-                    }
-
-                    // Check if coordinates are valid
-                    $invalid = false;
-                    $pointStrs = [];
-                    foreach ($coords as [$lon, $lat]) {
-                        if ($lon < -180 || $lon > 180 || $lat < -90 || $lat > 90) {
-                            $this->logToStdout("ERROR: Invalid coordinates for polygon {$polyid}");
-                            $invalid = true;
-
-                            break;
-                        }
-                        if (GIS_TYPE_MYSQL === $gis) {
-                            $pointStrs[] = "{$lat} {$lon}";
-                        } elseif (GIS_TYPE_POSTGRES === $gis) {
-                            $pointStrs[] = "({$lat},{$lon})";
-                        }
-                    }
-                    if ($invalid) {
-                        continue;
-                    }
-
-                    if (GIS_TYPE_MYSQL === $gis) {
-                        $geometry = 'POLYGON(('.implode(',', $pointStrs).'))';
-                    } elseif (GIS_TYPE_POSTGRES === $gis) {
-                        $geometry = '(('.implode(',', $pointStrs).'))';
-                    } else {
-                        continue;
-                    }
-
-                    fwrite($fpGeom, "{$pkey}\t{$polyid}\t{$typeid}\t{$osmId}\t{$geometry}\n");
-                }
-            }
-        } finally {
-            fclose($handle);
-            fclose($fpPlanet);
-            fclose($fpGeom);
+        if (!file_exists($planetFile) || !file_exists($geomFile)) {
+            throw new \Exception('Failed to find unzipped planet data files for bulk import');
         }
 
         $this->logToStdout('Inserting bulk data into database...');
@@ -367,18 +269,15 @@ final class Places
         try {
             if (GIS_TYPE_MYSQL === $gis) {
                 $pdo = SQL::getMysqlPdo($this->connection, $this->config);
-                SQL::mysqlCopyFromFile($pdo, $prefix.'memories_planet', $tmpPlanet, 'osm_id, admin_level, name, other_names');
-                SQL::mysqlCopyFromFile($pdo, 'memories_planet_geometry', $tmpGeom, 'id, poly_id, type_id, osm_id, @geom', 'geometry = ST_GeomFromText(@geom, 4326)');
+                SQL::mysqlCopyFromFile($pdo, $prefix.'memories_planet', $planetFile, 'osm_id, admin_level, name, other_names');
+                SQL::mysqlCopyFromFile($pdo, 'memories_planet_geometry', $geomFile, 'id, poly_id, type_id, osm_id, @geom', 'geometry = ST_GeomFromText(@geom, 4326)');
             } elseif (GIS_TYPE_POSTGRES === $gis) {
                 $pdo = SQL::getPgsqlPdo($this->connection, $this->config);
-                SQL::pgsqlCopyFromFile($pdo, $prefix.'memories_planet', $tmpPlanet, 'osm_id, admin_level, name, other_names');
-                SQL::pgsqlCopyFromFile($pdo, 'memories_planet_geometry', $tmpGeom, 'id, poly_id, type_id, osm_id, geometry');
+                SQL::pgsqlCopyFromFile($pdo, $prefix.'memories_planet', $planetFile, 'osm_id, admin_level, name, other_names');
+                SQL::pgsqlCopyFromFile($pdo, 'memories_planet_geometry', $geomFile, 'id, poly_id, type_id, osm_id, geometry');
             }
         } catch (\Exception $e) {
             throw new \Exception('Bulk insert failed: '.$e->getMessage(), (int) $e->getCode(), $e);
-        } finally {
-            @unlink($tmpPlanet);
-            @unlink($tmpGeom);
         }
 
         $this->logToStdout('Creating database indices...');
@@ -388,9 +287,6 @@ final class Places
         // Mark success
         $this->logToStdout('Planet database imported successfully!');
         SystemConfig::set('memories.gis_type', $gis);
-
-        // Delete data file
-        @unlink($datafile);
     }
 
     /**

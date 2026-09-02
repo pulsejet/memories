@@ -86,11 +86,8 @@ final class PlacesSetup extends Command
 
         // Check if we only need to recalculate
         if (!$recalculate) {
-            // Download the planet database
-            $datafile = $this->places->downloadPlanet();
-
-            // Import the planet database
-            $this->places->importPlanetBulk($datafile);
+            // Download and import the planet database
+            $this->places->downloadImportPlanet();
         }
 
         // Recalculate all places
