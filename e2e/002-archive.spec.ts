@@ -43,7 +43,7 @@ test.describe.serial('@api Archive file', () => {
 
   test('Archive file', async ({ request }) => {
     // Verify path before archival
-    const infoBefore = await getImageInfo(request, fileid);
+    const infoBefore = await getImageInfo(request, fileid, { basic: '1' });
     expect(infoBefore.filename).toBe(FILE_PATH_BASE);
 
     // Archive
@@ -51,7 +51,7 @@ test.describe.serial('@api Archive file', () => {
     expect(patchRes.ok()).toBeTruthy();
 
     // Verify path during archival (now in archive)
-    const infoDuring = await getImageInfo(request, fileid);
+    const infoDuring = await getImageInfo(request, fileid, { basic: '1' });
     expect(infoDuring.filename).toBe(FILE_PATH_ARCH);
 
     // Verify in archive
@@ -77,7 +77,7 @@ test.describe.serial('@api Archive file', () => {
     expect(patchRes.ok()).toBeTruthy();
 
     // Verify path after unarchival (back in main)
-    const infoAfter = await getImageInfo(request, fileid);
+    const infoAfter = await getImageInfo(request, fileid, { basic: '1' });
     expect(infoAfter.filename).toBe(FILE_PATH_BASE);
 
     // Verify back in main
@@ -123,8 +123,8 @@ test.describe.serial('@ui Archive', () => {
     await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
     await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
 
-    expect((await getImageInfo(request, fileid1)).filename?.includes('archive')).toBeTruthy();
-    expect((await getImageInfo(request, fileid2)).filename?.includes('archive')).toBeTruthy();
+    expect((await getImageInfo(request, fileid1, { basic: '1' })).filename?.includes('archive')).toBeTruthy();
+    expect((await getImageInfo(request, fileid2, { basic: '1' })).filename?.includes('archive')).toBeTruthy();
   });
 
   test('Unarchive file', async ({ page, request }) => {
@@ -141,7 +141,7 @@ test.describe.serial('@ui Archive', () => {
     await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
     await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
 
-    expect((await getImageInfo(request, fileid1)).filename?.includes('archive')).toBeFalsy();
-    expect((await getImageInfo(request, fileid2)).filename?.includes('archive')).toBeFalsy();
+    expect((await getImageInfo(request, fileid1, { basic: '1' })).filename?.includes('archive')).toBeFalsy();
+    expect((await getImageInfo(request, fileid2, { basic: '1' })).filename?.includes('archive')).toBeFalsy();
   });
 });
