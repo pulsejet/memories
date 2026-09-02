@@ -149,12 +149,16 @@ final class Places
             throw new \Exception('No supported GIS type detected');
         }
 
+        $startTime = microtime(true);
         $files = [];
 
         try {
             $files = $this->downloadPlanet($gis);
             [$planetFile, $geomFile] = $files;
             $this->importPlanetBulk($gis, $planetFile, $geomFile);
+
+            $duration = round(microtime(true) - $startTime, 2);
+            $this->logToStdout("Total time taken: {$duration}s");
         } finally {
             foreach ($files as $file) {
                 @unlink($file);
@@ -373,7 +377,9 @@ final class Places
      */
     private function logToStdout(string $message): void
     {
-        echo rtrim($message, "\r\n")."\n";
+        $time = date('Y-m-d H:i:s');
+        $text = rtrim($message, "\r\n");
+        echo "[{$time}] {$text}\n";
         flush();
     }
 }

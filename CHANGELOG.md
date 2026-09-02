@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Improved and 20x faster planet database setup
+
 ## [v8.0.0] - 2026-04-04
 
 - **Update**: Compatibility with Nextcloud 33
