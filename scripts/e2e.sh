@@ -42,6 +42,14 @@ occ() {
     php "$NC_DIR/occ" "$@"
 }
 
+e2e_generate_datasets() {
+    cd "$MEMORIES_DIR"
+    if [ ! -f "$MEMORIES_DIR/e2e/assets/primary/geo-test/geo-test-001.jpg" ]; then
+        echo "Generating geo dataset..."
+        npx tsx e2e/generate-geo-dataset.ts
+    fi
+}
+
 e2e_install_browsers() {
     cd "$MEMORIES_DIR"
     echo "Installing Playwright browsers..."
@@ -215,6 +223,7 @@ e2e_main() {
     }
     trap cleanup EXIT INT TERM
 
+    e2e_generate_datasets
     e2e_setup_user "$TEST_USER" "$TEST_PASSWORD"
 
     # Run playwright tests
