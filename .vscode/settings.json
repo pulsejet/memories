@@ -37,10 +37,6 @@
     "pcntl",
     "pcre",
     "PDO",
-    "pdo_ibm",
-    "pdo_mysql",
-    "pdo_pgsql",
-    "pdo_sqlite",
     "pgsql",
     "Phar",
     "posix",
@@ -99,11 +95,14 @@
   },
   "git.alwaysSignOff": true,
   "editor.formatOnSave": true,
-  "psalm.configPaths": ["psalm-ls.xml"],
-
-  "intelephense.environment.phpVersion": "8.1.0",
+  "psalm.configPaths": [
+    "psalm-ls.xml"
+  ],
+  "intelephense.environment.phpVersion": "8.4.0",
   "intelephense.environment.documentRoot": "../..",
-  "intelephense.environment.includePaths": ["../.."],
+  "intelephense.environment.includePaths": [
+    "../.."
+  ],
   "intelephense.files.exclude": [
     "**/.git/**",
     "**/.svn/**",
