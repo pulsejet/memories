@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
-- Improved and 20x faster planet database setup
+- **Fix**: Copied files are now immediately indexed
+- **Fix**: Improved and 20x faster planet database setup
 
 ## [v8.0.0] - 2026-04-04
 
