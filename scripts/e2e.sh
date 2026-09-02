@@ -59,6 +59,29 @@ e2e_install_browsers() {
 
 # CI-specific setup
 e2e_setup_ci() {
+    # Fresh install of Nextcloud.
+    cd "$NC_DIR"
+    mkdir data/
+    if [ "$NC_DB_TYPE" = "sqlite" ]; then
+        php occ maintenance:install \
+            --verbose \
+            --database="$NC_DB_TYPE" \
+            --admin-user="admin" \
+            --admin-pass="password"
+    else
+        php occ maintenance:install \
+            --verbose \
+            --database="$NC_DB_TYPE" \
+            --database-name="nextcloud" \
+            --database-host="127.0.0.1" \
+            --database-port="$NC_DB_PORT" \
+            --database-user="db_user" \
+            --database-pass="db_password" \
+            --admin-user="admin" \
+            --admin-pass="password"
+    fi
+
+    # Set up Memories app and dependencies.
     cd "$MEMORIES_DIR"
 
     # Install JS dependencies.
@@ -89,12 +112,12 @@ e2e_setup_ci() {
     fi
 
     # Set up redis cache
-    if [ -z "$NO_REDIS" ]; then
+    if [ ! -z "$NC_REDIS_PORT" ]; then
         occ config:system:set memcache.distributed --value '\OC\Memcache\Redis'
         occ config:system:set memcache.locking --value '\OC\Memcache\Redis'
         occ config:system:set redis host --value '127.0.0.1'
         occ config:system:set redis password --value ''
-        occ config:system:set redis port --type integer --value 6379
+        occ config:system:set redis port --type integer --value $NC_REDIS_PORT
     fi
 
     # Enable apps needed for running the tests.
@@ -187,6 +210,10 @@ e2e_cleanup_user() {
 e2e_main() {
     local test_args=("$@")
     mkdir -p "$E2E_LOGS_DIR"
+
+    if [ "$NC_DB_TYPE" = "sqlite" ]; then
+        export NO_PLANET_DB=1
+    fi
 
     if [ -n "$CI" ]; then
         e2e_setup_ci

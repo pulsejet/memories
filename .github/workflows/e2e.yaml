@@ -59,7 +59,10 @@ jobs:
         ports:
           - 4444:3306/tcp
         env:
-          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: nextcloud
+          MYSQL_USER: db_user
+          MYSQL_PASSWORD: db_password
+          MYSQL_ROOT_PASSWORD: root_password
         options: >-
           --health-cmd="healthcheck.sh --connect --innodb_initialized"
           --health-interval 5s
@@ -111,24 +114,11 @@ jobs:
             opcache.jit=tracing,
             opcache.jit_buffer_size=64M
 
-      - name: Set up Nextcloud
-        env:
-          DB_PORT: 4444
-        run: |
-          mkdir data
-          php occ maintenance:install \
-            --verbose \
-            --database=mysql \
-            --database-name=nextcloud \
-            --database-host=127.0.0.1 \
-            --database-port=$DB_PORT \
-            --database-user=root \
-            --database-pass=rootpassword \
-            --admin-user admin \
-            --admin-pass password
-
       - name: Run tests
         env:
+          NC_DB_TYPE: mysql
+          NC_DB_PORT: 4444
+          NC_REDIS_PORT: 6379
           NC_VERSION: ${{ matrix.server-versions }}
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
@@ -156,7 +146,8 @@ jobs:
           - 4444:5432/tcp
         env:
           POSTGRES_DB: nextcloud
-          POSTGRES_PASSWORD: rootpassword
+          POSTGRES_USER: db_user
+          POSTGRES_PASSWORD: db_password
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -208,24 +199,11 @@ jobs:
             opcache.jit=tracing,
             opcache.jit_buffer_size=64M
 
-      - name: Set up Nextcloud
-        env:
-          DB_PORT: 4444
-        run: |
-          mkdir data
-          php occ maintenance:install \
-            --verbose \
-            --database=pgsql \
-            --database-name=nextcloud \
-            --database-host=127.0.0.1 \
-            --database-port=$DB_PORT \
-            --database-user=postgres \
-            --database-pass=rootpassword \
-            --admin-user admin \
-            --admin-pass password
-
       - name: Run tests
         env:
+          NC_DB_TYPE: pgsql
+          NC_DB_PORT: 4444
+          NC_REDIS_PORT: 6379
           NC_VERSION: ${{ matrix.server-versions }}
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
@@ -282,23 +260,10 @@ jobs:
             opcache.jit=tracing,
             opcache.jit_buffer_size=64M
 
-      - name: Set up Nextcloud
-        env:
-          DB_PORT: 4444
-        run: |
-          mkdir data
-          php occ maintenance:install \
-            --verbose \
-            --database=sqlite \
-            --database-name=nextcloud \
-            --admin-user admin \
-            --admin-pass password
-
       - name: Run tests
         env:
           NC_VERSION: ${{ matrix.server-versions }}
-          NO_PLANET_DB: 1
-          NO_REDIS: 1
+          NC_DB_TYPE: sqlite
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
 
