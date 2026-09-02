@@ -14,11 +14,11 @@ const GIS_TYPE_NONE = 0;
 const GIS_TYPE_MYSQL = 1;
 const GIS_TYPE_POSTGRES = 2;
 
-const PLANET_MYSQL_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.5/planet_mysql.zip';
-const PLANET_MYSQL_CHECKSUM = '8406ef261c5c7f940bf7b40bdb5024d3955a96b45d92fec0964af1d27051fae2';
+const PLANET_MYSQL_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-20260902/planet_mysql.zip';
+const PLANET_MYSQL_CHECKSUM = '42ae55edc23fe79eaae04682e9aef99d03836bc9f794e868e38bf39c2d3a13e2';
 
-const PLANET_POSTGRES_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.5/planet_postgres.zip';
-const PLANET_POSTGRES_CHECKSUM = '5c391e56fcee95f207a6ed5fe1450b96e848cccd8fad70948fe89de4ccb59d4e';
+const PLANET_POSTGRES_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-20260902/planet_postgres.zip';
+const PLANET_POSTGRES_CHECKSUM = '33b9516ea284a089189075f61195be54a20a6d494d1de73c62172a964a67c48f';
 
 final class Places
 {
