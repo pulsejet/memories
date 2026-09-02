@@ -283,6 +283,7 @@ jobs:
       - name: Run tests
         env:
           NC_VERSION: ${{ matrix.server-versions }}
+          NO_PLANET_DB: 1
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
 

@@ -28,6 +28,7 @@
 #   E2E_USER          Specific test username. Enables Fast Iteration Mode.
 #   E2E_PASSWORD      Password for the test user (default: "password").
 #   E2E_CLEANUP_USER  Set to "1" to force deleting the user even when E2E_USER is set.
+#   NO_PLANET_DB      Set to "1" to skip planet database setup (e.g., on SQLite).
 # ==============================================================================
 
 set -e
@@ -78,6 +79,11 @@ e2e_setup_ci() {
 
     # Run repair steps
     occ maintenance:repair
+
+    # Setup places database unless disabled
+    if [ -z "$NO_PLANET_DB" ]; then
+        occ memories:places-setup --no-interaction --force
+    fi
 
     # Set debug mode and start dev server
     mkdir -p "$E2E_LOGS_DIR"
