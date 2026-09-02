@@ -69,6 +69,7 @@ jobs:
           --health-interval 5s
           --health-timeout 2s
           --health-retries 5
+        command: --local-infile=1
 
       mariadb:
         image: ${{ matrix.databases == 'mariadb' && 'mariadb:lts' || '' }}
@@ -122,28 +123,29 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Use Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: apps/${{ env.APP_NAME }}/package-lock.json
+      - parallel:
+        - uses: actions/download-artifact@v8
+          with:
+            name: vue.zip
 
-      - uses: actions/download-artifact@v8
-        with:
-          name: vue.zip
+        - name: Use Node.js
+          uses: actions/setup-node@v6
+          with:
+            node-version: ${{ env.NODE_VERSION }}
+            cache: 'npm'
+            cache-dependency-path: apps/${{ env.APP_NAME }}/package-lock.json
 
-      - name: Set up php ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
-          tools: phpunit
-          extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
-          coverage: none
-          ini-values: >-
-            opcache.enable_cli=1,
-            opcache.jit=tracing,
-            opcache.jit_buffer_size=64M
+        - name: Set up php ${{ matrix.php-versions }}
+          uses: shivammathur/setup-php@v2
+          with:
+            php-version: ${{ matrix.php-versions }}
+            tools: phpunit
+            extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
+            coverage: none
+            ini-values: >-
+              opcache.enable_cli=1,
+              opcache.jit=tracing,
+              opcache.jit_buffer_size=64M
 
       - name: Run tests
         env:
