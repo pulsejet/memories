@@ -18,7 +18,7 @@ const PLANET_MYSQL_URL = 'https://github.com/pulsejet/memories-assets/releases/d
 const PLANET_MYSQL_CHECKSUM = '8406ef261c5c7f940bf7b40bdb5024d3955a96b45d92fec0964af1d27051fae2';
 
 const PLANET_POSTGRES_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.5/planet_postgres.zip';
-const PLANET_POSTGRES_CHECKSUM = '515e72c9b5a42c1df423a93f0fe9b31d9ce8f3ee5611c832dfbdad4acfdd90fa';
+const PLANET_POSTGRES_CHECKSUM = '5c391e56fcee95f207a6ed5fe1450b96e848cccd8fad70948fe89de4ccb59d4e';
 
 final class Places
 {
