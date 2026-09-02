@@ -132,6 +132,7 @@ e2e_setup_ci() {
 
     # Enable Nextcloud debug mode.
     occ config:system:set --type bool --value true debug
+    occ config:system:set loglevel --type integer --value 0
 
     # Setup places database unless disabled (@slow).
     if [ -z "$NO_PLANET_DB" ]; then
@@ -269,6 +270,16 @@ e2e_main() {
             mkdir -p "$MEMORIES_DIR/playwright-report"
             rm -rf "$MEMORIES_DIR/playwright-report/e2e_logs"
             mv "$E2E_LOGS_DIR" "$MEMORIES_DIR/playwright-report/"
+        fi
+
+        if [  -n "$CI" ]; then
+            echo "Moving nextcloud logs to playwright-report..."
+            mkdir -p "$MEMORIES_DIR/playwright-report"
+            LOG_DST="$MEMORIES_DIR/playwright-report/nextcloud.log"
+            mv "$NC_DIR/data/nextcloud.log" "$LOG_DST"
+
+            # Remove excessively verbose messages that are not useful.
+            sed -i '/dirty table reads/d' "$LOG_DST"
         fi
 
         exit $exit_code
