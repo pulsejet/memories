@@ -135,15 +135,20 @@ export const GEO_DATASET: IGeoEntry[] = [
   { date: '2023-11-14 15:00:00', coords: [-33.92, 151.258], place: 'Coogee Beach', city: 'Sydney' },
 ];
 
+export const GEO_DATASET_FILES: Record<string, IGeoEntry> = Object.fromEntries(
+  GEO_DATASET.map((entry, index) => [`geo-test-${String(index + 1).padStart(3, '0')}.jpg`, entry]),
+);
+
 /**
  * Generate a 256x256 JPEG image with the place name and city rendered.
  */
-function generateImage(entry: IGeoEntry, index: number): Buffer {
+function generateImage(entry: IGeoEntry, filename: string): Buffer {
   const canvas = createCanvas(256, 256);
   const ctx = canvas.getContext('2d');
 
   // Background
-  const hue = (index * 37) % 360;
+  const hash = Array.from(filename).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const hue = (hash * 37) % 360;
   ctx.fillStyle = `hsl(${hue}, 20%, 94%)`;
   ctx.fillRect(0, 0, 256, 256);
 
@@ -152,13 +157,12 @@ function generateImage(entry: IGeoEntry, index: number): Buffer {
   ctx.lineWidth = 4;
   ctx.strokeRect(2, 2, 252, 252);
 
-  // Top header: image index
-  const numStr = `geo-test-${String(index).padStart(3, '0')}`;
+  // Top header: filename
   ctx.fillStyle = '#6b7280';
   ctx.font = '12px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(numStr, 128, 40);
+  ctx.fillText(filename, 128, 40);
 
   // Place name above in black
   ctx.fillStyle = '#000000';
@@ -188,16 +192,14 @@ async function main() {
   }
   fs.mkdirSync(targetDir, { recursive: true });
 
-  console.log(`Generating ${GEO_DATASET.length} images in ${targetDir}...`);
+  console.log(`Generating ${Object.keys(GEO_DATASET_FILES).length} images in ${targetDir}...`);
 
   const metadataList: Record<string, unknown>[] = [];
 
-  GEO_DATASET.forEach((entry, i) => {
-    const index = i + 1;
-    const filename = `geo-test-${String(index).padStart(3, '0')}.jpg`;
+  for (const [filename, entry] of Object.entries(GEO_DATASET_FILES)) {
     const filePath = path.join(targetDir, filename);
 
-    const buf = generateImage(entry, index);
+    const buf = generateImage(entry, filename);
     fs.writeFileSync(filePath, Uint8Array.from(buf));
 
     const [lat, lon] = entry.coords;
@@ -212,7 +214,7 @@ async function main() {
       GPSLongitude: Math.abs(lon),
       GPSLongitudeRef: lon >= 0 ? 'E' : 'W',
     });
-  });
+  }
 
   // Write EXIF tags in bulk using exiftool
   const exiftool = path.join(__dirname, '..', 'bin-ext', 'exiftool', 'exiftool');
@@ -223,6 +225,10 @@ async function main() {
   try {
     execFileSync(exiftool, ['-overwrite_original', `-json=${metaJsonPath}`, targetDir], {
       stdio: 'inherit',
+      env: {
+        ...process.env,
+        LC_ALL: 'C',
+      },
     });
   } finally {
     if (fs.existsSync(metaJsonPath)) {

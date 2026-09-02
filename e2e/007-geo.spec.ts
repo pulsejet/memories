@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders } from './navigation';
 import { getImageInfo } from './utils';
-import { GEO_DATASET } from './generate-geo-dataset';
+import { GEO_DATASET_FILES } from './generate-geo-dataset';
 import { imageSize } from 'image-size';
 
-import type { ICluster } from '@typings';
+import type { ICluster, IDay } from '@typings';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
@@ -111,18 +111,53 @@ test.describe('@api Geo', () => {
       const info = await getImageInfo(request, cluster.cover as number, { basic: '1' });
       expect(info.basename).toBeDefined();
 
-      // Extract dataset index from filename (e.g., "geo-test-026.jpg" -> 26).
-      const match = info.basename?.match(/^geo-test-(\d+)\.jpg$/);
-      expect(match).not.toBeNull();
-
-      const index = parseInt(match![1], 10);
-      const entry = GEO_DATASET[index - 1];
+      const entry = GEO_DATASET_FILES[info.basename!];
       expect(entry).toBeDefined();
 
       // Ensure the cover image belongs to the cluster's expected location.
       const expectedCities = clusterToCitiesMap[cluster.name];
       expect(expectedCities).toBeDefined();
       expect(expectedCities).toContain(entry.city);
+    }
+  });
+
+  // Query timeline photos filtered by a specific place cluster.
+  test('Query timeline for a specific place cluster', async ({ request }) => {
+    const targetPlace = 'Santa Monica';
+
+    // Retrieve place clusters to get the cluster ID for the target place.
+    const clustersRes = await request.get(`${appUrl}/api/clusters/places`);
+    expect(clustersRes.ok()).toBeTruthy();
+
+    const clusters: ICluster[] = await clustersRes.json();
+    const targetCluster = clusters.find((c) => c.name === targetPlace);
+    expect(targetCluster).toBeDefined();
+    expect(typeof targetCluster!.cluster_id).toBe('number');
+
+    // Query days endpoint filtered by the place cluster ID.
+    const url = new URL(`${appUrl}/api/days`);
+    url.searchParams.set('places', String(targetCluster!.cluster_id));
+    const daysRes = await request.get(url.toString());
+    expect(daysRes.ok()).toBeTruthy();
+
+    // Verify the the result match the test dataset.
+    const days: IDay[] = await daysRes.json();
+    expect(days).toHaveLength(2);
+    expect(days[0].count).toBe(2);
+    expect(days[1].count).toBe(4);
+    expect(days[0].dayid).toBeGreaterThan(days[1].dayid);
+
+    // Verify each photo in the day details corresponds to the target place in the test dataset.
+    for (const day of days) {
+      expect(day.detail).toBeDefined();
+      expect(day.detail).toHaveLength(day.count);
+
+      for (const photo of day.detail!) {
+        expect(photo.basename).toBeDefined();
+        const entry = GEO_DATASET_FILES[photo.basename!];
+        expect(entry).toBeDefined();
+        expect(entry.city).toBe(targetPlace);
+      }
     }
   });
 });
