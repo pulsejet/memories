@@ -1,24 +1,24 @@
 {
   "primary/Local/RmjH76vMWrI.jpg": {
-    "size": [100, 150],
+    "size": [200, 300],
     "exif": {
       "DateTimeOriginal": "2022:09:14 11:34:54+00:00"
     }
   },
   "primary/Local/dHLhDeEgxsg.jpg": {
-    "size": [100, 150],
+    "size": [200, 300],
     "exif": {
       "DateTimeOriginal": "2022:09:14 11:34:28+00:00"
     }
   },
   "primary/Local/kvRlouf0RTs.jpg": {
-    "size": [100, 125],
+    "size": [200, 250],
     "exif": {
       "DateTimeOriginal": "2022:09:14 11:34:58+00:00"
     }
   },
   "primary/Photos/.archive/archived_01.jpg": {
-    "size": [640, 360],
+    "size": [1280, 720],
     "exif": {
       "DateTimeOriginal": "2022:12:28 15:28:23+00:00",
       "GPSLatitude": 40.7018091997222,
@@ -26,7 +26,7 @@
     }
   },
   "primary/Photos/.archive/archived_02.jpg": {
-    "size": [640, 360],
+    "size": [1280, 720],
     "exif": {
       "DateTimeOriginal": "2022:12:28 15:28:10+00:00",
       "GPSLatitude": 40.7018091997222,
@@ -34,43 +34,43 @@
     }
   },
   "primary/Photos/3fUXeoW5Sso.jpg": {
-    "size": [100, 133],
+    "size": [200, 266],
     "exif": {
       "DateTimeOriginal": "2026:08:31 14:20:27+00:00"
     }
   },
   "primary/Photos/6khIhNYl1HI.jpg": {
-    "size": [100, 150],
+    "size": [200, 300],
     "exif": {
       "DateTimeOriginal": "2021:12:01 14:00:00+00:00"
     }
   },
   "primary/Photos/B6daqIhG8G0.jpg": {
-    "size": [100, 125],
+    "size": [200, 250],
     "exif": {
       "DateTimeOriginal": "2026:08:31 15:20:27+00:00"
     }
   },
   "primary/Photos/CbBbaNTmsAc.jpg": {
-    "size": [100, 150],
+    "size": [200, 300],
     "exif": {
       "DateTimeOriginal": "2026:08:31 16:20:27+00:00"
     }
   },
   "primary/Photos/NDPmLyPXnZU.jpg": {
-    "size": [100, 150],
+    "size": [200, 300],
     "exif": {
       "DateTimeOriginal": "2022:08:17 10:00:00+00:00"
     }
   },
   "primary/Photos/NKcupJh-Dos.jpg": {
-    "size": [100, 67],
+    "size": [200, 134],
     "exif": {
       "DateTimeOriginal": "2026:08:31 17:20:27+00:00"
     }
   },
   "primary/Photos/Nested 1/Nested 1_1/test_04.jpg": {
-    "size": [640, 480],
+    "size": [1280, 960],
     "exif": {
       "DateTimeOriginal": "2023:01:18 21:18:39+00:00",
       "GPSLatitude": 34.0293632997222,
@@ -78,7 +78,7 @@
     }
   },
   "primary/Photos/Nested 1/Nested 1_1/test_05.jpg": {
-    "size": [360, 480],
+    "size": [720, 960],
     "exif": {
       "DateTimeOriginal": "2023:01:18 21:24:32+00:00",
       "GPSLatitude": 34.0293384,
@@ -86,7 +86,7 @@
     }
   },
   "primary/Photos/Nested 1/test_01.jpg": {
-    "size": [640, 360],
+    "size": [1280, 720],
     "exif": {
       "DateTimeOriginal": "2023:06:24 04:10:04+00:00",
       "GPSLatitude": 39.326068,
@@ -94,7 +94,7 @@
     }
   },
   "primary/Photos/Nested 1/test_02.jpg": {
-    "size": [640, 480],
+    "size": [1280, 960],
     "exif": {
       "DateTimeOriginal": "2023:04:21 19:55:33+00:00",
       "GPSLatitude": 34.0804042997222,
@@ -102,7 +102,7 @@
     }
   },
   "primary/Photos/Nested 2/test_03.jpg": {
-    "size": [640, 480],
+    "size": [1280, 960],
     "exif": {
       "DateTimeOriginal": "2023:03:05 15:20:12+00:00",
       "GPSLatitude": 34.0194704,
@@ -110,37 +110,37 @@
     }
   },
   "primary/Photos/RD_VnDHL4oM.jpg": {
-    "size": [100, 150],
+    "size": [200, 300],
     "exif": {
       "DateTimeOriginal": "2021:12:01 15:00:00+00:00"
     }
   },
   "primary/Photos/RloUq_2-Jgs.jpg": {
-    "size": [100, 107],
+    "size": [200, 214],
     "exif": {
       "DateTimeOriginal": "2021:11:24 14:00:00+00:00"
     }
   },
   "primary/Photos/bnqdK7zvm4Y.jpg": {
-    "size": [100, 67],
+    "size": [200, 134],
     "exif": {
       "DateTimeOriginal": "2022:08:17 11:00:00+00:00"
     }
   },
   "primary/Photos/dibBJsnVTcc.jpg": {
-    "size": [100, 150],
+    "size": [200, 300],
     "exif": {
       "DateTimeOriginal": "2022:08:17 12:00:00+00:00"
     }
   },
   "primary/Photos/ipZPm7u6aPA.jpg": {
-    "size": [100, 150],
+    "size": [200, 300],
     "exif": {
       "DateTimeOriginal": "2026:08:31 18:20:27+00:00"
     }
   },
   "primary/Photos/mkBC3EOHsac.jpg": {
-    "size": [100, 75],
+    "size": [200, 150],
     "exif": {
       "DateTimeOriginal": "2022:08:17 13:00:00+00:00"
     }
