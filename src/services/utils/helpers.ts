@@ -204,7 +204,9 @@ export function removeExtension(filename: string) {
  * Check if the provided Axios Error is a network error.
  */
 export function isNetworkError(error: any) {
-  return error?.code === 'ERR_NETWORK';
+  // ECONNABORTED is a client-side timeout, which almost always
+  // means the network is unusable (e.g. offline behind a VPN)
+  return error?.code === 'ERR_NETWORK' || error?.code === 'ECONNABORTED';
 }
 
 /**
