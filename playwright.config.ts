@@ -1,5 +1,6 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 import { devices } from '@playwright/test';
+import { cpus } from 'os';
 
 const config: PlaywrightTestConfig = {
   testDir: './e2e',
@@ -11,8 +12,8 @@ const config: PlaywrightTestConfig = {
     },
   },
   snapshotPathTemplate: '{testDir}/screenshots/{testFilePath}/{arg}{ext}',
-  fullyParallel: false,
-  workers: 1,
+  fullyParallel: true,
+  workers: Math.max(2, Math.min(16, Math.floor(cpus().length / 2))),
   forbidOnly: !!process.env.CI,
   retries: 0,
   reporter: [['html', { open: 'never' }]],

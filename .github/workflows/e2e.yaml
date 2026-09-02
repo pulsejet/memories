@@ -15,7 +15,7 @@ on:
 env:
   APP_NAME: memories
   NODE_VERSION: 24.x
-  PHP_CLI_SERVER_WORKERS: 8
+  PHP_CLI_SERVER_WORKERS: 12
 
 jobs:
   vue:

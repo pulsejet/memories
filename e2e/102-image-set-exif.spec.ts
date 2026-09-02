@@ -3,13 +3,18 @@ import { randomBytes } from 'crypto';
 import { appUrl, ocsHeaders } from './navigation';
 import { getFileId, getImageInfo } from './utils';
 
-test.use({ extraHTTPHeaders: ocsHeaders });
+test.use({
+  extraHTTPHeaders: {
+    ...ocsHeaders,
+    'X-Timeline-Path': '/for-edit-exif',
+  },
+});
 
 test.describe('@api Image setExif', () => {
   let fileid: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid = await getFileId(request, '/Photos/Nested 2/test_03.jpg');
+    fileid = await getFileId(request, '/for-edit-exif/api_set_exif.jpg');
   });
 
   test('Set and verify description via setExif', async ({ request }) => {

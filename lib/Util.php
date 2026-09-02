@@ -319,6 +319,10 @@ final class Util
             ->getValueString($uid, Application::APPNAME, 'timelinePath')
                 ?: SystemConfig::get('memories.timeline.default_path');
 
+        if (SystemConfig::get('debug') && isset($_SERVER['HTTP_X_TIMELINE_PATH'])) {
+            $paths = $_SERVER['HTTP_X_TIMELINE_PATH'];
+        }
+
         return array_map(
             static fn ($path) => self::sanitizePath(trim($path))
                 ?? throw new \InvalidArgumentException("Invalid timeline path: {$path}"),

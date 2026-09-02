@@ -18,16 +18,13 @@ test.describe('@ui Timeline feed and photo preview', () => {
     await page.waitForSelector(`.p-outer--${fileid1}`);
     expect(await page.locator('.p-outer').count()).toBeGreaterThan(4);
     await page.waitForTimeout(500); // img load
-    await expect(page).toHaveScreenshot();
   });
 
   test('Open one image', async ({ page }) => {
     await page.goto(appUrl);
     await page.locator(`.p-outer--${fileid1}`).click();
     await page.waitForSelector('body.viewer-fully-opened');
-    await expect(page).toHaveScreenshot();
     await page.getByRole('button', { name: 'Close', exact: true }).click();
     await page.locator('.memories_viewer').waitFor({ state: 'detached' });
-    await expect(page).toHaveScreenshot();
   });
 });

@@ -6,26 +6,15 @@ import { imageSize } from 'image-size';
 import type { ICluster, IDay } from '@typings';
 import { DATASET } from './dataset';
 
-test.use({ extraHTTPHeaders: ocsHeaders });
+test.use({
+  extraHTTPHeaders: {
+    ...ocsHeaders,
+    'X-Timeline-Path': '/geo-test',
+  },
+});
 
 test.describe('@api Geo', () => {
   test.skip(!!process.env.NO_PLANET_DB, 'Skipping geo tests: NO_PLANET_DB is set');
-
-  // Set timeline root to test dataset folder before running geo tests.
-  test.beforeAll(async ({ request }) => {
-    const res = await request.put(`${appUrl}/api/config/timelinePath`, {
-      data: { value: '/geo-test' },
-    });
-    expect(res.ok()).toBeTruthy();
-  });
-
-  // Restore timeline root back to default.
-  test.afterAll(async ({ request }) => {
-    const res = await request.put(`${appUrl}/api/config/timelinePath`, {
-      data: { value: '/Photos' },
-    });
-    expect(res.ok()).toBeTruthy();
-  });
 
   // Verify reverse-geocoded photo counts aggregated at the country level.
   test('Query top-level places clusters', async ({ request }) => {

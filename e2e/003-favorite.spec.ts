@@ -4,13 +4,11 @@ import { getFileId } from './utils';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
-test.describe.serial('@ui Favorites', () => {
-  let fileid1: number;
-  let fileid2: number;
+test.describe.serial('@ui Favorites viewer', () => {
+  let fileid: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
-    fileid2 = await getFileId(request, '/Photos/CbBbaNTmsAc.jpg');
+    fileid = await getFileId(request, '/Photos/3fUXeoW5Sso.jpg');
   });
 
   test.beforeEach(async ({ page }) => {
@@ -21,24 +19,38 @@ test.describe.serial('@ui Favorites', () => {
   // the internal categories, before multiple can be done simultaneously.
   test('Favorite through viewer', async ({ page }) => {
     await page.goto(appUrl);
-    await page.locator(`.p-outer--${fileid1} > .img-outer`).click();
+    await page.locator(`.p-outer--${fileid} > .img-outer`).click();
     await page.waitForSelector('body.viewer-fully-opened');
     const favBtn = page.getByRole('button', { name: 'Favorite' });
     await expect(favBtn.locator('.star-outline-icon')).toBeVisible();
     await favBtn.click();
     await page.getByRole('button', { name: 'Close', exact: true }).click();
-    await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).toBeVisible();
+    await expect(page.locator(`.p-outer--${fileid} .flag.bottom-right > .star-icon`)).toBeVisible();
   });
 
   test('Unfavorite through viewer', async ({ page }) => {
     await page.goto(appUrl);
-    await page.locator(`.p-outer--${fileid1} > .img-outer`).click();
+    await page.locator(`.p-outer--${fileid} > .img-outer`).click();
     await page.waitForSelector('body.viewer-fully-opened');
     const favBtn = page.getByRole('button', { name: 'Favorite' });
     await expect(favBtn.locator('.star-icon')).toBeVisible();
     await favBtn.click();
     await page.getByRole('button', { name: 'Close', exact: true }).click();
-    await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).not.toBeVisible();
+    await expect(page.locator(`.p-outer--${fileid} .flag.bottom-right > .star-icon`)).not.toBeVisible();
+  });
+});
+
+test.describe.serial('@ui Favorites batch', () => {
+  let fileid1: number;
+  let fileid2: number;
+
+  test.beforeAll(async ({ request }) => {
+    fileid1 = await getFileId(request, '/Photos/CbBbaNTmsAc.jpg');
+    fileid2 = await getFileId(request, '/Photos/NDPmLyPXnZU.jpg');
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await bootstrap(page);
   });
 
   test('Favorite file', async ({ page }) => {

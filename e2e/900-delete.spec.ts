@@ -1,6 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap } from './navigation';
+import { appUrl, ocsHeaders, bootstrap } from './navigation';
 import { getFileId } from './utils';
+
+test.use({
+  extraHTTPHeaders: {
+    ...ocsHeaders,
+    'X-Timeline-Path': '/for-delete',
+  },
+});
 
 test.describe.serial('@ui @destructive Timeline photo deletion', () => {
   let fileid1: number;
@@ -8,9 +15,9 @@ test.describe.serial('@ui @destructive Timeline photo deletion', () => {
   let fileid3: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
-    fileid2 = await getFileId(request, '/Photos/CbBbaNTmsAc.jpg');
-    fileid3 = await getFileId(request, '/Photos/ipZPm7u6aPA.jpg');
+    fileid1 = await getFileId(request, '/for-delete/delete_01.jpg');
+    fileid2 = await getFileId(request, '/for-delete/delete_02.jpg');
+    fileid3 = await getFileId(request, '/for-delete/delete_03.jpg');
   });
 
   test.beforeEach(async ({ page }) => {

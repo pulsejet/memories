@@ -5,7 +5,12 @@ import { getImageInfo } from './utils';
 import type { IMapCluster, IDay, IPhoto } from '@typings';
 import { DATASET } from './dataset';
 
-test.use({ extraHTTPHeaders: ocsHeaders });
+test.use({
+  extraHTTPHeaders: {
+    ...ocsHeaders,
+    'X-Timeline-Path': '/geo-test',
+  },
+});
 
 // Approximate Euclidean distance in degrees.
 const distance = (c1: [number, number], c2: [number, number]) => {
@@ -13,22 +18,6 @@ const distance = (c1: [number, number], c2: [number, number]) => {
 };
 
 test.describe('@api Map', () => {
-  // Set timeline root to test dataset folder before running map tests.
-  test.beforeAll(async ({ request }) => {
-    const res = await request.put(`${appUrl}/api/config/timelinePath`, {
-      data: { value: '/geo-test' },
-    });
-    expect(res.ok()).toBeTruthy();
-  });
-
-  // Restore timeline root back to default.
-  test.afterAll(async ({ request }) => {
-    const res = await request.put(`${appUrl}/api/config/timelinePath`, {
-      data: { value: '/Photos' },
-    });
-    expect(res.ok()).toBeTruthy();
-  });
-
   // Query map clusters for the Santa Monica + Venice bounding box at zoom level 13.
   test('Query map clusters for Santa Monica and Venice', async ({ request }) => {
     const url = new URL(`${appUrl}/api/map/clusters`);

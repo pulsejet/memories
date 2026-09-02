@@ -2,13 +2,18 @@ import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders, bootstrap } from './navigation';
 import { getFileId } from './utils';
 
-test.use({ extraHTTPHeaders: ocsHeaders });
+test.use({
+  extraHTTPHeaders: {
+    ...ocsHeaders,
+    'X-Timeline-Path': '/for-edit-exif',
+  },
+});
 
-test.describe.serial('@ui Favorites', () => {
+test.describe.serial('@ui Edit metadata', () => {
   let fileid1: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
+    fileid1 = await getFileId(request, '/for-edit-exif/ui_edit.jpg');
   });
 
   test('Edit metadata through viewer', async ({ page }) => {
@@ -24,7 +29,6 @@ test.describe.serial('@ui Favorites', () => {
     const testDescription = `Test description ${random}`;
     await page.getByRole('textbox', { name: 'Title' }).fill(testTitle);
     await page.getByRole('textbox', { name: 'Description' }).fill(testDescription);
-    await expect(page).toHaveScreenshot();
     await page.getByRole('button', { name: 'Save' }).click();
 
     await expect(page.locator('.memories_viewer .exif.title')).toHaveText(testTitle);

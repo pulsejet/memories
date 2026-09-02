@@ -65,4 +65,22 @@ test.describe('@api Timeline', () => {
       expect(data).toStrictEqual(goldDayPhotos(TIMELINE_PATH, testDayId));
     });
   }
+
+  test('Query archived days endpoint', async ({ request }) => {
+    const res = await request.get(`${appUrl}/api/days?nopreload=1&archive=1`);
+    expect(res.ok()).toBeTruthy();
+
+    const data: IDay[] = await res.json();
+    expect(data).toStrictEqual(goldDays(TIMELINE_PATH, true));
+  });
+
+  test('Query archived day endpoint', async ({ request }) => {
+    const res = await request.get(`${appUrl}/api/days/19354?archive=1`);
+    expect(res.ok()).toBeTruthy();
+
+    const data: IPhoto[] = await res.json();
+    data.forEach(cleanupPhoto);
+
+    expect(data).toStrictEqual(goldDayPhotos(TIMELINE_PATH, 19354, true));
+  });
 });

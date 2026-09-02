@@ -1,40 +1,22 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders, bootstrap } from './navigation';
-import { cleanupPhoto, getFileId, getImageInfo } from './utils';
-import { goldDays, goldDayPhotos } from './dataset-measurements';
+import { getFileId, getImageInfo } from './utils';
 
-import type { IDay, IPhoto } from '@typings';
+import type { IPhoto } from '@typings';
 
-const TIMELINE_PATH = 'primary/Photos/';
-
-test.use({ extraHTTPHeaders: ocsHeaders });
-
-test.describe('@api Archive', () => {
-  test('Query archived days endpoint', async ({ request }) => {
-    const res = await request.get(`${appUrl}/api/days?nopreload=1&archive=1`);
-    expect(res.ok()).toBeTruthy();
-
-    const data: IDay[] = await res.json();
-    expect(data).toStrictEqual(goldDays(TIMELINE_PATH, true));
-  });
-
-  test('Query archived day endpoint', async ({ request }) => {
-    const res = await request.get(`${appUrl}/api/days/19354?archive=1`);
-    expect(res.ok()).toBeTruthy();
-
-    const data: IPhoto[] = await res.json();
-    data.forEach(cleanupPhoto);
-
-    expect(data).toStrictEqual(goldDayPhotos(TIMELINE_PATH, 19354, true));
-  });
+test.use({
+  extraHTTPHeaders: {
+    ...ocsHeaders,
+    'X-Timeline-Path': '/for-archive',
+  },
 });
 
 test.describe.serial('@api Archive file', () => {
-  // Hardcoded: test user day with 2 photos (from generate-golden).
-  // Contains test_05.jpg which is deeply nested — good for testing archive path resolution.
+  // Hardcoded: day with 2 photos (test_04.jpg and test_05.jpg).
+  // Contains test_05.jpg which is deeply nested — tests archive path resolution.
   const DAY_ID = 19375;
-  const FILE_PATH_BASE = '/Photos/Nested 1/Nested 1_1/test_05.jpg';
-  const FILE_PATH_ARCH = '/Photos/.archive/Nested 1/Nested 1_1/test_05.jpg';
+  const FILE_PATH_BASE = '/for-archive/Nested 1/Nested 1_1/test_05.jpg';
+  const FILE_PATH_ARCH = '/for-archive/.archive/Nested 1/Nested 1_1/test_05.jpg';
   let fileid: number;
 
   test.beforeAll(async ({ request }) => {
@@ -101,8 +83,8 @@ test.describe.serial('@ui Archive', () => {
   let fileid2: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
-    fileid2 = await getFileId(request, '/Photos/CbBbaNTmsAc.jpg');
+    fileid1 = await getFileId(request, '/for-archive/ui_test_01.jpg');
+    fileid2 = await getFileId(request, '/for-archive/ui_test_02.jpg');
   });
 
   test.beforeEach(async ({ page }) => {
@@ -123,8 +105,8 @@ test.describe.serial('@ui Archive', () => {
     await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
     await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
 
-    expect((await getImageInfo(request, fileid1, { basic: '1' })).filename?.includes('archive')).toBeTruthy();
-    expect((await getImageInfo(request, fileid2, { basic: '1' })).filename?.includes('archive')).toBeTruthy();
+    expect((await getImageInfo(request, fileid1, { basic: '1' })).filename?.includes('.archive/')).toBeTruthy();
+    expect((await getImageInfo(request, fileid2, { basic: '1' })).filename?.includes('.archive/')).toBeTruthy();
   });
 
   test('Unarchive file', async ({ page, request }) => {
@@ -141,7 +123,7 @@ test.describe.serial('@ui Archive', () => {
     await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
     await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
 
-    expect((await getImageInfo(request, fileid1, { basic: '1' })).filename?.includes('archive')).toBeFalsy();
-    expect((await getImageInfo(request, fileid2, { basic: '1' })).filename?.includes('archive')).toBeFalsy();
+    expect((await getImageInfo(request, fileid1, { basic: '1' })).filename?.includes('.archive/')).toBeFalsy();
+    expect((await getImageInfo(request, fileid2, { basic: '1' })).filename?.includes('.archive/')).toBeFalsy();
   });
 });

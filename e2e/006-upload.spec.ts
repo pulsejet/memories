@@ -22,7 +22,7 @@ test.describe.serial('@ui Upload', () => {
     ];
 
     await page.goto(`${appUrl}/folders`);
-    await page.locator('.folder--Local').click();
+    await page.locator('.folder--for-upload').click();
 
     const fileChooserPromise = page.waitForEvent('filechooser');
     await page.locator('.upload-menu').click();
@@ -32,16 +32,16 @@ test.describe.serial('@ui Upload', () => {
     await page.getByLabel('Upload 3 files').getByRole('button', { name: 'Upload' }).click();
     await page.locator('.memories-modal').waitFor({ state: 'detached' });
 
-    uFileId1 = await getFileId(request, '/Local/apple_h264_boy_01.jpg');
-    uFileId2 = await getFileId(request, '/Local/apple_h264_girl_01.jpg');
-    uFileId3 = await getFileId(request, '/Local/apple_h264_boy_01.mov');
+    uFileId1 = await getFileId(request, '/for-upload/apple_h264_boy_01.jpg');
+    uFileId2 = await getFileId(request, '/for-upload/apple_h264_girl_01.jpg');
+    uFileId3 = await getFileId(request, '/for-upload/apple_h264_boy_01.mov');
     await expect(page.locator(`.p-outer--${uFileId1}`)).toBeVisible();
     await expect(page.locator(`.p-outer--${uFileId2}`)).toBeVisible();
     await expect(page.locator(`.p-outer--${uFileId3}`)).not.toBeVisible();
   });
 
   test('Delete uploaded files', async ({ page }) => {
-    await page.goto(`${appUrl}/folders/Local`);
+    await page.goto(`${appUrl}/folders/for-upload`);
 
     await expect(page.locator(`.p-outer--${uFileId1}`)).toBeVisible();
     await expect(page.locator(`.p-outer--${uFileId2}`)).toBeVisible();

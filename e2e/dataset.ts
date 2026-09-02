@@ -184,6 +184,140 @@ export const PRIMARY_DATASET: IDatasetMap = {
 };
 
 /**
+ * Dedicated isolated assets for archive tests.
+ */
+export const FOR_ARCHIVE_DATASET: IDatasetMap = {
+  'primary/for-archive/.archive/archived_01.jpg': {
+    size: [1280, 720],
+    exif: {
+      DateTimeOriginal: '2022:12:28 15:28:23+00:00',
+      GPSLatitude: 40.7018091997222,
+      GPSLongitude: -74.0165487997222,
+    },
+  },
+  'primary/for-archive/.archive/archived_02.jpg': {
+    size: [1280, 720],
+    exif: {
+      DateTimeOriginal: '2022:12:28 15:28:10+00:00',
+      GPSLatitude: 40.7018091997222,
+      GPSLongitude: -74.0165487997222,
+    },
+  },
+  'primary/for-archive/Nested 1/Nested 1_1/test_04.jpg': {
+    size: [1280, 960],
+    exif: {
+      DateTimeOriginal: '2023:01:18 21:18:39+00:00',
+      GPSLatitude: 34.0293632997222,
+      GPSLongitude: -118.4984749,
+    },
+  },
+  'primary/for-archive/Nested 1/Nested 1_1/test_05.jpg': {
+    size: [720, 960],
+    exif: {
+      DateTimeOriginal: '2023:01:18 21:24:32+00:00',
+      GPSLatitude: 34.0293384,
+      GPSLongitude: -118.498384599722,
+    },
+  },
+  'primary/for-archive/ui_test_01.jpg': {
+    size: [600, 400],
+    exif: {
+      DateTimeOriginal: '2023:06:20 10:00:00+00:00',
+    },
+  },
+  'primary/for-archive/ui_test_02.jpg': {
+    size: [600, 400],
+    exif: {
+      DateTimeOriginal: '2023:06:20 11:00:00+00:00',
+    },
+  },
+};
+
+/**
+ * Dedicated isolated assets for EXIF edit tests (004 and 102).
+ */
+export const FOR_EDIT_EXIF_DATASET: IDatasetMap = {
+  'primary/for-edit-exif/ui_edit.jpg': {
+    size: [600, 400],
+    exif: {
+      DateTimeOriginal: '2023:06:24 12:00:00+00:00',
+    },
+  },
+  'primary/for-edit-exif/api_set_exif.jpg': {
+    size: [600, 400],
+    exif: {
+      DateTimeOriginal: '2023:06:24 13:00:00+00:00',
+    },
+  },
+};
+
+/**
+ * Dedicated isolated assets for upload tests (006).
+ */
+export const FOR_UPLOAD_DATASET: IDatasetMap = {
+  'primary/for-upload/placeholder.jpg': {
+    size: [600, 400],
+    exif: {
+      DateTimeOriginal: '2023:06:20 12:00:00+00:00',
+    },
+  },
+};
+
+/**
+ * Dedicated isolated assets for delete tests (900).
+ */
+export const FOR_DELETE_DATASET: IDatasetMap = {
+  'primary/for-delete/delete_01.jpg': {
+    size: [600, 400],
+    exif: {
+      DateTimeOriginal: '2023:06:20 10:00:00+00:00',
+    },
+  },
+  'primary/for-delete/delete_02.jpg': {
+    size: [600, 400],
+    exif: {
+      DateTimeOriginal: '2023:06:20 11:00:00+00:00',
+    },
+  },
+  'primary/for-delete/delete_03.jpg': {
+    size: [600, 400],
+    exif: {
+      DateTimeOriginal: '2023:06:20 12:00:00+00:00',
+    },
+  },
+};
+
+/**
+ * Dedicated isolated assets for folder move operations (901).
+ */
+export const FOR_MOVE_DATASET: IDatasetMap = {
+  'primary/for-move/source/move_01.jpg': {
+    size: [600, 400],
+    exif: {
+      DateTimeOriginal: '2023:06:20 10:00:00+00:00',
+    },
+  },
+  'primary/for-move/source/move_02.jpg': {
+    size: [600, 400],
+    exif: {
+      DateTimeOriginal: '2023:06:20 11:00:00+00:00',
+    },
+  },
+  'primary/for-move/source/move_03.jpg': {
+    size: [600, 400],
+    exif: {
+      DateTimeOriginal: '2023:06:20 12:00:00+00:00',
+    },
+  },
+  'primary/for-move/dest/dest_01.jpg': {
+    size: [600, 400],
+    exif: {
+      DateTimeOriginal: '2023:06:20 13:00:00+00:00',
+    },
+  },
+};
+
+/**
  * Geo-tagged synthetic photos categorized by city/region for geo and map tests.
  */
 export const GEO_DATASET: IDatasetMap = {
@@ -1430,6 +1564,11 @@ export const GEO_DATASET: IDatasetMap = {
  */
 export const DATASET: IDatasetMap = {
   ...PRIMARY_DATASET,
+  ...FOR_ARCHIVE_DATASET,
+  ...FOR_EDIT_EXIF_DATASET,
+  ...FOR_UPLOAD_DATASET,
+  ...FOR_DELETE_DATASET,
+  ...FOR_MOVE_DATASET,
   ...GEO_DATASET,
 };
 
