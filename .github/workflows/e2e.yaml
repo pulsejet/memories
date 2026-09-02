@@ -128,6 +128,20 @@ jobs:
           with:
             name: vue.zip
 
+        - name: Checkout Nextcloud Photos app
+          uses: actions/checkout@v6
+          with:
+            path: apps/photos
+            repository: nextcloud/photos
+            ref: ${{ matrix.server-versions }}
+
+        - name: Checkout Nextcloud Viewer app
+          uses: actions/checkout@v6
+          with:
+            path: apps/viewer
+            repository: nextcloud/viewer
+            ref: ${{ matrix.server-versions }}
+
         - name: Use Node.js
           uses: actions/setup-node@v6
           with:

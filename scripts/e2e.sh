@@ -59,6 +59,10 @@ e2e_install_browsers() {
 
 # CI-specific setup
 e2e_setup_ci() {
+    # Add composer deps for dependencies.
+    (cd "$NC_DIR/apps/photos" && composer install --no-dev)
+    (cd "$NC_DIR/apps/viewer" && composer install --no-dev)
+
     # Fresh install of Nextcloud.
     cd "$NC_DIR"
     mkdir data/ # fail on existing
@@ -107,13 +111,6 @@ e2e_setup_ci() {
         occ app:disable "$app" 2>/dev/null || true
     done
 
-    # Clone photos app with depth 1
-    if [ ! -d "$NC_DIR/apps/photos" ]; then
-        local photos_ref="${NC_VERSION:-master}"
-        git clone --depth 1 -b "$photos_ref" https://github.com/nextcloud/photos.git "$NC_DIR/apps/photos"
-        (cd "$NC_DIR/apps/photos" && composer install --no-dev)
-    fi
-
     # Set up redis cache
     if [ ! -z "$NC_REDIS_PORT" ]; then
         occ config:system:set memcache.distributed --value '\OC\Memcache\Redis'
@@ -124,6 +121,7 @@ e2e_setup_ci() {
     fi
 
     # Enable apps needed for running the tests.
+    occ app:enable --force viewer
     occ app:enable --force photos
     occ app:enable --force memories
 
