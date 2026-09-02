@@ -245,9 +245,6 @@ e2e_main() {
     # Run playwright tests
     cd "$MEMORIES_DIR"
     local run_args=()
-    if [ "$PERSISTENT_USER" -eq 1 ]; then
-        run_args+=("--grep-invert" "@destructive")
-    fi
     if [ ${#test_args[@]} -gt 0 ]; then
         run_args+=("${test_args[@]}")
     fi

@@ -1,4 +1,5 @@
 import { XMLParser } from 'fast-xml-parser';
+import XMLBuilder from 'fast-xml-builder';
 import type { APIRequestContext } from '@playwright/test';
 import type { IImageInfo, IPhoto } from '@typings';
 import { appUrl, baseUrl, ocsHeaders, username } from './navigation';
@@ -6,6 +7,12 @@ import { appUrl, baseUrl, ocsHeaders, username } from './navigation';
 const xmlParser = new XMLParser({
   removeNSPrefix: true,
   ignoreAttributes: true,
+});
+
+const xmlBuilder = new XMLBuilder({
+  ignoreAttributes: false,
+  format: true,
+  suppressEmptyNode: true,
 });
 
 // Cleanup unpredictable values from photo object.
@@ -55,12 +62,19 @@ export async function getFileId(request: APIRequestContext, filePath: string): P
       'Content-Type': 'application/xml',
       Depth: '0',
     },
-    data: `<?xml version="1.0" encoding="UTF-8"?>
-<d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns">
-  <d:prop>
-    <oc:fileid />
-  </d:prop>
-</d:propfind>`,
+    data: xmlBuilder.build({
+      '?xml': {
+        '@_version': '1.0',
+        '@_encoding': 'UTF-8',
+      },
+      'd:propfind': {
+        '@_xmlns:d': 'DAV:',
+        '@_xmlns:oc': 'http://owncloud.org/ns',
+        'd:prop': {
+          'oc:fileid': '',
+        },
+      },
+    }),
   });
   if (!res.ok()) {
     throw new Error(`getFileId PROPFIND failed for ${filePath} (${cleanPath}): ${res.status()} ${res.statusText()}`);
@@ -75,4 +89,50 @@ export async function getFileId(request: APIRequestContext, filePath: string): P
     throw new Error(`getFileId: failed to parse fileid for ${filePath} ` + `from WebDAV response:\n${xml}`);
   }
   return parseInt(String(fileid), 10);
+}
+
+// Copy a file or folder from srcPath to dstPath using WebDAV COPY.
+export async function copyPath(
+  request: APIRequestContext,
+  srcPath: string,
+  dstPath: string,
+  overwrite: boolean = true,
+): Promise<void> {
+  const cleanSrc = srcPath.replace(/^\/+/, '');
+  const encodedSrc = cleanSrc.split('/').map(encodeURIComponent).join('/');
+  const cleanDst = dstPath.replace(/^\/+/, '');
+  const encodedDst = cleanDst.split('/').map(encodeURIComponent).join('/');
+
+  const res = await request.fetch(`${baseUrl}/remote.php/dav/files/${username}/${encodedSrc}`, {
+    method: 'COPY',
+    headers: {
+      ...ocsHeaders,
+      Destination: `${baseUrl}/remote.php/dav/files/${username}/${encodedDst}`,
+      Overwrite: overwrite ? 'T' : 'F',
+    },
+  });
+  if (!res.ok()) {
+    throw new Error(`copyPath COPY failed from ${srcPath} to ${dstPath}: ${res.status()} ${res.statusText()}`);
+  }
+}
+
+// Delete a file or folder by path using WebDAV DELETE.
+export async function deletePath(
+  request: APIRequestContext,
+  targetPath: string,
+  ignoreMissing: boolean = false,
+): Promise<void> {
+  const cleanPath = targetPath.replace(/^\/+/, '');
+  const encodedPath = cleanPath.split('/').map(encodeURIComponent).join('/');
+
+  const res = await request.fetch(`${baseUrl}/remote.php/dav/files/${username}/${encodedPath}`, {
+    method: 'DELETE',
+    headers: ocsHeaders,
+  });
+  if (!res.ok()) {
+    if (ignoreMissing && res.status() === 404) {
+      return;
+    }
+    throw new Error(`deletePath DELETE failed for ${targetPath} (${cleanPath}): ${res.status()} ${res.statusText()}`);
+  }
 }
