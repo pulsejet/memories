@@ -37,6 +37,7 @@ E2E_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MEMORIES_DIR="$(cd "$E2E_SCRIPT_DIR/.." && pwd)"
 NC_DIR="$(cd "$MEMORIES_DIR/../.." && pwd)"
 E2E_LOGS_DIR="$MEMORIES_DIR/e2e_logs"
+E2E_DATASET_CACHE="$MEMORIES_DIR/e2e/.dataset-cache"
 
 occ() {
     php "$NC_DIR/occ" "$@"
@@ -44,7 +45,7 @@ occ() {
 
 e2e_generate_datasets() {
     cd "$MEMORIES_DIR"
-    if [ ! -f "$MEMORIES_DIR/e2e/.dataset-cache/primary/geo-test/geo-test-001.jpg" ]; then
+    if [ ! -f "$E2E_DATASET_CACHE/primary/geo-test/geo-test-001.jpg" ]; then
         echo "Generating image dataset..."
         npx tsx e2e/dataset-gen.ts
     fi
@@ -139,7 +140,7 @@ e2e_setup_user() {
     echo "Setting up test assets for $user..."
     local user_files_dir="$NC_DIR/data/$user/files"
     mkdir -p "$user_files_dir"
-    cp -r "$MEMORIES_DIR/e2e/.dataset-cache/primary/"* "$user_files_dir/"
+    cp -r "$E2E_DATASET_CACHE/primary/"* "$user_files_dir/"
 
     # Inherit ownership and permissions from main data directory
     chown -R --reference="$NC_DIR/data" "$NC_DIR/data/$user" 2>/dev/null || true
