@@ -69,4 +69,12 @@ declare module '@typings' {
     x: number;
     y: number;
   }
+
+  export interface IMapCluster {
+    id: number;
+    center: [number, number];
+    count: number;
+    preview: IPhoto;
+    dummy?: boolean;
+  }
 }
