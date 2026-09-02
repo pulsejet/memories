@@ -9,7 +9,11 @@ export const baseUrl = (process.env.E2E_BASE_URL || process.env.BASE_URL || defa
 export const appUrl = `${baseUrl}/index.php/apps/memories`;
 
 export const ocsHeaders = {
+  // Skip CSRF check for all requests.
   'OCS-APIREQUEST': 'true',
+  // Delete the files permanently, skipping trashbin.
+  // This also prevents locking conflicts.
+  'X-NC-SKIP-TRASHBIN': 'true',
 };
 
 const logDir = process.env.E2E_LOG_DIR || path.resolve(__dirname, '../e2e_logs');
