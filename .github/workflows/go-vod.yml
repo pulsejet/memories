@@ -13,7 +13,7 @@ jobs:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/go-vod/')
 
     container:
-      image: golang:1.20-bullseye
+      image: golang:1.27-bullseye
 
     steps:
       - name: Checkout
