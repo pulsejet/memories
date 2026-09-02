@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders } from './navigation';
-import { getImageInfo } from './utils';
+import { getFileId, getImageInfo } from './utils';
 import { GEO_DATASET_FILES } from './generate-geo-dataset';
 import { imageSize } from 'image-size';
 
@@ -62,11 +62,12 @@ test.describe('@api Geo', () => {
 
     // Force generation and persistence of cluster cover photos by requesting
     // previews for each cluster in parallel.
+    const random = Math.floor(Math.random() * 1000000);
     const previewResponses = await Promise.all(
       initialClusters.map((cluster) => {
         const url = new URL(`${appUrl}/api/clusters/places/preview`);
         url.searchParams.set('name', String(cluster.cluster_id));
-        url.searchParams.set('cover', String(Math.random()));
+        url.searchParams.set('cover', String(random));
         url.searchParams.set('cover_etag', 'null');
         return request.get(url.toString());
       }),
@@ -159,5 +160,36 @@ test.describe('@api Geo', () => {
         expect(entry.city).toBe(targetPlace);
       }
     }
+  });
+
+  // Verify reverse-geocoded address field on image info across different regions.
+  test('Query image info address field', async ({ request }) => {
+    const testCases = [
+      {
+        path: '/geo-test/geo-test-001.jpg',
+        basename: 'geo-test-001.jpg',
+        address: 'Los Angeles, Los Angeles County, California, United States',
+      },
+      {
+        path: '/geo-test/geo-test-051.jpg',
+        basename: 'geo-test-051.jpg',
+        address: 'City of Westminster, Greater London, England, United Kingdom',
+      },
+      {
+        path: '/geo-test/geo-test-061.jpg',
+        basename: 'geo-test-061.jpg',
+        address: 'Shibuya, Tokyo, Kanto, Japan',
+      },
+    ];
+
+    await Promise.all(
+      testCases.map(async (tc) => {
+        const fileid = await getFileId(request, tc.path);
+        const info = await getImageInfo(request, fileid);
+
+        expect(info.basename).toBe(tc.basename);
+        expect(info.address).toBe(tc.address);
+      }),
+    );
   });
 });
