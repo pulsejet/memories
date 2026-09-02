@@ -31,21 +31,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      - name: Set up php for tools
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          tools: phpunit
-          extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
-          coverage: none
-          ini-values: >-
-            opcache.enable_cli=1,
-            opcache.jit=tracing,
-            opcache.jit_buffer_size=64M
-
       - name: Build vue app
         run: |
-          make dev-setup
+          npm ci
           make patch-external
           make build-js-production
           zip -r vue.zip js/
