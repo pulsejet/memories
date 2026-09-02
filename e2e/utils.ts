@@ -23,8 +23,21 @@ export function cleanupPhoto(item: IPhoto): void {
 }
 
 // Get image info by fileid from the image info endpoint.
-export async function getImageInfo(request: APIRequestContext, fileid: number): Promise<IImageInfo> {
-  const res = await request.get(`${appUrl}/api/image/info/${fileid}`, {
+export async function getImageInfo(
+  request: APIRequestContext,
+  fileid: number,
+  params?: {
+    basic?: string;
+    current?: string;
+    tags?: string;
+    clusters?: string;
+  },
+): Promise<IImageInfo> {
+  const url = new URL(`${appUrl}/api/image/info/${fileid}?`);
+  for (const [k, v] of Object.entries(params || {})) {
+    url.searchParams.set(k, v);
+  }
+  const res = await request.get(url.toString(), {
     headers: ocsHeaders,
   });
   if (!res.ok()) throw new Error(`getImageInfo failed: ${res.status()}`);
