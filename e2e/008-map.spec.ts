@@ -7,7 +7,12 @@ import type { IMapCluster } from '@typings';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
-test.describe.serial('@api Map', () => {
+// Approximate Euclidean distance in degrees.
+const distance = (c1: [number, number], c2: [number, number]) => {
+  return Math.hypot(c1[0] - c2[0], c1[1] - c2[1]);
+};
+
+test.describe('@api Map', () => {
   // Set timeline root to test dataset folder before running map tests.
   test.beforeAll(async ({ request }) => {
     const res = await request.put(`${appUrl}/api/config/timelinePath`, {
@@ -37,13 +42,9 @@ test.describe.serial('@api Map', () => {
     expect(clusters.length).toBeGreaterThan(0);
 
     // Approximate cluster center coordinates and distance threshold (~3km).
-    const SANTA_MONICA_CENTER = [34.015, -118.495];
-    const VENICE_CENTER = [33.987, -118.467];
+    const SANTA_MONICA_CENTER: [number, number] = [34.015, -118.495];
+    const VENICE_CENTER: [number, number] = [33.987, -118.467];
     const MAX_RADIUS_DEG = 0.03;
-
-    const distance = (c1: [number, number], c2: number[]) => {
-      return Math.hypot(c1[0] - c2[0], c1[1] - c2[1]);
-    };
 
     let santaMonicaCount = 0;
     let veniceCount = 0;
@@ -84,5 +85,40 @@ test.describe.serial('@api Map', () => {
     // Santa Monica has 6 photos and Venice has 4 photos.
     expect(santaMonicaCount).toBe(6);
     expect(veniceCount).toBe(4);
+  });
+
+  // Query zoomed-out map clusters covering California (zoom level 6).
+  test('Query zoomed-out map clusters for California', async ({ request }) => {
+    const url = new URL(`${appUrl}/api/map/clusters`);
+    url.searchParams.set('bounds', '24.199194,44.871665,-129.699097,-111.406860');
+    url.searchParams.set('zoom', '6');
+
+    const res = await request.get(url.toString());
+    expect(res.ok()).toBeTruthy();
+
+    // At zoom 6, California photos are grouped into 2 clusters.
+    const clusters: IMapCluster[] = await res.json();
+    expect(clusters).toHaveLength(2);
+
+    const LA_CENTER: [number, number] = [34.0522, -118.2437];
+    const SF_CENTER: [number, number] = [37.7749, -122.4194];
+    const MAX_RADIUS_DEG = 0.5; // ~50 km
+
+    let laCluster: IMapCluster | undefined;
+    let sfCluster: IMapCluster | undefined;
+
+    for (const cluster of clusters) {
+      if (distance(cluster.center, LA_CENTER) <= MAX_RADIUS_DEG) {
+        laCluster = cluster;
+      } else if (distance(cluster.center, SF_CENTER) <= MAX_RADIUS_DEG) {
+        sfCluster = cluster;
+      }
+    }
+
+    expect(laCluster).toBeDefined();
+    expect(laCluster!.count).toBe(20);
+
+    expect(sfCluster).toBeDefined();
+    expect(sfCluster!.count).toBe(10);
   });
 });
