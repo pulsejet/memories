@@ -44,10 +44,9 @@ occ() {
 
 e2e_generate_datasets() {
     cd "$MEMORIES_DIR"
-    if [ ! -f "$MEMORIES_DIR/e2e/assets/primary/geo-test/geo-test-001.jpg" ]; then
+    if [ ! -f "$MEMORIES_DIR/e2e/.dataset-cache/primary/geo-test/geo-test-001.jpg" ]; then
         echo "Generating image dataset..."
         npx tsx e2e/generate-dataset.ts
-        npx tsx e2e/generate-geo-dataset.ts
     fi
 }
 
@@ -130,7 +129,7 @@ e2e_setup_user() {
     echo "Setting up test assets for $user..."
     local user_files_dir="$NC_DIR/data/$user/files"
     mkdir -p "$user_files_dir"
-    cp -r "$MEMORIES_DIR/e2e/assets/primary/"* "$user_files_dir/"
+    cp -r "$MEMORIES_DIR/e2e/.dataset-cache/primary/"* "$user_files_dir/"
 
     # Inherit ownership and permissions from main data directory
     chown -R --reference="$NC_DIR/data" "$NC_DIR/data/$user" 2>/dev/null || true

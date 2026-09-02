@@ -26,7 +26,7 @@ memories.tar.gz
 /playwright-report/
 /e2e_logs/
 /e2e/.state/
-/e2e/assets/
+/e2e/.dataset-cache/
 /playwright/.cache/
 .cache/
 tests/phpunit-junit.xml

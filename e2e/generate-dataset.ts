@@ -169,7 +169,7 @@ export async function generateDataset(dataset: IDatasetMap, baseAssetsDir: strin
 }
 
 async function main() {
-  const baseAssetsDir = path.join(__dirname, 'assets');
+  const baseAssetsDir = path.join(__dirname, '.dataset-cache');
   const datasetFile = process.argv[2] ? path.resolve(process.argv[2]) : null;
 
   let dataset: IDatasetMap;

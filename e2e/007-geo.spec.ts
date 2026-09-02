@@ -1,10 +1,14 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders } from './navigation';
 import { getFileId, getImageInfo } from './utils';
-import { GEO_DATASET_FILES } from './generate-geo-dataset';
 import { imageSize } from 'image-size';
 
 import type { ICluster, IDay } from '@typings';
+import type { IDatasetMap } from './generate-dataset';
+
+import datasetJson from './dataset.json';
+
+const dataset: IDatasetMap = datasetJson satisfies IDatasetMap;
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
@@ -112,13 +116,13 @@ test.describe('@api Geo', () => {
       const info = await getImageInfo(request, cluster.cover as number, { basic: '1' });
       expect(info.basename).toBeDefined();
 
-      const entry = GEO_DATASET_FILES[info.basename!];
+      const entry = dataset[`primary/geo-test/${info.basename!}`];
       expect(entry).toBeDefined();
 
       // Ensure the cover image belongs to the cluster's expected location.
       const expectedCities = clusterToCitiesMap[cluster.name];
       expect(expectedCities).toBeDefined();
-      expect(expectedCities).toContain(entry.city);
+      expect(expectedCities).toContain(entry.params?.city);
     }
   });
 
@@ -155,9 +159,9 @@ test.describe('@api Geo', () => {
 
       for (const photo of day.detail!) {
         expect(photo.basename).toBeDefined();
-        const entry = GEO_DATASET_FILES[photo.basename!];
+        const entry = dataset[`primary/geo-test/${photo.basename!}`];
         expect(entry).toBeDefined();
-        expect(entry.city).toBe(targetPlace);
+        expect(entry.params?.city).toBe(targetPlace);
       }
     }
   });
