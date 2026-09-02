@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders, username } from './navigation';
 import { getFileId } from './utils';
+import { goldImageInfo } from './golden-measurements';
 
 import type { IImageInfo } from '@typings';
-
-import assetImageInfoTest01 from './assets/primary-api/image-info-test_01.jpg.json';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
@@ -36,7 +35,9 @@ test.describe('@api Image info', () => {
     delete data.address;
     delete data.exif?.DateTimeEpoch;
     delete data.exif?.LocationTZID;
+    delete data.exif?.ExifVersion;
+    delete data.exif?.ColorSpace;
 
-    expect(data).toStrictEqual(assetImageInfoTest01 satisfies IImageInfo);
+    expect(data).toStrictEqual(goldImageInfo('primary/Photos/Nested 1/test_01.jpg'));
   });
 });

@@ -105,6 +105,7 @@ declare module '@typings' {
 
   export interface IImageInfo {
     fileid: number;
+    dayid: number;
     etag: string;
     h: number;
     w: number;
@@ -160,6 +161,9 @@ declare module '@typings' {
     ISO?: number;
     FNumber?: number;
     FocalLength?: number;
+
+    ExifVersion?: string;
+    ColorSpace?: number;
 
     GPSAltitude?: number;
     GPSLatitude?: number;

@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders, bootstrap } from './navigation';
 import { cleanupPhoto, getFileId, getImageInfo } from './utils';
+import { goldDays, goldDayPhotos } from './golden-measurements';
 
 import type { IDay, IPhoto } from '@typings';
 
-import assetArchivedApiDays from './assets/primary-api/archived-days.json';
-import assetArchivedApiDay19354 from './assets/primary-api/archived-day-19354.json';
+const TIMELINE_PATH = 'primary/Photos/';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
@@ -15,7 +15,7 @@ test.describe('@api Archive', () => {
     expect(res.ok()).toBeTruthy();
 
     const data: IDay[] = await res.json();
-    expect(data).toStrictEqual(assetArchivedApiDays satisfies IDay[]);
+    expect(data).toStrictEqual(goldDays(TIMELINE_PATH, true));
   });
 
   test('Query archived day endpoint', async ({ request }) => {
@@ -25,7 +25,7 @@ test.describe('@api Archive', () => {
     const data: IPhoto[] = await res.json();
     data.forEach(cleanupPhoto);
 
-    expect(data).toStrictEqual(assetArchivedApiDay19354 satisfies IPhoto[]);
+    expect(data).toStrictEqual(goldDayPhotos(TIMELINE_PATH, 19354, true));
   });
 });
 

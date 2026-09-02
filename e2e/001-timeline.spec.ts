@@ -1,23 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders } from './navigation';
 import { cleanupPhoto } from './utils';
+import { goldDays, goldDayPhotos } from './golden-measurements';
 
 import type { IDay, IPhoto } from '@typings';
 
-import assetPrimaryApiDays from './assets/primary-api/main-days.json';
-import assetPrimaryApiDay20696 from './assets/primary-api/main-day-20696.json';
-import assetPrimaryApiDay18962 from './assets/primary-api/main-day-18962.json';
-import assetPrimaryApiDay18955 from './assets/primary-api/main-day-18955.json';
-import assetPrimaryApiDay19221 from './assets/primary-api/main-day-19221.json';
-import assetPrimaryApiDay19468 from './assets/primary-api/main-day-19468.json';
-
-const TIMELINE_DAY_MAP: Record<any, IPhoto[]> = {
-  '20696': assetPrimaryApiDay20696 satisfies IPhoto[],
-  '18962': assetPrimaryApiDay18962 satisfies IPhoto[],
-  '18955': assetPrimaryApiDay18955 satisfies IPhoto[],
-  '19468': assetPrimaryApiDay19468 satisfies IPhoto[],
-  '19221': assetPrimaryApiDay19221 satisfies IPhoto[],
-};
+const TIMELINE_PATH = 'primary/Photos/';
+const TEST_DAY_IDS = [20696, 18962, 18955, 19468, 19221];
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
@@ -28,8 +17,7 @@ test.describe('@api Timeline', () => {
     expect(res.ok()).toBeTruthy();
 
     const data: IDay[] = await res.json();
-
-    expect(data).toStrictEqual(assetPrimaryApiDays satisfies IDay[]);
+    expect(data).toStrictEqual(goldDays(TIMELINE_PATH));
   });
 
   test('Query days preload', async ({ request }) => {
@@ -43,13 +31,11 @@ test.describe('@api Timeline', () => {
       expect(day.detail).toBeDefined();
       expect(day.detail!.length).toBeGreaterThan(0);
       day.detail!.forEach(cleanupPhoto);
-      if (day.dayid in TIMELINE_DAY_MAP) {
-        expect(day.detail).toStrictEqual(TIMELINE_DAY_MAP[day.dayid]);
-      }
+      expect(day.detail).toStrictEqual(goldDayPhotos(TIMELINE_PATH, day.dayid));
       delete day.detail;
     }
 
-    expect(data).toStrictEqual(assetPrimaryApiDays satisfies IDay[]);
+    expect(data).toStrictEqual(goldDays(TIMELINE_PATH));
   });
 
   // Tests OCA\Memories\Controller\DaysController::day()
@@ -64,11 +50,14 @@ test.describe('@api Timeline', () => {
     const data: IPhoto[] = await res.json();
     data.forEach(cleanupPhoto);
 
-    expect(data).toStrictEqual([...TIMELINE_DAY_MAP[20696], ...TIMELINE_DAY_MAP[18955]]);
+    expect(data).toStrictEqual([
+      ...goldDayPhotos(TIMELINE_PATH, 20696),
+      ...goldDayPhotos(TIMELINE_PATH, 18955),
+    ]);
   });
 
   // Tests OCA\Memories\Controller\DaysController::dayGet()
-  for (const testDayId of Object.keys(TIMELINE_DAY_MAP)) {
+  for (const testDayId of TEST_DAY_IDS) {
     test(`Query day(${testDayId}) GET endpoint`, async ({ request }) => {
       const res = await request.get(`${appUrl}/api/days/${testDayId}`);
       expect(res.ok()).toBeTruthy();
@@ -76,7 +65,7 @@ test.describe('@api Timeline', () => {
       const data: IPhoto[] = await res.json();
       data.forEach(cleanupPhoto);
 
-      expect(data).toStrictEqual(TIMELINE_DAY_MAP[testDayId]);
+      expect(data).toStrictEqual(goldDayPhotos(TIMELINE_PATH, testDayId));
     });
   }
 });
