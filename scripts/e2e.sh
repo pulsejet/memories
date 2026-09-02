@@ -53,7 +53,6 @@ e2e_generate_datasets() {
 e2e_install_browsers() {
     cd "$MEMORIES_DIR"
     echo "Installing Playwright browsers..."
-    export PLAYWRIGHT_SKIP_FFMPEG_INSTALL=1
     npx playwright install chromium --with-deps --only-shell
 }
 
