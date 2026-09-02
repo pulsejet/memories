@@ -21,14 +21,15 @@ jobs:
   vue:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout the app
+        uses: actions/checkout@v6
+
       - name: Use Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-
-      - name: Checkout the app
-        uses: actions/checkout@v6
+          cache-dependency-path: package-lock.json
 
       - name: Set up php for tools
         uses: shivammathur/setup-php@v2
@@ -95,6 +96,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: apps/${{ env.APP_NAME }}/package-lock.json
 
       - uses: actions/download-artifact@v8
         with:
@@ -182,6 +184,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: apps/${{ env.APP_NAME }}/package-lock.json
 
       - uses: actions/download-artifact@v8
         with:
@@ -255,6 +258,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: apps/${{ env.APP_NAME }}/package-lock.json
 
       - uses: actions/download-artifact@v8
         with:
