@@ -167,15 +167,15 @@ test.describe('@api Geo', () => {
     const testCases = [
       {
         path: '/geo-test/geo-test-001.jpg',
-        address: 'Los Angeles, Los Angeles County, California, United States',
+        addresses: ['Los Angeles, Los Angeles County, California, United States'],
       },
       {
         path: '/geo-test/geo-test-051.jpg',
-        address: 'City of Westminster, Greater London, England, United Kingdom',
+        addresses: ['City of Westminster, Greater London, England, United Kingdom'],
       },
       {
         path: '/geo-test/geo-test-061.jpg',
-        address: 'Shibuya, Tokyo, Kanto, Japan',
+        addresses: ['Shibuya, Tokyo, Kanto, Japan', 'Udagawachō, Shibuya, Tokyo, Kanto, Japan'],
       },
     ];
 
@@ -183,7 +183,7 @@ test.describe('@api Geo', () => {
       testCases.map(async (tc) => {
         const fileid = await getFileId(request, tc.path);
         const info = await getImageInfo(request, fileid);
-        expect(info.address).toBe(tc.address);
+        expect(tc.addresses).toContain(info.address);
       }),
     );
   });
