@@ -90,7 +90,7 @@ final class PlacesSetup extends Command
             $datafile = $this->places->downloadPlanet();
 
             // Import the planet database
-            $this->places->importPlanet($datafile);
+            $this->places->importPlanetBulk($datafile);
         }
 
         // Recalculate all places

@@ -232,7 +232,7 @@ final class AdminController extends GenericApiController
 
                 $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
                 $datafile = $places->downloadPlanet();
-                $places->importPlanet($datafile);
+                $places->importPlanetBulk($datafile);
                 $places->recalculateAll();
 
                 $out->setOutput("Places set up successfully.\n");
