@@ -6,6 +6,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
+const MiB = 1024 * 1024;
 const appName = process.env.npm_package_name!;
 const appVersion = process.env.npm_package_version!;
 const buildMode = process.env.NODE_ENV;
@@ -71,6 +72,12 @@ module.exports = {
     ],
   },
 
+  performance: {
+    maxAssetSize: (isDev ? 10 : 2.5) * MiB,
+    maxEntrypointSize: (isDev ? 10 : 2.5) * MiB,
+    hints: 'error',
+  },
+
   module: {
     rules: [
       {
@@ -123,7 +130,7 @@ module.exports = {
     new WorkboxPlugin.InjectManifest({
       swSrc: path.resolve(path.join('src', 'service-worker.ts')),
       swDest: 'memories-service-worker.js',
-      maximumFileSizeToCacheInBytes: (isDev ? 10 : 4) * 1024 * 1024,
+      maximumFileSizeToCacheInBytes: (isDev ? 50 : 20) * MiB,
     }),
 
     // Make appName & appVersion available as a constant
