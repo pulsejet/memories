@@ -56,33 +56,24 @@ e2e_install_browsers() {
     npx playwright install chromium --with-deps --only-shell
 }
 
-# CI-specific setup: Common
-e2e_setup_common() {
+# CI-specific setup
+e2e_setup_ci() {
     cd "$MEMORIES_DIR"
 
-    # Extract vue build from previous CI step into local.
-    ([ ! -f "$NC_DIR/vue.zip" ] || unzip -qq -o "$NC_DIR/vue.zip") & local vue_pid=$!
-
-    # Download external binaries.
-    make bin-ext & local bin_ext_pid=$!
-
-    wait "$bin_ext_pid" &&
-    wait "$vue_pid"
-}
-
-# CI-specific setup: JS
-e2e_setup_ci_js() {
-    cd "$MEMORIES_DIR"
+    # Install JS dependencies.
     npm ci
+
+    # Download external binaries; fast since they are small.
+    make bin-ext;
+
+    # Start some tasks in the background (@slow).
     e2e_install_browsers & local browser_pid=$!
     e2e_generate_datasets & local dataset_pid=$!
-    wait "$browser_pid" &&
-    wait "$dataset_pid"
-}
 
-# CI-specific setup: PHP
-e2e_setup_ci_php() {
-    cd "$MEMORIES_DIR"
+    # Extract vue build from previous CI step.
+    if [ -f "$NC_DIR/vue.zip" ]; then
+        unzip -qq -o "$NC_DIR/vue.zip"
+    fi
 
     # Speed up loads by disabling unused default apps
     for app in comments contactsinteraction dashboard weather_status user_status updatenotification systemtags files_sharing; do
@@ -96,31 +87,34 @@ e2e_setup_ci_php() {
         (cd "$NC_DIR/apps/photos" && composer install --no-dev)
     fi
 
-    # Enable memories and photos apps
+    # Enable apps needed for running the tests.
     occ app:enable --force photos
     occ app:enable --force memories
 
-    # Run repair steps
+    # Run repair steps.
     occ maintenance:repair
 
-    # Setup places database unless disabled
+    # Enable Nextcloud debug mode.
+    occ config:system:set --type bool --value true debug
+
+    # Setup places database unless disabled (@slow).
     if [ -z "$NO_PLANET_DB" ]; then
         occ memories:places-setup --no-interaction --force
     fi
 
-    # Set debug mode and start dev server
+    # Set debug mode and start dev server.
     mkdir -p "$E2E_LOGS_DIR"
-    occ config:system:set --type bool --value true debug
     php -S localhost:8080 -t "$NC_DIR" > "$E2E_LOGS_DIR/php_stdout.log" 2> "$E2E_LOGS_DIR/php_stderr.log" &
-    PHP_SERVER_PID=$!
-    echo "$PHP_SERVER_PID" > "$E2E_LOGS_DIR/php_server.pid"
+    echo "$!" > "$E2E_LOGS_DIR/php_server.pid"
     sleep 2 # wait for server to start
+
+    # Wait for background tasks to finish.
+    wait "$browser_pid" && wait "$dataset_pid"
 }
 
 # Check if a user exists
 e2e_user_exists() {
-    local user="$1"
-    occ user:info "$user" >/dev/null 2>&1
+    occ user:info "$1" >/dev/null 2>&1
 }
 
 # Set up test user and assets
@@ -185,12 +179,7 @@ e2e_main() {
     mkdir -p "$E2E_LOGS_DIR"
 
     if [ -n "$CI" ]; then
-        e2e_setup_common
-        e2e_setup_ci_php & local php_pid=$!
-        e2e_setup_ci_js & local js_pid=$!
-        wait "$php_pid" &&
-        wait "$js_pid"
-
+        e2e_setup_ci
         if [ -f "$E2E_LOGS_DIR/php_server.pid" ]; then
             PHP_SERVER_PID=$(cat "$E2E_LOGS_DIR/php_server.pid")
         fi
