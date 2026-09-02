@@ -88,6 +88,15 @@ e2e_setup_ci() {
         (cd "$NC_DIR/apps/photos" && composer install --no-dev)
     fi
 
+    # Set up redis cache
+    if [ -z "$NO_REDIS" ]; then
+        occ config:system:set memcache.distributed --value '\OC\Memcache\Redis'
+        occ config:system:set memcache.locking --value '\OC\Memcache\Redis'
+        occ config:system:set redis host --value '127.0.0.1'
+        occ config:system:set redis password --value ''
+        occ config:system:set redis port --type integer --value 6379
+    fi
+
     # Enable apps needed for running the tests.
     occ app:enable --force photos
     occ app:enable --force memories

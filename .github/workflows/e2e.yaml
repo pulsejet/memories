@@ -55,15 +55,24 @@ jobs:
 
     services:
       mysql:
-        image: mariadb:10.5
+        image: mariadb:lts
         ports:
           - 4444:3306/tcp
         env:
           MYSQL_ROOT_PASSWORD: rootpassword
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
           --health-interval 5s
           --health-timeout 2s
+          --health-retries 5
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379/tcp
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
           --health-retries 5
 
     steps:
@@ -142,7 +151,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres
+        image: postgres:alpine
         ports:
           - 4444:5432/tcp
         env:
@@ -150,6 +159,15 @@ jobs:
           POSTGRES_PASSWORD: rootpassword
         options: >-
           --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379/tcp
+        options: >-
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -280,6 +298,7 @@ jobs:
         env:
           NC_VERSION: ${{ matrix.server-versions }}
           NO_PLANET_DB: 1
+          NO_REDIS: 1
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
 
