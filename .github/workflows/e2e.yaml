@@ -51,7 +51,7 @@ jobs:
       fail-fast: false
       matrix:
         php-versions: ['8.4']
-        server-versions: ['stable33']
+        server-versions: ['stable34']
 
     services:
       mysql:
@@ -138,7 +138,7 @@ jobs:
       fail-fast: false
       matrix:
         php-versions: ['8.4']
-        server-versions: ['stable33']
+        server-versions: ['stable34']
 
     services:
       postgres:
@@ -226,7 +226,7 @@ jobs:
       fail-fast: false
       matrix:
         php-versions: ['8.4']
-        server-versions: ['stable33']
+        server-versions: ['stable34']
 
     steps:
       - name: Checkout server
