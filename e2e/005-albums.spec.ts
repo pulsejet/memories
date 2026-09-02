@@ -63,7 +63,7 @@ test.describe.serial('@ui Albums', () => {
     await page.locator(`.p-outer--${fileid1} > .img-outer`).click();
     await page.waitForSelector('body.viewer-fully-opened');
 
-    await page.getByRole('button', { name: 'Close', exact: true }).click();
+    await page.locator('.pswp__button--close').click();
     await page.locator('.memories_viewer').waitFor({ state: 'detached' });
 
     await page.goto(`${appUrl}/albums/${username}/${encodeURIComponent(albumName)}`);

@@ -24,7 +24,7 @@ test.describe.serial('@ui Favorites viewer', () => {
     const favBtn = page.getByRole('button', { name: 'Favorite' });
     await expect(favBtn.locator('.star-outline-icon')).toBeVisible();
     await favBtn.click();
-    await page.getByRole('button', { name: 'Close', exact: true }).click();
+    await page.locator('.pswp__button--close').click();
     await expect(page.locator(`.p-outer--${fileid} .flag.bottom-right > .star-icon`)).toBeVisible();
   });
 
@@ -35,7 +35,7 @@ test.describe.serial('@ui Favorites viewer', () => {
     const favBtn = page.getByRole('button', { name: 'Favorite' });
     await expect(favBtn.locator('.star-icon')).toBeVisible();
     await favBtn.click();
-    await page.getByRole('button', { name: 'Close', exact: true }).click();
+    await page.locator('.pswp__button--close').click();
     await expect(page.locator(`.p-outer--${fileid} .flag.bottom-right > .star-icon`)).not.toBeVisible();
   });
 });
