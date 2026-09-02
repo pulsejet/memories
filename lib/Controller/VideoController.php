@@ -81,7 +81,7 @@ final class VideoController extends GenericApiController
             // Request and check data was received
             return Util::guardExDirect(function (Http\IOutput $out) use ($client, $path, $profile) {
                 try {
-                    $status = $this->getUpstream($client, $path, $profile);
+                    $status = $this->getUpstream($out, $client, $path, $profile);
                     if (409 === $status || -1 === $status) {
                         // Just a conflict (transcoding process changed)
                         $response = new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
@@ -211,8 +211,8 @@ final class VideoController extends GenericApiController
 
                 // If this is H.264 it won't get transcoded anyway
                 if ($liveVideoPath) {
-                    return Util::guardExDirect(function ($out) use ($transcode, $liveVideoPath) {
-                        $this->getUpstream($transcode, $liveVideoPath, 'max.mp4');
+                    return Util::guardExDirect(function (Http\IOutput $out) use ($transcode, $liveVideoPath) {
+                        $this->getUpstream($out, $transcode, $liveVideoPath, 'max.mp4');
                     });
                 }
             }
@@ -229,9 +229,9 @@ final class VideoController extends GenericApiController
         });
     }
 
-    private function getUpstream(string $client, string $path, string $profile): int
+    private function getUpstream(Http\IOutput $out, string $client, string $path, string $profile): int
     {
-        $returnCode = $this->getUpstreamInternal($client, $path, $profile);
+        $returnCode = $this->getUpstreamInternal($out, $client, $path, $profile);
 
         // If status code was 0, it's likely the server is down
         // Make one attempt to start after killing whatever is there
@@ -242,7 +242,7 @@ final class VideoController extends GenericApiController
         // Start goVod and get log file
         $logFile = BinExt::startGoVod();
 
-        $returnCode = $this->getUpstreamInternal($client, $path, $profile);
+        $returnCode = $this->getUpstreamInternal($out, $client, $path, $profile);
         if (0 === $returnCode) {
             throw new \Exception("Transcoder could not be started, check {$logFile}");
         }
@@ -250,7 +250,7 @@ final class VideoController extends GenericApiController
         return $returnCode;
     }
 
-    private function getUpstreamInternal(string $client, string $path, string $profile): int
+    private function getUpstreamInternal(Http\IOutput $out, string $client, string $path, string $profile): int
     {
         // Make sure query params are repeated
         // For example, in folder sharing, we need the params on every request
@@ -259,83 +259,62 @@ final class VideoController extends GenericApiController
             $url .= "?{$params}";
         }
 
-        // Initialize request
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => 'X-Go-Vod-Version: '.BinExt::GOVOD_VER."\r\n",
+                'protocol_version' => 1.1,
+                'ignore_errors' => true,
+            ],
+        ]);
 
-        // Add header for expected go-vod version
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['X-Go-Vod-Version: '.BinExt::GOVOD_VER]);
-
-        // Catch connection abort here
         ignore_user_abort(true);
 
-        $headerswritten = false;
-        $sendheaders = static function (\CurlHandle $curl) use (&$headerswritten, $profile): void {
-            // Write headers if just got the first chunk of data
-            if ($headerswritten) {
-                return;
+        $stream = @fopen($url, 'r', false, $context);
+        if (!$stream) {
+            return 0;
+        }
+
+        $returnCode = 0;
+        if (isset($http_response_header[0]) && preg_match('#HTTP/\S+\s+(\d+)#', $http_response_header[0], $matches)) {
+            $returnCode = (int) $matches[1];
+        }
+
+        if (200 === $returnCode) {
+            if (200 !== $out->getHttpResponseCode()) {
+                $out->setHttpResponseCode(200);
             }
-            $headerswritten = true;
 
-            // Pass ahead response code
-            http_response_code((int) curl_getinfo($curl, CURLINFO_HTTP_CODE));
-
-            // Pass ahead content type
-            $contentType = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
-            header("Content-Type: {$contentType}");
+            foreach ($http_response_header ?? [] as $header) {
+                if (0 === stripos($header, 'Content-Type:')
+                 || 0 === stripos($header, 'Content-Length:')) {
+                    $out->setHeader($header);
+                }
+            }
 
             // Caching headers
             if (str_ends_with($profile, 'mp4')) {
                 // cache full video 24 hours
-                header('Cache-Control: max-age=86400, public');
+                $out->setHeader('Cache-Control: max-age=86400, public');
             } else {
                 // no caching of segments
-                header('Cache-Control: no-cache, no-store, must-revalidate');
+                $out->setHeader('Cache-Control: no-cache, no-store, must-revalidate');
             }
-        };
 
-        // On Safari with MP4, chunked transfer encoding is not supported
-        // So we need to read the whole file into memory and send it
-        $userAgent = $this->request->getHeader('User-Agent');
-        $isSafari = preg_match('/^((?!chrome|android).)*safari/i', $userAgent);
-
-        if (!$isSafari) {
-            // Stream the response to the browser without reading it into memory
-            curl_setopt($ch, CURLOPT_WRITEFUNCTION, static function (\CurlHandle $curl, string $data) use (&$sendheaders) {
-                $code = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-                if (200 === $code) {
-                    // Write headers if not done yet
-                    $sendheaders($curl);
-
-                    // Chunked transfer encoding
-                    echo $data;
-                    flush();
-
-                    // Check if the client is still connected
-                    if (connection_aborted()) {
-                        return -1; // stop the transfer
-                    }
+            // On Safari with MP4, chunked transfer encoding is not supported
+            // So we need to read the whole file into memory and send it.
+            if (preg_match('/^((?!chrome|android).)*safari/i', $this->request->getHeader('User-Agent'))) {
+                $response = stream_get_contents($stream);
+                if (false !== $response) {
+                    $out->setHeader('Content-Length: '.\strlen($response)); // critical
+                    $out->setOutput($response);
                 }
-
-                return \strlen($data);
-            });
+            } else {
+                $out->setReadfile($stream);
+            }
         }
 
-        // Start the request
-        $response = curl_exec($ch);
-
-        // Send the entire response if Safari
-        if ($isSafari && \is_string($response)) {
-            $sendheaders($ch);
-            header('Content-Length: '.\strlen($response)); // critical
-            echo $response;
-        }
-
-        $returnCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        fclose($stream);
 
         return $returnCode;
     }
