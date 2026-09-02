@@ -56,6 +56,20 @@ e2e_install_browsers() {
     npx playwright install chromium --with-deps --only-shell
 }
 
+# CI-specific setup: Common
+e2e_setup_common() {
+    cd "$MEMORIES_DIR"
+
+    # Extract vue build from previous CI step into local.
+    ([ ! -f "$NC_DIR/vue.zip" ] || unzip -qq -o "$NC_DIR/vue.zip") & local vue_pid=$!
+
+    # Download external binaries.
+    make bin-ext & local bin_ext_pid=$!
+
+    wait "$bin_ext_pid" &&
+    wait "$vue_pid"
+}
+
 # CI-specific setup: JS
 e2e_setup_ci_js() {
     cd "$MEMORIES_DIR"
@@ -69,10 +83,6 @@ e2e_setup_ci_js() {
 # CI-specific setup: PHP
 e2e_setup_ci_php() {
     cd "$MEMORIES_DIR"
-    if [ -f "$NC_DIR/vue.zip" ]; then
-        cp "$NC_DIR/vue.zip" .
-        unzip -qq -o vue.zip
-    fi
 
     # Speed up loads by disabling unused default apps
     for app in comments contactsinteraction dashboard weather_status user_status updatenotification systemtags files_sharing; do
@@ -85,10 +95,6 @@ e2e_setup_ci_php() {
         git clone --depth 1 -b "$photos_ref" https://github.com/nextcloud/photos.git "$NC_DIR/apps/photos"
         (cd "$NC_DIR/apps/photos" && composer install --no-dev)
     fi
-
-    # Setup binary extensions
-    cd "$MEMORIES_DIR"
-    make bin-ext
 
     # Enable memories and photos apps
     occ app:enable --force photos
@@ -179,6 +185,7 @@ e2e_main() {
     mkdir -p "$E2E_LOGS_DIR"
 
     if [ -n "$CI" ]; then
+        e2e_setup_common
         e2e_setup_ci_php & local php_pid=$!
         e2e_setup_ci_js & local js_pid=$!
         wait "$php_pid" &&
