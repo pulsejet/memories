@@ -137,9 +137,9 @@ final class Places
     /**
      * Download and import planet database.
      */
-    public function downloadImportPlanet(): void
+    public function downloadImportPlanet(int $gis = GIS_TYPE_NONE, ?string $zipFile = null): void
     {
-        $gis = $this->detectGisType();
+        $gis = GIS_TYPE_NONE !== $gis ? $gis : $this->detectGisType();
         if (GIS_TYPE_NONE === $gis) {
             throw new \Exception('No supported GIS type detected');
         }
@@ -148,7 +148,11 @@ final class Places
         $files = [];
 
         try {
-            $files = $this->downloadPlanet($gis);
+            if (null !== $zipFile) {
+                $files = $this->extractPlanet($zipFile);
+            } else {
+                $files = $this->downloadPlanet($gis);
+            }
             [$planetFile, $geomFile] = $files;
             $this->importPlanetBulk($gis, $planetFile, $geomFile);
 
@@ -185,16 +189,6 @@ final class Places
             throw new \Exception("Failed to delete old planet zip file: {$zipFile}");
         }
 
-        $planetFile = BinExt::getTmpPath().'/planet.tsv';
-        if (file_exists($planetFile) && !unlink($planetFile)) {
-            throw new \Exception("Failed to delete old planet data file: {$planetFile}");
-        }
-
-        $geomFile = BinExt::getTmpPath().'/planet_geometry.tsv';
-        if (file_exists($geomFile) && !unlink($geomFile)) {
-            throw new \Exception("Failed to delete old planet geometry file: {$geomFile}");
-        }
-
         $fp = fopen($zipFile, 'w+');
 
         $ch = curl_init();
@@ -215,7 +209,35 @@ final class Places
         }
         $this->logToStdout('Planet data checksum verified successfully');
 
-        // Unzip
+        try {
+            return $this->extractPlanet($zipFile);
+        } finally {
+            // Delete downloaded zip file
+            @unlink($zipFile);
+        }
+    }
+
+    /**
+     * Extract planet zip file and return paths to unzipped files.
+     *
+     * @return array{0: string, 1: string}
+     */
+    public function extractPlanet(string $zipFile): array
+    {
+        if (!file_exists($zipFile)) {
+            throw new \Exception("Planet zip file not found: {$zipFile}");
+        }
+
+        $planetFile = BinExt::getTmpPath().'/planet.tsv';
+        if (file_exists($planetFile) && !unlink($planetFile)) {
+            throw new \Exception("Failed to delete old planet data file: {$planetFile}");
+        }
+
+        $geomFile = BinExt::getTmpPath().'/planet_geometry.tsv';
+        if (file_exists($geomFile) && !unlink($geomFile)) {
+            throw new \Exception("Failed to delete old planet geometry file: {$geomFile}");
+        }
+
         $this->logToStdout('Extracting planet data...');
         $zip = new \ZipArchive();
         $res = $zip->open($zipFile);
@@ -223,7 +245,7 @@ final class Places
             $zip->extractTo(BinExt::getTmpPath());
             $zip->close();
         } else {
-            throw new \Exception('Failed to unzip planet data file');
+            throw new \Exception("Failed to unzip planet data file: {$zipFile}");
         }
         $this->logToStdout('Planet data extracted successfully');
 
@@ -231,9 +253,6 @@ final class Places
         if (!file_exists($planetFile) || !file_exists($geomFile)) {
             throw new \Exception('Failed to find planet data files after unzip');
         }
-
-        // Delete zip file
-        @unlink($zipFile);
 
         return [$planetFile, $geomFile];
     }

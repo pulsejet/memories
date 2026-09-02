@@ -48,6 +48,7 @@ Usage:
 Options:
   -f, --force                Ignore existing setup and re-download planet
   -r, --recalculate          Only recalculate places for existing files
+      --planet-file=FILE     Path to custom planet zip file
 ```
 
 ## `memories:migrate-google-takeout`

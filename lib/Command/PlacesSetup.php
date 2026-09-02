@@ -50,6 +50,7 @@ final class PlacesSetup extends Command
             ->setDescription('Setup reverse geocoding')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Ignore existing setup and re-download planet')
             ->addOption('recalculate', 'r', InputOption::VALUE_NONE, 'Only recalculate places for existing files')
+            ->addOption('planet-file', null, InputOption::VALUE_REQUIRED, 'Path to custom planet zip file')
         ;
     }
 
@@ -61,11 +62,13 @@ final class PlacesSetup extends Command
 
         $recalculate = (bool) $input->getOption('recalculate');
         $force = (bool) $input->getOption('force');
+        $planetFile = $input->getOption('planet-file');
 
         $this->output->writeln('Attempting to set up reverse geocoding');
 
         // Detect the GIS type
-        if ($this->places->detectGisType() <= 0) {
+        $gis = $this->places->detectGisType();
+        if ($gis <= 0) {
             $this->output->writeln('<error>No supported GIS type detected</error>');
 
             return 1;
@@ -80,7 +83,7 @@ final class PlacesSetup extends Command
         // Check if we only need to recalculate
         if (!$recalculate) {
             // Download and import the planet database
-            $this->places->downloadImportPlanet();
+            $this->places->downloadImportPlanet($gis, $planetFile);
         }
 
         // Recalculate all places
