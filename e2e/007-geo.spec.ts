@@ -8,7 +8,7 @@ import { DATASET } from './dataset';
 
 test.use({
   extraHTTPHeaders: e2eHeaders({
-    timelinePath: '/geo-test',
+    timelinePath: '/for-geo',
   }),
 });
 
@@ -100,7 +100,7 @@ test.describe('@api Geo', () => {
       const info = await getImageInfo(request, cluster.cover as number, { basic: '1' });
       expect(info.basename).toBeDefined();
 
-      const entry = DATASET[`primary/geo-test/${info.basename!}`];
+      const entry = DATASET[`primary/for-geo/${info.basename!}`];
       expect(entry).toBeDefined();
 
       // Ensure the cover image belongs to the cluster's expected location.
@@ -143,7 +143,7 @@ test.describe('@api Geo', () => {
 
       for (const photo of day.detail!) {
         expect(photo.basename).toBeDefined();
-        const entry = DATASET[`primary/geo-test/${photo.basename!}`];
+        const entry = DATASET[`primary/for-geo/${photo.basename!}`];
         expect(entry).toBeDefined();
         expect(entry.params?.city).toBe(targetPlace);
       }
@@ -154,15 +154,15 @@ test.describe('@api Geo', () => {
   test('Query image info address field', async ({ request }) => {
     const testCases = [
       {
-        path: '/geo-test/geo-test-001.jpg',
+        path: '/for-geo/for-geo-001.jpg',
         addresses: ['Los Angeles, Los Angeles County, California, United States'],
       },
       {
-        path: '/geo-test/geo-test-051.jpg',
+        path: '/for-geo/for-geo-051.jpg',
         addresses: ['City of Westminster, Greater London, England, United Kingdom'],
       },
       {
-        path: '/geo-test/geo-test-061.jpg',
+        path: '/for-geo/for-geo-061.jpg',
         addresses: ['Shibuya, Tokyo, Kanto, Japan', 'Udagawachō, Shibuya, Tokyo, Kanto, Japan'],
       },
     ];

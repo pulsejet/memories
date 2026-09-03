@@ -330,7 +330,7 @@ export const GEO_DATASET: IDatasetMap = {
   // ---------------------------------------------------------------------------
   // Los Angeles
   // ---------------------------------------------------------------------------
-  'primary/geo-test/geo-test-001.jpg': {
+  'primary/for-geo/for-geo-001.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:10 09:15:00+00:00',
@@ -342,7 +342,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Los Angeles',
     },
   },
-  'primary/geo-test/geo-test-002.jpg': {
+  'primary/for-geo/for-geo-002.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:10 11:30:00+00:00',
@@ -354,7 +354,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Los Angeles',
     },
   },
-  'primary/geo-test/geo-test-003.jpg': {
+  'primary/for-geo/for-geo-003.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:10 14:00:00+00:00',
@@ -366,7 +366,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Los Angeles',
     },
   },
-  'primary/geo-test/geo-test-004.jpg': {
+  'primary/for-geo/for-geo-004.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:10 16:45:00+00:00',
@@ -378,7 +378,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Los Angeles',
     },
   },
-  'primary/geo-test/geo-test-005.jpg': {
+  'primary/for-geo/for-geo-005.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:11 10:00:00+00:00',
@@ -390,7 +390,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Los Angeles',
     },
   },
-  'primary/geo-test/geo-test-006.jpg': {
+  'primary/for-geo/for-geo-006.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:11 12:30:00+00:00',
@@ -402,7 +402,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Los Angeles',
     },
   },
-  'primary/geo-test/geo-test-007.jpg': {
+  'primary/for-geo/for-geo-007.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:11 15:15:00+00:00',
@@ -414,7 +414,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Los Angeles',
     },
   },
-  'primary/geo-test/geo-test-008.jpg': {
+  'primary/for-geo/for-geo-008.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:12 18:30:00+00:00',
@@ -426,7 +426,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Los Angeles',
     },
   },
-  'primary/geo-test/geo-test-009.jpg': {
+  'primary/for-geo/for-geo-009.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:12 20:00:00+00:00',
@@ -438,7 +438,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Los Angeles',
     },
   },
-  'primary/geo-test/geo-test-010.jpg': {
+  'primary/for-geo/for-geo-010.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:12 21:45:00+00:00',
@@ -453,7 +453,7 @@ export const GEO_DATASET: IDatasetMap = {
   // ---------------------------------------------------------------------------
   // Santa Monica
   // ---------------------------------------------------------------------------
-  'primary/geo-test/geo-test-011.jpg': {
+  'primary/for-geo/for-geo-011.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:15 10:00:00+00:00',
@@ -465,7 +465,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Santa Monica',
     },
   },
-  'primary/geo-test/geo-test-012.jpg': {
+  'primary/for-geo/for-geo-012.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:15 12:15:00+00:00',
@@ -477,7 +477,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Santa Monica',
     },
   },
-  'primary/geo-test/geo-test-013.jpg': {
+  'primary/for-geo/for-geo-013.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:15 14:30:00+00:00',
@@ -489,7 +489,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Santa Monica',
     },
   },
-  'primary/geo-test/geo-test-014.jpg': {
+  'primary/for-geo/for-geo-014.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:15 16:00:00+00:00',
@@ -504,7 +504,7 @@ export const GEO_DATASET: IDatasetMap = {
   // ---------------------------------------------------------------------------
   // Venice
   // ---------------------------------------------------------------------------
-  'primary/geo-test/geo-test-015.jpg': {
+  'primary/for-geo/for-geo-015.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:16 09:30:00+00:00',
@@ -516,7 +516,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Venice',
     },
   },
-  'primary/geo-test/geo-test-016.jpg': {
+  'primary/for-geo/for-geo-016.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:16 11:45:00+00:00',
@@ -528,7 +528,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Venice',
     },
   },
-  'primary/geo-test/geo-test-017.jpg': {
+  'primary/for-geo/for-geo-017.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:16 14:00:00+00:00',
@@ -540,7 +540,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Venice',
     },
   },
-  'primary/geo-test/geo-test-018.jpg': {
+  'primary/for-geo/for-geo-018.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:16 15:30:00+00:00',
@@ -555,7 +555,7 @@ export const GEO_DATASET: IDatasetMap = {
   // ---------------------------------------------------------------------------
   // Santa Monica
   // ---------------------------------------------------------------------------
-  'primary/geo-test/geo-test-019.jpg': {
+  'primary/for-geo/for-geo-019.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:16 17:15:00+00:00',
@@ -567,7 +567,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Santa Monica',
     },
   },
-  'primary/geo-test/geo-test-020.jpg': {
+  'primary/for-geo/for-geo-020.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:05:16 19:00:00+00:00',
@@ -582,7 +582,7 @@ export const GEO_DATASET: IDatasetMap = {
   // ---------------------------------------------------------------------------
   // San Francisco
   // ---------------------------------------------------------------------------
-  'primary/geo-test/geo-test-021.jpg': {
+  'primary/for-geo/for-geo-021.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:06:01 09:00:00+00:00',
@@ -594,7 +594,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'San Francisco',
     },
   },
-  'primary/geo-test/geo-test-022.jpg': {
+  'primary/for-geo/for-geo-022.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:06:01 11:30:00+00:00',
@@ -606,7 +606,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'San Francisco',
     },
   },
-  'primary/geo-test/geo-test-023.jpg': {
+  'primary/for-geo/for-geo-023.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:06:01 13:45:00+00:00',
@@ -618,7 +618,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'San Francisco',
     },
   },
-  'primary/geo-test/geo-test-024.jpg': {
+  'primary/for-geo/for-geo-024.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:06:01 16:00:00+00:00',
@@ -630,7 +630,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'San Francisco',
     },
   },
-  'primary/geo-test/geo-test-025.jpg': {
+  'primary/for-geo/for-geo-025.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:06:02 10:15:00+00:00',
@@ -642,7 +642,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'San Francisco',
     },
   },
-  'primary/geo-test/geo-test-026.jpg': {
+  'primary/for-geo/for-geo-026.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:06:02 12:30:00+00:00',
@@ -654,7 +654,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'San Francisco',
     },
   },
-  'primary/geo-test/geo-test-027.jpg': {
+  'primary/for-geo/for-geo-027.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:06:02 15:00:00+00:00',
@@ -666,7 +666,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'San Francisco',
     },
   },
-  'primary/geo-test/geo-test-028.jpg': {
+  'primary/for-geo/for-geo-028.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:06:03 09:30:00+00:00',
@@ -678,7 +678,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'San Francisco',
     },
   },
-  'primary/geo-test/geo-test-029.jpg': {
+  'primary/for-geo/for-geo-029.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:06:03 12:00:00+00:00',
@@ -690,7 +690,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'San Francisco',
     },
   },
-  'primary/geo-test/geo-test-030.jpg': {
+  'primary/for-geo/for-geo-030.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:06:03 15:30:00+00:00',
@@ -705,7 +705,7 @@ export const GEO_DATASET: IDatasetMap = {
   // ---------------------------------------------------------------------------
   // New York
   // ---------------------------------------------------------------------------
-  'primary/geo-test/geo-test-031.jpg': {
+  'primary/for-geo/for-geo-031.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:07:10 10:00:00+00:00',
@@ -717,7 +717,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'New York',
     },
   },
-  'primary/geo-test/geo-test-032.jpg': {
+  'primary/for-geo/for-geo-032.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:07:10 12:30:00+00:00',
@@ -729,7 +729,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'New York',
     },
   },
-  'primary/geo-test/geo-test-033.jpg': {
+  'primary/for-geo/for-geo-033.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:07:10 15:00:00+00:00',
@@ -741,7 +741,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'New York',
     },
   },
-  'primary/geo-test/geo-test-034.jpg': {
+  'primary/for-geo/for-geo-034.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:07:10 18:00:00+00:00',
@@ -753,7 +753,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'New York',
     },
   },
-  'primary/geo-test/geo-test-035.jpg': {
+  'primary/for-geo/for-geo-035.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:07:11 09:30:00+00:00',
@@ -765,7 +765,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'New York',
     },
   },
-  'primary/geo-test/geo-test-036.jpg': {
+  'primary/for-geo/for-geo-036.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:07:11 12:00:00+00:00',
@@ -777,7 +777,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'New York',
     },
   },
-  'primary/geo-test/geo-test-037.jpg': {
+  'primary/for-geo/for-geo-037.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:07:11 14:30:00+00:00',
@@ -789,7 +789,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'New York',
     },
   },
-  'primary/geo-test/geo-test-038.jpg': {
+  'primary/for-geo/for-geo-038.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:07:12 10:15:00+00:00',
@@ -801,7 +801,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'New York',
     },
   },
-  'primary/geo-test/geo-test-039.jpg': {
+  'primary/for-geo/for-geo-039.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:07:12 13:00:00+00:00',
@@ -813,7 +813,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'New York',
     },
   },
-  'primary/geo-test/geo-test-040.jpg': {
+  'primary/for-geo/for-geo-040.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:07:12 16:30:00+00:00',
@@ -828,7 +828,7 @@ export const GEO_DATASET: IDatasetMap = {
   // ---------------------------------------------------------------------------
   // Paris
   // ---------------------------------------------------------------------------
-  'primary/geo-test/geo-test-041.jpg': {
+  'primary/for-geo/for-geo-041.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:05 09:30:00+00:00',
@@ -840,7 +840,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Paris',
     },
   },
-  'primary/geo-test/geo-test-042.jpg': {
+  'primary/for-geo/for-geo-042.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:05 12:00:00+00:00',
@@ -852,7 +852,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Paris',
     },
   },
-  'primary/geo-test/geo-test-043.jpg': {
+  'primary/for-geo/for-geo-043.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:05 15:30:00+00:00',
@@ -864,7 +864,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Paris',
     },
   },
-  'primary/geo-test/geo-test-044.jpg': {
+  'primary/for-geo/for-geo-044.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:05 18:00:00+00:00',
@@ -876,7 +876,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Paris',
     },
   },
-  'primary/geo-test/geo-test-045.jpg': {
+  'primary/for-geo/for-geo-045.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:06 10:00:00+00:00',
@@ -888,7 +888,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Paris',
     },
   },
-  'primary/geo-test/geo-test-046.jpg': {
+  'primary/for-geo/for-geo-046.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:06 13:15:00+00:00',
@@ -900,7 +900,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Paris',
     },
   },
-  'primary/geo-test/geo-test-047.jpg': {
+  'primary/for-geo/for-geo-047.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:06 16:00:00+00:00',
@@ -912,7 +912,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Paris',
     },
   },
-  'primary/geo-test/geo-test-048.jpg': {
+  'primary/for-geo/for-geo-048.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:07 09:45:00+00:00',
@@ -924,7 +924,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Paris',
     },
   },
-  'primary/geo-test/geo-test-049.jpg': {
+  'primary/for-geo/for-geo-049.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:07 13:00:00+00:00',
@@ -936,7 +936,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Paris',
     },
   },
-  'primary/geo-test/geo-test-050.jpg': {
+  'primary/for-geo/for-geo-050.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:07 16:30:00+00:00',
@@ -951,7 +951,7 @@ export const GEO_DATASET: IDatasetMap = {
   // ---------------------------------------------------------------------------
   // London
   // ---------------------------------------------------------------------------
-  'primary/geo-test/geo-test-051.jpg': {
+  'primary/for-geo/for-geo-051.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:10 09:30:00+00:00',
@@ -963,7 +963,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'London',
     },
   },
-  'primary/geo-test/geo-test-052.jpg': {
+  'primary/for-geo/for-geo-052.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:10 11:45:00+00:00',
@@ -975,7 +975,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'London',
     },
   },
-  'primary/geo-test/geo-test-053.jpg': {
+  'primary/for-geo/for-geo-053.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:10 14:00:00+00:00',
@@ -987,7 +987,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'London',
     },
   },
-  'primary/geo-test/geo-test-054.jpg': {
+  'primary/for-geo/for-geo-054.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:10 16:30:00+00:00',
@@ -999,7 +999,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'London',
     },
   },
-  'primary/geo-test/geo-test-055.jpg': {
+  'primary/for-geo/for-geo-055.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:11 10:00:00+00:00',
@@ -1011,7 +1011,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'London',
     },
   },
-  'primary/geo-test/geo-test-056.jpg': {
+  'primary/for-geo/for-geo-056.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:11 12:30:00+00:00',
@@ -1023,7 +1023,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'London',
     },
   },
-  'primary/geo-test/geo-test-057.jpg': {
+  'primary/for-geo/for-geo-057.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:11 15:00:00+00:00',
@@ -1035,7 +1035,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'London',
     },
   },
-  'primary/geo-test/geo-test-058.jpg': {
+  'primary/for-geo/for-geo-058.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:12 09:45:00+00:00',
@@ -1047,7 +1047,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'London',
     },
   },
-  'primary/geo-test/geo-test-059.jpg': {
+  'primary/for-geo/for-geo-059.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:12 12:30:00+00:00',
@@ -1059,7 +1059,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'London',
     },
   },
-  'primary/geo-test/geo-test-060.jpg': {
+  'primary/for-geo/for-geo-060.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:08:12 15:15:00+00:00',
@@ -1074,7 +1074,7 @@ export const GEO_DATASET: IDatasetMap = {
   // ---------------------------------------------------------------------------
   // Tokyo
   // ---------------------------------------------------------------------------
-  'primary/geo-test/geo-test-061.jpg': {
+  'primary/for-geo/for-geo-061.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:15 09:00:00+00:00',
@@ -1086,7 +1086,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Tokyo',
     },
   },
-  'primary/geo-test/geo-test-062.jpg': {
+  'primary/for-geo/for-geo-062.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:15 11:30:00+00:00',
@@ -1098,7 +1098,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Tokyo',
     },
   },
-  'primary/geo-test/geo-test-063.jpg': {
+  'primary/for-geo/for-geo-063.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:15 14:00:00+00:00',
@@ -1110,7 +1110,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Tokyo',
     },
   },
-  'primary/geo-test/geo-test-064.jpg': {
+  'primary/for-geo/for-geo-064.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:15 16:45:00+00:00',
@@ -1122,7 +1122,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Tokyo',
     },
   },
-  'primary/geo-test/geo-test-065.jpg': {
+  'primary/for-geo/for-geo-065.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:16 10:00:00+00:00',
@@ -1134,7 +1134,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Tokyo',
     },
   },
-  'primary/geo-test/geo-test-066.jpg': {
+  'primary/for-geo/for-geo-066.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:16 13:00:00+00:00',
@@ -1146,7 +1146,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Tokyo',
     },
   },
-  'primary/geo-test/geo-test-067.jpg': {
+  'primary/for-geo/for-geo-067.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:16 16:00:00+00:00',
@@ -1158,7 +1158,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Tokyo',
     },
   },
-  'primary/geo-test/geo-test-068.jpg': {
+  'primary/for-geo/for-geo-068.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:17 09:30:00+00:00',
@@ -1170,7 +1170,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Tokyo',
     },
   },
-  'primary/geo-test/geo-test-069.jpg': {
+  'primary/for-geo/for-geo-069.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:17 13:15:00+00:00',
@@ -1182,7 +1182,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Tokyo',
     },
   },
-  'primary/geo-test/geo-test-070.jpg': {
+  'primary/for-geo/for-geo-070.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:17 16:30:00+00:00',
@@ -1197,7 +1197,7 @@ export const GEO_DATASET: IDatasetMap = {
   // ---------------------------------------------------------------------------
   // Kyoto
   // ---------------------------------------------------------------------------
-  'primary/geo-test/geo-test-071.jpg': {
+  'primary/for-geo/for-geo-071.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:19 09:00:00+00:00',
@@ -1209,7 +1209,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Kyoto',
     },
   },
-  'primary/geo-test/geo-test-072.jpg': {
+  'primary/for-geo/for-geo-072.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:19 11:30:00+00:00',
@@ -1221,7 +1221,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Kyoto',
     },
   },
-  'primary/geo-test/geo-test-073.jpg': {
+  'primary/for-geo/for-geo-073.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:19 14:15:00+00:00',
@@ -1233,7 +1233,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Kyoto',
     },
   },
-  'primary/geo-test/geo-test-074.jpg': {
+  'primary/for-geo/for-geo-074.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:19 16:45:00+00:00',
@@ -1245,7 +1245,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Kyoto',
     },
   },
-  'primary/geo-test/geo-test-075.jpg': {
+  'primary/for-geo/for-geo-075.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:20 09:30:00+00:00',
@@ -1257,7 +1257,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Kyoto',
     },
   },
-  'primary/geo-test/geo-test-076.jpg': {
+  'primary/for-geo/for-geo-076.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:20 12:00:00+00:00',
@@ -1269,7 +1269,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Kyoto',
     },
   },
-  'primary/geo-test/geo-test-077.jpg': {
+  'primary/for-geo/for-geo-077.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:20 14:30:00+00:00',
@@ -1281,7 +1281,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Kyoto',
     },
   },
-  'primary/geo-test/geo-test-078.jpg': {
+  'primary/for-geo/for-geo-078.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:21 09:15:00+00:00',
@@ -1293,7 +1293,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Kyoto',
     },
   },
-  'primary/geo-test/geo-test-079.jpg': {
+  'primary/for-geo/for-geo-079.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:21 11:45:00+00:00',
@@ -1305,7 +1305,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Kyoto',
     },
   },
-  'primary/geo-test/geo-test-080.jpg': {
+  'primary/for-geo/for-geo-080.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:09:21 14:30:00+00:00',
@@ -1320,7 +1320,7 @@ export const GEO_DATASET: IDatasetMap = {
   // ---------------------------------------------------------------------------
   // Rome
   // ---------------------------------------------------------------------------
-  'primary/geo-test/geo-test-081.jpg': {
+  'primary/for-geo/for-geo-081.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:10:05 09:00:00+00:00',
@@ -1332,7 +1332,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Rome',
     },
   },
-  'primary/geo-test/geo-test-082.jpg': {
+  'primary/for-geo/for-geo-082.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:10:05 11:30:00+00:00',
@@ -1344,7 +1344,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Rome',
     },
   },
-  'primary/geo-test/geo-test-083.jpg': {
+  'primary/for-geo/for-geo-083.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:10:05 14:00:00+00:00',
@@ -1356,7 +1356,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Rome',
     },
   },
-  'primary/geo-test/geo-test-084.jpg': {
+  'primary/for-geo/for-geo-084.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:10:05 16:30:00+00:00',
@@ -1368,7 +1368,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Rome',
     },
   },
-  'primary/geo-test/geo-test-085.jpg': {
+  'primary/for-geo/for-geo-085.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:10:06 09:30:00+00:00',
@@ -1380,7 +1380,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Rome',
     },
   },
-  'primary/geo-test/geo-test-086.jpg': {
+  'primary/for-geo/for-geo-086.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:10:06 12:00:00+00:00',
@@ -1392,7 +1392,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Rome',
     },
   },
-  'primary/geo-test/geo-test-087.jpg': {
+  'primary/for-geo/for-geo-087.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:10:06 14:30:00+00:00',
@@ -1404,7 +1404,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Rome',
     },
   },
-  'primary/geo-test/geo-test-088.jpg': {
+  'primary/for-geo/for-geo-088.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:10:07 09:15:00+00:00',
@@ -1416,7 +1416,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Rome',
     },
   },
-  'primary/geo-test/geo-test-089.jpg': {
+  'primary/for-geo/for-geo-089.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:10:07 12:30:00+00:00',
@@ -1428,7 +1428,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Rome',
     },
   },
-  'primary/geo-test/geo-test-090.jpg': {
+  'primary/for-geo/for-geo-090.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:10:07 15:45:00+00:00',
@@ -1443,7 +1443,7 @@ export const GEO_DATASET: IDatasetMap = {
   // ---------------------------------------------------------------------------
   // Sydney
   // ---------------------------------------------------------------------------
-  'primary/geo-test/geo-test-091.jpg': {
+  'primary/for-geo/for-geo-091.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:11:12 09:00:00+00:00',
@@ -1455,7 +1455,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Sydney',
     },
   },
-  'primary/geo-test/geo-test-092.jpg': {
+  'primary/for-geo/for-geo-092.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:11:12 11:30:00+00:00',
@@ -1467,7 +1467,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Sydney',
     },
   },
-  'primary/geo-test/geo-test-093.jpg': {
+  'primary/for-geo/for-geo-093.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:11:12 14:00:00+00:00',
@@ -1479,7 +1479,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Sydney',
     },
   },
-  'primary/geo-test/geo-test-094.jpg': {
+  'primary/for-geo/for-geo-094.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:11:12 16:30:00+00:00',
@@ -1491,7 +1491,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Sydney',
     },
   },
-  'primary/geo-test/geo-test-095.jpg': {
+  'primary/for-geo/for-geo-095.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:11:13 10:00:00+00:00',
@@ -1503,7 +1503,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Sydney',
     },
   },
-  'primary/geo-test/geo-test-096.jpg': {
+  'primary/for-geo/for-geo-096.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:11:13 12:30:00+00:00',
@@ -1515,7 +1515,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Sydney',
     },
   },
-  'primary/geo-test/geo-test-097.jpg': {
+  'primary/for-geo/for-geo-097.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:11:13 15:00:00+00:00',
@@ -1527,7 +1527,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Sydney',
     },
   },
-  'primary/geo-test/geo-test-098.jpg': {
+  'primary/for-geo/for-geo-098.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:11:14 09:30:00+00:00',
@@ -1539,7 +1539,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Sydney',
     },
   },
-  'primary/geo-test/geo-test-099.jpg': {
+  'primary/for-geo/for-geo-099.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:11:14 12:15:00+00:00',
@@ -1551,7 +1551,7 @@ export const GEO_DATASET: IDatasetMap = {
       city: 'Sydney',
     },
   },
-  'primary/geo-test/geo-test-100.jpg': {
+  'primary/for-geo/for-geo-100.jpg': {
     size: [256, 256],
     exif: {
       DateTimeOriginal: '2023:11:14 15:00:00+00:00',

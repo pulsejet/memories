@@ -7,7 +7,7 @@ import { DATASET } from './dataset';
 
 test.use({
   extraHTTPHeaders: e2eHeaders({
-    timelinePath: '/geo-test',
+    timelinePath: '/for-geo',
   }),
 });
 
@@ -64,7 +64,7 @@ test.describe('@api Map', () => {
         const info = await getImageInfo(request, cluster.preview.fileid, { basic: '1' });
         expect(info.basename).toBeDefined();
 
-        const entry = DATASET[`primary/geo-test/${info.basename!}`];
+        const entry = DATASET[`primary/for-geo/${info.basename!}`];
         expect(entry).toBeDefined();
         expect(entry.params?.city).toBe(expectedCity);
       }),
