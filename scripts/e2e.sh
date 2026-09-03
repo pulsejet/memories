@@ -39,6 +39,9 @@ e2e_generate_datasets() {
     if [ ! -f "$E2E_DATASET_CACHE/primary/geo-test/geo-test-001.jpg" ]; then
         echo "Generating image dataset..."
         npx tsx e2e/dataset-gen.ts
+
+        mkdir -p "$E2E_DATASET_CACHE/primary/for-livephoto"
+        cp "$MEMORIES_DIR/tests/assets/apple_h264_boy_01."* "$E2E_DATASET_CACHE/primary/for-livephoto/"
     fi
 }
 
