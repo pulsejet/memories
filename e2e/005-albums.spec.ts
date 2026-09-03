@@ -16,7 +16,9 @@ test.describe.serial('@ui Albums', () => {
   let fileid3: number;
   let fileid4: number;
 
-  const uiUrl = (name: string) => `${appUrl}/albums/${username}/${encodeURIComponent(name)}`;
+  function uiUrl(name: string) {
+    return `${appUrl}/albums/${username}/${encodeURIComponent(name)}`;
+  }
 
   test.beforeAll(async ({ request }) => {
     fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
@@ -96,11 +98,13 @@ test.describe.serial('@ui Albums', () => {
     expect(album!.count).toBe(4);
     expect(album!.last_added_photo).toBe(fileid4);
     expect(album!.last_added_photo_etag).toBeTruthy();
+    expect(album!.cover).toBeFalsy();
+    expect(album!.cover_etag).toBeFalsy();
   });
 
   test('Set cover image on album', async ({ request, page }) => {
     // Set the cover image via the UI.
-    await page.goto(uiUrl(albumName) + '?covers=1');
+    await page.goto(uiUrl(albumName));
     await page.hover(`.p-outer--${fileid1}`);
     await page.locator(`.p-outer--${fileid1} > div.select`).click();
 
