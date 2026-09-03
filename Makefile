@@ -40,7 +40,7 @@ watch-js:
 .PHONY: build-js patch-external watch-js
 
 # Testing
-test-php:
+php-test:
 	vendor/bin/phpunit
 
 e2e:
@@ -49,7 +49,7 @@ e2e:
 e2e-headed:
 	npx playwright test --headed --reporter=list
 
-.PHONY: test-php e2e e2e-headed
+.PHONY: php-test e2e e2e-headed
 
 
 # Linting

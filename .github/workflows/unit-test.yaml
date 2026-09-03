@@ -74,4 +74,4 @@ jobs:
       - name: Run PHPUnit
         working-directory: apps/memories
         run: |
-          make test-php
+          make php-test
