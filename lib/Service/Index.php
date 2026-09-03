@@ -363,8 +363,10 @@ final class Index
         if ($this->section) {
             if ($overwrite && !$this->verbose) {
                 $this->section->clear(1);
+                $this->section->write($message);
+            } else {
+                $this->section->writeln($message);
             }
-            $this->section->write($message);
         }
     }
 

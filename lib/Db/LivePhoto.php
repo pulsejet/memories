@@ -9,6 +9,9 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
 
+// Atoms to detect in MP4 files for sanity checks.
+const MP4_ATOMS = ['ftyp', 'moov', 'mdat', 'moof', 'mfra', 'sidx', 'free', 'skip'];
+
 final class LivePhoto
 {
     public function __construct(private IDBConnection $connection) {}
@@ -136,6 +139,24 @@ final class LivePhoto
                 // Samsung HEIC -- no way to get this out yet (DirectoryItemLength is senseless)
                 // The reason this is above the MotionPhotoVideo check is because extracting binary
                 // EXIF fields on the fly is extremely expensive compared to trailer extraction.
+            }
+        }
+
+        // Huawei Motion Picture
+        if ('image/jpeg' === ($exif['MIMEType'] ?? null) && $size > 40) {
+            // LIVE_%d is the negative offset from the beggining of the
+            // metadata trailer to the beginning of the video part.
+            // <image> <video> <metadata: 40 bytes>
+            // |0:1477              LIVE_18666740       |
+            // |540:540             LIVE_4276837        |
+            $trailer = file_get_contents($path, false, null, -40, null);
+            if (preg_match('/LIVE_(\d+)/', $trailer ?: '', $matches)) {
+                $negativeOffset = (int) $matches[1];
+                $videoOffset = $size - 40 - $negativeOffset;
+                if ($negativeOffset > 0 && $videoOffset > 0
+                    && \in_array(file_get_contents($path, false, null, $videoOffset + 4, 4) ?: '', MP4_ATOMS, true)) {
+                    return "self__traileroffset={$videoOffset}";
+                }
             }
         }
 
