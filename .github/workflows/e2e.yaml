@@ -124,7 +124,8 @@ jobs:
           path: apps/${{ env.APP_NAME }}
 
       - parallel:
-        - uses: actions/download-artifact@v8
+        - name: Download WebUI bundle
+          uses: actions/download-artifact@v8
           with:
             name: vue.zip
 
@@ -161,17 +162,31 @@ jobs:
               opcache.jit=tracing,
               opcache.jit_buffer_size=64M
 
+        - name: Set up apt dependencies
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg --no-install-recommends
+
       - name: Run tests
         env:
           NC_DB_TYPE: ${{ matrix.databases }}
           NC_DB_PORT: 4444
           NC_REDIS_PORT: 6379
           NC_VERSION: ${{ matrix.server-versions }}
+          E2E_VIDEO: 1
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
 
-      - uses: actions/upload-artifact@v7
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: report-${{ matrix.databases }}-${{ matrix.php-versions }}-${{ matrix.server-versions }}
           path: apps/${{ env.APP_NAME }}/playwright-report
+
+      - name: Upload Playwright videos
+        uses: actions/upload-artifact@v7
+        with:
+          name: videos-${{ matrix.databases }}-${{ matrix.php-versions }}-${{ matrix.server-versions }}
+          path: apps/${{ env.APP_NAME }}/playwright-results.mp4
+          archive: false

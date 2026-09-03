@@ -19,11 +19,16 @@ const config: PlaywrightTestConfig = {
   reporter: [
     ['html', { open: 'never' }],
     ['list', { printSteps: true }],
+    ['json', { outputFile: 'playwright-results.json' }],
   ],
   use: {
     actionTimeout: 30000,
     trace: 'on-first-retry',
     screenshot: 'on',
+    video: {
+      mode: process.env.E2E_VIDEO === '1' ? 'on' : 'off',
+      size: { width: 1280, height: 720 },
+    },
     viewport: { width: 1280, height: 720 },
   },
   projects: [

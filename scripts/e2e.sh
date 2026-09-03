@@ -29,6 +29,7 @@ MEMORIES_DIR="$(cd "$E2E_SCRIPT_DIR/.." && pwd)"
 NC_DIR="$(cd "$MEMORIES_DIR/../.." && pwd)"
 E2E_LOGS_DIR="$MEMORIES_DIR/e2e_logs"
 E2E_DATASET_CACHE="$MEMORIES_DIR/e2e/.dataset-cache"
+REPORT_DIR="$MEMORIES_DIR/playwright-report"
 
 occ() {
     php "$NC_DIR/occ" "$@"
@@ -205,7 +206,8 @@ e2e_cleanup_user() {
 # Main entrypoint orchestrating full execution
 e2e_main() {
     local test_args=("$@")
-    mkdir -p "$E2E_LOGS_DIR"
+    rm -rf "$E2E_LOGS_DIR" "$REPORT_DIR"
+    mkdir -p "$E2E_LOGS_DIR" "$REPORT_DIR"
 
     if [ "$NC_DB_TYPE" = "sqlite" ]; then
         export NO_PLANET_DB=1
@@ -257,17 +259,12 @@ e2e_main() {
             kill "$PHP_SERVER_PID" 2>/dev/null || true
         fi
 
-        if [ -d "$E2E_LOGS_DIR" ]; then
-            echo "Moving e2e logs to playwright-report..."
-            mkdir -p "$MEMORIES_DIR/playwright-report"
-            rm -rf "$MEMORIES_DIR/playwright-report/e2e_logs"
-            mv "$E2E_LOGS_DIR" "$MEMORIES_DIR/playwright-report/"
-        fi
+        # Move e2e logs to report
+        mv "$E2E_LOGS_DIR" "$REPORT_DIR/"
 
+        # Move nextcloud logs to report
         if [  -n "$CI" ]; then
-            echo "Moving nextcloud logs to playwright-report..."
-            mkdir -p "$MEMORIES_DIR/playwright-report"
-            LOG_DST="$MEMORIES_DIR/playwright-report/nextcloud.log"
+            LOG_DST="$REPORT_DIR/nextcloud.log"
             mv "$NC_DIR/data/nextcloud.log" "$LOG_DST"
 
             # Remove excessively verbose messages that are not useful.
@@ -290,6 +287,12 @@ e2e_main() {
 
     echo "Running Playwright with args: ${run_args[*]}..."
     npx playwright test "${run_args[@]}"
+
+    # Post process video if enabled
+    if [ "${E2E_VIDEO:-0}" = "1" ]; then
+        echo "Post-processing Playwright videos..."
+        npx tsx e2e/video-postprocess.ts
+    fi
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
