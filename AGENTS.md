@@ -19,7 +19,7 @@
 - **Architecture & Setup (`e2e/`)**:
   - Playwright test suite driven by `scripts/e2e.sh` and configured in `playwright.config.ts`.
   - Authentication runs once via `auth.setup.ts`; UI tests must call `await bootstrap(page)` in `beforeEach`.
-  - Required headers: Use `ocsHeaders` from `navigation.ts` for all tests.
+  - Required headers: Use `e2eHeaders()` from `navigation.ts` for all tests.
 - **Test Categories & Data**:
   - Derive expected API responses dynamically via `e2e/dataset-measurements.ts` (`goldXXX()`) rather than hardcoding. Strip non-deterministic fields using before assertions.
 - **Fast Iteration & Execution**:

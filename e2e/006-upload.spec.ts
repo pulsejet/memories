@@ -1,9 +1,9 @@
 import * as path from 'path';
 import { test, expect } from '@playwright/test';
-import { appUrl, ocsHeaders, bootstrap } from './navigation';
+import { appUrl, e2eHeaders, bootstrap } from './navigation';
 import { getFileId } from './utils';
 
-test.use({ extraHTTPHeaders: ocsHeaders });
+test.use({ extraHTTPHeaders: e2eHeaders() });
 
 test.describe('@ui Upload Workflow', () => {
   test.beforeEach(async ({ page }) => {

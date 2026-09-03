@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, ocsHeaders, username } from './navigation';
+import { appUrl, e2eHeaders, username } from './navigation';
 import { getFileId } from './utils';
 import { goldImageInfo } from './dataset-measurements';
 
 import type { IImageInfo } from '@typings';
 
-test.use({ extraHTTPHeaders: ocsHeaders });
+test.use({ extraHTTPHeaders: e2eHeaders() });
 
 test.describe('@api Image Info', () => {
   test('Query image info for test_01.jpg', async ({ request }) => {

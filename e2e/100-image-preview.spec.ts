@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, ocsHeaders } from './navigation';
+import { appUrl, e2eHeaders } from './navigation';
 import { getFileId } from './utils';
 import { imageSize } from 'image-size';
 
-test.use({ extraHTTPHeaders: ocsHeaders });
+test.use({ extraHTTPHeaders: e2eHeaders() });
 
 // We need to run this test serially so that previews are
 // always generated for the last multipreview test.

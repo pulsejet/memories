@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, ocsHeaders } from './navigation';
+import { appUrl, e2eHeaders } from './navigation';
 import { getFileId, getImageInfo } from './utils';
 import { imageSize } from 'image-size';
 
@@ -7,10 +7,9 @@ import type { ICluster, IDay } from '@typings';
 import { DATASET } from './dataset';
 
 test.use({
-  extraHTTPHeaders: {
-    ...ocsHeaders,
-    'X-Timeline-Path': '/geo-test',
-  },
+  extraHTTPHeaders: e2eHeaders({
+    timelinePath: '/geo-test',
+  }),
 });
 
 test.describe('@api Geo', () => {

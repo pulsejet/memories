@@ -1,12 +1,11 @@
 import { test, expect, type Locator } from '@playwright/test';
-import { appUrl, ocsHeaders, bootstrap } from './navigation';
+import { appUrl, e2eHeaders, bootstrap } from './navigation';
 import { getFileId } from './utils';
 
 test.use({
-  extraHTTPHeaders: {
-    ...ocsHeaders,
-    'X-Timeline-Path': '/for-livephoto',
-  },
+  extraHTTPHeaders: e2eHeaders({
+    timelinePath: '/for-livephoto',
+  }),
 });
 
 test.describe('@ui Live photo', () => {

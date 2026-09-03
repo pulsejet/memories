@@ -2,7 +2,7 @@ import { XMLParser } from 'fast-xml-parser';
 import XMLBuilder from 'fast-xml-builder';
 import type { APIRequestContext } from '@playwright/test';
 import type { IImageInfo, IPhoto } from '@typings';
-import { appUrl, baseUrl, ocsHeaders, username } from './navigation';
+import { appUrl, baseUrl, e2eHeaders, username } from './navigation';
 
 const xmlParser = new XMLParser({
   removeNSPrefix: true,
@@ -45,7 +45,7 @@ export async function getImageInfo(
     url.searchParams.set(k, v);
   }
   const res = await request.get(url.toString(), {
-    headers: ocsHeaders,
+    headers: e2eHeaders(),
   });
   if (!res.ok()) throw new Error(`getImageInfo failed: ${res.status()}`);
   return res.json();
@@ -58,7 +58,7 @@ export async function getFileId(request: APIRequestContext, filePath: string): P
   const res = await request.fetch(`${baseUrl}/remote.php/dav/files/${username}/${encodedPath}`, {
     method: 'PROPFIND',
     headers: {
-      ...ocsHeaders,
+      ...e2eHeaders(),
       'Content-Type': 'application/xml',
       Depth: '0',
     },
@@ -106,7 +106,7 @@ export async function copyPath(
   const res = await request.fetch(`${baseUrl}/remote.php/dav/files/${username}/${encodedSrc}`, {
     method: 'COPY',
     headers: {
-      ...ocsHeaders,
+      ...e2eHeaders(),
       Destination: `${baseUrl}/remote.php/dav/files/${username}/${encodedDst}`,
       Overwrite: overwrite ? 'T' : 'F',
     },
@@ -127,7 +127,7 @@ export async function deletePath(
 
   const res = await request.fetch(`${baseUrl}/remote.php/dav/files/${username}/${encodedPath}`, {
     method: 'DELETE',
-    headers: ocsHeaders,
+    headers: e2eHeaders(),
   });
   if (!res.ok()) {
     if (ignoreMissing && res.status() === 404) {

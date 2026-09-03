@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, ocsHeaders, bootstrap, username } from './navigation';
+import { appUrl, e2eHeaders, bootstrap, username } from './navigation';
 import { getFileId } from './utils';
 
 import type { IAlbum } from '@typings';
 
-test.use({ extraHTTPHeaders: ocsHeaders });
+test.use({ extraHTTPHeaders: e2eHeaders() });
 
 test.describe.serial('@ui Albums', () => {
   const random = Math.floor(Math.random() * 1000000);

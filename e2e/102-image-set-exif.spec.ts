@@ -1,13 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { randomBytes } from 'crypto';
-import { appUrl, ocsHeaders } from './navigation';
+import { appUrl, e2eHeaders } from './navigation';
 import { getFileId, getImageInfo } from './utils';
 
 test.use({
-  extraHTTPHeaders: {
-    ...ocsHeaders,
-    'X-Timeline-Path': '/for-edit-exif',
-  },
+  extraHTTPHeaders: e2eHeaders({
+    timelinePath: '/for-edit-exif',
+  }),
 });
 
 test.describe('@api Image setExif', () => {

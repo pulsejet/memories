@@ -8,14 +8,6 @@ export const defaultBaseUrl = process.env.CI ? 'http://localhost:8080' : 'http:/
 export const baseUrl = (process.env.E2E_BASE_URL || process.env.BASE_URL || defaultBaseUrl).replace(/\/+$/, '');
 export const appUrl = `${baseUrl}/index.php/apps/memories`;
 
-export const ocsHeaders = {
-  // Skip CSRF check for all requests.
-  'OCS-APIREQUEST': 'true',
-  // Delete the files permanently, skipping trashbin.
-  // This also prevents locking conflicts.
-  'X-NC-SKIP-TRASHBIN': 'true',
-};
-
 const logDir = process.env.E2E_LOG_DIR || path.resolve(__dirname, '../e2e_logs');
 const logFile = path.join(logDir, 'js_console.log');
 
@@ -44,4 +36,18 @@ export async function bootstrap(page: Page) {
   });
 
   await page.clock.install({ time: new Date('2026-07-31T08:00:00') });
+}
+
+export function e2eHeaders(params: { timelinePath?: string } = {}) {
+  const h: Record<string, string> = {
+    // Skip CSRF check for all requests.
+    'OCS-APIREQUEST': 'true',
+    // Delete the files permanently, skipping trashbin.
+    // This also prevents locking conflicts.
+    'X-NC-SKIP-TRASHBIN': 'true',
+  };
+  if (params.timelinePath) {
+    h['X-TIMELINE-PATH'] = params.timelinePath;
+  }
+  return h;
 }

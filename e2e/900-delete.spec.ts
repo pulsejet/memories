@@ -1,12 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, ocsHeaders, bootstrap } from './navigation';
+import { appUrl, e2eHeaders, bootstrap } from './navigation';
 import { getFileId, copyPath, deletePath } from './utils';
 
 test.use({
-  extraHTTPHeaders: {
-    ...ocsHeaders,
-    'X-Timeline-Path': '/for-delete-now',
-  },
+  extraHTTPHeaders: e2eHeaders({
+    timelinePath: '/for-delete-now',
+  }),
 });
 
 test.describe.serial('@ui Timeline photo deletion', () => {

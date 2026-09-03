@@ -1,15 +1,14 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, ocsHeaders } from './navigation';
+import { appUrl, e2eHeaders } from './navigation';
 import { getImageInfo } from './utils';
 
 import type { IMapCluster, IDay, IPhoto } from '@typings';
 import { DATASET } from './dataset';
 
 test.use({
-  extraHTTPHeaders: {
-    ...ocsHeaders,
-    'X-Timeline-Path': '/geo-test',
-  },
+  extraHTTPHeaders: e2eHeaders({
+    timelinePath: '/geo-test',
+  }),
 });
 
 // Approximate Euclidean distance in degrees.

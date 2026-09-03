@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, ocsHeaders } from './navigation';
+import { appUrl, e2eHeaders } from './navigation';
 import { cleanupPhoto } from './utils';
 import { goldDays, goldDayPhotos } from './dataset-measurements';
 
@@ -8,7 +8,7 @@ import type { IDay, IPhoto } from '@typings';
 const TIMELINE_PATH = 'primary/Photos/';
 const TEST_DAY_IDS = [20696, 18962, 18955, 19468, 19221];
 
-test.use({ extraHTTPHeaders: ocsHeaders });
+test.use({ extraHTTPHeaders: e2eHeaders() });
 
 test.describe('@api Timeline', () => {
   // Tests OCA\Memories\Controller\DaysController::days()

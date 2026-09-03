@@ -1,14 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, ocsHeaders, bootstrap } from './navigation';
+import { appUrl, e2eHeaders, bootstrap } from './navigation';
 import { getFileId, getImageInfo } from './utils';
 
 import type { IPhoto } from '@typings';
 
 test.use({
-  extraHTTPHeaders: {
-    ...ocsHeaders,
-    'X-Timeline-Path': '/for-archive',
-  },
+  extraHTTPHeaders: e2eHeaders({
+    timelinePath: '/for-archive',
+  }),
 });
 
 test.describe('Archive', () => {
