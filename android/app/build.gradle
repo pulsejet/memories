@@ -34,6 +34,19 @@ android {
     buildFeatures {
         viewBinding true
     }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+
+            testLogging {
+                events "skipped", "failed"
+                showStandardStreams = false // set to true to debug tests
+                exceptionFormat = "full"
+            }
+        }
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -59,4 +72,9 @@ dependencies {
 
     implementation "com.squareup.okhttp3:okhttp:5.3.2"
     implementation "io.github.g00fy2:versioncompare:1.5.0"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.14.2'
+    testImplementation "io.mockk:mockk:1.14.9"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.14.2'
 }
