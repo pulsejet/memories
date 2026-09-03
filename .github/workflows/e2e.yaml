@@ -162,10 +162,10 @@ jobs:
               opcache.jit=tracing,
               opcache.jit_buffer_size=64M
 
-        - name: Set up apt dependencies
-          run: |
-            sudo apt-get update
-            sudo apt-get install -y ffmpeg --no-install-recommends
+        - name: Set up FFmpeg
+          env:
+            URL: https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n9.0-latest-linux64-gpl-9.0.tar.xz
+          run: curl -L $URL -o - | sudo tar -xJvf - -C /usr/bin/ --strip-components=2 --wildcards --no-anchored '**/bin/ff*'
 
       - name: Run tests
         env:
