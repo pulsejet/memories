@@ -420,6 +420,28 @@ final class ExifExtractTest extends TestCase
         self::assertEqualsWithDelta(12.110732, (float) ($res->exif['GPSLongitude'] ?? 0), 0.0001);
     }
 
+    public function testHuaweiMp01(): void
+    {
+        // Huawei Moving Picture
+        $res = $this->extract('huawei_mp_01.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertFalse(LivePhoto::isVideoPart($res->exif));
+        self::assertSame('self__traileroffset=2825042', $res->livePhotoId);
+
+        // Trailer video extraction & moov atom
+        $video = file_get_contents($res->path, false, null, 2825042);
+        self::assertSame('ftyp', substr($video, 4, 4));
+
+        // EXIF Fields
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2020-03-08 00:46:08 +00:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame('HUAWEI', $res->exif['Make'] ?? null);
+        self::assertSame('SHT-W09', $res->exif['Model'] ?? null);
+
+        self::assertEqualsWithDelta(51.330089, (float) ($res->exif['GPSLatitude'] ?? 0), 0.0001);
+        self::assertEqualsWithDelta(9.507718, (float) ($res->exif['GPSLongitude'] ?? 0), 0.0001);
+    }
+
     public function testUnknown01Video(): void
     {
         // MP4 video taken in Berlin, Germany
