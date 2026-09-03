@@ -14,15 +14,6 @@
 #   For rapid local development, specify a persistent test account:
 #   E2E_USER="my-test-user" make e2e
 #
-#   How Fast Iteration Mode works:
-#   1. Account Reuse: If the user already exists in Nextcloud, account creation,
-#      asset copying, file scanning, and indexing are skipped. If the user does
-#      not exist, it is created and initialized once.
-#   2. Skip Destructive Tests: State-mutating tests (tagged @destructive,
-#      such as file moves and deletions) are skipped so the account's
-#      photo structure stays intact across runs.
-#   3. Teardown Prevention: The test user and files are NOT deleted on exit.
-#
 # Optional Environment Variables:
 #   E2E_BASE_URL      Nextcloud base URL (default: http://localhost:8080 in CI, http://localhost locally).
 #   E2E_USER          Specific test username. Enables Fast Iteration Mode.
