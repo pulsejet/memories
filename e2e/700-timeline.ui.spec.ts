@@ -24,7 +24,7 @@ test.describe('@ui Timeline feed and photo preview', () => {
     await page.goto(appUrl);
     await page.locator(`.p-outer--${fileid1}`).click();
     await page.waitForSelector('body.viewer-fully-opened');
-    await page.locator('.pswp__button--close').click();
+    await page.keyboard.press('Escape');
     await page.locator('.memories_viewer').waitFor({ state: 'detached' });
   });
 });

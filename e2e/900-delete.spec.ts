@@ -63,7 +63,7 @@ test.describe.serial('@ui @destructive Timeline photo deletion', () => {
       return activeBefore !== activeAfter;
     }, activeBefore);
 
-    await page.locator('.pswp__button--close').click();
+    await page.keyboard.press('Escape');
     await page.locator('.memories_viewer').waitFor({ state: 'detached' });
 
     await expect(page.locator(`.p-outer--${fileid3}`)).not.toBeVisible();
