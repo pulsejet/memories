@@ -116,4 +116,52 @@ final class ExifDateParseTest extends TestCase
         ]);
         self::assertSame('2021-01-01 10:00:00', $dt->format('Y-m-d H:i:s'));
     }
+
+    public function testFallsBackToCreateDate(): void
+    {
+        $dt = Exif::parseExifDate(['CreateDate' => '2022:06:15 12:30:00']);
+
+        self::assertSame('2022-06-15 12:30:00', $dt->format('Y-m-d H:i:s'));
+    }
+
+    public function testEmbeddedOffsetDefinesInstant(): void
+    {
+        // Embedded +02:00 defines the instant; OffsetTimeOriginal only changes display tz
+        $dt = Exif::parseExifDate([
+            'DateTimeOriginal' => '2023:03:05 18:58:17+02:00',
+            'OffsetTimeOriginal' => '+05:30',
+        ]);
+
+        self::assertSame(1678035497, $dt->getTimestamp());
+        self::assertSame('+05:30', $dt->format('P'));
+    }
+
+    public function testThrowsOnEmpty(): void
+    {
+        $this->expectException(\Exception::class);
+        Exif::parseExifDate([]);
+    }
+
+    public function testThrowsOnInvalidDate(): void
+    {
+        $this->expectException(\Exception::class);
+        Exif::parseExifDate(['DateTimeOriginal' => 'not a date']);
+    }
+
+    public function testRejectsAncientDate(): void
+    {
+        $this->expectException(\Exception::class);
+        Exif::parseExifDate(['DateTimeOriginal' => '1700:01:01 00:00:00']);
+    }
+
+    public function testRejectsQuickTimeZeroDate(): void
+    {
+        // 1904-01-01 for blank with QuickTimeUTC=1
+        $this->expectException(\Exception::class);
+        Exif::parseExifDate([
+            'MIMEType' => 'video/mp4',
+            'DateTimeOriginal' => '1904:01:01 00:00:00',
+            'CreateDate' => '1904:01:01 00:00:00',
+        ]);
+    }
 }
