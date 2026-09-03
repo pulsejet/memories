@@ -285,6 +285,12 @@ export const FOR_DELETE_DATASET: IDatasetMap = {
       DateTimeOriginal: '2023:06:20 12:00:00+00:00',
     },
   },
+  'primary/for-delete/delete_04.jpg': {
+    size: [600, 400],
+    exif: {
+      DateTimeOriginal: '2023:06:20 09:00:00+00:00',
+    },
+  },
 };
 
 /**

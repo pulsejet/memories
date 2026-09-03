@@ -6,7 +6,7 @@ const config: PlaywrightTestConfig = {
   testDir: './e2e',
   timeout: 600 * 1000,
   expect: {
-    timeout: 30000,
+    timeout: 10000,
     toHaveScreenshot: {
       maxDiffPixelRatio: 1.0,
     },

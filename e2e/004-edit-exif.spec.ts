@@ -10,13 +10,12 @@ test.use({
 });
 
 test.describe('Metadata', () => {
-  let fileid1: number;
-
-  test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileId(request, '/for-edit-exif/ui_edit.jpg');
+  test.beforeEach(async ({ page }) => {
+    await bootstrap(page);
   });
 
   test('@ui Edit metadata through Viewer', async ({ page }) => {
+    const fileid1 = await getFileId(page.request, '/for-edit-exif/ui_edit.jpg');
     const random = Math.floor(Math.random() * 1000000);
     const testTitle = `Test title ${random}`;
     const testDescription = `Test description ${random}`;

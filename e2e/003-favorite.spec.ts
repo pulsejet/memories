@@ -5,16 +5,6 @@ import { getFileId } from './utils';
 test.use({ extraHTTPHeaders: ocsHeaders });
 
 test.describe.serial('@ui Favorites', () => {
-  let fileid1: number;
-  let fileid2: number;
-  let fileid3: number;
-
-  test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileId(request, '/Photos/CbBbaNTmsAc.jpg');
-    fileid2 = await getFileId(request, '/Photos/NDPmLyPXnZU.jpg');
-    fileid3 = await getFileId(request, '/Photos/3fUXeoW5Sso.jpg');
-  });
-
   test.beforeEach(async ({ page }) => {
     await bootstrap(page);
   });
@@ -22,6 +12,8 @@ test.describe.serial('@ui Favorites', () => {
   // Due to a bug in Nextcloud, a single file must be marked favorite to create
   // the internal categories, before multiple can be done simultaneously.
   test('Favorite from Viewer', async ({ page }) => {
+    const fileid3 = await getFileId(page.request, '/Photos/3fUXeoW5Sso.jpg');
+
     await test.step('Favorite', async () => {
       await page.goto(appUrl);
       await page.locator(`.p-outer--${fileid3} > .img-outer`).click();
@@ -46,6 +38,9 @@ test.describe.serial('@ui Favorites', () => {
   });
 
   test('Favorite from Timeline', async ({ page }) => {
+    const fileid1 = await getFileId(page.request, '/Photos/CbBbaNTmsAc.jpg');
+    const fileid2 = await getFileId(page.request, '/Photos/NDPmLyPXnZU.jpg');
+
     await test.step('Favorite', async () => {
       await page.goto(appUrl);
 

@@ -17,22 +17,14 @@ test.describe('Archive', () => {
   const DAY_ID = 19375;
   const FILE_PATH_BASE = '/for-archive/Nested 1/Nested 1_1/test_05.jpg';
   const FILE_PATH_ARCH = '/for-archive/.archive/Nested 1/Nested 1_1/test_05.jpg';
-  let fileid: number;
-
-  let fileid1: number;
-  let fileid2: number;
-
-  test.beforeAll(async ({ request }) => {
-    fileid = await getFileId(request, FILE_PATH_BASE);
-    fileid1 = await getFileId(request, '/for-archive/ui_test_01.jpg');
-    fileid2 = await getFileId(request, '/for-archive/ui_test_02.jpg');
-  });
 
   test.beforeEach(async ({ page }) => {
     await bootstrap(page);
   });
 
   test('@api Archive from API', async ({ request }) => {
+    const fileid = await getFileId(request, FILE_PATH_BASE);
+
     await test.step('Archive', async () => {
       await test.step('Verify path before archive', async () => {
         const infoBefore = await getImageInfo(request, fileid, { basic: '1' });
@@ -98,6 +90,9 @@ test.describe('Archive', () => {
   });
 
   test('@ui Archive from UI', async ({ page, request }) => {
+    const fileid1 = await getFileId(request, '/for-archive/ui_test_01.jpg');
+    const fileid2 = await getFileId(request, '/for-archive/ui_test_02.jpg');
+
     await test.step('Archive', async () => {
       await test.step('Archive files', async () => {
         await page.goto(appUrl);

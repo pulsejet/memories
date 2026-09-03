@@ -4,16 +4,10 @@ import { getFileId, copyPath, deletePath } from './utils';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
-test.describe('@ui @destructive Folder file operations', () => {
-  let fileid1: number;
-  let fileid2: number;
-
+test.describe.serial('@ui Folder file operations', () => {
   test.beforeAll(async ({ request }) => {
     await deletePath(request, '/for-move-now', true);
     await copyPath(request, '/for-move', '/for-move-now');
-
-    fileid1 = await getFileId(request, '/for-move-now/source/move_01.jpg');
-    fileid2 = await getFileId(request, '/for-move-now/source/move_02.jpg');
   });
 
   test.afterAll(async ({ request }) => {
@@ -24,7 +18,10 @@ test.describe('@ui @destructive Folder file operations', () => {
     await bootstrap(page);
   });
 
-  test('Select image and move out of folder', async ({ page }) => {
+  test('Select image and move out of folder', async ({ request, page }) => {
+    const fileid1 = await getFileId(request, '/for-move-now/source/move_01.jpg');
+    const fileid2 = await getFileId(request, '/for-move-now/source/move_02.jpg');
+
     await page.goto(`${appUrl}/folders/for-move-now`);
 
     await test.step('Select src files', async () => {
