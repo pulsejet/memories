@@ -1,11 +1,20 @@
 import * as path from 'path';
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap } from './navigation';
-import { getFileId } from './utils';
+import { appUrl, e2eHeaders, bootstrap, psub } from './navigation';
+import { getFileId, copyPath, deletePath } from './utils';
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
 
 test.describe('@ui Upload Workflow', () => {
+  test.beforeAll(async ({ request }) => {
+    await deletePath(request, '/for-upload-%wid', true);
+    await copyPath(request, '/for-upload', '/for-upload-%wid');
+  });
+
+  test.afterAll(async ({ request }) => {
+    await deletePath(request, '/for-upload-%wid');
+  });
+
   test.beforeEach(async ({ page }) => {
     await bootstrap(page);
   });
@@ -18,9 +27,7 @@ test.describe('@ui Upload Workflow', () => {
     ];
 
     await test.step('Select files', async () => {
-      await page.goto(`${appUrl}/folders`);
-      await page.locator('.folder--for-upload').click();
-
+      await page.goto(psub(`${appUrl}/folders/for-upload-%wid`));
       const fileChooserPromise = page.waitForEvent('filechooser');
       await page.locator('.upload-menu').click();
       const fileChooser = await fileChooserPromise;
@@ -34,32 +41,12 @@ test.describe('@ui Upload Workflow', () => {
 
     let fids: number[] = [0, 0, 0];
     await test.step('Verify', async () => {
-      fids[0] = await getFileId(request, '/for-upload/apple_h264_boy_01.jpg');
-      fids[1] = await getFileId(request, '/for-upload/apple_h264_girl_01.jpg');
-      fids[2] = await getFileId(request, '/for-upload/apple_h264_boy_01.mov');
+      fids[0] = await getFileId(request, '/for-upload-%wid/apple_h264_boy_01.jpg');
+      fids[1] = await getFileId(request, '/for-upload-%wid/apple_h264_girl_01.jpg');
+      fids[2] = await getFileId(request, '/for-upload-%wid/apple_h264_boy_01.mov');
       await expect(page.locator(`.p-outer--${fids[0]}`)).toBeVisible();
       await expect(page.locator(`.p-outer--${fids[1]}`)).toBeVisible();
       await expect(page.locator(`.p-outer--${fids[2]}`)).not.toBeVisible();
-    });
-
-    await test.step('Cleanup', async () => {
-      await page.goto(`${appUrl}/folders/for-upload`);
-
-      await expect(page.locator(`.p-outer--${fids[0]}`)).toBeVisible();
-      await expect(page.locator(`.p-outer--${fids[1]}`)).toBeVisible();
-
-      await page.hover(`.p-outer--${fids[0]}`);
-      await page.locator(`.p-outer--${fids[0]} > div.select`).click();
-      await page.hover(`.p-outer--${fids[1]}`);
-      await page.locator(`.p-outer--${fids[1]} > div.select`).click();
-
-      await page.getByRole('button', { name: 'Delete' }).click();
-      await page.getByRole('button', { name: 'Yes' }).click();
-
-      await test.step('Verify', async () => {
-        await expect(page.locator(`.p-outer--${fids[0]}`)).toHaveCount(0);
-        await expect(page.locator(`.p-outer--${fids[1]}`)).toHaveCount(0);
-      });
     });
   });
 });

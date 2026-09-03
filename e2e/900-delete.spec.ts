@@ -4,18 +4,18 @@ import { getFileId, copyPath, deletePath } from './utils';
 
 test.use({
   extraHTTPHeaders: e2eHeaders({
-    timelinePath: '/for-delete-now',
+    timelinePath: '/for-delete-%wid',
   }),
 });
 
-test.describe.serial('@ui Timeline photo deletion', () => {
+test.describe('@ui Timeline photo deletion', () => {
   test.beforeAll(async ({ request }) => {
-    await deletePath(request, '/for-delete-now', true);
-    await copyPath(request, '/for-delete', '/for-delete-now');
+    await deletePath(request, '/for-delete-%wid', true);
+    await copyPath(request, '/for-delete', '/for-delete-%wid');
   });
 
   test.afterAll(async ({ request }) => {
-    await deletePath(request, '/for-delete-now');
+    await deletePath(request, '/for-delete-%wid');
   });
 
   test.beforeEach(async ({ page }) => {
@@ -23,8 +23,8 @@ test.describe.serial('@ui Timeline photo deletion', () => {
   });
 
   test('Select two images and delete', async ({ page }) => {
-    const fileid1 = await getFileId(page.request, '/for-delete-now/delete_01.jpg');
-    const fileid2 = await getFileId(page.request, '/for-delete-now/delete_02.jpg');
+    const fileid1 = await getFileId(page.request, '/for-delete-%wid/delete_01.jpg');
+    const fileid2 = await getFileId(page.request, '/for-delete-%wid/delete_02.jpg');
     await page.goto(appUrl);
 
     await test.step('Select two images', async () => {
@@ -46,7 +46,7 @@ test.describe.serial('@ui Timeline photo deletion', () => {
   });
 
   test('Delete image from viewer', async ({ page }) => {
-    const fileid3 = await getFileId(page.request, '/for-delete-now/delete_03.jpg');
+    const fileid3 = await getFileId(page.request, '/for-delete-%wid/delete_03.jpg');
 
     await test.step('Open viewer', async () => {
       await page.goto(appUrl);

@@ -38,16 +38,24 @@ export async function bootstrap(page: Page) {
   await page.clock.install({ time: new Date('2026-07-31T08:00:00') });
 }
 
-export function e2eHeaders(params: { timelinePath?: string } = {}) {
-  const h: Record<string, string> = {
+export function e2eHeaders(params?: { timelinePath?: string }): Record<string, string> {
+  const entries = Object.entries({
     // Skip CSRF check for all requests.
     'OCS-APIREQUEST': 'true',
     // Delete the files permanently, skipping trashbin.
     // This also prevents locking conflicts.
     'X-NC-SKIP-TRASHBIN': 'true',
-  };
-  if (params.timelinePath) {
-    h['X-TIMELINE-PATH'] = params.timelinePath;
-  }
-  return h;
+    // Overwrite the timeline path if provided.
+    'X-TIMELINE-PATH': params?.timelinePath ?? null,
+  })
+    // Filter out all entries with non-string values
+    .filter((p): p is [string, string] => typeof p[1] === 'string')
+    // Replace parameters with values
+    .map(([k, v]) => [k, psub(v)]);
+
+  return Object.fromEntries(entries);
+}
+
+export function psub(input: string): string {
+  return input.replace(/%wid/g, process.env.TEST_WORKER_INDEX || '0');
 }

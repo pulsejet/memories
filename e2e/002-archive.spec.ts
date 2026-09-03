@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap } from './navigation';
-import { getFileId, getImageInfo } from './utils';
+import { appUrl, e2eHeaders, bootstrap, psub } from './navigation';
+import { getFileId, getImageInfo, deletePath, copyPath } from './utils';
 
 import type { IPhoto } from '@typings';
 
 test.use({
   extraHTTPHeaders: e2eHeaders({
-    timelinePath: '/for-archive',
+    timelinePath: '/for-archive-%wid',
   }),
 });
 
@@ -14,8 +14,17 @@ test.describe('Archive', () => {
   // Hardcoded: day with 2 photos (test_04.jpg and test_05.jpg).
   // Contains test_05.jpg which is deeply nested — tests archive path resolution.
   const DAY_ID = 19375;
-  const FILE_PATH_BASE = '/for-archive/Nested 1/Nested 1_1/test_05.jpg';
-  const FILE_PATH_ARCH = '/for-archive/.archive/Nested 1/Nested 1_1/test_05.jpg';
+  const FILE_PATH_BASE = psub('/for-archive-%wid/Nested 1/Nested 1_1/test_05.jpg');
+  const FILE_PATH_ARCH = psub('/for-archive-%wid/.archive/Nested 1/Nested 1_1/test_05.jpg');
+
+  test.beforeAll(async ({ request }) => {
+    await deletePath(request, '/for-archive-%wid', true);
+    await copyPath(request, '/for-archive', '/for-archive-%wid');
+  });
+
+  test.afterAll(async ({ request }) => {
+    await deletePath(request, '/for-archive-%wid');
+  });
 
   test.beforeEach(async ({ page }) => {
     await bootstrap(page);
@@ -89,8 +98,8 @@ test.describe('Archive', () => {
   });
 
   test('@ui Archive from UI', async ({ page, request }) => {
-    const fileid1 = await getFileId(request, '/for-archive/ui_test_01.jpg');
-    const fileid2 = await getFileId(request, '/for-archive/ui_test_02.jpg');
+    const fileid1 = await getFileId(request, '/for-archive-%wid/ui_test_01.jpg');
+    const fileid2 = await getFileId(request, '/for-archive-%wid/ui_test_02.jpg');
 
     await test.step('Archive', async () => {
       await test.step('Archive files', async () => {

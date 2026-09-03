@@ -2,7 +2,7 @@ import { XMLParser } from 'fast-xml-parser';
 import XMLBuilder from 'fast-xml-builder';
 import type { APIRequestContext } from '@playwright/test';
 import type { IImageInfo, IPhoto } from '@typings';
-import { appUrl, baseUrl, e2eHeaders, username } from './navigation';
+import { appUrl, baseUrl, e2eHeaders, username, psub } from './navigation';
 
 const xmlParser = new XMLParser({
   removeNSPrefix: true,
@@ -53,7 +53,7 @@ export async function getImageInfo(
 
 // Get fileid for a photo by its full path using WebDAV PROPFIND.
 export async function getFileId(request: APIRequestContext, filePath: string): Promise<number> {
-  const cleanPath = filePath.replace(/^\/+/, '');
+  const cleanPath = psub(filePath).replace(/^\/+/, '');
   const encodedPath = cleanPath.split('/').map(encodeURIComponent).join('/');
   const res = await request.fetch(`${baseUrl}/remote.php/dav/files/${username}/${encodedPath}`, {
     method: 'PROPFIND',
@@ -98,9 +98,9 @@ export async function copyPath(
   dstPath: string,
   overwrite: boolean = true,
 ): Promise<void> {
-  const cleanSrc = srcPath.replace(/^\/+/, '');
+  const cleanSrc = psub(srcPath).replace(/^\/+/, '');
   const encodedSrc = cleanSrc.split('/').map(encodeURIComponent).join('/');
-  const cleanDst = dstPath.replace(/^\/+/, '');
+  const cleanDst = psub(dstPath).replace(/^\/+/, '');
   const encodedDst = cleanDst.split('/').map(encodeURIComponent).join('/');
 
   const res = await request.fetch(`${baseUrl}/remote.php/dav/files/${username}/${encodedSrc}`, {
@@ -122,7 +122,7 @@ export async function deletePath(
   targetPath: string,
   ignoreMissing: boolean = false,
 ): Promise<void> {
-  const cleanPath = targetPath.replace(/^\/+/, '');
+  const cleanPath = psub(targetPath).replace(/^\/+/, '');
   const encodedPath = cleanPath.split('/').map(encodeURIComponent).join('/');
 
   const res = await request.fetch(`${baseUrl}/remote.php/dav/files/${username}/${encodedPath}`, {
