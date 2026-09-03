@@ -62,19 +62,20 @@ e2e_setup_ci() {
     # Fresh install of Nextcloud.
     cd "$NC_DIR"
     mkdir data/ # fail on existing
+    NC_SETUP_DB_TYPE="${NC_DB_TYPE}"
     if [ "$NC_DB_TYPE" = "mariadb" ]; then
-        NC_DB_TYPE="mysql"
+        NC_SETUP_DB_TYPE="mysql"
     fi
-    if [ "$NC_DB_TYPE" = "sqlite" ]; then
+    if [ "$NC_SETUP_DB_TYPE" = "sqlite" ]; then
         php occ maintenance:install \
             --verbose \
-            --database="$NC_DB_TYPE" \
+            --database="$NC_SETUP_DB_TYPE" \
             --admin-user="admin" \
             --admin-pass="password"
     else
         php occ maintenance:install \
             --verbose \
-            --database="$NC_DB_TYPE" \
+            --database="$NC_SETUP_DB_TYPE" \
             --database-name="nextcloud" \
             --database-host="127.0.0.1" \
             --database-port="$NC_DB_PORT" \
