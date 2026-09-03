@@ -11,7 +11,7 @@ test.use({
   },
 });
 
-test.describe.serial('@api Archive file', () => {
+test.describe('Archive', () => {
   // Hardcoded: day with 2 photos (test_04.jpg and test_05.jpg).
   // Contains test_05.jpg which is deeply nested — tests archive path resolution.
   const DAY_ID = 19375;
@@ -19,70 +19,11 @@ test.describe.serial('@api Archive file', () => {
   const FILE_PATH_ARCH = '/for-archive/.archive/Nested 1/Nested 1_1/test_05.jpg';
   let fileid: number;
 
-  test.beforeAll(async ({ request }) => {
-    fileid = await getFileId(request, FILE_PATH_BASE);
-  });
-
-  test('Archive file', async ({ request }) => {
-    // Verify path before archival
-    const infoBefore = await getImageInfo(request, fileid, { basic: '1' });
-    expect(infoBefore.filename).toBe(FILE_PATH_BASE);
-
-    // Archive
-    const patchRes = await request.patch(`${appUrl}/api/archive/${fileid}`);
-    expect(patchRes.ok()).toBeTruthy();
-
-    // Verify path during archival (now in archive)
-    const infoDuring = await getImageInfo(request, fileid, { basic: '1' });
-    expect(infoDuring.filename).toBe(FILE_PATH_ARCH);
-
-    // Verify in archive
-    const checkRes = await request.get(`${appUrl}/api/days/${DAY_ID}?archive=1`);
-    expect(checkRes.ok()).toBeTruthy();
-
-    const archived: IPhoto[] = await checkRes.json();
-    expect(archived.some((p) => p.fileid === fileid)).toBeTruthy();
-
-    // Verify gone from main
-    const mainRes = await request.get(`${appUrl}/api/days/${DAY_ID}`);
-    expect(mainRes.ok()).toBeTruthy();
-
-    const main: IPhoto[] = await mainRes.json();
-    expect(main.some((p) => p.fileid === fileid)).toBeFalsy();
-  });
-
-  test('Unarchive file', async ({ request }) => {
-    // Unarchive
-    const patchRes = await request.patch(`${appUrl}/api/archive/${fileid}`, {
-      data: { archive: false },
-    });
-    expect(patchRes.ok()).toBeTruthy();
-
-    // Verify path after unarchival (back in main)
-    const infoAfter = await getImageInfo(request, fileid, { basic: '1' });
-    expect(infoAfter.filename).toBe(FILE_PATH_BASE);
-
-    // Verify back in main
-    const checkRes = await request.get(`${appUrl}/api/days/${DAY_ID}`);
-    expect(checkRes.ok()).toBeTruthy();
-
-    const photos: IPhoto[] = await checkRes.json();
-    expect(photos.some((p) => p.fileid === fileid)).toBeTruthy();
-
-    // Verify gone from archive
-    const archRes = await request.get(`${appUrl}/api/days/${DAY_ID}?archive=1`);
-    expect(archRes.ok()).toBeTruthy();
-
-    const archived: IPhoto[] = await archRes.json();
-    expect(archived.some((p) => p.fileid === fileid)).toBeFalsy();
-  });
-});
-
-test.describe.serial('@ui Archive', () => {
   let fileid1: number;
   let fileid2: number;
 
   test.beforeAll(async ({ request }) => {
+    fileid = await getFileId(request, FILE_PATH_BASE);
     fileid1 = await getFileId(request, '/for-archive/ui_test_01.jpg');
     fileid2 = await getFileId(request, '/for-archive/ui_test_02.jpg');
   });
@@ -91,39 +32,114 @@ test.describe.serial('@ui Archive', () => {
     await bootstrap(page);
   });
 
-  test('Archive file', async ({ request, page }) => {
-    await page.goto(appUrl);
+  test('@api Archive from API', async ({ request }) => {
+    await test.step('Archive', async () => {
+      await test.step('Verify path before archive', async () => {
+        const infoBefore = await getImageInfo(request, fileid, { basic: '1' });
+        expect(infoBefore.filename).toBe(FILE_PATH_BASE);
+      });
 
-    await page.hover(`.p-outer--${fileid1}`);
-    await page.locator(`.p-outer--${fileid1} > div.select`).click();
-    await page.hover(`.p-outer--${fileid2}`);
-    await page.locator(`.p-outer--${fileid2} > div.select`).click();
+      await test.step('Submit', async () => {
+        const patchRes = await request.patch(`${appUrl}/api/archive/${fileid}`);
+        expect(patchRes.ok()).toBeTruthy();
+      });
 
-    await page.getByRole('button', { name: 'Actions' }).click();
-    await page.getByRole('menuitem', { name: 'Archive' }).click();
+      await test.step('Verify path after archive', async () => {
+        const infoDuring = await getImageInfo(request, fileid, { basic: '1' });
+        expect(infoDuring.filename).toBe(FILE_PATH_ARCH);
+      });
 
-    await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
-    await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
+      await test.step('Verify file is in archive', async () => {
+        const checkRes = await request.get(`${appUrl}/api/days/${DAY_ID}?archive=1`);
+        expect(checkRes.ok()).toBeTruthy();
 
-    expect((await getImageInfo(request, fileid1, { basic: '1' })).filename?.includes('.archive/')).toBeTruthy();
-    expect((await getImageInfo(request, fileid2, { basic: '1' })).filename?.includes('.archive/')).toBeTruthy();
+        const archived: IPhoto[] = await checkRes.json();
+        expect(archived.some((p) => p.fileid === fileid)).toBeTruthy();
+      });
+
+      await test.step('Verify file is gone from main', async () => {
+        const mainRes = await request.get(`${appUrl}/api/days/${DAY_ID}`);
+        expect(mainRes.ok()).toBeTruthy();
+
+        const main: IPhoto[] = await mainRes.json();
+        expect(main.some((p) => p.fileid === fileid)).toBeFalsy();
+      });
+    });
+
+    await test.step('Unarchive file', async () => {
+      await test.step('Unarchive', async () => {
+        const patchRes = await request.patch(`${appUrl}/api/archive/${fileid}`, {
+          data: { archive: false },
+        });
+        expect(patchRes.ok()).toBeTruthy();
+      });
+
+      await test.step('Verify path after unarchive', async () => {
+        const infoAfter = await getImageInfo(request, fileid, { basic: '1' });
+        expect(infoAfter.filename).toBe(FILE_PATH_BASE);
+      });
+
+      await test.step('Verify file is back in main', async () => {
+        const checkRes = await request.get(`${appUrl}/api/days/${DAY_ID}`);
+        expect(checkRes.ok()).toBeTruthy();
+
+        const photos: IPhoto[] = await checkRes.json();
+        expect(photos.some((p) => p.fileid === fileid)).toBeTruthy();
+      });
+
+      await test.step('Verify file is gone from archive', async () => {
+        const archRes = await request.get(`${appUrl}/api/days/${DAY_ID}?archive=1`);
+        expect(archRes.ok()).toBeTruthy();
+
+        const archived: IPhoto[] = await archRes.json();
+        expect(archived.some((p) => p.fileid === fileid)).toBeFalsy();
+      });
+    });
   });
 
-  test('Unarchive file', async ({ page, request }) => {
-    await page.goto(`${appUrl}/archive`);
+  test('@ui Archive from UI', async ({ page, request }) => {
+    await test.step('Archive', async () => {
+      await test.step('Archive files', async () => {
+        await page.goto(appUrl);
 
-    await page.hover(`.p-outer--${fileid1}`);
-    await page.locator(`.p-outer--${fileid1} > div.select`).click();
-    await page.hover(`.p-outer--${fileid2}`);
-    await page.locator(`.p-outer--${fileid2} > div.select`).click();
+        await page.hover(`.p-outer--${fileid1}`);
+        await page.locator(`.p-outer--${fileid1} > div.select`).click();
+        await page.hover(`.p-outer--${fileid2}`);
+        await page.locator(`.p-outer--${fileid2} > div.select`).click();
 
-    await page.getByRole('button', { name: 'Actions' }).click();
-    await page.getByRole('menuitem', { name: 'Unarchive' }).click();
+        await page.getByRole('button', { name: 'Actions' }).click();
+        await page.getByRole('menuitem', { name: 'Archive' }).click();
 
-    await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
-    await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
+        await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
+        await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
+      });
 
-    expect((await getImageInfo(request, fileid1, { basic: '1' })).filename?.includes('.archive/')).toBeFalsy();
-    expect((await getImageInfo(request, fileid2, { basic: '1' })).filename?.includes('.archive/')).toBeFalsy();
+      await test.step('Verify files are in archive', async () => {
+        expect((await getImageInfo(request, fileid1, { basic: '1' })).filename?.includes('.archive/')).toBeTruthy();
+        expect((await getImageInfo(request, fileid2, { basic: '1' })).filename?.includes('.archive/')).toBeTruthy();
+      });
+    });
+
+    await test.step('Unarchive', async () => {
+      await test.step('Submit', async () => {
+        await page.goto(`${appUrl}/archive`);
+
+        await page.hover(`.p-outer--${fileid1}`);
+        await page.locator(`.p-outer--${fileid1} > div.select`).click();
+        await page.hover(`.p-outer--${fileid2}`);
+        await page.locator(`.p-outer--${fileid2} > div.select`).click();
+
+        await page.getByRole('button', { name: 'Actions' }).click();
+        await page.getByRole('menuitem', { name: 'Unarchive' }).click();
+
+        await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
+        await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
+      });
+
+      await test.step('Verify files are back in main', async () => {
+        expect((await getImageInfo(request, fileid1, { basic: '1' })).filename?.includes('.archive/')).toBeFalsy();
+        expect((await getImageInfo(request, fileid2, { basic: '1' })).filename?.includes('.archive/')).toBeFalsy();
+      });
+    });
   });
 });

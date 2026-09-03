@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator } from '@playwright/test';
 import { appUrl, ocsHeaders, bootstrap } from './navigation';
 import { getFileId } from './utils';
 
@@ -20,68 +20,77 @@ test.describe('@ui Live photo', () => {
     await bootstrap(page);
   });
 
-  test('Timeline live photo play on hover', async ({ page }) => {
-    await page.goto(appUrl);
-    await page.waitForSelector(`.p-outer--${fileid}`);
+  test('Timeline live photo hover', async ({ page }) => {
+    let pOuter!: Locator;
+    let livePhoto!: Locator;
+    let livePhotoIcon!: Locator;
 
-    // Verify exactly one p-outer exists on the timeline
-    const pOuter = page.locator('.p-outer');
-    await expect(pOuter).toHaveCount(1);
-    await expect(page.locator(`.p-outer--${fileid}`)).toBeVisible();
+    await test.step('Verify initial state', async () => {
+      await page.goto(appUrl);
+      await page.waitForSelector(`.p-outer--${fileid}`);
 
-    const livePhoto = pOuter.locator('.memories-livephoto');
-    await expect(livePhoto).toBeVisible();
+      pOuter = page.locator('.p-outer');
+      await expect(pOuter).toHaveCount(1);
+      await expect(page.locator(`.p-outer--${fileid}`)).toBeVisible();
 
-    const livePhotoIcon = pOuter.locator('.flag.top-right .livephoto');
-    await expect(livePhotoIcon).toBeVisible();
+      livePhoto = pOuter.locator('.memories-livephoto');
+      await expect(livePhoto).toBeVisible();
 
-    // Not playing initially
-    await expect(livePhoto).not.toHaveClass(/playing/);
+      livePhotoIcon = pOuter.locator('.flag.top-right .livephoto');
+      await expect(livePhotoIcon).toBeVisible();
+    });
 
-    // Hover over live photo icon to start playback
-    await livePhotoIcon.hover();
+    await test.step('Verify not playing initially', async () => {
+      await expect(livePhoto).not.toHaveClass(/playing/);
+    });
 
-    // Video should be ready to play and currently playing
-    await expect(livePhoto).toHaveClass(/canplay/);
-    await expect(livePhoto).toHaveClass(/playing/);
-    await expect(livePhoto.locator('video')).toBeVisible();
+    await test.step('Verify playback on hover', async () => {
+      await livePhotoIcon.hover();
+      await expect(livePhoto).toHaveClass(/canplay/);
+      await expect(livePhoto).toHaveClass(/playing/);
+      await expect(livePhoto.locator('video')).toBeVisible();
+    });
 
-    // Stop hovering
-    await page.mouse.move(0, 0);
-
-    // Should stop playing but preserve canplay class
-    await expect(livePhoto).not.toHaveClass(/playing/);
-    await expect(livePhoto).toHaveClass(/canplay/);
-    await expect(livePhoto.locator('video')).not.toBeVisible();
+    await test.step('Verify stopped after un-hover', async () => {
+      await page.mouse.move(0, 0);
+      await expect(livePhoto).not.toHaveClass(/playing/);
+      await expect(livePhoto).toHaveClass(/canplay/);
+      await expect(livePhoto.locator('video')).not.toBeVisible();
+    });
   });
 
   test('Viewer live photo play', async ({ page }) => {
-    await page.goto(appUrl);
-    await page.waitForSelector(`.p-outer--${fileid}`);
+    let playButton!: Locator;
+    let viewerLivePhoto!: Locator;
 
-    // Open the photo in viewer
-    await page.locator(`.p-outer--${fileid}`).click();
-    await page.waitForSelector('body.viewer-fully-opened');
+    await test.step('Open Viewer', async () => {
+      await page.goto(appUrl);
+      await page.waitForSelector(`.p-outer--${fileid}`);
 
-    const playButton = page.getByLabel('Play Live Photo');
-    await expect(playButton).toBeVisible();
+      await page.locator(`.p-outer--${fileid}`).click();
+      await page.waitForSelector('body.viewer-fully-opened');
 
-    const viewerLivePhoto = page.locator('.pswp .memories-livephoto');
-    await expect(viewerLivePhoto).toBeVisible();
+      playButton = page.getByLabel('Play Live Photo');
+      await expect(playButton).toBeVisible();
 
-    // Autoplay is disabled by default: initially not playing
-    await expect(viewerLivePhoto).not.toHaveClass(/playing/);
-    await expect(playButton.locator('svg.pause')).not.toBeAttached();
+      viewerLivePhoto = page.locator('.pswp .memories-livephoto');
+      await expect(viewerLivePhoto).toBeVisible();
+    });
 
-    // Click button to start playback
-    await playButton.click();
+    await test.step('Verify not playing initially', async () => {
+      await expect(viewerLivePhoto).not.toHaveClass(/playing/);
+      await expect(playButton.locator('svg.pause')).not.toBeAttached();
+    });
 
-    // Verify it is playing
-    await expect(viewerLivePhoto).toHaveClass(/playing/);
-    await expect(playButton.locator('svg.pause')).toBeVisible();
+    await test.step('Play Live Photo', async () => {
+      await playButton.click();
+      await expect(viewerLivePhoto).toHaveClass(/playing/);
+      await expect(playButton.locator('svg.pause')).toBeVisible();
+    });
 
-    // Wait for video to finish playing
-    await expect(viewerLivePhoto).not.toHaveClass(/playing/);
-    await expect(playButton.locator('svg.pause')).not.toBeAttached();
+    await test.step('Verify after finish', async () => {
+      await expect(viewerLivePhoto).not.toHaveClass(/playing/);
+      await expect(playButton.locator('svg.pause')).not.toBeAttached();
+    });
   });
 });

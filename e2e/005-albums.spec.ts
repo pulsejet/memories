@@ -70,82 +70,86 @@ test.describe.serial('@ui Albums', () => {
     await page.waitForSelector('body.viewer-fully-opened');
   });
 
-  test('Add image to existing album', async ({ page }) => {
-    await page.goto(appUrl);
+  test('Add image to existing album', async ({ request, page }) => {
+    await test.step('Add image via UI', async () => {
+      await page.goto(appUrl);
 
-    await page.hover(`.p-outer--${fileid1}`);
-    await page.locator(`.p-outer--${fileid1} > div.select`).click();
-    await page.hover(`.p-outer--${fileid4}`);
-    await page.locator(`.p-outer--${fileid4} > div.select`).click();
+      await page.hover(`.p-outer--${fileid1}`);
+      await page.locator(`.p-outer--${fileid1} > div.select`).click();
+      await page.hover(`.p-outer--${fileid4}`);
+      await page.locator(`.p-outer--${fileid4} > div.select`).click();
 
-    await page.getByRole('button', { name: 'Actions' }).click();
-    await page.getByRole('menuitem', { name: 'Add to album' }).click();
+      await page.getByRole('button', { name: 'Actions' }).click();
+      await page.getByRole('menuitem', { name: 'Add to album' }).click();
 
-    await page.getByRole('link', { name: new RegExp(albumName) }).click();
-    await page.getByRole('button', { name: 'Save changes' }).click();
+      await page.getByRole('link', { name: new RegExp(albumName) }).click();
+      await page.getByRole('button', { name: 'Save changes' }).click();
 
-    await page.locator('.memories-modal').waitFor({ state: 'detached' });
-  });
+      await page.locator('.memories-modal').waitFor({ state: 'detached' });
+    });
 
-  test('Check last_added_photo', async ({ request }) => {
-    const res = await request.get(`${appUrl}/api/clusters/albums`);
-    expect(res.ok()).toBeTruthy();
+    await test.step('Check last_added_photo', async () => {
+      const res = await request.get(`${appUrl}/api/clusters/albums`);
+      expect(res.ok()).toBeTruthy();
 
-    const albums: IAlbum[] = await res.json();
-    const album = albums.find((a) => a.name === albumName);
+      const albums: IAlbum[] = await res.json();
+      const album = albums.find((a) => a.name === albumName);
 
-    expect(album).toBeDefined();
-    expect(album!.count).toBe(4);
-    expect(album!.last_added_photo).toBe(fileid4);
-    expect(album!.last_added_photo_etag).toBeTruthy();
-    expect(album!.cover).toBeFalsy();
-    expect(album!.cover_etag).toBeFalsy();
+      expect(album).toBeDefined();
+      expect(album!.count).toBe(4);
+      expect(album!.last_added_photo).toBe(fileid4);
+      expect(album!.last_added_photo_etag).toBeTruthy();
+      expect(album!.cover).toBeFalsy();
+      expect(album!.cover_etag).toBeFalsy();
+    });
   });
 
   test('Set cover image on album', async ({ request, page }) => {
-    // Set the cover image via the UI.
-    await page.goto(uiUrl(albumName));
-    await page.hover(`.p-outer--${fileid1}`);
-    await page.locator(`.p-outer--${fileid1} > div.select`).click();
+    await test.step('Set cover image via UI', async () => {
+      await page.goto(uiUrl(albumName));
+      await page.hover(`.p-outer--${fileid1}`);
+      await page.locator(`.p-outer--${fileid1} > div.select`).click();
 
-    const setCoverPromise = page.waitForResponse((r) => r.url().includes('/albums/set-cover') && r.status() === 200);
-    await page.getByRole('button', { name: 'Actions' }).click();
-    await page.getByRole('menuitem', { name: 'Set as cover image' }).click();
-    await setCoverPromise;
+      const setCoverPromise = page.waitForResponse((r) => r.url().includes('/albums/set-cover') && r.status() === 200);
+      await page.getByRole('button', { name: 'Actions' }).click();
+      await page.getByRole('menuitem', { name: 'Set as cover image' }).click();
+      await setCoverPromise;
+    });
 
-    // Recheck clusters API for the updated cover
-    const res = await request.get(`${appUrl}/api/clusters/albums`);
-    expect(res.ok()).toBeTruthy();
+    await test.step('Check cover image via API', async () => {
+      const res = await request.get(`${appUrl}/api/clusters/albums`);
+      expect(res.ok()).toBeTruthy();
 
-    const albums: IAlbum[] = await res.json();
-    const album = albums.find((a) => a.name === albumName);
-    expect(album).toBeDefined();
-    expect(album!.cover).toBe(fileid1);
-    expect(album!.cover_etag).toBeTruthy();
+      const albums: IAlbum[] = await res.json();
+      const album = albums.find((a) => a.name === albumName);
+      expect(album).toBeDefined();
+      expect(album!.cover).toBe(fileid1);
+      expect(album!.cover_etag).toBeTruthy();
+    });
   });
 
-  test('Remove image from album', async ({ page }) => {
-    await page.goto(uiUrl(albumName));
+  test('Remove image from album', async ({ request, page }) => {
+    await test.step('Remove image via UI', async () => {
+      await page.goto(uiUrl(albumName));
+      await page.hover(`.p-outer--${fileid1}`);
+      await page.locator(`.p-outer--${fileid1} > div.select`).click();
 
-    // Remove the photo that was set as cover
-    await page.hover(`.p-outer--${fileid1}`);
-    await page.locator(`.p-outer--${fileid1} > div.select`).click();
+      await page.getByRole('button', { name: 'Remove from album' }).click();
+      await page.getByRole('button', { name: 'Yes' }).click();
+      await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
+    });
 
-    await page.getByRole('button', { name: 'Remove from album' }).click();
-    await page.getByRole('button', { name: 'Yes' }).click();
-    await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
-  });
+    await test.step('Check removed cover is gone', async () => {
+      const res = await request.get(`${appUrl}/api/clusters/albums`);
+      expect(res.ok()).toBeTruthy();
 
-  test('Check removed cover is gone', async ({ request }) => {
-    const res = await request.get(`${appUrl}/api/clusters/albums`);
-    expect(res.ok()).toBeTruthy();
+      const albums: IAlbum[] = await res.json();
+      const album = albums.find((a) => a.name === albumName);
 
-    const albums: IAlbum[] = await res.json();
-    const album = albums.find((a) => a.name === albumName);
-
-    expect(album).toBeDefined();
-    expect(album!.cover).toBeFalsy();
-    expect(album!.cover_etag).toBeFalsy();
+      expect(album).toBeDefined();
+      expect(album!.cover).toBeFalsy();
+      expect(album!.cover_etag).toBeFalsy();
+    });
   });
 
   test('Rename album', async ({ page }) => {

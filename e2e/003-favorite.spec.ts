@@ -4,11 +4,15 @@ import { getFileId } from './utils';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
-test.describe.serial('@ui Favorites viewer', () => {
-  let fileid: number;
+test.describe.serial('@ui Favorites', () => {
+  let fileid1: number;
+  let fileid2: number;
+  let fileid3: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid = await getFileId(request, '/Photos/3fUXeoW5Sso.jpg');
+    fileid1 = await getFileId(request, '/Photos/CbBbaNTmsAc.jpg');
+    fileid2 = await getFileId(request, '/Photos/NDPmLyPXnZU.jpg');
+    fileid3 = await getFileId(request, '/Photos/3fUXeoW5Sso.jpg');
   });
 
   test.beforeEach(async ({ page }) => {
@@ -17,75 +21,65 @@ test.describe.serial('@ui Favorites viewer', () => {
 
   // Due to a bug in Nextcloud, a single file must be marked favorite to create
   // the internal categories, before multiple can be done simultaneously.
-  test('Favorite through viewer', async ({ page }) => {
-    await page.goto(appUrl);
-    await page.locator(`.p-outer--${fileid} > .img-outer`).click();
-    await page.waitForSelector('body.viewer-fully-opened');
-    const favBtn = page.getByRole('button', { name: 'Favorite' });
-    await expect(favBtn.locator('.star-outline-icon')).toBeVisible();
-    await favBtn.click();
-    await page.keyboard.press('Escape');
-    await expect(page.locator(`.p-outer--${fileid} .flag.bottom-right > .star-icon`)).toBeVisible();
+  test('Favorite from Viewer', async ({ page }) => {
+    await test.step('Favorite', async () => {
+      await page.goto(appUrl);
+      await page.locator(`.p-outer--${fileid3} > .img-outer`).click();
+      await page.waitForSelector('body.viewer-fully-opened');
+      const favBtn = page.getByRole('button', { name: 'Favorite' });
+      await expect(favBtn.locator('.star-outline-icon')).toBeVisible();
+      await favBtn.click();
+      await page.keyboard.press('Escape');
+      await expect(page.locator(`.p-outer--${fileid3} .flag.bottom-right > .star-icon`)).toBeVisible();
+    });
+
+    await test.step('Unfavorite', async () => {
+      await page.goto(appUrl);
+      await page.locator(`.p-outer--${fileid3} > .img-outer`).click();
+      await page.waitForSelector('body.viewer-fully-opened');
+      const favBtn = page.getByRole('button', { name: 'Favorite' });
+      await expect(favBtn.locator('.star-icon')).toBeVisible();
+      await favBtn.click();
+      await page.keyboard.press('Escape');
+      await expect(page.locator(`.p-outer--${fileid3} .flag.bottom-right > .star-icon`)).not.toBeVisible();
+    });
   });
 
-  test('Unfavorite through viewer', async ({ page }) => {
-    await page.goto(appUrl);
-    await page.locator(`.p-outer--${fileid} > .img-outer`).click();
-    await page.waitForSelector('body.viewer-fully-opened');
-    const favBtn = page.getByRole('button', { name: 'Favorite' });
-    await expect(favBtn.locator('.star-icon')).toBeVisible();
-    await favBtn.click();
-    await page.keyboard.press('Escape');
-    await expect(page.locator(`.p-outer--${fileid} .flag.bottom-right > .star-icon`)).not.toBeVisible();
-  });
-});
+  test('Favorite from Timeline', async ({ page }) => {
+    await test.step('Favorite', async () => {
+      await page.goto(appUrl);
 
-test.describe.serial('@ui Favorites batch', () => {
-  let fileid1: number;
-  let fileid2: number;
+      await page.hover(`.p-outer--${fileid1}`);
+      await page.locator(`.p-outer--${fileid1} > div.select`).click();
+      await page.hover(`.p-outer--${fileid2}`);
+      await page.locator(`.p-outer--${fileid2} > div.select`).click();
 
-  test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileId(request, '/Photos/CbBbaNTmsAc.jpg');
-    fileid2 = await getFileId(request, '/Photos/NDPmLyPXnZU.jpg');
-  });
+      await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).not.toBeVisible();
+      await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).not.toBeVisible();
 
-  test.beforeEach(async ({ page }) => {
-    await bootstrap(page);
-  });
+      await page.getByRole('button', { name: 'Actions' }).click();
+      await page.getByRole('menuitem', { name: 'Favorite' }).click();
 
-  test('Favorite file', async ({ page }) => {
-    await page.goto(appUrl);
+      await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).toBeVisible();
+      await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).toBeVisible();
+    });
 
-    await page.hover(`.p-outer--${fileid1}`);
-    await page.locator(`.p-outer--${fileid1} > div.select`).click();
-    await page.hover(`.p-outer--${fileid2}`);
-    await page.locator(`.p-outer--${fileid2} > div.select`).click();
+    await test.step('Unfavorite', async () => {
+      await page.goto(appUrl);
 
-    await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).not.toBeVisible();
-    await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).not.toBeVisible();
+      await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).toBeVisible();
+      await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).toBeVisible();
 
-    await page.getByRole('button', { name: 'Actions' }).click();
-    await page.getByRole('menuitem', { name: 'Favorite' }).click();
+      await page.hover(`.p-outer--${fileid1}`);
+      await page.locator(`.p-outer--${fileid1} > div.select`).click();
+      await page.hover(`.p-outer--${fileid2}`);
+      await page.locator(`.p-outer--${fileid2} > div.select`).click();
 
-    await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).toBeVisible();
-    await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).toBeVisible();
-  });
+      await page.getByRole('button', { name: 'Actions' }).click();
+      await page.getByRole('menuitem', { name: 'Favorite' }).click();
 
-  test('Unfavorite file', async ({ page }) => {
-    await page.goto(appUrl);
-
-    await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).toBeVisible();
-    await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).toBeVisible();
-
-    await page.hover(`.p-outer--${fileid1}`);
-    await page.locator(`.p-outer--${fileid1} > div.select`).click();
-    await page.hover(`.p-outer--${fileid2}`);
-    await page.locator(`.p-outer--${fileid2} > div.select`).click();
-
-    await page.getByRole('button', { name: 'Actions' }).click();
-    await page.getByRole('menuitem', { name: 'Favorite' }).click();
-
-    await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).not.toBeVisible();
-    await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).not.toBeVisible();
+      await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).not.toBeVisible();
+      await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).not.toBeVisible();
+    });
   });
 });

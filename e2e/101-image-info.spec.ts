@@ -7,7 +7,7 @@ import type { IImageInfo } from '@typings';
 
 test.use({ extraHTTPHeaders: ocsHeaders });
 
-test.describe('@api Image info', () => {
+test.describe('@api Image Info', () => {
   test('Query image info for test_01.jpg', async ({ request }) => {
     const fileid = await getFileId(request, '/Photos/Nested 1/test_01.jpg');
 

@@ -44,10 +44,10 @@ php-test:
 	vendor/bin/phpunit
 
 e2e:
-	bash scripts/e2e.sh --reporter=list
+	bash scripts/e2e.sh
 
 e2e-headed:
-	npx playwright test --headed --reporter=list
+	npx playwright test --headed
 
 .PHONY: php-test e2e e2e-headed
 

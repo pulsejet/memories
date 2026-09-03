@@ -16,7 +16,10 @@ const config: PlaywrightTestConfig = {
   workers: Math.max(2, Math.min(16, Math.floor(cpus().length / 2))),
   forbidOnly: !!process.env.CI,
   retries: 0,
-  reporter: [['html', { open: 'never' }]],
+  reporter: [
+    ['html', { open: 'never' }],
+    ['list', { printSteps: true }],
+  ],
   use: {
     actionTimeout: 30000,
     trace: 'on-first-retry',
