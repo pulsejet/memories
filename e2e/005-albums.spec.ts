@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 import { appUrl, ocsHeaders, bootstrap, username } from './navigation';
 import { getFileId } from './utils';
 
+import type { IAlbum } from '@typings';
+
 test.use({ extraHTTPHeaders: ocsHeaders });
 
 test.describe.serial('@ui Albums', () => {
@@ -13,6 +15,8 @@ test.describe.serial('@ui Albums', () => {
   let fileid2: number;
   let fileid3: number;
   let fileid4: number;
+
+  const uiUrl = (name: string) => `${appUrl}/albums/${username}/${encodeURIComponent(name)}`;
 
   test.beforeAll(async ({ request }) => {
     fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
@@ -53,7 +57,7 @@ test.describe.serial('@ui Albums', () => {
 
     await page.getByRole('link', { name: albumName }).click();
 
-    await expect(page).toHaveURL(`${appUrl}/albums/${username}/${encodeURIComponent(albumName)}`);
+    await expect(page).toHaveURL(uiUrl(albumName));
     await expect(page.locator('.dtm-container .header')).toHaveText(albumName);
     await expect(page.locator('.p-outer')).toHaveCount(3);
     await expect(page.locator(`.p-outer--${fileid1}`)).toBeVisible();
@@ -62,12 +66,6 @@ test.describe.serial('@ui Albums', () => {
 
     await page.locator(`.p-outer--${fileid1} > .img-outer`).click();
     await page.waitForSelector('body.viewer-fully-opened');
-
-    await page.keyboard.press('Escape');
-    await page.locator('.memories_viewer').waitFor({ state: 'detached' });
-
-    await page.goto(`${appUrl}/albums/${username}/${encodeURIComponent(albumName)}`);
-    await expect(page.locator('.dtm-container .header')).toHaveText(albumName);
   });
 
   test('Add image to existing album', async ({ page }) => {
@@ -85,22 +83,69 @@ test.describe.serial('@ui Albums', () => {
     await page.getByRole('button', { name: 'Save changes' }).click();
 
     await page.locator('.memories-modal').waitFor({ state: 'detached' });
+  });
 
-    await page.goto(`${appUrl}/albums`);
-    await page.getByRole('link', { name: albumName }).click();
+  test('Check last_added_photo', async ({ request }) => {
+    const res = await request.get(`${appUrl}/api/clusters/albums`);
+    expect(res.ok()).toBeTruthy();
 
-    await expect(page.locator('.dtm-container .header')).toHaveText(albumName);
-    await expect(page.locator('.p-outer')).toHaveCount(4);
-    await expect(page.locator(`.p-outer--${fileid1}`)).toBeVisible();
-    await expect(page.locator(`.p-outer--${fileid2}`)).toBeVisible();
-    await expect(page.locator(`.p-outer--${fileid3}`)).toBeVisible();
-    await expect(page.locator(`.p-outer--${fileid4}`)).toBeVisible();
+    const albums: IAlbum[] = await res.json();
+    const album = albums.find((a) => a.name === albumName);
+
+    expect(album).toBeDefined();
+    expect(album!.count).toBe(4);
+    expect(album!.last_added_photo).toBe(fileid4);
+    expect(album!.last_added_photo_etag).toBeTruthy();
+  });
+
+  test('Set cover image on album', async ({ request, page }) => {
+    // Set the cover image via the UI.
+    await page.goto(uiUrl(albumName) + '?covers=1');
+    await page.hover(`.p-outer--${fileid1}`);
+    await page.locator(`.p-outer--${fileid1} > div.select`).click();
+
+    const setCoverPromise = page.waitForResponse((r) => r.url().includes('/albums/set-cover') && r.status() === 200);
+    await page.getByRole('button', { name: 'Actions' }).click();
+    await page.getByRole('menuitem', { name: 'Set as cover image' }).click();
+    await setCoverPromise;
+
+    // Recheck clusters API for the updated cover
+    const res = await request.get(`${appUrl}/api/clusters/albums`);
+    expect(res.ok()).toBeTruthy();
+
+    const albums: IAlbum[] = await res.json();
+    const album = albums.find((a) => a.name === albumName);
+    expect(album).toBeDefined();
+    expect(album!.cover).toBe(fileid1);
+    expect(album!.cover_etag).toBeTruthy();
+  });
+
+  test('Remove image from album', async ({ page }) => {
+    await page.goto(uiUrl(albumName));
+
+    // Remove the photo that was set as cover
+    await page.hover(`.p-outer--${fileid1}`);
+    await page.locator(`.p-outer--${fileid1} > div.select`).click();
+
+    await page.getByRole('button', { name: 'Remove from album' }).click();
+    await page.getByRole('button', { name: 'Yes' }).click();
+    await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
+  });
+
+  test('Check removed cover is gone', async ({ request }) => {
+    const res = await request.get(`${appUrl}/api/clusters/albums`);
+    expect(res.ok()).toBeTruthy();
+
+    const albums: IAlbum[] = await res.json();
+    const album = albums.find((a) => a.name === albumName);
+
+    expect(album).toBeDefined();
+    expect(album!.cover).toBeFalsy();
+    expect(album!.cover_etag).toBeFalsy();
   });
 
   test('Rename album', async ({ page }) => {
-    await page.goto(`${appUrl}/albums`);
-
-    await page.getByRole('link', { name: albumName }).click();
+    await page.goto(uiUrl(albumName));
     await expect(page.locator('.dtm-container .header')).toHaveText(albumName);
 
     await page.getByRole('button', { name: 'Edit album details' }).click();
