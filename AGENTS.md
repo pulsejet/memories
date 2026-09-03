@@ -1,12 +1,5 @@
 # Agent Guidelines & Project Context
 
-## Architecture Overview
-- **Backend**: Nextcloud PHP app in `lib/` (namespace `OCA\Memories\`).
-- **Frontend**: Vue 2 app in `src/`, built with Webpack to `js/`.
-- **External Binaries** (`bin-ext/`):
-  - `exiftool`: Extracted static binary or Perl script used for fast EXIF metadata parsing/writing.
-  - `go-vod`: Go on-demand video transcoder daemon source in `go-vod/` (binaries in `bin-ext/`).
-
 ## Development
 - See `Makefile` for common workflows (building, linting, testing, and managing external binaries).
 
@@ -34,3 +27,41 @@
   - Fast iteration mode: `E2E_USER="test-user" make e2e` reuses an existing test user.
   - Run single spec: `npx playwright test e2e/<spec-file>`
   - Don't run any e2e test unless the user has explictly asked you to.
+
+## Key Subsystems & Architecture
+
+### Architecture Overview
+- **Backend**: Nextcloud PHP app in `lib/` (namespace `OCA\Memories\`).
+- **Routing**: Backend routes defined in `appinfo/routes.php`.
+- **Repository**: You are in Memories checkout, which is in `<nextcloud>/apps/memories` (or `custom_apps`)
+  - In general `../..` will likely be a Nextcloud checkout.
+
+### Database Schema & Storage
+- `oc_memories`: Main catalog indexed from the filesystem (`fileid`, `dayid`, `datetaken`, coordinates, EXIF).
+- `oc_memories_livephoto` (motion photos)
+- `oc_memories_mapclusters` (geohash clusters for map view)
+- `oc_memories_places` & `oc_memories_planet` (reverse geocoding)
+- `oc_memories_failures` (tracking failed files).
+
+### Metadata Extraction & Indexing Pipeline
+- **Engine**: Uses `exiftool` via `OCA\Memories\Exif` and `BinExt` to extract metadata and write EXIF back to files.
+- **Triggers**: Real-time filesystem hooks (`PostWriteListener`, `PostDeleteListener`), background cron (`OCA\Memories\Cron\IndexJob`), or manual OCC (`occ memories:index`).
+
+### Timeline Query Engine
+- High-performance SQL in `lib/Db/TimelineQuery*.php` leveraging Common Table Expressions (`TimelineQueryCTE.php`) and subquery materialization (`SQL::materialize`) to scale to millions of photos.
+- Aggregates media by `dayid` (epoch day index) for virtual scrolling and jump-to-date navigation.
+
+### Cluster Backends (`lib/ClustersBackend/`)
+- Implements groupings under `/api/clusters/{backend}`
+- Albums (integrates with Nextcloud Photos)
+- Tags (native Nextcloud systemtags)
+- Places (offline reverse geocoding)
+- AI tagging (Recognize and Face Recognition).
+
+### Video Transcoding (`go-vod/`)
+- Communicates with the `go-vod` HTTP daemon, which generates HLS segments via `ffmpeg`.
+- Supports hardware acceleration (VA-API, NVENC).
+
+### Frontend Architecture (`src/`)
+- Vue 2 app, built with Webpack to `js/`.
+- History mode under `/apps/memories`; routes in `src/router.ts`.
