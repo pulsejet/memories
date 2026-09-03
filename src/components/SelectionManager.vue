@@ -370,7 +370,7 @@ export default defineComponent({
       if (event?.pointerType === 'touch') return; // let touch events handle this
       if (event?.pointerType === 'mouse' && event?.button !== 0) return; // only left click for mouse
 
-      if (!this.empty() || event?.ctrlKey || event?.shiftKey) {
+      if (event?.ctrlKey || event?.shiftKey) {
         this.clickSelectionIcon(photo, event, rowIdx);
       } else {
         this.openViewer(photo);
