@@ -170,9 +170,10 @@ jobs:
       - name: Run tests
         env:
           NC_DB_TYPE: ${{ matrix.databases }}
+          PHP_VERSION: ${{ matrix.php-versions }}
+          NC_VERSION: ${{ matrix.server-versions }}
           NC_DB_PORT: 4444
           NC_REDIS_PORT: 6379
-          NC_VERSION: ${{ matrix.server-versions }}
           E2E_VIDEO: 1
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
@@ -183,10 +184,11 @@ jobs:
         with:
           name: report-${{ matrix.databases }}-${{ matrix.php-versions }}-${{ matrix.server-versions }}
           path: apps/${{ env.APP_NAME }}/playwright-report
+          retention-days: 15
 
       - name: Upload Playwright videos
         uses: actions/upload-artifact@v7
         with:
-          name: videos-${{ matrix.databases }}-${{ matrix.php-versions }}-${{ matrix.server-versions }}
-          path: apps/${{ env.APP_NAME }}/playwright-results.mp4
+          path: apps/${{ env.APP_NAME }}/video-${{ matrix.databases }}-${{ matrix.php-versions }}-${{ matrix.server-versions }}.mp4
+          retention-days: 3
           archive: false

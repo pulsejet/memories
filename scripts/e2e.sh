@@ -23,6 +23,7 @@
 # ==============================================================================
 
 set -e
+shopt -s globstar
 
 E2E_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MEMORIES_DIR="$(cd "$E2E_SCRIPT_DIR/.." && pwd)"
@@ -263,7 +264,7 @@ e2e_main() {
         mv "$E2E_LOGS_DIR" "$REPORT_DIR/"
 
         # Move nextcloud logs to report
-        if [  -n "$CI" ]; then
+        if [ -n "$CI" ]; then
             LOG_DST="$REPORT_DIR/nextcloud.log"
             mv "$NC_DIR/data/nextcloud.log" "$LOG_DST"
 
@@ -292,6 +293,13 @@ e2e_main() {
     if [ "${E2E_VIDEO:-0}" = "1" ]; then
         echo "Post-processing Playwright videos..."
         npx tsx e2e/video-postprocess.ts
+
+        # Remove duplicate videos from the report so we can retain
+        # it for a longer period of time without bloat.
+        if [ -n "$CI" ]; then
+            mv "$MEMORIES_DIR/playwright-results.mp4" "$MEMORIES_DIR/video-${NC_DB_TYPE}-${PHP_VERSION}-${NC_VERSION}.mp4"
+            rm -f "${REPORT_DIR}"/**/*.webm
+        fi
     fi
 }
 
