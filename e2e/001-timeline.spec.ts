@@ -5,7 +5,7 @@ import { goldDays, goldDayPhotos } from './dataset-measurements';
 
 import type { IDay, IPhoto } from '@typings';
 
-const TIMELINE_PATH = 'primary/Photos/';
+const TIMELINE_PATH = 'primary/for-default/';
 const TEST_DAY_IDS = [20696, 18962, 18955, 19468, 19221];
 
 test.use({ extraHTTPHeaders: e2eHeaders() });

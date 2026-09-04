@@ -7,7 +7,7 @@
  * Structure:
  *   - PRIMARY_DATASET: Timeline photos, nested directories, archive folders, and local media.
  *   - GEO_DATASET: 100 geo-tagged photos grouped across 11 cities/regions worldwide.
- *   - DATASET: Consolidated dataset map keyed by relative path (e.g. 'primary/Photos/...').
+ *   - DATASET: Consolidated dataset map keyed by relative path (e.g. 'primary/for-default/...').
  */
 
 export interface IDatasetExif {
@@ -35,25 +35,25 @@ export type IDatasetMap = Record<string, IDatasetEntry>;
  * Primary timeline, archive, and local photo assets.
  */
 export const PRIMARY_DATASET: IDatasetMap = {
-  'primary/Local/RmjH76vMWrI.jpg': {
+  'primary/for-other/RmjH76vMWrI.jpg': {
     size: [200, 300],
     exif: {
       DateTimeOriginal: '2022:09:14 11:34:54+00:00',
     },
   },
-  'primary/Local/dHLhDeEgxsg.jpg': {
+  'primary/for-other/dHLhDeEgxsg.jpg': {
     size: [200, 300],
     exif: {
       DateTimeOriginal: '2022:09:14 11:34:28+00:00',
     },
   },
-  'primary/Local/kvRlouf0RTs.jpg': {
+  'primary/for-other/kvRlouf0RTs.jpg': {
     size: [200, 250],
     exif: {
       DateTimeOriginal: '2022:09:14 11:34:58+00:00',
     },
   },
-  'primary/Photos/.archive/archived_01.jpg': {
+  'primary/for-default/.archive/archived_01.jpg': {
     size: [1280, 720],
     exif: {
       DateTimeOriginal: '2022:12:28 15:28:23+00:00',
@@ -61,7 +61,7 @@ export const PRIMARY_DATASET: IDatasetMap = {
       GPSLongitude: -74.0165487997222,
     },
   },
-  'primary/Photos/.archive/archived_02.jpg': {
+  'primary/for-default/.archive/archived_02.jpg': {
     size: [1280, 720],
     exif: {
       DateTimeOriginal: '2022:12:28 15:28:10+00:00',
@@ -69,43 +69,43 @@ export const PRIMARY_DATASET: IDatasetMap = {
       GPSLongitude: -74.0165487997222,
     },
   },
-  'primary/Photos/3fUXeoW5Sso.jpg': {
+  'primary/for-default/3fUXeoW5Sso.jpg': {
     size: [200, 266],
     exif: {
       DateTimeOriginal: '2026:08:31 14:20:27+00:00',
     },
   },
-  'primary/Photos/6khIhNYl1HI.jpg': {
+  'primary/for-default/6khIhNYl1HI.jpg': {
     size: [200, 300],
     exif: {
       DateTimeOriginal: '2021:12:01 14:00:00+00:00',
     },
   },
-  'primary/Photos/B6daqIhG8G0.jpg': {
+  'primary/for-default/B6daqIhG8G0.jpg': {
     size: [200, 250],
     exif: {
       DateTimeOriginal: '2026:08:31 15:20:27+00:00',
     },
   },
-  'primary/Photos/CbBbaNTmsAc.jpg': {
+  'primary/for-default/CbBbaNTmsAc.jpg': {
     size: [200, 300],
     exif: {
       DateTimeOriginal: '2026:08:31 16:20:27+00:00',
     },
   },
-  'primary/Photos/NDPmLyPXnZU.jpg': {
+  'primary/for-default/NDPmLyPXnZU.jpg': {
     size: [200, 300],
     exif: {
       DateTimeOriginal: '2022:08:17 10:00:00+00:00',
     },
   },
-  'primary/Photos/NKcupJh-Dos.jpg': {
+  'primary/for-default/NKcupJh-Dos.jpg': {
     size: [200, 134],
     exif: {
       DateTimeOriginal: '2026:08:31 17:20:27+00:00',
     },
   },
-  'primary/Photos/Nested 1/Nested 1_1/test_04.jpg': {
+  'primary/for-default/Nested 1/Nested 1_1/test_04.jpg': {
     size: [1280, 960],
     exif: {
       DateTimeOriginal: '2023:01:18 21:18:39+00:00',
@@ -113,7 +113,7 @@ export const PRIMARY_DATASET: IDatasetMap = {
       GPSLongitude: -118.4984749,
     },
   },
-  'primary/Photos/Nested 1/Nested 1_1/test_05.jpg': {
+  'primary/for-default/Nested 1/Nested 1_1/test_05.jpg': {
     size: [720, 960],
     exif: {
       DateTimeOriginal: '2023:01:18 21:24:32+00:00',
@@ -121,7 +121,7 @@ export const PRIMARY_DATASET: IDatasetMap = {
       GPSLongitude: -118.498384599722,
     },
   },
-  'primary/Photos/Nested 1/test_01.jpg': {
+  'primary/for-default/Nested 1/test_01.jpg': {
     size: [1280, 720],
     exif: {
       DateTimeOriginal: '2023:06:24 04:10:04+00:00',
@@ -129,7 +129,7 @@ export const PRIMARY_DATASET: IDatasetMap = {
       GPSLongitude: -4.837979,
     },
   },
-  'primary/Photos/Nested 1/test_02.jpg': {
+  'primary/for-default/Nested 1/test_02.jpg': {
     size: [1280, 960],
     exif: {
       DateTimeOriginal: '2023:04:21 19:55:33+00:00',
@@ -137,7 +137,7 @@ export const PRIMARY_DATASET: IDatasetMap = {
       GPSLongitude: -118.245578899722,
     },
   },
-  'primary/Photos/Nested 2/test_03.jpg': {
+  'primary/for-default/Nested 2/test_03.jpg': {
     size: [1280, 960],
     exif: {
       DateTimeOriginal: '2023:03:05 15:20:12+00:00',
@@ -145,37 +145,37 @@ export const PRIMARY_DATASET: IDatasetMap = {
       GPSLongitude: -118.491227,
     },
   },
-  'primary/Photos/RD_VnDHL4oM.jpg': {
+  'primary/for-default/RD_VnDHL4oM.jpg': {
     size: [200, 300],
     exif: {
       DateTimeOriginal: '2021:12:01 15:00:00+00:00',
     },
   },
-  'primary/Photos/RloUq_2-Jgs.jpg': {
+  'primary/for-default/RloUq_2-Jgs.jpg': {
     size: [200, 214],
     exif: {
       DateTimeOriginal: '2021:11:24 14:00:00+00:00',
     },
   },
-  'primary/Photos/bnqdK7zvm4Y.jpg': {
+  'primary/for-default/bnqdK7zvm4Y.jpg': {
     size: [200, 134],
     exif: {
       DateTimeOriginal: '2022:08:17 11:00:00+00:00',
     },
   },
-  'primary/Photos/dibBJsnVTcc.jpg': {
+  'primary/for-default/dibBJsnVTcc.jpg': {
     size: [200, 300],
     exif: {
       DateTimeOriginal: '2022:08:17 12:00:00+00:00',
     },
   },
-  'primary/Photos/ipZPm7u6aPA.jpg': {
+  'primary/for-default/ipZPm7u6aPA.jpg': {
     size: [200, 300],
     exif: {
       DateTimeOriginal: '2026:08:31 18:20:27+00:00',
     },
   },
-  'primary/Photos/mkBC3EOHsac.jpg': {
+  'primary/for-default/mkBC3EOHsac.jpg': {
     size: [200, 150],
     exif: {
       DateTimeOriginal: '2022:08:17 13:00:00+00:00',

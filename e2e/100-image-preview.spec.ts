@@ -13,9 +13,9 @@ test.describe.serial('@api Image preview', () => {
 
   test.beforeAll(async ({ request }) => {
     // JPEG 640x360 test image
-    fileid1 = await getFileId(request, '/Photos/Nested 1/test_01.jpg');
+    fileid1 = await getFileId(request, '/for-default/Nested 1/test_01.jpg');
     // JPEG 640x480 test image
-    fileid2 = await getFileId(request, '/Photos/Nested 1/test_02.jpg');
+    fileid2 = await getFileId(request, '/for-default/Nested 1/test_02.jpg');
   });
 
   test('Get 32x32 preview', async ({ request }) => {

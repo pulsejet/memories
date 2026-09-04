@@ -9,7 +9,7 @@ test.use({ extraHTTPHeaders: e2eHeaders() });
 
 test.describe('@api Image Info', () => {
   test('Query image info for test_01.jpg', async ({ request }) => {
-    const fileid = await getFileId(request, '/Photos/Nested 1/test_01.jpg');
+    const fileid = await getFileId(request, '/for-default/Nested 1/test_01.jpg');
 
     const res = await request.get(`${appUrl}/api/image/info/${fileid}`);
     expect(res.ok()).toBeTruthy();
@@ -38,6 +38,6 @@ test.describe('@api Image Info', () => {
     delete data.exif?.ExifVersion;
     delete data.exif?.ColorSpace;
 
-    expect(data).toStrictEqual(goldImageInfo('primary/Photos/Nested 1/test_01.jpg'));
+    expect(data).toStrictEqual(goldImageInfo('primary/for-default/Nested 1/test_01.jpg'));
   });
 });

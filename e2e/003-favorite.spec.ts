@@ -12,7 +12,7 @@ test.describe.serial('@ui Favorites', () => {
   // Due to a bug in Nextcloud, a single file must be marked favorite to create
   // the internal categories, before multiple can be done simultaneously.
   test('Favorite from Viewer', async ({ page }) => {
-    const fileid3 = await getFileId(page.request, '/Photos/3fUXeoW5Sso.jpg');
+    const fileid3 = await getFileId(page.request, '/for-default/3fUXeoW5Sso.jpg');
 
     await test.step('Favorite', async () => {
       await page.goto(appUrl);
@@ -38,8 +38,8 @@ test.describe.serial('@ui Favorites', () => {
   });
 
   test('Favorite from Timeline', async ({ page }) => {
-    const fileid1 = await getFileId(page.request, '/Photos/CbBbaNTmsAc.jpg');
-    const fileid2 = await getFileId(page.request, '/Photos/NDPmLyPXnZU.jpg');
+    const fileid1 = await getFileId(page.request, '/for-default/CbBbaNTmsAc.jpg');
+    const fileid2 = await getFileId(page.request, '/for-default/NDPmLyPXnZU.jpg');
 
     await test.step('Favorite', async () => {
       await page.goto(appUrl);

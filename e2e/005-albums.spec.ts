@@ -21,10 +21,10 @@ test.describe.serial('@ui Albums', () => {
   }
 
   test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
-    fileid2 = await getFileId(request, '/Photos/CbBbaNTmsAc.jpg');
-    fileid3 = await getFileId(request, '/Photos/Nested 1/test_01.jpg');
-    fileid4 = await getFileId(request, '/Photos/ipZPm7u6aPA.jpg');
+    fileid1 = await getFileId(request, '/for-default/NKcupJh-Dos.jpg');
+    fileid2 = await getFileId(request, '/for-default/CbBbaNTmsAc.jpg');
+    fileid3 = await getFileId(request, '/for-default/Nested 1/test_01.jpg');
+    fileid4 = await getFileId(request, '/for-default/ipZPm7u6aPA.jpg');
   });
 
   test.beforeEach(async ({ page }) => {

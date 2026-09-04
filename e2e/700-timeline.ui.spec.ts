@@ -6,7 +6,7 @@ test.describe('@ui Timeline feed and photo preview', () => {
   let fileid1: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileId(request, '/Photos/CbBbaNTmsAc.jpg');
+    fileid1 = await getFileId(request, '/for-default/CbBbaNTmsAc.jpg');
   });
 
   test.beforeEach(async ({ page }) => {

@@ -22,9 +22,6 @@
 #   NO_PLANET_DB      Set to "1" to skip planet database setup (e.g., on SQLite).
 # ==============================================================================
 
-set -e
-shopt -s globstar
-
 E2E_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MEMORIES_DIR="$(cd "$E2E_SCRIPT_DIR/.." && pwd)"
 NC_DIR="$(cd "$MEMORIES_DIR/../.." && pwd)"
@@ -183,7 +180,7 @@ e2e_setup_user() {
     occ memories:index -u "$user"
 
     # Set user timeline path
-    occ user:setting "$user" memories timelinePath "/Photos"
+    occ user:setting "$user" memories timelinePath "/for-default"
 
     # Set quota usage for file picker
     occ user:setting "$user" files lastSeenQuotaUsage 0.05
@@ -207,6 +204,9 @@ e2e_cleanup_user() {
 
 # Main entrypoint orchestrating full execution
 e2e_main() {
+    set -e
+    shopt -s globstar
+
     local test_args=("$@")
     rm -rf "$E2E_LOGS_DIR" "$REPORT_DIR"
     mkdir -p "$E2E_LOGS_DIR" "$REPORT_DIR"

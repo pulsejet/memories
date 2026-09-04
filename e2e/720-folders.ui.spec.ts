@@ -7,8 +7,8 @@ test.describe('@ui Folder view and navigation', () => {
   let fileid2: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileId(request, '/Photos/NKcupJh-Dos.jpg');
-    fileid2 = await getFileId(request, '/Photos/Nested 1/test_01.jpg');
+    fileid1 = await getFileId(request, '/for-default/NKcupJh-Dos.jpg');
+    fileid2 = await getFileId(request, '/for-default/Nested 1/test_01.jpg');
   });
 
   test.beforeEach(async ({ page }) => {
@@ -17,10 +17,10 @@ test.describe('@ui Folder view and navigation', () => {
 
   test('Look for Folders', async ({ page }) => {
     await page.goto(`${appUrl}/folders`);
-    await page.waitForSelector('.folder--Local');
-    await page.waitForSelector('.folder--Photos');
+    await page.waitForSelector('.folder--for-other');
+    await page.waitForSelector('.folder--for-default');
 
-    await page.locator('.folder--Photos').click();
+    await page.locator('.folder--for-default').click();
     await page.waitForSelector(`.p-outer--${fileid1}`);
   });
 
@@ -28,7 +28,7 @@ test.describe('@ui Folder view and navigation', () => {
     await page.goto(`${appUrl}/folders`);
 
     await test.step('Verify initial state', async () => {
-      await page.locator('.folder--Photos').click();
+      await page.locator('.folder--for-default').click();
       await expect(page.locator('.folder--Nested1')).toBeInViewport();
       await expect(page.locator('.folder--Nested2')).toBeInViewport();
       await expect(page.locator(`.p-outer--${fileid2}`)).not.toBeInViewport();
