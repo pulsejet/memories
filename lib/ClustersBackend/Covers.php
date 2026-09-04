@@ -63,7 +63,7 @@ final class Covers
                 ->from('filecache', 'cov_f')
                 ->innerJoin('cov_f', 'cte_folders', 'cov_cte_f', $treeSq->expr()->andX(
                     $treeSq->expr()->eq('cov_cte_f.fileid', 'cov_f.parent'),
-                    $treeSq->expr()->eq('cov_cte_f.hidden', $treeSq->expr()->literal(0, \PDO::PARAM_INT)),
+                    $treeSq->expr()->eq('cov_cte_f.hidden', SQL::literal($treeSq, 0, \PDO::PARAM_INT)),
                 ))
                 ->where($treeSq->expr()->eq('cov_f.fileid', 'mcov.fileid'))
             ;

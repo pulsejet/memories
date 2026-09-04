@@ -153,7 +153,7 @@ final class PlacesBackend extends Backend
 
         // WHERE at least 3 photos if want marked clusters
         if ($marked) {
-            $query->andWhere($query->expr()->gte('sub.count', $query->expr()->literal(3, \PDO::PARAM_INT)));
+            $query->andWhere($query->expr()->gte('sub.count', SQL::literal($query, 3, \PDO::PARAM_INT)));
         }
 
         // ORDER BY name and osm_id

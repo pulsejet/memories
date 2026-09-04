@@ -77,6 +77,22 @@ final class SQL
     }
 
     /**
+     * Create a literal for use in expressions.
+     *
+     * Integers with an integer column type are not quoted, since quoted
+     * integers never match columns without numeric affinity on SQLite
+     * (e.g. CTE or aggregate outputs).
+     */
+    public static function literal(IQueryBuilder $query, mixed $value, mixed $type = IQueryBuilder::PARAM_STR): mixed
+    {
+        if (\is_int($value) && \PDO::PARAM_INT === $type) {
+            return $query->createFunction((string) $value);
+        }
+
+        return $query->expr()->literal($value, $type);
+    }
+
+    /**
      * Create an EXISTS expression.
      *
      * @param IQueryBuilder        $query  The query to create the function on
