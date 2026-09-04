@@ -169,4 +169,14 @@ declare module '@typings' {
     GPSLatitude?: number;
     GPSLongitude?: number;
   }
+
+  export type IShare = {
+    id: string;
+    label: string;
+    token: string;
+    url: string;
+    hasPassword: boolean;
+    expiration: number | null;
+    editable: number;
+  };
 }

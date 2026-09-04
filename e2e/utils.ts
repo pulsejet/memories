@@ -1,8 +1,9 @@
 import { XMLParser } from 'fast-xml-parser';
 import XMLBuilder from 'fast-xml-builder';
-import type { APIRequestContext } from '@playwright/test';
+import { request } from '@playwright/test';
+import type { APIRequestContext, Browser, Page } from '@playwright/test';
 import type { IImageInfo } from '@typings';
-import { appUrl, baseUrl, e2eHeaders, username, psub } from './navigation';
+import { appUrl, baseUrl, bootstrap, e2eHeaders, teardown, username, psub } from './navigation';
 
 const xmlParser = new XMLParser({
   removeNSPrefix: true,
@@ -22,7 +23,7 @@ export class DavClient {
   // Delete the collection or file at the given path relative to the DAV root
   // using WebDAV DELETE, e.g. `photos/${username}/albums/${albumName}`.
   async del(davPath: string, ignoreMissing: boolean = false): Promise<void> {
-    const cleanPath = psub(davPath).replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/');
+    const cleanPath = DavClient.encodeDavPath(davPath);
 
     const res = await this.request.fetch(`${baseUrl}/remote.php/dav/${cleanPath}`, {
       method: 'DELETE',
@@ -39,10 +40,8 @@ export class DavClient {
   // Copy from srcDavPath to dstDavPath, both relative to the DAV root,
   // using WebDAV COPY.
   async copy(srcDavPath: string, dstDavPath: string, overwrite: boolean = true): Promise<void> {
-    const cleanSrc = psub(srcDavPath).replace(/^\/+/, '');
-    const encodedSrc = cleanSrc.split('/').map(encodeURIComponent).join('/');
-    const cleanDst = psub(dstDavPath).replace(/^\/+/, '');
-    const encodedDst = cleanDst.split('/').map(encodeURIComponent).join('/');
+    const encodedSrc = DavClient.encodeDavPath(srcDavPath);
+    const encodedDst = DavClient.encodeDavPath(dstDavPath);
 
     const res = await this.request.fetch(`${baseUrl}/remote.php/dav/${encodedSrc}`, {
       method: 'COPY',
@@ -64,9 +63,8 @@ export class DavClient {
     props: Record<string, string>,
     depth: number | 'infinity' = 0,
   ): Promise<any[]> {
-    const cleanPath = psub(davPath).replace(/^\/+/, '');
-    const encodedPath = cleanPath.split('/').map(encodeURIComponent).join('/');
-    const res = await this.request.fetch(`${baseUrl}/remote.php/dav/${encodedPath}`, {
+    const cleanPath = DavClient.encodeDavPath(davPath);
+    const res = await this.request.fetch(`${baseUrl}/remote.php/dav/${cleanPath}`, {
       method: 'PROPFIND',
       headers: {
         ...e2eHeaders(),
@@ -81,6 +79,7 @@ export class DavClient {
         'd:propfind': {
           '@_xmlns:d': 'DAV:',
           '@_xmlns:oc': 'http://owncloud.org/ns',
+          '@_xmlns:nc': 'http://nextcloud.org/ns',
           'd:prop': props,
         },
       }),
@@ -102,10 +101,41 @@ export class DavClient {
     return found;
   }
 
+  // Set props via WebDAV PROPPATCH on the given path relative to the DAV root,
+  // e.g. `photos/${username}/albums/${albumName}`.
+  async proppatch(davPath: string, props: Record<string, string>): Promise<void> {
+    const cleanPath = DavClient.encodeDavPath(davPath);
+
+    const res = await this.request.fetch(`${baseUrl}/remote.php/dav/${cleanPath}`, {
+      method: 'PROPPATCH',
+      headers: {
+        ...e2eHeaders(),
+        'Content-Type': 'application/xml',
+      },
+      data: xmlBuilder.build({
+        '?xml': {
+          '@_version': '1.0',
+          '@_encoding': 'UTF-8',
+        },
+        'd:propertyupdate': {
+          '@_xmlns:d': 'DAV:',
+          '@_xmlns:oc': 'http://owncloud.org/ns',
+          '@_xmlns:nc': 'http://nextcloud.org/ns',
+          'd:set': {
+            'd:prop': props,
+          },
+        },
+      }),
+    });
+    if (res.status() !== 207) {
+      throw new Error(`proppatch PROPPATCH failed for ${davPath} (${cleanPath}): ${res.status()} ${res.statusText()}`);
+    }
+  }
+
   // Create a collection at the given path relative to the DAV root
   // using WebDAV MKCOL, e.g. `photos/${username}/albums/${albumName}`.
   async mkcol(davPath: string, ignoreExisting: boolean = false): Promise<void> {
-    const cleanPath = psub(davPath).replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/');
+    const cleanPath = DavClient.encodeDavPath(davPath);
 
     const res = await this.request.fetch(`${baseUrl}/remote.php/dav/${cleanPath}`, {
       method: 'MKCOL',
@@ -164,5 +194,40 @@ export class DavClient {
     });
     if (!res.ok()) throw new Error(`imageInfo failed: ${res.status()}`);
     return res.json();
+  }
+
+  // Encode a path relative to the DAV root, substituting worker placeholders.
+  private static encodeDavPath(davPath: string): string {
+    return psub(davPath).replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/');
+  }
+}
+
+// Run fn with an unauthenticated API context.
+// New contexts inherit the test config storageState, hence cleared explicitly.
+export async function withPublicAPI(fn: (request: APIRequestContext) => Promise<void>): Promise<void> {
+  const publicRequest = await request.newContext({
+    storageState: { cookies: [], origins: [] },
+    extraHTTPHeaders: e2eHeaders(),
+  });
+  try {
+    await fn(publicRequest);
+  } finally {
+    await publicRequest.dispose();
+  }
+}
+
+// Run fn with an unauthenticated page in a fresh browser context.
+export async function withPublicPage(browser: Browser, fn: (page: Page) => Promise<void>): Promise<void> {
+  const context = await browser.newContext({
+    storageState: { cookies: [], origins: [] },
+    extraHTTPHeaders: e2eHeaders(),
+  });
+  const page = await context.newPage();
+  await bootstrap({ page });
+  try {
+    await fn(page);
+  } finally {
+    await teardown({});
+    await context.close();
   }
 }

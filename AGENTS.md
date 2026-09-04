@@ -16,6 +16,10 @@ Keep it concise, short bullets, no wrapping.
 Very important.
 - Keep code concise and clean.
 - Minimal or zero comments when things are obvious.
+- Use `git commit -s`.
+  - Message looks like: `<type>(<scope>): <imperative description>`.
+  - Types like fix, feat, chore, test, etc.
+  - Include few lines of description.
 
 ## Unit Testing
 - `vendor/autoload.php` alone is insufficient.

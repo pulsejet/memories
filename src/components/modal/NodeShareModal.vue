@@ -78,18 +78,10 @@ import { API } from '@services/API';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 
+import type { IShare } from '@typings';
+
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 import LinkIcon from 'vue-material-design-icons/LinkVariant.vue';
-
-type IShare = {
-  id: string;
-  label: string;
-  token: string;
-  url: string;
-  hasPassword: boolean;
-  expiration: number | null;
-  editable: number;
-};
 
 export default defineComponent({
   name: 'NodeShareModal',
