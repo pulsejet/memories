@@ -101,7 +101,7 @@ e2e_setup_ci() {
     fi
 
     # Speed up loads by disabling unused default apps
-    for app in comments contactsinteraction dashboard weather_status user_status updatenotification systemtags files_sharing; do
+    for app in contactsinteraction dashboard weather_status user_status updatenotification; do
         occ app:disable "$app" 2>/dev/null || true
     done
 
