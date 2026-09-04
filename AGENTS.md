@@ -2,6 +2,16 @@
 
 ## Development
 - See `Makefile` for common workflows (building, linting, testing, and managing external binaries).
+- Never rebuild JS (for typecheck `make js-lint`)
+  - Assume watcher is always running.
+  - If things are unexpected, check ps and ask user to run it.
+- Never read built JS files (in `js/`). Exclude them for grep etc.
+- To run e2e tests, create a test user using functions in `scripts/e2e.sh`. Create a file named .agent.json that contains the user name so you can re-read it. Re-read this file before running the test so you can reuse the context. Don't unnecessarily teardown and create new users frequently.
+
+## Code Style
+These instructions are very important.
+- Keep code concise and clean.
+- Minimal or zero comments when things are obvious
 
 ## Unit Testing Guidelines
 - **Bootstrapping**:
