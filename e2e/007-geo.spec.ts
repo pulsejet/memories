@@ -42,74 +42,80 @@ test.describe('@api Geo', () => {
     const dav = new DavClient(request);
 
     // Initial fetch to get the list of clusters (covers may not be initialized yet).
-    const initialRes = await request.get(`${appUrl}/api/clusters/places?covers=1`);
-    expect(initialRes.ok()).toBeTruthy();
+    let initialClusters: ICluster[];
+    await test.step('Fetch initial clusters', async () => {
+      const initialRes = await request.get(`${appUrl}/api/clusters/places?covers=1`);
+      expect(initialRes.ok()).toBeTruthy();
 
-    const initialClusters: ICluster[] = await initialRes.json();
-    for (const cluster of initialClusters) {
-      expect(typeof cluster.cluster_id).toBe('number');
-    }
+      initialClusters = await initialRes.json();
+      for (const cluster of initialClusters) {
+        expect(typeof cluster.cluster_id).toBe('number');
+      }
+    });
 
     // Force generation and persistence of cluster cover photos by requesting
     // previews for each cluster in parallel.
-    const random = Math.floor(Math.random() * 1000000);
-    const previewResponses = await Promise.all(
-      initialClusters.map((cluster) => {
-        const url = new URL(`${appUrl}/api/clusters/places/preview`);
-        url.searchParams.set('name', String(cluster.cluster_id));
-        url.searchParams.set('cover', String(random));
-        url.searchParams.set('cover_etag', 'null');
-        return request.get(url.toString());
-      }),
-    );
-    for (const res of previewResponses) {
+    await test.step('Generate covers via previews', async () => {
+      const random = Math.floor(Math.random() * 1000000);
+      const previewResponses = await Promise.all(
+        initialClusters.map((cluster) => {
+          const url = new URL(`${appUrl}/api/clusters/places/preview`);
+          url.searchParams.set('name', String(cluster.cluster_id));
+          url.searchParams.set('cover', String(random));
+          url.searchParams.set('cover_etag', 'null');
+          return request.get(url.toString());
+        }),
+      );
+      for (const res of previewResponses) {
+        expect(res.ok()).toBeTruthy();
+        expect(res.headers()['content-type']).toContain('image/jpeg');
+
+        const body = await res.body();
+        expect(body.length).toBeGreaterThan(0);
+        const size = imageSize(new Uint8Array(body));
+        expect(size.type).toBe('jpg');
+      }
+    });
+
+    await test.step('Verify covers belong to cluster locations', async () => {
+      const res = await request.get(`${appUrl}/api/clusters/places?covers=1`);
       expect(res.ok()).toBeTruthy();
-      expect(res.headers()['content-type']).toContain('image/jpeg');
 
-      const body = await res.body();
-      expect(body.length).toBeGreaterThan(0);
-      const size = imageSize(new Uint8Array(body));
-      expect(size.type).toBe('jpg');
-    }
+      const data: ICluster[] = await res.json();
+      expect(data.length).toBeGreaterThan(0);
 
-    // Re-fetch clusters endpoint now that covers have been populated.
-    const res = await request.get(`${appUrl}/api/clusters/places?covers=1`);
-    expect(res.ok()).toBeTruthy();
+      // Map cluster names to expected cities in the test dataset.
+      // This test may fail when the planet database is updated.
+      // Update this map if that happens to reflect the new state.
+      const clusterToCitiesMap: Record<string, string[]> = {
+        'Los Angeles': ['Los Angeles', 'Venice'],
+        'Santa Monica': ['Santa Monica'],
+        'San Francisco': ['San Francisco'],
+        Manhattan: ['New York'],
+        Paris: ['Paris'],
+        'City of Westminster': ['London'],
+        'Council of the City of Sydney': ['Sydney'],
+        'Higashiyama Ward': ['Kyoto'],
+        Rome: ['Rome'],
+      };
 
-    const data: ICluster[] = await res.json();
-    expect(data.length).toBeGreaterThan(0);
+      for (const cluster of data) {
+        expect(cluster.cover).toBeDefined();
+        expect(typeof cluster.cover).toBe('number');
 
-    // Map cluster names to expected cities in the test dataset.
-    // This test may fail when the planet database is updated.
-    // Update this map if that happens to reflect the new state.
-    const clusterToCitiesMap: Record<string, string[]> = {
-      'Los Angeles': ['Los Angeles', 'Venice'],
-      'Santa Monica': ['Santa Monica'],
-      'San Francisco': ['San Francisco'],
-      Manhattan: ['New York'],
-      Paris: ['Paris'],
-      'City of Westminster': ['London'],
-      'Council of the City of Sydney': ['Sydney'],
-      'Higashiyama Ward': ['Kyoto'],
-      Rome: ['Rome'],
-    };
+        // Resolve cover photo file metadata via basic image info.
+        const info = await dav.imageInfo(cluster.cover as number, { basic: '1' });
+        expect(info.basename).toBeDefined();
 
-    for (const cluster of data) {
-      expect(cluster.cover).toBeDefined();
-      expect(typeof cluster.cover).toBe('number');
+        const entry = DATASET[`primary/for-geo/${info.basename!}`];
+        expect(entry).toBeDefined();
 
-      // Resolve cover photo file metadata via basic image info.
-      const info = await dav.imageInfo(cluster.cover as number, { basic: '1' });
-      expect(info.basename).toBeDefined();
-
-      const entry = DATASET[`primary/for-geo/${info.basename!}`];
-      expect(entry).toBeDefined();
-
-      // Ensure the cover image belongs to the cluster's expected location.
-      const expectedCities = clusterToCitiesMap[cluster.name];
-      expect(expectedCities).toBeDefined();
-      expect(expectedCities).toContain(entry.params?.city);
-    }
+        // Ensure the cover image belongs to the cluster's expected location.
+        const expectedCities = clusterToCitiesMap[cluster.name];
+        expect(expectedCities).toBeDefined();
+        expect(expectedCities).toContain(entry.params?.city);
+      }
+    });
   });
 
   // Query timeline photos filtered by a specific place cluster.
@@ -117,39 +123,45 @@ test.describe('@api Geo', () => {
     const targetPlace = 'Santa Monica';
 
     // Retrieve place clusters to get the cluster ID for the target place.
-    const clustersRes = await request.get(`${appUrl}/api/clusters/places`);
-    expect(clustersRes.ok()).toBeTruthy();
+    let targetCluster: ICluster;
+    await test.step('Find target place cluster', async () => {
+      const clustersRes = await request.get(`${appUrl}/api/clusters/places`);
+      expect(clustersRes.ok()).toBeTruthy();
 
-    const clusters: ICluster[] = await clustersRes.json();
-    const targetCluster = clusters.find((c) => c.name === targetPlace);
-    expect(targetCluster).toBeDefined();
-    expect(typeof targetCluster!.cluster_id).toBe('number');
+      const clusters: ICluster[] = await clustersRes.json();
+      targetCluster = clusters.find((c) => c.name === targetPlace)!;
+      expect(targetCluster).toBeDefined();
+      expect(typeof targetCluster!.cluster_id).toBe('number');
+    });
 
-    // Query days endpoint filtered by the place cluster ID.
-    const url = new URL(`${appUrl}/api/days`);
-    url.searchParams.set('places', String(targetCluster!.cluster_id));
-    const daysRes = await request.get(url.toString());
-    expect(daysRes.ok()).toBeTruthy();
+    let days: IDay[];
+    await test.step('Query days filtered by cluster', async () => {
+      const url = new URL(`${appUrl}/api/days`);
+      url.searchParams.set('places', String(targetCluster.cluster_id));
+      const daysRes = await request.get(url.toString());
+      expect(daysRes.ok()).toBeTruthy();
 
-    // Verify the the result match the test dataset.
-    const days: IDay[] = await daysRes.json();
-    expect(days).toHaveLength(2);
-    expect(days[0].count).toBe(2);
-    expect(days[1].count).toBe(4);
-    expect(days[0].dayid).toBeGreaterThan(days[1].dayid);
+      // Verify the result matches the test dataset.
+      days = await daysRes.json();
+      expect(days).toHaveLength(2);
+      expect(days[0].count).toBe(2);
+      expect(days[1].count).toBe(4);
+      expect(days[0].dayid).toBeGreaterThan(days[1].dayid);
+    });
 
-    // Verify each photo in the day details corresponds to the target place in the test dataset.
-    for (const day of days) {
-      expect(day.detail).toBeDefined();
-      expect(day.detail).toHaveLength(day.count);
+    await test.step('Verify photos match the target place', async () => {
+      for (const day of days) {
+        expect(day.detail).toBeDefined();
+        expect(day.detail).toHaveLength(day.count);
 
-      for (const photo of day.detail!) {
-        expect(photo.basename).toBeDefined();
-        const entry = DATASET[`primary/for-geo/${photo.basename!}`];
-        expect(entry).toBeDefined();
-        expect(entry.params?.city).toBe(targetPlace);
+        for (const photo of day.detail!) {
+          expect(photo.basename).toBeDefined();
+          const entry = DATASET[`primary/for-geo/${photo.basename!}`];
+          expect(entry).toBeDefined();
+          expect(entry.params?.city).toBe(targetPlace);
+        }
       }
-    }
+    });
   });
 
   // Verify reverse-geocoded address field on image info across different regions.
