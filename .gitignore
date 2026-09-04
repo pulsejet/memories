@@ -36,3 +36,6 @@ bin-ext/
 
 .devcontainer/config/
 .devcontainer/data/
+
+# Local agent e2e context (see AGENTS.md)
+.agent.yaml

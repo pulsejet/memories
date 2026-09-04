@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
-import { getFileId } from './utils';
+import { DavClient } from './utils';
+
+test.beforeEach(bootstrap);
+test.afterEach(teardown);
 
 test.use({
   extraHTTPHeaders: e2eHeaders({
@@ -9,11 +12,9 @@ test.use({
 });
 
 test.describe('Metadata', () => {
-  test.beforeEach(bootstrap);
-  test.afterEach(teardown);
-
-  test('@ui Edit metadata through Viewer', async ({ page }) => {
-    const fileid1 = await getFileId(page.request, '/for-edit-exif/ui_edit.jpg');
+  test('@ui Edit metadata through Viewer', async ({ request, page }) => {
+    const dav = new DavClient(request);
+    const fileid1 = await dav.fileid('/for-edit-exif/ui_edit.jpg');
     const random = Math.floor(Math.random() * 1000000);
     const testTitle = `Test title ${random}`;
     const testDescription = `Test description ${random}`;

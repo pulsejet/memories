@@ -1,8 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { bootstrap, teardown, appUrl, e2eHeaders, psub } from './navigation';
-import { getFileId, getImageInfo, deletePath, copyPath } from './utils';
+import { DavClient } from './utils';
 
 import type { IPhoto } from '@typings';
+
+test.beforeEach(bootstrap);
+test.afterEach(teardown);
 
 test.use({
   extraHTTPHeaders: e2eHeaders({
@@ -18,23 +21,22 @@ test.describe('Archive', () => {
   const FILE_PATH_ARCH = psub('/for-archive-%wid/.archive/Nested 1/Nested 1_1/test_05.jpg');
 
   test.beforeAll(async ({ request }) => {
-    await deletePath(request, '/for-archive-%wid', true);
-    await copyPath(request, '/for-archive', '/for-archive-%wid');
+    const dav = new DavClient(request);
+    await dav.deleteFile('/for-archive-%wid', true);
+    await dav.copyFile('/for-archive', '/for-archive-%wid');
   });
 
   test.afterAll(async ({ request }) => {
-    await deletePath(request, '/for-archive-%wid');
+    await new DavClient(request).deleteFile('/for-archive-%wid');
   });
 
-  test.beforeEach(bootstrap);
-  test.afterEach(teardown);
-
   test('@api Archive from API', async ({ request }) => {
-    const fileid = await getFileId(request, FILE_PATH_BASE);
+    const dav = new DavClient(request);
+    const fileid = await dav.fileid(FILE_PATH_BASE);
 
     await test.step('Archive', async () => {
       await test.step('Verify path before archive', async () => {
-        const infoBefore = await getImageInfo(request, fileid, { basic: '1' });
+        const infoBefore = await dav.imageInfo(fileid, { basic: '1' });
         expect(infoBefore.filename).toBe(FILE_PATH_BASE);
       });
 
@@ -44,7 +46,7 @@ test.describe('Archive', () => {
       });
 
       await test.step('Verify path after archive', async () => {
-        const infoDuring = await getImageInfo(request, fileid, { basic: '1' });
+        const infoDuring = await dav.imageInfo(fileid, { basic: '1' });
         expect(infoDuring.filename).toBe(FILE_PATH_ARCH);
       });
 
@@ -74,7 +76,7 @@ test.describe('Archive', () => {
       });
 
       await test.step('Verify path after unarchive', async () => {
-        const infoAfter = await getImageInfo(request, fileid, { basic: '1' });
+        const infoAfter = await dav.imageInfo(fileid, { basic: '1' });
         expect(infoAfter.filename).toBe(FILE_PATH_BASE);
       });
 
@@ -97,8 +99,9 @@ test.describe('Archive', () => {
   });
 
   test('@ui Archive from UI', async ({ page, request }) => {
-    const fileid1 = await getFileId(request, '/for-archive-%wid/ui_test_01.jpg');
-    const fileid2 = await getFileId(request, '/for-archive-%wid/ui_test_02.jpg');
+    const dav = new DavClient(request);
+    const fileid1 = await dav.fileid('/for-archive-%wid/ui_test_01.jpg');
+    const fileid2 = await dav.fileid('/for-archive-%wid/ui_test_02.jpg');
 
     await test.step('Archive', async () => {
       await test.step('Archive files', async () => {
@@ -117,8 +120,8 @@ test.describe('Archive', () => {
       });
 
       await test.step('Verify files are in archive', async () => {
-        expect((await getImageInfo(request, fileid1, { basic: '1' })).filename?.includes('.archive/')).toBeTruthy();
-        expect((await getImageInfo(request, fileid2, { basic: '1' })).filename?.includes('.archive/')).toBeTruthy();
+        expect((await dav.imageInfo(fileid1, { basic: '1' })).filename?.includes('.archive/')).toBeTruthy();
+        expect((await dav.imageInfo(fileid2, { basic: '1' })).filename?.includes('.archive/')).toBeTruthy();
       });
     });
 
@@ -139,8 +142,8 @@ test.describe('Archive', () => {
       });
 
       await test.step('Verify files are back in main', async () => {
-        expect((await getImageInfo(request, fileid1, { basic: '1' })).filename?.includes('.archive/')).toBeFalsy();
-        expect((await getImageInfo(request, fileid2, { basic: '1' })).filename?.includes('.archive/')).toBeFalsy();
+        expect((await dav.imageInfo(fileid1, { basic: '1' })).filename?.includes('.archive/')).toBeFalsy();
+        expect((await dav.imageInfo(fileid2, { basic: '1' })).filename?.includes('.archive/')).toBeFalsy();
       });
     });
   });

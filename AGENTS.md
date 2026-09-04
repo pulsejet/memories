@@ -1,77 +1,95 @@
-# Agent Guidelines & Project Context
+# Project Context
+
+This file should be human-readable - less tokens.
+Keep it concise, short bullets, no wrapping.
 
 ## Development
-- See `Makefile` for common workflows (building, linting, testing, and managing external binaries).
-- Never rebuild JS (for typecheck `make js-lint`)
-  - Assume watcher is always running.
-  - If things are unexpected, check ps and ask user to run it.
-- Never read built JS files (in `js/`). Exclude them for grep etc.
-- To run e2e tests, create a test user using functions in `scripts/e2e.sh`. Create a file named .agent.json that contains the user name so you can re-read it. Re-read this file before running the test so you can reuse the context. Don't unnecessarily teardown and create new users frequently.
+- `Makefile` has all common workflows (build, lint, test, external binaries).
+- Never rebuild JS; typecheck via `make js-lint`.
+- Assume the watcher is running.
+  - If the build looks stale, check `ps` and ask the user to run it.
+- Never read built JS in `js/`; exclude it from grep etc.
+- Never install new deps without explicit user consent.
+- Never patch non-first-party code without user consent.
 
 ## Code Style
-These instructions are very important.
+Very important.
 - Keep code concise and clean.
-- Minimal or zero comments when things are obvious
+- Minimal or zero comments when things are obvious.
 
-## Unit Testing Guidelines
-- **Bootstrapping**:
-  - Standard `vendor/autoload.php` alone is insufficient because Nextcloud core classes (`OC\*`, `OCP\*`) and app namespaces are registered by Nextcloud's environment.
-  - For unit tests or standalone scripts/REPL, always bootstrap via `tests/bootstrap.php` (loads Nextcloud's `lib/base.php` and registers the app container).
-- **Test Fixtures (`tests/assets/`)**:
-  - For sample assets, inspect raw metadata, stream offsets, or binary properties using a `tests/bootstrap.php` one-liner before writing assertions.
-  - Tests interacting with metadata or transcoding rely on external binaries managed by `OCA\Memories\Service\BinExt`.
-- **Workflow**:
-  - Run target test: `vendor/bin/phpunit --filter <TestClassOrMethod>`
-  - Run full test suite: `vendor/bin/phpunit`
-  - Auto-format code: Always run `make php-lint` (runs `php-cs-fixer`) after adding or editing tests.
+## Unit Testing
+- `vendor/autoload.php` alone is insufficient.
+  - `OC\*`, `OCP\*` and app namespaces come from Nextcloud's environment.
+- Unit tests and standalone scripts/REPL must bootstrap via `tests/bootstrap.php`.
+  - Loads Nextcloud `lib/base.php`, registers the app container.
+- Before asserting on sample assets in `tests/assets/`, inspect them first.
+  - Check raw metadata, stream offsets, or binary properties.
+  - Use a `tests/bootstrap.php` one-liner.
+- Metadata/transcoding tests rely on external binaries via `OCA\Memories\Service\BinExt`.
+- Run one test: `vendor/bin/phpunit --filter <TestClassOrMethod>`.
+- Run all tests: bare `vendor/bin/phpunit`.
+- After adding/editing tests always run `make php-lint` (`php-cs-fixer`).
 
-## E2E Testing Guidelines
-- **Architecture & Setup (`e2e/`)**:
-  - Playwright test suite driven by `scripts/e2e.sh` and configured in `playwright.config.ts`.
-  - Authentication runs once via `auth.setup.ts`; UI tests must call `await bootstrap(page)` in `beforeEach`.
-  - Required headers: Use `e2eHeaders()` from `navigation.ts` for all tests.
-- **Test Categories & Data**:
-  - Derive expected API responses dynamically via `e2e/dataset-measurements.ts` (`goldXXX()`) rather than hardcoding. Strip non-deterministic fields using before assertions.
-- **Fast Iteration & Execution**:
-  - Run full suite with orchestration: `make e2e`.
-  - Fast iteration mode: `E2E_USER="test-user" make e2e` reuses an existing test user.
-  - Run single spec: `npx playwright test e2e/<spec-file>`
-  - Don't run any e2e test unless the user has explictly asked you to.
+## E2E Testing
+- Playwright suite in `e2e/`, run by `scripts/e2e.sh`.
+- Configured in `playwright.config.ts`.
+- Auth runs once via `auth.setup.ts`.
+- Derive expected API responses dynamically, never hardcode.
+  - Use `goldXXX()` from `e2e/dataset-measurements.ts`.
+  - Strip non-deterministic fields before asserting.
+- Full suite: `make e2e`.
+- Reuse a user: `E2E_USER="test-user" make e2e`.
+- Single spec: `npx playwright test e2e/<spec-file>`.
+- Never run e2e unless the user explicitly asks.
+- Create test users via functions in `scripts/e2e.sh`.
+- Record the info in `.agent.yaml` and re-read it at the beginning.
+- This reuses the context; don't teardown/recreate users unnecessarily.
+- Prefer subsets over the full suite.
 
 ## Key Subsystems & Architecture
 
-### Architecture Overview
-- **Backend**: Nextcloud PHP app in `lib/` (namespace `OCA\Memories\`).
-- **Routing**: Backend routes defined in `appinfo/routes.php`.
-- **Repository**: You are in Memories checkout, which is in `<nextcloud>/apps/memories` (or `custom_apps`)
-  - In general `../..` will likely be a Nextcloud checkout.
+### Overview
+- Backend: Nextcloud PHP app in `lib/` (`OCA\Memories\`).
+- Routes in `appinfo/routes.php`.
+- Checkout lives at `<nextcloud>/apps/memories` (or `custom_apps`).
+- `../..` is usually a Nextcloud checkout.
 
 ### Database Schema & Storage
-- `oc_memories`: Main catalog indexed from the filesystem (`fileid`, `dayid`, `datetaken`, coordinates, EXIF).
-- `oc_memories_livephoto` (motion photos)
-- `oc_memories_mapclusters` (geohash clusters for map view)
-- `oc_memories_places` & `oc_memories_planet` (reverse geocoding)
-- `oc_memories_failures` (tracking failed files).
+- `oc_memories`: main filesystem-indexed catalog.
+  - Columns: `fileid`, `dayid`, `datetaken`, coordinates, EXIF.
+- `oc_memories_livephoto`: motion photos.
+- `oc_memories_mapclusters`: geohash clusters for map view.
+- `oc_memories_places` & `oc_memories_planet`: reverse geocoding.
+- `oc_memories_failures`: failed files.
 
-### Metadata Extraction & Indexing Pipeline
-- **Engine**: Uses `exiftool` via `OCA\Memories\Exif` and `BinExt` to extract metadata and write EXIF back to files.
-- **Triggers**: Real-time filesystem hooks (`PostWriteListener`, `PostDeleteListener`), background cron (`OCA\Memories\Cron\IndexJob`), or manual OCC (`occ memories:index`).
+### Metadata Extraction & Indexing
+- `exiftool` via `OCA\Memories\Exif` + `BinExt`.
+- Extracts metadata and writes EXIF back.
+- Triggers:
+  - Filesystem hooks (`PostWriteListener`, `PostDeleteListener`).
+  - Cron (`OCA\Memories\Cron\IndexJob`).
+  - Manual: `occ memories:index`.
 
 ### Timeline Query Engine
-- High-performance SQL in `lib/Db/TimelineQuery*.php` leveraging Common Table Expressions (`TimelineQueryCTE.php`) and subquery materialization (`SQL::materialize`) to scale to millions of photos.
-- Aggregates media by `dayid` (epoch day index) for virtual scrolling and jump-to-date navigation.
+- High-performance SQL in `lib/Db/TimelineQuery*.php`.
+- Uses CTEs (`TimelineQueryCTE.php`).
+- Uses subquery materialization (`SQL::materialize`).
+- Scales to millions of photos.
+- Aggregates by `dayid` (epoch day index).
+- Powers virtual scrolling and jump-to-date.
 
 ### Cluster Backends (`lib/ClustersBackend/`)
-- Implements groupings under `/api/clusters/{backend}`
-- Albums (integrates with Nextcloud Photos)
-- Tags (native Nextcloud systemtags)
-- Places (offline reverse geocoding)
-- AI tagging (Recognize and Face Recognition).
+- Groupings under `/api/clusters/{backend}`.
+- Albums (Nextcloud Photos).
+- Tags (systemtags).
+- Places (offline reverse geocoding).
+- AI tagging (Recognize, Face Recognition).
 
 ### Video Transcoding (`go-vod/`)
-- Communicates with the `go-vod` HTTP daemon, which generates HLS segments via `ffmpeg`.
-- Supports hardware acceleration (VA-API, NVENC).
+- `go-vod` HTTP daemon generates HLS via `ffmpeg`.
+- VA-API and NVENC hardware acceleration supported.
 
-### Frontend Architecture (`src/`)
-- Vue 2 app, built with Webpack to `js/`.
-- History mode under `/apps/memories`; routes in `src/router.ts`.
+### Frontend (`src/`)
+- Vue 2 + Webpack, built to `js/`.
+- History mode under `/apps/memories`.
+- Routes in `src/router.ts`.

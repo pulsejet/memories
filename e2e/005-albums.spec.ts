@@ -1,10 +1,17 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders, bootstrap, username, teardown } from './navigation';
-import { getFileId } from './utils';
+import { DavClient } from './utils';
 
 import type { IAlbum } from '@typings';
 
+test.beforeEach(bootstrap);
+test.afterEach(teardown);
+
 test.use({ extraHTTPHeaders: e2eHeaders() });
+
+function uiUrl(name: string) {
+  return `${appUrl}/albums/${username}/${encodeURIComponent(name)}`;
+}
 
 test.describe.serial('@ui Albums', () => {
   const random = Math.floor(Math.random() * 1000000);
@@ -16,19 +23,13 @@ test.describe.serial('@ui Albums', () => {
   let fileid3: number;
   let fileid4: number;
 
-  function uiUrl(name: string) {
-    return `${appUrl}/albums/${username}/${encodeURIComponent(name)}`;
-  }
-
   test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileId(request, '/for-default/NKcupJh-Dos.jpg');
-    fileid2 = await getFileId(request, '/for-default/CbBbaNTmsAc.jpg');
-    fileid3 = await getFileId(request, '/for-default/Nested 1/test_01.jpg');
-    fileid4 = await getFileId(request, '/for-default/ipZPm7u6aPA.jpg');
+    const dav = new DavClient(request);
+    fileid1 = await dav.fileid('/for-default/NKcupJh-Dos.jpg');
+    fileid2 = await dav.fileid('/for-default/CbBbaNTmsAc.jpg');
+    fileid3 = await dav.fileid('/for-default/Nested 1/test_01.jpg');
+    fileid4 = await dav.fileid('/for-default/ipZPm7u6aPA.jpg');
   });
-
-  test.beforeEach(bootstrap);
-  test.afterEach(teardown);
 
   test('Create album with selected photos', async ({ page }) => {
     await page.goto(appUrl);
@@ -174,5 +175,33 @@ test.describe.serial('@ui Albums', () => {
 
     await page.locator('.memories-modal').waitFor({ state: 'detached' });
     await expect(page.getByRole('link', { name: renamedAlbumName })).toHaveCount(0);
+  });
+});
+
+test.describe('@ui Empty album', () => {
+  const random = Math.floor(Math.random() * 1000000);
+  const emptyAlbumName = `E2E Empty Album ${random}`;
+
+  test('Empty album shows empty view', async ({ request, page }) => {
+    const dav = new DavClient(request);
+    const albumPath = `photos/${username}/albums/${emptyAlbumName}`;
+
+    await test.step('Create empty album via WebDAV', async () => {
+      await dav.mkcol(albumPath);
+    });
+
+    await test.step('Empty album shows empty content', async () => {
+      await page.goto(uiUrl(emptyAlbumName));
+
+      await expect(page).toHaveURL(uiUrl(emptyAlbumName));
+      await expect(page.locator('.dtm-container .header')).toHaveText(emptyAlbumName);
+      await expect(page.locator('.p-outer')).toHaveCount(0);
+      await expect(page.getByText('Nothing to show here')).toBeVisible();
+      await expect(page.getByText('Add photos to albums by selecting them on your timeline.')).toBeVisible();
+    });
+
+    await test.step('Delete empty album via WebDAV', async () => {
+      await dav.del(albumPath);
+    });
   });
 });

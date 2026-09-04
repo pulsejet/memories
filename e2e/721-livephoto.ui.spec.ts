@@ -1,6 +1,9 @@
 import { test, expect, type Locator } from '@playwright/test';
 import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
-import { getFileId } from './utils';
+import { DavClient } from './utils';
+
+test.beforeEach(bootstrap);
+test.afterEach(teardown);
 
 test.use({
   extraHTTPHeaders: e2eHeaders({
@@ -12,11 +15,9 @@ test.describe('@ui Live photo', () => {
   let fileid: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid = await getFileId(request, '/for-livephoto/apple_h264_boy_01.jpg');
+    const dav = new DavClient(request);
+    fileid = await dav.fileid('/for-livephoto/apple_h264_boy_01.jpg');
   });
-
-  test.beforeEach(bootstrap);
-  test.afterEach(teardown);
 
   test('Timeline live photo hover', async ({ page }) => {
     let pOuter!: Locator;

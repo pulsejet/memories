@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders } from './navigation';
-import { getFileId, getImageInfo } from './utils';
+import { DavClient } from './utils';
 import { imageSize } from 'image-size';
 
 import type { ICluster, IDay } from '@typings';
@@ -39,6 +39,8 @@ test.describe('@api Geo', () => {
   // Verify top place clusters with cover photo IDs and ensure
   // each cover matches the cluster's location.
   test('Query places clusters with covers', async ({ request }) => {
+    const dav = new DavClient(request);
+
     // Initial fetch to get the list of clusters (covers may not be initialized yet).
     const initialRes = await request.get(`${appUrl}/api/clusters/places?covers=1`);
     expect(initialRes.ok()).toBeTruthy();
@@ -97,7 +99,7 @@ test.describe('@api Geo', () => {
       expect(typeof cluster.cover).toBe('number');
 
       // Resolve cover photo file metadata via basic image info.
-      const info = await getImageInfo(request, cluster.cover as number, { basic: '1' });
+      const info = await dav.imageInfo(cluster.cover as number, { basic: '1' });
       expect(info.basename).toBeDefined();
 
       const entry = DATASET[`primary/for-geo/${info.basename!}`];
@@ -169,8 +171,9 @@ test.describe('@api Geo', () => {
 
     await Promise.all(
       testCases.map(async (tc) => {
-        const fileid = await getFileId(request, tc.path);
-        const info = await getImageInfo(request, fileid);
+        const dav = new DavClient(request);
+        const fileid = await dav.fileid(tc.path);
+        const info = await dav.imageInfo(fileid);
         expect(tc.addresses).toContain(info.address);
       }),
     );

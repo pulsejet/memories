@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders } from './navigation';
-import { getImageInfo } from './utils';
+import { DavClient } from './utils';
 
 import type { IMapCluster, IDay, IPhoto } from '@typings';
 import { DATASET } from './dataset';
@@ -19,6 +19,7 @@ const distance = (c1: [number, number], c2: [number, number]) => {
 test.describe('@api Map', () => {
   // Query map clusters for the Santa Monica + Venice bounding box at zoom level 13.
   test('Query map clusters for Santa Monica and Venice', async ({ request }) => {
+    const dav = new DavClient(request);
     const url = new URL(`${appUrl}/api/map/clusters`);
     url.searchParams.set('bounds', '33.920842,34.084143,-118.553975,-118.411067');
     url.searchParams.set('zoom', '13');
@@ -61,7 +62,7 @@ test.describe('@api Map', () => {
         expect(expectedCity).not.toBeNull();
 
         // Verify the preview photo belongs to the expected city.
-        const info = await getImageInfo(request, cluster.preview.fileid, { basic: '1' });
+        const info = await dav.imageInfo(cluster.preview.fileid, { basic: '1' });
         expect(info.basename).toBeDefined();
 
         const entry = DATASET[`primary/for-geo/${info.basename!}`];

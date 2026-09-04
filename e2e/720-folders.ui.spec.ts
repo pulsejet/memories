@@ -1,18 +1,19 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, bootstrap, teardown } from './navigation';
-import { getFileId } from './utils';
+import { DavClient } from './utils';
+
+test.beforeEach(bootstrap);
+test.afterEach(teardown);
 
 test.describe('@ui Folder view and navigation', () => {
   let fileid1: number;
   let fileid2: number;
 
   test.beforeAll(async ({ request }) => {
-    fileid1 = await getFileId(request, '/for-default/NKcupJh-Dos.jpg');
-    fileid2 = await getFileId(request, '/for-default/Nested 1/test_01.jpg');
+    const dav = new DavClient(request);
+    fileid1 = await dav.fileid('/for-default/NKcupJh-Dos.jpg');
+    fileid2 = await dav.fileid('/for-default/Nested 1/test_01.jpg');
   });
-
-  test.beforeEach(bootstrap);
-  test.afterEach(teardown);
 
   test('Look for Folders', async ({ page }) => {
     await page.goto(`${appUrl}/folders`);

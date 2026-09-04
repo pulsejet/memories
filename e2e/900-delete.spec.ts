@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
-import { getFileId, copyPath, deletePath } from './utils';
+import { DavClient } from './utils';
+
+test.beforeEach(bootstrap);
+test.afterEach(teardown);
 
 test.use({
   extraHTTPHeaders: e2eHeaders({
@@ -10,20 +13,19 @@ test.use({
 
 test.describe('@ui Timeline photo deletion', () => {
   test.beforeAll(async ({ request }) => {
-    await deletePath(request, '/for-delete-%wid', true);
-    await copyPath(request, '/for-delete', '/for-delete-%wid');
+    const dav = new DavClient(request);
+    await dav.deleteFile('/for-delete-%wid', true);
+    await dav.copyFile('/for-delete', '/for-delete-%wid');
   });
 
   test.afterAll(async ({ request }) => {
-    await deletePath(request, '/for-delete-%wid');
+    await new DavClient(request).deleteFile('/for-delete-%wid');
   });
 
-  test.beforeEach(bootstrap);
-  test.afterEach(teardown);
-
-  test('Select two images and delete', async ({ page }) => {
-    const fileid1 = await getFileId(page.request, '/for-delete-%wid/delete_01.jpg');
-    const fileid2 = await getFileId(page.request, '/for-delete-%wid/delete_02.jpg');
+  test('Select two images and delete', async ({ request, page }) => {
+    const dav = new DavClient(request);
+    const fileid1 = await dav.fileid('/for-delete-%wid/delete_01.jpg');
+    const fileid2 = await dav.fileid('/for-delete-%wid/delete_02.jpg');
     await page.goto(appUrl);
 
     await test.step('Select two images', async () => {
@@ -44,8 +46,9 @@ test.describe('@ui Timeline photo deletion', () => {
     });
   });
 
-  test('Delete image from viewer', async ({ page }) => {
-    const fileid3 = await getFileId(page.request, '/for-delete-%wid/delete_03.jpg');
+  test('Delete image from viewer', async ({ request, page }) => {
+    const dav = new DavClient(request);
+    const fileid3 = await dav.fileid('/for-delete-%wid/delete_03.jpg');
 
     await test.step('Open viewer', async () => {
       await page.goto(appUrl);

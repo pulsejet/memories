@@ -62,10 +62,14 @@ export default defineComponent({
       // Get DAV album for collaborators
       try {
         this.album = await dav.getAlbum(user, name);
-        return true;
       } catch (e) {
-        return false;
+        console.warn('Failed to fetch album:', e);
       }
+
+      // The album header is metadata, not standalone content,
+      // so always return false. If true, an empty album would
+      // suppress the timeline empty view.
+      return false;
     },
   },
 });

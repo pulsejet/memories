@@ -1,25 +1,27 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders, bootstrap, psub, teardown } from './navigation';
-import { getFileId, copyPath, deletePath } from './utils';
+import { DavClient } from './utils';
+
+test.beforeEach(bootstrap);
+test.afterEach(teardown);
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
 
 test.describe('@ui Folder file operations', () => {
   test.beforeAll(async ({ request }) => {
-    await deletePath(request, '/for-move-%wid', true);
-    await copyPath(request, '/for-move', '/for-move-%wid');
+    const dav = new DavClient(request);
+    await dav.deleteFile('/for-move-%wid', true);
+    await dav.copyFile('/for-move', '/for-move-%wid');
   });
 
   test.afterAll(async ({ request }) => {
-    await deletePath(request, '/for-move-%wid');
+    await new DavClient(request).deleteFile('/for-move-%wid');
   });
 
-  test.beforeEach(bootstrap);
-  test.afterEach(teardown);
-
   test('Select image and move out of folder', async ({ request, page }) => {
-    const fileid1 = await getFileId(request, '/for-move-%wid/source/move_01.jpg');
-    const fileid2 = await getFileId(request, '/for-move-%wid/source/move_02.jpg');
+    const dav = new DavClient(request);
+    const fileid1 = await dav.fileid('/for-move-%wid/source/move_01.jpg');
+    const fileid2 = await dav.fileid('/for-move-%wid/source/move_02.jpg');
 
     await page.goto(psub(`${appUrl}/folders/for-move-%wid`));
 

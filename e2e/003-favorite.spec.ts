@@ -1,17 +1,18 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
-import { getFileId } from './utils';
+import { DavClient } from './utils';
+
+test.beforeEach(bootstrap);
+test.afterEach(teardown);
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
 
 test.describe.serial('@ui Favorites', () => {
-  test.beforeEach(bootstrap);
-  test.afterEach(teardown);
-
   // Due to a bug in Nextcloud, a single file must be marked favorite to create
   // the internal categories, before multiple can be done simultaneously.
-  test('Favorite from Viewer', async ({ page }) => {
-    const fileid3 = await getFileId(page.request, '/for-default/3fUXeoW5Sso.jpg');
+  test('Favorite from Viewer', async ({ request, page }) => {
+    const dav = new DavClient(request);
+    const fileid3 = await dav.fileid('/for-default/3fUXeoW5Sso.jpg');
 
     await test.step('Favorite', async () => {
       await page.goto(appUrl);
@@ -36,9 +37,10 @@ test.describe.serial('@ui Favorites', () => {
     });
   });
 
-  test('Favorite from Timeline', async ({ page }) => {
-    const fileid1 = await getFileId(page.request, '/for-default/CbBbaNTmsAc.jpg');
-    const fileid2 = await getFileId(page.request, '/for-default/NDPmLyPXnZU.jpg');
+  test('Favorite from Timeline', async ({ request, page }) => {
+    const dav = new DavClient(request);
+    const fileid1 = await dav.fileid('/for-default/CbBbaNTmsAc.jpg');
+    const fileid2 = await dav.fileid('/for-default/NDPmLyPXnZU.jpg');
 
     await test.step('Favorite', async () => {
       await page.goto(appUrl);

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders, username } from './navigation';
-import { getFileId } from './utils';
+import { DavClient } from './utils';
 import { goldImageInfo } from './dataset-measurements';
 
 import type { IImageInfo } from '@typings';
@@ -9,7 +9,8 @@ test.use({ extraHTTPHeaders: e2eHeaders() });
 
 test.describe('@api Image Info', () => {
   test('Query image info for test_01.jpg', async ({ request }) => {
-    const fileid = await getFileId(request, '/for-default/Nested 1/test_01.jpg');
+    const dav = new DavClient(request);
+    const fileid = await dav.fileid('/for-default/Nested 1/test_01.jpg');
 
     const res = await request.get(`${appUrl}/api/image/info/${fileid}`);
     expect(res.ok()).toBeTruthy();

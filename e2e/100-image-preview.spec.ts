@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders } from './navigation';
-import { getFileId } from './utils';
+import { DavClient } from './utils';
 import { imageSize } from 'image-size';
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
@@ -12,10 +12,11 @@ test.describe.serial('@api Image preview', () => {
   let fileid2: number;
 
   test.beforeAll(async ({ request }) => {
+    const dav = new DavClient(request);
     // JPEG 640x360 test image
-    fileid1 = await getFileId(request, '/for-default/Nested 1/test_01.jpg');
+    fileid1 = await dav.fileid('/for-default/Nested 1/test_01.jpg');
     // JPEG 640x480 test image
-    fileid2 = await getFileId(request, '/for-default/Nested 1/test_02.jpg');
+    fileid2 = await dav.fileid('/for-default/Nested 1/test_02.jpg');
   });
 
   test('Get 32x32 preview', async ({ request }) => {

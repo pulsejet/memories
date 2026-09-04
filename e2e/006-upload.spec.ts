@@ -1,24 +1,26 @@
 import * as path from 'path';
 import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders, bootstrap, psub, teardown } from './navigation';
-import { getFileId, copyPath, deletePath } from './utils';
+import { DavClient } from './utils';
+
+test.beforeEach(bootstrap);
+test.afterEach(teardown);
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
 
 test.describe('@ui Upload Workflow', () => {
   test.beforeAll(async ({ request }) => {
-    await deletePath(request, '/for-upload-%wid', true);
-    await copyPath(request, '/for-upload', '/for-upload-%wid');
+    const dav = new DavClient(request);
+    await dav.deleteFile('/for-upload-%wid', true);
+    await dav.copyFile('/for-upload', '/for-upload-%wid');
   });
 
   test.afterAll(async ({ request }) => {
-    await deletePath(request, '/for-upload-%wid');
+    await new DavClient(request).deleteFile('/for-upload-%wid');
   });
 
-  test.beforeEach(bootstrap);
-  test.afterEach(teardown);
-
   test('Upload files to folder', async ({ request, page }) => {
+    const dav = new DavClient(request);
     const uploadFilePaths = [
       path.resolve(__dirname, '../tests/assets/apple_h264_boy_01.jpg'),
       path.resolve(__dirname, '../tests/assets/apple_h264_boy_01.mov'),
@@ -40,9 +42,9 @@ test.describe('@ui Upload Workflow', () => {
 
     let fids: number[] = [0, 0, 0];
     await test.step('Verify', async () => {
-      fids[0] = await getFileId(request, '/for-upload-%wid/apple_h264_boy_01.jpg');
-      fids[1] = await getFileId(request, '/for-upload-%wid/apple_h264_girl_01.jpg');
-      fids[2] = await getFileId(request, '/for-upload-%wid/apple_h264_boy_01.mov');
+      fids[0] = await dav.fileid('/for-upload-%wid/apple_h264_boy_01.jpg');
+      fids[1] = await dav.fileid('/for-upload-%wid/apple_h264_girl_01.jpg');
+      fids[2] = await dav.fileid('/for-upload-%wid/apple_h264_boy_01.mov');
       await expect(page.locator(`.p-outer--${fids[0]}`)).toBeVisible();
       await expect(page.locator(`.p-outer--${fids[1]}`)).toBeVisible();
       await expect(page.locator(`.p-outer--${fids[2]}`)).not.toBeVisible();
