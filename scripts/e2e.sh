@@ -288,20 +288,23 @@ e2e_main() {
     fi
 
     echo "Running Playwright with args: ${run_args[*]}..."
+    set +e
     npx playwright test "${run_args[@]}"
+    local PW_EXIT=$?
+    set -e
 
     # Post process video if enabled
     if [ "${E2E_VIDEO:-0}" = "1" ]; then
         echo "Post-processing Playwright videos..."
         npx tsx e2e/video-postprocess.ts
 
-        # Remove duplicate videos from the report so we can retain
-        # it for a longer period of time without bloat.
         if [ -n "$CI" ]; then
-            mv "$MEMORIES_DIR/playwright-results.mp4" "$MEMORIES_DIR/video-${NC_DB_TYPE}-${PHP_VERSION}-${NC_VERSION}.mp4"
-            rm -f "${REPORT_DIR}"/**/*.webm
+            mv "$MEMORIES_DIR/playwright-results.mp4" \
+                "$MEMORIES_DIR/video-${NC_DB_TYPE}-${PHP_VERSION}-${NC_VERSION}.mp4"
         fi
     fi
+
+    return "$PW_EXIT"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
