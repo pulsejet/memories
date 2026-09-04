@@ -1,7 +1,7 @@
 import { XMLParser } from 'fast-xml-parser';
 import XMLBuilder from 'fast-xml-builder';
 import type { APIRequestContext } from '@playwright/test';
-import type { IImageInfo, IPhoto } from '@typings';
+import type { IImageInfo } from '@typings';
 import { appUrl, baseUrl, e2eHeaders, username, psub } from './navigation';
 
 const xmlParser = new XMLParser({
@@ -14,20 +14,6 @@ const xmlBuilder = new XMLBuilder({
   format: true,
   suppressEmptyNode: true,
 });
-
-// Cleanup unpredictable values from photo object.
-export function cleanupPhoto(item: IPhoto): void {
-  if (typeof item.etag !== 'string' || item.etag.length === 0) {
-    throw new Error(`Invalid etag: ${item.etag}`);
-  }
-  if (typeof item.fileid !== 'number' || item.fileid <= 0) {
-    throw new Error(`Invalid fileid: ${item.fileid}`);
-  }
-
-  delete item.etag;
-  item.fileid = 0;
-  item.flag = 0;
-}
 
 // WebDAV and API client for e2e tests.
 export class DavClient {

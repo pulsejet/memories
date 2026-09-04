@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders } from './navigation';
-import { cleanupPhoto } from './utils';
 import { goldDays, goldDayPhotos } from './dataset-measurements';
 
 import type { IDay, IPhoto } from '@typings';
@@ -84,3 +83,17 @@ test.describe('@api Timeline', () => {
     expect(data).toStrictEqual(goldDayPhotos(TIMELINE_PATH, 19354, true));
   });
 });
+
+// Cleanup unpredictable values from photo object.
+function cleanupPhoto(item: IPhoto): void {
+  if (typeof item.etag !== 'string' || item.etag.length === 0) {
+    throw new Error(`Invalid etag: ${item.etag}`);
+  }
+  if (typeof item.fileid !== 'number' || item.fileid <= 0) {
+    throw new Error(`Invalid fileid: ${item.fileid}`);
+  }
+
+  delete item.etag;
+  item.fileid = 0;
+  item.flag = 0;
+}
