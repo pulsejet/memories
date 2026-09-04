@@ -45,6 +45,10 @@ Very important.
 - Record the info in `.agent.yaml` and re-read it at the beginning.
 - This reuses the context; don't teardown/recreate users unnecessarily.
 - Prefer subsets over the full suite.
+- Specs run over HTTP only; assume a remote runner.
+- File changes index reactively; never wait/poll for indexing.
+- Never run `occ` in spec.
+- Put helpers bottom of spec, after all tests.
 
 ## Key Subsystems & Architecture
 

@@ -58,8 +58,12 @@ export class DavClient {
   }
 
   // Get props via WebDAV PROPFIND on the given path relative to the DAV root,
-  // e.g. `files/${username}/Photos/test.jpg`.
-  async propfind(davPath: string): Promise<{ fileid: number }> {
+  // e.g. `files/${username}/Photos/test.jpg`. Returns the list of found props.
+  async propfind(
+    davPath: string,
+    props: Record<string, string>,
+    depth: number | 'infinity' = 0,
+  ): Promise<any[]> {
     const cleanPath = psub(davPath).replace(/^\/+/, '');
     const encodedPath = cleanPath.split('/').map(encodeURIComponent).join('/');
     const res = await this.request.fetch(`${baseUrl}/remote.php/dav/${encodedPath}`, {
@@ -67,7 +71,7 @@ export class DavClient {
       headers: {
         ...e2eHeaders(),
         'Content-Type': 'application/xml',
-        Depth: '0',
+        Depth: String(depth),
       },
       data: xmlBuilder.build({
         '?xml': {
@@ -77,25 +81,25 @@ export class DavClient {
         'd:propfind': {
           '@_xmlns:d': 'DAV:',
           '@_xmlns:oc': 'http://owncloud.org/ns',
-          'd:prop': {
-            'oc:fileid': '',
-          },
+          'd:prop': props,
         },
       }),
     });
     if (!res.ok()) {
       throw new Error(`propfind PROPFIND failed for ${davPath} (${cleanPath}): ${res.status()} ${res.statusText()}`);
     }
-    const xml = await res.text();
-    const parsed = xmlParser.parse(xml);
-    const response = parsed?.multistatus?.response;
-    const propstats = Array.isArray(response?.propstat) ? response.propstat : [response?.propstat];
-    const fileid = propstats.find((ps: any) => ps?.prop?.fileid !== undefined)?.prop?.fileid;
-
-    if (fileid === undefined || fileid === null) {
-      throw new Error(`propfind: failed to parse fileid for ${davPath} ` + `from WebDAV response:\n${xml}`);
+    const parsed = xmlParser.parse(await res.text());
+    const responses = parsed?.multistatus?.response;
+    const found: any[] = [];
+    for (const r of Array.isArray(responses) ? responses : [responses]) {
+      const propstats = Array.isArray(r?.propstat) ? r.propstat : [r?.propstat];
+      for (const ps of propstats) {
+        if (ps?.prop !== undefined) {
+          found.push(ps.prop);
+        }
+      }
     }
-    return { fileid: parseInt(String(fileid), 10) };
+    return found;
   }
 
   // Create a collection at the given path relative to the DAV root
@@ -131,7 +135,14 @@ export class DavClient {
 
   // Get fileid for a photo by its user file path.
   async fileid(filePath: string): Promise<number> {
-    return (await this.propfind(`files/${username}/${filePath.replace(/^\/+/, '')}`)).fileid;
+    const davPath = `files/${username}/${filePath.replace(/^\/+/, '')}`;
+    const props = await this.propfind(davPath, { 'oc:fileid': '' });
+    const fileid = props.find((p: any) => p?.fileid !== undefined)?.fileid;
+
+    if (fileid === undefined || fileid === null) {
+      throw new Error(`propfind: failed to parse fileid for ${davPath}`);
+    }
+    return parseInt(String(fileid), 10);
   }
 
   // Get image info by fileid from the image info endpoint.
