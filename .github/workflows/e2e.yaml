@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: package-lock.json
 
       - name: Build vue app
@@ -147,7 +147,7 @@ jobs:
           uses: actions/setup-node@v6
           with:
             node-version: ${{ env.NODE_VERSION }}
-            cache: 'npm'
+            cache: npm
             cache-dependency-path: apps/${{ env.APP_NAME }}/package-lock.json
 
         - name: Set up php ${{ matrix.php-versions }}

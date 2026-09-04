@@ -69,6 +69,13 @@ jobs:
       - name: Checkout the app
         uses: actions/checkout@v6
 
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: package-lock.json
+
       - name: Install dependencies
         run: npm ci
 
