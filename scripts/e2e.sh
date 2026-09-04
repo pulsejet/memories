@@ -126,6 +126,10 @@ e2e_setup_ci() {
     occ config:system:set --type bool --value true debug
     occ config:system:set loglevel --type integer --value 0
 
+    # Silence expected debug noise at the source.
+    occ config:system:set log.condition matches 0 message --value "dirty table reads"
+    occ config:system:set log.condition matches 0 loglevel --type integer --value 4
+
     # Setup places database unless disabled (@slow).
     if [ -z "$NO_PLANET_DB" ]; then
         occ memories:places-setup --no-interaction --force
@@ -268,9 +272,6 @@ e2e_main() {
         if [ -n "$CI" ]; then
             LOG_DST="$REPORT_DIR/nextcloud.log"
             mv "$NC_DIR/data/nextcloud.log" "$LOG_DST"
-
-            # Remove excessively verbose messages that are not useful.
-            sed -i '/dirty table reads/d' "$LOG_DST"
         fi
 
         exit $exit_code
