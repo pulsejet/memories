@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap, psub } from './navigation';
+import { appUrl, e2eHeaders, bootstrap, psub, teardown } from './navigation';
 import { getFileId, copyPath, deletePath } from './utils';
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
@@ -14,9 +14,8 @@ test.describe('@ui Folder file operations', () => {
     await deletePath(request, '/for-move-%wid');
   });
 
-  test.beforeEach(async ({ page }) => {
-    await bootstrap(page);
-  });
+  test.beforeEach(bootstrap);
+  test.afterEach(teardown);
 
   test('Select image and move out of folder', async ({ request, page }) => {
     const fileid1 = await getFileId(request, '/for-move-%wid/source/move_01.jpg');

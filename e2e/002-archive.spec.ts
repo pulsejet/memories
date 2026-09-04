@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap, psub } from './navigation';
+import { bootstrap, teardown, appUrl, e2eHeaders, psub } from './navigation';
 import { getFileId, getImageInfo, deletePath, copyPath } from './utils';
 
 import type { IPhoto } from '@typings';
@@ -26,9 +26,8 @@ test.describe('Archive', () => {
     await deletePath(request, '/for-archive-%wid');
   });
 
-  test.beforeEach(async ({ page }) => {
-    await bootstrap(page);
-  });
+  test.beforeEach(bootstrap);
+  test.afterEach(teardown);
 
   test('@api Archive from API', async ({ request }) => {
     const fileid = await getFileId(request, FILE_PATH_BASE);

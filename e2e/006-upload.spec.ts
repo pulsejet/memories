@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap, psub } from './navigation';
+import { appUrl, e2eHeaders, bootstrap, psub, teardown } from './navigation';
 import { getFileId, copyPath, deletePath } from './utils';
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
@@ -15,9 +15,8 @@ test.describe('@ui Upload Workflow', () => {
     await deletePath(request, '/for-upload-%wid');
   });
 
-  test.beforeEach(async ({ page }) => {
-    await bootstrap(page);
-  });
+  test.beforeEach(bootstrap);
+  test.afterEach(teardown);
 
   test('Upload files to folder', async ({ request, page }) => {
     const uploadFilePaths = [

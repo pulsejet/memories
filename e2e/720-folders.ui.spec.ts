@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap } from './navigation';
+import { appUrl, bootstrap, teardown } from './navigation';
 import { getFileId } from './utils';
 
 test.describe('@ui Folder view and navigation', () => {
@@ -11,9 +11,8 @@ test.describe('@ui Folder view and navigation', () => {
     fileid2 = await getFileId(request, '/for-default/Nested 1/test_01.jpg');
   });
 
-  test.beforeEach(async ({ page }) => {
-    await bootstrap(page);
-  });
+  test.beforeEach(bootstrap);
+  test.afterEach(teardown);
 
   test('Look for Folders', async ({ page }) => {
     await page.goto(`${appUrl}/folders`);

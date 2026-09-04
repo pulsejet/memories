@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap } from './navigation';
+import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
 import { getFileId, copyPath, deletePath } from './utils';
 
 test.use({
@@ -18,9 +18,8 @@ test.describe('@ui Timeline photo deletion', () => {
     await deletePath(request, '/for-delete-%wid');
   });
 
-  test.beforeEach(async ({ page }) => {
-    await bootstrap(page);
-  });
+  test.beforeEach(bootstrap);
+  test.afterEach(teardown);
 
   test('Select two images and delete', async ({ page }) => {
     const fileid1 = await getFileId(page.request, '/for-delete-%wid/delete_01.jpg');

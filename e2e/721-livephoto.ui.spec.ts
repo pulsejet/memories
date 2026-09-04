@@ -1,5 +1,5 @@
 import { test, expect, type Locator } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap } from './navigation';
+import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
 import { getFileId } from './utils';
 
 test.use({
@@ -15,9 +15,8 @@ test.describe('@ui Live photo', () => {
     fileid = await getFileId(request, '/for-livephoto/apple_h264_boy_01.jpg');
   });
 
-  test.beforeEach(async ({ page }) => {
-    await bootstrap(page);
-  });
+  test.beforeEach(bootstrap);
+  test.afterEach(teardown);
 
   test('Timeline live photo hover', async ({ page }) => {
     let pOuter!: Locator;

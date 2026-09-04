@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap } from './navigation';
+import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
 import { getFileId } from './utils';
 
 test.use({
@@ -9,9 +9,8 @@ test.use({
 });
 
 test.describe('Metadata', () => {
-  test.beforeEach(async ({ page }) => {
-    await bootstrap(page);
-  });
+  test.beforeEach(bootstrap);
+  test.afterEach(teardown);
 
   test('@ui Edit metadata through Viewer', async ({ page }) => {
     const fileid1 = await getFileId(page.request, '/for-edit-exif/ui_edit.jpg');

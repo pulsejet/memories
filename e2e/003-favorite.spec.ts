@@ -1,13 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap } from './navigation';
+import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
 import { getFileId } from './utils';
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
 
 test.describe.serial('@ui Favorites', () => {
-  test.beforeEach(async ({ page }) => {
-    await bootstrap(page);
-  });
+  test.beforeEach(bootstrap);
+  test.afterEach(teardown);
 
   // Due to a bug in Nextcloud, a single file must be marked favorite to create
   // the internal categories, before multiple can be done simultaneously.

@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 export const username = process.env.E2E_USER || process.env.TEST_USER || 'admin';
@@ -8,34 +9,27 @@ export const defaultBaseUrl = process.env.CI ? 'http://localhost:8080' : 'http:/
 export const baseUrl = (process.env.E2E_BASE_URL || process.env.BASE_URL || defaultBaseUrl).replace(/\/+$/, '');
 export const appUrl = `${baseUrl}/index.php/apps/memories`;
 
-const logDir = process.env.E2E_LOG_DIR || path.resolve(__dirname, '../e2e_logs');
-const logFile = path.join(logDir, 'js_console.log');
+// Each worker runs a single test at any given time, so we
+// can use the same buffer for all tests in the worker.
+let logBuffer: string[] = [];
 
-const tagMap: Record<string, string> = {
-  warning: 'WARN',
-  error: 'ERROR',
-  info: 'INFO',
-  log: 'LOG',
-  debug: 'DEBUG',
-  trace: 'TRACE',
-};
-
-let logStream: fs.WriteStream | null = null;
-function getLogStream(): fs.WriteStream {
-  if (!logStream) {
-    fs.mkdirSync(logDir, { recursive: true });
-    logStream = fs.createWriteStream(logFile, { flags: 'a' });
-  }
-  return logStream;
-}
-
-export async function bootstrap(page: Page) {
+export async function bootstrap({ page }: { page: Page }) {
   page.on('console', (msg) => {
-    const tag = tagMap[msg.type()] || msg.type().toUpperCase();
-    getLogStream().write(`[${tag}] ${msg.text()}\n`);
+    const timestamp = new Date().toISOString();
+    const tag = msg.type().toUpperCase();
+    logBuffer.push(`[${timestamp}]\t${tag}\t${msg.text()}`);
   });
 
   await page.clock.install({ time: new Date('2026-07-31T08:00:00') });
+}
+
+export async function teardown({}: {}) {
+  if (logBuffer.length > 0) {
+    await test.info().attach('js-console.log', {
+      body: logBuffer.join('\n'),
+    });
+    logBuffer = [];
+  }
 }
 
 export function e2eHeaders(params?: { timelinePath?: string }): Record<string, string> {

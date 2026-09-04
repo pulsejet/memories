@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap } from './navigation';
+import { appUrl, bootstrap, teardown } from './navigation';
 import { getFileId } from './utils';
 
 test.describe('@ui Timeline feed and photo preview', () => {
@@ -9,9 +9,8 @@ test.describe('@ui Timeline feed and photo preview', () => {
     fileid1 = await getFileId(request, '/for-default/CbBbaNTmsAc.jpg');
   });
 
-  test.beforeEach(async ({ page }) => {
-    await bootstrap(page);
-  });
+  test.beforeEach(bootstrap);
+  test.afterEach(teardown);
 
   test('Look for Images', async ({ page }) => {
     await page.goto(appUrl);

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap, username } from './navigation';
+import { appUrl, e2eHeaders, bootstrap, username, teardown } from './navigation';
 import { getFileId } from './utils';
 
 import type { IAlbum } from '@typings';
@@ -27,9 +27,8 @@ test.describe.serial('@ui Albums', () => {
     fileid4 = await getFileId(request, '/for-default/ipZPm7u6aPA.jpg');
   });
 
-  test.beforeEach(async ({ page }) => {
-    await bootstrap(page);
-  });
+  test.beforeEach(bootstrap);
+  test.afterEach(teardown);
 
   test('Create album with selected photos', async ({ page }) => {
     await page.goto(appUrl);
