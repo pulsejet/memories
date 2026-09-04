@@ -27,6 +27,7 @@ test.describe.serial('@ui Favorites', () => {
 
     await test.step('Unfavorite', async () => {
       await page.goto(appUrl);
+      await expect(page.locator(`.p-outer--${fileid3} .flag.bottom-right > .star-icon`)).toBeVisible();
       await page.locator(`.p-outer--${fileid3} > .img-outer`).click();
       await page.waitForSelector('body.viewer-fully-opened');
       const favBtn = page.getByRole('button', { name: 'Favorite' });
