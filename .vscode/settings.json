@@ -123,5 +123,6 @@
   "php.validate.enable": false,
   "php.suggest.basic": false,
   "prettier.configPath": ".prettierrc",
-  "prettier.prettierPath": "node_modules/prettier"
+  "prettier.prettierPath": "node_modules/prettier",
+  "remote.autoForwardPorts": false,
 }
