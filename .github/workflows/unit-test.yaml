@@ -68,7 +68,7 @@ jobs:
       - name: Install dependencies
         working-directory: apps/memories
         run: |
-          make install-tools
+          make php-init
           make bin-ext
 
       - name: Run PHPUnit

@@ -8,6 +8,9 @@ patch-external:
 .PHONY: bin-ext patch-external
 
 # 2. PHP
+php-init:
+	composer install
+
 php-lint:
 	vendor/bin/php-cs-fixer fix
 
@@ -20,6 +23,9 @@ php-test:
 .PHONY: php-lint psalm php-test
 
 # 3. Vue
+js-init:
+	npm ci
+
 js-lint:
 	npx vue-tsc --noEmit --skipLibCheck
 
@@ -49,9 +55,7 @@ e2e-headed:
 .PHONY: e2e e2e-headed
 
 # 6. Dev & Cleaning
-init: bin-ext
-	composer install
-	npm ci
+init: bin-ext php-init js-init
 
 dev-setup: clean clean-dev init
 

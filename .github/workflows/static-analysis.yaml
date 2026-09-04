@@ -48,7 +48,7 @@ jobs:
       - name: Install dependencies
         working-directory: apps/memories
         run: |
-          make install-tools
+          make php-init
 
       - name: Run PHP-CS-Fixer
         if: ${{ ! cancelled() }}
