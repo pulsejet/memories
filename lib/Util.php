@@ -319,6 +319,13 @@ final class Util
             ->getValueString($uid, Application::APPNAME, 'timelinePath')
                 ?: SystemConfig::get('memories.timeline.default_path');
 
+        if (SystemConfig::get('debug')) {
+            $override = \OC::$server->get(\OCP\IRequest::class)->getHeader('X-TIMELINE-PATH');
+            if (!empty($override)) {
+                $paths = $override;
+            }
+        }
+
         return array_map(
             static fn ($path) => self::sanitizePath(trim($path))
                 ?? throw new \InvalidArgumentException("Invalid timeline path: {$path}"),

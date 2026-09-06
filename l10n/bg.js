@@ -62,6 +62,7 @@ OC.L10N.register(
     "Memories Settings" : "Настройки на приложението Спомени",
     "General" : "Общи",
     "Photo Viewer" : "Преглед на снимки",
+    "On This Day" : "На този ден",
     "Account" : "Профил",
     "Choose Timeline Paths" : "Избор на пътища на времевата линия",
     "Choose the root for the folders view" : "Изберете основа за изгледа на папките",

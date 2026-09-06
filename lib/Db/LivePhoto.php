@@ -9,6 +9,9 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\IDBConnection;
 
+// Atoms to detect in MP4 files for sanity checks.
+const MP4_ATOMS = ['ftyp', 'moov', 'mdat', 'moof', 'mfra', 'sidx', 'free', 'skip'];
+
 final class LivePhoto
 {
     public function __construct(private IDBConnection $connection) {}
@@ -16,14 +19,24 @@ final class LivePhoto
     /**
      * Check if a given Exif data is the video part of a Live Photo.
      */
-    public function isVideoPart(array $exif): bool
+    public static function isVideoPart(array $exif): bool
     {
         return 'video/quicktime' === ($exif['MIMEType'] ?? null)
                && !empty($exif['ContentIdentifier'] ?? null);
     }
 
     /** Get liveid from photo part */
-    public function getLivePhotoId(File $file, array $exif): string
+    public static function getLivePhotoId(File $file, array $exif): string
+    {
+        $path = $file->getStorage()->getLocalFile($file->getInternalPath())
+            ?: throw new \Exception('[BUG][LivePhoto] Failed to get local file path');
+        $size = (int) $file->getSize();
+
+        return self::getLivePhotoIdFromPath($path, $size, $exif);
+    }
+
+    /** Get liveid from photo local file path */
+    public static function getLivePhotoIdFromPath(string $path, int $size, array $exif): string
     {
         // Apple JPEG (MOV has ContentIdentifier)
         if ($uuid = ($exif['ContentIdentifier'] ?? $exif['MediaGroupUUID'] ?? null)) {
@@ -47,7 +60,7 @@ final class LivePhoto
             // and subsequently extract the video file using the
             // EmbeddedVideoFile binary prop, but setting the offset
             // is faster for the same reason mentioned above.
-            $videoOffset = $file->getSize() - $offset;
+            $videoOffset = $size - $offset;
 
             return "self__traileroffset={$videoOffset}";
         }
@@ -96,8 +109,6 @@ final class LivePhoto
                 // hope that the video is located at the end, and thus the last DirectoryItemLength
                 // seen before the DirectoryItemSemantic of MotionPhoto is the length of the video.
                 // https://github.com/pulsejet/memories/issues/965
-                $path = $file->getStorage()->getLocalFile($file->getInternalPath())
-                    ?: throw new \Exception('[BUG][LivePhoto] Failed to get local file path');
                 $extExif = Exif::getExifWithDuplicates($path);
                 $lastLength = null; // last DirectoryItemLength seen
 
@@ -108,7 +119,7 @@ final class LivePhoto
                             // If we can't find it, use the last length seen
                             $videoLength = $extExif[str_replace('Semantic', 'Length', $key)] ?? $lastLength;
                             if (\is_int($videoLength) && $videoLength > 0) {
-                                $videoOffset = (int) $file->getSize() - $videoLength;
+                                $videoOffset = $size - $videoLength;
 
                                 return "self__traileroffset={$videoOffset}";
                             }
@@ -128,6 +139,24 @@ final class LivePhoto
                 // Samsung HEIC -- no way to get this out yet (DirectoryItemLength is senseless)
                 // The reason this is above the MotionPhotoVideo check is because extracting binary
                 // EXIF fields on the fly is extremely expensive compared to trailer extraction.
+            }
+        }
+
+        // Huawei Motion Picture
+        if ('image/jpeg' === ($exif['MIMEType'] ?? null) && $size > 40) {
+            // LIVE_%d is the negative offset from the beggining of the
+            // metadata trailer to the beginning of the video part.
+            // <image> <video> <metadata: 40 bytes>
+            // |0:1477              LIVE_18666740       |
+            // |540:540             LIVE_4276837        |
+            $trailer = file_get_contents($path, false, null, -40, null);
+            if (preg_match('/LIVE_(\d+)/', $trailer ?: '', $matches)) {
+                $negativeOffset = (int) $matches[1];
+                $videoOffset = $size - 40 - $negativeOffset;
+                if ($negativeOffset > 0 && $videoOffset > 0
+                    && \in_array(file_get_contents($path, false, null, $videoOffset + 4, 4) ?: '', MP4_ATOMS, true)) {
+                    return "self__traileroffset={$videoOffset}";
+                }
             }
         }
 

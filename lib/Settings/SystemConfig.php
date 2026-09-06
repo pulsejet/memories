@@ -115,6 +115,7 @@ final class SystemConfig
 
         // Placeholders only; these are not touched by the app
         'instanceid' => 'default',
+        'debug' => false,
     ];
 
     /**

@@ -29,6 +29,7 @@ OC.L10N.register(
     "Cancel" : "Cancel",
     "_{n} selected_::_{n} selected_" : ["{n} selected","{n} selected"],
     "General" : "Kuu",
+    "On This Day" : "Katika siku hii",
     "Account" : "Akaunti",
     "Logged in as {user}" : "Logged in as {user}",
     "Info" : "Info",

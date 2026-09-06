@@ -7,6 +7,7 @@ OC.L10N.register(
     "Settings" : "සැකසුම්",
     "Edit" : "සංස්කරණය",
     "Photos" : "ඡායාරූප",
+    "Delete" : "Delete",
     "Share" : "බෙදාගන්න",
     "Favorite" : "ප්‍රියතම",
     "View in folder" : "බහාලුමේ බලන්න",

@@ -61,6 +61,7 @@ OC.L10N.register(
     "Memories Settings" : "Az Emlékek beállításai",
     "General" : "Általános",
     "Photo Viewer" : "Fénykép-megjelenítő",
+    "On This Day" : "Ezen a napon",
     "Account" : "Fiók",
     "Choose Timeline Paths" : "Idővonal-útvonalak kiválasztása",
     "Choose the root for the folders view" : "Válassza ki a mappanézet gyökerét",

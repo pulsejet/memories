@@ -211,6 +211,11 @@ export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: numbe
   }
 }
 
+type ExtendedStack = {
+  photos: IPhoto[];
+  livePhotoVideoFileIds: Set<number>;
+};
+
 /**
  * Extend given list of Ids with extra files for
  *
@@ -219,9 +224,9 @@ export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: numbe
  *
  * @param photos list of photos to search for
  *
- * @returns list of file ids that contains extra file Ids
+ * @returns expanded photos and the IDs of Live Photo video parts
  */
-export async function extendWithStack(photos: IPhoto[]) {
+export async function extendWithStack(photos: IPhoto[]): Promise<ExtendedStack> {
   // Add Live Photos files
   const livePhotos: IPhoto[] = [];
   for await (const res of runInParallel(
@@ -252,7 +257,10 @@ export async function extendWithStack(photos: IPhoto[]) {
   // De-duplicate keeping the order same as before
   // https://github.com/pulsejet/memories/issues/1056
   const cIds = new Set(combined.map((p) => p.fileid));
-  return combined.filter((p) => cIds.delete(p.fileid));
+  return {
+    photos: combined.filter((p) => cIds.delete(p.fileid)),
+    livePhotoVideoFileIds: new Set(livePhotos.map((p) => p.fileid)),
+  };
 }
 
 /**
@@ -265,20 +273,25 @@ export async function extendWithStack(photos: IPhoto[]) {
 export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   if (photos.length === 0) return;
 
+  // Use user selected count for confirmation
+  const confirmationCount = photos.length;
+
   // Extend with stack unless this is an album
   const routeIsAlbums = _m.route.name === _m.routes.Albums.name;
+  let livePhotoVideoFileIds = new Set<number>();
   if (!routeIsAlbums) {
-    photos = await extendWithStack(photos);
+    const extended = await extendWithStack(photos);
+    photos = extended.photos;
+    livePhotoVideoFileIds = extended.livePhotoVideoFileIds;
   }
 
   // Get set of unique file ids
-  let fileIds = new Set(photos.map((p) => p.fileid));
+  const fileIdsSet = new Set(photos.map((p) => p.fileid));
 
   // Get files data. The double filter ensures we never delete something accidentally.
-  const fileInfos = (await getFiles(photos)).filter((f) => fileIds.has(f.fileid));
-
-  // Take intersection of fileIds and fileInfos
-  fileIds = new Set(fileInfos.map((f) => f.fileid));
+  const fileInfos = (await getFiles(photos)).filter((f) => fileIdsSet.has(f.fileid));
+  const regularFileInfos = fileInfos.filter((f) => !livePhotoVideoFileIds.has(f.fileid));
+  const livePhotoFileInfos = fileInfos.filter((f) => livePhotoVideoFileIds.has(f.fileid));
 
   // Check for locally available files and delete them.
   // For albums, we are not actually deleting.
@@ -292,11 +305,11 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   // Show confirmation dialog if required
   if (confirm) {
     if (routeIsAlbums) {
-      if (!(await utils.dialogs.removeFromAlbum(photos.length))) {
+      if (!(await utils.dialogs.removeFromAlbum(confirmationCount))) {
         throw new Error('User cancelled removal');
       }
     } else {
-      if (!(await utils.dialogs.moveToTrash(photos.length))) {
+      if (!(await utils.dialogs.moveToTrash(confirmationCount))) {
         throw new Error('User cancelled deletion');
       }
     }
@@ -316,9 +329,8 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
     }
   }
 
-  // Delete each file
-  // For public shares, use API endpoint; for authenticated users, use WebDAV
-  const calls = fileInfos.map((fileInfo) => async () => {
+  /** Delete a server file. */
+  const _delete_file = async (fileInfo: IFileInfo, silenceErrors: boolean = false) => {
     try {
       if (!utils.uid) {
         // Public share: use API endpoint which supports token authentication
@@ -329,6 +341,7 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
       }
       return fileInfo.fileid;
     } catch (error) {
+      if (silenceErrors) return 0;
       console.error('Failed to delete', fileInfo, error);
       showError(
         t('memories', 'Failed to delete {fileName}.', {
@@ -337,9 +350,15 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
       );
       return 0;
     }
-  });
+  };
 
+  const calls = regularFileInfos.map((fileInfo) => async () => _delete_file(fileInfo));
   yield* runInParallel(calls, 10);
+  // Try to delete the live photo video parts but silently ignore errors
+  const livePhotoVideoCalls = livePhotoFileInfos.map((fileInfo) => () => _delete_file(fileInfo, true));
+  for await (const _ of runInParallel(livePhotoVideoCalls, 10)) {
+    // ignore results for live photo video operations
+  }
 }
 
 /**
@@ -363,7 +382,9 @@ export async function* copyPhotos(photos: IPhoto[], destination: string, overwri
   }
 
   // Also copy the stack files
-  photos = await extendWithStack(photos);
+  const extended = await extendWithStack(photos);
+  photos = extended.photos;
+  const livePhotoVideoFileIds = extended.livePhotoVideoFileIds;
   const fileIdsSet = new Set(photos.map((p) => p.fileid));
 
   // Get files data
@@ -376,9 +397,11 @@ export async function* copyPhotos(photos: IPhoto[], destination: string, overwri
     return;
   }
 
-  // Copy each file
-  fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
-  const calls = fileInfos.map((fileInfo) => async () => {
+  const regularFileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid) && !livePhotoVideoFileIds.has(f.fileid));
+  const livePhotoVideoFileInfos = fileInfos.filter((f) => livePhotoVideoFileIds.has(f.fileid));
+
+  /** Copy a server file */
+  const _copy_file = async (fileInfo: IFileInfo, silenceErrors: boolean = false) => {
     try {
       await client.copyFile(
         fileInfo.originalFilename,
@@ -388,6 +411,7 @@ export async function* copyPhotos(photos: IPhoto[], destination: string, overwri
       );
       return fileInfo.fileid;
     } catch (error) {
+      if (silenceErrors) return 0;
       console.error('Failed to copy', fileInfo, error);
       if (error.response?.status === 412) {
         // Precondition failed (only if `overwrite` flag set to false)
@@ -406,9 +430,14 @@ export async function* copyPhotos(photos: IPhoto[], destination: string, overwri
       );
       return 0;
     }
-  });
+  };
 
+  const calls = regularFileInfos.map((fileInfo) => () => _copy_file(fileInfo));
   yield* runInParallel(calls, 10);
+  const livePhotoVideoCalls = livePhotoVideoFileInfos.map((fileInfo) => () => _copy_file(fileInfo, true));
+  for await (const _ of runInParallel(livePhotoVideoCalls, 10)) {
+    // ignore results for live photo video operations
+  }
 }
 
 /**
@@ -432,7 +461,9 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
   }
 
   // Also move the stack files
-  photos = await extendWithStack(photos);
+  const extended = await extendWithStack(photos);
+  photos = extended.photos;
+  const livePhotoVideoFileIds = extended.livePhotoVideoFileIds;
   const fileIdsSet = new Set(photos.map((p) => p.fileid));
 
   // Get files data
@@ -445,9 +476,11 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
     return;
   }
 
-  // Move each file
-  fileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid));
-  const calls = fileInfos.map((fileInfo) => async () => {
+  const regularFileInfos = fileInfos.filter((f) => fileIdsSet.has(f.fileid) && !livePhotoVideoFileIds.has(f.fileid));
+  const livePhotoVideoFileInfos = fileInfos.filter((f) => livePhotoVideoFileIds.has(f.fileid));
+
+  /** Move a server file */
+  const _move_file = async (fileInfo: IFileInfo, silenceErrors: boolean = false) => {
     try {
       await client.moveFile(
         fileInfo.originalFilename,
@@ -457,6 +490,7 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
       );
       return fileInfo.fileid;
     } catch (error) {
+      if (silenceErrors) return 0;
       console.error('Failed to move', fileInfo, error);
       if (error.response?.status === 412) {
         // Precondition failed (only if `overwrite` flag set to false)
@@ -475,9 +509,14 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
       );
       return 0;
     }
-  });
+  };
 
+  const calls = regularFileInfos.map((fileInfo) => () => _move_file(fileInfo));
   yield* runInParallel(calls, 10);
+  const livePhotoVideoCalls = livePhotoVideoFileInfos.map((fileInfo) => () => _move_file(fileInfo, true));
+  for await (const _ of runInParallel(livePhotoVideoCalls, 10)) {
+    // ignore results for live photo video operations
+  }
 }
 
 /**
@@ -497,7 +536,9 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
   destination = `files/${utils.uid}/${destination}`;
 
   // Add the stacked photos
-  photos = await extendWithStack(photos);
+  const extended = await extendWithStack(photos);
+  photos = extended.photos;
+  const livePhotoVideoFileIds = extended.livePhotoVideoFileIds;
   const photosMap = new Map(photos.map((p) => [p.fileid, p]));
 
   let fileInfos: IFileInfo[] = [];
@@ -548,8 +589,8 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
     }
   }
 
-  // Move each file
-  const calls = operations.map(([targetPath, fileInfo]) => async () => {
+  /** Move server file */
+  const _move_file = async (targetPath: string, fileInfo: IFileInfo, silenceErrors: boolean = false) => {
     try {
       await client.moveFile(
         fileInfo.originalFilename,
@@ -559,6 +600,7 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
       );
       return fileInfo.fileid;
     } catch (error) {
+      if (silenceErrors) return 0;
       console.error('Failed to move', fileInfo, error);
       if (error.response?.status === 412) {
         // Precondition failed (only if `overwrite` flag set to false)
@@ -577,9 +619,22 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
       );
       return 0;
     }
-  });
+  };
 
+  // Separate live photo video operations, handle them later with errors silenced
+  const nonLivePhotoOperations = operations.filter(
+    ([targetPath, fileInfo]) => !livePhotoVideoFileIds.has(fileInfo.fileid),
+  );
+  const livePhotoVideoOperations = operations.filter(([targetPath, fileInfo]) =>
+    livePhotoVideoFileIds.has(fileInfo.fileid),
+  );
+
+  const calls = nonLivePhotoOperations.map((operation) => () => _move_file(...operation));
   yield* runInParallel(calls, 10);
+  const livePhotoVideoCalls = livePhotoVideoOperations.map((operation) => () => _move_file(...operation, true));
+  for await (const _ of runInParallel(livePhotoVideoCalls, 10)) {
+    // ignore results for live photo video operations
+  }
 }
 
 /**

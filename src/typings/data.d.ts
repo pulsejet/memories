@@ -105,6 +105,7 @@ declare module '@typings' {
 
   export interface IImageInfo {
     fileid: number;
+    dayid: number;
     etag: string;
     h: number;
     w: number;
@@ -161,8 +162,21 @@ declare module '@typings' {
     FNumber?: number;
     FocalLength?: number;
 
+    ExifVersion?: string;
+    ColorSpace?: number;
+
     GPSAltitude?: number;
     GPSLatitude?: number;
     GPSLongitude?: number;
   }
+
+  export type IShare = {
+    id: string;
+    label: string;
+    token: string;
+    url: string;
+    hasPassword: boolean;
+    expiration: number | null;
+    editable: number;
+  };
 }

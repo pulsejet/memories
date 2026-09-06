@@ -15,7 +15,7 @@
       @zoomend="refreshDebounced"
       :options="mapOptions"
     >
-      <LTileLayer :url="tileurl" :attribution="attribution" :noWrap="true" />
+      <LTileLayer :url="tileurl" :attribution="attribution" :noWrap="true" :options="tileLayerOptions" />
       <LMarker v-for="cluster of clusters" :key="cluster.id" :lat-lng="cluster.center" @click="zoomTo(cluster)">
         <LIcon :icon-anchor="[24, 24]" :className="clusterIconClass(cluster)">
           <div class="preview">
@@ -44,7 +44,7 @@ import axios from '@nextcloud/axios';
 import { API } from '@services/API';
 import * as utils from '@services/utils';
 
-import type { IPhoto } from '@typings';
+import type { IMapCluster } from '@typings';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-edgebuffer';
@@ -54,14 +54,6 @@ const OSM_ATTRIBUTION = '&copy; <a target="_blank" href="http://osm.org/copyrigh
 
 // CSS transition time for zooming in/out cluster animation
 const CLUSTER_TRANSITION_TIME = 300;
-
-type IMarkerCluster = {
-  id: number;
-  center: [number, number];
-  count: number;
-  preview: IPhoto;
-  dummy?: boolean;
-};
 
 delete (<any>Icon.Default.prototype)._getIconUrl;
 
@@ -88,7 +80,10 @@ export default defineComponent({
       maxBounds: latLngBounds([-90, -180], [90, 180]),
       maxBoundsViscosity: 0.9,
     },
-    clusters: [] as IMarkerCluster[],
+    tileLayerOptions: {
+      referrerPolicy: 'origin',
+    },
+    clusters: [] as IMapCluster[],
     animMarkers: false,
   }),
 
@@ -284,18 +279,18 @@ export default defineComponent({
       ]);
     },
 
-    clusterPreviewUrl(cluster: IMarkerCluster) {
+    clusterPreviewUrl(cluster: IMapCluster) {
       return utils.getPreviewUrl({
         photo: cluster.preview,
         msize: 256,
       });
     },
 
-    clusterIconClass(cluster: IMarkerCluster) {
+    clusterIconClass(cluster: IMapCluster) {
       return cluster.dummy ? 'dummy' : '';
     },
 
-    zoomTo(cluster: IMarkerCluster) {
+    zoomTo(cluster: IMapCluster) {
       // At high zoom levels, open the photo
       if (this.zoom >= 12 && cluster.preview) {
         cluster.preview.key = cluster.preview.fileid.toString();
@@ -321,8 +316,8 @@ export default defineComponent({
       return `${latGid}-${lonGid}`;
     },
 
-    getGridMap(clusters: IMarkerCluster[], zoom: number) {
-      const gridMap = new Map<string, IMarkerCluster>();
+    getGridMap(clusters: IMapCluster[], zoom: number) {
+      const gridMap = new Map<string, IMapCluster>();
       for (const cluster of clusters) {
         const key = this.getGridKey(cluster.center, zoom);
         gridMap.set(key, cluster);
@@ -330,12 +325,12 @@ export default defineComponent({
       return gridMap;
     },
 
-    async setClustersZoomIn(clusters: IMarkerCluster[], oldZoom: number) {
+    async setClustersZoomIn(clusters: IMapCluster[], oldZoom: number) {
       // Create GID-map for old clusters
       const oldClusters = this.getGridMap(this.clusters, oldZoom);
 
       // Dummy clusters to animate markers
-      const dummyClusters: IMarkerCluster[] = [];
+      const dummyClusters: IMapCluster[] = [];
 
       // Iterate new clusters
       for (const cluster of clusters) {
@@ -361,18 +356,18 @@ export default defineComponent({
       this.clusters = clusters;
     },
 
-    async setClustersZoomOut(clusters: IMarkerCluster[]) {
+    async setClustersZoomOut(clusters: IMapCluster[]) {
       // Get GID-map for new clusters
       const newClustersGid = this.getGridMap(clusters, this.zoom);
 
       // Get ID-map for new clusters
-      const newClustersId = new Map<number, IMarkerCluster>();
+      const newClustersId = new Map<number, IMapCluster>();
       for (const cluster of clusters) {
         newClustersId.set(cluster.id, cluster);
       }
 
       // Dummy clusters to animate markers
-      const dummyClusters: IMarkerCluster[] = [...clusters];
+      const dummyClusters: IMapCluster[] = [...clusters];
 
       // Iterate old clusters
       for (const oldCluster of this.clusters) {

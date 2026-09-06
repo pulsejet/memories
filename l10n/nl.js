@@ -62,6 +62,7 @@ OC.L10N.register(
     "Memories Settings" : "Herinneringen Instellingen",
     "General" : "Algemeen",
     "Photo Viewer" : "Fotoviewer",
+    "On This Day" : "Op deze dag",
     "Account" : "Account",
     "Choose Timeline Paths" : "Kies tijdlijnpaden",
     "Choose the root for the folders view" : "Kies de hoofdmap voor de mappenweergave",

@@ -27,6 +27,7 @@ OC.L10N.register(
     "Cancel" : "–±–æ–ª–∏—É–ª–∞—Ö",
     "_{n} selected_::_{n} selected_" : ["{n} сонгогдсон","{n} сонгогдсон"],
     "General" : "–ï—Ä”©–Ω—Ö–∏–π",
+    "On This Day" : "Энэ өдөр",
     "Account" : "–∞–∫–∫–∞—É–Ω—Ç",
     "Info" : "Info",
     "Close" : "–•–∞–∞—Ö",

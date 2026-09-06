@@ -1,12 +1,14 @@
-all: dev-setup lint build-js-production test
-
-# Dev env management
-dev-setup: clean clean-dev npm-init bin-ext install-tools
-
+# 1. Misc
 bin-ext:
 	sh scripts/get-bin-ext.sh
 
-install-tools:
+patch-external:
+	bash scripts/patch-external.sh
+
+.PHONY: bin-ext patch-external
+
+# 2. PHP
+php-init:
 	composer install
 
 php-lint:
@@ -15,55 +17,52 @@ php-lint:
 psalm:
 	vendor/bin/psalm --no-cache --show-info=true
 
-npm-init:
+php-test:
+	vendor/bin/phpunit
+
+.PHONY: php-lint psalm php-test
+
+# 3. Vue
+js-init:
 	npm ci
 
-npm-update:
-	npm update
+js-lint:
+	npx vue-tsc --noEmit --skipLibCheck
 
-.PHONY: dev-setup bin-ext install-tools php-lint psalm npm-init npm-update
-
-# Building
 build-js:
 	npm run dev
 
 build-js-production:
 	rm -f js/* && npm run build
 
-patch-external:
-	bash scripts/patch-external.sh
-
 watch-js:
 	npm run watch
 
-.PHONY: build-js patch-external watch-js
+.PHONY: js-lint build-js build-js-production watch-js
 
-# Testing
-test:
-	npm run test
+# 4. Lint
+lint: php-lint psalm js-lint
 
-test-watch:
-	npm run test:watch
+.PHONY: lint
 
-test-coverage:
-	npm run test:coverage
+# 5. E2E
+e2e:
+	bash scripts/e2e.sh
 
-.PHONY: test test-watch test-coverage
+e2e-headed:
+	npx playwright test --headed
 
-# Linting
-lint:
-	npm run lint
+.PHONY: e2e e2e-headed
 
-lint-fix:
-	npm run lint:fix
+# 6. Dev & Cleaning
+init: bin-ext php-init js-init
 
-.PHONY: lint lint-fix
+dev-setup: clean clean-dev init
 
-# Cleaning
 clean:
 	rm -f js/*
 
 clean-dev:
 	rm -rf node_modules
 
-.PHONY: clean clean-dev
+.PHONY: init dev-setup clean clean-dev

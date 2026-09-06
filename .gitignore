@@ -24,10 +24,18 @@ vendor
 memories.tar.gz
 /test-results/
 /playwright-report/
+/playwright-results.*
+/e2e_logs/
+/e2e/.state/
+/e2e/.dataset-cache/
 /playwright/.cache/
 .cache/
+tests/phpunit-junit.xml
 
 bin-ext/
 
 .devcontainer/config/
 .devcontainer/data/
+
+# Local agent e2e context (see AGENTS.md)
+.agent.yaml

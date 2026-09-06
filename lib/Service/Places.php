@@ -13,17 +13,15 @@ use OCP\IDBConnection;
 const GIS_TYPE_NONE = 0;
 const GIS_TYPE_MYSQL = 1;
 const GIS_TYPE_POSTGRES = 2;
-const APPROX_PLACES = 726000;
 
-const PLANET_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-0.0.4/planet_coarse_boundaries.zip';
+const PLANET_MYSQL_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-20260902/planet_mysql.zip';
+const PLANET_MYSQL_CHECKSUM = '42ae55edc23fe79eaae04682e9aef99d03836bc9f794e868e38bf39c2d3a13e2';
+
+const PLANET_POSTGRES_URL = 'https://github.com/pulsejet/memories-assets/releases/download/geo-20260902/planet_postgres.zip';
+const PLANET_POSTGRES_CHECKSUM = '33b9516ea284a089189075f61195be54a20a6d494d1de73c62172a964a67c48f';
 
 final class Places
 {
-    /**
-     * Number of places to process in a single transaction.
-     */
-    public int $txnSize = 50;
-
     public function __construct(
         private IConfig $config,
         private IDBConnection $connection,
@@ -137,27 +135,64 @@ final class Places
     }
 
     /**
-     * Download planet database file and return path to it.
+     * Download and import planet database.
      */
-    public function downloadPlanet(): string
+    public function downloadImportPlanet(int $gis = GIS_TYPE_NONE, ?string $zipFile = null): void
     {
-        echo "Download planet data to temporary file...\n";
-        flush();
-
-        $filename = BinExt::getTmpPath().'/planet_coarse_boundaries.zip';
-        if (file_exists($filename) && !unlink($filename)) {
-            throw new \Exception("Failed to delete old planet zip file: {$filename}");
+        $gis = GIS_TYPE_NONE !== $gis ? $gis : $this->detectGisType();
+        if (GIS_TYPE_NONE === $gis) {
+            throw new \Exception('No supported GIS type detected');
         }
 
-        $txtfile = BinExt::getTmpPath().'/planet_coarse_boundaries.txt';
-        if (file_exists($txtfile) && !unlink($txtfile)) {
-            throw new \Exception("Failed to delete old planet data file: {$txtfile}");
+        $startTime = microtime(true);
+        $files = [];
+
+        try {
+            if (null !== $zipFile) {
+                $files = $this->extractPlanet($zipFile);
+            } else {
+                $files = $this->downloadPlanet($gis);
+            }
+            [$planetFile, $geomFile] = $files;
+            $this->importPlanetBulk($gis, $planetFile, $geomFile);
+
+            $duration = round(microtime(true) - $startTime, 2);
+            $this->logToStdout("Total time taken: {$duration}s");
+        } finally {
+            foreach ($files as $file) {
+                @unlink($file);
+            }
+        }
+    }
+
+    /**
+     * Download planet database file and return paths to unzipped files.
+     *
+     * @return array{0: string, 1: string}
+     */
+    public function downloadPlanet(int $gis): array
+    {
+        if (GIS_TYPE_MYSQL === $gis) {
+            $url = PLANET_MYSQL_URL;
+            $checksum = PLANET_MYSQL_CHECKSUM;
+        } elseif (GIS_TYPE_POSTGRES === $gis) {
+            $url = PLANET_POSTGRES_URL;
+            $checksum = PLANET_POSTGRES_CHECKSUM;
+        } else {
+            throw new \Exception('No supported GIS type detected');
         }
 
-        $fp = fopen($filename, 'w+');
+        $this->logToStdout('Download planet data to temporary file...');
+
+        $zipFile = BinExt::getTmpPath().'/planet_data.zip';
+        if (file_exists($zipFile) && !unlink($zipFile)) {
+            throw new \Exception("Failed to delete old planet zip file: {$zipFile}");
+        }
+
+        $fp = fopen($zipFile, 'w+');
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, PLANET_URL);
+        curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_FILE, $fp);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 3600);
@@ -166,237 +201,110 @@ final class Places
 
         fclose($fp);
 
-        // Unzip
+        $this->logToStdout('Verifying planet data checksum...');
+        if ($checksum !== hash_file('sha256', $zipFile)) {
+            @unlink($zipFile);
+
+            throw new \Exception('Failed to verify checksum for planet data file');
+        }
+        $this->logToStdout('Planet data checksum verified successfully');
+
+        try {
+            return $this->extractPlanet($zipFile);
+        } finally {
+            // Delete downloaded zip file
+            @unlink($zipFile);
+        }
+    }
+
+    /**
+     * Extract planet zip file and return paths to unzipped files.
+     *
+     * @return array{0: string, 1: string}
+     */
+    public function extractPlanet(string $zipFile): array
+    {
+        if (!file_exists($zipFile)) {
+            throw new \Exception("Planet zip file not found: {$zipFile}");
+        }
+
+        $planetFile = BinExt::getTmpPath().'/planet.tsv';
+        if (file_exists($planetFile) && !unlink($planetFile)) {
+            throw new \Exception("Failed to delete old planet data file: {$planetFile}");
+        }
+
+        $geomFile = BinExt::getTmpPath().'/planet_geometry.tsv';
+        if (file_exists($geomFile) && !unlink($geomFile)) {
+            throw new \Exception("Failed to delete old planet geometry file: {$geomFile}");
+        }
+
+        $this->logToStdout('Extracting planet data...');
         $zip = new \ZipArchive();
-        $res = $zip->open($filename);
+        $res = $zip->open($zipFile);
         if (true === $res) {
             $zip->extractTo(BinExt::getTmpPath());
             $zip->close();
         } else {
-            throw new \Exception('Failed to unzip planet data file');
+            throw new \Exception("Failed to unzip planet data file: {$zipFile}");
+        }
+        $this->logToStdout('Planet data extracted successfully');
+
+        // Check if files exist
+        if (!file_exists($planetFile) || !file_exists($geomFile)) {
+            throw new \Exception('Failed to find planet data files after unzip');
         }
 
-        // Check if file exists
-        if (!file_exists($txtfile)) {
-            throw new \Exception('Failed to find planet data file after unzip');
-        }
-
-        // Delete zip file
-        @unlink($filename);
-
-        return $txtfile;
+        return [$planetFile, $geomFile];
     }
 
     /**
-     * Insert planet into database from file.
+     * Insert planet into database from files using bulk loading.
      */
-    public function importPlanet(string $datafile): void
+    public function importPlanetBulk(int $gis, string $planetFile, string $geomFile): void
     {
-        echo "Inserting planet data into database...\n";
-        flush();
+        $this->logToStdout('Preparing planet data for bulk import...');
 
-        // Detect the GIS type
-        $gis = $this->detectGisType();
-
-        // Make sure we support something
         if (GIS_TYPE_NONE === $gis) {
-            throw new \Exception('No GIS support detected');
+            throw new \Exception('No supported GIS type detected');
         }
 
-        // Setup the database
+        // Setup the database tables
         // This drops and recreates memories_planet_geometry
-        $this->setupDatabase($gis);
+        $this->setupTables();
 
         // Truncate planet table
         SQL::truncate($this->connection, 'memories_planet', false);
 
-        // Create place insertion statement
-        $query = $this->connection->getQueryBuilder();
-        $query->insert('memories_planet')
-            ->values([
-                'osm_id' => $query->createParameter('osm_id'),
-                'admin_level' => $query->createParameter('admin_level'),
-                'name' => $query->createParameter('name'),
-                'other_names' => $query->createParameter('other_names'),
-            ])
-        ;
-        $insertPlace = $this->connection->prepare($query->getSQL());
+        // Table prefix
+        $prefix = $this->config->getSystemValue('dbtableprefix', '') ?: '';
 
-        // Create geometry insertion statement
-        $query = $this->connection->getQueryBuilder();
-        $geomParam = (string) $query->createParameter('geometry');
-        if (GIS_TYPE_MYSQL === $gis) {
-            $geomParam = "ST_GeomFromText({$geomParam}, 4326)";
-        } elseif (GIS_TYPE_POSTGRES === $gis) {
-            $geomParam = "POLYGON({$geomParam}::text)";
-        }
-        $query->insert('memories_planet_geometry')
-            ->values([
-                'id' => $query->createParameter('id'),
-                'poly_id' => $query->createParameter('poly_id'),
-                'type_id' => $query->createParameter('type_id'),
-                'osm_id' => $query->createParameter('osm_id'),
-                'geometry' => $query->createFunction($geomParam),
-            ])
-        ;
-        $sql = str_replace('*PREFIX*memories_planet_geometry', 'memories_planet_geometry', $query->getSQL());
-        $insertGeometry = $this->connection->prepare($sql);
-
-        // The number of places in the current transaction
-        $txnCount = 0;
-
-        // Function to commit the current transaction
-        $transact = function () use (&$txnCount): void {
-            if (++$txnCount >= $this->txnSize) {
-                $this->connection->commit();
-                $this->connection->beginTransaction();
-                $txnCount = 0;
-            }
-        };
-
-        // Start the first transaction
-        $this->connection->beginTransaction();
-
-        // Iterate over the data file
-        $handle = fopen($datafile, 'r');
-        if ($handle) {
-            $count = 0;
-            while (($line = fgets($handle)) !== false) {
-                // Skip empty lines
-                if ('' === trim($line)) {
-                    continue;
-                }
-
-                ++$count;
-
-                // Decode JSON
-                $data = json_decode($line, true);
-                if (null === $data) {
-                    echo "ERROR: Failed to decode JSON\n";
-
-                    continue;
-                }
-
-                // Extract data
-                $osmId = $data['osm_id'];
-                $adminLevel = $data['admin_level'];
-                $boundaries = $data['geometry'];
-
-                /** @var string $name */
-                $name = $data['name'];
-
-                /** @var array<string, string> $otherNames */
-                $otherNames = $data['other_names'];
-
-                // Explicitly convert all names to UTF-8
-                $name = mb_convert_encoding($name, 'UTF-8');
-
-                $otherNames = [];
-                foreach (($data['other_names'] ?? []) as $lang => $val) {
-                    $otherNames[$lang] = mb_convert_encoding($val, 'UTF-8');
-                }
-                $otherNames = json_encode($otherNames);
-
-                // Skip some places
-                if ($adminLevel > -2 && ($adminLevel <= 1 || $adminLevel >= 10)) {
-                    // <=1: These are too general, e.g. "Earth"? or invalid
-                    // >=10: These are too specific, e.g. "Community Board"
-                    // <-1: These are special, e.g. "Timezone" = -7
-                    continue;
-                }
-
-                // Insert place into database
-                $insertPlace->bindValue('osm_id', $osmId);
-                $insertPlace->bindValue('admin_level', $adminLevel);
-                $insertPlace->bindValue('name', $name);
-                $insertPlace->bindValue('other_names', $otherNames);
-                $insertPlace->execute();
-                $transact();
-
-                // Insert polygons into database
-                $idx = 0;
-                foreach ($boundaries as &$polygon) {
-                    // $polygon is a struct as
-                    // [ "t" => "e", "c" => [lon, lat], [lon, lat], ... ] ]
-
-                    $polyid = $polygon['i'];
-                    $typeid = $polygon['t'];
-                    $pkey = $polygon['k'];
-                    $coords = $polygon['c'];
-
-                    // Create parameters
-                    ++$idx;
-                    $geometry = '';
-
-                    // Every polygon must have at least 3 points
-                    if (\count($coords) < 3) {
-                        echo "ERROR: Invalid polygon {$polyid}\n";
-
-                        continue;
-                    }
-
-                    // Check if coordinates are valid
-                    foreach ($coords as [$lon, $lat]) {
-                        if ($lon < -180 || $lon > 180 || $lat < -90 || $lat > 90) {
-                            echo "ERROR: Invalid coordinates for polygon {$polyid}\n";
-
-                            continue 2;
-                        }
-                    }
-
-                    if (GIS_TYPE_MYSQL === $gis) {
-                        $points = implode(',', array_map(static function (array $point) {
-                            [$lon, $lat] = $point;
-
-                            return "{$lat} {$lon}";
-                        }, $coords));
-
-                        $geometry = "POLYGON(({$points}))";
-                    } elseif (GIS_TYPE_POSTGRES === $gis) {
-                        $geometry = implode(',', array_map(static function (array $point) {
-                            [$lon, $lat] = $point;
-
-                            return "({$lat},{$lon})";
-                        }, $coords));
-                    }
-
-                    try {
-                        $insertGeometry->bindValue('id', $pkey);
-                        $insertGeometry->bindValue('poly_id', $polyid);
-                        $insertGeometry->bindValue('type_id', $typeid);
-                        $insertGeometry->bindValue('osm_id', $osmId);
-                        $insertGeometry->bindValue('geometry', $geometry);
-                        $insertGeometry->execute();
-                        $transact();
-                    } catch (\Exception $e) {
-                        echo "ERROR: Failed to insert polygon {$polyid} ({$e->getMessage()} \n";
-
-                        continue;
-                    }
-                }
-
-                if (0 === $count % 500) {
-                    // Print progress
-                    $total = APPROX_PLACES;
-                    $pct = round((float) $count / (float) $total * 100.0, 1);
-                    echo "Inserted {$count} / {$total} places ({$pct}%), Last: {$name}\n";
-                    flush();
-                }
-            }
-
-            fclose($handle);
+        if (!file_exists($planetFile) || !file_exists($geomFile)) {
+            throw new \Exception('Failed to find unzipped planet data files for bulk import');
         }
 
-        // Commit final transaction
-        $this->connection->commit();
+        $this->logToStdout('Inserting bulk data into database...');
+
+        try {
+            if (GIS_TYPE_MYSQL === $gis) {
+                $pdo = SQL::getMysqlPdo($this->connection, $this->config);
+                SQL::mysqlCopyFromFile($pdo, $prefix.'memories_planet', $planetFile, 'osm_id, admin_level, name, other_names');
+                SQL::mysqlCopyFromFile($pdo, 'memories_planet_geometry', $geomFile, 'id, poly_id, type_id, osm_id, @geom', 'geometry = ST_GeomFromText(@geom, 4326)');
+            } elseif (GIS_TYPE_POSTGRES === $gis) {
+                $pdo = SQL::getPgsqlPdo($this->connection, $this->config);
+                SQL::pgsqlCopyFromFile($pdo, $prefix.'memories_planet', $planetFile, 'osm_id, admin_level, name, other_names');
+                SQL::pgsqlCopyFromFile($pdo, 'memories_planet_geometry', $geomFile, 'id, poly_id, type_id, osm_id, geometry');
+            }
+        } catch (\Exception $e) {
+            throw new \Exception('Bulk insert failed: '.$e->getMessage(), (int) $e->getCode(), $e);
+        }
+
+        $this->logToStdout('Creating database indices...');
+        $this->createIndexes($gis);
+        $this->logToStdout('Database indices created successfully!');
 
         // Mark success
-        echo "Planet database imported successfully!\n";
-        flush();
+        $this->logToStdout('Planet database imported successfully!');
         SystemConfig::set('memories.gis_type', $gis);
-
-        // Delete data file
-        @unlink($datafile);
     }
 
     /**
@@ -404,8 +312,7 @@ final class Places
      */
     public function recalculateAll(): void
     {
-        echo "Recalculating places for all files (do not interrupt this process)...\n";
-        flush();
+        $this->logToStdout('Recalculating places for all files (do not interrupt this process)...');
 
         $count = 0;
         $this->tw->orphanAndRun(['fileid', 'lat', 'lon'], 20, function (array $row) use (&$count) {
@@ -423,16 +330,15 @@ final class Places
 
             // Print every 500 files
             if (0 === $count % 500) {
-                echo "Updated places data for {$count} files\n";
-                flush();
+                $this->logToStdout("Updated places data for {$count} files");
             }
         });
     }
 
     /**
-     * Create database tables and indices.
+     * Create database tables.
      */
-    private function setupDatabase(int $gis): void
+    private function setupTables(): void
     {
         try {
             // Drop the table if it exists
@@ -454,7 +360,17 @@ final class Places
                 geometry polygon NOT NULL {$srid}
             );";
             $this->connection->executeQuery($sql);
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to create database tables: '.$e->getMessage());
+        }
+    }
 
+    /**
+     * Create database indices.
+     */
+    private function createIndexes(int $gis): void
+    {
+        try {
             // Add indexes
             $this->connection->executeQuery('CREATE INDEX planet_osm_id_idx ON memories_planet_geometry (osm_id);');
 
@@ -466,7 +382,18 @@ final class Places
                 $this->connection->executeQuery('CREATE INDEX planet_osm_polygon_geometry_idx ON memories_planet_geometry USING GIST (geometry poly_ops);');
             }
         } catch (\Exception $e) {
-            throw new \Exception('Failed to create database tables: '.$e->getMessage());
+            throw new \Exception('Failed to create database indices: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Log message to standard output.
+     */
+    private function logToStdout(string $message): void
+    {
+        $time = date('Y-m-d H:i:s');
+        $text = rtrim($message, "\r\n");
+        echo "[{$time}] {$text}\n";
+        flush();
     }
 }

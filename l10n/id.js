@@ -28,6 +28,7 @@ OC.L10N.register(
     "Cancel" : "Membatalkan",
     "_{n} selected_::_{n} selected_" : ["{n} dipilih"],
     "General" : "Umum",
+    "On This Day" : "Pada Hari Ini",
     "Account" : "Akun",
     "Info" : "Info",
     "Close" : "Tutup",

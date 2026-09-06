@@ -18,6 +18,7 @@
         <template #extra="{ album }">
           <div
             :class="{
+              'album-selected': selection.has(album),
               'check-circle-icon': true,
               'check-circle-icon--active': selection.has(album),
             }"

@@ -289,7 +289,7 @@ final class FaceRecognitionBackend extends Backend
             $query->andWhere($query->expr()->eq('fri.file', $query->createNamedParameter($fileid)));
         } else {
             // WHERE these clusters has a minimum number of faces
-            $query->having($query->expr()->gte($count, $query->expr()->literal($this->minFaceInClusters(), \PDO::PARAM_INT)));
+            $query->having($query->expr()->gte($count, SQL::literal($query, $this->minFaceInClusters(), \PDO::PARAM_INT)));
             // WHERE these clusters were not hidden due inconsistencies
             $query->andWhere($query->expr()->eq('frp.is_visible', $query->expr()->literal(1)));
         }

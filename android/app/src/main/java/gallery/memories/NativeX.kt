@@ -119,6 +119,11 @@ class NativeX(private val mCtx: MainActivity) {
 
     @JavascriptInterface
     fun playVideo(auid: String, fileid: Long, urlsArray: String) {
+        this.playVideo2(auid, fileid, urlsArray, false)
+    }
+
+    @JavascriptInterface
+    fun playVideo2(auid: String, fileid: Long, urlsArray: String, loop: Boolean = false) {
         mCtx.threadPool.submit {
             // Get URI of remote videos
             val urls = JSONArray(urlsArray)
@@ -132,9 +137,9 @@ class NativeX(private val mCtx: MainActivity) {
             // Play with exoplayer
             mCtx.runOnUiThread {
                 if (!videos.isEmpty()) {
-                    mCtx.initializePlayer(arrayOf(videos[0].uri), fileid)
+                    mCtx.initializePlayer(arrayOf(videos[0].uri), fileid, loop)
                 } else {
-                    mCtx.initializePlayer(list, fileid)
+                    mCtx.initializePlayer(list, fileid, loop)
                 }
             }
         }

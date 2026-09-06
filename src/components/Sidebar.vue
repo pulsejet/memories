@@ -28,6 +28,7 @@ import Vue, { defineComponent } from 'vue';
 import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
 import { registerDavProperty } from '@nextcloud/files/dav';
+import { registerSidebarTab } from '@nextcloud/files';
 
 import Metadata from '@components/Metadata.vue';
 

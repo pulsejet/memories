@@ -144,6 +144,10 @@ class StaticConfig {
       sidebar_filepath: false,
       metadata_in_slideshow: false,
 
+      // on this day settings
+      onthisday_day_range: 0,
+      onthisday_photos_per_year: 10,
+
       // folder settings
       folders_path: '',
       show_hidden_folders: false,

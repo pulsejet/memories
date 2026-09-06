@@ -34,6 +34,7 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Http\Events\BeforeTemplateRenderedEvent;
+use OCP\Files\Events\Node\NodeCopiedEvent;
 use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
@@ -84,6 +85,7 @@ final class Application extends App implements IBootstrap
         // Register file hooks
         $context->registerEventListener(NodeWrittenEvent::class, PostWriteListener::class);
         $context->registerEventListener(NodeTouchedEvent::class, PostWriteListener::class);
+        $context->registerEventListener(NodeCopiedEvent::class, PostWriteListener::class);
         $context->registerEventListener(NodeDeletedEvent::class, PostDeleteListener::class);
 
         // Register other global hooks

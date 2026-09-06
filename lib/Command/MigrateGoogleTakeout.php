@@ -243,7 +243,7 @@ final class MigrateGoogleTakeout extends Command
         }
 
         // Convert Takeout metadata to exiftool JSON format
-        $txf = $this->takeoutToExiftoolJson($json);
+        $txf = self::takeoutToExiftoolJson($json);
 
         // Get current EXIF metadata
         $exif = Exif::getExifFromFile($file);
@@ -308,7 +308,7 @@ final class MigrateGoogleTakeout extends Command
         ++$this->nProcessed;
     }
 
-    protected function takeoutToExiftoolJson(array $json): array
+    protected static function takeoutToExiftoolJson(array $json): array
     {
         // Helper to get a value from nested JSON
         $get = static function (string $source) use ($json): mixed {

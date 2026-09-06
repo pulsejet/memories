@@ -113,7 +113,7 @@ trait TimelineQueryDays
             $hSq->select($hSq->expr()->literal(1))
                 ->from('cte_folders', 'cte_f')
                 ->andWhere($hSq->expr()->eq('cte_f.fileid', 'f.parent'))
-                ->andWhere($hSq->expr()->eq('cte_f.hidden', $hSq->expr()->literal(1)))
+                ->andWhere($hSq->expr()->eq('cte_f.hidden', SQL::literal($hSq, 1, \PDO::PARAM_INT)))
             ;
             $query->selectAlias(SQL::subquery($query, $hSq), 'hidden');
         }

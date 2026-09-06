@@ -21,14 +21,14 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Listeners;
 
-use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Service\Index;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
+use OCP\Files\Events\Node\NodeCopiedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
 use OCP\Files\File;
-use Psr\Log\LoggerInterface;
+use OCP\Files\Folder;
 
 /**
  * @template-implements IEventListener<Event>
@@ -36,22 +36,32 @@ use Psr\Log\LoggerInterface;
 final class PostWriteListener implements IEventListener
 {
     public function __construct(
-        private TimelineWrite $tw,
-        private LoggerInterface $logger,
+        private Index $indexer,
     ) {}
 
     #[\Override]
     public function handle(Event $event): void
     {
-        if (!($event instanceof NodeWrittenEvent)
-            && !($event instanceof NodeTouchedEvent)) {
+        /** @var null|\OCP\Files\Node */
+        $node = null;
+
+        if ($event instanceof NodeWrittenEvent
+            || $event instanceof NodeTouchedEvent) {
+            $node = $event->getNode();
+            if (!$node instanceof File) {
+                return;
+            }
+        } elseif ($event instanceof NodeCopiedEvent) {
+            $node = $event->getTarget();
+            if (!($node instanceof Folder) && !($node instanceof File)) {
+                return;
+            }
+        } else {
             return;
         }
 
-        $node = $event->getNode();
-
         // Check the mime type first
-        if (!($node instanceof File) || !Index::isSupported($node)) {
+        if ($node instanceof File && !Index::isSupported($node)) {
             return;
         }
 
@@ -70,14 +80,10 @@ final class PostWriteListener implements IEventListener
             // and getParent() is called on it.
         }
 
-        try {
-            $this->tw->processFile($node);
-        } catch (\Exception $e) {
-            $this->logger->error('Write hook failed to index file', [
-                'app' => 'memories',
-                'path' => $node->getPath(),
-                'message' => $e->getMessage(),
-            ]);
+        if ($node instanceof File) {
+            $this->indexer->indexFile($node);
+        } elseif ($node instanceof Folder) {
+            $this->indexer->indexFolder($node);
         }
     }
 }

@@ -5,6 +5,7 @@
     :class="{
       hasPreview: previews.length > 0,
       onePreview: previews.length === 1,
+      [`folder--${sanitizedName}`]: true,
     }"
     :to="target"
   >
@@ -76,6 +77,10 @@ export default defineComponent({
       } else {
         return previews.slice(0, 4);
       }
+    },
+
+    sanitizedName(): string {
+      return this.data.name.replace(/[^a-zA-Z0-9-_]/g, '');
     },
   },
 

@@ -424,7 +424,7 @@ class VideoContentSetup {
       });
 
       // Unlock orientation when exiting fullscreen
-      plyr.on('exitfullscreen', async (event) => {
+      plyr.on('exitfullscreen', async (event: Plyr.PlyrEvent) => {
         try {
           if (previousOrientation) {
             await (screen.orientation as any).lock(previousOrientation);

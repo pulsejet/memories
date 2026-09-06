@@ -1,6 +1,7 @@
 package gallery.memories
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -230,7 +231,11 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 // Open external links in browser
-                Intent(Intent.ACTION_VIEW, request.url).apply { startActivity(this) }
+                try {
+                    Intent(Intent.ACTION_VIEW, request.url).apply { startActivity(this) }
+                } catch (e: ActivityNotFoundException) {
+                    Toast.makeText(view.context, "No app found to open this link", Toast.LENGTH_SHORT).show()
+                }
 
                 return true
             }
@@ -338,7 +343,7 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    fun initializePlayer(uris: Array<Uri>, uid: Long) {
+    fun initializePlayer(uris: Array<Uri>, uid: Long, loop: Boolean = false) {
         if (player != null) {
             if (playerUid == uid) return
             player?.release()
@@ -402,6 +407,9 @@ class MainActivity : AppCompatActivity() {
                         exoPlayer.play()
                     }
                 })
+
+
+                exoPlayer.repeatMode = if (loop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
 
                 // Start the player
                 exoPlayer.playWhenReady = playWhenReady

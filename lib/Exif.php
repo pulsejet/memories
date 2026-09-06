@@ -13,6 +13,11 @@ use OCP\Files\File;
 
 final class Exif
 {
+    public const EXIF_KEY_IMAGE_WIDTH = 'ImageWidth';
+    public const EXIF_KEY_IMAGE_HEIGHT = 'ImageHeight';
+    public const EXIF_KEY_ROTATION = 'Rotation';
+    public const EXIF_KEY_ORIENTATION = 'Orientation';
+
     private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'image/x-dcraw', 'video/MP2T']; // also update const.ts
     private const EXIFTOOL_TIMEOUT = 30000;
     private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-api', 'LargeFileSupport=1', '-n', '-json'];
@@ -279,12 +284,12 @@ final class Exif
      */
     public static function getDimensions(array $exif): array
     {
-        $width = $exif['ImageWidth'] ?? 0;
-        $height = $exif['ImageHeight'] ?? 0;
+        $width = $exif[self::EXIF_KEY_IMAGE_WIDTH] ?? 0;
+        $height = $exif[self::EXIF_KEY_IMAGE_HEIGHT] ?? 0;
 
         // Check if image is rotated and we need to swap width and height
-        $rotation = $exif['Rotation'] ?? 0;
-        $orientation = $exif['Orientation'] ?? 0;
+        $rotation = $exif[self::EXIF_KEY_ROTATION] ?? 0;
+        $orientation = $exif[self::EXIF_KEY_ORIENTATION] ?? 0;
         if (\in_array($orientation, [5, 6, 7, 8], true) || \in_array($rotation, [90, 270], true)) {
             return [$height, $width];
         }

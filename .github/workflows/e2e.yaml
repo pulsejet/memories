@@ -14,135 +14,98 @@ on:
 
 env:
   APP_NAME: memories
-  PHP_CLI_SERVER_WORKERS: 8
+  NODE_VERSION: 24.x
+  PHP_CLI_SERVER_WORKERS: 12
 
 jobs:
   vue:
     runs-on: ubuntu-latest
     steps:
-      - name: Use Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24.x
-
       - name: Checkout the app
         uses: actions/checkout@v6
 
-      - name: Set up php for tools
-        uses: shivammathur/setup-php@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v6
         with:
-          php-version: '8.4'
-          tools: phpunit
-          extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
-          coverage: none
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: Build vue app
         run: |
-          make dev-setup
+          npm ci
           make patch-external
           make build-js-production
           zip -r vue.zip js/
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: vue.zip
           path: vue.zip
 
-  mysql:
+  e2e:
     runs-on: ubuntu-latest
     needs: vue
 
     strategy:
       fail-fast: false
       matrix:
+        databases: ['mysql', 'mariadb', 'pgsql', 'sqlite']
         php-versions: ['8.4']
-        server-versions: ['stable33']
+        server-versions: ['stable34']
 
     services:
       mysql:
-        image: mariadb:10.5
+        image: ${{ matrix.databases == 'mysql' && 'mysql:lts' || '' }}
         ports:
           - 4444:3306/tcp
         env:
-          MYSQL_ROOT_PASSWORD: rootpassword
-        options: --health-cmd="mysqladmin ping" --health-interval 5s --health-timeout 2s --health-retries 5
+          MYSQL_DATABASE: nextcloud
+          MYSQL_USER: db_user
+          MYSQL_PASSWORD: db_password
+          MYSQL_ROOT_PASSWORD: root_password
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval 5s
+          --health-timeout 2s
+          --health-retries 5
+        command: --local-infile=1
 
-    steps:
-      - name: Checkout server
-        uses: actions/checkout@v6
-        with:
-          submodules: true
-          repository: nextcloud/server
-          ref: ${{ matrix.server-versions }}
-
-      - name: Checkout the app
-        uses: actions/checkout@v6
-        with:
-          path: apps/${{ env.APP_NAME }}
-
-      - name: Use Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24.x
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: vue.zip
-
-      - name: Set up php ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
-          tools: phpunit
-          extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
-          coverage: none
-
-      - name: Set up Nextcloud
+      mariadb:
+        image: ${{ matrix.databases == 'mariadb' && 'mariadb:lts' || '' }}
+        ports:
+          - 4444:3306/tcp
         env:
-          DB_PORT: 4444
-        run: |
-          mkdir data
-          php occ maintenance:install \
-            --verbose \
-            --database=mysql \
-            --database-name=nextcloud \
-            --database-host=127.0.0.1 \
-            --database-port=$DB_PORT \
-            --database-user=root \
-            --database-pass=rootpassword \
-            --admin-user admin \
-            --admin-pass password
+          MYSQL_DATABASE: nextcloud
+          MYSQL_USER: db_user
+          MYSQL_PASSWORD: db_password
+          MYSQL_ROOT_PASSWORD: root_password
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval 5s
+          --health-timeout 2s
+          --health-retries 5
 
-      - name: Run tests
-        run: |
-          ./apps/memories/scripts/ci-test.sh
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: report-mysql-${{ matrix.php-versions }}-${{ matrix.server-versions }}
-          path: apps/${{ env.APP_NAME }}/playwright-report
-
-  pgsql:
-    runs-on: ubuntu-latest
-    needs: vue
-
-    strategy:
-      fail-fast: false
-      matrix:
-        php-versions: ['8.4']
-        server-versions: ['stable33']
-
-    services:
       postgres:
-        image: postgres
+        image: ${{ matrix.databases == 'pgsql' && 'postgres:alpine' || '' }}
         ports:
           - 4444:5432/tcp
         env:
           POSTGRES_DB: nextcloud
-          POSTGRES_PASSWORD: rootpassword
+          POSTGRES_USER: db_user
+          POSTGRES_PASSWORD: db_password
         options: >-
           --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379/tcp
+        options: >-
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -160,105 +123,72 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Use Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24.x
+      - parallel:
+        - name: Download WebUI bundle
+          uses: actions/download-artifact@v8
+          with:
+            name: vue.zip
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: vue.zip
+        - name: Checkout Nextcloud Photos app
+          uses: actions/checkout@v6
+          with:
+            path: apps/photos
+            repository: nextcloud/photos
+            ref: ${{ matrix.server-versions }}
 
-      - name: Set up php ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
-          tools: phpunit
-          extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
-          coverage: none
+        - name: Checkout Nextcloud Viewer app
+          uses: actions/checkout@v6
+          with:
+            path: apps/viewer
+            repository: nextcloud/viewer
+            ref: ${{ matrix.server-versions }}
 
-      - name: Set up Nextcloud
-        env:
-          DB_PORT: 4444
-        run: |
-          mkdir data
-          php occ maintenance:install \
-            --verbose \
-            --database=pgsql \
-            --database-name=nextcloud \
-            --database-host=127.0.0.1 \
-            --database-port=$DB_PORT \
-            --database-user=postgres \
-            --database-pass=rootpassword \
-            --admin-user admin \
-            --admin-pass password
+        - name: Use Node.js
+          uses: actions/setup-node@v6
+          with:
+            node-version: ${{ env.NODE_VERSION }}
+            cache: npm
+            cache-dependency-path: apps/${{ env.APP_NAME }}/package-lock.json
 
-      - name: Run tests
-        run: |
-          ./apps/memories/scripts/ci-test.sh
+        - name: Set up php ${{ matrix.php-versions }}
+          uses: shivammathur/setup-php@v2
+          with:
+            php-version: ${{ matrix.php-versions }}
+            tools: phpunit
+            extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
+            coverage: none
+            ini-values: >-
+              opcache.enable_cli=1,
+              opcache.jit=tracing,
+              opcache.jit_buffer_size=64M
 
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: report-pgsql-${{ matrix.php-versions }}-${{ matrix.server-versions }}
-          path: apps/${{ env.APP_NAME }}/playwright-report
-
-  sqlite:
-    runs-on: ubuntu-latest
-    needs: vue
-
-    strategy:
-      fail-fast: false
-      matrix:
-        php-versions: ['8.4']
-        server-versions: ['stable33']
-
-    steps:
-      - name: Checkout server
-        uses: actions/checkout@v6
-        with:
-          submodules: true
-          repository: nextcloud/server
-          ref: ${{ matrix.server-versions }}
-
-      - name: Checkout the app
-        uses: actions/checkout@v6
-        with:
-          path: apps/${{ env.APP_NAME }}
-
-      - name: Use Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24.x
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: vue.zip
-
-      - name: Set up php ${{ matrix.php-versions }}
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
-          tools: phpunit
-          extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
-          coverage: none
-
-      - name: Set up Nextcloud
-        env:
-          DB_PORT: 4444
-        run: |
-          mkdir data
-          php occ maintenance:install \
-            --verbose \
-            --admin-user admin \
-            --admin-pass password
+        - name: Set up FFmpeg
+          env:
+            URL: https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n9.0-latest-linux64-gpl-9.0.tar.xz
+          run: curl -L $URL -o - | sudo tar -xJvf - -C /usr/bin/ --strip-components=2 --wildcards --no-anchored '**/bin/ff*'
 
       - name: Run tests
+        env:
+          NC_DB_TYPE: ${{ matrix.databases }}
+          PHP_VERSION: ${{ matrix.php-versions }}
+          NC_VERSION: ${{ matrix.server-versions }}
+          NC_DB_PORT: 4444
+          NC_REDIS_PORT: 6379
+          E2E_VIDEO: 1
         run: |
-          ./apps/memories/scripts/ci-test.sh
+          make -C apps/${{ env.APP_NAME }} e2e
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: report-sqlite-${{ matrix.php-versions }}-${{ matrix.server-versions }}
+          name: report-${{ matrix.databases }}-${{ matrix.php-versions }}-${{ matrix.server-versions }}
           path: apps/${{ env.APP_NAME }}/playwright-report
+          retention-days: 15
+
+      - name: Upload Playwright videos
+        uses: actions/upload-artifact@v7
+        with:
+          path: apps/${{ env.APP_NAME }}/video-${{ matrix.databases }}-${{ matrix.php-versions }}-${{ matrix.server-versions }}.mp4
+          retention-days: 3
+          archive: false
