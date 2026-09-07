@@ -22,7 +22,11 @@ class StaticConfig {
 
   private async init() {
     try {
-      this.config = (await axios.get<IConfig>(API.CONFIG_GET())).data;
+      // Bound the request: much of the app waits on this config, and
+      // without a timeout an offline boot (e.g. behind a VPN that
+      // blackholes packets) blocks everything until the socket gives
+      // up. On timeout we fall back to the persisted configuration.
+      this.config = (await axios.get<IConfig>(API.CONFIG_GET(), { timeout: 5000 })).data;
     } catch (e) {
       if (!utils.isNetworkError(e)) {
         showError('Failed to load configuration');
@@ -30,6 +34,11 @@ class StaticConfig {
 
       // Offline or fail, continue with default configuration
       this.config = this.getDefault();
+
+      // Retry in the background: the request may fail transiently
+      // (e.g. offline start, or flaky connectivity right after login).
+      // Without the remote configuration a first start is unusable.
+      this.scheduleRetry();
     }
 
     // Check if version changed
@@ -72,6 +81,32 @@ class StaticConfig {
         this.initPromises.push(resolve);
       });
     }
+  }
+
+  /**
+   * Retry fetching the remote configuration with backoff after the
+   * initial attempt failed, then propagate the values to components.
+   */
+  private scheduleRetry(attempt: number = 0) {
+    if (attempt >= 8) return;
+
+    setTimeout(
+      async () => {
+        try {
+          const config = (await axios.get<IConfig>(API.CONFIG_GET(), { timeout: 5000 })).data;
+          for (const k in config) {
+            const key = k as keyof IConfig;
+            this.setLs(key, config[key]);
+          }
+
+          // Tell UserConfig components to pick up the new values
+          utils.bus.emit('memories:static-config-loaded', null);
+        } catch {
+          this.scheduleRetry(attempt + 1);
+        }
+      },
+      Math.min(30000, 2000 * 2 ** attempt),
+    );
   }
 
   public async getAll() {

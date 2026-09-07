@@ -3,7 +3,13 @@ import { uid } from './helpers';
 
 /** Cache keys */
 async function getCacheName() {
-  const ver = await config.get('version');
+  // Do not block on the remote configuration for the cache name: fall
+  // back to the persisted version if it takes too long (e.g. offline
+  // start), so that cached data can render without waiting on the network
+  const ver = await Promise.race([
+    config.get('version'),
+    new Promise<string>((res) => setTimeout(() => res(config.getSync('version')), 1000)),
+  ]);
   return `memories-data-${ver}-${uid}`;
 }
 

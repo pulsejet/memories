@@ -21,11 +21,13 @@ export default defineComponent({
 
   created() {
     utils.bus.on(eventName, this.updateLocalSetting);
+    utils.bus.on('memories:static-config-loaded', this.refreshFromConfig);
     this.refreshFromConfig();
   },
 
   beforeDestroy() {
     utils.bus.off(eventName, this.updateLocalSetting);
+    utils.bus.off('memories:static-config-loaded', this.refreshFromConfig);
   },
 
   methods: {

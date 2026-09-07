@@ -22,8 +22,15 @@
     -->
     <FirstStart v-else-if="isFirstStart" />
 
+    <!--
+      The configuration could not be loaded (e.g. offline first start).
+      It is retried in the background, so show a loading indicator
+      instead of nothing at all.
+    -->
+    <XLoadingIcon class="fill-block" v-else-if="isConfigUnknown" />
+
     <!-- Render the actual app when configuration has been loaded -->
-    <template v-else-if="!isConfigUnknown">
+    <template v-else>
       <NcAppNavigation v-if="showNavigation">
         <template #list>
           <NcAppNavigationItem
