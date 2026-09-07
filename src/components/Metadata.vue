@@ -23,14 +23,17 @@
     <div v-if="config.facerecognition_enabled" class="people face-recognition">
       <div class="section-header">
         <div class="section-title">{{ t('memories', 'Face Recognition') }}</div>
-        <NcActions :inline="1">
+        <NcActions :inline="1" v-if="!facerecognitionFailed">
           <NcActionButton :aria-label="t('memories', 'Add person')" @click="openManualAdd" close-after-click>
             {{ t('memories', 'Add person') }}
             <template #icon> <AddIcon :size="20" /> </template>
           </NcActionButton>
         </NcActions>
       </div>
-      <template v-if="facerecognitionPeople.length">
+      <div v-if="facerecognitionFailed" class="error-hint">
+        {{ t('memories', 'Face Recognition is unavailable. The app may need an update to match its database schema.') }}
+      </div>
+      <template v-else-if="facerecognitionPeople.length">
         <div class="container" v-for="face of facerecognitionPeople" :key="face.cluster_id">
           <Cluster class="cluster--rounded" :data="face" :counters="false"> </Cluster>
         </div>
@@ -422,6 +425,14 @@ export default defineComponent({
       return this.baseInfo?.clusters?.facerecognition ?? [];
     },
 
+    /**
+     * The server could not build the face recognition clusters for this file.
+     * The rest of the metadata is still valid, so only this section degrades.
+     */
+    facerecognitionFailed(): boolean {
+      return this.baseInfo?.clustersFailed?.includes('facerecognition') ?? false;
+    },
+
     isShared(): boolean {
       return !!this.baseInfo.owneruid && this.baseInfo.owneruid !== utils.uid;
     },
@@ -601,6 +612,12 @@ export default defineComponent({
     padding: 6px 8px 10px;
     font-size: 0.9em;
     color: var(--color-text-lighter);
+  }
+
+  > .error-hint {
+    padding: 6px 8px 10px;
+    font-size: 0.9em;
+    color: var(--color-error-text, var(--color-error));
   }
 }
 
