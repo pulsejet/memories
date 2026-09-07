@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, devices } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { appUrl, bootstrap, e2eHeaders, teardown } from './navigation';
 import { DavClient } from './utils';
@@ -186,4 +186,149 @@ test.describe('@ui Photo selection', () => {
     await page.locator(`.p-outer--${ids[i]}`).hover();
     await page.locator(`.p-outer--${ids[i]} .select`).click();
   }
+});
+
+test.describe('@ui Photo selection touch', () => {
+  test.use({
+    viewport: devices['Pixel 7'].viewport,
+    hasTouch: true,
+    isMobile: true,
+    userAgent: devices['Pixel 7'].userAgent,
+    deviceScaleFactor: devices['Pixel 7'].deviceScaleFactor,
+  });
+
+  // Latest photo in the dataset anchors the drag; for-geo-010 is the
+  // move-up target; dragging down to for-geo-007 selects 94 photos.
+  let id100: number;
+  let id010: number;
+  let id006: number;
+  let id097: number;
+
+  test.beforeAll(async ({ request }) => {
+    const dav = new DavClient(request);
+    id100 = await dav.fileid('/for-geo/for-geo-100.jpg');
+    id010 = await dav.fileid('/for-geo/for-geo-010.jpg');
+    id006 = await dav.fileid('/for-geo/for-geo-006.jpg');
+    id097 = await dav.fileid('/for-geo/for-geo-097.jpg');
+  });
+
+  test('Touch hold and drag selects range', async ({ page }) => {
+    // Real timers: the long-press (600ms) and the scroll interval run on rAF.
+    await page.clock.resume();
+    await page.goto(appUrl);
+
+    const firstImg = page.locator(`.p-outer--${id100} .img-outer`);
+    await firstImg.waitFor();
+    await page.waitForTimeout(500); // let the recycler settle
+
+    const box = (await firstImg.boundingBox())!;
+    const x = box.x + box.width / 2;
+    const height = page.viewportSize()!.height;
+    const countText = page.locator('.memories-top-bar .text');
+
+    // One CDP session for the whole gesture: touch state is per-session.
+    const cdp = await page.context().newCDPSession(page);
+    const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', tx: number, ty: number) =>
+      cdp.send('Input.dispatchTouchEvent', {
+        type,
+        touchPoints: type === 'touchEnd' ? [] : [{ x: tx, y: ty, id: 1 }],
+      });
+
+    await test.step('Touch and hold selects one image', async (step) => {
+      await touch('touchStart', x, box.y + box.height / 2);
+      await expect(countText).toContainText('1 selected', { timeout: 15000 });
+      await page.waitForTimeout(200); // animation
+      await snap(page, 'selection-touch-hold', step);
+    });
+
+    await test.step('Drag to the bottom selects everything underway', async (step) => {
+      // Jump the finger to the bottom scroll zone and keep it there;
+      // the page keeps scrolling and selecting by itself.
+      await touch('touchMove', x, height - 30);
+
+      for (let i = 0; i < 120; i++) {
+        const text = await countText.textContent();
+        if (text?.includes('94 selected')) break;
+        if (i === 5) {
+          await snap(page, 'selection-touch-mid', step);
+        }
+        await touch('touchMove', x, height - 30);
+        await page.waitForTimeout(400);
+      }
+      await expect(countText).toContainText('94 selected');
+      await page.waitForTimeout(200); // animation
+      await snap(page, 'selection-touch-drag', step);
+    });
+
+    await test.step('Move up without lifting deselects in between', async (step) => {
+      // Park the finger mid-screen (no scroll zone); the held touch
+      // stays active and for-geo-010 is already rendered just above.
+      await touch('touchMove', x, 400);
+      const sel010 = `.p-outer--${id010}`;
+
+      // Walk the finger to for-geo-010, reconverging if auto-scroll moves it.
+      for (let i = 0; i < 4; i++) {
+        const target = await page.locator(`${sel010} .img-outer`).boundingBox();
+        if (!target) break;
+        const ty = target.y + target.height / 2;
+        await touch('touchMove', x, ty);
+        await page.waitForTimeout(300);
+        const fresh = await page.locator(`${sel010} .img-outer`).boundingBox();
+        if (fresh && Math.abs(fresh.y + fresh.height / 2 - ty) < 40) break;
+      }
+
+      // for-geo-007/008/009 above for-geo-010 are deselected again.
+      await expect(countText).toContainText('91 selected');
+      await page.waitForTimeout(200); // animation
+      await snap(page, 'selection-touch-shrink', step);
+
+      await touch('touchEnd', 0, 0);
+      await expect(countText).toContainText('91 selected');
+    });
+
+    await test.step('Tap toggles single photos', async (step) => {
+      // for-geo-006 is outside the range: tapping selects it.
+      await tapPhoto(page, id006);
+      await expect(page.locator(`.p-outer--${id006}`)).toHaveClass(/selected/);
+      await expect(countText).toContainText('92 selected');
+      await page.waitForTimeout(200); // animation
+      await snap(page, 'selection-touch-tap-on', step);
+
+      // for-geo-010 is inside the range: tapping deselects it.
+      await tapPhoto(page, id010);
+      await expect(page.locator(`.p-outer--${id010}`)).not.toHaveClass(/selected/);
+      await expect(page.locator(`.p-outer--${id006}`)).toHaveClass(/selected/);
+      await expect(countText).toContainText('91 selected');
+      await page.waitForTimeout(200); // animation
+      await snap(page, 'selection-touch-tap-off', step);
+    });
+
+    await test.step('Scroll away and back keeps selection', async (step) => {
+      // Scroll right back to the top, forcing the recycler to drop
+      // every row and reuse its DOM elements for other photos.
+      // for-geo-097 renders at the top; it must still be selected,
+      // proving selection lives on the photo objects, not the elements.
+      await page.evaluate(() => {
+        document.querySelector('.recycler')!.scrollTop = 0;
+      });
+      const sel097 = `.p-outer--${id097}`;
+      await expect(page.locator(sel097)).toBeVisible();
+      await expect(page.locator(sel097)).toHaveClass(/selected/);
+      await expect(countText).toContainText('91 selected');
+      await page.waitForTimeout(200); // animation
+      await snap(page, 'selection-touch-recycled', step);
+    });
+
+    await cdp.detach();
+  });
+
+  async function tapPhoto(page: Page, id: number) {
+    const target = page.locator(`.p-outer--${id} .img-outer`);
+    await target.scrollIntoViewIfNeeded();
+    // Touches right after a recycler scroll are ignored for 200ms.
+    await page.waitForTimeout(400);
+    const box = (await target.boundingBox())!;
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+  }
+
 });
