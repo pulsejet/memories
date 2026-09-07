@@ -131,13 +131,13 @@ test.describe('@api Map', () => {
 
     const days: IDay[] = await res.json();
     expect(days).toStrictEqual([
-      { dayid: 19550, count: 3 },
-      { dayid: 19549, count: 3 },
-      { dayid: 19548, count: 4 },
+      { dayid: 18455, count: 3 },
+      { dayid: 18454, count: 3 },
+      { dayid: 18453, count: 4 },
     ]);
 
     // Query single day details filtered by the same map bounds.
-    const dayUrl = new URL(`${appUrl}/api/days/19550`);
+    const dayUrl = new URL(`${appUrl}/api/days/18455`);
     dayUrl.searchParams.set('mapbounds', mapbounds);
 
     const dayRes = await request.get(dayUrl.toString());
