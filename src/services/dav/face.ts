@@ -204,7 +204,5 @@ export async function faceRecognitionAddManualFace(params: {
  */
 export async function faceRecognitionReassignFace(faceId: number, personName: string) {
   const url = generateUrl(`/apps/facerecognition/api/2.0/face/${faceId}/reassign`);
-  return (
-    await axios.post<{ faceId: number; personId: number; name: string }>(url, { personName })
-  ).data;
+  return (await axios.post<{ faceId: number; personId: number; name: string }>(url, { personName })).data;
 }

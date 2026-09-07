@@ -38,13 +38,7 @@
           @touchmove.prevent="onTouchMove"
           @touchend.prevent="onUp"
         >
-          <img
-            ref="image"
-            class="photo"
-            :src="imageSrc"
-            @load="onImageLoad"
-            draggable="false"
-          />
+          <img ref="image" class="photo" :src="imageSrc" @load="onImageLoad" draggable="false" />
 
           <!-- Existing detected/manual faces -->
           <div
@@ -107,13 +101,7 @@
       <NcButton v-if="editingFace" @click="cancelEdit">
         {{ t('memories', 'Cancel') }}
       </NcButton>
-      <NcButton
-        v-if="editingFace"
-        class="button"
-        type="primary"
-        :disabled="!canSaveEdit"
-        @click="saveEdit"
-      >
+      <NcButton v-if="editingFace" class="button" type="primary" :disabled="!canSaveEdit" @click="saveEdit">
         {{ t('memories', 'Save') }}
       </NcButton>
       <NcButton v-if="rect && !editingFace" class="button" type="primary" :disabled="!canSave || saving" @click="save">
@@ -376,9 +364,13 @@ export default defineComponent({
       });
       const text = typeof res.data === 'string' ? res.data : new XMLSerializer().serializeToString(res.data);
       const doc = new DOMParser().parseFromString(text, 'application/xml');
-      const fileid = parseInt(doc.getElementsByTagNameNS('http://owncloud.org/ns', 'fileid')[0]?.textContent ?? '0', 10);
+      const fileid = parseInt(
+        doc.getElementsByTagNameNS('http://owncloud.org/ns', 'fileid')[0]?.textContent ?? '0',
+        10,
+      );
       const etag = (doc.getElementsByTagNameNS('DAV:', 'getetag')[0]?.textContent ?? '').replace(/"/g, '');
-      const sizeEl = doc.getElementsByTagNameNS('http://nextcloud.org/ns', 'metadata-photos-size')[0]?.textContent ?? '';
+      const sizeEl =
+        doc.getElementsByTagNameNS('http://nextcloud.org/ns', 'metadata-photos-size')[0]?.textContent ?? '';
       let w = 0,
         h = 0;
       const m = sizeEl.match(/(\d+)[^\d]+(\d+)/);
