@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 - **Fix**: Improved and 20x faster planet database setup
 - **Feature**: Huawei Moving Picture support
 
+## [v8.0.1] - 2026-04-16
+
+- **Feature**: Compatibility  with manual tagging in face recognition. 
+
 ## [v8.0.0] - 2026-04-04
 
 - **Update**: Compatibility with Nextcloud 33

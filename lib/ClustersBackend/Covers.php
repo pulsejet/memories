@@ -19,10 +19,16 @@ final class Covers
      * @param string        $clusterTableId       Column name for the cluster ID in clusterTable
      * @param string        $objectTable          Table name for the object mapping
      * @param string        $objectTableObjectId  Column name for the object ID in objectTable
-     * @param string        $objectTableClusterId Column name for the cluster ID in objectTable
+     * @param string        $objectTableClusterId Column name for the cluster ID in objectTable.
+     *                                            May be qualified with an alias (e.g. "foo.bar"), in which case it is
+     *                                            used verbatim instead of being resolved against the object table.
      * @param bool          $validateCluster      Whether to validate the cluster
      * @param bool          $validateFilecache    Whether to validate the filecache
      * @param mixed         $user                 Query expression for user ID to use for the covers
+     * @param null|\Closure $objectTableJoin      Optional hook to join further tables into the cluster validation
+     *                                            subquery, for backends where the object reaches its cluster over
+     *                                            more than one hop. Receives the subquery builder, whose object
+     *                                            table is aliased "cov_objs".
      */
     public static function selectCover(
         IQueryBuilder &$query,
@@ -36,7 +42,14 @@ final class Covers
         bool $validateFilecache = true,
         string $field = 'cover',
         mixed $user = null,
+        ?\Closure $objectTableJoin = null,
     ): void {
+        // Where the cluster ID lives on the object side. A qualified name points
+        // at a table the caller joins in through $objectTableJoin.
+        $objectClusterIdRef = str_contains($objectTableClusterId, '.')
+            ? $objectTableClusterId
+            : "cov_objs.{$objectTableClusterId}";
+
         // Clauses for the WHERE
         $clauses = [
             $query->expr()->eq('mcov.uid', $user ?? $query->expr()->literal(Util::getUser()->getUID())),
@@ -50,8 +63,14 @@ final class Covers
             $validSq->select($validSq->expr()->literal(1))
                 ->from($objectTable, 'cov_objs')
                 ->where($validSq->expr()->eq($query->expr()->castColumn("cov_objs.{$objectTableObjectId}", IQueryBuilder::PARAM_INT), 'mcov.objectid'))
-                ->andWhere($validSq->expr()->eq("cov_objs.{$objectTableClusterId}", "{$clusterTable}.{$clusterTableId}"))
             ;
+
+            // Let the backend bridge any extra hops to the cluster table
+            if (null !== $objectTableJoin) {
+                $objectTableJoin($validSq);
+            }
+
+            $validSq->andWhere($validSq->expr()->eq($objectClusterIdRef, "{$clusterTable}.{$clusterTableId}"));
 
             $clauses[] = SQL::exists($query, $validSq);
         }
@@ -90,7 +109,10 @@ final class Covers
      * @param string        $type                 Cluster type
      * @param string        $objectTable          Table name for the object mapping
      * @param string        $objectTableObjectId  Column name for the object ID in objectTable
-     * @param string        $objectTableClusterId Column name for the cluster ID in objectTable
+     * @param string        $objectTableClusterId Column name for the cluster ID in objectTable.
+     *                                            May be qualified with an alias (e.g. "foo.bar") that the caller has
+     *                                            already joined, for backends that reach the cluster over more
+     *                                            than one hop.
      */
     public static function filterCover(
         IQueryBuilder &$query,
@@ -99,10 +121,14 @@ final class Covers
         string $objectTableObjectId,
         string $objectTableClusterId,
     ): void {
+        $clusterIdRef = str_contains($objectTableClusterId, '.')
+            ? $objectTableClusterId
+            : "{$objectTable}.{$objectTableClusterId}";
+
         $query->innerJoin($objectTable, 'memories_covers', 'm_cov', $query->expr()->andX(
             $query->expr()->eq('m_cov.uid', $query->expr()->literal(Util::getUser()->getUID())),
             $query->expr()->eq('m_cov.clustertype', $query->expr()->literal($type)),
-            $query->expr()->eq('m_cov.clusterid', "{$objectTable}.{$objectTableClusterId}"),
+            $query->expr()->eq('m_cov.clusterid', $clusterIdRef),
             $query->expr()->eq('m_cov.objectid', $query->expr()->castColumn("{$objectTable}.{$objectTableObjectId}", IQueryBuilder::PARAM_INT)),
         ));
     }
