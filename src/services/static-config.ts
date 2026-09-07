@@ -145,7 +145,7 @@ class StaticConfig {
       metadata_in_slideshow: false,
 
       // on this day settings
-      onthisday_day_range: 0,
+      onthisday_day_range: 3,
       onthisday_photos_per_year: 10,
 
       // folder settings

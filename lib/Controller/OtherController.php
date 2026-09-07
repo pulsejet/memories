@@ -112,7 +112,7 @@ final class OtherController extends GenericApiController
                 'sidebar_filepath' => 'true' === $getAppConfig('sidebarFilepath', 'false'),
 
                 // on this day settings
-                'onthisday_day_range' => (int) $getAppConfig('onthisdayDayRange', '0'),
+                'onthisday_day_range' => (int) $getAppConfig('onthisdayDayRange', '3'),
                 'onthisday_photos_per_year' => (int) $getAppConfig('onthisdayPhotosPerYear', '10'),
 
                 // folder settings
