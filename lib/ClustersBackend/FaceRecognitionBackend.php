@@ -31,6 +31,17 @@ use OCP\Files\SimpleFS\ISimpleFile;
 use OCP\IAppConfig;
 use OCP\IRequest;
 
+/**
+ * Backend for the Face Recognition app.
+ *
+ * Schema note: a face no longer points at a person directly. The chain is
+ *
+ *     facerecog_faces.cluster  -> facerecog_clusters.id
+ *     facerecog_clusters.person -> facerecog_persons.id  (NULL while unnamed)
+ *
+ * so facerecog_persons holds only named people, and the unnamed groupings
+ * live in facerecog_clusters. Everything below joins through that extra hop.
+ */
 final class FaceRecognitionBackend extends Backend
 {
     use PeopleBackendUtils;
@@ -81,13 +92,23 @@ final class FaceRecognitionBackend extends Backend
         // Join with faces
         $query->innerJoin('fri', 'facerecog_faces', 'frf', $query->expr()->eq('frf.image', 'fri.id'));
 
-        // Join with persons
-        $nameField = is_numeric($personName) ? 'frp.id' : 'frp.name';
-        $query->innerJoin('frf', 'facerecog_persons', 'frp', $query->expr()->andX(
-            $query->expr()->eq('frf.person', 'frp.id'),
-            $query->expr()->eq('frp.user', $query->createNamedParameter($personUid)),
-            $query->expr()->eq($nameField, $query->createNamedParameter($personName)),
-        ));
+        // Join with clusters: every face belongs to at most one cluster
+        $query->innerJoin('frf', 'facerecog_clusters', 'frc', $query->expr()->eq('frc.id', 'frf.cluster'));
+
+        if (is_numeric($personName)) {
+            // An unnamed cluster is addressed by its numeric id
+            $query->andWhere($query->expr()->andX(
+                $query->expr()->eq('frc.id', $query->createNamedParameter($personName, \PDO::PARAM_INT)),
+                $query->expr()->eq('frc.user', $query->createNamedParameter($personUid)),
+            ));
+        } else {
+            // A named person is addressed by name, through the cluster
+            $query->innerJoin('frc', 'facerecog_persons', 'frp', $query->expr()->andX(
+                $query->expr()->eq('frp.id', 'frc.person'),
+                $query->expr()->eq('frp.user', $query->createNamedParameter($personUid)),
+                $query->expr()->eq('frp.name', $query->createNamedParameter($personName)),
+            ));
+        }
 
         if (!$aggregate) {
             // Multiple detections for the same image
@@ -153,10 +174,13 @@ final class FaceRecognitionBackend extends Backend
     {
         $query = $this->tq->getBuilder();
 
+        // A numeric name is the id of an unnamed cluster; anything else is a
+        // person name that has to be resolved through facerecog_persons.
+        $isClusterId = is_numeric($name);
+
         // SELECT face detections
         $query->select(
             'frf.id as faceid',         // Face ID
-            'frp.id as cluster_id',     // Cluster ID
             'fri.file as file_id',      // Get actual file
             'frf.x',                    // Image cropping
             'frf.y',
@@ -177,18 +201,34 @@ final class FaceRecognitionBackend extends Backend
         // WHERE these photos are memories indexed
         $query->innerJoin('fri', 'memories', 'm', $query->expr()->eq('m.fileid', 'fri.file'));
 
-        $query->innerJoin('frf', 'facerecog_persons', 'frp', $query->expr()->eq('frp.id', 'frf.person'));
+        // WHERE the face belongs to a cluster
+        $query->innerJoin('frf', 'facerecog_clusters', 'frc', $query->expr()->eq('frc.id', 'frf.cluster'));
 
-        // WHERE faces are from id persons (or a cluster).
-        $nameField = is_numeric($name) ? 'frp.id' : 'frp.name';
-        $query->where($query->expr()->eq($nameField, $query->createNamedParameter($name)));
+        if ($isClusterId) {
+            // WHERE faces are in this unnamed cluster
+            $query->selectAlias('frc.id', 'cluster_id');
+            $query->where($query->expr()->eq('frc.id', $query->createNamedParameter($name, \PDO::PARAM_INT)));
+        } else {
+            // WHERE faces belong to a cluster of this named person
+            $query->innerJoin('frc', 'facerecog_persons', 'frp', $query->expr()->eq('frp.id', 'frc.person'));
+            $query->selectAlias('frp.id', 'cluster_id');
+            $query->where($query->expr()->eq('frp.name', $query->createNamedParameter($name)));
+        }
 
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->tq->filterFilecache($query);
 
         // LIMIT results
         if (-6 === $limit) {
-            Covers::filterCover($query, self::clusterType(), 'frf', 'id', 'person');
+            // The cover is keyed by whatever getClusterIdFrom() reports: the
+            // cluster id for unnamed clusters, the person id for named ones.
+            Covers::filterCover(
+                $query,
+                self::clusterType(),
+                'frf',
+                'id',
+                $isClusterId ? 'frf.cluster' : 'frc.person',
+            );
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
@@ -254,18 +294,21 @@ final class FaceRecognitionBackend extends Backend
         return (int) $this->appConfig->getValueString('facerecognition', 'min_faces_in_cluster', (string) 5);
     }
 
+    /**
+     * Unnamed clusters: rows of facerecog_clusters with no person yet.
+     */
     private function getFaceRecognitionClusters(int $fileid = 0): array
     {
         $query = $this->tq->getBuilder();
 
         // SELECT all face clusters
         $count = $query->func()->count(SQL::distinct($query, 'm.fileid'));
-        $query->select('frp.id')->from('facerecog_persons', 'frp');
+        $query->select('frc.id')->from('facerecog_clusters', 'frc');
         $query->selectAlias($count, 'count');
-        $query->selectAlias('frp.user', 'user_id');
+        $query->selectAlias('frc.user', 'user_id');
 
         // WHERE there are faces with this cluster
-        $query->innerJoin('frp', 'facerecog_faces', 'frf', $query->expr()->eq('frp.id', 'frf.person'));
+        $query->innerJoin('frc', 'facerecog_faces', 'frf', $query->expr()->eq('frc.id', 'frf.cluster'));
 
         // WHERE faces are from images.
         $query->innerJoin('frf', 'facerecog_images', 'fri', $query->expr()->eq('fri.id', 'frf.image'));
@@ -280,8 +323,10 @@ final class FaceRecognitionBackend extends Backend
         $query = $this->tq->filterFilecache($query);
 
         // GROUP by ID of face cluster
-        $query->addGroupBy('frp.id', 'frp.user');
-        $query->andWhere($query->expr()->isNull('frp.name'));
+        $query->addGroupBy('frc.id', 'frc.user');
+
+        // WHERE the cluster has not been assigned to a person yet
+        $query->andWhere($query->expr()->isNull('frc.person'));
 
         // The query change if we want the people in an fileid, or the unnamed clusters
         if ($fileid > 0) {
@@ -291,36 +336,39 @@ final class FaceRecognitionBackend extends Backend
             // WHERE these clusters has a minimum number of faces
             $query->having($query->expr()->gte($count, SQL::literal($query, $this->minFaceInClusters(), \PDO::PARAM_INT)));
             // WHERE these clusters were not hidden due inconsistencies
-            $query->andWhere($query->expr()->eq('frp.is_visible', $query->expr()->literal(1)));
+            $query->andWhere($query->expr()->eq('frc.is_visible', $query->expr()->literal(1)));
         }
 
         // ORDER by number of faces in cluster and id for response stability.
         $query->addOrderBy('count', 'DESC');
-        $query->addOrderBy('frp.id', 'DESC');
+        $query->addOrderBy('frc.id', 'DESC');
 
         // It is not worth displaying all unnamed clusters. We show 15 to name them progressively,
         $query->setMaxResults(15);
 
         // SELECT covers
-        $query = SQL::materialize($query, 'frp');
+        $query = SQL::materialize($query, 'frc');
         Covers::selectCover(
             query: $query,
             type: self::clusterType(),
-            clusterTable: 'frp',
+            clusterTable: 'frc',
             clusterTableId: 'id',
             objectTable: 'facerecog_faces',
             objectTableObjectId: 'id',
-            objectTableClusterId: 'person',
+            objectTableClusterId: 'cluster',
         );
 
         // SELECT etag for the cover
-        $query = SQL::materialize($query, 'frp');
+        $query = SQL::materialize($query, 'frc');
         $this->tq->selectEtag($query, 'cover', 'cover_etag');
 
         // FETCH all faces
         return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
     }
 
+    /**
+     * Named people, reached through the clusters that point at them.
+     */
     private function getFaceRecognitionPersons(int $fileid = 0): array
     {
         $query = $this->tq->getBuilder();
@@ -333,8 +381,11 @@ final class FaceRecognitionBackend extends Backend
             ->from('facerecog_persons', 'frp')
         ;
 
-        // WHERE there are faces with this cluster
-        $query->innerJoin('frp', 'facerecog_faces', 'frf', $query->expr()->eq('frp.id', 'frf.person'));
+        // WHERE there are clusters for this person
+        $query->innerJoin('frp', 'facerecog_clusters', 'frc', $query->expr()->eq('frp.id', 'frc.person'));
+
+        // WHERE there are faces in those clusters
+        $query->innerJoin('frc', 'facerecog_faces', 'frf', $query->expr()->eq('frc.id', 'frf.cluster'));
 
         // WHERE faces are from images.
         $query->innerJoin('frf', 'facerecog_images', 'fri', $query->expr()->eq('fri.id', 'frf.image'));
@@ -371,7 +422,12 @@ final class FaceRecognitionBackend extends Backend
             clusterTableId: 'id',
             objectTable: 'facerecog_faces',
             objectTableObjectId: 'id',
-            objectTableClusterId: 'person',
+            // A face points at a cluster and the cluster at the person, so the
+            // cover validation needs the extra hop joined in below.
+            objectTableClusterId: 'cov_frc.person',
+            objectTableJoin: static function (IQueryBuilder $sq): void {
+                $sq->innerJoin('cov_objs', 'facerecog_clusters', 'cov_frc', $sq->expr()->eq('cov_frc.id', 'cov_objs.cluster'));
+            },
         );
 
         // SELECT etag for the cover
