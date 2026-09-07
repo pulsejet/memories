@@ -149,6 +149,8 @@ declare module '@typings' {
     DateTimeOriginal?: string;
     DateTimeEpoch?: number;
     OffsetTimeOriginal?: string;
+    TimeZone?: string;
+    OffsetTimeDigitized?: string;
     OffsetTime?: string;
     LocationTZID?: string;
     AllDates?: string; // only for setting

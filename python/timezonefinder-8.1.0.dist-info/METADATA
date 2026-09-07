@@ -1,0 +1,155 @@
+Metadata-Version: 2.4
+Name: timezonefinder
+Version: 8.1.0
+Summary: python package for finding the timezone of any point on earth (coordinates) offline
+Author-email: jannikmi <github@michelfe.it>
+License: The MIT License (MIT)
+        
+        Copyright (c) 2016 Jannik Michelfeit
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: homepage, https://timezonefinder.michelfe.it/gui
+Project-URL: repository, https://github.com/jannikmi/timezonefinder
+Project-URL: documentation, https://timezonefinder.readthedocs.io/en/latest/
+Keywords: timezone,coordinates,latitude,longitude,location,offline,polygon
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Information Technology
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Localization
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Python: <4,>=3.9
+Description-Content-Type: text/x-rst
+License-File: LICENSE
+Requires-Dist: numpy<3,>=1.23; python_version >= "3.9"
+Requires-Dist: h3>4
+Requires-Dist: cffi<3,>=1.15.1
+Requires-Dist: flatbuffers>=25.2.10
+Dynamic: license-file
+
+==============
+timezonefinder
+==============
+
+
+..
+    Note: can't include the badges file from the docs here, as it won't render on PyPI -> sync manually
+
+.. image:: https://github.com/jannikmi/timezonefinder/actions/workflows/build.yml/badge.svg?branch=master
+    :target: https://github.com/jannikmi/timezonefinder/actions?query=branch%3Amaster
+
+.. image:: https://readthedocs.org/projects/timezonefinder/badge/?version=latest
+    :alt: documentation status
+    :target: https://timezonefinder.readthedocs.io/en/latest/?badge=latest
+
+.. image:: https://img.shields.io/pypi/wheel/timezonefinder.svg
+    :target: https://pypi.python.org/pypi/timezonefinder
+
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+   :target: https://github.com/pre-commit/pre-commit
+   :alt: pre-commit
+
+.. image:: https://pepy.tech/badge/timezonefinder
+    :alt: total PyPI downloads
+    :target: https://pepy.tech/project/timezonefinder
+
+.. image:: https://img.shields.io/pypi/v/timezonefinder.svg
+    :alt: latest version on PyPI
+    :target: https://pypi.python.org/pypi/timezonefinder
+
+.. image:: https://img.shields.io/conda/vn/conda-forge/timezonefinder.svg
+   :target: https://anaconda.org/conda-forge/timezonefinder
+   :alt: latest version on conda-forge
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+
+
+
+
+This is a python package providing offline timezone lookups for WGS84 coordinates.
+In comparison to other alternatives this package aims at maximum accuracy around timezone borders (no geometry simplifications) while offering fast lookup performance and compatibility with many (Python) runtime environments.
+It combines preprocessed polygon data, H3-based spatial shortcuts, and optional acceleration via Numba or a clang-backed point-in-polygon routine.
+
+
+
+Notice: Looking for maintainers. Reach out if you want to contribute!
+---------------------------------------------------------------------
+
+
+Quick Guide
+-----------
+
+It is recommended to install it together with the optional `Numba <https://numba.pydata.org/>`__ package for increased performance:
+
+.. code-block:: console
+
+    pip install timezonefinder[numba]
+
+
+.. code-block:: python
+
+    from timezonefinder import timezone_at
+
+    tz = timezone_at(lng=13.358, lat=52.5061)  # 'Europe/Paris'
+
+
+    # For thread safety, increased performance and control, re-use an instance:
+    from timezonefinder import TimezoneFinder
+
+    tf = TimezoneFinder(in_memory=True)  # reuse
+
+    query_points = [(13.358, 52.5061), ...]
+    for lng, lat in query_points:
+        tz = tf.timezone_at(lng=lng, lat=lat)  # 'Europe/Paris'
+
+
+
+**Note:** This library uses the `"same since now dataset" <https://github.com/evansiroky/timezone-boundary-builder?tab=readme-ov-file#same-since-now>`__ optimized for the primary use case of timezone determination for current/future time calculations.
+For applications requiring historical accuracy or resolving to precise locations, consider parsing the original dataset (cf. `Documentation <https://timezonefinder.readthedocs.io/en/latest/data_format.html#reduced-dataset-caveats>`__).
+
+
+**Alternative:** Need maximum speed at the cost of accuracy? Check out `tzfpy <https://github.com/ringsaturn/tzfpy>`__ - a fast and lightweight alternative based on Rust.
+
+
+References
+----------
+
+* `Documentation <https://timezonefinder.readthedocs.io/en/latest/>`__
+* `PyPI <https://pypi.python.org/pypi/timezonefinder/>`__
+* `conda-forge feedstock <https://github.com/conda-forge/timezonefinder-feedstock>`__
+* `download stats <https://pepy.tech/project/timezonefinder>`__
+* `online GUI and API <https://timezonefinder.michelfe.it>`__
+* `GUI repository <https://github.com/jannikmi/timezonefinder_gui>`__
+* `ruby port <https://github.com/gunyarakun/timezone_finder>`__
+
+
+
+LICENSE
+-------
+
+``timezonefinder`` is licensed under the `MIT license <https://github.com/jannikmi/timezonefinder/blob/master/LICENSE>`__.
+
+The data is licensed under the `ODbL license <https://github.com/jannikmi/timezonefinder/blob/master/DATA_LICENSE>`__, following the base dataset from `evansiroky/timezone-boundary-builder <https://github.com/evansiroky/timezone-boundary-builder>`__.

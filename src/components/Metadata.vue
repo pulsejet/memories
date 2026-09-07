@@ -225,9 +225,9 @@ export default defineComponent({
 
       // If we have an actual epoch, we can shift the date to the correct timezone
       if (!valid() && this.exif.DateTimeEpoch) {
-        const date = DateTime.fromSeconds(this.exif.DateTimeEpoch);
+        const date = DateTime.fromSeconds(this.exif.DateTimeEpoch, { zone: 'UTC' });
         if (date.isValid) {
-          const tzOffset = this.exif.OffsetTimeOriginal || this.exif.OffsetTime; // e.g. -05:00
+          const tzOffset = this.exif.OffsetTimeOriginal || this.exif.OffsetTime || this.exif.TimeZone || this.exif.OffsetTimeDigitized // e.g. -05:00
           const tzId = this.exif.LocationTZID; // e.g. America/New_York
 
           // Use timezone offset if available
@@ -243,12 +243,9 @@ export default defineComponent({
       }
 
       // If tz info is unavailable / wrong, we will show the local time only
-      // In this case, use the datetaken instead, which is guaranteed to be local, shifted to UTC
+      // In this case, use the datetaken instead
       if (!valid() && this.baseInfo.datetaken) {
-        const date = DateTime.fromSeconds(this.baseInfo.datetaken);
-        if (date.isValid) {
-          dateWithTz = date.setZone('UTC');
-        }
+          dateWithTz = DateTime.fromSeconds(this.baseInfo.datetaken, { zone: 'UTC' });
       }
 
       // Return only if we found a valid date
@@ -256,13 +253,20 @@ export default defineComponent({
     },
 
     dateOriginalStr(): string | null {
-      return utils.getLongDateStr(new Date(this.baseInfo.datetaken * 1000), true);
+        // Use the dateOriginal property which already handles timezone correctly
+        if (!this.dateOriginal) {
+            // Fallback to raw datetaken if dateOriginal couldn't be computed
+            return utils.getLongDateStr(new Date(this.baseInfo.datetaken * 1000), true);
+            }
+
+        // Format the dateOriginal (which has timezone applied) as a long date string
+        return this.dateOriginal.toFormat('EEE, LLL d', { locale: getCanonicalLocale() });
     },
 
     dateOriginalTime(): string[] | null {
       if (!this.dateOriginal) return null;
 
-      const fields: (keyof IExif)[] = ['OffsetTimeOriginal', 'OffsetTime', 'LocationTZID'];
+      const fields: (keyof IExif)[] = ['OffsetTimeOriginal', 'OffsetTime', 'TimeZone', 'OffsetTimeDigitized', 'LocationTZID'];
       const hasTz = fields.some((key) => this.exif[key]);
 
       const format = 't' + (hasTz ? ' ZZ' : '');

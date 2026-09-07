@@ -1,0 +1,37 @@
+namespace timezonefinder.flatbuf.generated.shortcuts_uint16;
+
+// Table representing a unique zone ID (when all polygons in hex share same zone)
+// Optimized for uint16 zone IDs (0-65535)
+table UniqueZone {
+  // Direct zone ID storage - 2 bytes per zone ID
+  zone_id: ushort;
+}
+
+// Table representing a list of polygon IDs (when hex contains multiple zones)
+table PolygonList {
+  // List of polygon IDs (fixed uint16 as per requirement)
+  poly_ids: [ushort];
+}
+
+// Union type for the shortcut value - either unique zone or polygon list
+union ShortcutValue {
+  UniqueZone,
+  PolygonList
+}
+
+// Individual shortcut entry mapping H3 hex ID to its value
+table HybridShortcutEntry {
+  // H3 hexagon ID (uint64)
+  hex_id: ulong;
+  // The value for this hex - either unique zone or polygon list
+  value: ShortcutValue;
+}
+
+// Root collection containing all shortcut entries
+// Optimized for uint16 zone IDs - no metadata overhead
+table HybridShortcutCollection {
+  // All shortcut entries
+  entries: [HybridShortcutEntry];
+}
+
+root_type HybridShortcutCollection;
