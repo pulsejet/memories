@@ -54,6 +54,14 @@
           </template>
         </NcActionButton>
       </NcActions>
+
+      <NcDateTimePicker
+        :value="new Date()"
+        type="date"
+        :clearable="false"
+        :placeholder="t('memories', 'Go to date')"
+        @update:value="onDateSelected"
+      />
     </div>
   </div>
 </template>
@@ -67,6 +75,7 @@ const NcBreadcrumbs = () => import('@nextcloud/vue/dist/Components/NcBreadcrumbs
 const NcBreadcrumb = () => import('@nextcloud/vue/dist/Components/NcBreadcrumb.js');
 import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
 import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcDateTimePicker from '@nextcloud/vue/dist/Components/NcDateTimePicker.js';
 import PublicUploadHandler from '@components/upload/PublicUploadHandler.vue';
 
 import * as utils from '@services/utils';
@@ -86,6 +95,7 @@ export default defineComponent({
     NcBreadcrumb,
     NcActions,
     NcActionButton,
+    NcDateTimePicker,
     PublicUploadHandler,
     HomeIcon,
     ShareIcon,
@@ -160,6 +170,11 @@ export default defineComponent({
 
     uploadHandler(): InstanceType<typeof PublicUploadHandler> | null {
       return (this.$refs.uploadHandler as InstanceType<typeof PublicUploadHandler>) || null;
+    },
+
+    onDateSelected(date: Date) {
+      if (!date) return;
+      utils.bus.emit('memories:timeline:scrollToDate', date);
     },
   },
 });
