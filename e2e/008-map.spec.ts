@@ -139,4 +139,20 @@ test.describe('@api Map', () => {
     const photos: IPhoto[] = await dayRes.json();
     expect(photos).toHaveLength(3);
   });
+
+  test('Initial position for geo timeline', async ({ request }) => {
+    const res = await request.get(`${appUrl}/api/map/init`);
+    expect(res.ok()).toBeTruthy();
+
+    const data: { pos: { lat: number | string; lon: number | string } | null } = await res.json();
+    expect(data.pos).not.toBeNull();
+    const lat = Number(data.pos!.lat);
+    const lon = Number(data.pos!.lon);
+    expect(Number.isFinite(lat)).toBe(true);
+    expect(Number.isFinite(lon)).toBe(true);
+    expect(lat).toBeGreaterThanOrEqual(-90);
+    expect(lat).toBeLessThanOrEqual(90);
+    expect(lon).toBeGreaterThanOrEqual(-180);
+    expect(lon).toBeLessThanOrEqual(180);
+  });
 });

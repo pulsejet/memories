@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap, teardown } from './navigation';
+import { appUrl, bootstrap, e2eHeaders, teardown } from './navigation';
 import { DavClient } from './utils';
 
 test.beforeEach(bootstrap);
 test.afterEach(teardown);
+
+test.use({ extraHTTPHeaders: e2eHeaders() });
 
 test.describe('@ui Folder view and navigation', () => {
   let fileid1: number;
@@ -47,5 +49,53 @@ test.describe('@ui Folder view and navigation', () => {
       await expect(page.locator('.folder--Nested2')).toBeInViewport();
       await expect(page.locator(`.p-outer--${fileid2}`)).not.toBeInViewport();
     });
+  });
+});
+
+test.describe('@api Folders sub', () => {
+  test('List root subfolders', async ({ request }) => {
+    const url = new URL(`${appUrl}/api/folders/sub`);
+    url.searchParams.set('folder', '/');
+    const res = await request.get(url.toString());
+    expect(res.ok()).toBeTruthy();
+
+    const data: { fileid: number; name: string; previews: { fileid: number }[] }[] = await res.json();
+    expect(data.length).toBeGreaterThan(0);
+
+    const names = data.map((f) => f.name);
+    expect(names).toContain('for-default');
+
+    for (const f of data) {
+      expect(typeof f.fileid).toBe('number');
+      expect(typeof f.name).toBe('string');
+      expect(Array.isArray(f.previews)).toBeTruthy();
+      expect(f.previews.length).toBeLessThanOrEqual(4);
+    }
+  });
+
+  test('List nested subfolders', async ({ request }) => {
+    const url = new URL(`${appUrl}/api/folders/sub`);
+    url.searchParams.set('folder', '/for-default');
+    const res = await request.get(url.toString());
+    expect(res.ok()).toBeTruthy();
+
+    const data: { fileid: number; name: string }[] = await res.json();
+    const names = data.map((f) => f.name);
+    expect(names).toContain('Nested 1');
+    expect(names).toContain('Nested 2');
+  });
+
+  test('Invalid folder errors', async ({ request }) => {
+    const missingUrl = new URL(`${appUrl}/api/folders/sub`);
+    missingUrl.searchParams.set('folder', '/no-such-folder-xyz');
+    const missing = await request.get(missingUrl.toString());
+    expect(missing.ok()).toBeFalsy();
+    expect(missing.status()).toBe(404);
+
+    const fileUrl = new URL(`${appUrl}/api/folders/sub`);
+    fileUrl.searchParams.set('folder', '/for-default/Nested 1/test_01.jpg');
+    const file = await request.get(fileUrl.toString());
+    expect(file.ok()).toBeFalsy();
+    expect(file.status()).toBe(400);
   });
 });

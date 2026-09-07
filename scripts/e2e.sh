@@ -39,8 +39,13 @@ e2e_generate_datasets() {
         echo "Generating image dataset..."
         npx tsx e2e/dataset-gen.ts
 
+        # Livephoto for rendering tests.
         mkdir -p "$E2E_DATASET_CACHE/primary/for-livephoto"
         cp "$MEMORIES_DIR/tests/assets/apple_h264_boy_01."* "$E2E_DATASET_CACHE/primary/for-livephoto/"
+
+        # Standalone video for video filter tests.
+        mkdir -p "$E2E_DATASET_CACHE/primary/for-vid"
+        cp -n "$MEMORIES_DIR/tests/assets/unknown_01.mp4" "$E2E_DATASET_CACHE/primary/for-vid/clip.mp4"
     fi
 }
 

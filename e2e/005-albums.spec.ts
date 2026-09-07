@@ -13,7 +13,7 @@ function uiUrl(name: string) {
   return `${appUrl}/albums/${username}/${encodeURIComponent(name)}`;
 }
 
-test.describe.serial('@ui Albums', () => {
+test.describe.serial('Albums', () => {
   const random = Math.floor(Math.random() * 1000000);
   const albumName = `E2E Test Album ${random}`;
   const renamedAlbumName = `${albumName} Renamed`;
@@ -31,7 +31,7 @@ test.describe.serial('@ui Albums', () => {
     fileid4 = await dav.fileid('/for-default/ipZPm7u6aPA.jpg');
   });
 
-  test('Create album with selected photos', async ({ page }) => {
+  test('@ui Create album with selected photos', async ({ page }) => {
     await page.goto(appUrl);
 
     await page.hover(`.p-outer--${fileid1}`);
@@ -54,7 +54,7 @@ test.describe.serial('@ui Albums', () => {
     await page.locator('.memories-modal').waitFor({ state: 'detached' });
   });
 
-  test('View album and open photo in viewer', async ({ page }) => {
+  test('@ui View album and open photo in viewer', async ({ page }) => {
     await page.goto(`${appUrl}/albums`);
 
     await page.getByRole('link', { name: albumName }).click();
@@ -70,7 +70,7 @@ test.describe.serial('@ui Albums', () => {
     await page.waitForSelector('body.viewer-fully-opened');
   });
 
-  test('Add image to existing album', async ({ request, page }) => {
+  test('@ui Add image to existing album', async ({ request, page }) => {
     await test.step('Add image via UI', async () => {
       await page.goto(appUrl);
 
@@ -104,7 +104,7 @@ test.describe.serial('@ui Albums', () => {
     });
   });
 
-  test('Set cover image on album', async ({ request, page }) => {
+  test('@ui Set cover image on album', async ({ request, page }) => {
     await test.step('Set cover image via UI', async () => {
       await page.goto(uiUrl(albumName));
       await page.hover(`.p-outer--${fileid1}`);
@@ -128,7 +128,7 @@ test.describe.serial('@ui Albums', () => {
     });
   });
 
-  test('Remove image from album', async ({ request, page }) => {
+  test('@ui Remove image from album', async ({ request, page }) => {
     await test.step('Remove image via UI', async () => {
       await page.goto(uiUrl(albumName));
       await page.hover(`.p-outer--${fileid1}`);
@@ -152,7 +152,7 @@ test.describe.serial('@ui Albums', () => {
     });
   });
 
-  test('Rename album', async ({ page }) => {
+  test('@ui Rename album', async ({ page }) => {
     await page.goto(uiUrl(albumName));
     await expect(page.locator('.dtm-container .header')).toHaveText(albumName);
 
@@ -165,7 +165,33 @@ test.describe.serial('@ui Albums', () => {
     await expect(page.locator('.dtm-container .header')).toHaveText(renamedAlbumName);
   });
 
-  test('Delete album', async ({ page }) => {
+  test('@api Download album returns handle', async ({ request }) => {
+    const url = new URL(`${appUrl}/api/clusters/albums/download`);
+    url.searchParams.set('name', `${username}/${renamedAlbumName}`);
+    const res = await request.post(url.toString());
+    expect(res.ok()).toBeTruthy();
+    expect(typeof (await res.json()).handle).toBe('string');
+  });
+
+  test('@api Preview missing album is rejected', async ({ request }) => {
+    const url = new URL(`${appUrl}/api/clusters/albums/preview`);
+    url.searchParams.set('name', `${username}/no-such-album-xyz`);
+    url.searchParams.set('cover', '1');
+    url.searchParams.set('cover_etag', 'null');
+    expect((await request.get(url.toString())).status()).toBe(404);
+  });
+
+  test('@api Set cover for photo outside album is rejected', async ({ request }) => {
+    const dav = new DavClient(request);
+    const outside = await dav.fileid('/for-default/NDPmLyPXnZU.jpg');
+    const res = await request.post(`${appUrl}/api/clusters/albums/set-cover`, {
+      data: { name: `${username}/${renamedAlbumName}`, fileid: outside },
+    });
+    expect(res.ok()).toBeFalsy();
+    expect(res.status()).toBe(404);
+  });
+
+  test('@ui Delete album', async ({ page }) => {
     await page.goto(`${appUrl}/albums`);
 
     await page.getByRole('link', { name: renamedAlbumName }).click();

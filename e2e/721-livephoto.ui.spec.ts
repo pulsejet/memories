@@ -2,6 +2,8 @@ import { test, expect, type Locator } from '@playwright/test';
 import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
 import { DavClient } from './utils';
 
+import type { IPhoto } from '@typings';
+
 test.beforeEach(bootstrap);
 test.afterEach(teardown);
 
@@ -91,5 +93,52 @@ test.describe('@ui Live photo', () => {
       await expect(viewerLivePhoto).not.toHaveClass(/playing/);
       await expect(playButton.locator('svg.pause')).not.toBeAttached();
     });
+  });
+});
+
+test.describe('@api Live photo', () => {
+  test('Missing liveid is rejected', async ({ request }) => {
+    const dav = new DavClient(request);
+    const fileid = await dav.fileid('/for-default/Nested 1/test_01.jpg');
+    expect((await request.get(`${appUrl}/api/video/livephoto/${fileid}`)).status()).toBe(400);
+  });
+
+  test('Photo without live video is rejected', async ({ request }) => {
+    const dav = new DavClient(request);
+    const fileid = await dav.fileid('/for-default/Nested 1/test_01.jpg');
+    const url = new URL(`${appUrl}/api/video/livephoto/${fileid}`);
+    url.searchParams.set('liveid', 'sidecar');
+    expect((await request.get(url.toString())).status()).toBe(404);
+  });
+
+  test('Live photo JSON and blob', async ({ request }) => {
+    const daysRes = await request.get(`${appUrl}/api/days?nopreload=1`);
+    expect(daysRes.ok()).toBeTruthy();
+
+    const dayIds = ((await daysRes.json()) as { dayid: number }[]).map((d) => d.dayid);
+    const detailRes = await request.post(`${appUrl}/api/days`, { data: { dayIds } });
+    const photos: IPhoto[] = await detailRes.json();
+    const photo = photos.find((p) => p.liveid);
+    expect(photo).toBeDefined();
+
+    const dav = new DavClient(request);
+    const liveFileid = photo!.fileid;
+    const liveid = photo!.liveid!;
+
+    const jsonUrl = new URL(`${appUrl}/api/video/livephoto/${liveFileid}`);
+    jsonUrl.searchParams.set('liveid', liveid);
+    jsonUrl.searchParams.set('format', 'json');
+    const jsonRes = await request.get(jsonUrl.toString());
+    expect(jsonRes.ok()).toBeTruthy();
+    expect(typeof (await jsonRes.json()).fileid).toBe('number');
+
+    const blobUrl = new URL(`${appUrl}/api/video/livephoto/${liveFileid}`);
+    blobUrl.searchParams.set('liveid', liveid);
+    const blobRes = await request.get(blobUrl.toString());
+    expect(blobRes.ok()).toBeTruthy();
+    expect(blobRes.headers()['content-type']).toContain('video/');
+    expect((await blobRes.body()).length).toBeGreaterThan(0);
+
+    expect((await dav.imageInfo(liveFileid)).fileid).toBe(liveFileid);
   });
 });

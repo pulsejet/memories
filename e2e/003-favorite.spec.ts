@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
 import { DavClient } from './utils';
 
+import type { IDay, IPhoto } from '@typings';
+
 test.beforeEach(bootstrap);
 test.afterEach(teardown);
 
@@ -59,6 +61,29 @@ test.describe.serial('@ui Favorites', () => {
 
       await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).toBeVisible();
       await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).toBeVisible();
+    });
+
+    await test.step('Check favorites view', async () => {
+      await page.goto(`${appUrl}/favorites`);
+      await expect(page.locator(`.p-outer--${fileid1}`)).toBeVisible();
+      await expect(page.locator(`.p-outer--${fileid2}`)).toBeVisible();
+    });
+
+    await test.step('Check favorites API filter', async () => {
+      const daysUrl = new URL(`${appUrl}/api/days`);
+      daysUrl.searchParams.set('nopreload', '1');
+      daysUrl.searchParams.set('fav', '1');
+      const days: IDay[] = await (await request.get(daysUrl.toString())).json();
+
+      const detailUrl = new URL(`${appUrl}/api/days`);
+      detailUrl.searchParams.set('fav', '1');
+      const photos: IPhoto[] = await (
+        await request.post(detailUrl.toString(), { data: { dayIds: days.map((d) => d.dayid) } })
+      ).json();
+      expect(photos.map((p) => p.fileid)).toStrictEqual(expect.arrayContaining([fileid1, fileid2]));
+      for (const p of photos) {
+        expect(Boolean(p.isfavorite)).toBe(true);
+      }
     });
 
     await test.step('Unfavorite', async () => {
