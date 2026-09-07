@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders, bootstrap, username, teardown } from './navigation';
 import { DavClient } from './utils';
+import { snap } from './screenshots';
 
 import type { IAlbum } from '@typings';
 
@@ -193,6 +194,8 @@ test.describe.serial('Albums', () => {
 
   test('@ui Delete album', async ({ page }) => {
     await page.goto(`${appUrl}/albums`);
+    await expect(page.getByRole('link', { name: renamedAlbumName })).toBeVisible();
+    await snap(page, 'album-list');
 
     await page.getByRole('link', { name: renamedAlbumName }).click();
     await page.getByRole('button', { name: 'Actions' }).click();

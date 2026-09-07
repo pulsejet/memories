@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
 import { DavClient } from './utils';
+import { snap } from './screenshots';
 
 import type { IDay, IPhoto } from '@typings';
 
@@ -67,6 +68,7 @@ test.describe.serial('@ui Favorites', () => {
       await page.goto(`${appUrl}/favorites`);
       await expect(page.locator(`.p-outer--${fileid1}`)).toBeVisible();
       await expect(page.locator(`.p-outer--${fileid2}`)).toBeVisible();
+      await snap(page, 'favorites');
     });
 
     await test.step('Check favorites API filter', async () => {

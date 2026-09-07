@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import { test, expect } from '@playwright/test';
 import { appUrl, bootstrap, e2eHeaders, teardown } from './navigation';
 import { DavClient } from './utils';
+import { snap } from './screenshots';
 
 test.beforeEach(bootstrap);
 test.afterEach(teardown);
@@ -17,6 +18,7 @@ test.describe('@ui Viewer image download', () => {
     await page.goto(appUrl);
     await page.locator(`.p-outer--${fileid} > .img-outer`).click();
     await page.waitForSelector('body.viewer-fully-opened');
+    await snap(page, 'viewer-image');
 
     const downloadPromise = page.waitForEvent('download');
     await page.locator('.memories_viewer').getByRole('button', { name: 'Actions' }).click();

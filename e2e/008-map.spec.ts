@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, bootstrap, e2eHeaders, teardown } from './navigation';
 import { DavClient } from './utils';
+import { snap } from './screenshots';
 
 import type { IMapCluster, IDay, IPhoto } from '@typings';
 import type { Page } from '@playwright/test';
@@ -184,7 +185,7 @@ test.describe('@ui Map', () => {
   test('Map clusters at Santa Monica then pan past Los Angeles', async ({ page, request }) => {
     const dav = new DavClient(request);
 
-    await test.step('Open Santa Monica viewport', async () => {
+    await test.step('Open Santa Monica viewport', async (step) => {
       const mapPage = new URL(`${appUrl}/map`);
       mapPage.searchParams.set('b', SM_BOUNDS);
       mapPage.searchParams.set('z', '13');
@@ -201,6 +202,7 @@ test.describe('@ui Map', () => {
         const fileid = await dav.fileid(`/for-geo/${base}`);
         await expect(page.locator(`.p-outer--${fileid}`)).toBeVisible();
       }
+      await snap(page, 'map-santa-monica', step);
     });
 
     await test.step('Pan east past downtown Los Angeles', async () => {
@@ -216,7 +218,7 @@ test.describe('@ui Map', () => {
       expect(lon).toBeGreaterThan(DTLA_LON);
     });
 
-    await test.step('Check Los Angeles clusters and timeline', async () => {
+    await test.step('Check Los Angeles clusters and timeline', async (step) => {
       await expect(page.locator('.leaflet-marker-icon .preview')).toHaveCount(2);
 
       const badges = await page.locator('.leaflet-marker-icon .preview .count').allTextContents();

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { appUrl, bootstrap, e2eHeaders, teardown } from './navigation';
 import { DavClient } from './utils';
+import { snap } from './screenshots';
 
 test.beforeEach(bootstrap);
 test.afterEach(teardown);
@@ -21,6 +22,7 @@ test.describe('@ui Folder view and navigation', () => {
     await page.goto(`${appUrl}/folders`);
     await page.waitForSelector('.folder--for-other');
     await page.waitForSelector('.folder--for-default');
+    await snap(page, 'folders');
 
     await page.locator('.folder--for-default').click();
     await page.waitForSelector(`.p-outer--${fileid1}`);
