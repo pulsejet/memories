@@ -252,6 +252,85 @@ export const FOR_EDIT_EXIF_DATASET: IDatasetMap = {
 };
 
 /**
+ * Photos taken on July 31 of past years for on-this-day tests (012, 730).
+ * The e2e clock is pinned to 2026-07-31, so these show as 1, 2 and 3 years ago.
+ */
+export const FOR_ONTHISDAY_DATASET: IDatasetMap = {
+  'primary/for-onthisday/y1a.jpg': {
+    size: [800, 600],
+    exif: {
+      DateTimeOriginal: '2025:07:31 12:00:00+00:00',
+    },
+  },
+  'primary/for-onthisday/y1b.jpg': {
+    size: [600, 800],
+    exif: {
+      DateTimeOriginal: '2025:07:31 14:00:00+00:00',
+    },
+  },
+  'primary/for-onthisday/y2a.jpg': {
+    size: [800, 600],
+    exif: {
+      DateTimeOriginal: '2024:07:30 12:00:00+00:00',
+    },
+  },
+  'primary/for-onthisday/y2b.jpg': {
+    size: [600, 800],
+    exif: {
+      DateTimeOriginal: '2024:08:01 14:00:00+00:00',
+    },
+  },
+  'primary/for-onthisday/y3a.jpg': {
+    size: [800, 600],
+    exif: {
+      DateTimeOriginal: '2023:07:31 12:00:00+00:00',
+    },
+  },
+  'primary/for-onthisday/y3b.jpg': {
+    size: [600, 800],
+    exif: {
+      DateTimeOriginal: '2023:07:31 14:00:00+00:00',
+    },
+  },
+  'primary/for-onthisday/y4a.jpg': {
+    size: [800, 600],
+    exif: {
+      DateTimeOriginal: '2022:07:31 12:00:00+00:00',
+    },
+  },
+  'primary/for-onthisday/y4b.jpg': {
+    size: [600, 800],
+    exif: {
+      DateTimeOriginal: '2022:07:31 14:00:00+00:00',
+    },
+  },
+  'primary/for-onthisday/y5a.jpg': {
+    size: [800, 600],
+    exif: {
+      DateTimeOriginal: '2021:07:31 12:00:00+00:00',
+    },
+  },
+  'primary/for-onthisday/y5b.jpg': {
+    size: [600, 800],
+    exif: {
+      DateTimeOriginal: '2021:07:31 14:00:00+00:00',
+    },
+  },
+  'primary/for-onthisday/y6a.jpg': {
+    size: [800, 600],
+    exif: {
+      DateTimeOriginal: '2020:07:31 12:00:00+00:00',
+    },
+  },
+  'primary/for-onthisday/y6b.jpg': {
+    size: [600, 800],
+    exif: {
+      DateTimeOriginal: '2020:07:31 14:00:00+00:00',
+    },
+  },
+};
+
+/**
  * Dedicated isolated assets for upload tests (006).
  */
 export const FOR_UPLOAD_DATASET: IDatasetMap = {
@@ -1575,6 +1654,7 @@ export const DATASET: IDatasetMap = {
   ...FOR_UPLOAD_DATASET,
   ...FOR_DELETE_DATASET,
   ...FOR_MOVE_DATASET,
+  ...FOR_ONTHISDAY_DATASET,
   ...GEO_DATASET,
 };
 
