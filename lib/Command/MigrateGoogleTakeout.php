@@ -198,22 +198,17 @@ final class MigrateGoogleTakeout extends Command
         $jsonFile = null;
 
         try {
-            // the JSON file may contain the "supplemental-metadata" string, fully or partially
+            // The JSON sidecar may be truncated by Google for long file names
+            // https://github.com/pulsejet/memories/issues/1559
             // https://github.com/pulsejet/memories/pull/1441
-            $partial_re = '\.?[supplemental\-metadata]*\.json$';
+            $candidates = [];
             foreach ($nodes as $node) {
-                if (!$node instanceof File) {
-                    continue;
+                if ($node instanceof File) {
+                    $candidates[$node->getPath()] = $node;
                 }
-
-                // check if the current file matches our $path . $partial_re RegExp
-                $current = $node->getPath();
-                $re = preg_quote($path, '/').$partial_re;
-                if (preg_match("/{$re}/", $current)) {
-                    $jsonFile = $node;
-
-                    break;
-                }
+            }
+            if ($match = self::findTakeoutJsonFile($path, array_keys($candidates))) {
+                $jsonFile = $candidates[$match];
             }
 
             if (null === $jsonFile || !$jsonFile->isReadable()) {
@@ -358,5 +353,60 @@ final class MigrateGoogleTakeout extends Command
 
         // Remove all null values
         return array_filter($txf, static fn (mixed $value) => null !== $value);
+    }
+
+    /**
+     * Find the Google Takeout JSON sidecar for a media file.
+     *
+     * Google truncates long sidecar names (≈51 chars incl. ".json"), cutting
+     * the base name and/or the ".supplemental-metadata" suffix, e.g.
+     * "IMG….jpg.supplementa.json", "….snapchat.androi.json", "….jpeg.supp.json".
+     *
+     * https://github.com/pulsejet/memories/issues/1559
+     *
+     * @param string   $path           Full path of the media file
+     * @param string[] $candidatePaths Full paths to compare against
+     */
+    private static function findTakeoutJsonFile(string $path, array $candidatePaths): ?string
+    {
+        $dir = \dirname($path);
+        $base = basename($path);
+        $combined = $base.'.supplemental-metadata';
+
+        foreach ($candidatePaths as $candidate) {
+            if (!str_ends_with($candidate, '.json')) {
+                continue;
+            }
+            if (\dirname($candidate) !== $dir) {
+                continue;
+            }
+
+            $name = basename($candidate);
+            $stem = substr($name, 0, -5); // strip ".json"
+
+            // Sidecar starts with the full base name, e.g.
+            // "IMG.jpg.supplemental-metadata.json" or ".supplementa.json"
+            if (str_starts_with($stem, $base)) {
+                $rest = substr($stem, \strlen($base));
+                if ('' === $rest) {
+                    return $candidate;
+                }
+                if (str_starts_with($rest, '.') && str_starts_with('supplemental-metadata', substr($rest, 1)) && \strlen($rest) > 1) {
+                    return $candidate;
+                }
+
+                continue;
+            }
+
+            // Truncated sidecar: Google capped the total length, so only a
+            // prefix of "<base>.supplemental-metadata" (or of the base itself)
+            // remains. Only allow this near the cap to avoid collisions
+            // between short, similarly-named files in the same folder.
+            if (\strlen($name) >= 48 && \strlen($stem) >= 20 && str_starts_with($combined, $stem)) {
+                return $candidate;
+            }
+        }
+
+        return null;
     }
 }

@@ -106,6 +106,70 @@ final class MigrateGoogleTakeoutTest extends TestCase
         self::assertSame([], $res);
     }
 
+    public function testFindTakeoutJsonFile(): void
+    {
+        $dir = '/takeout/2024';
+
+        // Full suffix
+        self::assertSame(
+            $dir.'/IMG_0001.jpg.supplemental-metadata.json',
+            $this->findTakeoutJsonFile($dir.'/IMG_0001.jpg', [
+                $dir.'/IMG_0002.jpg.supplemental-metadata.json',
+                $dir.'/IMG_0001.jpg.supplemental-metadata.json',
+            ]),
+        );
+
+        // Truncated suffix variants from the issue report
+        self::assertSame(
+            $dir.'/Screenshot_2017-07-05-10-05-26.png.supplementa.json',
+            $this->findTakeoutJsonFile($dir.'/Screenshot_2017-07-05-10-05-26.png', [
+                $dir.'/Screenshot_2017-07-05-10-05-26.png.supplementa.json',
+            ]),
+        );
+        self::assertSame(
+            $dir.'/Screenshot_20241227_105539_Edge.jpg.supplement.json',
+            $this->findTakeoutJsonFile($dir.'/Screenshot_20241227_105539_Edge.jpg', [
+                $dir.'/Screenshot_20241227_105539_Edge.jpg.supplement.json',
+            ]),
+        );
+        self::assertSame(
+            $dir.'/D7157814-D2D5-4A62-AFCE-9CF465CB7D66.jpeg.supp.json',
+            $this->findTakeoutJsonFile($dir.'/D7157814-D2D5-4A62-AFCE-9CF465CB7D66.jpeg', [
+                $dir.'/D7157814-D2D5-4A62-AFCE-9CF465CB7D66.jpeg.supp.json',
+            ]),
+        );
+
+        // Truncated base name (suffix dropped entirely by Google)
+        self::assertSame(
+            $dir.'/Screenshot_20220207_102421_com.snapchat.androi.json',
+            $this->findTakeoutJsonFile($dir.'/Screenshot_20220207_102421_com.snapchat.android.jpg', [
+                $dir.'/Screenshot_20220207_102421_com.snapchat.androi.json',
+            ]),
+        );
+
+        // No match: unrelated file, short-name prefix trap, other directory
+        self::assertNull($this->findTakeoutJsonFile($dir.'/IMG_0001.jpg', [
+            $dir.'/OTHER.jpg.supplemental-metadata.json',
+        ]));
+        self::assertNull($this->findTakeoutJsonFile($dir.'/Screenshot_2024.jpg', [
+            $dir.'/Screenshot_2.json',
+        ]));
+        self::assertNull($this->findTakeoutJsonFile($dir.'/IMG_0001.jpg', [
+            '/takeout/other/IMG_0001.jpg.supplemental-metadata.json',
+        ]));
+        self::assertNull($this->findTakeoutJsonFile($dir.'/IMG_0001.jpg', [
+            $dir.'/IMG_0001.jpg',
+        ]));
+    }
+
+    private function findTakeoutJsonFile(string $path, array $candidatePaths): ?string
+    {
+        $method = new \ReflectionMethod(MigrateGoogleTakeout::class, 'findTakeoutJsonFile');
+
+        /** @var ?string */
+        return $method->invoke(null, $path, $candidatePaths);
+    }
+
     private function takeoutToExiftoolJson(array $json): array
     {
         $method = new \ReflectionMethod(MigrateGoogleTakeout::class, 'takeoutToExiftoolJson');
