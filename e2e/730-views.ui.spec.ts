@@ -29,7 +29,8 @@ test.describe('@ui Explore view', () => {
     await expect(page.getByText('Explore').first()).toBeVisible();
 
     for (const name of ['Folders', 'Favorites', 'Videos', 'Archive', 'On this day', 'Map']) {
-      await expect(page.getByRole('button', { name })).toBeVisible();
+      // NcButton with `to` renders a real link in Nextcloud Vue 9
+      await expect(page.locator('.explore-outer').getByRole('link', { name })).toBeVisible();
     }
   });
 });

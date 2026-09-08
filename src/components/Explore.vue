@@ -35,7 +35,7 @@
           <template #icon>
             <component :is="category.icon" />
           </template>
-          <template>{{ category.name }}</template>
+          {{ category.name }}
         </NcButton>
       </div>
     </div>
