@@ -10,6 +10,10 @@ All notable changes to this project will be documented in this file.
 - **Fix**: Fix broken sidebar integration
 - **Fix**: Password protected link shares ([#1721](https://github.com/pulsejet/memories/pull/1721))
 - **Fix**: Allow self-signed CA on Android ([#1330](https://github.com/pulsejet/memories/pull/1330))
+- **Fix**: Video upload to public shares ([#1634](https://github.com/pulsejet/memories/issues/1634))
+- **Fix**: Google Takeout migration for long file names ([#1559](https://github.com/pulsejet/memories/issues/1559))
+- **Fix**: Face cover when person name matches a username ([#1692](https://github.com/pulsejet/memories/issues/1692))
+- **Update**: Requires Nextcloud 34 or later
 - **Feature**: Huawei Moving Picture support
 - **Dev**: Migrated to Vue 3
 - **Dev**: New extensive unit and e2e test suite
