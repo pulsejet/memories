@@ -456,7 +456,7 @@ final class Util
         }
 
         // Register handler
-        pcntl_signal(SIGINT, static function () use ($handlers): void {
+        pcntl_signal(SIGINT, static function () use (&$handlers): void {
             foreach ($handlers as $handler) {
                 $handler();
             }

@@ -163,7 +163,7 @@ final class AlbumsQuery
         $albumUid = null;
 
         // Split name and uid
-        $parts = explode('/', $albumId);
+        $parts = explode('/', $albumId, 2);
         if (2 === \count($parts)) {
             $albumUid = $parts[0];
             $albumName = $parts[1];

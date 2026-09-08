@@ -39,8 +39,8 @@ trait TimelineQueryFilters
 
     public function transformLimit(IQueryBuilder &$query, bool $aggregate, int $limit): void
     {
-        if ($limit >= 1 && $limit <= 100) {
-            $query->setMaxResults($limit);
+        if ($limit >= 1) {
+            $query->setMaxResults(min($limit, 100));
         }
     }
 

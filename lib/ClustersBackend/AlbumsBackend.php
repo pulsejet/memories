@@ -60,7 +60,7 @@ final class AlbumsBackend extends Backend
     #[\Override]
     public function clusterName(string $name): string
     {
-        return explode('/', $name)[1];
+        return explode('/', $name, 2)[1] ?? $name;
     }
 
     #[\Override]

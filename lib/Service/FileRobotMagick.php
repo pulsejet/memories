@@ -84,13 +84,13 @@ final class FileRobotImageState
 
     public function __construct(array $json)
     {
-        if ($order = $json['finetunes']) {
+        if ($order = $json['finetunes'] ?? null) {
             foreach ($order as $key) {
                 $this->finetuneOrder[] = $key;
             }
         }
 
-        if ($props = $json['finetunesProps']) {
+        if ($props = $json['finetunesProps'] ?? null) {
             $this->_set($props, 'brightness');
             $this->_set($props, 'contrast');
             $this->_set($props, 'hue');
@@ -100,8 +100,8 @@ final class FileRobotImageState
             $this->_set($props, 'warmth');
         }
 
-        if ($props = $json['adjustments']) {
-            if ($crop = $props['crop']) {
+        if ($props = $json['adjustments'] ?? null) {
+            if ($crop = $props['crop'] ?? null) {
                 $this->_set($crop, 'x', 'cropX');
                 $this->_set($crop, 'y', 'cropY');
                 $this->_set($crop, 'width', 'cropWidth');
@@ -112,12 +112,12 @@ final class FileRobotImageState
             $this->_set($props, 'isFlippedY');
         }
 
-        if ($filter = $json['filter']) {
+        if ($filter = $json['filter'] ?? null) {
             // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/components/tools/Filters/Filters.constants.js#L8
             $this->filter = $filter;
         }
 
-        if ($resize = $json['resize']) {
+        if ($resize = $json['resize'] ?? null) {
             $this->_set($resize, 'width', 'resizeWidth');
             $this->_set($resize, 'height', 'resizeHeight');
         }

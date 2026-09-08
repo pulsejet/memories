@@ -144,7 +144,7 @@ final class ShareController extends GenericApiController
             'url' => $url,
             'hasPassword' => $share->getPassword() ? true : false,
             'expiration' => $expiration,
-            'editable' => $share->getPermissions() & \OCP\Constants::PERMISSION_UPDATE,
+            'editable' => (bool) ($share->getPermissions() & \OCP\Constants::PERMISSION_UPDATE),
         ];
     }
 }

@@ -55,6 +55,9 @@ trait TimelineQuerySingleItem
         }
 
         $row = $qb->executeQuery()->fetch();
+        if (false === $row) {
+            throw \OCA\Memories\Exceptions::NotFoundFile($id);
+        }
 
         // Basic information to return
         $info = [

@@ -192,12 +192,12 @@ final class Exif
         // https://github.com/pulsejet/memories/issues/485
 
         $formats = [
-            'Y:m:d H:i', // 2023:03:05 18:58
-            'Y:m:d H:iO', // 2023:03:05 18:58+05:00
-            'Y:m:d H:i:s', // 2023:03:05 18:58:17
-            'Y:m:d H:i:sO', // 2023:03:05 10:58:17+05:00
-            'Y:m:d H:i:s.u', // 2023:03:05 10:58:17.000
             'Y:m:d H:i:s.uO', // 2023:03:05 10:58:17.000Z
+            'Y:m:d H:i:s.u', // 2023:03:05 10:58:17.000
+            'Y:m:d H:i:sO', // 2023:03:05 10:58:17+05:00
+            'Y:m:d H:i:s', // 2023:03:05 18:58:17
+            'Y:m:d H:iO', // 2023:03:05 18:58+05:00
+            'Y:m:d H:i', // 2023:03:05 18:58
         ];
 
         /** @var \DateTime $dt */
@@ -287,15 +287,16 @@ final class Exif
         $width = $exif[self::EXIF_KEY_IMAGE_WIDTH] ?? 0;
         $height = $exif[self::EXIF_KEY_IMAGE_HEIGHT] ?? 0;
 
+        // Sanity check the dimensions before using them
+        if ($width <= 0 || $height <= 0 || $width > 100000 || $height > 100000) {
+            return [0, 0];
+        }
+
         // Check if image is rotated and we need to swap width and height
         $rotation = $exif[self::EXIF_KEY_ROTATION] ?? 0;
         $orientation = $exif[self::EXIF_KEY_ORIENTATION] ?? 0;
         if (\in_array($orientation, [5, 6, 7, 8], true) || \in_array($rotation, [90, 270], true)) {
             return [$height, $width];
-        }
-
-        if ($width <= 0 || $height <= 0 || $width > 100000 || $height > 100000) {
-            return [0, 0];
         }
 
         return [$width, $height];

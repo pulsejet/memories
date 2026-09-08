@@ -133,7 +133,7 @@ final class ImageController extends GenericApiController
                 try {
                     // Make sure max preview exists
                     $hasMax = false;
-                    foreach ($availablePreviews[$fileid] as $preview) {
+                    foreach ($availablePreviews[$fileid] ?? [] as $preview) {
                         if ($preview->isMax()) {
                             $hasMax = true;
 
@@ -161,6 +161,9 @@ final class ImageController extends GenericApiController
                     ]);
 
                     // Send the length of the json as a single byte
+                    if (\strlen($json) > 255) {
+                        continue;
+                    }
                     $out->setOutput(\chr(\strlen($json)));
                     $out->setOutput($json);
 

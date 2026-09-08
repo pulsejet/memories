@@ -70,7 +70,7 @@ trait TimelineQueryMap
                 (float) $row['lat'],
                 (float) $row['lon'],
             ],
-            'count' => (float) $row['count'],
+            'count' => (int) $row['count'],
         ], $res);
     }
 
