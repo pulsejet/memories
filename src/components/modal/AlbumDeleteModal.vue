@@ -72,8 +72,8 @@ export default defineComponent({
     async save() {
       try {
         await client.deleteFile(dav.getAlbumPath(this.user, this.name));
-        this.$router.push({ name: 'albums' });
-        this.close();
+        await this.close();
+        await this.$router.push({ name: 'albums' });
       } catch (error) {
         console.log(error);
         showError(this.t('memories', 'Failed to delete {name}.', { name: this.name }));
