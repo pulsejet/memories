@@ -292,7 +292,11 @@ final class ExifExtractTest extends TestCase
 
         // Date carries an embedded -07:00 offset (PDT)
         self::assertSame('2021:07:10 16:51:07-07:00', $res->exif['ContentCreateDate'] ?? null);
-        self::assertSame('2021:07:10 16:51:26-07:00', $res->exif['CreateDate'] ?? null);
+
+        // CreateDate has no timezone info, but the epoch should stay the same.
+        // '2021:07:10 16:51:26-07:00' (local timezone)
+        $createDate = \DateTime::createFromFormat('Y:m:d H:i:sO', $res->exif['CreateDate'] ?? null);
+        self::assertSame(1625961086, $createDate->getTimestamp());
 
         // Geolocation (Redlands, CA)
         self::assertEqualsWithDelta(34.0052, (float) ($res->exif['GPSLatitude'] ?? 0), 0.0001);
@@ -302,6 +306,7 @@ final class ExifExtractTest extends TestCase
         // ContentCreateDate takes precedence over CreateDate
         $dt = Exif::parseExifDate($res->exif);
         self::assertSame('2021-07-10 16:51:07 -07:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(1625961067, $dt->getTimestamp());
     }
 
     public function testGoogleMotion01(): void
