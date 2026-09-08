@@ -34,3 +34,8 @@ div.oc-dialog[role='dialog'] {
     }
   }
 }
+
+// Make tag dropdown show over modal
+ul.nc-select__dropdown {
+  z-index: 10000;
+}
