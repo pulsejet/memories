@@ -12,6 +12,7 @@ import { defineComponent, markRaw } from 'vue';
 
 import * as nativex from '@native';
 
+import UserConfig from '@mixins/UserConfig';
 import { translate as t } from '@services/l10n';
 
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
@@ -27,13 +28,18 @@ export default defineComponent({
     AlbumIcon,
   },
 
+  mixins: [UserConfig],
+
   computed: {
     links() {
-      return [
+      const links = [
         { to: '/', icon: markRaw(ImageMultipleIcon), text: t('memories', 'Photos') },
         { to: '/explore', icon: markRaw(SearchIcon), text: t('memories', 'Explore') },
-        { to: '/albums', icon: markRaw(AlbumIcon), text: t('memories', 'Albums') },
       ];
+      if (this.config.albums_enabled) {
+        links.push({ to: '/albums', icon: markRaw(AlbumIcon), text: t('memories', 'Albums') });
+      }
+      return links;
     },
   },
 
