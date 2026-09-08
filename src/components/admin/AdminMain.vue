@@ -183,42 +183,42 @@ export default defineComponent({
   :deep(.admin-section) {
     margin-top: 20px;
 
-    :deep(form) {
+    form {
       margin-top: 1em;
     }
 
-    :deep(.checkbox-radio-switch) {
+    .checkbox-radio-switch {
       margin: 2px 16px;
     }
 
-    :deep(.m-radio) {
+    .m-radio {
       display: inline-block;
     }
 
-    :deep(.input-field) {
+    .input-field {
       // Prevent overlapping label with another input
       margin-top: 0.8em;
     }
 
-    :deep(h2) {
+    h2 {
       font-size: 1.6em;
       font-weight: 500;
       padding-top: 20px;
     }
 
-    :deep(h3) {
+    h3 {
       font-size: 1.2em;
       font-weight: 500;
       padding-top: 10px;
     }
 
-    :deep(code) {
+    code {
       padding-left: 10px;
       -webkit-box-decoration-break: clone;
       box-decoration-break: clone;
     }
 
-    :deep(b) {
+    b {
       font-weight: 500;
     }
   }

@@ -87,7 +87,7 @@ export default defineComponent({
     flex: 1 1 0px;
     opacity: 0.75;
 
-    :deep(span.material-design-icon) {
+    span.material-design-icon {
       border-radius: 20px;
       padding: 4px;
       max-width: 70px;
@@ -97,7 +97,7 @@ export default defineComponent({
     &.router-link-exact-active {
       opacity: 1;
 
-      :deep(span.material-design-icon) {
+      span.material-design-icon {
         background: var(--color-primary-element-light);
       }
     }

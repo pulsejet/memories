@@ -155,7 +155,7 @@ export default defineComponent({
     margin-top: 10px;
     text-align: right;
 
-    > :deep(button) {
+    > button {
       display: inline-block !important;
     }
   }

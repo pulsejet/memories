@@ -154,8 +154,7 @@ export default defineComponent({
         :deep(.material-design-icon) {
           width: 100%;
           height: 100%;
-
-          :deep(.material-design-icon__svg) {
+          .material-design-icon__svg {
             fill: var(--color-primary);
           }
         }

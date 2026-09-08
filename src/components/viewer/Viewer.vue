@@ -1398,9 +1398,11 @@ export default defineComponent({
   transition: transform 0.75s ease !important;
 }
 
-.inner,
-.inner:deep(.pswp) {
+.inner {
   width: inherit;
+  :deep(.pswp) {
+    width: inherit;
+  }
 
   :deep(.pswp__top-bar) {
     background: linear-gradient(0deg, transparent, rgba(0, 0, 0, 0.3));
@@ -1428,38 +1430,38 @@ export default defineComponent({
 :deep(.pswp) {
   contain: strict;
 
-  :deep(.pswp__zoom-wrap) {
+  .pswp__zoom-wrap {
     width: 100%;
   }
 
-  :deep(img.pswp__img) {
+  img.pswp__img {
     object-fit: contain;
   }
 
-  :deep(.pswp__button) {
+  .pswp__button {
     color: white;
 
     &,
-    :deep(*) {
+    * {
       cursor: pointer;
     }
   }
 
-  :deep(.pswp__icn-shadow) {
+  .pswp__icn-shadow {
     display: none;
   }
 
   // Hide arrows on mobile
   @media (max-width: 768px) {
-    :deep(.pswp__button--arrow) {
+    .pswp__button--arrow {
       opacity: 0 !important;
     }
   }
 
   // Prevent the popper from overlapping with the sidebar
-  > :deep(div > .v-popper__wrapper) {
+  > div > .v-popper__wrapper {
     overflow: visible !important;
-    > :deep(.v-popper__inner) {
+    > .v-popper__inner {
       transform: translateX(-20px);
     }
   }

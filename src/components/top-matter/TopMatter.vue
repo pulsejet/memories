@@ -129,7 +129,7 @@ export default defineComponent({
       visibility: hidden;
     }
 
-    :deep(span) {
+    span {
       cursor: pointer;
     }
   }

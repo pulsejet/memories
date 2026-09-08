@@ -464,21 +464,5 @@ export default defineComponent({
   :deep(#sign-out) {
     margin-top: 10px;
   }
-
-  :deep(.checkbox-radio-switch__label) {
-    padding: 1px 14px; // was 4px 14px, make it more compact
-  }
-
-  :deep(.radio-group) {
-    margin-top: 6px;
-
-    :deep(.title) {
-      font-weight: 500;
-    }
-
-    :deep(.checkbox-radio-switch-radio) {
-      margin: 2px 16px; // indent for radio button
-    }
-  }
 }
 </style>
