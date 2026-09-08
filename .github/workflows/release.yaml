@@ -33,6 +33,7 @@ jobs:
         run: |
           make dev-setup
           make patch-external
+          make js-lint
           make build-js-production
 
       - name: Bundle app
