@@ -29,6 +29,7 @@ use OC\Files\Search\SearchQuery;
 use OCA\Memories\ClustersBackend;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
+use OCP\AppFramework\PublicShareController;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -335,18 +336,43 @@ final class FsManager
 
         // Check if share is password protected
         if (!empty($password = $share->getPassword())) {
-            $session = \OC::$server->get(\OCP\ISession::class);
-
-            // https://github.com/nextcloud/server/blob/0447b53bda9fe95ea0cbed765aa332584605d652/lib/public/AppFramework/PublicShareController.php#L119
-            if (
-                $session->get('public_link_authenticated_token') !== $token
-                || $session->get('public_link_authenticated_password_hash') !== $password
-            ) {
-                throw new \Exception('Share is password protected and user is not authenticated');
+            if (!self::isShareAuthenticated($token, $password)) {
+                throw Exceptions::Forbidden('Share is password protected and user is not authenticated');
             }
         }
 
         return $share;
+    }
+
+    /**
+     * Check whether the current session is authenticated for a password protected link share.
+     *
+     * This mirrors \OCP\AppFramework\PublicShareController::validateTokenSession(). After a
+     * successful login, AuthPublicShareController::authenticate() stores the token together with
+     * the password hash of the share as a JSON encoded map in the session, so that the session
+     * becomes invalid again when the password of the share is changed.
+     *
+     * This format replaced the former public_link_authenticated_token/_password_hash keys in
+     * Nextcloud 33 (declared @since 33.0.0) and was backported to 32.0.2 and 31.0.11.
+     *
+     * @param string $token        Share token
+     * @param string $passwordHash Password hash of the share (IShare::getPassword())
+     */
+    private static function isShareAuthenticated(string $token, string $passwordHash): bool
+    {
+        $session = \OC::$server->get(\OCP\ISession::class);
+
+        $allowedTokensJSON = $session->get(PublicShareController::DAV_AUTHENTICATED_FRONTEND);
+        if (!\is_string($allowedTokensJSON)) {
+            return false;
+        }
+
+        $allowedTokens = json_decode($allowedTokensJSON, true);
+        if (!\is_array($allowedTokens)) {
+            return false;
+        }
+
+        return ($allowedTokens[$token] ?? null) === $passwordHash;
     }
 
     /**
