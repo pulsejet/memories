@@ -54,6 +54,12 @@ Very important.
 - Never run `occ` in spec.
 - Put helpers bottom of spec, after all tests.
 
+## GitHub Interaction
+- Only for *GitHub*, not general Git stuff.
+- Use `gh` CLI, prompt user if not installed.
+- View/list: `gh issue view <num>`, `gh issue list --label "<label>"`, `gh label list`.
+- Edit labels: `gh issue edit <num> --add-label "<label>" --remove-label "<label>"`.
+
 ## Key Subsystems & Architecture
 
 ### Overview
