@@ -15,11 +15,13 @@ body {
 
 // Nextcloud 25+: get rid of gap and border radius at right
 #content-vue {
-  // was var(--body-container-radius)
-  // now set on .app-navigation
-  border-radius: 0;
   width: calc(100% - var(--body-container-margin) * 1); // was *2
   margin-right: 0;
+
+  // Rounded corners only on left.
+  border-radius: 0;
+  border-top-left-radius: var(--body-container-radius);
+  border-bottom-left-radius: var(--body-container-radius);
 
   // If no navigation remove both margins
   &:not(.has-nav) {
@@ -37,10 +39,6 @@ body {
     // Reduce size of navigation bar
     --app-navigation-max-width: 250px !important;
     max-width: var(--app-navigation-max-width); // NC <29
-
-    // Rounded corners only on left
-    border-top-left-radius: var(--body-container-radius);
-    border-bottom-left-radius: var(--body-container-radius);
 
     .app-navigation-toggle {
       // Move up to align with back button of top matter

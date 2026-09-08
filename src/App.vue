@@ -427,7 +427,7 @@ export default defineComponent({
 ul.app-navigation__settings {
   height: auto !important;
   overflow: hidden !important;
-  padding-top: 0 !important;
+  padding: var(--app-navigation-padding);
   flex: 0 0 auto;
 }
 </style>
