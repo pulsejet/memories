@@ -159,6 +159,11 @@ module.exports = {
       // See https://github.com/nextcloud/nextcloud-vue/issues/3281
       vue$: path.resolve(__dirname, 'node_modules', 'vue'),
 
+      // Use plyr source instead of the prebuilt dist so that
+      // patches/plyr-wrap.patch actually takes effect at runtime.
+      // The $ keeps subpath imports like 'plyr/dist/plyr.css' untouched.
+      plyr$: path.resolve(__dirname, 'node_modules', 'plyr', 'src', 'js', 'plyr.js'),
+
       // You also need to update tsconfig.json
       '@services': path.resolve(__dirname, 'src', 'services'),
       '@assets': path.resolve(__dirname, 'src', 'assets'),
