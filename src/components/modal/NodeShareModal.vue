@@ -49,12 +49,14 @@
     <XLoadingIcon v-if="loading" />
 
     <template #buttons>
-      <NcButton class="primary" :disabled="loading" @click="createLink">
-        {{ t('memories', 'Create Link') }}
-      </NcButton>
-      <NcButton class="primary" :disabled="loading" @click="refreshUrls">
-        {{ t('memories', 'Refresh') }}
-      </NcButton>
+      <div class="button-grid">
+        <NcButton class="primary" :disabled="loading" @click="createLink">
+          {{ t('memories', 'Create Link') }}
+        </NcButton>
+        <NcButton class="primary" :disabled="loading" @click="refreshUrls">
+          {{ t('memories', 'Refresh') }}
+        </NcButton>
+      </div>
     </template>
   </Modal>
 </template>
@@ -244,5 +246,9 @@ export default defineComponent({
   :deep(.avatar) {
     padding: 0 0.5em;
   }
+}
+div.button-grid {
+  display: flex;
+  gap: 1em;
 }
 </style>
