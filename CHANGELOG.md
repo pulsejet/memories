@@ -8,7 +8,8 @@ All notable changes to this project will be documented in this file.
 - **Fix**: Improved and 20x faster planet database setup
 - **Fix**: Fix broken cover images on SQLite
 - **Fix**: Fix broken sidebar integration
-- **Fix**: Password protected link shares
+- **Fix**: Password protected link shares ([#1721](https://github.com/pulsejet/memories/pull/1721))
+- **Fix**: Allow self-signed CA on Android ([#1330](https://github.com/pulsejet/memories/pull/1330))
 - **Feature**: Huawei Moving Picture support
 - **Dev**: Migrated to Vue 3
 - **Dev**: New extensive unit and e2e test suite
