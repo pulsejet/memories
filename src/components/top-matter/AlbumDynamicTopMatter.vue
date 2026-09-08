@@ -91,13 +91,17 @@ export default defineComponent({
   }
 
   > .avatars {
+    display: flex;
+    align-items: center;
+    gap: 2px;
     line-height: 1.2em;
     margin-top: 0.5em;
     padding-left: 10px;
 
     :deep(.avatardiv) {
-      margin-right: 2px;
-      vertical-align: bottom;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   }
 }
