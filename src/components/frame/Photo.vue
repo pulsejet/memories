@@ -95,7 +95,7 @@ import LocalIcon from 'vue-material-design-icons/CloudOff.vue';
 import RawIcon from 'vue-material-design-icons/Raw.vue';
 
 import type { IDay, IPhoto } from '@typings';
-import type XImg from '@components/frame/XImg.vue';
+import XImg from '@components/frame/XImg.vue';
 
 import errorsvg from '@assets/error.svg';
 
@@ -108,6 +108,7 @@ export default defineComponent({
     StarIcon,
     LocalIcon,
     RawIcon,
+    XImg,
   },
 
   props: {

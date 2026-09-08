@@ -42,6 +42,7 @@ import type { IPhoto } from '@typings';
 
 import LeftMoveIcon from 'vue-material-design-icons/ChevronLeft.vue';
 import RightMoveIcon from 'vue-material-design-icons/ChevronRight.vue';
+import XImg from '@components/frame/XImg.vue';
 
 interface IYear {
   year: number;
@@ -58,6 +59,7 @@ export default defineComponent({
     NcActionButton,
     LeftMoveIcon,
     RightMoveIcon,
+    XImg,
   },
 
   emits: {

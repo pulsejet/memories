@@ -111,11 +111,6 @@ declare module 'vue' {
     c: typeof constants;
     initstate: typeof initstate;
   }
-
-  export interface GlobalComponents {
-    XLoadingIcon: typeof import('@components/XLoadingIcon.vue').default;
-    XImg: typeof import('@components/frame/XImg.vue').default;
-  }
 }
 
 export {};

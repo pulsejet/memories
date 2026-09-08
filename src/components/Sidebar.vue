@@ -31,7 +31,6 @@ import { registerDavProperty } from '@nextcloud/files/dav';
 import { registerSidebarTab } from '@nextcloud/files';
 
 import Metadata from '@components/Metadata.vue';
-import XImg from '@components/frame/XImg.vue';
 import { registerGlobals } from '../bootstrap';
 import { registerRouteCheckers } from '../router';
 
@@ -231,7 +230,6 @@ export default defineComponent({
             componentApp = createApp(Metadata);
             registerGlobals(componentApp);
             registerRouteCheckers(componentApp);
-            componentApp.component('XImg', XImg);
             componentApp.use(router);
             const proxy = componentApp.mount(el) as unknown as InstanceType<typeof Metadata>;
 

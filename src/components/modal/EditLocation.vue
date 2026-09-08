@@ -79,6 +79,7 @@ import type { IPhoto } from '@typings';
 import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 import UndoIcon from 'vue-material-design-icons/UndoVariant.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 type NLocation = {
   osm_id: number;
@@ -98,6 +99,7 @@ export default defineComponent({
     MagnifyIcon,
     CloseIcon,
     UndoIcon,
+    XLoadingIcon,
   },
 
   props: {

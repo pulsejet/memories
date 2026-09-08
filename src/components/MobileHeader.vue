@@ -23,6 +23,7 @@ import { generateUrl } from '@nextcloud/router';
 
 import UploadMenuItem from '@components/header/UploadMenuItem.vue';
 import SearchbarMenuItem from '@components/header/SearchbarMenuItem.vue';
+import XImg from '@components/frame/XImg.vue';
 
 import * as utils from '@services/utils';
 
@@ -33,6 +34,7 @@ export default defineComponent({
   components: {
     UploadMenuItem,
     SearchbarMenuItem,
+    XImg,
   },
 
   data: () => ({

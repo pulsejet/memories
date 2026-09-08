@@ -38,6 +38,7 @@
 import { defineComponent, type PropType } from 'vue';
 
 import NcCounterBubble from '@nextcloud/vue/components/NcCounterBubble';
+import XImg from '@components/frame/XImg.vue';
 
 import errorsvg from '@assets/error.svg';
 import plussvg from '@assets/plus.svg';
@@ -51,6 +52,7 @@ export default defineComponent({
   name: 'Cluster',
   components: {
     NcCounterBubble,
+    XImg,
   },
 
   props: {

@@ -11,7 +11,9 @@
             :label="t('memories', 'Search your photos …')"
             :placeholder="t('memories', 'Search your photos …')"
           >
-            <MagnifyIcon :size="16" />
+            <template #icon>
+              <MagnifyIcon :size="16" />
+            </template>
           </NcTextField>
         </div>
       </template>
@@ -61,6 +63,8 @@ import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
+import XImg from '@components/frame/XImg.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import type { ICluster } from '@typings';
 
@@ -74,6 +78,8 @@ export default defineComponent({
     AlbumIcon,
     LocationIcon,
     TagIcon,
+    XImg,
+    XLoadingIcon,
   },
 
   mixins: [UserConfig],

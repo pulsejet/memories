@@ -34,11 +34,13 @@ import * as utils from '@services/utils/helpers';
 import type { IFolder, IPhoto } from '@typings';
 
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
+import XImg from '@components/frame/XImg.vue';
 
 export default defineComponent({
   name: 'Folder',
   components: {
     FolderIcon,
+    XImg,
   },
 
   mixins: [UserConfig],

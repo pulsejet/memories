@@ -85,6 +85,7 @@ const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components
 
 import AlbumForm from './AlbumForm.vue';
 import AlbumsList from './AlbumsList.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import * as dav from '@services/dav';
 
@@ -126,6 +127,7 @@ export default defineComponent({
     NcButton,
     NcListItem,
     NcTextField,
+    XLoadingIcon,
 
     PlusIcon,
     CheckIcon,

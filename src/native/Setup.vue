@@ -108,6 +108,7 @@ const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/
 
 import * as util from '@services/utils';
 import * as nativex from '@native';
+import XImg from '@components/frame/XImg.vue';
 
 import banner from '@assets/banner.svg';
 
@@ -117,6 +118,7 @@ export default defineComponent({
   components: {
     NcButton,
     NcCheckboxRadioSwitch,
+    XImg,
   },
 
   data: () => ({

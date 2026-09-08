@@ -75,6 +75,7 @@ import UserConfig from '@mixins/UserConfig';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import { API } from '@services/API';
 import * as utils from '@services/utils';
@@ -92,6 +93,7 @@ export default defineComponent({
     NcButton,
     NcListItem,
     NcActionButton,
+    XLoadingIcon,
 
     CloseIcon,
     LinkIcon,

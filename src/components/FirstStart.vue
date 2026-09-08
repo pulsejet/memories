@@ -46,6 +46,7 @@ import { defineComponent } from 'vue';
 
 import NcAppContent from '@nextcloud/vue/components/NcAppContent';
 import NcButton from '@nextcloud/vue/components/NcButton';
+import XImg from '@components/frame/XImg.vue';
 
 import UserConfig from '@mixins/UserConfig';
 
@@ -63,6 +64,7 @@ export default defineComponent({
   components: {
     NcAppContent,
     NcButton,
+    XImg,
   },
 
   mixins: [UserConfig],

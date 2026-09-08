@@ -41,12 +41,16 @@ import Places from './sections/Places.vue';
 import Video from './sections/Video.vue';
 import VideoTranscoder from './sections/VideoTranscoder.vue';
 import VideoAccel from './sections/VideoAccel.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import type { ISystemConfig, ISystemStatus } from './AdminTypes';
 import type { IConfig } from '@typings';
 
 export default defineComponent({
   name: 'Admin',
+  components: {
+    XLoadingIcon,
+  },
 
   data: () => ({
     loading: 0,

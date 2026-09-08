@@ -7,7 +7,6 @@ import router, { routes, registerRouteCheckers } from './router';
 import * as nativex from '@native';
 
 // Global components
-import XImg from '@components/frame/XImg.vue';
 import VueVirtualScroller from 'vue-virtual-scroller';
 
 // CSS for components
@@ -47,7 +46,6 @@ registerGlobals(app);
 registerRouteCheckers(app);
 app.use(router);
 app.use(VueVirtualScroller);
-app.component('XImg', XImg);
 
 // Initialize NativeX globals
 nativex.initialize();

@@ -125,6 +125,7 @@ import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import TopMatter from '@components/top-matter/TopMatter.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
 import TimelineTopOverlay from '@components/top-matter/TimelineTopOverlay.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
@@ -154,6 +155,7 @@ export default defineComponent({
     Viewer,
     SwipeRefresh,
     RecycleScroller,
+    XLoadingIcon,
   },
 
   mixins: [UserConfig],

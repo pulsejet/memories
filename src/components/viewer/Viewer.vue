@@ -66,6 +66,7 @@ import * as utils from '@services/utils';
 import * as nativex from '@native';
 
 import ImageEditor from './ImageEditor.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 import PhotoSwipe, { type PhotoSwipeOptions } from 'photoswipe';
 import 'photoswipe/style.css';
 import PsImage from './PsImage';
@@ -116,6 +117,7 @@ export default defineComponent({
     NcActions,
     NcActionButton,
     ImageEditor,
+    XLoadingIcon,
   },
 
   mixins: [UserConfig],

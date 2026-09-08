@@ -88,6 +88,7 @@ import { DateTime } from 'luxon';
 import UserConfig from '@mixins/UserConfig';
 import Cluster from '@components/frame/Cluster.vue';
 import AlbumsList from '@components/modal/AlbumsList.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
@@ -120,6 +121,7 @@ export default defineComponent({
     AlbumsList,
     Cluster,
     EditIcon,
+    XLoadingIcon,
   },
 
   mixins: [UserConfig],

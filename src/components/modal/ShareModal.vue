@@ -79,6 +79,7 @@ import UserConfig from '@mixins/UserConfig';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import { API } from '@services/API';
 import * as dav from '@services/dav';
@@ -98,6 +99,7 @@ export default defineComponent({
   components: {
     NcListItem,
     Modal,
+    XLoadingIcon,
 
     PhotoIcon,
     LargePhotoIcon,

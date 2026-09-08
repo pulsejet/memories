@@ -104,6 +104,7 @@ import * as dav from '@services/dav';
 
 import Send from 'vue-material-design-icons/Send.vue';
 import AccountMultiplePlus from 'vue-material-design-icons/AccountMultiplePlus.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 export default defineComponent({
   name: 'AlbumForm',
@@ -111,6 +112,7 @@ export default defineComponent({
     NcButton,
     NcTextField,
     AlbumCollaborators,
+    XLoadingIcon,
 
     Send,
     AccountMultiplePlus,

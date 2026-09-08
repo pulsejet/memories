@@ -3,9 +3,6 @@ import type { App } from 'vue';
 import { generateFilePath } from '@nextcloud/router';
 import { getRequestToken } from '@nextcloud/auth';
 
-// Global components
-import XLoadingIcon from '@components/XLoadingIcon.vue';
-
 // Locals
 import { constants, initstate } from '@services/utils';
 import { translate, translatePlural } from '@services/l10n';
@@ -29,8 +26,6 @@ if ('virtualKeyboard' in navigator) {
 
 // Register global components and plugins
 export function registerGlobals(app: App) {
-  app.component('XLoadingIcon', XLoadingIcon);
-
   // Register global constants and functions
   app.config.globalProperties.c = constants;
   app.config.globalProperties.initstate = initstate;

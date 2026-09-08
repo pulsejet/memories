@@ -42,6 +42,7 @@ import * as dav from '@services/dav';
 import type { IAlbum, IPhoto } from '@typings';
 
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
+import XImg from '@components/frame/XImg.vue';
 
 export default defineComponent({
   name: 'AlbumsList',
@@ -50,6 +51,7 @@ export default defineComponent({
     NcButton,
 
     ImageMultipleIcon,
+    XImg,
   },
 
   props: {

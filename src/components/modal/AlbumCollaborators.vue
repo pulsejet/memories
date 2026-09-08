@@ -146,6 +146,7 @@ import Check from 'vue-material-design-icons/Check.vue';
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue';
 import AccountGroup from 'vue-material-design-icons/AccountGroup.vue';
 import Earth from 'vue-material-design-icons/Earth.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
@@ -183,6 +184,7 @@ export default defineComponent({
     NcTextField,
     NcPopover,
     NcEmptyContent,
+    XLoadingIcon,
   },
 
   props: {

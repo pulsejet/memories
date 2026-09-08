@@ -45,6 +45,7 @@ import { API } from '@services/API';
 import * as utils from '@services/utils';
 
 import type { IMapCluster } from '@typings';
+import XImg from '@components/frame/XImg.vue';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-edgebuffer';
@@ -71,6 +72,7 @@ export default defineComponent({
     LMarker,
     LPopup,
     LIcon,
+    XImg,
   },
 
   data: () => ({

@@ -48,6 +48,7 @@ import type { Component } from 'vue';
 
 import Searchbar from '@components/header/Searchbar.vue';
 import ClusterHList from '@components/ClusterHList.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 
@@ -75,6 +76,7 @@ export default defineComponent({
     ClusterHList,
     NcButton,
     StarIcon,
+    XLoadingIcon,
   },
 
   data: () => ({

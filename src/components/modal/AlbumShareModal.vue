@@ -56,6 +56,7 @@ const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
 import AlbumCollaborators from './AlbumCollaborators.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
@@ -67,6 +68,7 @@ export default defineComponent({
     NcTextField,
     Modal,
     AlbumCollaborators,
+    XLoadingIcon,
   },
 
   mixins: [ModalMixin],

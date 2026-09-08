@@ -26,6 +26,7 @@ import ClusterGrid from '@components/ClusterGrid.vue';
 import Timeline from '@components/Timeline.vue';
 import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
@@ -41,6 +42,7 @@ export default defineComponent({
     Timeline,
     EmptyContent,
     DynamicTopMatter,
+    XLoadingIcon,
   },
 
   mixins: [UserConfig],
