@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap, e2eHeaders, teardown } from './navigation';
+import { appUrl, bootstrap, e2eHeaders, osmTileHits, teardown } from './navigation';
 import { DavClient } from './utils';
 import { snap } from './screenshots';
 
@@ -10,7 +10,6 @@ import { DATASET } from './dataset';
 
 const SM_BOUNDS = '33.920842,34.084143,-118.553975,-118.411067';
 const DTLA_LON = -118.2437;
-const DUMMY_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 
 test.use({
   extraHTTPHeaders: e2eHeaders({
@@ -165,21 +164,7 @@ test.describe('@api Map', () => {
 });
 
 test.describe('@ui Map', () => {
-  let tileHits = 0;
-
-  test.beforeEach(async ({ page }) => {
-    await bootstrap({ page });
-
-    tileHits = 0;
-    await page.route('**://tile.openstreetmap.org/**', (route) => {
-      tileHits++;
-      return route.fulfill({
-        status: 200,
-        contentType: 'image/png',
-        body: Buffer.from(DUMMY_PNG, 'base64'),
-      });
-    });
-  });
+  test.beforeEach(bootstrap);
   test.afterEach(teardown);
 
   test('Map clusters at Santa Monica then pan past Los Angeles', async ({ page, request }) => {
@@ -237,7 +222,7 @@ test.describe('@ui Map', () => {
       }
     });
 
-    expect(tileHits).toBeGreaterThan(0);
+    expect(osmTileHits).toBeGreaterThan(0);
   });
 });
 

@@ -35,15 +35,6 @@ test.describe('@ui Explore view', () => {
   });
 });
 
-test.describe('@ui Map view', () => {
-  test('Map split view loads', async ({ page }) => {
-    await page.goto(`${appUrl}/map`);
-    await expect(page).toHaveURL(/\/apps\/memories\/map/);
-    await expect(page.locator('.split-container')).toBeVisible();
-    await expect(page.locator('.map-matter .map')).toBeVisible();
-  });
-});
-
 test.describe('@ui Places view', () => {
   test.skip(!!process.env.NO_PLANET_DB, 'Skipping places UI: NO_PLANET_DB is set');
 

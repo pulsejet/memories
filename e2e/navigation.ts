@@ -11,6 +11,12 @@ export const appUrl = `${baseUrl}/index.php/apps/memories`;
 // can use the same buffer for all tests in the worker.
 let logBuffer: string[] = [];
 
+// 1x1 transparent PNG used to stub OpenStreetMap tiles.
+const DUMMY_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
+// Number of OSM tile requests intercepted in the current test.
+export let osmTileHits = 0;
+
 export async function bootstrap({ page }: { page: Page }) {
   page.on('console', (msg) => {
     const timestamp = new Date().toISOString();
@@ -19,6 +25,17 @@ export async function bootstrap({ page }: { page: Page }) {
   });
 
   await page.clock.install({ time: new Date('2026-07-31T08:00:00') });
+
+  // Stub OSM tiles so map tests never hit the network.
+  osmTileHits = 0;
+  await page.route('**://tile.openstreetmap.org/**', (route) => {
+    osmTileHits++;
+    return route.fulfill({
+      status: 200,
+      contentType: 'image/png',
+      body: Buffer.from(DUMMY_PNG, 'base64'),
+    });
+  });
 }
 
 export async function teardown({}: {}) {
