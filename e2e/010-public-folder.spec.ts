@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, psub } from './navigation';
+import { appUrl, baseUrl, e2eHeaders, psub } from './navigation';
 import { DavClient, withPublicAPI, withPublicPage } from './utils';
 
-import type { APIRequestContext } from '@playwright/test';
+import type { APIRequestContext, APIResponse } from '@playwright/test';
 import type { IDay, IPhoto, IShare } from '@typings';
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
@@ -36,10 +36,7 @@ test.describe('Public folder share', () => {
       folderToken = share.token;
       folderShareId = share.id;
 
-      const url = new URL(`${appUrl}/api/days`);
-      url.searchParams.set('nopreload', '1');
-      url.searchParams.set('token', folderToken);
-      const daysRes = await request.get(url.toString());
+      const daysRes = await folders.days(folderToken);
       expect(daysRes.ok()).toBeTruthy();
 
       const days: IDay[] = await daysRes.json();
@@ -71,10 +68,7 @@ test.describe('Public folder share', () => {
 
   test('@api Public folder days', async () => {
     await withPublicAPI(async (request) => {
-      const url = new URL(`${appUrl}/api/days`);
-      url.searchParams.set('nopreload', '1');
-      url.searchParams.set('token', folderToken);
-      const res = await request.get(url.toString());
+      const res = await new FolderShareAPI(request).days(folderToken);
       expect(res.ok()).toBeTruthy();
 
       const data: IDay[] = await res.json();
@@ -154,10 +148,7 @@ test.describe('Public folder share', () => {
 
   test('@api Public folder invalid token is rejected', async () => {
     await withPublicAPI(async (request) => {
-      const url = new URL(`${appUrl}/api/days`);
-      url.searchParams.set('nopreload', '1');
-      url.searchParams.set('token', 'invalid-token');
-      const res = await request.get(url.toString());
+      const res = await new FolderShareAPI(request).days('invalid-token');
       expect(res.ok()).toBe(false);
       expect(res.status()).toBe(412);
     });
@@ -205,6 +196,92 @@ test.describe('Public folder share', () => {
   });
 });
 
+test.describe('Password protected folder share', () => {
+  const folderDir = psub('/for-public-pw-%wid');
+  const folderFiles = ['RmjH76vMWrI.jpg', 'dHLhDeEgxsg.jpg', 'kvRlouf0RTs.jpg'];
+  const sharePassword = 'Sup3r-s3cret!';
+
+  let folderToken: string;
+  let folderShareId: string;
+  let folderFileids: number[];
+
+  test.beforeAll(async ({ request }) => {
+    const dav = new DavClient(request);
+    const folders = new FolderShareAPI(request);
+
+    await test.step('Setup isolated password share', async () => {
+      await dav.deleteFile(folderDir, true);
+      await dav.copyFile('/for-other', folderDir);
+
+      folderFileids = [];
+      for (const file of folderFiles) {
+        folderFileids.push(await dav.fileid(`${folderDir}/${file}`));
+      }
+
+      const share = await folders.create(folderDir);
+      folderToken = share.token;
+      folderShareId = share.id;
+
+      await folders.setPassword(folderShareId, sharePassword);
+    });
+  });
+
+  test.afterAll(async ({ request }) => {
+    const folders = new FolderShareAPI(request);
+    const dav = new DavClient(request);
+
+    if (folderShareId) {
+      await folders.remove(folderShareId).catch(() => {});
+    }
+    await dav.deleteFile(folderDir, true);
+  });
+
+  test('@api Unauthenticated access to protected share is rejected', async () => {
+    await withPublicAPI(async (request) => {
+      const res = await new FolderShareAPI(request).days(folderToken);
+      expect(res.ok()).toBe(false);
+      expect(res.status()).toBe(403);
+    });
+  });
+
+  test('@ui Protected share shows photos after entering the password', async ({ browser }) => {
+    await withPublicPage(browser, async (page) => {
+      await page.goto(`${appUrl}/s/${folderToken}`);
+
+      await test.step('Unlock share with password', async () => {
+        await page.getByRole('textbox', { name: 'Password' }).fill(sharePassword);
+        await page.getByRole('button', { name: 'Submit' }).click();
+      });
+
+      await test.step('Timeline shows shared photos', async () => {
+        for (const fileid of folderFileids) {
+          await expect(page.locator(`.p-outer--${fileid}`)).toBeVisible();
+        }
+      });
+
+      await test.step('Refresh does not ask for password again', async () => {
+        await page.reload();
+        await expect(page.getByRole('textbox', { name: 'Password' })).toHaveCount(0);
+        for (const fileid of folderFileids) {
+          await expect(page.locator(`.p-outer--${fileid}`)).toBeVisible();
+        }
+      });
+    });
+  });
+
+  test('@ui Wrong password is rejected', async ({ browser }) => {
+    await withPublicPage(browser, async (page) => {
+      await page.goto(`${appUrl}/s/${folderToken}`);
+
+      await page.getByRole('textbox', { name: 'Password' }).fill('definitely-wrong');
+      await page.getByRole('button', { name: 'Submit' }).click();
+
+      await expect(page.getByRole('textbox', { name: 'Password' })).toBeVisible();
+      await expect(page.locator('.p-outer')).toHaveCount(0);
+    });
+  });
+});
+
 // Memories link share API client for e2e tests.
 class FolderShareAPI {
   constructor(private request: APIRequestContext) {}
@@ -230,5 +307,22 @@ class FolderShareAPI {
       data: { id },
     });
     expect(res.ok()).toBeTruthy();
+  }
+
+  async setPassword(fullId: string, password: string): Promise<void> {
+    const id = fullId.split(':').pop();
+    const url = new URL(`${baseUrl}/ocs/v2.php/apps/files_sharing/api/v1/shares/${id}`);
+    url.searchParams.set('format', 'json');
+    const res = await this.request.put(url.toString(), {
+      form: { password },
+    });
+    expect(res.ok()).toBeTruthy();
+  }
+
+  async days(token: string): Promise<APIResponse> {
+    const url = new URL(`${appUrl}/api/days`);
+    url.searchParams.set('nopreload', '1');
+    url.searchParams.set('token', token);
+    return this.request.get(url.toString());
   }
 }
