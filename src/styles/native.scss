@@ -1,7 +1,7 @@
 // Native app styles
 html.native {
   // Fill up space
-  #content-vue {
+  #content, #content-vue {
     margin-top: 0 !important;
     height: 100vh !important;
   }
