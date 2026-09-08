@@ -72,7 +72,11 @@ export default defineComponent({
     },
 
     routeIsAlbum(album: IAlbum) {
-      return this.routeIsAlbums && this.$route.params.user?.toString() === album.user && this.$route.params.name?.toString() === album.name;
+      return (
+        this.routeIsAlbums &&
+        this.$route.params.user?.toString() === album.user &&
+        this.$route.params.name?.toString() === album.name
+      );
     },
 
     async update(selection: IAlbum[], deselection: IAlbum[]) {

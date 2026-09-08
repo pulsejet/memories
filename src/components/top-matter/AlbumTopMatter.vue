@@ -257,7 +257,9 @@ export default defineComponent({
     },
 
     async downloadAlbum() {
-      const res = await axios.post(API.ALBUM_DOWNLOAD(this.$route.params.user?.toString(), this.$route.params.name?.toString()));
+      const res = await axios.post(
+        API.ALBUM_DOWNLOAD(this.$route.params.user?.toString(), this.$route.params.name?.toString()),
+      );
       if (res.status === 200 && res.data.handle) {
         downloadWithHandle(res.data.handle);
       }

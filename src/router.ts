@@ -1,9 +1,4 @@
-import {
-  createRouter,
-  createWebHistory,
-  type RouteLocationNormalized,
-  type RouteRecordRaw,
-} from 'vue-router';
+import { createRouter, createWebHistory, type RouteLocationNormalized, type RouteRecordRaw } from 'vue-router';
 import type { App } from 'vue';
 
 import { generateUrl } from '@nextcloud/router';
@@ -176,7 +171,8 @@ export type GlobalRouteCheckers = {
 };
 
 // Implement getters for route checkers
-const routeCheckerDefs: { key: keyof GlobalRouteCheckers; condition: (route?: RouteLocationNormalized) => boolean }[] = [];
+const routeCheckerDefs: { key: keyof GlobalRouteCheckers; condition: (route?: RouteLocationNormalized) => boolean }[] =
+  [];
 
 function defineRouteChecker(key: keyof GlobalRouteCheckers, condition: (route?: RouteLocationNormalized) => boolean) {
   routeCheckerDefs.push({ key, condition });

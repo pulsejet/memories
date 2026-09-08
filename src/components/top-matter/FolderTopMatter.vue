@@ -152,9 +152,9 @@ export default defineComponent({
 
     getRoute(path: string[]): object {
       return {
-        ...this.$route,
-        params: { path },
-        hash: undefined,
+        name: this.$route.name,
+        params: { ...this.$route.params, path },
+        query: this.$route.query,
       };
     },
 

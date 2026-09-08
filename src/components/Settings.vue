@@ -29,11 +29,7 @@
           {{ t('memories', 'Show past photos on top of timeline') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch
-          v-model="config.stack_raw_files"
-          @update:model-value="updateStackRawFiles"
-          type="switch"
-        >
+        <NcCheckboxRadioSwitch v-model="config.stack_raw_files" @update:model-value="updateStackRawFiles" type="switch">
           {{ t('memories', 'Stack RAW files with same name') }}
         </NcCheckboxRadioSwitch>
 
@@ -63,11 +59,7 @@
           {{ t('memories', 'Autoplay Live Photos') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch
-          v-model="config.livephoto_loop"
-          @update:model-value="updateLivephotoLoop"
-          type="switch"
-        >
+        <NcCheckboxRadioSwitch v-model="config.livephoto_loop" @update:model-value="updateLivephotoLoop" type="switch">
           {{ t('memories', 'Loop Live Photos') }}
         </NcCheckboxRadioSwitch>
 
@@ -179,11 +171,7 @@
           {{ t('memories', 'Sort albums oldest-first') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch
-          v-model="config.show_hidden_albums"
-          @update:model-value="updateShowHidden"
-          type="switch"
-        >
+        <NcCheckboxRadioSwitch v-model="config.show_hidden_albums" @update:model-value="updateShowHidden" type="switch">
           {{ t('memories', 'Show hidden albums') }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
