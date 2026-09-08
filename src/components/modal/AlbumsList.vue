@@ -123,6 +123,11 @@ export default defineComponent({
     :deep(.list-item) {
       box-sizing: border-box;
       display: flex;
+
+      &::before {
+        // Hide the ugly blue line when link is active
+        display: none;
+      }
     }
 
     :deep(.list-item-content__wrapper) {
