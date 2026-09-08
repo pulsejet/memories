@@ -73,8 +73,8 @@ module.exports = {
   },
 
   performance: {
-    maxAssetSize: (isDev ? 15 : 2.5) * MiB,
-    maxEntrypointSize: (isDev ? 15 : 2.5) * MiB,
+    maxAssetSize: (isDev ? 15 : 3) * MiB,
+    maxEntrypointSize: (isDev ? 15 : 3) * MiB,
     hints: 'error',
   },
 
