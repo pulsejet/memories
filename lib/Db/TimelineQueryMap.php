@@ -156,7 +156,13 @@ trait TimelineQueryMap
 
         // FETCH coordinates
         $coords = $this->executeQueryWithCTEs($query)->fetch();
+        if (!$coords) {
+            return null;
+        }
 
-        return $coords ?: null;
+        return [
+            'lat' => (float) $coords['lat'],
+            'lon' => (float) $coords['lon'],
+        ];
     }
 }

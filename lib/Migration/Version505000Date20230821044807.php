@@ -93,7 +93,7 @@ final class Version505000Date20230821044807 extends SimpleMigrationStep
             while ($row = $result->fetch()) {
                 try {
                     // try to get the exif string
-                    if (!\is_array($row) || !\array_key_exists('exif', $row) || !\is_string($row['exif'])) {
+                    if (!\array_key_exists('exif', $row) || !\is_string($row['exif'])) {
                         continue;
                     }
 

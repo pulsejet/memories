@@ -371,7 +371,8 @@ final class MigrateGoogleTakeout extends Command
     {
         $dir = \dirname($path);
         $base = basename($path);
-        $combined = $base.'.supplemental-metadata';
+        $suffix = 'supplemental-metadata';
+        $combined = $base.'.'.$suffix;
 
         foreach ($candidatePaths as $candidate) {
             if (!str_ends_with($candidate, '.json')) {
@@ -391,7 +392,8 @@ final class MigrateGoogleTakeout extends Command
                 if ('' === $rest) {
                     return $candidate;
                 }
-                if (str_starts_with($rest, '.') && str_starts_with('supplemental-metadata', substr($rest, 1)) && \strlen($rest) > 1) {
+                $frag = substr($rest, 1);
+                if (str_starts_with($rest, '.') && '' !== $frag && $frag === substr($suffix, 0, \strlen($frag))) {
                     return $candidate;
                 }
 
