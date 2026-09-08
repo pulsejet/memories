@@ -836,7 +836,7 @@ export default defineComponent({
         const photo = this.list[idx];
 
         // Something went really wrong
-        console.assert(photo, 'Missing photo for index', index, 'and global anchor', this.globalAnchor);
+        console.assert(!!photo, 'Missing photo for index', index, 'and global anchor', this.globalAnchor);
         if (!photo) return {};
 
         // Get index of current day in dayIds lisst

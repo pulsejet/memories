@@ -151,7 +151,7 @@ export default defineComponent({
     await loadFilerobot();
 
     const div = this.refs().editor!;
-    console.assert(div, 'ImageEditor container not found');
+    console.assert(!!div, 'ImageEditor container not found');
 
     // Directly use an HTML element to make sure the resolution
     // in the editor matches the original file, but we can work

@@ -78,23 +78,23 @@ const TOUCH_SELECT_CLAMP = {
 
 class Selection extends Map<string, IPhoto> {
   addBy(photo: IPhoto): this {
-    console.assert(photo?.key, 'SelectionManager::addBy encountered a photo without a key');
+    console.assert(!!photo?.key, 'SelectionManager::addBy encountered a photo without a key');
     this.set(photo.key!, photo);
     return this;
   }
 
   getBy({ key }: { key?: string }): IPhoto | undefined {
-    console.assert(key, 'SelectionManager::getBy encountered a photo without a key');
+    console.assert(!!key, 'SelectionManager::getBy encountered a photo without a key');
     return this.get(key!);
   }
 
   deleteBy({ key }: { key?: string }): boolean {
-    console.assert(key, 'SelectionManager::deleteBy encountered a photo without a key');
+    console.assert(!!key, 'SelectionManager::deleteBy encountered a photo without a key');
     return this.delete(key!);
   }
 
   hasBy({ key }: { key?: string }): boolean {
-    console.assert(key, 'SelectionManager::hasBy encountered a photo without a key');
+    console.assert(!!key, 'SelectionManager::hasBy encountered a photo without a key');
     return this.has(key!);
   }
 
