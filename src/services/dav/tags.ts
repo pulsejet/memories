@@ -59,7 +59,7 @@ export async function createTag(tag: ITag): Promise<ITag> {
     }
 
     throw new Error(t('memories', 'No content-location header found'));
-  } catch (error) {
+  } catch (error: any) {
     if (error?.status === 409) {
       // Tag already exists. Now this may happen e.g. if the tag isn't
       // assignable or visible to the user and cause problems later.

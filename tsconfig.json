@@ -13,6 +13,7 @@
     "incremental": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
+    "strict": true,
     "types": ["node"],
     "paths": {
       "@services/*": ["./src/services/*"],

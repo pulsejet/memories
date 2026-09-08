@@ -63,8 +63,8 @@ export default defineComponent({
   },
 
   data: () => ({
-    list: null as ICluster[] | null,
-    fuse: null as Fuse<ICluster> | null,
+    list: null as IFace[] | null,
+    fuse: null as Fuse<IFace> | null,
     search: String(),
   }),
 
@@ -121,7 +121,7 @@ export default defineComponent({
         await dav.recognizeCreateFace(this.user, name);
 
         return this.selectNew(name);
-      } catch (e) {
+      } catch (e: any) {
         // Directory already exists
         if (e.status === 405) return this.selectNew(name);
 
@@ -139,8 +139,8 @@ export default defineComponent({
       });
     },
 
-    click(face: IFace) {
-      this.$emit('select', face);
+    click(item: ICluster) {
+      this.$emit('select', item as IFace);
     },
   },
 });

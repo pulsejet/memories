@@ -17,14 +17,14 @@ export default class ImageContentSetup {
   private stickySrcs = new Map<number, string>();
 
   constructor(private lightbox: PhotoSwipe) {
-    lightbox.on('contentLoad', this.onContentLoad.bind(this));
-    lightbox.on('contentLoadImage', this.onContentLoadImage.bind(this));
-    lightbox.on('contentDestroy', this.onContentDestroy.bind(this));
-    lightbox.on('destroy', this.onDestroy.bind(this));
-    lightbox.on('zoomPanUpdate', this.zoomPanUpdate.bind(this));
-    lightbox.on('slideActivate', this.slideActivate.bind(this));
-    lightbox.addFilter('isContentLoading', this.isContentLoading.bind(this));
-    lightbox.addFilter('placeholderSrc', this.placeholderSrc.bind(this));
+    lightbox.on('contentLoad', (e) => this.onContentLoad(e as unknown as PsEvent));
+    lightbox.on('contentLoadImage', (e) => this.onContentLoadImage(e as unknown as PsEvent));
+    lightbox.on('contentDestroy', (e) => this.onContentDestroy(e as unknown as PsEvent));
+    lightbox.on('destroy', () => this.onDestroy());
+    lightbox.on('zoomPanUpdate', (e) => this.zoomPanUpdate(e as unknown as { slide: PsSlide }));
+    lightbox.on('slideActivate', () => this.slideActivate());
+    lightbox.addFilter('isContentLoading', (l, c) => this.isContentLoading(l, c as unknown as PsContent));
+    lightbox.addFilter('placeholderSrc', (s, c) => this.placeholderSrc(s, c as unknown as PsContent));
   }
 
   private isContentLoading(isLoading: boolean, content: PsContent) {
@@ -59,7 +59,7 @@ export default class ImageContentSetup {
     }
   }
 
-  private placeholderSrc(placeholderSrc: string, content: PsContent) {
+  private placeholderSrc(placeholderSrc: string | false, content: PsContent) {
     // We can't load msrc unless it is a blob
     // since these requests are not cached, leading to race conditions
     // with the loading of the actual images.

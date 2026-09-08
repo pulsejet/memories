@@ -89,7 +89,7 @@ export default defineComponent({
         // Locking is needed primary for thumbnails,
         // since photoswipe uses the thumb url for the animated zoom-in
         this.lockBlob();
-      } catch (error) {
+      } catch (error: any) {
         this.dataSrc = BLANK_IMG;
         this.$emit('error', error);
         console.error('Failed to load XImg', error);

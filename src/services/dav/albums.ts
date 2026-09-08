@@ -84,7 +84,7 @@ export async function* addToAlbum(user: string, name: string, photos: IPhoto[]) 
     try {
       await client.copyFile(f.originalFilename, `${albumPath}/${f.basename}`);
       return f.fileid;
-    } catch (e) {
+    } catch (e: any) {
       if (e.response?.status === 409) {
         // File already exists, all good
         return f.fileid;

@@ -63,15 +63,15 @@ class VideoContentSetup {
   }
 
   initLightboxEvents(lightbox: PhotoSwipe) {
-    lightbox.on('contentLoad', this.onContentLoad.bind(this));
-    lightbox.on('contentDestroy', this.onContentDestroy.bind(this));
-    lightbox.on('contentActivate', this.onContentActivate.bind(this));
-    lightbox.on('contentDeactivate', this.onContentDeactivate.bind(this));
-    lightbox.on('contentResize', this.onContentResize.bind(this));
+    lightbox.on('contentLoad', (e) => this.onContentLoad(e as unknown as PsVideoEvent));
+    lightbox.on('contentDestroy', (e) => this.onContentDestroy(e as unknown as PsVideoEvent));
+    lightbox.on('contentActivate', (e) => this.onContentActivate(e as unknown as PsVideoEvent));
+    lightbox.on('contentDeactivate', (e) => this.onContentDeactivate(e as unknown as PsVideoEvent));
+    lightbox.on('contentResize', (e) => this.onContentResize(e as unknown as typeof e & PsVideoEvent));
 
-    lightbox.addFilter('isKeepingPlaceholder', this.isKeepingPlaceholder.bind(this));
-    lightbox.addFilter('isContentZoomable', this.isContentZoomable.bind(this));
-    lightbox.addFilter('useContentPlaceholder', this.useContentPlaceholder.bind(this));
+    lightbox.addFilter('isKeepingPlaceholder', (k, c) => this.isKeepingPlaceholder(k, c as unknown as PsContent));
+    lightbox.addFilter('isContentZoomable', (z, c) => this.isContentZoomable(z, c as unknown as PsContent));
+    lightbox.addFilter('useContentPlaceholder', (u, c) => this.useContentPlaceholder(u, c as unknown as PsContent));
   }
 
   initPswpEvents(pswp: PhotoSwipe) {

@@ -410,7 +410,7 @@ export async function* copyPhotos(photos: IPhoto[], destination: string, overwri
         { headers: { Overwrite: overwrite ? 'T' : 'F' } },
       );
       return fileInfo.fileid;
-    } catch (error) {
+    } catch (error: any) {
       if (silenceErrors) return 0;
       console.error('Failed to copy', fileInfo, error);
       if (error.response?.status === 412) {
@@ -489,7 +489,7 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
         { headers: { Overwrite: overwrite ? 'T' : 'F' } },
       );
       return fileInfo.fileid;
-    } catch (error) {
+    } catch (error: any) {
       if (silenceErrors) return 0;
       console.error('Failed to move', fileInfo, error);
       if (error.response?.status === 412) {
@@ -599,7 +599,7 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
         { headers: { Overwrite: overwrite ? 'T' : 'F' } },
       );
       return fileInfo.fileid;
-    } catch (error) {
+    } catch (error: any) {
       if (silenceErrors) return 0;
       console.error('Failed to move', fileInfo, error);
       if (error.response?.status === 412) {

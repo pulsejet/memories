@@ -8,7 +8,7 @@ import staticConfig from '../services/static-config';
 
 import type { IConfig } from '@typings';
 
-const eventName: keyof utils.BusEvent = 'memories:user-config-changed';
+const eventName = 'memories:user-config-changed' as const;
 
 const localSettings: (keyof IConfig)[] = ['square_thumbs', 'high_res_cond', 'show_face_rect'];
 
@@ -31,14 +31,14 @@ export default defineComponent({
   methods: {
     async refreshFromConfig() {
       const config = await staticConfig.getAll();
-      const changed = Object.keys(config).filter(<K extends keyof IConfig>(key: K) => config[key] !== this.config[key]);
-      if (changed.length === 0) return;
+      const changed = (Object.keys(config) as (keyof IConfig)[]).some((key) => config[key] !== this.config[key]);
+      if (!changed) return;
 
-      changed.forEach(<K extends keyof IConfig>(key: K) => (this.config[key] = config[key]));
+      this.config = { ...config };
       utils.bus.emit(eventName, null);
     },
 
-    updateLocalSetting(val: { setting: keyof IConfig; value: IConfig[keyof IConfig] }) {
+    updateLocalSetting(val: { setting: keyof IConfig; value: IConfig[keyof IConfig] } | null) {
       if (val?.setting) {
         (this.config as any)[val.setting] = val.value;
       }
