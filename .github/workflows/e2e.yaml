@@ -178,7 +178,7 @@ jobs:
           NC_VERSION: ${{ matrix.server-versions }}
           NC_DB_PORT: 4444
           NC_REDIS_PORT: 6379
-          E2E_VIDEO: 1
+          E2E_VIDEO: ${{ github.event_name == 'push' && '1' || '0' }}
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
 
