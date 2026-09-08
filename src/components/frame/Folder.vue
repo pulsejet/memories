@@ -60,9 +60,9 @@ export default defineComponent({
 
       path = [...path, this.data.name]; // intentional copy
       return {
-        ...this.$route,
-        params: { path },
-        hash: undefined,
+        name: this.$route.name,
+        params: { ...this.$route.params, path },
+        query: this.$route.query,
       };
     },
 
@@ -106,7 +106,7 @@ export default defineComponent({
   z-index: 100;
   transition: opacity 0.2s ease-in-out;
 
-  :deep .material-design-icon__svg {
+  :deep(.material-design-icon__svg) {
     width: 50%;
     height: 50%;
   }

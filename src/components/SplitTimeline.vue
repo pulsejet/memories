@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { defineAsyncComponent, defineComponent } from 'vue';
+import { defineAsyncComponent, defineComponent, markRaw } from 'vue';
 import Timeline from './Timeline.vue';
 const MapSplitMatter = defineAsyncComponent(() => import('./top-matter/MapSplitMatter.vue'));
 import Hammer from 'hammerjs';
@@ -55,7 +55,7 @@ export default defineComponent({
     primary() {
       switch (this.$route.name) {
         case _m.routes.Map.name:
-          return MapSplitMatter;
+          return markRaw(MapSplitMatter);
         default:
           return null;
       }
@@ -311,7 +311,7 @@ export default defineComponent({
         }
       }
 
-      :deep .empty-content {
+      :deep(.empty-content) {
         margin-top: 20%; // was 20vh
       }
     }

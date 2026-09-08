@@ -246,7 +246,7 @@ $mobHeight: 165px;
     will-change: scroll-position;
   }
 
-  :deep .dir-btn button {
+  :deep(.dir-btn button) {
     transform: scale(0.6);
     box-shadow: var(--color-main-text) 0 0 3px 0 !important;
     background-color: var(--color-main-background) !important;

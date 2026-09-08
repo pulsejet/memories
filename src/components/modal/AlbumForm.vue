@@ -271,7 +271,7 @@ export default defineComponent({
     label {
       display: flex;
       margin-top: 16px;
-      :deep svg {
+      :deep(svg) {
         margin-right: 12px;
       }
     }

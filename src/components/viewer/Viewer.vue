@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, markRaw } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
 import NcActions from '@nextcloud/vue/components/NcActions';
@@ -227,28 +227,28 @@ export default defineComponent({
         {
           id: 'share',
           name: this.t('memories', 'Share'),
-          icon: ShareIcon,
+          icon: markRaw(ShareIcon),
           callback: this.shareCurrent,
           if: this.canShare,
         },
         {
           id: 'delete',
           name: this.t('memories', 'Delete'),
-          icon: DeleteIcon,
+          icon: markRaw(DeleteIcon),
           callback: this.deleteCurrent,
           if: !this.routeIsAlbums && this.canDelete,
         },
         {
           id: 'remove-from-album',
           name: this.t('memories', 'Remove from album'),
-          icon: AlbumRemoveIcon,
+          icon: markRaw(AlbumRemoveIcon),
           callback: this.deleteCurrent,
           if: this.routeIsAlbums,
         },
         {
           id: 'play-live-photo',
           name: this.t('memories', 'Play Live Photo'),
-          icon: LivePhotoIcon,
+          icon: markRaw(LivePhotoIcon),
           iconArgs: {
             playing: this.liveState.playing,
             spin: this.liveState.waiting,
@@ -259,77 +259,77 @@ export default defineComponent({
         {
           id: 'favorite',
           name: this.t('memories', 'Favorite'),
-          icon: this.isFavorite ? StarIcon : StarOutlineIcon,
+          icon: this.isFavorite ? markRaw(StarIcon) : markRaw(StarOutlineIcon),
           callback: this.favoriteCurrent,
           if: !this.routeIsPublic && !this.isLocal,
         },
         {
           id: 'info',
           name: this.t('memories', 'Info'),
-          icon: InfoIcon,
+          icon: markRaw(InfoIcon),
           callback: this.toggleSidebar,
           if: true,
         },
         {
           id: 'edit',
           name: this.t('memories', 'Edit'),
-          icon: TuneIcon,
+          icon: markRaw(TuneIcon),
           callback: this.openEditor,
           if: this.canEdit && !this.isVideo,
         },
         {
           id: 'download',
           name: this.t('memories', 'Download'),
-          icon: DownloadIcon,
+          icon: markRaw(DownloadIcon),
           callback: this.downloadCurrent,
           if: this.canDownload,
         },
         {
           id: 'download-video',
           name: this.t('memories', 'Download Video'),
-          icon: DownloadIcon,
+          icon: markRaw(DownloadIcon),
           callback: this.downloadCurrentLiveVideo,
           if: this.canDownload && !!this.currentPhoto?.liveid,
         },
         ...this.stackedRaw.map((raw) => ({
           id: `download-raw-${raw.fileid}`,
           name: this.t('memories', 'Download {ext}', { ext: raw.extension }),
-          icon: DownloadIcon,
+          icon: markRaw(DownloadIcon),
           callback: () => this.downloadByFileId(raw.fileid),
           if: this.canDownload,
         })),
         {
           id: 'view-in-folder',
           name: this.t('memories', 'View in folder'),
-          icon: OpenInNewIcon,
+          icon: markRaw(OpenInNewIcon),
           callback: this.viewInFolder,
           if: !this.routeIsPublic && !this.routeIsAlbums && !this.isLocal,
         },
         {
           id: 'slideshow',
           name: this.t('memories', 'Slideshow'),
-          icon: SlideshowIcon,
+          icon: markRaw(SlideshowIcon),
           callback: this.startSlideshow,
           if: this.globalCount > 1,
         },
         {
           id: 'edit-metadata',
           name: this.t('memories', 'Edit metadata'),
-          icon: EditFileIcon,
+          icon: markRaw(EditFileIcon),
           callback: () => this.editMetadata(),
           if: this.canEdit,
         },
         {
           id: 'rotate-flip',
           name: this.t('memories', 'Rotate / Flip'),
-          icon: RotateLeftIcon,
+          icon: markRaw(RotateLeftIcon),
           callback: () => this.editMetadata([5]),
           if: this.canEdit && !this.isVideo,
         },
         {
           id: 'add-to-album',
           name: this.t('memories', 'Add to album'),
-          icon: AlbumIcon,
+          icon: markRaw(AlbumIcon),
           callback: this.updateAlbums,
           if:
             this.config.albums_enabled &&
@@ -1343,7 +1343,7 @@ export default defineComponent({
   right: 50px;
   --default-clickable-area: 44px;
 
-  :deep .button-vue--icon-only {
+  :deep(.button-vue--icon-only) {
     color: white;
     background-color: transparent !important;
     margin-right: 1px;
@@ -1390,76 +1390,74 @@ export default defineComponent({
   }
 }
 
-.fullyOpened.slideshowTimer :deep .pswp__container {
+.fullyOpened.slideshowTimer :deep(.pswp__container) {
   // Animate transitions
   // Disabled normally because this makes you sick if moving fast
   transition: transform 0.75s ease !important;
 }
 
 .inner,
-.inner :deep .pswp {
+.inner:deep(.pswp) {
   width: inherit;
 
-  .pswp__top-bar {
+  :deep(.pswp__top-bar) {
     background: linear-gradient(0deg, transparent, rgba(0, 0, 0, 0.3));
   }
 
-  .video-container {
-    &.error {
-      color: red;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+  :deep(.video-container.error) {
+    color: red;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
-:deep .video-js .vjs-big-play-button {
+:deep(.video-js .vjs-big-play-button) {
   display: none;
 }
 
-:deep .plyr__volume {
+:deep(.plyr__volume) {
   // Cannot be vertical yet :(
   @media (max-width: 768px) {
     display: none;
   }
 }
 
-:deep .pswp {
+:deep(.pswp) {
   contain: strict;
 
-  .pswp__zoom-wrap {
+  :deep(.pswp__zoom-wrap) {
     width: 100%;
   }
 
-  img.pswp__img {
+  :deep(img.pswp__img) {
     object-fit: contain;
   }
 
-  .pswp__button {
+  :deep(.pswp__button) {
     color: white;
 
     &,
-    * {
+    :deep(*) {
       cursor: pointer;
     }
   }
 
-  .pswp__icn-shadow {
+  :deep(.pswp__icn-shadow) {
     display: none;
   }
 
   // Hide arrows on mobile
   @media (max-width: 768px) {
-    .pswp__button--arrow {
+    :deep(.pswp__button--arrow) {
       opacity: 0 !important;
     }
   }
 
   // Prevent the popper from overlapping with the sidebar
-  > div > .v-popper__wrapper {
+  > :deep(div > .v-popper__wrapper) {
     overflow: visible !important;
-    > .v-popper__inner {
+    > :deep(.v-popper__inner) {
       transform: translateX(-20px);
     }
   }

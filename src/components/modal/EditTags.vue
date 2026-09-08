@@ -152,7 +152,7 @@ export default defineComponent({
   .nc-comp {
     width: 100%;
 
-    :deep ul {
+    :deep(ul) {
       max-height: 200px;
     }
   }

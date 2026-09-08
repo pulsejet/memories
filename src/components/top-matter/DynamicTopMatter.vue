@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type Component } from 'vue';
+import { defineComponent, markRaw, type Component } from 'vue';
 
 import UserMixin from '@mixins/UserConfig';
 
@@ -31,13 +31,13 @@ export default defineComponent({
   computed: {
     currentmatter(): Component | null {
       if (this.routeIsFolders || (this.routeIsFolderShare && this.initstate.shareType === 'folder')) {
-        return FolderDynamicTopMatter;
+        return markRaw(FolderDynamicTopMatter);
       } else if (this.routeIsPlaces) {
-        return PlacesDynamicTopMatterVue;
+        return markRaw(PlacesDynamicTopMatterVue);
       } else if (this.routeIsAlbums) {
-        return AlbumDynamicTopMatter;
+        return markRaw(AlbumDynamicTopMatter);
       } else if (this.routeIsBase && this.config.enable_top_memories) {
-        return OnThisDay;
+        return markRaw(OnThisDay);
       }
 
       return null;

@@ -336,7 +336,7 @@ ul.options {
   padding-top: 10px;
   padding-bottom: 5px;
 
-  :deep .avatar {
+  :deep(.avatar) {
     padding: 0 0.5em;
   }
 

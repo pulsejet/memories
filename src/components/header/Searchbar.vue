@@ -207,7 +207,7 @@ export default defineComponent({
     // Remove padding from text bar
     --border-width-input-focused: 0px;
 
-    :deep input[type='text'] {
+    :deep(input[type='text']) {
       border: none !important;
       background-color: color-mix(in srgb, var(--searchbar-color) 12%, transparent);
       backdrop-filter: blur(2px);
@@ -220,8 +220,8 @@ export default defineComponent({
       --input-border-width-offset: 0px;
     }
 
-    :deep *,
-    :deep input[type='text']::placeholder {
+    :deep(*),
+    :deep(input[type='text']::placeholder) {
       color: var(--searchbar-color);
     }
   }

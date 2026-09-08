@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, markRaw } from 'vue';
 
 import FolderTopMatter from './FolderTopMatter.vue';
 import ClusterTopMatter from './ClusterTopMatter.vue';
@@ -46,18 +46,18 @@ export default defineComponent({
     currentmatter() {
       switch (this.$route.name) {
         case _m.routes.Folders.name:
-          return FolderTopMatter;
+          return markRaw(FolderTopMatter);
         case _m.routes.FolderShare.name:
-          return this.initstate.shareType === 'folder' ? FolderTopMatter : null;
+          return this.initstate.shareType === 'folder' ? markRaw(FolderTopMatter) : null;
         case _m.routes.Albums.name:
-          return AlbumTopMatter;
+          return markRaw(AlbumTopMatter);
         case _m.routes.Places.name:
-          return PlacesTopMatter;
+          return markRaw(PlacesTopMatter);
         case _m.routes.Tags.name:
-          return ClusterTopMatter;
+          return markRaw(ClusterTopMatter);
         case _m.routes.Recognize.name:
         case _m.routes.FaceRecognition.name:
-          return FaceTopMatter;
+          return markRaw(FaceTopMatter);
         default:
           return null;
       }
@@ -98,7 +98,7 @@ export default defineComponent({
     vertical-align: middle;
   }
 
-  :deep .name {
+  :deep(.name) {
     overflow: hidden;
     text-overflow: ellipsis;
     padding-left: 10px;
@@ -110,11 +110,11 @@ export default defineComponent({
     flex-grow: 1;
   }
 
-  :deep button + .name {
+  :deep(button + .name) {
     padding-left: 0;
   }
 
-  :deep .right-actions {
+  :deep(.right-actions) {
     margin-right: 12px;
     z-index: 50;
     @media (max-width: 768px) {
@@ -129,12 +129,12 @@ export default defineComponent({
       visibility: hidden;
     }
 
-    span {
+    :deep(span) {
       cursor: pointer;
     }
   }
 
-  :deep button {
+  :deep(button) {
     display: inline-block;
   }
 }

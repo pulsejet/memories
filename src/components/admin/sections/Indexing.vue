@@ -179,7 +179,7 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .regex-field {
-  :deep input {
+  :deep(input) {
     font-family: monospace;
   }
 }

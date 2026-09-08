@@ -1487,15 +1487,15 @@ export default defineComponent({
   width: 100%;
   transition: opacity 0.2s ease-in-out;
 
-  :deep .vue-recycle-scroller__slot {
+  :deep(.vue-recycle-scroller__slot) {
     contain: content;
   }
 
-  :deep .vue-recycle-scroller__item-wrapper {
+  :deep(.vue-recycle-scroller__item-wrapper) {
     contain: strict;
   }
 
-  :deep .vue-recycle-scroller__item-view {
+  :deep(.vue-recycle-scroller__item-view) {
     contain: layout style;
   }
 

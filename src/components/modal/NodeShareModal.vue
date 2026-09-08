@@ -241,7 +241,7 @@ export default defineComponent({
 .links {
   margin-top: 1em;
 
-  :deep .avatar {
+  :deep(.avatar) {
     padding: 0 0.5em;
   }
 }

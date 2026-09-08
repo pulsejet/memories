@@ -131,7 +131,7 @@ img {
 
 .cluster {
   // Get rid of color of the bubble
-  .count-bubble :deep .counter-bubble__counter {
+  .count-bubble :deep(.counter-bubble__counter) {
     color: unset !important;
   }
 
@@ -274,7 +274,7 @@ $namemargin: 10px;
       background-color: var(--color-primary-element-light);
       color: var(--color-primary);
 
-      :deep svg {
+      :deep(svg) {
         cursor: pointer;
       }
     }

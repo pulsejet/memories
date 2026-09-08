@@ -469,37 +469,37 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-#memories-settings:deep {
-  .app-settings__content {
+#memories-settings {
+  :deep(.app-settings__content) {
     // Fix weirdness when focusing on toggle input on mobile
     position: relative;
   }
 
-  input[readonly] {
+  :deep(input[readonly]) {
     cursor: pointer;
     user-select: none;
   }
 
-  .app-settings-section {
+  :deep(.app-settings-section) {
     margin-bottom: 20px !important;
   }
 
-  #sign-out {
+  :deep(#sign-out) {
     margin-top: 10px;
   }
 
-  .checkbox-radio-switch__label {
+  :deep(.checkbox-radio-switch__label) {
     padding: 1px 14px; // was 4px 14px, make it more compact
   }
 
-  .radio-group {
+  :deep(.radio-group) {
     margin-top: 6px;
 
-    .title {
+    :deep(.title) {
       font-weight: 500;
     }
 
-    .checkbox-radio-switch-radio {
+    :deep(.checkbox-radio-switch-radio) {
       margin: 2px 16px; // indent for radio button
     }
   }

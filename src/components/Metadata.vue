@@ -74,7 +74,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+import { defineComponent, defineAsyncComponent, markRaw } from 'vue';
 import type { Component } from 'vue';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
@@ -153,7 +153,7 @@ export default defineComponent({
         list.push({
           title: this.dateOriginalStr!,
           subtitle: this.dateOriginalTime!,
-          icon: CalendarIcon,
+          icon: markRaw(CalendarIcon),
           edit: this.editDate,
         });
       }
@@ -162,7 +162,7 @@ export default defineComponent({
         list.push({
           title: this.camera,
           subtitle: this.cameraSub,
-          icon: CameraIrisIcon,
+          icon: markRaw(CameraIrisIcon),
         });
       }
 
@@ -171,7 +171,7 @@ export default defineComponent({
           id: 'image-info', // adds class
           title: this.imageInfoTitle,
           subtitle: this.imageInfoSub,
-          icon: ImageIcon,
+          icon: markRaw(ImageIcon),
           href: this.filepath
             ? dav.viewInFolderUrl({
                 fileid: this.fileid!,
@@ -185,7 +185,7 @@ export default defineComponent({
         list.push({
           title: this.tagNamesStr,
           subtitle: [],
-          icon: TagIcon,
+          icon: markRaw(TagIcon),
           edit: this.editTags,
         });
       }
@@ -194,7 +194,7 @@ export default defineComponent({
         list.push({
           title: this.address || this.t('memories', 'No coordinates'),
           subtitle: this.address ? [] : [this.t('memories', 'Click edit to set location')],
-          icon: LocationIcon,
+          icon: markRaw(LocationIcon),
           href: this.address ? this.mapFullUrl : undefined,
           edit: this.editGeo,
         });
@@ -552,7 +552,7 @@ export default defineComponent({
 
 .albums {
   font-size: 0.96em;
-  :deep .line-one__title {
+  :deep(.line-one__title) {
     font-weight: 400 !important; // no bold title
   }
 }
@@ -569,7 +569,7 @@ export default defineComponent({
     display: inline-block;
     margin-right: 10px;
 
-    :deep .material-design-icon {
+    :deep(.material-design-icon) {
       color: var(--color-text-lighter);
     }
   }

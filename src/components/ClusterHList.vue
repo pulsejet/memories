@@ -81,7 +81,7 @@ export default defineComponent({
     }
 
     > .action {
-      :deep a {
+      :deep(a) {
         font-size: 0.9em;
         color: var(--color-primary);
       }

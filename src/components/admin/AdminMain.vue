@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, markRaw } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
@@ -56,17 +56,17 @@ export default defineComponent({
     sconfig: null as IConfig | null,
 
     components: [
-      Help,
-      Exif,
-      Indexing,
-      FileSupport,
-      Viewer,
-      Performance,
-      Apps,
-      Places,
-      Video,
-      VideoTranscoder,
-      VideoAccel,
+      markRaw(Help),
+      markRaw(Exif),
+      markRaw(Indexing),
+      markRaw(FileSupport),
+      markRaw(Viewer),
+      markRaw(Performance),
+      markRaw(Apps),
+      markRaw(Places),
+      markRaw(Video),
+      markRaw(VideoTranscoder),
+      markRaw(VideoAccel),
     ],
   }),
 
@@ -173,49 +173,49 @@ export default defineComponent({
     }
   }
 
-  :deep a {
+  :deep(a) {
     color: var(--color-primary-element);
   }
 
-  :deep .admin-section {
+  :deep(.admin-section) {
     margin-top: 20px;
 
-    form {
+    :deep(form) {
       margin-top: 1em;
     }
 
-    .checkbox-radio-switch {
+    :deep(.checkbox-radio-switch) {
       margin: 2px 16px;
     }
 
-    .m-radio {
+    :deep(.m-radio) {
       display: inline-block;
     }
 
-    .input-field {
+    :deep(.input-field) {
       // Prevent overlapping label with another input
       margin-top: 0.8em;
     }
 
-    h2 {
+    :deep(h2) {
       font-size: 1.6em;
       font-weight: 500;
       padding-top: 20px;
     }
 
-    h3 {
+    :deep(h3) {
       font-size: 1.2em;
       font-weight: 500;
       padding-top: 10px;
     }
 
-    code {
+    :deep(code) {
       padding-left: 10px;
       -webkit-box-decoration-break: clone;
       box-decoration-break: clone;
     }
 
-    b {
+    :deep(b) {
       font-weight: 500;
     }
   }
@@ -227,7 +227,7 @@ export default defineComponent({
     width: 28px;
     height: 28px;
 
-    :deep svg {
+    :deep(svg) {
       width: 100%;
       height: 100%;
     }

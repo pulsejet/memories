@@ -120,16 +120,16 @@ export default defineComponent({
   padding: 2px;
 
   .album {
-    :deep .list-item {
+    :deep(.list-item) {
       box-sizing: border-box;
       display: flex;
     }
 
-    :deep .list-item-content__wrapper {
+    :deep(.list-item-content__wrapper) {
       flex-grow: 1;
     }
 
-    :deep .line-one__title {
+    :deep(.line-one__title) {
       font-weight: 500;
     }
 
@@ -144,11 +144,11 @@ export default defineComponent({
       &--placeholder {
         background: var(--color-primary-light);
 
-        :deep .material-design-icon {
+        :deep(.material-design-icon) {
           width: 100%;
           height: 100%;
 
-          .material-design-icon__svg {
+          :deep(.material-design-icon__svg) {
             fill: var(--color-primary);
           }
         }

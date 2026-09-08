@@ -430,7 +430,7 @@ $icon-size: $icon-half-size * 2;
 
     // Extremely ugly way to fill up the space
     // If this isn't done, bg has a border
-    :deep path {
+    :deep(path) {
       transform: scale(1.2) translate(-2px, -2px);
     }
   }

@@ -346,14 +346,14 @@ export default defineComponent({
 .inner {
   margin-top: 1em;
 
-  :deep .checkbox-content {
+  :deep(.checkbox-content) {
     max-width: calc(100% - 20px);
     padding: 4px 10px;
+  }
 
-    &__text {
-      display: block;
-      line-height: 1.1em;
-    }
+  :deep(.checkbox-content__text) {
+    display: block;
+    line-height: 1.1em;
   }
 }
 
@@ -365,7 +365,7 @@ export default defineComponent({
   margin-top: 10px;
 
   .tags-pane {
-    :deep .outer {
+    :deep(.outer) {
       margin-top: 2px;
       margin-left: 28px;
       margin-right: 14px;

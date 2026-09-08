@@ -110,7 +110,7 @@ export default defineComponent({
         padding: 12px 12px; // mobile
       }
 
-      :deep svg {
+      :deep(svg) {
         color: var(--color-primary) !important;
       }
 

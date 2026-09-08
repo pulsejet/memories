@@ -393,7 +393,7 @@ export default defineComponent({
     max-width: calc(20% - 4px);
   }
 
-  :deep label {
+  :deep(label) {
     font-size: 0.8em;
     padding: 0 !important;
     padding-left: 3px !important;

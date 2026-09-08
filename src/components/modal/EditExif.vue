@@ -144,7 +144,7 @@ export default defineComponent({
     margin-top: 0;
     margin-bottom: 8px;
   }
-  :deep label {
+  :deep(label) {
     font-size: 0.9em;
     padding: 0 !important;
     padding-left: 5px !important;

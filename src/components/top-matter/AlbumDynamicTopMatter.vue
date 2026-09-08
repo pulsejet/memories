@@ -95,7 +95,7 @@ export default defineComponent({
     margin-top: 0.5em;
     padding-left: 10px;
 
-    :deep .avatardiv {
+    :deep(.avatardiv) {
       margin-right: 2px;
       vertical-align: bottom;
     }

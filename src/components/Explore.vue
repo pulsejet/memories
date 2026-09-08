@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, markRaw } from 'vue';
 import type { Component } from 'vue';
 
 import Searchbar from '@components/header/Searchbar.vue';
@@ -90,37 +90,37 @@ export default defineComponent({
     categories: [
       {
         name: t('memories', 'Folders'),
-        icon: FolderIcon,
+        icon: markRaw(FolderIcon),
         link: '/folders',
       },
       {
         name: t('memories', 'Favorites'),
-        icon: StarIcon,
+        icon: markRaw(StarIcon),
         link: '/favorites',
       },
       {
         name: t('memories', 'Videos'),
-        icon: VideoIcon,
+        icon: markRaw(VideoIcon),
         link: '/videos',
       },
       {
         name: t('memories', 'Archive'),
-        icon: ArchiveIcon,
+        icon: markRaw(ArchiveIcon),
         link: '/archive',
       },
       {
         name: t('memories', 'On this day'),
-        icon: CalendarIcon,
+        icon: markRaw(CalendarIcon),
         link: '/thisday',
       },
       {
         name: t('memories', 'Map'),
-        icon: MapIcon,
+        icon: markRaw(MapIcon),
         link: '/map',
       },
       {
         name: t('memories', 'Settings'),
-        icon: CogIcon,
+        icon: markRaw(CogIcon),
         link: undefined,
         click: _m.modals.showSettings,
         if: () => utils.isMobile(),

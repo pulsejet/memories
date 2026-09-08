@@ -703,10 +703,10 @@ export default defineComponent({
         color: var(--color-main-text);
         opacity: 0.75;
 
-        :deep > .menu-up-icon {
+        > :deep(.menu-up-icon) {
           transform: translate(-3px, 4px);
         }
-        :deep > .menu-down-icon {
+        > :deep(.menu-down-icon) {
           transform: translate(-3px, -6px);
         }
       }

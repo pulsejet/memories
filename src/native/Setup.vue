@@ -206,7 +206,7 @@ export default defineComponent({
 
   .banner {
     padding: 30px 20px;
-    :deep > svg {
+    > :deep(svg) {
       width: 60%;
       max-width: 400px;
     }
@@ -228,7 +228,7 @@ export default defineComponent({
 
     .checkbox-radio-switch {
       margin-left: 10px;
-      :deep .checkbox-radio-switch__label {
+      :deep(.checkbox-radio-switch__label) {
         min-height: unset;
       }
     }

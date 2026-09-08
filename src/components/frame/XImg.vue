@@ -116,7 +116,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-div.svg > :deep svg {
+div.svg > :deep(svg) {
   width: 100%;
   height: 100%;
 }

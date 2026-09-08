@@ -151,23 +151,23 @@ export default defineComponent({
     margin-bottom: 5px;
   }
 
-  :deep .buttons {
+  :deep(.buttons) {
     margin-top: 10px;
     text-align: right;
 
-    > button {
+    > :deep(button) {
       display: inline-block !important;
     }
   }
 }
 
 @media (max-width: 512px) {
-  .memories-modal:deep {
-    .modal-header {
+  .memories-modal {
+    :deep(.modal-header) {
       display: none !important;
     }
 
-    .modal-wrapper > .modal-container {
+    :deep(.modal-wrapper > .modal-container) {
       max-height: calc(99% - env(keyboard-inset-height, 0px));
       height: unset;
       top: unset;
@@ -176,10 +176,11 @@ export default defineComponent({
       // Hide scrollbar
       scrollbar-width: none;
       -ms-overflow-style: none;
-      &::-webkit-scrollbar {
-        display: none;
-        width: 0 !important;
-      }
+    }
+
+    :deep(.modal-wrapper > .modal-container::-webkit-scrollbar) {
+      display: none;
+      width: 0 !important;
     }
   }
 }

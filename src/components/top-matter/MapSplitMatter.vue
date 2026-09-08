@@ -423,18 +423,18 @@ export default defineComponent({
   z-index: 0;
   background-color: var(--color-background-dark);
 
-  :deep .leaflet-control-attribution {
+  :deep(.leaflet-control-attribution) {
     background-color: var(--color-background-dark);
     color: var(--color-text-light);
   }
 
-  :deep .leaflet-bar a {
+  :deep(.leaflet-bar a) {
     background-color: var(--color-main-background);
     color: var(--color-main-text);
+  }
 
-    &.leaflet-disabled {
-      opacity: 0.6;
-    }
+  :deep(.leaflet-bar a.leaflet-disabled) {
+    opacity: 0.6;
   }
 }
 
