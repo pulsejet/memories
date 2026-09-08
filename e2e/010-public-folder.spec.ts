@@ -184,6 +184,25 @@ test.describe('Public folder share', () => {
       await page.waitForSelector('body.viewer-fully-opened');
     });
   });
+
+  test('@ui Public folder breadcrumbs navigate nested share', async ({ browser, request }) => {
+    const folders = new FolderShareAPI(request);
+    const share = await folders.create('/for-default/Nested 1');
+    try {
+      await withPublicPage(browser, async (page) => {
+        await page.goto(`${appUrl}/s/${share.token}/Nested%201_1`);
+
+        const crumbs = page.locator('.top-matter nav');
+        await expect(crumbs.getByRole('link', { name: 'Nested 1', exact: true })).toBeVisible();
+        await expect(crumbs.getByRole('link', { name: 'Nested 1_1', exact: true })).toBeVisible();
+
+        await crumbs.getByRole('link', { name: 'Nested 1', exact: true }).click();
+        await expect(page).toHaveURL(`${appUrl}/s/${share.token}`);
+      });
+    } finally {
+      await folders.remove(share.id).catch(() => {});
+    }
+  });
 });
 
 // Memories link share API client for e2e tests.
