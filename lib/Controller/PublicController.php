@@ -30,6 +30,14 @@ use OCP\Share\IShare;
 
 final class PublicController extends AuthPublicShareController
 {
+    /**
+     * Session key holding the IDs of the shares this session is authenticated for.
+     *
+     * Value of \OCA\DAV\Connector\Sabre\PublicAuth::DAV_AUTHENTICATED; declared here since
+     * the dav app is not available for static analysis in this project.
+     */
+    private const DAV_AUTHENTICATED = 'public_link_authenticated';
+
     /** @psalm-suppress PropertyNotSetInConstructor */
     protected IShare $share;
 
@@ -173,6 +181,31 @@ final class PublicController extends AuthPublicShareController
     {
         /** @psalm-suppress RedundantConditionGivenDocblockType */
         return null !== $this->share->getPassword();
+    }
+
+    /**
+     * Called by AuthPublicShareController after a successful password login.
+     *
+     * The base class only records the login for the AppFramework (used by isAuthenticated()).
+     * The WebDAV backend (\OCA\DAV\Connector\Sabre\PublicAuth) keeps its own list of authenticated
+     * share IDs in the session instead, which files_sharing populates in its own ShareController.
+     * We need to do the same, otherwise a session that logged in here cannot access the share
+     * over WebDAV afterwards (regular share page, download links, Nextcloud clients).
+     */
+    #[\Override]
+    protected function authSucceeded(): void
+    {
+        $allowedShareIds = $this->session->get(self::DAV_AUTHENTICATED);
+        if (!\is_array($allowedShareIds)) {
+            $allowedShareIds = [];
+        }
+
+        $shareId = $this->share->getId();
+        if (!\in_array($shareId, $allowedShareIds, true)) {
+            $allowedShareIds[] = $shareId;
+        }
+
+        $this->session->set(self::DAV_AUTHENTICATED, $allowedShareIds);
     }
 
     protected function redirectIfOwned(IShare $share): void
