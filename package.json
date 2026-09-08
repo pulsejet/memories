@@ -68,6 +68,11 @@
     "node": ">=18.2.0",
     "npm": ">=8.0.0"
   },
+  "overrides": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-konva": "^18.2.16"
+  },
   "devDependencies": {
     "@napi-rs/canvas": "^1.0.8",
     "@playwright/test": "^1.63.0",
