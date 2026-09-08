@@ -10,7 +10,7 @@ use OCA\Memories\Util;
 final class BinExt
 {
     public const EXIFTOOL_VER = '13.44';
-    public const GOVOD_VER = '0.2.7';
+    public const GOVOD_VER = '0.2.8';
     public const NX_VER_MIN = '1.1';
 
     /** Exiftool environment is initialized in this process */
