@@ -164,7 +164,6 @@ export default defineComponent({
       flex: 1;
       padding-right: 10px;
       height: 100%;
-      overflow-y: auto;
     }
 
     > .right-pane {
