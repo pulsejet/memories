@@ -149,11 +149,18 @@ final class Exif
         self::sanitizeDates($exif);
 
         // Get date from exif
-        $exifDate = $exif['DateTimeOriginal'] ?? $exif['CreateDate'] ?? null;
+        $exifDate = $exif['SubSecDateTimeOriginal']
+            ?? $exif['DateTimeOriginal']
+            ?? $exif['SubSecCreateDate']
+            ?? $exif['CreateDate']
+            ?? null;
 
         // For videos, prefer ContentCreateDate for timezone (QuickTimeUTC=1)
         if (preg_match('/^video\/\w+/', (string) ($exif['MIMEType'] ?? null))) {
-            $exifDate = $exif['ContentCreateDate'] ?? $exif['CreateDate'] ?? $exifDate;
+            $exifDate = $exif['ContentCreateDate']
+                ?? $exif['CreationDate']
+                ?? $exif['CreateDate']
+                ?? $exifDate;
         }
 
         // Check if we have a date
