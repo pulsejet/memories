@@ -209,9 +209,14 @@ final class FileRobotMagick
     private function applyResize(): void
     {
         if ($this->state->resizeWidth || $this->state->resizeHeight) {
+            $resizeWidth = $this->state->resizeWidth ?? 0;
+            $resizeHeight = $this->state->resizeHeight ?? 0;
+            if ($resizeWidth < 0 || $resizeHeight < 0 || $resizeWidth > 100000 || $resizeHeight > 100000) {
+                throw new \Exception('Invalid resize dimensions');
+            }
             $this->image->resizeImage(
-                $this->state->resizeWidth ?? 0,
-                $this->state->resizeHeight ?? 0,
+                $resizeWidth,
+                $resizeHeight,
                 \Imagick::FILTER_LANCZOS,
                 1,
             );

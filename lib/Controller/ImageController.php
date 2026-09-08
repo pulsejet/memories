@@ -288,6 +288,18 @@ final class ImageController extends GenericApiController
                 throw Exceptions::Forbidden("Cannot edit file {$name} (blacklisted type {$mime})");
             }
 
+            // Only tags editable from the UI may be set (see EditMetadataModal)
+            $allowed = [
+                'AllDates', 'Orientation', 'Title', 'Description', 'Label',
+                'Make', 'Model', 'LensModel', 'Copyright', 'GPSLatitude',
+                'GPSLongitude', 'GPSLatitudeRef', 'GPSLongitudeRef', 'GPSCoordinates',
+            ];
+            foreach (array_keys($raw) as $key) {
+                if (!\in_array($key, $allowed, true)) {
+                    throw Exceptions::BadRequest('Invalid EXIF tag');
+                }
+            }
+
             // Set the exif data
             Exif::setFileExif($file, $raw);
 
@@ -362,6 +374,14 @@ final class ImageController extends GenericApiController
                 throw Exceptions::ForbiddenFileUpdate($file->getName());
             }
 
+            // Name must be a single path segment with no control characters.
+            if ('.' === $name || '..' === $name || !preg_match('/^[^\/\0[:cntrl:]]+\z/u', $name)) {
+                throw Exceptions::BadRequest('Invalid file name');
+            }
+            if (!\in_array(strtolower($extension), ['jpeg', 'jpg', 'png', 'webp'], true)) {
+                throw Exceptions::BadRequest('Invalid image format');
+            }
+
             // Check if target copy file exists
             if ($copy && $file->getParent()->nodeExists($name)) {
                 throw Exceptions::ForbiddenFileUpdate($name);
@@ -387,6 +407,9 @@ final class ImageController extends GenericApiController
             $iw = $image->getImageWidth();
             $ih = $image->getImageHeight();
             if ($shouldResize && $width && $height && ($iw !== $width || $ih !== $height)) {
+                if ($width < 1 || $height < 1 || $width > 100000 || $height > 100000) {
+                    throw Exceptions::BadRequest('Invalid image dimensions');
+                }
                 $image->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
             }
 
@@ -485,7 +508,7 @@ final class ImageController extends GenericApiController
 
         // Get the tag ids for this file
         $objectMapper = \OC::$server->get(\OCP\SystemTag\ISystemTagObjectMapper::class);
-        $tagIds = $objectMapper->getTagIdsForObjects([$fileId], 'files')[(string) $fileId];
+        $tagIds = $objectMapper->getTagIdsForObjects([(string) $fileId], 'files')[(string) $fileId];
 
         // Get all matching tag objects
         $tags = \OC::$server->get(\OCP\SystemTag\ISystemTagManager::class)->getTagsByIds($tagIds);
