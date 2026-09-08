@@ -13,6 +13,7 @@ OC.L10N.register(
     "Places" : "Mjesta",
     "Map" : "Karta",
     "Tags" : "Oznake",
+    "Navigation" : "Navigacija",
     "Settings" : "Postavke",
     "Videos" : "Videozapisi",
     "Shared By" : "Dijeli",

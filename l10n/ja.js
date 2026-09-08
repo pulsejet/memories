@@ -18,6 +18,7 @@ OC.L10N.register(
     "Places" : "場所",
     "Map" : "地図",
     "Tags" : "タグ",
+    "Navigation" : "ナビゲーション",
     "Settings" : "設定",
     "Videos" : "動画",
     "Face Recognition" : "顔認識",

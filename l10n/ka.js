@@ -9,6 +9,7 @@ OC.L10N.register(
     "Archive" : "Archive",
     "Places" : "ადგილები",
     "Tags" : "Tags",
+    "Navigation" : "Navigation",
     "Settings" : "Settings",
     "Videos" : "Videos",
     "Shared By" : "Shared By",

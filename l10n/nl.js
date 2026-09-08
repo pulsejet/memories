@@ -18,6 +18,7 @@ OC.L10N.register(
     "Places" : "Locaties",
     "Map" : "Kaart",
     "Tags" : "Tags",
+    "Navigation" : "Navigatie",
     "Settings" : "Instellingen",
     "View all" : "Toon alles",
     "Videos" : "Videos",

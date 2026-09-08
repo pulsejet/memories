@@ -9,6 +9,7 @@ OC.L10N.register(
     "Albums" : "Albums",
     "Archive" : "Archiu",
     "Tags" : "Etiquetas",
+    "Navigation" : "Navegacion",
     "Settings" : "Paramètres",
     "Recognize" : "Reconéisser",
     "Metadata" : "Metadonadas",

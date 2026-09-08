@@ -13,6 +13,7 @@ OC.L10N.register(
     "Places" : "Lugares",
     "Map" : "Mapa",
     "Tags" : "Etiquetas",
+    "Navigation" : "Navegación",
     "Settings" : "Ajustes",
     "Videos" : "Videos",
     "Edit" : "Editar",

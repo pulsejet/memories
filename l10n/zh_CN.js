@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "地点",
     "Map" : "地图",
     "Tags" : "标签",
+    "Navigation" : "导航",
     "Settings" : "设置",
     "View all" : "查看全部",
     "Videos" : "视频",

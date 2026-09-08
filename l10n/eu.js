@@ -18,6 +18,7 @@ OC.L10N.register(
     "Places" : "Lekuak",
     "Map" : "Mapa",
     "Tags" : "Etiketak",
+    "Navigation" : "Nabigazioa",
     "Settings" : "Ezarpenak",
     "View all" : "Ikusi denak",
     "Videos" : "Bideoak",

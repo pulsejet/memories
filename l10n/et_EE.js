@@ -18,6 +18,7 @@ OC.L10N.register(
     "Places" : "Kohad",
     "Map" : "Kaart",
     "Tags" : "Sildid",
+    "Navigation" : "Liikumine",
     "Settings" : "Seadistused",
     "View all" : "Vaata kõiki",
     "Videos" : "Videod",

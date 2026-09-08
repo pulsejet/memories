@@ -14,6 +14,7 @@ OC.L10N.register(
     "Places" : "Staðir",
     "Map" : "Landakort",
     "Tags" : "Merki",
+    "Navigation" : "Yfirsýn",
     "Settings" : "Stillingar",
     "Videos" : "Myndskeið",
     "Shared By" : "Deilt af",

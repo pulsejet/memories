@@ -15,6 +15,7 @@ OC.L10N.register(
     "Places" : "Vietas",
     "Map" : "Karte",
     "Tags" : "Birkas",
+    "Navigation" : "Navigācija",
     "Settings" : "Iestatījumi",
     "View all" : "Skatīt visu",
     "Videos" : "Video",

@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "ສະຖານທີ່",
     "Map" : "ແຜນທີ່",
     "Tags" : "ປ້າຍກຳກັບ",
+    "Navigation" : "ການນຳທາງ",
     "Settings" : "ການຕັ້ງຄ່າ",
     "View all" : "ເບິ່ງທັງໝົດ",
     "Videos" : "ວິດີໂອ",

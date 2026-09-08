@@ -11,6 +11,7 @@ OC.L10N.register(
     "Places" : "Месцы",
     "Map" : "Карта",
     "Tags" : "Тэгі",
+    "Navigation" : "Навігацыя",
     "Settings" : "Налады",
     "Videos" : "Відэа",
     "Metadata" : "Метаданыя",

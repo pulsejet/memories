@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Steder",
     "Map" : "Kart",
     "Tags" : "Merkelapper",
+    "Navigation" : "Navigasjon",
     "Settings" : "Innstillinger",
     "View all" : "Se alle",
     "Videos" : "Filmer",

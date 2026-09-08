@@ -10,6 +10,7 @@ OC.L10N.register(
     "Albums" : "Album",
     "Archive" : "Cartella",
     "Tags" : "Etichetas",
+    "Navigation" : "Navigatzione",
     "Settings" : "Cunfiguratzione",
     "Videos" : "Vìdeos",
     "Shared By" : "Cumpartzidu dae",

@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Áiteanna",
     "Map" : "Léarscáil",
     "Tags" : "Clibeanna",
+    "Navigation" : "Loingseoireacht",
     "Settings" : "Socruithe",
     "View all" : "Féach ar fad",
     "Videos" : "Físeáin",

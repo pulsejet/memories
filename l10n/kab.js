@@ -13,6 +13,7 @@ OC.L10N.register(
     "Places" : "Imeḍqan",
     "Map" : "Tagertilt",
     "Tags" : "Tibzimin",
+    "Navigation" : "Tunigin",
     "Settings" : "Iɣewwaṛen",
     "View all" : "Wali-ten akk",
     "Videos" : "Tividyutin",

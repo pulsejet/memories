@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Miesta",
     "Map" : "Mapa",
     "Tags" : "Štítky",
+    "Navigation" : "Navigácia",
     "Settings" : "Nastavenia",
     "View all" : "Zobraziť všetko",
     "Videos" : "Videá",

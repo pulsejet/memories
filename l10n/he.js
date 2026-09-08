@@ -12,6 +12,7 @@ OC.L10N.register(
     "Places" : "מקומות",
     "Map" : "מפה",
     "Tags" : "תגיות",
+    "Navigation" : "ניווט",
     "Settings" : "הגדרות",
     "Videos" : "סרטונים",
     "Shared By" : "משותף על ידי",

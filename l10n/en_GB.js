@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Places",
     "Map" : "Map",
     "Tags" : "Tags",
+    "Navigation" : "Navigation",
     "Settings" : "Settings",
     "View all" : "View all",
     "Videos" : "Videos",

@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "أماكن",
     "Map" : "خريطة",
     "Tags" : "الوسوم",
+    "Navigation" : "التنقل",
     "Settings" : "الإعدادات",
     "View all" : "عرض الكل",
     "Videos" : "مقاطع الفيديو",

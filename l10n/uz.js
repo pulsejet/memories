@@ -7,6 +7,7 @@ OC.L10N.register(
     "Archive" : "Arxiv",
     "Places" : "Joylar",
     "Tags" : "Tags",
+    "Navigation" : "Navigatsiya",
     "Settings" : "Sozlamalar",
     "Videos" : "Videos",
     "Edit" : "Tahrirlash",

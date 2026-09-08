@@ -14,6 +14,7 @@ OC.L10N.register(
     "Places" : "Steder",
     "Map" : "Kort",
     "Tags" : "Tags",
+    "Navigation" : "Navigation",
     "Settings" : "Indstillinger",
     "View all" : "Vis alle",
     "Videos" : "Videoer",
