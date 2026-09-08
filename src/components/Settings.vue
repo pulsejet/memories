@@ -186,10 +186,8 @@
           max="7"
           step="1"
           @input="updateOnThisDayRange"
+          :helper-text="t('memories', 'Number of days before and after each anniversary to include')"
         />
-        <div class="settings-hint">
-          {{ t('memories', 'Number of days before and after each anniversary to include') }}
-        </div>
 
         <NcTextField
           :label="t('memories', 'Photos per year (1-50)')"
@@ -200,10 +198,8 @@
           max="50"
           step="1"
           @input="updateOnThisDayPhotos"
+          :helper-text="t('memories', 'Maximum number of photos to include per year')"
         />
-        <div class="settings-hint">
-          {{ t('memories', 'Maximum number of photos to include per year') }}
-        </div>
       </NcAppSettingsSection>
     </NcAppSettingsDialog>
 
@@ -214,13 +210,6 @@
 <style scoped>
 input[type='text'] {
   width: 100%;
-}
-
-div.settings-hint {
-  font-size: 0.8rem;
-  margin-left: 0.6rem;
-  margin-bottom: 0.6rem;
-  color: var(--color-text-lighter);
 }
 </style>
 

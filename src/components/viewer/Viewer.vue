@@ -2,7 +2,7 @@
   <div
     v-if="show"
     ref="outer"
-    class="memories_viewer outer"
+    class="memories_viewer outer remove-gap"
     :class="{ fullyOpened, slideshowTimer }"
     :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"

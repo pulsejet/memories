@@ -72,8 +72,10 @@
 
       <Settings v-model:open="settingsOpen" />
 
-      <Viewer />
-      <Sidebar />
+      <Teleport to="body">
+        <Viewer />
+        <Sidebar />
+      </Teleport>
 
       <EditMetadataModal />
       <AddToAlbumModal />
