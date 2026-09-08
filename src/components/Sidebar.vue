@@ -268,6 +268,7 @@ export default defineComponent({
   height: 100% !important;
   z-index: 2525;
   padding: 10px;
+  box-sizing: border-box;
   background-color: var(--color-main-background);
   border-left: 1px solid var(--color-border);
 
