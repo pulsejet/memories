@@ -23,7 +23,7 @@ registerRoute(
     plugins: [
       new ExpirationPlugin({
         maxAgeSeconds: 3600 * 24 * 7, // days
-        maxEntries: 1000, // 1k videos
+        maxEntries: 250, // videos
       }),
     ],
   }),

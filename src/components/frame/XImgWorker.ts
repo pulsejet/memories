@@ -32,10 +32,14 @@ let imageCache: Cache | undefined;
   }
 })();
 
-// Expiration for cache
+// Expiration for cache. iOS Safari has strict limits, which can crash PWA
+// https://github.com/pulsejet/memories/issues/1019
+const userAgent = self.navigator?.userAgent ?? '';
+const isIOS =
+  /iPad|iPhone|iPod/.test(userAgent) || (userAgent.includes('Mac') && (self.navigator as any)?.maxTouchPoints > 1);
 const expirationManager = new CacheExpiration(cacheName, {
   maxAgeSeconds: 3600 * 24 * 7, // days
-  maxEntries: 20000, // 20k images
+  maxEntries: isIOS ? 2000 : 20000,
 });
 
 // Start fetching with multipreview
