@@ -123,11 +123,11 @@ export default defineComponent({
       return this.photo.basename || '';
     },
 
-    defaultSavedImageType(): 'jpeg' | 'png' | 'webp' {
-      if (['image/jpeg', 'image/png', 'image/webp'].includes(this.photo.mimetype!)) {
+    defaultSavedImageType(): 'jpg' | 'png' | 'webp' {
+      if (['image/png', 'image/webp'].includes(this.photo.mimetype!)) {
         return this.photo.mimetype!.split('/')[1] as any;
       }
-      return 'jpeg';
+      return 'jpg';
     },
 
     hasHighContrastEnabled(): boolean {
@@ -265,10 +265,12 @@ export default defineComponent({
         };
       }
 
-      // Make sure we have an extension
+      // Suffix a different format so it saves as a copy
+      // https://github.com/pulsejet/memories/issues/1611
       let name = data.name;
       const nameLower = name.toLowerCase();
-      if (!nameLower.endsWith(data.extension) && !nameLower.endsWith('.jpg')) {
+      const ext = data.extension.toLowerCase() === 'jpeg' ? 'jpg' : data.extension.toLowerCase();
+      if (!nameLower.endsWith('.' + ext) && !(ext === 'jpg' && nameLower.endsWith('.jpeg'))) {
         name += '.' + data.extension;
       }
 
