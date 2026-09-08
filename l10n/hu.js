@@ -18,6 +18,7 @@ OC.L10N.register(
     "Places" : "Helyek",
     "Map" : "Térkép",
     "Tags" : "Címkék",
+    "Navigation" : "Navigáció",
     "Settings" : "Beállítások",
     "View all" : "Összes megtekintése",
     "Videos" : "Videók",

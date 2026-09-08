@@ -18,6 +18,7 @@ OC.L10N.register(
     "Places" : "Mesta",
     "Map" : "Zemljevid",
     "Tags" : "Oznake",
+    "Navigation" : "Krmarjenje",
     "Settings" : "Nastavitve",
     "View all" : "Poglej vse",
     "Videos" : "Video posnetki",

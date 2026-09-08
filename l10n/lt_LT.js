@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Vietos",
     "Map" : "Žemėlapis",
     "Tags" : "Žymos",
+    "Navigation" : "Naršymas",
     "Settings" : "Nustatymai",
     "View all" : "Žiūrėti viską",
     "Videos" : "Vaizdo įrašai",

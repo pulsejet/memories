@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Τοποθεσίες",
     "Map" : "Χάρτης",
     "Tags" : "Ετικέτες",
+    "Navigation" : "Πλοήγηση",
     "Settings" : "Ρυθμίσεις",
     "View all" : "Προβολή όλων",
     "Videos" : "Βίντεο",

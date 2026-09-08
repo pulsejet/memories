@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "مکان‌ها",
     "Map" : "نقشه",
     "Tags" : "برچسب‌ها",
+    "Navigation" : "ناوبری",
     "Settings" : "تنظیمات",
     "View all" : "مشاهده همه",
     "Videos" : "ویدئوها",

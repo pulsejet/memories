@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Paikat",
     "Map" : "Kartta",
     "Tags" : "Tunnisteet",
+    "Navigation" : "Navigointi",
     "Settings" : "Asetukset",
     "View all" : "Näytä kaikki",
     "Videos" : "Videot",

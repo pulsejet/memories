@@ -18,6 +18,7 @@ OC.L10N.register(
     "Places" : "Místa",
     "Map" : "Mapa",
     "Tags" : "Štítky",
+    "Navigation" : "Pohyb",
     "Settings" : "Nastavení",
     "View all" : "Zobrazit vše",
     "Videos" : "Videa",

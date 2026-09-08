@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "장소",
     "Map" : "지도",
     "Tags" : "태그",
+    "Navigation" : "탐색",
     "Settings" : "설정",
     "View all" : "모두 보기",
     "Videos" : "동영상",

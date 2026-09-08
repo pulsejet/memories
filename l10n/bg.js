@@ -17,6 +17,7 @@ OC.L10N.register(
     "Places" : "Места",
     "Map" : "Карта",
     "Tags" : "Етикети",
+    "Navigation" : "Навигация",
     "Settings" : "Настройки",
     "View all" : "Виж всички",
     "Videos" : "Видеа",

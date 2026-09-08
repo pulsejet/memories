@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "地點",
     "Map" : "地圖",
     "Tags" : "標籤",
+    "Navigation" : "導航",
     "Settings" : "設定",
     "View all" : "檢視所有",
     "Videos" : "影片",

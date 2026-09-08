@@ -14,6 +14,7 @@ OC.L10N.register(
     "Places" : "Llugares",
     "Map" : "Mapa",
     "Tags" : "Etiquetes",
+    "Navigation" : "Navegación",
     "Settings" : "Configuración",
     "Videos" : "Vídeos",
     "Metadata" : "Metadatos",

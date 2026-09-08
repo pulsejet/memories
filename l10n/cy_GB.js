@@ -5,6 +5,7 @@ OC.L10N.register(
     "Favorites" : "Ffefrynnau",
     "Archive" : "Archif",
     "Tags" : "Tagiau",
+    "Navigation" : "Llywio",
     "Settings" : "Gosodiadau",
     "Videos" : "Fideos",
     "Edit" : "Golygu",

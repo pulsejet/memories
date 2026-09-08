@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "جايلار",
     "Map" : "خەرىتە",
     "Tags" : "بەلگەلەر",
+    "Navigation" : "يول باشلاش",
     "Settings" : "تەڭشەكلەر",
     "View all" : "ھەممىنى كۆرۈش",
     "Videos" : "سىنلار",

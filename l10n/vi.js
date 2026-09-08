@@ -9,6 +9,7 @@ OC.L10N.register(
     "Albums" : "Albums",
     "Archive" : "Lưu trữ",
     "Tags" : "Nhãn",
+    "Navigation" : "Điều hướng",
     "Settings" : "Cài đặt",
     "Videos" : "Phim",
     "Metadata" : "Metadata",

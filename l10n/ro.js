@@ -10,6 +10,7 @@ OC.L10N.register(
     "Archive" : "Arhivă",
     "Places" : "Locuri",
     "Tags" : "Etichete",
+    "Navigation" : "Navigare",
     "Settings" : "Setări",
     "Videos" : "Fișiere video",
     "Edit" : "Editează",

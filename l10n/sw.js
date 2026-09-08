@@ -14,6 +14,7 @@ OC.L10N.register(
     "Places" : "Maeneo",
     "Map" : "Ramani",
     "Tags" : "Maoni",
+    "Navigation" : "Uendeshaji",
     "Settings" : "Mipangilio",
     "View all" : "View all",
     "Videos" : "Picha mjongeo",

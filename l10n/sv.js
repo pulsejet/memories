@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Platser",
     "Map" : "Karta",
     "Tags" : "Taggar",
+    "Navigation" : "Navigering",
     "Settings" : "Inställningar",
     "View all" : "Visa alla",
     "Videos" : "Videor",

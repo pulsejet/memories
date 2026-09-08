@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Yerler",
     "Map" : "Harita",
     "Tags" : "Etiketler",
+    "Navigation" : "Gezinme",
     "Settings" : "Ayarlar",
     "View all" : "Tümünü görüntüle",
     "Videos" : "Görüntüler",
