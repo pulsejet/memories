@@ -36,7 +36,7 @@
             exact
           >
             <template #icon>
-              <component :is="item.icon" slot="icon" :size="20" />
+              <component :is="item.icon" :size="20" />
             </template>
           </NcAppNavigationItem>
         </template>
@@ -44,7 +44,9 @@
         <template #footer>
           <ul class="app-navigation__settings">
             <NcAppNavigationItem :name="t('memories', 'Settings')" @click="showSettings" href="#ss">
-              <CogIcon slot="icon" :size="20" />
+              <template #icon>
+                <CogIcon :size="20" />
+              </template>
             </NcAppNavigationItem>
           </ul>
         </template>
@@ -68,7 +70,7 @@
         <MobileNav v-if="showNavigation" />
       </NcAppContent>
 
-      <Settings :open.sync="settingsOpen" />
+      <Settings v-model:open="settingsOpen" />
 
       <Viewer />
       <Sidebar />
@@ -87,12 +89,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
-import NcContent from '@nextcloud/vue/dist/Components/NcContent.js';
-import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent.js';
-import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation.js';
-const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNavigationItem.js');
+import NcContent from '@nextcloud/vue/components/NcContent';
+import NcAppContent from '@nextcloud/vue/components/NcAppContent';
+import NcAppNavigation from '@nextcloud/vue/components/NcAppNavigation';
+const NcAppNavigationItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAppNavigationItem'));
 
 import { generateUrl } from '@nextcloud/router';
 

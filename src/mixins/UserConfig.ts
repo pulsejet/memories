@@ -24,7 +24,7 @@ export default defineComponent({
     this.refreshFromConfig();
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     utils.bus.off(eventName, this.updateLocalSetting);
   },
 

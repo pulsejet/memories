@@ -6,8 +6,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
+import { defineComponent, defineAsyncComponent } from 'vue';
+const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 
 import { Uploader } from '@nextcloud/upload';
 import { Folder, Permission } from '@nextcloud/files';
@@ -31,7 +31,7 @@ export default defineComponent({
     existingFiles: new Set<string>(), // Track existing files in current directory
   }),
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.cancelAllUploads();
   },
 
@@ -82,7 +82,7 @@ export default defineComponent({
      */
     async fetchExistingFiles(): Promise<Set<string>> {
       try {
-        const token = this.$route.params.token;
+        const token = this.$route.params.token?.toString();
         const uploadPath = this.getCurrentPath();
         const publicDavPath = `${this.baseUrl}/public.php/dav/files/${token}${uploadPath}`;
 
@@ -132,7 +132,7 @@ export default defineComponent({
         }
 
         // Setup WebDAV destination
-        const token = this.$route.params.token as string;
+        const token = this.$route.params.token?.toString();
         const currentPath = this.getCurrentPath();
 
         // Build the absolute URL properly

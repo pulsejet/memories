@@ -55,8 +55,8 @@
 import { defineComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
@@ -188,7 +188,7 @@ export default defineComponent({
     };
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     utils.bus.off('memories:sidebar:opened', this.handleAppSidebarOpen);
     utils.bus.off('memories:sidebar:closed', this.handleAppSidebarClose);
     utils.bus.off('files:file:created', this.handleFileUpdated);
@@ -198,13 +198,6 @@ export default defineComponent({
   },
 
   computed: {
-    refs() {
-      return this.$refs as {
-        outer: HTMLDivElement;
-        inner: HTMLDivElement;
-      };
-    },
-
     /** Number of buttons to show inline */
     numInlineActions(): number {
       let base = 3;
@@ -437,6 +430,13 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        outer: HTMLDivElement;
+        inner: HTMLDivElement;
+      };
+    },
+
     updateLoading(delta: number) {
       this.loading += delta;
     },
@@ -499,7 +499,7 @@ export default defineComponent({
         loop: false,
         wheelToZoom: true,
         bgOpacity: 1,
-        appendToEl: this.refs.inner!,
+        appendToEl: this.refs().inner!,
         preload: [2, 2],
         bgClickAction: 'toggle-controls',
 
@@ -1045,7 +1045,7 @@ export default defineComponent({
       }
 
       if (e.key === 'F' && e.shiftKey) {
-        this.refs.outer?.requestFullscreen();
+        this.refs().outer?.requestFullscreen();
       }
 
       if (e.key === 'A' && e.shiftKey) {
@@ -1233,7 +1233,7 @@ export default defineComponent({
      */
     async startSlideshow() {
       // Full screen the outer element
-      if (!this.refs.outer?.requestFullscreen()) return;
+      if (!this.refs().outer?.requestFullscreen()) return;
 
       // Hide controls
       setTimeout(() => this.setUiVisible(false), 1);

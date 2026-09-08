@@ -17,13 +17,13 @@
         </div>
 
         <div class="options">
-          <NcCheckboxRadioSwitch :checked="albums.length > 0" :disabled="processing" @update:checked="pane = 1">
+          <NcCheckboxRadioSwitch :model-value="albums.length > 0" :disabled="processing" @update:model-value="pane = 1">
             {{ t('memories', 'Add to albums') }}
             <br />
             <span class="switch-subtitle">{{ albumNames }}</span>
           </NcCheckboxRadioSwitch>
 
-          <NcCheckboxRadioSwitch :checked.sync="tagsShown" :disabled="processing">
+          <NcCheckboxRadioSwitch v-model="tagsShown" :disabled="processing">
             {{ t('memories', 'Add tags') }}
             <br />
             <span class="switch-subtitle">
@@ -41,7 +41,7 @@
             {{ progressNote }}
             <NcProgressBar :value="progress" :error="true" />
           </div>
-          <NcButton @click="upload" type="primary" :disabled="processing">
+          <NcButton @click="upload" variant="primary" :disabled="processing">
             {{ t('memories', 'Upload') }}
           </NcButton>
         </div>
@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent } from 'vue';
+import { createApp, defineComponent, defineAsyncComponent } from 'vue';
 
 import Modal from '@components/modal/Modal.vue';
 import ModalMixin from '@components/modal/ModalMixin';
@@ -63,10 +63,10 @@ import AlbumPicker from '@components/modal/AlbumPicker.vue';
 import EditTags from '@components/modal/EditTags.vue';
 import UploadMenuItem from '@components/header/UploadMenuItem.vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
-const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
-const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
+const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
 
 import axios from '@nextcloud/axios';
 import { getUploader } from '@nextcloud/upload';
@@ -77,6 +77,8 @@ import UserConfig from '@mixins/UserConfig';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 import { API } from '@services/API';
+import { registerGlobals } from '../../bootstrap';
+import { registerRouteCheckers } from '../../router';
 
 import type { IAlbum, IPhoto } from '@typings';
 import type PCancelable from 'p-cancelable';
@@ -116,18 +118,18 @@ export default defineComponent({
     if (header && utils.uid) {
       const div = document.createElement('div');
       header.prepend(div);
-      const component = new Vue({ render: (h) => h(UploadMenuItem) });
-      component.$mount(div);
+      const headerApp = createApp(UploadMenuItem);
+      // Share globals and router with header button
+      registerGlobals(headerApp);
+      registerRouteCheckers(headerApp);
+      try {
+        headerApp.use(this.$router);
+      } catch {}
+      headerApp.mount(div);
     }
   },
 
   computed: {
-    refs() {
-      return this.$refs as {
-        tags?: InstanceType<typeof EditTags>;
-      };
-    },
-
     albumNames() {
       if (!this.albums.length) {
         return this.t('memories', 'No albums selected');
@@ -138,6 +140,12 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        tags?: InstanceType<typeof EditTags>;
+      };
+    },
+
     open() {
       // cannot upload to public shares
       if (this.routeIsPublic) return;
@@ -212,8 +220,8 @@ export default defineComponent({
       if (this.tagsShown) {
         try {
           this.progressNote = this.t('memories', 'Creating tags');
-          tags = (await this.refs.tags?.result?.())?.add ?? [];
-        } catch (e) {
+          tags = (await this.refs().tags?.result?.())?.add ?? [];
+        } catch (e: any) {
           showError(e);
           console.error(e);
           throw e;

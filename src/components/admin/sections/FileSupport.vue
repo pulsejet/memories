@@ -43,8 +43,8 @@
       type="switch"
       v-for="(provider, klass) in knownPreviewProviders"
       :key="klass"
-      :checked="hasProvider(klass)"
-      @update:checked="updateProvider(klass, $event)"
+      :model-value="hasProvider(klass)"
+      @update:model-value="updateProvider(klass, $event)"
       >{{ provider.name }}
     </NcCheckboxRadioSwitch>
 
@@ -66,11 +66,11 @@
       class="preview-box"
       v-for="size in previewSizes"
       :key="size"
-      :checked="String(config['preview_max_x'])"
+      :model-value="String(config['preview_max_x'])"
       :value="String(size)"
       name="previewsize_radio"
       type="radio"
-      @update:checked="updatePreviewSize(size)"
+      @update:model-value="updatePreviewSize(size)"
       >{{ size }}px
     </NcCheckboxRadioSwitch>
 
@@ -79,7 +79,7 @@
       placeholder="1024"
       :label="t('memories', 'Max memory for preview generation (MB)')"
       :label-visible="true"
-      :value="String(config['preview_max_memory'])"
+      :model-value="String(config['preview_max_memory'])"
       @change="update('preview_max_memory', Number($event.target.value))"
     />
 
@@ -88,7 +88,7 @@
       placeholder="50"
       :label="t('memories', 'Max size of file to generate previews for (MB)')"
       :label-visible="true"
-      :value="String(config['preview_max_filesize_image'])"
+      :model-value="String(config['preview_max_filesize_image'])"
       @change="update('preview_max_filesize_image', Number($event.target.value))"
     />
   </div>

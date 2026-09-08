@@ -27,10 +27,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 import type { PropType } from 'vue';
 
-const NcModal = () => import('@nextcloud/vue/dist/Components/NcModal.js');
+const NcModal = defineAsyncComponent(() => import('@nextcloud/vue/components/NcModal'));
 
 import * as utils from '@services/utils';
 
@@ -42,8 +42,8 @@ export default defineComponent({
 
   props: {
     size: {
-      type: String,
-      default: 'small',
+      type: String as PropType<'small' | 'normal' | 'large' | 'full'>,
+      default: 'small' as const,
     },
     sidebar: {
       type: String as PropType<string | null>,
@@ -71,7 +71,7 @@ export default defineComponent({
     this._mutationObserver.observe(document.body, { childList: true });
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.sidebar) {
       utils.bus.off('memories:sidebar:opened', this.handleAppSidebarOpen);
       utils.bus.off('memories:sidebar:closed', this.handleAppSidebarClose);

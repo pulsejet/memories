@@ -71,7 +71,7 @@ export default defineComponent({
     this.animate = this.loading; // start if needed
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.reset();
   },
 

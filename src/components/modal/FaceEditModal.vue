@@ -8,7 +8,7 @@
       <NcTextField
         class="field"
         :autofocus="true"
-        :value.sync="rawInput"
+        v-model="rawInput"
         :label="t('memories', 'Name')"
         :label-visible="false"
         :placeholder="t('memories', 'Name')"
@@ -17,7 +17,7 @@
     </div>
 
     <template #buttons>
-      <NcButton class="button" type="primary" :disabled="!canSave" @click="save">
+      <NcButton class="button" variant="primary" :disabled="!canSave" @click="save">
         {{ t('memories', 'Update') }}
       </NcButton>
     </template>
@@ -25,12 +25,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
@@ -56,11 +56,11 @@ export default defineComponent({
 
   computed: {
     name() {
-      return this.$route.params.name;
+      return this.$route.params.name?.toString();
     },
 
     user() {
-      return this.$route.params.user;
+      return this.$route.params.user?.toString();
     },
 
     canSave() {
@@ -101,7 +101,7 @@ export default defineComponent({
 
         await this.close();
         await this.$router.replace({
-          name: this.$route.name as string,
+          name: this.$route.name?.toString(),
           params: { user: this.user, name: this.input },
         });
       } catch (error) {

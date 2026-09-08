@@ -58,6 +58,49 @@ const cache = {
   list: [] as Fragment[],
 };
 
+/**
+ * Serialize all fragment mutations.
+ *
+ * push/pop compute history operations (go/replace) against the current URL.
+ * Concurrent calls (e.g. a modal closing while the selection is cleared) would
+ * otherwise interleave duplicate relative go() jumps and over-consume history
+ * entries (landing outside the app). Public methods below run exclusively.
+ */
+let fragmentMutex = Promise.resolve();
+
+function serialized<T>(fn: () => Promise<T>): Promise<T> {
+  const run = fragmentMutex.then(fn, fn);
+  fragmentMutex = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  return run;
+}
+
+/**
+ * Wait until a history.go() navigation commits (or a tick passes when it
+ * produces no navigation, e.g. already at the oldest entry).
+ */
+function waitForHistoryGo(go: () => void): Promise<void> {
+  return new Promise<void>((resolve) => {
+    let done = false;
+    const off = _m.router.afterEach(() => {
+      if (done) return;
+      done = true;
+      off();
+      resolve();
+    });
+    go();
+    // Fallback: go() is a no-op when there is nowhere to go back to.
+    setTimeout(() => {
+      if (done) return;
+      done = true;
+      off();
+      resolve();
+    }, 50);
+  });
+}
+
 export const fragment = {
   /**
    * List of all fragment types.
@@ -90,49 +133,7 @@ export const fragment = {
    * @param frag Fragment to add to route
    */
   async push(type: FragmentType, ...args: string[]) {
-    // Skip if no route (e.g. admin)
-    if (!_m.route) return;
-
-    const frag: Fragment = { type, args };
-    const list = this.list;
-
-    // Get the top fragment
-    const top = list.length ? list[list.length - 1] : null;
-
-    // Check if we are already on this fragment
-    if (top?.type === frag.type) {
-      // Replace the arguments
-      top.args = frag.args;
-      const hash = encodeFragment(list);
-
-      // Avoid redundant route changes
-      if (hash === _m.route.hash) return;
-
-      // Replace the route with the new fragment
-      await _m.router.replace({
-        path: _m.route.path,
-        query: _m.route.query,
-        hash: hash,
-      });
-
-      return;
-    }
-
-    // If the fragment is already in the list, we can't touch it.
-    if (list.find((f) => f.type === frag.type)) {
-      return;
-    }
-
-    // Add fragment to route
-    list.push(frag);
-    await _m.router.push({
-      path: _m.route.path,
-      query: _m.route.query,
-      hash: encodeFragment(list),
-    });
-
-    // wait for the route to change
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    return serialized(() => pushCore(type, ...args));
   },
 
   /**
@@ -140,29 +141,7 @@ export const fragment = {
    * @param type Fragment identifier
    */
   async pop(type: FragmentType) {
-    // Skip if no route (e.g. admin)
-    if (!_m.route) return;
-
-    // Get the index of this fragment from the end
-    const frag = this.get(type);
-    if (!frag) return;
-
-    // Go back in history
-    _m.router.go(-frag.index! - 1);
-
-    // Check if the fragment still exists
-    // In that case, replace the route to remove the fragment
-    const sfrag = this.get(type);
-    if (sfrag) {
-      await _m.router.replace({
-        path: _m.route.path,
-        query: _m.route.query,
-        hash: encodeFragment(this.list.slice(0, -sfrag.index! - 1)),
-      });
-    }
-
-    // wait for the route to change
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    return serialized(() => popCore(type));
   },
 
   /**
@@ -194,6 +173,87 @@ export const fragment = {
     return this.get(FragmentType.viewer);
   },
 };
+
+/**
+ * Implementation of push (runs inside the fragment mutex).
+ */
+async function pushCore(type: FragmentType, ...args: string[]) {
+  // Skip if no route (e.g. admin)
+  if (!_m.route) return;
+
+  const frag: Fragment = { type, args };
+  const list = fragment.list;
+
+  // Get the top fragment
+  const top = list.length ? list[list.length - 1] : null;
+
+  // Check if we are already on this fragment
+  if (top?.type === frag.type) {
+    // Replace the arguments
+    top.args = frag.args;
+    const hash = encodeFragment(list);
+
+    // Avoid redundant route changes
+    if (hash === _m.route.hash) return;
+
+    // Replace the route with the new fragment
+    await _m.router.replace({
+      path: _m.route.path,
+      query: _m.route.query,
+      hash: hash,
+    });
+
+    return;
+  }
+
+  // If the fragment is already in the list, we can't touch it.
+  if (list.find((f) => f.type === frag.type)) {
+    return;
+  }
+
+  // Add fragment to route
+  list.push(frag);
+  await _m.router.push({
+    path: _m.route.path,
+    query: _m.route.query,
+    hash: encodeFragment(list),
+  });
+
+  // wait for the route to change
+  await new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+/**
+ * Implementation of pop (runs inside the fragment mutex).
+ */
+async function popCore(type: FragmentType) {
+  // Skip if no route (e.g. admin)
+  if (!_m.route) return;
+
+  // Get the index of this fragment from the end
+  const frag = fragment.get(type);
+  if (!frag) return;
+
+  // Go back in history and wait for it to commit, so that the check
+  // below observes the post-navigation state and not a stale URL.
+  // Without this, concurrent pops compute duplicate relative jumps
+  // against the same stale URL and over-consume history entries.
+  await waitForHistoryGo(() => _m.router.go(-frag.index! - 1));
+
+  // Check if the fragment still exists
+  // In that case, replace the route to remove the fragment
+  const sfrag = fragment.get(type);
+  if (sfrag) {
+    await _m.router.replace({
+      path: _m.route.path,
+      query: _m.route.query,
+      hash: encodeFragment(fragment.list.slice(0, -sfrag.index! - 1)),
+    });
+  }
+
+  // wait for the route to change
+  await new Promise((resolve) => setTimeout(resolve, 0));
+}
 
 onDOMLoaded(() => {
   // Skip unless in user mode

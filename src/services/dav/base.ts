@@ -32,7 +32,7 @@ export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<I
   // Some routes may have special handling of filenames
   if (!opts?.ignoreRoute) {
     if (_m.route.name === _m.routes.Albums.name) {
-      return getAlbumFileInfos(photos, _m.route.params.user, _m.route.params.name);
+      return getAlbumFileInfos(photos, _m.route.params.user?.toString(), _m.route.params.name?.toString());
     }
   }
 
@@ -55,7 +55,7 @@ export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<I
           originalFilename = `/files/${utils.uid}${filename}`;
         } else {
           // Public share: use token-based WebDAV path
-          const token = _m.route.params.token;
+          const token = _m.route.params.token?.toString();
           originalFilename = `/files/${token}${filename}`;
         }
 
@@ -101,7 +101,7 @@ async function getFilesInternal1(photos: IPhoto[]): Promise<IFileInfo[]> {
  */
 async function getFilesViaAPI(photos: IPhoto[]): Promise<IFileInfo[]> {
   const fileInfos: IFileInfo[] = [];
-  const token = _m.route.params.token;
+  const token = _m.route.params.token?.toString();
 
   for (const photo of photos) {
     try {

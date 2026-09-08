@@ -12,7 +12,7 @@
         type="number"
         min="0"
         max="5000"
-        :value.sync="year"
+        v-model="year"
         :label="t('memories', 'Year')"
         :label-visible="true"
         :placeholder="t('memories', 'Year')"
@@ -25,7 +25,7 @@
         type="number"
         min="1"
         max="12"
-        :value.sync="month"
+        v-model="month"
         :label="t('memories', 'Month')"
         :label-visible="true"
         :placeholder="t('memories', 'Month')"
@@ -38,7 +38,7 @@
         type="number"
         min="1"
         max="31"
-        :value.sync="day"
+        v-model="day"
         :label="t('memories', 'Day')"
         :label-visible="true"
         :placeholder="t('memories', 'Day')"
@@ -51,7 +51,7 @@
         type="number"
         min="0"
         max="23"
-        :value.sync="hour"
+        v-model="hour"
         :label="t('memories', 'Hour')"
         :label-visible="true"
         :placeholder="t('memories', 'Hour')"
@@ -64,7 +64,7 @@
         type="number"
         min="0"
         max="59"
-        :value.sync="minute"
+        v-model="minute"
         :label="t('memories', 'Minute')"
         :placeholder="t('memories', 'Minute')"
         :disabled="disabled"
@@ -86,7 +86,7 @@
           type="number"
           min="0"
           max="5000"
-          :value.sync="yearLast"
+          v-model="yearLast"
           :label="t('memories', 'Year')"
           :label-visible="true"
           :placeholder="t('memories', 'Year')"
@@ -99,7 +99,7 @@
           type="number"
           min="1"
           max="12"
-          :value.sync="monthLast"
+          v-model="monthLast"
           :label="t('memories', 'Month')"
           :label-visible="true"
           :placeholder="t('memories', 'Month')"
@@ -112,7 +112,7 @@
           type="number"
           min="1"
           max="31"
-          :value.sync="dayLast"
+          v-model="dayLast"
           :label="t('memories', 'Day')"
           :label-visible="true"
           :placeholder="t('memories', 'Day')"
@@ -125,7 +125,7 @@
           type="number"
           min="0"
           max="23"
-          :value.sync="hourLast"
+          v-model="hourLast"
           :label="t('memories', 'Hour')"
           :label-visible="true"
           :placeholder="t('memories', 'Hour')"
@@ -138,7 +138,7 @@
           type="number"
           min="0"
           max="59"
-          :value.sync="minuteLast"
+          v-model="minuteLast"
           :label="t('memories', 'Minute')"
           :placeholder="t('memories', 'Minute')"
           :disabled="disabled"
@@ -151,9 +151,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import * as utils from '@services/utils';
 

@@ -9,7 +9,7 @@
     </div>
 
     <template #buttons>
-      <NcButton @click="close" class="button" type="error">
+      <NcButton @click="close" class="button" variant="error">
         {{ t('memories', 'Cancel') }}
       </NcButton>
     </template>
@@ -17,12 +17,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import Cluster from '@components/frame/Cluster.vue';
 import FaceList from './FaceList.vue';
@@ -66,8 +66,8 @@ export default defineComponent({
       }
 
       // check ownership
-      const user = this.$route.params.user || '';
-      if (this.$route.params.user !== utils.uid) {
+      const user = this.$route.params.user?.toString() || '';
+      if (this.$route.params.user?.toString() !== utils.uid) {
         showError(
           this.t('memories', 'Only user "{user}" can update this person', {
             user,
@@ -90,8 +90,8 @@ export default defineComponent({
     },
 
     async clickFace(face: IFace) {
-      const user = this.$route.params.user || '';
-      const name = this.$route.params.name || '';
+      const user = this.$route.params.user?.toString() || '';
+      const name = this.$route.params.name?.toString() || '';
       const target = String(face.name || face.cluster_id);
 
       if (

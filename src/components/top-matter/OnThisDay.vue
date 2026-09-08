@@ -32,8 +32,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
@@ -73,19 +73,13 @@ export default defineComponent({
   }),
 
   computed: {
-    refs() {
-      return this.$refs as {
-        inner?: HTMLDivElement;
-      };
-    },
-
     photosPerYear(): number {
       return staticConfig.getSync('onthisday_photos_per_year');
     },
   },
 
   mounted() {
-    const inner = this.refs.inner!;
+    const inner = this.refs().inner!;
 
     inner.addEventListener('scroll', this.onScroll.bind(this), {
       passive: true,
@@ -97,11 +91,17 @@ export default defineComponent({
     this.refreshNow();
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.resizeObserver?.disconnect();
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        inner?: HTMLDivElement;
+      };
+    },
+
     onload() {
       this.$emit('load');
     },
@@ -189,12 +189,12 @@ export default defineComponent({
     },
 
     moveLeft() {
-      const inner = this.refs.inner!;
+      const inner = this.refs().inner!;
       inner.scrollBy(-(this.scrollStack.pop() || inner.clientWidth), 0);
     },
 
     moveRight() {
-      const inner = this.refs.inner!;
+      const inner = this.refs().inner!;
       const innerRect = inner.getBoundingClientRect();
       const nextChild = Array.from(inner.children)
         .map((c) => c.getBoundingClientRect())
@@ -207,7 +207,7 @@ export default defineComponent({
     },
 
     onScroll() {
-      const inner = this.refs.inner;
+      const inner = this.refs().inner;
       if (!inner) return;
       this.hasLeft = inner.scrollLeft > 0;
       this.hasRight = inner.clientWidth + inner.scrollLeft < inner.scrollWidth - 20;

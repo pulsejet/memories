@@ -20,8 +20,8 @@
 
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
-        :checked.sync="config['memories.vod.external']"
-        @update:checked="update('memories.vod.external')"
+        v-model="config['memories.vod.external']"
+        @update:model-value="update('memories.vod.external')"
         type="switch"
       >
         {{ t('memories', 'Enable external transcoder') }}
@@ -31,7 +31,7 @@
         :disabled="!enableTranscoding"
         :label="t('memories', 'Binary path (local only)')"
         :label-visible="true"
-        :value="config['memories.vod.path']"
+        :model-value="config['memories.vod.path']"
         @change="update('memories.vod.path', $event.target.value)"
       />
 
@@ -39,7 +39,7 @@
         :disabled="!enableTranscoding"
         :label="t('memories', 'Bind address (local only)')"
         :label-visible="true"
-        :value="config['memories.vod.bind']"
+        :model-value="config['memories.vod.bind']"
         @change="update('memories.vod.bind', $event.target.value)"
       />
 
@@ -47,7 +47,7 @@
         :disabled="!enableTranscoding"
         :label="t('memories', 'Connection address (same as bind if local)')"
         :label-visible="true"
-        :value="config['memories.vod.connect']"
+        :model-value="config['memories.vod.connect']"
         @change="update('memories.vod.connect', $event.target.value)"
       />
 
@@ -59,7 +59,7 @@
         :disabled="!enableTranscoding"
         :label="t('memories', 'Quality Factor (15 - 45) (default 25)')"
         :label-visible="true"
-        :value="String(config['memories.vod.qf'])"
+        :model-value="String(config['memories.vod.qf'])"
         @change="update('memories.vod.qf', Number($event.target.value))"
       />
     </p>

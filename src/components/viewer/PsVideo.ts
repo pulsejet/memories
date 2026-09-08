@@ -372,8 +372,8 @@ class VideoContentSetup {
 
     container.style.height = '100%';
     container.style.width = '100%';
-    container.querySelectorAll('button').forEach((el) => el.classList.add('button-vue'));
-    container.querySelectorAll('progress').forEach((el) => el.classList.add('vue'));
+    container.querySelectorAll('button').forEach((el: HTMLButtonElement) => el.classList.add('button-vue'));
+    container.querySelectorAll('progress').forEach((el: HTMLProgressElement) => el.classList.add('vue'));
     container.style.backgroundColor = 'transparent';
     plyr.elements.wrapper!.style.backgroundColor = 'transparent';
 
@@ -407,7 +407,7 @@ class VideoContentSetup {
       let previousOrientation: OrientationType | undefined;
 
       // Lock orientation when entering fullscreen
-      plyr.on('enterfullscreen', async (event) => {
+      plyr.on('enterfullscreen', async (event: any) => {
         const h = content.data.photo.h;
         const w = content.data.photo.w;
 

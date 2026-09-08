@@ -7,7 +7,7 @@ const gen = generateUrl;
 
 /** Add auth token to this URL */
 function tok(url: string) {
-  const { token } = _m.route.params;
+  const token = _m.route.params.token as string | undefined;
   switch (_m.route.name) {
     case _m.routes.FolderShare.name:
       return API.Q(url, { token });

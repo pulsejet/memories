@@ -51,7 +51,7 @@ export default defineComponent({
     utils.bus.on('memories.recycler.scroll', this.onScroll);
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     utils.bus.off('memories.recycler.scroll', this.onScroll);
   },
 

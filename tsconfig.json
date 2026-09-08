@@ -17,13 +17,15 @@
     "paths": {
       "@services/*": ["./src/services/*"],
       "@assets": ["./src/assets"],
+      "@assets/*": ["./src/assets/*"],
       "@components/*": ["./src/components/*"],
       "@mixins/*": ["./src/mixins/*"],
-      "@native": ["./src/native", "./src/native/*"]
+      "@native": ["./src/native", "./src/native/*"],
+      "@native/*": ["./src/native/*"]
     }
   },
   "vueCompilerOptions": {
-    "target": 2.7
+    "target": 3
   },
   "ts-node": {
     "compilerOptions": {

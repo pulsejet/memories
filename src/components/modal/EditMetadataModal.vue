@@ -5,7 +5,7 @@
     </template>
 
     <template #buttons>
-      <NcButton @click="save" class="button" type="error" v-if="photos" :disabled="processing">
+      <NcButton @click="save" class="button" variant="error" v-if="photos" :disabled="processing">
         {{ t('memories', 'Save') }}
       </NcButton>
     </template>
@@ -55,11 +55,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
-const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 
 import UserConfig from '@mixins/UserConfig';
 
@@ -105,7 +105,12 @@ export default defineComponent({
     state: 0,
   }),
 
-  computed: {
+  created() {
+    console.assert(!_m.modals.editMetadata, 'EditMetadataModal created twice');
+    _m.modals.editMetadata = this.open;
+  },
+
+  methods: {
     refs() {
       return this.$refs as {
         editDate?: InstanceType<typeof EditDate>;
@@ -115,14 +120,7 @@ export default defineComponent({
         editOrientation?: InstanceType<typeof EditOrientation>;
       };
     },
-  },
 
-  created() {
-    console.assert(!_m.modals.editMetadata, 'EditMetadataModal created twice');
-    _m.modals.editMetadata = this.open;
-  },
-
-  methods: {
     async open(photos: IPhoto[], sections: number[] = [1, 2, 3, 4]) {
       const state = (this.state = Math.random());
       this.show = true;
@@ -189,8 +187,8 @@ export default defineComponent({
     async save() {
       // Perform validation
       try {
-        this.refs.editDate?.validate?.();
-      } catch (e) {
+        this.refs().editDate?.validate?.();
+      } catch (e: any) {
         console.error(e);
         showError(e);
         return;
@@ -203,15 +201,15 @@ export default defineComponent({
 
       // Get exif fields diff
       const exifResult = {
-        ...(this.refs.editExif?.result?.() || {}),
-        ...(this.refs.editLocation?.result?.() || {}),
+        ...(this.refs().editExif?.result?.() || {}),
+        ...(this.refs().editLocation?.result?.() || {}),
       };
 
       // Tags may be created which might throw
       let tagsResult: { add: number[]; remove: number[] } | null = null;
       try {
-        tagsResult = (await this.refs.editTags?.result?.()) ?? null;
-      } catch (e) {
+        tagsResult = (await this.refs().editTags?.result?.()) ?? null;
+      } catch (e: any) {
         this.processing = false;
         console.error(e);
         showError(e);
@@ -225,13 +223,13 @@ export default defineComponent({
         const raw: IExif = JSON.parse(JSON.stringify(exifResult));
 
         // Date header
-        const date = this.refs.editDate?.result?.(p);
+        const date = this.refs().editDate?.result?.(p);
         if (date) {
           raw.AllDates = date;
         }
 
         // Orientation
-        const orientation = this.refs.editOrientation?.result?.(p);
+        const orientation = this.refs().editOrientation?.result?.(p);
         if (orientation !== null && orientation !== undefined) {
           raw.Orientation = orientation;
         }
@@ -299,7 +297,7 @@ export default defineComponent({
             await axios.patch<null>(API.TAG_SET(fileid), tagsResult);
             dirty = true;
           }
-        } catch (e) {
+        } catch (e: any) {
           console.error('Failed to save metadata for', p.fileid, e);
           if (e.response?.data?.message) {
             showError(e.response.data.message);
@@ -323,7 +321,7 @@ export default defineComponent({
         // nothing to do
       }
 
-      this.refs.editOrientation?.reset();
+      this.refs().editOrientation?.reset();
       this.processing = false;
       this.close();
 

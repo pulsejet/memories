@@ -10,7 +10,7 @@
       </span>
 
       <NcTextField
-        :value.sync="albumName"
+        v-model="albumName"
         type="text"
         name="name"
         :required="true"
@@ -30,7 +30,7 @@
     >
       <NcButton
         :aria-label="t('memories', 'Save collaborators for this album.')"
-        type="primary"
+        variant="primary"
         :disabled="loadingAddCollaborators"
         @click="save(collaborators)"
       >
@@ -46,12 +46,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
@@ -81,12 +81,6 @@ export default defineComponent({
   }),
 
   computed: {
-    refs() {
-      return this.$refs as {
-        collaborators?: InstanceType<typeof AlbumCollaborators>;
-      };
-    },
-
     showEditFields() {
       return this.album?.basename?.startsWith('.link-');
     },
@@ -98,6 +92,12 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        collaborators?: InstanceType<typeof AlbumCollaborators>;
+      };
+    },
+
     async open(user: string, name: string, link?: boolean) {
       this.show = true;
 
@@ -115,7 +115,7 @@ export default defineComponent({
       // Check if we immediately want to share a link
       if (link) {
         await this.$nextTick(); // load collaborators component
-        this.refs.collaborators?.createPublicLinkForAlbum();
+        this.refs().collaborators?.createPublicLinkForAlbum();
       }
     },
 
@@ -145,7 +145,7 @@ export default defineComponent({
             this.$router.replace({
               name: this.$route.name!,
               params: {
-                user: this.$route.params.user,
+                user: this.$route.params.user?.toString(),
                 name: this.albumName,
               },
             });

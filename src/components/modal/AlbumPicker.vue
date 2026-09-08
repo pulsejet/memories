@@ -5,7 +5,7 @@
     <div class="search">
       <NcTextField
         :autofocus="true"
-        :value.sync="search"
+        v-model="search"
         :label="t('memories', 'Search')"
         :placeholder="t('memories', 'Search')"
       >
@@ -35,7 +35,7 @@
         :aria-label="t('memories', 'Create new album.')"
         :disabled="disabled"
         class="new-album-button"
-        type="tertiary"
+        variant="tertiary"
         @click="showAlbumCreationForm = true"
       >
         <template #icon>
@@ -47,7 +47,7 @@
       <div class="submit-btn-wrapper">
         <NcButton
           class="new-album-button"
-          type="primary"
+          variant="primary"
           :aria-label="t('memories', 'Save changes')"
           :disabled="disabled"
           @click="submit"
@@ -75,13 +75,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, type PropType, defineAsyncComponent } from 'vue';
 
 import Fuse from 'fuse.js';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import AlbumForm from './AlbumForm.vue';
 import AlbumsList from './AlbumsList.vue';
@@ -154,12 +154,6 @@ export default defineComponent({
   },
 
   computed: {
-    refs() {
-      return this.$refs as {
-        albumsList?: VueHTMLComponent;
-      };
-    },
-
     filteredList() {
       if (!this.albums || !this.search || !this.fuse) return this.albums || [];
       return this.fuse.search(this.search).map((r) => r.item);
@@ -167,6 +161,12 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        albumsList?: VueHTMLComponent;
+      };
+    },
+
     async albumCreatedHandler({ album }: { album: { basename: string } }) {
       this.showAlbumCreationForm = false;
       await this.loadAlbums(true);
@@ -247,7 +247,7 @@ export default defineComponent({
 
     forceUpdate() {
       this.$forceUpdate(); // sets do not trigger reactivity
-      this.refs.albumsList?.$forceUpdate();
+      this.refs().albumsList?.$forceUpdate();
     },
   },
 });

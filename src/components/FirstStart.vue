@@ -17,7 +17,7 @@
       <div class="info" v-if="info">
         {{ info }} <br />
 
-        <NcButton @click="finish" class="button" type="primary">
+        <NcButton @click="finish" class="button" variant="primary">
           {{ t('memories', 'Continue to Memories') }}
         </NcButton>
       </div>
@@ -25,7 +25,7 @@
       <NcButton @click="begin" class="button" v-if="info">
         {{ t('memories', 'Choose again') }}
       </NcButton>
-      <NcButton @click="begin" class="button" type="primary" v-else>
+      <NcButton @click="begin" class="button" variant="primary" v-else>
         {{ t('memories', 'Click here to start') }}
       </NcButton>
 
@@ -44,8 +44,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent.js';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+import NcAppContent from '@nextcloud/vue/components/NcAppContent';
+import NcButton from '@nextcloud/vue/components/NcButton';
 
 import UserConfig from '@mixins/UserConfig';
 

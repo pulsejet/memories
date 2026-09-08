@@ -36,8 +36,8 @@ import { defineComponent, type PropType } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import UserConfig from '@mixins/UserConfig';
 
@@ -299,7 +299,7 @@ export default defineComponent({
     utils.bus.on('memories:fragment:pop:selection', this.clear);
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     // Unsubscribe from global events
     utils.bus.off('memories:albums:update', this.clear);
     utils.bus.off('memories:fragment:pop:selection', this.clear);
@@ -552,7 +552,7 @@ export default defineComponent({
       const elem: any = document
         .elementsFromPoint(touch.clientX, clampedY)
         .find((e) => e.classList.contains('p-outer-super'));
-      let overPhoto: IPhoto | null = elem?.__vue__?.data;
+      let overPhoto: IPhoto | null = elem?.__photo;
       if (overPhoto && overPhoto.flag & this.c.FLAG_PLACEHOLDER) overPhoto = null;
 
       // Do multi-selection "till" overPhoto "from" anchor
@@ -880,7 +880,7 @@ export default defineComponent({
     /**
      * Share the currently selected photos
      */
-    shareSelection(selection: Selection) {
+    async shareSelection(selection: Selection) {
       _m.modals.sharePhotos(selection.photosNoDupFileId());
     },
 
@@ -897,7 +897,7 @@ export default defineComponent({
      */
     async viewInFolder(selection: Selection) {
       if (selection.size !== 1) return;
-      dav.viewInFolder(selection.values().next().value);
+      dav.viewInFolder(selection.values().next().value!);
     },
 
     /**
@@ -905,7 +905,7 @@ export default defineComponent({
      */
     async setClusterCover(selection: Selection) {
       if (selection.size !== 1 || !this.routeIsCluster) return;
-      if (await dav.setClusterCover(selection.values().next().value)) {
+      if (await dav.setClusterCover(selection.values().next().value!)) {
         this.clear();
       }
     },
@@ -955,7 +955,7 @@ export default defineComponent({
       if (!this.routeIsRecognize || !user || !name) return;
 
       // Check photo ownership
-      if (this.$route.params.user !== utils.uid) {
+      if (this.$route.params.user?.toString() !== utils.uid) {
         showError(this.t('memories', 'Only user "{user}" can update this person', { user }));
         return;
       }
@@ -970,7 +970,7 @@ export default defineComponent({
       const photos = Array.from(map.values());
 
       // Run WebDAV query
-      for await (let delIds of dav.recognizeDeleteFaceImages(user, name, photos)) {
+      for await (let delIds of dav.recognizeDeleteFaceImages(user.toString(), name.toString(), photos)) {
         const fileIds = delIds.map((id) => map.get(id)?.fileid).filter(utils.truthy);
         this.deleteSelectedPhotosById(fileIds, selection);
       }

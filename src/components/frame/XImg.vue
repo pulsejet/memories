@@ -50,7 +50,7 @@ export default defineComponent({
     this.loadImage();
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this._state = -1;
 
     // Free up the blob if it was locked

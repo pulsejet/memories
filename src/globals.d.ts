@@ -1,4 +1,4 @@
-import type Router, { type Route } from 'vue-router';
+import type { Router, RouteLocationNormalized } from 'vue-router';
 import type { ComponentPublicInstance } from 'vue';
 
 import type PlyrType from 'plyr';
@@ -33,7 +33,7 @@ declare global {
    */
   var _m: {
     mode: 'admin' | 'user';
-    route: Route;
+    route: RouteLocationNormalized;
     router: Router;
     routes: typeof routes;
 
@@ -85,9 +85,6 @@ declare global {
   // Typings for external libraries below
   type VueRecyclerType = ComponentPublicInstance & {
     $el: HTMLDivElement;
-    $refs: {
-      wrapper: HTMLDivElement;
-    };
     scrollToPosition: (position: number) => void;
     scrollToItem: (index: number) => void;
   };

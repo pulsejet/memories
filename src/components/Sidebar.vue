@@ -23,14 +23,17 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent } from 'vue';
+import { createApp, defineComponent, type App as VueApp } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import { registerDavProperty } from '@nextcloud/files/dav';
 import { registerSidebarTab } from '@nextcloud/files';
 
 import Metadata from '@components/Metadata.vue';
+import XImg from '@components/frame/XImg.vue';
+import { registerGlobals } from '../bootstrap';
+import { registerRouteCheckers } from '../router';
 
 import * as utils from '@services/utils';
 
@@ -58,12 +61,6 @@ export default defineComponent({
   }),
 
   computed: {
-    refs() {
-      return this.$refs as {
-        metadata?: InstanceType<typeof Metadata>;
-      };
-    },
-
     native() {
       return globalThis.OCA?.Files?.Sidebar;
     },
@@ -90,13 +87,19 @@ export default defineComponent({
     registerDavProperty('nc:share-attributes');
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     utils.bus.off('files:sidebar:opened', this.handleNativeOpen);
     utils.bus.off('files:sidebar:closed', this.handleNativeClose);
     utils.bus.off('memories:fragment:pop:sidebar', this.close);
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        metadata?: InstanceType<typeof Metadata>;
+      };
+    },
+
     async open(photo: IPhoto | number, filename?: string, useNative = false) {
       if (!this.reducedOpen && this.native && (!photo || useNative)) {
         // Open native sidebar
@@ -109,7 +112,7 @@ export default defineComponent({
         await this.$nextTick();
 
         // Update metadata compoenent
-        this.info = (await this.refs.metadata?.update(photo)) ?? null;
+        this.info = (await this.refs().metadata?.update(photo)) ?? null;
         if (!this.info) return; // failure or state change
         this.handleOpen();
       }
@@ -136,7 +139,7 @@ export default defineComponent({
     },
 
     invalidateUnless(fileid: number) {
-      this.refs.metadata?.invalidateUnless(fileid);
+      this.refs().metadata?.invalidateUnless(fileid);
       this.nativeMetadata?.invalidateUnless(fileid);
     },
 
@@ -212,7 +215,7 @@ export default defineComponent({
       const router = this.$router;
 
       // Component instance
-      let component: any;
+      let componentApp: VueApp | null = null;
       const self = this;
 
       // Register sidebar tab
@@ -224,11 +227,15 @@ export default defineComponent({
           iconSvg: window.atob(InfoSvg.split(',')[1]), // base64 to svg
 
           mount(el: HTMLElement, fileInfo: { id: string | number }, context: any) {
-            component?.$destroy?.();
-            component = new Vue({ render: (h) => h(Metadata), router });
-            component.$mount(el);
+            componentApp?.unmount();
+            componentApp = createApp(Metadata);
+            registerGlobals(componentApp);
+            registerRouteCheckers(componentApp);
+            componentApp.component('XImg', XImg);
+            componentApp.use(router);
+            const proxy = componentApp.mount(el) as unknown as InstanceType<typeof Metadata>;
 
-            self.nativeMetadata = component.$children[0];
+            self.nativeMetadata = proxy;
             self.nativeMetadata?.update(Number(fileInfo.id));
           },
 
@@ -237,8 +244,8 @@ export default defineComponent({
           },
 
           destroy() {
-            component?.$destroy?.();
-            component = null;
+            componentApp?.unmount();
+            componentApp = null;
             self.nativeMetadata = null;
           },
         }),

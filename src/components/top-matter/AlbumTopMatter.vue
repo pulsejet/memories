@@ -28,7 +28,8 @@
         <NcActionRadio
           name="sort"
           :aria-label="t('memories', 'Last updated')"
-          :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.LAST_UPDATE)"
+          :model-value="sortField"
+          value="last_update"
           @change="changeSort(c.ALBUM_SORT_FLAGS.LAST_UPDATE)"
           close-after-click
         >
@@ -38,7 +39,8 @@
         <NcActionRadio
           name="sort"
           :aria-label="t('memories', 'Creation date')"
-          :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.CREATED)"
+          :model-value="sortField"
+          value="created"
           @change="changeSort(c.ALBUM_SORT_FLAGS.CREATED)"
           close-after-click
         >
@@ -48,7 +50,8 @@
         <NcActionRadio
           name="sort"
           :aria-label="t('memories', 'Album name')"
-          :checked="!!(config.album_list_sort & c.ALBUM_SORT_FLAGS.NAME)"
+          :model-value="sortField"
+          value="name"
           @change="changeSort(c.ALBUM_SORT_FLAGS.NAME)"
           close-after-click
         >
@@ -60,7 +63,8 @@
         <NcActionRadio
           name="sort-dir"
           :aria-label="isDateSort ? t('memories', 'Oldest first') : t('memories', 'Ascending')"
-          :checked="!isDescending"
+          :model-value="sortDir"
+          value="asc"
           @change="setDescending(false)"
           close-after-click
         >
@@ -70,7 +74,8 @@
         <NcActionRadio
           name="sort-dir"
           :aria-label="isDateSort ? t('memories', 'Newest first') : t('memories', 'Descending')"
-          :checked="isDescending"
+          :model-value="sortDir"
+          value="desc"
           @change="setDescending(true)"
           close-after-click
         >
@@ -82,7 +87,7 @@
         <NcActionButton
           :aria-label="t('memories', 'Create new album')"
           :title="t('memories', 'Create new album')"
-          @click="refs.createModal.open(false)"
+          @click="refs().createModal.open(false)"
           close-after-click
           v-if="isAlbumList"
         >
@@ -112,7 +117,7 @@
         <NcActionButton
           :aria-label="t('memories', 'Edit album details')"
           :title="t('memories', 'Edit album details')"
-          @click="refs.createModal.open(true)"
+          @click="refs().createModal.open(true)"
           close-after-click
           v-if="canEditAlbum"
         >
@@ -122,7 +127,7 @@
         <NcActionButton
           :aria-label="t('memories', 'Remove album')"
           :title="t('memories', 'Remove album')"
-          @click="refs.deleteModal.open()"
+          @click="refs().deleteModal.open()"
           close-after-click
           v-if="!isAlbumList"
         >
@@ -141,11 +146,11 @@
 import { defineComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
-import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox.js';
-import NcActionRadio from '@nextcloud/vue/dist/Components/NcActionRadio.js';
-import NcActionSeparator from '@nextcloud/vue/dist/Components/NcActionSeparator.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
+import NcActionCheckbox from '@nextcloud/vue/components/NcActionCheckbox';
+import NcActionRadio from '@nextcloud/vue/components/NcActionRadio';
+import NcActionSeparator from '@nextcloud/vue/components/NcActionSeparator';
 
 import axios from '@nextcloud/axios';
 
@@ -196,19 +201,12 @@ export default defineComponent({
   mixins: [UserConfig],
 
   computed: {
-    refs() {
-      return this.$refs as {
-        createModal: InstanceType<typeof AlbumCreateModal>;
-        deleteModal: InstanceType<typeof AlbumDeleteModal>;
-      };
-    },
-
     isAlbumList(): boolean {
-      return !this.$route.params.name;
+      return !this.$route.params.name?.toString();
     },
 
     canEditAlbum(): boolean {
-      return !this.isAlbumList && this.$route.params.user === utils.uid;
+      return !this.isAlbumList && this.$route.params.user?.toString() === utils.uid;
     },
 
     name(): string {
@@ -230,19 +228,36 @@ export default defineComponent({
     isDescending(): boolean {
       return !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.DESCENDING);
     },
+
+    sortField(): string {
+      if (this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.CREATED) return 'created';
+      if (this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.NAME) return 'name';
+      return 'last_update';
+    },
+
+    sortDir(): string {
+      return this.isDescending ? 'desc' : 'asc';
+    },
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        createModal: InstanceType<typeof AlbumCreateModal>;
+        deleteModal: InstanceType<typeof AlbumDeleteModal>;
+      };
+    },
+
     back() {
       this.$router.go(-1);
     },
 
     openShareModal() {
-      _m.modals.albumShare(this.$route.params.user, this.$route.params.name);
+      _m.modals.albumShare(this.$route.params.user?.toString(), this.$route.params.name?.toString());
     },
 
     async downloadAlbum() {
-      const res = await axios.post(API.ALBUM_DOWNLOAD(this.$route.params.user, this.$route.params.name));
+      const res = await axios.post(API.ALBUM_DOWNLOAD(this.$route.params.user?.toString(), this.$route.params.name?.toString()));
       if (res.status === 200 && res.data.handle) {
         downloadWithHandle(res.data.handle);
       }

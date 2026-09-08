@@ -31,7 +31,7 @@
           </NcActionButton>
           <NcActionButton
             :aria-label="t('memories', 'Merge with different person')"
-            @click="refs.mergeModal.open()"
+            @click="refs().mergeModal.open()"
             close-after-click
           >
             {{ t('memories', 'Merge with different person') }}
@@ -39,14 +39,14 @@
           </NcActionButton>
           <NcActionCheckbox
             :aria-label="t('memories', 'Mark person in preview')"
-            :checked.sync="config.show_face_rect"
+            :model-value="config.show_face_rect"
             @change="changeShowFaceRect"
           >
             {{ t('memories', 'Mark person in preview') }}
           </NcActionCheckbox>
           <NcActionButton
             :aria-label="t('memories', 'Remove person')"
-            @click="refs.deleteModal.open()"
+            @click="refs().deleteModal.open()"
             close-after-click
           >
             {{ t('memories', 'Remove person') }}
@@ -67,9 +67,9 @@ import { defineComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
-import NcActionCheckbox from '@nextcloud/vue/dist/Components/NcActionCheckbox.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
+import NcActionCheckbox from '@nextcloud/vue/components/NcActionCheckbox';
 
 import FaceEditModal from '@components/modal/FaceEditModal.vue';
 import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';
@@ -102,16 +102,8 @@ export default defineComponent({
   mixins: [UserConfig],
 
   computed: {
-    refs() {
-      return this.$refs as {
-        editModal: InstanceType<typeof FaceEditModal>;
-        deleteModal: InstanceType<typeof FaceDeleteModal>;
-        mergeModal: InstanceType<typeof FaceMergeModal>;
-      };
-    },
-
     name() {
-      return this.$route.params.name || '';
+      return this.$route.params.name?.toString() || '';
     },
 
     isReal() {
@@ -131,17 +123,25 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        editModal: InstanceType<typeof FaceEditModal>;
+        deleteModal: InstanceType<typeof FaceDeleteModal>;
+        mergeModal: InstanceType<typeof FaceMergeModal>;
+      };
+    },
+
     back() {
       this.$router.go(-1);
     },
 
     rename() {
-      if (this.isReal) this.refs.editModal.open();
+      if (this.isReal) this.refs().editModal.open();
     },
 
     openUnassigned() {
       this.$router.push({
-        name: this.$route.name as string,
+        name: this.$route.name?.toString(),
         params: {
           user: utils.uid as string,
           name: this.c.FACE_NULL,
@@ -150,6 +150,7 @@ export default defineComponent({
     },
 
     changeShowFaceRect() {
+      this.config.show_face_rect = !this.config.show_face_rect;
       this.updateSetting('show_face_rect');
       utils.bus.emit('memories:timeline:hard-refresh', null);
     },

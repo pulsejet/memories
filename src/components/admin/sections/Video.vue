@@ -13,8 +13,8 @@
       }}
 
       <NcCheckboxRadioSwitch
-        :checked.sync="enableTranscoding"
-        @update:checked="update('memories.vod.disable', !enableTranscoding)"
+        v-model="enableTranscoding"
+        @update:model-value="update('memories.vod.disable', !enableTranscoding)"
         type="switch"
       >
         {{ t('memories', 'Enable Transcoding') }}
@@ -32,7 +32,7 @@
       <NcTextField
         :label="t('memories', 'ffmpeg path')"
         :label-visible="true"
-        :value="config['memories.vod.ffmpeg']"
+        :model-value="config['memories.vod.ffmpeg']"
         @change="update('memories.vod.ffmpeg', $event.target.value)"
         :disabled="!enableTranscoding"
       />
@@ -40,7 +40,7 @@
       <NcTextField
         :label="t('memories', 'ffprobe path')"
         :label-visible="true"
-        :value="config['memories.vod.ffprobe']"
+        :model-value="config['memories.vod.ffprobe']"
         @change="update('memories.vod.ffprobe', $event.target.value)"
         :disabled="!enableTranscoding"
       />
@@ -49,29 +49,29 @@
       {{ t('memories', 'Global default video quality (user may override)') }}
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
-        :checked.sync="config['memories.video_default_quality']"
+        v-model="config['memories.video_default_quality']"
         value="0"
         name="vdq_radio"
         type="radio"
-        @update:checked="update('memories.video_default_quality')"
+        @update:model-value="update('memories.video_default_quality')"
         >{{ t('memories', 'Auto (adaptive transcode)') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
-        :checked.sync="config['memories.video_default_quality']"
+        v-model="config['memories.video_default_quality']"
         value="-1"
         name="vdq_radio"
         type="radio"
-        @update:checked="update('memories.video_default_quality')"
+        @update:model-value="update('memories.video_default_quality')"
         >{{ t('memories', 'Original (transcode with max quality)') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
-        :checked.sync="config['memories.video_default_quality']"
+        v-model="config['memories.video_default_quality']"
         value="-2"
         name="vdq_radio"
         type="radio"
-        @update:checked="update('memories.video_default_quality')"
+        @update:model-value="update('memories.video_default_quality')"
         >{{ t('memories', 'Direct (original video file without transcode)') }}
       </NcCheckboxRadioSwitch>
     </p>

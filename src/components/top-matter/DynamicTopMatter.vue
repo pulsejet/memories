@@ -29,12 +29,6 @@ export default defineComponent({
   },
 
   computed: {
-    refs() {
-      return this.$refs as {
-        child?: { refresh?(): Promise<boolean> };
-      };
-    },
-
     currentmatter(): Component | null {
       if (this.routeIsFolders || (this.routeIsFolderShare && this.initstate.shareType === 'folder')) {
         return FolderDynamicTopMatter;
@@ -53,7 +47,7 @@ export default defineComponent({
     viewName(): string {
       // Show album name for album view
       if (this.routeIsAlbums) {
-        return strings.albumDisplayName(this.$route.params.name ?? String());
+        return strings.albumDisplayName(this.$route.params.name?.toString() ?? String());
       }
 
       // Show share name for public shares, except for folder share,
@@ -67,15 +61,21 @@ export default defineComponent({
         return String();
       }
 
-      return strings.viewName(this.$route.name!);
+      return strings.viewName(this.$route.name?.toString() ?? '');
     },
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        child?: { refresh?(): Promise<boolean> };
+      };
+    },
+
     async refresh(): Promise<boolean> {
       if (this.currentmatter) {
         await this.$nextTick();
-        return (await this.refs.child?.refresh?.()) ?? false;
+        return (await this.refs().child?.refresh?.()) ?? false;
       }
 
       return false;

@@ -18,10 +18,10 @@
     </ul>
 
     <template #buttons>
-      <NcButton @click="add" class="button" type="secondary">
+      <NcButton @click="add" class="button" variant="secondary">
         {{ t('memories', 'Add Path') }}
       </NcButton>
-      <NcButton @click="save" class="button" type="primary">
+      <NcButton @click="save" class="button" variant="primary">
         {{ t('memories', 'Save') }}
       </NcButton>
     </template>
@@ -31,9 +31,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
+import NcButton from '@nextcloud/vue/components/NcButton';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';

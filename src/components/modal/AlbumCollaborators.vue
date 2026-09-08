@@ -7,9 +7,9 @@
     <form class="manage-collaborators__form" @submit.prevent>
       <NcPopover :shown="showPopover" :auto-size="true" :distance="0" :focus-trap="false">
         <template #trigger="{ attrs }">
-          <label slot="trigger" class="manage-collaborators__form__input" v-bind="attrs">
+          <label class="manage-collaborators__form__input" v-bind="attrs">
             <NcTextField
-              :value.sync="searchText"
+              v-model="searchText"
               autocomplete="off"
               type="search"
               name="search"
@@ -54,7 +54,9 @@
           class="manage-collaborators__form__list--empty"
           :name="t('memories', 'No collaborators available')"
         >
-          <AccountGroup slot="icon" />
+          <template #icon>
+            <AccountGroup />
+          </template>
         </NcEmptyContent>
       </NcPopover>
     </form>
@@ -72,7 +74,7 @@
           :user="availableCollaborators[collaboratorKey].id"
         >
           <NcButton
-            type="tertiary"
+            variant="tertiary"
             :aria-label="
               t('memories', 'Remove {collaboratorLabel} from the collaborators list', {
                 collaboratorLabel: availableCollaborators[collaboratorKey].label,
@@ -80,7 +82,9 @@
             "
             @click="unselectEntity(collaboratorKey)"
           >
-            <Close slot="icon" :size="20" />
+            <template #icon>
+              <Close :size="20" />
+            </template>
           </NcButton>
         </NcListItemIcon>
       </li>
@@ -107,17 +111,21 @@
             </template>
           </NcButton>
           <NcButton
-            type="tertiary"
+            variant="tertiary"
             :aria-label="t('memories', 'Delete the public link')"
             :disabled="publicLink.id === ''"
             @click="deletePublicLink"
           >
-            <XLoadingIcon v-if="publicLink.id === ''" slot="icon" />
-            <Close v-else slot="icon" />
+            <template #icon>
+              <XLoadingIcon v-if="publicLink.id === ''" />
+              <Close v-else />
+            </template>
           </NcButton>
         </template>
         <NcButton v-else class="manage-collaborators__public-link-button" @click="createPublicLinkForAlbum">
-          <Earth slot="icon" />
+          <template #icon>
+            <Earth />
+          </template>
           {{ t('memories', 'Share via public link') }}
         </NcButton>
       </div>
@@ -130,7 +138,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, type PropType, defineAsyncComponent } from 'vue';
 
 import Magnify from 'vue-material-design-icons/Magnify.vue';
 import Close from 'vue-material-design-icons/Close.vue';
@@ -143,11 +151,11 @@ import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import { generateOcsUrl, generateUrl } from '@nextcloud/router';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js';
-const NcPopover = () => import('@nextcloud/vue/dist/Components/NcPopover.js');
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
-const NcListItemIcon = () => import('@nextcloud/vue/dist/Components/NcListItemIcon.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent';
+const NcPopover = defineAsyncComponent(() => import('@nextcloud/vue/components/NcPopover'));
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+const NcListItemIcon = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItemIcon'));
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
@@ -292,7 +300,7 @@ export default defineComponent({
           ...this.availableCollaborators,
           ...this.currentSearchResults.reduce(this.indexCollaborators, {}),
         };
-      } catch (error) {
+      } catch (error: any) {
         this.errorFetchingCollaborators = error;
         showError(this.t('memories', 'Failed to fetch collaborators list.'));
       } finally {
@@ -347,7 +355,7 @@ export default defineComponent({
         const album = await dav.getAlbum(utils.uid, this.albumName);
         this.populateCollaborators(album.collaborators);
         await this.copyPublicLink();
-      } catch (error) {
+      } catch (error: any) {
         if (error.response?.status === 404) {
           this.errorFetchingAlbum = 404;
         } else {

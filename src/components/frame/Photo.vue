@@ -95,7 +95,7 @@ import LocalIcon from 'vue-material-design-icons/CloudOff.vue';
 import RawIcon from 'vue-material-design-icons/Raw.vue';
 
 import type { IDay, IPhoto } from '@typings';
-import type XImg from '@components/XImg.vue';
+import type XImg from '@components/frame/XImg.vue';
 
 import errorsvg from '@assets/error.svg';
 
@@ -151,16 +151,21 @@ export default defineComponent({
 
   mounted() {
     this.faceSrc = null;
+    this.exposePhoto();
 
     // Setup video hooks
-    const video = this.refs.video;
+    const video = this.refs().video;
     if (video) {
       utils.setupLivePhotoHooks(video, this.liveState);
     }
   },
 
+  updated() {
+    this.exposePhoto();
+  },
+
   /** Clear timers */
-  beforeDestroy() {
+  beforeUnmount() {
     clearTimeout(this.touchTimer);
     clearTimeout(this.liveState.playTimer);
 
@@ -171,13 +176,6 @@ export default defineComponent({
   },
 
   computed: {
-    refs() {
-      return this.$refs as {
-        ximg?: InstanceType<typeof XImg> & { $el: HTMLImageElement };
-        video?: HTMLVideoElement;
-      };
-    },
-
     videoDuration(): string | null {
       if (this.data.video_duration) {
         return utils.getDurationStr(this.data.video_duration);
@@ -228,6 +226,17 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        ximg?: InstanceType<typeof XImg> & { $el: HTMLImageElement };
+        video?: HTMLVideoElement;
+      };
+    },
+
+    exposePhoto() {
+      (this.$el as any).__photo = this.data;
+    },
+
     /** Get url of the photo */
     url() {
       let base: 256 | 512 = 256;
@@ -252,7 +261,7 @@ export default defineComponent({
     async addFaceRect() {
       if (!this.data.facerect || this.faceSrc) return;
 
-      const img = this.refs.ximg?.$el;
+      const img = this.refs().ximg?.$el;
       if (!img) return;
 
       // This is a hack to check if img is actually loaded.
@@ -314,7 +323,7 @@ export default defineComponent({
         this.liveState,
         'playTimer',
         async () => {
-          const video = this.refs.video;
+          const video = this.refs().video;
           if (!video || this.data.flag & this.c.FLAG_SELECTED) return;
 
           try {
@@ -334,7 +343,7 @@ export default defineComponent({
 
     /** Stop preview video */
     stopVideo() {
-      this.refs.video?.pause();
+      this.refs().video?.pause();
       window.clearTimeout(this.liveState.playTimer);
       this.liveState.playTimer = 0;
       this.liveState.waiting = false;

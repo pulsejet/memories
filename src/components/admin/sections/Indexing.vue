@@ -56,42 +56,42 @@
         )
       }}
       <NcCheckboxRadioSwitch
-        :checked.sync="config['memories.index.mode']"
+        v-model="config['memories.index.mode']"
         value="1"
         name="idxm_radio"
         type="radio"
-        @update:checked="update('memories.index.mode')"
+        @update:model-value="update('memories.index.mode')"
         >{{ t('memories', 'Index all media automatically (recommended)') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
-        :checked.sync="config['memories.index.mode']"
+        v-model="config['memories.index.mode']"
         value="2"
         name="idxm_radio"
         type="radio"
-        @update:checked="update('memories.index.mode')"
+        @update:model-value="update('memories.index.mode')"
         >{{ t('memories', 'Index per-user timeline folders (not recommended)') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
-        :checked.sync="config['memories.index.mode']"
+        v-model="config['memories.index.mode']"
         value="3"
         name="idxm_radio"
         type="radio"
-        @update:checked="update('memories.index.mode')"
+        @update:model-value="update('memories.index.mode')"
         >{{ t('memories', 'Index a fixed relative path') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
-        :checked.sync="config['memories.index.mode']"
+        v-model="config['memories.index.mode']"
         value="0"
         name="idxm_radio"
         type="radio"
-        @update:checked="update('memories.index.mode')"
+        @update:model-value="update('memories.index.mode')"
         >{{ t('memories', 'Disable background indexing') }}
       </NcCheckboxRadioSwitch>
 
       <NcTextField
         :label="t('memories', 'Indexing path (relative, all users)')"
         :label-visible="true"
-        :value="config['memories.index.path']"
+        :model-value="config['memories.index.path']"
         @change="update('memories.index.path', $event.target.value)"
         v-if="config['memories.index.mode'] === '3'"
       />
@@ -117,7 +117,7 @@
         class="regex-field"
         :label="t('memories', 'Exclude paths matching regular expression')"
         :label-visible="true"
-        :value.sync="config['memories.index.path.blacklist']"
+        v-model="config['memories.index.path.blacklist']"
         :error="!blacklistRegexValid"
         @change="blacklistRegexValid && update('memories.index.path.blacklist', $event.target.value)"
       />

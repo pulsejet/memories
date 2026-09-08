@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import type { Route } from 'vue-router';
+import type { RouteLocationNormalized } from 'vue-router';
 
 import UserConfig from '@mixins/UserConfig';
 import TopMatter from '@components/top-matter/TopMatter.vue';
@@ -51,14 +51,8 @@ export default defineComponent({
   }),
 
   computed: {
-    refs() {
-      return this.$refs as {
-        dtm?: InstanceType<typeof DynamicTopMatter>;
-      };
-    },
-
     noParams() {
-      return !this.$route.params.name && !this.$route.params.user;
+      return !this.$route.params.name?.toString() && !this.$route.params.user?.toString();
     },
 
     minCols() {
@@ -78,18 +72,24 @@ export default defineComponent({
     utils.bus.on('memories:user-config-changed', this.refresh);
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     utils.bus.off('memories:user-config-changed', this.refresh);
   },
 
   watch: {
-    async $route(to: Route, from: Route) {
+    async $route(to: RouteLocationNormalized, from: RouteLocationNormalized) {
       if (to.path === from.path) return;
       await this.refresh();
     },
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        dtm?: InstanceType<typeof DynamicTopMatter>;
+      };
+    },
+
     async refresh() {
       await this.$nextTick();
       if (!this.noParams || !!this.loading) return;
@@ -99,7 +99,7 @@ export default defineComponent({
         this.loading++;
 
         await this.$nextTick();
-        await this.refs.dtm?.refresh?.();
+        await this.refs().dtm?.refresh?.();
 
         if (this.routeIsAlbums) {
           this.items = await dav.getAlbums();

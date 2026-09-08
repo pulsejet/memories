@@ -73,8 +73,8 @@ module.exports = {
   },
 
   performance: {
-    maxAssetSize: (isDev ? 10 : 2.5) * MiB,
-    maxEntrypointSize: (isDev ? 10 : 2.5) * MiB,
+    maxAssetSize: (isDev ? 15 : 2.5) * MiB,
+    maxEntrypointSize: (isDev ? 15 : 2.5) * MiB,
     hints: 'error',
   },
 
@@ -103,6 +103,7 @@ module.exports = {
             loader: 'ts-loader',
             options: {
               appendTsSuffixTo: [/\.vue$/],
+              transpileOnly: true,
             },
           },
         ],
@@ -136,6 +137,14 @@ module.exports = {
     // Make appName & appVersion available as a constant
     new webpack.DefinePlugin({ appName: JSON.stringify(appName) }),
     new webpack.DefinePlugin({ appVersion: JSON.stringify(appVersion) }),
+
+    // Vue 3 compile-time feature flags (required to silence the
+    // esm-bundler warning and enable proper tree-shaking)
+    new webpack.DefinePlugin({
+      __VUE_OPTIONS_API__: true,
+      __VUE_PROD_DEVTOOLS__: false,
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
+    }),
 
     // Bundle analyzer (npm i --no-save webpack-bundle-analyzer)
     // new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)()

@@ -11,11 +11,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
 import { showInfo } from '@nextcloud/dialogs';
 
-const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
+const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 
 import UserConfig from '@mixins/UserConfig';
 
@@ -72,16 +72,16 @@ export default defineComponent({
         () => [
           {
             label: 'Move and organise',
-            callback: () => (mode = Mode.Organise),
+            callback: () => void (mode = Mode.Organise),
           },
           {
             label: 'Copy',
-            callback: () => (mode = Mode.Copy),
+            callback: () => void (mode = Mode.Copy),
           },
           {
             label: 'Move',
             type: 'primary',
-            callback: () => (mode = Mode.Move),
+            callback: () => void (mode = Mode.Move),
           },
         ],
       );

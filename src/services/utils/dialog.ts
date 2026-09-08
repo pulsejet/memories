@@ -158,7 +158,7 @@ function chooseButtonFactory(nodes: Node[]): IFilePickerButton[] {
   return [
     {
       callback: () => {},
-      type: 'primary',
+      variant: 'primary',
       label: label,
     },
   ];

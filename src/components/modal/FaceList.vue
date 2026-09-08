@@ -3,7 +3,7 @@
     <div class="search">
       <NcTextField
         :autofocus="true"
-        :value.sync="search"
+        v-model="search"
         :label="t('memories', 'Search')"
         :placeholder="t('memories', 'Search')"
       >
@@ -27,12 +27,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 import Fuse from 'fuse.js';
 
 import { showError } from '@nextcloud/dialogs';
 
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import ClusterGrid from '@components/ClusterGrid.vue';
 
@@ -74,11 +74,11 @@ export default defineComponent({
 
   computed: {
     user() {
-      return this.$route.params.user;
+      return this.$route.params.user?.toString();
     },
 
     name() {
-      return this.$route.params.name;
+      return this.$route.params.name?.toString();
     },
 
     backend() {

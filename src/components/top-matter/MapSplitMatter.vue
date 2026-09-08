@@ -11,6 +11,7 @@
       :crossOrigin="true"
       :zoom="zoom"
       :minZoom="2"
+      @ready="onMapReady"
       @moveend="refreshDebounced"
       @zoomend="refreshDebounced"
       :options="mapOptions"
@@ -23,7 +24,6 @@
               {{ cluster.count }}
             </div>
             <XImg
-              v-once
               :src="clusterPreviewUrl(cluster)"
               :class="['thumb-important', `memories-thumb-${cluster.preview.fileid}`]"
             />
@@ -36,7 +36,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { LMap, LTileLayer, LMarker, LPopup, LIcon } from 'vue2-leaflet';
+import { LMap, LTileLayer, LMarker, LPopup, LIcon } from '@vue-leaflet/vue-leaflet';
 import { latLngBounds, Icon } from 'leaflet';
 
 import axios from '@nextcloud/axios';
@@ -88,28 +88,20 @@ export default defineComponent({
   }),
 
   mounted() {
-    // Make sure the zoom control doesn't overlap with the navbar
-    this.refs.map.mapObject.zoomControl.setPosition('topright');
-
-    // Initialize
-    this.initialize();
+    if (this.refs().map?.leafletObject) {
+      this.onMapReady();
+    }
   },
 
   created() {
     utils.bus.on('memories:window:resize', this.handleContainerResize);
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     utils.bus.off('memories:window:resize', this.handleContainerResize);
   },
 
   computed: {
-    refs() {
-      return this.$refs as {
-        map: LMap;
-      };
-    },
-
     tileurl() {
       return OSM_TILE_URL;
     },
@@ -127,6 +119,19 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        map: InstanceType<typeof LMap>;
+      };
+    },
+
+    onMapReady() {
+      // Make sure the zoom control doesn't overlap with the navbar
+      this.refs().map.leafletObject!.zoomControl.setPosition('topright');
+
+      // Initialize
+      this.initialize();
+    },
     /**
      * Get initial coordinates for display and set them.
      * Then fetch clusters.
@@ -150,14 +155,14 @@ export default defineComponent({
         }>(API.MAP_INIT());
 
         // Init data contains position information
-        const map = this.refs.map;
+        const map = this.refs().map;
         const pos = init?.data?.pos;
         if (!pos?.lat || !pos?.lon) {
           throw new Error('No position data');
         }
 
         // This will trigger route change -> fetchClusters
-        map.mapObject.setView([pos.lat, pos.lon], 11);
+        map.leafletObject!.setView([pos.lat, pos.lon], 11);
       } catch (e) {
         // We will initialize clusters anyway
       } finally {
@@ -170,11 +175,11 @@ export default defineComponent({
     },
 
     async refresh() {
-      const map = this.refs.map;
-      if (!map || !map.mapObject) return;
+      const map = this.refs().map;
+      if (!map || !map.leafletObject) return;
 
       // Get boundaries of the map
-      const boundary = map.mapObject.getBounds();
+      const boundary = map.leafletObject.getBounds();
       let minLat = boundary.getSouth();
       let maxLat = boundary.getNorth();
       let minLon = boundary.getWest();
@@ -184,7 +189,7 @@ export default defineComponent({
       const bounds = this.boundsToStr({ minLat, maxLat, minLon, maxLon });
 
       // Zoom level
-      this.zoom = Math.round(map.mapObject.getZoom());
+      this.zoom = Math.round(map.leafletObject.getZoom());
 
       // Construct query
       const query = {
@@ -207,7 +212,7 @@ export default defineComponent({
     async fetchClusters() {
       const oldZoom = this.oldZoom;
       const qbounds = this.$route.query.b;
-      const zoom = this.$route.query.z as string;
+      const zoom = this.$route.query.z?.toString();
       const paramsChanged = () => this.$route.query.b !== qbounds || this.$route.query.z !== zoom;
 
       let { minLat, maxLat, minLon, maxLon } = this.boundsFromQuery();
@@ -246,7 +251,7 @@ export default defineComponent({
     },
 
     boundsFromQuery() {
-      const bounds = (this.$route.query.b as string).split(',');
+      const bounds = (this.$route.query.b?.toString() ?? '').split(',');
       return {
         minLat: parseFloat(bounds[0]),
         maxLat: parseFloat(bounds[1]),
@@ -271,9 +276,9 @@ export default defineComponent({
     },
 
     setBoundsFromQuery() {
-      const map = this.refs.map;
+      const map = this.refs().map;
       const { minLat, maxLat, minLon, maxLon } = this.boundsFromQuery();
-      map.mapObject.fitBounds([
+      map.leafletObject!.fitBounds([
         [minLat, minLon],
         [maxLat, maxLon],
       ]);
@@ -299,10 +304,10 @@ export default defineComponent({
       }
 
       // Zoom in
-      const map = this.refs.map;
+      const map = this.refs().map;
       const factor = globalThis.innerWidth >= 768 ? 2 : 1;
-      const zoom = map.mapObject.getZoom() + factor;
-      map.mapObject.setView(cluster.center, zoom, { animate: true });
+      const zoom = map.leafletObject!.getZoom() + factor;
+      map.leafletObject!.setView(cluster.center, zoom, { animate: true });
     },
 
     getGridKey(center: [number, number], zoom: number) {
@@ -399,7 +404,7 @@ export default defineComponent({
     },
 
     handleContainerResize() {
-      this.refs.map?.mapObject?.invalidateSize(true);
+      this.refs().map?.leafletObject?.invalidateSize(true);
     },
   },
 });

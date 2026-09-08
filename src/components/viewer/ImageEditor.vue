@@ -25,7 +25,7 @@ import * as utils from '@services/utils';
 
 import type { IImageInfo, IPhoto } from '@typings';
 
-let TABS: any, TOOLS: any;
+let TABS: Record<string, any>, TOOLS: Record<string, any>;
 type FilerobotImageEditor = import('filerobot-image-editor').default;
 let FilerobotImageEditor: typeof import('filerobot-image-editor').default;
 
@@ -56,12 +56,6 @@ export default defineComponent({
   }),
 
   computed: {
-    refs() {
-      return this.$refs as {
-        editor?: HTMLDivElement;
-      };
-    },
-
     config(): FilerobotImageEditorConfig & { theme: any } {
       return {
         source:
@@ -156,7 +150,7 @@ export default defineComponent({
   async mounted() {
     await loadFilerobot();
 
-    const div = this.refs.editor!;
+    const div = this.refs().editor!;
     console.assert(div, 'ImageEditor container not found');
 
     // Directly use an HTML element to make sure the resolution
@@ -191,7 +185,7 @@ export default defineComponent({
     utils.bus.on('memories:fragment:pop:editor', this.warnUnsaved);
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     // Cleanup
     this.imageEditor?.terminate();
 
@@ -204,6 +198,12 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        editor?: HTMLDivElement;
+      };
+    },
+
     async getImage(): Promise<HTMLImageElement> {
       const img = new Image();
       img.name = this.defaultSavedImageName;
@@ -293,7 +293,7 @@ export default defineComponent({
           utils.bus.emit('files:file:updated', { fileid });
         }
         this.onClose(undefined, false);
-      } catch (err) {
+      } catch (err: any) {
         showError(
           this.t('memories', 'Error saving image: {error}', {
             error: err?.response?.data?.message ?? err?.message ?? this.t('memories', 'Unknown'),
@@ -309,7 +309,7 @@ export default defineComponent({
 
       // To find whether there are unsaved changes, just check
       // if the reset button is enabled
-      const noChanges = this.refs.editor?.querySelector('button[title="Reset"]')?.hasAttribute('disabled');
+      const noChanges = this.refs().editor?.querySelector('button[title="Reset"]')?.hasAttribute('disabled');
 
       if (
         noChanges ||

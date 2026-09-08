@@ -63,10 +63,10 @@ import { defineComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
 
-const NcBreadcrumbs = () => import('@nextcloud/vue/dist/Components/NcBreadcrumbs.js');
-const NcBreadcrumb = () => import('@nextcloud/vue/dist/Components/NcBreadcrumb.js');
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcBreadcrumbs from '@nextcloud/vue/components/NcBreadcrumbs';
+import NcBreadcrumb from '@nextcloud/vue/components/NcBreadcrumb';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import PublicUploadHandler from '@components/upload/PublicUploadHandler.vue';
 
 import * as utils from '@services/utils';
@@ -144,7 +144,7 @@ export default defineComponent({
     toggleRecursive(): void {
       this.$router.replace({
         query: {
-          ...this.$router.currentRoute.query,
+          ...this.$router.currentRoute.value.query,
           recursive: this.recursive ? undefined : String(1),
         },
       });

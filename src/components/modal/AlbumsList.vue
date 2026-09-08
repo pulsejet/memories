@@ -6,7 +6,7 @@
       :key="album.album_id"
       :name="album.name"
       :aria-label="album.name"
-      :to="link ? linkTarget(album) : null"
+      :to="link ? linkTarget(album) : undefined"
       :exact="true"
       @click="click($event, album)"
     >
@@ -31,10 +31,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, type PropType, defineAsyncComponent } from 'vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';

@@ -53,7 +53,7 @@ export default defineComponent({
       const elem: any = document
         .elementsFromPoint(rrect.left + 5, rrect.top + 50)
         .find((e) => e.classList.contains('p-outer-super'));
-      const overPhoto: IPhoto | null = elem?.__vue__?.data;
+      const overPhoto: IPhoto | null = elem?.__photo;
 
       // If no photo is round, no overlay to show
       if (!overPhoto) return;
