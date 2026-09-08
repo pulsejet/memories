@@ -117,21 +117,7 @@ final class Exif
         unset($exif['SourceFile'], $exif['FileName'], $exif['ExifToolVersion'], $exif['Directory'], $exif['FileSize'], $exif['FileModifyDate'], $exif['FileAccessDate'], $exif['FileInodeChangeDate'], $exif['FilePermissions'], $exif['ThumbnailImage']);
 
         // Ignore zero dates
-        $dateFields = [
-            'DateTimeOriginal',
-            'SubSecDateTimeOriginal',
-            'CreateDate',
-            'ModifyDate',
-            'TrackCreateDate',
-            'TrackModifyDate',
-            'MediaCreateDate',
-            'MediaModifyDate',
-        ];
-        foreach ($dateFields as $field) {
-            if (\array_key_exists($field, $exif) && \is_string($exif[$field]) && str_starts_with($exif[$field], '0000:00:00')) {
-                unset($exif[$field]);
-            }
-        }
+        self::sanitizeDates($exif);
 
         return $exif;
     }
@@ -159,12 +145,15 @@ final class Exif
      */
     public static function parseExifDate(array $exif): \DateTime
     {
+        // Ignore zero dates
+        self::sanitizeDates($exif);
+
         // Get date from exif
         $exifDate = $exif['DateTimeOriginal'] ?? $exif['CreateDate'] ?? null;
 
-        // For videos, prefer CreateDate for timezone (QuickTimeUTC=1)
+        // For videos, prefer ContentCreateDate for timezone (QuickTimeUTC=1)
         if (preg_match('/^video\/\w+/', (string) ($exif['MIMEType'] ?? null))) {
-            $exifDate = $exif['CreateDate'] ?? $exifDate;
+            $exifDate = $exif['ContentCreateDate'] ?? $exif['CreateDate'] ?? $exifDate;
         }
 
         // Check if we have a date
@@ -514,6 +503,37 @@ final class Exif
             throw new \Exception('Exiftool output is not an array with at least one element');
         }
 
-        return $json[0];
+        $exif = $json[0];
+        if (empty($exif['Make'] ?? null) && !empty($exif['UserData_mak'] ?? null)) {
+            $exif['Make'] = $exif['UserData_mak'];
+        }
+        if (empty($exif['Model'] ?? null) && !empty($exif['UserData_mod'] ?? null)) {
+            $exif['Model'] = $exif['UserData_mod'];
+        }
+
+        return $exif;
+    }
+
+    private static function sanitizeDates(array &$exif): void
+    {
+        $dateFields = [
+            'DateTimeOriginal',
+            'SubSecDateTimeOriginal',
+            'ContentCreateDate',
+            'CreateDate',
+            'ModifyDate',
+            'TrackCreateDate',
+            'TrackModifyDate',
+            'MediaCreateDate',
+            'MediaModifyDate',
+        ];
+        foreach ($dateFields as $field) {
+            if (!\array_key_exists($field, $exif)) {
+                continue;
+            }
+            if (!\is_string($exif[$field]) || str_starts_with($exif[$field], '0000:00:00')) {
+                unset($exif[$field]);
+            }
+        }
     }
 }

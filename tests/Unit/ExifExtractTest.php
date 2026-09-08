@@ -273,6 +273,37 @@ final class ExifExtractTest extends TestCase
         self::assertEqualsWithDelta(453.0998, (float) ($image->exif['GPSAltitude'] ?? 0), 0.0001);
     }
 
+    public function testAppleIphone02(): void
+    {
+        // Standalone MP4 video shot on iPhone 12 mini.
+        $res = $this->extract('apple_iphone_02.mov');
+        self::assertSame('video/mp4', $res->exif['MIMEType'] ?? null);
+        self::assertFalse(LivePhoto::isVideoPart($res->exif));
+        self::assertSame('', $res->livePhotoId);
+
+        // Video dimensions and rotation (portrait)
+        self::assertSame(1080, $res->exif['ImageWidth'] ?? null);
+        self::assertSame(1920, $res->exif['ImageHeight'] ?? null);
+        self::assertSame(0, $res->exif['Rotation'] ?? null);
+
+        // Camera make/model are stored as UserData atoms and mapped back to Make/Model
+        self::assertSame('Apple', $res->exif['Make'] ?? null);
+        self::assertSame('iPhone 12 mini', $res->exif['Model'] ?? null);
+
+        // Date carries an embedded -07:00 offset (PDT)
+        self::assertSame('2021:07:10 16:51:07-07:00', $res->exif['ContentCreateDate'] ?? null);
+        self::assertSame('2021:07:10 16:51:26-07:00', $res->exif['CreateDate'] ?? null);
+
+        // Geolocation (Redlands, CA)
+        self::assertEqualsWithDelta(34.0052, (float) ($res->exif['GPSLatitude'] ?? 0), 0.0001);
+        self::assertEqualsWithDelta(-117.0658, (float) ($res->exif['GPSLongitude'] ?? 0), 0.0001);
+        self::assertEqualsWithDelta(721.8, (float) ($res->exif['GPSAltitude'] ?? 0), 0.0001);
+
+        // ContentCreateDate takes precedence over CreateDate
+        $dt = Exif::parseExifDate($res->exif);
+        self::assertSame('2021-07-10 16:51:07 -07:00', $dt->format('Y-m-d H:i:s P'));
+    }
+
     public function testGoogleMotion01(): void
     {
         $res = $this->extract('google_motion_01.jpg');
