@@ -5,10 +5,14 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
@@ -18,9 +22,12 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.webkit.CookieManager
 import android.webkit.PermissionRequest
+import android.webkit.ServiceWorkerClient
+import android.webkit.ServiceWorkerController
 import android.webkit.SslErrorHandler
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
@@ -72,6 +79,42 @@ class MainActivity : AppCompatActivity() {
     private var playbackPosition = 0L
 
     private var mNeedRefresh = false
+
+    private var mOfflinePageShowing = false
+    private var mLoadPending = false
+    private var mReloadOnceOnLoad = false
+
+    private val mNetworkCallback = object : ConnectivityManager.NetworkCallback() {
+        private var mWasLost = false
+
+        override fun onLost(network: Network) {
+            mWasLost = true
+        }
+
+        override fun onAvailable(network: Network) {
+            // Reload the app if we failed to load it due to being offline
+            if (mOfflinePageShowing) {
+                runOnUiThread { loadDefaultUrl() }
+            }
+        }
+
+        override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
+            // onAvailable may fire before the network is actually usable
+            // (e.g. DNS through a VPN that is still reconnecting), so act
+            // only when the network is validated
+            if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) return
+
+            if (mOfflinePageShowing) {
+                runOnUiThread { loadDefaultUrl() }
+            } else if (mWasLost) {
+                // The web app cannot rely on the online event (e.g. behind
+                // an always-on VPN the browser never sees the network go
+                // away), so refresh the timeline for it
+                refreshTimeline()
+            }
+            mWasLost = false
+        }
+    }
 
     private val memoriesRegex = Regex("/apps/memories/.*$")
     private var host: String? = null
@@ -132,6 +175,10 @@ class MainActivity : AppCompatActivity() {
         // Load JavaScript
         initializeWebView()
 
+        // Reload the app automatically when connectivity returns
+        getSystemService(ConnectivityManager::class.java)
+            ?.registerDefaultNetworkCallback(mNetworkCallback)
+
         // Destroy video after 1 seconds (workaround for video not showing on first load)
         binding.videoView.postDelayed({
             binding.videoView.alpha = 1.0f
@@ -141,6 +188,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        getSystemService(ConnectivityManager::class.java)
+            ?.unregisterNetworkCallback(mNetworkCallback)
         binding.webview.removeAllViews()
         binding.coordinator.removeAllViews()
         binding.webview.destroy()
@@ -249,6 +298,35 @@ class MainActivity : AppCompatActivity() {
                 } else null
             }
 
+            override fun onPageFinished(view: WebView, url: String?) {
+                mLoadPending = false
+
+                // A page that commits in a fresh renderer process on the
+                // offline path can end up never painted even though it loaded
+                // correctly (observed with the Vanadium WebView). An in-page
+                // reload runs in the same process and reliably repaints.
+                if (mReloadOnceOnLoad) {
+                    mReloadOnceOnLoad = false
+                    if (url?.startsWith("http") == true) {
+                        view.evaluateJavascript("location.reload()", null)
+                    }
+                }
+            }
+
+            override fun onReceivedError(
+                view: WebView,
+                request: WebResourceRequest,
+                error: WebResourceError
+            ) {
+                // Show the offline page if the app itself failed to load, e.g. the
+                // device is offline and the service worker did not serve a cached copy
+                if (request.isForMainFrame) {
+                    Log.w(TAG, "onReceivedError: ${error.errorCode} ${error.description}")
+                    mLoadPending = false
+                    showOfflinePage()
+                }
+            }
+
             @SuppressLint("WebViewClientOnReceivedSslError")
             override fun onReceivedSslError(
                 view: WebView?,
@@ -263,6 +341,18 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        // Requests from pages controlled by a service worker bypass the
+        // WebViewClient above, so the local API interception must also be
+        // registered on the service worker controller
+        ServiceWorkerController.getInstance().setServiceWorkerClient(
+            object : ServiceWorkerClient() {
+                override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? {
+                    return if (request.url.host == "127.0.0.1") {
+                        nativex.handleRequest(request)
+                    } else null
+                }
+            })
 
         // Use the web chrome client to handle file uploads
         binding.webview.webChromeClient = object : WebChromeClient() {
@@ -334,6 +424,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun loadDefaultUrl(): Boolean {
+        // The offline page and the network callbacks may all ask for a
+        // reload around the same time; re-navigating while the previous
+        // load is still in flight would abort it
+        if (mLoadPending) return false
+        mLoadPending = true
+
+        // Failsafe: never leave the pending flag stuck if the load never
+        // finishes nor errors out
+        binding.webview.postDelayed({ mLoadPending = false }, 30000)
+
+        // Coming back from the offline page needs a surface nudge (see
+        // onPageFinished)
+        if (mOfflinePageShowing) mReloadOnceOnLoad = true
+
+        mOfflinePageShowing = false
+
         // Load app interface if authenticated
         host = nativex.http.loadWebView(binding.webview)
         if (host != null) return true
@@ -341,6 +447,43 @@ class MainActivity : AppCompatActivity() {
         // Load welcome page
         binding.webview.loadUrl("file:///android_asset/welcome.html")
         return false
+    }
+
+    /**
+     * Show the offline fallback page.
+     */
+    fun showOfflinePage() {
+        runOnUiThread {
+            // Do not reload the page on repeated errors
+            if (mOfflinePageShowing) return@runOnUiThread
+            mOfflinePageShowing = true
+            mReloadOnceOnLoad = true
+
+            // Serve the page from the app origin instead of file:// —
+            // navigating between file:// and the app URL swaps renderer
+            // processes, which can leave the WebView blank after reload
+            val base = nativex.http.baseUrl
+            if (base != null) {
+                binding.webview.loadDataWithBaseURL(
+                    base, readAssetInlined("offline.html"), "text/html", "UTF-8", null
+                )
+            } else {
+                binding.webview.loadUrl("file:///android_asset/offline.html")
+            }
+        }
+    }
+
+    /**
+     * Read an asset page and inline its stylesheet and logo, so it can be
+     * served from any origin with loadDataWithBaseURL.
+     */
+    private fun readAssetInlined(name: String): String {
+        fun read(file: String) = assets.open(file).bufferedReader().use { it.readText() }
+        val css = read("styles.css")
+        val logo = Base64.encodeToString(read("memories.svg").toByteArray(), Base64.NO_WRAP)
+        return read(name)
+            .replace("""<link rel="stylesheet" href="styles.css" />""", "<style>$css</style>")
+            .replace("memories.svg", "data:image/svg+xml;base64,$logo")
     }
 
     fun initializePlayer(uris: Array<Uri>, uid: Long, loop: Boolean = false) {
