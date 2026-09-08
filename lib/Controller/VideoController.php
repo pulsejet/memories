@@ -368,11 +368,8 @@ final class VideoController extends GenericApiController
         $liveRecords = $this->tq->getLivePhotos($file->getId());
 
         // Get file paths for all live photos
-        $liveFiles = array_map(fn ($r) => $this->rootFolder->getById((int) $r['fileid']), $liveRecords);
-        $liveFiles = array_filter($liveFiles, static fn ($files) => \count($files) > 0 && $files[0] instanceof File);
-
-        /** @var File[] (checked above) */
-        $liveFiles = array_map(static fn ($files) => $files[0], $liveFiles);
+        $liveFiles = array_map(fn ($r) => $this->fs->getUserFileOrNull((int) $r['fileid']), $liveRecords);
+        $liveFiles = array_filter($liveFiles, static fn ($f) => $f instanceof File);
 
         // Should be filtered enough by now
         if (!\count($liveFiles)) {
