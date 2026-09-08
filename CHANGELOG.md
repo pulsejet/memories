@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- **Fix**: Password protected link shares fail with "Share is password protected and user is not authenticated" (Nextcloud ≥ 31.0.11 / 32.0.2 / 33)
 - **Fix**: Copied files are now immediately indexed
 - **Fix**: Improved and 20x faster planet database setup
 - **Fix**: Fix broken cover images on SQLite
