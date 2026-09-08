@@ -6,7 +6,10 @@ All notable changes to this project will be documented in this file.
 
 - **Fix**: Copied files are now immediately indexed
 - **Fix**: Improved and 20x faster planet database setup
+- **Fix**: Fix broken cover images on SQLite
 - **Feature**: Huawei Moving Picture support
+- **Dev**: Migrated to Vue 3
+- **Dev**: New extensive unit and e2e test suite
 
 ## [v8.0.0] - 2026-04-04
 
