@@ -24,7 +24,7 @@
 
     <!-- Render the actual app when configuration has been loaded -->
     <template v-else-if="!isConfigUnknown">
-      <NcAppNavigation v-if="showNavigation">
+      <NcAppNavigation v-if="showNavigation" :aria-label="t('memories', 'Navigation')">
         <template #list>
           <NcAppNavigationItem
             v-for="item in navItems"
