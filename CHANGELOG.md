@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - **Fix**: Improved and 20x faster planet database setup
 - **Fix**: Fix broken cover images on SQLite
 - **Fix**: Fix broken sidebar integration
+- **Fix**: Password protected link shares
 - **Feature**: Huawei Moving Picture support
 - **Dev**: Migrated to Vue 3
 - **Dev**: New extensive unit and e2e test suite
