@@ -99,6 +99,19 @@ systemd.services.nextcloud-cron = {
 };
 ```
 
+## Issues with Snap
+
+### `failed to run exiftool: /tmp/exiftool-... -ver`
+
+Snap confinement isolates `/tmp` and hides system exiftool from the app ([#1496](https://github.com/pulsejet/memories/issues/1496)). Move the binary temp dir into the Snap common area:
+
+```bash
+sudo mkdir -p /var/snap/nextcloud/common/exiftool/tmp
+sudo nextcloud.occ config:system:set memories.exiftool.tmp --value /var/snap/nextcloud/common/exiftool/tmp
+```
+
+If it still fails, put `libimage-exiftool-perl` in the Snap common area behind a `PERL5LIB` wrapper (see [#1496](https://github.com/pulsejet/memories/issues/1496)) and set `memories.exiftool` to it.
+
 ## Reverse Geocoding (Places)
 
 You need to have a MySQL / MariaDB / Postgres database for reverse geocoding to work. SQLite is not supported.
