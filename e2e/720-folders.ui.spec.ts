@@ -35,15 +35,18 @@ test.describe('@ui Folder view and navigation', () => {
       await page.locator('.folder--for-default').click();
       await expect(page.locator('.folder--Nested1')).toBeInViewport();
       await expect(page.locator('.folder--Nested2')).toBeInViewport();
+      await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(1);
       await expect(page.locator(`.p-outer--${fileid1}`)).toBeInViewport();
-      await expect(page.locator(`.p-outer--${fileid2}`)).not.toBeInViewport();
+      await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
     });
 
     await test.step('Verify timeline view', async () => {
       await page.getByRole('button', { name: 'Timeline view' }).click();
       await expect(page.locator('.folder--Nested1')).not.toBeInViewport();
       await expect(page.locator('.folder--Nested2')).not.toBeInViewport();
+      await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(1);
       await expect(page.locator(`.p-outer--${fileid1}`)).toBeInViewport();
+      await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(1);
       await expect(page.locator(`.p-outer--${fileid2}`)).toBeInViewport();
     });
 
@@ -51,8 +54,9 @@ test.describe('@ui Folder view and navigation', () => {
       await page.getByRole('button', { name: 'Folder view' }).click();
       await expect(page.locator('.folder--Nested1')).toBeInViewport();
       await expect(page.locator('.folder--Nested2')).toBeInViewport();
+      await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(1);
       await expect(page.locator(`.p-outer--${fileid1}`)).toBeInViewport();
-      await expect(page.locator(`.p-outer--${fileid2}`)).not.toBeInViewport();
+      await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
     });
   });
 });
