@@ -129,8 +129,8 @@ func (s *Stream) ServeList(w http.ResponseWriter, r *http.Request) error {
 			size = duration
 		}
 
-		w.Write([]byte(fmt.Sprintf("#EXTINF:%.3f, nodesc\n", size)))
-		w.Write([]byte(fmt.Sprintf("%s-%06d.ts%s\n", s.quality, i, query)))
+		fmt.Fprintf(w, "#EXTINF:%.3f, nodesc\n", size)
+		fmt.Fprintf(w, "%s-%06d.ts%s\n", s.quality, i, query)
 
 		duration -= float64(s.c.ChunkSize)
 		i++
@@ -163,7 +163,7 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 
 	// Will have this soon enough
 	foundBehind := false
-	for i := id - 1; i > id-s.c.LookBehind && i >= 0; i-- {
+	for i := id - 1; i >= id-s.c.LookBehind && i >= 0; i-- {
 		if _, ok := s.chunks[i]; ok {
 			foundBehind = true
 		}
@@ -221,14 +221,14 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 	stdoutReader := bufio.NewReader(cmdStdOut)
 
 	// Write mov headers
-	w.Header().Set("Content-Type", "video/mp4")
-	w.WriteHeader(http.StatusOK)
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		http.Error(w, "Server does not support Flusher!",
 			http.StatusInternalServerError)
 		return nil
 	}
+	w.Header().Set("Content-Type", "video/mp4")
+	w.WriteHeader(http.StatusOK)
 
 	// Write data, flusing every 1MB
 	buf := make([]byte, 1024*1024)

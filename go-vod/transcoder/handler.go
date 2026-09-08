@@ -3,7 +3,7 @@ package transcoder
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -73,6 +73,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return
 		}
+		return
 	}
 
 	// Check if test request
@@ -97,7 +98,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" && chunk == "config" {
 		w.Header().Set("Content-Type", "application/json")
 		// read new config
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			log.Println("Error reading body", err)
 			w.WriteHeader(http.StatusInternalServerError)

@@ -77,8 +77,8 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		smDim, lgDim = lgDim, smDim
 	}
 
-	// Get the reference bitrate. This is the same as the current bitrate
-	// if the video is H.264, otherwise use double the current bitrate.
+	// Get the reference bitrate. This is half the current bitrate
+	// if the video is H.264, otherwise use the current bitrate.
 	refBitrate := int(float64(m.probe.BitRate) / 2.0)
 	if m.probe.CodecName != CODEC_H264 {
 		refBitrate *= 2
@@ -119,8 +119,8 @@ func NewManager(c *Config, path string, id string, close chan string) (*Manager,
 		// now store the width of the stream as the larger dimension
 		stream.width = int(math.Ceil(float64(lgDim) * float64(stream.height) / float64(smDim)))
 
-		// remove invalid streams
-		if (stream.height >= smDim || stream.width >= lgDim) || // no upscaling; we're not AI
+	// remove invalid streams
+	if (stream.height > smDim || stream.width > lgDim) || // no upscaling; we're not AI
 			(float64(stream.bitrate) > float64(m.probe.BitRate)*0.8) || // no more than 80% of original bitrate
 			(stream.height%2 != 0 || stream.width%2 != 0) { // no odd dimensions
 
@@ -341,7 +341,7 @@ func (m *Manager) ffprobe() error {
 	}
 	num, e1 := strconv.Atoi(frac[0])
 	den, e2 := strconv.Atoi(frac[1])
-	if e1 != nil || e2 != nil {
+	if e1 != nil || e2 != nil || den == 0 {
 		num = 30
 		den = 1
 	}

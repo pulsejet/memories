@@ -2,7 +2,7 @@ package transcoder
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -11,15 +11,9 @@ import (
 
 func (h *Handler) createTempFile(w http.ResponseWriter, r *http.Request, parts []string) (string, error) {
 	streamid := parts[0]
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Println("Error reading body", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return "", err
-	}
 
 	// Create temporary file
-	file, err := ioutil.TempFile(h.c.TempDir, streamid+"-govod-temp-")
+	file, err := os.CreateTemp(h.c.TempDir, streamid+"-govod-temp-")
 	if err != nil {
 		log.Println("Error creating temp file", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -27,9 +21,11 @@ func (h *Handler) createTempFile(w http.ResponseWriter, r *http.Request, parts [
 	}
 	defer file.Close()
 
-	// Write data to file
-	if _, err := file.Write(body); err != nil {
+	// Stream request body directly to file to avoid holding whole blob in RAM
+	if _, err := io.Copy(file, r.Body); err != nil {
 		log.Println("Error writing to temp file", err)
+		file.Close()
+		os.Remove(file.Name())
 		w.WriteHeader(http.StatusInternalServerError)
 		return "", err
 	}
