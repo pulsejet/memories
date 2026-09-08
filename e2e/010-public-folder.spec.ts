@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { test, expect } from '@playwright/test';
 import { appUrl, baseUrl, e2eHeaders, psub } from './navigation';
 import { DavClient, withPublicAPI, withPublicPage } from './utils';
@@ -282,6 +283,77 @@ test.describe('Password protected folder share', () => {
   });
 });
 
+test.describe('Public folder upload', () => {
+  const folderDir = psub('/for-upload-public-%wid');
+
+  let folderToken: string;
+  let folderShareId: string;
+
+  test.beforeAll(async ({ request }) => {
+    const dav = new DavClient(request);
+    const folders = new FolderShareAPI(request);
+
+    await dav.deleteFile(folderDir, true);
+    await dav.copyFile('/for-upload', folderDir);
+
+    const share = await folders.create(folderDir);
+    folderToken = share.token;
+    folderShareId = share.id;
+    await folders.updatePermissions(folderShareId, 15);
+  });
+
+  test.afterAll(async ({ request }) => {
+    const folders = new FolderShareAPI(request);
+    const dav = new DavClient(request);
+
+    if (folderShareId) {
+      await folders.remove(folderShareId).catch(() => {});
+    }
+    await dav.deleteFile(folderDir, true);
+  });
+
+  test('@ui Public folder upload image and video', async ({ browser, request }) => {
+    const dav = new DavClient(request);
+    const uploadFilePaths = [
+      path.resolve(__dirname, '../tests/assets/apple_h264_boy_01.jpg'),
+      // Large enough to force chunked upload (see #1634)
+      path.resolve(__dirname, '../tests/assets/samsung_s21_03.mp4'),
+    ];
+
+    await withPublicPage(browser, async (page) => {
+      await test.step('Select files', async () => {
+        await page.goto(`${appUrl}/s/${folderToken}`);
+        await expect(page.getByRole('button', { name: 'Upload files' })).toBeVisible();
+
+        // Force chunked upload for the video
+        // https://github.com/pulsejet/memories/issues/1634
+        const maxChunkSize = await page.evaluate(() => {
+          return window.OC?.appConfig?.files?.max_chunk_size;
+        });
+        expect(typeof maxChunkSize).toBe('number');
+        await page.evaluate(() => {
+          window.OC.appConfig.files.max_chunk_size = 1024 * 1024;
+        });
+
+        const fileChooserPromise = page.waitForEvent('filechooser');
+        await page.getByRole('button', { name: 'Upload files' }).click();
+        const fileChooser = await fileChooserPromise;
+        await fileChooser.setFiles(uploadFilePaths);
+      });
+
+      await test.step('Verify upload', async () => {
+        // Video uses chunked upload (see #1634); toast confirms both files landed.
+        await expect(page.getByText('Successfully uploaded 2 files', { exact: true })).toBeVisible({ timeout: 120000 });
+
+        const imageId = await dav.fileid(`${folderDir}/apple_h264_boy_01.jpg`);
+        const videoId = await dav.fileid(`${folderDir}/samsung_s21_03.mp4`);
+        expect(videoId).toBeGreaterThan(0);
+        await expect(page.locator(`.p-outer--${imageId}`)).toBeVisible();
+      });
+    });
+  });
+});
+
 // Memories link share API client for e2e tests.
 class FolderShareAPI {
   constructor(private request: APIRequestContext) {}
@@ -315,6 +387,16 @@ class FolderShareAPI {
     url.searchParams.set('format', 'json');
     const res = await this.request.put(url.toString(), {
       form: { password },
+    });
+    expect(res.ok()).toBeTruthy();
+  }
+
+  async updatePermissions(fullId: string, permissions: number): Promise<void> {
+    const id = fullId.split(':').pop();
+    const url = new URL(`${baseUrl}/ocs/v2.php/apps/files_sharing/api/v1/shares/${id}`);
+    url.searchParams.set('format', 'json');
+    const res = await this.request.put(url.toString(), {
+      form: { permissions },
     });
     expect(res.ok()).toBeTruthy();
   }

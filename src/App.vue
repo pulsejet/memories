@@ -188,6 +188,15 @@ export default defineComponent({
 
   mixins: [UserConfig],
 
+  watch: {
+    '$route.params.token': {
+      immediate: true,
+      handler(token?: string | string[]) {
+        this.syncSharingToken(token?.toString());
+      },
+    },
+  },
+
   data: () => ({
     navItems: [] as NavItem[],
     settingsOpen: false,
@@ -403,6 +412,18 @@ export default defineComponent({
 
     showSettings() {
       this.settingsOpen = true;
+    },
+
+    // https://github.com/pulsejet/memories/issues/1634
+    syncSharingToken(token?: string) {
+      document.querySelector('input#sharingToken')?.remove();
+      if (!token) return;
+
+      const el = document.createElement('input');
+      el.id = 'sharingToken';
+      el.type = 'hidden';
+      el.value = token;
+      document.body.appendChild(el);
     },
   },
 });
