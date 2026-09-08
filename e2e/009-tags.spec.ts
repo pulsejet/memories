@@ -188,10 +188,14 @@ class TagAPI {
 
   /** Assign/unassign tags on a file via the Memories API. */
   async set(fileid: number, add: number[] = [], remove: number[] = []) {
-    const res = await this.request.patch(`${appUrl}/api/tags/set/${fileid}`, {
-      data: { add, remove },
-    });
-    expect(res.ok()).toBeTruthy();
+    // Retry transient failures (e.g. file locks right after COPY
+    // under parallel CI workers). Assigning tags is idempotent.
+    await expect(async () => {
+      const res = await this.request.patch(`${appUrl}/api/tags/set/${fileid}`, {
+        data: { add, remove },
+      });
+      expect(res.ok(), `PATCH tags/set failed: ${res.status()}`).toBe(true);
+    }).toPass({ timeout: 10_000 });
   }
 
   /** List tag clusters in the current timeline. */
