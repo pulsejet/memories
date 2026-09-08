@@ -17,7 +17,12 @@
         </div>
 
         <div class="options">
-          <NcCheckboxRadioSwitch :model-value="albums.length > 0" :disabled="processing" @update:model-value="pane = 1">
+          <NcCheckboxRadioSwitch
+            v-if="config.albums_enabled"
+            :model-value="albums.length > 0"
+            :disabled="processing"
+            @update:model-value="pane = 1"
+          >
             {{ t('memories', 'Add to albums') }}
             <br />
             <span class="switch-subtitle">{{ albumNames }}</span>
