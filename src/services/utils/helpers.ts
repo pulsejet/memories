@@ -156,7 +156,7 @@ export function getFolderRoutePath(basePath: string) {
   let path = (_m.route.params.path || '/') as string | string[];
   path = typeof path === 'string' ? path : path.join('/');
   path = basePath + '/' + path;
-  path = path.replace(/\/\/+/, '/'); // Remove double slashes
+  path = path.replace(/\/\/+/g, '/'); // Remove double slashes
   return path;
 }
 

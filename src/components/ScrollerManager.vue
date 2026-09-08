@@ -235,7 +235,7 @@ export default defineComponent({
 
       // Get cursor px position
       const { top1, top2, y1, y2 } = this.getCoords(scroll, 'y');
-      const topfrac = (scroll - y1) / (y2 - y1);
+      const topfrac = y2 === y1 ? 0 : (scroll - y1) / (y2 - y1);
       const rtop = top1 + (top2 - top1) * (topfrac || 0);
 
       // Always move static cursor to right position
@@ -554,7 +554,7 @@ export default defineComponent({
       this.hoverCursorY = y;
 
       const { top1, top2, y1, y2 } = this.getCoords(y, 'topF');
-      const yfrac = (y - top1) / (top2 - top1);
+      const yfrac = top2 === top1 ? 0 : (y - top1) / (top2 - top1);
       const ry = y1 + (y2 - y1) * (yfrac || 0);
       const targetY = snap ? y1 + SNAP_OFFSET : ry;
 

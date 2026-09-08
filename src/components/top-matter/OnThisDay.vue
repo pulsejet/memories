@@ -171,13 +171,6 @@ export default defineComponent({
 
       // Choose preview photo
       for (const year of this.years) {
-        // Try to prioritize landscape photos on desktop
-        if (_m.window.innerWidth <= 600) {
-          const landscape = year.photos.filter((p) => (p.w ?? 0) > (p.h ?? 0));
-          year.preview = utils.randomChoice(landscape);
-        }
-
-        // Get random photo
         year.preview ||= utils.randomChoice(year.photos);
         year.url = utils.getPreviewUrl({
           photo: year.preview,
