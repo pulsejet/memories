@@ -221,8 +221,16 @@ test.describe('@ui Photo selection touch', () => {
     await firstImg.waitFor();
     await page.waitForTimeout(500); // let the recycler settle
 
-    const box = (await firstImg.boundingBox())!;
-    const x = box.x + box.width / 2;
+    // Rows can still reflow (briefly detaching elements), so wait for a box
+    // instead of trusting a single measurement.
+    let box = await firstImg.boundingBox();
+    for (let i = 0; i < 100 && !box; i++) {
+      await page.waitForTimeout(100);
+      box = await firstImg.boundingBox();
+    }
+    expect(box, 'first image should have a bounding box').not.toBeNull();
+    const rect = box!;
+    const x = rect.x + rect.width / 2;
     const height = page.viewportSize()!.height;
     const countText = page.locator('.memories-top-bar .text');
 
@@ -235,7 +243,7 @@ test.describe('@ui Photo selection touch', () => {
       });
 
     await test.step('Touch and hold selects one image', async (step) => {
-      await touch('touchStart', x, box.y + box.height / 2);
+      await touch('touchStart', x, rect.y + rect.height / 2);
       await expect(countText).toContainText('1 selected', { timeout: 15000 });
       await page.waitForTimeout(200); // animation
       await snap(page, 'selection-touch-hold', step);
@@ -327,8 +335,13 @@ test.describe('@ui Photo selection touch', () => {
     await target.scrollIntoViewIfNeeded();
     // Touches right after a recycler scroll are ignored for 200ms.
     await page.waitForTimeout(400);
-    const box = (await target.boundingBox())!;
-    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    let box = await target.boundingBox();
+    for (let i = 0; i < 100 && !box; i++) {
+      await page.waitForTimeout(100);
+      box = await target.boundingBox();
+    }
+    expect(box, 'tapped photo should have a bounding box').not.toBeNull();
+    await page.touchscreen.tap(box!.x + box!.width / 2, box!.y + box!.height / 2);
   }
 
 });
