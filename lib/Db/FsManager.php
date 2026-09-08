@@ -345,37 +345,6 @@ final class FsManager
     }
 
     /**
-     * Check whether the current session is authenticated for a password protected link share.
-     *
-     * This mirrors \OCP\AppFramework\PublicShareController::validateTokenSession(). After a
-     * successful login, AuthPublicShareController::authenticate() stores the token together with
-     * the password hash of the share as a JSON encoded map in the session, so that the session
-     * becomes invalid again when the password of the share is changed.
-     *
-     * This format replaced the former public_link_authenticated_token/_password_hash keys in
-     * Nextcloud 33 (declared @since 33.0.0) and was backported to 32.0.2 and 31.0.11.
-     *
-     * @param string $token        Share token
-     * @param string $passwordHash Password hash of the share (IShare::getPassword())
-     */
-    private static function isShareAuthenticated(string $token, string $passwordHash): bool
-    {
-        $session = \OC::$server->get(\OCP\ISession::class);
-
-        $allowedTokensJSON = $session->get(PublicShareController::DAV_AUTHENTICATED_FRONTEND);
-        if (!\is_string($allowedTokensJSON)) {
-            return false;
-        }
-
-        $allowedTokens = json_decode($allowedTokensJSON, true);
-        if (!\is_array($allowedTokens)) {
-            return false;
-        }
-
-        return ($allowedTokens[$token] ?? null) === $passwordHash;
-    }
-
-    /**
      * Get the share node from the request.
      */
     public function getShareNode(): ?Node
@@ -497,6 +466,29 @@ final class FsManager
 
         /** @var File */
         return $file;
+    }
+
+    /**
+     * Check whether the current session is authenticated for a password protected link share.
+     *
+     * @param string $token        Share token
+     * @param string $passwordHash Password hash
+     */
+    private static function isShareAuthenticated(string $token, string $passwordHash): bool
+    {
+        $session = \OC::$server->get(\OCP\ISession::class);
+
+        $allowedTokensJSON = $session->get(PublicShareController::DAV_AUTHENTICATED_FRONTEND);
+        if (!\is_string($allowedTokensJSON)) {
+            return false;
+        }
+
+        $allowedTokens = json_decode($allowedTokensJSON, true);
+        if (!\is_array($allowedTokens)) {
+            return false;
+        }
+
+        return ($allowedTokens[$token] ?? null) === $passwordHash;
     }
 
     private function hasAlbumToken(): bool
