@@ -539,7 +539,7 @@ export default defineComponent({
 
       // Check if someone else is trapping focus
       const hasNestedTrap = (e: Event): Element | null => {
-        const selectors = ['#app-sidebar-vue', '.v-popper__popper', '.modal-mask', '.oc-dialog'];
+        const selectors = ['#app-sidebar-vue', '#app-sidebar-native', '.v-popper__popper', '.modal-mask', '.oc-dialog'];
         if (e.target instanceof Element) {
           return e.target.closest(selectors.join(','));
         }
@@ -570,7 +570,7 @@ export default defineComponent({
         // For the sidebar, however, we want to continue executing our actions.
         // https://github.com/pulsejet/memories/issues/1414
         const nested = hasNestedTrap(e.originalEvent);
-        if (nested && nested.id !== 'app-sidebar-vue') {
+        if (nested && nested.id !== 'app-sidebar-vue' && nested.id !== 'app-sidebar-native') {
           e.preventDefault();
           return;
         }

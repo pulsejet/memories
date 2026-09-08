@@ -17,10 +17,6 @@ declare global {
   var OC: Nextcloud.Common.OC;
   var OCP: Nextcloud.Common.OCP;
   var OCA: {
-    Files?: {
-      Sidebar?: any;
-      App?: any;
-    };
     Theming?: {
       name: string;
       enabledThemes: any[];

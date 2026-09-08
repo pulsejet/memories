@@ -75,7 +75,7 @@
 
 <script lang="ts">
 import { defineComponent, defineAsyncComponent, markRaw } from 'vue';
-import type { Component } from 'vue';
+import type { Component, PropType } from 'vue';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
@@ -102,6 +102,7 @@ import * as dav from '@services/dav';
 import { API } from '@services/API';
 
 import type { IAlbum, IFace, IImageInfo, IPhoto, IExif } from '@typings';
+import type { IFolder, INode, IView } from '@nextcloud/files';
 
 interface TopField {
   id?: string;
@@ -125,6 +126,33 @@ export default defineComponent({
   },
 
   mixins: [UserConfig],
+
+  props: {
+    /** File node when mounted as Files sidebar tab (custom element) */
+    node: {
+      type: Object as PropType<INode>,
+      required: false,
+      default: undefined,
+    },
+    // eslint-disable-next-line vue/no-unused-properties -- Required on the web component interface
+    active: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    // eslint-disable-next-line vue/no-unused-properties -- Required on the web component interface
+    folder: {
+      type: Object as PropType<IFolder>,
+      required: false,
+      default: undefined,
+    },
+    // eslint-disable-next-line vue/no-unused-properties -- Required on the web component interface
+    view: {
+      type: Object as PropType<IView>,
+      required: false,
+      default: undefined,
+    },
+  },
 
   data: () => ({
     fileid: null as number | null,
@@ -403,6 +431,18 @@ export default defineComponent({
 
     isShared(): boolean {
       return !!this.baseInfo.owneruid && this.baseInfo.owneruid !== utils.uid;
+    },
+  },
+
+  watch: {
+    node: {
+      immediate: true,
+      handler() {
+        const fileid = Number(this.node?.fileid ?? this.node?.id ?? 0);
+        if (fileid) {
+          this.update(fileid);
+        }
+      },
     },
   },
 
