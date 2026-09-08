@@ -20,7 +20,8 @@ body {
 
   // Rounded corners only on left.
   border-radius: 0;
-  &, & > main {
+  &,
+  & > main {
     border-top-left-radius: var(--body-container-radius);
     border-bottom-left-radius: var(--body-container-radius);
   }
