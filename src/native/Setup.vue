@@ -226,6 +226,14 @@ export default defineComponent({
       margin: 10px auto;
     }
 
+    .button-vue--primary {
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        color: #fff;
+      }
+    }
+
     // Secondary NcButtons use a theme tint that looks near-black in dark
     // mode, so use the white welcome-series style on the dark card.
     .button-white {
