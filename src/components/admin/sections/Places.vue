@@ -37,7 +37,7 @@
       {{
         t(
           'memories',
-          'Memories supports offline reverse geocoding using the OpenStreetMaps data on MySQL and Postgres.',
+          'Memories supports offline reverse geocoding using OpenStreetMap data on MySQL and Postgres.',
         )
       }}
       <br />
