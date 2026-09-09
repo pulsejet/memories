@@ -57,8 +57,7 @@ class AppContainer(
     val deleter = MediaDeleter(activity)
     val permissions = PermissionsManager(activity, prefs).register()
 
-    lateinit var timeline: TimelineRepository
-        private set
+    val timeline: TimelineRepository
     val observer: MediaObserver
 
     val image: ImageService

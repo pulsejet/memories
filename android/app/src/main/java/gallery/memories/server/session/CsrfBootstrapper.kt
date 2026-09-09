@@ -66,7 +66,7 @@ class CsrfBootstrapper {
         return try {
             client.newCall(Request.Builder().url(url).get().build()).execute().use { res ->
                 if (res.code != 200) return null
-                JSONObject(res.body.string()).optString("token", null)?.ifEmpty { null }
+                JSONObject(res.body.string()).optString("token", "").ifEmpty { null }
             }
         } catch (e: Exception) {
             Log.w(TAG, "Token fetch failed: ${e.message}")

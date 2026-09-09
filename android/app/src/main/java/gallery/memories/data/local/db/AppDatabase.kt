@@ -21,7 +21,7 @@ abstract class AppDatabase : RoomDatabase() {
             return INSTANCE ?: synchronized(AppDatabase::class.java) {
                 val ctx = context.applicationContext
                 INSTANCE ?: Room.databaseBuilder(ctx, AppDatabase::class.java, DATABASE_NAME)
-                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigration(true)
                     .addCallback(callbacks(ctx))
                     .build()
                     .also { INSTANCE = it }

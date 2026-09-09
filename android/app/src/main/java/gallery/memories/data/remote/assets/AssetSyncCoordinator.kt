@@ -104,6 +104,7 @@ class AssetSyncCoordinator(
         return true
     }
 
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN") // wait() needs java.lang.Object
     fun syncAndAwait(fresh: JSONObject, timeoutMs: Long): Boolean {
         sync(fresh)
         val deadline = System.currentTimeMillis() + timeoutMs
@@ -121,6 +122,7 @@ class AssetSyncCoordinator(
         }
     }
 
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN") // notifyAll() needs java.lang.Object
     fun sync(describe: JSONObject) {
         synchronized(lock) {
             pending = describe
@@ -170,13 +172,13 @@ class AssetSyncCoordinator(
     @Throws(Exception::class)
     private fun syncBlocking(describe: JSONObject, baseUrl: String, dir: File) {
         val origin = AssetCache.originOf(baseUrl)
-        val jsB64 = describe.optString("jsManifest", null) ?: throw Exception("Server has no asset manifest")
+        val jsB64 = describe.optString("jsManifest", "").ifEmpty { null } ?: throw Exception("Server has no asset manifest")
         val jsJson = JSONObject(String(Base64.decode(jsB64, Base64.DEFAULT)))
         val js = jsJson.keys().asSequence()
             .filter { it.endsWith(".js") || it.endsWith(".mjs") }
             .mapNotNull {
                 val o = jsJson.getJSONObject(it)
-                val hash = o.optString("hash", null)?.ifEmpty { null } ?: return@mapNotNull null
+                val hash = o.optString("hash", "").ifEmpty { null } ?: return@mapNotNull null
                 JsAsset(it, hash, o.getString("href"))
             }.toList()
         val css = describe.optJSONArray("cssManifest") ?: JSONArray()

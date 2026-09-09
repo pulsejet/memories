@@ -3,8 +3,6 @@ package gallery.memories.data.local.media
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
-import android.os.Build
-import android.provider.MediaStore
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.timeline.TimelineRepository
 import java.io.ByteArrayOutputStream
@@ -32,15 +30,7 @@ class ImageService(private val ctx: Context, private val timeline: TimelineRepos
             }
         }
         if (w <= 0 || h <= 0) throw Exception("Invalid preview dimensions")
-        var bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ctx.applicationContext.contentResolver.loadThumbnail(sysImgs[0].uri, android.util.Size(w, h), null)
-        } else {
-            MediaStore.Images.Thumbnails.getThumbnail(
-                ctx.applicationContext.contentResolver, id, MediaStore.Images.Thumbnails.FULL_SCREEN_KIND, null,
-            ) ?: MediaStore.Video.Thumbnails.getThumbnail(
-                ctx.applicationContext.contentResolver, id, MediaStore.Video.Thumbnails.FULL_SCREEN_KIND, null,
-            ) ?: throw Exception("Thumbnail not found")
-        }
+        var bitmap = ctx.applicationContext.contentResolver.loadThumbnail(sysImgs[0].uri, android.util.Size(w, h), null)
         val stream = ByteArrayOutputStream()
         bitmap = Bitmap.createScaledBitmap(bitmap, w, h, true)
         bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
@@ -53,12 +43,7 @@ class ImageService(private val ctx: Context, private val timeline: TimelineRepos
         val sysImgs = timeline.getSystemImagesByAUIDs(listOf(auid))
         if (sysImgs.isEmpty()) throw Exception("Image not found")
         val uri = sysImgs[0].uri
-        var bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            ImageDecoder.decodeBitmap(ImageDecoder.createSource(ctx.applicationContext.contentResolver, uri))
-        } else {
-            MediaStore.Images.Media.getBitmap(ctx.applicationContext.contentResolver, uri)
-                ?: throw Exception("Image not found")
-        }
+        var bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(ctx.applicationContext.contentResolver, uri))
         val stream = ByteArrayOutputStream()
         if (size != null) {
             val scale = size.toFloat() / Math.max(bitmap.width, bitmap.height)
