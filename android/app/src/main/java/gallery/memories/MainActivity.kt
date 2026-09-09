@@ -409,11 +409,18 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 // Catch errors and fall back to other sources
+                var playerErrorCount = 0
                 exoPlayer.addListener(object : Player.Listener {
                     override fun onPlayerError(error: PlaybackException) {
-                        exoPlayer.seekToNext()
-                        exoPlayer.playWhenReady = true
-                        exoPlayer.play()
+                        Log.w(TAG, "Player error, skipping source", error)
+                        playerErrorCount++
+                        if (exoPlayer.hasNextMediaItem() && playerErrorCount < exoPlayer.mediaItemCount) {
+                            exoPlayer.seekToNext()
+                            exoPlayer.playWhenReady = true
+                            exoPlayer.play()
+                        } else {
+                            destroyPlayer(playerUid ?: return)
+                        }
                     }
                 })
 
