@@ -124,27 +124,31 @@
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="account-settings" :name="names.account" v-if="isNative">
-        {{ t('memories', 'Logged in as {user}', { user }) }}
-        <NcButton @click="logout" id="sign-out">
-          {{ t('memories', 'Sign out') }}
-        </NcButton>
+        <div class="radio-group">
+          {{ t('memories', 'Logged in as {user}', { user }) }}
+          <NcButton class="setting-button" @click="logout">
+            {{ t('memories', 'Sign out') }}
+          </NcButton>
+        </div>
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="device-settings" :name="t('memories', 'Device Folders')" v-if="isNative">
-        {{ t('memories', 'Local folders to include in the timeline view') }}
-        <NcCheckboxRadioSwitch
-          v-for="folder in localFolders"
-          :key="folder.id"
-          v-model="folder.enabled"
-          @update:model-value="updateDeviceFolders"
-          type="switch"
-        >
-          {{ folder.name }}
-        </NcCheckboxRadioSwitch>
+        <div class="radio-group">
+          {{ t('memories', 'Local folders to include in the timeline view') }}
+          <NcCheckboxRadioSwitch
+            v-for="folder in localFolders"
+            :key="folder.id"
+            v-model="folder.enabled"
+            @update:model-value="updateDeviceFolders"
+            type="switch"
+          >
+            {{ folder.name }}
+          </NcCheckboxRadioSwitch>
 
-        <NcButton @click="runNxSetup()" variant="secondary">
-          {{ t('memories', 'Run initial device setup') }}
-        </NcButton>
+          <NcButton class="setting-button" @click="runNxSetup()" variant="secondary">
+            {{ t('memories', 'Run initial device setup') }}
+          </NcButton>
+        </div>
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="folders-settings" :name="names.folders">
@@ -477,7 +481,7 @@ export default defineComponent({
 
     .input-field,
     .radio-group {
-      margin-left: 8px;
+      margin-left: 10px;
       margin-right: 12px;
       margin-top: 1em;
     }
@@ -502,7 +506,7 @@ export default defineComponent({
     }
   }
 
-  :deep(#sign-out) {
+  :deep(.setting-button) {
     margin-top: 10px;
   }
 }
