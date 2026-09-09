@@ -1,0 +1,111 @@
+/* Shared styles for the native edge-to-edge screens (welcome, waiting, setup).
+ * Plain CSS so it can be linked directly from the Android static pages
+ * (symlinked under android/app/src/main/assets) as well as imported
+ * by src/native/Setup.vue. Page-specific styles stay with each page.
+ *
+ * Every selector is namespaced under .native-auth, which must be set on
+ * the page wrapper (body in the static pages, .nxsetup-outer in Setup.vue),
+ * so none of these rules leak into the surrounding page.
+ */
+.native-auth,
+.native-auth * {
+  box-sizing: border-box;
+}
+.native-auth {
+  margin: 0;
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:
+    calc(24px + env(safe-area-inset-top, 0px))
+    calc(16px + env(safe-area-inset-right, 0px))
+    calc(24px + env(safe-area-inset-bottom, 0px))
+    calc(16px + env(safe-area-inset-left, 0px));
+  font-family: ui-sans-system, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
+  color: #fff;
+  background:
+    radial-gradient(600px 400px at 15% 10%, rgba(255, 255, 255, 0.18), transparent 60%),
+    radial-gradient(700px 500px at 90% 90%, rgba(0, 0, 0, 0.25), transparent 60%),
+    linear-gradient(165deg, #0d2038 0%, #174a7d 42%, var(--theme-color, #2b94f0) 100%);
+  overflow: auto;
+  text-align: center;
+}
+.native-auth .orbs {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.native-auth .orbs span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  animation: native-auth-drift 12s ease-in-out infinite alternate;
+}
+.native-auth .orbs span:nth-child(1) {
+  width: 280px;
+  height: 280px;
+  left: -80px;
+  top: -60px;
+  background: #7cc4ff;
+}
+.native-auth .orbs span:nth-child(2) {
+  width: 320px;
+  height: 320px;
+  right: -100px;
+  bottom: -80px;
+  background: #0b3b66;
+  opacity: 0.6;
+  animation-delay: -6s;
+}
+@keyframes native-auth-drift {
+  from {
+    transform: translateY(-12px) scale(1);
+  }
+  to {
+    transform: translateY(14px) scale(1.06);
+  }
+}
+.native-auth .card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 28px;
+  padding: 40px 28px 28px;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+.native-auth .logo {
+  width: 172px;
+  max-width: 60vw;
+  height: auto;
+  margin: 0 auto 16px;
+  filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.3));
+}
+.native-auth h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+}
+.native-auth .subtitle {
+  margin: 0 auto 24px;
+  max-width: 32ch;
+  font-size: 14.5px;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+@media (prefers-reduced-motion: reduce) {
+  .native-auth .orbs span {
+    animation: none;
+  }
+}

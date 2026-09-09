@@ -115,6 +115,14 @@ export type NativeX = {
   setThemeColor: (color: string, isDark: boolean) => void;
 
   /**
+   * Make status and navigation bars transparent so edge-to-edge
+   * pages draw underneath them.
+   * @param transparent Whether the bars should be transparent
+   * @param isDark Whether the page background is dark (for icon colors)
+   */
+  setTransparentBars: (transparent: boolean, isDark: boolean) => void;
+
+  /**
    * Play a tap sound for UI interaction.
    */
   playTouchSound: () => void;
