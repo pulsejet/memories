@@ -14,4 +14,10 @@
     <string name="err_no_ver">Your server does not have the minimum required version of Memories</string>
     <string name="err_logged_out">Logged out from server</string>
     <string name="err_no_describe">Failed to connect to server. Reset app data if this persists.</string>
+    
+    <!-- Viewer Activity -->
+    <string name="open_in_memories">Open in Memories</string>
+    <string name="share">Share</string>
+    <string name="delete">Delete</string>
+    <string name="use_this">Use this photo</string>
 </resources>
