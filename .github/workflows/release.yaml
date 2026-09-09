@@ -29,12 +29,19 @@ jobs:
           extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
           coverage: none
 
+      - name: Check manifest signing key
+        run: test -n "$MANIFEST_SIGNING_KEY"
+        env:
+          MANIFEST_SIGNING_KEY: ${{ secrets.MANIFEST_SIGNING_KEY }}
+
       - name: Build
         run: |
           make dev-setup
           make patch-external
           make js-lint
           make build-js-production
+        env:
+          MANIFEST_SIGNING_KEY: ${{ secrets.MANIFEST_SIGNING_KEY }}
 
       - name: Bundle app
         run: bash scripts/bundle.sh
