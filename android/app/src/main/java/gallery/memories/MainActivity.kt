@@ -376,11 +376,12 @@ class MainActivity : AppCompatActivity() {
                     // Check if remote or local URI
                     if (uri.toString().contains("http")) {
                         // Add cookies from webview to data source
-                        val cookies = CookieManager.getInstance().getCookie(uri.toString())
                         val httpDataSourceFactory =
                             DefaultHttpDataSource.Factory()
-                                .setDefaultRequestProperties(mapOf("cookie" to cookies))
                                 .setAllowCrossProtocolRedirects(true)
+                        CookieManager.getInstance().getCookie(uri.toString())?.let { cookies ->
+                            httpDataSourceFactory.setDefaultRequestProperties(mapOf("cookie" to cookies))
+                        }
                         val dataSourceFactory =
                             DefaultDataSource.Factory(this, httpDataSourceFactory)
 
