@@ -39,7 +39,7 @@ class CsrfBootstrapper {
             if (res.code != 302 && res.code != 303) Log.w(TAG, "Login POST unexpected status ${res.code}")
             res.body.string()
         }
-        return fetchToken(noRedirect, tokenUrl)?.also { Log.i(TAG, "Proxy session established") }
+        return fetchToken(noRedirect, tokenUrl)
     }
 
     private fun fetchLoginToken(client: OkHttpClient, config: ServerConfig, url: String): String? {
