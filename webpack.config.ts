@@ -4,6 +4,7 @@ const path = require('path');
 const WorkboxPlugin = require('workbox-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 const MiB = 1024 * 1024;
@@ -31,9 +32,19 @@ module.exports = {
     path: path.resolve(__dirname, 'js'),
     publicPath: path.join('/apps/', appName, '/js/'),
 
+    // Use a cryptographic hash of the file content for cache busting.
+    // We will use this as a transparency proof.
+    hashFunction: 'sha256',
+    hashDigestLength: 64,
+
     // Output file names
     filename: `${appName}-[name].js?v=[contenthash]`,
     chunkFilename: `${appName}-[name].js?v=[contenthash]`,
+
+    // Sourcemaps without query string: a ?v=<hash> here would be part of
+    // the JS content (sourceMappingURL comment) and break the correspondence
+    // between [contenthash] and the actual file content hash
+    sourceMapFilename: '[file].map',
 
     // Clean output before each build
     clean: true,
@@ -55,6 +66,7 @@ module.exports = {
 
   optimization: {
     chunkIds: 'named',
+    realContentHash: true,
     splitChunks: {
       automaticNameDelimiter: '-',
     },
@@ -120,6 +132,20 @@ module.exports = {
 
   plugins: [
     new VueLoaderPlugin(),
+
+    // Manifest of all built files (base name -> {hash, href}).
+    // The standalone shell uses this to know every chunk up front.
+    new WebpackManifestPlugin({
+      fileName: `${appName}-manifest.json`,
+      generate: (seed: any, files: any[]) =>
+        Object.fromEntries(
+          files.map((file) => {
+            const name = file.path.split('/').pop() ?? '';
+            const [basename, hash] = name.split('?v=');
+            return [basename, { hash: hash ?? '', href: file.path }];
+          }),
+        ),
+    }),
 
     // @nextcloud/dialogs depends on path
     // This is really frustrating, but it's the only way

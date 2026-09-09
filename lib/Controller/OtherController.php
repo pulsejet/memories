@@ -150,6 +150,13 @@ final class OtherController extends GenericApiController
                 $info['uid'] = null;
             }
 
+            // Static file manifests
+            if ('1' === \OC::$server->get(\OCP\IRequest::class)->getParam('manifest')) {
+                $manifest = @file_get_contents(__DIR__.'/../../js/memories-manifest.json');
+                $info['jsManifest'] = false !== $manifest ? base64_encode($manifest) : null;
+                $info['cssManifest'] = PageController::getLinkHeaders();
+            }
+
             // This is public information
             $res = new JSONResponse($info);
             $res->addHeader('Access-Control-Allow-Origin', '*');

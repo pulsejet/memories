@@ -12,8 +12,10 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\AppFramework\Http\Events\BeforeTemplateRenderedEvent;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
+use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IRequest;
@@ -211,5 +213,38 @@ final class PageController extends Controller
     public function nxsetup(): Response
     {
         return $this->main();
+    }
+
+    /**
+     * Get <link> headers from apps (theme stylesheets, icons, ...).
+     *
+     * Dispatches BeforeTemplateRenderedEvent first so apps (e.g. theming)
+     * inject their headers like on a normal page.
+     *
+     * There is no OCP API to read back headers added via OCP\Util::addHeader;
+     * core reads the same static in OC\Template\Template::fetchPage.
+     * Psalm reports no issue for this read.
+     *
+     * @return array<array<string, null|string>>
+     */
+    public static function getLinkHeaders(): array
+    {
+        $user = \OC::$server->get(\OCP\IUserSession::class)->getUser();
+        \OC::$server->get(\OCP\EventDispatcher\IEventDispatcher::class)->dispatchTyped(new BeforeTemplateRenderedEvent(
+            null !== $user,
+            new TemplateResponse(Application::APPNAME, 'main', [], TemplateResponse::RENDER_AS_BLANK),
+        ));
+
+        $cssLinks = [
+            ['rel' => 'stylesheet', 'href' => \OC::$WEBROOT.'/core/css/server.css'],
+        ];
+        foreach (\OC_Util::$headers as $header) {
+            if (($header['tag'] ?? null) !== 'link' || !isset($header['attributes']['href'])) {
+                continue;
+            }
+            $cssLinks[] = $header['attributes'];
+        }
+
+        return $cssLinks;
     }
 }
