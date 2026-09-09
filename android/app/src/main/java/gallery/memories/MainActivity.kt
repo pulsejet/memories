@@ -348,6 +348,11 @@ class MainActivity : AppCompatActivity() {
             if (playerUid == uid) return
             player?.release()
             player = null
+
+            // New video: forget the previous video's state so this one autoplays from the start
+            playWhenReady = true
+            mediaItemIndex = 0
+            playbackPosition = 0L
         }
 
         // Prevent re-creating
