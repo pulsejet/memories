@@ -53,6 +53,7 @@ object ShellPage {
                         }
                     }
                 }
+                link(href = "/local/static/shell-overrides.css", rel = "stylesheet")
             }
             body {
                 div { id = "skip-actions" }
