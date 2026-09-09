@@ -76,17 +76,17 @@
         <Viewer />
         <Sidebar />
       </Teleport>
-
-      <EditMetadataModal />
-      <AddToAlbumModal />
-      <NodeShareModal />
-      <ShareModal />
-      <MoveToFolderModal />
-      <FaceMoveModal />
-      <AlbumShareModal />
-      <UploadModal />
-      <SearchModal />
     </template>
+
+    <EditMetadataModal />
+    <AddToAlbumModal />
+    <NodeShareModal />
+    <ShareModal />
+    <MoveToFolderModal />
+    <FaceMoveModal />
+    <AlbumShareModal />
+    <UploadModal />
+    <SearchModal />
   </NcContent>
 </template>
 
