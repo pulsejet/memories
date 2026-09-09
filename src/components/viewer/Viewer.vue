@@ -1354,10 +1354,9 @@ export default defineComponent({
   right: 50px;
   --default-clickable-area: 44px;
 
-  :deep(.button-vue--icon-only) {
+  :deep(.button-vue) {
     color: white;
     background-color: transparent !important;
-    margin-right: 1px;
   }
 
   transition: opacity 0.2s ease-in-out;
