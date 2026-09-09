@@ -2,6 +2,7 @@ package gallery.memories.data.remote.assets
 
 import android.util.Base64
 import android.util.Log
+import gallery.memories.BuildConfig
 import org.json.JSONObject
 import java.math.BigInteger
 import java.security.MessageDigest
@@ -17,6 +18,7 @@ object ManifestVerifier {
 
     /** Prod Ed25519 public key (base64). */
     const val PUBLIC_KEY_B64 = "aA2fpqrrJHTiCkE9ecQNDR5V1qO7oHppjdJQ7Pj5nhQ="
+    const val DEBUG_PUBLIC_KEY_B64 = "MIJxGvOr0LMg9Isyfi5S4cHQsP+v4mFzrsmY2AYKOjs="
 
     /**
      * True when the describe carries no manifest, or its manifest signature verifies.
@@ -49,7 +51,9 @@ object ManifestVerifier {
             return false
         }
         val valid = try {
-            Ed25519.verify(Base64.decode(PUBLIC_KEY_B64, Base64.DEFAULT), manifest, sig)
+            // Debug builds also accept the dev key for local development.
+            val keys = if (BuildConfig.DEBUG) arrayOf(PUBLIC_KEY_B64, DEBUG_PUBLIC_KEY_B64) else arrayOf(PUBLIC_KEY_B64)
+            keys.any { Ed25519.verify(Base64.decode(it, Base64.DEFAULT), manifest, sig) }
         } catch (e: Exception) {
             Log.e(TAG, "Verification error", e)
             false
