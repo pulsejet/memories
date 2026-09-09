@@ -24,11 +24,15 @@ final class TimelineWrite
     use TimelineWritePlaces;
 
     public function __construct(
-        protected IDBConnection $connection,
+        IDBConnection $connection,
         protected LivePhoto $livePhoto,
         protected ILockingProvider $lockingProvider,
-        protected LoggerInterface $logger,
-    ) {}
+        LoggerInterface $logger,
+    ) {
+        // These are declared in traits, don't redeclare.
+        $this->connection = $connection;
+        $this->logger = $logger;
+    }
 
     /**
      * Process a file to insert Exif data into the database.
@@ -265,7 +269,7 @@ final class TimelineWrite
      */
     private function getCurrentRow(int $fileId): ?array
     {
-        $fetch = function (string $table) use ($fileId): false|null|array {
+        $fetch = function (string $table) use ($fileId): false|array {
             $query = $this->connection->getQueryBuilder();
 
             return $query->select('*')
