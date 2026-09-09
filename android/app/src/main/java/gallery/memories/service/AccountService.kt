@@ -121,7 +121,8 @@ class AccountService(
                     storeCredentials(baseUrl, loginName, appPassword)
 
                     // Serve locally, updating in the background if stale
-                    mCtx.startLocalApp()
+                    // Fresh login: route into the in-app setup flow
+                    mCtx.startLocalApp(toNxSetup = true)
                 }
 
                 return
