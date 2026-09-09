@@ -348,6 +348,11 @@ class MainActivity : AppCompatActivity() {
             if (playerUid == uid) return
             player?.release()
             player = null
+
+            // New video: forget the previous video's state so this one autoplays from the start
+            playWhenReady = true
+            mediaItemIndex = 0
+            playbackPosition = 0L
         }
 
         // Prevent re-creating
@@ -376,11 +381,12 @@ class MainActivity : AppCompatActivity() {
                     // Check if remote or local URI
                     if (uri.toString().contains("http")) {
                         // Add cookies from webview to data source
-                        val cookies = CookieManager.getInstance().getCookie(uri.toString())
                         val httpDataSourceFactory =
                             DefaultHttpDataSource.Factory()
-                                .setDefaultRequestProperties(mapOf("cookie" to cookies))
                                 .setAllowCrossProtocolRedirects(true)
+                        CookieManager.getInstance().getCookie(uri.toString())?.let { cookies ->
+                            httpDataSourceFactory.setDefaultRequestProperties(mapOf("cookie" to cookies))
+                        }
                         val dataSourceFactory =
                             DefaultDataSource.Factory(this, httpDataSourceFactory)
 
@@ -395,16 +401,31 @@ class MainActivity : AppCompatActivity() {
                             }
                         )
                     } else {
-                        exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
+                        exoPlayer.addMediaItem(mediaItem)
                     }
                 }
 
+                // Restore saved position
+                if (exoPlayer.mediaItemCount > 0) {
+                    exoPlayer.seekTo(
+                        mediaItemIndex.coerceAtMost(exoPlayer.mediaItemCount - 1),
+                        playbackPosition
+                    )
+                }
+
                 // Catch errors and fall back to other sources
+                var playerErrorCount = 0
                 exoPlayer.addListener(object : Player.Listener {
                     override fun onPlayerError(error: PlaybackException) {
-                        exoPlayer.seekToNext()
-                        exoPlayer.playWhenReady = true
-                        exoPlayer.play()
+                        Log.w(TAG, "Player error, skipping source", error)
+                        playerErrorCount++
+                        if (exoPlayer.hasNextMediaItem() && playerErrorCount < exoPlayer.mediaItemCount) {
+                            exoPlayer.seekToNext()
+                            exoPlayer.playWhenReady = true
+                            exoPlayer.play()
+                        } else {
+                            destroyPlayer(playerUid ?: return)
+                        }
                     }
                 })
 

@@ -56,8 +56,9 @@ class DownloadService(private val mActivity: AppCompatActivity, private val quer
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
 
         // Copy all cookies from the webview to the download request
-        val cookies = CookieManager.getInstance().getCookie(url)
-        request.addRequestHeader("cookie", cookies)
+        CookieManager.getInstance().getCookie(url)?.let { cookies ->
+            request.addRequestHeader("cookie", cookies)
+        }
         if (filename != "") {
             // Save the file to external storage
             request.setDestinationInExternalPublicDir(

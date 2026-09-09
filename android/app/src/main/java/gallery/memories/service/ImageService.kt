@@ -26,9 +26,12 @@ class ImageService(private val mCtx: Context, private val query: TimelineQuery) 
         // get the image dimensions
         var h = sysImgs[0].height.toInt()
         var w = sysImgs[0].width.toInt()
+        if (w <= 0 || h <= 0) {
+            throw Exception("Invalid image dimensions")
+        }
 
         // cap to x/y if provided, keeping aspect ratio
-        if (x != null && y != null) {
+        if (x != null && y != null && x > 0 && y > 0) {
             // calculate the aspect ratio
             val aspect = w.toFloat() / h.toFloat()
             if (x.toFloat() / y.toFloat() < aspect) {
@@ -38,6 +41,10 @@ class ImageService(private val mCtx: Context, private val query: TimelineQuery) 
                 w = (y.toFloat() * aspect).toInt()
                 h = y
             }
+        }
+
+        if (w <= 0 || h <= 0) {
+            throw Exception("Invalid preview dimensions")
         }
 
         var bitmap =

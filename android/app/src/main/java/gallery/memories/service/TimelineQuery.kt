@@ -142,7 +142,9 @@ class TimelineQuery(private val mCtx: MainActivity) {
      */
     @Throws(JSONException::class)
     fun getDays(): JSONArray {
-        return mPhotoDao.getDays(mConfigService.enabledBucketIds).map {
+        val buckets = mConfigService.enabledBucketIds
+        if (buckets.isEmpty()) return JSONArray()
+        return mPhotoDao.getDays(buckets).map {
             JSONObject()
                 .put(Fields.Day.DAYID, it.dayId)
                 .put(Fields.Day.COUNT, it.count)
@@ -156,8 +158,12 @@ class TimelineQuery(private val mCtx: MainActivity) {
      */
     @Throws(JSONException::class)
     fun getDay(dayId: Long): JSONArray {
+        // No folders enabled means no photos
+        val buckets = mConfigService.enabledBucketIds
+        if (buckets.isEmpty()) return JSONArray()
+
         // Get the photos for the day from DB
-        val photos = mPhotoDao.getPhotosByDay(dayId, mConfigService.enabledBucketIds)
+        val photos = mPhotoDao.getPhotosByDay(dayId, buckets)
             .map { it.localId to it }.toMap()
 
         if (photos.isEmpty()) return JSONArray()
@@ -432,7 +438,15 @@ class TimelineQuery(private val mCtx: MainActivity) {
      * @param value Value to set
      */
     fun setHasRemote(auids: List<String>, buids: List<String>, value: Boolean) {
-        mPhotoDao.setHasRemote(auids, buids, value)
+        // Skip empty IN lists, which are invalid SQL
+        if (auids.isEmpty()) {
+            if (buids.isEmpty()) return
+            mPhotoDao.setHasRemoteByBuids(buids, value)
+        } else if (buids.isEmpty()) {
+            mPhotoDao.setHasRemoteByAuids(auids, value)
+        } else {
+            mPhotoDao.setHasRemote(auids, buids, value)
+        }
     }
 
     /**

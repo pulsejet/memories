@@ -7,6 +7,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
+import gallery.memories.mapper.Response
 import gallery.memories.service.AccountService
 import gallery.memories.service.DownloadService
 import gallery.memories.service.HttpService
@@ -233,12 +234,11 @@ class NativeX(private val mCtx: MainActivity) {
 
         val parts = path.split("/").toTypedArray()
         return if (path.matches(API.LOGIN)) {
-            makeResponse(
-                account.login(
-                    URLDecoder.decode(parts[3], "UTF-8"),
-                    request.url.getBooleanQueryParameter("trustAll", false)
-                )
+            account.login(
+                URLDecoder.decode(parts[3], "UTF-8"),
+                request.url.getBooleanQueryParameter("trustAll", false)
             )
+            makeResponse(Response.OK)
         } else if (path.matches(API.DAYS)) {
             makeResponse(query.getDays())
         } else if (path.matches(API.DAY)) {

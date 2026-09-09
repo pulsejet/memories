@@ -62,7 +62,7 @@ class SecureStorage(private val context: Context) {
         context.getSharedPreferences("credentials", Context.MODE_PRIVATE).edit()
             .remove("url")
             .remove("trustAll")
-            .remove("encryptedUsername")
+            .remove("username")
             .remove("encryptedToken")
             .remove("iv")
             .apply()

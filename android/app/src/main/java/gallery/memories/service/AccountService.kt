@@ -149,11 +149,10 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
             }
 
             // Get body values
-            val uid = body.get("uid")
             val version = body.getString("version")
 
             // Check UID exists
-            if (uid.equals(null)) {
+            if (body.isNull("uid")) {
                 return loggedOut()
             }
 
