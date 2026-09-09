@@ -78,6 +78,11 @@ export default defineComponent({
     this.refreshSystemConfig();
     this.refreshStatus();
     this.refreshStaticConfig();
+    utils.bus.on('memories:user-config-changed', this.refreshStaticConfig);
+  },
+
+  beforeUnmount() {
+    utils.bus.off('memories:user-config-changed', this.refreshStaticConfig);
   },
 
   methods: {

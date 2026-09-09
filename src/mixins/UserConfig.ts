@@ -20,28 +20,33 @@ export default defineComponent({
   }),
 
   created() {
-    utils.bus.on(eventName, this.updateLocalSetting);
-    this.refreshFromConfig();
+    utils.bus.on(eventName, this.onConfigChanged);
+    this.syncFromStaticConfig();
   },
 
   beforeUnmount() {
-    utils.bus.off(eventName, this.updateLocalSetting);
+    utils.bus.off(eventName, this.onConfigChanged);
   },
 
   methods: {
-    async refreshFromConfig() {
-      const config = await staticConfig.getAll();
-      const changed = (Object.keys(config) as (keyof IConfig)[]).some((key) => config[key] !== this.config[key]);
-      if (!changed) return;
-
-      this.config = { ...config };
-      utils.bus.emit(eventName, null);
-    },
-
-    updateLocalSetting(val: { setting: keyof IConfig; value: IConfig[keyof IConfig] } | null) {
+    onConfigChanged(val: { setting: keyof IConfig; value: IConfig[keyof IConfig] } | null) {
       if (val?.setting) {
         (this.config as any)[val.setting] = val.value;
+      } else {
+        this.syncFromStaticConfig();
       }
+    },
+
+    syncFromStaticConfig() {
+      const fresh = staticConfig.getDefault();
+      const changed = (Object.keys(fresh) as (keyof IConfig)[]).some((key) => fresh[key] !== this.config[key]);
+      if (changed) {
+        this.config = { ...fresh };
+      }
+    },
+
+    async refreshFromConfig() {
+      this.syncFromStaticConfig();
     },
 
     async updateSetting<K extends keyof IConfig>(setting: K, remote?: string) {

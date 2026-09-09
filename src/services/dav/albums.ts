@@ -43,12 +43,12 @@ export async function getAlbums(fileid?: number) {
   let data = res.data;
 
   // Remove hidden albums unless specified
-  if (!(await staticConfig.get('show_hidden_albums'))) {
+  if (!staticConfig.getSync('show_hidden_albums')) {
     data = data.filter((a) => !a.name.startsWith('.'));
   }
 
   // Sort the response
-  const sort = await staticConfig.get('album_list_sort');
+  const sort = staticConfig.getSync('album_list_sort');
   if (sort & utils.constants.ALBUM_SORT_FLAGS.NAME) {
     data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
   } else if (sort & utils.constants.ALBUM_SORT_FLAGS.LAST_UPDATE) {

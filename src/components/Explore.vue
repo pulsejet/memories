@@ -88,6 +88,12 @@ export default defineComponent({
     facerecognition: [] as ICluster[],
     places: [] as ICluster[],
     tags: [] as ICluster[],
+    loaded: {
+      recognize: false,
+      facerecognition: false,
+      places: false,
+      tags: false,
+    },
 
     categories: [
       {
@@ -140,28 +146,46 @@ export default defineComponent({
     const res: IConfig | undefined = await this.load(config.getAll.bind(config));
     if (!res) return;
     this.config = res;
+    this.maybeLoad();
 
-    if (this.config.recognize_enabled) {
-      this.load(this.getRecognize);
-    }
-
-    if (this.config.facerecognition_enabled) {
-      this.load(this.getFaceRecognition);
-    }
-
-    if (this.config.places_gis > 0) {
-      this.load(this.getPlaces);
-    }
-
-    if (this.config.systemtags_enabled) {
-      this.load(this.getTags);
-    }
+    // Server copy may differ from cache; load newly enabled sections.
+    utils.bus.on('memories:user-config-changed', this.onConfigChanged);
 
     // Remove categories that should not be shown
     this.categories = this.categories.filter((c) => !c.if || c.if());
   },
 
+  beforeUnmount() {
+    utils.bus.off('memories:user-config-changed', this.onConfigChanged);
+  },
+
   methods: {
+    onConfigChanged() {
+      this.config = { ...config.getDefault() };
+      this.maybeLoad();
+    },
+
+    maybeLoad() {
+      if (this.config.recognize_enabled && !this.loaded.recognize) {
+        this.loaded.recognize = true;
+        this.load(this.getRecognize);
+      }
+
+      if (this.config.facerecognition_enabled && !this.loaded.facerecognition) {
+        this.loaded.facerecognition = true;
+        this.load(this.getFaceRecognition);
+      }
+
+      if (this.config.places_gis > 0 && !this.loaded.places) {
+        this.loaded.places = true;
+        this.load(this.getPlaces);
+      }
+
+      if (this.config.systemtags_enabled && !this.loaded.tags) {
+        this.loaded.tags = true;
+        this.load(this.getTags);
+      }
+    },
     async load<T>(fun: () => Promise<T>) {
       try {
         this.loading++;
