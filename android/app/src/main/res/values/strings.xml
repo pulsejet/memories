@@ -14,4 +14,5 @@
     <string name="err_no_ver">Your server does not have the minimum required version of Memories</string>
     <string name="err_logged_out">Logged out from server</string>
     <string name="err_no_describe">Failed to connect to server. Reset app data if this persists.</string>
+    <string name="err_login_timeout">Login timed out. Please try again.</string>
 </resources>

@@ -29,9 +29,13 @@ class AccountManager(
         private val TAG = AccountManager::class.java.simpleName
     }
 
+    /** Invalidates in-flight login polls on retry/logout so only the latest can transition UI. */
+    @Volatile private var loginGeneration = 0
+
     /** Validates the server, starts a non-blocking asset sync, then hands off to the browser login flow. */
     fun login(url: String, trustAll: Boolean) {
         try {
+            loginGeneration++
             auth.build(url, trustAll)
             clients.rebuild()
             val res = api.getApiDescriptionManifest()
@@ -64,17 +68,18 @@ class AccountManager(
         val pollUrl = pollObj.getString("endpoint")
         val loginUrl = body.getString("login")
         activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl)))
-        Thread { pollLogin(pollUrl, pollToken, baseUrl) }.start()
+        val gen = loginGeneration
+        Thread { pollLogin(pollUrl, pollToken, baseUrl, gen) }.start()
     }
 
-    /** Polls the login endpoint every 3s for up to 30min; on success stores credentials and boots into setup. */
-    private fun pollLogin(pollUrl: String, pollToken: String, baseUrl: String) {
+    /** Polls every 3s for up to 30min. Success boots into setup; timeout resets to welcome. Stale generations do nothing. */
+    private fun pollLogin(pollUrl: String, pollToken: String, baseUrl: String, gen: Int) {
         activity.binding.webview.post {
             activity.setTransparentBars(true, true)
             activity.binding.webview.loadUrl(activity.localStaticUrl("waiting.html") + "?login=1")
         }
         var pollCount = 0
-        while (pollCount < 10 * 60) {
+        while (pollCount < 10 * 60 && gen == loginGeneration) {
             pollCount += 3
             Thread.sleep(3000)
             try {
@@ -85,6 +90,7 @@ class AccountManager(
                 val loginName = body.getString("loginName")
                 val appPassword = body.getString("appPassword")
                 activity.runOnUiThread {
+                    if (gen != loginGeneration) return@runOnUiThread
                     storeCredentials(baseUrl, loginName, appPassword)
                     activity.startLocalApp(toNxSetup = true)
                 }
@@ -92,6 +98,12 @@ class AccountManager(
             } catch (e: Exception) {
                 continue
             }
+        }
+        if (gen != loginGeneration) return
+        activity.runOnUiThread {
+            if (gen != loginGeneration) return@runOnUiThread
+            toast(activity.getString(R.string.err_login_timeout))
+            activity.loadDefaultUrl()
         }
     }
 
@@ -117,6 +129,7 @@ class AccountManager(
     }
 
     fun loggedOut() {
+        loginGeneration++
         toast(activity.getString(R.string.err_logged_out))
         deleteCredentials()
         activity.runOnUiThread { activity.loadDefaultUrl() }
