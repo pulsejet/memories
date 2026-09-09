@@ -100,21 +100,22 @@ class SystemImage {
                 selectionArgs,
                 sortOrder
             ).use { cursor ->
-                while (cursor!!.moveToNext()) {
+                if (cursor == null) return@sequence
+                while (cursor.moveToNext()) {
                     val image = SystemImage()
 
                     // Common fields
                     image.fileId = cursor.getLong(idColumn)
-                    image.baseName = cursor.getString(nameColumn)
-                    image.mimeType = cursor.getString(mimeColumn)
+                    image.baseName = cursor.getString(nameColumn) ?: ""
+                    image.mimeType = cursor.getString(mimeColumn) ?: ""
                     image.height = cursor.getLong(heightColumn)
                     image.width = cursor.getLong(widthColumn)
                     image.size = cursor.getLong(sizeColumn)
                     image.dateTaken = cursor.getLong(dateTakenColumn)
                     image.mtime = cursor.getLong(dateModifiedColumn)
-                    image.dataPath = cursor.getString(dataColumn)
+                    image.dataPath = cursor.getString(dataColumn) ?: ""
                     image.bucketId = cursor.getLong(bucketIdColumn)
-                    image.bucketName = cursor.getString(bucketNameColumn)
+                    image.bucketName = cursor.getString(bucketNameColumn) ?: ""
                     image.mCollection = collection
 
                     // Swap width/height if orientation is 90 or 270
