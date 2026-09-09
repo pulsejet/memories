@@ -1,7 +1,12 @@
 const euc = encodeURIComponent;
 
 /** Access NativeX over localhost */
-export const BASE_URL = 'http://127.0.0.1';
+export const BASE_URL = ((): string => {
+  if (globalThis.location?.hostname === '127.0.0.1') {
+    return globalThis.location.origin;
+  }
+  return 'http://127.0.0.1';
+})();
 
 /** NativeX asynchronous API */
 export const NAPI = {
@@ -85,6 +90,13 @@ export const NAPI = {
    * @returns
    */
   CONFIG_ALLOW_MEDIA: (val: boolean) => `${BASE_URL}/api/config/allow_media/${val ? '1' : '0'}`,
+
+  /**
+   * Offline asset download progress.
+   * @regex ^/api/assets/progress$
+   * @returns {status, done, total, error} of the web asset sync.
+   */
+  ASSETS_PROGRESS: () => `${BASE_URL}/api/assets/progress`,
 };
 
 /** NativeX synchronous API. */

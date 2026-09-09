@@ -1,18 +1,283 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Memories</title>
     <link rel="stylesheet" href="styles.css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2b94f0" />
+    <meta name="color-scheme" content="dark" />
+    <style>
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding:
+          calc(24px + env(safe-area-inset-top, 0px))
+          calc(16px + env(safe-area-inset-right, 0px))
+          calc(24px + env(safe-area-inset-bottom, 0px))
+          calc(16px + env(safe-area-inset-left, 0px));
+        font-family: ui-sans-system, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
+        color: #fff;
+        background:
+          radial-gradient(600px 400px at 15% 10%, rgba(255,255,255,0.18), transparent 60%),
+          radial-gradient(700px 500px at 90% 90%, rgba(0,0,0,0.25), transparent 60%),
+          linear-gradient(165deg, #0d2038 0%, #174a7d 42%, var(--theme-color, #2b94f0) 100%);
+        overflow: auto;
+      }
+      .orbs { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+      .orbs span {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.35;
+        animation: drift 12s ease-in-out infinite alternate;
+      }
+      .orbs span:nth-child(1) { width: 280px; height: 280px; left: -80px; top: -60px; background: #7cc4ff; }
+      .orbs span:nth-child(2) { width: 320px; height: 320px; right: -100px; bottom: -80px; background: #0b3b66; opacity: 0.6; animation-delay: -6s; }
+      @keyframes drift {
+        from { transform: translateY(-12px) scale(1); }
+        to { transform: translateY(14px) scale(1.06); }
+      }
+      .card {
+        position: relative;
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.22);
+        border-radius: 28px;
+        padding: 40px 32px 32px;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.25);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        animation: rise 0.6s ease both;
+      }
+      @keyframes rise {
+        from { opacity: 0; transform: translateY(14px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      .logo {
+        width: 172px;
+        max-width: 60vw;
+        height: auto;
+        margin: 0 auto 20px;
+        filter: drop-shadow(0 6px 20px rgba(0,0,0,0.3));
+      }
+      .spinner-wrap {
+        display: flex;
+        justify-content: center;
+        margin: 8px 0 18px;
+        min-height: 64px;
+      }
+      .spinner {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: 4px solid rgba(255,255,255,0.25);
+        border-top-color: #fff;
+        animation: spin 0.9s linear infinite;
+        box-shadow: 0 0 0 6px rgba(255,255,255,0.06);
+      }
+      .spinner.done {
+        animation: none;
+        border-color: #fff;
+        border-top-color: #fff;
+        display: grid;
+        place-items: center;
+      }
+      .spinner.done::after {
+        content: "✓";
+        font-size: 26px;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .spinner.error { border-color: rgba(255,255,255,0.25); border-top-color: #ffb4b4; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 24px;
+        letter-spacing: -0.02em;
+        font-weight: 800;
+      }
+      .subtitle {
+        margin: 0 0 4px;
+        font-size: 14.5px;
+        line-height: 1.6;
+        opacity: 0.9;
+      }
+      #dl { margin-top: 22px; text-align: left; }
+      .bar-track {
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.22);
+        overflow: hidden;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+      }
+      #dlbar {
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #fff, #d6ecff);
+        transition: width 0.35s ease;
+      }
+      .dl-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 10px;
+      }
+      #dltxt {
+        margin: 0;
+        font-size: 13px;
+        opacity: 0.92;
+        font-variant-numeric: tabular-nums;
+        flex: 1;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      #pct {
+        font-size: 13px;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        opacity: 0.95;
+        flex-shrink: 0;
+      }
+      #retry {
+        margin-top: 14px;
+        width: 100%;
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 18px;
+        font-size: 15px;
+        font-weight: 800;
+        color: #0f3a5f;
+        background: #fff;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      }
+      #retry:active { transform: scale(0.99); }
+      .hint {
+        margin: 20px 0 0;
+        font-size: 12.5px;
+        opacity: 0.7;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .spinner, .orbs span, .card { animation: none; }
+        #dlbar { transition: none; }
+      }
+    </style>
   </head>
   <body>
-    <div id="main" class="container">
+    <div class="orbs" aria-hidden="true"><span></span><span></span></div>
+    <main id="main" class="card">
       <img src="memories.svg" alt="Memories Logo" class="logo" />
-      <p id="waiting">
-        Waiting for login to complete <br />
-        Keep this page open in the background
-      </p>
-    </div>
+
+      <div class="spinner-wrap">
+        <div id="spinner" class="spinner" role="status" aria-label="Loading"></div>
+      </div>
+
+      <h1 id="status-title">Waiting for login</h1>
+      <p id="waiting" class="subtitle">Keeping this page open in the background</p>
+
+      <div id="dl" style="display: none">
+        <div class="bar-track">
+          <div id="dlbar"></div>
+        </div>
+        <div class="dl-row">
+          <p id="dltxt"></p>
+          <span id="pct"></span>
+        </div>
+        <button
+          id="retry"
+          class="m-button"
+          style="display: none"
+          onclick="globalThis.nativex?.reload()"
+        >
+          Retry download
+        </button>
+      </div>
+
+      <p class="hint">Your photos will appear automatically once ready.</p>
+    </main>
+
+    <script>
+      // Draw under status / navigation bars; native makes them transparent.
+      try {
+        globalThis.nativex?.setTransparentBars(true, true);
+      } catch (e) {}
+
+      // Login phase (?login=1): just say waiting, never show asset errors.
+      // Asset progress only matters once login has completed (plain waiting.html).
+      const isLoginMode = new URLSearchParams(location.search).has("login");
+
+      const spinner = document.getElementById("spinner");
+      const title = document.getElementById("status-title");
+      const waiting = document.getElementById("waiting");
+      const dl = document.getElementById("dl");
+      const dltxt = document.getElementById("dltxt");
+      const pct = document.getElementById("pct");
+      const retry = document.getElementById("retry");
+
+      if (isLoginMode) {
+        dl.style.display = "none";
+        retry.style.display = "none";
+        title.textContent = "Waiting for login";
+        waiting.textContent = "Keeping this page open in the background";
+      }
+
+      async function pollAssets() {
+        if (isLoginMode) return;
+        try {
+          const res = await fetch("/api/assets/progress");
+          const j = await res.json();
+          if (j.total > 0) {
+            const done = Math.min(j.done, j.total);
+            const percent = Math.floor((100 * done) / j.total);
+            dl.style.display = "block";
+            dlbar.style.width = percent + "%";
+            pct.textContent = percent + "%";
+            retry.style.display = "none";
+            spinner.classList.remove("error");
+            spinner.style.display = "";
+
+            if (j.status === "ready") {
+              spinner.classList.add("done");
+              title.textContent = "You're all set";
+              waiting.style.display = "";
+              waiting.textContent = "Offline files are ready";
+              dltxt.textContent = done + " / " + j.total + " files";
+            } else if (j.status === "error") {
+              spinner.classList.remove("done");
+              spinner.classList.add("error");
+              title.textContent = "Download failed";
+              waiting.style.display = "";
+              waiting.textContent = "Check your connection, then try again";
+              dltxt.textContent =
+                "Offline download failed" + (j.error ? ": " + j.error : "");
+              retry.style.display = "inline-block";
+            } else {
+              // Downloading — main state requested
+              spinner.classList.remove("done");
+              title.textContent = "Updating Memories";
+              waiting.style.display = "none";
+              dltxt.textContent = done + " / " + j.total + " files";
+            }
+          } else {
+            pct.textContent = "";
+          }
+        } catch (e) {
+          // bridge not ready yet
+        }
+        setTimeout(pollAssets, 500);
+      }
+      pollAssets();
+    </script>
   </body>
 </html>

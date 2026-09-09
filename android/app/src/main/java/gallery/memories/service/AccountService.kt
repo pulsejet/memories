@@ -11,7 +11,11 @@ import gallery.memories.R
 import io.github.g00fy2.versioncompare.Version
 
 @UnstableApi
-class AccountService(private val mCtx: MainActivity, private val mHttp: HttpService) {
+class AccountService(
+    private val mCtx: MainActivity,
+    private val mHttp: HttpService,
+    private val mAssets: AssetService,
+) {
     companion object {
         val TAG = AccountService::class.java.simpleName
     }
@@ -27,12 +31,19 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
         try {
             mHttp.build(url, trustAll)
 
-            val res = mHttp.getApiDescription()
+            val res = mHttp.getApiDescriptionManifest()
             if (res.code != 200) {
                 throw Exception("${url}api/describe (status ${res.code})")
             }
 
             val body = mHttp.bodyJson(res) ?: throw Exception("Failed to parse API description")
+
+            // Start downloading web assets in the background (never blocks login)
+            try {
+                mAssets.sync(body)
+            } catch (e: Exception) {
+                Log.w(TAG, "Asset sync did not start: ${e.message}")
+            }
 
             val baseUrl = body.getString("baseUrl")
             val loginFlowUrl = body.getString("loginFlowUrl")
@@ -81,7 +92,8 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
      */
     private fun pollLogin(pollUrl: String, pollToken: String, baseUrl: String) {
         mCtx.binding.webview.post {
-            mCtx.binding.webview.loadUrl("file:///android_asset/waiting.html")
+            mCtx.setTransparentBars(true, true)
+            mCtx.binding.webview.loadUrl(mCtx.localStaticUrl("waiting.html") + "?login=1")
         }
 
         var pollCount = 0
@@ -104,14 +116,12 @@ class AccountService(private val mCtx: MainActivity, private val mHttp: HttpServ
                 val loginName = body.getString("loginName")
                 val appPassword = body.getString("appPassword")
 
-                toast("Logged in, waiting for next page ...")
-
                 mCtx.runOnUiThread {
                     // Save login info (also updates header)
                     storeCredentials(baseUrl, loginName, appPassword)
 
-                    // Go to next screen
-                    mHttp.loadWebView(mCtx.binding.webview, "nxsetup")
+                    // Serve locally, updating in the background if stale
+                    mCtx.startLocalApp()
                 }
 
                 return

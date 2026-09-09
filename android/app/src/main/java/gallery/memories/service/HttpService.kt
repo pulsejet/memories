@@ -6,6 +6,7 @@ import android.webkit.CookieManager
 import android.webkit.WebView
 import androidx.core.net.toUri
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.CookieJar
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -15,6 +16,7 @@ import org.json.JSONObject
 import java.security.SecureRandom
 import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
+import java.util.concurrent.TimeUnit
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.X509TrustManager
@@ -27,6 +29,7 @@ class HttpService {
 
     private var client = OkHttpClient()
     private var authHeader: String? = null
+    private var credentials: Pair<String, String>? = null
     private var mBaseUrl: String? = null
     private var mTrustAll = false
 
@@ -43,6 +46,40 @@ class HttpService {
      */
     fun isLoggedIn(): Boolean {
         return authHeader != null
+    }
+
+    /**
+     * Base URL of the memories app on the server, if known
+     */
+    fun baseUrl(): String? {
+        return mBaseUrl
+    }
+
+    /**
+     * Current authorization header value, if logged in
+     */
+    fun authHeader(): String? {
+        return authHeader
+    }
+
+    /**
+     * Stored credentials (username + app password), if logged in
+     */
+    fun credentials(): Pair<String, String>? {
+        return credentials
+    }
+
+    /**
+     * HTTP client for proxied requests: same TLS trust as the main client,
+     * but with timeouts suited for streaming.
+     */
+    fun newProxyClient(cookieJar: CookieJar? = null): OkHttpClient {
+        val builder = client.newBuilder()
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+        if (cookieJar != null) builder.cookieJar(cookieJar)
+        return builder.build()
     }
 
     /**
@@ -85,9 +122,11 @@ class HttpService {
         if (credentials != null) {
             val auth = "${credentials.first}:${credentials.second}"
             authHeader = "Basic ${Base64.encodeToString(auth.toByteArray(), Base64.NO_WRAP)}"
+            this.credentials = credentials
             return
         }
         authHeader = null
+        this.credentials = null
     }
 
     /**
@@ -145,6 +184,26 @@ class HttpService {
     @Throws(Exception::class)
     fun getApiDescription(): Response {
         return runRequest(buildGet("api/describe"))
+    }
+
+    /** Get the API description request including the asset manifests */
+    @Throws(Exception::class)
+    fun getApiDescriptionManifest(): Response {
+        return runRequest(buildGet("api/describe?manifest=1"))
+    }
+
+    /** Download raw bytes for an asset URL (public, no auth needed) */
+    @Throws(Exception::class)
+    fun downloadBytes(url: String): ByteArray {
+        val request = Request.Builder()
+            .url(url)
+            .header("User-Agent", "Memories")
+            .get()
+            .build()
+        client.newCall(request).execute().use { response ->
+            if (response.code != 200) throw Exception("HTTP ${response.code} for $url")
+            return response.body.bytes()
+        }
     }
 
     /** Make login flow request */

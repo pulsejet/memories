@@ -1,50 +1,361 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Memories</title>
     <link rel="stylesheet" href="styles.css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2b94f0" />
+    <meta name="color-scheme" content="dark" />
+    <style>
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding:
+          calc(24px + env(safe-area-inset-top, 0px))
+          calc(16px + env(safe-area-inset-right, 0px))
+          calc(24px + env(safe-area-inset-bottom, 0px))
+          calc(16px + env(safe-area-inset-left, 0px));
+        font-family: ui-sans-system, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
+        color: #fff;
+        background:
+          radial-gradient(600px 400px at 15% 10%, rgba(255,255,255,0.18), transparent 60%),
+          radial-gradient(700px 500px at 90% 90%, rgba(0,0,0,0.25), transparent 60%),
+          linear-gradient(165deg, #0d2038 0%, #174a7d 42%, var(--theme-color, #2b94f0) 100%);
+        overflow: auto;
+      }
+      .orbs { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+      .orbs span {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.35;
+        animation: drift 12s ease-in-out infinite alternate;
+      }
+      .orbs span:nth-child(1) { width: 280px; height: 280px; left: -80px; top: -60px; background: #7cc4ff; }
+      .orbs span:nth-child(2) { width: 320px; height: 320px; right: -100px; bottom: -80px; background: #0b3b66; opacity: 0.6; animation-delay: -6s; }
+      @keyframes drift {
+        from { transform: translateY(-12px) scale(1); }
+        to { transform: translateY(14px) scale(1.06); }
+      }
+      .card {
+        position: relative;
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.22);
+        border-radius: 28px;
+        padding: 40px 28px 28px;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.25);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+      }
+      .animatable { transition: opacity 0.7s ease, transform 0.7s ease; }
+      .invisible { transform: translateY(12px); opacity: 0; }
+      .logo {
+        width: 172px;
+        max-width: 60vw;
+        height: auto;
+        margin: 0 auto 16px;
+        filter: drop-shadow(0 6px 20px rgba(0,0,0,0.3));
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 26px;
+        letter-spacing: -0.02em;
+        font-weight: 800;
+      }
+      .subtitle {
+        margin: 0 auto 24px;
+        max-width: 32ch;
+        font-size: 14.5px;
+        line-height: 1.6;
+        opacity: 0.9;
+      }
+      .field { text-align: left; margin-bottom: 6px; }
+      .field label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        opacity: 0.9;
+        margin: 0 4px 8px;
+      }
+      .input-wrap { position: relative; }
+      .input-wrap svg {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        opacity: 0.55;
+      }
+      input.m-input {
+        width: 100%;
+        padding: 14px 14px 14px 42px;
+        font-size: 16px;
+        border: 1.5px solid rgba(255,255,255,0.35);
+        border-radius: 16px;
+        background: rgba(255,255,255,0.96);
+        color: #10233a;
+        outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      input.m-input::placeholder { color: #8a9bb0; }
+      input.m-input:focus {
+        border-color: #fff;
+        box-shadow: 0 0 0 4px rgba(255,255,255,0.25);
+      }
+      input.m-input:disabled { opacity: 0.7; }
+      .trust { margin: 14px 2px 6px; }
+      .trust label {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-align: left;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.22);
+        border-radius: 16px;
+        padding: 12px 14px;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      .trust label:hover { background: rgba(255,255,255,0.13); }
+      .trust label:has(input:checked) {
+        border-color: rgba(255,196,0,0.65);
+        background: rgba(255,196,0,0.12);
+      }
+      .trust label:has(input:focus-visible) {
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.35);
+        outline: none;
+      }
+      input[type="checkbox"].m-checkbox {
+        appearance: none;
+        -webkit-appearance: none;
+        flex: 0 0 auto;
+        width: 24px;
+        height: 24px;
+        margin: 0;
+        border-radius: 8px;
+        border: 2px solid rgba(255,255,255,0.75);
+        background: transparent;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+      }
+      input[type="checkbox"].m-checkbox:active { transform: scale(0.94); }
+      input[type="checkbox"].m-checkbox::after {
+        content: "";
+        width: 11px;
+        height: 6px;
+        border-left: 3px solid #0f3a5f;
+        border-bottom: 3px solid #0f3a5f;
+        transform: rotate(-45deg) translateY(-1px) scale(0);
+        transition: transform 0.15s ease;
+      }
+      input[type="checkbox"].m-checkbox:checked {
+        background: #fff;
+        border-color: #fff;
+      }
+      input[type="checkbox"].m-checkbox:checked::after {
+        transform: rotate(-45deg) translateY(-1px) scale(1);
+      }
+      .trust-text { font-size: 13.5px; line-height: 1.45; font-weight: 600; }
+      .trust-text em {
+        font-style: normal;
+        font-weight: 800;
+        font-size: 10.5px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        background: rgba(255,196,0,0.92);
+        color: #3a2a00;
+        padding: 2px 8px;
+        border-radius: 999px;
+        margin-left: 6px;
+        white-space: nowrap;
+        vertical-align: 1px;
+      }
+      .trust-sub { display: block; font-weight: 400; opacity: 0.75; font-size: 12px; margin-top: 3px; }
+      .login-button {
+        width: 100%;
+        margin-top: 16px;
+        border: 0;
+        border-radius: 999px;
+        padding: 15px 20px;
+        font-size: 16px;
+        font-weight: 800;
+        color: #0f3a5f;
+        background: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.28);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      }
+      .login-button:not(:disabled):hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 34px rgba(0,0,0,0.32);
+      }
+      .login-button:not(:disabled):active { transform: translateY(0) scale(0.99); }
+      .login-button:disabled {
+        background: rgba(255,255,255,0.55);
+        color: rgba(15,58,95,0.55);
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      .login-button .btn-spinner {
+        display: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2.5px solid rgba(15,58,95,0.25);
+        border-top-color: #0f3a5f;
+        animation: spin 0.8s linear infinite;
+      }
+      .login-button.loading .btn-spinner { display: inline-block; }
+      .login-button.loading .arrow { display: none; }
+      .login-button .arrow {
+        display: inline-flex;
+        align-items: center;
+        line-height: 1;
+        transform: translateY(-0.12em);
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 20px 4px 12px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        opacity: 0.7;
+      }
+      .divider::before, .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: rgba(255,255,255,0.3);
+      }
+      .m-button.link {
+        display: inline-block;
+        padding: 10px 18px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.4);
+        color: #fff;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 700;
+        background: rgba(255,255,255,0.1);
+        transition: background 0.2s ease;
+      }
+      .m-button.link:hover { background: rgba(255,255,255,0.2); }
+      .features {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 22px;
+        font-size: 12px;
+        opacity: 0.8;
+      }
+      .features span { display: flex; align-items: center; gap: 6px; }
+      #err {
+        display: none;
+        margin: 12px 4px 0;
+        font-size: 13px;
+        line-height: 1.5;
+        background: rgba(120, 20, 20, 0.35);
+        border: 1px solid rgba(255,255,255,0.25);
+        padding: 10px 12px;
+        border-radius: 12px;
+      }
+      .shake { animation: shake 0.3s ease; }
+      @keyframes shake {
+        25% { transform: translateX(-4px); }
+        50% { transform: translateX(4px); }
+        75% { transform: translateX(-2px); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .animatable, .orbs span { animation: none; transition: none; }
+      }
+    </style>
   </head>
   <body>
-    <div id="main" class="container animatable invisible">
+    <div class="orbs" aria-hidden="true"><span></span><span></span></div>
+
+    <div id="main" class="card animatable invisible">
       <img src="memories.svg" alt="Memories Logo" class="logo" />
-      <p>
+      <h1>Welcome to Memories</h1>
+      <p class="subtitle">
         Start organizing and sharing your precious moments. Enter the address of
         your Nextcloud server to begin.
       </p>
 
-      <input
-        type="url"
-        id="server-url"
-        class="m-input"
-        placeholder="nextcloud.example.com"
-      />
+      <div class="field">
+        <label for="server-url">Server address</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#10233a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <input
+            type="url"
+            id="server-url"
+            class="m-input"
+            placeholder="nextcloud.example.com"
+            autocomplete="url"
+            autocapitalize="off"
+            spellcheck="false"
+            inputmode="url"
+          />
+        </div>
+      </div>
 
       <div class="trust">
         <label for="trust-all">
-          <input
-            type="checkbox"
-            id="trust-all"
-            class="m-checkbox"
-          />
-          Disable certificate verification (unsafe)
+          <input type="checkbox" id="trust-all" class="m-checkbox" />
+          <span class="trust-text">Disable certificate verification<em>unsafe</em>
+            <span class="trust-sub">Only needed for self-signed home servers</span>
+          </span>
         </label>
       </div>
 
       <button class="m-button login-button" id="login">
-        Continue to Login
+        <span class="btn-spinner" aria-hidden="true"></span>
+        <span id="login-text">Continue to Login</span>
+        <span class="arrow" aria-hidden="true">→</span>
       </button>
-      <br />
+
+      <p id="err" role="alert"></p>
+
+      <div class="divider">or</div>
 
       <a class="m-button link" href="https://memories.gallery/install/">
         I don't have a server
       </a>
+
+      <div class="features" aria-hidden="true">
+        <span>✦ Fast</span>
+        <span>🔒 Private</span>
+      </div>
     </div>
 
     <script>
       const urlBox = document.getElementById("server-url");
       const loginButton = document.getElementById("login");
+      const loginText = document.getElementById("login-text");
+      const card = document.getElementById("main");
+      const err = document.getElementById("err");
 
       function validateUrl(url) {
         try {
@@ -58,7 +369,7 @@
       }
 
       function getUrl() {
-          const url = urlBox.value;
+          const url = urlBox.value.trim();
           if (!url.startsWith("http://") && !url.startsWith("https://")) {
               return "https://" + url;
           }
@@ -88,8 +399,22 @@
         return url;
       }
 
+      function showError(msg) {
+        err.textContent = msg;
+        err.style.display = "block";
+        card.classList.remove("shake");
+        void card.offsetWidth;
+        card.classList.add("shake");
+      }
+
       // Update login button enabled state when the URL changes
-      urlBox.addEventListener("input", updateLoginEnabled);
+      urlBox.addEventListener("input", () => {
+        err.style.display = "none";
+        updateLoginEnabled();
+      });
+      urlBox.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !loginButton.disabled) loginButton.click();
+      });
       updateLoginEnabled();
 
       // Login button click handler
@@ -97,6 +422,9 @@
         try {
           urlBox.disabled = true;
           loginButton.disabled = true;
+          loginButton.classList.add("loading");
+          loginText.textContent = "Connecting";
+          err.style.display = "none";
 
           // Abort request after 5 seconds
           const controller = new AbortController();
@@ -108,26 +436,29 @@
           // Trust all certificates
           const trustAll = document.getElementById("trust-all").checked ? "1" : "0";
 
-          await fetch(`http://127.0.0.1/api/login/${encUrl}?trustAll=${trustAll}`, {
+          await fetch(`/api/login/${encUrl}?trustAll=${trustAll}`, {
             method: "GET",
             signal: controller.signal,
           });
 
           // API is fine, redirect to login page
           clearTimeout(timeoutId);
+          loginText.textContent = "Redirecting";
         } catch (e) {
-          // unreachable?
+          // unreachable? native side will toast; show inline hint too
+          showError("Could not reach that server. Check the address and try again.");
         } finally {
           urlBox.disabled = false;
-          loginButton.disabled = false;
+          loginButton.classList.remove("loading");
+          loginText.textContent = "Continue to Login";
+          updateLoginEnabled();
         }
       });
 
-      // Set action bar color
-      const themeColor = getComputedStyle(
-        document.documentElement
-      ).getPropertyValue("--theme-color");
-      globalThis.nativex?.setThemeColor(themeColor, true);
+      // Transparent system bars so the gradient draws edge-to-edge
+      try {
+        globalThis.nativex?.setTransparentBars(true, true);
+      } catch (e) {}
 
       // Make container visible
       document.getElementById("main").classList.remove("invisible");

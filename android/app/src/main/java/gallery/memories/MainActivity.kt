@@ -21,8 +21,8 @@ import android.webkit.PermissionRequest
 import android.webkit.SslErrorHandler
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -46,6 +46,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import gallery.memories.databinding.ActivityMainBinding
+import gallery.memories.service.AssetService
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -73,11 +74,15 @@ class MainActivity : AppCompatActivity() {
 
     private var mNeedRefresh = false
 
+    var isTransparentBars = false
+        private set
+
     private val memoriesRegex = Regex("/apps/memories/.*$")
     private var host: String? = null
 
     private var chooseFileCallback: ValueCallback<Array<Uri>>? = null
     private lateinit var chooseFileIntentLauncher: ActivityResultLauncher<Intent>
+    private var mClearHistoryOnLoad = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,13 +95,23 @@ class MainActivity : AppCompatActivity() {
             // This way we can still set the background of the root and make sure the style
             // is visible under the status and navigation bars.
             binding.coordinator.setOnApplyWindowInsetsListener { v, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsets.Type.systemBars())
-                // Apply the insets as a margin to the view.
-                v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    leftMargin = insets.left
-                    rightMargin = insets.right
-                    topMargin = insets.top
-                    bottomMargin = insets.bottom
+                if (isTransparentBars) {
+                    // Edge-to-edge pages (welcome / waiting): draw under system bars.
+                    v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        leftMargin = 0
+                        rightMargin = 0
+                        topMargin = 0
+                        bottomMargin = 0
+                    }
+                } else {
+                    val insets = windowInsets.getInsets(WindowInsets.Type.systemBars())
+                    // Apply the insets as a margin to the view.
+                    v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        leftMargin = insets.left
+                        rightMargin = insets.right
+                        topMargin = insets.top
+                        bottomMargin = insets.bottom
+                    }
                 }
 
                 // Don't want the window insets to keep passing down to descendant views.
@@ -224,6 +239,11 @@ class MainActivity : AppCompatActivity() {
                 view: WebView,
                 request: WebResourceRequest
             ): Boolean {
+                // Everything on the localhost proxy is internal
+                if (request.url.host == "127.0.0.1") {
+                    return false
+                }
+
                 val pathMatches = request.url.path?.matches(memoriesRegex) == true
                 val hostMatches = request.url.host.equals(host)
                 if (pathMatches && hostMatches) {
@@ -240,13 +260,31 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
 
-            override fun shouldInterceptRequest(
+            override fun onPageFinished(view: WebView, url: String) {
+                super.onPageFinished(view, url)
+                if (mClearHistoryOnLoad) {
+                    mClearHistoryOnLoad = false
+                    view.clearHistory()
+                }
+            }
+
+            override fun onReceivedError(
                 view: WebView,
-                request: WebResourceRequest
-            ): WebResourceResponse? {
-                return if (request.url.host == "127.0.0.1") {
-                    nativex.handleRequest(request)
-                } else null
+                request: WebResourceRequest,
+                error: WebResourceError
+            ) {
+                if (request.isForMainFrame) {
+                    Log.w(
+                        TAG,
+                        "Page failed: ${request.url} " +
+                            "code=${error.errorCode} ${error.description}"
+                    )
+                    Toast.makeText(
+                        view.context,
+                        "Failed to load page: ${error.description}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
 
             @SuppressLint("WebViewClientOnReceivedSslError")
@@ -324,6 +362,33 @@ class MainActivity : AppCompatActivity() {
 
         // Welcome page or actual app
         nativex.account.refreshCredentials()
+
+        // Start the localhost server first: every page (welcome included)
+        // is served through it now.
+        try {
+            nativex.local.ensureStarted()
+        } catch (e: Exception) {
+            Log.w(TAG, "Local server failed to start: ${e.message}")
+            Toast.makeText(this, "Local server failed to start", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        // Hand the per-process server secret to the WebView (and ExoPlayer,
+        // which copies WebView cookies into its requests). Without this
+        // cookie the localhost server rejects everything, so other
+        // on-device apps cannot use it. The set is async: only load once
+        // it completes, otherwise the first requests go out cookieless
+        // and get rejected.
+        CookieManager.getInstance().setCookie(
+            "http://127.0.0.1/",
+            "local-auth=${nativex.local.secret}; Path=/"
+        ) {
+            runOnUiThread { onLocalCookieReady() }
+        }
+        CookieManager.getInstance().flush()
+    }
+
+    private fun onLocalCookieReady() {
         val isApp = loadDefaultUrl()
 
         // Start version check if loaded account
@@ -334,13 +399,103 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun loadDefaultUrl(): Boolean {
-        // Load app interface if authenticated
-        host = nativex.http.loadWebView(binding.webview)
-        if (host != null) return true
+        // Logged in: app first, reconcile assets in the background
+        if (nativex.http.baseUrl() != null) {
+            startLocalApp()
+            return true
+        }
 
-        // Load welcome page
-        binding.webview.loadUrl("file:///android_asset/welcome.html")
+        // Not logged in: drop any stale proxy session and show welcome
+        nativex.local.resetSession()
+        setTransparentBars(true, true)
+        binding.webview.loadUrl(localStaticUrl("welcome.html"))
         return false
+    }
+
+    /** Load the snapshot on disk now; update in the background if stale. */
+    fun startLocalApp() {
+        val base = nativex.http.baseUrl() ?: return
+        if (nativex.assets.hasSnapshot(base) && loadLocalApp()) {
+            Thread { backgroundUpdateCheck() }.start()
+        } else {
+            showWaitingAndEnsure()
+        }
+    }
+
+    private fun backgroundUpdateCheck() {
+        try {
+            val fresh = nativex.assets.fetchDescribe() ?: return
+            if (nativex.assets.isCurrent(fresh)) return
+            Log.i(TAG, "Assets changed, updating in foreground")
+        runOnUiThread {
+            setTransparentBars(true, true)
+            binding.webview.loadUrl(localStaticUrl("waiting.html"))
+        }
+        if (!nativex.assets.syncAndAwait(fresh, 15 * 60 * 1000)) {
+            runOnUiThread { nativex.toast("Update failed", true) }
+            return
+        }
+        runOnUiThread { loadLocalApp() }
+        } catch (e: Exception) {
+            Log.w(TAG, "Update check failed", e)
+            runOnUiThread { nativex.toast("Update check failed", true) }
+        }
+    }
+
+    /**
+     * Show progress, ensure a current asset snapshot (downloading first
+     * if needed), then load the local shell. Only used when there is
+     * nothing on disk yet; otherwise the app loads first and updates
+     * in the background.
+     */
+    private fun showWaitingAndEnsure() {
+        host = "127.0.0.1"
+        setTransparentBars(true, true)
+        binding.webview.loadUrl(localStaticUrl("waiting.html"))
+        Thread {
+            try {
+                val ok = nativex.assets.ensureFreshAndWait()
+                Log.i(TAG, "Offline ensure done: $ok")
+                runOnUiThread {
+                    if (ok) {
+                        if (!loadLocalApp()) {
+                            Log.w(TAG, "Offline ensure ok but load failed")
+                            nativex.toast("Could not load offline files", true)
+                        }
+                    } else {
+                        nativex.toast("Could not load offline files", true)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Offline ensure failed", e)
+                runOnUiThread { nativex.toast("Could not load offline files", true) }
+            }
+        }.start()
+    }
+
+    /** URL of a bundled entry page, served through the localhost server. */
+    fun localStaticUrl(name: String): String {
+        return nativex.local.origin() + "/local/static/$name"
+    }
+
+    /**
+     * Load the locally served app from the current snapshot.
+     * Session and CSRF heal inline on first use.
+     */
+    fun loadLocalApp(): Boolean {
+        val base = nativex.http.baseUrl() ?: return false
+        val (_, dir) = nativex.assets.current ?: nativex.assets.latestSnapshot(base) ?: return false
+        val describe = nativex.assets.readDescribe(dir) ?: return false
+
+        val webRoot = AssetService.webrootOf(base)
+        nativex.local.configure(AssetService.originOf(base), webRoot, dir, base)
+
+        // Session and token heal inline on first use; load straight away.
+        host = "127.0.0.1"
+        binding.webview.clearHistory()
+        mClearHistoryOnLoad = true
+        binding.webview.loadUrl(nativex.local.origin() + "$webRoot/")
+        return true
     }
 
     fun initializePlayer(uris: Array<Uri>, uid: Long, loop: Boolean = false) {
@@ -509,6 +664,15 @@ class MainActivity : AppCompatActivity() {
      */
     fun applyTheme(color: String?, isDark: Boolean) {
         if (color == null) return
+        isTransparentBars = false
+
+        if (SDK_INT < 35) {
+            androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true)
+        }
+        if (SDK_INT >= 29) {
+            window.isStatusBarContrastEnforced = true
+            window.isNavigationBarContrastEnforced = true
+        }
 
         // Set system bars
         val appearance =
@@ -527,6 +691,56 @@ class MainActivity : AppCompatActivity() {
         } catch (_: Exception) {
             Log.w(TAG, "Invalid color: $color")
             return
+        }
+
+        if (SDK_INT >= 35) {
+            binding.coordinator.requestApplyInsets()
+        }
+    }
+
+    /**
+     * Make status and navigation bars transparent so edge-to-edge
+     * pages (welcome / waiting) draw underneath them.
+     * The page background is dark, so light icons are used by default.
+     */
+    fun setTransparentBars(transparent: Boolean, isDark: Boolean = true) {
+        isTransparentBars = transparent
+        if (!transparent) {
+            restoreTheme()
+            return
+        }
+
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
+        if (SDK_INT >= 29) {
+            window.isStatusBarContrastEnforced = false
+            window.isNavigationBarContrastEnforced = false
+        }
+
+        val appearance =
+            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+        window.insetsController?.setSystemBarsAppearance(
+            if (isDark) 0 else appearance,
+            appearance
+        )
+
+        try {
+            window.statusBarColor = Color.TRANSPARENT
+            window.navigationBarColor = Color.TRANSPARENT
+        } catch (_: Exception) {
+        }
+        try {
+            // Matches the top of the welcome / waiting gradient.
+            binding.root.setBackgroundColor(Color.parseColor("#0d2038"))
+        } catch (_: Exception) {
+        }
+        try {
+            binding.coordinator.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = 0
+                rightMargin = 0
+                topMargin = 0
+                bottomMargin = 0
+            }
+        } catch (_: Exception) {
         }
     }
 

@@ -1,17 +1,19 @@
 package gallery.memories
 
+import android.net.Uri
 import android.util.Log
 import android.view.SoundEffectConstants
 import android.webkit.JavascriptInterface
-import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.mapper.Response
 import gallery.memories.service.AccountService
+import gallery.memories.service.AssetService
 import gallery.memories.service.DownloadService
 import gallery.memories.service.HttpService
 import gallery.memories.service.ImageService
+import gallery.memories.service.LocalServer
 import gallery.memories.service.PermissionsService
 import gallery.memories.service.TimelineQuery
 import org.json.JSONArray
@@ -25,7 +27,9 @@ class NativeX(private val mCtx: MainActivity) {
     val query = TimelineQuery(mCtx)
     val image = ImageService(mCtx, query)
     val http = HttpService()
-    val account = AccountService(mCtx, http)
+    val assets = AssetService(mCtx, http)
+    val local = LocalServer(mCtx, http, assets) { method, url -> handleBridge(method, url) }
+    val account = AccountService(mCtx, http, assets)
     val permissions = PermissionsService(mCtx).register()
 
     init {
@@ -39,6 +43,7 @@ class NativeX(private val mCtx: MainActivity) {
 
     fun destroy() {
         dlService = null
+        local.stop()
         query.destroy()
     }
 
@@ -58,11 +63,20 @@ class NativeX(private val mCtx: MainActivity) {
         val SHARE_BLOB = Regex("^/api/share/blobs$")
 
         val CONFIG_ALLOW_MEDIA = Regex("^/api/config/allow_media/\\d+$")
+
+        val ASSETS_PROGRESS = Regex("^/api/assets/progress$")
     }
 
     @JavascriptInterface
     fun isNative(): Boolean {
         return true
+    }
+
+    @JavascriptInterface
+    fun setTransparentBars(transparent: Boolean, isDark: Boolean) {
+        mCtx.runOnUiThread {
+            mCtx.setTransparentBars(transparent, isDark)
+        }
     }
 
     @JavascriptInterface
@@ -188,13 +202,13 @@ class NativeX(private val mCtx: MainActivity) {
         }
     }
 
-    fun handleRequest(request: WebResourceRequest): WebResourceResponse {
-        val path = request.url.path ?: return makeErrorResponse()
+    fun handleBridge(method: String, url: Uri): WebResourceResponse {
+        val path = url.path ?: return makeErrorResponse()
 
         val response = try {
-            when (request.method) {
+            when (method) {
                 "GET" -> {
-                    routerGet(request)
+                    routerGet(url)
                 }
 
                 "OPTIONS" -> {
@@ -210,7 +224,7 @@ class NativeX(private val mCtx: MainActivity) {
                 }
             }
         } catch (e: Exception) {
-            Log.w(TAG, "handleRequest: " + e.message)
+            Log.w(TAG, "handleBridge: " + e.message)
             makeErrorResponse()
         }
 
@@ -229,14 +243,14 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     @Throws(Exception::class)
-    private fun routerGet(request: WebResourceRequest): WebResourceResponse {
-        val path = request.url.path ?: return makeErrorResponse()
+    private fun routerGet(url: Uri): WebResourceResponse {
+        val path = url.path ?: return makeErrorResponse()
 
         val parts = path.split("/").toTypedArray()
         return if (path.matches(API.LOGIN)) {
             account.login(
                 URLDecoder.decode(parts[3], "UTF-8"),
-                request.url.getBooleanQueryParameter("trustAll", false)
+                url.getBooleanQueryParameter("trustAll", false)
             )
             makeResponse(Response.OK)
         } else if (path.matches(API.DAYS)) {
@@ -249,15 +263,15 @@ class NativeX(private val mCtx: MainActivity) {
             makeResponse(
                 query.delete(
                     parseIds(parts[4]),
-                    request.url.getBooleanQueryParameter("dry", false)
+                    url.getBooleanQueryParameter("dry", false)
                 )
             )
         } else if (path.matches(API.IMAGE_PREVIEW)) {
-            val x = request.url.getQueryParameter("x")?.toInt()
-            val y = request.url.getQueryParameter("y")?.toInt()
+            val x = url.getQueryParameter("x")?.toInt()
+            val y = url.getQueryParameter("y")?.toInt()
             makeResponse(image.getPreview(parts[3].toLong(), x, y), "image/jpeg")
         } else if (path.matches(API.IMAGE_FULL)) {
-            val size = request.url.getQueryParameter("size")?.toInt()
+            val size = url.getQueryParameter("size")?.toInt()
             makeResponse(image.getFull(parts[3], size), "image/jpeg")
         } else if (path.matches(API.SHARE_URL)) {
             makeResponse(dlService!!.shareUrl(URLDecoder.decode(parts[4], "UTF-8")))
@@ -269,6 +283,8 @@ class NativeX(private val mCtx: MainActivity) {
                 doMediaSync(true) // separate thread
             }
             makeResponse("done")
+        } else if (path.matches(API.ASSETS_PROGRESS)) {
+            makeResponse(assets.progressJson())
         } else {
             throw Exception("Path did not match any known API route: $path")
         }
