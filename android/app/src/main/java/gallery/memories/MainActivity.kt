@@ -1,7 +1,6 @@
 package gallery.memories
 
 import android.annotation.SuppressLint
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
@@ -14,7 +13,6 @@ import android.webkit.WebView
 import android.window.OnBackInvokedDispatcher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
-import gallery.memories.data.remote.http.TlsTrust
 import gallery.memories.databinding.ActivityMainBinding
 import gallery.memories.ui.player.VideoPlayerManager
 import gallery.memories.ui.startup.AppStartupCoordinator
@@ -190,10 +188,4 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun refreshTimeline(force: Boolean = false) = eventBus.refreshTimeline(force)
-
-    fun busEmit(event: String, data: String = "null") = eventBus.busEmit(event, data)
-
-    fun setTrustAllCertificatesDefault() = TlsTrust.setDefaultInsecureTLS()
-
-    fun onOrientationChanged(config: Configuration) = edges.applyOrientation(config.orientation)
 }

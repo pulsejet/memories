@@ -1,13 +1,9 @@
 package gallery.memories.data.remote.http
 
-import android.webkit.CookieManager
-import android.webkit.WebView
-import androidx.core.net.toUri
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import org.json.JSONArray
 import org.json.JSONObject
 
 class NextcloudApi(
@@ -16,9 +12,6 @@ class NextcloudApi(
 ) {
     @Throws(Exception::class)
     fun bodyJson(response: Response): JSONObject? = getBody(response)?.let { JSONObject(it) }
-
-    @Throws(Exception::class)
-    fun bodyJsonArray(response: Response): JSONArray? = getBody(response)?.let { JSONArray(it) }
 
     @Throws(Exception::class)
     fun getBody(response: Response): String? {
@@ -57,20 +50,6 @@ class NextcloudApi(
             Request.Builder().url(pollUrl)
                 .post("token=$pollToken".toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())).build(),
         ).execute()
-    }
-
-    fun loadWebView(webView: WebView, subpath: String? = null): String? {
-        val header = auth.authHeader()
-        var url = auth.baseUrl()
-        if (header != null && url != null) {
-            if (subpath != null) url += subpath
-            val host = url.toUri().host
-            webView.clearHistory()
-            CookieManager.getInstance().setCookie(url, "nx_auth=$header; Path=/; Domain=$host; HttpOnly")
-            webView.loadUrl(url, mapOf("Authorization" to header))
-            return host
-        }
-        return null
     }
 
     private fun buildGet(path: String, withAuth: Boolean = true): Request {
