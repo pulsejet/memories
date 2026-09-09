@@ -308,7 +308,7 @@ export default defineComponent({
   },
 
   async beforeMount() {
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && !nativex.has()) {
       // Use the window load event to keep the page load performant
       window.addEventListener('load', async () => {
         try {
