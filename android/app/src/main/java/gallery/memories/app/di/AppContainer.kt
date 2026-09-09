@@ -1,6 +1,7 @@
 package gallery.memories.app.di
 
 import android.webkit.WebResourceResponse
+import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.auth.AccountManager
@@ -46,7 +47,9 @@ class AppContainer(
     val api = NextcloudApi(auth, clients)
     val cache = AssetCache(activity)
     val downloader = AssetDownloader(api)
-    val assets = AssetSyncCoordinator(auth, api, cache, downloader)
+    val assets = AssetSyncCoordinator(auth, api, cache, downloader, onError = { msg ->
+        activity.runOnUiThread { Toast.makeText(activity, msg, Toast.LENGTH_LONG).show() }
+    })
 
     private val db = AppDatabase.get(activity)
     val dao = db.photoDao()

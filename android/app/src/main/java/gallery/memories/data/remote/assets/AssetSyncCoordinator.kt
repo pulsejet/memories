@@ -19,6 +19,7 @@ class AssetSyncCoordinator(
     private val api: NextcloudApi,
     private val cache: AssetCache,
     private val downloader: AssetDownloader,
+    private val onError: (String) -> Unit = {},
 ) {
     companion object {
         private val TAG = AssetSyncCoordinator::class.java.simpleName
@@ -46,10 +47,17 @@ class AssetSyncCoordinator(
     fun readDescribe(dir: File) = cache.readDescribe(dir)
     fun hasSnapshot(baseUrl: String) = cache.hasSnapshot(baseUrl)
 
+    /** Fetches describeApi and refuses manifests with a missing or invalid signature. */
     fun fetchDescribe(): JSONObject? {
         return try {
             api.getApiDescriptionManifest().use { res ->
-                if (res.code != 200) null else api.bodyJson(res)
+                if (res.code != 200) return@use null
+                val body = api.bodyJson(res) ?: return@use null
+                if (!ManifestVerifier.verifyDescribe(body)) {
+                    onError("Asset manifest signature verification failed")
+                    return@use null
+                }
+                body
             }
         } catch (_: Exception) {
             null

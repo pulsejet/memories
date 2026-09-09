@@ -10,6 +10,7 @@ import gallery.memories.R
 import gallery.memories.data.local.secure.Credential
 import gallery.memories.data.local.secure.SecureCredentialStore
 import gallery.memories.data.remote.assets.AssetSyncCoordinator
+import gallery.memories.data.remote.assets.ManifestVerifier
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.HttpClients
 import gallery.memories.data.remote.http.NextcloudApi
@@ -44,6 +45,9 @@ class AccountManager(
                 throw Exception("$url/api/describe (status ${res.code})")
             }
             val body = api.bodyJson(res) ?: throw Exception("Failed to parse API description")
+            if (!ManifestVerifier.verifyDescribe(body)) {
+                throw Exception("Asset manifest signature verification failed")
+            }
             try {
                 assets.sync(body)
             } catch (e: Exception) {
