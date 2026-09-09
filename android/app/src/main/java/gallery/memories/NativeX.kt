@@ -216,7 +216,9 @@ class NativeX(private val mCtx: MainActivity) {
                         "text/plain",
                         "UTF-8",
                         ByteArrayInputStream("".toByteArray())
-                    )
+                    ).apply {
+                        setStatusCodeAndReasonPhrase(200, "OK")
+                    }
                 }
 
                 else -> {
@@ -224,7 +226,7 @@ class NativeX(private val mCtx: MainActivity) {
                 }
             }
         } catch (e: Exception) {
-            Log.w(TAG, "handleBridge: " + e.message)
+            Log.w(TAG, "handleBridge: $method $path failed", e)
             makeErrorResponse()
         }
 
@@ -291,9 +293,10 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     private fun makeResponse(bytes: ByteArray?, mimeType: String?): WebResourceResponse {
-        return if (bytes != null) {
-            WebResourceResponse(mimeType, "UTF-8", ByteArrayInputStream(bytes))
-        } else makeErrorResponse()
+        if (bytes == null) return makeErrorResponse()
+        return WebResourceResponse(mimeType, "UTF-8", ByteArrayInputStream(bytes)).apply {
+            setStatusCodeAndReasonPhrase(200, "OK")
+        }
     }
 
     private fun makeResponse(json: Any): WebResourceResponse {

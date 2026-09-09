@@ -99,6 +99,8 @@ class HttpService {
         } else {
             OkHttpClient()
         }
+        client.dispatcher.maxRequests = 64
+        client.dispatcher.maxRequestsPerHost = AssetService.MAX_PARALLEL + 2
     }
 
     /**

@@ -309,7 +309,7 @@ class LocalServer(
         headers["Connection"] = "close"
 
         val code = try {
-            res.statusCode
+            res.statusCode.takeIf { it in 100..599 } ?: 200
         } catch (_: Exception) {
             200
         }
