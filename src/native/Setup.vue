@@ -17,11 +17,11 @@
         <br />
 
         <div class="buttons">
-        <NcButton
-          variant="secondary"
-          class="button button-white"
-          href="https://play.google.com/store/apps/details?id=com.nextcloud.client"
-        >
+          <NcButton
+            variant="secondary"
+            class="button button-white"
+            href="https://play.google.com/store/apps/details?id=com.nextcloud.client"
+          >
             {{ t('memories', 'Set up automatic upload') }}
           </NcButton>
 
@@ -49,16 +49,21 @@
         }}
 
         <div class="buttons">
-          <NcButton variant="secondary" class="button button-white" @click="grantMediaPermission" v-if="!hasMediaPermission">
+          <NcButton
+            variant="secondary"
+            class="button button-white"
+            @click="grantMediaPermission"
+            v-if="!hasMediaPermission"
+          >
             {{ t('memories', 'Grant permissions') }}
           </NcButton>
 
-        <NcButton
-          :variant="hasMediaPermission ? 'secondary' : 'primary'"
-          class="button"
-          :class="{ 'button-white': hasMediaPermission }"
-          @click="step += hasMediaPermission ? 1 : 2"
-        >
+          <NcButton
+            :variant="hasMediaPermission ? 'secondary' : 'primary'"
+            class="button"
+            :class="{ 'button-white': hasMediaPermission }"
+            @click="step += hasMediaPermission ? 1 : 2"
+          >
             {{ hasMediaPermission ? t('memories', 'Continue') : t('memories', 'Skip this step') }}
           </NcButton>
         </div>

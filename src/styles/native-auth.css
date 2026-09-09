@@ -18,12 +18,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding:
-    calc(24px + env(safe-area-inset-top, 0px))
-    calc(16px + env(safe-area-inset-right, 0px))
-    calc(24px + env(safe-area-inset-bottom, 0px))
-    calc(16px + env(safe-area-inset-left, 0px));
-  font-family: ui-sans-system, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-right, 0px))
+    calc(24px + env(safe-area-inset-bottom, 0px)) calc(16px + env(safe-area-inset-left, 0px));
+  font-family:
+    ui-sans-system,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Inter,
+    sans-serif;
   color: #fff;
   background:
     radial-gradient(600px 400px at 15% 10%, rgba(255, 255, 255, 0.18), transparent 60%),
