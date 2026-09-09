@@ -31,6 +31,7 @@ declare module '@typings' {
     video_loop: boolean;
     sidebar_filepath: boolean;
     metadata_in_slideshow: boolean;
+    slideshow_duration: number;
 
     // on this day settings
     onthisday_day_range: number;

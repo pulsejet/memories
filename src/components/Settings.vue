@@ -110,6 +110,17 @@
             >{{ t('memories', 'Never load high resolution image') }}
           </NcCheckboxRadioSwitch>
         </div>
+
+        <NcTextField
+          :label="t('memories', 'Slideshow duration in seconds (1-60)')"
+          :label-visible="true"
+          :model-value="config.slideshow_duration"
+          type="number"
+          min="1"
+          max="60"
+          step="1"
+          @update:model-value="updateSlideshowDuration"
+        />
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="account-settings" :name="names.account" v-if="isNative">
@@ -389,6 +400,13 @@ export default defineComponent({
 
     async updateMetadataInSlideshow() {
       await this.updateSetting('metadata_in_slideshow', 'metadataInSlideshow');
+    },
+
+    async updateSlideshowDuration(val: string | number) {
+      const n = typeof val === 'number' ? val : parseFloat(val);
+      if (!Number.isFinite(n)) return;
+      this.config.slideshow_duration = Math.min(60, Math.max(1, Math.round(n)));
+      await this.updateSetting('slideshow_duration', 'slideshowDuration');
     },
 
     // On This Day settings

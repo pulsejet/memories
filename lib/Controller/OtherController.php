@@ -110,6 +110,7 @@ final class OtherController extends GenericApiController
                 'livephoto_loop' => 'true' === $getAppConfig('livephotoLoop', 'false'),
                 'video_loop' => 'true' === $getAppConfig('videoLoop', 'false'),
                 'sidebar_filepath' => 'true' === $getAppConfig('sidebarFilepath', 'false'),
+                'slideshow_duration' => (int) $getAppConfig('slideshowDuration', '5'),
 
                 // on this day settings
                 'onthisday_day_range' => (int) $getAppConfig('onthisdayDayRange', '3'),

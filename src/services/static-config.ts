@@ -143,6 +143,7 @@ class StaticConfig {
       video_loop: false,
       sidebar_filepath: false,
       metadata_in_slideshow: false,
+      slideshow_duration: 5,
 
       // on this day settings
       onthisday_day_range: 3,
@@ -170,7 +171,8 @@ class StaticConfig {
       if (typeof config[key] === 'boolean') {
         config[key] = (value === 'true') as V;
       } else if (typeof config[key] === 'number') {
-        config[key] = Number(value) as V;
+        const n = Number(value);
+        if (Number.isFinite(n)) config[key] = n as V;
       } else {
         config[key] = value as V;
       }

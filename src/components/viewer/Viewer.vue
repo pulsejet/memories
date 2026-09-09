@@ -106,7 +106,7 @@ type IViewerAction = {
   if: boolean;
 };
 
-const SLIDESHOW_MS = 5000;
+const DEFAULT_SLIDESHOW_MS = 5000;
 const SIDEBAR_DEBOUNCE_MS = 350;
 const BODY_VIEWER_VIDEO = 'viewer-video';
 const BODY_VIEWER_FULLY_OPENED = 'viewer-fully-opened';
@@ -1241,7 +1241,7 @@ export default defineComponent({
       setTimeout(() => this.setUiVisible(false), 1);
 
       // Start slideshow
-      this.slideshowTimer = window.setTimeout(this.slideshowTimerFired, SLIDESHOW_MS);
+      this.slideshowTimer = window.setTimeout(this.slideshowTimerFired, this.getSlideshowMs());
     },
 
     /**
@@ -1277,8 +1277,17 @@ export default defineComponent({
     resetSlideshowTimer() {
       if (this.slideshowTimer) {
         window.clearTimeout(this.slideshowTimer);
-        this.slideshowTimer = window.setTimeout(this.slideshowTimerFired, SLIDESHOW_MS);
+        this.slideshowTimer = window.setTimeout(this.slideshowTimerFired, this.getSlideshowMs());
       }
+    },
+
+    /**
+     * Get the slideshow interval in milliseconds from user config
+     */
+    getSlideshowMs() {
+      const secs = Number(this.config.slideshow_duration);
+      if (!Number.isFinite(secs)) return DEFAULT_SLIDESHOW_MS;
+      return utils.clamp(Math.round(secs), 1, 60) * 1000;
     },
 
     /**
