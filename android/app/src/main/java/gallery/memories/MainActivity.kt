@@ -413,12 +413,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Load the snapshot on disk now; update in the background if stale. */
-    fun startLocalApp() {
+    fun startLocalApp(toNxSetup: Boolean = false) {
         val base = nativex.http.baseUrl() ?: return
-        if (nativex.assets.hasSnapshot(base) && loadLocalApp()) {
+        val subpath = if (toNxSetup) "nxsetup" else ""
+        if (nativex.assets.hasSnapshot(base) && loadLocalApp(subpath)) {
             Thread { backgroundUpdateCheck() }.start()
         } else {
-            showWaitingAndEnsure()
+            showWaitingAndEnsure(toNxSetup)
         }
     }
 
@@ -448,7 +449,7 @@ class MainActivity : AppCompatActivity() {
      * nothing on disk yet; otherwise the app loads first and updates
      * in the background.
      */
-    private fun showWaitingAndEnsure() {
+    private fun showWaitingAndEnsure(toNxSetup: Boolean = false) {
         host = "127.0.0.1"
         setTransparentBars(true, true)
         binding.webview.loadUrl(localStaticUrl("waiting.html"))
@@ -458,7 +459,7 @@ class MainActivity : AppCompatActivity() {
                 Log.i(TAG, "Offline ensure done: $ok")
                 runOnUiThread {
                     if (ok) {
-                        if (!loadLocalApp()) {
+                        if (!loadLocalApp(if (toNxSetup) "nxsetup" else "")) {
                             Log.w(TAG, "Offline ensure ok but load failed")
                             nativex.toast("Could not load offline files", true)
                         }
@@ -481,8 +482,9 @@ class MainActivity : AppCompatActivity() {
     /**
      * Load the locally served app from the current snapshot.
      * Session and CSRF heal inline on first use.
+     * @param subpath app route below /apps/memories, e.g. "nxsetup" for first setup
      */
-    fun loadLocalApp(): Boolean {
+    fun loadLocalApp(subpath: String = ""): Boolean {
         val base = nativex.http.baseUrl() ?: return false
         val (_, dir) = nativex.assets.current ?: nativex.assets.latestSnapshot(base) ?: return false
         val describe = nativex.assets.readDescribe(dir) ?: return false
@@ -494,7 +496,9 @@ class MainActivity : AppCompatActivity() {
         host = "127.0.0.1"
         binding.webview.clearHistory()
         mClearHistoryOnLoad = true
-        binding.webview.loadUrl(nativex.local.origin() + "$webRoot/")
+        val url = if (subpath.isEmpty()) nativex.local.origin() + "$webRoot/"
+        else nativex.local.origin() + "$webRoot/index.php/apps/memories/$subpath"
+        binding.webview.loadUrl(url)
         return true
     }
 
