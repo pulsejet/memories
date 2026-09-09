@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
+const { ManifestSignPlugin } = require('./webpack.manifest-sign-plugin.ts');
 
 const WorkboxPlugin = require('workbox-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -13,6 +14,9 @@ const appVersion = process.env.npm_package_version!;
 const buildMode = process.env.NODE_ENV;
 const isDev = buildMode === 'development';
 console.info('Building', appName, appVersion, '\n');
+
+const manifestFileName = `${appName}-manifest.json`;
+const manifestSigFileName = `${appName}-manifest.sig.json`;
 
 module.exports = {
   target: 'web',
@@ -136,7 +140,7 @@ module.exports = {
     // Manifest of all built files (base name -> {hash, href}).
     // The standalone shell uses this to know every chunk up front.
     new WebpackManifestPlugin({
-      fileName: `${appName}-manifest.json`,
+      fileName: manifestFileName,
       generate: (seed: any, files: any[]) =>
         Object.fromEntries(
           files.map((file) => {
@@ -146,6 +150,9 @@ module.exports = {
           }),
         ),
     }),
+
+    // Signature over manifest with a pinned public key.
+    new ManifestSignPlugin(manifestFileName, manifestSigFileName),
 
     // @nextcloud/dialogs depends on path
     // This is really frustrating, but it's the only way

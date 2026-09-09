@@ -154,6 +154,8 @@ final class OtherController extends GenericApiController
             if ('1' === \OC::$server->get(\OCP\IRequest::class)->getParam('manifest')) {
                 $manifest = @file_get_contents(__DIR__.'/../../js/memories-manifest.json');
                 $info['jsManifest'] = false !== $manifest ? base64_encode($manifest) : null;
+                $manifestSig = @file_get_contents(__DIR__.'/../../js/memories-manifest.sig.json');
+                $info['jsManifestSig'] = false !== $manifestSig ? base64_encode($manifestSig) : null;
                 $info['cssManifest'] = PageController::getLinkHeaders();
             }
 
