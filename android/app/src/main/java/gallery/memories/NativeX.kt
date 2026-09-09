@@ -6,98 +6,86 @@ import android.view.SoundEffectConstants
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceResponse
 import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.media3.common.util.UnstableApi
-import gallery.memories.mapper.Response
-import gallery.memories.service.AccountService
-import gallery.memories.service.AssetService
-import gallery.memories.service.DownloadService
-import gallery.memories.service.HttpService
-import gallery.memories.service.ImageService
-import gallery.memories.service.LocalServer
-import gallery.memories.service.PermissionsService
-import gallery.memories.service.TimelineQuery
+import gallery.memories.app.di.AppContainer
+import gallery.memories.bridge.BridgeResponses
+import gallery.memories.share.ShareManager
 import org.json.JSONArray
 import java.io.ByteArrayInputStream
-import java.net.URLDecoder
-import androidx.core.net.toUri
 
 @UnstableApi
+/**
+ * Injected into the WebView as `nativex`: sync calls below plus the localhost
+ * bridge (fetch /api/… and /image/… against 127.0.0.1).
+ */
 class NativeX(private val mCtx: MainActivity) {
     private var themeStored = false
-    val query = TimelineQuery(mCtx)
-    val image = ImageService(mCtx, query)
-    val http = HttpService()
-    val assets = AssetService(mCtx, http)
-    val local = LocalServer(mCtx, http, assets) { method, url -> handleBridge(method, url) }
-    val account = AccountService(mCtx, http, assets)
-    val permissions = PermissionsService(mCtx).register()
+
+    val container = AppContainer(mCtx, bridge = { method, url -> handleBridge(method, url) }, onAllowMedia = { doMediaSync(true) })
+
+    val timeline get() = container.timeline
+    val query get() = container.timeline
+    val image get() = container.image
+    val auth get() = container.auth
+    val assets get() = container.assets
+    val local get() = container.local
+    val account get() = container.account
+    val permissions get() = container.permissions
+    val router get() = container.router
+    val share: ShareManager get() = container.share
 
     init {
-        dlService = DownloadService(mCtx, query)
+        shareManager = container.share
     }
 
     companion object {
-        var dlService: DownloadService? = null
+        var shareManager: ShareManager? = null
         val TAG: String = NativeX::class.java.simpleName
     }
 
     fun destroy() {
-        dlService = null
+        shareManager = null
         local.stop()
-        query.destroy()
+        timeline.destroy()
     }
 
+    /** Bridge path patterns. Must stay in sync with the @regex docs in src/native/api.ts. */
     object API {
         val LOGIN = Regex("^/api/login/.+$")
-
         val DAYS = Regex("^/api/days$")
         val DAY = Regex("^/api/days/\\d+$")
-
         val IMAGE_INFO = Regex("^/api/image/info/\\d+$")
         val IMAGE_DELETE = Regex("^/api/image/delete/[0-9a-f]+(,[0-9a-f]+)*$")
-
         val IMAGE_PREVIEW = Regex("^/image/preview/\\d+$")
         val IMAGE_FULL = Regex("^/image/full/[0-9a-f]+$")
-
         val SHARE_URL = Regex("^/api/share/url/.+$")
         val SHARE_BLOB = Regex("^/api/share/blobs$")
-
         val CONFIG_ALLOW_MEDIA = Regex("^/api/config/allow_media/\\d+$")
-
         val ASSETS_PROGRESS = Regex("^/api/assets/progress$")
     }
 
     @JavascriptInterface
-    fun isNative(): Boolean {
-        return true
-    }
+    fun isNative(): Boolean = true
 
     @JavascriptInterface
     fun setTransparentBars(transparent: Boolean, isDark: Boolean) {
-        mCtx.runOnUiThread {
-            mCtx.setTransparentBars(transparent, isDark)
-        }
+        mCtx.runOnUiThread { mCtx.setTransparentBars(transparent, isDark) }
     }
 
+    /** Persists the theme once per login, then just applies it. */
     @JavascriptInterface
     fun setThemeColor(color: String?, isDark: Boolean) {
-        // Save for getting it back on next start
-        if (!themeStored && http.isLoggedIn()) {
+        if (!themeStored && auth.isLoggedIn()) {
             themeStored = true
             mCtx.storeTheme(color, isDark)
         }
-
-        // Apply the theme
-        mCtx.runOnUiThread {
-            mCtx.applyTheme(color, isDark)
-        }
+        mCtx.runOnUiThread { mCtx.applyTheme(color, isDark) }
     }
 
     @JavascriptInterface
     fun playTouchSound() {
-        mCtx.runOnUiThread {
-            mCtx.binding.webview.playSoundEffect(SoundEffectConstants.CLICK)
-        }
+        mCtx.runOnUiThread { mCtx.binding.webview.playSoundEffect(SoundEffectConstants.CLICK) }
     }
 
     @JavascriptInterface
@@ -115,21 +103,19 @@ class NativeX(private val mCtx: MainActivity) {
 
     @JavascriptInterface
     fun reload() {
-        mCtx.runOnUiThread {
-            mCtx.loadDefaultUrl()
-        }
+        mCtx.runOnUiThread { mCtx.loadDefaultUrl() }
     }
 
     @JavascriptInterface
     fun downloadFromUrl(url: String?, filename: String?) {
         if (url == null || filename == null) return
-        dlService!!.queue(url, filename)
+        shareManager?.queue(url, filename)
     }
 
     @JavascriptInterface
     fun setShareBlobs(objects: String?) {
         if (objects == null) return
-        dlService!!.setShareBlobs(JSONArray(objects))
+        shareManager?.setShareBlobs(JSONArray(objects))
     }
 
     @JavascriptInterface
@@ -137,21 +123,15 @@ class NativeX(private val mCtx: MainActivity) {
         this.playVideo2(auid, fileid, urlsArray, false)
     }
 
+    /** Plays the on-device copy when indexed, else the provided remote URLs. */
     @JavascriptInterface
     fun playVideo2(auid: String, fileid: Long, urlsArray: String, loop: Boolean = false) {
         mCtx.threadPool.submit {
-            // Get URI of remote videos
             val urls = JSONArray(urlsArray)
-            val list = Array(urls.length()) {
-                urls.getString(it).toUri()
-            }
-
-            // Get URI of local video
-            val videos = query.getSystemImagesByAUIDs(arrayListOf(auid))
-
-            // Play with exoplayer
+            val list = Array(urls.length()) { urls.getString(it).toUri() }
+            val videos = timeline.getSystemImagesByAUIDs(arrayListOf(auid))
             mCtx.runOnUiThread {
-                if (!videos.isEmpty()) {
+                if (videos.isNotEmpty()) {
                     mCtx.initializePlayer(arrayOf(videos[0].uri), fileid, loop)
                 } else {
                     mCtx.initializePlayer(list, fileid, loop)
@@ -162,31 +142,24 @@ class NativeX(private val mCtx: MainActivity) {
 
     @JavascriptInterface
     fun destroyVideo(fileid: Long) {
-        mCtx.runOnUiThread {
-            mCtx.destroyPlayer(fileid)
-        }
+        mCtx.runOnUiThread { mCtx.destroyPlayer(fileid) }
     }
 
     @JavascriptInterface
     fun configSetLocalFolders(json: String?) {
         if (json == null) return
-        query.localFolders = JSONArray(json)
+        timeline.localFolders = JSONArray(json)
     }
 
     @JavascriptInterface
-    fun configGetLocalFolders(): String {
-        return query.localFolders.toString()
-    }
+    fun configGetLocalFolders(): String = timeline.localFolders.toString()
 
     @JavascriptInterface
-    fun configHasMediaPermission(): Boolean {
-        return permissions.hasAllowMedia() && permissions.hasMediaPermission()
-    }
+    fun configHasMediaPermission(): Boolean =
+        permissions.hasAllowMedia() && permissions.hasMediaPermission()
 
     @JavascriptInterface
-    fun getSyncStatus(): Int {
-        return query.syncStatus
-    }
+    fun getSyncStatus(): Int = timeline.syncStatus
 
     @JavascriptInterface
     fun setHasRemote(auids: String, buids: String, value: Boolean) {
@@ -194,143 +167,47 @@ class NativeX(private val mCtx: MainActivity) {
         mCtx.threadPool.submit {
             val auidArray = JSONArray(auids)
             val buidArray = JSONArray(buids)
-            query.setHasRemote(
+            timeline.setHasRemote(
                 List(auidArray.length()) { auidArray.getString(it) },
                 List(buidArray.length()) { buidArray.getString(it) },
-                value
+                value,
             )
         }
     }
 
+    /** Serves one bridge request. GET-only; failures become 500, images get week-long caching. */
     fun handleBridge(method: String, url: Uri): WebResourceResponse {
-        val path = url.path ?: return makeErrorResponse()
-
+        val path = url.path ?: return BridgeResponses.error()
         val response = try {
             when (method) {
-                "GET" -> {
-                    routerGet(url)
+                "GET" -> router.routerGet(url)
+                "OPTIONS" -> WebResourceResponse("text/plain", "UTF-8", ByteArrayInputStream("".toByteArray())).apply {
+                    setStatusCodeAndReasonPhrase(200, "OK")
                 }
-
-                "OPTIONS" -> {
-                    WebResourceResponse(
-                        "text/plain",
-                        "UTF-8",
-                        ByteArrayInputStream("".toByteArray())
-                    ).apply {
-                        setStatusCodeAndReasonPhrase(200, "OK")
-                    }
-                }
-
-                else -> {
-                    throw Exception("Method Not Allowed")
-                }
+                else -> throw Exception("Method Not Allowed")
             }
         } catch (e: Exception) {
             Log.w(TAG, "handleBridge: $method $path failed", e)
-            makeErrorResponse()
+            BridgeResponses.error()
         }
-
-        // Allow CORS from all origins
         response.responseHeaders = mutableMapOf(
             "Access-Control-Allow-Origin" to "*",
-            "Access-Control-Allow-Headers" to "*"
+            "Access-Control-Allow-Headers" to "*",
         )
-
-        // Cache image responses for 7 days
         if (path.matches(API.IMAGE_PREVIEW) || path.matches(API.IMAGE_FULL)) {
             response.responseHeaders["Cache-Control"] = "max-age=604800"
         }
-
         return response
     }
 
-    @Throws(Exception::class)
-    private fun routerGet(url: Uri): WebResourceResponse {
-        val path = url.path ?: return makeErrorResponse()
-
-        val parts = path.split("/").toTypedArray()
-        return if (path.matches(API.LOGIN)) {
-            account.login(
-                URLDecoder.decode(parts[3], "UTF-8"),
-                url.getBooleanQueryParameter("trustAll", false)
-            )
-            makeResponse(Response.OK)
-        } else if (path.matches(API.DAYS)) {
-            makeResponse(query.getDays())
-        } else if (path.matches(API.DAY)) {
-            makeResponse(query.getDay(parts[3].toLong()))
-        } else if (path.matches(API.IMAGE_INFO)) {
-            makeResponse(query.getImageInfo(parts[4].toLong()))
-        } else if (path.matches(API.IMAGE_DELETE)) {
-            makeResponse(
-                query.delete(
-                    parseIds(parts[4]),
-                    url.getBooleanQueryParameter("dry", false)
-                )
-            )
-        } else if (path.matches(API.IMAGE_PREVIEW)) {
-            val x = url.getQueryParameter("x")?.toInt()
-            val y = url.getQueryParameter("y")?.toInt()
-            makeResponse(image.getPreview(parts[3].toLong(), x, y), "image/jpeg")
-        } else if (path.matches(API.IMAGE_FULL)) {
-            val size = url.getQueryParameter("size")?.toInt()
-            makeResponse(image.getFull(parts[3], size), "image/jpeg")
-        } else if (path.matches(API.SHARE_URL)) {
-            makeResponse(dlService!!.shareUrl(URLDecoder.decode(parts[4], "UTF-8")))
-        } else if (path.matches(API.SHARE_BLOB)) {
-            makeResponse(dlService!!.shareBlobs())
-        } else if (path.matches(API.CONFIG_ALLOW_MEDIA)) {
-            permissions.setAllowMedia(true)
-            if (permissions.requestMediaPermissionSync()) {
-                doMediaSync(true) // separate thread
-            }
-            makeResponse("done")
-        } else if (path.matches(API.ASSETS_PROGRESS)) {
-            makeResponse(assets.progressJson())
-        } else {
-            throw Exception("Path did not match any known API route: $path")
-        }
-    }
-
-    private fun makeResponse(bytes: ByteArray?, mimeType: String?): WebResourceResponse {
-        if (bytes == null) return makeErrorResponse()
-        return WebResourceResponse(mimeType, "UTF-8", ByteArrayInputStream(bytes)).apply {
-            setStatusCodeAndReasonPhrase(200, "OK")
-        }
-    }
-
-    private fun makeResponse(json: Any): WebResourceResponse {
-        return makeResponse(json.toString().toByteArray(), "application/json")
-    }
-
-    private fun makeErrorResponse(): WebResourceResponse {
-        val response = WebResourceResponse(
-            "application/json",
-            "UTF-8",
-            ByteArrayInputStream("{}".toByteArray())
-        )
-        response.setStatusCodeAndReasonPhrase(500, "Internal Server Error")
-        return response
-    }
-
-    private fun parseIds(ids: String): List<String> {
-        return ids.trim().split(",")
-    }
-
+    /** Delta sync normally; a first-time media grant forces a full sync instead. */
     fun doMediaSync(forceFull: Boolean) {
         if (permissions.hasAllowMedia()) {
-            // Full sync if this is the first time permission was granted
             val fullSync = forceFull || !permissions.hasMediaPermission()
-
             mCtx.threadPool.submit {
-                // Block for media permission
                 if (!permissions.requestMediaPermissionSync()) return@submit
-
-                // Full sync requested
-                if (fullSync) query.syncFullDb()
-
-                // Run delta sync and register hooks
-                query.initialize()
+                if (fullSync) timeline.syncFullDb()
+                timeline.initialize()
             }
         }
     }

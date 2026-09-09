@@ -32,7 +32,7 @@
         </activity>
 
         <receiver
-            android:name=".service.DownloadBroadcastReceiver"
+            android:name=".share.DownloadCompleteReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
