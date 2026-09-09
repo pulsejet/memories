@@ -108,6 +108,6 @@ Very important.
 - VA-API and NVENC hardware acceleration supported.
 
 ### Frontend (`src/`)
-- Vue 2 + Webpack, built to `js/`.
+- Vue 3 + Webpack, built to `js/`.
 - History mode under `/apps/memories`.
 - Routes in `src/router.ts`.
