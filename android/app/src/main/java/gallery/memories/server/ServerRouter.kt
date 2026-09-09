@@ -26,7 +26,7 @@ class ServerRouter(
 
     /**
      * Route order matters: bridge first (works unconfigured), then local
-     * files, then app JS chunks (always local, never remote JS), then the
+     * files (unknown /local/ paths 404 on-device, never proxied), then the
      * shell for app routes, and finally the upstream proxy.
      */
     fun route(req: HttpRequest, out: BufferedOutputStream) {
@@ -43,13 +43,26 @@ class ServerRouter(
             StaticController.serveApkFile(appCtx, req, out)
             return
         }
-        if (req.path == "/local/index.html" && config != null && serveShell(config, req, out)) return
-        if (req.path.startsWith("/local/assets/js/") && config != null) {
-            StaticController.serveFile(req, out, File(config.assetDir, "js"), "text/javascript; charset=utf-8")
+        // Everything under /local/ lives on-device; never proxy it upstream,
+        // where it would only burn a full round trip for a meaningless 404.
+        if (req.path == "/local" || req.path.startsWith("/local/")) {
+            if (config != null) {
+                if (req.path == "/local/index.html" && serveShell(config, req, out)) return
+                if (req.path.startsWith("/local/assets/js/")) {
+                    StaticController.serveFile(req, out, File(config.assetDir, "js"), "text/javascript; charset=utf-8")
+                    return
+                }
+                if (req.path.startsWith("/local/assets/css/")) {
+                    StaticController.serveFile(req, out, File(config.assetDir, "css"), "text/css; charset=utf-8")
+                    return
+                }
+            }
+            HttpWriter.reply(out, 404, "Not Found", "not found")
             return
         }
-        if (req.path.startsWith("/local/assets/css/") && config != null) {
-            StaticController.serveFile(req, out, File(config.assetDir, "css"), "text/css; charset=utf-8")
+        // Requested implicitly per page load; answer locally instead of proxying a 404.
+        if (req.path == "/favicon.ico") {
+            HttpWriter.reply(out, 404, "Not Found", "not found")
             return
         }
         if (config == null) {
