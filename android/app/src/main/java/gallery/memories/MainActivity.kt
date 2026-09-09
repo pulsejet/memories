@@ -395,8 +395,16 @@ class MainActivity : AppCompatActivity() {
                             }
                         )
                     } else {
-                        exoPlayer.setMediaItems(listOf(mediaItem), mediaItemIndex, playbackPosition)
+                        exoPlayer.addMediaItem(mediaItem)
                     }
+                }
+
+                // Restore saved position
+                if (exoPlayer.mediaItemCount > 0) {
+                    exoPlayer.seekTo(
+                        mediaItemIndex.coerceAtMost(exoPlayer.mediaItemCount - 1),
+                        playbackPosition
+                    )
                 }
 
                 // Catch errors and fall back to other sources
