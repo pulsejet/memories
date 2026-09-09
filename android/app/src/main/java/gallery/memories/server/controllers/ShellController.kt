@@ -20,13 +20,12 @@ object ShellController {
         req: HttpRequest,
         out: BufferedOutputStream,
         describe: JSONObject?,
-        csrfToken: String?,
         user: String?,
     ): Boolean {
         if (describe == null) return false
         return try {
             val nonce = java.util.UUID.randomUUID().toString()
-            val html = ShellPage.build(describe, config.webRoot, config.baseUrl, isDebug(req), csrfToken, user, nonce)
+            val html = ShellPage.build(describe, config.webRoot, config.baseUrl, isDebug(req), user, nonce)
             HttpWriter.writeStatus(
                 out, 200, "OK", "text/html; charset=utf-8", html.toByteArray(),
                 noStore = true, extraHeaders = mapOf("Content-Security-Policy" to ShellPage.csp(nonce)),

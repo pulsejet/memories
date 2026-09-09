@@ -1,10 +1,10 @@
 package gallery.memories.server.controllers
 
 import gallery.memories.data.remote.http.AuthState
+import gallery.memories.data.remote.http.HttpClients
 import gallery.memories.server.HttpRequest
 import gallery.memories.server.HttpWriter
 import gallery.memories.server.ServerConfig
-import gallery.memories.server.session.SessionManager
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -14,22 +14,20 @@ import java.io.IOException
 
 class ProxyController(
     private val auth: AuthState,
-    private val session: SessionManager,
+    clients: HttpClients,
     private val originProvider: () -> String,
 ) {
-    /** Session bootstrap traffic must not trigger itself. */
-    fun recoverable(req: HttpRequest): Boolean =
-        !req.path.endsWith("/login") && !req.path.endsWith("/csrftoken")
+    private val client by lazy { clients.newProxyClient() }
 
     /**
-     * Proxies one request upstream, healing the session first when needed and
-     * replaying once on 401/412 so the client sees the real upstream error.
+     * Proxies one request upstream with basic auth. The OCS-APIREQUEST header
+     * exempts the call from CSRF checks, so no cookie session is needed.
      * Upstream network failures throw [UpstreamNetworkException] so the caller
      * can drop the connection (axios ERR_NETWORK) instead of faking an HTTP 5xx.
      */
-    fun forward(req: HttpRequest, config: ServerConfig, out: BufferedOutputStream, retried: Boolean = false) {
+    fun forward(req: HttpRequest, config: ServerConfig, out: BufferedOutputStream) {
         try {
-            doForward(req, config, out, retried)
+            doForward(req, config, out)
         } catch (e: UpstreamNetworkException) {
             throw e
         } catch (e: IOException) {
@@ -37,11 +35,8 @@ class ProxyController(
         }
     }
 
-    private fun doForward(req: HttpRequest, config: ServerConfig, out: BufferedOutputStream, retried: Boolean = false) {
+    private fun doForward(req: HttpRequest, config: ServerConfig, out: BufferedOutputStream) {
         val url = config.serverOrigin + req.path + (req.query?.let { "?$it" } ?: "")
-        if (!retried && session.csrfToken == null && recoverable(req) && auth.credentials() != null) {
-            session.ensureSession()
-        }
         val builder = Request.Builder().url(url)
         for ((name, value) in req.headers) {
             if (name == "host" || name == "content-length" || name == "transfer-encoding" ||
@@ -50,6 +45,7 @@ class ProxyController(
             builder.header(name, value)
         }
         auth.authHeader()?.let { builder.header("Authorization", it) }
+        builder.header("OCS-APIREQUEST", "true")
         val mediaType = req.headers["content-type"]?.toMediaTypeOrNull()
         var body = when {
             req.bodyFile != null -> req.bodyFile.asRequestBody(mediaType)
@@ -60,18 +56,8 @@ class ProxyController(
             body = ByteArray(0).toRequestBody(mediaType)
         }
         builder.method(req.method, body)
-        val replay = session.client().newCall(builder.build()).execute().use { res ->
-            if (!retried && (res.code == 401 || res.code == 412) && recoverable(req) && auth.credentials() != null) {
-                true
-            } else {
-                streamResponse(res, config, out)
-                false
-            }
-        }
-        if (replay) {
-            session.clearToken()
-            session.ensureSession()
-            forward(req, config, out, retried = true)
+        client.newCall(builder.build()).execute().use { res ->
+            streamResponse(res, config, out)
         }
     }
 

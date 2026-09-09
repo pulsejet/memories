@@ -8,7 +8,6 @@ import gallery.memories.server.controllers.BridgeController
 import gallery.memories.server.controllers.ProxyController
 import gallery.memories.server.controllers.ShellController
 import gallery.memories.server.controllers.StaticController
-import gallery.memories.server.session.SessionManager
 import java.io.BufferedOutputStream
 import java.io.File
 
@@ -16,7 +15,6 @@ class ServerRouter(
     private val appCtx: Context,
     private val auth: AuthState,
     private val assets: AssetSyncCoordinator,
-    private val session: SessionManager,
     private val guard: AuthGuard,
     private val bridge: BridgeController,
     private val proxy: ProxyController,
@@ -84,6 +82,6 @@ class ServerRouter(
 
     private fun serveShell(config: ServerConfig, req: HttpRequest, out: BufferedOutputStream): Boolean {
         val describe = assets.readDescribe(config.assetDir) ?: return false
-        return ShellController.serveShell(config, req, out, describe, session.csrfToken, auth.credentials()?.first)
+        return ShellController.serveShell(config, req, out, describe, auth.credentials()?.first)
     }
 }

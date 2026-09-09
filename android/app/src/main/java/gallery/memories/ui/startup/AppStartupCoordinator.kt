@@ -28,7 +28,6 @@ class AppStartupCoordinator(
             startLocalApp()
             return true
         }
-        local.resetSession()
         activity.setTransparentBars(true, true)
         activity.binding.webview.loadUrl(localStaticUrl("welcome.html"))
         return false
@@ -96,7 +95,7 @@ class AppStartupCoordinator(
         }.start()
     }
 
-    /** Serves the snapshot's shell locally. Session/CSRF heal inline on first use. */
+    /** Serves the snapshot's shell locally; API traffic proxies upstream with basic auth. */
     fun loadLocalApp(subpath: String = ""): Boolean {
         val base = auth.baseUrl() ?: return false
         val (_, dir) = assets.current ?: assets.latestSnapshot(base) ?: return false

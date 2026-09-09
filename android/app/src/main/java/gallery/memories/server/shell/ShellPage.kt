@@ -28,13 +28,11 @@ object ShellPage {
         webRoot: String,
         baseUrl: String,
         debug: Boolean = false,
-        requestToken: String? = null,
         user: String? = null,
         nonce: String,
     ): String {
         return "<!DOCTYPE html>\n" + createHTML().html {
             head {
-                if (requestToken != null) attributes["data-requesttoken"] = requestToken
                 if (user != null) attributes["data-user"] = user
                 meta(charset = "utf-8")
                 meta(name = "viewport", content = "width=device-width, initial-scale=1")

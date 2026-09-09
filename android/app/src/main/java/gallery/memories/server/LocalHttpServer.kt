@@ -9,7 +9,6 @@ import gallery.memories.data.remote.http.HttpClients
 import gallery.memories.server.controllers.BridgeController
 import gallery.memories.server.controllers.ProxyController
 import gallery.memories.server.controllers.UpstreamNetworkException
-import gallery.memories.server.session.SessionManager
 import java.io.BufferedOutputStream
 import java.io.File
 import java.net.BindException
@@ -46,21 +45,13 @@ class LocalHttpServer(
     val secret: String = java.util.UUID.randomUUID().toString()
 
     private val guard = AuthGuard(secret)
-    private val session = SessionManager(auth, clients) { cfg }
     private val bridgeController = BridgeController(bridge)
-    private val proxy = ProxyController(auth, session) { origin() }
-    private val router = ServerRouter(appCtx, auth, assets, session, guard, bridgeController, proxy) { cfg }
+    private val proxy = ProxyController(auth, clients) { origin() }
+    private val router = ServerRouter(appCtx, auth, assets, guard, bridgeController, proxy) { cfg }
 
     fun configure(serverOrigin: String, webRoot: String, assetDir: File, baseUrl: String) {
-        val prev = cfg
         cfg = ServerConfig(serverOrigin, webRoot, assetDir, baseUrl)
-        if (prev != null && prev.serverOrigin != serverOrigin) resetSession()
     }
-
-    /** Drops the upstream session, e.g. on account switch. A new server origin does this implicitly. */
-    fun resetSession() = session.resetSession()
-
-    fun ensureSession(): Boolean = session.ensureSession()
 
     @Throws(Exception::class)
     @Synchronized
