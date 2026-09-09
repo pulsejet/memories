@@ -2,113 +2,115 @@
   <div class="nxsetup-outer native-auth">
     <div class="orbs" aria-hidden="true"><span></span><span></span></div>
 
-    <div class="card">
-      <XImg class="banner" :src="banner" :svg-tag="true" />
+    <Transition name="setup-step" mode="out-in">
+      <div class="card" :key="step">
+        <XImg class="banner" :src="banner" :svg-tag="true" />
 
-      <div class="setup-section" v-if="step === 1">
-        {{ t('memories', 'You are now logged in to the server!') }}
-        <br /><br />
-        {{
-          t(
-            'memories',
-            'You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue.',
-          )
-        }}
-        <br />
+        <div class="setup-section" v-if="step === 1">
+          {{ t('memories', 'You are now logged in to the server!') }}
+          <br /><br />
+          {{
+            t(
+              'memories',
+              'You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue.',
+            )
+          }}
+          <br />
 
-        <div class="buttons">
-          <NcButton
-            variant="secondary"
-            class="button button-white"
-            href="https://play.google.com/store/apps/details?id=com.nextcloud.client"
-          >
-            {{ t('memories', 'Set up automatic upload') }}
-          </NcButton>
-
-          <NcButton variant="primary" class="button" @click="step++">
-            {{ t('memories', 'Continue') }}
-          </NcButton>
-        </div>
-      </div>
-
-      <div class="setup-section" v-if="step === 2">
-        {{
-          t(
-            'memories',
-            'Memories can show local media on your device alongside the media on your server. This requires access to the media on this device.',
-          )
-        }}
-        <br /><br />
-        {{
-          hasMediaPermission
-            ? t('memories', 'Access to media has been granted.')
-            : t(
-                'memories',
-                'Access to media is not available yet. If the button below does not work, grant the permission through settings.',
-              )
-        }}
-
-        <div class="buttons">
-          <NcButton
-            variant="secondary"
-            class="button button-white"
-            @click="grantMediaPermission"
-            v-if="!hasMediaPermission"
-          >
-            {{ t('memories', 'Grant permissions') }}
-          </NcButton>
-
-          <NcButton
-            :variant="hasMediaPermission ? 'secondary' : 'primary'"
-            class="button"
-            :class="{ 'button-white': hasMediaPermission }"
-            @click="step += hasMediaPermission ? 1 : 2"
-          >
-            {{ hasMediaPermission ? t('memories', 'Continue') : t('memories', 'Skip this step') }}
-          </NcButton>
-        </div>
-      </div>
-
-      <div class="setup-section" v-else-if="step === 3">
-        {{ t('memories', 'Choose the folders on this device to show on your timeline.') }}
-        {{
-          t(
-            'memories',
-            'If no folders are visible here, you may need to grant the app storage permissions, or wait for the app to index your files.',
-          )
-        }}
-        <br /><br />
-        {{
-          t('memories', 'You can always change this in settings. Note that this does not affect automatic uploading.')
-        }}
-        <br />
-
-        <div id="folder-list">
-          <div v-if="syncStatus != -1">
-            {{ t('memories', 'Synchronizing local files ({n} done).', { n: syncStatus }) }}
-            <br />
-            {{ t('memories', 'This may take a while. Do not close this window.') }}
-          </div>
-          <template v-else>
-            <NcCheckboxRadioSwitch
-              v-for="folder in localFolders"
-              :key="folder.id"
-              v-model="folder.enabled"
-              @update:model-value="updateDeviceFolders"
-              type="switch"
+          <div class="buttons">
+            <NcButton
+              variant="secondary"
+              class="button button-white"
+              href="https://play.google.com/store/apps/details?id=com.nextcloud.client"
             >
-              {{ folder.name }}
-            </NcCheckboxRadioSwitch>
-          </template>
+              {{ t('memories', 'Set up automatic upload') }}
+            </NcButton>
+
+            <NcButton variant="primary" class="button" @click="step++">
+              {{ t('memories', 'Continue') }}
+            </NcButton>
+          </div>
         </div>
 
-        <div class="buttons">
-          <NcButton variant="secondary" class="button button-white" @click="step++">
-            {{ t('memories', 'Finish') }}
-          </NcButton>
+        <div class="setup-section" v-else-if="step === 2">
+          {{
+            t(
+              'memories',
+              'Memories can show local media on your device alongside the media on your server. This requires access to the media on this device.',
+            )
+          }}
+          <br /><br />
+          {{
+            hasMediaPermission
+              ? t('memories', 'Access to media has been granted.')
+              : t(
+                  'memories',
+                  'Access to media is not available yet. If the button below does not work, grant the permission through settings.',
+                )
+          }}
+
+          <div class="buttons">
+            <NcButton
+              variant="secondary"
+              class="button button-white"
+              @click="grantMediaPermission"
+              v-if="!hasMediaPermission"
+            >
+              {{ t('memories', 'Grant permissions') }}
+            </NcButton>
+
+            <NcButton
+              :variant="hasMediaPermission ? 'secondary' : 'primary'"
+              class="button"
+              :class="{ 'button-white': hasMediaPermission }"
+              @click="step += hasMediaPermission ? 1 : 2"
+            >
+              {{ hasMediaPermission ? t('memories', 'Continue') : t('memories', 'Skip this step') }}
+            </NcButton>
+          </div>
+        </div>
+
+        <div class="setup-section" v-else-if="step === 3">
+          {{ t('memories', 'Choose the folders on this device to show on your timeline.') }}
+          {{
+            t(
+              'memories',
+              'If no folders are visible here, you may need to grant the app storage permissions, or wait for the app to index your files.',
+            )
+          }}
+          <br /><br />
+          {{
+            t('memories', 'You can always change this in settings. Note that this does not affect automatic uploading.')
+          }}
+          <br />
+
+          <div id="folder-list">
+            <div v-if="syncStatus != -1">
+              {{ t('memories', 'Synchronizing local files ({n} done).', { n: syncStatus }) }}
+              <br />
+              {{ t('memories', 'This may take a while. Do not close this window.') }}
+            </div>
+            <template v-else>
+              <NcCheckboxRadioSwitch
+                v-for="folder in localFolders"
+                :key="folder.id"
+                v-model="folder.enabled"
+                @update:model-value="updateDeviceFolders"
+                type="switch"
+              >
+                {{ folder.name }}
+              </NcCheckboxRadioSwitch>
+            </template>
+          </div>
+
+          <div class="buttons">
+            <NcButton variant="secondary" class="button button-white" @click="step++">
+              {{ t('memories', 'Finish') }}
+            </NcButton>
+          </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -281,6 +283,23 @@ export default defineComponent({
         min-height: unset;
       }
     }
+  }
+}
+
+.setup-step-enter-active,
+.setup-step-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.setup-step-enter-from,
+.setup-step-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .setup-step-enter-active,
+  .setup-step-leave-active {
+    transition: none;
   }
 }
 </style>
