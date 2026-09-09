@@ -14,8 +14,9 @@ html.native {
 
   // Pass through to the element below
   &,
-  body {
+  body, #content-vue {
     background: transparent !important;
+    backdrop-filter: none !important;
   }
 
   body.viewer-fully-opened.viewer-video {
