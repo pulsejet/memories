@@ -9,6 +9,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.security.MessageDigest
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Downloads and caches the web app's JS/CSS assets for offline serving.
@@ -18,6 +21,7 @@ class AssetService(private val mCtx: Context, private val mHttp: HttpService) {
     companion object {
         val TAG: String = AssetService::class.java.simpleName
         const val ENTRY_JS = "memories-main.js"
+        const val MAX_PARALLEL = 8
 
         fun cssName(i: Int, href: String): String {
             return "%02d_%s".format(i, href.substringAfterLast("/").substringBefore("?"))
@@ -273,13 +277,40 @@ class AssetService(private val mCtx: Context, private val mHttp: HttpService) {
         val jsDir = File(dir, "js").apply { mkdirs() }
         val cssDir = File(dir, "css").apply { mkdirs() }
 
+        data class Task(val dir: File, val name: String, val url: String, val hash: String?)
+        val tasks = ArrayList<Task>(js.size + css.length())
         for (asset in js) {
-            downloadTo(jsDir, asset.name, absUrl(origin, asset.href), asset.hash)
+            tasks.add(Task(jsDir, asset.name, absUrl(origin, asset.href), asset.hash))
         }
-
         for (i in 0 until css.length()) {
             val href = css.getJSONObject(i).getString("href")
-            downloadTo(cssDir, cssName(i, href), absUrl(origin, href))
+            tasks.add(Task(cssDir, cssName(i, href), absUrl(origin, href), null))
+        }
+
+        val progress = AtomicInteger(0)
+
+        if (tasks.isNotEmpty()) {
+            val pool = Executors.newFixedThreadPool(minOf(tasks.size, MAX_PARALLEL))
+            try {
+                val futures = tasks.map { t ->
+                    pool.submit {
+                        downloadTo(t.dir, t.name, t.url, t.hash)
+                        done = progress.incrementAndGet()
+                    }
+                }
+                try {
+                    for (f in futures) f.get()
+                } catch (e: ExecutionException) {
+                    pool.shutdownNow()
+                    throw e.cause as? Exception ?: Exception(e.cause)
+                } catch (e: InterruptedException) {
+                    pool.shutdownNow()
+                    Thread.currentThread().interrupt()
+                    throw Exception("interrupted", e)
+                }
+            } finally {
+                pool.shutdown()
+            }
         }
 
         File(dir, "describe.json").writeText(describe.toString())
@@ -293,7 +324,6 @@ class AssetService(private val mCtx: Context, private val mHttp: HttpService) {
         val bytes = mHttp.downloadBytes(url)
         if (expectedSha256 != null) verifySha256(bytes, expectedSha256, name)
         File(dir, name).writeBytes(bytes)
-        done++
     }
 
     @Throws(Exception::class)
