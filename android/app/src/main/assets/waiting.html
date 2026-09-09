@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <title>Memories</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="native-auth.css" />
+    <link rel="stylesheet" href="/local/static/styles.css" />
+    <link rel="stylesheet" href="/local/static/native-auth.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#2b94f0" />
     <meta name="color-scheme" content="dark" />
@@ -49,7 +49,7 @@
       .spinner.error { border-color: rgba(255,255,255,0.25); border-top-color: #ffb4b4; }
       @keyframes spin { to { transform: rotate(360deg); } }
       .native-auth h1 { font-size: 24px; }
-      .native-auth .subtitle { margin: 0 0 4px; }
+      .native-auth .subtitle { margin: 0 auto 4px; }
       #dl { margin-top: 22px; text-align: left; }
       .bar-track {
         height: 10px;
@@ -117,7 +117,7 @@
   <body class="native-auth">
     <div class="orbs" aria-hidden="true"><span></span><span></span></div>
     <main id="main" class="card">
-      <img src="memories.svg" alt="Memories Logo" class="logo" />
+      <img src="/local/static/memories.svg" alt="Memories Logo" class="logo" />
 
       <div class="spinner-wrap">
         <div id="spinner" class="spinner" role="status" aria-label="Loading"></div>
