@@ -14,7 +14,8 @@ html.native {
 
   // Pass through to the element below
   &,
-  body, #content-vue {
+  body,
+  #content-vue {
     background: transparent !important;
     backdrop-filter: none !important;
   }
