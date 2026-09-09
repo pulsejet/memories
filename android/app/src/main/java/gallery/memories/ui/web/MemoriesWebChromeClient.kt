@@ -1,6 +1,8 @@
 package gallery.memories.ui.web
 
 import android.net.Uri
+import android.util.Log
+import android.webkit.ConsoleMessage
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -13,8 +15,23 @@ class MemoriesWebChromeClient(
     private val activity: MainActivity,
     private val chooser: FileChooserHandler,
 ) : WebChromeClient() {
+    companion object {
+        private val TAG = MemoriesWebChromeClient::class.java.simpleName
+    }
+
     override fun onPermissionRequest(request: PermissionRequest) {
         request.grant(request.resources)
+    }
+
+    /** Mirror page errors into logcat; WebView debugging is off in release builds. */
+    override fun onConsoleMessage(msg: ConsoleMessage): Boolean {
+        val line = "${msg.sourceId()}:${msg.lineNumber()} ${msg.message()}"
+        when (msg.messageLevel()) {
+            ConsoleMessage.MessageLevel.ERROR -> Log.e(TAG, line)
+            ConsoleMessage.MessageLevel.WARNING -> Log.w(TAG, line)
+            else -> {}
+        }
+        return false
     }
 
     override fun onShowFileChooser(

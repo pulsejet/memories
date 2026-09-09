@@ -16,6 +16,10 @@ import org.json.JSONObject
 
 /** Offline equivalent of the server page: local scripts/styles plus a nonced bootstrap snippet. */
 object ShellPage {
+    /** Single-quoted JS string literal for a trusted server path. */
+    private fun String.jsString(): String =
+        "'" + replace("\\", "\\\\").replace("'", "\\'") + "'"
+
     fun csp(nonce: String): String =
         "script-src 'self' 'nonce-$nonce'; style-src 'self' 'unsafe-inline'"
 
@@ -61,7 +65,8 @@ object ShellPage {
                 script {
                     attributes["nonce"] = nonce
                     unsafe {
-                        raw("window._oc_webroot = ''; window._oc_appswebroots = {'memories': '/apps/memories'};")
+                        val root = webRoot.jsString()
+                        raw("window._oc_webroot = $root; window._oc_appswebroots = {'memories': $root + '/apps/memories'};")
                     }
                 }
                 script(src = "/local/assets/js/" + AssetCache.ENTRY_JS) { defer = true }

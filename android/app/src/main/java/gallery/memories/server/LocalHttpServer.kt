@@ -8,9 +8,11 @@ import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.HttpClients
 import gallery.memories.server.controllers.BridgeController
 import gallery.memories.server.controllers.ProxyController
+import gallery.memories.server.controllers.UpstreamNetworkException
 import gallery.memories.server.session.SessionManager
 import java.io.BufferedOutputStream
 import java.io.File
+import java.net.BindException
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
@@ -32,6 +34,8 @@ class LocalHttpServer(
     companion object {
         val TAG: String = LocalHttpServer::class.java.simpleName
         const val HOST = "127.0.0.1"
+        // Fixed port so the WebView origin stays identical across restarts.
+        const val PORT = 62079
     }
 
     @Volatile private var cfg: ServerConfig? = null
@@ -64,7 +68,13 @@ class LocalHttpServer(
         if (server == null) {
             val s = ServerSocket()
             s.reuseAddress = true
-            s.bind(InetSocketAddress(HOST, 0))
+            try {
+                s.bind(InetSocketAddress(HOST, PORT))
+            } catch (e: BindException) {
+                // Stale process still holding the port; storage just misses this launch.
+                Log.w(TAG, "Fixed port $PORT busy, falling back to ephemeral", e)
+                s.bind(InetSocketAddress(HOST, 0))
+            }
             server = s
             port = s.localPort
             val pool = Executors.newCachedThreadPool()
@@ -115,6 +125,11 @@ class LocalHttpServer(
             }
             try {
                 router.route(req, out)
+            } catch (e: UpstreamNetworkException) {
+                // Upstream offline: close without a response so the WebView
+                // sees a network failure (axios ERR_NETWORK), not an HTTP 5xx.
+                Log.i(TAG, "Upstream unreachable, dropping connection: ${e.cause?.message}")
+                return
             } catch (e: Exception) {
                 Log.w(TAG, "Request failed: ${e.message}")
                 try { HttpWriter.reply(out, 500, "Internal Error", "proxy error") } catch (_: Exception) {}

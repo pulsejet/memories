@@ -10,6 +10,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.BufferedOutputStream
+import java.io.IOException
 
 class ProxyController(
     private val auth: AuthState,
@@ -23,8 +24,20 @@ class ProxyController(
     /**
      * Proxies one request upstream, healing the session first when needed and
      * replaying once on 401/412 so the client sees the real upstream error.
+     * Upstream network failures throw [UpstreamNetworkException] so the caller
+     * can drop the connection (axios ERR_NETWORK) instead of faking an HTTP 5xx.
      */
     fun forward(req: HttpRequest, config: ServerConfig, out: BufferedOutputStream, retried: Boolean = false) {
+        try {
+            doForward(req, config, out, retried)
+        } catch (e: UpstreamNetworkException) {
+            throw e
+        } catch (e: IOException) {
+            throw UpstreamNetworkException(e)
+        }
+    }
+
+    private fun doForward(req: HttpRequest, config: ServerConfig, out: BufferedOutputStream, retried: Boolean = false) {
         val url = config.serverOrigin + req.path + (req.query?.let { "?$it" } ?: "")
         if (!retried && session.csrfToken == null && recoverable(req) && auth.credentials() != null) {
             session.ensureSession()

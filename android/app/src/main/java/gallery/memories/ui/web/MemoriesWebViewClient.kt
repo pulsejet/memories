@@ -8,6 +8,7 @@ import android.util.Log
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
@@ -43,6 +44,14 @@ class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient(
         if (request.isForMainFrame) {
             Log.w(TAG, "Page failed: ${request.url} code=${error.errorCode} ${error.description}")
             Toast.makeText(view.context, "Failed to load page: ${error.description}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    /** HTTP 4xx/5xx on the main frame otherwise renders as a blank page with no log. */
+    override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, errorResponse: WebResourceResponse) {
+        if (request.isForMainFrame) {
+            Log.w(TAG, "Page HTTP error: ${request.url} code=${errorResponse.statusCode} ${errorResponse.reasonPhrase}")
+            Toast.makeText(view.context, "Failed to load page: HTTP ${errorResponse.statusCode}", Toast.LENGTH_LONG).show()
         }
     }
 
