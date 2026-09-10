@@ -21,6 +21,12 @@ Very important.
   - Types like fix, feat, chore, test, etc.
   - Include few lines of description.
 
+## Git
+- Always work on `development`; keep it checked out locally.
+- Linear history only: rebase, never merge commits.
+- Ship to master: `git fetch origin`, rebase `development` on `origin/master`, fast-forward `master`, push `master`.
+- Never force-push unless explicitly asked.
+
 ## Unit Testing
 - `vendor/autoload.php` alone is insufficient.
   - `OC\*`, `OCP\*` and app namespaces come from Nextcloud's environment.
