@@ -7,12 +7,18 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.webkit.CookieManager
+import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
+import gallery.memories.R
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.HttpClients
 import okhttp3.Request
+import okhttp3.Response
 import java.io.File
+import java.util.Collections
 import java.util.concurrent.TimeUnit
+import java.util.zip.ZipException
+import java.util.zip.ZipFile
 
 /**
  * In-process file downloader using the app's own OkHttp client.
@@ -45,32 +51,101 @@ class InAppDownloader(
 
     /**
      * Downloads [url] synchronously; must be called off the UI thread.
-     * Saves visibly to Downloads/memories/ when [toPublic] (inferring the
-     * name from Content-Disposition when [filename] is empty), otherwise to
-     * the private share cache for immediate ACTION_SEND. Throws on failure.
+     * A non-empty [filename] saves visibly to Downloads/memories/, otherwise
+     * to the private share cache for immediate ACTION_SEND. Throws on failure.
      */
     @Throws(Exception::class)
-    fun download(url: String, filename: String, toPublic: Boolean = filename.isNotEmpty()): DlFile {
-        val request = buildRequest(url)
-        // Per-call client: shares the current pool/dispatcher, picks up the
-        // latest TLS/auth config, times out instead of hanging forever.
-        val client = clients.client().newBuilder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
-            .writeTimeout(60, TimeUnit.SECONDS)
-            .build()
-        client.newCall(request).execute().use { res ->
-            if (res.code !in 200..299) throw Exception("Download failed: HTTP ${res.code}")
+    fun download(url: String, filename: String): DlFile {
+        newCallClient().newCall(buildRequest(url)).execute().use { res ->
+            if (res.code !in 200..299) throw Exception(ctx.getString(R.string.err_download_http, res.code))
             val body = res.body
-            val mime = body.contentType()?.let { "${it.type}/${it.subtype}" }
-                ?: res.header("Content-Type")?.substringBefore(";")?.trim()
-                ?: "application/octet-stream"
+            val mime = mimeOf(res)
             val name = sanitize(if (filename.isNotEmpty()) filename else inferName(res.header("Content-Disposition"), url))
-            if (toPublic) {
+            if (filename.isNotEmpty()) {
                 return DlFile(storePublic(name, mime) { out -> body.byteStream().use { it.copyTo(out) } }, name, mime)
             }
             return DlFile(storeCached(name) { out -> body.byteStream().use { it.copyTo(out) } }, name, mime)
         }
+    }
+
+    /**
+     * Visible download to Downloads/memories/; zips are extracted entry-wise.
+     * Returns every saved file. Must be called off the UI thread.
+     */
+    @Throws(Exception::class)
+    fun downloadPublic(url: String, filename: String): List<DlFile> {
+        val tmp = File.createTempFile("download", ".bin", ctx.cacheDir)
+        try {
+            var mime = "application/octet-stream"
+            var disposition: String? = null
+            newCallClient().newCall(buildRequest(url)).execute().use { res ->
+                if (res.code !in 200..299) throw Exception(ctx.getString(R.string.err_download_http, res.code))
+                mime = mimeOf(res)
+                disposition = res.header("Content-Disposition")
+                res.body.byteStream().use { input ->
+                    tmp.outputStream().use { input.copyTo(it) }
+                }
+            }
+            val name = sanitize(if (filename.isNotEmpty()) filename else inferName(disposition, url))
+            if (!isZip(mime, name)) {
+                val uri = storePublic(name, mime) { out -> tmp.inputStream().use { it.copyTo(out) } }
+                return listOf(DlFile(uri, name, mime))
+            }
+            return unzipPublic(tmp, name)
+        } finally {
+            tmp.delete()
+        }
+    }
+
+    /** Per-call client: current pool/dispatcher and TLS/auth config, bounded timeouts. */
+    private fun newCallClient() = clients.client().newBuilder()
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
+        .build()
+
+    private fun mimeOf(res: Response): String =
+        res.body.contentType()?.let { "${it.type}/${it.subtype}" }
+            ?: res.header("Content-Type")?.substringBefore(";")?.trim()
+            ?: "application/octet-stream"
+
+    private fun isZip(mime: String, name: String): Boolean =
+        mime.equals("application/zip", ignoreCase = true) ||
+            mime.equals("application/x-zip-compressed", ignoreCase = true) ||
+            name.endsWith(".zip", ignoreCase = true)
+
+    /** Extracts each zip entry into Downloads/memories/; entries come from the central directory. */
+    @Throws(Exception::class)
+    private fun unzipPublic(zipFile: File, zipName: String): List<DlFile> {
+        val out = ArrayList<DlFile>()
+        try {
+            ZipFile(zipFile).use { zip ->
+                for (entry in Collections.list(zip.entries()).filterNot { it.isDirectory }) {
+                    val name = entryName(entry.name) ?: continue
+                    val mime = mimeFor(name)
+                    zip.getInputStream(entry).use { input ->
+                        out.add(DlFile(storePublic(name, mime) { o -> input.copyTo(o) }, name, mime))
+                    }
+                }
+            }
+        } catch (_: ZipException) {
+            throw Exception(ctx.getString(R.string.err_download_incomplete, zipName))
+        }
+        if (out.isEmpty()) throw Exception(ctx.getString(R.string.err_download_empty, zipName))
+        return out
+    }
+
+    /** Basename only (no Zip Slip); null when nothing usable remains. */
+    private fun entryName(raw: String): String? {
+        val base = raw.substringAfterLast('/').substringAfterLast('\\').trim().trim('.')
+        if (base.isEmpty()) return null
+        return sanitize(base)
+    }
+
+    private fun mimeFor(name: String): String {
+        val ext = name.substringAfterLast('.', "").lowercase()
+        if (ext.isEmpty()) return "application/octet-stream"
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext) ?: "application/octet-stream"
     }
 
     private fun buildRequest(url: String): Request {
@@ -99,9 +174,9 @@ class InAppDownloader(
             put(MediaStore.Downloads.IS_PENDING, 1)
         }
         val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
-            ?: throw Exception("Failed to create download entry")
+            ?: throw Exception(ctx.getString(R.string.err_download_entry))
         try {
-            resolver.openOutputStream(uri)?.use(copy) ?: throw Exception("Failed to write download")
+            resolver.openOutputStream(uri)?.use(copy) ?: throw Exception(ctx.getString(R.string.err_download_write))
         } catch (e: Exception) {
             try { resolver.delete(uri, null, null) } catch (_: Exception) {}
             throw e
@@ -143,7 +218,7 @@ class InAppDownloader(
         val ext = if (dot > 0) name.substring(dot) else ""
         var i = 1
         while (file.exists() && i < 1000) file = File(dir, "$stem ($i)$ext").also { i++ }
-        if (file.exists()) throw Exception("Failed to create share file")
+        if (file.exists()) throw Exception(ctx.getString(R.string.err_download_share))
         return file
     }
 

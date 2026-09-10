@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
+import gallery.memories.R
 import gallery.memories.timeline.TimelineJson
 import gallery.memories.timeline.TimelineRepository
 import org.json.JSONArray
@@ -23,10 +24,10 @@ class ShareManager(
 ) {
     private var shareBlobs: JSONArray? = null
 
-    /** Downloads one URL visibly to Downloads/memories/; infers the name when empty. Throws on failure. */
+    /** Visible download; zips are extracted entry-wise. Returns every saved file. Throws on failure. */
     @Throws(Exception::class)
-    fun downloadFile(url: String, filename: String): InAppDownloader.DlFile =
-        downloads.download(url, filename, toPublic = true)
+    fun downloadFile(url: String, filename: String): List<InAppDownloader.DlFile> =
+        downloads.downloadPublic(url, filename)
 
     /** Shares a plain URL via the system chooser. */
     fun shareUrl(url: String): Boolean {
@@ -53,7 +54,7 @@ class ShareManager(
         val blobs = shareBlobs ?: throw Exception("No blobs to share")
         try {
             val files = List(blobs.length()) { blobs.getJSONObject(it) }.mapNotNull(::resolve)
-            if (files.isEmpty()) throw Exception("Nothing to share")
+            if (files.isEmpty()) throw Exception(activity.getString(R.string.err_share_nothing))
             send(files)
             return true
         } finally {

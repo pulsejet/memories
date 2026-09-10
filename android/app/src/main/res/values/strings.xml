@@ -15,4 +15,21 @@
     <string name="err_logged_out">Logged out from server</string>
     <string name="err_no_describe">Failed to connect to server. Reset app data if this persists.</string>
     <string name="err_login_timeout">Login timed out. Please try again.</string>
+
+    <string name="notif_channel_downloads">Downloads</string>
+    <string name="notif_download_complete">Download complete</string>
+    <string name="notif_download_failed">Download failed</string>
+    <string name="notif_tap_to_view">Tap to view</string>
+    <plurals name="notif_files_downloaded">
+        <item quantity="one">%d file downloaded</item>
+        <item quantity="other">%d files downloaded</item>
+    </plurals>
+
+    <string name="err_download_http">Download failed: HTTP %1$d</string>
+    <string name="err_download_entry">Failed to create download entry</string>
+    <string name="err_download_write">Failed to write download</string>
+    <string name="err_download_share">Failed to create share file</string>
+    <string name="err_download_empty">Empty archive: %1$s</string>
+    <string name="err_download_incomplete">Incomplete download: %1$s</string>
+    <string name="err_share_nothing">Nothing to share</string>
 </resources>

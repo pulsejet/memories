@@ -261,7 +261,7 @@ export default defineComponent({
         API.ALBUM_DOWNLOAD(this.$route.params.user?.toString(), this.$route.params.name?.toString()),
       );
       if (res.status === 200 && res.data.handle) {
-        downloadWithHandle(res.data.handle);
+        downloadWithHandle(res.data.handle, this.$route.params.name?.toString());
       }
     },
 

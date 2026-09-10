@@ -115,7 +115,7 @@ class NativeX(private val mCtx: MainActivity) {
 
     /** Downloads a file in-process with the app's own client. Notifies on completion. Nulls are ignored. */
     @JavascriptInterface
-    fun downloadFromUrl(url: String?, filename: String?) {
+    fun downloadFromUrl(url: String?, filename: String?, title: String?) {
         if (url == null) return
         mCtx.threadPool.submit {
             try {
@@ -123,12 +123,16 @@ class NativeX(private val mCtx: MainActivity) {
             } catch (_: Exception) {
             }
             val notifier = DownloadNotifier(mCtx)
+            val label = title?.takeIf { it.isNotEmpty() }
+            val failed = mCtx.getString(R.string.notif_download_failed)
             try {
-                val file = shareManager?.downloadFile(url, filename ?: "") ?: throw Exception("Unavailable")
-                notifier.success(file.name, file.uri, file.mimeType)
+                val files = shareManager?.downloadFile(url, filename ?: "") ?: throw Exception(failed)
+                if (files.isEmpty()) throw Exception(failed)
+                if (files.size == 1) notifier.success(files[0].name, files[0].uri, files[0].mimeType, label)
+                else notifier.successMany(files.size, label)
             } catch (e: Exception) {
                 Log.w(TAG, "downloadFromUrl failed: $url", e)
-                notifier.failure(e.message ?: "Download failed")
+                notifier.failure(e.message ?: failed, label)
             }
         }
     }

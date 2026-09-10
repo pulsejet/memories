@@ -159,10 +159,11 @@ export type NativeX = {
   /**
    * Start downloading a file from a given URL.
    * @param url URL to download from
-   * @param filename Filename to save as
+   * @param filename Filename to save as (empty: infer from response)
+   * @param title Optional label for the completion notification (e.g. album name)
    * @details An error must be shown to the user natively if the download fails.
    */
-  downloadFromUrl: (url: string, filename: string) => void;
+  downloadFromUrl: (url: string, filename: string, title?: string) => void;
 
   /**
    * Set the list of objects to share with SHARE_BLOB API.
