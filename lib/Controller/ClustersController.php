@@ -29,7 +29,6 @@ use OCA\Memories\Util;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
-use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 
@@ -115,7 +114,6 @@ final class ClustersController extends GenericApiController
      * Download a cluster as a zip file.
      */
     #[NoAdminRequired]
-    #[UseSession]
     public function download(string $backend, string $name): Http\Response
     {
         return Util::guardEx(function () use ($backend, $name) {
@@ -127,7 +125,7 @@ final class ClustersController extends GenericApiController
 
             // Get download handle
             $filename = $this->backend->clusterName($name);
-            $handle = \OCA\Memories\Controller\DownloadController::createHandle($filename, $fileIds);
+            $handle = \OC::$server->get(DownloadController::class)->createHandle($filename, $fileIds);
 
             return new JSONResponse(['handle' => $handle], Http::STATUS_OK);
         });

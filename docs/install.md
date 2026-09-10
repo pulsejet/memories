@@ -27,6 +27,7 @@ Before installing Memories, make sure that the following requirements are met:
 1. MySQL, MariaDB, or PostgreSQL (>=v15) database.
 1. [Imagick](https://www.php.net/manual/en/book.imagick.php) PHP extension.
 1. [ffmpeg](https://ffmpeg.org/) and [ffprobe](https://ffmpeg.org/ffprobe.html) binaries.
+1. A distributed memcache (e.g. Redis).
 
 ## Installing Memories
 

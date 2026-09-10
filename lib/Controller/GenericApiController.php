@@ -30,10 +30,12 @@ use OCP\App\IAppManager;
 use OCP\AppFramework\ApiController;
 use OCP\Config\IUserConfig;
 use OCP\Files\IRootFolder;
+use OCP\ICacheFactory;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IRequest;
 use OCP\IUserSession;
+use OCP\Security\ISecureRandom;
 use Psr\Log\LoggerInterface;
 
 abstract class GenericApiController extends ApiController
@@ -49,6 +51,8 @@ abstract class GenericApiController extends ApiController
         protected LoggerInterface $logger,
         protected TimelineQuery $tq,
         protected FsManager $fs,
+        protected ICacheFactory $cacheFactory,
+        protected ISecureRandom $secureRandom,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }

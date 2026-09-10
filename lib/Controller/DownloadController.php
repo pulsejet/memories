@@ -29,14 +29,15 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
-use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\ISession;
+use OCP\ICache;
 use OCP\ITempManager;
 use OCP\Security\ISecureRandom;
 
 final class DownloadController extends GenericApiController
 {
+    private const HANDLE_TTL = 24 * 60 * 60;
+
     /**
      * Request to download one or more files.
      *
@@ -44,11 +45,10 @@ final class DownloadController extends GenericApiController
      */
     #[NoAdminRequired]
     #[PublicPage]
-    #[UseSession]
     public function request(array $files): Http\Response
     {
-        return Util::guardEx(static function () use ($files) {
-            $handle = self::createHandle('memories', $files);
+        return Util::guardEx(function () use ($files) {
+            $handle = $this->createHandle('memories', $files);
 
             return new JSONResponse(['handle' => $handle]);
         });
@@ -57,15 +57,18 @@ final class DownloadController extends GenericApiController
     /**
      * Get a handle for downloading files.
      *
-     * The calling controller must have the UseSession annotation.
-     *
      * @param string $name  Name of zip file
      * @param int[]  $files List of file IDs
      */
-    public static function createHandle(string $name, array $files): string
+    public function createHandle(string $name, array $files): string
     {
-        $handle = \OC::$server->get(ISecureRandom::class)->generate(16, ISecureRandom::CHAR_ALPHANUMERIC);
-        \OC::$server->get(ISession::class)->set("memories_download_{$handle}", [$name, $files]);
+        $handle = $this->secureRandom->generate(16, ISecureRandom::CHAR_ALPHANUMERIC);
+        $cache = $this->getCache();
+        if (null !== $cache->get($handle)) {
+            throw new \Exception('Download handle collision');
+        }
+
+        $cache->set($handle, [$name, $files], self::HANDLE_TTL);
 
         return $handle;
     }
@@ -79,14 +82,11 @@ final class DownloadController extends GenericApiController
     public function file(string $handle): Http\Response
     {
         return Util::guardEx(function () use ($handle) {
-            // Get ids from request
-            $session = \OC::$server->get(ISession::class);
-            $key = "memories_download_{$handle}";
-            $info = $session->get($key);
+            $cache = $this->getCache();
+            $info = $cache->get($handle);
 
-            // Remove handle from session unless HEAD request
             if ('HEAD' !== $this->request->getMethod()) {
-                $session->remove($key);
+                $cache->remove($handle);
             }
 
             if (null === $info) {
@@ -284,6 +284,12 @@ final class DownloadController extends GenericApiController
             // Close file
             fclose($res);
         });
+    }
+
+    /** Cache for download handles. */
+    private function getCache(): ICache
+    {
+        return $this->cacheFactory->createDistributed('memories:downloads');
     }
 
     /**

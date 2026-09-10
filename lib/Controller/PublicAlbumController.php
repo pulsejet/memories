@@ -121,7 +121,7 @@ final class PublicAlbumController extends Controller
 
         // Get download handle
         $downloadController = \OC::$server->get(\OCA\Memories\Controller\DownloadController::class);
-        $handle = $downloadController::createHandle($album['name'], $fileIds);
+        $handle = $downloadController->createHandle($album['name'], $fileIds);
 
         // Start download
         return $downloadController->file($handle);
