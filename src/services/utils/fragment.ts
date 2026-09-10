@@ -172,6 +172,8 @@ export const fragment = {
   get viewer() {
     return this.get(FragmentType.viewer);
   },
+
+  encode: encodeFragment,
 };
 
 /**
