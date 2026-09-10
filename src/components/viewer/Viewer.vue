@@ -904,7 +904,7 @@ export default defineComponent({
 
       photoswipe.addFilter('itemData', (itemData, index) => ({
         ...this.getItemData(this.list[index]),
-        msrc: thumbSize ? utils.getPreviewUrl({ photo, msize: thumbSize }) : undefined,
+        msrc: thumbSize ? utils.getPreviewUrl({ photo: this.list[index], msize: thumbSize }) : undefined,
       }));
 
       this.isOpen = true;
