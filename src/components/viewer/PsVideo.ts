@@ -346,6 +346,10 @@ class VideoContentSetup {
       },
       fullscreen: {
         enabled: true,
+        // Native iOS player, fixed by patches/plyr-ios-native.patch (#697).
+        // The patch feature-detects webkit availability instead of UA
+        // sniffing; fallback stays enabled so the button is shown.
+        iosNative: true,
         // container: we need to set this after Plyr is loaded
         // since we don't initialize Plyr inside the container,
         // and this container is computed during construction

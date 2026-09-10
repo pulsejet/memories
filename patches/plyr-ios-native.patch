@@ -1,0 +1,120 @@
+# plyr iOS native fullscreen fixes
+# https://github.com/pulsejet/memories/issues/697
+#
+# Background: iPhone Safari offers no generic Fullscreen API (neither
+# unprefixed requestFullscreen nor an element-level webkit-prefixed one).
+# The only fullscreen available there is the native video-player
+# presentation via HTMLVideoElement.webkitEnterFullscreen().
+# Plyr has a dedicated path for this (fullscreen.iosNative, which
+# PsVideo.ts opts into unconditionally), but upstream gates that path on
+# browser.isIos UA sniffing, which misses some iOS contexts (standalone
+# home-screen apps, iPads with desktop UA). The helper below replaces the
+# UA check with feature detection: native video presentation is used
+# whenever the video element offers webkitEnterFullscreen and no generic
+# Fullscreen API exists. Desktops are unaffected: generic fullscreen is
+# available there, so the helper is false even though desktop Safari also
+# exposes webkitEnterFullscreen.
+#
+# That upstream path is additionally broken in three ways, fixed by the
+# hunks below.
+#
+# Hunk 2 (constructor): Plyr only listens for document-level
+#   *fullscreenchange to sync the toggle button and to fire its own
+#   enter/exitfullscreen events (which the app uses e.g. for the
+#   screen-orientation lock). Native iOS fullscreen fires
+#   webkitbeginfullscreen/webkitendfullscreen on the <video> element
+#   instead, so without this wiring the button state goes stale and no
+#   Plyr fullscreen events ever fire.
+# Hunk 4 (get active): with no native Fullscreen support Plyr falls back
+#   to checking the CSS-fallback class, which native iOS fullscreen never
+#   sets, so active is always false and toggle() can only ever enter.
+#   Read webkitDisplayingFullscreen off the video element instead.
+# Hunk 6 (exit): upstream typo calls webkitEnterFullscreen() when
+#   exiting; call webkitExitFullscreen() instead.
+#
+# Maintenance: re-verify against node_modules/plyr/src/js/fullscreen.js
+# on every plyr upgrade and drop hunks fixed upstream. Applied by
+# scripts/patch-external.sh via `patch -p1 -N`.
+--- ./node_modules/plyr/src/js/fullscreen.js
++++ ./node_modules/plyr/src/js/fullscreen.js
+@@ -10,6 +10,21 @@
+ import is from './utils/is';
+ import { silencePromise } from './utils/promise';
+
++// Whether to present fullscreen through the native video player instead of
++// the Fullscreen API. Feature-detected rather than UA-sniffed: browser.isIos
++// misses some iOS contexts (standalone home-screen apps, iPads with desktop
++// UA), while desktops must stay on the standard path since they do have
++// generic fullscreen (and Safari there also exposes webkitEnterFullscreen).
++// https://github.com/pulsejet/memories/issues/697
++function useWebkitVideoFullscreen(player) {
++  return !!(
++    player.config.fullscreen.iosNative &&
++    !Fullscreen.nativeSupported &&
++    player.media &&
++    typeof player.media.webkitEnterFullscreen === 'function'
++  );
++}
++
+ class Fullscreen {
+   constructor(player) {
+     // Keep reference to parent
+@@ -42,6 +57,13 @@
+       },
+     );
+
++    // iOS native video fullscreen fires element events, not document events
++    // https://github.com/pulsejet/memories/issues/697
++    if (useWebkitVideoFullscreen(player)) {
++      player.media.addEventListener('webkitbeginfullscreen', () => this.onChange());
++      player.media.addEventListener('webkitendfullscreen', () => this.onChange());
++    }
++
+     // Fullscreen toggle on double click
+     on.call(this.player, this.player.elements.container, 'dblclick', (event) => {
+       // Ignore double click in controls
+@@ -121,6 +143,11 @@
+   get active() {
+     if (!this.supported) return false;
+
++    // iOS native state lives on the video element, not the document
++    if (useWebkitVideoFullscreen(this.player)) {
++      return this.target.webkitDisplayingFullscreen === true;
++    }
++
+     // Fallback using classname
+     if (!Fullscreen.nativeSupported || this.forceFallback) {
+       return hasClass(this.target, this.player.config.classNames.fullscreen.fallback);
+@@ -135,7 +162,7 @@
+
+   // Get target element
+   get target() {
+-    return browser.isIos && this.player.config.fullscreen.iosNative
++    return useWebkitVideoFullscreen(this.player)
+       ? this.player.media
+       : this.player.elements.fullscreen ?? this.player.elements.container;
+   }
+@@ -250,7 +277,7 @@
+     if (!this.supported) return;
+
+     // iOS native fullscreen doesn't need the request step
+-    if (browser.isIos && this.player.config.fullscreen.iosNative) {
++    if (useWebkitVideoFullscreen(this.player)) {
+       if (this.player.isVimeo) {
+         this.player.embed.requestFullscreen();
+       }
+@@ -274,12 +301,12 @@
+     if (!this.supported) return;
+
+     // iOS native fullscreen
+-    if (browser.isIos && this.player.config.fullscreen.iosNative) {
++    if (useWebkitVideoFullscreen(this.player)) {
+       if (this.player.isVimeo) {
+         this.player.embed.exitFullscreen();
+       }
+       else {
+-        this.target.webkitEnterFullscreen();
++        this.target.webkitExitFullscreen();
+       }
+       silencePromise(this.player.play());
+     }
