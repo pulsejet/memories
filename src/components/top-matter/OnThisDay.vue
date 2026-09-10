@@ -135,9 +135,6 @@ export default defineComponent({
         if (photo.ishidden) continue;
         if (photo.basename?.startsWith('.')) continue;
 
-        // Skip videos for now (strange bugs)
-        if (photo.isvideo) continue;
-
         // Get year and text for this photo
         const dateTaken = utils.dayIdToDate(photo.dayid);
         const year = dateTaken.getUTCFullYear();
