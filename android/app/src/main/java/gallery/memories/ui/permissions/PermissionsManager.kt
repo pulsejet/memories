@@ -31,10 +31,13 @@ class PermissionsManager(
 ) {
     private var isGranted: Boolean = false
     private var latch: CountDownLatch? = null
+    private var notifLatch: CountDownLatch? = null
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var requestNotificationLauncher: ActivityResultLauncher<String>
 
     companion object {
         private const val LOCATION_PERM = Manifest.permission.ACCESS_MEDIA_LOCATION
+        private const val NOTIF_PERM = Manifest.permission.POST_NOTIFICATIONS
     }
 
     /** Registers the permission launcher. Must be called during activity creation. */
@@ -49,6 +52,11 @@ class PermissionsManager(
                 prefs.hasMediaPermission = isGranted
             }
             latch?.countDown()
+        }
+        requestNotificationLauncher = activity.registerForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) {
+            notifLatch?.countDown()
         }
         return this
     }
@@ -82,6 +90,25 @@ class PermissionsManager(
             prefs.hasMediaPermission = false
         }
         return isGranted
+    }
+
+    /** Live OS grant for posting notifications. Always true below Android 13. */
+    fun hasNotificationPermission(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
+        return ContextCompat.checkSelfPermission(activity, NOTIF_PERM) == PackageManager.PERMISSION_GRANTED
+    }
+
+    /**
+     * Requests the notification permission, blocking until the user answers.
+     * Must be called off the UI thread. No-op when already granted or denied
+     * twice (the system then answers without showing UI).
+     */
+    fun requestNotificationsPermissionSync(): Boolean {
+        if (hasNotificationPermission()) return true
+        notifLatch = CountDownLatch(1)
+        requestNotificationLauncher.launch(NOTIF_PERM)
+        notifLatch?.await()
+        return hasNotificationPermission()
     }
 
     /** Live OS grant for location EXIF. Always true below Android 10 (no redaction there). */

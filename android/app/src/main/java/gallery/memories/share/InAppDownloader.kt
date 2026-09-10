@@ -45,11 +45,12 @@ class InAppDownloader(
 
     /**
      * Downloads [url] synchronously; must be called off the UI thread.
-     * A non-empty [filename] saves visibly to Downloads/memories/, otherwise
-     * to the private share cache for immediate ACTION_SEND. Throws on failure.
+     * Saves visibly to Downloads/memories/ when [toPublic] (inferring the
+     * name from Content-Disposition when [filename] is empty), otherwise to
+     * the private share cache for immediate ACTION_SEND. Throws on failure.
      */
     @Throws(Exception::class)
-    fun download(url: String, filename: String): DlFile {
+    fun download(url: String, filename: String, toPublic: Boolean = filename.isNotEmpty()): DlFile {
         val request = buildRequest(url)
         // Per-call client: shares the current pool/dispatcher, picks up the
         // latest TLS/auth config, times out instead of hanging forever.
@@ -65,7 +66,7 @@ class InAppDownloader(
                 ?: res.header("Content-Type")?.substringBefore(";")?.trim()
                 ?: "application/octet-stream"
             val name = sanitize(if (filename.isNotEmpty()) filename else inferName(res.header("Content-Disposition"), url))
-            if (filename.isNotEmpty()) {
+            if (toPublic) {
                 return DlFile(storePublic(name, mime) { out -> body.byteStream().use { it.copyTo(out) } }, name, mime)
             }
             return DlFile(storeCached(name) { out -> body.byteStream().use { it.copyTo(out) } }, name, mime)

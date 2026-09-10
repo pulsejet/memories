@@ -23,10 +23,10 @@ class ShareManager(
 ) {
     private var shareBlobs: JSONArray? = null
 
-    /** Downloads one URL in-process; throws on failure. */
+    /** Downloads one URL visibly to Downloads/memories/; infers the name when empty. Throws on failure. */
     @Throws(Exception::class)
     fun downloadFile(url: String, filename: String): InAppDownloader.DlFile =
-        downloads.download(url, filename)
+        downloads.download(url, filename, toPublic = true)
 
     /** Shares a plain URL via the system chooser. */
     fun shareUrl(url: String): Boolean {

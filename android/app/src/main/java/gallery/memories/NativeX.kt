@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.app.di.AppContainer
 import gallery.memories.bridge.BridgeResponses
+import gallery.memories.share.DownloadNotifier
 import gallery.memories.share.ShareManager
 import org.json.JSONArray
 import java.io.ByteArrayInputStream
@@ -112,17 +113,22 @@ class NativeX(private val mCtx: MainActivity) {
         mCtx.runOnUiThread { mCtx.loadDefaultUrl() }
     }
 
-    /** Downloads a file in-process with the app's own client. Toasts success/failure. Nulls are ignored. */
+    /** Downloads a file in-process with the app's own client. Notifies on completion. Nulls are ignored. */
     @JavascriptInterface
     fun downloadFromUrl(url: String?, filename: String?) {
-        if (url == null || filename == null) return
+        if (url == null) return
         mCtx.threadPool.submit {
             try {
-                shareManager?.downloadFile(url, filename)
-                mCtx.runOnUiThread { android.widget.Toast.makeText(mCtx, "Download complete: $filename", android.widget.Toast.LENGTH_SHORT).show() }
+                permissions.requestNotificationsPermissionSync()
+            } catch (_: Exception) {
+            }
+            val notifier = DownloadNotifier(mCtx)
+            try {
+                val file = shareManager?.downloadFile(url, filename ?: "") ?: throw Exception("Unavailable")
+                notifier.success(file.name, file.uri, file.mimeType)
             } catch (e: Exception) {
                 Log.w(TAG, "downloadFromUrl failed: $url", e)
-                mCtx.runOnUiThread { android.widget.Toast.makeText(mCtx, "Download failed: ${e.message}", android.widget.Toast.LENGTH_LONG).show() }
+                notifier.failure(e.message ?: "Download failed")
             }
         }
     }
