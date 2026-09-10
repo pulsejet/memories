@@ -73,6 +73,18 @@ object ShellPage {
                     unsafe {
                         val root = webRoot.jsString()
                         raw("window._oc_webroot = $root; window._oc_appswebroots = {'memories': $root + '/apps/memories'};")
+                        raw(
+                            """
+                            window._oc_capabilities = {
+                              'files': {
+                                'forbidden_filename_characters': ['/', '\\'],
+                                'forbidden_filenames': ['.htaccess'],
+                                'forbidden_filename_basenames': [],
+                                'forbidden_filename_extensions': ['.part', '.filepart']
+                              }
+                            };
+                            """.trimIndent(),
+                        )
                     }
                 }
                 script(src = "/local/assets/js/" + AssetCache.ENTRY_JS) { defer = true }
