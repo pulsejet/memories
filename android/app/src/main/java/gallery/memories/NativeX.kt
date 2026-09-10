@@ -6,7 +6,6 @@ import android.view.SoundEffectConstants
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceResponse
 import android.widget.Toast
-import androidx.core.net.toUri
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.app.di.AppContainer
 import gallery.memories.bridge.BridgeResponses
@@ -25,7 +24,6 @@ class NativeX(private val mCtx: MainActivity) {
     val container = AppContainer(mCtx, bridge = { method, url -> handleBridge(method, url) }, onAllowMedia = { doMediaSync(true) })
 
     val timeline get() = container.timeline
-    val query get() = container.timeline
     val image get() = container.image
     val auth get() = container.auth
     val assets get() = container.assets
@@ -40,6 +38,10 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     companion object {
+        /**
+         * Latest live [ShareManager], for the manifest-registered download receiver
+         * which cannot receive it via intent. Nulled in [destroy].
+         */
         var shareManager: ShareManager? = null
         val TAG: String = NativeX::class.java.simpleName
     }
@@ -68,6 +70,7 @@ class NativeX(private val mCtx: MainActivity) {
     @JavascriptInterface
     fun isNative(): Boolean = true
 
+    /** Lets entry pages draw under transparent system bars. */
     @JavascriptInterface
     fun setTransparentBars(transparent: Boolean, isDark: Boolean) {
         mCtx.runOnUiThread { mCtx.setTransparentBars(transparent, isDark) }
@@ -88,6 +91,7 @@ class NativeX(private val mCtx: MainActivity) {
         mCtx.runOnUiThread { mCtx.binding.webview.playSoundEffect(SoundEffectConstants.CLICK) }
     }
 
+    /** Short or long toast on the UI thread. Safe to call from any thread. */
     @JavascriptInterface
     fun toast(message: String, long: Boolean = false) {
         mCtx.runOnUiThread {
@@ -101,23 +105,27 @@ class NativeX(private val mCtx: MainActivity) {
         account.loggedOut()
     }
 
+    /** Reloads whatever [MainActivity.loadDefaultUrl] resolves to (app or welcome). */
     @JavascriptInterface
     fun reload() {
         mCtx.runOnUiThread { mCtx.loadDefaultUrl() }
     }
 
+    /** Enqueues a download via the system DownloadManager. Nulls are ignored. */
     @JavascriptInterface
     fun downloadFromUrl(url: String?, filename: String?) {
         if (url == null || filename == null) return
         shareManager?.queue(url, filename)
     }
 
+    /** Stages share blobs (as a JSON array string) for a later /api/share/blobs call. */
     @JavascriptInterface
     fun setShareBlobs(objects: String?) {
         if (objects == null) return
         shareManager?.setShareBlobs(JSONArray(objects))
     }
 
+    /** Backwards-compatible alias of [playVideo2] without looping. */
     @JavascriptInterface
     fun playVideo(auid: String, fileid: Long, urlsArray: String) {
         this.playVideo2(auid, fileid, urlsArray, false)
@@ -128,7 +136,7 @@ class NativeX(private val mCtx: MainActivity) {
     fun playVideo2(auid: String, fileid: Long, urlsArray: String, loop: Boolean = false) {
         mCtx.threadPool.submit {
             val urls = JSONArray(urlsArray)
-            val list = Array(urls.length()) { urls.getString(it).toUri() }
+            val list = Array(urls.length()) { Uri.parse(urls.getString(it)) }
             val videos = timeline.getSystemImagesByAUIDs(arrayListOf(auid))
             mCtx.runOnUiThread {
                 if (videos.isNotEmpty()) {
@@ -145,22 +153,27 @@ class NativeX(private val mCtx: MainActivity) {
         mCtx.runOnUiThread { mCtx.destroyPlayer(fileid) }
     }
 
+    /** Persists the folder selection from the setup UI. */
     @JavascriptInterface
     fun configSetLocalFolders(json: String?) {
         if (json == null) return
         timeline.localFolders = JSONArray(json)
     }
 
+    /** Current folder selection as JSON. */
     @JavascriptInterface
     fun configGetLocalFolders(): String = timeline.localFolders.toString()
 
+    /** True once the user opted in and the OS permission is granted. */
     @JavascriptInterface
     fun configHasMediaPermission(): Boolean =
         permissions.hasAllowMedia() && permissions.hasMediaPermission()
 
+    /** Indexed-file count, or -1 when no sync is running. */
     @JavascriptInterface
     fun getSyncStatus(): Int = timeline.syncStatus
 
+    /** Hides indexed files already present on the server. Runs off the UI thread. */
     @JavascriptInterface
     fun setHasRemote(auids: String, buids: String, value: Boolean) {
         Log.v(TAG, "setHasRemote: auids=$auids, buids=$buids, value=$value")
@@ -190,10 +203,11 @@ class NativeX(private val mCtx: MainActivity) {
             Log.w(TAG, "handleBridge: $method $path failed", e)
             BridgeResponses.error()
         }
-        response.responseHeaders = mutableMapOf(
-            "Access-Control-Allow-Origin" to "*",
-            "Access-Control-Allow-Headers" to "*",
-        )
+        // Merge CORS headers so any headers set by the route survive.
+        val headers = (response.responseHeaders ?: emptyMap()).toMutableMap()
+        headers["Access-Control-Allow-Origin"] = "*"
+        headers["Access-Control-Allow-Headers"] = "*"
+        response.responseHeaders = headers
         if (path.matches(API.IMAGE_PREVIEW) || path.matches(API.IMAGE_FULL)) {
             response.responseHeaders["Cache-Control"] = "max-age=604800"
         }

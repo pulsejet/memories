@@ -1,5 +1,6 @@
 package gallery.memories.app.di
 
+import android.net.Uri
 import android.webkit.WebResourceResponse
 import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
@@ -34,10 +35,13 @@ import gallery.memories.ui.permissions.PermissionsManager
  * Owns every app-scoped service and wires their dependencies.
  * Lives as long as the activity; [timeline] is late-initialized so the
  * media observer can reference it without a construction cycle.
+ *
+ * @param bridge handles in-app /api and /image requests for the local server.
+ * @param onAllowMedia re-runs a full media sync after the user opts in.
  */
 class AppContainer(
     private val activity: MainActivity,
-    bridge: (method: String, url: android.net.Uri) -> WebResourceResponse,
+    bridge: (method: String, url: Uri) -> WebResourceResponse,
     onAllowMedia: () -> Unit,
 ) {
     val prefs = PreferencesStore(activity)

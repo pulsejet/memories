@@ -6,13 +6,13 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
-import android.view.View
 import android.webkit.CookieManager
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.window.OnBackInvokedDispatcher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
+import gallery.memories.data.local.prefs.PreferencesStore
 import gallery.memories.databinding.ActivityMainBinding
 import gallery.memories.ui.player.VideoPlayerManager
 import gallery.memories.ui.startup.AppStartupCoordinator
@@ -27,7 +27,10 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 @UnstableApi
-/** Single-activity host: owns the WebView and components, delegates logic to them. */
+/**
+ * Single-activity host: owns the WebView and UI components, delegating
+ * business logic to them. All [NativeX] bridge entry points funnel through here.
+ */
 class MainActivity : AppCompatActivity() {
     companion object {
         val TAG: String = MainActivity::class.java.simpleName
@@ -37,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
+    /** Background pool for bridge/DB work. Never submit UI work to it. */
     val threadPool: ExecutorService = Executors.newFixedThreadPool(4)
 
     lateinit var nativex: NativeX
@@ -49,11 +53,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var chooser: FileChooserHandler
     private lateinit var startup: AppStartupCoordinator
 
+    /** Whether entry pages draw under transparent system bars. Read by the edge-to-edge controller. */
     var isTransparentBars = false
+    /** Last upstream host served locally. Used to keep app navigation inside the WebView. */
     var host: String? = null
     /** One-shot: cleared by the web client after the main page loads so Back skips entry pages. */
     var clearHistoryOnLoad = false
 
+    /** Matches in-app routes; everything else opens in the browser. */
     val memoriesRegex = Regex("/apps/memories/.*$")
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,6 +97,7 @@ class MainActivity : AppCompatActivity() {
         binding.coordinator.removeAllViews()
         binding.webview.destroy()
         nativex.destroy()
+        threadPool.shutdownNow()
     }
 
     override fun onConfigurationChanged(config: android.content.res.Configuration) {
@@ -158,10 +166,13 @@ class MainActivity : AppCompatActivity() {
 
     fun loadDefaultUrl(): Boolean = startup.loadDefaultUrl()
 
+    /** Boots the locally served app, optionally into the first-run setup flow. */
     fun startLocalApp(toNxSetup: Boolean = false) = startup.startLocalApp(toNxSetup)
 
+    /** Loads the cached snapshot's shell at [subpath]. False when no snapshot is ready. */
     fun loadLocalApp(subpath: String = ""): Boolean = startup.loadLocalApp(subpath)
 
+    /** URL of a static entry page (welcome/waiting) bundled in the APK. */
     fun localStaticUrl(name: String): String = startup.localStaticUrl(name)
 
     fun initializePlayer(uris: Array<Uri>, uid: Long, loop: Boolean = false) = player.initializePlayer(uris, uid, loop)
@@ -173,7 +184,7 @@ class MainActivity : AppCompatActivity() {
     /** Tolerates calls before onCreate wiring by falling back to prefs-backed components. */
     fun restoreTheme() {
         if (!::themes.isInitialized) {
-            val prefs = gallery.memories.data.local.prefs.PreferencesStore(this)
+            val prefs = PreferencesStore(this)
             themes = ThemeManager(this, prefs)
         }
         themes.restoreTheme()
