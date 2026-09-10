@@ -128,6 +128,9 @@ export default defineComponent({
       this.sections = sections;
       this.progress = 0;
 
+      // Include identical copies hidden by de-duplication (#1299)
+      photos = photos.flatMap((p) => [p, ...(p.dups ?? [])]);
+
       // Filter out forbidden MIME types
       photos = photos.filter((p) => {
         if (this.c.FORBIDDEN_EDIT_MIMES.includes(p.mimetype ?? String())) {

@@ -1064,6 +1064,9 @@ export default defineComponent({
                 // copy over flags
                 utils.copyPhotoFlags(now, curr);
 
+                // keep deduped copies up to date (#1299)
+                curr.dups = now.dups;
+
                 return true;
               }
 
@@ -1098,7 +1101,7 @@ export default defineComponent({
       // Set of basenames without extension
       const res1: IPhoto[] = [];
       const toStack = new Map<string, IPhoto[]>();
-      const auids = new Set<string>();
+      const auids = new Map<string, IPhoto>();
 
       // First pass -- remove hidden and prepare
       for (const photo of data) {
@@ -1106,10 +1109,14 @@ export default defineComponent({
         if (photo.ishidden) continue;
         if (photo.basename?.startsWith('.')) continue;
 
-        // Skip identical duplicates
+        // Remember hidden duplicates for bulk actions (#1299)
         if (this.config.dedup_identical && photo.auid) {
-          if (auids.has(photo.auid)) continue;
-          auids.add(photo.auid);
+          const prev = auids.get(photo.auid);
+          if (prev) {
+            (prev.dups ??= []).push(photo);
+            continue;
+          }
+          auids.set(photo.auid, photo);
         }
 
         // Add to first pass result

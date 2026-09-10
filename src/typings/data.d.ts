@@ -108,6 +108,9 @@ declare module '@typings' {
 
     /** Stacked RAW photos */
     stackraw?: IPhoto[];
+
+    /** Identical files hidden by de-duplication */
+    dups?: IPhoto[];
   };
 
   export interface IImageInfo {
