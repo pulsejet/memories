@@ -120,11 +120,13 @@ class StaticConfig {
 
     const config: IConfig = {
       // general stuff
-      version: '',
+      version: String(),
       vod_disable: false,
       video_default_quality: '0',
       places_gis: -1,
       places_search_url: 'https://nominatim.openstreetmap.org',
+      language: String(),
+      locale: String(),
 
       // enabled apps
       systemtags_enabled: false,
@@ -156,7 +158,7 @@ class StaticConfig {
       onthisday_photos_per_year: 10,
 
       // folder settings
-      folders_path: '',
+      folders_path: String(),
       show_hidden_folders: false,
       sort_folder_month: false,
 

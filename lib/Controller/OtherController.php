@@ -81,6 +81,11 @@ final class OtherController extends GenericApiController
                 return $uid ? $this->userConfig->getValueString($uid, Application::APPNAME, $key, $default) : $default;
             };
 
+            // user language and locale for native clients
+            $l10nFactory = \OC::$server->get(\OCP\L10N\IFactory::class);
+            $language = $l10nFactory->findLanguage();
+            $locale = $l10nFactory->findLocale($language);
+
             return new JSONResponse([
                 // general stuff
                 'version' => $version,
@@ -88,6 +93,8 @@ final class OtherController extends GenericApiController
                 'video_default_quality' => SystemConfig::get('memories.video_default_quality'),
                 'places_gis' => SystemConfig::get('memories.gis_type'),
                 'places_search_url' => SystemConfig::get('memories.places.search.url'),
+                'language' => $language,
+                'locale' => $locale,
 
                 // enabled apps
                 'systemtags_enabled' => Util::tagsIsEnabled(),

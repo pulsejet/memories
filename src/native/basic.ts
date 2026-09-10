@@ -1,6 +1,7 @@
 import axios from '@nextcloud/axios';
 import { generateUrl } from '@nextcloud/router';
 import { nativex } from './api';
+import { initShellSync } from './shell';
 import { getBuilder as storageBuilder } from '@nextcloud/browser-storage';
 
 /**
@@ -22,6 +23,9 @@ export async function initialize() {
   const coreStore = storageBuilder('core').clearOnLogout().persist().build();
   // https://github.com/nextcloud/server/blob/8af5e06b6239102cb6905ed5717a62565b3bdfcc/core/src/utils/RedirectUnsupportedBrowsers.js#L9
   coreStore.setItem('unsupported-browser-ignore', 'true');
+
+  // Replicate the server template
+  initShellSync();
 }
 
 /**

@@ -18,6 +18,7 @@ class AssetCache(private val ctx: Context) {
         private val TAG = AssetCache::class.java.simpleName
         /** Entry chunk the shell page loads; every snapshot must contain it. */
         const val ENTRY_JS = "memories-main.js"
+        const val L10N_JS = "memories-l10n.js"
 
         /** Stable local filename for the i-th stylesheet: index plus remote basename. */
         fun cssName(i: Int, href: String): String =

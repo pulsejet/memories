@@ -13,6 +13,7 @@ import type { GlobalRouteCheckers, routes } from './router';
 declare global {
   var __webpack_nonce__: string;
   var __webpack_public_path__: string;
+  var __packed_l10n: Record<string, unknown> | undefined;
 
   var OC: Nextcloud.Common.OC;
   var OCP: Nextcloud.Common.OCP;

@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 const { ManifestSignPlugin } = require('./webpack.manifest-sign-plugin.ts');
+const { L10nBundlePlugin } = require('./webpack.l10n-bundle-plugin.ts');
 
 const WorkboxPlugin = require('workbox-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -136,6 +137,9 @@ module.exports = {
 
   plugins: [
     new VueLoaderPlugin(),
+
+    // Bundle all l10n/*.json into memories-l10n.js as globalThis.__packed_l10n.
+    new L10nBundlePlugin(appName, path.resolve(__dirname, 'l10n')),
 
     // Manifest of all built files (base name -> {hash, href}).
     // The standalone shell uses this to know every chunk up front.

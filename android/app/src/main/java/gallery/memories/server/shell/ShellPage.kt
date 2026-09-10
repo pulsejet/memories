@@ -61,6 +61,7 @@ object ShellPage {
                     }
                 }
                 link(href = "/local/static/shell-overrides.css", rel = "stylesheet")
+                script(src = "/local/assets/js/" + AssetCache.L10N_JS) {}
             }
             body {
                 div { id = "skip-actions" }

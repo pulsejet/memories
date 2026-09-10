@@ -8,6 +8,8 @@ declare module '@typings' {
     video_default_quality: string;
     places_gis: number;
     places_search_url: string;
+    language: string;
+    locale: string;
 
     // enabled apps
     systemtags_enabled: boolean;
