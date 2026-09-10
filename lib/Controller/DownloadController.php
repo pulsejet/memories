@@ -62,7 +62,8 @@ final class DownloadController extends GenericApiController
      */
     public function createHandle(string $name, array $files): string
     {
-        $handle = $this->secureRandom->generate(16, ISecureRandom::CHAR_ALPHANUMERIC);
+        // 86 alphanumeric chars ≈ 512 bits of entropy (86 * log2(62))
+        $handle = $this->secureRandom->generate(86, ISecureRandom::CHAR_ALPHANUMERIC);
         $cache = $this->getCache();
         if (null !== $cache->get($handle)) {
             throw new \Exception('Download handle collision');
