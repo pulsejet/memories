@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 - **Fix**: Face cover when person name matches a username ([#1692](https://github.com/pulsejet/memories/issues/1692))
 - **Update**: Requires Nextcloud 34 or later
 - **Feature**: Huawei Moving Picture support
+- **Feature**: Geolocation for local photos on Android ([#1723](https://github.com/pulsejet/memories/issues/1723))
 - **Dev**: Migrated to Vue 3
 - **Dev**: New extensive unit and e2e test suite
 

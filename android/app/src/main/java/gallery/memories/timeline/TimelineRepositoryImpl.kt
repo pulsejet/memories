@@ -2,7 +2,6 @@ package gallery.memories.timeline
 
 import android.os.Build
 import android.util.Log
-import androidx.exifinterface.media.ExifInterface
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.data.local.db.PhotoDao
 import gallery.memories.data.local.media.MediaDeleter
@@ -15,7 +14,6 @@ import gallery.memories.data.local.prefs.FolderSettings
 import gallery.memories.data.local.prefs.PreferencesStore
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.IOException
 
 @UnstableApi
 /** Local-media timeline: Room index joined with MediaStore rows, shaped as server-API JSON. */
@@ -100,11 +98,22 @@ class TimelineRepositoryImpl(
             .put(TimelineJson.Photo.DATETAKEN, photo.dateTaken)
             .put(TimelineJson.Photo.PERMISSIONS, TimelineJson.Perm.DELETE)
         try {
-            val exif = ExifInterface(image.dataPath)
+            val exif = mapper.exifOf(image)
             obj.put(TimelineJson.Photo.EXIF, JSONObject().apply {
-                TimelineJson.EXIF.MAP.forEach { (key, field) -> put(field, exif.getAttribute(key)) }
+                if (exif != null) {
+                    TimelineJson.EXIF.MAP.forEach { (key, field) -> put(field, exif.getAttribute(key)) }
+                }
+                // Decimal degrees to match the server; raw EXIF GPS is DMS rationals.
+                try {
+                    mapper.latLong(image, exif)?.let { ll ->
+                        put("GPSLatitude", ll[0])
+                        put("GPSLongitude", ll[1])
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Error reading location for $id: ${e.message}")
+                }
             })
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             Log.w(TAG, "Error reading EXIF data for $id")
         }
         return obj

@@ -58,7 +58,7 @@ class AppContainer(
     private val db = AppDatabase.get(activity)
     val dao = db.photoDao()
     val dataSource = MediaStoreDataSource(activity)
-    val mapper = PhotoMapper()
+    val mapper = PhotoMapper(activity)
     val syncManager = MediaSyncManager(activity, dao, dataSource, mapper, prefs)
     val folders = FolderSettings(dao, prefs)
     val deleter = MediaDeleter(activity)
