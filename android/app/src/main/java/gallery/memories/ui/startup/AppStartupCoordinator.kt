@@ -19,10 +19,18 @@ class AppStartupCoordinator(
 ) {
     companion object {
         private val TAG = AppStartupCoordinator::class.java.simpleName
+
+        /** Upper bound for a foreground asset sync before giving up with a toast. */
+        private const val SYNC_TIMEOUT_MS = 15 * 60 * 1000L
     }
 
+    /** URL of a static entry page (welcome/waiting) bundled in the APK. */
     fun localStaticUrl(name: String): String = local.origin() + "/local/static/$name"
 
+    /**
+     * Loads the app when logged in, else the welcome page.
+     * True when the app (not welcome) was started.
+     */
     fun loadDefaultUrl(): Boolean {
         if (auth.baseUrl() != null) {
             startLocalApp()
@@ -54,7 +62,7 @@ class AppStartupCoordinator(
                 activity.setTransparentBars(true, true)
                 activity.binding.webview.loadUrl(localStaticUrl("waiting.html"))
             }
-            if (!assets.syncAndAwait(fresh, 15 * 60 * 1000)) {
+            if (!assets.syncAndAwait(fresh, SYNC_TIMEOUT_MS)) {
                 activity.runOnUiThread { toast("Update failed", true) }
                 return
             }
@@ -70,6 +78,7 @@ class AppStartupCoordinator(
         }
     }
 
+    /** Shows the waiting page and blocks boot until the snapshot is fresh. */
     private fun showWaitingAndEnsure(toNxSetup: Boolean = false) {
         activity.host = "127.0.0.1"
         activity.setTransparentBars(true, true)
@@ -111,6 +120,10 @@ class AppStartupCoordinator(
         return true
     }
 
+    /**
+     * Entry point once the local-auth cookie lands: boots the app (plus a
+     * credential check) or falls back to welcome when logged out.
+     */
     fun onLocalCookieReady() {
         val isApp = loadDefaultUrl()
         if (isApp) Thread { activity.nativex.account.checkCredentialsAndVersion() }.start()

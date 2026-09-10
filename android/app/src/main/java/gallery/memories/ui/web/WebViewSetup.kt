@@ -6,10 +6,25 @@ import android.view.View
 import android.webkit.WebView
 import android.widget.Toast
 
-/** One-time WebView configuration. Transparent background: pages paint over the themed root. */
+import android.annotation.SuppressLint
+import android.graphics.Color
+import android.view.View
+import android.webkit.WebView
+import android.widget.Toast
+import gallery.memories.NativeX
+
+/**
+ * One-time WebView configuration. Transparent background: pages paint over
+ * the themed root.
+ */
 object WebViewSetup {
+    /**
+     * Applies the app's WebView settings and injects [jsInterface] as
+     * `nativex`. [debug] additionally clears the cache and enables remote
+     * debugging with a toast; release builds pass false.
+     */
     @SuppressLint("SetJavaScriptEnabled")
-    fun setup(webview: WebView, userAgent: String, jsInterface: Any, debug: Boolean) {
+    fun setup(webview: WebView, userAgent: String, jsInterface: NativeX, debug: Boolean) {
         val s = webview.settings
         s.javaScriptEnabled = true
         s.javaScriptCanOpenWindowsAutomatically = true

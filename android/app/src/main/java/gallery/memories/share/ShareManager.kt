@@ -1,6 +1,7 @@
 package gallery.memories.share
 
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArrayMap
 import androidx.media3.common.util.UnstableApi
@@ -10,7 +11,11 @@ import org.json.JSONArray
 import java.util.concurrent.CountDownLatch
 
 @UnstableApi
-/** Shares URLs/files with other apps. Remote files are downloaded first; completion is matched by download ID. */
+/**
+ * Shares URLs/files with other apps. Remote files are downloaded first;
+ * completion is matched by download ID. All methods must be called on the
+ * bridge thread: [shareBlobs] blocks until every download completes.
+ */
 class ShareManager(
     private val activity: AppCompatActivity,
     private val timeline: TimelineRepository,
@@ -19,6 +24,7 @@ class ShareManager(
     private val callbacks: MutableMap<Long, () -> Unit> = ArrayMap()
     private var shareBlobs: JSONArray? = null
 
+    /** Matches a system download-complete broadcast to its waiting share. */
     fun runDownloadCallback(intent: Intent) {
         if (activity.isDestroyed) return
         if (android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE == intent.action) {
@@ -34,6 +40,7 @@ class ShareManager(
 
     fun queue(url: String, filename: String): Long = downloads.queue(url, filename)
 
+    /** Shares a plain URL via the system chooser. */
     fun shareUrl(url: String): Boolean {
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
@@ -43,13 +50,15 @@ class ShareManager(
         return true
     }
 
+    /** Stages blobs for the next [shareBlobs] call. */
     fun setShareBlobs(objects: JSONArray) {
         shareBlobs = objects
     }
 
     /**
      * Shares staged blobs: on-device files directly, remote ones after
-     * downloading. Blocks until every download completes.
+     * downloading. Blocks until every download completes. Single files
+     * share as ACTION_SEND, several as ACTION_SEND_MULTIPLE.
      */
     @Throws(Exception::class)
     fun shareBlobs(): Boolean {
@@ -62,11 +71,13 @@ class ShareManager(
             if (auid.isNotEmpty()) {
                 val sysImgs = timeline.getSystemImagesByAUIDs(listOf(auid))
                 if (sysImgs.isNotEmpty()) {
-                    files.add(DownloadManagerWrapper.DlFile().apply {
-                        uri = sysImgs[0].uri
-                        name = sysImgs[0].baseName
-                        mimeType = sysImgs[0].mimeType
-                    })
+                    files.add(
+                        DownloadManagerWrapper.DlFile(
+                            uri = sysImgs[0].uri,
+                            name = sysImgs[0].baseName,
+                            mimeType = sysImgs[0].mimeType,
+                        ),
+                    )
                     continue
                 }
             }
@@ -83,8 +94,8 @@ class ShareManager(
         if (files.size > 1) {
             val intent = Intent(Intent.ACTION_SEND_MULTIPLE)
             val uris = files.map { it.uri }.toCollection(ArrayList())
-            val firstMime = files[0].mimeType?.split("/")?.get(0) ?: "*"
-            intent.type = if (files.all { it.mimeType?.startsWith(firstMime) == true }) "$firstMime/*" else "*/*"
+            val firstTopLevel = files[0].mimeType?.substringBefore("/") ?: "*"
+            intent.type = if (files.all { it.mimeType?.startsWith(firstTopLevel) == true }) "$firstTopLevel/*" else "*/*"
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             intent.putExtra(Intent.EXTRA_STREAM, uris)
             activity.startActivity(Intent.createChooser(intent, null))

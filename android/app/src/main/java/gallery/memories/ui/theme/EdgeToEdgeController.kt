@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
+import androidx.core.view.WindowCompat
 import androidx.core.view.updateLayoutParams
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
@@ -14,6 +15,15 @@ import gallery.memories.MainActivity
 @UnstableApi
 /** System bars and cutout handling. Transparent mode lets welcome/waiting draw underneath. */
 class EdgeToEdgeController(private val activity: MainActivity) {
+    companion object {
+        /** Opaque backdrop behind transparent entry pages, matching the server theme. */
+        private const val ENTRY_BACKGROUND = "#0d2038"
+    }
+
+    /**
+     * Applies system-bar insets as coordinator margins. Below SDK 35 the
+     * platform handles fitting, so there is nothing to do.
+     */
     fun setupInsets() {
         if (SDK_INT >= 35) {
             activity.binding.coordinator.setOnApplyWindowInsetsListener { v, windowInsets ->
@@ -53,13 +63,18 @@ class EdgeToEdgeController(private val activity: MainActivity) {
         setFullscreen(orientation == Configuration.ORIENTATION_LANDSCAPE)
     }
 
+    /**
+     * Makes system bars transparent for entry pages (restoring the server
+     * theme when disabled). [isDark] picks the icon contrast: dark
+     * backgrounds keep light icons.
+     */
     fun setTransparentBars(transparent: Boolean, isDark: Boolean = true) {
         activity.isTransparentBars = transparent
         if (!transparent) {
             activity.restoreTheme()
             return
         }
-        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(activity.window, false)
+        WindowCompat.setDecorFitsSystemWindows(activity.window, false)
         if (SDK_INT >= 29) {
             activity.window.isStatusBarContrastEnforced = false
             activity.window.isNavigationBarContrastEnforced = false
@@ -72,7 +87,7 @@ class EdgeToEdgeController(private val activity: MainActivity) {
             activity.window.navigationBarColor = Color.TRANSPARENT
         } catch (_: Exception) {}
         try {
-            activity.binding.root.setBackgroundColor(Color.parseColor("#0d2038"))
+            activity.binding.root.setBackgroundColor(Color.parseColor(ENTRY_BACKGROUND))
         } catch (_: Exception) {}
         try {
             activity.binding.coordinator.updateLayoutParams<ViewGroup.MarginLayoutParams> {

@@ -9,15 +9,23 @@ import gallery.memories.data.local.prefs.PreferencesStore
 import java.util.concurrent.CountDownLatch
 
 @UnstableApi
-/** Media permission plus the user's opt-in to show device files. Sync variant blocks on a latch. */
+/**
+ * Media permission plus the user's opt-in to show device files. The sync
+ * variant blocks on a latch, so it must be called off the UI thread.
+ *
+ * Permission truth lives in two places: [isGranted] reflects the live OS
+ * grant for this process, while [hasMediaPermission] persists it for boot.
+ * They diverge when the user revokes mid-session until the next request.
+ */
 class PermissionsManager(
     private val activity: MainActivity,
     private val prefs: PreferencesStore,
 ) {
-    var isGranted: Boolean = false
-    var latch: CountDownLatch? = null
-    lateinit var requestPermissionLauncher: ActivityResultLauncher<Array<String>>
+    private var isGranted: Boolean = false
+    private var latch: CountDownLatch? = null
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<Array<String>>
 
+    /** Registers the permission launcher. Must be called during activity creation. */
     fun register(): PermissionsManager {
         requestPermissionLauncher = activity.registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions(),
@@ -29,6 +37,11 @@ class PermissionsManager(
         return this
     }
 
+    /**
+     * Requests the OS media permission, blocking until the user answers.
+     * Must be called off the UI thread. True when all requested permissions
+     * were granted.
+     */
     fun requestMediaPermissionSync(): Boolean {
         if (isGranted) return true
         latch = CountDownLatch(1)
@@ -46,8 +59,10 @@ class PermissionsManager(
         return isGranted
     }
 
+    /** Persisted OS grant from the last request. See the class docs on staleness. */
     fun hasMediaPermission(): Boolean = prefs.hasMediaPermission
 
+    /** Whether the user opted into showing device files (setup UI). */
     fun hasAllowMedia(): Boolean = prefs.allowMedia
 
     fun setAllowMedia(v: Boolean) {

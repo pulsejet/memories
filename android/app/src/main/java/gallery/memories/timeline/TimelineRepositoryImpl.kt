@@ -18,6 +18,7 @@ import org.json.JSONObject
 import java.io.IOException
 
 @UnstableApi
+/** Local-media timeline: Room index joined with MediaStore rows, shaped as server-API JSON. */
 class TimelineRepositoryImpl(
     private val dao: PhotoDao,
     private val dataSource: MediaStoreDataSource,
@@ -62,6 +63,10 @@ class TimelineRepositoryImpl(
         }.let { JSONArray(it) }
     }
 
+    /**
+     * One day of photos. Prunes index rows whose device files vanished
+     * outside the app as a side effect.
+     */
     override fun getDay(dayId: Long): JSONArray {
         val buckets = prefs.enabledBucketIds
         if (buckets.isEmpty()) return JSONArray()
@@ -115,9 +120,7 @@ class TimelineRepositoryImpl(
         response.put("count", sysImgs.size)
         response.put("confirms", Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
         if (dry || sysImgs.isEmpty()) return response
-        val uris = sysImgs.map { it.uri }
-        if (uris.isEmpty()) return JSONObject().put("message", "ok")
-        deleter.deleteUris(uris)
+        deleter.deleteUris(sysImgs.map { it.uri })
         dao.deleteFileIds(sysImgs.map { it.fileId })
         onDatabaseChanged()
         return response

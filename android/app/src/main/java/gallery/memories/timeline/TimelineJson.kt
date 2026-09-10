@@ -29,10 +29,12 @@ object TimelineJson {
     }
 
     object Perm {
+        /** Local files are deletable; the server permission string is fixed. */
         const val DELETE = "D"
     }
 
     object EXIF {
+        /** EXIF tag to server field name. Covers the viewer's detail panel; extend as needed. */
         val MAP = mapOf(
             ExifInterface.TAG_APERTURE_VALUE to "Aperture",
             ExifInterface.TAG_FOCAL_LENGTH to "FocalLength",
@@ -59,6 +61,7 @@ object TimelineJson {
     }
 
     object Other {
+        /** Remote download URL for blobs not present on device. */
         const val HREF = "href"
     }
 }

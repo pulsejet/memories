@@ -40,6 +40,7 @@ class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient(
         activity.consumeClearHistoryFlag(view)
     }
 
+    /** Main-frame network failures otherwise render as a silent blank page. */
     override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
         if (request.isForMainFrame) {
             Log.w(TAG, "Page failed: ${request.url} code=${error.errorCode} ${error.description}")
@@ -55,6 +56,10 @@ class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient(
         }
     }
 
+    /**
+     * Proceeds on SSL errors only when the user explicitly trusts all
+     * certificates for this server; otherwise surfaces a toast.
+     */
     @SuppressLint("WebViewClientOnReceivedSslError")
     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
         if (activity.nativex.auth.isTrustingAllCertificates) {

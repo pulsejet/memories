@@ -11,6 +11,11 @@ import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 
 @UnstableApi
+/**
+ * Chrome client: delegates upload pickers, mirrors console errors to logcat.
+ * Grants all page permission requests: the WebView only ever loads the
+ * first-party app shell and localhost, never third-party content.
+ */
 class MemoriesWebChromeClient(
     private val activity: MainActivity,
     private val chooser: FileChooserHandler,

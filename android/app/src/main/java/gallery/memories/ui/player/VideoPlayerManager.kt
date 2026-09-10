@@ -2,6 +2,7 @@ package gallery.memories.ui.player
 
 import android.net.Uri
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.webkit.CookieManager
 import androidx.media3.common.MediaItem
@@ -40,7 +41,8 @@ class VideoPlayerManager(
 
     val hasPlayer: Boolean get() = player != null
 
-    fun dispatchTouch(event: android.view.MotionEvent) {
+    /** Forwards WebView touches to the player overlay (back/hide gestures). */
+    fun dispatchTouch(event: MotionEvent) {
         if (player != null) activity.binding.videoView.dispatchTouchEvent(event)
     }
 
@@ -52,7 +54,10 @@ class VideoPlayerManager(
         }, 1000)
     }
 
-    /** Remote URLs reuse the WebView session cookies; .m3u8 plays as HLS. */
+    /**
+     * Shows the player for [uris], reusing the existing player for the same
+     * [uid]. Remote URLs reuse the WebView session cookies; .m3u8 plays as HLS.
+     */
     fun initializePlayer(uris: Array<Uri>, uid: Long, loop: Boolean = false) {
         if (player != null) {
             if (playerUid == uid) return
@@ -73,14 +78,14 @@ class VideoPlayerManager(
             activity.binding.videoView.setShowPreviousButton(false)
             for (uri in uris) {
                 val mediaItem = MediaItem.fromUri(uri)
-                if (uri.toString().contains("http")) {
+                if (isRemote(uri)) {
                     val httpFactory = DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true)
                     CookieManager.getInstance().getCookie(uri.toString())?.let { cookies ->
                         httpFactory.setDefaultRequestProperties(mapOf("cookie" to cookies))
                     }
                     val dataSourceFactory = DefaultDataSource.Factory(activity, httpFactory)
                     exoPlayer.addMediaSource(
-                        if (uri.toString().contains(".m3u8")) {
+                        if (isHls(uri)) {
                             HlsMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
                         } else {
                             ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
@@ -113,6 +118,7 @@ class VideoPlayerManager(
         }
     }
 
+    /** Tears down the player for [uid]; ignores stale ids from previous videos. */
     fun destroyPlayer(uid: Long) {
         if (playerUid == uid) {
             releasePlayer()
@@ -125,6 +131,7 @@ class VideoPlayerManager(
         }
     }
 
+    /** Saves position and releases the player; the view restores it on resume. */
     fun releasePlayer() {
         player?.let { exoPlayer ->
             playbackPosition = exoPlayer.currentPosition
@@ -136,9 +143,14 @@ class VideoPlayerManager(
         activity.binding.videoView.visibility = View.GONE
     }
 
+    /** Rebuilds the player after resume when the activity kept its video state. */
     fun restoreIfNeeded(uris: Array<Uri>?, uid: Long?) {
         if (uris != null && uid != null && player == null) initializePlayer(uris, uid, looping)
     }
+
+    private fun isRemote(uri: Uri): Boolean = uri.scheme == "http" || uri.scheme == "https"
+
+    private fun isHls(uri: Uri): Boolean = uri.path?.endsWith(".m3u8") == true
 
     fun urisForRestore(): Array<Uri>? = playerUris
     fun uidForRestore(): Long? = playerUid
