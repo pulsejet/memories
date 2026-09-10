@@ -284,7 +284,12 @@ export default defineComponent({
       }[],
     ) {
       if (nativex.has()) {
-        return await this.l(async () => nativex.shareBlobs(objects));
+        try {
+          return await this.l(async () => nativex.shareBlobs(objects));
+        } catch (e) {
+          showError(this.t('memories', 'Failed to download file for sharing'));
+          return;
+        }
       }
 
       // Pull blobs in parallel

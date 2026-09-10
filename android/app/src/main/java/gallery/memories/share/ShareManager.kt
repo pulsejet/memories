@@ -1,44 +1,32 @@
 package gallery.memories.share
 
+import android.content.ClipData
 import android.content.Intent
-import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
-import androidx.collection.ArrayMap
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.timeline.TimelineJson
 import gallery.memories.timeline.TimelineRepository
 import org.json.JSONArray
-import java.util.concurrent.CountDownLatch
+import org.json.JSONObject
 
 @UnstableApi
 /**
- * Shares URLs/files with other apps. Remote files are downloaded first;
- * completion is matched by download ID. All methods must be called on the
- * bridge thread: [shareBlobs] blocks until every download completes.
+ * Shares URLs/files with other apps. Remote files are downloaded in-process
+ * first (see [InAppDownloader]: the system DownloadManager cannot reach LAN
+ * hosts on Android 17). All methods must be called on the bridge thread:
+ * [shareBlobs] blocks until every download completes or throws.
  */
 class ShareManager(
     private val activity: AppCompatActivity,
     private val timeline: TimelineRepository,
-    private val downloads: DownloadManagerWrapper,
+    private val downloads: InAppDownloader,
 ) {
-    private val callbacks: MutableMap<Long, () -> Unit> = ArrayMap()
     private var shareBlobs: JSONArray? = null
 
-    /** Matches a system download-complete broadcast to its waiting share. */
-    fun runDownloadCallback(intent: Intent) {
-        if (activity.isDestroyed) return
-        if (android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE == intent.action) {
-            val id = intent.getLongExtra(android.app.DownloadManager.EXTRA_DOWNLOAD_ID, 0)
-            synchronized(callbacks) {
-                callbacks[id]?.let {
-                    it()
-                    callbacks.remove(id)
-                }
-            }
-        }
-    }
-
-    fun queue(url: String, filename: String): Long = downloads.queue(url, filename)
+    /** Downloads one URL in-process; throws on failure. */
+    @Throws(Exception::class)
+    fun downloadFile(url: String, filename: String): InAppDownloader.DlFile =
+        downloads.download(url, filename)
 
     /** Shares a plain URL via the system chooser. */
     fun shareUrl(url: String): Boolean {
@@ -57,58 +45,69 @@ class ShareManager(
 
     /**
      * Shares staged blobs: on-device files directly, remote ones after
-     * downloading. Blocks until every download completes. Single files
-     * share as ACTION_SEND, several as ACTION_SEND_MULTIPLE.
+     * in-process downloading. Blocks until every download completes; throws
+     * on the first failure instead of hanging forever.
      */
     @Throws(Exception::class)
     fun shareBlobs(): Boolean {
         val blobs = shareBlobs ?: throw Exception("No blobs to share")
-        val files = ArrayList<DownloadManagerWrapper.DlFile>()
-        val dlHref = ArrayList<String>()
-        for (i in 0 until blobs.length()) {
-            val obj = blobs.getJSONObject(i)
-            val auid = obj.getString(TimelineJson.Photo.AUID)
-            if (auid.isNotEmpty()) {
-                val sysImgs = timeline.getSystemImagesByAUIDs(listOf(auid))
-                if (sysImgs.isNotEmpty()) {
-                    files.add(
-                        DownloadManagerWrapper.DlFile(
-                            uri = sysImgs[0].uri,
-                            name = sysImgs[0].baseName,
-                            mimeType = sysImgs[0].mimeType,
-                        ),
-                    )
-                    continue
-                }
+        try {
+            val files = List(blobs.length()) { blobs.getJSONObject(it) }.mapNotNull(::resolve)
+            if (files.isEmpty()) throw Exception("Nothing to share")
+            send(files)
+            return true
+        } finally {
+            shareBlobs = null
+        }
+    }
+
+    /** On-device copy when indexed, else in-process download. Null when unresolvable. */
+    @Throws(Exception::class)
+    private fun resolve(obj: JSONObject): InAppDownloader.DlFile? {
+        val auid = obj.optString(TimelineJson.Photo.AUID)
+        if (auid.isNotEmpty()) {
+            timeline.getSystemImagesByAUIDs(listOf(auid)).firstOrNull()?.let {
+                return InAppDownloader.DlFile(it.uri, it.baseName, it.mimeType)
             }
-            val href = obj.getString(TimelineJson.Other.HREF)
-            if (href.isNotEmpty()) dlHref.add(href)
         }
-        val dlIds = dlHref.map { downloads.queue(it, "") }
-        val latch = CountDownLatch(dlIds.size)
-        synchronized(callbacks) {
-            dlIds.forEach { id -> callbacks[id] = { latch.countDown() } }
-        }
-        latch.await()
-        dlIds.forEach { id -> files.add(downloads.getDownloadedFile(id) ?: throw Exception("Failed to download file")) }
-        if (files.size > 1) {
-            val intent = Intent(Intent.ACTION_SEND_MULTIPLE)
-            val uris = files.map { it.uri }.toCollection(ArrayList())
-            val firstTopLevel = files[0].mimeType?.substringBefore("/") ?: "*"
-            intent.type = if (files.all { it.mimeType?.startsWith(firstTopLevel) == true }) "$firstTopLevel/*" else "*/*"
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            intent.putExtra(Intent.EXTRA_STREAM, uris)
-            activity.startActivity(Intent.createChooser(intent, null))
-        } else if (files.size == 1) {
-            val file = files[0]
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = file.mimeType
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                putExtra(Intent.EXTRA_STREAM, file.uri)
+        val href = obj.optString(TimelineJson.Other.HREF)
+        if (href.isNotEmpty()) return downloads.download(href, "")
+        return null
+    }
+
+    /**
+     * Fires the system chooser for resolved [files] (non-empty).
+     *
+     * - Single file: ACTION_SEND with its exact mime type (wildcard when unknown)
+     *   and its name as the chooser title.
+     * - Uniform set: ACTION_SEND_MULTIPLE with the shared top-level type
+     *   (e.g. image wildcard) for tight target filtering.
+     * - Mixed set: ACTION_SEND_MULTIPLE with the wildcard type (an intent holds
+     *   a single [Intent.type]) plus the distinct mime types in
+     *   [Intent.EXTRA_MIME_TYPES] for precise filtering.
+     * - Read access to the FileProvider/MediaStore URIs is granted via
+     *   FLAG_GRANT_READ_URI_PERMISSION plus ClipData carrying every URI,
+     *   since the receiving app reads them asynchronously after we return.
+     */
+    private fun send(files: List<InAppDownloader.DlFile>) {
+        val intent = if (files.size > 1) {
+            Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                val top = files[0].mimeType.substringBefore("/").ifEmpty { "*" }
+                type = if (files.all { it.mimeType.substringBefore("/").ifEmpty { "*" } == top }) "$top/*" else "*/*"
+                putExtra(Intent.EXTRA_STREAM, ArrayList(files.map { it.uri }))
+                files.map { it.mimeType }.filter { it.isNotEmpty() }.distinct()
+                    .takeIf { it.size > 1 }?.let { putExtra(Intent.EXTRA_MIME_TYPES, it.toTypedArray()) }
             }
-            activity.startActivity(Intent.createChooser(intent, file.name))
+        } else {
+            Intent(Intent.ACTION_SEND).apply {
+                type = files[0].mimeType.ifEmpty { "*/*" }
+                putExtra(Intent.EXTRA_STREAM, files[0].uri)
+            }
         }
-        shareBlobs = null
-        return true
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        val clip = ClipData.newUri(activity.contentResolver, files[0].name, files[0].uri)
+        for (i in 1 until files.size) clip.addItem(ClipData.Item(files[i].uri))
+        intent.clipData = clip
+        activity.startActivity(Intent.createChooser(intent, if (files.size == 1) files[0].name else null))
     }
 }

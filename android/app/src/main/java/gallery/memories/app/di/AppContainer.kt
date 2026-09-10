@@ -24,7 +24,7 @@ import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.HttpClients
 import gallery.memories.data.remote.http.NextcloudApi
 import gallery.memories.server.LocalHttpServer
-import gallery.memories.share.DownloadManagerWrapper
+import gallery.memories.share.InAppDownloader
 import gallery.memories.share.ShareManager
 import gallery.memories.timeline.TimelineRepository
 import gallery.memories.timeline.TimelineRepositoryImpl
@@ -69,7 +69,7 @@ class AppContainer(
     val observer: MediaObserver
 
     val image: ImageService
-    val downloads = DownloadManagerWrapper(activity)
+    val downloads = InAppDownloader(activity.applicationContext, auth, clients)
     val upload: UploadService
     val share: ShareManager
     val account = AccountManager(activity, auth, clients, api, assets, secure)

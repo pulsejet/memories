@@ -112,11 +112,19 @@ class NativeX(private val mCtx: MainActivity) {
         mCtx.runOnUiThread { mCtx.loadDefaultUrl() }
     }
 
-    /** Enqueues a download via the system DownloadManager. Nulls are ignored. */
+    /** Downloads a file in-process with the app's own client. Toasts success/failure. Nulls are ignored. */
     @JavascriptInterface
     fun downloadFromUrl(url: String?, filename: String?) {
         if (url == null || filename == null) return
-        shareManager?.queue(url, filename)
+        mCtx.threadPool.submit {
+            try {
+                shareManager?.downloadFile(url, filename)
+                mCtx.runOnUiThread { android.widget.Toast.makeText(mCtx, "Download complete: $filename", android.widget.Toast.LENGTH_SHORT).show() }
+            } catch (e: Exception) {
+                Log.w(TAG, "downloadFromUrl failed: $url", e)
+                mCtx.runOnUiThread { android.widget.Toast.makeText(mCtx, "Download failed: ${e.message}", android.widget.Toast.LENGTH_LONG).show() }
+            }
+        }
     }
 
     /** Stages share blobs (as a JSON array string) for a later /api/share/blobs call. */

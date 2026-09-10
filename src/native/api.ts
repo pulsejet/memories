@@ -87,7 +87,8 @@ export const NAPI = {
   /**
    * Share an object (as blob) natively.
    * The list of objects to share is already set using setShareBlobs
-   * The native client MUST download the object using a download manager
+   * The native client MUST download the object in-process (never via the
+   * system DownloadManager, which cannot reach LAN hosts on Android 17)
    * and immediately prompt the user to download it. The asynchronous call
    * must return only after the object has been downloaded.
    * @regex ^/api/share/blobs$
