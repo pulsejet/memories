@@ -4,7 +4,7 @@ import type { ComponentPublicInstance } from 'vue';
 import type PlyrType from 'plyr';
 import type videojsType from 'video.js';
 
-import type { IPhoto, TimelineState } from '@typings';
+import type { IPhoto, IUploadLocal, TimelineState } from '@typings';
 import type { constants, initstate } from '@services/utils';
 import type { translate, translatePlural } from '@services/l10n';
 import type { GlobalRouteCheckers, routes } from './router';
@@ -42,7 +42,7 @@ declare global {
       moveToFace: (photos: IPhoto[]) => void;
       albumShare: (user: string, name: string, link?: boolean) => Promise<void>;
       showSettings: () => void;
-      upload: () => void;
+      upload: (locals?: IUploadLocal[]) => void;
       search: () => void;
     };
 

@@ -49,6 +49,7 @@ import * as nativex from '@native';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
+import UploadIcon from 'vue-material-design-icons/CloudUpload.vue';
 import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';
 import EditFileIcon from 'vue-material-design-icons/FileEdit.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
@@ -62,7 +63,7 @@ import FolderMoveIcon from 'vue-material-design-icons/FolderMove.vue';
 import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
 import ImageCheckIcon from 'vue-material-design-icons/ImageCheck.vue';
 
-import type { IDay, IHeadRow, IPhoto, IRow } from '@typings';
+import type { IDay, IHeadRow, IPhoto, IRow, IUploadLocal } from '@typings';
 import type ScrollerManager from './ScrollerManager.vue';
 
 /**
@@ -196,6 +197,12 @@ export default defineComponent({
   mounted() {
     // Make default actions
     this.defaultActions = [
+      {
+        name: t('memories', 'Upload Local'),
+        icon: markRaw(UploadIcon),
+        callback: this.uploadLocalSelection.bind(this),
+        if: () => nativex.has() && Array.from(this.selection.values()).some((p) => utils.isLocalPhoto(p)),
+      },
       {
         name: t('memories', 'Delete'),
         icon: markRaw(DeleteIcon),
@@ -844,6 +851,17 @@ export default defineComponent({
     async downloadSelection(selection: Selection) {
       if (selection.size >= 100 && !(await utils.dialogs.downloadItems(selection.size))) return;
       await dav.downloadFiles(selection.photosNoDupFileId().map((p) => p.fileid));
+    },
+
+    /**
+     * Upload locally available files from the selection (NativeX only)
+     */
+    async uploadLocalSelection(selection: Selection) {
+      const locals: IUploadLocal[] = Array.from(selection.values())
+        .filter((p) => utils.isLocalPhoto(p) && p.auid)
+        .map((p) => ({ auid: p.auid!, filename: p.basename || p.auid! }));
+      if (!locals.length) return;
+      _m.modals.upload(locals);
     },
 
     /**
