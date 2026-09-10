@@ -168,6 +168,10 @@ final class Exif
             throw new \Exception('No date found in exif');
         }
 
+        // Strip trailing DST/STD from exiftool H264 dates
+        // https://github.com/pulsejet/memories/issues/1710
+        $exifDate = preg_replace('/\s+(?:DST|STD)$/', '', $exifDate) ?? $exifDate;
+
         // Get timezone from exif
         try {
             $tzStr = $exif['OffsetTimeOriginal']

@@ -136,6 +136,33 @@ final class ExifDateParseTest extends TestCase
         self::assertSame('+05:30', $dt->format('P'));
     }
 
+    public function testTrailingDstSuffixWithOffset(): void
+    {
+        // ExifTool appends " DST" to H264/AVCHD dates with DST flag set (#1710)
+        $dt = Exif::parseExifDate([
+            'DateTimeOriginal' => '2018:05:10 13:23:29+02:00 DST',
+        ]);
+        self::assertSame('2018-05-10 13:23:29 +02:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(1525951409, $dt->getTimestamp());
+    }
+
+    public function testTrailingStdSuffixWithOffset(): void
+    {
+        $dt = Exif::parseExifDate([
+            'DateTimeOriginal' => '2018:01:10 13:23:29+01:00 STD',
+        ]);
+        self::assertSame('2018-01-10 13:23:29 +01:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(1515587009, $dt->getTimestamp());
+    }
+
+    public function testTrailingDstSuffixWithSubseconds(): void
+    {
+        $dt = Exif::parseExifDate([
+            'DateTimeOriginal' => '2023:03:05 18:58:17.500000+02:00 DST',
+        ]);
+        self::assertSame('2023-03-05 18:58:17.500000 +02:00', $dt->format('Y-m-d H:i:s.u P'));
+    }
+
     public function testThrowsOnEmpty(): void
     {
         $this->expectException(\Exception::class);
