@@ -63,6 +63,7 @@ class NativeX(private val mCtx: MainActivity) {
         val IMAGE_FULL = Regex("^/image/full/[0-9a-f]+$")
         val SHARE_URL = Regex("^/api/share/url/.+$")
         val SHARE_BLOB = Regex("^/api/share/blobs$")
+        val UPLOAD_LOCAL = Regex("^/api/upload/local$")
         val CONFIG_ALLOW_MEDIA = Regex("^/api/config/allow_media/\\d+$")
         val ASSETS_PROGRESS = Regex("^/api/assets/progress$")
     }

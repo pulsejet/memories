@@ -10,6 +10,7 @@ import gallery.memories.data.remote.assets.AssetSyncCoordinator
 import gallery.memories.share.ShareManager
 import gallery.memories.timeline.TimelineRepository
 import gallery.memories.ui.permissions.PermissionsManager
+import gallery.memories.upload.UploadService
 import org.json.JSONObject
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -26,6 +27,7 @@ class ApiRouter(
     private val account: AccountManager,
     private val timeline: TimelineRepository,
     private val image: ImageService,
+    private val upload: UploadService,
     private val share: ShareManager,
     private val permissions: PermissionsManager,
     private val assets: AssetSyncCoordinator,
@@ -58,6 +60,11 @@ class ApiRouter(
             path.matches(NativeX.API.IMAGE_FULL) -> {
                 val size = url.getQueryParameter("size")?.toInt()
                 BridgeResponses.bytes(image.getFull(parts[3], size), "image/jpeg")
+            }
+            path.matches(NativeX.API.UPLOAD_LOCAL) -> {
+                val auid = url.getQueryParameter("auid") ?: throw Exception("Missing auid")
+                val filename = url.getQueryParameter("filename") ?: throw Exception("Missing filename")
+                BridgeResponses.json(upload.upload(auid, filename))
             }
             path.matches(NativeX.API.SHARE_URL) -> BridgeResponses.json(share.shareUrl(decode(parts[4])))
             path.matches(NativeX.API.SHARE_BLOB) -> BridgeResponses.json(share.shareBlobs())

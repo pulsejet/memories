@@ -66,6 +66,17 @@ export const NAPI = {
   IMAGE_FULL: (auid: string) => `${BASE_URL}/image/full/${auid}`,
 
   /**
+   * Upload a local file to Nextcloud natively, without routing
+   * bytes through the WebView.
+   * @regex ^/api/upload/local$
+   * @param auid (Query) AUID of the local file
+   * @param filename (Query) Destination path, e.g. /Photos/IMG_001.jpg
+   * @returns {fileid} File ID of the uploaded file
+   */
+  UPLOAD_LOCAL: (auid: string, filename: string) =>
+    `${BASE_URL}/api/upload/local?auid=${euc(auid)}&filename=${euc(filename)}`,
+
+  /**
    * Share a URL with native page.
    * The native client MUST NOT download the object but share the URL directly.
    * @regex ^/api/share/url/.+$

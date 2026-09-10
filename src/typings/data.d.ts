@@ -12,6 +12,13 @@ declare module '@typings' {
     basename: string;
   };
 
+  export type IUploadNativeX = {
+    /** AUID of the local file (NativeX) */
+    auid: string;
+    /** Name to upload the file as */
+    filename: string;
+  };
+
   export type IDay = {
     /** Day ID */
     dayid: number;
