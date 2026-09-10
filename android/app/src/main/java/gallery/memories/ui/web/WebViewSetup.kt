@@ -5,12 +5,6 @@ import android.graphics.Color
 import android.view.View
 import android.webkit.WebView
 import android.widget.Toast
-
-import android.annotation.SuppressLint
-import android.graphics.Color
-import android.view.View
-import android.webkit.WebView
-import android.widget.Toast
 import gallery.memories.NativeX
 
 /**
