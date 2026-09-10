@@ -70,23 +70,30 @@ class InAppDownloader(
 
     /**
      * Visible download to Downloads/memories/; zips are extracted entry-wise.
-     * Returns every saved file. Must be called off the UI thread.
+     * Returns every saved file. Calls [onStarted] once headers arrive.
+     * Must be called off the UI thread.
      */
     @Throws(Exception::class)
-    fun downloadPublic(url: String, filename: String): List<DlFile> {
+    fun downloadPublic(
+        url: String,
+        filename: String,
+        onStarted: (name: String) -> Unit = {},
+    ): List<DlFile> {
         val tmp = File.createTempFile("download", ".bin", ctx.cacheDir)
         try {
             var mime = "application/octet-stream"
             var disposition: String? = null
+            var name = ""
             newCallClient().newCall(buildRequest(url)).execute().use { res ->
                 if (res.code !in 200..299) throw Exception(ctx.getString(R.string.err_download_http, res.code))
                 mime = mimeOf(res)
                 disposition = res.header("Content-Disposition")
+                name = sanitize(if (filename.isNotEmpty()) filename else inferName(disposition, url))
+                onStarted(name)
                 res.body.byteStream().use { input ->
                     tmp.outputStream().use { input.copyTo(it) }
                 }
             }
-            val name = sanitize(if (filename.isNotEmpty()) filename else inferName(disposition, url))
             if (!isZip(mime, name)) {
                 val uri = storePublic(name, mime) { out -> tmp.inputStream().use { it.copyTo(out) } }
                 return listOf(DlFile(uri, name, mime))

@@ -125,14 +125,17 @@ class NativeX(private val mCtx: MainActivity) {
             val notifier = DownloadNotifier(mCtx)
             val label = title?.takeIf { it.isNotEmpty() }
             val failed = mCtx.getString(R.string.notif_download_failed)
+            var progressId: Int? = null
             try {
-                val files = shareManager?.downloadFile(url, filename ?: "") ?: throw Exception(failed)
+                val files = shareManager?.downloadFile(url, filename ?: "") { name ->
+                    progressId = progressId ?: notifier.start(label ?: name)
+                } ?: throw Exception(failed)
                 if (files.isEmpty()) throw Exception(failed)
-                if (files.size == 1) notifier.success(files[0].name, files[0].uri, files[0].mimeType, label)
-                else notifier.successMany(files.size, label)
+                if (files.size == 1) notifier.success(files[0].name, files[0].uri, files[0].mimeType, label, progressId)
+                else notifier.successMany(files.size, label, progressId)
             } catch (e: Exception) {
                 Log.w(TAG, "downloadFromUrl failed: $url", e)
-                notifier.failure(e.message ?: failed, label)
+                notifier.failure(e.message ?: failed, label, progressId)
             }
         }
     }

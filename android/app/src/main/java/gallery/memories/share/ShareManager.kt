@@ -26,8 +26,11 @@ class ShareManager(
 
     /** Visible download; zips are extracted entry-wise. Returns every saved file. Throws on failure. */
     @Throws(Exception::class)
-    fun downloadFile(url: String, filename: String): List<InAppDownloader.DlFile> =
-        downloads.downloadPublic(url, filename)
+    fun downloadFile(
+        url: String,
+        filename: String,
+        onStarted: (name: String) -> Unit = {},
+    ): List<InAppDownloader.DlFile> = downloads.downloadPublic(url, filename, onStarted)
 
     /** Shares a plain URL via the system chooser. */
     fun shareUrl(url: String): Boolean {
