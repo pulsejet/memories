@@ -27,6 +27,7 @@ OC.L10N.register(
     "Read only" : "Diňe okaň",
     "Share link" : "Baglanyşyk paýlaş",
     "Refresh" : "Täzelemek",
+    "OK" : "OK",
     "Oldest first" : "Ilki bilen iň köne",
     "Newest first" : "Täze ilkinji",
     "Home" : "Baş sahypa",

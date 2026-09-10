@@ -55,6 +55,7 @@ OC.L10N.register(
     "Read only" : "Doar citire",
     "Share link" : "Partajază legătură",
     "Refresh" : "Reîmprospătează",
+    "OK" : "OK",
     "Failed to upload {file}" : "Eroare la încărcarea {file}",
     "Last updated" : "Ultima actualizare",
     "Oldest first" : "Cel mai vechi mai întâi",

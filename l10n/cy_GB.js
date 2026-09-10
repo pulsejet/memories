@@ -36,6 +36,7 @@ OC.L10N.register(
     "Move" : "Symud",
     "Password protected" : "Diogelwyd â chyfrinair",
     "Refresh" : "Ail-lwytho",
+    "OK" : "OK",
     "Oldest first" : "Hynaf gyntaf",
     "Newest first" : "Diweddaraf gyntaf",
     "Home" : "Cartref",

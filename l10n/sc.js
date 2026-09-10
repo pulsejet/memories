@@ -65,6 +65,7 @@ OC.L10N.register(
     "Link copied to clipboard" : "Ligòngiu copiadu in punta de billete",
     "Share link" : "Cumpartzi ligòngiu",
     "Refresh" : "Agiorna",
+    "OK" : "OK",
     "Failed to upload {file}" : "No at fatu a agiornare {file}",
     "Some files have not been uploaded." : "No est istadu possìbile a carrigare tzertos archìvios.",
     "Creation date" : "Data de creatzione",

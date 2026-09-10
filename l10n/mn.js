@@ -87,6 +87,7 @@ OC.L10N.register(
     "Link copied to clipboard" : "Холбоос санах ойд хуулагдсан",
     "Share link" : "Холбоос хуваалцах",
     "Refresh" : "–°—ç—Ä–≥—ç—ç—Ö",
+    "OK" : "–æ–∫",
     "Failed to upload {file}" : "{file} байршуулж чадсангүй",
     "Add tags" : "Тагууд нэмэх",
     "Oldest first" : "–•—É—É—á–Ω—ã–≥ —É—Ä–¥ –Ω—å",

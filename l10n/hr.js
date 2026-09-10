@@ -88,6 +88,7 @@ OC.L10N.register(
     "Link copied to clipboard" : "Poveznica je kopirana u međuspremnik",
     "Share link" : "Dijeli poveznicu",
     "Refresh" : "Osvježi",
+    "OK" : "OK",
     "Failed to upload {file}" : "Neuspješno otpremanje {file}",
     "Add tags" : "Dodaj oznake",
     "Creation date" : "Datum stvaranja",

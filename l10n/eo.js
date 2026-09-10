@@ -50,6 +50,7 @@ OC.L10N.register(
     "Link copied to clipboard" : "Ligilo kopiita al tondujo",
     "Share link" : "Konhavigi ligilon",
     "Refresh" : "Aktualigi",
+    "OK" : "OK",
     "Creation date" : "Krea dato",
     "Oldest first" : "Malpli novaj unue",
     "Newest first" : "Pli novaj unue",

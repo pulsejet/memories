@@ -32,6 +32,7 @@ OC.L10N.register(
     "Update" : "යාවත්කාල",
     "Loading …" : "පූරණය වෙමින් …",
     "Remove" : "ඉවත් කරන්න",
+    "OK" : "OK",
     "Home" : "මුල් පිටුව",
     "Upload files" : "ගොනු උඩුගත කරන්න",
     "Previous" : "පෙර",

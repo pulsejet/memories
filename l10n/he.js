@@ -81,6 +81,7 @@ OC.L10N.register(
     "Link copied to clipboard" : "הקישור הועתק ללוח הגזירים",
     "Share link" : "שיתוף קישור",
     "Refresh" : "רענון",
+    "OK" : "OK",
     "Failed to upload {file}" : "העלאת {file} נכשלה",
     "Creation date" : "מועד יצירה",
     "Oldest first" : "הישן ביותר ראשון",

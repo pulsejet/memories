@@ -43,6 +43,7 @@ OC.L10N.register(
     "Remove" : "Fjern",
     "Password protected" : "Passordverna",
     "Refresh" : "Last inn på nytt",
+    "OK" : "OK",
     "Oldest first" : "Eldste fyrst",
     "Newest first" : "Nyaste fyrst",
     "Home" : "Heim",

@@ -39,6 +39,7 @@ OC.L10N.register(
     "Remove" : "Ewechhuelen",
     "Password protected" : "Passwuertgeschützt",
     "Refresh" : "Opfrëschen",
+    "OK" : "OK",
     "Home" : "Doheem",
     "Upload failed" : "Eropluede feelgeschloen",
     "Previous" : "Zeréck",

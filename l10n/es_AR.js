@@ -50,6 +50,7 @@ OC.L10N.register(
     "Link copied to clipboard" : "Enlace copiado al portapapeles",
     "Share link" : "Compartir link",
     "Refresh" : "Recargar",
+    "OK" : "OK",
     "Oldest first" : "Los más viejos primero",
     "Newest first" : "El más reciente primero",
     "Home" : "Casa",

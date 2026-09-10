@@ -76,6 +76,7 @@ OC.L10N.register(
     "Share link" : "Fren aseɣwen",
     "Create Link" : "Rnu aseɣwen",
     "Refresh" : "Sismeḍ",
+    "OK" : "Ih",
     "Original File" : "Afaylu aneṣli",
     "Add tags" : "Rnu ticraḍ",
     "Sorting order" : "Amizzwer n wefran",

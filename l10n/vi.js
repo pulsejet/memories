@@ -54,6 +54,7 @@ OC.L10N.register(
     "Read only" : "Chỉ xem",
     "Share link" : "Chia sẻ liên kết",
     "Refresh" : "Tải mới",
+    "OK" : "OK",
     "Failed to upload {file}" : "Tải lên {file} thất bại",
     "Creation date" : "Ngày thành lập",
     "Oldest first" : "Cũ nhất trước",

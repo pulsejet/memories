@@ -48,6 +48,7 @@ OC.L10N.register(
     "Read only" : "Sólo lectura",
     "Share link" : "Compartir enlace",
     "Refresh" : "Actualizar",
+    "OK" : "OK",
     "Oldest first" : "Más antiguo primero",
     "Newest first" : "Más reciente primero",
     "Home" : "Inicio",

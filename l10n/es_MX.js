@@ -93,6 +93,7 @@ OC.L10N.register(
     "Link copied to clipboard" : "Enlace copiado al portapapeles",
     "Share link" : "Compartir enlace",
     "Refresh" : "Actualizar",
+    "OK" : "OK",
     "Oldest first" : "Más antiguo primero",
     "Newest first" : "Más reciente primero",
     "Unassigned faces" : "Caras sin asignar",

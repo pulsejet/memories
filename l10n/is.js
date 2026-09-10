@@ -102,6 +102,7 @@ OC.L10N.register(
     "Link copied to clipboard" : "Tengill afritaður á klippispjald",
     "Share link" : "Tengill á sameign",
     "Refresh" : "Endurnýja",
+    "OK" : "OK",
     "Failed to upload {file}" : "Mistókst að senda inn {file}",
     "Last updated" : "Síðast uppfært",
     "Creation date" : "Upprunadagsetning",

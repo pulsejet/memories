@@ -111,6 +111,7 @@ OC.L10N.register(
     "Share link" : "Dalīt saiti",
     "Create Link" : "Izveidot saiti",
     "Refresh" : "Atsvaidzināt",
+    "OK" : "Labi",
     "Failed to create album for public link" : "Neizdevās izveidot albumu publiskajai saitei",
     "Adding files to album {album}" : "Pievieno datnes albumam {album}",
     "Add to albums" : "Pievienot albumiem",

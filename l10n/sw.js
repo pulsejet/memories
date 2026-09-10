@@ -92,6 +92,7 @@ OC.L10N.register(
     "Failed to copy link to clipboard" : "Failed to copy link to clipboard",
     "Share link" : "Shirikisha kiungio",
     "Refresh" : "Refresh",
+    "OK" : "SAWA",
     "Failed to upload {file}" : "Imeshindwa kupakia {file}",
     "Last updated" : "Imesasishwa mara ya mwisho",
     "Creation date" : "Tarehe ya uundaji",

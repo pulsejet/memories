@@ -47,6 +47,7 @@ OC.L10N.register(
     "Share link" : "Lidhje ndarjeje",
     "Create Link" : "Krijo lidhje",
     "Refresh" : "Rifreskoje",
+    "OK" : "OK",
     "Oldest first" : "Më i vjetri i pari",
     "Newest first" : "Më i riu i pari",
     "Home" : "Kryefaqja",

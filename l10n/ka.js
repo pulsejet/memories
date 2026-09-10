@@ -55,6 +55,7 @@ OC.L10N.register(
     "Read only" : "Read only",
     "Share link" : "გაზიარების ლინკი",
     "Refresh" : "Refresh",
+    "OK" : "დიახ",
     "Failed to upload {file}" : "Failed to upload {file}",
     "Last updated" : "Last updated",
     "Oldest first" : "Oldest first",

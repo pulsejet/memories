@@ -101,6 +101,7 @@ OC.L10N.register(
     "Link copied to clipboard" : "Tautan disalin ke papan klip",
     "Share link" : "Bagikan tautan",
     "Refresh" : "Muat ulang",
+    "OK" : "OK",
     "Failed to upload {file}" : "Gagal mengunggah {file}",
     "Add tags" : "Tambahkan tag",
     "Last updated" : "Terakhir diperbarui",
