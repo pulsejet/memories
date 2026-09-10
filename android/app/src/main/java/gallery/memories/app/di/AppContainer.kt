@@ -29,6 +29,7 @@ import gallery.memories.share.ShareManager
 import gallery.memories.timeline.TimelineRepository
 import gallery.memories.timeline.TimelineRepositoryImpl
 import gallery.memories.ui.permissions.PermissionsManager
+import gallery.memories.upload.UploadService
 
 @UnstableApi
 /**
@@ -69,6 +70,7 @@ class AppContainer(
 
     val image: ImageService
     val downloads = DownloadManagerWrapper(activity)
+    val upload: UploadService
     val share: ShareManager
     val account = AccountManager(activity, auth, clients, api, assets, secure)
     val local = LocalHttpServer(activity, auth, clients, assets, bridge)
@@ -85,7 +87,8 @@ class AppContainer(
             isAlive = { !activity.isDestroyed && !activity.isFinishing },
         )
         image = ImageService(activity, timeline)
+        upload = UploadService(activity, timeline, auth, clients)
         share = ShareManager(activity, timeline, downloads)
-        router = ApiRouter(account, timeline, image, share, permissions, assets, onAllowMedia)
+        router = ApiRouter(account, timeline, image, upload, share, permissions, assets, onAllowMedia)
     }
 }
