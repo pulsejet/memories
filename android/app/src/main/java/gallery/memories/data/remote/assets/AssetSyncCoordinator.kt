@@ -41,7 +41,7 @@ class AssetSyncCoordinator(
     @Volatile var error: String? = null
     val done: Int get() = downloader.done
 
-    /** Currently served snapshot (version, dir), null before the first sync. */
+    /** Currently served snapshot (manifest hash, dir), null before the first sync. */
     @Volatile var current: Pair<String, File>? = null
         private set
 
@@ -73,11 +73,11 @@ class AssetSyncCoordinator(
         }
     }
 
+    /** True when the snapshot for [fresh]'s manifest is already downloaded and ready. */
     fun isCurrent(fresh: JSONObject): Boolean {
         val base = fresh.optString("baseUrl", "")
-        val version = fresh.optString("version", "")
-        if (base.isEmpty() || version.isEmpty()) return false
-        val dir = cache.dirFor(base, version)
+        if (base.isEmpty()) return false
+        val dir = cache.dirFor(base, cache.snapshotKey(fresh))
         if (!File(dir, ".ready").exists()) return false
         val cur = cache.readDescribe(dir) ?: return false
         return cache.manifestKey(cur) == cache.manifestKey(fresh)
@@ -111,8 +111,8 @@ class AssetSyncCoordinator(
             return useSnapshot(snap)
         }
         if (!syncAndAwait(fresh, timeoutMs)) return false
-        val version = fresh.getString("version")
-        return useSnapshot(version to cache.dirFor(base, version))
+        val key = cache.snapshotKey(fresh)
+        return useSnapshot(key to cache.dirFor(base, key))
     }
 
     /** Serves [snap] as the current snapshot. */
@@ -176,15 +176,17 @@ class AssetSyncCoordinator(
 
     private fun syncOne(describe: JSONObject): Boolean {
         try {
-            val version = describe.getString("version")
             val baseUrl = describe.getString("baseUrl")
-            val dir = cache.dirFor(baseUrl, version)
+            val key = cache.snapshotKey(describe)
+            val dir = cache.dirFor(baseUrl, key)
             val existing = cache.readDescribe(dir)?.takeIf { File(dir, ".ready").exists() }
             if (existing != null && cache.manifestKey(existing) == cache.manifestKey(describe)) {
+                cache.pruneExcept(baseUrl, key)
                 status = "ready"
                 return true
             }
             syncBlocking(describe, baseUrl, dir)
+            cache.pruneExcept(baseUrl, key)
             status = "ready"
             return true
         } catch (e: Exception) {
