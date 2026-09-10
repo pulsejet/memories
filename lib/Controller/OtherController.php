@@ -87,6 +87,7 @@ final class OtherController extends GenericApiController
                 'vod_disable' => SystemConfig::get('memories.vod.disable'),
                 'video_default_quality' => SystemConfig::get('memories.video_default_quality'),
                 'places_gis' => SystemConfig::get('memories.gis_type'),
+                'places_search_url' => SystemConfig::get('memories.places.search.url'),
 
                 // enabled apps
                 'systemtags_enabled' => Util::tagsIsEnabled(),

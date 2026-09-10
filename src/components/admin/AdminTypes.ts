@@ -9,6 +9,7 @@ export type ISystemConfig = {
   'memories.index.path.blacklist': string;
 
   'memories.gis_type': number;
+  'memories.places.search.url': string;
 
   'memories.viewer.high_res_cond_default': IConfig['high_res_cond_default'];
 

@@ -40,6 +40,11 @@ final class SystemConfig
         // Places database type identifier
         'memories.gis_type' => -1,
 
+        // Base URL of the location search service used by the metadata editor.
+        // Must be compatible with the Nominatim search API.
+        // Set to an empty string to disable location search.
+        'memories.places.search.url' => 'https://nominatim.openstreetmap.org',
+
         // Default timeline path for all users
         // If set to '_empty_', the user is prompted to select a path
         'memories.timeline.default_path' => '_empty_',

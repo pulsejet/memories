@@ -53,10 +53,20 @@
     <form :action="placesSetupUrl" method="post" @submit.prevent.stop="placesSetup" target="_blank">
       <input name="requesttoken" type="hidden" :value="requestToken" />
       <input name="actiontoken" type="hidden" :value="actionToken" />
-      <NcButton nativeType="submit" variant="warning" style="margin-top: 8px">
+      <NcButton nativeType="submit" variant="warning">
         {{ t('memories', 'Download planet database') }}
       </NcButton>
     </form>
+
+    <div style="margin-top: 1.3em">
+      <NcTextField
+        :label="t('memories', 'Location search endpoint for metadata editor')"
+        :label-visible="true"
+        placeholder="https://nominatim.openstreetmap.org"
+        :model-value="config['memories.places.search.url']"
+        @change="update('memories.places.search.url', $event.target.value.trim())"
+      />
+    </div>
   </div>
 </template>
 

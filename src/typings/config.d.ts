@@ -7,6 +7,7 @@ declare module '@typings' {
     vod_disable: boolean;
     video_default_quality: string;
     places_gis: number;
+    places_search_url: string;
 
     // enabled apps
     systemtags_enabled: boolean;

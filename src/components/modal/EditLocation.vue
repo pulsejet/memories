@@ -38,9 +38,9 @@
       <MagnifyIcon :size="16" />
     </NcTextField>
 
-    <div class="osm-attribution">
+    <div class="osm-attribution" v-if="isNominatim">
       Powered by
-      <a href="https://nominatim.openstreetmap.org" target="_blank">Nominatim</a>
+      <a :href="searchBase" target="_blank">Nominatim</a>
       &copy;
       <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
       contributors
@@ -68,6 +68,7 @@ import { defineComponent, defineAsyncComponent } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
+import staticConfig from '@services/static-config';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
@@ -130,6 +131,14 @@ export default defineComponent({
       }
       return this.t('memories', 'No coordinates');
     },
+
+    searchBase() {
+      return staticConfig.getSync('places_search_url').trim();
+    },
+
+    isNominatim() {
+      return this.searchBase.toLowerCase().includes('nominatim');
+    },
   },
 
   mounted() {
@@ -185,10 +194,13 @@ export default defineComponent({
         }
       }
 
+      // No search provider configured.
+      if (!this.searchBase) return;
+
       this.loading = true;
       const q = window.encodeURIComponent(this.searchBar);
       axios
-        .get<NLocation[]>(`https://nominatim.openstreetmap.org/search?q=${q}&format=jsonv2`)
+        .get<NLocation[]>(`${this.searchBase}/search?q=${q}&format=jsonv2`)
         .then((response) => {
           this.loading = false;
           this.options = response.data.filter((x) => x.lat && x.lon && x.display_name);
@@ -196,7 +208,7 @@ export default defineComponent({
         .catch((error) => {
           this.loading = false;
           console.error(error);
-          showError(this.t('memories', 'Failed to search for location with Nominatim.'));
+          showError(this.t('memories', 'Failed to search for location.'));
         });
     },
 

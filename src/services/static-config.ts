@@ -124,6 +124,7 @@ class StaticConfig {
       vod_disable: false,
       video_default_quality: '0',
       places_gis: -1,
+      places_search_url: 'https://nominatim.openstreetmap.org',
 
       // enabled apps
       systemtags_enabled: false,

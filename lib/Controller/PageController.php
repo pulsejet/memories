@@ -7,6 +7,7 @@ namespace OCA\Memories\Controller;
 use OCA\Files\Event\LoadSidebar;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Service\BinExt;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -108,8 +109,11 @@ final class PageController extends Controller
         // Native communication
         $addImageDomain('http://127.0.0.1');
 
-        // Allow Nominatim
-        $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
+        // Allow configured location search provider
+        $searchHost = parse_url((string) SystemConfig::get('memories.places.search.url'), PHP_URL_HOST);
+        if (\is_string($searchHost) && '' !== $searchHost) {
+            $policy->addAllowedConnectDomain($searchHost);
+        }
 
         return $policy;
     }
