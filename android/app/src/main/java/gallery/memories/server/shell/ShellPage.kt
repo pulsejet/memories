@@ -16,13 +16,20 @@ import org.json.JSONObject
 
 /** Offline equivalent of the server page: local scripts/styles plus a nonced bootstrap snippet. */
 object ShellPage {
-    /** Single-quoted JS string literal for a trusted server path. */
+    /** Single-quoted JS string literal for a trusted server path. Escapes backslash/quote only. */
     private fun String.jsString(): String =
         "'" + replace("\\", "\\\\").replace("'", "\\'") + "'"
 
+    /** Content-Security-Policy for the shell: self plus the per-request bootstrap nonce. */
     fun csp(nonce: String): String =
         "script-src 'self' 'nonce-$nonce'; style-src 'self' 'unsafe-inline'"
 
+    /**
+     * Renders the shell for a snapshot [describe].
+     *
+     * @param debug reserved for a future unminified/debug shell; currently ignored.
+     */
+    @Suppress("UNUSED_PARAMETER")
     fun build(
         describe: JSONObject,
         webRoot: String,

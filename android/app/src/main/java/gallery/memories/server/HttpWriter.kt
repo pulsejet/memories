@@ -4,12 +4,17 @@ import android.webkit.WebResourceResponse
 import java.io.BufferedOutputStream
 import java.io.InputStream
 
+/** Serializes HTTP responses onto the local server's sockets. */
 object HttpWriter {
+    private const val CHUNK_SIZE = 32768
+
+    /** Plain-text response with Content-Length; always followed by flush. */
     fun reply(out: BufferedOutputStream, code: Int, phrase: String, body: String, mime: String = "text/plain") {
         writeStatus(out, code, phrase, mime, body.toByteArray())
         out.flush()
     }
 
+    /** Status line plus in-memory body. Set [noStore] for per-request pages. */
     fun writeStatus(
         out: BufferedOutputStream,
         code: Int,
@@ -31,6 +36,7 @@ object HttpWriter {
         out.flush()
     }
 
+    /** Raw status line and headers without a body. */
     fun writeHeaders(out: BufferedOutputStream, code: Int, phrase: String, headers: Map<String, String>) {
         val sb = StringBuilder()
         sb.append("HTTP/1.1 ").append(code).append(' ').append(phrase).append("\r\n")
@@ -39,12 +45,13 @@ object HttpWriter {
         out.write(sb.toString().toByteArray(Charsets.ISO_8859_1))
     }
 
+    /** Pumps a stream as chunked encoding, for bodies of unknown length. */
     fun streamChunked(input: InputStream, out: BufferedOutputStream) {
-        val buf = ByteArray(32768)
+        val buf = ByteArray(CHUNK_SIZE)
         while (true) {
             val r = input.read(buf)
             if (r < 0) break
-            out.write(Integer.toHexString(r).toByteArray(Charsets.US_ASCII))
+            out.write(r.toString(16).toByteArray(Charsets.US_ASCII))
             out.write("\r\n".toByteArray(Charsets.US_ASCII))
             out.write(buf, 0, r)
             out.write("\r\n".toByteArray(Charsets.US_ASCII))
@@ -53,6 +60,10 @@ object HttpWriter {
         out.flush()
     }
 
+    /**
+     * Writes an in-app bridge response onto the socket. Chunked when the
+     * bridge produced a body stream, empty 0-length otherwise.
+     */
     fun writeBridgeResponse(res: WebResourceResponse, out: BufferedOutputStream) {
         val headers = mutableMapOf<String, String>()
         var mime = "application/octet-stream"
@@ -80,6 +91,7 @@ object HttpWriter {
         out.flush()
     }
 
+    /** Streams a file with a known length without loading it into memory. */
     fun sendStream(out: BufferedOutputStream, mime: String, length: Long, open: () -> InputStream) {
         writeHeaders(
             out, 200, "OK",
@@ -89,6 +101,7 @@ object HttpWriter {
         out.flush()
     }
 
+    /** Reason phrase for locally generated statuses. Unknown codes fall back to "Status". */
     fun reason(code: Int): String = when (code) {
         200 -> "OK"
         201 -> "Created"
@@ -106,10 +119,13 @@ object HttpWriter {
         403 -> "Forbidden"
         404 -> "Not Found"
         405 -> "Method Not Allowed"
+        408 -> "Request Timeout"
         409 -> "Conflict"
+        410 -> "Gone"
         412 -> "Precondition Failed"
         415 -> "Unsupported Media Type"
         423 -> "Locked"
+        429 -> "Too Many Requests"
         500 -> "Internal Error"
         501 -> "Not Implemented"
         502 -> "Bad Gateway"

@@ -17,7 +17,12 @@ import gallery.memories.data.remote.http.NextcloudApi
 import io.github.g00fy2.versioncompare.Version
 
 @UnstableApi
-/** Login, credential storage, and server version checks. */
+/**
+ * Login, credential storage, and server version checks.
+ *
+ * [login] performs network I/O synchronously; callers must invoke it off
+ * the UI thread (today that is the localhost bridge worker).
+ */
 class AccountManager(
     private val activity: MainActivity,
     private val auth: AuthState,
@@ -60,7 +65,8 @@ class AccountManager(
         }
     }
 
-    fun loginFlow(baseUrl: String, loginFlowUrl: String) {
+    /** Starts the browser-based login flow for an already-validated server. */
+    private fun loginFlow(baseUrl: String, loginFlowUrl: String) {
         val res = api.postLoginFlow(loginFlowUrl)
         if (res.code != 200) {
             res.close()
@@ -82,9 +88,10 @@ class AccountManager(
             activity.setTransparentBars(true, true)
             activity.binding.webview.loadUrl(activity.localStaticUrl("waiting.html") + "?login=1")
         }
-        var pollCount = 0
-        while (pollCount < 10 * 60 && gen == loginGeneration) {
-            pollCount += 3
+        // Counts elapsed seconds, not polls: incremented by the 3s sleep below.
+        var polledSeconds = 0
+        while (polledSeconds < 10 * 60 && gen == loginGeneration) {
+            polledSeconds += 3
             Thread.sleep(3000)
             try {
                 val response = api.getPollLogin(pollUrl, pollToken)
@@ -100,6 +107,8 @@ class AccountManager(
                 }
                 return
             } catch (e: Exception) {
+                // Most polls fail until the user approves in the browser; keep waiting.
+                Log.v(TAG, "pollLogin: waiting ($polledSeconds s): ${e.message}")
                 continue
             }
         }
@@ -111,6 +120,10 @@ class AccountManager(
         }
     }
 
+    /**
+     * Revalidates stored credentials against describeApi: 401 clears them,
+     * an old server warns, anything else is silently kept.
+     */
     fun checkCredentialsAndVersion() {
         if (!auth.isLoggedIn()) return
         try {
@@ -132,6 +145,7 @@ class AccountManager(
         }
     }
 
+    /** Clears credentials and returns to the welcome page. Safe to call from any thread. */
     fun loggedOut() {
         loginGeneration++
         toast(activity.getString(R.string.err_logged_out))
@@ -139,11 +153,13 @@ class AccountManager(
         activity.runOnUiThread { activity.loadDefaultUrl() }
     }
 
+    /** Persists new credentials and applies them to the HTTP clients. */
     fun storeCredentials(url: String, user: String, password: String) {
         store.saveCredentials(Credential(url = url, trustAll = auth.isTrustingAllCertificates, username = user, token = password))
         refreshCredentials()
     }
 
+    /** Drops stored credentials and resets HTTP clients to the logged-out state. */
     fun deleteCredentials() {
         store.deleteCredentials()
         auth.setAuthHeader(null)
@@ -151,6 +167,7 @@ class AccountManager(
         clients.rebuild()
     }
 
+    /** Reloads stored credentials into the HTTP clients. No-op when logged out. */
     fun refreshCredentials() {
         val cred = store.getCredentials() ?: return
         auth.build(cred.url, cred.trustAll)

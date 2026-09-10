@@ -1,13 +1,20 @@
 package gallery.memories.server
 
-import gallery.memories.server.HttpRequest
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStream
+import java.io.OutputStream
 
-/** Minimal HTTP/1.1 request parser: origin- and absolute-form targets, headers lowercased and merged. */
+/**
+ * Minimal HTTP/1.1 request parser: origin- and absolute-form targets,
+ * headers lowercased and merged.
+ */
 object HttpParser {
+    /** Bodies up to this size stay in memory; larger ones spill to [HttpRequest.bodyFile]. */
     const val MAX_BODY_MEMORY = 1024 * 1024
+
+    /** Hard cap on any request body; larger requests are rejected. */
     const val MAX_BODY_TOTAL = 256 * 1024 * 1024
 
     @Throws(Exception::class)
@@ -75,7 +82,7 @@ object HttpParser {
     }
 
     @Throws(Exception::class)
-    fun readExact(input: InputStream, n: Long): ByteArray {
+    private fun readExact(input: InputStream, n: Long): ByteArray {
         val out = ByteArrayOutputStream(n.coerceAtMost(MAX_BODY_TOTAL.toLong()).toInt())
         val buf = ByteArray(32768)
         var remaining = n
@@ -95,7 +102,7 @@ object HttpParser {
     @Throws(Exception::class)
     private fun readChunkedBody(input: InputStream, cacheDir: File): Pair<ByteArray?, File?> {
         var mem: ByteArrayOutputStream? = ByteArrayOutputStream()
-        var file: java.io.FileOutputStream? = null
+        var file: FileOutputStream? = null
         var tmp: File? = null
         var total = 0L
         try {
@@ -110,7 +117,7 @@ object HttpParser {
                 if (total + size > MAX_BODY_TOTAL) throw Exception("Body too large")
                 if (file == null && total + size > MAX_BODY_MEMORY) {
                     tmp = File.createTempFile("proxy", ".body", cacheDir)
-                    file = java.io.FileOutputStream(tmp)
+                    file = FileOutputStream(tmp)
                     mem?.let { file.write(it.toByteArray()) }
                     mem = null
                 }
@@ -140,7 +147,7 @@ object HttpParser {
     private fun streamExactToFile(input: InputStream, n: Long, cacheDir: File): File {
         val tmp = File.createTempFile("proxy", ".body", cacheDir)
         try {
-            java.io.FileOutputStream(tmp).use { copyExact(input, n, it) }
+            FileOutputStream(tmp).use { copyExact(input, n, it) }
         } catch (e: Exception) {
             tmp.delete()
             throw e
@@ -149,7 +156,7 @@ object HttpParser {
     }
 
     @Throws(Exception::class)
-    private fun copyExact(input: InputStream, n: Long, out: java.io.OutputStream) {
+    private fun copyExact(input: InputStream, n: Long, out: OutputStream) {
         val buf = ByteArray(32768)
         var remaining = n
         while (remaining > 0) {

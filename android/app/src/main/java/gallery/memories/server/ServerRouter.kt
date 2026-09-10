@@ -11,6 +11,10 @@ import gallery.memories.server.controllers.StaticController
 import java.io.BufferedOutputStream
 import java.io.File
 
+/**
+ * Dispatches local-server requests to the bridge, static files, the
+ * offline shell, or the upstream proxy. See [route] for the order.
+ */
 class ServerRouter(
     private val appCtx: Context,
     private val auth: AuthState,
@@ -75,7 +79,7 @@ class ServerRouter(
             val name = req.path.substringAfterLast("/")
             val file = File(File(config.assetDir, "js"), name)
             if (name.isEmpty() || name.contains("..") || !file.isFile) {
-                Log.w(TAG, "xx MISSING-CHUNK ${req.path}")
+                Log.w(TAG, "Missing chunk: ${req.path}")
                 HttpWriter.reply(out, 404, "Not Found", "not found")
                 return
             }
@@ -93,6 +97,10 @@ class ServerRouter(
         out.flush()
     }
 
+    /**
+     * Serves the offline shell for the snapshot in [config].
+     * False when no snapshot describe is available or rendering failed.
+     */
     private fun serveShell(config: ServerConfig, req: HttpRequest, out: BufferedOutputStream): Boolean {
         val describe = assets.readDescribe(config.assetDir) ?: return false
         return ShellController.serveShell(config, req, out, describe, auth.credentials()?.first)

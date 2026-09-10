@@ -12,11 +12,27 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.BufferedOutputStream
 import java.io.IOException
 
+/** Forwards non-local requests to Nextcloud with stored basic auth, streaming both ways. */
 class ProxyController(
     private val auth: AuthState,
     clients: HttpClients,
     private val originProvider: () -> String,
 ) {
+    companion object {
+        /** Hop-by-hop and client-specific headers that must not be forwarded upstream. */
+        private val SKIPPED_REQUEST_HEADERS = setOf(
+            "host", "content-length", "transfer-encoding",
+            "connection", "cookie", "accept-encoding",
+        )
+
+        /** Framing and server-owned headers regenerated locally on the way back. */
+        private val SKIPPED_RESPONSE_HEADERS = setOf(
+            "content-encoding", "transfer-encoding",
+            "content-length", "content-type",
+            "connection", "keep-alive", "set-cookie",
+        )
+    }
+
     private val client by lazy { clients.newProxyClient() }
 
     /**
@@ -39,9 +55,7 @@ class ProxyController(
         val url = config.serverOrigin + req.path + (req.query?.let { "?$it" } ?: "")
         val builder = Request.Builder().url(url)
         for ((name, value) in req.headers) {
-            if (name == "host" || name == "content-length" || name == "transfer-encoding" ||
-                name == "connection" || name == "cookie" || name == "accept-encoding"
-            ) continue
+            if (name in SKIPPED_REQUEST_HEADERS) continue
             builder.header(name, value)
         }
         auth.authHeader()?.let { builder.header("Authorization", it) }
@@ -65,10 +79,7 @@ class ProxyController(
         val respHeaders = mutableMapOf<String, String>()
         for (i in 0 until res.headers.size) {
             val name = res.headers.name(i).lowercase()
-            if (name == "content-encoding" || name == "transfer-encoding" ||
-                name == "content-length" || name == "content-type" ||
-                name == "connection" || name == "keep-alive" || name == "set-cookie"
-            ) continue
+            if (name in SKIPPED_RESPONSE_HEADERS) continue
             if (name == "location") {
                 respHeaders["Location"] = rewriteLocation(res.headers.value(i), config)
                 continue

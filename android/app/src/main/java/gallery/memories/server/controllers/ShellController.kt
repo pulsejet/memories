@@ -7,10 +7,13 @@ import gallery.memories.server.ServerConfig
 import gallery.memories.server.shell.ShellPage
 import org.json.JSONObject
 import java.io.BufferedOutputStream
+import java.util.UUID
 
+/** Renders the offline app shell for app routes and the local entry page. */
 object ShellController {
     private val TAG = ShellController::class.java.simpleName
 
+    /** Enabled with ?shelldebug for unminified local debugging of the shell page. */
     fun isDebug(req: HttpRequest): Boolean =
         req.query?.split("&")?.any { it == "shelldebug" || it.startsWith("shelldebug=") } == true
 
@@ -24,7 +27,7 @@ object ShellController {
     ): Boolean {
         if (describe == null) return false
         return try {
-            val nonce = java.util.UUID.randomUUID().toString()
+            val nonce = UUID.randomUUID().toString()
             val html = ShellPage.build(describe, config.webRoot, config.baseUrl, isDebug(req), user, nonce)
             HttpWriter.writeStatus(
                 out, 200, "OK", "text/html; charset=utf-8", html.toByteArray(),

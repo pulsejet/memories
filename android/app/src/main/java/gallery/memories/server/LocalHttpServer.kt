@@ -1,6 +1,7 @@
 package gallery.memories.server
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import android.webkit.WebResourceResponse
 import gallery.memories.data.remote.assets.AssetSyncCoordinator
@@ -15,6 +16,8 @@ import java.net.BindException
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
+import java.util.UUID
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /**
@@ -28,7 +31,7 @@ class LocalHttpServer(
     private val auth: AuthState,
     private val clients: HttpClients,
     private val assets: AssetSyncCoordinator,
-    private val bridge: (method: String, url: android.net.Uri) -> WebResourceResponse,
+    private val bridge: (method: String, url: Uri) -> WebResourceResponse,
 ) {
     companion object {
         val TAG: String = LocalHttpServer::class.java.simpleName
@@ -39,20 +42,27 @@ class LocalHttpServer(
 
     @Volatile private var cfg: ServerConfig? = null
     @Volatile private var server: ServerSocket? = null
+    @Volatile private var pool: ExecutorService? = null
     @Volatile var port = 0
         private set
 
-    val secret: String = java.util.UUID.randomUUID().toString()
+    /** Per-process secret: the WebView proves same-process origin via this cookie. */
+    val secret: String = UUID.randomUUID().toString()
 
     private val guard = AuthGuard(secret)
     private val bridgeController = BridgeController(bridge)
     private val proxy = ProxyController(auth, clients) { origin() }
     private val router = ServerRouter(appCtx, auth, assets, guard, bridgeController, proxy) { cfg }
 
+    /** Points the server at an upstream origin and its offline snapshot. */
     fun configure(serverOrigin: String, webRoot: String, assetDir: File, baseUrl: String) {
         cfg = ServerConfig(serverOrigin, webRoot, assetDir, baseUrl)
     }
 
+    /**
+     * Starts the accept loop once; returns the bound port. Falls back to an
+     * ephemeral port when a stale process still holds the fixed one.
+     */
     @Throws(Exception::class)
     @Synchronized
     fun ensureStarted(): Int {
@@ -68,12 +78,13 @@ class LocalHttpServer(
             }
             server = s
             port = s.localPort
-            val pool = Executors.newCachedThreadPool()
+            val workers = Executors.newCachedThreadPool()
+            pool = workers
             Thread {
                 try {
                     while (!s.isClosed) {
                         val sock = s.accept()
-                        pool.submit {
+                        workers.submit {
                             try {
                                 handle(sock)
                             } catch (e: Exception) {
@@ -83,10 +94,12 @@ class LocalHttpServer(
                         }
                     }
                 } catch (_: Exception) {
+                    // ServerSocket closed under us during stop(); not an error.
                 } finally {
-                    pool.shutdownNow()
+                    workers.shutdownNow()
                     if (server === s) {
                         server = null
+                        pool = null
                         port = 0
                     }
                 }
@@ -96,8 +109,11 @@ class LocalHttpServer(
         return port
     }
 
+    /** Closes the socket and stops accepting; in-flight requests run to completion. */
     fun stop() {
         try { server?.close() } catch (_: Exception) {}
+        pool?.shutdownNow()
+        pool = null
         server = null
         port = 0
     }
