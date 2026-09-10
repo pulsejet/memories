@@ -7,6 +7,12 @@ import gallery.memories.data.local.db.PhotoDao
 import gallery.memories.data.local.prefs.PreferencesStore
 import java.time.Instant
 
+/**
+ * Indexes device media into Room. Delta syncs cover files changed since
+ * [PreferencesStore.lastSyncTime]; full syncs reindex everything and prune
+ * missing files via the flag sweep. All methods run synchronously on the
+ * caller thread and are re-entrancy-guarded via [syncStatus].
+ */
 class MediaSyncManager(
     private val ctx: Context,
     private val dao: PhotoDao,
@@ -22,7 +28,7 @@ class MediaSyncManager(
     @Volatile var syncStatus = -1
         private set
 
-    /** Index only files changed since the last sync. */
+    /** Index only files changed since the last sync. Returns the indexed count. */
     fun syncDeltaDb(): Int {
         synchronized(this) {
             if (syncStatus != -1) return 0

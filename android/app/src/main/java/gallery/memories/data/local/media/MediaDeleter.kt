@@ -16,15 +16,17 @@ import java.util.concurrent.CountDownLatch
 /**
  * Deletes device files. Android R+ requires user confirmation via system
  * dialog, so the call blocks on a latch until the picker result returns.
+ * Must be called off the UI thread: the R+ path blocks indefinitely.
  */
 class MediaDeleter(private val activity: MainActivity) {
     private var deleting = false
     private var deleteCallback: ((ActivityResult?) -> Unit)? = null
-    val deleteLauncher: ActivityResultLauncher<IntentSenderRequest> =
+    private val deleteLauncher: ActivityResultLauncher<IntentSenderRequest> =
         activity.registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             synchronized(this) { deleteCallback?.invoke(result) }
         }
 
+    /** Deletes [uris], asking the user on R+. Throws when already deleting or when the user cancels. */
     @Throws(Exception::class)
     fun deleteUris(uris: List<Uri>) {
         synchronized(this) {
@@ -46,7 +48,8 @@ class MediaDeleter(private val activity: MainActivity) {
                 }
                 latch.await()
                 deleteCallback = null
-                if (res == null || res!!.resultCode != Activity.RESULT_OK) {
+                val resultCode = res?.resultCode
+                if (resultCode == null || resultCode != Activity.RESULT_OK) {
                     throw Exception("Delete canceled or failed")
                 }
             } else {

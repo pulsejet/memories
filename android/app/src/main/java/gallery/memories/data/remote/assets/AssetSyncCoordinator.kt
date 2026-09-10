@@ -13,6 +13,9 @@ import java.util.concurrent.Executors
 /**
  * Downloads and caches the web app's JS/CSS for offline serving.
  * Syncs run on a worker thread; callers observe progress via status/done/total.
+ *
+ * Only one sync runs at a time; a newer describe queued mid-sync is picked
+ * up immediately after (see [sync]).
  */
 class AssetSyncCoordinator(
     private val auth: AuthState,
@@ -26,13 +29,19 @@ class AssetSyncCoordinator(
         const val MAX_PARALLEL = 8
     }
 
+    /** One downloadable web asset: remote [href], verified against [hash] for JS. */
     data class JsAsset(val name: String, val hash: String, val href: String)
 
+    /** One queued file download within [syncBlocking]. */
+    private data class DownloadTask(val dir: File, val name: String, val url: String, val hash: String?)
+
+    /** Lifecycle: idle → downloading → ready | error. */
     @Volatile var status = "idle"
     @Volatile var total = 0
     @Volatile var error: String? = null
     val done: Int get() = downloader.done
 
+    /** Currently served snapshot (version, dir), null before the first sync. */
     @Volatile var current: Pair<String, File>? = null
         private set
 
@@ -106,12 +115,17 @@ class AssetSyncCoordinator(
         return useSnapshot(version to cache.dirFor(base, version))
     }
 
+    /** Serves [snap] as the current snapshot. */
     private fun useSnapshot(snap: Pair<String, File>): Boolean {
         current = snap
         status = "ready"
         return true
     }
 
+    /**
+     * Queues a sync and blocks until it finishes or [timeoutMs] elapses.
+     * True only when the fresh describe is ready to serve.
+     */
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN") // wait() needs java.lang.Object
     fun syncAndAwait(fresh: JSONObject, timeoutMs: Long): Boolean {
         sync(fresh)
@@ -130,6 +144,10 @@ class AssetSyncCoordinator(
         }
     }
 
+    /**
+     * Queues [describe] for download on a worker thread. Coalesces: when a
+     * sync is already running, the newest queued describe runs right after.
+     */
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN") // notifyAll() needs java.lang.Object
     fun sync(describe: JSONObject) {
         synchronized(lock) {
@@ -198,14 +216,13 @@ class AssetSyncCoordinator(
         val jsDir = File(dir, "js").apply { mkdirs() }
         val cssDir = File(dir, "css").apply { mkdirs() }
 
-        data class Task(val dir: File, val name: String, val url: String, val hash: String?)
-        val tasks = ArrayList<Task>(js.size + css.length())
+        val tasks = ArrayList<DownloadTask>(js.size + css.length())
         for (asset in js) {
-            tasks.add(Task(jsDir, asset.name, absUrl(origin, asset.href), asset.hash))
+            tasks.add(DownloadTask(jsDir, asset.name, absUrl(origin, asset.href), asset.hash))
         }
         for (i in 0 until css.length()) {
             val href = css.getJSONObject(i).getString("href")
-            tasks.add(Task(cssDir, AssetCache.cssName(i, href), absUrl(origin, href), null))
+            tasks.add(DownloadTask(cssDir, AssetCache.cssName(i, href), absUrl(origin, href), null))
         }
 
         if (tasks.isNotEmpty()) {
@@ -234,6 +251,7 @@ class AssetSyncCoordinator(
         Log.i(TAG, "Asset sync complete: ${downloader.done} files for $origin")
     }
 
+    /** Joins a manifest href onto the server origin; absolute hrefs pass through. */
     private fun absUrl(origin: String, href: String): String =
         if (href.startsWith("http://") || href.startsWith("https://")) href else origin + href
 }

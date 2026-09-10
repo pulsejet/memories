@@ -12,13 +12,19 @@ import javax.net.ssl.X509TrustManager
 object TlsTrust {
     @Volatile private var defaultInsecure = false
 
+    /** Trust-all TLS context for OkHttp clients. Scoped to the clients built with it. */
     fun insecureContext(): Pair<SSLContext, X509TrustManager> {
         val tm = insecureTrustManager()
-        val sc = SSLContext.getInstance("SSL")
+        val sc = SSLContext.getInstance("TLS")
         sc.init(null, arrayOf(tm), SecureRandom())
         return sc to tm
     }
 
+    /**
+     * Makes trust-all the default for HttpsURLConnection (used by the video
+     * player). One-way: there is no supported scenario for re-enabling
+     * verification within a process lifetime.
+     */
     fun setDefaultInsecureTLS() {
         if (defaultInsecure) return
         defaultInsecure = true

@@ -4,6 +4,10 @@ import android.content.Context
 import android.database.ContentObserver
 import android.net.Uri
 
+/**
+ * Watches MediaStore for device media changes and debounces bursts into one
+ * [onChange] callback. Register once after the first sync; unregister on destroy.
+ */
 class MediaObserver(
     private val ctx: Context,
     private val onChange: () -> Unit,
@@ -13,11 +17,13 @@ class MediaObserver(
     private var refreshPending = false
     private val lock = Any()
 
+    /** Starts watching images and videos. Idempotent. */
     fun register() {
         if (imageObserver == null) imageObserver = observe(SystemImage.IMAGE_URI)
         if (videoObserver == null) videoObserver = observe(SystemImage.VIDEO_URI)
     }
 
+    /** Stops watching. Idempotent. */
     fun unregister() {
         imageObserver?.let { ctx.applicationContext.contentResolver.unregisterContentObserver(it) }
         videoObserver?.let { ctx.applicationContext.contentResolver.unregisterContentObserver(it) }

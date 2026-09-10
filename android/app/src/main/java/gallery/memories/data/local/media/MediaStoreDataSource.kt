@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 
+/** Reads device media rows from the ContentResolver as lazy sequences. */
 class MediaStoreDataSource(private val ctx: Context) {
     private val resolver get() = ctx.applicationContext.contentResolver
 
@@ -42,6 +43,8 @@ class MediaStoreDataSource(private val ctx: Context) {
         val dataCol = projection.indexOf(MediaStore.Images.Media.DATA)
         val bucketIdCol = projection.indexOf(MediaStore.Images.Media.BUCKET_ID)
         val bucketNameCol = projection.indexOf(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)
+        // Video-only column; index is fixed for the whole cursor, so hoist it out of the loop.
+        val durCol = projection.indexOf(MediaStore.Video.Media.DURATION)
 
         resolver.query(collection, projection.toTypedArray(), selection, selectionArgs, sortOrder).use { c ->
             if (c == null) return@sequence
@@ -65,7 +68,6 @@ class MediaStoreDataSource(private val ctx: Context) {
                 }
                 img.isVideo = collection == SystemImage.VIDEO_URI
                 if (img.isVideo) {
-                    val durCol = projection.indexOf(MediaStore.Video.Media.DURATION)
                     img.videoDuration = c.getLong(durCol)
                 }
                 yield(img)
@@ -73,7 +75,11 @@ class MediaStoreDataSource(private val ctx: Context) {
         }
     }
 
-    /** Looks up IDs in images first, then videos for whatever is missing. */
+    /**
+     * Looks up IDs in images first, then videos for whatever is missing.
+     * Note: very large [ids] can exceed the SQLite variable limit; callers
+     * pass day-sized batches.
+     */
     fun getByIds(ids: List<Long>): List<SystemImage> {
         if (ids.isEmpty()) return listOf()
         val sel = MediaStore.Images.Media._ID + " IN (" + ids.joinToString(",") + ")"

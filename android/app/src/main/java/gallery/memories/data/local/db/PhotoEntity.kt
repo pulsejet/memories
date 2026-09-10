@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+/** Mirror of a device media file. auid/buid are content-derived IDs shared with the server; flag drives the full-sync sweep. */
 @Entity(
     tableName = "photos",
     indices = [
@@ -17,7 +18,6 @@ import androidx.room.PrimaryKey
         Index(value = ["bucket_id", "dayid", "has_remote"]),
     ],
 )
-/** Mirror of a device media file. auid/buid are content-derived IDs shared with the server; flag drives the full-sync sweep. */
 data class PhotoEntity(
     @PrimaryKey(autoGenerate = true) val id: Int? = null,
     @ColumnInfo(name = "local_id") val localId: Long,
@@ -29,6 +29,8 @@ data class PhotoEntity(
     @ColumnInfo(name = "basename") val baseName: String,
     @ColumnInfo(name = "bucket_id") val bucketId: Long,
     @ColumnInfo(name = "bucket_name") val bucketName: String,
+    /** Whether the file is already on the server; such rows are hidden from the local timeline. */
     @ColumnInfo(name = "has_remote") val hasRemote: Boolean,
+    /** Full-sync sweep marker: 1 = unseen this sweep (delete candidate), 0 = seen. */
     @ColumnInfo(name = "flag") val flag: Int,
 )

@@ -7,13 +7,16 @@ import androidx.exifinterface.media.ExifInterface
 import gallery.memories.data.local.db.PhotoEntity
 import gallery.memories.timeline.TimelineJson
 import org.json.JSONObject
-import java.io.IOException
 import java.math.BigInteger
 import java.security.MessageDigest
 
+/** Maps MediaStore rows to index entities and timeline JSON, deriving content IDs. */
 class PhotoMapper {
     companion object {
         private val TAG = PhotoMapper::class.java.simpleName
+
+        /** Seconds per day; dayId is the epoch day index shared with the server. */
+        private const val SECONDS_PER_DAY = 86400
     }
 
     /** EXIF applies to photos only; videos carry no EXIF segment. */
@@ -22,7 +25,7 @@ class PhotoMapper {
         return try {
             ExifInterface(image.dataPath)
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to read EXIF data: " + e.message)
+            Log.w(TAG, "Failed to read EXIF data: ${e.message}")
             null
         }
     }
@@ -30,13 +33,20 @@ class PhotoMapper {
     /** EXIF capture time (UTC) falling back to MediaStore time shifted into UTC. */
     fun utcDate(image: SystemImage, exif: ExifInterface?): Long {
         if (exif != null) {
-            try {
-                val exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME) ?: throw IOException()
-                val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
-                sdf.timeZone = TimeZone.GMT_ZONE
-                sdf.parse(exifDate)?.let { return it.time / 1000 }
+            val exifDate = try {
+                exif.getAttribute(ExifInterface.TAG_DATETIME)
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to read EXIF datetime: " + e.message)
+                Log.w(TAG, "Failed to read EXIF datetime: ${e.message}")
+                null
+            }
+            if (exifDate != null) {
+                try {
+                    val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
+                    sdf.timeZone = TimeZone.GMT_ZONE
+                    sdf.parse(exifDate)?.let { return it.time / 1000 }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to parse EXIF datetime: ${e.message}")
+                }
             }
         }
         return (image.dateTaken + TimeZone.getDefault().getOffset(image.dateTaken).toLong()) / 1000
@@ -50,14 +60,20 @@ class PhotoMapper {
         var sfx = "size=${image.size}"
         if (exif != null) {
             try {
-                sfx = "iuid=${exif.getAttribute(ExifInterface.TAG_IMAGE_UNIQUE_ID) ?: throw IOException()}"
+                val iuid = exif.getAttribute(ExifInterface.TAG_IMAGE_UNIQUE_ID)
+                if (iuid != null) {
+                    sfx = "iuid=$iuid"
+                } else {
+                    Log.w(TAG, "Missing EXIF unique ID (${image.baseName})")
+                }
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to read EXIF unique ID (${image.baseName}): " + e.message)
+                Log.w(TAG, "Failed to read EXIF unique ID (${image.baseName}): ${e.message}")
             }
         }
         return md5("${image.baseName}$sfx")
     }
 
+    /** Index entity for a MediaStore row. */
     fun toPhoto(image: SystemImage): PhotoEntity {
         val exif = exifOf(image)
         val taken = utcDate(image, exif)
@@ -67,7 +83,7 @@ class PhotoMapper {
             buid = buid(image, exif),
             mtime = image.mtime,
             dateTaken = taken,
-            dayId = taken / 86400,
+            dayId = taken / SECONDS_PER_DAY,
             baseName = image.baseName,
             bucketId = image.bucketId,
             bucketName = image.bucketName,
@@ -76,6 +92,7 @@ class PhotoMapper {
         )
     }
 
+    /** Timeline JSON for a MediaStore row; auid/buid/dayid are joined in by the caller. */
     fun toJson(image: SystemImage): JSONObject {
         val obj = JSONObject()
             .put(TimelineJson.Photo.FILEID, image.fileId)

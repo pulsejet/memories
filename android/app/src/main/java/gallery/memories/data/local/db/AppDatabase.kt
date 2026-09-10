@@ -17,6 +17,11 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
+        /**
+         * Singleton; uses the application context to avoid leaking activities.
+         * Note: destructive migration wipes the index on schema upgrades (see
+         * [callbacks]); only the index is lost, never user files.
+         */
         fun get(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(AppDatabase::class.java) {
                 val ctx = context.applicationContext

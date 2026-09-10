@@ -12,19 +12,24 @@ import javax.crypto.spec.IvParameterSpec
 
 /** Keystore-backed credential storage. Only the token is encrypted; the rest is plaintext prefs. */
 class SecureCredentialStore(private val context: Context) {
+    companion object {
+        private const val KEY_ALIAS = "MemoriesKey"
+        private const val PREFS_NAME = "credentials"
+    }
+
     private val keyStore = KeyStore.getInstance("AndroidKeyStore")
-    private val keyAlias = "MemoriesKey"
 
     init {
         keyStore.load(null)
-        if (!keyStore.containsAlias(keyAlias)) generateNewKey()
+        if (!keyStore.containsAlias(KEY_ALIAS)) generateNewKey()
     }
 
+    /** Encrypts and persists credentials. Overwrites any previous login. */
     fun saveCredentials(cred: Credential) {
         val cipher = getCipher()
         cipher.init(Cipher.ENCRYPT_MODE, getSecretKey())
         val encryptedToken = cipher.doFinal(cred.token.toByteArray())
-        context.applicationContext.getSharedPreferences("credentials", Context.MODE_PRIVATE).edit()
+        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
             .putString("url", cred.url)
             .putBoolean("trustAll", cred.trustAll)
             .putString("username", cred.username)
@@ -33,8 +38,9 @@ class SecureCredentialStore(private val context: Context) {
             .apply()
     }
 
+    /** Decrypted credentials, or null when logged out. Runs crypto on the caller thread. */
     fun getCredentials(): Credential? {
-        val prefs = context.applicationContext.getSharedPreferences("credentials", Context.MODE_PRIVATE)
+        val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val url = prefs.getString("url", null)
         val trustAll = prefs.getBoolean("trustAll", false)
         val username = prefs.getString("username", null)
@@ -50,14 +56,14 @@ class SecureCredentialStore(private val context: Context) {
     }
 
     fun deleteCredentials() {
-        context.applicationContext.getSharedPreferences("credentials", Context.MODE_PRIVATE).edit()
+        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
             .remove("url").remove("trustAll").remove("username")
             .remove("encryptedToken").remove("iv").apply()
     }
 
     private fun generateNewKey() {
         val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
-        val spec = KeyGenParameterSpec.Builder(keyAlias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+        val spec = KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
             .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
             .setUserAuthenticationRequired(false)
@@ -71,5 +77,5 @@ class SecureCredentialStore(private val context: Context) {
         return Cipher.getInstance(transformation)
     }
 
-    private fun getSecretKey(): SecretKey = keyStore.getKey(keyAlias, null) as SecretKey
+    private fun getSecretKey(): SecretKey = keyStore.getKey(KEY_ALIAS, null) as SecretKey
 }

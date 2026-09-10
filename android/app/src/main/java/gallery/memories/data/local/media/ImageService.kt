@@ -3,9 +3,11 @@ package gallery.memories.data.local.media
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
+import android.util.Size
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.timeline.TimelineRepository
 import java.io.ByteArrayOutputStream
+import kotlin.math.max
 
 @UnstableApi
 /** Renders device photos for the web timeline, always as JPEG. */
@@ -30,7 +32,7 @@ class ImageService(private val ctx: Context, private val timeline: TimelineRepos
             }
         }
         if (w <= 0 || h <= 0) throw Exception("Invalid preview dimensions")
-        var bitmap = ctx.applicationContext.contentResolver.loadThumbnail(sysImgs[0].uri, android.util.Size(w, h), null)
+        var bitmap = ctx.applicationContext.contentResolver.loadThumbnail(sysImgs[0].uri, Size(w, h), null)
         val stream = ByteArrayOutputStream()
         bitmap = Bitmap.createScaledBitmap(bitmap, w, h, true)
         bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
@@ -46,7 +48,7 @@ class ImageService(private val ctx: Context, private val timeline: TimelineRepos
         var bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(ctx.applicationContext.contentResolver, uri))
         val stream = ByteArrayOutputStream()
         if (size != null) {
-            val scale = size.toFloat() / Math.max(bitmap.width, bitmap.height)
+            val scale = size.toFloat() / max(bitmap.width, bitmap.height)
             if (scale < 1) {
                 bitmap = Bitmap.createScaledBitmap(bitmap, (bitmap.width * scale).toInt(), (bitmap.height * scale).toInt(), true)
             }

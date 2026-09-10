@@ -62,6 +62,7 @@ object ManifestVerifier {
         return valid
     }
 
+    /** Decoded base64 field, or null when missing, empty, or malformed. */
     private fun fieldBytes(obj: JSONObject, key: String): ByteArray? {
         val raw = obj.optString(key, "")
         if (raw.isEmpty()) return null
@@ -73,7 +74,10 @@ object ManifestVerifier {
     }
 }
 
-/** Minimal Ed25519 verifier (RFC 8032 section 5.1.7) over platform SHA-512. */
+/**
+ * Minimal Ed25519 verifier (RFC 8032 section 5.1.7) over platform SHA-512.
+ * Vendored to avoid a crypto dependency; verification-only (no signing).
+ */
 private object Ed25519 {
     private val P = BigInteger.ONE.shiftLeft(255).subtract(BigInteger.valueOf(19))
     private val MASK255 = BigInteger.ONE.shiftLeft(255).subtract(BigInteger.ONE)

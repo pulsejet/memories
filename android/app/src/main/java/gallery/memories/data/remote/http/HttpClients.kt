@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit
 class HttpClients(private val auth: AuthState) {
     @Volatile private var client = OkHttpClient()
 
+    /** Swaps the shared client; in-flight calls keep the previous instance. */
     fun rebuild() {
         client = if (auth.isTrustingAllCertificates) {
             val (sc, tm) = TlsTrust.insecureContext()
@@ -23,6 +24,7 @@ class HttpClients(private val auth: AuthState) {
         }
     }
 
+    /** Shared client for short API calls. */
     fun client(): OkHttpClient = client
 
     /** Proxy client with streaming-friendly timeouts and isolated pools. */

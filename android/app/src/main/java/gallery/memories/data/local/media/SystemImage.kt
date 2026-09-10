@@ -4,7 +4,11 @@ import android.content.ContentUris
 import android.net.Uri
 import android.provider.MediaStore
 
-/** One MediaStore row plus derived IDs; uri/epoch are computed, not stored. */
+/**
+ * One MediaStore row plus derived IDs; uri/epoch are computed, not stored.
+ * Times are MediaStore units: [dateTaken] and [mtime] are milliseconds,
+ * [videoDuration] is milliseconds, [epoch] is seconds.
+ */
 class SystemImage {
     var fileId = 0L
     var baseName = ""

@@ -1,7 +1,7 @@
 package gallery.memories.data.remote.assets
 
 import android.content.Context
-import androidx.core.net.toUri
+import android.net.Uri
 import io.github.g00fy2.versioncompare.Version
 import org.json.JSONObject
 import java.io.File
@@ -9,27 +9,33 @@ import java.io.File
 /** On-disk snapshots of the web app (one dir per server+version). A snapshot is usable only with a .ready marker. */
 class AssetCache(private val ctx: Context) {
     companion object {
+        /** Entry chunk the shell page loads; every snapshot must contain it. */
         const val ENTRY_JS = "memories-main.js"
 
+        /** Stable local filename for the i-th stylesheet: index plus remote basename. */
         fun cssName(i: Int, href: String): String =
             "%02d_%s".format(i, href.substringAfterLast("/").substringBefore("?"))
 
+        /** Scheme + host + port of a describeApi baseUrl, e.g. https://cloud.example.com. */
         fun originOf(baseUrl: String): String {
-            val uri = baseUrl.toUri()
+            val uri = Uri.parse(baseUrl)
             val port = uri.port.takeIf { it > 0 }?.let { ":$it" } ?: ""
             return "${uri.scheme}://${uri.host}$port"
         }
 
+        /** Nextcloud web root (path prefix before index.php), "" for domain roots. */
         fun webrootOf(baseUrl: String): String {
-            val path = baseUrl.toUri().path ?: ""
+            val path = Uri.parse(baseUrl).path ?: ""
             return path.substringBefore("/index.php/")
         }
     }
 
+    /** Snapshot dir for one server version. */
     fun dirFor(baseUrl: String, version: String): File = File(serverDir(baseUrl), version)
 
+    /** Root dir for one server; the host is sanitized so it is a safe path segment. */
     fun serverDir(baseUrl: String): File {
-        val uri = baseUrl.toUri()
+        val uri = Uri.parse(baseUrl)
         val port = uri.port.takeIf { it > 0 }?.toString() ?: ""
         val safe = "${uri.scheme}_${uri.host}$port".replace(Regex("[^A-Za-z0-9_.-]"), "_")
         return File(ctx.applicationContext.filesDir, "offline/$safe")
@@ -49,6 +55,7 @@ class AssetCache(private val ctx: Context) {
         }
     }
 
+    /** Stored describeApi of a snapshot dir, null when missing or corrupt. */
     fun readDescribe(dir: File): JSONObject? {
         return try {
             JSONObject(File(dir, "describe.json").readText())
@@ -57,6 +64,7 @@ class AssetCache(private val ctx: Context) {
         }
     }
 
+    /** Whether any usable snapshot exists for [baseUrl]. */
     fun hasSnapshot(baseUrl: String): Boolean {
         return try {
             latestSnapshot(baseUrl) != null

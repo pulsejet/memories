@@ -5,7 +5,11 @@ import gallery.memories.timeline.TimelineJson
 import org.json.JSONArray
 import org.json.JSONObject
 
-/** Device folders for the setup/timeline UI, derived live from indexed buckets. */
+/**
+ * Device folders for the setup/timeline UI, derived live from indexed buckets.
+ * Shape per entry: {id, name, enabled}. Must be touched off the main thread:
+ * the getter queries Room synchronously.
+ */
 class FolderSettings(
     private val dao: PhotoDao,
     private val prefs: PreferencesStore,
