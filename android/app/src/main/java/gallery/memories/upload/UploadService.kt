@@ -2,7 +2,6 @@ package gallery.memories.upload
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import gallery.memories.data.remote.assets.AssetCache
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.HttpClients
@@ -26,10 +25,6 @@ class UploadService(
     private val auth: AuthState,
     clients: HttpClients,
 ) {
-    companion object {
-        private val TAG = UploadService::class.java.simpleName
-    }
-
     // No write timeout: big uploads on slow links must not be cut off.
     private val client = clients.newProxyClient().newBuilder()
         .writeTimeout(0, TimeUnit.SECONDS)
@@ -64,7 +59,6 @@ class UploadService(
             .put(body)
             .build()
         client.newCall(request).execute().use { res ->
-            Log.v(TAG, "PUT $url -> ${res.code} headers: ${res.headers}")
             if (res.code !in 200..299) throw Exception("Upload failed: HTTP ${res.code}")
             // oc-fileid is the DAV ID (zero-padded ID + instance ID);
             // the numeric ID is its leading digits, like parseInt elsewhere.
