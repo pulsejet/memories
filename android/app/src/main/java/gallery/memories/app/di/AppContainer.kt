@@ -77,9 +77,9 @@ class AppContainer(
     val router: ApiRouter
 
     init {
-        observer = MediaObserver(activity) {
+        observer = MediaObserver(activity) { uris ->
             if (activity.isDestroyed || activity.isFinishing) return@MediaObserver
-            if (timeline.syncDeltaDb() > 0) activity.refreshTimeline()
+            if (timeline.syncDeltaDb() + timeline.evictUris(uris) > 0) activity.refreshTimeline()
         }
         timeline = TimelineRepositoryImpl(
             dao, dataSource, mapper, prefs, syncManager, deleter, folders, observer,
