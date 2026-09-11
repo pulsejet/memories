@@ -42,7 +42,7 @@ export default defineComponent({
       const folder = utils.getFolderRoutePath(this.config.folders_path);
 
       // Clear folders if switching to a different folder, otherwise just refresh
-      if (this.currentFolder === folder) {
+      if (this.currentFolder !== folder) {
         this.currentFolder = folder;
         this.folders = [];
       }
@@ -52,7 +52,11 @@ export default defineComponent({
 
       // Make API call to get subfolders
       try {
-        this.folders = (await axios.get<IFolder[]>(url)).data;
+        const data = (await axios.get<IFolder[]>(url)).data;
+        if (folder !== utils.getFolderRoutePath(this.config.folders_path)) {
+          return false;
+        }
+        this.folders = data;
       } catch (e) {
         console.error(e);
         return false;
