@@ -122,10 +122,10 @@ class LocalHttpServer(
 
     private fun handle(sock: Socket) {
         sock.use { s ->
-            val input = s.inputStream
+            val input = java.io.BufferedInputStream(s.inputStream, 8192)
             val out = BufferedOutputStream(s.outputStream)
             val req = try {
-                HttpParser.readRequest(input, appCtx.cacheDir)
+                HttpParser.readRequest(input, appCtx.cacheDir, out)
             } catch (e: Exception) {
                 HttpWriter.reply(out, 400, "Bad Request", "bad request")
                 return

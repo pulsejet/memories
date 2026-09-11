@@ -22,7 +22,7 @@ class ProxyController(
         /** Hop-by-hop and client-specific headers that must not be forwarded upstream. */
         private val SKIPPED_REQUEST_HEADERS = setOf(
             "host", "content-length", "transfer-encoding",
-            "connection", "cookie", "accept-encoding",
+            "connection", "cookie", "accept-encoding", "expect",
         )
 
         /** Framing and server-owned headers regenerated locally on the way back. */

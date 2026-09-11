@@ -18,7 +18,7 @@ object HttpParser {
     const val MAX_BODY_TOTAL = 256 * 1024 * 1024
 
     @Throws(Exception::class)
-    fun readRequest(input: InputStream, cacheDir: File): HttpRequest {
+    fun readRequest(input: InputStream, cacheDir: File, out: OutputStream? = null): HttpRequest {
         val head = readHead(input, 65536)
         val lines = String(head, Charsets.ISO_8859_1).split("\r\n")
         if (lines.isEmpty()) throw Exception("Empty request")
@@ -41,6 +41,11 @@ object HttpParser {
             val name = line.substring(0, idx).trim().lowercase()
             val value = line.substring(idx + 1).trim()
             headers[name] = if (headers.containsKey(name)) headers[name] + ", " + value else value
+        }
+        // Answer 100-continue before blocking on the body.
+        if (out != null && headers["expect"]?.contains("100-continue") == true) {
+            out.write("HTTP/1.1 100 Continue\r\n\r\n".toByteArray(Charsets.ISO_8859_1))
+            out.flush()
         }
         var body: ByteArray? = null
         var bodyFile: File? = null
