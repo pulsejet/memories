@@ -49,6 +49,12 @@ NVIDIA GPUs support hardware transcoding using NVENC.
         init: true
         depends_on:
           - server
+        healthcheck:
+          test: ["CMD-SHELL", "curl -f http://localhost:47788/test/none/test || exit 1"]
+          interval: 30s
+          timeout: 5s
+          retries: 3
+          start_period: 30s
         environment:
           - NEXTCLOUD_HOST=https://your-nextcloud-url
           # - NEXTCLOUD_ALLOW_INSECURE=1 # (self-signed certs or no HTTPS)

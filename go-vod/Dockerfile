@@ -14,4 +14,11 @@ WORKDIR /app
 
 EXPOSE 47788
 
+HEALTHCHECK \
+  --interval=30s \
+  --timeout=5s \
+  --start-period=30s \
+  --retries=3 \
+  CMD curl -f http://localhost:47788/test/none/test || exit 1
+
 ENTRYPOINT ["/app/entrypoint.sh"]
