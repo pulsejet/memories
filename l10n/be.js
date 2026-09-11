@@ -103,6 +103,7 @@ OC.L10N.register(
     "Share link" : "Абагуліць спасылку",
     "Create Link" : "Стварыць спасылку",
     "Refresh" : "Абнавіць",
+    "OK" : "OK",
     "Original File" : "Арыгінальны файл",
     "Public Link" : "Публічная спасылка",
     "Creating tags" : "Стварэнне тэгаў",

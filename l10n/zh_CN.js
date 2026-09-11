@@ -314,7 +314,6 @@ OC.L10N.register(
     "Copyright" : "版权",
     "Empty" : "空",
     "Unchanged" : "未变更",
-    "Failed to search for location with Nominatim." : "使用Nominatim搜索位置失败。",
     "Reset" : "重置",
     "Remove location" : "移除位置",
     "Search location / landmark" : "搜索位置/地标",

@@ -314,7 +314,6 @@ OC.L10N.register(
     "Copyright" : "Direito autoral",
     "Empty" : "Vazio",
     "Unchanged" : "Sem alterações",
-    "Failed to search for location with Nominatim." : "Falha ao pesquisar o local com Nominatim.",
     "Reset" : "Redefinir",
     "Remove location" : "Remover localização",
     "Search location / landmark" : "Pesquisar local / ponto de referência",

@@ -200,7 +200,6 @@ OC.L10N.register(
     "Copyright" : "Copyright",
     "Empty" : "Hutsik",
     "Unchanged" : "Aldatu gabe",
-    "Failed to search for location with Nominatim." : "Ezin izan da bilatu kokapena Nominatim-ekin.",
     "Reset" : "Berrezarri",
     "Remove location" : "Kendu kokapena",
     "Search location / landmark" : "Bilatu kokapena / mugarria",

@@ -308,7 +308,6 @@
     "Copyright" : "Derechos de autor",
     "Empty" : "Vacío",
     "Unchanged" : "Sin cambios",
-    "Failed to search for location with Nominatim." : "Fallo al buscar la ubicación con Nominatim.",
     "Reset" : "Restablecer",
     "Remove location" : "Quitar ubicación",
     "Search location / landmark" : "Buscar ubicación / punto de referencia",

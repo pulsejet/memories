@@ -314,7 +314,6 @@ OC.L10N.register(
     "Copyright" : "Copyright",
     "Empty" : "Prázdny",
     "Unchanged" : "Nezmenené",
-    "Failed to search for location with Nominatim." : "Nepodarilo sa vyhľadať polohu pomocou Nominatim.",
     "Reset" : "Resetovať",
     "Remove location" : "Odstrániť polohu",
     "Search location / landmark" : "Vyhľadajte miesto / orientačný bod",

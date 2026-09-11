@@ -314,7 +314,6 @@ OC.L10N.register(
     "Copyright" : "Autorių teisės",
     "Empty" : "Tuščias",
     "Unchanged" : "Nepakitęs",
-    "Failed to search for location with Nominatim." : "Nepavyko rasti vietovės naudojant „Nominatim“.",
     "Reset" : "Atstatyti",
     "Remove location" : "Pašalinti vietovę",
     "Search location / landmark" : "Ieškokite vietos / orientyro",

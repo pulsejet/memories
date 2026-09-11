@@ -112,6 +112,7 @@ OC.L10N.register(
     "Failed to copy link to clipboard" : "Nun se pue copiar l'enllaz nel cartfaueyu",
     "Share link" : "Compartir l'enllaz",
     "Refresh" : "Anovar",
+    "OK" : "OK",
     "High Resolution" : "Resolución alta",
     "Original File" : "FIcheru orixinal",
     "Public Link" : "Enllaz públicu",

@@ -246,7 +246,6 @@ OC.L10N.register(
     "Copyright" : "Tekijänoikeus",
     "Empty" : "Tyhjä",
     "Unchanged" : "Muuttamaton",
-    "Failed to search for location with Nominatim." : "Sijainnin haku Nominatimilla epäonnistui.",
     "Reset" : "Palauta",
     "Remove location" : "Poista sijainti",
     "Search location / landmark" : "Etsi sijaintia / maamerkkiä",

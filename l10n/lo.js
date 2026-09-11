@@ -309,7 +309,6 @@ OC.L10N.register(
     "Copyright" : "ລິຂະສິດ",
     "Empty" : "ຫວ່າງເປົ່າ",
     "Unchanged" : "ບໍ່ປ່ຽນແປງ",
-    "Failed to search for location with Nominatim." : "ຄົ້ນຫາສະຖານທີ່ດ້ວຍ Nominatim ບໍ່ສຳເລັດ.",
     "Reset" : "ຕັ້ງຄ່າໃໝ່",
     "Remove location" : "ລຶບສະຖານທີ່",
     "Search location / landmark" : "ຄົ້ນຫາສະຖານທີ່ / ຈຸດສຳຄັນ",

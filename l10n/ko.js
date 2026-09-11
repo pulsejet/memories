@@ -306,7 +306,6 @@ OC.L10N.register(
     "Copyright" : "저작권",
     "Empty" : "비어 있음",
     "Unchanged" : "바꾸지 않음",
-    "Failed to search for location with Nominatim." : "Nominatim에서 위치를 검색하지 못했습니다.",
     "Reset" : "초기화",
     "Remove location" : "위치 제거",
     "Search location / landmark" : "위치 및 랜드마크 검색",

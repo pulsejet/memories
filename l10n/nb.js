@@ -307,7 +307,6 @@ OC.L10N.register(
     "Copyright" : "Opphavsrett",
     "Empty" : "Tom",
     "Unchanged" : "Uforandret",
-    "Failed to search for location with Nominatim." : "Kunne ikke søke etter plassering med Nominatim.",
     "Reset" : "Tilbakestill",
     "Remove location" : "Fjern plassering",
     "Search location / landmark" : "Søk plassering/landemerke",

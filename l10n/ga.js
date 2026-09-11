@@ -314,7 +314,6 @@ OC.L10N.register(
     "Copyright" : "Cóipcheart",
     "Empty" : "Folamh",
     "Unchanged" : "Gan athrú",
-    "Failed to search for location with Nominatim." : "Theip ar chuardach do shuíomh le Nominatim.",
     "Reset" : "Athshocraigh",
     "Remove location" : "Bain suíomh",
     "Search location / landmark" : "Cuardaigh suíomh / sainchomhartha",

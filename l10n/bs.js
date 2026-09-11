@@ -26,6 +26,7 @@ OC.L10N.register(
     "Update" : "Ažuriraj",
     "Move" : "Move",
     "Password protected" : "Zaštićeno lozinkom",
+    "OK" : "OK",
     "Home" : "Početna stranica",
     "Previous" : "Prethodno",
     "Size" : "Veličina",

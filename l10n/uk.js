@@ -310,7 +310,6 @@ OC.L10N.register(
     "Copyright" : "Права на копіюівння",
     "Empty" : "Порожньо",
     "Unchanged" : "Без змін",
-    "Failed to search for location with Nominatim." : "Не вдалося знайти місце розташування за допомогою Nominatim.",
     "Reset" : "Скидання",
     "Remove location" : "Вилучити місце розташування",
     "Search location / landmark" : "Пошук місця розташування / орієнтиру",

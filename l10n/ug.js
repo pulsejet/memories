@@ -310,7 +310,6 @@ OC.L10N.register(
     "Copyright" : "نەشر ھوقۇقى",
     "Empty" : "قۇرۇق",
     "Unchanged" : "ئۆزگەرمەيدۇ",
-    "Failed to search for location with Nominatim." : "Nominatim بىلەن ئورۇن ئىزدىمىدى.",
     "Reset" : "ئەسلىگە قايتۇرۇش",
     "Remove location" : "ئورۇننى ئۆچۈرۈڭ",
     "Search location / landmark" : "ئىزدەش ئورنى / بەلگە",

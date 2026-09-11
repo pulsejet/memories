@@ -313,7 +313,6 @@ OC.L10N.register(
     "Copyright" : "Авторско право",
     "Empty" : "Празно",
     "Unchanged" : "Непроменето",
-    "Failed to search for location with Nominatim." : "Не успеа пребарувањето на локација со Nominatim.",
     "Reset" : "Ресетирање",
     "Remove location" : "Избриши локација",
     "Search location / landmark" : "Пребарување локација / обележје",

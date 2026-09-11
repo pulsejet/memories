@@ -311,7 +311,6 @@ OC.L10N.register(
     "Copyright" : "حق نشر",
     "Empty" : "خالی",
     "Unchanged" : "بدون تغییر",
-    "Failed to search for location with Nominatim." : "جستجوی مکان با Nominatim ناموفق بود.",
     "Reset" : "بازنشانی",
     "Remove location" : "حذف مکان",
     "Search location / landmark" : "جستجوی مکان / نشانه",

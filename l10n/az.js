@@ -31,6 +31,7 @@ OC.L10N.register(
     "Move" : "Move",
     "Read only" : "Oxumaq üçün",
     "Refresh" : "Yenilə",
+    "OK" : "OK",
     "Home" : "Ev",
     "Upload failed" : "Yüklənmədə səhv baş verdi",
     "Download {ext}" : "Endir {ext}",

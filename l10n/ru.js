@@ -311,7 +311,6 @@ OC.L10N.register(
     "Copyright" : "Авторские права",
     "Empty" : "Пустой",
     "Unchanged" : "Неизменившийся",
-    "Failed to search for location with Nominatim." : "Не удалось найти местоположение в службе Nominatim.",
     "Reset" : "Сброс",
     "Remove location" : "Удалить сведения о местоположении",
     "Search location / landmark" : "Поиск места или достопримечательности",

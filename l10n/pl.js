@@ -277,7 +277,6 @@ OC.L10N.register(
     "Copyright" : "Prawa autorskie",
     "Empty" : "Pusty",
     "Unchanged" : "Brak zmian",
-    "Failed to search for location with Nominatim." : "Nie udało się znaleźć lokalizacji za pomocą Nominatim.",
     "Reset" : "Resetuj",
     "Remove location" : "Usuń lokalizację",
     "Search location / landmark" : "Wyszukaj lokalizację / punkt",

@@ -314,7 +314,6 @@ OC.L10N.register(
     "Copyright" : "Upphovsrätt",
     "Empty" : "Tomt",
     "Unchanged" : "Oförändrat",
-    "Failed to search for location with Nominatim." : "Det gick inte att söka efter plats med Nominatim.",
     "Reset" : "Återställ",
     "Remove location" : "Ta bort platsdata",
     "Search location / landmark" : "Sök efter plats eller landmärke",

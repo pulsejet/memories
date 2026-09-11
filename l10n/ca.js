@@ -103,6 +103,7 @@ OC.L10N.register(
     "Share link" : "Comparteix un enllaç",
     "Create Link" : "Crear link",
     "Refresh" : "Actualitza",
+    "OK" : "OK",
     "Failed to upload {file}" : "No s'ha pogut pujar {file}",
     "Add tags" : "Afegeix etiquetes",
     "Last updated" : "Darrera actualització",

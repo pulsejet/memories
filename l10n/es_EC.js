@@ -225,7 +225,6 @@ OC.L10N.register(
     "Copyright" : "Derechos de autor",
     "Empty" : "Vacío",
     "Unchanged" : "Sin cambios",
-    "Failed to search for location with Nominatim." : "Error al buscar ubicación con Nominatim.",
     "Reset" : "Restablecer",
     "Remove location" : "Eliminar ubicación",
     "Search location / landmark" : "Buscar ubicación / hito",

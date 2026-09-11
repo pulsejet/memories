@@ -313,7 +313,6 @@ OC.L10N.register(
     "Copyright" : "Držitel práv",
     "Empty" : "Prázdná",
     "Unchanged" : "Nezměněno",
-    "Failed to search for location with Nominatim." : "Nepodařilo se vyhledat umístění prostřednictvím Nominatim",
     "Reset" : "Vrátit na výchozí hodnoty",
     "Remove location" : "Odebrat umístění",
     "Search location / landmark" : "Vyberte umístění / orientační bod",

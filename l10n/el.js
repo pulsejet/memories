@@ -310,7 +310,6 @@ OC.L10N.register(
     "Copyright" : "Πνευματική Ιδιοκτησία",
     "Empty" : "Κενό",
     "Unchanged" : "Αμετάβλητο",
-    "Failed to search for location with Nominatim." : "Αποτυχία αναζήτησης τοποθεσίας με Nominatim.",
     "Reset" : "Επαναφορά",
     "Remove location" : "Αφαίρεση τοποθεσίας",
     "Search location / landmark" : "Αναζήτηση τοποθεσίας / ορόσημου",

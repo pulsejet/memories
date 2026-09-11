@@ -266,7 +266,6 @@ OC.L10N.register(
     "Copyright" : "Szerzői jog",
     "Empty" : "Üres",
     "Unchanged" : "Változatlan",
-    "Failed to search for location with Nominatim." : "A hely keresése a Nominatimmal nem sikerült.",
     "Reset" : "Alaphelyzetbe állítás",
     "Remove location" : "Hely eltávolítása",
     "Search location / landmark" : "Hely / tájékozódási pont keresése",

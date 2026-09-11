@@ -311,7 +311,6 @@ OC.L10N.register(
     "Copyright" : "Dereitos de autoría",
     "Empty" : "Baleiro",
     "Unchanged" : "Sen cambios",
-    "Failed to search for location with Nominatim." : "Produciuse un fallo ao buscar a localización con Nominatim.",
     "Reset" : "Restabelecer",
     "Remove location" : "Retirar a localización",
     "Search location / landmark" : "Buscar localización / lugar emblemático",
