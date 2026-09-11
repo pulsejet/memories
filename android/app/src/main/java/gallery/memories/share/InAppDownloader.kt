@@ -161,8 +161,10 @@ class InAppDownloader(
             .header("OCS-APIREQUEST", "true")
         auth.authHeader()?.let { builder.header("Authorization", it) }
         try {
-            CookieManager.getInstance().getCookie(url)?.let { cookies ->
-                if (cookies.isNotEmpty()) builder.header("Cookie", cookies)
+            if (Uri.parse(url).host == "127.0.0.1") {
+                CookieManager.getInstance().getCookie(url)?.let { cookies ->
+                    if (cookies.isNotEmpty()) builder.header("Cookie", cookies)
+                }
             }
         } catch (e: Exception) {
             Log.w(TAG, "Cookie lookup failed, continuing without cookies", e)

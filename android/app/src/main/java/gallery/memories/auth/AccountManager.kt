@@ -162,6 +162,7 @@ class AccountManager(
     /** Drops stored credentials and resets HTTP clients to the logged-out state. */
     fun deleteCredentials() {
         store.deleteCredentials()
+        clients.clearCookies()
         auth.setAuthHeader(null)
         auth.build(null, false)
         clients.rebuild()

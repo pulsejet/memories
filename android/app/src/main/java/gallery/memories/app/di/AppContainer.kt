@@ -23,6 +23,7 @@ import gallery.memories.data.remote.assets.AssetSyncCoordinator
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.HttpClients
 import gallery.memories.data.remote.http.NextcloudApi
+import gallery.memories.data.remote.http.SessionCookieJar
 import gallery.memories.server.LocalHttpServer
 import gallery.memories.share.InAppDownloader
 import gallery.memories.share.ShareManager
@@ -48,7 +49,8 @@ class AppContainer(
     val prefs = PreferencesStore(activity)
     val secure = SecureCredentialStore(activity)
     val auth = AuthState()
-    val clients = HttpClients(auth)
+    val cookies = SessionCookieJar(activity)
+    val clients = HttpClients(auth, cookies)
     val api = NextcloudApi(auth, clients)
     val cache = AssetCache(activity)
     val downloader = AssetDownloader(api)

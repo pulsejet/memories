@@ -8,8 +8,8 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 /** OkHttp clients following the current [AuthState]. Rebuild after any auth/TLS change. */
-class HttpClients(private val auth: AuthState) {
-    @Volatile private var client = OkHttpClient()
+class HttpClients(private val auth: AuthState, private val cookies: SessionCookieJar) {
+    @Volatile private var client = OkHttpClient.Builder().cookieJar(cookies).build()
 
     /** Swaps the shared client; in-flight calls keep the previous instance. */
     fun rebuild() {
@@ -18,11 +18,14 @@ class HttpClients(private val auth: AuthState) {
             OkHttpClient.Builder()
                 .sslSocketFactory(sc.socketFactory, tm)
                 .hostnameVerifier { _, _ -> true }
+                .cookieJar(cookies)
                 .build()
         } else {
-            OkHttpClient()
+            OkHttpClient.Builder().cookieJar(cookies).build()
         }
     }
+
+    fun clearCookies() = cookies.clear()
 
     /** Shared client for short API calls. */
     fun client(): OkHttpClient = client
