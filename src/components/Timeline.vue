@@ -749,13 +749,16 @@ export default defineComponent({
           setTimeout(() => _m.viewer.open(data[0]!.detail![0]), 0);
         } else {
           // Try the cache
-          if (!noCache) {
+          if (!noCache || this.routeHasNative) {
             try {
-              if ((cache = await utils.getCachedData(cacheUrl))) {
-                if (this.routeHasNative) {
-                  cache = nativex.mergeDays(cache, await nativex.getLocalDays());
-                }
+              cache = await utils.getCachedData(cacheUrl);
 
+              // On native, treat a missing remote cache as empty.
+              if (this.routeHasNative) {
+                cache = nativex.mergeDays(cache ?? [], await nativex.getLocalDays());
+              }
+
+              if (cache) {
                 await this.processDays(cache, true);
                 this.updateLoading(-1);
               }
@@ -939,13 +942,15 @@ export default defineComponent({
       const cacheUrl = this.getDayUrl([dayId]);
       try {
         let cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
-        if (cache) {
-          // Cache only contains remote images; update from local too
-          if (this.routeHasNative && head.day?.haslocal) {
-            nativex.mergeDay(cache, await nativex.getLocalDay(dayId));
-          }
+        utils.applyAuids(cache);
 
-          // Process the cache
+        // On native, treat a missing remote cache as empty.
+        if (this.routeHasNative && head.day?.haslocal) {
+          nativex.mergeDay((cache ??= []), await nativex.getLocalDay(dayId));
+        }
+
+        // Process the cache
+        if (cache) {
           cache = this.preprocessDay(dayId, cache);
 
           // If this is a cached response and the list is not, then we don't
@@ -995,9 +1000,27 @@ export default defineComponent({
 
       try {
         const startState = this.state;
-        const res = await axios.get<IPhoto[]>(url);
-        if (res.status !== 200) throw res;
-        const data = res.data;
+        const [data, isCached] = await (async () => {
+          try {
+            const res = await axios.get<IPhoto[]>(url);
+            if (res.status !== 200) throw res;
+            return [res.data, false];
+          } catch (e: any) {
+            // Force a cache read with nativex to update local.
+            if (nativex.has()) {
+              const res = await Promise.all(
+                dayIds.map(async (dayId) => {
+                  const cacheUrl = this.getDayUrl([dayId]);
+                  const data = await utils.getCachedData<IPhoto[]>(cacheUrl);
+                  return data ?? [];
+                }),
+              );
+              return [res.flat(), true];
+            }
+            throw e;
+          }
+        })();
+        utils.applyAuids(data);
 
         // Check if the state has changed
         if (this.state !== startState || this.getDayUrl(dayIds) !== url) {
@@ -1010,7 +1033,7 @@ export default defineComponent({
           dayMap.get(photo.dayid)?.push(photo);
         }
 
-        // Store cache asynchronously
+        // Store cache asynchronously if this was not cache.
         // Do this regardless of whether the state has
         // changed since the data is already fetched
         //
@@ -1020,8 +1043,10 @@ export default defineComponent({
         // The day is cached regardless of whether it is empty.
         // Empty days might be fetched e.g. on NativeX. In this case,
         // empty caches will not be processed if the view is fresh.
-        for (const [dayId, photos] of dayMap) {
-          utils.cacheData(this.getDayUrl([dayId]), photos);
+        if (!isCached) {
+          for (const [dayId, photos] of dayMap) {
+            utils.cacheData(this.getDayUrl([dayId]), photos);
+          }
         }
 
         // Get local images if we are running in native environment.
@@ -1063,6 +1088,9 @@ export default defineComponent({
 
                 // copy over flags
                 utils.copyPhotoFlags(now, curr);
+
+                // keep merged local copy up to date
+                curr.local_photo = now.local_photo;
 
                 // keep deduped copies up to date (#1299)
                 curr.dups = now.dups;

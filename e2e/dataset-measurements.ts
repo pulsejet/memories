@@ -10,12 +10,10 @@
  *   - `goldDayMap(timelinePath, isArchive?)`: Derives dayid -> photo array mapping.
  *   - `goldImageInfo(relPath)`: Derives expected metadata for a specific photo.
  *   - `parseExifDate(dateStr)`: Computes epoch and day ID from EXIF date string.
- *   - `getAUID(epoch, size)`: Derives Approximate Unique ID (MD5 hash).
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
-import * as crypto from 'crypto';
 
 import type { IDay, IImageInfo, IPhoto } from '@typings';
 import { DATASET, type IDatasetEntry } from './dataset';
@@ -31,10 +29,6 @@ export function parseExifDate(dateStr: string): { epoch: number; dayid: number }
   const epoch = Math.floor(date.getTime() / 1000);
   const dayid = Math.floor(epoch / 86400);
   return { epoch, dayid };
-}
-
-export function getAUID(epoch: number, size: number): string {
-  return crypto.createHash('md5').update(`${epoch}${size}`).digest('hex');
 }
 
 /**
@@ -59,7 +53,6 @@ export function goldDayMap(timelinePath: string, isArchive: boolean = false): Ma
     const fileSize = fs.existsSync(filePath) ? fs.statSync(filePath).size : 0;
 
     const { epoch, dayid } = parseExifDate(entry.exif.DateTimeOriginal || '');
-    const auid = getAUID(epoch, fileSize);
 
     const photo: IPhoto = {
       fileid: 0,
@@ -69,7 +62,7 @@ export function goldDayMap(timelinePath: string, isArchive: boolean = false): Ma
       basename,
       epoch,
       mimetype: 'image/jpeg',
-      auid,
+      size: fileSize,
       flag: 0,
     };
 
