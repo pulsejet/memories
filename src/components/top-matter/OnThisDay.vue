@@ -1,7 +1,7 @@
 <template>
   <div class="outer" v-show="years.length > 0">
     <div class="inner hide-scrollbar" ref="inner">
-      <div v-for="year of years" class="group" :key="year.year" @click="click(year)">
+      <div v-for="year of years" class="group" :key="year.text" @click="click(year)">
         <XImg class="fill-block" :src="year.url" />
 
         <div class="overlay top-left fill-block">
@@ -127,22 +127,22 @@ export default defineComponent({
     async process(photos: IPhoto[]) {
       this.years = [];
 
-      let currentYear = 9999;
       let currentText = '';
+      let prevDayId = Number.MAX_SAFE_INTEGER;
 
       for (const photo of photos) {
         // Skip hidden files
+        if (!photo.dayid) continue;
         if (photo.ishidden) continue;
         if (photo.basename?.startsWith('.')) continue;
 
-        // Get year and text for this photo
-        const dateTaken = utils.dayIdToDate(photo.dayid);
-        const year = dateTaken.getUTCFullYear();
         photo.key = `${photo.fileid}`;
 
-        // DateTime calls are expensive, so check if the year
-        // itself is different first, then also check the text
-        if (year !== currentYear) {
+        // New anniversary, not calendar year (breaks at year boundary).
+        // Mirrors Timeline.vue. DateTime calls are expensive.
+        if (Math.abs(prevDayId - photo.dayid) > 30) {
+          const dateTaken = utils.dayIdToDate(photo.dayid);
+          const year = dateTaken.getUTCFullYear();
           const text = utils.getFromNowStr(dateTaken, { padding: 10 });
           if (text !== currentText) {
             this.years.push({
@@ -154,8 +154,8 @@ export default defineComponent({
             });
             currentText = text;
           }
-          currentYear = year;
         }
+        prevDayId = photo.dayid;
 
         const yearObj = this.years[this.years.length - 1];
         yearObj.photos.push(photo);
