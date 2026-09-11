@@ -32,6 +32,9 @@ class AssetSyncCoordinator(
     /** One downloadable web asset: remote [href], verified against [hash] for JS. */
     data class JsAsset(val name: String, val hash: String, val href: String)
 
+    /** One downloadable stylesheet: local [name] derived from its position and remote [href]. */
+    data class CssAsset(val name: String, val href: String)
+
     /** One queued file download within [syncBlocking]. */
     private data class DownloadTask(val dir: File, val name: String, val url: String, val hash: String?)
 
@@ -80,7 +83,7 @@ class AssetSyncCoordinator(
         val dir = cache.dirFor(base, cache.snapshotKey(fresh))
         if (!File(dir, ".ready").exists()) return false
         val cur = cache.readDescribe(dir) ?: return false
-        return cache.manifestKey(cur) == cache.manifestKey(fresh)
+        return !cache.jsChanged(cur, fresh) && !cache.cssChanged(cur, fresh)
     }
 
     fun ensureFreshAndWait(timeoutMs: Long = 15 * 60 * 1000): Boolean {
@@ -107,7 +110,7 @@ class AssetSyncCoordinator(
         }
         val snap = cache.latestSnapshot(base)
         val cur = snap?.let { cache.readDescribe(it.second) }
-        if (snap != null && cur != null && cache.manifestKey(cur) == cache.manifestKey(fresh)) {
+        if (snap != null && cur != null && !cache.jsChanged(cur, fresh) && !cache.cssChanged(cur, fresh)) {
             return useSnapshot(snap)
         }
         if (!syncAndAwait(fresh, timeoutMs)) return false
@@ -180,7 +183,7 @@ class AssetSyncCoordinator(
             val key = cache.snapshotKey(describe)
             val dir = cache.dirFor(baseUrl, key)
             val existing = cache.readDescribe(dir)?.takeIf { File(dir, ".ready").exists() }
-            if (existing != null && cache.manifestKey(existing) == cache.manifestKey(describe)) {
+            if (existing != null && !cache.jsChanged(existing, describe) && !cache.cssChanged(existing, describe)) {
                 cache.pruneExcept(baseUrl, key)
                 status = "ready"
                 return true
@@ -200,17 +203,21 @@ class AssetSyncCoordinator(
     @Throws(Exception::class)
     private fun syncBlocking(describe: JSONObject, baseUrl: String, dir: File) {
         val origin = AssetCache.originOf(baseUrl)
-        val jsB64 = describe.optString("jsManifest", "").ifEmpty { null } ?: throw Exception("Server has no asset manifest")
-        val jsJson = JSONObject(String(Base64.decode(jsB64, Base64.DEFAULT)))
-        val js = jsJson.keys().asSequence()
-            .filter { it.endsWith(".js") || it.endsWith(".mjs") }
-            .mapNotNull {
-                val o = jsJson.getJSONObject(it)
-                val hash = o.optString("hash", "").ifEmpty { null } ?: return@mapNotNull null
-                JsAsset(it, hash, o.getString("href"))
-            }.toList()
-        val css = describe.optJSONArray("cssManifest") ?: JSONArray()
-        total = js.size + css.length()
+        val js = parseJsAssets(describe)
+        val css = parseCssAssets(describe)
+
+        // Previous snapshot to reuse unchanged files from (different dir by key).
+        val prev = cache.latestSnapshot(baseUrl)?.takeIf { it.second.absolutePath != dir.absolutePath }
+        val prevDescribe = prev?.let { cache.readDescribe(it.second) }
+        val prevJsHashes = try {
+            prevDescribe?.let { parseJsAssets(it).associate { a -> a.name to a.hash } }
+        } catch (_: Exception) {
+            null
+        }
+        val reuseCss = prev != null && prevDescribe != null && !cache.cssChanged(prevDescribe, describe)
+        val prevJsDir = prev?.let { File(it.second, "js") }
+        val prevCssDir = prev?.let { File(it.second, "css") }
+
         downloader.reset()
         status = "downloading"
         error = null
@@ -218,14 +225,28 @@ class AssetSyncCoordinator(
         val jsDir = File(dir, "js").apply { mkdirs() }
         val cssDir = File(dir, "css").apply { mkdirs() }
 
-        val tasks = ArrayList<DownloadTask>(js.size + css.length())
+        val tasks = ArrayList<DownloadTask>(js.size + css.size)
+        var reused = 0
         for (asset in js) {
-            tasks.add(DownloadTask(jsDir, asset.name, absUrl(origin, asset.href), asset.hash))
+            val prevFile = prevJsDir?.let { File(it, asset.name) }
+            if (prevFile?.isFile == true && prevJsHashes?.get(asset.name) == asset.hash) {
+                prevFile.copyTo(File(jsDir, asset.name), overwrite = true)
+                reused++
+            } else {
+                tasks.add(DownloadTask(jsDir, asset.name, absUrl(origin, asset.href), asset.hash))
+            }
         }
-        for (i in 0 until css.length()) {
-            val href = css.getJSONObject(i).getString("href")
-            tasks.add(DownloadTask(cssDir, AssetCache.cssName(i, href), absUrl(origin, href), null))
+        for (asset in css) {
+            // CSS has no content hash, so reuse only when the whole manifest is unchanged.
+            val prevFile = prevCssDir?.let { File(it, asset.name) }
+            if (reuseCss && prevFile?.isFile == true) {
+                prevFile.copyTo(File(cssDir, asset.name), overwrite = true)
+                reused++
+            } else {
+                tasks.add(DownloadTask(cssDir, asset.name, absUrl(origin, asset.href), null))
+            }
         }
+        total = tasks.size
 
         if (tasks.isNotEmpty()) {
             val pool = Executors.newFixedThreadPool(minOf(tasks.size, MAX_PARALLEL))
@@ -250,7 +271,28 @@ class AssetSyncCoordinator(
         File(dir, "describe.json").writeText(describe.toString())
         File(dir, ".ready").createNewFile()
         status = "ready"
-        Log.i(TAG, "Asset sync complete: ${downloader.done} files for $origin")
+        Log.i(TAG, "Asset sync complete: ${downloader.done} downloaded, $reused reused for $origin")
+    }
+
+    @Throws(Exception::class)
+    private fun parseJsAssets(describe: JSONObject): List<JsAsset> {
+        val jsB64 = describe.optString("jsManifest", "").ifEmpty { null } ?: throw Exception("Server has no asset manifest")
+        val jsJson = JSONObject(String(Base64.decode(jsB64, Base64.DEFAULT)))
+        return jsJson.keys().asSequence()
+            .filter { it.endsWith(".js") || it.endsWith(".mjs") }
+            .mapNotNull {
+                val o = jsJson.getJSONObject(it)
+                val hash = o.optString("hash", "").ifEmpty { null } ?: return@mapNotNull null
+                JsAsset(it, hash, o.getString("href"))
+            }.toList()
+    }
+
+    private fun parseCssAssets(describe: JSONObject): List<CssAsset> {
+        val css = describe.optJSONArray("cssManifest") ?: JSONArray()
+        return (0 until css.length()).map {
+            val href = css.getJSONObject(it).getString("href")
+            CssAsset(AssetCache.cssName(it, href), href)
+        }
     }
 
     /** Joins a manifest href onto the server origin; absolute hrefs pass through. */

@@ -103,9 +103,29 @@ class AssetCache(private val ctx: Context) {
         }
     }
 
+    /** Raw JS manifest: catches upstream rebuilds that keep the version number. */
+    fun jsKey(describe: JSONObject): String =
+        describe.optString("jsManifest", "")
+
+    /** Hrefs of the CSS manifest, order-sensitive like the shell renderer. */
+    fun cssKey(describe: JSONObject): String {
+        val css = describe.optJSONArray("cssManifest") ?: return ""
+        return (0 until css.length()).joinToString("\n") {
+            css.optJSONObject(it)?.optString("href", "") ?: ""
+        }
+    }
+
+    /** True when the JS asset set changed between describes. */
+    fun jsChanged(old: JSONObject, fresh: JSONObject): Boolean =
+        jsKey(old) != jsKey(fresh)
+
+    /** True when the CSS asset set changed between describes. */
+    fun cssChanged(old: JSONObject, fresh: JSONObject): Boolean =
+        cssKey(old) != cssKey(fresh)
+
     /** Version-independent content key: catches upstream rebuilds that keep the version number. */
     fun manifestKey(describe: JSONObject): String =
-        describe.optString("jsManifest", "") + "\n" + describe.opt("cssManifest")
+        jsKey(describe) + "\n" + cssKey(describe)
 
     /** Content address of a describe: SHA-256 of its [manifestKey], used as the snapshot dir name. */
     fun snapshotKey(describe: JSONObject): String =
