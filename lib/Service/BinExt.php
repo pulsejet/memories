@@ -35,7 +35,7 @@ final class BinExt
                 throw new \Exception("{$name} temp binary path is not writable: {$target}");
             }
 
-            if (!is_executable($target) && !chmod($target, 0755)) {
+            if (!is_executable($target) && !chmod($target, 0o755)) {
                 throw new \Exception("failed to make {$name} temp binary executable: {$target}");
             }
 
@@ -272,7 +272,7 @@ final class BinExt
 
         // (Re-)create temp dir
         Util::execSafe(['rm', '-rf', $tmpPath], 3000);
-        mkdir($tmpPath, 0755, true);
+        mkdir($tmpPath, 0o755, true);
 
         // Check temp directory exists
         if (!is_dir($tmpPath)) {
@@ -412,7 +412,7 @@ final class BinExt
 
             // Make executable
             if (!is_executable($goVodPath)) {
-                @chmod($goVodPath, 0755);
+                @chmod($goVodPath, 0o755);
             }
         }
 

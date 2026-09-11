@@ -361,7 +361,7 @@ final class Exif
             throw new \Exception('Could not set exif data: '.$stderr);
         }
         if (null === $stdout || str_contains($stdout, 'Error')) {
-            $stdout = $stdout ?? $stderr ?? 'Error: Unknown cmd fail';
+            $stdout ??= $stderr ?? 'Error: Unknown cmd fail';
             error_log("Exiftool error: {$stdout}");
 
             throw new \Exception('Could not set exif data: '.$stdout);

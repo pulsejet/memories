@@ -140,7 +140,7 @@ final class SystemConfig
         }
 
         // Use the default value if not provided
-        $default = $default ?? self::DEFAULTS[$key];
+        $default ??= self::DEFAULTS[$key];
 
         // Get the value from the config
         $value = \OC::$server->get(\OCP\IConfig::class)
