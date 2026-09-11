@@ -77,6 +77,7 @@ class TimelineRepositoryImpl(
             photos[image.fileId]?.let { photo ->
                 json.put(TimelineJson.Photo.AUID, photo.auid)
                     .put(TimelineJson.Photo.BUID, photo.buid)
+                    .put(TimelineJson.Photo.LOCAL_HAS_REMOTE, photo.hasRemote)
                     .put(TimelineJson.Photo.DAYID, dayId)
             }
             json
@@ -135,7 +136,7 @@ class TimelineRepositoryImpl(
         return response
     }
 
-    /** Marks indexed files as already on the server so the local timeline hides them. */
+    /** Records which indexed files are already on the server; web filters on it. */
     override fun setHasRemote(auids: List<String>, buids: List<String>, value: Boolean) {
         if (auids.isEmpty()) {
             if (buids.isEmpty()) return
