@@ -26,6 +26,9 @@ export async function initialize() {
 
   // Replicate the server template
   initShellSync();
+
+  // System theme changes need a native bar update (CSS follows on its own).
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setTheme());
 }
 
 /**
@@ -34,11 +37,32 @@ export async function initialize() {
 export async function setTheme(color?: string, dark?: boolean) {
   if (!has()) return;
 
+  // The offline shell has no server template, so no data-theme-* attributes.
+  // Without them the CSS variables stick to light (white) and native bars
+  // never turn dark. Follow the OS instead via data-theme-default.
+  const body = document.body;
+  const root = document.documentElement;
+  const hasAttr = (n: string) => body.hasAttribute(n) || root.hasAttribute(n);
+  const names = [
+    'data-theme-default',
+    'data-theme-light',
+    'data-theme-light-highcontrast',
+    'data-theme-dark',
+    'data-theme-dark-highcontrast',
+  ];
+  if (!names.some((n) => hasAttr(n))) {
+    body.setAttribute('data-theme-default', '');
+    root.setAttribute('data-theme-default', '');
+  }
+
   color ??= getComputedStyle(document.body).getPropertyValue('--color-main-background');
-  dark ??=
-    (document.body.hasAttribute('data-theme-default') && window.matchMedia('(prefers-color-scheme: dark)').matches) ||
-    document.body.hasAttribute('data-theme-dark') ||
-    document.body.hasAttribute('data-theme-dark-highcontrast');
+  if (dark === undefined) {
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    dark =
+      (hasAttr('data-theme-default') && systemDark) ||
+      hasAttr('data-theme-dark') ||
+      hasAttr('data-theme-dark-highcontrast');
+  }
   nativex?.setThemeColor?.(color, dark);
 }
 
