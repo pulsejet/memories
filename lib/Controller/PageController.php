@@ -101,10 +101,15 @@ final class PageController extends Controller
         // Image editor
         $policy->addAllowedConnectDomain('data:');
 
-        // Allow OSM
+        // Allow OSM embeds
         $policy->addAllowedFrameDomain('www.openstreetmap.org');
-        $addImageDomain('https://tile.openstreetmap.org');
-        $addImageDomain('https://*.a.ssl.fastly.net');
+
+        // Allow CSP domains of configured map tile servers
+        foreach (SystemConfig::get('memories.map.tile_servers') as $tile) {
+            foreach ((array) ($tile['csp'] ?? []) as $csp) {
+                $addImageDomain((string) $csp);
+            }
+        }
 
         // Native communication
         $addImageDomain('http://127.0.0.1');

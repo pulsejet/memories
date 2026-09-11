@@ -86,6 +86,14 @@ final class OtherController extends GenericApiController
             $language = $l10nFactory->findLanguage();
             $locale = $l10nFactory->findLocale($language);
 
+            // available map tile servers and the user's selected server URL
+            $mapTileServers = SystemConfig::get('memories.map.tile_servers');
+            $mapTileServerDefault = $mapTileServers[0]['url'] ?? '';
+            $mapTileServerUrl = $uid ? $this->userConfig->getValueString($uid, Application::APPNAME, 'mapTileServerUrl', $mapTileServerDefault) : $mapTileServerDefault;
+            if (!\in_array($mapTileServerUrl, array_column($mapTileServers, 'url'), true)) {
+                $mapTileServerUrl = $mapTileServerDefault;
+            }
+
             return new JSONResponse([
                 // general stuff
                 'version' => $version,
@@ -93,6 +101,8 @@ final class OtherController extends GenericApiController
                 'video_default_quality' => SystemConfig::get('memories.video_default_quality'),
                 'places_gis' => SystemConfig::get('memories.gis_type'),
                 'places_search_url' => SystemConfig::get('memories.places.search.url'),
+                'map_tile_servers' => $mapTileServers,
+                'map_tile_server_url' => $mapTileServerUrl,
                 'language' => $language,
                 'locale' => $locale,
 

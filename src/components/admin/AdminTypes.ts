@@ -1,4 +1,4 @@
-import type { IConfig } from '@typings';
+import type { IConfig, IMapTileServer } from '@typings';
 
 /** System configuration */
 export type ISystemConfig = {
@@ -10,6 +10,7 @@ export type ISystemConfig = {
 
   'memories.gis_type': number;
   'memories.places.search.url': string;
+  'memories.map.tile_servers': IMapTileServer[];
 
   'memories.viewer.high_res_cond_default': IConfig['high_res_cond_default'];
 

@@ -45,6 +45,10 @@ final class SystemConfig
         // Set to an empty string to disable location search.
         'memories.places.search.url' => 'https://nominatim.openstreetmap.org',
 
+        // Available map tile servers for the map view.
+        // The first entry is the default for new users.
+        'memories.map.tile_servers' => FreeTileServers::TILES,
+
         // Default timeline path for all users
         // If set to '_empty_', the user is prompted to select a path
         'memories.timeline.default_path' => '_empty_',

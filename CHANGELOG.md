@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Configurable location search provider for the metadata editor ([#1500](https://github.com/pulsejet/memories/issues/1500))
 - **Feature**: Geolocation for local photos on Android ([#1723](https://github.com/pulsejet/memories/issues/1723))
 - **Feature**: Upload selected local photos on Android ([#1505](https://github.com/pulsejet/memories/issues/1505), [#1640](https://github.com/pulsejet/memories/issues/1640))
+- **Feature**: Allow selecting map tile server ([#1702](https://github.com/pulsejet/memories/issues/1702), [#1534](https://github.com/pulsejet/memories/issues/1534))
 - **Dev**: Migrated to Vue 3
 - **Dev**: New extensive unit and e2e test suite
 

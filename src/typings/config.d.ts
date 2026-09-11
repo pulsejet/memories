@@ -8,6 +8,8 @@ declare module '@typings' {
     video_default_quality: string;
     places_gis: number;
     places_search_url: string;
+    map_tile_servers: IMapTileServer[];
+    map_tile_server_url: string;
     language: string;
     locale: string;
 
@@ -54,5 +56,13 @@ declare module '@typings' {
     high_res_cond: HighResCond | null;
     show_face_rect: boolean;
     album_list_sort: number;
+  };
+
+  export type IMapTileServer = {
+    name: string;
+    url: string;
+    attribution: string;
+    maxZoom: number;
+    csp: string[];
   };
 }

@@ -16,7 +16,7 @@
       @zoomend="refreshDebounced"
       :options="mapOptions"
     >
-      <LTileLayer :url="tileurl" :attribution="attribution" :noWrap="true" :options="tileLayerOptions" />
+      <LTileLayer :key="tileurl" :url="tileurl" :attribution="attribution" :noWrap="true" :options="tileLayerOptions" />
       <LMarker v-for="cluster of clusters" :key="cluster.id" :lat-lng="cluster.center" @click="zoomTo(cluster)">
         <LIcon :icon-anchor="[24, 24]" :className="clusterIconClass(cluster)">
           <div class="preview">
@@ -41,6 +41,8 @@ import { latLngBounds, Icon } from 'leaflet';
 
 import axios from '@nextcloud/axios';
 
+import UserConfig from '@mixins/UserConfig';
+import staticConfig from '@services/static-config';
 import { API } from '@services/API';
 import * as utils from '@services/utils';
 
@@ -66,6 +68,7 @@ Icon.Default.mergeOptions({
 
 export default defineComponent({
   name: 'MapSplitMatter',
+  mixins: [UserConfig],
   components: {
     LMap,
     LTileLayer,
@@ -81,9 +84,6 @@ export default defineComponent({
     mapOptions: {
       maxBounds: latLngBounds([-90, -180], [90, 180]),
       maxBoundsViscosity: 0.9,
-    },
-    tileLayerOptions: {
-      referrerPolicy: 'origin',
     },
     clusters: [] as IMapCluster[],
     animMarkers: false,
@@ -104,12 +104,25 @@ export default defineComponent({
   },
 
   computed: {
+    tileServer() {
+      const tiles = staticConfig.getSync('map_tile_servers') || [];
+      return tiles.find((t) => t.url === this.config.map_tile_server_url);
+    },
+
     tileurl() {
-      return OSM_TILE_URL;
+      return this.config.map_tile_server_url || OSM_TILE_URL;
     },
 
     attribution() {
-      return OSM_ATTRIBUTION;
+      return this.tileServer?.attribution || OSM_ATTRIBUTION;
+    },
+
+    tileLayerOptions() {
+      return {
+        referrerPolicy: 'origin',
+        maxZoom: this.tileServer?.maxZoom || 19,
+        maxNativeZoom: this.tileServer?.maxZoom || 19,
+      };
     },
   },
 

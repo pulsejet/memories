@@ -191,6 +191,21 @@
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
+      <NcAppSettingsSection id="map-settings" :name="names.map" v-if="tileServers.length > 0">
+        <div class="radio-group">
+          <NcCheckboxRadioSwitch
+            v-for="tile in tileServers"
+            :key="tile.name"
+            :model-value="config.map_tile_server_url"
+            :value="tile.url"
+            name="map_style_radio"
+            type="radio"
+            @update:model-value="updateMapTileServer($event)"
+            >{{ tile.name }}
+          </NcCheckboxRadioSwitch>
+        </div>
+      </NcAppSettingsSection>
+
       <NcAppSettingsSection id="onthisday-settings" :name="names.onthisday">
         <NcTextField
           :label="t('memories', 'Day range (1-7)')"
@@ -233,6 +248,7 @@ import { defineComponent, defineAsyncComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
 import { translate as t } from '@services/l10n';
+import staticConfig from '@services/static-config';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 
@@ -244,7 +260,7 @@ const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/
 
 import MultiPathSelectionModal from '@components/modal/MultiPathSelectionModal.vue';
 
-import type { IConfig } from '@typings';
+import type { IConfig, IMapTileServer } from '@typings';
 
 export default defineComponent({
   name: 'Settings',
@@ -274,6 +290,7 @@ export default defineComponent({
       account: t('memories', 'Account'),
       folders: t('memories', 'Folders'),
       albums: t('memories', 'Albums'),
+      map: t('memories', 'Map Tiles'),
     },
   }),
 
@@ -299,6 +316,10 @@ export default defineComponent({
 
     highResCond(): IConfig['high_res_cond_default'] {
       return this.config.high_res_cond || this.config.high_res_cond_default || 'zoom';
+    },
+
+    tileServers(): IMapTileServer[] {
+      return staticConfig.getSync('map_tile_servers') || [];
     },
   },
 
@@ -435,6 +456,12 @@ export default defineComponent({
     // Albums settings
     async updateSortAlbumMonth() {
       await this.updateSetting('sort_album_month', 'sortAlbumMonth');
+    },
+
+    // Map settings
+    async updateMapTileServer(val: string) {
+      this.config.map_tile_server_url = val;
+      await this.updateSetting('map_tile_server_url', 'mapTileServerUrl');
     },
 
     // --------------- Native APIs start -----------------------------

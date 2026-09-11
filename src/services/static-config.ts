@@ -69,8 +69,10 @@ class StaticConfig {
     let changed = false;
     for (const k in server) {
       const key = k as keyof IConfig;
-      if (server[key] !== old[key]) {
-        changed = true;
+      if (server[key] === null && typeof server[key] !== 'object') {
+        if (server[key] !== old[key]) {
+          changed = true;
+        }
       }
       this.setLs(key, server[key]);
     }
@@ -107,6 +109,10 @@ class StaticConfig {
       return;
     }
 
+    if (typeof value === 'object') {
+      return;
+    }
+
     this.storage.setItem(`memories_${key}`, value.toString());
   }
 
@@ -125,6 +131,8 @@ class StaticConfig {
       video_default_quality: '0',
       places_gis: -1,
       places_search_url: 'https://nominatim.openstreetmap.org',
+      map_tile_servers: [],
+      map_tile_server_url: String(),
       language: String(),
       locale: String(),
 
