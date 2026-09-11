@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- **Notice**: The next version of the Android app will be incomptible with older versions of Memories.
 - **Fix**: Copied files are now immediately indexed
 - **Fix**: Improved and 20x faster planet database setup
 - **Fix**: Fix broken cover images on SQLite
