@@ -1,4 +1,5 @@
 import { getCurrentUser } from '@nextcloud/auth';
+import { Md5 } from 'ts-md5';
 
 import { constants as c } from './const';
 
@@ -96,6 +97,8 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
   // NativeX preview
   if (isLocalPhoto(photo)) {
     return API.Q(NAPI.IMAGE_PREVIEW(photo.fileid), { c, x, y });
+  } else if (isLikelySamePhoto(photo, photo.local_photo)) {
+    return API.Q(NAPI.IMAGE_PREVIEW(photo.local_photo.fileid), { c, x, y });
   }
 
   // Preview from server
@@ -146,6 +149,33 @@ export function updatePhotoFromImageInfo(photo: IPhoto, imageInfo: IImageInfo) {
     ...photo.imageInfo,
     ...imageInfo,
   };
+}
+
+/**
+ * Check if a photo object likely is the same as another.
+ * Used to check local native vs remote photos for previews.
+ */
+export function isLikelySamePhoto(photoA: IPhoto, photoB?: IPhoto): photoB is IPhoto {
+  return (
+    !!photoA &&
+    !!photoB &&
+    photoA.w === photoB.w &&
+    photoA.h === photoB.h &&
+    photoA.size === photoB.size &&
+    photoA.basename === photoB.basename &&
+    photoA.buid === photoB.buid
+  );
+}
+
+/**
+ * Calculate the AUID of photos for dedup and native lookups.
+ */
+export function applyAuids(photos: IPhoto[] | null | undefined): void {
+  for (const photo of photos ?? []) {
+    if (!photo.auid && photo.epoch && photo.size) {
+      photo.auid = Md5.hashStr(`${photo.epoch}${photo.size}`);
+    }
+  }
 }
 
 /**

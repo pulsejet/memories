@@ -113,10 +113,12 @@ export default defineComponent({
       const dayIdToday = utils.dateToDayId(new Date());
       const cacheUrl = `/onthisday/${dayIdToday}`;
       const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
+      utils.applyAuids(cache);
       if (cache) this.process(cache);
 
       // Network request
       const photos = await dav.getOnThisDayRaw();
+      utils.applyAuids(photos);
       utils.cacheData(cacheUrl, photos);
 
       // Check if exactly same as cache

@@ -14,12 +14,6 @@ use PHPUnit\Framework\TestCase;
  */
 final class ExifHelpersTest extends TestCase
 {
-    public function testGetAuid(): void
-    {
-        self::assertSame(md5('167804269712345'), Exif::getAUID(1678042697, 12345));
-        self::assertNotSame(Exif::getAUID(1, 2), Exif::getAUID(1, 3));
-    }
-
     public function testGetBuid(): void
     {
         $withId = Exif::getBUID('IMG_001.jpg', 'ABCDEF123456', 999);

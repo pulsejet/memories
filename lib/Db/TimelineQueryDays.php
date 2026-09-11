@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCA\Memories\ClustersBackend;
-use OCA\Memories\Exif;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -314,6 +313,7 @@ trait TimelineQueryDays
         $row['dayid'] = (int) $row['dayid'];
         $row['w'] = (int) $row['w'];
         $row['h'] = (int) $row['h'];
+        $row['size'] = (int) $row['size'];
 
         // Optional fields
         if (!$row['isvideo']) {
@@ -340,15 +340,6 @@ trait TimelineQueryDays
 
         // This field is only required due to the GROUP BY clause
         unset($row['datetaken']);
-
-        // Calculate the AUID if we can
-        if (($epoch = $row['epoch'] ?? null) && ($size = $row['size'] ?? null)) {
-            // compute AUID and discard size
-            // epoch is used for ordering, so we keep it
-            $row['auid'] = Exif::getAUID((int) $epoch, (int) $size);
-            unset($row['size']);
-        }
-
         // Convert dayId to monthId if needed
         if ($monthView) {
             $row['dayid'] = $this->dayIdToMonthId($row['dayid']);

@@ -303,17 +303,6 @@ final class Exif
     }
 
     /**
-     * Get the Approximate Unique ID (AUID) from parameters.
-     *
-     * @param int $epoch the date taken as a unix timestamp (seconds)
-     * @param int $size  the file size in bytes
-     */
-    public static function getAUID(int $epoch, int $size): string
-    {
-        return md5($epoch.$size);
-    }
-
-    /**
      * Get the Basename approximate Unique ID (BUID) from parameters.
      *
      * @param string $basename      the basename of the file

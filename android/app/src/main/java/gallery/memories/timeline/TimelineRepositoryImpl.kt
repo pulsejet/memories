@@ -1,5 +1,6 @@
 package gallery.memories.timeline
 
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.media3.common.util.UnstableApi
@@ -37,7 +38,7 @@ class TimelineRepositoryImpl(
 
     override fun initialize() {
         dao.ping()
-        if (syncManager.syncDeltaDb() > 0) onDatabaseChanged()
+        if (syncManager.syncDeltaDb() + syncManager.pruneDeleted() > 0) onDatabaseChanged()
         observer.register()
     }
 
@@ -46,6 +47,23 @@ class TimelineRepositoryImpl(
     override fun syncDeltaDb(): Int = syncManager.syncDeltaDb()
 
     override fun syncFullDb() = syncManager.syncFullDb()
+
+    /**
+     * Evicts only the given URIs whose files are actually gone (verified
+     * against MediaStore, so insert/update notifications are harmless no-ops).
+     * Collection-level URIs carry no id, so those fall back to a full sweep.
+     */
+    override fun evictUris(uris: List<Uri>): Int {
+        val ids = uris.mapNotNull { it.lastPathSegment?.toLongOrNull() }.distinct()
+        if (ids.isEmpty()) {
+            return if (uris.isNotEmpty()) syncManager.pruneDeleted() else 0
+        }
+        val found = dataSource.getByIds(ids).map { it.fileId }.toSet()
+        val indexed = dao.getPhotosByFileIds(ids.filter { it !in found }).map { it.localId }
+        if (indexed.isEmpty()) return 0
+        dao.deleteFileIds(indexed)
+        return indexed.size
+    }
 
     override fun getSystemImagesByAUIDs(auids: List<String>): List<SystemImage> {
         val photos = dao.getPhotosByAUIDs(auids)
@@ -77,12 +95,16 @@ class TimelineRepositoryImpl(
             photos[image.fileId]?.let { photo ->
                 json.put(TimelineJson.Photo.AUID, photo.auid)
                     .put(TimelineJson.Photo.BUID, photo.buid)
+                    .put(TimelineJson.Photo.LOCAL_HAS_REMOTE, photo.hasRemote)
                     .put(TimelineJson.Photo.DAYID, dayId)
             }
             json
         }.let { JSONArray(it) }
         // Anything left was deleted from the device outside the app.
-        dao.deleteFileIds(fileIds)
+        if (fileIds.isNotEmpty()) {
+            dao.deleteFileIds(fileIds)
+            onDatabaseChanged()
+        }
         return response
     }
 
@@ -135,7 +157,7 @@ class TimelineRepositoryImpl(
         return response
     }
 
-    /** Marks indexed files as already on the server so the local timeline hides them. */
+    /** Records which indexed files are already on the server; web filters on it. */
     override fun setHasRemote(auids: List<String>, buids: List<String>, value: Boolean) {
         if (auids.isEmpty()) {
             if (buids.isEmpty()) return

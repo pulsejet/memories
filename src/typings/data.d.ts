@@ -60,6 +60,8 @@ declare module '@typings' {
     liveid?: string;
     /** File owner display name */
     shared_by?: string;
+    /** File size in bytes */
+    size?: number;
 
     /** Grid display width px */
     dispW?: number;
@@ -96,12 +98,16 @@ declare module '@typings' {
      */
     ishidden?: boolean;
 
-    /** AUID of file (optional, NativeX) */
+    /** AUID of file (client-computed) */
     auid?: string;
     /** BUID of file (optional, NativeX) */
     buid?: string;
     /** Epoch of file (optional, NativeX) */
     epoch?: number;
+    /** Local copy matched by AUID/BUID (post-merge) */
+    local_photo?: IPhoto;
+    /** Local copy has a remote counterpart (local only) */
+    local_has_remote?: boolean;
 
     /** Date taken UTC value (lazy fetched) */
     datetaken?: number;

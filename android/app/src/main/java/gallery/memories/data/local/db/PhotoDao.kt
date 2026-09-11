@@ -5,23 +5,27 @@ import androidx.room.Insert
 import androidx.room.Query
 
 @Dao
-/** Device-media index. All queries exclude files already on the server unless noted. */
+/** Device-media index. Web merges local and remote timelines; use [hasRemote] for that. */
 interface PhotoDao {
     /** Cheap liveness probe used to fail fast when the DB was wiped. */
     @Query("SELECT 1")
     fun ping(): Int
 
-    /** Local-only timeline: files already on the server (has_remote) are excluded. */
-    @Query("SELECT dayid, COUNT(local_id) AS count FROM photos WHERE bucket_id IN (:bucketIds) AND has_remote = 0 GROUP BY dayid ORDER BY dayid DESC")
+    /** All local days; backed-up files are flagged via has_remote but included. */
+    @Query("SELECT dayid, COUNT(local_id) AS count FROM photos WHERE bucket_id IN (:bucketIds) GROUP BY dayid ORDER BY dayid DESC")
     fun getDays(bucketIds: List<String>): List<DayDto>
 
-    /** One day of local photos, newest first. */
-    @Query("SELECT * FROM photos WHERE dayid=:dayId AND bucket_id IN (:bucketIds) AND has_remote = 0 ORDER BY date_taken DESC")
+    /** One day of local photos, newest first, including files already on the server. */
+    @Query("SELECT * FROM photos WHERE dayid=:dayId AND bucket_id IN (:bucketIds) ORDER BY date_taken DESC")
     fun getPhotosByDay(dayId: Long, bucketIds: List<String>): List<PhotoEntity>
 
     /** Drops index rows for device files, e.g. after deletion or reindexing. */
     @Query("DELETE FROM photos WHERE local_id IN (:fileIds)")
     fun deleteFileIds(fileIds: List<Long>)
+
+    /** All indexed device ids, for pruning files deleted outside the app. */
+    @Query("SELECT local_id FROM photos")
+    fun getAllLocalIds(): List<Long>
 
     @Query("SELECT * FROM photos WHERE local_id IN (:fileIds)")
     fun getPhotosByFileIds(fileIds: List<Long>): List<PhotoEntity>
