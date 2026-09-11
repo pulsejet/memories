@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 - **Notice**: The next version of the Android app will be incomptible with older versions of Memories.
+- **Notice**: Requires Nextcloud 34 or later.
+- **Notice**: Updated Planet DB is avilable.
+- **Feature**: Huawei Moving Picture support
+- **Feature**: Configurable location search provider for the metadata editor ([#1500](https://github.com/pulsejet/memories/issues/1500))
+- **Feature**: Geolocation for local photos on Android ([#1723](https://github.com/pulsejet/memories/issues/1723))
+- **Feature**: Upload selected local photos on Android ([#1505](https://github.com/pulsejet/memories/issues/1505), [#1640](https://github.com/pulsejet/memories/issues/1640))
+- **Feature**: Allow selecting map tile server ([#1702](https://github.com/pulsejet/memories/issues/1702), [#1534](https://github.com/pulsejet/memories/issues/1534))
 - **Fix**: Copied files are now immediately indexed
 - **Fix**: Improved and 20x faster planet database setup
 - **Fix**: Fix broken cover images on SQLite
@@ -14,12 +21,6 @@ All notable changes to this project will be documented in this file.
 - **Fix**: Video upload to public shares ([#1634](https://github.com/pulsejet/memories/issues/1634))
 - **Fix**: Google Takeout migration for long file names ([#1559](https://github.com/pulsejet/memories/issues/1559))
 - **Fix**: Face cover when person name matches a username ([#1692](https://github.com/pulsejet/memories/issues/1692))
-- **Update**: Requires Nextcloud 34 or later
-- **Feature**: Huawei Moving Picture support
-- **Feature**: Configurable location search provider for the metadata editor ([#1500](https://github.com/pulsejet/memories/issues/1500))
-- **Feature**: Geolocation for local photos on Android ([#1723](https://github.com/pulsejet/memories/issues/1723))
-- **Feature**: Upload selected local photos on Android ([#1505](https://github.com/pulsejet/memories/issues/1505), [#1640](https://github.com/pulsejet/memories/issues/1640))
-- **Feature**: Allow selecting map tile server ([#1702](https://github.com/pulsejet/memories/issues/1702), [#1534](https://github.com/pulsejet/memories/issues/1534))
 - **Dev**: Migrated to Vue 3
 - **Dev**: New extensive unit and e2e test suite
 
