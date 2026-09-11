@@ -6,15 +6,17 @@ import android.net.Uri
 
 /**
  * Watches MediaStore for device media changes and debounces bursts into one
- * [onChange] callback. Register once after the first sync; unregister on destroy.
+ * [onChange] callback. Changed item URIs are collected across the debounce
+ * window so callers can evict exactly those rows instead of sweeping the index.
  */
 class MediaObserver(
     private val ctx: Context,
-    private val onChange: () -> Unit,
+    private val onChange: (uris: List<Uri>) -> Unit,
 ) {
     private var imageObserver: ContentObserver? = null
     private var videoObserver: ContentObserver? = null
     private var refreshPending = false
+    private val pendingUris = mutableListOf<Uri>()
     private val lock = Any()
 
     /** Starts watching images and videos. Idempotent. */
@@ -35,18 +37,32 @@ class MediaObserver(
     private fun observe(uri: Uri): ContentObserver {
         val observer = object : ContentObserver(null) {
             override fun onChange(selfChange: Boolean) {
-                synchronized(lock) {
-                    if (refreshPending) return
-                    refreshPending = true
-                }
-                Thread {
-                    Thread.sleep(750)
-                    synchronized(lock) { refreshPending = false }
-                    onChange()
-                }.start()
+                onMediaChanged(null)
+            }
+
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                onMediaChanged(uri)
             }
         }
         ctx.applicationContext.contentResolver.registerContentObserver(uri, true, observer)
         return observer
+    }
+
+    private fun onMediaChanged(uri: Uri?) {
+        synchronized(lock) {
+            if (uri != null) pendingUris.add(uri)
+            if (refreshPending) return
+            refreshPending = true
+        }
+        Thread {
+            Thread.sleep(750)
+            val uris: List<Uri>
+            synchronized(lock) {
+                refreshPending = false
+                uris = pendingUris.toList()
+                pendingUris.clear()
+            }
+            onChange(uris)
+        }.start()
     }
 }

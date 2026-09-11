@@ -23,6 +23,10 @@ interface PhotoDao {
     @Query("DELETE FROM photos WHERE local_id IN (:fileIds)")
     fun deleteFileIds(fileIds: List<Long>)
 
+    /** All indexed device ids, for pruning files deleted outside the app. */
+    @Query("SELECT local_id FROM photos")
+    fun getAllLocalIds(): List<Long>
+
     @Query("SELECT * FROM photos WHERE local_id IN (:fileIds)")
     fun getPhotosByFileIds(fileIds: List<Long>): List<PhotoEntity>
 

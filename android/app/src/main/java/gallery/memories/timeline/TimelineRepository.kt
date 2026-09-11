@@ -1,5 +1,6 @@
 package gallery.memories.timeline
 
+import android.net.Uri
 import gallery.memories.data.local.media.SystemImage
 import org.json.JSONArray
 import org.json.JSONObject
@@ -11,6 +12,7 @@ interface TimelineRepository {
     fun destroy()
     fun syncDeltaDb(): Int
     fun syncFullDb()
+    fun evictUris(uris: List<Uri>): Int
     fun getSystemImagesByAUIDs(auids: List<String>): List<SystemImage>
     fun getDays(): JSONArray
     fun getDay(dayId: Long): JSONArray

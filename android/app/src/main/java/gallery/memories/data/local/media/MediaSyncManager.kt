@@ -48,6 +48,34 @@ class MediaSyncManager(
         dao.deleteFlagged()
     }
 
+    /** Evicts index rows whose device files are gone. Returns the pruned count. */
+    fun pruneDeleted(): Int {
+        synchronized(this) {
+            if (syncStatus != -1) return 0
+            syncStatus = 0
+        }
+        try {
+            val ids = dao.getAllLocalIds()
+            if (ids.isEmpty()) return 0
+            var deleted = 0
+            for (chunk in ids.chunked(500)) {
+                val found = dataSource.getByIds(chunk).map { it.fileId }.toSet()
+                if (found.size == chunk.size) continue
+                val missing = chunk.filter { it !in found }
+                if (missing.isNotEmpty()) {
+                    dao.deleteFileIds(missing)
+                    deleted += missing.size
+                }
+            }
+            return deleted
+        } catch (e: Exception) {
+            Log.e(TAG, "Error pruning database", e)
+            return 0
+        } finally {
+            synchronized(this) { syncStatus = -1 }
+        }
+    }
+
     private fun syncDb(startTime: Long): Int {
         val syncTime = Instant.now().toEpochMilli() / 1000
         var selection: String? = null
