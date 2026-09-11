@@ -69,7 +69,7 @@ class StaticConfig {
     let changed = false;
     for (const k in server) {
       const key = k as keyof IConfig;
-      if (server[key] === null && typeof server[key] !== 'object') {
+      if (server[key] === null || typeof server[key] !== 'object') {
         if (server[key] !== old[key]) {
           changed = true;
         }
