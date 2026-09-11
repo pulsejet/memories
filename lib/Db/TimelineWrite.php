@@ -138,7 +138,7 @@ final class TimelineWrite
         // We need to use the local time in UTC for the dayId
         // This way two photos in different timezones on the same date locally
         // end up in the same dayId group
-        $dayId = (int) floor($dateLocalUtc / 86400);
+        $dayId = intdiv($dateLocalUtc, 86400);
 
         // Get size of image
         [$w, $h] = Exif::getDimensions($exif);
