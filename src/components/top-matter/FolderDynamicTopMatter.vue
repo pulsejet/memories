@@ -38,8 +38,12 @@ export default defineComponent({
   },
 
   methods: {
+    folder(): string {
+      return utils.getFolderRoutePath(this.config.folders_path);
+    },
+
     async refresh(): Promise<boolean> {
-      const folder = utils.getFolderRoutePath(this.config.folders_path);
+      const folder = this.folder();
 
       // Clear folders if switching to a different folder, otherwise just refresh
       if (this.currentFolder !== folder) {
@@ -53,7 +57,7 @@ export default defineComponent({
       // Make API call to get subfolders
       try {
         const data = (await axios.get<IFolder[]>(url)).data;
-        if (folder !== utils.getFolderRoutePath(this.config.folders_path)) {
+        if (folder !== this.folder()) {
           return false;
         }
         this.folders = data;

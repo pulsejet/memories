@@ -27,6 +27,12 @@ export default defineComponent({
     NcButton,
   },
 
+  computed: {
+    placeId(): number {
+      return Number(this.$route.params.name?.toString()?.split('-')[0]) || -1;
+    },
+  },
+
   methods: {
     async refresh(): Promise<boolean> {
       // Clear subplaces
@@ -36,12 +42,16 @@ export default defineComponent({
       if (this.routeIsPlacesUnassigned) return false;
 
       // Get ID of place from URL
-      const placeId = Number(this.$route.params.name?.toString()?.split('-')[0]) || -1;
+      const placeId = this.placeId;
       const url = API.Q(API.PLACE_LIST(), { inside: placeId });
 
       // Make API call to get subplaces
       try {
-        this.places = (await axios.get<ICluster[]>(url)).data;
+        const data = (await axios.get<ICluster[]>(url)).data;
+        if (placeId !== this.placeId) {
+          return false;
+        }
+        this.places = data;
       } catch (e) {
         console.error(e);
         return false;

@@ -50,18 +50,33 @@ export default defineComponent({
     utils: utils,
   }),
 
+  computed: {
+    albumUser(): string {
+      return this.$route.params.user?.toString() ?? '';
+    },
+
+    albumName(): string {
+      return this.$route.params.name?.toString() ?? '';
+    },
+  },
+
   methods: {
     async refresh(): Promise<boolean> {
       // Skip everything if user is not logged in
       if (!utils.uid) return false;
 
       // Skip if we are not on an album (e.g. on the list)
-      const { user, name } = this.$route.params as { user: string; name: string };
+      const user = this.albumUser;
+      const name = this.albumName;
       if (!user || !name) return false;
 
       // Get DAV album for collaborators
       try {
-        this.album = await dav.getAlbum(user, name);
+        const album = await dav.getAlbum(user, name);
+        if (user !== this.albumUser || name !== this.albumName) {
+          return false;
+        }
+        this.album = album;
       } catch (e) {
         console.warn('Failed to fetch album:', e);
       }
