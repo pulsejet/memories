@@ -69,6 +69,7 @@ Very important.
   - `duplicate`, `wontfix`, `needs details`, `documentation`
 - Triage issues with `needs triage` label.
   - Don't relabel unless confirmed bug or regression.
+- NEVER comment on issues/PRs without explicit user consent.
 
 ## Key Subsystems & Architecture
 
