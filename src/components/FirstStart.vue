@@ -196,6 +196,10 @@ export default defineComponent({
     }
   }
 
+  .info + .buttons {
+    margin-top: 8px;
+  }
+
   .footer {
     margin-top: 20px;
     font-size: 12.5px;
