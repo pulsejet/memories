@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, markRaw } from 'vue';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
@@ -87,7 +87,7 @@ export default defineComponent({
       passive: true,
     });
 
-    this.resizeObserver = new ResizeObserver(this.onScroll.bind(this));
+    this.resizeObserver = markRaw(new ResizeObserver(this.onScroll.bind(this)));
     this.resizeObserver.observe(inner);
 
     this.refreshNow();

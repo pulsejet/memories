@@ -75,7 +75,7 @@ export default defineComponent({
 
   mounted() {
     // Set up hammerjs hooks
-    this.hammer = new Hammer(this.refs().timelineHeader!);
+    this.hammer = markRaw(new Hammer(this.refs().timelineHeader!));
     this.hammer.get('swipe').set({
       direction: Hammer.DIRECTION_VERTICAL,
       threshold: 3,

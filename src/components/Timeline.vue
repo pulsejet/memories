@@ -104,7 +104,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, markRaw } from 'vue';
 import type { RouteLocationNormalized } from 'vue-router';
 import { RecycleScroller } from 'vue-virtual-scroller';
 
@@ -218,7 +218,7 @@ export default defineComponent({
     // Start resize observer on container
     const container = this.refs().container;
     if (container?.$el) {
-      this.resizeObserver = new ResizeObserver(() => this.handleResizeWithDelay());
+      this.resizeObserver = markRaw(new ResizeObserver(() => this.handleResizeWithDelay()));
       this.resizeObserver.observe(container.$el);
     }
 

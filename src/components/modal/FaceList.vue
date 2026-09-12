@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+import { defineComponent, defineAsyncComponent, markRaw } from 'vue';
 import Fuse from 'fuse.js';
 
 import { showError } from '@nextcloud/dialogs';
@@ -97,7 +97,7 @@ export default defineComponent({
         this.list = null;
         const faces = await dav.getFaceList(this.backend);
         this.list = faces.filter((c: IFace) => c.user_id === this.user && String(c.name || c.cluster_id) !== this.name);
-        this.fuse = new Fuse(this.list, { keys: ['name'] });
+        this.fuse = markRaw(new Fuse(this.list, { keys: ['name'] }));
       } catch (e) {
         showError(this.t('memories', 'Failed to load faces'));
         console.error(e);

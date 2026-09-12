@@ -676,12 +676,10 @@ export default defineComponent({
       this.psVideo = markRaw(psVideo);
 
       // Image support
-      const psImage = new PsImage(<any>this.photoswipe);
-      this.psImage = markRaw(psImage);
+      this.psImage = markRaw(new PsImage(<any>this.photoswipe));
 
       // Live Photo support
-      const psLivePhoto = new PsLivePhoto(<any>this.photoswipe, <any>this.psImage, this.liveState);
-      this.psLivePhoto = markRaw(psLivePhoto);
+      this.psLivePhoto = markRaw(new PsLivePhoto(<any>this.photoswipe, <any>this.psImage, this.liveState));
 
       // Patch the close button to stop the slideshow
       const _close = this.photoswipe.close.bind(this.photoswipe);

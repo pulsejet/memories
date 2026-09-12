@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, markRaw, type PropType } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError, showSuccess } from '@nextcloud/dialogs';
@@ -174,7 +174,7 @@ export default defineComponent({
     }).observe(div, { childList: true, subtree: true });
 
     // Create the editor
-    this.imageEditor = new FilerobotImageEditor(div, config);
+    this.imageEditor = markRaw(new FilerobotImageEditor(div, config));
     this.imageEditor.render();
 
     // Handle keyboard

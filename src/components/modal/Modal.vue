@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+import { defineComponent, defineAsyncComponent, markRaw } from 'vue';
 import type { PropType } from 'vue';
 
 const NcModal = defineAsyncComponent(() => import('@nextcloud/vue/components/NcModal'));
@@ -67,7 +67,7 @@ export default defineComponent({
       utils.bus.on('memories:sidebar:opened', this.handleAppSidebarOpen);
       utils.bus.on('memories:sidebar:closed', this.handleAppSidebarClose);
     }
-    this._mutationObserver = new MutationObserver(this.handleBodyMutation);
+    this._mutationObserver = markRaw(new MutationObserver(this.handleBodyMutation));
     this._mutationObserver.observe(document.body, { childList: true });
   },
 

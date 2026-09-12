@@ -75,7 +75,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType, defineAsyncComponent } from 'vue';
+import { defineComponent, type PropType, defineAsyncComponent, markRaw } from 'vue';
 
 import Fuse from 'fuse.js';
 
@@ -193,7 +193,7 @@ export default defineComponent({
         this.albums = await dav.getAlbums();
 
         // create search provider
-        this.fuse = new Fuse(this.albums, { keys: ['name'] });
+        this.fuse = markRaw(new Fuse(this.albums, { keys: ['name'] }));
 
         // get initial selection
         let initSelIds: number[] = [];
