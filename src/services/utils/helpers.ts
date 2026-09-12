@@ -71,11 +71,14 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
   if (size === 'screen') {
     const sw = Math.floor(screen.width * devicePixelRatio);
     const sh = Math.floor(screen.height * devicePixelRatio);
+    const longEdge = Math.max(sw, sh);
     size = [sw, sh];
 
     // Use capped full image if NativeX is used
     if (isLocalPhoto(photo)) {
-      return API.Q(NAPI.IMAGE_FULL(photo.auid!), { size: Math.max(sw, sh) });
+      return API.Q(NAPI.IMAGE_FULL(photo.auid!), { size: longEdge });
+    } else if (photo.local_photo?.auid && isLikelySamePhoto(photo, photo.local_photo)) {
+      return API.Q(NAPI.IMAGE_FULL(photo.local_photo.auid), { size: longEdge });
     }
   }
 
