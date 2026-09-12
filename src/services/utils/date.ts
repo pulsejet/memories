@@ -45,6 +45,25 @@ export function getLongDateStr(date: Date, skipYear = false, time = false) {
   });
 }
 
+/** Get date string like "Sep 5, 2021" (locale dependent) */
+export function getDateStr(date: Date) {
+  return date.toLocaleDateString(getCanonicalLocale(), {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+}
+
+/** Get time string like "2:21 PM" (locale dependent) */
+export function getTimeStr(date: Date) {
+  return date.toLocaleTimeString(getCanonicalLocale(), {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'UTC',
+  });
+}
+
 /** Get month and year string */
 export function getMonthDateStr(date: Date) {
   return date.toLocaleDateString(getCanonicalLocale(), {

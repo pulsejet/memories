@@ -49,6 +49,11 @@
         </NcActions>
       </div>
 
+      <div class="top-date" v-if="photoswipe" :class="{ visible: showControls }">
+        <div class="date-line" v-if="currentDateStr">{{ currentDateStr }}</div>
+        <div class="time-line" v-if="currentTimeStr">{{ currentTimeStr }}</div>
+      </div>
+
       <div class="bottom-bar" v-if="photoswipe" :class="{ visible: showBottomBar }">
         <div class="exif title" v-if="currentPhoto?.imageInfo?.exif?.Title">
           {{ currentPhoto.imageInfo.exif.Title }}
@@ -224,7 +229,7 @@ export default defineComponent({
       if (this.canEdit) base++;
 
       if (_m.window.innerWidth < 768) {
-        return Math.min(base, 3);
+        return Math.min(base, 1);
       } else {
         return Math.min(base, 5);
       }
@@ -243,6 +248,13 @@ export default defineComponent({
     /** Get all actions to show */
     actions(): IViewerAction[] {
       return [
+        {
+          id: 'favorite',
+          name: this.t('memories', 'Favorite'),
+          icon: this.isFavorite ? markRaw(StarIcon) : markRaw(StarOutlineIcon),
+          callback: this.favoriteCurrent,
+          if: !this.routeIsPublic && !this.isLocal,
+        },
         {
           id: 'share',
           name: this.t('memories', 'Share'),
@@ -274,13 +286,6 @@ export default defineComponent({
           },
           callback: this.playLivePhoto,
           if: this.isLivePhoto,
-        },
-        {
-          id: 'favorite',
-          name: this.t('memories', 'Favorite'),
-          icon: this.isFavorite ? markRaw(StarIcon) : markRaw(StarOutlineIcon),
-          callback: this.favoriteCurrent,
-          if: !this.routeIsPublic && !this.isLocal,
         },
         {
           id: 'info',
@@ -395,6 +400,20 @@ export default defineComponent({
     /** Allow closing the viewer */
     allowClose(): boolean {
       return !this.editorOpen && !dav.isSingleItem() && !this.slideshowTimer;
+    },
+
+    /** Get date taken date line */
+    currentDateStr(): string | null {
+      const date = this.currentPhoto?.imageInfo?.datetaken;
+      if (!date) return null;
+      return utils.getDateStr(new Date(date * 1000));
+    },
+
+    /** Get date taken time line */
+    currentTimeStr(): string | null {
+      const date = this.currentPhoto?.imageInfo?.datetaken;
+      if (!date) return null;
+      return utils.getTimeStr(new Date(date * 1000));
     },
 
     /** Get date taken string */
@@ -1399,6 +1418,37 @@ export default defineComponent({
   }
 }
 
+/** Top date is only displayed on mobile. */
+.top-date {
+  display: none;
+  @media (max-width: 768px) {
+    display: block;
+  }
+
+  z-index: 100001;
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+
+  transition: opacity 0.2s ease-in-out;
+  opacity: 0;
+  &.visible {
+    opacity: 1;
+  }
+
+  .date-line {
+    font-size: 1em;
+    font-weight: 500;
+  }
+  .time-line {
+    font-size: 0.85em;
+    opacity: 0.85;
+  }
+}
+
 .bottom-bar {
   background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.3));
   width: inherit;
@@ -1416,6 +1466,9 @@ export default defineComponent({
   }
 
   .exif {
+    @media (max-width: 768px) {
+      display: none;
+    }
     &.title {
       font-weight: bold;
       font-size: 0.9em;
