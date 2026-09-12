@@ -293,8 +293,8 @@ export default defineComponent({
     root.style.setProperty('--plyr-color-main', colorPrimary);
 
     // Set theme color to default
-    // Skip on nxsetup to avoid flashing white on initial setup.
-    if (!this.routeIsNxSetup) {
+    // Skip on nxsetup and firststart to avoid flashing white on initial setup.
+    if (!this.routeIsNxSetup && !this.isFirstStart) {
       nativex.setTheme();
     }
 
