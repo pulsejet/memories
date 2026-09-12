@@ -72,12 +72,6 @@ class NativeX(private val mCtx: MainActivity) {
     @JavascriptInterface
     fun isNative(): Boolean = true
 
-    /** Lets entry pages draw under transparent system bars. */
-    @JavascriptInterface
-    fun setTransparentBars(transparent: Boolean, isDark: Boolean) {
-        mCtx.runOnUiThread { mCtx.setTransparentBars(transparent, isDark) }
-    }
-
     /** Persists the theme once per login, then just applies it. */
     @JavascriptInterface
     fun setThemeColor(color: String?, isDark: Boolean) {

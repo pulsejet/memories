@@ -1,7 +1,5 @@
 <template>
   <div class="nxsetup-outer native-auth">
-    <div class="orbs" aria-hidden="true"><span></span><span></span></div>
-
     <Transition name="setup-step" mode="out-in">
       <div class="card" :key="step">
         <XImg class="banner" :src="banner" :svg-tag="true" />
@@ -169,11 +167,8 @@ export default defineComponent({
   async mounted() {
     await this.$nextTick();
 
-    // set nativex theme
-    nativex.setTheme(getComputedStyle(document.body).getPropertyValue('--color-background-plain'));
-
-    // Transparent system bars so the gradient draws edge-to-edge (same as welcome/waiting)
-    nativex.nativex?.setTransparentBars?.(true, true);
+    // Match system bars to the auth pages (same as welcome/waiting)
+    nativex.setTheme('#174a7d', true);
 
     // set up sync status watcher
     this.syncStatusWatch = window.setInterval(() => {

@@ -7,6 +7,7 @@ import gallery.memories.data.remote.assets.AssetCache
 import gallery.memories.data.remote.assets.AssetSyncCoordinator
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.server.LocalHttpServer
+import gallery.memories.ui.theme.ThemeManager
 
 @UnstableApi
 /** Boots the WebView: welcome when logged out, snapshot immediately when cached, waiting page while downloading. */
@@ -36,7 +37,7 @@ class AppStartupCoordinator(
             startLocalApp()
             return true
         }
-        activity.setTransparentBars(true, true)
+        activity.applyTheme(ThemeManager.ENTRY_THEME_COLOR, true)
         activity.binding.webview.loadUrl(localStaticUrl("welcome.html"))
         return false
     }
@@ -59,7 +60,7 @@ class AppStartupCoordinator(
             if (assets.isCurrent(fresh)) return
             Log.i(TAG, "Assets changed, updating in foreground")
             activity.runOnUiThread {
-                activity.setTransparentBars(true, true)
+                activity.applyTheme(ThemeManager.ENTRY_THEME_COLOR, true)
                 activity.binding.webview.loadUrl(localStaticUrl("waiting.html"))
             }
             if (!assets.syncAndAwait(fresh, SYNC_TIMEOUT_MS)) {
@@ -81,7 +82,7 @@ class AppStartupCoordinator(
     /** Shows the waiting page and blocks boot until the snapshot is fresh. */
     private fun showWaitingAndEnsure(toNxSetup: Boolean = false) {
         activity.host = "127.0.0.1"
-        activity.setTransparentBars(true, true)
+        activity.applyTheme(ThemeManager.ENTRY_THEME_COLOR, true)
         activity.binding.webview.loadUrl(localStaticUrl("waiting.html"))
         Thread {
             try {

@@ -14,6 +14,7 @@ import gallery.memories.data.remote.assets.ManifestVerifier
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.HttpClients
 import gallery.memories.data.remote.http.NextcloudApi
+import gallery.memories.ui.theme.ThemeManager
 import io.github.g00fy2.versioncompare.Version
 
 @UnstableApi
@@ -85,7 +86,7 @@ class AccountManager(
     /** Polls every 3s for up to 30min. Success boots into setup; timeout resets to welcome. Stale generations do nothing. */
     private fun pollLogin(pollUrl: String, pollToken: String, baseUrl: String, gen: Int) {
         activity.binding.webview.post {
-            activity.setTransparentBars(true, true)
+            activity.applyTheme(ThemeManager.ENTRY_THEME_COLOR, true)
             activity.binding.webview.loadUrl(activity.localStaticUrl("waiting.html") + "?login=1")
         }
         // Counts elapsed seconds, not polls: incremented by the 3s sleep below.
