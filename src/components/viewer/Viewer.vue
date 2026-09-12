@@ -1414,6 +1414,11 @@ export default defineComponent({
     opacity: 1;
     pointer-events: auto;
   }
+
+  :deep(.button-vue) {
+    color: white;
+    background-color: transparent !important;
+  }
 }
 
 .top-bar-left {
@@ -1422,10 +1427,6 @@ export default defineComponent({
 
 .top-bar {
   right: 8px;
-  :deep(.button-vue) {
-    color: white;
-    background-color: transparent !important;
-  }
 }
 
 /** Top date is only displayed on mobile. */
