@@ -1,8 +1,3 @@
-// Make popper menus full height
-.v-popper--theme-dropdown .v-popper__inner {
-  max-height: calc(90vh - 86px) !important; // was 50vh
-}
-
 // Increase padding on popper menu to make it clickable
 .v-popper__popper ul[role="menu"] li {
   padding: 3px !important;
@@ -12,26 +7,6 @@
   .action-button__longtext-wrapper {
     margin-left: 3px;
   }
-}
-
-// Make sure empty content is full width
-[role='note'].empty-content {
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  padding: 10px;
-}
-
-// Make NcListItem border-box to prevent overflow
-li.list-item__wrapper {
-  > a.list-item {
-    box-sizing: border-box;
-  }
-}
-
-div.oc-dialog[role='dialog'] {
-  // Make OC dialogs larger to a minimum width
-  min-width: min(400px, 90vw);
 }
 
 // Make tag dropdown show over modal
