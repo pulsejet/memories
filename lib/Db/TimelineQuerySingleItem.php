@@ -100,15 +100,19 @@ trait TimelineQuerySingleItem
                 // Get user language
                 $lang = Util::getUserLang();
 
-                // Get translated address
-                $info['address'] = implode(', ', array_map(
+                // Get translated place names
+                $names = array_map(
                     static fn ($p): string => PlacesBackend::translateName(
                         $lang,
                         $p['name'],
                         $p['other_names'],
                     ),
                     $places,
-                ));
+                );
+
+                // Get translated address
+                $info['address'] = implode(', ', $names);
+                $info['address_short'] = $names[0];
             }
         }
 

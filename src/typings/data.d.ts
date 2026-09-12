@@ -138,6 +138,7 @@ declare module '@typings' {
 
     filename?: string;
     address?: string;
+    address_short?: string;
     tags?: { [id: string]: string };
 
     exif?: IExif;

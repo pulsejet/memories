@@ -50,8 +50,13 @@
       </div>
 
       <div class="top-date" v-if="photoswipe" :class="{ visible: showControls }">
-        <div class="date-line" v-if="currentDateStr">{{ currentDateStr }}</div>
-        <div class="time-line" v-if="currentTimeStr">{{ currentTimeStr }}</div>
+        <div class="date-line" v-if="currentDateStr">
+          {{ currentDateStr }}
+        </div>
+        <div class="time-line" v-if="currentTimeStr">
+          {{ currentTimeStr }}
+          <template v-if="currentAddressShort"> • {{ currentAddressShort }}</template>
+        </div>
       </div>
 
       <div class="bottom-bar" v-if="photoswipe" :class="{ visible: showBottomBar }">
@@ -62,7 +67,7 @@
           {{ currentPhoto.imageInfo.exif.Description }}
         </div>
         <div class="exif date" v-if="currentDateTaken">
-          {{ currentDateTaken }}
+          {{ currentDateTaken }}<template v-if="currentAddressShort"> • {{ currentAddressShort }}</template>
         </div>
       </div>
     </div>
@@ -421,6 +426,11 @@ export default defineComponent({
       const date = this.currentPhoto?.imageInfo?.datetaken;
       if (!date) return null;
       return utils.getLongDateStr(new Date(date * 1000), false, true);
+    },
+
+    /** Get short place name for current photo */
+    currentAddressShort(): string | null {
+      return this.currentPhoto?.imageInfo?.address_short ?? null;
     },
 
     /** Show edit buttons */
@@ -1446,6 +1456,10 @@ export default defineComponent({
   .time-line {
     font-size: 0.85em;
     opacity: 0.85;
+    max-width: calc(100vw - 220px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
