@@ -13,6 +13,7 @@ import axios from '@nextcloud/axios';
 import NcButton from '@nextcloud/vue/components/NcButton';
 
 import { API } from '@services/API';
+import * as utils from '@services/utils';
 
 import type { ICluster } from '@typings';
 
@@ -29,7 +30,7 @@ export default defineComponent({
 
   computed: {
     placeId(): number {
-      return Number(this.$route.params.name?.toString()?.split('-')[0]) || -1;
+      return Number(utils.routeParamToString(this.$route.params.name).split('-')[0]) || -1;
     },
   },
 

@@ -645,7 +645,8 @@ export default defineComponent({
       }
 
       // Albums
-      const { user, name } = this.$route.params as { user: string; name: string };
+      const user = utils.routeParamToString(this.$route.params.user);
+      const name = utils.routeParamToString(this.$route.params.name);
       if (this.routeIsAlbums) {
         if (!user || !name) {
           throw new Error('Invalid album route');

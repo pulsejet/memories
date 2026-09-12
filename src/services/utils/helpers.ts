@@ -190,6 +190,12 @@ export function getFolderRoutePath(basePath: string) {
   return path;
 }
 
+/** Normalize a route param to string (repeatable params parse as string[]). */
+export function routeParamToString(param?: string | string[]): string {
+  if (Array.isArray(param)) return param.join('/');
+  return param?.toString() ?? String();
+}
+
 /**
  * Get URL to Live Photo video part
  */
