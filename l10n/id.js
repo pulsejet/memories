@@ -18,6 +18,7 @@ OC.L10N.register(
     "Settings" : "Setelan",
     "View all" : "Lihat semua",
     "Videos" : "Video",
+    "Shared By" : "Dibagikan oleh",
     "Metadata" : "Metadata",
     "Edit" : "Sunting",
     "Photos" : "Foto",
