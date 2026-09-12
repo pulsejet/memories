@@ -495,7 +495,7 @@ export default defineComponent({
       this.show = true;
       await this.$nextTick();
 
-      this.photoswipe = new PhotoSwipe({
+      const photoswipe = new PhotoSwipe({
         counter: true,
         zoom: false,
         loop: false,
@@ -533,6 +533,11 @@ export default defineComponent({
         },
         ...args,
       });
+
+      // PhotoSwipe relies on object identity internally, and Vue's
+      // reactivity proxying breaks it. All photoswipe-related objects
+      // MUST use markRaw() if stored in data.
+      this.photoswipe = markRaw(photoswipe);
 
       // Debugging only
       _m.viewer.photoswipe = this.photoswipe;
@@ -663,17 +668,20 @@ export default defineComponent({
       });
 
       // Video support
-      this.psVideo = new PsVideo(<any>this.photoswipe, {
+      const psVideo = new PsVideo(<any>this.photoswipe, {
         // Explicity disable dragging to another slide at the bottom of a video,
         // to allow player controls to work properly.
         preventDragOffset: 60,
       });
+      this.psVideo = markRaw(psVideo);
 
       // Image support
-      this.psImage = new PsImage(<any>this.photoswipe);
+      const psImage = new PsImage(<any>this.photoswipe);
+      this.psImage = markRaw(psImage);
 
       // Live Photo support
-      this.psLivePhoto = new PsLivePhoto(<any>this.photoswipe, <any>this.psImage, this.liveState);
+      const psLivePhoto = new PsLivePhoto(<any>this.photoswipe, <any>this.psImage, this.liveState);
+      this.psLivePhoto = markRaw(psLivePhoto);
 
       // Patch the close button to stop the slideshow
       const _close = this.photoswipe.close.bind(this.photoswipe);
