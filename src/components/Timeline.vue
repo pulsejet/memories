@@ -1509,6 +1509,8 @@ export default defineComponent({
   width: 100%;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
 
   @media (max-width: 768px) {
     // Get rid of padding on img-outer (1px on mobile)

@@ -310,10 +310,6 @@ export default defineComponent({
           padding-top: 22px;
         }
       }
-
-      :deep(.empty-content) {
-        margin-top: 20%; // was 20vh
-      }
     }
 
     &.m-zero > .timeline {
