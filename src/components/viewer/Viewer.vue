@@ -19,6 +19,19 @@
       @pointermove.passive="setUiVisible"
       @pointerdown.passive="setUiVisible"
     >
+      <div class="top-bar-left" v-if="photoswipe" :class="{ visible: showControls }">
+        <NcButton
+          variant="tertiary-no-background"
+          :aria-label="t('memories', 'Back')"
+          :title="t('memories', 'Back')"
+          @click="close"
+        >
+          <template #icon>
+            <BackIcon :size="24" />
+          </template>
+        </NcButton>
+      </div>
+
       <div class="top-bar" v-if="photoswipe" :class="{ visible: showControls }">
         <NcActions :inline="numInlineActions" container=".memories_viewer .pswp">
           <NcActionButton
@@ -57,6 +70,7 @@ import { defineComponent, markRaw } from 'vue';
 import UserConfig from '@mixins/UserConfig';
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
+import NcButton from '@nextcloud/vue/components/NcButton';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
@@ -77,6 +91,7 @@ import type { IImageInfo, IPhoto, TimelineState } from '@typings';
 import type { PsContent } from './types';
 
 import LivePhotoIcon from '@components/icons/LivePhoto.vue';
+import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
@@ -116,6 +131,8 @@ export default defineComponent({
   components: {
     NcActions,
     NcActionButton,
+    NcButton,
+    BackIcon,
     ImageEditor,
     XLoadingIcon,
   },
@@ -496,7 +513,8 @@ export default defineComponent({
       await this.$nextTick();
 
       const photoswipe = new PhotoSwipe({
-        counter: true,
+        counter: false,
+        close: false,
         zoom: false,
         loop: false,
         wheelToZoom: true,
@@ -1353,17 +1371,12 @@ export default defineComponent({
   }
 }
 
-.top-bar {
+.top-bar,
+.top-bar-left {
   z-index: 100001;
   position: absolute;
   top: 8px;
-  right: 50px;
   --default-clickable-area: 44px;
-
-  :deep(.button-vue) {
-    color: white;
-    background-color: transparent !important;
-  }
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
@@ -1371,6 +1384,18 @@ export default defineComponent({
   &.visible {
     opacity: 1;
     pointer-events: auto;
+  }
+}
+
+.top-bar-left {
+  left: 8px;
+}
+
+.top-bar {
+  right: 8px;
+  :deep(.button-vue) {
+    color: white;
+    background-color: transparent !important;
   }
 }
 
