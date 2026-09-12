@@ -403,6 +403,7 @@ export default defineComponent({
 .title-text {
   font-size: 0.9em;
   margin-left: 0.2em;
+  margin-bottom: 4px;
 }
 
 .oldest {

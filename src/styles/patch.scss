@@ -3,6 +3,17 @@
   max-height: calc(90vh - 86px) !important; // was 50vh
 }
 
+// Increase padding on popper menu to make it clickable
+.v-popper__popper ul[role="menu"] li {
+  padding: 3px !important;
+  &:hover {
+    padding: 3px !important;
+  }
+  .action-button__longtext-wrapper {
+    margin-left: 3px;
+  }
+}
+
 // Make sure empty content is full width
 [role='note'].empty-content {
   width: 100%;

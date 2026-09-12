@@ -2,7 +2,7 @@
   <div class="outer">
     <NcSelectTags
       ref="selectTags"
-      class="nc-comp"
+      class="nc-component"
       v-model="tagSelection"
       :label-outside="true"
       :disabled="disabled"
@@ -147,13 +147,11 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .outer {
-  margin-top: 10px;
-
-  .nc-comp {
+  .nc-component {
     width: 100%;
-
-    :deep(ul) {
-      max-height: 200px;
+    :deep(.vs__dropdown-toggle) {
+      padding-block: 0 !important;
+      padding-inline: 0 !important;
     }
   }
 }
