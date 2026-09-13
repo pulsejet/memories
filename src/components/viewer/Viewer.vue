@@ -1124,15 +1124,38 @@ export default defineComponent({
       // Mark as loading
       this.imageInfoLoading.add(key);
 
-      try {
-        const res = await axios.get<IImageInfo>(utils.getImageInfoUrl(photo));
-        photo.imageInfo = res.data;
+      // Get a consistent URL so we can cache.
+      const url = utils.getImageInfoUrl(photo, this.config);
 
-        // Update params in photo object
-        photo.w = res.data.w;
-        photo.h = res.data.h;
-        photo.basename = res.data.basename;
-        photo.mimetype = res.data.mimetype;
+      // Apply image data onto the photo.
+      const applyImageInfo = (data: IImageInfo) => {
+        photo.imageInfo = data;
+        photo.w = data.w;
+        photo.h = data.h;
+        photo.basename = data.basename;
+        photo.mimetype = data.mimetype;
+      };
+
+      // Get cached data first.
+      let wasCached = false;
+      try {
+        const cached = await utils.getCachedData<IImageInfo>(url);
+        if (cached) {
+          applyImageInfo(cached);
+          wasCached = true;
+        }
+      } catch {
+        // cache miss
+      }
+
+      // Attempt to refresh the cached data.
+      try {
+        const res = await axios.get<IImageInfo>(url);
+        applyImageInfo(res.data);
+        utils.cacheData(url, res.data);
+      } catch (e) {
+        if (wasCached) return;
+        throw e;
       } finally {
         // Allow another chance in case this failed
         this.imageInfoLoading.delete(key);

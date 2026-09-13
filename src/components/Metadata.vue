@@ -100,7 +100,6 @@ import TagIcon from 'vue-material-design-icons/Tag.vue';
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
-import { API } from '@services/API';
 
 import type { IAlbum, IFace, IImageInfo, IPhoto, IExif } from '@typings';
 import type { IFolder, INode, IView } from '@nextcloud/files';
@@ -449,30 +448,41 @@ export default defineComponent({
     async update(photo: number | IPhoto): Promise<IImageInfo | null> {
       this.invalidateUnless(0);
 
-      // which clusters to get
-      const clusters = this.routeIsPublic
-        ? String()
-        : [
-            this.config.albums_enabled ? 'albums' : null,
-            this.config.recognize_enabled ? 'recognize' : null,
-            this.config.facerecognition_enabled ? 'facerecognition' : null,
-          ]
-            .filter((c) => c)
-            .join(',');
+      // Use a consistent URL for metadata.
+      const url = utils.getImageInfoUrl(photo, this.config);
 
-      // get tags if enabled
-      const tags = this.config.systemtags_enabled ? 1 : undefined;
+      // Helper to apply additional fields.
+      const applyImageInfo = (data: IImageInfo) => {
+        this.baseInfo = data;
+        this.fileid = data.fileid;
+        this.filename = data.basename;
+        this.exif = data.exif ?? {};
+      };
 
-      // get image info
-      const url = API.Q(utils.getImageInfoUrl(photo), { tags, clusters });
-      const res = await this.guardState(axios.get<IImageInfo>(url));
-      if (!res) return null;
+      // Attempt to get it from the cache first.
+      let wasCached = false;
+      try {
+        const state = this.state;
+        const cached = await utils.getCachedData<IImageInfo>(url);
+        if (cached && state === this.state) {
+          applyImageInfo(cached);
+          wasCached = true;
+        }
+      } catch {}
 
-      // set image info
-      this.baseInfo = res.data;
-      this.fileid = this.baseInfo.fileid;
-      this.filename = this.baseInfo.basename;
-      this.exif = this.baseInfo.exif ?? {};
+      // Always refresh the metadata from server.
+      try {
+        const res = await this.guardState(axios.get<IImageInfo>(url));
+        if (!res) return null;
+        applyImageInfo(res.data);
+        utils.cacheData(url, res.data);
+      } catch (err) {
+        if (wasCached) {
+          this.error = false;
+        } else {
+          throw err;
+        }
+      }
 
       return this.baseInfo;
     },

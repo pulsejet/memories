@@ -6,7 +6,7 @@ import { constants as c } from './const';
 import { API } from '@services/API';
 import { NAPI } from '@native';
 
-import type { IImageInfo, IPhoto } from '@typings';
+import type { IConfig, IImageInfo, IPhoto } from '@typings';
 
 /**
  * Get the current user UID
@@ -125,18 +125,41 @@ export function isVideo(photo: IPhoto): boolean {
 }
 
 /**
- * Get the URL for the imageInfo of a photo
+ * Get the URL for the imageInfo of a photo, including tags/clusters params.
  *
  * @param photo Photo object or fileid (remote only)
+ * @param config User config to derive tags/clusters params
  */
-export function getImageInfoUrl(photo: IPhoto | number): string {
+export function getImageInfoUrl(photo: IPhoto | number, config: IConfig): string {
   const fileid = typeof photo === 'number' ? photo : photo.fileid;
 
+  // Base URL for getting image info.
+  let base: string;
   if (typeof photo === 'object' && isLocalPhoto(photo)) {
-    return NAPI.IMAGE_INFO(fileid);
+    base = NAPI.IMAGE_INFO(fileid);
+  } else {
+    base = API.IMAGE_INFO(fileid);
   }
 
-  return API.IMAGE_INFO(fileid);
+  // Public share route should not show clusters.
+  const routeName = _m.route?.name?.toString() ?? '';
+  const isPublic = routeName.endsWith('-share');
+
+  // Include clusters like people and albums.
+  let clusters: string | undefined;
+  if (!isPublic) {
+    const parts = [
+      config.albums_enabled ? 'albums' : null,
+      config.recognize_enabled ? 'recognize' : null,
+      config.facerecognition_enabled ? 'facerecognition' : null,
+    ].filter((c) => c);
+    clusters = parts.join(',') || undefined;
+  }
+
+  // Include tags for public and logged in.
+  const tags = config.systemtags_enabled ? 1 : undefined;
+
+  return API.Q(base, { tags, clusters });
 }
 
 /**
