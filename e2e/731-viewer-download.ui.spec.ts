@@ -17,7 +17,7 @@ test.describe('@ui Viewer image download', () => {
 
     await page.goto(appUrl);
     await page.locator(`.p-outer--${fileid} > .img-outer`).click();
-    await page.waitForSelector('body.viewer-fully-opened');
+    await page.waitForSelector('.memories-viewer.fullyOpened');
     await snap(page, 'viewer-image');
 
     const downloadPromise = page.waitForEvent('download');
@@ -46,7 +46,7 @@ test.describe('@ui Viewer live video download', () => {
 
     await page.goto(appUrl);
     await page.locator(`.p-outer--${fileid} > .img-outer`).click();
-    await page.waitForSelector('body.viewer-fully-opened');
+    await page.waitForSelector('.memories-viewer.fullyOpened');
 
     const downloadPromise = page.waitForEvent('download');
     await page.locator('.memories-viewer').getByRole('button', { name: 'Actions' }).click();

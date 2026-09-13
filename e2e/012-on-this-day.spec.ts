@@ -52,6 +52,6 @@ test.describe('@ui On this day carousel', () => {
   test('Open year group in viewer', async ({ page }) => {
     await page.goto(appUrl);
     await page.locator('.dtm-container .outer .group').first().click();
-    await page.waitForSelector('body.viewer-fully-opened');
+    await page.waitForSelector('.memories-viewer.fullyOpened');
   });
 });

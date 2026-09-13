@@ -3,7 +3,7 @@
     v-if="show"
     ref="outer"
     class="memories-viewer outer remove-gap"
-    :class="{ fullyOpened, slideshowTimer }"
+    :class="{ fullyOpened, isVideo, slideshowTimer }"
     :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"
   >
@@ -139,8 +139,6 @@ type IViewerAction = {
 
 const DEFAULT_SLIDESHOW_MS = 5000;
 const SIDEBAR_DEBOUNCE_MS = 350;
-const BODY_VIEWER_VIDEO = 'viewer-video';
-const BODY_VIEWER_FULLY_OPENED = 'viewer-fully-opened';
 
 export default defineComponent({
   name: 'Viewer',
@@ -485,10 +483,6 @@ export default defineComponent({
   },
 
   watch: {
-    fullyOpened(val) {
-      document.body.classList.toggle(BODY_VIEWER_FULLY_OPENED, val);
-    },
-
     allowClose(val) {
       if (!this.photoswipe) return;
       this.photoswipe.options.pinchToClose = val;
@@ -687,7 +681,6 @@ export default defineComponent({
         this.setFragment(null);
         this.updateTitle(undefined);
         nativex.setTheme(); // reset
-        document.body.classList.remove(BODY_VIEWER_VIDEO);
       });
       this.photoswipe.on('destroy', () => {
         if (navElem) navElem.style.zIndex = '';
@@ -716,9 +709,6 @@ export default defineComponent({
         // Remove active class from others and add to this one
         this.photoswipe!.element?.querySelectorAll('.pswp__item').forEach((el) => el.classList.remove('active'));
         e.slide.holderElement?.classList.add('active');
-
-        // Add type class to body (gates native video passthrough CSS)
-        document.body.classList.toggle(BODY_VIEWER_VIDEO, !!(photo?.flag & this.c.FLAG_IS_VIDEO));
       });
 
       // Show and hide controls

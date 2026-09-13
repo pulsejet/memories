@@ -173,7 +173,7 @@ test.describe('Public folder share', () => {
       await expect(page.locator(`.p-outer--${folderFileids[0]}`)).toBeVisible();
 
       await page.locator(`.p-outer--${folderFileids[0]} > .img-outer`).click();
-      await page.waitForSelector('body.viewer-fully-opened');
+      await page.waitForSelector('.memories-viewer.fullyOpened');
     });
   });
 

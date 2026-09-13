@@ -68,7 +68,7 @@ test.describe.serial('Albums', () => {
     await expect(page.locator(`.p-outer--${fileid3}`)).toBeVisible();
 
     await page.locator(`.p-outer--${fileid1} > .img-outer`).click();
-    await page.waitForSelector('body.viewer-fully-opened');
+    await page.waitForSelector('.memories-viewer.fullyOpened');
   });
 
   test('@ui Add image to existing album', async ({ request, page }) => {
