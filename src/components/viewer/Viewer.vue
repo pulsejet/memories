@@ -23,6 +23,9 @@
       v-show="!editorOpen"
       @pointermove.passive="setUiVisible"
       @pointerdown.passive="setUiVisible"
+      @touchstart.passive="tapPatch.onTouchStart"
+      @touchend="tapPatch.onTouchEnd"
+      @touchcancel.passive="tapPatch.onTouchCancel"
     >
       <div class="top-bar-left" v-if="photoswipe">
         <NcButton
@@ -110,6 +113,7 @@ import { API } from '@services/API';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
+import { makeTapPatch } from '@services/patches/mobile-click';
 
 import ImageEditor from './ImageEditor.vue';
 import ViewerBottomSheet from './ViewerBottomSheet.vue';
@@ -221,6 +225,13 @@ export default defineComponent({
 
     /** Photo keys for which an imageInfo request is currently ongoing */
     imageInfoLoading: new Set<string>(),
+
+    /** Tap-to-click patch handlers for viewer chrome buttons */
+    tapPatch: markRaw(
+      makeTapPatch({
+        containers: ['.top-bar', '.top-bar-left', '.viewer-mobile-actions', '.v-popper__popper'],
+      }),
+    ),
   }),
 
   mounted() {
