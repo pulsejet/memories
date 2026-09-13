@@ -57,7 +57,6 @@
           :class="{
             outer: true,
             'router-outlet': true,
-            'remove-gap': removeNavGap,
             'has-nav': showNavigation,
             'has-mobile-header': hasMobileHeader,
             'is-native': native,
@@ -259,10 +258,6 @@ export default defineComponent({
     hasMobileHeader(): boolean {
       return this.native && this.showNavigation && this.routeIsBase;
     },
-
-    removeNavGap(): boolean {
-      return this.routeIsMap;
-    },
   },
 
   created() {
@@ -438,9 +433,9 @@ export default defineComponent({
   height: 100%;
   width: 100%;
 
-  &.remove-gap {
-    // Fill up the whole space, e.g. on map
-    padding: 0;
+  &.remove-gap,
+  &:has(.map-matter) {
+    padding: 0; // gap on map left
   }
 }
 
