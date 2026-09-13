@@ -648,5 +648,7 @@ a {
   aspect-ratio: 16 / 10;
   min-height: 200px;
   max-height: 250px;
+  border-radius: 16px;
+  overflow: hidden;
 }
 </style>
