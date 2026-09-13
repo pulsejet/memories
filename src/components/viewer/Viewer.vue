@@ -1662,9 +1662,9 @@ export default defineComponent({
 .pswp > div > .v-popper__wrapper {
   overflow: visible !important;
   > .v-popper__inner {
-    transform: translateX(-20px);
+    transform: translateX(-15px);
     body:has(aside.app-sidebar) & {
-      transform: translateX(-70px);
+      transform: translateX(-65px);
     }
   }
 }
