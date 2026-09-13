@@ -78,8 +78,15 @@ export default defineComponent({
       opacity: 0.92;
 
       &:hover,
+      &:focus,
+      &:active,
       &:focus-visible {
         opacity: 1;
+        background-color: transparent !important;
+        color: inherit !important;
+        border-color: transparent;
+        box-shadow: none !important;
+        outline: none !important;
       }
 
       &.router-link-exact-active,
