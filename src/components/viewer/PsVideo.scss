@@ -19,8 +19,11 @@
       height: 100%;
       // Override vidstack's 16/9 default; the video is letterboxed below.
       aspect-ratio: auto;
+      // Default layout rounds the player frame (6px + border); square video.
       --video-border-radius: 0;
       --video-border: none;
+      --media-slider-track-height: 8px;
+      --media-slider-thumb-size: 22px;
     }
 
     media-provider {
@@ -58,11 +61,65 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease-out;
+    padding-block-end: calc(50px + env(safe-area-inset-bottom, 0px)) !important;
+
+    .vds-controls-group:has(> media-time-slider) {
+      order: 1;
+    }
+
+    .vds-controls-group:has(media-play-button) {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-inline: calc(var(--media-slider-thumb-size, 22px) / 2);
+
+      .vds-time-group {
+        margin-inline-end: auto;
+      }
+    }
+
+    .vds-chapter-title {
+      display: none;
+    }
+
+    .vds-time-slider,
+    .vds-button {
+      cursor: pointer;
+    }
+
+    .vds-time-slider .vds-slider-thumb {
+      inline-size: 10px;
+      block-size: 24px;
+      border-radius: 5px;
+      opacity: 1;
+    }
+  }
+
+  .vds-buffering-spinner {
+    inline-size: 96px;
+    block-size: 96px;
+
+    svg {
+      display: block;
+      inline-size: 96px;
+      block-size: 96px;
+    }
+  }
+
+  [data-buffering] .vds-poster,
+  [data-waiting] .vds-poster,
+  [data-seeking] .vds-poster {
+    display: block;
+    opacity: 1;
   }
 
   &:has(.pswp--ui-visible) .vds-controls {
     opacity: 1;
     visibility: visible;
     transition: opacity 0.2s ease-in;
+  }
+
+  &:has(.pswp--ui-visible) .video-container media-player[data-view-type='video'] {
+    cursor: auto;
   }
 }

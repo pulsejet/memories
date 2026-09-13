@@ -171,6 +171,8 @@ class VideoContentSetup {
     // Late mount: controls render now, media loads since the slide is active.
     // Starts hidden, revealed once fully opened; poster thumbs pre-playback.
     const { src, videoIsHls } = this.getPreferredSrc(content);
+
+    // Make elements.
     const player = document.createElement('media-player') as MediaPlayerElement;
     player.style.opacity = '0';
     player.src = src;
@@ -192,8 +194,12 @@ class VideoContentSetup {
     // Visibility is owned by Photoswipe (CSS sync)
     player.controls.canIdle = false;
 
-    player.appendChild(document.createElement('media-provider'));
-    player.appendChild(document.createElement('media-video-layout'));
+    const providerEl = document.createElement('media-provider');
+    const posterEl = document.createElement('media-poster');
+    posterEl.classList.add('vds-poster');
+
+    const layout = document.createElement('media-video-layout');
+    layout.setAttribute('small-when', 'never');
 
     player.addEventListener('provider-change', (e: Event) => {
       const provider = (e as MediaProviderChangeEvent).detail;
@@ -213,6 +219,10 @@ class VideoContentSetup {
       this.onPlayerError(content, e as MediaErrorEvent);
     });
 
+    // Append elements.
+    providerEl.appendChild(posterEl);
+    player.appendChild(providerEl);
+    player.appendChild(layout);
     content.videoPlayer = player;
     content.videoIsHls = videoIsHls;
     content.element.appendChild(player);
