@@ -90,6 +90,7 @@ export default {
       new TerserPlugin({
         exclude: [/filerobot-image-editor/],
         terserOptions: {
+          ecma: 2022,
           output: {
             comments: false,
           },
