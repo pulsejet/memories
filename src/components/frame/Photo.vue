@@ -32,7 +32,7 @@
           @mouseleave.passive="stopVideo"
           @touchstart.passive="touchVideo"
         >
-          <LivePhotoIcon :size="22" :spin="liveState.waiting" :playing="liveState.playing" />
+          <LivePhotoIcon size="22px" :spin="liveState.waiting" :playing="liveState.playing" />
         </div>
       </div>
 
