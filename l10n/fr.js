@@ -45,6 +45,7 @@ OC.L10N.register(
     "Edit" : "Modifier",
     "Failed to load metadata" : "Impossible de charger les métadonnées.",
     "Photos" : "Images",
+    "Upload Local" : "Téléverser depuis l'appareil",
     "Delete" : "Supprimer",
     "Remove from album" : "Supprimer de l'album",
     "Share" : "Partage",

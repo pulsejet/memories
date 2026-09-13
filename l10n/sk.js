@@ -176,7 +176,7 @@ OC.L10N.register(
     "Performance" : "Výkon",
     "Unknown" : "Neznámy",
     "HTTPS is enabled" : "HTTPS je povolené",
-    "You are accessing this page over an insecure context. Several browser APIs are not available, which will make Memories very slow. Enable HTTPS on your server to improve performance." : "Na túto stránku pristupujete v nezabezpečenom HTTP. Niekoľko rozhraní API prehliadača nie je dostupných, čo spôsobí, že spomienky budú veľmi pomalé. Ak chcete zvýšiť výkon, povoľte na svojom serveri protokol HTTPS.",
+    "You are accessing this page over an insecure context. Several browser APIs are not available, which will make Memories very slow. Enable HTTPS on your server to improve performance." : "Pristupujete k tejto stránke cez nezabezpečený kontext. Niekoľko rozhraní API prehliadača nie je dostupných, čo spôsobí, že Memories budú veľmi pomalé. Ak chcete zvýšiť výkon, povoľte na svojom serveri protokol HTTPS.",
     "HTTP/2 or HTTP/3 is enabled" : "HTTP/2 alebo HTTP/3 je povolený",
     "HTTP/2 or HTTP/3 is strongly recommended ({httpVer} detected)" : "Dôrazne sa odporúča HTTP/2 alebo HTTP/3 (zistilo sa {httpVer})",
     "Database triggers are set up correctly." : "Databázové spúšťače sú nastavené správne.",
