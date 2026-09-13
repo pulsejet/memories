@@ -26,6 +26,32 @@ type PsVideoEvent = PsEvent & {
   content: VideoContent;
 };
 
+/** Interactive player elements; drags starting here must not move the slide */
+const PLAYER_UI_SELECTOR = [
+  'media-controls',
+  'media-menu',
+  'media-play-button',
+  'media-mute-button',
+  'media-fullscreen-button',
+  'media-pip-button',
+  'media-caption-button',
+  'media-seek-button',
+  'media-airplay-button',
+  'media-live-button',
+  'media-menu-button',
+  'media-menu-item',
+  'media-menu-items',
+  'media-time-slider',
+  'media-volume-slider',
+  'media-slider-video',
+  'media-thumbnail',
+  'button',
+  'input',
+  '[role="slider"]',
+  '[role="menu"]',
+  '[role="menuitem"]',
+].join(', ');
+
 /**
  * Check if slide has video content
  */
@@ -39,12 +65,7 @@ class VideoContentSetup {
   /** Vidstack chunk, prefetched so controls mount instantly on activation */
   private vidstack = import('@services/vidstack');
 
-  constructor(
-    lightbox: PhotoSwipe,
-    private options: {
-      preventDragOffset: number;
-    },
-  ) {
+  constructor(lightbox: PhotoSwipe) {
     this.initLightboxEvents(lightbox);
     lightbox.on('init', () => {
       this.initPswpEvents(lightbox);
@@ -64,20 +85,13 @@ class VideoContentSetup {
   }
 
   initPswpEvents(pswp: PhotoSwipe) {
-    // Prevent dragging when pointer is in bottom part of the video,
-    // to allow player controls to work properly.
+    // Drags starting on player UI (controls, sliders, menus) belong to the
+    // player; keep PhotoSwipe from dragging the slide underneath.
     pswp.on('pointerDown', (e) => {
-      const slide = pswp.currSlide;
-      if (isVideoContent(slide) && this.options.preventDragOffset) {
-        const origEvent = e.originalEvent;
-        if (origEvent.type === 'pointerdown') {
-          const videoHeight = Math.ceil(slide.height * slide.currZoomLevel);
-          const verticalEnding = videoHeight + slide.bounds.center.y;
-          const pointerYPos = origEvent.pageY - pswp.offset.y;
-          if (pointerYPos > verticalEnding - this.options.preventDragOffset && pointerYPos < verticalEnding) {
-            e.preventDefault();
-          }
-        }
+      if (!isVideoContent(pswp.currSlide)) return;
+      const target = e.originalEvent?.target as HTMLElement | null;
+      if (target?.closest?.(PLAYER_UI_SELECTOR)) {
+        e.preventDefault();
       }
     });
 
@@ -175,8 +189,11 @@ class VideoContentSetup {
       player.fullscreenOrientation = h < w ? 'landscape' : 'portrait';
     }
 
+    // Visibility is owned by Photoswipe (CSS sync)
+    player.controls.canIdle = false;
+
     player.appendChild(document.createElement('media-provider'));
-    player.appendChild(document.createElement('media-plyr-layout'));
+    player.appendChild(document.createElement('media-video-layout'));
 
     player.addEventListener('provider-change', (e: Event) => {
       const provider = (e as MediaProviderChangeEvent).detail;

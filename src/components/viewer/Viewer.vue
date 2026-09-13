@@ -782,11 +782,7 @@ export default defineComponent({
       });
 
       // Video support
-      const psVideo = new PsVideo(<any>this.photoswipe, {
-        // Explicity disable dragging to another slide at the bottom of a video,
-        // to allow player controls to work properly.
-        preventDragOffset: 60,
-      });
+      const psVideo = new PsVideo(<any>this.photoswipe);
       this.psVideo = markRaw(psVideo);
 
       // Image support
