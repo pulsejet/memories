@@ -9,7 +9,8 @@ import gallery.memories.NativeX
 
 /**
  * One-time WebView configuration. Transparent background: pages paint over
- * the themed root.
+ * the themed root. Popups stay in the same window so MemoriesWebViewClient
+ * can route them (loopback inside, everything else to the browser).
  */
 object WebViewSetup {
     /**
@@ -21,8 +22,10 @@ object WebViewSetup {
     fun setup(webview: WebView, userAgent: String, jsInterface: NativeX, debug: Boolean) {
         val s = webview.settings
         s.javaScriptEnabled = true
-        s.javaScriptCanOpenWindowsAutomatically = true
-        s.allowContentAccess = true
+        // Popups never get their own window: window.open/target=_blank falls back
+        // into shouldOverrideUrlLoading, which externalizes non-loopback URLs.
+        s.javaScriptCanOpenWindowsAutomatically = false
+        s.setSupportMultipleWindows(false)
         s.domStorageEnabled = true
         s.userAgentString = userAgent
         s.setSupportZoom(false)
