@@ -299,17 +299,6 @@ e2e_main() {
     local PW_EXIT=$?
     set -e
 
-    # Post process video if enabled
-    if [ "${E2E_VIDEO:-0}" = "1" ]; then
-        echo "Post-processing Playwright videos..."
-        npx tsx e2e/video-postprocess.ts
-
-        if [ -n "$CI" ]; then
-            mv "$MEMORIES_DIR/playwright-results.mp4" \
-                "$MEMORIES_DIR/video-${NC_DB_TYPE}-${PHP_VERSION}-${NC_VERSION}.mp4"
-        fi
-    fi
-
     return "$PW_EXIT"
 }
 
