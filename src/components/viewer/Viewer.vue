@@ -32,7 +32,10 @@
           variant="tertiary-no-background"
           :aria-label="t('memories', 'Back')"
           :title="t('memories', 'Back')"
-          @click="beep(); close()"
+          @click="
+            beep();
+            close();
+          "
         >
           <template #icon>
             <BackIcon :size="24" />
@@ -47,7 +50,10 @@
             :key="action.id"
             :aria-label="action.name"
             close-after-click
-            @click="beep(); action.callback()"
+            @click="
+              beep();
+              action.callback();
+            "
           >
             {{ action.name }}
             <template #icon>
@@ -86,7 +92,10 @@
           class="mobile-bottom-bar-item"
           :aria-label="action.name"
           :title="action.name"
-          @click="beep(); action.callback()"
+          @click="
+            beep();
+            action.callback();
+          "
         >
           <component :is="action.icon" :size="24" v-bind="action.iconArgs ?? {}" />
           <span class="label">{{ action.name }}</span>

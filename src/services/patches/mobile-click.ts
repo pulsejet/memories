@@ -47,9 +47,7 @@ export function makeTapPatch({ containers, slopPx = 12, timeoutMs = 600 }: TapCl
     }
     const touch = e.touches[0];
     const button = (e.target as Element | null)?.closest(buttonSelector) as HTMLElement | null;
-    pendingTap = button
-      ? { startX: touch.clientX, startY: touch.clientY, startTime: performance.now(), button }
-      : null;
+    pendingTap = button ? { startX: touch.clientX, startY: touch.clientY, startTime: performance.now(), button } : null;
   };
 
   const onTouchEnd = (e: TouchEvent) => {
