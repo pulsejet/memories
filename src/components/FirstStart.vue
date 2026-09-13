@@ -196,7 +196,7 @@ export default defineComponent({
     }
   }
 
-  .info + .buttons {
+  &:has(> .info) > .buttons {
     margin-top: 8px;
   }
 
