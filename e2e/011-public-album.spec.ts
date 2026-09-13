@@ -167,7 +167,7 @@ test.describe('Public album share', () => {
       await expect(page.locator(`.p-outer--${albumFileids[0]}`)).toBeVisible();
 
       await page.locator(`.p-outer--${albumFileids[0]} > .img-outer`).click();
-      await page.waitForSelector('.memories-viewer.fullyOpened');
+      await page.waitForSelector('.memories-viewer.fully-opened');
     });
   });
 });

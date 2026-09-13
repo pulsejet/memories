@@ -4,10 +4,10 @@
     ref="outer"
     class="memories-viewer outer remove-gap"
     :class="{
-      fullyOpened: fullyOpened,
-      isVideo: isVideo,
-      slideshowTimer: slideshowTimer,
-      showMetadataSlideshow: config.metadata_in_slideshow,
+      'fully-opened': fullyOpened,
+      'is-video': isVideo,
+      'is-slideshow': !!slideshowTimer,
+      'force-metadata': !!slideshowTimer && config.metadata_in_slideshow,
     }"
     :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"
@@ -1422,7 +1422,7 @@ export default defineComponent({
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
   pointer-events: none;
-  .memories-viewer:has(.pswp--ui-visible):not(.slideshowTimer) & {
+  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow) & {
     opacity: 1;
     pointer-events: auto;
   }
@@ -1458,7 +1458,7 @@ export default defineComponent({
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
-  .memories-viewer:has(.pswp--ui-visible):not(.slideshowTimer) & {
+  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow) & {
     opacity: 1;
   }
 
@@ -1488,8 +1488,8 @@ export default defineComponent({
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
-  .memories-viewer:has(.pswp--ui-visible):not(.slideshowTimer).fullyOpened:not(.isVideo) &:has(> .exif),
-  .memories-viewer.slideshowTimer.showMetadataSlideshow.fullyOpened:not(.isVideo) &:has(> .exif) {
+  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow).fully-opened:not(.is-video) &:has(> .exif),
+  .memories-viewer.force-metadata.fully-opened:not(.is-video) &:has(> .exif) {
     opacity: 1;
   }
 
@@ -1512,7 +1512,7 @@ export default defineComponent({
   }
 }
 
-.fullyOpened.slideshowTimer :deep(.pswp__container) {
+.fully-opened.is-slideshow :deep(.pswp__container) {
   // Animate transitions
   // Disabled normally because this makes you sick if moving fast
   transition: transform 0.75s ease !important;

@@ -53,7 +53,7 @@ test.describe('@ui Timeline photo deletion', () => {
     await test.step('Open viewer', async () => {
       await page.goto(appUrl);
       await page.locator(`.p-outer--${fileid3}`).click();
-      await page.waitForSelector('.memories-viewer.fullyOpened');
+      await page.waitForSelector('.memories-viewer.fully-opened');
     });
 
     // Get the the current active image so we can recheck.

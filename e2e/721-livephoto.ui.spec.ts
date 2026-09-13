@@ -70,7 +70,7 @@ test.describe('@ui Live photo', () => {
       await page.waitForSelector(`.p-outer--${fileid}`);
 
       await page.locator(`.p-outer--${fileid}`).click();
-      await page.waitForSelector('.memories-viewer.fullyOpened');
+      await page.waitForSelector('.memories-viewer.fully-opened');
 
       playButton = page.getByLabel('Play Live Photo');
       await expect(playButton).toBeVisible();

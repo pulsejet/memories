@@ -23,7 +23,7 @@ test.describe('@ui Timeline feed and photo preview', () => {
   test('Open one image', async ({ page }) => {
     await page.goto(appUrl);
     await page.locator(`.p-outer--${fileid1}`).click();
-    await page.waitForSelector('.memories-viewer.fullyOpened');
+    await page.waitForSelector('.memories-viewer.fully-opened');
     await page.keyboard.press('Escape');
     await page.locator('.memories-viewer').waitFor({ state: 'detached' });
   });

@@ -59,7 +59,7 @@ test.describe('@ui Photo selection', () => {
       await page.locator(`.p-outer--${ids[1]} .img-outer`).click();
       await expectSelection(page, [true, true, true, false, false, false]);
       // Clicking must toggle selection, not open the viewer.
-      await expect(page.locator('.memories-viewer.fullyOpened')).toHaveCount(0);
+      await expect(page.locator('.memories-viewer.fully-opened')).toHaveCount(0);
     });
 
     await test.step('Shift+click across days selects subset in between', async (step) => {
