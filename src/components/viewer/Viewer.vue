@@ -312,7 +312,8 @@ export default defineComponent({
       }
 
       // Bottom bar uses a fixed independent order.
-      const order = ['share', 'edit', 'add-to-album', 'delete', 'remove-from-album'];
+      const edit = this.actions.some((a) => a.id === 'edit') ? 'edit' : 'edit-metadata';
+      const order = ['share', edit, 'add-to-album', 'delete', 'remove-from-album'];
 
       // Get all actions available in this order.
       return this.actions
@@ -324,6 +325,8 @@ export default defineComponent({
             return { ...action, name: this.t('memories', 'Add to') };
           } else if (action.id === 'remove-from-album') {
             return { ...action, name: this.t('memories', 'Remove') };
+          } else if (action.id === 'edit-metadata') {
+            return { ...action, name: this.t('memories', 'Edit') };
           }
           return action;
         });
