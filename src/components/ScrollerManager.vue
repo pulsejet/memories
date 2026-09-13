@@ -40,7 +40,6 @@
         v-for="tick of visibleTicks"
         :key="tick.key"
         class="tick"
-        :class="{ dash: !tick.text }"
         :style="{ transform: `translateY(calc(${tick.top}px - 50%))` }"
       >
         <span v-if="tick.text">{{ tick.text }}</span>
@@ -653,7 +652,7 @@ export default defineComponent({
     transition: transform 0.2s linear;
     z-index: 1;
 
-    &.dash {
+    &:not(:has(span)) {
       height: 4px;
       width: 4px;
       border-radius: 50%;
