@@ -167,6 +167,9 @@ final class ClustersController extends GenericApiController
                 $file = $previewManager->getPreview($file, $quality, $quality, false);
 
                 [$blob, $mimetype] = $this->backend->getPreviewBlob($file, $photo);
+                if (empty($blob)) {
+                    continue;
+                }
 
                 $response = new DataDisplayResponse($blob, Http::STATUS_OK, [
                     'Content-Type' => $mimetype,

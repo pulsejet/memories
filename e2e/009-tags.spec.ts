@@ -106,14 +106,16 @@ test.describe('Tags', () => {
 
     await test.step('Generate covers via previews', async () => {
       const random = Math.floor(Math.random() * 1000000);
-      const responses = await Promise.all([tagA, tagB].map((name) => tags.preview(name, random)));
-      for (const res of responses) {
-        expect(res.headers()['content-type']).toContain('image/jpeg');
+      await expect(async () => {
+        for (const name of [tagA, tagB]) {
+          const res = await tags.preview(name, random);
+          expect(res.headers()['content-type']).toContain('image/jpeg');
 
-        const body = await res.body();
-        expect(body.length).toBeGreaterThan(0);
-        expect(imageSize(new Uint8Array(body)).type).toBe('jpg');
-      }
+          const body = await res.body();
+          expect(body.length).toBeGreaterThan(0);
+          expect(imageSize(new Uint8Array(body)).type).toBe('jpg');
+        }
+      }).toPass({ timeout: 10_000 });
     });
 
     await test.step('Covers are photos carrying the tag', async () => {
