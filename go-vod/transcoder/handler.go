@@ -3,6 +3,7 @@ package transcoder
 import (
 	"context"
 	"encoding/json"
+	"hash/fnv"
 	"io"
 	"log"
 	"net/http"
@@ -13,12 +14,13 @@ import (
 )
 
 type Handler struct {
-	c        *Config
-	server   *http.Server
-	managers map[string]*Manager
-	mutex    sync.RWMutex
-	close    chan string
-	exitCode int
+	c           *Config
+	server      *http.Server
+	managers    map[string]*Manager
+	mutex       sync.RWMutex
+	createLocks [256]sync.Mutex
+	close       chan string
+	exitCode    int
 }
 
 func NewHandler(c *Config) *Handler {
@@ -133,10 +135,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get existing manager or create new one
-	manager := h.getManager(path, streamid)
-	if manager == nil {
-		manager = h.createManager(path, streamid)
-	}
+	manager := h.getOrCreateManager(path, streamid)
 
 	// Failed to create manager
 	if manager == nil {
@@ -176,6 +175,27 @@ func (h *Handler) getManager(path string, streamid string) *Manager {
 		return nil
 	}
 	return m
+}
+
+func (h *Handler) lockFor(streamid string) *sync.Mutex {
+	ha := fnv.New32a()
+	ha.Write([]byte(streamid))
+	return &h.createLocks[ha.Sum32()%uint32(len(h.createLocks))]
+}
+
+func (h *Handler) getOrCreateManager(path string, streamid string) *Manager {
+	if m := h.getManager(path, streamid); m != nil {
+		return m
+	}
+
+	mu := h.lockFor(streamid)
+	mu.Lock()
+	defer mu.Unlock()
+
+	if m := h.getManager(path, streamid); m != nil {
+		return m
+	}
+	return h.createManager(path, streamid)
 }
 
 func (h *Handler) createManager(path string, streamid string) *Manager {
