@@ -307,8 +307,7 @@ export default defineComponent({
 
     /** Bottom bar actions on mobile */
     bottomActions(): IViewerAction[] {
-      // Hidden on videos to avoid overlap with player controls.
-      if (!this.isMobileLayout || this.isVideo) {
+      if (!this.isMobileLayout) {
         return [];
       }
 
@@ -1588,8 +1587,10 @@ export default defineComponent({
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
+  // Videos too (text hidden below).
   .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow).fully-opened:not(.is-video) &:has(> .exif),
-  .memories-viewer.force-metadata.fully-opened:not(.is-video) &:has(> .exif) {
+  .memories-viewer.force-metadata.fully-opened:not(.is-video) &:has(> .exif),
+  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow).fully-opened.is-video & {
     opacity: 1;
   }
 
@@ -1608,6 +1609,17 @@ export default defineComponent({
       max-width: 90%;
       word-break: break-word;
       line-height: 1.2em;
+    }
+  }
+
+  .memories-viewer.is-video & {
+    min-height: 170px;
+
+    // Desktop videos: gradient only.
+    @media (min-width: 769px) {
+      .exif {
+        display: none;
+      }
     }
   }
 }
@@ -1629,7 +1641,7 @@ export default defineComponent({
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
   pointer-events: none;
-  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow):not(.is-video) & {
+  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow) & {
     opacity: 1;
     pointer-events: auto;
   }
