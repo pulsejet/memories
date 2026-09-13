@@ -81,7 +81,6 @@ class AppStartupCoordinator(
 
     /** Shows the waiting page and blocks boot until the snapshot is fresh. */
     private fun showWaitingAndEnsure(toNxSetup: Boolean = false) {
-        activity.host = "127.0.0.1"
         activity.applyTheme(ThemeManager.ENTRY_THEME_COLOR, true)
         activity.binding.webview.loadUrl(localStaticUrl("waiting.html"))
         Thread {
@@ -112,7 +111,6 @@ class AppStartupCoordinator(
         val describe = assets.readDescribe(dir) ?: return false
         val webRoot = AssetCache.webrootOf(base)
         local.configure(AssetCache.originOf(base), webRoot, dir, base)
-        activity.host = "127.0.0.1"
         activity.binding.webview.clearHistory()
         activity.clearHistoryOnLoad = true
         val url = if (subpath.isEmpty()) local.origin() + "$webRoot/"

@@ -93,6 +93,14 @@ class ServerRouter(
             (isEntry || req.headers["accept"]?.contains("text/html") == true) &&
             serveShell(config, req, out)
         ) return
+        // Only local code serves documents (shell/static above): never forward a
+        // page navigation upstream, or remote content would render as a local page.
+        if (req.method == "GET" &&
+            (req.headers["accept"]?.contains("text/html") == true || req.headers["sec-fetch-dest"] == "document")
+        ) {
+            HttpWriter.reply(out, 404, "Not Found", "not found")
+            return
+        }
         proxy.forward(req, config, out)
         out.flush()
     }
