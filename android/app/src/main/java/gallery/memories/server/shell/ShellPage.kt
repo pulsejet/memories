@@ -35,7 +35,6 @@ object ShellPage {
         "base-uri 'self'",
         "form-action 'self'",
         "frame-ancestors 'none'",
-        "navigate-to 'self' http://127.0.0.1",
     ).joinToString("; ")
 
     /**
