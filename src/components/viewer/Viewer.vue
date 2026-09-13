@@ -1607,12 +1607,17 @@ export default defineComponent({
       opacity: 0 !important;
     }
   }
+}
+</style>
 
-  // Prevent the popper from overlapping with the sidebar
-  > div > .v-popper__wrapper {
-    overflow: visible !important;
-    > .v-popper__inner {
-      transform: translateX(-20px);
+<style lang="scss">
+// Prevent the popper from overlapping with the sidebar
+.pswp > div > .v-popper__wrapper {
+  overflow: visible !important;
+  > .v-popper__inner {
+    transform: translateX(-20px);
+    body:has(aside.app-sidebar) & {
+      transform: translateX(-70px);
     }
   }
 }
