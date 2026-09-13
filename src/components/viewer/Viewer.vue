@@ -72,12 +72,14 @@
       </div>
     </div>
 
-    <ViewerBottomSheet
+    <ViewerSheetGestures
       v-if="isMobileLayout && photoswipe"
-      :photo="currentPhoto"
       :photoswipe="photoswipe"
-      :open="sheetOpen"
       @open="setBottomSheet(true)"
+    />
+    <ViewerBottomSheet
+      v-if="sheetOpen && isMobileLayout"
+      :photo="currentPhoto"
       @close="setBottomSheet(false)"
     />
   </div>
@@ -100,6 +102,7 @@ import * as nativex from '@native';
 
 import ImageEditor from './ImageEditor.vue';
 import ViewerBottomSheet from './ViewerBottomSheet.vue';
+import ViewerSheetGestures from './ViewerSheetGestures.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 import PhotoSwipe, { type PhotoSwipeOptions } from 'photoswipe';
 import 'photoswipe/style.css';
@@ -156,6 +159,7 @@ export default defineComponent({
     BackIcon,
     ImageEditor,
     ViewerBottomSheet,
+    ViewerSheetGestures,
     XLoadingIcon,
   },
 

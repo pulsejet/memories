@@ -1,27 +1,21 @@
 <!--
   Mobile metadata bottom sheet for the photo viewer.
 
-  Rendered over PhotoSwipe on small screens, showing Metadata for the
-  current photo. The parent mounts it while the viewer is open on
-  mobile and drives visibility through the `open` prop; the sheet
-  requests state changes through the `open` / `close` events.
-  PhotoSwipe itself stays non-reactive (see Viewer): the sheet only
-  receives a minimal event/pan surface through `photoswipe`.
+  Rendered over PhotoSwipe on small screens while open, showing
+  Metadata for the current photo; unmounted when closed, so nothing
+  of it remains on screen. Swipe-up detection lives in
+  ViewerSheetGestures; this component only pans, snaps and dismisses.
+  PhotoSwipe itself is never touched here (see Viewer).
 
   Position model: the sheet wraps the full content (never scrolls
   inside) and is moved as a whole with translateY. Detents, top to
   bottom: tail (0, content end docked), head (content start
   fullscreen), peek (content start, 45vh visible), dismissed (full
-  height, parked off-screen).
+  height, parked off-screen during close).
 
   Gestures: pan anywhere moves the sheet 1:1 with the finger; release
-  snaps to a detent or dismisses. Swipe up on the photo opens the
-  sheet, tracked through PhotoSwipe pointer events with a touch
-  fallback for content refusing the gesture (e.g. video controls).
-  Handle taps toggle peek/head; embedded links, buttons and the map
-  keep their own behavior. The inline off-screen transform below is
-  the initial state; mounted replaces it with the measured offset so
-  the first paint never flashes the sheet.
+  snaps to a detent or dismisses. Handle taps toggle peek/head;
+  embedded links, buttons and the map keep their own behavior.
 -->
 <template>
   <div
@@ -40,7 +34,7 @@
       class="sheet-handle-area"
       role="button"
       tabindex="0"
-      :aria-label="open ? t('memories', 'Collapse details') : t('memories', 'Expand details')"
+      :aria-label="expanded ? t('memories', 'Collapse details') : t('memories', 'Expand details')"
       @keydown.enter="toggleOpen"
       @keydown.space.prevent="toggleOpen"
     >
@@ -66,16 +60,6 @@ const CLOSE_PX = 80;
 const DOCK_PX = 40;
 const FLING_PX_MS = 0.5;
 const CLOSE_ANIM_MS = 280;
-const SHEET_SWIPE_UP_PX = 70;
-
-/** PhotoSwipe surface the sheet gestures need */
-interface SheetPhotoSwipe {
-  on(name: string, fn: (e: any) => void): void;
-  off(name: string, fn: (e: any) => void): void;
-  element?: HTMLDivElement | null;
-  gestures?: { isMultitouch: boolean };
-  currSlide?: { pan: { y: number } } | null;
-}
 
 export default defineComponent({
   name: 'ViewerBottomSheet',
@@ -89,20 +73,9 @@ export default defineComponent({
       type: Object as PropType<IPhoto | null>,
       default: null,
     },
-    /** Live PhotoSwipe instance driving the viewer */
-    photoswipe: {
-      type: Object as PropType<SheetPhotoSwipe | null>,
-      default: null,
-    },
-    /** Whether the sheet is open (parent state) */
-    open: {
-      type: Boolean,
-      default: false,
-    },
   },
 
-  // Both ask the parent to flip the `open` prop.
-  emits: ['close', 'open'],
+  emits: ['close'],
 
   data: () => ({
     /** Docked at head/tail (vs peek) */
@@ -127,51 +100,19 @@ export default defineComponent({
     resizeListener: null as (() => void) | null,
     closeTimer: 0,
     enterTimer: 0,
-    /** Element the fallback swipe detector is bound to, if any */
-    fallbackEl: null as HTMLElement | null,
-    /** Finger position and pan at the current PhotoSwipe gesture start */
-    downClientX: 0,
-    downClientY: null as number | null,
-    downPanY: 0,
-    /** Fallback swipe tracking on viewer slides */
-    fbStartX: 0,
-    fbStartY: 0,
-    fbStartT: 0,
-    fbTracking: false,
   }),
 
   watch: {
     photo: {
       handler() {
-        // Skip mid-dismiss refreshes; reopening refetches anyway.
-        if (this.open && !this.closing) this.refreshMetadata();
+        this.refreshMetadata();
       },
-    },
-
-    open(isOpen: boolean) {
-      this.closing = false;
-      window.clearTimeout(this.closeTimer);
-      if (isOpen) {
-        this.openSheet();
-      } else {
-        this.offsetY = this.fullHeight();
-        this.applyOffset();
-      }
-    },
-
-    photoswipe() {
-      this.setupGestures();
     },
   },
 
   mounted() {
-    this.setupGestures();
-    if (this.open) {
-      this.openSheet();
-    } else {
-      this.offsetY = this.fullHeight();
-      this.applyOffset();
-    }
+    this.refreshMetadata();
+    this.$nextTick(() => this.enter());
 
     this.refs().sheet?.addEventListener('touchmove', this.onDragMove, { passive: false });
     // ResizeObserver batches per frame, so adjust synchronously
@@ -183,7 +124,6 @@ export default defineComponent({
   },
 
   beforeUnmount() {
-    this.teardownGestures();
     this.refs().sheet?.removeEventListener('touchmove', this.onDragMove);
     this.resizeObserver?.disconnect();
     if (this.resizeListener) window.removeEventListener('resize', this.resizeListener);
@@ -205,16 +145,6 @@ export default defineComponent({
       if (!this.photo || this.refs().metadata?.fileid === this.photo.fileid) return;
       await this.refs().metadata?.update(this.photo);
       this.layout();
-    },
-
-    // Clear stale content first so enter() measures the skeleton.
-    async openSheet() {
-      if (this.photo && this.refs().metadata?.fileid !== this.photo.fileid) {
-        this.refs().metadata?.invalidateUnless(0);
-        await this.$nextTick();
-      }
-      this.enter();
-      this.refreshMetadata();
     },
 
     /** Full height of the embedded content; the sheet always wraps it all */
@@ -453,109 +383,6 @@ export default defineComponent({
       this.offsetY = this.fullHeight();
       this.applyOffset();
       this.closeTimer = window.setTimeout(() => this.$emit('close'), CLOSE_ANIM_MS);
-    },
-
-    /** Open the sheet on a sufficient upward swipe (dy<0). */
-    maybeOpenSheet(dy: number, dx = 0, dt = 0) {
-      if (this.open) return;
-      if (dy < -SHEET_SWIPE_UP_PX && Math.abs(dy) > 1.8 * Math.abs(dx) && dt < 800) {
-        this.$emit('open');
-      }
-    },
-
-    /** Wire swipe-up gestures to the PhotoSwipe instance. */
-    setupGestures() {
-      // Teardown first so repeat calls never double-bind.
-      this.teardownGestures();
-      const pswp = this.photoswipe;
-      if (!pswp) return;
-
-      pswp.on('pointerDown', this.onPsPointerDown);
-      pswp.on('pointerUp', this.onPsPointerUp);
-      pswp.on('pointerMove', this.onPsPointerMove);
-      pswp.on('verticalDrag', this.onPsVerticalDrag);
-    },
-
-    teardownGestures() {
-      // Listeners are stable method references, so unbinding
-      // what was never bound is a safe no-op.
-      this.photoswipe?.off('pointerDown', this.onPsPointerDown);
-      this.photoswipe?.off('pointerUp', this.onPsPointerUp);
-      this.photoswipe?.off('pointerMove', this.onPsPointerMove);
-      this.photoswipe?.off('verticalDrag', this.onPsVerticalDrag);
-      this.unbindFallback();
-    },
-
-    /**
-     * Fallback swipe detector for content where verticalDrag does not
-     * fire (e.g. video controls refusing the gesture). Scoped to the
-     * PhotoSwipe element, so sheet and viewer chrome never reach it.
-     */
-    bindFallback() {
-      const el = this.photoswipe?.element;
-      if (!el || this.fallbackEl) return;
-      this.fallbackEl = el;
-      el.addEventListener('touchstart', this.onFallbackTouchStart, { passive: true });
-      el.addEventListener('touchend', this.onFallbackTouchEnd, { passive: true });
-    },
-
-    unbindFallback() {
-      if (!this.fallbackEl) return;
-      this.fallbackEl.removeEventListener('touchstart', this.onFallbackTouchStart);
-      this.fallbackEl.removeEventListener('touchend', this.onFallbackTouchEnd);
-      this.fallbackEl = null;
-    },
-
-    /** Record the gesture origin; a gesture also implies init, so bind the fallback here. */
-    onPsPointerDown(e: { originalEvent: PointerEvent }) {
-      this.downClientX = e.originalEvent.clientX;
-      this.downClientY = e.originalEvent.clientY;
-      this.downPanY = this.photoswipe?.currSlide?.pan.y ?? 0;
-      // The element only exists after init, which any gesture implies.
-      this.bindFallback();
-    },
-
-    onPsPointerUp() {
-      this.downClientY = null;
-    },
-
-    /** Open once the finger traveled far enough upward. */
-    onPsPointerMove(e: { originalEvent: PointerEvent }) {
-      if (this.downClientY === null || this.open) return;
-      if (this.photoswipe?.gestures?.isMultitouch) return;
-      this.maybeOpenSheet(e.originalEvent.clientY - this.downClientY, e.originalEvent.clientX - this.downClientX);
-    },
-
-    /** Pin upward drags so the photo never follows the finger up (down keeps the native close). */
-    onPsVerticalDrag(e: { panY: number; preventDefault(): void }) {
-      if (e.panY - this.downPanY >= 0) return;
-      e.preventDefault();
-    },
-
-    /** Fallback swipe start; buttons keep their own behavior. */
-    onFallbackTouchStart(e: TouchEvent) {
-      if (e.touches.length !== 1) {
-        this.fbTracking = false;
-        return;
-      }
-      if ((e.target as HTMLElement).closest('button')) {
-        this.fbTracking = false;
-        return;
-      }
-      this.fbStartX = e.touches[0].clientX;
-      this.fbStartY = e.touches[0].clientY;
-      this.fbStartT = Date.now();
-      this.fbTracking = true;
-    },
-
-    /** Fallback swipe end; opens on a quick, mostly-vertical swipe up. */
-    onFallbackTouchEnd(e: TouchEvent) {
-      if (!this.fbTracking) return;
-      this.fbTracking = false;
-      if (this.open) return;
-      const t = e.changedTouches[0];
-      if (!t) return;
-      this.maybeOpenSheet(t.clientY - this.fbStartY, t.clientX - this.fbStartX, Date.now() - this.fbStartT);
     },
 
     onClickCapture(e: Event) {
