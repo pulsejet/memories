@@ -129,7 +129,8 @@ export default defineComponent({
     enterTimer: 0,
     /** Element the fallback swipe detector is bound to, if any */
     fallbackEl: null as HTMLElement | null,
-    /** Finger Y and pan at the current PhotoSwipe gesture start */
+    /** Finger position and pan at the current PhotoSwipe gesture start */
+    downClientX: 0,
     downClientY: null as number | null,
     downPanY: 0,
     /** Fallback swipe tracking on viewer slides */
@@ -507,6 +508,7 @@ export default defineComponent({
 
     /** Record the gesture origin; a gesture also implies init, so bind the fallback here. */
     onPsPointerDown(e: { originalEvent: PointerEvent }) {
+      this.downClientX = e.originalEvent.clientX;
       this.downClientY = e.originalEvent.clientY;
       this.downPanY = this.photoswipe?.currSlide?.pan.y ?? 0;
       // The element only exists after init, which any gesture implies.
@@ -521,7 +523,10 @@ export default defineComponent({
     onPsPointerMove(e: { originalEvent: PointerEvent }) {
       if (this.downClientY === null || this.open) return;
       if (this.photoswipe?.gestures?.isMultitouch) return;
-      this.maybeOpenSheet(e.originalEvent.clientY - this.downClientY);
+      this.maybeOpenSheet(
+        e.originalEvent.clientY - this.downClientY,
+        e.originalEvent.clientX - this.downClientX,
+      );
     },
 
     /** Pin upward drags so the photo never follows the finger up (down keeps the native close). */
