@@ -71,6 +71,15 @@
         </div>
       </div>
     </div>
+
+    <ViewerBottomSheet
+      v-if="isMobileLayout && photoswipe"
+      :photo="currentPhoto"
+      :photoswipe="photoswipe"
+      :open="sheetOpen"
+      @open="setBottomSheet(true)"
+      @close="setBottomSheet(false)"
+    />
   </div>
 </template>
 
@@ -90,6 +99,7 @@ import * as utils from '@services/utils';
 import * as nativex from '@native';
 
 import ImageEditor from './ImageEditor.vue';
+import ViewerBottomSheet from './ViewerBottomSheet.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 import PhotoSwipe, { type PhotoSwipeOptions } from 'photoswipe';
 import 'photoswipe/style.css';
@@ -108,6 +118,7 @@ import StarIcon from 'vue-material-design-icons/Star.vue';
 import StarOutlineIcon from 'vue-material-design-icons/StarOutline.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
 import InfoIcon from 'vue-material-design-icons/InformationOutline.vue';
+import SidebarIcon from 'vue-material-design-icons/DockRight.vue';
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 import TuneIcon from 'vue-material-design-icons/Tune.vue';
 import SlideshowIcon from 'vue-material-design-icons/PlayBox.vue';
@@ -144,6 +155,7 @@ export default defineComponent({
     NcButton,
     BackIcon,
     ImageEditor,
+    ViewerBottomSheet,
     XLoadingIcon,
   },
 
@@ -162,6 +174,10 @@ export default defineComponent({
     sidebarOpen: false,
     sidebarWidth: 400,
     outerWidth: '100vw',
+
+    /** Mobile bottom sheet with photo metadata */
+    sheetOpen: false,
+    isMobileLayout: utils.isMobile(),
 
     /** User interaction detection */
     activityTimer: 0,
@@ -296,8 +312,15 @@ export default defineComponent({
           id: 'info',
           name: this.t('memories', 'Info'),
           icon: markRaw(InfoIcon),
-          callback: this.toggleSidebar,
+          callback: this.toggleInfo,
           if: true,
+        },
+        {
+          id: 'sidebar',
+          name: this.t('memories', 'Sidebar'),
+          icon: markRaw(SidebarIcon),
+          callback: this.toggleSidebar,
+          if: this.isMobileLayout && !nativex.has(),
         },
         {
           id: 'edit',
@@ -539,6 +562,7 @@ export default defineComponent({
     /** Create the base photoswipe object */
     async createBase(args: PhotoSwipeOptions) {
       this.show = true;
+      this.sheetOpen = false;
       await this.$nextTick();
 
       const photoswipe = new PhotoSwipe({
@@ -567,7 +591,7 @@ export default defineComponent({
         getViewportSizeFn: () => {
           // Ignore the sidebar if mobile or fullscreen
           const isFullscreen = Boolean(document.fullscreenElement);
-          const use = this.sidebarOpen && !utils.isMobile() && !isFullscreen;
+          const use = this.sidebarOpen && !this.isMobileLayout && !isFullscreen;
 
           // Calculate the sidebar width to use and outer width
           const sidebarWidth = use ? _m.sidebar.getWidth() : 0;
@@ -661,6 +685,7 @@ export default defineComponent({
       this.photoswipe.on('close', () => {
         this.isOpen = false;
         this.fullyOpened = false;
+        this.sheetOpen = false;
         this.setUiVisible(false);
         this.hideSidebar();
         this.setFragment(null);
@@ -676,6 +701,7 @@ export default defineComponent({
         this.isOpen = false;
         this.fullyOpened = false;
         this.editorOpen = false;
+        this.sheetOpen = false;
         this.photoswipe = null;
         this.list = [];
         this.globalCount = 0;
@@ -1252,6 +1278,8 @@ export default defineComponent({
     },
 
     handleWindowResize() {
+      this.isMobileLayout = utils.isMobile();
+      this.sheetOpen &&= this.isMobileLayout;
       this.show && this.photoswipe?.updateSize();
     },
 
@@ -1272,8 +1300,27 @@ export default defineComponent({
       if (this.sidebarOpen) {
         this.closeSidebar();
       } else {
+        this.setBottomSheet(false);
         this.openSidebar();
       }
+    },
+
+    /** Toggle photo info: bottom sheet on mobile, sidebar otherwise */
+    toggleInfo() {
+      if (this.isMobileLayout) {
+        this.setBottomSheet();
+      } else {
+        this.toggleSidebar();
+      }
+    },
+
+    /** Open, close, or toggle the mobile bottom sheet */
+    setBottomSheet(want?: boolean) {
+      want ??= !this.sheetOpen;
+      if (want === this.sheetOpen) return;
+      if (want && (!this.currentPhoto || this.editorOpen)) return;
+      if (want && this.sidebarOpen) this.closeSidebar();
+      this.sheetOpen = want;
     },
 
     /**
