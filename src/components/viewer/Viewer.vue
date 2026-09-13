@@ -137,6 +137,7 @@ import PsLivePhoto from './PsLivePhoto';
 
 import type { IImageInfo, IPhoto, TimelineState } from '@typings';
 import type { PsContent } from './types';
+import type { MediaPlayerElement } from 'vidstack/elements';
 
 import LivePhotoIcon from '@components/icons/LivePhoto.vue';
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
@@ -1422,14 +1423,14 @@ export default defineComponent({
 
       // If this is a video, wait for it to finish
       if (this.isVideo) {
-        // Get active video element
-        const video = this.photoswipe?.element?.querySelector<HTMLVideoElement>('.pswp__item.active video');
+        // Get active player element
+        const player = this.photoswipe?.element?.querySelector<MediaPlayerElement>('.pswp__item.active media-player');
 
-        // If no video tag is found by now, something likely went wrong. Just skip ahead.
+        // If no player is found by now, something likely went wrong. Just skip ahead.
         // Otherwise check if video is not ended yet
-        if ((video?.currentTime ?? Infinity) < (video?.duration ?? 0) - 0.1) {
+        if ((player?.currentTime ?? Infinity) < (player?.duration ?? 0) - 0.1) {
           // Wait for video to finish
-          video?.addEventListener('ended', this.slideshowTimerFired);
+          player?.addEventListener('ended', this.slideshowTimerFired, { once: true });
           return;
         }
       }
@@ -1662,17 +1663,6 @@ export default defineComponent({
   }
 }
 
-:deep(.video-js .vjs-big-play-button) {
-  display: none;
-}
-
-:deep(.plyr__volume) {
-  // Cannot be vertical yet :(
-  @media (max-width: 768px) {
-    display: none;
-  }
-}
-
 :deep(.pswp) {
   contain: strict;
 
@@ -1707,6 +1697,9 @@ export default defineComponent({
 </style>
 
 <style lang="scss">
+// Video styles
+@use './PsVideo.scss';
+
 // Prevent the popper from overlapping with the sidebar
 .pswp > div > .v-popper__wrapper {
   overflow: visible !important;

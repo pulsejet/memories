@@ -1,0 +1,51 @@
+// Video player styles (managed by PsVideo.ts). Scoped to the viewer root;
+// the player itself lives in PhotoSwipe slide holders below it.
+.memories-viewer {
+  .video-container {
+    // Video-sized box centered in the slide holder by default (dimensions
+    // from PsVideo.onContentResize); full viewport once fully-opened below.
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: var(--vw, 100%);
+    height: var(--vh, 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    media-player {
+      width: 100%;
+      height: 100%;
+      // Override vidstack's 16/9 default; the video is letterboxed below.
+      aspect-ratio: auto;
+    }
+
+    media-provider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+
+      video {
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+        aspect-ratio: auto;
+      }
+    }
+  }
+
+  // Full-viewport player (and full-width controls) once the viewer
+  // is fully opened; the opening transition uses the video-sized box.
+  &.fully-opened {
+    .video-container {
+      left: 0;
+      top: 0;
+      transform: none;
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
