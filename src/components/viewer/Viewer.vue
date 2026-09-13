@@ -38,9 +38,9 @@
       </div>
 
       <div class="top-bar" v-if="photoswipe">
-        <NcActions :inline="numInlineActions" container=".memories-viewer .pswp">
+        <NcActions :inline="numInlineTopActions" container=".memories-viewer .pswp">
           <NcActionButton
-            v-for="action of actions"
+            v-for="action of topActions"
             :key="action.id"
             :aria-label="action.name"
             close-after-click
@@ -75,6 +75,20 @@
           {{ currentDateTaken }}<template v-if="currentAddressShort"> • {{ currentAddressShort }}</template>
         </div>
       </div>
+
+      <MobileBottomBar v-if="photoswipe && bottomActions.length" class="viewer-mobile-actions" dark>
+        <button
+          v-for="action of bottomActions"
+          :key="action.id"
+          class="mobile-bottom-bar-item"
+          :aria-label="action.name"
+          :title="action.name"
+          @click="action.callback()"
+        >
+          <component :is="action.icon" :size="24" v-bind="action.iconArgs ?? {}" />
+          <span class="label">{{ action.name }}</span>
+        </button>
+      </MobileBottomBar>
     </div>
 
     <ViewerSheetGestures v-if="isMobileLayout && photoswipe" :photoswipe="photoswipe" @open="setBottomSheet(true)" />
@@ -100,6 +114,7 @@ import * as nativex from '@native';
 import ImageEditor from './ImageEditor.vue';
 import ViewerBottomSheet from './ViewerBottomSheet.vue';
 import ViewerSheetGestures from './ViewerSheetGestures.vue';
+import MobileBottomBar from '@components/MobileBottomBar.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 import PhotoSwipe, { type PhotoSwipeOptions } from 'photoswipe';
 import 'photoswipe/style.css';
@@ -153,6 +168,7 @@ export default defineComponent({
     NcButton,
     BackIcon,
     ImageEditor,
+    MobileBottomBar,
     ViewerBottomSheet,
     ViewerSheetGestures,
     XLoadingIcon,
@@ -241,17 +257,53 @@ export default defineComponent({
   },
 
   computed: {
-    /** Number of buttons to show inline */
-    numInlineActions(): number {
-      let base = 3;
-      if (this.canShare) base++;
-      if (this.canEdit) base++;
-
-      if (_m.window.innerWidth < 768) {
-        return Math.min(base, 1);
-      } else {
-        return Math.min(base, 5);
+    /** Number of top bar buttons to show inline */
+    numInlineTopActions(): number {
+      if (this.isMobileLayout) {
+        return Math.min(this.topActions.length, 1);
       }
+
+      let base = 3;
+      if (this.canShare) {
+        base++;
+      }
+      if (this.canEdit) {
+        base++;
+      }
+
+      return Math.min(base, 5);
+    },
+
+    /** Top bar actions, excluding anything visible in the mobile bottom bar */
+    topActions(): IViewerAction[] {
+      if (!this.isMobileLayout) {
+        return this.actions;
+      }
+
+      const bottomIds = new Set(this.bottomActions.map((action) => action.id));
+      return this.actions.filter((action) => !bottomIds.has(action.id));
+    },
+
+    /** Bottom bar actions on mobile */
+    bottomActions(): IViewerAction[] {
+      if (!this.isMobileLayout) {
+        return [];
+      }
+
+      // Bottom bar uses a fixed independent order.
+      const order = ['share', 'edit', 'add-to-album', 'delete', 'remove-from-album'];
+
+      // Get all actions available in this order.
+      return this.actions
+        .filter((action) => order.includes(action.id))
+        .sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))
+        .map((action) => {
+          // Some names may be too long for the bottom bar.
+          if (action.id === 'add-to-album') {
+            return { ...action, name: this.t('memories', 'Add to') };
+          }
+          return action;
+        });
     },
 
     /** Get the currently open photo */
@@ -1509,6 +1561,29 @@ export default defineComponent({
       word-break: break-word;
       line-height: 1.2em;
     }
+  }
+}
+
+.viewer-mobile-actions {
+  display: none;
+  @media (max-width: 768px) {
+    display: flex;
+  }
+
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55));
+  width: inherit;
+  padding: 8px 8px max(10px, env(safe-area-inset-bottom));
+  z-index: 100001;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+
+  transition: opacity 0.2s ease-in-out;
+  opacity: 0;
+  pointer-events: none;
+  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow) & {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 
