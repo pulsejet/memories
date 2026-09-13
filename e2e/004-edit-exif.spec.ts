@@ -34,8 +34,8 @@ test.describe('Metadata', () => {
     });
 
     await test.step('Verify in viewer', async () => {
-      await expect(page.locator('.memories_viewer .exif.title')).toHaveText(testTitle);
-      await expect(page.locator('.memories_viewer .exif.description')).toHaveText(testDescription);
+      await expect(page.locator('.memories-viewer .exif.title')).toHaveText(testTitle);
+      await expect(page.locator('.memories-viewer .exif.description')).toHaveText(testDescription);
     });
   });
 });

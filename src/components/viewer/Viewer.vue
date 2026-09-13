@@ -2,7 +2,7 @@
   <div
     v-if="show"
     ref="outer"
-    class="memories_viewer outer remove-gap"
+    class="memories-viewer outer remove-gap"
     :class="{ fullyOpened, slideshowTimer }"
     :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"
@@ -33,7 +33,7 @@
       </div>
 
       <div class="top-bar" v-if="photoswipe" :class="{ visible: showControls }">
-        <NcActions :inline="numInlineActions" container=".memories_viewer .pswp">
+        <NcActions :inline="numInlineActions" container=".memories-viewer .pswp">
           <NcActionButton
             v-for="action of actions"
             :key="action.id"

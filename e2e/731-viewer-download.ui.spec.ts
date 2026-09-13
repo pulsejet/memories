@@ -21,7 +21,7 @@ test.describe('@ui Viewer image download', () => {
     await snap(page, 'viewer-image');
 
     const downloadPromise = page.waitForEvent('download');
-    await page.locator('.memories_viewer').getByRole('button', { name: 'Actions' }).click();
+    await page.locator('.memories-viewer').getByRole('button', { name: 'Actions' }).click();
     await page.getByRole('menuitem', { name: 'Download', exact: true }).click();
     const download = await downloadPromise;
 
@@ -49,7 +49,7 @@ test.describe('@ui Viewer live video download', () => {
     await page.waitForSelector('body.viewer-fully-opened');
 
     const downloadPromise = page.waitForEvent('download');
-    await page.locator('.memories_viewer').getByRole('button', { name: 'Actions' }).click();
+    await page.locator('.memories-viewer').getByRole('button', { name: 'Actions' }).click();
     await page.getByRole('menuitem', { name: 'Download Video' }).click();
     const download = await downloadPromise;
 

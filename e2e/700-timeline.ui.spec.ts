@@ -25,6 +25,6 @@ test.describe('@ui Timeline feed and photo preview', () => {
     await page.locator(`.p-outer--${fileid1}`).click();
     await page.waitForSelector('body.viewer-fully-opened');
     await page.keyboard.press('Escape');
-    await page.locator('.memories_viewer').waitFor({ state: 'detached' });
+    await page.locator('.memories-viewer').waitFor({ state: 'detached' });
   });
 });
