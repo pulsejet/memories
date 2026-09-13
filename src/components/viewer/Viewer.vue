@@ -286,7 +286,8 @@ export default defineComponent({
 
     /** Bottom bar actions on mobile */
     bottomActions(): IViewerAction[] {
-      if (!this.isMobileLayout) {
+      // Hidden on videos to avoid overlap with player controls.
+      if (!this.isMobileLayout || this.isVideo) {
         return [];
       }
 
@@ -1583,7 +1584,7 @@ export default defineComponent({
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
   pointer-events: none;
-  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow) & {
+  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow):not(.is-video) & {
     opacity: 1;
     pointer-events: auto;
   }
