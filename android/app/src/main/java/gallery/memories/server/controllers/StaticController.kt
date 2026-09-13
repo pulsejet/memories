@@ -44,7 +44,10 @@ object StaticController {
         out.flush()
     }
 
-    /** Serves one file from a snapshot [dir] (js/css). Replies 404 itself when missing. */
+    /**
+     * Serves one file from a snapshot [dir] (js/css), ETag-validated so repeat
+     * launches reuse the cache instead of reparsing. Replies 404 itself when missing.
+     */
     fun serveFile(req: HttpRequest, out: BufferedOutputStream, dir: File, mime: String) {
         val name = staticName(req, out) ?: return
         val file = File(dir, name)
@@ -52,6 +55,13 @@ object StaticController {
             HttpWriter.reply(out, 404, "Not Found", "not found")
             return
         }
-        HttpWriter.sendStream(out, mime, file.length()) { file.inputStream() }
+        val etag = "\"${file.lastModified().toString(16)}-${file.length().toString(16)}\""
+        if (req.headers["if-none-match"]?.split(",")?.any { it.trim() == etag || it.trim() == "*" } == true) {
+            HttpWriter.writeHeaders(out, 304, HttpWriter.reason(304), mapOf("ETag" to etag))
+            out.flush()
+            return
+        }
+        val extra = mapOf("ETag" to etag, "Cache-Control" to "no-cache")
+        HttpWriter.sendStream(out, mime, file.length(), extra) { file.inputStream() }
     }
 }
