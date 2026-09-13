@@ -125,7 +125,7 @@ export default defineComponent({
     },
 
     async update<K extends keyof ISystemConfig>(key: K, value: ISystemConfig[K] | null = null) {
-      if (!this.config?.hasOwnProperty(key)) {
+      if (!this.config || !Object.hasOwn(this.config, key)) {
         console.error('Unknown setting', key);
         return;
       }

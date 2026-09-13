@@ -65,13 +65,13 @@ export default defineComponent({
       // Find common tags in all selected photos
       for (const photo of this.photos) {
         const s = new Set<number>();
-        for (const tag of Object.keys(photo.imageInfo?.tags || {}).map(Number)) {
+        for (const tag of Object.keys(photo.imageInfo?.tags ?? {}).map(Number)) {
           s.add(tag);
         }
         tagIds = tagIds ? [...tagIds].filter((x: number) => s.has(x)) : [...s];
       }
 
-      this.tagSelection = tagIds || [];
+      this.tagSelection = tagIds ?? [];
       this.origIds = new Set(this.tagSelection);
     },
 

@@ -174,7 +174,7 @@ export default defineComponent({
       }
     },
 
-    search() {
+    async search() {
       if (this.loading || this.searchBar.length === 0) {
         return;
       }
@@ -199,17 +199,15 @@ export default defineComponent({
 
       this.loading = true;
       const q = window.encodeURIComponent(this.searchBar);
-      axios
-        .get<NLocation[]>(`${this.searchBase}/search?q=${q}&format=jsonv2`)
-        .then((response) => {
-          this.loading = false;
-          this.options = response.data.filter((x) => x.lat && x.lon && x.display_name);
-        })
-        .catch((error) => {
-          this.loading = false;
-          console.error(error);
-          showError(this.t('memories', 'Failed to search for location.'));
-        });
+      try {
+        const response = await axios.get<NLocation[]>(`${this.searchBase}/search?q=${q}&format=jsonv2`);
+        this.options = response.data.filter((x) => x.lat && x.lon && x.display_name);
+      } catch (error) {
+        console.error(error);
+        showError(this.t('memories', 'Failed to search for location.'));
+      } finally {
+        this.loading = false;
+      }
     },
 
     clear() {

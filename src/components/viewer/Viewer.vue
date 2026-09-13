@@ -585,8 +585,8 @@ export default defineComponent({
     /** Event on file changed */
     handleFileUpdated({ fileid }: { fileid: number }) {
       const photo = this.currentPhoto;
-      const isvideo = photo && photo.flag & this.c.FLAG_IS_VIDEO;
-      if (photo && !isvideo && photo.fileid === fileid) {
+      const isvideo = (photo?.flag ?? 0) & this.c.FLAG_IS_VIDEO;
+      if (photo?.fileid === fileid && !isvideo) {
         this.photoswipe?.refreshSlideContent(this.currIndex);
       }
     },
@@ -728,7 +728,7 @@ export default defineComponent({
       // Put viewer over everything else
       const navElem = document.getElementById('app-navigation-vue');
       this.photoswipe.on('beforeOpen', () => {
-        if (navElem) navElem.style.zIndex = '0';
+        navElem?.style.setProperty('z-index', '0');
       });
       this.photoswipe.on('openingAnimationStart', () => {
         this.isOpen = true;
@@ -752,7 +752,7 @@ export default defineComponent({
         nativex.setTheme(); // reset
       });
       this.photoswipe.on('destroy', () => {
-        if (navElem) navElem.style.zIndex = '';
+        navElem?.style.setProperty('z-index', '');
 
         // reset everything
         this.show = false;
@@ -943,7 +943,7 @@ export default defineComponent({
           this.globalAnchor -= prevDay.count;
         } else if (idx >= this.list.length) {
           // Load next day
-          const lastDayId = this.list[this.list.length - 1].dayid;
+          const lastDayId = this.list.at(-1)!.dayid;
           const lastDayIdx = utils.binarySearch(dayIds, lastDayId);
           if (lastDayIdx === dayIds.length - 1) {
             // No next day
@@ -1404,9 +1404,9 @@ export default defineComponent({
 
         // If no video tag is found by now, something likely went wrong. Just skip ahead.
         // Otherwise check if video is not ended yet
-        if (video && video.currentTime < video.duration - 0.1) {
+        if ((video?.currentTime ?? Infinity) < (video?.duration ?? 0) - 0.1) {
           // Wait for video to finish
-          video.addEventListener('ended', this.slideshowTimerFired);
+          video?.addEventListener('ended', this.slideshowTimerFired);
           return;
         }
       }

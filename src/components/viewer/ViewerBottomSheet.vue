@@ -166,7 +166,7 @@ export default defineComponent({
     spots(): number[] {
       const out: number[] = [];
       for (const s of [0, this.headOffset(), this.restOffset()].sort((a, b) => a - b)) {
-        if (!out.length || s - out[out.length - 1] >= DOCK_PX) out.push(s);
+        if (!out.length || s - out.at(-1)! >= DOCK_PX) out.push(s);
       }
       return out;
     },
@@ -180,7 +180,7 @@ export default defineComponent({
 
     applyOffset() {
       const sheet = this.refs().sheet;
-      if (sheet) sheet.style.transform = `translateY(${Math.round(this.offsetY)}px)`;
+      sheet?.style.setProperty('transform', `translateY(${Math.round(this.offsetY)}px)`);
     },
 
     /** Run fn with transitions off so the box jumps without animating. */
@@ -205,7 +205,7 @@ export default defineComponent({
       sheet.style.transition = `transform ${ms}ms ease-out`;
       window.clearTimeout(this.enterTimer);
       this.enterTimer = window.setTimeout(() => {
-        if (this.refs().sheet) this.refs().sheet.style.transition = '';
+        this.refs().sheet?.style.setProperty('transition', '');
       }, ms + 60);
       this.snapPeek();
     },

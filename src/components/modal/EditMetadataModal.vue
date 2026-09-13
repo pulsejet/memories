@@ -204,8 +204,8 @@ export default defineComponent({
 
       // Get exif fields diff
       const exifResult = {
-        ...(this.refs().editExif?.result?.() || {}),
-        ...(this.refs().editLocation?.result?.() || {}),
+        ...(this.refs().editExif?.result?.() ?? {}),
+        ...(this.refs().editLocation?.result?.() ?? {}),
       };
 
       // Tags may be created which might throw
@@ -223,7 +223,7 @@ export default defineComponent({
       const exifs = new Map<number, IExif>();
       for (const p of this.photos!) {
         // Basic EXIF fields
-        const raw: IExif = JSON.parse(JSON.stringify(exifResult));
+        const raw: IExif = structuredClone(exifResult as IExif);
 
         // Date header
         const date = this.refs().editDate?.result?.(p);
@@ -233,7 +233,7 @@ export default defineComponent({
 
         // Orientation
         const orientation = this.refs().editOrientation?.result?.(p);
-        if (orientation !== null && orientation !== undefined) {
+        if (orientation != null) {
           raw.Orientation = orientation;
         }
 

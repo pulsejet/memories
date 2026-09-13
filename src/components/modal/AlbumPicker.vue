@@ -157,7 +157,7 @@ export default defineComponent({
 
   computed: {
     filteredList() {
-      if (!this.albums || !this.search || !this.fuse) return this.albums || [];
+      if (!this.albums || !this.search || !this.fuse) return this.albums ?? [];
       return this.fuse.search(this.search).map((r) => r.item);
     },
   },

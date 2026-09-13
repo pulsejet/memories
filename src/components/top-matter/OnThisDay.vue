@@ -184,7 +184,7 @@ export default defineComponent({
 
     moveLeft() {
       const inner = this.refs().inner!;
-      inner.scrollBy(-(this.scrollStack.pop() || inner.clientWidth), 0);
+      inner.scrollBy(-(this.scrollStack.pop() ?? inner.clientWidth), 0);
     },
 
     moveRight() {

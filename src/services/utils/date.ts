@@ -110,22 +110,15 @@ export function getFromNowStr(date: Date, opts?: { padding?: number }) {
 
 /** Convert number of seconds to time string */
 export function getDurationStr(sec: number) {
-  let hours = Math.floor(sec / 3600);
-  let minutes: number | string = Math.floor((sec - hours * 3600) / 60);
-  let seconds: number | string = sec - hours * 3600 - minutes * 60;
-
-  if (seconds < 10) {
-    seconds = '0' + seconds;
-  }
+  const hours = Math.floor(sec / 3600);
+  const minutes = Math.floor((sec - hours * 3600) / 60);
+  const seconds = sec - hours * 3600 - minutes * 60;
 
   if (hours > 0) {
-    if (minutes < 10) {
-      minutes = '0' + minutes;
-    }
-    return `${hours}:${minutes}:${seconds}`;
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 
-  return `${minutes}:${seconds}`;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
 /**

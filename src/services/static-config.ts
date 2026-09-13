@@ -58,7 +58,7 @@ class StaticConfig {
 
     // Copy over all missing settings (e.g. local settings)
     for (const key in old) {
-      if (!server.hasOwnProperty(key)) {
+      if (!Object.hasOwn(server, key)) {
         (server as any)[key] = (old as any)[key];
       }
     }

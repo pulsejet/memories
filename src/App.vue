@@ -399,7 +399,7 @@ export default defineComponent({
         },
       ];
 
-      this.navItems = navItems.filter((item) => typeof item.if === 'undefined' || Boolean(item.if));
+      this.navItems = navItems.filter((item) => item.if === undefined || Boolean(item.if));
     },
 
     linkClick() {

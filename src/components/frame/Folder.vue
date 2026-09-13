@@ -80,7 +80,7 @@ export default defineComponent({
     },
 
     sanitizedName(): string {
-      return this.data.name.replace(/[^a-zA-Z0-9-_]/g, '');
+      return this.data.name.replaceAll(/[^a-zA-Z0-9-_]/g, '');
     },
   },
 

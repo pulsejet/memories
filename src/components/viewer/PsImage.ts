@@ -54,7 +54,7 @@ export default class ImageContentSetup {
   public onDestroy() {
     // When the photoswipe instance is destroyed, make sure
     // all sticky URLs are released. This will prevent memory leaks.
-    for (const fileid of Array.from(this.stickySrcs.keys())) {
+    for (const fileid of this.stickySrcs.keys()) {
       this.setUnsticky(fileid);
     }
   }

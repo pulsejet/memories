@@ -222,16 +222,16 @@ export function getLayout(
 
 function flagMatrixStr(matrix: number[][], numFlag: number) {
   let str = '';
-  for (let i = 0; i < matrix.length; i++) {
-    const rstr = matrix[i].map((v) => v.toString(2).padStart(numFlag, '0')).join(' ');
-    str += i.toString().padStart(2) + ' | ' + rstr + '\n';
+  for (const [i, row] of matrix.entries()) {
+    const rstr = row.map((v) => v.toString(2).padStart(numFlag, '0')).join(' ');
+    str += `${i.toString().padStart(2)} | ${rstr}\n`;
   }
   return str;
 }
 
 function mulberry32(a: number) {
-  return function () {
-    var t = (a += 0x6d2b79f5);
+  return () => {
+    let t = (a += 0x6d2b79f5);
     t = Math.imul(t ^ (t >>> 15), t | 1);
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;

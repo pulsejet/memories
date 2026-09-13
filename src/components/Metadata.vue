@@ -268,7 +268,7 @@ export default defineComponent({
 
           // Use timezone offset if available
           if (!valid() && tzOffset) {
-            dateWithTz = date.setZone('UTC' + tzOffset);
+            dateWithTz = date.setZone(`UTC${tzOffset}`);
           }
 
           // Fall back to tzId

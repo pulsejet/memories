@@ -212,7 +212,7 @@ export default defineComponent({
     errorFetchingAlbum: null as number | null,
     loadingCollaborators: false,
     errorFetchingCollaborators: null,
-    randomId: Math.random().toString().substring(2, 10),
+    randomId: Math.random().toString().slice(2, 10),
     publicLinkCopied: false,
     config: {
       minSearchStringLength: parseInt(window.OC.config['sharing.minSearchStringLength'], 10) || 0,

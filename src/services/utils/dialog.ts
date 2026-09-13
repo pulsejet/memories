@@ -39,16 +39,14 @@ bus.on('memories:fragment:pop:dialog', () => {
 });
 
 export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
-  const opts: ConfirmOptions = Object.assign(
-    {
-      title: '',
-      message: '',
-      confirm: t('memories', 'Yes'),
-      confirmClasses: 'error',
-      cancel: t('memories', 'No'),
-    },
-    options ?? {},
-  );
+  const opts: ConfirmOptions = {
+    title: '',
+    message: '',
+    confirm: t('memories', 'Yes'),
+    confirmClasses: 'error',
+    cancel: t('memories', 'No'),
+    ...options,
+  };
 
   let result = false;
   const dialog = getDialogBuilder(opts.title ?? '')
@@ -104,12 +102,12 @@ export function prompt(opts: PromptOptions): Promise<string | null> {
 /** Default button factory for the file picker */
 function chooseButtonFactory(nodes: INode[]): IFilePickerButton[] {
   const fileName = nodes?.[0]?.attributes?.displayName || nodes?.[0]?.basename;
-  let label = nodes.length === 1 ? t('memories', 'Choose {file}', { file: fileName }) : t('memories', 'Choose');
+  const label = nodes.length === 1 ? t('memories', 'Choose {file}', { file: fileName }) : t('memories', 'Choose');
   return [
     {
       callback: () => {},
       variant: 'primary',
-      label: label,
+      label,
     },
   ];
 }
@@ -143,10 +141,10 @@ export async function chooseNcFolder(
   }
 
   // Blank is not a valid folder
-  folder = folder || '/';
+  folder ||= '/';
 
   // Remove double slashes
-  folder = folder.replace(/\/+/g, '/');
+  folder = folder.replaceAll(/\/+/g, '/');
 
   // Look for any trailing or leading whitespace
   if (folder.trim() !== folder) {

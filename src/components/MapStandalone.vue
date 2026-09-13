@@ -112,8 +112,8 @@ export default defineComponent({
     tileLayerOptions(): { referrerPolicy: string; maxZoom: number; maxNativeZoom: number } {
       return {
         referrerPolicy: 'origin',
-        maxZoom: this.tileServer?.maxZoom || 19,
-        maxNativeZoom: this.tileServer?.maxZoom || 19,
+        maxZoom: this.tileServer?.maxZoom ?? 19,
+        maxNativeZoom: this.tileServer?.maxZoom ?? 19,
       };
     },
   },
