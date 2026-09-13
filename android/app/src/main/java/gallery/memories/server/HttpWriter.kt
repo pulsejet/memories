@@ -92,11 +92,21 @@ object HttpWriter {
     }
 
     /** Streams a file with a known length without loading it into memory. */
-    fun sendStream(out: BufferedOutputStream, mime: String, length: Long, open: () -> InputStream) {
-        writeHeaders(
-            out, 200, "OK",
-            mapOf("Content-Type" to mime, "Content-Length" to length.toString(), "Cache-Control" to "no-store", "Connection" to "close"),
+    fun sendStream(
+        out: BufferedOutputStream,
+        mime: String,
+        length: Long,
+        extraHeaders: Map<String, String> = emptyMap(),
+        open: () -> InputStream,
+    ) {
+        val headers = mutableMapOf(
+            "Content-Type" to mime,
+            "Content-Length" to length.toString(),
+            "Cache-Control" to "no-store",
+            "Connection" to "close",
         )
+        headers.putAll(extraHeaders)
+        writeHeaders(out, 200, "OK", headers)
         open().use { it.copyTo(out) }
         out.flush()
     }

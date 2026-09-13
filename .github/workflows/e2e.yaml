@@ -166,11 +166,6 @@ jobs:
               opcache.jit=tracing,
               opcache.jit_buffer_size=64M
 
-        - name: Set up FFmpeg
-          env:
-            URL: https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n9.0-latest-linux64-gpl-9.0.tar.xz
-          run: curl -L $URL -o - | sudo tar -xJvf - -C /usr/bin/ --strip-components=2 --wildcards --no-anchored '**/bin/ff*'
-
       - name: Run tests
         env:
           NC_DB_TYPE: ${{ matrix.databases }}
@@ -189,11 +184,3 @@ jobs:
           name: report-${{ matrix.databases }}-${{ matrix.php-versions }}-${{ matrix.server-versions }}
           path: apps/${{ env.APP_NAME }}/playwright-report
           retention-days: 15
-
-      - name: Upload Playwright videos
-        uses: actions/upload-artifact@v7
-        if: ${{ github.event_name != 'pull_request' }}
-        with:
-          path: apps/${{ env.APP_NAME }}/video-${{ matrix.databases }}-${{ matrix.php-versions }}-${{ matrix.server-versions }}.mp4
-          retention-days: 3
-          archive: false

@@ -86,7 +86,7 @@ export default defineComponent({
     },
 
     filteredList() {
-      if (!this.list || !this.search || !this.fuse) return this.list || [];
+      if (!this.list || !this.search || !this.fuse) return this.list ?? [];
       return this.fuse.search(this.search).map((r) => r.item);
     },
   },

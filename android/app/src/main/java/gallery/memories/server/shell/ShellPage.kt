@@ -20,9 +20,22 @@ object ShellPage {
     private fun String.jsString(): String =
         "'" + replace("\\", "\\\\").replace("'", "\\'") + "'"
 
-    /** Content-Security-Policy for the shell: self plus the per-request bootstrap nonce. */
-    fun csp(nonce: String): String =
-        "script-src 'self' 'nonce-$nonce'; style-src 'self' 'unsafe-inline'"
+    /** Content-Security-Policy for the shell: local pages only, API calls anywhere. */
+    fun csp(nonce: String): String = listOf(
+        "default-src 'self'",
+        "script-src 'self' blob: 'nonce-$nonce'",
+        "worker-src 'self' blob:",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob: https:",
+        "media-src 'self' blob: data:",
+        "connect-src 'self' https: http: wss: ws: data: blob:",
+        "font-src 'self' data:",
+        "frame-src 'self' https://www.openstreetmap.org",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+    ).joinToString("; ")
 
     /**
      * Renders the shell for a snapshot [describe].

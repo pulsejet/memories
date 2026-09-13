@@ -45,7 +45,7 @@ e2e_generate_datasets() {
 
         # Standalone video for video filter tests.
         mkdir -p "$E2E_DATASET_CACHE/primary/for-vid"
-        cp -n "$MEMORIES_DIR/tests/assets/unknown_01.mp4" "$E2E_DATASET_CACHE/primary/for-vid/clip.mp4"
+        cp "$MEMORIES_DIR/tests/assets/unknown_01.mp4" "$E2E_DATASET_CACHE/primary/for-vid/clip.mp4"
     fi
 }
 
@@ -298,17 +298,6 @@ e2e_main() {
     npx playwright test "${run_args[@]}"
     local PW_EXIT=$?
     set -e
-
-    # Post process video if enabled
-    if [ "${E2E_VIDEO:-0}" = "1" ]; then
-        echo "Post-processing Playwright videos..."
-        npx tsx e2e/video-postprocess.ts
-
-        if [ -n "$CI" ]; then
-            mv "$MEMORIES_DIR/playwright-results.mp4" \
-                "$MEMORIES_DIR/video-${NC_DB_TYPE}-${PHP_VERSION}-${NC_VERSION}.mp4"
-        fi
-    fi
 
     return "$PW_EXIT"
 }

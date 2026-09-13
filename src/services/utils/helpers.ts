@@ -71,11 +71,14 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
   if (size === 'screen') {
     const sw = Math.floor(screen.width * devicePixelRatio);
     const sh = Math.floor(screen.height * devicePixelRatio);
+    const longEdge = Math.max(sw, sh);
     size = [sw, sh];
 
     // Use capped full image if NativeX is used
     if (isLocalPhoto(photo)) {
-      return API.Q(NAPI.IMAGE_FULL(photo.auid!), { size: Math.max(sw, sh) });
+      return API.Q(NAPI.IMAGE_FULL(photo.auid!), { size: longEdge });
+    } else if (photo.local_photo?.auid && isLikelySamePhoto(photo, photo.local_photo)) {
+      return API.Q(NAPI.IMAGE_FULL(photo.local_photo.auid), { size: longEdge });
     }
   }
 
@@ -185,9 +188,15 @@ export function applyAuids(photos: IPhoto[] | null | undefined): void {
 export function getFolderRoutePath(basePath: string) {
   let path = (_m.route.params.path || '/') as string | string[];
   path = typeof path === 'string' ? path : path.join('/');
-  path = basePath + '/' + path;
-  path = path.replace(/\/\/+/g, '/'); // Remove double slashes
+  path = `${basePath}/${path}`;
+  path = path.replaceAll(/\/\/+/g, '/'); // Remove double slashes
   return path;
+}
+
+/** Normalize a route param to string (repeatable params parse as string[]). */
+export function routeParamToString(param?: string | string[]): string {
+  if (Array.isArray(param)) return param.join('/');
+  return param?.toString() ?? String();
 }
 
 /**

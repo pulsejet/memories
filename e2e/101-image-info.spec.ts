@@ -35,6 +35,7 @@ test.describe('@api Image Info', () => {
 
     // These depend on reverse geocoding, not setup yet.
     delete data.address;
+    delete data.address_short;
     delete data.exif?.DateTimeEpoch;
     delete data.exif?.LocationTZID;
     delete data.exif?.ExifVersion;

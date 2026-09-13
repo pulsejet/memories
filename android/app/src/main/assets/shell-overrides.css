@@ -1,1 +1,4 @@
-body{background-image:none!important}
+html, body {
+    background-color: transparent !important;
+    background-image: none !important
+}

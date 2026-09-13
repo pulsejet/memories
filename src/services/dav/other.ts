@@ -26,7 +26,7 @@ export async function viewInFolder(photo: IPhoto) {
  */
 export function viewInFolderUrl({ filename, fileid }: { filename: string; fileid: number }) {
   // ensure dirPath starts with a slash
-  let dirPath = filename.substring(0, filename.lastIndexOf('/'));
+  let dirPath = filename.slice(0, filename.lastIndexOf('/'));
   if (!dirPath.startsWith('/')) {
     dirPath = `/${dirPath}`;
   }

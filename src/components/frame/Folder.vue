@@ -3,8 +3,6 @@
     draggable="false"
     class="folder fill-block"
     :class="{
-      hasPreview: previews.length > 0,
-      onePreview: previews.length === 1,
       [`folder--${sanitizedName}`]: true,
     }"
     :to="target"
@@ -82,7 +80,7 @@ export default defineComponent({
     },
 
     sanitizedName(): string {
-      return this.data.name.replace(/[^a-zA-Z0-9-_]/g, '');
+      return this.data.name.replaceAll(/[^a-zA-Z0-9-_]/g, '');
     },
   },
 
@@ -132,7 +130,7 @@ export default defineComponent({
   }
 
   // Make it white if there is a preview
-  .folder.hasPreview > & {
+  .folder:has(.previews .img-outer) > & {
     .folder-icon {
       opacity: 1;
       filter: invert(1) brightness(100);
@@ -146,7 +144,7 @@ export default defineComponent({
   .folder:hover > & > .folder-icon {
     opacity: 0.8;
   }
-  .folder.hasPreview:hover > & {
+  .folder:has(.previews .img-outer):hover > & {
     opacity: 0;
   }
 
@@ -177,7 +175,7 @@ export default defineComponent({
     height: 50%;
     display: inline-block;
 
-    .folder.onePreview > & {
+    .folder:has(.preview-container > .img-outer:only-child) > & {
       width: 100%;
       height: 100%;
     }

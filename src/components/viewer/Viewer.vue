@@ -2,8 +2,13 @@
   <div
     v-if="show"
     ref="outer"
-    class="memories_viewer outer remove-gap"
-    :class="{ fullyOpened, slideshowTimer }"
+    class="memories-viewer outer remove-gap"
+    :class="{
+      'fully-opened': fullyOpened,
+      'is-video': isVideo,
+      'is-slideshow': !!slideshowTimer,
+      'force-metadata': !!slideshowTimer && config.metadata_in_slideshow,
+    }"
     :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"
   >
@@ -18,15 +23,37 @@
       v-show="!editorOpen"
       @pointermove.passive="setUiVisible"
       @pointerdown.passive="setUiVisible"
+      @touchstart.passive="tapPatch.onTouchStart"
+      @touchend="tapPatch.onTouchEnd"
+      @touchcancel.passive="tapPatch.onTouchCancel"
     >
-      <div class="top-bar" v-if="photoswipe" :class="{ visible: showControls }">
-        <NcActions :inline="numInlineActions" container=".memories_viewer .pswp">
+      <div class="top-bar-left" v-if="photoswipe">
+        <NcButton
+          variant="tertiary-no-background"
+          :aria-label="t('memories', 'Back')"
+          :title="t('memories', 'Back')"
+          @click="
+            beep();
+            close();
+          "
+        >
+          <template #icon>
+            <BackIcon :size="24" />
+          </template>
+        </NcButton>
+      </div>
+
+      <div class="top-bar" v-if="photoswipe">
+        <NcActions :inline="numInlineTopActions" container=".memories-viewer .pswp">
           <NcActionButton
-            v-for="action of actions"
+            v-for="action of topActions"
             :key="action.id"
             :aria-label="action.name"
             close-after-click
-            @click="action.callback()"
+            @click="
+              beep();
+              action.callback();
+            "
           >
             {{ action.name }}
             <template #icon>
@@ -36,7 +63,17 @@
         </NcActions>
       </div>
 
-      <div class="bottom-bar" v-if="photoswipe" :class="{ visible: showBottomBar }">
+      <div class="top-date" v-if="photoswipe">
+        <div class="date-line" v-if="currentDateStr">
+          {{ currentDateStr }}
+        </div>
+        <div class="time-line" v-if="currentTimeStr">
+          {{ currentTimeStr }}
+          <template v-if="currentAddressShort"> • {{ currentAddressShort }}</template>
+        </div>
+      </div>
+
+      <div class="bottom-bar" v-if="photoswipe">
         <div class="exif title" v-if="currentPhoto?.imageInfo?.exif?.Title">
           {{ currentPhoto.imageInfo.exif.Title }}
         </div>
@@ -44,10 +81,30 @@
           {{ currentPhoto.imageInfo.exif.Description }}
         </div>
         <div class="exif date" v-if="currentDateTaken">
-          {{ currentDateTaken }}
+          {{ currentDateTaken }}<template v-if="currentAddressShort"> • {{ currentAddressShort }}</template>
         </div>
       </div>
+
+      <MobileBottomBar v-if="photoswipe && bottomActions.length" class="viewer-mobile-actions" dark>
+        <button
+          v-for="action of bottomActions"
+          :key="action.id"
+          class="mobile-bottom-bar-item"
+          :aria-label="action.name"
+          :title="action.name"
+          @click="
+            beep();
+            action.callback();
+          "
+        >
+          <component :is="action.icon" :size="24" v-bind="action.iconArgs ?? {}" />
+          <span class="label">{{ action.name }}</span>
+        </button>
+      </MobileBottomBar>
     </div>
+
+    <ViewerSheetGestures v-if="isMobileLayout && photoswipe" :photoswipe="photoswipe" @open="setBottomSheet(true)" />
+    <ViewerBottomSheet v-if="sheetOpen && isMobileLayout" :photo="currentPhoto" @close="setBottomSheet(false)" />
   </div>
 </template>
 
@@ -57,6 +114,7 @@ import { defineComponent, markRaw } from 'vue';
 import UserConfig from '@mixins/UserConfig';
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
+import NcButton from '@nextcloud/vue/components/NcButton';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
@@ -64,8 +122,12 @@ import { API } from '@services/API';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
+import { makeTapPatch } from '@services/patches/mobile-click';
 
 import ImageEditor from './ImageEditor.vue';
+import ViewerBottomSheet from './ViewerBottomSheet.vue';
+import ViewerSheetGestures from './ViewerSheetGestures.vue';
+import MobileBottomBar from '@components/MobileBottomBar.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 import PhotoSwipe, { type PhotoSwipeOptions } from 'photoswipe';
 import 'photoswipe/style.css';
@@ -77,12 +139,14 @@ import type { IImageInfo, IPhoto, TimelineState } from '@typings';
 import type { PsContent } from './types';
 
 import LivePhotoIcon from '@components/icons/LivePhoto.vue';
+import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import StarOutlineIcon from 'vue-material-design-icons/StarOutline.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
 import InfoIcon from 'vue-material-design-icons/InformationOutline.vue';
+import SidebarIcon from 'vue-material-design-icons/DockRight.vue';
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 import TuneIcon from 'vue-material-design-icons/Tune.vue';
 import SlideshowIcon from 'vue-material-design-icons/PlayBox.vue';
@@ -108,15 +172,18 @@ type IViewerAction = {
 
 const DEFAULT_SLIDESHOW_MS = 5000;
 const SIDEBAR_DEBOUNCE_MS = 350;
-const BODY_VIEWER_VIDEO = 'viewer-video';
-const BODY_VIEWER_FULLY_OPENED = 'viewer-fully-opened';
 
 export default defineComponent({
   name: 'Viewer',
   components: {
     NcActions,
     NcActionButton,
+    NcButton,
+    BackIcon,
     ImageEditor,
+    MobileBottomBar,
+    ViewerBottomSheet,
+    ViewerSheetGestures,
     XLoadingIcon,
   },
 
@@ -130,11 +197,14 @@ export default defineComponent({
     editorSrc: '',
 
     show: false,
-    showControls: false,
     fullyOpened: false,
     sidebarOpen: false,
     sidebarWidth: 400,
     outerWidth: '100vw',
+
+    /** Mobile bottom sheet with photo metadata */
+    sheetOpen: false,
+    isMobileLayout: utils.isMobile(),
 
     /** User interaction detection */
     activityTimer: 0,
@@ -164,6 +234,13 @@ export default defineComponent({
 
     /** Photo keys for which an imageInfo request is currently ongoing */
     imageInfoLoading: new Set<string>(),
+
+    /** Tap-to-click patch handlers for viewer chrome buttons */
+    tapPatch: markRaw(
+      makeTapPatch({
+        containers: ['.top-bar', '.top-bar-left', '.viewer-mobile-actions', '.v-popper__popper'],
+      }),
+    ),
   }),
 
   mounted() {
@@ -200,17 +277,56 @@ export default defineComponent({
   },
 
   computed: {
-    /** Number of buttons to show inline */
-    numInlineActions(): number {
-      let base = 3;
-      if (this.canShare) base++;
-      if (this.canEdit) base++;
-
-      if (_m.window.innerWidth < 768) {
-        return Math.min(base, 3);
-      } else {
-        return Math.min(base, 5);
+    /** Number of top bar buttons to show inline */
+    numInlineTopActions(): number {
+      if (this.isMobileLayout) {
+        return Math.min(this.topActions.length, 1);
       }
+
+      let base = 3;
+      if (this.canShare) {
+        base++;
+      }
+      if (this.canEdit) {
+        base++;
+      }
+
+      return Math.min(base, 5);
+    },
+
+    /** Top bar actions, excluding anything visible in the mobile bottom bar */
+    topActions(): IViewerAction[] {
+      if (!this.isMobileLayout) {
+        return this.actions;
+      }
+
+      const bottomIds = new Set(this.bottomActions.map((action) => action.id));
+      return this.actions.filter((action) => !bottomIds.has(action.id));
+    },
+
+    /** Bottom bar actions on mobile */
+    bottomActions(): IViewerAction[] {
+      // Hidden on videos to avoid overlap with player controls.
+      if (!this.isMobileLayout || this.isVideo) {
+        return [];
+      }
+
+      // Bottom bar uses a fixed independent order.
+      const order = ['share', 'edit', 'add-to-album', 'delete', 'remove-from-album'];
+
+      // Get all actions available in this order.
+      return this.actions
+        .filter((action) => order.includes(action.id))
+        .sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))
+        .map((action) => {
+          // Some names may be too long for the bottom bar.
+          if (action.id === 'add-to-album') {
+            return { ...action, name: this.t('memories', 'Add to') };
+          } else if (action.id === 'remove-from-album') {
+            return { ...action, name: this.t('memories', 'Remove') };
+          }
+          return action;
+        });
     },
 
     /** Get the currently open photo */
@@ -226,6 +342,13 @@ export default defineComponent({
     /** Get all actions to show */
     actions(): IViewerAction[] {
       return [
+        {
+          id: 'favorite',
+          name: this.t('memories', 'Favorite'),
+          icon: this.isFavorite ? markRaw(StarIcon) : markRaw(StarOutlineIcon),
+          callback: this.favoriteCurrent,
+          if: !this.routeIsPublic && !this.isLocal,
+        },
         {
           id: 'share',
           name: this.t('memories', 'Share'),
@@ -259,18 +382,18 @@ export default defineComponent({
           if: this.isLivePhoto,
         },
         {
-          id: 'favorite',
-          name: this.t('memories', 'Favorite'),
-          icon: this.isFavorite ? markRaw(StarIcon) : markRaw(StarOutlineIcon),
-          callback: this.favoriteCurrent,
-          if: !this.routeIsPublic && !this.isLocal,
-        },
-        {
           id: 'info',
           name: this.t('memories', 'Info'),
           icon: markRaw(InfoIcon),
-          callback: this.toggleSidebar,
+          callback: this.toggleInfo,
           if: true,
+        },
+        {
+          id: 'sidebar',
+          name: this.t('memories', 'Sidebar'),
+          icon: markRaw(SidebarIcon),
+          callback: this.toggleSidebar,
+          if: this.isMobileLayout && !nativex.has(),
         },
         {
           id: 'edit',
@@ -365,19 +488,23 @@ export default defineComponent({
       return Boolean(p.flag & this.c.FLAG_IS_FAVORITE);
     },
 
-    /** Show bottom bar info such as date taken */
-    showBottomBar(): boolean {
-      return (
-        (this.showControls || (!!this.slideshowTimer && this.config.metadata_in_slideshow)) &&
-        !this.isVideo &&
-        this.fullyOpened &&
-        Boolean(this.currentPhoto?.imageInfo)
-      );
-    },
-
     /** Allow closing the viewer */
     allowClose(): boolean {
       return !this.editorOpen && !dav.isSingleItem() && !this.slideshowTimer;
+    },
+
+    /** Get date taken date line */
+    currentDateStr(): string | null {
+      const date = this.currentPhoto?.imageInfo?.datetaken;
+      if (!date) return null;
+      return utils.getDateStr(new Date(date * 1000));
+    },
+
+    /** Get date taken time line */
+    currentTimeStr(): string | null {
+      const date = this.currentPhoto?.imageInfo?.datetaken;
+      if (!date) return null;
+      return utils.getTimeStr(new Date(date * 1000));
     },
 
     /** Get date taken string */
@@ -385,6 +512,11 @@ export default defineComponent({
       const date = this.currentPhoto?.imageInfo?.datetaken;
       if (!date) return null;
       return utils.getLongDateStr(new Date(date * 1000), false, true);
+    },
+
+    /** Get short place name for current photo */
+    currentAddressShort(): string | null {
+      return this.currentPhoto?.imageInfo?.address_short ?? null;
     },
 
     /** Show edit buttons */
@@ -420,10 +552,6 @@ export default defineComponent({
   },
 
   watch: {
-    fullyOpened(val) {
-      document.body.classList.toggle(BODY_VIEWER_FULLY_OPENED, val);
-    },
-
     allowClose(val) {
       if (!this.photoswipe) return;
       this.photoswipe.options.pinchToClose = val;
@@ -457,8 +585,8 @@ export default defineComponent({
     /** Event on file changed */
     handleFileUpdated({ fileid }: { fileid: number }) {
       const photo = this.currentPhoto;
-      const isvideo = photo && photo.flag & this.c.FLAG_IS_VIDEO;
-      if (photo && !isvideo && photo.fileid === fileid) {
+      const isvideo = (photo?.flag ?? 0) & this.c.FLAG_IS_VIDEO;
+      if (photo?.fileid === fileid && !isvideo) {
         this.photoswipe?.refreshSlideContent(this.currIndex);
       }
     },
@@ -493,10 +621,12 @@ export default defineComponent({
     /** Create the base photoswipe object */
     async createBase(args: PhotoSwipeOptions) {
       this.show = true;
+      this.sheetOpen = false;
       await this.$nextTick();
 
       const photoswipe = new PhotoSwipe({
-        counter: true,
+        counter: false,
+        close: false,
         zoom: false,
         loop: false,
         wheelToZoom: true,
@@ -520,7 +650,7 @@ export default defineComponent({
         getViewportSizeFn: () => {
           // Ignore the sidebar if mobile or fullscreen
           const isFullscreen = Boolean(document.fullscreenElement);
-          const use = this.sidebarOpen && !utils.isMobile() && !isFullscreen;
+          const use = this.sidebarOpen && !this.isMobileLayout && !isFullscreen;
 
           // Calculate the sidebar width to use and outer width
           const sidebarWidth = use ? _m.sidebar.getWidth() : 0;
@@ -598,7 +728,7 @@ export default defineComponent({
       // Put viewer over everything else
       const navElem = document.getElementById('app-navigation-vue');
       this.photoswipe.on('beforeOpen', () => {
-        if (navElem) navElem.style.zIndex = '0';
+        navElem?.style.setProperty('z-index', '0');
       });
       this.photoswipe.on('openingAnimationStart', () => {
         this.isOpen = true;
@@ -614,21 +744,22 @@ export default defineComponent({
       this.photoswipe.on('close', () => {
         this.isOpen = false;
         this.fullyOpened = false;
+        this.sheetOpen = false;
         this.setUiVisible(false);
         this.hideSidebar();
         this.setFragment(null);
         this.updateTitle(undefined);
         nativex.setTheme(); // reset
-        document.body.classList.remove(BODY_VIEWER_VIDEO);
       });
       this.photoswipe.on('destroy', () => {
-        if (navElem) navElem.style.zIndex = '';
+        navElem?.style.setProperty('z-index', '');
 
         // reset everything
         this.show = false;
         this.isOpen = false;
         this.fullyOpened = false;
         this.editorOpen = false;
+        this.sheetOpen = false;
         this.photoswipe = null;
         this.list = [];
         this.globalCount = 0;
@@ -647,24 +778,6 @@ export default defineComponent({
         // Remove active class from others and add to this one
         this.photoswipe!.element?.querySelectorAll('.pswp__item').forEach((el) => el.classList.remove('active'));
         e.slide.holderElement?.classList.add('active');
-
-        // Add type class to body (gates native video passthrough CSS)
-        document.body.classList.toggle(BODY_VIEWER_VIDEO, !!(photo?.flag & this.c.FLAG_IS_VIDEO));
-      });
-
-      // Show and hide controls
-      this.photoswipe.on('uiRegister', (e) => {
-        if (this.photoswipe?.template) {
-          new MutationObserver((mutations) => {
-            mutations.forEach((mutationRecord) => {
-              const pswp = mutationRecord.target as HTMLElement;
-              this.showControls = pswp?.classList.contains('pswp--ui-visible') && !this.slideshowTimer;
-            });
-          }).observe(this.photoswipe.template, {
-            attributes: true,
-            attributeFilter: ['class'],
-          });
-        }
       });
 
       // Video support
@@ -830,7 +943,7 @@ export default defineComponent({
           this.globalAnchor -= prevDay.count;
         } else if (idx >= this.list.length) {
           // Load next day
-          const lastDayId = this.list[this.list.length - 1].dayid;
+          const lastDayId = this.list.at(-1)!.dayid;
           const lastDayIdx = utils.binarySearch(dayIds, lastDayId);
           if (lastDayIdx === dayIds.length - 1) {
             // No next day
@@ -896,6 +1009,11 @@ export default defineComponent({
     close() {
       if (!this.isOpen) return;
       this.photoswipe?.close();
+    },
+
+    /** Play native tap sound on button press */
+    beep() {
+      nativex.playTouchSound();
     },
 
     /** Open with a static list of photos */
@@ -1205,6 +1323,8 @@ export default defineComponent({
     },
 
     handleWindowResize() {
+      this.isMobileLayout = utils.isMobile();
+      this.sheetOpen &&= this.isMobileLayout;
       this.show && this.photoswipe?.updateSize();
     },
 
@@ -1225,8 +1345,27 @@ export default defineComponent({
       if (this.sidebarOpen) {
         this.closeSidebar();
       } else {
+        this.setBottomSheet(false);
         this.openSidebar();
       }
+    },
+
+    /** Toggle photo info: bottom sheet on mobile, sidebar otherwise */
+    toggleInfo() {
+      if (this.isMobileLayout) {
+        this.setBottomSheet();
+      } else {
+        this.toggleSidebar();
+      }
+    },
+
+    /** Open, close, or toggle the mobile bottom sheet */
+    setBottomSheet(want?: boolean) {
+      want ??= !this.sheetOpen;
+      if (want === this.sheetOpen) return;
+      if (want && (!this.currentPhoto || this.editorOpen)) return;
+      if (want && this.sidebarOpen) this.closeSidebar();
+      this.sheetOpen = want;
     },
 
     /**
@@ -1265,9 +1404,9 @@ export default defineComponent({
 
         // If no video tag is found by now, something likely went wrong. Just skip ahead.
         // Otherwise check if video is not ended yet
-        if (video && video.currentTime < video.duration - 0.1) {
+        if ((video?.currentTime ?? Infinity) < (video?.duration ?? 0) - 0.1) {
           // Wait for video to finish
-          video.addEventListener('ended', this.slideshowTimerFired);
+          video?.addEventListener('ended', this.slideshowTimerFired);
           return;
         }
       }
@@ -1353,24 +1492,67 @@ export default defineComponent({
   }
 }
 
-.top-bar {
+.top-bar,
+.top-bar-left {
   z-index: 100001;
   position: absolute;
   top: 8px;
-  right: 50px;
   --default-clickable-area: 44px;
+
+  transition: opacity 0.2s ease-in-out;
+  opacity: 0;
+  pointer-events: none;
+  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow) & {
+    opacity: 1;
+    pointer-events: auto;
+  }
 
   :deep(.button-vue) {
     color: white;
     background-color: transparent !important;
   }
+}
+
+.top-bar-left {
+  left: 8px;
+}
+
+.top-bar {
+  right: 8px;
+}
+
+/** Top date is only displayed on mobile. */
+.top-date {
+  display: none;
+  @media (max-width: 768px) {
+    display: block;
+  }
+
+  z-index: 100001;
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
-  pointer-events: none;
-  &.visible {
+  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow) & {
     opacity: 1;
-    pointer-events: auto;
+  }
+
+  .date-line {
+    font-size: 1em;
+    font-weight: 500;
+  }
+  .time-line {
+    font-size: 0.85em;
+    opacity: 0.85;
+    max-width: calc(100vw - 220px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -1386,11 +1568,15 @@ export default defineComponent({
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
-  &.visible {
+  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow).fully-opened:not(.is-video) &:has(> .exif),
+  .memories-viewer.force-metadata.fully-opened:not(.is-video) &:has(> .exif) {
     opacity: 1;
   }
 
   .exif {
+    @media (max-width: 768px) {
+      display: none;
+    }
     &.title {
       font-weight: bold;
       font-size: 0.9em;
@@ -1406,7 +1592,30 @@ export default defineComponent({
   }
 }
 
-.fullyOpened.slideshowTimer :deep(.pswp__container) {
+.viewer-mobile-actions {
+  display: none;
+  @media (max-width: 768px) {
+    display: flex;
+  }
+
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55));
+  width: inherit;
+  padding: 8px 8px max(10px, env(safe-area-inset-bottom));
+  z-index: 100001;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+
+  transition: opacity 0.2s ease-in-out;
+  opacity: 0;
+  pointer-events: none;
+  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow):not(.is-video) & {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.fully-opened.is-slideshow :deep(.pswp__container) {
   // Animate transitions
   // Disabled normally because this makes you sick if moving fast
   transition: transform 0.75s ease !important;
@@ -1471,12 +1680,17 @@ export default defineComponent({
       opacity: 0 !important;
     }
   }
+}
+</style>
 
-  // Prevent the popper from overlapping with the sidebar
-  > div > .v-popper__wrapper {
-    overflow: visible !important;
-    > .v-popper__inner {
-      transform: translateX(-20px);
+<style lang="scss">
+// Prevent the popper from overlapping with the sidebar
+.pswp > div > .v-popper__wrapper {
+  overflow: visible !important;
+  > .v-popper__inner {
+    transform: translateX(-15px);
+    body:has(aside.app-sidebar) & {
+      transform: translateX(-65px);
     }
   }
 }

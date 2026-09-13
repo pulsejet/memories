@@ -61,3 +61,9 @@ body {
 #app-content-vue {
   overflow-x: hidden;
 }
+
+// Full-bleed routes (e.g. first start) opt out of content margins
+#content.no-margins {
+  margin: 0;
+  padding: 0;
+}

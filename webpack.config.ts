@@ -1,13 +1,23 @@
-const webpack = require('webpack');
-const path = require('path');
-const { ManifestSignPlugin } = require('./webpack.manifest-sign-plugin.ts');
-const { L10nBundlePlugin } = require('./webpack.l10n-bundle-plugin.ts');
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 
-const WorkboxPlugin = require('workbox-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
-const { VueLoaderPlugin } = require('vue-loader');
-const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+import webpack from 'webpack';
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
+import { VueLoaderPlugin } from 'vue-loader';
+import { WebpackManifestPlugin } from 'webpack-manifest-plugin';
+import WorkboxPlugin from 'workbox-webpack-plugin';
+
+// Explicit `.ts` extensions are required by Node's ESM loader.
+// @ts-expect-error TS5097: extension is intentional, do not drop it
+import { L10nBundlePlugin } from './webpack.l10n-bundle-plugin.ts';
+// @ts-expect-error TS5097: extension is intentional, do not drop it
+import { ManifestSignPlugin } from './webpack.manifest-sign-plugin.ts';
+
+// npm i --no-save webpack-bundle-analyzer to enable
+// import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const MiB = 1024 * 1024;
 const appName = process.env.npm_package_name!;
@@ -19,7 +29,7 @@ console.info('Building', appName, appVersion, '\n');
 const manifestFileName = `${appName}-manifest.json`;
 const manifestSigFileName = `${appName}-manifest.sig.json`;
 
-module.exports = {
+export default {
   target: 'web',
   mode: buildMode,
   devtool: 'source-map',
@@ -80,6 +90,7 @@ module.exports = {
       new TerserPlugin({
         exclude: [/filerobot-image-editor/],
         terserOptions: {
+          ecma: 2022,
           output: {
             comments: false,
           },
@@ -183,8 +194,8 @@ module.exports = {
       __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
     }),
 
-    // Bundle analyzer (npm i --no-save webpack-bundle-analyzer)
-    // new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)()
+    // Bundle analyzer (uncomment the import above to use)
+    // new BundleAnalyzerPlugin(),
   ],
 
   resolve: {
@@ -209,7 +220,7 @@ module.exports = {
       '@native': path.resolve(__dirname, 'src', 'native'),
     },
     fallback: {
-      stream: require.resolve('stream-browserify'),
+      stream: fileURLToPath(import.meta.resolve('stream-browserify')),
     },
   },
 };

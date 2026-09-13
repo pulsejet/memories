@@ -83,14 +83,13 @@ export async function createTag(tag: ITag): Promise<ITag> {
 function parseIdFromLocation(url: string): number {
   const queryPos = url.indexOf('?');
   if (queryPos > 0) {
-    url = url.substring(0, queryPos);
+    url = url.slice(0, queryPos);
   }
 
   const parts: string[] = url.split('/');
   let result: string | undefined;
   do {
-    result = parts[parts.length - 1];
-    parts.pop();
+    result = parts.pop();
     // note: first result can be empty when there is a trailing slash,
     // so we take the part before that
   } while (!result && parts.length > 0);

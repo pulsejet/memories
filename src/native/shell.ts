@@ -10,7 +10,7 @@ import type { IConfig } from '@typings';
 export function applyShellConfig(cfg: IConfig) {
   // Mirror of core/layout.user.php html attributes for the given language
   if (cfg.language) {
-    setLanguage(cfg.language.replace(/_/g, '-'));
+    setLanguage(cfg.language.replaceAll('_', '-'));
   }
   if (cfg.locale) {
     setLocale(cfg.locale);

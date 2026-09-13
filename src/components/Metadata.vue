@@ -62,7 +62,7 @@
     </div>
 
     <div v-if="lat && lon" class="map">
-      <iframe class="fill-block" :src="mapUrl"></iframe>
+      <MapStandalone :center="[lat, lon]" :pins="[[lat, lon]]" />
     </div>
   </div>
   <div class="loading-icon fill-block" v-else-if="loading">
@@ -89,6 +89,7 @@ import UserConfig from '@mixins/UserConfig';
 import Cluster from '@components/frame/Cluster.vue';
 import AlbumsList from '@components/modal/AlbumsList.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
+import MapStandalone from '@components/MapStandalone.vue';
 
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
@@ -105,7 +106,7 @@ import type { IAlbum, IFace, IImageInfo, IPhoto, IExif } from '@typings';
 import type { IFolder, INode, IView } from '@nextcloud/files';
 
 interface TopField {
-  id?: string;
+  id: string;
   title: string;
   subtitle: string[];
   icon: Component;
@@ -123,6 +124,7 @@ export default defineComponent({
     Cluster,
     EditIcon,
     XLoadingIcon,
+    MapStandalone,
   },
 
   mixins: [UserConfig],
@@ -181,6 +183,7 @@ export default defineComponent({
 
       if (this.dateOriginal) {
         list.push({
+          id: 'date',
           title: this.dateOriginalStr!,
           subtitle: this.dateOriginalTime!,
           icon: markRaw(CalendarIcon),
@@ -190,6 +193,7 @@ export default defineComponent({
 
       if (this.camera) {
         list.push({
+          id: 'camera',
           title: this.camera,
           subtitle: this.cameraSub,
           icon: markRaw(CameraIrisIcon),
@@ -213,6 +217,7 @@ export default defineComponent({
 
       if (this.tagNamesStr) {
         list.push({
+          id: 'tags',
           title: this.tagNamesStr,
           subtitle: [],
           icon: markRaw(TagIcon),
@@ -222,6 +227,7 @@ export default defineComponent({
 
       if (this.address || this.canEdit) {
         list.push({
+          id: 'location',
           title: this.address || this.t('memories', 'No coordinates'),
           subtitle: this.address ? [] : [this.t('memories', 'Click edit to set location')],
           icon: markRaw(LocationIcon),
@@ -262,7 +268,7 @@ export default defineComponent({
 
           // Use timezone offset if available
           if (!valid() && tzOffset) {
-            dateWithTz = date.setZone('UTC' + tzOffset);
+            dateWithTz = date.setZone(`UTC${tzOffset}`);
           }
 
           // Fall back to tzId
@@ -394,13 +400,6 @@ export default defineComponent({
 
     tagNamesStr(): string | null {
       return this.tagNames.length > 0 ? this.tagNames.join(', ') : null;
-    },
-
-    mapUrl(): string {
-      const boxSize = 0.0075;
-      const bbox = [this.lon - boxSize, this.lat - boxSize, this.lon + boxSize, this.lat + boxSize];
-      const m = `${this.lat},${this.lon}`;
-      return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.join()}&marker=${m}`;
     },
 
     mapFullUrl(): string {
@@ -539,6 +538,10 @@ export default defineComponent({
 .section-title {
   font-variant: all-small-caps;
   padding: 0px 6px;
+}
+
+a {
+  color: inherit; // forced-dark sheet
 }
 
 .exif-head {

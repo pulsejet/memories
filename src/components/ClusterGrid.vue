@@ -179,6 +179,8 @@ export default defineComponent({
 
   &.empty {
     visibility: hidden;
+    flex: 0 0 auto;
+    height: 0;
   }
 
   &:focus {

@@ -1,10 +1,14 @@
 import * as path from 'path';
+import { fileURLToPath } from 'node:url';
 import { test, expect } from '@playwright/test';
 import { appUrl, baseUrl, e2eHeaders, psub } from './navigation';
 import { DavClient, withPublicAPI, withPublicPage } from './utils';
 
 import type { APIRequestContext, APIResponse } from '@playwright/test';
 import type { IDay, IPhoto, IShare } from '@typings';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
 
@@ -173,7 +177,7 @@ test.describe('Public folder share', () => {
       await expect(page.locator(`.p-outer--${folderFileids[0]}`)).toBeVisible();
 
       await page.locator(`.p-outer--${folderFileids[0]} > .img-outer`).click();
-      await page.waitForSelector('body.viewer-fully-opened');
+      await page.waitForSelector('.memories-viewer.fully-opened');
     });
   });
 

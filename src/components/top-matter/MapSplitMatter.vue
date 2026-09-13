@@ -5,18 +5,14 @@
       'anim-markers': animMarkers,
     }"
   >
-    <LMap
-      class="map"
-      ref="map"
-      :crossOrigin="true"
+    <MapStandalone
+      ref="standalone"
       :zoom="zoom"
-      :minZoom="2"
+      :scroll-wheel-zoom="true"
       @ready="onMapReady"
       @moveend="refreshDebounced"
       @zoomend="refreshDebounced"
-      :options="mapOptions"
     >
-      <LTileLayer :key="tileurl" :url="tileurl" :attribution="attribution" :noWrap="true" :options="tileLayerOptions" />
       <LMarker v-for="cluster of clusters" :key="cluster.id" :lat-lng="cluster.center" @click="zoomTo(cluster)">
         <LIcon :icon-anchor="[24, 24]" :className="clusterIconClass(cluster)">
           <div class="preview">
@@ -30,50 +26,34 @@
           </div>
         </LIcon>
       </LMarker>
-    </LMap>
+    </MapStandalone>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { LMap, LTileLayer, LMarker, LPopup, LIcon } from '@vue-leaflet/vue-leaflet';
-import { latLngBounds, Icon } from 'leaflet';
+import { LMarker, LIcon } from '@vue-leaflet/vue-leaflet';
 
 import axios from '@nextcloud/axios';
 
 import UserConfig from '@mixins/UserConfig';
-import staticConfig from '@services/static-config';
 import { API } from '@services/API';
 import * as utils from '@services/utils';
 
-import type { IMapCluster } from '@typings';
+import MapStandalone from '@components/MapStandalone.vue';
 import XImg from '@components/frame/XImg.vue';
 
-import 'leaflet/dist/leaflet.css';
-import 'leaflet-edgebuffer';
-
-const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-const OSM_ATTRIBUTION = '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors';
+import type { IMapCluster } from '@typings';
 
 // CSS transition time for zooming in/out cluster animation
 const CLUSTER_TRANSITION_TIME = 300;
-
-delete (<any>Icon.Default.prototype)._getIconUrl;
-
-Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl: require('leaflet/dist/images/marker-icon.png'),
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
-});
 
 export default defineComponent({
   name: 'MapSplitMatter',
   mixins: [UserConfig],
   components: {
-    LMap,
-    LTileLayer,
+    MapStandalone,
     LMarker,
-    LPopup,
     LIcon,
     XImg,
   },
@@ -81,16 +61,12 @@ export default defineComponent({
   data: () => ({
     zoom: 2,
     oldZoom: 2,
-    mapOptions: {
-      maxBounds: latLngBounds([-90, -180], [90, 180]),
-      maxBoundsViscosity: 0.9,
-    },
     clusters: [] as IMapCluster[],
     animMarkers: false,
   }),
 
   mounted() {
-    if (this.refs().map?.leafletObject) {
+    if (this.refs().standalone?.getMap()) {
       this.onMapReady();
     }
   },
@@ -103,29 +79,6 @@ export default defineComponent({
     utils.bus.off('memories:window:resize', this.handleContainerResize);
   },
 
-  computed: {
-    tileServer() {
-      const tiles = staticConfig.getSync('map_tile_servers') || [];
-      return tiles.find((t) => t.url === this.config.map_tile_server_url);
-    },
-
-    tileurl() {
-      return this.config.map_tile_server_url || OSM_TILE_URL;
-    },
-
-    attribution() {
-      return this.tileServer?.attribution || OSM_ATTRIBUTION;
-    },
-
-    tileLayerOptions() {
-      return {
-        referrerPolicy: 'origin',
-        maxZoom: this.tileServer?.maxZoom || 19,
-        maxNativeZoom: this.tileServer?.maxZoom || 19,
-      };
-    },
-  },
-
   watch: {
     $route(curr, old) {
       if (curr.query.b === old.query.b && curr.query.z === old.query.z) return;
@@ -136,13 +89,13 @@ export default defineComponent({
   methods: {
     refs() {
       return this.$refs as {
-        map: InstanceType<typeof LMap>;
+        standalone: InstanceType<typeof MapStandalone>;
       };
     },
 
     onMapReady() {
       // Make sure the zoom control doesn't overlap with the navbar
-      this.refs().map.leafletObject!.zoomControl.setPosition('topright');
+      this.refs().standalone.getMap()!.zoomControl.setPosition('topright');
 
       // Initialize
       this.initialize();
@@ -170,14 +123,14 @@ export default defineComponent({
         }>(API.MAP_INIT());
 
         // Init data contains position information
-        const map = this.refs().map;
+        const map = this.refs().standalone.getMap();
         const pos = init?.data?.pos;
         if (!pos?.lat || !pos?.lon) {
           throw new Error('No position data');
         }
 
         // This will trigger route change -> fetchClusters
-        map.leafletObject!.setView([pos.lat, pos.lon], 11);
+        map!.setView([pos.lat, pos.lon], 11);
       } catch (e) {
         // We will initialize clusters anyway
       } finally {
@@ -190,11 +143,11 @@ export default defineComponent({
     },
 
     async refresh() {
-      const map = this.refs().map;
-      if (!map || !map.leafletObject) return;
+      const map = this.refs().standalone.getMap();
+      if (!map) return;
 
       // Get boundaries of the map
-      const boundary = map.leafletObject.getBounds();
+      const boundary = map.getBounds();
       let minLat = boundary.getSouth();
       let maxLat = boundary.getNorth();
       let minLon = boundary.getWest();
@@ -204,7 +157,7 @@ export default defineComponent({
       const bounds = this.boundsToStr({ minLat, maxLat, minLon, maxLon });
 
       // Zoom level
-      this.zoom = Math.round(map.leafletObject.getZoom());
+      this.zoom = Math.round(map.getZoom());
 
       // Construct query
       const query = {
@@ -291,9 +244,9 @@ export default defineComponent({
     },
 
     setBoundsFromQuery() {
-      const map = this.refs().map;
+      const map = this.refs().standalone.getMap();
       const { minLat, maxLat, minLon, maxLon } = this.boundsFromQuery();
-      map.leafletObject!.fitBounds([
+      map!.fitBounds([
         [minLat, minLon],
         [maxLat, maxLon],
       ]);
@@ -319,10 +272,10 @@ export default defineComponent({
       }
 
       // Zoom in
-      const map = this.refs().map;
+      const map = this.refs().standalone.getMap();
       const factor = globalThis.innerWidth >= 768 ? 2 : 1;
-      const zoom = map.leafletObject!.getZoom() + factor;
-      map.leafletObject!.setView(cluster.center, zoom, { animate: true });
+      const zoom = map!.getZoom() + factor;
+      map!.setView(cluster.center, zoom, { animate: true });
     },
 
     getGridKey(center: [number, number], zoom: number) {
@@ -419,7 +372,7 @@ export default defineComponent({
     },
 
     handleContainerResize() {
-      this.refs().map?.leafletObject?.invalidateSize(true);
+      this.refs().standalone?.getMap()?.invalidateSize(true);
     },
   },
 });
@@ -429,28 +382,6 @@ export default defineComponent({
 .map-matter {
   height: 100%;
   width: 100%;
-}
-
-.map {
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  z-index: 0;
-  background-color: var(--color-background-dark);
-
-  :deep(.leaflet-control-attribution) {
-    background-color: var(--color-background-dark);
-    color: var(--color-text-light);
-  }
-
-  :deep(.leaflet-bar a) {
-    background-color: var(--color-main-background);
-    color: var(--color-main-text);
-  }
-
-  :deep(.leaflet-bar a.leaflet-disabled) {
-    opacity: 0.6;
-  }
 }
 
 .preview {

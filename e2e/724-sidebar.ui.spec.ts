@@ -37,7 +37,7 @@ test.describe('@ui Sidebar', () => {
   test('Timeline viewer opens native sidebar with sharing tab', async ({ page }) => {
     await page.goto(appUrl);
     await page.locator(`.p-outer--${fileid} > .img-outer`).click();
-    await page.waitForSelector('body.viewer-fully-opened');
+    await page.waitForSelector('.memories-viewer.fully-opened');
 
     await page.getByRole('button', { name: 'Info', exact: true }).click();
     const sidebar = page.locator('#app-sidebar-native');
@@ -61,7 +61,7 @@ test.describe('@ui Sidebar', () => {
   test('Album viewer opens reduced sidebar', async ({ page }) => {
     await page.goto(`${appUrl}/albums/${username}/${encodeURIComponent(albumName)}`);
     await page.locator('.p-outer > .img-outer').first().click();
-    await page.waitForSelector('body.viewer-fully-opened');
+    await page.waitForSelector('.memories-viewer.fully-opened');
 
     await page.getByRole('button', { name: 'Info', exact: true }).click();
     const sidebar = page.locator('#app-sidebar-vue');

@@ -297,7 +297,7 @@ export default defineComponent({
         });
       }
 
-      const dir = filename.substring(0, filename.lastIndexOf('/')) || '/';
+      const dir = filename.slice(0, filename.lastIndexOf('/')) || '/';
       const folder: IFolder = new Folder({
         source: `${getRemoteURL()}${getRootPath()}${dir}`,
         root: getRootPath(),
@@ -331,7 +331,7 @@ export default defineComponent({
       this.info = {
         basename: node.displayname,
         size: node.size ?? 0,
-        mtime: node.mtime ? node.mtime.getTime() / 1000 : 0,
+        mtime: (node.mtime?.getTime() ?? 0) / 1000,
       } as IImageInfo;
 
       this.reducedOpen = false;

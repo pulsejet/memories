@@ -65,7 +65,7 @@ export default defineComponent({
           '{name} failed test: {info}.',
           {
             name,
-            info: status.substring(10),
+            info: status.slice(10),
           },
           0,
           noescape,
@@ -76,7 +76,7 @@ export default defineComponent({
           '{name} binary exists and is usable ({info}).',
           {
             name,
-            info: status.substring(8),
+            info: status.slice(8),
           },
           0,
           noescape,

@@ -10,11 +10,16 @@ import gallery.memories.MainActivity
 import gallery.memories.data.local.prefs.PreferencesStore
 
 @UnstableApi
-/** Server-driven theme (persisted) plus transparent edge-to-edge entry pages. */
+/** Server-driven theme (persisted). Entry pages use the main blue. */
 class ThemeManager(
     private val activity: MainActivity,
     private val prefs: PreferencesStore,
 ) {
+    companion object {
+        /** Flat auth background, matching the welcome/waiting/setup pages. */
+        const val ENTRY_THEME_COLOR = "#174a7d"
+    }
+
     /** Persists the server theme. A null color keeps the previous theme. */
     fun storeTheme(color: String?, isDark: Boolean) = prefs.storeTheme(color, isDark)
 
@@ -27,13 +32,13 @@ class ThemeManager(
      */
     fun applyTheme(color: String?, isDark: Boolean) {
         if (color == null) return
-        activity.isTransparentBars = false
         if (SDK_INT < 35) {
             WindowCompat.setDecorFitsSystemWindows(activity.window, true)
         }
         if (SDK_INT >= 29) {
-            activity.window.isStatusBarContrastEnforced = true
-            activity.window.isNavigationBarContrastEnforced = true
+            // Exact colors, no system scrim: icon contrast comes from [isDark] instead.
+            activity.window.isStatusBarContrastEnforced = false
+            activity.window.isNavigationBarContrastEnforced = false
         }
         val appearance = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
             WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS

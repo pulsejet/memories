@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - **Notice**: The next version of the Android app will be incomptible with older versions of Memories.
 - **Notice**: Requires Nextcloud 34 or later.
 - **Notice**: Updated Planet DB is avilable.
+- **Feature**: Redesigned Viewer UX on mobile
 - **Feature**: Huawei Moving Picture support
 - **Feature**: Configurable location search provider for the metadata editor ([#1500](https://github.com/pulsejet/memories/issues/1500))
 - **Feature**: Geolocation for local photos on Android ([#1723](https://github.com/pulsejet/memories/issues/1723))

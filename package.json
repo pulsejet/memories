@@ -22,6 +22,7 @@
   "homepage": "https://github.com/pulsejet/memories",
   "license": "agpl",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "webpack --config-node-env production --progress",
     "dev": "webpack --config-node-env development --progress",

@@ -1,29 +1,35 @@
-// Make popper menus full height
-.v-popper--theme-dropdown .v-popper__inner {
-  max-height: calc(90vh - 86px) !important; // was 50vh
-}
-
-// Make sure empty content is full width
-[role='note'].empty-content {
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  padding: 10px;
-}
-
-// Make NcListItem border-box to prevent overflow
-li.list-item__wrapper {
-  > a.list-item {
-    box-sizing: border-box;
+// Increase padding on popper menu to make it clickable
+.v-popper__popper ul[role='menu'] li {
+  padding: 3px !important;
+  &:hover {
+    padding: 3px !important;
   }
-}
-
-div.oc-dialog[role='dialog'] {
-  // Make OC dialogs larger to a minimum width
-  min-width: min(400px, 90vw);
+  .action-button__longtext-wrapper {
+    margin-left: 3px;
+  }
 }
 
 // Make tag dropdown show over modal
 ul.nc-select__dropdown {
   z-index: 10000;
+}
+
+// Fix toast position when navigation is closed
+// https://github.com/nextcloud-libraries/nextcloud-dialogs/pull/2600
+body:has(.app-navigation--closed) div[class*='toastContainer_navOpen'] {
+  left: var(--body-container-margin);
+}
+
+// Keep small dialogs compact on mobile
+// https://github.com/nextcloud-libraries/nextcloud-vue/pull/8956
+@media only screen and (max-width: 512px) {
+  body .dialog__modal .modal-wrapper--small .modal-container {
+    width: fit-content;
+    max-width: 90%;
+    height: unset;
+    max-height: 90%;
+    position: relative;
+    top: unset;
+    border-radius: var(--border-radius-element);
+  }
 }

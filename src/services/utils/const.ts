@@ -43,7 +43,7 @@ export const initstate = Object.freeze({
  * @param photo Photo to process
  */
 export function convertFlags(photo: IPhoto) {
-  if (typeof photo.flag === 'undefined') {
+  if (photo.flag === undefined) {
     photo.flag = 0; // flags
     photo.imageInfo = null; // make it reactive
   }

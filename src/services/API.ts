@@ -46,7 +46,7 @@ export class API {
 
     // Clean up input
     for (const key of Object.keys(query)) {
-      if (query[key] === undefined || query[key] === null) {
+      if (query[key] == null) {
         continue;
       }
 
@@ -67,7 +67,7 @@ export class API {
     if (!queryString) return url;
 
     // Check if url already has query string
-    if (url.indexOf('?') > -1) {
+    if (url.includes('?')) {
       return `${url}&${queryString}`;
     } else {
       return `${url}?${queryString}`;

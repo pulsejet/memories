@@ -28,7 +28,7 @@ export type Fragment = {
  */
 function decodeFragment(hash: string): Fragment[] {
   return hash
-    .substring(1) // remove # at start
+    .slice(1) // remove # at start
     .split('&') // get all parts
     .filter(Boolean) // remove empty parts
     .map((frag, i, arr) => {
@@ -185,7 +185,7 @@ async function pushCore(type: FragmentType, ...args: string[]) {
   const list = fragment.list;
 
   // Get the top fragment
-  const top = list.length ? list[list.length - 1] : null;
+  const top = list.at(-1) ?? null;
 
   // Check if we are already on this fragment
   if (top?.type === frag.type) {

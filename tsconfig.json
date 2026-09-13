@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["DOM", "ES2017", "WebWorker"],
-    "target": "ES2017",
-    "module": "ES2020",
+    "lib": ["DOM", "ES2022", "WebWorker"],
+    "target": "ES2022",
+    "module": "ES2022",
     "moduleResolution": "Bundler",
     "sourceMap": true,
     "noImplicitThis": true,

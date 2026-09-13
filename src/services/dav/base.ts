@@ -73,7 +73,7 @@ export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<I
   }
 
   // Get file infos for the rest
-  return cache.concat(await getFilesInternal1(rest));
+  return [...cache, ...(await getFilesInternal1(rest))];
 }
 
 async function getFilesInternal1(photos: IPhoto[]): Promise<IFileInfo[]> {
@@ -152,7 +152,7 @@ async function getFilesInternal2(fileIds: number[]): Promise<IFileInfo[]> {
     .map((file) => {
       // remote remotePath from start
       if (file.filename.startsWith(remotePath)) {
-        file.filename = file.filename.substring(remotePath.length);
+        file.filename = file.filename.slice(remotePath.length);
       }
 
       // create IFileInfo
@@ -252,7 +252,7 @@ export async function extendWithStack(photos: IPhoto[]): Promise<ExtendedStack> 
   const stackRaw = photos.map((p) => p.stackraw ?? []).flat();
 
   // Combine all files
-  const combined = photos.concat(livePhotos, stackRaw);
+  const combined = [...photos, ...livePhotos, ...stackRaw];
 
   // De-duplicate keeping the order same as before
   // https://github.com/pulsejet/memories/issues/1056
@@ -580,7 +580,7 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
       }
 
       createPaths.push(folderPath);
-      folderPath = folderPath.substring(0, folderPath.lastIndexOf('/'));
+      folderPath = folderPath.slice(0, folderPath.lastIndexOf('/'));
     }
 
     // Create from top to bottom

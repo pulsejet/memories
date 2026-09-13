@@ -176,7 +176,7 @@ test.describe('@ui Map', () => {
       mapPage.searchParams.set('z', '13');
       await page.goto(mapPage.toString());
       await expect(page.locator('.split-container')).toBeVisible();
-      await expect(page.locator('.map-matter .map')).toBeVisible();
+      await expect(page.locator('.map-matter .leaflet-container')).toBeVisible();
       await expect(page.locator('.leaflet-marker-icon .preview')).toHaveCount(3);
 
       const badges = await page.locator('.leaflet-marker-icon .preview .count').allTextContents();

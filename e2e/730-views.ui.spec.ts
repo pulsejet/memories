@@ -37,10 +37,23 @@ test.describe('@ui Explore view', () => {
 
 test.describe('@ui Places view', () => {
   test.skip(!!process.env.NO_PLANET_DB, 'Skipping places UI: NO_PLANET_DB is set');
+  test.use({
+    extraHTTPHeaders: e2eHeaders({
+      timelinePath: '/for-geo',
+    }),
+  });
 
   test('Places clusters load', async ({ page }) => {
     await page.goto(`${appUrl}/places`);
     await expect(page).toHaveURL(`${appUrl}/places`);
     await expect(page.locator('.cluster').first()).toBeVisible();
+  });
+
+  test('Place timeline survives refresh', async ({ page }) => {
+    await page.goto(`${appUrl}/places`);
+    await page.locator('.cluster').first().click();
+    await page.waitForSelector('.p-outer');
+    await page.reload();
+    await page.waitForSelector('.p-outer');
   });
 });

@@ -9,7 +9,7 @@
 export function binarySearch<T, K extends keyof T>(arr: T[], elem: T | T[K], key?: K): number {
   if (arr.length === 0) return 0;
 
-  const desc = key ? arr[0][key] > arr[arr.length - 1][key] : arr[0] > arr[arr.length - 1];
+  const desc = key ? arr[0][key] > arr.at(-1)![key] : arr[0] > arr.at(-1)!;
 
   let minIndex = 0;
   let maxIndex = arr.length - 1;
@@ -42,7 +42,7 @@ export function binarySearch<T, K extends keyof T>(arr: T[], elem: T | T[K], key
  * @param floor If true, round down instead of to nearest
  */
 export function round(num: number, places: number, floor = false) {
-  const pow = Math.pow(10, places);
+  const pow = 10 ** places;
   const int = num * pow;
   return (floor ? Math.floor : Math.round)(int) / pow;
 }
@@ -66,7 +66,7 @@ export function randomChoice<T>(arr: T[]): T {
  */
 export function randomSubarray<T>(arr: T[], size: number): T[] {
   if (arr.length <= size) return arr;
-  let shuffled: T[] = arr.slice(0),
+  let shuffled: T[] = [...arr],
     i: number = arr.length,
     min: number = i - size,
     temp: T,
@@ -135,5 +135,5 @@ export function truthyProp<T, K extends keyof T>(obj: T, prop: K): obj is T & { 
 export function humanFileSize(size: number): string {
   if (size === 0) return '0 B';
   const i = Math.floor(Math.log(size) / Math.log(1024));
-  return (size / Math.pow(1024, i)).toFixed(2) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+  return `${(size / 1024 ** i).toFixed(2)} ${['B', 'kB', 'MB', 'GB', 'TB'][i]}`;
 }

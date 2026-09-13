@@ -13,3 +13,4 @@ declare module 'vue-material-design-icons/*.vue' {
 }
 
 declare module 'plyr/dist/plyr.mjs';
+declare module 'node-polyfill-webpack-plugin';

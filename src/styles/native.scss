@@ -20,7 +20,7 @@ html.native {
     backdrop-filter: none !important;
   }
 
-  body.viewer-fully-opened.viewer-video {
+  body:has(.memories-viewer.fully-opened.is-video) {
     // Hide main content when playing a video,
     // so we can pass through to the native video player.
     // The photoswipe element is outside the main content,

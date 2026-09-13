@@ -236,7 +236,7 @@ export default defineComponent({
     },
 
     origDateOldest() {
-      return new Date(this.sortedPhotos[this.sortedPhotos.length - 1].datetaken! * 1000);
+      return new Date(this.sortedPhotos.at(-1)!.datetaken! * 1000);
     },
 
     origDateDiff() {
@@ -275,7 +275,7 @@ export default defineComponent({
 
       // Get date of oldest photo
       if (photos.length > 1) {
-        date = new Date(photos[photos.length - 1].datetaken! * 1000);
+        date = new Date(photos.at(-1)!.datetaken! * 1000);
         this.yearLast = date.getUTCFullYear().toString();
         this.monthLast = (date.getUTCMonth() + 1).toString();
         this.dayLast = date.getUTCDate().toString();
@@ -403,6 +403,7 @@ export default defineComponent({
 .title-text {
   font-size: 0.9em;
   margin-left: 0.2em;
+  margin-bottom: 4px;
 }
 
 .oldest {

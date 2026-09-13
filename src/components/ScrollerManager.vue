@@ -40,7 +40,6 @@
         v-for="tick of visibleTicks"
         :key="tick.key"
         class="tick"
-        :class="{ dash: !tick.text }"
         :style="{ transform: `translateY(calc(${tick.top}px - 50%))` }"
       >
         <span v-if="tick.text">{{ tick.text }}</span>
@@ -221,7 +220,7 @@ export default defineComponent({
       if (this.interacting) return;
 
       // Get the scroll position
-      const scroll = this.recycler?.$el?.scrollTop || 0;
+      const scroll = this.recycler?.$el?.scrollTop ?? 0;
 
       // Emit scroll event
       const event = {
@@ -527,7 +526,7 @@ export default defineComponent({
 
       // Position is after the last tick; choose last
       if (idx >= this.ticks.length) {
-        const tick = this.ticks[this.ticks.length - 1];
+        const tick = this.ticks.at(-1)!;
         return {
           top1: tick.topF,
           top2: this.fullHeight,
@@ -653,7 +652,7 @@ export default defineComponent({
     transition: transform 0.2s linear;
     z-index: 1;
 
-    &.dash {
+    &:not(:has(span)) {
       height: 4px;
       width: 4px;
       border-radius: 50%;

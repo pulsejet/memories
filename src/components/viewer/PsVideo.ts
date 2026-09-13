@@ -513,21 +513,17 @@ class VideoContentSetup {
     if (isVideoContent(e.content)) {
       e.preventDefault();
 
-      const width = e.width;
-      const height = e.height;
-      const content = e.content;
+      const { width, height, content } = e;
 
-      if (content.element) {
-        content.element.style.width = width + 'px';
-        content.element.style.height = height + 'px';
-      }
+      content.element?.style.setProperty('width', `${width}px`);
+      content.element?.style.setProperty('height', `${height}px`);
 
       // override placeholder size, so it more accurately matches the video
       const phStyle = content.placeholder?.element?.style;
       if (phStyle) {
         phStyle.transform = 'none';
-        phStyle.width = width + 'px';
-        phStyle.height = height + 'px';
+        phStyle.width = `${width}px`;
+        phStyle.height = `${height}px`;
       }
     }
   }

@@ -14,10 +14,13 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'node:url';
 
 import type { IDay, IImageInfo, IPhoto } from '@typings';
 import { DATASET, type IDatasetEntry } from './dataset';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const baseAssetsDir = path.join(__dirname, '.dataset-cache');
 
 export function parseExifDate(dateStr: string): { epoch: number; dayid: number } {

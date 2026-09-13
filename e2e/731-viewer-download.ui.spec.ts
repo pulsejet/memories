@@ -17,11 +17,11 @@ test.describe('@ui Viewer image download', () => {
 
     await page.goto(appUrl);
     await page.locator(`.p-outer--${fileid} > .img-outer`).click();
-    await page.waitForSelector('body.viewer-fully-opened');
+    await page.waitForSelector('.memories-viewer.fully-opened');
     await snap(page, 'viewer-image');
 
     const downloadPromise = page.waitForEvent('download');
-    await page.locator('.memories_viewer').getByRole('button', { name: 'Actions' }).click();
+    await page.locator('.memories-viewer').getByRole('button', { name: 'Actions' }).click();
     await page.getByRole('menuitem', { name: 'Download', exact: true }).click();
     const download = await downloadPromise;
 
@@ -46,10 +46,10 @@ test.describe('@ui Viewer live video download', () => {
 
     await page.goto(appUrl);
     await page.locator(`.p-outer--${fileid} > .img-outer`).click();
-    await page.waitForSelector('body.viewer-fully-opened');
+    await page.waitForSelector('.memories-viewer.fully-opened');
 
     const downloadPromise = page.waitForEvent('download');
-    await page.locator('.memories_viewer').getByRole('button', { name: 'Actions' }).click();
+    await page.locator('.memories-viewer').getByRole('button', { name: 'Actions' }).click();
     await page.getByRole('menuitem', { name: 'Download Video' }).click();
     const download = await downloadPromise;
 

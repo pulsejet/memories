@@ -120,6 +120,22 @@ class LocalHttpServer(
 
     fun origin(): String = "http://$HOST:$port"
 
+    /**
+     * Browser URL for a top-level navigation to a loopback [path]: local documents
+     * (shell/static/bridge) stay inside (null), anything else is a proxied upstream
+     * path unwrapped to the origin URL. Null when unconfigured: without an upstream
+     * nothing is proxied, so there is nothing to unwrap to.
+     */
+    fun browserUrlFor(path: String?, query: String?): String? {
+        val config = cfg ?: return null
+        val p = path ?: "/"
+        if (p == "/local" || p.startsWith("/local/")) return null
+        if (p == "/" || p == config.webRoot || p == config.webRoot + "/") return null
+        if (p == "/api" || p.startsWith("/api/") || p == "/image" || p.startsWith("/image/")) return null
+        if (p == "/favicon.ico") return null
+        return config.serverOrigin + p + (query?.let { "?$it" } ?: "")
+    }
+
     private fun handle(sock: Socket) {
         sock.use { s ->
             val input = java.io.BufferedInputStream(s.inputStream, 8192)

@@ -53,7 +53,7 @@ test.describe('@ui Timeline photo deletion', () => {
     await test.step('Open viewer', async () => {
       await page.goto(appUrl);
       await page.locator(`.p-outer--${fileid3}`).click();
-      await page.waitForSelector('body.viewer-fully-opened');
+      await page.waitForSelector('.memories-viewer.fully-opened');
     });
 
     // Get the the current active image so we can recheck.
@@ -62,7 +62,7 @@ test.describe('@ui Timeline photo deletion', () => {
     expect(activePrev).toBeTruthy();
 
     await test.step('Delete image', async () => {
-      const viewer = page.locator('.memories_viewer');
+      const viewer = page.locator('.memories-viewer');
       await viewer.getByRole('button', { name: 'Delete' }).click();
       await page.getByRole('button', { name: 'Yes' }).click();
     });
@@ -76,7 +76,7 @@ test.describe('@ui Timeline photo deletion', () => {
 
     await test.step('Close viewer', async () => {
       await page.keyboard.press('Escape');
-      await page.locator('.memories_viewer').waitFor({ state: 'detached' });
+      await page.locator('.memories-viewer').waitFor({ state: 'detached' });
     });
 
     await test.step('Verify timeline', async () => {

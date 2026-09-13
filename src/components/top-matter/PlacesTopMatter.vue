@@ -34,6 +34,7 @@ import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import * as strings from '@services/strings';
+import * as utils from '@services/utils';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import UnassignedIcon from 'vue-material-design-icons/MapMarkerOff.vue';
@@ -57,7 +58,7 @@ export default defineComponent({
         return this.t('memories', 'Unidentified location');
       }
 
-      return this.$route.params.name?.toString()?.split('-').slice(1).join('-');
+      return utils.routeParamToString(this.$route.params.name).split('-').slice(1).join('-');
     },
   },
 

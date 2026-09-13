@@ -455,7 +455,7 @@ export default defineComponent({
 
       // Static top matter to exclude from recycler height
       const topmatter = this.refs().topmatter;
-      const tmHeight = topmatter?.$el?.clientHeight || 0;
+      const tmHeight = topmatter?.$el?.clientHeight ?? 0;
 
       // Recycler height
       const recycler = this.refs().recycler!;
@@ -465,7 +465,7 @@ export default defineComponent({
       const widthChanged = this.rowWidth !== targetWidth;
 
       if (heightChanged) {
-        recycler.$el.style.height = targetHeight + 'px';
+        recycler.$el.style.height = `${targetHeight}px`;
       }
 
       if (widthChanged) {
@@ -645,7 +645,8 @@ export default defineComponent({
       }
 
       // Albums
-      const { user, name } = this.$route.params as { user: string; name: string };
+      const user = utils.routeParamToString(this.$route.params.user);
+      const name = utils.routeParamToString(this.$route.params.name);
       if (this.routeIsAlbums) {
         if (!user || !name) {
           throw new Error('Invalid album route');
@@ -1285,7 +1286,7 @@ export default defineComponent({
       const seen = new Map<number, number>();
 
       // Previous justified row
-      let prevJustifyTop = justify[0]?.top || 0;
+      let prevJustifyTop = justify[0]?.top ?? 0;
 
       // Add all rows
       let dataIdx = 0;
@@ -1508,6 +1509,8 @@ export default defineComponent({
   width: 100%;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
 
   @media (max-width: 768px) {
     // Get rid of padding on img-outer (1px on mobile)

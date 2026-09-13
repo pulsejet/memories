@@ -53,15 +53,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var chooser: FileChooserHandler
     private lateinit var startup: AppStartupCoordinator
 
-    /** Whether entry pages draw under transparent system bars. Read by the edge-to-edge controller. */
-    var isTransparentBars = false
-    /** Last upstream host served locally. Used to keep app navigation inside the WebView. */
-    var host: String? = null
     /** One-shot: cleared by the web client after the main page loads so Back skips entry pages. */
     var clearHistoryOnLoad = false
-
-    /** Matches in-app routes; everything else opens in the browser. */
-    val memoriesRegex = Regex("/apps/memories/.*$")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -191,12 +184,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun applyTheme(color: String?, isDark: Boolean) = themes.applyTheme(color, isDark)
-
-    /** Tolerates calls before onCreate wiring by falling back to a fresh controller. */
-    fun setTransparentBars(transparent: Boolean, isDark: Boolean = true) {
-        if (!::edges.isInitialized) edges = EdgeToEdgeController(this)
-        edges.setTransparentBars(transparent, isDark)
-    }
 
     fun refreshTimeline(force: Boolean = false) = eventBus.refreshTimeline(force)
 }

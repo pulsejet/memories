@@ -132,7 +132,7 @@ export default defineComponent({
 
     hasHighContrastEnabled(): boolean {
       const themes = globalThis.OCA?.Theming?.enabledThemes || [];
-      return themes.find((theme: any) => theme.indexOf('highcontrast') !== -1);
+      return themes.some((theme: string) => theme.includes('highcontrast'));
     },
 
     themeDataAttr(): Record<string, boolean> {

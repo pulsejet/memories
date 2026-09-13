@@ -560,7 +560,7 @@ export default defineComponent({
         .elementsFromPoint(touch.clientX, clampedY)
         .find((e) => e.classList.contains('p-outer-super'));
       let overPhoto: IPhoto | null = elem?.__photo;
-      if (overPhoto && overPhoto.flag & this.c.FLAG_PLACEHOLDER) overPhoto = null;
+      if ((overPhoto?.flag ?? 0) & this.c.FLAG_PLACEHOLDER) overPhoto = null;
 
       // Do multi-selection "till" overPhoto "from" anchor
       // This logic is completely different from the desktop because of the

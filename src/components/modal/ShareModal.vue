@@ -248,7 +248,7 @@ export default defineComponent({
       }
 
       // Generate random alphanumeric string name for album
-      const name = '.link-' + (Math.random() + 1).toString(36).substring(2);
+      const name = `.link-${(Math.random() + 1).toString(36).slice(2)}`;
 
       // Create hidden album if multiple files are selected
       await this.l(async () => {
