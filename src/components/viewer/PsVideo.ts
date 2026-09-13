@@ -52,6 +52,14 @@ const PLAYER_UI_SELECTOR = [
   '[role="menuitem"]',
 ].join(', ');
 
+// Cap buffer to avoid overloading go-vod while
+// processing requests from multiple users.
+const HLS_BUFFER_CONFIG = {
+  maxBufferLength: 30,
+  maxMaxBufferLength: 30,
+  backBufferLength: 30,
+};
+
 /**
  * Check if slide has video content
  */
@@ -205,7 +213,15 @@ class VideoContentSetup {
       const provider = (e as MediaProviderChangeEvent).detail;
       if (isHLSProvider(provider)) {
         provider.library = Hls;
+        provider.config = {
+          ...provider.config,
+          ...HLS_BUFFER_CONFIG,
+        };
       }
+    });
+
+    player.addEventListener('hls-instance', (e: Event) => {
+      Object.assign((e as CustomEvent).detail.config, HLS_BUFFER_CONFIG);
     });
 
     player.addEventListener('playing', () => {
