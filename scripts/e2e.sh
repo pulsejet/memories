@@ -45,7 +45,7 @@ e2e_generate_datasets() {
 
         # Standalone video for video filter tests.
         mkdir -p "$E2E_DATASET_CACHE/primary/for-vid"
-        cp -n "$MEMORIES_DIR/tests/assets/unknown_01.mp4" "$E2E_DATASET_CACHE/primary/for-vid/clip.mp4"
+        cp "$MEMORIES_DIR/tests/assets/unknown_01.mp4" "$E2E_DATASET_CACHE/primary/for-vid/clip.mp4"
     fi
 }
 
