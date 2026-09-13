@@ -5,7 +5,6 @@
     tabindex="1"
     :aria-label="title"
     class="cluster fill-block"
-    :class="{ error }"
     :to="target"
     @click="click"
   >
@@ -22,7 +21,6 @@
         <XImg
           draggable="false"
           class="fill-block"
-          :class="{ error }"
           :key="data.cluster_id"
           :src="previewUrl"
           :svg-tag="plus"
@@ -179,7 +177,7 @@ $namemargin: 10px;
 
   .cluster--circle &,
   .cluster--album &,
-  .cluster.error & {
+  .cluster:has(img.error) & {
     color: unset;
 
     > .title {
@@ -292,7 +290,7 @@ $namemargin: 10px;
       overflow: hidden;
       background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 10%, transparent 40%);
 
-      .cluster.error &,
+      .cluster:has(img.error) &,
       .cluster--circle &,
       .cluster--album & {
         display: none;
