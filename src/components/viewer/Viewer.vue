@@ -72,16 +72,8 @@
       </div>
     </div>
 
-    <ViewerSheetGestures
-      v-if="isMobileLayout && photoswipe"
-      :photoswipe="photoswipe"
-      @open="setBottomSheet(true)"
-    />
-    <ViewerBottomSheet
-      v-if="sheetOpen && isMobileLayout"
-      :photo="currentPhoto"
-      @close="setBottomSheet(false)"
-    />
+    <ViewerSheetGestures v-if="isMobileLayout && photoswipe" :photoswipe="photoswipe" @open="setBottomSheet(true)" />
+    <ViewerBottomSheet v-if="sheetOpen && isMobileLayout" :photo="currentPhoto" @close="setBottomSheet(false)" />
   </div>
 </template>
 

@@ -133,10 +133,7 @@ export default defineComponent({
     onPsPointerMove(e: { originalEvent: PointerEvent }) {
       if (this.downClientY === null) return;
       if (this.photoswipe?.gestures?.isMultitouch) return;
-      this.maybeOpenSheet(
-        e.originalEvent.clientY - this.downClientY,
-        e.originalEvent.clientX - this.downClientX,
-      );
+      this.maybeOpenSheet(e.originalEvent.clientY - this.downClientY, e.originalEvent.clientX - this.downClientX);
     },
 
     onPsVerticalDrag(e: { panY: number; preventDefault(): void }) {
