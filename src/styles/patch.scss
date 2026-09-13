@@ -13,3 +13,23 @@
 ul.nc-select__dropdown {
   z-index: 10000;
 }
+
+// Fix toast position when navigation is closed
+// https://github.com/nextcloud-libraries/nextcloud-dialogs/pull/2600
+body:has(.app-navigation--closed) div[class*='toastContainer_navOpen'] {
+  left: var(--body-container-margin);
+}
+
+// Keep small dialogs compact on mobile
+// https://github.com/nextcloud-libraries/nextcloud-vue/pull/8956
+@media only screen and (max-width: 512px) {
+  body .dialog__modal .modal-wrapper--small .modal-container {
+    width: fit-content;
+    max-width: 90%;
+    height: unset;
+    max-height: 90%;
+    position: relative;
+    top: unset;
+    border-radius: var(--border-radius-element);
+  }
+}
