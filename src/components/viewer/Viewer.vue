@@ -3,7 +3,12 @@
     v-if="show"
     ref="outer"
     class="memories-viewer outer remove-gap"
-    :class="{ fullyOpened, isVideo, slideshowTimer }"
+    :class="{
+      fullyOpened: fullyOpened,
+      isVideo: isVideo,
+      slideshowTimer: slideshowTimer,
+      showMetadataSlideshow: config.metadata_in_slideshow,
+    }"
     :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"
   >
@@ -19,7 +24,7 @@
       @pointermove.passive="setUiVisible"
       @pointerdown.passive="setUiVisible"
     >
-      <div class="top-bar-left" v-if="photoswipe" :class="{ visible: showControls }">
+      <div class="top-bar-left" v-if="photoswipe">
         <NcButton
           variant="tertiary-no-background"
           :aria-label="t('memories', 'Back')"
@@ -32,7 +37,7 @@
         </NcButton>
       </div>
 
-      <div class="top-bar" v-if="photoswipe" :class="{ visible: showControls }">
+      <div class="top-bar" v-if="photoswipe">
         <NcActions :inline="numInlineActions" container=".memories-viewer .pswp">
           <NcActionButton
             v-for="action of actions"
@@ -49,7 +54,7 @@
         </NcActions>
       </div>
 
-      <div class="top-date" v-if="photoswipe" :class="{ visible: showControls }">
+      <div class="top-date" v-if="photoswipe">
         <div class="date-line" v-if="currentDateStr">
           {{ currentDateStr }}
         </div>
@@ -59,7 +64,7 @@
         </div>
       </div>
 
-      <div class="bottom-bar" v-if="photoswipe" :class="{ visible: showBottomBar }">
+      <div class="bottom-bar" v-if="photoswipe">
         <div class="exif title" v-if="currentPhoto?.imageInfo?.exif?.Title">
           {{ currentPhoto.imageInfo.exif.Title }}
         </div>
@@ -163,7 +168,6 @@ export default defineComponent({
     editorSrc: '',
 
     show: false,
-    showControls: false,
     fullyOpened: false,
     sidebarOpen: false,
     sidebarWidth: 400,
@@ -407,16 +411,6 @@ export default defineComponent({
       const p = this.currentPhoto;
       if (!p) return false;
       return Boolean(p.flag & this.c.FLAG_IS_FAVORITE);
-    },
-
-    /** Show bottom bar info such as date taken */
-    showBottomBar(): boolean {
-      return (
-        (this.showControls || (!!this.slideshowTimer && this.config.metadata_in_slideshow)) &&
-        !this.isVideo &&
-        this.fullyOpened &&
-        Boolean(this.currentPhoto?.imageInfo)
-      );
     },
 
     /** Allow closing the viewer */
@@ -709,21 +703,6 @@ export default defineComponent({
         // Remove active class from others and add to this one
         this.photoswipe!.element?.querySelectorAll('.pswp__item').forEach((el) => el.classList.remove('active'));
         e.slide.holderElement?.classList.add('active');
-      });
-
-      // Show and hide controls
-      this.photoswipe.on('uiRegister', (e) => {
-        if (this.photoswipe?.template) {
-          new MutationObserver((mutations) => {
-            mutations.forEach((mutationRecord) => {
-              const pswp = mutationRecord.target as HTMLElement;
-              this.showControls = pswp?.classList.contains('pswp--ui-visible') && !this.slideshowTimer;
-            });
-          }).observe(this.photoswipe.template, {
-            attributes: true,
-            attributeFilter: ['class'],
-          });
-        }
       });
 
       // Video support
@@ -1443,7 +1422,7 @@ export default defineComponent({
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
   pointer-events: none;
-  &.visible {
+  .memories-viewer:has(.pswp--ui-visible):not(.slideshowTimer) & {
     opacity: 1;
     pointer-events: auto;
   }
@@ -1479,7 +1458,7 @@ export default defineComponent({
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
-  &.visible {
+  .memories-viewer:has(.pswp--ui-visible):not(.slideshowTimer) & {
     opacity: 1;
   }
 
@@ -1509,7 +1488,8 @@ export default defineComponent({
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
-  &.visible {
+  .memories-viewer:has(.pswp--ui-visible):not(.slideshowTimer).fullyOpened:not(.isVideo) &:has(> .exif),
+  .memories-viewer.slideshowTimer.showMetadataSlideshow.fullyOpened:not(.isVideo) &:has(> .exif) {
     opacity: 1;
   }
 
