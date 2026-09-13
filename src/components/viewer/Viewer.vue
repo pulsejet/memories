@@ -301,6 +301,8 @@ export default defineComponent({
           // Some names may be too long for the bottom bar.
           if (action.id === 'add-to-album') {
             return { ...action, name: this.t('memories', 'Add to') };
+          } else if (action.id === 'remove-from-album') {
+            return { ...action, name: this.t('memories', 'Remove') };
           }
           return action;
         });
