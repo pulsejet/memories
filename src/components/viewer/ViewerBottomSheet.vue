@@ -523,10 +523,7 @@ export default defineComponent({
     onPsPointerMove(e: { originalEvent: PointerEvent }) {
       if (this.downClientY === null || this.open) return;
       if (this.photoswipe?.gestures?.isMultitouch) return;
-      this.maybeOpenSheet(
-        e.originalEvent.clientY - this.downClientY,
-        e.originalEvent.clientX - this.downClientX,
-      );
+      this.maybeOpenSheet(e.originalEvent.clientY - this.downClientY, e.originalEvent.clientX - this.downClientX);
     },
 
     /** Pin upward drags so the photo never follows the finger up (down keeps the native close). */
@@ -589,8 +586,8 @@ export default defineComponent({
   min-height: 45vh;
   min-height: 45dvh;
 
-  background: #161616;
-  color: #fff;
+  background: var(--color-main-background);
+  color: var(--color-main-text);
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
@@ -612,7 +609,7 @@ export default defineComponent({
   width: 40px;
   height: 4px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(128, 128, 128, 0.4);
 }
 
 .sheet-content {
