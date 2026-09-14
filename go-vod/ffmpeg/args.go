@@ -102,8 +102,12 @@ func Encoder(s Spec) string {
 // still refers to source timestamps), the -vf graph (nv12 normalize +
 // aspect-preserving downscale, in hardware frames per backend; scale_cuda
 // needs passthrough=0), an appended transpose stage for rotated HLS sources,
-// fixed mapping (first video re-encoded, optional first audio to AAC), and
+// fixed mapping (first video re-encoded, optional first audio normalized
+// to stereo 48kHz AAC), and
 // constant-quality rate control per encoder (crf / global_quality / cq).
+// Audio is always normalized to stereo 48kHz AAC: passthrough channel
+// counts and sample rates (notably multichannel) yield segments that
+// Chrome's MSE audio SourceBuffer rejects with bufferAppendingError.
 // Ladder bitrates appear only in playlists, never here. With Copy set, the
 // offload, filter graph and rate control collapse to "-c:v copy".
 func BuildArgs(s Spec) []string {
@@ -231,7 +235,13 @@ func BuildArgs(s Spec) []string {
 		)
 	}
 
-	return append(args, "-map", "0:a:0?", "-c:a", "aac")
+	return append(args,
+		"-map", "0:a:0?",
+		"-c:a", "aac",
+		"-ac", "2",
+		"-ar", "48000",
+		"-b:a", "128k",
+	)
 }
 
 // SegmentArgs extends BuildArgs with the HLS muxer tail that chops one

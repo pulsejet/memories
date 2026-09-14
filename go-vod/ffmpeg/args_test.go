@@ -38,6 +38,7 @@ func TestBuildArgsSoftware(t *testing.T) {
 	require.NotContains(t, c, "-ss")
 	require.NotContains(t, c, "-noautorotate")
 	require.Contains(t, c, `-map "0:a:0?"`)
+	require.Contains(t, c, `"-c:a" aac -ac 2 -ar 48000 "-b:a" 128k`)
 }
 
 func TestBuildArgsSeekAndMax(t *testing.T) {
