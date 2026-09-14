@@ -442,6 +442,7 @@ OC.L10N.register(
     "Unsaved changes" : "Незачувани промени",
     "Drop changes" : "Орфрли ги промени",
     "Play Live Photo" : "Пушти жива фотографија",
+    "Sidebar" : "Странична лента",
     "Download Video" : "Преземи видео",
     "Download {ext}" : "Преземи {ext}",
     "Slideshow" : "Слајдшоу",

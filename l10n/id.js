@@ -123,6 +123,8 @@ OC.L10N.register(
     "Slideshow" : "Tayangan slide",
     "Previous" : "Sebelumnya",
     "Next" : "Berikutnya",
+    "Collapse details" : "Ciutkan rincian",
+    "Expand details" : "Perluas rincian",
     "Finish" : "Selesai",
     "Save as" : "Simpan sebagai",
     "Undo" : "Undo",

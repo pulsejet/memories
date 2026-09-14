@@ -434,6 +434,7 @@ OC.L10N.register(
     "Unsaved changes" : "Несачуване измене",
     "Drop changes" : "Откажи измене",
     "Play Live Photo" : "Прикажи Live Photo",
+    "Sidebar" : "Бочна трака",
     "Download Video" : "Преузми видео",
     "Download {ext}" : "Преузми {ext}",
     "Slideshow" : "Пројектор слајдова",

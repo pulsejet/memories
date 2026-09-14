@@ -455,6 +455,8 @@
     "Previous" : "Eelmine",
     "Next" : "Järgmine",
     "Editing is currently disabled for Live Photos" : "„Live Photo“ meediumi (videoklipp+foto) muutmine pole hetkel võimalik",
+    "Collapse details" : "Sulge üksikasjad",
+    "Expand details" : "Näita üksikasju",
     "You are now logged in to the server!" : "Sa oled nüüd serverisse sisse loginud!",
     "You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue." : "Nextcloudi nutirakenduse abil võid seadistada automaatsed üleslaadimised sellest seadmest. Klõpsa järgnevat nuppu ja laadi rakendus alla või jäta see samm vahele ja jätka.",
     "Set up automatic upload" : "Seadista automaatne üleslaadimine",

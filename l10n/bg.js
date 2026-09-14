@@ -298,6 +298,7 @@ OC.L10N.register(
     "Unsaved changes" : "Незаписани промени",
     "Drop changes" : "Игнориране на промените",
     "Play Live Photo" : "Възпроизвеждане на Live Photo/жива снимка/",
+    "Sidebar" : "Странична лента",
     "Download Video" : "Изтегляне на видео",
     "Download {ext}" : "Изтегляне на {ext}",
     "Slideshow" : "Слайдшоу",

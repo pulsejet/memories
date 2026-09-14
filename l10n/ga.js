@@ -457,6 +457,8 @@ OC.L10N.register(
     "Previous" : "Roimhe Seo",
     "Next" : "Ar aghaidh",
     "Editing is currently disabled for Live Photos" : "Tá an eagarthóireacht díchumasaithe faoi láthair le haghaidh Grianghraif Beo",
+    "Collapse details" : "Laghdaigh sonraí",
+    "Expand details" : "Leathnaigh sonraí",
     "You are now logged in to the server!" : "Tá tú logáilte isteach ar an bhfreastalaí anois!",
     "You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue." : "Is féidir leat uaslódálacha uathoibríocha a shocrú ón ngléas seo trí úsáid a bhaint as an aip mhóibíleach Nextcloud. Cliceáil ar an gcnaipe thíos chun an aip a íoslódáil, nó scipeáil an chéim seo agus lean ar aghaidh.",
     "Set up automatic upload" : "Suiteáil uathoibríoch íoslódáil",

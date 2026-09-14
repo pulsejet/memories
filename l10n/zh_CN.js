@@ -443,6 +443,7 @@ OC.L10N.register(
     "Unsaved changes" : "未保存的更改",
     "Drop changes" : "取消更改",
     "Play Live Photo" : "播放实况照片",
+    "Sidebar" : "侧边栏",
     "Download Video" : "下载视频",
     "Download {ext}" : "下载 {ext}",
     "Slideshow" : "幻灯片",

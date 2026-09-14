@@ -433,6 +433,7 @@ OC.L10N.register(
     "Unsaved changes" : "Незбережені зміни",
     "Drop changes" : "Відкинути зміни",
     "Play Live Photo" : "Відтворити фото в реальному часі",
+    "Sidebar" : "Бокове меню",
     "Download Video" : "Звантажити відео",
     "Download {ext}" : "Звантажити {ext}",
     "Slideshow" : "Слайд-шоу",

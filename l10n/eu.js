@@ -288,6 +288,7 @@ OC.L10N.register(
     "Unsaved changes" : "Gorde gabeko aldaketak",
     "Drop changes" : "Jaregin aldaketak",
     "Play Live Photo" : "Erreproduzitu zuzeneko argazkia",
+    "Sidebar" : "Alboko barra",
     "Download Video" : "Deskargatu bideoa",
     "Download {ext}" : "Deskargatu {ext}",
     "Slideshow" : "Diapositiba-aurkezpena",

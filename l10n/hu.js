@@ -346,6 +346,7 @@ OC.L10N.register(
     "Unsaved changes" : "Mentetlen változtatások",
     "Drop changes" : "Változtatások elvetése",
     "Play Live Photo" : "Élő fénykép lejátszása",
+    "Sidebar" : "Oldalsáv",
     "Download Video" : "Videó letöltése",
     "Download {ext}" : "{ext} letöltése",
     "Slideshow" : "Diavetítés",

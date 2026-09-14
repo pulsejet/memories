@@ -123,6 +123,7 @@ OC.L10N.register(
     "Share folder" : "Condividi cartella",
     "Unsaved changes" : "Modifiche non salvate",
     "Drop changes" : "Scarta le modifiche",
+    "Sidebar" : "Barra laterale",
     "Download {ext}" : "Scarica {ext}",
     "Slideshow" : "Presentazione",
     "Previous" : "Precedente",

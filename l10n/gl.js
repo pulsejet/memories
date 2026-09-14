@@ -446,6 +446,8 @@ OC.L10N.register(
     "Previous" : "Anterior",
     "Next" : "Seguinte",
     "Editing is currently disabled for Live Photos" : "Actualmente, está desactivada a edición para Live Photos",
+    "Collapse details" : "Contraer os detalles",
+    "Expand details" : "Expandir os detalles",
     "You are now logged in to the server!" : "Agora accedeu ao servidor!",
     "You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue." : "Pode definir os envíos automáticos desde este dispositivo mediante a aplicación móbil Nextcloud. Prema no botón de embaixo para descargar a aplicación ou omita este paso e continúe.",
     "Set up automatic upload" : "Definir o envío automático",

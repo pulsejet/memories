@@ -360,6 +360,7 @@ OC.L10N.register(
     "Unsaved changes" : "Niezapisane zmiany",
     "Drop changes" : "Odrzuć zmiany",
     "Play Live Photo" : "Odtwórz Live Photo",
+    "Sidebar" : "Pasek boczny",
     "Download Video" : "Pobierz film",
     "Download {ext}" : "Pobierz {ext}",
     "Slideshow" : "Pokaz slajdów",

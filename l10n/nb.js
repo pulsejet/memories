@@ -428,6 +428,7 @@ OC.L10N.register(
     "Unsaved changes" : "Ulagrede endringer",
     "Drop changes" : "Slipp endringer",
     "Play Live Photo" : "Spill av Live-foto",
+    "Sidebar" : "Sidefelt",
     "Download Video" : "Last ned video",
     "Download {ext}" : "Last ned {ext}",
     "Slideshow" : "Lysbildefremvisning",

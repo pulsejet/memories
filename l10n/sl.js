@@ -338,6 +338,7 @@ OC.L10N.register(
     "Unsaved changes" : "Neshranjene spremembe",
     "Drop changes" : "Opusti spremembe",
     "Play Live Photo" : "Predvajaj Live Photo",
+    "Sidebar" : "Bočno okno",
     "Download Video" : "Prejmi posnetek",
     "Download {ext}" : "Prejmi {ext}",
     "Slideshow" : "Projekcija",

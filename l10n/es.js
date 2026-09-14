@@ -433,6 +433,7 @@ OC.L10N.register(
     "Unsaved changes" : "Cambios sin guardar",
     "Drop changes" : "Descartar cambios",
     "Play Live Photo" : "Reproducir foto en vivo",
+    "Sidebar" : "Barra lateral",
     "Download Video" : "Descargar Video",
     "Download {ext}" : "Descargar {ext}",
     "Slideshow" : "Presentación de diapositivas",

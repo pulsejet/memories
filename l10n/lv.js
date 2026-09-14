@@ -124,6 +124,7 @@ OC.L10N.register(
     "Upload files" : "Augšupielādēt datnes",
     "Upload failed" : "Augšupielāde neizdevās",
     "Unsaved changes" : "Nesaglabātas izmaiņas",
+    "Sidebar" : "Sānjosla",
     "Download {ext}" : "Lejupielādēt {ext}",
     "Slideshow" : "Slīdrāde",
     "Previous" : "Iepriekšējā",

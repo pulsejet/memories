@@ -443,6 +443,7 @@ OC.L10N.register(
     "Unsaved changes" : "Neįrašyti pakeitimai",
     "Drop changes" : "Atmesti pakeitimus",
     "Play Live Photo" : "Paleisti „Gyvąsias nuotraukas“",
+    "Sidebar" : "Šoninė juosta",
     "Download Video" : "Atsisiųsti vaizdo įrašą",
     "Download {ext}" : "Atsisiųsti {ext}",
     "Slideshow" : "Skaidrių rodymas",

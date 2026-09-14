@@ -443,6 +443,7 @@ OC.L10N.register(
     "Unsaved changes" : "Neuložené zmeny",
     "Drop changes" : "Zrušiť zmeny",
     "Play Live Photo" : "Prehrať Aktívne fotografie",
+    "Sidebar" : "Bočný panel",
     "Download Video" : "Stiahnuť Video",
     "Download {ext}" : "Stiahnuť {ext}",
     "Slideshow" : "Prehliadka",

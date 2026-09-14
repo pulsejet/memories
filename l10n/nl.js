@@ -196,6 +196,7 @@ OC.L10N.register(
     "Upload files" : "Bestanden uploaden",
     "Upload failed" : "Upload mislukt",
     "Unsaved changes" : "Niet opgeslagen veranderingen",
+    "Sidebar" : "Zijbalk",
     "Download {ext}" : "Download {ext}",
     "Slideshow" : "Diavoorstelling",
     "Previous" : "Vorige",
