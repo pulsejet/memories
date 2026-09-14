@@ -19,6 +19,8 @@
       height: 100%;
       // Override vidstack's 16/9 default; the video is letterboxed below.
       aspect-ratio: auto;
+      // Background is owned by Photoswipe.
+      background: transparent !important;
       // Default layout rounds the player frame (6px + border); square video.
       --video-border-radius: 0;
       --video-border: none;
@@ -32,6 +34,7 @@
       justify-content: center;
       height: 100%;
       pointer-events: none;
+      background: transparent !important;
 
       video {
         width: 100%;
