@@ -88,7 +88,7 @@ func Encoder(s Spec) string {
 // split out of blank-separated blobs, so paths with spaces can't reshape the
 // command line.
 //
-// In order: quiet logging, input seek (-ss, only when StartAt > 0),
+// In order: quiet logging, hidden banner, input seek (-ss, only when StartAt > 0),
 // hardware decode offload on a named "memories" device (explicit
 // -init_hw_device/-filter_hw_device, required since ffmpeg 8), -noautorotate
 // when transposing manually, input with -copyts/+genpts (post-seek timing
@@ -99,7 +99,7 @@ func Encoder(s Spec) string {
 // constant-quality rate control per encoder (crf / global_quality / cq).
 // Ladder bitrates appear only in playlists, never here.
 func BuildArgs(s Spec) []string {
-	args := []string{"-loglevel", "warning"}
+	args := []string{"-hide_banner", "-loglevel", "warning"}
 
 	if s.StartAt > 0 {
 		args = append(args, "-ss", fmt.Sprintf("%.6f", s.StartAt))
