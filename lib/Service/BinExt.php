@@ -19,7 +19,9 @@ final class BinExt
     /** Get the path to the temp directory */
     public static function getTmpPath(): string
     {
-        return SystemConfig::get('memories.exiftool.tmp') ?: sys_get_temp_dir();
+        $path = SystemConfig::get('memories.exiftool.tmp');
+
+        return rtrim($path ?: sys_get_temp_dir(), '/');
     }
 
     /** Copy a binary to temp dir for execution */
@@ -31,10 +33,6 @@ final class BinExt
         // Check target temp file
         $target = self::getTmpPath().'/'.$name.'-'.$suffix;
         if (file_exists($target)) {
-            if (!is_writable($target)) {
-                throw new \Exception("{$name} temp binary path is not writable: {$target}");
-            }
-
             if (!is_executable($target) && !chmod($target, 0o755)) {
                 throw new \Exception("failed to make {$name} temp binary executable: {$target}");
             }
