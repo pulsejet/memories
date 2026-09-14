@@ -15,20 +15,35 @@ import (
 	"github.com/pulsejet/memories/go-vod/ffmpeg"
 )
 
-const QUALITY_MAX = "max"
+const (
+	QUALITY_MAX    = "max"
+	QUALITY_DIRECT = "direct"
+)
 
 type Manager struct {
+	// c is the shared server config.
 	c *config.Config
 
-	path       string
-	tempDir    string
-	id         string
+	// path is the source file served.
+	path string
+	// tempDir is the per-file segment scratch dir.
+	tempDir string
+	// id is the registry key and log prefix.
+	id string
+	// generation is the registry epoch; stale generations are dropped.
 	generation uint64
-	idle       chan IdleEvent
-	inactive   atomic.Int32
+	// idle reports expiry to the registry.
+	idle chan IdleEvent
+	// inactive counts ticks since any transcode (-1 once destroyed).
+	inactive atomic.Int32
 
+	// probe holds the source properties, immutable after creation.
 	probe *ProbeVideoData
 
+	// srcSegments is the copy grid for max; empty means re-encode.
+	srcSegments []ffmpeg.Segment
+
+	// streams are the renditions by quality ("480p", "max").
 	streams map[string]*Stream
 }
 
@@ -135,14 +150,25 @@ func NewManager(c *config.Config, path string, id string, generation uint64, idl
 		}
 	}
 
-	// Original stream
-	m.streams[QUALITY_MAX] = &Stream{
-		c: c, m: m,
-		quality: QUALITY_MAX,
-		height:  m.probe.Height,
-		width:   m.probe.Width,
-		bitrate: refBitrate,
-		order:   1,
+	// Original: stream copy as direct when eligible.
+	if _, ok := m.CopySegments(); ok {
+		m.streams[QUALITY_DIRECT] = &Stream{
+			c: c, m: m,
+			quality: QUALITY_DIRECT,
+			height:  m.probe.Height,
+			width:   m.probe.Width,
+			bitrate: m.probe.BitRate,
+			order:   1,
+		}
+	} else {
+		m.streams[QUALITY_MAX] = &Stream{
+			c: c, m: m,
+			quality: QUALITY_MAX,
+			height:  m.probe.Height,
+			width:   m.probe.Width,
+			bitrate: refBitrate,
+			order:   1,
+		}
 	}
 
 	// Start all streams
@@ -225,6 +251,13 @@ func (m *Manager) Duration() time.Duration {
 	return m.probe.Duration
 }
 
+func (m *Manager) CopySegments() ([]ffmpeg.Segment, bool) {
+	if len(m.srcSegments) == 0 {
+		return nil, false
+	}
+	return m.srcSegments, true
+}
+
 func (m *Manager) FrameRate() int {
 	return m.probe.FrameRate
 }
@@ -249,8 +282,14 @@ func (m *Manager) ServeFullVideo(w http.ResponseWriter, r *http.Request, quality
 		return
 	}
 
-	// Fall back to original
-	m.streams[QUALITY_MAX].ServeFullVideo(w, r)
+	// Fall back to the original: direct copy when eligible, else max.
+	if stream, ok := m.streams[QUALITY_DIRECT]; ok {
+		stream.ServeFullVideo(w, r)
+	} else if stream, ok := m.streams[QUALITY_MAX]; ok {
+		stream.ServeFullVideo(w, r)
+	} else {
+		panic("no original stream")
+	}
 }
 
 func (m *Manager) ffprobe() error {
@@ -272,5 +311,25 @@ func (m *Manager) ffprobe() error {
 		Rotation:  info.Rotation,
 	}
 
+	// Check if the video is copy-elgible for MAX.
+	if m.probe.CodecName == CODEC_H264 && m.probe.Rotation == 0 {
+		if err := m.probeCopy(); err != nil {
+			log.Printf("%s: copy disabled for max: %v", m.id, err)
+		}
+	}
+
+	return nil
+}
+
+func (m *Manager) probeCopy() error {
+	keys, err := ffmpeg.Keyframes(context.Background(), m.c.FFprobe, m.path)
+	if err != nil {
+		return err
+	}
+	segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.c.ChunkSize)
+	if len(segs) == 0 {
+		return fmt.Errorf("no keyframe grid for %s", m.path)
+	}
+	m.srcSegments = segs
 	return nil
 }

@@ -26,6 +26,7 @@ const (
 	CodecH264  = "h264"
 
 	probeTimeout    = 5 * time.Second
+	keyframeTimeout = 30 * time.Second
 	defaultBitRate  = 5000000
 	defaultFrameNum = 30
 	defaultFrameDen = 1
@@ -56,17 +57,27 @@ type probeOutput struct {
 	Format  *ffprobe.Format `json:"format"`
 }
 
-func ProbeArgs(path string) []string {
-	return []string{
+// Probe runs ffprobe and parses the first video stream.
+func Probe(ctx context.Context, bin, path string) (VideoInfo, error) {
+	ctx, cancel := context.WithTimeout(ctx, probeTimeout)
+	defer cancel()
+
+	args := []string{
 		"-v", "error",
 		"-show_entries", "format:stream",
 		"-select_streams", "v",
 		"-of", "json",
 		path,
 	}
+	out, serr, err := runFFprobe(ctx, bin, args...)
+	if err != nil {
+		return VideoInfo{}, fmt.Errorf("ffprobe %s: %w: %s", path, err, serr)
+	}
+	return ParseProbeJSON(out)
 }
 
-var runFFprobe = func(ctx context.Context, bin string, args ...string) (stdout, stderr []byte, err error) {
+// runFFprobe executes the binary, capturing stdout and stderr.
+func runFFprobe(ctx context.Context, bin string, args ...string) (stdout, stderr []byte, err error) {
 	cmd := exec.CommandContext(ctx, bin, args...)
 	var out, serr bytes.Buffer
 	cmd.Stdout = &out
@@ -75,16 +86,7 @@ var runFFprobe = func(ctx context.Context, bin string, args ...string) (stdout, 
 	return out.Bytes(), serr.Bytes(), err
 }
 
-func Probe(ctx context.Context, bin, path string) (VideoInfo, error) {
-	ctx, cancel := context.WithTimeout(ctx, probeTimeout)
-	defer cancel()
-	out, serr, err := runFFprobe(ctx, bin, ProbeArgs(path)...)
-	if err != nil {
-		return VideoInfo{}, fmt.Errorf("ffprobe %s: %w: %s", path, err, serr)
-	}
-	return ParseProbeJSON(out)
-}
-
+// ParseProbeJSON parses Probe output, defaulting missing fields.
 func ParseProbeJSON(data []byte) (VideoInfo, error) {
 	var out probeOutput
 	if err := json.Unmarshal(data, &out); err != nil {
@@ -120,6 +122,7 @@ func ParseProbeJSON(data []byte) (VideoInfo, error) {
 	}, nil
 }
 
+// parseFrameRate parses a "num/den" frame rate, defaulting to 30fps.
 func parseFrameRate(frac string) int {
 	parts := strings.Split(frac, "/")
 	if len(parts) != 2 {
@@ -133,6 +136,7 @@ func parseFrameRate(frac string) int {
 	return int(float64(num) / float64(den))
 }
 
+// probeRotation reads rotation from display-matrix side data, else tags.
 func probeRotation(s videoStream) int {
 	for _, sd := range s.SideDataList {
 		if sd.SideDataType == "Display Matrix" {
@@ -140,4 +144,39 @@ func probeRotation(s videoStream) int {
 		}
 	}
 	return s.Tags.Rotate
+}
+
+// Keyframes runs ffprobe and parses keyframe timestamps in seconds.
+func Keyframes(ctx context.Context, bin, path string) ([]float64, error) {
+	ctx, cancel := context.WithTimeout(ctx, keyframeTimeout)
+	defer cancel()
+
+	args := []string{
+		"-v", "error",
+		"-select_streams", "v:0",
+		"-show_entries", "packet=pts_time,flags",
+		"-of", "csv=p=0",
+		path,
+	}
+	out, serr, err := runFFprobe(ctx, bin, args...)
+	if err != nil {
+		return nil, fmt.Errorf("ffprobe keyframes %s: %w: %s", path, err, serr)
+	}
+	return ParseKeyframes(out), nil
+}
+
+// ParseKeyframes parses Keyframes output, keeping keyframe (K) packets,
+// so garbage yields an empty slice and callers fall back to re-encoding.
+func ParseKeyframes(data []byte) []float64 {
+	var out []float64
+	for line := range strings.SplitSeq(string(data), "\n") {
+		pts, flags, _ := strings.Cut(strings.TrimSpace(line), ",")
+		if !strings.Contains(flags, "K") {
+			continue
+		}
+		if ts, err := strconv.ParseFloat(pts, 64); err == nil {
+			out = append(out, ts)
+		}
+	}
+	return out
 }

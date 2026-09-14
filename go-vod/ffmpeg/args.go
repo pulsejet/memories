@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Spec describes one transcode job: which input to read, which rendition to
@@ -66,13 +68,18 @@ type Spec struct {
 	// UseGopSize uses a fixed GOP (ChunkSize*FrameRate) instead of forced
 	// keyframes, for encoders whose forced keyframes drift (notably NVENC).
 	UseGopSize bool
+	// Copy stream-copies the video (-c:v copy) instead of re-encoding it,
+	// for copy-eligible sources.
+	Copy bool
 }
 
-// Encoder resolves the video encoder: VAAPI, then NVENC, then software x264.
-// "copy" is never selected here; the only stream-copy fast path (original
-// h264 served as-is) bypasses argument building entirely.
+// Encoder resolves the video encoder: stream copy, then VAAPI, then NVENC,
+// then software x264. The only other stream-copy fast path (original h264
+// served as-is for progressive download) bypasses argument building entirely.
 func Encoder(s Spec) string {
 	switch {
+	case s.Copy:
+		return EncoderCopy
 	case s.VAAPI:
 		return EncoderVAAPI
 	case s.NVENC:
@@ -97,7 +104,8 @@ func Encoder(s Spec) string {
 // needs passthrough=0), an appended transpose stage for rotated HLS sources,
 // fixed mapping (first video re-encoded, optional first audio to AAC), and
 // constant-quality rate control per encoder (crf / global_quality / cq).
-// Ladder bitrates appear only in playlists, never here.
+// Ladder bitrates appear only in playlists, never here. With Copy set, the
+// offload, filter graph and rate control collapse to "-c:v copy".
 func BuildArgs(s Spec) []string {
 	args := []string{"-hide_banner", "-loglevel", "warning"}
 
@@ -242,14 +250,21 @@ func BuildArgs(s Spec) []string {
 //     goes to stdout ("-"), where the segment watcher reads names from it.
 //   - Keyframes are forced every ChunkSize seconds — fixed GOP when
 //     UseGopSize is set, "-force_key_frames expr:…" otherwise — so each
-//     boundary lands near a keyframe.
+//     boundary lands near a keyframe. Stream copy (Copy) cannot create
+//     keyframes, so nothing is forced: the muxer cuts at the next source
+//     keyframe past each -hls_time boundary, matching CopySegments.
 func SegmentArgs(s Spec, startID int, pattern string) []string {
 	args := BuildArgs(s)
 	args = append(args,
 		"-start_number", fmt.Sprintf("%d", startID),
 		"-avoid_negative_ts", "disabled",
 		"-f", "hls",
+		"-hls_time", fmt.Sprintf("%d", s.ChunkSize),
+		"-hls_segment_type", "mpegts",
+		"-hls_segment_filename", pattern,
+	)
 
+	if !s.Copy {
 		// We force a keyframe at the start of each segment.
 		// By default, ffmpeg will split only on keyframes, so
 		// theoretically we should have perfectly sized chunks.
@@ -263,18 +278,14 @@ func SegmentArgs(s Spec, startID int, pattern string) []string {
 		// segment with the previous GOP if no keyframe is found
 		// at the start of the segment.
 		// https://github.com/videojs/mux.js/pull/138
-		"-hls_flags", "split_by_time",
-		"-hls_time", fmt.Sprintf("%d", s.ChunkSize),
+		args = append(args, "-hls_flags", "split_by_time")
 
-		"-hls_segment_type", "mpegts",
-		"-hls_segment_filename", pattern,
-	)
-
-	if s.UseGopSize && s.FrameRate > 0 {
-		gop := fmt.Sprintf("%d", s.ChunkSize*s.FrameRate)
-		args = append(args, "-g", gop, "-keyint_min", gop)
-	} else {
-		args = append(args, "-force_key_frames", fmt.Sprintf("expr:gte(t,n_forced*%d)", s.ChunkSize))
+		if s.UseGopSize && s.FrameRate > 0 {
+			gop := fmt.Sprintf("%d", s.ChunkSize*s.FrameRate)
+			args = append(args, "-g", gop, "-keyint_min", gop)
+		} else {
+			args = append(args, "-force_key_frames", fmt.Sprintf("expr:gte(t,n_forced*%d)", s.ChunkSize))
+		}
 	}
 
 	return append(args, "-")
@@ -289,6 +300,47 @@ func MP4Args(s Spec) []string {
 		"-movflags", "frag_keyframe+empty_moov+faststart",
 		"-f", "mp4", "pipe:1",
 	)
+}
+
+// Segment is one stream-copy HLS segment: absolute start and duration.
+type Segment struct {
+	Start, Duration float64
+}
+
+// CopySegments groups keyframes into HLS-sized segments, mirroring the
+// muxer's stream-copy splitting. Nil when no grid can be derived.
+func CopySegments(keyframes []float64, duration time.Duration, chunkSize int) []Segment {
+	total := duration.Seconds()
+	if len(keyframes) == 0 || total <= 0 || chunkSize <= 0 {
+		return nil
+	}
+
+	size := float64(chunkSize)
+	bounds := []float64{0}
+	for _, k := range slices.Sorted(slices.Values(keyframes)) {
+		if k < 0 || k >= total {
+			continue
+		}
+		if k-bounds[len(bounds)-1] >= size {
+			bounds = append(bounds, k)
+		}
+	}
+
+	segs := make([]Segment, 0, len(bounds))
+	for i, b := range bounds {
+		end := total
+		if i+1 < len(bounds) {
+			end = bounds[i+1]
+		}
+		if end-b <= 0 {
+			continue
+		}
+		segs = append(segs, Segment{Start: b, Duration: end - b})
+	}
+	if len(segs) == 0 {
+		return nil
+	}
+	return segs
 }
 
 // SegmentPattern is the "-hls_segment_filename" template for one rendition:

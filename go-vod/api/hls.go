@@ -10,6 +10,7 @@ import (
 
 	"github.com/grafov/m3u8"
 	"github.com/pulsejet/memories/go-vod/core"
+	"github.com/pulsejet/memories/go-vod/ffmpeg"
 )
 
 func MasterPlaylist(renditions []core.Rendition, frameRate int, query string) (string, error) {
@@ -30,7 +31,19 @@ func MasterPlaylist(renditions []core.Rendition, frameRate int, query string) (s
 	return m.Encode().String(), nil
 }
 
-func VariantPlaylist(quality string, total time.Duration, chunkSize int, query string) (string, error) {
+// VariantPlaylist is the entry point for serving a rendition's playlist.
+func VariantPlaylist(m *core.Manager, quality string, chunkSize int, query string) (string, error) {
+	if quality == core.QUALITY_DIRECT {
+		if segs, ok := m.CopySegments(); ok {
+			return CopyVariantPlaylist(quality, segs, query)
+		}
+	}
+	return TranscodeVariantPlaylist(quality, m.Duration(), chunkSize, query)
+}
+
+// TranscodeVariantPlaylist renders the variant playlist for a re-encoded
+// rendition: uniform chunkSize segments.
+func TranscodeVariantPlaylist(quality string, total time.Duration, chunkSize int, query string) (string, error) {
 	n := 0
 	if total > 0 && chunkSize > 0 {
 		n = int(math.Ceil(total.Seconds() / float64(chunkSize)))
@@ -54,6 +67,32 @@ func VariantPlaylist(quality string, total time.Duration, chunkSize int, query s
 			return "", err
 		}
 		remaining -= float64(chunkSize)
+	}
+	p.Close()
+	return p.Encode().String(), nil
+}
+
+// CopyVariantPlaylist renders the variant playlist for a stream-copy
+// rendition from its keyframe-derived segments.
+func CopyVariantPlaylist(quality string, segments []ffmpeg.Segment, query string) (string, error) {
+	n := len(segments)
+	p, err := m3u8.NewMediaPlaylist(uint(n), uint(n))
+	if err != nil {
+		return "", err
+	}
+	p.SetVersion(4)
+	p.MediaType = m3u8.VOD
+
+	longest := 0.0
+	for _, s := range segments {
+		longest = max(longest, s.Duration)
+	}
+	p.TargetDuration = math.Ceil(longest)
+
+	for i, s := range segments {
+		if err := p.Append(fmt.Sprintf("%s-%06d.ts%s", quality, i, query), s.Duration, "nodesc"); err != nil {
+			return "", err
+		}
 	}
 	p.Close()
 	return p.Encode().String(), nil

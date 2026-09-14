@@ -2,6 +2,7 @@ package ffmpeg
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -137,4 +138,55 @@ func TestParseSegmentLine(t *testing.T) {
 
 func TestQuoteForLog(t *testing.T) {
 	require.Equal(t, `-vf "scale=1:2"`, QuoteForLog([]string{"-vf", "scale=1:2"}))
+}
+
+func TestEncoderCopy(t *testing.T) {
+	require.Equal(t, EncoderCopy, Encoder(Spec{Copy: true}))
+	require.Equal(t, EncoderCopy, Encoder(Spec{Copy: true, VAAPI: true, NVENC: true}))
+}
+
+func TestBuildArgsCopy(t *testing.T) {
+	s := baseSpec()
+	s.Copy = true
+	c := cmd(s, BuildArgs(s))
+	require.Contains(t, c, `"-c:v" copy`)
+	require.Contains(t, c, `"-c:a" aac`)
+	require.NotContains(t, c, "-vf")
+	require.NotContains(t, c, "-hwaccel")
+	require.NotContains(t, c, "-crf")
+}
+
+func TestSegmentArgsCopy(t *testing.T) {
+	s := baseSpec()
+	s.Copy = true
+	c := cmd(s, SegmentArgs(s, 2, SegmentPattern("/tmp/vod", "direct")))
+	require.Contains(t, c, "-hls_time 3")
+	require.NotContains(t, c, "force_key_frames")
+	require.NotContains(t, c, " -g ")
+	require.NotContains(t, c, "split_by_time")
+}
+
+func TestCopySegments(t *testing.T) {
+	segs := CopySegments([]float64{0, 2, 4, 6, 8, 10}, 11*time.Second, 3)
+	require.Equal(t, []Segment{
+		{Start: 0, Duration: 4},
+		{Start: 4, Duration: 4},
+		{Start: 8, Duration: 3},
+	}, segs)
+
+	segs = CopySegments([]float64{0, 10}, 12*time.Second, 3)
+	require.Equal(t, []Segment{
+		{Start: 0, Duration: 10},
+		{Start: 10, Duration: 2},
+	}, segs)
+
+	segs = CopySegments([]float64{8, 0, 4, 2, 10, 6}, 11*time.Second, 3)
+	require.Len(t, segs, 3)
+
+	segs = CopySegments([]float64{0, 12}, 12*time.Second, 3)
+	require.Equal(t, []Segment{{Start: 0, Duration: 12}}, segs)
+
+	require.Nil(t, CopySegments(nil, 11*time.Second, 3))
+	require.Nil(t, CopySegments([]float64{0}, 0, 3))
+	require.Nil(t, CopySegments([]float64{0}, 11*time.Second, 0))
 }

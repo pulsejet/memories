@@ -162,7 +162,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, sid, dir, leaf st
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		body, err := VariantPlaylist(quality, manager.Duration(), s.chunkSize(), query)
+		body, err := VariantPlaylist(manager, quality, s.chunkSize(), query)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return

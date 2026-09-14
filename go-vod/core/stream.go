@@ -16,7 +16,12 @@ import (
 	"github.com/pulsejet/memories/go-vod/ffmpeg"
 )
 
+// CODEC_H264 matches ffprobe's codec_name for H.264 streams.
 const CODEC_H264 = "h264"
+
+// copySeekEpsilon nudges copy seeks past timestamp rounding, so -ss lands
+// on the grid keyframe instead of the one before it.
+const copySeekEpsilon = 0.001
 
 // chunkWait caps per-request chunk waits; the transcode continues.
 var chunkWait = 10 * time.Second
@@ -303,6 +308,7 @@ func (s *Stream) spec(startAt float64, isHls bool) ffmpeg.Spec {
 		FrameRate: s.m.probe.FrameRate,
 		Rotation:  s.m.probe.Rotation,
 		ChunkSize: s.c.ChunkSize,
+		Copy:      s.quality == QUALITY_DIRECT,
 
 		VAAPI:           s.c.VAAPI,
 		VAAPILowPower:   s.c.VAAPILowPower,
@@ -317,14 +323,26 @@ func (s *Stream) spec(startAt float64, isHls bool) ffmpeg.Spec {
 }
 
 func (s *Stream) transcode(startId int) {
-	if startId > 0 {
-		// Start one frame before
-		// This ensures that the keyframes are aligned
-		startId--
-	}
-	startAt := float64(startId * s.c.ChunkSize)
+	var startNumber int
+	var startAt float64
 
-	args := ffmpeg.SegmentArgs(s.spec(startAt, true), startId, s.getTsPath(-1))
+	if segs, ok := s.m.CopySegments(); ok && s.quality == QUALITY_DIRECT {
+		if startId >= len(segs) {
+			startId = len(segs) - 1
+		}
+		startNumber = startId
+		startAt = 0
+		if startId > 0 {
+			startAt = segs[startId].Start + copySeekEpsilon
+		}
+	} else if startId > 0 {
+		// Start one frame before.
+		// This ensures that the keyframes are aligned.
+		startNumber = startId - 1
+		startAt = float64(startNumber * s.c.ChunkSize)
+	}
+
+	args := ffmpeg.SegmentArgs(s.spec(startAt, true), startNumber, s.getTsPath(-1))
 
 	// Start the process
 	s.coder = exec.Command(s.c.FFmpeg, args...)
