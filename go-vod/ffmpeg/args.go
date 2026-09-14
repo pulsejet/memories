@@ -44,6 +44,8 @@ type Spec struct {
 	// Rotation is the probed source rotation (-90, 90, ±180, 0), applied as
 	// an explicit transpose filter for HLS when UseTranspose is set.
 	Rotation int
+	// HDR marks sources needing SDR tonemapping.
+	HDR bool
 	// ChunkSize is the target segment length in whole seconds. Drives
 	// -hls_time and the forced-keyframe interval.
 	ChunkSize int
@@ -170,7 +172,9 @@ func BuildArgs(s Spec) []string {
 
 	if cv != EncoderCopy {
 		filter := fmt.Sprintf("%s,%s=%s", format, scaler, strings.Join(scalerArgs, ":"))
-
+		if s.HDR {
+			filter = tonemapFilter(cv, scaler, scalerArgs)
+		}
 		if s.HLS && s.UseTranspose {
 			transposer := "transpose"
 			switch cv {
@@ -242,6 +246,17 @@ func BuildArgs(s Spec) []string {
 		"-ar", "48000",
 		"-b:a", "128k",
 	)
+}
+
+// tonemapFilter maps HDR to SDR with hable; zscale supplies linear light.
+func tonemapFilter(cv, scaler string, scalerArgs []string) string {
+	scale := fmt.Sprintf("%s=%s", scaler, strings.Join(scalerArgs, ":"))
+	tail := "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709," +
+		"tonemap=hable,zscale=t=bt709:m=bt709:range=tv"
+	if cv == EncoderX264 {
+		return fmt.Sprintf("%s,format=yuv420p,%s", tail, scale)
+	}
+	return fmt.Sprintf("hwdownload,%s,format=nv12,hwupload,%s", tail, scale)
 }
 
 // SegmentArgs extends BuildArgs with the HLS muxer tail that chops one

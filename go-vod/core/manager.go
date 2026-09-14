@@ -55,6 +55,7 @@ type ProbeVideoData struct {
 	CodecName string
 	BitRate   int
 	Rotation  int
+	HDR       bool
 }
 
 type Rendition struct {
@@ -309,6 +310,7 @@ func (m *Manager) ffprobe() error {
 		CodecName: info.CodecName,
 		BitRate:   info.BitRate,
 		Rotation:  info.Rotation,
+		HDR:       info.HDR,
 	}
 
 	// Check if the video is copy-elgible for MAX.

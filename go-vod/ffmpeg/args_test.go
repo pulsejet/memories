@@ -86,6 +86,34 @@ func TestBuildArgsNVENC(t *testing.T) {
 	require.Contains(t, c, "-temporal-aq 1")
 }
 
+func TestBuildArgsTonemap(t *testing.T) {
+	sw := baseSpec()
+	sw.HDR = true
+	c := cmd(sw, BuildArgs(sw))
+	require.Contains(t, c, "zscale=t=linear")
+	require.Contains(t, c, "tonemap=hable")
+	require.Contains(t, c, "format=yuv420p")
+	require.NotContains(t, c, "format=nv12,scale=")
+
+	vaapi := baseSpec()
+	vaapi.HDR, vaapi.VAAPI = true, true
+	c = cmd(vaapi, BuildArgs(vaapi))
+	require.Contains(t, c, "hwdownload,zscale=")
+	require.Contains(t, c, "tonemap=hable")
+	require.Contains(t, c, "format=nv12,hwupload,scale_vaapi=")
+
+	nvenc := baseSpec()
+	nvenc.HDR, nvenc.NVENC, nvenc.NVENCScale = true, true, "cuda"
+	c = cmd(nvenc, BuildArgs(nvenc))
+	require.Contains(t, c, "hwdownload,zscale=")
+	require.Contains(t, c, "tonemap=hable")
+	require.Contains(t, c, "format=nv12,hwupload,scale_cuda=")
+
+	sdr := baseSpec()
+	require.NotContains(t, cmd(sdr, BuildArgs(sdr)), "tonemap")
+	require.NotContains(t, cmd(sdr, BuildArgs(sdr)), "zscale")
+}
+
 func TestSegmentArgs(t *testing.T) {
 	s := baseSpec()
 	c := cmd(s, SegmentArgs(s, 4, SegmentPattern("/tmp/vod", "720p")))

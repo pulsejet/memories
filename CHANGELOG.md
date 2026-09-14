@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file.
 - **Fix**: Video upload to public shares ([#1634](https://github.com/pulsejet/memories/issues/1634))
 - **Fix**: Google Takeout migration for long file names ([#1559](https://github.com/pulsejet/memories/issues/1559))
 - **Fix**: Face cover when person name matches a username ([#1692](https://github.com/pulsejet/memories/issues/1692))
+- **Fix**: Washed out HDR video transcoding ([#718](https://github.com/pulsejet/memories/issues/718), [#406](https://github.com/pulsejet/memories/issues/406), [#875](https://github.com/pulsejet/memories/issues/875), [#349](https://github.com/pulsejet/memories/issues/349), [#1465](https://github.com/pulsejet/memories/issues/1465))
 - **Dev**: Migrated to Vue 3
 - **Dev**: New extensive unit and e2e test suite
 

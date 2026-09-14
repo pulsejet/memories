@@ -40,6 +40,7 @@ type VideoInfo struct {
 	CodecName string
 	BitRate   int
 	Rotation  int
+	HDR       bool
 }
 
 type sideData struct {
@@ -49,7 +50,9 @@ type sideData struct {
 
 type videoStream struct {
 	ffprobe.Stream
-	SideDataList []sideData `json:"side_data_list"`
+	SideDataList   []sideData `json:"side_data_list"`
+	ColorTransfer  string     `json:"color_transfer"`
+	ColorPrimaries string     `json:"color_primaries"`
 }
 
 type probeOutput struct {
@@ -119,6 +122,7 @@ func ParseProbeJSON(data []byte) (VideoInfo, error) {
 		CodecName: s.CodecName,
 		BitRate:   bitRate,
 		Rotation:  probeRotation(s),
+		HDR:       probeHDR(s),
 	}, nil
 }
 
@@ -144,6 +148,19 @@ func probeRotation(s videoStream) int {
 		}
 	}
 	return s.Tags.Rotate
+}
+
+// probeHDR detects HDR from transfer and color metadata.
+func probeHDR(s videoStream) bool {
+	switch s.ColorTransfer {
+	case "smpte2084", "arib-std-b67":
+		return true
+	}
+	if s.ColorSpace == "bt2020nc" || s.ColorSpace == "bt2020c" || s.ColorPrimaries == "bt2020" {
+		pix := s.PixFmt
+		return strings.Contains(pix, "10") || strings.Contains(pix, "12") || strings.Contains(pix, "16")
+	}
+	return false
 }
 
 // Keyframes runs ffprobe and parses keyframe timestamps in seconds.

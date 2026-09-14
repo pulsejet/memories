@@ -14,6 +14,25 @@ func TestParseFrameRate(t *testing.T) {
 	require.Equal(t, 30, parseFrameRate(""))
 }
 
+func TestParseProbeJSONHDR(t *testing.T) {
+	probe := func(stream string) bool {
+		info, err := ParseProbeJSON([]byte(`{"streams":[` + stream + `]}`))
+		require.NoError(t, err)
+		return info.HDR
+	}
+
+	require.True(t, probe(`{"codec_name":"hevc","width":3840,"height":2160,`+
+		`"pix_fmt":"yuv420p10le","color_space":"bt2020nc",`+
+		`"color_transfer":"smpte2084","color_primaries":"bt2020"}`))
+	require.True(t, probe(`{"codec_name":"hevc","pix_fmt":"yuv420p10le",`+
+		`"color_transfer":"arib-std-b67"}`))
+	require.True(t, probe(`{"codec_name":"hevc","pix_fmt":"p010le",`+
+		`"color_space":"bt2020nc","color_primaries":"bt2020"}`))
+	require.False(t, probe(`{"codec_name":"h264","pix_fmt":"yuv420p10le",`+
+		`"color_space":"bt709","color_transfer":"bt709"}`))
+	require.False(t, probe(`{"codec_name":"h264","pix_fmt":"yuv420p"}`))
+}
+
 func TestParseKeyframes(t *testing.T) {
 	require.Equal(t,
 		[]float64{0, 2.5},
