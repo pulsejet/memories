@@ -60,6 +60,14 @@ func TestBuildArgsVAAPI(t *testing.T) {
 	require.Contains(t, c, "-hwaccel vaapi")
 	require.Contains(t, c, "scale_vaapi=force_original_aspect_ratio=decrease:format=nv12")
 	require.Contains(t, c, "-global_quality 25 -low_power 1")
+	require.Contains(t, c, "vaapi=memories:/dev/dri/renderD128")
+
+	dev := baseSpec()
+	dev.VAAPI, dev.VAAPIDevice = true, "/dev/dri/renderD129"
+	c = cmd(dev, BuildArgs(dev))
+	require.Contains(t, c, "-hwaccel_device /dev/dri/renderD129")
+	require.Contains(t, c, "vaapi=memories:/dev/dri/renderD129")
+	require.NotContains(t, c, "renderD128")
 }
 
 func TestBuildArgsTranspose(t *testing.T) {

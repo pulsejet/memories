@@ -196,6 +196,7 @@ final class BinExt
 
             'vaapi' => SystemConfig::get('memories.vod.vaapi'),
             'vaapiLowPower' => SystemConfig::get('memories.vod.vaapi.low_power'),
+            'vaapiDevice' => SystemConfig::get('memories.vod.vaapi.device'),
 
             'nvenc' => SystemConfig::get('memories.vod.nvenc'),
             'nvencTemporalAQ' => SystemConfig::get('memories.vod.nvenc.temporal_aq'),

@@ -52,9 +52,11 @@ type Spec struct {
 	// -hls_time and the forced-keyframe interval.
 	ChunkSize int
 
-	// VAAPI selects h264_vaapi on /dev/dri/renderD128; VAAPILowPower adds
+	// VAAPI selects h264_vaapi on VAAPIDevice; VAAPILowPower adds
 	// "-low_power 1" for fixed-function encode blocks.
 	VAAPI, VAAPILowPower bool
+	// VAAPIDevice is the VA-API render node; empty selects /dev/dri/renderD128.
+	VAAPIDevice string
 	// NVENC selects h264_nvenc with CUDA offload. NVENCScale picks the scaler
 	// ("cuda" or "npp"); NVENCTemporalAQ enables temporal AQ.
 	NVENC, NVENCTemporalAQ bool
@@ -124,11 +126,15 @@ func BuildArgs(s Spec) []string {
 	cv := Encoder(s)
 	switch cv {
 	case EncoderVAAPI:
+		dev := s.VAAPIDevice
+		if dev == "" {
+			dev = "/dev/dri/renderD128"
+		}
 		args = append(args,
 			"-hwaccel", "vaapi",
-			"-hwaccel_device", "/dev/dri/renderD128",
+			"-hwaccel_device", dev,
 			"-hwaccel_output_format", "vaapi",
-			"-init_hw_device", "vaapi=memories:/dev/dri/renderD128",
+			"-init_hw_device", "vaapi=memories:"+dev,
 			"-filter_hw_device", "memories",
 		)
 	case EncoderNVENC:

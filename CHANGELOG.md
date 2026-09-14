@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Geolocation for local photos on Android ([#1723](https://github.com/pulsejet/memories/issues/1723))
 - **Feature**: Upload selected local photos on Android ([#1505](https://github.com/pulsejet/memories/issues/1505), [#1640](https://github.com/pulsejet/memories/issues/1640))
 - **Feature**: Allow selecting map tile server ([#1702](https://github.com/pulsejet/memories/issues/1702), [#1534](https://github.com/pulsejet/memories/issues/1534))
+- **Feature**: Configurable VA-API device path for hardware transcoding ([#1658](https://github.com/pulsejet/memories/issues/1658))
 - **Fix**: Copied files are now immediately indexed
 - **Fix**: Improved and 20x faster planet database setup
 - **Fix**: Fix broken cover images on SQLite

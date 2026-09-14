@@ -26,6 +26,7 @@ export type ISystemConfig = {
 
   'memories.vod.vaapi': boolean;
   'memories.vod.vaapi.low_power': boolean;
+  'memories.vod.vaapi.device': string;
 
   'memories.vod.nvenc': boolean;
   'memories.vod.nvenc.temporal_aq': boolean;

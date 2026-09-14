@@ -166,7 +166,7 @@ final class AdminController extends GenericApiController
             );
 
             // Check for VA-API device
-            $devPath = '/dev/dri/renderD128';
+            $devPath = SystemConfig::get('memories.vod.vaapi.device');
             if (!file_exists($devPath)) {
                 $status['vaapi_dev'] = 'not_found';
             } elseif (!is_readable($devPath)) {

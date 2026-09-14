@@ -30,8 +30,9 @@ type Config struct {
 
 	QF int `json:"qf"`
 
-	VAAPI         bool `json:"vaapi"`
-	VAAPILowPower bool `json:"vaapiLowPower"`
+	VAAPI         bool   `json:"vaapi"`
+	VAAPILowPower bool   `json:"vaapiLowPower"`
+	VAAPIDevice   string `json:"vaapiDevice"`
 
 	NVENC           bool   `json:"nvenc"`
 	NVENCTemporalAQ bool   `json:"nvencTemporalAQ"`
@@ -58,6 +59,7 @@ func Defaults(version string) *Config {
 		StreamIdleTime:  60,
 		ManagerIdleTime: 60,
 		MaxUploadSize:   4 << 30,
+		VAAPIDevice:     "/dev/dri/renderD128",
 	}
 }
 

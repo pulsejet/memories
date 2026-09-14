@@ -314,6 +314,7 @@ func (s *Stream) spec(startAt float64, isHls bool) ffmpeg.Spec {
 
 		VAAPI:           s.c.VAAPI,
 		VAAPILowPower:   s.c.VAAPILowPower,
+		VAAPIDevice:     s.c.VAAPIDevice,
 		NVENC:           s.c.NVENC,
 		NVENCTemporalAQ: s.c.NVENCTemporalAQ,
 		NVENCScale:      s.c.NVENCScale,

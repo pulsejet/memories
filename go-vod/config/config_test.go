@@ -13,6 +13,7 @@ func TestDefaultsValid(t *testing.T) {
 	c.FFmpeg, c.FFprobe, c.TempDir = "/bin/ffmpeg", "/bin/ffprobe", t.TempDir()
 	require.NoError(t, c.Validate())
 	require.Equal(t, int64(4<<30), c.MaxUploadSize)
+	require.Equal(t, "/dev/dri/renderD128", c.VAAPIDevice)
 }
 
 func TestLoadFile(t *testing.T) {

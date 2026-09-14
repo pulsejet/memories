@@ -63,6 +63,7 @@ final class SystemConfig
         // VA-API configuration options
         'memories.vod.vaapi' => false,  // Transcode with VA-API
         'memories.vod.vaapi.low_power' => false, // Use low_power mode for VA-API
+        'memories.vod.vaapi.device' => '/dev/dri/renderD128', // VA-API render node
 
         // NVENC configuration options
         'memories.vod.nvenc' => false,  // Transcode with NVIDIA NVENC
