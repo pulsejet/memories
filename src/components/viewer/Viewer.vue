@@ -1636,7 +1636,7 @@ export default defineComponent({
   background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55));
   width: inherit;
   padding: 8px 8px max(10px, env(safe-area-inset-bottom));
-  z-index: 100001;
+  z-index: 100002;
   position: fixed;
   bottom: 0;
   left: 0;

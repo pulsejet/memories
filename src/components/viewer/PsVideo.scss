@@ -128,3 +128,26 @@
     cursor: auto;
   }
 }
+
+// Vidstack menu layout uses :where() (zero specificity), so Nextcloud's
+// styles interfere with the layout.
+.vds-menu-items {
+  .vds-menu-item-hint,
+  .vds-menu-open-icon,
+  .vds-radio-hint {
+    margin-inline-start: auto;
+  }
+
+  .vds-menu-item-hint + .vds-menu-open-icon {
+    margin-inline-start: 2px;
+  }
+
+  .vds-radio-hint {
+    padding-inline-start: 12px;
+  }
+
+  .vds-menu-item .vds-icon,
+  .vds-radio .vds-icon {
+    margin-inline-end: 6px;
+  }
+}
