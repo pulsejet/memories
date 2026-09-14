@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - **Notice**: Requires Nextcloud 34 or later.
 - **Notice**: Updated Planet DB is avilable.
 - **Feature**: Redesigned Viewer UX on mobile
+- **Feature**: Support zooming in on videos ([#1242](https://github.com/pulsejet/memories/issues/1242))
 - **Feature**: Huawei Moving Picture support
 - **Feature**: Configurable location search provider for the metadata editor ([#1500](https://github.com/pulsejet/memories/issues/1500))
 - **Feature**: Geolocation for local photos on Android ([#1723](https://github.com/pulsejet/memories/issues/1723))

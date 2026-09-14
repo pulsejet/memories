@@ -7,7 +7,7 @@ import * as nativex from '@native';
 import { API } from '@services/API';
 
 import type PhotoSwipe from 'photoswipe';
-import type { PsContent, PsEvent } from './types';
+import type { PsContent, PsEvent, PsSlide } from './types';
 import type { MediaPlayerElement } from 'vidstack/elements';
 import type { MediaErrorEvent, MediaProviderChangeEvent, PlayerSrc } from 'vidstack';
 import type Hls from 'hls.js';
@@ -94,6 +94,7 @@ class VideoContentSetup {
     lightbox.on('contentActivate', (e) => this.onContentActivate(e as unknown as PsVideoEvent));
     lightbox.on('contentDeactivate', (e) => this.onContentDeactivate(e as unknown as PsVideoEvent));
     lightbox.on('contentResize', (e) => this.onContentResize(e as unknown as typeof e & PsVideoEvent));
+    lightbox.on('zoomPanUpdate', (e) => this.onZoomPanUpdate(e as unknown as { slide: PsSlide }));
 
     lightbox.addFilter('isKeepingPlaceholder', (k, c) => this.isKeepingPlaceholder(k, c as unknown as PsContent));
     lightbox.addFilter('isContentZoomable', (z, c) => this.isContentZoomable(z, c as unknown as PsContent));
@@ -253,8 +254,8 @@ class VideoContentSetup {
     content.videoIsHls = videoIsHls;
     content.element.appendChild(player);
 
-    // Move the container to the slide holder for full-viewport controls
-    // (like the old Plyr chrome); the video itself is letterboxed via CSS.
+    // Full-viewport player in the slide holder; onZoomPanUpdate mirrors
+    // PhotoSwipe's native slide values onto the picture layer.
     content.slide?.holderElement?.appendChild(content.element);
 
     // Reveal once fully opened (or shortly after, if the opening
@@ -355,14 +356,11 @@ class VideoContentSetup {
   }
 
   isContentZoomable(isZoomable: boolean, content: PsContent) {
-    return !isVideoContent(content) && isZoomable;
+    return isVideoContent(content) || isZoomable;
   }
 
   isKeepingPlaceholder(keep: boolean, content: PsContent) {
-    if (isVideoContent(content)) {
-      return true;
-    }
-    return keep;
+    return isVideoContent(content) || keep;
   }
 
   onContentActivate({ content }: PsVideoEvent) {
@@ -371,6 +369,46 @@ class VideoContentSetup {
 
   onContentDeactivate({ content }: PsVideoEvent) {
     this.destroyPlayer(content);
+  }
+
+  /**
+   * Mirror the native slide transform onto the picture layer only.
+   * Maps the target picture rect back to the viewport-aspect box that
+   * contains it centered; identity at rest, so settled visuals are pure CSS.
+   */
+  onZoomPanUpdate({ slide }: { slide: PsSlide }) {
+    const content = slide?.content as VideoContent | undefined;
+    if (!content || !isVideoContent(content)) return;
+
+    const el = content.element as HTMLElement | undefined;
+    const provider = el?.querySelector('media-provider') as HTMLElement | null;
+    if (!el || !provider) return;
+
+    if (el.parentElement !== slide.holderElement) return;
+
+    const vw0 = slide.panAreaSize.x;
+    const vh0 = slide.panAreaSize.y;
+    const dispW = slide.width * slide.zoomLevels.initial;
+    const dispH = slide.height * slide.zoomLevels.initial;
+    const k = slide.zoomLevels.initial ? slide.currZoomLevel / slide.zoomLevels.initial : NaN;
+    if (!vw0 || !vh0 || !dispW || !dispH || !Number.isFinite(k)) {
+      if (provider.style.transform) provider.style.transform = '';
+      return;
+    }
+
+    const tw = dispW * k;
+    const th = dispH * k;
+    const tcx = slide.pan.x + tw / 2;
+    const tcy = slide.pan.y + th / 2;
+
+    const bw = Math.max(tw, (th * vw0) / vh0);
+    const bh = Math.max(th, (tw * vh0) / vw0);
+    const bx = tcx - bw / 2;
+    const by = tcy - bh / 2;
+    const s = bw / vw0;
+
+    const settled = Math.abs(bx) < 0.5 && Math.abs(by) < 0.5 && Math.abs(s - 1) < 1e-6;
+    provider.style.transform = settled ? '' : `translate3d(${bx}px, ${by}px, 0) scale(${s})`;
   }
 
   onContentLoad(e: PsVideoEvent) {

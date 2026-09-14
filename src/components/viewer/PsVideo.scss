@@ -2,8 +2,6 @@
 // the player itself lives in PhotoSwipe slide holders below it.
 .memories-viewer {
   .video-container {
-    // Video-sized box centered in the slide holder by default (dimensions
-    // from PsVideo.onContentResize); full viewport once fully-opened below.
     position: absolute;
     left: 50%;
     top: 50%;
@@ -35,6 +33,7 @@
       height: 100%;
       pointer-events: none;
       background: transparent !important;
+      transform-origin: 0 0; // onZoomPanUpdate
 
       video {
         width: 100%;
@@ -45,35 +44,10 @@
         pointer-events: none;
       }
     }
-
-    // Bottom gradient for videos. Lives in the slide above video,
-    // so it never covers the controls like the viewer-level bottom bar would.
-    &::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 180px;
-      max-height: 40%;
-      background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.35));
-      pointer-events: none;
-      z-index: 5;
-      opacity: 0;
-      visibility: hidden;
-      transition:
-        opacity 0.2s ease-in-out,
-        visibility 0.2s allow-discrete;
-
-      @media (max-width: 768px) {
-        height: 250px;
-        max-height: 50%;
-      }
-    }
   }
 
-  // Full-viewport player (and full-width controls) once the viewer
-  // is fully opened; the opening transition uses the video-sized box.
+  // Full-viewport player once fully opened; the opening transition
+  // uses the video-sized box. The mirror transform assumes this layout.
   &.fully-opened {
     .video-container {
       left: 0;
@@ -81,6 +55,31 @@
       transform: none;
       width: 100%;
       height: 100%;
+
+      // Bottom gradient for videos. Lives in the slide above video,
+      // so it never covers the controls like the viewer-level bottom bar would.
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 180px;
+        max-height: 40%;
+        background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.35));
+        pointer-events: none;
+        z-index: 5;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.2s ease-in-out,
+          visibility 0.2s allow-discrete;
+
+        @media (max-width: 768px) {
+          height: 250px;
+          max-height: 50%;
+        }
+      }
     }
   }
 
@@ -138,6 +137,10 @@
       inline-size: 96px;
       block-size: 96px;
     }
+  }
+
+  .vds-poster {
+    background-color: transparent;
   }
 
   [data-buffering] .vds-poster,
