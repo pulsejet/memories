@@ -10,6 +10,7 @@ import type PhotoSwipe from 'photoswipe';
 import type { PsContent, PsEvent } from './types';
 import type { MediaPlayerElement } from 'vidstack/elements';
 import type { MediaErrorEvent, MediaProviderChangeEvent, PlayerSrc } from 'vidstack';
+import type Hls from 'hls.js';
 
 type VideoContent = PsContent & {
   videoPlayer: MediaPlayerElement | null;
@@ -54,10 +55,17 @@ const PLAYER_UI_SELECTOR = [
 
 // Cap buffer to avoid overloading go-vod while
 // processing requests from multiple users.
-const HLS_BUFFER_CONFIG = {
+const HLS_LIVE_CONFIG = {
+  /** Forward buffer target in seconds. */
   maxBufferLength: 30,
+  /** Hard cap for forward buffer growth. */
   maxMaxBufferLength: 30,
+  /** Backward buffer kept for seeking back. */
   backBufferLength: 30,
+  /** Fetch the first segment while the manifest is still parsing. */
+  startFragPrefetch: true,
+  /** Tolerate segments not opening on a keyframe (split_by_time). */
+  maxBufferHole: 0.5,
 };
 
 /**
@@ -215,13 +223,15 @@ class VideoContentSetup {
         provider.library = Hls;
         provider.config = {
           ...provider.config,
-          ...HLS_BUFFER_CONFIG,
+          ...HLS_LIVE_CONFIG,
         };
       }
     });
 
     player.addEventListener('hls-instance', (e: Event) => {
-      Object.assign((e as CustomEvent).detail.config, HLS_BUFFER_CONFIG);
+      const hls = (e as CustomEvent).detail as Hls;
+      Object.assign(hls.config, HLS_LIVE_CONFIG);
+      this.pickInitialLevel(hls);
     });
 
     player.addEventListener('playing', () => {
@@ -399,6 +409,34 @@ class VideoContentSetup {
     } finally {
       this.wakeLock = null;
     }
+  }
+
+  /** Start at the admin default quality ('-1' = original). */
+  pickInitialLevel(hls: Hls) {
+    const spec = staticConfig.getSync('video_default_quality');
+    if (!spec || spec === '0') return;
+
+    const Events = (hls.constructor as typeof Hls).Events;
+    hls.once(Events.MANIFEST_PARSED, () => {
+      const levels = hls.levels;
+      if (!levels?.length) return;
+
+      let idx = levels.length - 1;
+      if (spec !== '-1') {
+        const target = Number.parseInt(spec, 10);
+        if (!Number.isFinite(target) || target <= 0) return;
+        const best =
+          levels.filter((l) => (l.height ?? 0) <= target).sort((a, b) => (b.height ?? 0) - (a.height ?? 0))[0] ??
+          levels[0];
+        idx = levels.indexOf(best);
+      }
+
+      try {
+        hls.nextLevel = idx;
+      } catch {
+        // Player may be gone by the time the manifest parses.
+      }
+    });
   }
 }
 

@@ -102,8 +102,7 @@ final class SystemConfig
 
         // Set the default video quality for a first time user
         //    0 => Auto (default)
-        //   -1 => Original (max quality with transcoding)
-        //   -2 => Direct (disable transcoding)
+        //   -1 => Original (max quality)
         // 1080 => 1080p (and so on)
         'memories.video_default_quality' => '0',
 
