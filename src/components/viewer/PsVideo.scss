@@ -42,6 +42,31 @@
         pointer-events: none;
       }
     }
+
+    // Bottom gradient for videos. Lives in the slide above video,
+    // so it never covers the controls like the viewer-level bottom bar would.
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 180px;
+      max-height: 40%;
+      background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.35));
+      pointer-events: none;
+      z-index: 5;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.2s ease-in-out,
+        visibility 0.2s allow-discrete;
+
+      @media (max-width: 768px) {
+        height: 250px;
+        max-height: 50%;
+      }
+    }
   }
 
   // Full-viewport player (and full-width controls) once the viewer
@@ -120,6 +145,11 @@
   }
 
   &:has(.pswp--ui-visible) .vds-controls {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &:has(.pswp--ui-visible) .video-container::after {
     opacity: 1;
     visibility: visible;
   }

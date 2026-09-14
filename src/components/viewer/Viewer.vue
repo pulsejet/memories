@@ -1590,10 +1590,8 @@ export default defineComponent({
 
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
-  // Videos too (text hidden below).
   .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow).fully-opened:not(.is-video) &:has(> .exif),
-  .memories-viewer.force-metadata.fully-opened:not(.is-video) &:has(> .exif),
-  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow).fully-opened.is-video & {
+  .memories-viewer.force-metadata.fully-opened:not(.is-video) &:has(> .exif) {
     opacity: 1;
   }
 
@@ -1616,14 +1614,8 @@ export default defineComponent({
   }
 
   .memories-viewer.is-video & {
-    min-height: 170px;
-
-    // Desktop videos: gradient only.
-    @media (min-width: 769px) {
-      .exif {
-        display: none;
-      }
-    }
+    // Videos paint their own gradient inside the slide.
+    display: none;
   }
 }
 
