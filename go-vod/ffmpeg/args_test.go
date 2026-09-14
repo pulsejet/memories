@@ -17,6 +17,7 @@ func baseSpec() Spec {
 		Quality:   "720p",
 		Width:     1280,
 		Height:    720,
+		Audio:     AudioInfo{CodecName: "ac3", Channels: 6, SampleRate: 48000, BitRate: 384000},
 	}
 }
 
@@ -112,6 +113,28 @@ func TestBuildArgsTonemap(t *testing.T) {
 	sdr := baseSpec()
 	require.NotContains(t, cmd(sdr, BuildArgs(sdr)), "tonemap")
 	require.NotContains(t, cmd(sdr, BuildArgs(sdr)), "zscale")
+}
+
+func TestBuildArgsNoAudio(t *testing.T) {
+	s := baseSpec()
+	s.Audio = AudioInfo{}
+	c := cmd(s, BuildArgs(s))
+	require.Contains(t, c, `"-c:v" libx264`)
+	require.NotContains(t, c, `-map "0:a`)
+	require.NotContains(t, c, `"-c:a"`)
+	require.NotContains(t, c, "b:a")
+}
+
+func TestBuildArgsAudioCopy(t *testing.T) {
+	s := baseSpec()
+	s.Audio = AudioInfo{CodecName: "aac", Channels: 2, SampleRate: 48000, BitRate: 128000}
+	c := cmd(s, BuildArgs(s))
+	require.Contains(t, c, `-map "0:a:0?" "-c:a" copy`)
+	require.NotContains(t, c, "b:a")
+
+	multi := baseSpec()
+	multi.Audio = AudioInfo{CodecName: "aac", Channels: 6}
+	require.Contains(t, cmd(multi, BuildArgs(multi)), `"-c:a" aac`)
 }
 
 func TestSegmentArgs(t *testing.T) {

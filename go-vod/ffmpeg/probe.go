@@ -41,6 +41,15 @@ type VideoInfo struct {
 	BitRate   int
 	Rotation  int
 	HDR       bool
+	Audio     AudioInfo
+}
+
+// AudioInfo describes the first audio stream; empty when silent.
+type AudioInfo struct {
+	CodecName  string
+	Channels   int
+	SampleRate int
+	BitRate    int
 }
 
 type sideData struct {
@@ -68,7 +77,6 @@ func Probe(ctx context.Context, bin, path string) (VideoInfo, error) {
 	args := []string{
 		"-v", "error",
 		"-show_entries", "format:stream",
-		"-select_streams", "v",
 		"-of", "json",
 		path,
 	}
@@ -95,10 +103,16 @@ func ParseProbeJSON(data []byte) (VideoInfo, error) {
 	if err := json.Unmarshal(data, &out); err != nil {
 		return VideoInfo{}, err
 	}
-	if len(out.Streams) == 0 {
+	var s *videoStream
+	for i := range out.Streams {
+		if out.Streams[i].CodecType == "video" {
+			s = &out.Streams[i]
+			break
+		}
+	}
+	if s == nil {
 		return VideoInfo{}, errors.New("no video streams found")
 	}
-	s := out.Streams[0]
 
 	var duration time.Duration
 	if s.Duration != "" {
@@ -121,9 +135,29 @@ func ParseProbeJSON(data []byte) (VideoInfo, error) {
 		FrameRate: parseFrameRate(s.AvgFrameRate),
 		CodecName: s.CodecName,
 		BitRate:   bitRate,
-		Rotation:  probeRotation(s),
-		HDR:       probeHDR(s),
+		Rotation:  probeRotation(*s),
+		HDR:       probeHDR(*s),
+		Audio:     probeAudio(out.Streams),
 	}, nil
+}
+
+// probeAudio describes the first audio stream; empty when silent.
+func probeAudio(streams []videoStream) AudioInfo {
+	for i := range streams {
+		st := &streams[i]
+		if st.CodecType != "audio" || st.CodecName == "" {
+			continue
+		}
+		rate, _ := strconv.Atoi(st.SampleRate)
+		br, _ := strconv.Atoi(st.BitRate)
+		return AudioInfo{
+			CodecName:  st.CodecName,
+			Channels:   st.Channels,
+			SampleRate: rate,
+			BitRate:    br,
+		}
+	}
+	return AudioInfo{}
 }
 
 // parseFrameRate parses a "num/den" frame rate, defaulting to 30fps.

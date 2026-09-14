@@ -29,7 +29,7 @@ func stubCopyProbe(t *testing.T, probeJSON, keyframes string, keyFail bool) stri
 	return bin
 }
 
-const copyProbeJSON = `{"streams":[{"codec_name":"h264","width":1280,"height":720,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000"}],"format":{}}`
+const copyProbeJSON = `{"streams":[{"codec_type":"video","codec_name":"h264","width":1280,"height":720,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000"}],"format":{}}`
 
 func newCopyManager(t *testing.T, probeJSON, keyframes string, keyFail bool) *Manager {
 	t.Helper()
@@ -58,7 +58,7 @@ func TestManagerCopySegments(t *testing.T) {
 }
 
 func TestManagerCopyDisabledCodec(t *testing.T) {
-	probe := `{"streams":[{"codec_name":"hevc","width":1280,"height":720,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000"}],"format":{}}`
+	probe := `{"streams":[{"codec_type":"video","codec_name":"hevc","width":1280,"height":720,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000"}],"format":{}}`
 	m := newCopyManager(t, probe, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false)
 
 	_, ok := m.CopySegments()
@@ -68,7 +68,7 @@ func TestManagerCopyDisabledCodec(t *testing.T) {
 }
 
 func TestManagerCopyDisabledRotation(t *testing.T) {
-	probe := `{"streams":[{"codec_name":"h264","width":720,"height":1280,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000","side_data_list":[{"side_data_type":"Display Matrix","rotation":90}]}],"format":{}}`
+	probe := `{"streams":[{"codec_type":"video","codec_name":"h264","width":720,"height":1280,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000","side_data_list":[{"side_data_type":"Display Matrix","rotation":90}]}],"format":{}}`
 	m := newCopyManager(t, probe, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false)
 
 	_, ok := m.CopySegments()

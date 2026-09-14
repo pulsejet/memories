@@ -13,7 +13,7 @@ func stubProbe(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "out.json"), []byte(
-		`{"streams":[{"codec_name":"h264","width":64,"height":64,"avg_frame_rate":"30/1","duration":"1","bit_rate":"100"}],"format":{}}`,
+		`{"streams":[{"codec_type":"video","codec_name":"h264","width":64,"height":64,"avg_frame_rate":"30/1","duration":"1","bit_rate":"100"}],"format":{}}`,
 	), 0644))
 	bin := filepath.Join(dir, "ffprobe")
 	require.NoError(t, os.WriteFile(bin, []byte("#!/bin/sh\ncat "+filepath.Join(dir, "out.json")+"\n"), 0755))

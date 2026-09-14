@@ -46,6 +46,8 @@ type Spec struct {
 	Rotation int
 	// HDR marks sources needing SDR tonemapping.
 	HDR bool
+	// Audio is the first audio stream; empty when silent.
+	Audio AudioInfo
 	// ChunkSize is the target segment length in whole seconds. Drives
 	// -hls_time and the forced-keyframe interval.
 	ChunkSize int
@@ -239,13 +241,21 @@ func BuildArgs(s Spec) []string {
 		)
 	}
 
-	return append(args,
-		"-map", "0:a:0?",
-		"-c:a", "aac",
-		"-ac", "2",
-		"-ar", "48000",
-		"-b:a", "128k",
-	)
+	if s.Audio.CodecName != "" {
+		args = append(args, "-map", "0:a:0?")
+		if s.Audio.CodecName == "aac" && s.Audio.Channels >= 1 && s.Audio.Channels <= 2 {
+			args = append(args, "-c:a", "copy")
+		} else {
+			args = append(args,
+				"-c:a", "aac",
+				"-ac", "2",
+				"-ar", "48000",
+				"-b:a", "128k",
+			)
+		}
+	}
+
+	return args
 }
 
 // tonemapFilter maps HDR to SDR with hable; zscale supplies linear light.
