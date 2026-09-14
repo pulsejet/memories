@@ -15,12 +15,13 @@ func main() {
 	c := config.Defaults(VERSION)
 
 	for _, arg := range os.Args[1:] {
-		if arg == "-version-monitor" {
+		switch arg {
+		case "-version-monitor":
 			c.VersionMonitor = true
-		} else if arg == "-version" {
+		case "-version":
 			fmt.Print("go-vod " + VERSION)
 			return
-		} else {
+		default:
 			if err := c.LoadFile(arg); err != nil {
 				log.Fatal("Error loading config: ", err)
 			}

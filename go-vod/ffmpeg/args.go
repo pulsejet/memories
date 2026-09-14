@@ -106,7 +106,8 @@ func BuildArgs(s Spec) []string {
 	}
 
 	cv := Encoder(s)
-	if s.VAAPI {
+	switch cv {
+	case EncoderVAAPI:
 		args = append(args,
 			"-hwaccel", "vaapi",
 			"-hwaccel_device", "/dev/dri/renderD128",
@@ -114,7 +115,7 @@ func BuildArgs(s Spec) []string {
 			"-init_hw_device", "vaapi=memories:/dev/dri/renderD128",
 			"-filter_hw_device", "memories",
 		)
-	} else if s.NVENC {
+	case EncoderNVENC:
 		args = append(args,
 			"-hwaccel", "cuda",
 			"-hwaccel_output_format", "cuda",
@@ -137,11 +138,12 @@ func BuildArgs(s Spec) []string {
 	scaler := "scale"
 	scalerArgs := []string{"force_original_aspect_ratio=decrease"}
 
-	if cv == EncoderVAAPI {
+	switch cv {
+	case EncoderVAAPI:
 		format = "format=nv12|vaapi,hwupload"
 		scaler = "scale_vaapi"
 		scalerArgs = append(scalerArgs, "format=nv12")
-	} else if cv == EncoderNVENC {
+	case EncoderNVENC:
 		format = "format=nv12|cuda,hwupload"
 		scaler = fmt.Sprintf("scale_%s", s.NVENCScale)
 		if s.NVENCScale == "cuda" {
@@ -150,10 +152,7 @@ func BuildArgs(s Spec) []string {
 	}
 
 	if s.Quality != QualityMax {
-		maxDim := s.Height
-		if s.Width > s.Height {
-			maxDim = s.Width
-		}
+		maxDim := max(s.Width, s.Height)
 		scalerArgs = append(scalerArgs, fmt.Sprintf("w=%d", maxDim), fmt.Sprintf("h=%d", maxDim))
 	}
 
