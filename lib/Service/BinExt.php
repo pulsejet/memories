@@ -9,7 +9,7 @@ use OCA\Memories\Util;
 
 final class BinExt
 {
-    public const EXIFTOOL_VER = '13.44';
+    public const EXIFTOOL_VER = '13.59';
     public const GOVOD_VER = '0.2.9';
     public const NX_VER_MIN = '1.1';
 
