@@ -26,8 +26,7 @@ type Spec struct {
 
 	// StartAt seeks before decoding; <= 0 emits no "-ss".
 	StartAt float64
-	// HLS marks segment output (vs progressive file). Only gates rotation
-	// handling: manual transpose applies to HLS renditions.
+	// HLS marks segment output (vs progressive file).
 	HLS bool
 
 	// Quality is the rendition label ("480p", …, QualityMax). Anything but
@@ -42,7 +41,7 @@ type Spec struct {
 	// GOP when UseGopSize is set.
 	FrameRate int
 	// Rotation is the probed source rotation (-90, 90, ±180, 0), applied as
-	// an explicit transpose filter for HLS when UseTranspose is set.
+	// an explicit transpose filter when UseTranspose is set.
 	Rotation int
 	// HDR marks sources needing SDR tonemapping.
 	HDR bool
@@ -107,7 +106,7 @@ func Encoder(s Spec) string {
 // when transposing manually, input with -copyts/+genpts (post-seek timing
 // still refers to source timestamps), the -vf graph (nv12 normalize +
 // aspect-preserving downscale, in hardware frames per backend; scale_cuda
-// needs passthrough=0), an appended transpose stage for rotated HLS sources,
+// needs passthrough=0), an appended transpose stage for rotated sources,
 // fixed mapping (first video re-encoded, optional first audio normalized
 // to stereo 48kHz AAC), and
 // constant-quality rate control per encoder (crf / global_quality / cq).
@@ -183,7 +182,7 @@ func BuildArgs(s Spec) []string {
 		if s.HDR {
 			filter = tonemapFilter(cv, scaler, scalerArgs)
 		}
-		if s.HLS && s.UseTranspose {
+		if s.UseTranspose {
 			transposer := "transpose"
 			switch cv {
 			case EncoderVAAPI:
