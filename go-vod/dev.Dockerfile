@@ -1,4 +1,4 @@
-FROM golang:bullseye AS builder
+FROM golang:1.27-bookworm AS builder
 WORKDIR /app
 COPY . .
 RUN CGO_ENABLED=0 go build -buildvcs=false -ldflags="-s -w"
