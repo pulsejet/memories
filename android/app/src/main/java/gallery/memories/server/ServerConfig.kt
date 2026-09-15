@@ -7,5 +7,4 @@ data class ServerConfig(
     val serverOrigin: String,
     val webRoot: String,
     val assetDir: File,
-    val baseUrl: String,
 )

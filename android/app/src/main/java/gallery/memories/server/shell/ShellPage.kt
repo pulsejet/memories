@@ -39,15 +39,10 @@ object ShellPage {
 
     /**
      * Renders the shell for a snapshot [describe].
-     *
-     * @param debug reserved for a future unminified/debug shell; currently ignored.
      */
-    @Suppress("UNUSED_PARAMETER")
     fun build(
         describe: JSONObject,
         webRoot: String,
-        baseUrl: String,
-        debug: Boolean = false,
         user: String? = null,
         nonce: String,
     ): String {
@@ -78,10 +73,7 @@ object ShellPage {
             }
             body {
                 div { id = "skip-actions" }
-                div {
-                    id = "content"
-                    attributes["data-base-url"] = baseUrl
-                }
+                div { id = "content" }
                 script {
                     attributes["nonce"] = nonce
                     unsafe {

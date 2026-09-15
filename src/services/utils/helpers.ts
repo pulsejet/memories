@@ -4,7 +4,7 @@ import { Md5 } from 'ts-md5';
 import { constants as c } from './const';
 
 import { API } from '@services/API';
-import { NAPI } from '@native';
+import { has as hasNativeX, NAPI } from '@native';
 
 import type { IConfig, IImageInfo, IPhoto } from '@typings';
 
@@ -266,7 +266,7 @@ export function removeExtension(filename: string) {
  * Check if the provided Axios Error is a network error.
  */
 export function isNetworkError(error: any) {
-  return error?.code === 'ERR_NETWORK';
+  return error?.code === 'ERR_NETWORK' || (hasNativeX() && error?.response?.status === 504);
 }
 
 /**

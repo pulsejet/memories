@@ -16,6 +16,6 @@
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Ktor's desktop-only debug detector references java.lang.management,
+# which does not exist on Android. It is never used at runtime here.
+-dontwarn java.lang.management.**

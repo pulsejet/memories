@@ -110,7 +110,7 @@ class AppStartupCoordinator(
         val (_, dir) = assets.current ?: assets.latestSnapshot(base) ?: return false
         val describe = assets.readDescribe(dir) ?: return false
         val webRoot = AssetCache.webrootOf(base)
-        local.configure(AssetCache.originOf(base), webRoot, dir, base)
+        local.configure(AssetCache.originOf(base), webRoot, dir)
         activity.binding.webview.clearHistory()
         activity.clearHistoryOnLoad = true
         val url = if (subpath.isEmpty()) local.origin() + "$webRoot/"

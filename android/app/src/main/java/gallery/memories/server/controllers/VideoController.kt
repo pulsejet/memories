@@ -3,11 +3,19 @@ package gallery.memories.server.controllers
 import android.content.Context
 import android.util.Log
 import gallery.memories.data.local.media.MediaStoreDataSource
-import gallery.memories.server.HttpRequest
-import gallery.memories.server.HttpWriter
-import java.io.BufferedOutputStream
+import gallery.memories.server.KtorRespond
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.uri
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondOutputStream
 import java.io.FileInputStream
 import java.io.InputStream
+import java.io.OutputStream
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Streams on-device video files to the WebView's <video> element.
@@ -21,112 +29,87 @@ object VideoController {
      * to the bridge/proxy. Must stay in sync with NativeX.API.VIDEO_FULL
      * and NAPI.VIDEO_FULL.
      */
-    private val VIDEO_FULL = Regex("^/video/full/\\d+/?$")
+    private val VIDEO_FULL = Regex("^/video/full/\\d+$")
 
-    fun isVideo(req: HttpRequest): Boolean = VIDEO_FULL.matches(req.path)
+    fun isVideo(rawPath: String): Boolean = VIDEO_FULL.matches(rawPath)
 
-    fun serveVideo(
+    suspend fun serveVideo(
         appCtx: Context,
-        req: HttpRequest,
-        out: BufferedOutputStream,
+        call: ApplicationCall,
         dataSource: MediaStoreDataSource,
     ) {
-        if (req.method != "GET" && req.method != "HEAD") {
-            HttpWriter.reply(out, 405, "Method Not Allowed", "method")
+        if (call.request.httpMethod.value.uppercase() != "GET") {
+            KtorRespond.plain(call, HttpStatusCode.MethodNotAllowed, "method")
             return
         }
-        val isHead = req.method == "HEAD"
 
-        val id = req.path.trimEnd('/').substringAfterLast("/").toLongOrNull()
+        val rawPath = call.request.uri.substringBefore("?")
+        val id = rawPath.trimEnd('/').substringAfterLast("/").toLongOrNull()
         if (id == null) {
-            HttpWriter.reply(out, 404, "Not Found", "not found")
+            KtorRespond.plain(call, HttpStatusCode.NotFound, "not found")
             return
         }
 
         val sysImg = try {
-            dataSource.getByIds(listOf(id)).firstOrNull()
+            withContext(Dispatchers.IO) { dataSource.getByIds(listOf(id)).firstOrNull() }
         } catch (e: Exception) {
             Log.w(TAG, "Video lookup failed for $id", e)
             null
         }
         if (sysImg == null) {
-            HttpWriter.reply(out, 404, "Not Found", "not found")
+            KtorRespond.plain(call, HttpStatusCode.NotFound, "not found")
             return
         }
 
-        val mime = sysImg.mimeType.takeIf { it.isNotEmpty() } ?: "video/mp4"
+        val contentType = KtorRespond.contentType(
+            sysImg.mimeType.takeIf { it.isNotEmpty() },
+            ContentType.Video.MP4,
+        )
         val resolver = appCtx.applicationContext.contentResolver
 
         val total: Long = try {
-            resolver.openFileDescriptor(sysImg.uri, "r")?.use { fd ->
-                fd.statSize.takeIf { it > 0 }
-            } ?: sysImg.size.takeIf { it > 0 } ?: -1L
+            withContext(Dispatchers.IO) {
+                resolver.openFileDescriptor(sysImg.uri, "r")?.use { fd ->
+                    fd.statSize.takeIf { it > 0 }
+                } ?: sysImg.size.takeIf { it > 0 } ?: -1L
+            }
         } catch (e: Exception) {
             Log.w(TAG, "Video size failed for $id", e)
             sysImg.size.takeIf { it > 0 } ?: -1L
         }
         if (total <= 0) {
-            HttpWriter.reply(out, 500, "Internal Error", "no size")
+            KtorRespond.plain(call, HttpStatusCode.InternalServerError, "no size")
             return
         }
 
-        val rangeHeader = req.headers["range"]
-        if (rangeHeader == null) {
-            val headers = mapOf(
-                "Content-Type" to mime,
-                "Content-Length" to total.toString(),
-                "Accept-Ranges" to "bytes",
-            )
-            HttpWriter.writeHeaders(out, 200, "OK", headers)
-            if (isHead) {
-                out.flush()
+        // Full content by default; a Range header narrows it to one 206 slice.
+        var start = 0L
+        var length = total
+        var status = HttpStatusCode.OK
+        val rangeHeader = call.request.headers["Range"]
+        if (rangeHeader != null) {
+            val range = parseRange(rangeHeader, total)
+            if (range == null) {
+                call.response.headers.append("Content-Range", "bytes */$total")
+                call.respond(HttpStatusCode.RequestedRangeNotSatisfiable)
                 return
             }
-            try {
-                resolver.openInputStream(sysImg.uri)?.use { it.copyTo(out) }
-                    ?: throw Exception("Null stream")
-            } catch (e: Exception) {
-                Log.w(TAG, "Video stream failed for $id", e)
-                return
+            start = range.first
+            length = range.second - range.first + 1
+            status = HttpStatusCode.PartialContent
+            call.response.headers.append("Content-Range", "bytes $start-${range.second}/$total")
+        }
+        call.response.headers.append("Accept-Ranges", "bytes")
+        call.respondOutputStream(contentType, status, length) {
+            withContext(Dispatchers.IO) {
+                resolver.openAssetFileDescriptor(sysImg.uri, "r")?.use { afd ->
+                    FileInputStream(afd.fileDescriptor).use { fis ->
+                        fis.channel.position(afd.startOffset + start)
+                        copyExact(fis, length, this@respondOutputStream)
+                    }
+                } ?: throw Exception("Null afd")
             }
-            out.flush()
-            return
         }
-
-        val range = parseRange(rangeHeader, total)
-        if (range == null) {
-            HttpWriter.writeHeaders(
-                out, 416, "Range Not Satisfiable",
-                mapOf("Content-Range" to "bytes */$total"),
-            )
-            out.flush()
-            return
-        }
-        val (start, end) = range
-        val length = end - start + 1
-        val headers = mapOf(
-            "Content-Type" to mime,
-            "Content-Length" to length.toString(),
-            "Content-Range" to "bytes $start-$end/$total",
-            "Accept-Ranges" to "bytes",
-        )
-        HttpWriter.writeHeaders(out, 206, "Partial Content", headers)
-        if (isHead) {
-            out.flush()
-            return
-        }
-        try {
-            resolver.openAssetFileDescriptor(sysImg.uri, "r")?.use { afd ->
-                FileInputStream(afd.fileDescriptor).use { fis ->
-                    fis.channel.position(afd.startOffset + start)
-                    copyExact(fis, length, out)
-                }
-            } ?: throw Exception("Null afd")
-        } catch (e: Exception) {
-            Log.w(TAG, "Video range stream failed for $id", e)
-            return
-        }
-        out.flush()
     }
 
     /** Single-range bytes=start-end, bytes=start-, bytes=-suffix. Null when unsatisfiable. */
@@ -153,7 +136,7 @@ object VideoController {
         }
     }
 
-    private fun copyExact(input: InputStream, n: Long, out: BufferedOutputStream) {
+    private fun copyExact(input: InputStream, n: Long, out: OutputStream) {
         val buf = ByteArray(32768)
         var remaining = n
         while (remaining > 0) {
