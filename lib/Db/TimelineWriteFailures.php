@@ -88,6 +88,6 @@ trait TimelineWriteFailures
      */
     public function clearAllFailures(): void
     {
-        SQL::truncate($this->connection, 'memories_failures', false);
+        $this->connection->truncateTable('memories_failures', false);
     }
 }

@@ -31,7 +31,6 @@ export function viewInFolderUrl({ filename, fileid }: { filename: string; fileid
     dirPath = `/${dirPath}`;
   }
 
-  /** @todo Doesn't seem to work on Nextcloud 28 */
   return API.Q(generateUrl('/apps/files/'), {
     dir: dirPath,
     scrollto: fileid,

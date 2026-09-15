@@ -336,15 +336,10 @@ final class AlbumsQuery
 
     /**
      * Get the name of the collaborators table.
+     * Renamed in https://github.com/nextcloud/photos/commit/20e3e61ad577014e5f092a292c90a8476f630355.
      */
     private function collaboratorsTable(): string
     {
-        // https://github.com/nextcloud/photos/commit/20e3e61ad577014e5f092a292c90a8476f630355
-        $photosVersion = \OC::$server->get(\OCP\App\IAppManager::class)->getAppVersion('photos');
-        if (version_compare($photosVersion, '2.0.1', '>=')) {
-            return 'photos_albums_collabs';
-        }
-
-        return 'photos_collaborators';
+        return 'photos_albums_collabs';
     }
 }

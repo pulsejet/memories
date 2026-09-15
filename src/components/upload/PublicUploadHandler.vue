@@ -156,7 +156,8 @@ export default defineComponent({
           owner: null,
           permissions: Permission.CREATE,
         });
-        // TODO: remove the type cast when migrated to new @nextcloud/dialogs (Vue 3 only)
+        // @nextcloud/upload bundles its own copy of @nextcloud/files,
+        // so its Folder type differs from ours despite identical shape.
         const uploader = new Uploader(true, <any>destination);
 
         // Track upload progress

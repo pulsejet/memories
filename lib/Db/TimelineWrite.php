@@ -260,7 +260,7 @@ final class TimelineWrite
     public function clear(): void
     {
         foreach (array_merge(DELETE_TABLES, TRUNCATE_TABLES) as $table) {
-            SQL::truncate($this->connection, $table, false);
+            $this->connection->truncateTable($table, false);
         }
     }
 

@@ -32,16 +32,12 @@ body {
     margin-left: 0;
   }
 
-  // Prevent content overflow on NC <25
-  max-height: 100vh;
-
   // https://bugs.webkit.org/show_bug.cgi?id=160953
   overflow: visible;
 
   > div.app-navigation {
     // Reduce size of navigation bar
     --app-navigation-max-width: 250px !important;
-    max-width: var(--app-navigation-max-width); // NC <29
 
     .app-navigation-toggle {
       // Move up to align with back button of top matter

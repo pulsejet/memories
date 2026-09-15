@@ -169,11 +169,9 @@ final class PublicController extends AuthPublicShareController
     }
 
     #[\Override]
-    protected function getPasswordHash(): string
+    protected function getPasswordHash(): ?string
     {
-        // TODO: return type has changed to ?string with 29
-        // Change this when dropping support for 28
-        return $this->share->getPassword() ?? '';
+        return $this->share->getPassword();
     }
 
     #[\Override]

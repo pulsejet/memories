@@ -68,15 +68,7 @@ final class Util
      */
     public static function albumsIsEnabled(): bool
     {
-        $appManager = \OC::$server->get(IAppManager::class);
-
-        if (!$appManager->isEnabledForUser('photos')) {
-            return false;
-        }
-
-        $v = $appManager->getAppVersion('photos');
-
-        return version_compare($v, '1.7.0', '>=');
+        return \OC::$server->get(IAppManager::class)->isEnabledForUser('photos');
     }
 
     /**

@@ -273,7 +273,7 @@ final class Places
         $this->setupTables();
 
         // Truncate planet table
-        SQL::truncate($this->connection, 'memories_planet', false);
+        $this->connection->truncateTable('memories_planet', false);
 
         // Table prefix
         $prefix = $this->config->getSystemValue('dbtableprefix', '') ?: '';

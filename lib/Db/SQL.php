@@ -145,26 +145,6 @@ final class SQL
     }
 
     /**
-     * TRUNCATE a table (remove all rows and reset auto-increment).
-     * This wrapper should be removed when support for Nextcloud <32 is dropped.
-     *
-     * @param IDBConnection $connection The database connection
-     * @param string        $table      The table to truncate
-     * @param bool          $cascade    Whether to cascade the truncate operation
-     */
-    public static function truncate(IDBConnection &$connection, string $table, bool $cascade): void
-    {
-        // getDatabasePlatform is deprecated on Nextcloud 32
-        if (method_exists($connection, 'truncateTable')) {
-            $connection->truncateTable($table, $cascade);
-        } else {
-            /** @psalm-suppress DeprecatedMethod */
-            $sql = $connection->getDatabasePlatform()->getTruncateTableSQL('*PREFIX*'.$table, $cascade);
-            $connection->executeStatement($sql);
-        }
-    }
-
-    /**
      * Escape a string value for MySQL LOAD DATA TSV format.
      */
     public static function escapeTsv(string $str): string
