@@ -50,11 +50,12 @@ final class Version505001Date20230828155021 extends SimpleMigrationStep
 
         if ($table->hasColumn('mtime')) {
             $mtime = $table->getColumn('mtime');
-            $mtime->setType(Type::getType(Types::BIGINT));
-            $mtime->setOptions([
-                'notnull' => true,
-                'length' => 20,
-            ]);
+
+            // NC35 wrapper takes a type name, older Doctrine column a Type instance
+            /** @psalm-suppress InvalidArgument, PossiblyInvalidArgument */
+            $mtime->setType(interface_exists('OCP\DB\Schema\IColumn') ? Types::BIGINT : Type::getType(Types::BIGINT));
+            $mtime->setNotnull(true);
+            $mtime->setLength(20);
         }
 
         return $schema;

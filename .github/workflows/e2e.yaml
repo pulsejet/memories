@@ -56,7 +56,7 @@ jobs:
       matrix:
         databases: ['mysql', 'mariadb', 'pgsql', 'sqlite']
         php-versions: ['8.4']
-        server-versions: ['stable34']
+        server-versions: ['stable34', 'stable35']
 
     services:
       mysql:
