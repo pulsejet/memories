@@ -75,7 +75,7 @@ class AppContainer(
     val upload: UploadService
     val share: ShareManager
     val account = AccountManager(activity, auth, clients, api, assets, secure)
-    val local = LocalHttpServer(activity, auth, clients, assets, bridge)
+    val local = LocalHttpServer(activity, auth, clients, assets, dataSource, bridge)
     val router: ApiRouter
 
     init {

@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.webkit.WebResourceResponse
+import gallery.memories.data.local.media.MediaStoreDataSource
 import gallery.memories.data.remote.assets.AssetSyncCoordinator
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.HttpClients
@@ -31,6 +32,7 @@ class LocalHttpServer(
     private val auth: AuthState,
     private val clients: HttpClients,
     private val assets: AssetSyncCoordinator,
+    private val dataSource: MediaStoreDataSource,
     private val bridge: (method: String, url: Uri) -> WebResourceResponse,
 ) {
     companion object {
@@ -52,7 +54,7 @@ class LocalHttpServer(
     private val guard = AuthGuard(secret)
     private val bridgeController = BridgeController(bridge)
     private val proxy = ProxyController(auth, clients) { origin() }
-    private val router = ServerRouter(appCtx, auth, assets, guard, bridgeController, proxy) { cfg }
+    private val router = ServerRouter(appCtx, auth, assets, guard, bridgeController, proxy, dataSource) { cfg }
 
     /** HttpOnly cookie value the WebView must present; see [AuthGuard]. */
     fun authCookie(): String = guard.cookieHeader()
@@ -135,6 +137,7 @@ class LocalHttpServer(
         if (p == "/local" || p.startsWith("/local/")) return null
         if (p == "/" || p == config.webRoot || p == config.webRoot + "/") return null
         if (p == "/api" || p.startsWith("/api/") || p == "/image" || p.startsWith("/image/")) return null
+        if (p == "/video" || p.startsWith("/video/")) return null
         if (p == "/favicon.ico") return null
         return config.serverOrigin + p + (query?.let { "?$it" } ?: "")
     }

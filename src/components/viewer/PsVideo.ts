@@ -145,12 +145,25 @@ class VideoContentSetup {
     };
   }
 
+  getLocalSrc(content: VideoContent): PlayerSrc | null {
+    const url = nativex.getLocalVideoUrl(content.data.photo);
+    if (!url) return null;
+    return {
+      src: url,
+      type: 'video/mp4',
+    };
+  }
+
   /** Initial source: HLS unless transcoding is disabled */
   getPreferredSrc(content: VideoContent): { src: PlayerSrc; videoIsHls: boolean } {
-    if (!staticConfig.getSync('vod_disable')) {
+    const local = this.getLocalSrc(content);
+    if (local) {
+      return { src: local, videoIsHls: false };
+    } else if (!staticConfig.getSync('vod_disable')) {
       return { src: this.getHLSsrc(content), videoIsHls: true };
+    } else {
+      return { src: this.getDirectSrc(content), videoIsHls: false };
     }
-    return { src: this.getDirectSrc(content), videoIsHls: false };
   }
 
   async initPlayer(content: VideoContent) {
@@ -169,14 +182,6 @@ class VideoContentSetup {
   async initPlayerInner(content: VideoContent) {
     // Prevent screen from sleeping
     this.getWakeLock();
-
-    // Hand off to native player if available
-    if (nativex.has()) {
-      // Local videos are played back directly
-      // Remote videos are played back via HLS / Direct
-      nativex.playVideo(content.data.photo, [API.VIDEO_TRANSCODE(content.data.photo.fileid), content.data.src]);
-      return;
-    }
 
     const { isHLSProvider, Hls } = await this.vidstack;
 
@@ -241,8 +246,6 @@ class VideoContentSetup {
     player.addEventListener('playing', () => {
       if (!isVideoContent(content) || content.videoPlayer !== player) return;
       content.videoHasPlayed = true;
-      // Hide the preview image only once playback actually starts
-      content.placeholder?.element?.setAttribute('hidden', 'true');
     });
 
     player.addEventListener('error', (e: Event) => {
@@ -282,7 +285,9 @@ class VideoContentSetup {
    */
   onPlayerError(content: VideoContent, _e: MediaErrorEvent) {
     if (!isVideoContent(content) || content.videoFailedOver || content.videoHasPlayed) return;
+    if (utils.isLocalPhoto(content.data.photo)) return; // local-only
     if (staticConfig.getSync('vod_disable')) return;
+
     const player = content.videoPlayer;
     if (!player) return;
     content.videoFailedOver = true;
@@ -311,13 +316,6 @@ class VideoContentSetup {
 
     this.releaseWakeLock();
 
-    if (nativex.has()) {
-      // Add a timeout in case another video initializes
-      // immediately after this one is destroyed
-      setTimeout(() => nativex.destroyVideo(content.data.photo), 500);
-      return;
-    }
-
     try {
       void content.videoPlayer?.pause()?.catch(() => undefined);
     } catch {
@@ -330,8 +328,6 @@ class VideoContentSetup {
     content.videoPlayer = null;
     content.videoFailedOver = false;
     content.videoHasPlayed = false;
-
-    content.placeholder?.element?.removeAttribute('hidden');
   }
 
   onContentDestroy({ content }: PsVideoEvent) {

@@ -62,6 +62,7 @@ class NativeX(private val mCtx: MainActivity) {
         val IMAGE_DELETE = Regex("^/api/image/delete/[0-9a-f]+(,[0-9a-f]+)*$")
         val IMAGE_PREVIEW = Regex("^/image/preview/\\d+$")
         val IMAGE_FULL = Regex("^/image/full/[0-9a-f]+$")
+        val VIDEO_FULL = Regex("^/video/full/\\d+$")
         val SHARE_URL = Regex("^/api/share/url/.+$")
         val SHARE_BLOB = Regex("^/api/share/blobs$")
         val UPLOAD_LOCAL = Regex("^/api/upload/local$")

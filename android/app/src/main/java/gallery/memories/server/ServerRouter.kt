@@ -2,12 +2,14 @@ package gallery.memories.server
 
 import android.content.Context
 import android.util.Log
+import gallery.memories.data.local.media.MediaStoreDataSource
 import gallery.memories.data.remote.assets.AssetSyncCoordinator
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.server.controllers.BridgeController
 import gallery.memories.server.controllers.ProxyController
 import gallery.memories.server.controllers.ShellController
 import gallery.memories.server.controllers.StaticController
+import gallery.memories.server.controllers.VideoController
 import java.io.BufferedOutputStream
 import java.io.File
 
@@ -22,6 +24,7 @@ class ServerRouter(
     private val guard: AuthGuard,
     private val bridge: BridgeController,
     private val proxy: ProxyController,
+    private val dataSource: MediaStoreDataSource,
     private val configProvider: () -> ServerConfig?,
 ) {
     companion object {
@@ -29,7 +32,7 @@ class ServerRouter(
     }
 
     /**
-     * Route order matters: bridge first (works unconfigured), then local
+     * Route order matters: bridge and video first (work unconfigured), then local
      * files (unknown /local/ paths 404 on-device, never proxied), then the
      * shell for app routes, and finally the upstream proxy.
      */
@@ -37,6 +40,10 @@ class ServerRouter(
         val config = configProvider()
         if (!guard.authorized(req)) {
             HttpWriter.reply(out, 403, "Forbidden", "forbidden")
+            return
+        }
+        if (VideoController.isVideo(req)) {
+            VideoController.serveVideo(appCtx, req, out, dataSource)
             return
         }
         if (bridge.isBridge(req)) {
