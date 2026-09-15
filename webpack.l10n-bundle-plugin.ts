@@ -10,7 +10,7 @@ import * as path from 'path';
  *
  *   `globalThis.__packed_l10n = { "<lang>": <parsed JSON of <lang>.json>, ... };`
  *
- * It is emitted at the `PROCESS_ASSETS_STAGE_ADDITIONAL` stage so that
+ * It is emitted at the `PROCESS_ASSETS_STAGE_SUMMARIZE` stage so that
  * downstream plugins running later (e.g. `WebpackManifestPlugin`, which
  * runs at `Infinity`) pick it up and include it in the JS manifest and
  * therefore in the manifest signature and service-worker precache list.
@@ -46,9 +46,7 @@ export class L10nBundlePlugin {
       compilation.hooks.processAssets.tap(
         {
           name: 'L10nBundlePlugin',
-          // Must run before WebpackManifestPlugin (stage Infinity) so the
-          // bundle shows up in the manifest.
-          stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+          stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
         },
         () => {
           // Collect every locale: filename `<lang>.json` -> language key `<lang>`.
@@ -77,6 +75,7 @@ export class L10nBundlePlugin {
           compilation.emitAsset(
             `${this.appName}-l10n.js?v=${hash}`,
             new compiler.webpack.sources.RawSource(code),
+            { minimized: true },
           );
         },
       );
