@@ -8,9 +8,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { constants } from '@services/utils/const';
 import { fetchImage, sticky } from './XImgCache';
 
-const BLANK_IMG = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+const BLANK_IMG: string = constants.BLANK_IMG;
 
 export default defineComponent({
   name: 'XImg',

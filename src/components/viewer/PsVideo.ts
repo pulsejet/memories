@@ -227,6 +227,9 @@ class VideoContentSetup {
           ...HLS_LIVE_CONFIG,
         };
       }
+
+      // Prevent showing any default poster like a big play button.
+      providerEl.querySelector('video')?.setAttribute('poster', utils.constants.BLANK_IMG);
     });
 
     player.addEventListener('hls-instance', (e: Event) => {
