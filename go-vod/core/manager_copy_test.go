@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/pulsejet/memories/go-vod/config"
+	"github.com/pulsejet/memories/go-vod/ffmpeg"
 	"github.com/stretchr/testify/require"
 )
 
@@ -129,4 +130,87 @@ func TestManagerDirectChunkFallsBack(t *testing.T) {
 	w := httptest.NewRecorder()
 	require.True(t, m.ServeChunk(w, QUALITY_DIRECT, 0))
 	require.Equal(t, http.StatusRequestTimeout, w.Code)
+}
+
+// newBlockingCopyManager fakes ffprobe with a keyframe pass that signals
+// via dir/started on entry and waits for dir/release before answering.
+func newBlockingCopyManager(t *testing.T) (*Manager, string) {
+	t.Helper()
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "out.json"), []byte(copyProbeJSON), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "keys.txt"), []byte("0.000000,K__\n4.000000,K__\n8.000000,K__\n"), 0644))
+	script := "#!/bin/sh\nfor a in \"$@\"; do\n  if [ \"$a\" = \"packet=pts_time,flags\" ]; then\n" +
+		"    touch " + filepath.Join(dir, "started") + "\n" +
+		"    while [ ! -f " + filepath.Join(dir, "release") + " ]; do sleep 0.05; done\n" +
+		"    cat " + filepath.Join(dir, "keys.txt") + "; exit 0\n" +
+		"  fi\ndone\ncat " + filepath.Join(dir, "out.json") + "\n"
+	bin := filepath.Join(dir, "ffprobe")
+	require.NoError(t, os.WriteFile(bin, []byte(script), 0755))
+
+	cfg := config.Defaults("test")
+	cfg.TempDir = t.TempDir()
+	cfg.FFprobe = bin
+	m, err := NewManager(cfg, "input.mp4", "id", 0, "", 1, make(chan IdleEvent, 1))
+	require.NoError(t, err)
+	t.Cleanup(m.Destroy)
+	return m, dir
+}
+
+func TestKeyframeProbeDoesNotBlockTranscodes(t *testing.T) {
+	m, dir := newBlockingCopyManager(t)
+
+	var transcode *Stream
+	for _, s := range m.streams {
+		if s.quality != QUALITY_DIRECT && s.quality != QUALITY_MAX {
+			transcode = s
+			break
+		}
+	}
+	require.NotNil(t, transcode)
+
+	type result struct {
+		segs []ffmpeg.Segment
+		ok   bool
+	}
+	ensureRes := make(chan result, 1)
+	go func() {
+		segs, ok := m.EnsureCopySegments()
+		ensureRes <- result{segs, ok}
+	}()
+
+	// Wait until the probe is inside ffprobe.
+	deadline := time.Now().Add(10 * time.Second)
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "started")); err == nil {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("keyframe probe never started")
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+
+	// Everything 1080p.ts needs (CopySegments in transcode/spec) must
+	// stay fast while direct.m3u8 sits in the probe.
+	fast := make(chan bool, 1)
+	go func() {
+		_, ok := m.CopySegments()
+		_ = transcode.spec(0, true)
+		fast <- ok
+	}()
+	select {
+	case ok := <-fast:
+		require.False(t, ok) // no grid yet
+	case <-time.After(5 * time.Second):
+		t.Fatal("transcode path blocked behind keyframe probe")
+	}
+
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "release"), []byte{}, 0644))
+	select {
+	case r := <-ensureRes:
+		require.True(t, r.ok)
+		require.Len(t, r.segs, 3)
+	case <-time.After(10 * time.Second):
+		t.Fatal("keyframe probe never finished")
+	}
 }

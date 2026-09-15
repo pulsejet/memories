@@ -14,6 +14,7 @@ import (
 
 	"github.com/pulsejet/memories/go-vod/config"
 	"github.com/pulsejet/memories/go-vod/ffmpeg"
+	"golang.org/x/sync/singleflight"
 )
 
 const (
@@ -48,14 +49,17 @@ type Manager struct {
 	// immutable after creation. It only says keyframes are worth trying.
 	copyEligible bool
 
-	// copyMu guards srcSegments and copyProbed. Keyframes are extracted
-	// lazily on direct.m3u8, long after creation, so all accessors lock.
+	// copyMu guards srcSegments and copyProbed with brief critical
+	// sections only. It is never held across the minutes-long ffprobe,
+	// or every transcode start would wedge behind direct.m3u8.
 	copyMu sync.Mutex
 	// srcSegments is the copy grid for direct; empty until EnsureCopySegments.
 	srcSegments []ffmpeg.Segment
 	// copyProbed marks a finished keyframe attempt, so failures fail fast
 	// instead of re-running a minutes-long ffprobe on every request.
 	copyProbed bool
+	// copySF dedupes concurrent keyframe probes so they share one ffprobe.
+	copySF singleflight.Group
 
 	// streams are the renditions by quality ("480p", "direct" / "max").
 	streams map[string]*Stream
@@ -291,29 +295,47 @@ func (m *Manager) CopySegments() ([]ffmpeg.Segment, bool) {
 }
 
 // EnsureCopySegments blocks for keyframe extraction on first direct use.
-// Safe for concurrent direct.m3u8 / direct.ts requests; other renditions
-// never call it, so 480p etc stay fast while direct probes.
+// Concurrent callers share one probe; CopySegments only takes copyMu
+// briefly, so other renditions keep serving while direct probes.
 func (m *Manager) EnsureCopySegments() ([]ffmpeg.Segment, bool) {
 	if !m.copyEligible {
 		return nil, false
 	}
-	m.copyMu.Lock()
-	defer m.copyMu.Unlock()
-	if len(m.srcSegments) != 0 {
-		return m.srcSegments, true
+	if segs, ok := m.CopySegments(); ok {
+		return segs, true
 	}
-	if m.copyProbed {
+	v, err, _ := m.copySF.Do("keyframes", func() (any, error) {
+		if segs, ok := m.CopySegments(); ok {
+			return segs, nil
+		}
+		m.copyMu.Lock()
+		probed := m.copyProbed
+		m.copyMu.Unlock()
+		if probed {
+			return nil, fmt.Errorf("keyframe probe already failed for %s", m.path)
+		}
+
+		// Long ffprobe with no locks held.
+		segs, perr := m.probeCopy()
+
+		m.copyMu.Lock()
+		defer m.copyMu.Unlock()
+		m.copyProbed = true
+		if perr != nil {
+			log.Printf("%s: copy disabled for direct: %v", m.id, perr)
+			return nil, perr
+		}
+		m.srcSegments = segs
+		return segs, nil
+	})
+	if err != nil {
 		return nil, false
 	}
-	m.copyProbed = true
-	if err := m.probeCopy(); err != nil {
-		log.Printf("%s: copy disabled for direct: %v", m.id, err)
+	segs, _ := v.([]ffmpeg.Segment)
+	if len(segs) == 0 {
 		return nil, false
 	}
-	if len(m.srcSegments) == 0 {
-		return nil, false
-	}
-	return m.srcSegments, true
+	return segs, true
 }
 
 func (m *Manager) FrameRate() int {
@@ -382,32 +404,30 @@ func (m *Manager) ffprobe() error {
 	return nil
 }
 
-// probeCopy extracts keyframes and fills srcSegments.
-// Callers must hold copyMu; see EnsureCopySegments.
-func (m *Manager) probeCopy() error {
+// probeCopy extracts keyframes and derives the copy grid.
+// Lock-free; EnsureCopySegments publishes the result under copyMu.
+func (m *Manager) probeCopy() ([]ffmpeg.Segment, error) {
 	cachePath := KeyframeCachePath(m.c.ResolvedCacheDir(), m.fileid)
 	if keys, ok := LoadCachedKeyframes(m.c.ResolvedCacheDir(), m.fileid, m.etag); ok {
 		log.Printf("%s: keyframe cache hit %s", m.id, cachePath)
 		segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.c.ChunkSize)
 		if len(segs) == 0 {
-			return fmt.Errorf("no keyframe grid for %s", m.path)
+			return nil, fmt.Errorf("no keyframe grid for %s", m.path)
 		}
-		m.srcSegments = segs
-		return nil
+		return segs, nil
 	}
 	log.Printf("%s: keyframe cache miss %s", m.id, cachePath)
 
 	keys, err := ffmpeg.Keyframes(context.Background(), m.c.FFprobe, m.path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err := StoreCachedKeyframes(m.c.ResolvedCacheDir(), m.fileid, m.etag, keys); err != nil {
 		log.Printf("%s: keyframe cache store failed: %v", m.id, err)
 	}
 	segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.c.ChunkSize)
 	if len(segs) == 0 {
-		return fmt.Errorf("no keyframe grid for %s", m.path)
+		return nil, fmt.Errorf("no keyframe grid for %s", m.path)
 	}
-	m.srcSegments = segs
-	return nil
+	return segs, nil
 }
