@@ -98,13 +98,6 @@ func CopyVariantPlaylist(quality string, segments []ffmpeg.Segment, query string
 	return p.Encode().String(), nil
 }
 
-func QueryString(r *http.Request) string {
-	if q := r.URL.Query().Encode(); q != "" {
-		return "?" + q
-	}
-	return ""
-}
-
 func WriteM3U8(w http.ResponseWriter, body string) {
 	w.Header().Set("Content-Type", "application/x-mpegURL")
 	w.Write([]byte(body))

@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -24,61 +25,53 @@ func testServer(t *testing.T, mutate func(*config.Config)) *Server {
 	return NewServer(cfg)
 }
 
-func enc(p string) string {
-	return strings.ReplaceAll(p, "/", "%2F")
-}
-
-func TestSplitPath(t *testing.T) {
-	sid, dir, leaf, ok := splitPath("/abc//files/x.mp4/index.m3u8")
-	require.True(t, ok)
-	require.Equal(t, "abc", sid)
-	require.Equal(t, "/files/x.mp4", dir)
-	require.Equal(t, "index.m3u8", leaf)
-
-	// Equivalent spellings canonicalize to the same triple
-	for _, p := range []string{"/abc/files/x.mp4/index.m3u8", "/abc/files/x.mp4/index.m3u8/", "/abc/./files/x.mp4/index.m3u8"} {
-		sid, dir, leaf, ok := splitPath(p)
-		require.True(t, ok, p)
-		require.Equal(t, "abc", sid, p)
-		require.Equal(t, "/files/x.mp4", dir, p)
-		require.Equal(t, "index.m3u8", leaf, p)
-	}
-
-	_, _, _, ok = splitPath("/onlyone")
-	require.False(t, ok)
-	_, _, _, ok = splitPath("/a/b")
-	require.False(t, ok)
-	_, _, _, ok = splitPath("/")
-	require.False(t, ok)
-}
-
-func TestBadURLs(t *testing.T) {
-	s := testServer(t, nil)
-	for _, target := range []string{"/", "/onlyone", "/a/b"} {
-		r := httptest.NewRequest("GET", target, nil)
-		w := httptest.NewRecorder()
-		s.routes().ServeHTTP(w, r)
-		require.Equal(t, http.StatusBadRequest, w.Code, target)
-	}
-}
-
-func TestUnconfigured(t *testing.T) {
-	s := testServer(t, nil)
-	r := httptest.NewRequest("GET", "/s/%2Fa%2Fb.ts/x.ts", nil)
+func postVod(s *Server, body string) *httptest.ResponseRecorder {
+	r := httptest.NewRequest("POST", "/vod", strings.NewReader(body))
 	w := httptest.NewRecorder()
 	s.routes().ServeHTTP(w, r)
+	return w
+}
+
+func TestVodBadRequests(t *testing.T) {
+	s := testServer(t, func(c *config.Config) { c.Configured = true })
+
+	w := postVod(s, "nope")
+	require.Equal(t, http.StatusBadRequest, w.Code)
+
+	// Missing required fields (fileid/etag are optional).
+	for _, body := range []string{
+		`{}`,
+		`{"client":"","path":"/x","profile":"test"}`,
+		`{"client":"c","path":"","profile":"test"}`,
+		`{"client":"c","path":"/x","profile":""}`,
+	} {
+		w := postVod(s, body)
+		require.Equal(t, http.StatusBadRequest, w.Code, body)
+	}
+
+	w = postVod(s, `{"client":"c","path":"/x","profile":"bogus"}`)
+	require.Equal(t, http.StatusNotFound, w.Code)
+
+	// GET is gone entirely.
+	r := httptest.NewRequest("GET", "/vod", nil)
+	w = httptest.NewRecorder()
+	s.routes().ServeHTTP(w, r)
+	require.Equal(t, http.StatusMethodNotAllowed, w.Code)
+}
+
+func TestVodUnconfigured(t *testing.T) {
+	s := testServer(t, nil)
+	w := postVod(s, `{"client":"c","path":"/x","profile":"index.m3u8"}`)
 	require.Equal(t, http.StatusServiceUnavailable, w.Code)
 }
 
-func TestEndpoint(t *testing.T) {
+func TestVodTestProfile(t *testing.T) {
 	s := testServer(t, nil)
 
 	path := filepath.Join(t.TempDir(), "f.mp4")
 	require.NoError(t, os.WriteFile(path, []byte("12345"), 0644))
 
-	r := httptest.NewRequest("GET", "/test/"+enc(path)+"/test", nil)
-	w := httptest.NewRecorder()
-	s.routes().ServeHTTP(w, r)
+	w := postVod(s, `{"client":"test","fileid":7,"etag":"e","path":`+strconv.Quote(path)+`,"profile":"test"}`)
 	require.Equal(t, http.StatusOK, w.Code)
 
 	var body struct {
@@ -90,7 +83,7 @@ func TestEndpoint(t *testing.T) {
 	require.Equal(t, 5, body.Size)
 }
 
-func TestStoryboardNoEtag(t *testing.T) {
+func TestVodStoryboardNoFileID(t *testing.T) {
 	dir := t.TempDir()
 	out := filepath.Join(dir, "out.json")
 	require.NoError(t, os.WriteFile(out, []byte(
@@ -104,11 +97,9 @@ func TestStoryboardNoEtag(t *testing.T) {
 		c.FFprobe = bin
 	})
 
-	// No etag header means no cache dir, so no storyboard.
+	// No fileid means no cache dir, so no storyboard.
 	for _, leaf := range []string{"storyboard.vtt", "storyboard-0.jpg", "storyboard-x.jpg"} {
-		r := httptest.NewRequest("GET", "/s/%2Finput.mp4/"+leaf, nil)
-		w := httptest.NewRecorder()
-		s.routes().ServeHTTP(w, r)
+		w := postVod(s, `{"client":"s","path":"/input.mp4","profile":"`+leaf+`"}`)
 		require.Equal(t, http.StatusNotFound, w.Code, leaf)
 	}
 }
@@ -116,7 +107,7 @@ func TestStoryboardNoEtag(t *testing.T) {
 func TestConfigReload(t *testing.T) {
 	s := testServer(t, func(c *config.Config) { c.Configured = true })
 
-	r := httptest.NewRequest("POST", "/config/%2Fconfig/config", strings.NewReader(`{"chunkSize":7,"qf":24}`))
+	r := httptest.NewRequest("POST", "/config", strings.NewReader(`{"chunkSize":7,"qf":24}`))
 	w := httptest.NewRecorder()
 	s.routes().ServeHTTP(w, r)
 	require.Equal(t, http.StatusOK, w.Code)
@@ -124,7 +115,7 @@ func TestConfigReload(t *testing.T) {
 	require.True(t, s.cfg.Configured)
 
 	before := s.cfg.ChunkSize
-	r = httptest.NewRequest("POST", "/config/%2Fconfig/config", strings.NewReader(`{"chunkSize":0}`))
+	r = httptest.NewRequest("POST", "/config", strings.NewReader(`{"chunkSize":0}`))
 	w = httptest.NewRecorder()
 	s.routes().ServeHTTP(w, r)
 	require.Equal(t, http.StatusInternalServerError, w.Code)
@@ -138,7 +129,7 @@ func TestConfigReloadIgnoresPostedCacheDirWhenEnvSet(t *testing.T) {
 		c.CacheDir = "/from-env"
 	})
 
-	r := httptest.NewRequest("POST", "/config/%2Fconfig/config", strings.NewReader(`{"chunkSize":7,"cacheDir":"/from-php"}`))
+	r := httptest.NewRequest("POST", "/config", strings.NewReader(`{"chunkSize":7,"cacheDir":"/from-php"}`))
 	w := httptest.NewRecorder()
 	s.routes().ServeHTTP(w, r)
 	require.Equal(t, http.StatusOK, w.Code)
@@ -150,7 +141,7 @@ func TestCreateTempLimit(t *testing.T) {
 	s := testServer(t, nil)
 	s.cfg.MaxUploadSize = 1024
 
-	r := httptest.NewRequest("POST", "/xyz/%2Fcreate/ignore", strings.NewReader(strings.Repeat("x", 2048)))
+	r := httptest.NewRequest("POST", "/create", strings.NewReader(strings.Repeat("x", 2048)))
 	w := httptest.NewRecorder()
 	s.routes().ServeHTTP(w, r)
 	require.Equal(t, http.StatusRequestEntityTooLarge, w.Code)
@@ -159,7 +150,7 @@ func TestCreateTempLimit(t *testing.T) {
 func TestCreateTemp(t *testing.T) {
 	s := testServer(t, nil)
 
-	r := httptest.NewRequest("POST", "/xyz/%2Fcreate/ignore", strings.NewReader("hello"))
+	r := httptest.NewRequest("POST", "/create", strings.NewReader("hello"))
 	w := httptest.NewRecorder()
 	s.routes().ServeHTTP(w, r)
 	require.Equal(t, http.StatusOK, w.Code)
@@ -168,7 +159,7 @@ func TestCreateTemp(t *testing.T) {
 		Path string `json:"path"`
 	}
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
-	require.Contains(t, body.Path, "xyz-govod-temp-")
+	require.Contains(t, body.Path, "govod-temp-")
 	content, err := os.ReadFile(body.Path)
 	require.NoError(t, err)
 	require.Equal(t, "hello", string(content))
@@ -178,14 +169,14 @@ func TestVersionGuard(t *testing.T) {
 	s := testServer(t, func(c *config.Config) { c.VersionMonitor = true })
 	go func() { <-s.idle }()
 
-	r := httptest.NewRequest("GET", "/test/%2Fnone/test", nil)
+	r := httptest.NewRequest("POST", "/vod", strings.NewReader(`{"client":"c","path":"/x","profile":"test"}`))
 	r.Header.Set("X-Go-Vod-Version", "wrong")
 	w := httptest.NewRecorder()
 	s.routes().ServeHTTP(w, r)
 	require.Equal(t, http.StatusServiceUnavailable, w.Code)
 	require.Equal(t, 12, s.exitCode)
 
-	r = httptest.NewRequest("GET", "/test/%2Fnone/test", nil)
+	r = httptest.NewRequest("POST", "/vod", strings.NewReader(`{"client":"c","path":"/x","profile":"test"}`))
 	r.Header.Set("X-Go-Vod-Version", "test")
 	w = httptest.NewRecorder()
 	s.routes().ServeHTTP(w, r)

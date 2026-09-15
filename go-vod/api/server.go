@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
 	"strings"
 	"sync"
 	"time"
@@ -39,8 +38,9 @@ func NewServer(cfg *config.Config) *Server {
 
 func (s *Server) routes() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /", s.handleGet)
-	mux.HandleFunc("POST /", s.handlePost)
+	mux.HandleFunc("POST /vod", s.handleVod)
+	mux.HandleFunc("POST /config", s.handleConfig)
+	mux.HandleFunc("POST /create", s.handleCreate)
 	return mux
 }
 
@@ -68,63 +68,51 @@ func (s *Server) maxUpload() int64 {
 	return s.cfg.MaxUploadSize
 }
 
-// File paths arrive whole-encoded (slashes as %2F, see BinExt::getGoVodUrl),
-// so routes cannot be expressed as ServeMux segment patterns.
-// Split the decoded path in this one place instead. The path is cleaned
-// first, so equivalent spellings (doubled slashes from the leading %2F,
-// trailing slashes, dot segments) all resolve to one canonical
-// sid/dir/leaf triple — and therefore one manager — per file.
-func splitPath(p string) (sid, dir, leaf string, ok bool) {
-	parts := strings.Split(path.Clean("/"+p), "/")
-	if len(parts) < 4 {
-		return "", "", "", false
-	}
-	return parts[1], "/" + strings.Join(parts[2:len(parts)-1], "/"), parts[len(parts)-1], true
+// VodRequest is the envelope for every file request from PHP. The cache
+// is keyed by FileID; Etag is stored in every plan and a mismatch evicts
+// the file. Query carries the "?..." passthrough baked into playlists.
+type VodRequest struct {
+	Client  string `json:"client"`
+	FileID  int64  `json:"fileid"`
+	Etag    string `json:"etag"`
+	Path    string `json:"path"`
+	Profile string `json:"profile"`
+	Query   string `json:"query"`
 }
 
-func (s *Server) handleGet(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleVod(w http.ResponseWriter, r *http.Request) {
 	if s.cfg.VersionMonitor && !s.versionOk(w, r) {
 		return
 	}
 
-	sid, dir, leaf, ok := splitPath(r.URL.Path)
-	if !ok {
-		log.Println("Invalid URL", r.URL.Path)
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 1<<20))
+	if err != nil {
+		log.Println("Error reading vod body", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	s.serve(w, r, sid, dir, leaf)
-}
-
-func (s *Server) handlePost(w http.ResponseWriter, r *http.Request) {
-	if s.cfg.VersionMonitor && !s.versionOk(w, r) {
-		return
-	}
-
-	sid, dir, leaf, ok := splitPath(r.URL.Path)
-	if !ok {
-		log.Println("Invalid URL", r.URL.Path)
+	var req VodRequest
+	if err := json.Unmarshal(body, &req); err != nil {
+		log.Println("Error unmarshaling vod request", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
-	if dir == "/create" || strings.HasPrefix(dir, "/create/") {
-		s.handleCreate(w, r, sid)
+	if req.Client == "" || req.Path == "" || req.Profile == "" {
+		log.Println("Invalid vod request", req.Profile)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if leaf == "config" {
-		s.handleConfig(w, r)
-		return
-	}
-	s.serve(w, r, sid, dir, leaf)
+	s.serve(w, r, req)
 }
 
-func (s *Server) serve(w http.ResponseWriter, r *http.Request, sid, dir, leaf string) {
+func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
+	leaf := req.Profile
+
 	if leaf == "test" {
 		w.Header().Set("Content-Type", "application/json")
 
 		size := 0
-		if info, err := os.Stat(dir); err == nil {
+		if info, err := os.Stat(req.Path); err == nil {
 			size = int(info.Size())
 		}
 
@@ -140,14 +128,21 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, sid, dir, leaf st
 		return
 	}
 
-	etag := r.Header.Get(core.EtagHeader)
-	manager, err := s.reg.GetOrCreate(dir, sid, etag)
+	if !validProfile(leaf) {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	manager, err := s.reg.GetOrCreate(req.Path, req.Client, req.FileID, req.Etag)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	query := QueryString(r)
+	query := req.Query
+	if query != "" && !strings.HasPrefix(query, "?") {
+		query = "?" + query
+	}
 	switch {
 	case leaf == "ignore":
 		// Warm up the manager without serving anything
@@ -187,6 +182,22 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, sid, dir, leaf st
 		w.WriteHeader(http.StatusNotFound)
 	}
 }
+
+// validProfile gates manager creation on known profile names.
+func validProfile(leaf string) bool {
+	switch {
+	case leaf == "ignore" || leaf == "index.m3u8":
+		return true
+	case strings.HasSuffix(leaf, ".m3u8"),
+		strings.HasSuffix(leaf, ".ts"),
+		strings.HasSuffix(leaf, ".mp4"):
+		return true
+	case core.IsStoryboardLeaf(leaf):
+		return true
+	}
+	return false
+}
+
 func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	body, err := io.ReadAll(r.Body)
@@ -220,8 +231,8 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%+v\n", s.cfg)
 }
 
-func (s *Server) handleCreate(w http.ResponseWriter, r *http.Request, sid string) {
-	file, err := os.CreateTemp(s.tempDir(), sid+"-govod-temp-")
+func (s *Server) handleCreate(w http.ResponseWriter, r *http.Request) {
+	file, err := os.CreateTemp(s.tempDir(), "govod-temp-")
 	if err != nil {
 		log.Println("Error creating temp file", err)
 		w.WriteHeader(http.StatusInternalServerError)

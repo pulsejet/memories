@@ -28,10 +28,14 @@ func IsStoryboardLeaf(leaf string) bool {
 	return leaf == StoryboardVTTFile || spriteNameRe.MatchString(leaf)
 }
 
-// ServeStoryboard builds the storyboard on first view (cached per etag
-// after that) and serves the requested VTT or sprite with a long cache.
-// The VTT is rendered per request with the query string baked into sprite
-// URLs (share tokens, like m3u8 playlists), so only the plan is stored.
+// storyboardFile is the stored storyboard payload, validated by Etag.
+type storyboardFile struct {
+	Etag string                `json:"etag"`
+	Plan ffmpeg.StoryboardPlan `json:"plan"`
+}
+
+// ServeStoryboard builds the storyboard on first view and serves the VTT
+// or sprite. The VTT is rendered per request with the query baked in.
 func (m *Manager) ServeStoryboard(w http.ResponseWriter, r *http.Request, leaf, query string) {
 	if !IsStoryboardLeaf(leaf) {
 		w.WriteHeader(http.StatusNotFound)
@@ -45,33 +49,32 @@ func (m *Manager) ServeStoryboard(w http.ResponseWriter, r *http.Request, leaf, 
 	}
 	w.Header().Set("Cache-Control", "max-age=86400, public")
 	if leaf == StoryboardVTTFile {
-		plan, err := LoadStoryboardPlan(dir)
+		file, err := LoadStoryboardPlan(m.c.ResolvedCacheDir(), m.fileid, m.etag)
 		if err != nil {
 			log.Printf("%s: storyboard: %v", m.id, err)
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 		w.Header().Set("Content-Type", "text/vtt")
-		w.Write([]byte(plan.VTT(query)))
+		w.Write([]byte(file.Plan.VTT(query)))
 		return
 	}
 	w.Header().Set("Content-Type", "image/jpeg")
 	http.ServeFile(w, r, filepath.Join(dir, leaf))
 }
 
-// EnsureStoryboard renders sprites + plan into the etag cache dir,
-// or returns the existing dir. The plan JSON is written last as the
-// ready marker.
+// EnsureStoryboard builds the storyboard once and returns its dir.
+// The plan JSON is written last as the ready marker.
 func (m *Manager) EnsureStoryboard() (string, error) {
-	dir := CacheFileDir(m.c.ResolvedCacheDir(), m.etag)
+	dir := FileCacheDir(m.c.ResolvedCacheDir(), m.fileid)
 	if dir == "" {
 		return "", os.ErrNotExist
 	}
-	if _, err := os.Stat(filepath.Join(dir, StoryboardPlanFile)); err == nil {
+	if _, err := LoadStoryboardPlan(m.c.ResolvedCacheDir(), m.fileid, m.etag); err == nil {
 		return dir, nil
 	}
 	_, err, _ := storyboardSF.Do(dir, func() (any, error) {
-		if _, err := os.Stat(filepath.Join(dir, StoryboardPlanFile)); err == nil {
+		if _, err := LoadStoryboardPlan(m.c.ResolvedCacheDir(), m.fileid, m.etag); err == nil {
 			return nil, nil
 		}
 		return nil, m.buildStoryboard(dir)
@@ -82,17 +85,30 @@ func (m *Manager) EnsureStoryboard() (string, error) {
 	return dir, nil
 }
 
-// LoadStoryboardPlan reads a built storyboard's stored plan.
-func LoadStoryboardPlan(dir string) (ffmpeg.StoryboardPlan, error) {
-	var plan ffmpeg.StoryboardPlan
+// LoadStoryboardPlan reads the stored plan, evicting on etag mismatch.
+// Missing plans surface as os.ErrNotExist.
+func LoadStoryboardPlan(cacheDir string, fileid int64, etag string) (storyboardFile, error) {
+	var file storyboardFile
+	dir := FileCacheDir(cacheDir, fileid)
+	if dir == "" {
+		return file, os.ErrNotExist
+	}
 	data, err := os.ReadFile(filepath.Join(dir, StoryboardPlanFile))
 	if err != nil {
-		return plan, err
+		if os.IsNotExist(err) {
+			return file, os.ErrNotExist
+		}
+		return file, err
 	}
-	if err := json.Unmarshal(data, &plan); err != nil {
-		return plan, err
+	if err := json.Unmarshal(data, &file); err != nil {
+		EvictFileCache(cacheDir, fileid)
+		return file, os.ErrNotExist
 	}
-	return plan, nil
+	if file.Etag != etag {
+		EvictFileCache(cacheDir, fileid)
+		return file, os.ErrNotExist
+	}
+	return file, nil
 }
 
 func (m *Manager) buildStoryboard(dir string) error {
@@ -102,8 +118,8 @@ func (m *Manager) buildStoryboard(dir string) error {
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}
-	// Render into same-dir .part files so a crash never leaves a
-	// half-written sprite behind; VTT goes last as the ready marker.
+	// Render into same-dir .part files; the plan JSON goes last as the
+	// ready marker.
 	pattern := filepath.Join(dir, "storyboard-%d.jpg.part")
 	for _, stale := range glob(filepath.Join(dir, "storyboard-*.jpg.part")) {
 		os.Remove(stale)
@@ -132,7 +148,7 @@ func (m *Manager) buildStoryboard(dir string) error {
 		os.Remove(stale)
 	}
 
-	data, err := json.Marshal(plan)
+	data, err := json.Marshal(storyboardFile{Etag: m.etag, Plan: plan})
 	if err != nil {
 		return err
 	}

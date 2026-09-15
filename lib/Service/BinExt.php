@@ -173,17 +173,13 @@ final class BinExt
         return false;
     }
 
-    /**
-     * Get the upstream URL for a video.
-     */
-    public static function getGoVodUrl(string $client, string $path, string $profile): string
+    /** Get the upstream URL for a go-vod API (vod, config, create). */
+    public static function getGoVodEndpoint(string $endpoint): string
     {
-        $path = rawurlencode($path);
-
         $bind = SystemConfig::get('memories.vod.bind');
         $connect = SystemConfig::get('memories.vod.connect', $bind);
 
-        return "http://{$connect}/{$client}{$path}/{$profile}";
+        return "http://{$connect}/{$endpoint}";
     }
 
     public static function getGoVodConfig(bool $local = false): array
@@ -338,11 +334,19 @@ final class BinExt
         $testfile = realpath(__DIR__.'/../../exiftest.jpg');
 
         // Make request
-        $url = self::getGoVodUrl('test', $testfile, 'test');
+        $url = self::getGoVodEndpoint('vod');
 
         try {
             $client = new \GuzzleHttp\Client();
-            $res = $client->request('GET', $url, [
+            $res = $client->request('POST', $url, [
+                'json' => [
+                    'client' => 'test',
+                    'fileid' => 0,
+                    'etag' => '',
+                    'path' => $testfile,
+                    'profile' => 'test',
+                    'query' => '',
+                ],
                 'timeout' => 1,
                 'connect_timeout' => 1,
             ]);
@@ -375,7 +379,7 @@ final class BinExt
         $config = self::getGoVodConfig();
 
         // Make request
-        $url = self::getGoVodUrl('config', '/config', 'config');
+        $url = self::getGoVodEndpoint('config');
 
         try {
             $client = new \GuzzleHttp\Client();

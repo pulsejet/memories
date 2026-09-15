@@ -1,32 +1,52 @@
 package core
 
 import (
+	"encoding/binary"
 	"encoding/json"
+	"fmt"
+	"hash/fnv"
 	"os"
 	"path/filepath"
 )
 
-const EtagHeader = "X-Go-Vod-Etag"
-
 const KeyframeCacheFile = "keyframes.json"
 
-func CacheFileDir(cacheDir, etag string) string {
-	if cacheDir == "" || len(etag) < 4 {
+// FileCacheDir is the file's cache home, sharded by hashed fileid.
+// Empty when caching is unavailable (no cache dir or fileid).
+func FileCacheDir(cacheDir string, fileid int64) string {
+	if cacheDir == "" || fileid <= 0 {
 		return ""
 	}
-	return filepath.Join(cacheDir, etag[:2], etag[2:4], etag)
+	h := fnv.New32a()
+	var b [8]byte
+	binary.LittleEndian.PutUint64(b[:], uint64(fileid))
+	h.Write(b[:])
+	return filepath.Join(cacheDir, fmt.Sprintf("%02x", h.Sum32()&0xff), fmt.Sprint(fileid))
 }
 
-func KeyframeCachePath(cacheDir, etag string) string {
-	dir := CacheFileDir(cacheDir, etag)
+// EvictFileCache drops the entire cache for one file on etag mismatch.
+func EvictFileCache(cacheDir string, fileid int64) {
+	if dir := FileCacheDir(cacheDir, fileid); dir != "" {
+		os.RemoveAll(dir)
+	}
+}
+
+func KeyframeCachePath(cacheDir string, fileid int64) string {
+	dir := FileCacheDir(cacheDir, fileid)
 	if dir == "" {
 		return ""
 	}
 	return filepath.Join(dir, KeyframeCacheFile)
 }
 
-func LoadCachedKeyframes(cacheDir, etag string) ([]float64, bool) {
-	path := KeyframeCachePath(cacheDir, etag)
+// keyframesPlan is the stored keyframe payload, validated by Etag.
+type keyframesPlan struct {
+	Etag string    `json:"etag"`
+	Keys []float64 `json:"keys"`
+}
+
+func LoadCachedKeyframes(cacheDir string, fileid int64, etag string) ([]float64, bool) {
+	path := KeyframeCachePath(cacheDir, fileid)
 	if path == "" {
 		return nil, false
 	}
@@ -34,22 +54,27 @@ func LoadCachedKeyframes(cacheDir, etag string) ([]float64, bool) {
 	if err != nil {
 		return nil, false
 	}
-	var out []float64
-	if err := json.Unmarshal(data, &out); err != nil {
+	var plan keyframesPlan
+	if err := json.Unmarshal(data, &plan); err != nil {
+		EvictFileCache(cacheDir, fileid)
 		return nil, false
 	}
-	return out, true
+	if plan.Etag != etag {
+		EvictFileCache(cacheDir, fileid)
+		return nil, false
+	}
+	return plan.Keys, true
 }
 
-func StoreCachedKeyframes(cacheDir, etag string, keys []float64) error {
-	path := KeyframeCachePath(cacheDir, etag)
+func StoreCachedKeyframes(cacheDir string, fileid int64, etag string, keys []float64) error {
+	path := KeyframeCachePath(cacheDir, fileid)
 	if path == "" {
 		return nil
 	}
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		return err
 	}
-	data, err := json.Marshal(keys)
+	data, err := json.Marshal(keyframesPlan{Etag: etag, Keys: keys})
 	if err != nil {
 		return err
 	}

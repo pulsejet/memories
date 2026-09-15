@@ -34,7 +34,7 @@ func NewRegistry(cfg *config.Config, idle chan IdleEvent) *Registry {
 	}
 }
 
-func (r *Registry) GetOrCreate(path, streamID, etag string) (*Manager, error) {
+func (r *Registry) GetOrCreate(path, streamID string, fileid int64, etag string) (*Manager, error) {
 	if m := r.get(path, streamID, etag); m != nil {
 		return m, nil
 	}
@@ -43,7 +43,7 @@ func (r *Registry) GetOrCreate(path, streamID, etag string) (*Manager, error) {
 		if m := r.get(path, streamID, etag); m != nil {
 			return m, nil
 		}
-		return r.create(path, streamID, etag)
+		return r.create(path, streamID, fileid, etag)
 	})
 	if err != nil {
 		return nil, err
@@ -65,8 +65,8 @@ func (r *Registry) get(path, streamID, etag string) *Manager {
 	return m
 }
 
-func (r *Registry) create(path, streamID, etag string) (*Manager, error) {
-	manager, err := NewManager(r.cfg, path, streamID, etag, r.gen.Add(1), r.idle)
+func (r *Registry) create(path, streamID string, fileid int64, etag string) (*Manager, error) {
+	manager, err := NewManager(r.cfg, path, streamID, fileid, etag, r.gen.Add(1), r.idle)
 	if err != nil {
 		log.Println("Error creating manager", err)
 		freeIfTemp(r.cfg.TempDir, path)

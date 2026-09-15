@@ -174,7 +174,8 @@ final class VideoController extends GenericApiController
                 // If this is H.264 it won't get transcoded anyway
                 if ($liveVideoPath) {
                     return Util::guardExDirect(function (Http\IOutput $out) use ($transcode, $liveVideoPath) {
-                        $this->getUpstream($out, $transcode, $liveVideoPath, 'max.mp4');
+                        // Temp upload with no fileid: transcoded without disk cache.
+                        $this->getUpstream($out, $transcode, 0, $liveVideoPath, 'max.mp4');
                     });
                 }
             }
@@ -224,13 +225,11 @@ final class VideoController extends GenericApiController
                 throw Exceptions::Forbidden('files in temp directory not supported');
             }
 
-            // Request and check data was received
-            $fileEtag = $file->getEtag();
-            $etag = hash('sha256', pack('J', $fileid).$fileEtag);
+            $etag = $file->getEtag();
 
-            return Util::guardExDirect(function (Http\IOutput $out) use ($client, $path, $profile, $etag) {
+            return Util::guardExDirect(function (Http\IOutput $out) use ($client, $fileid, $path, $profile, $etag) {
                 try {
-                    $status = $this->getUpstream($out, $client, $path, $profile, $etag);
+                    $status = $this->getUpstream($out, $client, $fileid, $path, $profile, $etag);
                     if (409 === $status || -1 === $status) {
                         // Just a conflict (transcoding process changed)
                         $response = new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
@@ -254,9 +253,9 @@ final class VideoController extends GenericApiController
         });
     }
 
-    private function getUpstream(Http\IOutput $out, string $client, string $path, string $profile, string $etag = ''): int
+    private function getUpstream(Http\IOutput $out, string $client, int $fileid, string $path, string $profile, string $etag = ''): int
     {
-        $returnCode = $this->getUpstreamInternal($out, $client, $path, $profile, $etag);
+        $returnCode = $this->getUpstreamInternal($out, $client, $fileid, $path, $profile, $etag);
 
         // If status code was 0, it's likely the server is down
         // Make one attempt to start after killing whatever is there
@@ -267,7 +266,7 @@ final class VideoController extends GenericApiController
         // Start goVod and get log file
         $logFile = BinExt::startGoVod();
 
-        $returnCode = $this->getUpstreamInternal($out, $client, $path, $profile, $etag);
+        $returnCode = $this->getUpstreamInternal($out, $client, $fileid, $path, $profile, $etag);
         if (0 === $returnCode) {
             throw new \Exception("Transcoder could not be started, check {$logFile}");
         }
@@ -275,24 +274,31 @@ final class VideoController extends GenericApiController
         return $returnCode;
     }
 
-    private function getUpstreamInternal(Http\IOutput $out, string $client, string $path, string $profile, string $etag = ''): int
+    private function getUpstreamInternal(Http\IOutput $out, string $client, int $fileid, string $path, string $profile, string $etag = ''): int
     {
-        // Make sure query params are repeated
+        $url = BinExt::getGoVodEndpoint('vod');
+
+        // Repeat query params so go-vod can bake them into playlists and VTTs
         // For example, in folder sharing, we need the params on every request
-        $url = BinExt::getGoVodUrl($client, $path, $profile);
+        $query = '';
         if (\array_key_exists('QUERY_STRING', $_SERVER) && !empty($params = $_SERVER['QUERY_STRING'])) {
-            $url .= "?{$params}";
+            $query = "?{$params}";
         }
 
-        $header = 'X-Go-Vod-Version: '.BinExt::GOVOD_VER."\r\n";
-        if ('' !== $etag) {
-            $header .= 'X-Go-Vod-Etag: '.$etag."\r\n";
-        }
+        $body = json_encode([
+            'client' => $client,
+            'fileid' => $fileid,
+            'etag' => $etag,
+            'path' => $path,
+            'profile' => $profile,
+            'query' => $query,
+        ]);
 
         $context = stream_context_create([
             'http' => [
-                'method' => 'GET',
-                'header' => $header,
+                'method' => 'POST',
+                'header' => "Content-Type: application/json\r\nX-Go-Vod-Version: ".BinExt::GOVOD_VER."\r\n",
+                'content' => $body,
                 'protocol_version' => 1.1,
                 'ignore_errors' => true,
             ],
@@ -369,7 +375,7 @@ final class VideoController extends GenericApiController
 
     private static function postFileInternal(string $client, string $blob): mixed
     {
-        $url = BinExt::getGoVodUrl($client, '/create', 'ignore');
+        $url = BinExt::getGoVodEndpoint('create');
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

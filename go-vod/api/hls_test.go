@@ -1,7 +1,6 @@
 package api
 
 import (
-	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
@@ -56,10 +55,4 @@ func TestCopyVariantPlaylist(t *testing.T) {
 	require.Contains(t, got, "direct-000000.ts?t=123")
 	require.Contains(t, got, "direct-000002.ts?t=123")
 	require.True(t, strings.HasSuffix(strings.TrimSpace(got), "#EXT-X-ENDLIST"))
-}
-
-func TestQueryString(t *testing.T) {
-	r := httptest.NewRequest("GET", "/x?a=1&b=2", nil)
-	require.Equal(t, "?a=1&b=2", QueryString(r))
-	require.Equal(t, "", QueryString(httptest.NewRequest("GET", "/x", nil)))
 }
