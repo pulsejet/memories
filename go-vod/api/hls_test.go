@@ -98,11 +98,16 @@ func TestVariantPlaylistLazyDirect(t *testing.T) {
 	require.Contains(t, got, "direct-000000.ts")
 }
 
-func TestVariantPlaylistDirectFailure(t *testing.T) {
+func TestVariantPlaylistDirectFallback(t *testing.T) {
 	m := stubVariantManager(t, true)
 
-	_, err := VariantPlaylist(m, "direct", 4, "")
-	require.Error(t, err)
+	// Zero keyframes: direct serves max-style uniform segments under its
+	// own name instead of failing.
+	got, err := VariantPlaylist(m, "direct", 4, "")
+	require.NoError(t, err)
+	require.Contains(t, got, "direct-000000.ts")
+	require.NotContains(t, got, "max-")
+	require.Contains(t, got, "#EXT-X-TARGETDURATION:4")
 
 	// Lower renditions still serve.
 	_, err = VariantPlaylist(m, "480p", 4, "")

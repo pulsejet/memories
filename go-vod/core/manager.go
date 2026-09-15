@@ -331,9 +331,8 @@ func (m *Manager) ServeChunk(w http.ResponseWriter, quality string, id int) bool
 		return false
 	}
 	if quality == QUALITY_DIRECT {
-		if _, ok := m.EnsureCopySegments(); !ok {
-			return false
-		}
+		// Trigger the probe; on empty grid the stream re-encodes.
+		m.EnsureCopySegments()
 	}
 	stream.ServeChunk(w, id)
 	return true

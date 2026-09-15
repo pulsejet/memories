@@ -98,7 +98,9 @@ func (s *Stream) clear() {
 	s.goal = 0
 
 	if s.coder != nil {
-		s.coder.Process.Kill()
+		if s.coder.Process != nil {
+			s.coder.Process.Kill()
+		}
 		s.coder.Wait()
 		s.coder = nil
 	}
@@ -203,7 +205,9 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	// Terminate ffmpeg process
-	coder.Process.Kill()
+	if coder.Process != nil {
+		coder.Process.Kill()
+	}
 	coder.Wait()
 
 	return nil
@@ -295,6 +299,10 @@ func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 }
 
 func (s *Stream) spec(startAt float64, isHls bool) ffmpeg.Spec {
+	// Stream copy needs the keyframe grid for HLS segmentation. Without it
+	// direct falls back to re-encoding (like max); progressive MP4 copies
+	// fine without keyframes, so it always copies.
+	_, grid := s.m.CopySegments()
 	return ffmpeg.Spec{
 		Bin:     s.c.FFmpeg,
 		Input:   s.m.path,
@@ -310,7 +318,7 @@ func (s *Stream) spec(startAt float64, isHls bool) ffmpeg.Spec {
 		HDR:       s.m.probe.HDR,
 		Audio:     s.m.probe.Audio,
 		ChunkSize: s.c.ChunkSize,
-		Copy:      s.quality == QUALITY_DIRECT,
+		Copy:      s.quality == QUALITY_DIRECT && (!isHls || grid),
 
 		VAAPI:           s.c.VAAPI,
 		VAAPILowPower:   s.c.VAAPILowPower,

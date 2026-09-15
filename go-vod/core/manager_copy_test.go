@@ -1,9 +1,12 @@
 package core
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/pulsejet/memories/go-vod/config"
 	"github.com/stretchr/testify/require"
@@ -82,8 +85,8 @@ func TestManagerCopyDisabledRotation(t *testing.T) {
 }
 
 func TestManagerCopyKeyframeFailure(t *testing.T) {
-	// A failing keyframe probe never fails the manager; direct.m3u8 fails
-	// later while lower renditions keep playing.
+	// A failing keyframe probe never fails the manager; direct falls back
+	// to re-encoding (max-style) while lower renditions keep playing.
 	m := newCopyManager(t, copyProbeJSON, "", true)
 
 	require.True(t, m.IsCopyEligible())
@@ -97,4 +100,33 @@ func TestManagerCopyKeyframeFailure(t *testing.T) {
 	// Second ensure fails fast without re-probing.
 	_, ok = m.EnsureCopySegments()
 	require.False(t, ok)
+
+	// Without a grid direct re-encodes for HLS but still copies for MP4.
+	direct := m.streams[QUALITY_DIRECT]
+	require.False(t, direct.spec(0, true).Copy)
+	require.True(t, direct.spec(0, false).Copy)
+}
+
+func TestManagerCopyGridSpec(t *testing.T) {
+	m := newCopyManager(t, copyProbeJSON, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false)
+
+	// With a grid direct copies for both HLS and MP4.
+	_, ok := m.EnsureCopySegments()
+	require.True(t, ok)
+	direct := m.streams[QUALITY_DIRECT]
+	require.True(t, direct.spec(0, true).Copy)
+	require.True(t, direct.spec(0, false).Copy)
+}
+
+func TestManagerDirectChunkFallsBack(t *testing.T) {
+	m := newCopyManager(t, copyProbeJSON, "", true)
+
+	old := chunkWait
+	chunkWait = 50 * time.Millisecond
+	defer func() { chunkWait = old }()
+
+	// Empty grid serves (re-encode attempt) instead of 404.
+	w := httptest.NewRecorder()
+	require.True(t, m.ServeChunk(w, QUALITY_DIRECT, 0))
+	require.Equal(t, http.StatusRequestTimeout, w.Code)
 }
