@@ -162,6 +162,16 @@ export class API {
     );
   }
 
+  static VIDEO_STORYBOARD(fileid: number, file: string) {
+    return tok(
+      gen(`${BASE}/video/storyboard/{client}/{fileid}/{file}`, {
+        client: _m.video.clientId,
+        fileid,
+        file,
+      }),
+    );
+  }
+
   static VIDEO_LIVEPHOTO(fileid: number) {
     return tok(gen(`${BASE}/video/livephoto/{fileid}`, { fileid }));
   }

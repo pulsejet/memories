@@ -67,6 +67,7 @@ return [
         ['name' => 'Image#deleteFile', 'url' => '/api/image/delete/{id}', 'verb' => 'DELETE'],
 
         ['name' => 'Video#transcode', 'url' => '/api/video/transcode/{client}/{fileid}/{profile}', 'verb' => 'GET'],
+        ['name' => 'Video#storyboard', 'url' => '/api/video/storyboard/{client}/{fileid}/{profile}', 'verb' => 'GET'],
         ['name' => 'Video#livephoto', 'url' => '/api/video/livephoto/{fileid}', 'verb' => 'GET'],
 
         ['name' => 'Download#request', 'url' => '/api/download', 'verb' => 'POST'],

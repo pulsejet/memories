@@ -181,6 +181,8 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, sid, dir, leaf st
 		}
 	case strings.HasSuffix(leaf, ".mp4"):
 		manager.ServeFullVideo(w, r, strings.TrimSuffix(leaf, ".mp4"))
+	case core.IsStoryboardLeaf(leaf):
+		manager.ServeStoryboard(w, r, leaf, query)
 	default:
 		w.WriteHeader(http.StatusNotFound)
 	}

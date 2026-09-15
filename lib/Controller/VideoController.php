@@ -47,64 +47,23 @@ final class VideoController extends GenericApiController
     #[NoCSRFRequired]
     public function transcode(string $client, int $fileid, string $profile): Http\Response
     {
+        return $this->proxyProfile($client, $fileid, $profile);
+    }
+
+    /**
+     * Serve a storyboard VTT or sprite for timeline hover previews.
+     */
+    #[NoAdminRequired]
+    #[PublicPage]
+    #[NoCSRFRequired]
+    public function storyboard(string $client, int $fileid, string $profile): Http\Response
+    {
         return Util::guardEx(function () use ($client, $fileid, $profile) {
-            // Make sure transcoding is enabled
-            if (SystemConfig::get('memories.vod.disable')) {
-                throw Exceptions::Forbidden('Transcoding disabled');
+            if (1 !== preg_match('#^(storyboard\.vtt|storyboard-\d+\.jpg)$#', $profile)) {
+                throw Exceptions::BadRequest('Invalid storyboard file');
             }
 
-            // Check client identifier is 8 characters or more
-            if (\strlen($client) < 8) {
-                throw Exceptions::MissingParameter('client (invalid)');
-            }
-
-            // Get file
-            $file = $this->fs->getUserFile($fileid);
-
-            // Local files only for now
-            if (!$file->getStorage()->isLocal()) {
-                throw Exceptions::Forbidden('External storage not supported');
-            }
-
-            // Get file path
-            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-            if (!$path || !file_exists($path)) {
-                throw Exceptions::NotFound('local file path');
-            }
-
-            // Check if file starts with temp dir
-            $tmpDir = sys_get_temp_dir();
-            if (str_starts_with($path, $tmpDir)) {
-                throw Exceptions::Forbidden('files in temp directory not supported');
-            }
-
-            // Request and check data was received
-            $fileEtag = $file->getEtag();
-            $etag = hash('sha256', pack('J', $fileid).$fileEtag);
-
-            return Util::guardExDirect(function (Http\IOutput $out) use ($client, $path, $profile, $etag) {
-                try {
-                    $status = $this->getUpstream($out, $client, $path, $profile, $etag);
-                    if (409 === $status || -1 === $status) {
-                        // Just a conflict (transcoding process changed)
-                        $response = new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
-
-                        throw new HttpResponseException($response);
-                    }
-                    if (200 !== $status) {
-                        throw new \Exception("Transcoder returned {$status}");
-                    }
-                } catch (\Exception $e) {
-                    if ($e instanceof HttpResponseException && Http::STATUS_CONFLICT === $e->response->getStatus()) {
-                        throw $e; // Logging this is noise
-                    }
-
-                    // We cannot show this error in the user interface, so log it
-                    $this->logger->error('Transcode failed: '.$e->getMessage(), ['app' => 'memories']);
-
-                    throw $e;
-                }
-            });
+            return $this->proxyProfile($client, $fileid, $profile);
         });
     }
 
@@ -232,6 +191,69 @@ final class VideoController extends GenericApiController
         });
     }
 
+    private function proxyProfile(string $client, int $fileid, string $profile): Http\Response
+    {
+        return Util::guardEx(function () use ($client, $fileid, $profile) {
+            // Make sure transcoding is enabled
+            if (SystemConfig::get('memories.vod.disable')) {
+                throw Exceptions::Forbidden('Transcoding disabled');
+            }
+
+            // Check client identifier is 8 characters or more
+            if (\strlen($client) < 8) {
+                throw Exceptions::MissingParameter('client (invalid)');
+            }
+
+            // Get file
+            $file = $this->fs->getUserFile($fileid);
+
+            // Local files only for now
+            if (!$file->getStorage()->isLocal()) {
+                throw Exceptions::Forbidden('External storage not supported');
+            }
+
+            // Get file path
+            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+            if (!$path || !file_exists($path)) {
+                throw Exceptions::NotFound('local file path');
+            }
+
+            // Check if file starts with temp dir
+            $tmpDir = sys_get_temp_dir();
+            if (str_starts_with($path, $tmpDir)) {
+                throw Exceptions::Forbidden('files in temp directory not supported');
+            }
+
+            // Request and check data was received
+            $fileEtag = $file->getEtag();
+            $etag = hash('sha256', pack('J', $fileid).$fileEtag);
+
+            return Util::guardExDirect(function (Http\IOutput $out) use ($client, $path, $profile, $etag) {
+                try {
+                    $status = $this->getUpstream($out, $client, $path, $profile, $etag);
+                    if (409 === $status || -1 === $status) {
+                        // Just a conflict (transcoding process changed)
+                        $response = new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
+
+                        throw new HttpResponseException($response);
+                    }
+                    if (200 !== $status) {
+                        throw new \Exception("Transcoder returned {$status}");
+                    }
+                } catch (\Exception $e) {
+                    if ($e instanceof HttpResponseException && Http::STATUS_CONFLICT === $e->response->getStatus()) {
+                        throw $e; // Logging this is noise
+                    }
+
+                    // We cannot show this error in the user interface, so log it
+                    $this->logger->error('Transcode failed: '.$e->getMessage(), ['app' => 'memories']);
+
+                    throw $e;
+                }
+            });
+        });
+    }
+
     private function getUpstream(Http\IOutput $out, string $client, string $path, string $profile, string $etag = ''): int
     {
         $returnCode = $this->getUpstreamInternal($out, $client, $path, $profile, $etag);
@@ -301,8 +323,8 @@ final class VideoController extends GenericApiController
             }
 
             // Caching headers
-            if (str_ends_with($profile, 'mp4')) {
-                // cache full video 24 hours
+            if (str_ends_with($profile, 'mp4') || str_ends_with($profile, '.vtt') || str_ends_with($profile, '.jpg')) {
+                // cache full video and storyboards 24 hours
                 $out->setHeader('Cache-Control: max-age=86400, public');
             } else {
                 // no caching of segments

@@ -90,6 +90,29 @@ func TestEndpoint(t *testing.T) {
 	require.Equal(t, 5, body.Size)
 }
 
+func TestStoryboardNoEtag(t *testing.T) {
+	dir := t.TempDir()
+	out := filepath.Join(dir, "out.json")
+	require.NoError(t, os.WriteFile(out, []byte(
+		`{"streams":[{"codec_type":"video","codec_name":"h264","width":64,"height":64,"avg_frame_rate":"30/1","duration":"1","bit_rate":"100"}],"format":{}}`,
+	), 0644))
+	bin := filepath.Join(dir, "ffprobe")
+	require.NoError(t, os.WriteFile(bin, []byte("#!/bin/sh\ncat "+out+"\n"), 0755))
+
+	s := testServer(t, func(c *config.Config) {
+		c.Configured = true
+		c.FFprobe = bin
+	})
+
+	// No etag header means no cache dir, so no storyboard.
+	for _, leaf := range []string{"storyboard.vtt", "storyboard-0.jpg", "storyboard-x.jpg"} {
+		r := httptest.NewRequest("GET", "/s/%2Finput.mp4/"+leaf, nil)
+		w := httptest.NewRecorder()
+		s.routes().ServeHTTP(w, r)
+		require.Equal(t, http.StatusNotFound, w.Code, leaf)
+	}
+}
+
 func TestConfigReload(t *testing.T) {
 	s := testServer(t, func(c *config.Config) { c.Configured = true })
 

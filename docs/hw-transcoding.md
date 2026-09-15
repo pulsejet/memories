@@ -73,7 +73,8 @@ NVIDIA GPUs support hardware transcoding using NVENC.
 
     !!! info "Persistent keyframe cache (CACHE_DIR)"
 
-        go-vod caches extracted video keyframes in `CACHE_DIR`, overriding `memories.vod.cachedir`.
+        go-vod caches extracted video keyframes and timeline hover storyboards
+        (thumbnail sprites + VTT) in `CACHE_DIR`, overriding `memories.vod.cachedir`.
         Without a persistent volume (e.g. the `go-vod-cache` volume above, declared under top-level
         `volumes:`), the cache is lost on every container restart and keyframes are re-extracted
         from scratch, which is very slow for large videos.

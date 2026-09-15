@@ -1,0 +1,99 @@
+package core
+
+import (
+	"encoding/json"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
+
+	"github.com/pulsejet/memories/go-vod/config"
+	"github.com/pulsejet/memories/go-vod/ffmpeg"
+	"github.com/stretchr/testify/require"
+)
+
+func TestIsStoryboardLeaf(t *testing.T) {
+	require.True(t, IsStoryboardLeaf("storyboard.vtt"))
+	require.True(t, IsStoryboardLeaf("storyboard-0.jpg"))
+	require.True(t, IsStoryboardLeaf("storyboard-12.jpg"))
+	require.False(t, IsStoryboardLeaf("index.m3u8"))
+	require.False(t, IsStoryboardLeaf("storyboard-.jpg"))
+	require.False(t, IsStoryboardLeaf("storyboard-1.png"))
+	require.False(t, IsStoryboardLeaf("storyboard-../x.jpg"))
+	require.False(t, IsStoryboardLeaf("../keyframes.json"))
+	require.False(t, IsStoryboardLeaf("storyboard-0.jpg.part"))
+}
+
+func testStoryboardManager(t *testing.T, ffmpeg string) *Manager {
+	t.Helper()
+	cfg := config.Defaults("test")
+	cfg.TempDir = t.TempDir()
+	cfg.CacheDir = t.TempDir()
+	cfg.FFprobe = stubProbe(t)
+	cfg.FFmpeg = ffmpeg
+
+	m, err := NewManager(cfg, "input.mp4", "id", "abcdef0123456789", 1, make(chan IdleEvent, 1))
+	require.NoError(t, err)
+	t.Cleanup(m.Destroy)
+	return m
+}
+
+func TestEnsureStoryboardCached(t *testing.T) {
+	m := testStoryboardManager(t, "false")
+	dir := CacheFileDir(m.c.ResolvedCacheDir(), m.etag)
+	require.NoError(t, os.MkdirAll(dir, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, StoryboardPlanFile), []byte("{}"), 0644))
+
+	got, err := m.EnsureStoryboard()
+	require.NoError(t, err)
+	require.Equal(t, dir, got)
+}
+
+func TestServeStoryboardVTTBakesQuery(t *testing.T) {
+	m := testStoryboardManager(t, "false")
+	dir := CacheFileDir(m.c.ResolvedCacheDir(), m.etag)
+	require.NoError(t, os.MkdirAll(dir, 0755))
+	plan := ffmpeg.PlanStoryboard(12 * time.Second)
+	data, err := json.Marshal(plan)
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(filepath.Join(dir, StoryboardPlanFile), data, 0644))
+
+	w := httptest.NewRecorder()
+	m.ServeStoryboard(w, httptest.NewRequest("GET", "/x", nil), StoryboardVTTFile, "?token=abc")
+	require.Equal(t, 200, w.Code)
+	require.Equal(t, "text/vtt", w.Header().Get("Content-Type"))
+	require.Contains(t, w.Body.String(), "storyboard-0.jpg?token=abc#xywh=0,0,160,90")
+}
+
+func TestEnsureStoryboardNoEtag(t *testing.T) {
+	cfg := config.Defaults("test")
+	cfg.TempDir = t.TempDir()
+	cfg.CacheDir = t.TempDir()
+	cfg.FFprobe = stubProbe(t)
+
+	m, err := NewManager(cfg, "input.mp4", "id", "", 1, make(chan IdleEvent, 1))
+	require.NoError(t, err)
+	defer m.Destroy()
+
+	_, err = m.EnsureStoryboard()
+	require.Error(t, err)
+}
+
+func TestEnsureStoryboardBuildFailure(t *testing.T) {
+	m := testStoryboardManager(t, "false")
+
+	_, err := m.EnsureStoryboard()
+	require.Error(t, err)
+	// Failed builds leave no ready marker behind.
+	_, statErr := os.Stat(filepath.Join(CacheFileDir(m.c.ResolvedCacheDir(), m.etag), StoryboardPlanFile))
+	require.Error(t, statErr)
+}
+
+func TestServeStoryboardRejectsLeaf(t *testing.T) {
+	m := testStoryboardManager(t, "false")
+
+	w := httptest.NewRecorder()
+	m.ServeStoryboard(w, httptest.NewRequest("GET", "/x", nil), "../keyframes.json", "")
+	require.Equal(t, 404, w.Code)
+}
