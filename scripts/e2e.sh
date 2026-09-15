@@ -81,8 +81,8 @@ e2e_setup_ci() {
             --database-name="nextcloud" \
             --database-host="127.0.0.1" \
             --database-port="$NC_DB_PORT" \
-            --database-user="db_user" \
-            --database-pass="db_password" \
+            --database-user="$NC_DB_USER" \
+            --database-pass="$NC_DB_PASS" \
             --admin-user="admin" \
             --admin-pass="password"
     fi

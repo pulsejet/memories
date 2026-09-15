@@ -67,7 +67,7 @@ jobs:
           MYSQL_DATABASE: nextcloud
           MYSQL_USER: db_user
           MYSQL_PASSWORD: db_password
-          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_ROOT_PASSWORD: db_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval 5s
@@ -169,6 +169,8 @@ jobs:
       - name: Run tests
         env:
           NC_DB_TYPE: ${{ matrix.databases }}
+          NC_DB_USER: ${{ matrix.databases == 'mysql' && 'root' || 'db_user' }}
+          NC_DB_PASS: db_password
           PHP_VERSION: ${{ matrix.php-versions }}
           NC_VERSION: ${{ matrix.server-versions }}
           NC_DB_PORT: 4444
