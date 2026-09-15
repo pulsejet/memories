@@ -98,8 +98,16 @@ class MainActivity : AppCompatActivity() {
         edges.applyOrientation(config.orientation)
     }
 
+    public override fun onPause() {
+        super.onPause()
+        binding.webview.onPause()
+        binding.webview.pauseTimers()
+    }
+
     public override fun onResume() {
         super.onResume()
+        binding.webview.onResume()
+        binding.webview.resumeTimers()
         val uris = player.urisForRestore()
         val uid = player.uidForRestore()
         if (uris != null && uid != null) player.restoreIfNeeded(uris, uid)
