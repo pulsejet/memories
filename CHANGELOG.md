@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 - **Notice**: The next version of the Android app will be incomptible with older versions of Memories.
 - **Notice**: Requires Nextcloud 34 or later.
-- **Notice**: go-vod now caches extracted video keyframes in `CACHE_DIR` (`memories.vod.cachedir`). External transcoder setups must mount a persistent volume for it.
+- **Notice**: go-vod now caches extracted video keyframes in `CACHE_DIR` (`memories.vod.cachedir`). [External transcoder](https://memories.gallery/hw-transcoding/#external-transcoder) setups must mount a persistent volume for it.
 - **Notice**: Updated Planet DB is avilable.
 - **Feature**: Redesigned Viewer UX on mobile
 - **Feature**: Support zooming in on videos ([#1242](https://github.com/pulsejet/memories/issues/1242))
