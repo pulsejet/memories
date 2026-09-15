@@ -115,6 +115,10 @@ class LocalHttpServer(
         if (p == "/api" || p.startsWith("/api/") || p == "/image" || p.startsWith("/image/")) return null
         if (p == "/video" || p.startsWith("/video/")) return null
         if (p == "/favicon.ico") return null
+        val appPrefix = config.webRoot + "/index.php/apps/memories"
+        if (p == appPrefix || p == "$appPrefix/" || p.startsWith("$appPrefix/")) return null
+        val prettyPrefix = config.webRoot + "/apps/memories"
+        if (p == prettyPrefix || p == "$prettyPrefix/" || p.startsWith("$prettyPrefix/")) return null
         return config.serverOrigin + p + (query?.let { "?$it" } ?: "")
     }
 
