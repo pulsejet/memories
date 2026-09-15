@@ -1,6 +1,7 @@
 buildscript {
     ext.kotlin_version = '2.3.21'
     dependencies {
+        // AGP 9 provides built-in Kotlin (KGP 2.2.10); use a newer KGP explicitly.
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -8,5 +9,4 @@ buildscript {
 plugins {
     id 'com.android.application' version '9.0.1' apply false
     id 'com.android.library' version '9.0.1' apply false
-    id 'org.jetbrains.kotlin.android' version "$kotlin_version" apply false
 }

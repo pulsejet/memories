@@ -1,36 +1,35 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
     id 'com.google.devtools.ksp' version '2.3.11'
 }
 
 android {
-    namespace 'gallery.memories'
+    namespace = "gallery.memories"
     compileSdk = 36
 
     buildFeatures {
         buildConfig = true
-        viewBinding true
+        viewBinding = true
     }
 
     defaultConfig {
-        applicationId "gallery.memories"
-        minSdk 30
-        targetSdk 36
-        versionCode 15
-        versionName "1.15"
+        applicationId = "gallery.memories"
+        minSdk = 30
+        targetSdk = 36
+        versionCode = 15
+        versionName = "1.15"
     }
 
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled = true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_21
-        targetCompatibility JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 }
 
