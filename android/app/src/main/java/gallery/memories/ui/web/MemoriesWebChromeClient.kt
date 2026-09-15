@@ -9,6 +9,7 @@ import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import androidx.core.graphics.createBitmap
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 
@@ -32,7 +33,7 @@ class MemoriesWebChromeClient(
 
     /** Transparent 1x1 poster so videos never flash the default gray/white placeholder. */
     override fun getDefaultVideoPoster(): Bitmap {
-        val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(1, 1)
         Canvas(bitmap).drawARGB(0, 0, 0, 0)
         return bitmap
     }

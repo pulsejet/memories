@@ -142,8 +142,8 @@ class MainActivity : AppCompatActivity() {
             nativex.toast("Local server failed to start", true)
             return
         }
-        // Per-process secret: without this cookie the local server rejects everything. Load only after it lands.
-        CookieManager.getInstance().setCookie("http://127.0.0.1/", "local-auth=${nativex.local.secret}; Path=/") {
+        // Per-process secret as HttpOnly cookie: without it the local server rejects everything. Load only after it lands.
+        CookieManager.getInstance().setCookie("http://127.0.0.1/", nativex.local.authCookie()) {
             runOnUiThread { startup.onLocalCookieReady() }
         }
         CookieManager.getInstance().flush()

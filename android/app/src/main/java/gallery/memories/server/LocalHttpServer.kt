@@ -54,6 +54,9 @@ class LocalHttpServer(
     private val proxy = ProxyController(auth, clients) { origin() }
     private val router = ServerRouter(appCtx, auth, assets, guard, bridgeController, proxy) { cfg }
 
+    /** HttpOnly cookie value the WebView must present; see [AuthGuard]. */
+    fun authCookie(): String = guard.cookieHeader()
+
     /** Points the server at an upstream origin and its offline snapshot. */
     fun configure(serverOrigin: String, webRoot: String, assetDir: File, baseUrl: String) {
         cfg = ServerConfig(serverOrigin, webRoot, assetDir, baseUrl)
