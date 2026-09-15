@@ -1,7 +1,7 @@
 {
   "name": "memories",
   "description": "A better photos app",
-  "version": "9.0.0-rc.3",
+  "version": "9.0.0",
   "author": "Varun Patil <radialapps@gmail.com>",
   "contributors": [
     "Varun Patil <radialapps@gmail.com>"
