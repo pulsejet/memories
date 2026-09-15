@@ -450,6 +450,7 @@ OC.L10N.register(
     "Error saving image: {error}" : "儲存圖像時發生錯誤：{error}",
     "Unsaved changes" : "未儲存變更",
     "Drop changes" : "取消更改",
+    "Add to" : "添加到",
     "Play Live Photo" : "播放 Live Photo",
     "Sidebar" : "側邊欄",
     "Download Video" : "下載視像",

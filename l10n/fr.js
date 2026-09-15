@@ -450,6 +450,7 @@ OC.L10N.register(
     "Error saving image: {error}" : "Erreur lors de l'enregistrement de l'image : {error}",
     "Unsaved changes" : "Modifications non enregistrées",
     "Drop changes" : "Abandonner les modifications",
+    "Add to" : "Ajouter à",
     "Play Live Photo" : "Lire la photo en direct",
     "Sidebar" : "Panneau latéral",
     "Download Video" : "Télécharger la vidéo",

@@ -450,6 +450,7 @@ OC.L10N.register(
     "Error saving image: {error}" : "Error saving image: {error}",
     "Unsaved changes" : "Unsaved changes",
     "Drop changes" : "Drop changes",
+    "Add to" : "Add to",
     "Play Live Photo" : "Play Live Photo",
     "Sidebar" : "Sidebar",
     "Download Video" : "Download Video",
