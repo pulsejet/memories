@@ -187,3 +187,7 @@
     margin-inline-end: 6px;
   }
 }
+
+.memories-viewer.fully-opened:has(.video-started) :is(.vds-poster, .pswp__img--placeholder) {
+  display: none;
+}

@@ -251,6 +251,7 @@ class VideoContentSetup {
     player.addEventListener('playing', () => {
       if (!isVideoContent(content) || content.videoPlayer !== player) return;
       content.videoHasPlayed = true;
+      content.element?.classList.add('video-started');
     });
 
     player.addEventListener('error', (e: Event) => {
