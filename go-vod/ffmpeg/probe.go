@@ -26,7 +26,7 @@ const (
 	CodecH264  = "h264"
 
 	probeTimeout    = 5 * time.Second
-	keyframeTimeout = 30 * time.Second
+	keyframeTimeout = 5 * time.Minute
 	defaultBitRate  = 5000000
 	defaultFrameNum = 30
 	defaultFrameDen = 1
