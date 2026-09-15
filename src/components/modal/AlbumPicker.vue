@@ -4,7 +4,7 @@
 
     <div class="search">
       <NcTextField
-        :autofocus="true"
+        :autofocus="false"
         v-model="search"
         :label="t('memories', 'Search')"
         :placeholder="t('memories', 'Search')"
@@ -153,6 +153,10 @@ export default defineComponent({
 
   mounted() {
     this.loadAlbums();
+    this.$nextTick(() => {
+      // prevent autofocus on search bar for mobile
+      this.$el.closest('.modal-mask')?.focus?.();
+    });
   },
 
   computed: {
