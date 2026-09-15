@@ -16,6 +16,9 @@ import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 
 const SHEET_SWIPE_UP_PX = 70;
+// Zoom ratio above initial that still counts as "not zoomed"
+// (tolerates float noise so only a real zoom ignores the swipe).
+const SHEET_ZOOM_TOLERANCE = 1.05;
 
 /** PhotoSwipe surface the gestures need */
 interface SheetPhotoSwipe {
@@ -23,7 +26,11 @@ interface SheetPhotoSwipe {
   off(name: string, fn: (e: any) => void): void;
   element?: HTMLDivElement | null;
   gestures?: { isMultitouch: boolean };
-  currSlide?: { pan: { y: number } } | null;
+  currSlide?: {
+    pan: { y: number };
+    currZoomLevel: number;
+    zoomLevels: { initial: number };
+  } | null;
 }
 
 export default defineComponent({
@@ -68,8 +75,18 @@ export default defineComponent({
   },
 
   methods: {
+    /** True when the current slide is more than a little zoomed in. */
+    isZoomed() {
+      const slide = this.photoswipe?.currSlide;
+      const curr = slide?.currZoomLevel;
+      const initial = slide?.zoomLevels?.initial;
+      if (!Number.isFinite(curr) || !Number.isFinite(initial) || !initial) return false;
+      return curr! > initial! * SHEET_ZOOM_TOLERANCE;
+    },
+
     /** Open the sheet on a sufficient upward swipe (dy<0). */
     maybeOpenSheet(dy: number, dx = 0, dt = 0) {
+      if (this.isZoomed()) return;
       if (dy < -SHEET_SWIPE_UP_PX && Math.abs(dy) > 1.8 * Math.abs(dx) && dt < 800) {
         this.$emit('open');
       }
@@ -137,6 +154,7 @@ export default defineComponent({
     },
 
     onPsVerticalDrag(e: { panY: number; preventDefault(): void }) {
+      if (this.isZoomed()) return;
       if (e.panY - this.downPanY >= 0) return;
       e.preventDefault();
     },
