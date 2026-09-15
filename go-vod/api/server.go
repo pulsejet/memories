@@ -30,6 +30,7 @@ type Server struct {
 func NewServer(cfg *config.Config) *Server {
 	os.RemoveAll(cfg.TempDir)
 	os.MkdirAll(cfg.TempDir, 0755)
+	os.MkdirAll(cfg.ResolvedCacheDir(), 0755)
 
 	s := &Server{cfg: cfg, idle: make(chan core.IdleEvent)}
 	s.reg = core.NewRegistry(cfg, s.idle)
@@ -139,7 +140,8 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, sid, dir, leaf st
 		return
 	}
 
-	manager, err := s.reg.GetOrCreate(dir, sid)
+	etag := r.Header.Get(core.EtagHeader)
+	manager, err := s.reg.GetOrCreate(dir, sid, etag)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -201,6 +203,9 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	if v, ok := os.LookupEnv("CACHE_DIR"); ok && v != "" {
+		next.CacheDir = v
+	}
 	if err := next.Validate(); err != nil {
 		log.Println("Error validating config", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -209,6 +214,7 @@ func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 
 	next.Configured = true
 	*s.cfg = next
+	os.MkdirAll(next.ResolvedCacheDir(), 0755)
 	log.Printf("%+v\n", s.cfg)
 }
 

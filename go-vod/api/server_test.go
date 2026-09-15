@@ -108,6 +108,21 @@ func TestConfigReload(t *testing.T) {
 	require.Equal(t, before, s.cfg.ChunkSize)
 }
 
+func TestConfigReloadIgnoresPostedCacheDirWhenEnvSet(t *testing.T) {
+	t.Setenv("CACHE_DIR", "/from-env")
+	s := testServer(t, func(c *config.Config) {
+		c.Configured = true
+		c.CacheDir = "/from-env"
+	})
+
+	r := httptest.NewRequest("POST", "/config/%2Fconfig/config", strings.NewReader(`{"chunkSize":7,"cacheDir":"/from-php"}`))
+	w := httptest.NewRecorder()
+	s.routes().ServeHTTP(w, r)
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Equal(t, 7, s.cfg.ChunkSize)
+	require.Equal(t, "/from-env", s.cfg.CacheDir)
+}
+
 func TestCreateTempLimit(t *testing.T) {
 	s := testServer(t, nil)
 	s.cfg.MaxUploadSize = 1024

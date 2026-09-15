@@ -37,7 +37,7 @@ func newCopyManager(t *testing.T, probeJSON, keyframes string, keyFail bool) *Ma
 	cfg.TempDir = t.TempDir()
 	cfg.FFprobe = stubCopyProbe(t, probeJSON, keyframes, keyFail)
 
-	m, err := NewManager(cfg, "input.mp4", "id", 1, make(chan IdleEvent, 1))
+	m, err := NewManager(cfg, "input.mp4", "id", "", 1, make(chan IdleEvent, 1))
 	require.NoError(t, err)
 	t.Cleanup(m.Destroy)
 	return m

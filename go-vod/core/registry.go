@@ -34,16 +34,16 @@ func NewRegistry(cfg *config.Config, idle chan IdleEvent) *Registry {
 	}
 }
 
-func (r *Registry) GetOrCreate(path, streamID string) (*Manager, error) {
-	if m := r.get(path, streamID); m != nil {
+func (r *Registry) GetOrCreate(path, streamID, etag string) (*Manager, error) {
+	if m := r.get(path, streamID, etag); m != nil {
 		return m, nil
 	}
 
 	v, err, _ := r.sf.Do(streamID+"\x00"+path, func() (any, error) {
-		if m := r.get(path, streamID); m != nil {
+		if m := r.get(path, streamID, etag); m != nil {
 			return m, nil
 		}
-		return r.create(path, streamID)
+		return r.create(path, streamID, etag)
 	})
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (r *Registry) GetOrCreate(path, streamID string) (*Manager, error) {
 	return v.(*Manager), nil
 }
 
-func (r *Registry) get(path, streamID string) *Manager {
+func (r *Registry) get(path, streamID, etag string) *Manager {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -59,11 +59,14 @@ func (r *Registry) get(path, streamID string) *Manager {
 	if m == nil || m.path != path {
 		return nil
 	}
+	if etag != "" && m.etag != "" && m.etag != etag {
+		return nil
+	}
 	return m
 }
 
-func (r *Registry) create(path, streamID string) (*Manager, error) {
-	manager, err := NewManager(r.cfg, path, streamID, r.gen.Add(1), r.idle)
+func (r *Registry) create(path, streamID, etag string) (*Manager, error) {
+	manager, err := NewManager(r.cfg, path, streamID, etag, r.gen.Add(1), r.idle)
 	if err != nil {
 		log.Println("Error creating manager", err)
 		freeIfTemp(r.cfg.TempDir, path)

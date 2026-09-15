@@ -190,6 +190,8 @@ final class BinExt
     {
         // Get config from system values
         $env = [
+            'cacheDir' => SystemConfig::get('memories.vod.cachedir'),
+
             'qf' => SystemConfig::get('memories.vod.qf'),
 
             'vaapi' => SystemConfig::get('memories.vod.vaapi'),

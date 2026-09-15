@@ -86,6 +86,9 @@ final class SystemConfig
         // Make sure this has plenty of space
         'memories.vod.tempdir' => '',
 
+        // Path for durable go-vod caches, defaults to system temp go-vod-cache
+        'memories.vod.cachedir' => '',
+
         // Bind address to use when starting the transcoding server
         'memories.vod.bind' => '127.0.0.1:47788',
 

@@ -93,3 +93,22 @@ func TestAutoDetect(t *testing.T) {
 	require.NoError(t, preset.AutoDetect())
 	require.Equal(t, "/custom/ffmpeg", preset.FFmpeg)
 }
+
+func TestCacheDir(t *testing.T) {
+	t.Setenv("CACHE_DIR", "")
+	c := Defaults("test")
+	c.TempDir = t.TempDir()
+	require.NoError(t, c.AutoDetect())
+	require.Equal(t, "", c.CacheDir)
+	require.Equal(t, filepath.Join(os.TempDir(), "go-vod-cache"), c.ResolvedCacheDir())
+
+	t.Setenv("CACHE_DIR", "/from-env")
+	c = Defaults("test")
+	c.TempDir = t.TempDir()
+	require.NoError(t, c.AutoDetect())
+	require.Equal(t, "/from-env", c.CacheDir)
+
+	c = Defaults("test")
+	c.TempDir = t.TempDir()
+	require.Equal(t, filepath.Join(os.TempDir(), "go-vod-cache"), c.ResolvedCacheDir())
+}

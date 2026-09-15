@@ -59,15 +59,24 @@ NVIDIA GPUs support hardware transcoding using NVENC.
           - NEXTCLOUD_HOST=https://your-nextcloud-url
           # - NEXTCLOUD_ALLOW_INSECURE=1 # (self-signed certs or no HTTPS)
           - NVIDIA_VISIBLE_DEVICES=all
+          - CACHE_DIR=/cache
         devices:
           - /dev/dri:/dev/dri # VA-API (omit for NVENC)
         volumes:
           - ncdata:/var/www/html:ro
+          - go-vod-cache:/cache
         # runtime: nvidia # (NVENC)
     ```
 
     !!! info "Device and volume bindings"
         In this example, the VA-API devices in `/dev/dri` are passed to the container, along with the Nextcloud data directory (as readonly). All volumes must be mounted at the same location as the Nextcloud container.
+
+    !!! info "Persistent keyframe cache (CACHE_DIR)"
+
+        go-vod caches extracted video keyframes in `CACHE_DIR`, overriding `memories.vod.cachedir`.
+        Without a persistent volume (e.g. the `go-vod-cache` volume above, declared under top-level
+        `volumes:`), the cache is lost on every container restart and keyframes are re-extracted
+        from scratch, which is very slow for large videos.
 
     !!! question "What to set in `NEXTCLOUD_HOST`?"
         The `NEXTCLOUD_HOST` environment variable must be set to the URL of your Nextcloud instance. If you are using a reverse proxy, you must set this to the URL of the reverse proxy. If you are using a self-signed certificate or http, you must also set `NEXTCLOUD_ALLOW_INSECURE=1`. This URL is used to download the transcoder binary and to connect to the Nextcloud instance.
@@ -233,6 +242,7 @@ On TrueNAS Scale system, you can create a custom docker apps to setup an externa
         environment:
           - NEXTCLOUD_HOST=https://your.nextcloud.domain
           - NVIDIA_VISIBLE_DEVICES=all
+          - CACHE_DIR=/cache
         group_add:
           - 107
         image: radialapps/go-vod

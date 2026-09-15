@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -15,9 +16,10 @@ import (
 type Config struct {
 	Bind string `json:"bind" validate:"required"`
 
-	FFmpeg  string `json:"ffmpeg" validate:"required"`
-	FFprobe string `json:"ffprobe" validate:"required"`
-	TempDir string `json:"tempdir" validate:"required"`
+	FFmpeg   string `json:"ffmpeg" validate:"required"`
+	FFprobe  string `json:"ffprobe" validate:"required"`
+	TempDir  string `json:"tempdir" validate:"required"`
+	CacheDir string `json:"cacheDir"`
 
 	MaxUploadSize int64 `json:"maxUploadSize" validate:"gte=1"`
 
@@ -105,5 +107,15 @@ func (c *Config) AutoDetect() error {
 	if c.TempDir == "" {
 		c.TempDir = os.TempDir() + "/go-vod"
 	}
+	if v, ok := os.LookupEnv("CACHE_DIR"); ok && v != "" {
+		c.CacheDir = v
+	}
 	return nil
+}
+
+func (c *Config) ResolvedCacheDir() string {
+	if c.CacheDir != "" {
+		return c.CacheDir
+	}
+	return filepath.Join(os.TempDir(), "go-vod-cache")
 }

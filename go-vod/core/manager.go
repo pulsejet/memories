@@ -26,6 +26,7 @@ type Manager struct {
 
 	// path is the source file served.
 	path string
+	etag string
 	// tempDir is the per-file segment scratch dir.
 	tempDir string
 	// id is the registry key and log prefix.
@@ -67,8 +68,8 @@ type Rendition struct {
 	Order   int
 }
 
-func NewManager(c *config.Config, path string, id string, generation uint64, idle chan IdleEvent) (*Manager, error) {
-	m := &Manager{c: c, path: path, id: id, generation: generation, idle: idle}
+func NewManager(c *config.Config, path string, id string, etag string, generation uint64, idle chan IdleEvent) (*Manager, error) {
+	m := &Manager{c: c, path: path, id: id, etag: etag, generation: generation, idle: idle}
 	m.streams = make(map[string]*Stream)
 
 	h := fnv.New32a()
@@ -326,9 +327,24 @@ func (m *Manager) ffprobe() error {
 }
 
 func (m *Manager) probeCopy() error {
+	cachePath := KeyframeCachePath(m.c.ResolvedCacheDir(), m.etag)
+	if keys, ok := LoadCachedKeyframes(m.c.ResolvedCacheDir(), m.etag); ok {
+		log.Printf("%s: keyframe cache hit %s", m.id, cachePath)
+		segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.c.ChunkSize)
+		if len(segs) == 0 {
+			return fmt.Errorf("no keyframe grid for %s", m.path)
+		}
+		m.srcSegments = segs
+		return nil
+	}
+	log.Printf("%s: keyframe cache miss %s", m.id, cachePath)
+
 	keys, err := ffmpeg.Keyframes(context.Background(), m.c.FFprobe, m.path)
 	if err != nil {
 		return err
+	}
+	if err := StoreCachedKeyframes(m.c.ResolvedCacheDir(), m.etag, keys); err != nil {
+		log.Printf("%s: keyframe cache store failed: %v", m.id, err)
 	}
 	segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.c.ChunkSize)
 	if len(segs) == 0 {

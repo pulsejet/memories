@@ -25,7 +25,7 @@ func TestManagerStreamsInitialized(t *testing.T) {
 	cfg.TempDir = t.TempDir()
 	cfg.FFprobe = stubProbe(t)
 
-	m, err := NewManager(cfg, "input.mp4", "id", 1, make(chan IdleEvent, 1))
+	m, err := NewManager(cfg, "input.mp4", "id", "", 1, make(chan IdleEvent, 1))
 	require.NoError(t, err)
 	defer m.Destroy()
 
@@ -43,20 +43,20 @@ func TestRegistryStaleRemove(t *testing.T) {
 
 	reg := NewRegistry(cfg, make(chan IdleEvent, 16))
 
-	m1, err := reg.GetOrCreate("input.mp4", "s")
+	m1, err := reg.GetOrCreate("input.mp4", "s", "")
 	require.NoError(t, err)
 
 	reg.Remove("s", m1.generation)
 	m1.Destroy()
 
-	m2, err := reg.GetOrCreate("input.mp4", "s")
+	m2, err := reg.GetOrCreate("input.mp4", "s", "")
 	require.NoError(t, err)
 	defer m2.Destroy()
 	require.NotSame(t, m1, m2)
 
 	reg.Remove("s", m1.generation)
 
-	got, err := reg.GetOrCreate("input.mp4", "s")
+	got, err := reg.GetOrCreate("input.mp4", "s", "")
 	require.NoError(t, err)
 	require.Same(t, m2, got)
 }

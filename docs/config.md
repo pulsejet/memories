@@ -67,6 +67,7 @@ Read the following considerations carefully regarding transcoding:
 1. In general, transcoding can be very compute intensive. If you run Nextcloud on an RPi, it will not work for you.
 1. If you use external storage, transcoding might be very slow or not work at all. In this case, you should disable it.
 1. Make sure there is a lot of space available in `/tmp` for the transcoded files.
+1. The transcoder caches extracted video keyframes in `memories.vod.cachedir` (or the `CACHE_DIR` environment variable for an external transcoder, overriding it). Point this at persistent storage with enough space. Without it, keyframes are re-extracted on every restart, which is very slow for large videos. See [here](./hw-transcoding.md#external-transcoder) for the docker compose setup.
 1. If transcoding fails, the video player will fall back to the original video stream. Check the output of `/tmp/go-vod/<instanceid>.log`
 1. For better performance, you may configure the transcoder to use hardware acceleration. See [this page](./hw-transcoding.md).
 
