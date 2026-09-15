@@ -2,7 +2,6 @@ package gallery.memories.ui.theme
 
 import android.os.Build.VERSION.SDK_INT
 import android.util.Log
-import android.view.WindowInsetsController
 import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowCompat
 import androidx.media3.common.util.UnstableApi
@@ -30,28 +29,37 @@ class ThemeManager(
      * Paints system bars and the root backdrop in [color]. [isDark] selects
      * the system-icon contrast. A null color leaves the current theme in place.
      */
+    @Suppress("DEPRECATION")
     fun applyTheme(color: String?, isDark: Boolean) {
         if (color == null) return
-        if (SDK_INT < 35) {
-            WindowCompat.setDecorFitsSystemWindows(activity.window, true)
-        }
-        if (SDK_INT >= 29) {
-            // Exact colors, no system scrim: icon contrast comes from [isDark] instead.
-            activity.window.isStatusBarContrastEnforced = false
-            activity.window.isNavigationBarContrastEnforced = false
-        }
-        val appearance = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
-            WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-        activity.window.insetsController?.setSystemBarsAppearance(if (isDark) 0 else appearance, appearance)
-        try {
-            val parsed = color.trim().toColorInt()
-            activity.binding.root.setBackgroundColor(parsed)
-            activity.window.navigationBarColor = parsed
-            activity.window.statusBarColor = parsed
+        val parsed = try {
+            color.trim().toColorInt()
         } catch (_: Exception) {
             Log.w(MainActivity.TAG, "Invalid color: $color")
             return
         }
-        if (SDK_INT >= 35) activity.binding.coordinator.requestApplyInsets()
+
+        activity.binding.root.setBackgroundColor(parsed)
+
+        // Compat wrapper around WindowInsetsController (platform API 30+, covered by minSdk).
+        WindowCompat.getInsetsController(activity.window, activity.binding.root).apply {
+            isAppearanceLightStatusBars = !isDark
+            isAppearanceLightNavigationBars = !isDark
+        }
+
+        // Exact colors, no system scrim: icon contrast comes from [isDark] instead.
+        activity.window.isStatusBarContrastEnforced = false
+        activity.window.isNavigationBarContrastEnforced = false
+
+        if (SDK_INT < 35) {
+            // Opaque bars: opt out of edge-to-edge and paint them explicitly.
+            // statusBarColor/navigationBarColor are deprecated and ignored on 35+.
+            WindowCompat.setDecorFitsSystemWindows(activity.window, true)
+            activity.window.statusBarColor = parsed
+            activity.window.navigationBarColor = parsed
+        } else {
+            // Edge-to-edge is enforced: transparent bars show the root backdrop above.
+            activity.binding.coordinator.requestApplyInsets()
+        }
     }
 }
