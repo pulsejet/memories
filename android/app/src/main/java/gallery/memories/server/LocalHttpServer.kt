@@ -4,33 +4,39 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.webkit.WebResourceResponse
+import gallery.memories.data.local.media.MediaStoreDataSource
 import gallery.memories.data.remote.assets.AssetSyncCoordinator
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.HttpClients
 import gallery.memories.server.controllers.BridgeController
 import gallery.memories.server.controllers.ProxyController
-import gallery.memories.server.controllers.UpstreamNetworkException
-import java.io.BufferedOutputStream
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.call
+import io.ktor.server.cio.CIO
+import io.ktor.server.engine.ApplicationEngine
+import io.ktor.server.engine.embeddedServer
 import java.io.File
 import java.net.BindException
-import java.net.InetSocketAddress
-import java.net.ServerSocket
-import java.net.Socket
 import java.util.UUID
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 
 /**
  * Localhost server that serves the offline shell/assets and proxies the rest
  * to Nextcloud with stored credentials, keeping everything same-origin.
  * The port alone is not a secret (any on-device app can connect), so every
  * request must carry the per-process cookie checked by [AuthGuard].
+ *
+ * Backed by Ktor CIO: it owns request parsing, framing (Content-Length,
+ * chunked, 100-continue) and keep-alive. Any HTTP method token (SEARCH,
+ * PROPFIND, REPORT, ...) routes through; see [ServerRouter].
  */
 class LocalHttpServer(
     private val appCtx: Context,
     private val auth: AuthState,
     private val clients: HttpClients,
     private val assets: AssetSyncCoordinator,
+    private val dataSource: MediaStoreDataSource,
     private val bridge: (method: String, url: Uri) -> WebResourceResponse,
 ) {
     companion object {
@@ -41,8 +47,7 @@ class LocalHttpServer(
     }
 
     @Volatile private var cfg: ServerConfig? = null
-    @Volatile private var server: ServerSocket? = null
-    @Volatile private var pool: ExecutorService? = null
+    @Volatile private var engine: ApplicationEngine? = null
     @Volatile var port = 0
         private set
 
@@ -52,69 +57,45 @@ class LocalHttpServer(
     private val guard = AuthGuard(secret)
     private val bridgeController = BridgeController(bridge)
     private val proxy = ProxyController(auth, clients) { origin() }
-    private val router = ServerRouter(appCtx, auth, assets, guard, bridgeController, proxy) { cfg }
+    private val router = ServerRouter(appCtx, auth, assets, guard, bridgeController, proxy, dataSource) { cfg }
+
+    /** HttpOnly cookie value the WebView must present; see [AuthGuard]. */
+    fun authCookie(): String = guard.cookieHeader()
 
     /** Points the server at an upstream origin and its offline snapshot. */
-    fun configure(serverOrigin: String, webRoot: String, assetDir: File, baseUrl: String) {
-        cfg = ServerConfig(serverOrigin, webRoot, assetDir, baseUrl)
+    fun configure(serverOrigin: String, webRoot: String, assetDir: File) {
+        cfg = ServerConfig(serverOrigin, webRoot, assetDir)
     }
 
     /**
-     * Starts the accept loop once; returns the bound port. Falls back to an
+     * Starts the engine once; returns the bound port. Falls back to an
      * ephemeral port when a stale process still holds the fixed one.
      */
     @Throws(Exception::class)
     @Synchronized
     fun ensureStarted(): Int {
-        if (server == null) {
-            val s = ServerSocket()
-            s.reuseAddress = true
+        if (engine == null) {
             try {
-                s.bind(InetSocketAddress(HOST, PORT))
+                engine = startEngine(PORT)
+                port = PORT
             } catch (e: BindException) {
                 // Stale process still holding the port; storage just misses this launch.
                 Log.w(TAG, "Fixed port $PORT busy, falling back to ephemeral", e)
-                s.bind(InetSocketAddress(HOST, 0))
+                val fallback = startEngine(0)
+                engine = fallback
+                port = runBlocking { withTimeout(10_000) { fallback.resolvedConnectors().first().port } }
             }
-            server = s
-            port = s.localPort
-            val workers = Executors.newCachedThreadPool()
-            pool = workers
-            Thread {
-                try {
-                    while (!s.isClosed) {
-                        val sock = s.accept()
-                        workers.submit {
-                            try {
-                                handle(sock)
-                            } catch (e: Exception) {
-                                Log.w(TAG, "Connection failed: ${e.message}")
-                                try { sock.close() } catch (_: Exception) {}
-                            }
-                        }
-                    }
-                } catch (_: Exception) {
-                    // ServerSocket closed under us during stop(); not an error.
-                } finally {
-                    workers.shutdownNow()
-                    if (server === s) {
-                        server = null
-                        pool = null
-                        port = 0
-                    }
-                }
-            }.start()
             Log.i(TAG, "Listening on $HOST:$port")
         }
         return port
     }
 
-    /** Closes the socket and stops accepting; in-flight requests run to completion. */
+    /** Stops the engine; in-flight requests get a brief grace period. */
     fun stop() {
-        try { server?.close() } catch (_: Exception) {}
-        pool?.shutdownNow()
-        pool = null
-        server = null
+        try {
+            engine?.stop(0, 500)
+        } catch (_: Exception) {}
+        engine = null
         port = 0
     }
 
@@ -132,33 +113,21 @@ class LocalHttpServer(
         if (p == "/local" || p.startsWith("/local/")) return null
         if (p == "/" || p == config.webRoot || p == config.webRoot + "/") return null
         if (p == "/api" || p.startsWith("/api/") || p == "/image" || p.startsWith("/image/")) return null
+        if (p == "/video" || p.startsWith("/video/")) return null
         if (p == "/favicon.ico") return null
         return config.serverOrigin + p + (query?.let { "?$it" } ?: "")
     }
 
-    private fun handle(sock: Socket) {
-        sock.use { s ->
-            val input = java.io.BufferedInputStream(s.inputStream, 8192)
-            val out = BufferedOutputStream(s.outputStream)
-            val req = try {
-                HttpParser.readRequest(input, appCtx.cacheDir, out)
-            } catch (e: Exception) {
-                HttpWriter.reply(out, 400, "Bad Request", "bad request")
-                return
+    /**
+     * Single pipeline interceptor, not routing: it imposes no method or path
+     * constraints, so WebDAV methods unknown to Ktor's constants still arrive.
+     * Not calling proceed() ends the pipeline; every request is answered (or
+     * the connection dropped) inside [ServerRouter.handle].
+     */
+    private fun startEngine(port: Int): ApplicationEngine =
+        embeddedServer(CIO, host = HOST, port = port) {
+            intercept(ApplicationCallPipeline.Call) {
+                router.handle(call)
             }
-            try {
-                router.route(req, out)
-            } catch (e: UpstreamNetworkException) {
-                // Upstream offline: close without a response so the WebView
-                // sees a network failure (axios ERR_NETWORK), not an HTTP 5xx.
-                Log.i(TAG, "Upstream unreachable, dropping connection: ${e.cause?.message}")
-                return
-            } catch (e: Exception) {
-                Log.w(TAG, "Request failed: ${e.message}")
-                try { HttpWriter.reply(out, 500, "Internal Error", "proxy error") } catch (_: Exception) {}
-            } finally {
-                req.bodyFile?.delete()
-            }
-        }
-    }
+        }.start(wait = false).engine
 }

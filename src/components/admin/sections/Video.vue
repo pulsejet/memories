@@ -65,15 +65,6 @@
         @update:model-value="update('memories.video_default_quality')"
         >{{ t('memories', 'Original (transcode with max quality)') }}
       </NcCheckboxRadioSwitch>
-      <NcCheckboxRadioSwitch
-        :disabled="!enableTranscoding"
-        v-model="config['memories.video_default_quality']"
-        value="-2"
-        name="vdq_radio"
-        type="radio"
-        @update:model-value="update('memories.video_default_quality')"
-        >{{ t('memories', 'Direct (original video file without transcode)') }}
-      </NcCheckboxRadioSwitch>
     </p>
   </div>
 </template>

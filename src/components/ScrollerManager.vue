@@ -200,6 +200,11 @@ export default defineComponent({
       this.scrollingRecyclerUpdateTimer = 0;
     },
 
+    /** Query height of the recycler */
+    recyclerHeightDOM(): number {
+      return this.recycler?.$el?.scrollHeight ?? 0;
+    },
+
     /** Recycler scroll event, must be called by timeline */
     recyclerScrolled(event: Event | null) {
       // This isn't a renewing timer, it's a scheduled task
@@ -264,7 +269,7 @@ export default defineComponent({
       if (!this.recycler?.$el) return;
 
       // Refresh height of recycler
-      this.recyclerHeight = this.recycler?.$el.clientHeight ?? 0;
+      this.recyclerHeight = this.recyclerHeightDOM();
 
       // Recreate ticks data
       this.recreate();
@@ -329,7 +334,7 @@ export default defineComponent({
     /** Do adjustment synchronously */
     adjustNow() {
       // Refresh height of recycler
-      this.recyclerHeight = this.recycler?.$el.clientHeight ?? 0;
+      this.recyclerHeight = this.recyclerHeightDOM();
       this.dynTopMatterHeight = this.recyclerBefore?.clientHeight ?? 0;
 
       // Exclude hover cursor height

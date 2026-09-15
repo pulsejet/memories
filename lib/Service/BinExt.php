@@ -9,7 +9,7 @@ use OCA\Memories\Util;
 
 final class BinExt
 {
-    public const EXIFTOOL_VER = '13.44';
+    public const EXIFTOOL_VER = '13.59';
     public const GOVOD_VER = '0.2.9';
     public const NX_VER_MIN = '1.1';
 
@@ -19,7 +19,9 @@ final class BinExt
     /** Get the path to the temp directory */
     public static function getTmpPath(): string
     {
-        return SystemConfig::get('memories.exiftool.tmp') ?: sys_get_temp_dir();
+        $path = SystemConfig::get('memories.exiftool.tmp');
+
+        return rtrim($path ?: sys_get_temp_dir(), '/');
     }
 
     /** Copy a binary to temp dir for execution */
@@ -31,10 +33,6 @@ final class BinExt
         // Check target temp file
         $target = self::getTmpPath().'/'.$name.'-'.$suffix;
         if (file_exists($target)) {
-            if (!is_writable($target)) {
-                throw new \Exception("{$name} temp binary path is not writable: {$target}");
-            }
-
             if (!is_executable($target) && !chmod($target, 0o755)) {
                 throw new \Exception("failed to make {$name} temp binary executable: {$target}");
             }
@@ -196,6 +194,7 @@ final class BinExt
 
             'vaapi' => SystemConfig::get('memories.vod.vaapi'),
             'vaapiLowPower' => SystemConfig::get('memories.vod.vaapi.low_power'),
+            'vaapiDevice' => SystemConfig::get('memories.vod.vaapi.device'),
 
             'nvenc' => SystemConfig::get('memories.vod.nvenc'),
             'nvencTemporalAQ' => SystemConfig::get('memories.vod.nvenc.temporal_aq'),

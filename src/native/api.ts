@@ -66,6 +66,14 @@ export const NAPI = {
   IMAGE_FULL: (auid: string) => `${BASE_URL}/image/full/${auid}`,
 
   /**
+   * Local video file API (range-aware, for <video> / vidstack).
+   * @regex ^/video/full/\d+$
+   * @param fileId MediaStore file ID of the local video
+   * @returns {Blob} Original video bytes of the photo.
+   */
+  VIDEO_FULL: (fileId: number) => `${BASE_URL}/video/full/${fileId}`,
+
+  /**
    * Upload a local file to Nextcloud natively, without routing
    * bytes through the WebView.
    * @regex ^/api/upload/local$

@@ -8,10 +8,12 @@
   PhotoSwipe itself is never touched here (see Viewer).
 
   Position model: the sheet wraps the full content (never scrolls
-  inside) and is moved as a whole with translateY. Detents, top to
-  bottom: tail (0, content end docked), head (content start
-  fullscreen), peek (content start, 45vh visible), dismissed (full
-  height, parked off-screen during close).
+  inside) and is anchored by its top edge. Detents, top to
+  bottom: tail (content end docked), head (content start
+  fullscreen), peek (content start, min(45vh, 340px) visible),
+  dismissed (parked off-screen during close). All motion runs
+  through transform deltas over the exact top, so content growth
+  extending downward never disturbs an animation.
 
   Gestures: pan anywhere moves the sheet 1:1 with the finger; release
   snaps to a detent or dismisses. Handle taps toggle peek/head;
@@ -24,7 +26,7 @@
     :class="{ dragging, closing }"
     role="dialog"
     :aria-label="t('memories', 'Info')"
-    style="transform: translateY(10000px)"
+    style="top: 10000px"
     @click.capture="onClickCapture"
     @touchstart.passive="onDragStart"
     @touchend="onDragEnd"
@@ -60,6 +62,8 @@ const CLOSE_PX = 80;
 const DOCK_PX = 40;
 const FLING_PX_MS = 0.5;
 const CLOSE_ANIM_MS = 280;
+/** Visible peek height: 45vh capped for tall screens */
+const PEEK_PX = 340;
 
 export default defineComponent({
   name: 'ViewerBottomSheet',
@@ -82,8 +86,10 @@ export default defineComponent({
     expanded: false,
     dragging: false,
     closing: false,
-    /** Current translateY of the sheet in px */
-    offsetY: 0,
+    /** Resting top edge of the sheet in px */
+    top: 0,
+    /** Transient transform delta; always 0 at rest */
+    ty: 0,
     dragStartY: 0,
     dragBase: 0,
     dragDy: 0,
@@ -99,7 +105,9 @@ export default defineComponent({
     resizeObserver: null as ResizeObserver | null,
     resizeListener: null as (() => void) | null,
     closeTimer: 0,
-    enterTimer: 0,
+    glideTimer: 0,
+    /** Transform glide in flight */
+    gliding: false,
   }),
 
   watch: {
@@ -128,7 +136,7 @@ export default defineComponent({
     this.resizeObserver?.disconnect();
     if (this.resizeListener) window.removeEventListener('resize', this.resizeListener);
     window.clearTimeout(this.closeTimer);
-    window.clearTimeout(this.enterTimer);
+    window.clearTimeout(this.glideTimer);
   },
 
   methods: {
@@ -152,20 +160,30 @@ export default defineComponent({
       return this.refs().sheet?.scrollHeight ?? 0;
     },
 
-    /** Resting translateY showing just the peek area */
-    restOffset(): number {
-      return Math.max(0, this.fullHeight() - Math.round(window.innerHeight * 0.45));
+    /** Top edge with the content end docked at the viewport bottom */
+    tailTop(): number {
+      return window.innerHeight - this.fullHeight();
     },
 
-    /** TranslateY with the head fullscreen (handle at the viewport top) */
-    headOffset(): number {
-      return Math.max(0, this.fullHeight() - window.innerHeight);
+    /** Visible peek height */
+    peekSize(): number {
+      return Math.min(Math.round(window.innerHeight * 0.45), PEEK_PX);
+    },
+
+    /** Top edge showing just the peek area */
+    peekTop(): number {
+      return window.innerHeight - this.peekSize();
+    },
+
+    /** Top edge with the head fullscreen (handle at the viewport top) */
+    headTop(): number {
+      return Math.max(this.tailTop(), 0);
     },
 
     /** Merged detent list: tail, head, peek */
     spots(): number[] {
       const out: number[] = [];
-      for (const s of [0, this.headOffset(), this.restOffset()].sort((a, b) => a - b)) {
+      for (const s of [this.tailTop(), this.headTop(), this.peekTop()].sort((a, b) => a - b)) {
         if (!out.length || s - out.at(-1)! >= DOCK_PX) out.push(s);
       }
       return out;
@@ -173,91 +191,144 @@ export default defineComponent({
 
     /** Remember current detents to recognize parked positions later. */
     syncDetents() {
-      this.lastRest = this.restOffset();
-      this.lastHead = this.headOffset();
+      this.lastRest = this.peekTop();
+      this.lastHead = this.headTop();
       this.lastFull = this.fullHeight();
     },
 
-    applyOffset() {
+    applyPos() {
       const sheet = this.refs().sheet;
-      sheet?.style.setProperty('transform', `translateY(${Math.round(this.offsetY)}px)`);
+      if (!sheet) return;
+      sheet.style.setProperty('top', `${Math.round(this.top)}px`);
+      sheet.style.setProperty('transform', `translateY(${Math.round(this.ty)}px)`);
+    },
+
+    applyTransform() {
+      this.refs().sheet?.style.setProperty('transform', `translateY(${Math.round(this.ty)}px)`);
+    },
+
+    /** Live visual top edge, adopting any in-flight glide. */
+    liveTop(): number {
+      const sheet = this.refs().sheet;
+      if (!sheet) return this.top;
+      const cs = getComputedStyle(sheet);
+      const top = parseFloat(cs.top);
+      const m = cs.transform;
+      const dy = m && m !== 'none' ? new DOMMatrixReadOnly(m).m42 : 0;
+      return (Number.isFinite(top) ? top : this.top) + (Number.isFinite(dy) ? dy : 0);
     },
 
     /** Run fn with transitions off so the box jumps without animating. */
     freeze(sheet: HTMLElement, fn: () => void) {
       sheet.style.transition = 'none';
       fn();
-      this.applyOffset();
+      this.applyPos();
       void sheet.offsetHeight;
       sheet.style.transition = '';
     },
 
-    /** Initial slide-up from dismissed, paced to travel distance
-     * so long sheets don't fling (fixed duration would). */
+    /** Glide the visual top to target through transform; top stays
+     * exact throughout, so content reflows can't disturb the motion. */
+    glideTo(target: number, ms = 250, settle?: () => void) {
+      const sheet = this.refs().sheet;
+      const visual = this.liveTop();
+      this.cancelGlide();
+      this.top = target;
+      this.ty = 0;
+      if (!sheet || Math.abs(visual - target) < 1) {
+        this.applyPos();
+        this.syncDetents();
+        settle?.();
+        return;
+      }
+      this.gliding = true;
+      sheet.style.transition = 'none';
+      this.ty = visual - target;
+      this.applyPos();
+      void sheet.offsetHeight;
+      sheet.style.transition = `transform ${ms}ms ease-out`;
+      this.ty = 0;
+      this.applyTransform();
+      this.syncDetents();
+      this.glideTimer = window.setTimeout(() => {
+        if (!this.gliding) return;
+        this.gliding = false;
+        this.refs().sheet?.style.setProperty('transition', '');
+        this.ty = 0;
+        this.applyTransform();
+        this.syncDetents();
+        settle?.();
+      }, ms + 60);
+    },
+
+    /** Drop a pending glide without moving. */
+    cancelGlide() {
+      if (!this.gliding) return;
+      this.gliding = false;
+      window.clearTimeout(this.glideTimer);
+      this.refs().sheet?.style.setProperty('transition', '');
+    },
+
+    /** Initial slide-up from dismissed to peek. The travel is fixed,
+     * so content reflows mid-flight extend downward undisturbed. */
     enter() {
       const sheet = this.refs().sheet;
       if (!sheet) return;
       this.freeze(sheet, () => {
-        this.offsetY = this.fullHeight();
+        this.top = window.innerHeight;
+        this.ty = 0;
       });
-      const dist = Math.abs(this.restOffset() - this.offsetY);
-      const ms = Math.min(600, Math.max(200, Math.round(dist / 1.5)));
-      sheet.style.transition = `transform ${ms}ms ease-out`;
-      window.clearTimeout(this.enterTimer);
-      this.enterTimer = window.setTimeout(() => {
-        this.refs().sheet?.style.setProperty('transition', '');
-      }, ms + 60);
-      this.snapPeek();
+      this.expanded = false;
+      const ms = Math.min(600, Math.max(200, Math.round(this.peekSize() / 1.5)));
+      this.glideTo(this.peekTop(), ms, () => this.snapPeek());
     },
 
-    // Parked positions follow their detent across content growth; a
-    // freely panned sheet keeps its window instead of jumping. Growth
-    // freezes the top edge first so the box never chases snapped content.
+    // A docked tail follows content growth so the end stays docked;
+    // peek and head are fixed viewport positions that growth extends
+    // downward from. A freely panned sheet keeps its top instead.
     layout() {
-      if (this.dragging || this.closing) return;
+      if (this.dragging || this.closing || this.gliding) return;
       const sheet = this.refs().sheet;
       if (!sheet) return;
 
       const full = this.fullHeight();
-      const atRest = Math.abs(this.offsetY - this.lastRest) < DOCK_PX;
-      const atHead = !atRest && Math.abs(this.offsetY - this.lastHead) < DOCK_PX;
-      if (full !== this.lastFull && (atRest || atHead)) {
+      const tail = window.innerHeight - full;
+      const atTail = Math.abs(this.top - (window.innerHeight - this.lastFull)) < DOCK_PX;
+      const atRest = Math.abs(this.top - this.lastRest) < DOCK_PX;
+      const atHead = !atRest && Math.abs(this.top - this.lastHead) < DOCK_PX;
+      if (full !== this.lastFull && atTail) {
         this.freeze(sheet, () => {
-          this.offsetY += full - this.lastFull;
+          this.top = tail;
+          this.ty = 0;
         });
       }
 
       if (atRest) this.snapPeek();
       else if (atHead) this.snapHead();
       else {
-        this.offsetY = Math.min(full, Math.max(0, this.offsetY));
+        this.top = Math.min(window.innerHeight, Math.max(tail, this.top));
+        this.ty = 0;
         this.syncDetents();
-        this.applyOffset();
+        this.applyPos();
       }
     },
 
-    snapTo(offset: number, expanded: boolean) {
+    snapTo(top: number, expanded: boolean) {
       this.expanded = expanded;
-      this.offsetY = offset;
-      this.syncDetents();
-      this.applyOffset();
+      this.glideTo(top);
     },
 
-    /** Dock at an offset; anything but peek counts as expanded. */
+    /** Dock at a top; anything but peek counts as expanded. */
     snapValue(target: number) {
-      this.snapTo(target, target !== this.restOffset());
-    },
-
-    snapTail() {
-      this.snapTo(0, true);
+      this.snapTo(target, target !== this.peekTop());
     },
 
     snapHead() {
-      this.snapTo(this.headOffset(), true);
+      this.snapTo(this.headTop(), true);
     },
 
     snapPeek() {
-      this.snapTo(this.restOffset(), false);
+      this.snapTo(this.peekTop(), false);
     },
 
     /** Handle tap/keyboard: alternate peek and head. */
@@ -275,6 +346,14 @@ export default defineComponent({
       if (e.touches.length !== 1 || this.closing) return;
       // Embedded interactive content keeps its own gestures (e.g. map pan).
       if ((e.target as HTMLElement).closest('.leaflet-container')) return;
+      // Grab the live position so a mid-glide grab never jumps.
+      if (this.gliding) {
+        this.top = this.liveTop();
+        this.ty = 0;
+        this.cancelGlide();
+        this.syncDetents();
+        this.applyPos();
+      }
       this.startPan(e.touches[0].clientY, this.panTarget(e));
     },
 
@@ -287,21 +366,21 @@ export default defineComponent({
 
     onDragEnd() {
       if (!this.dragging) return;
-      this.dragging = false;
       this.finishPan();
+      this.dragging = false;
     },
 
     /** Abort the gesture: snap back to the current dock. */
     onDragCancel() {
       this.dragging = false;
-      this.snapTo(this.expanded ? this.headOffset() : this.restOffset(), this.expanded);
+      this.snapTo(this.expanded ? this.headTop() : this.peekTop(), this.expanded);
     },
 
-    /** Begin a 1:1 pan from the current offset. */
+    /** Begin a 1:1 pan from the current top. */
     startPan(clientY: number, onHandle: boolean) {
       this.dragging = true;
       this.dragStartY = clientY;
-      this.dragBase = this.offsetY;
+      this.dragBase = this.top;
       this.dragDy = 0;
       this.lastY = clientY;
       this.lastT = Date.now();
@@ -322,19 +401,27 @@ export default defineComponent({
       this.lastY = clientY;
       this.lastT = now;
 
-      // Follow the finger 1:1 across the whole box, from the tail (0)
-      // down to dismissed. The handle may travel above the viewport
-      // on long sheets; the sheet never lifts past its own tail.
-      this.offsetY = Math.min(this.fullHeight(), Math.max(0, this.dragBase + this.dragDy));
-      this.applyOffset();
+      // Follow the finger 1:1 through transform across the whole box,
+      // from the tail down to dismissed. The handle may travel above
+      // the viewport on long sheets; the sheet never lifts past
+      // its own tail.
+      const tail = window.innerHeight - this.fullHeight();
+      this.ty = Math.min(window.innerHeight, Math.max(tail, this.dragBase + this.dragDy)) - this.top;
+      this.applyTransform();
     },
 
     // Release: tap toggles, fling steps detents, far-down dismisses,
     // otherwise dock nearby or stay where dropped.
     finishPan() {
+      // Commit the finger position first; with transitions off while
+      // dragging this moves nothing, so the snaps below start live.
+      this.top += this.ty;
+      this.ty = 0;
+      this.applyPos();
+
       const dy = this.dragDy;
       const vel = this.velocity;
-      const rest = this.restOffset();
+      const rest = this.peekTop();
 
       // Taps on the handle toggle; taps elsewhere do nothing so
       // embedded links and buttons keep working normally.
@@ -345,8 +432,8 @@ export default defineComponent({
 
       if (vel < -FLING_PX_MS) this.snapNeighbor(-1);
       else if (vel > FLING_PX_MS) this.snapNeighbor(1);
-      else if (this.offsetY > rest + CLOSE_PX) this.dismiss();
-      else this.snapNearest();
+      else if (this.top > rest + CLOSE_PX) this.dismiss();
+      else if (!this.snapNearest()) this.syncDetents();
     },
 
     // Step to the neighboring detent (+1 down, -1 up),
@@ -355,7 +442,7 @@ export default defineComponent({
       const spots = this.spots();
       let idx = 0;
       spots.forEach((s, i) => {
-        if (s <= this.offsetY + DOCK_PX) idx = i;
+        if (s <= this.top + DOCK_PX) idx = i;
       });
       const next = idx + dir;
       if (next >= spots.length) {
@@ -365,23 +452,24 @@ export default defineComponent({
       this.snapValue(spots[Math.max(0, next)]);
     },
 
-    // Dock to a nearby detent, else stay exactly where released.
+    // Dock to a nearby detent; false to stay exactly where released.
     snapNearest() {
       const spots = this.spots();
       let near = spots[0];
       for (const s of spots) {
-        if (Math.abs(s - this.offsetY) < Math.abs(near - this.offsetY)) near = s;
+        if (Math.abs(s - this.top) < Math.abs(near - this.top)) near = s;
       }
-      if (Math.abs(near - this.offsetY) < DOCK_PX) {
+      if (Math.abs(near - this.top) < DOCK_PX) {
         this.snapValue(near);
+        return true;
       }
+      return false;
     },
 
     /** Glide off-screen, then ask the parent to close. */
     dismiss() {
       this.closing = true;
-      this.offsetY = this.fullHeight();
-      this.applyOffset();
+      this.glideTo(window.innerHeight);
       this.closeTimer = window.setTimeout(() => this.$emit('close'), CLOSE_ANIM_MS);
     },
 
@@ -402,16 +490,17 @@ export default defineComponent({
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  top: 0;
   z-index: 100002;
 
   // Embedded content: the sheet wraps it all and panning moves
   // the whole sheet, so the inside never scrolls.
   overflow: hidden;
   touch-action: none;
+  will-change: transform;
   // Reserve peek space while metadata loads.
-  min-height: 45vh;
-  min-height: 45dvh;
+  min-height: min(45vh, 340px);
+  min-height: min(45dvh, 340px);
 
   background: var(--color-main-background);
   color: var(--color-main-text);
@@ -443,8 +532,8 @@ export default defineComponent({
   overflow: hidden;
   padding: 0 12px 24px 12px;
   // Floor for height measurement while metadata loads.
-  min-height: 40vh;
-  min-height: 40dvh;
+  min-height: min(40vh, 300px);
+  min-height: min(40dvh, 300px);
 
   // Loading wrapper fills the sheet, giving the absolutely-centered
   // spinner a definite box so it never collapses onto the handle.

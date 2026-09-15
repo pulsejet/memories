@@ -98,8 +98,16 @@ class MainActivity : AppCompatActivity() {
         edges.applyOrientation(config.orientation)
     }
 
+    public override fun onPause() {
+        super.onPause()
+        binding.webview.onPause()
+        binding.webview.pauseTimers()
+    }
+
     public override fun onResume() {
         super.onResume()
+        binding.webview.onResume()
+        binding.webview.resumeTimers()
         val uris = player.urisForRestore()
         val uid = player.uidForRestore()
         if (uris != null && uid != null) player.restoreIfNeeded(uris, uid)
@@ -142,8 +150,8 @@ class MainActivity : AppCompatActivity() {
             nativex.toast("Local server failed to start", true)
             return
         }
-        // Per-process secret: without this cookie the local server rejects everything. Load only after it lands.
-        CookieManager.getInstance().setCookie("http://127.0.0.1/", "local-auth=${nativex.local.secret}; Path=/") {
+        // Per-process secret as HttpOnly cookie: without it the local server rejects everything. Load only after it lands.
+        CookieManager.getInstance().setCookie("http://127.0.0.1/", nativex.local.authCookie()) {
             runOnUiThread { startup.onLocalCookieReady() }
         }
         CookieManager.getInstance().flush()

@@ -63,6 +63,7 @@ final class SystemConfig
         // VA-API configuration options
         'memories.vod.vaapi' => false,  // Transcode with VA-API
         'memories.vod.vaapi.low_power' => false, // Use low_power mode for VA-API
+        'memories.vod.vaapi.device' => '/dev/dri/renderD128', // VA-API render node
 
         // NVENC configuration options
         'memories.vod.nvenc' => false,  // Transcode with NVIDIA NVENC
@@ -102,8 +103,7 @@ final class SystemConfig
 
         // Set the default video quality for a first time user
         //    0 => Auto (default)
-        //   -1 => Original (max quality with transcoding)
-        //   -2 => Direct (disable transcoding)
+        //   -1 => Original (max quality)
         // 1080 => 1080p (and so on)
         'memories.video_default_quality' => '0',
 

@@ -174,6 +174,12 @@ In some cases, along with adding `www-data` to the appropriate groups, you may a
 sudo chmod 666 /dev/dri/renderD128
 ```
 
+!!! tip "Multiple GPUs"
+    If your host has multiple GPUs (e.g. an Intel iGPU alongside a discrete NVIDIA card),
+    the Intel card may show up as `/dev/dri/renderD129` instead of `renderD128`.
+    Set the correct render node in the admin settings (**HW Acceleration** →
+    **VA-API device path**) or `memories.vod.vaapi.device` in `config.php`.
+
 You can run a test using a sample video file to check if VA-API is working correctly for the `www-data` user:
 
 ```bash

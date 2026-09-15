@@ -49,6 +49,14 @@
         {{ t('memories', 'Enable low-power mode (QSV only)') }}
       </NcCheckboxRadioSwitch>
 
+      <NcTextField
+        :disabled="!enableTranscoding || !config['memories.vod.vaapi']"
+        :label="t('memories', 'VA-API device path')"
+        :label-visible="true"
+        :model-value="config['memories.vod.vaapi.device']"
+        @change="update('memories.vod.vaapi.device', $event.target.value)"
+      />
+
       <br />
 
       {{ t('memories', 'NVIDIA GPUs can be used for transcoding using the NVENC encoder with the proper drivers.') }}
@@ -173,7 +181,7 @@ export default defineComponent({
     vaapiStatusText(): string {
       if (!this.status) return '';
 
-      const dev = '/dev/dri/renderD128';
+      const dev = this.config['memories.vod.vaapi.device'] || '/dev/dri/renderD128';
       if (this.status.vaapi_dev === 'ok') {
         return this.t('memories', 'VA-API device ({dev}) is readable', { dev });
       } else if (this.status.vaapi_dev === 'not_found') {

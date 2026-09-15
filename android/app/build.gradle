@@ -1,36 +1,35 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
     id 'com.google.devtools.ksp' version '2.3.11'
 }
 
 android {
-    namespace 'gallery.memories'
+    namespace = "gallery.memories"
     compileSdk = 36
 
     buildFeatures {
         buildConfig = true
-        viewBinding true
+        viewBinding = true
     }
 
     defaultConfig {
-        applicationId "gallery.memories"
-        minSdk 30
-        targetSdk 36
-        versionCode 15
-        versionName "1.15"
+        applicationId = "gallery.memories"
+        minSdk = 30
+        targetSdk = 36
+        versionCode = 15
+        versionName = "1.15"
     }
 
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled = true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_21
-        targetCompatibility JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 }
 
@@ -41,6 +40,8 @@ kotlin {
 dependencies {
     def media_version = "1.10.1"
     def room_version = "2.8.4"
+    def ktor_version = "3.5.1"
+    def coroutines_version = "1.11.0"
 
     implementation 'androidx.core:core-ktx:1.17.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -61,4 +62,8 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:5.4.0"
     implementation "org.jetbrains.kotlinx:kotlinx-html-jvm:0.12.0"
     implementation "io.github.g00fy2:versioncompare:1.5.0"
+
+    implementation "io.ktor:ktor-server-core:$ktor_version"
+    implementation "io.ktor:ktor-server-cio:$ktor_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 }

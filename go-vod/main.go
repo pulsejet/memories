@@ -5,44 +5,39 @@ import (
 	"log"
 	"os"
 
-	"github.com/pulsejet/memories/go-vod/transcoder"
+	"github.com/pulsejet/memories/go-vod/api"
+	"github.com/pulsejet/memories/go-vod/config"
 )
 
-const VERSION = "0.2.9"
+const VERSION = "0.3.0"
 
 func main() {
-	// Build initial configuration
-	c := &transcoder.Config{
-		VersionMonitor:  false,
-		Version:         VERSION,
-		Bind:            ":47788",
-		ChunkSize:       3,
-		LookBehind:      3,
-		GoalBufferMin:   1,
-		GoalBufferMax:   4,
-		StreamIdleTime:  60,
-		ManagerIdleTime: 60,
-	}
+	c := config.Defaults(VERSION)
 
-	// Parse arguments
 	for _, arg := range os.Args[1:] {
-		if arg == "-version-monitor" {
+		switch arg {
+		case "-version-monitor":
 			c.VersionMonitor = true
-		} else if arg == "-version" {
+		case "-version":
 			fmt.Print("go-vod " + VERSION)
 			return
-		} else {
-			c.FromFile(arg) // config file
+		default:
+			if err := c.LoadFile(arg); err != nil {
+				log.Fatal("Error loading config: ", err)
+			}
 		}
 	}
 
-	// Auto detect ffmpeg and ffprobe
-	c.AutoDetect()
+	if err := c.AutoDetect(); err != nil {
+		log.Fatal("Error detecting environment: ", err)
+	}
 
-	// Start server
-	code := transcoder.NewHandler(c).Start()
+	if err := c.Validate(); err != nil {
+		log.Fatal("Invalid config: ", err)
+	}
 
-	// Exit
+	code := api.NewServer(c).Start()
+
 	log.Println("Exiting go-vod with status code", code)
 	os.Exit(code)
 }

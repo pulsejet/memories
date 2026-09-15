@@ -2,15 +2,21 @@ package gallery.memories.server.controllers
 
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.HttpClients
-import gallery.memories.server.HttpRequest
-import gallery.memories.server.HttpWriter
+import gallery.memories.server.KtorRespond
 import gallery.memories.server.ServerConfig
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.queryString
+import io.ktor.server.request.receiveStream
+import io.ktor.server.request.uri
+import io.ktor.server.response.respondOutputStream
+import java.io.IOException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.BufferedOutputStream
-import java.io.IOException
 
 /** Forwards non-local requests to Nextcloud with stored basic auth, streaming both ways. */
 class ProxyController(
@@ -41,63 +47,62 @@ class ProxyController(
      * Upstream network failures throw [UpstreamNetworkException] so the caller
      * can drop the connection (axios ERR_NETWORK) instead of faking an HTTP 5xx.
      */
-    fun forward(req: HttpRequest, config: ServerConfig, out: BufferedOutputStream) {
-        try {
-            doForward(req, config, out)
-        } catch (e: UpstreamNetworkException) {
-            throw e
-        } catch (e: IOException) {
-            throw UpstreamNetworkException(e)
-        }
-    }
-
-    private fun doForward(req: HttpRequest, config: ServerConfig, out: BufferedOutputStream) {
-        val url = config.serverOrigin + req.path + (req.query?.let { "?$it" } ?: "")
-        val builder = Request.Builder().url(url)
-        for ((name, value) in req.headers) {
-            if (name in SKIPPED_REQUEST_HEADERS) continue
-            builder.header(name, value)
+    suspend fun forward(call: ApplicationCall, config: ServerConfig) {
+        val method = call.request.httpMethod.value.uppercase()
+        val rawPath = call.request.uri.substringBefore("?")
+        val query = call.request.queryString().ifEmpty { null }
+        val builder = Request.Builder().url(config.serverOrigin + rawPath + (query?.let { "?$it" } ?: ""))
+        for ((name, values) in call.request.headers.entries()) {
+            if (name.lowercase() in SKIPPED_REQUEST_HEADERS) continue
+            builder.header(name, values.joinToString(", "))
         }
         auth.authHeader()?.let { builder.header("Authorization", it) }
         builder.header("OCS-APIREQUEST", "true")
-        val mediaType = req.headers["content-type"]?.toMediaTypeOrNull()
-        var body = when {
-            req.bodyFile != null -> req.bodyFile.asRequestBody(mediaType)
-            req.body != null -> req.body.toRequestBody(mediaType)
-            else -> null
-        }
-        if (body == null && requiresBody(req.method)) {
-            body = ByteArray(0).toRequestBody(mediaType)
-        }
-        builder.method(req.method, body)
-        client.newCall(builder.build()).execute().use { res ->
-            streamResponse(res, config, out)
-        }
+        val mediaType = call.request.headers["Content-Type"]?.toMediaTypeOrNull()
+        val sentBytes = withContext(Dispatchers.IO) { call.receiveStream().readBytes() }
+        val body =
+            if (sentBytes.isNotEmpty()) {
+                sentBytes.toRequestBody(mediaType)
+            } else if (requiresBody(method)) {
+                ByteArray(0).toRequestBody(mediaType)
+            } else {
+                null
+            }
+        builder.method(method, body)
+        val response =
+            try {
+                withContext(Dispatchers.IO) { client.newCall(builder.build()).execute() }
+            } catch (e: IOException) {
+                throw UpstreamNetworkException(e)
+            }
+        response.use { res -> streamResponse(call, res, config) }
     }
 
-    private fun streamResponse(res: okhttp3.Response, config: ServerConfig, out: BufferedOutputStream) {
-        val respHeaders = mutableMapOf<String, String>()
+    private suspend fun streamResponse(call: ApplicationCall, res: okhttp3.Response, config: ServerConfig) {
         for (i in 0 until res.headers.size) {
-            val name = res.headers.name(i).lowercase()
-            if (name in SKIPPED_RESPONSE_HEADERS) continue
-            if (name == "location") {
-                respHeaders["Location"] = rewriteLocation(res.headers.value(i), config)
+            val name = res.headers.name(i)
+            val lower = name.lowercase()
+            if (lower in SKIPPED_RESPONSE_HEADERS) continue
+            if (lower == "location") {
+                call.response.headers.append("Location", rewriteLocation(res.headers.value(i), config))
                 continue
             }
-            respHeaders[res.headers.name(i)] = res.headers.value(i)
+            call.response.headers.append(name, res.headers.value(i))
         }
-        val ctype = res.body.contentType()?.toString() ?: "application/octet-stream"
-        respHeaders.putIfAbsent("Content-Type", ctype)
-        respHeaders["Connection"] = "close"
-        val length = res.body.contentLength()
-        if (length >= 0) {
-            respHeaders["Content-Length"] = length.toString()
-            HttpWriter.writeHeaders(out, res.code, HttpWriter.reason(res.code), respHeaders)
-            res.body.byteStream().use { it.copyTo(out) }
-        } else {
-            respHeaders["Transfer-Encoding"] = "chunked"
-            HttpWriter.writeHeaders(out, res.code, HttpWriter.reason(res.code), respHeaders)
-            res.body.byteStream().use { HttpWriter.streamChunked(it, out) }
+        val contentType = KtorRespond.contentType(res.body.contentType()?.toString())
+        val status = KtorRespond.status(res.code)
+        // Known length goes out as Content-Length, unknown as chunked.
+        val length = res.body.contentLength().takeIf { it >= 0 }
+        try {
+            call.respondOutputStream(contentType, status, length) {
+                withContext(Dispatchers.IO) {
+                    res.body.byteStream().use { it.copyTo(this@respondOutputStream) }
+                }
+            }
+        } catch (e: IOException) {
+            // Upstream reset or client gone mid-stream: either way the
+            // connection cannot complete, so signal a drop, not a 500.
+            throw UpstreamNetworkException(e)
         }
     }
 
@@ -105,11 +110,14 @@ class ProxyController(
     private fun rewriteLocation(location: String, config: ServerConfig): String =
         if (location.startsWith(config.serverOrigin)) {
             originProvider() + location.substring(config.serverOrigin.length)
-        } else location
+        } else {
+            location
+        }
 
     /** OkHttp rejects a null body for these methods, even when content-length is 0. */
-    private fun requiresBody(method: String): Boolean = when (method) {
-        "POST", "PUT", "PATCH", "PROPPATCH", "REPORT" -> true
-        else -> false
-    }
+    private fun requiresBody(method: String): Boolean =
+        when (method) {
+            "POST", "PUT", "PATCH", "PROPPATCH", "REPORT" -> true
+            else -> false
+        }
 }

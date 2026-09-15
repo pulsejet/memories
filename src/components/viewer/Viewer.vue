@@ -137,6 +137,7 @@ import PsLivePhoto from './PsLivePhoto';
 
 import type { IImageInfo, IPhoto, TimelineState } from '@typings';
 import type { PsContent } from './types';
+import type { MediaPlayerElement } from 'vidstack/elements';
 
 import LivePhotoIcon from '@components/icons/LivePhoto.vue';
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
@@ -306,13 +307,13 @@ export default defineComponent({
 
     /** Bottom bar actions on mobile */
     bottomActions(): IViewerAction[] {
-      // Hidden on videos to avoid overlap with player controls.
-      if (!this.isMobileLayout || this.isVideo) {
+      if (!this.isMobileLayout) {
         return [];
       }
 
       // Bottom bar uses a fixed independent order.
-      const order = ['share', 'edit', 'add-to-album', 'delete', 'remove-from-album'];
+      const edit = this.actions.some((a) => a.id === 'edit') ? 'edit' : 'edit-metadata';
+      const order = ['share', edit, 'add-to-album', 'delete', 'remove-from-album'];
 
       // Get all actions available in this order.
       return this.actions
@@ -324,6 +325,8 @@ export default defineComponent({
             return { ...action, name: this.t('memories', 'Add to') };
           } else if (action.id === 'remove-from-album') {
             return { ...action, name: this.t('memories', 'Remove') };
+          } else if (action.id === 'edit-metadata') {
+            return { ...action, name: this.t('memories', 'Edit') };
           }
           return action;
         });
@@ -781,11 +784,7 @@ export default defineComponent({
       });
 
       // Video support
-      const psVideo = new PsVideo(<any>this.photoswipe, {
-        // Explicity disable dragging to another slide at the bottom of a video,
-        // to allow player controls to work properly.
-        preventDragOffset: 60,
-      });
+      const psVideo = new PsVideo(<any>this.photoswipe);
       this.psVideo = markRaw(psVideo);
 
       // Image support
@@ -1124,15 +1123,38 @@ export default defineComponent({
       // Mark as loading
       this.imageInfoLoading.add(key);
 
-      try {
-        const res = await axios.get<IImageInfo>(utils.getImageInfoUrl(photo));
-        photo.imageInfo = res.data;
+      // Get a consistent URL so we can cache.
+      const url = utils.getImageInfoUrl(photo, this.config);
 
-        // Update params in photo object
-        photo.w = res.data.w;
-        photo.h = res.data.h;
-        photo.basename = res.data.basename;
-        photo.mimetype = res.data.mimetype;
+      // Apply image data onto the photo.
+      const applyImageInfo = (data: IImageInfo) => {
+        photo.imageInfo = data;
+        photo.w = data.w;
+        photo.h = data.h;
+        photo.basename = data.basename;
+        photo.mimetype = data.mimetype;
+      };
+
+      // Get cached data first.
+      let wasCached = false;
+      try {
+        const cached = await utils.getCachedData<IImageInfo>(url);
+        if (cached) {
+          applyImageInfo(cached);
+          wasCached = true;
+        }
+      } catch {
+        // cache miss
+      }
+
+      // Attempt to refresh the cached data.
+      try {
+        const res = await axios.get<IImageInfo>(url);
+        applyImageInfo(res.data);
+        utils.cacheData(url, res.data);
+      } catch (e) {
+        if (wasCached) return;
+        throw e;
       } finally {
         // Allow another chance in case this failed
         this.imageInfoLoading.delete(key);
@@ -1399,14 +1421,14 @@ export default defineComponent({
 
       // If this is a video, wait for it to finish
       if (this.isVideo) {
-        // Get active video element
-        const video = this.photoswipe?.element?.querySelector<HTMLVideoElement>('.pswp__item.active video');
+        // Get active player element
+        const player = this.photoswipe?.element?.querySelector<MediaPlayerElement>('.pswp__item.active media-player');
 
-        // If no video tag is found by now, something likely went wrong. Just skip ahead.
+        // If no player is found by now, something likely went wrong. Just skip ahead.
         // Otherwise check if video is not ended yet
-        if ((video?.currentTime ?? Infinity) < (video?.duration ?? 0) - 0.1) {
+        if ((player?.currentTime ?? Infinity) < (player?.duration ?? 0) - 0.1) {
           // Wait for video to finish
-          video?.addEventListener('ended', this.slideshowTimerFired);
+          player?.addEventListener('ended', this.slideshowTimerFired, { once: true });
           return;
         }
       }
@@ -1590,6 +1612,11 @@ export default defineComponent({
       line-height: 1.2em;
     }
   }
+
+  .memories-viewer.is-video & {
+    // Videos paint their own gradient inside the slide.
+    display: none;
+  }
 }
 
 .viewer-mobile-actions {
@@ -1601,7 +1628,7 @@ export default defineComponent({
   background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55));
   width: inherit;
   padding: 8px 8px max(10px, env(safe-area-inset-bottom));
-  z-index: 100001;
+  z-index: 100002;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -1609,7 +1636,7 @@ export default defineComponent({
   transition: opacity 0.2s ease-in-out;
   opacity: 0;
   pointer-events: none;
-  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow):not(.is-video) & {
+  .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow) & {
     opacity: 1;
     pointer-events: auto;
   }
@@ -1636,17 +1663,6 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-}
-
-:deep(.video-js .vjs-big-play-button) {
-  display: none;
-}
-
-:deep(.plyr__volume) {
-  // Cannot be vertical yet :(
-  @media (max-width: 768px) {
-    display: none;
   }
 }
 
@@ -1684,6 +1700,9 @@ export default defineComponent({
 </style>
 
 <style lang="scss">
+// Video styles
+@use './PsVideo.scss';
+
 // Prevent the popper from overlapping with the sidebar
 .pswp > div > .v-popper__wrapper {
   overflow: visible !important;

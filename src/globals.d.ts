@@ -1,9 +1,6 @@
 import type { Router, RouteLocationNormalized } from 'vue-router';
 import type { ComponentPublicInstance } from 'vue';
 
-import type PlyrType from 'plyr';
-import type videojsType from 'video.js';
-
 import type { IPhoto, IUploadNativeX, TimelineState } from '@typings';
 import type { constants, initstate } from '@services/utils';
 import type { translate, translatePlural } from '@services/l10n';
@@ -67,8 +64,6 @@ declare global {
     };
 
     video: {
-      videojs: typeof videojsType;
-      Plyr: typeof PlyrType;
       clientId: string;
       clientIdPersistent: string;
     };

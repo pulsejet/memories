@@ -17,6 +17,8 @@ export const constants = Object.freeze({
   MIME_RAW: 'image/x-dcraw',
   FORBIDDEN_EDIT_MIMES: ['image/bmp', 'image/x-dcraw', 'video/MP2T'], // Exif.php
 
+  BLANK_IMG: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+
   ALBUM_SORT_FLAGS: {
     DESCENDING: 1 << 0, // default true
     LAST_UPDATE: 1 << 1, // default
