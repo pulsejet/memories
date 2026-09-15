@@ -1,5 +1,7 @@
 package gallery.memories.ui.web
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.net.Uri
 import android.util.Log
 import android.webkit.ConsoleMessage
@@ -26,6 +28,13 @@ class MemoriesWebChromeClient(
 
     override fun onPermissionRequest(request: PermissionRequest) {
         request.grant(request.resources)
+    }
+
+    /** Transparent 1x1 poster so videos never flash the default gray/white placeholder. */
+    override fun getDefaultVideoPoster(): Bitmap {
+        val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        Canvas(bitmap).drawARGB(0, 0, 0, 0)
+        return bitmap
     }
 
     /** Mirror page errors into logcat; WebView debugging is off in release builds. */
