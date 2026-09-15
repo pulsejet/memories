@@ -32,11 +32,15 @@ func MasterPlaylist(renditions []core.Rendition, frameRate int, query string) (s
 }
 
 // VariantPlaylist is the entry point for serving a rendition's playlist.
+// Only direct.m3u8 extracts keyframes (blocking); index.m3u8 and transcodes
+// never do, so 480p etc stay fast while direct probes.
 func VariantPlaylist(m *core.Manager, quality string, chunkSize int, query string) (string, error) {
 	if quality == core.QUALITY_DIRECT {
-		if segs, ok := m.CopySegments(); ok {
-			return CopyVariantPlaylist(quality, segs, query)
+		segs, ok := m.EnsureCopySegments()
+		if !ok {
+			return "", fmt.Errorf("no keyframe grid for direct")
 		}
+		return CopyVariantPlaylist(quality, segs, query)
 	}
 	return TranscodeVariantPlaylist(quality, m.Duration(), chunkSize, query)
 }

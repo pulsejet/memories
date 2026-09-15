@@ -81,7 +81,7 @@ func TestManagerCopyCacheHit(t *testing.T) {
 	require.NoError(t, StoreCachedKeyframes(cfgDir, 7, "etag-hit", keys))
 
 	m := newCopyManagerWithEtag(t, copyProbeJSON, "", true, cfgDir, "etag-hit")
-	segs, ok := m.CopySegments()
+	segs, ok := m.EnsureCopySegments()
 	require.True(t, ok)
 	require.Len(t, segs, 3)
 }

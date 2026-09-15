@@ -8,6 +8,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -43,10 +44,20 @@ type Manager struct {
 	// probe holds the source properties, immutable after creation.
 	probe *ProbeVideoData
 
-	// srcSegments is the copy grid for max; empty means re-encode.
-	srcSegments []ffmpeg.Segment
+	// copyEligible is set from the base probe (h264, no rotation) and is
+	// immutable after creation. It only says keyframes are worth trying.
+	copyEligible bool
 
-	// streams are the renditions by quality ("480p", "max").
+	// copyMu guards srcSegments and copyProbed. Keyframes are extracted
+	// lazily on direct.m3u8, long after creation, so all accessors lock.
+	copyMu sync.Mutex
+	// srcSegments is the copy grid for direct; empty until EnsureCopySegments.
+	srcSegments []ffmpeg.Segment
+	// copyProbed marks a finished keyframe attempt, so failures fail fast
+	// instead of re-running a minutes-long ffprobe on every request.
+	copyProbed bool
+
+	// streams are the renditions by quality ("480p", "direct" / "max").
 	streams map[string]*Stream
 }
 
@@ -163,8 +174,10 @@ func NewManager(c *config.Config, path string, id string, fileid int64, etag str
 		}
 	}
 
-	// Original: stream copy as direct when eligible.
-	if _, ok := m.CopySegments(); ok {
+	// Original: stream copy as direct when eligible. Keyframes are not
+	// extracted here; direct.m3u8 triggers EnsureCopySegments on demand,
+	// so index.m3u8 and 480p etc stay fast.
+	if m.IsCopyEligible() {
 		m.streams[QUALITY_DIRECT] = &Stream{
 			c: c, m: m,
 			quality: QUALITY_DIRECT,
@@ -264,7 +277,39 @@ func (m *Manager) Duration() time.Duration {
 	return m.probe.Duration
 }
 
+func (m *Manager) IsCopyEligible() bool {
+	return m.copyEligible
+}
+
 func (m *Manager) CopySegments() ([]ffmpeg.Segment, bool) {
+	m.copyMu.Lock()
+	defer m.copyMu.Unlock()
+	if len(m.srcSegments) == 0 {
+		return nil, false
+	}
+	return m.srcSegments, true
+}
+
+// EnsureCopySegments blocks for keyframe extraction on first direct use.
+// Safe for concurrent direct.m3u8 / direct.ts requests; other renditions
+// never call it, so 480p etc stay fast while direct probes.
+func (m *Manager) EnsureCopySegments() ([]ffmpeg.Segment, bool) {
+	if !m.copyEligible {
+		return nil, false
+	}
+	m.copyMu.Lock()
+	defer m.copyMu.Unlock()
+	if len(m.srcSegments) != 0 {
+		return m.srcSegments, true
+	}
+	if m.copyProbed {
+		return nil, false
+	}
+	m.copyProbed = true
+	if err := m.probeCopy(); err != nil {
+		log.Printf("%s: copy disabled for direct: %v", m.id, err)
+		return nil, false
+	}
 	if len(m.srcSegments) == 0 {
 		return nil, false
 	}
@@ -284,6 +329,11 @@ func (m *Manager) ServeChunk(w http.ResponseWriter, quality string, id int) bool
 	stream, ok := m.streams[quality]
 	if !ok {
 		return false
+	}
+	if quality == QUALITY_DIRECT {
+		if _, ok := m.EnsureCopySegments(); !ok {
+			return false
+		}
 	}
 	stream.ServeChunk(w, id)
 	return true
@@ -326,16 +376,15 @@ func (m *Manager) ffprobe() error {
 		Audio:     info.Audio,
 	}
 
-	// Check if the video is copy-elgible for MAX.
-	if m.probe.CodecName == CODEC_H264 && m.probe.Rotation == 0 {
-		if err := m.probeCopy(); err != nil {
-			log.Printf("%s: copy disabled for max: %v", m.id, err)
-		}
-	}
+	// Copy eligibility is cheap (codec + rotation); keyframes come later
+	// via EnsureCopySegments on direct.m3u8, so creation stays fast.
+	m.copyEligible = m.probe.CodecName == CODEC_H264 && m.probe.Rotation == 0
 
 	return nil
 }
 
+// probeCopy extracts keyframes and fills srcSegments.
+// Callers must hold copyMu; see EnsureCopySegments.
 func (m *Manager) probeCopy() error {
 	cachePath := KeyframeCachePath(m.c.ResolvedCacheDir(), m.fileid)
 	if keys, ok := LoadCachedKeyframes(m.c.ResolvedCacheDir(), m.fileid, m.etag); ok {

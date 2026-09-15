@@ -46,15 +46,20 @@ func newCopyManager(t *testing.T, probeJSON, keyframes string, keyFail bool) *Ma
 func TestManagerCopySegments(t *testing.T) {
 	m := newCopyManager(t, copyProbeJSON, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false)
 
-	segs, ok := m.CopySegments()
+	// Lazy: creation advertises direct without extracting keyframes.
+	require.True(t, m.IsCopyEligible())
+	require.True(t, m.HasStream(QUALITY_DIRECT))
+	require.False(t, m.HasStream(QUALITY_MAX))
+	_, ok := m.CopySegments()
+	require.False(t, ok)
+
+	segs, ok := m.EnsureCopySegments()
 	require.True(t, ok)
 	require.Equal(t, 3, len(segs))
 	require.Equal(t, 0.0, segs[0].Start)
 	require.Equal(t, 4.0, segs[0].Duration)
 	require.Equal(t, 8.0, segs[2].Start)
 	require.Equal(t, 2.0, segs[2].Duration)
-	require.True(t, m.HasStream(QUALITY_DIRECT))
-	require.False(t, m.HasStream(QUALITY_MAX))
 }
 
 func TestManagerCopyDisabledCodec(t *testing.T) {
@@ -77,11 +82,19 @@ func TestManagerCopyDisabledRotation(t *testing.T) {
 }
 
 func TestManagerCopyKeyframeFailure(t *testing.T) {
-	// A failing keyframe probe never fails the manager; max re-encodes.
+	// A failing keyframe probe never fails the manager; direct.m3u8 fails
+	// later while lower renditions keep playing.
 	m := newCopyManager(t, copyProbeJSON, "", true)
 
-	_, ok := m.CopySegments()
+	require.True(t, m.IsCopyEligible())
+	require.True(t, m.HasStream(QUALITY_DIRECT))
+	require.False(t, m.HasStream(QUALITY_MAX))
+
+	_, ok := m.EnsureCopySegments()
 	require.False(t, ok)
-	require.False(t, m.HasStream(QUALITY_DIRECT))
-	require.True(t, m.HasStream(QUALITY_MAX))
+	_, ok = m.CopySegments()
+	require.False(t, ok)
+	// Second ensure fails fast without re-probing.
+	_, ok = m.EnsureCopySegments()
+	require.False(t, ok)
 }
