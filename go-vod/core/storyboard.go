@@ -8,7 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
+	"time"
 
 	"github.com/pulsejet/memories/go-vod/ffmpeg"
 	"golang.org/x/sync/singleflight"
@@ -20,7 +22,28 @@ const StoryboardPlanFile = "storyboard.json"
 
 var spriteNameRe = regexp.MustCompile(`^storyboard-\d+\.jpg$`)
 
-var storyboardSF singleflight.Group
+// StoryboardInput snapshots a storyboard request so builds outlive Managers.
+type StoryboardInput struct {
+	CacheDir string
+	FileID   int64
+	Etag     string
+	Path     string
+	Duration time.Duration
+	FFmpeg   string
+	LogID    string
+}
+
+// storyboardService builds storyboards process-wide, deduplicated by cache
+// dir. A build keeps running if its Manager goes away mid-flight.
+type storyboardService struct {
+	sf singleflight.Group
+}
+
+var sharedStoryboards = &storyboardService{}
+
+// storyboardSlots caps concurrent storyboard ffmpeg builds at NumCPU;
+// extra builds queue behind it.
+var storyboardSlots = make(chan struct{}, runtime.NumCPU())
 
 // IsStoryboardLeaf reports whether a serve leaf is a storyboard file.
 // Sprite names are strict so no user input ever reaches the filesystem.
@@ -34,24 +57,47 @@ type storyboardFile struct {
 	Plan ffmpeg.StoryboardPlan `json:"plan"`
 }
 
+func (m *Manager) storyboardInput() StoryboardInput {
+	return StoryboardInput{
+		CacheDir: m.c.ResolvedCacheDir(),
+		FileID:   m.fileid,
+		Etag:     m.etag,
+		Path:     m.path,
+		Duration: m.probe.Duration,
+		FFmpeg:   m.c.FFmpeg,
+		LogID:    m.id,
+	}
+}
+
 // ServeStoryboard builds the storyboard on first view and serves the VTT
 // or sprite. The VTT is rendered per request with the query baked in.
 func (m *Manager) ServeStoryboard(w http.ResponseWriter, r *http.Request, leaf, query string) {
+	sharedStoryboards.Serve(w, r, m.storyboardInput(), leaf, query)
+}
+
+// EnsureStoryboard builds the storyboard once and returns its dir.
+// The plan JSON is written last as the ready marker.
+func (m *Manager) EnsureStoryboard() (string, error) {
+	return sharedStoryboards.Ensure(m.storyboardInput())
+}
+
+// Serve builds the storyboard on first view and serves the VTT or sprite.
+func (s *storyboardService) Serve(w http.ResponseWriter, r *http.Request, in StoryboardInput, leaf, query string) {
 	if !IsStoryboardLeaf(leaf) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	dir, err := m.EnsureStoryboard()
+	dir, err := s.Ensure(in)
 	if err != nil {
-		log.Printf("%s: storyboard: %v", m.id, err)
+		log.Printf("%s: storyboard: %v", in.LogID, err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	w.Header().Set("Cache-Control", "max-age=86400, public")
 	if leaf == StoryboardVTTFile {
-		file, err := LoadStoryboardPlan(m.c.ResolvedCacheDir(), m.fileid, m.etag)
+		file, err := LoadStoryboardPlan(in.CacheDir, in.FileID, in.Etag)
 		if err != nil {
-			log.Printf("%s: storyboard: %v", m.id, err)
+			log.Printf("%s: storyboard: %v", in.LogID, err)
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
@@ -63,21 +109,20 @@ func (m *Manager) ServeStoryboard(w http.ResponseWriter, r *http.Request, leaf, 
 	http.ServeFile(w, r, filepath.Join(dir, leaf))
 }
 
-// EnsureStoryboard builds the storyboard once and returns its dir.
-// The plan JSON is written last as the ready marker.
-func (m *Manager) EnsureStoryboard() (string, error) {
-	dir := FileCacheDir(m.c.ResolvedCacheDir(), m.fileid)
+// Ensure builds the storyboard once and returns its dir.
+func (s *storyboardService) Ensure(in StoryboardInput) (string, error) {
+	dir := FileCacheDir(in.CacheDir, in.FileID)
 	if dir == "" {
 		return "", os.ErrNotExist
 	}
-	if _, err := LoadStoryboardPlan(m.c.ResolvedCacheDir(), m.fileid, m.etag); err == nil {
+	if _, err := LoadStoryboardPlan(in.CacheDir, in.FileID, in.Etag); err == nil {
 		return dir, nil
 	}
-	_, err, _ := storyboardSF.Do(dir, func() (any, error) {
-		if _, err := LoadStoryboardPlan(m.c.ResolvedCacheDir(), m.fileid, m.etag); err == nil {
+	_, err, _ := s.sf.Do(dir, func() (any, error) {
+		if _, err := LoadStoryboardPlan(in.CacheDir, in.FileID, in.Etag); err == nil {
 			return nil, nil
 		}
-		return nil, m.buildStoryboard(dir)
+		return nil, s.build(dir, in)
 	})
 	if err != nil {
 		return "", err
@@ -111,9 +156,10 @@ func LoadStoryboardPlan(cacheDir string, fileid int64, etag string) (storyboardF
 	return file, nil
 }
 
-func (m *Manager) buildStoryboard(dir string) error {
-	plan := ffmpeg.PlanStoryboard(m.probe.Duration)
-	log.Printf("%s: building storyboard (%d thumbs @ %.1fs)", m.id, plan.Count, plan.Interval)
+func (s *storyboardService) build(dir string, in StoryboardInput) error {
+	plan := ffmpeg.PlanStoryboard(in.Duration)
+	start := time.Now()
+	log.Printf("%s: building storyboard (%d thumbs @ %.1fs)", in.LogID, plan.Count, plan.Interval)
 
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
@@ -124,9 +170,17 @@ func (m *Manager) buildStoryboard(dir string) error {
 	for _, stale := range glob(filepath.Join(dir, "storyboard-*.jpg.part")) {
 		os.Remove(stale)
 	}
-	if err := ffmpeg.BuildStoryboard(context.Background(), m.c.FFmpeg, m.path, plan, pattern); err != nil {
+	select {
+	case storyboardSlots <- struct{}{}:
+	default:
+		log.Printf("%s: storyboard queued behind %d builds", in.LogID, len(storyboardSlots))
+		storyboardSlots <- struct{}{}
+	}
+	defer func() { <-storyboardSlots }()
+	if err := ffmpeg.BuildStoryboard(context.Background(), in.FFmpeg, in.Path, plan, pattern); err != nil {
 		return err
 	}
+	log.Printf("%s: storyboard rendered in %s", in.LogID, time.Since(start).Round(time.Second))
 
 	// Keep only the sprites actually produced and truncate dangling cues.
 	parts := glob(filepath.Join(dir, "storyboard-*.jpg.part"))
@@ -148,7 +202,7 @@ func (m *Manager) buildStoryboard(dir string) error {
 		os.Remove(stale)
 	}
 
-	data, err := json.Marshal(storyboardFile{Etag: m.etag, Plan: plan})
+	data, err := json.Marshal(storyboardFile{Etag: in.Etag, Plan: plan})
 	if err != nil {
 		return err
 	}

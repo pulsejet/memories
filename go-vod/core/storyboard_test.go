@@ -115,3 +115,65 @@ func TestServeStoryboardRejectsLeaf(t *testing.T) {
 	m.ServeStoryboard(w, httptest.NewRequest("GET", "/x", nil), "../keyframes.json", "")
 	require.Equal(t, 404, w.Code)
 }
+
+func TestStoryboardBuildsSerializeAtOneSlot(t *testing.T) {
+	old := storyboardSlots
+	storyboardSlots = make(chan struct{}, 1)
+	defer func() { storyboardSlots = old }()
+
+	dir := t.TempDir()
+	script := "#!/bin/sh\npat=\"\"\nfor a in \"$@\"; do pat=\"$a\"; done\nsleep 1\ntouch \"$(dirname \"$pat\")/storyboard-0.jpg.part\"\n"
+	bin := filepath.Join(dir, "ffmpeg")
+	require.NoError(t, os.WriteFile(bin, []byte(script), 0755))
+
+	inputs := make([]StoryboardInput, 0, 2)
+	for _, fileid := range []int64{7, 8} {
+		cfg := config.Defaults("test")
+		cfg.TempDir = t.TempDir()
+		cfg.CacheDir = dir
+		cfg.FFprobe = stubProbe(t)
+		cfg.FFmpeg = bin
+
+		m, err := NewManager(cfg, "input.mp4", "id", fileid, "etag-01", 1, make(chan IdleEvent, 1))
+		require.NoError(t, err)
+		defer m.Destroy()
+		inputs = append(inputs, m.storyboardInput())
+	}
+
+	start := time.Now()
+	errs := make(chan error, 2)
+	for _, in := range inputs {
+		go func() { _, err := sharedStoryboards.Ensure(in); errs <- err }()
+	}
+	for range inputs {
+		require.NoError(t, <-errs)
+	}
+	require.GreaterOrEqual(t, time.Since(start), 1500*time.Millisecond)
+}
+
+func TestStoryboardSurvivesManagerDestroy(t *testing.T) {
+	dir := t.TempDir()
+	script := "#!/bin/sh\npat=\"\"\nfor a in \"$@\"; do pat=\"$a\"; done\nsleep 2\ntouch \"$(dirname \"$pat\")/storyboard-0.jpg.part\"\n"
+	bin := filepath.Join(dir, "ffmpeg")
+	require.NoError(t, os.WriteFile(bin, []byte(script), 0755))
+
+	cfg := config.Defaults("test")
+	cfg.TempDir = t.TempDir()
+	cfg.CacheDir = t.TempDir()
+	cfg.FFprobe = stubProbe(t)
+	cfg.FFmpeg = bin
+
+	m, err := NewManager(cfg, "input.mp4", "id", 7, "etag-01", 1, make(chan IdleEvent, 1))
+	require.NoError(t, err)
+	in := m.storyboardInput()
+	m.Destroy()
+
+	got, err := sharedStoryboards.Ensure(in)
+	require.NoError(t, err)
+	require.Equal(t, FileCacheDir(cfg.ResolvedCacheDir(), 7), got)
+
+	w := httptest.NewRecorder()
+	sharedStoryboards.Serve(w, httptest.NewRequest("GET", "/x", nil), in, StoryboardVTTFile, "")
+	require.Equal(t, 200, w.Code)
+	require.Contains(t, w.Body.String(), "storyboard-0.jpg#xywh=")
+}
