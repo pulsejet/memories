@@ -123,14 +123,14 @@ func TestBuildArgsTonemap(t *testing.T) {
 	vaapi := baseSpec()
 	vaapi.HDR, vaapi.VAAPI = true, true
 	c = cmd(vaapi, BuildArgs(vaapi))
-	require.Contains(t, c, "hwdownload,zscale=")
+	require.Contains(t, c, "hwdownload,format=nv12,zscale=")
 	require.Contains(t, c, "tonemap=hable")
 	require.Contains(t, c, "format=nv12,hwupload,scale_vaapi=")
 
 	nvenc := baseSpec()
 	nvenc.HDR, nvenc.NVENC, nvenc.NVENCScale = true, true, "cuda"
 	c = cmd(nvenc, BuildArgs(nvenc))
-	require.Contains(t, c, "hwdownload,zscale=")
+	require.Contains(t, c, "hwdownload,format=nv12,zscale=")
 	require.Contains(t, c, "tonemap=hable")
 	require.Contains(t, c, "format=nv12,hwupload,scale_cuda=")
 

@@ -271,7 +271,10 @@ func tonemapFilter(cv, scaler string, scalerArgs []string) string {
 	if cv == EncoderX264 {
 		return fmt.Sprintf("%s,format=yuv420p,%s", tail, scale)
 	}
-	return fmt.Sprintf("hwdownload,%s,format=nv12,hwupload,%s", tail, scale)
+	// Pin the download to nv12: the linear-light tail negotiates high depth
+	// upstream, and some drivers cannot read 10-bit (notably Dolby Vision)
+	// surfaces any other way.
+	return fmt.Sprintf("hwdownload,format=nv12,%s,format=nv12,hwupload,%s", tail, scale)
 }
 
 // SegmentArgs extends BuildArgs with the HLS muxer tail that chops one
