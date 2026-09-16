@@ -11,6 +11,7 @@ import type { PsContent, PsEvent, PsSlide } from './types';
 import type { MediaPlayerElement } from 'vidstack/elements';
 import type { MediaErrorEvent, MediaProviderChangeEvent, PlayerSrc } from 'vidstack';
 import type Hls from 'hls.js';
+import type { HlsConfig } from 'hls.js';
 
 type VideoContent = PsContent & {
   videoPlayer: MediaPlayerElement | null;
@@ -55,7 +56,7 @@ const PLAYER_UI_SELECTOR = [
 
 // Cap buffer to avoid overloading go-vod while
 // processing requests from multiple users.
-const HLS_LIVE_CONFIG = {
+const HLS_LIVE_CONFIG: Partial<HlsConfig> = {
   /** Forward buffer target in seconds. */
   maxBufferLength: 30,
   /** Hard cap for forward buffer growth. */
@@ -76,6 +77,15 @@ const HLS_LIVE_CONFIG = {
     },
   },
   errorPenaltyExpireMs: 3000,
+  /** Smooth estimate: cold transcode latency is not low bandwidth. */
+  abrEwmaFastVoD: 6,
+  abrEwmaSlowVoD: 18,
+  /** Down fast, up only on sustained headroom. */
+  abrBandWidthFactor: 0.9,
+  abrBandWidthUpFactor: 0.5,
+  /** Keep abandon responsive; slow transcode must downswitch, not stall. */
+  maxStarvationDelay: 4,
+  maxLoadingDelay: 4,
 };
 
 /**
