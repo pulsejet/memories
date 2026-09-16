@@ -144,7 +144,7 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 	args := ffmpeg.MP4Args(s.spec(0, false))
 
-	if s.m.probe.CodecName == CODEC_H264 && s.quality == QUALITY_MAX {
+	if s.quality == QUALITY_MAX && IsCodecPlayable(s.m.probe.CodecName, s.m.playableCodecs) {
 		// try to just send the original file
 		http.ServeFile(w, r, s.m.path)
 		return nil

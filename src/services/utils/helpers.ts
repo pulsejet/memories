@@ -2,6 +2,7 @@ import { getCurrentUser } from '@nextcloud/auth';
 import { Md5 } from 'ts-md5';
 
 import { constants as c } from './const';
+import { getPlayableVideoCodecsSync } from './video';
 
 import { API } from '@services/API';
 import { has as hasNativeX, NAPI } from '@native';
@@ -230,6 +231,7 @@ export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
     etag: p.etag,
     liveid: p.liveid,
     transcode: transcode ? _m.video.clientIdPersistent : undefined,
+    codecs: transcode ? getPlayableVideoCodecsSync()?.join(',') : undefined,
   });
 }
 

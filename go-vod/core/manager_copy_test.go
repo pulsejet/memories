@@ -100,6 +100,33 @@ func TestManagerCopyPlayableCodecs(t *testing.T) {
 	require.True(t, m.HasStream(QUALITY_DIRECT))
 }
 
+func TestServeFullVideoPlayableCodec(t *testing.T) {
+	src := filepath.Join(t.TempDir(), "src.mp4")
+	require.NoError(t, os.WriteFile(src, []byte("fake-video-bytes"), 0644))
+
+	probe := `{"streams":[{"codec_type":"video","codec_name":"hevc","width":1280,"height":720,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000","side_data_list":[{"side_data_type":"Display Matrix","rotation":90}]}],"format":{}}`
+	cfg := config.Defaults("test")
+	cfg.TempDir = t.TempDir()
+	cfg.FFprobe = stubCopyProbe(t, probe, "", false)
+
+	m, err := NewManager(NewManagerArgs{
+		C:             cfg,
+		ManagerParams: ManagerParams{Path: src, StreamID: "id", PlayableCodecs: []string{"hevc"}},
+		Generation:    1,
+		Idle:          make(chan IdleEvent, 1),
+	})
+	require.NoError(t, err)
+	t.Cleanup(m.Destroy)
+
+	// Rotated HEVC is not copy-eligible for HLS, but a playable
+	// codec is still served directly for progressive MP4.
+	require.True(t, m.HasStream(QUALITY_MAX))
+	w := httptest.NewRecorder()
+	m.ServeFullVideo(w, httptest.NewRequest("GET", "/max.mp4", nil), QUALITY_MAX)
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Equal(t, "fake-video-bytes", w.Body.String())
+}
+
 func TestManagerCopyDisabledRotation(t *testing.T) {
 	probe := `{"streams":[{"codec_type":"video","codec_name":"h264","width":720,"height":1280,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000","side_data_list":[{"side_data_type":"Display Matrix","rotation":90}]}],"format":{}}`
 	m := newCopyManager(t, probe, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false, nil)

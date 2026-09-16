@@ -276,6 +276,9 @@ export default defineComponent({
 
     // Register global functions
     _m.modals.showSettings = this.showSettings;
+
+    // Warm codec detection for video URLs
+    void utils.getPlayableVideoCodecs();
   },
 
   mounted() {

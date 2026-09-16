@@ -1,6 +1,7 @@
 // Probes browser-playable video codecs via the Media Capabilities API.
-// The result is sent to go-vod as ?codecs=, which serves stream copy
-// instead of transcoding when the source codec is playable.
+// The result is sent to go-vod as ?codecs= for HLS and live photo
+// transcoding, which serves stream copy instead of transcoding
+// when the source codec is playable.
 // Codec names must match ffprobe codec_name; go-vod compares them verbatim.
 const VIDEO_CODEC_PROBES: { codec: string; contentType: string }[] = [
   { codec: 'h264', contentType: 'video/mp4; codecs="avc1.42E01E"' },
@@ -17,17 +18,26 @@ const PROBE_VIDEO_CONFIG = {
   framerate: 30,
 };
 
-let cached: Promise<string[]> | null = null;
+let resolved: string[] | undefined;
 
 /**
  * Playable video codecs in this browser. Never throws;
  * falls back to h264 when probing is unavailable or fails.
  */
-export function getPlayableVideoCodecs(): Promise<string[]> {
-  if (!cached) {
-    cached = detectPlayableVideoCodecs().catch(() => ['h264']);
+export async function getPlayableVideoCodecs(): Promise<string[]> {
+  if (!resolved) {
+    try {
+      resolved = await detectPlayableVideoCodecs();
+    } catch {
+      resolved = ['h264'];
+    }
   }
-  return cached;
+  return resolved;
+}
+
+/** Last resolved codecs, if detection has finished. */
+export function getPlayableVideoCodecsSync(): string[] | undefined {
+  return resolved;
 }
 
 async function detectPlayableVideoCodecs(): Promise<string[]> {

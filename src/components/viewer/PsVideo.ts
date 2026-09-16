@@ -89,12 +89,6 @@ const HLS_LIVE_CONFIG: Partial<HlsConfig> = {
 };
 
 /**
- * Browser-playable video codecs (Media Capabilities probe).
- * Resolved once in initPlayer and cached for process lifetime.
- */
-let playableCodecs: string[] | undefined;
-
-/**
  * Check if slide has video content
  */
 export function isVideoContent(content: unknown): content is VideoContent {
@@ -166,7 +160,7 @@ class VideoContentSetup {
   getHLSsrc(content: VideoContent): PlayerSrc {
     const fileid = content.data.photo.fileid;
     return {
-      src: API.VIDEO_TRANSCODE(fileid, 'index.m3u8', playableCodecs),
+      src: API.VIDEO_TRANSCODE(fileid, 'index.m3u8', utils.getPlayableVideoCodecsSync()),
       type: 'application/x-mpegurl',
     };
   }
@@ -199,7 +193,6 @@ class VideoContentSetup {
     content.videoStarting = true;
 
     try {
-      playableCodecs ??= await utils.getPlayableVideoCodecs();
       await this.initPlayerInner(content);
     } finally {
       content.videoStarting = false;
