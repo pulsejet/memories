@@ -78,7 +78,12 @@ func stubVariantManager(t *testing.T, keyFail bool) *core.Manager {
 	cfg := config.Defaults("test")
 	cfg.TempDir = t.TempDir()
 	cfg.FFprobe = bin
-	m, err := core.NewManager(cfg, "input.mp4", "id", 0, "", 1, make(chan core.IdleEvent, 1))
+	m, err := core.NewManager(core.NewManagerArgs{
+		C:             cfg,
+		ManagerParams: core.ManagerParams{Path: "input.mp4", StreamID: "id"},
+		Generation:    1,
+		Idle:          make(chan core.IdleEvent, 1),
+	})
 	require.NoError(t, err)
 	t.Cleanup(m.Destroy)
 	return m

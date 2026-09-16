@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Feature**: Direct play for browser-supported video codecs via codec detection
+
 ## [v9.0.1] - 2026-09-15
 
 - **Notice**: The next version of the Android app will be incomptible with older versions of Memories.

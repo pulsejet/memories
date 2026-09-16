@@ -121,6 +121,32 @@ func TestVodStoryboardNoFileID(t *testing.T) {
 	}
 }
 
+func TestVodCodecsQueryParam(t *testing.T) {
+	dir := t.TempDir()
+	out := filepath.Join(dir, "out.json")
+	require.NoError(t, os.WriteFile(out, []byte(
+		`{"streams":[{"codec_type":"video","codec_name":"hevc","width":1280,"height":720,"avg_frame_rate":"30/1","duration":"12","bit_rate":"1000000"}],"format":{}}`,
+	), 0644))
+	bin := filepath.Join(dir, "ffprobe")
+	require.NoError(t, os.WriteFile(bin, []byte("#!/bin/sh\ncat "+out+"\n"), 0755))
+
+	s := testServer(t, func(c *config.Config) {
+		c.Configured = true
+		c.FFprobe = bin
+	})
+
+	// Without playable codecs an HEVC source only offers a transcode.
+	w := postVod(s, `{"client":"s1","path":"/input.mp4","profile":"index.m3u8"}`)
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Contains(t, w.Body.String(), "max.m3u8")
+	require.NotContains(t, w.Body.String(), "direct.m3u8")
+
+	w = postVod(s, `{"client":"s2","path":"/input.mp4","profile":"index.m3u8","query":"?codecs=h264,hevc"}`)
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Contains(t, w.Body.String(), "direct.m3u8")
+	require.NotContains(t, w.Body.String(), "max.m3u8")
+}
+
 func TestConfigReload(t *testing.T) {
 	s := testServer(t, func(c *config.Config) { c.Configured = true })
 

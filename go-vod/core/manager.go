@@ -50,8 +50,11 @@ type Manager struct {
 	// probe holds the source properties, immutable after creation.
 	probe *ProbeVideoData
 
-	// copyEligible is set from the base probe (h264, no rotation) and is
-	// immutable after creation. It only says keyframes are worth trying.
+	// playableCodecs lists browser-playable codecs; immutable after creation.
+	playableCodecs []string
+
+	// copyEligible is set from the base probe (playable codec, no rotation)
+	// and is immutable after creation. It only says keyframes are worth trying.
 	copyEligible bool
 
 	// copyMu guards srcSegments and copyProbed with brief critical
@@ -90,22 +93,31 @@ type Rendition struct {
 	Order   int
 }
 
-func NewManager(c *config.Config, path string, id string, fileid int64, etag string, generation uint64, idle chan IdleEvent) (*Manager, error) {
+// NewManagerArgs bundles NewManager construction args.
+type NewManagerArgs struct {
+	ManagerParams
+	C          *config.Config
+	Generation uint64
+	Idle       chan IdleEvent
+}
+
+func NewManager(a NewManagerArgs) (*Manager, error) {
 	m := &Manager{
-		c:          c,
-		path:       path,
-		id:         id,
-		fileid:     fileid,
-		etag:       etag,
-		generation: generation,
-		idle:       idle,
+		c:              a.C,
+		path:           a.Path,
+		id:             a.StreamID,
+		fileid:         a.FileID,
+		etag:           a.Etag,
+		generation:     a.Generation,
+		idle:           a.Idle,
+		playableCodecs: a.PlayableCodecs,
 	}
 	m.streams = make(map[string]*Stream)
 
 	h := fnv.New32a()
-	h.Write([]byte(path))
+	h.Write([]byte(m.path))
 	ph := fmt.Sprint(h.Sum32())
-	m.tempDir = fmt.Sprintf("%s/%s-%s", m.c.TempDir, id, ph)
+	m.tempDir = fmt.Sprintf("%s/%s-%s", m.c.TempDir, m.id, ph)
 
 	// Delete temp dir if exists
 	os.RemoveAll(m.tempDir)
@@ -116,11 +128,11 @@ func NewManager(c *config.Config, path string, id string, fileid int64, etag str
 	}
 
 	// Possible streams
-	m.streams["480p"] = &Stream{c: c, m: m, quality: "480p", height: 480, width: 854, bitrate: 400}
-	m.streams["720p"] = &Stream{c: c, m: m, quality: "720p", height: 720, width: 1280, bitrate: 700}
-	m.streams["1080p"] = &Stream{c: c, m: m, quality: "1080p", height: 1080, width: 1920, bitrate: 1000}
-	m.streams["1440p"] = &Stream{c: c, m: m, quality: "1440p", height: 1440, width: 2560, bitrate: 1400}
-	m.streams["2160p"] = &Stream{c: c, m: m, quality: "2160p", height: 2160, width: 3840, bitrate: 3000}
+	m.streams["480p"] = &Stream{c: m.c, m: m, quality: "480p", height: 480, width: 854, bitrate: 400}
+	m.streams["720p"] = &Stream{c: m.c, m: m, quality: "720p", height: 720, width: 1280, bitrate: 700}
+	m.streams["1080p"] = &Stream{c: m.c, m: m, quality: "1080p", height: 1080, width: 1920, bitrate: 1000}
+	m.streams["1440p"] = &Stream{c: m.c, m: m, quality: "1440p", height: 1440, width: 2560, bitrate: 1400}
+	m.streams["2160p"] = &Stream{c: m.c, m: m, quality: "2160p", height: 2160, width: 3840, bitrate: 3000}
 
 	// height is our primary dimension for scaling
 	// using the probed size, we adjust the width of the stream
@@ -188,7 +200,7 @@ func NewManager(c *config.Config, path string, id string, fileid int64, etag str
 	// so index.m3u8 and 480p etc stay fast.
 	if m.IsCopyEligible() {
 		m.streams[QUALITY_DIRECT] = &Stream{
-			c: c, m: m,
+			c: m.c, m: m,
 			quality: QUALITY_DIRECT,
 			height:  m.probe.Height,
 			width:   m.probe.Width,
@@ -197,7 +209,7 @@ func NewManager(c *config.Config, path string, id string, fileid int64, etag str
 		}
 	} else {
 		m.streams[QUALITY_MAX] = &Stream{
-			c: c, m: m,
+			c: m.c, m: m,
 			quality: QUALITY_MAX,
 			height:  m.probe.Height,
 			width:   m.probe.Width,
@@ -444,7 +456,7 @@ func (m *Manager) ffprobe() error {
 
 	// Copy eligibility is cheap (codec + rotation); keyframes come later
 	// via EnsureCopySegments on direct.m3u8, so creation stays fast.
-	m.copyEligible = m.probe.CodecName == CODEC_H264 && m.probe.Rotation == 0
+	m.copyEligible = m.probe.Rotation == 0 && IsCodecPlayable(m.probe.CodecName, m.playableCodecs)
 
 	return nil
 }

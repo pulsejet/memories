@@ -17,7 +17,12 @@ func newCopyManagerWithEtag(t *testing.T, probeJSON, keyframes string, keyFail b
 	cfg.CacheDir = cacheDir
 	cfg.FFprobe = stubCopyProbe(t, probeJSON, keyframes, keyFail)
 
-	m, err := NewManager(cfg, "input.mp4", "id", 7, etag, 1, make(chan IdleEvent, 1))
+	m, err := NewManager(NewManagerArgs{
+		C:             cfg,
+		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", FileID: 7, Etag: etag},
+		Generation:    1,
+		Idle:          make(chan IdleEvent, 1),
+	})
 	require.NoError(t, err)
 	t.Cleanup(m.Destroy)
 	return m

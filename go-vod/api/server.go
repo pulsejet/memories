@@ -142,7 +142,13 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 		return
 	}
 
-	manager, err := s.reg.GetOrCreate(req.Path, req.Client, req.FileID, req.Etag)
+	manager, err := s.reg.GetOrCreate(core.ManagerParams{
+		Path:           req.Path,
+		StreamID:       req.Client,
+		FileID:         req.FileID,
+		Etag:           req.Etag,
+		PlayableCodecs: core.ParsePlayableCodecs(req.Query),
+	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

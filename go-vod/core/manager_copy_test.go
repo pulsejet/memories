@@ -35,20 +35,27 @@ func stubCopyProbe(t *testing.T, probeJSON, keyframes string, keyFail bool) stri
 
 const copyProbeJSON = `{"streams":[{"codec_type":"video","codec_name":"h264","width":1280,"height":720,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000"}],"format":{}}`
 
-func newCopyManager(t *testing.T, probeJSON, keyframes string, keyFail bool) *Manager {
+const hevcProbeJSON = `{"streams":[{"codec_type":"video","codec_name":"hevc","width":1280,"height":720,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000"}],"format":{}}`
+
+func newCopyManager(t *testing.T, probeJSON, keyframes string, keyFail bool, playableCodecs []string) *Manager {
 	t.Helper()
 	cfg := config.Defaults("test")
 	cfg.TempDir = t.TempDir()
 	cfg.FFprobe = stubCopyProbe(t, probeJSON, keyframes, keyFail)
 
-	m, err := NewManager(cfg, "input.mp4", "id", 0, "", 1, make(chan IdleEvent, 1))
+	m, err := NewManager(NewManagerArgs{
+		C:             cfg,
+		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", PlayableCodecs: playableCodecs},
+		Generation:    1,
+		Idle:          make(chan IdleEvent, 1),
+	})
 	require.NoError(t, err)
 	t.Cleanup(m.Destroy)
 	return m
 }
 
 func TestManagerCopySegments(t *testing.T) {
-	m := newCopyManager(t, copyProbeJSON, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false)
+	m := newCopyManager(t, copyProbeJSON, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false, nil)
 
 	// Lazy: creation advertises direct without extracting keyframes.
 	require.True(t, m.IsCopyEligible())
@@ -67,8 +74,7 @@ func TestManagerCopySegments(t *testing.T) {
 }
 
 func TestManagerCopyDisabledCodec(t *testing.T) {
-	probe := `{"streams":[{"codec_type":"video","codec_name":"hevc","width":1280,"height":720,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000"}],"format":{}}`
-	m := newCopyManager(t, probe, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false)
+	m := newCopyManager(t, hevcProbeJSON, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false, nil)
 
 	_, ok := m.CopySegments()
 	require.False(t, ok)
@@ -76,9 +82,27 @@ func TestManagerCopyDisabledCodec(t *testing.T) {
 	require.True(t, m.HasStream(QUALITY_MAX))
 }
 
+func TestManagerCopyPlayableCodecs(t *testing.T) {
+	keys := "0.000000,K__\n4.000000,K__\n8.000000,K__\n"
+
+	m := newCopyManager(t, hevcProbeJSON, keys, false, []string{"h264", "hevc"})
+	require.True(t, m.IsCopyEligible())
+	require.True(t, m.HasStream(QUALITY_DIRECT))
+	require.False(t, m.HasStream(QUALITY_MAX))
+
+	m = newCopyManager(t, hevcProbeJSON, keys, false, []string{"h264"})
+	require.False(t, m.IsCopyEligible())
+	require.False(t, m.HasStream(QUALITY_DIRECT))
+	require.True(t, m.HasStream(QUALITY_MAX))
+
+	m = newCopyManager(t, copyProbeJSON, keys, false, []string{"av1"})
+	require.True(t, m.IsCopyEligible())
+	require.True(t, m.HasStream(QUALITY_DIRECT))
+}
+
 func TestManagerCopyDisabledRotation(t *testing.T) {
 	probe := `{"streams":[{"codec_type":"video","codec_name":"h264","width":720,"height":1280,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000","side_data_list":[{"side_data_type":"Display Matrix","rotation":90}]}],"format":{}}`
-	m := newCopyManager(t, probe, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false)
+	m := newCopyManager(t, probe, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false, nil)
 
 	_, ok := m.CopySegments()
 	require.False(t, ok)
@@ -88,7 +112,7 @@ func TestManagerCopyDisabledRotation(t *testing.T) {
 func TestManagerCopyKeyframeFailure(t *testing.T) {
 	// A failing keyframe probe never fails the manager; direct falls back
 	// to re-encoding (max-style) while lower renditions keep playing.
-	m := newCopyManager(t, copyProbeJSON, "", true)
+	m := newCopyManager(t, copyProbeJSON, "", true, nil)
 
 	require.True(t, m.IsCopyEligible())
 	require.True(t, m.HasStream(QUALITY_DIRECT))
@@ -109,7 +133,7 @@ func TestManagerCopyKeyframeFailure(t *testing.T) {
 }
 
 func TestManagerCopyGridSpec(t *testing.T) {
-	m := newCopyManager(t, copyProbeJSON, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false)
+	m := newCopyManager(t, copyProbeJSON, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false, nil)
 
 	// With a grid direct copies for both HLS and MP4.
 	_, ok := m.EnsureCopySegments()
@@ -120,7 +144,7 @@ func TestManagerCopyGridSpec(t *testing.T) {
 }
 
 func TestManagerDirectChunkFallsBack(t *testing.T) {
-	m := newCopyManager(t, copyProbeJSON, "", true)
+	m := newCopyManager(t, copyProbeJSON, "", true, nil)
 
 	old := chunkWait
 	chunkWait = 50 * time.Millisecond
@@ -150,7 +174,12 @@ func newBlockingCopyManager(t *testing.T) (*Manager, string) {
 	cfg := config.Defaults("test")
 	cfg.TempDir = t.TempDir()
 	cfg.FFprobe = bin
-	m, err := NewManager(cfg, "input.mp4", "id", 0, "", 1, make(chan IdleEvent, 1))
+	m, err := NewManager(NewManagerArgs{
+		C:             cfg,
+		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id"},
+		Generation:    1,
+		Idle:          make(chan IdleEvent, 1),
+	})
 	require.NoError(t, err)
 	t.Cleanup(m.Destroy)
 	return m, dir

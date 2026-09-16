@@ -33,7 +33,12 @@ func testStoryboardManager(t *testing.T, ffmpeg string) *Manager {
 	cfg.FFprobe = stubProbe(t)
 	cfg.FFmpeg = ffmpeg
 
-	m, err := NewManager(cfg, "input.mp4", "id", 7, "etag-01", 1, make(chan IdleEvent, 1))
+	m, err := NewManager(NewManagerArgs{
+		C:             cfg,
+		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", FileID: 7, Etag: "etag-01"},
+		Generation:    1,
+		Idle:          make(chan IdleEvent, 1),
+	})
 	require.NoError(t, err)
 	t.Cleanup(m.Destroy)
 	return m
@@ -90,7 +95,12 @@ func TestEnsureStoryboardNoEtag(t *testing.T) {
 	cfg.CacheDir = t.TempDir()
 	cfg.FFprobe = stubProbe(t)
 
-	m, err := NewManager(cfg, "input.mp4", "id", 0, "", 1, make(chan IdleEvent, 1))
+	m, err := NewManager(NewManagerArgs{
+		C:             cfg,
+		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id"},
+		Generation:    1,
+		Idle:          make(chan IdleEvent, 1),
+	})
 	require.NoError(t, err)
 	defer m.Destroy()
 
@@ -134,7 +144,12 @@ func TestStoryboardBuildsSerializeAtOneSlot(t *testing.T) {
 		cfg.FFprobe = stubProbe(t)
 		cfg.FFmpeg = bin
 
-		m, err := NewManager(cfg, "input.mp4", "id", fileid, "etag-01", 1, make(chan IdleEvent, 1))
+		m, err := NewManager(NewManagerArgs{
+			C:             cfg,
+			ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", FileID: fileid, Etag: "etag-01"},
+			Generation:    1,
+			Idle:          make(chan IdleEvent, 1),
+		})
 		require.NoError(t, err)
 		defer m.Destroy()
 		inputs = append(inputs, m.storyboardInput())
@@ -163,7 +178,12 @@ func TestStoryboardSurvivesManagerDestroy(t *testing.T) {
 	cfg.FFprobe = stubProbe(t)
 	cfg.FFmpeg = bin
 
-	m, err := NewManager(cfg, "input.mp4", "id", 7, "etag-01", 1, make(chan IdleEvent, 1))
+	m, err := NewManager(NewManagerArgs{
+		C:             cfg,
+		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", FileID: 7, Etag: "etag-01"},
+		Generation:    1,
+		Idle:          make(chan IdleEvent, 1),
+	})
 	require.NoError(t, err)
 	in := m.storyboardInput()
 	m.Destroy()

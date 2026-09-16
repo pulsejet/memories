@@ -152,13 +152,16 @@ export class API {
     return tok(gen(`${BASE}/image/delete/{id}`, { id }));
   }
 
-  static VIDEO_TRANSCODE(fileid: number, file = 'index.m3u8') {
+  static VIDEO_TRANSCODE(fileid: number, file = 'index.m3u8', codecs?: string[]) {
     return tok(
-      gen(`${BASE}/video/transcode/{client}/{fileid}/{file}`, {
-        client: _m.video.clientId,
-        fileid,
-        file,
-      }),
+      API.Q(
+        gen(`${BASE}/video/transcode/{client}/{fileid}/{file}`, {
+          client: _m.video.clientId,
+          fileid,
+          file,
+        }),
+        { codecs: codecs?.join(',') },
+      ),
     );
   }
 
