@@ -92,8 +92,6 @@ OC.L10N.register(
     "Extension" : "Estensione",
     "Name is required." : "Su nùmene est rechertu: ",
     "Quality" : "Calidade",
-    "Direct" : "Deretu",
-    "Auto" : "Auto",
     "Setup" : "Cunfigura",
     "Shared by {user}" : "Cumpartzidu dae {user}",
     "Yes" : "Si",

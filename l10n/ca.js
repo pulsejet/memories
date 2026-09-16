@@ -203,8 +203,6 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Tingueu en compte que l'àrea de retall seleccionada és inferior al canvi de mida aplicat, cosa que pot provocar una disminució de la qualitat",
     "Actual size (100%)" : "Mida real (100%)",
     "Fit size" : "Talla ajustada",
-    "Direct" : "Dirrecte",
-    "Auto" : "Automàtic",
     "Setup" : "Configuració",
     "Failed to create {albumName}." : "No s'ha pogut crear {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "No s'ha pogut reanomenar {currentAlbumName} a {newAlbumName}.",

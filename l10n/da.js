@@ -212,7 +212,6 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Bemærk, at det valgte beskæringsareal er lavere end den anvendte ændring, hvilket kan medføre kvalitetsfald",
     "Actual size (100%)" : "Faktisk størrelse (100%)",
     "Fit size" : "Tilpasset størrelse",
-    "Auto" : "Auto",
     "Setup" : "Opsætning",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Kunne ikke omdøbe {currentAlbumName} til {newAlbumName}.",
     "No items" : "Ingen elementer",

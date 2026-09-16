@@ -206,7 +206,6 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Perhatikan bahwa area potong yang dipilih lebih kecil daripada pengubahan ukuran yang diterapkan sehingga dapat menyebabkan penurunan kualitas",
     "Actual size (100%)" : "Ukuran sebenarnya (100%)",
     "Fit size" : "Pas ukuran",
-    "Auto" : "Otomatis",
     "Setup" : "Pengaturan",
     "Failed to create {albumName}." : "Gagal membuat {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Gagal mengubah nama {currentAlbumName} to {newAlbumName}.",

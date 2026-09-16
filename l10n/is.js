@@ -202,8 +202,6 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Athugaðu að valið afskurðarsvæði er minna en virkjuð stærðarbreyting gefur, sem gæti komið niður á gæðum",
     "Actual size (100%)" : "Raunstærð (100%)",
     "Fit size" : "Aðlaga stærð",
-    "Direct" : "Beint",
-    "Auto" : "Sjálfvirkt",
     "Setup" : "Uppsetning",
     "Failed to create {albumName}." : "Gat ekki búið til {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Mistókst að endurnefna {currentAlbumName} sem {newAlbumName}.",

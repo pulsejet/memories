@@ -183,7 +183,6 @@
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Сонгосон тайрах хэсэг нь хэрэглэгдсэн хэмжээ өөрчлөлтөөс бага байгаа тул чанар буурах магадлалтайг анхаарна уу.",
     "Actual size (100%)" : "Жинхэнэ хэмжээ (100%)",
     "Fit size" : "Тохирох хэмжээ",
-    "Auto" : "Автомат",
     "Setup" : "–¢–æ—Ö–∏—Ä—É—É–ª–∞—Ö",
     "Shared by {user}" : "{user}-р хуваалцсан",
     "Yes" : "Тийм",

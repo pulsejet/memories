@@ -147,8 +147,6 @@ OC.L10N.register(
     "Stroke" : "Stroke",
     "Extension" : "Asiɣzef",
     "Quality" : "Taɣara",
-    "Direct" : "Srid",
-    "Auto" : "Awurman",
     "Setup" : "Sbadu",
     "No items" : "Ulac iferdisen",
     "Yes" : "Ih",

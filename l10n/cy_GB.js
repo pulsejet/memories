@@ -45,7 +45,6 @@ OC.L10N.register(
     "Undo" : "Dadwneud",
     "Custom" : "Cyfaddas",
     "Size" : "Maint",
-    "Auto" : "Awto",
     "Setup" : "Gosod",
     "Yes" : "Ie",
     "No" : "Na",

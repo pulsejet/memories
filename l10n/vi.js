@@ -79,7 +79,6 @@ OC.L10N.register(
     "Size" : "Kích cỡ",
     "Extension" : "Tiện ích",
     "Name is required." : "Tên là bắt buộc.",
-    "Auto" : "Tự động",
     "Setup" : "Cài đặt",
     "Yes" : "Có",
     "No" : "Không",

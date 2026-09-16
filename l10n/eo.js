@@ -67,7 +67,6 @@ OC.L10N.register(
     "Size" : "Grando",
     "Position" : "Loko",
     "Extension" : "Dosiersufikso",
-    "Auto" : "Aŭtomate",
     "Setup" : "Agordi",
     "Yes" : "Jes",
     "No" : "Ne",

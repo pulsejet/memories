@@ -282,8 +282,6 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Let op dat de geselecteerde bijsnijruimte kleiner is dan de gekozen formaatswijziging wat kwaliteitsverlies kan geven",
     "Actual size (100%)" : "Ware grootte (100%)",
     "Fit size" : "Passend maken",
-    "Direct" : "Direct",
-    "Auto" : "Automatisch",
     "Setup" : "Configureren",
     "Failed to create {albumName}." : "Het maken van {albumName} is mislukt.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Hernoemen van {currentAlbumName} naar {newAlbumName} mislukt.",

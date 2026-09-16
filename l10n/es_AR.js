@@ -66,7 +66,6 @@ OC.L10N.register(
     "Text" : "Texto",
     "Size" : "Tamaño",
     "Position" : "Posición",
-    "Direct" : "Directo",
     "Setup" : "Ajustes",
     "No items" : "No hay elementos",
     "Yes" : "Sí",

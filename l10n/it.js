@@ -209,8 +209,6 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Nota che l'area di ritaglio selezionata è più piccola del ridimensionamento applicato, il che potrebbe causare perdita di qualità",
     "Actual size (100%)" : "Dimensione effettiva (100%)",
     "Fit size" : "Adatta dimensione",
-    "Direct" : "Diretto",
-    "Auto" : "Automatico",
     "Setup" : "Configurazione",
     "Failed to create {albumName}." : "Creazione di {albumName} non riuscita",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Rinominazione di {currentAlbumName} in {newAlbumName} non riuscita.",
