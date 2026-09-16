@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v9.0.0] - 2026-09-15
+## [v9.0.1] - 2026-09-15
 
 - **Notice**: The next version of the Android app will be incomptible with older versions of Memories.
 - **Notice**: Requires Nextcloud 34 or later.
