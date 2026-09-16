@@ -32,7 +32,7 @@ Very important.
 - Verify versions in info.xml and package.json are committed (`git show HEAD:...`).
 - On master: `git fetch origin`, check in sync with origin/master and development. Dirty tree OK if tag targets clean HEAD.
 - `git tag vX.X.X`, `git push origin vX.X.X`. Check tag absent first, `ls-remote` after.
-- `gh release create <tag> --generate-notes --notes <CHANGELOG-URL> --notes-start-tag <prev-stable> --verify-tag`, plus `--prerelease` for alpha/beta/rc.
+- `gh release create <tag> --title <tag> --generate-notes --notes <CHANGELOG-URL> --notes-start-tag <prev-stable> --verify-tag`, plus `--prerelease` for alpha/beta/rc.
   - `--notes` prepends changelog pointer to auto notes.
   - `--notes-start-tag` must be last stable (auto picks newest tag by date, e.g. go-vod/*).
   - Fix wrong base via `gh api .../generate-notes -f previous_tag_name=<prev>` + `gh release edit --notes-file`.

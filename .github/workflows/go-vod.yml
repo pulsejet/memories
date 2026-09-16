@@ -32,6 +32,7 @@ jobs:
           file: go-vod/go-vod-*
           file_glob: true
           tag: ${{ github.ref }}
+          release_name: ${{ github.ref_name }}
           overwrite: true
           make_latest: false
 
