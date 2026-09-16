@@ -160,6 +160,10 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 			return
 		}
 		body, err := VariantPlaylist(manager, quality, s.chunkSize(), query)
+		if errors.Is(err, core.ErrCopyPending) {
+			w.WriteHeader(http.StatusConflict)
+			return
+		}
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return

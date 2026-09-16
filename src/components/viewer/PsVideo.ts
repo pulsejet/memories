@@ -66,8 +66,16 @@ const HLS_LIVE_CONFIG = {
   startFragPrefetch: true,
   /** Tolerate segments not opening on a keyframe (split_by_time). */
   maxBufferHole: 0.5,
-  /** direct.m3u8 blocks on go-vod keyframe extraction (up to 5 min). */
-  levelLoadingTimeOut: 360000,
+  /** direct.m3u8 409s while probing; fail over fast, retry upgrade. */
+  playlistLoadPolicy: {
+    default: {
+      maxTimeToFirstByteMs: 3000,
+      maxLoadTimeMs: 3000,
+      timeoutRetry: { maxNumRetry: 100, retryDelayMs: 0, maxRetryDelayMs: 0 },
+      errorRetry: { maxNumRetry: 100, retryDelayMs: 1000, maxRetryDelayMs: 8000 },
+    },
+  },
+  errorPenaltyExpireMs: 3000,
 };
 
 /**

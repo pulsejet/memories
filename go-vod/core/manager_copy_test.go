@@ -214,3 +214,49 @@ func TestKeyframeProbeDoesNotBlockTranscodes(t *testing.T) {
 		t.Fatal("keyframe probe never finished")
 	}
 }
+
+func TestDirectPendingFastWhileProbeBlocked(t *testing.T) {
+	m, dir := newBlockingCopyManager(t)
+
+	m.StartCopyProbeAsync()
+
+	deadline := time.Now().Add(10 * time.Second)
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "started")); err == nil {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("keyframe probe never started")
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+
+	fast := make(chan bool, 1)
+	go func() {
+		_, _ = m.TryCacheCopySegments()
+		fast <- m.CopyProbed()
+	}()
+	select {
+	case probed := <-fast:
+		require.False(t, probed)
+	case <-time.After(5 * time.Second):
+		t.Fatal("direct pending check blocked behind keyframe probe")
+	}
+
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "release"), []byte{}, 0644))
+	deadline = time.Now().Add(10 * time.Second)
+	for {
+		if segs, ok := m.TryCacheCopySegments(); ok {
+			require.Len(t, segs, 3)
+			return
+		}
+		if segs, ok := m.CopySegments(); ok {
+			require.Len(t, segs, 3)
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("grid never warmed after probe release")
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+}

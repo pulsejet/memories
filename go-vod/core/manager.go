@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"hash/fnv"
 	"log"
@@ -21,6 +22,10 @@ const (
 	QUALITY_MAX    = "max"
 	QUALITY_DIRECT = "direct"
 )
+
+// ErrCopyPending means the keyframe probe is still running; answer 409
+// so the client fails over and retries later once the grid is warm.
+var ErrCopyPending = errors.New("keyframe probe pending")
 
 type Manager struct {
 	// c is the shared server config.
@@ -292,6 +297,46 @@ func (m *Manager) CopySegments() ([]ffmpeg.Segment, bool) {
 		return nil, false
 	}
 	return m.srcSegments, true
+}
+
+// CopyProbed reports whether a keyframe attempt has finished.
+func (m *Manager) CopyProbed() bool {
+	m.copyMu.Lock()
+	defer m.copyMu.Unlock()
+	return m.copyProbed
+}
+
+// TryCacheCopySegments returns the grid from memory or disk cache
+// without running ffprobe.
+func (m *Manager) TryCacheCopySegments() ([]ffmpeg.Segment, bool) {
+	if !m.copyEligible {
+		return nil, false
+	}
+	if segs, ok := m.CopySegments(); ok {
+		return segs, true
+	}
+	keys, ok := LoadCachedKeyframes(m.c.ResolvedCacheDir(), m.fileid, m.etag)
+	if !ok {
+		return nil, false
+	}
+	segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.c.ChunkSize)
+	if len(segs) == 0 {
+		return nil, false
+	}
+	m.copyMu.Lock()
+	defer m.copyMu.Unlock()
+	if len(m.srcSegments) == 0 {
+		m.srcSegments = segs
+	} else {
+		segs = m.srcSegments
+	}
+	return segs, true
+}
+
+// StartCopyProbeAsync warms the grid in the background; shared across
+// retries by singleflight and outlives any single request.
+func (m *Manager) StartCopyProbeAsync() {
+	go m.EnsureCopySegments()
 }
 
 // EnsureCopySegments blocks for keyframe extraction on first direct use.

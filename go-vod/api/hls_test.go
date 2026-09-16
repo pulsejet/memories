@@ -87,27 +87,62 @@ func stubVariantManager(t *testing.T, keyFail bool) *core.Manager {
 func TestVariantPlaylistLazyDirect(t *testing.T) {
 	m := stubVariantManager(t, false)
 
-	// Transcodes never touch keyframes, even with a failing keyframe pass.
 	got, err := VariantPlaylist(m, "480p", 4, "")
 	require.NoError(t, err)
 	require.Contains(t, got, "480p-000000.ts")
+	require.False(t, m.CopyProbed())
+	_, ok := m.CopySegments()
+	require.False(t, ok)
 
-	// Only direct.m3u8 extracts keyframes.
+	_, ok = m.EnsureCopySegments()
+	require.True(t, ok)
 	got, err = VariantPlaylist(m, "direct", 4, "")
 	require.NoError(t, err)
 	require.Contains(t, got, "direct-000000.ts")
 }
 
+func TestVariantPlaylistDirectPending(t *testing.T) {
+	m := stubVariantManager(t, false)
+
+	_, err := VariantPlaylist(m, "direct", 4, "")
+	require.ErrorIs(t, err, core.ErrCopyPending)
+
+	deadline := time.Now().Add(10 * time.Second)
+	for {
+		got, err := VariantPlaylist(m, "direct", 4, "")
+		if err == nil {
+			require.Contains(t, got, "direct-000000.ts")
+			return
+		}
+		require.ErrorIs(t, err, core.ErrCopyPending)
+		if time.Now().After(deadline) {
+			t.Fatal("direct.m3u8 never warmed past 409")
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+}
+
 func TestVariantPlaylistDirectFallback(t *testing.T) {
 	m := stubVariantManager(t, true)
 
-	// Zero keyframes: direct serves max-style uniform segments under its
-	// own name instead of failing.
-	got, err := VariantPlaylist(m, "direct", 4, "")
-	require.NoError(t, err)
-	require.Contains(t, got, "direct-000000.ts")
-	require.NotContains(t, got, "max-")
-	require.Contains(t, got, "#EXT-X-TARGETDURATION:4")
+	_, err := VariantPlaylist(m, "direct", 4, "")
+	require.ErrorIs(t, err, core.ErrCopyPending)
+
+	deadline := time.Now().Add(10 * time.Second)
+	for {
+		got, err := VariantPlaylist(m, "direct", 4, "")
+		if err == nil {
+			require.Contains(t, got, "direct-000000.ts")
+			require.NotContains(t, got, "max-")
+			require.Contains(t, got, "#EXT-X-TARGETDURATION:4")
+			break
+		}
+		require.ErrorIs(t, err, core.ErrCopyPending)
+		if time.Now().After(deadline) {
+			t.Fatal("direct.m3u8 never fell back past 409")
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
 
 	// Lower renditions still serve.
 	_, err = VariantPlaylist(m, "480p", 4, "")
