@@ -38,6 +38,7 @@ func NewServer(cfg *config.Config) *Server {
 
 func (s *Server) routes() *http.ServeMux {
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /health", s.handleHealth)
 	mux.HandleFunc("POST /vod", s.handleVod)
 	mux.HandleFunc("POST /config", s.handleConfig)
 	mux.HandleFunc("POST /create", s.handleCreate)
@@ -78,6 +79,14 @@ type VodRequest struct {
 	Path    string `json:"path"`
 	Profile string `json:"profile"`
 	Query   string `json:"query"`
+}
+
+func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"status":  "ok",
+		"version": s.cfg.Version,
+	})
 }
 
 func (s *Server) handleVod(w http.ResponseWriter, r *http.Request) {

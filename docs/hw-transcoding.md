@@ -50,7 +50,7 @@ NVIDIA GPUs support hardware transcoding using NVENC.
         depends_on:
           - server
         healthcheck:
-          test: ["CMD-SHELL", "curl -f http://localhost:47788/test/none/test || exit 1"]
+          test: ["CMD-SHELL", "curl -f http://localhost:47788/health || exit 1"]
           interval: 30s
           timeout: 5s
           retries: 3

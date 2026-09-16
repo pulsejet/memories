@@ -32,6 +32,23 @@ func postVod(s *Server, body string) *httptest.ResponseRecorder {
 	return w
 }
 
+func TestHealth(t *testing.T) {
+	s := testServer(t, nil)
+
+	r := httptest.NewRequest("GET", "/health", nil)
+	w := httptest.NewRecorder()
+	s.routes().ServeHTTP(w, r)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var body struct {
+		Status  string `json:"status"`
+		Version string `json:"version"`
+	}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
+	require.Equal(t, "ok", body.Status)
+	require.Equal(t, "test", body.Version)
+}
+
 func TestVodBadRequests(t *testing.T) {
 	s := testServer(t, func(c *config.Config) { c.Configured = true })
 
