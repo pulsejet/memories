@@ -55,6 +55,7 @@ trait UtilController
                 } catch (\OCA\Memories\HttpResponseException $e) {
                     $res = $e->response;
                     $output->setHttpResponseCode($res->getStatus());
+                    $output->setHeader($this->getStatusHeader($res->getStatus()));
                     if ($res instanceof Http\DataResponse) {
                         $output->setHeader('Content-Type: application/json');
                         $output->setOutput(json_encode($res->getData()));
@@ -63,11 +64,22 @@ trait UtilController
                     }
                 } catch (\Exception $e) {
                     $output->setHttpResponseCode(Http::STATUS_INTERNAL_SERVER_ERROR);
+                    $output->setHeader($this->getStatusHeader(Http::STATUS_INTERNAL_SERVER_ERROR));
                     $output->setHeader('Content-Type: application/json');
                     $output->setOutput(json_encode([
                         'message' => $e->getMessage(),
                     ]));
                 }
+            }
+
+            /**
+             * Status must be sent via header() too: \OC\AppFramework\App::main()
+             * already sent 200 before callback(), and http_response_code() alone
+             * does not override it on php-fpm (https://bugs.php.net/bug.php?id=81451).
+             */
+            private function getStatusHeader(int $code): string
+            {
+                return \sprintf('%s %d', $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1', $code);
             }
         };
     }
