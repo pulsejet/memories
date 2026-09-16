@@ -123,7 +123,10 @@ func FormatVTTTime(s float64) string {
 // (-skip_frame nokey), picks frames at the planned interval, scales and
 // tiles them into sprite sheets at pattern (printf-style, e.g. storyboard-%d.jpg).
 func StoryboardArgs(input string, interval float64, cols, rows, sprites int, pattern string) []string {
-	filter := fmt.Sprintf("fps=1/%.6f,scale=%d:%d:force_original_aspect_ratio=decrease,pad=%d:%d:(ow-iw)/2:(oh-ih)/2,tile=%dx%d",
+	// format=yuv420p keeps 10-bit/HDR sources away from the mjpeg encoder;
+	// eof_action=pass flushes the last frame so clips shorter than the
+	// interval still yield a sprite instead of no filtered frames.
+	filter := fmt.Sprintf("fps=1/%.6f:eof_action=pass,scale=%d:%d:force_original_aspect_ratio=decrease,format=yuv420p,pad=%d:%d:(ow-iw)/2:(oh-ih)/2,tile=%dx%d",
 		interval, StoryboardWidth, StoryboardHeight, StoryboardWidth, StoryboardHeight,
 		cols, rows)
 	return []string{

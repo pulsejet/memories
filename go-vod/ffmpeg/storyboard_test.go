@@ -76,7 +76,7 @@ func TestStoryboardArgs(t *testing.T) {
 		"-skip_frame", "nokey",
 		"-i", "in.mp4",
 		"-an",
-		"-vf", "fps=1/5.000000,scale=160:90:force_original_aspect_ratio=decrease,pad=160:90:(ow-iw)/2:(oh-ih)/2,tile=10x2",
+		"-vf", "fps=1/5.000000:eof_action=pass,scale=160:90:force_original_aspect_ratio=decrease,format=yuv420p,pad=160:90:(ow-iw)/2:(oh-ih)/2,tile=10x2",
 		"-start_number", "0",
 		"-frames:v", "1",
 		"-q:v", "4",
