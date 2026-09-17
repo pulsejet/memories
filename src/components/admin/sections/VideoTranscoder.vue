@@ -45,10 +45,10 @@
 
       <NcTextField
         :disabled="!enableTranscoding || !config['memories.vod.external']"
-        :label="t('memories', 'Connection address (same as bind if local)')"
+        :label="t('memories', 'Connection addresses (comma separated)')"
         :label-visible="true"
-        :model-value="config['memories.vod.connect']"
-        @change="update('memories.vod.connect', $event.target.value)"
+        :model-value="config['memories.vod.connect'].join(', ')"
+        @change="updateConnect($event.target.value)"
       />
 
       <NcTextField
@@ -77,5 +77,12 @@ export default defineComponent({
   name: 'VideoTranscoder',
   title: t('memories', 'Transcoder'),
   mixins: [AdminMixin],
+
+  methods: {
+    updateConnect(value: string) {
+      const array = value.split(',').map((s) => s.trim());
+      this.update('memories.vod.connect', array.filter(Boolean));
+    },
+  },
 });
 </script>

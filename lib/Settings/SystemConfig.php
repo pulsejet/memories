@@ -92,9 +92,9 @@ final class SystemConfig
         // Bind address to use when starting the transcoding server
         'memories.vod.bind' => '127.0.0.1:47788',
 
-        // Address used to connect to the transcoding server
-        // If not specified, the bind address above will be used
-        'memories.vod.connect' => '127.0.0.1:47788',
+        // Transcoding servers to connect to in external mode.
+        // Each client is sticky-routed to one server by hash.
+        'memories.vod.connect' => ['127.0.0.1:47788'],
 
         // Mark go-vod as external. If true, Memories will not attempt to
         // start go-vod if it is not running already.

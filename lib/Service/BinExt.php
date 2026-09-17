@@ -177,14 +177,18 @@ final class BinExt
     }
 
     /** Get the upstream URL for a go-vod API (vod, create). */
-    public static function getGoVodEndpoint(string $endpoint): string
+    public static function getGoVodEndpoint(string $client, string $endpoint): string
     {
-        $connect = $bind = SystemConfig::get('memories.vod.bind');
+        $bind = SystemConfig::get('memories.vod.bind');
+        $servers = [$bind];
         if (SystemConfig::get('memories.vod.external')) {
-            $connect = SystemConfig::get('memories.vod.connect', $bind);
+            $servers = SystemConfig::get('memories.vod.connect') ?: [$bind];
         }
 
-        return "http://{$connect}/{$endpoint}";
+        // Sticky-route each client to one server so go-vod state stays local
+        $srv = $servers[(crc32($client) & 0xFFFFFFFF) % \count($servers)];
+
+        return "http://{$srv}/{$endpoint}";
     }
 
     public static function goVodTConfig(): array
@@ -352,7 +356,7 @@ final class BinExt
         register_shutdown_function(static fn () => @unlink($testfile));
 
         // Make request
-        $url = self::getGoVodEndpoint('vod');
+        $url = self::getGoVodEndpoint('test', 'vod');
 
         try {
             $client = new \GuzzleHttp\Client();

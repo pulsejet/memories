@@ -71,5 +71,13 @@ final class Repair implements IRepairStep
                 $this->config->setSystemValue($key, (int) $value ?: 2048);
             }
         }
+
+        // changed from string to string[]
+        $connectKey = 'memories.vod.connect';
+        $connect = $this->config->getSystemValue($connectKey, null);
+        if (\is_string($connect)) {
+            $output->info("Fixing system config value for {$connectKey}");
+            $this->config->setSystemValue($connectKey, [trim($connect)]);
+        }
     }
 }

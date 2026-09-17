@@ -93,6 +93,10 @@ NVIDIA GPUs support hardware transcoding using NVENC.
 
 Your external transcoder should now be functional. You can check the transcoding logs by running `docker compose logs -f go-vod`.
 
+!!! tip "Multiple transcoders"
+
+    You can run multiple go-vod instances on separate hosts for more concurrency. List them all in the *connection addresses* field in the admin panel. Each client is sticky-routed to one server.
+
 !!! tip "Usage with Nextcloud AIO"
 
     If you are not using NVENC, you can use the **memories community container**. Relevant documentation can be found [here](https://github.com/nextcloud/all-in-one/tree/main/community-containers/memories), and general directions on using community containers [here](https://github.com/nextcloud/all-in-one/tree/main/community-containers). AIO v7.7.0 or higher is required.

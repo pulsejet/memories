@@ -257,7 +257,7 @@ final class VideoController extends GenericApiController
     {
         BinExt::ensureGoVod();
 
-        $url = BinExt::getGoVodEndpoint('vod');
+        $url = BinExt::getGoVodEndpoint($client, 'vod');
 
         $body = json_encode([
             'client' => $client,
@@ -343,7 +343,7 @@ final class VideoController extends GenericApiController
     {
         BinExt::ensureGoVod();
 
-        $url = BinExt::getGoVodEndpoint('create');
+        $url = BinExt::getGoVodEndpoint($client, 'create');
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

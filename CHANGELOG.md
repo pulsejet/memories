@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- **Feature**: Direct play for browser-supported video codecs via codec detection
+- **Feature**: Direct play for browser-supported video codecs via codec detection.
+- **Feature**: Support multiple external transcoders with automatic load distribution.
 
 ## [v9.0.1] - 2026-09-15
 
