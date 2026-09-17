@@ -331,14 +331,25 @@ final class BinExt
     {
         // Check if disabled
         if (SystemConfig::get('memories.vod.disable')) {
-            throw new \Exception('Transcoding is disabled');
+            throw new \Exception('transcoding is disabled');
         }
 
         // Ensure transcoder is running
         self::ensureGoVod();
 
-        // TODO: check data mount; ignoring the result of the file for now
-        $testfile = realpath(__DIR__.'/../../exiftest.jpg');
+        // Copy test file into datadir so (external) go-vod can access it
+        $src = realpath(__DIR__.'/../../exiftest.jpg');
+        if (!$src) {
+            throw new \Exception('could not find test file');
+        }
+
+        $config = \OC::$server->get(\OCP\IConfig::class);
+        $dataDir = $config->getSystemValueString('datadirectory', \OC::$SERVERROOT.'/data');
+        $testfile = rtrim($dataDir, '/').'/go-vod-test-'.uniqid().'.jpg';
+        if (!@copy($src, $testfile)) {
+            throw new \Exception("failed to copy test file to datadir ({$testfile})");
+        }
+        register_shutdown_function(static fn () => @unlink($testfile));
 
         // Make request
         $url = self::getGoVodEndpoint('vod');
@@ -348,31 +359,37 @@ final class BinExt
             $res = $client->request('POST', $url, [
                 'json' => [
                     'client' => 'test',
-                    'fileid' => 0,
-                    'etag' => '',
                     'path' => $testfile,
                     'profile' => 'test',
-                    'query' => '',
                     'config' => self::goVodTConfig(),
                 ],
                 'timeout' => 1,
                 'connect_timeout' => 1,
             ]);
         } catch (\Exception $e) {
-            throw new \Exception('failed to connect to go-vod: '.$e->getMessage());
+            throw new \Exception('failed to connect: '.$e->getMessage());
         }
 
         // Parse body
         $json = json_decode((string) $res->getBody(), true);
         if (!$json) {
-            throw new \Exception('failed to parse go-vod response');
+            throw new \Exception('failed to parse response');
         }
 
         // Check version
         $version = $json['version'];
         $target = self::GOVOD_VER;
         if (!version_compare($version, $target, '=')) {
-            throw new \Exception("govod version does not match: expected {$target} but found {$version}");
+            throw new \Exception("version does not match: expected {$target} but found {$version}");
+        }
+
+        // Check go-vod can read the file (size must match)
+        $expected = filesize($testfile);
+        if (false === $expected || !isset($json['size']) || (int) $json['size'] !== $expected) {
+            $got = $json['size'] ?? 'missing';
+            $testDir = \dirname($testfile);
+
+            throw new \Exception("cannot access dir '{$testDir}': {$expected} =/= {$got}");
         }
 
         return $version;
