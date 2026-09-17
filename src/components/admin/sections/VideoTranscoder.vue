@@ -28,7 +28,7 @@
       </NcCheckboxRadioSwitch>
 
       <NcTextField
-        :disabled="!enableTranscoding"
+        :disabled="!enableTranscoding || config['memories.vod.external']"
         :label="t('memories', 'Binary path (local only)')"
         :label-visible="true"
         :model-value="config['memories.vod.path']"
@@ -36,7 +36,7 @@
       />
 
       <NcTextField
-        :disabled="!enableTranscoding"
+        :disabled="!enableTranscoding || config['memories.vod.external']"
         :label="t('memories', 'Bind address (local only)')"
         :label-visible="true"
         :model-value="config['memories.vod.bind']"
@@ -44,7 +44,7 @@
       />
 
       <NcTextField
-        :disabled="!enableTranscoding"
+        :disabled="!enableTranscoding || !config['memories.vod.external']"
         :label="t('memories', 'Connection address (same as bind if local)')"
         :label-visible="true"
         :model-value="config['memories.vod.connect']"

@@ -176,8 +176,10 @@ final class BinExt
     /** Get the upstream URL for a go-vod API (vod, config, create). */
     public static function getGoVodEndpoint(string $endpoint): string
     {
-        $bind = SystemConfig::get('memories.vod.bind');
-        $connect = SystemConfig::get('memories.vod.connect', $bind);
+        $connect = $bind = SystemConfig::get('memories.vod.bind');
+        if (SystemConfig::get('memories.vod.external')) {
+            $connect = SystemConfig::get('memories.vod.connect', $bind);
+        }
 
         return "http://{$connect}/{$endpoint}";
     }
