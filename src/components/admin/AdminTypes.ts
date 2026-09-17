@@ -47,6 +47,12 @@ export type ISystemConfig = {
 
 export type IBinaryStatus = 'ok' | 'not_found' | 'not_executable' | 'test_ok' | string;
 
+export type IServiceStatus = {
+  server: string;
+  healthy: boolean;
+  detail: string;
+};
+
 export type ISystemStatus = {
   last_index_job_start: number;
   last_index_job_duration: number;
@@ -66,6 +72,7 @@ export type ISystemStatus = {
   ffmpeg: IBinaryStatus;
   ffprobe: IBinaryStatus;
   govod: IBinaryStatus;
+  govod_servers: IServiceStatus[];
   vaapi_dev: 'ok' | 'not_found' | 'not_readable';
 
   action_token: string;

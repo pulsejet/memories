@@ -6,7 +6,7 @@ const NcNoteCard = defineAsyncComponent(() => import('@nextcloud/vue/components/
 const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 import NcButton from '@nextcloud/vue/components/NcButton';
 
-import type { ISystemStatus, ISystemConfig, IBinaryStatus } from './AdminTypes';
+import type { ISystemStatus, ISystemConfig, IBinaryStatus, IServiceStatus } from './AdminTypes';
 import type { IConfig } from '@typings';
 
 export default defineComponent({
@@ -101,6 +101,23 @@ export default defineComponent({
 
     binaryStatusOk(status: IBinaryStatus): boolean {
       return status === 'ok' || status.startsWith('test_ok');
+    },
+
+    serviceStatus(s: IServiceStatus): string {
+      if (s.healthy) {
+        return this.t('memories', '{srv} - Healthy ({version}).', {
+          srv: s.server,
+          version: s.detail,
+        });
+      }
+      return this.t('memories', '{srv} - Unhealthy ({info}).', {
+        srv: s.server,
+        info: s.detail,
+      });
+    },
+
+    serviceStatusType(s: IServiceStatus): 'success' | 'error' {
+      return s.healthy ? 'success' : 'error';
     },
   },
 

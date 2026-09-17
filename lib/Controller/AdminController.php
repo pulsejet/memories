@@ -170,10 +170,29 @@ final class AdminController extends GenericApiController
             $extGoVod = SystemConfig::get('memories.vod.external');
             $status['govod'] = $this->getExecutableStatus(
                 static fn () => BinExt::getGoVodBin(),
-                static fn () => BinExt::testGoVod(),
+                static fn ($p) => BinExt::testGoVodBin($p),
                 !$extGoVod,
                 !$extGoVod,
             );
+
+            // Check each go-vod server separately
+            $govods = [];
+            foreach (BinExt::getGoVodServers() as $server) {
+                try {
+                    $govods[] = [
+                        'server' => $server,
+                        'healthy' => true,
+                        'detail' => BinExt::testGoVod($server),
+                    ];
+                } catch (\Exception $e) {
+                    $govods[] = [
+                        'server' => $server,
+                        'healthy' => false,
+                        'detail' => $e->getMessage(),
+                    ];
+                }
+            }
+            $status['govod_servers'] = $govods;
 
             // Check for VA-API device
             $devPath = SystemConfig::get('memories.vod.vaapi.device');

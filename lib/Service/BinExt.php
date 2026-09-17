@@ -176,14 +176,21 @@ final class BinExt
         return false;
     }
 
+    /** Get all configured go-vod servers. */
+    public static function getGoVodServers(): array
+    {
+        $bind = SystemConfig::get('memories.vod.bind');
+        if (!SystemConfig::get('memories.vod.external')) {
+            return [$bind];
+        }
+
+        return SystemConfig::get('memories.vod.connect') ?: [$bind];
+    }
+
     /** Get the upstream URL for a go-vod API (vod, create). */
     public static function getGoVodEndpoint(string $client, string $endpoint): string
     {
-        $bind = SystemConfig::get('memories.vod.bind');
-        $servers = [$bind];
-        if (SystemConfig::get('memories.vod.external')) {
-            $servers = SystemConfig::get('memories.vod.connect') ?: [$bind];
-        }
+        $servers = self::getGoVodServers();
 
         // Sticky-route each client to one server so go-vod state stays local
         $srv = $servers[(crc32($client) & 0xFFFFFFFF) % \count($servers)];
@@ -331,7 +338,7 @@ final class BinExt
     }
 
     /** Test the go-vod instance that is running */
-    public static function testGoVod(): string
+    public static function testGoVod(string $server): string
     {
         // Check if disabled
         if (SystemConfig::get('memories.vod.disable')) {
@@ -355,12 +362,9 @@ final class BinExt
         }
         register_shutdown_function(static fn () => @unlink($testfile));
 
-        // Make request
-        $url = self::getGoVodEndpoint('test', 'vod');
-
         try {
             $client = new \GuzzleHttp\Client();
-            $res = $client->request('POST', $url, [
+            $res = $client->request('POST', "http://{$server}/vod", [
                 'json' => [
                     'client' => 'test',
                     'path' => $testfile,
@@ -394,6 +398,22 @@ final class BinExt
             $testDir = \dirname($testfile);
 
             throw new \Exception("cannot access dir '{$testDir}': {$expected} =/= {$got}");
+        }
+
+        return $version;
+    }
+
+    public static function testGoVodBin(string $path): string
+    {
+        $version = Util::execSafe([$path, '-version'], 3000) ?: '';
+        if (!preg_match('/go-vod (\S*)/', $version, $matches)) {
+            throw new \Exception("failed to detect version, found {$version}");
+        }
+
+        $version = $matches[1];
+        $target = self::GOVOD_VER;
+        if (!version_compare($version, $target, '=')) {
+            throw new \Exception("version does not match: expected {$target} but found {$version}");
         }
 
         return $version;

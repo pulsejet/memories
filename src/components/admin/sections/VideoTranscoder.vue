@@ -16,6 +16,9 @@
         <NcNoteCard :type="binaryStatusType(status.govod)">
           {{ binaryStatus('go-vod', status.govod) }}
         </NcNoteCard>
+        <NcNoteCard v-for="server in status.govod_servers" :key="server.server" :type="serviceStatusType(server)">
+          go-vod {{ serviceStatus(server) }}
+        </NcNoteCard>
       </template>
 
       <NcCheckboxRadioSwitch
