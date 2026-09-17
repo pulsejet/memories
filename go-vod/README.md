@@ -32,11 +32,12 @@ main.go → api/ → core/ → ffmpeg/
               ↘ config/ ↙
 ```
 
-- `api/` — HTTP routes, HLS playlists, temp uploads, config reload.
+- `api/` — HTTP routes, HLS playlists, temp uploads.
 - `core/` — sessions: rendition ladder, per-quality transcode supervision,
   chunk wait/serve, idle teardown.
 - `ffmpeg/` — probes, argv builder (x264/VA-API/NVENC), segment naming.
-- `config/` — load, validate, auto-detect.
+- `config/` — server bootstrap load/validate/auto-detect plus the
+  per-request transcoding knobs carried in every `/vod` body.
 
 ## Thanks
 Partially inspired from [go-transcode](https://github.com/m1k1o/go-transcode). The projects use different approaches for segmenting the transcodes.

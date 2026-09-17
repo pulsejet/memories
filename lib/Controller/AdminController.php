@@ -67,10 +67,20 @@ final class AdminController extends GenericApiController
             // Assign config with type checking
             SystemConfig::set($key, $value);
 
-            // If changing vod settings, kill any running go-vod instances
-            if (str_starts_with($key, 'memories.vod.')) {
+            // Kill go-vod if changing startup config settings.
+            if (\in_array($key, [
+                'memories.vod.bind',
+                'memories.vod.connect',
+                'memories.vod.path',
+                'memories.vod.tempdir',
+                'memories.vod.cachedir',
+                'memories.vod.ffmpeg',
+                'memories.vod.ffprobe',
+                'memories.vod.external',
+                'memories.vod.disable',
+            ], true)) {
                 try {
-                    BinExt::startGoVod();
+                    BinExt::ensureGoVod();
                 } catch (\Exception $e) {
                     error_log('Failed to start go-vod: '.$e->getMessage());
                 }
@@ -160,7 +170,7 @@ final class AdminController extends GenericApiController
             $extGoVod = SystemConfig::get('memories.vod.external');
             $status['govod'] = $this->getExecutableStatus(
                 static fn () => BinExt::getGoVodBin(),
-                static fn () => BinExt::testStartGoVod(),
+                static fn () => BinExt::testGoVod(),
                 !$extGoVod,
                 !$extGoVod,
             );

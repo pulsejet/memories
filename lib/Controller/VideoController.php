@@ -255,27 +255,8 @@ final class VideoController extends GenericApiController
 
     private function getUpstream(Http\IOutput $out, string $client, int $fileid, string $path, string $profile, string $etag = ''): int
     {
-        $returnCode = $this->getUpstreamInternal($out, $client, $fileid, $path, $profile, $etag);
+        BinExt::ensureGoVod();
 
-        // If status code was 0, it's likely the server is down
-        // Make one attempt to start after killing whatever is there
-        if (0 !== $returnCode && 503 !== $returnCode) {
-            return $returnCode;
-        }
-
-        // Start goVod and get log file
-        $logFile = BinExt::startGoVod();
-
-        $returnCode = $this->getUpstreamInternal($out, $client, $fileid, $path, $profile, $etag);
-        if (0 === $returnCode) {
-            throw new \Exception("Transcoder could not be started, check {$logFile}");
-        }
-
-        return $returnCode;
-    }
-
-    private function getUpstreamInternal(Http\IOutput $out, string $client, int $fileid, string $path, string $profile, string $etag = ''): int
-    {
         $url = BinExt::getGoVodEndpoint('vod');
 
         // Repeat query params so go-vod can bake them into playlists and VTTs
@@ -292,6 +273,7 @@ final class VideoController extends GenericApiController
             'path' => $path,
             'profile' => $profile,
             'query' => $query,
+            'config' => BinExt::goVodTConfig(),
         ]);
 
         $context = stream_context_create([
@@ -362,19 +344,8 @@ final class VideoController extends GenericApiController
      */
     private static function postFile(string $client, string $blob): mixed
     {
-        try {
-            return self::postFileInternal($client, $blob);
-        } catch (\Exception $e) {
-            if (BinExt::startGoVod()) { // If the server is down, try to start it
-                return self::postFileInternal($client, $blob);
-            }
+        BinExt::ensureGoVod();
 
-            throw $e;
-        }
-    }
-
-    private static function postFileInternal(string $client, string $blob): mixed
-    {
         $url = BinExt::getGoVodEndpoint('create');
 
         $ch = curl_init($url);

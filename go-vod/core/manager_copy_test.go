@@ -45,7 +45,7 @@ func newCopyManager(t *testing.T, probeJSON, keyframes string, keyFail bool, pla
 
 	m, err := NewManager(NewManagerArgs{
 		C:             cfg,
-		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", PlayableCodecs: playableCodecs},
+		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", PlayableCodecs: playableCodecs, TConfig: config.TCfg{ChunkSize: 3}},
 		Generation:    1,
 		Idle:          make(chan IdleEvent, 1),
 	})
@@ -203,7 +203,7 @@ func newBlockingCopyManager(t *testing.T) (*Manager, string) {
 	cfg.FFprobe = bin
 	m, err := NewManager(NewManagerArgs{
 		C:             cfg,
-		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id"},
+		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", TConfig: config.TCfg{ChunkSize: 3}},
 		Generation:    1,
 		Idle:          make(chan IdleEvent, 1),
 	})

@@ -30,6 +30,8 @@ var ErrCopyPending = errors.New("keyframe probe pending")
 type Manager struct {
 	// c is the shared server config.
 	c *config.Config
+	// tc is the per-request transcode config.
+	tc config.TCfg
 
 	// path is the source file served.
 	path string
@@ -104,6 +106,7 @@ type NewManagerArgs struct {
 func NewManager(a NewManagerArgs) (*Manager, error) {
 	m := &Manager{
 		c:              a.C,
+		tc:             a.TConfig,
 		path:           a.Path,
 		id:             a.StreamID,
 		fileid:         a.FileID,
@@ -327,11 +330,11 @@ func (m *Manager) TryCacheCopySegments() ([]ffmpeg.Segment, bool) {
 	if segs, ok := m.CopySegments(); ok {
 		return segs, true
 	}
-	keys, ok := LoadCachedKeyframes(m.c.ResolvedCacheDir(), m.fileid, m.etag)
+	keys, ok := LoadCachedKeyframes(m.c.CacheDir(), m.fileid, m.etag)
 	if !ok {
 		return nil, false
 	}
-	segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.c.ChunkSize)
+	segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.tc.ChunkSize)
 	if len(segs) == 0 {
 		return nil, false
 	}
@@ -464,10 +467,10 @@ func (m *Manager) ffprobe() error {
 // probeCopy extracts keyframes and derives the copy grid.
 // Lock-free; EnsureCopySegments publishes the result under copyMu.
 func (m *Manager) probeCopy() ([]ffmpeg.Segment, error) {
-	cachePath := KeyframeCachePath(m.c.ResolvedCacheDir(), m.fileid)
-	if keys, ok := LoadCachedKeyframes(m.c.ResolvedCacheDir(), m.fileid, m.etag); ok {
+	cachePath := KeyframeCachePath(m.c.CacheDir(), m.fileid)
+	if keys, ok := LoadCachedKeyframes(m.c.CacheDir(), m.fileid, m.etag); ok {
 		log.Printf("%s: keyframe cache hit %s", m.id, cachePath)
-		segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.c.ChunkSize)
+		segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.tc.ChunkSize)
 		if len(segs) == 0 {
 			return nil, fmt.Errorf("no keyframe grid for %s", m.path)
 		}
@@ -479,10 +482,10 @@ func (m *Manager) probeCopy() ([]ffmpeg.Segment, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := StoreCachedKeyframes(m.c.ResolvedCacheDir(), m.fileid, m.etag, keys); err != nil {
+	if err := StoreCachedKeyframes(m.c.CacheDir(), m.fileid, m.etag, keys); err != nil {
 		log.Printf("%s: keyframe cache store failed: %v", m.id, err)
 	}
-	segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.c.ChunkSize)
+	segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.tc.ChunkSize)
 	if len(segs) == 0 {
 		return nil, fmt.Errorf("no keyframe grid for %s", m.path)
 	}

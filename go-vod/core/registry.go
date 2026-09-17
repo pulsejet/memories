@@ -33,6 +33,7 @@ type ManagerParams struct {
 	FileID         int64
 	Etag           string
 	PlayableCodecs []string
+	TConfig        config.TCfg
 }
 
 func NewRegistry(cfg *config.Config, idle chan IdleEvent) *Registry {

@@ -29,7 +29,7 @@ func testStoryboardManager(t *testing.T, ffmpeg string) *Manager {
 	t.Helper()
 	cfg := config.Defaults("test")
 	cfg.TempDir = t.TempDir()
-	cfg.CacheDir = t.TempDir()
+	t.Setenv("CACHE_DIR", t.TempDir())
 	cfg.FFprobe = stubProbe(t)
 	cfg.FFmpeg = ffmpeg
 
@@ -46,7 +46,7 @@ func testStoryboardManager(t *testing.T, ffmpeg string) *Manager {
 
 func TestEnsureStoryboardCached(t *testing.T) {
 	m := testStoryboardManager(t, "false")
-	dir := FileCacheDir(m.c.ResolvedCacheDir(), m.fileid)
+	dir := FileCacheDir(m.c.CacheDir(), m.fileid)
 	require.NoError(t, os.MkdirAll(dir, 0755))
 	data, err := json.Marshal(storyboardFile{Etag: m.etag, Plan: ffmpeg.PlanStoryboard(12 * time.Second)})
 	require.NoError(t, err)
@@ -59,7 +59,7 @@ func TestEnsureStoryboardCached(t *testing.T) {
 
 func TestEnsureStoryboardEtagMismatchEvictsFile(t *testing.T) {
 	m := testStoryboardManager(t, "false")
-	dir := FileCacheDir(m.c.ResolvedCacheDir(), m.fileid)
+	dir := FileCacheDir(m.c.CacheDir(), m.fileid)
 	require.NoError(t, os.MkdirAll(dir, 0755))
 	// Stale plan plus an unrelated sibling artifact.
 	data, err := json.Marshal(storyboardFile{Etag: "stale", Plan: ffmpeg.PlanStoryboard(12 * time.Second)})
@@ -67,7 +67,7 @@ func TestEnsureStoryboardEtagMismatchEvictsFile(t *testing.T) {
 	require.NoError(t, os.WriteFile(filepath.Join(dir, StoryboardPlanFile), data, 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(dir, KeyframeCacheFile), []byte("{}"), 0644))
 
-	_, err = LoadStoryboardPlan(m.c.ResolvedCacheDir(), m.fileid, m.etag)
+	_, err = LoadStoryboardPlan(m.c.CacheDir(), m.fileid, m.etag)
 	require.Error(t, err)
 	_, statErr := os.Stat(dir)
 	require.True(t, os.IsNotExist(statErr))
@@ -75,7 +75,7 @@ func TestEnsureStoryboardEtagMismatchEvictsFile(t *testing.T) {
 
 func TestServeStoryboardVTTBakesQuery(t *testing.T) {
 	m := testStoryboardManager(t, "false")
-	dir := FileCacheDir(m.c.ResolvedCacheDir(), m.fileid)
+	dir := FileCacheDir(m.c.CacheDir(), m.fileid)
 	require.NoError(t, os.MkdirAll(dir, 0755))
 	plan := ffmpeg.PlanStoryboard(12 * time.Second)
 	data, err := json.Marshal(storyboardFile{Etag: m.etag, Plan: plan})
@@ -92,7 +92,7 @@ func TestServeStoryboardVTTBakesQuery(t *testing.T) {
 func TestEnsureStoryboardNoEtag(t *testing.T) {
 	cfg := config.Defaults("test")
 	cfg.TempDir = t.TempDir()
-	cfg.CacheDir = t.TempDir()
+	t.Setenv("CACHE_DIR", t.TempDir())
 	cfg.FFprobe = stubProbe(t)
 
 	m, err := NewManager(NewManagerArgs{
@@ -114,7 +114,7 @@ func TestEnsureStoryboardBuildFailure(t *testing.T) {
 	_, err := m.EnsureStoryboard()
 	require.Error(t, err)
 	// Failed builds leave no ready marker behind.
-	_, statErr := os.Stat(filepath.Join(FileCacheDir(m.c.ResolvedCacheDir(), m.fileid), StoryboardPlanFile))
+	_, statErr := os.Stat(filepath.Join(FileCacheDir(m.c.CacheDir(), m.fileid), StoryboardPlanFile))
 	require.Error(t, statErr)
 }
 
@@ -140,7 +140,7 @@ func TestStoryboardBuildsSerializeAtOneSlot(t *testing.T) {
 	for _, fileid := range []int64{7, 8} {
 		cfg := config.Defaults("test")
 		cfg.TempDir = t.TempDir()
-		cfg.CacheDir = dir
+		t.Setenv("CACHE_DIR", dir)
 		cfg.FFprobe = stubProbe(t)
 		cfg.FFmpeg = bin
 
@@ -172,9 +172,10 @@ func TestStoryboardSurvivesManagerDestroy(t *testing.T) {
 	bin := filepath.Join(dir, "ffmpeg")
 	require.NoError(t, os.WriteFile(bin, []byte(script), 0755))
 
+	cacheDir := t.TempDir()
+	t.Setenv("CACHE_DIR", cacheDir)
 	cfg := config.Defaults("test")
 	cfg.TempDir = t.TempDir()
-	cfg.CacheDir = t.TempDir()
 	cfg.FFprobe = stubProbe(t)
 	cfg.FFmpeg = bin
 
@@ -190,7 +191,7 @@ func TestStoryboardSurvivesManagerDestroy(t *testing.T) {
 
 	got, err := sharedStoryboards.Ensure(in)
 	require.NoError(t, err)
-	require.Equal(t, FileCacheDir(cfg.ResolvedCacheDir(), 7), got)
+	require.Equal(t, FileCacheDir(cacheDir, 7), got)
 
 	w := httptest.NewRecorder()
 	sharedStoryboards.Serve(w, httptest.NewRequest("GET", "/x", nil), in, StoryboardVTTFile, "")

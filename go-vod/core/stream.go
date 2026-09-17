@@ -312,24 +312,24 @@ func (s *Stream) spec(startAt float64, isHls bool) ffmpeg.Spec {
 		Quality:   s.quality,
 		Width:     s.width,
 		Height:    s.height,
-		QF:        s.c.QF,
+		QF:        s.m.tc.QF,
 		FrameRate: s.m.probe.FrameRate,
 		Rotation:  s.m.probe.Rotation,
 		HDR:       s.m.probe.HDR,
 		Audio:     s.m.probe.Audio,
-		ChunkSize: s.c.ChunkSize,
+		ChunkSize: s.m.tc.ChunkSize,
 		Copy:      s.quality == QUALITY_DIRECT && (!isHls || grid),
 
-		VAAPI:           s.c.VAAPI,
-		VAAPILowPower:   s.c.VAAPILowPower,
-		VAAPIDevice:     s.c.VAAPIDevice,
-		NVENC:           s.c.NVENC,
-		NVENCTemporalAQ: s.c.NVENCTemporalAQ,
-		NVENCScale:      s.c.NVENCScale,
+		VAAPI:           s.m.tc.VAAPI,
+		VAAPILowPower:   s.m.tc.VAAPILowPower,
+		VAAPIDevice:     s.m.tc.VAAPIDevice,
+		NVENC:           s.m.tc.NVENC,
+		NVENCTemporalAQ: s.m.tc.NVENCTemporalAQ,
+		NVENCScale:      s.m.tc.NVENCScale,
 
-		UseTranspose:     s.c.UseTranspose,
-		ForceSwTranspose: s.c.ForceSwTranspose,
-		UseGopSize:       s.c.UseGopSize,
+		UseTranspose:     s.m.tc.UseTranspose,
+		ForceSwTranspose: s.m.tc.ForceSwTranspose,
+		UseGopSize:       s.m.tc.UseGopSize,
 	}
 }
 
@@ -350,7 +350,7 @@ func (s *Stream) transcode(startId int) {
 		// Start one frame before.
 		// This ensures that the keyframes are aligned.
 		startNumber = startId - 1
-		startAt = float64(startNumber * s.c.ChunkSize)
+		startAt = float64(startNumber * s.m.tc.ChunkSize)
 	}
 
 	args := ffmpeg.SegmentArgs(s.spec(startAt, true), startNumber, s.getTsPath(-1))

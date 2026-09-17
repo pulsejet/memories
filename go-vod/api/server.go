@@ -8,8 +8,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
-	"sync"
+	"syscall"
 	"time"
 
 	"github.com/pulsejet/memories/go-vod/config"
@@ -19,7 +20,6 @@ import (
 
 type Server struct {
 	cfg      *config.Config
-	cfgMu    sync.RWMutex
 	server   *http.Server
 	reg      *core.Registry
 	idle     chan core.IdleEvent
@@ -29,7 +29,6 @@ type Server struct {
 func NewServer(cfg *config.Config) *Server {
 	os.RemoveAll(cfg.TempDir)
 	os.MkdirAll(cfg.TempDir, 0755)
-	os.MkdirAll(cfg.ResolvedCacheDir(), 0755)
 
 	s := &Server{cfg: cfg, idle: make(chan core.IdleEvent)}
 	s.reg = core.NewRegistry(cfg, s.idle)
@@ -40,45 +39,21 @@ func (s *Server) routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", s.handleHealth)
 	mux.HandleFunc("POST /vod", s.handleVod)
-	mux.HandleFunc("POST /config", s.handleConfig)
 	mux.HandleFunc("POST /create", s.handleCreate)
 	return mux
-}
-
-func (s *Server) configured() bool {
-	s.cfgMu.RLock()
-	defer s.cfgMu.RUnlock()
-	return s.cfg.Configured
-}
-
-func (s *Server) chunkSize() int {
-	s.cfgMu.RLock()
-	defer s.cfgMu.RUnlock()
-	return s.cfg.ChunkSize
-}
-
-func (s *Server) tempDir() string {
-	s.cfgMu.RLock()
-	defer s.cfgMu.RUnlock()
-	return s.cfg.TempDir
-}
-
-func (s *Server) maxUpload() int64 {
-	s.cfgMu.RLock()
-	defer s.cfgMu.RUnlock()
-	return s.cfg.MaxUploadSize
 }
 
 // VodRequest is the envelope for every file request from PHP. The cache
 // is keyed by FileID; Etag is stored in every plan and a mismatch evicts
 // the file. Query carries the "?..." passthrough baked into playlists.
 type VodRequest struct {
-	Client  string `json:"client"`
-	FileID  int64  `json:"fileid"`
-	Etag    string `json:"etag"`
-	Path    string `json:"path"`
-	Profile string `json:"profile"`
-	Query   string `json:"query"`
+	Client  string      `json:"client"`
+	FileID  int64       `json:"fileid"`
+	Etag    string      `json:"etag"`
+	Path    string      `json:"path"`
+	Profile string      `json:"profile"`
+	Query   string      `json:"query"`
+	TConfig config.TCfg `json:"config"`
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
@@ -111,6 +86,11 @@ func (s *Server) handleVod(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	if err := req.TConfig.Validate(); err != nil {
+		log.Println("Invalid vod config", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	s.serve(w, r, req)
 }
 
@@ -132,11 +112,6 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 		return
 	}
 
-	if !s.configured() {
-		w.WriteHeader(http.StatusServiceUnavailable)
-		return
-	}
-
 	if !validProfile(leaf) {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -148,6 +123,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 		FileID:         req.FileID,
 		Etag:           req.Etag,
 		PlayableCodecs: core.ParsePlayableCodecs(req.Query),
+		TConfig:        req.TConfig,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -174,7 +150,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		body, err := VariantPlaylist(manager, quality, s.chunkSize(), query)
+		body, err := VariantPlaylist(manager, req.TConfig, quality, query)
 		if errors.Is(err, core.ErrCopyPending) {
 			w.WriteHeader(http.StatusConflict)
 			return
@@ -217,41 +193,8 @@ func validProfile(leaf string) bool {
 	return false
 }
 
-func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Println("Error reading body", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	s.cfgMu.Lock()
-	defer s.cfgMu.Unlock()
-
-	next := *s.cfg
-	if err := json.Unmarshal(body, &next); err != nil {
-		log.Println("Error unmarshaling config", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if v, ok := os.LookupEnv("CACHE_DIR"); ok && v != "" {
-		next.CacheDir = v
-	}
-	if err := next.Validate(); err != nil {
-		log.Println("Error validating config", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	next.Configured = true
-	*s.cfg = next
-	os.MkdirAll(next.ResolvedCacheDir(), 0755)
-	log.Printf("%+v\n", s.cfg)
-}
-
 func (s *Server) handleCreate(w http.ResponseWriter, r *http.Request) {
-	file, err := os.CreateTemp(s.tempDir(), "govod-temp-")
+	file, err := os.CreateTemp(s.cfg.TempDir, "govod-temp-")
 	if err != nil {
 		log.Println("Error creating temp file", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -259,7 +202,7 @@ func (s *Server) handleCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	if _, err := io.Copy(file, http.MaxBytesReader(w, r.Body, s.maxUpload())); err != nil {
+	if _, err := io.Copy(file, http.MaxBytesReader(w, r.Body, s.cfg.MaxUploadSize)); err != nil {
 		file.Close()
 		os.Remove(file.Name())
 		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
@@ -293,6 +236,15 @@ func (s *Server) versionOk(w http.ResponseWriter, r *http.Request) bool {
 
 func (s *Server) Start() int {
 	log.Println("Starting go-vod " + s.cfg.Version + " on " + s.cfg.Bind)
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(sig)
+	go func() {
+		<-sig
+		s.Close()
+	}()
+
 	s.server = &http.Server{Addr: s.cfg.Bind, Handler: s.routes()}
 
 	go func() {

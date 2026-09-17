@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,27 +14,23 @@ func TestDefaultsValid(t *testing.T) {
 	c.FFmpeg, c.FFprobe, c.TempDir = "/bin/ffmpeg", "/bin/ffprobe", t.TempDir()
 	require.NoError(t, c.Validate())
 	require.Equal(t, int64(4<<30), c.MaxUploadSize)
-	require.Equal(t, "/dev/dri/renderD128", c.VAAPIDevice)
 }
 
 func TestLoadFile(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "valid.json")
 	require.NoError(t, os.WriteFile(path, []byte(
-		`{"bind": ":49999", "chunkSize": 5, "vaapi": true}`,
+		`{"bind": ":49999", "lookBehind": 5}`,
 	), 0644))
 
 	c := Defaults("test")
 	require.NoError(t, c.LoadFile(path))
-	require.True(t, c.Configured)
 	require.Equal(t, ":49999", c.Bind)
-	require.Equal(t, 5, c.ChunkSize)
-	require.True(t, c.VAAPI)
+	require.Equal(t, 5, c.LookBehind)
 }
 
 func TestLoadFileMissing(t *testing.T) {
 	c := Defaults("test")
 	require.Error(t, c.LoadFile(filepath.Join(t.TempDir(), "does-not-exist.json")))
-	require.False(t, c.Configured)
 }
 
 func TestLoadFileBadJSON(t *testing.T) {
@@ -43,6 +40,21 @@ func TestLoadFileBadJSON(t *testing.T) {
 	require.Error(t, Defaults("test").LoadFile(path))
 }
 
+func TestConfigCacheDir(t *testing.T) {
+	var c Config
+	require.NoError(t, json.Unmarshal([]byte(`{"cacheDir":"/from-php"}`), &c))
+
+	t.Setenv("CACHE_DIR", "/from-env")
+	require.Equal(t, "/from-env", c.CacheDir())
+
+	t.Setenv("CACHE_DIR", "")
+	require.Equal(t, "/from-php", c.CacheDir())
+
+	var empty Config
+	require.NoError(t, json.Unmarshal([]byte(`{}`), &empty))
+	require.Equal(t, "", empty.CacheDir())
+}
+
 func TestValidate(t *testing.T) {
 	cases := []struct {
 		name   string
@@ -50,16 +62,10 @@ func TestValidate(t *testing.T) {
 		ok     bool
 	}{
 		{"valid", func(*Config) {}, true},
-		{"zero chunk", func(c *Config) { c.ChunkSize = 0 }, false},
 		{"bad buffers", func(c *Config) { c.GoalBufferMax = 0 }, false},
 		{"negative lookbehind", func(c *Config) { c.LookBehind = -1 }, false},
 		{"missing paths", func(c *Config) { c.FFmpeg, c.FFprobe, c.TempDir = "", "", "" }, false},
 		{"zero upload", func(c *Config) { c.MaxUploadSize = 0 }, false},
-		{"vaapi and nvenc", func(c *Config) { c.VAAPI, c.NVENC, c.NVENCScale = true, true, "cuda" }, false},
-		{"bad nvenc scale", func(c *Config) { c.NVENCScale = "vulkan" }, false},
-		{"nvenc without scale", func(c *Config) { c.NVENC = true }, false},
-		{"nvenc cuda", func(c *Config) { c.NVENC, c.NVENCScale = true, "cuda" }, true},
-		{"nvenc npp", func(c *Config) { c.NVENC, c.NVENCScale = true, "npp" }, true},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -92,23 +98,4 @@ func TestAutoDetect(t *testing.T) {
 	preset.FFmpeg = "/custom/ffmpeg"
 	require.NoError(t, preset.AutoDetect())
 	require.Equal(t, "/custom/ffmpeg", preset.FFmpeg)
-}
-
-func TestCacheDir(t *testing.T) {
-	t.Setenv("CACHE_DIR", "")
-	c := Defaults("test")
-	c.TempDir = t.TempDir()
-	require.NoError(t, c.AutoDetect())
-	require.Equal(t, "", c.CacheDir)
-	require.Equal(t, filepath.Join(os.TempDir(), "go-vod-cache"), c.ResolvedCacheDir())
-
-	t.Setenv("CACHE_DIR", "/from-env")
-	c = Defaults("test")
-	c.TempDir = t.TempDir()
-	require.NoError(t, c.AutoDetect())
-	require.Equal(t, "/from-env", c.CacheDir)
-
-	c = Defaults("test")
-	c.TempDir = t.TempDir()
-	require.Equal(t, filepath.Join(os.TempDir(), "go-vod-cache"), c.ResolvedCacheDir())
 }

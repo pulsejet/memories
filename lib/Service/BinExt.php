@@ -13,6 +13,9 @@ final class BinExt
     public const GOVOD_VER = '0.4.2';
     public const NX_VER_MIN = '1.1';
 
+    private const GO_VOD_PID_FILE = '/tmp/go-vod.pid';
+    private const GO_VOD_LOCK_FILE = '/tmp/go-vod.lock';
+
     /** Exiftool environment is initialized in this process */
     private static bool $hasExiftoolEnv = false;
 
@@ -173,7 +176,7 @@ final class BinExt
         return false;
     }
 
-    /** Get the upstream URL for a go-vod API (vod, config, create). */
+    /** Get the upstream URL for a go-vod API (vod, create). */
     public static function getGoVodEndpoint(string $endpoint): string
     {
         $connect = $bind = SystemConfig::get('memories.vod.bind');
@@ -184,12 +187,11 @@ final class BinExt
         return "http://{$connect}/{$endpoint}";
     }
 
-    public static function getGoVodConfig(bool $local = false): array
+    public static function goVodTConfig(): array
     {
         // Get config from system values
-        $env = [
-            'cacheDir' => SystemConfig::get('memories.vod.cachedir'),
-
+        return [
+            'chunkSize' => 3,
             'qf' => SystemConfig::get('memories.vod.qf'),
 
             'vaapi' => SystemConfig::get('memories.vod.vaapi'),
@@ -204,28 +206,22 @@ final class BinExt
             'forceSwTranspose' => SystemConfig::get('memories.vod.use_transpose.force_sw'),
             'useGopSize' => SystemConfig::get('memories.vod.use_gop_size'),
         ];
+    }
 
-        if (!$local) {
-            return $env;
-        }
+    public static function goVodServerConfig(): array
+    {
+        $dir = static function (string $key, string $default): string {
+            return rtrim(SystemConfig::get($key, $default), '/')
+                .'/'.SystemConfig::get('instanceid');
+        };
 
-        // Get temp directory
-        $tmpPath = SystemConfig::get('memories.vod.tempdir', sys_get_temp_dir().'/go-vod/');
-
-        // Make sure path ends with slash
-        if ('/' !== substr($tmpPath, -1)) {
-            $tmpPath .= '/';
-        }
-
-        // Add instance ID to path
-        $tmpPath .= SystemConfig::get('instanceid');
-
-        return array_merge($env, [
+        return [
             'bind' => SystemConfig::get('memories.vod.bind'),
             'ffmpeg' => SystemConfig::get('memories.vod.ffmpeg'),
             'ffprobe' => SystemConfig::get('memories.vod.ffprobe'),
-            'tempdir' => $tmpPath,
-        ]);
+            'tempdir' => $dir('memories.vod.tempdir', sys_get_temp_dir().'/go-vod/'),
+            'cacheDir' => $dir('memories.vod.cachedir', sys_get_temp_dir().'/go-vod-cache'),
+        ];
     }
 
     /**
@@ -238,90 +234,96 @@ final class BinExt
         return self::getTempBin($path, self::getName('go-vod', self::GOVOD_VER));
     }
 
-    /**
-     * If local, restart the go-vod instance.
-     * If external, configure the go-vod instance.
-     */
-    public static function startGoVod(): ?string
+    public static function ensureGoVod(): void
     {
-        // Check if disabled
-        if (SystemConfig::get('memories.vod.disable')) {
-            // Make sure it's dead, in case the user just disabled it
+        if (SystemConfig::get('memories.vod.disable') || SystemConfig::get('memories.vod.external')) {
+            return;
+        }
+
+        if (self::isGoVodAlive()) {
+            return;
+        }
+
+        // Serialize concurrent starters (e.g. parallel segment requests)
+        $lock = @fopen(self::GO_VOD_LOCK_FILE, 'c');
+        if (false !== $lock) {
+            flock($lock, LOCK_EX);
+        }
+
+        try {
+            // Re-check after acquiring the lock
+            if (self::isGoVodAlive()) {
+                return;
+            }
+
+            // Get transcoder path
+            $transcoder = self::getGoVodBin();
+            if (empty($transcoder)) {
+                throw new \Exception('Transcoder not configured');
+            }
+
+            // Get local server config
+            $env = self::goVodServerConfig();
+            $tmpPath = $env['tempdir'];
+
+            // (Re-)create temp dir
+            Util::execSafe(['rm', '-rf', $tmpPath], 3000);
+            mkdir($tmpPath, 0o755, true);
+
+            // Check temp directory exists
+            if (!is_dir($tmpPath)) {
+                throw new \Exception("Temp directory could not be created ({$tmpPath})");
+            }
+
+            // Check temp directory is writable
+            if (!is_writable($tmpPath)) {
+                throw new \Exception("Temp directory is not writable ({$tmpPath})");
+            }
+
+            // Write config to file
+            $logFile = $tmpPath.'.log';
+            $configFile = $tmpPath.'.json';
+            file_put_contents($configFile, json_encode($env, JSON_PRETTY_PRINT));
+
+            // Kill the transcoder in case it's running
             self::pkill(self::getName('go-vod'));
 
-            return null;
+            // Spawn detached via shell backgrounding so init adopts go-vod.
+            // An abandoned proc_open handle would leave a zombie under the PHP worker.
+            $shell = \sprintf(
+                'nohup %s %s >> %s 2>&1 & echo $!',
+                escapeshellarg($transcoder),
+                escapeshellarg($configFile),
+                escapeshellarg($logFile),
+            );
+
+            $pipes = [];
+            $proc = proc_open(['sh', '-c', $shell], [
+                0 => ['file', '/dev/null', 'r'],
+                1 => ['pipe', 'w'],
+                2 => ['file', '/dev/null', 'w'],
+            ], $pipes);
+
+            $childPid = 0;
+            if (\is_resource($proc)) {
+                $childPid = (int) trim((string) stream_get_contents($pipes[1]));
+                fclose($pipes[1]);
+                proc_close($proc); // reaps sh; go-vod is adopted by init
+            }
+
+            // Record the pid for liveness checks
+            if ($childPid > 0) {
+                @file_put_contents(self::GO_VOD_PID_FILE, (string) $childPid);
+            }
+
+            // wait for 500ms
+            usleep(500000);
+        } finally {
+            if (false !== $lock) {
+                flock($lock, LOCK_UN);
+                fclose($lock);
+            }
         }
-
-        // Check if external
-        if (SystemConfig::get('memories.vod.external')) {
-            self::configureGoVod();
-
-            return null;
-        }
-
-        // Get transcoder path
-        $transcoder = self::getGoVodBin();
-        if (empty($transcoder)) {
-            throw new \Exception('Transcoder not configured');
-        }
-
-        // Get local config
-        $env = self::getGoVodConfig(true);
-        $tmpPath = $env['tempdir'];
-
-        // (Re-)create temp dir
-        Util::execSafe(['rm', '-rf', $tmpPath], 3000);
-        mkdir($tmpPath, 0o755, true);
-
-        // Check temp directory exists
-        if (!is_dir($tmpPath)) {
-            throw new \Exception("Temp directory could not be created ({$tmpPath})");
-        }
-
-        // Check temp directory is writable
-        if (!is_writable($tmpPath)) {
-            throw new \Exception("Temp directory is not writable ({$tmpPath})");
-        }
-
-        // Write config to file
-        $logFile = $tmpPath.'.log';
-        $configFile = $tmpPath.'.json';
-        file_put_contents($configFile, json_encode($env, JSON_PRETTY_PRINT));
-
-        // Kill the transcoder in case it's running
-        self::pkill(self::getName('go-vod'));
-
-        // Start transcoder directly with no shell; init owns it once this request ends
-        $pipes = [];
-        proc_open([$transcoder, $configFile], [
-            0 => ['file', '/dev/null', 'r'],
-            1 => ['file', $logFile, 'a'],
-            2 => ['file', $logFile, 'a'],
-        ], $pipes, null, null, ['bypass_shell' => true]);
-
-        // wait for 500ms
-        usleep(500000);
-
-        return $logFile;
-    }
-
-    /**
-     * Test go-vod and (re)-start if it is not external.
-     */
-    public static function testStartGoVod(): string
-    {
-        try {
-            return self::testGoVod();
-        } catch (\Exception $e) {
-            // silently try to restart
-        }
-
-        // Attempt to (re)start go-vod
-        // If it is external, this only attempts to reconfigure
-        self::startGoVod();
-
-        // Test again
-        return self::testGoVod();
     }
 
     /** Test the go-vod instance that is running */
@@ -331,6 +333,9 @@ final class BinExt
         if (SystemConfig::get('memories.vod.disable')) {
             throw new \Exception('Transcoding is disabled');
         }
+
+        // Ensure transcoder is running
+        self::ensureGoVod();
 
         // TODO: check data mount; ignoring the result of the file for now
         $testfile = realpath(__DIR__.'/../../exiftest.jpg');
@@ -348,6 +353,7 @@ final class BinExt
                     'path' => $testfile,
                     'profile' => 'test',
                     'query' => '',
+                    'config' => self::goVodTConfig(),
                 ],
                 'timeout' => 1,
                 'connect_timeout' => 1,
@@ -370,31 +376,6 @@ final class BinExt
         }
 
         return $version;
-    }
-
-    /**
-     * POST a new configuration to go-vod.
-     */
-    public static function configureGoVod(): bool
-    {
-        // Get config
-        $config = self::getGoVodConfig();
-
-        // Make request
-        $url = self::getGoVodEndpoint('config');
-
-        try {
-            $client = new \GuzzleHttp\Client();
-            $client->request('POST', $url, [
-                'json' => $config,
-                'timeout' => 1,
-                'connect_timeout' => 1,
-            ]);
-        } catch (\Exception $e) {
-            throw new \Exception('failed to connect to go-vod: '.$e->getMessage());
-        }
-
-        return true;
     }
 
     /**
@@ -514,5 +495,46 @@ final class BinExt
         foreach ($pids as $pid) {
             posix_kill($pid, 9); // SIGKILL
         }
+    }
+
+    /** Check if the local go-vod instance is alive */
+    private static function isGoVodAlive(): bool
+    {
+        $pid = (int) @file_get_contents(self::GO_VOD_PID_FILE);
+        if ($pid <= 0) {
+            return false;
+        }
+
+        // Fast path: Linux /proc
+        $stat = @file_get_contents("/proc/{$pid}/stat");
+        if (\is_string($stat) && false !== ($end = strrpos($stat, ')'))) {
+            // Check process state (Z = zombie, X = dead)
+            if (\in_array(trim(substr($stat, $end + 1, 2)), ['Z', 'X'], true)) {
+                return false;
+            }
+
+            // Guard against PID reuse: make sure it is actually go-vod
+            $cmdline = @file_get_contents("/proc/{$pid}/cmdline");
+
+            return \is_string($cmdline) && str_contains($cmdline, 'go-vod');
+        }
+
+        // Fallback: ps for systems without procfs (e.g. FreeBSD).
+        // Only POSIX flags so this works on Linux, FreeBSD and macOS.
+        try {
+            $out = trim((string) Util::execSafe(['ps', '-o', 'stat=', '-o', 'command=', '-p', (string) $pid], 1000));
+        } catch (\Exception) {
+            return false;
+        }
+        if ('' === $out) {
+            return false;
+        }
+
+        $parts = preg_split('/\s+/', $out, 2);
+        if (!$parts || str_starts_with($parts[0], 'Z')) {
+            return false;
+        }
+
+        return isset($parts[1]) && str_contains($parts[1], 'go-vod');
     }
 }

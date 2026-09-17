@@ -12,14 +12,14 @@ import (
 
 func newCopyManagerWithEtag(t *testing.T, probeJSON, keyframes string, keyFail bool, cacheDir, etag string) *Manager {
 	t.Helper()
+	t.Setenv("CACHE_DIR", cacheDir)
 	cfg := config.Defaults("test")
 	cfg.TempDir = t.TempDir()
-	cfg.CacheDir = cacheDir
 	cfg.FFprobe = stubCopyProbe(t, probeJSON, keyframes, keyFail)
 
 	m, err := NewManager(NewManagerArgs{
 		C:             cfg,
-		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", FileID: 7, Etag: etag},
+		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", FileID: 7, Etag: etag, TConfig: config.TCfg{ChunkSize: 3}},
 		Generation:    1,
 		Idle:          make(chan IdleEvent, 1),
 	})

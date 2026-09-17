@@ -59,7 +59,7 @@ type storyboardFile struct {
 
 func (m *Manager) storyboardInput() StoryboardInput {
 	return StoryboardInput{
-		CacheDir: m.c.ResolvedCacheDir(),
+		CacheDir: m.c.CacheDir(),
 		FileID:   m.fileid,
 		Etag:     m.etag,
 		Path:     m.path,
