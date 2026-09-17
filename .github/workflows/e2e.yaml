@@ -73,7 +73,9 @@ jobs:
           --health-interval 5s
           --health-timeout 2s
           --health-retries 5
-        command: --local-infile=1
+        command: >-
+          --local-infile=1
+          --log_bin_trust_function_creators=true
 
       mariadb:
         image: ${{ matrix.databases == 'mariadb' && 'mariadb:lts' || '' }}
