@@ -1,22 +1,17 @@
 package core
 
 import (
-	"net/url"
 	"slices"
 	"strings"
 )
 
-// ParsePlayableCodecs parses the "codecs" query param, e.g. "?codecs=h264,hevc".
-// It returns nil when the param is absent or empty.
-func ParsePlayableCodecs(query string) []string {
-	values, err := url.ParseQuery(strings.TrimPrefix(query, "?"))
-	if err != nil {
+// ParseCodecs splits the "codecs" value, e.g. "h264,hevc".
+// It returns nil when the value is absent or empty.
+func ParseCodecs(codecs string) []string {
+	if codecs == "" {
 		return nil
 	}
-	if v := values.Get("codecs"); v != "" {
-		return strings.Split(v, ",")
-	}
-	return nil
+	return strings.Split(codecs, ",")
 }
 
 // IsCodecPlayable reports whether an ffprobe codec_name can be served directly.

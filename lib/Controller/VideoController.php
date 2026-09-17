@@ -259,20 +259,17 @@ final class VideoController extends GenericApiController
 
         $url = BinExt::getGoVodEndpoint('vod');
 
-        // Repeat query params so go-vod can bake them into playlists and VTTs
-        // For example, in folder sharing, we need the params on every request
-        $query = '';
-        if (\array_key_exists('QUERY_STRING', $_SERVER) && !empty($params = $_SERVER['QUERY_STRING'])) {
-            $query = "?{$params}";
-        }
-
         $body = json_encode([
             'client' => $client,
             'fileid' => $fileid,
             'etag' => $etag,
             'path' => $path,
             'profile' => $profile,
-            'query' => $query,
+            'query' => [
+                'albums' => $this->request->getParam('albums'),
+                'token' => $this->request->getParam('token'),
+                'codecs' => $this->request->getParam('codecs'),
+            ],
             'config' => BinExt::goVodTConfig(),
         ]);
 

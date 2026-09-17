@@ -6,23 +6,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParsePlayableCodecs(t *testing.T) {
+func TestParseCodecs(t *testing.T) {
 	for _, tc := range []struct {
-		query string
-		want  []string
+		codecs string
+		want   []string
 	}{
 		{"", nil},
-		{"?", nil},
-		{"%zz", nil},
-		{"?token=abc", nil},
-		{"?codecs=", nil},
-		{"?codecs=bogus", []string{"bogus"}},
-		{"?codecs=h264", []string{"h264"}},
-		{"codecs=h264,hevc", []string{"h264", "hevc"}},
-		{"?codecs=h264%2Chevc&token=abc", []string{"h264", "hevc"}},
-		{"?codecs=h264,h264", []string{"h264", "h264"}},
+		{"bogus", []string{"bogus"}},
+		{"h264", []string{"h264"}},
+		{"h264,hevc", []string{"h264", "hevc"}},
+		{"h264,h264", []string{"h264", "h264"}},
 	} {
-		require.Equal(t, tc.want, ParsePlayableCodecs(tc.query), tc.query)
+		require.Equal(t, tc.want, ParseCodecs(tc.codecs), tc.codecs)
 	}
 }
 

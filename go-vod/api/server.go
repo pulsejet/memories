@@ -43,19 +43,6 @@ func (s *Server) routes() *http.ServeMux {
 	return mux
 }
 
-// VodRequest is the envelope for every file request from PHP. The cache
-// is keyed by FileID; Etag is stored in every plan and a mismatch evicts
-// the file. Query carries the "?..." passthrough baked into playlists.
-type VodRequest struct {
-	Client  string      `json:"client"`
-	FileID  int64       `json:"fileid"`
-	Etag    string      `json:"etag"`
-	Path    string      `json:"path"`
-	Profile string      `json:"profile"`
-	Query   string      `json:"query"`
-	TConfig config.TCfg `json:"config"`
-}
-
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
@@ -122,7 +109,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 		StreamID:       req.Client,
 		FileID:         req.FileID,
 		Etag:           req.Etag,
-		PlayableCodecs: core.ParsePlayableCodecs(req.Query),
+		PlayableCodecs: core.ParseCodecs(req.Query.Codecs),
 		TConfig:        req.TConfig,
 	})
 	if err != nil {
@@ -130,10 +117,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 		return
 	}
 
-	query := req.Query
-	if query != "" && !strings.HasPrefix(query, "?") {
-		query = "?" + query
-	}
+	query := req.Query.Encode()
 	switch {
 	case leaf == "ignore":
 		// Warm up the manager without serving anything

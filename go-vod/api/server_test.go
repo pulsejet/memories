@@ -152,10 +152,26 @@ func TestVodCodecsQueryParam(t *testing.T) {
 	require.Contains(t, w.Body.String(), "max.m3u8")
 	require.NotContains(t, w.Body.String(), "direct.m3u8")
 
-	w = postVod(s, `{"client":"s2","path":"/input.mp4","profile":"index.m3u8","query":"?codecs=h264,hevc","config":{"chunkSize":3}}`)
+	w = postVod(s, `{"client":"s2","path":"/input.mp4","profile":"index.m3u8","query":{"token":"abc","codecs":"h264,hevc"},"config":{"chunkSize":3}}`)
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Contains(t, w.Body.String(), "direct.m3u8")
 	require.NotContains(t, w.Body.String(), "max.m3u8")
+	require.Contains(t, w.Body.String(), "direct.m3u8?token=abc")
+	require.NotContains(t, w.Body.String(), "codecs=")
+}
+
+func TestVodQueryEncode(t *testing.T) {
+	require.Equal(t, "", VodQuery{}.Encode())
+	require.Equal(t, "?token=abc", VodQuery{Token: "abc", Codecs: "h264,hevc"}.Encode())
+	require.Equal(t, "?albums=xyz&token=abc", VodQuery{Albums: "xyz", Token: "abc", Codecs: "h264"}.Encode())
+}
+
+func TestNullQueryValues(t *testing.T) {
+	var req VodRequest
+	require.NoError(t, json.Unmarshal([]byte(`{"client":"c","path":"/x","profile":"test","query":{"albums":null,"token":"abc","codecs":null},"config":{"chunkSize":3}}`), &req))
+	require.Equal(t, "", req.Query.Albums)
+	require.Equal(t, "abc", req.Query.Token)
+	require.Equal(t, "?token=abc", req.Query.Encode())
 }
 
 func TestVodReusesManagerOnConfigChange(t *testing.T) {
