@@ -225,6 +225,7 @@ OC.L10N.register(
     "For more details on driver installation, check the documentation:" : "Pour plus de détails sur l'installation du pilote, consultez la documentation :",
     "Enable acceleration with VA-API" : "Activer l'accélération avec VA-API",
     "Enable low-power mode (QSV only)" : "Activer le mode basse consommation (QSV uniquement)",
+    "VA-API device path" : "Chemin du périphérique VA-API",
     "NVIDIA GPUs can be used for transcoding using the NVENC encoder with the proper drivers." : "Les GPUs NVIDIA peuvent être utilisés pour le transcodage grâce à l'encodeur NVENC avec les pilotes appropriés.",
     "Depending on the versions of the installed SDK and ffmpeg, you need to specify the scaler to use" : "En fonction des versions installées du kit de développement et de ffmpeg, vous devez préciser le zoom à utiliser",
     "No automated tests are available for NVIDIA acceleration." : "Aucun test automatisé n'est disponible pour l'accélération NVIDIA.",

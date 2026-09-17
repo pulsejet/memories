@@ -225,6 +225,7 @@ OC.L10N.register(
     "For more details on driver installation, check the documentation:" : "Lisateavet draiverite paigalduse kohta leiad juhendist:",
     "Enable acceleration with VA-API" : "Kasuta raudvaralist kiirendust VA-API liidestuse abil",
     "Enable low-power mode (QSV only)" : "Kasuta vähese energiatarbega režiimi (vaid QSV puhul)",
+    "VA-API device path" : "VA-API seadme asukoht",
     "NVIDIA GPUs can be used for transcoding using the NVENC encoder with the proper drivers." : "NVIDIA graafikaprotsessorid on pruugitavad teisendamiseks, kui kasutusel on NVENC kodeerija koos korrektsete draiveritega.",
     "Depending on the versions of the installed SDK and ffmpeg, you need to specify the scaler to use" : "Sõltuvalt paigaldatud SDK ja ffmpeg-i versioonidest sa võib-olla pead määratlema kasutatava skaleerija/teisendaja",
     "No automated tests are available for NVIDIA acceleration." : "NVIDIA raudvaralise kiirenduse jaoks pole saadaval ühtegi automatiseeritud testi.",

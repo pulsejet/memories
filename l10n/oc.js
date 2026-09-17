@@ -54,6 +54,7 @@ OC.L10N.register(
     "Share link" : "Partejar via ligam",
     "Refresh" : "Refrescar",
     "OK" : "OK",
+    "Home" : "Acuèlh",
     "Upload failed" : "Fracàs del mandadís",
     "Unsaved changes" : "Modificacions pas enregistradas",
     "Download {ext}" : "Telecargar {ext}",

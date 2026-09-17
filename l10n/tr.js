@@ -225,6 +225,7 @@ OC.L10N.register(
     "For more details on driver installation, check the documentation:" : "Sürücü kurulumu ile ilgili ayrıntılı bilgi almak için belgelere bakın:",
     "Enable acceleration with VA-API" : "VA-API hızlandırması kullanılsın",
     "Enable low-power mode (QSV only)" : "Düşük güç kipi kullanılsın (yalnızca QSV)",
+    "VA-API device path" : "VA-API aygıtı yolu",
     "NVIDIA GPUs can be used for transcoding using the NVENC encoder with the proper drivers." : "NVIDIA grafik işlemcileri uygun sürücülerle NVENC kodlayıcı ile kod dönüştürme için kullanılabilir.",
     "Depending on the versions of the installed SDK and ffmpeg, you need to specify the scaler to use" : "Kurulu SDK ve ffmpeg sürümlerine bağlı olarak, kullanılacak ölçekleyiciyi belirtmeniz gerekir.",
     "No automated tests are available for NVIDIA acceleration." : "NVIDIA hızlandırması için herhangi bir otomatik sınama yoktur.",
