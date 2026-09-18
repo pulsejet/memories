@@ -235,7 +235,6 @@ OC.L10N.register(
     "Enable external transcoder" : "تاشقى تىرانسفورماتورنى قوزغىتىڭ",
     "Binary path (local only)" : "ئىككىلىك يول (پەقەت يەرلىك)",
     "Bind address (local only)" : "باغلىنىش ئادرېسى (پەقەت يەرلىك)",
-    "Connection address (same as bind if local)" : "ئۇلىنىش ئادرېسى (يەرلىك بولسا باغلىنىشقا ئوخشاش)",
     "Quality Factor (15 - 45) (default 25)" : "سۈپەت ئامىلى (15 - 45) (سۈكۈتتىكى 25)",
     "Default high resolution image loading behavior of the photo viewer." : "سۈكۈتتىكى يۇقىرى ئېنىقلىقتىكى رەسىم يۈكلەش ھەرىكىتى.",
     "The configuration here also applies to public link shares." : "بۇ يەردىكى سەپلىمە ئاممىۋى ئۇلىنىش ھەمبەھىرلىرىگىمۇ ماس كېلىدۇ.",

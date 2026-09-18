@@ -246,7 +246,6 @@ OC.L10N.register(
     "Enable external transcoder" : "Kasuta välist transkodeerijat",
     "Binary path (local only)" : "Programmi asukoht (kohalikus seadmes)",
     "Bind address (local only)" : "Seotud aadress (kohalikus seadmes)",
-    "Connection address (same as bind if local)" : "Ühenduse aadress (kohaliku seadme puhul sama, kui seotud aadress)",
     "Quality Factor (15 - 45) (default 25)" : "Kvaliteedifaktor (15 - 45) (vaikimisi 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Fotode kuvaja vaikimisi seadistatud laadimiskäitumine kõrge resolutsiooniga piltide jaoks.",
     "The configuration here also applies to public link shares." : "Siinne seadistus kehtib ka avalike lingiga jagamiste puhul.",

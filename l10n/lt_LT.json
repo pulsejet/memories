@@ -237,7 +237,6 @@
     "Enable external transcoder" : "Įjungti išorinį perkodavimo variklį",
     "Binary path (local only)" : "Vykdomojo failo kelias (tik vietinis)",
     "Bind address (local only)" : "Priskyrimo adresas (tik vietinis)",
-    "Connection address (same as bind if local)" : "Prisijungimo adresas (jei vietinis – toks pats kaip priskyrimo adresas)",
     "Quality Factor (15 - 45) (default 25)" : "Kokybės koeficientas (15–45) (numatytoji reikšmė – 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Numatytasis didelės raiškos vaizdų įkėlimo būdas nuotraukų peržiūros programoje.",
     "The configuration here also applies to public link shares." : "Ši konfigūracija taip pat taikoma viešai bendrinamoms nuorodoms.",

@@ -235,7 +235,6 @@ OC.L10N.register(
     "Enable external transcoder" : "Ενεργοποίηση εξωτερικού μετακωδικοποιητή",
     "Binary path (local only)" : "Διαδρομή δυαδικού (μόνο τοπικά)",
     "Bind address (local only)" : "Διεύθυνση δέσμευσης (μόνο τοπικά)",
-    "Connection address (same as bind if local)" : "Διεύθυνση σύνδεσης (ίδια με τη δέσμευση εάν είναι τοπική)",
     "Quality Factor (15 - 45) (default 25)" : "Συντελεστής Ποιότητας (15 - 45) (προεπιλογή 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Προεπιλεγμένη συμπεριφορά φόρτωσης εικόνων υψηλής ανάλυσης του προγράμματος προβολής φωτογραφιών.",
     "The configuration here also applies to public link shares." : "Η διαμόρφωση εδώ ισχύει και για δημόσιους συνδέσμους κοινής χρήσης.",

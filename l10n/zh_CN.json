@@ -237,7 +237,6 @@
     "Enable external transcoder" : "启用外部转码器",
     "Binary path (local only)" : "Binary路径（仅本地）",
     "Bind address (local only)" : "绑定地址（仅本地）",
-    "Connection address (same as bind if local)" : "连接地址(如果是本地，则与绑定地址相同)",
     "Quality Factor (15 - 45) (default 25)" : "品质系数（15-45）（默认 25）",
     "Default high resolution image loading behavior of the photo viewer." : "默认图片浏览器高清图片加载偏好。",
     "The configuration here also applies to public link shares." : "此处的设置也适用于公开分享链接。",

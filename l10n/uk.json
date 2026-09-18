@@ -233,7 +233,6 @@
     "Enable external transcoder" : "Увімкнути зовнішній транскодер",
     "Binary path (local only)" : "Двійковий шлях (тільки локально)",
     "Bind address (local only)" : "Прив'язати адресу (тільки локальну)",
-    "Connection address (same as bind if local)" : "Адреса з'єднання (така ж, як і bind, якщо локальна)",
     "Quality Factor (15 - 45) (default 25)" : "Фактор якості (15 - 45) (за замовчуванням 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Типова поведінка завантаження зображень у програмі для перегляду фотографій у високій роздільній здатності.",
     "The configuration here also applies to public link shares." : "Наведена тут конфігурація також застосовується до публічних посилань.",

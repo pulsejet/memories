@@ -244,7 +244,6 @@
     "Enable external transcoder" : "Dış dönüştürücü kullanılsın",
     "Binary path (local only)" : "Dosya yolu (yalnızca yerel)",
     "Bind address (local only)" : "Bağlanma adresi (yalnızca yerel)",
-    "Connection address (same as bind if local)" : "Bağlantı adresi (yerel ise bağlanma ile aynı)",
     "Quality Factor (15 - 45) (default 25)" : "Kalite çarpanı (15 - 45) (varsayılan 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Fotoğraf görüntüleyicinin varsayılan yüksek çözünürlüklü görsel yükleme davranışı.",
     "The configuration here also applies to public link shares." : "Bu yapılandırma herkese açık bağlantı paylaşımlarına da uygulanır.",

@@ -195,7 +195,6 @@
     "Enable external transcoder" : "Külső transcoder engedélyezése",
     "Binary path (local only)" : "Bináris útvonala (csak helyi esetén)",
     "Bind address (local only)" : "Kötési cím (csak helyi esetén)",
-    "Connection address (same as bind if local)" : "Kapcsolati cím (helyi esetén megegyezik a kötéssel)",
     "The configuration here also applies to public link shares." : "Ez a beállítás a nyilvános hivatkozáskora is hatással van.",
     "Users may override this setting." : "A felhasználók felülírhatják ezt a beállítást.",
     "Always load high resolution image (not recommended if using HEIC/TIFF)" : "Mindig töltse be a nagy felbontású képeket (nem ajánlott, ha HEIC/TIFF formátumot használ)",

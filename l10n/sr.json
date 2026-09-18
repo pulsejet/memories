@@ -233,7 +233,6 @@
     "Enable external transcoder" : "Укључи спољни транскодер",
     "Binary path (local only)" : "Путања до бинарног фајла (само локална)",
     "Bind address (local only)" : "Адреса везивања (само локална)",
-    "Connection address (same as bind if local)" : "Адреса везе (иста као везивања, ако је локална)",
     "Quality Factor (15 - 45) (default 25)" : "Фактор квалитета (15 - 45) (подразумевано 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Подразумевано понашање прегледача слика за учитавање слике високе резолуције.",
     "The configuration here also applies to public link shares." : "Ова конфигурација се такође примењује и на дељења јавним линком.",

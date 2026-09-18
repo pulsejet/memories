@@ -231,7 +231,6 @@
     "Enable external transcoder" : "تمكين مُحوِّل خارجي ",
     "Binary path (local only)" : "المسار الثنائي (محلي فقط)",
     "Bind address (local only)" : "عنوان الاقتران/ الربط (محلي فقط)",
-    "Connection address (same as bind if local)" : "عنوان الاتصال (نفس عنوان الاقتران إذا كان محلياً)",
     "Quality Factor (15 - 45) (default 25)" : "عامل الكفاءة (15 - 45) (التلقائي 25)",
     "Default high resolution image loading behavior of the photo viewer." : "السلوك التلقائي لتحميل الصور عالية الدقة في \"عارض الصور\"",
     "The configuration here also applies to public link shares." : "هذا الإعداد ينطبق كذلك على المشاركات عبر الروابط العمومية",

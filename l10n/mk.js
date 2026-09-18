@@ -238,7 +238,6 @@ OC.L10N.register(
     "Enable external transcoder" : "Овозможи надворешен транскодер",
     "Binary path (local only)" : "Патека до бинарна датотека (само локално)",
     "Bind address (local only)" : "Адреса за врзување (само локално)",
-    "Connection address (same as bind if local)" : "Адреса за поврзување (истата како за врзување ако е локално)",
     "Quality Factor (15 - 45) (default 25)" : "Фактор на квалитет (15–45) (стандардно 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Стандардно однесување при вчитување слики со висока резолуција во прегледникот на фотографии.",
     "The configuration here also applies to public link shares." : "Оваа конфигурација важи и за јавни споделувања преку линк.",

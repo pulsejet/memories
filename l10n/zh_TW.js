@@ -246,7 +246,6 @@ OC.L10N.register(
     "Enable external transcoder" : "啟用外部轉碼程式",
     "Binary path (local only)" : "二進位檔路徑（僅本機）",
     "Bind address (local only)" : "綁定地址（僅本機）",
-    "Connection address (same as bind if local)" : "連線地址（若為本機的話，則與綁定相同）",
     "Quality Factor (15 - 45) (default 25)" : "品質係數 (15 - 45)（預設 25）",
     "Default high resolution image loading behavior of the photo viewer." : "照片檢視程式的預設高解析度影像載入行為。",
     "The configuration here also applies to public link shares." : "此處的設定也會套用到公開連結分享。",

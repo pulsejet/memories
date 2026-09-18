@@ -246,7 +246,6 @@ OC.L10N.register(
     "Enable external transcoder" : "Externen Transcoder aktivieren",
     "Binary path (local only)" : "Binärer Pfad (nur lokal)",
     "Bind address (local only)" : "Bind-Adresse (nur lokal)",
-    "Connection address (same as bind if local)" : "Verbindungsadresse (dasselbe wie bind, wenn lokal)",
     "Quality Factor (15 - 45) (default 25)" : "Qualitätsfaktor (15 - 45) (Standard 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Standardmäßiges Ladeverhalten des Fotobetrachters für hochauflösende Bilder.",
     "The configuration here also applies to public link shares." : "Die hier vorgenommene Einstellung gilt auch für öffentliche Linkfreigaben.",

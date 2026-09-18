@@ -232,7 +232,6 @@
     "Enable external transcoder" : "ເປີດໃຊ້ຕົວແປງລະຫັດພາຍນອກ",
     "Binary path (local only)" : "ເສັ້ນທາງໄຟລ໌ (ສະເພາະໃນເຄື່ອງ)",
     "Bind address (local only)" : "ທີ່ຢູ່ bind (ສະເພາະໃນເຄື່ອງ)",
-    "Connection address (same as bind if local)" : "ທີ່ຢູ່ການເຊື່ອມຕໍ່ (ຄືກັນກັບ bind ຖ້າຢູ່ໃນເຄື່ອງ)",
     "Quality Factor (15 - 45) (default 25)" : "ປັດໄຈຄຸນນະພາບ (15 - 45) (ຄ່າເລີ່ມຕົ້ນ 25)",
     "Default high resolution image loading behavior of the photo viewer." : "ພຶດຕິກຳການໂຫຼດຮູບພາບຄວາມລະອຽດສູງເລີ່ມຕົ້ນຂອງຕົວເບິ່ງຮູບພາບ.",
     "The configuration here also applies to public link shares." : "ການຕັ້ງຄ່າທີ່ນີ້ຍັງນຳໃຊ້ກັບການແບ່ງປັນລິ້ງສາທາລະນະ.",

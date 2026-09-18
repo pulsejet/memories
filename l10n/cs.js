@@ -238,7 +238,6 @@ OC.L10N.register(
     "Enable external transcoder" : "Zapnout externí nástroj pro překódování",
     "Binary path (local only)" : "Popis umístění spustitelného souboru (pouze lokální)",
     "Bind address (local only)" : "Adresa, na kterou navázat (pouze místní)",
-    "Connection address (same as bind if local)" : "Adresa pro připojení (pokud lokální, stejná jako ta pro navázání na)",
     "Quality Factor (15 - 45) (default 25)" : "Stupeň kvality (15 - 45) (výchozí 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Výchozí chování při načítání obrázku s vysokým rozlišení v prohlížeči fotek.",
     "The configuration here also applies to public link shares." : "Nastavení zde se také uplatní na sdílení veřejnými odkazy.",

@@ -233,7 +233,6 @@ OC.L10N.register(
     "Enable external transcoder" : "Aktiver ekstern transkoder",
     "Binary path (local only)" : "Binær bane (bare lokalt)",
     "Bind address (local only)" : "Bind adresse (bare lokalt)",
-    "Connection address (same as bind if local)" : "Tilkoblingsadresse (samme som bind hvis lokal)",
     "Quality Factor (15 - 45) (default 25)" : "Kvalitetsfaktor (15 - 45) (standard 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Standard virkemåte for innlasting av bilder med høy oppløsning for bildeviseren.",
     "The configuration here also applies to public link shares." : "Konfigurasjonen her gjelder også for delte fellesressurser.",

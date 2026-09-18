@@ -239,7 +239,6 @@ OC.L10N.register(
     "Enable external transcoder" : "Aktivera extern omkodare",
     "Binary path (local only)" : "Sökväg till binärfil (endast lokalt)",
     "Bind address (local only)" : "Bindningsadress (endast lokalt)",
-    "Connection address (same as bind if local)" : "Anslutningsadress (samma som bindningsadressen vid lokal körning)",
     "Quality Factor (15 - 45) (default 25)" : "Kvalitetsfaktor (15–45, standardvärde 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Fotovisarens standardinställning för laddning av högupplösta bilder.",
     "The configuration here also applies to public link shares." : "Konfigurationen här gäller även offentliga länkdelningar.",

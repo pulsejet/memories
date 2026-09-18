@@ -245,7 +245,6 @@ OC.L10N.register(
     "Enable external transcoder" : "Cumasaigh traschódóir seachtrach",
     "Binary path (local only)" : "Conair dhénártha (áitiúil amháin)",
     "Bind address (local only)" : "Seoladh ceangail (áitiúil amháin)",
-    "Connection address (same as bind if local)" : "Seoladh ceangail (mar an gcéanna leis an gceangal más logánta)",
     "Quality Factor (15 - 45) (default 25)" : "Fachtóir Cáilíochta (15 - 45) (réamhshocraithe 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Iompar réamhshocraithe lódála ardtaifigh íomhá an bhreathnóra grianghraf.",
     "The configuration here also applies to public link shares." : "Baineann an chumraíocht anseo freisin le scaireanna naisc phoiblí.",

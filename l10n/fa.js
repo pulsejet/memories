@@ -236,7 +236,6 @@ OC.L10N.register(
     "Enable external transcoder" : "فعال‌سازی ترنسکودر خارجی",
     "Binary path (local only)" : "مسیر باینری (فقط محلی)",
     "Bind address (local only)" : "آدرس bind (فقط محلی)",
-    "Connection address (same as bind if local)" : "آدرس اتصال (در صورت محلی بودن، همان bind است)",
     "Quality Factor (15 - 45) (default 25)" : "ضریب کیفیت (15 - 45) (پیش‌فرض 25)",
     "Default high resolution image loading behavior of the photo viewer." : "رفتار پیش‌فرض بارگذاری تصاویر با وضوح بالا در نمایشگر عکس.",
     "The configuration here also applies to public link shares." : "تنظیمات اینجا برای اشتراک‌گذاری لینک عمومی نیز اعمال می‌شود.",

@@ -165,7 +165,6 @@ OC.L10N.register(
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "Memories utiliza el transcodificador go-vod. Puedes ejecutar go-vod externamente (por ejemplo, en un contenedor Docker separado para la aceleración de hardware) o utilizar el transcodificador incorporado. Para utilizar un transcodificador externo, habilita la siguiente opción y sigue las instrucciones de la documentación:",
     "Binary path (local only)" : "Ruta del binario (solo local)",
     "Bind address (local only)" : "Dirección de enlace (solo local)",
-    "Connection address (same as bind if local)" : "Dirección de conexión (misma que enlace si es local)",
     "Template" : "Plantilla",
     "Shared" : "Compartido",
     "No results found" : "No se encontraron resultados",

@@ -167,7 +167,6 @@
     "Memories uses the go-vod transcoder. You can run go-vod exernally (e.g. in a separate Docker container for hardware acceleration) or use the built-in transcoder. To use an external transcoder, enable the following option and follow the instructions in the documentation:" : "Приложението Memories използва go-vod транскодер. Можете да стартирате go-vod външно (напр. в отделен Docker контейнер за хардуерно ускорение) или да използвате вградения транскодер. За да използвате външен транскодер, активирайте следната опция и следвайте инструкциите  в документацията:",
     "Binary path (local only)" : "Бинарен път (само локален)",
     "Bind address (local only)" : "Обвързващ адрес (само локален)",
-    "Connection address (same as bind if local)" : "Адрес на връзката (същият като адреса на обвързване ако е локален)",
     "Template" : "Шаблон",
     "Shared" : "Споделен",
     "No results found" : "Няма намерени резултати",

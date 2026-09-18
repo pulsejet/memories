@@ -231,7 +231,6 @@ OC.L10N.register(
     "Enable external transcoder" : "외부 트랜스코더 활성화",
     "Binary path (local only)" : "바이너리 경로 (로컬 전용)",
     "Bind address (local only)" : "바인드 주소 (로컬 전용)",
-    "Connection address (same as bind if local)" : "연결 주소 (로컬이라면 바인드와 같게)",
     "Quality Factor (15 - 45) (default 25)" : "품질 계수 (15 - 45) (기본 25)",
     "Default high resolution image loading behavior of the photo viewer." : "사진 뷰어의 고해상도 이미지 로딩 기본 동작",
     "The configuration here also applies to public link shares." : "이곳의 설정은 공개 링크 공유에도 적용됩니다.",
