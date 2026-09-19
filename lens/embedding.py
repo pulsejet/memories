@@ -70,7 +70,11 @@ class EmbeddingModel:
 
         for attempt in range(1, 4):
             try:
-                snapshot_download(config.embedding.model_id, revision=config.embedding.model_revision, local_dir=path)
+                snapshot_download(
+                    repo_id=config.embedding.model_id,
+                    revision=config.embedding.model_revision,
+                    local_dir=path,
+                )
                 log.info("snapshot ready at %s", path)
                 return path
             except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -101,8 +105,17 @@ class EmbeddingModel:
 
         log.info("loading %s from %s on %s", config.embedding.model_id, path, self._device)
 
-        self._processor = AutoProcessor.from_pretrained(path, local_files_only=True, trust_remote_code=False)
-        self._model = AutoModel.from_pretrained(path, dtype=dtype, local_files_only=True, trust_remote_code=False)
+        self._processor = AutoProcessor.from_pretrained(
+            pretrained_model_name_or_path=path,
+            local_files_only=True,
+            trust_remote_code=False,
+        )
+        self._model = AutoModel.from_pretrained(
+            pretrained_model_name_or_path=path,
+            dtype=dtype,
+            local_files_only=True,
+            trust_remote_code=False,
+        )
         self._model.to(self._device).eval()
 
         text_config = getattr(self._model.config, "text_config", self._model.config)
@@ -133,7 +146,12 @@ class EmbeddingModel:
     def embed_text(self, text: str) -> list[float]:
         """Encode a query string to an L2-normed vector (trained padding: max_length)."""
 
-        inputs = self._processor(text=[text], padding="max_length", truncation=True, return_tensors="pt")
+        inputs = self._processor(
+            text=[text],
+            padding="max_length",
+            truncation=True,
+            return_tensors="pt",
+        )
 
         return self._encode(self._model.get_text_features, inputs)
 

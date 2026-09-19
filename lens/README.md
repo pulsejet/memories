@@ -78,5 +78,6 @@ make lint
 ```
 
 Style: short docstrings on every module/function, blank line after each
-docstring, blank lines between logical blocks, keep it flat. `make lint`
-(pylint + flake8, max line 120) must be clean.
+docstring, blank lines between logical blocks, keep it flat. Calls that
+don't fit on one line break with one argument per line, naming positional
+args as kwargs. `make lint` (pylint + flake8, max line 120) must be clean.

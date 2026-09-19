@@ -31,6 +31,7 @@ def _float(name: str, default: float) -> float:
     except ValueError as exc:
         raise RuntimeError(f"{name} must be a number") from exc
 
+
 @dataclass(frozen=True)
 class EmbeddingConfig:
     """Pinned embedding checkpoint settings."""
@@ -38,6 +39,7 @@ class EmbeddingConfig:
     model_id: str
     model_revision: str
     version: int
+    qdrant_collection: str
 
 
 @dataclass(frozen=True)
@@ -75,6 +77,7 @@ def load_config() -> Config:
         model_id=os.environ.get("EMBEDDING_MODEL_ID", "google/siglip2-base-patch16-256"),
         model_revision=os.environ["EMBEDDING_MODEL_REVISION"],
         version=_int("EMBEDDING_VERSION", 1),
+        qdrant_collection=os.environ.get("EMBEDDING_QDRANT_COLLECTION", "lens_images"),
     )
 
     return Config(
