@@ -1093,8 +1093,8 @@ export default defineComponent({
       if (elems.length === 0) return;
       if (elems.length === 1) return elems[0] as HTMLImageElement;
 
-      // Find if any element has the thumb-important class
-      const important = elems.filter((e) => e.classList.contains('thumb-important'));
+      // Find if any element has the important class
+      const important = elems.filter((e) => e.classList.contains('memories-thumb-important'));
       if (important.length > 0) return important[0] as HTMLImageElement;
 
       // Find element within 500px of the screen top
