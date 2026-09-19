@@ -58,15 +58,21 @@ Start it:
 docker compose up -d lens qdrant
 ```
 
-### 3. Local development (optional)
+## Development
 
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -e .
+make install
 ```
 
-Create `.env` with the same values as the compose environment above.
+Create `.env` with the same values as the compose environment above, except
+`QDRANT_URL=http://localhost:6333`, then:
 
 ```bash
 .venv/bin/uvicorn app:app --port 47789
+```
+
+Lint:
+
+```bash
+make lint
 ```
