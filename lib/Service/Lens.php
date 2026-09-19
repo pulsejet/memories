@@ -36,6 +36,14 @@ final class Lens
     ) {}
 
     /**
+     * Base URL of the Lens daemon with no trailing slash (empty = disabled).
+     */
+    public static function daemonUrl(): string
+    {
+        return rtrim(SystemConfig::get('memories.lens.daemon_url'), '/');
+    }
+
+    /**
      * Enqueue a file with the Lens daemon after a successful index.
      *
      * Best-effort: failures are logged and never break indexing.
@@ -43,7 +51,7 @@ final class Lens
     public function enqueue(File $file): void
     {
         try {
-            $base = SystemConfig::get('memories.lens.daemon_url');
+            $base = self::daemonUrl();
             if ('' === $base) {
                 return;
             }
@@ -52,7 +60,7 @@ final class Lens
                 return;
             }
 
-            $this->clientService->newClient()->post(rtrim($base, '/').'/v1/index', [
+            $this->clientService->newClient()->post($base.'/v1/index', [
                 'json' => [
                     'fileid' => $file->getId(),
                     'parent_id' => $file->getParent()->getId(),

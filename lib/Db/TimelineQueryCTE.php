@@ -4,11 +4,36 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 trait TimelineQueryCTE
 {
     protected IDBConnection $connection;
+
+    /**
+     * Run a query referencing cte_folders, prepending the WITH clause as needed.
+     *
+     * Hidden folders are excluded unless the cteIncludeHidden parameter is set.
+     */
+    public function executeQueryWithCTEs(IQueryBuilder $query, string $psql = ''): \OCP\DB\IResult
+    {
+        $sql = empty($psql) ? $query->getSQL() : $psql;
+        $params = $query->getParameters();
+        $types = $query->getParameterTypes();
+
+        // Get SQL
+        $CTE_SQL = \array_key_exists('cteFoldersArchive', $params)
+            ? $this->CTE_FOLDERS_ARCHIVE()
+            : $this->CTE_FOLDERS(\array_key_exists('cteIncludeHidden', $params));
+
+        // Add WITH clause if needed
+        if (str_contains($sql, 'cte_folders')) {
+            $sql = $CTE_SQL.' '.$sql;
+        }
+
+        return $this->connection->executeQuery($sql, $params, $types);
+    }
 
     /**
      * CTE to get all files recursively in the given top folders
