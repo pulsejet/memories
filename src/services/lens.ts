@@ -12,6 +12,9 @@ export const TOP_RESULTS_DAYID = 56978;
 /** Fallback top-results size when scores decay smoothly with no clear cliff. */
 export const TOP_RESULTS_COUNT_FALLBACK = 20;
 
+/** Minimum top-results size; a cliff before this still yields this many. */
+export const TOP_RESULTS_COUNT_MIN = 6;
+
 /** Fixed title for the top-results day. */
 export const TOP_RESULTS_TEXT = t('memories', 'Top results');
 
@@ -112,6 +115,7 @@ const SCORE_CLIFF_RATIO = 2;
  * Leading hits that count as top results: split after the biggest score
  * cliff, which must clearly dominate the runner-up gap. Falls back to
  * TOP_RESULTS_COUNT_FALLBACK when scores decay smoothly with no clear cliff.
+ * Never fewer than TOP_RESULTS_COUNT_MIN (clamped to hits length).
  */
 export function findTopCutoff(hits: ILensHit[]): number {
   if (hits.length <= 1) return hits.length;
@@ -132,8 +136,8 @@ export function findTopCutoff(hits: ILensHit[]): number {
   }
 
   if (!(bestGap > 0) || !(bestGap > runnerUp * SCORE_CLIFF_RATIO)) {
-    return Math.min(hits.length, TOP_RESULTS_COUNT_FALLBACK);
+    return Math.min(hits.length, Math.max(TOP_RESULTS_COUNT_MIN, TOP_RESULTS_COUNT_FALLBACK));
   }
 
-  return best + 1;
+  return Math.min(hits.length, Math.max(TOP_RESULTS_COUNT_MIN, best + 1));
 }
