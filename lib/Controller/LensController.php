@@ -112,7 +112,6 @@ final class LensController extends GenericApiController
      * @param int    $limit max hits, clamped to 1–500
      */
     #[NoAdminRequired]
-    #[NoCSRFRequired]
     public function search(string $text = '', int $limit = 50): Http\Response
     {
         return Util::guardEx(function () use ($text, $limit) {
