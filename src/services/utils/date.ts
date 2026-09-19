@@ -17,6 +17,12 @@ export function dateToDayId(date: Date) {
   return Math.floor(date.getTime() / (86400 * 1000));
 }
 
+/** Day ID of the first day of the month containing dayId (UTC) */
+export function dayIdToMonthId(dayId: number) {
+  const date = dayIdToDate(dayId);
+  return Math.floor(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1) / 86400000);
+}
+
 /** Get month name from number */
 export function getShortDateStr(date: Date): string {
   const dayId = dateToDayId(date);

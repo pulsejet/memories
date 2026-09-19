@@ -25,6 +25,8 @@ state = State()
 async def lifespan(_app: FastAPI):
     """Load model, ensure collection, start worker; mismatch is fatal."""
 
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s: %(message)s")
+
     await asyncio.to_thread(embedding_model.ensure_snapshot)
     await asyncio.to_thread(embedding_model.load)
 

@@ -105,11 +105,16 @@ class IndexQueue:
                         h=h,
                         etag=result.etag,
                         mimetype=result.mimetype,
+                        epoch=result.epoch,
+                        dayid=result.dayid,
                     ),
                 )
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 log.exception("index failed for %d: %s", fileid, exc)
                 self.done(fileid, ok=False)
             else:
-                log.info("indexed %d (%dx%d %s)", fileid, w, h, result.mimetype)
+                log.info(
+                    "indexed %d (%dx%d %s epoch=%s dayid=%s)",
+                    fileid, w, h, result.mimetype, result.epoch, result.dayid,
+                )
                 self.done(fileid, ok=True)

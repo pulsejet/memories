@@ -22,6 +22,8 @@ class FileMeta:
     h: int
     etag: str
     mimetype: str
+    epoch: int | None
+    dayid: int | None
 
 
 class CompatMismatch(RuntimeError):
@@ -74,6 +76,8 @@ class Store:
                 "h": meta.h,
                 "etag": meta.etag,
                 "mimetype": meta.mimetype,
+                **({"epoch": meta.epoch} if meta.epoch is not None else {}),
+                **({"dayid": meta.dayid} if meta.dayid is not None else {}),
             },
         )
 

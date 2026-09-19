@@ -1508,7 +1508,7 @@ export default defineComponent({
       }
     },
 
-    /** Fetch lens search results into a fake single day */
+    /** Fetch lens search results into top + month days */
     async fetchLensSearch() {
       const query = lens.routeQueryText(this.$route.query.q).trim();
 
@@ -1519,9 +1519,10 @@ export default defineComponent({
         if (this.state !== state) return;
         await this.processDays(days, false);
 
-        // Title the fake day; the overlay picks this up too
-        const head = this.heads.get(lens.TOP_RESULTS_DAYID);
-        if (head) head.name = lens.TOP_RESULTS_TEXT;
+        // Title the top day; month days get month titles via head.ismonth
+        for (const day of days) {
+          lens.markSearchHead(day, this.heads.get(day.dayid));
+        }
       } catch (e: any) {
         if (!utils.isNetworkError(e)) {
           showError(e?.response?.data?.message ?? e.message);

@@ -36,6 +36,7 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\StreamResponse;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\Config\IUserMountCache;
 use OCP\Files\File;
 use OCP\Files\NotFoundException;
@@ -91,6 +92,13 @@ final class LensController extends GenericApiController
             $response->addHeader('Content-Type', $file->getMimeType());
             if ($etag = $file->getEtag()) {
                 $response->addHeader('ETag', $etag);
+            }
+            $meta = $this->getIndexMeta($fileid);
+            if (null !== $meta['epoch']) {
+                $response->addHeader('X-Memories-Epoch', (string) $meta['epoch']);
+            }
+            if (null !== $meta['dayid']) {
+                $response->addHeader('X-Memories-Dayid', (string) $meta['dayid']);
             }
 
             return $response;
@@ -165,8 +173,38 @@ final class LensController extends GenericApiController
                 'h' => isset($hit['h']) ? (int) $hit['h'] : null,
                 'etag' => $hit['etag'] ?? null,
                 'mimetype' => $hit['mimetype'] ?? null,
+                'epoch' => isset($hit['epoch']) ? (int) $hit['epoch'] : null,
+                'dayid' => isset($hit['dayid']) ? (int) $hit['dayid'] : null,
             ], $hits));
         });
+    }
+
+    /**
+     * Epoch and dayid of a file from the memories table, nulls when unknown.
+     *
+     * Best-effort: failures never break file serving.
+     *
+     * @return array{epoch: ?int, dayid: ?int}
+     */
+    private function getIndexMeta(int $fileid): array
+    {
+        try {
+            $qb = $this->connection->getQueryBuilder();
+            $qb->select('epoch', 'dayid')
+                ->from('memories')
+                ->where($qb->expr()->eq('fileid', $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)))
+            ;
+            $row = $qb->executeQuery()->fetch();
+            if (false !== $row) {
+                return [
+                    'epoch' => isset($row['epoch']) ? (int) $row['epoch'] : null,
+                    'dayid' => isset($row['dayid']) ? (int) $row['dayid'] : null,
+                ];
+            }
+        } catch (\Throwable) {
+        }
+
+        return ['epoch' => null, 'dayid' => null];
     }
 
     /**

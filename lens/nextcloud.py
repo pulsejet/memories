@@ -19,6 +19,8 @@ class FetchResult:
     data: bytes
     etag: str
     mimetype: str
+    epoch: int | None
+    dayid: int | None
 
 
 class FetchError(RuntimeError):
@@ -54,6 +56,16 @@ def fetch_file(fileid: int) -> FetchResult:
             etag = res.headers.get("etag", "") or ""
             mimetype = res.headers.get("content-type", "") or ""
 
+            try:
+                epoch = int(res.headers.get("x-memories-epoch", "") or "")
+            except ValueError:
+                epoch = None
+
+            try:
+                dayid = int(res.headers.get("x-memories-dayid", "") or "")
+            except ValueError:
+                dayid = None
+
             chunks = []
 
             for chunk in res.iter_bytes():
@@ -63,4 +75,6 @@ def fetch_file(fileid: int) -> FetchResult:
         data=b"".join(chunks),
         etag=etag,
         mimetype=mimetype,
+        epoch=epoch,
+        dayid=dayid,
     )
