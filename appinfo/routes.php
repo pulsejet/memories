@@ -21,6 +21,7 @@ return [
         ['name' => 'Page#thisday', 'url' => '/thisday', 'verb' => 'GET'],
         ['name' => 'Page#map', 'url' => '/map', 'verb' => 'GET'],
         ['name' => 'Page#explore', 'url' => '/explore', 'verb' => 'GET'],
+        ['name' => 'Page#search', 'url' => '/search', 'verb' => 'GET'],
         ['name' => 'Page#nxsetup', 'url' => '/nxsetup', 'verb' => 'GET'],
 
         // Routes with params

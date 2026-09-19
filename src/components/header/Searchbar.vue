@@ -1,15 +1,17 @@
 <template>
   <div ref="outer" class="memories-searchbar">
-    <NcPopover :shown="shown" :focus-trap="false" @after-hide="pHidden = true">
+    <NcPopover :shown="shown" :no-focus-trap="true" @after-hide="pHidden = true">
       <template #trigger="{ attrs }">
         <div v-bind="attrs">
           <NcTextField
             ref="textField"
             class="text-field"
             v-model="prompt"
+            auto-complete="off"
             :label-outside="true"
             :label="t('memories', 'Search your photos …')"
             :placeholder="t('memories', 'Search your photos …')"
+            @keydown.enter="openSearch"
           >
             <template #icon>
               <MagnifyIcon :size="16" />
@@ -18,7 +20,14 @@
         </div>
       </template>
 
-      <div class="searchbar-results">
+      <div class="searchbar-results" v-if="!isLensLive">
+        <div v-if="showLensEntry" class="cluster" @click="openSearch">
+          <div class="icon">
+            <MagnifyIcon :size="22" />
+          </div>
+          {{ lensEntryText }}
+        </div>
+
         <div class="empty" v-if="prompt.length === 0">
           {{ t('memories', 'Start typing to find photos and albums') }}
         </div>
@@ -56,6 +65,8 @@ const NcPopover = defineAsyncComponent(() => import('@nextcloud/vue/components/N
 import UserConfig from '@mixins/UserConfig';
 
 import * as dav from '@services/dav';
+import * as lens from '@services/lens';
+import * as utils from '@services/utils';
 
 import Fuse from 'fuse.js';
 
@@ -103,6 +114,9 @@ export default defineComponent({
     // it to show again. This flag is used to force it.
     pHidden: false,
 
+    // Pending live lens navigation (debounced)
+    lensTimer: null as number | null,
+
     clusters: null as ICluster[] | null,
     clustersLoad: false,
     clusterIs: dav.clusterIs,
@@ -111,11 +125,13 @@ export default defineComponent({
   }),
 
   mounted() {
-    if (this.autoFocus) {
-      setTimeout(() => {
+    this.syncPromptFromRoute();
+    setTimeout(() => {
+      this.syncPromptFromRoute();
+      if (this.autoFocus) {
         (<any>this.$refs.textField)?.focus();
-      }, 100); // wait for opacity transition
-    }
+      }
+    }, 100); // wait for opacity transition
   },
 
   computed: {
@@ -126,6 +142,7 @@ export default defineComponent({
     },
 
     shown() {
+      // Live search mode navigates directly; no popover needed
       return !this.pHidden && !!this.prompt.length;
     },
 
@@ -137,13 +154,33 @@ export default defineComponent({
     clustersFuse() {
       return new Fuse(this.clusters ?? [], { keys: ['name', 'display_name'], threshold: 0.3 });
     },
+
+    /** Live lens search hijacks typing only on desktop timeline/search views */
+    isLensLive(): boolean {
+      return (this.routeIsBase || this.routeIsSearch) && !utils.isMobile();
+    },
+
+    /** Explicit lens entry for anywhere live search does not apply */
+    showLensEntry(): boolean {
+      return !!this.prompt && !this.isLensLive;
+    },
+
+    lensEntryText(): string {
+      return this.t('memories', 'Find photos matching “{query}”', { query: this.prompt });
+    },
   },
 
   watch: {
     prompt(val: string) {
       this.pHidden = false;
-      if (!val) return;
-      this.load(); // load clusters
+      if (val) {
+        this.load(); // load clusters
+      }
+
+      // Queue lens search if route changed.
+      if (lens.routeQueryText(this.$route.query.q) !== val) {
+        this.queueLensSearch();
+      }
     },
   },
 
@@ -172,6 +209,48 @@ export default defineComponent({
         this.clusters = results
           .flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
           .filter((c) => !!(c.name || c.display_name));
+      }
+    },
+
+    /** Mirror ?q= into the box when on the search view (e.g. direct open). */
+    syncPromptFromRoute() {
+      if (!this.routeIsSearch) return;
+      const q = lens.routeQueryText(this.$route.query.q);
+      if (q !== this.prompt) this.prompt = q;
+    },
+
+    /** Open the search view for the current prompt */
+    openSearch() {
+      const q = this.prompt.trim();
+      if (!q || this.isLensLive) return;
+      window.clearTimeout(this.lensTimer ?? 0);
+      this.lensTimer = null;
+      this.$router.push({ name: 'search', query: { q } });
+      this.prompt = q;
+      this.pHidden = true;
+      this.$emit('select');
+    },
+
+    /** Live lens search on desktop timeline/search views */
+    queueLensSearch() {
+      if (!this.isLensLive) return;
+      utils.setRenewingTimeout(this, 'lensTimer', this.routeToLens, 500);
+    },
+
+    /** Run the pending live lens navigation */
+    routeToLens() {
+      if (!this.prompt) {
+        if (!this.routeIsBase) {
+          this.$router.replace({ name: 'timeline' });
+        }
+      } else {
+        this.$router.replace({
+          name: 'search',
+          query: {
+            ...this.$route.query,
+            q: this.prompt,
+          },
+        });
       }
     },
   },

@@ -132,6 +132,7 @@ import * as utils from '@services/utils';
 import * as nativex from '@native';
 
 import { API, DaysFilterType } from '@services/API';
+import * as lens from '@services/lens';
 
 import type { IDay, IHeadRow, IPhoto, IPhotoRow, IRow } from '@typings';
 
@@ -310,7 +311,10 @@ export default defineComponent({
         await this.refresh();
 
         // Focus on the recycler (e.g. after navigation click)
-        this.refs().recycler?.$el.focus();
+        // Unless the user is typing in the search box
+        if (!document.activeElement?.closest?.('.memories-searchbar')) {
+          this.refs().recycler?.$el.focus();
+        }
       }
 
       // Do a soft refresh if the query changes
@@ -721,6 +725,11 @@ export default defineComponent({
         this.dtmContent = res ?? false;
       } finally {
         this.updateLoading(-1);
+      }
+
+      // Lens search mode serves a fake day, not the days API
+      if (this.routeIsSearch) {
+        return await this.fetchLensSearch();
       }
 
       // Get URL an cache identifier
@@ -1496,6 +1505,30 @@ export default defineComponent({
       for (const day of updatedDays) {
         const newDetail = day.detail?.filter((p) => !delPhotosSet.has(p));
         this.processDay(day.dayid, newDetail!);
+      }
+    },
+
+    /** Fetch lens search results into a fake single day */
+    async fetchLensSearch() {
+      const query = lens.routeQueryText(this.$route.query.q).trim();
+
+      try {
+        this.updateLoading(1);
+        const state = this.state;
+        const days = await lens.getLensSearchDays(query);
+        if (this.state !== state) return;
+        await this.processDays(days, false);
+
+        // Title the fake day; the overlay picks this up too
+        const head = this.heads.get(lens.TOP_RESULTS_DAYID);
+        if (head) head.name = lens.TOP_RESULTS_TEXT;
+      } catch (e: any) {
+        if (!utils.isNetworkError(e)) {
+          showError(e?.response?.data?.message ?? e.message);
+          console.error(e);
+        }
+      } finally {
+        this.updateLoading(-1);
       }
     },
   },
