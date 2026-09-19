@@ -13,6 +13,7 @@ Create a dedicated **non-admin** user (e.g. `lens`), then mint its token:
 ```bash
 occ user:add lens
 occ user:auth-tokens:add lens
+occ config:system:set memories.lens.service_user --value="lens" --type=string
 ```
 
 Save the username + token — you need them below.

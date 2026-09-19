@@ -110,6 +110,9 @@ final class SystemConfig
         // 1080 => 1080p (and so on)
         'memories.video_default_quality' => '0',
 
+        // UID of the dedicated Lens service account (empty = endpoint disabled)
+        'memories.lens.service_user' => '',
+
         // Availability of database features, e.g. triggers
         'memories.db.triggers.fcu' => false,
 
