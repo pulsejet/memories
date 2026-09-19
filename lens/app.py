@@ -12,7 +12,7 @@ from qdrant_client.http.exceptions import UnexpectedResponse
 from config import config
 from embedding import EmbeddingModel
 from queueing import IndexQueue
-from state import IndexRequest, State
+from state import IndexRequest, SearchRequest, State
 from store import CompatMismatch, Store
 
 log = logging.getLogger("lens.app")
@@ -115,6 +115,32 @@ async def delete_index(fileid: int = Path(gt=0)):
     state.index_queue.drop(fileid)
 
     return {"fileid": fileid, "status": "deleted"}
+
+
+@app.post("/v1/search")
+async def search(body: SearchRequest):
+    """Embed the query and return matching fileids, score desc."""
+
+    if not body.folders:
+        raise HTTPException(
+            status_code=400,
+            detail="folders must not be empty",
+        )
+
+    vec = await embedding_model.embed_text_async(body.text)
+    hits = await state.store.search(
+        vector=vec,
+        folders=body.folders,
+        limit=body.limit,
+    )
+
+    if not hits:
+        return {"hits": []}
+
+    cutoff = hits[0]["score"] - config.score_margin
+    kept = [h for h in hits if h["score"] >= cutoff]
+
+    return {"hits": kept}
 
 
 @app.post("/v1/embedding/text")

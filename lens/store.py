@@ -72,7 +72,10 @@ class Store:
             limit=limit,
         )
 
-        return [{"fileid": p.payload["fileid"], "score": p.score} for p in res.points]
+        return [
+            {"fileid": p.payload["fileid"], "score": p.score}
+            for p in res.points
+        ]
 
     async def delete(self, fileid: str):
         """Remove one file embedding."""

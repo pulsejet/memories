@@ -17,6 +17,14 @@ class IndexRequest(BaseModel):
     parent_id: int
 
 
+class SearchRequest(BaseModel):
+    """Text query scoped to parent folders."""
+
+    text: str
+    folders: list[int]
+    limit: int = Field(default=50, gt=0)
+
+
 @dataclass
 class State:
     """Mutable runtime handles; filled during lifespan, read by routes."""
