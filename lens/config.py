@@ -13,6 +13,7 @@ REQUIRED = (
     "NC_TOKEN",
     "QDRANT_URL",
     "EMBEDDING_MODEL_REVISION",
+    "SENTENCE_MODEL_REVISION",
 )
 
 
@@ -43,6 +44,15 @@ class EmbeddingConfig:
 
 
 @dataclass(frozen=True)
+class SentenceConfig:
+    """Pinned sentence checkpoint settings."""
+
+    model_id: str
+    model_revision: str
+    version: int
+
+
+@dataclass(frozen=True)
 class Config:  # pylint: disable=too-many-instance-attributes
     """All daemon settings; see ARCH.md config table."""
 
@@ -51,6 +61,7 @@ class Config:  # pylint: disable=too-many-instance-attributes
     nc_token: str
     qdrant_url: str
     embedding: EmbeddingConfig
+    sentence_model: SentenceConfig
     model_cache_dir: str
     device: str
     workers: int
@@ -85,12 +96,19 @@ def load_config() -> Config:
         qdrant_collection=os.environ.get("EMBEDDING_QDRANT_COLLECTION", "lens_images"),
     )
 
+    sentence_model = SentenceConfig(
+        model_id=os.environ.get("SENTENCE_MODEL_ID", "intfloat/multilingual-e5-small"),
+        model_revision=os.environ["SENTENCE_MODEL_REVISION"],
+        version=_int("SENTENCE_VERSION", 1),
+    )
+
     return Config(
         nextcloud_url=os.environ["NEXTCLOUD_URL"],
         nc_user=os.environ["NC_USER"],
         nc_token=os.environ["NC_TOKEN"],
         qdrant_url=os.environ["QDRANT_URL"],
         embedding=embedding,
+        sentence_model=sentence_model,
         model_cache_dir=os.environ.get("MODEL_CACHE_DIR", "/app/models"),
         device=os.environ.get("DEVICE", "auto"),
         workers=workers,

@@ -11,6 +11,7 @@ dependencies = [
   "huggingface-hub>=1.32,<2",
   "qdrant-client>=1.19,<2",
   "httpx>=0.28,<0.29",
+  "sentence-transformers>=6.1,<7",
   "pillow>=12.3,<13",
   "pillow-heif>=1.7,<2",
   "python-dotenv>=1.2,<2",

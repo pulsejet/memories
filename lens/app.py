@@ -12,23 +12,30 @@ from qdrant_client.http.exceptions import UnexpectedResponse
 from config import config
 from embedding import EmbeddingModel
 from queueing import IndexQueue
+from sentence import SentenceModel
 from state import IndexRequest, SearchRequest, State
 from store import CompatMismatch, Store
 
 log = logging.getLogger("lens.app")
 
 embedding_model = EmbeddingModel()
+sentence_model = SentenceModel()
 state = State()
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    """Load model, ensure collection, start worker; mismatch is fatal."""
+    """Load models, ensure collection, start worker; mismatch is fatal."""
 
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s: %(message)s")
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(name)s %(levelname)s: %(message)s",
+    )
 
     await asyncio.to_thread(embedding_model.ensure_snapshot)
     await asyncio.to_thread(embedding_model.load)
+    await asyncio.to_thread(sentence_model.ensure_snapshot)
+    await asyncio.to_thread(sentence_model.load)
 
     client = AsyncQdrantClient(url=config.qdrant_url)
     store = Store(client, embedding_model.dim())
@@ -61,7 +68,7 @@ app = FastAPI(title="Memories Lens", lifespan=lifespan)
 
 @app.get("/v1/health")
 def health():
-    """Liveness + model/qdrant readiness; degraded until wired."""
+    """Liveness + models/qdrant readiness; degraded until wired."""
 
     return {
         "status": "ok" if state.ready else "degraded",
@@ -72,6 +79,13 @@ def health():
             "device": embedding_model.device(),
             "dimension": embedding_model.dim() or None,
             "batch_size": config.index_batch_size,
+        },
+        "sentence_model": {
+            "id": config.sentence_model.model_id,
+            "revision": config.sentence_model.model_revision,
+            "version": config.sentence_model.version,
+            "device": sentence_model.device(),
+            "dimension": sentence_model.dim() or None,
         },
         "qdrant": state.qdrant,
     }
@@ -124,6 +138,8 @@ async def delete_index(fileid: int = Path(gt=0)):
 async def search(body: SearchRequest):
     """Embed the query and return matching fileids, score desc."""
 
+    require_ready()
+
     if not body.folders:
         raise HTTPException(
             status_code=400,
@@ -150,11 +166,7 @@ async def search(body: SearchRequest):
 async def embedding_text(body: dict):
     """Embed text for testing; returns the raw vector."""
 
-    if not state.ready:
-        raise HTTPException(
-            status_code=503,
-            detail="model not loaded",
-        )
+    require_ready()
 
     vec = await embedding_model.embed_text_async(body.get("text", ""))
 
@@ -165,12 +177,29 @@ async def embedding_text(body: dict):
 async def embedding_image(request: Request):
     """Embed raw image bytes for testing; returns the raw vector."""
 
+    require_ready()
+
+    vec = await embedding_model.embed_image_async(await request.body())
+
+    return {"vector": vec, "dimension": len(vec)}
+
+
+@app.post("/v1/sentence/query")
+async def sentence_query(body: dict):
+    """Embed text with the sentence model for testing; returns the raw vector."""
+
+    require_ready()
+
+    vec = await sentence_model.embed_query_async(body.get("text", ""))
+
+    return {"vector": vec, "dimension": len(vec)}
+
+
+def require_ready():
+    """Raise 503 unless the models are loaded."""
+
     if not state.ready:
         raise HTTPException(
             status_code=503,
             detail="model not loaded",
         )
-
-    vec = await embedding_model.embed_image_async(await request.body())
-
-    return {"vector": vec, "dimension": len(vec)}
