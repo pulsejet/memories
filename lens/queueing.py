@@ -111,4 +111,5 @@ class IndexQueue:
                 log.exception("index failed for %d: %s", fileid, exc)
                 self.done(fileid, ok=False)
             else:
+                log.info("indexed %d (%dx%d %s)", fileid, w, h, result.mimetype)
                 self.done(fileid, ok=True)
