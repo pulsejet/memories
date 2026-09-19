@@ -1,0 +1,49 @@
+"""Nextcloud file-bytes client (blocking; call via to_thread)."""
+
+import logging
+
+import httpx
+
+from config import config
+
+log = logging.getLogger("lens.nextcloud")
+
+TIMEOUT = 30.0
+
+
+class FetchError(RuntimeError):
+    """File fetch failed (network, oversize, or unexpected status)."""
+
+
+class AuthError(FetchError):
+    """Service-account token rejected (401); re-issue via occ."""
+
+
+class NotFoundError(FetchError):
+    """No such fileid (404)."""
+
+
+def fetch_file(fileid: int) -> bytes:
+    """Download raw file bytes for one fileid; raise on any failure."""
+
+    url = f"{config.nextcloud_url}/index.php/apps/memories/lens/file/{fileid}"
+
+    with httpx.Client(timeout=TIMEOUT, auth=(config.nc_user, config.nc_token)) as client:
+        with client.stream("GET", url) as res:
+            if res.status_code == 401:
+                # Token expired/removed: loud, the runbook is re-issuing it.
+                log.error("lens service account rejected (401); re-issue via occ user:auth-tokens:add")
+                raise AuthError(f"GET {url} -> 401")
+
+            if res.status_code == 404:
+                raise NotFoundError(f"GET {url} -> 404")
+
+            if res.status_code != 200:
+                raise FetchError(f"GET {url} -> {res.status_code}")
+
+            chunks = []
+
+            for chunk in res.iter_bytes():
+                chunks.append(chunk)
+
+    return b"".join(chunks)
