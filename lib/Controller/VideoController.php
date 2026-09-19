@@ -259,7 +259,7 @@ final class VideoController extends GenericApiController
 
         $url = BinExt::getGoVodEndpoint($client, 'vod');
 
-        $body = json_encode([
+        $data = [
             'client' => $client,
             'fileid' => $fileid,
             'etag' => $etag,
@@ -271,39 +271,37 @@ final class VideoController extends GenericApiController
                 'codecs' => $this->request->getParam('codecs'),
             ],
             'config' => BinExt::goVodTConfig(),
-        ]);
-
-        $context = stream_context_create([
-            'http' => [
-                'method' => 'POST',
-                'header' => "Content-Type: application/json\r\nX-Go-Vod-Version: ".BinExt::GOVOD_VER."\r\n",
-                'content' => $body,
-                'protocol_version' => 1.1,
-                'ignore_errors' => true,
-            ],
-        ]);
+        ];
 
         ignore_user_abort(true);
 
-        $stream = @fopen($url, 'r', false, $context);
-        if (!$stream) {
+        try {
+            $clientService = \OC::$server->get(\OCP\Http\Client\IClientService::class);
+            $response = $clientService->newClient()->post($url, [
+                'json' => $data,
+                'headers' => [
+                    'X-Go-Vod-Version' => BinExt::GOVOD_VER,
+                ],
+                'stream' => true,
+                'http_errors' => false,
+                'timeout' => 0,
+                'nextcloud' => ['allow_local_address' => true],
+            ]);
+        } catch (\Exception) {
             return 0;
         }
 
-        $returnCode = 0;
-        if (isset($http_response_header[0]) && preg_match('#HTTP/\S+\s+(\d+)#', $http_response_header[0], $matches)) {
-            $returnCode = (int) $matches[1];
-        }
+        $returnCode = $response->getStatusCode();
 
         if (200 === $returnCode) {
             if (200 !== $out->getHttpResponseCode()) {
                 $out->setHttpResponseCode(200);
             }
 
-            foreach ($http_response_header ?? [] as $header) {
-                if (0 === stripos($header, 'Content-Type:')
-                 || 0 === stripos($header, 'Content-Length:')) {
-                    $out->setHeader($header);
+            foreach (['Content-Type', 'Content-Length'] as $name) {
+                $value = $response->getHeader($name);
+                if ('' !== $value) {
+                    $out->setHeader("{$name}: {$value}");
                 }
             }
 
@@ -316,20 +314,26 @@ final class VideoController extends GenericApiController
                 $out->setHeader('Cache-Control: no-cache, no-store, must-revalidate');
             }
 
+            $stream = $response->getBody();
+
             // On Safari with MP4, chunked transfer encoding is not supported
             // So we need to read the whole file into memory and send it.
             if (preg_match('/^((?!chrome|android).)*safari/i', $this->request->getHeader('User-Agent'))) {
-                $response = stream_get_contents($stream);
-                if (false !== $response) {
-                    $out->setHeader('Content-Length: '.\strlen($response)); // critical
-                    $out->setOutput($response);
+                $body = \is_resource($stream) ? stream_get_contents($stream) : (string) $stream;
+                if (false !== $body) {
+                    $out->setHeader('Content-Length: '.\strlen($body)); // critical
+                    $out->setOutput($body);
                 }
-            } else {
+            } elseif (\is_resource($stream)) {
                 $out->setReadfile($stream);
+            } else {
+                $out->setOutput((string) $stream);
+            }
+
+            if (\is_resource($stream)) {
+                fclose($stream);
             }
         }
-
-        fclose($stream);
 
         return $returnCode;
     }
