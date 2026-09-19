@@ -244,6 +244,7 @@
     "Enable external transcoder" : "Activer le transcodeur externe",
     "Binary path (local only)" : "Chemin des exécutables (local uniquement)",
     "Bind address (local only)" : "Adresse de liaison (locale uniquement)",
+    "Connection addresses (comma separated)" : "Adresses de connexion (séparées par des virgules)",
     "Quality Factor (15 - 45) (default 25)" : "Facteur de qualité (15 - 45) (25 par défaut)",
     "Default high resolution image loading behavior of the photo viewer." : "Comportement par défaut de chargement d'images haute résolution de la visionneuse de photos.",
     "The configuration here also applies to public link shares." : "La configuration ici s'applique également aux partages par liens publics.",
