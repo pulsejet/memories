@@ -5,44 +5,52 @@ import logging
 from contextlib import asynccontextmanager
 
 import httpx
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Path, Request
 from qdrant_client import AsyncQdrantClient
 from qdrant_client.http.exceptions import UnexpectedResponse
 
 from config import config
 from embedding import EmbeddingModel
+from queueing import IndexQueue
+from state import IndexRequest, State
 from store import CompatMismatch, Store
 
 log = logging.getLogger("lens.app")
 
 embedding_model = EmbeddingModel()
-state = {"ready": False, "qdrant": "unknown", "store": None}
+state = State()
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    """Provision snapshot, load model, ensure collection; mismatch is fatal."""
+    """Load model, ensure collection, start worker; mismatch is fatal."""
 
     await asyncio.to_thread(embedding_model.ensure_snapshot)
     await asyncio.to_thread(embedding_model.load)
 
     client = AsyncQdrantClient(url=config.qdrant_url)
     store = Store(client, embedding_model.dim())
-    state["store"] = store
+    state.store = store
+
+    index_queue = IndexQueue(maxsize=config.queue_max)
+    state.index_queue = index_queue
+    worker = index_queue.run(embedding_model=embedding_model, store=store)
 
     try:
         await store.ensure_embedding_collection()
     except CompatMismatch:
+        worker.cancel()
         await client.close()
         raise
 
     except (UnexpectedResponse, httpx.HTTPError):
         log.exception("qdrant unreachable, staying degraded")
     else:
-        state["qdrant"] = "ok"
-        state["ready"] = True
+        state.qdrant = "ok"
+        state.ready = True
 
     yield
+    worker.cancel()
     await client.close()
 
 
@@ -54,7 +62,7 @@ def health():
     """Liveness + model/qdrant readiness; degraded until wired."""
 
     return {
-        "status": "ok" if state["ready"] else "degraded",
+        "status": "ok" if state.ready else "degraded",
         "embedding_model": {
             "id": config.embedding.model_id,
             "revision": config.embedding.model_revision,
@@ -62,27 +70,62 @@ def health():
             "device": embedding_model.device(),
             "dimension": embedding_model.dim() or None,
         },
-        "qdrant": state["qdrant"],
+        "qdrant": state.qdrant,
     }
 
 
 @app.get("/v1/stats")
 def stats():
-    """Queue/index/failure counters; zeros until worker lands."""
+    """Queue depth, in-flight fileids, and index/failure counters."""
+
+    queue = state.index_queue
 
     return {
-        "queued": 0,
-        "indexed_total": 0,
-        "failed_total": 0,
+        "queue_depth": queue.depth,
+        "in_flight": sorted(queue.in_flight),
+        "indexed_total": queue.indexed_total,
+        "failed_total": queue.failed_total,
     }
+
+
+@app.post("/v1/index", status_code=202)
+def index(body: IndexRequest):
+    """Enqueue a file; 429 when the queue is full."""
+
+    try:
+        state.index_queue.enqueue(
+            fileid=body.fileid,
+            parent_id=body.parent_id,
+        )
+    except asyncio.QueueFull as exc:
+        raise HTTPException(
+            status_code=429,
+            detail="queue full",
+            headers={"Retry-After": "5"},
+        ) from exc
+
+    return {"fileid": body.fileid, "status": "queued"}
+
+
+@app.delete("/v1/index/{fileid}")
+async def delete_index(fileid: int = Path(gt=0)):
+    """Delete a point and drop its queued entry, if any."""
+
+    await state.store.delete(fileid)
+    state.index_queue.drop(fileid)
+
+    return {"fileid": fileid, "status": "deleted"}
 
 
 @app.post("/v1/embedding/text")
 async def embedding_text(body: dict):
     """Embed text for testing; returns the raw vector."""
 
-    if not state["ready"]:
-        raise HTTPException(status_code=503, detail="model not loaded")
+    if not state.ready:
+        raise HTTPException(
+            status_code=503,
+            detail="model not loaded",
+        )
 
     vec = await embedding_model.embed_text_async(body.get("text", ""))
 
@@ -93,8 +136,11 @@ async def embedding_text(body: dict):
 async def embedding_image(request: Request):
     """Embed raw image bytes for testing; returns the raw vector."""
 
-    if not state["ready"]:
-        raise HTTPException(status_code=503, detail="model not loaded")
+    if not state.ready:
+        raise HTTPException(
+            status_code=503,
+            detail="model not loaded",
+        )
 
     vec = await embedding_model.embed_image_async(await request.body())
 

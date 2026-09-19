@@ -89,7 +89,7 @@ def load_config() -> Config:
         model_cache_dir=os.environ.get("MODEL_CACHE_DIR", "/app/models"),
         device=os.environ.get("DEVICE", "auto"),
         workers=workers,
-        queue_max=_int("QUEUE_MAX", 1000),
+        queue_max=_int("QUEUE_MAX", 100000),
         score_margin=_float("SCORE_MARGIN", 0.1),
         port=_int("PORT", 47789),
         torch_num_threads=int(threads) if threads else None,
