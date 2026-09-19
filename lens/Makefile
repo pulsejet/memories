@@ -11,8 +11,8 @@ $(VENV):
 
 .PHONY: lint
 lint:
-	$(PY)/pylint config.py app.py
-	$(PY)/flake8 config.py app.py
+	$(PY)/pylint *.py
+	$(PY)/flake8 *.py
 
 .PHONY: dev
 dev:

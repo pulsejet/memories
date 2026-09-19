@@ -31,18 +31,25 @@ def _float(name: str, default: float) -> float:
     except ValueError as exc:
         raise RuntimeError(f"{name} must be a number") from exc
 
+@dataclass(frozen=True)
+class EmbeddingConfig:
+    """Pinned embedding checkpoint settings."""
+
+    model_id: str
+    model_revision: str
+    version: int
+
 
 @dataclass(frozen=True)
 class Config:  # pylint: disable=too-many-instance-attributes
     """All daemon settings; see ARCH.md config table."""
+
     nextcloud_url: str
     nc_user: str
     nc_token: str
     qdrant_url: str
-    embedding_model_id: str
-    embedding_model_revision: str
+    embedding: EmbeddingConfig
     model_cache_dir: str
-    embedding_version: int
     device: str
     workers: int
     queue_max: int
@@ -53,22 +60,30 @@ class Config:  # pylint: disable=too-many-instance-attributes
 
 def load_config() -> Config:
     """Build Config from env; raise on missing required or locked values."""
+
     missing = [v for v in REQUIRED if not os.environ.get(v)]
     if missing:
         raise RuntimeError(f"missing required env vars: {', '.join(missing)}")
+
     workers = _int("WORKERS", 1)
     if workers != 1:
         raise RuntimeError("WORKERS is locked to 1 for v1")
+
     threads = os.environ.get("TORCH_NUM_THREADS")
+
+    embedding = EmbeddingConfig(
+        model_id=os.environ.get("EMBEDDING_MODEL_ID", "google/siglip2-base-patch16-256"),
+        model_revision=os.environ["EMBEDDING_MODEL_REVISION"],
+        version=_int("EMBEDDING_VERSION", 1),
+    )
+
     return Config(
         nextcloud_url=os.environ["NEXTCLOUD_URL"],
         nc_user=os.environ["NC_USER"],
         nc_token=os.environ["NC_TOKEN"],
         qdrant_url=os.environ["QDRANT_URL"],
-        embedding_model_id=os.environ.get("EMBEDDING_MODEL_ID", "google/siglip2-base-patch16-256"),
-        embedding_model_revision=os.environ["EMBEDDING_MODEL_REVISION"],
+        embedding=embedding,
         model_cache_dir=os.environ.get("MODEL_CACHE_DIR", "/app/models"),
-        embedding_version=_int("EMBEDDING_VERSION", 1),
         device=os.environ.get("DEVICE", "auto"),
         workers=workers,
         queue_max=_int("QUEUE_MAX", 1000),
