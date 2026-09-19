@@ -16,7 +16,16 @@ occ user:auth-tokens:add lens
 occ config:system:set memories.lens.service_user --value="lens" --type=string
 ```
 
-Save the username + token — you need them below.
+Save the username + token — you need them below. Then tell Memories about
+the service account and the daemon:
+
+```bash
+occ config:system:set memories.lens.service_user --value="lens" --type=string
+occ config:system:set memories.lens.daemon_url --value="http://lens:47789" --type=string
+```
+
+The daemon URL must be reachable from Nextcloud (use the compose service
+name above).
 
 ### 2. Docker Compose
 

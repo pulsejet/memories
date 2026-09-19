@@ -71,6 +71,7 @@ final class Index
         private IAppManager $appManager,
         private SetupManager $setupManager,
         private IUserManager $userManager,
+        private Lens $lens,
     ) {}
 
     /**
@@ -238,6 +239,7 @@ final class Index
         try {
             $this->log("Indexing file {$path}", true);
             $this->tw->processFile($file);
+            $this->lens->enqueue($file);
         } catch (\OCP\Lock\LockedException $e) {
             $this->log("Skipping file {$path} due to lock", true);
         } catch (\Exception $e) {
