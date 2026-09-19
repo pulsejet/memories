@@ -30,7 +30,7 @@ export type ILensHit = {
   etag: string | null;
   mimetype: string | null;
   epoch: number | null;
-  dayid: number | null;
+  dayid: number;
 };
 
 /** Run a lens text search; hits stay in score order. */
@@ -45,6 +45,7 @@ function hitToPhoto(hit: ILensHit, dayid: number): IPhoto {
   return {
     fileid: hit.fileid,
     dayid,
+    key: dayid === TOP_RESULTS_DAYID ? `top-${hit.fileid}` : `${hit.fileid}`,
     w: hit.w ?? undefined,
     h: hit.h ?? undefined,
     etag: hit.etag ?? undefined,
@@ -70,7 +71,7 @@ export function monthSearchDays(hits: ILensHit[]): IDay[] {
   const groups = new Map<number, IPhoto[]>();
 
   for (const hit of hits) {
-    if (hit.dayid == null) continue;
+    if (typeof hit.dayid !== 'number') continue;
     const monthId = utils.dayIdToMonthId(hit.dayid);
     let detail = groups.get(monthId);
     if (!detail) groups.set(monthId, (detail = []));
@@ -92,20 +93,16 @@ export function markSearchHead(day: IDay, head: IHeadRow | undefined): void {
   }
 }
 
-/** Search and wrap hits as days: top hits first, rest grouped by month. */
+/** Search and wrap hits as days: top hits first, all hits grouped by month. */
 export async function getLensSearchDays(text: string, limit = 200): Promise<IDay[]> {
   if (!text.trim()) return [];
   const hits = await searchLens(text, limit);
   if (!hits.length) return [];
 
   const cutoff = findTopCutoff(hits);
-  const rest = hits.slice(cutoff);
+  const top = fakeSearchDay(hits.slice(0, cutoff));
 
-  const topHits = hits.slice(0, cutoff);
-  topHits.push(...rest.filter((h) => h.dayid == null));
-  const top = fakeSearchDay(topHits);
-
-  return [top].concat(monthSearchDays(rest));
+  return [top].concat(monthSearchDays(hits));
 }
 
 /** Biggest drop must beat the runner-up gap by this factor to count as a cliff. */
