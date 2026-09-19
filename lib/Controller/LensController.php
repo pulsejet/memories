@@ -82,7 +82,10 @@ final class LensController extends GenericApiController
             }
 
             $response = new StreamResponse($handle);
-            $response->addHeader('Content-Type', 'application/octet-stream');
+            $response->addHeader('Content-Type', $file->getMimeType());
+            if ($etag = $file->getEtag()) {
+                $response->addHeader('ETag', $etag);
+            }
 
             return $response;
         });

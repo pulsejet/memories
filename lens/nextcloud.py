@@ -1,6 +1,7 @@
 """Nextcloud file-bytes client (blocking; call via to_thread)."""
 
 import logging
+from dataclasses import dataclass
 
 import httpx
 
@@ -9,6 +10,15 @@ from config import config
 log = logging.getLogger("lens.nextcloud")
 
 TIMEOUT = 30.0
+
+
+@dataclass(frozen=True)
+class FetchResult:
+    """Downloaded bytes plus response validators (empty when missing)."""
+
+    data: bytes
+    etag: str
+    mimetype: str
 
 
 class FetchError(RuntimeError):
@@ -23,8 +33,8 @@ class NotFoundError(FetchError):
     """No such fileid (404)."""
 
 
-def fetch_file(fileid: int) -> bytes:
-    """Download raw file bytes for one fileid; raise on any failure."""
+def fetch_file(fileid: int) -> FetchResult:
+    """Download raw file bytes plus validators for one fileid; raise on any failure."""
 
     url = f"{config.nextcloud_url}/index.php/apps/memories/lens/file/{fileid}"
 
@@ -41,9 +51,16 @@ def fetch_file(fileid: int) -> bytes:
             if res.status_code != 200:
                 raise FetchError(f"GET {url} -> {res.status_code}")
 
+            etag = res.headers.get("etag", "") or ""
+            mimetype = res.headers.get("content-type", "") or ""
+
             chunks = []
 
             for chunk in res.iter_bytes():
                 chunks.append(chunk)
 
-    return b"".join(chunks)
+    return FetchResult(
+        data=b"".join(chunks),
+        etag=etag,
+        mimetype=mimetype,
+    )

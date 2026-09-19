@@ -76,7 +76,7 @@ def load_config() -> Config:
     embedding = EmbeddingConfig(
         model_id=os.environ.get("EMBEDDING_MODEL_ID", "google/siglip2-base-patch16-256"),
         model_revision=os.environ["EMBEDDING_MODEL_REVISION"],
-        version=_int("EMBEDDING_VERSION", 1),
+        version=_int("EMBEDDING_VERSION", 2),
         qdrant_collection=os.environ.get("EMBEDDING_QDRANT_COLLECTION", "lens_images"),
     )
 

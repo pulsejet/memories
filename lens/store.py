@@ -1,6 +1,7 @@
 """Qdrant vector store with embedding-compat guard."""
 
 import logging
+from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from qdrant_client import AsyncQdrantClient, models
@@ -11,6 +12,16 @@ log = logging.getLogger("lens.store")
 
 # Nextcloud fileids are positive, so id 0 never collides with real points.
 META_ID = 0
+
+
+@dataclass(frozen=True)
+class FileMeta:
+    """Display metadata stored alongside each embedding."""
+
+    w: int
+    h: int
+    etag: str
+    mimetype: str
 
 
 class CompatMismatch(RuntimeError):
@@ -49,12 +60,22 @@ class Store:
         # Sentinel guard: stamp when absent, refuse when the space differs.
         await self._check_meta(name, META_ID, self._expected_meta())
 
-    async def upsert(self, fileid: str, vector, parent_id):
-        """Store one file embedding (re-index overwrites)."""
+    async def upsert(self, fileid: int, vector, parent_id: int, meta: FileMeta):
+        """Store one file embedding with display metadata (re-index overwrites)."""
 
-        now = datetime.now(timezone.utc).isoformat()
-        payload = {"fileid": fileid, "parent_id": parent_id, "indexed_at": now}
-        point = models.PointStruct(id=int(fileid), vector=vector, payload=payload)
+        point = models.PointStruct(
+            id=int(fileid),
+            vector=vector,
+            payload={
+                "fileid": fileid,
+                "parent_id": parent_id,
+                "indexed_at": datetime.now(timezone.utc).isoformat(),
+                "w": meta.w,
+                "h": meta.h,
+                "etag": meta.etag,
+                "mimetype": meta.mimetype,
+            },
+        )
 
         await self.client.upsert(config.embedding.qdrant_collection, points=[point])
 
@@ -73,11 +94,11 @@ class Store:
         )
 
         return [
-            {"fileid": p.payload["fileid"], "score": p.score}
+            {**p.payload, "score": p.score}
             for p in res.points
         ]
 
-    async def delete(self, fileid: str):
+    async def delete(self, fileid: int):
         """Remove one file embedding."""
 
         selector = models.PointIdsList(points=[int(fileid)])

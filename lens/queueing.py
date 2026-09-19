@@ -1,9 +1,16 @@
 """Bounded index queue with queued-only dedupe and stats."""
 
 import asyncio
+import io
 import logging
 
+import pillow_heif
+from PIL import Image
+
 from nextcloud import fetch_file
+from store import FileMeta
+
+pillow_heif.register_heif_opener()
 
 log = logging.getLogger("lens.queue")
 
@@ -72,15 +79,34 @@ class IndexQueue:
         return asyncio.create_task(self._worker(embedding_model=embedding_model, store=store))
 
     async def _worker(self, embedding_model, store):
-        """Index loop: fetch → embed → upsert; failures count, never retry."""
+        """Index loop: fetch → decode size → embed → upsert; failures count, never retry."""
 
         while True:
             fileid, parent_id = await self.next()
 
             try:
-                data = await asyncio.to_thread(fetch_file, fileid)
-                vector = await embedding_model.embed_image_async(data)
-                await store.upsert(fileid, vector, parent_id)
+                # Fetch raw bytes plus validators from Nextcloud.
+                result = await asyncio.to_thread(fetch_file, fileid)
+
+                # Decode dimensions; header read is ms next to the model embed.
+                with Image.open(io.BytesIO(result.data)) as image:
+                    w, h = image.size
+
+                # Embed under the shared inference semaphore.
+                vector = await embedding_model.embed_image_async(result.data)
+
+                # Store vector with display metadata (re-index overwrites).
+                await store.upsert(
+                    fileid=fileid,
+                    vector=vector,
+                    parent_id=parent_id,
+                    meta=FileMeta(
+                        w=w,
+                        h=h,
+                        etag=result.etag,
+                        mimetype=result.mimetype,
+                    ),
+                )
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 log.exception("index failed for %d: %s", fileid, exc)
                 self.done(fileid, ok=False)
