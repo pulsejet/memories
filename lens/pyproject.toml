@@ -1,0 +1,20 @@
+[project]
+name = "memories-lens"
+version = "0.1.0"
+description = "Memories Lens inference server"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi",
+  "uvicorn[standard]",
+  "transformers",
+  "torch",
+  "huggingface-hub",
+  "qdrant-client",
+  "httpx",
+  "pillow",
+  "pillow-heif",
+  "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = []
