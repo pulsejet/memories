@@ -26,6 +26,16 @@ class FileMeta:
     dayid: int | None
 
 
+@dataclass(frozen=True)
+class UpsertPoint:
+    """One file embedding with display metadata, ready for Qdrant."""
+
+    fileid: int
+    vector: list[float]
+    parent_id: int
+    meta: FileMeta
+
+
 class CompatMismatch(RuntimeError):
     """Stored embedding metadata differs from current config."""
 
@@ -62,26 +72,43 @@ class Store:
         # Sentinel guard: stamp when absent, refuse when the space differs.
         await self._check_meta(name, META_ID, self._expected_meta())
 
-    async def upsert(self, fileid: int, vector, parent_id: int, meta: FileMeta):
+    async def upsert(self, point: UpsertPoint):
         """Store one file embedding with display metadata (re-index overwrites)."""
 
-        point = models.PointStruct(
-            id=int(fileid),
-            vector=vector,
-            payload={
-                "fileid": fileid,
-                "parent_id": parent_id,
-                "indexed_at": datetime.now(timezone.utc).isoformat(),
-                "w": meta.w,
-                "h": meta.h,
-                "etag": meta.etag,
-                "mimetype": meta.mimetype,
-                **({"epoch": meta.epoch} if meta.epoch is not None else {}),
-                **({"dayid": meta.dayid} if meta.dayid is not None else {}),
-            },
-        )
+        await self.upsert_many([point])
 
-        await self.client.upsert(config.embedding.qdrant_collection, points=[point])
+    async def upsert_many(self, points: list[UpsertPoint]):
+        """Store a batch of file embeddings in one request."""
+
+        structs = []
+        now = datetime.now(timezone.utc).isoformat()
+
+        for point in points:
+            payload = {
+                "fileid": point.fileid,
+                "parent_id": point.parent_id,
+                "indexed_at": now,
+                "w": point.meta.w,
+                "h": point.meta.h,
+                "etag": point.meta.etag,
+                "mimetype": point.meta.mimetype,
+            }
+
+            if point.meta.epoch is not None:
+                payload["epoch"] = point.meta.epoch
+
+            if point.meta.dayid is not None:
+                payload["dayid"] = point.meta.dayid
+
+            structs.append(
+                models.PointStruct(
+                    id=int(point.fileid),
+                    vector=point.vector,
+                    payload=payload,
+                ),
+            )
+
+        await self.client.upsert(config.embedding.qdrant_collection, points=structs)
 
     async def search(self, vector, folders, limit):
         """Nearest vectors scoped to parent folders, score desc."""
@@ -141,7 +168,7 @@ class Store:
         got = actual.get("embedding") or {}
         want = expected.get("embedding") or {}
 
-        mismatched = {k: (got.get(k), v) for k, v in want.items() if got.get(k) != v}
+        mismatched = {k: (got.get(k), want.get(k)) for k in set(got) | set(want) if got.get(k) != want.get(k)}
 
         if actual.get("kind") != expected.get("kind"):
             mismatched["kind"] = (actual.get("kind"), expected.get("kind"))

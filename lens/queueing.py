@@ -1,16 +1,11 @@
 """Bounded index queue with queued-only dedupe and stats."""
 
 import asyncio
-import io
 import logging
 
-import pillow_heif
-from PIL import Image
-
+from config import config
 from nextcloud import fetch_file
-from store import FileMeta
-
-pillow_heif.register_heif_opener()
+from store import FileMeta, UpsertPoint
 
 log = logging.getLogger("lens.queue")
 
@@ -50,6 +45,28 @@ class IndexQueue:
             self.in_flight.add(fileid)
             return fileid, parent_id
 
+    async def next_batch(self, max_items):
+        """Block for the first item, then drain queued extras without blocking."""
+
+        batch = [await self.next()]
+
+        while len(batch) < max_items:
+            try:
+                fileid = self._queue.get_nowait()
+            except asyncio.QueueEmpty:
+                break
+
+            try:
+                parent_id = self._queued.pop(fileid)
+            except KeyError:
+                self._queue.task_done()
+                continue
+
+            self.in_flight.add(fileid)
+            batch.append((fileid, parent_id))
+
+        return batch
+
     def done(self, fileid, ok):
         """Record completion of one item."""
 
@@ -79,42 +96,94 @@ class IndexQueue:
         return asyncio.create_task(self._worker(embedding_model=embedding_model, store=store))
 
     async def _worker(self, embedding_model, store):
-        """Index loop: fetch → decode size → embed → upsert; failures count, never retry."""
+        """Index loop: fetch batch → decode once → embed batch → upsert; failures count, never retry."""
 
         while True:
-            fileid, parent_id = await self.next()
+            batch = await self.next_batch(config.index_batch_size)
+            await self._index_batch(batch, embedding_model, store)
 
-            try:
-                # Fetch raw bytes plus validators from Nextcloud.
-                result = await asyncio.to_thread(fetch_file, fileid)
+    async def _index_batch(self, batch, embedding_model, store):
+        """Fetch concurrently, decode each once, embed in one forward pass."""
 
-                # Decode dimensions; header read is ms next to the model embed.
-                with Image.open(io.BytesIO(result.data)) as image:
-                    w, h = image.size
+        parents = dict(batch)
+        pending = await self._fetch_all([fileid for fileid, _ in batch])
+        good = await self._decode_all(pending, embedding_model)
 
-                # Embed under the shared inference semaphore.
-                vector = await embedding_model.embed_image_async(result.data)
+        if not good:
+            return
 
-                # Store vector with display metadata (re-index overwrites).
-                await store.upsert(
-                    fileid=fileid,
-                    vector=vector,
-                    parent_id=parent_id,
-                    meta=FileMeta(
-                        w=w,
-                        h=h,
-                        etag=result.etag,
-                        mimetype=result.mimetype,
-                        epoch=result.epoch,
-                        dayid=result.dayid,
-                    ),
-                )
-            except Exception as exc:  # pylint: disable=broad-exception-caught
+        try:
+            vectors = await embedding_model.embed_pil_images_async([image for _, _, image in good])
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            for fileid, _, _ in good:
                 log.exception("index failed for %d: %s", fileid, exc)
                 self.done(fileid, ok=False)
+            return
+
+        points = []
+
+        for (fileid, res, image), vector in zip(good, vectors):
+            points.append(UpsertPoint(
+                fileid=fileid,
+                vector=vector,
+                parent_id=parents[fileid],
+                meta=FileMeta(
+                    w=image.width,
+                    h=image.height,
+                    etag=res.etag,
+                    mimetype=res.mimetype,
+                    epoch=res.epoch,
+                    dayid=res.dayid,
+                ),
+            ))
+
+        try:
+            await store.upsert_many(points)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            for fileid, _, _ in good:
+                log.exception("index failed for %d: %s", fileid, exc)
+                self.done(fileid, ok=False)
+            return
+
+        for fileid, res, image in good:
+            log.info(
+                "indexed %d (%dx%d %s epoch=%s dayid=%s)",
+                fileid, image.width, image.height, res.mimetype, res.epoch, res.dayid,
+            )
+            self.done(fileid, ok=True)
+
+    async def _fetch_all(self, fileids):
+        """Download one batch concurrently; fetch failures count immediately."""
+
+        results = await asyncio.gather(
+            *(asyncio.to_thread(fetch_file, fileid) for fileid in fileids),
+            return_exceptions=True,
+        )
+
+        pending = []
+        for fileid, res in zip(fileids, results):
+            if isinstance(res, Exception):
+                log.error("index failed for %d: %s", fileid, res, exc_info=res)
+                self.done(fileid, ok=False)
             else:
-                log.info(
-                    "indexed %d (%dx%d %s epoch=%s dayid=%s)",
-                    fileid, w, h, result.mimetype, result.epoch, result.dayid,
-                )
-                self.done(fileid, ok=True)
+                pending.append((fileid, res))
+
+        return pending
+
+    async def _decode_all(self, pending, embedding_model):
+        """Decode each fetch once, off the event loop; decode failures count immediately."""
+
+        images = await asyncio.gather(
+            *(asyncio.to_thread(embedding_model.decode_image, res.data) for _, res in pending),
+            return_exceptions=True,
+        )
+
+        good = []
+        for (fileid, res), image in zip(pending, images):
+            if isinstance(image, Exception):
+                log.error("index failed for %d: %s", fileid, image, exc_info=image)
+                self.done(fileid, ok=False)
+            else:
+                good.append((fileid, res, image))
+
+        return good

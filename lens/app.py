@@ -71,6 +71,7 @@ def health():
             "version": config.embedding.version,
             "device": embedding_model.device(),
             "dimension": embedding_model.dim() or None,
+            "batch_size": config.index_batch_size,
         },
         "qdrant": state.qdrant,
     }

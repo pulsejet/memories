@@ -58,6 +58,7 @@ class Config:  # pylint: disable=too-many-instance-attributes
     score_margin: float
     port: int
     torch_num_threads: int | None
+    index_batch_size: int
 
 
 def load_config() -> Config:
@@ -72,6 +73,10 @@ def load_config() -> Config:
         raise RuntimeError("WORKERS is locked to 1 for v1")
 
     threads = os.environ.get("TORCH_NUM_THREADS")
+
+    batch_size = _int("INDEX_BATCH_SIZE", 4)
+    if batch_size < 1 or batch_size > 32:
+        raise RuntimeError("INDEX_BATCH_SIZE must be between 1 and 32")
 
     embedding = EmbeddingConfig(
         model_id=os.environ.get("EMBEDDING_MODEL_ID", "google/siglip2-base-patch16-256"),
@@ -93,6 +98,7 @@ def load_config() -> Config:
         score_margin=_float("SCORE_MARGIN", 0.1),
         port=_int("PORT", 47789),
         torch_num_threads=int(threads) if threads else None,
+        index_batch_size=batch_size,
     )
 
 
