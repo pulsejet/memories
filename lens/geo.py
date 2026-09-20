@@ -44,11 +44,16 @@ def split_query(text: str, spans: list["Span"]) -> tuple[str | None, str]:
     return geo, remainder
 
 
-async def match_places(text: str, sentence_model: "SentenceModel", store: "Store") -> list[int] | None:
-    """osm_ids of top places matching the query; None when none qualify (visual fallback)."""
+async def match_places(
+    text: str,
+    sentence_model: "SentenceModel",
+    store: "Store",
+    folders: list[int],
+) -> list[int] | None:
+    """osm_ids of top places matching the query in folders; None = visual fallback."""
 
     query = await sentence_model.embed_query_async(text)
-    hits = await store.search_places(query, limit=config.places.top_k)
+    hits = await store.search_places(query, folders=folders, limit=config.places.top_k)
 
     if not hits:
         return None

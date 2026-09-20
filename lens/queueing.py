@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from dataclasses import replace
 
 from config import config
 from nextcloud import fetch_file
@@ -125,7 +126,7 @@ class IndexQueue:
             return
 
         try:
-            await self._ensure_places(good, sentence_model, store)
+            await self._ensure_places(good, parents, sentence_model, store)
         except Exception as exc:  # pylint: disable=broad-exception-caught
             log.exception("places ensure failed for batch: %s", exc)
 
@@ -163,44 +164,33 @@ class IndexQueue:
             )
             self.done(fileid, ok=True)
 
-    async def _ensure_places(self, good, sentence_model, store):
-        """Embed full addresses for place ids missing from the store; raises on failure."""
+    async def _ensure_places(self, good, parents, sentence_model, store):
+        """Embed every (file, place) address; re-index overwrites the same hashed pair."""
 
-        # First-seen hierarchy wins when two photos disagree on one osm_id.
-        seen = {}
+        points = []
 
-        for _, res, _ in good:
+        for fileid, res, _ in good:
             places = res.metadata.places
             names = [p.name for p in places]
 
             for idx, place in enumerate(places):
-                if place.osm_id not in seen:
-                    seen[place.osm_id] = (
-                        place.admin_level,
-                        place.name,
-                        ", ".join(names[idx:]),
-                    )
+                points.append(PlacePoint(
+                    fileid=fileid,
+                    parent_id=parents[fileid],
+                    osm_id=place.osm_id,
+                    vector=[],
+                    admin_level=place.admin_level,
+                    name=place.name,
+                    full_address=", ".join(names[idx:]),
+                ))
 
-        if not seen:
+        if not points:
             return
 
-        existing = await store.existing_place_ids(list(seen))
-        missing = {osm_id: val for osm_id, val in seen.items() if osm_id not in existing}
-
-        if not missing:
-            return
-
-        vectors = await sentence_model.embed_passages_async([full for _, _, full in missing.values()])
+        vectors = await sentence_model.embed_passages_async([p.full_address for p in points])
 
         await store.upsert_places([
-            PlacePoint(
-                osm_id=osm_id,
-                vector=vector,
-                admin_level=admin_level,
-                name=name,
-                full_address=full,
-            )
-            for (osm_id, (admin_level, name, full)), vector in zip(missing.items(), vectors)
+            replace(point, vector=vector) for point, vector in zip(points, vectors)
         ])
 
     async def _fetch_all(self, fileids):

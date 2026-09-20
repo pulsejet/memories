@@ -4,10 +4,8 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
-import httpx
 from fastapi import FastAPI, HTTPException, Path, Request
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.http.exceptions import UnexpectedResponse
 
 from config import config
 from embedding import EmbeddingModel
@@ -66,7 +64,7 @@ async def lifespan(_app: FastAPI):
         await client.close()
         raise
 
-    except (UnexpectedResponse, httpx.HTTPError):
+    except Exception:  # pylint: disable=broad-exception-caught
         log.exception("qdrant unreachable, staying degraded")
     else:
         state.qdrant = "ok"
@@ -174,7 +172,12 @@ async def search(body: SearchRequest):
         geo_text, visual = geo.split_query(body.text, spans)
 
         if geo_text is not None:
-            osm_ids = await geo.match_places(geo_text, sentence_model, state.store)
+            osm_ids = await geo.match_places(
+                text=geo_text,
+                sentence_model=sentence_model,
+                store=state.store,
+                folders=body.folders,
+            )
     except Exception:  # pylint: disable=broad-exception-caught
         log.warning("geo split failed, full-text fallback", exc_info=True)
         osm_ids, visual = None, body.text

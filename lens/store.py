@@ -1,6 +1,7 @@
 """Qdrant vector store with embedding-compat guard."""
 
 import logging
+import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -13,6 +14,9 @@ log = logging.getLogger("lens.store")
 
 # Nextcloud fileids are positive, so id 0 never collides with real points.
 META_ID = 0
+
+# Index builds on large collections take a while; the client default (5s) trips.
+PAYLOAD_INDEX_TIMEOUT = 120
 
 
 @dataclass(frozen=True)
@@ -40,13 +44,21 @@ class UpsertPoint:
 
 @dataclass(frozen=True)
 class PlacePoint:
-    """One OSM place embedding, keyed by osm_id (shared across photos)."""
+    """One per-(file, place) address embedding, scoped by parent_id, grouped by osm_id."""
 
+    fileid: int
+    parent_id: int
     osm_id: int
     vector: list[float]
     admin_level: int
     name: str
     full_address: str
+
+
+def place_point_id(fileid: int, osm_id: int) -> str:
+    """Deterministic point id for one (file, place) pair; re-index overwrites."""
+
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"lens_places:{int(fileid)}:{int(osm_id)}"))
 
 
 class CompatMismatch(RuntimeError):
@@ -84,6 +96,7 @@ class Store:
                 collection_name=name,
                 field_name="parent_id",
                 field_schema=models.PayloadSchemaType.INTEGER,
+                timeout=PAYLOAD_INDEX_TIMEOUT,
             )
             log.info("indexed parent_id in %s", name)
 
@@ -93,6 +106,7 @@ class Store:
                 collection_name=name,
                 field_name="osm_ids",
                 field_schema=models.PayloadSchemaType.INTEGER,
+                timeout=PAYLOAD_INDEX_TIMEOUT,
             )
             log.info("indexed osm_ids in %s", name)
 
@@ -100,11 +114,11 @@ class Store:
         await self._check_meta(name, META_ID, self._expected_meta(), self.embedding_dim)
 
     async def ensure_places_collection(self):
-        """Create the global places collection and its sentinel; reruns are safe."""
+        """Create the per-file places collection, indexes, and sentinel; reruns are safe."""
 
         name = config.places.qdrant_collection
 
-        # Single unnamed sentence vector per OSM place.
+        # Single unnamed sentence vector per (file, place) pair.
         if not await self.client.collection_exists(name):
             params = models.VectorParams(size=self.sentence_dim, distance=models.Distance.COSINE)
             await self.client.create_collection(name, vectors_config=params)
@@ -112,6 +126,17 @@ class Store:
 
         info = await self.client.get_collection(name)
         self._require_unnamed_vectors(info, name)
+
+        # Integer indexes for folder-scoped grouped search + per-file delete.
+        for field in ("parent_id", "osm_id", "fileid"):
+            if field not in (info.payload_schema or {}):
+                await self.client.create_payload_index(
+                    collection_name=name,
+                    field_name=field,
+                    field_schema=models.PayloadSchemaType.INTEGER,
+                    timeout=PAYLOAD_INDEX_TIMEOUT,
+                )
+                log.info("indexed %s in %s", field, name)
 
         # Sentinel guard: stamp when absent, refuse when the space differs.
         await self._check_meta(name, META_ID, self._expected_places_meta(), self.sentence_dim)
@@ -158,13 +183,15 @@ class Store:
         await self.client.upsert(config.embedding.qdrant_collection, points=structs)
 
     async def upsert_places(self, points: list[PlacePoint]):
-        """Store new place embeddings; callers skip ids that already exist."""
+        """Store per-(file, place) address embeddings; re-index overwrites the same pair."""
 
         structs = [
             models.PointStruct(
-                id=int(point.osm_id),
+                id=place_point_id(point.fileid, point.osm_id),
                 vector=point.vector,
                 payload={
+                    "fileid": int(point.fileid),
+                    "parent_id": int(point.parent_id),
                     "osm_id": int(point.osm_id),
                     "admin_level": point.admin_level,
                     "name": point.name,
@@ -206,43 +233,52 @@ class Store:
 
         return drop_low_scores(hits, config.embedding.score_margin)
 
-    async def search_places(self, vector, limit):
-        """Nearest place embeddings, global scope, score desc."""
+    async def search_places(self, vector, folders, limit):
+        """Nearest per-(file, place) address embeddings in folders, one hit per osm_id."""
 
-        # Sentinel id 0 is not a real place; exclude it by id.
-        filtr = models.Filter(must_not=[models.HasIdCondition(has_id=[META_ID])])
+        # Sentinel has no parent_id, so the filter excludes it automatically.
+        filtr = models.Filter(must=[models.FieldCondition(
+            key="parent_id",
+            match=models.MatchAny(any=folders),
+        )])
 
-        res = await self.client.query_points(
+        res = await self.client.query_points_groups(
             collection_name=config.places.qdrant_collection,
+            group_by="osm_id",
             query=vector,
             query_filter=filtr,
             limit=limit,
+            group_size=1,
         )
 
-        return [
-            {**p.payload, "score": p.score}
-            for p in res.points
-        ]
+        hits = []
 
-    async def existing_place_ids(self, osm_ids: list[int]) -> set[int]:
-        """Subset of osm_ids already stored in the places collection."""
+        for group in res.groups:
+            if not group.hits:
+                continue
 
-        if not osm_ids:
-            return set()
+            best = group.hits[0]
+            hits.append({**(best.payload or {}), "score": best.score})
 
-        points = await self.client.retrieve(
-            collection_name=config.places.qdrant_collection,
-            ids=[int(i) for i in osm_ids],
-        )
+        return hits
 
-        return {int(p.id) for p in points}
+    async def delete_places(self, fileid: int):
+        """Remove all address embeddings for one file (all its hashed pairs)."""
+
+        selector = models.FilterSelector(filter=models.Filter(must=[models.FieldCondition(
+            key="fileid",
+            match=models.MatchValue(value=int(fileid)),
+        )]))
+
+        await self.client.delete(config.places.qdrant_collection, points_selector=selector)
 
     async def delete(self, fileid: int):
-        """Remove one file embedding."""
+        """Remove one file embedding and all its address embeddings."""
 
         selector = models.PointIdsList(points=[int(fileid)])
 
         await self.client.delete(config.embedding.qdrant_collection, points_selector=selector)
+        await self.delete_places(int(fileid))
 
     def _expected_meta(self):
         """Sentinel payload describing the current embedding space."""
