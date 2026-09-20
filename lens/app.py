@@ -16,6 +16,7 @@ from schema import SchemaModel
 from sentence import SentenceModel
 from state import IndexRequest, SearchRequest, State
 from store import CompatMismatch, Store
+import geo
 
 log = logging.getLogger("lens.app")
 
@@ -155,7 +156,7 @@ async def delete_index(fileid: int = Path(gt=0)):
 
 @app.post("/v1/search")
 async def search(body: SearchRequest):
-    """Two-stage search: places lookup, then place-filtered visual search with fallback."""
+    """Split search: geo spans feed the place filter, the rest feeds visual."""
 
     _require_ready()
 
@@ -165,8 +166,20 @@ async def search(body: SearchRequest):
             detail="folders must not be empty",
         )
 
-    osm_ids = await _match_places(body.text)
-    vec = await embedding_model.embed_text_async(body.text)
+    osm_ids = None
+    visual = body.text
+
+    try:
+        spans = await schema_model.extract_async(body.text)
+        geo_text, visual = geo.split_query(body.text, spans)
+
+        if geo_text is not None:
+            osm_ids = await geo.match_places(geo_text, sentence_model, state.store)
+    except Exception:  # pylint: disable=broad-exception-caught
+        log.warning("geo split failed, full-text fallback", exc_info=True)
+        osm_ids, visual = None, body.text
+
+    vec = await embedding_model.embed_text_async(visual)
     hits = await state.store.search(
         vector=vec,
         folders=body.folders,
@@ -235,18 +248,3 @@ def _require_ready():
             status_code=503,
             detail="model not loaded",
         )
-
-
-async def _match_places(text):
-    """osm_ids of top places matching the query; None when none qualify (visual fallback)."""
-
-    query = await sentence_model.embed_query_async(text)
-    hits = await state.store.search_places(query, limit=config.places.top_k)
-
-    if not hits:
-        return None
-
-    floor = max(config.places.min_score, hits[0]["score"] - config.places.score_margin)
-    matched = [h["osm_id"] for h in hits if h["score"] >= floor]
-
-    return matched or None

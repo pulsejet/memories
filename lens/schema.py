@@ -7,6 +7,7 @@ import asyncio
 import logging
 import os
 import time
+from dataclasses import dataclass
 
 import torch
 from huggingface_hub import snapshot_download
@@ -22,6 +23,17 @@ LABELS = {
     "region": "Proper noun naming a state, province, county, region or island, "
     "e.g. California, Bavaria, Normandy, Sicily.",
 }
+
+
+@dataclass(frozen=True)
+class Span:
+    """One extracted proper-noun span with char offsets and confidence."""
+
+    text: str
+    label: str
+    start: int
+    end: int
+    score: float = 0.0
 
 
 class SchemaModel:
@@ -121,7 +133,7 @@ class SchemaModel:
 
         log.info("schema model loaded")
 
-    def extract(self, text: str) -> list[dict]:
+    def extract(self, text: str) -> list[Span]:
         """Extract geo spans; empty text yields none. Raw model order, NMS is the caller's job."""
 
         if not text.strip():
@@ -140,19 +152,17 @@ class SchemaModel:
 
         for label, items in (res.get("entities") or {}).items():
             for item in items or []:
-                spans.append(
-                    {
-                        "text": item["text"],
-                        "label": label,
-                        "start": item["start"],
-                        "end": item["end"],
-                        "score": item.get("confidence", 0.0),
-                    }
-                )
+                spans.append(Span(
+                    text=item["text"],
+                    label=label,
+                    start=item["start"],
+                    end=item["end"],
+                    score=item.get("confidence", 0.0),
+                ))
 
         return spans
 
-    async def extract_async(self, text: str) -> list[dict]:
+    async def extract_async(self, text: str) -> list[Span]:
         """Serialize extraction through the shared semaphore."""
 
         async with inference_sem:
