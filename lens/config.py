@@ -41,6 +41,7 @@ class EmbeddingConfig:
     model_revision: str
     version: int
     qdrant_collection: str
+    score_margin: float
 
 
 @dataclass(frozen=True)
@@ -59,6 +60,7 @@ class PlacesConfig:
     qdrant_collection: str
     top_k: int
     min_score: float
+    score_margin: float
 
 
 @dataclass(frozen=True)
@@ -76,7 +78,6 @@ class Config:  # pylint: disable=too-many-instance-attributes
     device: str
     workers: int
     queue_max: int
-    score_margin: float
     port: int
     torch_num_threads: int | None
     index_batch_size: int
@@ -104,6 +105,7 @@ def load_config() -> Config:
         model_revision=os.environ["EMBEDDING_MODEL_REVISION"],
         version=_int("EMBEDDING_VERSION", 3),
         qdrant_collection=os.environ.get("EMBEDDING_QDRANT_COLLECTION", "lens_images"),
+        score_margin=_float("EMBEDDING_SCORE_MARGIN", 0.1),
     )
 
     sentence_model = SentenceConfig(
@@ -124,6 +126,7 @@ def load_config() -> Config:
         qdrant_collection=os.environ.get("PLACES_QDRANT_COLLECTION", "lens_places"),
         top_k=places_top_k,
         min_score=places_min_score,
+        score_margin=_float("PLACES_SCORE_MARGIN", 0.02),
     )
 
     return Config(
@@ -138,7 +141,6 @@ def load_config() -> Config:
         device=os.environ.get("DEVICE", "auto"),
         workers=workers,
         queue_max=_int("QUEUE_MAX", 100000),
-        score_margin=_float("SCORE_MARGIN", 0.1),
         port=_int("PORT", 47789),
         torch_num_threads=int(threads) if threads else None,
         index_batch_size=batch_size,

@@ -167,7 +167,7 @@ async def search(body: SearchRequest):
     if not hits:
         return {"hits": []}
 
-    cutoff = hits[0]["score"] - config.score_margin
+    cutoff = hits[0]["score"] - config.embedding.score_margin
     kept = [h for h in hits if h["score"] >= cutoff]
 
     return {"hits": kept}
@@ -225,7 +225,7 @@ async def _match_places(text):
     if not hits:
         return None
 
-    floor = max(config.places.min_score, hits[0]["score"] - config.score_margin)
+    floor = max(config.places.min_score, hits[0]["score"] - config.places.score_margin)
     matched = [h["osm_id"] for h in hits if h["score"] >= floor]
 
     return matched or None
