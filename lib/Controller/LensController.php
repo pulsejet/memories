@@ -101,6 +101,15 @@ final class LensController extends GenericApiController
                 $response->addHeader('X-Memories-Dayid', (string) $meta['dayid']);
             }
 
+            // Places as base64 JSON (ASCII-safe for multibyte names), skip when empty
+            $places = $this->getLensPlaces($fileid);
+            if ([] !== $places) {
+                $json = json_encode($places, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                if (\is_string($json)) {
+                    $response->addHeader('X-Memories-Places', base64_encode($json));
+                }
+            }
+
             return $response;
         });
     }
@@ -204,6 +213,22 @@ final class LensController extends GenericApiController
         }
 
         return ['epoch' => null, 'dayid' => null];
+    }
+
+    /**
+     * Individual places of a file for the daemon, leaf first.
+     *
+     * Best-effort: failures never break file serving.
+     *
+     * @return list<array{osm_id: int, admin_level: int, name: string}>
+     */
+    private function getLensPlaces(int $fileid): array
+    {
+        try {
+            return $this->tq->getPlacesById($fileid);
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     /**
