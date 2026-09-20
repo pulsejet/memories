@@ -7,7 +7,7 @@
             ref="textField"
             class="text-field"
             v-model="prompt"
-            auto-complete="off"
+            autocomplete="off"
             :label-outside="true"
             :label="t('memories', 'Search your photos …')"
             :placeholder="t('memories', 'Search your photos …')"
