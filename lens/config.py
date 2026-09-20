@@ -53,6 +53,15 @@ class SentenceConfig:
 
 
 @dataclass(frozen=True)
+class PlacesConfig:
+    """Geo place lookup settings (Qdrant places collection)."""
+
+    qdrant_collection: str
+    top_k: int
+    min_score: float
+
+
+@dataclass(frozen=True)
 class Config:  # pylint: disable=too-many-instance-attributes
     """All daemon settings; see ARCH.md config table."""
 
@@ -62,6 +71,7 @@ class Config:  # pylint: disable=too-many-instance-attributes
     qdrant_url: str
     embedding: EmbeddingConfig
     sentence_model: SentenceConfig
+    places: PlacesConfig
     model_cache_dir: str
     device: str
     workers: int
@@ -92,7 +102,7 @@ def load_config() -> Config:
     embedding = EmbeddingConfig(
         model_id=os.environ.get("EMBEDDING_MODEL_ID", "google/siglip2-base-patch16-256"),
         model_revision=os.environ["EMBEDDING_MODEL_REVISION"],
-        version=_int("EMBEDDING_VERSION", 2),
+        version=_int("EMBEDDING_VERSION", 3),
         qdrant_collection=os.environ.get("EMBEDDING_QDRANT_COLLECTION", "lens_images"),
     )
 
@@ -102,6 +112,20 @@ def load_config() -> Config:
         version=_int("SENTENCE_VERSION", 1),
     )
 
+    places_top_k = _int("PLACES_TOP_K", 3)
+    if places_top_k < 1 or places_top_k > 32:
+        raise RuntimeError("PLACES_TOP_K must be between 1 and 32")
+
+    places_min_score = _float("PLACES_MIN_SCORE", 0.82)
+    if places_min_score < 0 or places_min_score > 1:
+        raise RuntimeError("PLACES_MIN_SCORE must be between 0 and 1")
+
+    places = PlacesConfig(
+        qdrant_collection=os.environ.get("PLACES_QDRANT_COLLECTION", "lens_places"),
+        top_k=places_top_k,
+        min_score=places_min_score,
+    )
+
     return Config(
         nextcloud_url=os.environ["NEXTCLOUD_URL"],
         nc_user=os.environ["NC_USER"],
@@ -109,6 +133,7 @@ def load_config() -> Config:
         qdrant_url=os.environ["QDRANT_URL"],
         embedding=embedding,
         sentence_model=sentence_model,
+        places=places,
         model_cache_dir=os.environ.get("MODEL_CACHE_DIR", "/app/models"),
         device=os.environ.get("DEVICE", "auto"),
         workers=workers,

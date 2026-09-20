@@ -34,6 +34,18 @@ class UpsertPoint:
     vector: list[float]
     parent_id: int
     meta: FileMeta
+    osm_ids: list[int] | None = None
+
+
+@dataclass(frozen=True)
+class PlacePoint:
+    """One OSM place embedding, keyed by osm_id (shared across photos)."""
+
+    osm_id: int
+    vector: list[float]
+    admin_level: int
+    name: str
+    full_address: str
 
 
 class CompatMismatch(RuntimeError):
@@ -43,12 +55,13 @@ class CompatMismatch(RuntimeError):
 class Store:
     """Qdrant collection handle; refuses to mix embedding spaces."""
 
-    def __init__(self, client: AsyncQdrantClient, embedding_dim):
+    def __init__(self, client: AsyncQdrantClient, embedding_dim, sentence_dim):
         self.client = client
         self.embedding_dim = embedding_dim
+        self.sentence_dim = sentence_dim
 
     async def ensure_embedding_collection(self):
-        """Create collection, index, and sentinel step by step; reruns are safe."""
+        """Create collection, indexes, and sentinel step by step; reruns are safe."""
 
         name = config.embedding.qdrant_collection
 
@@ -60,6 +73,10 @@ class Store:
 
         info = await self.client.get_collection(name)
 
+        # Clean break from the reset named-vectors attempt: refuse those
+        # collections instead of failing later at upsert (wipe + reindex).
+        self._require_unnamed_vectors(info, name)
+
         # Integer index on parent_id for folder-scoped search.
         if "parent_id" not in (info.payload_schema or {}):
             await self.client.create_payload_index(
@@ -69,8 +86,34 @@ class Store:
             )
             log.info("indexed parent_id in %s", name)
 
+        # Integer index on osm_ids for place-filtered search.
+        if "osm_ids" not in (info.payload_schema or {}):
+            await self.client.create_payload_index(
+                collection_name=name,
+                field_name="osm_ids",
+                field_schema=models.PayloadSchemaType.INTEGER,
+            )
+            log.info("indexed osm_ids in %s", name)
+
         # Sentinel guard: stamp when absent, refuse when the space differs.
-        await self._check_meta(name, META_ID, self._expected_meta())
+        await self._check_meta(name, META_ID, self._expected_meta(), self.embedding_dim)
+
+    async def ensure_places_collection(self):
+        """Create the global places collection and its sentinel; reruns are safe."""
+
+        name = config.places.qdrant_collection
+
+        # Single unnamed sentence vector per OSM place.
+        if not await self.client.collection_exists(name):
+            params = models.VectorParams(size=self.sentence_dim, distance=models.Distance.COSINE)
+            await self.client.create_collection(name, vectors_config=params)
+            log.info("created collection %s", name)
+
+        info = await self.client.get_collection(name)
+        self._require_unnamed_vectors(info, name)
+
+        # Sentinel guard: stamp when absent, refuse when the space differs.
+        await self._check_meta(name, META_ID, self._expected_places_meta(), self.sentence_dim)
 
     async def upsert(self, point: UpsertPoint):
         """Store one file embedding with display metadata (re-index overwrites)."""
@@ -100,6 +143,9 @@ class Store:
             if point.meta.dayid is not None:
                 payload["dayid"] = point.meta.dayid
 
+            if point.osm_ids:
+                payload["osm_ids"] = list(point.osm_ids)
+
             structs.append(
                 models.PointStruct(
                     id=int(point.fileid),
@@ -110,17 +156,67 @@ class Store:
 
         await self.client.upsert(config.embedding.qdrant_collection, points=structs)
 
-    async def search(self, vector, folders, limit):
-        """Nearest vectors scoped to parent folders, score desc."""
+    async def upsert_places(self, points: list[PlacePoint]):
+        """Store new place embeddings; callers skip ids that already exist."""
+
+        structs = [
+            models.PointStruct(
+                id=int(point.osm_id),
+                vector=point.vector,
+                payload={
+                    "osm_id": int(point.osm_id),
+                    "admin_level": point.admin_level,
+                    "name": point.name,
+                    "full_address": point.full_address,
+                },
+            )
+            for point in points
+        ]
+
+        if structs:
+            await self.client.upsert(config.places.qdrant_collection, points=structs)
+
+    async def existing_place_ids(self, osm_ids: list[int]) -> set[int]:
+        """Subset of osm_ids already stored in the places collection."""
+
+        if not osm_ids:
+            return set()
+
+        points = await self.client.retrieve(config.places.qdrant_collection, ids=[int(i) for i in osm_ids])
+
+        return {int(p.id) for p in points}
+
+    async def search_places(self, vector, limit):
+        """Nearest place embeddings, global scope, score desc."""
+
+        # Sentinel id 0 is not a real place; exclude it by id.
+        filtr = models.Filter(must_not=[models.HasIdCondition(has_id=[META_ID])])
+
+        res = await self.client.query_points(
+            collection_name=config.places.qdrant_collection,
+            query=vector,
+            query_filter=filtr,
+            limit=limit,
+        )
+
+        return [
+            {**p.payload, "score": p.score}
+            for p in res.points
+        ]
+
+    async def search(self, vector, folders, limit, osm_ids=None):
+        """Nearest image vectors scoped to folders, optionally place-filtered, score desc."""
 
         # Sentinel has no parent_id, so the filter excludes it automatically.
-        cond = models.FieldCondition(key="parent_id", match=models.MatchAny(any=folders))
-        filtr = models.Filter(must=[cond])
+        must = [models.FieldCondition(key="parent_id", match=models.MatchAny(any=folders))]
+
+        if osm_ids:
+            must.append(models.FieldCondition(key="osm_ids", match=models.MatchAny(any=[int(i) for i in osm_ids])))
 
         res = await self.client.query_points(
             collection_name=config.embedding.qdrant_collection,
             query=vector,
-            query_filter=filtr,
+            query_filter=models.Filter(must=must),
             limit=limit,
         )
 
@@ -150,14 +246,28 @@ class Store:
             },
         }
 
-    async def _check_meta(self, collection, point_id, expected):
+    def _expected_places_meta(self):
+        """Sentinel payload describing the places sentence space."""
+
+        return {
+            "kind": "lens_places_meta",
+            "sentence": {
+                "id": config.sentence_model.model_id,
+                "revision": config.sentence_model.model_revision,
+                "version": config.sentence_model.version,
+                "dimension": self.sentence_dim,
+                "normalization": "l2",
+            },
+        }
+
+    async def _check_meta(self, collection, point_id, expected, dim):
         """Generic meta guard for any collection; stamp if absent, refuse if changed."""
 
         points = await self.client.retrieve(collection, ids=[point_id])
 
         if not points:
             # Unit stub: sentinels need a vector, and all-zero breaks cosine.
-            stub = [1.0] + [0.0] * (self.embedding_dim - 1)
+            stub = [1.0] + [0.0] * (dim - 1)
             point = models.PointStruct(id=point_id, vector=stub, payload=expected)
 
             await self.client.upsert(collection, points=[point])
@@ -165,10 +275,17 @@ class Store:
             return
 
         actual = points[0].payload or {}
-        got = actual.get("embedding") or {}
-        want = expected.get("embedding") or {}
+        mismatched = {}
 
-        mismatched = {k: (got.get(k), want.get(k)) for k in set(got) | set(want) if got.get(k) != want.get(k)}
+        for key, want in expected.items():
+            if key == "kind":
+                continue
+
+            got = actual.get(key) or {}
+
+            for field in set(got) | set(want):
+                if got.get(field) != want.get(field):
+                    mismatched[f"{key}.{field}"] = (got.get(field), want.get(field))
 
         if actual.get("kind") != expected.get("kind"):
             mismatched["kind"] = (actual.get("kind"), expected.get("kind"))
@@ -179,3 +296,11 @@ class Store:
             raise CompatMismatch(f"{collection}: {mismatched}")
 
         log.info("collection %s compatible: %s", collection, expected)
+
+    @staticmethod
+    def _require_unnamed_vectors(info, name):
+        """Refuse collections with named vectors; both ours are single-vector."""
+
+        if isinstance(info.config.params.vectors, dict):
+            log.error("named vectors in %s, expected a single unnamed space", name)
+            raise CompatMismatch(f"{name}: named vectors, expected single unnamed space")

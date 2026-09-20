@@ -25,7 +25,7 @@ state = State()
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    """Load models, ensure collection, start worker; mismatch is fatal."""
+    """Load models, ensure collections, start worker; mismatch is fatal."""
 
     logging.basicConfig(
         level=logging.INFO,
@@ -38,7 +38,11 @@ async def lifespan(_app: FastAPI):
     await asyncio.to_thread(sentence_model.load)
 
     client = AsyncQdrantClient(url=config.qdrant_url)
-    store = Store(client, embedding_model.dim())
+    store = Store(
+        client=client,
+        embedding_dim=embedding_model.dim(),
+        sentence_dim=sentence_model.dim(),
+    )
     state.store = store
 
     index_queue = IndexQueue(maxsize=config.queue_max)
@@ -47,6 +51,7 @@ async def lifespan(_app: FastAPI):
 
     try:
         await store.ensure_embedding_collection()
+        await store.ensure_places_collection()
     except CompatMismatch:
         worker.cancel()
         await client.close()
