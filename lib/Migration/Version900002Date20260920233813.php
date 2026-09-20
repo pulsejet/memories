@@ -27,7 +27,7 @@ use OCP\DB\ISchemaWrapper;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
-final class Version900001Date20260920224059 extends SimpleMigrationStep
+final class Version900002Date20260920233813 extends SimpleMigrationStep
 {
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
@@ -44,14 +44,17 @@ final class Version900001Date20260920224059 extends SimpleMigrationStep
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
-        $table = $schema->getTable('memories_places');
+        $table = $schema->getTable('memories');
 
-        // Covering index for the places clusters query, which joins
-        // memories_places to memories on fileid, filters on mark and
-        // groups by osm_id. Leading fileid serves the join, the trailing
-        // columns serve the filter and grouping straight from the index
-        if (!$table->hasIndex('memories_places_fid_mk_oid_idx')) {
-            $table->addIndex(['fileid', 'mark', 'osm_id'], 'memories_places_fid_mk_oid_idx');
+        // Covering index for the map clusters query in world view, where the
+        // viewport matches nearly all of the user's photos. The query then
+        // joins memories to the folder CTE on parent and reads mapcluster
+        // and fileid from each matched row. Leading parent serves the folder
+        // filter, the trailing columns serve the cluster join and the fileid
+        // count straight from the index. Tight viewports instead drive from
+        // mapclusters via the lat/lon index and do not use this index
+        if (!$table->hasIndex('memories_parent_mc_fid_idx')) {
+            $table->addIndex(['parent', 'mapcluster', 'fileid'], 'memories_parent_mc_fid_idx');
         }
 
         return $schema;
