@@ -14,6 +14,7 @@ REQUIRED = (
     "QDRANT_URL",
     "EMBEDDING_MODEL_REVISION",
     "SENTENCE_MODEL_REVISION",
+    "SCHEMA_MODEL_REVISION",
 )
 
 
@@ -54,6 +55,15 @@ class SentenceConfig:
 
 
 @dataclass(frozen=True)
+class SchemaModelConfig:
+    """Pinned schema-extraction checkpoint settings."""
+
+    model_id: str
+    model_revision: str
+    threshold: float
+
+
+@dataclass(frozen=True)
 class PlacesConfig:
     """Geo place lookup settings (Qdrant places collection)."""
 
@@ -73,6 +83,7 @@ class Config:  # pylint: disable=too-many-instance-attributes
     qdrant_url: str
     embedding: EmbeddingConfig
     sentence_model: SentenceConfig
+    schema_model: SchemaModelConfig
     places: PlacesConfig
     model_cache_dir: str
     device: str
@@ -114,6 +125,16 @@ def load_config() -> Config:
         version=_int("SENTENCE_VERSION", 1),
     )
 
+    schema_threshold = _float("SCHEMA_THRESHOLD", 0.5)
+    if schema_threshold < 0 or schema_threshold > 1:
+        raise RuntimeError("SCHEMA_THRESHOLD must be between 0 and 1")
+
+    schema_model = SchemaModelConfig(
+        model_id=os.environ.get("SCHEMA_MODEL_ID", "fastino/gliner2-multi-v1"),
+        model_revision=os.environ["SCHEMA_MODEL_REVISION"],
+        threshold=schema_threshold,
+    )
+
     places_top_k = _int("PLACES_TOP_K", 3)
     if places_top_k < 1 or places_top_k > 32:
         raise RuntimeError("PLACES_TOP_K must be between 1 and 32")
@@ -136,6 +157,7 @@ def load_config() -> Config:
         qdrant_url=os.environ["QDRANT_URL"],
         embedding=embedding,
         sentence_model=sentence_model,
+        schema_model=schema_model,
         places=places,
         model_cache_dir=os.environ.get("MODEL_CACHE_DIR", "/app/models"),
         device=os.environ.get("DEVICE", "auto"),

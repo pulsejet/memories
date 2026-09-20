@@ -12,6 +12,7 @@ from qdrant_client.http.exceptions import UnexpectedResponse
 from config import config
 from embedding import EmbeddingModel
 from queueing import IndexQueue
+from schema import SchemaModel
 from sentence import SentenceModel
 from state import IndexRequest, SearchRequest, State
 from store import CompatMismatch, Store
@@ -20,6 +21,7 @@ log = logging.getLogger("lens.app")
 
 embedding_model = EmbeddingModel()
 sentence_model = SentenceModel()
+schema_model = SchemaModel()
 state = State()
 
 
@@ -36,6 +38,8 @@ async def lifespan(_app: FastAPI):
     await asyncio.to_thread(embedding_model.load)
     await asyncio.to_thread(sentence_model.ensure_snapshot)
     await asyncio.to_thread(sentence_model.load)
+    await asyncio.to_thread(schema_model.ensure_snapshot)
+    await asyncio.to_thread(schema_model.load)
 
     client = AsyncQdrantClient(url=config.qdrant_url)
     store = Store(
@@ -95,6 +99,12 @@ def health():
             "version": config.sentence_model.version,
             "device": sentence_model.device(),
             "dimension": sentence_model.dim() or None,
+        },
+        "schema_model": {
+            "id": config.schema_model.model_id,
+            "revision": config.schema_model.model_revision,
+            "threshold": config.schema_model.threshold,
+            "device": schema_model.device(),
         },
         "qdrant": state.qdrant,
     }
@@ -204,6 +214,17 @@ async def sentence_query(body: dict):
     vec = await sentence_model.embed_query_async(body.get("text", ""))
 
     return {"vector": vec, "dimension": len(vec)}
+
+
+@app.post("/v1/schema/extract")
+async def extract_schema(body: dict):
+    """Extract geo spans for testing; returns raw spans in model order."""
+
+    _require_ready()
+
+    spans = await schema_model.extract_async(body.get("text", ""))
+
+    return {"spans": spans}
 
 
 def _require_ready():
