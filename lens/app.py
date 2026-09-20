@@ -187,13 +187,7 @@ async def search(body: SearchRequest):
         osm_ids=osm_ids,
     )
 
-    if not hits:
-        return {"hits": []}
-
-    cutoff = hits[0]["score"] - config.embedding.score_margin
-    kept = [h for h in hits if h["score"] >= cutoff]
-
-    return {"hits": kept}
+    return {"hits": hits}
 
 
 @app.post("/v1/embedding/text")

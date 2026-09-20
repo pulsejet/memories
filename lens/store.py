@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from qdrant_client import AsyncQdrantClient, models
 
 from config import config
+from embedding_scoring import drop_low_scores
 
 log = logging.getLogger("lens.store")
 
@@ -177,7 +178,7 @@ class Store:
             await self.client.upsert(config.places.qdrant_collection, points=structs)
 
     async def search(self, vector, folders, limit, osm_ids=None):
-        """Nearest image vectors scoped to folders, optionally place-filtered, score desc."""
+        """Nearest image vectors scoped to folders, low scores dropped, score desc."""
 
         # Sentinel has no parent_id, so the filter excludes it automatically.
         must = [models.FieldCondition(
@@ -198,10 +199,12 @@ class Store:
             limit=limit,
         )
 
-        return [
+        hits = [
             {**p.payload, "score": p.score}
             for p in res.points
         ]
+
+        return drop_low_scores(hits, config.embedding.score_margin)
 
     async def search_places(self, vector, limit):
         """Nearest place embeddings, global scope, score desc."""

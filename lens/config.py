@@ -116,7 +116,7 @@ def load_config() -> Config:
         model_revision=os.environ["EMBEDDING_MODEL_REVISION"],
         version=_int("EMBEDDING_VERSION", 3),
         qdrant_collection=os.environ.get("EMBEDDING_QDRANT_COLLECTION", "lens_images"),
-        score_margin=_float("EMBEDDING_SCORE_MARGIN", 0.1),
+        score_margin=_float("EMBEDDING_SCORE_MARGIN", 0.4),
     )
 
     sentence_model = SentenceConfig(
