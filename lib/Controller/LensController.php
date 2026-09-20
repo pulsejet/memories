@@ -90,24 +90,18 @@ final class LensController extends GenericApiController
 
             $response = new StreamResponse($handle);
             $response->addHeader('Content-Type', $file->getMimeType());
-            if ($etag = $file->getEtag()) {
-                $response->addHeader('ETag', $etag);
-            }
-            $meta = $this->getIndexMeta($fileid);
-            if (null !== $meta['epoch']) {
-                $response->addHeader('X-Memories-Epoch', (string) $meta['epoch']);
-            }
-            if (null !== $meta['dayid']) {
-                $response->addHeader('X-Memories-Dayid', (string) $meta['dayid']);
-            }
 
-            // Places as base64 JSON (ASCII-safe for multibyte names), skip when empty
-            $places = $this->getLensPlaces($fileid);
-            if ([] !== $places) {
-                $json = json_encode($places, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                if (\is_string($json)) {
-                    $response->addHeader('X-Memories-Places', base64_encode($json));
-                }
+            $meta = $this->getIndexMeta($fileid);
+            $metadata = [
+                'etag' => $file->getEtag(),
+                'mimetype' => $file->getMimeType(),
+                'epoch' => $meta['epoch'],
+                'dayid' => $meta['dayid'],
+                'places' => $this->getLensPlaces($fileid),
+            ];
+            $json = json_encode($metadata, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            if (\is_string($json)) {
+                $response->addHeader('X-Memories-Metadata', base64_encode($json));
             }
 
             return $response;

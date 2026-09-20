@@ -5,7 +5,7 @@ import logging
 
 from config import config
 from nextcloud import fetch_file
-from store import FileMeta, UpsertPoint
+from store import FileMeta, PlacePoint, UpsertPoint
 
 log = logging.getLogger("lens.queue")
 
@@ -90,19 +90,23 @@ class IndexQueue:
 
         return self._queue.qsize()
 
-    def run(self, embedding_model, store):
+    def run(self, embedding_model, sentence_model, store):
         """Spawn the background index loop; cancel the task to stop."""
 
-        return asyncio.create_task(self._worker(embedding_model=embedding_model, store=store))
+        return asyncio.create_task(self._worker(
+            embedding_model=embedding_model,
+            sentence_model=sentence_model,
+            store=store,
+        ))
 
-    async def _worker(self, embedding_model, store):
+    async def _worker(self, embedding_model, sentence_model, store):
         """Index loop: fetch batch → decode once → embed batch → upsert; failures count, never retry."""
 
         while True:
             batch = await self.next_batch(config.index_batch_size)
-            await self._index_batch(batch, embedding_model, store)
+            await self._index_batch(batch, embedding_model, sentence_model, store)
 
-    async def _index_batch(self, batch, embedding_model, store):
+    async def _index_batch(self, batch, embedding_model, sentence_model, store):  # pylint: disable=too-many-locals
         """Fetch concurrently, decode each once, embed in one forward pass."""
 
         parents = dict(batch)
@@ -120,6 +124,11 @@ class IndexQueue:
                 self.done(fileid, ok=False)
             return
 
+        try:
+            await self._ensure_places(good, sentence_model, store)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            log.exception("places ensure failed for batch: %s", exc)
+
         points = []
 
         for (fileid, res, image), vector in zip(good, vectors):
@@ -130,11 +139,12 @@ class IndexQueue:
                 meta=FileMeta(
                     w=image.width,
                     h=image.height,
-                    etag=res.etag,
-                    mimetype=res.mimetype,
-                    epoch=res.epoch,
-                    dayid=res.dayid,
+                    etag=res.metadata.etag,
+                    mimetype=res.metadata.mimetype,
+                    epoch=res.metadata.epoch,
+                    dayid=res.metadata.dayid,
                 ),
+                osm_ids=[p.osm_id for p in res.metadata.places],
             ))
 
         try:
@@ -147,10 +157,51 @@ class IndexQueue:
 
         for fileid, res, image in good:
             log.info(
-                "indexed %d (%dx%d %s epoch=%s dayid=%s)",
-                fileid, image.width, image.height, res.mimetype, res.epoch, res.dayid,
+                "indexed %d (%dx%d %s epoch=%s dayid=%s places=%d)",
+                fileid, image.width, image.height, res.metadata.mimetype,
+                res.metadata.epoch, res.metadata.dayid, len(res.metadata.places),
             )
             self.done(fileid, ok=True)
+
+    async def _ensure_places(self, good, sentence_model, store):
+        """Embed full addresses for place ids missing from the store; raises on failure."""
+
+        # First-seen hierarchy wins when two photos disagree on one osm_id.
+        seen = {}
+
+        for _, res, _ in good:
+            places = res.metadata.places
+            names = [p.name for p in places]
+
+            for idx, place in enumerate(places):
+                if place.osm_id not in seen:
+                    seen[place.osm_id] = (
+                        place.admin_level,
+                        place.name,
+                        ", ".join(names[idx:]),
+                    )
+
+        if not seen:
+            return
+
+        existing = await store.existing_place_ids(list(seen))
+        missing = {osm_id: val for osm_id, val in seen.items() if osm_id not in existing}
+
+        if not missing:
+            return
+
+        vectors = await sentence_model.embed_passages_async([full for _, _, full in missing.values()])
+
+        await store.upsert_places([
+            PlacePoint(
+                osm_id=osm_id,
+                vector=vector,
+                admin_level=admin_level,
+                name=name,
+                full_address=full,
+            )
+            for (osm_id, (admin_level, name, full)), vector in zip(missing.items(), vectors)
+        ])
 
     async def _fetch_all(self, fileids):
         """Download one batch concurrently; fetch failures count immediately."""

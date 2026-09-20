@@ -47,7 +47,11 @@ async def lifespan(_app: FastAPI):
 
     index_queue = IndexQueue(maxsize=config.queue_max)
     state.index_queue = index_queue
-    worker = index_queue.run(embedding_model=embedding_model, store=store)
+    worker = index_queue.run(
+        embedding_model=embedding_model,
+        sentence_model=sentence_model,
+        store=store,
+    )
 
     try:
         await store.ensure_embedding_collection()

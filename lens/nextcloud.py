@@ -1,9 +1,12 @@
 """Nextcloud file-bytes client (blocking; call via to_thread)."""
 
+import base64
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import httpx
+import orjson
+from dacite import DaciteError, from_dict
 
 from config import config
 
@@ -13,14 +16,31 @@ TIMEOUT = 30.0
 
 
 @dataclass(frozen=True)
-class FetchResult:
-    """Downloaded bytes plus response validators (empty when missing)."""
+class Place:
+    """One OSM place from the file metadata, leaf-first order kept."""
 
-    data: bytes
+    osm_id: int
+    admin_level: int
+    name: str
+
+
+@dataclass(frozen=True)
+class FileMetadata:
+    """File metadata from the X-Memories-Metadata header (empties when missing)."""
+
     etag: str
     mimetype: str
     epoch: int | None
     dayid: int | None
+    places: list[Place]
+
+
+@dataclass(frozen=True)
+class FetchResult:
+    """Downloaded bytes plus file metadata."""
+
+    data: bytes
+    metadata: FileMetadata
 
 
 class FetchError(RuntimeError):
@@ -53,18 +73,7 @@ def fetch_file(fileid: int) -> FetchResult:
             if res.status_code != 200:
                 raise FetchError(f"GET {url} -> {res.status_code}")
 
-            etag = res.headers.get("etag", "") or ""
-            mimetype = res.headers.get("content-type", "") or ""
-
-            try:
-                epoch = int(res.headers.get("x-memories-epoch", "") or "")
-            except ValueError:
-                epoch = None
-
-            try:
-                dayid = int(res.headers.get("x-memories-dayid", "") or "")
-            except ValueError:
-                dayid = None
+            metadata = parse_metadata(res.headers.get("x-memories-metadata", "") or "")
 
             chunks = []
 
@@ -73,8 +82,25 @@ def fetch_file(fileid: int) -> FetchResult:
 
     return FetchResult(
         data=b"".join(chunks),
-        etag=etag,
-        mimetype=mimetype,
-        epoch=epoch,
-        dayid=dayid,
+        metadata=metadata,
     )
+
+
+def parse_metadata(value: str) -> FileMetadata:
+    """Decode the base64 JSON metadata header; garbage yields empty metadata, never raises."""
+
+    if value:
+        try:
+            decoded = orjson.loads(base64.b64decode(value))  # pylint: disable=no-member
+        except ValueError:
+            decoded = {}
+
+        if isinstance(decoded, dict):
+            try:
+                meta = from_dict(FileMetadata, decoded)
+            except DaciteError:
+                pass
+            else:
+                return replace(meta, places=[p for p in meta.places if p.osm_id > 0 and p.name])
+
+    return FileMetadata(etag="", mimetype="", epoch=None, dayid=None, places=[])
