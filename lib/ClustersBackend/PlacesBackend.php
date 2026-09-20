@@ -90,8 +90,9 @@ final class PlacesBackend extends Backend
         $query = $this->tq->getBuilder();
 
         // SELECT location name and count of photos
-        $count = $query->func()->count(SQL::distinct($query, 'm.fileid'), 'count');
-        $query->select('e.osm_id', $count)->from('memories_planet', 'e');
+        $count = $query->func()->count('m.fileid');
+        $query->select('e.osm_id')->from('memories_planet', 'e');
+        $query->selectAlias($count, 'count');
 
         // WHERE these are not special clusters (e.g. timezone)
         $query->where($query->expr()->gt('e.admin_level', $query->expr()->literal(0, \PDO::PARAM_INT)));
@@ -142,6 +143,11 @@ final class PlacesBackend extends Backend
         // GROUP and ORDER by tag name
         $query->groupBy('e.osm_id');
 
+        // WHERE at least 3 photos if want marked clusters
+        if ($marked) {
+            $query->having($query->expr()->gte($count, SQL::literal($query, 3, \PDO::PARAM_INT)));
+        }
+
         // We use this as the subquery for the main query, where we also re-join with
         // oc_memories_planet to the the names from the IDS
         // If we just AGGREGATE+GROUP with the name in one query, then it can't use indexes
@@ -150,11 +156,6 @@ final class PlacesBackend extends Backend
         // INNER JOIN back on the planet table to get the names
         $query->innerJoin('sub', 'memories_planet', 'e', $query->expr()->eq('e.osm_id', 'sub.osm_id'));
         $query->addSelect('e.name', 'e.other_names');
-
-        // WHERE at least 3 photos if want marked clusters
-        if ($marked) {
-            $query->andWhere($query->expr()->gte('sub.count', SQL::literal($query, 3, \PDO::PARAM_INT)));
-        }
 
         // ORDER BY name and osm_id
         $query->addOrderBy('sub.count', 'DESC');
