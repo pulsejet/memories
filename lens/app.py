@@ -145,9 +145,9 @@ async def delete_index(fileid: int = Path(gt=0)):
 
 @app.post("/v1/search")
 async def search(body: SearchRequest):
-    """Embed the query and return matching fileids, score desc."""
+    """Two-stage search: places lookup, then place-filtered visual search with fallback."""
 
-    require_ready()
+    _require_ready()
 
     if not body.folders:
         raise HTTPException(
@@ -155,11 +155,13 @@ async def search(body: SearchRequest):
             detail="folders must not be empty",
         )
 
+    osm_ids = await _match_places(body.text)
     vec = await embedding_model.embed_text_async(body.text)
     hits = await state.store.search(
         vector=vec,
         folders=body.folders,
         limit=body.limit,
+        osm_ids=osm_ids,
     )
 
     if not hits:
@@ -175,7 +177,7 @@ async def search(body: SearchRequest):
 async def embedding_text(body: dict):
     """Embed text for testing; returns the raw vector."""
 
-    require_ready()
+    _require_ready()
 
     vec = await embedding_model.embed_text_async(body.get("text", ""))
 
@@ -186,7 +188,7 @@ async def embedding_text(body: dict):
 async def embedding_image(request: Request):
     """Embed raw image bytes for testing; returns the raw vector."""
 
-    require_ready()
+    _require_ready()
 
     vec = await embedding_model.embed_image_async(await request.body())
 
@@ -197,14 +199,14 @@ async def embedding_image(request: Request):
 async def sentence_query(body: dict):
     """Embed text with the sentence model for testing; returns the raw vector."""
 
-    require_ready()
+    _require_ready()
 
     vec = await sentence_model.embed_query_async(body.get("text", ""))
 
     return {"vector": vec, "dimension": len(vec)}
 
 
-def require_ready():
+def _require_ready():
     """Raise 503 unless the models are loaded."""
 
     if not state.ready:
@@ -212,3 +214,18 @@ def require_ready():
             status_code=503,
             detail="model not loaded",
         )
+
+
+async def _match_places(text):
+    """osm_ids of top places matching the query; None when none qualify (visual fallback)."""
+
+    query = await sentence_model.embed_query_async(text)
+    hits = await state.store.search_places(query, limit=config.places.top_k)
+
+    if not hits:
+        return None
+
+    floor = max(config.places.min_score, hits[0]["score"] - config.score_margin)
+    matched = [h["osm_id"] for h in hits if h["score"] >= floor]
+
+    return matched or None

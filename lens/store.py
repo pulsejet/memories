@@ -176,15 +176,32 @@ class Store:
         if structs:
             await self.client.upsert(config.places.qdrant_collection, points=structs)
 
-    async def existing_place_ids(self, osm_ids: list[int]) -> set[int]:
-        """Subset of osm_ids already stored in the places collection."""
+    async def search(self, vector, folders, limit, osm_ids=None):
+        """Nearest image vectors scoped to folders, optionally place-filtered, score desc."""
 
-        if not osm_ids:
-            return set()
+        # Sentinel has no parent_id, so the filter excludes it automatically.
+        must = [models.FieldCondition(
+            key="parent_id",
+            match=models.MatchAny(any=folders),
+        )]
 
-        points = await self.client.retrieve(config.places.qdrant_collection, ids=[int(i) for i in osm_ids])
+        if osm_ids:
+            must.append(models.FieldCondition(
+                key="osm_ids",
+                match=models.MatchAny(any=[int(i) for i in osm_ids]),
+            ))
 
-        return {int(p.id) for p in points}
+        res = await self.client.query_points(
+            collection_name=config.embedding.qdrant_collection,
+            query=vector,
+            query_filter=models.Filter(must=must),
+            limit=limit,
+        )
+
+        return [
+            {**p.payload, "score": p.score}
+            for p in res.points
+        ]
 
     async def search_places(self, vector, limit):
         """Nearest place embeddings, global scope, score desc."""
@@ -204,26 +221,18 @@ class Store:
             for p in res.points
         ]
 
-    async def search(self, vector, folders, limit, osm_ids=None):
-        """Nearest image vectors scoped to folders, optionally place-filtered, score desc."""
+    async def existing_place_ids(self, osm_ids: list[int]) -> set[int]:
+        """Subset of osm_ids already stored in the places collection."""
 
-        # Sentinel has no parent_id, so the filter excludes it automatically.
-        must = [models.FieldCondition(key="parent_id", match=models.MatchAny(any=folders))]
+        if not osm_ids:
+            return set()
 
-        if osm_ids:
-            must.append(models.FieldCondition(key="osm_ids", match=models.MatchAny(any=[int(i) for i in osm_ids])))
-
-        res = await self.client.query_points(
-            collection_name=config.embedding.qdrant_collection,
-            query=vector,
-            query_filter=models.Filter(must=must),
-            limit=limit,
+        points = await self.client.retrieve(
+            collection_name=config.places.qdrant_collection,
+            ids=[int(i) for i in osm_ids],
         )
 
-        return [
-            {**p.payload, "score": p.score}
-            for p in res.points
-        ]
+        return {int(p.id) for p in points}
 
     async def delete(self, fileid: int):
         """Remove one file embedding."""
