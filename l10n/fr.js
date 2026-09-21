@@ -481,6 +481,8 @@ OC.L10N.register(
     "{name} failed test: {info}." : "Le test de {name} a échoué : {info}.",
     "{name} binary exists and is usable ({info})." : "Le binaire {name} existe et est utilisable ({info}).",
     "{name} binary status: {status}." : "État du binaire {name} : {status}.",
+    "{srv} - Healthy ({version})." : "{srv} - Sain ({version}).",
+    "{srv} - Unhealthy ({info})." : "{srv} - Défaillant ({info}).",
     "Save as" : "Enregistrer sous",
     "Are you sure you want to discard the changes?" : "Êtes-vous sûr de vouloir abandonner les modifications ?",
     "Undo" : "Annuler",
