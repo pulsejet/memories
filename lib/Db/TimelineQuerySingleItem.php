@@ -83,39 +83,54 @@ trait TimelineQuerySingleItem
         }
 
         // Get address from places
-        if (SystemConfig::gisType() > 0) {
-            // Get names of places for this file
-            $qb = $this->connection->getQueryBuilder();
-            $places = $qb->select('e.name', 'e.other_names')
-                ->from('memories_places', 'mp')
-                ->innerJoin('mp', 'memories_planet', 'e', $qb->expr()->eq('mp.osm_id', 'e.osm_id'))
-                ->andWhere($qb->expr()->eq('mp.fileid', $qb->createNamedParameter($id, \PDO::PARAM_INT)))
-                ->andWhere($qb->expr()->gt('e.admin_level', $qb->expr()->literal(0, \PDO::PARAM_INT)))
-                ->addOrderBy('e.admin_level', 'DESC')
-                ->executeQuery()
-                ->fetchAll()
-            ;
+        $names = array_column($this->getPlacesById($id), 'name');
 
-            if (\count($places)) {
-                // Get user language
-                $lang = Util::getUserLang();
-
-                // Get translated place names
-                $names = array_map(
-                    static fn ($p): string => PlacesBackend::translateName(
-                        $lang,
-                        $p['name'],
-                        $p['other_names'],
-                    ),
-                    $places,
-                );
-
-                // Get translated address
-                $info['address'] = implode(', ', $names);
-                $info['address_short'] = $names[0];
-            }
+        if (\count($names)) {
+            // Get translated address
+            $info['address'] = implode(', ', $names);
+            $info['address_short'] = $names[0];
         }
 
         return $info;
+    }
+
+    /**
+     * Individual places of a file, leaf first, names in the caller's language.
+     *
+     * @return list<array{osm_id: int, admin_level: int, name: string}>
+     */
+    public function getPlacesById(int $id): array
+    {
+        if (SystemConfig::gisType() <= 0) {
+            return [];
+        }
+
+        // Get places for this file, most specific first
+        $qb = $this->connection->getQueryBuilder();
+        $places = $qb->select('e.osm_id', 'e.admin_level', 'e.name', 'e.other_names')
+            ->from('memories_places', 'mp')
+            ->innerJoin('mp', 'memories_planet', 'e', $qb->expr()->eq('mp.osm_id', 'e.osm_id'))
+            ->andWhere($qb->expr()->eq('mp.fileid', $qb->createNamedParameter($id, \PDO::PARAM_INT)))
+            ->andWhere($qb->expr()->gt('e.admin_level', $qb->expr()->literal(0, \PDO::PARAM_INT)))
+            ->addOrderBy('e.admin_level', 'DESC')
+            ->executeQuery()
+            ->fetchAll()
+        ;
+
+        if (!\count($places)) {
+            return [];
+        }
+
+        // Get user language (the Lens service user on the daemon path)
+        $lang = Util::getUserLang();
+
+        return array_map(
+            static fn ($p): array => [
+                'osm_id' => (int) $p['osm_id'],
+                'admin_level' => (int) $p['admin_level'],
+                'name' => PlacesBackend::translateName($lang, $p['name'], $p['other_names']),
+            ],
+            $places,
+        );
     }
 }

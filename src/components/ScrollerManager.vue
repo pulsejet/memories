@@ -52,6 +52,7 @@
 import { defineComponent, type PropType } from 'vue';
 
 import * as utils from '@services/utils';
+import * as lens from '@services/lens';
 
 import type { IRow, ITick } from '@typings';
 
@@ -480,6 +481,9 @@ export default defineComponent({
       // Special days
       if (dayId === undefined) {
         this.hoverCursorText = '';
+        return;
+      } else if (dayId === lens.TOP_RESULTS_DAYID) {
+        this.hoverCursorText = lens.TOP_RESULTS_TEXT;
         return;
       }
 

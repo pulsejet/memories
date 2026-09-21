@@ -363,8 +363,8 @@ final class BinExt
         register_shutdown_function(static fn () => @unlink($testfile));
 
         try {
-            $client = new \GuzzleHttp\Client();
-            $res = $client->request('POST', "http://{$server}/vod", [
+            $clientService = \OC::$server->get(\OCP\Http\Client\IClientService::class);
+            $res = $clientService->newClient()->post("http://{$server}/vod", [
                 'json' => [
                     'client' => 'test',
                     'path' => $testfile,
@@ -373,6 +373,7 @@ final class BinExt
                 ],
                 'timeout' => 1,
                 'connect_timeout' => 1,
+                'nextcloud' => ['allow_local_address' => true],
             ]);
         } catch (\Exception $e) {
             throw new \Exception('failed to connect: '.$e->getMessage());

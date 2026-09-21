@@ -29,6 +29,7 @@ export type RouteId =
   | 'AlbumShare'
   | 'Map'
   | 'Explore'
+  | 'Search'
   | 'NxSetup';
 
 export const routes: { [key in RouteId]: RouteRecordRaw } = {
@@ -135,6 +136,13 @@ export const routes: { [key in RouteId]: RouteRecordRaw } = {
     component: Explore,
     name: 'explore',
     props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Explore') }),
+  },
+
+  Search: {
+    path: '/search',
+    component: Timeline,
+    name: 'search',
+    props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Search') }),
   },
 
   NxSetup: {

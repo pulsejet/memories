@@ -25,6 +25,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Service\Lens;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\Http;
@@ -113,6 +114,7 @@ final class OtherController extends GenericApiController
                 'recognize_enabled' => Util::recognizeIsEnabled(),
                 'facerecognition_installed' => Util::facerecognitionIsInstalled(),
                 'facerecognition_enabled' => Util::facerecognitionIsEnabled(),
+                'lens_enabled' => '' !== trim(Lens::daemonUrl()),
                 'preview_generator_enabled' => Util::previewGeneratorIsEnabled(),
 
                 // general settings

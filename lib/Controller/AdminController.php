@@ -139,6 +139,23 @@ final class AdminController extends GenericApiController
             // Check for bad encryption module
             $status['bad_encryption'] = \OCA\Memories\Util::isEncryptionEnabled();
 
+            // Check database platform and parameters
+            try {
+                $db = \OC::$server->get(\OCP\IDBConnection::class);
+                $provider = $db->getDatabaseProvider(true);
+
+                // SQLite is not recommended for performance.
+                $status['db_is_sqlite'] = \OCP\IDBConnection::PLATFORM_SQLITE === $provider;
+
+                // Check InnoDB buffer pool size for MySQL/MariaDB
+                if (\OCP\IDBConnection::PLATFORM_MYSQL === $provider
+                 || \OCP\IDBConnection::PLATFORM_MARIADB === $provider) {
+                    $status['innodb_buffer_pool_size'] = (int) $db->executeQuery('SELECT @@innodb_buffer_pool_size')->fetchOne();
+                }
+            } catch (\Exception $e) {
+                $status['innodb_buffer_pool_size'] = 0;
+            }
+
             // Get GIS status
             $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
 

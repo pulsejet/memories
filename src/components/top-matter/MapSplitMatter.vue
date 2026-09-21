@@ -21,7 +21,10 @@
             </div>
             <XImg
               :src="clusterPreviewUrl(cluster)"
-              :class="['thumb-important', `memories-thumb-${cluster.preview.fileid}`]"
+              :class="{
+                'memories-thumb-important': true,
+                [`memories-thumb-${cluster.preview.key}`]: lastClick === cluster.preview.fileid,
+              }"
             />
           </div>
         </LIcon>
@@ -63,6 +66,7 @@ export default defineComponent({
     oldZoom: 2,
     clusters: [] as IMapCluster[],
     animMarkers: false,
+    lastClick: 0, // fileid
   }),
 
   mounted() {
@@ -200,7 +204,7 @@ export default defineComponent({
       const url = API.Q(API.MAP_CLUSTERS(), { bounds, zoom });
 
       // Params have changed, quit
-      const res = await axios.get(url);
+      const res = await axios.get<IMapCluster[]>(url);
       if (paramsChanged()) return;
 
       // Mark currently loaded zoom level
@@ -266,7 +270,12 @@ export default defineComponent({
     zoomTo(cluster: IMapCluster) {
       // At high zoom levels, open the photo
       if (this.zoom >= 12 && cluster.preview) {
+        // Set the thum key and important class so this zooms in.
+        // Reset it later so the next click is unambiguous.
         cluster.preview.key = cluster.preview.fileid.toString();
+        this.lastClick = cluster.preview.fileid;
+        setTimeout(() => (this.lastClick = 0), 500);
+        // Open viewer with this photo.
         _m.viewer.open(cluster.preview);
         return;
       }

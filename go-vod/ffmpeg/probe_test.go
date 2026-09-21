@@ -31,6 +31,32 @@ func TestParseProbeJSONHDR(t *testing.T) {
 	require.False(t, probe(`{"codec_type":"video","codec_name":"h264","pix_fmt":"yuv420p10le",`+
 		`"color_space":"bt709","color_transfer":"bt709"}`))
 	require.False(t, probe(`{"codec_type":"video","codec_name":"h264","pix_fmt":"yuv420p"}`))
+	require.True(t, probe(`{"codec_type":"video","codec_name":"hevc","pix_fmt":"yuv420p14le",`+
+		`"color_space":"bt2020nc"}`))
+	require.False(t, probe(`{"codec_type":"video","codec_name":"h264","pix_fmt":"nv12",`+
+		`"color_space":"bt2020nc"}`))
+	require.True(t, probe(`{"codec_type":"video","codec_name":"dvhe","pix_fmt":"yuv420p10le"}`))
+	require.True(t, probe(`{"codec_type":"video","codec_name":"hevc","pix_fmt":"yuv420p10le",`+
+		`"color_transfer":"bt709","side_data_list":[{"side_data_type":"Dolby Vision RPU data"}]}`))
+	require.False(t, probe(`{"codec_type":"video","codec_name":"dvvideo","pix_fmt":"yuv411p"}`))
+}
+
+func TestParseProbeJSONBitDepth(t *testing.T) {
+	probe := func(pixFmt string) int {
+		info, err := ParseProbeJSON([]byte(`{"streams":[{"codec_type":"video","pix_fmt":"` + pixFmt + `"}]}`))
+		require.NoError(t, err)
+		return info.BitDepth
+	}
+
+	for pix, depth := range map[string]int{
+		"yuv420p10le": 10, "p010le": 10, "p010be": 10,
+		"yuv420p12be": 12, "p012le": 12, "gray16le": 16, "p016le": 16,
+	} {
+		require.Equal(t, depth, probe(pix), pix)
+	}
+	for _, pix := range []string{"yuv420p", "nv12", "yuv444p", ""} {
+		require.Equal(t, 8, probe(pix), pix)
+	}
 }
 
 func TestParseProbeJSONAudio(t *testing.T) {

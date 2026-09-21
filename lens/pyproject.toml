@@ -1,0 +1,31 @@
+[project]
+name = "memories-lens"
+version = "0.1.0"
+description = "Memories Lens inference server"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.141,<0.142",
+  "uvicorn[standard]>=0.53,<0.54",
+  "transformers>=5.17,<6",
+  "torch>=2.14,<3",
+  "huggingface-hub>=1.32,<2",
+  "qdrant-client>=1.19,<2",
+  "httpx>=0.28,<0.29",
+  "orjson>=3.11,<4",
+  "dacite>=1.8,<2",
+  "sentence-transformers>=6.1,<7",
+  "gliner2>=2.0,<3",
+  "peft>=0.10,<1",
+  "pillow>=12.3,<13",
+  "pillow-heif>=1.7,<2",
+  "python-dotenv>=1.2,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pylint>=4.0,<5",
+  "flake8>=7.0,<8",
+]
+
+[tool.pylint.format]
+max-line-length = 120

@@ -95,14 +95,10 @@
   },
   "git.alwaysSignOff": true,
   "editor.formatOnSave": true,
-  "psalm.configPaths": [
-    "psalm-ls.xml"
-  ],
+  "psalm.configPaths": ["psalm-ls.xml"],
   "intelephense.environment.phpVersion": "8.4.0",
   "intelephense.environment.documentRoot": "../..",
-  "intelephense.environment.includePaths": [
-    "../.."
-  ],
+  "intelephense.environment.includePaths": ["../.."],
   "intelephense.files.exclude": [
     "**/.git/**",
     "**/.svn/**",
@@ -125,4 +121,5 @@
   "prettier.configPath": ".prettierrc",
   "prettier.prettierPath": "node_modules/prettier",
   "remote.autoForwardPorts": false,
+  "flake8.args": ["--max-line-length=120"]
 }

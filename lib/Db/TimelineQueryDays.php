@@ -171,25 +171,6 @@ trait TimelineQueryDays
         return $day;
     }
 
-    public function executeQueryWithCTEs(IQueryBuilder $query, string $psql = ''): \OCP\DB\IResult
-    {
-        $sql = empty($psql) ? $query->getSQL() : $psql;
-        $params = $query->getParameters();
-        $types = $query->getParameterTypes();
-
-        // Get SQL
-        $CTE_SQL = \array_key_exists('cteFoldersArchive', $params)
-            ? $this->CTE_FOLDERS_ARCHIVE()
-            : $this->CTE_FOLDERS(\array_key_exists('cteIncludeHidden', $params));
-
-        // Add WITH clause if needed
-        if (str_contains($sql, 'cte_folders')) {
-            $sql = $CTE_SQL.' '.$sql;
-        }
-
-        return $this->connection->executeQuery($sql, $params, $types);
-    }
-
     /**
      * Inner join with oc_filecache.
      *

@@ -77,18 +77,13 @@ final class TagsBackend extends Backend
 
         $query = $this->tq->getBuilder();
 
-        // SELECT visible tag name and count of photos
+        // SELECT tag id and count of photos
         $count = $query->func()->count(SQL::distinct($query, 'm.fileid'), 'count');
-        $query->select('st.id', 'st.name', $count)
-            ->from('systemtag', 'st')
-            ->where($query->expr()->eq('st.visibility', $query->expr()->literal(1, \PDO::PARAM_INT)))
-        ;
+        $query->selectAlias('stom.systemtagid', 'id')->from('systemtag_object_mapping', 'stom');
+        $query->addSelect($count);
 
         // WHERE there are items with this tag
-        $query->innerJoin('st', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
-            $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
-            $query->expr()->eq('stom.systemtagid', 'st.id'),
-        ));
+        $query->andWhere($query->expr()->eq('stom.objecttype', $query->expr()->literal('files')));
 
         // WHERE these items are memories indexed photos
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
@@ -96,10 +91,23 @@ final class TagsBackend extends Backend
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->tq->filterFilecache($query);
 
-        // GROUP and ORDER by tag name
-        $query->addGroupBy('st.id');
-        $query->addOrderBy($query->func()->lower('st.name'), 'ASC');
-        $query->addOrderBy('st.id'); // tie-breaker
+        // GROUP BY tag id
+        $query->addGroupBy('stom.systemtagid');
+
+        // Materialize the aggregation, then join systemtag once per tag
+        // to filter by visibility and fetch the names from the IDs
+        $query = SQL::materialize($query, 'st');
+
+        // INNER JOIN systemtag to get the names
+        $query->innerJoin('st', 'systemtag', 'tag', $query->expr()->eq('tag.id', 'st.id'));
+        $query->addSelect('tag.name');
+
+        // WHERE this is a visible tag
+        $query->andWhere($query->expr()->eq('tag.visibility', $query->expr()->literal(1, \PDO::PARAM_INT)));
+
+        // ORDER BY tag name and id
+        $query->addOrderBy($query->func()->lower('tag.name'), 'ASC');
+        $query->addOrderBy('tag.id'); // tie-breaker
 
         // SELECT cover photo
         $query = SQL::materialize($query, 'st');

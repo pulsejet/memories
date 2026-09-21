@@ -1,4 +1,4 @@
-FROM jellyfin/jellyfin:latest as base
+FROM jellyfin/jellyfin:latest AS base
 
 RUN rm -rf /jellyfin && \
     ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/local/bin/ffmpeg && \

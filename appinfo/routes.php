@@ -21,6 +21,7 @@ return [
         ['name' => 'Page#thisday', 'url' => '/thisday', 'verb' => 'GET'],
         ['name' => 'Page#map', 'url' => '/map', 'verb' => 'GET'],
         ['name' => 'Page#explore', 'url' => '/explore', 'verb' => 'GET'],
+        ['name' => 'Page#search', 'url' => '/search', 'verb' => 'GET'],
         ['name' => 'Page#nxsetup', 'url' => '/nxsetup', 'verb' => 'GET'],
 
         // Routes with params
@@ -73,6 +74,9 @@ return [
         ['name' => 'Download#request', 'url' => '/api/download', 'verb' => 'POST'],
         ['name' => 'Download#file', 'url' => '/api/download/{handle}', 'verb' => 'GET'],
         ['name' => 'Download#one', 'url' => '/api/stream/{fileid}', 'verb' => 'GET'],
+
+        ['name' => 'Lens#file', 'url' => '/lens/file/{fileid}', 'verb' => 'GET', 'requirements' => ['fileid' => '\d+']],
+        ['name' => 'Lens#search', 'url' => '/api/lens/search', 'verb' => 'GET'],
 
         ['name' => 'Share#links', 'url' => '/api/share/links', 'verb' => 'GET'],
         ['name' => 'Share#createNode', 'url' => '/api/share/node', 'verb' => 'POST'],

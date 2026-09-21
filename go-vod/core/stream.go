@@ -44,6 +44,9 @@ type Stream struct {
 
 	coder *exec.Cmd
 
+	tonemapOnce sync.Once
+	vaapiOpenCL bool
+
 	inactive int
 	stop     chan bool
 }
@@ -142,13 +145,12 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 }
 
 func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
-	args := ffmpeg.MP4Args(s.spec(0, false))
-
 	if s.quality == QUALITY_MAX && IsCodecPlayable(s.m.probe.CodecName, s.m.playableCodecs) {
 		// try to just send the original file
 		http.ServeFile(w, r, s.m.path)
 		return nil
 	}
+	args := ffmpeg.MP4Args(s.transcodeSpec(0, false))
 
 	coder := exec.Command(s.c.FFmpeg, args...)
 	log.Printf("%s-%s: %s", s.m.id, s.quality, strings.Join(coder.Args[:], " "))
@@ -316,6 +318,7 @@ func (s *Stream) spec(startAt float64, isHls bool) ffmpeg.Spec {
 		FrameRate: s.m.probe.FrameRate,
 		Rotation:  s.m.probe.Rotation,
 		HDR:       s.m.probe.HDR,
+		BitDepth:  s.m.probe.BitDepth,
 		Audio:     s.m.probe.Audio,
 		ChunkSize: s.m.tc.ChunkSize,
 		Copy:      s.quality == QUALITY_DIRECT && (!isHls || grid),
@@ -353,7 +356,7 @@ func (s *Stream) transcode(startId int) {
 		startAt = float64(startNumber * s.m.tc.ChunkSize)
 	}
 
-	args := ffmpeg.SegmentArgs(s.spec(startAt, true), startNumber, s.getTsPath(-1))
+	args := ffmpeg.SegmentArgs(s.transcodeSpec(startAt, true), startNumber, s.getTsPath(-1))
 
 	// Start the process
 	s.coder = exec.Command(s.c.FFmpeg, args...)

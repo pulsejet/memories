@@ -45,6 +45,8 @@ type Spec struct {
 	Rotation int
 	// HDR marks sources needing SDR tonemapping.
 	HDR bool
+	// BitDepth is the source sample depth, 8 when unknown.
+	BitDepth int
 	// Audio is the first audio stream; empty when silent.
 	Audio AudioInfo
 	// ChunkSize is the target segment length in whole seconds. Drives
@@ -56,6 +58,8 @@ type Spec struct {
 	VAAPI, VAAPILowPower bool
 	// VAAPIDevice is the VA-API render node; empty selects /dev/dri/renderD128.
 	VAAPIDevice string
+	// VAAPIOpenCL enables GPU HDR tonemapping after a successful interop probe.
+	VAAPIOpenCL bool
 	// NVENC selects h264_nvenc with CUDA offload. NVENCScale picks the scaler
 	// ("cuda" or "npp"); NVENCTemporalAQ enables temporal AQ.
 	NVENC, NVENCTemporalAQ bool
@@ -104,9 +108,14 @@ func Encoder(s Spec) string {
 // hardware decode offload on a named "memories" device (explicit
 // -init_hw_device/-filter_hw_device, required since ffmpeg 8), -noautorotate
 // when transposing manually, input with -copyts/+genpts (post-seek timing
-// still refers to source timestamps), the -vf graph (nv12 normalize +
-// aspect-preserving downscale, in hardware frames per backend; scale_cuda
-// needs passthrough=0), an appended transpose stage for rotated sources,
+// still refers to source timestamps), the -vf graph as a staged pipeline:
+// normalize into the encode domain (8-bit convert, plus hardware upload
+// on HW backends),
+// aspect-preserving downscale (hardware scaler per backend, software
+// preserving depth ahead of CPU tonemap; scale_cuda needs passthrough=0),
+// HDR tonemap when needed (GPU interop or CPU zscale/hable, always after
+// the downscale so it runs on fewer pixels), then transpose for rotated
+// sources (software transpose drops to CPU and re-uploads after),
 // fixed mapping (first video re-encoded, optional first audio normalized
 // to stereo 48kHz AAC), and
 // constant-quality rate control per encoder (crf / global_quality / cq).
@@ -134,8 +143,15 @@ func BuildArgs(s Spec) []string {
 			"-hwaccel_device", dev,
 			"-hwaccel_output_format", "vaapi",
 			"-init_hw_device", "vaapi=memories:"+dev,
-			"-filter_hw_device", "memories",
 		)
+		if s.HDR && s.VAAPIOpenCL {
+			args = append(args,
+				"-init_hw_device", "opencl=memories_opencl@memories",
+				"-filter_hw_device", "memories_opencl",
+			)
+		} else {
+			args = append(args, "-filter_hw_device", "memories")
+		}
 	case EncoderNVENC:
 		args = append(args,
 			"-hwaccel", "cuda",
@@ -155,69 +171,48 @@ func BuildArgs(s Spec) []string {
 		"-fflags", "+genpts",
 	)
 
-	format := "format=nv12"
-	scaler := "scale"
-	scalerArgs := []string{"force_original_aspect_ratio=decrease"}
-
-	switch cv {
-	case EncoderVAAPI:
-		format = "format=nv12|vaapi,hwupload"
-		scaler = "scale_vaapi"
-		scalerArgs = append(scalerArgs, "format=nv12")
-	case EncoderNVENC:
-		format = "format=nv12|cuda,hwupload"
-		scaler = fmt.Sprintf("scale_%s", s.NVENCScale)
-		if s.NVENCScale == "cuda" {
-			scalerArgs = append(scalerArgs, "passthrough=0")
-		}
-	}
-
-	if s.Quality != QualityMax {
-		maxDim := max(s.Width, s.Height)
-		scalerArgs = append(scalerArgs, fmt.Sprintf("w=%d", maxDim), fmt.Sprintf("h=%d", maxDim))
-	}
-
 	if cv != EncoderCopy {
-		filter := fmt.Sprintf("%s,%s=%s", format, scaler, strings.Join(scalerArgs, ":"))
-		if s.HDR {
-			filter = tonemapFilter(cv, scaler, scalerArgs)
-		}
-		if s.UseTranspose {
-			transposer := "transpose"
-			switch cv {
-			case EncoderVAAPI:
-				transposer = "transpose_vaapi"
-			case EncoderNVENC:
-				transposer = fmt.Sprintf("transpose_%s", s.NVENCScale)
-			}
+		b := NewFilterBuilder(s, cv)
 
-			forceSwTranspose := transposer != "transpose" && (s.ForceSwTranspose || transposer == "transpose_cuda")
-			if forceSwTranspose {
-				transposer = "transpose"
-			}
-
-			var transpose string
-			switch s.Rotation {
-			case -90:
-				transpose = fmt.Sprintf("%s=1", transposer)
-			case 90:
-				transpose = fmt.Sprintf("%s=2", transposer)
-			case 180, -180:
-				transpose = fmt.Sprintf("%s=1,%s=1", transposer, transposer)
-			}
-
-			if transpose != "" {
-				if forceSwTranspose {
-					pre := "hwdownload,format=nv12"
-					post := format
-					filter = fmt.Sprintf("%s,%s,%s,%s", filter, pre, transpose, post)
-				} else {
-					filter = fmt.Sprintf("%s,%s", filter, transpose)
-				}
-			}
+		switch {
+		case s.HDR && cv == EncoderVAAPI && s.VAAPIOpenCL:
+			// Skip the 8-bit SDR prefix: it would destroy HDR detail.
+			// Scale first in 10-bit so the GPU tonemap sees fewer pixels.
+			b.scaleEncode("p010")
+			b.tonemapOpenCL()
+			b.bitDepth = 8
+		case s.HDR:
+			// CPU tonemap between decode and encode; the download
+			// pin matches the surface depth and no-ops on SW frames.
+			// https://github.com/pulsejet/memories/issues/1726
+			b.hwdownload()
+			b.scaleCpu()
+			b.tonemapCpu()
+			b.append("format=nv12")
+			b.bitDepth = 8
+		default:
+			// SDR: normalize into the encode domain, then scale there.
+			b.normalize()
+			b.scaleEncode("nv12")
 		}
 
-		args = append(args, "-vf", filter)
+		// Software transpose on the CPU, with download and re-upload
+		// around rotation. Hardware transpose stays in domain and is
+		// appended after the upload below.
+		transpose, swTranspose := b.transposePlan()
+		if len(transpose) > 0 && swTranspose {
+			b.hwdownload()
+			b.append(transpose...)
+			transpose = nil
+		}
+
+		// Done with all CPU filters.
+		b.hwupload()
+
+		// Apply remaining hardware filters, if any.
+		b.append(transpose...)
+
+		args = append(args, "-vf", b.render())
 	}
 
 	args = append(args, "-map", "0:v:0", "-c:v", cv)
@@ -263,20 +258,6 @@ func BuildArgs(s Spec) []string {
 	return args
 }
 
-// tonemapFilter maps HDR to SDR with hable; zscale supplies linear light.
-func tonemapFilter(cv, scaler string, scalerArgs []string) string {
-	scale := fmt.Sprintf("%s=%s", scaler, strings.Join(scalerArgs, ":"))
-	tail := "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709," +
-		"tonemap=hable,zscale=t=bt709:m=bt709:range=tv"
-	if cv == EncoderX264 {
-		return fmt.Sprintf("%s,format=yuv420p,%s", tail, scale)
-	}
-	// Pin the download to nv12: the linear-light tail negotiates high depth
-	// upstream, and some drivers cannot read 10-bit (notably Dolby Vision)
-	// surfaces any other way.
-	return fmt.Sprintf("hwdownload,format=nv12,%s,format=nv12,hwupload,%s", tail, scale)
-}
-
 // SegmentArgs extends BuildArgs with the HLS muxer tail that chops one
 // rendition into servable MPEG-TS segments:
 //
@@ -308,6 +289,9 @@ func SegmentArgs(s Spec, startID int, pattern string) []string {
 	)
 
 	if !s.Copy {
+		// HLS may otherwise duplicate VFR frames to match the probed r_frame_rate.
+		args = append(args, "-fps_mode", "passthrough")
+
 		// We force a keyframe at the start of each segment.
 		// By default, ffmpeg will split only on keyframes, so
 		// theoretically we should have perfectly sized chunks.

@@ -238,4 +238,8 @@ export class API {
   static MAP_INIT() {
     return tok(gen(`${BASE}/map/init`));
   }
+
+  static LENS_SEARCH() {
+    return gen(`${BASE}/lens/search`);
+  }
 }

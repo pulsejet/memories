@@ -101,21 +101,29 @@ export default defineComponent({
         this.loading++;
 
         await this.$nextTick();
-        await this.refs().dtm?.refresh?.();
 
-        if (this.routeIsAlbums) {
-          this.items = await dav.getAlbums();
-        } else if (this.routeIsTags) {
-          this.items = await dav.getTags();
-        } else if (this.routeIsRecognize) {
-          this.items = await dav.getFaceList('recognize');
-        } else if (this.routeIsFaceRecognition) {
-          this.items = await dav.getFaceList('facerecognition');
-        } else if (this.routeIsPlaces) {
-          this.items = await dav.getPlaces();
-        }
+        // Refresh the DTM in parallel with loading our own data,
+        // but wait for it to complete to avoid glitches.
+        const [, items] = await Promise.all([this.refs().dtm?.refresh?.(), this.fetchClusters()]);
+        this.items = items;
       } finally {
         this.loading--;
+      }
+    },
+
+    async fetchClusters(): Promise<ICluster[]> {
+      if (this.routeIsAlbums) {
+        return await dav.getAlbums();
+      } else if (this.routeIsTags) {
+        return await dav.getTags();
+      } else if (this.routeIsRecognize) {
+        return await dav.getFaceList('recognize');
+      } else if (this.routeIsFaceRecognition) {
+        return await dav.getFaceList('facerecognition');
+      } else if (this.routeIsPlaces) {
+        return await dav.getPlaces();
+      } else {
+        return [];
       }
     },
   },

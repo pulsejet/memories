@@ -41,6 +41,7 @@ type VideoInfo struct {
 	BitRate   int
 	Rotation  int
 	HDR       bool
+	BitDepth  int
 	Audio     AudioInfo
 }
 
@@ -137,6 +138,7 @@ func ParseProbeJSON(data []byte) (VideoInfo, error) {
 		BitRate:   bitRate,
 		Rotation:  probeRotation(*s),
 		HDR:       probeHDR(*s),
+		BitDepth:  probeBitDepth(s.PixFmt),
 		Audio:     probeAudio(out.Streams),
 	}, nil
 }
@@ -184,15 +186,38 @@ func probeRotation(s videoStream) int {
 	return s.Tags.Rotate
 }
 
+// probeBitDepth reads sample depth from the pix_fmt name, 8 when unknown.
+// Matched on explicit suffixes since Contains "12" would match nv12.
+func probeBitDepth(pixFmt string) int {
+	for _, depth := range []int{10, 12, 14, 16} {
+		d := strconv.Itoa(depth)
+		if strings.HasSuffix(pixFmt, d+"le") || strings.HasSuffix(pixFmt, d+"be") {
+			return depth
+		}
+	}
+	return 8
+}
+
 // probeHDR detects HDR from transfer and color metadata.
 func probeHDR(s videoStream) bool {
 	switch s.ColorTransfer {
 	case "smpte2084", "arib-std-b67":
 		return true
 	}
+	// Dolby Vision by codec or RPU side data, including profile 8 tucked
+	// into HEVC streams whose transfer tags look SDR alone. Explicit names
+	// only: prefix-matching "dv" would catch SDR dvvideo.
+	switch s.CodecName {
+	case "dvav", "dva1", "dvhe", "dvh1", "dvh2", "dvh3", "dvc1", "dav1":
+		return true
+	}
+	for _, sd := range s.SideDataList {
+		if strings.Contains(strings.ToLower(sd.SideDataType), "dolby vision") {
+			return true
+		}
+	}
 	if s.ColorSpace == "bt2020nc" || s.ColorSpace == "bt2020c" || s.ColorPrimaries == "bt2020" {
-		pix := s.PixFmt
-		return strings.Contains(pix, "10") || strings.Contains(pix, "12") || strings.Contains(pix, "16")
+		return probeBitDepth(s.PixFmt) > 8
 	}
 	return false
 }
