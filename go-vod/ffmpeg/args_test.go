@@ -108,9 +108,16 @@ func TestBuildArgsNVENC(t *testing.T) {
 	s := baseSpec()
 	s.NVENC, s.NVENCScale, s.NVENCTemporalAQ = true, "cuda", true
 	c := cmd(s, BuildArgs(s))
-	require.Contains(t, c, "scale_cuda=force_original_aspect_ratio=decrease:passthrough=0")
+	require.Contains(t, c, "scale_cuda=force_original_aspect_ratio=decrease:format=nv12:passthrough=0")
 	require.Contains(t, c, "-preset p6 -tune ll -rc vbr")
 	require.Contains(t, c, "-temporal-aq 1")
+
+	// 10-bit SDR converts in the scaler instead of reaching h264_nvenc.
+	for _, scale := range []string{"cuda", "npp"} {
+		deep := baseSpec()
+		deep.BitDepth, deep.NVENC, deep.NVENCScale = 10, true, scale
+		require.Contains(t, cmd(deep, BuildArgs(deep)), "scale_"+scale+"=force_original_aspect_ratio=decrease:format=nv12")
+	}
 }
 
 func TestBuildArgsTonemap(t *testing.T) {

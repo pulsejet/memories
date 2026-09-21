@@ -186,6 +186,7 @@ func BuildArgs(s Spec) []string {
 	case EncoderNVENC:
 		format = "format=nv12|cuda,hwupload"
 		scaler = fmt.Sprintf("scale_%s", s.NVENCScale)
+		scalerArgs = append(scalerArgs, "format=nv12")
 		if s.NVENCScale == "cuda" {
 			scalerArgs = append(scalerArgs, "passthrough=0")
 		}
