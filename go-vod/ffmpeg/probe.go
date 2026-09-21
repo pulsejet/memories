@@ -204,6 +204,18 @@ func probeHDR(s videoStream) bool {
 	case "smpte2084", "arib-std-b67":
 		return true
 	}
+	// Dolby Vision by codec or RPU side data, including profile 8 tucked
+	// into HEVC streams whose transfer tags look SDR alone. Explicit names
+	// only: prefix-matching "dv" would catch SDR dvvideo.
+	switch s.CodecName {
+	case "dvav", "dva1", "dvhe", "dvh1", "dvh2", "dvh3", "dvc1", "dav1":
+		return true
+	}
+	for _, sd := range s.SideDataList {
+		if strings.Contains(strings.ToLower(sd.SideDataType), "dolby vision") {
+			return true
+		}
+	}
 	if s.ColorSpace == "bt2020nc" || s.ColorSpace == "bt2020c" || s.ColorPrimaries == "bt2020" {
 		return probeBitDepth(s.PixFmt) > 8
 	}

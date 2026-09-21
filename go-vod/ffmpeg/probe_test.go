@@ -35,6 +35,10 @@ func TestParseProbeJSONHDR(t *testing.T) {
 		`"color_space":"bt2020nc"}`))
 	require.False(t, probe(`{"codec_type":"video","codec_name":"h264","pix_fmt":"nv12",`+
 		`"color_space":"bt2020nc"}`))
+	require.True(t, probe(`{"codec_type":"video","codec_name":"dvhe","pix_fmt":"yuv420p10le"}`))
+	require.True(t, probe(`{"codec_type":"video","codec_name":"hevc","pix_fmt":"yuv420p10le",`+
+		`"color_transfer":"bt709","side_data_list":[{"side_data_type":"Dolby Vision RPU data"}]}`))
+	require.False(t, probe(`{"codec_type":"video","codec_name":"dvvideo","pix_fmt":"yuv411p"}`))
 }
 
 func TestParseProbeJSONBitDepth(t *testing.T) {
