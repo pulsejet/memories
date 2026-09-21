@@ -9,7 +9,7 @@ import (
 	"github.com/pulsejet/memories/go-vod/config"
 )
 
-const VERSION = "0.4.2"
+const VERSION = "0.5.0"
 
 func main() {
 	c := config.Defaults(VERSION)
