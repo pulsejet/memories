@@ -45,6 +45,8 @@ type Spec struct {
 	Rotation int
 	// HDR marks sources needing SDR tonemapping.
 	HDR bool
+	// BitDepth is the source sample depth, 8 when unknown.
+	BitDepth int
 	// Audio is the first audio stream; empty when silent.
 	Audio AudioInfo
 	// ChunkSize is the target segment length in whole seconds. Drives
@@ -197,11 +199,7 @@ func BuildArgs(s Spec) []string {
 	if cv != EncoderCopy {
 		filter := fmt.Sprintf("%s,%s=%s", format, scaler, strings.Join(scalerArgs, ":"))
 		if s.HDR {
-			if cv == EncoderVAAPI && s.VAAPIOpenCL {
-				filter = vaapiTonemapFilter(scalerArgs)
-			} else {
-				filter = tonemapFilter(cv, scaler, scalerArgs)
-			}
+			filter = tonemapFilter(s, scaler, scalerArgs)
 		}
 		if s.UseTranspose {
 			transposer := "transpose"
@@ -229,7 +227,11 @@ func BuildArgs(s Spec) []string {
 
 			if transpose != "" {
 				if forceSwTranspose {
-					pre := "hwdownload,format=nv12"
+					depth := s.BitDepth
+					if s.HDR {
+						depth = 8 // post-tonemap surfaces are nv12.
+					}
+					pre := fmt.Sprintf("hwdownload,format=%s", downloadPin(depth))
 					post := format
 					filter = fmt.Sprintf("%s,%s,%s,%s", filter, pre, transpose, post)
 				} else {
@@ -284,26 +286,42 @@ func BuildArgs(s Spec) []string {
 	return args
 }
 
-// Scale HDR surfaces before tonemapping to avoid processing discarded pixels.
-func vaapiTonemapFilter(scalerArgs []string) string {
-	return "scale_vaapi=" + strings.Join(scalerArgs, ":") +
-		",hwmap=derive_device=opencl" +
-		",tonemap_opencl=tonemap=hable:format=nv12:primaries=bt709:transfer=bt709:matrix=bt709:range=tv" +
-		",hwmap=derive_device=vaapi:reverse=1"
-}
-
 // tonemapFilter maps HDR to SDR with hable; zscale supplies linear light.
-func tonemapFilter(cv, scaler string, scalerArgs []string) string {
+func tonemapFilter(s Spec, scaler string, scalerArgs []string) string {
 	scale := fmt.Sprintf("%s=%s", scaler, strings.Join(scalerArgs, ":"))
+
+	if Encoder(s) == EncoderVAAPI && s.VAAPIOpenCL {
+		return scale +
+			",hwmap=derive_device=opencl" +
+			",tonemap_opencl=tonemap=hable:format=nv12:primaries=bt709:transfer=bt709:matrix=bt709:range=tv" +
+			",hwmap=derive_device=vaapi:reverse=1"
+	}
+
 	tail := "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709," +
 		"tonemap=hable,zscale=t=bt709:m=bt709:range=tv"
-	if cv == EncoderX264 {
+	if Encoder(s) == EncoderX264 {
 		return fmt.Sprintf("%s,format=yuv420p,%s", tail, scale)
 	}
-	// Pin the download to nv12: the linear-light tail negotiates high depth
-	// upstream, and some drivers cannot read 10-bit (notably Dolby Vision)
-	// surfaces any other way.
-	return fmt.Sprintf("hwdownload,format=nv12,%s,format=nv12,hwupload,%s", tail, scale)
+
+	// The hwdownload pin must match the surface depth.
+	// https://github.com/pulsejet/memories/issues/1726
+	download := downloadPin(s.BitDepth)
+
+	return fmt.Sprintf("hwdownload,format=%s,%s,format=nv12,hwupload,%s", download, tail, scale)
+}
+
+// downloadPin maps sample depth to the hw surface format.
+func downloadPin(depth int) string {
+	switch depth {
+	case 12:
+		return "p012le"
+	case 14, 16:
+		return "p016le"
+	case 10:
+		return "p010le"
+	default:
+		return "nv12"
+	}
 }
 
 // SegmentArgs extends BuildArgs with the HLS muxer tail that chops one

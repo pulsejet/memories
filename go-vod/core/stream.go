@@ -318,6 +318,7 @@ func (s *Stream) spec(startAt float64, isHls bool) ffmpeg.Spec {
 		FrameRate: s.m.probe.FrameRate,
 		Rotation:  s.m.probe.Rotation,
 		HDR:       s.m.probe.HDR,
+		BitDepth:  s.m.probe.BitDepth,
 		Audio:     s.m.probe.Audio,
 		ChunkSize: s.m.tc.ChunkSize,
 		Copy:      s.quality == QUALITY_DIRECT && (!isHls || grid),

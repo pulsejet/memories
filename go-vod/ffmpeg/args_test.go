@@ -141,6 +141,49 @@ func TestBuildArgsTonemap(t *testing.T) {
 	require.NotContains(t, cmd(sdr, BuildArgs(sdr)), "zscale")
 }
 
+func TestBuildArgsTonemapDepth(t *testing.T) {
+	// The download pin must match the surface depth; the encoder still
+	// receives nv12 either way.
+	for _, scale := range []string{"cuda", "npp"} {
+		deep := baseSpec()
+		deep.HDR, deep.BitDepth, deep.NVENC, deep.NVENCScale = true, 10, true, scale
+		c := cmd(deep, BuildArgs(deep))
+		require.Contains(t, c, "hwdownload,format=p010le,zscale=")
+		require.Contains(t, c, "format=nv12,hwupload,scale_"+scale+"=")
+
+		deep12 := baseSpec()
+		deep12.HDR, deep12.BitDepth, deep12.NVENC, deep12.NVENCScale = true, 12, true, scale
+		require.Contains(t, cmd(deep12, BuildArgs(deep12)), "hwdownload,format=p012le,zscale=")
+
+		shallow := baseSpec()
+		shallow.HDR, shallow.NVENC, shallow.NVENCScale = true, true, scale
+		require.Contains(t, cmd(shallow, BuildArgs(shallow)), "hwdownload,format=nv12,zscale=")
+	}
+
+	vaapi := baseSpec()
+	vaapi.HDR, vaapi.BitDepth, vaapi.VAAPI = true, 10, true
+	c := cmd(vaapi, BuildArgs(vaapi))
+	require.Contains(t, c, "hwdownload,format=p010le,zscale=")
+	require.Contains(t, c, "format=nv12,hwupload,scale_vaapi=")
+
+	// Software transpose after tonemapping downloads converted nv12.
+	transposed := baseSpec()
+	transposed.HDR, transposed.BitDepth, transposed.VAAPI = true, 10, true
+	transposed.UseTranspose, transposed.ForceSwTranspose, transposed.Rotation = true, true, 90
+	require.Contains(t, cmd(transposed, BuildArgs(transposed)), "hwdownload,format=nv12,transpose=2")
+
+	// But 10-bit SDR skips tonemapping, so the transpose download keeps depth.
+	sdr := baseSpec()
+	sdr.BitDepth, sdr.NVENC, sdr.NVENCScale = 10, true, "cuda"
+	sdr.UseTranspose, sdr.Rotation = true, 90
+	require.Contains(t, cmd(sdr, BuildArgs(sdr)), "hwdownload,format=p010le,transpose=2")
+
+	sdr12 := baseSpec()
+	sdr12.BitDepth, sdr12.NVENC, sdr12.NVENCScale = 12, true, "cuda"
+	sdr12.UseTranspose, sdr12.Rotation = true, 90
+	require.Contains(t, cmd(sdr12, BuildArgs(sdr12)), "hwdownload,format=p012le,transpose=2")
+}
+
 func TestBuildArgsNoAudio(t *testing.T) {
 	s := baseSpec()
 	s.Audio = AudioInfo{}

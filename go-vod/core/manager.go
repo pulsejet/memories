@@ -84,6 +84,7 @@ type ProbeVideoData struct {
 	BitRate   int
 	Rotation  int
 	HDR       bool
+	BitDepth  int
 	Audio     ffmpeg.AudioInfo
 }
 
@@ -459,6 +460,7 @@ func (m *Manager) ffprobe() error {
 			BitRate:   info.BitRate,
 			Rotation:  info.Rotation,
 			HDR:       info.HDR,
+			BitDepth:  info.BitDepth,
 			Audio:     info.Audio,
 		}
 

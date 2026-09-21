@@ -98,7 +98,7 @@ func TestProbeCacheRoundtrip(t *testing.T) {
 	probe := &ProbeVideoData{
 		Width: 1280, Height: 720, Duration: 10 * time.Second,
 		FrameRate: 30, CodecName: "h264", BitRate: 1000000,
-		Rotation: 90, HDR: true,
+		Rotation: 90, HDR: true, BitDepth: 10,
 		Audio: ffmpeg.AudioInfo{
 			CodecName:  "aac",
 			Channels:   2,

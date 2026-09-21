@@ -13,6 +13,8 @@ const KeyframeCacheFile = "keyframes.json"
 
 const ProbeCacheFile = "probe.json"
 
+const probeCacheVersion = 2
+
 // FileCacheDir is the file's cache home, sharded by hashed fileid.
 // Empty when caching is unavailable (no cache dir or fileid).
 func FileCacheDir(cacheDir string, fileid int64) string {
@@ -95,6 +97,7 @@ func ProbeCachePath(cacheDir string, fileid int64) string {
 // Only ProbeVideoData is cached; copyEligible is re-derived per Manager
 // from probe + playableCodecs.
 type probePlan struct {
+	V     int            `json:"v"`
 	Etag  string         `json:"etag"`
 	Probe ProbeVideoData `json:"probe"`
 }
@@ -113,7 +116,7 @@ func LoadCachedProbe(cacheDir string, fileid int64, etag string) (*ProbeVideoDat
 		EvictFileCache(cacheDir, fileid)
 		return nil, false
 	}
-	if plan.Etag != etag {
+	if plan.V != probeCacheVersion || plan.Etag != etag {
 		EvictFileCache(cacheDir, fileid)
 		return nil, false
 	}
@@ -129,7 +132,11 @@ func StoreCachedProbe(cacheDir string, fileid int64, etag string, probe *ProbeVi
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		return err
 	}
-	data, err := json.Marshal(probePlan{Etag: etag, Probe: *probe})
+	data, err := json.Marshal(probePlan{
+		V:     probeCacheVersion,
+		Etag:  etag,
+		Probe: *probe,
+	})
 	if err != nil {
 		return err
 	}
