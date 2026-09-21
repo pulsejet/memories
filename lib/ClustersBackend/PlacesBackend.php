@@ -89,16 +89,10 @@ final class PlacesBackend extends Backend
 
         $query = $this->tq->getBuilder();
 
-        // SELECT location name and count of photos
+        // SELECT osm_id and count of photos
         $count = $query->func()->count('m.fileid');
-        $query->select('e.osm_id')->from('memories_planet', 'e');
+        $query->select('mp.osm_id')->from('memories_places', 'mp');
         $query->selectAlias($count, 'count');
-
-        // WHERE these are not special clusters (e.g. timezone)
-        $query->where($query->expr()->gt('e.admin_level', $query->expr()->literal(0, \PDO::PARAM_INT)));
-
-        // WHERE there are items with this osm_id
-        $mpJoinOn = [$query->expr()->eq('mp.osm_id', 'e.osm_id')];
 
         // AND these items are inside the requested place
         if ($inside > 0) {
@@ -107,8 +101,47 @@ final class PlacesBackend extends Backend
                 ->where($sub->expr()->eq('mp_sq.osm_id', $query->createNamedParameter($inside, \PDO::PARAM_INT)))
                 ->andWhere($sub->expr()->eq('mp_sq.fileid', 'mp.fileid'))
             ;
-            $mpJoinOn[] = SQL::exists($query, $sub);
+            $query->andWhere(SQL::exists($query, $sub));
+        }
 
+        // Else if we are looking for countries
+        elseif (-1 === $inside) {
+            // no mark filter
+        }
+
+        // AND these items are marked (only if not inside)
+        elseif ($marked > 0) {
+            $query->andWhere($query->expr()->eq('mp.mark', $query->expr()->literal(1, \PDO::PARAM_INT)));
+        }
+
+        // WHERE these items are memories indexed photos
+        $query->innerJoin('mp', 'memories', 'm', $query->expr()->eq('m.fileid', 'mp.fileid'));
+
+        // WHERE these photos are in the user's requested folder recursively
+        $query = $this->tq->filterFilecache($query);
+
+        // GROUP BY osm_id
+        $query->groupBy('mp.osm_id');
+
+        // WHERE at least 3 photos if want marked clusters
+        if ($marked) {
+            $query->having($query->expr()->gte($count, SQL::literal($query, 3, \PDO::PARAM_INT)));
+        }
+
+        // Materialize the aggregation, then join planet once per place
+        // to filter by admin_level and fetch the names from the IDs.
+        // If we just AGGREGATE+GROUP with the name in one query, then it can't use indexes
+        $query = SQL::materialize($query, 'sub');
+
+        // INNER JOIN planet to get the names
+        $query->innerJoin('sub', 'memories_planet', 'e', $query->expr()->eq('e.osm_id', 'sub.osm_id'));
+        $query->addSelect('e.name', 'e.other_names');
+
+        // WHERE these are not special clusters (e.g. timezone)
+        $query->andWhere($query->expr()->gt('e.admin_level', $query->expr()->literal(0, \PDO::PARAM_INT)));
+
+        // AND these places are inside the requested place
+        if ($inside > 0) {
             // Add WHERE clauses to main query to filter out admin_levels
             $sub = $this->tq->getBuilder();
             $sub->select('e_sq.admin_level')
@@ -125,37 +158,6 @@ final class PlacesBackend extends Backend
         elseif (-1 === $inside) {
             $query->andWhere($query->expr()->eq('e.admin_level', $query->expr()->literal(2, \PDO::PARAM_INT)));
         }
-
-        // AND these items are marked (only if not inside)
-        elseif ($marked > 0) {
-            $mpJoinOn[] = $query->expr()->eq('mp.mark', $query->expr()->literal(1, \PDO::PARAM_INT));
-        }
-
-        // JOIN on memories_places
-        $query->innerJoin('e', 'memories_places', 'mp', $query->expr()->andX(...$mpJoinOn));
-
-        // WHERE these items are memories indexed photos
-        $query->innerJoin('mp', 'memories', 'm', $query->expr()->eq('m.fileid', 'mp.fileid'));
-
-        // WHERE these photos are in the user's requested folder recursively
-        $query = $this->tq->filterFilecache($query);
-
-        // GROUP and ORDER by tag name
-        $query->groupBy('e.osm_id');
-
-        // WHERE at least 3 photos if want marked clusters
-        if ($marked) {
-            $query->having($query->expr()->gte($count, SQL::literal($query, 3, \PDO::PARAM_INT)));
-        }
-
-        // We use this as the subquery for the main query, where we also re-join with
-        // oc_memories_planet to the the names from the IDS
-        // If we just AGGREGATE+GROUP with the name in one query, then it can't use indexes
-        $query = SQL::materialize($query, 'sub');
-
-        // INNER JOIN back on the planet table to get the names
-        $query->innerJoin('sub', 'memories_planet', 'e', $query->expr()->eq('e.osm_id', 'sub.osm_id'));
-        $query->addSelect('e.name', 'e.other_names');
 
         // ORDER BY name and osm_id
         $query->addOrderBy('sub.count', 'DESC');
