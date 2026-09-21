@@ -60,6 +60,7 @@ export type ISystemStatus = {
   last_index_job_status_type: string;
 
   bad_encryption: boolean;
+  db_is_sqlite?: boolean;
   innodb_buffer_pool_size?: number;
 
   indexed_count: number;

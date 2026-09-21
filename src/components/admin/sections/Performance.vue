@@ -39,6 +39,12 @@
       </NcNoteCard>
     </p>
 
+    <p v-if="status && status.db_is_sqlite">
+      <NcNoteCard type="warning">
+        {{ t('memories', 'You are using SQLite, which is not recommended for performance.') }}
+      </NcNoteCard>
+    </p>
+
     <p v-if="status && typeof status.innodb_buffer_pool_size === 'number'">
       <NcNoteCard :type="status.innodb_buffer_pool_size >= recommendedBufferPoolSize ? 'success' : 'warning'">
         {{
