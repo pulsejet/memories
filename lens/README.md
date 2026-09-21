@@ -47,7 +47,11 @@ services:
       NC_TOKEN: "token-from-step-1"
       QDRANT_URL: "http://qdrant:6333"
       EMBEDDING_MODEL_ID: "google/siglip2-base-patch16-256"
-      EMBEDDING_MODEL_REVISION: "pinned-commit-sha-of-the-model"
+      EMBEDDING_MODEL_REVISION: "3f9f96cb90da5dbc758b01813f2f6f1aee24c1ab"
+      SENTENCE_MODEL_ID: "intfloat/multilingual-e5-small"
+      SENTENCE_MODEL_REVISION: "614241f622f53c4eeff9890bdc4f31cfecc418b3"
+      SCHEMA_MODEL_ID: "fastino/gliner2.5-multi-v1"
+      SCHEMA_MODEL_REVISION: "a221b77a8baf4a613b8f8652661d41fa10a5641e"
     depends_on:
       - qdrant
 
