@@ -155,14 +155,19 @@ export default defineComponent({
       return new Fuse(this.clusters ?? [], { keys: ['name', 'display_name'], threshold: 0.3 });
     },
 
+    /** Lens backend available (daemon URL configured) */
+    lensEnabled(): boolean {
+      return !!this.config.lens_enabled;
+    },
+
     /** Live lens search hijacks typing only on desktop timeline/search views */
     isLensLive(): boolean {
-      return (this.routeIsBase || this.routeIsSearch) && !utils.isMobile();
+      return this.lensEnabled && (this.routeIsBase || this.routeIsSearch) && !utils.isMobile();
     },
 
     /** Explicit lens entry for anywhere live search does not apply */
     showLensEntry(): boolean {
-      return !!this.prompt && !this.isLensLive;
+      return !!this.prompt && this.lensEnabled && !this.isLensLive;
     },
 
     lensEntryText(): string {
@@ -225,7 +230,7 @@ export default defineComponent({
     /** Open the search view for the current prompt */
     openSearch() {
       const q = this.prompt.trim();
-      if (!q || this.isLensLive) return;
+      if (!q || !this.lensEnabled || this.isLensLive) return;
       window.clearTimeout(this.lensTimer ?? 0);
       this.lensTimer = null;
       this.$router.push({ name: 'search', query: { q } });
@@ -242,6 +247,7 @@ export default defineComponent({
 
     /** Run the pending live lens navigation */
     routeToLens() {
+      if (!this.lensEnabled) return;
       if (!this.prompt) {
         if (!this.routeIsBase) {
           this.$router.replace({ name: 'timeline' });

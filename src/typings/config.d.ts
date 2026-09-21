@@ -20,6 +20,7 @@ declare module '@typings' {
     recognize_enabled: boolean;
     facerecognition_installed: boolean;
     facerecognition_enabled: boolean;
+    lens_enabled: boolean;
     preview_generator_enabled: boolean;
 
     // general settings

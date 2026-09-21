@@ -143,6 +143,7 @@ class StaticConfig {
       recognize_enabled: false,
       facerecognition_installed: false,
       facerecognition_enabled: false,
+      lens_enabled: false,
       preview_generator_enabled: false,
 
       // general settings
