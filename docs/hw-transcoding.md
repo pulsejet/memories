@@ -8,10 +8,6 @@ This document describes setting up transcoding in Memories, specifically using h
 
 ## Overview
 
-HLS transcoding requires FFmpeg 5.1 or newer for `-fps_mode passthrough`, which
-preserves source timestamps instead of duplicating variable-frame-rate video
-to match its nominal frame rate.
-
 Newer Intel processors come with a feature called QuickSync that can significantly boost transcoding performance (4-5x improvement over x264 is common). QuickSync can be used for hardware accelerated transcoding using the VA-API in ffmpeg.
 
 Note: VA-API acceleration may also work with some AMD GPUs.
@@ -19,20 +15,6 @@ Note: VA-API acceleration may also work with some AMD GPUs.
 To configure VAAPI, you need to have `/dev/dri` available to the Nextcloud instance with the `www-data` in the group owning the drivers. You also need the correct drivers and a compatible version of ffmpeg installed (older versions may not work with modern hardware).
 
 NVIDIA GPUs support hardware transcoding using NVENC.
-
-For VA-API HDR sources, go-vod tries a single-frame transcode before starting
-each rendition. When VA-API/OpenCL frame sharing works, it scales the 10-bit
-surfaces first, applies Hable tone mapping with `tonemap_opencl`, then maps the
-SDR frames back to VA-API for rotation and encoding. This requires an OpenCL
-runtime with VA-API sharing support; the presence of the filter alone is not
-sufficient. The probe uses the selected render device, source and rendition,
-and its result is reused for subsequent seeks in that stream.
-
-If the probe fails or takes more than 10 seconds, go-vod keeps the existing
-software HDR tone mapper and logs the reason. Forcing software transpose also
-keeps the software tone mapper. The probe adds startup work on the first use
-of each HDR rendition; it does not guarantee against later driver or decoder
-failures during playback.
 
 !!! tip "Hardware acceleration is optional"
 

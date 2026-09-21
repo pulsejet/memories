@@ -172,7 +172,15 @@ func BuildArgs(s Spec) []string {
 	case EncoderVAAPI:
 		format = "format=nv12|vaapi,hwupload"
 		scaler = "scale_vaapi"
-		scalerArgs = append(scalerArgs, "format=nv12")
+		if s.HDR && s.VAAPIOpenCL {
+			// The OpenCL tonemap graph scales before tonemapping, so
+			// keep 10-bit surfaces through the scaler.
+			scalerArgs = append(scalerArgs, "format=p010")
+		} else {
+			// h264_vaapi encodes 8-bit 4:2:0 only; HDR converts to NV12
+			// after tonemapping instead.
+			scalerArgs = append(scalerArgs, "format=nv12")
+		}
 	case EncoderNVENC:
 		format = "format=nv12|cuda,hwupload"
 		scaler = fmt.Sprintf("scale_%s", s.NVENCScale)
@@ -278,13 +286,7 @@ func BuildArgs(s Spec) []string {
 
 // Scale HDR surfaces before tonemapping to avoid processing discarded pixels.
 func vaapiTonemapFilter(scalerArgs []string) string {
-	args := slices.Clone(scalerArgs)
-	for i, arg := range args {
-		if arg == "format=nv12" {
-			args[i] = "format=p010"
-		}
-	}
-	return "scale_vaapi=" + strings.Join(args, ":") +
+	return "scale_vaapi=" + strings.Join(scalerArgs, ":") +
 		",hwmap=derive_device=opencl" +
 		",tonemap_opencl=tonemap=hable:format=nv12:primaries=bt709:transfer=bt709:matrix=bt709:range=tv" +
 		",hwmap=derive_device=vaapi:reverse=1"
@@ -325,10 +327,6 @@ func tonemapFilter(cv, scaler string, scalerArgs []string) string {
 //     keyframe past each -hls_time boundary, matching CopySegments.
 func SegmentArgs(s Spec, startID int, pattern string) []string {
 	args := BuildArgs(s)
-	if !s.Copy {
-		// HLS may otherwise duplicate VFR frames to match the probed r_frame_rate.
-		args = append(args, "-fps_mode", "passthrough")
-	}
 	args = append(args,
 		"-start_number", fmt.Sprintf("%d", startID),
 		"-avoid_negative_ts", "disabled",
@@ -339,6 +337,9 @@ func SegmentArgs(s Spec, startID int, pattern string) []string {
 	)
 
 	if !s.Copy {
+		// HLS may otherwise duplicate VFR frames to match the probed r_frame_rate.
+		args = append(args, "-fps_mode", "passthrough")
+
 		// We force a keyframe at the start of each segment.
 		// By default, ffmpeg will split only on keyframes, so
 		// theoretically we should have perfectly sized chunks.

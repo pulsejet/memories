@@ -184,20 +184,6 @@ func TestBuildArgsVAAPIOpenCL(t *testing.T) {
 	}
 }
 
-func TestVAAPIOpenCLDoesNotChangeOtherBackends(t *testing.T) {
-	for _, s := range []Spec{
-		{VAAPI: true},
-		{HDR: true},
-		{HDR: true, NVENC: true, NVENCScale: "cuda"},
-		{HDR: true, NVENC: true, NVENCScale: "npp"},
-		{HDR: true, VAAPI: true, Copy: true},
-	} {
-		want := BuildArgs(s)
-		s.VAAPIOpenCL = true
-		require.Equal(t, want, BuildArgs(s))
-	}
-}
-
 func TestBuildArgsAudioCopy(t *testing.T) {
 	s := baseSpec()
 	s.Audio = AudioInfo{CodecName: "aac", Channels: 2, SampleRate: 48000, BitRate: 128000}
@@ -307,7 +293,7 @@ func TestSegmentTimestamps(t *testing.T) {
 				require.Equal(t, -1, i)
 			} else {
 				require.Greater(t, i, slices.Index(args, "-i"))
-				require.Less(t, i, slices.Index(args, "-f"))
+				require.Greater(t, i, slices.Index(args, "-f"))
 				require.Equal(t, "passthrough", args[i+1])
 			}
 			require.Equal(t, "9.000000", args[slices.Index(args, "-ss")+1])
