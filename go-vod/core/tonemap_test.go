@@ -43,7 +43,8 @@ func TestTonemapSelection(t *testing.T) {
 			require.Equal(t, !fail, spec.VAAPIOpenCL)
 			args := strings.Join(ffmpeg.BuildArgs(spec), " ")
 			if fail {
-				require.Contains(t, args, "hwdownload,format=nv12,zscale=")
+				require.Contains(t, args, "hwdownload,format=nv12,scale=")
+				require.Contains(t, args, "zscale=")
 				require.NotContains(t, args, "opencl")
 			} else {
 				require.Contains(t, args, "tonemap_opencl=")
