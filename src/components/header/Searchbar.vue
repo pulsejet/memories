@@ -182,6 +182,10 @@ export default defineComponent({
         this.queueLensSearch();
       }
     },
+
+    '$route.query.q'() {
+      this.syncPromptFromRoute();
+    },
   },
 
   methods: {
@@ -214,9 +218,8 @@ export default defineComponent({
 
     /** Mirror ?q= into the box when on the search view (e.g. direct open). */
     syncPromptFromRoute() {
-      if (!this.routeIsSearch) return;
-      const q = lens.routeQueryText(this.$route.query.q);
-      if (q !== this.prompt) this.prompt = q;
+      const query = this.routeIsSearch ? lens.routeQueryText(this.$route.query.q) : String();
+      if (query !== this.prompt) this.prompt = query;
     },
 
     /** Open the search view for the current prompt */
