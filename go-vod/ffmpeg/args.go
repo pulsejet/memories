@@ -56,6 +56,8 @@ type Spec struct {
 	VAAPI, VAAPILowPower bool
 	// VAAPIDevice is the VA-API render node; empty selects /dev/dri/renderD128.
 	VAAPIDevice string
+	// VAAPIOpenCL enables GPU HDR tonemapping after a successful interop probe.
+	VAAPIOpenCL bool
 	// NVENC selects h264_nvenc with CUDA offload. NVENCScale picks the scaler
 	// ("cuda" or "npp"); NVENCTemporalAQ enables temporal AQ.
 	NVENC, NVENCTemporalAQ bool
@@ -134,8 +136,15 @@ func BuildArgs(s Spec) []string {
 			"-hwaccel_device", dev,
 			"-hwaccel_output_format", "vaapi",
 			"-init_hw_device", "vaapi=memories:"+dev,
-			"-filter_hw_device", "memories",
 		)
+		if s.HDR && s.VAAPIOpenCL {
+			args = append(args,
+				"-init_hw_device", "opencl=memories_opencl@memories",
+				"-filter_hw_device", "memories_opencl",
+			)
+		} else {
+			args = append(args, "-filter_hw_device", "memories")
+		}
 	case EncoderNVENC:
 		args = append(args,
 			"-hwaccel", "cuda",
@@ -180,7 +189,11 @@ func BuildArgs(s Spec) []string {
 	if cv != EncoderCopy {
 		filter := fmt.Sprintf("%s,%s=%s", format, scaler, strings.Join(scalerArgs, ":"))
 		if s.HDR {
-			filter = tonemapFilter(cv, scaler, scalerArgs)
+			if cv == EncoderVAAPI && s.VAAPIOpenCL {
+				filter = vaapiTonemapFilter(scalerArgs)
+			} else {
+				filter = tonemapFilter(cv, scaler, scalerArgs)
+			}
 		}
 		if s.UseTranspose {
 			transposer := "transpose"
@@ -261,6 +274,20 @@ func BuildArgs(s Spec) []string {
 	}
 
 	return args
+}
+
+// Scale HDR surfaces before tonemapping to avoid processing discarded pixels.
+func vaapiTonemapFilter(scalerArgs []string) string {
+	args := slices.Clone(scalerArgs)
+	for i, arg := range args {
+		if arg == "format=nv12" {
+			args[i] = "format=p010"
+		}
+	}
+	return "scale_vaapi=" + strings.Join(args, ":") +
+		",hwmap=derive_device=opencl" +
+		",tonemap_opencl=tonemap=hable:format=nv12:primaries=bt709:transfer=bt709:matrix=bt709:range=tv" +
+		",hwmap=derive_device=vaapi:reverse=1"
 }
 
 // tonemapFilter maps HDR to SDR with hable; zscale supplies linear light.

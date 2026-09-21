@@ -1,6 +1,8 @@
 package ffmpeg
 
 import (
+	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -147,6 +149,53 @@ func TestBuildArgsNoAudio(t *testing.T) {
 	require.NotContains(t, c, `-map "0:a`)
 	require.NotContains(t, c, `"-c:a"`)
 	require.NotContains(t, c, "b:a")
+}
+
+func TestBuildArgsVAAPIOpenCL(t *testing.T) {
+	for _, quality := range []string{"720p", QualityMax} {
+		for _, rotation := range []int{0, -90, 90, 180} {
+			s := baseSpec()
+			s.VAAPI, s.HDR, s.VAAPIOpenCL, s.UseTranspose = true, true, true, true
+			s.Quality, s.Rotation, s.VAAPIDevice = quality, rotation, "/dev/dri/renderD129"
+			args := BuildArgs(s)
+			require.Contains(t, args, "vaapi=memories:/dev/dri/renderD129")
+			require.Contains(t, args, "opencl=memories_opencl@memories")
+			require.Equal(t, "memories_opencl", args[slices.Index(args, "-filter_hw_device")+1])
+			filter := args[slices.Index(args, "-vf")+1]
+			scale := "scale_vaapi=force_original_aspect_ratio=decrease:format=p010"
+			if quality != QualityMax {
+				scale += ":w=1280:h=1280"
+			}
+			want := scale + ",hwmap=derive_device=opencl," +
+				"tonemap_opencl=tonemap=hable:format=nv12:primaries=bt709:transfer=bt709:matrix=bt709:range=tv," +
+				"hwmap=derive_device=vaapi:reverse=1"
+			switch rotation {
+			case -90:
+				want += ",transpose_vaapi=1"
+			case 90:
+				want += ",transpose_vaapi=2"
+			case 180:
+				want += ",transpose_vaapi=1,transpose_vaapi=1"
+			}
+			require.Equal(t, want, filter)
+			require.NotContains(t, strings.Join(args, " "), "hwdownload")
+			require.NotContains(t, filter, "zscale")
+		}
+	}
+}
+
+func TestVAAPIOpenCLDoesNotChangeOtherBackends(t *testing.T) {
+	for _, s := range []Spec{
+		{VAAPI: true},
+		{HDR: true},
+		{HDR: true, NVENC: true, NVENCScale: "cuda"},
+		{HDR: true, NVENC: true, NVENCScale: "npp"},
+		{HDR: true, VAAPI: true, Copy: true},
+	} {
+		want := BuildArgs(s)
+		s.VAAPIOpenCL = true
+		require.Equal(t, want, BuildArgs(s))
+	}
 }
 
 func TestBuildArgsAudioCopy(t *testing.T) {
