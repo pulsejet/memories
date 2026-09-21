@@ -38,6 +38,17 @@
         </template>
       </NcNoteCard>
     </p>
+
+    <p v-if="status && typeof status.innodb_buffer_pool_size === 'number'">
+      <NcNoteCard :type="status.innodb_buffer_pool_size >= recommendedBufferPoolSize ? 'success' : 'warning'">
+        {{
+          t('memories', 'innodb_buffer_pool_size is set to {size} GiB (minimum recommended: {minimum} GiB).', {
+            size: gibibytes(status.innodb_buffer_pool_size),
+            minimum: gibibytes(recommendedBufferPoolSize),
+          })
+        }}
+      </NcNoteCard>
+    </p>
   </div>
 </template>
 
@@ -65,6 +76,16 @@ export default defineComponent({
 
     httpVerOk(): boolean {
       return this.httpVer === 'h2' || this.httpVer === 'h3';
+    },
+
+    recommendedBufferPoolSize(): number {
+      return 2 * 1024 ** 3; // 2 GiB
+    },
+  },
+
+  methods: {
+    gibibytes(bytes: number): string {
+      return (bytes / 1024 ** 3).toFixed(1);
     },
   },
 });

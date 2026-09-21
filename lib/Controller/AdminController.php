@@ -139,6 +139,17 @@ final class AdminController extends GenericApiController
             // Check for bad encryption module
             $status['bad_encryption'] = \OCA\Memories\Util::isEncryptionEnabled();
 
+            // Check InnoDB buffer pool size on MySQL/MariaDB
+            try {
+                $db = \OC::$server->get(\OCP\IDBConnection::class);
+                $provider = $db->getDatabaseProvider();
+                if (\OCP\IDBConnection::PLATFORM_MYSQL === $provider) {
+                    $status['innodb_buffer_pool_size'] = (int) $db->executeQuery('SELECT @@innodb_buffer_pool_size')->fetchOne();
+                }
+            } catch (\Exception $e) {
+                $status['innodb_buffer_pool_size'] = 0;
+            }
+
             // Get GIS status
             $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
 
