@@ -8,6 +8,10 @@ This document describes setting up transcoding in Memories, specifically using h
 
 ## Overview
 
+HLS transcoding requires FFmpeg 5.1 or newer for `-fps_mode passthrough`, which
+preserves source timestamps instead of duplicating variable-frame-rate video
+to match its nominal frame rate.
+
 Newer Intel processors come with a feature called QuickSync that can significantly boost transcoding performance (4-5x improvement over x264 is common). QuickSync can be used for hardware accelerated transcoding using the VA-API in ffmpeg.
 
 Note: VA-API acceleration may also work with some AMD GPUs.

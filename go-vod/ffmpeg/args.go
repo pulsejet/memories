@@ -325,6 +325,10 @@ func tonemapFilter(cv, scaler string, scalerArgs []string) string {
 //     keyframe past each -hls_time boundary, matching CopySegments.
 func SegmentArgs(s Spec, startID int, pattern string) []string {
 	args := BuildArgs(s)
+	if !s.Copy {
+		// HLS may otherwise duplicate VFR frames to match the probed r_frame_rate.
+		args = append(args, "-fps_mode", "passthrough")
+	}
 	args = append(args,
 		"-start_number", fmt.Sprintf("%d", startID),
 		"-avoid_negative_ts", "disabled",

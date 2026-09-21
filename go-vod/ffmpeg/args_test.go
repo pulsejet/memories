@@ -213,6 +213,7 @@ func TestBuildArgsAudioCopy(t *testing.T) {
 func TestSegmentArgs(t *testing.T) {
 	s := baseSpec()
 	c := cmd(s, SegmentArgs(s, 4, SegmentPattern("/tmp/vod", "720p")))
+	require.Contains(t, c, "-fps_mode passthrough")
 	require.Contains(t, c, "-start_number 4")
 	require.Contains(t, c, "-hls_segment_filename /tmp/vod/720p-%06d.ts")
 	require.Contains(t, c, `"expr:gte(t,n_forced*3)" -`)
@@ -226,6 +227,7 @@ func TestSegmentArgs(t *testing.T) {
 
 func TestMP4Args(t *testing.T) {
 	c := cmd(baseSpec(), MP4Args(baseSpec()))
+	require.NotContains(t, c, "-fps_mode")
 	require.Contains(t, c, `-movflags frag_keyframe+empty_moov+faststart -f mp4 "pipe:1"`)
 }
 
@@ -285,10 +287,36 @@ func TestSegmentArgsCopy(t *testing.T) {
 	s := baseSpec()
 	s.Copy = true
 	c := cmd(s, SegmentArgs(s, 2, SegmentPattern("/tmp/vod", "direct")))
+	require.NotContains(t, c, "-fps_mode")
 	require.Contains(t, c, "-hls_time 3")
 	require.NotContains(t, c, "force_key_frames")
 	require.NotContains(t, c, " -g ")
 	require.NotContains(t, c, "split_by_time")
+}
+
+func TestSegmentTimestamps(t *testing.T) {
+	for _, backend := range []string{EncoderX264, EncoderVAAPI, EncoderNVENC} {
+		for _, copy := range []bool{false, true} {
+			s := baseSpec()
+			s.VAAPI, s.NVENC, s.NVENCScale = backend == EncoderVAAPI, backend == EncoderNVENC, "cuda"
+			s.Copy, s.StartAt, s.FrameRate = copy, 9, 120
+			s.UseGopSize = s.NVENC
+			args := SegmentArgs(s, 3, SegmentPattern("/tmp/vod", s.Quality))
+			i := slices.Index(args, "-fps_mode")
+			if copy {
+				require.Equal(t, -1, i)
+			} else {
+				require.Greater(t, i, slices.Index(args, "-i"))
+				require.Less(t, i, slices.Index(args, "-f"))
+				require.Equal(t, "passthrough", args[i+1])
+			}
+			require.Equal(t, "9.000000", args[slices.Index(args, "-ss")+1])
+			require.Equal(t, "3", args[slices.Index(args, "-start_number")+1])
+			require.Contains(t, args, "-copyts")
+			require.Equal(t, "+genpts", args[slices.Index(args, "-fflags")+1])
+			require.Equal(t, "disabled", args[slices.Index(args, "-avoid_negative_ts")+1])
+		}
+	}
 }
 
 func TestCopySegments(t *testing.T) {
