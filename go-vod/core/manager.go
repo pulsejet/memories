@@ -437,24 +437,32 @@ func (m *Manager) ServeFullVideo(w http.ResponseWriter, r *http.Request, quality
 }
 
 func (m *Manager) ffprobe() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	if probe, ok := LoadCachedProbe(m.c.CacheDir(), m.fileid, m.etag); ok {
+		log.Printf("%s: probe cache hit", m.id)
+		m.probe = probe
+	} else {
+		log.Printf("%s: probe cache miss", m.id)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 
-	info, err := ffmpeg.Probe(ctx, m.c.FFprobe, m.path)
-	if err != nil {
-		return err
-	}
+		info, err := ffmpeg.Probe(ctx, m.c.FFprobe, m.path)
+		if err != nil {
+			return err
+		}
 
-	m.probe = &ProbeVideoData{
-		Width:     info.Width,
-		Height:    info.Height,
-		Duration:  info.Duration,
-		FrameRate: info.FrameRate,
-		CodecName: info.CodecName,
-		BitRate:   info.BitRate,
-		Rotation:  info.Rotation,
-		HDR:       info.HDR,
-		Audio:     info.Audio,
+		m.probe = &ProbeVideoData{
+			Width:     info.Width,
+			Height:    info.Height,
+			Duration:  info.Duration,
+			FrameRate: info.FrameRate,
+			CodecName: info.CodecName,
+			BitRate:   info.BitRate,
+			Rotation:  info.Rotation,
+			HDR:       info.HDR,
+			Audio:     info.Audio,
+		}
+
+		StoreCachedProbe(m.c.CacheDir(), m.fileid, m.etag, m.probe)
 	}
 
 	// Copy eligibility is cheap (codec + rotation); keyframes come later
