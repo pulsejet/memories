@@ -10,7 +10,7 @@ use OCA\Memories\Util;
 final class BinExt
 {
     public const EXIFTOOL_VER = '13.59';
-    public const GOVOD_VER = '0.4.2';
+    public const GOVOD_VER = '0.5.0';
     public const NX_VER_MIN = '1.1';
 
     private const GO_VOD_PID_FILE = '/tmp/go-vod.pid';
