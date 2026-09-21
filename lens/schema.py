@@ -106,7 +106,7 @@ class SchemaModel:
     def load(self):
         """Load extractor from the local snapshot only."""
 
-        from gliner2 import GLiNER2  # pylint: disable=import-outside-toplevel,no-name-in-module
+        from gliner2 import AutoExtractor  # pylint: disable=import-outside-toplevel,no-name-in-module
 
         if config.torch_num_threads:
             torch.set_num_threads(config.torch_num_threads)
@@ -125,7 +125,7 @@ class SchemaModel:
 
         log.info("loading %s from %s on %s", config.schema_model.model_id, path, self._device)
 
-        self._model = GLiNER2.from_pretrained(
+        self._model = AutoExtractor.from_pretrained(
             path,
             map_location=self._device,
             local_files_only=True,

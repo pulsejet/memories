@@ -125,12 +125,12 @@ def load_config() -> Config:
         version=_int("SENTENCE_VERSION", 1),
     )
 
-    schema_threshold = _float("SCHEMA_THRESHOLD", 0.5)
+    schema_threshold = _float("SCHEMA_THRESHOLD", 0.7)
     if schema_threshold < 0 or schema_threshold > 1:
         raise RuntimeError("SCHEMA_THRESHOLD must be between 0 and 1")
 
     schema_model = SchemaModelConfig(
-        model_id=os.environ.get("SCHEMA_MODEL_ID", "fastino/gliner2-multi-v1"),
+        model_id=os.environ.get("SCHEMA_MODEL_ID", "fastino/gliner2.5-multi-v1"),
         model_revision=os.environ["SCHEMA_MODEL_REVISION"],
         threshold=schema_threshold,
     )
