@@ -16,6 +16,20 @@ To configure VAAPI, you need to have `/dev/dri` available to the Nextcloud insta
 
 NVIDIA GPUs support hardware transcoding using NVENC.
 
+For VA-API HDR sources, go-vod tries a single-frame transcode before starting
+each rendition. When VA-API/OpenCL frame sharing works, it scales the 10-bit
+surfaces first, applies Hable tone mapping with `tonemap_opencl`, then maps the
+SDR frames back to VA-API for rotation and encoding. This requires an OpenCL
+runtime with VA-API sharing support; the presence of the filter alone is not
+sufficient. The probe uses the selected render device, source and rendition,
+and its result is reused for subsequent seeks in that stream.
+
+If the probe fails or takes more than 10 seconds, go-vod keeps the existing
+software HDR tone mapper and logs the reason. Forcing software transpose also
+keeps the software tone mapper. The probe adds startup work on the first use
+of each HDR rendition; it does not guarantee against later driver or decoder
+failures during playback.
+
 !!! tip "Hardware acceleration is optional"
 
     Hardware acceleration is optional and not required for Memories to function. If you do not have hardware acceleration, Memories will use the CPU for transcoding.
