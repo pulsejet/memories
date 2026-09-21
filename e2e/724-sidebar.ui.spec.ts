@@ -44,7 +44,7 @@ test.describe('@ui Sidebar', () => {
     await expect(sidebar).toBeVisible();
     await expect(sidebar.getByRole('tab', { name: 'Info', exact: true })).toBeVisible();
     await expect(sidebar.getByRole('tab', { name: 'Sharing', exact: true })).toBeVisible();
-    await expect(page.locator('#app-sidebar-vue')).toHaveCount(0);
+    await expect(page.locator('#app-sidebar-vue.reduced')).toHaveCount(0);
     await snap(page, 'sidebar-native');
 
     await test.step('Reopen sidebar loads tab content', async () => {
@@ -64,7 +64,7 @@ test.describe('@ui Sidebar', () => {
     await page.waitForSelector('.memories-viewer.fully-opened');
 
     await page.getByRole('button', { name: 'Info', exact: true }).click();
-    const sidebar = page.locator('#app-sidebar-vue');
+    const sidebar = page.locator('#app-sidebar-vue.reduced');
     await expect(sidebar).toBeVisible();
     await expect(sidebar.locator('h2')).toHaveText(albumPhoto);
     await expect(page.locator('#app-sidebar-native')).toHaveCount(0);
