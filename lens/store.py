@@ -61,6 +61,38 @@ def place_point_id(fileid: int, osm_id: int) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_URL, f"lens_places:{int(fileid)}:{int(osm_id)}"))
 
 
+@dataclass(frozen=True)
+class FacePoint:  # pylint: disable=too-many-instance-attributes
+    """One detected face: geometry in fractions, L2-normed 128-d vector, uint63 cluster or null."""
+
+    fileid: int
+    parent_id: int
+    face_idx: int
+    vector: list[float]
+    x: float
+    y: float
+    w: float
+    h: float
+    det_score: float
+    cluster_id: int | None = None
+
+
+def face_point_id(fileid: int, face_idx: int) -> str:
+    """Deterministic point id for one (file, face) pair; re-index overwrites."""
+
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"lens_face:{int(fileid)}:{int(face_idx)}"))
+
+
+def _normed_mean(vectors: list[list[float]]) -> list[float]:
+    """L2-normalized mean of L2-normed vectors (cosine-comparable centroid)."""
+
+    dim = len(vectors[0])
+    mean = [sum(v[i] for v in vectors) / len(vectors) for i in range(dim)]
+    norm = sum(v * v for v in mean) ** 0.5
+
+    return [v / norm for v in mean] if norm else mean
+
+
 class CompatMismatch(RuntimeError):
     """Stored embedding metadata differs from current config."""
 
@@ -68,10 +100,11 @@ class CompatMismatch(RuntimeError):
 class Store:
     """Qdrant collection handle; refuses to mix embedding spaces."""
 
-    def __init__(self, client: AsyncQdrantClient, embedding_dim, sentence_dim):
+    def __init__(self, client: AsyncQdrantClient, embedding_dim, sentence_dim, face_dim):
         self.client = client
         self.embedding_dim = embedding_dim
         self.sentence_dim = sentence_dim
+        self.face_dim = face_dim
 
     async def ensure_embedding_collection(self):
         """Create collection, indexes, and sentinel step by step; reruns are safe."""
@@ -141,6 +174,34 @@ class Store:
         # Sentinel guard: stamp when absent, refuse when the space differs.
         await self._check_meta(name, META_ID, self._expected_places_meta(), self.sentence_dim)
 
+    async def ensure_faces_collection(self):
+        """Create the per-face collection, indexes, and sentinel; reruns are safe."""
+
+        name = config.face.qdrant_collection
+
+        # Single unnamed SFace vector per (file, face) pair.
+        if not await self.client.collection_exists(name):
+            params = models.VectorParams(size=self.face_dim, distance=models.Distance.COSINE)
+            await self.client.create_collection(name, vectors_config=params)
+            log.info("created collection %s", name)
+
+        info = await self.client.get_collection(name)
+        self._require_unnamed_vectors(info, name)
+
+        # Integer indexes for folder-scoped search, per-file delete, cluster moves.
+        for field in ("parent_id", "fileid", "cluster_id"):
+            if field not in (info.payload_schema or {}):
+                await self.client.create_payload_index(
+                    collection_name=name,
+                    field_name=field,
+                    field_schema=models.PayloadSchemaType.INTEGER,
+                    timeout=PAYLOAD_INDEX_TIMEOUT,
+                )
+                log.info("indexed %s in %s", field, name)
+
+        # Sentinel guard: stamp when absent, refuse when the space differs.
+        await self._check_meta(name, META_ID, self._expected_faces_meta(), self.face_dim)
+
     async def upsert(self, point: UpsertPoint):
         """Store one file embedding with display metadata (re-index overwrites)."""
 
@@ -203,6 +264,204 @@ class Store:
 
         if structs:
             await self.client.upsert(config.places.qdrant_collection, points=structs)
+
+    async def upsert_faces(self, points: list[FacePoint]):
+        """Store per-(file, face) embeddings with final cluster ids; re-index overwrites."""
+
+        structs = []
+
+        for point in points:
+            payload = {
+                "fileid": int(point.fileid),
+                "parent_id": int(point.parent_id),
+                "face_idx": int(point.face_idx),
+                "x": point.x,
+                "y": point.y,
+                "w": point.w,
+                "h": point.h,
+                "det_score": point.det_score,
+            }
+
+            # Null cluster means unassigned; omit so the integer index only sees real ids.
+            if point.cluster_id is not None:
+                payload["cluster_id"] = int(point.cluster_id)
+
+            structs.append(
+                models.PointStruct(
+                    id=face_point_id(point.fileid, point.face_idx),
+                    vector=point.vector,
+                    payload=payload,
+                ),
+            )
+
+        if structs:
+            await self.client.upsert(config.face.qdrant_collection, points=structs)
+
+    async def search_faces(self, vector, folders, limit):
+        """Nearest face vectors scoped to folders, low scores dropped, score desc."""
+
+        # Sentinel has no parent_id, so the filter excludes it automatically.
+        filtr = models.Filter(must=[models.FieldCondition(
+            key="parent_id",
+            match=models.MatchAny(any=folders),
+        )])
+
+        res = await self.client.query_points(
+            collection_name=config.face.qdrant_collection,
+            query=vector,
+            query_filter=filtr,
+            limit=limit,
+        )
+
+        hits = [
+            {"id": p.id, **p.payload, "score": p.score}
+            for p in res.points
+        ]
+
+        return drop_low_scores(hits, config.face.score_margin)
+
+    async def assign_faces(self, pairs: list[tuple[str, int]]):
+        """Move face points to new clusters (corrections, merge disposal); integer ids."""
+
+        by_cluster: dict[int, list] = {}
+
+        for point_id, cluster_id in pairs:
+            by_cluster.setdefault(int(cluster_id), []).append(point_id)
+
+        for cluster_id, point_ids in by_cluster.items():
+            selector = models.PointIdsList(points=point_ids)
+            await self.client.set_payload(
+                collection_name=config.face.qdrant_collection,
+                payload={"cluster_id": cluster_id},
+                points=selector,
+            )
+
+    async def merge_candidates(self, limit: int):
+        """Pure KNN oracle: quorum + centroid double-gate proposals; stores nothing."""
+
+        members = await self._face_members()
+
+        proposals = []
+
+        for src, point_ids in members.items():
+            proposal = await self._propose_merge(src, point_ids)
+
+            if proposal is not None:
+                proposals.append(proposal)
+
+        proposals.sort(key=lambda proposal: proposal["score"], reverse=True)
+
+        return proposals[:max(0, limit)]
+
+    async def _face_members(self):
+        """Group assigned face point ids by cluster; the sentinel has no cluster_id."""
+
+        name = config.face.qdrant_collection
+        members: dict[int, list] = {}
+        offset = None
+
+        while True:
+            records, offset = await self.client.scroll(
+                collection_name=name,
+                limit=1000,
+                offset=offset,
+                with_payload=True,
+                with_vectors=False,
+            )
+
+            for record in records:
+                cluster_id = (record.payload or {}).get("cluster_id")
+
+                if isinstance(cluster_id, int):
+                    members.setdefault(cluster_id, []).append(record.id)
+
+            if offset is None:
+                return members
+
+    async def _propose_merge(self, src: int, point_ids: list):
+        """Quorum + centroid double-gate merge proposal for one source cluster."""
+
+        gate = 1.0 - config.face.merge_distance
+        quorum = config.face.merge_quorum
+
+        # Evenly spaced round-robin sample of the source's members.
+        step = max(1, len(point_ids) // config.face.merge_samples)
+        vectors = await self._face_vectors(point_ids[::step][:config.face.merge_samples])
+
+        if not vectors:
+            return None
+
+        src_centroid = _normed_mean([entry["vector"] for entry in vectors])
+
+        # One vote per sample: its top hit within merge distance,
+        # excluding self-cluster and same-fileid faces.
+        votes: dict[int, list] = {}
+
+        for entry in vectors:
+            vote = await self._sample_vote(entry, src, gate)
+
+            if vote is not None:
+                votes.setdefault(vote[0], []).append(vote[1:])
+
+        for dst, agreed in votes.items():
+            if len(agreed) < quorum:
+                continue
+
+            dst_centroid = _normed_mean([vector for _, vector in agreed])
+
+            if sum(a * b for a, b in zip(src_centroid, dst_centroid)) < gate:
+                continue
+
+            score = sum(s for s, _ in agreed) / len(agreed)
+
+            return {"src": src, "dst": dst, "votes": len(agreed), "score": score}
+
+        return None
+
+    async def _sample_vote(self, entry: dict, src: int, gate: float):
+        """Top qualifying hit for one sample as (dst, score, vector); None when absent."""
+
+        filtr = models.Filter(must_not=[
+            models.FieldCondition(key="cluster_id", match=models.MatchValue(value=src)),
+            models.FieldCondition(
+                key="fileid",
+                match=models.MatchValue(value=entry["fileid"]),
+            ),
+        ])
+
+        res = await self.client.query_points(
+            collection_name=config.face.qdrant_collection,
+            query=entry["vector"],
+            query_filter=filtr,
+            limit=10,
+            with_vectors=True,
+        )
+
+        for hit in res.points:
+            if hit.score < gate:
+                return None
+
+            dst = (hit.payload or {}).get("cluster_id")
+
+            if isinstance(dst, int):
+                return (dst, hit.score, hit.vector)
+
+        return None
+
+    async def _face_vectors(self, point_ids: list):
+        """Fetch vectors + fileids for sampled points; skips vanished ids."""
+
+        if not point_ids:
+            return []
+
+        name = config.face.qdrant_collection
+        records = await self.client.retrieve(name, ids=point_ids, with_vectors=True)
+
+        return [
+            {"vector": list(record.vector), "fileid": (record.payload or {}).get("fileid")}
+            for record in records
+            if record.vector is not None
+        ]
 
     async def search(self, vector, folders, limit, osm_ids=None):
         """Nearest image vectors scoped to folders, low scores dropped, score desc."""
@@ -272,13 +531,24 @@ class Store:
 
         await self.client.delete(config.places.qdrant_collection, points_selector=selector)
 
+    async def delete_faces(self, fileid: int):
+        """Remove all face embeddings for one file (all its hashed pairs)."""
+
+        selector = models.FilterSelector(filter=models.Filter(must=[models.FieldCondition(
+            key="fileid",
+            match=models.MatchValue(value=int(fileid)),
+        )]))
+
+        await self.client.delete(config.face.qdrant_collection, points_selector=selector)
+
     async def delete(self, fileid: int):
-        """Remove one file embedding and all its address embeddings."""
+        """Remove one file embedding and all its address + face embeddings."""
 
         selector = models.PointIdsList(points=[int(fileid)])
 
         await self.client.delete(config.embedding.qdrant_collection, points_selector=selector)
         await self.delete_places(int(fileid))
+        await self.delete_faces(int(fileid))
 
     def _expected_meta(self):
         """Sentinel payload describing the current embedding space."""
@@ -304,6 +574,20 @@ class Store:
                 "revision": config.sentence_model.model_revision,
                 "version": config.sentence_model.version,
                 "dimension": self.sentence_dim,
+                "normalization": "l2",
+            },
+        }
+
+    def _expected_faces_meta(self):
+        """Sentinel payload describing the face embedding space."""
+
+        return {
+            "kind": "lens_faces_meta",
+            "face": {
+                "det_sha": config.face.det_sha,
+                "rec_sha": config.face.rec_sha,
+                "version": config.face.version,
+                "dimension": self.face_dim,
                 "normalization": "l2",
             },
         }

@@ -1,7 +1,7 @@
 """Env-only config with .env auto-load; fails fast on missing/invalid values."""
 
 import os
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 from dotenv import load_dotenv
 
@@ -97,6 +97,7 @@ class FaceConfig:  # pylint: disable=too-many-instance-attributes
     merge_samples: int
     merge_batch: int
     merge_retry_interval: int
+    score_margin: float
     suggest_samples: int
     suggest_ttl: int
 
@@ -150,21 +151,9 @@ def _face_config() -> FaceConfig:
     if merge_distance <= 0 or merge_distance > max_distance:
         raise RuntimeError("FACE_MERGE_DISTANCE must be between 0 and FACE_MAX_DISTANCE (never looser)")
 
-    merge_quorum = _int("FACE_MERGE_QUORUM", 2)
-    if merge_quorum < 1:
-        raise RuntimeError("FACE_MERGE_QUORUM must be at least 1")
-
-    merge_samples = _int("FACE_MERGE_SAMPLES", 5)
-    if merge_samples < 1:
-        raise RuntimeError("FACE_MERGE_SAMPLES must be at least 1")
-
-    merge_batch = _int("FACE_MERGE_BATCH", 20)
-    if merge_batch < 1:
-        raise RuntimeError("FACE_MERGE_BATCH must be at least 1")
-
-    merge_retry_interval = _int("FACE_MERGE_RETRY_INTERVAL", 604800)
-    if merge_retry_interval < 0:
-        raise RuntimeError("FACE_MERGE_RETRY_INTERVAL must not be negative")
+    score_margin = _float("FACE_SCORE_MARGIN", 0.1)
+    if score_margin < 0 or score_margin > 1:
+        raise RuntimeError("FACE_SCORE_MARGIN must be between 0 and 1")
 
     suggest_samples = _int("SUGGEST_SAMPLES", 5)
     if suggest_samples < 1:
@@ -187,12 +176,47 @@ def _face_config() -> FaceConfig:
         min_faces=min_faces,
         restore_center_frac=restore_center_frac,
         merge_distance=merge_distance,
+        score_margin=score_margin,
+        suggest_samples=suggest_samples,
+        suggest_ttl=suggest_ttl,
+        **asdict(_face_merge_config()),
+    )
+
+
+@dataclass(frozen=True)
+class FaceMergeConfig:
+    """Merge sweep knobs; flattened into FaceConfig at construction."""
+
+    merge_quorum: int
+    merge_samples: int
+    merge_batch: int
+    merge_retry_interval: int
+
+
+def _face_merge_config() -> FaceMergeConfig:
+    """Merge sweep knobs; split out so _face_config stays under the branch budget."""
+
+    merge_quorum = _int("FACE_MERGE_QUORUM", 2)
+    if merge_quorum < 1:
+        raise RuntimeError("FACE_MERGE_QUORUM must be at least 1")
+
+    merge_samples = _int("FACE_MERGE_SAMPLES", 5)
+    if merge_samples < 1:
+        raise RuntimeError("FACE_MERGE_SAMPLES must be at least 1")
+
+    merge_batch = _int("FACE_MERGE_BATCH", 20)
+    if merge_batch < 1:
+        raise RuntimeError("FACE_MERGE_BATCH must be at least 1")
+
+    merge_retry_interval = _int("FACE_MERGE_RETRY_INTERVAL", 604800)
+    if merge_retry_interval < 0:
+        raise RuntimeError("FACE_MERGE_RETRY_INTERVAL must not be negative")
+
+    return FaceMergeConfig(
         merge_quorum=merge_quorum,
         merge_samples=merge_samples,
         merge_batch=merge_batch,
         merge_retry_interval=merge_retry_interval,
-        suggest_samples=suggest_samples,
-        suggest_ttl=suggest_ttl,
     )
 
 

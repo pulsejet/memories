@@ -49,6 +49,7 @@ async def lifespan(_app: FastAPI):
         client=client,
         embedding_dim=embedding_model.dim(),
         sentence_dim=sentence_model.dim(),
+        face_dim=face_model.dim(),
     )
     state.store = store
 
@@ -63,6 +64,7 @@ async def lifespan(_app: FastAPI):
     try:
         await store.ensure_embedding_collection()
         await store.ensure_places_collection()
+        await store.ensure_faces_collection()
     except CompatMismatch:
         worker.cancel()
         await client.close()
