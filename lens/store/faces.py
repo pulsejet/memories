@@ -8,7 +8,14 @@ from qdrant_client import AsyncQdrantClient, models
 
 from config import config
 from process.scoring import drop_low_scores
-from store.base import META_ID, check_meta, ensure_collection, ensure_integer_indexes, require_unnamed_vectors
+from store.base import (
+    META_ID,
+    check_meta,
+    ensure_collection,
+    ensure_integer_indexes,
+    ensure_keyword_indexes,
+    require_unnamed_vectors,
+)
 
 log = logging.getLogger("lens.store")
 
@@ -19,6 +26,7 @@ class FacePoint:
 
     fileid: int
     parent_id: int
+    owner_id: str
     face_idx: int
     vector: list[float]
     x: float
@@ -52,6 +60,9 @@ class FacesStore:
         # Integer indexes for folder-scoped search, per-file delete, cluster moves.
         await ensure_integer_indexes(self.client, name, info, ("parent_id", "fileid", "cluster_id"))
 
+        # Keyword index for owner-scoped assignment KNN; no cross-owner matching ever.
+        await ensure_keyword_indexes(self.client, name, info, ("owner_id",))
+
         # Sentinel guard: stamp when absent, refuse when the space differs.
         await check_meta(self.client, name, META_ID, self._expected_meta(), self.dim)
 
@@ -71,6 +82,10 @@ class FacesStore:
                 "h": point.h,
                 "det_score": point.det_score,
             }
+
+            # Empty owner means unknown; omit so the keyword index only sees real UIDs.
+            if point.owner_id:
+                payload["owner_id"] = point.owner_id
 
             # Null cluster means unassigned; omit so the integer index only sees real ids.
             if point.cluster_id is not None:
@@ -110,8 +125,39 @@ class FacesStore:
 
         return drop_low_scores(hits, config.face.score_margin)
 
+    async def search_owner(self, vector, owner_id, limit):
+        """
+        Nearest face vectors within one owner's scope; raw hits, score desc.
+
+        No relative cutoff here: the caller applies the absolute
+        FACE_MAX_DISTANCE gate plus the core-point check, and a relative
+        cutoff could discard valid within-threshold neighbors whenever
+        the top hit is much better than the rest.
+        """
+
+        if not owner_id:
+            raise ValueError("owner_id must not be empty")
+
+        # Sentinel has no owner_id, so the filter excludes it automatically.
+        filtr = models.Filter(must=[models.FieldCondition(
+            key="owner_id",
+            match=models.MatchValue(value=owner_id),
+        )])
+
+        res = await self.client.query_points(
+            collection_name=config.face.qdrant_collection,
+            query=vector,
+            query_filter=filtr,
+            limit=limit,
+        )
+
+        return [
+            {"id": p.id, **p.payload, "score": p.score}
+            for p in res.points
+        ]
+
     async def assign_faces(self, pairs: list[tuple[str, int]]):
-        """Move face points to new clusters (manual corrections); integer ids."""
+        """Move face points to new clusters; owner untouched (same-owner moves only)."""
 
         by_cluster: dict[int, list] = {}
 

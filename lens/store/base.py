@@ -86,3 +86,17 @@ async def ensure_integer_indexes(client: AsyncQdrantClient, name, info, fields):
                 timeout=PAYLOAD_INDEX_TIMEOUT,
             )
             log.info("indexed %s in %s", field, name)
+
+
+async def ensure_keyword_indexes(client: AsyncQdrantClient, name, info, fields):
+    """Create missing keyword payload indexes; reruns are safe."""
+
+    for field in fields:
+        if field not in (info.payload_schema or {}):
+            await client.create_payload_index(
+                collection_name=name,
+                field_name=field,
+                field_schema=models.PayloadSchemaType.KEYWORD,
+                timeout=PAYLOAD_INDEX_TIMEOUT,
+            )
+            log.info("indexed %s in %s", field, name)
