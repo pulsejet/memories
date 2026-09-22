@@ -49,11 +49,6 @@ def health():
             "max_distance": config.face.max_distance,
             "min_faces": config.face.min_faces,
             "restore_center_frac": config.face.restore_center_frac,
-            "merge_distance": config.face.merge_distance,
-            "merge_quorum": config.face.merge_quorum,
-            "merge_samples": config.face.merge_samples,
-            "merge_batch": config.face.merge_batch,
-            "merge_retry_interval": config.face.merge_retry_interval,
         },
         "qdrant": state.qdrant,
     }

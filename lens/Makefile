@@ -11,8 +11,8 @@ $(VENV):
 
 .PHONY: lint
 lint:
-	$(PY)/pylint *.py store models nextcloud process routes index
-	$(PY)/flake8 *.py store models nextcloud process routes index
+	$(PY)/pylint -j 0 --disable=duplicate-code *.py store models nextcloud process routes index
+	$(PY)/flake8 --jobs=auto *.py store models nextcloud process routes index
 
 .PHONY: dev
 dev:
