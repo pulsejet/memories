@@ -1,7 +1,6 @@
 """Schema extraction backend: pinned GLiNER2 snapshot, load, extract."""
 
 # Mirrors sentence.py provisioning; keep the three in sync by hand.
-# pylint: disable=duplicate-code
 
 import asyncio
 import logging
@@ -92,7 +91,7 @@ class SchemaModel:
                 log.info("snapshot ready at %s", path)
 
                 return path
-            except Exception as exc:  # pylint: disable=broad-exception-caught
+            except Exception as exc:  # noqa: BLE001
                 log.warning("snapshot download attempt %d/3 failed: %s", attempt, exc)
                 time.sleep(2**attempt)
 
@@ -106,7 +105,7 @@ class SchemaModel:
     def load(self):
         """Load extractor from the local snapshot only."""
 
-        from gliner2 import AutoExtractor  # pylint: disable=import-outside-toplevel,no-name-in-module
+        from gliner2 import AutoExtractor  # noqa: PLC0415
 
         if config.torch_num_threads:
             torch.set_num_threads(config.torch_num_threads)

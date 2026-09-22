@@ -62,7 +62,7 @@ async def lifespan(_app: FastAPI):
         await client.close()
         raise
 
-    except Exception:  # pylint: disable=broad-exception-caught
+    except Exception:
         log.exception("qdrant unreachable, staying degraded")
     else:
         state.qdrant = "ok"

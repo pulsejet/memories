@@ -91,7 +91,7 @@ def parse_metadata(value: str) -> FileMetadata:
 
     if value:
         try:
-            decoded = orjson.loads(base64.b64decode(value))  # pylint: disable=no-member
+            decoded = orjson.loads(base64.b64decode(value))
         except ValueError:
             decoded = {}
 

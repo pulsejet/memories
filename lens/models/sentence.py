@@ -1,7 +1,6 @@
 """Sentence embedding backend: pinned e5 snapshot, load, encode."""
 
 # Mirrors embedding.py provisioning; keep the two in sync by hand.
-# pylint: disable=duplicate-code
 
 import asyncio
 import logging
@@ -74,7 +73,7 @@ class SentenceModel:
                 log.info("snapshot ready at %s", path)
 
                 return path
-            except Exception as exc:  # pylint: disable=broad-exception-caught
+            except Exception as exc:  # noqa: BLE001
                 log.warning("snapshot download attempt %d/3 failed: %s", attempt, exc)
                 time.sleep(2**attempt)
 
@@ -88,7 +87,7 @@ class SentenceModel:
     def load(self) -> int:
         """Load sentence model from the local snapshot only; return dim D."""
 
-        from sentence_transformers import SentenceTransformer  # pylint: disable=import-outside-toplevel
+        from sentence_transformers import SentenceTransformer  # noqa: PLC0415
 
         if config.torch_num_threads:
             torch.set_num_threads(config.torch_num_threads)

@@ -10,7 +10,7 @@ from store import FileMeta, PlacePoint, UpsertPoint
 log = logging.getLogger("lens.queue")
 
 
-class Indexer:  # pylint: disable=too-few-public-methods
+class Indexer:
     """Index one batch at a time; completion is reported via the done callback."""
 
     def __init__(self, embedding_model, sentence_model, store, done):
@@ -19,7 +19,7 @@ class Indexer:  # pylint: disable=too-few-public-methods
         self.store = store
         self.done = done
 
-    async def handle_batch(self, batch):  # pylint: disable=too-many-locals
+    async def handle_batch(self, batch):
         """Fetch concurrently, decode each once, embed in one forward pass."""
 
         parents = dict(batch)
@@ -32,7 +32,7 @@ class Indexer:  # pylint: disable=too-few-public-methods
         try:
             images = [image for _, _, image in good]
             vectors = await self.embedding_model.embed_pil_images_async(images)
-        except Exception as exc:  # pylint: disable=broad-exception-caught
+        except Exception as exc:
             for fileid, _, _ in good:
                 log.exception("index failed for %d: %s", fileid, exc)
                 self.done(fileid, ok=False)
@@ -40,7 +40,7 @@ class Indexer:  # pylint: disable=too-few-public-methods
 
         try:
             await self._ensure_places(good, parents)
-        except Exception as exc:  # pylint: disable=broad-exception-caught
+        except Exception as exc:
             log.exception("places ensure failed for batch: %s", exc)
 
         points = []
@@ -63,7 +63,7 @@ class Indexer:  # pylint: disable=too-few-public-methods
 
         try:
             await self.store.embedding.upsert_many(points)
-        except Exception as exc:  # pylint: disable=broad-exception-caught
+        except Exception as exc:
             for fileid, _, _ in good:
                 log.exception("index failed for %d: %s", fileid, exc)
                 self.done(fileid, ok=False)

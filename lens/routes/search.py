@@ -48,7 +48,7 @@ async def search(body: SearchRequest):
                 store=state.store,
                 folders=body.folders,
             )
-    except Exception:  # pylint: disable=broad-exception-caught
+    except Exception:
         log.warning("geo split failed, full-text fallback", exc_info=True)
         osm_ids, visual = None, body.text
 

@@ -4,7 +4,6 @@
 # YuNet decode ports OpenCV's FaceDetectorYN postprocess; SFace alignment ports
 # FaceRecognizerSF's similarity warp. Both verified to parity against the cv2
 # wrappers (cosine 1.0) in the Phase 0 spike.
-# pylint: disable=no-member
 
 import asyncio
 import hashlib
@@ -95,7 +94,7 @@ class FaceModel:
                     return
 
                 raise RuntimeError(f"SHA256 mismatch for {url}")
-            except Exception as exc:  # pylint: disable=broad-exception-caught
+            except Exception as exc:  # noqa: BLE001
                 log.warning("face download attempt %d/3 failed: %s", attempt, exc)
                 time.sleep(2**attempt)
 
@@ -252,7 +251,7 @@ class FaceModel:
         return self._device
 
 
-def _decode_stride(  # pylint: disable=too-many-locals
+def _decode_stride(
     outputs: list[np.ndarray],
     level: int,
     stride: int,

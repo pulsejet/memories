@@ -121,5 +121,6 @@
   "prettier.configPath": ".prettierrc",
   "prettier.prettierPath": "node_modules/prettier",
   "remote.autoForwardPorts": false,
-  "flake8.args": ["--max-line-length=120"]
+  "pylint.enabled": false,
+  "flake8.enabled": false
 }

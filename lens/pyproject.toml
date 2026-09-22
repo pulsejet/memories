@@ -26,9 +26,12 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-  "pylint>=4.0,<5",
-  "flake8>=7.0,<8",
+  "ruff>=0.14,<1",
 ]
 
-[tool.pylint.format]
-max-line-length = 120
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "BLE", "PLC0415"]

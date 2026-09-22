@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-class Store:  # pylint: disable=too-few-public-methods
+class Store:
     """Qdrant collections handle; one sub-store per collection, no delegates."""
 
     def __init__(self, client: AsyncQdrantClient, embedding_dim, sentence_dim, face_dim):

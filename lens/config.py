@@ -78,7 +78,7 @@ class PlacesConfig:
 
 
 @dataclass(frozen=True)
-class FaceConfig:  # pylint: disable=too-many-instance-attributes
+class FaceConfig:
     """Pinned YuNet/SFace checkpoints plus detection/clustering thresholds."""
 
     det_url: str
@@ -98,7 +98,7 @@ class FaceConfig:  # pylint: disable=too-many-instance-attributes
 
 
 @dataclass(frozen=True)
-class Config:  # pylint: disable=too-many-instance-attributes
+class Config:
     """All daemon settings; see ARCH.md config table."""
 
     nextcloud_url: str

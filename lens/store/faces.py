@@ -14,7 +14,7 @@ log = logging.getLogger("lens.store")
 
 
 @dataclass(frozen=True)
-class FacePoint:  # pylint: disable=too-many-instance-attributes
+class FacePoint:
     """One detected face: geometry in fractions, L2-normed 128-d vector, uint63 cluster or null."""
 
     fileid: int
