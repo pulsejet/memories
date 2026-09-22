@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 from config import config
 
 if TYPE_CHECKING:
-    from schema import Span
-    from sentence import SentenceModel
+    from models.schema import Span
+    from models.sentence import SentenceModel
     from store import Store
 
 
@@ -53,7 +53,7 @@ async def match_places(
     """osm_ids of top places matching the query in folders; None = visual fallback."""
 
     query = await sentence_model.embed_query_async(text)
-    hits = await store.search_places(query, folders=folders, limit=config.places.top_k)
+    hits = await store.places.search(query, folders=folders, limit=config.places.top_k)
 
     if not hits:
         return None

@@ -1,36 +1,54 @@
-"""Sentence embedding backend: pinned e5 snapshot, load, encode."""
+"""Schema extraction backend: pinned GLiNER2 snapshot, load, extract."""
 
-# Mirrors embedding.py provisioning; keep the two in sync by hand.
+# Mirrors sentence.py provisioning; keep the three in sync by hand.
 # pylint: disable=duplicate-code
 
 import asyncio
 import logging
 import os
 import time
+from dataclasses import dataclass
 
 import torch
 from huggingface_hub import snapshot_download
 
 from config import config
-from embedding import inference_sem
+from models.common import inference_sem
 
-log = logging.getLogger("lens.sentence")
+log = logging.getLogger("lens.schema")
+
+LABELS = {
+    "city": "Proper noun naming a city, town or village, e.g. Paris, Berlin, Nice, Kyoto.",
+    "country": "Proper noun naming a country, e.g. France, Germany, Japan.",
+    "region": "Proper noun naming a state, province, county, region or island, "
+    "e.g. California, Bavaria, Normandy, Sicily.",
+}
 
 
-class SentenceModel:
-    """One pinned sentence checkpoint: snapshot on disk, loaded encoder."""
+@dataclass(frozen=True)
+class Span:
+    """One extracted proper-noun span with char offsets and confidence."""
+
+    text: str
+    label: str
+    start: int
+    end: int
+    score: float = 0.0
+
+
+class SchemaModel:
+    """One pinned extraction checkpoint: snapshot on disk, loaded extractor."""
 
     def __init__(self):
-        """Empty state; call ensure_snapshot + load before encoding."""
+        """Empty state; call ensure_snapshot + load before extracting."""
 
         self._model = None
-        self._dim = 0
         self._device = "pending"
 
     def snapshot_dir(self) -> str:
         """Local snapshot dir, namespaced by model id for multi-model caches."""
 
-        name = config.sentence_model.model_id.replace("/", "--")
+        name = config.schema_model.model_id.replace("/", "--")
 
         return os.path.join(config.model_cache_dir, name)
 
@@ -62,13 +80,13 @@ class SentenceModel:
 
             raise RuntimeError(f"HF_HUB_OFFLINE=1 but no complete snapshot at {path}")
 
-        log.info("resolving snapshot %s @ %s", config.sentence_model.model_id, config.sentence_model.model_revision)
+        log.info("resolving snapshot %s @ %s", config.schema_model.model_id, config.schema_model.model_revision)
 
         for attempt in range(1, 4):
             try:
                 snapshot_download(
-                    repo_id=config.sentence_model.model_id,
-                    revision=config.sentence_model.model_revision,
+                    repo_id=config.schema_model.model_id,
+                    revision=config.schema_model.model_revision,
                     local_dir=path,
                 )
                 log.info("snapshot ready at %s", path)
@@ -85,10 +103,10 @@ class SentenceModel:
 
         raise RuntimeError(f"snapshot unreachable and no cached snapshot at {path}")
 
-    def load(self) -> int:
-        """Load sentence model from the local snapshot only; return dim D."""
+    def load(self):
+        """Load extractor from the local snapshot only."""
 
-        from sentence_transformers import SentenceTransformer  # pylint: disable=import-outside-toplevel
+        from gliner2 import AutoExtractor  # pylint: disable=import-outside-toplevel,no-name-in-module
 
         if config.torch_num_threads:
             torch.set_num_threads(config.torch_num_threads)
@@ -105,62 +123,50 @@ class SentenceModel:
 
         path = self.snapshot_dir()
 
-        log.info("loading %s from %s on %s", config.sentence_model.model_id, path, self._device)
+        log.info("loading %s from %s on %s", config.schema_model.model_id, path, self._device)
 
-        self._model = SentenceTransformer(
-            model_name_or_path=path,
-            device=self._device,
-            trust_remote_code=False,
+        self._model = AutoExtractor.from_pretrained(
+            path,
+            map_location=self._device,
             local_files_only=True,
         )
-        self._dim = self._model.get_embedding_dimension()
 
-        log.info("sentence model loaded, dim D=%d", self._dim)
+        log.info("schema model loaded")
 
-        return self._dim
+    def extract(self, text: str) -> list[Span]:
+        """Extract geo spans; empty text yields none. Raw model order, NMS is the caller's job."""
 
-    def embed_passages(self, texts: list[str]) -> list[list[float]]:
-        """Encode passage texts with passage prefix to L2-normed vectors."""
-
-        prefixed = [f"passage: {t}" for t in texts]
+        if not text.strip():
+            return []
 
         with torch.inference_mode():
-            arr = self._model.encode(
-                inputs=prefixed,
-                normalize_embeddings=True,
-                show_progress_bar=False,
+            res = self._model.extract_entities(
+                text,
+                LABELS,
+                threshold=config.schema_model.threshold,
+                include_confidence=True,
+                include_spans=True,
             )
 
-        return arr.tolist()
+        spans = []
 
-    def embed_query(self, text: str) -> list[float]:
-        """Encode a query string with query prefix to an L2-normed vector."""
+        for label, items in (res.get("entities") or {}).items():
+            for item in items or []:
+                spans.append(Span(
+                    text=item["text"],
+                    label=label,
+                    start=item["start"],
+                    end=item["end"],
+                    score=item.get("confidence", 0.0),
+                ))
 
-        with torch.inference_mode():
-            arr = self._model.encode(
-                inputs=[f"query: {text}"],
-                normalize_embeddings=True,
-                show_progress_bar=False,
-            )
+        return spans
 
-        return arr.tolist()[0]
-
-    async def embed_passages_async(self, texts: list[str]) -> list[list[float]]:
-        """Serialize passage inference through the shared semaphore."""
-
-        async with inference_sem:
-            return await asyncio.to_thread(self.embed_passages, texts)
-
-    async def embed_query_async(self, text: str) -> list[float]:
-        """Serialize query inference through the shared semaphore."""
+    async def extract_async(self, text: str) -> list[Span]:
+        """Serialize extraction through the shared semaphore."""
 
         async with inference_sem:
-            return await asyncio.to_thread(self.embed_query, text)
-
-    def dim(self) -> int:
-        """Sentence dim D (0 until loaded)."""
-
-        return self._dim
+            return await asyncio.to_thread(self.extract, text)
 
     def device(self) -> str:
         """Resolved device, or 'pending' before load."""

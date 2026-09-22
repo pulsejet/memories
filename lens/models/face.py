@@ -20,7 +20,7 @@ import onnxruntime as ort
 from PIL import Image
 
 from config import config
-from embedding import inference_sem
+from models.common import inference_sem
 
 log = logging.getLogger("lens.face")
 

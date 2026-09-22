@@ -12,12 +12,11 @@ from huggingface_hub import snapshot_download
 from PIL import Image
 
 from config import config
+from models.common import inference_sem
 
 pillow_heif.register_heif_opener()
 
 log = logging.getLogger("lens.embedding")
-
-inference_sem = asyncio.Semaphore(1)
 
 REQUIRED_FILES = ("config.json", "preprocessor_config.json", "model.safetensors")
 TOKENIZER_FILES = ("tokenizer.json", "tokenizer.model")

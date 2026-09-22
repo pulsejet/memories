@@ -11,8 +11,8 @@ $(VENV):
 
 .PHONY: lint
 lint:
-	$(PY)/pylint *.py
-	$(PY)/flake8 *.py
+	$(PY)/pylint *.py store models nextcloud process routes index
+	$(PY)/flake8 *.py store models nextcloud process routes index
 
 .PHONY: dev
 dev:
