@@ -52,6 +52,10 @@ services:
       SENTENCE_MODEL_REVISION: "614241f622f53c4eeff9890bdc4f31cfecc418b3"
       SCHEMA_MODEL_ID: "fastino/gliner2.5-multi-v1"
       SCHEMA_MODEL_REVISION: "a221b77a8baf4a613b8f8652661d41fa10a5641e"
+      FACE_DET_URL: "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2026may.onnx"
+      FACE_DET_SHA: "ebafce4e3c118d6554634be5c27ab333b4c047a9a8c3faf1d7cf93101c22f0f0"
+      FACE_REC_URL: "https://huggingface.co/opencv/face_recognition_sface/resolve/main/face_recognition_sface_2021dec.onnx"
+      FACE_REC_SHA: "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79"
     depends_on:
       - qdrant
 

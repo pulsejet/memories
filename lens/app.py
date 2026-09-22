@@ -9,6 +9,7 @@ from qdrant_client import AsyncQdrantClient
 
 from config import config
 from embedding import EmbeddingModel
+from face import FaceModel
 from queueing import IndexQueue
 from schema import SchemaModel
 from sentence import SentenceModel
@@ -21,6 +22,7 @@ log = logging.getLogger("lens.app")
 embedding_model = EmbeddingModel()
 sentence_model = SentenceModel()
 schema_model = SchemaModel()
+face_model = FaceModel()
 state = State()
 
 
@@ -39,6 +41,8 @@ async def lifespan(_app: FastAPI):
     await asyncio.to_thread(sentence_model.load)
     await asyncio.to_thread(schema_model.ensure_snapshot)
     await asyncio.to_thread(schema_model.load)
+    await asyncio.to_thread(face_model.ensure_snapshot)
+    await asyncio.to_thread(face_model.load)
 
     client = AsyncQdrantClient(url=config.qdrant_url)
     store = Store(
@@ -104,6 +108,26 @@ def health():
             "revision": config.schema_model.model_revision,
             "threshold": config.schema_model.threshold,
             "device": schema_model.device(),
+        },
+        "face": {
+            "det_url": config.face.det_url,
+            "det_sha": config.face.det_sha,
+            "rec_url": config.face.rec_url,
+            "rec_sha": config.face.rec_sha,
+            "version": config.face.version,
+            "qdrant_collection": config.face.qdrant_collection,
+            "dimension": face_model.dim() or None,
+            "device": face_model.device(),
+            "det_threshold": config.face.det_threshold,
+            "det_max_side": config.face.det_max_side,
+            "max_distance": config.face.max_distance,
+            "min_faces": config.face.min_faces,
+            "restore_center_frac": config.face.restore_center_frac,
+            "merge_distance": config.face.merge_distance,
+            "merge_quorum": config.face.merge_quorum,
+            "merge_samples": config.face.merge_samples,
+            "merge_batch": config.face.merge_batch,
+            "merge_retry_interval": config.face.merge_retry_interval,
         },
         "qdrant": state.qdrant,
     }
@@ -235,6 +259,18 @@ async def extract_schema(body: dict):
     spans = await schema_model.extract_async(body.get("text", ""))
 
     return {"spans": spans}
+
+
+@app.post("/v1/faces/detect")
+async def detect_faces(request: Request):
+    """Detect faces in posted image bytes for tuning; returns boxes in fractions."""
+
+    _require_ready()
+
+    image = await asyncio.to_thread(face_model.decode_image, await request.body())
+    faces = await face_model.detect_async(image)
+
+    return {"faces": faces}
 
 
 def _require_ready():

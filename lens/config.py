@@ -15,6 +15,10 @@ REQUIRED = (
     "EMBEDDING_MODEL_REVISION",
     "SENTENCE_MODEL_REVISION",
     "SCHEMA_MODEL_REVISION",
+    "FACE_DET_URL",
+    "FACE_DET_SHA",
+    "FACE_REC_URL",
+    "FACE_REC_SHA",
 )
 
 
@@ -74,6 +78,30 @@ class PlacesConfig:
 
 
 @dataclass(frozen=True)
+class FaceConfig:  # pylint: disable=too-many-instance-attributes
+    """Pinned YuNet/SFace checkpoints plus detection/clustering thresholds."""
+
+    det_url: str
+    det_sha: str
+    rec_url: str
+    rec_sha: str
+    version: int
+    qdrant_collection: str
+    det_threshold: float
+    det_max_side: int
+    max_distance: float
+    min_faces: int
+    restore_center_frac: float
+    merge_distance: float
+    merge_quorum: int
+    merge_samples: int
+    merge_batch: int
+    merge_retry_interval: int
+    suggest_samples: int
+    suggest_ttl: int
+
+
+@dataclass(frozen=True)
 class Config:  # pylint: disable=too-many-instance-attributes
     """All daemon settings; see ARCH.md config table."""
 
@@ -85,6 +113,7 @@ class Config:  # pylint: disable=too-many-instance-attributes
     sentence_model: SentenceConfig
     schema_model: SchemaModelConfig
     places: PlacesConfig
+    face: FaceConfig
     model_cache_dir: str
     device: str
     workers: int
@@ -92,6 +121,79 @@ class Config:  # pylint: disable=too-many-instance-attributes
     port: int
     torch_num_threads: int | None
     index_batch_size: int
+
+
+def _face_config() -> FaceConfig:
+    """Build the face section from env; raise on garbage."""
+
+    det_threshold = _float("FACE_DET_THRESHOLD", 0.6)
+    if det_threshold < 0 or det_threshold > 1:
+        raise RuntimeError("FACE_DET_THRESHOLD must be between 0 and 1")
+
+    det_max_side = _int("FACE_DET_MAX_SIDE", 1920)
+    if det_max_side < 320 or det_max_side > 8192:
+        raise RuntimeError("FACE_DET_MAX_SIDE must be between 320 and 8192")
+
+    max_distance = _float("FACE_MAX_DISTANCE", 0.6)
+    if max_distance <= 0 or max_distance > 2:
+        raise RuntimeError("FACE_MAX_DISTANCE must be between 0 and 2")
+
+    min_faces = _int("FACE_MIN_FACES", 3)
+    if min_faces < 1:
+        raise RuntimeError("FACE_MIN_FACES must be at least 1")
+
+    restore_center_frac = _float("FACE_RESTORE_CENTER_FRAC", 0.25)
+    if restore_center_frac <= 0 or restore_center_frac > 1:
+        raise RuntimeError("FACE_RESTORE_CENTER_FRAC must be between 0 and 1")
+
+    merge_distance = _float("FACE_MERGE_DISTANCE", max_distance)
+    if merge_distance <= 0 or merge_distance > max_distance:
+        raise RuntimeError("FACE_MERGE_DISTANCE must be between 0 and FACE_MAX_DISTANCE (never looser)")
+
+    merge_quorum = _int("FACE_MERGE_QUORUM", 2)
+    if merge_quorum < 1:
+        raise RuntimeError("FACE_MERGE_QUORUM must be at least 1")
+
+    merge_samples = _int("FACE_MERGE_SAMPLES", 5)
+    if merge_samples < 1:
+        raise RuntimeError("FACE_MERGE_SAMPLES must be at least 1")
+
+    merge_batch = _int("FACE_MERGE_BATCH", 20)
+    if merge_batch < 1:
+        raise RuntimeError("FACE_MERGE_BATCH must be at least 1")
+
+    merge_retry_interval = _int("FACE_MERGE_RETRY_INTERVAL", 604800)
+    if merge_retry_interval < 0:
+        raise RuntimeError("FACE_MERGE_RETRY_INTERVAL must not be negative")
+
+    suggest_samples = _int("SUGGEST_SAMPLES", 5)
+    if suggest_samples < 1:
+        raise RuntimeError("SUGGEST_SAMPLES must be at least 1")
+
+    suggest_ttl = _int("SUGGEST_TTL", 300)
+    if suggest_ttl < 0:
+        raise RuntimeError("SUGGEST_TTL must not be negative")
+
+    return FaceConfig(
+        det_url=os.environ["FACE_DET_URL"],
+        det_sha=os.environ["FACE_DET_SHA"],
+        rec_url=os.environ["FACE_REC_URL"],
+        rec_sha=os.environ["FACE_REC_SHA"],
+        version=_int("FACE_VERSION", 1),
+        qdrant_collection=os.environ.get("FACE_QDRANT_COLLECTION", "lens_faces"),
+        det_threshold=det_threshold,
+        det_max_side=det_max_side,
+        max_distance=max_distance,
+        min_faces=min_faces,
+        restore_center_frac=restore_center_frac,
+        merge_distance=merge_distance,
+        merge_quorum=merge_quorum,
+        merge_samples=merge_samples,
+        merge_batch=merge_batch,
+        merge_retry_interval=merge_retry_interval,
+        suggest_samples=suggest_samples,
+        suggest_ttl=suggest_ttl,
+    )
 
 
 def load_config() -> Config:
@@ -159,6 +261,7 @@ def load_config() -> Config:
         sentence_model=sentence_model,
         schema_model=schema_model,
         places=places,
+        face=_face_config(),
         model_cache_dir=os.environ.get("MODEL_CACHE_DIR", "/app/models"),
         device=os.environ.get("DEVICE", "auto"),
         workers=workers,
