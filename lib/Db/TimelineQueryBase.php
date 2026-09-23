@@ -32,6 +32,7 @@ trait TimelineQueryBase
         protected IUserManager $userManager,
         protected SystemConfig $systemConfig,
         protected Util $util,
+        protected FsManager $fsManager,
     ) {}
 
     public function allowEmptyRoot(bool $value = true): void
