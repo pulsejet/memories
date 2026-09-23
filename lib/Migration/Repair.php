@@ -12,7 +12,10 @@ use OCP\Migration\IRepairStep;
 
 final class Repair implements IRepairStep
 {
-    public function __construct(private IConfig $config) {}
+    public function __construct(
+        private IConfig $config,
+        private AddMissingIndices $indices,
+    ) {}
 
     #[\Override]
     public function getName(): string
@@ -23,7 +26,7 @@ final class Repair implements IRepairStep
     #[\Override]
     public function run(IOutput $output): void
     {
-        AddMissingIndices::run($output);
+        $this->indices->run($output);
         $this->configureBinExt($output);
         $this->fixSystemConfigTypes($output);
     }
