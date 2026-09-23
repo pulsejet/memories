@@ -54,6 +54,7 @@ final class PublicController extends AuthPublicShareController
         protected IUserConfig $userConfig,
         protected TimelineQuery $tq,
         protected IL10N $l10n,
+        protected FsManager $fs,
     ) {
         parent::__construct(Application::APPNAME, $request, $session, $urlGenerator);
     }
@@ -98,7 +99,7 @@ final class PublicController extends AuthPublicShareController
             throw new NotFoundException();
         }
 
-        if (!FsManager::validateShare($share)) {
+        if (!$this->fs->validateShare($share)) {
             throw new NotFoundException();
         }
 

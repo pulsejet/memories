@@ -8,10 +8,16 @@ use OCA\Memories\ClustersBackend\AlbumsBackend;
 use OCA\Memories\ClustersBackend\Covers;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use OCP\IGroupManager;
+use OCP\IUserManager;
 
 final class AlbumsQuery
 {
-    public function __construct(private IDBConnection $connection) {}
+    public function __construct(
+        private IDBConnection $connection,
+        private IUserManager $userManager,
+        private IGroupManager $groupManager,
+    ) {}
 
     /**
      * Get list of albums.
@@ -323,10 +329,10 @@ final class AlbumsQuery
     private function getSelfCollaborators(string $uid)
     {
         // Get the user in question
-        $user = \OC::$server->get(\OCP\IUserManager::class)->get($uid)
+        $user = $this->userManager->get($uid)
             ?: throw new \Exception('User not found');
         // Get groups for the user
-        $groups = \OC::$server->get(\OCP\IGroupManager::class)->getUserGroupIds($user);
+        $groups = $this->groupManager->getUserGroupIds($user);
 
         // Add the user itself as a collaborator
         $groups[] = $uid;

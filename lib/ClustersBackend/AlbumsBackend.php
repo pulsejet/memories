@@ -30,6 +30,7 @@ use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
+use OCP\IUserManager;
 
 final class AlbumsBackend extends Backend
 {
@@ -37,6 +38,7 @@ final class AlbumsBackend extends Backend
         protected AlbumsQuery $albumsQuery,
         protected IRequest $request,
         protected TimelineQuery $tq,
+        protected IUserManager $userManager,
     ) {}
 
     #[\Override]
@@ -162,9 +164,7 @@ final class AlbumsBackend extends Backend
             return true;
         });
 
-        $userManager = \OC::$server->get(\OCP\IUserManager::class);
-
-        array_walk($list, static function (array &$item) use ($userManager) {
+        array_walk($list, function (array &$item) {
             // Fall back cover to cover_owner if available
             if (empty($item['cover']) && !empty($item['cover_owner'] ?? null)) {
                 $item['cover'] = $item['cover_owner'];
@@ -173,7 +173,7 @@ final class AlbumsBackend extends Backend
             unset($item['cover_owner'], $item['cover_owner_etag']);
 
             // Add display names for users
-            $user = $userManager->get($item['user']);
+            $user = $this->userManager->get($item['user']);
             $item['user_display'] = $user ? $user->getDisplayName() : null;
         });
 

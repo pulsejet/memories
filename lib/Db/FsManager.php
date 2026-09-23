@@ -38,11 +38,12 @@ use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
 use OCP\ICache;
 use OCP\ICacheFactory;
-use OCP\IConfig;
 use OCP\IRequest;
+use OCP\ISession;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Share\Exceptions\ShareNotFound;
+use OCP\Share\IManager as ShareManager;
 use OCP\Share\IShare;
 
 final class FsManager
@@ -50,11 +51,13 @@ final class FsManager
     private ICache $nomediaCache;
 
     public function __construct(
-        private IConfig $config,
         private IUserSession $userSession,
         private IRootFolder $rootFolder,
         private AlbumsQuery $albumsQuery,
         private IRequest $request,
+        private ShareManager $shareManager,
+        private IUserManager $userManager,
+        private ISession $session,
         ICacheFactory $cacheFactory,
     ) {
         $this->nomediaCache = $cacheFactory->createLocal('memories:nomedia');
@@ -326,17 +329,17 @@ final class FsManager
         //
         // Catch the ShareNotFound exception to enable further processing of the request.
         try {
-            $share = \OC::$server->get(\OCP\Share\IManager::class)->getShareByToken($token);
+            $share = $this->shareManager->getShareByToken($token);
         } catch (ShareNotFound $e) {
             return null;
         }
-        if (!self::validateShare($share)) {
+        if (!$this->validateShare($share)) {
             return null;
         }
 
         // Check if share is password protected
         if (!empty($password = $share->getPassword())) {
-            if (!self::isShareAuthenticated($token, $password)) {
+            if (!$this->isShareAuthenticated($token, $password)) {
                 throw Exceptions::Forbidden('Share is password protected and user is not authenticated');
             }
         }
@@ -369,14 +372,11 @@ final class FsManager
     /**
      * Validate the permissions of the share.
      */
-    public static function validateShare(?IShare $share): bool
+    public function validateShare(?IShare $share): bool
     {
         if (null === $share) {
             return false;
         }
-
-        // Get user manager
-        $userManager = \OC::$server->get(IUserManager::class);
 
         // Check if share read is allowed
         if (!($share->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
@@ -384,13 +384,13 @@ final class FsManager
         }
 
         // If the owner is disabled no access to the linke is granted
-        $owner = $userManager->get($share->getShareOwner());
+        $owner = $this->userManager->get($share->getShareOwner());
         if (null === $owner || !$owner->isEnabled()) {
             return false;
         }
 
         // If the initiator of the share is disabled no access is granted
-        $initiator = $userManager->get($share->getSharedBy());
+        $initiator = $this->userManager->get($share->getSharedBy());
         if (null === $initiator || !$initiator->isEnabled()) {
             return false;
         }
@@ -474,11 +474,9 @@ final class FsManager
      * @param string $token        Share token
      * @param string $passwordHash Password hash
      */
-    private static function isShareAuthenticated(string $token, string $passwordHash): bool
+    private function isShareAuthenticated(string $token, string $passwordHash): bool
     {
-        $session = \OC::$server->get(\OCP\ISession::class);
-
-        $allowedTokensJSON = $session->get(PublicShareController::DAV_AUTHENTICATED_FRONTEND);
+        $allowedTokensJSON = $this->session->get(PublicShareController::DAV_AUTHENTICATED_FRONTEND);
         if (!\is_string($allowedTokensJSON)) {
             return false;
         }
