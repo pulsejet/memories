@@ -34,7 +34,7 @@ final class Version800000Date20240329060325 extends SimpleMigrationStep
     public function __construct(private IDBConnection $dbc) {}
 
     /**
-     * @param Closure(): ISchemaWrapper $schemaClosure
+     * @param \Closure(): ISchemaWrapper $schemaClosure
      */
     #[\Override]
     public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
@@ -70,7 +70,7 @@ final class Version800000Date20240329060325 extends SimpleMigrationStep
     }
 
     /**
-     * @param Closure(): ISchemaWrapper $schemaClosure
+     * @param \Closure(): ISchemaWrapper $schemaClosure
      */
     #[\Override]
     public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void

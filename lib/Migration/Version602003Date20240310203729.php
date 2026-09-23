@@ -31,7 +31,7 @@ use OCP\Migration\SimpleMigrationStep;
 final class Version602003Date20240310203729 extends SimpleMigrationStep
 {
     /**
-     * @param Closure(): ISchemaWrapper $schemaClosure
+     * @param \Closure(): ISchemaWrapper $schemaClosure
      */
     #[\Override]
     public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
@@ -76,7 +76,7 @@ final class Version602003Date20240310203729 extends SimpleMigrationStep
     }
 
     /**
-     * @param Closure(): ISchemaWrapper $schemaClosure
+     * @param \Closure(): ISchemaWrapper $schemaClosure
      */
     #[\Override]
     public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
