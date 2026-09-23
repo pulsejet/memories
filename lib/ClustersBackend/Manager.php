@@ -45,7 +45,7 @@ final class Manager
     {
         if ($className = self::$backends[$name] ?? null) {
             /** @var Backend */
-            return \OC::$server->get($className);
+            return \OCP\Server::get($className);
         }
 
         throw new \Exception("Invalid clusters backend '{$name}'");
