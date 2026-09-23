@@ -25,7 +25,10 @@ trait TimelineQueryCTE
         // Get SQL
         $CTE_SQL = CTEParams::isFoldersArchive($query)
             ? $this->CTE_FOLDERS_ARCHIVE()
-            : $this->CTE_FOLDERS(CTEParams::isIncludeHidden($query));
+            : $this->CTE_FOLDERS(
+                CTEParams::isIncludeHidden($query),
+                CTEParams::getFolderNameBlocklistCount($query),
+            );
 
         // Add WITH clause if needed
         if (str_contains($sql, 'cte_folders')) {
@@ -38,12 +41,14 @@ trait TimelineQueryCTE
     /**
      * CTE to get all files recursively in the given top folders
      * :topFolderIds - The top folders to get files from.
+     * :fnBlocklistN - Folder name LIKE patterns to prune.
      *
-     * @param bool $hidden Whether to include files in hidden folders
-     *                     If the top folder is hidden, the files in it will still be returned
-     *                     Hidden files are marked as such in the "hidden" field
+     * @param bool $hidden   Whether to include files in hidden folders
+     *                       If the top folder is hidden, the files in it will still be returned
+     *                       Hidden files are marked as such in the "hidden" field
+     * @param int  $fnBlockN Number of folder blocklist patterns
      */
-    protected function CTE_FOLDERS_ALL(bool $hidden): string
+    protected function CTE_FOLDERS_ALL(bool $hidden, int $fnBlockN): string
     {
         $provider = $this->connection->getDatabaseProvider();
 
@@ -64,6 +69,9 @@ trait TimelineQueryCTE
         // Whether to filter out hidden folders
         $CLS_HIDDEN_JOIN = $hidden ? '1 = 1' : "f.name NOT LIKE '.%'";
 
+        // Blocklisted folder names prune the whole subtree (pfx AND)
+        $CLS_BLOCKLIST = $this->folderNameBlocklistClause($fnBlockN);
+
         // On MySQL or MariaDB, provide the hint to use the index
         // The index is not used sometimes since the table is unbalanced
         // and fs_parent is used instead
@@ -77,8 +85,9 @@ trait TimelineQueryCTE
                 (0) AS hidden
             FROM *PREFIX*filecache f
             WHERE (
-                f.fileid IN (:topFolderIds) AND
-                {$CLS_NOMEDIA}
+                (f.fileid IN (:topFolderIds)) AND
+                ({$CLS_NOMEDIA}) AND
+                ({$CLS_BLOCKLIST})
             )
 
             UNION ALL
@@ -94,7 +103,8 @@ trait TimelineQueryCTE
                     ({$CLS_HIDDEN_JOIN})
                 )
             WHERE (
-                {$CLS_NOMEDIA}
+                ({$CLS_NOMEDIA}) AND
+                ({$CLS_BLOCKLIST})
             )
         )";
     }
@@ -102,9 +112,10 @@ trait TimelineQueryCTE
     /**
      * CTE to get all folders recursively in the given top folders.
      *
-     * @param bool $hidden Whether to include files in hidden folders
+     * @param bool $hidden   Whether to include files in hidden folders
+     * @param int  $fnBlockN Number of folder blocklist patterns
      */
-    protected function CTE_FOLDERS(bool $hidden): string
+    protected function CTE_FOLDERS(bool $hidden, int $fnBlockN): string
     {
         $CLS_HIDDEN = $hidden ? 'MIN(hidden)' : '0';
 
@@ -117,7 +128,7 @@ trait TimelineQueryCTE
                 fileid
         )";
 
-        return self::bundleCTEs([$this->CTE_FOLDERS_ALL($hidden), $cte]);
+        return self::bundleCTEs([$this->CTE_FOLDERS_ALL($hidden, $fnBlockN), $cte]);
     }
 
     /**
@@ -143,7 +154,7 @@ trait TimelineQueryCTE
                 ON (f.parent = c.fileid)
         )";
 
-        return self::bundleCTEs([$this->CTE_FOLDERS_ALL(true), $cte]);
+        return self::bundleCTEs([$this->CTE_FOLDERS_ALL(true, 0), $cte]);
     }
 
     /**
@@ -152,5 +163,22 @@ trait TimelineQueryCTE
     protected static function bundleCTEs(array $ctes): string
     {
         return 'WITH RECURSIVE '.implode(',', $ctes);
+    }
+
+    /**
+     * @param int $count number of bound :fnBlocklistN patterns
+     */
+    private function folderNameBlocklistClause(int $count): string
+    {
+        if (0 === $count) {
+            return '(1 = 1)';
+        }
+
+        $parts = [];
+        for ($i = 0; $i < $count; ++$i) {
+            $parts[] = "(f.name NOT LIKE :fnBlocklist{$i} ESCAPE :fnBlocklistEscape)";
+        }
+
+        return '('.implode(' AND ', $parts).')';
     }
 }
