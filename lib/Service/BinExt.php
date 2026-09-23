@@ -356,11 +356,12 @@ final class BinExt
 
         $config = \OC::$server->get(\OCP\IConfig::class);
         $dataDir = $config->getSystemValueString('datadirectory', \OC::$SERVERROOT.'/data');
-        $testfile = rtrim($dataDir, '/').'/go-vod-test-'.uniqid().'.jpg';
-        if (!@copy($src, $testfile)) {
-            throw new \Exception("failed to copy test file to datadir ({$testfile})");
+        $testfile = rtrim($dataDir, '/').'/go-vod-test.jpg';
+        if (!file_exists($testfile) || @filesize($testfile) !== @filesize($src)) {
+            if (!@copy($src, $testfile)) {
+                throw new \Exception("failed to copy test file to datadir ({$testfile})");
+            }
         }
-        register_shutdown_function(static fn () => @unlink($testfile));
 
         try {
             $clientService = \OC::$server->get(\OCP\Http\Client\IClientService::class);
