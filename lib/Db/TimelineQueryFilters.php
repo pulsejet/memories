@@ -11,6 +11,8 @@ use OCP\ITags;
 
 trait TimelineQueryFilters
 {
+    use TimelineQueryBase;
+
     public function transformFavoriteFilter(IQueryBuilder &$query, bool $aggregate): void
     {
         if (Util::isLoggedIn()) {

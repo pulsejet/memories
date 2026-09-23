@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
 
 trait TimelineQueryMap
 {
+    use TimelineQueryBase;
     use TimelineQueryDays;
-
-    protected IDBConnection $connection;
 
     public function transformMapBoundsFilter(IQueryBuilder &$query, bool $aggregate, string $bounds, string $table = 'm'): void
     {

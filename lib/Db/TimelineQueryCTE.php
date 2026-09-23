@@ -9,7 +9,7 @@ use OCP\IDBConnection;
 
 trait TimelineQueryCTE
 {
-    protected IDBConnection $connection;
+    use TimelineQueryBase;
 
     /**
      * Run a query referencing cte_folders, prepending the WITH clause as needed.

@@ -8,11 +8,10 @@ use OCA\Memories\ClustersBackend\PlacesBackend;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
 
 trait TimelineQuerySingleItem
 {
-    protected IDBConnection $connection;
+    use TimelineQueryBase;
 
     public function getSingleItem(int $fileId): ?array
     {

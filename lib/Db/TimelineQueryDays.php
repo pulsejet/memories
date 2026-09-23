@@ -8,13 +8,12 @@ use OCA\Memories\ClustersBackend;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
 
 trait TimelineQueryDays
 {
+    use TimelineQueryBase;
     use TimelineQueryCTE;
-
-    protected IDBConnection $connection;
+    use TimelineQueryFilters;
 
     /**
      * Get the days response from the database for the timeline.

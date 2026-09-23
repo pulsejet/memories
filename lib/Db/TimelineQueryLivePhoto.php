@@ -6,6 +6,8 @@ namespace OCA\Memories\Db;
 
 trait TimelineQueryLivePhoto
 {
+    use TimelineQueryBase;
+
     public function getLivePhotos(int $fileid): array
     {
         $qb = $this->connection->getQueryBuilder();

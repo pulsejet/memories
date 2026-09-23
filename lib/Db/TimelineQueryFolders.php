@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
 
 trait TimelineQueryFolders
 {
-    protected IDBConnection $connection;
+    use TimelineQueryBase;
 
     /**
      * Get the previews inside a given TimelineRoot.

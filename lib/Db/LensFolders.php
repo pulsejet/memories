@@ -7,12 +7,11 @@ namespace OCA\Memories\Db;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
-class LensFolders
+final class LensFolders
 {
-    use TimelineQueryCTE;
-
     public function __construct(
-        protected IDBConnection $connection,
+        private IDBConnection $connection,
+        private TimelineQuery $tq,
     ) {}
 
     /**
@@ -34,7 +33,7 @@ class LensFolders
         $query->select('cte_f.fileid')->from('cte_folders', 'cte_f');
         $query->setParameter('topFolderIds', array_values($topFolderIds), IQueryBuilder::PARAM_INT_ARRAY);
 
-        $rows = $this->executeQueryWithCTEs($query)->fetchAll();
+        $rows = $this->tq->executeQueryWithCTEs($query)->fetchAll();
 
         return array_map(static fn (mixed $row) => (int) $row['fileid'], $rows);
     }

@@ -8,6 +8,8 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 
 trait TimelineQueryNativeX
 {
+    use TimelineQueryBase;
+
     public function transformNativeQuery(IQueryBuilder &$query, bool $aggregate): void
     {
         if (!$aggregate) {
