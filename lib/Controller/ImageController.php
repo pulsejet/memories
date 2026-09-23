@@ -59,6 +59,7 @@ final class ImageController extends ApiController
         protected ISystemTagManager $tagManager,
         protected Exif $exif,
         protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -78,7 +79,7 @@ final class ImageController extends ApiController
         bool $a = false,
         string $mode = 'fill',
     ): Http\Response {
-        return Util::guardEx(function () use ($id, $x, $y, $a, $mode) {
+        return $this->util->guardEx(function () use ($id, $x, $y, $a, $mode) {
             if (-1 === $id || 0 === $x || 0 === $y) {
                 throw Exceptions::MissingParameter('id, x, y');
             }
@@ -122,7 +123,7 @@ final class ImageController extends ApiController
     #[PublicPage]
     public function multipreview(array $files): Http\Response
     {
-        return Util::guardExDirect(function (Http\IOutput $out) use ($files) {
+        return $this->util->guardExDirect(function (Http\IOutput $out) use ($files) {
             // Filter files with valid parameters
             $files = array_filter($files, static function (array $file) {
                 return isset($file['reqid'], $file['fileid'], $file['x'], $file['y'], $file['a'])
@@ -203,8 +204,6 @@ final class ImageController extends ApiController
 
     /**
      * Get EXIF info for an image with file id.
-     *
-     * @param string fileid
      */
     #[NoAdminRequired]
     #[PublicPage]
@@ -215,7 +214,7 @@ final class ImageController extends ApiController
         bool $tags = false,
         string $clusters = '',
     ): Http\Response {
-        return Util::guardEx(function () use ($id, $basic, $current, $tags, $clusters) {
+        return $this->util->guardEx(function () use ($id, $basic, $current, $tags, $clusters) {
             $file = $this->fs->getUserFile($id);
 
             // Get the image info
@@ -297,7 +296,7 @@ final class ImageController extends ApiController
     #[PublicPage]
     public function setExif(int $id, array $raw): Http\Response
     {
-        return Util::guardEx(function () use ($id, $raw) {
+        return $this->util->guardEx(function () use ($id, $raw) {
             $file = $this->fs->getUserFile($id);
 
             // Check if user has permissions
@@ -347,7 +346,7 @@ final class ImageController extends ApiController
     #[PublicPage]
     public function decodable(string $id): Http\Response
     {
-        return Util::guardEx(function () use ($id) {
+        return $this->util->guardEx(function () use ($id) {
             $file = $this->fs->getUserFile((int) $id);
 
             // Check if valid image
@@ -387,7 +386,7 @@ final class ImageController extends ApiController
         string $extension,
         array $state,
     ): Http\Response {
-        return Util::guardEx(function () use ($id, $name, $width, $height, $quality, $extension, $state) {
+        return $this->util->guardEx(function () use ($id, $name, $width, $height, $quality, $extension, $state) {
             // Get the file
             $file = $this->fs->getUserFile($id);
 
@@ -470,7 +469,7 @@ final class ImageController extends ApiController
     #[PublicPage]
     public function deleteFile(int $id): Http\Response
     {
-        return Util::guardEx(function () use ($id) {
+        return $this->util->guardEx(function () use ($id) {
             // Get the file
             $file = $this->fs->getUserFile($id);
 

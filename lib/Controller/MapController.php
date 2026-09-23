@@ -38,6 +38,7 @@ final class MapController extends ApiController
     public function __construct(
         IRequest $request,
         protected TimelineQuery $tq,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -45,7 +46,7 @@ final class MapController extends ApiController
     #[NoAdminRequired]
     public function clusters(string $bounds, string $zoom): Http\Response
     {
-        return Util::guardEx(function () use ($bounds, $zoom) {
+        return $this->util->guardEx(function () use ($bounds, $zoom) {
             // Make sure we have bounds and zoom level
             // Zoom level is used to determine the grid length
             if (!$bounds || !$zoom || !is_numeric($zoom)) {
@@ -79,7 +80,7 @@ final class MapController extends ApiController
     #[NoAdminRequired]
     public function init(): Http\Response
     {
-        return Util::guardEx(function () {
+        return $this->util->guardEx(function () {
             return new JSONResponse([
                 'pos' => $this->tq->getMapInitialPosition(),
             ]);

@@ -60,6 +60,7 @@ final class FsManager
         private IUserManager $userManager,
         private ISession $session,
         private SystemConfig $systemConfig,
+        private Util $util,
         ICacheFactory $cacheFactory,
     ) {
         $this->nomediaCache = $cacheFactory->createLocal('memories:nomedia');
@@ -189,7 +190,7 @@ final class FsManager
             new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomedia'),
             new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomemories'),
         ]);
-        $search = $root->search(new SearchQuery($comp, 0, 0, [], Util::getUser()));
+        $search = $root->search(new SearchQuery($comp, 0, 0, [], $this->util->getUser()));
 
         $paths = array_unique(array_map(static fn (Node $node) => \dirname($node->getPath()), $search));
         $this->nomediaCache->set($key, $paths, 60 * 60); // 1 hour

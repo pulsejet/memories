@@ -120,7 +120,7 @@ trait TimelineQuerySingleItem
         }
 
         // Get user language (the Lens service user on the daemon path)
-        $lang = Util::getUserLang();
+        $lang = $this->systemConfig->getUserLang();
 
         return array_map(
             static fn ($p): array => [

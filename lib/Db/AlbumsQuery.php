@@ -17,6 +17,7 @@ final class AlbumsQuery
         private IDBConnection $connection,
         private IUserManager $userManager,
         private IGroupManager $groupManager,
+        private Covers $covers,
     ) {}
 
     /**
@@ -244,7 +245,7 @@ final class AlbumsQuery
 
         // Get the cover image of the owner of the album
         // See AlbumsBackend::getClustersInternal
-        Covers::selectCover(
+        $this->covers->selectCover(
             query: $query,
             type: AlbumsBackend::clusterType(),
             clusterTable: 'pa',

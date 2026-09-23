@@ -342,6 +342,26 @@ final class SystemConfig
         return false;
     }
 
+    /** Get the language code for the current user */
+    public function getUserLang(): string
+    {
+        // Get the default language
+        $default = (string) $this->config->getSystemValue('default_language', 'en');
+
+        try {
+            $uid = $this->userSession->getUser()?->getUID();
+            if (null === $uid) {
+                return $default;
+            }
+
+            // Get language of the user
+            return $this->userConfig->getValueString($uid, 'core', 'lang', $default);
+        } catch (\Exception) {
+            // Fallback to server language
+            return $default;
+        }
+    }
+
     /** Get the common content security policy */
     public function getCSP(): ContentSecurityPolicy
     {

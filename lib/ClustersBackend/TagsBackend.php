@@ -113,7 +113,7 @@ final class TagsBackend extends Backend
 
         // SELECT cover photo
         $query = SQL::materialize($query, 'st');
-        Covers::selectCover(
+        $this->covers->selectCover(
             query: $query,
             type: self::clusterType(),
             clusterTable: 'st',
@@ -171,7 +171,7 @@ final class TagsBackend extends Backend
 
         // MAX number of files
         if (-6 === $limit) {
-            Covers::filterCover($query, self::clusterType(), 'stom', 'objectid', 'systemtagid');
+            $this->covers->filterCover($query, self::clusterType(), 'stom', 'objectid', 'systemtagid');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }

@@ -40,6 +40,7 @@ final class RecognizeBackend extends Backend
         protected IRequest $request,
         protected Covers $covers,
         protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {}
 
     #[\Override]
@@ -99,13 +100,13 @@ final class RecognizeBackend extends Backend
         $clusterQuery = null;
         if ('NULL' === $faceName) {
             $clusterQuery = $query->expr()->andX(
-                $query->expr()->eq('rfd.user_id', $query->createNamedParameter(Util::getUID())),
+                $query->expr()->eq('rfd.user_id', $query->createNamedParameter($this->util->getUID())),
                 $query->expr()->eq('rfd.cluster_id', $query->expr()->literal(-1)),
             );
         } else {
             $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';
             $query->innerJoin('m', 'recognize_face_clusters', 'rfc', $query->expr()->andX(
-                $query->expr()->eq('rfc.user_id', $query->createNamedParameter(Util::getUID())),
+                $query->expr()->eq('rfc.user_id', $query->createNamedParameter($this->util->getUID())),
                 $query->expr()->eq($nameField, $query->createNamedParameter($faceName)),
             ));
             $clusterQuery = $query->expr()->eq('rfd.cluster_id', 'rfc.id');
@@ -156,7 +157,7 @@ final class RecognizeBackend extends Backend
         $query = $this->tq->filterFilecache($query);
 
         // WHERE this cluster belongs to the user
-        $query->andWhere($query->expr()->eq('rfc.user_id', $query->createNamedParameter(Util::getUID())));
+        $query->andWhere($query->expr()->eq('rfc.user_id', $query->createNamedParameter($this->util->getUID())));
 
         // WHERE these clusters contain fileid if specified
         if ($fileid > 0) {
@@ -175,7 +176,7 @@ final class RecognizeBackend extends Backend
 
         // SELECT to get all covers
         $query = SQL::materialize($query, 'rfc');
-        Covers::selectCover(
+        $this->covers->selectCover(
             query: $query,
             type: self::clusterType(),
             clusterTable: 'rfc',
@@ -252,7 +253,7 @@ final class RecognizeBackend extends Backend
 
         // LIMIT results
         if (-6 === $limit) {
-            Covers::filterCover($query, self::clusterType(), 'rfd', 'id', 'cluster_id');
+            $this->covers->filterCover($query, self::clusterType(), 'rfd', 'id', 'cluster_id');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
@@ -327,7 +328,7 @@ final class RecognizeBackend extends Backend
             $query->select('id')
                 ->from('recognize_face_clusters', 'rfc')
                 ->where($query->expr()->eq($nameField, $query->createNamedParameter($faceName)))
-                ->andWhere($query->expr()->eq('rfc.user_id', $query->createNamedParameter(Util::getUID())))
+                ->andWhere($query->expr()->eq('rfc.user_id', $query->createNamedParameter($this->util->getUID())))
             ;
 
             if ($id = $query->executeQuery()->fetchOne()) {

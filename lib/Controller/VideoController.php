@@ -55,6 +55,7 @@ final class VideoController extends ApiController
         protected SystemConfig $systemConfig,
         protected BinExt $binExt,
         protected Exif $exif,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -78,7 +79,7 @@ final class VideoController extends ApiController
     #[NoCSRFRequired]
     public function storyboard(string $client, int $fileid, string $profile): Http\Response
     {
-        return Util::guardEx(function () use ($client, $fileid, $profile) {
+        return $this->util->guardEx(function () use ($client, $fileid, $profile) {
             if (1 !== preg_match('#^(storyboard\.vtt|storyboard-\d+\.jpg)$#', $profile)) {
                 throw Exceptions::BadRequest('Invalid storyboard file');
             }
@@ -99,7 +100,7 @@ final class VideoController extends ApiController
         string $format = '',
         string $transcode = '',
     ): Http\Response {
-        return Util::guardEx(function () use ($fileid, $liveid, $format, $transcode) {
+        return $this->util->guardEx(function () use ($fileid, $liveid, $format, $transcode) {
             $file = $this->fs->getUserFile($fileid);
 
             // Check file liveid
@@ -193,7 +194,7 @@ final class VideoController extends ApiController
 
                 // If this is H.264 it won't get transcoded anyway
                 if ($liveVideoPath) {
-                    return Util::guardExDirect(function (Http\IOutput $out) use ($transcode, $liveVideoPath) {
+                    return $this->util->guardExDirect(function (Http\IOutput $out) use ($transcode, $liveVideoPath) {
                         // Temp upload with no fileid: transcoded without disk cache.
                         $this->getUpstream($out, $transcode, 0, $liveVideoPath, 'max.mp4');
                     });
@@ -214,7 +215,7 @@ final class VideoController extends ApiController
 
     private function proxyProfile(string $client, int $fileid, string $profile): Http\Response
     {
-        return Util::guardEx(function () use ($client, $fileid, $profile) {
+        return $this->util->guardEx(function () use ($client, $fileid, $profile) {
             // Make sure transcoding is enabled
             if ($this->systemConfig->get('memories.vod.disable')) {
                 throw Exceptions::Forbidden('Transcoding disabled');
@@ -247,7 +248,7 @@ final class VideoController extends ApiController
 
             $etag = $file->getEtag();
 
-            return Util::guardExDirect(function (Http\IOutput $out) use ($client, $fileid, $path, $profile, $etag) {
+            return $this->util->guardExDirect(function (Http\IOutput $out) use ($client, $fileid, $path, $profile, $etag) {
                 try {
                     $status = $this->getUpstream($out, $client, $fileid, $path, $profile, $etag);
                     if (409 === $status || -1 === $status) {

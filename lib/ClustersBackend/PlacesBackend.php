@@ -26,7 +26,6 @@ namespace OCA\Memories\ClustersBackend;
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Settings\SystemConfig;
-use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
@@ -172,7 +171,7 @@ final class PlacesBackend extends Backend
         // SELECT to get all covers
         if ($covers) {
             $query = SQL::materialize($query, 'sub');
-            Covers::selectCover(
+            $this->covers->selectCover(
                 query: $query,
                 type: self::clusterType(),
                 clusterTable: 'sub',
@@ -191,7 +190,7 @@ final class PlacesBackend extends Backend
         $places = $this->tq->executeQueryWithCTEs($query)->fetchAll();
 
         // Post process
-        $lang = Util::getUserLang();
+        $lang = $this->systemConfig->getUserLang();
         foreach ($places as &$row) {
             $row['osm_id'] = (int) $row['osm_id'];
             $row['count'] = (int) $row['count'];
@@ -231,7 +230,7 @@ final class PlacesBackend extends Backend
 
         // MAX number of photos
         if (-6 === $limit) {
-            Covers::filterCover($query, self::clusterType(), 'mp', 'fileid', 'osm_id');
+            $this->covers->filterCover($query, self::clusterType(), 'mp', 'fileid', 'osm_id');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }

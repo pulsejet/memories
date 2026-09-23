@@ -42,6 +42,7 @@ final class TagsController extends ApiController
         protected FsManager $fs,
         protected ISystemTagObjectMapper $tagObjectMapper,
         protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -56,7 +57,7 @@ final class TagsController extends ApiController
     #[NoAdminRequired]
     public function set(int $id, ?array $add, ?array $remove): Http\Response
     {
-        return Util::guardEx(function () use ($id, $add, $remove) {
+        return $this->util->guardEx(function () use ($id, $add, $remove) {
             // Check tags enabled for this user
             if (!$this->systemConfig->tagsIsEnabled()) {
                 throw Exceptions::NotEnabled('Tags');

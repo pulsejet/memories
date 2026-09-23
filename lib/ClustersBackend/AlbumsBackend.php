@@ -42,6 +42,7 @@ final class AlbumsBackend extends Backend
         protected IUserManager $userManager,
         protected Covers $covers,
         protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {}
 
     #[\Override]
@@ -103,8 +104,8 @@ final class AlbumsBackend extends Backend
         };
 
         // Add cover from self user
-        $ownCover = static function (IQueryBuilder &$query): void {
-            Covers::selectCover(
+        $ownCover = function (IQueryBuilder &$query): void {
+            $this->covers->selectCover(
                 query: $query,
                 type: self::clusterType(),
                 clusterTable: 'pa',
@@ -117,8 +118,8 @@ final class AlbumsBackend extends Backend
         };
 
         // Transformation for shared albums
-        $shareCover = static function (IQueryBuilder &$query): void {
-            Covers::selectCover(
+        $shareCover = function (IQueryBuilder &$query): void {
+            $this->covers->selectCover(
                 query: $query,
                 type: self::clusterType(),
                 clusterTable: 'pa',
@@ -152,8 +153,8 @@ final class AlbumsBackend extends Backend
 
         // Get personal and shared albums
         $list = array_merge(
-            $this->albumsQuery->getList(Util::getUID(), false, $fileid, $transformOwned),
-            $this->albumsQuery->getList(Util::getUID(), true, $fileid, $transformShared),
+            $this->albumsQuery->getList($this->util->getUID(), false, $fileid, $transformOwned),
+            $this->albumsQuery->getList($this->util->getUID(), true, $fileid, $transformShared),
         );
 
         // Remove elements with duplicate album_id
@@ -225,6 +226,6 @@ final class AlbumsBackend extends Backend
 
     private function getUID(): string
     {
-        return Util::isLoggedIn() ? Util::getUID() : '---';
+        return $this->util->isLoggedIn() ? $this->util->getUID() : '---';
     }
 }

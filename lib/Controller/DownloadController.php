@@ -49,6 +49,7 @@ final class DownloadController extends ApiController
         protected ICacheFactory $cacheFactory,
         protected ISecureRandom $secureRandom,
         protected ITempManager $tempManager,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -62,7 +63,7 @@ final class DownloadController extends ApiController
     #[PublicPage]
     public function request(array $files): Http\Response
     {
-        return Util::guardEx(function () use ($files) {
+        return $this->util->guardEx(function () use ($files) {
             $handle = $this->createHandle('memories', $files);
 
             return new JSONResponse(['handle' => $handle]);
@@ -97,7 +98,7 @@ final class DownloadController extends ApiController
     #[PublicPage]
     public function file(string $handle): Http\Response
     {
-        return Util::guardEx(function () use ($handle) {
+        return $this->util->guardEx(function () use ($handle) {
             $cache = $this->getCache();
             $info = $cache->get($handle);
 
@@ -135,7 +136,7 @@ final class DownloadController extends ApiController
     #[PublicPage]
     public function one(int $fileid, bool $resumable = true): Http\Response
     {
-        return Util::guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable) {
+        return $this->util->guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable) {
             $file = $this->fs->getUserFile($fileid);
 
             // Check if we're allowed to download the file
@@ -316,7 +317,7 @@ final class DownloadController extends ApiController
      */
     private function multiple(string $name, array $fileIds): Http\Response
     {
-        return Util::guardExDirect(function ($out) use ($name, $fileIds) {
+        return $this->util->guardExDirect(function ($out) use ($name, $fileIds) {
             // Disable time limit
             @set_time_limit(0);
 

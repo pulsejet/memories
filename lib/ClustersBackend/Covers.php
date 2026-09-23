@@ -15,6 +15,7 @@ final class Covers
     public function __construct(
         private IDBConnection $connection,
         private LoggerInterface $logger,
+        private Util $util,
     ) {}
 
     /**
@@ -31,7 +32,7 @@ final class Covers
      * @param bool          $validateFilecache    Whether to validate the filecache
      * @param mixed         $user                 Query expression for user ID to use for the covers
      */
-    public static function selectCover(
+    public function selectCover(
         IQueryBuilder &$query,
         string $type,
         string $clusterTable,
@@ -46,7 +47,7 @@ final class Covers
     ): void {
         // Clauses for the WHERE
         $clauses = [
-            $query->expr()->eq('mcov.uid', $user ?? $query->expr()->literal(Util::getUser()->getUID())),
+            $query->expr()->eq('mcov.uid', $user ?? $query->expr()->literal($this->util->getUser()->getUID())),
             $query->expr()->eq('mcov.clustertype', $query->expr()->literal($type)),
             $query->expr()->eq('mcov.clusterid', "{$clusterTable}.{$clusterTableId}"),
         ];
@@ -99,7 +100,7 @@ final class Covers
      * @param string        $objectTableObjectId  Column name for the object ID in objectTable
      * @param string        $objectTableClusterId Column name for the cluster ID in objectTable
      */
-    public static function filterCover(
+    public function filterCover(
         IQueryBuilder &$query,
         string $type,
         string $objectTable,
@@ -107,7 +108,7 @@ final class Covers
         string $objectTableClusterId,
     ): void {
         $query->innerJoin($objectTable, 'memories_covers', 'm_cov', $query->expr()->andX(
-            $query->expr()->eq('m_cov.uid', $query->expr()->literal(Util::getUser()->getUID())),
+            $query->expr()->eq('m_cov.uid', $query->expr()->literal($this->util->getUser()->getUID())),
             $query->expr()->eq('m_cov.clustertype', $query->expr()->literal($type)),
             $query->expr()->eq('m_cov.clusterid', "{$objectTable}.{$objectTableClusterId}"),
             $query->expr()->eq('m_cov.objectid', $query->expr()->castColumn("{$objectTable}.{$objectTableObjectId}", IQueryBuilder::PARAM_INT)),
@@ -128,7 +129,7 @@ final class Covers
         Util::transaction(function () use ($type, $clusterId, $objectId, $fileid, $manual): void {
             $query = $this->connection->getQueryBuilder();
             $query->delete('memories_covers')
-                ->where($query->expr()->eq('uid', $query->createNamedParameter(Util::getUser()->getUID())))
+                ->where($query->expr()->eq('uid', $query->createNamedParameter($this->util->getUser()->getUID())))
                 ->andWhere($query->expr()->eq('clustertype', $query->createNamedParameter($type)))
                 ->andWhere($query->expr()->eq('clusterid', $query->createNamedParameter($clusterId)))
                 ->executeStatement()
@@ -137,7 +138,7 @@ final class Covers
             $query = $this->connection->getQueryBuilder();
             $query->insert('memories_covers')
                 ->values([
-                    'uid' => $query->createNamedParameter(Util::getUser()->getUID()),
+                    'uid' => $query->createNamedParameter($this->util->getUser()->getUID()),
                     'clustertype' => $query->createNamedParameter($type),
                     'clusterid' => $query->createNamedParameter($clusterId),
                     'objectid' => $query->createNamedParameter($objectId),

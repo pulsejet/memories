@@ -64,6 +64,7 @@ final class LensController extends ApiController
         protected IUserMountCache $mountCache,
         protected Lens $lens,
         protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -78,7 +79,7 @@ final class LensController extends ApiController
     #[PublicPage]
     public function file(int $fileid): Http\Response
     {
-        return Util::guardEx(function () use ($fileid) {
+        return $this->util->guardEx(function () use ($fileid) {
             $this->guardServiceAccount();
 
             if ($fileid <= 0) {
@@ -141,7 +142,7 @@ final class LensController extends ApiController
     #[NoAdminRequired]
     public function search(string $text = '', int $limit = 50): Http\Response
     {
-        return Util::guardEx(function () use ($text, $limit) {
+        return $this->util->guardEx(function () use ($text, $limit) {
             if ('' === trim($text)) {
                 throw new HttpResponseException(new DataResponse([
                     'message' => 'Search text must not be empty',

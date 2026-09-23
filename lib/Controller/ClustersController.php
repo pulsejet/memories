@@ -50,6 +50,7 @@ final class ClustersController extends ApiController
         IRequest $request,
         protected FsManager $fs,
         protected IPreview $previewManager,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -60,7 +61,7 @@ final class ClustersController extends ApiController
     #[NoAdminRequired]
     public function list(string $backend, int $fileid = 0): Http\Response
     {
-        return Util::guardEx(function () use ($backend, $fileid) {
+        return $this->util->guardEx(function () use ($backend, $fileid) {
             $this->init($backend);
 
             $list = $this->backend->getClusters($fileid);
@@ -76,7 +77,7 @@ final class ClustersController extends ApiController
     #[NoCSRFRequired]
     public function preview(string $backend, string $name): Http\Response
     {
-        return Util::guardEx(function () use ($backend, $name) {
+        return $this->util->guardEx(function () use ($backend, $name) {
             $this->init($backend);
 
             // Attempt to get the cover preview (-6 magic)
@@ -109,7 +110,7 @@ final class ClustersController extends ApiController
     #[NoAdminRequired]
     public function setCover(string $backend, string $name, int $fileid): Http\Response
     {
-        return Util::guardEx(function () use ($backend, $name, $fileid) {
+        return $this->util->guardEx(function () use ($backend, $name, $fileid) {
             $this->init($backend);
 
             $photos = $this->backend->getPhotos($name, 1, $fileid);
@@ -129,7 +130,7 @@ final class ClustersController extends ApiController
     #[NoAdminRequired]
     public function download(string $backend, string $name, DownloadController $downloadController): Http\Response
     {
-        return Util::guardEx(function () use ($backend, $name, $downloadController) {
+        return $this->util->guardEx(function () use ($backend, $name, $downloadController) {
             $this->init($backend);
 
             // Get list of all files in this cluster
@@ -150,7 +151,7 @@ final class ClustersController extends ApiController
      */
     protected function init(string $backend): void
     {
-        Util::getUser();
+        $this->util->getUser();
 
         $this->backend = ClustersBackend\Manager::get($backend);
 

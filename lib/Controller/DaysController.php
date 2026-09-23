@@ -39,6 +39,7 @@ final class DaysController extends ApiController
     public function __construct(
         IRequest $request,
         protected TimelineQuery $tq,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -47,7 +48,7 @@ final class DaysController extends ApiController
     #[PublicPage]
     public function days(): Http\Response
     {
-        return Util::guardEx(function () {
+        return $this->util->guardEx(function () {
             $list = $this->tq->getDays(
                 $this->isRecursive(),
                 $this->isArchive(),
@@ -70,7 +71,7 @@ final class DaysController extends ApiController
     #[PublicPage]
     public function day(array $dayIds): Http\Response
     {
-        return Util::guardEx(function () use ($dayIds) {
+        return $this->util->guardEx(function () use ($dayIds) {
             // Run actual query
             $list = $this->tq->getDay(
                 $dayIds,
@@ -106,7 +107,7 @@ final class DaysController extends ApiController
         $transforms = array_merge($transforms, $clusterTs);
 
         // Other transforms not allowed for public shares
-        if (!Util::isLoggedIn()) {
+        if (!$this->util->isLoggedIn()) {
             return $transforms;
         }
 

@@ -43,6 +43,7 @@ final class ShareController extends ApiController
         protected FsManager $fs,
         protected IManager $shareManager,
         protected IURLGenerator $urlGenerator,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -53,11 +54,11 @@ final class ShareController extends ApiController
     #[NoAdminRequired]
     public function links(?int $id, ?string $path): Http\Response
     {
-        return Util::guardEx(function () use ($id, $path) {
+        return $this->util->guardEx(function () use ($id, $path) {
             $file = $this->getNodeByIdOrPath($id, $path);
 
             $shares = $this->shareManager
-                ->getSharesBy(Util::getUID(), IShare::TYPE_LINK, $file, true, 50, 0)
+                ->getSharesBy($this->util->getUID(), IShare::TYPE_LINK, $file, true, 50, 0)
             ;
 
             if (empty($shares)) {
@@ -76,14 +77,14 @@ final class ShareController extends ApiController
     #[NoAdminRequired]
     public function createNode(?int $id, ?string $path): Http\Response
     {
-        return Util::guardEx(function () use ($id, $path) {
+        return $this->util->guardEx(function () use ($id, $path) {
             $file = $this->getNodeByIdOrPath($id, $path);
 
             $share = $this->shareManager->createShare(
                 $this->shareManager->newShare()
                     ->setNode($file)
                     ->setShareType(\OCP\Share\IShare::TYPE_LINK)
-                    ->setSharedBy(Util::getUID())
+                    ->setSharedBy($this->util->getUID())
                     ->setPermissions(\OCP\Constants::PERMISSION_READ),
             );
 
@@ -97,8 +98,8 @@ final class ShareController extends ApiController
     #[NoAdminRequired]
     public function deleteShare(string $id): Http\Response
     {
-        return Util::guardEx(function () use ($id) {
-            $uid = Util::getUID();
+        return $this->util->guardEx(function () use ($id) {
+            $uid = $this->util->getUID();
 
             $share = $this->shareManager->getShareById($id);
 
@@ -114,14 +115,14 @@ final class ShareController extends ApiController
 
     private function getNodeByIdOrPath(?int $id, ?string $path): \OCP\Files\Node
     {
-        $uid = Util::getUID();
+        $uid = $this->util->getUID();
 
         try {
             $file = null;
             if ($id) {
                 $file = $this->fs->getUserFile($id);
             } elseif ($path) {
-                $file = Util::getUserFolder($uid)->get($path);
+                $file = $this->util->getUserFolder($uid)->get($path);
             }
         } catch (\OCP\Files\NotFoundException) {
             throw Exceptions::NotFoundFile($path ?? $id);

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\DB\QueryBuilder\IQueryFunction;
 use OCP\ITags;
@@ -15,7 +14,7 @@ trait TimelineQueryFilters
 
     public function transformFavoriteFilter(IQueryBuilder &$query, bool $aggregate): void
     {
-        if (Util::isLoggedIn()) {
+        if ($this->util->isLoggedIn()) {
             $query->innerJoin('m', 'vcategory_to_object', 'vcoi', $query->expr()->andX(
                 $query->expr()->eq('vcoi.objid', 'm.fileid'),
                 $query->expr()->in('vcoi.categoryid', $this->getFavoriteVCategoryFun($query)),
@@ -25,7 +24,7 @@ trait TimelineQueryFilters
 
     public function addFavoriteTag(IQueryBuilder &$query): void
     {
-        if (Util::isLoggedIn()) {
+        if ($this->util->isLoggedIn()) {
             $query->leftJoin('m', 'vcategory_to_object', 'vco', $query->expr()->andX(
                 $query->expr()->eq('vco.objid', 'm.fileid'),
                 $query->expr()->in('vco.categoryid', $this->getFavoriteVCategoryFun($query)),
@@ -64,7 +63,7 @@ trait TimelineQueryFilters
             ->from('vcategory', 'vc')
             ->where($sub->expr()->andX(
                 $sub->expr()->eq('type', $sub->expr()->literal('files')),
-                $sub->expr()->eq('uid', $query->createNamedParameter(Util::getUID())),
+                $sub->expr()->eq('uid', $query->createNamedParameter($this->util->getUID())),
                 $sub->expr()->eq('category', $sub->expr()->literal(ITags::TAG_FAVORITE)),
             ))
         ;

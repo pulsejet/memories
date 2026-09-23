@@ -54,6 +54,7 @@ final class OtherController extends ApiController
         protected IConfig $config,
         protected SystemConfig $systemConfig,
         protected Lens $lens,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -69,13 +70,13 @@ final class OtherController extends ApiController
     #[NoAdminRequired]
     public function setUserConfig(string $key, string $value): Http\Response
     {
-        return Util::guardEx(function () use ($key, $value) {
+        return $this->util->guardEx(function () use ($key, $value) {
             // Make sure not running in read-only mode
             if ($this->systemConfig->get('memories.readonly', false)) {
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
             }
 
-            $this->userConfig->setValueString(Util::getUID(), Application::APPNAME, $key, $value);
+            $this->userConfig->setValueString($this->util->getUID(), Application::APPNAME, $key, $value);
 
             return new JSONResponse([], Http::STATUS_OK);
         });
@@ -85,13 +86,13 @@ final class OtherController extends ApiController
     #[PublicPage]
     public function getUserConfig(): Http\Response
     {
-        return Util::guardEx(function () {
+        return $this->util->guardEx(function () {
             // get memories version
             $version = $this->appManager->getAppVersion('memories');
 
             // get user if logged in
             try {
-                $uid = Util::getUID();
+                $uid = $this->util->getUID();
             } catch (\Exception) {
                 $uid = null;
             }
@@ -172,7 +173,7 @@ final class OtherController extends ApiController
     #[NoCSRFRequired]
     public function describeApi(PageController $pageController): Http\Response
     {
-        return Util::guardEx(function () use ($pageController) {
+        return $this->util->guardEx(function () use ($pageController) {
             $info = [
                 'version' => $this->appManager->getAppVersion('memories'),
                 'baseUrl' => $this->urlGenerator->linkToRouteAbsolute('memories.Page.main'),
@@ -180,7 +181,7 @@ final class OtherController extends ApiController
             ];
 
             try {
-                $info['uid'] = Util::getUID();
+                $info['uid'] = $this->util->getUID();
             } catch (\Exception) {
                 $info['uid'] = null;
             }
@@ -207,7 +208,7 @@ final class OtherController extends ApiController
     #[NoCSRFRequired]
     public function static(string $name): Http\Response
     {
-        return Util::guardEx(function () use ($name) {
+        return $this->util->guardEx(function () use ($name) {
             switch ($name) {
                 case 'service-worker.js':
                     // Disable service worker if server is in debug mode

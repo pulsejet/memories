@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCA\Memories\ClustersBackend;
-use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
 trait TimelineQueryDays
@@ -148,7 +147,7 @@ trait TimelineQueryDays
 
         // SELECT storage ID to check if this photo is shared
         // Do not expose storage to anonymous users (link shares)
-        if (\OCA\Memories\Util::isLoggedIn()) {
+        if ($this->util->isLoggedIn()) {
             $query->leftJoin('f', 'storages', 's', $query->expr()->eq('f.storage', 's.numeric_id'));
             $query->selectAlias('s.id', 'storage_id');
         }
@@ -396,7 +395,7 @@ trait TimelineQueryDays
         }
 
         // Check if self
-        if (Util::isLoggedIn() && $uid === Util::getUID()) {
+        if ($this->util->isLoggedIn() && $uid === $this->util->getUID()) {
             return '';
         }
 

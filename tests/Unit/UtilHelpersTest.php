@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  *
- * @covers \OCA\Memories\Util
+ * @covers \OCA\Memories\StaticUtil
  */
 final class UtilHelpersTest extends TestCase
 {

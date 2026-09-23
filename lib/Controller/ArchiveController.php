@@ -41,6 +41,7 @@ final class ArchiveController extends ApiController
         IRequest $request,
         protected ILockingProvider $lockingProvider,
         protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -53,8 +54,8 @@ final class ArchiveController extends ApiController
     #[NoAdminRequired]
     public function archive(string $id): Http\Response
     {
-        return Util::guardEx(function () use ($id) {
-            $userFolder = Util::getUserFolder();
+        return $this->util->guardEx(function () use ($id) {
+            $userFolder = $this->util->getUserFolder();
 
             // Check for permissions and get numeric Id
             $file = $userFolder->getById((int) $id);
@@ -69,7 +70,7 @@ final class ArchiveController extends ApiController
             }
 
             // Create archive folder in the root of the user's configured timeline
-            $configPaths = $this->systemConfig->getTimelinePaths(Util::getUID());
+            $configPaths = $this->systemConfig->getTimelinePaths($this->util->getUID());
             $timelinePaths = [];
 
             // Get all timeline paths

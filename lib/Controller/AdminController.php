@@ -55,6 +55,7 @@ final class AdminController extends ApiController
         protected ISession $session,
         protected SystemConfig $systemConfig,
         protected BinExt $binExt,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -64,7 +65,7 @@ final class AdminController extends ApiController
      */
     public function getSystemConfig(): Http\Response
     {
-        return Util::guardEx(function () {
+        return $this->util->guardEx(function () {
             $config = [];
             foreach (SystemConfig::DEFAULTS as $key => $default) {
                 $config[$key] = $this->systemConfig->get($key);
@@ -82,7 +83,7 @@ final class AdminController extends ApiController
      */
     public function setSystemConfig(string $key, mixed $value): Http\Response
     {
-        return Util::guardEx(function () use ($key, $value) {
+        return $this->util->guardEx(function () use ($key, $value) {
             // Make sure not running in read-only mode
             if ($this->systemConfig->get('memories.readonly')) {
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
@@ -120,7 +121,7 @@ final class AdminController extends ApiController
     #[UseSession]
     public function getSystemStatus(): Http\Response
     {
-        return Util::guardEx(function () {
+        return $this->util->guardEx(function () {
             // Build status array
             $status = [];
 
@@ -250,7 +251,7 @@ final class AdminController extends ApiController
     #[NoCSRFRequired]
     public function getFailureLogs(): Http\Response
     {
-        return Util::guardExDirect(function (Http\IOutput $out) {
+        return $this->util->guardExDirect(function (Http\IOutput $out) {
             $out->setHeader('Content-Type: text/plain');
             $out->setHeader('X-Accel-Buffering: no');
             $out->setHeader('Cache-Control: no-cache');
@@ -278,7 +279,7 @@ final class AdminController extends ApiController
         // Reset action token
         $this->actionToken(true);
 
-        return Util::guardExDirect(function (Http\IOutput $out) {
+        return $this->util->guardExDirect(function (Http\IOutput $out) {
             try {
                 // Set PHP timeout to infinite
                 set_time_limit(0);
