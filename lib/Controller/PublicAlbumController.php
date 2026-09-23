@@ -7,6 +7,7 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\AlbumsQuery;
 use OCA\Memories\Settings\SystemConfig;
+use OCA\Memories\Util;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -24,7 +25,6 @@ use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IURLGenerator;
 use OCP\IUserSession;
-use OCP\Util;
 
 final class PublicAlbumController extends Controller
 {
@@ -40,6 +40,7 @@ final class PublicAlbumController extends Controller
         protected AlbumsQuery $albumsQuery,
         protected IL10N $l10n,
         protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -84,7 +85,7 @@ final class PublicAlbumController extends Controller
         $this->addOgMetadata($album, $title, $token);
 
         // Scripts
-        Util::addScript(Application::APPNAME, 'memories-main');
+        \OCP\Util::addScript(Application::APPNAME, 'memories-main');
 
         // Share info
         $this->initialState->provideInitialState('share_title', $title);
@@ -145,6 +146,6 @@ final class PublicAlbumController extends Controller
 
         $params = ['token' => $token];
         $url = $this->urlGenerator->linkToRouteAbsolute('memories.PublicAlbum.showShare', $params);
-        \OCA\Memories\Util::addOGMetadata($node, $title, $url, array_merge($params, ['albums' => true]));
+        $this->util->addOgMetadata($node, $title, $url, array_merge($params, ['albums' => true]));
     }
 }

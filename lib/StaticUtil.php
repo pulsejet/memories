@@ -101,50 +101,6 @@ class StaticUtil
     }
 
     /**
-     * Add OG metadata to a page for a node.
-     *
-     * @param Node   $node        Node to get metadata from
-     * @param string $title       Title of the page
-     * @param string $url         URL of the page
-     * @param array  $previewArgs Preview arguments (e.g. token)
-     */
-    public static function addOgMetadata(Node $node, string $title, string $url, array $previewArgs): void
-    {
-        // Add title
-        \OCP\Util::addHeader('meta', ['property' => 'og:title', 'content' => $title]);
-
-        // Get first node if folder
-        if ($node instanceof \OCP\Files\Folder) {
-            if (null === ($node = self::getAnyMedia($node))) {
-                return; // no media in folder
-            }
-        }
-
-        // Add file type
-        $mimeType = $node->getMimeType();
-        if (str_starts_with($mimeType, 'image/')) {
-            \OCP\Util::addHeader('meta', ['property' => 'og:type', 'content' => 'image']);
-        } elseif (str_starts_with($mimeType, 'video/')) {
-            \OCP\Util::addHeader('meta', ['property' => 'og:type', 'content' => 'video']);
-        }
-
-        // Add OG url
-        \OCP\Util::addHeader('meta', ['property' => 'og:url', 'content' => $url]);
-
-        // Get URL generator
-        $urlGenerator = \OCP\Server::get(\OCP\IURLGenerator::class);
-
-        // Add OG image
-        $preview = $urlGenerator->linkToRouteAbsolute('memories.Image.preview', array_merge($previewArgs, [
-            'id' => $node->getId(),
-            'x' => 1024,
-            'y' => 1024,
-            'a' => true,
-        ]));
-        \OCP\Util::addHeader('meta', ['property' => 'og:image', 'content' => $preview]);
-    }
-
-    /**
      * Get a random image or video from a given folder.
      */
     public static function getAnyMedia(\OCP\Files\Folder $folder): ?Node
@@ -160,33 +116,6 @@ class StaticUtil
         }
 
         return $nodes[0];
-    }
-
-    /**
-     * Run a callback in a transaction.
-     * It returns the same type as the return type of the closure.
-     *
-     * @template T
-     *
-     * @psalm-param \Closure(): T $callback
-     *
-     * @psalm-return T
-     */
-    public static function transaction(\Closure $callback): mixed
-    {
-        $connection = \OCP\Server::get(\OCP\IDBConnection::class);
-        $connection->beginTransaction();
-
-        try {
-            $val = $callback();
-            $connection->commit();
-
-            return $val;
-        } catch (\Throwable $e) {
-            $connection->rollBack();
-
-            throw $e;
-        }
     }
 
     /**
@@ -240,21 +169,6 @@ class StaticUtil
         // Should not use IRequest here since this method is called during registration
         return 'gallery.memories' === ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')
         || str_contains($_SERVER['HTTP_USER_AGENT'] ?? '', 'MemoriesNative');
-    }
-
-    /**
-     * Get the version of the native caller.
-     */
-    public static function callerNativeVersion(): ?string
-    {
-        $userAgent = \OCP\Server::get(\OCP\IRequest::class)->getHeader('User-Agent');
-
-        $matches = [];
-        if (preg_match('/MemoriesNative\/([0-9.]+)/', $userAgent, $matches)) {
-            return $matches[1];
-        }
-
-        return null;
     }
 
     /**

@@ -57,6 +57,7 @@ final class PublicController extends AuthPublicShareController
         protected IL10N $l10n,
         protected FsManager $fs,
         protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request, $session, $urlGenerator);
     }
@@ -135,7 +136,7 @@ final class PublicController extends AuthPublicShareController
         // Add OG metadata
         $params = ['token' => $this->getToken()];
         $url = $this->urlGenerator->linkToRouteAbsolute('memories.Public.showShare', $params);
-        Util::addOgMetadata($node, $node->getName(), $url, $params);
+        $this->util->addOgMetadata($node, $node->getName(), $url, $params);
 
         // Render the template
         $response = new PublicTemplateResponse($this->appName, 'main', PageController::getMainParams());

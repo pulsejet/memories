@@ -8,6 +8,10 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
+use OCP\Files\Node;
+use OCP\IDBConnection;
+use OCP\IRequest;
+use OCP\IURLGenerator;
 use OCP\IUser;
 use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
@@ -18,6 +22,9 @@ final class Util extends StaticUtil
         private LoggerInterface $logger,
         private IUserSession $userSession,
         private IRootFolder $rootFolder,
+        private IDBConnection $connection,
+        private IURLGenerator $urlGenerator,
+        private IRequest $request,
     ) {}
 
     /**
@@ -133,5 +140,87 @@ final class Util extends StaticUtil
     public function getUserFolder(?string $uid = null): Folder
     {
         return $this->rootFolder->getUserFolder($uid ?? $this->getUID());
+    }
+
+    /**
+     * Add OG metadata to a page for a node.
+     *
+     * @param Node   $node        Node to get metadata from
+     * @param string $title       Title of the page
+     * @param string $url         URL of the page
+     * @param array  $previewArgs Preview arguments (e.g. token)
+     */
+    public function addOgMetadata(Node $node, string $title, string $url, array $previewArgs): void
+    {
+        // Add title
+        \OCP\Util::addHeader('meta', ['property' => 'og:title', 'content' => $title]);
+
+        // Get first node if folder
+        if ($node instanceof \OCP\Files\Folder) {
+            if (null === ($node = self::getAnyMedia($node))) {
+                return; // no media in folder
+            }
+        }
+
+        // Add file type
+        $mimeType = $node->getMimeType();
+        if (str_starts_with($mimeType, 'image/')) {
+            \OCP\Util::addHeader('meta', ['property' => 'og:type', 'content' => 'image']);
+        } elseif (str_starts_with($mimeType, 'video/')) {
+            \OCP\Util::addHeader('meta', ['property' => 'og:type', 'content' => 'video']);
+        }
+
+        // Add OG url
+        \OCP\Util::addHeader('meta', ['property' => 'og:url', 'content' => $url]);
+
+        // Add OG image
+        $preview = $this->urlGenerator->linkToRouteAbsolute('memories.Image.preview', array_merge($previewArgs, [
+            'id' => $node->getId(),
+            'x' => 1024,
+            'y' => 1024,
+            'a' => true,
+        ]));
+        \OCP\Util::addHeader('meta', ['property' => 'og:image', 'content' => $preview]);
+    }
+
+    /**
+     * Run a callback in a transaction.
+     * It returns the same type as the return type of the closure.
+     *
+     * @template T
+     *
+     * @psalm-param \Closure(): T $callback
+     *
+     * @psalm-return T
+     */
+    public function transaction(\Closure $callback): mixed
+    {
+        $this->connection->beginTransaction();
+
+        try {
+            $val = $callback();
+            $this->connection->commit();
+
+            return $val;
+        } catch (\Throwable $e) {
+            $this->connection->rollBack();
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Get the version of the native caller.
+     */
+    public function callerNativeVersion(): ?string
+    {
+        $userAgent = $this->request->getHeader('User-Agent');
+
+        $matches = [];
+        if (preg_match('/MemoriesNative\/([0-9.]+)/', $userAgent, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 }

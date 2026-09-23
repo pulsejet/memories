@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
 const LAT_KEY = 'GPSLatitude';
@@ -34,7 +33,7 @@ trait TimelineWritePlaces
         }
 
         // Delete previous records
-        Util::transaction(function () use ($fileId): void {
+        $this->util->transaction(function () use ($fileId): void {
             $query = $this->connection->getQueryBuilder();
             $query->delete('memories_places')
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
@@ -50,7 +49,7 @@ trait TimelineWritePlaces
         // Get places
         try {
             $places = \OCP\Server::get(\OCA\Memories\Service\Places::class);
-            $rows = Util::transaction(static fn () => $places->queryPoint($lat, $lon));
+            $rows = $this->util->transaction(static fn () => $places->queryPoint($lat, $lon));
         } catch (\Exception $e) {
             $this->logger->error("Error querying places: {$e->getMessage()}", ['app' => 'memories']);
 
@@ -62,7 +61,7 @@ trait TimelineWritePlaces
         $markRow = array_pop($crows);
 
         // Insert records in transaction
-        Util::transaction(function () use ($fileId, $rows, $markRow): void {
+        $this->util->transaction(function () use ($fileId, $rows, $markRow): void {
             foreach ($rows as $row) {
                 $isMark = $markRow && $row['osm_id'] === $markRow['osm_id'];
 

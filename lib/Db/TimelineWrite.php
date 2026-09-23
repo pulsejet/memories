@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 use OCP\Lock\ILockingProvider;
@@ -91,7 +90,7 @@ final class TimelineWrite
 
         // Hand off if Live Photo video part
         if ($isvideo && $this->livePhoto->isVideoPart($exif)) {
-            return Util::transaction(fn () => $this->livePhoto->processVideoPart($file, $exif));
+            return $this->util->transaction(fn () => $this->livePhoto->processVideoPart($file, $exif));
         }
 
         // If control reaches here, it's not a Live Photo video part
@@ -178,7 +177,7 @@ final class TimelineWrite
         }
 
         // Execute query
-        $updated = Util::transaction(static fn () => $query->executeStatement() > 0);
+        $updated = $this->util->transaction(static fn () => $query->executeStatement() > 0);
 
         // Clear failures if successful
         if ($updated) {
@@ -193,7 +192,7 @@ final class TimelineWrite
      */
     public function deleteFile(File $file): void
     {
-        Util::transaction(function () use ($file): void {
+        $this->util->transaction(function () use ($file): void {
             // Get full record
             $query = $this->connection->getQueryBuilder();
             $record = $query->select('*')
@@ -266,7 +265,7 @@ final class TimelineWrite
             ;
         };
 
-        return Util::transaction(static fn () => $fetch('memories') ?: $fetch('memories_livephoto') ?: null);
+        return $this->util->transaction(static fn () => $fetch('memories') ?: $fetch('memories_livephoto') ?: null);
     }
 
     /**

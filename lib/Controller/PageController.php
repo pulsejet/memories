@@ -32,6 +32,7 @@ final class PageController extends Controller
         private IUserSession $userSession,
         private ?\OCA\Recognize\Public\ApiKeyManager $apiKeyManager,
         protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -41,7 +42,7 @@ final class PageController extends Controller
     public function main(): Response
     {
         // Check native version if available
-        $nativeVer = Util::callerNativeVersion();
+        $nativeVer = $this->util->callerNativeVersion();
         if (null !== $nativeVer && version_compare($nativeVer, BinExt::NX_VER_MIN, '<')) {
             return new PublicTemplateResponse(Application::APPNAME, 'native-old');
         }

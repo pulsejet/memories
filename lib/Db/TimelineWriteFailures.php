@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
 
@@ -25,7 +24,7 @@ trait TimelineWriteFailures
         $reason .= " ({$file->getPath()})";
 
         // Remove all previous failures for this file
-        Util::transaction(function () use ($file, $reason): void {
+        $this->util->transaction(function () use ($file, $reason): void {
             $this->clearFailures($file);
 
             // Add the failure to the database

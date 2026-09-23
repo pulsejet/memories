@@ -21,7 +21,7 @@ trait TimelineWriteOrphans
     public function orphanAll(bool $value = true, ?array $fileIds = null, bool $livephoto = true): void
     {
         // Helper function to update a table.
-        $update = fn (string $table): int => Util::transaction(function () use ($table, $value, $fileIds): int {
+        $update = fn (string $table): int => $this->util->transaction(function () use ($table, $value, $fileIds): int {
             $query = $this->connection->getQueryBuilder();
             $query->update($table)
                 ->set('orphan', $query->createNamedParameter($value, IQueryBuilder::PARAM_BOOL))
@@ -70,7 +70,7 @@ trait TimelineWriteOrphans
         $this->orphanAll(true, null, false);
 
         while (\count($orphans = $this->getSomeOrphans($txnSize, $fields))) {
-            Util::transaction(function () use ($callback, $orphans): void {
+            $this->util->transaction(function () use ($callback, $orphans): void {
                 foreach ($orphans as $row) {
                     $callback($row);
                 }
@@ -90,7 +90,7 @@ trait TimelineWriteOrphans
      */
     private function getSomeOrphans(int $count, array $fields): array
     {
-        return Util::transaction(function () use ($count, $fields): array {
+        return $this->util->transaction(function () use ($count, $fields): array {
             $query = $this->connection->getQueryBuilder();
 
             return $query->select(...$fields)

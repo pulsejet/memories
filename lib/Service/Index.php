@@ -66,6 +66,7 @@ final class Index
         private IAppManager $appManager,
         private SetupManager $setupManager,
         private Lens $lens,
+        private Util $util,
     ) {}
 
     /**
@@ -199,7 +200,7 @@ final class Index
             $query->andWhere($getFilter('memories_failures', false));
 
             // Get file IDs to actually index
-            $fileIds = Util::transaction(static fn (): array => $query->executeQuery()->fetchAll(\PDO::FETCH_COLUMN));
+            $fileIds = $this->util->transaction(static fn (): array => $query->executeQuery()->fetchAll(\PDO::FETCH_COLUMN));
 
             // Index files
             foreach ($fileIds as $fileId) {

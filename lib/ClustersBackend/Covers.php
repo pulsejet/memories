@@ -126,7 +126,7 @@ final class Covers
      */
     public function setCover(string $type, int $clusterId, int $objectId, int $fileid, bool $manual): void
     {
-        Util::transaction(function () use ($type, $clusterId, $objectId, $fileid, $manual): void {
+        $this->util->transaction(function () use ($type, $clusterId, $objectId, $fileid, $manual): void {
             $query = $this->connection->getQueryBuilder();
             $query->delete('memories_covers')
                 ->where($query->expr()->eq('uid', $query->createNamedParameter($this->util->getUser()->getUID())))
