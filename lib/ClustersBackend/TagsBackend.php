@@ -34,6 +34,7 @@ final class TagsBackend extends Backend
     public function __construct(
         protected TimelineQuery $tq,
         protected IRequest $request,
+        protected Covers $covers,
     ) {}
 
     #[\Override]
@@ -187,6 +188,12 @@ final class TagsBackend extends Backend
     public function getClusterIdFrom(array $photo): int
     {
         return (int) $photo['systemtagid'];
+    }
+
+    #[\Override]
+    public function setCover(array $photo, bool $manual = false): void
+    {
+        $this->covers->setBackendCover($this, $photo, $manual);
     }
 
     /**

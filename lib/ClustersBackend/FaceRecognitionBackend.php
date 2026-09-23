@@ -39,6 +39,7 @@ final class FaceRecognitionBackend extends Backend
         protected IRequest $request,
         protected TimelineQuery $tq,
         protected IAppConfig $appConfig,
+        protected Covers $covers,
     ) {}
 
     #[\Override]
@@ -242,6 +243,12 @@ final class FaceRecognitionBackend extends Backend
     public function getClusterIdFrom(array $photo): int
     {
         return (int) $photo['cluster_id'];
+    }
+
+    #[\Override]
+    public function setCover(array $photo, bool $manual = false): void
+    {
+        $this->covers->setBackendCover($this, $photo, $manual);
     }
 
     private function model(): int

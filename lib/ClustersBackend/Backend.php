@@ -170,37 +170,21 @@ abstract class Backend
     }
 
     /**
-     * Register the backend. Do not override.
-     */
-    final public static function register(): void
-    {
-        Manager::register(static::clusterType(), static::class);
-    }
-
-    /**
      * Set the cover photo for the given cluster.
      *
      * @param array $photo  Photo object
      * @param bool  $manual Whether this is a manual selection
      */
-    final public function setCover(array $photo, bool $manual = false): void
+    public function setCover(array $photo, bool $manual = false): void
     {
-        try {
-            Covers::setCover(
-                type: $this->clusterType(),
-                clusterId: $this->getClusterIdFrom($photo),
-                objectId: $this->getCoverObjId($photo),
-                fileid: $this->getFileId($photo),
-                manual: $manual,
-            );
-        } catch (\Exception $e) {
-            if ($manual) {
-                throw $e;
-            }
+        throw new \Exception('setCover not implemented by '.$this::class);
+    }
 
-            \OCP\Server::get(\Psr\Log\LoggerInterface::class)
-                ->error('Failed to set cover', ['app' => 'memories', 'exception' => $e->getMessage()])
-            ;
-        }
+    /**
+     * Register the backend. Do not override.
+     */
+    final public static function register(): void
+    {
+        Manager::register(static::clusterType(), static::class);
     }
 }

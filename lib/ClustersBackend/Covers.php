@@ -7,9 +7,16 @@ namespace OCA\Memories\ClustersBackend;
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IDBConnection;
+use Psr\Log\LoggerInterface;
 
 final class Covers
 {
+    public function __construct(
+        private IDBConnection $connection,
+        private LoggerInterface $logger,
+    ) {}
+
     /**
      * Select the list query to get covers.
      *
@@ -116,11 +123,10 @@ final class Covers
      * @param int    $fileid    File ID
      * @param bool   $manual    Whether this is a manual selection
      */
-    public static function setCover(string $type, int $clusterId, int $objectId, int $fileid, bool $manual): void
+    public function setCover(string $type, int $clusterId, int $objectId, int $fileid, bool $manual): void
     {
-        Util::transaction(static function () use ($type, $clusterId, $objectId, $fileid, $manual): void {
-            $connection = \OCP\Server::get(\OCP\IDBConnection::class);
-            $query = $connection->getQueryBuilder();
+        Util::transaction(function () use ($type, $clusterId, $objectId, $fileid, $manual): void {
+            $query = $this->connection->getQueryBuilder();
             $query->delete('memories_covers')
                 ->where($query->expr()->eq('uid', $query->createNamedParameter(Util::getUser()->getUID())))
                 ->andWhere($query->expr()->eq('clustertype', $query->createNamedParameter($type)))
@@ -128,7 +134,7 @@ final class Covers
                 ->executeStatement()
             ;
 
-            $query = $connection->getQueryBuilder();
+            $query = $this->connection->getQueryBuilder();
             $query->insert('memories_covers')
                 ->values([
                     'uid' => $query->createNamedParameter(Util::getUser()->getUID()),
@@ -142,5 +148,31 @@ final class Covers
                 ->executeStatement()
             ;
         });
+    }
+
+    /**
+     * Set the cover photo for the given cluster using a backend instance.
+     *
+     * @param Backend $backend Backend instance
+     * @param array   $photo   Photo object
+     * @param bool    $manual  Whether this is a manual selection
+     */
+    public function setBackendCover(Backend $backend, array $photo, bool $manual = false): void
+    {
+        try {
+            $this->setCover(
+                type: $backend->clusterType(),
+                clusterId: $backend->getClusterIdFrom($photo),
+                objectId: $backend->getCoverObjId($photo),
+                fileid: $backend->getFileId($photo),
+                manual: $manual,
+            );
+        } catch (\Exception $e) {
+            if ($manual) {
+                throw $e;
+            }
+
+            $this->logger->error('Failed to set cover', ['app' => 'memories', 'exception' => $e->getMessage()]);
+        }
     }
 }

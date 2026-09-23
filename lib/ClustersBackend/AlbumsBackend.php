@@ -39,6 +39,7 @@ final class AlbumsBackend extends Backend
         protected IRequest $request,
         protected TimelineQuery $tq,
         protected IUserManager $userManager,
+        protected Covers $covers,
     ) {}
 
     #[\Override]
@@ -212,6 +213,12 @@ final class AlbumsBackend extends Backend
     public function getClusterIdFrom(array $photo): int
     {
         return (int) $photo['album_id'];
+    }
+
+    #[\Override]
+    public function setCover(array $photo, bool $manual = false): void
+    {
+        $this->covers->setBackendCover($this, $photo, $manual);
     }
 
     private function getUID(): string

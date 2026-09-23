@@ -36,6 +36,7 @@ final class PlacesBackend extends Backend
         protected TimelineQuery $tq,
         protected IRequest $request,
         protected SystemConfig $systemConfig,
+        protected Covers $covers,
     ) {}
 
     #[\Override]
@@ -272,5 +273,11 @@ final class PlacesBackend extends Backend
         }
 
         return $name;
+    }
+
+    #[\Override]
+    public function setCover(array $photo, bool $manual = false): void
+    {
+        $this->covers->setBackendCover($this, $photo, $manual);
     }
 }
