@@ -6,6 +6,8 @@ namespace OCA\Memories\Service;
 
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\Http\Client\IClientService;
+use OCP\IConfig;
 
 final class BinExt
 {
@@ -21,6 +23,8 @@ final class BinExt
 
     public function __construct(
         private SystemConfig $systemConfig,
+        private IConfig $config,
+        private IClientService $clientService,
     ) {}
 
     /** Get the path to the temp directory */
@@ -360,8 +364,7 @@ final class BinExt
             throw new \Exception('could not find test file');
         }
 
-        $config = \OCP\Server::get(\OCP\IConfig::class);
-        $dataDir = $config->getSystemValueString('datadirectory', \OC::$SERVERROOT.'/data');
+        $dataDir = $this->config->getSystemValueString('datadirectory', \OC::$SERVERROOT.'/data');
         $testfile = rtrim($dataDir, '/').'/go-vod-test.jpg';
         if (!file_exists($testfile) || @filesize($testfile) !== @filesize($src)) {
             if (!@copy($src, $testfile)) {
@@ -370,8 +373,7 @@ final class BinExt
         }
 
         try {
-            $clientService = \OCP\Server::get(\OCP\Http\Client\IClientService::class);
-            $res = $clientService->newClient()->post("http://{$server}/vod", [
+            $res = $this->clientService->newClient()->post("http://{$server}/vod", [
                 'json' => [
                     'client' => 'test',
                     'path' => $testfile,

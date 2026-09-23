@@ -9,6 +9,7 @@ use OCA\Memories\Util;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\Config\IUserConfig;
 use OCP\IConfig;
+use OCP\IRequest;
 
 final class SystemConfig
 {
@@ -143,6 +144,7 @@ final class SystemConfig
     public function __construct(
         private IConfig $config,
         private IUserConfig $userConfig,
+        private IRequest $request,
     ) {}
 
     /**
@@ -228,7 +230,7 @@ final class SystemConfig
                 ?: $this->get('memories.timeline.default_path');
 
         if ($this->get('debug')) {
-            $override = \OCP\Server::get(\OCP\IRequest::class)->getHeader('X-TIMELINE-PATH');
+            $override = $this->request->getHeader('X-TIMELINE-PATH');
             if (!empty($override)) {
                 $paths = $override;
             }
