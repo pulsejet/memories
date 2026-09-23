@@ -40,7 +40,6 @@ use OCP\IDBConnection;
 use OCP\IPreview;
 use OCP\ITempManager;
 use OCP\IUser;
-use OCP\IUserManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\ConsoleSectionOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -70,7 +69,6 @@ final class Index
         private LoggerInterface $logger,
         private IAppManager $appManager,
         private SetupManager $setupManager,
-        private IUserManager $userManager,
         private Lens $lens,
     ) {}
 
