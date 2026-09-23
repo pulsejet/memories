@@ -62,6 +62,8 @@ final class LensController extends ApiController
         protected LensFolders $lensFolders,
         protected IClientService $clientService,
         protected IUserMountCache $mountCache,
+        protected Lens $lens,
+        protected SystemConfig $systemConfig,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -146,7 +148,7 @@ final class LensController extends ApiController
                 ], Http::STATUS_BAD_REQUEST));
             }
 
-            $base = Lens::daemonUrl();
+            $base = $this->lens->daemonUrl();
             if ('' === $base) {
                 throw new HttpResponseException(new DataResponse([
                     'message' => 'Lens daemon not configured',
@@ -271,7 +273,7 @@ final class LensController extends ApiController
      */
     private function guardServiceAccount(): void
     {
-        $serviceUser = SystemConfig::get('memories.lens.service_user');
+        $serviceUser = $this->systemConfig->get('memories.lens.service_user');
 
         $user = $this->userSession->getUser();
         if (null === $user) {

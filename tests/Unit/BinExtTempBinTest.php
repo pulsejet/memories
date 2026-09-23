@@ -14,17 +14,25 @@ use PHPUnit\Framework\TestCase;
  */
 final class BinExtTempBinTest extends TestCase
 {
+    private BinExt $binExt;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->binExt = \OCP\Server::get(BinExt::class);
+    }
+
     public function testGetTempBinCopiesAndCaches(): void
     {
         $src = tempnam(sys_get_temp_dir(), 'memories-src-');
         file_put_contents($src, "#!/bin/sh\necho hi\n");
         $name = 'testbin-'.bin2hex(random_bytes(4));
 
-        $target = BinExt::getTempBin($src, $name);
+        $target = $this->binExt->getTempBin($src, $name);
         self::assertFileExists($target);
         self::assertSame(file_get_contents($src), file_get_contents($target));
         self::assertTrue(is_executable($target));
-        self::assertSame($target, BinExt::getTempBin($src, $name));
+        self::assertSame($target, $this->binExt->getTempBin($src, $name));
 
         unlink($src);
     }
@@ -35,10 +43,10 @@ final class BinExtTempBinTest extends TestCase
         file_put_contents($src, 'data');
         $name = 'testbin-'.bin2hex(random_bytes(4));
 
-        $target = BinExt::getTempBin($src, $name);
+        $target = $this->binExt->getTempBin($src, $name);
         chmod($target, 0o555);
 
-        self::assertSame($target, BinExt::getTempBin($src, $name));
+        self::assertSame($target, $this->binExt->getTempBin($src, $name));
 
         unlink($src);
     }

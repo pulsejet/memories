@@ -65,6 +65,7 @@ final class Index
         private IRootFolder $rootFolder,
         private TimelineWrite $tw,
         private IDBConnection $db,
+        private SystemConfig $systemConfig,
         private ITempManager $tempManager,
         private LoggerInterface $logger,
         private IAppManager $appManager,
@@ -92,15 +93,15 @@ final class Index
         $root = $this->rootFolder->getUserFolder($uid);
 
         // Get paths of folders to index
-        $mode = SystemConfig::get('memories.index.mode');
+        $mode = $this->systemConfig->get('memories.index.mode');
         if (null !== $path) {
             $paths = [$path];
         } elseif ('1' === $mode || '0' === $mode) { // everything (or nothing)
             $paths = ['/'];
         } elseif ('2' === $mode) { // timeline
-            $paths = Util::getTimelinePaths($uid);
+            $paths = $this->systemConfig->getTimelinePaths($uid);
         } elseif ('3' === $mode) { // custom
-            $paths = [SystemConfig::get('memories.index.path')];
+            $paths = [$this->systemConfig->get('memories.index.path')];
         } else {
             throw new \Exception('Invalid index mode');
         }
@@ -138,7 +139,7 @@ final class Index
         $this->log("Indexing folder {$path}", true);
 
         // Check if path is blacklisted
-        if (!$this->isPathAllowed($path.'/')) {
+        if (!$this->isPathAllowed($path.'/', (string) $this->systemConfig->get('memories.index.path.blacklist'))) {
             $this->log("Skipping folder {$path} (path excluded)".PHP_EOL, true);
 
             return;
@@ -156,9 +157,10 @@ final class Index
 
         // Filter files that are supported
         $mimes = self::getMimeList();
+        $pathBlacklist = (string) $this->systemConfig->get('memories.index.path.blacklist');
         $files = array_filter($nodes, static fn ($n): bool => $n instanceof File
             && \in_array($n->getMimeType(), $mimes, true)
-            && self::isPathAllowed($n->getPath()));
+            && self::isPathAllowed($n->getPath(), $pathBlacklist));
 
         // Create an associative array with file ID as key
         $files = array_combine(array_map(static fn ($n) => $n->getId(), $files), $files);
@@ -325,7 +327,7 @@ final class Index
     /**
      * Checks if the specified node's path is allowed to be indexed.
      */
-    public static function isPathAllowed(string $path): bool
+    public static function isPathAllowed(string $path, string $blacklist): bool
     {
         // Always exclude some predefined patterns
         //   .trashed-<file> (https://github.com/nextcloud/android/issues/10645)
@@ -333,17 +335,12 @@ final class Index
             return false;
         }
 
-        /** @var ?string $pattern */
-        static $pattern = null;
-
-        if (null === $pattern) {
-            $pattern = trim(SystemConfig::get('memories.index.path.blacklist') ?: '');
-            if (!empty($pattern) && !\is_int(preg_match("/{$pattern}/", ''))) {
-                throw new \Exception('Invalid regex pattern in memories.index.path.blacklist');
-            }
+        $pattern = trim($blacklist);
+        if ('' !== $pattern && !\is_int(preg_match("/{$pattern}/", ''))) {
+            throw new \Exception('Invalid regex pattern in memories.index.path.blacklist');
         }
 
-        return empty($pattern) || !preg_match("/{$pattern}/", $path);
+        return '' === $pattern || !preg_match("/{$pattern}/", $path);
     }
 
     /**

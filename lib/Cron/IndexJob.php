@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace OCA\Memories\Cron;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Exif;
 use OCA\Memories\Service;
+use OCA\Memories\Service\BinExt;
 use OCA\Memories\Settings\SystemConfig;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\TimedJob;
@@ -26,6 +28,9 @@ final class IndexJob extends TimedJob
         private IUserManager $userManager,
         private LoggerInterface $logger,
         private IAppConfig $appConfig,
+        private SystemConfig $systemConfig,
+        private Exif $exif,
+        private BinExt $binExt,
     ) {
         parent::__construct($time);
 
@@ -39,7 +44,7 @@ final class IndexJob extends TimedJob
     protected function run(mixed $argument): void
     {
         // Check if indexing is enabled
-        if ('0' === SystemConfig::get('memories.index.mode')) {
+        if ('0' === $this->systemConfig->get('memories.index.mode')) {
             return;
         }
 
@@ -57,8 +62,8 @@ final class IndexJob extends TimedJob
         // This is sub-optimal: the process may not be required at all.
         try {
             // Start and make sure exiftool is working
-            \OCA\Memories\Exif::ensureStaticExiftoolProc();
-            Service\BinExt::testExiftool(); // throws
+            $this->exif->ensureStaticExiftoolProc();
+            $this->binExt->testExiftool(); // throws
 
             // Run the indexer
             $this->indexAllUsers();
@@ -73,7 +78,7 @@ final class IndexJob extends TimedJob
             $this->log('Indexing exception: '.$e->getMessage());
         } finally {
             // Close the static exiftool process
-            \OCA\Memories\Exif::closeStaticExiftoolProc();
+            $this->exif->closeStaticExiftoolProc();
         }
 
         // Store the last run duration

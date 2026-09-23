@@ -15,6 +15,7 @@ final class Repair implements IRepairStep
     public function __construct(
         private IConfig $config,
         private AddMissingIndices $indices,
+        private BinExt $binExt,
     ) {}
 
     #[\Override]
@@ -34,25 +35,25 @@ final class Repair implements IRepairStep
     public function configureBinExt(IOutput $output): void
     {
         // kill any instances of go-vod and exiftool
-        BinExt::pkill(BinExt::getName('go-vod'));
-        BinExt::pkill(BinExt::getName('exiftool'));
+        $this->binExt->pkill($this->binExt->getName('go-vod'));
+        $this->binExt->pkill($this->binExt->getName('exiftool'));
 
         // detect exiftool
-        if ($path = BinExt::detectExiftool()) {
+        if ($path = $this->binExt->detectExiftool()) {
             $output->info("exiftool binary is configured: {$path}");
         } else {
             $output->warning('exiftool binary could not be configured');
         }
 
         // detect go-vod
-        if ($path = BinExt::detectGoVod()) {
+        if ($path = $this->binExt->detectGoVod()) {
             $output->info("go-vod binary is configured: {$path}");
         } else {
             $output->warning('go-vod binary could not be configured');
         }
 
         // detect ffmpeg
-        if ($path = BinExt::detectFFmpeg()) {
+        if ($path = $this->binExt->detectFFmpeg()) {
             $output->info("ffmpeg binary is configured: {$path}");
         } else {
             $output->warning('ffmpeg binary could not be configured');

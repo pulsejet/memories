@@ -6,6 +6,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\AlbumsQuery;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -38,6 +39,7 @@ final class PublicAlbumController extends Controller
         protected IURLGenerator $urlGenerator,
         protected AlbumsQuery $albumsQuery,
         protected IL10N $l10n,
+        protected SystemConfig $systemConfig,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -92,7 +94,7 @@ final class PublicAlbumController extends Controller
         $response = new PublicTemplateResponse(Application::APPNAME, 'main', PageController::getMainParams());
         $response->setHeaderTitle($title);
         $response->setFooterVisible(false); // wth is that anyway?
-        $response->setContentSecurityPolicy(PageController::getCSP());
+        $response->setContentSecurityPolicy($this->systemConfig->getCSP());
 
         // Add download link
         $dlUrl = $this->urlGenerator->linkToRouteAbsolute('memories.PublicAlbum.download', [

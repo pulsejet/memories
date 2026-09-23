@@ -31,6 +31,10 @@ use OCP\Migration\SimpleMigrationStep;
 
 final class Version602003Date20240310203729 extends SimpleMigrationStep
 {
+    public function __construct(
+        private SystemConfig $systemConfig,
+    ) {}
+
     /**
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
@@ -69,7 +73,7 @@ final class Version602003Date20240310203729 extends SimpleMigrationStep
         }
 
         // This version changes the geometry of planet
-        SystemConfig::set('memories.gis_type', -1);
+        $this->systemConfig->set('memories.gis_type', -1);
 
         return $schema;
     }

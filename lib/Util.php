@@ -7,8 +7,6 @@ namespace OCA\Memories;
 use OC\Files\Search\SearchBinaryOperator;
 use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
-use OCA\Memories\AppInfo\Application;
-use OCA\Memories\Settings\SystemConfig;
 use OCP\App\IAppManager;
 use OCP\Files\Node;
 use OCP\Files\Search\ISearchBinaryOperator;
@@ -298,31 +296,6 @@ final class Util
         }
 
         return false;
-    }
-
-    /**
-     * Get list of timeline paths as array.
-     *
-     * @return string[] List of paths
-     */
-    public static function getTimelinePaths(string $uid): array
-    {
-        $paths = \OCP\Server::get(\OCP\Config\IUserConfig::class)
-            ->getValueString($uid, Application::APPNAME, 'timelinePath')
-                ?: SystemConfig::get('memories.timeline.default_path');
-
-        if (SystemConfig::get('debug')) {
-            $override = \OCP\Server::get(\OCP\IRequest::class)->getHeader('X-TIMELINE-PATH');
-            if (!empty($override)) {
-                $paths = $override;
-            }
-        }
-
-        return array_map(
-            static fn ($path) => self::sanitizePath(trim($path))
-                ?? throw new \InvalidArgumentException("Invalid timeline path: {$path}"),
-            explode(';', $paths),
-        );
     }
 
     /**

@@ -28,6 +28,7 @@ use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
 use OCA\Memories\ClustersBackend;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\PublicShareController;
 use OCP\Files\File;
@@ -58,6 +59,7 @@ final class FsManager
         private ShareManager $shareManager,
         private IUserManager $userManager,
         private ISession $session,
+        private SystemConfig $systemConfig,
         ICacheFactory $cacheFactory,
     ) {
         $this->nomediaCache = $cacheFactory->createLocal('memories:nomedia');
@@ -124,7 +126,7 @@ final class FsManager
         if ($path = $this->getRequestFolder()) {
             $paths = [$path];
         } else {
-            $paths = Util::getTimelinePaths($uid);
+            $paths = $this->systemConfig->getTimelinePaths($uid);
         }
 
         // Combined etag, for cache invalidation.

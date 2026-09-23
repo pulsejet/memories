@@ -14,7 +14,10 @@ const MP4_ATOMS = ['ftyp', 'moov', 'mdat', 'moof', 'mfra', 'sidx', 'free', 'skip
 
 final class LivePhoto
 {
-    public function __construct(private IDBConnection $connection) {}
+    public function __construct(
+        private IDBConnection $connection,
+        private Exif $exif,
+    ) {}
 
     /**
      * Check if a given Exif data is the video part of a Live Photo.
@@ -26,17 +29,17 @@ final class LivePhoto
     }
 
     /** Get liveid from photo part */
-    public static function getLivePhotoId(File $file, array $exif): string
+    public function getLivePhotoId(File $file, array $exif): string
     {
         $path = $file->getStorage()->getLocalFile($file->getInternalPath())
             ?: throw new \Exception('[BUG][LivePhoto] Failed to get local file path');
         $size = (int) $file->getSize();
 
-        return self::getLivePhotoIdFromPath($path, $size, $exif);
+        return $this->getLivePhotoIdFromPath($path, $size, $exif);
     }
 
     /** Get liveid from photo local file path */
-    public static function getLivePhotoIdFromPath(string $path, int $size, array $exif): string
+    public function getLivePhotoIdFromPath(string $path, int $size, array $exif): string
     {
         // Apple JPEG (MOV has ContentIdentifier)
         if ($uuid = ($exif['ContentIdentifier'] ?? $exif['MediaGroupUUID'] ?? null)) {
@@ -109,7 +112,7 @@ final class LivePhoto
                 // hope that the video is located at the end, and thus the last DirectoryItemLength
                 // seen before the DirectoryItemSemantic of MotionPhoto is the length of the video.
                 // https://github.com/pulsejet/memories/issues/965
-                $extExif = Exif::getExifWithDuplicates($path);
+                $extExif = $this->exif->getExifWithDuplicates($path);
                 $lastLength = null; // last DirectoryItemLength seen
 
                 foreach ($extExif as $key => $value) {

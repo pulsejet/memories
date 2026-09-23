@@ -14,14 +14,16 @@ use PHPUnit\Framework\TestCase;
  */
 final class IndexLogicTest extends TestCase
 {
+    private const BLACKLIST = '\/@(Recycle|eaDir)\/';
+
     public function testIsPathAllowed(): void
     {
-        self::assertTrue(Index::isPathAllowed('/admin/files/Photos/IMG_001.jpg'));
-        self::assertTrue(Index::isPathAllowed('/admin/files/Photos/.archive/old.jpg'));
+        self::assertTrue(Index::isPathAllowed('/admin/files/Photos/IMG_001.jpg', self::BLACKLIST));
+        self::assertTrue(Index::isPathAllowed('/admin/files/Photos/.archive/old.jpg', self::BLACKLIST));
 
-        self::assertFalse(Index::isPathAllowed('/admin/files/Photos/.trashed-12345'));
+        self::assertFalse(Index::isPathAllowed('/admin/files/Photos/.trashed-12345', self::BLACKLIST));
 
-        self::assertFalse(Index::isPathAllowed('/admin/files/Photos/@Recycle/foo.jpg'));
-        self::assertFalse(Index::isPathAllowed('/admin/files/Photos/@eaDir/foo.jpg'));
+        self::assertFalse(Index::isPathAllowed('/admin/files/Photos/@Recycle/foo.jpg', self::BLACKLIST));
+        self::assertFalse(Index::isPathAllowed('/admin/files/Photos/@eaDir/foo.jpg', self::BLACKLIST));
     }
 }

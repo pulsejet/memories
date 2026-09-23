@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace OCA\Memories\Settings;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Util;
+use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\Config\IUserConfig;
+use OCP\IConfig;
 
 final class SystemConfig
 {
@@ -136,13 +140,18 @@ final class SystemConfig
         'debug' => false,
     ];
 
+    public function __construct(
+        private IConfig $config,
+        private IUserConfig $userConfig,
+    ) {}
+
     /**
      * Get a system config key with the correct default.
      *
      * @param string $key     System config key
      * @param mixed  $default Default value
      */
-    public static function get(string $key, mixed $default = null): mixed
+    public function get(string $key, mixed $default = null): mixed
     {
         if (!\array_key_exists($key, self::DEFAULTS)) {
             throw new \InvalidArgumentException("Invalid system config key: {$key}");
@@ -152,9 +161,7 @@ final class SystemConfig
         $default ??= self::DEFAULTS[$key];
 
         // Get the value from the config
-        $value = \OCP\Server::get(\OCP\IConfig::class)
-            ->getSystemValue($key, $default)
-        ;
+        $value = $this->config->getSystemValue($key, $default);
 
         // Check if the value has the correct type
         if (($got = \gettype($value)) !== ($exp = \gettype($default))) {
@@ -172,7 +179,7 @@ final class SystemConfig
      *
      * @throws \InvalidArgumentException
      */
-    public static function set(string $key, mixed $value): void
+    public function set(string $key, mixed $value): void
     {
         // Check if the key is valid
         if (!\array_key_exists($key, self::DEFAULTS)) {
@@ -192,7 +199,7 @@ final class SystemConfig
             throw new \InvalidArgumentException("Invalid value for system config {$key}, null is not allowed");
         }
 
-        $config = \OCP\Server::get(\OCP\IConfig::class);
+        $config = $this->config;
         if ($isAppKey && ($value === self::DEFAULTS[$key] || null === $value)) {
             $config->deleteSystemValue($key);
         } else {
@@ -204,8 +211,80 @@ final class SystemConfig
      * Check if geolocation (places) is enabled and available.
      * Returns the type of the GIS.
      */
-    public static function gisType(): int
+    public function gisType(): int
     {
-        return self::get('memories.gis_type');
+        return $this->get('memories.gis_type');
+    }
+
+    /**
+     * Get list of timeline paths as array.
+     *
+     * @return string[] List of paths
+     */
+    public function getTimelinePaths(string $uid): array
+    {
+        $paths = $this->userConfig
+            ->getValueString($uid, Application::APPNAME, 'timelinePath')
+                ?: $this->get('memories.timeline.default_path');
+
+        if ($this->get('debug')) {
+            $override = \OCP\Server::get(\OCP\IRequest::class)->getHeader('X-TIMELINE-PATH');
+            if (!empty($override)) {
+                $paths = $override;
+            }
+        }
+
+        return array_map(
+            static fn ($path) => Util::sanitizePath(trim($path))
+                ?? throw new \InvalidArgumentException("Invalid timeline path: {$path}"),
+            explode(';', $paths),
+        );
+    }
+
+    /** Get the common content security policy */
+    public function getCSP(): ContentSecurityPolicy
+    {
+        $policy = new ContentSecurityPolicy();
+
+        // Image domains MUST be added to the connect domain list
+        // because of the service worker fetch() call
+        $addImageDomain = static function (string $url) use (&$policy): void {
+            $policy->addAllowedImageDomain($url);
+            $policy->addAllowedConnectDomain($url);
+        };
+
+        // Create base policy
+        $policy->addAllowedWorkerSrcDomain("'self'");
+        $policy->addAllowedScriptDomain("'self'");
+        $policy->addAllowedFrameDomain("'self'");
+        $policy->addAllowedImageDomain("'self'");
+        $policy->addAllowedMediaDomain("'self'");
+        $policy->addAllowedConnectDomain("'self'");
+
+        // Video player
+        $policy->addAllowedWorkerSrcDomain('blob:');
+        $policy->addAllowedScriptDomain('blob:');
+        $policy->addAllowedMediaDomain('blob:');
+
+        // Image editor
+        $policy->addAllowedConnectDomain('data:');
+
+        // Allow CSP domains of configured map tile servers
+        foreach ($this->get('memories.map.tile_servers') as $tile) {
+            foreach ((array) ($tile['csp'] ?? []) as $csp) {
+                $addImageDomain((string) $csp);
+            }
+        }
+
+        // Native communication
+        $addImageDomain('http://127.0.0.1');
+
+        // Allow configured location search provider
+        $searchHost = parse_url((string) $this->get('memories.places.search.url'), PHP_URL_HOST);
+        if (\is_string($searchHost) && '' !== $searchHost) {
+            $policy->addAllowedConnectDomain($searchHost);
+        }
+
+        return $policy;
     }
 }

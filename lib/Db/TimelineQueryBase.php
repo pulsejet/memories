@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCA\Memories\Settings\SystemConfig;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use OCP\IRequest;
@@ -28,6 +29,7 @@ trait TimelineQueryBase
         protected IDBConnection $connection,
         protected IRequest $request,
         protected IUserManager $userManager,
+        protected SystemConfig $systemConfig,
     ) {}
 
     public function allowEmptyRoot(bool $value = true): void

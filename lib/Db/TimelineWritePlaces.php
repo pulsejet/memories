@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
@@ -27,7 +26,7 @@ trait TimelineWritePlaces
     public function updatePlacesData(int $fileId, ?float $lat, ?float $lon): array
     {
         // Get GIS type
-        $gisType = SystemConfig::gisType();
+        $gisType = $this->systemConfig->gisType();
 
         // Check if valid
         if ($gisType <= 0) {

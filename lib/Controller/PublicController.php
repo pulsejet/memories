@@ -7,6 +7,7 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -55,6 +56,7 @@ final class PublicController extends AuthPublicShareController
         protected TimelineQuery $tq,
         protected IL10N $l10n,
         protected FsManager $fs,
+        protected SystemConfig $systemConfig,
     ) {
         parent::__construct(Application::APPNAME, $request, $session, $urlGenerator);
     }
@@ -139,7 +141,7 @@ final class PublicController extends AuthPublicShareController
         $response = new PublicTemplateResponse($this->appName, 'main', PageController::getMainParams());
         $response->setHeaderTitle($node->getName());
         $response->setFooterVisible(false); // wth is that anyway?
-        $response->setContentSecurityPolicy(PageController::getCSP());
+        $response->setContentSecurityPolicy($this->systemConfig->getCSP());
         $response->cacheFor(0);
 
         // Add download link

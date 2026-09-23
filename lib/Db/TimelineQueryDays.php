@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCA\Memories\ClustersBackend;
-use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
@@ -219,7 +218,7 @@ trait TimelineQueryDays
         $parent = 'm.parent';
 
         // Check if triggers are properly set up
-        if (!SystemConfig::get('memories.db.triggers.fcu')) {
+        if (!$this->systemConfig->get('memories.db.triggers.fcu')) {
             // Compatibility mode - JOIN filecache and use the parent from there (this is slow)
             $query->innerJoin('m', 'filecache', 'ff_f', $query->expr()->eq('m.fileid', 'ff_f.fileid'));
             $parent = 'ff_f.parent';

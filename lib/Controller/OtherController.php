@@ -52,6 +52,8 @@ final class OtherController extends ApiController
         protected L10NFactory $l10nFactory,
         protected IURLGenerator $urlGenerator,
         protected IConfig $config,
+        protected SystemConfig $systemConfig,
+        protected Lens $lens,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -69,7 +71,7 @@ final class OtherController extends ApiController
     {
         return Util::guardEx(function () use ($key, $value) {
             // Make sure not running in read-only mode
-            if (SystemConfig::get('memories.readonly', false)) {
+            if ($this->systemConfig->get('memories.readonly', false)) {
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
             }
 
@@ -104,7 +106,7 @@ final class OtherController extends ApiController
             $locale = $this->l10nFactory->findLocale($language);
 
             // available map tile servers and the user's selected server URL
-            $mapTileServers = SystemConfig::get('memories.map.tile_servers');
+            $mapTileServers = $this->systemConfig->get('memories.map.tile_servers');
             $mapTileServerDefault = $mapTileServers[0]['url'] ?? '';
             $mapTileServerUrl = $uid ? $this->userConfig->getValueString($uid, Application::APPNAME, 'mapTileServerUrl', $mapTileServerDefault) : $mapTileServerDefault;
             if (!\in_array($mapTileServerUrl, array_column($mapTileServers, 'url'), true)) {
@@ -114,10 +116,10 @@ final class OtherController extends ApiController
             return new JSONResponse([
                 // general stuff
                 'version' => $version,
-                'vod_disable' => SystemConfig::get('memories.vod.disable'),
-                'video_default_quality' => SystemConfig::get('memories.video_default_quality'),
-                'places_gis' => SystemConfig::get('memories.gis_type'),
-                'places_search_url' => SystemConfig::get('memories.places.search.url'),
+                'vod_disable' => $this->systemConfig->get('memories.vod.disable'),
+                'video_default_quality' => $this->systemConfig->get('memories.video_default_quality'),
+                'places_gis' => $this->systemConfig->get('memories.gis_type'),
+                'places_search_url' => $this->systemConfig->get('memories.places.search.url'),
                 'map_tile_servers' => $mapTileServers,
                 'map_tile_server_url' => $mapTileServerUrl,
                 'language' => $language,
@@ -130,18 +132,18 @@ final class OtherController extends ApiController
                 'recognize_enabled' => Util::recognizeIsEnabled(),
                 'facerecognition_installed' => Util::facerecognitionIsInstalled(),
                 'facerecognition_enabled' => Util::facerecognitionIsEnabled(),
-                'lens_enabled' => '' !== trim(Lens::daemonUrl()),
+                'lens_enabled' => '' !== trim($this->lens->daemonUrl()),
                 'preview_generator_enabled' => Util::previewGeneratorIsEnabled(),
 
                 // general settings
-                'timeline_path' => $getAppConfig('timelinePath', SystemConfig::get('memories.timeline.default_path')),
+                'timeline_path' => $getAppConfig('timelinePath', $this->systemConfig->get('memories.timeline.default_path')),
                 'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
                 'stack_raw_files' => 'true' === $getAppConfig('stackRawFiles', 'true'),
                 'dedup_identical' => 'true' === $getAppConfig('dedupIdentical', 'false'),
                 'show_owner_name_timeline' => 'true' === $getAppConfig('showOwnerNameTimeline', 'false'),
 
                 // viewer settings
-                'high_res_cond_default' => SystemConfig::get('memories.viewer.high_res_cond_default'),
+                'high_res_cond_default' => $this->systemConfig->get('memories.viewer.high_res_cond_default'),
                 'livephoto_autoplay' => 'true' === $getAppConfig('livephotoAutoplay', 'false'),
                 'livephoto_loop' => 'true' === $getAppConfig('livephotoLoop', 'false'),
                 'video_loop' => 'true' === $getAppConfig('videoLoop', 'false'),
@@ -250,7 +252,7 @@ final class OtherController extends ApiController
             }
 
             /** @var Http\Response $response */
-            $response->setContentSecurityPolicy(PageController::getCSP());
+            $response->setContentSecurityPolicy($this->systemConfig->getCSP());
 
             return $response;
         });

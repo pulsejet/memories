@@ -25,6 +25,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
@@ -39,6 +40,7 @@ final class ArchiveController extends ApiController
     public function __construct(
         IRequest $request,
         protected ILockingProvider $lockingProvider,
+        protected SystemConfig $systemConfig,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -67,7 +69,7 @@ final class ArchiveController extends ApiController
             }
 
             // Create archive folder in the root of the user's configured timeline
-            $configPaths = Util::getTimelinePaths(Util::getUID());
+            $configPaths = $this->systemConfig->getTimelinePaths(Util::getUID());
             $timelinePaths = [];
 
             // Get all timeline paths

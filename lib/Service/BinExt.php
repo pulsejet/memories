@@ -17,24 +17,28 @@ final class BinExt
     private const GO_VOD_LOCK_FILE = '/tmp/go-vod.lock';
 
     /** Exiftool environment is initialized in this process */
-    private static bool $hasExiftoolEnv = false;
+    private bool $hasExiftoolEnv = false;
+
+    public function __construct(
+        private SystemConfig $systemConfig,
+    ) {}
 
     /** Get the path to the temp directory */
-    public static function getTmpPath(): string
+    public function getTmpPath(): string
     {
-        $path = SystemConfig::get('memories.exiftool.tmp');
+        $path = $this->systemConfig->get('memories.exiftool.tmp');
 
         return rtrim($path ?: sys_get_temp_dir(), '/');
     }
 
     /** Copy a binary to temp dir for execution */
-    public static function getTempBin(string $path, string $name, bool $copy = true): string
+    public function getTempBin(string $path, string $name, bool $copy = true): string
     {
         // Bust cache if the path changes
         $suffix = hash('crc32', $path);
 
         // Check target temp file
-        $target = self::getTmpPath().'/'.$name.'-'.$suffix;
+        $target = $this->getTmpPath().'/'.$name.'-'.$suffix;
         if (file_exists($target)) {
             if (!is_executable($target) && !chmod($target, 0o755)) {
                 throw new \Exception("failed to make {$name} temp binary executable: {$target}");
@@ -52,24 +56,24 @@ final class BinExt
                 throw new \Exception("failed to copy {$name} binary from {$path} to {$target}");
             }
 
-            return self::getTempBin($path, $name, false);
+            return $this->getTempBin($path, $name, false);
         }
 
         throw new \Exception("failed to find exiftool temp binary {$target}");
     }
 
     /** Get the name for a binary */
-    public static function getName(string $name, string $version = ''): string
+    public function getName(string $name, string $version = ''): string
     {
-        $id = SystemConfig::get('instanceid');
+        $id = $this->systemConfig->get('instanceid');
 
         return empty($version) ? "{$name}-{$id}" : "{$name}-{$id}-{$version}";
     }
 
     /** Test configured exiftool binary */
-    public static function testExiftool(): string
+    public function testExiftool(): string
     {
-        $cmd = array_merge(self::getExiftool(), ['-ver']);
+        $cmd = array_merge($this->getExiftool(), ['-ver']);
 
         $out = Util::execSafe($cmd, 3000);
         if (!$out) {
@@ -90,16 +94,18 @@ final class BinExt
         }
 
         try {
-            $exif = \OCA\Memories\Exif::getExifFromLocalPath($file);
+            $dateTaken = trim((string) Util::execSafe(array_merge($this->getExiftool(), [
+                '-n', '-s', '-s', '-s', '-DateTimeOriginal', $file,
+            ]), 3000));
         } catch (\Exception $e) {
             throw new \Exception("Couldn't read Exif data from test file: ".$e->getMessage());
         }
 
-        if (!$exif) {
+        if ('' === $dateTaken) {
             throw new \Exception('Got no Exif data from test file');
         }
 
-        if (($exp = '2004:08:31 19:52:58') !== ($got = $exif['DateTimeOriginal'])) {
+        if (($exp = '2004:08:31 19:52:58') !== ($got = $dateTaken)) {
             throw new \Exception("Got wrong Exif data from test file {$exp} <==> {$got}");
         }
 
@@ -107,11 +113,11 @@ final class BinExt
     }
 
     /** Get path to exiftool binary */
-    public static function getExiftoolPBin(): string
+    public function getExiftoolPBin(): string
     {
-        $path = SystemConfig::get('memories.exiftool');
+        $path = $this->systemConfig->get('memories.exiftool');
 
-        $path = self::getTempBin($path, self::getName('exiftool', self::EXIFTOOL_VER));
+        $path = $this->getTempBin($path, $this->getName('exiftool', self::EXIFTOOL_VER));
 
         // Explicitly set the PAR directory to avoid cache collisions
         // https://github.com/pulsejet/memories/issues/1608
@@ -125,33 +131,33 @@ final class BinExt
      *
      * @return string[]
      */
-    public static function getExiftool(): array
+    public function getExiftool(): array
     {
-        if (!self::$hasExiftoolEnv) {
-            self::$hasExiftoolEnv = true;
+        if (!$this->hasExiftoolEnv) {
+            $this->hasExiftoolEnv = true;
             putenv('LANG=C'); // set perl lang to suppress warning
         }
 
-        if (SystemConfig::get('memories.exiftool_no_local')) {
+        if ($this->systemConfig->get('memories.exiftool_no_local')) {
             $path = realpath(__DIR__.'/../../bin-ext/exiftool/exiftool') ?: '';
 
             return ['perl', $path];
         }
 
-        return [self::getExiftoolPBin()];
+        return [$this->getExiftoolPBin()];
     }
 
     /**
      * Detect the exiftool binary to use.
      */
-    public static function detectExiftool(): false|string
+    public function detectExiftool(): false|string
     {
-        if (!empty($path = SystemConfig::get('memories.exiftool')) && file_exists($path)) {
+        if (!empty($path = $this->systemConfig->get('memories.exiftool')) && file_exists($path)) {
             return $path;
         }
 
-        if (SystemConfig::get('memories.exiftool_no_local')) {
-            return implode(' ', self::getExiftool());
+        if ($this->systemConfig->get('memories.exiftool_no_local')) {
+            return implode(' ', $this->getExiftool());
         }
 
         // Detect architecture
@@ -165,32 +171,32 @@ final class BinExt
 
             // make sure it exists
             if ($path && file_exists($path)) {
-                SystemConfig::set('memories.exiftool', $path);
+                $this->systemConfig->set('memories.exiftool', $path);
 
                 return $path;
             }
         }
 
-        SystemConfig::set('memories.exiftool_no_local', true);
+        $this->systemConfig->set('memories.exiftool_no_local', true);
 
         return false;
     }
 
     /** Get all configured go-vod servers. */
-    public static function getGoVodServers(): array
+    public function getGoVodServers(): array
     {
-        $bind = SystemConfig::get('memories.vod.bind');
-        if (!SystemConfig::get('memories.vod.external')) {
+        $bind = $this->systemConfig->get('memories.vod.bind');
+        if (!$this->systemConfig->get('memories.vod.external')) {
             return [$bind];
         }
 
-        return SystemConfig::get('memories.vod.connect') ?: [$bind];
+        return $this->systemConfig->get('memories.vod.connect') ?: [$bind];
     }
 
     /** Get the upstream URL for a go-vod API (vod, create). */
-    public static function getGoVodEndpoint(string $client, string $endpoint): string
+    public function getGoVodEndpoint(string $client, string $endpoint): string
     {
-        $servers = self::getGoVodServers();
+        $servers = $this->getGoVodServers();
 
         // Sticky-route each client to one server so go-vod state stays local
         $srv = $servers[(crc32($client) & 0xFFFFFFFF) % \count($servers)];
@@ -198,38 +204,38 @@ final class BinExt
         return "http://{$srv}/{$endpoint}";
     }
 
-    public static function goVodTConfig(): array
+    public function goVodTConfig(): array
     {
         // Get config from system values
         return [
             'chunkSize' => 3,
-            'qf' => SystemConfig::get('memories.vod.qf'),
+            'qf' => $this->systemConfig->get('memories.vod.qf'),
 
-            'vaapi' => SystemConfig::get('memories.vod.vaapi'),
-            'vaapiLowPower' => SystemConfig::get('memories.vod.vaapi.low_power'),
-            'vaapiDevice' => SystemConfig::get('memories.vod.vaapi.device'),
+            'vaapi' => $this->systemConfig->get('memories.vod.vaapi'),
+            'vaapiLowPower' => $this->systemConfig->get('memories.vod.vaapi.low_power'),
+            'vaapiDevice' => $this->systemConfig->get('memories.vod.vaapi.device'),
 
-            'nvenc' => SystemConfig::get('memories.vod.nvenc'),
-            'nvencTemporalAQ' => SystemConfig::get('memories.vod.nvenc.temporal_aq'),
-            'nvencScale' => SystemConfig::get('memories.vod.nvenc.scale'),
+            'nvenc' => $this->systemConfig->get('memories.vod.nvenc'),
+            'nvencTemporalAQ' => $this->systemConfig->get('memories.vod.nvenc.temporal_aq'),
+            'nvencScale' => $this->systemConfig->get('memories.vod.nvenc.scale'),
 
-            'useTranspose' => SystemConfig::get('memories.vod.use_transpose'),
-            'forceSwTranspose' => SystemConfig::get('memories.vod.use_transpose.force_sw'),
-            'useGopSize' => SystemConfig::get('memories.vod.use_gop_size'),
+            'useTranspose' => $this->systemConfig->get('memories.vod.use_transpose'),
+            'forceSwTranspose' => $this->systemConfig->get('memories.vod.use_transpose.force_sw'),
+            'useGopSize' => $this->systemConfig->get('memories.vod.use_gop_size'),
         ];
     }
 
-    public static function goVodServerConfig(): array
+    public function goVodServerConfig(): array
     {
-        $dir = static function (string $key, string $default): string {
-            return rtrim(SystemConfig::get($key, $default), '/')
-                .'/'.SystemConfig::get('instanceid');
+        $dir = function (string $key, string $default): string {
+            return rtrim($this->systemConfig->get($key, $default), '/')
+                .'/'.trim((string) $this->systemConfig->get('instanceid'), '/');
         };
 
         return [
-            'bind' => SystemConfig::get('memories.vod.bind'),
-            'ffmpeg' => SystemConfig::get('memories.vod.ffmpeg'),
-            'ffprobe' => SystemConfig::get('memories.vod.ffprobe'),
+            'bind' => $this->systemConfig->get('memories.vod.bind'),
+            'ffmpeg' => $this->systemConfig->get('memories.vod.ffmpeg'),
+            'ffprobe' => $this->systemConfig->get('memories.vod.ffprobe'),
             'tempdir' => $dir('memories.vod.tempdir', sys_get_temp_dir().'/go-vod/'),
             'cacheDir' => $dir('memories.vod.cachedir', sys_get_temp_dir().'/go-vod-cache'),
         ];
@@ -238,20 +244,20 @@ final class BinExt
     /**
      * Get temp binary for go-vod.
      */
-    public static function getGoVodBin(): string
+    public function getGoVodBin(): string
     {
-        $path = SystemConfig::get('memories.vod.path');
+        $path = $this->systemConfig->get('memories.vod.path');
 
-        return self::getTempBin($path, self::getName('go-vod', self::GOVOD_VER));
+        return $this->getTempBin($path, $this->getName('go-vod', self::GOVOD_VER));
     }
 
-    public static function ensureGoVod(): void
+    public function ensureGoVod(): void
     {
-        if (SystemConfig::get('memories.vod.disable') || SystemConfig::get('memories.vod.external')) {
+        if ($this->systemConfig->get('memories.vod.disable') || $this->systemConfig->get('memories.vod.external')) {
             return;
         }
 
-        if (self::isGoVodAlive()) {
+        if ($this->isGoVodAlive()) {
             return;
         }
 
@@ -263,18 +269,18 @@ final class BinExt
 
         try {
             // Re-check after acquiring the lock
-            if (self::isGoVodAlive()) {
+            if ($this->isGoVodAlive()) {
                 return;
             }
 
             // Get transcoder path
-            $transcoder = self::getGoVodBin();
+            $transcoder = $this->getGoVodBin();
             if (empty($transcoder)) {
                 throw new \Exception('Transcoder not configured');
             }
 
             // Get local server config
-            $env = self::goVodServerConfig();
+            $env = $this->goVodServerConfig();
             $tmpPath = $env['tempdir'];
 
             // (Re-)create temp dir
@@ -297,7 +303,7 @@ final class BinExt
             file_put_contents($configFile, json_encode($env, JSON_PRETTY_PRINT));
 
             // Kill the transcoder in case it's running
-            self::pkill(self::getName('go-vod'));
+            $this->pkill($this->getName('go-vod'));
 
             // Spawn detached via shell backgrounding so init adopts go-vod.
             // An abandoned proc_open handle would leave a zombie under the PHP worker.
@@ -338,15 +344,15 @@ final class BinExt
     }
 
     /** Test the go-vod instance that is running */
-    public static function testGoVod(string $server): string
+    public function testGoVod(string $server): string
     {
         // Check if disabled
-        if (SystemConfig::get('memories.vod.disable')) {
+        if ($this->systemConfig->get('memories.vod.disable')) {
             throw new \Exception('transcoding is disabled');
         }
 
         // Ensure transcoder is running
-        self::ensureGoVod();
+        $this->ensureGoVod();
 
         // Copy test file into datadir so (external) go-vod can access it
         $src = realpath(__DIR__.'/../../exiftest.jpg');
@@ -370,7 +376,7 @@ final class BinExt
                     'client' => 'test',
                     'path' => $testfile,
                     'profile' => 'test',
-                    'config' => self::goVodTConfig(),
+                    'config' => $this->goVodTConfig(),
                 ],
                 'timeout' => 1,
                 'connect_timeout' => 1,
@@ -405,7 +411,7 @@ final class BinExt
         return $version;
     }
 
-    public static function testGoVodBin(string $path): string
+    public function testGoVodBin(string $path): string
     {
         $version = Util::execSafe([$path, '-version'], 3000) ?: '';
         if (!preg_match('/go-vod (\S*)/', $version, $matches)) {
@@ -424,9 +430,9 @@ final class BinExt
     /**
      * Detect the go-vod binary to use.
      */
-    public static function detectGoVod(): false|string
+    public function detectGoVod(): false|string
     {
-        $goVodPath = SystemConfig::get('memories.vod.path');
+        $goVodPath = $this->systemConfig->get('memories.vod.path');
 
         if (empty($goVodPath) || !file_exists($goVodPath)) {
             // Detect architecture
@@ -439,7 +445,7 @@ final class BinExt
             }
 
             // Set config
-            SystemConfig::set('memories.vod.path', $goVodPath);
+            $this->systemConfig->set('memories.vod.path', $goVodPath);
 
             // Make executable
             if (!is_executable($goVodPath)) {
@@ -450,10 +456,10 @@ final class BinExt
         return $goVodPath;
     }
 
-    public static function detectFFmpeg(): ?string
+    public function detectFFmpeg(): ?string
     {
-        $ffmpegPath = SystemConfig::get('memories.vod.ffmpeg');
-        $ffprobePath = SystemConfig::get('memories.vod.ffprobe');
+        $ffmpegPath = $this->systemConfig->get('memories.vod.ffmpeg');
+        $ffprobePath = $this->systemConfig->get('memories.vod.ffprobe');
 
         if (empty($ffmpegPath) || !file_exists($ffmpegPath) || empty($ffprobePath) || !file_exists($ffprobePath)) {
             // Use PATH environment variable to find ffmpeg
@@ -468,8 +474,8 @@ final class BinExt
             $ffprobePath = trim($ffprobePath);
 
             // Set config
-            SystemConfig::set('memories.vod.ffmpeg', $ffmpegPath);
-            SystemConfig::set('memories.vod.ffprobe', $ffprobePath);
+            $this->systemConfig->set('memories.vod.ffmpeg', $ffmpegPath);
+            $this->systemConfig->set('memories.vod.ffprobe', $ffprobePath);
         }
 
         // Check if executable
@@ -480,7 +486,7 @@ final class BinExt
         return $ffmpegPath;
     }
 
-    public static function testFFmpeg(string $path, string $name): string
+    public function testFFmpeg(string $path, string $name): string
     {
         $version = Util::execSafe([$path, '-version'], 3000) ?: '';
         if (!preg_match("/{$name} version \\S*/", $version, $matches)) {
@@ -490,7 +496,7 @@ final class BinExt
         return explode(' ', $matches[0])[2];
     }
 
-    public static function testSystemPerl(string $path): string
+    public function testSystemPerl(string $path): string
     {
         if (($out = Util::execSafe([$path, '-e', 'print "OK";'], 3000)) !== 'OK') {
             throw new \Exception('Failed to run test perl script: '.(string) $out);
@@ -505,7 +511,7 @@ final class BinExt
      *
      * @param string $name Process name (only the first 12 characters are used)
      */
-    public static function pkill(string $name): void
+    public function pkill(string $name): void
     {
         // don't kill everything
         if (empty($name)) {
@@ -541,7 +547,7 @@ final class BinExt
     }
 
     /** Check if the local go-vod instance is alive */
-    private static function isGoVodAlive(): bool
+    private function isGoVodAlive(): bool
     {
         $pid = (int) @file_get_contents(self::GO_VOD_PID_FILE);
         if ($pid <= 0) {

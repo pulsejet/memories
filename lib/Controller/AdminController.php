@@ -51,6 +51,8 @@ final class AdminController extends ApiController
         protected IDBConnection $connection,
         protected Places $places,
         protected ISession $session,
+        protected SystemConfig $systemConfig,
+        protected BinExt $binExt,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -60,10 +62,10 @@ final class AdminController extends ApiController
      */
     public function getSystemConfig(): Http\Response
     {
-        return Util::guardEx(static function () {
+        return Util::guardEx(function () {
             $config = [];
             foreach (SystemConfig::DEFAULTS as $key => $default) {
-                $config[$key] = SystemConfig::get($key);
+                $config[$key] = $this->systemConfig->get($key);
             }
 
             // Convert array types from map
@@ -78,14 +80,14 @@ final class AdminController extends ApiController
      */
     public function setSystemConfig(string $key, mixed $value): Http\Response
     {
-        return Util::guardEx(static function () use ($key, $value) {
+        return Util::guardEx(function () use ($key, $value) {
             // Make sure not running in read-only mode
-            if (SystemConfig::get('memories.readonly')) {
+            if ($this->systemConfig->get('memories.readonly')) {
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
             }
 
             // Assign config with type checking
-            SystemConfig::set($key, $value);
+            $this->systemConfig->set($key, $value);
 
             // Kill go-vod if changing startup config settings.
             if (\in_array($key, [
@@ -100,7 +102,7 @@ final class AdminController extends ApiController
                 'memories.vod.disable',
             ], true)) {
                 try {
-                    BinExt::ensureGoVod();
+                    $this->binExt->ensureGoVod();
                 } catch (\Exception $e) {
                     error_log('Failed to start go-vod: '.$e->getMessage());
                 }
@@ -121,10 +123,10 @@ final class AdminController extends ApiController
             $status = [];
 
             // Check exiftool version
-            $exiftoolNoLocal = SystemConfig::get('memories.exiftool_no_local');
+            $exiftoolNoLocal = $this->systemConfig->get('memories.exiftool_no_local');
             $status['exiftool'] = $this->getExecutableStatus(
-                static fn () => BinExt::getExiftoolPBin(),
-                static fn () => BinExt::testExiftool(),
+                fn () => $this->binExt->getExiftoolPBin(),
+                fn () => $this->binExt->testExiftool(),
                 !$exiftoolNoLocal,
                 !$exiftoolNoLocal,
             );
@@ -132,7 +134,7 @@ final class AdminController extends ApiController
             // Check for system perl
             $status['perl'] = $this->getExecutableStatus(
                 trim(Util::execSafe(['which', 'perl'], 3000) ?: '/bin/perl'),
-                static fn (string $p) => BinExt::testSystemPerl($p),
+                fn (string $p) => $this->binExt->testSystemPerl($p),
             );
 
             // Check number of indexed files
@@ -180,38 +182,38 @@ final class AdminController extends ApiController
 
             // Check for FFmpeg for preview generation
             $status['ffmpeg_preview'] = $this->getExecutableStatus(
-                SystemConfig::get('preview_ffmpeg_path')
+                $this->systemConfig->get('preview_ffmpeg_path')
                     ?: trim(Util::execSafe(['which', 'ffmpeg'], 3000) ?: ''),
-                static fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
+                fn ($p) => $this->binExt->testFFmpeg($p, 'ffmpeg'),
             );
 
             // Check ffmpeg and ffprobe binaries for transcoding
             $status['ffmpeg'] = $this->getExecutableStatus(
-                SystemConfig::get('memories.vod.ffmpeg'),
-                static fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
+                $this->systemConfig->get('memories.vod.ffmpeg'),
+                fn ($p) => $this->binExt->testFFmpeg($p, 'ffmpeg'),
             );
             $status['ffprobe'] = $this->getExecutableStatus(
-                SystemConfig::get('memories.vod.ffprobe'),
-                static fn ($p) => BinExt::testFFmpeg($p, 'ffprobe'),
+                $this->systemConfig->get('memories.vod.ffprobe'),
+                fn ($p) => $this->binExt->testFFmpeg($p, 'ffprobe'),
             );
 
             // Check go-vod binary
-            $extGoVod = SystemConfig::get('memories.vod.external');
+            $extGoVod = $this->systemConfig->get('memories.vod.external');
             $status['govod'] = $this->getExecutableStatus(
-                static fn () => BinExt::getGoVodBin(),
-                static fn ($p) => BinExt::testGoVodBin($p),
+                fn () => $this->binExt->getGoVodBin(),
+                fn ($p) => $this->binExt->testGoVodBin($p),
                 !$extGoVod,
                 !$extGoVod,
             );
 
             // Check each go-vod server separately
             $govods = [];
-            foreach (BinExt::getGoVodServers() as $server) {
+            foreach ($this->binExt->getGoVodServers() as $server) {
                 try {
                     $govods[] = [
                         'server' => $server,
                         'healthy' => true,
-                        'detail' => BinExt::testGoVod($server),
+                        'detail' => $this->binExt->testGoVod($server),
                     ];
                 } catch (\Exception $e) {
                     $govods[] = [
@@ -224,7 +226,7 @@ final class AdminController extends ApiController
             $status['govod_servers'] = $govods;
 
             // Check for VA-API device
-            $devPath = SystemConfig::get('memories.vod.vaapi.device');
+            $devPath = $this->systemConfig->get('memories.vod.vaapi.device');
             if (!file_exists($devPath)) {
                 $status['vaapi_dev'] = 'not_found';
             } elseif (!is_readable($devPath)) {

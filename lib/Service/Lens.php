@@ -33,14 +33,15 @@ final class Lens
     public function __construct(
         private IClientService $clientService,
         private LoggerInterface $logger,
+        private SystemConfig $systemConfig,
     ) {}
 
     /**
      * Base URL of the Lens daemon with no trailing slash (empty = disabled).
      */
-    public static function daemonUrl(): string
+    public function daemonUrl(): string
     {
-        return rtrim(SystemConfig::get('memories.lens.daemon_url'), '/');
+        return rtrim($this->systemConfig->get('memories.lens.daemon_url'), '/');
     }
 
     /**
@@ -51,7 +52,7 @@ final class Lens
     public function enqueue(File $file): void
     {
         try {
-            $base = self::daemonUrl();
+            $base = $this->daemonUrl();
             if ('' === $base) {
                 return;
             }

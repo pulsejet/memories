@@ -52,6 +52,9 @@ final class VideoController extends ApiController
         protected TimelineQuery $tq,
         protected FsManager $fs,
         protected IClientService $clientService,
+        protected SystemConfig $systemConfig,
+        protected BinExt $binExt,
+        protected Exif $exif,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -122,7 +125,7 @@ final class VideoController extends ApiController
             // Different manufacurers have different formats
             if ('self__trailer' === $liveid) {
                 try { // Get trailer
-                    $blob = Exif::getBinaryExifProp($path, '-trailer');
+                    $blob = $this->exif->getBinaryExifProp($path, '-trailer');
                 } catch (\Exception) {
                     throw Exceptions::NotFound('file trailer');
                 }
@@ -135,7 +138,7 @@ final class VideoController extends ApiController
                 }
 
                 try { // Get embedded video file
-                    $blob = Exif::getBinaryExifProp($path, "-{$field}");
+                    $blob = $this->exif->getBinaryExifProp($path, "-{$field}");
                 } catch (\Exception) {
                     throw Exceptions::NotFound('Could not read binary EXIF field');
                 }
@@ -182,10 +185,10 @@ final class VideoController extends ApiController
             }
 
             // Transcode video if allowed
-            if ($transcode && !SystemConfig::get('memories.vod.disable')) {
+            if ($transcode && !$this->systemConfig->get('memories.vod.disable')) {
                 // If video path not given, write to temp file
                 if (!$liveVideoPath) {
-                    $liveVideoPath = self::postFile($transcode, $blob)['path'];
+                    $liveVideoPath = $this->postFile($transcode, $blob)['path'];
                 }
 
                 // If this is H.264 it won't get transcoded anyway
@@ -213,7 +216,7 @@ final class VideoController extends ApiController
     {
         return Util::guardEx(function () use ($client, $fileid, $profile) {
             // Make sure transcoding is enabled
-            if (SystemConfig::get('memories.vod.disable')) {
+            if ($this->systemConfig->get('memories.vod.disable')) {
                 throw Exceptions::Forbidden('Transcoding disabled');
             }
 
@@ -272,9 +275,9 @@ final class VideoController extends ApiController
 
     private function getUpstream(Http\IOutput $out, string $client, int $fileid, string $path, string $profile, string $etag = ''): int
     {
-        BinExt::ensureGoVod();
+        $this->binExt->ensureGoVod();
 
-        $url = BinExt::getGoVodEndpoint($client, 'vod');
+        $url = $this->binExt->getGoVodEndpoint($client, 'vod');
 
         $data = [
             'client' => $client,
@@ -287,7 +290,7 @@ final class VideoController extends ApiController
                 'token' => $this->request->getParam('token'),
                 'codecs' => $this->request->getParam('codecs'),
             ],
-            'config' => BinExt::goVodTConfig(),
+            'config' => $this->binExt->goVodTConfig(),
         ];
 
         ignore_user_abort(true);
@@ -359,11 +362,11 @@ final class VideoController extends ApiController
      *
      * @return mixed The response from upstream
      */
-    private static function postFile(string $client, string $blob): mixed
+    private function postFile(string $client, string $blob): mixed
     {
-        BinExt::ensureGoVod();
+        $this->binExt->ensureGoVod();
 
-        $url = BinExt::getGoVodEndpoint($client, 'create');
+        $url = $this->binExt->getGoVodEndpoint($client, 'create');
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

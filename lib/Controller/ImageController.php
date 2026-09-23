@@ -56,6 +56,7 @@ final class ImageController extends ApiController
         protected PreviewService $previewService,
         protected ISystemTagObjectMapper $tagObjectMapper,
         protected ISystemTagManager $tagManager,
+        protected Exif $exif,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -260,7 +261,7 @@ final class ImageController extends ApiController
 
                 // Get latest exif data if requested
                 if ($current) {
-                    $info['current'] = Exif::getExifFromFile($file);
+                    $info['current'] = $this->exif->getExifFromFile($file);
                 }
 
                 // Get clusters for this file
@@ -304,7 +305,7 @@ final class ImageController extends ApiController
 
             // Check if allowed to edit file
             $mime = $file->getMimeType();
-            if (!\in_array($mime, Exif::allowedEditMimetypes(), true)) {
+            if (!\in_array($mime, $this->exif->allowedEditMimetypes(), true)) {
                 $name = $file->getName();
 
                 throw Exceptions::Forbidden("Cannot edit file {$name} (blacklisted type {$mime})");
@@ -323,7 +324,7 @@ final class ImageController extends ApiController
             }
 
             // Set the exif data
-            Exif::setFileExif($file, $raw);
+            $this->exif->setFileExif($file, $raw);
 
             // If rotation changed then update the previews
             if ($raw['Orientation'] ?? false) {

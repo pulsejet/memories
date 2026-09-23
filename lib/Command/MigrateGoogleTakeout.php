@@ -26,7 +26,7 @@ namespace OCA\Memories\Command;
 use OC\Files\SetupManager;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exif;
-use OCA\Memories\Service;
+use OCA\Memories\Service\BinExt;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -64,6 +64,8 @@ final class MigrateGoogleTakeout extends Command
         protected IDBConnection $connection,
         protected ITempManager $tempManager,
         protected TimelineWrite $timelineWrite,
+        protected Exif $exif,
+        protected BinExt $binExt,
     ) {
         parent::__construct();
     }
@@ -85,7 +87,7 @@ final class MigrateGoogleTakeout extends Command
     {
         $this->output = $output;
         $this->input = $input;
-        $this->mimeTypes = Exif::allowedEditMimetypes();
+        $this->mimeTypes = $this->exif->allowedEditMimetypes();
 
         // Provide ample warnings
         if ($input->isInteractive()) {
@@ -104,8 +106,8 @@ final class MigrateGoogleTakeout extends Command
         }
 
         // Start static exif process
-        Exif::ensureStaticExiftoolProc();
-        Service\BinExt::testExiftool(); // throws
+        $this->exif->ensureStaticExiftoolProc();
+        $this->binExt->testExiftool(); // throws
 
         // Call migration for each user
         if ($input->getOption('user')) {
@@ -241,7 +243,7 @@ final class MigrateGoogleTakeout extends Command
         $txf = self::takeoutToExiftoolJson($json);
 
         // Get current EXIF metadata
-        $exif = Exif::getExifFromFile($file);
+        $exif = $this->exif->getExifFromFile($file);
 
         // Check if EXIF is blank, which is probably wrong
         if (0 === \count($exif)) {
@@ -278,7 +280,7 @@ final class MigrateGoogleTakeout extends Command
 
             // Write EXIF metadata
             try {
-                Exif::setFileExif($file, $txf);
+                $this->exif->setFileExif($file, $txf);
             } catch (\Exception $e) {
                 $this->output->writeln("<error>Error while writing EXIF metadata for {$path}: {$e->getMessage()}</error>");
 

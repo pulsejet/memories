@@ -35,6 +35,7 @@ final class PlacesBackend extends Backend
     public function __construct(
         protected TimelineQuery $tq,
         protected IRequest $request,
+        protected SystemConfig $systemConfig,
     ) {}
 
     #[\Override]
@@ -52,7 +53,7 @@ final class PlacesBackend extends Backend
     #[\Override]
     public function isEnabled(): bool
     {
-        return SystemConfig::gisType() > 0;
+        return $this->systemConfig->gisType() > 0;
     }
 
     #[\Override]

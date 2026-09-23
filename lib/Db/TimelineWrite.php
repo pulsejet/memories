@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\Exif;
 use OCA\Memories\Service\Index;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -41,7 +40,7 @@ final class TimelineWrite
     ): bool {
         // Check if we want to process this file
         // https://github.com/pulsejet/memories/issues/933 (zero-byte files)
-        if ($file->getSize() <= 0 || !Index::isSupported($file) || !Index::isPathAllowed($file->getPath())) {
+        if ($file->getSize() <= 0 || !Index::isSupported($file) || !Index::isPathAllowed($file->getPath(), (string) $this->systemConfig->get('memories.index.path.blacklist'))) {
             return false;
         }
 
@@ -79,7 +78,7 @@ final class TimelineWrite
         }
 
         // Get exif data
-        $exif = Exif::getExifFromFile($file);
+        $exif = $this->exif->getExifFromFile($file);
 
         // Check if EXIF is blank, which is probably wrong
         if (0 === \count($exif)) {
@@ -113,14 +112,14 @@ final class TimelineWrite
         [$lat, $lon, $mapCluster] = $this->processExifLocation($fileId, $exif, $prevRow);
 
         // Get date parameters (after setting timezone offset)
-        $dateTaken = Exif::getDateTaken($file, $exif);
+        $dateTaken = $this->exif->getDateTaken($file, $exif);
 
         // Store the acutal epoch with the EXIF data
         $epoch = $exif['DateTimeEpoch'] = $dateTaken->getTimestamp();
 
         // Store the date taken in the database as UTC (local date) only
         // Basically, assume everything happens in Greenwich
-        $dateLocalUtc = Exif::forgetTimezone($dateTaken)->getTimestamp();
+        $dateLocalUtc = $this->exif->forgetTimezone($dateTaken)->getTimestamp();
         $dateTakenStr = gmdate('Y-m-d H:i:s', $dateLocalUtc);
 
         // We need to use the local time in UTC for the dayId
@@ -129,7 +128,7 @@ final class TimelineWrite
         $dayId = intdiv($dateLocalUtc, 86400);
 
         // Get size of image
-        [$w, $h] = Exif::getDimensions($exif);
+        [$w, $h] = $this->exif->getDimensions($exif);
 
         // Get live photo ID of video part
         $liveid = $this->livePhoto->getLivePhotoId($file, $exif);
@@ -137,7 +136,7 @@ final class TimelineWrite
         // Get BUID from ImageUniqueId if not present
         $buid = $prevRow ? $prevRow['buid'] : '';
         if (empty($buid)) {
-            $buid = Exif::getBUID($file->getName(), $exif['ImageUniqueID'] ?? null, (int) $file->getSize());
+            $buid = $this->exif->getBUID($file->getName(), $exif['ImageUniqueID'] ?? null, (int) $file->getSize());
         }
 
         // Get exif json

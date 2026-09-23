@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCA\Memories\ClustersBackend\PlacesBackend;
-use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
@@ -100,7 +99,7 @@ trait TimelineQuerySingleItem
      */
     public function getPlacesById(int $id): array
     {
-        if (SystemConfig::gisType() <= 0) {
+        if ($this->systemConfig->gisType() <= 0) {
             return [];
         }
 

@@ -12,7 +12,6 @@ use OCA\Memories\Util;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
-use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\Events\BeforeTemplateRenderedEvent;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
@@ -32,6 +31,7 @@ final class PageController extends Controller
         private LoggerInterface $logger,
         private IUserSession $userSession,
         private ?\OCA\Recognize\Public\ApiKeyManager $apiKeyManager,
+        protected SystemConfig $systemConfig,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -64,7 +64,7 @@ final class PageController extends Controller
         }
 
         $response = new TemplateResponsePatch(Application::APPNAME, 'main', self::getMainParams());
-        $response->setContentSecurityPolicy(self::getCSP());
+        $response->setContentSecurityPolicy($this->systemConfig->getCSP());
         $response->cacheFor(0);
 
         // Check if requested from native app
@@ -73,53 +73,6 @@ final class PageController extends Controller
         }
 
         return $response;
-    }
-
-    /** Get the common content security policy */
-    public static function getCSP(): ContentSecurityPolicy
-    {
-        $policy = new ContentSecurityPolicy();
-
-        // Image domains MUST be added to the connect domain list
-        // because of the service worker fetch() call
-        $addImageDomain = static function (string $url) use (&$policy): void {
-            $policy->addAllowedImageDomain($url);
-            $policy->addAllowedConnectDomain($url);
-        };
-
-        // Create base policy
-        $policy->addAllowedWorkerSrcDomain("'self'");
-        $policy->addAllowedScriptDomain("'self'");
-        $policy->addAllowedFrameDomain("'self'");
-        $policy->addAllowedImageDomain("'self'");
-        $policy->addAllowedMediaDomain("'self'");
-        $policy->addAllowedConnectDomain("'self'");
-
-        // Video player
-        $policy->addAllowedWorkerSrcDomain('blob:');
-        $policy->addAllowedScriptDomain('blob:');
-        $policy->addAllowedMediaDomain('blob:');
-
-        // Image editor
-        $policy->addAllowedConnectDomain('data:');
-
-        // Allow CSP domains of configured map tile servers
-        foreach (SystemConfig::get('memories.map.tile_servers') as $tile) {
-            foreach ((array) ($tile['csp'] ?? []) as $csp) {
-                $addImageDomain((string) $csp);
-            }
-        }
-
-        // Native communication
-        $addImageDomain('http://127.0.0.1');
-
-        // Allow configured location search provider
-        $searchHost = parse_url((string) SystemConfig::get('memories.places.search.url'), PHP_URL_HOST);
-        if (\is_string($searchHost) && '' !== $searchHost) {
-            $policy->addAllowedConnectDomain($searchHost);
-        }
-
-        return $policy;
     }
 
     /**

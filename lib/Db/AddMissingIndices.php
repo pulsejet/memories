@@ -14,6 +14,7 @@ final class AddMissingIndices
 {
     public function __construct(
         private Connection $connection,
+        private SystemConfig $systemConfig,
     ) {}
 
     /**
@@ -146,10 +147,10 @@ final class AddMissingIndices
             }
 
             $output->info('Recreated filecache trigger with: '.$provider);
-            SystemConfig::set('memories.db.triggers.fcu', true);
+            $this->systemConfig->set('memories.db.triggers.fcu', true);
         } catch (\Throwable $e) {
             $output->warning('Failed to create filecache trigger (compatibility mode will be used): '.$e->getMessage());
-            SystemConfig::set('memories.db.triggers.fcu', false);
+            $this->systemConfig->set('memories.db.triggers.fcu', false);
         }
     }
 }

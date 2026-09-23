@@ -24,66 +24,71 @@ final class Exif
 
     /** Opened instance of exiftool when running in command mode */
     /** @var null|resource */
-    private static $staticProc;
+    private $staticProc;
 
     /** @var null|resource[] */
-    private static $staticPipes;
+    private $staticPipes;
 
     /** Disable uisage of static process */
-    private static bool $noStaticProc = false;
+    private bool $noProc = false;
 
-    public static function closeStaticExiftoolProc(): void
+    public function __construct(
+        private BinExt $binExt,
+        private SystemConfig $systemConfig,
+    ) {}
+
+    public function closeStaticExiftoolProc(): void
     {
         try {
             // Close I/O pipes
-            if (self::$staticPipes) {
-                fclose(self::$staticPipes[0]);
-                fclose(self::$staticPipes[1]);
-                fclose(self::$staticPipes[2]);
-                self::$staticPipes = null;
+            if ($this->staticPipes) {
+                fclose($this->staticPipes[0]);
+                fclose($this->staticPipes[1]);
+                fclose($this->staticPipes[2]);
+                $this->staticPipes = null;
             }
 
             // Close process
-            if (self::$staticProc) {
-                proc_terminate(self::$staticProc);
-                proc_close(self::$staticProc);
-                self::$staticProc = null;
+            if ($this->staticProc) {
+                proc_terminate($this->staticProc);
+                proc_close($this->staticProc);
+                $this->staticProc = null;
             }
         } catch (\Exception $ex) {
         }
     }
 
-    public static function restartStaticExiftoolProc(): void
+    public function restartStaticExiftoolProc(): void
     {
-        self::closeStaticExiftoolProc();
-        self::ensureStaticExiftoolProc();
+        $this->closeStaticExiftoolProc();
+        $this->ensureStaticExiftoolProc();
     }
 
-    public static function ensureStaticExiftoolProc(): void
+    public function ensureStaticExiftoolProc(): void
     {
-        if (self::$noStaticProc) {
+        if ($this->noProc) {
             return;
         }
 
-        if (!self::$staticProc) {
-            self::initializeStaticExiftoolProc();
+        if (!$this->staticProc) {
+            $this->initializeStaticExiftoolProc();
             usleep(500000); // wait if error
 
-            /** @psalm-suppress NullArgument */
-            if (!proc_get_status(self::$staticProc)['running']) {
+            /** @psalm-suppress PossiblyNullArgument */
+            if (!proc_get_status($this->staticProc)['running']) {
                 error_log('WARN: Failed to create stay_open exiftool process');
-                self::$noStaticProc = true;
-                self::$staticProc = null;
-                self::$staticPipes = null;
+                $this->noProc = true;
+                $this->staticProc = null;
+                $this->staticPipes = null;
             }
 
             return;
         }
 
-        if (!proc_get_status(self::$staticProc)['running']) {
-            self::$staticProc = null;
-            self::$staticPipes = null;
-            self::ensureStaticExiftoolProc();
+        if (!proc_get_status($this->staticProc)['running']) {
+            $this->staticProc = null;
+            $this->staticPipes = null;
+            $this->ensureStaticExiftoolProc();
         }
     }
 
@@ -92,7 +97,7 @@ final class Exif
      *
      * @return array<string, mixed>
      */
-    public static function getExifFromFile(File $file): array
+    public function getExifFromFile(File $file): array
     {
         try {
             $path = $file->getStorage()->getLocalFile($file->getInternalPath());
@@ -111,13 +116,13 @@ final class Exif
             throw new \Exception("File is not readable: {$path}");
         }
 
-        $exif = self::getExifFromLocalPath($path);
+        $exif = $this->getExifFromLocalPath($path);
 
         // We need to remove blacklisted fields to prevent leaking info
         unset($exif['SourceFile'], $exif['FileName'], $exif['ExifToolVersion'], $exif['Directory'], $exif['FileSize'], $exif['FileModifyDate'], $exif['FileAccessDate'], $exif['FileInodeChangeDate'], $exif['FilePermissions'], $exif['ThumbnailImage']);
 
         // Ignore zero dates
-        self::sanitizeDates($exif);
+        $this->sanitizeDates($exif);
 
         return $exif;
     }
@@ -127,15 +132,15 @@ final class Exif
      *
      * @return array<string, mixed>
      */
-    public static function getExifFromLocalPath(string $path): array
+    public function getExifFromLocalPath(string $path): array
     {
-        if (null !== self::$staticProc) {
-            self::ensureStaticExiftoolProc();
+        if (null !== $this->staticProc) {
+            $this->ensureStaticExiftoolProc();
 
-            return self::getExifFromLocalPathWithStaticProc($path);
+            return $this->getExifFromLocalPathWithStaticProc($path);
         }
 
-        return self::getExifFromLocalPathWithSeparateProc($path);
+        return $this->getExifFromLocalPathWithSeparateProc($path);
     }
 
     /**
@@ -143,10 +148,10 @@ final class Exif
      *
      * @param array<string, mixed> $exif
      */
-    public static function parseExifDate(array $exif): \DateTime
+    public function parseExifDate(array $exif): \DateTime
     {
         // Ignore zero dates
-        self::sanitizeDates($exif);
+        $this->sanitizeDates($exif);
 
         // Get date from exif
         $exifDate = $exif['SubSecDateTimeOriginal']
@@ -242,10 +247,10 @@ final class Exif
      *
      * @param array<string, mixed> $exif
      */
-    public static function getDateTaken(File $file, array $exif): \DateTime
+    public function getDateTaken(File $file, array $exif): \DateTime
     {
         try {
-            return self::parseExifDate($exif);
+            return $this->parseExifDate($exif);
         } catch (\Exception) {
         } catch (\ValueError) {
         }
@@ -254,7 +259,7 @@ final class Exif
         $dt = new \DateTime('@'.$file->getMtime());
 
         // Set timezone to system timezone
-        $tz = SystemConfig::get('default_timezone') ?: getenv('TZ') ?: date_default_timezone_get();
+        $tz = $this->systemConfig->get('default_timezone') ?: getenv('TZ') ?: date_default_timezone_get();
 
         try {
             $dt->setTimezone(new \DateTimeZone($tz));
@@ -268,7 +273,7 @@ final class Exif
     /**
      * Convert time to local date in UTC.
      */
-    public static function forgetTimezone(\DateTime $date): \DateTime
+    public function forgetTimezone(\DateTime $date): \DateTime
     {
         return new \DateTime($date->format('Y-m-d H:i:s'), new \DateTimeZone('UTC'));
     }
@@ -282,7 +287,7 @@ final class Exif
      *
      * @psalm-return list{int, int}
      */
-    public static function getDimensions(array $exif): array
+    public function getDimensions(array $exif): array
     {
         $width = $exif[self::EXIF_KEY_IMAGE_WIDTH] ?? 0;
         $height = $exif[self::EXIF_KEY_IMAGE_HEIGHT] ?? 0;
@@ -309,7 +314,7 @@ final class Exif
      * @param mixed  $imageUniqueID EXIF field
      * @param int    $size          the file size in bytes (fallback)
      */
-    public static function getBUID(string $basename, mixed $imageUniqueID, int $size): string
+    public function getBUID(string $basename, mixed $imageUniqueID, int $size): string
     {
         $sfx = "size={$size}";
         if (null !== $imageUniqueID && \strlen((string) $imageUniqueID) >= 4) {
@@ -322,7 +327,7 @@ final class Exif
     /**
      * Get the list of MIME Types that are allowed to be edited.
      */
-    public static function allowedEditMimetypes(): array
+    public function allowedEditMimetypes(): array
     {
         return array_diff(array_merge(Application::IMAGE_MIMES, Application::VIDEO_MIMES), self::FORBIDDEN_EDIT_MIMES);
     }
@@ -335,11 +340,11 @@ final class Exif
      *
      * @throws \Exception on failure
      */
-    public static function setExif(string $path, array $data): void
+    public function setExif(string $path, array $data): void
     {
         $data['SourceFile'] = $path;
         $raw = json_encode([$data], JSON_UNESCAPED_UNICODE);
-        $cmd = array_merge(self::getExiftool(), [
+        $cmd = array_merge($this->getExiftool(), [
             '-overwrite_original_in_place', '-n',
             '-api', 'LargeFileSupport=1',
             '-json=-', $path,
@@ -373,7 +378,7 @@ final class Exif
      *
      * @param array<string, mixed> $data exif data
      */
-    public static function setFileExif(File $file, array $data): void
+    public function setFileExif(File $file, array $data): void
     {
         // Get path to local file so we can skip reading
         $path = $file->getStorage()->getLocalFile($file->getInternalPath());
@@ -382,7 +387,7 @@ final class Exif
         }
 
         // Set exif data
-        self::setExif($path, $data);
+        $this->setExif($path, $data);
 
         // Update remote file if not local
         if (!$file->getStorage()->isLocal()) {
@@ -401,9 +406,9 @@ final class Exif
         $file->touch();
     }
 
-    public static function getBinaryExifProp(string $path, string $prop): string
+    public function getBinaryExifProp(string $path, string $prop): string
     {
-        $cmd = array_merge(self::getExiftool(), [$prop, '-n', '-b', $path]);
+        $cmd = array_merge($this->getExiftool(), [$prop, '-n', '-b', $path]);
 
         try {
             return Util::execSafe($cmd, self::EXIFTOOL_TIMEOUT) ?? '';
@@ -414,48 +419,49 @@ final class Exif
         }
     }
 
-    public static function getExifWithDuplicates(string $path): array
+    public function getExifWithDuplicates(string $path): array
     {
-        return self::getExifFromLocalPathWithSeparateProc($path, ['-U', '-G4']);
+        return $this->getExifFromLocalPathWithSeparateProc($path, ['-U', '-G4']);
     }
 
-    private static function getExiftool(): array
+    private function getExiftool(): array
     {
-        return BinExt::getExiftool();
+        return $this->binExt->getExiftool();
     }
 
     /**
      * Initialize static exiftool process for local reads.
      */
-    private static function initializeStaticExiftoolProc(): void
+    private function initializeStaticExiftoolProc(): void
     {
-        self::closeStaticExiftoolProc();
-        self::$staticPipes = [];
-        self::$staticProc = proc_open(array_merge(self::getExiftool(), ['-stay_open', 'true', '-@', '-']), [
+        $this->closeStaticExiftoolProc();
+        $this->staticPipes = [];
+        $proc = proc_open(array_merge($this->getExiftool(), ['-stay_open', 'true', '-@', '-']), [
             0 => ['pipe', 'r'],
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
-        ], self::$staticPipes);
-        stream_set_blocking(self::$staticPipes[1], false);
+        ], $this->staticPipes);
+        $this->staticProc = \is_resource($proc) ? $proc : null;
+        stream_set_blocking($this->staticPipes[1], false);
     }
 
-    private static function getExifFromLocalPathWithStaticProc(string $path): array
+    private function getExifFromLocalPathWithStaticProc(string $path): array
     {
         // This function should not be called if there is no static process
-        if (!self::$staticPipes) {
+        if (!$this->staticPipes) {
             throw new \Error('[BUG] No static pipes found');
         }
 
         // Create arguments for exiftool
         $args = implode("\n", self::EXIFTOOL_ARGS);
-        fwrite(self::$staticPipes[0], "{$path}\n{$args}\n-execute\n");
-        fflush(self::$staticPipes[0]);
+        fwrite($this->staticPipes[0], "{$path}\n{$args}\n-execute\n");
+        fflush($this->staticPipes[0]);
 
         // The output of exiftool's stay_open process ends with this token
         $readyToken = "\n{ready}\n";
 
         try {
-            $buf = Util::readOrTimeout(self::$staticPipes[1], self::EXIFTOOL_TIMEOUT, $readyToken);
+            $buf = Util::readOrTimeout($this->staticPipes[1], self::EXIFTOOL_TIMEOUT, $readyToken);
 
             // The output buffer should always contain the ready token
             // (this is the point of readOrTimeout)
@@ -467,18 +473,18 @@ final class Exif
             // Slice everything before the ready token
             $buf = substr($buf, 0, $tokPos);
 
-            return self::processStdout($buf);
+            return $this->processStdout($buf);
         } catch (\Exception) {
             error_log("ERROR: Exiftool may have crashed, restarting process [{$path}]");
-            self::restartStaticExiftoolProc();
+            $this->restartStaticExiftoolProc();
 
             throw new \Exception('Nothing to read from Exiftool');
         }
     }
 
-    private static function getExifFromLocalPathWithSeparateProc(string $path, array $extraArgs = []): array
+    private function getExifFromLocalPathWithSeparateProc(string $path, array $extraArgs = []): array
     {
-        $cmd = array_merge(self::getExiftool(), self::EXIFTOOL_ARGS, $extraArgs, [$path]);
+        $cmd = array_merge($this->getExiftool(), self::EXIFTOOL_ARGS, $extraArgs, [$path]);
 
         try {
             $stdout = Util::execSafe($cmd, self::EXIFTOOL_TIMEOUT) ?? '';
@@ -488,11 +494,11 @@ final class Exif
             throw $ex;
         }
 
-        return self::processStdout($stdout);
+        return $this->processStdout($stdout);
     }
 
     /** Get json array from stdout of exiftool */
-    private static function processStdout(string $stdout): array
+    private function processStdout(string $stdout): array
     {
         $json = json_decode($stdout, true);
         if (!$json) {
@@ -514,7 +520,7 @@ final class Exif
         return $exif;
     }
 
-    private static function sanitizeDates(array &$exif): void
+    private function sanitizeDates(array &$exif): void
     {
         $dateFields = [
             'DateTimeOriginal',
