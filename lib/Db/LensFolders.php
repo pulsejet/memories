@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 final class LensFolders
@@ -31,7 +30,7 @@ final class LensFolders
 
         $query = $this->connection->getQueryBuilder();
         $query->select('cte_f.fileid')->from('cte_folders', 'cte_f');
-        $query->setParameter('topFolderIds', array_values($topFolderIds), IQueryBuilder::PARAM_INT_ARRAY);
+        CTEParams::setTopFolderIds($query, $topFolderIds);
 
         $rows = $this->tq->executeQueryWithCTEs($query)->fetchAll();
 

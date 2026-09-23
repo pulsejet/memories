@@ -224,8 +224,10 @@ trait TimelineQueryDays
 
         // Filter by folder (recursive or otherwise)
         if ($recursive) {
-            // This are used later by the execution function
-            $this->addSubfolderJoinParams($query, $root, $archive, $hidden);
+            // These are used later by the execution function
+            CTEParams::setTopFolderIds($query, $root->getIds());
+            CTEParams::setFoldersArchive($query, $archive);
+            CTEParams::setIncludeHidden($query, $hidden);
 
             // Subquery to test parent folder
             $sq = $query->getConnection()->getQueryBuilder();
@@ -337,27 +339,6 @@ trait TimelineQueryDays
             if ('' === ($row['shared_by'] ?? null)) {
                 unset($row['shared_by']);
             }
-        }
-    }
-
-    /**
-     * Get all folders inside a top folder.
-     */
-    private function addSubfolderJoinParams(
-        IQueryBuilder &$query,
-        TimelineRoot &$root,
-        bool $archive,
-        bool $hidden,
-    ): void {
-        // Add query parameters
-        $query->setParameter('topFolderIds', $root->getIds(), IQueryBuilder::PARAM_INT_ARRAY);
-
-        if ($archive) {
-            $query->setParameter('cteFoldersArchive', true, IQueryBuilder::PARAM_BOOL);
-        }
-
-        if ($hidden) {
-            $query->setParameter('cteIncludeHidden', true, IQueryBuilder::PARAM_BOOL);
         }
     }
 

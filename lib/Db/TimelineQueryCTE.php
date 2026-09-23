@@ -23,9 +23,9 @@ trait TimelineQueryCTE
         $types = $query->getParameterTypes();
 
         // Get SQL
-        $CTE_SQL = \array_key_exists('cteFoldersArchive', $params)
+        $CTE_SQL = CTEParams::isFoldersArchive($query)
             ? $this->CTE_FOLDERS_ARCHIVE()
-            : $this->CTE_FOLDERS(\array_key_exists('cteIncludeHidden', $params));
+            : $this->CTE_FOLDERS(CTEParams::isIncludeHidden($query));
 
         // Add WITH clause if needed
         if (str_contains($sql, 'cte_folders')) {
