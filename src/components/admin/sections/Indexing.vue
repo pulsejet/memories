@@ -99,27 +99,15 @@
 
     <div>
       {{ t('memories', 'Folders with a ".nomedia" or a ".nomemories" file are always excluded from indexing.') }}
-      {{ t('memories', 'You can optionally use a regular expression to exclude matching paths from being indexed.') }}
-      {{ t('memories', 'For example, to exclude special QNAP folders:') }}
+      {{ t('memories', 'You can optionally exclude specific folder names from being indexed.') }}
       <br />
-      <code>\/@(Recycle|eaDir)\/</code>
-      <br />
-      {{ t('memories', 'Or, exclude all files starting with "private-" or "backup-":') }}
-      <br />
-      <code>\/(private|backup)-[^\/]*$</code>
-      <br />
-      {{ t('memories', 'You can use the regex101 website to validate and test the pattern:') }}
-      <a target="_blank" href="https://regex101.com/">
-        {{ t('memories', 'External Link') }}
-      </a>
 
       <NcTextField
         class="regex-field"
-        :label="t('memories', 'Exclude paths matching regular expression')"
+        :label="t('memories', 'Excluded folder names (comma-separated)')"
         :label-visible="true"
-        v-model="config['memories.index.path.blacklist']"
-        :error="!blacklistRegexValid"
-        @change="blacklistRegexValid && update('memories.index.path.blacklist', $event.target.value)"
+        v-model="blocklistText"
+        @change="update('memories.index.folder.blocklist')"
       />
     </div>
 
@@ -165,13 +153,16 @@ export default defineComponent({
   data: () => ({ API }),
 
   computed: {
-    blacklistRegexValid(): boolean {
-      console.log(this.config['memories.index.path.blacklist']);
-      try {
-        return !!new RegExp(this.config['memories.index.path.blacklist']);
-      } catch {
-        return false;
-      }
+    blocklistText: {
+      get(): string {
+        return (this.config['memories.index.folder.blocklist'] ?? []).join(', ');
+      },
+      set(value: string) {
+        this.config['memories.index.folder.blocklist'] = value
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => s !== '');
+      },
     },
   },
 });

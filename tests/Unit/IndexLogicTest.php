@@ -20,12 +20,18 @@ final class IndexLogicTest extends TestCase
 
     public function testIsPathAllowed(): void
     {
+        self::assertTrue($this->mime->isPathAllowed('/admin/files/Photos/'));
+        self::assertTrue($this->mime->isPathAllowed('/admin/files/Photos/.archive/'));
+        self::assertTrue($this->mime->isPathAllowed('/admin/files/Photos/IMG_001.jpg/'));
+
+        // Default blocklist: @Recycle, @eaDir, .trashed-%
+        self::assertFalse($this->mime->isPathAllowed('/admin/files/Photos/@Recycle/'));
+        self::assertFalse($this->mime->isPathAllowed('/admin/files/Photos/@eaDir/'));
+        self::assertFalse($this->mime->isPathAllowed('/admin/files/Photos/.trashed-12345/'));
+
+        // Files (no trailing slash): own name never matched, ancestors are
         self::assertTrue($this->mime->isPathAllowed('/admin/files/Photos/IMG_001.jpg'));
-        self::assertTrue($this->mime->isPathAllowed('/admin/files/Photos/.archive/old.jpg'));
-
-        self::assertFalse($this->mime->isPathAllowed('/admin/files/Photos/.trashed-12345'));
-
+        self::assertTrue($this->mime->isPathAllowed('/admin/files/Photos/@Recycle'));
         self::assertFalse($this->mime->isPathAllowed('/admin/files/Photos/@Recycle/foo.jpg'));
-        self::assertFalse($this->mime->isPathAllowed('/admin/files/Photos/@eaDir/foo.jpg'));
     }
 }

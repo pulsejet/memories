@@ -33,6 +33,9 @@ final class MIME
     /** @var string[] */
     private ?array $mimeList = null;
 
+    /** Memoized blocklist as regex fragments. */
+    private static ?string $blocklistInner = null;
+
     public function __construct(
         private IPreview $preview,
         private SystemConfig $systemConfig,
@@ -89,22 +92,44 @@ final class MIME
     }
 
     /**
-     * Checks if the specified node's path is allowed to be indexed.
+     * Check if a file or folder path is allowed to be indexed.
+     * Every folder segment must be allowed; a trailing file name is never matched.
+     *
+     * @param string $path file or folder path to check
      */
     public function isPathAllowed(string $path): bool
     {
-        // Always exclude some predefined patterns
-        //   .trashed-<file> (https://github.com/nextcloud/android/issues/10645)
-        if (preg_match('/\/.trashed-[^\/]*$/', $path)) {
-            return false;
+        if (null === self::$blocklistInner) {
+            /** @var string[] $blocklist */
+            $blocklist = $this->systemConfig->get('memories.index.folder.blocklist');
+            self::$blocklistInner = implode('|', array_map(self::likeToRegex(...), $blocklist));
         }
 
-        $blacklist = (string) $this->systemConfig->get('memories.index.path.blacklist');
-        $pattern = trim($blacklist);
-        if ('' !== $pattern && !\is_int(preg_match("/{$pattern}/", ''))) {
-            throw new \Exception('Invalid regex pattern in memories.index.path.blacklist');
+        return '' === self::$blocklistInner || !preg_match('/(?:^|\/)(?:'.self::$blocklistInner.')(?=\/)/', $path);
+    }
+
+    /**
+     * Convert a LIKE pattern to a regex fragment (% and _ wildcards, \ escape).
+     *
+     * @param string $pattern LIKE pattern to convert
+     */
+    private static function likeToRegex(string $pattern): string
+    {
+        $regex = '';
+        $len = \strlen($pattern);
+        for ($i = 0; $i < $len; ++$i) {
+            $c = $pattern[$i];
+            if ('\\' === $c && $i + 1 < $len) {
+                $regex .= preg_quote($pattern[++$i], '/');
+            } elseif ('%' === $c) {
+                $regex .= '[^\/]*';
+            } elseif ('_' === $c) {
+                $regex .= '[^\/]';
+            } else {
+                $regex .= preg_quote($c, '/');
+            }
         }
 
-        return '' === $pattern || !preg_match("/{$pattern}/", $path);
+        return $regex;
     }
 }
