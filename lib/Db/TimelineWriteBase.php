@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCA\Memories\Exif;
+use OCA\Memories\Service\MIME;
 use OCA\Memories\Settings\SystemConfig;
 use OCP\IDBConnection;
 use OCP\Lock\ILockingProvider;
@@ -19,5 +20,6 @@ trait TimelineWriteBase
         protected ILockingProvider $lockingProvider,
         protected SystemConfig $systemConfig,
         protected Exif $exif,
+        protected MIME $mime,
     ) {}
 }

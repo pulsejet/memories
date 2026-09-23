@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace OCA\Memories\Service;
 
 use OC\Files\SetupManager;
-use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Settings\SystemConfig;
@@ -35,9 +34,7 @@ use OCP\DB\QueryBuilder\IQueryFunction;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
-use OCP\Files\Node;
 use OCP\IDBConnection;
-use OCP\IPreview;
 use OCP\ITempManager;
 use OCP\IUser;
 use Psr\Log\LoggerInterface;
@@ -58,12 +55,10 @@ final class Index
      */
     public ?\Closure $continueCheck = null;
 
-    /** @var string[] */
-    private static ?array $mimeList = null;
-
     public function __construct(
         private IRootFolder $rootFolder,
         private TimelineWrite $tw,
+        private MIME $mime,
         private IDBConnection $db,
         private SystemConfig $systemConfig,
         private ITempManager $tempManager,
@@ -139,7 +134,7 @@ final class Index
         $this->log("Indexing folder {$path}", true);
 
         // Check if path is blacklisted
-        if (!$this->isPathAllowed($path.'/', (string) $this->systemConfig->get('memories.index.path.blacklist'))) {
+        if (!$this->mime->isPathAllowed($path.'/')) {
             $this->log("Skipping folder {$path} (path excluded)".PHP_EOL, true);
 
             return;
@@ -156,11 +151,10 @@ final class Index
         $nodes = $folder->getDirectoryListing();
 
         // Filter files that are supported
-        $mimes = self::getMimeList();
-        $pathBlacklist = (string) $this->systemConfig->get('memories.index.path.blacklist');
-        $files = array_filter($nodes, static fn ($n): bool => $n instanceof File
+        $mimes = $this->mime->getMimeList();
+        $files = array_filter($nodes, fn ($n): bool => $n instanceof File
             && \in_array($n->getMimeType(), $mimes, true)
-            && self::isPathAllowed($n->getPath(), $pathBlacklist));
+            && $this->mime->isPathAllowed($n->getPath()));
 
         // Create an associative array with file ID as key
         $files = array_combine(array_map(static fn ($n) => $n->getId(), $files), $files);
@@ -270,77 +264,6 @@ final class Index
         ;
 
         return (int) $query->executeQuery()->fetchOne();
-    }
-
-    /**
-     * Get list of MIME types to process.
-     */
-    public static function getMimeList(): array
-    {
-        return self::$mimeList ??= array_merge(
-            self::getPreviewMimes(Application::IMAGE_MIMES),
-            Application::VIDEO_MIMES,
-        );
-    }
-
-    /**
-     * Get list of MIME types that have a preview.
-     */
-    public static function getPreviewMimes(array $source): array
-    {
-        $preview = \OCP\Server::get(IPreview::class);
-
-        return array_filter($source, static fn ($m) => $preview->isMimeSupported($m));
-    }
-
-    /**
-     * Get list of all supported MIME types.
-     */
-    public static function getAllMimes(): array
-    {
-        return array_merge(
-            Application::IMAGE_MIMES,
-            Application::VIDEO_MIMES,
-        );
-    }
-
-    /**
-     * Check if a file is supported.
-     *
-     * @param Node $file file to check
-     */
-    public static function isSupported(Node $file): bool
-    {
-        return \in_array($file->getMimeType(), self::getMimeList(), true);
-    }
-
-    /**
-     * Check if a file is a video.
-     *
-     * @param Node $file file to check
-     */
-    public static function isVideo(Node $file): bool
-    {
-        return \in_array($file->getMimeType(), Application::VIDEO_MIMES, true);
-    }
-
-    /**
-     * Checks if the specified node's path is allowed to be indexed.
-     */
-    public static function isPathAllowed(string $path, string $blacklist): bool
-    {
-        // Always exclude some predefined patterns
-        //   .trashed-<file> (https://github.com/nextcloud/android/issues/10645)
-        if (preg_match('/\/.trashed-[^\/]*$/', $path)) {
-            return false;
-        }
-
-        $pattern = trim($blacklist);
-        if ('' !== $pattern && !\is_int(preg_match("/{$pattern}/", ''))) {
-            throw new \Exception('Invalid regex pattern in memories.index.path.blacklist');
-        }
-
-        return '' === $pattern || !preg_match("/{$pattern}/", $path);
     }
 
     /**

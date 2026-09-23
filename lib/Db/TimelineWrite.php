@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\Service\Index;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
@@ -40,7 +39,7 @@ final class TimelineWrite
     ): bool {
         // Check if we want to process this file
         // https://github.com/pulsejet/memories/issues/933 (zero-byte files)
-        if ($file->getSize() <= 0 || !Index::isSupported($file) || !Index::isPathAllowed($file->getPath(), (string) $this->systemConfig->get('memories.index.path.blacklist'))) {
+        if ($file->getSize() <= 0 || !$this->mime->isSupported($file) || !$this->mime->isPathAllowed($file->getPath())) {
             return false;
         }
 
@@ -63,7 +62,7 @@ final class TimelineWrite
         // Get parameters
         $mtime = $file->getMtime();
         $fileId = $file->getId();
-        $isvideo = Index::isVideo($file);
+        $isvideo = $this->mime->isVideo($file);
 
         // Get previous row
         $prevRow = $this->getCurrentRow($fileId);

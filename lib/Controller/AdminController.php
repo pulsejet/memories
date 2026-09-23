@@ -28,6 +28,7 @@ use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Service\BinExt;
 use OCA\Memories\Service\Index;
+use OCA\Memories\Service\MIME;
 use OCA\Memories\Service\Places;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
@@ -47,6 +48,7 @@ final class AdminController extends ApiController
         IRequest $request,
         protected IAppConfig $appConfig,
         protected Index $index,
+        protected MIME $mime,
         protected TimelineWrite $tw,
         protected IDBConnection $connection,
         protected Places $places,
@@ -149,7 +151,7 @@ final class AdminController extends ApiController
             $status['last_index_job_status_type'] = $this->appConfig->getValueString(Application::APPNAME, 'last_index_job_status_type', 'warning');
 
             // Check supported preview mimes
-            $status['mimes'] = $this->index->getPreviewMimes($this->index->getAllMimes());
+            $status['mimes'] = $this->mime->getPreviewMimes($this->mime->getAllMimes());
 
             // Check for PHP Imagick
             $status['imagick'] = class_exists('\Imagick') ? \Imagick::getVersion()['versionString'] : false;

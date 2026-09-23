@@ -4,26 +4,26 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Tests\Unit;
 
-use OCA\Memories\Service\Index;
+use OCA\Memories\Service\MIME;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
  *
- * @covers \OCA\Memories\Service\Index
+ * @covers \OCA\Memories\Service\MIME
  */
 final class IndexLogicTest extends TestCase
 {
-    private const BLACKLIST = '\/@(Recycle|eaDir)\/';
-
     public function testIsPathAllowed(): void
     {
-        self::assertTrue(Index::isPathAllowed('/admin/files/Photos/IMG_001.jpg', self::BLACKLIST));
-        self::assertTrue(Index::isPathAllowed('/admin/files/Photos/.archive/old.jpg', self::BLACKLIST));
+        $mime = \OCP\Server::get(MIME::class);
 
-        self::assertFalse(Index::isPathAllowed('/admin/files/Photos/.trashed-12345', self::BLACKLIST));
+        self::assertTrue($mime->isPathAllowed('/admin/files/Photos/IMG_001.jpg'));
+        self::assertTrue($mime->isPathAllowed('/admin/files/Photos/.archive/old.jpg'));
 
-        self::assertFalse(Index::isPathAllowed('/admin/files/Photos/@Recycle/foo.jpg', self::BLACKLIST));
-        self::assertFalse(Index::isPathAllowed('/admin/files/Photos/@eaDir/foo.jpg', self::BLACKLIST));
+        self::assertFalse($mime->isPathAllowed('/admin/files/Photos/.trashed-12345'));
+
+        self::assertFalse($mime->isPathAllowed('/admin/files/Photos/@Recycle/foo.jpg'));
+        self::assertFalse($mime->isPathAllowed('/admin/files/Photos/@eaDir/foo.jpg'));
     }
 }
