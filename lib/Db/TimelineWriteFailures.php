@@ -7,11 +7,10 @@ namespace OCA\Memories\Db;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
-use OCP\IDBConnection;
 
 trait TimelineWriteFailures
 {
-    protected IDBConnection $connection;
+    use TimelineWriteBase;
 
     /**
      * Mark a file as failed indexing.

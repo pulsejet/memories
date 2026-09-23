@@ -9,30 +9,18 @@ use OCA\Memories\Service\Index;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
-use OCP\IDBConnection;
 use OCP\Lock\ILockingProvider;
-use Psr\Log\LoggerInterface;
 
 const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places', 'memories_failures'];
 const TRUNCATE_TABLES = ['memories_mapclusters'];
 
 final class TimelineWrite
 {
+    use TimelineWriteBase;
     use TimelineWriteFailures;
     use TimelineWriteMap;
     use TimelineWriteOrphans;
     use TimelineWritePlaces;
-
-    public function __construct(
-        IDBConnection $connection,
-        protected LivePhoto $livePhoto,
-        protected ILockingProvider $lockingProvider,
-        LoggerInterface $logger,
-    ) {
-        // These are declared in traits, don't redeclare.
-        $this->connection = $connection;
-        $this->logger = $logger;
-    }
 
     /**
      * Process a file to insert Exif data into the database.

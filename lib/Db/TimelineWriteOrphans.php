@@ -6,11 +6,10 @@ namespace OCA\Memories\Db;
 
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
 
 trait TimelineWriteOrphans
 {
-    protected IDBConnection $connection;
+    use TimelineWriteBase;
 
     /**
      * Mark all or some files in the table as (un)orphaned.

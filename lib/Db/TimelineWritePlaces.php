@@ -7,16 +7,13 @@ namespace OCA\Memories\Db;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
-use Psr\Log\LoggerInterface;
 
 const LAT_KEY = 'GPSLatitude';
 const LON_KEY = 'GPSLongitude';
 
 trait TimelineWritePlaces
 {
-    protected IDBConnection $connection;
-    protected LoggerInterface $logger;
+    use TimelineWriteBase;
 
     /**
      * Add places data for a file.
@@ -112,15 +109,13 @@ trait TimelineWritePlaces
             try {
                 $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon, $oldLat, $oldLon);
             } catch (\Exception $e) {
-                $logger = \OCP\Server::get(LoggerInterface::class);
-                $logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
+                $this->logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
             }
 
             try {
                 $osmIds = $this->updatePlacesData($fileId, $lat, $lon);
             } catch (\Exception $e) {
-                $logger = \OCP\Server::get(LoggerInterface::class);
-                $logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
+                $this->logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
             }
         }
 

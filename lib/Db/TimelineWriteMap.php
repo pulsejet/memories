@@ -6,13 +6,12 @@ namespace OCA\Memories\Db;
 
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
 
 const CLUSTER_DEG = 0.0003;
 
 trait TimelineWriteMap
 {
-    protected IDBConnection $connection;
+    use TimelineWriteBase;
 
     /**
      * Get the cluster ID for a given point.
