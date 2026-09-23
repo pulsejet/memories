@@ -35,6 +35,7 @@ final class Exif
     public function __construct(
         private BinExt $binExt,
         private SystemConfig $systemConfig,
+        private IEventDispatcher $eventDispatcher,
     ) {}
 
     public function closeStaticExiftoolProc(): void
@@ -396,8 +397,7 @@ final class Exif
 
         // Dispatch NodeWrittenEvent to trigger processing by other apps
         try {
-            $eventDispatcher = \OCP\Server::get(IEventDispatcher::class);
-            $eventDispatcher->dispatchTyped(new NodeWrittenEvent($file));
+            $this->eventDispatcher->dispatchTyped(new NodeWrittenEvent($file));
         } catch (\Exception) {
             // Not our problem
         }
