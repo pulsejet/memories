@@ -7,11 +7,9 @@ namespace OCA\Memories;
 use OC\Files\Search\SearchBinaryOperator;
 use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
-use OCP\App\IAppManager;
 use OCP\Files\Node;
 use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
-use OCP\IAppConfig;
 
 final class Util
 {
@@ -59,123 +57,6 @@ final class Util
         }
 
         return null;
-    }
-
-    /**
-     * Check if albums are enabled for this user.
-     */
-    public static function albumsIsEnabled(): bool
-    {
-        return \OCP\Server::get(IAppManager::class)->isEnabledForUser('photos');
-    }
-
-    /**
-     * Check if tags is enabled for this user.
-     */
-    public static function tagsIsEnabled(): bool
-    {
-        return \OCP\Server::get(IAppManager::class)->isEnabledForUser('systemtags');
-    }
-
-    /**
-     * Check if recognize is enabled for this user.
-     */
-    public static function recognizeIsEnabled(): bool
-    {
-        if (!self::recognizeIsInstalled()) {
-            return false;
-        }
-
-        $appConfig = \OCP\Server::get(IAppConfig::class);
-        if ('true' !== $appConfig->getValueString('recognize', 'faces.enabled', 'false')) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Check if recognize is installed.
-     */
-    public static function recognizeIsInstalled(): bool
-    {
-        $appManager = \OCP\Server::get(IAppManager::class);
-
-        if (!$appManager->isEnabledForUser('recognize')) {
-            return false;
-        }
-
-        $v = $appManager->getAppVersion('recognize');
-
-        return version_compare($v, '3.8.0', '>=');
-    }
-
-    /**
-     * Check if Face Recognition is enabled by the user.
-     */
-    public static function facerecognitionIsEnabled(): bool
-    {
-        if (!self::facerecognitionIsInstalled()) {
-            return false;
-        }
-
-        try {
-            return 'true' === \OCP\Server::get(\OCP\Config\IUserConfig::class)
-                ->getValueString(self::getUID(), 'facerecognition', 'enabled', 'false')
-            ;
-        } catch (\Exception) {
-            // not logged in
-        }
-
-        return false;
-    }
-
-    /**
-     * Check if Face Recognition is installed and enabled for this user.
-     */
-    public static function facerecognitionIsInstalled(): bool
-    {
-        $appManager = \OCP\Server::get(IAppManager::class);
-
-        if (!$appManager->isEnabledForUser('facerecognition')) {
-            return false;
-        }
-
-        $v = $appManager->getAppVersion('facerecognition');
-
-        return version_compare($v, '0.9.10-beta.2', '>=');
-    }
-
-    /**
-     * Check if preview generator is installed.
-     */
-    public static function previewGeneratorIsEnabled(): bool
-    {
-        return \OCP\Server::get(IAppManager::class)->isEnabledForUser('previewgenerator');
-    }
-
-    /**
-     * Check if link sharing is allowed.
-     *
-     * @todo Check if link sharing is enabled to show the button
-     *
-     * @psalm-suppress PossiblyUnusedMethod
-     */
-    public static function isLinkSharingEnabled(): bool
-    {
-        $appConfig = \OCP\Server::get(IAppConfig::class);
-
-        // Check if the shareAPI is enabled
-        if ('yes' !== $appConfig->getValueString('core', 'shareapi_enabled', 'yes')) {
-            return false;
-        }
-
-        // Check whether public sharing is enabled
-        if ('yes' !== $appConfig->getValueString('core', 'shareapi_allow_links', 'yes')) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -281,21 +162,6 @@ final class Util
         }
 
         return $nodes[0];
-    }
-
-    /**
-     * Check if any encryption is enabled that we can not cope with
-     * such as end-to-end encryption.
-     */
-    public static function isEncryptionEnabled(): bool
-    {
-        $encryptionManager = \OCP\Server::get(\OCP\Encryption\IManager::class);
-        if ($encryptionManager->isEnabled()) {
-            // Server-side encryption (OC_DEFAULT_MODULE) is okay, others like e2e are not
-            return 'OC_DEFAULT_MODULE' !== $encryptionManager->getDefaultEncryptionModuleId();
-        }
-
-        return false;
     }
 
     /**

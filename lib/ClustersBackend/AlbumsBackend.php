@@ -27,6 +27,7 @@ use OCA\Memories\Db\AlbumsQuery;
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
@@ -40,6 +41,7 @@ final class AlbumsBackend extends Backend
         protected TimelineQuery $tq,
         protected IUserManager $userManager,
         protected Covers $covers,
+        protected SystemConfig $systemConfig,
     ) {}
 
     #[\Override]
@@ -57,7 +59,7 @@ final class AlbumsBackend extends Backend
     #[\Override]
     public function isEnabled(): bool
     {
-        return Util::albumsIsEnabled();
+        return $this->systemConfig->albumsIsEnabled();
     }
 
     #[\Override]

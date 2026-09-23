@@ -6,10 +6,14 @@ namespace OCA\Memories\Settings;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Util;
+use OCP\App\IAppManager;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\Config\IUserConfig;
+use OCP\Encryption\IManager as EncryptionManager;
+use OCP\IAppConfig;
 use OCP\IConfig;
 use OCP\IRequest;
+use OCP\IUserSession;
 
 final class SystemConfig
 {
@@ -145,6 +149,10 @@ final class SystemConfig
         private IConfig $config,
         private IUserConfig $userConfig,
         private IRequest $request,
+        private IAppManager $appManager,
+        private IAppConfig $appConfig,
+        private IUserSession $userSession,
+        private EncryptionManager $encryptionManager,
     ) {}
 
     /**
@@ -241,6 +249,97 @@ final class SystemConfig
                 ?? throw new \InvalidArgumentException("Invalid timeline path: {$path}"),
             explode(';', $paths),
         );
+    }
+
+    /** Check if albums are enabled for this user */
+    public function albumsIsEnabled(): bool
+    {
+        return $this->appManager->isEnabledForUser('photos');
+    }
+
+    /** Check if tags is enabled for this user */
+    public function tagsIsEnabled(): bool
+    {
+        return $this->appManager->isEnabledForUser('systemtags');
+    }
+
+    /** Check if recognize is enabled for this user */
+    public function recognizeIsEnabled(): bool
+    {
+        if (!$this->recognizeIsInstalled()) {
+            return false;
+        }
+
+        if ('true' !== $this->appConfig->getValueString('recognize', 'faces.enabled', 'false')) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /** Check if recognize is installed */
+    public function recognizeIsInstalled(): bool
+    {
+        if (!$this->appManager->isEnabledForUser('recognize')) {
+            return false;
+        }
+
+        $v = $this->appManager->getAppVersion('recognize');
+
+        return version_compare($v, '3.8.0', '>=');
+    }
+
+    /** Check if Face Recognition is enabled by the user */
+    public function facerecognitionIsEnabled(): bool
+    {
+        if (!$this->facerecognitionIsInstalled()) {
+            return false;
+        }
+
+        try {
+            $uid = $this->userSession->getUser()?->getUID();
+            if (null === $uid) {
+                return false;
+            }
+
+            return 'true' === $this->userConfig->getValueString($uid, 'facerecognition', 'enabled', 'false');
+        } catch (\Exception) {
+            // not logged in
+        }
+
+        return false;
+    }
+
+    /** Check if Face Recognition is installed and enabled for this user */
+    public function facerecognitionIsInstalled(): bool
+    {
+        if (!$this->appManager->isEnabledForUser('facerecognition')) {
+            return false;
+        }
+
+        $v = $this->appManager->getAppVersion('facerecognition');
+
+        return version_compare($v, '0.9.10-beta.2', '>=');
+    }
+
+    /** Check if preview generator is installed */
+    public function previewGeneratorIsEnabled(): bool
+    {
+        return $this->appManager->isEnabledForUser('previewgenerator');
+    }
+
+    /**
+     * Check if any encryption is enabled that we can not cope with
+     * such as end-to-end encryption.
+     */
+    public function isEncryptionEnabled(): bool
+    {
+        if ($this->encryptionManager->isEnabled()) {
+            // Server-side encryption (OC_DEFAULT_MODULE) is okay, others like e2e are not
+            return 'OC_DEFAULT_MODULE' !== $this->encryptionManager->getDefaultEncryptionModuleId();
+        }
+
+        return false;
     }
 
     /** Get the common content security policy */

@@ -50,7 +50,7 @@ final class PageController extends Controller
         \OCP\Util::addScript(Application::APPNAME, 'memories-main');
 
         // Additional setup for Recognize
-        if (Util::recognizeIsInstalled()) {
+        if ($this->systemConfig->recognizeIsInstalled()) {
             // Auto translation for tags
             \OCP\Util::addTranslations('recognize');
             // Obtain API Key

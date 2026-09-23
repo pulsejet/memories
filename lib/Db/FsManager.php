@@ -76,7 +76,7 @@ final class FsManager
         $user = $this->userSession->getUser();
 
         // Albums have no folder
-        if ($this->hasAlbumToken() && Util::albumsIsEnabled()) {
+        if ($this->hasAlbumToken() && $this->systemConfig->albumsIsEnabled()) {
             if (null !== $user) {
                 return $root;
             }

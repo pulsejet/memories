@@ -25,6 +25,7 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\SimpleFS\ISimpleFile;
@@ -38,6 +39,7 @@ final class RecognizeBackend extends Backend
         protected TimelineQuery $tq,
         protected IRequest $request,
         protected Covers $covers,
+        protected SystemConfig $systemConfig,
     ) {}
 
     #[\Override]
@@ -55,7 +57,7 @@ final class RecognizeBackend extends Backend
     #[\Override]
     public function isEnabled(): bool
     {
-        return Util::recognizeIsEnabled();
+        return $this->systemConfig->recognizeIsEnabled();
     }
 
     #[\Override]

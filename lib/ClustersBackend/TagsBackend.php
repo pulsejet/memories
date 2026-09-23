@@ -25,7 +25,7 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
-use OCA\Memories\Util;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
@@ -35,6 +35,7 @@ final class TagsBackend extends Backend
         protected TimelineQuery $tq,
         protected IRequest $request,
         protected Covers $covers,
+        protected SystemConfig $systemConfig,
     ) {}
 
     #[\Override]
@@ -52,7 +53,7 @@ final class TagsBackend extends Backend
     #[\Override]
     public function isEnabled(): bool
     {
-        return Util::tagsIsEnabled();
+        return $this->systemConfig->tagsIsEnabled();
     }
 
     #[\Override]

@@ -126,14 +126,14 @@ final class OtherController extends ApiController
                 'locale' => $locale,
 
                 // enabled apps
-                'systemtags_enabled' => Util::tagsIsEnabled(),
-                'albums_enabled' => Util::albumsIsEnabled(),
-                'recognize_installed' => Util::recognizeIsInstalled(),
-                'recognize_enabled' => Util::recognizeIsEnabled(),
-                'facerecognition_installed' => Util::facerecognitionIsInstalled(),
-                'facerecognition_enabled' => Util::facerecognitionIsEnabled(),
+                'systemtags_enabled' => $this->systemConfig->tagsIsEnabled(),
+                'albums_enabled' => $this->systemConfig->albumsIsEnabled(),
+                'recognize_installed' => $this->systemConfig->recognizeIsInstalled(),
+                'recognize_enabled' => $this->systemConfig->recognizeIsEnabled(),
+                'facerecognition_installed' => $this->systemConfig->facerecognitionIsInstalled(),
+                'facerecognition_enabled' => $this->systemConfig->facerecognitionIsEnabled(),
                 'lens_enabled' => '' !== trim($this->lens->daemonUrl()),
-                'preview_generator_enabled' => Util::previewGeneratorIsEnabled(),
+                'preview_generator_enabled' => $this->systemConfig->previewGeneratorIsEnabled(),
 
                 // general settings
                 'timeline_path' => $getAppConfig('timelinePath', $this->systemConfig->get('memories.timeline.default_path')),

@@ -30,6 +30,7 @@ use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
 use OCA\Memories\Service;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
@@ -57,6 +58,7 @@ final class ImageController extends ApiController
         protected ISystemTagObjectMapper $tagObjectMapper,
         protected ISystemTagManager $tagManager,
         protected Exif $exif,
+        protected SystemConfig $systemConfig,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -299,7 +301,7 @@ final class ImageController extends ApiController
             $file = $this->fs->getUserFile($id);
 
             // Check if user has permissions
-            if (!$file->isUpdateable() || Util::isEncryptionEnabled()) {
+            if (!$file->isUpdateable() || $this->systemConfig->isEncryptionEnabled()) {
                 throw Exceptions::ForbiddenFileUpdate($file->getName());
             }
 
@@ -525,7 +527,7 @@ final class ImageController extends ApiController
     private function getTags(int $fileId): array
     {
         // Make sure tags are enabled
-        if (!Util::tagsIsEnabled()) {
+        if (!$this->systemConfig->tagsIsEnabled()) {
             return [];
         }
 

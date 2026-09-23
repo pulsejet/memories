@@ -157,7 +157,7 @@ final class AdminController extends ApiController
             $status['imagick'] = class_exists('\Imagick') ? \Imagick::getVersion()['versionString'] : false;
 
             // Check for bad encryption module
-            $status['bad_encryption'] = \OCA\Memories\Util::isEncryptionEnabled();
+            $status['bad_encryption'] = $this->systemConfig->isEncryptionEnabled();
 
             // Check database platform and parameters
             try {

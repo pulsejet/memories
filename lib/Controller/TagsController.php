@@ -26,6 +26,7 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\FsManager;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
@@ -40,6 +41,7 @@ final class TagsController extends ApiController
         IRequest $request,
         protected FsManager $fs,
         protected ISystemTagObjectMapper $tagObjectMapper,
+        protected SystemConfig $systemConfig,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -56,7 +58,7 @@ final class TagsController extends ApiController
     {
         return Util::guardEx(function () use ($id, $add, $remove) {
             // Check tags enabled for this user
-            if (!Util::tagsIsEnabled()) {
+            if (!$this->systemConfig->tagsIsEnabled()) {
                 throw Exceptions::NotEnabled('Tags');
             }
 

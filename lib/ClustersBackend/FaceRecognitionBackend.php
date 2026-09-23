@@ -25,7 +25,7 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
-use OCA\Memories\Util;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\SimpleFS\ISimpleFile;
 use OCP\IAppConfig;
@@ -40,6 +40,7 @@ final class FaceRecognitionBackend extends Backend
         protected TimelineQuery $tq,
         protected IAppConfig $appConfig,
         protected Covers $covers,
+        protected SystemConfig $systemConfig,
     ) {}
 
     #[\Override]
@@ -57,8 +58,8 @@ final class FaceRecognitionBackend extends Backend
     #[\Override]
     public function isEnabled(): bool
     {
-        return Util::facerecognitionIsInstalled()
-               && Util::facerecognitionIsEnabled();
+        return $this->systemConfig->facerecognitionIsInstalled()
+               && $this->systemConfig->facerecognitionIsEnabled();
     }
 
     #[\Override]
