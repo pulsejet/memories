@@ -24,8 +24,11 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Service\BinExt;
+use OCA\Memories\Service\Index;
+use OCA\Memories\Service\Places;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\ApiController;
@@ -33,12 +36,21 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IAppConfig;
+use OCP\IDBConnection;
 use OCP\IRequest;
+use OCP\ISession;
 
 final class AdminController extends ApiController
 {
     public function __construct(
         IRequest $request,
+        protected IAppConfig $appConfig,
+        protected Index $index,
+        protected TimelineWrite $tw,
+        protected IDBConnection $connection,
+        protected Places $places,
+        protected ISession $session,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -105,10 +117,6 @@ final class AdminController extends ApiController
     public function getSystemStatus(): Http\Response
     {
         return Util::guardEx(function () {
-            $appConfig = \OC::$server->get(\OCP\IAppConfig::class);
-            $index = \OC::$server->get(\OCA\Memories\Service\Index::class);
-            $tw = \OC::$server->get(\OCA\Memories\Db\TimelineWrite::class);
-
             // Build status array
             $status = [];
 
@@ -128,18 +136,18 @@ final class AdminController extends ApiController
             );
 
             // Check number of indexed files
-            $status['indexed_count'] = $index->getIndexedCount();
-            $status['failure_count'] = $tw->countFailures();
+            $status['indexed_count'] = $this->index->getIndexedCount();
+            $status['failure_count'] = $this->tw->countFailures();
 
             // Automatic indexing stats
-            $jobStart = (int) $appConfig->getValueString(Application::APPNAME, 'last_index_job_start', (string) 0);
+            $jobStart = (int) $this->appConfig->getValueString(Application::APPNAME, 'last_index_job_start', (string) 0);
             $status['last_index_job_start'] = $jobStart ? time() - $jobStart : 0; // Seconds ago
-            $status['last_index_job_duration'] = (float) $appConfig->getValueString(Application::APPNAME, 'last_index_job_duration', (string) 0);
-            $status['last_index_job_status'] = $appConfig->getValueString(Application::APPNAME, 'last_index_job_status', 'Indexing has not been run yet');
-            $status['last_index_job_status_type'] = $appConfig->getValueString(Application::APPNAME, 'last_index_job_status_type', 'warning');
+            $status['last_index_job_duration'] = (float) $this->appConfig->getValueString(Application::APPNAME, 'last_index_job_duration', (string) 0);
+            $status['last_index_job_status'] = $this->appConfig->getValueString(Application::APPNAME, 'last_index_job_status', 'Indexing has not been run yet');
+            $status['last_index_job_status_type'] = $this->appConfig->getValueString(Application::APPNAME, 'last_index_job_status_type', 'warning');
 
             // Check supported preview mimes
-            $status['mimes'] = $index->getPreviewMimes($index->getAllMimes());
+            $status['mimes'] = $this->index->getPreviewMimes($this->index->getAllMimes());
 
             // Check for PHP Imagick
             $status['imagick'] = class_exists('\Imagick') ? \Imagick::getVersion()['versionString'] : false;
@@ -149,8 +157,7 @@ final class AdminController extends ApiController
 
             // Check database platform and parameters
             try {
-                $db = \OC::$server->get(\OCP\IDBConnection::class);
-                $provider = $db->getDatabaseProvider(true);
+                $provider = $this->connection->getDatabaseProvider(true);
 
                 // SQLite is not recommended for performance.
                 $status['db_is_sqlite'] = \OCP\IDBConnection::PLATFORM_SQLITE === $provider;
@@ -158,18 +165,15 @@ final class AdminController extends ApiController
                 // Check InnoDB buffer pool size for MySQL/MariaDB
                 if (\OCP\IDBConnection::PLATFORM_MYSQL === $provider
                  || \OCP\IDBConnection::PLATFORM_MARIADB === $provider) {
-                    $status['innodb_buffer_pool_size'] = (int) $db->executeQuery('SELECT @@innodb_buffer_pool_size')->fetchOne();
+                    $status['innodb_buffer_pool_size'] = (int) $this->connection->executeQuery('SELECT @@innodb_buffer_pool_size')->fetchOne();
                 }
             } catch (\Exception $e) {
                 $status['innodb_buffer_pool_size'] = 0;
             }
 
-            // Get GIS status
-            $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
-
             try {
-                $status['gis_type'] = $places->detectGisType();
-                $status['gis_count'] = $places->geomCount();
+                $status['gis_type'] = $this->places->detectGisType();
+                $status['gis_count'] = $this->places->geomCount();
             } catch (\Exception $e) {
                 $status['gis_type'] = $e->getMessage();
             }
@@ -242,14 +246,12 @@ final class AdminController extends ApiController
     #[NoCSRFRequired]
     public function getFailureLogs(): Http\Response
     {
-        return Util::guardExDirect(static function (Http\IOutput $out) {
-            $tw = \OC::$server->get(\OCA\Memories\Db\TimelineWrite::class);
-
+        return Util::guardExDirect(function (Http\IOutput $out) {
             $out->setHeader('Content-Type: text/plain');
             $out->setHeader('X-Accel-Buffering: no');
             $out->setHeader('Cache-Control: no-cache');
 
-            foreach ($tw->listFailures() as $log) {
+            foreach ($this->tw->listFailures() as $log) {
                 $fileid = str_pad((string) $log['fileid'], 12, ' ', STR_PAD_RIGHT); // size
                 $mtime = $log['mtime'];
                 $reason = $log['reason'];
@@ -272,7 +274,7 @@ final class AdminController extends ApiController
         // Reset action token
         $this->actionToken(true);
 
-        return Util::guardExDirect(static function (Http\IOutput $out) {
+        return Util::guardExDirect(function (Http\IOutput $out) {
             try {
                 // Set PHP timeout to infinite
                 set_time_limit(0);
@@ -284,9 +286,8 @@ final class AdminController extends ApiController
                 $out->setHeader('Connection: keep-alive');
                 $out->setHeader('Content-Length: 0');
 
-                $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
-                $places->downloadImportPlanet();
-                $places->recalculateAll();
+                $this->places->downloadImportPlanet();
+                $this->places->recalculateAll();
 
                 $out->setOutput("Places set up successfully.\n");
             } catch (\Exception $e) {
@@ -338,13 +339,12 @@ final class AdminController extends ApiController
 
     private function actionToken(bool $set = false): string
     {
-        $session = \OC::$server->get(\OCP\ISession::class);
         if (!$set) {
-            return $session->get('memories_action_token');
+            return $this->session->get('memories_action_token');
         }
 
         $token = bin2hex(random_bytes(32));
-        $session->set('memories_action_token', $token);
+        $this->session->set('memories_action_token', $token);
 
         return $token;
     }

@@ -32,6 +32,7 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 use OCP\Share\IManager;
 use OCP\Share\IShare;
 
@@ -40,6 +41,8 @@ final class ShareController extends ApiController
     public function __construct(
         IRequest $request,
         protected FsManager $fs,
+        protected IManager $shareManager,
+        protected IURLGenerator $urlGenerator,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -53,7 +56,7 @@ final class ShareController extends ApiController
         return Util::guardEx(function () use ($id, $path) {
             $file = $this->getNodeByIdOrPath($id, $path);
 
-            $shares = \OC::$server->get(IManager::class)
+            $shares = $this->shareManager
                 ->getSharesBy(Util::getUID(), IShare::TYPE_LINK, $file, true, 50, 0)
             ;
 
@@ -76,10 +79,8 @@ final class ShareController extends ApiController
         return Util::guardEx(function () use ($id, $path) {
             $file = $this->getNodeByIdOrPath($id, $path);
 
-            $manager = \OC::$server->get(IManager::class);
-
-            $share = $manager->createShare(
-                $manager->newShare()
+            $share = $this->shareManager->createShare(
+                $this->shareManager->newShare()
                     ->setNode($file)
                     ->setShareType(\OCP\Share\IShare::TYPE_LINK)
                     ->setSharedBy(Util::getUID())
@@ -96,18 +97,16 @@ final class ShareController extends ApiController
     #[NoAdminRequired]
     public function deleteShare(string $id): Http\Response
     {
-        return Util::guardEx(static function () use ($id) {
+        return Util::guardEx(function () use ($id) {
             $uid = Util::getUID();
 
-            $manager = \OC::$server->get(\OCP\Share\IManager::class);
-
-            $share = $manager->getShareById($id);
+            $share = $this->shareManager->getShareById($id);
 
             if ($share->getSharedBy() !== $uid) {
                 throw Exceptions::Forbidden('You are not the owner of this share');
             }
 
-            $manager->deleteShare($share);
+            $this->shareManager->deleteShare($share);
 
             return new JSONResponse([], Http::STATUS_OK);
         });
@@ -138,7 +137,7 @@ final class ShareController extends ApiController
     private function makeShareResponse(IShare $share): array
     {
         $token = $share->getToken();
-        $url = \OC::$server->get(\OCP\IURLGenerator::class)
+        $url = $this->urlGenerator
             ->linkToRouteAbsolute('memories.Public.showShare', ['token' => $token])
         ;
 

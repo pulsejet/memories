@@ -28,6 +28,7 @@ use OCA\Memories\Exceptions;
 use OCA\Memories\Service\Lens;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\App\IAppManager;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -37,13 +38,20 @@ use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
 use OCP\Config\IUserConfig;
+use OCP\IConfig;
 use OCP\IRequest;
+use OCP\IURLGenerator;
+use OCP\L10N\IFactory as L10NFactory;
 
 final class OtherController extends ApiController
 {
     public function __construct(
         IRequest $request,
         protected IUserConfig $userConfig,
+        protected IAppManager $appManager,
+        protected L10NFactory $l10nFactory,
+        protected IURLGenerator $urlGenerator,
+        protected IConfig $config,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -77,7 +85,7 @@ final class OtherController extends ApiController
     {
         return Util::guardEx(function () {
             // get memories version
-            $version = \OC::$server->get(\OCP\App\IAppManager::class)->getAppVersion('memories');
+            $version = $this->appManager->getAppVersion('memories');
 
             // get user if logged in
             try {
@@ -92,9 +100,8 @@ final class OtherController extends ApiController
             };
 
             // user language and locale for native clients
-            $l10nFactory = \OC::$server->get(\OCP\L10N\IFactory::class);
-            $language = $l10nFactory->findLanguage();
-            $locale = $l10nFactory->findLocale($language);
+            $language = $this->l10nFactory->findLanguage();
+            $locale = $this->l10nFactory->findLocale($language);
 
             // available map tile servers and the user's selected server URL
             $mapTileServers = SystemConfig::get('memories.map.tile_servers');
@@ -161,16 +168,13 @@ final class OtherController extends ApiController
     #[NoAdminRequired]
     #[PublicPage]
     #[NoCSRFRequired]
-    public function describeApi(): Http\Response
+    public function describeApi(PageController $pageController): Http\Response
     {
-        return Util::guardEx(static function () {
-            $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
-            $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
-
+        return Util::guardEx(function () use ($pageController) {
             $info = [
-                'version' => $appManager->getAppVersion('memories'),
-                'baseUrl' => $urlGenerator->linkToRouteAbsolute('memories.Page.main'),
-                'loginFlowUrl' => $urlGenerator->linkToRouteAbsolute('core.ClientFlowLoginV2.init'),
+                'version' => $this->appManager->getAppVersion('memories'),
+                'baseUrl' => $this->urlGenerator->linkToRouteAbsolute('memories.Page.main'),
+                'loginFlowUrl' => $this->urlGenerator->linkToRouteAbsolute('core.ClientFlowLoginV2.init'),
             ];
 
             try {
@@ -180,12 +184,12 @@ final class OtherController extends ApiController
             }
 
             // Static file manifests
-            if ('1' === \OC::$server->get(\OCP\IRequest::class)->getParam('manifest')) {
+            if ('1' === $this->request->getParam('manifest')) {
                 $manifest = @file_get_contents(__DIR__.'/../../js/memories-manifest.json');
                 $info['jsManifest'] = false !== $manifest ? base64_encode($manifest) : null;
                 $manifestSig = @file_get_contents(__DIR__.'/../../js/memories-manifest.sig.json');
                 $info['jsManifestSig'] = false !== $manifestSig ? base64_encode($manifestSig) : null;
-                $info['cssManifest'] = PageController::getLinkHeaders();
+                $info['cssManifest'] = $pageController->getLinkHeaders();
             }
 
             // This is public information
@@ -201,16 +205,16 @@ final class OtherController extends ApiController
     #[NoCSRFRequired]
     public function static(string $name): Http\Response
     {
-        return Util::guardEx(static function () use ($name) {
+        return Util::guardEx(function () use ($name) {
             switch ($name) {
                 case 'service-worker.js':
                     // Disable service worker if server is in debug mode
-                    if (!\OC::$server->get(\OCP\IConfig::class)->getSystemValue('memories.sw.enabled', true)) {
+                    if (!$this->config->getSystemValue('memories.sw.enabled', true)) {
                         throw Exceptions::NotFound('Service worker is disabled in global configuration');
                     }
 
                     // Get relative URL to JS web root of the app
-                    $prefix = \OC::$server->get(\OCP\IURLGenerator::class)->linkTo('memories', 'js/memories-main.js');
+                    $prefix = $this->urlGenerator->linkTo('memories', 'js/memories-main.js');
                     $prefix = preg_replace('/memories-main\.js.*$/', '', $prefix) ?? $prefix;
 
                     // Make sure prefix starts and ends with a slash
@@ -230,7 +234,7 @@ final class OtherController extends ApiController
                     break;
 
                 case 'go-vod':
-                    switch (\OC::$server->get(IRequest::class)->getParam('arch')) {
+                    switch ($this->request->getParam('arch')) {
                         case 'x86_64':
                         case 'amd64':
                             return new StreamResponse(__DIR__.'/../../bin-ext/go-vod-amd64');

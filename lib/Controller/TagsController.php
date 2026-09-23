@@ -32,12 +32,14 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
+use OCP\SystemTag\ISystemTagObjectMapper;
 
 final class TagsController extends ApiController
 {
     public function __construct(
         IRequest $request,
         protected FsManager $fs,
+        protected ISystemTagObjectMapper $tagObjectMapper,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -66,17 +68,14 @@ final class TagsController extends ApiController
                 throw Exceptions::ForbiddenFileUpdate($file->getName());
             }
 
-            // Get mapper from tags to objects
-            $om = \OC::$server->get(\OCP\SystemTag\ISystemTagObjectMapper::class);
-
             // Add tags
             if (null !== $add && \count($add) > 0) {
-                $om->assignTags((string) $id, 'files', array_values(array_map(static fn ($t): string => (string) $t, $add)));
+                $this->tagObjectMapper->assignTags((string) $id, 'files', array_values(array_map(static fn ($t): string => (string) $t, $add)));
             }
 
             // Remove tags
             if (null !== $remove && \count($remove) > 0) {
-                $om->unassignTags((string) $id, 'files', array_values(array_map(static fn ($t): string => (string) $t, $remove)));
+                $this->tagObjectMapper->unassignTags((string) $id, 'files', array_values(array_map(static fn ($t): string => (string) $t, $remove)));
             }
 
             return new JSONResponse([], Http::STATUS_OK);

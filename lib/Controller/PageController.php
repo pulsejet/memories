@@ -20,6 +20,7 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IRequest;
+use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
 
 final class PageController extends Controller
@@ -29,6 +30,7 @@ final class PageController extends Controller
         protected IEventDispatcher $eventDispatcher,
         private IInitialState $initialState,
         private LoggerInterface $logger,
+        private IUserSession $userSession,
         private ?\OCA\Recognize\Public\ApiKeyManager $apiKeyManager,
     ) {
         parent::__construct(Application::APPNAME, $request);
@@ -240,10 +242,10 @@ final class PageController extends Controller
      *
      * @return array<array<string, null|string>>
      */
-    public static function getLinkHeaders(): array
+    public function getLinkHeaders(): array
     {
-        $user = \OC::$server->get(\OCP\IUserSession::class)->getUser();
-        \OC::$server->get(\OCP\EventDispatcher\IEventDispatcher::class)->dispatchTyped(new BeforeTemplateRenderedEvent(
+        $user = $this->userSession->getUser();
+        $this->eventDispatcher->dispatchTyped(new BeforeTemplateRenderedEvent(
             null !== $user,
             new TemplateResponse(Application::APPNAME, 'main', [], TemplateResponse::RENDER_AS_BLANK),
         ));

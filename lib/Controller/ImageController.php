@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OC\Preview\PreviewService;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\TimelineQuery;
@@ -36,8 +37,11 @@ use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IPreview;
 use OCP\IRequest;
 use OCP\IUserSession;
+use OCP\SystemTag\ISystemTagManager;
+use OCP\SystemTag\ISystemTagObjectMapper;
 
 const IMAGICK_SAFE = '/^image\/(x-)?(png|jpeg|gif|bmp|tiff|webp|hei(f|c)|avif|dcraw)$/';
 
@@ -48,6 +52,10 @@ final class ImageController extends ApiController
         protected FsManager $fs,
         protected TimelineQuery $tq,
         protected IUserSession $userSession,
+        protected IPreview $preview,
+        protected PreviewService $previewService,
+        protected ISystemTagObjectMapper $tagObjectMapper,
+        protected ISystemTagManager $tagManager,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -76,7 +84,7 @@ final class ImageController extends ApiController
             $file = $this->fs->getUserFile($id);
 
             try {
-                $preview = \OC::$server->get(\OCP\IPreview::class)
+                $preview = $this->preview
                     ->getPreview($file, $x, $y, !$a, $mode)
                 ;
             } catch (\OCP\Files\NotFoundException $e) {
@@ -128,11 +136,8 @@ final class ImageController extends ApiController
                 return $aArea <=> $bArea;
             });
 
-            $previewManager = \OC::$server->get(\OCP\IPreview::class);
-            $previewService = \OC::$server->get(\OC\Preview\PreviewService::class);
-
             $requestedFileIds = array_map(static fn ($bodyFile) => (int) $bodyFile['fileid'], $files);
-            $availablePreviews = $previewService->getAvailablePreviews($requestedFileIds);
+            $availablePreviews = $this->previewService->getAvailablePreviews($requestedFileIds);
 
             // stream the response
             $out->setHeader('Content-Type: application/octet-stream');
@@ -160,7 +165,7 @@ final class ImageController extends ApiController
 
                     // Add this preview to the response
                     $file = $this->fs->getUserFile($fileid);
-                    $preview = $previewManager->getPreview($file, $x, $y, !$a, \OCP\IPreview::MODE_FILL);
+                    $preview = $this->preview->getPreview($file, $x, $y, !$a, \OCP\IPreview::MODE_FILL);
                     $content = $preview->getContent();
                     if (empty($content)) {
                         continue;
@@ -262,7 +267,7 @@ final class ImageController extends ApiController
                 if ($clusters) {
                     $clist = [];
                     foreach (explode(',', $clusters) as $type) {
-                        $backend = \OC::$server->get(\OCA\Memories\ClustersBackend\Manager::class)->get($type);
+                        $backend = \OCA\Memories\ClustersBackend\Manager::get($type);
                         if ($backend->isEnabled()) {
                             $clist[$type] = $backend->getClusters($id);
                         }
@@ -449,7 +454,7 @@ final class ImageController extends ApiController
             }
 
             // Make sure the preview is updated
-            \OC::$server->get(\OCP\IPreview::class)->getPreview($file);
+            $this->preview->getPreview($file);
 
             return $this->info($file->getId(), true);
         });
@@ -524,11 +529,10 @@ final class ImageController extends ApiController
         }
 
         // Get the tag ids for this file
-        $objectMapper = \OC::$server->get(\OCP\SystemTag\ISystemTagObjectMapper::class);
-        $tagIds = $objectMapper->getTagIdsForObjects([(string) $fileId], 'files')[(string) $fileId];
+        $tagIds = $this->tagObjectMapper->getTagIdsForObjects([(string) $fileId], 'files')[(string) $fileId];
 
         // Get all matching tag objects
-        $tags = \OC::$server->get(\OCP\SystemTag\ISystemTagManager::class)->getTagsByIds($tagIds);
+        $tags = $this->tagManager->getTagsByIds($tagIds);
 
         // Filter out the tags that are not user visible
         $visible = array_filter($tags, static fn ($t) => $t->isUserVisible());
@@ -545,17 +549,14 @@ final class ImageController extends ApiController
     private function refreshPreviews(\OCP\Files\File $file): void
     {
         try {
-            $previewService = \OC::$server->get(\OC\Preview\PreviewService::class);
-
             // Delete all available previews
             $fileId = $file->getId();
-            foreach ($previewService->getAvailablePreviewsForFile($fileId) as $preview) {
-                $previewService->deletePreview($preview);
+            foreach ($this->previewService->getAvailablePreviewsForFile($fileId) as $preview) {
+                $this->previewService->deletePreview($preview);
             }
 
             // Get the preview to regenerate
-            $previewManager = \OC::$server->get(\OCP\IPreview::class);
-            $previewManager->getPreview($file, 32, 32, true, \OCP\IPreview::MODE_FILL);
+            $this->preview->getPreview($file, 32, 32, true, \OCP\IPreview::MODE_FILL);
         } catch (\Exception $e) {
             return;
         }

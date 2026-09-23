@@ -59,6 +59,9 @@ final class LensController extends ApiController
         protected IRootFolder $rootFolder,
         protected TimelineQuery $tq,
         protected FsManager $fs,
+        protected LensFolders $lensFolders,
+        protected IClientService $clientService,
+        protected IUserMountCache $mountCache,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -159,13 +162,13 @@ final class LensController extends ApiController
                 return new DataResponse([]);
             }
 
-            $folders = \OC::$server->get(LensFolders::class)->getFolderIds($root->getIds());
+            $folders = $this->lensFolders->getFolderIds($root->getIds());
             if ([] === $folders) {
                 return new DataResponse([]);
             }
 
             try {
-                $res = \OC::$server->get(IClientService::class)->newClient()->post($base.'/v1/search', [
+                $res = $this->clientService->newClient()->post($base.'/v1/search', [
                     'json' => [
                         'text' => $text,
                         'folders' => $folders,
@@ -254,8 +257,7 @@ final class LensController extends ApiController
      */
     private function getFileOwner(int $fileid): string
     {
-        $mountCache = \OC::$server->get(IUserMountCache::class);
-        foreach ($mountCache->getMountsForFileId($fileid) as $info) {
+        foreach ($this->mountCache->getMountsForFileId($fileid) as $info) {
             return $info->getUser()->getUID();
         }
 

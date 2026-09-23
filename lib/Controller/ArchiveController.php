@@ -38,6 +38,7 @@ final class ArchiveController extends ApiController
 {
     public function __construct(
         IRequest $request,
+        protected ILockingProvider $lockingProvider,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -189,14 +190,13 @@ final class ArchiveController extends ApiController
         // Attempt to create the folder
         if (!$parent->nodeExists($name)) {
             $pathHash = md5($finalPath);
-            $lockingProvider = \OC::$server->get(ILockingProvider::class);
             $lockKey = "memories/create/{$pathHash}";
             $lockType = ILockingProvider::LOCK_EXCLUSIVE;
             $locked = false;
 
             try {
                 // Attempt to acquire exclusive lock
-                $lockingProvider->acquireLock($lockKey, $lockType);
+                $this->lockingProvider->acquireLock($lockKey, $lockType);
                 $locked = true;
             } catch (\OCP\Lock\LockedException) {
                 // Someone else is creating, wait and try to get the folder
@@ -215,7 +215,7 @@ final class ArchiveController extends ApiController
                     throw Exceptions::ForbiddenFileUpdate("{$finalPath} [locked]");
                 } finally {
                     // Release our lock
-                    $lockingProvider->releaseLock($lockKey, $lockType);
+                    $this->lockingProvider->releaseLock($lockKey, $lockType);
                 }
             }
         }

@@ -48,6 +48,7 @@ final class DownloadController extends ApiController
         protected FsManager $fs,
         protected ICacheFactory $cacheFactory,
         protected ISecureRandom $secureRandom,
+        protected ITempManager $tempManager,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -337,9 +338,6 @@ final class DownloadController extends ApiController
             // So we need to add a number to the end of the name
             $nameCounts = [];
 
-            /** @var ITempManager for clearing temp files */
-            $tempManager = \OC::$server->get(ITempManager::class);
-
             // Send each file
             foreach ($fileIds as $fileId) {
                 if (connection_aborted()) {
@@ -408,7 +406,7 @@ final class DownloadController extends ApiController
                     }
 
                     // Clear any temp files
-                    $tempManager->clean();
+                    $this->tempManager->clean();
                 }
             }
 

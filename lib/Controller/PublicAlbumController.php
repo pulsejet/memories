@@ -107,7 +107,7 @@ final class PublicAlbumController extends Controller
 
     #[PublicPage]
     #[NoCSRFRequired]
-    public function download(string $token): Response
+    public function download(string $token, DownloadController $downloadController): Response
     {
         $album = $this->albumsQuery->getAlbumByLink($token);
         if (!$album) {
@@ -120,7 +120,6 @@ final class PublicAlbumController extends Controller
         $fileIds = array_map(static fn ($file) => (int) $file['file_id'], $files);
 
         // Get download handle
-        $downloadController = \OC::$server->get(\OCA\Memories\Controller\DownloadController::class);
         $handle = $downloadController->createHandle($album['name'], $fileIds);
 
         // Start download

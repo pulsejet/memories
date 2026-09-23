@@ -34,6 +34,7 @@ use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IPreview;
 use OCP\IRequest;
 
 final class ClustersController extends ApiController
@@ -48,6 +49,7 @@ final class ClustersController extends ApiController
     public function __construct(
         IRequest $request,
         protected FsManager $fs,
+        protected IPreview $previewManager,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -125,9 +127,9 @@ final class ClustersController extends ApiController
      * Download a cluster as a zip file.
      */
     #[NoAdminRequired]
-    public function download(string $backend, string $name): Http\Response
+    public function download(string $backend, string $name, DownloadController $downloadController): Http\Response
     {
-        return Util::guardEx(function () use ($backend, $name) {
+        return Util::guardEx(function () use ($backend, $name, $downloadController) {
             $this->init($backend);
 
             // Get list of all files in this cluster
@@ -136,7 +138,7 @@ final class ClustersController extends ApiController
 
             // Get download handle
             $filename = $this->backend->clusterName($name);
-            $handle = \OC::$server->get(DownloadController::class)->createHandle($filename, $fileIds);
+            $handle = $downloadController->createHandle($filename, $fileIds);
 
             return new JSONResponse(['handle' => $handle], Http::STATUS_OK);
         });
@@ -165,9 +167,6 @@ final class ClustersController extends ApiController
      */
     private function getPreviewFromPhotoList(array $photos, bool $isCover): Http\Response
     {
-        // Get preview manager
-        $previewManager = \OC::$server->get(\OCP\IPreview::class);
-
         // Try to get a preview
         foreach ($photos as $photo) {
             // Get preview image
@@ -175,7 +174,7 @@ final class ClustersController extends ApiController
                 $quality = $this->backend->getPreviewQuality();
 
                 $file = $this->fs->getUserFile($this->backend->getFileId($photo));
-                $file = $previewManager->getPreview($file, $quality, $quality, false);
+                $file = $this->previewManager->getPreview($file, $quality, $quality, false);
 
                 [$blob, $mimetype] = $this->backend->getPreviewBlob($file, $photo);
                 if (empty($blob)) {

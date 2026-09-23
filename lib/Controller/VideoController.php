@@ -40,6 +40,7 @@ use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\File;
+use OCP\Http\Client\IClientService;
 use OCP\IRequest;
 use Psr\Log\LoggerInterface;
 
@@ -50,6 +51,7 @@ final class VideoController extends ApiController
         protected LoggerInterface $logger,
         protected TimelineQuery $tq,
         protected FsManager $fs,
+        protected IClientService $clientService,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -291,8 +293,7 @@ final class VideoController extends ApiController
         ignore_user_abort(true);
 
         try {
-            $clientService = \OC::$server->get(\OCP\Http\Client\IClientService::class);
-            $response = $clientService->newClient()->post($url, [
+            $response = $this->clientService->newClient()->post($url, [
                 'json' => $data,
                 'headers' => [
                     'X-Go-Vod-Version' => BinExt::GOVOD_VER,
