@@ -23,13 +23,17 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\LensFolders;
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Exceptions;
 use OCA\Memories\HttpResponseException;
 use OCA\Memories\Service\Lens;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -39,11 +43,26 @@ use OCP\AppFramework\Http\StreamResponse;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\Config\IUserMountCache;
 use OCP\Files\File;
+use OCP\Files\IRootFolder;
 use OCP\Files\NotFoundException;
 use OCP\Http\Client\IClientService;
+use OCP\IDBConnection;
+use OCP\IRequest;
+use OCP\IUserSession;
 
-final class LensController extends GenericApiController
+final class LensController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected IUserSession $userSession,
+        protected IDBConnection $connection,
+        protected IRootFolder $rootFolder,
+        protected TimelineQuery $tq,
+        protected FsManager $fs,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * Serve raw file bytes to the Lens service account by fileid.
      *

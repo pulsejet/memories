@@ -23,12 +23,16 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\FsManager;
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
 use OCA\Memories\HttpResponseException;
 use OCA\Memories\Service\BinExt;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -36,9 +40,20 @@ use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\File;
+use OCP\IRequest;
+use Psr\Log\LoggerInterface;
 
-final class VideoController extends GenericApiController
+final class VideoController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected LoggerInterface $logger,
+        protected TimelineQuery $tq,
+        protected FsManager $fs,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * Transcode a video to HLS by proxy.
      */

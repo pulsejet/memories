@@ -28,6 +28,7 @@ use OCA\Memories\Exceptions;
 use OCA\Memories\Service\Lens;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -35,10 +36,18 @@ use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
+use OCP\Config\IUserConfig;
 use OCP\IRequest;
 
-final class OtherController extends GenericApiController
+final class OtherController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected IUserConfig $userConfig,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * update preferences (user setting).
      *

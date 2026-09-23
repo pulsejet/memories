@@ -23,20 +23,34 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\FsManager;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\ICache;
+use OCP\ICacheFactory;
+use OCP\IRequest;
 use OCP\ITempManager;
 use OCP\Security\ISecureRandom;
 
-final class DownloadController extends GenericApiController
+final class DownloadController extends ApiController
 {
     private const HANDLE_TTL = 24 * 60 * 60;
+
+    public function __construct(
+        IRequest $request,
+        protected FsManager $fs,
+        protected ICacheFactory $cacheFactory,
+        protected ISecureRandom $secureRandom,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
 
     /**
      * Request to download one or more files.

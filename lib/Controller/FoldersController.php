@@ -4,17 +4,30 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\FsManager;
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\Files\FileInfo;
 use OCP\Files\Folder;
+use OCP\IRequest;
 
-final class FoldersController extends GenericApiController
+final class FoldersController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected TimelineQuery $tq,
+        protected FsManager $fs,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     #[NoAdminRequired]
     #[PublicPage]
     public function sub(string $folder): Http\Response

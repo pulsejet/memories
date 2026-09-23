@@ -23,16 +23,20 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
 use OCA\Memories\ClustersBackend;
+use OCA\Memories\Db\FsManager;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IRequest;
 
-final class ClustersController extends GenericApiController
+final class ClustersController extends ApiController
 {
     /**
      * Current backend for this instance.
@@ -40,6 +44,13 @@ final class ClustersController extends GenericApiController
      * @psalm-suppress PropertyNotSetInConstructor
      */
     protected ClustersBackend\Backend $backend;
+
+    public function __construct(
+        IRequest $request,
+        protected FsManager $fs,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
 
     /**
      * Get list of clusters.

@@ -23,15 +23,26 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
 use OCA\Memories\ClustersBackend;
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IRequest;
 
-final class DaysController extends GenericApiController
+final class DaysController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected TimelineQuery $tq,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     #[NoAdminRequired]
     #[PublicPage]
     public function days(): Http\Response

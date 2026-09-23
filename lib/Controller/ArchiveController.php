@@ -23,16 +23,25 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\Folder;
+use OCP\IRequest;
 use OCP\Lock\ILockingProvider;
 
-final class ArchiveController extends GenericApiController
+final class ArchiveController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * Move one file to the archive folder.
      *

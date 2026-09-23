@@ -24,20 +24,34 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\FsManager;
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
 use OCA\Memories\Service;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IRequest;
+use OCP\IUserSession;
 
 const IMAGICK_SAFE = '/^image\/(x-)?(png|jpeg|gif|bmp|tiff|webp|hei(f|c)|avif|dcraw)$/';
 
-final class ImageController extends GenericApiController
+final class ImageController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected FsManager $fs,
+        protected TimelineQuery $tq,
+        protected IUserSession $userSession,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * Get preview of image.
      *

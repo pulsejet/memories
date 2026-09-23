@@ -23,14 +23,25 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\FsManager;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IRequest;
 
-final class TagsController extends GenericApiController
+final class TagsController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected FsManager $fs,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * @param int   $id     File ID
      * @param int[] $add    Tags to add

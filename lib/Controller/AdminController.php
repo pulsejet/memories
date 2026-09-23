@@ -28,13 +28,21 @@ use OCA\Memories\Exceptions;
 use OCA\Memories\Service\BinExt;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IRequest;
 
-final class AdminController extends GenericApiController
+final class AdminController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * @AdminRequired
      */
