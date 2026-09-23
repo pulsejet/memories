@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Tests\Unit;
 
 use OCA\Memories\Command\MigrateGoogleTakeout;
-use PHPUnit\Framework\TestCase;
+use OCA\Memories\Tests\TestCase;
 
 /**
  * @internal

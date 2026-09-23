@@ -7,7 +7,8 @@ namespace OCA\Memories\Tests\Unit;
 use OCA\Memories\Db\LivePhoto;
 use OCA\Memories\Exif;
 use OCA\Memories\Service\BinExt;
-use PHPUnit\Framework\TestCase;
+use OCA\Memories\Tests\Injected;
+use OCA\Memories\Tests\TestCase;
 
 /**
  * @internal
@@ -40,16 +41,16 @@ final class ExtractResult
  */
 final class ExifExtractTest extends TestCase
 {
+    #[Injected]
     private static Exif $exif;
+    #[Injected]
     private static BinExt $binExt;
-    private static LivePhoto $livePhoto;
+    #[Injected]
+    private LivePhoto $livePhoto;
 
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        self::$binExt = \OCP\Server::get(BinExt::class);
-        self::$exif = \OCP\Server::get(Exif::class);
-        self::$livePhoto = \OCP\Server::get(LivePhoto::class);
         self::$binExt->detectExiftool();
         self::$exif->ensureStaticExiftoolProc();
     }
@@ -646,7 +647,7 @@ final class ExifExtractTest extends TestCase
         self::assertFileExists($path);
 
         $exif = self::$exif->getExifFromLocalPath($path);
-        $livePhotoId = self::$livePhoto->getLivePhotoIdFromPath($path, (int) filesize($path), $exif);
+        $livePhotoId = $this->livePhoto->getLivePhotoIdFromPath($path, (int) filesize($path), $exif);
 
         return new ExtractResult($path, $exif, $livePhotoId);
     }

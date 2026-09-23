@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace OCA\Memories\Tests\Unit;
 
 use OCA\Memories\Service\BinExt;
-use PHPUnit\Framework\TestCase;
+use OCA\Memories\Tests\Injected;
+use OCA\Memories\Tests\TestCase;
 
 /**
  * @internal
@@ -14,13 +15,8 @@ use PHPUnit\Framework\TestCase;
  */
 final class BinExtTempBinTest extends TestCase
 {
+    #[Injected]
     private BinExt $binExt;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->binExt = \OCP\Server::get(BinExt::class);
-    }
 
     public function testGetTempBinCopiesAndCaches(): void
     {

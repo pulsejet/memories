@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Tests\Unit;
 
+use OCA\Memories\Tests\TestCase;
 use OCA\Memories\Util;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @internal

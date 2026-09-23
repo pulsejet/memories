@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace OCA\Memories\Tests\Unit;
 
 use OCA\Memories\Exif;
-use PHPUnit\Framework\TestCase;
+use OCA\Memories\Tests\Injected;
+use OCA\Memories\Tests\TestCase;
 
 /**
  * @internal
@@ -14,13 +15,8 @@ use PHPUnit\Framework\TestCase;
  */
 final class ExifDateParseTest extends TestCase
 {
+    #[Injected]
     private Exif $exif;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->exif = \OCP\Server::get(Exif::class);
-    }
 
     public function testStandardUtc(): void
     {
