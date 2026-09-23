@@ -30,20 +30,26 @@ final class Manager
     /**
      * Mapping of backend name to className.
      *
-     * @var array<string, class-string>
+     * @var array<string, class-string<Backend>>
      */
-    public static array $backends = [];
+    public const array BACKENDS = [
+        AlbumsBackend::CLUSTER_TYPE => AlbumsBackend::class,
+        TagsBackend::CLUSTER_TYPE => TagsBackend::class,
+        PlacesBackend::CLUSTER_TYPE => PlacesBackend::class,
+        RecognizeBackend::CLUSTER_TYPE => RecognizeBackend::class,
+        FaceRecognitionBackend::CLUSTER_TYPE => FaceRecognitionBackend::class,
+    ];
 
     /**
      * Get a cluster backend.
      *
      * @param string $name Name of the backend
      *
-     * @throws \Exception If the backend is not registered
+     * @throws \Exception If the backend is not found
      */
     public static function get(string $name): Backend
     {
-        if ($className = self::$backends[$name] ?? null) {
+        if ($className = self::BACKENDS[$name] ?? null) {
             /** @var Backend */
             return \OCP\Server::get($className);
         }
@@ -52,22 +58,12 @@ final class Manager
     }
 
     /**
-     * Register a new backend.
-     *
-     * @param class-string $className
-     */
-    public static function register(string $name, string $className): void
-    {
-        self::$backends[$name] = $className;
-    }
-
-    /**
      * Apply all query transformations for the given request.
      */
     public static function getTransforms(IRequest $request): array
     {
         $transforms = [];
-        foreach (array_keys(self::$backends) as $backendName) {
+        foreach (array_keys(self::BACKENDS) as $backendName) {
             if ($request->getParam($backendName)) {
                 $backend = self::get($backendName);
                 if ($backend->isEnabled()) {
@@ -84,7 +80,7 @@ final class Manager
      */
     public static function applyDayPostTransforms(IRequest $request, array &$row): void
     {
-        foreach (array_keys(self::$backends) as $backendName) {
+        foreach (array_keys(self::BACKENDS) as $backendName) {
             if ($request->getParam($backendName)) {
                 $backend = self::get($backendName);
                 if ($backend->isEnabled()) {

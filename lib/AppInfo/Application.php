@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\AppInfo;
 
-use OCA\Memories\ClustersBackend;
 use OCA\Memories\Listeners\BeforeTemplateListener;
 use OCA\Memories\Listeners\PostDeleteListener;
 use OCA\Memories\Listeners\PostLogoutListener;
@@ -91,13 +90,6 @@ final class Application extends App implements IBootstrap
         // Register other global hooks
         $context->registerEventListener(BeforeTemplateRenderedEvent::class, BeforeTemplateListener::class);
         $context->registerEventListener(UserLoggedOutEvent::class, PostLogoutListener::class);
-
-        // Register clusters backends
-        ClustersBackend\AlbumsBackend::register();
-        ClustersBackend\TagsBackend::register();
-        ClustersBackend\PlacesBackend::register();
-        ClustersBackend\RecognizeBackend::register();
-        ClustersBackend\FaceRecognitionBackend::register();
 
         // Extra hooks for native extension calls
         if (Util::callerIsNative()) {

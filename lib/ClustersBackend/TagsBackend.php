@@ -31,6 +31,8 @@ use OCP\IRequest;
 
 final class TagsBackend extends Backend
 {
+    public const CLUSTER_TYPE = 'tags';
+
     public function __construct(
         protected TimelineQuery $tq,
         protected IRequest $request,
@@ -47,7 +49,7 @@ final class TagsBackend extends Backend
     #[\Override]
     public static function clusterType(): string
     {
-        return 'tags';
+        return self::CLUSTER_TYPE;
     }
 
     #[\Override]

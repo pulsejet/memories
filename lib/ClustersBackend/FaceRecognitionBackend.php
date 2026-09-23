@@ -35,6 +35,8 @@ final class FaceRecognitionBackend extends Backend
 {
     use PeopleBackendUtils;
 
+    public const CLUSTER_TYPE = 'facerecognition';
+
     public function __construct(
         protected IRequest $request,
         protected TimelineQuery $tq,
@@ -52,7 +54,7 @@ final class FaceRecognitionBackend extends Backend
     #[\Override]
     public static function clusterType(): string
     {
-        return 'facerecognition';
+        return self::CLUSTER_TYPE;
     }
 
     #[\Override]

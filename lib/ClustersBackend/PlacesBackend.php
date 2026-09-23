@@ -31,6 +31,8 @@ use OCP\IRequest;
 
 final class PlacesBackend extends Backend
 {
+    public const CLUSTER_TYPE = 'places';
+
     public function __construct(
         protected TimelineQuery $tq,
         protected IRequest $request,
@@ -47,7 +49,7 @@ final class PlacesBackend extends Backend
     #[\Override]
     public static function clusterType(): string
     {
-        return 'places';
+        return self::CLUSTER_TYPE;
     }
 
     #[\Override]

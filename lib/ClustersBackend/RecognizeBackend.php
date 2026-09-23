@@ -35,6 +35,8 @@ final class RecognizeBackend extends Backend
 {
     use PeopleBackendUtils;
 
+    public const CLUSTER_TYPE = 'recognize';
+
     public function __construct(
         protected TimelineQuery $tq,
         protected IRequest $request,
@@ -52,7 +54,7 @@ final class RecognizeBackend extends Backend
     #[\Override]
     public static function clusterType(): string
     {
-        return 'recognize';
+        return self::CLUSTER_TYPE;
     }
 
     #[\Override]

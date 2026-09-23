@@ -48,6 +48,7 @@ trait TimelineWritePlaces
 
         // Get places
         try {
+            // Manually inject to avoid circular dependency.
             $places = \OCP\Server::get(\OCA\Memories\Service\Places::class);
             $rows = $this->util->transaction(static fn () => $places->queryPoint($lat, $lon));
         } catch (\Exception $e) {

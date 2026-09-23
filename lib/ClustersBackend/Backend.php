@@ -179,12 +179,4 @@ abstract class Backend
     {
         throw new \Exception('setCover not implemented by '.$this::class);
     }
-
-    /**
-     * Register the backend. Do not override.
-     */
-    final public static function register(): void
-    {
-        Manager::register(static::clusterType(), static::class);
-    }
 }

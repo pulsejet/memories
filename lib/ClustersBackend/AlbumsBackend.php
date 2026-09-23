@@ -35,6 +35,8 @@ use OCP\IUserManager;
 
 final class AlbumsBackend extends Backend
 {
+    public const CLUSTER_TYPE = 'albums';
+
     public function __construct(
         protected AlbumsQuery $albumsQuery,
         protected IRequest $request,
@@ -54,7 +56,7 @@ final class AlbumsBackend extends Backend
     #[\Override]
     public static function clusterType(): string
     {
-        return 'albums';
+        return self::CLUSTER_TYPE;
     }
 
     #[\Override]
