@@ -152,7 +152,7 @@ final class SystemConfig
         $default ??= self::DEFAULTS[$key];
 
         // Get the value from the config
-        $value = \OC::$server->get(\OCP\IConfig::class)
+        $value = \OCP\Server::get(\OCP\IConfig::class)
             ->getSystemValue($key, $default)
         ;
 
@@ -192,7 +192,7 @@ final class SystemConfig
             throw new \InvalidArgumentException("Invalid value for system config {$key}, null is not allowed");
         }
 
-        $config = \OC::$server->get(\OCP\IConfig::class);
+        $config = \OCP\Server::get(\OCP\IConfig::class);
         if ($isAppKey && ($value === self::DEFAULTS[$key] || null === $value)) {
             $config->deleteSystemValue($key);
         } else {

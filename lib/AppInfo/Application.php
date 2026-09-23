@@ -133,7 +133,7 @@ final class Application extends App implements IBootstrap
             // and hope that nobody has already used it yet.
             // This is truly horrible.
             if (!empty($_SERVER['PHP_AUTH_USER']) && !empty($_SERVER['PHP_AUTH_PW'])) {
-                $request = \OC::$server->get(\OCP\IRequest::class);
+                $request = \OCP\Server::get(\OCP\IRequest::class);
                 $prop = new \ReflectionProperty(\OC\AppFramework\Http\Request::class, 'items');
                 $prop->setAccessible(true);
 

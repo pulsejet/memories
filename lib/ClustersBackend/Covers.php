@@ -119,7 +119,7 @@ final class Covers
     public static function setCover(string $type, int $clusterId, int $objectId, int $fileid, bool $manual): void
     {
         Util::transaction(static function () use ($type, $clusterId, $objectId, $fileid, $manual): void {
-            $connection = \OC::$server->get(\OCP\IDBConnection::class);
+            $connection = \OCP\Server::get(\OCP\IDBConnection::class);
             $query = $connection->getQueryBuilder();
             $query->delete('memories_covers')
                 ->where($query->expr()->eq('uid', $query->createNamedParameter(Util::getUser()->getUID())))

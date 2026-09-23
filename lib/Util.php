@@ -68,7 +68,7 @@ final class Util
      */
     public static function albumsIsEnabled(): bool
     {
-        return \OC::$server->get(IAppManager::class)->isEnabledForUser('photos');
+        return \OCP\Server::get(IAppManager::class)->isEnabledForUser('photos');
     }
 
     /**
@@ -76,7 +76,7 @@ final class Util
      */
     public static function tagsIsEnabled(): bool
     {
-        return \OC::$server->get(IAppManager::class)->isEnabledForUser('systemtags');
+        return \OCP\Server::get(IAppManager::class)->isEnabledForUser('systemtags');
     }
 
     /**
@@ -88,7 +88,7 @@ final class Util
             return false;
         }
 
-        $appConfig = \OC::$server->get(IAppConfig::class);
+        $appConfig = \OCP\Server::get(IAppConfig::class);
         if ('true' !== $appConfig->getValueString('recognize', 'faces.enabled', 'false')) {
             return false;
         }
@@ -101,7 +101,7 @@ final class Util
      */
     public static function recognizeIsInstalled(): bool
     {
-        $appManager = \OC::$server->get(IAppManager::class);
+        $appManager = \OCP\Server::get(IAppManager::class);
 
         if (!$appManager->isEnabledForUser('recognize')) {
             return false;
@@ -122,7 +122,7 @@ final class Util
         }
 
         try {
-            return 'true' === \OC::$server->get(\OCP\Config\IUserConfig::class)
+            return 'true' === \OCP\Server::get(\OCP\Config\IUserConfig::class)
                 ->getValueString(self::getUID(), 'facerecognition', 'enabled', 'false')
             ;
         } catch (\Exception) {
@@ -137,7 +137,7 @@ final class Util
      */
     public static function facerecognitionIsInstalled(): bool
     {
-        $appManager = \OC::$server->get(IAppManager::class);
+        $appManager = \OCP\Server::get(IAppManager::class);
 
         if (!$appManager->isEnabledForUser('facerecognition')) {
             return false;
@@ -153,7 +153,7 @@ final class Util
      */
     public static function previewGeneratorIsEnabled(): bool
     {
-        return \OC::$server->get(IAppManager::class)->isEnabledForUser('previewgenerator');
+        return \OCP\Server::get(IAppManager::class)->isEnabledForUser('previewgenerator');
     }
 
     /**
@@ -165,7 +165,7 @@ final class Util
      */
     public static function isLinkSharingEnabled(): bool
     {
-        $appConfig = \OC::$server->get(IAppConfig::class);
+        $appConfig = \OCP\Server::get(IAppConfig::class);
 
         // Check if the shareAPI is enabled
         if ('yes' !== $appConfig->getValueString('core', 'shareapi_enabled', 'yes')) {
@@ -255,7 +255,7 @@ final class Util
         \OCP\Util::addHeader('meta', ['property' => 'og:url', 'content' => $url]);
 
         // Get URL generator
-        $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
+        $urlGenerator = \OCP\Server::get(\OCP\IURLGenerator::class);
 
         // Add OG image
         $preview = $urlGenerator->linkToRouteAbsolute('memories.Image.preview', array_merge($previewArgs, [
@@ -291,7 +291,7 @@ final class Util
      */
     public static function isEncryptionEnabled(): bool
     {
-        $encryptionManager = \OC::$server->get(\OCP\Encryption\IManager::class);
+        $encryptionManager = \OCP\Server::get(\OCP\Encryption\IManager::class);
         if ($encryptionManager->isEnabled()) {
             // Server-side encryption (OC_DEFAULT_MODULE) is okay, others like e2e are not
             return 'OC_DEFAULT_MODULE' !== $encryptionManager->getDefaultEncryptionModuleId();
@@ -307,12 +307,12 @@ final class Util
      */
     public static function getTimelinePaths(string $uid): array
     {
-        $paths = \OC::$server->get(\OCP\Config\IUserConfig::class)
+        $paths = \OCP\Server::get(\OCP\Config\IUserConfig::class)
             ->getValueString($uid, Application::APPNAME, 'timelinePath')
                 ?: SystemConfig::get('memories.timeline.default_path');
 
         if (SystemConfig::get('debug')) {
-            $override = \OC::$server->get(\OCP\IRequest::class)->getHeader('X-TIMELINE-PATH');
+            $override = \OCP\Server::get(\OCP\IRequest::class)->getHeader('X-TIMELINE-PATH');
             if (!empty($override)) {
                 $paths = $override;
             }
@@ -337,7 +337,7 @@ final class Util
      */
     public static function transaction(\Closure $callback): mixed
     {
-        $connection = \OC::$server->get(\OCP\IDBConnection::class);
+        $connection = \OCP\Server::get(\OCP\IDBConnection::class);
         $connection->beginTransaction();
 
         try {
@@ -410,7 +410,7 @@ final class Util
      */
     public static function callerNativeVersion(): ?string
     {
-        $userAgent = \OC::$server->get(\OCP\IRequest::class)->getHeader('User-Agent');
+        $userAgent = \OCP\Server::get(\OCP\IRequest::class)->getHeader('User-Agent');
 
         $matches = [];
         if (preg_match('/MemoriesNative\/([0-9.]+)/', $userAgent, $matches)) {

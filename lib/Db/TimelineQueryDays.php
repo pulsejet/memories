@@ -196,7 +196,7 @@ trait TimelineQueryDays
                 $this->_root = new TimelineRoot();
 
                 // Populate the root using parameters from the request
-                $fs = \OC::$server->get(FsManager::class);
+                $fs = \OCP\Server::get(FsManager::class);
                 $fs->populateRoot($this->_root, $recursive);
             }
 

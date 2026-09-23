@@ -198,7 +198,7 @@ abstract class Backend
                 throw $e;
             }
 
-            \OC::$server->get(\Psr\Log\LoggerInterface::class)
+            \OCP\Server::get(\Psr\Log\LoggerInterface::class)
                 ->error('Failed to set cover', ['app' => 'memories', 'exception' => $e->getMessage()])
             ;
         }

@@ -286,7 +286,7 @@ final class Index
      */
     public static function getPreviewMimes(array $source): array
     {
-        $preview = \OC::$server->get(IPreview::class);
+        $preview = \OCP\Server::get(IPreview::class);
 
         return array_filter($source, static fn ($m) => $preview->isMimeSupported($m));
     }

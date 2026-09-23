@@ -53,7 +53,7 @@ trait TimelineWritePlaces
 
         // Get places
         try {
-            $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
+            $places = \OCP\Server::get(\OCA\Memories\Service\Places::class);
             $rows = Util::transaction(static fn () => $places->queryPoint($lat, $lon));
         } catch (\Exception $e) {
             $this->logger->error("Error querying places: {$e->getMessage()}", ['app' => 'memories']);
@@ -112,14 +112,14 @@ trait TimelineWritePlaces
             try {
                 $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon, $oldLat, $oldLon);
             } catch (\Exception $e) {
-                $logger = \OC::$server->get(LoggerInterface::class);
+                $logger = \OCP\Server::get(LoggerInterface::class);
                 $logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
             }
 
             try {
                 $osmIds = $this->updatePlacesData($fileId, $lat, $lon);
             } catch (\Exception $e) {
-                $logger = \OC::$server->get(LoggerInterface::class);
+                $logger = \OCP\Server::get(LoggerInterface::class);
                 $logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
             }
         }

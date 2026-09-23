@@ -21,7 +21,7 @@ trait UtilController
         } catch (\OCA\Memories\HttpResponseException $e) {
             return $e->response;
         } catch (\Exception $e) {
-            $logger = \OC::$server->get(\Psr\Log\LoggerInterface::class);
+            $logger = \OCP\Server::get(\Psr\Log\LoggerInterface::class);
             $logger->error($e->getMessage(), ['trace' => $e->getTrace()]);
 
             return new DataResponse([
@@ -91,7 +91,7 @@ trait UtilController
      */
     public static function getUser(): \OCP\IUser
     {
-        return \OC::$server->get(\OCP\IUserSession::class)->getUser()
+        return \OCP\Server::get(\OCP\IUserSession::class)->getUser()
             ?? throw Exceptions::NotLoggedIn();
     }
 
@@ -110,7 +110,7 @@ trait UtilController
      */
     public static function isLoggedIn(): bool
     {
-        return null !== \OC::$server->get(\OCP\IUserSession::class)->getUser();
+        return null !== \OCP\Server::get(\OCP\IUserSession::class)->getUser();
     }
 
     /**
@@ -122,7 +122,7 @@ trait UtilController
      */
     public static function getUserFolder(?string $uid = null): \OCP\Files\Folder
     {
-        return \OC::$server->get(\OCP\Files\IRootFolder::class)
+        return \OCP\Server::get(\OCP\Files\IRootFolder::class)
             ->getUserFolder($uid ?? self::getUID())
         ;
     }
@@ -132,8 +132,8 @@ trait UtilController
      */
     public static function getUserLang(): string
     {
-        $config = \OC::$server->get(\OCP\IConfig::class);
-        $userConfig = \OC::$server->get(\OCP\Config\IUserConfig::class);
+        $config = \OCP\Server::get(\OCP\IConfig::class);
+        $userConfig = \OCP\Server::get(\OCP\Config\IUserConfig::class);
 
         // Get the default language
         $default = $config->getSystemValue('default_language', 'en');

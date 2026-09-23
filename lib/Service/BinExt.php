@@ -354,7 +354,7 @@ final class BinExt
             throw new \Exception('could not find test file');
         }
 
-        $config = \OC::$server->get(\OCP\IConfig::class);
+        $config = \OCP\Server::get(\OCP\IConfig::class);
         $dataDir = $config->getSystemValueString('datadirectory', \OC::$SERVERROOT.'/data');
         $testfile = rtrim($dataDir, '/').'/go-vod-test.jpg';
         if (!file_exists($testfile) || @filesize($testfile) !== @filesize($src)) {
@@ -364,7 +364,7 @@ final class BinExt
         }
 
         try {
-            $clientService = \OC::$server->get(\OCP\Http\Client\IClientService::class);
+            $clientService = \OCP\Server::get(\OCP\Http\Client\IClientService::class);
             $res = $clientService->newClient()->post("http://{$server}/vod", [
                 'json' => [
                     'client' => 'test',
