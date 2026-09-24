@@ -13,6 +13,9 @@ trait TimelineQueryDays
     use TimelineQueryCTE;
     use TimelineQueryFilters;
 
+    /** @var array<string,string> Memo of storage_id to display name. */
+    private array $userMemo = [];
+
     /**
      * Get the days response from the database for the timeline.
      *
@@ -328,16 +331,8 @@ trait TimelineQueryDays
         if ($storage = $row['storage_id'] ?? null) {
             unset($row['storage_id']);
 
-            /** @var array<string,string> */
-            static $userMemo = [];
-            if ($user = $userMemo[$storage] ?? null) {
+            if ('' !== ($user = $this->storageIdToUserName($storage))) {
                 $row['shared_by'] = $user;
-            } elseif ($user = $this->storageIdToUserName($storage)) {
-                $row['shared_by'] = $userMemo[$storage] = $user;
-            }
-
-            if ('' === ($row['shared_by'] ?? null)) {
-                unset($row['shared_by']);
             }
         }
     }
@@ -350,19 +345,30 @@ trait TimelineQueryDays
     private function dayIdToMonthId(int $dayId): int
     {
         static $memoize = [];
-        if ($cache = $memoize[$dayId] ?? null) {
-            return $cache;
+        if (isset($memoize[$dayId])) {
+            return $memoize[$dayId];
         }
 
-        return $memoize[$dayId] = intdiv(strtotime(gmdate('Ym', $dayId * 86400).'01') ?: 0, 86400);
+        $monthId = intdiv(strtotime(gmdate('Ym', $dayId * 86400).'01') ?: 0, 86400);
+
+        // Only cache sane dayIds to keep the static bounded.
+        if ($dayId > 0 && $dayId < 100000) {
+            $memoize[$dayId] = $monthId;
+        }
+
+        return $monthId;
     }
 
     private function storageIdToUserName(string $storage): string
     {
+        if (\array_key_exists($storage, $this->userMemo)) {
+            return $this->userMemo[$storage];
+        }
+
         // Storage ID looks like "home::{uid}" or "local::{/path}" etc
         $pos = strpos($storage, '::');
         if (false === $pos) {
-            return '';
+            return $this->userMemo[$storage] = '';
         }
         $uid = substr($storage, $pos + 2);
 
@@ -371,17 +377,17 @@ trait TimelineQueryDays
         // We should handle these cases in the future.
         // https://github.com/pulsejet/memories/issues/1402
         if (str_contains($uid, '/')) {
-            return '';
+            return $this->userMemo[$storage] = '';
         }
 
         // Check if self
         if ($this->util->isLoggedIn() && $uid === $this->util->getUID()) {
-            return '';
+            return $this->userMemo[$storage] = '';
         }
 
         // Otherwise it *may* be a user
         $user = $this->userManager->get($uid);
 
-        return $user ? $user->getDisplayName() : '';
+        return $this->userMemo[$storage] = $user?->getDisplayName() ?? '';
     }
 }

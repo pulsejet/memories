@@ -33,9 +33,6 @@ final class MIME
     /** @var string[] */
     private ?array $mimeList = null;
 
-    /** Memoized blocklist as regex fragments. */
-    private static ?string $blocklistInner = null;
-
     public function __construct(
         private IPreview $preview,
         private SystemConfig $systemConfig,
@@ -99,13 +96,28 @@ final class MIME
      */
     public function isPathAllowed(string $path): bool
     {
-        if (null === self::$blocklistInner) {
-            /** @var string[] $blocklist */
-            $blocklist = $this->systemConfig->get('memories.index.folder.blocklist');
-            self::$blocklistInner = implode('|', array_map(self::likeToRegex(...), $blocklist));
+        $inner = $this->getBlocklistRegexInner();
+
+        return '' === $inner || !preg_match('/(?:^|\/)(?:'.$inner.')(?=\/)/', $path);
+    }
+
+    /**
+     * Get cached blocklist as regex fragments.
+     */
+    private function getBlocklistRegexInner(): string
+    {
+        static $inner = null;
+        static $source = null;
+
+        /** @var string[] $blocklist */
+        $blocklist = $this->systemConfig->get('memories.index.folder.blocklist');
+        $newSource = implode("\0", $blocklist);
+        if (null === $inner || $source !== $newSource) {
+            $source = $newSource;
+            $inner = implode('|', array_map(self::likeToRegex(...), $blocklist));
         }
 
-        return '' === self::$blocklistInner || !preg_match('/(?:^|\/)(?:'.self::$blocklistInner.')(?=\/)/', $path);
+        return $inner;
     }
 
     /**
