@@ -208,26 +208,26 @@
 
       <NcAppSettingsSection id="onthisday-settings" :name="names.onthisday">
         <NcTextField
-          :label="t('memories', 'Day range (1-7)')"
+          :label="t('memories', 'Day range (0-7)')"
           :label-visible="true"
-          v-model="config.onthisday_day_range"
+          :model-value="config.onthisday_day_range"
           type="number"
-          min="1"
+          min="0"
           max="7"
           step="1"
-          @input="updateOnThisDayRange"
+          @update:model-value="updateOnThisDayRange"
           :helper-text="t('memories', 'Number of days before and after each anniversary')"
         />
 
         <NcTextField
           :label="t('memories', 'Photos per year (1-50)')"
           :label-visible="true"
-          v-model="config.onthisday_photos_per_year"
+          :model-value="config.onthisday_photos_per_year"
           type="number"
           min="1"
           max="50"
           step="1"
-          @input="updateOnThisDayPhotos"
+          @update:model-value="updateOnThisDayPhotos"
           :helper-text="t('memories', 'Maximum number of photos to include per year')"
         />
       </NcAppSettingsSection>
@@ -435,11 +435,17 @@ export default defineComponent({
     },
 
     // On This Day settings
-    async updateOnThisDayRange() {
+    async updateOnThisDayRange(val: string | number) {
+      const n = typeof val === 'number' ? val : parseFloat(val);
+      if (!Number.isFinite(n)) return;
+      this.config.onthisday_day_range = Math.min(7, Math.max(0, Math.round(n)));
       await this.updateSetting('onthisday_day_range', 'onthisdayDayRange');
     },
 
-    async updateOnThisDayPhotos() {
+    async updateOnThisDayPhotos(val: string | number) {
+      const n = typeof val === 'number' ? val : parseFloat(val);
+      if (!Number.isFinite(n)) return;
+      this.config.onthisday_photos_per_year = Math.min(50, Math.max(1, Math.round(n)));
       await this.updateSetting('onthisday_photos_per_year', 'onthisdayPhotosPerYear');
     },
 
