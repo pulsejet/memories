@@ -120,7 +120,7 @@
       <br />
       {{ t('memories', 'Run index in parallel with 4 threads:') }}
       <br />
-      <code>bash -c 'for i in {1..4}; do (occ memories:index &amp;); done'</code>
+      <code>bash -c 'trap "kill 0" INT TERM; for i in {1..4}; do (occ memories:index) & done; wait'</code>
       <br />
       {{ t('memories', 'Force re-indexing of all files:') }}
       <br />
