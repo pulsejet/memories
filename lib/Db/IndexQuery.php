@@ -50,7 +50,12 @@ final class IndexQuery
         }
     }
 
-    /** Revalidate candidate after acquiring the index lock. */
+    /**
+     * Check if a file is indexed (or failed).
+     *
+     * @param int $fileId fileid
+     * @param int $mtime  file mtime
+     */
     public function isIndexed(int $fileId, int $mtime): bool
     {
         $query = $this->connection->getQueryBuilder();
@@ -59,7 +64,7 @@ final class IndexQuery
             ->where($query->expr()->eq('f.fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
             ->andWhere($query->expr()->eq('f.mtime', $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT)))
         ;
-        $query = $this->getNotIndexedFilter($query);
+        $query = $this->filterNonIndexed($query);
 
         return false === $query->executeQuery()->fetchOne();
     }
@@ -103,7 +108,7 @@ final class IndexQuery
         $query->andWhere(SQL::exists($query, $inFolders));
 
         // Filter out files that are already indexed or failed
-        $this->getNotIndexedFilter($query);
+        $this->filterNonIndexed($query);
 
         // Unordered fetch: indexed rows drop out via NOT EXISTS,
         // so refetching makes progress until an empty batch
@@ -121,7 +126,7 @@ final class IndexQuery
         return $batch;
     }
 
-    private function getNotIndexedFilter(IQueryBuilder $query): IQueryBuilder
+    private function filterNonIndexed(IQueryBuilder $query): IQueryBuilder
     {
         // Whether the orphan flag applies per table
         $tables = [
