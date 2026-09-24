@@ -165,6 +165,10 @@ final class Index
      */
     public function indexFolder(Folder $folder): void
     {
+        if (!$this->indexQuery->isEligible($folder->getId())) {
+            return;
+        }
+
         $path = $folder->getPath();
         $this->log("Indexing folder {$path}", true);
         $this->indexFolderIds($folder, [$folder->getId()]);
@@ -182,7 +186,7 @@ final class Index
             // https://github.com/pulsejet/memories/issues/933 (zero-byte files)
             if ($file->getSize() <= 0
                 || !$this->mime->isSupported($file)
-                || !$this->mime->isPathAllowed($path)) {
+                || !$this->indexQuery->isEligible($file->getId())) {
                 // Drift between SQL and PHP enforcement would wedge the batch
                 // on this file, so mark it failed to keep making progress
                 if ($failSkip) {

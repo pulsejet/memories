@@ -70,6 +70,39 @@ final class IndexQuery
     }
 
     /**
+     * Query if a file is eligible for indexing (nomedia + blocklist).
+     */
+    public function isEligible(int $fileId): bool
+    {
+        /** @var string[] $blocklist */
+        $blocklist = $this->systemConfig->get('memories.index.folder.blocklist');
+
+        $query = $this->connection->getQueryBuilder();
+
+        $nomedia = $this->connection->getQueryBuilder();
+        $nomedia->select($nomedia->expr()->literal(1))
+            ->from('filecache', 'f2')
+            ->where($nomedia->expr()->eq('f2.parent', 'c.fileid'))
+            ->andWhere($nomedia->expr()->in('f2.name', $query->createNamedParameter(
+                ['.nomedia', '.nomemories'],
+                IQueryBuilder::PARAM_STR_ARRAY,
+            )))
+        ;
+
+        $query->select($query->expr()->literal(1))
+            ->from('cte_file_parents', 'c')
+            ->where(SQL::exists($query, $nomedia))
+            ->orWhere('NOT '.$this->tq->folderNotBlocklistedClause(\count($blocklist), 'c'))
+            ->setMaxResults(1)
+        ;
+
+        CTEParams::setFileId($query, $fileId);
+        CTEParams::setFolderNameBlocklist($query, $blocklist);
+
+        return false === $this->tq->executeQueryWithCTEs($query)->fetchOne();
+    }
+
+    /**
      * Fetch up to $batchSize candidate fileids.
      *
      * @param int[]    $topFolderIds top folder fileids

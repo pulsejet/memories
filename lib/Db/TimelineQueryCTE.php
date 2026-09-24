@@ -22,20 +22,39 @@ trait TimelineQueryCTE
         $params = $query->getParameters();
         $types = $query->getParameterTypes();
 
-        // Get SQL
-        $CTE_SQL = CTEParams::isFoldersArchive($query)
-            ? $this->CTE_FOLDERS_ARCHIVE()
-            : $this->CTE_FOLDERS(
-                CTEParams::isIncludeHidden($query),
-                CTEParams::getFolderNameBlocklistCount($query),
-            );
-
         // Add WITH clause if needed
         if (str_contains($sql, 'cte_folders')) {
+            $CTE_SQL = CTEParams::isFoldersArchive($query)
+                ? $this->CTE_FOLDERS_ARCHIVE()
+                : $this->CTE_FOLDERS(
+                    CTEParams::isIncludeHidden($query),
+                    CTEParams::getFolderNameBlocklistCount($query),
+                );
+            $sql = $CTE_SQL.' '.$sql;
+        } elseif (str_contains($sql, 'cte_file_parents')) {
+            $CTE_SQL = $this->CTE_FILE_PARENTS();
             $sql = $CTE_SQL.' '.$sql;
         }
 
         return $this->connection->executeQuery($sql, $params, $types);
+    }
+
+    /**
+     * @param int    $count number of bound :fnBlocklistN patterns
+     * @param string $alias table alias holding the folder name column
+     */
+    public function folderNotBlocklistedClause(int $count, string $alias): string
+    {
+        if (0 === $count) {
+            return '(1 = 1)';
+        }
+
+        $parts = [];
+        for ($i = 0; $i < $count; ++$i) {
+            $parts[] = "({$alias}.name NOT LIKE :fnBlocklist{$i} ESCAPE :fnBlocklistEscape)";
+        }
+
+        return '('.implode(' AND ', $parts).')';
     }
 
     /**
@@ -70,7 +89,7 @@ trait TimelineQueryCTE
         $CLS_HIDDEN_JOIN = $hidden ? '1 = 1' : "f.name NOT LIKE '.%'";
 
         // Blocklisted folder names prune the whole subtree (pfx AND)
-        $CLS_BLOCKLIST = $this->folderNameBlocklistClause($fnBlockN);
+        $CLS_BLOCKLIST = $this->folderNotBlocklistedClause($fnBlockN, 'f');
 
         // On MySQL or MariaDB, provide the hint to use the index
         // The index is not used sometimes since the table is unbalanced
@@ -158,27 +177,39 @@ trait TimelineQueryCTE
     }
 
     /**
+     * CTE to walk up the parents of a single file.
+     * :cteFileId - The fileid to start from (depth 0).
+     *
+     * Each row is one ancestor (depth 0 is the file itself).
+     * Recursion stops at parent -1 or after 48 steps.
+     */
+    protected function CTE_FILE_PARENTS(): string
+    {
+        $cte = '*PREFIX*cte_file_parents(fileid, parent, name, depth) AS (
+            SELECT f.fileid, f.parent, f.name, 0
+            FROM *PREFIX*filecache f
+            WHERE f.fileid = :cteFileId
+
+            UNION ALL
+
+            SELECT f.fileid, f.parent, f.name, c.depth + 1
+            FROM *PREFIX*filecache f
+            INNER JOIN *PREFIX*cte_file_parents c
+                ON (f.fileid = c.parent)
+            WHERE (
+                (c.parent <> -1) AND
+                (c.depth < 48)
+            )
+        )';
+
+        return self::bundleCTEs([$cte]);
+    }
+
+    /**
      * @param string[] $ctes The CTEs to bundle
      */
     protected static function bundleCTEs(array $ctes): string
     {
         return 'WITH RECURSIVE '.implode(',', $ctes);
-    }
-
-    /**
-     * @param int $count number of bound :fnBlocklistN patterns
-     */
-    private function folderNameBlocklistClause(int $count): string
-    {
-        if (0 === $count) {
-            return '(1 = 1)';
-        }
-
-        $parts = [];
-        for ($i = 0; $i < $count; ++$i) {
-            $parts[] = "(f.name NOT LIKE :fnBlocklist{$i} ESCAPE :fnBlocklistEscape)";
-        }
-
-        return '('.implode(' AND ', $parts).')';
     }
 }

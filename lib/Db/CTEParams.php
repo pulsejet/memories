@@ -11,6 +11,7 @@ final class CTEParams
     private const TOP_FOLDER_IDS = 'topFolderIds';
     private const FOLDERS_ARCHIVE = 'cteFoldersArchive';
     private const INCLUDE_HIDDEN = 'cteIncludeHidden';
+    private const FILE_ID = 'cteFileId';
 
     private const FOLDER_NAME_BLOCKLIST = 'fnBlocklist';
     private const FOLDER_NAME_BLOCKLIST_COUNT = 'fnBlocklistCount';
@@ -44,6 +45,11 @@ final class CTEParams
     public static function isIncludeHidden(IQueryBuilder $query): bool
     {
         return \array_key_exists(self::INCLUDE_HIDDEN, $query->getParameters());
+    }
+
+    public static function setFileId(IQueryBuilder &$query, int $id): void
+    {
+        $query->setParameter(self::FILE_ID, $id, IQueryBuilder::PARAM_INT);
     }
 
     /** @param string[] $patterns */
