@@ -92,7 +92,7 @@ final class IndexQuery
         $query->select($query->expr()->literal(1))
             ->from('cte_file_parents', 'c')
             ->where(SQL::exists($query, $nomedia))
-            ->orWhere('NOT '.$this->tq->folderNotBlocklistedClause(\count($blocklist), 'c'))
+            ->orWhere($query->createFunction($this->tq->folderBlocklistedClause(\count($blocklist), 'c')))
             ->setMaxResults(1)
         ;
 

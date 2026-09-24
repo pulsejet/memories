@@ -43,18 +43,18 @@ trait TimelineQueryCTE
      * @param int    $count number of bound :fnBlocklistN patterns
      * @param string $alias table alias holding the folder name column
      */
-    public function folderNotBlocklistedClause(int $count, string $alias): string
+    public function folderBlocklistedClause(int $count, string $alias): string
     {
         if (0 === $count) {
-            return '(1 = 1)';
+            return '1 = 0';
         }
 
         $parts = [];
         for ($i = 0; $i < $count; ++$i) {
-            $parts[] = "({$alias}.name NOT LIKE :fnBlocklist{$i} ESCAPE :fnBlocklistEscape)";
+            $parts[] = "({$alias}.name LIKE :fnBlocklist{$i} ESCAPE :fnBlocklistEscape)";
         }
 
-        return '('.implode(' AND ', $parts).')';
+        return implode(' OR ', $parts);
     }
 
     /**
@@ -88,8 +88,8 @@ trait TimelineQueryCTE
         // Whether to filter out hidden folders
         $CLS_HIDDEN_JOIN = $hidden ? '1 = 1' : "f.name NOT LIKE '.%'";
 
-        // Blocklisted folder names prune the whole subtree (pfx AND)
-        $CLS_BLOCKLIST = $this->folderNotBlocklistedClause($fnBlockN, 'f');
+        // Blocklisted folder names prune the whole subtree
+        $CLS_BLOCKLIST = $this->folderBlocklistedClause($fnBlockN, 'f');
 
         // On MySQL or MariaDB, provide the hint to use the index
         // The index is not used sometimes since the table is unbalanced
@@ -106,7 +106,7 @@ trait TimelineQueryCTE
             WHERE (
                 (f.fileid IN (:topFolderIds)) AND
                 ({$CLS_NOMEDIA}) AND
-                ({$CLS_BLOCKLIST})
+                (NOT ({$CLS_BLOCKLIST}))
             )
 
             UNION ALL
@@ -123,7 +123,7 @@ trait TimelineQueryCTE
                 )
             WHERE (
                 ({$CLS_NOMEDIA}) AND
-                ({$CLS_BLOCKLIST})
+                (NOT ({$CLS_BLOCKLIST}))
             )
         )";
     }
