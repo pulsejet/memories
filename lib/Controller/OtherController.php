@@ -62,8 +62,8 @@ final class OtherController extends ApiController
     /**
      * update preferences (user setting).
      *
-     * @param string key the identifier to change
-     * @param string value the value to set
+     * @param string $key   the identifier to change
+     * @param string $value the value to set
      *
      * @return Http\Response empty JSONResponse with respective http status code
      */

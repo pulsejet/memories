@@ -33,7 +33,7 @@ final class Places
     /**
      * Make SQL query to detect GIS type.
      *
-     * @psalm-return 0|1|2|3
+     * @psalm-return 0|1|2
      */
     public function detectGisType(): int
     {
@@ -46,7 +46,7 @@ final class Places
         // Detect database type
         $provider = $this->connection->getDatabaseProvider(true);
 
-        // Test MySQL-like support in databse
+        // Test MySQL-like support in database
         if (IDBConnection::PLATFORM_MYSQL === $provider
         || IDBConnection::PLATFORM_MARIADB === $provider) {
             try {
@@ -61,7 +61,7 @@ final class Places
             }
         }
 
-        // Test Postgres native geometry like support in database
+        // Test Postgres native geometry support in database
         if (IDBConnection::PLATFORM_POSTGRES === $provider) {
             try {
                 $res = $this->connection->executeQuery("SELECT POINT('1,1')")->fetch();

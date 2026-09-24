@@ -228,8 +228,8 @@ export type NativeX = {
 
   /**
    * Set if the given files have remote copies.
-   * @param auid List of AUIDs to set the server ID for (JSON-encoded)
-   * @param auid List of BUIDs to set the server ID for (JSON-encoded)
+   * @param auids List of AUIDs to set the server ID for (JSON-encoded)
+   * @param buids List of BUIDs to set the server ID for (JSON-encoded)
    * @param value Value of remote
    */
   setHasRemote: (auids: string, buids: string, value: boolean) => void;

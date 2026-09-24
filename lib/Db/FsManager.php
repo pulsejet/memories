@@ -164,7 +164,7 @@ final class FsManager
 
             // Exclude .nomedia folders
             //
-            // This is needed to be done despite the exlusion in the CTE to account
+            // This is needed to be done despite the exclusion in the CTE to account
             // for mount points inside folders with a .nomedia file. For example:
             //  /user/files/timeline-path/
             //     => subfolder1
@@ -394,7 +394,7 @@ final class FsManager
             return false;
         }
 
-        // If the owner is disabled no access to the linke is granted
+        // If the owner is disabled no access to the link is granted
         $owner = $this->userManager->get($share->getShareOwner());
         if (null === $owner || !$owner->isEnabled()) {
             return false;
@@ -445,7 +445,7 @@ final class FsManager
     }
 
     /**
-     * Helper to get one file or null from a fiolder.
+     * Helper to get one file or null from a folder.
      *
      * @param Folder $folder Folder to search in
      * @param int    $id     Id of the file

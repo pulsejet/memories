@@ -964,7 +964,7 @@ export default defineComponent({
         console.assert(!!photo, 'Missing photo for index', index, 'and global anchor', this.globalAnchor);
         if (!photo) return {};
 
-        // Get index of current day in dayIds lisst
+        // Get index of current day in dayIds list
         const dayIdx = utils.binarySearch(dayIds, photo.dayid);
 
         // Preload next and previous 3 days

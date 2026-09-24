@@ -293,14 +293,14 @@ final class FaceRecognitionBackend extends Backend
         $query->addGroupBy('frp.id', 'frp.user');
         $query->andWhere($query->expr()->isNull('frp.name'));
 
-        // The query change if we want the people in an fileid, or the unnamed clusters
+        // The query changes if we want the people in a fileid, or the unnamed clusters
         if ($fileid > 0) {
             // WHERE these clusters contain fileid if specified
             $query->andWhere($query->expr()->eq('fri.file', $query->createNamedParameter($fileid)));
         } else {
             // WHERE these clusters has a minimum number of faces
             $query->having($query->expr()->gte($count, SQL::literal($query, $this->minFaceInClusters(), \PDO::PARAM_INT)));
-            // WHERE these clusters were not hidden due inconsistencies
+            // WHERE these clusters were not hidden due to inconsistencies
             $query->andWhere($query->expr()->eq('frp.is_visible', $query->expr()->literal(1)));
         }
 

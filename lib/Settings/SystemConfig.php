@@ -111,7 +111,7 @@ final class SystemConfig
         'memories.vod.external' => false,
 
         // Quality Factor used for transcoding
-        // This correspondes to CRF for x264 and global_quality for VA-API
+        // This corresponds to CRF for x264 and global_quality for VA-API
         'memories.vod.qf' => 24,
 
         // Set the default video quality for a first time user

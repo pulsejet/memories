@@ -36,7 +36,7 @@ type PreviewOptsSize = PreviewOpts & {
    * Directly specify the size of the preview.
    * If you already know the size of the photo, use msize instead,
    * so that caching can be utilized best. A size of 256 is not allowed
-   * here size the thumbnails are not pre-generated.
+   * here since the thumbnails are not pre-generated.
    */
   size: 512 | 1024 | 2048 | [number, number] | 'screen';
 };
@@ -238,7 +238,7 @@ export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
 /**
  * Set up hooks to set classes on parent element for Live Photo
  * @param video Video element
- * @param parent State object to update (reactivity)
+ * @param state State object to update (reactivity)
  */
 export function setupLivePhotoHooks(video: HTMLVideoElement, state: { playing: boolean }) {
   const div = video.closest('.memories-livephoto') as HTMLDivElement;

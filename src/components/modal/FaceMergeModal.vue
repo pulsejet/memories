@@ -88,8 +88,8 @@ export default defineComponent({
         !(await utils.confirmDestructive({
           title: this.t('memories', 'Merge faces'),
           message: this.t('memories', 'Merge {name} with {newName}?', {
-            name: utils.isNumber(name) ? this.t('memories', 'unnamed person') : name,
-            newName: utils.isNumber(newName) ? this.t('memories', 'unnamed person') : newName,
+            name: utils.isNumber(name) ? this.t('memories', 'Unnamed person') : name,
+            newName: utils.isNumber(newName) ? this.t('memories', 'Unnamed person') : newName,
           }),
           confirm: this.t('memories', 'Continue'),
           confirmClasses: 'error',
@@ -101,7 +101,7 @@ export default defineComponent({
 
       if (this.routeIsFaceRecognition) {
         if (Number.isInteger(Number(newName))) {
-          showError(this.t('memories', 'You can only merge with a person with name'));
+          showError(this.t('memories', 'You can only merge with a named person'));
           return;
         }
         await dav.faceRecognitionRenamePerson(name, newName);

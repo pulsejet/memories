@@ -129,7 +129,7 @@ final class ShareController extends ApiController
         }
 
         if (!$file || !$file->isShareable()) {
-            throw Exceptions::Forbidden('File not sharable');
+            throw Exceptions::Forbidden('File not shareable');
         }
 
         return $file;

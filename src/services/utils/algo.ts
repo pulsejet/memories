@@ -110,7 +110,7 @@ export function setRenewingTimeout(
   }, delay);
 }
 
-/** Checks if a object is numeric */
+/** Checks if an object is numeric */
 export function isNumber<T>(num: T): boolean {
   const cast = Number(num);
   return !isNaN(cast) && isFinite(cast);

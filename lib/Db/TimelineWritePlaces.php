@@ -41,7 +41,7 @@ trait TimelineWritePlaces
             ;
         });
 
-        // Just remove from if the point is no longer valid
+        // Just remove from places if the point is no longer valid
         if (null === $lat || null === $lon) {
             return [];
         }

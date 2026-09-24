@@ -33,7 +33,7 @@ trait TimelineQueryFolders
         // MAX 4
         $query->setMaxResults(4);
 
-        // FETCH tag previews
+        // FETCH root previews
         $rows = $this->executeQueryWithCTEs($query)->fetchAll();
 
         // Post-process

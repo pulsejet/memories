@@ -66,7 +66,7 @@ final class TagsController extends ApiController
             // Check the user is allowed to edit the file
             $file = $this->fs->getUserFile($id);
 
-            // Check the user is allowed to edit the file
+            // Check the file is updateable
             if (!$file->isUpdateable()) {
                 throw Exceptions::ForbiddenFileUpdate($file->getName());
             }

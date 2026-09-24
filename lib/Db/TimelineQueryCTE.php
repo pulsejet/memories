@@ -61,7 +61,7 @@ trait TimelineQueryCTE
             AND (f2.name = '{$name}')";
 
         // Check for nomedia and nomemories files
-        // Two separate subqueries can actually be faster here (upto 10x on MariaDB)
+        // Two separate subqueries can actually be faster here (up to 10x on MariaDB)
         $SEL_NOMEDIA = $SEL_FILE('.nomedia');
         $SEL_NOMEMORIES = $SEL_FILE('.nomemories');
         $CLS_NOMEDIA = "NOT EXISTS ({$SEL_NOMEDIA}) AND NOT EXISTS ({$SEL_NOMEMORIES})";

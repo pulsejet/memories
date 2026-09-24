@@ -23,7 +23,7 @@ async function archiveFile(fileid: number, archive: boolean) {
  *
  * @param photos list of photos to process
  * @param archive Archive or unarchive
- * @returns list of file ids that were deleted
+ * @returns list of file ids that were archived
  */
 export async function* archiveFilesByIds(photos: IPhoto[], archive: boolean) {
   if (!photos.length) return;

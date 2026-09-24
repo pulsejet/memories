@@ -98,7 +98,7 @@ export default defineComponent({
         !(await utils.confirmDestructive({
           title: this.t('memories', 'Move to person'),
           message: this.t('memories', 'Move the selected photos to {target}?', {
-            target: utils.isNumber(target) ? this.t('memories', 'unnamed person') : target,
+            target: utils.isNumber(target) ? this.t('memories', 'Unnamed person') : target,
           }),
           confirm: this.t('memories', 'Move'),
           confirmClasses: 'primary',

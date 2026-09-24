@@ -118,7 +118,7 @@ final class TimelineWrite
         // Get date parameters (after setting timezone offset)
         $dateTaken = $this->exif->getDateTaken($file, $exif);
 
-        // Store the acutal epoch with the EXIF data
+        // Store the actual epoch with the EXIF data
         $epoch = $exif['DateTimeEpoch'] = $dateTaken->getTimestamp();
 
         // Store the date taken in the database as UTC (local date) only

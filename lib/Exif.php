@@ -29,7 +29,7 @@ final class Exif
     /** @var null|resource[] */
     private $staticPipes;
 
-    /** Disable uisage of static process */
+    /** Disable usage of static process */
     private bool $noProc = false;
 
     public function __construct(
@@ -206,7 +206,7 @@ final class Exif
             'Y:m:d H:i', // 2023:03:05 18:58
         ];
 
-        /** @var \DateTime $dt */
+        /** @var null|\DateTime $parsedDate */
         $parsedDate = null;
 
         foreach ($formats as $format) {
@@ -272,7 +272,7 @@ final class Exif
     }
 
     /**
-     * Convert time to local date in UTC.
+     * Strip timezone, reinterpreting wall-clock time as UTC.
      */
     public function forgetTimezone(\DateTime $date): \DateTime
     {

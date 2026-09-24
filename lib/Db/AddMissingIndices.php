@@ -105,7 +105,7 @@ final class AddMissingIndices
                         WHERE fileid = NEW.fileid;',
                 );
             } elseif (IDBConnection::PLATFORM_POSTGRES === $provider) {
-                // Postgres requres a function to do the update
+                // Postgres requires a function to do the update
                 // Note: when dropping, the function should be dropped
                 // with CASCADE to remove the trigger as well
                 $this->connection->executeQuery(

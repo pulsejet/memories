@@ -21,11 +21,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+import { defineComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 import NcButton from '@nextcloud/vue/components/NcButton';
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
@@ -38,7 +37,6 @@ export default defineComponent({
   name: 'AlbumDeleteModal',
   components: {
     NcButton,
-    NcTextField,
     Modal,
   },
 
@@ -75,7 +73,7 @@ export default defineComponent({
         await this.close();
         await this.$router.push({ name: 'albums' });
       } catch (error) {
-        console.log(error);
+        console.error(error);
         showError(this.t('memories', 'Failed to delete {name}.', { name: this.name }));
       }
     },

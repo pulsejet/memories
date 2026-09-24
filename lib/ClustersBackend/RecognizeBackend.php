@@ -72,7 +72,7 @@ final class RecognizeBackend extends Backend
         }
 
         // Note: all of this is duplicated in nameToClusterId since we want to avoid
-        // making two queries for the getting the cluster_id and the actual clusters
+        // making two queries for getting the cluster_id and the actual clusters
         $faceStr = (string) $this->request->getParam('recognize');
         $faceNames = explode('/', $faceStr);
         if (2 !== \count($faceNames)) {

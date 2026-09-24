@@ -123,7 +123,7 @@ final class VideoController extends ApiController
                 $name = $file->getName().'.mp4';
             }
 
-            // Different manufacurers have different formats
+            // Different manufacturers have different formats
             if ('self__trailer' === $liveid) {
                 try { // Get trailer
                     $blob = $this->exif->getBinaryExifProp($path, '-trailer');

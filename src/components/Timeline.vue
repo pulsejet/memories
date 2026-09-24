@@ -1489,7 +1489,7 @@ export default defineComponent({
       delPhotos = delPhotos.filter((p) => p?.d);
       if (delPhotos.length === 0) return;
 
-      // Get all days that need to be updatd
+      // Get all days that need to be updated
       const updatedDays = new Set<IDay>(delPhotos.map((p) => p.d!));
       const delPhotosSet = new Set(delPhotos);
 

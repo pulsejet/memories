@@ -7,7 +7,7 @@ namespace OCA\Memories\Db;
 final class ExifFields
 {
     /**
-     * This is the list of fields that will be STORED in the databse as JSON.
+     * This is the list of fields that will be STORED in the database as JSON.
      * This is mostly only used for the metadata view.
      */
     public const EXIF_FIELDS_LIST = [

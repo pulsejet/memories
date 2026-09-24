@@ -147,7 +147,7 @@ final class LivePhoto
 
         // Huawei Motion Picture
         if ('image/jpeg' === ($exif['MIMEType'] ?? null) && $size > 40) {
-            // LIVE_%d is the negative offset from the beggining of the
+            // LIVE_%d is the negative offset from the beginning of the
             // metadata trailer to the beginning of the video part.
             // <image> <video> <metadata: 40 bytes>
             // |0:1477              LIVE_18666740       |

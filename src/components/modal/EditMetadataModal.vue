@@ -58,7 +58,6 @@
 import { defineComponent, defineAsyncComponent } from 'vue';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 
 import UserConfig from '@mixins/UserConfig';
@@ -84,7 +83,6 @@ import type { IExif, IImageInfo, IPhoto } from '@typings';
 export default defineComponent({
   components: {
     NcButton,
-    NcTextField,
     NcProgressBar,
     Modal,
 
@@ -336,9 +334,10 @@ export default defineComponent({
       // Check if we have image info
       const valid = photos.filter((p) => p.imageInfo);
       if (valid.length !== photos.length) {
+        const n = photos.length - valid.length;
         showError(
-          this.t('memories', 'Failed to load metadata for {n} photos.', {
-            n: photos.length - valid.length,
+          this.n('memories', 'Failed to load metadata for {n} photo.', 'Failed to load metadata for {n} photos.', n, {
+            n,
           }),
         );
       }
@@ -346,10 +345,15 @@ export default defineComponent({
       // Check if photos are updatable
       const updatable = valid.filter((p) => p.imageInfo?.permissions?.includes('U'));
       if (updatable.length !== valid.length) {
+        const n = valid.length - updatable.length;
         showError(
-          this.t('memories', '{n} photos cannot be edited (permissions error).', {
-            n: valid.length - updatable.length,
-          }),
+          this.n(
+            'memories',
+            '{n} photo cannot be edited (permissions error).',
+            '{n} photos cannot be edited (permissions error).',
+            n,
+            { n },
+          ),
         );
       }
 

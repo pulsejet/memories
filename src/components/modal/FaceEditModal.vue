@@ -105,7 +105,7 @@ export default defineComponent({
           params: { user: this.user, name: this.input },
         });
       } catch (error) {
-        console.log(error);
+        console.error(error);
         showError(
           this.t('memories', 'Failed to rename {oldName} to {name}.', {
             oldName: this.name,

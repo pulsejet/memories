@@ -81,7 +81,7 @@ trait TimelineQueryMap
     {
         $query = $this->connection->getQueryBuilder();
 
-        // SELECT all photos with this tag
+        // SELECT all photos in these map clusters
         $query->selectAlias($query->func()->max('m.fileid'), 'fileid')
             ->from('memories', 'm')
             ->where($query->expr()->in('m.mapcluster', $query->createNamedParameter(

@@ -121,7 +121,7 @@ final class DaysController extends ApiController
             $transforms[] = [$this->tq, 'transformVideoFilter'];
         }
 
-        // Filter geological bounds
+        // Filter geographical bounds
         if ($bounds = $this->request->getParam('mapbounds')) {
             $transforms[] = [$this->tq, 'transformMapBoundsFilter', $bounds];
         }

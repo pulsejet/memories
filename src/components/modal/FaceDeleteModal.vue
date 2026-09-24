@@ -15,12 +15,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+import { defineComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
@@ -32,7 +31,6 @@ export default defineComponent({
   name: 'FaceDeleteModal',
   components: {
     NcButton,
-    NcTextField,
     Modal,
   },
 
@@ -74,7 +72,7 @@ export default defineComponent({
         this.$router.push({ name: this.$route.name?.toString() }); // "recognize" or "facerecognition"
         this.close();
       } catch (error) {
-        console.log(error);
+        console.error(error);
         showError(this.t('memories', 'Failed to delete {name}.', { name: this.name }));
       }
     },

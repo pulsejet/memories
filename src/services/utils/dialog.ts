@@ -179,7 +179,13 @@ export const dialogs = {
   downloadItems: (count: number) =>
     confirmDestructive({
       title: t('memories', 'Download'),
-      message: t('memories', 'You are about to download {count} items.', { count }),
+      message: n(
+        'memories',
+        'You are about to download {count} item.',
+        'You are about to download {count} items.',
+        count,
+        { count },
+      ),
       confirm: t('memories', 'Continue'),
       cancel: t('memories', 'Cancel'),
     }),
@@ -187,7 +193,9 @@ export const dialogs = {
   moveItems: (count: number) =>
     confirmDestructive({
       title: t('memories', 'Move'),
-      message: t('memories', 'You are about to move {count} items.', { count }),
+      message: n('memories', 'You are about to move {count} item.', 'You are about to move {count} items.', count, {
+        count,
+      }),
       confirm: t('memories', 'Continue'),
       cancel: t('memories', 'Cancel'),
     }),
