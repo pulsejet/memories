@@ -178,7 +178,12 @@ final class Index
 
         try {
             $this->log("Indexing file {$path}", true);
-            $this->tw->processFile($file);
+            $this->tw->processFile(
+                file: $file,
+                validate: function () use ($file): bool {
+                    return $this->indexQuery->needsIndex($file->getId(), $file->getMtime());
+                },
+            );
             $this->lens->enqueue($file);
         } catch (\OCP\Lock\LockedException $e) {
             $this->log("Skipping file {$path} due to lock", true);

@@ -22,9 +22,10 @@ final class TimelineWrite
     /**
      * Process a file to insert Exif data into the database.
      *
-     * @param File $file  File node to process
-     * @param bool $lock  Lock the file before processing
-     * @param bool $force Update the record even if the file has not changed
+     * @param File                  $file     File node to process
+     * @param bool                  $lock     Lock the file before processing
+     * @param bool                  $force    Update the record even if the file has not changed
+     * @param null|\Closure(): bool $validate Post-lock validation hook
      *
      * @return bool True if the file was processed
      *
@@ -35,6 +36,7 @@ final class TimelineWrite
         File $file,
         bool $lock = true,
         bool $force = false,
+        ?\Closure $validate = null,
     ): bool {
         // Check if we want to process this file
         // https://github.com/pulsejet/memories/issues/933 (zero-byte files)
@@ -52,7 +54,7 @@ final class TimelineWrite
             $this->lockingProvider->acquireLock($lockKey, $lockType);
 
             try {
-                return $this->processFile($file, false, $force);
+                return $this->processFile($file, false, $force, $validate);
             } finally {
                 $this->lockingProvider->releaseLock($lockKey, $lockType);
             }
@@ -62,6 +64,11 @@ final class TimelineWrite
         $mtime = $file->getMtime();
         $fileId = $file->getId();
         $isvideo = $this->mime->isVideo($file);
+
+        // Run post-lock validation hook if set
+        if (!$force && null !== $validate && !$validate()) {
+            return false;
+        }
 
         // Get previous row
         $prevRow = $this->getCurrentRow($fileId);

@@ -7,7 +7,6 @@ namespace OCA\Memories\Db;
 use OCA\Memories\Service\MIME;
 use OCA\Memories\Settings\SystemConfig;
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\DB\QueryBuilder\IQueryFunction;
 use OCP\IDBConnection;
 
 final class IndexQuery
@@ -51,6 +50,20 @@ final class IndexQuery
         }
     }
 
+    /** Revalidate candidate after acquiring the index lock. */
+    public function needsIndex(int $fileId, int $mtime): bool
+    {
+        $query = $this->connection->getQueryBuilder();
+        $query->select($query->expr()->literal(1))
+            ->from('filecache', 'f')
+            ->where($query->expr()->eq('f.fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
+            ->andWhere($query->expr()->eq('f.mtime', $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT)))
+        ;
+        $query = $this->getNotIndexedFilter($query);
+
+        return false !== $query->executeQuery()->fetchOne();
+    }
+
     /**
      * Fetch up to $batchSize candidate fileids.
      *
@@ -90,23 +103,7 @@ final class IndexQuery
         $query->andWhere(SQL::exists($query, $inFolders));
 
         // Filter out files that are already indexed or failed
-        $getFilter = function (string $table, bool $notOrphaned) use ($query): IQueryFunction {
-            $clause = $this->connection->getQueryBuilder();
-            $clause->select($clause->expr()->literal(1))
-                ->from($table, 'a')
-                ->andWhere($clause->expr()->eq('f.fileid', 'a.fileid'))
-                ->andWhere($clause->expr()->eq('f.mtime', 'a.mtime'))
-            ;
-
-            if ($notOrphaned) {
-                $clause->andWhere($clause->expr()->eq('a.orphan', $clause->expr()->literal(0)));
-            }
-
-            return SQL::notExists($query, $clause);
-        };
-        $query->andWhere($getFilter('memories', true));
-        $query->andWhere($getFilter('memories_livephoto', true));
-        $query->andWhere($getFilter('memories_failures', false));
+        $this->getNotIndexedFilter($query);
 
         // Unordered fetch: indexed rows drop out via NOT EXISTS,
         // so refetching makes progress until an empty batch
@@ -122,5 +119,33 @@ final class IndexQuery
         }
 
         return $batch;
+    }
+
+    private function getNotIndexedFilter(IQueryBuilder $query): IQueryBuilder
+    {
+        // Whether the orphan flag applies per table
+        $tables = [
+            'memories' => true,
+            'memories_livephoto' => true,
+            'memories_failures' => false,
+        ];
+
+        foreach ($tables as $table => $checkOrphan) {
+            $clause = $this->connection->getQueryBuilder();
+
+            $clause->select($clause->expr()->literal(1))
+                ->from($table, 'a')
+                ->andWhere($clause->expr()->eq('f.fileid', 'a.fileid'))
+                ->andWhere($clause->expr()->eq('f.mtime', 'a.mtime'))
+            ;
+
+            if ($checkOrphan) {
+                $clause->andWhere($clause->expr()->eq('a.orphan', $clause->expr()->literal(0)));
+            }
+
+            $query->andWhere(SQL::notExists($query, $clause));
+        }
+
+        return $query;
     }
 }
