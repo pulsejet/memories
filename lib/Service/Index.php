@@ -167,7 +167,7 @@ final class Index
     {
         $path = $folder->getPath();
         $this->log("Indexing folder {$path}", true);
-        $this->indexFolderIds($folder, [$folder->getId() ?? 0]);
+        $this->indexFolderIds($folder, [$folder->getId()]);
     }
 
     /**
