@@ -9,9 +9,11 @@ use OCP\AppFramework\Http\DataResponse;
 
 final class Exceptions
 {
+    /**
+     * @param Http::STATUS_* $status
+     */
     public static function Generic(\Exception $e, int $status = Http::STATUS_INTERNAL_SERVER_ERROR): HttpResponseException
     {
-        /** @psalm-suppress ArgumentTypeCoercion */
         return new HttpResponseException(new DataResponse([
             'message' => $e->getMessage(),
         ], $status));

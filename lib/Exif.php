@@ -75,8 +75,7 @@ final class Exif
             $this->initializeStaticExiftoolProc();
             usleep(500000); // wait if error
 
-            /** @psalm-suppress PossiblyNullArgument */
-            if (!proc_get_status($this->staticProc)['running']) {
+            if ($this->staticProc && !proc_get_status($this->staticProc)['running']) {
                 error_log('WARN: Failed to create stay_open exiftool process');
                 $this->noProc = true;
                 $this->staticProc = null;

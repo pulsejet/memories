@@ -6,7 +6,7 @@ namespace OCA\Memories\Controller;
 
 use OCP\AppFramework\Http\TemplateResponse;
 
-/** @psalm-suppress MissingTemplateParam */
+/** @extends TemplateResponse<\OCP\AppFramework\Http::STATUS_*, array<string, mixed>> */
 final class TemplateResponsePatch extends TemplateResponse
 {
     #[\Override]

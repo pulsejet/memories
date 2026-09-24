@@ -88,11 +88,6 @@ final class ArchiveController extends ApiController
             $isArchived = false;
             $depth = 0;
             while (true) {
-                /** @psalm-suppress DocblockTypeContradiction */
-                if (null === $parent) {
-                    throw new \Exception('Cannot get correct parent of file');
-                }
-
                 // Hit a timeline folder
                 if (\in_array($parent->getPath(), $timelinePaths, true)) {
                     break;
