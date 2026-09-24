@@ -18,6 +18,7 @@ final class TimelineWrite
     use TimelineWriteMap;
     use TimelineWriteOrphans;
     use TimelineWritePlaces;
+    use TimelineWriteTags;
 
     /**
      * Process a file to insert Exif data into the database.
@@ -91,6 +92,10 @@ final class TimelineWrite
         // Hand off if Live Photo video part
         if ($isvideo && $this->livePhoto->isVideoPart($exif)) {
             return $this->util->transaction(fn () => $this->livePhoto->processVideoPart($file, $exif));
+        }
+
+        if (!empty($exif['TagsList'])){
+            Util::transaction(fn () => $this->processTags($file, $exif));
         }
 
         // If control reaches here, it's not a Live Photo video part
