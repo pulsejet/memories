@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCP\DB\QueryBuilder\ILiteral;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\DB\QueryBuilder\IQueryFunction;
 use OCP\IConfig;
@@ -83,8 +84,11 @@ final class SQL
      * integers never match columns without numeric affinity on SQLite
      * (e.g. CTE or aggregate outputs).
      */
-    public static function literal(IQueryBuilder $query, mixed $value, mixed $type = IQueryBuilder::PARAM_STR): mixed
-    {
+    public static function literal(
+        IQueryBuilder $query,
+        int|string $value,
+        int $type = IQueryBuilder::PARAM_STR,
+    ): ILiteral|IQueryFunction {
         if (\is_int($value) && \PDO::PARAM_INT === $type) {
             return $query->createFunction((string) $value);
         }
