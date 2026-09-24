@@ -41,6 +41,7 @@ use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IRequest;
 use OCP\ISession;
+use OCP\IUser;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Share\Exceptions\ShareNotFound;
@@ -71,10 +72,16 @@ final class FsManager
      *
      * @param TimelineRoot $root      Root object to populate (by reference)
      * @param bool         $recursive Whether to get the folders recursively
+     * @param ?IUser       $user      User to populate for (default: current session user)
+     * @param ?string[]    $paths     Explicit folder paths (default: request or timeline paths)
      */
-    public function populateRoot(TimelineRoot &$root, bool $recursive = true): TimelineRoot
-    {
-        $user = $this->userSession->getUser();
+    public function populateRoot(
+        TimelineRoot &$root,
+        bool $recursive = true,
+        ?IUser $user = null,
+        ?array $paths = null,
+    ): TimelineRoot {
+        $user ??= $this->userSession->getUser();
 
         // Albums have no folder
         if ($this->hasAlbumToken() && $this->systemConfig->albumsIsEnabled()) {
@@ -122,12 +129,13 @@ final class FsManager
         $uid = $user->getUID();
         $userFolder = $this->rootFolder->getUserFolder($uid);
 
-        /** @var string[] $paths List of paths to add to root */
-        $paths = [];
-        if ($path = $this->getRequestFolder()) {
-            $paths = [$path];
-        } else {
-            $paths = $this->systemConfig->getTimelinePaths($uid);
+        if (null === $paths) {
+            /** @var string[] $paths List of paths to add to root */
+            if ($path = $this->getRequestFolder()) {
+                $paths = [$path];
+            } else {
+                $paths = $this->systemConfig->getTimelinePaths($uid);
+            }
         }
 
         // Combined etag, for cache invalidation.
@@ -166,7 +174,7 @@ final class FsManager
             //        => .nomedia
             //        => external-mount   <-- this is a separate topFolder in the CTE
             //           => photo2        <-- this should be excluded, but CTE cannot find this
-            $root->excludePaths($this->getNoMediaFolders($userFolder, md5($etag)));
+            $root->excludePaths($this->getNoMediaFolders($userFolder, md5($etag), $user));
         }
 
         return $root;
@@ -177,10 +185,11 @@ final class FsManager
      *
      * @param Folder $root root folder
      * @param string $key  cache key
+     * @param IUser  $user user to search as
      *
      * @return string[] List of paths
      */
-    public function getNoMediaFolders(Folder $root, string $key): array
+    public function getNoMediaFolders(Folder $root, string $key, IUser $user): array
     {
         if (null !== ($paths = $this->nomediaCache->get($key))) {
             return $paths;
@@ -190,7 +199,7 @@ final class FsManager
             new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomedia'),
             new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomemories'),
         ]);
-        $search = $root->search(new SearchQuery($comp, 0, 0, [], $this->util->getUser()));
+        $search = $root->search(new SearchQuery($comp, 0, 0, [], $user));
 
         $paths = array_unique(array_map(static fn (Node $node) => \dirname($node->getPath()), $search));
         $this->nomediaCache->set($key, $paths, 60 * 60); // 1 hour
