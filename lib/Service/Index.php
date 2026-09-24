@@ -67,6 +67,7 @@ final class Index
         private IAppManager $appManager,
         private SetupManager $setupManager,
         private Lens $lens,
+        private MIME $mime,
     ) {}
 
     /**
@@ -149,7 +150,7 @@ final class Index
                     if (!$node instanceof File) {
                         throw new \Exception('Not a file');
                     }
-                    $this->indexFile($node);
+                    $this->indexFile($node, failSkip: true);
                 } catch (\Exception $e) {
                     $this->error("Failed to index file {$fileId}: {$e->getMessage()}");
                 }
@@ -172,11 +173,26 @@ final class Index
     /**
      * Index a single file.
      */
-    public function indexFile(File $file): void
+    public function indexFile(File $file, bool $failSkip = false): void
     {
         $path = $file->getPath();
 
         try {
+            // Check if this file should be indexed.
+            // https://github.com/pulsejet/memories/issues/933 (zero-byte files)
+            if ($file->getSize() <= 0
+                || !$this->mime->isSupported($file)
+                || !$this->mime->isPathAllowed($path)) {
+                // Drift between SQL and PHP enforcement would wedge the batch
+                // on this file, so mark it failed to keep making progress
+                if ($failSkip) {
+                    throw new \Exception('File does not meet indexing criteria');
+                }
+
+                return;
+            }
+
+            // Checks passed - index the file.
             $this->log("Indexing file {$path}", true);
             $this->tw->processFile(
                 file: $file,
@@ -184,6 +200,8 @@ final class Index
                     return !$this->indexQuery->isIndexed($file->getId(), $file->getMtime());
                 },
             );
+
+            // Queue indexing in the Lens daemon if enabled.
             $this->lens->enqueue($file);
         } catch (\OCP\Lock\LockedException $e) {
             $this->log("Skipping file {$path} due to lock", true);

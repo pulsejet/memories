@@ -38,12 +38,6 @@ final class TimelineWrite
         bool $force = false,
         ?\Closure $validate = null,
     ): bool {
-        // Check if we want to process this file
-        // https://github.com/pulsejet/memories/issues/933 (zero-byte files)
-        if ($file->getSize() <= 0 || !$this->mime->isSupported($file) || !$this->mime->isPathAllowed($file->getPath())) {
-            return false;
-        }
-
         // Check if we need to lock the file
         if ($lock) {
             $lockKey = 'memories/'.$file->getId();
