@@ -20,6 +20,7 @@ Very important.
   - Message looks like: `<type>(<scope>): <imperative description>`.
   - Types like fix, feat, chore, test, etc.
   - Include few lines of description.
+  - Include refs to issues / PRs like Closes #... or Fixes #...
 
 ## Git
 - Always work on `development`; keep it checked out locally.
