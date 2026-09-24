@@ -6,6 +6,7 @@
  *
  * Structure:
  *   - PRIMARY_DATASET: Timeline photos, nested directories, archive folders, and local media.
+ *   - FOR_EXCLUDED_DATASET: Photos under blocklisted / .nomedia folders (never indexed).
  *   - GEO_DATASET: 100 geo-tagged photos grouped across 11 cities/regions worldwide.
  *   - DATASET: Consolidated dataset map keyed by relative path (e.g. 'primary/for-default/...').
  */
@@ -402,6 +403,61 @@ export const FOR_MOVE_DATASET: IDatasetMap = {
   },
 };
 
+/**
+ * Photos under blocklisted folder names and .nomedia/.nomemories folders.
+ * These must never be indexed (see 103-excluded.spec.ts). Kept outside the
+ * timeline path so golden day measurements are unaffected.
+ */
+export const FOR_EXCLUDED_DATASET: IDatasetMap = {
+  'primary/for-excluded/@Recycle/recycle_01.jpg': {
+    size: [320, 240],
+    exif: {
+      DateTimeOriginal: '2023:05:01 10:00:00+00:00',
+    },
+  },
+  'primary/for-excluded/@eaDir/eadir_01.jpg': {
+    size: [320, 240],
+    exif: {
+      DateTimeOriginal: '2023:05:01 11:00:00+00:00',
+    },
+  },
+  'primary/for-excluded/.trashed-12345/trashed_01.jpg': {
+    size: [320, 240],
+    exif: {
+      DateTimeOriginal: '2023:05:01 12:00:00+00:00',
+    },
+  },
+  'primary/for-excluded/Nested/@Recycle/nested_recycle_01.jpg': {
+    size: [320, 240],
+    exif: {
+      DateTimeOriginal: '2023:05:02 10:00:00+00:00',
+    },
+  },
+  'primary/for-excluded/with-nomedia/photo_01.jpg': {
+    size: [320, 240],
+    exif: {
+      DateTimeOriginal: '2023:05:03 10:00:00+00:00',
+    },
+  },
+  'primary/for-excluded/with-nomedia/.nomedia': {
+    size: [320, 240],
+    exif: {
+      DateTimeOriginal: '2023:05:03 10:00:00+00:00',
+    },
+  },
+  'primary/for-excluded/with-nomemories/photo_02.jpg': {
+    size: [320, 240],
+    exif: {
+      DateTimeOriginal: '2023:05:03 11:00:00+00:00',
+    },
+  },
+  'primary/for-excluded/with-nomemories/.nomemories': {
+    size: [320, 240],
+    exif: {
+      DateTimeOriginal: '2023:05:03 11:00:00+00:00',
+    },
+  },
+};
 /**
  * Geo-tagged synthetic photos categorized by city/region for geo and map tests.
  */
@@ -1655,6 +1711,7 @@ export const DATASET: IDatasetMap = {
   ...FOR_DELETE_DATASET,
   ...FOR_MOVE_DATASET,
   ...FOR_ONTHISDAY_DATASET,
+  ...FOR_EXCLUDED_DATASET,
   ...GEO_DATASET,
 };
 
