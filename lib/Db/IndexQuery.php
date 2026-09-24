@@ -51,7 +51,7 @@ final class IndexQuery
     }
 
     /** Revalidate candidate after acquiring the index lock. */
-    public function needsIndex(int $fileId, int $mtime): bool
+    public function isIndexed(int $fileId, int $mtime): bool
     {
         $query = $this->connection->getQueryBuilder();
         $query->select($query->expr()->literal(1))
@@ -61,7 +61,7 @@ final class IndexQuery
         ;
         $query = $this->getNotIndexedFilter($query);
 
-        return false !== $query->executeQuery()->fetchOne();
+        return false === $query->executeQuery()->fetchOne();
     }
 
     /**

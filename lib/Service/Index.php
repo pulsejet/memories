@@ -181,7 +181,7 @@ final class Index
             $this->tw->processFile(
                 file: $file,
                 validate: function () use ($file): bool {
-                    return $this->indexQuery->needsIndex($file->getId(), $file->getMtime());
+                    return !$this->indexQuery->isIndexed($file->getId(), $file->getMtime());
                 },
             );
             $this->lens->enqueue($file);
