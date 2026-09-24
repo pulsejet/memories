@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 - **Feature**: Direct play for browser-supported video codecs via codec detection.
 - **Feature**: Support multiple external transcoders with automatic load distribution.
+- **Fix**: Improved efficiency for indexing jobs ([#1315](https://github.com/pulsejet/memories/issues/1315))
 
 ## [v9.0.1] - 2026-09-15
 
