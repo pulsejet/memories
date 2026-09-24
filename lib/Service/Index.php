@@ -51,7 +51,7 @@ final class Index
      * Callback to check if the process should continue.
      * This is called before every file is indexed.
      *
-     * @var null|\Closure(): bool
+     * @var ?\Closure(): bool
      */
     public ?\Closure $continueCheck = null;
 

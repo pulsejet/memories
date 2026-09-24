@@ -133,7 +133,7 @@ final class Util extends StaticUtil
     /**
      * Get a user's home folder.
      *
-     * @param null|string $uid User ID, or null for the user
+     * @param ?string $uid User ID, or null for the user
      *
      * @throws \OCA\Memories\HttpResponseException if the user is not logged in
      */

@@ -22,10 +22,10 @@ final class TimelineWrite
     /**
      * Process a file to insert Exif data into the database.
      *
-     * @param File                  $file     File node to process
-     * @param bool                  $lock     Lock the file before processing
-     * @param bool                  $force    Update the record even if the file has not changed
-     * @param null|\Closure(): bool $validate Post-lock validation hook
+     * @param File              $file     File node to process
+     * @param bool              $lock     Lock the file before processing
+     * @param bool              $force    Update the record even if the file has not changed
+     * @param ?\Closure(): bool $validate Post-lock validation hook
      *
      * @return bool True if the file was processed
      *

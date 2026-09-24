@@ -272,9 +272,9 @@ class StaticUtil
     /**
      * Read from non blocking handle or throw timeout.
      *
-     * @param resource    $handle
-     * @param int         $timeout   milliseconds
-     * @param null|string $delimiter null for eof
+     * @param resource $handle
+     * @param int      $timeout   milliseconds
+     * @param ?string  $delimiter null for eof
      */
     public static function readOrTimeout($handle, int $timeout, ?string $delimiter = null): string
     {

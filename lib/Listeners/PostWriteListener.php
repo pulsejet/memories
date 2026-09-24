@@ -44,7 +44,7 @@ final class PostWriteListener implements IEventListener
     #[\Override]
     public function handle(Event $event): void
     {
-        /** @var null|\OCP\Files\Node */
+        /** @var ?\OCP\Files\Node */
         $node = null;
 
         if ($event instanceof NodeWrittenEvent

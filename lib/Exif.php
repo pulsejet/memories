@@ -23,10 +23,10 @@ final class Exif
     private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-api', 'LargeFileSupport=1', '-n', '-json'];
 
     /** Opened instance of exiftool when running in command mode */
-    /** @var null|resource */
+    /** @var ?resource */
     private $staticProc;
 
-    /** @var null|resource[] */
+    /** @var ?resource[] */
     private $staticPipes;
 
     /** Disable usage of static process */
@@ -206,7 +206,7 @@ final class Exif
             'Y:m:d H:i', // 2023:03:05 18:58
         ];
 
-        /** @var null|\DateTime $parsedDate */
+        /** @var ?\DateTime $parsedDate */
         $parsedDate = null;
 
         foreach ($formats as $format) {
