@@ -61,10 +61,9 @@ final class FsManager
         private IUserManager $userManager,
         private ISession $session,
         private SystemConfig $systemConfig,
-        private Util $util,
         ICacheFactory $cacheFactory,
     ) {
-        $this->nomediaCache = $cacheFactory->createLocal('memories:nomedia');
+        $this->nomediaCache = $cacheFactory->createDistributed('memories:nomedia');
     }
 
     /**
