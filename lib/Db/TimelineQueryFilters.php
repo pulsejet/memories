@@ -45,17 +45,6 @@ trait TimelineQueryFilters
         }
     }
 
-    private function applyAllTransforms(array $transforms, IQueryBuilder &$query, bool $aggregate): void
-    {
-        foreach ($transforms as &$transform) {
-            $fun = \array_slice($transform, 0, 2);
-            $params = \array_slice($transform, 2);
-            array_unshift($params, $aggregate);
-            array_unshift($params, $query);
-            $fun(...$params);
-        }
-    }
-
     private function getFavoriteVCategoryFun(IQueryBuilder &$query): IQueryFunction
     {
         $sub = $query->getConnection()->getQueryBuilder();

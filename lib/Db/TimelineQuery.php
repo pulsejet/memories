@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+/**
+ * @psalm-type QueryTransform = \Closure(\OCP\DB\QueryBuilder\IQueryBuilder, bool): void
+ */
 final class TimelineQuery
 {
     use TimelineQueryBase;

@@ -32,8 +32,12 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
+/**
+ * @psalm-import-type QueryTransform from TimelineQuery
+ */
 final class DaysController extends ApiController
 {
     public function __construct(
@@ -97,9 +101,12 @@ final class DaysController extends ApiController
 
     /**
      * Get transformations depending on the request.
+     *
+     * @return list<QueryTransform>
      */
     private function getTransformations(): array
     {
+        /** @var list<QueryTransform> $transforms */
         $transforms = [];
 
         // Add clustering transforms
@@ -113,27 +120,31 @@ final class DaysController extends ApiController
 
         // Filter only favorites
         if ($this->request->getParam('fav')) {
-            $transforms[] = [$this->tq, 'transformFavoriteFilter'];
+            $transforms[] = $this->tq->transformFavoriteFilter(...);
         }
 
         // Filter only videos
         if ($this->request->getParam('vid')) {
-            $transforms[] = [$this->tq, 'transformVideoFilter'];
+            $transforms[] = $this->tq->transformVideoFilter(...);
         }
 
         // Filter geographical bounds
         if ($bounds = $this->request->getParam('mapbounds')) {
-            $transforms[] = [$this->tq, 'transformMapBoundsFilter', $bounds];
+            $transforms[] = function (IQueryBuilder &$query, bool $aggregate) use ($bounds): void {
+                $this->tq->transformMapBoundsFilter($query, $aggregate, (string) $bounds);
+            };
         }
 
         // Limit number of responses for day query
         if ($limit = $this->request->getParam('limit')) {
-            $transforms[] = [$this->tq, 'transformLimit', (int) $limit];
+            $transforms[] = function (IQueryBuilder &$query, bool $aggregate) use ($limit): void {
+                $this->tq->transformLimit($query, $aggregate, (int) $limit);
+            };
         }
 
         // Add extra fields for native callers
         if (Util::callerIsNative()) {
-            $transforms[] = [$this->tq, 'transformNativeQuery'];
+            $transforms[] = $this->tq->transformNativeQuery(...);
         }
 
         return $transforms;

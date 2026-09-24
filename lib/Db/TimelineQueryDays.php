@@ -7,6 +7,9 @@ namespace OCA\Memories\Db;
 use OCA\Memories\ClustersBackend;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
+/**
+ * @psalm-import-type QueryTransform from TimelineQuery
+ */
 trait TimelineQueryDays
 {
     use TimelineQueryBase;
@@ -19,11 +22,11 @@ trait TimelineQueryDays
     /**
      * Get the days response from the database for the timeline.
      *
-     * @param bool  $recursive       Whether to get the days recursively
-     * @param bool  $archive         Whether to get the days only from the archive folder
-     * @param bool  $monthView       Whether the response should be in month view
-     * @param bool  $reverse         Whether the response should be in reverse order
-     * @param array $queryTransforms An array of query transforms to apply to the query
+     * @param bool                 $recursive       Whether to get the days recursively
+     * @param bool                 $archive         Whether to get the days only from the archive folder
+     * @param bool                 $monthView       Whether the response should be in month view
+     * @param bool                 $reverse         Whether the response should be in reverse order
+     * @param list<QueryTransform> $queryTransforms An array of query transforms to apply to the query
      *
      * @return array The days response
      */
@@ -48,7 +51,9 @@ trait TimelineQueryDays
         ;
 
         // Apply all transformations
-        $this->applyAllTransforms($queryTransforms, $query, true);
+        foreach ($queryTransforms as $transform) {
+            $transform($query, true);
+        }
 
         // FILTER with filecache for timeline path
         $query = $this->filterFilecache($query, null, $recursive, $archive);
@@ -70,13 +75,13 @@ trait TimelineQueryDays
     /**
      * Get the day response from the database for the timeline.
      *
-     * @param int[] $dayIds          The day ids to fetch
-     * @param bool  $recursive       If the query should be recursive
-     * @param bool  $archive         If the query should include only the archive folder
-     * @param bool  $hidden          If the query should include hidden files
-     * @param bool  $monthView       If the query should be in month view (dayIds are monthIds)
-     * @param bool  $reverse         If the query should be in reverse order
-     * @param array $queryTransforms The query transformations to apply
+     * @param int[]                $dayIds          The day ids to fetch
+     * @param bool                 $recursive       If the query should be recursive
+     * @param bool                 $archive         If the query should include only the archive folder
+     * @param bool                 $hidden          If the query should include hidden files
+     * @param bool                 $monthView       If the query should be in month view (dayIds are monthIds)
+     * @param bool                 $reverse         If the query should be in reverse order
+     * @param list<QueryTransform> $queryTransforms The query transformations to apply
      *
      * @return array An array of day responses
      */
@@ -140,7 +145,9 @@ trait TimelineQueryDays
         $query->addOrderBy('m.fileid', 'DESC'); // unique tie-breaker
 
         // Apply all transformations
-        $this->applyAllTransforms($queryTransforms, $query, false);
+        foreach ($queryTransforms as $transform) {
+            $transform($query, false);
+        }
 
         // JOIN with filecache to get the basename etc
         $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));

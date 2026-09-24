@@ -25,6 +25,9 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCP\IRequest;
 
+/**
+ * @psalm-import-type QueryTransform from \OCA\Memories\Db\TimelineQuery
+ */
 final class Manager
 {
     /**
@@ -59,15 +62,18 @@ final class Manager
 
     /**
      * Apply all query transformations for the given request.
+     *
+     * @return list<QueryTransform>
      */
     public static function getTransforms(IRequest $request): array
     {
+        /** @var list<QueryTransform> $transforms */
         $transforms = [];
         foreach (array_keys(self::BACKENDS) as $backendName) {
             if ($request->getParam($backendName)) {
                 $backend = self::get($backendName);
                 if ($backend->isEnabled()) {
-                    $transforms[] = [$backend, 'transformDayQuery'];
+                    $transforms[] = $backend->transformDayQuery(...);
                 }
             }
         }
