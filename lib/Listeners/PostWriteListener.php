@@ -53,11 +53,6 @@ final class PostWriteListener implements IEventListener
             }
         } elseif ($event instanceof NodeCopiedEvent) {
             $node = $event->getTarget();
-            if (!($node instanceof Folder) && !($node instanceof File)) {
-                return;
-            }
-        } else {
-            return;
         }
 
         if ($node instanceof File) {
