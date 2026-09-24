@@ -79,19 +79,22 @@ final class IndexQuery
 
         $query = $this->connection->getQueryBuilder();
 
-        $nomedia = $this->connection->getQueryBuilder();
-        $nomedia->select($nomedia->expr()->literal(1))
-            ->from('filecache', 'f2')
-            ->where($nomedia->expr()->eq('f2.parent', 'c.fileid'))
-            ->andWhere($nomedia->expr()->in('f2.name', $query->createNamedParameter(
-                ['.nomedia', '.nomemories'],
-                IQueryBuilder::PARAM_STR_ARRAY,
-            )))
-        ;
+        // Keep the two probes separate: a single IN probe plans as
+        // range instead of ref on MariaDB and is much slower.
+        $hasFile = function (string $name): IQueryBuilder {
+            $sub = $this->connection->getQueryBuilder();
+
+            return $sub->select($sub->expr()->literal(1))
+                ->from('filecache', 'f2')
+                ->where($sub->expr()->eq('f2.parent', 'c.fileid'))
+                ->andWhere($sub->expr()->eq('f2.name', $sub->expr()->literal($name)))
+            ;
+        };
 
         $query->select($query->expr()->literal(1))
             ->from('cte_file_parents', 'c')
-            ->where(SQL::exists($query, $nomedia))
+            ->where(SQL::exists($query, $hasFile('.nomedia')))
+            ->orWhere(SQL::exists($query, $hasFile('.nomemories')))
             ->orWhere($query->createFunction($this->tq->folderBlocklistedClause(\count($blocklist), 'c')))
             ->setMaxResults(1)
         ;

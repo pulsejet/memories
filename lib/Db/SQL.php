@@ -15,7 +15,7 @@ final class SQL
     /**
      * @return never
      */
-    public static function debugQuery(IQueryBuilder &$query, string $sql = '')
+    public static function debugQuery(IQueryBuilder $query, string $sql = '')
     {
         // Print the query and exit
         $sql = empty($sql) ? $query->getSQL() : $sql;
@@ -26,7 +26,7 @@ final class SQL
         exit; // only for debugging, so this is okay
     }
 
-    public static function replaceQueryParams(IQueryBuilder &$query, string $sql): string
+    public static function replaceQueryParams(IQueryBuilder $query, string $sql): string
     {
         $conn = $query->getConnection();
 
@@ -72,7 +72,7 @@ final class SQL
      * @param IQueryBuilder $query    The query to create the function on
      * @param IQueryBuilder $subquery The subquery to use
      */
-    public static function subquery(IQueryBuilder &$query, IQueryBuilder &$subquery): IQueryFunction
+    public static function subquery(IQueryBuilder $query, IQueryBuilder $subquery): IQueryFunction
     {
         return $query->createFunction("({$subquery->getSQL()})");
     }
@@ -102,7 +102,7 @@ final class SQL
      * @param IQueryBuilder        $query  The query to create the function on
      * @param IQueryBuilder|string $clause The clause to check for existence
      */
-    public static function exists(IQueryBuilder &$query, IQueryBuilder|string &$clause): IQueryFunction
+    public static function exists(IQueryBuilder $query, IQueryBuilder|string $clause): IQueryFunction
     {
         if ($clause instanceof IQueryBuilder) {
             $clause = $clause->getSQL();
@@ -117,7 +117,7 @@ final class SQL
      * @param IQueryBuilder        $query  The query to create the function on
      * @param IQueryBuilder|string $clause The clause to check for existence
      */
-    public static function notExists(IQueryBuilder &$query, IQueryBuilder|string &$clause): IQueryFunction
+    public static function notExists(IQueryBuilder $query, IQueryBuilder|string $clause): IQueryFunction
     {
         if ($clause instanceof IQueryBuilder) {
             $clause = $clause->getSQL();
@@ -132,7 +132,7 @@ final class SQL
      * @param IQueryBuilder $query The query to create the function on
      * @param string        $field The field to select distinct values from
      */
-    public static function distinct(IQueryBuilder &$query, string $field): IQueryFunction
+    public static function distinct(IQueryBuilder $query, string $field): IQueryFunction
     {
         return $query->createFunction("DISTINCT {$field}");
     }
@@ -143,7 +143,7 @@ final class SQL
      * @param IQueryBuilder $query The query to create the function on
      * @param string        $field The field to average
      */
-    public static function average(IQueryBuilder &$query, string $field): IQueryFunction
+    public static function average(IQueryBuilder $query, string $field): IQueryFunction
     {
         return $query->createFunction("AVG({$field})");
     }
