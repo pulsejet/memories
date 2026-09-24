@@ -48,21 +48,26 @@ final class TimelineWrite
             $this->lockingProvider->acquireLock($lockKey, $lockType);
 
             try {
-                return $this->processFile($file, false, $force, $validate);
+                return $this->processFile(
+                    file: $file,
+                    lock: false,
+                    force: $force,
+                    validate: $validate,
+                );
             } finally {
                 $this->lockingProvider->releaseLock($lockKey, $lockType);
             }
+        }
+
+        // Run post-lock validation hook if set
+        if (null !== $validate && !$validate()) {
+            return false;
         }
 
         // Get parameters
         $mtime = $file->getMtime();
         $fileId = $file->getId();
         $isvideo = $this->mime->isVideo($file);
-
-        // Run post-lock validation hook if set
-        if (!$force && null !== $validate && !$validate()) {
-            return false;
-        }
 
         // Get previous row
         $prevRow = $this->getCurrentRow($fileId);

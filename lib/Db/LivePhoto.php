@@ -176,9 +176,7 @@ final class LivePhoto
         $fileId = $file->getId();
         $mtime = $file->getMTime();
         $liveid = $exif['ContentIdentifier'] ?? null;
-        if (empty($liveid)) {
-            return false;
-        }
+        \assert(null !== $liveid);
 
         // Check if entry already exists
         $query = $this->connection->getQueryBuilder();
