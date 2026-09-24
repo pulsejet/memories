@@ -279,7 +279,6 @@ final class FileRobotMagick
         $bg = 0.587 * $v - 0.586 * $vsu - 1.05 * $vsw;
         $bb = 0.114 * $v + 0.886 * $vsu - 0.2 * $vsw;
 
-        /** @psalm-suppress InvalidArgument */
         $this->image->colorMatrixImage([
             $rr, $rg, $rb, 0, 0,
             $gr, $gg, $gb, 0, 0,
@@ -328,7 +327,6 @@ final class FileRobotMagick
     private function applyFilterSepia(): void
     {
         // https://github.com/konvajs/konva/blob/master/src/filters/Sepia.ts
-        /** @psalm-suppress InvalidArgument */
         $this->image->colorMatrixImage([
             0.393, 0.769, 0.189, 0, 0,
             0.349, 0.686, 0.168, 0, 0,
@@ -621,7 +619,6 @@ final class FileRobotMagick
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L38
         //  y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-        /** @psalm-suppress InvalidArgument */
         $this->image->colorMatrixImage([
             0.2126, 0.7152, 0.0722, 0, 0,
             0.2126, 0.7152, 0.0722, 0, 0,
@@ -634,7 +631,6 @@ final class FileRobotMagick
     private function applyBaseFilterSepia(float $value): void
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L46
-        /** @psalm-suppress InvalidArgument */
         $this->image->colorMatrixImage([
             1.0 - 0.607 * $value, 0.769 * $value, 0.189 * $value, 0, 0,
             0.349 * $value, 1.0 - 0.314 * $value, 0.168 * $value, 0, 0,
@@ -647,7 +643,6 @@ final class FileRobotMagick
     private function applyBaseFilterAdjustRGB(float $r, float $g, float $b): void
     {
         // https://github.com/scaleflex/filerobot-image-editor/blob/7113bf4968d97f41381f4a2965a59defd44562c8/packages/react-filerobot-image-editor/src/custom/filters/BaseFilters.js#L57
-        /** @psalm-suppress InvalidArgument */
         $this->image->colorMatrixImage([
             $r, 0, 0, 0, 0,
             0, $g, 0, 0, 0,

@@ -142,10 +142,6 @@ final class ShareController extends ApiController
             ->linkToRouteAbsolute('memories.Public.showShare', ['token' => $token])
         ;
 
-        /**
-         * @psalm-suppress RedundantConditionGivenDocblockType
-         * @psalm-suppress DocblockTypeContradiction
-         */
         $expiration = $share->getExpirationDate()?->getTimestamp();
 
         return [

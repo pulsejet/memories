@@ -181,7 +181,6 @@ final class PublicController extends AuthPublicShareController
     #[\Override]
     protected function isPasswordProtected(): bool
     {
-        /** @psalm-suppress RedundantConditionGivenDocblockType */
         return null !== $this->share->getPassword();
     }
 

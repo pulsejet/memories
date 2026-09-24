@@ -52,7 +52,7 @@ final class Version505001Date20230828155021 extends SimpleMigrationStep
             $mtime = $table->getColumn('mtime');
 
             // NC35 wrapper takes a type name, older Doctrine column a Type instance
-            /** @psalm-suppress InvalidArgument, PossiblyInvalidArgument */
+            /** @psalm-suppress PossiblyInvalidArgument */
             $mtime->setType(interface_exists('OCP\DB\Schema\IColumn') ? Types::BIGINT : Type::getType(Types::BIGINT));
             $mtime->setNotnull(true);
             $mtime->setLength(20);

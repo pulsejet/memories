@@ -294,7 +294,6 @@ final class SQL
      */
     public static function pgsqlCopyFromFile(\PDO $pdo, string $table, string $file, string $fields = ''): void
     {
-        /** @psalm-suppress UndefinedMethod */
         if (method_exists($pdo, 'copyFromFile')) {
             /** @var mixed $res */
             $res = '' !== $fields
