@@ -19,6 +19,7 @@ export type ISystemConfig = {
   'memories.vod.ffprobe': string;
   'memories.vod.path': string;
   'memories.vod.bind': string;
+  'memories.vod.nc_url': string;
   'memories.vod.connect': string[];
   'memories.vod.external': boolean;
   'memories.vod.qf': number;

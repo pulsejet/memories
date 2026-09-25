@@ -102,6 +102,9 @@ final class SystemConfig
         // Bind address to use when starting the transcoding server
         'memories.vod.bind' => '127.0.0.1:47788',
 
+        // URL go-vod uses to connect back to Nextcloud (internal transcoder only)
+        'memories.vod.nc_url' => 'http://localhost:80',
+
         // Transcoding servers to connect to in external mode.
         // Each client is sticky-routed to one server by hash.
         'memories.vod.connect' => ['127.0.0.1:47788'],

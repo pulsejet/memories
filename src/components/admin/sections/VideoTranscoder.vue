@@ -47,6 +47,14 @@
       />
 
       <NcTextField
+        :disabled="!enableTranscoding || config['memories.vod.external']"
+        :label="t('memories', 'Nextcloud URL for transcoder (local only)')"
+        :label-visible="true"
+        :model-value="config['memories.vod.nc_url']"
+        @change="update('memories.vod.nc_url', $event.target.value)"
+      />
+
+      <NcTextField
         :disabled="!enableTranscoding || !config['memories.vod.external']"
         :label="t('memories', 'Connection addresses (comma separated)')"
         :label-visible="true"

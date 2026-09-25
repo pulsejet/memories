@@ -7,7 +7,6 @@ namespace OCA\Memories\Service;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\Http\Client\IClientService;
-use OCP\IConfig;
 
 final class BinExt
 {
@@ -23,7 +22,6 @@ final class BinExt
 
     public function __construct(
         private SystemConfig $systemConfig,
-        private IConfig $config,
         private IClientService $clientService,
     ) {}
 
@@ -242,7 +240,7 @@ final class BinExt
             'ffprobe' => $this->systemConfig->get('memories.vod.ffprobe'),
             'tempdir' => $dir('memories.vod.tempdir', sys_get_temp_dir().'/go-vod/'),
             'cacheDir' => $dir('memories.vod.cachedir', sys_get_temp_dir().'/go-vod-cache'),
-            'nextcloudUrl' => rtrim($this->config->getSystemValueString('overwrite.cli.url', ''), '/'),
+            'nextcloudUrl' => rtrim($this->systemConfig->get('memories.vod.nc_url'), '/'),
         ];
     }
 

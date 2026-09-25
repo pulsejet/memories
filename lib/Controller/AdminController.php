@@ -95,6 +95,7 @@ final class AdminController extends ApiController
             // Kill go-vod if changing startup config settings.
             if (\in_array($key, [
                 'memories.vod.bind',
+                'memories.vod.nc_url',
                 'memories.vod.connect',
                 'memories.vod.path',
                 'memories.vod.tempdir',
@@ -105,6 +106,7 @@ final class AdminController extends ApiController
                 'memories.vod.disable',
             ], true)) {
                 try {
+                    $this->binExt->pkill('go-vod');
                     $this->binExt->ensureGoVod();
                 } catch (\Exception $e) {
                     error_log('Failed to start go-vod: '.$e->getMessage());
