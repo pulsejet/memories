@@ -225,24 +225,6 @@ final class VideoController extends ApiController
 
             // Get file
             $file = $this->fs->getUserFile($fileid);
-
-            // Local files only for now
-            if (!$file->getStorage()->isLocal()) {
-                throw Exceptions::Forbidden('External storage not supported');
-            }
-
-            // Get file path
-            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-            if (!$path || !file_exists($path)) {
-                throw Exceptions::NotFound('local file path');
-            }
-
-            // Check if file starts with temp dir
-            $tmpDir = sys_get_temp_dir();
-            if (str_starts_with($path, $tmpDir)) {
-                throw Exceptions::Forbidden('files in temp directory not supported');
-            }
-
             $etag = $file->getEtag();
 
             return $this->util->guardExDirect(function (Http\IOutput $out) use ($client, $fileid, $profile, $etag, $liveid) {
