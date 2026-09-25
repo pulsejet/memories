@@ -25,6 +25,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\FsManager;
+use OCA\Memories\Exceptions;
 use OCA\Memories\Service\ServiceManager;
 use OCA\Memories\Util;
 use OCP\AppFramework\ApiController;
@@ -36,6 +37,7 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IRequest;
+use OCP\ISession;
 use OCP\ITempManager;
 use OCP\Security\ISecureRandom;
 
@@ -50,6 +52,7 @@ final class DownloadController extends ApiController
         protected ISecureRandom $secureRandom,
         protected ITempManager $tempManager,
         protected ServiceManager $serviceManager,
+        protected ISession $session,
         protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
@@ -138,14 +141,21 @@ final class DownloadController extends ApiController
     public function one(int $fileid, bool $resumable = true): Http\Response
     {
         return $this->util->guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable) {
-            $file = $this->serviceManager->isVodServiceAccount()
-                ? $this->serviceManager->getServiceFile($fileid)
-                : $this->fs->getUserFile($fileid);
+            /** @var \OCP\Files\File $file */
+            if ($this->serviceManager->isVodServiceAccount()) {
+                $file = $this->serviceManager->getServiceFile($fileid);
+            } else {
+                $file = $this->fs->getUserFile($fileid);
 
-            // Check if we're allowed to download the file
-            if (!$this->fs->canDownload($file)) {
-                throw new \Exception("Download forbidden: {$file->getName()}");
+                // Check if we're allowed to download the file
+                if (!$this->fs->canDownload($file)) {
+                    throw new \Exception("Download forbidden: {$file->getName()}");
+                }
             }
+
+            // Release the PHP session lock BEFORE streaming.
+            // Prevents a deadlock on simultaneous connections.
+            $this->closeSession();
 
             // Get file reading parameters
             $size = (int) $file->getSize();
@@ -158,6 +168,7 @@ final class DownloadController extends ApiController
             $seekEnd = max(0, $size - 1);
 
             $sendRangeNotSatisfiable = static function () use ($out, $size): void {
+                $out->setHttpResponseCode(416);
                 $out->setHeader('HTTP/1.1 416 Range Not Satisfiable');
                 $out->setHeader("Content-Range: bytes */{$size}");
                 $out->setHeader('Accept-Ranges: bytes');
@@ -213,6 +224,7 @@ final class DownloadController extends ApiController
 
             // Send partial content header if a range was requested
             if ($isRange) {
+                $out->setHttpResponseCode(206); // see Util::guardExDirect
                 $out->setHeader('HTTP/1.1 206 Partial Content');
                 $out->setHeader("Content-Range: bytes {$seekStart}-{$seekEnd}/{$size}");
             }
@@ -241,13 +253,12 @@ final class DownloadController extends ApiController
             $disposition = $isMedia && $resumable ? 'inline' : 'attachment';
             $out->setHeader("Content-Disposition: {$disposition}; filename=\"{$filename}\"");
 
-            // Prevent output from being buffered
-            $out->setHeader('X-Accel-Buffering: no');
-
             // Quit if HEAD request or empty file
             if ('HEAD' === $this->request->getMethod() || 0 === $size) {
                 return;
             }
+
+            $this->prepareStreaming($out);
 
             // Open file to send
             $res = $file->fopen('rb');
@@ -255,61 +266,32 @@ final class DownloadController extends ApiController
                 throw new \Exception('Failed to open file on disk');
             }
 
-            // Seek to start if not zero
-            if ($seekStart > 0) {
-                fseek($res, $seekStart);
-            }
-
-            // Handle aborts manually
-            ignore_user_abort(true);
-
-            // Send 1MB at a time
-            // But send 256KB initially in case loading metadata only
-            $chunkRead = 0;
-
-            // Start output buffering
-            ob_start();
-
-            // Disable time limit
-            @set_time_limit(0);
-
-            while (!feof($res) && $seekStart <= $seekEnd) {
-                $lenLeft = $seekEnd - $seekStart + 1;
-                $buffer = fread($res, min(1024 * 1024, $lenLeft));
-                if (false === $buffer) {
-                    break;
+            try {
+                // Seek to start if not zero
+                if ($seekStart > 0 && 0 !== fseek($res, $seekStart)) {
+                    throw new \Exception('Failed to seek file');
                 }
-                $seekStart += \strlen($buffer);
-                $chunkRead += \strlen($buffer);
 
-                // Send buffer
-                $out->setOutput($buffer);
-
-                // Flush output if chunk is large enough
-                if ($chunkRead > 1024 * 512) {
-                    // Check if client disconnected
-                    if (CONNECTION_NORMAL !== connection_status() || connection_aborted()) {
+                while (!feof($res) && $seekStart <= $seekEnd) {
+                    $lenLeft = $seekEnd - $seekStart + 1;
+                    $buffer = fread($res, min(512 * 1024, $lenLeft));
+                    if (false === $buffer || '' === $buffer) {
                         break;
                     }
+                    $seekStart += \strlen($buffer);
 
-                    // Flush output
-                    ob_flush();
-                    $chunkRead = 0;
+                    // Send buffer
+                    $out->setOutput($buffer);
+                    flush();
+
+                    if (connection_aborted()) {
+                        break;
+                    }
                 }
+            } finally {
+                fclose($res);
             }
-
-            // Flush remaining output
-            ob_end_flush();
-
-            // Close file
-            fclose($res);
         });
-    }
-
-    /** Cache for download handles. */
-    private function getCache(): ICache
-    {
-        return $this->cacheFactory->createDistributed('memories:downloads');
     }
 
     /**
@@ -320,12 +302,11 @@ final class DownloadController extends ApiController
      */
     private function multiple(string $name, array $fileIds): Http\Response
     {
-        return $this->util->guardExDirect(function ($out) use ($name, $fileIds) {
-            // Disable time limit
-            @set_time_limit(0);
-
-            // Ensure we can abort the request if user stops it
-            ignore_user_abort(true);
+        return $this->util->guardExDirect(function (Http\IOutput $out) use ($name, $fileIds) {
+            // Release the PHP session lock BEFORE streaming.
+            // Prevents a deadlock on simultaneous connections.
+            $this->closeSession();
+            $this->prepareStreaming($out);
 
             // Create zip streamer
             $streamer = new \ZipStreamer\ZipStreamer(['zip64' => true]);
@@ -395,15 +376,20 @@ final class DownloadController extends ApiController
                 } catch (\Exception $e) {
                     // create a dummy memory file with the error message
                     $dummy = fopen('php://memory', 'rw+');
-                    fwrite($dummy, $e->getMessage());
-                    rewind($dummy);
-
-                    if (!$streamer->addFileFromStream($dummy, "{$name}_error.txt", [])) {
+                    if (false === $dummy) {
                         throw new \Exception('Failed to add file to zip');
                     }
 
-                    // close the dummy file
-                    fclose($dummy);
+                    try {
+                        fwrite($dummy, $e->getMessage());
+                        rewind($dummy);
+
+                        if (!$streamer->addFileFromStream($dummy, "{$name}_error.txt", [])) {
+                            throw new \Exception('Failed to add file to zip');
+                        }
+                    } finally {
+                        fclose($dummy);
+                    }
                 } finally {
                     if (false !== $handle) {
                         fclose($handle);
@@ -417,5 +403,38 @@ final class DownloadController extends ApiController
             // Done
             $streamer->finalize();
         });
+    }
+
+    private function closeSession(): void
+    {
+        try {
+            $this->session->close();
+        } catch (\Throwable) {
+            // best effort; streaming must not fail on this
+        }
+    }
+
+    private function prepareStreaming(Http\IOutput $out): void
+    {
+        // Do not die silently without cleanup, but poll for client.
+        ignore_user_abort(true);
+        @set_time_limit(0);
+        @ini_set('zlib.output_compression', '0');
+
+        // Prevent output from being buffered, so flush() reaches the client.
+        // Must run before ZipStreamer::sendHeaders, which aborts
+        // if the output buffer already contains text.
+        $out->setHeader('X-Accel-Buffering: no');
+        while (ob_get_level() > 0) {
+            if (!@ob_end_clean()) {
+                break;
+            }
+        }
+    }
+
+    /** Cache for download handles. */
+    private function getCache(): ICache
+    {
+        return $this->cacheFactory->createDistributed('memories:downloads');
     }
 }
