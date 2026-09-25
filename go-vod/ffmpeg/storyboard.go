@@ -135,6 +135,8 @@ func StoryboardArgs(input, headers string, interval float64, cols, rows, sprites
 		"-multiple_requests", "1",
 		"-seekable", "1",
 	}
+	// Same bounded http reconnects as transcodes; ignored for file inputs.
+	args = append(args, reconnectArgs()...)
 	if headers != "" {
 		args = append(args, "-headers", headers)
 	}

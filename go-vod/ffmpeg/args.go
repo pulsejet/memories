@@ -100,6 +100,25 @@ func Encoder(s Spec) string {
 	}
 }
 
+// reconnectArgs are the http input reconnect flags shared by transcode and
+// storyboard inputs: transient network/server failures are ridden out inside
+// ffmpeg instead of failing the job. Retries stay bounded (count and total
+// delay) so a dead upstream still surfaces as an error. Only 429 and 5xx
+// reconnect; other 4xx (bad token, missing file) fail fast.
+func reconnectArgs() []string {
+	return []string{
+		"-reconnect", "1",
+		"-reconnect_at_eof", "1",
+		"-reconnect_on_network_error", "1",
+		"-reconnect_on_http_error", "429,5xx",
+		"-reconnect_streamed", "1",
+		"-reconnect_delay_max", "5",
+		"-reconnect_max_retries", "10",
+		"-reconnect_delay_total_max", "30",
+		"-respect_retry_after", "1",
+	}
+}
+
 // BuildArgs renders the shared ffmpeg prefix for one rendition: input,
 // timestamp handling, filter graph, mapping and encoder quality. It returns
 // one argv element per slice entry — flags are appended individually, never
@@ -109,7 +128,8 @@ func Encoder(s Spec) string {
 // In order: quiet logging, hidden banner, input seek (-ss, only when StartAt > 0),
 // hardware decode offload on a named "memories" device (explicit
 // -init_hw_device/-filter_hw_device, required since ffmpeg 8), -noautorotate
-// when transposing manually, persistent http connections, service auth
+// when transposing manually, persistent http connections with bounded
+// reconnects, service auth
 // headers for the http input, input with -copyts/+genpts (post-seek timing
 // still refers to source timestamps), the -vf graph as a staged pipeline:
 // normalize into the encode domain (8-bit convert, plus hardware upload
@@ -171,8 +191,9 @@ func BuildArgs(s Spec) []string {
 	if s.Headers != "" {
 		args = append(args,
 			"-multiple_requests", "1",
-			"-seekable", "1",
-			"-headers", s.Headers)
+			"-seekable", "1")
+		args = append(args, reconnectArgs()...)
+		args = append(args, "-headers", s.Headers)
 	}
 
 	args = append(args,

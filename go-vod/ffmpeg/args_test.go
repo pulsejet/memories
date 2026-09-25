@@ -41,6 +41,7 @@ func TestBuildArgsSoftware(t *testing.T) {
 	require.NotContains(t, c, "-ss")
 	require.NotContains(t, c, "-noautorotate")
 	require.NotContains(t, c, "-headers")
+	require.NotContains(t, c, "-reconnect")
 	require.Contains(t, c, `-map "0:a:0?"`)
 	require.Contains(t, c, `"-c:a" aac -ac 2 -ar 48000 "-b:a" 128k`)
 }
@@ -56,6 +57,16 @@ func TestBuildArgsHeaders(t *testing.T) {
 	require.Equal(t, "1", args[slices.Index(args, "-multiple_requests")+1])
 	require.Equal(t, "1", args[slices.Index(args, "-seekable")+1])
 	require.Less(t, slices.Index(args, "-multiple_requests"), slices.Index(args, "-i"))
+	for flag, value := range map[string]string{
+		"-reconnect": "1", "-reconnect_at_eof": "1",
+		"-reconnect_on_network_error": "1", "-reconnect_on_http_error": "429,5xx",
+		"-reconnect_streamed": "1", "-reconnect_delay_max": "5",
+		"-reconnect_max_retries": "10", "-reconnect_delay_total_max": "30",
+		"-respect_retry_after": "1",
+	} {
+		require.Equal(t, value, args[slices.Index(args, flag)+1], flag)
+		require.Less(t, slices.Index(args, flag), slices.Index(args, "-i"), flag)
+	}
 }
 
 func TestBuildArgsSeekAndMax(t *testing.T) {
