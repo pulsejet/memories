@@ -335,6 +335,24 @@ func TestQuoteForLog(t *testing.T) {
 	require.Equal(t, `-vf "scale=1:2"`, QuoteForLog([]string{"-vf", "scale=1:2"}))
 }
 
+func TestRedactArgs(t *testing.T) {
+	t.Setenv("GO_VOD_DEBUG", "")
+	in := []string{"-seekable", "1", "-headers", "X-Token: secret\r\n", "-i", "http://nc/file/7"}
+	out := RedactArgs(in)
+	require.Equal(t, []string{"-seekable", "1", "-headers", "<redacted>", "-i", "http://nc/file/7"}, out)
+	require.Equal(t, "X-Token: secret\r\n", in[3])
+	require.NotContains(t, QuoteForLog(out), "secret")
+
+	plain := []string{"-i", "file.mp4"}
+	require.Equal(t, plain, RedactArgs(plain))
+
+	dangling := []string{"-headers"}
+	require.Equal(t, dangling, RedactArgs(dangling))
+
+	t.Setenv("GO_VOD_DEBUG", "1")
+	require.Equal(t, in, RedactArgs(in))
+}
+
 func TestEncoderCopy(t *testing.T) {
 	require.Equal(t, EncoderCopy, Encoder(Spec{Copy: true}))
 	require.Equal(t, EncoderCopy, Encoder(Spec{Copy: true, VAAPI: true, NVENC: true}))

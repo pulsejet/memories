@@ -164,7 +164,7 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 	args := ffmpeg.MP4Args(s.transcodeSpec(0, false))
 
 	coder := exec.Command(s.c.FFmpeg, args...)
-	log.Printf("%s-%s: %s", s.m.id, s.quality, strings.Join(coder.Args[:], " "))
+	log.Printf("%s-%s: %s", s.m.id, s.quality, strings.Join(ffmpeg.RedactArgs(coder.Args), " "))
 
 	cmdStdOut, err := coder.StdoutPipe()
 	if err != nil {
@@ -374,7 +374,7 @@ func (s *Stream) transcode(startId int) {
 	s.coder = exec.Command(s.c.FFmpeg, args...)
 
 	// Log command, quoting the args as needed
-	log.Printf("%s-%s: %s", s.m.id, s.quality, ffmpeg.QuoteForLog(s.coder.Args))
+	log.Printf("%s-%s: %s", s.m.id, s.quality, ffmpeg.QuoteForLog(ffmpeg.RedactArgs(s.coder.Args)))
 
 	cmdStdOut, err := s.coder.StdoutPipe()
 	if err != nil {

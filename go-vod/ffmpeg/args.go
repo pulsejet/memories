@@ -2,6 +2,7 @@ package ffmpeg
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -445,6 +446,22 @@ func ParseSegmentLine(line string) (quality string, id int, ok bool) {
 		return "", 0, false
 	}
 	return quality, id, true
+}
+
+// RedactArgs replaces the -headers value with a placeholder, unless
+// GO_VOD_DEBUG is set. Every logged ffmpeg command must go through it so
+// the Nextcloud service token never lands in logs by default.
+func RedactArgs(args []string) []string {
+	if os.Getenv("GO_VOD_DEBUG") != "" {
+		return args
+	}
+	out := slices.Clone(args)
+	for i, a := range out {
+		if a == "-headers" && i+1 < len(out) {
+			out[i+1] = "<redacted>"
+		}
+	}
+	return out
 }
 
 // QuoteForLog renders argv for log lines, quoting elements with
