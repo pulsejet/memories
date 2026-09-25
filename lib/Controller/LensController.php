@@ -28,10 +28,9 @@ use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\LensFolders;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
-use OCA\Memories\Exceptions;
 use OCA\Memories\HttpResponseException;
 use OCA\Memories\Service\Lens;
-use OCA\Memories\Settings\SystemConfig;
+use OCA\Memories\Service\ServiceManager;
 use OCA\Memories\Util;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
@@ -41,29 +40,21 @@ use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\StreamResponse;
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\Files\Config\IUserMountCache;
-use OCP\Files\File;
-use OCP\Files\IRootFolder;
-use OCP\Files\NotFoundException;
 use OCP\Http\Client\IClientService;
 use OCP\IDBConnection;
 use OCP\IRequest;
-use OCP\IUserSession;
 
 final class LensController extends ApiController
 {
     public function __construct(
         IRequest $request,
-        protected IUserSession $userSession,
         protected IDBConnection $connection,
-        protected IRootFolder $rootFolder,
         protected TimelineQuery $tq,
         protected FsManager $fs,
         protected LensFolders $lensFolders,
         protected IClientService $clientService,
-        protected IUserMountCache $mountCache,
         protected Lens $lens,
-        protected SystemConfig $systemConfig,
+        protected ServiceManager $serviceManager,
         protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
@@ -80,33 +71,8 @@ final class LensController extends ApiController
     public function file(int $fileid): Http\Response
     {
         return $this->util->guardEx(function () use ($fileid) {
-            $this->guardServiceAccount();
-
-            if ($fileid <= 0) {
-                throw Exceptions::NotFoundFile($fileid);
-            }
-
-            try {
-                // getById only sees set-up mounts, which are the caller's;
-                // find a user whose mounts contain this file and look up inside theirs.
-                $userFolder = $this->rootFolder->getUserFolder($this->getFileOwner($fileid));
-                $nodes = $userFolder->getById($fileid);
-            } catch (NotFoundException $e) {
-                throw Exceptions::NotFoundFile($fileid);
-            }
-
-            $file = null;
-            foreach ($nodes as $node) {
-                if ($node instanceof File) {
-                    $file = $node;
-
-                    break;
-                }
-            }
-
-            if (null === $file) {
-                throw Exceptions::NotFoundFile($fileid);
-            }
+            $this->serviceManager->guardLensServiceAccount();
+            $file = $this->serviceManager->getServiceFile($fileid);
 
             $handle = $file->fopen('rb');
             if (false === $handle) {
@@ -247,46 +213,6 @@ final class LensController extends ApiController
             return $this->tq->getPlacesById($fileid);
         } catch (\Throwable) {
             return [];
-        }
-    }
-
-    /**
-     * UID of a user whose mounts contain this fileid.
-     *
-     * Any mount serves identical bytes; the auth guard already ran,
-     * so this reveals nothing about the file to the caller.
-     *
-     * @param int $fileid file ID to resolve an owner for
-     */
-    private function getFileOwner(int $fileid): string
-    {
-        foreach ($this->mountCache->getMountsForFileId($fileid) as $info) {
-            return $info->getUser()->getUID();
-        }
-
-        throw Exceptions::NotFoundFile($fileid);
-    }
-
-    /**
-     * Only the configured Lens service account may call this endpoint.
-     *
-     * Runs before any file lookup, so failures never reveal file existence.
-     */
-    private function guardServiceAccount(): void
-    {
-        $serviceUser = $this->systemConfig->get('memories.lens.service_user');
-
-        $user = $this->userSession->getUser();
-        if (null === $user) {
-            throw new HttpResponseException(new DataResponse([
-                'message' => 'Unauthorized',
-            ], Http::STATUS_UNAUTHORIZED));
-        }
-
-        if ('' === $serviceUser || $user->getUID() !== $serviceUser) {
-            throw new HttpResponseException(new DataResponse([
-                'message' => 'Forbidden',
-            ], Http::STATUS_FORBIDDEN));
         }
     }
 }

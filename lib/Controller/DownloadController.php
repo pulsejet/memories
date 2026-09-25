@@ -25,7 +25,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\FsManager;
-use OCA\Memories\Exceptions;
+use OCA\Memories\Service\ServiceManager;
 use OCA\Memories\Util;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
@@ -49,6 +49,7 @@ final class DownloadController extends ApiController
         protected ICacheFactory $cacheFactory,
         protected ISecureRandom $secureRandom,
         protected ITempManager $tempManager,
+        protected ServiceManager $serviceManager,
         protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
@@ -137,7 +138,9 @@ final class DownloadController extends ApiController
     public function one(int $fileid, bool $resumable = true): Http\Response
     {
         return $this->util->guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable) {
-            $file = $this->fs->getUserFile($fileid);
+            $file = $this->serviceManager->isVodServiceAccount()
+                ? $this->serviceManager->getServiceFile($fileid)
+                : $this->fs->getUserFile($fileid);
 
             // Check if we're allowed to download the file
             if (!$this->fs->canDownload($file)) {
