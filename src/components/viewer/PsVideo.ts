@@ -78,10 +78,12 @@ const HLS_LIVE_CONFIG: Partial<HlsConfig> = {
   },
   errorPenaltyExpireMs: 3000,
   /** Smooth estimate: cold transcode latency is not low bandwidth. */
-  abrEwmaFastVoD: 6,
-  abrEwmaSlowVoD: 18,
+  abrEwmaFastVoD: 10,
+  abrEwmaSlowVoD: 15,
+  abrEwmaDefaultEstimate: 8000000,
+  abrMaxWithRealBitrate: true,
   /** Down fast, up only on sustained headroom. */
-  abrBandWidthFactor: 0.9,
+  abrBandWidthFactor: 0.8,
   abrBandWidthUpFactor: 0.5,
   /** Keep abandon responsive; slow transcode must downswitch, not stall. */
   maxStarvationDelay: 4,
