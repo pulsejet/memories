@@ -104,11 +104,12 @@ func Encoder(s Spec) string {
 // storyboard inputs: transient network/server failures are ridden out inside
 // ffmpeg instead of failing the job. Retries stay bounded (count and total
 // delay) so a dead upstream still surfaces as an error. Only 429 and 5xx
-// reconnect; other 4xx (bad token, missing file) fail fast.
+// reconnect; other 4xx (bad token, missing file) fail fast. No
+// reconnect_at_eof: inputs are finite files, so clean EOF must end the job
+// instead of looping reconnects at the last byte.
 func reconnectArgs() []string {
 	return []string{
 		"-reconnect", "1",
-		"-reconnect_at_eof", "1",
 		"-reconnect_on_network_error", "1",
 		"-reconnect_on_http_error", "429,5xx",
 		"-reconnect_streamed", "1",

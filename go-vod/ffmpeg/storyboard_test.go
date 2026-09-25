@@ -78,7 +78,6 @@ func TestStoryboardArgs(t *testing.T) {
 		"-multiple_requests", "1",
 		"-seekable", "1",
 		"-reconnect", "1",
-		"-reconnect_at_eof", "1",
 		"-reconnect_on_network_error", "1",
 		"-reconnect_on_http_error", "429,5xx",
 		"-reconnect_streamed", "1",

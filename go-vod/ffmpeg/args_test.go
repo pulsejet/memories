@@ -58,7 +58,7 @@ func TestBuildArgsHeaders(t *testing.T) {
 	require.Equal(t, "1", args[slices.Index(args, "-seekable")+1])
 	require.Less(t, slices.Index(args, "-multiple_requests"), slices.Index(args, "-i"))
 	for flag, value := range map[string]string{
-		"-reconnect": "1", "-reconnect_at_eof": "1",
+		"-reconnect":                  "1",
 		"-reconnect_on_network_error": "1", "-reconnect_on_http_error": "429,5xx",
 		"-reconnect_streamed": "1", "-reconnect_delay_max": "5",
 		"-reconnect_max_retries": "10", "-reconnect_delay_total_max": "30",
