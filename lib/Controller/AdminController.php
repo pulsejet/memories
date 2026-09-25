@@ -130,7 +130,7 @@ final class AdminController extends ApiController
             // Check exiftool version
             $exiftoolNoLocal = $this->systemConfig->get('memories.exiftool_no_local');
             $status['exiftool'] = $this->getExecutableStatus(
-                fn () => $this->binExt->getExiftoolPBin(),
+                fn () => $this->binExt->getEPerlBin(),
                 fn () => $this->binExt->testExiftool(),
                 !$exiftoolNoLocal,
                 !$exiftoolNoLocal,

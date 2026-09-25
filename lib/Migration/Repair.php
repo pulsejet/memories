@@ -36,6 +36,7 @@ final class Repair implements IRepairStep
     {
         // kill any instances of go-vod and exiftool
         $this->binExt->pkill($this->binExt->getName('go-vod'));
+        $this->binExt->pkill($this->binExt->getName('eperl'));
         $this->binExt->pkill($this->binExt->getName('exiftool'));
 
         // detect exiftool

@@ -114,12 +114,12 @@ final class BinExt
         return $version;
     }
 
-    /** Get path to exiftool binary */
-    public function getExiftoolPBin(): string
+    /** Get path to eperl binary */
+    public function getEPerlBin(): string
     {
         $path = $this->systemConfig->get('memories.exiftool');
 
-        $path = $this->getTempBin($path, $this->getName('exiftool', self::EXIFTOOL_VER));
+        $path = $this->getTempBin($path, $this->getName('eperl', self::EXIFTOOL_VER));
 
         // Explicitly set the PAR directory to avoid cache collisions
         // https://github.com/pulsejet/memories/issues/1608
@@ -140,13 +140,13 @@ final class BinExt
             putenv('LANG=C'); // set perl lang to suppress warning
         }
 
-        if ($this->systemConfig->get('memories.exiftool_no_local')) {
-            $path = realpath(__DIR__.'/../../bin-ext/exiftool/exiftool') ?: '';
+        $path = realpath(__DIR__.'/../../bin-ext/exiftool/exiftool') ?: '';
 
+        if ($this->systemConfig->get('memories.exiftool_no_local')) {
             return ['perl', $path];
         }
 
-        return [$this->getExiftoolPBin()];
+        return [$this->getEPerlBin(), $path];
     }
 
     /**
@@ -169,7 +169,7 @@ final class BinExt
         // Get static binary if available
         if ($arch && $libc) {
             // get target file path
-            $path = realpath(__DIR__."/../../bin-ext/exiftool-{$arch}-{$libc}");
+            $path = realpath(__DIR__."/../../bin-ext/eperl-{$arch}-{$libc}");
 
             // make sure it exists
             if ($path && file_exists($path)) {
