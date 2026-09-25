@@ -32,8 +32,8 @@ final class LensFolders
         $query->select('cte_f.fileid')->from('cte_folders', 'cte_f');
         CTEParams::setTopFolderIds($query, $topFolderIds);
 
-        $rows = $this->tq->executeQueryWithCTEs($query)->fetchAll();
+        $ids = $this->tq->executeQueryWithCTEs($query)->fetchFirstColumn();
 
-        return array_map(static fn (mixed $row) => (int) $row['fileid'], $rows);
+        return array_map(static fn (mixed $id) => (int) $id, $ids);
     }
 }

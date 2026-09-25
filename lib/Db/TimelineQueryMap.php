@@ -59,7 +59,7 @@ trait TimelineQueryMap
         $this->transformMapBoundsFilter($query, false, $bounds, 'c');
 
         // Execute query
-        $res = $this->executeQueryWithCTEs($query)->fetchAll();
+        $res = $this->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post-process results
         return array_map(static fn ($row) => [
@@ -98,7 +98,7 @@ trait TimelineQueryMap
 
         // Get the fileIds
         $cursor = $this->executeQueryWithCTEs($query);
-        $fileIds = $cursor->fetchAll(\PDO::FETCH_COLUMN);
+        $fileIds = $cursor->fetchFirstColumn();
 
         // SELECT these files from the filecache
         $query = $this->connection->getQueryBuilder();
@@ -107,7 +107,7 @@ trait TimelineQueryMap
             ->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'))
             ->where($query->expr()->in('m.fileid', $query->createNamedParameter($fileIds, IQueryBuilder::PARAM_INT_ARRAY)))
             ->executeQuery()
-            ->fetchAll()
+            ->fetchAllAssociative()
         ;
 
         // Post-process
@@ -153,7 +153,7 @@ trait TimelineQueryMap
         $query->setMaxResults(1);
 
         // FETCH coordinates
-        $coords = $this->executeQueryWithCTEs($query)->fetch();
+        $coords = $this->executeQueryWithCTEs($query)->fetchAssociative();
         if (!$coords) {
             return null;
         }

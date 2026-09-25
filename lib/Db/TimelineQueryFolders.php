@@ -34,7 +34,7 @@ trait TimelineQueryFolders
         $query->setMaxResults(4);
 
         // FETCH root previews
-        $rows = $this->executeQueryWithCTEs($query)->fetchAll();
+        $rows = $this->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post-process
         foreach ($rows as &$row) {

@@ -200,7 +200,7 @@ final class RecognizeBackend extends Backend
         $this->tq->selectEtag($query, SQL::subquery($query, $cfSq), 'cover_etag');
 
         // FETCH all faces
-        $faces = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        $faces = $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post process
         foreach ($faces as &$row) {
@@ -270,7 +270,7 @@ final class RecognizeBackend extends Backend
         $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
 
         // FETCH face detections
-        return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        return $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
     }
 
     #[\Override]

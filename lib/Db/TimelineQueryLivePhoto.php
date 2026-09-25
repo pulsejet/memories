@@ -19,6 +19,6 @@ trait TimelineQueryLivePhoto
             ))
         ;
 
-        return $qb->executeQuery()->fetchAll();
+        return $qb->executeQuery()->fetchAllAssociative();
     }
 }

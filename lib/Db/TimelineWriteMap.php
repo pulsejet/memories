@@ -42,12 +42,12 @@ trait TimelineWriteMap
             ->andWhere($query->expr()->gte('lon', $query->createNamedParameter($lon - CLUSTER_DEG, IQueryBuilder::PARAM_STR)))
             ->andWhere($query->expr()->lte('lon', $query->createNamedParameter($lon + CLUSTER_DEG, IQueryBuilder::PARAM_STR)))
         ;
-        $rows = $this->util->transaction(static fn () => $query->executeQuery()->fetchAll());
+        $rows = $this->util->transaction(static fn () => $query->executeQuery()->fetchAllAssociative());
 
         // Find cluster closest to the point
         $minDist = PHP_INT_MAX;
         $minId = -1;
-        foreach ($rows as &$r) {
+        foreach ($rows as $r) {
             $clusterLat = (float) $r['lat'];
             $clusterLon = (float) $r['lon'];
             $dist = ($lat - $clusterLat) ** 2.0 + ($lon - $clusterLon) ** 2.0;

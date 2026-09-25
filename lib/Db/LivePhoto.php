@@ -184,7 +184,7 @@ final class LivePhoto
             ->from('memories_livephoto')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
             ->executeQuery()
-            ->fetch()
+            ->fetchAssociative()
         ;
 
         // Construct query parameters

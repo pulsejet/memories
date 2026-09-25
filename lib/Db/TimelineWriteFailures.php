@@ -77,7 +77,7 @@ trait TimelineWriteFailures
             ->select('*')
             ->from('memories_failures')
             ->executeQuery()
-            ->fetchAll()
+            ->fetchAllAssociative()
         ;
     }
 

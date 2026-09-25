@@ -93,7 +93,7 @@ final class AlbumsQuery
         }
 
         // FETCH all albums
-        $albums = $query->executeQuery()->fetchAll();
+        $albums = $query->executeQuery()->fetchAllAssociative();
 
         // Post process
         foreach ($albums as &$row) {
@@ -183,7 +183,7 @@ final class AlbumsQuery
                     $query->expr()->eq('user', $query->createNamedParameter($albumUid)),
                 ),
             );
-            $album = $query->executeQuery()->fetch();
+            $album = $query->executeQuery()->fetchAssociative();
         }
 
         // Album not found: it could be a link token at best
@@ -258,7 +258,7 @@ final class AlbumsQuery
             user: 'pa.user',
         );
 
-        return $query->executeQuery()->fetch() ?: null;
+        return $query->executeQuery()->fetchAssociative() ?: null;
     }
 
     /**
@@ -298,7 +298,7 @@ final class AlbumsQuery
             $query->andWhere($query->expr()->eq('paf.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
-        $result = $query->executeQuery()->fetchAll();
+        $result = $query->executeQuery()->fetchAllAssociative();
 
         foreach ($result as &$row) {
             $row['fileid'] = (int) $row['file_id'];

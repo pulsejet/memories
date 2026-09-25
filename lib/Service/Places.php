@@ -50,7 +50,7 @@ final class Places
         if (IDBConnection::PLATFORM_MYSQL === $provider
         || IDBConnection::PLATFORM_MARIADB === $provider) {
             try {
-                $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)', 4326)")->fetch();
+                $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)', 4326)")->fetchAssociative();
                 if (0 === \count($res)) {
                     throw new \Exception('Invalid result');
                 }
@@ -64,7 +64,7 @@ final class Places
         // Test Postgres native geometry support in database
         if (IDBConnection::PLATFORM_POSTGRES === $provider) {
             try {
-                $res = $this->connection->executeQuery("SELECT POINT('1,1')")->fetch();
+                $res = $this->connection->executeQuery("SELECT POINT('1,1')")->fetchAssociative();
                 if (0 === \count($res)) {
                     throw new \Exception('Invalid result');
                 }
@@ -133,7 +133,7 @@ final class Places
         ;
 
         // Run query
-        return $query->executeQuery()->fetchAll();
+        return $query->executeQuery()->fetchAllAssociative();
     }
 
     /**

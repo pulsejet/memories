@@ -205,7 +205,7 @@ final class TimelineWrite
                 ->from('memories')
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
                 ->executeQuery()
-                ->fetch()
+                ->fetchAssociative()
             ;
 
             // Delete all records regardless of existence
@@ -267,7 +267,7 @@ final class TimelineWrite
                 ->from($table)
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
                 ->executeQuery()
-                ->fetch()
+                ->fetchAssociative()
             ;
         };
 

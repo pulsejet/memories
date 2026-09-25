@@ -221,7 +221,7 @@ final class LensController extends ApiController
                 ->from('memories')
                 ->where($qb->expr()->eq('fileid', $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)))
             ;
-            $row = $qb->executeQuery()->fetch();
+            $row = $qb->executeQuery()->fetchAssociative();
             if (false !== $row) {
                 return [
                     'epoch' => isset($row['epoch']) ? (int) $row['epoch'] : null,

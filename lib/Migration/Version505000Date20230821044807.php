@@ -90,7 +90,7 @@ final class Version505000Date20230821044807 extends SimpleMigrationStep
 
             // iterate the memories table and update the epoch column
             $this->dbc->beginTransaction();
-            while ($row = $result->fetch()) {
+            while ($row = $result->fetchAssociative()) {
                 try {
                     // try to get the exif string
                     if (!\array_key_exists('exif', $row) || !\is_string($row['exif'])) {

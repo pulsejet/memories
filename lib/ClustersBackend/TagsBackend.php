@@ -130,7 +130,7 @@ final class TagsBackend extends Backend
         $this->tq->selectEtag($query, 'st.cover', 'cover_etag');
 
         // FETCH all tags
-        $tags = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        $tags = $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post process
         foreach ($tags as &$row) {
@@ -184,7 +184,7 @@ final class TagsBackend extends Backend
         }
 
         // FETCH tag photos
-        return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        return $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
     }
 
     #[\Override]
@@ -216,7 +216,7 @@ final class TagsBackend extends Backend
                 $sqb->expr()->in('name', $sqb->createNamedParameter($tagNames, IQueryBuilder::PARAM_STR_ARRAY)),
                 $sqb->expr()->eq('visibility', $sqb->expr()->literal(1, IQueryBuilder::PARAM_INT)),
             ),
-        )->executeQuery()->fetchAll();
+        )->executeQuery()->fetchAllAssociative();
 
         // Create result map
         $map = array_fill_keys($tagNames, 0);

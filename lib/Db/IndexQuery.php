@@ -155,8 +155,8 @@ final class IndexQuery
         CTEParams::setFolderNameBlocklist($query, $blocklist);
 
         $batch = [];
-        foreach ($this->tq->executeQueryWithCTEs($query)->fetchAll() as $row) {
-            $batch[] = (int) $row['fileid'];
+        foreach ($this->tq->executeQueryWithCTEs($query)->fetchFirstColumn() as $fileid) {
+            $batch[] = (int) $fileid;
         }
 
         return $batch;

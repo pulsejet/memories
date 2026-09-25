@@ -59,7 +59,7 @@ trait TimelineQueryDays
         $query = $this->filterFilecache($query, null, $recursive, $archive);
 
         // FETCH all days
-        $rows = $this->executeQueryWithCTEs($query)->fetchAll();
+        $rows = $this->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post process the days
         $rows = $this->postProcessDays($rows, $monthView);
@@ -175,7 +175,7 @@ trait TimelineQueryDays
         }
 
         // FETCH all photos in this day
-        $day = $this->executeQueryWithCTEs($query)->fetchAll();
+        $day = $this->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post process the day in-place
         foreach ($day as &$photo) {

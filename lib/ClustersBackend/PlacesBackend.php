@@ -189,7 +189,7 @@ final class PlacesBackend extends Backend
         }
 
         // FETCH all tags
-        $places = $this->tq->executeQueryWithCTEs($query)->fetchAll();
+        $places = $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post process
         $lang = $this->systemConfig->getUserLang();
@@ -243,7 +243,7 @@ final class PlacesBackend extends Backend
         }
 
         // FETCH tag photos
-        return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        return $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
     }
 
     #[\Override]

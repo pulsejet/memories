@@ -207,7 +207,7 @@ final class FaceRecognitionBackend extends Backend
         $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
 
         // FETCH face detections
-        return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        return $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
     }
 
     #[\Override]
@@ -328,7 +328,7 @@ final class FaceRecognitionBackend extends Backend
         $this->tq->selectEtag($query, 'cover', 'cover_etag');
 
         // FETCH all faces
-        return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        return $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
     }
 
     private function getFaceRecognitionPersons(int $fileid = 0): array
@@ -389,6 +389,6 @@ final class FaceRecognitionBackend extends Backend
         $this->tq->selectEtag($query, 'frp.cover', 'cover_etag');
 
         // FETCH all faces
-        return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        return $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
     }
 }

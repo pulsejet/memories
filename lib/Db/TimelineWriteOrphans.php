@@ -98,7 +98,7 @@ trait TimelineWriteOrphans
                 ->where($query->expr()->eq('orphan', $query->expr()->literal(1)))
                 ->setMaxResults($count)
                 ->executeQuery()
-                ->fetchAll()
+                ->fetchAllAssociative()
             ;
         });
     }

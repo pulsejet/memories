@@ -39,7 +39,7 @@ trait TimelineQuerySingleItem
         $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
 
         // FETCH the photo
-        $photo = $query->executeQuery()->fetch();
+        $photo = $query->executeQuery()->fetchAssociative();
 
         // Check if photo was found
         if (false === $photo) {
@@ -64,7 +64,7 @@ trait TimelineQuerySingleItem
             $qb->addSelect('exif');
         }
 
-        $row = $qb->executeQuery()->fetch();
+        $row = $qb->executeQuery()->fetchAssociative();
         if (false === $row) {
             throw \OCA\Memories\Exceptions::NotFoundFile($id);
         }
@@ -124,7 +124,7 @@ trait TimelineQuerySingleItem
             ->andWhere($qb->expr()->gt('e.admin_level', $qb->expr()->literal(0, \PDO::PARAM_INT)))
             ->addOrderBy('e.admin_level', 'DESC')
             ->executeQuery()
-            ->fetchAll()
+            ->fetchAllAssociative()
         ;
 
         if (!\count($places)) {
