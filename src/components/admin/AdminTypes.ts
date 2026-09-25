@@ -52,6 +52,7 @@ export type IServiceStatus = {
   server: string;
   healthy: boolean;
   detail: string;
+  latencyMs?: number | null;
 };
 
 export type ISystemStatus = {

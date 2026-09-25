@@ -215,10 +215,12 @@ final class AdminController extends ApiController
             $govods = [];
             foreach ($this->binExt->getGoVodServers() as $server) {
                 try {
+                    $result = $this->binExt->testGoVod($server);
                     $govods[] = [
                         'server' => $server,
                         'healthy' => true,
-                        'detail' => $this->binExt->testGoVod($server),
+                        'detail' => $result['version'],
+                        'latencyMs' => $result['latencyMs'],
                     ];
                 } catch (\Exception $e) {
                     $govods[] = [

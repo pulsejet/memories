@@ -105,6 +105,13 @@ export default defineComponent({
 
     serviceStatus(s: IServiceStatus): string {
       if (s.healthy) {
+        if (s.latencyMs !== undefined && s.latencyMs !== null) {
+          return this.t('memories', '{srv} - Healthy ({version}, latency={latency}ms).', {
+            srv: s.server,
+            version: s.detail,
+            latency: s.latencyMs,
+          });
+        }
         return this.t('memories', '{srv} - Healthy ({version}).', {
           srv: s.server,
           version: s.detail,

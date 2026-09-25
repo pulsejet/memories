@@ -347,7 +347,7 @@ final class BinExt
     }
 
     /** Test the go-vod instance that is running */
-    public function testGoVod(string $server): string
+    public function testGoVod(string $server): array
     {
         // Check if disabled
         if ($this->systemConfig->get('memories.vod.disable')) {
@@ -380,7 +380,10 @@ final class BinExt
             throw new \Exception("version does not match: expected {$target} but found {$version}");
         }
 
-        return $version;
+        return [
+            'version' => $version,
+            'latencyMs' => isset($json['latencyMs']) ? (int) $json['latencyMs'] : null,
+        ];
     }
 
     public function testGoVodBin(string $path): string

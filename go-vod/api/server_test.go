@@ -49,27 +49,31 @@ func TestHealth(t *testing.T) {
 	}))
 	defer upstream.Close()
 
-	getHealth := func(s *Server) (int, string, string) {
+	getHealth := func(s *Server) (int, string, int64) {
 		r := httptest.NewRequest("GET", "/health", nil)
 		w := httptest.NewRecorder()
 		s.routes().ServeHTTP(w, r)
 		var body struct {
-			Status  string `json:"status"`
-			Version string `json:"version"`
+			Status    string `json:"status"`
+			Version   string `json:"version"`
+			LatencyMs int64  `json:"latencyMs"`
 		}
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
 		require.Equal(t, "test", body.Version)
-		return w.Code, body.Status, w.Body.String()
+		require.GreaterOrEqual(t, body.LatencyMs, int64(0))
+		require.Contains(t, w.Body.String(), "latencyMs")
+		return w.Code, body.Status, body.LatencyMs
 	}
 
 	s := testServer(t, func(c *config.Config) {
 		c.NextcloudURL = upstream.URL
 	})
-	code, status, _ := getHealth(s)
+	code, status, latency := getHealth(s)
 	require.Equal(t, http.StatusOK, code)
 	require.Equal(t, "healthy", status)
 	require.Equal(t, "GET", gotMethod)
 	require.Equal(t, "/index.php/apps/memories/api/describe", gotPath)
+	_ = latency
 
 	// Unreachable upstream fails the health check.
 	s.cfg.NextcloudURL = "http://127.0.0.1:1"
@@ -77,6 +81,32 @@ func TestHealth(t *testing.T) {
 	require.Equal(t, http.StatusInternalServerError, code)
 	require.NotEqual(t, "healthy", status)
 	require.NotEmpty(t, status)
+}
+
+func TestHealthDescribeLatency(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(60 * time.Millisecond)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer upstream.Close()
+
+	s := testServer(t, func(c *config.Config) {
+		c.NextcloudURL = upstream.URL
+	})
+
+	r := httptest.NewRequest("GET", "/health", nil)
+	w := httptest.NewRecorder()
+	s.routes().ServeHTTP(w, r)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var body struct {
+		Status    string `json:"status"`
+		Version   string `json:"version"`
+		LatencyMs int64  `json:"latencyMs"`
+	}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
+	require.Equal(t, "healthy", body.Status)
+	require.GreaterOrEqual(t, body.LatencyMs, int64(50))
 }
 
 func TestVodBadRequests(t *testing.T) {
@@ -133,13 +163,15 @@ func TestHealthDescribeError(t *testing.T) {
 	require.Equal(t, http.StatusInternalServerError, w.Code)
 
 	var body struct {
-		Status  string `json:"status"`
-		Version string `json:"version"`
+		Status    string `json:"status"`
+		Version   string `json:"version"`
+		LatencyMs int64  `json:"latencyMs"`
 	}
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
 	require.Equal(t, "test", body.Version)
 	require.NotEqual(t, "healthy", body.Status)
 	require.Contains(t, body.Status, "500")
+	require.GreaterOrEqual(t, body.LatencyMs, int64(0))
 }
 
 func TestVodRequiresFileID(t *testing.T) {

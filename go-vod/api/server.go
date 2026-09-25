@@ -45,13 +45,14 @@ func (s *Server) routes() *http.ServeMux {
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	status := s.describeStatus()
+	status, latencyMs := s.describeStatus()
 	if status != "healthy" {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	json.NewEncoder(w).Encode(map[string]any{
-		"status":  status,
-		"version": s.cfg.Version,
+		"status":    status,
+		"version":   s.cfg.Version,
+		"latencyMs": latencyMs,
 	})
 }
 
@@ -175,26 +176,31 @@ func validProfile(leaf string) bool {
 
 // describeStatus probes Nextcloud reachability via the public describe
 // endpoint. "healthy" on 200, otherwise the error.
-func (s *Server) describeStatus() string {
+// It also returns the describe round-trip latency in milliseconds.
+func (s *Server) describeStatus() (string, int64) {
+	start := time.Now()
+	elapsedMs := func() int64 { return time.Since(start).Milliseconds() }
+
 	req, err := http.NewRequest("GET", s.cfg.DescribeURL(), nil)
 	if err != nil {
 		log.Println("Error creating describe request", err)
-		return err.Error()
+		return err.Error(), elapsedMs()
 	}
 
 	client := &http.Client{Timeout: 2 * time.Second}
 	res, err := client.Do(req)
 	if err != nil {
 		log.Println("Error testing describe URL", err)
-		return err.Error()
+		return err.Error(), elapsedMs()
 	}
 	defer res.Body.Close()
+	io.Copy(io.Discard, res.Body)
 	if res.StatusCode != http.StatusOK {
 		err := fmt.Sprintf("unexpected status %d", res.StatusCode)
 		log.Println("Describe URL check failed:", err)
-		return err
+		return err, elapsedMs()
 	}
-	return "healthy"
+	return "healthy", elapsedMs()
 }
 
 func (s *Server) versionOk(w http.ResponseWriter, r *http.Request) bool {

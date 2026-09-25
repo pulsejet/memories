@@ -56,10 +56,12 @@ NVIDIA GPUs support hardware transcoding using NVENC.
           retries: 3
           start_period: 30s
         environment:
-          - NEXTCLOUD_HOST=https://your-nextcloud-url
-          # - NEXTCLOUD_ALLOW_INSECURE=1 # (self-signed certs or no HTTPS)
+          - NEXTCLOUD_HOST=http://your-nextcloud-host.com
+          - NEXTCLOUD_ALLOW_INSECURE=1 # (self-signed certs or no HTTPS)
           - NVIDIA_VISIBLE_DEVICES=all
           - CACHE_DIR=/cache
+        links:
+          - web:your-nextcloud-host.com # (reach Nextcloud container directly)
         devices:
           - /dev/dri:/dev/dri # VA-API (omit for NVENC)
         volumes:

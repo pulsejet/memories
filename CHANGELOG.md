@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- **Feature**: Video transcoding now works with external and object storage.
+  - **Important**: Setups using Docker must add `links` to the `go-vod` container (see [docs](https://memories.gallery/hw-transcoding/#external-transcoder))
 - **Feature**: Direct play for browser-supported video codecs via codec detection.
 - **Feature**: Support multiple external transcoders with automatic load distribution.
-- **Feature**: Video transcoding now works with external and object storage.
 - **Fix**: Improved efficiency for indexing jobs ([#1315](https://github.com/pulsejet/memories/issues/1315))
 
 ## [v9.0.1] - 2026-09-15
