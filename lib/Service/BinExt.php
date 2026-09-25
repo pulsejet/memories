@@ -359,28 +359,8 @@ final class BinExt
         // Ensure transcoder is running
         $this->ensureGoVod();
 
-        // Copy test file into datadir so (external) go-vod can access it
-        $src = realpath(__DIR__.'/../../exiftest.jpg');
-        if (!$src) {
-            throw new \Exception('could not find test file');
-        }
-
-        $dataDir = $this->config->getSystemValueString('datadirectory', \OC::$SERVERROOT.'/data');
-        $testfile = rtrim($dataDir, '/').'/go-vod-test.jpg';
-        if (!file_exists($testfile) || @filesize($testfile) !== @filesize($src)) {
-            if (!@copy($src, $testfile)) {
-                throw new \Exception("failed to copy test file to datadir ({$testfile})");
-            }
-        }
-
         try {
-            $res = $this->clientService->newClient()->post("http://{$server}/vod", [
-                'json' => [
-                    'client' => 'test',
-                    'path' => $testfile,
-                    'profile' => 'test',
-                    'config' => $this->goVodTConfig(),
-                ],
+            $res = $this->clientService->newClient()->get("http://{$server}/health", [
                 'timeout' => 1,
                 'connect_timeout' => 1,
                 'nextcloud' => ['allow_local_address' => true],
@@ -400,15 +380,6 @@ final class BinExt
         $target = self::GOVOD_VER;
         if (!version_compare($version, $target, '=')) {
             throw new \Exception("version does not match: expected {$target} but found {$version}");
-        }
-
-        // Check go-vod can read the file (size must match)
-        $expected = filesize($testfile);
-        if (false === $expected || !isset($json['size']) || (int) $json['size'] !== $expected) {
-            $got = $json['size'] ?? 'missing';
-            $testDir = \dirname($testfile);
-
-            throw new \Exception("cannot access dir '{$testDir}': {$expected} =/= {$got}");
         }
 
         return $version;

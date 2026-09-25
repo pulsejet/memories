@@ -42,20 +42,41 @@ func newTestParams(client, fileURL string, qf int) core.ManagerParams {
 }
 
 func TestHealth(t *testing.T) {
-	s := testServer(t, nil)
+	var gotMethod, gotPath string
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotMethod, gotPath = r.Method, r.URL.Path
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer upstream.Close()
 
-	r := httptest.NewRequest("GET", "/health", nil)
-	w := httptest.NewRecorder()
-	s.routes().ServeHTTP(w, r)
-	require.Equal(t, http.StatusOK, w.Code)
-
-	var body struct {
-		Status  string `json:"status"`
-		Version string `json:"version"`
+	getHealth := func(s *Server) (int, string, string) {
+		r := httptest.NewRequest("GET", "/health", nil)
+		w := httptest.NewRecorder()
+		s.routes().ServeHTTP(w, r)
+		var body struct {
+			Status  string `json:"status"`
+			Version string `json:"version"`
+		}
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
+		require.Equal(t, "test", body.Version)
+		return w.Code, body.Status, w.Body.String()
 	}
-	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
-	require.Equal(t, "ok", body.Status)
-	require.Equal(t, "test", body.Version)
+
+	s := testServer(t, func(c *config.Config) {
+		c.NextcloudURL = upstream.URL
+	})
+	code, status, _ := getHealth(s)
+	require.Equal(t, http.StatusOK, code)
+	require.Equal(t, "healthy", status)
+	require.Equal(t, "GET", gotMethod)
+	require.Equal(t, "/index.php/apps/memories/api/describe", gotPath)
+
+	// Unreachable upstream fails the health check.
+	s.cfg.NextcloudURL = "http://127.0.0.1:1"
+	code, status, _ = getHealth(s)
+	require.Equal(t, http.StatusInternalServerError, code)
+	require.NotEqual(t, "healthy", status)
+	require.NotEmpty(t, status)
 }
 
 func TestVodBadRequests(t *testing.T) {
@@ -96,11 +117,9 @@ func TestVodBadRequests(t *testing.T) {
 	require.Equal(t, http.StatusMethodNotAllowed, w.Code)
 }
 
-func TestVodTestProfile(t *testing.T) {
-	var gotToken, gotMethod, gotPath string
+func TestHealthDescribeError(t *testing.T) {
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotToken, gotMethod, gotPath = r.Header.Get(core.ServiceTokenHeader), r.Method, r.URL.Path
-		http.ServeContent(w, r, "f.mp4", time.Now(), strings.NewReader("12345"))
+		w.WriteHeader(http.StatusInternalServerError)
 	}))
 	defer upstream.Close()
 
@@ -108,26 +127,19 @@ func TestVodTestProfile(t *testing.T) {
 		c.NextcloudURL = upstream.URL
 	})
 
-	w := postVod(s, `{"client":"test","fileid":7,"etag":"e","serviceToken":"tok-1","profile":"test","config":{"chunkSize":3}}`)
-	require.Equal(t, http.StatusOK, w.Code)
+	r := httptest.NewRequest("GET", "/health", nil)
+	w := httptest.NewRecorder()
+	s.routes().ServeHTTP(w, r)
+	require.Equal(t, http.StatusInternalServerError, w.Code)
 
 	var body struct {
+		Status  string `json:"status"`
 		Version string `json:"version"`
-		Size    int    `json:"size"`
 	}
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
 	require.Equal(t, "test", body.Version)
-	require.Equal(t, 5, body.Size)
-	require.Equal(t, "HEAD", gotMethod)
-	require.Equal(t, "/index.php/apps/memories/api/stream/7", gotPath)
-	require.Equal(t, "tok-1", gotToken)
-
-	// Unreachable upstream reports size zero without failing the version check.
-	s.cfg.NextcloudURL = "http://127.0.0.1:1"
-	w = postVod(s, `{"client":"test","fileid":7,"etag":"e","serviceToken":"tok-1","profile":"test","config":{"chunkSize":3}}`)
-	require.Equal(t, http.StatusOK, w.Code)
-	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
-	require.Equal(t, 0, body.Size)
+	require.NotEqual(t, "healthy", body.Status)
+	require.Contains(t, body.Status, "500")
 }
 
 func TestVodRequiresFileID(t *testing.T) {
@@ -178,9 +190,7 @@ func TestVodCodecsQueryParam(t *testing.T) {
 }
 
 func TestVodLivephotoFullVideo(t *testing.T) {
-	var gotToken, gotLiveid, gotPath, gotMethod string
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotToken, gotLiveid, gotPath, gotMethod = r.Header.Get(core.ServiceTokenHeader), r.URL.Query().Get("liveid"), r.URL.Path, r.Method
 		http.ServeContent(w, r, "live.mp4", time.Now(), strings.NewReader("live-video-bytes"))
 	}))
 	defer upstream.Close()
@@ -204,14 +214,6 @@ func TestVodLivephotoFullVideo(t *testing.T) {
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Empty(t, w.Header().Get(core.StreamOriginalHeader))
 	require.Equal(t, "live-video-bytes", w.Body.String())
-
-	// The live URL names the extracted part and carries the token.
-	w = postVod(s, `{"client":"live","fileid":7,"serviceToken":"tok-1","profile":"test","query":{"liveid":"self__trailer"},"config":{"chunkSize":3}}`)
-	require.Equal(t, http.StatusOK, w.Code)
-	require.Equal(t, "HEAD", gotMethod)
-	require.Equal(t, "/index.php/apps/memories/api/video/livephoto/7", gotPath)
-	require.Equal(t, "self__trailer", gotLiveid)
-	require.Equal(t, "tok-1", gotToken)
 }
 
 func TestVodQueryEncode(t *testing.T) {
@@ -270,5 +272,5 @@ func TestVersionGuard(t *testing.T) {
 	r.Header.Set("X-Go-Vod-Version", "test")
 	w = httptest.NewRecorder()
 	s.routes().ServeHTTP(w, r)
-	require.Equal(t, http.StatusOK, w.Code)
+	require.Equal(t, http.StatusNotFound, w.Code)
 }

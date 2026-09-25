@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -44,8 +45,12 @@ func (s *Server) routes() *http.ServeMux {
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	status := s.describeStatus()
+	if status != "healthy" {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 	json.NewEncoder(w).Encode(map[string]any{
-		"status":  "ok",
+		"status":  status,
 		"version": s.cfg.Version,
 	})
 }
@@ -86,16 +91,6 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 	fileURL := s.cfg.FileURL(req.FileID)
 	if req.Query.Liveid != "" {
 		fileURL = s.cfg.LiveURL(req.FileID, req.Query.Liveid)
-	}
-
-	if leaf == "test" {
-		w.Header().Set("Content-Type", "application/json")
-
-		json.NewEncoder(w).Encode(map[string]any{
-			"version": s.cfg.Version,
-			"size":    s.headSize(fileURL, req.ServiceToken),
-		})
-		return
 	}
 
 	if !validProfile(leaf) {
@@ -178,32 +173,28 @@ func validProfile(leaf string) bool {
 	return false
 }
 
-// headSize probes the upstream file size with a HEAD carrying the
-// provisioned token. Zero when unreachable or rejected.
-func (s *Server) headSize(fileURL, serviceToken string) int {
-	req, err := http.NewRequest("HEAD", fileURL, nil)
+// describeStatus probes Nextcloud reachability via the public describe
+// endpoint. "healthy" on 200, otherwise the error.
+func (s *Server) describeStatus() string {
+	req, err := http.NewRequest("GET", s.cfg.DescribeURL(), nil)
 	if err != nil {
-		log.Println("Error creating test request", err)
-		return 0
-	}
-	if serviceToken != "" {
-		req.Header.Set(core.ServiceTokenHeader, serviceToken)
+		log.Println("Error creating describe request", err)
+		return err.Error()
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	client := &http.Client{Timeout: 2 * time.Second}
+	res, err := client.Do(req)
 	if err != nil {
-		log.Println("Error testing upstream URL", err)
-		return 0
+		log.Println("Error testing describe URL", err)
+		return err.Error()
 	}
 	defer res.Body.Close()
-	if res.StatusCode == http.StatusForbidden {
-		log.Println("Upstream service token rejected; Nextcloud must provision a fresh one")
-		return 0
-	}
 	if res.StatusCode != http.StatusOK {
-		return 0
+		err := fmt.Sprintf("unexpected status %d", res.StatusCode)
+		log.Println("Describe URL check failed:", err)
+		return err
 	}
-	return int(res.ContentLength)
+	return "healthy"
 }
 
 func (s *Server) versionOk(w http.ResponseWriter, r *http.Request) bool {

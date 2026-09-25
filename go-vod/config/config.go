@@ -81,6 +81,11 @@ func (c *Config) LiveURL(fileid int64, liveid string) string {
 		"?liveid=" + url.QueryEscape(liveid)
 }
 
+func (c *Config) DescribeURL() string {
+	return strings.TrimSuffix(c.NextcloudURL, "/") +
+		"/index.php/apps/memories/api/describe"
+}
+
 func (c *Config) AutoDetect() error {
 	if c.FFmpeg == "" {
 		ffmpeg, err := exec.LookPath("ffmpeg")
