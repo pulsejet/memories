@@ -105,7 +105,19 @@ trait TimelineQueryDays
         // We don't actually use m.datetaken here, but postgres
         // needs that all fields in ORDER BY are also in SELECT
         // when using DISTINCT on selected fields
-        $query->select(SQL::distinct($query, 'm.fileid'), ...TimelineQuery::TIMELINE_SELECT)
+        $query->selectAlias(SQL::distinct($query, 'm.fileid'), 'fileid')
+            ->selectAlias('m.datetaken', 'datetaken')
+            ->selectAlias('m.dayid', 'dayid')
+            ->selectAlias('m.w', 'w')
+            ->selectAlias('m.h', 'h')
+            ->selectAlias('m.liveid', 'liveid')
+            ->selectAlias('m.isvideo', 'isvideo')
+            ->selectAlias('m.video_duration', 'video_duration')
+            ->selectAlias('f.etag', 'etag')
+            ->selectAlias('f.name', 'basename')
+            ->selectAlias('f.size', 'size')
+            ->selectAlias('m.epoch', 'epoch')
+            ->selectAlias('mimetypes.mimetype', 'mimetype')
             ->from('memories', 'm')
         ;
 

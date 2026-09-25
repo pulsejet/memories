@@ -15,7 +15,19 @@ trait TimelineQuerySingleItem
     public function getSingleItem(int $fileId): ?array
     {
         $query = $this->connection->getQueryBuilder();
-        $query->select('m.fileid', ...TimelineQuery::TIMELINE_SELECT)
+        $query->selectAlias('m.fileid', 'fileid')
+            ->selectAlias('m.datetaken', 'datetaken')
+            ->selectAlias('m.dayid', 'dayid')
+            ->selectAlias('m.w', 'w')
+            ->selectAlias('m.h', 'h')
+            ->selectAlias('m.liveid', 'liveid')
+            ->selectAlias('m.isvideo', 'isvideo')
+            ->selectAlias('m.video_duration', 'video_duration')
+            ->selectAlias('f.etag', 'etag')
+            ->selectAlias('f.name', 'basename')
+            ->selectAlias('f.size', 'size')
+            ->selectAlias('m.epoch', 'epoch')
+            ->selectAlias('mimetypes.mimetype', 'mimetype')
             ->from('memories', 'm')
             ->where($query->expr()->eq('m.fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
         ;
