@@ -90,61 +90,6 @@ final class LivePhoto
             return 'self__exifbin=EmbeddedVideoFile';
         }
 
-        // Google JPEG and Samsung HEIC / JPEG (Apple?)
-        if ($exif['MotionPhoto'] ?? null) {
-            if ('image/jpeg' === ($exif['MIMEType'] ?? null)) {
-                // Google Motion Photo JPEG
-
-                // We need to read the DirectoryItemLength key to get the length of the video
-                // These keys are duplicate, one for the image and one for the video
-                // With exiftool -G4, we get the following:
-                //
-                //    "Unknown:DirectoryItemSemantic": "Primary"
-                //    "Unknown:DirectoryItemLength": 0
-                //    "Copy1:DirectoryItemSemantic": "MotionPhoto"
-                //    "Copy1:DirectoryItemLength": 3011435    // <-- this is the length of the video
-                //
-                // The video is then located at the end of the file, so we can get the offset.
-                // Match each DirectoryItemSemantic to find MotionPhoto, then get the length.
-                //
-                // There are cases where Google decided to completely screw up and not include
-                // the length for one of the *earlier* DirectoryItemSemantic; in this case we still
-                // hope that the video is located at the end, and thus the last DirectoryItemLength
-                // seen before the DirectoryItemSemantic of MotionPhoto is the length of the video.
-                // https://github.com/pulsejet/memories/issues/965
-                $extExif = $this->exif->getExifWithDuplicates($path);
-                $lastLength = null; // last DirectoryItemLength seen
-
-                foreach ($extExif as $key => $value) {
-                    if (str_ends_with($key, ':DirectoryItemSemantic')) {
-                        if ('MotionPhoto' === $value) {
-                            // Found the video, try to find the corresponding semantic length
-                            // If we can't find it, use the last length seen
-                            $videoLength = $extExif[str_replace('Semantic', 'Length', $key)] ?? $lastLength;
-                            if (\is_int($videoLength) && $videoLength > 0) {
-                                $videoOffset = $size - $videoLength;
-
-                                return "self__traileroffset={$videoOffset}";
-                            }
-                        }
-                    }
-
-                    if (str_ends_with($key, ':DirectoryItemLength')) {
-                        $lastLength = $value;
-                    }
-                }
-
-                // Fallback: video should hopefully be in trailer
-                return 'self__trailer';
-            }
-
-            if ('image/heic' === ($exif['MIMEType'] ?? null)) {
-                // Samsung HEIC -- no way to get this out yet (DirectoryItemLength is senseless)
-                // The reason this is above the MotionPhotoVideo check is because extracting binary
-                // EXIF fields on the fly is extremely expensive compared to trailer extraction.
-            }
-        }
-
         // Huawei Motion Picture
         if ('image/jpeg' === ($exif['MIMEType'] ?? null) && $size > 40) {
             // LIVE_%d is the negative offset from the beginning of the

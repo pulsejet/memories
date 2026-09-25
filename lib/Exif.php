@@ -418,11 +418,6 @@ final class Exif
         }
     }
 
-    public function getExifWithDuplicates(string $path): array
-    {
-        return $this->getExifFromLocalPathWithSeparateProc($path, ['-U', '-G4']);
-    }
-
     private function getExiftool(): array
     {
         return $this->binExt->getExiftool();
