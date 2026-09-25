@@ -51,11 +51,6 @@ Memories works out-of-the-box with most Nextcloud setups, including with externa
 - If you upload any photos from outside of Nextcloud, you may need to run the `occ files:scan` and `occ memories:index` commands.
 - With external storage, indexing may be slow since all files must be downloaded.
 
-!!! warning "Transcoding with external storage"
-
-    Video transcoding requires the entire file to be available locally for ffmpeg. To prevent downloading the
-    entire for every playback, transcoding is disabled for external storage.
-
 ## Transcoding
 
 Memories bundles a [transcoding server](https://github.com/pulsejet/memories/tree/master/go-vod) with HLS capabilites for adaptive streaming. You need to configure transcoding to be able to play any videos. HLS enables the browser to download the video as small chunks and in resolutions adaptive to the connection speed. As a result, this is usually expected to have a major boost in video experience and performance.
@@ -65,7 +60,7 @@ You can configure transcoding from the admin panel. Make sure to test all settin
 Read the following considerations carefully regarding transcoding:
 
 1. In general, transcoding can be very compute intensive. If you run Nextcloud on an RPi, it will not work for you.
-1. If you use external storage, transcoding might be very slow or not work at all. In this case, you should disable it.
+1. If you use external storage, transcoding works but might be slow since files are streamed over HTTP.
 1. Make sure there is a lot of space available in `/tmp` for the transcoded files.
 1. The transcoder caches extracted video keyframes in `memories.vod.cachedir` (or the `CACHE_DIR` environment variable for an external transcoder, overriding it). Point this at persistent storage with enough space. Without it, keyframes are re-extracted on every restart, which is very slow for large videos. See [here](./hw-transcoding.md#external-transcoder) for the docker compose setup.
 1. If transcoding fails, the video player will fall back to the original video stream. Check the output of `/tmp/go-vod/<instanceid>.log`

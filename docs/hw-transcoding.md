@@ -63,13 +63,9 @@ NVIDIA GPUs support hardware transcoding using NVENC.
         devices:
           - /dev/dri:/dev/dri # VA-API (omit for NVENC)
         volumes:
-          - ncdata:/var/www/html:ro
           - go-vod-cache:/cache
         # runtime: nvidia # (NVENC)
     ```
-
-    !!! info "Device and volume bindings"
-        In this example, the VA-API devices in `/dev/dri` are passed to the container, along with the Nextcloud data directory (as readonly). All volumes must be mounted at the same location as the Nextcloud container.
 
     !!! info "Persistent keyframe cache (CACHE_DIR)"
 
@@ -80,7 +76,7 @@ NVIDIA GPUs support hardware transcoding using NVENC.
         from scratch, which is very slow for large videos.
 
     !!! question "What to set in `NEXTCLOUD_HOST`?"
-        The `NEXTCLOUD_HOST` environment variable must be set to the URL of your Nextcloud instance. If you are using a reverse proxy, you must set this to the URL of the reverse proxy. If you are using a self-signed certificate or http, you must also set `NEXTCLOUD_ALLOW_INSECURE=1`. This URL is used to download the transcoder binary and to connect to the Nextcloud instance.
+        The `NEXTCLOUD_HOST` environment variable must be set to the URL of your Nextcloud instance. If you are using a reverse proxy, you must set this to the URL of the reverse proxy. If you are using a self-signed certificate or http, you must also set `NEXTCLOUD_ALLOW_INSECURE=1`. This URL is used to download the transcoder binary and to connect to the Nextcloud instance. It is best to use a local address here if possible to allow high throughput video transfer
 
     !!! tip "Setup for NVENC"
         If you want to use NVENC instead of VA-API, uncomment the `runtime` line and remove the `devices` section above. You will need to install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) on your host. You may also need to switch to the CUDA scaler in the Memories admin panel.
@@ -138,6 +134,8 @@ services:
 ## Internal Transcoder
 
 Memories ships with an internal transcoder binary that you can directly use. In this case, you must install the drivers and ffmpeg on the same host as Nextcloud, and Memories will automatically handle starting and communicating with go-vod. This is also the default setup when you enable transcoding without hardware acceleration.
+
+The internal transcoder connects back to Nextcloud over HTTP. The URL it uses is configured with `memories.vod.nc_url` in `config.php` (default `http://localhost:80`, also settable in the admin panel).
 
 !!! danger "Advanced usage only"
 
