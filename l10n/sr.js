@@ -312,8 +312,6 @@ OC.L10N.register(
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Неке изабране ставке имају наслагане RAW фајлове.\nRAW се неће уређивати.",
     "Missing date metadata" : "Недостају метаподаци датума",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Неким ставкама можда недостају метаподаци датума. Да ли желите покушати копирање тренутно познате временске ознаке у метаподатке (препоручује се)? У супротном, временска ознака ће се вероватно ресетовати на текуће време.",
-    "Failed to load metadata for {n} photos." : "Није успело учитавање метаподатака за {n} фотографија.",
-    "{n} photos cannot be edited (permissions error)." : "{n} фотографија не може да се уреди (грешка дозволе).",
     "Date / Time" : "Датум / време",
     "Collaborative Tags" : "Ознаке сарадње",
     "EXIF Fields" : "EXIF поља",
@@ -336,9 +334,8 @@ OC.L10N.register(
     "Failed to create face" : "Није успело креирање лица",
     "Loading …" : "Учитавање…",
     "Merge faces" : "Спајање лица",
-    "unnamed person" : "неименована особа",
+    "Unnamed person" : "Неименована особа",
     "Merge {name} with {newName}?" : "Желите ли да се {name} споји са {newName}?",
-    "You can only merge with a person with name" : "Можете да спојите само са особом која има име",
     "Too many failures, aborting" : "Превише грешака, прекида се",
     "Error while moving {basename}" : "Грешка токома премештања {basename}",
     "Failed to move {name}." : "Није успело премештање {name}.",
@@ -408,7 +405,6 @@ OC.L10N.register(
     "Remove album" : "Уклони албум",
     "Nothing to show here" : "Овде нема шта да се прикаже",
     "Unassigned faces" : "Недодељена лица",
-    "Unnamed person" : "Неименована особа",
     "Merge with different person" : "Споји са другом особом",
     "Mark person in preview" : "Означи особу у прегледу",
     "Home" : "Почетна",
@@ -588,8 +584,6 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Желите ли да се {count} ставка премести у отпад?","Желите ли да се {count} ставке преместе у отпад?","Желите ли да се {count} ставки премести у отпад?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Фајлови у отпаду могу аутоматски да се обришу након фиксног временског периода.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Желите ли да се {count} ставка уклони из албума?","Желите ли да се {count} ставке уклоне из албума?","Желите ли да се {count} ставки уклони из албума?"],
-    "This will not delete your original files." : "Ово неће да обрише ваше оригиналне фајлове.",
-    "You are about to download {count} items." : "Управо ћете преузети {count} ставки.",
-    "You are about to move {count} items." : "Управо ћете преместити {count} ставки."
+    "This will not delete your original files." : "Ово неће да обрише ваше оригиналне фајлове."
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);");

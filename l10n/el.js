@@ -312,8 +312,6 @@ OC.L10N.register(
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Ορισμένα επιλεγμένα αντικείμενα έχουν στοιβαγμένα αρχεία RAW.\nΤα αρχεία RAW δεν θα επεξεργαστούν.",
     "Missing date metadata" : "Λείπουν μεταδεδομένα ημερομηνίας",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Ορισμένα αντικείμενα μπορεί να λείπουν τα μεταδεδομένα ημερομηνίας. Θέλετε να προσπαθήσετε να αντιγράψετε το τρέχον γνωστό χρονικό σήμα στα μεταδεδομένα (συνιστάται); Διαφορετικά, το χρονικό σήμα μπορεί να επαναφερθεί στην τρέχουσα ώρα.",
-    "Failed to load metadata for {n} photos." : "Αποτυχία φόρτωσης μεταδεδομένων για {n} φωτογραφίες.",
-    "{n} photos cannot be edited (permissions error)." : "{n} φωτογραφίες δεν μπορούν να επεξεργαστούν (σφάλμα δικαιωμάτων).",
     "Date / Time" : "Ημερομηνία / Ώρα",
     "Collaborative Tags" : "Συνεργατικές Ετικέτες",
     "EXIF Fields" : "Πεδία EXIF",
@@ -336,9 +334,8 @@ OC.L10N.register(
     "Failed to create face" : "Αποτυχία δημιουργίας προσώπου",
     "Loading …" : "Φόρτωση …",
     "Merge faces" : "Συγχώνευση προσώπων",
-    "unnamed person" : "ανώνυμο άτομο",
+    "Unnamed person" : "Ανώνυμο άτομο",
     "Merge {name} with {newName}?" : "Συγχώνευση {name} με {newName};",
-    "You can only merge with a person with name" : "Μπορείτε να συγχωνεύσετε μόνο με ένα άτομο που έχει όνομα",
     "Too many failures, aborting" : "Πάρα πολλές αποτυχίες, ματαίωση",
     "Error while moving {basename}" : "Σφάλμα κατά τη μετακίνηση {basename}",
     "Failed to move {name}." : "Απέτυχε η μετακίνηση {name}.",
@@ -408,7 +405,6 @@ OC.L10N.register(
     "Remove album" : "Αφαίρεση άλμπουμ",
     "Nothing to show here" : "Δεν υπάρχει τίποτα να εμφανιστεί εδώ",
     "Unassigned faces" : "Μη αντιστοιχισμένα πρόσωπα",
-    "Unnamed person" : "Ανώνυμο άτομο",
     "Merge with different person" : "Συγχώνευση με διαφορετικό άτομο",
     "Mark person in preview" : "Σήμανση ατόμου στην προεπισκόπηση",
     "Home" : "Σπίτι",
@@ -586,8 +582,6 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Μετακίνηση {count} αντικειμένου στα απορρίμματα;","Μετακίνηση {count} αντικειμένων στα απορρίμματα;"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Τα αρχεία στα απορρίμματα μπορεί να διαγραφούν αυτόματα μετά από ένα σταθερό χρονικό διάστημα.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Αφαίρεση {count} αντικειμένου από άλμπουμ;","Αφαίρεση {count} αντικειμένων από άλμπουμ;"],
-    "This will not delete your original files." : "Αυτό δεν θα διαγράψει τα αρχικά αρχεία σας.",
-    "You are about to download {count} items." : "Πρόκειται να κατεβάσετε {count} αντικείμενα.",
-    "You are about to move {count} items." : "Πρόκειται να μετακινήσετε {count} αντικείμενα."
+    "This will not delete your original files." : "Αυτό δεν θα διαγράψει τα αρχικά αρχεία σας."
 },
 "nplurals=2; plural=(n != 1);");

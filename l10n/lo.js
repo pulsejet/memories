@@ -311,8 +311,6 @@ OC.L10N.register(
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "ບາງລາຍການທີ່ເລືອກມີໄຟລ໌ RAW ຊ້ອນກັນຢູ່.\nໄຟລ໌ RAW ຈະບໍ່ຖືກແກ້ໄຂ.",
     "Missing date metadata" : "ບໍ່ມີຂໍ້ມູນເມຕາວັນທີ",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "ບາງລາຍການອາດຈະບໍ່ມີຂໍ້ມູນເມຕາວັນທີ. ທ່ານຕ້ອງການພະຍາຍາມສຳເນົາເວລາປັດຈຸບັນໄປໃສ່ຂໍ້ມູນເມຕາບໍ່ (ແນະນຳ)? ຖ້າບໍ່ດັ່ງນັ້ນ, ເວລາອາດຈະຖືກຕັ້ງຄ່າໃໝ່ເປັນເວລາປັດຈຸບັນ.",
-    "Failed to load metadata for {n} photos." : "ໂຫຼດຂໍ້ມູນເມຕາສຳລັບ {n} ຮູບບໍ່ສຳເລັດ.",
-    "{n} photos cannot be edited (permissions error)." : "{n} ຮູບບໍ່ສາມາດແກ້ໄຂໄດ້ (ຂໍ້ຜິດພາດດ້ານການອະນຸຍາດ).",
     "Date / Time" : "ວັນທີ / ເວລາ",
     "Collaborative Tags" : "ແທັກທີ່ຮ່ວມມືກັນ",
     "EXIF Fields" : "ຊ່ອງຂໍ້ມູນ EXIF",
@@ -335,9 +333,8 @@ OC.L10N.register(
     "Failed to create face" : "ສ້າງໃບໜ້າບໍ່ສຳເລັດ",
     "Loading …" : "ກຳລັງໂຫຼດ...",
     "Merge faces" : "ຮວມໃບໜ້າ",
-    "unnamed person" : "ບຸກຄົນບໍ່ມີຊື່",
+    "Unnamed person" : "ບຸກຄົນບໍ່ມີຊື່",
     "Merge {name} with {newName}?" : "ຮວມ {name} ກັບ {newName} ບໍ່?",
-    "You can only merge with a person with name" : "ທ່ານສາມາດຮວມໄດ້ກັບບຸກຄົນທີ່ມີຊື່ເທົ່ານັ້ນ",
     "Too many failures, aborting" : "ລົ້ມເຫຼວຫຼາຍເກີນໄປ, ກຳລັງຍົກເລີກ",
     "Error while moving {basename}" : "ເກີດຂໍ້ຜິດພາດຂະນະຍ້າຍ {basename}",
     "Failed to move {name}." : "ຍ້າຍ {name} ບໍ່ສຳເລັດ.",
@@ -407,7 +404,6 @@ OC.L10N.register(
     "Remove album" : "ລຶບອາລະບ້ຳ",
     "Nothing to show here" : "ບໍ່ມີຫຍັງສະແດງຢູ່ບ່ອນນີ້",
     "Unassigned faces" : "ໃບໜ້າທີ່ຍັງບໍ່ໄດ້ກຳນົດ",
-    "Unnamed person" : "ບຸກຄົນບໍ່ມີຊື່",
     "Merge with different person" : "ຮວມກັບບຸກຄົນອື່ນ",
     "Mark person in preview" : "ໝາຍບຸກຄົນໃນຕົວຢ່າງ",
     "Home" : "ໜ້າຫຼັກ",
@@ -591,8 +587,6 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["ຍ້າຍ {count} ລາຍການໄປຖັງຂີ້ເຫຍື້ອບໍ່?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "ໄຟລ໌ໃນຖັງຂີ້ເຫຍື້ອອາດຈະຖືກລຶບໂດຍອັດຕະໂນມັດຫຼັງຈາກໄລຍະເວລາທີ່ກຳນົດ.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["ລຶບ {count} ລາຍການອອກຈາກອາລະບ້ຳບໍ່?"],
-    "This will not delete your original files." : "ການກະທຳນີ້ຈະບໍ່ລຶບໄຟລ໌ຕົ້ນສະບັບຂອງທ່ານ.",
-    "You are about to download {count} items." : "ທ່ານກຳລັງຈະດາວໂຫຼດ {count} ລາຍການ.",
-    "You are about to move {count} items." : "ທ່ານກຳລັງຈະຍ້າຍ {count} ລາຍການ."
+    "This will not delete your original files." : "ການກະທຳນີ້ຈະບໍ່ລຶບໄຟລ໌ຕົ້ນສະບັບຂອງທ່ານ."
 },
 "nplurals=1; plural=0;");

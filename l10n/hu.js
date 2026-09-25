@@ -268,8 +268,6 @@ OC.L10N.register(
     "Remove location" : "Hely eltávolítása",
     "Search location / landmark" : "Hely / tájékozódási pont keresése",
     "Missing date metadata" : "Hiányzik a dátum metaadat",
-    "Failed to load metadata for {n} photos." : "A metadaatok betöltése {n} fényképnél nem sikerült.",
-    "{n} photos cannot be edited (permissions error)." : "{n} fénykép nem szerkeszthető (jogosultsági hiba)",
     "Date / Time" : "Dátum / idő",
     "Collaborative Tags" : "Együttműködési címkék",
     "EXIF Fields" : "EXIF-mezők",
@@ -283,7 +281,7 @@ OC.L10N.register(
     "Update" : "Frissítés",
     "Failed to create face" : "Az arc létrehozása sikertelen",
     "Loading …" : "Betöltés…",
-    "unnamed person" : "névtelen személy",
+    "Unnamed person" : "Névtelen személy",
     "Merge {name} with {newName}?" : "Összevonja a következőket: {name} és {newName}?",
     "Too many failures, aborting" : "Túl sok hiba, megszakítás",
     "Error while moving {basename}" : "Hiba a(z) {basename} áthelyezése során",
@@ -331,7 +329,6 @@ OC.L10N.register(
     "Remove album" : "Album eltávolítása",
     "Nothing to show here" : "Nincs mit megjeleníteni",
     "Unassigned faces" : "Nem hozzárendelt arcok",
-    "Unnamed person" : "Névtelen személy",
     "Merge with different person" : "Összevonás egy másik személlyel",
     "Mark person in preview" : "Személy megjelölése az előnézetben",
     "Home" : "Kezdőlap",
@@ -485,8 +482,6 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Biztos, hogy {count} elemet a lomtárba kíván helyezni?","Biztos, hogy {count} elemet a lomtárba kíván helyezni?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "A lomtárban lévő fájlok rögzített idő után törlésre kerülnek.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Biztos, hogy {count} elemet el kíván távolítani az albumból?","Biztos, hogy {count} elemet el kíván távolítani az albumból?"],
-    "This will not delete your original files." : "Ezzel nem törli az eredeti fájlokat.",
-    "You are about to download {count} items." : "{count} elem letöltésére készül.",
-    "You are about to move {count} items." : "{count} elem mozgatására készül."
+    "This will not delete your original files." : "Ezzel nem törli az eredeti fájlokat."
 },
 "nplurals=2; plural=(n != 1);");

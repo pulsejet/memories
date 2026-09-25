@@ -243,8 +243,6 @@ OC.L10N.register(
     "Reset" : "Palauta",
     "Remove location" : "Poista sijainti",
     "Search location / landmark" : "Etsi sijaintia / maamerkkiä",
-    "Failed to load metadata for {n} photos." : "Metatietojen haku {n} kuvalle epäonnistui.",
-    "{n} photos cannot be edited (permissions error)." : "{n} kuvaa ei voitu muokata (käyttöoikeusvirhe)",
     "Date / Time" : "Päivä / aika",
     "Collaborative Tags" : "Yhteiset tunnisteet",
     "EXIF Fields" : "EXIF-kentät",
@@ -264,7 +262,7 @@ OC.L10N.register(
     "Failed to create face" : "Kasvojen luonti epäonnistui",
     "Loading …" : "Ladataan…",
     "Merge faces" : "Yhdistä kasvot",
-    "unnamed person" : "nimetön henkilö",
+    "Unnamed person" : "Nimetön henkilö",
     "Merge {name} with {newName}?" : "Yhdistetäänkä {name} ja {newName}?",
     "Too many failures, aborting" : "Liian monta epäonnistumista, lopetetaan",
     "Error while moving {basename}" : "Virhe siirtäessä kohdetta {basename}",
@@ -332,7 +330,6 @@ OC.L10N.register(
     "Remove album" : "Poista albumi",
     "Nothing to show here" : "Täällä ei ole mitään näytettävää",
     "Unassigned faces" : "Määrittämättömät kasvot",
-    "Unnamed person" : "Nimetön henkilö",
     "Merge with different person" : "Yhdistä toisen henkilön kanssa",
     "Mark person in preview" : "Merkkaa henkilö esikatselussa",
     "Home" : "Koti",
@@ -495,8 +492,6 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Siirretäänkö {count} kohde roskakoriin?","Siirretäänkö {count} kohdetta roskakoriin?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Roskakorissa olevat tiedostot voidaan poistaa automaattisesti määritellyn ajan jälkeen.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Poistetaanko {count} kohde albumista?","Poistetaanko {count} kohdetta albumista?"],
-    "This will not delete your original files." : "Tämä ei poista alkuperäisiä tiedostojasi.",
-    "You are about to download {count} items." : "Olet lataamassa {count} kohdetta.",
-    "You are about to move {count} items." : "Olet siirtämässä {count} kohdetta."
+    "This will not delete your original files." : "Tämä ei poista alkuperäisiä tiedostojasi."
 },
 "nplurals=2; plural=(n != 1);");

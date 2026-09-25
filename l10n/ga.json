@@ -95,7 +95,6 @@
     "Sort folders oldest-first" : "Sórtáil fillteáin is sine-an chéad",
     "Sort albums oldest-first" : "Sórtáil albam is sine-an chéad",
     "Show hidden albums" : "Taispeáin albam i bhfolach",
-    "Day range (1-7)" : "Raon lae (1-7)",
     "Number of days before and after each anniversary" : "Líon na laethanta roimh gach comóradh agus ina dhiaidh",
     "Photos per year (1-50)" : "Grianghraif in aghaidh na bliana (1-50)",
     "Maximum number of photos to include per year" : "Uasmhéid na ngrianghraf le cur san áireamh in aghaidh na bliana",
@@ -323,8 +322,6 @@
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Tá comhaid RAW cruachta ag roinnt míreanna roghnaithe.\nNí chuirfear comhaid RAW in eagar.",
     "Missing date metadata" : "Meiteashonraí dáta ar iarraidh",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Seans go bhfuil na meiteashonraí dáta in easnamh ar roinnt míreanna. Ar mhaith leat iarracht a dhéanamh an stampa ama atá ar eolas faoi láthair a chóipeáil go dtí na meiteashonraí (molta)? Mar sin féin, féadfar an stampa ama a athshocrú go dtí an t-am reatha.",
-    "Failed to load metadata for {n} photos." : "Theip ar lódáil meiteashonraí do {n} ghrianghraf.",
-    "{n} photos cannot be edited (permissions error)." : "Ní féidir {n} grianghraf a chur in eagar (earráid cheada).",
     "Date / Time" : "Dáta / Am",
     "Collaborative Tags" : "Clibeanna Comhoibríocha",
     "EXIF Fields" : "Réimsí EXIF",
@@ -347,9 +344,8 @@
     "Failed to create face" : "Theip ar aghaidh a chruthú",
     "Loading …" : "Á lódáil…",
     "Merge faces" : "Cumaisc aghaidheanna",
-    "unnamed person" : "duine gan ainm",
+    "Unnamed person" : "Duine gan ainm",
     "Merge {name} with {newName}?" : "An bhfuil fonn ort {name} a chumasc le {newName}?",
-    "You can only merge with a person with name" : "Ní féidir leat ach cumasc le duine leis an ainm",
     "Too many failures, aborting" : "An iomarca teipeanna, ginmhilleadh",
     "Error while moving {basename}" : "Earráid agus {basename} á bhogadh",
     "Failed to move {name}." : "Theip ar {name} a bhogadh.",
@@ -420,7 +416,6 @@
     "Remove album" : "Bain albam",
     "Nothing to show here" : "Ní dhéanfaidh aon ní a thaispeáint anseo",
     "Unassigned faces" : "Aghaidheanna neamhshannta",
-    "Unnamed person" : "Duine gan ainm",
     "Merge with different person" : "Cumasc le duine difriúil",
     "Mark person in preview" : "Marcáil an duine sa réamhamharc",
     "Home" : "Baile",
@@ -610,8 +605,6 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["An bhfuil fonn ort {count} mhír a chur sa bhruscar?","An bhfuil fonn ort {count} mír a chur sa bhruscar?","An bhfuil fonn ort {count} mír a chur sa bhruscar?","An bhfuil fonn ort {count} mír a chur sa bhruscar?","An bhfuil fonn ort {count} mír a chur sa bhruscar?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Is féidir comhaid sa bhruscar a scriosadh go huathoibríoch tar éis tréimhse socraithe ama.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["An bhfuil fonn ort {count} mír a bhaint den albam?","An bhfuil fonn ort {count} mír a bhaint den albam?","An bhfuil fonn ort {count} mír a bhaint den albam?","An bhfuil fonn ort {count} mír a bhaint den albam?","An bhfuil fonn ort {count} mír a bhaint den albam?"],
-    "This will not delete your original files." : "Ní scriosfaidh sé seo do chomhaid bhunaidh.",
-    "You are about to download {count} items." : "Tá tú ar tí {count} mír a íoslódáil.",
-    "You are about to move {count} items." : "Tá tú ar tí {count} mír a bhogadh."
+    "This will not delete your original files." : "Ní scriosfaidh sé seo do chomhaid bhunaidh."
 },"pluralForm" :"nplurals=5; plural=(n==1 ? 0 : n==2 ? 1 : n<7 ? 2 : n<11 ? 3 : 4);"
 }

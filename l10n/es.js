@@ -312,8 +312,6 @@ OC.L10N.register(
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Algunos ítems seleccionados tienen archivos RAW apilados.\nLos archivos RAW no serán editados.",
     "Missing date metadata" : "No hay metadatos de fecha",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Algunos ítems podrían no tener metadatos de fecha. ¿Quisiera intentar copiando la marca de tiempo conocida en los metadatos (recomendado)?, de otra manera, la marca de tiempo podría ser restablecida a la fecha actual.",
-    "Failed to load metadata for {n} photos." : "Fallo al cargar los metadados para {n} fotos",
-    "{n} photos cannot be edited (permissions error)." : "{n} fotos no pudieron ser editadas (error de permisos).",
     "Date / Time" : "Fecha / Hora",
     "Collaborative Tags" : "Etiquetas Colaborativas",
     "EXIF Fields" : "Campos EXIF",
@@ -336,9 +334,8 @@ OC.L10N.register(
     "Failed to create face" : "Fallo al crear la cara",
     "Loading …" : "Cargando …",
     "Merge faces" : "Fusionar caras",
-    "unnamed person" : "persona sin nombre",
+    "Unnamed person" : "Persona sin nombre",
     "Merge {name} with {newName}?" : "¿Fusionar {name} con {newName}?",
-    "You can only merge with a person with name" : "Solo puede fusionar con una persona con nombre",
     "Too many failures, aborting" : "Demasiados fallos, abortando",
     "Error while moving {basename}" : "Error mientras se movía {basename}",
     "Failed to move {name}." : "Fallo al mover {name}.",
@@ -408,7 +405,6 @@ OC.L10N.register(
     "Remove album" : "Quitar Álbum",
     "Nothing to show here" : "Nada que mostrar aquí",
     "Unassigned faces" : "Caras sin asignar",
-    "Unnamed person" : "Persona sin nombre",
     "Merge with different person" : "Unir con una persona diferente",
     "Mark person in preview" : "Marcar persona en vista previa",
     "Home" : "Inicio",
@@ -587,8 +583,6 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["¿Mover {count} ítem a la papelera?","¿Mover {count} ítems a la papelera?","¿Mover {count} ítems a la papelera?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Los archivos en la papelera podrían ser eliminados automáticamente después de un período fijo de tiempo.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["¿Quitar {count} ítem del álbum?","¿Quitar {count} ítems del álbum?","¿Quitar {count} ítems del álbum?"],
-    "This will not delete your original files." : "Esto no eliminará sus archivos originales.",
-    "You are about to download {count} items." : "Está a punto de descargar {count} ítems.",
-    "You are about to move {count} items." : "Está a punto de mover {count} ítems."
+    "This will not delete your original files." : "Esto no eliminará sus archivos originales."
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

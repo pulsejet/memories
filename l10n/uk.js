@@ -312,8 +312,6 @@ OC.L10N.register(
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Деякі вибрані елементи мають накопичені файли RAW.\nФайли RAW не будуть редагуватися.",
     "Missing date metadata" : "Відсутні метадані дати",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Деякі елементи можуть не мати метаданих дати. Чи хочете ви спробувати скопіювати поточну мітку часу до метаданих (рекомендовано)? В іншому випадку мітка часу може бути скинута до поточного часу.",
-    "Failed to load metadata for {n} photos." : "Не вдалося завантажити метадані для {n} світлин(-и).",
-    "{n} photos cannot be edited (permissions error)." : "{n} світлин(-а,и) не можуть бути відредаговані (помилка з правами доступу).",
     "Date / Time" : "Дата / Час",
     "Collaborative Tags" : "Мітки для співпраці",
     "EXIF Fields" : "Поля EXIF",
@@ -336,9 +334,8 @@ OC.L10N.register(
     "Failed to create face" : "Не вдалося створити обличчя",
     "Loading …" : "Завантаження …",
     "Merge faces" : "Об'єднати обличчя",
-    "unnamed person" : "неназвана особа",
+    "Unnamed person" : "Неназвана особа",
     "Merge {name} with {newName}?" : "Об'єднати {name} з {newName}?",
-    "You can only merge with a person with name" : "Ви можете об'єднатися лише з людиною, яка має ім'я",
     "Too many failures, aborting" : "Занадто багато невдач, абортів",
     "Error while moving {basename}" : "Помилка під час переміщення {basename}",
     "Failed to move {name}." : "Не вдалося перемістити {name}.",
@@ -408,7 +405,6 @@ OC.L10N.register(
     "Remove album" : "Вилучити альбом",
     "Nothing to show here" : "Тут немає чого показувати",
     "Unassigned faces" : "Неідентифіковані обличчя",
-    "Unnamed person" : "Неназвана особа",
     "Merge with different person" : "Об'єднати з даними іншої особи",
     "Mark person in preview" : "Позначити особу в попередньому перегляді",
     "Home" : "Домівка",
@@ -587,8 +583,6 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Перемістити {count} елемент(-и,ів) до кошика?","Перемістити {count} елементів до кошика?","Перемістити {count} елементів до кошика?","Перемістити {count} елемент(-и,ів) до кошика?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Файли в кошику буде автоматично вилучено через певний проміжок часу.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Видалити {count} елементів з альбому?","Видалити {count} елементів з альбому?","Видалити {count} елемент(-и,ів) з альбому?","Вилучити {count} елемент(-и,ів) з альбому?"],
-    "This will not delete your original files." : "Це не призведе до вилучення ваших оригінальних файлів.",
-    "You are about to download {count} items." : "Ви збираєтеся звантажити {count} елемент(-ів).",
-    "You are about to move {count} items." : "Ви збираєтеся перемістити {count} елемент(-и,ів)."
+    "This will not delete your original files." : "Це не призведе до вилучення ваших оригінальних файлів."
 },
 "nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);");

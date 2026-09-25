@@ -226,8 +226,6 @@ OC.L10N.register(
     "Reset" : "Restablecer",
     "Remove location" : "Eliminar ubicación",
     "Search location / landmark" : "Buscar ubicación / hito",
-    "Failed to load metadata for {n} photos." : "Error al cargar los metadatos de {n} fotos.",
-    "{n} photos cannot be edited (permissions error)." : "No se pueden editar {n} fotos (error de permisos).",
     "Date / Time" : "Fecha / Hora",
     "Collaborative Tags" : "Etiquetas colaborativas",
     "EXIF Fields" : "Campos EXIF",

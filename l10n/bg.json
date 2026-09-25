@@ -228,8 +228,6 @@
     "Reset" : "Възстановяване",
     "Remove location" : "Премахване на местоположение",
     "Search location / landmark" : "Търсене на местоположение / забележителност",
-    "Failed to load metadata for {n} photos." : "Неуспешно зареждане на метаданни за {n} снимки.",
-    "{n} photos cannot be edited (permissions error)." : "{n} снимки не могат да бъдат редактирани (грешка в права).",
     "Date / Time" : "Дата / Час",
     "Collaborative Tags" : "Съвместни Етикети",
     "EXIF Fields" : "EXIF Полета",

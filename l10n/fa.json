@@ -311,8 +311,6 @@
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "برخی موارد انتخاب شده دارای فایل‌های RAW پشته‌ای هستند.\nفایل‌های RAW ویرایش نخواهند شد.",
     "Missing date metadata" : "فراداده تاریخ وجود ندارد",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "برخی موارد ممکن است فاقد فراداده تاریخ باشند. آیا می‌خواهید زمان فعلی شناخته شده را در فراداده کپی کنید (توصیه می‌شود)؟ در غیر این صورت، زمان ممکن است به زمان فعلی بازنشانی شود.",
-    "Failed to load metadata for {n} photos." : "بارگیری فراداده برای {n} عکس انجام نشد.",
-    "{n} photos cannot be edited (permissions error)." : "{n} عکس قابل ویرایش نیست (خطای مجوز).",
     "Date / Time" : "تاریخ / زمان",
     "Collaborative Tags" : "برچسب‌های مشارکتی",
     "EXIF Fields" : "فیلدهای EXIF",
@@ -335,9 +333,8 @@
     "Failed to create face" : "ایجاد چهره ناموفق بود",
     "Loading …" : "بارگذاری …",
     "Merge faces" : "ادغام چهره‌ها",
-    "unnamed person" : "فرد بی‌نام",
+    "Unnamed person" : "فرد بی‌نام",
     "Merge {name} with {newName}?" : "ادغام {name} با {newName}؟",
-    "You can only merge with a person with name" : "فقط می‌توانید با فردی که نام دارد ادغام کنید",
     "Too many failures, aborting" : "تعداد خطاها زیاد است، در حال لغو",
     "Error while moving {basename}" : "خطا در جابجایی {basename}",
     "Failed to move {name}." : "جابجایی {name} ناموفق بود.",
@@ -407,7 +404,6 @@
     "Remove album" : "حذف آلبوم",
     "Nothing to show here" : "چیزی برای نمایش وجود ندارد",
     "Unassigned faces" : "چهره‌های تخصیص‌نیافته",
-    "Unnamed person" : "فرد بی‌نام",
     "Merge with different person" : "ادغام با فرد دیگر",
     "Mark person in preview" : "علامت‌گذاری فرد در پیش‌نمایش",
     "Home" : "خانه",
@@ -591,8 +587,6 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["{count} مورد به سطل زباله منتقل شود؟","{count} مورد به سطل زباله منتقل شوند؟"],
     "Files in trash may be automatically deleted after a fixed period of time." : "فایل‌های موجود در سطل زباله ممکن است پس از یک دوره زمانی مشخص به طور خودکار حذف شوند.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["{count} مورد از آلبوم حذف شود؟","{count} مورد از آلبوم حذف شوند؟"],
-    "This will not delete your original files." : "این کار فایل‌های اصلی شما را حذف نمی‌کند.",
-    "You are about to download {count} items." : "شما در حال دانلود {count} مورد هستید.",
-    "You are about to move {count} items." : "شما در حال جابجایی {count} مورد هستید."
+    "This will not delete your original files." : "این کار فایل‌های اصلی شما را حذف نمی‌کند."
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

@@ -310,8 +310,6 @@
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "بەزى تاللانغان تۈرلەردە RAW ھۆججىتى بار.\nRAW ھۆججىتى تەھرىرلەنمەيدۇ.",
     "Missing date metadata" : "يوقاپ كەتكەن ۋاقىت ئۇچۇرلىرى",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "بەزى تۈرلەر چېسلا ئۇچۇرلىرىنى يوقىتىپ قويۇشى مۇمكىن. سىز ھازىر بىلىدىغان ۋاقىت جەدۋىلىنى مېتا سانلىق مەلۇماتقا كۆچۈرمەكچىمۇ (تەۋسىيە قىلىنغان)؟ ئەكسىچە ، ۋاقىت تامغىسى ھازىرقى ۋاقىتقا قايتۇرۇلۇشى مۇمكىن.",
-    "Failed to load metadata for {n} photos." : "{n} رەسىملەرنىڭ مېتا سانلىق مەلۇماتلىرىنى يۈكلىيەلمىدى.",
-    "{n} photos cannot be edited (permissions error)." : "{n} رەسىملەرنى تەھرىرلەشكە بولمايدۇ (ئىجازەت خاتالىقى).",
     "Date / Time" : "چېسلا / ۋاقىت",
     "Collaborative Tags" : "ھەمكارلىق خەتكۈچلىرى",
     "EXIF Fields" : "EXIF ئورنى",
@@ -334,9 +332,8 @@
     "Failed to create face" : "چىراي ھاسىل قىلالمىدى",
     "Loading …" : "يۈكلەۋاتىدۇ…",
     "Merge faces" : "چىرايلارنى بىرلەشتۈرۈش",
-    "unnamed person" : "نامسىز كىشى",
+    "Unnamed person" : "نامسىز كىشى",
     "Merge {name} with {newName}?" : "{name} نى {newName} بىلەن بىرلەشتۈرۈڭ؟",
-    "You can only merge with a person with name" : "سىز پەقەت ئىسمى بار ئادەم بىلەن بىرلەشتۈرەلەيسىز",
     "Too many failures, aborting" : "بەك مەغلۇبىيەت ، بالا چۈشۈرۈش",
     "Error while moving {basename}" : "{basename} يۆتكىگەندە خاتالىق",
     "Failed to move {name}." : "يۆتكەش مەغلۇب بولدى {name}.",
@@ -406,7 +403,6 @@
     "Remove album" : "ئالبۇمنى ئۆچۈرۈڭ",
     "Nothing to show here" : "بۇ يەردە كۆرسىتىدىغان ھېچ نەرسە يوق",
     "Unassigned faces" : "ئىمزاسىز چىراي",
-    "Unnamed person" : "نامسىز كىشى",
     "Merge with different person" : "ئوخشىمىغان ئادەم بىلەن بىرلەشتۈرۈڭ",
     "Mark person in preview" : "ئالدىن كۆرۈشكە بەلگە قويۇڭ",
     "Home" : "ئۆي",
@@ -592,8 +588,6 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["{count} تۈرنى ئەخلەت ساندۇقىغا يۆتكەمسىز؟","{count} تۈرنى ئەخلەت ساندۇقىغا يۆتكەمسىز؟"],
     "Files in trash may be automatically deleted after a fixed period of time." : "ئەخلەت ساندۇقىدىكى ھۆججەتلەر بەلگىلەنگەن ۋاقىتتىن كېيىن ئاپتوماتىك ئۆچۈرۈلۈشى مۇمكىن.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["{count} تۈرنى ئالبومدىن چىقىرۋېتەمسىز؟","{count} تۈرنى ئالبومدىن چىقىرۋېتەمسىز؟"],
-    "This will not delete your original files." : "بۇ ئەسلى ھۆججەتلىرىڭىزنى ئۆچۈرمەيدۇ.",
-    "You are about to download {count} items." : "سىز {count} تۈرلىرىنى چۈشۈرمەكچى بولۇۋاتىسىز.",
-    "You are about to move {count} items." : "سىز {count} تۈرلىرىنى يۆتكىمەكچى بولۇۋاتىسىز."
+    "This will not delete your original files." : "بۇ ئەسلى ھۆججەتلىرىڭىزنى ئۆچۈرمەيدۇ."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

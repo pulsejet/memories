@@ -92,7 +92,6 @@
     "Sort folders oldest-first" : "将文件夹从最旧开始排序",
     "Sort albums oldest-first" : "将相册从最旧开始排序",
     "Show hidden albums" : "显示隐藏的相册",
-    "Day range (1-7)" : "日范围 (1-7)",
     "Photos per year (1-50)" : "每年的照片数 (1-50)",
     "Maximum number of photos to include per year" : "每年最多可包含的照片数量",
     "Info" : "信息",
@@ -314,8 +313,6 @@
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "某些选中的项目存在堆叠的 RAW 文件。RAW 文件不会被修改。",
     "Missing date metadata" : "缺少日期数据",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "某些项目可能缺少日期数据。您想尝试将目前时间戳复制到文件数据中吗（建议）？否则，时间戳可能会重置至当前时间。",
-    "Failed to load metadata for {n} photos." : "{n}张照片加载元数据失败。",
-    "{n} photos cannot be edited (permissions error)." : "{n}张照片无法编辑（权限错误）。",
     "Date / Time" : "日期/时间",
     "Collaborative Tags" : "协作标签",
     "EXIF Fields" : "EXIF字段",
@@ -338,9 +335,8 @@
     "Failed to create face" : "创建人脸失败",
     "Loading …" : "正在加载 …",
     "Merge faces" : "合并面孔",
-    "unnamed person" : "未命名的人",
+    "Unnamed person" : "未命名的人",
     "Merge {name} with {newName}?" : "将 {name} 合并至 {newName} ？",
-    "You can only merge with a person with name" : "您只能与下列名字的人合并",
     "Too many failures, aborting" : "失败次数过多，中止",
     "Error while moving {basename}" : "移动{basename}时出错。",
     "Failed to move {name}." : "移动{name}失败。",
@@ -410,7 +406,6 @@
     "Remove album" : "移除相册",
     "Nothing to show here" : "这里没什么可展示的",
     "Unassigned faces" : "未指派的人脸",
-    "Unnamed person" : "未命名的人",
     "Merge with different person" : "与另一个人合并为同一人",
     "Mark person in preview" : "在预览中标记人",
     "Home" : "首页",
@@ -590,8 +585,6 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["将 {count} 个项目移动至回收站？"],
     "Files in trash may be automatically deleted after a fixed period of time." : "回收站中的文件可能会在固定时间后被自动删除。",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["从相册中移除 {count} 个项目？"],
-    "This will not delete your original files." : "这不会删除您原先的文件。",
-    "You are about to download {count} items." : "您即将下载 {count} 个项目。",
-    "You are about to move {count} items." : "您即将移动 {count} 个项目。"
+    "This will not delete your original files." : "这不会删除您原先的文件。"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

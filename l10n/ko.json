@@ -306,8 +306,6 @@
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "일부 선택된 파일들은 쌓여진 RAW 파일들이 있습니다.\nRAW 파일은 편집하지 않습니다.",
     "Missing date metadata" : "날짜 메타데이터 누락",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "일부 항목은 날짜 메타데이터가 누락되었을 수도 있습니다. 지금 알려진 타임스탬프를 메타데이터에 복사해 보겠습니까 (권장)? 그렇지 않으면, 타임스탬프가 현재 시간으로 재설정 될 수 있습니다.",
-    "Failed to load metadata for {n} photos." : "{n}개 사진에서 메타데이터를 가져오지 못했습니다.",
-    "{n} photos cannot be edited (permissions error)." : "{n}개의 사진을 수정할 수 없습니다. (권한 오류)",
     "Date / Time" : "날짜 / 시간",
     "Collaborative Tags" : "공동 작업 태그",
     "EXIF Fields" : "EXIF 필드",
@@ -330,9 +328,8 @@
     "Failed to create face" : "얼굴을 만들지 못했습니다.",
     "Loading …" : "불러오는 중 …",
     "Merge faces" : "얼굴 합치기",
-    "unnamed person" : "이름짓지 않은 사람",
+    "Unnamed person" : "이름짓지 않은 사람",
     "Merge {name} with {newName}?" : "{name}과 {newName}을 합치겠습니까?",
-    "You can only merge with a person with name" : "이름이 있는 사람과 합칠 수 있습니다.",
     "Too many failures, aborting" : "너무 많이 실패하여 취소함",
     "Error while moving {basename}" : "{basename} 이동 중 실패",
     "Failed to move {name}." : "{name}(을)를 이동하지 못했습니다.",
@@ -401,7 +398,6 @@
     "Remove album" : "앨범 제거",
     "Nothing to show here" : "표시할 항목 없음",
     "Unassigned faces" : "지정되지 않은 얼굴",
-    "Unnamed person" : "이름짓지 않은 사람",
     "Merge with different person" : "다른 사람에게 병합",
     "Mark person in preview" : "미리 보기에 사람 표시",
     "Home" : "집",
@@ -570,8 +566,6 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["{count}개 항목을 휴지통으로 이동할까요?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "휴지통의 파일은 정해진 시간 후 자동으로 삭제됩니다.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["앨범에서 {count}개 항목을 삭제할까요?"],
-    "This will not delete your original files." : "원본 파일은 삭제하지 않습니다.",
-    "You are about to download {count} items." : "{count}개 항목을 다운로드합니다.",
-    "You are about to move {count} items." : "{count}개 항목을 이동합니다."
+    "This will not delete your original files." : "원본 파일은 삭제하지 않습니다."
 },"pluralForm" :"nplurals=1; plural=0;"
 }

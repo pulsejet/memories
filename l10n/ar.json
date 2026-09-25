@@ -308,8 +308,6 @@
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "بعض العناصر لها ملفات stacked RAW  خام مُكوَّمة.",
     "Missing date metadata" : "البيانات الوصفية للتاريخ metadata ناقصة",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "قد تفتقد بعض العناصر للبيانات الوصفية للتاريخ date metadata. هل ترغب في محاولة نسخ الختم الزمني timestamp المعروف حاليًا إلى البيانات الوصفية (مستحسن)؟ بخلاف ذلك، قد تتم إعادة ضبط الختم الزمني على الوقت الحالي.",
-    "Failed to load metadata for {n} photos." : "تعذّر تحميل البيانات الوصفية لـ {n} صور.",
-    "{n} photos cannot be edited (permissions error)." : "{n} صور لا يمكن تحريرها (حطأ في الأذونات).",
     "Date / Time" : "التاريخ / الوقت",
     "Collaborative Tags" : "الوسوم التشاركية",
     "EXIF Fields" : "حقول EXIF",
@@ -332,9 +330,8 @@
     "Failed to create face" : "فشل في إنشاء الوجه",
     "Loading …" : "التحميل جارٍ ...",
     "Merge faces" : "دمج الوجوه",
-    "unnamed person" : "شخصٌ لم بُعطَ اسمه",
+    "Unnamed person" : "شخص لم يذكر اسمه",
     "Merge {name} with {newName}?" : "دمج {name} مع {newName}؟",
-    "You can only merge with a person with name" : "لايمكنك الدمج إلا مع شخص يحمل اسماً",
     "Too many failures, aborting" : "حالات فشل كثيرة، سيتم الإلغاء",
     "Error while moving {basename}" : "خطأٌ أثناء نقل {basename}",
     "Failed to move {name}." : "فشل في نقل {name}.",
@@ -404,7 +401,6 @@
     "Remove album" : "إحذِف الألبُوم",
     "Nothing to show here" : "لا يوجد شيء لِيُعرَض هُنا",
     "Unassigned faces" : "أوجه غير معينة",
-    "Unnamed person" : "شخص لم يذكر اسمه",
     "Merge with different person" : "الدمج مع شخص آخر",
     "Mark person in preview" : "وضع علامة على الشخص في المعاينة",
     "Home" : "الرئيسية",
@@ -575,8 +571,6 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["أنقُل {count} عنصر إلى سلة المهملات؟","أنقُل {count} عنصر إلى سلة المهملات؟","أنقُل {count} عنصر إلى سلة المهملات؟","أنقُل {count} عنصر إلى سلة المهملات؟","أنقُل {count} عناصر إلى سلة المهملات؟","أنقُل {count} عنصر إلى سلة المهملات؟"],
     "Files in trash may be automatically deleted after a fixed period of time." : "الملفات في سلة المهملات سيقع حذفها تلقائياً بعد مرور فترة زمنية معينة.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["هل ترغب في حذف {count} عنصر من الألبوم؟","هل ترغب في حذف {count} عنصر من الألبوم؟","هل ترغب في حذف {count} عنصرين من الألبوم؟","هل ترغب في حذف {count} عنصر من الألبوم؟","هل ترغب في حذف {count} عناصر من الألبوم؟","هل ترغب في حذف {count} عناصر من الألبوم؟"],
-    "This will not delete your original files." : "سوف لن يؤدّي هذا إلى حذف ملفاتك الأصلية.",
-    "You are about to download {count} items." : "أنت على وشك تنزيل {count} عنصر.",
-    "You are about to move {count} items." : "أنت على وشك نقل {count} عنصر."
+    "This will not delete your original files." : "سوف لن يؤدّي هذا إلى حذف ملفاتك الأصلية."
 },"pluralForm" :"nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;"
 }

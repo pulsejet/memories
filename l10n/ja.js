@@ -120,7 +120,6 @@ OC.L10N.register(
     "Name" : "名前",
     "Update" : "更新",
     "Loading …" : "読み込み中…",
-    "You can only merge with a person with name" : "名前がある人物としか統合できません。",
     "Move" : "移動",
     "Remove" : "削除",
     "Password protected" : "パスワード保護",

@@ -91,7 +91,6 @@
     "Sort folders oldest-first" : "Seřadit složky od nejstarších",
     "Sort albums oldest-first" : "Seřadit alba od nejstarších",
     "Show hidden albums" : "Zobrazit skrytá alba",
-    "Day range (1-7)" : "Rozsah dní (1-7)",
     "Photos per year (1-50)" : "Fotky na rok (1-50)",
     "Maximum number of photos to include per year" : "Maximální počet zarhnutých fotek na rok",
     "Info" : "Informace",
@@ -313,8 +312,6 @@
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Některé z označených souborů mají navrstvené RAW soubory.\nRAW soubory nebudou upraveny.",
     "Missing date metadata" : "Chybí metadata k datům",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Některým položkám mohou chybět metadata k datům. Chcete se pokusit zkopírovat stávající známé časové razítko do metadat (doporučeno)? Pokud ne, může se stát, že časové razítko bude resetováno na stávající čas.",
-    "Failed to load metadata for {n} photos." : "Nepodařilo se načíst metadata pro {n} fotek.",
-    "{n} photos cannot be edited (permissions error)." : "{n} fotek není možné upravit (permissions error).",
     "Date / Time" : "Datum / čas",
     "Collaborative Tags" : "Štítky pro spolupráci",
     "EXIF Fields" : "Kolonky EXIF",
@@ -337,9 +334,8 @@
     "Failed to create face" : "Nepodařilo se vytvořit obličej",
     "Loading …" : "Načítání …",
     "Merge faces" : "Sloučit obličeje",
-    "unnamed person" : "bezejmenná osoba",
+    "Unnamed person" : "Bezejmenná osoba",
     "Merge {name} with {newName}?" : "Sloučit {name} s {newName}?",
-    "You can only merge with a person with name" : "Sloučit je možné pouze s pojmenovanou osobou",
     "Too many failures, aborting" : "Příliš mnoho nezdarů – přerušuje se",
     "Error while moving {basename}" : "Chyba při přesouvání {basename}",
     "Failed to move {name}." : "Nepodařilo se přesunout {name}.",
@@ -409,7 +405,6 @@
     "Remove album" : "Odebrat album",
     "Nothing to show here" : "Není co zde zobrazit",
     "Unassigned faces" : "Nepřiřazené obličeje",
-    "Unnamed person" : "Bezejmenná osoba",
     "Merge with different person" : "Sloučit s jinou osobou",
     "Mark person in preview" : "Označovat osobu v náhledu",
     "Home" : "Domů",
@@ -596,8 +591,6 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Přesunout {count} položku do Koše?","Přesunout {count} položky do Koše?","Přesunout {count} položek do Koše?","Přesunout {count} položky do Koše?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Soubory v Koši budou po dané době automaticky smazány.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Odebrat {count} položku z alba?","Odebrat {count} položky z alba?","Odebrat {count} položek z alba?","Odebrat {count} položky z alba?"],
-    "This will not delete your original files." : "Toto nesmaže vaše původní soubory.",
-    "You are about to download {count} items." : "Chystáte se stáhnout si {count} položek.",
-    "You are about to move {count} items." : "Chystáte se přesunout {count} položek."
+    "This will not delete your original files." : "Toto nesmaže vaše původní soubory."
 },"pluralForm" :"nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;"
 }

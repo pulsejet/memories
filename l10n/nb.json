@@ -307,8 +307,6 @@
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Noen utvalgte elementer har stablede RAW-filer.\nRAW-filer blir ikke redigert.",
     "Missing date metadata" : "Mangler metadata for dato",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Noen elementer mangler kanskje datometadataene. Vil du prøve å kopiere det kjente tidsstempelet til metadataene (anbefales)? Ellers kan tidsstemplet tilbakestilles til gjeldende tid.",
-    "Failed to load metadata for {n} photos." : "Kunne ikke laste inn metadata for {n} bilder.",
-    "{n} photos cannot be edited (permissions error)." : "{n} bilder kan ikke redigeres (tillatelsesfeil).",
     "Date / Time" : "Dato/Tid",
     "Collaborative Tags" : "Samarbeidsmerkelapper",
     "EXIF Fields" : "EXIF-felt",
@@ -331,7 +329,7 @@
     "Failed to create face" : "Kunne ikke opprette ansikt",
     "Loading …" : "Laster ...",
     "Merge faces" : "Slå sammen ansikter",
-    "unnamed person" : "ikke navngitt person",
+    "Unnamed person" : "Ikke navngitt person",
     "Merge {name} with {newName}?" : "Slå {name} sammen med {newName}?",
     "Too many failures, aborting" : "For mange feil, abort",
     "Error while moving {basename}" : "Feil under flytting av {basename}",
@@ -401,7 +399,6 @@
     "Remove album" : "Fjern album",
     "Nothing to show here" : "Ingenting å vise her",
     "Unassigned faces" : "Ikke-tilordnede ansikter",
-    "Unnamed person" : "Ikke navngitt person",
     "Merge with different person" : "Slå sammen med en annen person",
     "Mark person in preview" : "Merk person i forhåndsvisning",
     "Home" : "Hjem",
@@ -571,8 +568,6 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Flytte {count} element til papirkurven?","Flytte {count} elementer til papirkurven?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Filer i papirkurven kan slettes automatisk etter en bestemt tidsperiode.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Fjerne {count} element fra albumet?","Fjerne {count} elementer fra albumet?"],
-    "This will not delete your original files." : "Dette vil ikke slette de opprinnelige filene dine.",
-    "You are about to download {count} items." : "Du er i ferd med å laste ned {count} elementer.",
-    "You are about to move {count} items." : "Du er i ferd med å flytte {count} elementer."
+    "This will not delete your original files." : "Dette vil ikke slette de opprinnelige filene dine."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

@@ -311,8 +311,6 @@
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Некоторые выбранные элементы содержат файлы RAW.\nФайлы RAW редактироваться не будут.",
     "Missing date metadata" : "Отсутствуют метаданные о дате",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "В некоторых элементах могут отсутствовать метаданные о дате. Вы хотите попытаться скопировать известную на данный момент метку времени в метаданные (рекомендуется)? В противном случае метка времени может быть сброшена до текущего времени.",
-    "Failed to load metadata for {n} photos." : "Не удалось загрузить метаданные из {n} фотографий.",
-    "{n} photos cannot be edited (permissions error)." : "{n}фотографии не могут быть отредактированы (ошибка доступа)",
     "Date / Time" : "Дата и время",
     "Collaborative Tags" : "Метки совместной работы",
     "EXIF Fields" : "Поля EXIF",
@@ -335,9 +333,8 @@
     "Failed to create face" : "Не удалось создать лицо",
     "Loading …" : "Загрузка …",
     "Merge faces" : "Объединить лица",
-    "unnamed person" : "безымянный человек",
+    "Unnamed person" : "Безымянный человек",
     "Merge {name} with {newName}?" : "Объединить {name} с {newName}?",
-    "You can only merge with a person with name" : "Вы можете объединить только с человеком с именем",
     "Too many failures, aborting" : "Произошло множество ошибок, действие прервано",
     "Error while moving {basename}" : "Ошибка при перемещении {basename}",
     "Failed to move {name}." : "Не удалось переместить «{name}».",
@@ -407,7 +404,6 @@
     "Remove album" : "Удалить альбом",
     "Nothing to show here" : "Нет ни одного объекта для просмотра",
     "Unassigned faces" : "Неназначенные лица",
-    "Unnamed person" : "Безымянный человек",
     "Merge with different person" : "Объединить с другой меткой",
     "Mark person in preview" : "Отметить человека в предварительном просмотре",
     "Home" : "Дом",
@@ -592,8 +588,6 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Переместить {count} в корзину?","Переместить {count} в корзину?","Переместить {count} в корзину?","Переместить {count} в корзину?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Файлы в корзине, могут быть автоматически удалены по истечении определенного периода времени.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Удалить {count} из альбома?","Удалить {count} из альбома?","Удалить {count} из альбома?","Удалить {count} из альбома?"],
-    "This will not delete your original files." : "Это не приведет к удалению исходных файлов.",
-    "You are about to download {count} items." : "Подтвердите загрузку {count} объекта (-ов).",
-    "You are about to move {count} items." : "Подтвердите перемещение {count} объекта (-ов)."
+    "This will not delete your original files." : "Это не приведет к удалению исходных файлов."
 },"pluralForm" :"nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);"
 }
