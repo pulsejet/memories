@@ -548,13 +548,16 @@ func (m *Manager) downloadTemp() error {
 		req.Header.Set(ServiceTokenHeader, token)
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := UpstreamClient.Do(req)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("download temp %s: status %d", m.url, res.StatusCode)
+	}
+	if res.ContentLength > MaxTempDownloadSize {
+		return fmt.Errorf("download temp %s: too large %d", m.url, res.ContentLength)
 	}
 
 	tmp := filepath.Join(m.tempDir, "input.mp4")
@@ -564,9 +567,14 @@ func (m *Manager) downloadTemp() error {
 	}
 	defer f.Close()
 
-	if _, err := io.Copy(f, res.Body); err != nil {
+	n, err := io.Copy(f, io.LimitReader(res.Body, MaxTempDownloadSize+1))
+	if err != nil {
 		os.Remove(tmp)
 		return err
+	}
+	if n > MaxTempDownloadSize {
+		os.Remove(tmp)
+		return fmt.Errorf("download temp %s: exceeds %d bytes", m.url, MaxTempDownloadSize)
 	}
 	if st, err := f.Stat(); err != nil || st.Size() == 0 {
 		os.Remove(tmp)

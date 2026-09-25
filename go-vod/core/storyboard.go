@@ -29,6 +29,8 @@ type StoryboardInput struct {
 	Etag         string
 	URL          string
 	ServiceToken string
+	Input        string
+	Headers      string
 	Duration     time.Duration
 	FFmpeg       string
 	LogID        string
@@ -65,6 +67,8 @@ func (m *Manager) storyboardInput() StoryboardInput {
 		Etag:         m.etag,
 		URL:          m.url,
 		ServiceToken: m.getServiceToken(),
+		Input:        m.ffmpegInput(),
+		Headers:      m.inputHeaders(),
 		Duration:     m.probe.Duration,
 		FFmpeg:       m.c.FFmpeg,
 		LogID:        m.id,
@@ -179,7 +183,15 @@ func (s *storyboardService) build(dir string, in StoryboardInput) error {
 		storyboardSlots <- struct{}{}
 	}
 	defer func() { <-storyboardSlots }()
-	if err := ffmpeg.BuildStoryboard(context.Background(), in.FFmpeg, in.URL, HeadersBlock(in.ServiceToken), plan, pattern); err != nil {
+	input, headers := in.Input, in.Headers
+	if input == "" {
+		input, headers = in.URL, HeadersBlock(in.ServiceToken)
+	} else if input != in.URL {
+		if _, err := os.Stat(input); err != nil {
+			input, headers = in.URL, HeadersBlock(in.ServiceToken)
+		}
+	}
+	if err := ffmpeg.BuildStoryboard(context.Background(), in.FFmpeg, input, headers, plan, pattern); err != nil {
 		return err
 	}
 	log.Printf("%s: storyboard rendered in %s", in.LogID, time.Since(start).Round(time.Second))

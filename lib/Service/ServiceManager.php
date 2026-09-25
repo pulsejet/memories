@@ -38,7 +38,7 @@ use OCP\Security\ICrypto;
 final class ServiceManager
 {
     public const SERVICE_TOKEN_HEADER = 'X-Memories-Service-Token';
-    public const SERVICE_TOKEN_TTL = 24 * 60 * 60; // 24 hours
+    public const SERVICE_TOKEN_TTL = 12 * 60 * 60; // 12 hours
 
     public function __construct(
         private IUserSession $userSession,
