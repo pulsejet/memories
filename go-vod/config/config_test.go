@@ -22,6 +22,17 @@ func TestFileURL(t *testing.T) {
 	require.Equal(t, "https://cloud.example.com/index.php/apps/memories/api/stream/7", c.FileURL(7))
 }
 
+func TestLiveURL(t *testing.T) {
+	c := Defaults("test")
+	c.NextcloudURL = "https://cloud.example.com/"
+	require.Equal(t,
+		"https://cloud.example.com/index.php/apps/memories/api/video/livephoto/7?liveid=self__trailer",
+		c.LiveURL(7, "self__trailer"))
+	require.Equal(t,
+		"https://cloud.example.com/index.php/apps/memories/api/video/livephoto/7?liveid=self__exifbin%3DEmbeddedVideoFile",
+		c.LiveURL(7, "self__exifbin=EmbeddedVideoFile"))
+}
+
 func TestNextcloudEnvPriority(t *testing.T) {
 	c := Defaults("test")
 	c.FFmpeg, c.FFprobe, c.TempDir = "/bin/ffmpeg", "/bin/ffprobe", t.TempDir()

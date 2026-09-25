@@ -1,6 +1,8 @@
 package core
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -112,4 +114,98 @@ func TestRegistryEtagMismatch(t *testing.T) {
 	got, err := reg.GetOrCreate(ManagerParams{URL: "http://localhost/moved.mp4", StreamID: "s", FileID: 7, Etag: "etag-2"})
 	require.NoError(t, err)
 	require.Same(t, m3, got)
+}
+
+func TestManagerLiveDownloadsToTempFile(t *testing.T) {
+	var gotToken string
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotToken = r.Header.Get(ServiceTokenHeader)
+		w.Header().Set("Content-Type", "video/mp4")
+		_, _ = w.Write([]byte("live-video-bytes"))
+	}))
+	defer upstream.Close()
+
+	cfg := config.Defaults("test")
+	cfg.TempDir = t.TempDir()
+	cfg.FFprobe = stubProbe(t)
+
+	m, err := NewManager(NewManagerArgs{
+		C: cfg,
+		ManagerParams: ManagerParams{
+			URL:      upstream.URL + "/index.php/apps/memories/api/video/livephoto/7?liveid=self__trailer",
+			StreamID: "live", ServiceToken: "tok-1", UsesTemp: true,
+			TConfig: config.TCfg{ChunkSize: 3},
+		},
+		Generation: 1,
+		Idle:       make(chan IdleEvent, 1),
+	})
+	require.NoError(t, err)
+	defer m.Destroy()
+
+	require.Equal(t, "tok-1", gotToken)
+	require.True(t, m.usesTemp)
+	require.NotEqual(t, m.url, m.input)
+	require.Equal(t, m.input, m.ffmpegInput())
+	require.Empty(t, m.inputHeaders())
+	require.FileExists(t, m.input)
+	data, err := os.ReadFile(m.input)
+	require.NoError(t, err)
+	require.Equal(t, "live-video-bytes", string(data))
+
+	// ffmpeg gets the temp file, never the remote URL.
+	for _, s := range m.streams {
+		spec := s.spec(0, true)
+		require.Equal(t, m.input, spec.Input)
+		require.Empty(t, spec.Headers)
+		break
+	}
+}
+
+func TestManagerLiveDownloadFailure(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer upstream.Close()
+
+	cfg := config.Defaults("test")
+	cfg.TempDir = t.TempDir()
+	cfg.FFprobe = stubProbe(t)
+
+	_, err := NewManager(NewManagerArgs{
+		C: cfg,
+		ManagerParams: ManagerParams{
+			URL:      upstream.URL + "/livephoto/7?liveid=self__trailer",
+			StreamID: "live-fail", ServiceToken: "tok-1", UsesTemp: true,
+			TConfig: config.TCfg{ChunkSize: 3},
+		},
+		Generation: 1,
+		Idle:       make(chan IdleEvent, 1),
+	})
+	require.Error(t, err)
+}
+
+func TestManagerNonLiveStillStreams(t *testing.T) {
+	cfg := config.Defaults("test")
+	cfg.TempDir = t.TempDir()
+	cfg.FFprobe = stubProbe(t)
+
+	m, err := NewManager(NewManagerArgs{
+		C: cfg,
+		ManagerParams: ManagerParams{
+			URL: "http://localhost/input.mp4", StreamID: "plain",
+			ServiceToken: "tok-1", TConfig: config.TCfg{ChunkSize: 3},
+		},
+		Generation: 1,
+		Idle:       make(chan IdleEvent, 1),
+	})
+	require.NoError(t, err)
+	defer m.Destroy()
+
+	require.False(t, m.usesTemp)
+	require.Equal(t, m.url, m.ffmpegInput())
+	require.Contains(t, m.inputHeaders(), "tok-1")
+	for _, s := range m.streams {
+		require.Equal(t, m.url, s.spec(0, true).Input)
+		break
+	}
 }

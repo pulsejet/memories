@@ -82,7 +82,11 @@ func (s *Server) handleVod(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 	leaf := req.Profile
+
 	fileURL := s.cfg.FileURL(req.FileID)
+	if req.Query.Liveid != "" {
+		fileURL = s.cfg.LiveURL(req.FileID, req.Query.Liveid)
+	}
 
 	if leaf == "test" {
 		w.Header().Set("Content-Type", "application/json")
@@ -107,6 +111,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 		ServiceToken:   req.ServiceToken,
 		PlayableCodecs: core.ParseCodecs(req.Query.Codecs),
 		TConfig:        req.TConfig,
+		UsesTemp:       req.Query.Liveid != "",
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

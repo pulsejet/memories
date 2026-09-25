@@ -40,6 +40,7 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\RedirectResponse;
 use OCP\Files\File;
 use OCP\Http\Client\IClientService;
 use OCP\IRequest;
@@ -72,7 +73,7 @@ final class VideoController extends ApiController
     #[NoCSRFRequired]
     public function transcode(string $client, int $fileid, string $profile): Http\Response
     {
-        return $this->proxyProfile($client, $fileid, $profile);
+        return $this->proxyUpstream($client, $fileid, $profile);
     }
 
     /**
@@ -88,7 +89,7 @@ final class VideoController extends ApiController
                 throw Exceptions::BadRequest('Invalid storyboard file');
             }
 
-            return $this->proxyProfile($client, $fileid, $profile);
+            return $this->proxyUpstream($client, $fileid, $profile);
         });
     }
 
@@ -105,26 +106,59 @@ final class VideoController extends ApiController
         string $transcode = '',
     ): Http\Response {
         return $this->util->guardEx(function () use ($fileid, $liveid, $format, $transcode) {
-            $file = $this->fs->getUserFile($fileid);
-
             // Check file liveid
             if (!$liveid) {
                 throw Exceptions::MissingParameter('liveid');
             }
 
-            // Response data
-            $name = '';
-            $mime = '';
-            $blob = null;
+            // go-vod might call back on this endpoint, allow service tokens.
+            if ($token = $this->request->getHeader(ServiceManager::SERVICE_TOKEN_HEADER)) {
+                $file = $this->serviceManager->getServiceTokenFile($token, $fileid);
+            } else {
+                $file = $this->fs->getUserFile($fileid);
+            }
+
+            /** @var ?File $liveFile separate live video file */
+            $liveFile = null;
+
+            // Check if the live video is stored in a separate file (Apple MOV)
+            if (!str_starts_with($liveid, 'self__')) {
+                $liveFile = $this->getClosestLiveVideo($file);
+                if (null === $liveFile) {
+                    throw Exceptions::NotFound('live video file');
+                }
+            }
+
+            // Transcode through go-vod: it fetches the full video back.
+            if ($transcode && !$this->systemConfig->get('memories.vod.disable')) {
+                if ($liveFile) {
+                    return $this->proxyUpstream($transcode, $liveFile->getId(), 'max.mp4');
+                }
+
+                return $this->proxyUpstream($transcode, $fileid, 'livephoto.mp4', $liveid);
+            }
+
+            // Requested IPhoto object for the live video
+            if ('json' === $format) {
+                if (!$liveFile) {
+                    throw Exceptions::BadRequest('Invalid format');
+                }
+
+                return new JSONResponse([
+                    'fileid' => $liveFile->getId(),
+                    'etag' => $liveFile->getEtag(),
+                    'basename' => $liveFile->getName(),
+                    'mimetype' => $liveFile->getMimeType(),
+                ]);
+            }
+
+            if ($liveFile) {
+                return new RedirectResponse($this->downloadUrl($liveFile->getId()));
+            }
 
             // Video is inside the file
-            $path = '<>';
-            if (str_starts_with($liveid, 'self__')) {
-                $path = $file->getStorage()->getLocalFile($file->getInternalPath())
-                    ?: throw Exceptions::BadRequest('[Video] File path missing (self__*)');
-                $mime = 'video/mp4';
-                $name = $file->getName().'.mp4';
-            }
+            $path = $file->getStorage()->getLocalFile($file->getInternalPath())
+                ?: throw Exceptions::BadRequest('[Video] File path missing (self__*)');
 
             // Different manufacturers have different formats
             if ('self__trailer' === $liveid) {
@@ -156,25 +190,7 @@ final class VideoController extends ApiController
                 // Read file from offset to end
                 $blob = file_get_contents($path, false, null, $offset);
             } else {
-                $liveFile = $this->getClosestLiveVideo($file);
-                if (null === $liveFile) {
-                    throw Exceptions::NotFound('live video file');
-                }
-
-                // Requested only JSON info
-                if ('json' === $format) {
-                    // IPhoto object for the live video
-                    return new JSONResponse([
-                        'fileid' => $liveFile->getId(),
-                        'etag' => $liveFile->getEtag(),
-                        'basename' => $liveFile->getName(),
-                        'mimetype' => $liveFile->getMimeType(),
-                    ]);
-                }
-
-                $name = $liveFile->getName();
-                $blob = $liveFile->getContent();
-                $mime = $liveFile->getMimeType();
+                throw Exceptions::BadRequest('Invalid liveid');
             }
 
             // Data not found
@@ -182,21 +198,11 @@ final class VideoController extends ApiController
                 throw Exceptions::NotFound('live video data');
             }
 
-            // Cannot return JSON if it is not a file
-            if ('json' === $format) {
-                throw Exceptions::BadRequest('Invalid format');
-            }
-
-            // Transcode video if allowed
-            if ($transcode && !$this->systemConfig->get('memories.vod.disable')) {
-                return $this->proxyProfile($transcode, $fileid, 'max.mp4');
-            }
-
             // Make and send response
             $response = new DataDisplayResponse($blob, Http::STATUS_OK, []);
             $response->setHeaders([
-                'Content-Type' => $mime,
-                'Content-Disposition' => "attachment; filename=\"{$name}\"",
+                'Content-Type' => 'video/mp4',
+                'Content-Disposition' => "attachment; filename=\"{$file->getName()}.mp4\"",
             ]);
             $response->cacheFor(3600 * 24, false, false);
 
@@ -204,9 +210,9 @@ final class VideoController extends ApiController
         });
     }
 
-    private function proxyProfile(string $client, int $fileid, string $profile): Http\Response
+    private function proxyUpstream(string $client, int $fileid, string $profile, string $liveid = ''): Http\Response
     {
-        return $this->util->guardEx(function () use ($client, $fileid, $profile) {
+        return $this->util->guardEx(function () use ($client, $fileid, $profile, $liveid) {
             // Make sure transcoding is enabled
             if ($this->systemConfig->get('memories.vod.disable')) {
                 throw Exceptions::Forbidden('Transcoding disabled');
@@ -239,7 +245,7 @@ final class VideoController extends ApiController
 
             $etag = $file->getEtag();
 
-            return $this->util->guardExDirect(function (Http\IOutput $out) use ($client, $fileid, $profile, $etag) {
+            return $this->util->guardExDirect(function (Http\IOutput $out) use ($client, $fileid, $profile, $etag, $liveid) {
                 try {
                     $status = $this->getUpstream(
                         out: $out,
@@ -247,6 +253,7 @@ final class VideoController extends ApiController
                         fileid: $fileid,
                         profile: $profile,
                         etag: $etag,
+                        liveid: $liveid,
                     );
                     if (303 === $status) {
                         return; // redirect already sent
@@ -280,6 +287,7 @@ final class VideoController extends ApiController
         int $fileid,
         string $profile,
         string $etag,
+        string $liveid,
     ): int {
         $this->binExt->ensureGoVod();
 
@@ -295,6 +303,7 @@ final class VideoController extends ApiController
                 'albums' => $this->request->getParam('albums'),
                 'token' => $this->request->getParam('token'),
                 'codecs' => $this->request->getParam('codecs'),
+                'liveid' => $liveid,
             ],
             'config' => $this->binExt->goVodTConfig(),
         ];

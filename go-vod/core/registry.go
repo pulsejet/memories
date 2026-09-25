@@ -33,6 +33,7 @@ type ManagerParams struct {
 	ServiceToken   string
 	PlayableCodecs []string
 	TConfig        config.TCfg
+	UsesTemp       bool
 }
 
 func NewRegistry(cfg *config.Config, idle chan IdleEvent) *Registry {
@@ -69,6 +70,9 @@ func (r *Registry) get(p ManagerParams) *Manager {
 
 	m := r.members[p.StreamID]
 	if m == nil || m.url != p.URL {
+		return nil
+	}
+	if m.usesTemp != p.UsesTemp {
 		return nil
 	}
 	if p.Etag != "" && m.etag != "" && m.etag != p.Etag {

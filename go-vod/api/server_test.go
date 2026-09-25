@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -178,7 +177,14 @@ func TestVodCodecsQueryParam(t *testing.T) {
 	require.NotContains(t, w.Body.String(), "codecs=")
 }
 
-func TestVodEmbedFullVideo(t *testing.T) {
+func TestVodLivephotoFullVideo(t *testing.T) {
+	var gotToken, gotLiveid, gotPath, gotMethod string
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotToken, gotLiveid, gotPath, gotMethod = r.Header.Get(core.ServiceTokenHeader), r.URL.Query().Get("liveid"), r.URL.Path, r.Method
+		http.ServeContent(w, r, "live.mp4", time.Now(), strings.NewReader("live-video-bytes"))
+	}))
+	defer upstream.Close()
+
 	dir := t.TempDir()
 	out := filepath.Join(dir, "out.json")
 	require.NoError(t, os.WriteFile(out, []byte(
@@ -189,29 +195,23 @@ func TestVodEmbedFullVideo(t *testing.T) {
 
 	s := testServer(t, func(c *config.Config) {
 		c.FFprobe = bin
+		c.NextcloudURL = upstream.URL
 	})
 
-	// Playable inline data is answered with bytes, never a redirect.
-	raw := "embed-video-bytes"
-	body := `{"client":"emb","profile":"max.mp4","fileData":"` +
-		base64.StdEncoding.EncodeToString([]byte(raw)) +
-		`","query":{"codecs":"h264"},"config":{"chunkSize":3}}`
-	w := postVod(s, body)
+	// A temp-file live part is served directly from disk,
+	// never a redirect back to PHP.
+	w := postVod(s, `{"client":"live","fileid":7,"serviceToken":"tok-1","profile":"livephoto.mp4","query":{"codecs":"h264","liveid":"self__trailer"},"config":{"chunkSize":3}}`)
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Empty(t, w.Header().Get(core.StreamOriginalHeader))
-	require.Equal(t, raw, w.Body.String())
+	require.Equal(t, "live-video-bytes", w.Body.String())
 
-	// Invalid base64 is rejected.
-	w = postVod(s, `{"client":"emb","profile":"max.mp4","fileData":"!!!","config":{"chunkSize":3}}`)
-	require.Equal(t, http.StatusBadRequest, w.Code)
-
-	// Only progressive MP4 is served from inline data.
-	w = postVod(s, `{"client":"emb","profile":"index.m3u8","fileData":"eA==","config":{"chunkSize":3}}`)
-	require.Equal(t, http.StatusNotFound, w.Code)
-
-	// Zero fileid without inline data is still rejected.
-	w = postVod(s, `{"client":"emb","profile":"max.mp4","config":{"chunkSize":3}}`)
-	require.Equal(t, http.StatusBadRequest, w.Code)
+	// The live URL names the extracted part and carries the token.
+	w = postVod(s, `{"client":"live","fileid":7,"serviceToken":"tok-1","profile":"test","query":{"liveid":"self__trailer"},"config":{"chunkSize":3}}`)
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Equal(t, "HEAD", gotMethod)
+	require.Equal(t, "/index.php/apps/memories/api/video/livephoto/7", gotPath)
+	require.Equal(t, "self__trailer", gotLiveid)
+	require.Equal(t, "tok-1", gotToken)
 }
 
 func TestVodQueryEncode(t *testing.T) {

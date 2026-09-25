@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"hash/fnv"
+	"io"
 	"log"
 	"math"
 	"net/http"
 	"os"
+	"path/filepath"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -34,7 +36,12 @@ type Manager struct {
 	tc config.TCfg
 
 	// url is the Nextcloud file endpoint streamed with Range requests.
+	// With usesTemp it is fetched once to input before probing.
 	url string
+	// input is the actual ffmpeg/ffprobe input
+	input string
+	// usesTemp marks inputs served from a temp file download.
+	usesTemp bool
 	// serviceToken is the short-lived provisioned token sent back upstream.
 	// Refreshed on every request since each carries a new token.
 	tokenMu      sync.RWMutex
@@ -113,6 +120,8 @@ func NewManager(a NewManagerArgs) (*Manager, error) {
 		c:              a.C,
 		tc:             a.TConfig,
 		url:            a.URL,
+		input:          a.URL,
+		usesTemp:       a.UsesTemp,
 		serviceToken:   a.ServiceToken,
 		id:             a.StreamID,
 		fileid:         a.FileID,
@@ -132,7 +141,18 @@ func NewManager(a NewManagerArgs) (*Manager, error) {
 	os.RemoveAll(m.tempDir)
 	os.MkdirAll(m.tempDir, 0755)
 
+	// Temp-file inputs need full file downloaded.
+	if m.usesTemp {
+		if err := m.downloadTemp(); err != nil {
+			os.RemoveAll(m.tempDir)
+			return nil, err
+		}
+	}
+
 	if err := m.ffprobe(); err != nil {
+		if m.usesTemp {
+			os.RemoveAll(m.tempDir)
+		}
 		return nil, err
 	}
 
@@ -462,7 +482,7 @@ func (m *Manager) ffprobe() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		info, err := ffmpeg.Probe(ctx, m.c.FFprobe, m.url, HeadersBlock(m.getServiceToken()))
+		info, err := ffmpeg.Probe(ctx, m.c.FFprobe, m.ffmpegInput(), m.inputHeaders())
 		if err != nil {
 			return err
 		}
@@ -504,7 +524,7 @@ func (m *Manager) probeCopy() ([]ffmpeg.Segment, error) {
 	}
 	log.Printf("%s: keyframe cache miss %s", m.id, cachePath)
 
-	keys, err := ffmpeg.Keyframes(context.Background(), m.c.FFprobe, m.url, HeadersBlock(m.getServiceToken()))
+	keys, err := ffmpeg.Keyframes(context.Background(), m.c.FFprobe, m.ffmpegInput(), m.inputHeaders())
 	if err != nil {
 		return nil, err
 	}
@@ -516,4 +536,62 @@ func (m *Manager) probeCopy() ([]ffmpeg.Segment, error) {
 		return nil, fmt.Errorf("no keyframe grid for file %d", m.fileid)
 	}
 	return segs, nil
+}
+
+// downloadTemp fetches the input URL once into the manager temp dir.
+func (m *Manager) downloadTemp() error {
+	req, err := http.NewRequest("GET", m.url, nil)
+	if err != nil {
+		return err
+	}
+	if token := m.getServiceToken(); token != "" {
+		req.Header.Set(ServiceTokenHeader, token)
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("download temp %s: status %d", m.url, res.StatusCode)
+	}
+
+	tmp := filepath.Join(m.tempDir, "input.mp4")
+	f, err := os.Create(tmp)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(f, res.Body); err != nil {
+		os.Remove(tmp)
+		return err
+	}
+	if st, err := f.Stat(); err != nil || st.Size() == 0 {
+		os.Remove(tmp)
+		if err == nil {
+			err = fmt.Errorf("download temp %s: empty body", m.url)
+		}
+		return err
+	}
+
+	m.input = tmp
+	return nil
+}
+
+// inputHeaders renders auth headers for remote inputs only.
+func (m *Manager) inputHeaders() string {
+	if m.usesTemp {
+		return ""
+	}
+	return HeadersBlock(m.getServiceToken())
+}
+
+// ffmpegInput is the actual ffprobe/ffmpeg input: temp file when usesTemp
+func (m *Manager) ffmpegInput() string {
+	if m.input != "" {
+		return m.input
+	}
+	return m.url
 }

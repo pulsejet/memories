@@ -5,6 +5,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
@@ -72,6 +73,12 @@ func (c *Config) CacheDir() string {
 func (c *Config) FileURL(fileid int64) string {
 	return strings.TrimSuffix(c.NextcloudURL, "/") +
 		"/index.php/apps/memories/api/stream/" + strconv.FormatInt(fileid, 10)
+}
+
+func (c *Config) LiveURL(fileid int64, liveid string) string {
+	return strings.TrimSuffix(c.NextcloudURL, "/") +
+		"/index.php/apps/memories/api/video/livephoto/" + strconv.FormatInt(fileid, 10) +
+		"?liveid=" + url.QueryEscape(liveid)
 }
 
 func (c *Config) AutoDetect() error {

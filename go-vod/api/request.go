@@ -32,6 +32,7 @@ type VodQuery struct {
 	Albums string `json:"albums,omitempty"`
 	Token  string `json:"token,omitempty"`
 	Codecs string `json:"codecs,omitempty"`
+	Liveid string `json:"liveid,omitempty"`
 }
 
 // Encode renders "?..." with only the auth fields.
