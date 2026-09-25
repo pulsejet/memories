@@ -122,16 +122,23 @@ func FormatVTTTime(s float64) string {
 // convention as BuildArgs). A single pass decodes keyframes only
 // (-skip_frame nokey), picks frames at the planned interval, scales and
 // tiles them into sprite sheets at pattern (printf-style, e.g. storyboard-%d.jpg).
-func StoryboardArgs(input string, interval float64, cols, rows, sprites int, pattern string) []string {
+func StoryboardArgs(input, headers string, interval float64, cols, rows, sprites int, pattern string) []string {
 	// format=yuv420p keeps 10-bit/HDR sources away from the mjpeg encoder;
 	// eof_action=pass flushes the last frame so clips shorter than the
 	// interval still yield a sprite instead of no filtered frames.
 	filter := fmt.Sprintf("fps=1/%.6f:eof_action=pass,scale=%d:%d:force_original_aspect_ratio=decrease,format=yuv420p,pad=%d:%d:(ow-iw)/2:(oh-ih)/2,tile=%dx%d",
 		interval, StoryboardWidth, StoryboardHeight, StoryboardWidth, StoryboardHeight,
 		cols, rows)
-	return []string{
+	args := []string{
 		"-hide_banner", "-loglevel", "warning",
 		"-skip_frame", "nokey",
+		"-multiple_requests", "1",
+		"-seekable", "1",
+	}
+	if headers != "" {
+		args = append(args, "-headers", headers)
+	}
+	return append(args,
 		"-i", input,
 		"-an",
 		"-vf", filter,
@@ -142,17 +149,17 @@ func StoryboardArgs(input string, interval float64, cols, rows, sprites int, pat
 		// while rendering, which ffmpeg can't sniff a format from.
 		"-f", "image2",
 		pattern,
-	}
+	)
 }
 
 // BuildStoryboard runs ffmpeg to render the plan's sprites at pattern.
 // Autorotation stays on (no -noautorotate) so thumbs match display orientation.
-func BuildStoryboard(ctx context.Context, bin, input string, plan StoryboardPlan, pattern string) error {
+func BuildStoryboard(ctx context.Context, bin, input, headers string, plan StoryboardPlan, pattern string) error {
 	ctx, cancel := context.WithTimeout(ctx, storyboardTimeout)
 	defer cancel()
 
 	// StoryboardArgs excludes bin (same convention as BuildArgs).
-	cmd := exec.CommandContext(ctx, bin, StoryboardArgs(input, plan.Interval, plan.Cols, plan.GridRows, plan.Sprites, pattern)...)
+	cmd := exec.CommandContext(ctx, bin, StoryboardArgs(input, headers, plan.Interval, plan.Cols, plan.GridRows, plan.Sprites, pattern)...)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("storyboard %s: %w: %s", input, err, strings.TrimSpace(string(out)))
 	}

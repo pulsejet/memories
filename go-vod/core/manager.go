@@ -33,8 +33,12 @@ type Manager struct {
 	// tc is the per-request transcode config.
 	tc config.TCfg
 
-	// path is the source file served.
-	path string
+	// url is the Nextcloud file endpoint streamed with Range requests.
+	url string
+	// serviceToken is the short-lived provisioned token sent back upstream.
+	// Refreshed on every request since each carries a new token.
+	tokenMu      sync.RWMutex
+	serviceToken string
 	// fileid keys the on-disk cache; etag validates it.
 	fileid int64
 	etag   string
@@ -108,7 +112,8 @@ func NewManager(a NewManagerArgs) (*Manager, error) {
 	m := &Manager{
 		c:              a.C,
 		tc:             a.TConfig,
-		path:           a.Path,
+		url:            a.URL,
+		serviceToken:   a.ServiceToken,
 		id:             a.StreamID,
 		fileid:         a.FileID,
 		etag:           a.Etag,
@@ -119,7 +124,7 @@ func NewManager(a NewManagerArgs) (*Manager, error) {
 	m.streams = make(map[string]*Stream)
 
 	h := fnv.New32a()
-	h.Write([]byte(m.path))
+	h.Write([]byte(m.url))
 	ph := fmt.Sprint(h.Sum32())
 	m.tempDir = fmt.Sprintf("%s/%s-%s", m.c.TempDir, m.id, ph)
 
@@ -228,7 +233,7 @@ func NewManager(a NewManagerArgs) (*Manager, error) {
 		go stream.Run()
 	}
 
-	log.Printf("%s: new manager for %s", m.id, m.path)
+	log.Printf("%s: new manager for file %d", m.id, m.fileid)
 
 	// Check for inactivity
 	go func() {
@@ -279,9 +284,6 @@ func (m *Manager) Destroy() {
 
 	// Delete temp dir
 	os.RemoveAll(m.tempDir)
-
-	// Delete file if temp
-	freeIfTemp(m.c.TempDir, m.path)
 }
 
 func (m *Manager) Renditions() []Rendition {
@@ -300,6 +302,20 @@ func (m *Manager) Renditions() []Rendition {
 
 func (m *Manager) Duration() time.Duration {
 	return m.probe.Duration
+}
+
+func (m *Manager) getServiceToken() string {
+	m.tokenMu.RLock()
+	defer m.tokenMu.RUnlock()
+	return m.serviceToken
+}
+
+func (m *Manager) refreshServiceToken(serviceToken string) {
+	if serviceToken != "" {
+		m.tokenMu.Lock()
+		defer m.tokenMu.Unlock()
+		m.serviceToken = serviceToken
+	}
 }
 
 func (m *Manager) IsCopyEligible() bool {
@@ -373,7 +389,7 @@ func (m *Manager) EnsureCopySegments() ([]ffmpeg.Segment, bool) {
 		probed := m.copyProbed
 		m.copyMu.Unlock()
 		if probed {
-			return nil, fmt.Errorf("keyframe probe already failed for %s", m.path)
+			return nil, fmt.Errorf("keyframe probe already failed for file %d", m.fileid)
 		}
 
 		// Long ffprobe with no locks held.
@@ -446,7 +462,7 @@ func (m *Manager) ffprobe() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		info, err := ffmpeg.Probe(ctx, m.c.FFprobe, m.path)
+		info, err := ffmpeg.Probe(ctx, m.c.FFprobe, m.url, HeadersBlock(m.getServiceToken()))
 		if err != nil {
 			return err
 		}
@@ -482,13 +498,13 @@ func (m *Manager) probeCopy() ([]ffmpeg.Segment, error) {
 		log.Printf("%s: keyframe cache hit %s", m.id, cachePath)
 		segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.tc.ChunkSize)
 		if len(segs) == 0 {
-			return nil, fmt.Errorf("no keyframe grid for %s", m.path)
+			return nil, fmt.Errorf("no keyframe grid for file %d", m.fileid)
 		}
 		return segs, nil
 	}
 	log.Printf("%s: keyframe cache miss %s", m.id, cachePath)
 
-	keys, err := ffmpeg.Keyframes(context.Background(), m.c.FFprobe, m.path)
+	keys, err := ffmpeg.Keyframes(context.Background(), m.c.FFprobe, m.url, HeadersBlock(m.getServiceToken()))
 	if err != nil {
 		return nil, err
 	}
@@ -497,7 +513,7 @@ func (m *Manager) probeCopy() ([]ffmpeg.Segment, error) {
 	}
 	segs := ffmpeg.CopySegments(keys, m.probe.Duration, m.tc.ChunkSize)
 	if len(segs) == 0 {
-		return nil, fmt.Errorf("no keyframe grid for %s", m.path)
+		return nil, fmt.Errorf("no keyframe grid for file %d", m.fileid)
 	}
 	return segs, nil
 }

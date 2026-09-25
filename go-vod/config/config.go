@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -19,7 +21,7 @@ type Config struct {
 	TempDir   string `json:"tempdir" validate:"required"`
 	CacheDir_ string `json:"cacheDir"`
 
-	MaxUploadSize int64 `json:"maxUploadSize" validate:"gte=1"`
+	NextcloudURL string `json:"nextcloudUrl" validate:"required,http_url"`
 
 	LookBehind      int `json:"lookBehind" validate:"gte=0"`
 	GoalBufferMin   int `json:"goalBufferMin" validate:"gte=0"`
@@ -40,7 +42,6 @@ func Defaults(version string) *Config {
 		GoalBufferMax:   4,
 		StreamIdleTime:  60,
 		ManagerIdleTime: 60,
-		MaxUploadSize:   4 << 30,
 	}
 }
 
@@ -68,6 +69,11 @@ func (c *Config) CacheDir() string {
 	return c.CacheDir_
 }
 
+func (c *Config) FileURL(fileid int64) string {
+	return strings.TrimSuffix(c.NextcloudURL, "/") +
+		"/index.php/apps/memories/api/stream/" + strconv.FormatInt(fileid, 10)
+}
+
 func (c *Config) AutoDetect() error {
 	if c.FFmpeg == "" {
 		ffmpeg, err := exec.LookPath("ffmpeg")
@@ -85,6 +91,9 @@ func (c *Config) AutoDetect() error {
 	}
 	if c.TempDir == "" {
 		c.TempDir = os.TempDir() + "/go-vod"
+	}
+	if v, ok := os.LookupEnv("NEXTCLOUD_HOST"); ok && v != "" {
+		c.NextcloudURL = v
 	}
 	return nil
 }

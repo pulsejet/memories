@@ -12,8 +12,25 @@ import (
 func TestDefaultsValid(t *testing.T) {
 	c := Defaults("test")
 	c.FFmpeg, c.FFprobe, c.TempDir = "/bin/ffmpeg", "/bin/ffprobe", t.TempDir()
+	c.NextcloudURL = "http://localhost"
 	require.NoError(t, c.Validate())
-	require.Equal(t, int64(4<<30), c.MaxUploadSize)
+}
+
+func TestFileURL(t *testing.T) {
+	c := Defaults("test")
+	c.NextcloudURL = "https://cloud.example.com/"
+	require.Equal(t, "https://cloud.example.com/index.php/apps/memories/api/stream/7", c.FileURL(7))
+}
+
+func TestNextcloudEnvPriority(t *testing.T) {
+	c := Defaults("test")
+	c.FFmpeg, c.FFprobe, c.TempDir = "/bin/ffmpeg", "/bin/ffprobe", t.TempDir()
+	c.NextcloudURL = "http://file"
+
+	t.Setenv("NEXTCLOUD_HOST", "http://env")
+	require.NoError(t, c.AutoDetect())
+	require.Equal(t, "http://env", c.NextcloudURL)
+	require.NoError(t, c.Validate())
 }
 
 func TestLoadFile(t *testing.T) {
@@ -65,12 +82,14 @@ func TestValidate(t *testing.T) {
 		{"bad buffers", func(c *Config) { c.GoalBufferMax = 0 }, false},
 		{"negative lookbehind", func(c *Config) { c.LookBehind = -1 }, false},
 		{"missing paths", func(c *Config) { c.FFmpeg, c.FFprobe, c.TempDir = "", "", "" }, false},
-		{"zero upload", func(c *Config) { c.MaxUploadSize = 0 }, false},
+		{"missing nextcloud", func(c *Config) { c.NextcloudURL = "" }, false},
+		{"bad nextcloud url", func(c *Config) { c.NextcloudURL = "notaurl" }, false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			c := Defaults("test")
 			c.FFmpeg, c.FFprobe, c.TempDir = "/bin/ffmpeg", "/bin/ffprobe", t.TempDir()
+			c.NextcloudURL = "http://localhost"
 			tc.mutate(c)
 			if tc.ok {
 				require.NoError(t, c.Validate())

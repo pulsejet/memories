@@ -39,7 +39,6 @@ func (s *Server) routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", s.handleHealth)
 	mux.HandleFunc("POST /vod", s.handleVod)
-	mux.HandleFunc("POST /create", s.handleCreate)
 	return mux
 }
 
@@ -68,7 +67,7 @@ func (s *Server) handleVod(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if req.Client == "" || req.Path == "" || req.Profile == "" {
+	if req.Client == "" || req.FileID <= 0 || req.Profile == "" {
 		log.Println("Invalid vod request", req.Profile)
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -83,18 +82,14 @@ func (s *Server) handleVod(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 	leaf := req.Profile
+	fileURL := s.cfg.FileURL(req.FileID)
 
 	if leaf == "test" {
 		w.Header().Set("Content-Type", "application/json")
 
-		size := 0
-		if info, err := os.Stat(req.Path); err == nil {
-			size = int(info.Size())
-		}
-
 		json.NewEncoder(w).Encode(map[string]any{
 			"version": s.cfg.Version,
-			"size":    size,
+			"size":    s.headSize(fileURL, req.ServiceToken),
 		})
 		return
 	}
@@ -105,10 +100,11 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 	}
 
 	manager, err := s.reg.GetOrCreate(core.ManagerParams{
-		Path:           req.Path,
+		URL:            fileURL,
 		StreamID:       req.Client,
 		FileID:         req.FileID,
 		Etag:           req.Etag,
+		ServiceToken:   req.ServiceToken,
 		PlayableCodecs: core.ParseCodecs(req.Query.Codecs),
 		TConfig:        req.TConfig,
 	})
@@ -177,30 +173,32 @@ func validProfile(leaf string) bool {
 	return false
 }
 
-func (s *Server) handleCreate(w http.ResponseWriter, r *http.Request) {
-	file, err := os.CreateTemp(s.cfg.TempDir, "govod-temp-")
+// headSize probes the upstream file size with a HEAD carrying the
+// provisioned token. Zero when unreachable or rejected.
+func (s *Server) headSize(fileURL, serviceToken string) int {
+	req, err := http.NewRequest("HEAD", fileURL, nil)
 	if err != nil {
-		log.Println("Error creating temp file", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		log.Println("Error creating test request", err)
+		return 0
 	}
-	defer file.Close()
-
-	if _, err := io.Copy(file, http.MaxBytesReader(w, r.Body, s.cfg.MaxUploadSize)); err != nil {
-		file.Close()
-		os.Remove(file.Name())
-		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
-			log.Println("Upload exceeds size limit", file.Name())
-			w.WriteHeader(http.StatusRequestEntityTooLarge)
-		} else {
-			log.Println("Error writing to temp file", err)
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
+	if serviceToken != "" {
+		req.Header.Set(core.ServiceTokenHeader, serviceToken)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"path": file.Name()})
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Println("Error testing upstream URL", err)
+		return 0
+	}
+	defer res.Body.Close()
+	if res.StatusCode == http.StatusForbidden {
+		log.Println("Upstream service token rejected; Nextcloud must provision a fresh one")
+		return 0
+	}
+	if res.StatusCode != http.StatusOK {
+		return 0
+	}
+	return int(res.ContentLength)
 }
 
 func (s *Server) versionOk(w http.ResponseWriter, r *http.Request) bool {

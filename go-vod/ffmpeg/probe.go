@@ -71,19 +71,24 @@ type probeOutput struct {
 }
 
 // Probe runs ffprobe and parses the first video stream.
-func Probe(ctx context.Context, bin, path string) (VideoInfo, error) {
+func Probe(ctx context.Context, bin, fileURL, headers string) (VideoInfo, error) {
 	ctx, cancel := context.WithTimeout(ctx, probeTimeout)
 	defer cancel()
 
 	args := []string{
 		"-v", "error",
+	}
+	if headers != "" {
+		args = append(args, "-headers", headers)
+	}
+	args = append(args,
 		"-show_entries", "format:stream",
 		"-of", "json",
-		path,
-	}
+		fileURL,
+	)
 	out, serr, err := runFFprobe(ctx, bin, args...)
 	if err != nil {
-		return VideoInfo{}, fmt.Errorf("ffprobe %s: %w: %s", path, err, serr)
+		return VideoInfo{}, fmt.Errorf("ffprobe %s: %w: %s", fileURL, err, serr)
 	}
 	return ParseProbeJSON(out)
 }
@@ -223,20 +228,25 @@ func probeHDR(s videoStream) bool {
 }
 
 // Keyframes runs ffprobe and parses keyframe timestamps in seconds.
-func Keyframes(ctx context.Context, bin, path string) ([]float64, error) {
+func Keyframes(ctx context.Context, bin, fileURL, headers string) ([]float64, error) {
 	ctx, cancel := context.WithTimeout(ctx, keyframeTimeout)
 	defer cancel()
 
 	args := []string{
 		"-v", "error",
+	}
+	if headers != "" {
+		args = append(args, "-headers", headers)
+	}
+	args = append(args,
 		"-select_streams", "v:0",
 		"-show_entries", "packet=pts_time,flags",
 		"-of", "csv=p=0",
-		path,
-	}
+		fileURL,
+	)
 	out, serr, err := runFFprobe(ctx, bin, args...)
 	if err != nil {
-		return nil, fmt.Errorf("ffprobe keyframes %s: %w: %s", path, err, serr)
+		return nil, fmt.Errorf("ffprobe keyframes %s: %w: %s", fileURL, err, serr)
 	}
 	return ParseKeyframes(out), nil
 }

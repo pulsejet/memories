@@ -40,8 +40,22 @@ func TestBuildArgsSoftware(t *testing.T) {
 	require.NotContains(t, c, "-hwaccel")
 	require.NotContains(t, c, "-ss")
 	require.NotContains(t, c, "-noautorotate")
+	require.NotContains(t, c, "-headers")
 	require.Contains(t, c, `-map "0:a:0?"`)
 	require.Contains(t, c, `"-c:a" aac -ac 2 -ar 48000 "-b:a" 128k`)
+}
+
+func TestBuildArgsHeaders(t *testing.T) {
+	s := baseSpec()
+	s.Input = "http://nc/apps/memories/api/stream/7"
+	s.Headers = "Authorization: Basic dXNlcjp0b2tlbg==\r\n"
+	args := BuildArgs(s)
+	require.Equal(t, s.Headers, args[slices.Index(args, "-headers")+1])
+	require.Less(t, slices.Index(args, "-headers"), slices.Index(args, "-i"))
+	require.Equal(t, s.Input, args[slices.Index(args, "-i")+1])
+	require.Equal(t, "1", args[slices.Index(args, "-multiple_requests")+1])
+	require.Equal(t, "1", args[slices.Index(args, "-seekable")+1])
+	require.Less(t, slices.Index(args, "-multiple_requests"), slices.Index(args, "-i"))
 }
 
 func TestBuildArgsSeekAndMax(t *testing.T) {

@@ -24,13 +24,14 @@ var spriteNameRe = regexp.MustCompile(`^storyboard-\d+\.jpg$`)
 
 // StoryboardInput snapshots a storyboard request so builds outlive Managers.
 type StoryboardInput struct {
-	CacheDir string
-	FileID   int64
-	Etag     string
-	Path     string
-	Duration time.Duration
-	FFmpeg   string
-	LogID    string
+	CacheDir     string
+	FileID       int64
+	Etag         string
+	URL          string
+	ServiceToken string
+	Duration     time.Duration
+	FFmpeg       string
+	LogID        string
 }
 
 // storyboardService builds storyboards process-wide, deduplicated by cache
@@ -59,13 +60,14 @@ type storyboardFile struct {
 
 func (m *Manager) storyboardInput() StoryboardInput {
 	return StoryboardInput{
-		CacheDir: m.c.CacheDir(),
-		FileID:   m.fileid,
-		Etag:     m.etag,
-		Path:     m.path,
-		Duration: m.probe.Duration,
-		FFmpeg:   m.c.FFmpeg,
-		LogID:    m.id,
+		CacheDir:     m.c.CacheDir(),
+		FileID:       m.fileid,
+		Etag:         m.etag,
+		URL:          m.url,
+		ServiceToken: m.getServiceToken(),
+		Duration:     m.probe.Duration,
+		FFmpeg:       m.c.FFmpeg,
+		LogID:        m.id,
 	}
 }
 
@@ -177,7 +179,7 @@ func (s *storyboardService) build(dir string, in StoryboardInput) error {
 		storyboardSlots <- struct{}{}
 	}
 	defer func() { <-storyboardSlots }()
-	if err := ffmpeg.BuildStoryboard(context.Background(), in.FFmpeg, in.Path, plan, pattern); err != nil {
+	if err := ffmpeg.BuildStoryboard(context.Background(), in.FFmpeg, in.URL, HeadersBlock(in.ServiceToken), plan, pattern); err != nil {
 		return err
 	}
 	log.Printf("%s: storyboard rendered in %s", in.LogID, time.Since(start).Round(time.Second))

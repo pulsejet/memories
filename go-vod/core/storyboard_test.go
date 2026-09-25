@@ -35,7 +35,7 @@ func testStoryboardManager(t *testing.T, ffmpeg string) *Manager {
 
 	m, err := NewManager(NewManagerArgs{
 		C:             cfg,
-		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", FileID: 7, Etag: "etag-01"},
+		ManagerParams: ManagerParams{URL: "http://localhost/input.mp4", StreamID: "id", FileID: 7, Etag: "etag-01"},
 		Generation:    1,
 		Idle:          make(chan IdleEvent, 1),
 	})
@@ -97,7 +97,7 @@ func TestEnsureStoryboardNoEtag(t *testing.T) {
 
 	m, err := NewManager(NewManagerArgs{
 		C:             cfg,
-		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id"},
+		ManagerParams: ManagerParams{URL: "http://localhost/input.mp4", StreamID: "id"},
 		Generation:    1,
 		Idle:          make(chan IdleEvent, 1),
 	})
@@ -146,7 +146,7 @@ func TestStoryboardBuildsSerializeAtOneSlot(t *testing.T) {
 
 		m, err := NewManager(NewManagerArgs{
 			C:             cfg,
-			ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", FileID: fileid, Etag: "etag-01"},
+			ManagerParams: ManagerParams{URL: "http://localhost/input.mp4", StreamID: "id", FileID: fileid, Etag: "etag-01"},
 			Generation:    1,
 			Idle:          make(chan IdleEvent, 1),
 		})
@@ -181,7 +181,7 @@ func TestStoryboardSurvivesManagerDestroy(t *testing.T) {
 
 	m, err := NewManager(NewManagerArgs{
 		C:             cfg,
-		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", FileID: 7, Etag: "etag-01"},
+		ManagerParams: ManagerParams{URL: "http://localhost/input.mp4", StreamID: "id", FileID: 7, Etag: "etag-01"},
 		Generation:    1,
 		Idle:          make(chan IdleEvent, 1),
 	})

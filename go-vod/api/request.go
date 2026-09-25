@@ -6,16 +6,25 @@ import (
 	"github.com/pulsejet/memories/go-vod/config"
 )
 
-// VodRequest is the envelope for every file request from PHP. The cache
-// is keyed by FileID; Etag is stored in every plan and a mismatch evicts
-// the file. Query carries the passthrough baked into playlists.
+// VodRequest is the envelope for every file request from PHP. ServiceToken
+// is a short-lived provisioned token go-vod sends back upstream. go-vod
+// builds the Nextcloud URL from FileID. The cache is keyed by FileID;
+// Etag is stored in every plan and a mismatch evicts the file.
+// Query carries the passthrough baked into playlists.
 type VodRequest struct {
-	Client  string      `json:"client"`
-	FileID  int64       `json:"fileid"`
-	Etag    string      `json:"etag"`
-	Path    string      `json:"path"`
-	Profile string      `json:"profile"`
-	Query   VodQuery    `json:"query"`
+	// Client is a unique identifier for the caller.
+	Client string `json:"client"`
+	// FileID is the unique identifier.
+	FileID int64 `json:"fileid"`
+	// Etag is the file change detection tag.
+	Etag string `json:"etag"`
+	// ServiceToken is the auth token for calling back to PHP.
+	ServiceToken string `json:"serviceToken"`
+	// Profile is the transcoding profile for this request.
+	Profile string `json:"profile"`
+	// Query are passthrough parameters, e.g. auth tokens.
+	Query VodQuery `json:"query"`
+	// TConfig is the config for this request.
 	TConfig config.TCfg `json:"config"`
 }
 

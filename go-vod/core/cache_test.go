@@ -21,7 +21,7 @@ func newCopyManagerWithEtag(t *testing.T, probeJSON, keyframes string, keyFail b
 
 	m, err := NewManager(NewManagerArgs{
 		C:             cfg,
-		ManagerParams: ManagerParams{Path: "input.mp4", StreamID: "id", FileID: 7, Etag: etag, TConfig: config.TCfg{ChunkSize: 3}},
+		ManagerParams: ManagerParams{URL: "http://localhost/input.mp4", StreamID: "id", FileID: 7, Etag: etag, TConfig: config.TCfg{ChunkSize: 3}},
 		Generation:    1,
 		Idle:          make(chan IdleEvent, 1),
 	})
@@ -124,7 +124,7 @@ func TestManagerProbeCache(t *testing.T) {
 	args := NewManagerArgs{
 		C: cfg,
 		ManagerParams: ManagerParams{
-			Path:     "input.mp4",
+			URL:      "http://localhost/input.mp4",
 			StreamID: "id",
 			FileID:   7,
 			Etag:     "etag-probe",

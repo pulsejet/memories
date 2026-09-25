@@ -30,6 +30,7 @@ use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
 use OCA\Memories\HttpResponseException;
 use OCA\Memories\Service\BinExt;
+use OCA\Memories\Service\ServiceManager;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\ApiController;
@@ -42,6 +43,7 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\File;
 use OCP\Http\Client\IClientService;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 use Psr\Log\LoggerInterface;
 
 final class VideoController extends ApiController
@@ -55,7 +57,9 @@ final class VideoController extends ApiController
         protected SystemConfig $systemConfig,
         protected BinExt $binExt,
         protected Exif $exif,
+        protected ServiceManager $serviceManager,
         protected Util $util,
+        protected IURLGenerator $urlGenerator,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -112,7 +116,6 @@ final class VideoController extends ApiController
             $name = '';
             $mime = '';
             $blob = null;
-            $liveVideoPath = null;
 
             // Video is inside the file
             $path = '<>';
@@ -172,7 +175,6 @@ final class VideoController extends ApiController
                 $name = $liveFile->getName();
                 $blob = $liveFile->getContent();
                 $mime = $liveFile->getMimeType();
-                $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
             }
 
             // Data not found
@@ -187,18 +189,7 @@ final class VideoController extends ApiController
 
             // Transcode video if allowed
             if ($transcode && !$this->systemConfig->get('memories.vod.disable')) {
-                // If video path not given, write to temp file
-                if (!$liveVideoPath) {
-                    $liveVideoPath = $this->postFile($transcode, $blob)['path'];
-                }
-
-                // If this is H.264 it won't get transcoded anyway
-                if ($liveVideoPath) {
-                    return $this->util->guardExDirect(function (Http\IOutput $out) use ($transcode, $liveVideoPath) {
-                        // Temp upload with no fileid: transcoded without disk cache.
-                        $this->getUpstream($out, $transcode, 0, $liveVideoPath, 'max.mp4');
-                    });
-                }
+                return $this->proxyProfile($transcode, $fileid, 'max.mp4');
             }
 
             // Make and send response
@@ -248,9 +239,18 @@ final class VideoController extends ApiController
 
             $etag = $file->getEtag();
 
-            return $this->util->guardExDirect(function (Http\IOutput $out) use ($client, $fileid, $path, $profile, $etag) {
+            return $this->util->guardExDirect(function (Http\IOutput $out) use ($client, $fileid, $profile, $etag) {
                 try {
-                    $status = $this->getUpstream($out, $client, $fileid, $path, $profile, $etag);
+                    $status = $this->getUpstream(
+                        out: $out,
+                        client: $client,
+                        fileid: $fileid,
+                        profile: $profile,
+                        etag: $etag,
+                    );
+                    if (303 === $status) {
+                        return; // redirect already sent
+                    }
                     if (409 === $status || -1 === $status) {
                         // Just a conflict (transcoding process changed)
                         $response = new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
@@ -274,8 +274,13 @@ final class VideoController extends ApiController
         });
     }
 
-    private function getUpstream(Http\IOutput $out, string $client, int $fileid, string $path, string $profile, string $etag = ''): int
-    {
+    private function getUpstream(
+        Http\IOutput $out,
+        string $client,
+        int $fileid,
+        string $profile,
+        string $etag,
+    ): int {
         $this->binExt->ensureGoVod();
 
         $url = $this->binExt->getGoVodEndpoint($client, 'vod');
@@ -284,7 +289,7 @@ final class VideoController extends ApiController
             'client' => $client,
             'fileid' => $fileid,
             'etag' => $etag,
-            'path' => $path,
+            'serviceToken' => $this->serviceManager->mintServiceToken($fileid),
             'profile' => $profile,
             'query' => [
                 'albums' => $this->request->getParam('albums'),
@@ -312,6 +317,14 @@ final class VideoController extends ApiController
         }
 
         $returnCode = $response->getStatusCode();
+
+        if (204 === $returnCode && $response->getHeader('X-Go-Vod-Original')) {
+            $out->setHttpResponseCode(303); // see Util::guardExDirect
+            $out->setHeader('HTTP/1.1 303 See Other');
+            $out->setHeader('Location: '.$this->downloadUrl($fileid));
+
+            return 303;
+        }
 
         if (200 === $returnCode) {
             if (200 !== $out->getHttpResponseCode()) {
@@ -356,35 +369,6 @@ final class VideoController extends ApiController
         }
 
         return $returnCode;
-    }
-
-    /**
-     * POST to go-vod to create a temporary file.
-     *
-     * @return mixed The response from upstream
-     */
-    private function postFile(string $client, string $blob): mixed
-    {
-        $this->binExt->ensureGoVod();
-
-        $url = $this->binExt->getGoVodEndpoint($client, 'create');
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $blob);
-
-        $response = curl_exec($ch);
-        $returnCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if (200 !== $returnCode) {
-            throw new \Exception("Could not create temporary file ({$returnCode})");
-        }
-
-        return json_decode((string) $response, true);
     }
 
     /**
@@ -445,5 +429,17 @@ final class VideoController extends ApiController
         array_multisort($scores, SORT_ASC, $liveFiles);
 
         return array_pop($liveFiles);
+    }
+
+    /**
+     * Download URL for the file, preserving share context.
+     */
+    private function downloadUrl(int $fileid): string
+    {
+        return $this->urlGenerator->linkToRoute('memories.Download.one', [
+            'fileid' => $fileid,
+            'albums' => $this->request->getParam('albums'),
+            'token' => $this->request->getParam('token'),
+        ]);
     }
 }

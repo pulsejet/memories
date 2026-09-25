@@ -79,10 +79,14 @@ func stubVariantManager(t *testing.T, keyFail bool) *core.Manager {
 	cfg.TempDir = t.TempDir()
 	cfg.FFprobe = bin
 	m, err := core.NewManager(core.NewManagerArgs{
-		C:             cfg,
-		ManagerParams: core.ManagerParams{Path: "input.mp4", StreamID: "id", TConfig: config.TCfg{ChunkSize: 3}},
-		Generation:    1,
-		Idle:          make(chan core.IdleEvent, 1),
+		C: cfg,
+		ManagerParams: core.ManagerParams{
+			URL:      "http://localhost/input.mp4",
+			StreamID: "id",
+			TConfig:  config.TCfg{ChunkSize: 3},
+		},
+		Generation: 1,
+		Idle:       make(chan core.IdleEvent, 1),
 	})
 	require.NoError(t, err)
 	t.Cleanup(m.Destroy)

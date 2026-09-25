@@ -21,8 +21,10 @@ type Spec struct {
 	// Bin is the ffmpeg executable. Informational only (callers prepend it
 	// via exec.Command); kept so tests render complete command lines.
 	Bin string
-	// Input is the source file handed to "-i".
+	// Input is the Nextcloud file URL handed to "-i".
 	Input string
+	// Headers is the ffmpeg "-headers" block.
+	Headers string
 
 	// StartAt seeks before decoding; <= 0 emits no "-ss".
 	StartAt float64
@@ -107,7 +109,8 @@ func Encoder(s Spec) string {
 // In order: quiet logging, hidden banner, input seek (-ss, only when StartAt > 0),
 // hardware decode offload on a named "memories" device (explicit
 // -init_hw_device/-filter_hw_device, required since ffmpeg 8), -noautorotate
-// when transposing manually, input with -copyts/+genpts (post-seek timing
+// when transposing manually, persistent http connections, service auth
+// headers for the http input, input with -copyts/+genpts (post-seek timing
 // still refers to source timestamps), the -vf graph as a staged pipeline:
 // normalize into the encode domain (8-bit convert, plus hardware upload
 // on HW backends),
@@ -163,6 +166,13 @@ func BuildArgs(s Spec) []string {
 
 	if s.UseTranspose {
 		args = append(args, "-noautorotate")
+	}
+
+	if s.Headers != "" {
+		args = append(args,
+			"-multiple_requests", "1",
+			"-seekable", "1",
+			"-headers", s.Headers)
 	}
 
 	args = append(args,

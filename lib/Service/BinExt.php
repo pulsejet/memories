@@ -12,7 +12,7 @@ use OCP\IConfig;
 final class BinExt
 {
     public const EXIFTOOL_VER = '13.59';
-    public const GOVOD_VER = '0.5.0';
+    public const GOVOD_VER = '0.6.0';
     public const NX_VER_MIN = '1.1';
 
     private const GO_VOD_PID_FILE = '/tmp/go-vod.pid';
@@ -242,6 +242,7 @@ final class BinExt
             'ffprobe' => $this->systemConfig->get('memories.vod.ffprobe'),
             'tempdir' => $dir('memories.vod.tempdir', sys_get_temp_dir().'/go-vod/'),
             'cacheDir' => $dir('memories.vod.cachedir', sys_get_temp_dir().'/go-vod-cache'),
+            'nextcloudUrl' => rtrim($this->config->getSystemValueString('overwrite.cli.url', ''), '/'),
         ];
     }
 

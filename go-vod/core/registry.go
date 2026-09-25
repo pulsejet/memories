@@ -2,9 +2,6 @@ package core
 
 import (
 	"log"
-	"os"
-	"path/filepath"
-	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -26,12 +23,14 @@ type IdleEvent struct {
 	Generation uint64
 }
 
-// ManagerParams identifies a manager for a file and client.
+// ManagerParams identifies a manager for a file and client. Token is
+// per-request auth material, refreshed on hits, never identity.
 type ManagerParams struct {
-	Path           string
+	URL            string
 	StreamID       string
 	FileID         int64
 	Etag           string
+	ServiceToken   string
 	PlayableCodecs []string
 	TConfig        config.TCfg
 }
@@ -46,10 +45,11 @@ func NewRegistry(cfg *config.Config, idle chan IdleEvent) *Registry {
 
 func (r *Registry) GetOrCreate(p ManagerParams) (*Manager, error) {
 	if m := r.get(p); m != nil {
+		m.refreshServiceToken(p.ServiceToken)
 		return m, nil
 	}
 
-	v, err, _ := r.sf.Do(p.StreamID+"\x00"+p.Path, func() (any, error) {
+	v, err, _ := r.sf.Do(p.StreamID+"\x00"+p.URL, func() (any, error) {
 		if m := r.get(p); m != nil {
 			return m, nil
 		}
@@ -58,7 +58,9 @@ func (r *Registry) GetOrCreate(p ManagerParams) (*Manager, error) {
 	if err != nil {
 		return nil, err
 	}
-	return v.(*Manager), nil
+	m := v.(*Manager)
+	m.refreshServiceToken(p.ServiceToken)
+	return m, nil
 }
 
 func (r *Registry) get(p ManagerParams) *Manager {
@@ -66,7 +68,7 @@ func (r *Registry) get(p ManagerParams) *Manager {
 	defer r.mu.Unlock()
 
 	m := r.members[p.StreamID]
-	if m == nil || m.path != p.Path {
+	if m == nil || m.url != p.URL {
 		return nil
 	}
 	if p.Etag != "" && m.etag != "" && m.etag != p.Etag {
@@ -84,7 +86,6 @@ func (r *Registry) create(p ManagerParams) (*Manager, error) {
 	})
 	if err != nil {
 		log.Println("Error creating manager", err)
-		freeIfTemp(r.cfg.TempDir, p.Path)
 		return nil, err
 	}
 
@@ -105,10 +106,4 @@ func (r *Registry) Remove(streamID string, generation uint64) {
 		return
 	}
 	delete(r.members, streamID)
-}
-
-func freeIfTemp(tempDir, path string) {
-	if filepath.Dir(path) == filepath.Clean(tempDir) && strings.Contains(path, "-govod-temp-") {
-		os.Remove(path)
-	}
 }

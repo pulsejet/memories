@@ -145,9 +145,12 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 }
 
 func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
-	if s.quality == QUALITY_MAX && IsCodecPlayable(s.m.probe.CodecName, s.m.playableCodecs) {
-		// try to just send the original file
-		http.ServeFile(w, r, s.m.path)
+	if (s.quality == QUALITY_MAX || s.quality == QUALITY_DIRECT) &&
+		IsCodecPlayable(s.m.probe.CodecName, s.m.playableCodecs) {
+		// Full quality in a playable codec - signal PHP to download directly.
+		log.Printf("%s-%s: playable, signalling direct stream", s.m.id, s.quality)
+		w.Header().Set(StreamOriginalHeader, "1")
+		w.WriteHeader(http.StatusNoContent)
 		return nil
 	}
 	args := ffmpeg.MP4Args(s.transcodeSpec(0, false))
@@ -307,7 +310,8 @@ func (s *Stream) spec(startAt float64, isHls bool) ffmpeg.Spec {
 	_, grid := s.m.CopySegments()
 	return ffmpeg.Spec{
 		Bin:     s.c.FFmpeg,
-		Input:   s.m.path,
+		Input:   s.m.url,
+		Headers: HeadersBlock(s.m.getServiceToken()),
 		StartAt: startAt,
 		HLS:     isHls,
 

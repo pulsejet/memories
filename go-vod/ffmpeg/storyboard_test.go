@@ -1,6 +1,7 @@
 package ffmpeg
 
 import (
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -70,11 +71,13 @@ func TestFormatVTTTime(t *testing.T) {
 }
 
 func TestStoryboardArgs(t *testing.T) {
-	args := StoryboardArgs("in.mp4", 5, 10, 2, 1, "storyboard-%d.jpg")
+	args := StoryboardArgs("http://nc/file/7", "", 5, 10, 2, 1, "storyboard-%d.jpg")
 	require.Equal(t, []string{
 		"-hide_banner", "-loglevel", "warning",
 		"-skip_frame", "nokey",
-		"-i", "in.mp4",
+		"-multiple_requests", "1",
+		"-seekable", "1",
+		"-i", "http://nc/file/7",
 		"-an",
 		"-vf", "fps=1/5.000000:eof_action=pass,scale=160:90:force_original_aspect_ratio=decrease,format=yuv420p,pad=160:90:(ow-iw)/2:(oh-ih)/2,tile=10x2",
 		"-start_number", "0",
@@ -83,4 +86,9 @@ func TestStoryboardArgs(t *testing.T) {
 		"-f", "image2",
 		"storyboard-%d.jpg",
 	}, args)
+
+	args = StoryboardArgs("http://nc/file/7", "Authorization: Basic eA==\r\n", 5, 10, 2, 1, "storyboard-%d.jpg")
+	require.Equal(t, "http://nc/file/7", args[slices.Index(args, "-i")+1])
+	require.Equal(t, "Authorization: Basic eA==\r\n", args[slices.Index(args, "-headers")+1])
+	require.Less(t, slices.Index(args, "-headers"), slices.Index(args, "-i"))
 }

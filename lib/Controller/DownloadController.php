@@ -142,8 +142,8 @@ final class DownloadController extends ApiController
     {
         return $this->util->guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable) {
             /** @var \OCP\Files\File $file */
-            if ($this->serviceManager->isVodServiceAccount()) {
-                $file = $this->serviceManager->getServiceFile($fileid);
+            if ($token = $this->request->getHeader(ServiceManager::SERVICE_TOKEN_HEADER)) {
+                $file = $this->serviceManager->getServiceTokenFile($token, $fileid);
             } else {
                 $file = $this->fs->getUserFile($fileid);
 

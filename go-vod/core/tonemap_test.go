@@ -24,7 +24,7 @@ func tonemapStream(t *testing.T, fail bool) (*Stream, string) {
 	require.NoError(t, os.WriteFile(bin, []byte(script), 0755))
 	c := &config.Config{FFmpeg: bin}
 	m := &Manager{
-		c: c, path: "/videos/hdr.mov",
+		c: c, url: "http://localhost/hdr.mov",
 		tc:    config.TCfg{VAAPI: true, VAAPIDevice: "/dev/dri/renderD129", UseTranspose: true},
 		probe: &ProbeVideoData{HDR: true, Rotation: -90},
 	}

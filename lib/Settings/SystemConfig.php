@@ -126,9 +126,6 @@ final class SystemConfig
         // UID of the dedicated Lens service account (empty = endpoint disabled)
         'memories.lens.service_user' => '',
 
-        // UID of the dedicated go-vod service account (empty = endpoint disabled)
-        'memories.vod.service_user' => '',
-
         // Availability of database features, e.g. triggers
         'memories.db.triggers.fcu' => false,
 
