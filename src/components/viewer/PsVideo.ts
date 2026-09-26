@@ -121,6 +121,7 @@ class VideoContentSetup {
     lightbox.addFilter('isKeepingPlaceholder', (k, c) => this.isKeepingPlaceholder(k, c as unknown as PsContent));
     lightbox.addFilter('isContentZoomable', (z, c) => this.isContentZoomable(z, c as unknown as PsContent));
     lightbox.addFilter('useContentPlaceholder', (u, c) => this.useContentPlaceholder(u, c as unknown as PsContent));
+    lightbox.addFilter('placeholderSrc', (s, c) => this.placeholderSrc(s, c as unknown as PsContent));
   }
 
   initPswpEvents(pswp: PhotoSwipe) {
@@ -220,7 +221,7 @@ class VideoContentSetup {
     const player = document.createElement('media-player') as MediaPlayerElement;
     player.style.opacity = '0';
     player.src = src;
-    player.poster = content.data.msrc ?? '';
+    player.poster = this.getPosterSrc(content);
     player.title = content.data.photo.basename ?? '';
     player.playsInline = true;
     player.preload = 'metadata';
@@ -457,6 +458,21 @@ class VideoContentSetup {
 
   useContentPlaceholder(usePlaceholder: boolean, content: PsContent) {
     return isVideoContent(content) || usePlaceholder;
+  }
+
+  getPosterSrc(content: PsContent): string {
+    return utils.getPreviewUrl({
+      photo: content.data.photo,
+      msize: 1024,
+    });
+  }
+
+  placeholderSrc(placeholderSrc: string | false, content: PsContent) {
+    if (placeholderSrc || !isVideoContent(content)) {
+      return placeholderSrc;
+    } else {
+      return this.getPosterSrc(content);
+    }
   }
 
   async getWakeLock() {
