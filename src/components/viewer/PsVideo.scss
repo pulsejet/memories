@@ -141,11 +141,13 @@
 
   // Force spinner over the poster until playback starts.
   // Seems like a bug in vidstack - it's hidden on HLS playlist load.
-  media-player:not([data-started], [data-autoplay-error], [data-paused]) .vds-buffering-spinner {
-    opacity: 1;
-    animation: var(--media-buffering-animation, vds-buffering-spin 1s linear infinite);
-    @media (prefers-reduced-motion) {
-      animation-duration: 8s;
+  media-player:not([data-started], [data-autoplay-error], [data-paused]) {
+    .vds-buffering-spinner {
+      opacity: 1;
+      animation: var(--media-buffering-animation, vds-buffering-spin 1s linear infinite);
+      @media (prefers-reduced-motion) {
+        animation-duration: 8s;
+      }
     }
   }
 
@@ -198,6 +200,8 @@
   }
 }
 
-.memories-viewer.fully-opened:has(.video-started) :is(.vds-poster, .pswp__img--placeholder) {
-  display: none;
+.memories-viewer.fully-opened:has(media-player[data-started]) {
+  :is(.vds-poster, .pswp__img--placeholder) {
+    display: none;
+  }
 }
