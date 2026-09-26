@@ -109,7 +109,13 @@ export default class ImageContentSetup {
   public zoomPanUpdate({ slide }: { slide: PsSlide }) {
     if (!slide.data.highSrc.length || slide.data.highSrcCond !== 'zoom') return;
 
-    if (slide.currZoomLevel >= slide.zoomLevels.secondary) {
+    // Check if zoomed in enough to load the full image.
+    // For small images, we check that there is at least a 10% zoom to avoid
+    // loading the full sized image immediately when the user opens viewer.
+    const isZoomedIn = slide.currZoomLevel >= 1.1 * slide.zoomLevels.initial;
+    const isOverSecondary = slide.currZoomLevel >= slide.zoomLevels.secondary;
+
+    if (isZoomedIn && isOverSecondary) {
       this.loadFullImage(slide);
     }
   }
