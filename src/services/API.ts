@@ -187,8 +187,12 @@ export class API {
     return tok(gen(`${BASE}/download/{handle}`, { handle }));
   }
 
-  static STREAM_FILE(id: number) {
-    return tok(gen(`${BASE}/stream/{id}`, { id }));
+  static DOWNLOAD_ONE(fileid: number) {
+    return tok(API.Q(gen(`${BASE}/stream/{fileid}`, { fileid }), { attachment: true }));
+  }
+
+  static STREAM_FILE(fileid: number) {
+    return tok(gen(`${BASE}/stream/{fileid}`, { fileid }));
   }
 
   static SHARE_LINKS() {

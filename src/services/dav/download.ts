@@ -11,7 +11,13 @@ import type { IPhoto } from '@typings';
  * Download files
  */
 export async function downloadFiles(fileIds: number[], title?: string) {
-  if (!fileIds.length) return;
+  if (!fileIds.length) {
+    return;
+  }
+
+  if (fileIds.length === 1) {
+    return downloadFromUrl(API.DOWNLOAD_ONE(fileIds[0]), title);
+  }
 
   const res = await axios.post(API.DOWNLOAD_REQUEST(), { files: fileIds });
   if (res.status !== 200 || !res.data.handle) {

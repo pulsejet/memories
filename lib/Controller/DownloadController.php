@@ -125,9 +125,9 @@ final class DownloadController extends ApiController
                 throw Exceptions::NotFound('file IDs');
             }
 
-            // Download single file
+            // Download single file; handle is one-shot.
             if (1 === \count($fileIds)) {
-                return $this->one($fileIds[0], false);
+                return $this->one($fileIds[0], false, true);
             }
 
             // Download multiple files
@@ -135,12 +135,22 @@ final class DownloadController extends ApiController
         });
     }
 
+    /**
+     * Download a single file using a file ID.
+     *
+     * @param int  $fileid     File ID
+     * @param bool $resumable  Allow range requests and partial responses
+     * @param bool $attachment Force attachment disposition instead of inline
+     */
     #[NoAdminRequired]
     #[NoCSRFRequired]
     #[PublicPage]
-    public function one(int $fileid, bool $resumable = true): Http\Response
-    {
-        return $this->util->guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable) {
+    public function one(
+        int $fileid,
+        bool $resumable = true,
+        bool $attachment = false,
+    ): Http\Response {
+        return $this->util->guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable, $attachment) {
             /** @var \OCP\Files\File $file */
             if ($token = $this->request->getHeader(ServiceManager::SERVICE_TOKEN_HEADER)) {
                 $file = $this->serviceManager->getServiceTokenFile($token, $fileid);
@@ -238,8 +248,9 @@ final class DownloadController extends ApiController
             $contentLength = (0 === $size) ? 0 : ($seekEnd - $seekStart + 1);
             $out->setHeader('Content-Length: '.(string) $contentLength);
             $out->setHeader('Content-Type: '.$mimeType);
+            $out->setHeader('X-Content-Type-Options: nosniff');
 
-            // Range-seeking media players need a validator and permission to cache
+            // Range-seeking clients need a validator
             if ($etag = $file->getEtag()) {
                 $out->setHeader('ETag: "'.$etag.'"');
             }
@@ -250,7 +261,7 @@ final class DownloadController extends ApiController
 
             // Play media inline for in-browser playback; force a download for everything else
             $filename = str_replace('"', '\"', $file->getName());
-            $disposition = $isMedia && $resumable ? 'inline' : 'attachment';
+            $disposition = !$attachment && $isMedia && $resumable ? 'inline' : 'attachment';
             $out->setHeader("Content-Disposition: {$disposition}; filename=\"{$filename}\"");
 
             // Quit if HEAD request or empty file
