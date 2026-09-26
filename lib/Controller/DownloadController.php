@@ -118,7 +118,7 @@ final class DownloadController extends ApiController
             $fileIds = $info[1];
 
             /** @var int[] $fileIds */
-            $fileIds = array_filter(array_map('intval', $fileIds), static fn ($id) => $id > 0);
+            $fileIds = array_values(array_filter(array_map('intval', $fileIds), static fn ($id) => $id > 0));
 
             // Check if we have any valid ids
             if (0 === \count($fileIds)) {
