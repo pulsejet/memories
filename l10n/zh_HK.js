@@ -97,6 +97,7 @@ OC.L10N.register(
     "Sort folders oldest-first" : "將資料夾從最舊開始排序",
     "Sort albums oldest-first" : "將相簿從最舊開始排序",
     "Show hidden albums" : "顯示隱藏的相簿",
+    "Day range (0-7)" : "天數範圍（0-7）",
     "Number of days before and after each anniversary" : "每個紀念日前後的天數",
     "Photos per year (1-50)" : "每年照片數量（1-50）",
     "Maximum number of photos to include per year" : "每年最多包含的照片數量",
@@ -329,6 +330,8 @@ OC.L10N.register(
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "某些選定的項目有堆疊的 RAW 檔案。\nRAW 檔案不會被編輯。",
     "Missing date metadata" : "找不到日期元數據",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "有些項目可能缺少日期元數據。您想嘗試將目前已知的時間戳複製到元數據（建議）嗎？ 否則，時間戳可能會重設為目前時間。",
+    "_Failed to load metadata for {n} photo._::_Failed to load metadata for {n} photos._" : ["未能為 {n} 張照片載入元數據。"],
+    "_{n} photo cannot be edited (permissions error)._::_{n} photos cannot be edited (permissions error)._" : ["無法編輯 {n} 張照片（權限錯誤）。"],
     "Date / Time" : "日期／時間",
     "Collaborative Tags" : "協作標籤",
     "EXIF Fields" : "EXIF 字段",
@@ -353,6 +356,7 @@ OC.L10N.register(
     "Merge faces" : "合併面孔",
     "Unnamed person" : "未命名的人",
     "Merge {name} with {newName}?" : "將 {name} 與 {newName} 合併?",
+    "You can only merge with a named person" : "你只能與已命名的人物合併",
     "Too many failures, aborting" : "失敗次數過多，中止",
     "Error while moving {basename}" : "移動 {basename} 時出錯",
     "Failed to move {name}." : "移動 {name} 失敗。",
@@ -613,6 +617,8 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["將 {count} 件物品移至垃圾箱？"],
     "Files in trash may be automatically deleted after a fixed period of time." : "垃圾箱中的檔案可能會在固定時段後自動刪除。",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["從相簿中刪除 {count} 個項目？"],
-    "This will not delete your original files." : "這不會刪除您原先的檔案。"
+    "This will not delete your original files." : "這不會刪除您原先的檔案。",
+    "_You are about to download {count} item._::_You are about to download {count} items._" : ["您將要下載 {count} 個項目。"],
+    "_You are about to move {count} item._::_You are about to move {count} items._" : ["您將要移動 {count} 個項目。"]
 },
 "nplurals=1; plural=0;");

@@ -95,6 +95,7 @@
     "Sort folders oldest-first" : "Järjesta vanemad kaustad esimesena",
     "Sort albums oldest-first" : "Järjesta vanemad albumid esimesena",
     "Show hidden albums" : "Näita peidetud albumeid",
+    "Day range (0-7)" : "Päevade vahemik (0-7)",
     "Number of days before and after each anniversary" : "Päevade arv enne ja pärast iga tähtpäeva",
     "Photos per year (1-50)" : "Fotosid aasta kohta (1-50)",
     "Maximum number of photos to include per year" : "Aasta koha kaasatavate fotode ülempiir",
@@ -327,6 +328,8 @@
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Mõnedel valitud objektidel on töötlemata (RAW) faile.\nNeed failid jäävad muutmata.",
     "Missing date metadata" : "Kuupäeva metateave on puudu",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Kuupäeva metateabes on mõned kirjed puudu. Kas tahaksid proovida hetkel teadaoleva ajatempli kopeerimist metateabesse (soovitame seda)? Vastasel juhul võib minna nii, et andmed lähtestuvad praeguse ajaga.",
+    "_Failed to load metadata for {n} photo._::_Failed to load metadata for {n} photos._" : ["{n} foto metateabe laadimine ei õnnestunud","{n} foto metateabe laadimine ei õnnestunud"],
+    "_{n} photo cannot be edited (permissions error)._::_{n} photos cannot be edited (permissions error)._" : ["{n} foto muutmine pole võimalik (õigustega seotud viga).","{n} foto muutmine pole võimalik (õigustega seotud viga)."],
     "Date / Time" : "Kuupäev / kellaaeg",
     "Collaborative Tags" : "Ühistegevuslikud sildid",
     "EXIF Fields" : "EXIF-väljad",
@@ -351,6 +354,7 @@
     "Merge faces" : "Mesti näotuvastuskirjed",
     "Unnamed person" : "Ilma nimeta inimene",
     "Merge {name} with {newName}?" : "Kas mestid „{name}“ näotuvastuskirje „{newName}“ kirjega?",
+    "You can only merge with a named person" : "Saad mestida vaid sellise näotuvastuskirjega, millega on seotud konkreetse nimega isik",
     "Too many failures, aborting" : "Liiga palju vigu, katkestan",
     "Error while moving {basename}" : "Viga teisaldamisel: {basename}",
     "Failed to move {name}." : "{name} faili teisaldamine ei õnnestunud.",
@@ -611,6 +615,8 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Kas viskame {count} objekti prügikasti?","Kas viskame {count} objekti prügikasti?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Prügikastis olevad failid võidakse kustutada etteantud aja möödumisel.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Kas eemaldame albumist {count} objekti?","Kas eemaldame albumist {count} objekti?"],
-    "This will not delete your original files." : "Sellega sa ei kustuta algseid faile."
+    "This will not delete your original files." : "Sellega sa ei kustuta algseid faile.",
+    "_You are about to download {count} item._::_You are about to download {count} items._" : ["Sa oled laadimas alla {count} objekti.","Sa oled laadimas alla {count} objekti."],
+    "_You are about to move {count} item._::_You are about to move {count} items._" : ["Sa oled teisaldamas {count} objekti.","Sa oled teisaldamas {count} objekti."]
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

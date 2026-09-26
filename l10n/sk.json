@@ -95,6 +95,7 @@
     "Sort folders oldest-first" : "Zoradiť priečinky od najstarších",
     "Sort albums oldest-first" : "Zoradiť albumy od najstarších",
     "Show hidden albums" : "Zobraziť skryté albumy",
+    "Day range (0-7)" : "Rozsah dní (0–7)",
     "Number of days before and after each anniversary" : "Počet dní pred a po každom výročí",
     "Photos per year (1-50)" : "Fotky za rok (1–50)",
     "Maximum number of photos to include per year" : "Maximálny počet fotografií, ktoré sa majú zahrnúť za rok",
@@ -327,6 +328,8 @@
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Niektoré vybraté položky majú nahromadené súbory RAW. Súbory RAW nebudú upravované.",
     "Missing date metadata" : "Chýbajúce metadáta dátumu",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Niektorým položkám môžu chýbať metadáta dátumu. Chcete sa pokúsiť skopírovať aktuálne známu časovú pečiatku do metadát (odporúča sa)? V opačnom prípade môže byť časová pečiatka resetovaná na aktuálny čas.",
+    "_Failed to load metadata for {n} photo._::_Failed to load metadata for {n} photos._" : ["Nepodarilo sa načítať metadáta pre {n} fotografiu.","Nepodarilo sa načítať metadáta pre {n} fotografie.","Nepodarilo sa načítať metadáta pre {n} fotografií.","Nepodarilo sa načítať metadáta pre {n} fotografií."],
+    "_{n} photo cannot be edited (permissions error)._::_{n} photos cannot be edited (permissions error)._" : ["{n} fotografiu nie je možné upraviť (chyba oprávnení).","{n} fotografie nie je možné upraviť (chyba oprávnení).","{n} fotografií nie je možné upraviť (chyba oprávnení).","{n} fotografií nie je možné upraviť (chyba oprávnení)."],
     "Date / Time" : "Dátum / Čas",
     "Collaborative Tags" : "Kolaboratívne značky",
     "EXIF Fields" : "EXIF polia",
@@ -351,6 +354,7 @@
     "Merge faces" : "Zlúčiť tváre",
     "Unnamed person" : "Nepomenovaná osoba",
     "Merge {name} with {newName}?" : "Zlúčiť {name} s {newName}?",
+    "You can only merge with a named person" : "Zlúčiť môžete iba s pomenovanou osobou",
     "Too many failures, aborting" : "Príliš veľa zlyhaní, prerušujem",
     "Error while moving {basename}" : "Chyba pri presúvaní {basename}",
     "Failed to move {name}." : "Nepodarilo sa presunúť {name}.",
@@ -611,6 +615,8 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Chcete presunúť {count} položku do koša?","Chcete presunúť {count} položky do koša?","Chcete presunúť {count} položiek do koša?","Chcete presunúť {count} položiek do koša?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Súbory v koši môžu byť po určitom čase automaticky odstránené.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Odstrániť {count} položku z albumu?","Odstrániť {count} položky z albumu?","Odstrániť {count} položiek z albumu?","Odstrániť {count} položky z albumu?"],
-    "This will not delete your original files." : "Týmto sa neodstránia vaše pôvodné súbory."
+    "This will not delete your original files." : "Týmto sa neodstránia vaše pôvodné súbory.",
+    "_You are about to download {count} item._::_You are about to download {count} items._" : ["Chystáte sa stiahnuť {count} položku.","Chystáte sa stiahnuť {count} položky.","Chystáte sa stiahnuť {count} položiek.","Chystáte sa stiahnuť {count} položiek."],
+    "_You are about to move {count} item._::_You are about to move {count} items._" : ["Chystáte sa presunúť {count} položku.","Chystáte sa presunúť {count} položky.","Chystáte sa presunúť {count} položiek.","Chystáte sa presunúť {count} položiek."]
 },"pluralForm" :"nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);"
 }

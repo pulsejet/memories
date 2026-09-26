@@ -97,6 +97,7 @@ OC.L10N.register(
     "Sort folders oldest-first" : "Ordner sortieren, älteste zuerst",
     "Sort albums oldest-first" : "Alben sortieren, älteste zuerst",
     "Show hidden albums" : "Zeige versteckte Alben",
+    "Day range (0-7)" : "Tagesbereich (0-7)",
     "Number of days before and after each anniversary" : "Anzahl der Tage vor und nach jedem Jahrestag",
     "Photos per year (1-50)" : "Fotos pro Jahr (1–50)",
     "Maximum number of photos to include per year" : "Maximale Anzahl der pro Jahr einzubeziehenden Fotos",
@@ -329,6 +330,8 @@ OC.L10N.register(
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Einige ausgewählte Elemente verfügen über gestapelte RAW-Dateien.\nRAW-Dateien werden nicht bearbeitet.",
     "Missing date metadata" : "Fehlende Datumsmetadaten",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Bei einigen Elementen fehlen möglicherweise die Datumsmetadaten. Möchtest du versuchen, den aktuell bekannten Zeitstempel in die Metadaten zu kopieren (empfohlen)? Andernfalls wird der Zeitstempel möglicherweise auf die aktuelle Zeit zurückgesetzt.",
+    "_Failed to load metadata for {n} photo._::_Failed to load metadata for {n} photos._" : ["Metadaten für {n} Foto konnte nicht geladen werden.","Metadaten für {n} Fotos konnten nicht geladen werden."],
+    "_{n} photo cannot be edited (permissions error)._::_{n} photos cannot be edited (permissions error)._" : ["{n} Foto kann nicht bearbeitet werden (Berechtigungsfehler).","{n} Fotos können nicht bearbeitet werden (Berechtigungsfehler)."],
     "Date / Time" : "Datum und Zeit",
     "Collaborative Tags" : "Kollaborative Schlagworte",
     "EXIF Fields" : "EXIF-Felder",
@@ -353,6 +356,7 @@ OC.L10N.register(
     "Merge faces" : "Gesichter vereinen",
     "Unnamed person" : "Unbenannte Person",
     "Merge {name} with {newName}?" : "{name} mit {newName} vereinen?",
+    "You can only merge with a named person" : "Du kannst nur mit einer Person mit Namen zusammenführen",
     "Too many failures, aborting" : "Zu viele Fehler, Abbruch",
     "Error while moving {basename}" : "Fehler beim Verschieben von {basename}",
     "Failed to move {name}." : "{name} konnte nicht verschoben werden.",
@@ -613,6 +617,8 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["{count} Element in den Papierkorb verschieben?","{count} Elemente in den Papierkorb verschieben?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Dateien im Papierkorb können nach einer festgelegten Zeitspanne automatisch gelöscht werden.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["{count} Element aus Album entfernen?","{count} Elemente aus Album entfernen?"],
-    "This will not delete your original files." : "Dies wird deine Originaldateien nicht löschen."
+    "This will not delete your original files." : "Dies wird deine Originaldateien nicht löschen.",
+    "_You are about to download {count} item._::_You are about to download {count} items._" : ["Du bist dabei, {count} Element herunterzuladen.","Du bist dabei, {count} Elemente herunterzuladen."],
+    "_You are about to move {count} item._::_You are about to move {count} items._" : ["Du bist dabei, {count} Element zu verschieben.","Du bist dabei, {count} Elemente zu verschieben."]
 },
 "nplurals=2; plural=(n != 1);");

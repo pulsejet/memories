@@ -95,6 +95,7 @@
     "Sort folders oldest-first" : "Ordenar pastas, itens mais antigos primeiro",
     "Sort albums oldest-first" : "Ordenar álbuns, itens mais antigos primeiro",
     "Show hidden albums" : "Mostrar álbuns ocultos",
+    "Day range (0-7)" : "Intervalo de dias (0-7)",
     "Number of days before and after each anniversary" : "Número de dias antes e depois de cada aniversário",
     "Photos per year (1-50)" : "Fotos por ano (1-50)",
     "Maximum number of photos to include per year" : "Número máximo de fotos a serem incluídas por ano",
@@ -327,6 +328,8 @@
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Alguns itens selecionados possuem arquivos RAW empilhados. \nArquivos RAW não serão editados.",
     "Missing date metadata" : "Metadados de data ausentes",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Alguns itens podem estar sem metadados de data. Deseja tentar copiar a marca temporal atualmente conhecida para os metadados (recomendado)? Caso contrário, a marca temporal poderá ser redefinida para a hora atual.",
+    "_Failed to load metadata for {n} photo._::_Failed to load metadata for {n} photos._" : ["Não foi possível carregar os metadados de {n} foto.","Não foi possível carregar os metadados de {n} de fotos.","Não foi possível carregar os metadados de {n} fotos."],
+    "_{n} photo cannot be edited (permissions error)._::_{n} photos cannot be edited (permissions error)._" : ["Não é possível editar {n} foto (erro de permissão).","Não é possível editar {n} de fotos (erro de permissão).","Não é possível editar {n} fotos (erro de permissão)."],
     "Date / Time" : "Data / Hora",
     "Collaborative Tags" : "Etiquetas Colaborativas",
     "EXIF Fields" : "Campos EXIF",
@@ -351,6 +354,7 @@
     "Merge faces" : "Mesclar rostos",
     "Unnamed person" : "Pessoa sem nome",
     "Merge {name} with {newName}?" : "Mesclar {name} com {newName}?",
+    "You can only merge with a named person" : "Você só pode mesclar com uma pessoa com nome",
     "Too many failures, aborting" : "Muitas falhas, abortando",
     "Error while moving {basename}" : "Erro ao mover {basename}",
     "Failed to move {name}." : "Falha ao mover {name}.",
@@ -611,6 +615,8 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Mover {count} item para a lixeira?","Mover {count} itens para a lixeira?","Mover {count} itens para a lixeira?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Os arquivos na lixeira podem ser excluídos automaticamente após um período fixo de tempo.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Remover {count} item do álbum?","Remover {count} itens do álbum?","Remover {count} itens do álbum?"],
-    "This will not delete your original files." : "Isso não excluirá seus arquivos originais."
+    "This will not delete your original files." : "Isso não excluirá seus arquivos originais.",
+    "_You are about to download {count} item._::_You are about to download {count} items._" : ["Você está prestes a baixar {count} item.","Você está prestes a baixar {count} de itens.","Você está prestes a baixar {count} itens."],
+    "_You are about to move {count} item._::_You are about to move {count} items._" : ["Você está prestes a mover {count} item.","Você está prestes a mover {count} de itens.","Você está prestes a mover {count} itens."]
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }
