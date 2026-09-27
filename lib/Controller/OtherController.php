@@ -90,29 +90,9 @@ final class OtherController extends ApiController
             // get memories version
             $version = $this->appManager->getAppVersion('memories');
 
-            // get user if logged in
-            try {
-                $uid = $this->util->getUID();
-            } catch (\Exception) {
-                $uid = null;
-            }
-
-            // helper function to get user config values
-            $getAppConfig = function (string $key, string $default) use ($uid): string {
-                return $uid ? $this->userConfig->getValueString($uid, Application::APPNAME, $key, $default) : $default;
-            };
-
             // user language and locale for native clients
             $language = $this->l10nFactory->findLanguage();
             $locale = $this->l10nFactory->findLocale($language);
-
-            // available map tile servers and the user's selected server URL
-            $mapTileServers = $this->systemConfig->get('memories.map.tile_servers');
-            $mapTileServerDefault = $mapTileServers[0]['url'] ?? '';
-            $mapTileServerUrl = $uid ? $this->userConfig->getValueString($uid, Application::APPNAME, 'mapTileServerUrl', $mapTileServerDefault) : $mapTileServerDefault;
-            if (!\in_array($mapTileServerUrl, array_column($mapTileServers, 'url'), true)) {
-                $mapTileServerUrl = $mapTileServerDefault;
-            }
 
             return new JSONResponse([
                 // general stuff
@@ -121,8 +101,8 @@ final class OtherController extends ApiController
                 'video_default_quality' => $this->systemConfig->get('memories.video_default_quality'),
                 'places_gis' => $this->systemConfig->get('memories.gis_type'),
                 'places_search_url' => $this->systemConfig->get('memories.places.search.url'),
-                'map_tile_servers' => $mapTileServers,
-                'map_tile_server_url' => $mapTileServerUrl,
+                'map_tile_servers' => $this->systemConfig->get('memories.map.tile_servers'),
+                'map_tile_server_url' => $this->systemConfig->getUserMapTileServerUrl(),
                 'language' => $language,
                 'locale' => $locale,
 
@@ -137,33 +117,34 @@ final class OtherController extends ApiController
                 'preview_generator_enabled' => $this->systemConfig->previewGeneratorIsEnabled(),
 
                 // general settings
-                'timeline_path' => $getAppConfig('timelinePath', $this->systemConfig->get('memories.timeline.default_path')),
-                'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
-                'stack_raw_files' => 'true' === $getAppConfig('stackRawFiles', 'true'),
-                'dedup_identical' => 'true' === $getAppConfig('dedupIdentical', 'false'),
-                'show_owner_name_timeline' => 'true' === $getAppConfig('showOwnerNameTimeline', 'false'),
+                'timeline_path' => $this->systemConfig->getUserConfigValue('timelinePath', $this->systemConfig->get('memories.timeline.default_path')),
+                'enable_top_memories' => 'true' === $this->systemConfig->getUserConfigValue('enableTopMemories', 'true'),
+                'stack_raw_files' => 'true' === $this->systemConfig->getUserConfigValue('stackRawFiles', 'true'),
+                'dedup_identical' => 'true' === $this->systemConfig->getUserConfigValue('dedupIdentical', 'false'),
+                'show_owner_name_timeline' => 'true' === $this->systemConfig->getUserConfigValue('showOwnerNameTimeline', 'false'),
 
                 // viewer settings
                 'high_res_cond_default' => $this->systemConfig->get('memories.viewer.high_res_cond_default'),
-                'livephoto_autoplay' => 'true' === $getAppConfig('livephotoAutoplay', 'false'),
-                'livephoto_loop' => 'true' === $getAppConfig('livephotoLoop', 'false'),
-                'video_loop' => 'true' === $getAppConfig('videoLoop', 'false'),
-                'sidebar_filepath' => 'true' === $getAppConfig('sidebarFilepath', 'false'),
-                'slideshow_duration' => (int) $getAppConfig('slideshowDuration', '5'),
+                'livephoto_autoplay' => 'true' === $this->systemConfig->getUserConfigValue('livephotoAutoplay', 'false'),
+                'livephoto_loop' => 'true' === $this->systemConfig->getUserConfigValue('livephotoLoop', 'false'),
+                'video_autoplay' => $this->systemConfig->getUserVideoAutoplay(),
+                'video_loop' => 'true' === $this->systemConfig->getUserConfigValue('videoLoop', 'false'),
+                'sidebar_filepath' => 'true' === $this->systemConfig->getUserConfigValue('sidebarFilepath', 'false'),
+                'slideshow_duration' => (int) $this->systemConfig->getUserConfigValue('slideshowDuration', '5'),
 
                 // on this day settings
-                'onthisday_day_range' => (int) $getAppConfig('onthisdayDayRange', '3'),
-                'onthisday_photos_per_year' => (int) $getAppConfig('onthisdayPhotosPerYear', '10'),
+                'onthisday_day_range' => (int) $this->systemConfig->getUserConfigValue('onthisdayDayRange', '3'),
+                'onthisday_photos_per_year' => (int) $this->systemConfig->getUserConfigValue('onthisdayPhotosPerYear', '10'),
 
                 // folder settings
-                'folders_path' => $getAppConfig('foldersPath', '/'),
-                'show_hidden_folders' => 'true' === $getAppConfig('showHidden', 'false'),
-                'sort_folder_month' => 'true' === $getAppConfig('sortFolderMonth', 'false'),
+                'folders_path' => $this->systemConfig->getUserConfigValue('foldersPath', '/'),
+                'show_hidden_folders' => 'true' === $this->systemConfig->getUserConfigValue('showHidden', 'false'),
+                'sort_folder_month' => 'true' === $this->systemConfig->getUserConfigValue('sortFolderMonth', 'false'),
 
                 // album settings
-                'sort_album_month' => 'true' === $getAppConfig('sortAlbumMonth', 'true'),
-                'show_hidden_albums' => 'true' === $getAppConfig('showHiddenAlbums', 'false'),
-                'album_list_sort' => (int) $getAppConfig('album_list_sort', '3'),
+                'sort_album_month' => 'true' === $this->systemConfig->getUserConfigValue('sortAlbumMonth', 'true'),
+                'show_hidden_albums' => 'true' === $this->systemConfig->getUserConfigValue('showHiddenAlbums', 'false'),
+                'album_list_sort' => (int) $this->systemConfig->getUserConfigValue('album_list_sort', '3'),
             ], Http::STATUS_OK);
         });
     }

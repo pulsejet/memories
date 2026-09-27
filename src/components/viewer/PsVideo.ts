@@ -203,9 +203,6 @@ class VideoContentSetup {
   }
 
   async initPlayerInner(content: VideoContent) {
-    // Prevent screen from sleeping
-    this.getWakeLock();
-
     const { isHLSProvider, Hls } = await this.vidstack;
 
     // Slide may have been destroyed or deactivated while loading the player chunk
@@ -222,8 +219,16 @@ class VideoContentSetup {
     player.poster = this.getPosterSrc(content);
     player.title = content.data.photo.basename ?? '';
     player.playsInline = true;
-    player.preload = 'metadata';
-    player.autoPlay = true;
+
+    if (staticConfig.getSync('video_autoplay') === 'true') {
+      player.preload = 'metadata';
+      player.autoPlay = true;
+    } else {
+      player.preload = 'none';
+      player.load = 'play';
+      player.autoPlay = false;
+    }
+
     if (staticConfig.getSync('video_loop')) {
       player.loop = true;
     }
@@ -272,6 +277,7 @@ class VideoContentSetup {
     player.addEventListener('playing', () => {
       if (!isVideoContent(content) || content.videoPlayer !== player) return;
       content.videoHasPlayed = true;
+      this.getWakeLock();
     });
 
     player.addEventListener('error', (e: Event) => {

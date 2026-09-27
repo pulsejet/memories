@@ -63,6 +63,15 @@
           {{ t('memories', 'Loop Live Photos') }}
         </NcCheckboxRadioSwitch>
 
+        <NcCheckboxRadioSwitch
+          :model-value="config.video_autoplay === 'true'"
+          :disabled="config.video_autoplay === 'disallow'"
+          @update:model-value="updateVideoAutoplay"
+          type="switch"
+        >
+          {{ t('memories', 'Autoplay Videos') }}
+        </NcCheckboxRadioSwitch>
+
         <NcCheckboxRadioSwitch v-model="config.video_loop" @update:model-value="updateVideoLoop" type="switch">
           {{ t('memories', 'Loop Videos') }}
         </NcCheckboxRadioSwitch>
@@ -417,6 +426,11 @@ export default defineComponent({
 
     async updateVideoLoop() {
       await this.updateSetting('video_loop', 'videoLoop');
+    },
+
+    async updateVideoAutoplay(val: boolean) {
+      this.config.video_autoplay = val ? 'true' : 'false';
+      await this.updateSetting('video_autoplay', 'videoAutoplay');
     },
 
     async updateSidebarFilepath() {

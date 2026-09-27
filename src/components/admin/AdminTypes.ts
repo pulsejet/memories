@@ -1,4 +1,4 @@
-import type { IConfig, IMapTileServer } from '@typings';
+import type { IConfig } from '@typings';
 
 /** System configuration */
 export type ISystemConfig = {
@@ -10,9 +10,10 @@ export type ISystemConfig = {
 
   'memories.gis_type': number;
   'memories.places.search.url': string;
-  'memories.map.tile_servers': IMapTileServer[];
+  'memories.map.tile_servers': IConfig['map_tile_servers'];
 
   'memories.viewer.high_res_cond_default': IConfig['high_res_cond_default'];
+  'memories.viewer.video.autoplay': IConfig['video_autoplay'];
 
   'memories.vod.disable': boolean;
   'memories.vod.ffmpeg': string;

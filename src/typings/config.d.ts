@@ -1,5 +1,6 @@
 declare module '@typings' {
   type HighResCond = 'always' | 'zoom' | 'never';
+  type VideoAutoplayOpts = 'true' | 'false' | 'disallow';
 
   export type IConfig = {
     // general stuff
@@ -34,6 +35,7 @@ declare module '@typings' {
     high_res_cond_default: HighResCond;
     livephoto_autoplay: boolean;
     livephoto_loop: boolean;
+    video_autoplay: VideoAutoplayOpts;
     video_loop: boolean;
     sidebar_filepath: boolean;
     metadata_in_slideshow: boolean;

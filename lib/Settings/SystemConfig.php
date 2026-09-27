@@ -67,6 +67,10 @@ final class SystemConfig
         // Valid values: 'always' | 'zoom' | 'never'
         'memories.viewer.high_res_cond_default' => 'zoom',
 
+        // Default video autoplay behavior for the photo viewer
+        // Valid values: 'true' | 'false' | 'disallow'
+        'memories.viewer.video.autoplay' => 'true',
+
         // Disable transcoding
         'memories.vod.disable' => true,
 
@@ -265,6 +269,43 @@ final class SystemConfig
     public function tagsIsEnabled(): bool
     {
         return $this->appManager->isEnabledForUser('systemtags');
+    }
+
+    /** Get a user config value for the app or default. */
+    public function getUserConfigValue(string $key, string $default): string
+    {
+        if ($uid = $this->userSession->getUser()?->getUID()) {
+            return $this->userConfig->getValueString($uid, Application::APPNAME, $key, $default);
+        }
+
+        return $default;
+    }
+
+    /** Get the user's selected map tile server URL. */
+    public function getUserMapTileServerUrl(): string
+    {
+        $mapTileServers = $this->get('memories.map.tile_servers');
+        $default = $mapTileServers[0]['url'] ?? '';
+
+        $url = $this->getUserConfigValue('mapTileServerUrl', $default);
+        if (!\in_array($url, array_column($mapTileServers, 'url'), true)) {
+            return $default;
+        }
+
+        return $url;
+    }
+
+    /** Get the effective video autoplay state for a user. */
+    public function getUserVideoAutoplay(): string
+    {
+        $admin = $this->get('memories.viewer.video.autoplay');
+        if ('disallow' === $admin) {
+            return $admin;
+        }
+
+        $value = $this->getUserConfigValue('videoAutoplay', $admin);
+
+        return 'false' === $value ? 'false' : 'true';
     }
 
     /** Check if recognize is enabled for this user */

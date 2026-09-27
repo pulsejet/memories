@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Direct play for browser-supported video codecs via codec detection.
 - **Feature**: Support multiple external transcoders with automatic load distribution.
 - **Feature**: File downloads are now resumable.
+- **Feature**: Allow admin and user to disable video autoplay ([#1230](https://github.com/pulsejet/memories/issues/1230))
 - **Fix**: Improved efficiency for indexing jobs ([#1315](https://github.com/pulsejet/memories/issues/1315))
 
 ## [v9.0.1] - 2026-09-15
