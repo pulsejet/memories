@@ -8,14 +8,15 @@ import { translate as t } from '@services/l10n';
 import { constants } from '@services/utils/const';
 import { isNetworkError } from '@services/utils/helpers';
 import { bus } from '@services/utils/event-bus';
+import { nativex } from '@native/api';
 
 import type { IConfig } from '@typings';
 
 class StaticConfig {
   private config: IConfig | null = null;
+  private versionChanged: boolean = false;
   private default: IConfig;
   private storage;
-  private verchange: boolean = false;
   private serverPromise: Promise<void>;
 
   public constructor() {
@@ -42,14 +43,12 @@ class StaticConfig {
 
     // Check if version changed
     if (old.version !== server.version) {
-      this.verchange = true;
+      this.versionChanged = true;
 
-      if (old.version) {
-        showInfo(
-          t('memories', 'Memories has been updated to {version}. Reload to get the new version.', {
-            version: server.version,
-          }),
-        );
+      // Let the user know they might need a page refresh to get a new version.
+      // None of the callers know about the old version, so we need to do this here.
+      if (!nativex && old.version) {
+        this.notifyVersionChanged(server.version);
       }
 
       // Clear page cache, keep other caches
@@ -90,6 +89,7 @@ class StaticConfig {
   }
 
   public async get<K extends keyof IConfig>(key: K): Promise<IConfig[K]> {
+    await this.serverPromise;
     return this.default[key];
   }
 
@@ -203,9 +203,17 @@ class StaticConfig {
     return config;
   }
 
-  public async versionChanged(): Promise<boolean> {
+  public async hasVersionChanged(): Promise<boolean> {
     await this.serverPromise;
-    return this.verchange;
+    return this.versionChanged;
+  }
+
+  private notifyVersionChanged(version: string) {
+    showInfo(
+      t('memories', 'Memories has been updated to {version}. Reload to get the new version.', {
+        version,
+      }),
+    );
   }
 }
 

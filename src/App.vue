@@ -320,7 +320,7 @@ export default defineComponent({
           console.info('SW registered: ', registration);
 
           // Check for updates
-          if (await staticConfig.versionChanged()) {
+          if (await staticConfig.hasVersionChanged()) {
             await registration.update();
           }
         } catch (error) {
