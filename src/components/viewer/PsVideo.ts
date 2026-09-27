@@ -121,7 +121,6 @@ class VideoContentSetup {
     lightbox.addFilter('isKeepingPlaceholder', (k, c) => this.isKeepingPlaceholder(k, c as unknown as PsContent));
     lightbox.addFilter('isContentZoomable', (z, c) => this.isContentZoomable(z, c as unknown as PsContent));
     lightbox.addFilter('useContentPlaceholder', (u, c) => this.useContentPlaceholder(u, c as unknown as PsContent));
-    lightbox.addFilter('placeholderSrc', (s, c) => this.placeholderSrc(s, c as unknown as PsContent));
   }
 
   initPswpEvents(pswp: PhotoSwipe) {
@@ -137,12 +136,6 @@ class VideoContentSetup {
 
     pswp.on('close', () => {
       this.destroyPlayer(pswp.currSlide?.content as VideoContent);
-    });
-
-    // Reveal once the opening animation lands; until then the placeholder
-    // carries the transition. Vue applies fully-opened on next tick, so defer.
-    pswp.on('openingAnimationEnd', () => {
-      window.setTimeout(() => this.maybeRevealPlayer(pswp.currSlide?.content as VideoContent), 50);
     });
 
     // Prevent closing when video fullscreen is active
@@ -189,6 +182,13 @@ class VideoContentSetup {
     }
   }
 
+  getPosterSrc(content: PsContent): string {
+    return utils.getPreviewUrl({
+      photo: content.data.photo,
+      msize: 1024,
+    });
+  }
+
   async initPlayer(content: VideoContent) {
     if (!isVideoContent(content) || content.videoPlayer || content.videoStarting) {
       return;
@@ -214,12 +214,10 @@ class VideoContentSetup {
     }
 
     // Late mount: controls render now, media loads since the slide is active.
-    // Starts hidden, revealed once fully opened; poster thumbs pre-playback.
     const { src, videoIsHls } = this.getPreferredSrc(content);
 
     // Make elements.
     const player = document.createElement('media-player') as MediaPlayerElement;
-    player.style.opacity = '0';
     player.src = src;
     player.poster = this.getPosterSrc(content);
     player.title = content.data.photo.basename ?? '';
@@ -291,20 +289,6 @@ class VideoContentSetup {
     // Full-viewport player in the slide holder; onZoomPanUpdate mirrors
     // PhotoSwipe's native slide values onto the picture layer.
     content.slide?.holderElement?.appendChild(content.element);
-
-    // Reveal once fully opened (or shortly after, if the opening
-    // animation events don't fire, e.g. animation disabled).
-    this.maybeRevealPlayer(content);
-    window.setTimeout(() => this.maybeRevealPlayer(content, true), 1500);
-  }
-
-  /** Show the player once the viewer is fully opened (poster covers pre-playback) */
-  maybeRevealPlayer(content: VideoContent, force = false) {
-    const player = content?.videoPlayer;
-    if (!player || !isVideoContent(content)) return;
-    if (force || document.querySelector('.memories-viewer.fully-opened')) {
-      player.style.opacity = '1';
-    }
   }
 
   /**
@@ -457,21 +441,6 @@ class VideoContentSetup {
 
   useContentPlaceholder(usePlaceholder: boolean, content: PsContent) {
     return isVideoContent(content) || usePlaceholder;
-  }
-
-  getPosterSrc(content: PsContent): string {
-    return utils.getPreviewUrl({
-      photo: content.data.photo,
-      msize: 1024,
-    });
-  }
-
-  placeholderSrc(placeholderSrc: string | false, content: PsContent) {
-    if (placeholderSrc || !isVideoContent(content)) {
-      return placeholderSrc;
-    } else {
-      return this.getPosterSrc(content);
-    }
   }
 
   async getWakeLock() {

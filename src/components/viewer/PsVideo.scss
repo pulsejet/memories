@@ -8,9 +8,9 @@
     transform: translate(-50%, -50%);
     width: var(--vw, 100%);
     height: var(--vh, 100%);
-    display: flex;
     align-items: center;
     justify-content: center;
+    display: none;
 
     media-player {
       width: 100%;
@@ -55,6 +55,7 @@
       transform: none;
       width: 100%;
       height: 100%;
+      display: flex;
 
       // Bottom gradient for videos. Lives in the slide above video,
       // so it never covers the controls like the viewer-level bottom bar would.
