@@ -87,6 +87,7 @@ OC.L10N.register(
     "Ascending" : "S walluy",
     "Newest first" : "Imaynuten d imezwura",
     "Descending" : "S usider",
+    "Share album" : "Bḍu album",
     "Home" : "Asnubeg",
     "Upload files" : "Azen ifuyla",
     "Move left" : "Smutti ɣer zelmaḍ",
