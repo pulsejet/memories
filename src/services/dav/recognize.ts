@@ -9,18 +9,17 @@ import staticConfig from '@services/static-config';
  * is disabled or unavailable.
  */
 export function onRecognizeApiKeyUpdate(callback: (key?: string) => void): void {
-  (async () => {
+  (async (): Promise<string | undefined> => {
     if (!(await staticConfig.get('recognize_enabled'))) {
-      callback();
-      return;
+      return undefined;
     }
 
     try {
       const res = await axios.get<{ apiKey: string }>(API.RECOGNIZE_API_KEY());
-      callback(res.data?.apiKey || undefined);
+      return res.data?.apiKey || undefined;
     } catch (err) {
       console.error('Failed to fetch Recognize API key', err);
-      callback();
+      return undefined;
     }
-  })();
+  })().then(callback);
 }
