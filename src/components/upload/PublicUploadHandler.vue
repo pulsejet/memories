@@ -284,7 +284,7 @@ export default defineComponent({
   .progress-text {
     display: block;
     font-size: 0.8em;
-    color: var(--color-text-lighter);
+    color: var(--color-text-maxcontrast);
     margin-bottom: 2px;
     white-space: nowrap;
     overflow: hidden;

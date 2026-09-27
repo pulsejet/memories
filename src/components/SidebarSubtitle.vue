@@ -36,7 +36,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .sidebar-subtitle {
-  color: var(--color-text-lighter);
+  color: var(--color-text-maxcontrast);
   display: flex;
   gap: 0 12px;
 }

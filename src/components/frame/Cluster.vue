@@ -201,7 +201,7 @@ $namemargin: 10px;
     }
 
     > .subtitle {
-      color: var(--color-text-lighter);
+      color: var(--color-text-maxcontrast);
     }
   }
 

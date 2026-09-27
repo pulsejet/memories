@@ -96,7 +96,7 @@ export default defineComponent({
     font-size: 1.1em;
     line-height: 1.2em;
     margin-top: 0.5em;
-    color: var(--color-text-lighter);
+    color: var(--color-text-maxcontrast);
     display: flex;
     padding-left: 10px;
 

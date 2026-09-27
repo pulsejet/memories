@@ -141,7 +141,7 @@ export default defineComponent({
 
   :deep(.leaflet-control-attribution) {
     background-color: var(--color-background-dark);
-    color: var(--color-text-light);
+    color: var(--color-text-maxcontrast);
   }
 
   :deep(.leaflet-bar a) {

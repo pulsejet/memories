@@ -440,7 +440,7 @@ export default defineComponent({
   }
 
   &__subtitle {
-    color: var(--color-text-lighter);
+    color: var(--color-text-maxcontrast);
   }
 
   &__public-link-button {

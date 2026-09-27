@@ -262,7 +262,7 @@ export default defineComponent({
     font-weight: bold;
   }
   .form-subtitle {
-    color: var(--color-text-lighter);
+    color: var(--color-text-maxcontrast);
   }
   .form-inputs {
     flex-grow: 1;

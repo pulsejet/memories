@@ -175,6 +175,6 @@ export default defineComponent({
 }
 
 span.field-title {
-  color: var(--color-text-lighter);
+  color: var(--color-text-maxcontrast);
 }
 </style>

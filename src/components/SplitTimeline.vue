@@ -300,7 +300,7 @@ export default defineComponent({
           width: 22px;
           height: 4px;
           border-radius: 40px;
-          background-color: var(--color-text-light);
+          background-color: var(--color-text-maxcontrast);
           z-index: 1;
           opacity: 0.75;
           pointer-events: none;

@@ -625,7 +625,7 @@ a {
     margin-right: 10px;
 
     :deep(.material-design-icon) {
-      color: var(--color-text-lighter);
+      color: var(--color-text-maxcontrast);
     }
   }
   .edit {
