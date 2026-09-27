@@ -1559,7 +1559,6 @@ export default defineComponent({
 
 .recycler {
   will-change: scroll-position;
-  overscroll-behavior: none;
   contain: strict;
   height: 300px;
   width: 100%;
