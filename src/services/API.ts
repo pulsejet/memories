@@ -223,6 +223,10 @@ export class API {
     return gen(`${BASE}/system-status`);
   }
 
+  static RECOGNIZE_API_KEY() {
+    return gen(`${BASE}/recognize/api-key`);
+  }
+
   static FAILURE_LOGS() {
     return gen(`${BASE}/failure-logs`);
   }

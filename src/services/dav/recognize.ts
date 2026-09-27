@@ -1,0 +1,26 @@
+import axios from '@nextcloud/axios';
+import { API } from '@services/API';
+import staticConfig from '@services/static-config';
+
+/**
+ * One-shot fetch of the Recognize API key.
+ *
+ * Calls back with the API key, or undefined if Recognize
+ * is disabled or unavailable.
+ */
+export function onRecognizeApiKeyUpdate(callback: (key?: string) => void): void {
+  (async () => {
+    if (!(await staticConfig.get('recognize_enabled'))) {
+      callback();
+      return;
+    }
+
+    try {
+      const res = await axios.get<{ apiKey: string }>(API.RECOGNIZE_API_KEY());
+      callback(res.data?.apiKey || undefined);
+    } catch (err) {
+      console.error('Failed to fetch Recognize API key', err);
+      callback();
+    }
+  })();
+}

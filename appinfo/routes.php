@@ -87,6 +87,8 @@ return [
         ['name' => 'Other#getUserConfig', 'url' => '/api/config', 'verb' => 'GET'],
         ['name' => 'Other#describeApi', 'url' => '/api/describe', 'verb' => 'GET'],
 
+        ['name' => 'Recognize#apiKey', 'url' => '/api/recognize/api-key', 'verb' => 'GET'],
+
         // Admin
         ['name' => 'Admin#getSystemStatus', 'url' => '/api/system-status', 'verb' => 'GET'],
         ['name' => 'Admin#getSystemConfig', 'url' => '/api/system-config', 'verb' => 'GET'],

@@ -16,21 +16,16 @@ use OCP\AppFramework\Http\Events\BeforeTemplateRenderedEvent;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
 use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Services\IInitialState;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IRequest;
 use OCP\IUserSession;
-use Psr\Log\LoggerInterface;
 
 final class PageController extends Controller
 {
     public function __construct(
         IRequest $request,
         protected IEventDispatcher $eventDispatcher,
-        private IInitialState $initialState,
-        private LoggerInterface $logger,
         private IUserSession $userSession,
-        private ?\OCA\Recognize\Public\ApiKeyManager $apiKeyManager,
         protected SystemConfig $systemConfig,
         protected Util $util,
     ) {
@@ -52,16 +47,7 @@ final class PageController extends Controller
 
         // Additional setup for Recognize
         if ($this->systemConfig->recognizeIsInstalled()) {
-            // Auto translation for tags
             \OCP\Util::addTranslations('recognize');
-            // Obtain API Key
-            if (null !== $this->apiKeyManager) {
-                try {
-                    $this->initialState->provideInitialState('recognizeApiKey', $this->apiKeyManager->generateApiKey());
-                } catch (\JsonException $e) {
-                    $this->logger->error('Failed to generate recognize api key', ['exception' => $e]);
-                }
-            }
         }
 
         $response = new TemplateResponsePatch(Application::APPNAME, 'main', self::getMainParams());
