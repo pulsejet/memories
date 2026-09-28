@@ -37,6 +37,7 @@
       key-field="id"
       size-field="size"
       type-field="type"
+      :disableTransform="true"
       :updateInterval="100"
       @update="scrollChangeRecycler"
     >
