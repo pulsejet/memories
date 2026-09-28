@@ -25,6 +25,7 @@ OC.L10N.register(
     "Favorite" : "Menyif",
     "Unarchive" : "Kkes aɣbar",
     "Edit metadata" : "Ẓreg iɣefisefka",
+    "Add to album" : "Rnu ɣer walbum",
     "Cancel" : "Sefsex",
     "General" : "Amatu",
     "Account" : "Amiḍan",

@@ -95,6 +95,7 @@
     "Sort folders oldest-first" : "Sort folders oldest-first",
     "Sort albums oldest-first" : "Sort albums oldest-first",
     "Show hidden albums" : "Show hidden albums",
+    "Day range (0-7)" : "Day range (0-7)",
     "Number of days before and after each anniversary" : "Number of days before and after each anniversary",
     "Photos per year (1-50)" : "Photos per year (1-50)",
     "Maximum number of photos to include per year" : "Maximum number of photos to include per year",
@@ -242,6 +243,7 @@
     "Enable external transcoder" : "Enable external transcoder",
     "Binary path (local only)" : "Binary path (local only)",
     "Bind address (local only)" : "Bind address (local only)",
+    "Nextcloud URL for transcoder (local only)" : "Nextcloud URL for transcoder (local only)",
     "Connection addresses (comma separated)" : "Connection addresses (comma separated)",
     "Quality Factor (15 - 45) (default 25)" : "Quality Factor (15 - 45) (default 25)",
     "Default high resolution image loading behavior of the photo viewer." : "Default high resolution image loading behaviour of the photo viewer.",
@@ -327,6 +329,8 @@
     "Some selected items have stacked RAW files.\nRAW files will not be edited." : "Some selected items have stacked RAW files.\nRAW files will not be edited.",
     "Missing date metadata" : "Missing date metadata",
     "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time." : "Some items may be missing the date metadata. Do you want to attempt copying the currently known timestamp to the metadata (recommended)? Othewise, the timestamp may be reset to the current time.",
+    "_Failed to load metadata for {n} photo._::_Failed to load metadata for {n} photos._" : ["Failed to load metadata for {n} photo.","Failed to load metadata for {n} photos."],
+    "_{n} photo cannot be edited (permissions error)._::_{n} photos cannot be edited (permissions error)._" : ["{n} photo cannot be edited (permissions error).","{n} photos cannot be edited (permissions error)."],
     "Date / Time" : "Date / Time",
     "Collaborative Tags" : "Collaborative Tags",
     "EXIF Fields" : "EXIF Fields",
@@ -351,6 +355,7 @@
     "Merge faces" : "Merge faces",
     "Unnamed person" : "Unnamed person",
     "Merge {name} with {newName}?" : "Merge {name} with {newName}?",
+    "You can only merge with a named person" : "You can only merge with a named person",
     "Too many failures, aborting" : "Too many failures, aborting",
     "Error while moving {basename}" : "Error while moving {basename}",
     "Failed to move {name}." : "Failed to move {name}.",
@@ -474,6 +479,7 @@
     "{name} failed test: {info}." : "{name} failed test: {info}.",
     "{name} binary exists and is usable ({info})." : "{name} binary exists and is usable ({info}).",
     "{name} binary status: {status}." : "{name} binary status: {status}.",
+    "{srv} - Healthy ({version}, latency={latency}ms)." : "{srv} - Healthy ({version}, latency={latency}ms).",
     "{srv} - Healthy ({version})." : "{srv} - Healthy ({version}).",
     "{srv} - Unhealthy ({info})." : "{srv} - Unhealthy ({info}).",
     "Save as" : "Save as",
@@ -611,6 +617,8 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Move {count} item to trash?","Move {count} items to trash?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Files in trash may be automatically deleted after a fixed period of time.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Remove {count} item from album?","Remove {count} items from album?"],
-    "This will not delete your original files." : "This will not delete your original files."
+    "This will not delete your original files." : "This will not delete your original files.",
+    "_You are about to download {count} item._::_You are about to download {count} items._" : ["You are about to download {count} item.","You are about to download {count} items."],
+    "_You are about to move {count} item._::_You are about to move {count} items._" : ["You are about to move {count} item.","You are about to move {count} items."]
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

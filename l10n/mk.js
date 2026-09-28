@@ -93,6 +93,8 @@ OC.L10N.register(
     "Sort folders oldest-first" : "Сортирај папки по најстарите",
     "Sort albums oldest-first" : "Подреди ги албумите од најстарите",
     "Show hidden albums" : "Прикажи сокриени албуми",
+    "Day range (0-7)" : "Дневен опсег (0-7)",
+    "Number of days before and after each anniversary" : "Број на денови пред и по секоја годишнина",
     "Photos per year (1-50)" : "Фотографии годишно (1-50)",
     "Maximum number of photos to include per year" : "Максимален број на фотографии што треба да се вклучат годишно",
     "Info" : "Инфо",
