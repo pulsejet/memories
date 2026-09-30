@@ -12,7 +12,7 @@
       >
         <span class="text">{{ regionText(region) }}</span>
         <NcButton
-          :type="confirming === region.id ? 'error' : 'tertiary'"
+          :variant="confirming === region.id ? 'error' : 'tertiary'"
           :aria-label="removeLabel(region)"
           :title="removeLabel(region)"
           :disabled="removing"
@@ -33,8 +33,8 @@
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js';
+import NcButton from '@nextcloud/vue/components/NcButton';
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
 
 import DeleteIcon from 'vue-material-design-icons/Delete.vue';
 

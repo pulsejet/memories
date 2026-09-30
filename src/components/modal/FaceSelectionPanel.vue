@@ -11,7 +11,7 @@
         <NcTextField
           ref="editField"
           class="field"
-          :value.sync="editName"
+          v-model="editName"
           :label="t('memories', 'Name')"
           :label-visible="false"
           :placeholder="t('memories', 'Name')"
@@ -29,7 +29,7 @@
             <OpenInNewIcon :size="16" />
           </a>
         </p>
-        <NcCheckboxRadioSwitch v-if="canMoveGroup" :checked.sync="wholeGroup">
+        <NcCheckboxRadioSwitch v-if="canMoveGroup" v-model="wholeGroup">
           {{ t('memories', 'Move the whole group') }}
         </NcCheckboxRadioSwitch>
         <p v-if="target" class="scope">{{ editScope }}</p>
@@ -58,7 +58,7 @@
       <NcButton @click="$emit('cancel')">
         {{ t('memories', 'Cancel') }}
       </NcButton>
-      <NcButton v-if="canDelete" :type="confirmDelete ? 'error' : 'secondary'" :disabled="saving" @click="remove">
+      <NcButton v-if="canDelete" :variant="confirmDelete ? 'error' : 'secondary'" :disabled="saving" @click="remove">
         {{ deleteLabel }}
       </NcButton>
       <NcButton v-if="canUnignore" :disabled="saving" @click="unignore">
@@ -67,7 +67,7 @@
       <NcButton v-else-if="canIgnore" :disabled="saving" @click="ignore">
         {{ t('memories', 'Ignore') }}
       </NcButton>
-      <NcButton v-if="face && canEditName" type="primary" :disabled="!canSaveName" @click="saveName">
+      <NcButton v-if="face && canEditName" variant="primary" :disabled="!canSaveName" @click="saveName">
         {{ t('memories', 'Save') }}
       </NcButton>
     </div>
@@ -75,13 +75,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 import type { PropType } from 'vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
-const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
 
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 

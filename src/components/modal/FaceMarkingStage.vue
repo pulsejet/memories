@@ -50,7 +50,7 @@
 
     <div class="zoom-controls">
       <NcButton
-        type="tertiary"
+        variant="tertiary"
         :aria-label="t('memories', 'Zoom out')"
         :disabled="scale <= MIN_SCALE"
         @click="zoomBy(1 / ZOOM_STEP)"
@@ -59,14 +59,14 @@
       </NcButton>
       <span class="zoom-level">{{ Math.round(scale * 100) }} %</span>
       <NcButton
-        type="tertiary"
+        variant="tertiary"
         :aria-label="t('memories', 'Zoom in')"
         :disabled="scale >= MAX_SCALE"
         @click="zoomBy(ZOOM_STEP)"
       >
         +
       </NcButton>
-      <NcButton type="tertiary" :disabled="scale === MIN_SCALE" @click="resetView">
+      <NcButton variant="tertiary" :disabled="scale === MIN_SCALE" @click="resetView">
         {{ t('memories', 'Fit') }}
       </NcButton>
     </div>
@@ -77,7 +77,7 @@
 import { defineComponent, type PropType } from 'vue';
 import Hammer from 'hammerjs';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+import NcButton from '@nextcloud/vue/components/NcButton';
 
 import type { Rect, StageFace, StageRegion } from './faceMarking';
 import { rectFromPoints, toCss } from './faceMarking';
@@ -183,7 +183,7 @@ export default defineComponent({
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     try {
       hammers.get(this)?.destroy();
     } catch (e) {

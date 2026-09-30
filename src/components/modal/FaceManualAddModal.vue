@@ -9,7 +9,7 @@
       <div v-if="!fileId" class="picker-step">
         <NcNoteCard v-if="loadError" type="error">{{ loadError }}</NcNoteCard>
         <p>{{ t('memories', 'Choose a photo containing the person you want to tag.') }}</p>
-        <NcButton type="primary" @click="pickFile">
+        <NcButton variant="primary" @click="pickFile">
           {{ t('memories', 'Choose photo') }}
         </NcButton>
       </div>
@@ -23,7 +23,7 @@
 
         <NcNoteCard v-if="loadError" type="error">
           {{ loadError }}
-          <NcButton type="tertiary" @click="loadFaces">{{ t('memories', 'Try again') }}</NcButton>
+          <NcButton variant="tertiary" @click="loadFaces">{{ t('memories', 'Try again') }}</NcButton>
         </NcNoteCard>
 
         <NcNoteCard v-if="!dimensionsKnown" type="warning">
@@ -95,7 +95,7 @@
           <NcTextField
             ref="nameField"
             class="field"
-            :value.sync="rawInput"
+            v-model="rawInput"
             :label="t('memories', 'Name')"
             :label-visible="false"
             :placeholder="t('memories', 'Name')"
@@ -133,7 +133,7 @@
         <NcButton v-if="canSaveUnnamed" :disabled="saving" @click="saveUnnamed">
           {{ t('memories', 'Save without name') }}
         </NcButton>
-        <NcButton class="button" type="primary" :disabled="!canSaveNamed" @click="saveNamed">
+        <NcButton class="button" variant="primary" :disabled="!canSaveNamed" @click="saveNamed">
           {{ t('memories', 'Save') }}
         </NcButton>
       </template>
@@ -142,13 +142,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 import axios from '@nextcloud/axios';
 import { getFilePickerBuilder } from '@nextcloud/dialogs';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-import NcNoteCard from '@nextcloud/vue/dist/Components/NcNoteCard.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
@@ -683,7 +683,7 @@ export default defineComponent({
   transition: opacity 0.25s ease;
 }
 
-.saved-notice-enter,
+.saved-notice-enter-from,
 .saved-notice-leave-to {
   opacity: 0;
 }
