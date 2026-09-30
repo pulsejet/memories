@@ -249,11 +249,11 @@ export function regionText(region: IManualRegion): string {
   }
 }
 
-export function stageRegionOf(region: IManualRegion, width: number, height: number): StageRegion {
+export function stageRegionOf(region: IManualRegion, width: number, height: number, highlighted = false): StageRegion {
   return {
     id: region.id,
     rect: fractionsOf(region, width, height),
-    classes: [`region-${region.state}`],
+    classes: [`region-${region.state}`, ...(highlighted ? ['highlighted'] : [])],
     title: regionText(region),
   };
 }

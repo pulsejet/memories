@@ -387,6 +387,15 @@ export async function faceRecognitionIgnoreFaces(faceIds: number[]) {
   return (await axios.post<{ faceIds: number[] }>(url, { faceIds })).data;
 }
 
+/**
+ * Delete areas drawn to be searched. One still waiting is not searched any
+ * more; the faces found in the others stay.
+ */
+export async function faceRecognitionDeleteRegions(regionIds: number[]) {
+  const url = generateUrl(`/apps/facerecognition/api/2.0/regions/delete`);
+  return (await axios.post<{ regionIds: number[] }>(url, { regionIds })).data;
+}
+
 /** Stop ignoring faces: they go back to the recognition. */
 export async function faceRecognitionUnignoreFaces(faceIds: number[]) {
   const url = generateUrl(`/apps/facerecognition/api/2.0/faces/unignore`);

@@ -83,12 +83,12 @@
           </template>
         </div>
 
-        <div v-if="regions && regions.length" class="regions">
-          <div class="section-title">{{ t('memories', 'Searched areas') }}</div>
-          <ul>
-            <li v-for="region in regions" :key="region.id">{{ regionText(region) }}</li>
-          </ul>
-        </div>
+        <FaceRegionList
+          v-if="regions && regions.length"
+          :regions="regions"
+          @highlight="highlightedRegionId = $event"
+          @done="onRegionRemoved"
+        />
 
         <!-- A new marking -->
         <div v-if="rect && !selectedFaces.length" class="fields">
@@ -154,6 +154,7 @@ import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
 import FaceMarkingStage from './FaceMarkingStage.vue';
 import FaceSelectionPanel from './FaceSelectionPanel.vue';
+import FaceRegionList from './FaceRegionList.vue';
 
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
@@ -173,7 +174,6 @@ import {
   inputOf,
   markingScope,
   regionScope,
-  regionText,
   stageFaceOf,
   stageRegionOf,
   type Rect,
@@ -186,7 +186,7 @@ const NOTICE_MS = 4000;
 
 export default defineComponent({
   name: 'FaceManualAddModal',
-  components: { NcButton, NcNoteCard, NcTextField, Modal, FaceMarkingStage, FaceSelectionPanel },
+  components: { NcButton, NcNoteCard, NcTextField, Modal, FaceMarkingStage, FaceSelectionPanel, FaceRegionList },
 
   mixins: [ModalMixin],
 
@@ -211,6 +211,8 @@ export default defineComponent({
     saveError: '',
     /** The faces selected, in the order they were picked; several with Ctrl+click */
     selectedFaceIds: [] as number[],
+    /** The searched area the pointer is on in the list, shown on the photo */
+    highlightedRegionId: null as number | null,
     knownNames: [] as string[],
     navigationError: false,
     /** What was just saved, shown over the photo for a moment */
@@ -282,7 +284,9 @@ export default defineComponent({
 
     stageRegions(): StageRegion[] {
       if (!this.dimensionsKnown || !this.regions) return [];
-      return this.regions.map((region) => stageRegionOf(region, this.imageNatW, this.imageNatH));
+      return this.regions.map((region) =>
+        stageRegionOf(region, this.imageNatW, this.imageNatH, region.id === this.highlightedRegionId),
+      );
     },
 
     markingScope(): string {
@@ -302,8 +306,6 @@ export default defineComponent({
   },
 
   methods: {
-    regionText,
-
     open() {
       this.resetAll();
       this.changed = false;
@@ -416,6 +418,7 @@ export default defineComponent({
       this.saving = false;
       this.saveError = '';
       this.selectedFaceIds = [];
+      this.highlightedRegionId = null;
       window.clearTimeout(this.noticeTimer);
       this.notice = '';
     },
@@ -529,6 +532,13 @@ export default defineComponent({
       if (this.selectedFaceIds.length === 1) {
         this.$nextTick(() => (this.$refs.panel as InstanceType<typeof FaceSelectionPanel> | undefined)?.focusName());
       }
+    },
+
+    /** A searched area was removed from the list: tell, and read the photo again. */
+    async onRegionRemoved(message: string): Promise<void> {
+      this.showNotice(message);
+      this.highlightedRegionId = null;
+      await this.loadFaces();
     },
 
     clearSelection() {
@@ -715,21 +725,6 @@ export default defineComponent({
       border: 1px dotted #95a5a6;
       opacity: 0.6;
     }
-  }
-}
-
-.regions {
-  font-size: 0.9em;
-
-  .section-title {
-    font-weight: bold;
-    margin-bottom: 2px;
-  }
-
-  ul {
-    margin: 0;
-    padding-left: 18px;
-    list-style: disc;
   }
 }
 

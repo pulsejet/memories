@@ -460,6 +460,12 @@ export default defineComponent({
   &.region-done {
     border: 1px dashed rgba(52, 152, 219, 0.6);
   }
+
+  // The area the pointer is on in the list below the photo, to see which it is.
+  &.highlighted {
+    border: 3px solid #3498db;
+    background: rgba(52, 152, 219, 0.15);
+  }
 }
 
 .face-box {
