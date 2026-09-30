@@ -20,6 +20,31 @@
       </div>
     </div>
 
+    <div v-if="config.facerecognition_enabled" class="people face-recognition">
+      <div class="section-header">
+        <div class="section-title">{{ t('memories', 'Face Recognition') }}</div>
+        <NcActions :inline="1" v-if="!facerecognitionFailed">
+          <NcActionButton :aria-label="t('memories', 'Add person')" @click="openManualAdd" close-after-click>
+            {{ t('memories', 'Add person') }}
+            <template #icon> <AddIcon :size="20" /> </template>
+          </NcActionButton>
+        </NcActions>
+      </div>
+      <div v-if="facerecognitionFailed" class="error-hint">
+        {{ t('memories', 'Face Recognition is unavailable. The app may need an update to match its database schema.') }}
+      </div>
+      <template v-else-if="facerecognitionPeople.length">
+        <div class="container" v-for="face of facerecognitionPeople" :key="face.cluster_id">
+          <Cluster class="cluster--rounded" :data="face" :counters="false"> </Cluster>
+        </div>
+      </template>
+      <div v-else class="empty-hint">
+        {{ t('memories', 'No faces detected — click + to tag manually') }}
+      </div>
+    </div>
+
+    <FaceManualAddModal ref="manualAddModal" @added="refresh" />
+
     <div v-if="albums.length">
       <div class="section-title">{{ t('memories', 'Albums') }}</div>
       <AlbumsList class="albums" :albums="albums" />
@@ -88,9 +113,11 @@ import { DateTime } from 'luxon';
 import UserConfig from '@mixins/UserConfig';
 import Cluster from '@components/frame/Cluster.vue';
 import AlbumsList from '@components/modal/AlbumsList.vue';
+import FaceManualAddModal from '@components/modal/FaceManualAddModal.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 import MapStandalone from '@components/MapStandalone.vue';
 
+import AddIcon from 'vue-material-design-icons/AccountPlus.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import CameraIrisIcon from 'vue-material-design-icons/CameraIris.vue';
@@ -121,6 +148,8 @@ export default defineComponent({
     NcAvatar,
     AlbumsList,
     Cluster,
+    FaceManualAddModal,
+    AddIcon,
     EditIcon,
     XLoadingIcon,
     MapStandalone,
@@ -417,14 +446,19 @@ export default defineComponent({
     },
 
     people(): IFace[] {
-      const clusters = this.baseInfo?.clusters;
+      return this.baseInfo?.clusters?.recognize ?? [];
+    },
 
-      // force face-recognition on its own route, or if recognize is disabled
-      if (this.routeIsFaceRecognition || !this.config.recognize_enabled) {
-        return clusters?.facerecognition ?? [];
-      }
+    facerecognitionPeople(): IFace[] {
+      return this.baseInfo?.clusters?.facerecognition ?? [];
+    },
 
-      return clusters?.recognize ?? [];
+    /**
+     * The server could not build the face recognition clusters for this file.
+     * The rest of the metadata is still valid, so only this section degrades.
+     */
+    facerecognitionFailed(): boolean {
+      return this.baseInfo?.clustersFailed?.includes('facerecognition') ?? false;
     },
 
     isShared(): boolean {
@@ -520,6 +554,21 @@ export default defineComponent({
       _m.modals.editMetadata([_m.viewer.currentPhoto!], [4]);
     },
 
+    openManualAdd() {
+      const modal = this.$refs.manualAddModal as InstanceType<typeof FaceManualAddModal> | undefined;
+      if (!modal) return;
+      if (this.fileid) {
+        modal.openForFile({
+          fileid: this.fileid,
+          etag: this.baseInfo?.etag,
+          w: this.baseInfo?.w,
+          h: this.baseInfo?.h,
+        });
+      } else {
+        modal.open();
+      }
+    },
+
     handleFileUpdated({ fileid }: utils.BusEvent['files:file:updated']) {
       if (fileid && this.fileid === fileid) {
         this.refresh();
@@ -591,6 +640,17 @@ a {
   > .section-title {
     margin-bottom: 4px;
   }
+  > .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 4px;
+    margin-bottom: 4px;
+
+    > .section-title {
+      flex: 1;
+    }
+  }
   > .container {
     width: calc(100% / 3);
     aspect-ratio: 1;
@@ -602,6 +662,17 @@ a {
     @media (max-width: 768px) {
       font-size: 0.95em;
     }
+  }
+  > .empty-hint {
+    padding: 6px 8px 10px;
+    font-size: 0.9em;
+    color: var(--color-text-lighter);
+  }
+
+  > .error-hint {
+    padding: 6px 8px 10px;
+    font-size: 0.9em;
+    color: var(--color-error-text, var(--color-error));
   }
 }
 
