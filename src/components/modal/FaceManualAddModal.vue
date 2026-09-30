@@ -712,6 +712,8 @@ export default defineComponent({
 
   .swatch {
     display: inline-block;
+    // The border comes on top of the size; NcModal makes everything in it border-box.
+    box-sizing: content-box;
     width: 16px;
     height: 10px;
     border: 2px solid #95a5a6;
