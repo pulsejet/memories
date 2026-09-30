@@ -13,7 +13,7 @@
     </div>
 
     <template #buttons>
-      <NcButton @click="close" class="button" type="error">
+      <NcButton @click="close" class="button" variant="error">
         {{ t('memories', 'Cancel') }}
       </NcButton>
     </template>
@@ -21,13 +21,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
-const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 
 import Cluster from '@components/frame/Cluster.vue';
 import Modal from './Modal.vue';
@@ -62,8 +62,8 @@ export default defineComponent({
 
   methods: {
     open() {
-      const user = this.$route.params.user || '';
-      if (this.$route.params.user !== utils.uid) {
+      const user = this.$route.params.user?.toString() || '';
+      if (this.$route.params.user?.toString() !== utils.uid) {
         showError(
           this.t('memories', 'Only user "{user}" can update this person', {
             user,
@@ -79,8 +79,8 @@ export default defineComponent({
     },
 
     async clickFace(face: IFace) {
-      const user = this.$route.params.user || '';
-      const name = this.$route.params.name || '';
+      const user = this.$route.params.user?.toString() || '';
+      const name = this.$route.params.name?.toString() || '';
 
       const newName = String(face.name || face.cluster_id);
 
@@ -88,8 +88,8 @@ export default defineComponent({
         !(await utils.confirmDestructive({
           title: this.t('memories', 'Merge faces'),
           message: this.t('memories', 'Merge {name} with {newName}?', {
-            name: utils.isNumber(name) ? this.t('memories', 'unnamed person') : name,
-            newName: utils.isNumber(newName) ? this.t('memories', 'unnamed person') : newName,
+            name: utils.isNumber(name) ? this.t('memories', 'Unnamed person') : name,
+            newName: utils.isNumber(newName) ? this.t('memories', 'Unnamed person') : newName,
           }),
           confirm: this.t('memories', 'Continue'),
           confirmClasses: 'error',
@@ -101,7 +101,7 @@ export default defineComponent({
 
       if (this.routeIsFaceRecognition) {
         if (Number.isInteger(Number(newName))) {
-          showError(this.t('memories', 'You can only merge with a person with name'));
+          showError(this.t('memories', 'You can only merge with a named person'));
           return;
         }
         await dav.faceRecognitionRenamePerson(name, newName);

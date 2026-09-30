@@ -5,6 +5,7 @@ on:
       - master
     paths:
       - 'docs/**'
+      - 'hooks/**'
       - 'CHANGELOG.md'
       - 'mkdocs.yml'
 

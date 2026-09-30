@@ -6,24 +6,29 @@ export type ISystemConfig = {
   'memories.exiftool_no_local': boolean;
   'memories.index.mode': string;
   'memories.index.path': string;
-  'memories.index.path.blacklist': string;
+  'memories.index.folder.blocklist': string[];
 
   'memories.gis_type': number;
+  'memories.places.search.url': string;
+  'memories.map.tile_servers': IConfig['map_tile_servers'];
 
   'memories.viewer.high_res_cond_default': IConfig['high_res_cond_default'];
+  'memories.viewer.video.autoplay': IConfig['video_autoplay'];
 
   'memories.vod.disable': boolean;
   'memories.vod.ffmpeg': string;
   'memories.vod.ffprobe': string;
   'memories.vod.path': string;
   'memories.vod.bind': string;
-  'memories.vod.connect': string;
+  'memories.vod.nc_url': string;
+  'memories.vod.connect': string[];
   'memories.vod.external': boolean;
   'memories.vod.qf': number;
   'memories.video_default_quality': string;
 
   'memories.vod.vaapi': boolean;
   'memories.vod.vaapi.low_power': boolean;
+  'memories.vod.vaapi.device': string;
 
   'memories.vod.nvenc': boolean;
   'memories.vod.nvenc.temporal_aq': boolean;
@@ -44,6 +49,13 @@ export type ISystemConfig = {
 
 export type IBinaryStatus = 'ok' | 'not_found' | 'not_executable' | 'test_ok' | string;
 
+export type IServiceStatus = {
+  server: string;
+  healthy: boolean;
+  detail: string;
+  latencyMs?: number | null;
+};
+
 export type ISystemStatus = {
   last_index_job_start: number;
   last_index_job_duration: number;
@@ -51,6 +63,9 @@ export type ISystemStatus = {
   last_index_job_status_type: string;
 
   bad_encryption: boolean;
+  db_is_sqlite?: boolean;
+  innodb_buffer_pool_size?: number;
+
   indexed_count: number;
   failure_count: number;
   mimes: string[];
@@ -63,6 +78,7 @@ export type ISystemStatus = {
   ffmpeg: IBinaryStatus;
   ffprobe: IBinaryStatus;
   govod: IBinaryStatus;
+  govod_servers: IServiceStatus[];
   vaapi_dev: 'ok' | 'not_found' | 'not_readable';
 
   action_token: string;

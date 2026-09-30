@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace OCA\Memories\Tests\Unit;
 
 use OCA\Memories\Exif;
-use PHPUnit\Framework\TestCase;
+use OCA\Memories\Tests\Injected;
+use OCA\Memories\Tests\TestCase;
 
 /**
  * @internal
@@ -14,9 +15,12 @@ use PHPUnit\Framework\TestCase;
  */
 final class ExifDateParseTest extends TestCase
 {
+    #[Injected]
+    private Exif $exif;
+
     public function testStandardUtc(): void
     {
-        $dt = Exif::parseExifDate([
+        $dt = $this->exif->parseExifDate([
             'DateTimeOriginal' => '2023:03:05 18:58:17',
         ]);
         self::assertSame('2023-03-05 18:58:17', $dt->format('Y-m-d H:i:s'));
@@ -26,7 +30,7 @@ final class ExifDateParseTest extends TestCase
 
     public function testFallbackToCreateDate(): void
     {
-        $dt = Exif::parseExifDate([
+        $dt = $this->exif->parseExifDate([
             'CreateDate' => '2023:03:05 18:58:17',
         ]);
         self::assertSame('2023-03-05 18:58:17', $dt->format('Y-m-d H:i:s'));
@@ -34,7 +38,7 @@ final class ExifDateParseTest extends TestCase
 
     public function testFormatWithoutSeconds(): void
     {
-        $dt = Exif::parseExifDate([
+        $dt = $this->exif->parseExifDate([
             'DateTimeOriginal' => '2023:03:05 18:58',
         ]);
         self::assertSame('2023-03-05 18:58:00', $dt->format('Y-m-d H:i:s'));
@@ -42,7 +46,7 @@ final class ExifDateParseTest extends TestCase
 
     public function testFormatWithSubseconds(): void
     {
-        $dt = Exif::parseExifDate([
+        $dt = $this->exif->parseExifDate([
             'DateTimeOriginal' => '2023:03:05 18:58:17.500000',
         ]);
         self::assertSame('2023-03-05 18:58:17.500000', $dt->format('Y-m-d H:i:s.u'));
@@ -50,7 +54,7 @@ final class ExifDateParseTest extends TestCase
 
     public function testFormatWithEmbeddedOffset(): void
     {
-        $dt = Exif::parseExifDate([
+        $dt = $this->exif->parseExifDate([
             'DateTimeOriginal' => '2023:03:05 18:58:17+02:00',
         ]);
         self::assertSame('2023-03-05 18:58:17 +02:00', $dt->format('Y-m-d H:i:s P'));
@@ -59,7 +63,7 @@ final class ExifDateParseTest extends TestCase
 
     public function testTimezoneOffsetTimeOriginal(): void
     {
-        $dt = Exif::parseExifDate([
+        $dt = $this->exif->parseExifDate([
             'DateTimeOriginal' => '2023:03:05 18:58:17',
             'OffsetTimeOriginal' => '+05:30',
         ]);
@@ -69,7 +73,7 @@ final class ExifDateParseTest extends TestCase
 
     public function testTimezoneOffsetTime(): void
     {
-        $dt = Exif::parseExifDate([
+        $dt = $this->exif->parseExifDate([
             'DateTimeOriginal' => '2023:03:05 18:58:17',
             'OffsetTime' => '-04:00',
         ]);
@@ -79,7 +83,7 @@ final class ExifDateParseTest extends TestCase
 
     public function testTimezoneLocationTzid(): void
     {
-        $dt = Exif::parseExifDate([
+        $dt = $this->exif->parseExifDate([
             'DateTimeOriginal' => '2023:03:05 18:58:17',
             'LocationTZID' => 'America/New_York',
         ]);
@@ -89,7 +93,7 @@ final class ExifDateParseTest extends TestCase
 
     public function testInvalidTimezoneFallbackToUtc(): void
     {
-        $dt = Exif::parseExifDate([
+        $dt = $this->exif->parseExifDate([
             'DateTimeOriginal' => '2023:03:05 18:58:17',
             'OffsetTimeOriginal' => 'invalid-tz',
         ]);
@@ -99,7 +103,7 @@ final class ExifDateParseTest extends TestCase
 
     public function testVideoPrefersCreateDate(): void
     {
-        $dt = Exif::parseExifDate([
+        $dt = $this->exif->parseExifDate([
             'MIMEType' => 'video/mp4',
             'DateTimeOriginal' => '2021:01:01 10:00:00',
             'CreateDate' => '2022:06:15 12:30:00',
@@ -109,7 +113,7 @@ final class ExifDateParseTest extends TestCase
 
     public function testImagePrefersDateTimeOriginal(): void
     {
-        $dt = Exif::parseExifDate([
+        $dt = $this->exif->parseExifDate([
             'MIMEType' => 'image/jpeg',
             'DateTimeOriginal' => '2021:01:01 10:00:00',
             'CreateDate' => '2022:06:15 12:30:00',
@@ -119,7 +123,7 @@ final class ExifDateParseTest extends TestCase
 
     public function testFallsBackToCreateDate(): void
     {
-        $dt = Exif::parseExifDate(['CreateDate' => '2022:06:15 12:30:00']);
+        $dt = $this->exif->parseExifDate(['CreateDate' => '2022:06:15 12:30:00']);
 
         self::assertSame('2022-06-15 12:30:00', $dt->format('Y-m-d H:i:s'));
     }
@@ -127,7 +131,7 @@ final class ExifDateParseTest extends TestCase
     public function testEmbeddedOffsetDefinesInstant(): void
     {
         // Embedded +02:00 defines the instant; OffsetTimeOriginal only changes display tz
-        $dt = Exif::parseExifDate([
+        $dt = $this->exif->parseExifDate([
             'DateTimeOriginal' => '2023:03:05 18:58:17+02:00',
             'OffsetTimeOriginal' => '+05:30',
         ]);
@@ -136,29 +140,56 @@ final class ExifDateParseTest extends TestCase
         self::assertSame('+05:30', $dt->format('P'));
     }
 
+    public function testTrailingDstSuffixWithOffset(): void
+    {
+        // ExifTool appends " DST" to H264/AVCHD dates with DST flag set (#1710)
+        $dt = $this->exif->parseExifDate([
+            'DateTimeOriginal' => '2018:05:10 13:23:29+02:00 DST',
+        ]);
+        self::assertSame('2018-05-10 13:23:29 +02:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(1525951409, $dt->getTimestamp());
+    }
+
+    public function testTrailingStdSuffixWithOffset(): void
+    {
+        $dt = $this->exif->parseExifDate([
+            'DateTimeOriginal' => '2018:01:10 13:23:29+01:00 STD',
+        ]);
+        self::assertSame('2018-01-10 13:23:29 +01:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(1515587009, $dt->getTimestamp());
+    }
+
+    public function testTrailingDstSuffixWithSubseconds(): void
+    {
+        $dt = $this->exif->parseExifDate([
+            'DateTimeOriginal' => '2023:03:05 18:58:17.500000+02:00 DST',
+        ]);
+        self::assertSame('2023-03-05 18:58:17.500000 +02:00', $dt->format('Y-m-d H:i:s.u P'));
+    }
+
     public function testThrowsOnEmpty(): void
     {
         $this->expectException(\Exception::class);
-        Exif::parseExifDate([]);
+        $this->exif->parseExifDate([]);
     }
 
     public function testThrowsOnInvalidDate(): void
     {
         $this->expectException(\Exception::class);
-        Exif::parseExifDate(['DateTimeOriginal' => 'not a date']);
+        $this->exif->parseExifDate(['DateTimeOriginal' => 'not a date']);
     }
 
     public function testRejectsAncientDate(): void
     {
         $this->expectException(\Exception::class);
-        Exif::parseExifDate(['DateTimeOriginal' => '1700:01:01 00:00:00']);
+        $this->exif->parseExifDate(['DateTimeOriginal' => '1700:01:01 00:00:00']);
     }
 
     public function testRejectsQuickTimeZeroDate(): void
     {
         // 1904-01-01 for blank with QuickTimeUTC=1
         $this->expectException(\Exception::class);
-        Exif::parseExifDate([
+        $this->exif->parseExifDate([
             'MIMEType' => 'video/mp4',
             'DateTimeOriginal' => '1904:01:01 00:00:00',
             'CreateDate' => '1904:01:01 00:00:00',

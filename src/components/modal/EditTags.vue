@@ -2,7 +2,7 @@
   <div class="outer">
     <NcSelectTags
       ref="selectTags"
-      class="nc-comp"
+      class="nc-component"
       v-model="tagSelection"
       :label-outside="true"
       :disabled="disabled"
@@ -17,9 +17,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
-const NcSelectTags = () => import('@nextcloud/vue/dist/Components/NcSelectTags.js');
+const NcSelectTags = defineAsyncComponent(() => import('@nextcloud/vue/components/NcSelectTags'));
 
 import * as dav from '@services/dav';
 
@@ -48,32 +48,30 @@ export default defineComponent({
     newTags: new Map<number, dav.ITag>(),
   }),
 
-  computed: {
-    refs() {
-      return this.$refs as {
-        selectTags: VueNcSelectTags;
-      };
-    },
-  },
-
   mounted() {
     this.init();
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        selectTags: VueNcSelectTags;
+      };
+    },
+
     init() {
       let tagIds: number[] | null = null;
 
       // Find common tags in all selected photos
       for (const photo of this.photos) {
         const s = new Set<number>();
-        for (const tag of Object.keys(photo.imageInfo?.tags || {}).map(Number)) {
+        for (const tag of Object.keys(photo.imageInfo?.tags ?? {}).map(Number)) {
           s.add(tag);
         }
-        tagIds = tagIds ? [...tagIds].filter((x) => s.has(x)) : [...s];
+        tagIds = tagIds ? [...tagIds].filter((x: number) => s.has(x)) : [...s];
       }
 
-      this.tagSelection = tagIds || [];
+      this.tagSelection = tagIds ?? [];
       this.origIds = new Set(this.tagSelection);
     },
 
@@ -106,7 +104,7 @@ export default defineComponent({
 
     getAvailable(): dav.ITag[] {
       // FIXME: this is extremely fragile
-      return this.refs.selectTags.availableTags;
+      return this.refs().selectTags.availableTags;
     },
 
     handleCreate(newTag: dav.ITag) {
@@ -149,13 +147,11 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .outer {
-  margin-top: 10px;
-
-  .nc-comp {
+  .nc-component {
     width: 100%;
-
-    :deep ul {
-      max-height: 200px;
+    :deep(.vs__dropdown-toggle) {
+      padding-block: 0 !important;
+      padding-inline: 0 !important;
     }
   }
 }

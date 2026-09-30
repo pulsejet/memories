@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
-use OCP\IDBConnection;
 
 trait TimelineWriteFailures
 {
-    protected IDBConnection $connection;
+    use TimelineWriteBase;
 
     /**
      * Mark a file as failed indexing.
@@ -26,7 +24,7 @@ trait TimelineWriteFailures
         $reason .= " ({$file->getPath()})";
 
         // Remove all previous failures for this file
-        Util::transaction(function () use ($file, $reason): void {
+        $this->util->transaction(function () use ($file, $reason): void {
             $this->clearFailures($file);
 
             // Add the failure to the database
@@ -79,7 +77,7 @@ trait TimelineWriteFailures
             ->select('*')
             ->from('memories_failures')
             ->executeQuery()
-            ->fetchAll()
+            ->fetchAllAssociative()
         ;
     }
 
@@ -88,6 +86,6 @@ trait TimelineWriteFailures
      */
     public function clearAllFailures(): void
     {
-        SQL::truncate($this->connection, 'memories_failures', false);
+        $this->connection->truncateTable('memories_failures', false);
     }
 }

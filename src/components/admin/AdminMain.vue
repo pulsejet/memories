@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, markRaw } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
@@ -41,12 +41,16 @@ import Places from './sections/Places.vue';
 import Video from './sections/Video.vue';
 import VideoTranscoder from './sections/VideoTranscoder.vue';
 import VideoAccel from './sections/VideoAccel.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import type { ISystemConfig, ISystemStatus } from './AdminTypes';
 import type { IConfig } from '@typings';
 
 export default defineComponent({
   name: 'Admin',
+  components: {
+    XLoadingIcon,
+  },
 
   data: () => ({
     loading: 0,
@@ -56,17 +60,17 @@ export default defineComponent({
     sconfig: null as IConfig | null,
 
     components: [
-      Help,
-      Exif,
-      Indexing,
-      FileSupport,
-      Viewer,
-      Performance,
-      Apps,
-      Places,
-      Video,
-      VideoTranscoder,
-      VideoAccel,
+      markRaw(Help),
+      markRaw(Exif),
+      markRaw(Indexing),
+      markRaw(FileSupport),
+      markRaw(Viewer),
+      markRaw(Performance),
+      markRaw(Apps),
+      markRaw(Places),
+      markRaw(Video),
+      markRaw(VideoTranscoder),
+      markRaw(VideoAccel),
     ],
   }),
 
@@ -74,6 +78,11 @@ export default defineComponent({
     this.refreshSystemConfig();
     this.refreshStatus();
     this.refreshStaticConfig();
+    utils.bus.on('memories:user-config-changed', this.refreshStaticConfig);
+  },
+
+  beforeUnmount() {
+    utils.bus.off('memories:user-config-changed', this.refreshStaticConfig);
   },
 
   methods: {
@@ -82,7 +91,7 @@ export default defineComponent({
         this.loading++;
         const res = await axios.get<ISystemConfig>(API.SYSTEM_CONFIG(null));
         this.config = res.data;
-      } catch (e) {
+      } catch (e: any) {
         showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
         console.error(e);
       } finally {
@@ -95,7 +104,7 @@ export default defineComponent({
         this.loading++;
         const res = await axios.get<ISystemStatus>(API.SYSTEM_STATUS());
         this.status = res.data;
-      } catch (e) {
+      } catch (e: any) {
         showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
         console.error(e);
       } finally {
@@ -107,7 +116,7 @@ export default defineComponent({
       try {
         this.loading++;
         this.sconfig = await staticConfig.getAll();
-      } catch (e) {
+      } catch (e: any) {
         showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
         console.error(e);
       } finally {
@@ -116,7 +125,7 @@ export default defineComponent({
     },
 
     async update<K extends keyof ISystemConfig>(key: K, value: ISystemConfig[K] | null = null) {
-      if (!this.config?.hasOwnProperty(key)) {
+      if (!this.config || !Object.hasOwn(this.config, key)) {
         console.error('Unknown setting', key);
         return;
       }
@@ -160,7 +169,6 @@ export default defineComponent({
       flex: 1;
       padding-right: 10px;
       height: 100%;
-      overflow-y: auto;
     }
 
     > .right-pane {
@@ -173,11 +181,11 @@ export default defineComponent({
     }
   }
 
-  :deep a {
+  :deep(a) {
     color: var(--color-primary-element);
   }
 
-  :deep .admin-section {
+  :deep(.admin-section) {
     margin-top: 20px;
 
     form {
@@ -227,7 +235,7 @@ export default defineComponent({
     width: 28px;
     height: 28px;
 
-    :deep svg {
+    :deep(svg) {
       width: 100%;
       height: 100%;
     }

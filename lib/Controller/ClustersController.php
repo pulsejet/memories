@@ -23,17 +23,21 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
 use OCA\Memories\ClustersBackend;
+use OCA\Memories\Db\FsManager;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
-use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IPreview;
+use OCP\IRequest;
 
-final class ClustersController extends GenericApiController
+final class ClustersController extends ApiController
 {
     /**
      * Current backend for this instance.
@@ -42,13 +46,22 @@ final class ClustersController extends GenericApiController
      */
     protected ClustersBackend\Backend $backend;
 
+    public function __construct(
+        IRequest $request,
+        protected FsManager $fs,
+        protected IPreview $previewManager,
+        protected Util $util,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * Get list of clusters.
      */
     #[NoAdminRequired]
     public function list(string $backend, int $fileid = 0): Http\Response
     {
-        return Util::guardEx(function () use ($backend, $fileid) {
+        return $this->util->guardEx(function () use ($backend, $fileid) {
             $this->init($backend);
 
             $list = $this->backend->getClusters($fileid);
@@ -64,7 +77,7 @@ final class ClustersController extends GenericApiController
     #[NoCSRFRequired]
     public function preview(string $backend, string $name): Http\Response
     {
-        return Util::guardEx(function () use ($backend, $name) {
+        return $this->util->guardEx(function () use ($backend, $name) {
             $this->init($backend);
 
             // Attempt to get the cover preview (-6 magic)
@@ -97,7 +110,7 @@ final class ClustersController extends GenericApiController
     #[NoAdminRequired]
     public function setCover(string $backend, string $name, int $fileid): Http\Response
     {
-        return Util::guardEx(function () use ($backend, $name, $fileid) {
+        return $this->util->guardEx(function () use ($backend, $name, $fileid) {
             $this->init($backend);
 
             $photos = $this->backend->getPhotos($name, 1, $fileid);
@@ -115,10 +128,9 @@ final class ClustersController extends GenericApiController
      * Download a cluster as a zip file.
      */
     #[NoAdminRequired]
-    #[UseSession]
-    public function download(string $backend, string $name): Http\Response
+    public function download(string $backend, string $name, DownloadController $downloadController): Http\Response
     {
-        return Util::guardEx(function () use ($backend, $name) {
+        return $this->util->guardEx(function () use ($backend, $name, $downloadController) {
             $this->init($backend);
 
             // Get list of all files in this cluster
@@ -127,7 +139,7 @@ final class ClustersController extends GenericApiController
 
             // Get download handle
             $filename = $this->backend->clusterName($name);
-            $handle = \OCA\Memories\Controller\DownloadController::createHandle($filename, $fileIds);
+            $handle = $downloadController->createHandle($filename, $fileIds);
 
             return new JSONResponse(['handle' => $handle], Http::STATUS_OK);
         });
@@ -139,7 +151,7 @@ final class ClustersController extends GenericApiController
      */
     protected function init(string $backend): void
     {
-        Util::getUser();
+        $this->util->getUser();
 
         $this->backend = ClustersBackend\Manager::get($backend);
 
@@ -156,9 +168,6 @@ final class ClustersController extends GenericApiController
      */
     private function getPreviewFromPhotoList(array $photos, bool $isCover): Http\Response
     {
-        // Get preview manager
-        $previewManager = \OC::$server->get(\OCP\IPreview::class);
-
         // Try to get a preview
         foreach ($photos as $photo) {
             // Get preview image
@@ -166,9 +175,12 @@ final class ClustersController extends GenericApiController
                 $quality = $this->backend->getPreviewQuality();
 
                 $file = $this->fs->getUserFile($this->backend->getFileId($photo));
-                $file = $previewManager->getPreview($file, $quality, $quality, false);
+                $file = $this->previewManager->getPreview($file, $quality, $quality, false);
 
                 [$blob, $mimetype] = $this->backend->getPreviewBlob($file, $photo);
+                if (empty($blob)) {
+                    continue;
+                }
 
                 $response = new DataDisplayResponse($blob, Http::STATUS_OK, [
                     'Content-Type' => $mimetype,

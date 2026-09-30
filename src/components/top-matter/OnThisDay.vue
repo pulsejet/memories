@@ -1,7 +1,7 @@
 <template>
   <div class="outer" v-show="years.length > 0">
     <div class="inner hide-scrollbar" ref="inner">
-      <div v-for="year of years" class="group" :key="year.year" @click="click(year)">
+      <div v-for="year of years" class="group" :key="year.text" @click="click(year)">
         <XImg class="fill-block" :src="year.url" />
 
         <div class="overlay top-left fill-block">
@@ -30,10 +30,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, markRaw } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
@@ -42,6 +42,7 @@ import type { IPhoto } from '@typings';
 
 import LeftMoveIcon from 'vue-material-design-icons/ChevronLeft.vue';
 import RightMoveIcon from 'vue-material-design-icons/ChevronRight.vue';
+import XImg from '@components/frame/XImg.vue';
 
 interface IYear {
   year: number;
@@ -58,6 +59,7 @@ export default defineComponent({
     NcActionButton,
     LeftMoveIcon,
     RightMoveIcon,
+    XImg,
   },
 
   emits: {
@@ -73,35 +75,35 @@ export default defineComponent({
   }),
 
   computed: {
-    refs() {
-      return this.$refs as {
-        inner?: HTMLDivElement;
-      };
-    },
-
     photosPerYear(): number {
       return staticConfig.getSync('onthisday_photos_per_year');
     },
   },
 
   mounted() {
-    const inner = this.refs.inner!;
+    const inner = this.refs().inner!;
 
     inner.addEventListener('scroll', this.onScroll.bind(this), {
       passive: true,
     });
 
-    this.resizeObserver = new ResizeObserver(this.onScroll.bind(this));
+    this.resizeObserver = markRaw(new ResizeObserver(this.onScroll.bind(this)));
     this.resizeObserver.observe(inner);
 
     this.refreshNow();
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.resizeObserver?.disconnect();
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        inner?: HTMLDivElement;
+      };
+    },
+
     onload() {
       this.$emit('load');
     },
@@ -111,10 +113,12 @@ export default defineComponent({
       const dayIdToday = utils.dateToDayId(new Date());
       const cacheUrl = `/onthisday/${dayIdToday}`;
       const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
+      utils.applyAuids(cache);
       if (cache) this.process(cache);
 
       // Network request
       const photos = await dav.getOnThisDayRaw();
+      utils.applyAuids(photos);
       utils.cacheData(cacheUrl, photos);
 
       // Check if exactly same as cache
@@ -125,25 +129,22 @@ export default defineComponent({
     async process(photos: IPhoto[]) {
       this.years = [];
 
-      let currentYear = 9999;
       let currentText = '';
+      let prevDayId = Number.MAX_SAFE_INTEGER;
 
       for (const photo of photos) {
         // Skip hidden files
+        if (!photo.dayid) continue;
         if (photo.ishidden) continue;
         if (photo.basename?.startsWith('.')) continue;
 
-        // Skip videos for now (strange bugs)
-        if (photo.isvideo) continue;
-
-        // Get year and text for this photo
-        const dateTaken = utils.dayIdToDate(photo.dayid);
-        const year = dateTaken.getUTCFullYear();
         photo.key = `${photo.fileid}`;
 
-        // DateTime calls are expensive, so check if the year
-        // itself is different first, then also check the text
-        if (year !== currentYear) {
+        // New anniversary, not calendar year (breaks at year boundary).
+        // Mirrors Timeline.vue. DateTime calls are expensive.
+        if (Math.abs(prevDayId - photo.dayid) > 30) {
+          const dateTaken = utils.dayIdToDate(photo.dayid);
+          const year = dateTaken.getUTCFullYear();
           const text = utils.getFromNowStr(dateTaken, { padding: 10 });
           if (text !== currentText) {
             this.years.push({
@@ -155,8 +156,8 @@ export default defineComponent({
             });
             currentText = text;
           }
-          currentYear = year;
         }
+        prevDayId = photo.dayid;
 
         const yearObj = this.years[this.years.length - 1];
         yearObj.photos.push(photo);
@@ -169,13 +170,6 @@ export default defineComponent({
 
       // Choose preview photo
       for (const year of this.years) {
-        // Try to prioritize landscape photos on desktop
-        if (_m.window.innerWidth <= 600) {
-          const landscape = year.photos.filter((p) => (p.w ?? 0) > (p.h ?? 0));
-          year.preview = utils.randomChoice(landscape);
-        }
-
-        // Get random photo
         year.preview ||= utils.randomChoice(year.photos);
         year.url = utils.getPreviewUrl({
           photo: year.preview,
@@ -189,12 +183,12 @@ export default defineComponent({
     },
 
     moveLeft() {
-      const inner = this.refs.inner!;
-      inner.scrollBy(-(this.scrollStack.pop() || inner.clientWidth), 0);
+      const inner = this.refs().inner!;
+      inner.scrollBy(-(this.scrollStack.pop() ?? inner.clientWidth), 0);
     },
 
     moveRight() {
-      const inner = this.refs.inner!;
+      const inner = this.refs().inner!;
       const innerRect = inner.getBoundingClientRect();
       const nextChild = Array.from(inner.children)
         .map((c) => c.getBoundingClientRect())
@@ -207,7 +201,7 @@ export default defineComponent({
     },
 
     onScroll() {
-      const inner = this.refs.inner;
+      const inner = this.refs().inner;
       if (!inner) return;
       this.hasLeft = inner.scrollLeft > 0;
       this.hasRight = inner.clientWidth + inner.scrollLeft < inner.scrollWidth - 20;
@@ -246,7 +240,7 @@ $mobHeight: 165px;
     will-change: scroll-position;
   }
 
-  :deep .dir-btn button {
+  :deep(.dir-btn button) {
     transform: scale(0.6);
     box-shadow: var(--color-main-text) 0 0 3px 0 !important;
     background-color: var(--color-main-background) !important;

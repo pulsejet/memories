@@ -45,6 +45,7 @@ OC.L10N.register(
     "Expires" : "Expira",
     "Read only" : "Sólo lectura",
     "Refresh" : "Actualizar",
+    "OK" : "OK",
     "Oldest first" : "Más antiguo primero",
     "Newest first" : "Más reciente primero",
     "Home" : "Inicio",
@@ -59,7 +60,6 @@ OC.L10N.register(
     "Text" : "Texto",
     "Size" : "Tamaño",
     "Position" : "Posición",
-    "Auto" : "Auto",
     "Setup" : "Ajustes",
     "Choose" : "Seleccionar"
 },

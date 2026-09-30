@@ -5,7 +5,7 @@
     </template>
 
     <template #buttons>
-      <NcButton @click="save" class="button" type="error" v-if="photos" :disabled="processing">
+      <NcButton @click="save" class="button" variant="error" v-if="photos" :disabled="processing">
         {{ t('memories', 'Save') }}
       </NcButton>
     </template>
@@ -55,11 +55,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
-const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 
 import UserConfig from '@mixins/UserConfig';
 
@@ -84,7 +83,6 @@ import type { IExif, IImageInfo, IPhoto } from '@typings';
 export default defineComponent({
   components: {
     NcButton,
-    NcTextField,
     NcProgressBar,
     Modal,
 
@@ -105,7 +103,12 @@ export default defineComponent({
     state: 0,
   }),
 
-  computed: {
+  created() {
+    console.assert(!_m.modals.editMetadata, 'EditMetadataModal created twice');
+    _m.modals.editMetadata = this.open;
+  },
+
+  methods: {
     refs() {
       return this.$refs as {
         editDate?: InstanceType<typeof EditDate>;
@@ -115,20 +118,16 @@ export default defineComponent({
         editOrientation?: InstanceType<typeof EditOrientation>;
       };
     },
-  },
 
-  created() {
-    console.assert(!_m.modals.editMetadata, 'EditMetadataModal created twice');
-    _m.modals.editMetadata = this.open;
-  },
-
-  methods: {
     async open(photos: IPhoto[], sections: number[] = [1, 2, 3, 4]) {
       const state = (this.state = Math.random());
       this.show = true;
       this.processing = true;
       this.sections = sections;
       this.progress = 0;
+
+      // Include identical copies hidden by de-duplication (#1299)
+      photos = photos.flatMap((p) => [p, ...(p.dups ?? [])]);
 
       // Filter out forbidden MIME types
       photos = photos.filter((p) => {
@@ -189,8 +188,8 @@ export default defineComponent({
     async save() {
       // Perform validation
       try {
-        this.refs.editDate?.validate?.();
-      } catch (e) {
+        this.refs().editDate?.validate?.();
+      } catch (e: any) {
         console.error(e);
         showError(e);
         return;
@@ -203,15 +202,15 @@ export default defineComponent({
 
       // Get exif fields diff
       const exifResult = {
-        ...(this.refs.editExif?.result?.() || {}),
-        ...(this.refs.editLocation?.result?.() || {}),
+        ...(this.refs().editExif?.result?.() ?? {}),
+        ...(this.refs().editLocation?.result?.() ?? {}),
       };
 
       // Tags may be created which might throw
       let tagsResult: { add: number[]; remove: number[] } | null = null;
       try {
-        tagsResult = (await this.refs.editTags?.result?.()) ?? null;
-      } catch (e) {
+        tagsResult = (await this.refs().editTags?.result?.()) ?? null;
+      } catch (e: any) {
         this.processing = false;
         console.error(e);
         showError(e);
@@ -222,17 +221,17 @@ export default defineComponent({
       const exifs = new Map<number, IExif>();
       for (const p of this.photos!) {
         // Basic EXIF fields
-        const raw: IExif = JSON.parse(JSON.stringify(exifResult));
+        const raw: IExif = structuredClone(exifResult as IExif);
 
         // Date header
-        const date = this.refs.editDate?.result?.(p);
+        const date = this.refs().editDate?.result?.(p);
         if (date) {
           raw.AllDates = date;
         }
 
         // Orientation
-        const orientation = this.refs.editOrientation?.result?.(p);
-        if (orientation !== null && orientation !== undefined) {
+        const orientation = this.refs().editOrientation?.result?.(p);
+        if (orientation != null) {
           raw.Orientation = orientation;
         }
 
@@ -299,7 +298,7 @@ export default defineComponent({
             await axios.patch<null>(API.TAG_SET(fileid), tagsResult);
             dirty = true;
           }
-        } catch (e) {
+        } catch (e: any) {
           console.error('Failed to save metadata for', p.fileid, e);
           if (e.response?.data?.message) {
             showError(e.response.data.message);
@@ -323,7 +322,7 @@ export default defineComponent({
         // nothing to do
       }
 
-      this.refs.editOrientation?.reset();
+      this.refs().editOrientation?.reset();
       this.processing = false;
       this.close();
 
@@ -335,9 +334,10 @@ export default defineComponent({
       // Check if we have image info
       const valid = photos.filter((p) => p.imageInfo);
       if (valid.length !== photos.length) {
+        const n = photos.length - valid.length;
         showError(
-          this.t('memories', 'Failed to load metadata for {n} photos.', {
-            n: photos.length - valid.length,
+          this.n('memories', 'Failed to load metadata for {n} photo.', 'Failed to load metadata for {n} photos.', n, {
+            n,
           }),
         );
       }
@@ -345,10 +345,15 @@ export default defineComponent({
       // Check if photos are updatable
       const updatable = valid.filter((p) => p.imageInfo?.permissions?.includes('U'));
       if (updatable.length !== valid.length) {
+        const n = valid.length - updatable.length;
         showError(
-          this.t('memories', '{n} photos cannot be edited (permissions error).', {
-            n: valid.length - updatable.length,
-          }),
+          this.n(
+            'memories',
+            '{n} photo cannot be edited (permissions error).',
+            '{n} photos cannot be edited (permissions error).',
+            n,
+            { n },
+          ),
         );
       }
 

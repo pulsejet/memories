@@ -8,7 +8,7 @@ import staticConfig from '../services/static-config';
 
 import type { IConfig } from '@typings';
 
-const eventName: keyof utils.BusEvent = 'memories:user-config-changed';
+const eventName = 'memories:user-config-changed' as const;
 
 const localSettings: (keyof IConfig)[] = ['square_thumbs', 'high_res_cond', 'show_face_rect'];
 
@@ -20,28 +20,33 @@ export default defineComponent({
   }),
 
   created() {
-    utils.bus.on(eventName, this.updateLocalSetting);
-    this.refreshFromConfig();
+    utils.bus.on(eventName, this.onConfigChanged);
+    this.syncFromStaticConfig();
   },
 
-  beforeDestroy() {
-    utils.bus.off(eventName, this.updateLocalSetting);
+  beforeUnmount() {
+    utils.bus.off(eventName, this.onConfigChanged);
   },
 
   methods: {
-    async refreshFromConfig() {
-      const config = await staticConfig.getAll();
-      const changed = Object.keys(config).filter(<K extends keyof IConfig>(key: K) => config[key] !== this.config[key]);
-      if (changed.length === 0) return;
-
-      changed.forEach(<K extends keyof IConfig>(key: K) => (this.config[key] = config[key]));
-      utils.bus.emit(eventName, null);
-    },
-
-    updateLocalSetting(val: { setting: keyof IConfig; value: IConfig[keyof IConfig] }) {
+    onConfigChanged(val: { setting: keyof IConfig; value: IConfig[keyof IConfig] } | null) {
       if (val?.setting) {
         (this.config as any)[val.setting] = val.value;
+      } else {
+        this.syncFromStaticConfig();
       }
+    },
+
+    syncFromStaticConfig() {
+      const fresh = staticConfig.getDefault();
+      const changed = (Object.keys(fresh) as (keyof IConfig)[]).some((key) => fresh[key] !== this.config[key]);
+      if (changed) {
+        this.config = { ...fresh };
+      }
+    },
+
+    async refreshFromConfig() {
+      this.syncFromStaticConfig();
     },
 
     async updateSetting<K extends keyof IConfig>(setting: K, remote?: string) {

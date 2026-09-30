@@ -15,7 +15,7 @@ apt-get install -y \
     xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev \
     libxkbcommon-x11-dev libxcb-dri3-dev \
     cmake git nasm build-essential \
-    libx264-dev
+    libx264-dev libzimg-dev
 
 mkdir qsvbuild
 cd qsvbuild
@@ -51,7 +51,8 @@ cd FFmpeg
 ./configure \
 	--enable-nonfree \
 	--enable-gpl \
-	--enable-libx264
+	--enable-libx264 \
+	--enable-libzimg
 
 make -j"$(nproc)"
 sudo make install

@@ -1,97 +1,104 @@
 import axios from '@nextcloud/axios';
 import { showInfo, showError } from '@nextcloud/dialogs';
 import { getBuilder } from '@nextcloud/browser-storage';
+import { reactive } from 'vue';
 
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
-import * as utils from '@services/utils';
+import { constants } from '@services/utils/const';
+import { isNetworkError } from '@services/utils/helpers';
+import { bus } from '@services/utils/event-bus';
+import { nativex } from '@native/api';
 
 import type { IConfig } from '@typings';
 
 class StaticConfig {
   private config: IConfig | null = null;
-  private initPromises: Array<() => void> = [];
-  private default: IConfig | null = null;
+  private versionChanged: boolean = false;
+  private default: IConfig;
   private storage;
-  private verchange: boolean = false;
+  private serverPromise: Promise<void>;
 
   public constructor() {
     this.storage = getBuilder('memories').clearOnLogout().persist().build();
-    this.init();
+    this.default = reactive(this.loadCached());
+    this.serverPromise = this.fetchServer();
   }
 
-  private async init() {
+  private async fetchServer() {
+    let server: IConfig;
     try {
-      this.config = (await axios.get<IConfig>(API.CONFIG_GET())).data;
+      server = (await axios.get<IConfig>(API.CONFIG_GET())).data;
     } catch (e) {
-      if (!utils.isNetworkError(e)) {
+      if (!isNetworkError(e)) {
         showError('Failed to load configuration');
       }
 
-      // Offline or fail, continue with default configuration
-      this.config = this.getDefault();
+      // Offline or fail, continue with cached configuration
+      return;
     }
 
-    // Check if version changed
-    const old = this.getDefault();
-    if (old.version !== this.config.version) {
-      this.verchange = true;
+    // Snapshot of cached config for diffing
+    const old = { ...this.default } as IConfig;
 
-      if (old.version) {
-        showInfo(
-          t('memories', 'Memories has been updated to {version}. Reload to get the new version.', {
-            version: this.config.version,
-          }),
-        );
+    // Check if version changed
+    if (old.version !== server.version) {
+      this.versionChanged = true;
+
+      // Let the user know they might need a page refresh to get a new version.
+      // None of the callers know about the old version, so we need to do this here.
+      if (!nativex && old.version) {
+        this.notifyVersionChanged(server.version);
       }
 
       // Clear page cache, keep other caches
       window.caches?.delete('memories-pages');
     }
 
-    // Assign to existing default
-    for (const k in this.config) {
-      const key = k as keyof IConfig;
-      this.setLs(key, this.config[key]);
-    }
-
     // Copy over all missing settings (e.g. local settings)
     for (const key in old) {
-      if (!this.config.hasOwnProperty(key)) {
-        (this.config as any)[key] = (old as any)[key];
+      if (!Object.hasOwn(server, key)) {
+        (server as any)[key] = (old as any)[key];
       }
     }
 
-    // Resolve all promises
-    this.initPromises.forEach((resolve) => resolve());
-  }
+    this.config = server;
 
-  private async waitForInit() {
-    if (!this.config) {
-      await new Promise<void>((resolve) => {
-        this.initPromises.push(resolve);
-      });
+    // Update cached copy and storage, track changes
+    let changed = false;
+    for (const k in server) {
+      const key = k as keyof IConfig;
+      if (server[key] === null || typeof server[key] !== 'object') {
+        if (server[key] !== old[key]) {
+          changed = true;
+        }
+      }
+      this.setLs(key, server[key]);
+    }
+
+    // Notify reactive consumers if server copy differs from cache
+    if (changed) {
+      bus.emit('memories:user-config-changed', null);
     }
   }
 
-  public async getAll() {
-    await this.waitForInit();
-    return this.config!;
+  public async getAll(): Promise<IConfig> {
+    // Cached-first: do not block on server RTT.
+    // Consumers are notified via bus event if server copy differs.
+    return this.default;
   }
 
-  public async get<K extends keyof IConfig>(key: K) {
-    await this.waitForInit();
-    return this.config![key];
+  public async get<K extends keyof IConfig>(key: K): Promise<IConfig[K]> {
+    await this.serverPromise;
+    return this.default[key];
   }
 
-  public getSync<K extends keyof IConfig>(key: K) {
-    return this.getDefault()[key];
+  public getSync<K extends keyof IConfig>(key: K): IConfig[K] {
+    return this.default[key];
   }
 
   public setLs<K extends keyof IConfig>(key: K, value: IConfig[K]) {
-    if (this.default) {
-      this.default[key] = value;
-    }
+    this.default[key] = value;
 
     if (this.config) {
       this.config[key] = value;
@@ -102,23 +109,32 @@ class StaticConfig {
       return;
     }
 
+    if (typeof value === 'object') {
+      return;
+    }
+
     this.storage.setItem(`memories_${key}`, value.toString());
   }
 
   public getDefault(): IConfig {
-    if (this.default) {
-      return this.default;
-    }
+    return this.default;
+  }
 
+  private loadCached(): IConfig {
     // get constants for easier access
-    const { ALBUM_SORT_FLAGS } = utils.constants;
+    const { ALBUM_SORT_FLAGS } = constants;
 
     const config: IConfig = {
       // general stuff
-      version: '',
+      version: String(),
       vod_disable: false,
       video_default_quality: '0',
       places_gis: -1,
+      places_search_url: 'https://nominatim.openstreetmap.org',
+      map_tile_servers: [],
+      map_tile_server_url: String(),
+      language: String(),
+      locale: String(),
 
       // enabled apps
       systemtags_enabled: false,
@@ -127,6 +143,7 @@ class StaticConfig {
       recognize_enabled: false,
       facerecognition_installed: false,
       facerecognition_enabled: false,
+      lens_enabled: false,
       preview_generator_enabled: false,
 
       // general settings
@@ -140,16 +157,18 @@ class StaticConfig {
       high_res_cond_default: 'zoom',
       livephoto_autoplay: true,
       livephoto_loop: false,
+      video_autoplay: 'true',
       video_loop: false,
       sidebar_filepath: false,
       metadata_in_slideshow: false,
+      slideshow_duration: 5,
 
       // on this day settings
-      onthisday_day_range: 0,
+      onthisday_day_range: 3,
       onthisday_photos_per_year: 10,
 
       // folder settings
-      folders_path: '',
+      folders_path: String(),
       show_hidden_folders: false,
       sort_folder_month: false,
 
@@ -170,7 +189,8 @@ class StaticConfig {
       if (typeof config[key] === 'boolean') {
         config[key] = (value === 'true') as V;
       } else if (typeof config[key] === 'number') {
-        config[key] = Number(value) as V;
+        const n = Number(value);
+        if (Number.isFinite(n)) config[key] = n as V;
       } else {
         config[key] = value as V;
       }
@@ -180,14 +200,20 @@ class StaticConfig {
       set(key as keyof IConfig, this.storage.getItem(`memories_${key}`));
     }
 
-    this.default = config;
-
     return config;
   }
 
-  public async versionChanged(): Promise<boolean> {
-    await this.getAll();
-    return this.verchange;
+  public async hasVersionChanged(): Promise<boolean> {
+    await this.serverPromise;
+    return this.versionChanged;
+  }
+
+  private notifyVersionChanged(version: string) {
+    showInfo(
+      t('memories', 'Memories has been updated to {version}. Reload to get the new version.', {
+        version,
+      }),
+    );
   }
 }
 

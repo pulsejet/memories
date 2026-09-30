@@ -12,7 +12,11 @@ use OCP\Migration\IRepairStep;
 
 final class Repair implements IRepairStep
 {
-    public function __construct(private IConfig $config) {}
+    public function __construct(
+        private IConfig $config,
+        private AddMissingIndices $indices,
+        private BinExt $binExt,
+    ) {}
 
     #[\Override]
     public function getName(): string
@@ -23,15 +27,7 @@ final class Repair implements IRepairStep
     #[\Override]
     public function run(IOutput $output): void
     {
-        // Mitigation for https://github.com/pulsejet/memories/issues/1401
-        // Remove this a few releases down the line.
-        if (!method_exists(\OCA\Memories\Util::class, 'execSafe')) {
-            $output->warning('Upgrade in progress, temporarily skipping Memories repair steps');
-
-            return;
-        }
-
-        AddMissingIndices::run($output);
+        $this->indices->run($output);
         $this->configureBinExt($output);
         $this->fixSystemConfigTypes($output);
     }
@@ -39,25 +35,26 @@ final class Repair implements IRepairStep
     public function configureBinExt(IOutput $output): void
     {
         // kill any instances of go-vod and exiftool
-        BinExt::pkill(BinExt::getName('go-vod'));
-        BinExt::pkill(BinExt::getName('exiftool'));
+        $this->binExt->pkill($this->binExt->getName('go-vod'));
+        $this->binExt->pkill($this->binExt->getName('eperl'));
+        $this->binExt->pkill($this->binExt->getName('exiftool'));
 
         // detect exiftool
-        if ($path = BinExt::detectExiftool()) {
+        if ($path = $this->binExt->detectExiftool()) {
             $output->info("exiftool binary is configured: {$path}");
         } else {
             $output->warning('exiftool binary could not be configured');
         }
 
         // detect go-vod
-        if ($path = BinExt::detectGoVod()) {
+        if ($path = $this->binExt->detectGoVod()) {
             $output->info("go-vod binary is configured: {$path}");
         } else {
             $output->warning('go-vod binary could not be configured');
         }
 
         // detect ffmpeg
-        if ($path = BinExt::detectFFmpeg()) {
+        if ($path = $this->binExt->detectFFmpeg()) {
             $output->info("ffmpeg binary is configured: {$path}");
         } else {
             $output->warning('ffmpeg binary could not be configured');
@@ -78,6 +75,14 @@ final class Repair implements IRepairStep
                 $output->info("Fixing system config value for {$key}");
                 $this->config->setSystemValue($key, (int) $value ?: 2048);
             }
+        }
+
+        // changed from string to string[]
+        $connectKey = 'memories.vod.connect';
+        $connect = $this->config->getSystemValue($connectKey, null);
+        if (\is_string($connect)) {
+            $output->info("Fixing system config value for {$connectKey}");
+            $this->config->setSystemValue($connectKey, [trim($connect)]);
         }
     }
 }

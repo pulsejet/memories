@@ -1,13 +1,15 @@
 import './bootstrap';
+import { registerGlobals } from './bootstrap';
 
-import Vue from 'vue';
+import { createApp } from 'vue';
 import App from '@components/admin/AdminMain.vue';
 
 globalThis._m = {
   mode: 'admin',
 } as any;
 
-export default new Vue({
-  el: '#vue-content',
-  render: (h) => h(App),
-});
+const app = createApp(App);
+registerGlobals(app);
+app.mount('#vue-content');
+
+export default app;

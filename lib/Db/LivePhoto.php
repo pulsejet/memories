@@ -14,7 +14,10 @@ const MP4_ATOMS = ['ftyp', 'moov', 'mdat', 'moof', 'mfra', 'sidx', 'free', 'skip
 
 final class LivePhoto
 {
-    public function __construct(private IDBConnection $connection) {}
+    public function __construct(
+        private IDBConnection $connection,
+        private Exif $exif,
+    ) {}
 
     /**
      * Check if a given Exif data is the video part of a Live Photo.
@@ -26,17 +29,17 @@ final class LivePhoto
     }
 
     /** Get liveid from photo part */
-    public static function getLivePhotoId(File $file, array $exif): string
+    public function getLivePhotoId(File $file, array $exif): string
     {
         $path = $file->getStorage()->getLocalFile($file->getInternalPath())
             ?: throw new \Exception('[BUG][LivePhoto] Failed to get local file path');
         $size = (int) $file->getSize();
 
-        return self::getLivePhotoIdFromPath($path, $size, $exif);
+        return $this->getLivePhotoIdFromPath($path, $size, $exif);
     }
 
     /** Get liveid from photo local file path */
-    public static function getLivePhotoIdFromPath(string $path, int $size, array $exif): string
+    public function getLivePhotoIdFromPath(string $path, int $size, array $exif): string
     {
         // Apple JPEG (MOV has ContentIdentifier)
         if ($uuid = ($exif['ContentIdentifier'] ?? $exif['MediaGroupUUID'] ?? null)) {
@@ -87,64 +90,9 @@ final class LivePhoto
             return 'self__exifbin=EmbeddedVideoFile';
         }
 
-        // Google JPEG and Samsung HEIC / JPEG (Apple?)
-        if ($exif['MotionPhoto'] ?? null) {
-            if ('image/jpeg' === ($exif['MIMEType'] ?? null)) {
-                // Google Motion Photo JPEG
-
-                // We need to read the DirectoryItemLength key to get the length of the video
-                // These keys are duplicate, one for the image and one for the video
-                // With exiftool -G4, we get the following:
-                //
-                //    "Unknown:DirectoryItemSemantic": "Primary"
-                //    "Unknown:DirectoryItemLength": 0
-                //    "Copy1:DirectoryItemSemantic": "MotionPhoto"
-                //    "Copy1:DirectoryItemLength": 3011435    // <-- this is the length of the video
-                //
-                // The video is then located at the end of the file, so we can get the offset.
-                // Match each DirectoryItemSemantic to find MotionPhoto, then get the length.
-                //
-                // There are cases where Google decided to completely screw up and not include
-                // the length for one of the *earlier* DirectoryItemSemantic; in this case we still
-                // hope that the video is located at the end, and thus the last DirectoryItemLength
-                // seen before the DirectoryItemSemantic of MotionPhoto is the length of the video.
-                // https://github.com/pulsejet/memories/issues/965
-                $extExif = Exif::getExifWithDuplicates($path);
-                $lastLength = null; // last DirectoryItemLength seen
-
-                foreach ($extExif as $key => $value) {
-                    if (str_ends_with($key, ':DirectoryItemSemantic')) {
-                        if ('MotionPhoto' === $value) {
-                            // Found the video, try to find the corresponding semantic length
-                            // If we can't find it, use the last length seen
-                            $videoLength = $extExif[str_replace('Semantic', 'Length', $key)] ?? $lastLength;
-                            if (\is_int($videoLength) && $videoLength > 0) {
-                                $videoOffset = $size - $videoLength;
-
-                                return "self__traileroffset={$videoOffset}";
-                            }
-                        }
-                    }
-
-                    if (str_ends_with($key, ':DirectoryItemLength')) {
-                        $lastLength = $value;
-                    }
-                }
-
-                // Fallback: video should hopefully be in trailer
-                return 'self__trailer';
-            }
-
-            if ('image/heic' === ($exif['MIMEType'] ?? null)) {
-                // Samsung HEIC -- no way to get this out yet (DirectoryItemLength is senseless)
-                // The reason this is above the MotionPhotoVideo check is because extracting binary
-                // EXIF fields on the fly is extremely expensive compared to trailer extraction.
-            }
-        }
-
         // Huawei Motion Picture
         if ('image/jpeg' === ($exif['MIMEType'] ?? null) && $size > 40) {
-            // LIVE_%d is the negative offset from the beggining of the
+            // LIVE_%d is the negative offset from the beginning of the
             // metadata trailer to the beginning of the video part.
             // <image> <video> <metadata: 40 bytes>
             // |0:1477              LIVE_18666740       |
@@ -173,9 +121,7 @@ final class LivePhoto
         $fileId = $file->getId();
         $mtime = $file->getMTime();
         $liveid = $exif['ContentIdentifier'] ?? null;
-        if (empty($liveid)) {
-            return false;
-        }
+        \assert(null !== $liveid);
 
         // Check if entry already exists
         $query = $this->connection->getQueryBuilder();
@@ -183,7 +129,7 @@ final class LivePhoto
             ->from('memories_livephoto')
             ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
             ->executeQuery()
-            ->fetch()
+            ->fetchAssociative()
         ;
 
         // Construct query parameters

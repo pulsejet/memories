@@ -28,6 +28,7 @@ OC.L10N.register(
     "Update" : "ធ្វើ​បច្ចុប្បន្នភាព",
     "Move" : "Move",
     "Password protected" : "បាន​ការ​ពារ​ដោយ​ពាក្យ​សម្ងាត់",
+    "OK" : "OK",
     "Home" : "ទំព័រដើម",
     "Upload failed" : "ការផ្ទុកឡើងបាន​បរាជ័យ",
     "Download {ext}" : "ទាញយក {ext}",

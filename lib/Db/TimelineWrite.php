@@ -4,38 +4,28 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\Exif;
-use OCA\Memories\Service\Index;
-use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
-use OCP\IDBConnection;
 use OCP\Lock\ILockingProvider;
-use Psr\Log\LoggerInterface;
 
 const DELETE_TABLES = ['memories', 'memories_livephoto', 'memories_places', 'memories_failures'];
 const TRUNCATE_TABLES = ['memories_mapclusters'];
 
 final class TimelineWrite
 {
+    use TimelineWriteBase;
     use TimelineWriteFailures;
     use TimelineWriteMap;
     use TimelineWriteOrphans;
     use TimelineWritePlaces;
 
-    public function __construct(
-        protected IDBConnection $connection,
-        protected LivePhoto $livePhoto,
-        protected ILockingProvider $lockingProvider,
-        protected LoggerInterface $logger,
-    ) {}
-
     /**
      * Process a file to insert Exif data into the database.
      *
-     * @param File $file  File node to process
-     * @param bool $lock  Lock the file before processing
-     * @param bool $force Update the record even if the file has not changed
+     * @param File              $file     File node to process
+     * @param bool              $lock     Lock the file before processing
+     * @param bool              $force    Update the record even if the file has not changed
+     * @param ?\Closure(): bool $validate Post-lock validation hook
      *
      * @return bool True if the file was processed
      *
@@ -46,13 +36,8 @@ final class TimelineWrite
         File $file,
         bool $lock = true,
         bool $force = false,
+        ?\Closure $validate = null,
     ): bool {
-        // Check if we want to process this file
-        // https://github.com/pulsejet/memories/issues/933 (zero-byte files)
-        if ($file->getSize() <= 0 || !Index::isSupported($file) || !Index::isPathAllowed($file->getPath())) {
-            return false;
-        }
-
         // Check if we need to lock the file
         if ($lock) {
             $lockKey = 'memories/'.$file->getId();
@@ -63,16 +48,26 @@ final class TimelineWrite
             $this->lockingProvider->acquireLock($lockKey, $lockType);
 
             try {
-                return $this->processFile($file, false, $force);
+                return $this->processFile(
+                    file: $file,
+                    lock: false,
+                    force: $force,
+                    validate: $validate,
+                );
             } finally {
                 $this->lockingProvider->releaseLock($lockKey, $lockType);
             }
         }
 
+        // Run post-lock validation hook if set
+        if (null !== $validate && !$validate()) {
+            return false;
+        }
+
         // Get parameters
         $mtime = $file->getMtime();
         $fileId = $file->getId();
-        $isvideo = Index::isVideo($file);
+        $isvideo = $this->mime->isVideo($file);
 
         // Get previous row
         $prevRow = $this->getCurrentRow($fileId);
@@ -87,7 +82,7 @@ final class TimelineWrite
         }
 
         // Get exif data
-        $exif = Exif::getExifFromFile($file);
+        $exif = $this->exif->getExifFromFile($file);
 
         // Check if EXIF is blank, which is probably wrong
         if (0 === \count($exif)) {
@@ -101,7 +96,7 @@ final class TimelineWrite
 
         // Hand off if Live Photo video part
         if ($isvideo && $this->livePhoto->isVideoPart($exif)) {
-            return Util::transaction(fn () => $this->livePhoto->processVideoPart($file, $exif));
+            return $this->util->transaction(fn () => $this->livePhoto->processVideoPart($file, $exif));
         }
 
         // If control reaches here, it's not a Live Photo video part
@@ -113,7 +108,7 @@ final class TimelineWrite
         }
 
         // Video parameters
-        $videoDuration = round((float) ($isvideo ? ($exif['Duration'] ?? $exif['TrackDuration'] ?? 0) : 0));
+        $videoDuration = (int) round((float) ($isvideo ? ($exif['Duration'] ?? $exif['TrackDuration'] ?? 0) : 0));
 
         // Process location data
         // This also modifies the exif array in-place to set the LocationTZID
@@ -121,23 +116,23 @@ final class TimelineWrite
         [$lat, $lon, $mapCluster] = $this->processExifLocation($fileId, $exif, $prevRow);
 
         // Get date parameters (after setting timezone offset)
-        $dateTaken = Exif::getDateTaken($file, $exif);
+        $dateTaken = $this->exif->getDateTaken($file, $exif);
 
-        // Store the acutal epoch with the EXIF data
+        // Store the actual epoch with the EXIF data
         $epoch = $exif['DateTimeEpoch'] = $dateTaken->getTimestamp();
 
         // Store the date taken in the database as UTC (local date) only
         // Basically, assume everything happens in Greenwich
-        $dateLocalUtc = Exif::forgetTimezone($dateTaken)->getTimestamp();
+        $dateLocalUtc = $this->exif->forgetTimezone($dateTaken)->getTimestamp();
         $dateTakenStr = gmdate('Y-m-d H:i:s', $dateLocalUtc);
 
         // We need to use the local time in UTC for the dayId
         // This way two photos in different timezones on the same date locally
         // end up in the same dayId group
-        $dayId = floor($dateLocalUtc / 86400);
+        $dayId = intdiv($dateLocalUtc, 86400);
 
         // Get size of image
-        [$w, $h] = Exif::getDimensions($exif);
+        [$w, $h] = $this->exif->getDimensions($exif);
 
         // Get live photo ID of video part
         $liveid = $this->livePhoto->getLivePhotoId($file, $exif);
@@ -145,7 +140,7 @@ final class TimelineWrite
         // Get BUID from ImageUniqueId if not present
         $buid = $prevRow ? $prevRow['buid'] : '';
         if (empty($buid)) {
-            $buid = Exif::getBUID($file->getName(), $exif['ImageUniqueID'] ?? null, (int) $file->getSize());
+            $buid = $this->exif->getBUID($file->getName(), $exif['ImageUniqueID'] ?? null, (int) $file->getSize());
         }
 
         // Get exif json
@@ -188,7 +183,7 @@ final class TimelineWrite
         }
 
         // Execute query
-        $updated = Util::transaction(static fn () => $query->executeStatement() > 0);
+        $updated = $this->util->transaction(static fn () => $query->executeStatement() > 0);
 
         // Clear failures if successful
         if ($updated) {
@@ -203,14 +198,14 @@ final class TimelineWrite
      */
     public function deleteFile(File $file): void
     {
-        Util::transaction(function () use ($file): void {
+        $this->util->transaction(function () use ($file): void {
             // Get full record
             $query = $this->connection->getQueryBuilder();
             $record = $query->select('*')
                 ->from('memories')
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
                 ->executeQuery()
-                ->fetch()
+                ->fetchAssociative()
             ;
 
             // Delete all records regardless of existence
@@ -256,7 +251,7 @@ final class TimelineWrite
     public function clear(): void
     {
         foreach (array_merge(DELETE_TABLES, TRUNCATE_TABLES) as $table) {
-            SQL::truncate($this->connection, $table, false);
+            $this->connection->truncateTable($table, false);
         }
     }
 
@@ -265,18 +260,18 @@ final class TimelineWrite
      */
     private function getCurrentRow(int $fileId): ?array
     {
-        $fetch = function (string $table) use ($fileId): false|null|array {
+        $fetch = function (string $table) use ($fileId): false|array {
             $query = $this->connection->getQueryBuilder();
 
             return $query->select('*')
                 ->from($table)
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
                 ->executeQuery()
-                ->fetch()
+                ->fetchAssociative()
             ;
         };
 
-        return Util::transaction(static fn () => $fetch('memories') ?: $fetch('memories_livephoto') ?: null);
+        return $this->util->transaction(static fn () => $fetch('memories') ?: $fetch('memories_livephoto') ?: null);
     }
 
     /**
@@ -291,7 +286,7 @@ final class TimelineWrite
         foreach ($exif as $key => $value) {
             // Truncate any fields > 2048 chars
             if (\is_string($value) && \strlen($value) > 2048) {
-                $value = substr($value, 0, 2048);
+                $value = mb_strcut($value, 0, 2048);
             }
 
             // Only keep fields in the whitelist

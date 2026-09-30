@@ -49,30 +49,33 @@
     <XLoadingIcon v-if="loading" />
 
     <template #buttons>
-      <NcButton class="primary" :disabled="loading" @click="createLink">
-        {{ t('memories', 'Create Link') }}
-      </NcButton>
-      <NcButton class="primary" :disabled="loading" @click="refreshUrls">
-        {{ t('memories', 'Refresh') }}
-      </NcButton>
+      <div class="button-grid">
+        <NcButton class="primary" :disabled="loading" @click="createLink">
+          {{ t('memories', 'Create Link') }}
+        </NcButton>
+        <NcButton class="primary" :disabled="loading" @click="refreshUrls">
+          {{ t('memories', 'Refresh') }}
+        </NcButton>
+      </div>
     </template>
   </Modal>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError, showSuccess } from '@nextcloud/dialogs';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import UserConfig from '@mixins/UserConfig';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import { API } from '@services/API';
 import * as utils from '@services/utils';
@@ -90,6 +93,7 @@ export default defineComponent({
     NcButton,
     NcListItem,
     NcActionButton,
+    XLoadingIcon,
 
     CloseIcon,
     LinkIcon,
@@ -241,8 +245,12 @@ export default defineComponent({
 .links {
   margin-top: 1em;
 
-  :deep .avatar {
+  :deep(.avatar) {
     padding: 0 0.5em;
   }
+}
+div.button-grid {
+  display: flex;
+  gap: 1em;
 }
 </style>

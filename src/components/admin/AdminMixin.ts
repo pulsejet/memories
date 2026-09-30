@@ -1,12 +1,12 @@
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, type PropType, defineAsyncComponent } from 'vue';
 import axios from '@nextcloud/axios';
 
-const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js');
-const NcNoteCard = () => import('@nextcloud/vue/dist/Components/NcNoteCard.js');
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
+const NcNoteCard = defineAsyncComponent(() => import('@nextcloud/vue/components/NcNoteCard'));
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcButton from '@nextcloud/vue/components/NcButton';
 
-import type { ISystemStatus, ISystemConfig, IBinaryStatus } from './AdminTypes';
+import type { ISystemStatus, ISystemConfig, IBinaryStatus, IServiceStatus } from './AdminTypes';
 import type { IConfig } from '@typings';
 
 export default defineComponent({
@@ -65,7 +65,7 @@ export default defineComponent({
           '{name} failed test: {info}.',
           {
             name,
-            info: status.substring(10),
+            info: status.slice(10),
           },
           0,
           noescape,
@@ -76,7 +76,7 @@ export default defineComponent({
           '{name} binary exists and is usable ({info}).',
           {
             name,
-            info: status.substring(8),
+            info: status.slice(8),
           },
           0,
           noescape,
@@ -101,6 +101,30 @@ export default defineComponent({
 
     binaryStatusOk(status: IBinaryStatus): boolean {
       return status === 'ok' || status.startsWith('test_ok');
+    },
+
+    serviceStatus(s: IServiceStatus): string {
+      if (s.healthy) {
+        if (s.latencyMs !== undefined && s.latencyMs !== null) {
+          return this.t('memories', '{srv} - Healthy ({version}, latency={latency}ms).', {
+            srv: s.server,
+            version: s.detail,
+            latency: s.latencyMs,
+          });
+        }
+        return this.t('memories', '{srv} - Healthy ({version}).', {
+          srv: s.server,
+          version: s.detail,
+        });
+      }
+      return this.t('memories', '{srv} - Unhealthy ({info}).', {
+        srv: s.server,
+        info: s.detail,
+      });
+    },
+
+    serviceStatusType(s: IServiceStatus): 'success' | 'error' {
+      return s.healthy ? 'success' : 'error';
     },
   },
 

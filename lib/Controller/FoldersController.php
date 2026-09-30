@@ -4,29 +4,43 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\FsManager;
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\Files\FileInfo;
 use OCP\Files\Folder;
+use OCP\IRequest;
 
-final class FoldersController extends GenericApiController
+final class FoldersController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected TimelineQuery $tq,
+        protected FsManager $fs,
+        protected Util $util,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     #[NoAdminRequired]
     #[PublicPage]
     public function sub(string $folder): Http\Response
     {
-        return Util::guardEx(function () use ($folder) {
+        return $this->util->guardEx(function () use ($folder) {
             $folder = Util::sanitizePath($folder);
             if (null === $folder) {
                 throw Exceptions::BadRequest('Invalid parameter folder');
             }
 
             // Get the root folder (share root or user root)
-            $root = $this->fs->getShareNode() ?? Util::getUserFolder();
+            $root = $this->fs->getShareNode() ?? $this->util->getUserFolder();
             if (!$root instanceof Folder) {
                 throw Exceptions::BadRequest('Root is not a folder');
             }

@@ -21,5 +21,5 @@ export async function getSingleItemData(): Promise<IDay[]> {
   ];
 
   // Return copy to prevent circular reference
-  return JSON.parse(JSON.stringify(days));
+  return structuredClone(days);
 }

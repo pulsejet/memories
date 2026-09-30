@@ -2,9 +2,13 @@ name: e2e
 
 on:
   push:
-    branches:
-      - master
-      - pulsejet/*
+    paths-ignore:
+      - 'docs/**'
+      - 'go-vod/**'
+      - 'android/**'
+      - 'mkdocs.yml'
+      - '**.md'
+  pull_request:
     paths-ignore:
       - 'docs/**'
       - 'go-vod/**'
@@ -52,7 +56,7 @@ jobs:
       matrix:
         databases: ['mysql', 'mariadb', 'pgsql', 'sqlite']
         php-versions: ['8.4']
-        server-versions: ['stable34']
+        server-versions: ['stable34', 'stable35']
 
     services:
       mysql:
@@ -63,13 +67,15 @@ jobs:
           MYSQL_DATABASE: nextcloud
           MYSQL_USER: db_user
           MYSQL_PASSWORD: db_password
-          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_ROOT_PASSWORD: db_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval 5s
           --health-timeout 2s
           --health-retries 5
-        command: --local-infile=1
+        command: >-
+          --local-infile=1
+          --log_bin_trust_function_creators=true
 
       mariadb:
         image: ${{ matrix.databases == 'mariadb' && 'mariadb:lts' || '' }}
@@ -162,33 +168,23 @@ jobs:
               opcache.jit=tracing,
               opcache.jit_buffer_size=64M
 
-        - name: Set up FFmpeg
-          env:
-            URL: https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n9.0-latest-linux64-gpl-9.0.tar.xz
-          run: curl -L $URL -o - | sudo tar -xJvf - -C /usr/bin/ --strip-components=2 --wildcards --no-anchored '**/bin/ff*'
-
       - name: Run tests
         env:
           NC_DB_TYPE: ${{ matrix.databases }}
+          NC_DB_USER: ${{ matrix.databases == 'mysql' && 'root' || 'db_user' }}
+          NC_DB_PASS: db_password
           PHP_VERSION: ${{ matrix.php-versions }}
           NC_VERSION: ${{ matrix.server-versions }}
           NC_DB_PORT: 4444
           NC_REDIS_PORT: 6379
-          E2E_VIDEO: 1
+          E2E_VIDEO: ${{ github.event_name == 'push' && '1' || '0' }}
         run: |
           make -C apps/${{ env.APP_NAME }} e2e
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v7
-        if: always()
+        if: ${{ always() && github.event_name != 'pull_request' }}
         with:
           name: report-${{ matrix.databases }}-${{ matrix.php-versions }}-${{ matrix.server-versions }}
           path: apps/${{ env.APP_NAME }}/playwright-report
           retention-days: 15
-
-      - name: Upload Playwright videos
-        uses: actions/upload-artifact@v7
-        with:
-          path: apps/${{ env.APP_NAME }}/video-${{ matrix.databases }}-${{ matrix.php-versions }}-${{ matrix.server-versions }}.mp4
-          retention-days: 3
-          archive: false

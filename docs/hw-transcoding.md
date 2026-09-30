@@ -49,22 +49,36 @@ NVIDIA GPUs support hardware transcoding using NVENC.
         init: true
         depends_on:
           - server
+        healthcheck:
+          test: ["CMD-SHELL", "curl -f http://localhost:47788/health || exit 1"]
+          interval: 30s
+          timeout: 5s
+          retries: 3
+          start_period: 30s
         environment:
-          - NEXTCLOUD_HOST=https://your-nextcloud-url
-          # - NEXTCLOUD_ALLOW_INSECURE=1 # (self-signed certs or no HTTPS)
+          - NEXTCLOUD_HOST=http://your-nextcloud-host.com
+          - NEXTCLOUD_ALLOW_INSECURE=1 # (self-signed certs or no HTTPS)
           - NVIDIA_VISIBLE_DEVICES=all
+          - CACHE_DIR=/cache
+        links:
+          - web:your-nextcloud-host.com # (reach Nextcloud container directly)
         devices:
           - /dev/dri:/dev/dri # VA-API (omit for NVENC)
         volumes:
-          - ncdata:/var/www/html:ro
+          - go-vod-cache:/cache
         # runtime: nvidia # (NVENC)
     ```
 
-    !!! info "Device and volume bindings"
-        In this example, the VA-API devices in `/dev/dri` are passed to the container, along with the Nextcloud data directory (as readonly). All volumes must be mounted at the same location as the Nextcloud container.
+    !!! info "Persistent keyframe cache (CACHE_DIR)"
+
+        go-vod caches extracted video keyframes and timeline hover storyboards
+        (thumbnail sprites + VTT) in `CACHE_DIR`, overriding `memories.vod.cachedir`.
+        Without a persistent volume (e.g. the `go-vod-cache` volume above, declared under top-level
+        `volumes:`), the cache is lost on every container restart and keyframes are re-extracted
+        from scratch, which is very slow for large videos.
 
     !!! question "What to set in `NEXTCLOUD_HOST`?"
-        The `NEXTCLOUD_HOST` environment variable must be set to the URL of your Nextcloud instance. If you are using a reverse proxy, you must set this to the URL of the reverse proxy. If you are using a self-signed certificate or http, you must also set `NEXTCLOUD_ALLOW_INSECURE=1`. This URL is used to download the transcoder binary and to connect to the Nextcloud instance.
+        The `NEXTCLOUD_HOST` environment variable must be set to the URL of your Nextcloud instance. If you are using a reverse proxy, you must set this to the URL of the reverse proxy. If you are using a self-signed certificate or http, you must also set `NEXTCLOUD_ALLOW_INSECURE=1`. This URL is used to download the transcoder binary and to connect to the Nextcloud instance. It is best to use a local address here if possible to allow high throughput video transfer
 
     !!! tip "Setup for NVENC"
         If you want to use NVENC instead of VA-API, uncomment the `runtime` line and remove the `devices` section above. You will need to install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) on your host. You may also need to switch to the CUDA scaler in the Memories admin panel.
@@ -76,6 +90,10 @@ NVIDIA GPUs support hardware transcoding using NVENC.
 1. Finally, turn on **enable external transcoder** in the admin panel. This will initiate a test of the transcoder and show the result.
 
 Your external transcoder should now be functional. You can check the transcoding logs by running `docker compose logs -f go-vod`.
+
+!!! tip "Multiple transcoders"
+
+    You can run multiple go-vod instances on separate hosts for more concurrency. List them all in the *connection addresses* field in the admin panel. Each client is sticky-routed to one server.
 
 !!! tip "Usage with Nextcloud AIO"
 
@@ -118,6 +136,8 @@ services:
 ## Internal Transcoder
 
 Memories ships with an internal transcoder binary that you can directly use. In this case, you must install the drivers and ffmpeg on the same host as Nextcloud, and Memories will automatically handle starting and communicating with go-vod. This is also the default setup when you enable transcoding without hardware acceleration.
+
+The internal transcoder connects back to Nextcloud over HTTP. The URL it uses is configured with `memories.vod.nc_url` in `config.php` (default `http://localhost:80`, also settable in the admin panel).
 
 !!! danger "Advanced usage only"
 
@@ -167,6 +187,12 @@ In some cases, along with adding `www-data` to the appropriate groups, you may a
 ```bash
 sudo chmod 666 /dev/dri/renderD128
 ```
+
+!!! tip "Multiple GPUs"
+    If your host has multiple GPUs (e.g. an Intel iGPU alongside a discrete NVIDIA card),
+    the Intel card may show up as `/dev/dri/renderD129` instead of `renderD128`.
+    Set the correct render node in the admin settings (**HW Acceleration** →
+    **VA-API device path**) or `memories.vod.vaapi.device` in `config.php`.
 
 You can run a test using a sample video file to check if VA-API is working correctly for the `www-data` user:
 
@@ -221,6 +247,7 @@ On TrueNAS Scale system, you can create a custom docker apps to setup an externa
         environment:
           - NEXTCLOUD_HOST=https://your.nextcloud.domain
           - NVIDIA_VISIBLE_DEVICES=all
+          - CACHE_DIR=/cache
         group_add:
           - 107
         image: radialapps/go-vod

@@ -25,15 +25,19 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
-use OCA\Memories\Util;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
 
 final class TagsBackend extends Backend
 {
+    public const CLUSTER_TYPE = 'tags';
+
     public function __construct(
         protected TimelineQuery $tq,
         protected IRequest $request,
+        protected Covers $covers,
+        protected SystemConfig $systemConfig,
     ) {}
 
     #[\Override]
@@ -45,13 +49,13 @@ final class TagsBackend extends Backend
     #[\Override]
     public static function clusterType(): string
     {
-        return 'tags';
+        return self::CLUSTER_TYPE;
     }
 
     #[\Override]
     public function isEnabled(): bool
     {
-        return Util::tagsIsEnabled();
+        return $this->systemConfig->tagsIsEnabled();
     }
 
     #[\Override]
@@ -77,18 +81,13 @@ final class TagsBackend extends Backend
 
         $query = $this->tq->getBuilder();
 
-        // SELECT visible tag name and count of photos
+        // SELECT tag id and count of photos
         $count = $query->func()->count(SQL::distinct($query, 'm.fileid'), 'count');
-        $query->select('st.id', 'st.name', $count)
-            ->from('systemtag', 'st')
-            ->where($query->expr()->eq('st.visibility', $query->expr()->literal(1, \PDO::PARAM_INT)))
-        ;
+        $query->selectAlias('stom.systemtagid', 'id')->from('systemtag_object_mapping', 'stom');
+        $query->addSelect($count);
 
         // WHERE there are items with this tag
-        $query->innerJoin('st', 'systemtag_object_mapping', 'stom', $query->expr()->andX(
-            $query->expr()->eq('stom.objecttype', $query->expr()->literal('files')),
-            $query->expr()->eq('stom.systemtagid', 'st.id'),
-        ));
+        $query->andWhere($query->expr()->eq('stom.objecttype', $query->expr()->literal('files')));
 
         // WHERE these items are memories indexed photos
         $query->innerJoin('stom', 'memories', 'm', $query->expr()->eq('m.objectid', 'stom.objectid'));
@@ -96,14 +95,27 @@ final class TagsBackend extends Backend
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->tq->filterFilecache($query);
 
-        // GROUP and ORDER by tag name
-        $query->addGroupBy('st.id');
-        $query->addOrderBy($query->func()->lower('st.name'), 'ASC');
-        $query->addOrderBy('st.id'); // tie-breaker
+        // GROUP BY tag id
+        $query->addGroupBy('stom.systemtagid');
+
+        // Materialize the aggregation, then join systemtag once per tag
+        // to filter by visibility and fetch the names from the IDs
+        $query = SQL::materialize($query, 'st');
+
+        // INNER JOIN systemtag to get the names
+        $query->innerJoin('st', 'systemtag', 'tag', $query->expr()->eq('tag.id', 'st.id'));
+        $query->addSelect('tag.name');
+
+        // WHERE this is a visible tag
+        $query->andWhere($query->expr()->eq('tag.visibility', $query->expr()->literal(1, \PDO::PARAM_INT)));
+
+        // ORDER BY tag name and id
+        $query->addOrderBy($query->func()->lower('tag.name'), 'ASC');
+        $query->addOrderBy('tag.id'); // tie-breaker
 
         // SELECT cover photo
         $query = SQL::materialize($query, 'st');
-        Covers::selectCover(
+        $this->covers->selectCover(
             query: $query,
             type: self::clusterType(),
             clusterTable: 'st',
@@ -118,7 +130,7 @@ final class TagsBackend extends Backend
         $this->tq->selectEtag($query, 'st.cover', 'cover_etag');
 
         // FETCH all tags
-        $tags = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        $tags = $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post process
         foreach ($tags as &$row) {
@@ -161,7 +173,7 @@ final class TagsBackend extends Backend
 
         // MAX number of files
         if (-6 === $limit) {
-            Covers::filterCover($query, self::clusterType(), 'stom', 'objectid', 'systemtagid');
+            $this->covers->filterCover($query, self::clusterType(), 'stom', 'objectid', 'systemtagid');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
@@ -172,13 +184,19 @@ final class TagsBackend extends Backend
         }
 
         // FETCH tag photos
-        return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        return $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
     }
 
     #[\Override]
     public function getClusterIdFrom(array $photo): int
     {
         return (int) $photo['systemtagid'];
+    }
+
+    #[\Override]
+    public function setCover(array $photo, bool $manual = false): void
+    {
+        $this->covers->setBackendCover($this, $photo, $manual);
     }
 
     /**
@@ -198,7 +216,7 @@ final class TagsBackend extends Backend
                 $sqb->expr()->in('name', $sqb->createNamedParameter($tagNames, IQueryBuilder::PARAM_STR_ARRAY)),
                 $sqb->expr()->eq('visibility', $sqb->expr()->literal(1, IQueryBuilder::PARAM_INT)),
             ),
-        )->executeQuery()->fetchAll();
+        )->executeQuery()->fetchAllAssociative();
 
         // Create result map
         $map = array_fill_keys($tagNames, 0);

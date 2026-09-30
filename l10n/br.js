@@ -42,6 +42,7 @@ OC.L10N.register(
     "Read only" : "Da lenn nemetken",
     "Share link" : "Lodañ al liamm",
     "Refresh" : "Freskaat",
+    "OK" : "OK",
     "Oldest first" : "An hini kozhoñ da gentañ",
     "Newest first" : "An hini nevesañ da gentañ",
     "Home" : "Degemer",

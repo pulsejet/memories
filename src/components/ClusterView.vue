@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import type { Route } from 'vue-router';
+import type { RouteLocationNormalized } from 'vue-router';
 
 import UserConfig from '@mixins/UserConfig';
 import TopMatter from '@components/top-matter/TopMatter.vue';
@@ -26,6 +26,7 @@ import ClusterGrid from '@components/ClusterGrid.vue';
 import Timeline from '@components/Timeline.vue';
 import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
@@ -41,6 +42,7 @@ export default defineComponent({
     Timeline,
     EmptyContent,
     DynamicTopMatter,
+    XLoadingIcon,
   },
 
   mixins: [UserConfig],
@@ -51,14 +53,8 @@ export default defineComponent({
   }),
 
   computed: {
-    refs() {
-      return this.$refs as {
-        dtm?: InstanceType<typeof DynamicTopMatter>;
-      };
-    },
-
     noParams() {
-      return !this.$route.params.name && !this.$route.params.user;
+      return !this.$route.params.name?.toString() && !this.$route.params.user?.toString();
     },
 
     minCols() {
@@ -78,18 +74,24 @@ export default defineComponent({
     utils.bus.on('memories:user-config-changed', this.refresh);
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     utils.bus.off('memories:user-config-changed', this.refresh);
   },
 
   watch: {
-    async $route(to: Route, from: Route) {
+    async $route(to: RouteLocationNormalized, from: RouteLocationNormalized) {
       if (to.path === from.path) return;
       await this.refresh();
     },
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        dtm?: InstanceType<typeof DynamicTopMatter>;
+      };
+    },
+
     async refresh() {
       await this.$nextTick();
       if (!this.noParams || !!this.loading) return;
@@ -99,21 +101,29 @@ export default defineComponent({
         this.loading++;
 
         await this.$nextTick();
-        await this.refs.dtm?.refresh?.();
 
-        if (this.routeIsAlbums) {
-          this.items = await dav.getAlbums();
-        } else if (this.routeIsTags) {
-          this.items = await dav.getTags();
-        } else if (this.routeIsRecognize) {
-          this.items = await dav.getFaceList('recognize');
-        } else if (this.routeIsFaceRecognition) {
-          this.items = await dav.getFaceList('facerecognition');
-        } else if (this.routeIsPlaces) {
-          this.items = await dav.getPlaces();
-        }
+        // Refresh the DTM in parallel with loading our own data,
+        // but wait for it to complete to avoid glitches.
+        const [, items] = await Promise.all([this.refs().dtm?.refresh?.(), this.fetchClusters()]);
+        this.items = items;
       } finally {
         this.loading--;
+      }
+    },
+
+    async fetchClusters(): Promise<ICluster[]> {
+      if (this.routeIsAlbums) {
+        return await dav.getAlbums();
+      } else if (this.routeIsTags) {
+        return await dav.getTags();
+      } else if (this.routeIsRecognize) {
+        return await dav.getFaceList('recognize');
+      } else if (this.routeIsFaceRecognition) {
+        return await dav.getFaceList('facerecognition');
+      } else if (this.routeIsPlaces) {
+        return await dav.getPlaces();
+      } else {
+        return [];
       }
     },
   },

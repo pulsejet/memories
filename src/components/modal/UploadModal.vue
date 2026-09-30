@@ -1,7 +1,7 @@
 <template>
   <Modal ref="modal" @close="cleanup" v-if="show" size="normal" :can-close="pane === 0">
     <template #title>
-      {{ n('memories', 'Upload {n} file', 'Upload {n} files', files.length, { n: files.length }) }}
+      {{ n('memories', 'Upload {n} file', 'Upload {n} files', fileCount, { n: fileCount }) }}
     </template>
 
     <div class="inner">
@@ -17,13 +17,18 @@
         </div>
 
         <div class="options">
-          <NcCheckboxRadioSwitch :checked="albums.length > 0" :disabled="processing" @update:checked="pane = 1">
+          <NcCheckboxRadioSwitch
+            v-if="config.albums_enabled"
+            :model-value="albums.length > 0"
+            :disabled="processing"
+            @update:model-value="pane = 1"
+          >
             {{ t('memories', 'Add to albums') }}
             <br />
             <span class="switch-subtitle">{{ albumNames }}</span>
           </NcCheckboxRadioSwitch>
 
-          <NcCheckboxRadioSwitch :checked.sync="tagsShown" :disabled="processing">
+          <NcCheckboxRadioSwitch v-model="tagsShown" :disabled="processing">
             {{ t('memories', 'Add tags') }}
             <br />
             <span class="switch-subtitle">
@@ -41,7 +46,7 @@
             {{ progressNote }}
             <NcProgressBar :value="progress" :error="true" />
           </div>
-          <NcButton @click="upload" type="primary" :disabled="processing">
+          <NcButton @click="upload" variant="primary" :disabled="processing">
             {{ t('memories', 'Upload') }}
           </NcButton>
         </div>
@@ -55,7 +60,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent } from 'vue';
+import { createApp, defineComponent, defineAsyncComponent } from 'vue';
 
 import Modal from '@components/modal/Modal.vue';
 import ModalMixin from '@components/modal/ModalMixin';
@@ -63,10 +68,10 @@ import AlbumPicker from '@components/modal/AlbumPicker.vue';
 import EditTags from '@components/modal/EditTags.vue';
 import UploadMenuItem from '@components/header/UploadMenuItem.vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
-const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
-const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
+const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
 
 import axios from '@nextcloud/axios';
 import { getUploader } from '@nextcloud/upload';
@@ -76,9 +81,12 @@ import UserConfig from '@mixins/UserConfig';
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
+import * as nativex from '@native';
 import { API } from '@services/API';
+import { registerGlobals } from '../../bootstrap';
+import { registerRouteCheckers } from '../../router';
 
-import type { IAlbum, IPhoto } from '@typings';
+import type { IAlbum, IPhoto, IUploadNativeX } from '@typings';
 import type PCancelable from 'p-cancelable';
 
 export default defineComponent({
@@ -105,6 +113,7 @@ export default defineComponent({
     progress: 0,
     progressNote: String(),
     currentUpload: null as null | PCancelable<any>,
+    locals: [] as IUploadNativeX[],
   }),
 
   created() {
@@ -116,16 +125,20 @@ export default defineComponent({
     if (header && utils.uid) {
       const div = document.createElement('div');
       header.prepend(div);
-      const component = new Vue({ render: (h) => h(UploadMenuItem) });
-      component.$mount(div);
+      const headerApp = createApp(UploadMenuItem);
+      // Share globals and router with header button
+      registerGlobals(headerApp);
+      registerRouteCheckers(headerApp);
+      try {
+        headerApp.use(this.$router);
+      } catch {}
+      headerApp.mount(div);
     }
   },
 
   computed: {
-    refs() {
-      return this.$refs as {
-        tags?: InstanceType<typeof EditTags>;
-      };
+    fileCount(): number {
+      return this.files.length + this.locals.length;
     },
 
     albumNames() {
@@ -138,25 +151,26 @@ export default defineComponent({
   },
 
   methods: {
-    open() {
+    refs() {
+      return this.$refs as {
+        tags?: InstanceType<typeof EditTags>;
+      };
+    },
+
+    open(locals?: IUploadNativeX[]) {
       // cannot upload to public shares
       if (this.routeIsPublic) return;
 
-      // reset everything
-      this.pane = 0;
-      this.files = [];
-      this.albums = [];
-      this.tagsShown = false;
-      this.processing = false;
-      this.progress = 0;
-
-      // choose first path of timeline path
-      this.uploadPath = this.config.timeline_path.split(';')?.[0] ?? '/';
-
-      // choose current folder if in folders view
-      if (this.routeIsFolders) {
-        this.uploadPath = utils.getFolderRoutePath(this.config.folders_path);
+      // Upload local files natively (NativeX)
+      if (locals?.length) {
+        this.resetState();
+        this.locals = locals;
+        this.show = true;
+        return;
       }
+
+      // reset everything
+      this.resetState();
 
       // prompt the user to select the files
       const input = document.createElement('input');
@@ -172,9 +186,29 @@ export default defineComponent({
       input.click();
     },
 
+    resetState() {
+      this.pane = 0;
+      this.files = [];
+      this.albums = [];
+      this.tagsShown = false;
+      this.processing = false;
+      this.progress = 0;
+      this.progressNote = String();
+      this.locals = [];
+
+      // choose first path of timeline path
+      this.uploadPath = this.config.timeline_path.split(';')?.[0] ?? '/';
+
+      // choose current folder if in folders view
+      if (this.routeIsFolders) {
+        this.uploadPath = utils.getFolderRoutePath(this.config.folders_path);
+      }
+    },
+
     cleanup() {
       this.show = false;
       this.files = [];
+      this.locals = [];
       this.processing = false;
       this.currentUpload?.cancel('Modal closed');
     },
@@ -212,13 +246,19 @@ export default defineComponent({
       if (this.tagsShown) {
         try {
           this.progressNote = this.t('memories', 'Creating tags');
-          tags = (await this.refs.tags?.result?.())?.add ?? [];
-        } catch (e) {
+          tags = (await this.refs().tags?.result?.())?.add ?? [];
+        } catch (e: any) {
           showError(e);
           console.error(e);
           throw e;
         }
       }
+
+      type UploadSource = { kind: 'file'; file: File } | { kind: 'nativex'; entry: IUploadNativeX };
+      const queue: UploadSource[] = [
+        ...this.files.map((file) => ({ kind: 'file' as const, file })),
+        ...this.locals.map((entry) => ({ kind: 'nativex' as const, entry })),
+      ];
 
       /**
        * for each file:
@@ -230,14 +270,15 @@ export default defineComponent({
        */
       const OP_FAC = 100 * 1024;
       let maxProgress = this.files.reduce((sum, file) => sum + file.size, 0); // file size
-      maxProgress += (tags.length ? 1 : 0) * this.files.length * OP_FAC; // tags
-      maxProgress += this.albums.length * this.files.length * OP_FAC; // albums
+      maxProgress += this.locals.length; // local size unknown, assume 1 each
+      maxProgress += (tags.length ? 1 : 0) * queue.length * OP_FAC; // tags
+      maxProgress += this.albums.length * queue.length * OP_FAC; // albums
 
       // Update progress bar
       let progress = 0;
       const addProgress = (delta: number) => {
         progress += delta;
-        this.progress = (progress * 100) / maxProgress;
+        this.progress = maxProgress ? (progress * 100) / maxProgress : 0;
       };
 
       // Guard against closed modal
@@ -249,43 +290,66 @@ export default defineComponent({
       const uploaded = [] as {
         fileid: number;
         filename: string;
-        file: File;
+        name: string;
       }[];
+
+      // Sources that still need (re)trying after a partial failure
+      const remaining = [] as UploadSource[];
 
       // Start upload process
       const uploader = getUploader();
-      for (const file of this.files) {
+      for (const source of queue) {
         guardOpen();
 
         // add slash to upload path
         let path = this.uploadPath;
         if (!path.endsWith('/')) path += '/';
 
-        try {
-          this.progressNote = this.t('memories', 'Uploading {file}', { file: file.name });
+        if (source.kind === 'nativex') {
+          // NativeX files upload natively without downloading
+          try {
+            const dest = path + source.entry.filename;
+            this.progressNote = this.t('memories', 'Uploading {file}', { file: source.entry.filename });
+            const fileid = await this.uploadNativeX(source.entry.auid, dest);
+            guardOpen();
+            uploaded.push({ fileid, filename: dest, name: source.entry.filename });
+          } catch (e) {
+            showError(this.t('memories', 'Failed to upload {file}', { file: source.entry.filename }));
+            console.error(e);
+            remaining.push(source);
+          } finally {
+            addProgress(1);
+          }
+        } else {
+          // Browser files are uploaded using the uploader.
+          const file = source.file;
+          try {
+            this.progressNote = this.t('memories', 'Uploading {file}', { file: file.name });
 
-          const filename = path + file.name;
-          const promise = (this.currentUpload = uploader.upload(filename, file));
-          const res = await promise;
-          this.currentUpload = null;
+            const filename = path + file.name;
+            const promise = (this.currentUpload = uploader.upload(filename, file));
+            const res = await promise;
+            this.currentUpload = null;
 
-          const fileid = parseInt(res.response?.headers?.['oc-fileid'] ?? 0);
-          if (!fileid) throw new Error('No fileid header in response');
+            const fileid = parseInt(res.response?.headers?.['oc-fileid'] ?? 0);
+            if (!fileid) throw new Error('No fileid header in response');
 
-          uploaded.push({ fileid, filename, file });
-        } catch (e) {
-          showError(this.t('memories', 'Failed to upload {file}', { file: file.name }));
-          console.error(e);
-        } finally {
-          this.currentUpload = null;
-          addProgress(file.size);
+            uploaded.push({ fileid, filename, name: file.name });
+          } catch (e) {
+            showError(this.t('memories', 'Failed to upload {file}', { file: file.name }));
+            console.error(e);
+            remaining.push(source);
+          } finally {
+            this.currentUpload = null;
+            addProgress(file.size);
+          }
         }
       }
 
       // Make IPhoto types for album calls
       const photos = uploaded.map((f) => ({
         fileid: f.fileid,
-        basename: f.file.name,
+        basename: f.name,
         imageInfo: {
           filename: f.filename, // prevent info calls (see dav/base.ts)
         },
@@ -324,11 +388,22 @@ export default defineComponent({
       }
 
       // Throw if all files were not uploaded
-      if (uploaded.length !== this.files.length) {
+      if (uploaded.length !== queue.length) {
         showError(this.t('memories', 'Some files have not been uploaded.'));
-        this.files = this.files.filter((file) => !uploaded.some((up) => up.file === file));
+        this.files = remaining.filter((s): s is { kind: 'file'; file: File } => s.kind === 'file').map((s) => s.file);
+        this.locals = remaining
+          .filter((s): s is { kind: 'nativex'; entry: IUploadNativeX } => s.kind === 'nativex')
+          .map((s) => s.entry);
         throw new Error('Some files have not been uploaded.');
       }
+    },
+
+    async uploadNativeX(auid: string, filename: string): Promise<number> {
+      const res = await fetch(nativex.NAPI.UPLOAD_LOCAL(auid, filename));
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const fileid = parseInt((await res.json())?.fileid ?? 0);
+      if (!fileid) throw new Error('No fileid in response');
+      return fileid;
     },
   },
 });
@@ -338,14 +413,14 @@ export default defineComponent({
 .inner {
   margin-top: 1em;
 
-  :deep .checkbox-content {
+  :deep(.checkbox-content) {
     max-width: calc(100% - 20px);
     padding: 4px 10px;
+  }
 
-    &__text {
-      display: block;
-      line-height: 1.1em;
-    }
+  :deep(.checkbox-content__text) {
+    display: block;
+    line-height: 1.1em;
   }
 }
 
@@ -357,7 +432,7 @@ export default defineComponent({
   margin-top: 10px;
 
   .tags-pane {
-    :deep .outer {
+    :deep(.outer) {
       margin-top: 2px;
       margin-left: 28px;
       margin-right: 14px;

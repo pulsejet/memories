@@ -56,42 +56,42 @@
         )
       }}
       <NcCheckboxRadioSwitch
-        :checked.sync="config['memories.index.mode']"
+        v-model="config['memories.index.mode']"
         value="1"
         name="idxm_radio"
         type="radio"
-        @update:checked="update('memories.index.mode')"
+        @update:model-value="update('memories.index.mode')"
         >{{ t('memories', 'Index all media automatically (recommended)') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
-        :checked.sync="config['memories.index.mode']"
+        v-model="config['memories.index.mode']"
         value="2"
         name="idxm_radio"
         type="radio"
-        @update:checked="update('memories.index.mode')"
+        @update:model-value="update('memories.index.mode')"
         >{{ t('memories', 'Index per-user timeline folders (not recommended)') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
-        :checked.sync="config['memories.index.mode']"
+        v-model="config['memories.index.mode']"
         value="3"
         name="idxm_radio"
         type="radio"
-        @update:checked="update('memories.index.mode')"
+        @update:model-value="update('memories.index.mode')"
         >{{ t('memories', 'Index a fixed relative path') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
-        :checked.sync="config['memories.index.mode']"
+        v-model="config['memories.index.mode']"
         value="0"
         name="idxm_radio"
         type="radio"
-        @update:checked="update('memories.index.mode')"
+        @update:model-value="update('memories.index.mode')"
         >{{ t('memories', 'Disable background indexing') }}
       </NcCheckboxRadioSwitch>
 
       <NcTextField
         :label="t('memories', 'Indexing path (relative, all users)')"
         :label-visible="true"
-        :value="config['memories.index.path']"
+        :model-value="config['memories.index.path']"
         @change="update('memories.index.path', $event.target.value)"
         v-if="config['memories.index.mode'] === '3'"
       />
@@ -99,27 +99,15 @@
 
     <div>
       {{ t('memories', 'Folders with a ".nomedia" or a ".nomemories" file are always excluded from indexing.') }}
-      {{ t('memories', 'You can optionally use a regular expression to exclude matching paths from being indexed.') }}
-      {{ t('memories', 'For example, to exclude special QNAP folders:') }}
+      {{ t('memories', 'You can optionally exclude specific folder names from being indexed.') }}
       <br />
-      <code>\/@(Recycle|eaDir)\/</code>
-      <br />
-      {{ t('memories', 'Or, exclude all files starting with "private-" or "backup-":') }}
-      <br />
-      <code>\/(private|backup)-[^\/]*$</code>
-      <br />
-      {{ t('memories', 'You can use the regex101 website to validate and test the pattern:') }}
-      <a target="_blank" href="https://regex101.com/">
-        {{ t('memories', 'External Link') }}
-      </a>
 
       <NcTextField
         class="regex-field"
-        :label="t('memories', 'Exclude paths matching regular expression')"
+        :label="t('memories', 'Excluded folder names (comma-separated)')"
         :label-visible="true"
-        :value.sync="config['memories.index.path.blacklist']"
-        :error="!blacklistRegexValid"
-        @change="blacklistRegexValid && update('memories.index.path.blacklist', $event.target.value)"
+        v-model="blocklistText"
+        @change="update('memories.index.folder.blocklist')"
       />
     </div>
 
@@ -132,7 +120,7 @@
       <br />
       {{ t('memories', 'Run index in parallel with 4 threads:') }}
       <br />
-      <code>bash -c 'for i in {1..4}; do (occ memories:index &amp;); done'</code>
+      <code>bash -c 'trap "kill 0" INT TERM; for i in {1..4}; do (occ memories:index) & done; wait'</code>
       <br />
       {{ t('memories', 'Force re-indexing of all files:') }}
       <br />
@@ -165,13 +153,16 @@ export default defineComponent({
   data: () => ({ API }),
 
   computed: {
-    blacklistRegexValid(): boolean {
-      console.log(this.config['memories.index.path.blacklist']);
-      try {
-        return !!new RegExp(this.config['memories.index.path.blacklist']);
-      } catch {
-        return false;
-      }
+    blocklistText: {
+      get(): string {
+        return (this.config['memories.index.folder.blocklist'] ?? []).join(', ');
+      },
+      set(value: string) {
+        this.config['memories.index.folder.blocklist'] = value
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => s !== '');
+      },
     },
   },
 });
@@ -179,7 +170,7 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .regex-field {
-  :deep input {
+  :deep(input) {
     font-family: monospace;
   }
 }

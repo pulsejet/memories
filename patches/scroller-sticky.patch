@@ -1,11 +1,55 @@
---- ./node_modules/vue-virtual-scroller/dist/vue-virtual-scroller.esm.js	2022-11-12 00:44:05.303602165 -0800
-+++ ./node_modules/vue-virtual-scroller/dist/vue-virtual-scroller.esm.js	2022-11-12 00:43:40.030571395 -0800
-@@ -425,7 +425,7 @@
-             }
-
-             // Check if index is still in visible range
--            if (view.nr.index === -1 || view.nr.index < startIndex || view.nr.index >= endIndex) {
-+            if (!view.item.virtualSticky && (view.nr.index === -1 || view.nr.index < startIndex || view.nr.index >= endIndex)) {
-               this.unuseView(view);
-             }
-           }
+# Keeps recycler views marked with `item.virtualSticky` alive.
+#
+# Memories sets `virtualSticky = true` on the touched row during touch-hold
+# selection (see SelectionManager::touchstartPhoto). The view backing that row
+# must stay in the DOM for the whole gesture, otherwise the browser stops
+# delivering touchmove/touchend events and the drag selection breaks.
+# This ports the old vue-virtual-scroller v1 patch to the v3 codebase, which
+# has TWO places that release views (v1 had one):
+#   1. the visible-range keep-check in updateVisibleItems: sticky views are
+#      treated as in range so they are never released;
+#   2. the Kt() full reset (runs when the item keys change, e.g. rows are
+#      added while auto-scroll loads more days): sticky views are skipped and
+#      stay registered in the key map so the render loop reuses them in place
+#      instead of mounting duplicates.
+#
+# HOW TO REBASE when vue-virtual-scroller is upgraded (the dist file below is
+# a versioned build artifact, its name and minified identifiers change):
+#   1. The dist chunk is hashed per release, e.g.
+#      dist/useRecycleScroller-<HASH>.js. Update the ---/+++ paths below to
+#      the new file name.
+#   2. Hunk 1 (Kt): search the new file for the full-reset loop that clears
+#      the view maps, i.e. a function containing `<map>.clear()` twice
+#      followed by a loop calling the unuse helper on every pooled view.
+#      Re-apply the sticky guard there, keeping sticky views registered.
+#   3. Hunk 2 (keep-check): search for the per-view retention condition that
+#      compares the view index against the visible range
+#      (e.g. `y.nr.index >= w && y.nr.index < g`) and ORs in the unuse call.
+#      Add the `y.item.virtualSticky` escape before the unuse call.
+#   4. Refresh the @@ line numbers and verify with:
+#        patch -p1 --dry-run --verbose < patches/scroller-sticky.patch
+#      Both hunks must succeed. Then re-apply with scripts/patch-external.sh.
+--- ./node_modules/vue-virtual-scroller/dist/useRecycleScroller-D_RDrEg2.js	2026-09-07 00:00:00.000000000 -0700
++++ ./node_modules/vue-virtual-scroller/dist/useRecycleScroller-D_RDrEg2.js	2026-09-07 00:00:00.000000000 -0700
+@@ -398,7 +398,11 @@
+   function Kt() {
+     Ue.clear(), $e.clear();
+     for (let e = 0, t = N.value.length; e < t; e++) {
+       const r = N.value[e];
+-      r && St(r);
++      if (r && r.item && r.item.virtualSticky) {
++        Ue.set(r.nr.key, r);
++        continue;
++      }
++      r && St(r);
+     }
+   }
+@@ -743,7 +743,7 @@
+     else {
+       const b = (W) => {
+         const $ = E[W];
+-        $ && (y = $, y.nr.used && ((me ? me.has(y.nr.index) : y.nr.index >= w && y.nr.index < g) || St(y, tt)));
++        $ && (y = $, y.nr.used && ((me ? me.has(y.nr.index) : y.nr.index >= w && y.nr.index < g) || y.item && y.item.virtualSticky || St(y, tt)));
+       };
+       if (tt) {
+         for (let W = E.length - 1; W >= 0; W--)

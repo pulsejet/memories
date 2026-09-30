@@ -1,3 +1,4 @@
+<?php /** @var bool $native */ ?>
 <?php if ($native === true) { ?>
 <style type="text/css">
     body, html {

@@ -5,6 +5,15 @@ declare(strict_types=1);
 namespace OCA\Memories\Settings;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Util;
+use OCP\App\IAppManager;
+use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\Config\IUserConfig;
+use OCP\Encryption\IManager as EncryptionManager;
+use OCP\IAppConfig;
+use OCP\IConfig;
+use OCP\IRequest;
+use OCP\IUserSession;
 
 final class SystemConfig
 {
@@ -34,11 +43,21 @@ final class SystemConfig
         // Path to index (only used if indexing mode is 3)
         'memories.index.path' => '/',
 
-        // Blacklist file or folder paths by regex
-        'memories.index.path.blacklist' => '\/@(Recycle|eaDir)\/',
+        // Blocklist folder names by SQL LIKE pattern.
+        // % and _ are wildcards, \ escapes
+        'memories.index.folder.blocklist' => ['@Recycle', '@eaDir', '.trashed-%'],
 
         // Places database type identifier
         'memories.gis_type' => -1,
+
+        // Base URL of the location search service used by the metadata editor.
+        // Must be compatible with the Nominatim search API.
+        // Set to an empty string to disable location search.
+        'memories.places.search.url' => 'https://nominatim.openstreetmap.org',
+
+        // Available map tile servers for the map view.
+        // The first entry is the default for new users.
+        'memories.map.tile_servers' => FreeTileServers::TILES,
 
         // Default timeline path for all users
         // If set to '_empty_', the user is prompted to select a path
@@ -48,12 +67,17 @@ final class SystemConfig
         // Valid values: 'always' | 'zoom' | 'never'
         'memories.viewer.high_res_cond_default' => 'zoom',
 
+        // Default video autoplay behavior for the photo viewer
+        // Valid values: 'true' | 'false' | 'disallow'
+        'memories.viewer.video.autoplay' => 'true',
+
         // Disable transcoding
         'memories.vod.disable' => true,
 
         // VA-API configuration options
         'memories.vod.vaapi' => false,  // Transcode with VA-API
         'memories.vod.vaapi.low_power' => false, // Use low_power mode for VA-API
+        'memories.vod.vaapi.device' => '/dev/dri/renderD128', // VA-API render node
 
         // NVENC configuration options
         'memories.vod.nvenc' => false,  // Transcode with NVIDIA NVENC
@@ -76,27 +100,38 @@ final class SystemConfig
         // Make sure this has plenty of space
         'memories.vod.tempdir' => '',
 
+        // Path for durable go-vod caches, defaults to system temp go-vod-cache
+        'memories.vod.cachedir' => '',
+
         // Bind address to use when starting the transcoding server
         'memories.vod.bind' => '127.0.0.1:47788',
 
-        // Address used to connect to the transcoding server
-        // If not specified, the bind address above will be used
-        'memories.vod.connect' => '127.0.0.1:47788',
+        // URL go-vod uses to connect back to Nextcloud (internal transcoder only)
+        'memories.vod.nc_url' => 'http://localhost:80',
+
+        // Transcoding servers to connect to in external mode.
+        // Each client is sticky-routed to one server by hash.
+        'memories.vod.connect' => ['127.0.0.1:47788'],
 
         // Mark go-vod as external. If true, Memories will not attempt to
         // start go-vod if it is not running already.
         'memories.vod.external' => false,
 
         // Quality Factor used for transcoding
-        // This correspondes to CRF for x264 and global_quality for VA-API
+        // This corresponds to CRF for x264 and global_quality for VA-API
         'memories.vod.qf' => 24,
 
         // Set the default video quality for a first time user
         //    0 => Auto (default)
-        //   -1 => Original (max quality with transcoding)
-        //   -2 => Direct (disable transcoding)
+        //   -1 => Original (max quality)
         // 1080 => 1080p (and so on)
         'memories.video_default_quality' => '0',
+
+        // Base URL of the Lens daemon (empty = disabled)
+        'memories.lens.daemon_url' => '',
+
+        // UID of the dedicated Lens service account (empty = endpoint disabled)
+        'memories.lens.service_user' => '',
 
         // Availability of database features, e.g. triggers
         'memories.db.triggers.fcu' => false,
@@ -118,25 +153,33 @@ final class SystemConfig
         'debug' => false,
     ];
 
+    public function __construct(
+        private IConfig $config,
+        private IUserConfig $userConfig,
+        private IRequest $request,
+        private IAppManager $appManager,
+        private IAppConfig $appConfig,
+        private IUserSession $userSession,
+        private EncryptionManager $encryptionManager,
+    ) {}
+
     /**
      * Get a system config key with the correct default.
      *
      * @param string $key     System config key
      * @param mixed  $default Default value
      */
-    public static function get(string $key, mixed $default = null): mixed
+    public function get(string $key, mixed $default = null): mixed
     {
         if (!\array_key_exists($key, self::DEFAULTS)) {
             throw new \InvalidArgumentException("Invalid system config key: {$key}");
         }
 
         // Use the default value if not provided
-        $default = $default ?? self::DEFAULTS[$key];
+        $default ??= self::DEFAULTS[$key];
 
         // Get the value from the config
-        $value = \OC::$server->get(\OCP\IConfig::class)
-            ->getSystemValue($key, $default)
-        ;
+        $value = $this->config->getSystemValue($key, $default);
 
         // Check if the value has the correct type
         if (($got = \gettype($value)) !== ($exp = \gettype($default))) {
@@ -154,7 +197,7 @@ final class SystemConfig
      *
      * @throws \InvalidArgumentException
      */
-    public static function set(string $key, mixed $value): void
+    public function set(string $key, mixed $value): void
     {
         // Check if the key is valid
         if (!\array_key_exists($key, self::DEFAULTS)) {
@@ -174,7 +217,7 @@ final class SystemConfig
             throw new \InvalidArgumentException("Invalid value for system config {$key}, null is not allowed");
         }
 
-        $config = \OC::$server->get(\OCP\IConfig::class);
+        $config = $this->config;
         if ($isAppKey && ($value === self::DEFAULTS[$key] || null === $value)) {
             $config->deleteSystemValue($key);
         } else {
@@ -186,8 +229,228 @@ final class SystemConfig
      * Check if geolocation (places) is enabled and available.
      * Returns the type of the GIS.
      */
-    public static function gisType(): int
+    public function gisType(): int
     {
-        return self::get('memories.gis_type');
+        return $this->get('memories.gis_type');
+    }
+
+    /**
+     * Get list of timeline paths as array.
+     *
+     * @return string[] List of paths
+     */
+    public function getTimelinePaths(string $uid): array
+    {
+        $paths = $this->userConfig
+            ->getValueString($uid, Application::APPNAME, 'timelinePath')
+                ?: $this->get('memories.timeline.default_path');
+
+        if ($this->get('debug')) {
+            $override = $this->request->getHeader('X-TIMELINE-PATH');
+            if (!empty($override)) {
+                $paths = $override;
+            }
+        }
+
+        return array_map(
+            static fn ($path) => Util::sanitizePath(trim($path))
+                ?? throw new \InvalidArgumentException("Invalid timeline path: {$path}"),
+            explode(';', $paths),
+        );
+    }
+
+    /** Check if albums are enabled for this user */
+    public function albumsIsEnabled(): bool
+    {
+        return $this->appManager->isEnabledForUser('photos');
+    }
+
+    /** Check if tags is enabled for this user */
+    public function tagsIsEnabled(): bool
+    {
+        return $this->appManager->isEnabledForUser('systemtags');
+    }
+
+    /** Get a user config value for the app or default. */
+    public function getUserConfigValue(string $key, string $default): string
+    {
+        if ($uid = $this->userSession->getUser()?->getUID()) {
+            return $this->userConfig->getValueString($uid, Application::APPNAME, $key, $default);
+        }
+
+        return $default;
+    }
+
+    /** Get the user's selected map tile server URL. */
+    public function getUserMapTileServerUrl(): string
+    {
+        $mapTileServers = $this->get('memories.map.tile_servers');
+        $default = $mapTileServers[0]['url'] ?? '';
+
+        $url = $this->getUserConfigValue('mapTileServerUrl', $default);
+        if (!\in_array($url, array_column($mapTileServers, 'url'), true)) {
+            return $default;
+        }
+
+        return $url;
+    }
+
+    /** Get the effective video autoplay state for a user. */
+    public function getUserVideoAutoplay(): string
+    {
+        $admin = $this->get('memories.viewer.video.autoplay');
+        if ('disallow' === $admin) {
+            return $admin;
+        }
+
+        $value = $this->getUserConfigValue('videoAutoplay', $admin);
+
+        return 'false' === $value ? 'false' : 'true';
+    }
+
+    /** Check if recognize is enabled for this user */
+    public function recognizeIsEnabled(): bool
+    {
+        if (!$this->recognizeIsInstalled()) {
+            return false;
+        }
+
+        if ('true' !== $this->appConfig->getValueString('recognize', 'faces.enabled', 'false')) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /** Check if recognize is installed */
+    public function recognizeIsInstalled(): bool
+    {
+        if (!$this->appManager->isEnabledForUser('recognize')) {
+            return false;
+        }
+
+        $v = $this->appManager->getAppVersion('recognize');
+
+        return version_compare($v, '3.8.0', '>=');
+    }
+
+    /** Check if Face Recognition is enabled by the user */
+    public function facerecognitionIsEnabled(): bool
+    {
+        if (!$this->facerecognitionIsInstalled()) {
+            return false;
+        }
+
+        try {
+            $uid = $this->userSession->getUser()?->getUID();
+            if (null === $uid) {
+                return false;
+            }
+
+            return 'true' === $this->userConfig->getValueString($uid, 'facerecognition', 'enabled', 'false');
+        } catch (\Exception) {
+            // not logged in
+        }
+
+        return false;
+    }
+
+    /** Check if Face Recognition is installed and enabled for this user */
+    public function facerecognitionIsInstalled(): bool
+    {
+        if (!$this->appManager->isEnabledForUser('facerecognition')) {
+            return false;
+        }
+
+        $v = $this->appManager->getAppVersion('facerecognition');
+
+        return version_compare($v, '0.9.10-beta.2', '>=');
+    }
+
+    /** Check if preview generator is installed */
+    public function previewGeneratorIsEnabled(): bool
+    {
+        return $this->appManager->isEnabledForUser('previewgenerator');
+    }
+
+    /**
+     * Check if any encryption is enabled that we can not cope with
+     * such as end-to-end encryption.
+     */
+    public function isEncryptionEnabled(): bool
+    {
+        if ($this->encryptionManager->isEnabled()) {
+            // Server-side encryption (OC_DEFAULT_MODULE) is okay, others like e2e are not
+            return 'OC_DEFAULT_MODULE' !== $this->encryptionManager->getDefaultEncryptionModuleId();
+        }
+
+        return false;
+    }
+
+    /** Get the language code for the current user */
+    public function getUserLang(): string
+    {
+        // Get the default language
+        $default = (string) $this->config->getSystemValue('default_language', 'en');
+
+        try {
+            $uid = $this->userSession->getUser()?->getUID();
+            if (null === $uid) {
+                return $default;
+            }
+
+            // Get language of the user
+            return $this->userConfig->getValueString($uid, 'core', 'lang', $default);
+        } catch (\Exception) {
+            // Fallback to server language
+            return $default;
+        }
+    }
+
+    /** Get the common content security policy */
+    public function getCSP(): ContentSecurityPolicy
+    {
+        $policy = new ContentSecurityPolicy();
+
+        // Image domains MUST be added to the connect domain list
+        // because of the service worker fetch() call
+        $addImageDomain = static function (string $url) use (&$policy): void {
+            $policy->addAllowedImageDomain($url);
+            $policy->addAllowedConnectDomain($url);
+        };
+
+        // Create base policy
+        $policy->addAllowedWorkerSrcDomain("'self'");
+        $policy->addAllowedScriptDomain("'self'");
+        $policy->addAllowedFrameDomain("'self'");
+        $policy->addAllowedImageDomain("'self'");
+        $policy->addAllowedMediaDomain("'self'");
+        $policy->addAllowedConnectDomain("'self'");
+
+        // Video player
+        $policy->addAllowedWorkerSrcDomain('blob:');
+        $policy->addAllowedScriptDomain('blob:');
+        $policy->addAllowedMediaDomain('blob:');
+
+        // Image editor
+        $policy->addAllowedConnectDomain('data:');
+
+        // Allow CSP domains of configured map tile servers
+        foreach ($this->get('memories.map.tile_servers') as $tile) {
+            foreach ((array) ($tile['csp'] ?? []) as $csp) {
+                $addImageDomain((string) $csp);
+            }
+        }
+
+        // Native communication
+        $addImageDomain('http://127.0.0.1');
+
+        // Allow configured location search provider
+        $searchHost = parse_url((string) $this->get('memories.places.search.url'), PHP_URL_HOST);
+        if (\is_string($searchHost) && '' !== $searchHost) {
+            $policy->addAllowedConnectDomain($searchHost);
+        }
+
+        return $policy;
     }
 }

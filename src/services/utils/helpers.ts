@@ -1,11 +1,13 @@
 import { getCurrentUser } from '@nextcloud/auth';
+import { Md5 } from 'ts-md5';
 
 import { constants as c } from './const';
+import { getPlayableVideoCodecsSync } from './video';
 
 import { API } from '@services/API';
-import { NAPI } from '@native';
+import { has as hasNativeX, NAPI } from '@native';
 
-import type { IImageInfo, IPhoto } from '@typings';
+import type { IConfig, IImageInfo, IPhoto } from '@typings';
 
 /**
  * Get the current user UID
@@ -34,7 +36,7 @@ type PreviewOptsSize = PreviewOpts & {
    * Directly specify the size of the preview.
    * If you already know the size of the photo, use msize instead,
    * so that caching can be utilized best. A size of 256 is not allowed
-   * here size the thumbnails are not pre-generated.
+   * here since the thumbnails are not pre-generated.
    */
   size: 512 | 1024 | 2048 | [number, number] | 'screen';
 };
@@ -70,11 +72,14 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
   if (size === 'screen') {
     const sw = Math.floor(screen.width * devicePixelRatio);
     const sh = Math.floor(screen.height * devicePixelRatio);
+    const longEdge = Math.max(sw, sh);
     size = [sw, sh];
 
     // Use capped full image if NativeX is used
     if (isLocalPhoto(photo)) {
-      return API.Q(NAPI.IMAGE_FULL(photo.auid!), { size: Math.max(sw, sh) });
+      return API.Q(NAPI.IMAGE_FULL(photo.auid!), { size: longEdge });
+    } else if (photo.local_photo?.auid && isLikelySamePhoto(photo, photo.local_photo)) {
+      return API.Q(NAPI.IMAGE_FULL(photo.local_photo.auid), { size: longEdge });
     }
   }
 
@@ -96,6 +101,8 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
   // NativeX preview
   if (isLocalPhoto(photo)) {
     return API.Q(NAPI.IMAGE_PREVIEW(photo.fileid), { c, x, y });
+  } else if (isLikelySamePhoto(photo, photo.local_photo)) {
+    return API.Q(NAPI.IMAGE_PREVIEW(photo.local_photo.fileid), { c, x, y });
   }
 
   // Preview from server
@@ -119,18 +126,41 @@ export function isVideo(photo: IPhoto): boolean {
 }
 
 /**
- * Get the URL for the imageInfo of a photo
+ * Get the URL for the imageInfo of a photo, including tags/clusters params.
  *
  * @param photo Photo object or fileid (remote only)
+ * @param config User config to derive tags/clusters params
  */
-export function getImageInfoUrl(photo: IPhoto | number): string {
+export function getImageInfoUrl(photo: IPhoto | number, config: IConfig): string {
   const fileid = typeof photo === 'number' ? photo : photo.fileid;
 
+  // Base URL for getting image info.
+  let base: string;
   if (typeof photo === 'object' && isLocalPhoto(photo)) {
-    return NAPI.IMAGE_INFO(fileid);
+    base = NAPI.IMAGE_INFO(fileid);
+  } else {
+    base = API.IMAGE_INFO(fileid);
   }
 
-  return API.IMAGE_INFO(fileid);
+  // Public share route should not show clusters.
+  const routeName = _m.route?.name?.toString() ?? '';
+  const isPublic = routeName.endsWith('-share');
+
+  // Include clusters like people and albums.
+  let clusters: string | undefined;
+  if (!isPublic) {
+    const parts = [
+      config.albums_enabled ? 'albums' : null,
+      config.recognize_enabled ? 'recognize' : null,
+      config.facerecognition_enabled ? 'facerecognition' : null,
+    ].filter((c) => c);
+    clusters = parts.join(',') || undefined;
+  }
+
+  // Include tags for public and logged in.
+  const tags = config.systemtags_enabled ? 1 : undefined;
+
+  return API.Q(base, { tags, clusters });
 }
 
 /**
@@ -149,15 +179,48 @@ export function updatePhotoFromImageInfo(photo: IPhoto, imageInfo: IImageInfo) {
 }
 
 /**
+ * Check if a photo object likely is the same as another.
+ * Used to check local native vs remote photos for previews.
+ */
+export function isLikelySamePhoto(photoA: IPhoto, photoB?: IPhoto): photoB is IPhoto {
+  return (
+    !!photoA &&
+    !!photoB &&
+    photoA.w === photoB.w &&
+    photoA.h === photoB.h &&
+    photoA.size === photoB.size &&
+    photoA.basename === photoB.basename &&
+    photoA.buid === photoB.buid
+  );
+}
+
+/**
+ * Calculate the AUID of photos for dedup and native lookups.
+ */
+export function applyAuids(photos: IPhoto[] | null | undefined): void {
+  for (const photo of photos ?? []) {
+    if (!photo.auid && photo.epoch && photo.size) {
+      photo.auid = Md5.hashStr(`${photo.epoch}${photo.size}`);
+    }
+  }
+}
+
+/**
  * Get the path of the folder on folders route
  * This function does not check if this is the folder route
  */
 export function getFolderRoutePath(basePath: string) {
   let path = (_m.route.params.path || '/') as string | string[];
   path = typeof path === 'string' ? path : path.join('/');
-  path = basePath + '/' + path;
-  path = path.replace(/\/\/+/, '/'); // Remove double slashes
+  path = `${basePath}/${path}`;
+  path = path.replaceAll(/\/\/+/g, '/'); // Remove double slashes
   return path;
+}
+
+/** Normalize a route param to string (repeatable params parse as string[]). */
+export function routeParamToString(param?: string | string[]): string {
+  if (Array.isArray(param)) return param.join('/');
+  return param?.toString() ?? String();
 }
 
 /**
@@ -168,13 +231,14 @@ export function getLivePhotoVideoUrl(p: IPhoto, transcode: boolean) {
     etag: p.etag,
     liveid: p.liveid,
     transcode: transcode ? _m.video.clientIdPersistent : undefined,
+    codecs: transcode ? getPlayableVideoCodecsSync()?.join(',') : undefined,
   });
 }
 
 /**
  * Set up hooks to set classes on parent element for Live Photo
  * @param video Video element
- * @param parent State object to update (reactivity)
+ * @param state State object to update (reactivity)
  */
 export function setupLivePhotoHooks(video: HTMLVideoElement, state: { playing: boolean }) {
   const div = video.closest('.memories-livephoto') as HTMLDivElement;
@@ -204,7 +268,7 @@ export function removeExtension(filename: string) {
  * Check if the provided Axios Error is a network error.
  */
 export function isNetworkError(error: any) {
-  return error?.code === 'ERR_NETWORK';
+  return error?.code === 'ERR_NETWORK' || (hasNativeX() && error?.response?.status === 504);
 }
 
 /**

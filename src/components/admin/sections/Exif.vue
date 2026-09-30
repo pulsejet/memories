@@ -11,7 +11,7 @@
     <NcTextField
       :label="t('memories', 'Path to packaged exiftool binary')"
       :label-visible="true"
-      :value="config['memories.exiftool']"
+      :model-value="config['memories.exiftool']"
       @change="update('memories.exiftool', $event.target.value)"
       readonly
     />
@@ -24,8 +24,8 @@
     </template>
 
     <NcCheckboxRadioSwitch
-      :checked.sync="config['memories.exiftool_no_local']"
-      @update:checked="update('memories.exiftool_no_local')"
+      v-model="config['memories.exiftool_no_local']"
+      @update:model-value="update('memories.exiftool_no_local')"
       type="switch"
     >
       {{ t('memories', 'Use system perl (only if exiftool binary does not work)') }}

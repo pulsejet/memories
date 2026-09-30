@@ -17,14 +17,14 @@ export default class ImageContentSetup {
   private stickySrcs = new Map<number, string>();
 
   constructor(private lightbox: PhotoSwipe) {
-    lightbox.on('contentLoad', this.onContentLoad.bind(this));
-    lightbox.on('contentLoadImage', this.onContentLoadImage.bind(this));
-    lightbox.on('contentDestroy', this.onContentDestroy.bind(this));
-    lightbox.on('destroy', this.onDestroy.bind(this));
-    lightbox.on('zoomPanUpdate', this.zoomPanUpdate.bind(this));
-    lightbox.on('slideActivate', this.slideActivate.bind(this));
-    lightbox.addFilter('isContentLoading', this.isContentLoading.bind(this));
-    lightbox.addFilter('placeholderSrc', this.placeholderSrc.bind(this));
+    lightbox.on('contentLoad', (e) => this.onContentLoad(e as unknown as PsEvent));
+    lightbox.on('contentLoadImage', (e) => this.onContentLoadImage(e as unknown as PsEvent));
+    lightbox.on('contentDestroy', (e) => this.onContentDestroy(e as unknown as PsEvent));
+    lightbox.on('destroy', () => this.onDestroy());
+    lightbox.on('zoomPanUpdate', (e) => this.zoomPanUpdate(e as unknown as { slide: PsSlide }));
+    lightbox.on('slideActivate', () => this.slideActivate());
+    lightbox.addFilter('isContentLoading', (l, c) => this.isContentLoading(l, c as unknown as PsContent));
+    lightbox.addFilter('placeholderSrc', (s, c) => this.placeholderSrc(s, c as unknown as PsContent));
   }
 
   private isContentLoading(isLoading: boolean, content: PsContent) {
@@ -54,12 +54,12 @@ export default class ImageContentSetup {
   public onDestroy() {
     // When the photoswipe instance is destroyed, make sure
     // all sticky URLs are released. This will prevent memory leaks.
-    for (const fileid of Array.from(this.stickySrcs.keys())) {
+    for (const fileid of this.stickySrcs.keys()) {
       this.setUnsticky(fileid);
     }
   }
 
-  private placeholderSrc(placeholderSrc: string, content: PsContent) {
+  private placeholderSrc(placeholderSrc: string | false, content: PsContent) {
     // We can't load msrc unless it is a blob
     // since these requests are not cached, leading to race conditions
     // with the loading of the actual images.
@@ -109,7 +109,13 @@ export default class ImageContentSetup {
   public zoomPanUpdate({ slide }: { slide: PsSlide }) {
     if (!slide.data.highSrc.length || slide.data.highSrcCond !== 'zoom') return;
 
-    if (slide.currZoomLevel >= slide.zoomLevels.secondary) {
+    // Check if zoomed in enough to load the full image.
+    // For small images, we check that there is at least a 10% zoom to avoid
+    // loading the full sized image immediately when the user opens viewer.
+    const isZoomedIn = slide.currZoomLevel >= 1.1 * slide.zoomLevels.initial;
+    const isOverSecondary = slide.currZoomLevel >= slide.zoomLevels.secondary;
+
+    if (isZoomedIn && isOverSecondary) {
       this.loadFullImage(slide);
     }
   }

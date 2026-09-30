@@ -21,6 +21,7 @@ return [
         ['name' => 'Page#thisday', 'url' => '/thisday', 'verb' => 'GET'],
         ['name' => 'Page#map', 'url' => '/map', 'verb' => 'GET'],
         ['name' => 'Page#explore', 'url' => '/explore', 'verb' => 'GET'],
+        ['name' => 'Page#search', 'url' => '/search', 'verb' => 'GET'],
         ['name' => 'Page#nxsetup', 'url' => '/nxsetup', 'verb' => 'GET'],
 
         // Routes with params
@@ -32,8 +33,8 @@ return [
         w(['name' => 'Page#tags', 'url' => '/tags/{name}', 'verb' => 'GET'], 'name'),
 
         // Public folder share
-        ['name' => 'Public#showAuthenticate', 'url' => '/s/{token}/authenticate/{redirect}', 'verb' => 'GET'],
-        ['name' => 'Public#authenticate', 'url' => '/s/{token}/authenticate/{redirect}', 'verb' => 'POST'],
+        w(['name' => 'Public#showAuthenticate', 'url' => '/s/{token}/authenticate/{redirect}', 'verb' => 'GET'], 'redirect'),
+        w(['name' => 'Public#authenticate', 'url' => '/s/{token}/authenticate/{redirect}', 'verb' => 'POST'], 'redirect'),
         w(['name' => 'Public#showShare', 'url' => '/s/{token}/{path}', 'verb' => 'GET'], 'path'),
 
         // Public album share
@@ -67,11 +68,15 @@ return [
         ['name' => 'Image#deleteFile', 'url' => '/api/image/delete/{id}', 'verb' => 'DELETE'],
 
         ['name' => 'Video#transcode', 'url' => '/api/video/transcode/{client}/{fileid}/{profile}', 'verb' => 'GET'],
+        ['name' => 'Video#storyboard', 'url' => '/api/video/storyboard/{client}/{fileid}/{profile}', 'verb' => 'GET'],
         ['name' => 'Video#livephoto', 'url' => '/api/video/livephoto/{fileid}', 'verb' => 'GET'],
 
         ['name' => 'Download#request', 'url' => '/api/download', 'verb' => 'POST'],
         ['name' => 'Download#file', 'url' => '/api/download/{handle}', 'verb' => 'GET'],
         ['name' => 'Download#one', 'url' => '/api/stream/{fileid}', 'verb' => 'GET'],
+
+        ['name' => 'Lens#file', 'url' => '/lens/file/{fileid}', 'verb' => 'GET', 'requirements' => ['fileid' => '\d+']],
+        ['name' => 'Lens#search', 'url' => '/api/lens/search', 'verb' => 'GET'],
 
         ['name' => 'Share#links', 'url' => '/api/share/links', 'verb' => 'GET'],
         ['name' => 'Share#createNode', 'url' => '/api/share/node', 'verb' => 'POST'],
@@ -81,6 +86,8 @@ return [
         ['name' => 'Other#setUserConfig', 'url' => '/api/config/{key}', 'verb' => 'PUT'],
         ['name' => 'Other#getUserConfig', 'url' => '/api/config', 'verb' => 'GET'],
         ['name' => 'Other#describeApi', 'url' => '/api/describe', 'verb' => 'GET'],
+
+        ['name' => 'Recognize#apiKey', 'url' => '/api/recognize/api-key', 'verb' => 'GET'],
 
         // Admin
         ['name' => 'Admin#getSystemStatus', 'url' => '/api/system-status', 'verb' => 'GET'],

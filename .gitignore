@@ -13,6 +13,7 @@ js/
 *.njsproj
 *.sln
 .vscode/launch.json
+.plans/
 
 .marginalia
 

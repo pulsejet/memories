@@ -23,6 +23,7 @@ import { generateUrl } from '@nextcloud/router';
 
 import UploadMenuItem from '@components/header/UploadMenuItem.vue';
 import SearchbarMenuItem from '@components/header/SearchbarMenuItem.vue';
+import XImg from '@components/frame/XImg.vue';
 
 import * as utils from '@services/utils';
 
@@ -33,6 +34,7 @@ export default defineComponent({
   components: {
     UploadMenuItem,
     SearchbarMenuItem,
+    XImg,
   },
 
   data: () => ({
@@ -51,7 +53,7 @@ export default defineComponent({
     utils.bus.on('memories.recycler.scroll', this.onScroll);
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     utils.bus.off('memories.recycler.scroll', this.onScroll);
   },
 
@@ -110,7 +112,7 @@ export default defineComponent({
         padding: 12px 12px; // mobile
       }
 
-      :deep svg {
+      :deep(svg) {
         color: var(--color-primary) !important;
       }
 

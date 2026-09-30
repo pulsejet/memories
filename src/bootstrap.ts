@@ -1,10 +1,7 @@
-import Vue from 'vue';
+import type { App } from 'vue';
 
 import { generateFilePath } from '@nextcloud/router';
 import { getRequestToken } from '@nextcloud/auth';
-
-// Global components
-import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 // Locals
 import { constants, initstate } from '@services/utils';
@@ -28,10 +25,10 @@ if ('virtualKeyboard' in navigator) {
 }
 
 // Register global components and plugins
-Vue.component('XLoadingIcon', XLoadingIcon);
-
-// Register global constants and functions
-Vue.prototype.c = constants;
-Vue.prototype.initstate = initstate;
-Vue.prototype.t = translate;
-Vue.prototype.n = translatePlural;
+export function registerGlobals(app: App) {
+  // Register global constants and functions
+  app.config.globalProperties.c = constants;
+  app.config.globalProperties.initstate = initstate;
+  app.config.globalProperties.t = translate;
+  app.config.globalProperties.n = translatePlural;
+}

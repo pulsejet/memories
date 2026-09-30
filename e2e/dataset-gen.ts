@@ -15,10 +15,14 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'child_process';
 import { createCanvas } from '@napi-rs/canvas';
 
 import { DATASET, type IDatasetEntry, type IDatasetMap } from './dataset';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Generate a JPEG image buffer based on dataset entry specifications.
@@ -173,7 +177,8 @@ async function main() {
   console.log('Dataset generation completed successfully!');
 }
 
-if (require.main === module) {
+const isMain = process.argv[1] ? path.resolve(process.argv[1]) === __filename : false;
+if (isMain) {
   main().catch((err) => {
     console.error(err);
     process.exit(1);

@@ -2,7 +2,7 @@ import { NAPI, nativex } from './api';
 import { has } from './basic';
 
 import { API } from '@services/API';
-import { bus, setRenewingTimeout, truthy } from '@services/utils';
+import * as utils from '@services/utils';
 
 import type { IDay, IPhoto } from '@typings';
 
@@ -15,18 +15,18 @@ const seenABUIDs = new Set<string>();
 // Clear the cache whenever the timeline is refreshed
 if (has()) {
   document.addEventListener('DOMContentLoaded', () => {
-    bus.on('nativex:db:updated', () => daysCache.clear());
+    utils.bus.on('nativex:db:updated', () => daysCache.clear());
   });
 }
 
 /**
  * Merge incoming days into current days.
  * Both arrays MUST be sorted by dayid descending.
- * @param current Response to update
- * @param incoming Incoming response
+ * @param remote Response to update
+ * @param local Incoming response
  * @return merged days
  */
-export function mergeDays(current: IDay[], incoming: IDay[]): IDay[] {
+export function mergeDays(remote: IDay[], local: IDay[]): IDay[] {
   // Do a two pointer merge keeping the days sorted in O(n) time
   // If a day is missing from current, add it
   // If a day already exists in current, update haslocal on it
@@ -35,9 +35,9 @@ export function mergeDays(current: IDay[], incoming: IDay[]): IDay[] {
 
   // Merge local photos into remote photos
   const merged: IDay[] = [];
-  while (i < current.length && j < incoming.length) {
-    const curr = current[i];
-    const inc = incoming[j];
+  while (i < remote.length && j < local.length) {
+    const curr = remote[i];
+    const inc = local[j];
     if (curr.dayid === inc.dayid) {
       curr.haslocal ||= inc.haslocal;
       merged.push(curr);
@@ -53,14 +53,14 @@ export function mergeDays(current: IDay[], incoming: IDay[]): IDay[] {
   }
 
   // Add remaining current days
-  while (i < current.length) {
-    merged.push(current[i]);
+  while (i < remote.length) {
+    merged.push(remote[i]);
     i++;
   }
 
   // Add remaining incoming days
-  while (j < incoming.length) {
-    merged.push(incoming[j]);
+  while (j < local.length) {
+    merged.push(local[j]);
     j++;
   }
 
@@ -69,27 +69,30 @@ export function mergeDays(current: IDay[], incoming: IDay[]): IDay[] {
 
 /**
  * Merge incoming photos into current photos.
- * @param current Response to update
- * @param incoming Incoming response
+ * @param remote Response to update
+ * @param local Incoming response
  */
-export function mergeDay(current: IPhoto[], incoming: IPhoto[]): void {
+export function mergeDay(remote: IPhoto[], local: IPhoto[]): void {
   // Create sets of current AUIDs and BUIDs
-  const auids = new Set<string>();
-  const buids = new Set<string>();
-  for (const photo of current) {
-    if (photo.auid) auids.add(photo.auid);
-    if (photo.buid) buids.add(photo.buid);
+  const auids = new Map<string, IPhoto>();
+  const buids = new Map<string, IPhoto>();
+  for (const photo of remote) {
+    if (photo.auid) auids.set(photo.auid, photo);
+    if (photo.buid) buids.set(photo.buid, photo);
   }
 
   // Filter out files that are only available locally
-  for (const photo of incoming) {
-    if (!auids.has(photo.auid!) && !buids.has(photo.buid!)) {
-      current.push(photo);
+  for (const photo of local) {
+    const match = auids.get(photo.auid!) ?? buids.get(photo.buid!);
+    if (match) {
+      match.local_photo = photo;
+    } else {
+      remote.push(photo);
     }
   }
 
   // Sort by epoch value
-  current.sort((a, b) => (b.epoch ?? 0) - (a.epoch ?? 0));
+  remote.sort((a, b) => (b.epoch ?? 0) - (a.epoch ?? 0));
 }
 
 /**
@@ -108,7 +111,7 @@ export function processFreshServerDay(this: any, dayId: number, photos: IPhoto[]
   }
 
   // Debounce
-  setRenewingTimeout(
+  utils.setRenewingTimeout(
     this,
     'pfsdq_timer',
     () => {
@@ -172,9 +175,12 @@ export async function getLocalDay(dayId: number): Promise<IPhoto[]> {
   if (!res.ok) return [];
 
   const photos: IPhoto[] = await res.json();
+  utils.applyAuids(photos);
   photos.forEach((p) => {
-    if (p.auid) seenABUIDs.add(p.auid);
-    if (p.buid) seenABUIDs.add(p.buid);
+    if (!p.local_has_remote) {
+      if (p.auid) seenABUIDs.add(p.auid);
+      if (p.buid) seenABUIDs.add(p.buid);
+    }
     p.islocal = true;
   });
 
@@ -193,7 +199,7 @@ export async function getLocalDay(dayId: number): Promise<IPhoto[]> {
 export async function deleteLocalPhotos(photos: IPhoto[], dry: boolean = false): Promise<number> {
   if (!has()) return 0;
 
-  const auids = photos.map((p) => p.auid).filter(truthy);
+  const auids = photos.map((p) => p.auid).filter(utils.truthy);
 
   // Delete local photos
   const res = await fetch(API.Q(NAPI.IMAGE_DELETE(auids), { dry }));

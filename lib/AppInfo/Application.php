@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\AppInfo;
 
-use OCA\Memories\ClustersBackend;
 use OCA\Memories\Listeners\BeforeTemplateListener;
 use OCA\Memories\Listeners\PostDeleteListener;
 use OCA\Memories\Listeners\PostLogoutListener;
@@ -92,13 +91,6 @@ final class Application extends App implements IBootstrap
         $context->registerEventListener(BeforeTemplateRenderedEvent::class, BeforeTemplateListener::class);
         $context->registerEventListener(UserLoggedOutEvent::class, PostLogoutListener::class);
 
-        // Register clusters backends
-        ClustersBackend\AlbumsBackend::register();
-        ClustersBackend\TagsBackend::register();
-        ClustersBackend\PlacesBackend::register();
-        ClustersBackend\RecognizeBackend::register();
-        ClustersBackend\FaceRecognitionBackend::register();
-
         // Extra hooks for native extension calls
         if (Util::callerIsNative()) {
             $this->handleNativeHeaders();
@@ -133,7 +125,7 @@ final class Application extends App implements IBootstrap
             // and hope that nobody has already used it yet.
             // This is truly horrible.
             if (!empty($_SERVER['PHP_AUTH_USER']) && !empty($_SERVER['PHP_AUTH_PW'])) {
-                $request = \OC::$server->get(\OCP\IRequest::class);
+                $request = \OCP\Server::get(\OCP\IRequest::class);
                 $prop = new \ReflectionProperty(\OC\AppFramework\Http\Request::class, 'items');
                 $prop->setAccessible(true);
 

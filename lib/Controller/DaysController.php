@@ -23,20 +23,36 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
 use OCA\Memories\ClustersBackend;
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IRequest;
 
-final class DaysController extends GenericApiController
+/**
+ * @psalm-import-type QueryTransform from TimelineQuery
+ */
+final class DaysController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected TimelineQuery $tq,
+        protected Util $util,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     #[NoAdminRequired]
     #[PublicPage]
     public function days(): Http\Response
     {
-        return Util::guardEx(function () {
+        return $this->util->guardEx(function () {
             $list = $this->tq->getDays(
                 $this->isRecursive(),
                 $this->isArchive(),
@@ -59,7 +75,7 @@ final class DaysController extends GenericApiController
     #[PublicPage]
     public function day(array $dayIds): Http\Response
     {
-        return Util::guardEx(function () use ($dayIds) {
+        return $this->util->guardEx(function () use ($dayIds) {
             // Run actual query
             $list = $this->tq->getDay(
                 $dayIds,
@@ -85,9 +101,12 @@ final class DaysController extends GenericApiController
 
     /**
      * Get transformations depending on the request.
+     *
+     * @return list<QueryTransform>
      */
     private function getTransformations(): array
     {
+        /** @var list<QueryTransform> $transforms */
         $transforms = [];
 
         // Add clustering transforms
@@ -95,33 +114,37 @@ final class DaysController extends GenericApiController
         $transforms = array_merge($transforms, $clusterTs);
 
         // Other transforms not allowed for public shares
-        if (!Util::isLoggedIn()) {
+        if (!$this->util->isLoggedIn()) {
             return $transforms;
         }
 
         // Filter only favorites
         if ($this->request->getParam('fav')) {
-            $transforms[] = [$this->tq, 'transformFavoriteFilter'];
+            $transforms[] = $this->tq->transformFavoriteFilter(...);
         }
 
         // Filter only videos
         if ($this->request->getParam('vid')) {
-            $transforms[] = [$this->tq, 'transformVideoFilter'];
+            $transforms[] = $this->tq->transformVideoFilter(...);
         }
 
-        // Filter geological bounds
+        // Filter geographical bounds
         if ($bounds = $this->request->getParam('mapbounds')) {
-            $transforms[] = [$this->tq, 'transformMapBoundsFilter', $bounds];
+            $transforms[] = function (IQueryBuilder &$query, bool $aggregate) use ($bounds): void {
+                $this->tq->transformMapBoundsFilter($query, $aggregate, (string) $bounds);
+            };
         }
 
         // Limit number of responses for day query
         if ($limit = $this->request->getParam('limit')) {
-            $transforms[] = [$this->tq, 'transformLimit', (int) $limit];
+            $transforms[] = function (IQueryBuilder &$query, bool $aggregate) use ($limit): void {
+                $this->tq->transformLimit($query, $aggregate, (int) $limit);
+            };
         }
 
         // Add extra fields for native callers
         if (Util::callerIsNative()) {
-            $transforms[] = [$this->tq, 'transformNativeQuery'];
+            $transforms[] = $this->tq->transformNativeQuery(...);
         }
 
         return $transforms;

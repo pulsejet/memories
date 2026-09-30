@@ -8,28 +8,58 @@
     <br />
 
     <NcCheckboxRadioSwitch
-      :checked.sync="config['memories.viewer.high_res_cond_default']"
+      v-model="config['memories.viewer.high_res_cond_default']"
       value="zoom"
       name="vhrc_radio"
       type="radio"
-      @update:checked="update('memories.viewer.high_res_cond_default')"
+      @update:model-value="update('memories.viewer.high_res_cond_default')"
       >{{ t('memories', 'Load high resolution image on zoom') }}
     </NcCheckboxRadioSwitch>
     <NcCheckboxRadioSwitch
-      :checked.sync="config['memories.viewer.high_res_cond_default']"
+      v-model="config['memories.viewer.high_res_cond_default']"
       value="always"
       name="vhrc_radio"
       type="radio"
-      @update:checked="update('memories.viewer.high_res_cond_default')"
+      @update:model-value="update('memories.viewer.high_res_cond_default')"
       >{{ t('memories', 'Always load high resolution image (not recommended if using HEIC/TIFF)') }}
     </NcCheckboxRadioSwitch>
     <NcCheckboxRadioSwitch
-      :checked.sync="config['memories.viewer.high_res_cond_default']"
+      v-model="config['memories.viewer.high_res_cond_default']"
       value="never"
       name="vhrc_radio"
       type="radio"
-      @update:checked="update('memories.viewer.high_res_cond_default')"
+      @update:model-value="update('memories.viewer.high_res_cond_default')"
       >{{ t('memories', 'Never load high resolution image') }}
+    </NcCheckboxRadioSwitch>
+
+    <br />
+    {{ t('memories', 'Default video autoplay behavior of the photo viewer.') }}
+    {{ t('memories', 'Users may override this setting unless disallowed.') }}
+    <br />
+
+    <NcCheckboxRadioSwitch
+      v-model="config['memories.viewer.video.autoplay']"
+      value="true"
+      name="vauto_radio"
+      type="radio"
+      @update:model-value="update('memories.viewer.video.autoplay')"
+      >{{ t('memories', 'Autoplay videos') }}
+    </NcCheckboxRadioSwitch>
+    <NcCheckboxRadioSwitch
+      v-model="config['memories.viewer.video.autoplay']"
+      value="false"
+      name="vauto_radio"
+      type="radio"
+      @update:model-value="update('memories.viewer.video.autoplay')"
+      >{{ t('memories', 'Do not autoplay videos') }}
+    </NcCheckboxRadioSwitch>
+    <NcCheckboxRadioSwitch
+      v-model="config['memories.viewer.video.autoplay']"
+      value="disallow"
+      name="vauto_radio"
+      type="radio"
+      @update:model-value="update('memories.viewer.video.autoplay')"
+      >{{ t('memories', 'Disallow video autoplay') }}
     </NcCheckboxRadioSwitch>
   </div>
 </template>

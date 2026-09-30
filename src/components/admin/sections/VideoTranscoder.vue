@@ -16,39 +16,50 @@
         <NcNoteCard :type="binaryStatusType(status.govod)">
           {{ binaryStatus('go-vod', status.govod) }}
         </NcNoteCard>
+        <NcNoteCard v-for="server in status.govod_servers" :key="server.server" :type="serviceStatusType(server)">
+          go-vod {{ serviceStatus(server) }}
+        </NcNoteCard>
       </template>
 
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
-        :checked.sync="config['memories.vod.external']"
-        @update:checked="update('memories.vod.external')"
+        v-model="config['memories.vod.external']"
+        @update:model-value="update('memories.vod.external')"
         type="switch"
       >
         {{ t('memories', 'Enable external transcoder') }}
       </NcCheckboxRadioSwitch>
 
       <NcTextField
-        :disabled="!enableTranscoding"
+        :disabled="!enableTranscoding || config['memories.vod.external']"
         :label="t('memories', 'Binary path (local only)')"
         :label-visible="true"
-        :value="config['memories.vod.path']"
+        :model-value="config['memories.vod.path']"
         @change="update('memories.vod.path', $event.target.value)"
       />
 
       <NcTextField
-        :disabled="!enableTranscoding"
+        :disabled="!enableTranscoding || config['memories.vod.external']"
         :label="t('memories', 'Bind address (local only)')"
         :label-visible="true"
-        :value="config['memories.vod.bind']"
+        :model-value="config['memories.vod.bind']"
         @change="update('memories.vod.bind', $event.target.value)"
       />
 
       <NcTextField
-        :disabled="!enableTranscoding"
-        :label="t('memories', 'Connection address (same as bind if local)')"
+        :disabled="!enableTranscoding || config['memories.vod.external']"
+        :label="t('memories', 'Nextcloud URL for transcoder (local only)')"
         :label-visible="true"
-        :value="config['memories.vod.connect']"
-        @change="update('memories.vod.connect', $event.target.value)"
+        :model-value="config['memories.vod.nc_url']"
+        @change="update('memories.vod.nc_url', $event.target.value)"
+      />
+
+      <NcTextField
+        :disabled="!enableTranscoding || !config['memories.vod.external']"
+        :label="t('memories', 'Connection addresses (comma separated)')"
+        :label-visible="true"
+        :model-value="config['memories.vod.connect'].join(', ')"
+        @change="updateConnect($event.target.value)"
       />
 
       <NcTextField
@@ -59,7 +70,7 @@
         :disabled="!enableTranscoding"
         :label="t('memories', 'Quality Factor (15 - 45) (default 25)')"
         :label-visible="true"
-        :value="String(config['memories.vod.qf'])"
+        :model-value="String(config['memories.vod.qf'])"
         @change="update('memories.vod.qf', Number($event.target.value))"
       />
     </p>
@@ -77,5 +88,12 @@ export default defineComponent({
   name: 'VideoTranscoder',
   title: t('memories', 'Transcoder'),
   mixins: [AdminMixin],
+
+  methods: {
+    updateConnect(value: string) {
+      const array = value.split(',').map((s) => s.trim());
+      this.update('memories.vod.connect', array.filter(Boolean));
+    },
+  },
 });
 </script>

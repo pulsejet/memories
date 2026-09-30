@@ -7,7 +7,8 @@ namespace OCA\Memories\Tests\Unit;
 use OCA\Memories\Db\LivePhoto;
 use OCA\Memories\Exif;
 use OCA\Memories\Service\BinExt;
-use PHPUnit\Framework\TestCase;
+use OCA\Memories\Tests\Injected;
+use OCA\Memories\Tests\TestCase;
 
 /**
  * @internal
@@ -40,22 +41,29 @@ final class ExtractResult
  */
 final class ExifExtractTest extends TestCase
 {
+    #[Injected]
+    private static Exif $exif;
+    #[Injected]
+    private static BinExt $binExt;
+    #[Injected]
+    private LivePhoto $livePhoto;
+
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        BinExt::detectExiftool();
-        Exif::ensureStaticExiftoolProc();
+        self::$binExt->detectExiftool();
+        self::$exif->ensureStaticExiftoolProc();
     }
 
     public static function tearDownAfterClass(): void
     {
-        Exif::closeStaticExiftoolProc();
+        self::$exif->closeStaticExiftoolProc();
         parent::tearDownAfterClass();
     }
 
     public function testExiftool(): void
     {
-        self::assertSame(BinExt::EXIFTOOL_VER, BinExt::testExiftool());
+        self::assertSame(BinExt::EXIFTOOL_VER, self::$binExt->testExiftool());
     }
 
     public function testSamsungS2101(): void
@@ -67,7 +75,7 @@ final class ExifExtractTest extends TestCase
         self::assertSame('2023:04:21 19:55:33', $res->exif['DateTimeOriginal'] ?? null);
         self::assertSame('-07:00', $res->exif['OffsetTimeOriginal'] ?? null);
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2023-04-21 19:55:33 -07:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(-25200, $dt->getOffset());
         self::assertSame(1682132133, $dt->getTimestamp());
@@ -96,7 +104,7 @@ final class ExifExtractTest extends TestCase
         self::assertSame('2023:01:18 21:18:39', $res->exif['DateTimeOriginal'] ?? null);
         self::assertSame('-08:00', $res->exif['OffsetTimeOriginal'] ?? null);
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2023-01-18 21:18:39 -08:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(-28800, $dt->getOffset());
         self::assertSame(1674105519, $dt->getTimestamp());
@@ -106,7 +114,7 @@ final class ExifExtractTest extends TestCase
         $exifWithTz = $res->exif;
         $exifWithTz['LocationTZID'] = 'America/Chicago';
 
-        $dtWithTz = Exif::parseExifDate($exifWithTz);
+        $dtWithTz = self::$exif->parseExifDate($exifWithTz);
         self::assertSame('2023-01-18 21:18:39 -08:00', $dtWithTz->format('Y-m-d H:i:s P'));
         self::assertSame(-28800, $dtWithTz->getOffset());
         self::assertSame(1674105519, $dtWithTz->getTimestamp());
@@ -134,7 +142,7 @@ final class ExifExtractTest extends TestCase
         $exifWithTz = $res->exif;
         $exifWithTz['LocationTZID'] = 'America/New_York';
 
-        $dt = Exif::parseExifDate($exifWithTz);
+        $dt = self::$exif->parseExifDate($exifWithTz);
         self::assertSame('2023-03-05 13:58:17 -05:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(-18000, $dt->getOffset());
         self::assertSame(1678042697, $dt->getTimestamp());
@@ -144,7 +152,7 @@ final class ExifExtractTest extends TestCase
         $exifCentral = $res->exif;
         $exifCentral['LocationTZID'] = 'America/Chicago';
 
-        $dtCentral = Exif::parseExifDate($exifCentral);
+        $dtCentral = self::$exif->parseExifDate($exifCentral);
         self::assertSame('2023-03-05 12:58:17 -06:00', $dtCentral->format('Y-m-d H:i:s P'));
         self::assertSame(-21600, $dtCentral->getOffset());
         self::assertSame(1678042697, $dtCentral->getTimestamp());
@@ -156,10 +164,10 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=EmbeddedVideoFile', $res->livePhotoId);
 
-        $video = Exif::getBinaryExifProp($res->path, '-EmbeddedVideoFile');
+        $video = self::$exif->getBinaryExifProp($res->path, '-EmbeddedVideoFile');
         self::assertSame('ftyp', substr($video, 4, 4));
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2024-08-09 21:17:01 +02:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(7200, $dt->getOffset());
         self::assertSame(1723231021, $dt->getTimestamp());
@@ -171,11 +179,11 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=EmbeddedVideoFile', $res->livePhotoId);
 
-        $video = Exif::getBinaryExifProp($res->path, '-EmbeddedVideoFile');
+        $video = self::$exif->getBinaryExifProp($res->path, '-EmbeddedVideoFile');
         self::assertSame('ftyp', substr($video, 4, 4));
 
         // Date and Timezone (DST, -04:00)
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2025-04-03 09:11:42 -04:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(-14400, $dt->getOffset());
         self::assertSame(1743685902, $dt->getTimestamp());
@@ -206,7 +214,7 @@ final class ExifExtractTest extends TestCase
         self::assertSame('2021:03:26 15:53:38', $res->exif['DateTimeOriginal'] ?? null);
         self::assertSame('+09:00', $res->exif['OffsetTimeOriginal'] ?? null);
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2021-03-26 15:53:38 +09:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(32400, $dt->getOffset());
         self::assertSame(1616741618, $dt->getTimestamp());
@@ -255,7 +263,7 @@ final class ExifExtractTest extends TestCase
         self::assertSame('2022:11:21 16:49:32', $image->exif['DateTimeOriginal'] ?? null);
         self::assertSame('-05:00', $image->exif['OffsetTimeOriginal'] ?? null);
 
-        $dt = Exif::parseExifDate($image->exif);
+        $dt = self::$exif->parseExifDate($image->exif);
         self::assertSame('2022-11-21 16:49:32 -05:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(-18000, $dt->getOffset());
         self::assertSame(1669067372, $dt->getTimestamp());
@@ -273,16 +281,52 @@ final class ExifExtractTest extends TestCase
         self::assertEqualsWithDelta(453.0998, (float) ($image->exif['GPSAltitude'] ?? 0), 0.0001);
     }
 
+    public function testAppleIphone02(): void
+    {
+        // Standalone MP4 video shot on iPhone 12 mini.
+        $res = $this->extract('apple_iphone_02.mov');
+        self::assertSame('video/mp4', $res->exif['MIMEType'] ?? null);
+        self::assertFalse(LivePhoto::isVideoPart($res->exif));
+        self::assertSame('', $res->livePhotoId);
+
+        // Video dimensions and rotation (portrait)
+        self::assertSame(1080, $res->exif['ImageWidth'] ?? null);
+        self::assertSame(1920, $res->exif['ImageHeight'] ?? null);
+        self::assertSame(0, $res->exif['Rotation'] ?? null);
+
+        // Camera make/model are stored as UserData atoms and mapped back to Make/Model
+        self::assertSame('Apple', $res->exif['Make'] ?? null);
+        self::assertSame('iPhone 12 mini', $res->exif['Model'] ?? null);
+
+        // Date carries an embedded -07:00 offset (PDT)
+        self::assertSame('2021:07:10 16:51:07-07:00', $res->exif['ContentCreateDate'] ?? null);
+
+        // CreateDate has no timezone info, but the epoch should stay the same.
+        // '2021:07:10 16:51:26-07:00' (local timezone)
+        $createDate = \DateTime::createFromFormat('Y:m:d H:i:sO', $res->exif['CreateDate'] ?? null);
+        self::assertSame(1625961086, $createDate->getTimestamp());
+
+        // Geolocation (Redlands, CA)
+        self::assertEqualsWithDelta(34.0052, (float) ($res->exif['GPSLatitude'] ?? 0), 0.0001);
+        self::assertEqualsWithDelta(-117.0658, (float) ($res->exif['GPSLongitude'] ?? 0), 0.0001);
+        self::assertEqualsWithDelta(721.8, (float) ($res->exif['GPSAltitude'] ?? 0), 0.0001);
+
+        // ContentCreateDate takes precedence over CreateDate
+        $dt = self::$exif->parseExifDate($res->exif);
+        self::assertSame('2021-07-10 16:51:07 -07:00', $dt->format('Y-m-d H:i:s P'));
+        self::assertSame(1625961067, $dt->getTimestamp());
+    }
+
     public function testGoogleMotion01(): void
     {
         $res = $this->extract('google_motion_01.jpg');
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
 
-        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        $video = self::$exif->getBinaryExifProp($res->path, '-MotionPhotoVideo');
         self::assertSame('ftyp', substr($video, 4, 4));
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2023-02-10 18:12:21 +01:00', $dt->format('Y-m-d H:i:s P'));
     }
 
@@ -292,10 +336,10 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
 
-        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        $video = self::$exif->getBinaryExifProp($res->path, '-MotionPhotoVideo');
         self::assertSame('ftyp', substr($video, 4, 4));
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2021-08-30 10:37:47 +05:30', $dt->format('Y-m-d H:i:s P'));
     }
 
@@ -305,10 +349,10 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
 
-        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        $video = self::$exif->getBinaryExifProp($res->path, '-MotionPhotoVideo');
         self::assertSame('ftyp', substr($video, 4, 4));
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2022-07-07 20:27:03 +02:00', $dt->format('Y-m-d H:i:s P'));
     }
 
@@ -318,7 +362,7 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
 
-        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        $video = self::$exif->getBinaryExifProp($res->path, '-MotionPhotoVideo');
         self::assertSame('ftyp', substr($video, 4, 4));
     }
 
@@ -328,10 +372,10 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
 
-        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        $video = self::$exif->getBinaryExifProp($res->path, '-MotionPhotoVideo');
         self::assertSame('ftyp', substr($video, 4, 4));
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2022-12-03 18:48:32 +02:00', $dt->format('Y-m-d H:i:s P'));
     }
 
@@ -344,7 +388,7 @@ final class ExifExtractTest extends TestCase
         $video = file_get_contents($res->path, false, null, 4347622);
         self::assertSame('ftyp', substr($video, 4, 4));
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2023-03-10 18:39:04 +00:00', $dt->format('Y-m-d H:i:s P'));
     }
 
@@ -357,7 +401,7 @@ final class ExifExtractTest extends TestCase
         $video = file_get_contents($res->path, false, null, 3534847);
         self::assertSame('ftyp', substr($video, 4, 4));
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2020-03-08 00:51:56 +00:00', $dt->format('Y-m-d H:i:s P'));
     }
 
@@ -367,10 +411,10 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/heic', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
 
-        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        $video = self::$exif->getBinaryExifProp($res->path, '-MotionPhotoVideo');
         self::assertSame('ftyp', substr($video, 4, 4));
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2023-10-04 22:53:36 -07:00', $dt->format('Y-m-d H:i:s P'));
     }
 
@@ -380,10 +424,10 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
 
-        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        $video = self::$exif->getBinaryExifProp($res->path, '-MotionPhotoVideo');
         self::assertSame('ftyp', substr($video, 4, 4));
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2023-10-04 22:55:33 -07:00', $dt->format('Y-m-d H:i:s P'));
     }
 
@@ -396,14 +440,14 @@ final class ExifExtractTest extends TestCase
         self::assertSame('self__exifbin=MotionPhotoVideo', $res->livePhotoId);
 
         // Binary video extraction
-        $video = Exif::getBinaryExifProp($res->path, '-MotionPhotoVideo');
+        $video = self::$exif->getBinaryExifProp($res->path, '-MotionPhotoVideo');
         self::assertSame('ftyp', substr($video, 4, 4));
 
         // Date and Timezone (+02:00)
         self::assertSame('2022:04:23 08:59:35', $res->exif['DateTimeOriginal'] ?? null);
         self::assertSame('+02:00', $res->exif['OffsetTimeOriginal'] ?? null);
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2022-04-23 08:59:35 +02:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(7200, $dt->getOffset());
         self::assertSame(1650697175, $dt->getTimestamp());
@@ -433,7 +477,7 @@ final class ExifExtractTest extends TestCase
         self::assertSame('ftyp', substr($video, 4, 4));
 
         // EXIF Fields
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('2020-03-08 00:46:08 +00:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame('HUAWEI', $res->exif['Make'] ?? null);
         self::assertSame('SHT-W09', $res->exif['Model'] ?? null);
@@ -457,7 +501,7 @@ final class ExifExtractTest extends TestCase
         // The MP4 container stores date in UTC but contains no explicit timezone offset.
         // When parsed without a timezone, ExifTool converts the UTC date using the local machine's
         // timezone, giving the correct epoch timestamp but with the test runner's system timezone.
-        $dtNoTz = Exif::parseExifDate($res->exif);
+        $dtNoTz = self::$exif->parseExifDate($res->exif);
         self::assertSame(1678026114, $dtNoTz->getTimestamp());
 
         // When the timezone is resolved from the geolocation (Europe/Berlin, UTC+1),
@@ -465,7 +509,7 @@ final class ExifExtractTest extends TestCase
         $exifWithTz = $res->exif;
         $exifWithTz['LocationTZID'] = 'Europe/Berlin';
 
-        $dt = Exif::parseExifDate($exifWithTz);
+        $dt = self::$exif->parseExifDate($exifWithTz);
         self::assertSame('2023-03-05 15:21:54 +01:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(3600, $dt->getOffset());
         self::assertSame(1678026114, $dt->getTimestamp());
@@ -490,7 +534,7 @@ final class ExifExtractTest extends TestCase
         // In this photo, DateTimeOriginal contains the local time string ("2023:03:05 15:21:47")
         // without any timezone offset. When parsed without a timezone, it defaults to UTC (+00:00).
         // While the formatted time string matches the local time, the resulting epoch timestamp is wrong.
-        $dtNoTz = Exif::parseExifDate($res->exif);
+        $dtNoTz = self::$exif->parseExifDate($res->exif);
         self::assertSame('2023-03-05 15:21:47 +00:00', $dtNoTz->format('Y-m-d H:i:s P'));
         self::assertSame(0, $dtNoTz->getOffset());
         self::assertSame(1678029707, $dtNoTz->getTimestamp()); // wrong epoch
@@ -500,7 +544,7 @@ final class ExifExtractTest extends TestCase
         $exifWithTz = $res->exif;
         $exifWithTz['LocationTZID'] = 'Europe/Berlin';
 
-        $dt = Exif::parseExifDate($exifWithTz);
+        $dt = self::$exif->parseExifDate($exifWithTz);
         self::assertSame('2023-03-05 15:21:47 +01:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(3600, $dt->getOffset());
         self::assertSame(1678026107, $dt->getTimestamp());
@@ -528,7 +572,7 @@ final class ExifExtractTest extends TestCase
         self::assertArrayNotHasKey('GPSLatitude', $res->exif);
         self::assertArrayNotHasKey('GPSLongitude', $res->exif);
 
-        $dt = Exif::parseExifDate($res->exif);
+        $dt = self::$exif->parseExifDate($res->exif);
         self::assertSame('Tue, Mar 27, 2018 9:43 AM', $dt->format('D, M j, Y g:i A'));
         self::assertSame('2018-03-27 09:43:23 +00:00', $dt->format('Y-m-d H:i:s P'));
         self::assertSame(0, $dt->getOffset());
@@ -559,15 +603,15 @@ final class ExifExtractTest extends TestCase
                 'Rating' => 5,
             ];
 
-            Exif::setExif($tmpFile, $dataToSet);
+            self::$exif->setExif($tmpFile, $dataToSet);
 
             // Re-read EXIF from updated file
-            $exif = Exif::getExifFromLocalPath($tmpFile);
+            $exif = self::$exif->getExifFromLocalPath($tmpFile);
 
             // Verify updated date & timezone
             self::assertSame('2024:06:15 14:30:00', $exif['DateTimeOriginal'] ?? null);
             self::assertSame('+02:00', $exif['OffsetTimeOriginal'] ?? null);
-            $dt = Exif::parseExifDate($exif);
+            $dt = self::$exif->parseExifDate($exif);
             self::assertSame('2024-06-15 14:30:00 +02:00', $dt->format('Y-m-d H:i:s P'));
             self::assertSame(7200, $dt->getOffset());
             self::assertSame(1718454600, $dt->getTimestamp());
@@ -602,8 +646,8 @@ final class ExifExtractTest extends TestCase
         $path = __DIR__.'/../assets/'.$filename;
         self::assertFileExists($path);
 
-        $exif = Exif::getExifFromLocalPath($path);
-        $livePhotoId = LivePhoto::getLivePhotoIdFromPath($path, (int) filesize($path), $exif);
+        $exif = self::$exif->getExifFromLocalPath($path);
+        $livePhotoId = $this->livePhoto->getLivePhotoIdFromPath($path, (int) filesize($path), $exif);
 
         return new ExtractResult($path, $exif, $livePhotoId);
     }

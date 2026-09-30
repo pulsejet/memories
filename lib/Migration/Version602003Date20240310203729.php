@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Migration;
 
+use OCA\Memories\Settings\SystemConfig;
 use OCP\DB\ISchemaWrapper;
 use OCP\DB\Types;
 use OCP\Migration\IOutput;
@@ -30,8 +31,12 @@ use OCP\Migration\SimpleMigrationStep;
 
 final class Version602003Date20240310203729 extends SimpleMigrationStep
 {
+    public function __construct(
+        private SystemConfig $systemConfig,
+    ) {}
+
     /**
-     * @param Closure(): ISchemaWrapper $schemaClosure
+     * @param \Closure(): ISchemaWrapper $schemaClosure
      */
     #[\Override]
     public function preSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
@@ -68,15 +73,13 @@ final class Version602003Date20240310203729 extends SimpleMigrationStep
         }
 
         // This version changes the geometry of planet
-        \OC::$server->get(\OCA\Memories\Settings\SystemConfig::class)
-            ->set('memories.gis_type', -1)
-        ;
+        $this->systemConfig->set('memories.gis_type', -1);
 
         return $schema;
     }
 
     /**
-     * @param Closure(): ISchemaWrapper $schemaClosure
+     * @param \Closure(): ISchemaWrapper $schemaClosure
      */
     #[\Override]
     public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}

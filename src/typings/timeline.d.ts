@@ -28,7 +28,7 @@ declare module '@typings' {
   /** Type of IRow (0 = head, 1 = photos) */
   export type IRowType = 0 | 1;
 
-  export type IRow = {
+  type IRowBase = {
     /** Vue Recycler identifier */
     id?: string;
     /** Row ID from head */
@@ -37,21 +37,23 @@ declare module '@typings' {
     dayId: number;
     /** Refrence to day object */
     day: IDay;
-    /** Type of row (0 = head, 1 = photos) */
-    type: IRowType;
-    /** Main list of photo items */
-    photos?: IPhoto[];
-
     /** Height in px of the row */
     size: number;
+    /** Main list of photo items */
+    photos?: IPhoto[];
     /** Count of placeholders to create */
     pct?: number;
     /** Don't remove dom element */
     virtualSticky?: boolean;
   };
 
-  export type IHeadRow = IRow & {
-    /** Type of row */
+  export type IPhotoRow = IRowBase & {
+    /** Type of row (1 = photos) */
+    type: 1;
+  };
+
+  export type IHeadRow = IRowBase & {
+    /** Type of row (0 = head) */
     type: 0;
     /** Title of the header */
     name?: string;
@@ -62,4 +64,7 @@ declare module '@typings' {
     /** Bigger header text */
     super?: string;
   };
+
+  /** A timeline row, discriminated by `type` so templates narrow with v-if */
+  export type IRow = IHeadRow | IPhotoRow;
 }

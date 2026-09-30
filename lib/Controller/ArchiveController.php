@@ -23,16 +23,29 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\Folder;
+use OCP\IRequest;
 use OCP\Lock\ILockingProvider;
 
-final class ArchiveController extends GenericApiController
+final class ArchiveController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected ILockingProvider $lockingProvider,
+        protected SystemConfig $systemConfig,
+        protected Util $util,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * Move one file to the archive folder.
      *
@@ -41,8 +54,8 @@ final class ArchiveController extends GenericApiController
     #[NoAdminRequired]
     public function archive(string $id): Http\Response
     {
-        return Util::guardEx(function () use ($id) {
-            $userFolder = Util::getUserFolder();
+        return $this->util->guardEx(function () use ($id) {
+            $userFolder = $this->util->getUserFolder();
 
             // Check for permissions and get numeric Id
             $file = $userFolder->getById((int) $id);
@@ -57,7 +70,7 @@ final class ArchiveController extends GenericApiController
             }
 
             // Create archive folder in the root of the user's configured timeline
-            $configPaths = Util::getTimelinePaths(Util::getUID());
+            $configPaths = $this->systemConfig->getTimelinePaths($this->util->getUID());
             $timelinePaths = [];
 
             // Get all timeline paths
@@ -75,11 +88,6 @@ final class ArchiveController extends GenericApiController
             $isArchived = false;
             $depth = 0;
             while (true) {
-                /** @psalm-suppress DocblockTypeContradiction */
-                if (null === $parent) {
-                    throw new \Exception('Cannot get correct parent of file');
-                }
-
                 // Hit a timeline folder
                 if (\in_array($parent->getPath(), $timelinePaths, true)) {
                     break;
@@ -180,14 +188,13 @@ final class ArchiveController extends GenericApiController
         // Attempt to create the folder
         if (!$parent->nodeExists($name)) {
             $pathHash = md5($finalPath);
-            $lockingProvider = \OC::$server->get(ILockingProvider::class);
             $lockKey = "memories/create/{$pathHash}";
             $lockType = ILockingProvider::LOCK_EXCLUSIVE;
             $locked = false;
 
             try {
                 // Attempt to acquire exclusive lock
-                $lockingProvider->acquireLock($lockKey, $lockType);
+                $this->lockingProvider->acquireLock($lockKey, $lockType);
                 $locked = true;
             } catch (\OCP\Lock\LockedException) {
                 // Someone else is creating, wait and try to get the folder
@@ -206,7 +213,7 @@ final class ArchiveController extends GenericApiController
                     throw Exceptions::ForbiddenFileUpdate("{$finalPath} [locked]");
                 } finally {
                     // Release our lock
-                    $lockingProvider->releaseLock($lockKey, $lockType);
+                    $this->lockingProvider->releaseLock($lockKey, $lockType);
                 }
             }
         }

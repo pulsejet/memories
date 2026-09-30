@@ -87,7 +87,7 @@
     </div>
 
     <div v-if="lat && lon" class="map">
-      <iframe class="fill-block" :src="mapUrl"></iframe>
+      <MapStandalone :center="[lat, lon]" :pins="[[lat, lon]]" />
     </div>
   </div>
   <div class="loading-icon fill-block" v-else-if="loading">
@@ -99,12 +99,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import type { Component } from 'vue';
+import { defineComponent, defineAsyncComponent, markRaw } from 'vue';
+import type { Component, PropType } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
-const NcAvatar = () => import('@nextcloud/vue/dist/Components/NcAvatar.js');
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
+const NcAvatar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAvatar'));
 
 import axios from '@nextcloud/axios';
 import { getCanonicalLocale } from '@nextcloud/l10n';
@@ -114,6 +114,8 @@ import UserConfig from '@mixins/UserConfig';
 import Cluster from '@components/frame/Cluster.vue';
 import AlbumsList from '@components/modal/AlbumsList.vue';
 import FaceManualAddModal from '@components/modal/FaceManualAddModal.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
+import MapStandalone from '@components/MapStandalone.vue';
 
 import AddIcon from 'vue-material-design-icons/AccountPlus.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
@@ -125,12 +127,12 @@ import TagIcon from 'vue-material-design-icons/Tag.vue';
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
-import { API } from '@services/API';
 
 import type { IAlbum, IFace, IImageInfo, IPhoto, IExif } from '@typings';
+import type { IFolder, INode, IView } from '@nextcloud/files';
 
 interface TopField {
-  id?: string;
+  id: string;
   title: string;
   subtitle: string[];
   icon: Component;
@@ -149,9 +151,38 @@ export default defineComponent({
     FaceManualAddModal,
     AddIcon,
     EditIcon,
+    XLoadingIcon,
+    MapStandalone,
   },
 
   mixins: [UserConfig],
+
+  props: {
+    /** File node when mounted as Files sidebar tab (custom element) */
+    node: {
+      type: Object as PropType<INode>,
+      required: false,
+      default: undefined,
+    },
+    // eslint-disable-next-line vue/no-unused-properties -- Required on the web component interface
+    active: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    // eslint-disable-next-line vue/no-unused-properties -- Required on the web component interface
+    folder: {
+      type: Object as PropType<IFolder>,
+      required: false,
+      default: undefined,
+    },
+    // eslint-disable-next-line vue/no-unused-properties -- Required on the web component interface
+    view: {
+      type: Object as PropType<IView>,
+      required: false,
+      default: undefined,
+    },
+  },
 
   data: () => ({
     fileid: null as number | null,
@@ -169,7 +200,7 @@ export default defineComponent({
     utils.bus.on('memories:albums:update', this.refresh);
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     utils.bus.off('files:file:updated', this.handleFileUpdated);
     utils.bus.off('memories:albums:update', this.refresh);
   },
@@ -180,18 +211,20 @@ export default defineComponent({
 
       if (this.dateOriginal) {
         list.push({
+          id: 'date',
           title: this.dateOriginalStr!,
           subtitle: this.dateOriginalTime!,
-          icon: CalendarIcon,
+          icon: markRaw(CalendarIcon),
           edit: this.editDate,
         });
       }
 
       if (this.camera) {
         list.push({
+          id: 'camera',
           title: this.camera,
           subtitle: this.cameraSub,
-          icon: CameraIrisIcon,
+          icon: markRaw(CameraIrisIcon),
         });
       }
 
@@ -200,7 +233,7 @@ export default defineComponent({
           id: 'image-info', // adds class
           title: this.imageInfoTitle,
           subtitle: this.imageInfoSub,
-          icon: ImageIcon,
+          icon: markRaw(ImageIcon),
           href: this.filepath
             ? dav.viewInFolderUrl({
                 fileid: this.fileid!,
@@ -212,18 +245,20 @@ export default defineComponent({
 
       if (this.tagNamesStr) {
         list.push({
+          id: 'tags',
           title: this.tagNamesStr,
           subtitle: [],
-          icon: TagIcon,
+          icon: markRaw(TagIcon),
           edit: this.editTags,
         });
       }
 
       if (this.address || this.canEdit) {
         list.push({
+          id: 'location',
           title: this.address || this.t('memories', 'No coordinates'),
           subtitle: this.address ? [] : [this.t('memories', 'Click edit to set location')],
-          icon: LocationIcon,
+          icon: markRaw(LocationIcon),
           href: this.address ? this.mapFullUrl : undefined,
           edit: this.editGeo,
         });
@@ -261,7 +296,7 @@ export default defineComponent({
 
           // Use timezone offset if available
           if (!valid() && tzOffset) {
-            dateWithTz = date.setZone('UTC' + tzOffset);
+            dateWithTz = date.setZone(`UTC${tzOffset}`);
           }
 
           // Fall back to tzId
@@ -395,13 +430,6 @@ export default defineComponent({
       return this.tagNames.length > 0 ? this.tagNames.join(', ') : null;
     },
 
-    mapUrl(): string {
-      const boxSize = 0.0075;
-      const bbox = [this.lon - boxSize, this.lat - boxSize, this.lon + boxSize, this.lat + boxSize];
-      const m = `${this.lat},${this.lon}`;
-      return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.join()}&marker=${m}`;
-    },
-
     mapFullUrl(): string {
       return `https://www.openstreetmap.org/?mlat=${this.lat}&mlon=${this.lon}#map=18/${this.lat}/${this.lon}`;
     },
@@ -438,34 +466,57 @@ export default defineComponent({
     },
   },
 
+  watch: {
+    node: {
+      immediate: true,
+      handler() {
+        const fileid = Number(this.node?.fileid ?? this.node?.id ?? 0);
+        if (fileid) {
+          this.update(fileid);
+        }
+      },
+    },
+  },
+
   methods: {
     async update(photo: number | IPhoto): Promise<IImageInfo | null> {
       this.invalidateUnless(0);
 
-      // which clusters to get
-      const clusters = this.routeIsPublic
-        ? String()
-        : [
-            this.config.albums_enabled ? 'albums' : null,
-            this.config.recognize_enabled ? 'recognize' : null,
-            this.config.facerecognition_enabled ? 'facerecognition' : null,
-          ]
-            .filter((c) => c)
-            .join(',');
+      // Use a consistent URL for metadata.
+      const url = utils.getImageInfoUrl(photo, this.config);
 
-      // get tags if enabled
-      const tags = this.config.systemtags_enabled ? 1 : undefined;
+      // Helper to apply additional fields.
+      const applyImageInfo = (data: IImageInfo) => {
+        this.baseInfo = data;
+        this.fileid = data.fileid;
+        this.filename = data.basename;
+        this.exif = data.exif ?? {};
+      };
 
-      // get image info
-      const url = API.Q(utils.getImageInfoUrl(photo), { tags, clusters });
-      const res = await this.guardState(axios.get<IImageInfo>(url));
-      if (!res) return null;
+      // Attempt to get it from the cache first.
+      let wasCached = false;
+      try {
+        const state = this.state;
+        const cached = await utils.getCachedData<IImageInfo>(url);
+        if (cached && state === this.state) {
+          applyImageInfo(cached);
+          wasCached = true;
+        }
+      } catch {}
 
-      // set image info
-      this.baseInfo = res.data;
-      this.fileid = this.baseInfo.fileid;
-      this.filename = this.baseInfo.basename;
-      this.exif = this.baseInfo.exif ?? {};
+      // Always refresh the metadata from server.
+      try {
+        const res = await this.guardState(axios.get<IImageInfo>(url));
+        if (!res) return null;
+        applyImageInfo(res.data);
+        utils.cacheData(url, res.data);
+      } catch (err) {
+        if (wasCached) {
+          this.error = false;
+        } else {
+          throw err;
+        }
+      }
 
       return this.baseInfo;
     },
@@ -548,6 +599,10 @@ export default defineComponent({
   padding: 0px 6px;
 }
 
+a {
+  color: inherit; // forced-dark sheet
+}
+
 .exif-head {
   padding: 4px 6px;
 
@@ -623,7 +678,7 @@ export default defineComponent({
 
 .albums {
   font-size: 0.96em;
-  :deep .line-one__title {
+  :deep(.line-one__title) {
     font-weight: 400 !important; // no bold title
   }
 }
@@ -640,7 +695,7 @@ export default defineComponent({
     display: inline-block;
     margin-right: 10px;
 
-    :deep .material-design-icon {
+    :deep(.material-design-icon) {
       color: var(--color-text-lighter);
     }
   }
@@ -674,5 +729,7 @@ export default defineComponent({
   aspect-ratio: 16 / 10;
   min-height: 200px;
   max-height: 250px;
+  border-radius: 16px;
+  overflow: hidden;
 }
 </style>

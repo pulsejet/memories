@@ -6,7 +6,7 @@
         type="text"
         name="name"
         autofocus="true"
-        :value.sync="albumName"
+        v-model="albumName"
         :required="true"
         :label="t('memories', 'Album Name')"
         :label-visible="true"
@@ -15,7 +15,7 @@
       <NcTextField
         name="location"
         type="text"
-        :value.sync="albumLocation"
+        v-model="albumLocation"
         :label="t('memories', 'Location')"
         :label-visible="true"
         :placeholder="t('memories', 'Location of the album')"
@@ -26,7 +26,7 @@
         <NcButton
           v-if="displayBackButton"
           :aria-label="t('memories', 'Go back to the previous view.')"
-          type="tertiary"
+          variant="tertiary"
           @click="back"
         >
           {{ t('memories', 'Back') }}
@@ -36,7 +36,7 @@
         <NcButton
           v-if="sharingEnabled && !editMode"
           :aria-label="t('memories', 'Go to the add collaborators view.')"
-          type="secondary"
+          variant="secondary"
           :disabled="albumName.trim() === '' || loading"
           @click="showCollaboratorView = true"
         >
@@ -45,7 +45,7 @@
           </template>
           {{ t('memories', 'Add collaborators') }}
         </NcButton>
-        <NcButton :aria-label="saveText" type="primary" :disabled="albumName === '' || loading" @click="submit()">
+        <NcButton :aria-label="saveText" variant="primary" :disabled="albumName === '' || loading" @click="submit()">
           <template #icon>
             <XLoadingIcon v-if="loading" />
             <Send v-else />
@@ -66,7 +66,7 @@
     <span class="left-buttons">
       <NcButton
         :aria-label="t('memories', 'Back to the new album form.')"
-        type="tertiary"
+        variant="tertiary"
         @click="showCollaboratorView = false"
       >
         {{ t('memories', 'Back') }}
@@ -75,7 +75,7 @@
     <span class="right-buttons">
       <NcButton
         :aria-label="saveText"
-        type="primary"
+        variant="primary"
         :disabled="albumName.trim() === '' || loading"
         @click="submit(collaborators)"
       >
@@ -90,11 +90,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, type PropType, defineAsyncComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import AlbumCollaborators from './AlbumCollaborators.vue';
 
@@ -104,6 +104,7 @@ import * as dav from '@services/dav';
 
 import Send from 'vue-material-design-icons/Send.vue';
 import AccountMultiplePlus from 'vue-material-design-icons/AccountMultiplePlus.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 export default defineComponent({
   name: 'AlbumForm',
@@ -111,6 +112,7 @@ export default defineComponent({
     NcButton,
     NcTextField,
     AlbumCollaborators,
+    XLoadingIcon,
 
     Send,
     AccountMultiplePlus,
@@ -141,12 +143,6 @@ export default defineComponent({
   }),
 
   computed: {
-    refs() {
-      return this.$refs as {
-        nameInput?: VueHTMLComponent;
-      };
-    },
-
     /**
      * @return Whether sharing is enabled.
      */
@@ -172,11 +168,17 @@ export default defineComponent({
       this.albumLocation = this.album.location;
     }
     this.$nextTick(() => {
-      this.refs.nameInput?.$el.getElementsByTagName('input')[0].focus();
+      this.refs().nameInput?.$el.getElementsByTagName('input')[0].focus();
     });
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        nameInput?: VueHTMLComponent;
+      };
+    },
+
     submit(collaborators: any[] = []) {
       if (this.albumName === '' || this.loading) {
         return;
@@ -271,7 +273,7 @@ export default defineComponent({
     label {
       display: flex;
       margin-top: 16px;
-      :deep svg {
+      :deep(svg) {
         margin-right: 12px;
       }
     }

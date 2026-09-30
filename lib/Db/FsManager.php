@@ -28,7 +28,9 @@ use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
 use OCA\Memories\ClustersBackend;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\AppFramework\PublicShareController;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -37,11 +39,13 @@ use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
 use OCP\ICache;
 use OCP\ICacheFactory;
-use OCP\IConfig;
 use OCP\IRequest;
+use OCP\ISession;
+use OCP\IUser;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Share\Exceptions\ShareNotFound;
+use OCP\Share\IManager as ShareManager;
 use OCP\Share\IShare;
 
 final class FsManager
@@ -49,14 +53,17 @@ final class FsManager
     private ICache $nomediaCache;
 
     public function __construct(
-        private IConfig $config,
         private IUserSession $userSession,
         private IRootFolder $rootFolder,
         private AlbumsQuery $albumsQuery,
         private IRequest $request,
+        private ShareManager $shareManager,
+        private IUserManager $userManager,
+        private ISession $session,
+        private SystemConfig $systemConfig,
         ICacheFactory $cacheFactory,
     ) {
-        $this->nomediaCache = $cacheFactory->createLocal('memories:nomedia');
+        $this->nomediaCache = $cacheFactory->createDistributed('memories:nomedia');
     }
 
     /**
@@ -64,13 +71,19 @@ final class FsManager
      *
      * @param TimelineRoot $root      Root object to populate (by reference)
      * @param bool         $recursive Whether to get the folders recursively
+     * @param ?IUser       $user      User to populate for (default: current session user)
+     * @param ?string[]    $paths     Explicit folder paths (default: request or timeline paths)
      */
-    public function populateRoot(TimelineRoot &$root, bool $recursive = true): TimelineRoot
-    {
-        $user = $this->userSession->getUser();
+    public function populateRoot(
+        TimelineRoot &$root,
+        bool $recursive = true,
+        ?IUser $user = null,
+        ?array $paths = null,
+    ): TimelineRoot {
+        $user ??= $this->userSession->getUser();
 
         // Albums have no folder
-        if ($this->hasAlbumToken() && Util::albumsIsEnabled()) {
+        if ($this->hasAlbumToken() && $this->systemConfig->albumsIsEnabled()) {
             if (null !== $user) {
                 return $root;
             }
@@ -115,12 +128,13 @@ final class FsManager
         $uid = $user->getUID();
         $userFolder = $this->rootFolder->getUserFolder($uid);
 
-        /** @var string[] $paths List of paths to add to root */
-        $paths = [];
-        if ($path = $this->getRequestFolder()) {
-            $paths = [$path];
-        } else {
-            $paths = Util::getTimelinePaths($uid);
+        if (null === $paths) {
+            /** @var string[] $paths List of paths to add to root */
+            if ($path = $this->getRequestFolder()) {
+                $paths = [$path];
+            } else {
+                $paths = $this->systemConfig->getTimelinePaths($uid);
+            }
         }
 
         // Combined etag, for cache invalidation.
@@ -150,7 +164,7 @@ final class FsManager
 
             // Exclude .nomedia folders
             //
-            // This is needed to be done despite the exlusion in the CTE to account
+            // This is needed to be done despite the exclusion in the CTE to account
             // for mount points inside folders with a .nomedia file. For example:
             //  /user/files/timeline-path/
             //     => subfolder1
@@ -159,7 +173,7 @@ final class FsManager
             //        => .nomedia
             //        => external-mount   <-- this is a separate topFolder in the CTE
             //           => photo2        <-- this should be excluded, but CTE cannot find this
-            $root->excludePaths($this->getNoMediaFolders($userFolder, md5($etag)));
+            $root->excludePaths($this->getNoMediaFolders($userFolder, md5($etag), $user));
         }
 
         return $root;
@@ -170,10 +184,11 @@ final class FsManager
      *
      * @param Folder $root root folder
      * @param string $key  cache key
+     * @param IUser  $user user to search as
      *
      * @return string[] List of paths
      */
-    public function getNoMediaFolders(Folder $root, string $key): array
+    public function getNoMediaFolders(Folder $root, string $key, IUser $user): array
     {
         if (null !== ($paths = $this->nomediaCache->get($key))) {
             return $paths;
@@ -183,7 +198,7 @@ final class FsManager
             new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomedia'),
             new SearchComparison(ISearchComparison::COMPARE_EQUAL, 'name', '.nomemories'),
         ]);
-        $search = $root->search(new SearchQuery($comp, 0, 0, [], Util::getUser()));
+        $search = $root->search(new SearchQuery($comp, 0, 0, [], $user));
 
         $paths = array_unique(array_map(static fn (Node $node) => \dirname($node->getPath()), $search));
         $this->nomediaCache->set($key, $paths, 60 * 60); // 1 hour
@@ -325,24 +340,18 @@ final class FsManager
         //
         // Catch the ShareNotFound exception to enable further processing of the request.
         try {
-            $share = \OC::$server->get(\OCP\Share\IManager::class)->getShareByToken($token);
+            $share = $this->shareManager->getShareByToken($token);
         } catch (ShareNotFound $e) {
             return null;
         }
-        if (!self::validateShare($share)) {
+        if (!$this->validateShare($share)) {
             return null;
         }
 
         // Check if share is password protected
         if (!empty($password = $share->getPassword())) {
-            $session = \OC::$server->get(\OCP\ISession::class);
-
-            // https://github.com/nextcloud/server/blob/0447b53bda9fe95ea0cbed765aa332584605d652/lib/public/AppFramework/PublicShareController.php#L119
-            if (
-                $session->get('public_link_authenticated_token') !== $token
-                || $session->get('public_link_authenticated_password_hash') !== $password
-            ) {
-                throw new \Exception('Share is password protected and user is not authenticated');
+            if (!$this->isShareAuthenticated($token, $password)) {
+                throw Exceptions::Forbidden('Share is password protected and user is not authenticated');
             }
         }
 
@@ -374,28 +383,25 @@ final class FsManager
     /**
      * Validate the permissions of the share.
      */
-    public static function validateShare(?IShare $share): bool
+    public function validateShare(?IShare $share): bool
     {
         if (null === $share) {
             return false;
         }
-
-        // Get user manager
-        $userManager = \OC::$server->get(IUserManager::class);
 
         // Check if share read is allowed
         if (!($share->getPermissions() & \OCP\Constants::PERMISSION_READ)) {
             return false;
         }
 
-        // If the owner is disabled no access to the linke is granted
-        $owner = $userManager->get($share->getShareOwner());
+        // If the owner is disabled no access to the link is granted
+        $owner = $this->userManager->get($share->getShareOwner());
         if (null === $owner || !$owner->isEnabled()) {
             return false;
         }
 
         // If the initiator of the share is disabled no access is granted
-        $initiator = $userManager->get($share->getSharedBy());
+        $initiator = $this->userManager->get($share->getSharedBy());
         if (null === $initiator || !$initiator->isEnabled()) {
             return false;
         }
@@ -439,7 +445,7 @@ final class FsManager
     }
 
     /**
-     * Helper to get one file or null from a fiolder.
+     * Helper to get one file or null from a folder.
      *
      * @param Folder $folder Folder to search in
      * @param int    $id     Id of the file
@@ -471,6 +477,27 @@ final class FsManager
 
         /** @var File */
         return $file;
+    }
+
+    /**
+     * Check whether the current session is authenticated for a password protected link share.
+     *
+     * @param string $token        Share token
+     * @param string $passwordHash Password hash
+     */
+    private function isShareAuthenticated(string $token, string $passwordHash): bool
+    {
+        $allowedTokensJSON = $this->session->get(PublicShareController::DAV_AUTHENTICATED_FRONTEND);
+        if (!\is_string($allowedTokensJSON)) {
+            return false;
+        }
+
+        $allowedTokens = json_decode($allowedTokensJSON, true);
+        if (!\is_array($allowedTokens)) {
+            return false;
+        }
+
+        return ($allowedTokens[$token] ?? null) === $passwordHash;
     }
 
     private function hasAlbumToken(): bool

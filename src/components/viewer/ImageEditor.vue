@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, markRaw, type PropType } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError, showSuccess } from '@nextcloud/dialogs';
@@ -25,7 +25,7 @@ import * as utils from '@services/utils';
 
 import type { IImageInfo, IPhoto } from '@typings';
 
-let TABS: any, TOOLS: any;
+let TABS: Record<string, any>, TOOLS: Record<string, any>;
 type FilerobotImageEditor = import('filerobot-image-editor').default;
 let FilerobotImageEditor: typeof import('filerobot-image-editor').default;
 
@@ -56,12 +56,6 @@ export default defineComponent({
   }),
 
   computed: {
-    refs() {
-      return this.$refs as {
-        editor?: HTMLDivElement;
-      };
-    },
-
     config(): FilerobotImageEditorConfig & { theme: any } {
       return {
         source:
@@ -129,16 +123,16 @@ export default defineComponent({
       return this.photo.basename || '';
     },
 
-    defaultSavedImageType(): 'jpeg' | 'png' | 'webp' {
-      if (['image/jpeg', 'image/png', 'image/webp'].includes(this.photo.mimetype!)) {
+    defaultSavedImageType(): 'jpg' | 'png' | 'webp' {
+      if (['image/png', 'image/webp'].includes(this.photo.mimetype!)) {
         return this.photo.mimetype!.split('/')[1] as any;
       }
-      return 'jpeg';
+      return 'jpg';
     },
 
     hasHighContrastEnabled(): boolean {
       const themes = globalThis.OCA?.Theming?.enabledThemes || [];
-      return themes.find((theme: any) => theme.indexOf('highcontrast') !== -1);
+      return themes.some((theme: string) => theme.includes('highcontrast'));
     },
 
     themeDataAttr(): Record<string, boolean> {
@@ -156,8 +150,8 @@ export default defineComponent({
   async mounted() {
     await loadFilerobot();
 
-    const div = this.refs.editor!;
-    console.assert(div, 'ImageEditor container not found');
+    const div = this.refs().editor!;
+    console.assert(!!div, 'ImageEditor container not found');
 
     // Directly use an HTML element to make sure the resolution
     // in the editor matches the original file, but we can work
@@ -180,7 +174,7 @@ export default defineComponent({
     }).observe(div, { childList: true, subtree: true });
 
     // Create the editor
-    this.imageEditor = new FilerobotImageEditor(div, config);
+    this.imageEditor = markRaw(new FilerobotImageEditor(div, config));
     this.imageEditor.render();
 
     // Handle keyboard
@@ -191,7 +185,7 @@ export default defineComponent({
     utils.bus.on('memories:fragment:pop:editor', this.warnUnsaved);
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     // Cleanup
     this.imageEditor?.terminate();
 
@@ -204,6 +198,12 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        editor?: HTMLDivElement;
+      };
+    },
+
     async getImage(): Promise<HTMLImageElement> {
       const img = new Image();
       img.name = this.defaultSavedImageName;
@@ -265,10 +265,12 @@ export default defineComponent({
         };
       }
 
-      // Make sure we have an extension
+      // Suffix a different format so it saves as a copy
+      // https://github.com/pulsejet/memories/issues/1611
       let name = data.name;
       const nameLower = name.toLowerCase();
-      if (!nameLower.endsWith(data.extension) && !nameLower.endsWith('.jpg')) {
+      const ext = data.extension.toLowerCase() === 'jpeg' ? 'jpg' : data.extension.toLowerCase();
+      if (!nameLower.endsWith('.' + ext) && !(ext === 'jpg' && nameLower.endsWith('.jpeg'))) {
         name += '.' + data.extension;
       }
 
@@ -293,7 +295,7 @@ export default defineComponent({
           utils.bus.emit('files:file:updated', { fileid });
         }
         this.onClose(undefined, false);
-      } catch (err) {
+      } catch (err: any) {
         showError(
           this.t('memories', 'Error saving image: {error}', {
             error: err?.response?.data?.message ?? err?.message ?? this.t('memories', 'Unknown'),
@@ -309,7 +311,7 @@ export default defineComponent({
 
       // To find whether there are unsaved changes, just check
       // if the reset button is enabled
-      const noChanges = this.refs.editor?.querySelector('button[title="Reset"]')?.hasAttribute('disabled');
+      const noChanges = this.refs().editor?.querySelector('button[title="Reset"]')?.hasAttribute('disabled');
 
       if (
         noChanges ||

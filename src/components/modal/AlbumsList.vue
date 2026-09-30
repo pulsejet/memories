@@ -6,7 +6,7 @@
       :key="album.album_id"
       :name="album.name"
       :aria-label="album.name"
-      :to="link ? linkTarget(album) : null"
+      :to="link ? linkTarget(album) : undefined"
       :exact="true"
       @click="click($event, album)"
     >
@@ -31,10 +31,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, type PropType, defineAsyncComponent } from 'vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
@@ -42,6 +42,7 @@ import * as dav from '@services/dav';
 import type { IAlbum, IPhoto } from '@typings';
 
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
+import XImg from '@components/frame/XImg.vue';
 
 export default defineComponent({
   name: 'AlbumsList',
@@ -50,6 +51,7 @@ export default defineComponent({
     NcButton,
 
     ImageMultipleIcon,
+    XImg,
   },
 
   props: {
@@ -120,16 +122,21 @@ export default defineComponent({
   padding: 2px;
 
   .album {
-    :deep .list-item {
+    :deep(.list-item) {
       box-sizing: border-box;
       display: flex;
+
+      &::before {
+        // Hide the ugly blue line when link is active
+        display: none;
+      }
     }
 
-    :deep .list-item-content__wrapper {
+    :deep(.list-item-content__wrapper) {
       flex-grow: 1;
     }
 
-    :deep .line-one__title {
+    :deep(.line-one__title) {
       font-weight: 500;
     }
 
@@ -144,10 +151,9 @@ export default defineComponent({
       &--placeholder {
         background: var(--color-primary-light);
 
-        :deep .material-design-icon {
+        :deep(.material-design-icon) {
           width: 100%;
           height: 100%;
-
           .material-design-icon__svg {
             fill: var(--color-primary);
           }

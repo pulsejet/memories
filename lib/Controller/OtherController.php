@@ -25,8 +25,11 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Service\Lens;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\App\IAppManager;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -34,28 +37,46 @@ use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
+use OCP\Config\IUserConfig;
+use OCP\IConfig;
 use OCP\IRequest;
+use OCP\IURLGenerator;
+use OCP\L10N\IFactory as L10NFactory;
 
-final class OtherController extends GenericApiController
+final class OtherController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected IUserConfig $userConfig,
+        protected IAppManager $appManager,
+        protected L10NFactory $l10nFactory,
+        protected IURLGenerator $urlGenerator,
+        protected IConfig $config,
+        protected SystemConfig $systemConfig,
+        protected Lens $lens,
+        protected Util $util,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * update preferences (user setting).
      *
-     * @param string key the identifier to change
-     * @param string value the value to set
+     * @param string $key   the identifier to change
+     * @param string $value the value to set
      *
      * @return Http\Response empty JSONResponse with respective http status code
      */
     #[NoAdminRequired]
     public function setUserConfig(string $key, string $value): Http\Response
     {
-        return Util::guardEx(function () use ($key, $value) {
+        return $this->util->guardEx(function () use ($key, $value) {
             // Make sure not running in read-only mode
-            if (SystemConfig::get('memories.readonly', false)) {
+            if ($this->systemConfig->get('memories.readonly', false)) {
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
             }
 
-            $this->userConfig->setValueString(Util::getUID(), Application::APPNAME, $key, $value);
+            $this->userConfig->setValueString($this->util->getUID(), Application::APPNAME, $key, $value);
 
             return new JSONResponse([], Http::STATUS_OK);
         });
@@ -65,65 +86,65 @@ final class OtherController extends GenericApiController
     #[PublicPage]
     public function getUserConfig(): Http\Response
     {
-        return Util::guardEx(function () {
+        return $this->util->guardEx(function () {
             // get memories version
-            $version = \OC::$server->get(\OCP\App\IAppManager::class)->getAppVersion('memories');
+            $version = $this->appManager->getAppVersion('memories');
 
-            // get user if logged in
-            try {
-                $uid = Util::getUID();
-            } catch (\Exception) {
-                $uid = null;
-            }
-
-            // helper function to get user config values
-            $getAppConfig = function (string $key, string $default) use ($uid): string {
-                return $uid ? $this->userConfig->getValueString($uid, Application::APPNAME, $key, $default) : $default;
-            };
+            // user language and locale for native clients
+            $language = $this->l10nFactory->findLanguage();
+            $locale = $this->l10nFactory->findLocale($language);
 
             return new JSONResponse([
                 // general stuff
                 'version' => $version,
-                'vod_disable' => SystemConfig::get('memories.vod.disable'),
-                'video_default_quality' => SystemConfig::get('memories.video_default_quality'),
-                'places_gis' => SystemConfig::get('memories.gis_type'),
+                'vod_disable' => $this->systemConfig->get('memories.vod.disable'),
+                'video_default_quality' => $this->systemConfig->get('memories.video_default_quality'),
+                'places_gis' => $this->systemConfig->get('memories.gis_type'),
+                'places_search_url' => $this->systemConfig->get('memories.places.search.url'),
+                'map_tile_servers' => $this->systemConfig->get('memories.map.tile_servers'),
+                'map_tile_server_url' => $this->systemConfig->getUserMapTileServerUrl(),
+                'language' => $language,
+                'locale' => $locale,
 
                 // enabled apps
-                'systemtags_enabled' => Util::tagsIsEnabled(),
-                'albums_enabled' => Util::albumsIsEnabled(),
-                'recognize_installed' => Util::recognizeIsInstalled(),
-                'recognize_enabled' => Util::recognizeIsEnabled(),
-                'facerecognition_installed' => Util::facerecognitionIsInstalled(),
-                'facerecognition_enabled' => Util::facerecognitionIsEnabled(),
-                'preview_generator_enabled' => Util::previewGeneratorIsEnabled(),
+                'systemtags_enabled' => $this->systemConfig->tagsIsEnabled(),
+                'albums_enabled' => $this->systemConfig->albumsIsEnabled(),
+                'recognize_installed' => $this->systemConfig->recognizeIsInstalled(),
+                'recognize_enabled' => $this->systemConfig->recognizeIsEnabled(),
+                'facerecognition_installed' => $this->systemConfig->facerecognitionIsInstalled(),
+                'facerecognition_enabled' => $this->systemConfig->facerecognitionIsEnabled(),
+                'lens_enabled' => '' !== trim($this->lens->daemonUrl()),
+                'preview_generator_enabled' => $this->systemConfig->previewGeneratorIsEnabled(),
 
                 // general settings
-                'timeline_path' => $getAppConfig('timelinePath', SystemConfig::get('memories.timeline.default_path')),
-                'enable_top_memories' => 'true' === $getAppConfig('enableTopMemories', 'true'),
-                'stack_raw_files' => 'true' === $getAppConfig('stackRawFiles', 'true'),
-                'dedup_identical' => 'true' === $getAppConfig('dedupIdentical', 'false'),
-                'show_owner_name_timeline' => 'true' === $getAppConfig('showOwnerNameTimeline', 'false'),
+                'timeline_path' => $this->systemConfig->getUserConfigValue('timelinePath', $this->systemConfig->get('memories.timeline.default_path')),
+                'enable_top_memories' => 'true' === $this->systemConfig->getUserConfigValue('enableTopMemories', 'true'),
+                'stack_raw_files' => 'true' === $this->systemConfig->getUserConfigValue('stackRawFiles', 'true'),
+                'dedup_identical' => 'true' === $this->systemConfig->getUserConfigValue('dedupIdentical', 'false'),
+                'show_owner_name_timeline' => 'true' === $this->systemConfig->getUserConfigValue('showOwnerNameTimeline', 'false'),
 
                 // viewer settings
-                'high_res_cond_default' => SystemConfig::get('memories.viewer.high_res_cond_default'),
-                'livephoto_autoplay' => 'true' === $getAppConfig('livephotoAutoplay', 'false'),
-                'livephoto_loop' => 'true' === $getAppConfig('livephotoLoop', 'false'),
-                'video_loop' => 'true' === $getAppConfig('videoLoop', 'false'),
-                'sidebar_filepath' => 'true' === $getAppConfig('sidebarFilepath', 'false'),
+                'high_res_cond_default' => $this->systemConfig->get('memories.viewer.high_res_cond_default'),
+                'livephoto_autoplay' => 'true' === $this->systemConfig->getUserConfigValue('livephotoAutoplay', 'false'),
+                'livephoto_loop' => 'true' === $this->systemConfig->getUserConfigValue('livephotoLoop', 'false'),
+                'video_autoplay' => $this->systemConfig->getUserVideoAutoplay(),
+                'video_loop' => 'true' === $this->systemConfig->getUserConfigValue('videoLoop', 'false'),
+                'sidebar_filepath' => 'true' === $this->systemConfig->getUserConfigValue('sidebarFilepath', 'false'),
+                'slideshow_duration' => (int) $this->systemConfig->getUserConfigValue('slideshowDuration', '5'),
 
                 // on this day settings
-                'onthisday_day_range' => (int) $getAppConfig('onthisdayDayRange', '0'),
-                'onthisday_photos_per_year' => (int) $getAppConfig('onthisdayPhotosPerYear', '10'),
+                'onthisday_day_range' => (int) $this->systemConfig->getUserConfigValue('onthisdayDayRange', '3'),
+                'onthisday_photos_per_year' => (int) $this->systemConfig->getUserConfigValue('onthisdayPhotosPerYear', '10'),
 
                 // folder settings
-                'folders_path' => $getAppConfig('foldersPath', '/'),
-                'show_hidden_folders' => 'true' === $getAppConfig('showHidden', 'false'),
-                'sort_folder_month' => 'true' === $getAppConfig('sortFolderMonth', 'false'),
+                'folders_path' => $this->systemConfig->getUserConfigValue('foldersPath', '/'),
+                'show_hidden_folders' => 'true' === $this->systemConfig->getUserConfigValue('showHidden', 'false'),
+                'sort_folder_month' => 'true' === $this->systemConfig->getUserConfigValue('sortFolderMonth', 'false'),
 
                 // album settings
-                'sort_album_month' => 'true' === $getAppConfig('sortAlbumMonth', 'true'),
-                'show_hidden_albums' => 'true' === $getAppConfig('showHiddenAlbums', 'false'),
-                'album_list_sort' => (int) $getAppConfig('album_list_sort', '3'),
+                'sort_album_month' => 'true' === $this->systemConfig->getUserConfigValue('sortAlbumMonth', 'true'),
+                'show_hidden_albums' => 'true' === $this->systemConfig->getUserConfigValue('showHiddenAlbums', 'false'),
+                'album_list_sort' => (int) $this->systemConfig->getUserConfigValue('album_list_sort', '3'),
             ], Http::STATUS_OK);
         });
     }
@@ -131,22 +152,28 @@ final class OtherController extends GenericApiController
     #[NoAdminRequired]
     #[PublicPage]
     #[NoCSRFRequired]
-    public function describeApi(): Http\Response
+    public function describeApi(PageController $pageController): Http\Response
     {
-        return Util::guardEx(static function () {
-            $appManager = \OC::$server->get(\OCP\App\IAppManager::class);
-            $urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
-
+        return $this->util->guardEx(function () use ($pageController) {
             $info = [
-                'version' => $appManager->getAppVersion('memories'),
-                'baseUrl' => $urlGenerator->linkToRouteAbsolute('memories.Page.main'),
-                'loginFlowUrl' => $urlGenerator->linkToRouteAbsolute('core.ClientFlowLoginV2.init'),
+                'version' => $this->appManager->getAppVersion('memories'),
+                'baseUrl' => $this->urlGenerator->linkToRouteAbsolute('memories.Page.main'),
+                'loginFlowUrl' => $this->urlGenerator->linkToRouteAbsolute('core.ClientFlowLoginV2.init'),
             ];
 
             try {
-                $info['uid'] = Util::getUID();
+                $info['uid'] = $this->util->getUID();
             } catch (\Exception) {
                 $info['uid'] = null;
+            }
+
+            // Static file manifests
+            if ('1' === $this->request->getParam('manifest')) {
+                $manifest = @file_get_contents(__DIR__.'/../../js/memories-manifest.json');
+                $info['jsManifest'] = false !== $manifest ? base64_encode($manifest) : null;
+                $manifestSig = @file_get_contents(__DIR__.'/../../js/memories-manifest.sig.json');
+                $info['jsManifestSig'] = false !== $manifestSig ? base64_encode($manifestSig) : null;
+                $info['cssManifest'] = $pageController->getLinkHeaders();
             }
 
             // This is public information
@@ -162,16 +189,16 @@ final class OtherController extends GenericApiController
     #[NoCSRFRequired]
     public function static(string $name): Http\Response
     {
-        return Util::guardEx(static function () use ($name) {
+        return $this->util->guardEx(function () use ($name) {
             switch ($name) {
                 case 'service-worker.js':
                     // Disable service worker if server is in debug mode
-                    if (!\OC::$server->get(\OCP\IConfig::class)->getSystemValue('memories.sw.enabled', true)) {
+                    if (!$this->config->getSystemValue('memories.sw.enabled', true)) {
                         throw Exceptions::NotFound('Service worker is disabled in global configuration');
                     }
 
                     // Get relative URL to JS web root of the app
-                    $prefix = \OC::$server->get(\OCP\IURLGenerator::class)->linkTo('memories', 'js/memories-main.js');
+                    $prefix = $this->urlGenerator->linkTo('memories', 'js/memories-main.js');
                     $prefix = preg_replace('/memories-main\.js.*$/', '', $prefix) ?? $prefix;
 
                     // Make sure prefix starts and ends with a slash
@@ -191,7 +218,7 @@ final class OtherController extends GenericApiController
                     break;
 
                 case 'go-vod':
-                    switch (\OC::$server->get(IRequest::class)->getParam('arch')) {
+                    switch ($this->request->getParam('arch')) {
                         case 'x86_64':
                         case 'amd64':
                             return new StreamResponse(__DIR__.'/../../bin-ext/go-vod-amd64');
@@ -207,7 +234,7 @@ final class OtherController extends GenericApiController
             }
 
             /** @var Http\Response $response */
-            $response->setContentSecurityPolicy(PageController::getCSP());
+            $response->setContentSecurityPolicy($this->systemConfig->getCSP());
 
             return $response;
         });

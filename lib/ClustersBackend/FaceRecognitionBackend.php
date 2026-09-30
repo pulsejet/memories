@@ -25,7 +25,7 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
-use OCA\Memories\Util;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\SimpleFS\ISimpleFile;
 use OCP\IAppConfig;
@@ -46,10 +46,14 @@ final class FaceRecognitionBackend extends Backend
 {
     use PeopleBackendUtils;
 
+    public const CLUSTER_TYPE = 'facerecognition';
+
     public function __construct(
         protected IRequest $request,
         protected TimelineQuery $tq,
         protected IAppConfig $appConfig,
+        protected Covers $covers,
+        protected SystemConfig $systemConfig,
     ) {}
 
     #[\Override]
@@ -61,14 +65,14 @@ final class FaceRecognitionBackend extends Backend
     #[\Override]
     public static function clusterType(): string
     {
-        return 'facerecognition';
+        return self::CLUSTER_TYPE;
     }
 
     #[\Override]
     public function isEnabled(): bool
     {
-        return Util::facerecognitionIsInstalled()
-               && Util::facerecognitionIsEnabled();
+        return $this->systemConfig->facerecognitionIsInstalled()
+               && $this->systemConfig->facerecognitionIsEnabled();
     }
 
     #[\Override]
@@ -222,7 +226,7 @@ final class FaceRecognitionBackend extends Backend
         if (-6 === $limit) {
             // The cover is keyed by whatever getClusterIdFrom() reports: the
             // cluster id for unnamed clusters, the person id for named ones.
-            Covers::filterCover(
+            $this->covers->filterCover(
                 $query,
                 self::clusterType(),
                 'frf',
@@ -243,7 +247,7 @@ final class FaceRecognitionBackend extends Backend
         $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
 
         // FETCH face detections
-        return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        return $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
     }
 
     #[\Override]
@@ -282,6 +286,12 @@ final class FaceRecognitionBackend extends Backend
     public function getClusterIdFrom(array $photo): int
     {
         return (int) $photo['cluster_id'];
+    }
+
+    #[\Override]
+    public function setCover(array $photo, bool $manual = false): void
+    {
+        $this->covers->setBackendCover($this, $photo, $manual);
     }
 
     private function model(): int
@@ -334,7 +344,7 @@ final class FaceRecognitionBackend extends Backend
         // parameter, since PostgreSQL has no = between boolean and integer.
         $query->andWhere($query->expr()->eq('frc.is_visible', $query->createNamedParameter(true, IQueryBuilder::PARAM_BOOL)));
 
-        // The query change if we want the people in an fileid, or the unnamed clusters
+        // The query changes if we want the people in a fileid, or the unnamed clusters
         if ($fileid > 0) {
             // WHERE these clusters contain fileid if specified
             $query->andWhere($query->expr()->eq('fri.file', $query->createNamedParameter($fileid)));
@@ -352,7 +362,7 @@ final class FaceRecognitionBackend extends Backend
 
         // SELECT covers
         $query = SQL::materialize($query, 'frc');
-        Covers::selectCover(
+        $this->covers->selectCover(
             query: $query,
             type: self::clusterType(),
             clusterTable: 'frc',
@@ -367,7 +377,7 @@ final class FaceRecognitionBackend extends Backend
         $this->tq->selectEtag($query, 'cover', 'cover_etag');
 
         // FETCH all faces
-        return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        return $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
     }
 
     /**
@@ -419,7 +429,7 @@ final class FaceRecognitionBackend extends Backend
 
         // SELECT to get all covers
         $query = SQL::materialize($query, 'frp');
-        Covers::selectCover(
+        $this->covers->selectCover(
             query: $query,
             type: self::clusterType(),
             clusterTable: 'frp',
@@ -439,6 +449,6 @@ final class FaceRecognitionBackend extends Backend
         $this->tq->selectEtag($query, 'frp.cover', 'cover_etag');
 
         // FETCH all faces
-        return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        return $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
     }
 }

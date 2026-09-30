@@ -20,8 +20,8 @@
     <TimelineTopOverlay
       ref="topOverlay"
       :heads="heads"
-      :container="refs.container?.$el"
-      :recycler="refs.recycler?.$el"
+      :container="refs().container?.$el"
+      :recycler="refs().recycler?.$el"
     />
 
     <!-- Main recycler view for rows -->
@@ -47,17 +47,17 @@
           <div class="mobile-header-top-gap"></div>
 
           <!-- Route-specific top matter -->
-          <DynamicTopMatter ref="dtm" @load="refs.scrollerManager.adjust()" />
+          <DynamicTopMatter ref="dtm" @load="refs().scrollerManager.adjust()" />
         </div>
       </template>
 
       <template v-slot="{ item, index }">
-        <RowHead v-if="item.type === 0" :item="item" @click="refs.selectionManager.selectHead(item)" />
+        <RowHead v-if="item.type === 0" :item="item" @click="refs().selectionManager.selectHead(item)" />
 
         <template v-else>
           <Photo
             class="photo top-left"
-            v-for="photo of item.photos"
+            v-for="photo of item.photos ?? []"
             :key="photo.key"
             :style="{
               height: `${photo.dispH}px`,
@@ -66,11 +66,11 @@
             }"
             :data="photo"
             :day="item.day"
-            @select="refs.selectionManager.clickSelectionIcon(photo, $event, index)"
-            @pointerdown="refs.selectionManager.clickPhoto(photo, $event, index)"
-            @touchstart="refs.selectionManager.touchstartPhoto(photo, $event, index)"
-            @touchend="refs.selectionManager.touchendPhoto(photo, $event, index)"
-            @touchmove="refs.selectionManager.touchmovePhoto(photo, $event, index)"
+            @select="refs().selectionManager.clickSelectionIcon(photo, $event, index)"
+            @pointerdown="refs().selectionManager.clickPhoto(photo, $event, index)"
+            @touchstart="refs().selectionManager.touchstartPhoto(photo, $event, index)"
+            @touchend="refs().selectionManager.touchendPhoto(photo, $event, index)"
+            @touchmove="refs().selectionManager.touchmovePhoto(photo, $event, index)"
           />
         </template>
       </template>
@@ -82,12 +82,12 @@
       v-show="!showEmpty"
       :rows="list"
       :fullHeight="scrollerHeight"
-      :recycler="refs.recycler"
-      :recyclerBefore="refs.recyclerBefore"
+      :recycler="refs().recycler"
+      :recyclerBefore="refs().recyclerBefore"
       @interactend="loadScrollView"
       @scroll="
         currentScroll = $event.current;
-        refs.topOverlay?.refresh();
+        refs().topOverlay?.refresh();
       "
     />
 
@@ -96,16 +96,17 @@
       :heads="heads"
       :rows="list"
       :isreverse="isMonthView"
-      :recycler="refs.recycler?.$el"
-      :scrollerManager="refs.scrollerManager"
+      :recycler="refs().recycler?.$el"
+      :scrollerManager="refs().scrollerManager"
       @updateLoading="updateLoading"
     />
   </SwipeRefresh>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import type { Route } from 'vue-router';
+import { defineComponent, markRaw } from 'vue';
+import type { RouteLocationNormalized } from 'vue-router';
+import { RecycleScroller } from 'vue-virtual-scroller';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
@@ -124,14 +125,16 @@ import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import TopMatter from '@components/top-matter/TopMatter.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
 import TimelineTopOverlay from '@components/top-matter/TimelineTopOverlay.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 
 import { API, DaysFilterType } from '@services/API';
+import * as lens from '@services/lens';
 
-import type { IDay, IHeadRow, IPhoto, IRow } from '@typings';
+import type { IDay, IHeadRow, IPhoto, IPhotoRow, IRow } from '@typings';
 
 const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop
@@ -152,6 +155,8 @@ export default defineComponent({
     ScrollerManager,
     Viewer,
     SwipeRefresh,
+    RecycleScroller,
+    XLoadingIcon,
   },
 
   mixins: [UserConfig],
@@ -212,10 +217,16 @@ export default defineComponent({
     this.routeChange(this.$route);
 
     // Start resize observer on container
-    if (this.refs.container?.$el) {
-      this.resizeObserver = new ResizeObserver(() => this.handleResizeWithDelay());
-      this.resizeObserver.observe(this.refs.container.$el);
+    const container = this.refs().container;
+    if (container?.$el) {
+      this.resizeObserver = markRaw(new ResizeObserver(() => this.handleResizeWithDelay()));
+      this.resizeObserver.observe(container.$el);
     }
+
+    // Template refs ($refs) are not reactive in Vue 3, so prop bindings
+    // like :recycler="refs().recycler" evaluated during the initial render
+    // stay undefined. Re-render once now that all refs are populated.
+    this.$forceUpdate();
   },
 
   unmounted() {
@@ -223,7 +234,7 @@ export default defineComponent({
   },
 
   watch: {
-    async $route(to: Route, from?: Route) {
+    async $route(to: RouteLocationNormalized, from?: RouteLocationNormalized) {
       await this.routeChange(to, from);
     },
   },
@@ -238,7 +249,7 @@ export default defineComponent({
     utils.bus.on('memories:timeline:hard-refresh', this.refresh);
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     utils.bus.off('memories:user-config-changed', this.softRefresh);
     utils.bus.off('files:file:created', this.softRefresh);
     utils.bus.off('memories:window:resize', this.handleResizeWithDelay);
@@ -251,19 +262,6 @@ export default defineComponent({
   },
 
   computed: {
-    refs() {
-      return this.$refs as {
-        container?: InstanceType<typeof SwipeRefresh>;
-        topmatter?: InstanceType<typeof TopMatter>;
-        dtm?: InstanceType<typeof DynamicTopMatter>;
-        topOverlay?: InstanceType<typeof TimelineTopOverlay>;
-        recycler?: VueRecyclerType;
-        recyclerBefore?: HTMLDivElement;
-        selectionManager: InstanceType<typeof SelectionManager>;
-        scrollerManager: InstanceType<typeof ScrollerManager>;
-      };
-    },
-
     routeHasNative(): boolean {
       return this.routeIsBase && nativex.has();
     },
@@ -294,13 +292,29 @@ export default defineComponent({
   },
 
   methods: {
-    async routeChange(to: Route, from?: Route) {
+    refs() {
+      return this.$refs as {
+        container?: InstanceType<typeof SwipeRefresh>;
+        topmatter?: InstanceType<typeof TopMatter>;
+        dtm?: InstanceType<typeof DynamicTopMatter>;
+        topOverlay?: InstanceType<typeof TimelineTopOverlay>;
+        recycler?: VueRecyclerType;
+        recyclerBefore?: HTMLDivElement;
+        selectionManager: InstanceType<typeof SelectionManager>;
+        scrollerManager: InstanceType<typeof ScrollerManager>;
+      };
+    },
+
+    async routeChange(to: RouteLocationNormalized, from?: RouteLocationNormalized) {
       // Always do a hard refresh if the path changes
       if (from?.path !== to.path) {
         await this.refresh();
 
         // Focus on the recycler (e.g. after navigation click)
-        this.refs.recycler?.$el.focus();
+        // Unless the user is typing in the search box
+        if (!document.activeElement?.closest?.('.memories-searchbar')) {
+          this.refs().recycler?.$el.focus();
+        }
       }
 
       // Do a soft refresh if the query changes
@@ -331,7 +345,7 @@ export default defineComponent({
         if (!from) {
           const index = this.list.findIndex((r) => r.day.dayid === dayid && r.photos?.includes(photo));
           if (index !== -1) {
-            this.refs.recycler?.scrollToItem(index);
+            this.refs().recycler?.scrollToItem(index);
           }
         }
 
@@ -364,7 +378,7 @@ export default defineComponent({
       this.recomputeSizes();
 
       // Timeline recycler init
-      this.refs.recycler?.$el.addEventListener('scroll', this.scrollPositionChange, { passive: true });
+      this.refs().recycler?.$el.addEventListener('scroll', this.scrollPositionChange, { passive: true });
 
       // Get data
       await this.fetchDays();
@@ -372,8 +386,8 @@ export default defineComponent({
 
     /** Reset all state */
     async resetState() {
-      this.refs.selectionManager.clear();
-      this.refs.scrollerManager.reset();
+      this.refs().selectionManager.clear();
+      this.refs().scrollerManager.reset();
       this.loading = 0;
       this.list = [];
       this.dtmContent = false;
@@ -413,7 +427,7 @@ export default defineComponent({
      * Do not pass this function as a callback directly.
      */
     async _softRefreshInternal(sync: boolean) {
-      this.refs.selectionManager.clear();
+      this.refs().selectionManager.clear();
       this.fetchDayQueue = []; // reset queue
 
       // Fetch days
@@ -432,7 +446,7 @@ export default defineComponent({
     /** Recompute static sizes of containers */
     recomputeSizes() {
       // Get the container element
-      const container = this.refs.container?.$el;
+      const container = this.refs().container?.$el;
       if (!container) return;
 
       // Size of outer container
@@ -444,18 +458,18 @@ export default defineComponent({
       this.scrollerHeight = height;
 
       // Static top matter to exclude from recycler height
-      const topmatter = this.refs.topmatter;
-      const tmHeight = topmatter?.$el?.clientHeight || 0;
+      const topmatter = this.refs().topmatter;
+      const tmHeight = topmatter?.$el?.clientHeight ?? 0;
 
       // Recycler height
-      const recycler = this.refs.recycler!;
+      const recycler = this.refs().recycler!;
       const targetHeight = height - tmHeight - 4;
       const targetWidth = this.isMobile() ? width : width - 40;
       const heightChanged = recycler.$el.clientHeight !== targetHeight;
       const widthChanged = this.rowWidth !== targetWidth;
 
       if (heightChanged) {
-        recycler.$el.style.height = targetHeight + 'px';
+        recycler.$el.style.height = `${targetHeight}px`;
       }
 
       if (widthChanged) {
@@ -490,7 +504,7 @@ export default defineComponent({
         // At this point we're sure the size has changed, so we need
         // to invalidate everything related to sizes
         this.sizedDays.clear();
-        this.refs.scrollerManager.adjust();
+        this.refs().scrollerManager.adjust();
 
         // Explicitly request a scroll event
         this.loadScrollView();
@@ -503,7 +517,7 @@ export default defineComponent({
      * the pixel position of the recycler has changed.
      */
     scrollPositionChange(event?: Event) {
-      this.refs.scrollerManager.recyclerScrolled(event ?? null);
+      this.refs().scrollerManager.recyclerScrolled(event ?? null);
     },
 
     /** Trigger when recycler view changes (for callback) */
@@ -549,7 +563,7 @@ export default defineComponent({
       }
 
       // We only need to debounce loads if the user is dragging the scrollbar
-      const scrolling = this.refs.scrollerManager.interacting;
+      const scrolling = this.refs().scrollerManager.interacting;
 
       // Make sure we don't do this too often
       this.currentStart = startIndex;
@@ -635,7 +649,8 @@ export default defineComponent({
       }
 
       // Albums
-      const { user, name } = this.$route.params;
+      const user = utils.routeParamToString(this.$route.params.user);
+      const name = utils.routeParamToString(this.$route.params.name);
       if (this.routeIsAlbums) {
         if (!user || !name) {
           throw new Error('Invalid album route');
@@ -681,7 +696,7 @@ export default defineComponent({
 
       // Map Bounds
       if (this.routeIsMap) {
-        const bounds = <string>this.$route.query.b;
+        const bounds = this.$route.query.b?.toString();
         if (!bounds) {
           throw new Error('Missing map bounds');
         }
@@ -705,11 +720,16 @@ export default defineComponent({
       try {
         this.updateLoading(1);
         const state = this.state;
-        const res = await this.refs.dtm?.refresh();
+        const res = await this.refs().dtm?.refresh();
         if (this.state !== state) return;
         this.dtmContent = res ?? false;
       } finally {
         this.updateLoading(-1);
+      }
+
+      // Lens search mode serves a fake day, not the days API
+      if (this.routeIsSearch) {
+        return await this.fetchLensSearch();
       }
 
       // Get URL an cache identifier
@@ -739,13 +759,16 @@ export default defineComponent({
           setTimeout(() => _m.viewer.open(data[0]!.detail![0]), 0);
         } else {
           // Try the cache
-          if (!noCache) {
+          if (!noCache || this.routeHasNative) {
             try {
-              if ((cache = await utils.getCachedData(cacheUrl))) {
-                if (this.routeHasNative) {
-                  cache = nativex.mergeDays(cache, await nativex.getLocalDays());
-                }
+              cache = await utils.getCachedData(cacheUrl);
 
+              // On native, treat a missing remote cache as empty.
+              if (this.routeHasNative) {
+                cache = nativex.mergeDays(cache ?? [], await nativex.getLocalDays());
+              }
+
+              if (cache) {
                 await this.processDays(cache, true);
                 this.updateLoading(-1);
               }
@@ -772,7 +795,7 @@ export default defineComponent({
         // Make sure we're still on the same page
         if (this.state !== startState) return;
         await this.processDays(data, false);
-      } catch (e) {
+      } catch (e: any) {
         if (!utils.isNetworkError(e)) {
           showError(e?.response?.data?.message ?? e.message);
           console.error(e);
@@ -891,7 +914,7 @@ export default defineComponent({
       });
 
       // Fix view height variable
-      await this.refs.scrollerManager.reflow();
+      await this.refs().scrollerManager.reflow();
       this.scrollPositionChange();
 
       // Trigger a view refresh. This will load any new placeholders too.
@@ -929,13 +952,15 @@ export default defineComponent({
       const cacheUrl = this.getDayUrl([dayId]);
       try {
         let cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
-        if (cache) {
-          // Cache only contains remote images; update from local too
-          if (this.routeHasNative && head.day?.haslocal) {
-            nativex.mergeDay(cache, await nativex.getLocalDay(dayId));
-          }
+        utils.applyAuids(cache);
 
-          // Process the cache
+        // On native, treat a missing remote cache as empty.
+        if (this.routeHasNative && head.day?.haslocal) {
+          nativex.mergeDay((cache ??= []), await nativex.getLocalDay(dayId));
+        }
+
+        // Process the cache
+        if (cache) {
           cache = this.preprocessDay(dayId, cache);
 
           // If this is a cached response and the list is not, then we don't
@@ -985,9 +1010,27 @@ export default defineComponent({
 
       try {
         const startState = this.state;
-        const res = await axios.get<IPhoto[]>(url);
-        if (res.status !== 200) throw res;
-        const data = res.data;
+        const [data, isCached] = await (async () => {
+          try {
+            const res = await axios.get<IPhoto[]>(url);
+            if (res.status !== 200) throw res;
+            return [res.data, false];
+          } catch (e: any) {
+            // Force a cache read with nativex to update local.
+            if (nativex.has()) {
+              const res = await Promise.all(
+                dayIds.map(async (dayId) => {
+                  const cacheUrl = this.getDayUrl([dayId]);
+                  const data = await utils.getCachedData<IPhoto[]>(cacheUrl);
+                  return data ?? [];
+                }),
+              );
+              return [res.flat(), true];
+            }
+            throw e;
+          }
+        })();
+        utils.applyAuids(data);
 
         // Check if the state has changed
         if (this.state !== startState || this.getDayUrl(dayIds) !== url) {
@@ -1000,7 +1043,7 @@ export default defineComponent({
           dayMap.get(photo.dayid)?.push(photo);
         }
 
-        // Store cache asynchronously
+        // Store cache asynchronously if this was not cache.
         // Do this regardless of whether the state has
         // changed since the data is already fetched
         //
@@ -1010,8 +1053,10 @@ export default defineComponent({
         // The day is cached regardless of whether it is empty.
         // Empty days might be fetched e.g. on NativeX. In this case,
         // empty caches will not be processed if the view is fresh.
-        for (const [dayId, photos] of dayMap) {
-          utils.cacheData(this.getDayUrl([dayId]), photos);
+        if (!isCached) {
+          for (const [dayId, photos] of dayMap) {
+            utils.cacheData(this.getDayUrl([dayId]), photos);
+          }
         }
 
         // Get local images if we are running in native environment.
@@ -1054,6 +1099,12 @@ export default defineComponent({
                 // copy over flags
                 utils.copyPhotoFlags(now, curr);
 
+                // keep merged local copy up to date
+                curr.local_photo = now.local_photo;
+
+                // keep deduped copies up to date (#1299)
+                curr.dups = now.dups;
+
                 return true;
               }
 
@@ -1088,7 +1139,7 @@ export default defineComponent({
       // Set of basenames without extension
       const res1: IPhoto[] = [];
       const toStack = new Map<string, IPhoto[]>();
-      const auids = new Set<string>();
+      const auids = new Map<string, IPhoto>();
 
       // First pass -- remove hidden and prepare
       for (const photo of data) {
@@ -1096,10 +1147,14 @@ export default defineComponent({
         if (photo.ishidden) continue;
         if (photo.basename?.startsWith('.')) continue;
 
-        // Skip identical duplicates
+        // Remember hidden duplicates for bulk actions (#1299)
         if (this.config.dedup_identical && photo.auid) {
-          if (auids.has(photo.auid)) continue;
-          auids.add(photo.auid);
+          const prev = auids.get(photo.auid);
+          if (prev) {
+            (prev.dups ??= []).push(photo);
+            continue;
+          }
+          auids.set(photo.auid, photo);
         }
 
         // Add to first pass result
@@ -1222,7 +1277,7 @@ export default defineComponent({
       let addedRows: IRow[] = [];
 
       // Recycler scroll top
-      let scrollTop = this.refs.recycler!.$el.scrollTop;
+      let scrollTop = this.refs().recycler!.$el.scrollTop;
       let needAdjust = false;
 
       // Get index and Y position of header in O(n)
@@ -1240,7 +1295,7 @@ export default defineComponent({
       const seen = new Map<number, number>();
 
       // Previous justified row
-      let prevJustifyTop = justify[0]?.top || 0;
+      let prevJustifyTop = justify[0]?.top ?? 0;
 
       // Add all rows
       let dataIdx = 0;
@@ -1325,14 +1380,17 @@ export default defineComponent({
         // Duplicate detection.
         // These may be valid, e.g. in face rects. All we need to have
         // is a unique Vue key for the v-for loop.
-        const key = photo.faceid || photo.fileid;
-        const val = seen.get(key);
-        if (val) {
-          photo.key = `${key}-${val}`;
-          seen.set(key, val + 1);
-        } else {
-          photo.key = `${key}`;
-          seen.set(key, 1);
+        // Some backends might provide a key, such as lens.
+        if (!photo.key) {
+          const key = photo.faceid || photo.fileid;
+          const val = seen.get(key);
+          if (val) {
+            photo.key = `${key}-${val}`;
+            seen.set(key, val + 1);
+          } else {
+            photo.key = `${key}`;
+            seen.set(key, 1);
+          }
         }
 
         // Add photo to row
@@ -1341,7 +1399,7 @@ export default defineComponent({
       }
 
       // Restore selection day
-      this.refs.selectionManager.restoreDay(day);
+      this.refs().selectionManager.restoreDay(day);
 
       // Rows that were removed
       const removedRows: IRow[] = [];
@@ -1384,24 +1442,24 @@ export default defineComponent({
         if (headRemoved) {
           // If the head was removed, we need a reflow,
           // or adjust isn't going to work right
-          this.refs.scrollerManager.reflow();
+          this.refs().scrollerManager.reflow();
         } else {
           // Otherwise just adjust the ticks
-          this.refs.scrollerManager.adjust();
+          this.refs().scrollerManager.adjust();
         }
 
         // Scroll to new position
-        this.refs.recycler!.$el.scrollTop = scrollTop;
+        this.refs().recycler!.$el.scrollTop = scrollTop;
       }
     },
 
     /** Add and get a new blank photos row */
-    addRow(day: IDay): IRow {
+    addRow(day: IDay): IPhotoRow {
       // Make sure rows exists
       day.rows ??= [];
 
       // Create new row
-      const row: IRow = {
+      const row: IPhotoRow = {
         id: `${day.dayid}-${day.rows.length}`,
         num: day.rows.length,
         photos: [],
@@ -1431,7 +1489,7 @@ export default defineComponent({
       delPhotos = delPhotos.filter((p) => p?.d);
       if (delPhotos.length === 0) return;
 
-      // Get all days that need to be updatd
+      // Get all days that need to be updated
       const updatedDays = new Set<IDay>(delPhotos.map((p) => p.d!));
       const delPhotosSet = new Set(delPhotos);
 
@@ -1444,12 +1502,37 @@ export default defineComponent({
       await new Promise((resolve) => setTimeout(resolve, 200));
 
       // clear selection at this point
-      this.refs.selectionManager.deselect(delPhotos);
+      this.refs().selectionManager.deselect(delPhotos);
 
       // Reflow all touched days
       for (const day of updatedDays) {
         const newDetail = day.detail?.filter((p) => !delPhotosSet.has(p));
         this.processDay(day.dayid, newDetail!);
+      }
+    },
+
+    /** Fetch lens search results into top + month days */
+    async fetchLensSearch() {
+      const query = lens.routeQueryText(this.$route.query.q).trim();
+
+      try {
+        this.updateLoading(1);
+        const state = this.state;
+        const days = await lens.getLensSearchDays(query);
+        if (this.state !== state) return;
+        await this.processDays(days, false);
+
+        // Title the top day; month days get month titles via head.ismonth
+        for (const day of days) {
+          lens.markSearchHead(day, this.heads.get(day.dayid));
+        }
+      } catch (e: any) {
+        if (!utils.isNetworkError(e)) {
+          showError(e?.response?.data?.message ?? e.message);
+          console.error(e);
+        }
+      } finally {
+        this.updateLoading(-1);
       }
     },
   },
@@ -1463,6 +1546,8 @@ export default defineComponent({
   width: 100%;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
 
   @media (max-width: 768px) {
     // Get rid of padding on img-outer (1px on mobile)
@@ -1479,15 +1564,15 @@ export default defineComponent({
   width: 100%;
   transition: opacity 0.2s ease-in-out;
 
-  :deep .vue-recycle-scroller__slot {
+  :deep(.vue-recycle-scroller__slot) {
     contain: content;
   }
 
-  :deep .vue-recycle-scroller__item-wrapper {
+  :deep(.vue-recycle-scroller__item-wrapper) {
     contain: strict;
   }
 
-  :deep .vue-recycle-scroller__item-view {
+  :deep(.vue-recycle-scroller__item-view) {
     contain: layout style;
   }
 

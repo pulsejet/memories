@@ -23,27 +23,42 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\FsManager;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IRequest;
+use OCP\IURLGenerator;
 use OCP\Share\IManager;
 use OCP\Share\IShare;
 
-final class ShareController extends GenericApiController
+final class ShareController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected FsManager $fs,
+        protected IManager $shareManager,
+        protected IURLGenerator $urlGenerator,
+        protected Util $util,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * Get the tokens of a node shared using an external link.
      */
     #[NoAdminRequired]
     public function links(?int $id, ?string $path): Http\Response
     {
-        return Util::guardEx(function () use ($id, $path) {
+        return $this->util->guardEx(function () use ($id, $path) {
             $file = $this->getNodeByIdOrPath($id, $path);
 
-            $shares = \OC::$server->get(IManager::class)
-                ->getSharesBy(Util::getUID(), IShare::TYPE_LINK, $file, true, 50, 0)
+            $shares = $this->shareManager
+                ->getSharesBy($this->util->getUID(), IShare::TYPE_LINK, $file, true, 50, 0)
             ;
 
             if (empty($shares)) {
@@ -62,16 +77,14 @@ final class ShareController extends GenericApiController
     #[NoAdminRequired]
     public function createNode(?int $id, ?string $path): Http\Response
     {
-        return Util::guardEx(function () use ($id, $path) {
+        return $this->util->guardEx(function () use ($id, $path) {
             $file = $this->getNodeByIdOrPath($id, $path);
 
-            $manager = \OC::$server->get(IManager::class);
-
-            $share = $manager->createShare(
-                $manager->newShare()
+            $share = $this->shareManager->createShare(
+                $this->shareManager->newShare()
                     ->setNode($file)
                     ->setShareType(\OCP\Share\IShare::TYPE_LINK)
-                    ->setSharedBy(Util::getUID())
+                    ->setSharedBy($this->util->getUID())
                     ->setPermissions(\OCP\Constants::PERMISSION_READ),
             );
 
@@ -85,18 +98,16 @@ final class ShareController extends GenericApiController
     #[NoAdminRequired]
     public function deleteShare(string $id): Http\Response
     {
-        return Util::guardEx(static function () use ($id) {
-            $uid = Util::getUID();
+        return $this->util->guardEx(function () use ($id) {
+            $uid = $this->util->getUID();
 
-            $manager = \OC::$server->get(\OCP\Share\IManager::class);
-
-            $share = $manager->getShareById($id);
+            $share = $this->shareManager->getShareById($id);
 
             if ($share->getSharedBy() !== $uid) {
                 throw Exceptions::Forbidden('You are not the owner of this share');
             }
 
-            $manager->deleteShare($share);
+            $this->shareManager->deleteShare($share);
 
             return new JSONResponse([], Http::STATUS_OK);
         });
@@ -104,21 +115,21 @@ final class ShareController extends GenericApiController
 
     private function getNodeByIdOrPath(?int $id, ?string $path): \OCP\Files\Node
     {
-        $uid = Util::getUID();
+        $uid = $this->util->getUID();
 
         try {
             $file = null;
             if ($id) {
                 $file = $this->fs->getUserFile($id);
             } elseif ($path) {
-                $file = Util::getUserFolder($uid)->get($path);
+                $file = $this->util->getUserFolder($uid)->get($path);
             }
         } catch (\OCP\Files\NotFoundException) {
             throw Exceptions::NotFoundFile($path ?? $id);
         }
 
         if (!$file || !$file->isShareable()) {
-            throw Exceptions::Forbidden('File not sharable');
+            throw Exceptions::Forbidden('File not shareable');
         }
 
         return $file;
@@ -127,14 +138,10 @@ final class ShareController extends GenericApiController
     private function makeShareResponse(IShare $share): array
     {
         $token = $share->getToken();
-        $url = \OC::$server->get(\OCP\IURLGenerator::class)
+        $url = $this->urlGenerator
             ->linkToRouteAbsolute('memories.Public.showShare', ['token' => $token])
         ;
 
-        /**
-         * @psalm-suppress RedundantConditionGivenDocblockType
-         * @psalm-suppress DocblockTypeContradiction
-         */
         $expiration = $share->getExpirationDate()?->getTimestamp();
 
         return [
@@ -144,7 +151,7 @@ final class ShareController extends GenericApiController
             'url' => $url,
             'hasPassword' => $share->getPassword() ? true : false,
             'expiration' => $expiration,
-            'editable' => $share->getPermissions() & \OCP\Constants::PERMISSION_UPDATE,
+            'editable' => (bool) ($share->getPermissions() & \OCP\Constants::PERMISSION_UPDATE),
         ];
     }
 }

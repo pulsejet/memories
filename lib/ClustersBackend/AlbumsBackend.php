@@ -27,16 +27,24 @@ use OCA\Memories\Db\AlbumsQuery;
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IRequest;
+use OCP\IUserManager;
 
 final class AlbumsBackend extends Backend
 {
+    public const CLUSTER_TYPE = 'albums';
+
     public function __construct(
         protected AlbumsQuery $albumsQuery,
         protected IRequest $request,
         protected TimelineQuery $tq,
+        protected IUserManager $userManager,
+        protected Covers $covers,
+        protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {}
 
     #[\Override]
@@ -48,19 +56,19 @@ final class AlbumsBackend extends Backend
     #[\Override]
     public static function clusterType(): string
     {
-        return 'albums';
+        return self::CLUSTER_TYPE;
     }
 
     #[\Override]
     public function isEnabled(): bool
     {
-        return Util::albumsIsEnabled();
+        return $this->systemConfig->albumsIsEnabled();
     }
 
     #[\Override]
     public function clusterName(string $name): string
     {
-        return explode('/', $name)[1];
+        return explode('/', $name, 2)[1] ?? $name;
     }
 
     #[\Override]
@@ -98,8 +106,8 @@ final class AlbumsBackend extends Backend
         };
 
         // Add cover from self user
-        $ownCover = static function (IQueryBuilder &$query): void {
-            Covers::selectCover(
+        $ownCover = function (IQueryBuilder &$query): void {
+            $this->covers->selectCover(
                 query: $query,
                 type: self::clusterType(),
                 clusterTable: 'pa',
@@ -112,8 +120,8 @@ final class AlbumsBackend extends Backend
         };
 
         // Transformation for shared albums
-        $shareCover = static function (IQueryBuilder &$query): void {
-            Covers::selectCover(
+        $shareCover = function (IQueryBuilder &$query): void {
+            $this->covers->selectCover(
                 query: $query,
                 type: self::clusterType(),
                 clusterTable: 'pa',
@@ -147,8 +155,8 @@ final class AlbumsBackend extends Backend
 
         // Get personal and shared albums
         $list = array_merge(
-            $this->albumsQuery->getList(Util::getUID(), false, $fileid, $transformOwned),
-            $this->albumsQuery->getList(Util::getUID(), true, $fileid, $transformShared),
+            $this->albumsQuery->getList($this->util->getUID(), false, $fileid, $transformOwned),
+            $this->albumsQuery->getList($this->util->getUID(), true, $fileid, $transformShared),
         );
 
         // Remove elements with duplicate album_id
@@ -162,9 +170,7 @@ final class AlbumsBackend extends Backend
             return true;
         });
 
-        $userManager = \OC::$server->get(\OCP\IUserManager::class);
-
-        array_walk($list, static function (array &$item) use ($userManager) {
+        array_walk($list, function (array &$item) {
             // Fall back cover to cover_owner if available
             if (empty($item['cover']) && !empty($item['cover_owner'] ?? null)) {
                 $item['cover'] = $item['cover_owner'];
@@ -173,7 +179,7 @@ final class AlbumsBackend extends Backend
             unset($item['cover_owner'], $item['cover_owner_etag']);
 
             // Add display names for users
-            $user = $userManager->get($item['user']);
+            $user = $this->userManager->get($item['user']);
             $item['user_display'] = $user ? $user->getDisplayName() : null;
         });
 
@@ -214,8 +220,14 @@ final class AlbumsBackend extends Backend
         return (int) $photo['album_id'];
     }
 
+    #[\Override]
+    public function setCover(array $photo, bool $manual = false): void
+    {
+        $this->covers->setBackendCover($this, $photo, $manual);
+    }
+
     private function getUID(): string
     {
-        return Util::isLoggedIn() ? Util::getUID() : '---';
+        return $this->util->isLoggedIn() ? $this->util->getUID() : '---';
     }
 }

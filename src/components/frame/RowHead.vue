@@ -1,5 +1,12 @@
 <template>
-  <div class="head-row no-user-select" :class="{ selected: item.selected }" :style="{ height: `${item.size}px` }">
+  <div
+    class="head-row no-user-select"
+    :class="{
+      selected: item.selected,
+      [`head-row--${item.dayId}`]: true,
+    }"
+    :style="{ height: `${item.size}px` }"
+  >
     <div class="super" v-if="item.super !== undefined">
       {{ item.super }}
     </div>

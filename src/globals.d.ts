@@ -1,10 +1,7 @@
-import type Router, { type Route } from 'vue-router';
+import type { Router, RouteLocationNormalized } from 'vue-router';
 import type { ComponentPublicInstance } from 'vue';
 
-import type PlyrType from 'plyr';
-import type videojsType from 'video.js';
-
-import type { IPhoto, TimelineState } from '@typings';
+import type { IPhoto, IUploadNativeX, TimelineState } from '@typings';
 import type { constants, initstate } from '@services/utils';
 import type { translate, translatePlural } from '@services/l10n';
 import type { GlobalRouteCheckers, routes } from './router';
@@ -13,14 +10,11 @@ import type { GlobalRouteCheckers, routes } from './router';
 declare global {
   var __webpack_nonce__: string;
   var __webpack_public_path__: string;
+  var __packed_l10n: Record<string, unknown> | undefined;
 
   var OC: Nextcloud.Common.OC;
   var OCP: Nextcloud.Common.OCP;
   var OCA: {
-    Files?: {
-      Sidebar?: any;
-      App?: any;
-    };
     Theming?: {
       name: string;
       enabledThemes: any[];
@@ -33,7 +27,7 @@ declare global {
    */
   var _m: {
     mode: 'admin' | 'user';
-    route: Route;
+    route: RouteLocationNormalized;
     router: Router;
     routes: typeof routes;
 
@@ -46,7 +40,7 @@ declare global {
       moveToFace: (photos: IPhoto[]) => void;
       albumShare: (user: string, name: string, link?: boolean) => Promise<void>;
       showSettings: () => void;
-      upload: () => void;
+      upload: (locals?: IUploadNativeX[]) => void;
       search: () => void;
     };
 
@@ -70,8 +64,6 @@ declare global {
     };
 
     video: {
-      videojs: typeof videojsType;
-      Plyr: typeof PlyrType;
       clientId: string;
       clientIdPersistent: string;
     };
@@ -85,9 +77,6 @@ declare global {
   // Typings for external libraries below
   type VueRecyclerType = ComponentPublicInstance & {
     $el: HTMLDivElement;
-    $refs: {
-      wrapper: HTMLDivElement;
-    };
     scrollToPosition: (position: number) => void;
     scrollToItem: (index: number) => void;
   };
@@ -113,11 +102,6 @@ declare module 'vue' {
 
     c: typeof constants;
     initstate: typeof initstate;
-  }
-
-  export interface GlobalComponents {
-    XLoadingIcon: typeof import('@components/XLoadingIcon.vue').default;
-    XImg: typeof import('@components/frame/XImg.vue').default;
   }
 }
 

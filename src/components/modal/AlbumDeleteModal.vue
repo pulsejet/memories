@@ -13,7 +13,7 @@
     </span>
 
     <template #buttons>
-      <NcButton @click="save" class="button" type="error">
+      <NcButton @click="save" class="button" variant="error">
         {{ t('memories', 'Delete') }}
       </NcButton>
     </template>
@@ -24,8 +24,7 @@
 import { defineComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
@@ -38,7 +37,6 @@ export default defineComponent({
   name: 'AlbumDeleteModal',
   components: {
     NcButton,
-    NcTextField,
     Modal,
   },
 
@@ -48,11 +46,11 @@ export default defineComponent({
 
   computed: {
     user() {
-      return this.$route.params.user;
+      return this.$route.params.user?.toString();
     },
 
     name() {
-      return this.$route.params.name;
+      return this.$route.params.name?.toString();
     },
 
     owned() {
@@ -72,10 +70,10 @@ export default defineComponent({
     async save() {
       try {
         await client.deleteFile(dav.getAlbumPath(this.user, this.name));
-        this.$router.push({ name: 'albums' });
-        this.close();
+        await this.close();
+        await this.$router.push({ name: 'albums' });
       } catch (error) {
-        console.log(error);
+        console.error(error);
         showError(this.t('memories', 'Failed to delete {name}.', { name: this.name }));
       }
     },

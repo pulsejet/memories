@@ -50,7 +50,7 @@ export default defineComponent({
     async open(edit: boolean) {
       if (edit) {
         try {
-          this.album = await dav.getAlbum(this.$route.params.user, this.$route.params.name);
+          this.album = await dav.getAlbum(this.$route.params.user?.toString(), this.$route.params.name?.toString());
         } catch (e) {
           console.error(e);
           showError(this.t('memories', 'Could not load the selected album'));

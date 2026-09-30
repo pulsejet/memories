@@ -53,20 +53,18 @@ final class Version505002Date20230831201833 extends SimpleMigrationStep
         if ($schema->hasTable('memories')) {
             $table = $schema->getTable('memories');
 
-            $table->getColumn('liveid')->setOptions([
-                'notnull' => false,
-                'length' => 128,
-                'default' => '',
-            ]);
+            $column = $table->getColumn('liveid');
+            $column->setNotnull(false);
+            $column->setLength(128);
+            $column->setDefault('');
         }
 
         if ($schema->hasTable('memories_livephoto')) {
             $table = $schema->getTable('memories_livephoto');
 
-            $table->getColumn('liveid')->setOptions([
-                'notnull' => true,
-                'length' => 128,
-            ]);
+            $column = $table->getColumn('liveid');
+            $column->setNotnull(true);
+            $column->setLength(128);
         }
 
         return $schema;

@@ -10,8 +10,14 @@ import type { IPhoto } from '@typings';
 /**
  * Download files
  */
-export async function downloadFiles(fileIds: number[]) {
-  if (!fileIds.length) return;
+export async function downloadFiles(fileIds: number[], title?: string) {
+  if (!fileIds.length) {
+    return;
+  }
+
+  if (fileIds.length === 1) {
+    return downloadFromUrl(API.DOWNLOAD_ONE(fileIds[0]), title);
+  }
 
   const res = await axios.post(API.DOWNLOAD_REQUEST(), { files: fileIds });
   if (res.status !== 200 || !res.data.handle) {
@@ -19,7 +25,7 @@ export async function downloadFiles(fileIds: number[]) {
     return;
   }
 
-  downloadWithHandle(res.data.handle);
+  downloadWithHandle(res.data.handle, title);
 }
 
 /** Get URL to download one file (e.g. for video streaming) */
@@ -30,22 +36,26 @@ export function getDownloadLink(photo: IPhoto) {
 /**
  * Download files with a download handle
  * @param handle Download handle
+ * @param title Optional label for the native completion notification
  */
-export function downloadWithHandle(handle: string) {
-  return downloadFromUrl(API.DOWNLOAD_FILE(handle));
+export function downloadWithHandle(handle: string, title?: string) {
+  return downloadFromUrl(API.DOWNLOAD_FILE(handle), title);
 }
 
 /**
  * Download files from a URL.
  * @param url URL to download from
+ * @param title Optional label for the native completion notification
  */
-export function downloadFromUrl(url: string) {
+export function downloadFromUrl(url: string, title?: string) {
   // Hand off to download manager (absolute URL)
-  if (nativex.has()) return nativex.downloadFromUrl(url);
+  if (nativex.has()) return nativex.downloadFromUrl(url, title);
 
   // Fallback to browser download
   const link = document.createElement('a');
   link.href = url;
   link.download = '';
+  document.body.appendChild(link);
   link.click();
+  link.remove();
 }

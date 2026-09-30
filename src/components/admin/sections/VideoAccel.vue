@@ -33,8 +33,8 @@
 
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
-        :checked.sync="config['memories.vod.vaapi']"
-        @update:checked="update('memories.vod.vaapi')"
+        v-model="config['memories.vod.vaapi']"
+        @update:model-value="update('memories.vod.vaapi')"
         type="switch"
       >
         {{ t('memories', 'Enable acceleration with VA-API') }}
@@ -42,12 +42,20 @@
 
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding || !config['memories.vod.vaapi']"
-        :checked.sync="config['memories.vod.vaapi.low_power']"
-        @update:checked="update('memories.vod.vaapi.low_power')"
+        v-model="config['memories.vod.vaapi.low_power']"
+        @update:model-value="update('memories.vod.vaapi.low_power')"
         type="switch"
       >
         {{ t('memories', 'Enable low-power mode (QSV only)') }}
       </NcCheckboxRadioSwitch>
+
+      <NcTextField
+        :disabled="!enableTranscoding || !config['memories.vod.vaapi']"
+        :label="t('memories', 'VA-API device path')"
+        :label-visible="true"
+        :model-value="config['memories.vod.vaapi.device']"
+        @change="update('memories.vod.vaapi.device', $event.target.value)"
+      />
 
       <br />
 
@@ -69,16 +77,16 @@
 
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
-        :checked.sync="config['memories.vod.nvenc']"
-        @update:checked="update('memories.vod.nvenc')"
+        v-model="config['memories.vod.nvenc']"
+        @update:model-value="update('memories.vod.nvenc')"
         type="switch"
       >
         {{ t('memories', 'Enable acceleration with NVENC') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding || !config['memories.vod.nvenc']"
-        :checked.sync="config['memories.vod.nvenc.temporal_aq']"
-        @update:checked="update('memories.vod.nvenc.temporal_aq')"
+        v-model="config['memories.vod.nvenc.temporal_aq']"
+        @update:model-value="update('memories.vod.nvenc.temporal_aq')"
         type="switch"
       >
         {{ t('memories', 'Enable NVENC Temporal AQ') }}
@@ -86,21 +94,21 @@
 
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding || !config['memories.vod.nvenc']"
-        :checked.sync="config['memories.vod.nvenc.scale']"
+        v-model="config['memories.vod.nvenc.scale']"
         value="cuda"
         name="nvence_scaler_radio"
         type="radio"
         class="m-radio"
-        @update:checked="update('memories.vod.nvenc.scale')"
+        @update:model-value="update('memories.vod.nvenc.scale')"
         >{{ t('memories', 'CUDA scaler') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding || !config['memories.vod.nvenc']"
-        :checked.sync="config['memories.vod.nvenc.scale']"
+        v-model="config['memories.vod.nvenc.scale']"
         value="npp"
         name="nvence_scaler_radio"
         type="radio"
-        @update:checked="update('memories.vod.nvenc.scale')"
+        @update:model-value="update('memories.vod.nvenc.scale')"
         class="m-radio"
         >{{ t('memories', 'NPP scaler') }}
       </NcCheckboxRadioSwitch>
@@ -125,8 +133,8 @@
 
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
-        :checked.sync="config['memories.vod.use_transpose']"
-        @update:checked="update('memories.vod.use_transpose')"
+        v-model="config['memories.vod.use_transpose']"
+        @update:model-value="update('memories.vod.use_transpose')"
         type="switch"
       >
         {{ t('memories', 'Enable streaming transpose workaround') }}
@@ -134,8 +142,8 @@
 
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding || !config['memories.vod.use_transpose']"
-        :checked.sync="config['memories.vod.use_transpose.force_sw']"
-        @update:checked="update('memories.vod.use_transpose.force_sw')"
+        v-model="config['memories.vod.use_transpose.force_sw']"
+        @update:model-value="update('memories.vod.use_transpose.force_sw')"
         type="switch"
       >
         {{ t('memories', 'Force transpose in software') }}
@@ -147,8 +155,8 @@
 
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
-        :checked.sync="config['memories.vod.use_gop_size']"
-        @update:checked="update('memories.vod.use_gop_size')"
+        v-model="config['memories.vod.use_gop_size']"
+        @update:model-value="update('memories.vod.use_gop_size')"
         type="switch"
       >
         {{ t('memories', 'Enable streaming GOP size workaround') }}
@@ -173,7 +181,7 @@ export default defineComponent({
     vaapiStatusText(): string {
       if (!this.status) return '';
 
-      const dev = '/dev/dri/renderD128';
+      const dev = this.config['memories.vod.vaapi.device'] || '/dev/dri/renderD128';
       if (this.status.vaapi_dev === 'ok') {
         return this.t('memories', 'VA-API device ({dev}) is readable', { dev });
       } else if (this.status.vaapi_dev === 'not_found') {

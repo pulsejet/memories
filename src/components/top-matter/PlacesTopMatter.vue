@@ -30,10 +30,11 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import * as strings from '@services/strings';
+import * as utils from '@services/utils';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import UnassignedIcon from 'vue-material-design-icons/MapMarkerOff.vue';
@@ -49,7 +50,7 @@ export default defineComponent({
 
   computed: {
     viewname(): string {
-      return strings.viewName(this.$route.name!);
+      return strings.viewName(this.$route.name?.toString() ?? '');
     },
 
     name(): string | null {
@@ -57,7 +58,7 @@ export default defineComponent({
         return this.t('memories', 'Unidentified location');
       }
 
-      return this.$route.params.name?.split('-').slice(1).join('-');
+      return utils.routeParamToString(this.$route.params.name).split('-').slice(1).join('-');
     },
   },
 

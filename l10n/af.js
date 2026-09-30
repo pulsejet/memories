@@ -37,6 +37,7 @@ OC.L10N.register(
     "Loading …" : "Laai …",
     "Move" : "Skuif",
     "Read only" : "Leesalleen",
+    "OK" : "OK",
     "Oldest first" : "Oudste eerste",
     "Newest first" : "Nuutste eerste",
     "Home" : "Tuis",

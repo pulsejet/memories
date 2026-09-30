@@ -4,18 +4,15 @@ import { addOrigin } from './basic';
 
 /**
  * Download a file from the given URL.
+ *
+ * The filename is inferred natively from the response Content-Disposition,
+ * so no HEAD round trip is needed here.
+ *
+ * @param url URL to download from
+ * @param title Optional label for the completion notification (e.g. album name)
  */
-export async function downloadFromUrl(url: string) {
-  // Make HEAD request to get filename
-  const res = await axios.head(url);
-  let filename = res.headers['content-disposition'];
-  if (res.status !== 200 || !filename) return;
-
-  // Extract filename from header without quotes
-  filename = filename.split('filename="')[1].slice(0, -1);
-
-  // Hand off to download manager
-  nativex?.downloadFromUrl?.(addOrigin(url), filename);
+export function downloadFromUrl(url: string = String(), title: string | undefined = undefined) {
+  nativex?.downloadFromUrl?.(addOrigin(url), String(), title ?? String());
 }
 
 /**

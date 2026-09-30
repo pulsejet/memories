@@ -8,10 +8,17 @@ use OCA\Memories\ClustersBackend\AlbumsBackend;
 use OCA\Memories\ClustersBackend\Covers;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use OCP\IGroupManager;
+use OCP\IUserManager;
 
 final class AlbumsQuery
 {
-    public function __construct(private IDBConnection $connection) {}
+    public function __construct(
+        private IDBConnection $connection,
+        private IUserManager $userManager,
+        private IGroupManager $groupManager,
+        private Covers $covers,
+    ) {}
 
     /**
      * Get list of albums.
@@ -86,7 +93,7 @@ final class AlbumsQuery
         }
 
         // FETCH all albums
-        $albums = $query->executeQuery()->fetchAll();
+        $albums = $query->executeQuery()->fetchAllAssociative();
 
         // Post process
         foreach ($albums as &$row) {
@@ -163,7 +170,7 @@ final class AlbumsQuery
         $albumUid = null;
 
         // Split name and uid
-        $parts = explode('/', $albumId);
+        $parts = explode('/', $albumId, 2);
         if (2 === \count($parts)) {
             $albumUid = $parts[0];
             $albumName = $parts[1];
@@ -176,7 +183,7 @@ final class AlbumsQuery
                     $query->expr()->eq('user', $query->createNamedParameter($albumUid)),
                 ),
             );
-            $album = $query->executeQuery()->fetch();
+            $album = $query->executeQuery()->fetchAssociative();
         }
 
         // Album not found: it could be a link token at best
@@ -238,7 +245,7 @@ final class AlbumsQuery
 
         // Get the cover image of the owner of the album
         // See AlbumsBackend::getClustersInternal
-        Covers::selectCover(
+        $this->covers->selectCover(
             query: $query,
             type: AlbumsBackend::clusterType(),
             clusterTable: 'pa',
@@ -251,7 +258,7 @@ final class AlbumsQuery
             user: 'pa.user',
         );
 
-        return $query->executeQuery()->fetch() ?: null;
+        return $query->executeQuery()->fetchAssociative() ?: null;
     }
 
     /**
@@ -291,7 +298,7 @@ final class AlbumsQuery
             $query->andWhere($query->expr()->eq('paf.file_id', $query->createNamedParameter($fileid, \PDO::PARAM_INT)));
         }
 
-        $result = $query->executeQuery()->fetchAll();
+        $result = $query->executeQuery()->fetchAllAssociative();
 
         foreach ($result as &$row) {
             $row['fileid'] = (int) $row['file_id'];
@@ -323,10 +330,10 @@ final class AlbumsQuery
     private function getSelfCollaborators(string $uid)
     {
         // Get the user in question
-        $user = \OC::$server->get(\OCP\IUserManager::class)->get($uid)
+        $user = $this->userManager->get($uid)
             ?: throw new \Exception('User not found');
         // Get groups for the user
-        $groups = \OC::$server->get(\OCP\IGroupManager::class)->getUserGroupIds($user);
+        $groups = $this->groupManager->getUserGroupIds($user);
 
         // Add the user itself as a collaborator
         $groups[] = $uid;
@@ -336,15 +343,10 @@ final class AlbumsQuery
 
     /**
      * Get the name of the collaborators table.
+     * Renamed in https://github.com/nextcloud/photos/commit/20e3e61ad577014e5f092a292c90a8476f630355.
      */
     private function collaboratorsTable(): string
     {
-        // https://github.com/nextcloud/photos/commit/20e3e61ad577014e5f092a292c90a8476f630355
-        $photosVersion = \OC::$server->get(\OCP\App\IAppManager::class)->getAppVersion('photos');
-        if (version_compare($photosVersion, '2.0.1', '>=')) {
-            return 'photos_albums_collabs';
-        }
-
-        return 'photos_collaborators';
+        return 'photos_albums_collabs';
     }
 }

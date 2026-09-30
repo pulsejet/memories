@@ -3,7 +3,7 @@
     v-bind="$attrs"
     :aria-hidden="!title"
     :aria-label="title"
-    :style="{ width: `${size}px`, height: `${size}px` }"
+    :style="{ width: sizePx, height: sizePx }"
     class="material-design-icon live-photo-icon"
     :class="{ spin }"
     role="img"
@@ -55,8 +55,8 @@ export default defineComponent({
       default: 'currentColor',
     },
     size: {
-      type: Number,
-      default: 24,
+      type: [String, Number],
+      default: '24px',
     },
     spin: {
       type: Boolean,
@@ -65,6 +65,11 @@ export default defineComponent({
     playing: {
       type: Boolean,
       default: false,
+    },
+  },
+  computed: {
+    sizePx(): string {
+      return typeof this.size === 'number' ? `${this.size}px` : this.size;
     },
   },
 });

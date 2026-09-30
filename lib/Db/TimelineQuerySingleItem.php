@@ -5,19 +5,29 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCA\Memories\ClustersBackend\PlacesBackend;
-use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
 
 trait TimelineQuerySingleItem
 {
-    protected IDBConnection $connection;
+    use TimelineQueryBase;
 
     public function getSingleItem(int $fileId): ?array
     {
         $query = $this->connection->getQueryBuilder();
-        $query->select('m.fileid', ...TimelineQuery::TIMELINE_SELECT)
+        $query->selectAlias('m.fileid', 'fileid')
+            ->selectAlias('m.datetaken', 'datetaken')
+            ->selectAlias('m.dayid', 'dayid')
+            ->selectAlias('m.w', 'w')
+            ->selectAlias('m.h', 'h')
+            ->selectAlias('m.liveid', 'liveid')
+            ->selectAlias('m.isvideo', 'isvideo')
+            ->selectAlias('m.video_duration', 'video_duration')
+            ->selectAlias('f.etag', 'etag')
+            ->selectAlias('f.name', 'basename')
+            ->selectAlias('f.size', 'size')
+            ->selectAlias('m.epoch', 'epoch')
+            ->selectAlias('mimetypes.mimetype', 'mimetype')
             ->from('memories', 'm')
             ->where($query->expr()->eq('m.fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
         ;
@@ -29,7 +39,7 @@ trait TimelineQuerySingleItem
         $query->join('f', 'mimetypes', 'mimetypes', $query->expr()->eq('f.mimetype', 'mimetypes.id'));
 
         // FETCH the photo
-        $photo = $query->executeQuery()->fetch();
+        $photo = $query->executeQuery()->fetchAssociative();
 
         // Check if photo was found
         if (false === $photo) {
@@ -54,7 +64,10 @@ trait TimelineQuerySingleItem
             $qb->addSelect('exif');
         }
 
-        $row = $qb->executeQuery()->fetch();
+        $row = $qb->executeQuery()->fetchAssociative();
+        if (false === $row) {
+            throw \OCA\Memories\Exceptions::NotFoundFile($id);
+        }
 
         // Basic information to return
         $info = [
@@ -80,35 +93,54 @@ trait TimelineQuerySingleItem
         }
 
         // Get address from places
-        if (SystemConfig::gisType() > 0) {
-            // Get names of places for this file
-            $qb = $this->connection->getQueryBuilder();
-            $places = $qb->select('e.name', 'e.other_names')
-                ->from('memories_places', 'mp')
-                ->innerJoin('mp', 'memories_planet', 'e', $qb->expr()->eq('mp.osm_id', 'e.osm_id'))
-                ->andWhere($qb->expr()->eq('mp.fileid', $qb->createNamedParameter($id, \PDO::PARAM_INT)))
-                ->andWhere($qb->expr()->gt('e.admin_level', $qb->expr()->literal(0, \PDO::PARAM_INT)))
-                ->addOrderBy('e.admin_level', 'DESC')
-                ->executeQuery()
-                ->fetchAll()
-            ;
+        $names = array_column($this->getPlacesById($id), 'name');
 
-            if (\count($places)) {
-                // Get user language
-                $lang = Util::getUserLang();
-
-                // Get translated address
-                $info['address'] = implode(', ', array_map(
-                    static fn ($p): string => PlacesBackend::translateName(
-                        $lang,
-                        $p['name'],
-                        $p['other_names'],
-                    ),
-                    $places,
-                ));
-            }
+        if (\count($names)) {
+            // Get translated address
+            $info['address'] = implode(', ', $names);
+            $info['address_short'] = $names[0];
         }
 
         return $info;
+    }
+
+    /**
+     * Individual places of a file, leaf first, names in the caller's language.
+     *
+     * @return list<array{osm_id: int, admin_level: int, name: string}>
+     */
+    public function getPlacesById(int $id): array
+    {
+        if ($this->systemConfig->gisType() <= 0) {
+            return [];
+        }
+
+        // Get places for this file, most specific first
+        $qb = $this->connection->getQueryBuilder();
+        $places = $qb->select('e.osm_id', 'e.admin_level', 'e.name', 'e.other_names')
+            ->from('memories_places', 'mp')
+            ->innerJoin('mp', 'memories_planet', 'e', $qb->expr()->eq('mp.osm_id', 'e.osm_id'))
+            ->andWhere($qb->expr()->eq('mp.fileid', $qb->createNamedParameter($id, \PDO::PARAM_INT)))
+            ->andWhere($qb->expr()->gt('e.admin_level', $qb->expr()->literal(0, \PDO::PARAM_INT)))
+            ->addOrderBy('e.admin_level', 'DESC')
+            ->executeQuery()
+            ->fetchAllAssociative()
+        ;
+
+        if (!\count($places)) {
+            return [];
+        }
+
+        // Get user language (the Lens service user on the daemon path)
+        $lang = $this->systemConfig->getUserLang();
+
+        return array_map(
+            static fn ($p): array => [
+                'osm_id' => (int) $p['osm_id'],
+                'admin_level' => (int) $p['admin_level'],
+                'name' => PlacesBackend::translateName($lang, $p['name'], $p['other_names']),
+            ],
+            $places,
+        );
     }
 }

@@ -149,6 +149,23 @@ export class DavClient {
     }
   }
 
+  // Upload file content to the given user file path using WebDAV PUT.
+  async putFile(targetPath: string, data: Buffer | string, contentType = 'application/octet-stream'): Promise<void> {
+    const cleanPath = DavClient.encodeDavPath(`files/${username}/${targetPath.replace(/^\/+/, '')}`);
+
+    const res = await this.request.fetch(`${baseUrl}/remote.php/dav/${cleanPath}`, {
+      method: 'PUT',
+      headers: {
+        ...e2eHeaders(),
+        'Content-Type': contentType,
+      },
+      data,
+    });
+    if (!res.ok()) {
+      throw new Error(`putFile PUT failed for ${targetPath}: ${res.status()} ${res.statusText()}`);
+    }
+  }
+
   // Copy a file or folder from srcPath to dstPath by user file path using WebDAV COPY.
   async copyFile(srcPath: string, dstPath: string, overwrite: boolean = true): Promise<void> {
     await this.copy(

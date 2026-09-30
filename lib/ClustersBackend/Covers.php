@@ -7,9 +7,17 @@ namespace OCA\Memories\ClustersBackend;
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IDBConnection;
+use Psr\Log\LoggerInterface;
 
 final class Covers
 {
+    public function __construct(
+        private IDBConnection $connection,
+        private LoggerInterface $logger,
+        private Util $util,
+    ) {}
+
     /**
      * Select the list query to get covers.
      *
@@ -30,7 +38,7 @@ final class Covers
      *                                            more than one hop. Receives the subquery builder, whose object
      *                                            table is aliased "cov_objs".
      */
-    public static function selectCover(
+    public function selectCover(
         IQueryBuilder &$query,
         string $type,
         string $clusterTable,
@@ -52,7 +60,7 @@ final class Covers
 
         // Clauses for the WHERE
         $clauses = [
-            $query->expr()->eq('mcov.uid', $user ?? $query->expr()->literal(Util::getUser()->getUID())),
+            $query->expr()->eq('mcov.uid', $user ?? $query->expr()->literal($this->util->getUser()->getUID())),
             $query->expr()->eq('mcov.clustertype', $query->expr()->literal($type)),
             $query->expr()->eq('mcov.clusterid', "{$clusterTable}.{$clusterTableId}"),
         ];
@@ -114,7 +122,7 @@ final class Covers
      *                                            already joined, for backends that reach the cluster over more
      *                                            than one hop.
      */
-    public static function filterCover(
+    public function filterCover(
         IQueryBuilder &$query,
         string $type,
         string $objectTable,
@@ -126,7 +134,7 @@ final class Covers
             : "{$objectTable}.{$objectTableClusterId}";
 
         $query->innerJoin($objectTable, 'memories_covers', 'm_cov', $query->expr()->andX(
-            $query->expr()->eq('m_cov.uid', $query->expr()->literal(Util::getUser()->getUID())),
+            $query->expr()->eq('m_cov.uid', $query->expr()->literal($this->util->getUser()->getUID())),
             $query->expr()->eq('m_cov.clustertype', $query->expr()->literal($type)),
             $query->expr()->eq('m_cov.clusterid', $clusterIdRef),
             $query->expr()->eq('m_cov.objectid', $query->expr()->castColumn("{$objectTable}.{$objectTableObjectId}", IQueryBuilder::PARAM_INT)),
@@ -142,22 +150,21 @@ final class Covers
      * @param int    $fileid    File ID
      * @param bool   $manual    Whether this is a manual selection
      */
-    public static function setCover(string $type, int $clusterId, int $objectId, int $fileid, bool $manual): void
+    public function setCover(string $type, int $clusterId, int $objectId, int $fileid, bool $manual): void
     {
-        Util::transaction(static function () use ($type, $clusterId, $objectId, $fileid, $manual): void {
-            $connection = \OC::$server->get(\OCP\IDBConnection::class);
-            $query = $connection->getQueryBuilder();
+        $this->util->transaction(function () use ($type, $clusterId, $objectId, $fileid, $manual): void {
+            $query = $this->connection->getQueryBuilder();
             $query->delete('memories_covers')
-                ->where($query->expr()->eq('uid', $query->createNamedParameter(Util::getUser()->getUID())))
+                ->where($query->expr()->eq('uid', $query->createNamedParameter($this->util->getUser()->getUID())))
                 ->andWhere($query->expr()->eq('clustertype', $query->createNamedParameter($type)))
                 ->andWhere($query->expr()->eq('clusterid', $query->createNamedParameter($clusterId)))
                 ->executeStatement()
             ;
 
-            $query = $connection->getQueryBuilder();
+            $query = $this->connection->getQueryBuilder();
             $query->insert('memories_covers')
                 ->values([
-                    'uid' => $query->createNamedParameter(Util::getUser()->getUID()),
+                    'uid' => $query->createNamedParameter($this->util->getUser()->getUID()),
                     'clustertype' => $query->createNamedParameter($type),
                     'clusterid' => $query->createNamedParameter($clusterId),
                     'objectid' => $query->createNamedParameter($objectId),
@@ -168,5 +175,31 @@ final class Covers
                 ->executeStatement()
             ;
         });
+    }
+
+    /**
+     * Set the cover photo for the given cluster using a backend instance.
+     *
+     * @param Backend $backend Backend instance
+     * @param array   $photo   Photo object
+     * @param bool    $manual  Whether this is a manual selection
+     */
+    public function setBackendCover(Backend $backend, array $photo, bool $manual = false): void
+    {
+        try {
+            $this->setCover(
+                type: $backend->clusterType(),
+                clusterId: $backend->getClusterIdFrom($photo),
+                objectId: $backend->getCoverObjId($photo),
+                fileid: $backend->getFileId($photo),
+                manual: $manual,
+            );
+        } catch (\Exception $e) {
+            if ($manual) {
+                throw $e;
+            }
+
+            $this->logger->error('Failed to set cover', ['app' => 'memories', 'exception' => $e->getMessage()]);
+        }
     }
 }

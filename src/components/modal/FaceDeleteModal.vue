@@ -7,7 +7,7 @@
     <span>{{ t('memories', 'Are you sure you want to remove {name}?', { name }) }}</span>
 
     <template #buttons>
-      <NcButton @click="save" class="button" type="error">
+      <NcButton @click="save" class="button" variant="error">
         {{ t('memories', 'Delete') }}
       </NcButton>
     </template>
@@ -19,8 +19,7 @@ import { defineComponent } from 'vue';
 
 import { showError } from '@nextcloud/dialogs';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
@@ -32,7 +31,6 @@ export default defineComponent({
   name: 'FaceDeleteModal',
   components: {
     NcButton,
-    NcTextField,
     Modal,
   },
 
@@ -42,11 +40,11 @@ export default defineComponent({
 
   computed: {
     name() {
-      return this.$route.params.name;
+      return this.$route.params.name?.toString();
     },
 
     user() {
-      return this.$route.params.user;
+      return this.$route.params.user?.toString();
     },
   },
 
@@ -71,10 +69,10 @@ export default defineComponent({
         } else {
           await dav.faceRecognitionSetPersonVisibility(this.name, false);
         }
-        this.$router.push({ name: this.$route.name as string }); // "recognize" or "facerecognition"
+        this.$router.push({ name: this.$route.name?.toString() }); // "recognize" or "facerecognition"
         this.close();
       } catch (error) {
-        console.log(error);
+        console.error(error);
         showError(this.t('memories', 'Failed to delete {name}.', { name: this.name }));
       }
     },

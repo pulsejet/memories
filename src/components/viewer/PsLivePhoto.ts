@@ -22,10 +22,10 @@ class LivePhotoContentSetup {
     private psImage: PsImage,
     private liveState: { playing: boolean; waiting: boolean },
   ) {
-    lightbox.on('contentLoad', this.onContentLoad.bind(this));
-    lightbox.on('contentActivate', this.onContentActivate.bind(this));
-    lightbox.on('contentDeactivate', this.onContentDeactivate.bind(this));
-    lightbox.on('contentDestroy', this.onContentDestroy.bind(this));
+    lightbox.on('contentLoad', (e) => this.onContentLoad(e as unknown as PsEvent));
+    lightbox.on('contentActivate', (e) => this.onContentActivate(e as unknown as { content: PsContent }));
+    lightbox.on('contentDeactivate', (e) => this.onContentDeactivate(e as unknown as PsEvent));
+    lightbox.on('contentDestroy', (e) => this.onContentDestroy(e as unknown as PsEvent));
   }
 
   async play(content: PsContent) {

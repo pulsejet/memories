@@ -5,26 +5,28 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCA\Memories\ClustersBackend;
-use OCA\Memories\Exif;
-use OCA\Memories\Settings\SystemConfig;
-use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
 
+/**
+ * @psalm-import-type QueryTransform from TimelineQuery
+ */
 trait TimelineQueryDays
 {
+    use TimelineQueryBase;
     use TimelineQueryCTE;
+    use TimelineQueryFilters;
 
-    protected IDBConnection $connection;
+    /** @var array<string,string> Memo of storage_id to display name. */
+    private array $userMemo = [];
 
     /**
      * Get the days response from the database for the timeline.
      *
-     * @param bool  $recursive       Whether to get the days recursively
-     * @param bool  $archive         Whether to get the days only from the archive folder
-     * @param bool  $monthView       Whether the response should be in month view
-     * @param bool  $reverse         Whether the response should be in reverse order
-     * @param array $queryTransforms An array of query transforms to apply to the query
+     * @param bool                 $recursive       Whether to get the days recursively
+     * @param bool                 $archive         Whether to get the days only from the archive folder
+     * @param bool                 $monthView       Whether the response should be in month view
+     * @param bool                 $reverse         Whether the response should be in reverse order
+     * @param list<QueryTransform> $queryTransforms An array of query transforms to apply to the query
      *
      * @return array The days response
      */
@@ -49,13 +51,15 @@ trait TimelineQueryDays
         ;
 
         // Apply all transformations
-        $this->applyAllTransforms($queryTransforms, $query, true);
+        foreach ($queryTransforms as $transform) {
+            $transform($query, true);
+        }
 
         // FILTER with filecache for timeline path
         $query = $this->filterFilecache($query, null, $recursive, $archive);
 
         // FETCH all days
-        $rows = $this->executeQueryWithCTEs($query)->fetchAll();
+        $rows = $this->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post process the days
         $rows = $this->postProcessDays($rows, $monthView);
@@ -71,13 +75,13 @@ trait TimelineQueryDays
     /**
      * Get the day response from the database for the timeline.
      *
-     * @param int[] $dayIds          The day ids to fetch
-     * @param bool  $recursive       If the query should be recursive
-     * @param bool  $archive         If the query should include only the archive folder
-     * @param bool  $hidden          If the query should include hidden files
-     * @param bool  $monthView       If the query should be in month view (dayIds are monthIds)
-     * @param bool  $reverse         If the query should be in reverse order
-     * @param array $queryTransforms The query transformations to apply
+     * @param int[]                $dayIds          The day ids to fetch
+     * @param bool                 $recursive       If the query should be recursive
+     * @param bool                 $archive         If the query should include only the archive folder
+     * @param bool                 $hidden          If the query should include hidden files
+     * @param bool                 $monthView       If the query should be in month view (dayIds are monthIds)
+     * @param bool                 $reverse         If the query should be in reverse order
+     * @param list<QueryTransform> $queryTransforms The query transformations to apply
      *
      * @return array An array of day responses
      */
@@ -101,7 +105,19 @@ trait TimelineQueryDays
         // We don't actually use m.datetaken here, but postgres
         // needs that all fields in ORDER BY are also in SELECT
         // when using DISTINCT on selected fields
-        $query->select(SQL::distinct($query, 'm.fileid'), ...TimelineQuery::TIMELINE_SELECT)
+        $query->selectAlias(SQL::distinct($query, 'm.fileid'), 'fileid')
+            ->selectAlias('m.datetaken', 'datetaken')
+            ->selectAlias('m.dayid', 'dayid')
+            ->selectAlias('m.w', 'w')
+            ->selectAlias('m.h', 'h')
+            ->selectAlias('m.liveid', 'liveid')
+            ->selectAlias('m.isvideo', 'isvideo')
+            ->selectAlias('m.video_duration', 'video_duration')
+            ->selectAlias('f.etag', 'etag')
+            ->selectAlias('f.name', 'basename')
+            ->selectAlias('f.size', 'size')
+            ->selectAlias('m.epoch', 'epoch')
+            ->selectAlias('mimetypes.mimetype', 'mimetype')
             ->from('memories', 'm')
         ;
 
@@ -141,7 +157,9 @@ trait TimelineQueryDays
         $query->addOrderBy('m.fileid', 'DESC'); // unique tie-breaker
 
         // Apply all transformations
-        $this->applyAllTransforms($queryTransforms, $query, false);
+        foreach ($queryTransforms as $transform) {
+            $transform($query, false);
+        }
 
         // JOIN with filecache to get the basename etc
         $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
@@ -151,13 +169,13 @@ trait TimelineQueryDays
 
         // SELECT storage ID to check if this photo is shared
         // Do not expose storage to anonymous users (link shares)
-        if (\OCA\Memories\Util::isLoggedIn()) {
+        if ($this->util->isLoggedIn()) {
             $query->leftJoin('f', 'storages', 's', $query->expr()->eq('f.storage', 's.numeric_id'));
             $query->selectAlias('s.id', 'storage_id');
         }
 
         // FETCH all photos in this day
-        $day = $this->executeQueryWithCTEs($query)->fetchAll();
+        $day = $this->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post process the day in-place
         foreach ($day as &$photo) {
@@ -170,25 +188,6 @@ trait TimelineQueryDays
         }
 
         return $day;
-    }
-
-    public function executeQueryWithCTEs(IQueryBuilder $query, string $psql = ''): \OCP\DB\IResult
-    {
-        $sql = empty($psql) ? $query->getSQL() : $psql;
-        $params = $query->getParameters();
-        $types = $query->getParameterTypes();
-
-        // Get SQL
-        $CTE_SQL = \array_key_exists('cteFoldersArchive', $params)
-            ? $this->CTE_FOLDERS_ARCHIVE()
-            : $this->CTE_FOLDERS(\array_key_exists('cteIncludeHidden', $params));
-
-        // Add WITH clause if needed
-        if (str_contains($sql, 'cte_folders')) {
-            $sql = $CTE_SQL.' '.$sql;
-        }
-
-        return $this->connection->executeQuery($sql, $params, $types);
     }
 
     /**
@@ -217,8 +216,7 @@ trait TimelineQueryDays
                 $this->_root = new TimelineRoot();
 
                 // Populate the root using parameters from the request
-                $fs = \OC::$server->get(FsManager::class);
-                $fs->populateRoot($this->_root, $recursive);
+                $this->fsManager->populateRoot($this->_root, $recursive);
             }
 
             // Use the cached / newly populated root
@@ -240,7 +238,7 @@ trait TimelineQueryDays
         $parent = 'm.parent';
 
         // Check if triggers are properly set up
-        if (!SystemConfig::get('memories.db.triggers.fcu')) {
+        if (!$this->systemConfig->get('memories.db.triggers.fcu')) {
             // Compatibility mode - JOIN filecache and use the parent from there (this is slow)
             $query->innerJoin('m', 'filecache', 'ff_f', $query->expr()->eq('m.fileid', 'ff_f.fileid'));
             $parent = 'ff_f.parent';
@@ -248,8 +246,10 @@ trait TimelineQueryDays
 
         // Filter by folder (recursive or otherwise)
         if ($recursive) {
-            // This are used later by the execution function
-            $this->addSubfolderJoinParams($query, $root, $archive, $hidden);
+            // These are used later by the execution function
+            CTEParams::setTopFolderIds($query, $root->getIds());
+            CTEParams::setFoldersArchive($query, $archive);
+            CTEParams::setIncludeHidden($query, $hidden);
 
             // Subquery to test parent folder
             $sq = $query->getConnection()->getQueryBuilder();
@@ -314,6 +314,7 @@ trait TimelineQueryDays
         $row['dayid'] = (int) $row['dayid'];
         $row['w'] = (int) $row['w'];
         $row['h'] = (int) $row['h'];
+        $row['size'] = (int) $row['size'];
 
         // Optional fields
         if (!$row['isvideo']) {
@@ -340,15 +341,6 @@ trait TimelineQueryDays
 
         // This field is only required due to the GROUP BY clause
         unset($row['datetaken']);
-
-        // Calculate the AUID if we can
-        if (($epoch = $row['epoch'] ?? null) && ($size = $row['size'] ?? null)) {
-            // compute AUID and discard size
-            // epoch is used for ordering, so we keep it
-            $row['auid'] = Exif::getAUID((int) $epoch, (int) $size);
-            unset($row['size']);
-        }
-
         // Convert dayId to monthId if needed
         if ($monthView) {
             $row['dayid'] = $this->dayIdToMonthId($row['dayid']);
@@ -358,62 +350,44 @@ trait TimelineQueryDays
         if ($storage = $row['storage_id'] ?? null) {
             unset($row['storage_id']);
 
-            /** @var array<string,string> */
-            static $userMemo = [];
-            if ($user = $userMemo[$storage] ?? null) {
+            if ('' !== ($user = $this->storageIdToUserName($storage))) {
                 $row['shared_by'] = $user;
-            } elseif ($user = $this->storageIdToUserName($storage)) {
-                $row['shared_by'] = $userMemo[$storage] = $user;
             }
-
-            if ('' === ($row['shared_by'] ?? null)) {
-                unset($row['shared_by']);
-            }
-        }
-    }
-
-    /**
-     * Get all folders inside a top folder.
-     */
-    private function addSubfolderJoinParams(
-        IQueryBuilder &$query,
-        TimelineRoot &$root,
-        bool $archive,
-        bool $hidden,
-    ): void {
-        // Add query parameters
-        $query->setParameter('topFolderIds', $root->getIds(), IQueryBuilder::PARAM_INT_ARRAY);
-
-        if ($archive) {
-            $query->setParameter('cteFoldersArchive', true, IQueryBuilder::PARAM_BOOL);
-        }
-
-        if ($hidden) {
-            $query->setParameter('cteIncludeHidden', true, IQueryBuilder::PARAM_BOOL);
         }
     }
 
     private function dayIdMonthEnd(int $monthId): int
     {
-        return (int) ((strtotime(date('Ymt', $monthId * 86400)) ?: 0) / 86400);
+        return intdiv(strtotime(gmdate('Ymt', $monthId * 86400)) ?: 0, 86400);
     }
 
     private function dayIdToMonthId(int $dayId): int
     {
         static $memoize = [];
-        if ($cache = $memoize[$dayId] ?? null) {
-            return $cache;
+        if (isset($memoize[$dayId])) {
+            return $memoize[$dayId];
         }
 
-        return $memoize[$dayId] = (strtotime(date('Ym', $dayId * 86400).'01') ?: 0) / 86400;
+        $monthId = intdiv(strtotime(gmdate('Ym', $dayId * 86400).'01') ?: 0, 86400);
+
+        // Only cache sane dayIds to keep the static bounded.
+        if ($dayId > 0 && $dayId < 100000) {
+            $memoize[$dayId] = $monthId;
+        }
+
+        return $monthId;
     }
 
     private function storageIdToUserName(string $storage): string
     {
+        if (\array_key_exists($storage, $this->userMemo)) {
+            return $this->userMemo[$storage];
+        }
+
         // Storage ID looks like "home::{uid}" or "local::{/path}" etc
         $pos = strpos($storage, '::');
         if (false === $pos) {
-            return '';
+            return $this->userMemo[$storage] = '';
         }
         $uid = substr($storage, $pos + 2);
 
@@ -422,17 +396,17 @@ trait TimelineQueryDays
         // We should handle these cases in the future.
         // https://github.com/pulsejet/memories/issues/1402
         if (str_contains($uid, '/')) {
-            return '';
+            return $this->userMemo[$storage] = '';
         }
 
         // Check if self
-        if (Util::isLoggedIn() && $uid === Util::getUID()) {
-            return '';
+        if ($this->util->isLoggedIn() && $uid === $this->util->getUID()) {
+            return $this->userMemo[$storage] = '';
         }
 
         // Otherwise it *may* be a user
         $user = $this->userManager->get($uid);
 
-        return $user ? $user->getDisplayName() : '';
+        return $this->userMemo[$storage] = $user?->getDisplayName() ?? '';
     }
 }

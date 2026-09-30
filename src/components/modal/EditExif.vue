@@ -9,7 +9,7 @@
         :id="`exif-field-${field.field}`"
         :disabled="disabled"
         :label-outside="true"
-        :value.sync="exif[field.field]"
+        v-model="exif[field.field]"
         :placeholder="placeholder(field)"
         @input="dirty[field.field] = true"
         trailing-button-icon="close"
@@ -22,9 +22,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import { translate as t } from '@services/l10n';
 
@@ -144,7 +144,7 @@ export default defineComponent({
     margin-top: 0;
     margin-bottom: 8px;
   }
-  :deep label {
+  :deep(label) {
     font-size: 0.9em;
     padding: 0 !important;
     padding-left: 5px !important;

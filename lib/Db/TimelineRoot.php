@@ -105,7 +105,7 @@ final class TimelineRoot
 
     public function getFolder(int $id): ?FileInfo
     {
-        return $this->folders[$id];
+        return $this->folders[$id] ?? null;
     }
 
     public function isEmpty(): bool

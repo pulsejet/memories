@@ -42,7 +42,7 @@ final class PostWriteListener implements IEventListener
     #[\Override]
     public function handle(Event $event): void
     {
-        /** @var null|\OCP\Files\Node */
+        /** @var ?\OCP\Files\Node */
         $node = null;
 
         if ($event instanceof NodeWrittenEvent
@@ -53,31 +53,6 @@ final class PostWriteListener implements IEventListener
             }
         } elseif ($event instanceof NodeCopiedEvent) {
             $node = $event->getTarget();
-            if (!($node instanceof Folder) && !($node instanceof File)) {
-                return;
-            }
-        } else {
-            return;
-        }
-
-        // Check the mime type first
-        if ($node instanceof File && !Index::isSupported($node)) {
-            return;
-        }
-
-        // Check if a directory at a higher level contains a .nomedia file
-        try {
-            $parent = $node;
-
-            /** @psalm-suppress RedundantConditionGivenDocblockType */
-            while ($parent = $parent->getParent()) {
-                if ($parent->nodeExists('.nomedia') || $parent->nodeExists('.nomemories')) {
-                    return;
-                }
-            }
-        } catch (\OCP\Files\NotFoundException $e) {
-            // This happens when the parent is in the root directory
-            // and getParent() is called on it.
         }
 
         if ($node instanceof File) {

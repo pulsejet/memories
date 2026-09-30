@@ -24,7 +24,7 @@
 
     <!-- Render the actual app when configuration has been loaded -->
     <template v-else-if="!isConfigUnknown">
-      <NcAppNavigation v-if="showNavigation">
+      <NcAppNavigation v-if="showNavigation" :aria-label="t('memories', 'Navigation')">
         <template #list>
           <NcAppNavigationItem
             v-for="item in navItems"
@@ -36,7 +36,7 @@
             exact
           >
             <template #icon>
-              <component :is="item.icon" slot="icon" :size="20" />
+              <component :is="item.icon" :size="20" />
             </template>
           </NcAppNavigationItem>
         </template>
@@ -44,7 +44,9 @@
         <template #footer>
           <ul class="app-navigation__settings">
             <NcAppNavigationItem :name="t('memories', 'Settings')" @click="showSettings" href="#ss">
-              <CogIcon slot="icon" :size="20" />
+              <template #icon>
+                <CogIcon :size="20" />
+              </template>
             </NcAppNavigationItem>
           </ul>
         </template>
@@ -55,7 +57,6 @@
           :class="{
             outer: true,
             'router-outlet': true,
-            'remove-gap': removeNavGap,
             'has-nav': showNavigation,
             'has-mobile-header': hasMobileHeader,
             'is-native': native,
@@ -68,31 +69,33 @@
         <MobileNav v-if="showNavigation" />
       </NcAppContent>
 
-      <Settings :open.sync="settingsOpen" />
+      <Settings v-model:open="settingsOpen" />
 
-      <Viewer />
-      <Sidebar />
-
-      <EditMetadataModal />
-      <AddToAlbumModal />
-      <NodeShareModal />
-      <ShareModal />
-      <MoveToFolderModal />
-      <FaceMoveModal />
-      <AlbumShareModal />
-      <UploadModal />
-      <SearchModal />
+      <Teleport to="body">
+        <Viewer />
+        <Sidebar />
+      </Teleport>
     </template>
+
+    <EditMetadataModal />
+    <AddToAlbumModal />
+    <NodeShareModal />
+    <ShareModal />
+    <MoveToFolderModal />
+    <FaceMoveModal />
+    <AlbumShareModal />
+    <UploadModal />
+    <SearchModal />
   </NcContent>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent, markRaw } from 'vue';
 
-import NcContent from '@nextcloud/vue/dist/Components/NcContent.js';
-import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent.js';
-import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation.js';
-const NcAppNavigationItem = () => import('@nextcloud/vue/dist/Components/NcAppNavigationItem.js');
+import NcContent from '@nextcloud/vue/components/NcContent';
+import NcAppContent from '@nextcloud/vue/components/NcAppContent';
+import NcAppNavigation from '@nextcloud/vue/components/NcAppNavigation';
+const NcAppNavigationItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAppNavigationItem'));
 
 import { generateUrl } from '@nextcloud/router';
 
@@ -184,6 +187,15 @@ export default defineComponent({
 
   mixins: [UserConfig],
 
+  watch: {
+    '$route.params.token': {
+      immediate: true,
+      handler(token?: string | string[]) {
+        this.syncSharingToken(token?.toString());
+      },
+    },
+  },
+
   data: () => ({
     navItems: [] as NavItem[],
     settingsOpen: false,
@@ -246,10 +258,6 @@ export default defineComponent({
     hasMobileHeader(): boolean {
       return this.native && this.showNavigation && this.routeIsBase;
     },
-
-    removeNavGap(): boolean {
-      return this.routeIsMap;
-    },
   },
 
   created() {
@@ -268,6 +276,9 @@ export default defineComponent({
 
     // Register global functions
     _m.modals.showSettings = this.showSettings;
+
+    // Warm codec detection for video URLs
+    void utils.getPlayableVideoCodecs();
   },
 
   mounted() {
@@ -277,10 +288,13 @@ export default defineComponent({
     const root = document.documentElement;
     const colorPrimary = getComputedStyle(root).getPropertyValue('--color-primary');
     root.style.setProperty('--color-primary-select-light', `${colorPrimary}40`);
-    root.style.setProperty('--plyr-color-main', colorPrimary);
+    root.style.setProperty('--media-brand', colorPrimary);
 
     // Set theme color to default
-    nativex.setTheme();
+    // Skip on nxsetup and firststart to avoid flashing white on initial setup.
+    if (!this.routeIsNxSetup && !this.isFirstStart) {
+      nativex.setTheme();
+    }
 
     // Check for native interface
     if (this.native) {
@@ -295,7 +309,7 @@ export default defineComponent({
   },
 
   async beforeMount() {
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && !nativex.has()) {
       // Use the window load event to keep the page load performant
       window.addEventListener('load', async () => {
         try {
@@ -306,7 +320,7 @@ export default defineComponent({
           console.info('SW registered: ', registration);
 
           // Check for updates
-          if (await staticConfig.versionChanged()) {
+          if (await staticConfig.hasVersionChanged()) {
             await registration.update();
           }
         } catch (error) {
@@ -323,72 +337,72 @@ export default defineComponent({
       const navItems = [
         {
           name: 'timeline',
-          icon: ImageMultiple,
+          icon: markRaw(ImageMultiple),
           title: t('memories', 'Timeline'),
         },
         {
           name: 'explore',
-          icon: SearchIcon,
+          icon: markRaw(SearchIcon),
           title: t('memories', 'Explore'),
         },
         {
           name: 'folders',
-          icon: FolderIcon,
+          icon: markRaw(FolderIcon),
           title: t('memories', 'Folders'),
         },
         {
           name: 'favorites',
-          icon: Star,
+          icon: markRaw(Star),
           title: t('memories', 'Favorites'),
         },
         {
           name: 'albums',
-          icon: AlbumIcon,
+          icon: markRaw(AlbumIcon),
           title: t('memories', 'Albums'),
           if: this.showAlbums,
         },
         {
           name: 'recognize',
-          icon: PeopleIcon,
+          icon: markRaw(PeopleIcon),
           title: this.recognize || '',
           if: this.recognize,
         },
         {
           name: 'facerecognition',
-          icon: PeopleIcon,
+          icon: markRaw(PeopleIcon),
           title: this.facerecognition || '',
           if: this.facerecognition,
         },
         {
           name: 'archive',
-          icon: ArchiveIcon,
+          icon: markRaw(ArchiveIcon),
           title: t('memories', 'Archive'),
         },
         {
           name: 'thisday',
-          icon: CalendarIcon,
+          icon: markRaw(CalendarIcon),
           title: t('memories', 'On this day'),
         },
         {
           name: 'places',
-          icon: MarkerIcon,
+          icon: markRaw(MarkerIcon),
           title: t('memories', 'Places'),
           if: this.config.places_gis > 0,
         },
         {
           name: 'map',
-          icon: MapIcon,
+          icon: markRaw(MapIcon),
           title: t('memories', 'Map'),
         },
         {
           name: 'tags',
-          icon: TagsIcon,
+          icon: markRaw(TagsIcon),
           title: t('memories', 'Tags'),
           if: this.config.systemtags_enabled,
         },
       ];
 
-      this.navItems = navItems.filter((item) => typeof item.if === 'undefined' || Boolean(item.if));
+      this.navItems = navItems.filter((item) => item.if === undefined || Boolean(item.if));
     },
 
     linkClick() {
@@ -400,6 +414,18 @@ export default defineComponent({
     showSettings() {
       this.settingsOpen = true;
     },
+
+    // https://github.com/pulsejet/memories/issues/1634
+    syncSharingToken(token?: string) {
+      document.querySelector('input#sharingToken')?.remove();
+      if (!token) return;
+
+      const el = document.createElement('input');
+      el.id = 'sharingToken';
+      el.type = 'hidden';
+      el.value = token;
+      document.body.appendChild(el);
+    },
   },
 });
 </script>
@@ -410,9 +436,9 @@ export default defineComponent({
   height: 100%;
   width: 100%;
 
-  &.remove-gap {
-    // Fill up the whole space, e.g. on map
-    padding: 0;
+  &.remove-gap,
+  &:has(.map-matter) {
+    padding: 0; // gap on map left
   }
 }
 
@@ -425,7 +451,7 @@ export default defineComponent({
 ul.app-navigation__settings {
   height: auto !important;
   overflow: hidden !important;
-  padding-top: 0 !important;
+  padding: var(--app-navigation-padding);
   flex: 0 0 auto;
 }
 </style>

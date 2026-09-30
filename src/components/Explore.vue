@@ -30,12 +30,12 @@
           :key="category.name"
           :to="category.link"
           @click="category.click?.()"
-          type="tertiary-no-background"
+          variant="tertiary-no-background"
         >
           <template #icon>
             <component :is="category.icon" />
           </template>
-          <template>{{ category.name }}</template>
+          {{ category.name }}
         </NcButton>
       </div>
     </div>
@@ -43,13 +43,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, markRaw } from 'vue';
 import type { Component } from 'vue';
 
 import Searchbar from '@components/header/Searchbar.vue';
 import ClusterHList from '@components/ClusterHList.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+import NcButton from '@nextcloud/vue/components/NcButton';
 
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
@@ -75,6 +76,7 @@ export default defineComponent({
     ClusterHList,
     NcButton,
     StarIcon,
+    XLoadingIcon,
   },
 
   data: () => ({
@@ -86,41 +88,47 @@ export default defineComponent({
     facerecognition: [] as ICluster[],
     places: [] as ICluster[],
     tags: [] as ICluster[],
+    loaded: {
+      recognize: false,
+      facerecognition: false,
+      places: false,
+      tags: false,
+    },
 
     categories: [
       {
         name: t('memories', 'Folders'),
-        icon: FolderIcon,
+        icon: markRaw(FolderIcon),
         link: '/folders',
       },
       {
         name: t('memories', 'Favorites'),
-        icon: StarIcon,
+        icon: markRaw(StarIcon),
         link: '/favorites',
       },
       {
         name: t('memories', 'Videos'),
-        icon: VideoIcon,
+        icon: markRaw(VideoIcon),
         link: '/videos',
       },
       {
         name: t('memories', 'Archive'),
-        icon: ArchiveIcon,
+        icon: markRaw(ArchiveIcon),
         link: '/archive',
       },
       {
         name: t('memories', 'On this day'),
-        icon: CalendarIcon,
+        icon: markRaw(CalendarIcon),
         link: '/thisday',
       },
       {
         name: t('memories', 'Map'),
-        icon: MapIcon,
+        icon: markRaw(MapIcon),
         link: '/map',
       },
       {
         name: t('memories', 'Settings'),
-        icon: CogIcon,
+        icon: markRaw(CogIcon),
         link: undefined,
         click: _m.modals.showSettings,
         if: () => utils.isMobile(),
@@ -138,28 +146,46 @@ export default defineComponent({
     const res: IConfig | undefined = await this.load(config.getAll.bind(config));
     if (!res) return;
     this.config = res;
+    this.maybeLoad();
 
-    if (this.config.recognize_enabled) {
-      this.load(this.getRecognize);
-    }
-
-    if (this.config.facerecognition_enabled) {
-      this.load(this.getFaceRecognition);
-    }
-
-    if (this.config.places_gis > 0) {
-      this.load(this.getPlaces);
-    }
-
-    if (this.config.systemtags_enabled) {
-      this.load(this.getTags);
-    }
+    // Server copy may differ from cache; load newly enabled sections.
+    utils.bus.on('memories:user-config-changed', this.onConfigChanged);
 
     // Remove categories that should not be shown
     this.categories = this.categories.filter((c) => !c.if || c.if());
   },
 
+  beforeUnmount() {
+    utils.bus.off('memories:user-config-changed', this.onConfigChanged);
+  },
+
   methods: {
+    onConfigChanged() {
+      this.config = { ...config.getDefault() };
+      this.maybeLoad();
+    },
+
+    maybeLoad() {
+      if (this.config.recognize_enabled && !this.loaded.recognize) {
+        this.loaded.recognize = true;
+        this.load(this.getRecognize);
+      }
+
+      if (this.config.facerecognition_enabled && !this.loaded.facerecognition) {
+        this.loaded.facerecognition = true;
+        this.load(this.getFaceRecognition);
+      }
+
+      if (this.config.places_gis > 0 && !this.loaded.places) {
+        this.loaded.places = true;
+        this.load(this.getPlaces);
+      }
+
+      if (this.config.systemtags_enabled && !this.loaded.tags) {
+        this.loaded.tags = true;
+        this.load(this.getTags);
+      }
+    },
     async load<T>(fun: () => Promise<T>) {
       try {
         this.loading++;

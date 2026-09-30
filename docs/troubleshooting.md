@@ -32,6 +32,20 @@ Memories is very fast, but its performance largely depends on how well the Nextc
 
 This means that Memories is unable to find any indexed photos in your Nextcloud instance. Make sure you have followed the [configuration steps](../config). Note that Memories indexes photos in the background, so it may take a while for the photos to show up. Ensure that Nextcloud's cron system is properly configured and running.
 
+## Downloads fail with 404
+
+The memcache is likely misconfigured or missing. Downloads require a working memcache.
+
+- Configure a distributed memcache (`memcache.distributed`, e.g. Redis or Memcached) as described in the [server tuning](https://docs.nextcloud.com/server/latest/admin_manual/installation/server_tuning.html) documentation:
+
+```php
+'memcache.distributed' => '\OC\Memcache\Redis',
+'redis' => ['host' => 'localhost', 'port' => 6379],
+```
+
+- With only a local cache (APCu), downloads work on single-node setups but can fail on multi-node setups.
+- With no memcache configured at all, downloads always fail.
+
 ## Issues with Docker
 
 Note: Using the community [Nextcloud Docker](https://hub.docker.com/_/nextcloud/) image or [AIO](https://github.com/nextcloud/all-in-one) are the recommended ways of running Memories. If you are using a different image, you may run into issues. Please file any bugs you find on GitHub.
@@ -98,6 +112,19 @@ systemd.services.nextcloud-cron = {
   path = [pkgs.perl];
 };
 ```
+
+## Issues with Snap
+
+### `failed to run exiftool: /tmp/exiftool-... -ver`
+
+Snap confinement isolates `/tmp` and hides system exiftool from the app ([#1496](https://github.com/pulsejet/memories/issues/1496)). Move the binary temp dir into the Snap common area:
+
+```bash
+sudo mkdir -p /var/snap/nextcloud/common/exiftool/tmp
+sudo nextcloud.occ config:system:set memories.exiftool.tmp --value /var/snap/nextcloud/common/exiftool/tmp
+```
+
+If it still fails, put `libimage-exiftool-perl` in the Snap common area behind a `PERL5LIB` wrapper (see [#1496](https://github.com/pulsejet/memories/issues/1496)) and set `memories.exiftool` to it.
 
 ## Reverse Geocoding (Places)
 

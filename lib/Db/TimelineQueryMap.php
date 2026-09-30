@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
 
 trait TimelineQueryMap
 {
+    use TimelineQueryBase;
     use TimelineQueryDays;
-
-    protected IDBConnection $connection;
 
     public function transformMapBoundsFilter(IQueryBuilder &$query, bool $aggregate, string $bounds, string $table = 'm'): void
     {
@@ -61,7 +59,7 @@ trait TimelineQueryMap
         $this->transformMapBoundsFilter($query, false, $bounds, 'c');
 
         // Execute query
-        $res = $this->executeQueryWithCTEs($query)->fetchAll();
+        $res = $this->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post-process results
         return array_map(static fn ($row) => [
@@ -70,7 +68,7 @@ trait TimelineQueryMap
                 (float) $row['lat'],
                 (float) $row['lon'],
             ],
-            'count' => (float) $row['count'],
+            'count' => (int) $row['count'],
         ], $res);
     }
 
@@ -83,7 +81,7 @@ trait TimelineQueryMap
     {
         $query = $this->connection->getQueryBuilder();
 
-        // SELECT all photos with this tag
+        // SELECT all photos in these map clusters
         $query->selectAlias($query->func()->max('m.fileid'), 'fileid')
             ->from('memories', 'm')
             ->where($query->expr()->in('m.mapcluster', $query->createNamedParameter(
@@ -100,7 +98,7 @@ trait TimelineQueryMap
 
         // Get the fileIds
         $cursor = $this->executeQueryWithCTEs($query);
-        $fileIds = $cursor->fetchAll(\PDO::FETCH_COLUMN);
+        $fileIds = $cursor->fetchFirstColumn();
 
         // SELECT these files from the filecache
         $query = $this->connection->getQueryBuilder();
@@ -109,7 +107,7 @@ trait TimelineQueryMap
             ->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'))
             ->where($query->expr()->in('m.fileid', $query->createNamedParameter($fileIds, IQueryBuilder::PARAM_INT_ARRAY)))
             ->executeQuery()
-            ->fetchAll()
+            ->fetchAllAssociative()
         ;
 
         // Post-process
@@ -155,8 +153,14 @@ trait TimelineQueryMap
         $query->setMaxResults(1);
 
         // FETCH coordinates
-        $coords = $this->executeQueryWithCTEs($query)->fetch();
+        $coords = $this->executeQueryWithCTEs($query)->fetchAssociative();
+        if (!$coords) {
+            return null;
+        }
 
-        return $coords ?: null;
+        return [
+            'lat' => (float) $coords['lat'],
+            'lon' => (float) $coords['lon'],
+        ];
     }
 }

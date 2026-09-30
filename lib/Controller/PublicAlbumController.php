@@ -6,6 +6,8 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\AlbumsQuery;
+use OCA\Memories\Settings\SystemConfig;
+use OCA\Memories\Util;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -23,7 +25,6 @@ use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IURLGenerator;
 use OCP\IUserSession;
-use OCP\Util;
 
 final class PublicAlbumController extends Controller
 {
@@ -38,6 +39,8 @@ final class PublicAlbumController extends Controller
         protected IURLGenerator $urlGenerator,
         protected AlbumsQuery $albumsQuery,
         protected IL10N $l10n,
+        protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -82,7 +85,7 @@ final class PublicAlbumController extends Controller
         $this->addOgMetadata($album, $title, $token);
 
         // Scripts
-        Util::addScript(Application::APPNAME, 'memories-main');
+        \OCP\Util::addScript(Application::APPNAME, 'memories-main');
 
         // Share info
         $this->initialState->provideInitialState('share_title', $title);
@@ -92,7 +95,7 @@ final class PublicAlbumController extends Controller
         $response = new PublicTemplateResponse(Application::APPNAME, 'main', PageController::getMainParams());
         $response->setHeaderTitle($title);
         $response->setFooterVisible(false); // wth is that anyway?
-        $response->setContentSecurityPolicy(PageController::getCSP());
+        $response->setContentSecurityPolicy($this->systemConfig->getCSP());
 
         // Add download link
         $dlUrl = $this->urlGenerator->linkToRouteAbsolute('memories.PublicAlbum.download', [
@@ -107,7 +110,7 @@ final class PublicAlbumController extends Controller
 
     #[PublicPage]
     #[NoCSRFRequired]
-    public function download(string $token): Response
+    public function download(string $token, DownloadController $downloadController): Response
     {
         $album = $this->albumsQuery->getAlbumByLink($token);
         if (!$album) {
@@ -120,8 +123,7 @@ final class PublicAlbumController extends Controller
         $fileIds = array_map(static fn ($file) => (int) $file['file_id'], $files);
 
         // Get download handle
-        $downloadController = \OC::$server->get(\OCA\Memories\Controller\DownloadController::class);
-        $handle = $downloadController::createHandle($album['name'], $fileIds);
+        $handle = $downloadController->createHandle($album['name'], $fileIds);
 
         // Start download
         return $downloadController->file($handle);
@@ -144,6 +146,6 @@ final class PublicAlbumController extends Controller
 
         $params = ['token' => $token];
         $url = $this->urlGenerator->linkToRouteAbsolute('memories.PublicAlbum.showShare', $params);
-        \OCA\Memories\Util::addOGMetadata($node, $title, $url, array_merge($params, ['albums' => true]));
+        $this->util->addOgMetadata($node, $title, $url, array_merge($params, ['albums' => true]));
     }
 }

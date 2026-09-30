@@ -23,21 +23,49 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OC\Preview\PreviewService;
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\FsManager;
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
 use OCA\Memories\Service;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IPreview;
+use OCP\IRequest;
+use OCP\IUserSession;
+use OCP\SystemTag\ISystemTagManager;
+use OCP\SystemTag\ISystemTagObjectMapper;
+use Psr\Log\LoggerInterface;
 
 const IMAGICK_SAFE = '/^image\/(x-)?(png|jpeg|gif|bmp|tiff|webp|hei(f|c)|avif|dcraw)$/';
 
-final class ImageController extends GenericApiController
+final class ImageController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected FsManager $fs,
+        protected TimelineQuery $tq,
+        protected IUserSession $userSession,
+        protected IPreview $preview,
+        protected PreviewService $previewService,
+        protected ISystemTagObjectMapper $tagObjectMapper,
+        protected ISystemTagManager $tagManager,
+        protected Exif $exif,
+        protected SystemConfig $systemConfig,
+        protected Util $util,
+        protected LoggerInterface $logger,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * Get preview of image.
      *
@@ -53,7 +81,7 @@ final class ImageController extends GenericApiController
         bool $a = false,
         string $mode = 'fill',
     ): Http\Response {
-        return Util::guardEx(function () use ($id, $x, $y, $a, $mode) {
+        return $this->util->guardEx(function () use ($id, $x, $y, $a, $mode) {
             if (-1 === $id || 0 === $x || 0 === $y) {
                 throw Exceptions::MissingParameter('id, x, y');
             }
@@ -62,7 +90,7 @@ final class ImageController extends GenericApiController
             $file = $this->fs->getUserFile($id);
 
             try {
-                $preview = \OC::$server->get(\OCP\IPreview::class)
+                $preview = $this->preview
                     ->getPreview($file, $x, $y, !$a, $mode)
                 ;
             } catch (\OCP\Files\NotFoundException $e) {
@@ -97,7 +125,7 @@ final class ImageController extends GenericApiController
     #[PublicPage]
     public function multipreview(array $files): Http\Response
     {
-        return Util::guardExDirect(function (Http\IOutput $out) use ($files) {
+        return $this->util->guardExDirect(function (Http\IOutput $out) use ($files) {
             // Filter files with valid parameters
             $files = array_filter($files, static function (array $file) {
                 return isset($file['reqid'], $file['fileid'], $file['x'], $file['y'], $file['a'])
@@ -114,11 +142,8 @@ final class ImageController extends GenericApiController
                 return $aArea <=> $bArea;
             });
 
-            $previewManager = \OC::$server->get(\OCP\IPreview::class);
-            $previewService = \OC::$server->get(\OC\Preview\PreviewService::class);
-
             $requestedFileIds = array_map(static fn ($bodyFile) => (int) $bodyFile['fileid'], $files);
-            $availablePreviews = $previewService->getAvailablePreviews($requestedFileIds);
+            $availablePreviews = $this->previewService->getAvailablePreviews($requestedFileIds);
 
             // stream the response
             $out->setHeader('Content-Type: application/octet-stream');
@@ -133,7 +158,7 @@ final class ImageController extends GenericApiController
                 try {
                     // Make sure max preview exists
                     $hasMax = false;
-                    foreach ($availablePreviews[$fileid] as $preview) {
+                    foreach ($availablePreviews[$fileid] ?? [] as $preview) {
                         if ($preview->isMax()) {
                             $hasMax = true;
 
@@ -146,7 +171,7 @@ final class ImageController extends GenericApiController
 
                     // Add this preview to the response
                     $file = $this->fs->getUserFile($fileid);
-                    $preview = $previewManager->getPreview($file, $x, $y, !$a, \OCP\IPreview::MODE_FILL);
+                    $preview = $this->preview->getPreview($file, $x, $y, !$a, \OCP\IPreview::MODE_FILL);
                     $content = $preview->getContent();
                     if (empty($content)) {
                         continue;
@@ -161,6 +186,9 @@ final class ImageController extends GenericApiController
                     ]);
 
                     // Send the length of the json as a single byte
+                    if (\strlen($json) > 255) {
+                        continue;
+                    }
                     $out->setOutput(\chr(\strlen($json)));
                     $out->setOutput($json);
 
@@ -178,8 +206,6 @@ final class ImageController extends GenericApiController
 
     /**
      * Get EXIF info for an image with file id.
-     *
-     * @param string fileid
      */
     #[NoAdminRequired]
     #[PublicPage]
@@ -190,7 +216,7 @@ final class ImageController extends GenericApiController
         bool $tags = false,
         string $clusters = '',
     ): Http\Response {
-        return Util::guardEx(function () use ($id, $basic, $current, $tags, $clusters) {
+        return $this->util->guardEx(function () use ($id, $basic, $current, $tags, $clusters) {
             $file = $this->fs->getUserFile($id);
 
             // Get the image info
@@ -238,7 +264,7 @@ final class ImageController extends GenericApiController
 
                 // Get latest exif data if requested
                 if ($current) {
-                    $info['current'] = Exif::getExifFromFile($file);
+                    $info['current'] = $this->exif->getExifFromFile($file);
                 }
 
                 // Get clusters for this file
@@ -252,7 +278,7 @@ final class ImageController extends GenericApiController
                         // schema underneath us: report that single feature as
                         // unavailable and keep serving everything else.
                         try {
-                            $backend = \OC::$server->get(\OCA\Memories\ClustersBackend\Manager::class)->get($type);
+                            $backend = \OCA\Memories\ClustersBackend\Manager::get($type);
                             if ($backend->isEnabled()) {
                                 $clist[$type] = $backend->getClusters($id);
                             }
@@ -290,24 +316,36 @@ final class ImageController extends GenericApiController
     #[PublicPage]
     public function setExif(int $id, array $raw): Http\Response
     {
-        return Util::guardEx(function () use ($id, $raw) {
+        return $this->util->guardEx(function () use ($id, $raw) {
             $file = $this->fs->getUserFile($id);
 
             // Check if user has permissions
-            if (!$file->isUpdateable() || Util::isEncryptionEnabled()) {
+            if (!$file->isUpdateable() || $this->systemConfig->isEncryptionEnabled()) {
                 throw Exceptions::ForbiddenFileUpdate($file->getName());
             }
 
             // Check if allowed to edit file
             $mime = $file->getMimeType();
-            if (!\in_array($mime, Exif::allowedEditMimetypes(), true)) {
+            if (!\in_array($mime, $this->exif->allowedEditMimetypes(), true)) {
                 $name = $file->getName();
 
                 throw Exceptions::Forbidden("Cannot edit file {$name} (blacklisted type {$mime})");
             }
 
+            // Only tags editable from the UI may be set (see EditMetadataModal)
+            $allowed = [
+                'AllDates', 'Orientation', 'Title', 'Description', 'Label',
+                'Make', 'Model', 'LensModel', 'Copyright', 'GPSLatitude',
+                'GPSLongitude', 'GPSLatitudeRef', 'GPSLongitudeRef', 'GPSCoordinates',
+            ];
+            foreach (array_keys($raw) as $key) {
+                if (!\in_array($key, $allowed, true)) {
+                    throw Exceptions::BadRequest('Invalid EXIF tag');
+                }
+            }
+
             // Set the exif data
-            Exif::setFileExif($file, $raw);
+            $this->exif->setFileExif($file, $raw);
 
             // If rotation changed then update the previews
             if ($raw['Orientation'] ?? false) {
@@ -328,7 +366,7 @@ final class ImageController extends GenericApiController
     #[PublicPage]
     public function decodable(string $id): Http\Response
     {
-        return Util::guardEx(function () use ($id) {
+        return $this->util->guardEx(function () use ($id) {
             $file = $this->fs->getUserFile((int) $id);
 
             // Check if valid image
@@ -368,7 +406,7 @@ final class ImageController extends GenericApiController
         string $extension,
         array $state,
     ): Http\Response {
-        return Util::guardEx(function () use ($id, $name, $width, $height, $quality, $extension, $state) {
+        return $this->util->guardEx(function () use ($id, $name, $width, $height, $quality, $extension, $state) {
             // Get the file
             $file = $this->fs->getUserFile($id);
 
@@ -378,6 +416,14 @@ final class ImageController extends GenericApiController
             // Check if user has permissions to do this
             if (!$file->isUpdateable() || ($copy && !$file->getParent()->isCreatable())) {
                 throw Exceptions::ForbiddenFileUpdate($file->getName());
+            }
+
+            // Name must be a single path segment with no control characters.
+            if ('.' === $name || '..' === $name || !preg_match('/^[^\/\0[:cntrl:]]+\z/u', $name)) {
+                throw Exceptions::BadRequest('Invalid file name');
+            }
+            if (!\in_array(strtolower($extension), ['jpeg', 'jpg', 'png', 'webp'], true)) {
+                throw Exceptions::BadRequest('Invalid image format');
             }
 
             // Check if target copy file exists
@@ -405,6 +451,9 @@ final class ImageController extends GenericApiController
             $iw = $image->getImageWidth();
             $ih = $image->getImageHeight();
             if ($shouldResize && $width && $height && ($iw !== $width || $ih !== $height)) {
+                if ($width < 1 || $height < 1 || $width > 100000 || $height > 100000) {
+                    throw Exceptions::BadRequest('Invalid image dimensions');
+                }
                 $image->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
             }
 
@@ -427,7 +476,7 @@ final class ImageController extends GenericApiController
             }
 
             // Make sure the preview is updated
-            \OC::$server->get(\OCP\IPreview::class)->getPreview($file);
+            $this->preview->getPreview($file);
 
             return $this->info($file->getId(), true);
         });
@@ -440,7 +489,7 @@ final class ImageController extends GenericApiController
     #[PublicPage]
     public function deleteFile(int $id): Http\Response
     {
-        return Util::guardEx(function () use ($id) {
+        return $this->util->guardEx(function () use ($id) {
             // Get the file
             $file = $this->fs->getUserFile($id);
 
@@ -497,16 +546,15 @@ final class ImageController extends GenericApiController
     private function getTags(int $fileId): array
     {
         // Make sure tags are enabled
-        if (!Util::tagsIsEnabled()) {
+        if (!$this->systemConfig->tagsIsEnabled()) {
             return [];
         }
 
         // Get the tag ids for this file
-        $objectMapper = \OC::$server->get(\OCP\SystemTag\ISystemTagObjectMapper::class);
-        $tagIds = $objectMapper->getTagIdsForObjects([$fileId], 'files')[(string) $fileId];
+        $tagIds = $this->tagObjectMapper->getTagIdsForObjects([(string) $fileId], 'files')[(string) $fileId];
 
         // Get all matching tag objects
-        $tags = \OC::$server->get(\OCP\SystemTag\ISystemTagManager::class)->getTagsByIds($tagIds);
+        $tags = $this->tagManager->getTagsByIds($tagIds);
 
         // Filter out the tags that are not user visible
         $visible = array_filter($tags, static fn ($t) => $t->isUserVisible());
@@ -523,17 +571,14 @@ final class ImageController extends GenericApiController
     private function refreshPreviews(\OCP\Files\File $file): void
     {
         try {
-            $previewService = \OC::$server->get(\OC\Preview\PreviewService::class);
-
             // Delete all available previews
             $fileId = $file->getId();
-            foreach ($previewService->getAvailablePreviewsForFile($fileId) as $preview) {
-                $previewService->deletePreview($preview);
+            foreach ($this->previewService->getAvailablePreviewsForFile($fileId) as $preview) {
+                $this->previewService->deletePreview($preview);
             }
 
             // Get the preview to regenerate
-            $previewManager = \OC::$server->get(\OCP\IPreview::class);
-            $previewManager->getPreview($file, 32, 32, true, \OCP\IPreview::MODE_FILL);
+            $this->preview->getPreview($file, 32, 32, true, \OCP\IPreview::MODE_FILL);
         } catch (\Exception $e) {
             return;
         }

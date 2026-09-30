@@ -40,7 +40,6 @@
         v-for="tick of visibleTicks"
         :key="tick.key"
         class="tick"
-        :class="{ dash: !tick.text }"
         :style="{ transform: `translateY(calc(${tick.top}px - 50%))` }"
       >
         <span v-if="tick.text">{{ tick.text }}</span>
@@ -53,6 +52,7 @@
 import { defineComponent, type PropType } from 'vue';
 
 import * as utils from '@services/utils';
+import * as lens from '@services/lens';
 
 import type { IRow, ITick } from '@typings';
 
@@ -140,14 +140,6 @@ export default defineComponent({
   }),
 
   computed: {
-    refs() {
-      return this.$refs as {
-        scroller?: HTMLDivElement;
-        cursorSt?: HTMLSpanElement;
-        hoverCursor?: HTMLSpanElement;
-      };
-    },
-
     /** Get the visible ticks */
     visibleTicks(): ITick[] {
       let key = 9999999900;
@@ -180,6 +172,14 @@ export default defineComponent({
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        scroller?: HTMLDivElement;
+        cursorSt?: HTMLSpanElement;
+        hoverCursor?: HTMLSpanElement;
+      };
+    },
+
     /** Reset state */
     reset() {
       this.ticks = [];
@@ -199,6 +199,11 @@ export default defineComponent({
       this.scrollingRecyclerTimer = 0;
       this.scrollingRecyclerNowTimer = 0;
       this.scrollingRecyclerUpdateTimer = 0;
+    },
+
+    /** Query height of the recycler */
+    recyclerHeightDOM(): number {
+      return this.recycler?.$el?.scrollHeight ?? 0;
     },
 
     /** Recycler scroll event, must be called by timeline */
@@ -221,7 +226,7 @@ export default defineComponent({
       if (this.interacting) return;
 
       // Get the scroll position
-      const scroll = this.recycler?.$el?.scrollTop || 0;
+      const scroll = this.recycler?.$el?.scrollTop ?? 0;
 
       // Emit scroll event
       const event = {
@@ -235,7 +240,7 @@ export default defineComponent({
 
       // Get cursor px position
       const { top1, top2, y1, y2 } = this.getCoords(scroll, 'y');
-      const topfrac = (scroll - y1) / (y2 - y1);
+      const topfrac = y2 === y1 ? 0 : (scroll - y1) / (y2 - y1);
       const rtop = top1 + (top2 - top1) * (topfrac || 0);
 
       // Always move static cursor to right position
@@ -243,7 +248,7 @@ export default defineComponent({
 
       // Move hover cursor to same position unless hovering
       // Regardless, we need this call because the internal mapping might have changed
-      if (!utils.isMobile() && this.refs.scroller?.matches(':hover')) {
+      if (!utils.isMobile() && this.refs().scroller?.matches(':hover')) {
         this.moveHoverCursor(this.hoverCursorY);
       } else {
         this.moveHoverCursor(rtop);
@@ -262,10 +267,10 @@ export default defineComponent({
     /** Re-create tick data */
     reflowNow() {
       // Ignore if not initialized
-      if (!this.recycler?.$refs.wrapper) return;
+      if (!this.recycler?.$el) return;
 
       // Refresh height of recycler
-      this.recyclerHeight = this.recycler?.$refs.wrapper.clientHeight ?? 0;
+      this.recyclerHeight = this.recyclerHeightDOM();
 
       // Recreate ticks data
       this.recreate();
@@ -330,11 +335,11 @@ export default defineComponent({
     /** Do adjustment synchronously */
     adjustNow() {
       // Refresh height of recycler
-      this.recyclerHeight = this.recycler?.$refs.wrapper.clientHeight ?? 0;
+      this.recyclerHeight = this.recyclerHeightDOM();
       this.dynTopMatterHeight = this.recyclerBefore?.clientHeight ?? 0;
 
       // Exclude hover cursor height
-      const hoverCursor = this.refs.hoverCursor;
+      const hoverCursor = this.refs().hoverCursor;
       this.topPadding = hoverCursor?.offsetHeight ?? 0;
 
       // Add extra padding for any top elements (top matter, mobile header)
@@ -390,12 +395,12 @@ export default defineComponent({
     /** Mark ticks as visible or invisible */
     computeVisibleTicks() {
       // Kind of unrelated here, but refresh rect
-      this.scrollerRect = this.refs.scroller!.getBoundingClientRect();
+      this.scrollerRect = this.refs().scroller!.getBoundingClientRect();
 
       // Do another pass to figure out which points are visible
       // This is not as bad as it looks, it's actually 12*O(n)
       // because there are only 12 months in a year
-      const fontSizePx = parseFloat(getComputedStyle(this.refs.cursorSt!).fontSize);
+      const fontSizePx = parseFloat(getComputedStyle(this.refs().cursorSt!).fontSize);
       const minGap = fontSizePx + (_m.window.innerWidth <= 768 ? 5 : 2);
       let prevShow = -9999;
       for (const [idx, tick] of this.ticks.entries()) {
@@ -477,6 +482,9 @@ export default defineComponent({
       if (dayId === undefined) {
         this.hoverCursorText = '';
         return;
+      } else if (dayId === lens.TOP_RESULTS_DAYID) {
+        this.hoverCursorText = lens.TOP_RESULTS_TEXT;
+        return;
       }
 
       const date = utils.dayIdToDate(dayId);
@@ -527,7 +535,7 @@ export default defineComponent({
 
       // Position is after the last tick; choose last
       if (idx >= this.ticks.length) {
-        const tick = this.ticks[this.ticks.length - 1];
+        const tick = this.ticks.at(-1)!;
         return {
           top1: tick.topF,
           top2: this.fullHeight,
@@ -554,7 +562,7 @@ export default defineComponent({
       this.hoverCursorY = y;
 
       const { top1, top2, y1, y2 } = this.getCoords(y, 'topF');
-      const yfrac = (y - top1) / (top2 - top1);
+      const yfrac = top2 === top1 ? 0 : (y - top1) / (top2 - top1);
       const ry = y1 + (y2 - y1) * (yfrac || 0);
       const targetY = snap ? y1 + SNAP_OFFSET : ry;
 
@@ -653,7 +661,7 @@ export default defineComponent({
     transition: transform 0.2s linear;
     z-index: 1;
 
-    &.dash {
+    &:not(:has(span)) {
       height: 4px;
       width: 4px;
       border-radius: 50%;
@@ -703,10 +711,10 @@ export default defineComponent({
         color: var(--color-main-text);
         opacity: 0.75;
 
-        :deep > .menu-up-icon {
+        > :deep(.menu-up-icon) {
           transform: translate(-3px, 4px);
         }
-        :deep > .menu-down-icon {
+        > :deep(.menu-down-icon) {
           transform: translate(-3px, -6px);
         }
       }

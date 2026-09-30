@@ -7,6 +7,7 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
@@ -30,6 +31,14 @@ use OCP\Share\IShare;
 
 final class PublicController extends AuthPublicShareController
 {
+    /**
+     * Session key holding the IDs of the shares this session is authenticated for.
+     *
+     * Value of \OCA\DAV\Connector\Sabre\PublicAuth::DAV_AUTHENTICATED; declared here since
+     * the dav app is not available for static analysis in this project.
+     */
+    private const DAV_AUTHENTICATED = 'public_link_authenticated';
+
     /** @psalm-suppress PropertyNotSetInConstructor */
     protected IShare $share;
 
@@ -46,6 +55,9 @@ final class PublicController extends AuthPublicShareController
         protected IUserConfig $userConfig,
         protected TimelineQuery $tq,
         protected IL10N $l10n,
+        protected FsManager $fs,
+        protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request, $session, $urlGenerator);
     }
@@ -90,7 +102,7 @@ final class PublicController extends AuthPublicShareController
             throw new NotFoundException();
         }
 
-        if (!FsManager::validateShare($share)) {
+        if (!$this->fs->validateShare($share)) {
             throw new NotFoundException();
         }
 
@@ -124,13 +136,13 @@ final class PublicController extends AuthPublicShareController
         // Add OG metadata
         $params = ['token' => $this->getToken()];
         $url = $this->urlGenerator->linkToRouteAbsolute('memories.Public.showShare', $params);
-        Util::addOgMetadata($node, $node->getName(), $url, $params);
+        $this->util->addOgMetadata($node, $node->getName(), $url, $params);
 
         // Render the template
         $response = new PublicTemplateResponse($this->appName, 'main', PageController::getMainParams());
         $response->setHeaderTitle($node->getName());
         $response->setFooterVisible(false); // wth is that anyway?
-        $response->setContentSecurityPolicy(PageController::getCSP());
+        $response->setContentSecurityPolicy($this->systemConfig->getCSP());
         $response->cacheFor(0);
 
         // Add download link
@@ -161,18 +173,40 @@ final class PublicController extends AuthPublicShareController
     }
 
     #[\Override]
-    protected function getPasswordHash(): string
+    protected function getPasswordHash(): ?string
     {
-        // TODO: return type has changed to ?string with 29
-        // Change this when dropping support for 28
-        return $this->share->getPassword() ?? '';
+        return $this->share->getPassword();
     }
 
     #[\Override]
     protected function isPasswordProtected(): bool
     {
-        /** @psalm-suppress RedundantConditionGivenDocblockType */
         return null !== $this->share->getPassword();
+    }
+
+    /**
+     * Called by AuthPublicShareController after a successful password login.
+     *
+     * The base class only records the login for the AppFramework (used by isAuthenticated()).
+     * The WebDAV backend (\OCA\DAV\Connector\Sabre\PublicAuth) keeps its own list of authenticated
+     * share IDs in the session instead, which files_sharing populates in its own ShareController.
+     * We need to do the same, otherwise a session that logged in here cannot access the share
+     * over WebDAV afterwards (regular share page, download links, Nextcloud clients).
+     */
+    #[\Override]
+    protected function authSucceeded(): void
+    {
+        $allowedShareIds = $this->session->get(self::DAV_AUTHENTICATED);
+        if (!\is_array($allowedShareIds)) {
+            $allowedShareIds = [];
+        }
+
+        $shareId = $this->share->getId();
+        if (!\in_array($shareId, $allowedShareIds, true)) {
+            $allowedShareIds[] = $shareId;
+        }
+
+        $this->session->set(self::DAV_AUTHENTICATED, $allowedShareIds);
     }
 
     protected function redirectIfOwned(IShare $share): void

@@ -17,6 +17,8 @@
     <style name="Theme.Memories.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:windowSplashScreenBackground">@color/theme</item>
+        <item name="android:windowSplashScreenAnimationDuration">0</item>
     </style>
 
     <style name="Theme.Memories.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

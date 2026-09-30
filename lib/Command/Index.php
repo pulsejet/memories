@@ -24,7 +24,9 @@ declare(strict_types=1);
 namespace OCA\Memories\Command;
 
 use OCA\Memories\Db\TimelineWrite;
+use OCA\Memories\Exif;
 use OCA\Memories\Service;
+use OCA\Memories\Service\BinExt;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IGroupManager;
@@ -75,6 +77,8 @@ final class Index extends Command
         protected IConfig $config,
         protected Service\Index $indexer,
         protected TimelineWrite $tw,
+        protected Exif $exif,
+        protected BinExt $binExt,
     ) {
         parent::__construct();
     }
@@ -113,8 +117,8 @@ final class Index extends Command
 
         try {
             // Use static exiftool process
-            \OCA\Memories\Exif::ensureStaticExiftoolProc();
-            Service\BinExt::testExiftool(); // throws
+            $this->exif->ensureStaticExiftoolProc();
+            $this->binExt->testExiftool(); // throws
 
             // Perform steps based on opts
             $this->checkClear();
@@ -138,7 +142,7 @@ final class Index extends Command
 
             return 1;
         } finally {
-            \OCA\Memories\Exif::closeStaticExiftoolProc();
+            $this->exif->closeStaticExiftoolProc();
         }
     }
 

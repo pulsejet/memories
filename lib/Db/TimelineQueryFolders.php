@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
 
 trait TimelineQueryFolders
 {
-    protected IDBConnection $connection;
+    use TimelineQueryBase;
 
     /**
      * Get the previews inside a given TimelineRoot.
@@ -34,8 +33,8 @@ trait TimelineQueryFolders
         // MAX 4
         $query->setMaxResults(4);
 
-        // FETCH tag previews
-        $rows = $this->executeQueryWithCTEs($query)->fetchAll();
+        // FETCH root previews
+        $rows = $this->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post-process
         foreach ($rows as &$row) {

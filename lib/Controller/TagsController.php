@@ -23,14 +23,30 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\FsManager;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IRequest;
+use OCP\SystemTag\ISystemTagObjectMapper;
 
-final class TagsController extends GenericApiController
+final class TagsController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected FsManager $fs,
+        protected ISystemTagObjectMapper $tagObjectMapper,
+        protected SystemConfig $systemConfig,
+        protected Util $util,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * @param int   $id     File ID
      * @param int[] $add    Tags to add
@@ -41,31 +57,28 @@ final class TagsController extends GenericApiController
     #[NoAdminRequired]
     public function set(int $id, ?array $add, ?array $remove): Http\Response
     {
-        return Util::guardEx(function () use ($id, $add, $remove) {
+        return $this->util->guardEx(function () use ($id, $add, $remove) {
             // Check tags enabled for this user
-            if (!Util::tagsIsEnabled()) {
+            if (!$this->systemConfig->tagsIsEnabled()) {
                 throw Exceptions::NotEnabled('Tags');
             }
 
             // Check the user is allowed to edit the file
             $file = $this->fs->getUserFile($id);
 
-            // Check the user is allowed to edit the file
+            // Check the file is updateable
             if (!$file->isUpdateable()) {
                 throw Exceptions::ForbiddenFileUpdate($file->getName());
             }
 
-            // Get mapper from tags to objects
-            $om = \OC::$server->get(\OCP\SystemTag\ISystemTagObjectMapper::class);
-
             // Add tags
             if (null !== $add && \count($add) > 0) {
-                $om->assignTags((string) $id, 'files', $add);
+                $this->tagObjectMapper->assignTags((string) $id, 'files', array_values(array_map(static fn ($t): string => (string) $t, $add)));
             }
 
             // Remove tags
             if (null !== $remove && \count($remove) > 0) {
-                $om->unassignTags((string) $id, 'files', $remove);
+                $this->tagObjectMapper->unassignTags((string) $id, 'files', array_values(array_map(static fn ($t): string => (string) $t, $remove)));
             }
 
             return new JSONResponse([], Http::STATUS_OK);

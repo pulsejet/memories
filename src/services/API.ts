@@ -7,7 +7,7 @@ const gen = generateUrl;
 
 /** Add auth token to this URL */
 function tok(url: string) {
-  const { token } = _m.route.params;
+  const token = _m.route.params.token as string | undefined;
   switch (_m.route.name) {
     case _m.routes.FolderShare.name:
       return API.Q(url, { token });
@@ -46,7 +46,7 @@ export class API {
 
     // Clean up input
     for (const key of Object.keys(query)) {
-      if (query[key] === undefined || query[key] === null) {
+      if (query[key] == null) {
         continue;
       }
 
@@ -67,7 +67,7 @@ export class API {
     if (!queryString) return url;
 
     // Check if url already has query string
-    if (url.indexOf('?') > -1) {
+    if (url.includes('?')) {
       return `${url}&${queryString}`;
     } else {
       return `${url}?${queryString}`;
@@ -152,9 +152,22 @@ export class API {
     return tok(gen(`${BASE}/image/delete/{id}`, { id }));
   }
 
-  static VIDEO_TRANSCODE(fileid: number, file = 'index.m3u8') {
+  static VIDEO_TRANSCODE(fileid: number, file = 'index.m3u8', codecs?: string[]) {
     return tok(
-      gen(`${BASE}/video/transcode/{client}/{fileid}/{file}`, {
+      API.Q(
+        gen(`${BASE}/video/transcode/{client}/{fileid}/{file}`, {
+          client: _m.video.clientId,
+          fileid,
+          file,
+        }),
+        { codecs: codecs?.join(',') },
+      ),
+    );
+  }
+
+  static VIDEO_STORYBOARD(fileid: number, file: string) {
+    return tok(
+      gen(`${BASE}/video/storyboard/{client}/{fileid}/{file}`, {
         client: _m.video.clientId,
         fileid,
         file,
@@ -174,8 +187,12 @@ export class API {
     return tok(gen(`${BASE}/download/{handle}`, { handle }));
   }
 
-  static STREAM_FILE(id: number) {
-    return tok(gen(`${BASE}/stream/{id}`, { id }));
+  static DOWNLOAD_ONE(fileid: number) {
+    return tok(API.Q(gen(`${BASE}/stream/{fileid}`, { fileid }), { attachment: true }));
+  }
+
+  static STREAM_FILE(fileid: number) {
+    return tok(gen(`${BASE}/stream/{fileid}`, { fileid }));
   }
 
   static SHARE_LINKS() {
@@ -206,6 +223,10 @@ export class API {
     return gen(`${BASE}/system-status`);
   }
 
+  static RECOGNIZE_API_KEY() {
+    return gen(`${BASE}/recognize/api-key`);
+  }
+
   static FAILURE_LOGS() {
     return gen(`${BASE}/failure-logs`);
   }
@@ -224,5 +245,9 @@ export class API {
 
   static MAP_INIT() {
     return tok(gen(`${BASE}/map/init`));
+  }
+
+  static LENS_SEARCH() {
+    return gen(`${BASE}/lens/search`);
   }
 }

@@ -15,7 +15,6 @@ export async function getNextcloudLogo(): Promise<string> {
 
     // Fetch image
     const blob = (await axios.get(url, { responseType: 'blob' })).data;
-    console.log('Loaded logo', blob);
 
     // Convert to data URI and pass to logo
     const reader = new FileReader();

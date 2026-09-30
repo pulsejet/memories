@@ -8,9 +8,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { constants } from '@services/utils/const';
 import { fetchImage, sticky } from './XImgCache';
 
-const BLANK_IMG = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+const BLANK_IMG: string = constants.BLANK_IMG;
 
 export default defineComponent({
   name: 'XImg',
@@ -50,7 +51,7 @@ export default defineComponent({
     this.loadImage();
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this._state = -1;
 
     // Free up the blob if it was locked
@@ -89,7 +90,7 @@ export default defineComponent({
         // Locking is needed primary for thumbnails,
         // since photoswipe uses the thumb url for the animated zoom-in
         this.lockBlob();
-      } catch (error) {
+      } catch (error: any) {
         this.dataSrc = BLANK_IMG;
         this.$emit('error', error);
         console.error('Failed to load XImg', error);
@@ -116,7 +117,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-div.svg > :deep svg {
+div.svg > :deep(svg) {
   width: 100%;
   height: 100%;
 }

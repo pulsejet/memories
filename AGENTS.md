@@ -20,6 +20,24 @@ Very important.
   - Message looks like: `<type>(<scope>): <imperative description>`.
   - Types like fix, feat, chore, test, etc.
   - Include few lines of description.
+  - Include refs to issues / PRs like Closes #... or Fixes #...
+
+## Git
+- Always work on `development`; keep it checked out locally.
+- Linear history only: rebase, never merge commits.
+- Ship to master: `git fetch origin`, rebase `development` on `origin/master`, fast-forward `master`, push `master`.
+- Never force-push unless explicitly asked.
+
+## Main Release Flow
+- *Confirm each step with user*.
+- Verify versions in info.xml and package.json are committed (`git show HEAD:...`).
+- On master: `git fetch origin`, check in sync with origin/master and development. Dirty tree OK if tag targets clean HEAD.
+- `git tag vX.X.X`, `git push origin vX.X.X`. Check tag absent first, `ls-remote` after.
+- Push branches before tagging/releasing; push only the new tag, never `--tags` (publishes stale local tags).
+- `gh release create <tag> --title <tag> --generate-notes --notes <CHANGELOG-URL> --notes-start-tag <prev-stable> --verify-tag`, plus `--prerelease` for alpha/beta/rc.
+  - `--notes` prepends changelog pointer to auto notes.
+  - `--notes-start-tag` must be last stable (auto picks newest tag by date, e.g. go-vod/*).
+  - Fix wrong base via `gh api .../generate-notes -f previous_tag_name=<prev>` + `gh release edit --notes-file`.
 
 ## Unit Testing
 - `vendor/autoload.php` alone is insufficient.
@@ -53,6 +71,17 @@ Very important.
 - File changes index reactively; never wait/poll for indexing.
 - Never run `occ` in spec.
 - Put helpers bottom of spec, after all tests.
+
+## GitHub Interaction
+- Only for *GitHub*, not general Git stuff.
+- Use `gh` CLI, prompt user if not installed.
+- View/list: `gh issue view <num>`, `gh issue list --label "<label>"`, `gh label list`.
+- Edit labels: `gh issue edit <num> --add-label "<label>" --remove-label "<label>"`.
+  - `bug`, `feature`, `regression`, `performance`, `android`, 
+  - `duplicate`, `wontfix`, `needs details`, `documentation`
+- Triage issues with `needs triage` label.
+  - Don't relabel unless confirmed bug or regression.
+- NEVER comment on issues/PRs without explicit user consent.
 
 ## Key Subsystems & Architecture
 
@@ -98,6 +127,6 @@ Very important.
 - VA-API and NVENC hardware acceleration supported.
 
 ### Frontend (`src/`)
-- Vue 2 + Webpack, built to `js/`.
+- Vue 3 + Webpack, built to `js/`.
 - History mode under `/apps/memories`.
 - Routes in `src/router.ts`.

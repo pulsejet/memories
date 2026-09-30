@@ -4,8 +4,8 @@
 
     <div class="search">
       <NcTextField
-        :autofocus="true"
-        :value.sync="search"
+        :autofocus="false"
+        v-model="search"
         :label="t('memories', 'Search')"
         :placeholder="t('memories', 'Search')"
       >
@@ -35,7 +35,7 @@
         :aria-label="t('memories', 'Create new album.')"
         :disabled="disabled"
         class="new-album-button"
-        type="tertiary"
+        variant="tertiary"
         @click="showAlbumCreationForm = true"
       >
         <template #icon>
@@ -47,7 +47,7 @@
       <div class="submit-btn-wrapper">
         <NcButton
           class="new-album-button"
-          type="primary"
+          variant="primary"
           :aria-label="t('memories', 'Save changes')"
           :disabled="disabled"
           @click="submit"
@@ -75,16 +75,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, type PropType, defineAsyncComponent, markRaw } from 'vue';
 
 import Fuse from 'fuse.js';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import AlbumForm from './AlbumForm.vue';
 import AlbumsList from './AlbumsList.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import * as dav from '@services/dav';
 
@@ -126,6 +127,7 @@ export default defineComponent({
     NcButton,
     NcListItem,
     NcTextField,
+    XLoadingIcon,
 
     PlusIcon,
     CheckIcon,
@@ -151,22 +153,26 @@ export default defineComponent({
 
   mounted() {
     this.loadAlbums();
+    this.$nextTick(() => {
+      // prevent autofocus on search bar for mobile
+      this.$el.closest('.modal-mask')?.focus?.();
+    });
   },
 
   computed: {
+    filteredList() {
+      if (!this.albums || !this.search || !this.fuse) return this.albums ?? [];
+      return this.fuse.search(this.search).map((r) => r.item);
+    },
+  },
+
+  methods: {
     refs() {
       return this.$refs as {
         albumsList?: VueHTMLComponent;
       };
     },
 
-    filteredList() {
-      if (!this.albums || !this.search || !this.fuse) return this.albums || [];
-      return this.fuse.search(this.search).map((r) => r.item);
-    },
-  },
-
-  methods: {
     async albumCreatedHandler({ album }: { album: { basename: string } }) {
       this.showAlbumCreationForm = false;
       await this.loadAlbums(true);
@@ -191,7 +197,7 @@ export default defineComponent({
         this.albums = await dav.getAlbums();
 
         // create search provider
-        this.fuse = new Fuse(this.albums, { keys: ['name'] });
+        this.fuse = markRaw(new Fuse(this.albums, { keys: ['name'] }));
 
         // get initial selection
         let initSelIds: number[] = [];
@@ -247,7 +253,7 @@ export default defineComponent({
 
     forceUpdate() {
       this.$forceUpdate(); // sets do not trigger reactivity
-      this.refs.albumsList?.$forceUpdate();
+      this.refs().albumsList?.$forceUpdate();
     },
   },
 });

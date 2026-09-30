@@ -75,6 +75,7 @@ export const bus = {
    * @param callback Callback to be called when the event is emitted
    */
   on<T extends keyof BusEvent>(name: T, callback: (data: BusEvent[T]) => void): void {
+    // @ts-expect-error - legacy
     subscribe(name, callback);
   },
 
@@ -84,6 +85,7 @@ export const bus = {
    * @param callback Same callback that was passed to `on`
    */
   off<T extends keyof BusEvent>(name: T, callback: (data: BusEvent[T]) => void): void {
+    // @ts-expect-error - legacy
     unsubscribe(name, callback);
   },
 };

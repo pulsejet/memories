@@ -24,26 +24,51 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Service\BinExt;
+use OCA\Memories\Service\Index;
+use OCA\Memories\Service\MIME;
+use OCA\Memories\Service\Places;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\UseSession;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IAppConfig;
+use OCP\IDBConnection;
+use OCP\IRequest;
+use OCP\ISession;
 
-final class AdminController extends GenericApiController
+final class AdminController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected IAppConfig $appConfig,
+        protected Index $index,
+        protected MIME $mime,
+        protected TimelineWrite $tw,
+        protected IDBConnection $connection,
+        protected Places $places,
+        protected ISession $session,
+        protected SystemConfig $systemConfig,
+        protected BinExt $binExt,
+        protected Util $util,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * @AdminRequired
      */
     public function getSystemConfig(): Http\Response
     {
-        return Util::guardEx(static function () {
+        return $this->util->guardEx(function () {
             $config = [];
             foreach (SystemConfig::DEFAULTS as $key => $default) {
-                $config[$key] = SystemConfig::get($key);
+                $config[$key] = $this->systemConfig->get($key);
             }
 
             // Convert array types from map
@@ -58,19 +83,31 @@ final class AdminController extends GenericApiController
      */
     public function setSystemConfig(string $key, mixed $value): Http\Response
     {
-        return Util::guardEx(static function () use ($key, $value) {
+        return $this->util->guardEx(function () use ($key, $value) {
             // Make sure not running in read-only mode
-            if (SystemConfig::get('memories.readonly')) {
+            if ($this->systemConfig->get('memories.readonly')) {
                 throw Exceptions::Forbidden('Cannot change settings in readonly mode');
             }
 
             // Assign config with type checking
-            SystemConfig::set($key, $value);
+            $this->systemConfig->set($key, $value);
 
-            // If changing vod settings, kill any running go-vod instances
-            if (str_starts_with($key, 'memories.vod.')) {
+            // Kill go-vod if changing startup config settings.
+            if (\in_array($key, [
+                'memories.vod.bind',
+                'memories.vod.nc_url',
+                'memories.vod.connect',
+                'memories.vod.path',
+                'memories.vod.tempdir',
+                'memories.vod.cachedir',
+                'memories.vod.ffmpeg',
+                'memories.vod.ffprobe',
+                'memories.vod.external',
+                'memories.vod.disable',
+            ], true)) {
                 try {
-                    BinExt::startGoVod();
+                    $this->binExt->pkill('go-vod');
+                    $this->binExt->ensureGoVod();
                 } catch (\Exception $e) {
                     error_log('Failed to start go-vod: '.$e->getMessage());
                 }
@@ -86,19 +123,15 @@ final class AdminController extends GenericApiController
     #[UseSession]
     public function getSystemStatus(): Http\Response
     {
-        return Util::guardEx(function () {
-            $appConfig = \OC::$server->get(\OCP\IAppConfig::class);
-            $index = \OC::$server->get(\OCA\Memories\Service\Index::class);
-            $tw = \OC::$server->get(\OCA\Memories\Db\TimelineWrite::class);
-
+        return $this->util->guardEx(function () {
             // Build status array
             $status = [];
 
             // Check exiftool version
-            $exiftoolNoLocal = SystemConfig::get('memories.exiftool_no_local');
+            $exiftoolNoLocal = $this->systemConfig->get('memories.exiftool_no_local');
             $status['exiftool'] = $this->getExecutableStatus(
-                static fn () => BinExt::getExiftoolPBin(),
-                static fn () => BinExt::testExiftool(),
+                fn () => $this->binExt->getEPerlBin(),
+                fn () => $this->binExt->testExiftool(),
                 !$exiftoolNoLocal,
                 !$exiftoolNoLocal,
             );
@@ -106,67 +139,101 @@ final class AdminController extends GenericApiController
             // Check for system perl
             $status['perl'] = $this->getExecutableStatus(
                 trim(Util::execSafe(['which', 'perl'], 3000) ?: '/bin/perl'),
-                static fn (string $p) => BinExt::testSystemPerl($p),
+                fn (string $p) => $this->binExt->testSystemPerl($p),
             );
 
             // Check number of indexed files
-            $status['indexed_count'] = $index->getIndexedCount();
-            $status['failure_count'] = $tw->countFailures();
+            $status['indexed_count'] = $this->index->getIndexedCount();
+            $status['failure_count'] = $this->tw->countFailures();
 
             // Automatic indexing stats
-            $jobStart = (int) $appConfig->getValueString(Application::APPNAME, 'last_index_job_start', (string) 0);
+            $jobStart = (int) $this->appConfig->getValueString(Application::APPNAME, 'last_index_job_start', (string) 0);
             $status['last_index_job_start'] = $jobStart ? time() - $jobStart : 0; // Seconds ago
-            $status['last_index_job_duration'] = (float) $appConfig->getValueString(Application::APPNAME, 'last_index_job_duration', (string) 0);
-            $status['last_index_job_status'] = $appConfig->getValueString(Application::APPNAME, 'last_index_job_status', 'Indexing has not been run yet');
-            $status['last_index_job_status_type'] = $appConfig->getValueString(Application::APPNAME, 'last_index_job_status_type', 'warning');
+            $status['last_index_job_duration'] = (float) $this->appConfig->getValueString(Application::APPNAME, 'last_index_job_duration', (string) 0);
+            $status['last_index_job_status'] = $this->appConfig->getValueString(Application::APPNAME, 'last_index_job_status', 'Indexing has not been run yet');
+            $status['last_index_job_status_type'] = $this->appConfig->getValueString(Application::APPNAME, 'last_index_job_status_type', 'warning');
 
             // Check supported preview mimes
-            $status['mimes'] = $index->getPreviewMimes($index->getAllMimes());
+            $status['mimes'] = $this->mime->getPreviewMimes($this->mime->getAllMimes());
 
             // Check for PHP Imagick
             $status['imagick'] = class_exists('\Imagick') ? \Imagick::getVersion()['versionString'] : false;
 
             // Check for bad encryption module
-            $status['bad_encryption'] = \OCA\Memories\Util::isEncryptionEnabled();
+            $status['bad_encryption'] = $this->systemConfig->isEncryptionEnabled();
 
-            // Get GIS status
-            $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
+            // Check database platform and parameters
+            try {
+                $provider = $this->connection->getDatabaseProvider(true);
+
+                // SQLite is not recommended for performance.
+                $status['db_is_sqlite'] = \OCP\IDBConnection::PLATFORM_SQLITE === $provider;
+
+                // Check InnoDB buffer pool size for MySQL/MariaDB
+                if (\OCP\IDBConnection::PLATFORM_MYSQL === $provider
+                 || \OCP\IDBConnection::PLATFORM_MARIADB === $provider) {
+                    $status['innodb_buffer_pool_size'] = (int) $this->connection->executeQuery('SELECT @@innodb_buffer_pool_size')->fetchOne();
+                }
+            } catch (\Exception $e) {
+                $status['innodb_buffer_pool_size'] = 0;
+            }
 
             try {
-                $status['gis_type'] = $places->detectGisType();
-                $status['gis_count'] = $places->geomCount();
+                $status['gis_type'] = $this->places->detectGisType();
+                $status['gis_count'] = $this->places->geomCount();
             } catch (\Exception $e) {
                 $status['gis_type'] = $e->getMessage();
             }
 
             // Check for FFmpeg for preview generation
             $status['ffmpeg_preview'] = $this->getExecutableStatus(
-                SystemConfig::get('preview_ffmpeg_path')
+                $this->systemConfig->get('preview_ffmpeg_path')
                     ?: trim(Util::execSafe(['which', 'ffmpeg'], 3000) ?: ''),
-                static fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
+                fn ($p) => $this->binExt->testFFmpeg($p, 'ffmpeg'),
             );
 
             // Check ffmpeg and ffprobe binaries for transcoding
             $status['ffmpeg'] = $this->getExecutableStatus(
-                SystemConfig::get('memories.vod.ffmpeg'),
-                static fn ($p) => BinExt::testFFmpeg($p, 'ffmpeg'),
+                $this->systemConfig->get('memories.vod.ffmpeg'),
+                fn ($p) => $this->binExt->testFFmpeg($p, 'ffmpeg'),
             );
             $status['ffprobe'] = $this->getExecutableStatus(
-                SystemConfig::get('memories.vod.ffprobe'),
-                static fn ($p) => BinExt::testFFmpeg($p, 'ffprobe'),
+                $this->systemConfig->get('memories.vod.ffprobe'),
+                fn ($p) => $this->binExt->testFFmpeg($p, 'ffprobe'),
             );
 
             // Check go-vod binary
-            $extGoVod = SystemConfig::get('memories.vod.external');
+            $extGoVod = $this->systemConfig->get('memories.vod.external');
             $status['govod'] = $this->getExecutableStatus(
-                static fn () => BinExt::getGoVodBin(),
-                static fn () => BinExt::testStartGoVod(),
+                fn () => $this->binExt->getGoVodBin(),
+                fn ($p) => $this->binExt->testGoVodBin($p),
                 !$extGoVod,
                 !$extGoVod,
             );
 
+            // Check each go-vod server separately
+            $govods = [];
+            foreach ($this->binExt->getGoVodServers() as $server) {
+                try {
+                    $result = $this->binExt->testGoVod($server);
+                    $govods[] = [
+                        'server' => $server,
+                        'healthy' => true,
+                        'detail' => $result['version'],
+                        'latencyMs' => $result['latencyMs'],
+                    ];
+                } catch (\Exception $e) {
+                    $govods[] = [
+                        'server' => $server,
+                        'healthy' => false,
+                        'detail' => $e->getMessage(),
+                    ];
+                }
+            }
+            $status['govod_servers'] = $govods;
+
             // Check for VA-API device
-            $devPath = '/dev/dri/renderD128';
+            $devPath = $this->systemConfig->get('memories.vod.vaapi.device');
             if (!file_exists($devPath)) {
                 $status['vaapi_dev'] = 'not_found';
             } elseif (!is_readable($devPath)) {
@@ -188,14 +255,12 @@ final class AdminController extends GenericApiController
     #[NoCSRFRequired]
     public function getFailureLogs(): Http\Response
     {
-        return Util::guardExDirect(static function (Http\IOutput $out) {
-            $tw = \OC::$server->get(\OCA\Memories\Db\TimelineWrite::class);
-
+        return $this->util->guardExDirect(function (Http\IOutput $out) {
             $out->setHeader('Content-Type: text/plain');
             $out->setHeader('X-Accel-Buffering: no');
             $out->setHeader('Cache-Control: no-cache');
 
-            foreach ($tw->listFailures() as $log) {
+            foreach ($this->tw->listFailures() as $log) {
                 $fileid = str_pad((string) $log['fileid'], 12, ' ', STR_PAD_RIGHT); // size
                 $mtime = $log['mtime'];
                 $reason = $log['reason'];
@@ -218,7 +283,7 @@ final class AdminController extends GenericApiController
         // Reset action token
         $this->actionToken(true);
 
-        return Util::guardExDirect(static function (Http\IOutput $out) {
+        return $this->util->guardExDirect(function (Http\IOutput $out) {
             try {
                 // Set PHP timeout to infinite
                 set_time_limit(0);
@@ -230,9 +295,8 @@ final class AdminController extends GenericApiController
                 $out->setHeader('Connection: keep-alive');
                 $out->setHeader('Content-Length: 0');
 
-                $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
-                $places->downloadImportPlanet();
-                $places->recalculateAll();
+                $this->places->downloadImportPlanet();
+                $this->places->recalculateAll();
 
                 $out->setOutput("Places set up successfully.\n");
             } catch (\Exception $e) {
@@ -284,13 +348,12 @@ final class AdminController extends GenericApiController
 
     private function actionToken(bool $set = false): string
     {
-        $session = \OC::$server->get(\OCP\ISession::class);
         if (!$set) {
-            return $session->get('memories_action_token');
+            return $this->session->get('memories_action_token');
         }
 
         $token = bin2hex(random_bytes(32));
-        $session->set('memories_action_token', $token);
+        $this->session->set('memories_action_token', $token);
 
         return $token;
     }

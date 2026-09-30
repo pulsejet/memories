@@ -17,37 +17,33 @@
           readonly
         />
 
-        <NcCheckboxRadioSwitch :checked.sync="config.square_thumbs" @update:checked="updateSquareThumbs" type="switch">
+        <NcCheckboxRadioSwitch v-model="config.square_thumbs" @update:model-value="updateSquareThumbs" type="switch">
           {{ t('memories', 'Square grid mode') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
-          :checked.sync="config.enable_top_memories"
-          @update:checked="updateEnableTopMemories"
+          v-model="config.enable_top_memories"
+          @update:model-value="updateEnableTopMemories"
           type="switch"
         >
           {{ t('memories', 'Show past photos on top of timeline') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch
-          :checked.sync="config.stack_raw_files"
-          @update:checked="updateStackRawFiles"
-          type="switch"
-        >
+        <NcCheckboxRadioSwitch v-model="config.stack_raw_files" @update:model-value="updateStackRawFiles" type="switch">
           {{ t('memories', 'Stack RAW files with same name') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
-          :checked.sync="config.dedup_identical"
-          @update:checked="updateDedupIdentical"
+          v-model="config.dedup_identical"
+          @update:model-value="updateDedupIdentical"
           type="switch"
         >
           {{ t('memories', 'De-duplicate identical files') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
-          :checked.sync="config.show_owner_name_timeline"
-          @update:checked="updateShowOwnerNameTimeline"
+          v-model="config.show_owner_name_timeline"
+          @update:model-value="updateShowOwnerNameTimeline"
           type="switch"
         >
           {{ t('memories', 'Show photo owner name on timeline') }}
@@ -56,92 +52,112 @@
 
       <NcAppSettingsSection id="viewer-settings" :name="names.viewer">
         <NcCheckboxRadioSwitch
-          :checked.sync="config.livephoto_autoplay"
-          @update:checked="updateLivephotoAutoplay"
+          v-model="config.livephoto_autoplay"
+          @update:model-value="updateLivephotoAutoplay"
           type="switch"
         >
           {{ t('memories', 'Autoplay Live Photos') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch
-          :checked.sync="config.livephoto_loop"
-          @update:checked="updateLivephotoLoop"
-          type="switch"
-        >
+        <NcCheckboxRadioSwitch v-model="config.livephoto_loop" @update:model-value="updateLivephotoLoop" type="switch">
           {{ t('memories', 'Loop Live Photos') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch :checked.sync="config.video_loop" @update:checked="updateVideoLoop" type="switch">
+        <NcCheckboxRadioSwitch
+          :model-value="config.video_autoplay === 'true'"
+          :disabled="config.video_autoplay === 'disallow'"
+          @update:model-value="updateVideoAutoplay"
+          type="switch"
+        >
+          {{ t('memories', 'Autoplay Videos') }}
+        </NcCheckboxRadioSwitch>
+
+        <NcCheckboxRadioSwitch v-model="config.video_loop" @update:model-value="updateVideoLoop" type="switch">
           {{ t('memories', 'Loop Videos') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
-          :checked.sync="config.sidebar_filepath"
-          @update:checked="updateSidebarFilepath"
+          v-model="config.sidebar_filepath"
+          @update:model-value="updateSidebarFilepath"
           type="switch"
         >
           {{ t('memories', 'Show full file path in sidebar') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
-          :checked.sync="config.metadata_in_slideshow"
-          @update:checked="updateMetadataInSlideshow"
+          v-model="config.metadata_in_slideshow"
+          @update:model-value="updateMetadataInSlideshow"
           type="switch"
         >
           {{ t('memories', 'Show metadata in slideshow') }}
         </NcCheckboxRadioSwitch>
 
+        <NcTextField
+          :label="t('memories', 'Slideshow Duration (1-60 seconds)')"
+          :label-visible="true"
+          :model-value="config.slideshow_duration"
+          type="number"
+          min="1"
+          max="60"
+          step="1"
+          @update:model-value="updateSlideshowDuration"
+        />
+
         <div class="radio-group">
           <div class="title">{{ t('memories', 'High resolution image loading behavior') }}</div>
           <NcCheckboxRadioSwitch
-            :checked="highResCond"
+            :model-value="highResCond"
             value="zoom"
             name="vhrc_radio"
             type="radio"
-            @update:checked="updateHighResCond($event)"
+            @update:model-value="updateHighResCond($event)"
             >{{ t('memories', 'Load high resolution image on zoom') }}
           </NcCheckboxRadioSwitch>
           <NcCheckboxRadioSwitch
-            :checked="highResCond"
+            :model-value="highResCond"
             value="always"
             name="vhrc_radio"
             type="radio"
-            @update:checked="updateHighResCond($event)"
+            @update:model-value="updateHighResCond($event)"
             >{{ t('memories', 'Always load high resolution image (not recommended)') }}
           </NcCheckboxRadioSwitch>
           <NcCheckboxRadioSwitch
-            :checked="highResCond"
+            :model-value="highResCond"
             value="never"
             name="vhrc_radio"
             type="radio"
-            @update:checked="updateHighResCond($event)"
+            @update:model-value="updateHighResCond($event)"
             >{{ t('memories', 'Never load high resolution image') }}
           </NcCheckboxRadioSwitch>
         </div>
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="account-settings" :name="names.account" v-if="isNative">
-        {{ t('memories', 'Logged in as {user}', { user }) }}
-        <NcButton @click="logout" id="sign-out">
-          {{ t('memories', 'Sign out') }}
-        </NcButton>
+        <div class="radio-group">
+          {{ t('memories', 'Logged in as {user}', { user }) }}
+          <NcButton class="setting-button" @click="logout">
+            {{ t('memories', 'Sign out') }}
+          </NcButton>
+        </div>
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="device-settings" :name="t('memories', 'Device Folders')" v-if="isNative">
-        {{ t('memories', 'Local folders to include in the timeline view') }}
-        <NcCheckboxRadioSwitch
-          v-for="folder in localFolders"
-          :key="folder.id"
-          :checked.sync="folder.enabled"
-          @update:checked="updateDeviceFolders"
-          type="switch"
-        >
-          {{ folder.name }}
-        </NcCheckboxRadioSwitch>
+        <div class="radio-group">
+          {{ t('memories', 'Local folders to include in the timeline view') }}
+          <NcCheckboxRadioSwitch
+            v-for="folder in localFolders"
+            :key="folder.id"
+            v-model="folder.enabled"
+            @update:model-value="updateDeviceFolders"
+            type="switch"
+          >
+            {{ folder.name }}
+          </NcCheckboxRadioSwitch>
 
-        <NcButton @click="runNxSetup()" type="secondary">
-          {{ t('memories', 'Run initial device setup') }}
-        </NcButton>
+          <NcButton class="setting-button" @click="runNxSetup()" variant="secondary">
+            {{ t('memories', 'Run initial device setup') }}
+          </NcButton>
+        </div>
       </NcAppSettingsSection>
 
       <NcAppSettingsSection id="folders-settings" :name="names.folders">
@@ -154,16 +170,16 @@
         />
 
         <NcCheckboxRadioSwitch
-          :checked.sync="config.show_hidden_folders"
-          @update:checked="updateShowHidden"
+          v-model="config.show_hidden_folders"
+          @update:model-value="updateShowHidden"
           type="switch"
         >
           {{ t('memories', 'Show hidden folders') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
-          :checked.sync="config.sort_folder_month"
-          @update:checked="updateSortFolderMonth"
+          v-model="config.sort_folder_month"
+          @update:model-value="updateSortFolderMonth"
           type="switch"
         >
           {{ t('memories', 'Sort folders oldest-first') }}
@@ -172,50 +188,57 @@
 
       <NcAppSettingsSection id="albums-settings" :name="names.albums">
         <NcCheckboxRadioSwitch
-          :checked.sync="config.sort_album_month"
-          @update:checked="updateSortAlbumMonth"
+          v-model="config.sort_album_month"
+          @update:model-value="updateSortAlbumMonth"
           type="switch"
         >
           {{ t('memories', 'Sort albums oldest-first') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch
-          :checked.sync="config.show_hidden_albums"
-          @update:checked="updateShowHidden"
-          type="switch"
-        >
+        <NcCheckboxRadioSwitch v-model="config.show_hidden_albums" @update:model-value="updateShowHidden" type="switch">
           {{ t('memories', 'Show hidden albums') }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
 
+      <NcAppSettingsSection id="map-settings" :name="names.map" v-if="tileServers.length > 0">
+        <div class="radio-group">
+          <NcCheckboxRadioSwitch
+            v-for="tile in tileServers"
+            :key="tile.name"
+            :model-value="config.map_tile_server_url"
+            :value="tile.url"
+            name="map_style_radio"
+            type="radio"
+            @update:model-value="updateMapTileServer($event)"
+            >{{ tile.name }}
+          </NcCheckboxRadioSwitch>
+        </div>
+      </NcAppSettingsSection>
+
       <NcAppSettingsSection id="onthisday-settings" :name="names.onthisday">
         <NcTextField
-          :label="t('memories', 'Day range (1-7)')"
+          :label="t('memories', 'Day range (0-7)')"
           :label-visible="true"
-          v-model="config.onthisday_day_range"
+          :model-value="config.onthisday_day_range"
           type="number"
-          min="1"
+          min="0"
           max="7"
           step="1"
-          @input="updateOnThisDayRange"
+          @update:model-value="updateOnThisDayRange"
+          :helper-text="t('memories', 'Number of days before and after each anniversary')"
         />
-        <div class="settings-hint">
-          {{ t('memories', 'Number of days before and after each anniversary to include') }}
-        </div>
 
         <NcTextField
           :label="t('memories', 'Photos per year (1-50)')"
           :label-visible="true"
-          v-model="config.onthisday_photos_per_year"
+          :model-value="config.onthisday_photos_per_year"
           type="number"
           min="1"
           max="50"
           step="1"
-          @input="updateOnThisDayPhotos"
+          @update:model-value="updateOnThisDayPhotos"
+          :helper-text="t('memories', 'Maximum number of photos to include per year')"
         />
-        <div class="settings-hint">
-          {{ t('memories', 'Maximum number of photos to include per year') }}
-        </div>
       </NcAppSettingsSection>
     </NcAppSettingsDialog>
 
@@ -227,32 +250,26 @@
 input[type='text'] {
   width: 100%;
 }
-
-div.settings-hint {
-  font-size: 0.8rem;
-  margin-left: 0.6rem;
-  margin-bottom: 0.6rem;
-  color: var(--color-text-lighter);
-}
 </style>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
 import { translate as t } from '@services/l10n';
+import staticConfig from '@services/static-config';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
-const NcAppSettingsDialog = () => import('@nextcloud/vue/dist/Components/NcAppSettingsDialog.js');
-const NcAppSettingsSection = () => import('@nextcloud/vue/dist/Components/NcAppSettingsSection.js');
-const NcCheckboxRadioSwitch = () => import('@nextcloud/vue/dist/Components/NcCheckboxRadioSwitch.js');
+import NcButton from '@nextcloud/vue/components/NcButton';
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+const NcAppSettingsDialog = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAppSettingsDialog'));
+const NcAppSettingsSection = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAppSettingsSection'));
+const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
 
 import MultiPathSelectionModal from '@components/modal/MultiPathSelectionModal.vue';
 
-import type { IConfig } from '@typings';
+import type { IConfig, IMapTileServer } from '@typings';
 
 export default defineComponent({
   name: 'Settings',
@@ -275,13 +292,14 @@ export default defineComponent({
   data: () => ({
     localFolders: [] as nativex.LocalFolderConfig[],
     names: {
-      header: t('memories', 'Memories Settings'),
+      header: t('memories', 'Settings'),
       general: t('memories', 'General'),
       viewer: t('memories', 'Photo Viewer'),
       onthisday: t('memories', 'On This Day'),
       account: t('memories', 'Account'),
       folders: t('memories', 'Folders'),
       albums: t('memories', 'Albums'),
+      map: t('memories', 'Map Tiles'),
     },
   }),
 
@@ -293,12 +311,6 @@ export default defineComponent({
   },
 
   computed: {
-    refs() {
-      return this.$refs as {
-        multiPathModal: InstanceType<typeof MultiPathSelectionModal>;
-      };
-    },
-
     pathSelTitle(): string {
       return this.t('memories', 'Choose Timeline Paths');
     },
@@ -313,6 +325,10 @@ export default defineComponent({
 
     highResCond(): IConfig['high_res_cond_default'] {
       return this.config.high_res_cond || this.config.high_res_cond_default || 'zoom';
+    },
+
+    tileServers(): IMapTileServer[] {
+      return staticConfig.getSync('map_tile_servers') || [];
     },
   },
 
@@ -331,18 +347,24 @@ export default defineComponent({
     utils.bus.on('memories:fragment:pop:settings', this.onClose);
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     utils.bus.off('memories:fragment:pop:settings', this.onClose);
   },
 
   methods: {
+    refs() {
+      return this.$refs as {
+        multiPathModal: InstanceType<typeof MultiPathSelectionModal>;
+      };
+    },
+
     onClose() {
       this.$emit('update:open', false);
     },
 
     // Paths settings
     async chooseTimelinePath() {
-      this.refs.multiPathModal.open(this.config.timeline_path.split(';'));
+      this.refs().multiPathModal.open(this.config.timeline_path.split(';'));
     },
 
     async saveTimelinePath(paths: string[]) {
@@ -406,6 +428,11 @@ export default defineComponent({
       await this.updateSetting('video_loop', 'videoLoop');
     },
 
+    async updateVideoAutoplay(val: boolean) {
+      this.config.video_autoplay = val ? 'true' : 'false';
+      await this.updateSetting('video_autoplay', 'videoAutoplay');
+    },
+
     async updateSidebarFilepath() {
       await this.updateSetting('sidebar_filepath', 'sidebarFilepath');
     },
@@ -414,12 +441,25 @@ export default defineComponent({
       await this.updateSetting('metadata_in_slideshow', 'metadataInSlideshow');
     },
 
+    async updateSlideshowDuration(val: string | number) {
+      const n = typeof val === 'number' ? val : parseFloat(val);
+      if (!Number.isFinite(n)) return;
+      this.config.slideshow_duration = Math.min(60, Math.max(1, Math.round(n)));
+      await this.updateSetting('slideshow_duration', 'slideshowDuration');
+    },
+
     // On This Day settings
-    async updateOnThisDayRange() {
+    async updateOnThisDayRange(val: string | number) {
+      const n = typeof val === 'number' ? val : parseFloat(val);
+      if (!Number.isFinite(n)) return;
+      this.config.onthisday_day_range = Math.min(7, Math.max(0, Math.round(n)));
       await this.updateSetting('onthisday_day_range', 'onthisdayDayRange');
     },
 
-    async updateOnThisDayPhotos() {
+    async updateOnThisDayPhotos(val: string | number) {
+      const n = typeof val === 'number' ? val : parseFloat(val);
+      if (!Number.isFinite(n)) return;
+      this.config.onthisday_photos_per_year = Math.min(50, Math.max(1, Math.round(n)));
       await this.updateSetting('onthisday_photos_per_year', 'onthisdayPhotosPerYear');
     },
 
@@ -436,6 +476,12 @@ export default defineComponent({
     // Albums settings
     async updateSortAlbumMonth() {
       await this.updateSetting('sort_album_month', 'sortAlbumMonth');
+    },
+
+    // Map settings
+    async updateMapTileServer(val: string) {
+      this.config.map_tile_server_url = val;
+      await this.updateSetting('map_tile_server_url', 'mapTileServerUrl');
     },
 
     // --------------- Native APIs start -----------------------------
@@ -469,39 +515,46 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-#memories-settings:deep {
-  .app-settings__content {
+#memories-settings {
+  :deep(.app-settings__content) {
     // Fix weirdness when focusing on toggle input on mobile
     position: relative;
+
+    .app-settings-section__content {
+      padding: 6px 6px;
+      margin-block-start: 0;
+      gap: 2px;
+    }
+
+    .input-field,
+    .radio-group {
+      margin-left: 10px;
+      margin-right: 12px;
+      margin-top: 1em;
+    }
+
+    .input-field__helper-text-message {
+      font-size: 0.8em;
+    }
+
+    input[readonly] {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    @media (max-width: 600px) {
+      &,
+      & .app-settings-section__content {
+        padding: 0;
+      }
+      .input-field {
+        width: calc(100% - 22px);
+      }
+    }
   }
 
-  input[readonly] {
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .app-settings-section {
-    margin-bottom: 20px !important;
-  }
-
-  #sign-out {
+  :deep(.setting-button) {
     margin-top: 10px;
-  }
-
-  .checkbox-radio-switch__label {
-    padding: 1px 14px; // was 4px 14px, make it more compact
-  }
-
-  .radio-group {
-    margin-top: 6px;
-
-    .title {
-      font-weight: 500;
-    }
-
-    .checkbox-radio-switch-radio {
-      margin: 2px 16px; // indent for radio button
-    }
   }
 }
 </style>

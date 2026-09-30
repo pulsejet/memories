@@ -4,19 +4,14 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\Settings\SystemConfig;
-use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
-use Psr\Log\LoggerInterface;
 
 const LAT_KEY = 'GPSLatitude';
 const LON_KEY = 'GPSLongitude';
 
 trait TimelineWritePlaces
 {
-    protected IDBConnection $connection;
-    protected LoggerInterface $logger;
+    use TimelineWriteBase;
 
     /**
      * Add places data for a file.
@@ -30,7 +25,7 @@ trait TimelineWritePlaces
     public function updatePlacesData(int $fileId, ?float $lat, ?float $lon): array
     {
         // Get GIS type
-        $gisType = SystemConfig::gisType();
+        $gisType = $this->systemConfig->gisType();
 
         // Check if valid
         if ($gisType <= 0) {
@@ -38,7 +33,7 @@ trait TimelineWritePlaces
         }
 
         // Delete previous records
-        Util::transaction(function () use ($fileId): void {
+        $this->util->transaction(function () use ($fileId): void {
             $query = $this->connection->getQueryBuilder();
             $query->delete('memories_places')
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
@@ -46,15 +41,16 @@ trait TimelineWritePlaces
             ;
         });
 
-        // Just remove from if the point is no longer valid
+        // Just remove from places if the point is no longer valid
         if (null === $lat || null === $lon) {
             return [];
         }
 
         // Get places
         try {
-            $places = \OC::$server->get(\OCA\Memories\Service\Places::class);
-            $rows = Util::transaction(static fn () => $places->queryPoint($lat, $lon));
+            // Manually inject to avoid circular dependency.
+            $places = \OCP\Server::get(\OCA\Memories\Service\Places::class);
+            $rows = $this->util->transaction(static fn () => $places->queryPoint($lat, $lon));
         } catch (\Exception $e) {
             $this->logger->error("Error querying places: {$e->getMessage()}", ['app' => 'memories']);
 
@@ -66,7 +62,7 @@ trait TimelineWritePlaces
         $markRow = array_pop($crows);
 
         // Insert records in transaction
-        Util::transaction(function () use ($fileId, $rows, $markRow): void {
+        $this->util->transaction(function () use ($fileId, $rows, $markRow): void {
             foreach ($rows as $row) {
                 $isMark = $markRow && $row['osm_id'] === $markRow['osm_id'];
 
@@ -112,15 +108,13 @@ trait TimelineWritePlaces
             try {
                 $mapCluster = $this->mapGetCluster($mapCluster, $lat, $lon, $oldLat, $oldLon);
             } catch (\Exception $e) {
-                $logger = \OC::$server->get(LoggerInterface::class);
-                $logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
+                $this->logger->log(3, 'Error updating map cluster data: '.$e->getMessage(), ['app' => 'memories']);
             }
 
             try {
                 $osmIds = $this->updatePlacesData($fileId, $lat, $lon);
             } catch (\Exception $e) {
-                $logger = \OC::$server->get(LoggerInterface::class);
-                $logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
+                $this->logger->log(3, 'Error updating places data: '.$e->getMessage(), ['app' => 'memories']);
             }
         }
 

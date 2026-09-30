@@ -25,6 +25,7 @@ namespace OCA\Memories\ClustersBackend;
 
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineQuery;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\SimpleFS\ISimpleFile;
@@ -34,9 +35,14 @@ final class RecognizeBackend extends Backend
 {
     use PeopleBackendUtils;
 
+    public const CLUSTER_TYPE = 'recognize';
+
     public function __construct(
         protected TimelineQuery $tq,
         protected IRequest $request,
+        protected Covers $covers,
+        protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {}
 
     #[\Override]
@@ -48,13 +54,13 @@ final class RecognizeBackend extends Backend
     #[\Override]
     public static function clusterType(): string
     {
-        return 'recognize';
+        return self::CLUSTER_TYPE;
     }
 
     #[\Override]
     public function isEnabled(): bool
     {
-        return Util::recognizeIsEnabled();
+        return $this->systemConfig->recognizeIsEnabled();
     }
 
     #[\Override]
@@ -66,7 +72,7 @@ final class RecognizeBackend extends Backend
         }
 
         // Note: all of this is duplicated in nameToClusterId since we want to avoid
-        // making two queries for the getting the cluster_id and the actual clusters
+        // making two queries for getting the cluster_id and the actual clusters
         $faceStr = (string) $this->request->getParam('recognize');
         $faceNames = explode('/', $faceStr);
         if (2 !== \count($faceNames)) {
@@ -96,13 +102,13 @@ final class RecognizeBackend extends Backend
         $clusterQuery = null;
         if ('NULL' === $faceName) {
             $clusterQuery = $query->expr()->andX(
-                $query->expr()->eq('rfd.user_id', $query->createNamedParameter(Util::getUID())),
+                $query->expr()->eq('rfd.user_id', $query->createNamedParameter($this->util->getUID())),
                 $query->expr()->eq('rfd.cluster_id', $query->expr()->literal(-1)),
             );
         } else {
             $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';
             $query->innerJoin('m', 'recognize_face_clusters', 'rfc', $query->expr()->andX(
-                $query->expr()->eq('rfc.user_id', $query->createNamedParameter(Util::getUID())),
+                $query->expr()->eq('rfc.user_id', $query->createNamedParameter($this->util->getUID())),
                 $query->expr()->eq($nameField, $query->createNamedParameter($faceName)),
             ));
             $clusterQuery = $query->expr()->eq('rfd.cluster_id', 'rfc.id');
@@ -153,7 +159,7 @@ final class RecognizeBackend extends Backend
         $query = $this->tq->filterFilecache($query);
 
         // WHERE this cluster belongs to the user
-        $query->andWhere($query->expr()->eq('rfc.user_id', $query->createNamedParameter(Util::getUID())));
+        $query->andWhere($query->expr()->eq('rfc.user_id', $query->createNamedParameter($this->util->getUID())));
 
         // WHERE these clusters contain fileid if specified
         if ($fileid > 0) {
@@ -172,7 +178,7 @@ final class RecognizeBackend extends Backend
 
         // SELECT to get all covers
         $query = SQL::materialize($query, 'rfc');
-        Covers::selectCover(
+        $this->covers->selectCover(
             query: $query,
             type: self::clusterType(),
             clusterTable: 'rfc',
@@ -194,7 +200,7 @@ final class RecognizeBackend extends Backend
         $this->tq->selectEtag($query, SQL::subquery($query, $cfSq), 'cover_etag');
 
         // FETCH all faces
-        $faces = $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        $faces = $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post process
         foreach ($faces as &$row) {
@@ -249,7 +255,7 @@ final class RecognizeBackend extends Backend
 
         // LIMIT results
         if (-6 === $limit) {
-            Covers::filterCover($query, self::clusterType(), 'rfd', 'id', 'cluster_id');
+            $this->covers->filterCover($query, self::clusterType(), 'rfd', 'id', 'cluster_id');
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
@@ -264,7 +270,7 @@ final class RecognizeBackend extends Backend
         $query->addOrderBy('m.fileid', 'DESC'); // tie-breaker
 
         // FETCH face detections
-        return $this->tq->executeQueryWithCTEs($query)->fetchAll() ?: [];
+        return $this->tq->executeQueryWithCTEs($query)->fetchAllAssociative();
     }
 
     #[\Override]
@@ -297,6 +303,12 @@ final class RecognizeBackend extends Backend
         return (int) $photo['cluster_id'];
     }
 
+    #[\Override]
+    public function setCover(array $photo, bool $manual = false): void
+    {
+        $this->covers->setBackendCover($this, $photo, $manual);
+    }
+
     /**
      * Get the numeric cluster ID for a non-numeric string
      * This runs the actual query to find the cluster
@@ -312,12 +324,13 @@ final class RecognizeBackend extends Backend
 
             [$faceUid, $faceName] = $faceNames;
 
-            // Get cluster ID
+            // Get cluster ID for the current user
             $nameField = is_numeric($faceName) ? 'rfc.id' : 'rfc.title';
             $query = $this->tq->getBuilder();
             $query->select('id')
                 ->from('recognize_face_clusters', 'rfc')
                 ->where($query->expr()->eq($nameField, $query->createNamedParameter($faceName)))
+                ->andWhere($query->expr()->eq('rfc.user_id', $query->createNamedParameter($this->util->getUID())))
             ;
 
             if ($id = $query->executeQuery()->fetchOne()) {

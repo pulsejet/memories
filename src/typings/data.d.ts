@@ -12,6 +12,13 @@ declare module '@typings' {
     basename: string;
   };
 
+  export type IUploadNativeX = {
+    /** AUID of the local file (NativeX) */
+    auid: string;
+    /** Name to upload the file as */
+    filename: string;
+  };
+
   export type IDay = {
     /** Day ID */
     dayid: number;
@@ -53,6 +60,8 @@ declare module '@typings' {
     liveid?: string;
     /** File owner display name */
     shared_by?: string;
+    /** File size in bytes */
+    size?: number;
 
     /** Grid display width px */
     dispW?: number;
@@ -89,18 +98,25 @@ declare module '@typings' {
      */
     ishidden?: boolean;
 
-    /** AUID of file (optional, NativeX) */
+    /** AUID of file (client-computed) */
     auid?: string;
     /** BUID of file (optional, NativeX) */
     buid?: string;
     /** Epoch of file (optional, NativeX) */
     epoch?: number;
+    /** Local copy matched by AUID/BUID (post-merge) */
+    local_photo?: IPhoto;
+    /** Local copy has a remote counterpart (local only) */
+    local_has_remote?: boolean;
 
     /** Date taken UTC value (lazy fetched) */
     datetaken?: number;
 
     /** Stacked RAW photos */
     stackraw?: IPhoto[];
+
+    /** Identical files hidden by de-duplication */
+    dups?: IPhoto[];
   };
 
   export interface IImageInfo {
@@ -122,6 +138,7 @@ declare module '@typings' {
 
     filename?: string;
     address?: string;
+    address_short?: string;
     tags?: { [id: string]: string };
 
     exif?: IExif;

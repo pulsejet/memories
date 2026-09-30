@@ -26,11 +26,11 @@
     </div>
 
     <NcTextField
-      :value.sync="searchBar"
+      v-model="searchBar"
       :label="t('memories', 'Search')"
       :placeholder="t('memories', 'Search location / landmark')"
       :disabled="disabled"
-      trailing-button-icon="arrowRight"
+      trailing-button-icon="arrowEnd"
       :show-trailing-button="searchBar.length > 0 && !loading"
       @trailing-button-click="search"
       @keypress.enter="search"
@@ -38,9 +38,9 @@
       <MagnifyIcon :size="16" />
     </NcTextField>
 
-    <div class="osm-attribution">
+    <div class="osm-attribution" v-if="isNominatim">
       Powered by
-      <a href="https://nominatim.openstreetmap.org" target="_blank">Nominatim</a>
+      <a :href="searchBase" target="_blank">Nominatim</a>
       &copy;
       <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
       contributors
@@ -64,21 +64,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
+import staticConfig from '@services/static-config';
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js';
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js';
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
-const NcListItem = () => import('@nextcloud/vue/dist/Components/NcListItem.js');
+import NcActions from '@nextcloud/vue/components/NcActions';
+import NcActionButton from '@nextcloud/vue/components/NcActionButton';
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
 
 import type { IPhoto } from '@typings';
 
 import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 import UndoIcon from 'vue-material-design-icons/UndoVariant.vue';
+import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 type NLocation = {
   osm_id: number;
@@ -98,6 +100,7 @@ export default defineComponent({
     MagnifyIcon,
     CloseIcon,
     UndoIcon,
+    XLoadingIcon,
   },
 
   props: {
@@ -127,6 +130,14 @@ export default defineComponent({
         return `${this.lat.toFixed(6)}, ${this.lon.toFixed(6)}`;
       }
       return this.t('memories', 'No coordinates');
+    },
+
+    searchBase() {
+      return staticConfig.getSync('places_search_url').trim();
+    },
+
+    isNominatim() {
+      return this.searchBase.toLowerCase().includes('nominatim');
     },
   },
 
@@ -163,7 +174,7 @@ export default defineComponent({
       }
     },
 
-    search() {
+    async search() {
       if (this.loading || this.searchBar.length === 0) {
         return;
       }
@@ -183,19 +194,20 @@ export default defineComponent({
         }
       }
 
+      // No search provider configured.
+      if (!this.searchBase) return;
+
       this.loading = true;
       const q = window.encodeURIComponent(this.searchBar);
-      axios
-        .get<NLocation[]>(`https://nominatim.openstreetmap.org/search?q=${q}&format=jsonv2`)
-        .then((response) => {
-          this.loading = false;
-          this.options = response.data.filter((x) => x.lat && x.lon && x.display_name);
-        })
-        .catch((error) => {
-          this.loading = false;
-          console.error(error);
-          showError(this.t('memories', 'Failed to search for location with Nominatim.'));
-        });
+      try {
+        const response = await axios.get<NLocation[]>(`${this.searchBase}/search?q=${q}&format=jsonv2`);
+        this.options = response.data.filter((x) => x.lat && x.lon && x.display_name);
+      } catch (error) {
+        console.error(error);
+        showError(this.t('memories', 'Failed to search for location.'));
+      } finally {
+        this.loading = false;
+      }
     },
 
     clear() {

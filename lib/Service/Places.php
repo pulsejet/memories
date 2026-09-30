@@ -26,12 +26,14 @@ final class Places
         private IConfig $config,
         private IDBConnection $connection,
         private TimelineWrite $tw,
+        private SystemConfig $systemConfig,
+        private BinExt $binExt,
     ) {}
 
     /**
      * Make SQL query to detect GIS type.
      *
-     * @psalm-return 0|1|2|3
+     * @psalm-return 0|1|2
      */
     public function detectGisType(): int
     {
@@ -44,11 +46,11 @@ final class Places
         // Detect database type
         $provider = $this->connection->getDatabaseProvider(true);
 
-        // Test MySQL-like support in databse
+        // Test MySQL-like support in database
         if (IDBConnection::PLATFORM_MYSQL === $provider
         || IDBConnection::PLATFORM_MARIADB === $provider) {
             try {
-                $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)', 4326)")->fetch();
+                $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)', 4326)")->fetchAssociative();
                 if (0 === \count($res)) {
                     throw new \Exception('Invalid result');
                 }
@@ -59,10 +61,10 @@ final class Places
             }
         }
 
-        // Test Postgres native geometry like support in database
+        // Test Postgres native geometry support in database
         if (IDBConnection::PLATFORM_POSTGRES === $provider) {
             try {
-                $res = $this->connection->executeQuery("SELECT POINT('1,1')")->fetch();
+                $res = $this->connection->executeQuery("SELECT POINT('1,1')")->fetchAssociative();
                 if (0 === \count($res)) {
                     throw new \Exception('Invalid result');
                 }
@@ -94,7 +96,7 @@ final class Places
     public function queryPoint(float $lat, float $lon): array
     {
         // Get GIS type
-        $gisType = SystemConfig::gisType();
+        $gisType = $this->systemConfig->gisType();
 
         // Construct WHERE clause depending on GIS type
         $where = null;
@@ -131,7 +133,7 @@ final class Places
         ;
 
         // Run query
-        return $query->executeQuery()->fetchAll();
+        return $query->executeQuery()->fetchAllAssociative();
     }
 
     /**
@@ -184,7 +186,7 @@ final class Places
 
         $this->logToStdout('Download planet data to temporary file...');
 
-        $zipFile = BinExt::getTmpPath().'/planet_data.zip';
+        $zipFile = $this->binExt->getTmpPath().'/planet_data.zip';
         if (file_exists($zipFile) && !unlink($zipFile)) {
             throw new \Exception("Failed to delete old planet zip file: {$zipFile}");
         }
@@ -228,12 +230,12 @@ final class Places
             throw new \Exception("Planet zip file not found: {$zipFile}");
         }
 
-        $planetFile = BinExt::getTmpPath().'/planet.tsv';
+        $planetFile = $this->binExt->getTmpPath().'/planet.tsv';
         if (file_exists($planetFile) && !unlink($planetFile)) {
             throw new \Exception("Failed to delete old planet data file: {$planetFile}");
         }
 
-        $geomFile = BinExt::getTmpPath().'/planet_geometry.tsv';
+        $geomFile = $this->binExt->getTmpPath().'/planet_geometry.tsv';
         if (file_exists($geomFile) && !unlink($geomFile)) {
             throw new \Exception("Failed to delete old planet geometry file: {$geomFile}");
         }
@@ -242,7 +244,7 @@ final class Places
         $zip = new \ZipArchive();
         $res = $zip->open($zipFile);
         if (true === $res) {
-            $zip->extractTo(BinExt::getTmpPath());
+            $zip->extractTo($this->binExt->getTmpPath());
             $zip->close();
         } else {
             throw new \Exception("Failed to unzip planet data file: {$zipFile}");
@@ -273,7 +275,7 @@ final class Places
         $this->setupTables();
 
         // Truncate planet table
-        SQL::truncate($this->connection, 'memories_planet', false);
+        $this->connection->truncateTable('memories_planet', false);
 
         // Table prefix
         $prefix = $this->config->getSystemValue('dbtableprefix', '') ?: '';
@@ -304,7 +306,7 @@ final class Places
 
         // Mark success
         $this->logToStdout('Planet database imported successfully!');
-        SystemConfig::set('memories.gis_type', $gis);
+        $this->systemConfig->set('memories.gis_type', $gis);
     }
 
     /**

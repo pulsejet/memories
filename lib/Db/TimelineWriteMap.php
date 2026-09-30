@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
 
 const CLUSTER_DEG = 0.0003;
 
 trait TimelineWriteMap
 {
-    protected IDBConnection $connection;
+    use TimelineWriteBase;
 
     /**
      * Get the cluster ID for a given point.
@@ -44,12 +42,12 @@ trait TimelineWriteMap
             ->andWhere($query->expr()->gte('lon', $query->createNamedParameter($lon - CLUSTER_DEG, IQueryBuilder::PARAM_STR)))
             ->andWhere($query->expr()->lte('lon', $query->createNamedParameter($lon + CLUSTER_DEG, IQueryBuilder::PARAM_STR)))
         ;
-        $rows = Util::transaction(static fn () => $query->executeQuery()->fetchAll());
+        $rows = $this->util->transaction(static fn () => $query->executeQuery()->fetchAllAssociative());
 
         // Find cluster closest to the point
         $minDist = PHP_INT_MAX;
         $minId = -1;
-        foreach ($rows as &$r) {
+        foreach ($rows as $r) {
             $clusterLat = (float) $r['lat'];
             $clusterLon = (float) $r['lon'];
             $dist = ($lat - $clusterLat) ** 2.0 + ($lon - $clusterLon) ** 2.0;
@@ -92,7 +90,7 @@ trait TimelineWriteMap
             return;
         }
 
-        Util::transaction(function () use ($clusterId, $lat, $lon): void {
+        $this->util->transaction(function () use ($clusterId, $lat, $lon): void {
             $query = $this->connection->getQueryBuilder();
             $query->update('memories_mapclusters')
                 ->set('point_count', $query->createFunction('point_count + 1'))
@@ -116,7 +114,7 @@ trait TimelineWriteMap
      */
     private function mapCreateCluster(float $lat, float $lon): int
     {
-        return Util::transaction(function () use ($lat, $lon): int {
+        return $this->util->transaction(function () use ($lat, $lon): int {
             $query = $this->connection->getQueryBuilder();
             $query->insert('memories_mapclusters')
                 ->values([
@@ -147,7 +145,7 @@ trait TimelineWriteMap
             return;
         }
 
-        Util::transaction(function () use ($clusterId, $lat, $lon): void {
+        $this->util->transaction(function () use ($clusterId, $lat, $lon): void {
             $query = $this->connection->getQueryBuilder();
             $query->update('memories_mapclusters')
                 ->set('point_count', $query->createFunction('point_count - 1'))

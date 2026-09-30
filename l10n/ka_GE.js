@@ -47,6 +47,7 @@ OC.L10N.register(
     "Read only" : "მხოლოდ-კითხვადი",
     "Share link" : "ბმულს გაზიარება",
     "Refresh" : "განახლება",
+    "OK" : "OK",
     "Oldest first" : "ჯერ ძველი",
     "Newest first" : "ჯერ ახალი",
     "Home" : "სახლი",

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
+use OCP\DB\QueryBuilder\ILiteral;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\DB\QueryBuilder\IQueryFunction;
 use OCP\IConfig;
@@ -14,7 +15,7 @@ final class SQL
     /**
      * @return never
      */
-    public static function debugQuery(IQueryBuilder &$query, string $sql = '')
+    public static function debugQuery(IQueryBuilder $query, string $sql = '')
     {
         // Print the query and exit
         $sql = empty($sql) ? $query->getSQL() : $sql;
@@ -25,7 +26,7 @@ final class SQL
         exit; // only for debugging, so this is okay
     }
 
-    public static function replaceQueryParams(IQueryBuilder &$query, string $sql): string
+    public static function replaceQueryParams(IQueryBuilder $query, string $sql): string
     {
         $conn = $query->getConnection();
 
@@ -71,7 +72,7 @@ final class SQL
      * @param IQueryBuilder $query    The query to create the function on
      * @param IQueryBuilder $subquery The subquery to use
      */
-    public static function subquery(IQueryBuilder &$query, IQueryBuilder &$subquery): IQueryFunction
+    public static function subquery(IQueryBuilder $query, IQueryBuilder $subquery): IQueryFunction
     {
         return $query->createFunction("({$subquery->getSQL()})");
     }
@@ -83,8 +84,11 @@ final class SQL
      * integers never match columns without numeric affinity on SQLite
      * (e.g. CTE or aggregate outputs).
      */
-    public static function literal(IQueryBuilder $query, mixed $value, mixed $type = IQueryBuilder::PARAM_STR): mixed
-    {
+    public static function literal(
+        IQueryBuilder $query,
+        int|string $value,
+        int $type = IQueryBuilder::PARAM_STR,
+    ): ILiteral|IQueryFunction {
         if (\is_int($value) && \PDO::PARAM_INT === $type) {
             return $query->createFunction((string) $value);
         }
@@ -98,7 +102,7 @@ final class SQL
      * @param IQueryBuilder        $query  The query to create the function on
      * @param IQueryBuilder|string $clause The clause to check for existence
      */
-    public static function exists(IQueryBuilder &$query, IQueryBuilder|string &$clause): IQueryFunction
+    public static function exists(IQueryBuilder $query, IQueryBuilder|string $clause): IQueryFunction
     {
         if ($clause instanceof IQueryBuilder) {
             $clause = $clause->getSQL();
@@ -113,7 +117,7 @@ final class SQL
      * @param IQueryBuilder        $query  The query to create the function on
      * @param IQueryBuilder|string $clause The clause to check for existence
      */
-    public static function notExists(IQueryBuilder &$query, IQueryBuilder|string &$clause): IQueryFunction
+    public static function notExists(IQueryBuilder $query, IQueryBuilder|string $clause): IQueryFunction
     {
         if ($clause instanceof IQueryBuilder) {
             $clause = $clause->getSQL();
@@ -128,7 +132,7 @@ final class SQL
      * @param IQueryBuilder $query The query to create the function on
      * @param string        $field The field to select distinct values from
      */
-    public static function distinct(IQueryBuilder &$query, string $field): IQueryFunction
+    public static function distinct(IQueryBuilder $query, string $field): IQueryFunction
     {
         return $query->createFunction("DISTINCT {$field}");
     }
@@ -139,29 +143,9 @@ final class SQL
      * @param IQueryBuilder $query The query to create the function on
      * @param string        $field The field to average
      */
-    public static function average(IQueryBuilder &$query, string $field): IQueryFunction
+    public static function average(IQueryBuilder $query, string $field): IQueryFunction
     {
         return $query->createFunction("AVG({$field})");
-    }
-
-    /**
-     * TRUNCATE a table (remove all rows and reset auto-increment).
-     * This wrapper should be removed when support for Nextcloud <32 is dropped.
-     *
-     * @param IDBConnection $connection The database connection
-     * @param string        $table      The table to truncate
-     * @param bool          $cascade    Whether to cascade the truncate operation
-     */
-    public static function truncate(IDBConnection &$connection, string $table, bool $cascade): void
-    {
-        // getDatabasePlatform is deprecated on Nextcloud 32
-        if (method_exists($connection, 'truncateTable')) {
-            $connection->truncateTable($table, $cascade);
-        } else {
-            /** @psalm-suppress DeprecatedMethod */
-            $sql = $connection->getDatabasePlatform()->getTruncateTableSQL('*PREFIX*'.$table, $cascade);
-            $connection->executeStatement($sql);
-        }
     }
 
     /**
@@ -310,7 +294,6 @@ final class SQL
      */
     public static function pgsqlCopyFromFile(\PDO $pdo, string $table, string $file, string $fields = ''): void
     {
-        /** @psalm-suppress UndefinedMethod */
         if (method_exists($pdo, 'copyFromFile')) {
             /** @var mixed $res */
             $res = '' !== $fields

@@ -23,7 +23,7 @@ async function archiveFile(fileid: number, archive: boolean) {
  *
  * @param photos list of photos to process
  * @param archive Archive or unarchive
- * @returns list of file ids that were deleted
+ * @returns list of file ids that were archived
  */
 export async function* archiveFilesByIds(photos: IPhoto[], archive: boolean) {
   if (!photos.length) return;
@@ -38,7 +38,7 @@ export async function* archiveFilesByIds(photos: IPhoto[], archive: boolean) {
     try {
       await archiveFile(photo.fileid, archive);
       return photo.fileid;
-    } catch (error) {
+    } catch (error: any) {
       if (silenceErrors) return 0;
       console.error('Failed to (un)archive', photo.fileid, error);
       const msg = error?.response?.data?.message || t('memories', 'General Failure');

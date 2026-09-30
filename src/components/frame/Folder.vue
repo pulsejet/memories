@@ -3,8 +3,6 @@
     draggable="false"
     class="folder fill-block"
     :class="{
-      hasPreview: previews.length > 0,
-      onePreview: previews.length === 1,
       [`folder--${sanitizedName}`]: true,
     }"
     :to="target"
@@ -34,11 +32,13 @@ import * as utils from '@services/utils/helpers';
 import type { IFolder, IPhoto } from '@typings';
 
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
+import XImg from '@components/frame/XImg.vue';
 
 export default defineComponent({
   name: 'Folder',
   components: {
     FolderIcon,
+    XImg,
   },
 
   mixins: [UserConfig],
@@ -60,9 +60,9 @@ export default defineComponent({
 
       path = [...path, this.data.name]; // intentional copy
       return {
-        ...this.$route,
-        params: { path },
-        hash: undefined,
+        name: this.$route.name,
+        params: { ...this.$route.params, path },
+        query: this.$route.query,
       };
     },
 
@@ -80,7 +80,7 @@ export default defineComponent({
     },
 
     sanitizedName(): string {
-      return this.data.name.replace(/[^a-zA-Z0-9-_]/g, '');
+      return this.data.name.replaceAll(/[^a-zA-Z0-9-_]/g, '');
     },
   },
 
@@ -106,7 +106,7 @@ export default defineComponent({
   z-index: 100;
   transition: opacity 0.2s ease-in-out;
 
-  :deep .material-design-icon__svg {
+  :deep(.material-design-icon__svg) {
     width: 50%;
     height: 50%;
   }
@@ -130,7 +130,7 @@ export default defineComponent({
   }
 
   // Make it white if there is a preview
-  .folder.hasPreview > & {
+  .folder:has(.previews .img-outer) > & {
     .folder-icon {
       opacity: 1;
       filter: invert(1) brightness(100);
@@ -144,7 +144,7 @@ export default defineComponent({
   .folder:hover > & > .folder-icon {
     opacity: 0.8;
   }
-  .folder.hasPreview:hover > & {
+  .folder:has(.previews .img-outer):hover > & {
     opacity: 0;
   }
 
@@ -175,7 +175,7 @@ export default defineComponent({
     height: 50%;
     display: inline-block;
 
-    .folder.onePreview > & {
+    .folder:has(.preview-container > .img-outer:only-child) > & {
       width: 100%;
       height: 100%;
     }

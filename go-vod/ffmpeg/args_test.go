@@ -1,0 +1,431 @@
+package ffmpeg
+
+import (
+	"slices"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/require"
+)
+
+func baseSpec() Spec {
+	return Spec{
+		Bin:       "ffmpeg",
+		Input:     "/videos/input.mp4",
+		ChunkSize: 3,
+		QF:        25,
+		FrameRate: 30,
+		Quality:   "720p",
+		Width:     1280,
+		Height:    720,
+		Audio:     AudioInfo{CodecName: "ac3", Channels: 6, SampleRate: 48000, BitRate: 384000},
+	}
+}
+
+func cmd(s Spec, args []string) string {
+	return QuoteForLog(append([]string{s.Bin}, args...))
+}
+
+func TestEncoder(t *testing.T) {
+	require.Equal(t, EncoderX264, Encoder(Spec{}))
+	require.Equal(t, EncoderVAAPI, Encoder(Spec{VAAPI: true}))
+	require.Equal(t, EncoderNVENC, Encoder(Spec{NVENC: true}))
+}
+
+func TestBuildArgsSoftware(t *testing.T) {
+	c := cmd(baseSpec(), BuildArgs(baseSpec()))
+	require.Contains(t, c, `"-c:v" libx264 -preset faster -crf 25`)
+	require.Contains(t, c, "scale=force_original_aspect_ratio=decrease:w=1280:h=1280")
+	require.NotContains(t, c, "-hwaccel")
+	require.NotContains(t, c, "-ss")
+	require.NotContains(t, c, "-noautorotate")
+	require.NotContains(t, c, "-headers")
+	require.NotContains(t, c, "-reconnect")
+	require.Contains(t, c, `-map "0:a:0?"`)
+	require.Contains(t, c, `"-c:a" aac -ac 2 -ar 48000 "-b:a" 128k`)
+}
+
+func TestBuildArgsHeaders(t *testing.T) {
+	s := baseSpec()
+	s.Input = "http://nc/apps/memories/api/stream/7"
+	s.Headers = "Authorization: Basic dXNlcjp0b2tlbg==\r\n"
+	args := BuildArgs(s)
+	require.Equal(t, s.Headers, args[slices.Index(args, "-headers")+1])
+	require.Less(t, slices.Index(args, "-headers"), slices.Index(args, "-i"))
+	require.Equal(t, s.Input, args[slices.Index(args, "-i")+1])
+	require.Equal(t, "1", args[slices.Index(args, "-multiple_requests")+1])
+	require.Equal(t, "1", args[slices.Index(args, "-seekable")+1])
+	require.Less(t, slices.Index(args, "-multiple_requests"), slices.Index(args, "-i"))
+	for flag, value := range map[string]string{
+		"-reconnect":                  "1",
+		"-reconnect_on_network_error": "1", "-reconnect_on_http_error": "429,5xx",
+		"-reconnect_streamed": "1", "-reconnect_delay_max": "5",
+		"-reconnect_max_retries": "10", "-reconnect_delay_total_max": "30",
+		"-respect_retry_after": "1",
+	} {
+		require.Equal(t, value, args[slices.Index(args, flag)+1], flag)
+		require.Less(t, slices.Index(args, flag), slices.Index(args, "-i"), flag)
+	}
+}
+
+func TestBuildArgsSeekAndMax(t *testing.T) {
+	s := baseSpec()
+	s.StartAt = 12.5
+	require.Contains(t, cmd(s, BuildArgs(s)), "-ss 12.500000")
+
+	max := baseSpec()
+	max.Quality, max.Width, max.Height = QualityMax, 1920, 1080
+	c := cmd(max, BuildArgs(max))
+	require.NotContains(t, c, "w=1920")
+}
+
+func TestBuildArgsVAAPI(t *testing.T) {
+	s := baseSpec()
+	s.VAAPI, s.VAAPILowPower = true, true
+	c := cmd(s, BuildArgs(s))
+	require.Contains(t, c, "-hwaccel vaapi")
+	require.Contains(t, c, "scale_vaapi=force_original_aspect_ratio=decrease:format=nv12")
+	require.Contains(t, c, "-global_quality 25 -low_power 1")
+	require.Contains(t, c, "vaapi=memories:/dev/dri/renderD128")
+
+	dev := baseSpec()
+	dev.VAAPI, dev.VAAPIDevice = true, "/dev/dri/renderD129"
+	c = cmd(dev, BuildArgs(dev))
+	require.Contains(t, c, "-hwaccel_device /dev/dri/renderD129")
+	require.Contains(t, c, "vaapi=memories:/dev/dri/renderD129")
+	require.NotContains(t, c, "renderD128")
+}
+
+func TestBuildArgsTranspose(t *testing.T) {
+	s := baseSpec()
+	s.VAAPI, s.UseTranspose, s.HLS, s.Rotation = true, true, true, -90
+	c := cmd(s, BuildArgs(s))
+	require.Contains(t, c, "-noautorotate")
+	require.Contains(t, c, "transpose_vaapi=1")
+
+	sw := baseSpec()
+	sw.NVENC, sw.NVENCScale, sw.UseTranspose, sw.HLS, sw.Rotation = true, "cuda", true, true, 90
+	require.Contains(t, cmd(sw, BuildArgs(sw)), "hwdownload,format=nv12,transpose=2")
+
+	off := baseSpec()
+	off.Rotation = 90
+	require.NotContains(t, cmd(off, BuildArgs(off)), "transpose")
+}
+
+func TestMP4Transpose(t *testing.T) {
+	sw := baseSpec()
+	sw.HLS, sw.UseTranspose, sw.Rotation = false, true, 90
+	c := cmd(sw, MP4Args(sw))
+	require.Contains(t, c, "-noautorotate")
+	require.Contains(t, c, "transpose=2")
+
+	vaapi := baseSpec()
+	vaapi.HLS, vaapi.VAAPI, vaapi.UseTranspose, vaapi.Rotation = false, true, true, -90
+	require.Contains(t, cmd(vaapi, MP4Args(vaapi)), "transpose_vaapi=1")
+
+	off := baseSpec()
+	off.HLS, off.Rotation = false, 90
+	require.NotContains(t, cmd(off, MP4Args(off)), "transpose")
+}
+
+func TestBuildArgsNVENC(t *testing.T) {
+	s := baseSpec()
+	s.NVENC, s.NVENCScale, s.NVENCTemporalAQ = true, "cuda", true
+	c := cmd(s, BuildArgs(s))
+	require.Contains(t, c, "scale_cuda=force_original_aspect_ratio=decrease:format=nv12:passthrough=0")
+	require.Contains(t, c, "-preset p6 -tune ll -rc vbr")
+	require.Contains(t, c, "-temporal-aq 1")
+
+	// 10-bit SDR converts in the scaler instead of reaching h264_nvenc.
+	for _, scale := range []string{"cuda", "npp"} {
+		deep := baseSpec()
+		deep.BitDepth, deep.NVENC, deep.NVENCScale = 10, true, scale
+		require.Contains(t, cmd(deep, BuildArgs(deep)), "scale_"+scale+"=force_original_aspect_ratio=decrease:format=nv12")
+	}
+}
+
+func TestBuildArgsTonemap(t *testing.T) {
+	sw := baseSpec()
+	sw.HDR = true
+	c := cmd(sw, BuildArgs(sw))
+	require.Contains(t, c, "scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=t=linear")
+	require.Contains(t, c, "tonemap=hable")
+	require.Contains(t, c, "zscale=t=bt709:m=bt709:range=tv,format=nv12")
+	require.NotContains(t, c, "format=nv12,scale=")
+
+	vaapi := baseSpec()
+	vaapi.HDR, vaapi.VAAPI = true, true
+	c = cmd(vaapi, BuildArgs(vaapi))
+	require.Contains(t, c, "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
+	require.Contains(t, c, "tonemap=hable")
+	require.Contains(t, c, "format=nv12|vaapi,hwupload")
+	require.NotContains(t, c, "hwupload,scale_vaapi=")
+
+	nvenc := baseSpec()
+	nvenc.HDR, nvenc.NVENC, nvenc.NVENCScale = true, true, "cuda"
+	c = cmd(nvenc, BuildArgs(nvenc))
+	require.Contains(t, c, "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
+	require.Contains(t, c, "tonemap=hable")
+	require.Contains(t, c, "format=nv12|cuda,hwupload")
+	require.NotContains(t, c, "hwupload,scale_cuda=")
+
+	sdr := baseSpec()
+	require.NotContains(t, cmd(sdr, BuildArgs(sdr)), "tonemap")
+	require.NotContains(t, cmd(sdr, BuildArgs(sdr)), "zscale")
+}
+
+func TestBuildArgsTonemapDepth(t *testing.T) {
+	// The download pin must match the surface depth; the encoder still
+	// receives nv12 either way.
+	for _, scale := range []string{"cuda", "npp"} {
+		deep := baseSpec()
+		deep.HDR, deep.BitDepth, deep.NVENC, deep.NVENCScale = true, 10, true, scale
+		c := cmd(deep, BuildArgs(deep))
+		require.Contains(t, c, "hwdownload,format=p010le,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
+		require.Contains(t, c, "format=nv12|cuda,hwupload")
+		require.NotContains(t, c, "hwupload,scale_"+scale)
+
+		deep12 := baseSpec()
+		deep12.HDR, deep12.BitDepth, deep12.NVENC, deep12.NVENCScale = true, 12, true, scale
+		require.Contains(t, cmd(deep12, BuildArgs(deep12)), "hwdownload,format=p012le,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
+
+		shallow := baseSpec()
+		shallow.HDR, shallow.NVENC, shallow.NVENCScale = true, true, scale
+		require.Contains(t, cmd(shallow, BuildArgs(shallow)), "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
+	}
+
+	vaapi := baseSpec()
+	vaapi.HDR, vaapi.BitDepth, vaapi.VAAPI = true, 10, true
+	c := cmd(vaapi, BuildArgs(vaapi))
+	require.Contains(t, c, "hwdownload,format=p010le,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
+	require.Contains(t, c, "format=nv12|vaapi,hwupload")
+	require.NotContains(t, c, "hwupload,scale_vaapi")
+
+	// Software transpose after tonemapping stays on the CPU: no
+	// upload/download roundtrip around rotation.
+	transposed := baseSpec()
+	transposed.HDR, transposed.BitDepth, transposed.VAAPI = true, 10, true
+	transposed.UseTranspose, transposed.ForceSwTranspose, transposed.Rotation = true, true, 90
+	transposedCmd := cmd(transposed, BuildArgs(transposed))
+	require.Contains(t, transposedCmd, "format=nv12,transpose=2,format=nv12|vaapi,hwupload")
+	require.NotContains(t, transposedCmd, "hwupload,hwdownload")
+
+	// But 10-bit SDR skips tonemapping, so the transpose download keeps depth.
+	sdr := baseSpec()
+	sdr.BitDepth, sdr.NVENC, sdr.NVENCScale = 10, true, "cuda"
+	sdr.UseTranspose, sdr.Rotation = true, 90
+	require.Contains(t, cmd(sdr, BuildArgs(sdr)), "hwdownload,format=p010le,transpose=2")
+
+	sdr12 := baseSpec()
+	sdr12.BitDepth, sdr12.NVENC, sdr12.NVENCScale = 12, true, "cuda"
+	sdr12.UseTranspose, sdr12.Rotation = true, 90
+	require.Contains(t, cmd(sdr12, BuildArgs(sdr12)), "hwdownload,format=p012le,transpose=2")
+}
+
+func TestBuildArgsNoAudio(t *testing.T) {
+	s := baseSpec()
+	s.Audio = AudioInfo{}
+	c := cmd(s, BuildArgs(s))
+	require.Contains(t, c, `"-c:v" libx264`)
+	require.NotContains(t, c, `-map "0:a`)
+	require.NotContains(t, c, `"-c:a"`)
+	require.NotContains(t, c, "b:a")
+}
+
+func TestBuildArgsVAAPIOpenCL(t *testing.T) {
+	for _, quality := range []string{"720p", QualityMax} {
+		for _, rotation := range []int{0, -90, 90, 180} {
+			s := baseSpec()
+			s.VAAPI, s.HDR, s.VAAPIOpenCL, s.UseTranspose = true, true, true, true
+			s.Quality, s.Rotation, s.VAAPIDevice = quality, rotation, "/dev/dri/renderD129"
+			args := BuildArgs(s)
+			require.Contains(t, args, "vaapi=memories:/dev/dri/renderD129")
+			require.Contains(t, args, "opencl=memories_opencl@memories")
+			require.Equal(t, "memories_opencl", args[slices.Index(args, "-filter_hw_device")+1])
+			filter := args[slices.Index(args, "-vf")+1]
+			scale := "scale_vaapi=force_original_aspect_ratio=decrease:format=p010"
+			if quality != QualityMax {
+				scale += ":w=1280:h=1280"
+			}
+			want := scale + ",hwmap=derive_device=opencl," +
+				"tonemap_opencl=tonemap=hable:format=nv12:primaries=bt709:transfer=bt709:matrix=bt709:range=tv," +
+				"hwmap=derive_device=vaapi:reverse=1"
+			switch rotation {
+			case -90:
+				want += ",transpose_vaapi=1"
+			case 90:
+				want += ",transpose_vaapi=2"
+			case 180:
+				want += ",transpose_vaapi=1,transpose_vaapi=1"
+			}
+			require.Equal(t, want, filter)
+			require.NotContains(t, strings.Join(args, " "), "hwdownload")
+			require.NotContains(t, filter, "zscale")
+		}
+	}
+}
+
+func TestBuildArgsAudioCopy(t *testing.T) {
+	s := baseSpec()
+	s.Audio = AudioInfo{CodecName: "aac", Channels: 2, SampleRate: 48000, BitRate: 128000}
+	c := cmd(s, BuildArgs(s))
+	require.Contains(t, c, `-map "0:a:0?" "-c:a" copy`)
+	require.NotContains(t, c, "b:a")
+
+	multi := baseSpec()
+	multi.Audio = AudioInfo{CodecName: "aac", Channels: 6}
+	require.Contains(t, cmd(multi, BuildArgs(multi)), `"-c:a" aac`)
+}
+
+func TestSegmentArgs(t *testing.T) {
+	s := baseSpec()
+	c := cmd(s, SegmentArgs(s, 4, SegmentPattern("/tmp/vod", "720p")))
+	require.Contains(t, c, "-fps_mode passthrough")
+	require.Contains(t, c, "-start_number 4")
+	require.Contains(t, c, "-hls_segment_filename /tmp/vod/720p-%06d.ts")
+	require.Contains(t, c, `"expr:gte(t,n_forced*3)" -`)
+
+	gop := baseSpec()
+	gop.UseGopSize = true
+	g := cmd(gop, SegmentArgs(gop, 0, SegmentPattern("/tmp/vod", "720p")))
+	require.Contains(t, g, "-g 90 -keyint_min 90")
+	require.NotContains(t, g, "force_key_frames")
+}
+
+func TestMP4Args(t *testing.T) {
+	c := cmd(baseSpec(), MP4Args(baseSpec()))
+	require.NotContains(t, c, "-fps_mode")
+	require.Contains(t, c, `-movflags frag_keyframe+empty_moov+faststart -f mp4 "pipe:1"`)
+}
+
+func TestSegmentPaths(t *testing.T) {
+	require.Equal(t, "/tmp/vod/720p-%06d.ts", SegmentPattern("/tmp/vod", "720p"))
+	require.Equal(t, "/tmp/vod/720p-000003.ts", SegmentPath("/tmp/vod", "720p", 3))
+}
+
+func TestParseSegmentName(t *testing.T) {
+	q, id, err := ParseSegmentName("720p-000003.ts")
+	require.NoError(t, err)
+	require.Equal(t, "720p", q)
+	require.Equal(t, 3, id)
+
+	q, id, err = ParseSegmentName("/tmp/go-vod/my-id-1/max-000042.ts")
+	require.NoError(t, err)
+	require.Equal(t, "max", q)
+	require.Equal(t, 42, id)
+
+	for _, bad := range []string{"", "720p.ts", "720p-abc.ts", "720p-000003.mp4", "a-b-c.ts"} {
+		_, _, err := ParseSegmentName(bad)
+		require.Error(t, err, bad)
+	}
+}
+
+func TestParseSegmentLine(t *testing.T) {
+	q, id, ok := ParseSegmentLine("  1080p-000003.ts\n")
+	require.True(t, ok)
+	require.Equal(t, "1080p", q)
+	require.Equal(t, 3, id)
+
+	_, _, ok = ParseSegmentLine("frame=  100 fps=30")
+	require.False(t, ok)
+}
+
+func TestQuoteForLog(t *testing.T) {
+	require.Equal(t, `-vf "scale=1:2"`, QuoteForLog([]string{"-vf", "scale=1:2"}))
+}
+
+func TestRedactArgs(t *testing.T) {
+	t.Setenv("GO_VOD_DEBUG", "")
+	in := []string{"-seekable", "1", "-headers", "X-Token: secret\r\n", "-i", "http://nc/file/7"}
+	out := RedactArgs(in)
+	require.Equal(t, []string{"-seekable", "1", "-headers", "<redacted>", "-i", "http://nc/file/7"}, out)
+	require.Equal(t, "X-Token: secret\r\n", in[3])
+	require.NotContains(t, QuoteForLog(out), "secret")
+
+	plain := []string{"-i", "file.mp4"}
+	require.Equal(t, plain, RedactArgs(plain))
+
+	dangling := []string{"-headers"}
+	require.Equal(t, dangling, RedactArgs(dangling))
+
+	t.Setenv("GO_VOD_DEBUG", "1")
+	require.Equal(t, in, RedactArgs(in))
+}
+
+func TestEncoderCopy(t *testing.T) {
+	require.Equal(t, EncoderCopy, Encoder(Spec{Copy: true}))
+	require.Equal(t, EncoderCopy, Encoder(Spec{Copy: true, VAAPI: true, NVENC: true}))
+}
+
+func TestBuildArgsCopy(t *testing.T) {
+	s := baseSpec()
+	s.Copy = true
+	c := cmd(s, BuildArgs(s))
+	require.Contains(t, c, `"-c:v" copy`)
+	require.Contains(t, c, `"-c:a" aac`)
+	require.NotContains(t, c, "-vf")
+	require.NotContains(t, c, "-hwaccel")
+	require.NotContains(t, c, "-crf")
+}
+
+func TestSegmentArgsCopy(t *testing.T) {
+	s := baseSpec()
+	s.Copy = true
+	c := cmd(s, SegmentArgs(s, 2, SegmentPattern("/tmp/vod", "direct")))
+	require.NotContains(t, c, "-fps_mode")
+	require.Contains(t, c, "-hls_time 3")
+	require.NotContains(t, c, "force_key_frames")
+	require.NotContains(t, c, " -g ")
+	require.NotContains(t, c, "split_by_time")
+}
+
+func TestSegmentTimestamps(t *testing.T) {
+	for _, backend := range []string{EncoderX264, EncoderVAAPI, EncoderNVENC} {
+		for _, copy := range []bool{false, true} {
+			s := baseSpec()
+			s.VAAPI, s.NVENC, s.NVENCScale = backend == EncoderVAAPI, backend == EncoderNVENC, "cuda"
+			s.Copy, s.StartAt, s.FrameRate = copy, 9, 120
+			s.UseGopSize = s.NVENC
+			args := SegmentArgs(s, 3, SegmentPattern("/tmp/vod", s.Quality))
+			i := slices.Index(args, "-fps_mode")
+			if copy {
+				require.Equal(t, -1, i)
+			} else {
+				require.Greater(t, i, slices.Index(args, "-i"))
+				require.Greater(t, i, slices.Index(args, "-f"))
+				require.Equal(t, "passthrough", args[i+1])
+			}
+			require.Equal(t, "9.000000", args[slices.Index(args, "-ss")+1])
+			require.Equal(t, "3", args[slices.Index(args, "-start_number")+1])
+			require.Contains(t, args, "-copyts")
+			require.Equal(t, "+genpts", args[slices.Index(args, "-fflags")+1])
+			require.Equal(t, "disabled", args[slices.Index(args, "-avoid_negative_ts")+1])
+		}
+	}
+}
+
+func TestCopySegments(t *testing.T) {
+	segs := CopySegments([]float64{0, 2, 4, 6, 8, 10}, 11*time.Second, 3)
+	require.Equal(t, []Segment{
+		{Start: 0, Duration: 4},
+		{Start: 4, Duration: 4},
+		{Start: 8, Duration: 3},
+	}, segs)
+
+	segs = CopySegments([]float64{0, 10}, 12*time.Second, 3)
+	require.Equal(t, []Segment{
+		{Start: 0, Duration: 10},
+		{Start: 10, Duration: 2},
+	}, segs)
+
+	segs = CopySegments([]float64{8, 0, 4, 2, 10, 6}, 11*time.Second, 3)
+	require.Len(t, segs, 3)
+
+	segs = CopySegments([]float64{0, 12}, 12*time.Second, 3)
+	require.Equal(t, []Segment{{Start: 0, Duration: 12}}, segs)
+
+	require.Nil(t, CopySegments(nil, 11*time.Second, 3))
+	require.Nil(t, CopySegments([]float64{0}, 0, 3))
+	require.Nil(t, CopySegments([]float64{0}, 11*time.Second, 0))
+}

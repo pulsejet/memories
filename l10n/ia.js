@@ -33,6 +33,7 @@ OC.L10N.register(
     "Password protected" : "Protegite per contrasigno",
     "Share link" : "Divulgar ligamine",
     "Refresh" : "Refrescar",
+    "OK" : "OK",
     "Home" : "Initio",
     "Previous" : "Previe",
     "Next" : "Proxime",

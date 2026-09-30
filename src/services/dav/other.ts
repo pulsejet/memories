@@ -26,12 +26,11 @@ export async function viewInFolder(photo: IPhoto) {
  */
 export function viewInFolderUrl({ filename, fileid }: { filename: string; fileid: number }) {
   // ensure dirPath starts with a slash
-  let dirPath = filename.substring(0, filename.lastIndexOf('/'));
+  let dirPath = filename.slice(0, filename.lastIndexOf('/'));
   if (!dirPath.startsWith('/')) {
     dirPath = `/${dirPath}`;
   }
 
-  /** @todo Doesn't seem to work on Nextcloud 28 */
   return API.Q(generateUrl('/apps/files/'), {
     dir: dirPath,
     scrollto: fileid,

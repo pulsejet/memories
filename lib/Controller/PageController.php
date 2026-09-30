@@ -7,26 +7,27 @@ namespace OCA\Memories\Controller;
 use OCA\Files\Event\LoadSidebar;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Service\BinExt;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
-use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\AppFramework\Http\Events\BeforeTemplateRenderedEvent;
 use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\Template\PublicTemplateResponse;
-use OCP\AppFramework\Services\IInitialState;
+use OCP\AppFramework\Http\TemplateResponse;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IRequest;
-use Psr\Log\LoggerInterface;
+use OCP\IUserSession;
 
 final class PageController extends Controller
 {
     public function __construct(
         IRequest $request,
         protected IEventDispatcher $eventDispatcher,
-        private IInitialState $initialState,
-        private LoggerInterface $logger,
-        private ?\OCA\Recognize\Public\ApiKeyManager $apiKeyManager,
+        private IUserSession $userSession,
+        protected SystemConfig $systemConfig,
+        protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -36,7 +37,7 @@ final class PageController extends Controller
     public function main(): Response
     {
         // Check native version if available
-        $nativeVer = Util::callerNativeVersion();
+        $nativeVer = $this->util->callerNativeVersion();
         if (null !== $nativeVer && version_compare($nativeVer, BinExt::NX_VER_MIN, '<')) {
             return new PublicTemplateResponse(Application::APPNAME, 'native-old');
         }
@@ -45,21 +46,12 @@ final class PageController extends Controller
         \OCP\Util::addScript(Application::APPNAME, 'memories-main');
 
         // Additional setup for Recognize
-        if (Util::recognizeIsInstalled()) {
-            // Auto translation for tags
+        if ($this->systemConfig->recognizeIsInstalled()) {
             \OCP\Util::addTranslations('recognize');
-            // Obtain API Key
-            if (null !== $this->apiKeyManager) {
-                try {
-                    $this->initialState->provideInitialState('recognizeApiKey', $this->apiKeyManager->generateApiKey());
-                } catch (\JsonException $e) {
-                    $this->logger->error('Failed to generate recognize api key', ['exception' => $e]);
-                }
-            }
         }
 
         $response = new TemplateResponsePatch(Application::APPNAME, 'main', self::getMainParams());
-        $response->setContentSecurityPolicy(self::getCSP());
+        $response->setContentSecurityPolicy($this->systemConfig->getCSP());
         $response->cacheFor(0);
 
         // Check if requested from native app
@@ -68,48 +60,6 @@ final class PageController extends Controller
         }
 
         return $response;
-    }
-
-    /** Get the common content security policy */
-    public static function getCSP(): ContentSecurityPolicy
-    {
-        $policy = new ContentSecurityPolicy();
-
-        // Image domains MUST be added to the connect domain list
-        // because of the service worker fetch() call
-        $addImageDomain = static function (string $url) use (&$policy): void {
-            $policy->addAllowedImageDomain($url);
-            $policy->addAllowedConnectDomain($url);
-        };
-
-        // Create base policy
-        $policy->addAllowedWorkerSrcDomain("'self'");
-        $policy->addAllowedScriptDomain("'self'");
-        $policy->addAllowedFrameDomain("'self'");
-        $policy->addAllowedImageDomain("'self'");
-        $policy->addAllowedMediaDomain("'self'");
-        $policy->addAllowedConnectDomain("'self'");
-
-        // Video player
-        $policy->addAllowedWorkerSrcDomain('blob:');
-        $policy->addAllowedScriptDomain('blob:');
-        $policy->addAllowedMediaDomain('blob:');
-
-        // Image editor
-        $policy->addAllowedConnectDomain('data:');
-
-        // Allow OSM
-        $policy->addAllowedFrameDomain('www.openstreetmap.org');
-        $addImageDomain('https://tile.openstreetmap.org');
-        $addImageDomain('https://*.a.ssl.fastly.net');
-
-        // Native communication
-        $addImageDomain('http://127.0.0.1');
-
-        // Allow Nominatim
-        $policy->addAllowedConnectDomain('nominatim.openstreetmap.org');
-
-        return $policy;
     }
 
     /**
@@ -208,8 +158,48 @@ final class PageController extends Controller
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
+    public function search(): Response
+    {
+        return $this->main();
+    }
+
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function nxsetup(): Response
     {
         return $this->main();
+    }
+
+    /**
+     * Get <link> headers from apps (theme stylesheets, icons, ...).
+     *
+     * Dispatches BeforeTemplateRenderedEvent first so apps (e.g. theming)
+     * inject their headers like on a normal page.
+     *
+     * There is no OCP API to read back headers added via OCP\Util::addHeader;
+     * core reads the same static in OC\Template\Template::fetchPage.
+     * Psalm reports no issue for this read.
+     *
+     * @return array<array<string, null|string>>
+     */
+    public function getLinkHeaders(): array
+    {
+        $user = $this->userSession->getUser();
+        $this->eventDispatcher->dispatchTyped(new BeforeTemplateRenderedEvent(
+            null !== $user,
+            new TemplateResponse(Application::APPNAME, 'main', [], TemplateResponse::RENDER_AS_BLANK),
+        ));
+
+        $cssLinks = [
+            ['rel' => 'stylesheet', 'href' => \OC::$WEBROOT.'/core/css/server.css'],
+        ];
+        foreach (\OC_Util::$headers as $header) {
+            if (($header['tag'] ?? null) !== 'link' || !isset($header['attributes']['href'])) {
+                continue;
+            }
+            $cssLinks[] = $header['attributes'];
+        }
+
+        return $cssLinks;
     }
 }

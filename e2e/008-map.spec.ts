@@ -1,9 +1,15 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders } from './navigation';
+import { appUrl, bootstrap, e2eHeaders, osmTileHits, teardown } from './navigation';
 import { DavClient } from './utils';
+import { snap } from './screenshots';
 
 import type { IMapCluster, IDay, IPhoto } from '@typings';
+import type { Page } from '@playwright/test';
+
 import { DATASET } from './dataset';
+
+const SM_BOUNDS = '33.920842,34.084143,-118.553975,-118.411067';
+const DTLA_LON = -118.2437;
 
 test.use({
   extraHTTPHeaders: e2eHeaders({
@@ -21,7 +27,7 @@ test.describe('@api Map', () => {
   test('Query map clusters for Santa Monica and Venice', async ({ request }) => {
     const dav = new DavClient(request);
     const url = new URL(`${appUrl}/api/map/clusters`);
-    url.searchParams.set('bounds', '33.920842,34.084143,-118.553975,-118.411067');
+    url.searchParams.set('bounds', SM_BOUNDS);
     url.searchParams.set('zoom', '13');
 
     const res = await request.get(url.toString());
@@ -124,13 +130,13 @@ test.describe('@api Map', () => {
 
     const days: IDay[] = await res.json();
     expect(days).toStrictEqual([
-      { dayid: 19550, count: 3 },
-      { dayid: 19549, count: 3 },
-      { dayid: 19548, count: 4 },
+      { dayid: 18455, count: 3 },
+      { dayid: 18454, count: 3 },
+      { dayid: 18453, count: 4 },
     ]);
 
     // Query single day details filtered by the same map bounds.
-    const dayUrl = new URL(`${appUrl}/api/days/19550`);
+    const dayUrl = new URL(`${appUrl}/api/days/18455`);
     dayUrl.searchParams.set('mapbounds', mapbounds);
 
     const dayRes = await request.get(dayUrl.toString());
@@ -139,4 +145,92 @@ test.describe('@api Map', () => {
     const photos: IPhoto[] = await dayRes.json();
     expect(photos).toHaveLength(3);
   });
+
+  test('Initial position for geo timeline', async ({ request }) => {
+    const res = await request.get(`${appUrl}/api/map/init`);
+    expect(res.ok()).toBeTruthy();
+
+    const data: { pos: { lat: number | string; lon: number | string } | null } = await res.json();
+    expect(data.pos).not.toBeNull();
+    const lat = Number(data.pos!.lat);
+    const lon = Number(data.pos!.lon);
+    expect(Number.isFinite(lat)).toBe(true);
+    expect(Number.isFinite(lon)).toBe(true);
+    expect(lat).toBeGreaterThanOrEqual(-90);
+    expect(lat).toBeLessThanOrEqual(90);
+    expect(lon).toBeGreaterThanOrEqual(-180);
+    expect(lon).toBeLessThanOrEqual(180);
+  });
 });
+
+test.describe('@ui Map', () => {
+  test.beforeEach(bootstrap);
+  test.afterEach(teardown);
+
+  test('Map clusters at Santa Monica then pan past Los Angeles', async ({ page, request }) => {
+    const dav = new DavClient(request);
+
+    await test.step('Open Santa Monica viewport', async (step) => {
+      const mapPage = new URL(`${appUrl}/map`);
+      mapPage.searchParams.set('b', SM_BOUNDS);
+      mapPage.searchParams.set('z', '13');
+      await page.goto(mapPage.toString());
+      await expect(page.locator('.split-container')).toBeVisible();
+      await expect(page.locator('.map-matter .leaflet-container')).toBeVisible();
+      await expect(page.locator('.leaflet-marker-icon .preview')).toHaveCount(3);
+
+      const badges = await page.locator('.leaflet-marker-icon .preview .count').allTextContents();
+      expect(badges.map((b) => b.trim()).sort()).toStrictEqual(['3', '3', '4']);
+
+      await expect(page.locator('.split-container .timeline-header .title')).toHaveText('10 photos');
+      for (const base of ['for-geo-020.jpg', 'for-geo-019.jpg', 'for-geo-018.jpg']) {
+        const fileid = await dav.fileid(`/for-geo/${base}`);
+        await expect(page.locator(`.p-outer--${fileid}`)).toBeVisible();
+      }
+      await snap(page, 'map-santa-monica', step);
+    });
+
+    await test.step('Pan east past downtown Los Angeles', async () => {
+      await page.locator('.map-matter .leaflet-container').evaluate((el) => (el as HTMLElement).focus());
+      for (let i = 0; i < 12; i++) {
+        const [, lon] = boundsCenter(currentBounds(page));
+        if (lon > DTLA_LON + 0.03) break;
+        const bBefore = currentBounds(page);
+        await page.keyboard.press('ArrowRight');
+        await expect.poll(() => currentBounds(page)).not.toBe(bBefore);
+      }
+      const [, lon] = boundsCenter(currentBounds(page));
+      expect(lon).toBeGreaterThan(DTLA_LON);
+    });
+
+    await test.step('Check Los Angeles clusters and timeline', async (step) => {
+      await expect(page.locator('.leaflet-marker-icon .preview')).toHaveCount(2);
+
+      const badges = await page.locator('.leaflet-marker-icon .preview .count').allTextContents();
+      expect(badges.map((b) => b.trim()).sort()).toStrictEqual(['2', '8']);
+
+      await expect(page.locator('.split-container .timeline-header .title')).toHaveText('10 photos');
+      for (const base of ['for-geo-010.jpg', 'for-geo-009.jpg', 'for-geo-008.jpg']) {
+        const fileid = await dav.fileid(`/for-geo/${base}`);
+        await expect(page.locator(`.p-outer--${fileid}`)).toBeVisible();
+      }
+
+      // Venice photos from the Santa Monica viewport must be gone even with preloading.
+      for (const base of ['for-geo-015.jpg', 'for-geo-016.jpg', 'for-geo-017.jpg', 'for-geo-018.jpg']) {
+        const fileid = await dav.fileid(`/for-geo/${base}`);
+        await expect(page.locator(`.memories-thumb-${fileid}`)).toHaveCount(0);
+      }
+    });
+
+    expect(osmTileHits).toBeGreaterThan(0);
+  });
+});
+
+function currentBounds(page: Page): string {
+  return new URL(page.url()).searchParams.get('b') ?? '';
+}
+
+function boundsCenter(bounds: string): [number, number] {
+  const [minLat, maxLat, minLon, maxLon] = bounds.split(',').map(Number);
+  return [(minLat + maxLat) / 2, (minLon + maxLon) / 2];
+}

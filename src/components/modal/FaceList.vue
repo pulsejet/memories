@@ -3,7 +3,7 @@
     <div class="search">
       <NcTextField
         :autofocus="true"
-        :value.sync="search"
+        v-model="search"
         :label="t('memories', 'Search')"
         :placeholder="t('memories', 'Search')"
       >
@@ -27,12 +27,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent, markRaw } from 'vue';
 import Fuse from 'fuse.js';
 
 import { showError } from '@nextcloud/dialogs';
 
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import ClusterGrid from '@components/ClusterGrid.vue';
 
@@ -63,8 +63,8 @@ export default defineComponent({
   },
 
   data: () => ({
-    list: null as ICluster[] | null,
-    fuse: null as Fuse<ICluster> | null,
+    list: null as IFace[] | null,
+    fuse: null as Fuse<IFace> | null,
     search: String(),
   }),
 
@@ -74,11 +74,11 @@ export default defineComponent({
 
   computed: {
     user() {
-      return this.$route.params.user;
+      return this.$route.params.user?.toString();
     },
 
     name() {
-      return this.$route.params.name;
+      return this.$route.params.name?.toString();
     },
 
     backend() {
@@ -86,7 +86,7 @@ export default defineComponent({
     },
 
     filteredList() {
-      if (!this.list || !this.search || !this.fuse) return this.list || [];
+      if (!this.list || !this.search || !this.fuse) return this.list ?? [];
       return this.fuse.search(this.search).map((r) => r.item);
     },
   },
@@ -97,7 +97,7 @@ export default defineComponent({
         this.list = null;
         const faces = await dav.getFaceList(this.backend);
         this.list = faces.filter((c: IFace) => c.user_id === this.user && String(c.name || c.cluster_id) !== this.name);
-        this.fuse = new Fuse(this.list, { keys: ['name'] });
+        this.fuse = markRaw(new Fuse(this.list, { keys: ['name'] }));
       } catch (e) {
         showError(this.t('memories', 'Failed to load faces'));
         console.error(e);
@@ -121,7 +121,7 @@ export default defineComponent({
         await dav.recognizeCreateFace(this.user, name);
 
         return this.selectNew(name);
-      } catch (e) {
+      } catch (e: any) {
         // Directory already exists
         if (e.status === 405) return this.selectNew(name);
 
@@ -139,8 +139,8 @@ export default defineComponent({
       });
     },
 
-    click(face: IFace) {
-      this.$emit('select', face);
+    click(item: ICluster) {
+      this.$emit('select', item as IFace);
     },
   },
 });

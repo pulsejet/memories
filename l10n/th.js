@@ -53,6 +53,7 @@ OC.L10N.register(
     "Password protected" : "ใส่รหัสผ่านไว้",
     "Share link" : "แชร์ลิงก์",
     "Refresh" : "รีเฟรช",
+    "OK" : "OK",
     "Oldest first" : "เก่าที่สุดก่อน",
     "Newest first" : "ใหม่ที่สุดก่อน",
     "Home" : "หน้าหลัก",

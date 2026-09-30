@@ -27,10 +27,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent, markRaw } from 'vue';
 import type { PropType } from 'vue';
 
-const NcModal = () => import('@nextcloud/vue/dist/Components/NcModal.js');
+const NcModal = defineAsyncComponent(() => import('@nextcloud/vue/components/NcModal'));
 
 import * as utils from '@services/utils';
 
@@ -42,8 +42,8 @@ export default defineComponent({
 
   props: {
     size: {
-      type: String,
-      default: 'small',
+      type: String as PropType<'small' | 'normal' | 'large' | 'full'>,
+      default: 'small' as const,
     },
     sidebar: {
       type: String as PropType<string | null>,
@@ -67,11 +67,11 @@ export default defineComponent({
       utils.bus.on('memories:sidebar:opened', this.handleAppSidebarOpen);
       utils.bus.on('memories:sidebar:closed', this.handleAppSidebarClose);
     }
-    this._mutationObserver = new MutationObserver(this.handleBodyMutation);
+    this._mutationObserver = markRaw(new MutationObserver(this.handleBodyMutation));
     this._mutationObserver.observe(document.body, { childList: true });
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.sidebar) {
       utils.bus.off('memories:sidebar:opened', this.handleAppSidebarOpen);
       utils.bus.off('memories:sidebar:closed', this.handleAppSidebarClose);
@@ -125,7 +125,7 @@ export default defineComponent({
     },
 
     handleAppSidebarOpen() {
-      const sidebar = document.getElementById('app-sidebar-vue');
+      const sidebar = document.getElementById('app-sidebar-vue') ?? document.getElementById('app-sidebar-native');
       if (sidebar) {
         this.isSidebarShown = true;
         this.sidebarWidth = sidebar.offsetWidth;
@@ -151,7 +151,7 @@ export default defineComponent({
     margin-bottom: 5px;
   }
 
-  :deep .buttons {
+  :deep(.buttons) {
     margin-top: 10px;
     text-align: right;
 
@@ -162,12 +162,12 @@ export default defineComponent({
 }
 
 @media (max-width: 512px) {
-  .memories-modal:deep {
-    .modal-header {
+  .memories-modal {
+    :deep(.modal-header) {
       display: none !important;
     }
 
-    .modal-wrapper > .modal-container {
+    :deep(.modal-wrapper > .modal-container) {
       max-height: calc(99% - env(keyboard-inset-height, 0px));
       height: unset;
       top: unset;
@@ -176,10 +176,11 @@ export default defineComponent({
       // Hide scrollbar
       scrollbar-width: none;
       -ms-overflow-style: none;
-      &::-webkit-scrollbar {
-        display: none;
-        width: 0 !important;
-      }
+    }
+
+    :deep(.modal-wrapper > .modal-container::-webkit-scrollbar) {
+      display: none;
+      width: 0 !important;
     }
   }
 }

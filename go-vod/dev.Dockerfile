@@ -1,9 +1,9 @@
-FROM golang:bullseye AS builder
+FROM golang:1.27-bookworm AS builder
 WORKDIR /app
 COPY . .
 RUN CGO_ENABLED=0 go build -buildvcs=false -ldflags="-s -w"
 
-FROM jellyfin/jellyfin:latest as base
+FROM jellyfin/jellyfin:latest AS base
 
 RUN rm -rf /jellyfin && \
     ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/local/bin/ffmpeg && \
@@ -17,5 +17,12 @@ COPY --from=base / /
 COPY --from=builder /app/go-vod .
 
 EXPOSE 47788
+
+HEALTHCHECK \
+  --interval=30s \
+  --timeout=5s \
+  --start-period=30s \
+  --retries=3 \
+  CMD curl -f http://localhost:47788/health || exit 1
 
 ENTRYPOINT ["/go-vod"]

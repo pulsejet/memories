@@ -1,18 +1,28 @@
 <template>
-  <div id="mobile-nav">
-    <router-link v-for="link in links" :key="link.to" :to="link.to" @click.native="linkClick" replace exact-path>
+  <MobileBottomBar id="mobile-nav">
+    <router-link
+      v-for="link in links"
+      :key="link.to"
+      :to="link.to"
+      class="mobile-bottom-bar-item"
+      @click.native="linkClick"
+      replace
+      exact-path
+    >
       <component :is="link.icon" :size="22" />
-      {{ link.text }}
+      <span class="label">{{ link.text }}</span>
     </router-link>
-  </div>
+  </MobileBottomBar>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, markRaw } from 'vue';
 
 import * as nativex from '@native';
 
+import UserConfig from '@mixins/UserConfig';
 import { translate as t } from '@services/l10n';
+import MobileBottomBar from '@components/MobileBottomBar.vue';
 
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import SearchIcon from 'vue-material-design-icons/Magnify.vue';
@@ -22,18 +32,24 @@ export default defineComponent({
   name: 'MobileNav',
 
   components: {
+    MobileBottomBar,
     ImageMultipleIcon,
     SearchIcon,
     AlbumIcon,
   },
 
+  mixins: [UserConfig],
+
   computed: {
     links() {
-      return [
-        { to: '/', icon: ImageMultipleIcon, text: t('memories', 'Photos') },
-        { to: '/explore', icon: SearchIcon, text: t('memories', 'Explore') },
-        { to: '/albums', icon: AlbumIcon, text: t('memories', 'Albums') },
+      const links = [
+        { to: '/', icon: markRaw(ImageMultipleIcon), text: t('memories', 'Photos') },
+        { to: '/explore', icon: markRaw(SearchIcon), text: t('memories', 'Explore') },
       ];
+      if (this.config.albums_enabled) {
+        links.push({ to: '/albums', icon: markRaw(AlbumIcon), text: t('memories', 'Albums') });
+      }
+      return links;
     },
   },
 
@@ -76,31 +92,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 #mobile-nav {
   background-color: var(--color-main-background);
+  color: var(--color-main-text);
   height: var(--mobile-nav-height);
-  text-align: center;
-  padding: 8px;
-  padding-top: 3px;
-  font-size: 0.9em;
-  overflow: hidden;
-
-  :deep a {
-    flex: 1 1 0px;
-    opacity: 0.75;
-
-    span.material-design-icon {
-      border-radius: 20px;
-      padding: 4px;
-      max-width: 70px;
-      margin: 0 auto;
-    }
-
-    &.router-link-exact-active {
-      opacity: 1;
-
-      span.material-design-icon {
-        background: var(--color-primary-element-light);
-      }
-    }
-  }
 }
 </style>

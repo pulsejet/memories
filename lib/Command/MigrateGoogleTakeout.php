@@ -26,7 +26,7 @@ namespace OCA\Memories\Command;
 use OC\Files\SetupManager;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Exif;
-use OCA\Memories\Service;
+use OCA\Memories\Service\BinExt;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -64,6 +64,8 @@ final class MigrateGoogleTakeout extends Command
         protected IDBConnection $connection,
         protected ITempManager $tempManager,
         protected TimelineWrite $timelineWrite,
+        protected Exif $exif,
+        protected BinExt $binExt,
     ) {
         parent::__construct();
     }
@@ -85,7 +87,7 @@ final class MigrateGoogleTakeout extends Command
     {
         $this->output = $output;
         $this->input = $input;
-        $this->mimeTypes = Exif::allowedEditMimetypes();
+        $this->mimeTypes = $this->exif->allowedEditMimetypes();
 
         // Provide ample warnings
         if ($input->isInteractive()) {
@@ -104,8 +106,8 @@ final class MigrateGoogleTakeout extends Command
         }
 
         // Start static exif process
-        Exif::ensureStaticExiftoolProc();
-        Service\BinExt::testExiftool(); // throws
+        $this->exif->ensureStaticExiftoolProc();
+        $this->binExt->testExiftool(); // throws
 
         // Call migration for each user
         if ($input->getOption('user')) {
@@ -198,22 +200,17 @@ final class MigrateGoogleTakeout extends Command
         $jsonFile = null;
 
         try {
-            // the JSON file may contain the "supplemental-metadata" string, fully or partially
+            // The JSON sidecar may be truncated by Google for long file names
+            // https://github.com/pulsejet/memories/issues/1559
             // https://github.com/pulsejet/memories/pull/1441
-            $partial_re = '\.?[supplemental\-metadata]*\.json$';
+            $candidates = [];
             foreach ($nodes as $node) {
-                if (!$node instanceof File) {
-                    continue;
+                if ($node instanceof File) {
+                    $candidates[$node->getPath()] = $node;
                 }
-
-                // check if the current file matches our $path . $partial_re RegExp
-                $current = $node->getPath();
-                $re = preg_quote($path, '/').$partial_re;
-                if (preg_match("/{$re}/", $current)) {
-                    $jsonFile = $node;
-
-                    break;
-                }
+            }
+            if ($match = self::findTakeoutJsonFile($path, array_keys($candidates))) {
+                $jsonFile = $candidates[$match];
             }
 
             if (null === $jsonFile || !$jsonFile->isReadable()) {
@@ -246,7 +243,7 @@ final class MigrateGoogleTakeout extends Command
         $txf = self::takeoutToExiftoolJson($json);
 
         // Get current EXIF metadata
-        $exif = Exif::getExifFromFile($file);
+        $exif = $this->exif->getExifFromFile($file);
 
         // Check if EXIF is blank, which is probably wrong
         if (0 === \count($exif)) {
@@ -283,7 +280,7 @@ final class MigrateGoogleTakeout extends Command
 
             // Write EXIF metadata
             try {
-                Exif::setFileExif($file, $txf);
+                $this->exif->setFileExif($file, $txf);
             } catch (\Exception $e) {
                 $this->output->writeln("<error>Error while writing EXIF metadata for {$path}: {$e->getMessage()}</error>");
 
@@ -358,5 +355,62 @@ final class MigrateGoogleTakeout extends Command
 
         // Remove all null values
         return array_filter($txf, static fn (mixed $value) => null !== $value);
+    }
+
+    /**
+     * Find the Google Takeout JSON sidecar for a media file.
+     *
+     * Google truncates long sidecar names (≈51 chars incl. ".json"), cutting
+     * the base name and/or the ".supplemental-metadata" suffix, e.g.
+     * "IMG….jpg.supplementa.json", "….snapchat.androi.json", "….jpeg.supp.json".
+     *
+     * https://github.com/pulsejet/memories/issues/1559
+     *
+     * @param string   $path           Full path of the media file
+     * @param string[] $candidatePaths Full paths to compare against
+     */
+    private static function findTakeoutJsonFile(string $path, array $candidatePaths): ?string
+    {
+        $dir = \dirname($path);
+        $base = basename($path);
+        $suffix = 'supplemental-metadata';
+        $combined = $base.'.'.$suffix;
+
+        foreach ($candidatePaths as $candidate) {
+            if (!str_ends_with($candidate, '.json')) {
+                continue;
+            }
+            if (\dirname($candidate) !== $dir) {
+                continue;
+            }
+
+            $name = basename($candidate);
+            $stem = substr($name, 0, -5); // strip ".json"
+
+            // Sidecar starts with the full base name, e.g.
+            // "IMG.jpg.supplemental-metadata.json" or ".supplementa.json"
+            if (str_starts_with($stem, $base)) {
+                $rest = substr($stem, \strlen($base));
+                if ('' === $rest) {
+                    return $candidate;
+                }
+                $frag = substr($rest, 1);
+                if (str_starts_with($rest, '.') && '' !== $frag && $frag === substr($suffix, 0, \strlen($frag))) {
+                    return $candidate;
+                }
+
+                continue;
+            }
+
+            // Truncated sidecar: Google capped the total length, so only a
+            // prefix of "<base>.supplemental-metadata" (or of the base itself)
+            // remains. Only allow this near the cap to avoid collisions
+            // between short, similarly-named files in the same folder.
+            if (\strlen($name) >= 48 && \strlen($stem) >= 20 && str_starts_with($combined, $stem)) {
+                return $candidate;
+            }
+        }
+
+        return null;
     }
 }

@@ -18,7 +18,7 @@ export function emptyDescription(routeName: string): string {
     case _m.routes.Videos.name:
       return t('memories', 'Your videos will appear here');
     case _m.routes.Albums.name:
-      return _m.route.params.name
+      return _m.route.params.name?.toString()
         ? t('memories', 'Add photos to albums by selecting them on your timeline.')
         : t('memories', 'Create an album to get started');
     case _m.routes.Archive.name:

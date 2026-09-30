@@ -25,6 +25,7 @@ OC.L10N.register(
     "Read only" : "Ri leughadh a-mhàin",
     "Share link" : "Ceangal co-roinnidh",
     "Refresh" : "Ath-nuadhaich",
+    "OK" : "OK",
     "Oldest first" : "As sine an toiseach",
     "Newest first" : "As ùire an toiseach",
     "Home" : "Dachaigh",

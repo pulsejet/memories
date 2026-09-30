@@ -12,7 +12,7 @@
         type="number"
         min="0"
         max="5000"
-        :value.sync="year"
+        v-model="year"
         :label="t('memories', 'Year')"
         :label-visible="true"
         :placeholder="t('memories', 'Year')"
@@ -25,7 +25,7 @@
         type="number"
         min="1"
         max="12"
-        :value.sync="month"
+        v-model="month"
         :label="t('memories', 'Month')"
         :label-visible="true"
         :placeholder="t('memories', 'Month')"
@@ -38,7 +38,7 @@
         type="number"
         min="1"
         max="31"
-        :value.sync="day"
+        v-model="day"
         :label="t('memories', 'Day')"
         :label-visible="true"
         :placeholder="t('memories', 'Day')"
@@ -51,7 +51,7 @@
         type="number"
         min="0"
         max="23"
-        :value.sync="hour"
+        v-model="hour"
         :label="t('memories', 'Hour')"
         :label-visible="true"
         :placeholder="t('memories', 'Hour')"
@@ -64,7 +64,7 @@
         type="number"
         min="0"
         max="59"
-        :value.sync="minute"
+        v-model="minute"
         :label="t('memories', 'Minute')"
         :placeholder="t('memories', 'Minute')"
         :disabled="disabled"
@@ -86,7 +86,7 @@
           type="number"
           min="0"
           max="5000"
-          :value.sync="yearLast"
+          v-model="yearLast"
           :label="t('memories', 'Year')"
           :label-visible="true"
           :placeholder="t('memories', 'Year')"
@@ -99,7 +99,7 @@
           type="number"
           min="1"
           max="12"
-          :value.sync="monthLast"
+          v-model="monthLast"
           :label="t('memories', 'Month')"
           :label-visible="true"
           :placeholder="t('memories', 'Month')"
@@ -112,7 +112,7 @@
           type="number"
           min="1"
           max="31"
-          :value.sync="dayLast"
+          v-model="dayLast"
           :label="t('memories', 'Day')"
           :label-visible="true"
           :placeholder="t('memories', 'Day')"
@@ -125,7 +125,7 @@
           type="number"
           min="0"
           max="23"
-          :value.sync="hourLast"
+          v-model="hourLast"
           :label="t('memories', 'Hour')"
           :label-visible="true"
           :placeholder="t('memories', 'Hour')"
@@ -138,7 +138,7 @@
           type="number"
           min="0"
           max="59"
-          :value.sync="minuteLast"
+          v-model="minuteLast"
           :label="t('memories', 'Minute')"
           :placeholder="t('memories', 'Minute')"
           :disabled="disabled"
@@ -151,9 +151,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
-const NcTextField = () => import('@nextcloud/vue/dist/Components/NcTextField.js');
+const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import * as utils from '@services/utils';
 
@@ -236,7 +236,7 @@ export default defineComponent({
     },
 
     origDateOldest() {
-      return new Date(this.sortedPhotos[this.sortedPhotos.length - 1].datetaken! * 1000);
+      return new Date(this.sortedPhotos.at(-1)!.datetaken! * 1000);
     },
 
     origDateDiff() {
@@ -275,7 +275,7 @@ export default defineComponent({
 
       // Get date of oldest photo
       if (photos.length > 1) {
-        date = new Date(photos[photos.length - 1].datetaken! * 1000);
+        date = new Date(photos.at(-1)!.datetaken! * 1000);
         this.yearLast = date.getUTCFullYear().toString();
         this.monthLast = (date.getUTCMonth() + 1).toString();
         this.dayLast = date.getUTCDate().toString();
@@ -393,7 +393,7 @@ export default defineComponent({
     max-width: calc(20% - 4px);
   }
 
-  :deep label {
+  :deep(label) {
     font-size: 0.8em;
     padding: 0 !important;
     padding-left: 3px !important;
@@ -403,6 +403,7 @@ export default defineComponent({
 .title-text {
   font-size: 0.9em;
   margin-left: 0.2em;
+  margin-bottom: 4px;
 }
 
 .oldest {

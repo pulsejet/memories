@@ -23,18 +23,30 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\IRequest;
 
-final class MapController extends GenericApiController
+final class MapController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected TimelineQuery $tq,
+        protected Util $util,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     #[NoAdminRequired]
     public function clusters(string $bounds, string $zoom): Http\Response
     {
-        return Util::guardEx(function () use ($bounds, $zoom) {
+        return $this->util->guardEx(function () use ($bounds, $zoom) {
             // Make sure we have bounds and zoom level
             // Zoom level is used to determine the grid length
             if (!$bounds || !$zoom || !is_numeric($zoom)) {
@@ -68,7 +80,7 @@ final class MapController extends GenericApiController
     #[NoAdminRequired]
     public function init(): Http\Response
     {
-        return Util::guardEx(function () {
+        return $this->util->guardEx(function () {
             return new JSONResponse([
                 'pos' => $this->tq->getMapInitialPosition(),
             ]);

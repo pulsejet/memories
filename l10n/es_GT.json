@@ -43,6 +43,7 @@
     "Expires" : "Expira",
     "Read only" : "Sólo lectura",
     "Refresh" : "Actualizar",
+    "OK" : "OK",
     "Oldest first" : "Más antiguo primero",
     "Newest first" : "Más reciente primero",
     "Home" : "Inicio",
@@ -57,7 +58,6 @@
     "Text" : "Texto",
     "Size" : "Tamaño",
     "Position" : "Posición",
-    "Auto" : "Auto",
     "Setup" : "Ajustes",
     "Choose" : "Seleccionar"
 },"pluralForm" :"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"

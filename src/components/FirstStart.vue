@@ -1,6 +1,6 @@
 <template>
-  <NcAppContent :allowSwipeNavigation="false">
-    <div class="outer fill-block" :class="{ show }">
+  <div class="native-auth">
+    <div class="card outer" :class="{ show }">
       <div class="title">
         <XImg class="img" :src="banner" :svg-tag="true" />
       </div>
@@ -17,17 +17,19 @@
       <div class="info" v-if="info">
         {{ info }} <br />
 
-        <NcButton @click="finish" class="button" type="primary">
+        <NcButton @click="finish" class="button" variant="primary">
           {{ t('memories', 'Continue to Memories') }}
         </NcButton>
       </div>
 
-      <NcButton @click="begin" class="button" v-if="info">
-        {{ t('memories', 'Choose again') }}
-      </NcButton>
-      <NcButton @click="begin" class="button" type="primary" v-else>
-        {{ t('memories', 'Click here to start') }}
-      </NcButton>
+      <div class="buttons">
+        <NcButton @click="begin" class="button" v-if="info">
+          {{ t('memories', 'Choose again') }}
+        </NcButton>
+        <NcButton @click="begin" class="button" variant="primary" v-else>
+          {{ t('memories', 'Click here to start') }}
+        </NcButton>
+      </div>
 
       <div class="footer">
         {{ t('memories', 'You can always change this later in settings') }}
@@ -38,14 +40,15 @@
         </span>
       </div>
     </div>
-  </NcAppContent>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent.js';
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js';
+import NcButton from '@nextcloud/vue/components/NcButton';
+import XImg from '@components/frame/XImg.vue';
+import * as nativex from '@native';
 
 import UserConfig from '@mixins/UserConfig';
 
@@ -61,8 +64,8 @@ import type { IDay } from '@typings';
 export default defineComponent({
   name: 'FirstStart',
   components: {
-    NcAppContent,
     NcButton,
+    XImg,
   },
 
   mixins: [UserConfig],
@@ -76,9 +79,16 @@ export default defineComponent({
   }),
 
   mounted() {
+    nativex.setTheme('#174a7d', true);
+    document.getElementById('content')?.classList.add('no-margins');
     window.setTimeout(() => {
       this.show = true;
     }, 300);
+  },
+
+  beforeUnmount() {
+    nativex.setTheme(); // restore server theme
+    document.getElementById('content')?.classList.remove('no-margins');
   },
 
   computed: {
@@ -138,11 +148,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .outer {
-  max-width: 450px;
-  margin: 0 auto;
-  padding: 20px;
-  text-align: center;
-
   transition: opacity 1s ease;
   opacity: 0;
   &.show {
@@ -150,43 +155,57 @@ export default defineComponent({
   }
 
   .title {
-    color: var(--color-primary);
-    font-size: 2.8em;
-    line-height: 1.1em;
-    font-family: cursive;
-    font-weight: 500;
-    margin-top: 10px;
-    margin-bottom: 20px;
-    width: 100%;
+    margin: 0 auto 16px;
+    color: #fff;
 
     > .img {
       margin: 0 auto;
-      width: 60vw;
-      max-width: 400px;
+      width: 172px;
+      max-width: 60vw;
     }
   }
 
+  .text {
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+
   .error {
-    color: red;
-    margin-top: 7px;
-    font-size: 0.8em;
-    line-height: 1.2em;
-    font-weight: 500;
+    color: #ffb4b4;
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    font-weight: 600;
     white-space: pre-line;
   }
 
   .info {
-    margin-top: 10px;
+    margin-top: 14px;
     font-weight: bold;
+
+    .button {
+      margin: 12px auto 0;
+    }
   }
 
-  .button {
-    display: inline-block;
-    margin: 8px;
+  .buttons {
+    margin-top: 20px;
+
+    .button {
+      margin: 10px auto;
+    }
+  }
+
+  &:has(> .info) > .buttons {
+    margin-top: 8px;
   }
 
   .footer {
-    font-size: 0.8em;
+    margin-top: 20px;
+    font-size: 12.5px;
+    opacity: 0.75;
   }
 }
 </style>
+
+<style scoped src="../styles/native-auth.css"></style>

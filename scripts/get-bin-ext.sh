@@ -29,10 +29,10 @@ cd bin-ext
 
 # Get prebuilt exiftool binaries with embedded perl.
 echo "Getting exiftool $EXIFTOOL_VER"
-wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/exiftool-amd64-musl" & pid_et_amd64_musl=$!
-wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/exiftool-amd64-glibc" & pid_et_amd64_glibc=$!
-wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/exiftool-aarch64-musl" & pid_et_aarch64_musl=$!
-wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/exiftool-aarch64-glibc" & pid_et_aarch64_glibc=$!
+wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/eperl-amd64-musl" & pid_et_amd64_musl=$!
+wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/eperl-amd64-glibc" & pid_et_amd64_glibc=$!
+wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/eperl-aarch64-musl" & pid_et_aarch64_musl=$!
+wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VER/eperl-aarch64-glibc" & pid_et_aarch64_glibc=$!
 
 ( # Get exiftool source for direct perl invocation.
     wget -q "https://github.com/exiftool/exiftool/archive/refs/tags/$EXIFTOOL_VER.zip"
@@ -55,7 +55,7 @@ wait "$pid_et_src"
 wait "$pid_vod_amd64"
 wait "$pid_vod_aarch64"
 
-chmod 755 exiftool/exiftool exiftool-* go-vod-*
+chmod 755 exiftool/exiftool eperl-* go-vod-*
 
 # Check the version of go-vod is correct internally
 if [ "$(./go-vod-$(arch) -version)" != "go-vod $GOVOD_VER" ]; then

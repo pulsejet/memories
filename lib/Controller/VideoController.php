@@ -23,22 +23,48 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Controller;
 
+use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Db\FsManager;
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
 use OCA\Memories\HttpResponseException;
 use OCA\Memories\Service\BinExt;
+use OCA\Memories\Service\ServiceManager;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\DataDisplayResponse;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\RedirectResponse;
 use OCP\Files\File;
+use OCP\Http\Client\IClientService;
+use OCP\IRequest;
+use OCP\IURLGenerator;
+use Psr\Log\LoggerInterface;
 
-final class VideoController extends GenericApiController
+final class VideoController extends ApiController
 {
+    public function __construct(
+        IRequest $request,
+        protected LoggerInterface $logger,
+        protected TimelineQuery $tq,
+        protected FsManager $fs,
+        protected IClientService $clientService,
+        protected SystemConfig $systemConfig,
+        protected BinExt $binExt,
+        protected Exif $exif,
+        protected ServiceManager $serviceManager,
+        protected Util $util,
+        protected IURLGenerator $urlGenerator,
+    ) {
+        parent::__construct(Application::APPNAME, $request);
+    }
+
     /**
      * Transcode a video to HLS by proxy.
      */
@@ -47,9 +73,148 @@ final class VideoController extends GenericApiController
     #[NoCSRFRequired]
     public function transcode(string $client, int $fileid, string $profile): Http\Response
     {
-        return Util::guardEx(function () use ($client, $fileid, $profile) {
+        return $this->proxyUpstream($client, $fileid, $profile);
+    }
+
+    /**
+     * Serve a storyboard VTT or sprite for timeline hover previews.
+     */
+    #[NoAdminRequired]
+    #[PublicPage]
+    #[NoCSRFRequired]
+    public function storyboard(string $client, int $fileid, string $profile): Http\Response
+    {
+        return $this->util->guardEx(function () use ($client, $fileid, $profile) {
+            if (1 !== preg_match('#^(storyboard\.vtt|storyboard-\d+\.jpg)$#', $profile)) {
+                throw Exceptions::BadRequest('Invalid storyboard file');
+            }
+
+            return $this->proxyUpstream($client, $fileid, $profile);
+        });
+    }
+
+    /**
+     * Return the live video part of a Live Photo.
+     */
+    #[NoAdminRequired]
+    #[PublicPage]
+    #[NoCSRFRequired]
+    public function livephoto(
+        int $fileid,
+        string $liveid = '',
+        string $format = '',
+        string $transcode = '',
+    ): Http\Response {
+        return $this->util->guardEx(function () use ($fileid, $liveid, $format, $transcode) {
+            // Check file liveid
+            if (!$liveid) {
+                throw Exceptions::MissingParameter('liveid');
+            }
+
+            // go-vod might call back on this endpoint, allow service tokens.
+            if ($token = $this->request->getHeader(ServiceManager::SERVICE_TOKEN_HEADER)) {
+                $file = $this->serviceManager->getServiceTokenFile($token, $fileid);
+            } else {
+                $file = $this->fs->getUserFile($fileid);
+            }
+
+            /** @var ?File $liveFile separate live video file */
+            $liveFile = null;
+
+            // Check if the live video is stored in a separate file (Apple MOV)
+            if (!str_starts_with($liveid, 'self__')) {
+                $liveFile = $this->getClosestLiveVideo($file);
+                if (null === $liveFile) {
+                    throw Exceptions::NotFound('live video file');
+                }
+            }
+
+            // Transcode through go-vod: it fetches the full video back.
+            if ($transcode && !$this->systemConfig->get('memories.vod.disable')) {
+                if ($liveFile) {
+                    return $this->proxyUpstream($transcode, $liveFile->getId(), 'max.mp4');
+                }
+
+                return $this->proxyUpstream($transcode, $fileid, 'livephoto.mp4', $liveid);
+            }
+
+            // Requested IPhoto object for the live video
+            if ('json' === $format) {
+                if (!$liveFile) {
+                    throw Exceptions::BadRequest('Invalid format');
+                }
+
+                return new JSONResponse([
+                    'fileid' => $liveFile->getId(),
+                    'etag' => $liveFile->getEtag(),
+                    'basename' => $liveFile->getName(),
+                    'mimetype' => $liveFile->getMimeType(),
+                ]);
+            }
+
+            if ($liveFile) {
+                return new RedirectResponse($this->downloadUrl($liveFile->getId()));
+            }
+
+            // Video is inside the file
+            $path = $file->getStorage()->getLocalFile($file->getInternalPath())
+                ?: throw Exceptions::BadRequest('[Video] File path missing (self__*)');
+
+            // Different manufacturers have different formats
+            if ('self__trailer' === $liveid) {
+                try { // Get trailer
+                    $blob = $this->exif->getBinaryExifProp($path, '-trailer');
+                } catch (\Exception) {
+                    throw Exceptions::NotFound('file trailer');
+                }
+            } elseif (str_starts_with($liveid, 'self__exifbin=')) {
+                $field = substr($liveid, \strlen('self__exifbin='));
+
+                // Need explicit whitelisting here because this is user input
+                if (!\in_array($field, ['EmbeddedVideoFile', 'MotionPhotoVideo'], true)) {
+                    throw Exceptions::BadRequest('Invalid binary EXIF field');
+                }
+
+                try { // Get embedded video file
+                    $blob = $this->exif->getBinaryExifProp($path, "-{$field}");
+                } catch (\Exception) {
+                    throw Exceptions::NotFound('Could not read binary EXIF field');
+                }
+            } elseif (str_starts_with($liveid, 'self__traileroffset=')) {
+                // Remove prefix
+                $offset = (int) substr($liveid, \strlen('self__traileroffset='));
+                if ($offset <= 0) {
+                    throw Exceptions::BadRequest('Invalid offset');
+                }
+
+                // Read file from offset to end
+                $blob = file_get_contents($path, false, null, $offset);
+            } else {
+                throw Exceptions::BadRequest('Invalid liveid');
+            }
+
+            // Data not found
+            if (!$blob) {
+                throw Exceptions::NotFound('live video data');
+            }
+
+            // Make and send response
+            $response = new DataDisplayResponse($blob, Http::STATUS_OK, []);
+            $response->setHeaders([
+                'Content-Type' => 'video/mp4',
+                'Content-Disposition' => "attachment; filename=\"{$file->getName()}.mp4\"",
+            ]);
+            $response->cacheFor(3600 * 24, false, false);
+
+            return $response;
+        });
+    }
+
+    private function proxyUpstream(string $client, int $fileid, string $profile, string $liveid = ''): Http\Response
+    {
+        return $this->util->guardEx(function () use ($client, $fileid, $profile, $liveid) {
             // Make sure transcoding is enabled
-            if (SystemConfig::get('memories.vod.disable')) {
+            if ($this->systemConfig->get('memories.vod.disable')) {
                 throw Exceptions::Forbidden('Transcoding disabled');
             }
 
@@ -60,28 +225,21 @@ final class VideoController extends GenericApiController
 
             // Get file
             $file = $this->fs->getUserFile($fileid);
+            $etag = $file->getEtag();
 
-            // Local files only for now
-            if (!$file->getStorage()->isLocal()) {
-                throw Exceptions::Forbidden('External storage not supported');
-            }
-
-            // Get file path
-            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-            if (!$path || !file_exists($path)) {
-                throw Exceptions::NotFound('local file path');
-            }
-
-            // Check if file starts with temp dir
-            $tmpDir = sys_get_temp_dir();
-            if (str_starts_with($path, $tmpDir)) {
-                throw Exceptions::Forbidden('files in temp directory not supported');
-            }
-
-            // Request and check data was received
-            return Util::guardExDirect(function (Http\IOutput $out) use ($client, $path, $profile) {
+            return $this->util->guardExDirect(function (Http\IOutput $out) use ($client, $fileid, $profile, $etag, $liveid) {
                 try {
-                    $status = $this->getUpstream($out, $client, $path, $profile);
+                    $status = $this->getUpstream(
+                        out: $out,
+                        client: $client,
+                        fileid: $fileid,
+                        profile: $profile,
+                        etag: $etag,
+                        liveid: $liveid,
+                    );
+                    if (303 === $status) {
+                        return; // redirect already sent
+                    }
                     if (409 === $status || -1 === $status) {
                         // Just a conflict (transcoding process changed)
                         $response = new JSONResponse(['message' => 'Conflict'], Http::STATUS_CONFLICT);
@@ -105,179 +263,58 @@ final class VideoController extends GenericApiController
         });
     }
 
-    /**
-     * Return the live video part of a Live Photo.
-     */
-    #[NoAdminRequired]
-    #[PublicPage]
-    #[NoCSRFRequired]
-    public function livephoto(
+    private function getUpstream(
+        Http\IOutput $out,
+        string $client,
         int $fileid,
-        string $liveid = '',
-        string $format = '',
-        string $transcode = '',
-    ): Http\Response {
-        return Util::guardEx(function () use ($fileid, $liveid, $format, $transcode) {
-            $file = $this->fs->getUserFile($fileid);
+        string $profile,
+        string $etag,
+        string $liveid,
+    ): int {
+        $this->binExt->ensureGoVod();
 
-            // Check file liveid
-            if (!$liveid) {
-                throw Exceptions::MissingParameter('liveid');
-            }
+        $url = $this->binExt->getGoVodEndpoint($client, 'vod');
 
-            // Response data
-            $name = '';
-            $mime = '';
-            $blob = null;
-            $liveVideoPath = null;
-
-            // Video is inside the file
-            $path = '<>';
-            if (str_starts_with($liveid, 'self__')) {
-                $path = $file->getStorage()->getLocalFile($file->getInternalPath())
-                    ?: throw Exceptions::BadRequest('[Video] File path missing (self__*)');
-                $mime = 'video/mp4';
-                $name = $file->getName().'.mp4';
-            }
-
-            // Different manufacurers have different formats
-            if ('self__trailer' === $liveid) {
-                try { // Get trailer
-                    $blob = Exif::getBinaryExifProp($path, '-trailer');
-                } catch (\Exception) {
-                    throw Exceptions::NotFound('file trailer');
-                }
-            } elseif (str_starts_with($liveid, 'self__exifbin=')) {
-                $field = substr($liveid, \strlen('self__exifbin='));
-
-                // Need explicit whitelisting here because this is user input
-                if (!\in_array($field, ['EmbeddedVideoFile', 'MotionPhotoVideo'], true)) {
-                    throw Exceptions::BadRequest('Invalid binary EXIF field');
-                }
-
-                try { // Get embedded video file
-                    $blob = Exif::getBinaryExifProp($path, "-{$field}");
-                } catch (\Exception) {
-                    throw Exceptions::NotFound('Could not read binary EXIF field');
-                }
-            } elseif (str_starts_with($liveid, 'self__traileroffset=')) {
-                // Remove prefix
-                $offset = (int) substr($liveid, \strlen('self__traileroffset='));
-                if ($offset <= 0) {
-                    throw Exceptions::BadRequest('Invalid offset');
-                }
-
-                // Read file from offset to end
-                $blob = file_get_contents($path, false, null, $offset);
-            } else {
-                $liveFile = $this->getClosestLiveVideo($file);
-                if (null === $liveFile) {
-                    throw Exceptions::NotFound('live video file');
-                }
-
-                // Requested only JSON info
-                if ('json' === $format) {
-                    // IPhoto object for the live video
-                    return new JSONResponse([
-                        'fileid' => $liveFile->getId(),
-                        'etag' => $liveFile->getEtag(),
-                        'basename' => $liveFile->getName(),
-                        'mimetype' => $liveFile->getMimeType(),
-                    ]);
-                }
-
-                $name = $liveFile->getName();
-                $blob = $liveFile->getContent();
-                $mime = $liveFile->getMimeType();
-                $liveVideoPath = $liveFile->getStorage()->getLocalFile($liveFile->getInternalPath());
-            }
-
-            // Data not found
-            if (!$blob) {
-                throw Exceptions::NotFound('live video data');
-            }
-
-            // Cannot return JSON if it is not a file
-            if ('json' === $format) {
-                throw Exceptions::BadRequest('Invalid format');
-            }
-
-            // Transcode video if allowed
-            if ($transcode && !SystemConfig::get('memories.vod.disable')) {
-                // If video path not given, write to temp file
-                if (!$liveVideoPath) {
-                    $liveVideoPath = self::postFile($transcode, $blob)['path'];
-                }
-
-                // If this is H.264 it won't get transcoded anyway
-                if ($liveVideoPath) {
-                    return Util::guardExDirect(function (Http\IOutput $out) use ($transcode, $liveVideoPath) {
-                        $this->getUpstream($out, $transcode, $liveVideoPath, 'max.mp4');
-                    });
-                }
-            }
-
-            // Make and send response
-            $response = new DataDisplayResponse($blob, Http::STATUS_OK, []);
-            $response->setHeaders([
-                'Content-Type' => $mime,
-                'Content-Disposition' => "attachment; filename=\"{$name}\"",
-            ]);
-            $response->cacheFor(3600 * 24, false, false);
-
-            return $response;
-        });
-    }
-
-    private function getUpstream(Http\IOutput $out, string $client, string $path, string $profile): int
-    {
-        $returnCode = $this->getUpstreamInternal($out, $client, $path, $profile);
-
-        // If status code was 0, it's likely the server is down
-        // Make one attempt to start after killing whatever is there
-        if (0 !== $returnCode && 503 !== $returnCode) {
-            return $returnCode;
-        }
-
-        // Start goVod and get log file
-        $logFile = BinExt::startGoVod();
-
-        $returnCode = $this->getUpstreamInternal($out, $client, $path, $profile);
-        if (0 === $returnCode) {
-            throw new \Exception("Transcoder could not be started, check {$logFile}");
-        }
-
-        return $returnCode;
-    }
-
-    private function getUpstreamInternal(Http\IOutput $out, string $client, string $path, string $profile): int
-    {
-        // Make sure query params are repeated
-        // For example, in folder sharing, we need the params on every request
-        $url = BinExt::getGoVodUrl($client, $path, $profile);
-        if (\array_key_exists('QUERY_STRING', $_SERVER) && !empty($params = $_SERVER['QUERY_STRING'])) {
-            $url .= "?{$params}";
-        }
-
-        $context = stream_context_create([
-            'http' => [
-                'method' => 'GET',
-                'header' => 'X-Go-Vod-Version: '.BinExt::GOVOD_VER."\r\n",
-                'protocol_version' => 1.1,
-                'ignore_errors' => true,
+        $data = [
+            'client' => $client,
+            'fileid' => $fileid,
+            'etag' => $etag,
+            'serviceToken' => $this->serviceManager->mintServiceToken($fileid),
+            'profile' => $profile,
+            'query' => [
+                'albums' => $this->request->getParam('albums'),
+                'token' => $this->request->getParam('token'),
+                'codecs' => $this->request->getParam('codecs'),
+                'liveid' => $liveid,
             ],
-        ]);
+            'config' => $this->binExt->goVodTConfig(),
+        ];
 
         ignore_user_abort(true);
 
-        $stream = @fopen($url, 'r', false, $context);
-        if (!$stream) {
+        try {
+            $response = $this->clientService->newClient()->post($url, [
+                'json' => $data,
+                'headers' => [
+                    'X-Go-Vod-Version' => BinExt::GOVOD_VER,
+                ],
+                'stream' => true,
+                'http_errors' => false,
+                'timeout' => 0,
+                'nextcloud' => ['allow_local_address' => true],
+            ]);
+        } catch (\Exception) {
             return 0;
         }
 
-        $returnCode = 0;
-        if (isset($http_response_header[0]) && preg_match('#HTTP/\S+\s+(\d+)#', $http_response_header[0], $matches)) {
-            $returnCode = (int) $matches[1];
+        $returnCode = $response->getStatusCode();
+
+        if (204 === $returnCode && $response->getHeader('X-Go-Vod-Original')) {
+            $out->setHttpResponseCode(303); // see Util::guardExDirect
+            $out->setHeader('HTTP/1.1 303 See Other');
+            $out->setHeader('Location: '.$this->downloadUrl($fileid));
+
+            return 303;
         }
 
         if (200 === $returnCode) {
@@ -285,78 +322,44 @@ final class VideoController extends GenericApiController
                 $out->setHttpResponseCode(200);
             }
 
-            foreach ($http_response_header ?? [] as $header) {
-                if (0 === stripos($header, 'Content-Type:')
-                 || 0 === stripos($header, 'Content-Length:')) {
-                    $out->setHeader($header);
+            foreach (['Content-Type', 'Content-Length'] as $name) {
+                $value = $response->getHeader($name);
+                if ('' !== $value) {
+                    $out->setHeader("{$name}: {$value}");
                 }
             }
 
             // Caching headers
-            if (str_ends_with($profile, 'mp4')) {
-                // cache full video 24 hours
+            if (str_ends_with($profile, 'mp4') || str_ends_with($profile, '.vtt') || str_ends_with($profile, '.jpg')) {
+                // cache full video and storyboards 24 hours
                 $out->setHeader('Cache-Control: max-age=86400, public');
             } else {
                 // no caching of segments
                 $out->setHeader('Cache-Control: no-cache, no-store, must-revalidate');
             }
 
+            $stream = $response->getBody();
+
             // On Safari with MP4, chunked transfer encoding is not supported
             // So we need to read the whole file into memory and send it.
             if (preg_match('/^((?!chrome|android).)*safari/i', $this->request->getHeader('User-Agent'))) {
-                $response = stream_get_contents($stream);
-                if (false !== $response) {
-                    $out->setHeader('Content-Length: '.\strlen($response)); // critical
-                    $out->setOutput($response);
+                $body = \is_resource($stream) ? stream_get_contents($stream) : (string) $stream;
+                if (false !== $body) {
+                    $out->setHeader('Content-Length: '.\strlen($body)); // critical
+                    $out->setOutput($body);
                 }
-            } else {
+            } elseif (\is_resource($stream)) {
                 $out->setReadfile($stream);
+            } else {
+                $out->setOutput((string) $stream);
+            }
+
+            if (\is_resource($stream)) {
+                fclose($stream);
             }
         }
-
-        fclose($stream);
 
         return $returnCode;
-    }
-
-    /**
-     * POST to go-vod to create a temporary file.
-     *
-     * @return mixed The response from upstream
-     */
-    private static function postFile(string $client, string $blob): mixed
-    {
-        try {
-            return self::postFileInternal($client, $blob);
-        } catch (\Exception $e) {
-            if (BinExt::startGoVod()) { // If the server is down, try to start it
-                return self::postFileInternal($client, $blob);
-            }
-
-            throw $e;
-        }
-    }
-
-    private static function postFileInternal(string $client, string $blob): mixed
-    {
-        $url = BinExt::getGoVodUrl($client, '/create', 'ignore');
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $blob);
-
-        $response = curl_exec($ch);
-        $returnCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if (200 !== $returnCode) {
-            throw new \Exception("Could not create temporary file ({$returnCode})");
-        }
-
-        return json_decode((string) $response, true);
     }
 
     /**
@@ -368,11 +371,8 @@ final class VideoController extends GenericApiController
         $liveRecords = $this->tq->getLivePhotos($file->getId());
 
         // Get file paths for all live photos
-        $liveFiles = array_map(fn ($r) => $this->rootFolder->getById((int) $r['fileid']), $liveRecords);
-        $liveFiles = array_filter($liveFiles, static fn ($files) => \count($files) > 0 && $files[0] instanceof File);
-
-        /** @var File[] (checked above) */
-        $liveFiles = array_map(static fn ($files) => $files[0], $liveFiles);
+        $liveFiles = array_map(fn ($r) => $this->fs->getUserFileOrNull((int) $r['fileid']), $liveRecords);
+        $liveFiles = array_filter($liveFiles, static fn ($f) => $f instanceof File);
 
         // Should be filtered enough by now
         if (!\count($liveFiles)) {
@@ -420,5 +420,17 @@ final class VideoController extends GenericApiController
         array_multisort($scores, SORT_ASC, $liveFiles);
 
         return array_pop($liveFiles);
+    }
+
+    /**
+     * Download URL for the file, preserving share context.
+     */
+    private function downloadUrl(int $fileid): string
+    {
+        return $this->urlGenerator->linkToRoute('memories.Download.one', [
+            'fileid' => $fileid,
+            'albums' => $this->request->getParam('albums'),
+            'token' => $this->request->getParam('token'),
+        ]);
     }
 }

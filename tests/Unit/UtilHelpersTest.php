@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Tests\Unit;
 
+use OCA\Memories\Tests\TestCase;
 use OCA\Memories\Util;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
  *
- * @covers \OCA\Memories\Util
+ * @covers \OCA\Memories\StaticUtil
  */
 final class UtilHelpersTest extends TestCase
 {

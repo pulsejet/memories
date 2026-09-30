@@ -2,8 +2,8 @@ import config from '../static-config';
 import { uid } from './helpers';
 
 /** Cache keys */
-async function getCacheName() {
-  const ver = await config.get('version');
+function getCacheName() {
+  const ver = config.getSync('version');
   return `memories-data-${ver}-${uid}`;
 }
 
@@ -14,7 +14,7 @@ async function getCacheName() {
   const keys = await window.caches?.keys();
   if (!keys?.length) return;
 
-  const cacheName = await getCacheName();
+  const cacheName = getCacheName();
 
   for (const key of keys) {
     if (key.match(/^memories-data-/) && key !== cacheName) {
@@ -27,7 +27,7 @@ async function getCacheName() {
 let staticCache: Cache | null = null;
 export async function openCache() {
   try {
-    return (staticCache ??= (await window.caches?.open(await getCacheName())) ?? null);
+    return (staticCache ??= (await window.caches?.open(getCacheName())) ?? null);
   } catch {
     return null;
   }

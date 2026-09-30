@@ -1,7 +1,12 @@
 const euc = encodeURIComponent;
 
 /** Access NativeX over localhost */
-export const BASE_URL = 'http://127.0.0.1';
+export const BASE_URL = ((): string => {
+  if (globalThis.location?.hostname === '127.0.0.1') {
+    return globalThis.location.origin;
+  }
+  return 'http://127.0.0.1';
+})();
 
 /** NativeX asynchronous API */
 export const NAPI = {
@@ -61,6 +66,25 @@ export const NAPI = {
   IMAGE_FULL: (auid: string) => `${BASE_URL}/image/full/${auid}`,
 
   /**
+   * Local video file API (range-aware, for <video> / vidstack).
+   * @regex ^/video/full/\d+$
+   * @param fileId MediaStore file ID of the local video
+   * @returns {Blob} Original video bytes of the photo.
+   */
+  VIDEO_FULL: (fileId: number) => `${BASE_URL}/video/full/${fileId}`,
+
+  /**
+   * Upload a local file to Nextcloud natively, without routing
+   * bytes through the WebView.
+   * @regex ^/api/upload/local$
+   * @param auid (Query) AUID of the local file
+   * @param filename (Query) Destination path, e.g. /Photos/IMG_001.jpg
+   * @returns {fileid} File ID of the uploaded file
+   */
+  UPLOAD_LOCAL: (auid: string, filename: string) =>
+    `${BASE_URL}/api/upload/local?auid=${euc(auid)}&filename=${euc(filename)}`,
+
+  /**
    * Share a URL with native page.
    * The native client MUST NOT download the object but share the URL directly.
    * @regex ^/api/share/url/.+$
@@ -71,7 +95,8 @@ export const NAPI = {
   /**
    * Share an object (as blob) natively.
    * The list of objects to share is already set using setShareBlobs
-   * The native client MUST download the object using a download manager
+   * The native client MUST download the object in-process (never via the
+   * system DownloadManager, which cannot reach LAN hosts on Android 17)
    * and immediately prompt the user to download it. The asynchronous call
    * must return only after the object has been downloaded.
    * @regex ^/api/share/blobs$
@@ -85,6 +110,13 @@ export const NAPI = {
    * @returns
    */
   CONFIG_ALLOW_MEDIA: (val: boolean) => `${BASE_URL}/api/config/allow_media/${val ? '1' : '0'}`,
+
+  /**
+   * Offline asset download progress.
+   * @regex ^/api/assets/progress$
+   * @returns {status, done, total, error} of the web asset sync.
+   */
+  ASSETS_PROGRESS: () => `${BASE_URL}/api/assets/progress`,
 };
 
 /** NativeX synchronous API. */
@@ -127,10 +159,11 @@ export type NativeX = {
   /**
    * Start downloading a file from a given URL.
    * @param url URL to download from
-   * @param filename Filename to save as
+   * @param filename Filename to save as (empty: infer from response)
+   * @param title Optional label for the completion notification (e.g. album name)
    * @details An error must be shown to the user natively if the download fails.
    */
-  downloadFromUrl: (url: string, filename: string) => void;
+  downloadFromUrl: (url: string, filename: string, title?: string) => void;
 
   /**
    * Set the list of objects to share with SHARE_BLOB API.
@@ -195,8 +228,8 @@ export type NativeX = {
 
   /**
    * Set if the given files have remote copies.
-   * @param auid List of AUIDs to set the server ID for (JSON-encoded)
-   * @param auid List of BUIDs to set the server ID for (JSON-encoded)
+   * @param auids List of AUIDs to set the server ID for (JSON-encoded)
+   * @param buids List of BUIDs to set the server ID for (JSON-encoded)
    * @param value Value of remote
    */
   setHasRemote: (auids: string, buids: string, value: boolean) => void;

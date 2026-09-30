@@ -5,12 +5,14 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent } from 'vue';
+import { createApp, defineComponent } from 'vue';
 
 import Searchbar from '@components/header/Searchbar.vue';
 import SearchbarMenuItem from '@components/header/SearchbarMenuItem.vue';
 
 import * as utils from '@services/utils';
+import { registerGlobals } from '../../bootstrap';
+import { registerRouteCheckers } from '../../router';
 
 export default defineComponent({
   name: 'SearchModal',
@@ -33,11 +35,13 @@ export default defineComponent({
     if (header && utils.uid) {
       const div = document.createElement('div');
       header.prepend(div);
-      const component = new Vue({
-        render: (h) => h(SearchbarMenuItem),
-        router: this.$router,
-      });
-      component.$mount(div);
+      const headerApp = createApp(SearchbarMenuItem);
+      registerGlobals(headerApp);
+      registerRouteCheckers(headerApp);
+      try {
+        headerApp.use(this.$router);
+      } catch {}
+      headerApp.mount(div);
 
       // remove unified search button
       document.querySelector<HTMLDivElement>('.unified-search-menu')?.remove(); // 29+

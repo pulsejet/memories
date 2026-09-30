@@ -15,10 +15,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, defineAsyncComponent } from 'vue';
 
 import { showInfo } from '@nextcloud/dialogs';
-const NcProgressBar = () => import('@nextcloud/vue/dist/Components/NcProgressBar.js');
+const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
@@ -72,7 +72,11 @@ export default defineComponent({
     },
 
     routeIsAlbum(album: IAlbum) {
-      return this.routeIsAlbums && this.$route.params.user === album.user && this.$route.params.name === album.name;
+      return (
+        this.routeIsAlbums &&
+        this.$route.params.user?.toString() === album.user &&
+        this.$route.params.name?.toString() === album.name
+      );
     },
 
     async update(selection: IAlbum[], deselection: IAlbum[]) {

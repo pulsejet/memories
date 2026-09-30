@@ -31,6 +31,7 @@ OC.L10N.register(
     "Move" : "Move",
     "Password protected" : "কূটশব্দদ্বারা সুরক্ষিত",
     "Refresh" : "নবোদ্যম",
+    "OK" : "OK",
     "Home" : "বাড়ি",
     "Upload failed" : "আপলোড হয়নি",
     "Download {ext}" : "ডাউনলোড  {ext}",
