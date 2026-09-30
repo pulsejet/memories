@@ -41,6 +41,7 @@ OC.L10N.register(
     "Search" : "Nadi",
     "Upload" : "Sili",
     "Public link" : "Aseɣwen azayaz",
+    "New album" : "Album amaynut",
     "Save" : "Sekles",
     "Location" : "Adig",
     "Back" : "Retour",
