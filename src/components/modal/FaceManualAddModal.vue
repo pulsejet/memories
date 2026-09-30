@@ -181,6 +181,8 @@ import {
   type StageRegion,
 } from './faceMarking';
 
+import type { IImageInfo } from '@typings';
+
 /** How long a saved marking is announced over the photo */
 const NOTICE_MS = 4000;
 
@@ -447,23 +449,41 @@ export default defineComponent({
     },
 
     async loadPhotoByPath(path: string): Promise<void> {
+      let file: { fileid: number; etag: string };
       try {
         // Memories' IMAGE_INFO requires a fileid, so the file is looked up via WebDAV.
-        const props = await this.webdavFileInfo(path);
-        this.fileId = props.fileid;
-        this.imageNatW = props.w;
-        this.imageNatH = props.h;
-        this.imageSrc = this.previewOf(this.fileId, props.etag);
+        file = await this.webdavFileInfo(path);
       } catch (e) {
         console.error(e);
         this.resetFile();
         this.loadError = t('memories', 'Failed to load the selected photo.');
         return;
       }
+      const size = await this.indexedSize(file.fileid);
+      this.fileId = file.fileid;
+      this.imageNatW = size.w;
+      this.imageNatH = size.h;
+      this.imageSrc = this.previewOf(this.fileId, file.etag);
       await this.loadFaces();
     },
 
-    async webdavFileInfo(path: string): Promise<{ fileid: number; etag: string; w: number; h: number }> {
+    /**
+     * The size of the original as Memories indexed it, the same the sidebar
+     * opens the dialog with. A photo not indexed yet has none: it is shown,
+     * but nothing can be marked on it, since the size of the preview would
+     * put the marking elsewhere.
+     */
+    async indexedSize(fileId: number): Promise<{ w: number; h: number }> {
+      try {
+        const { data } = await axios.get<IImageInfo>(API.Q(API.IMAGE_INFO(fileId), { basic: 1 }));
+        return { w: data.w || 0, h: data.h || 0 };
+      } catch (e) {
+        console.warn(e);
+        return { w: 0, h: 0 };
+      }
+    },
+
+    async webdavFileInfo(path: string): Promise<{ fileid: number; etag: string }> {
       const url = `/remote.php/dav/files/${encodeURIComponent((window as any).OC?.getCurrentUser?.().uid || '')}${path
         .split('/')
         .map(encodeURIComponent)
@@ -473,7 +493,6 @@ export default defineComponent({
   <d:prop>
     <oc:fileid/>
     <d:getetag/>
-    <nc:metadata-photos-size/>
   </d:prop>
 </d:propfind>`;
       const res = await axios.request({
@@ -489,18 +508,7 @@ export default defineComponent({
         10,
       );
       const etag = (doc.getElementsByTagNameNS('DAV:', 'getetag')[0]?.textContent ?? '').replace(/"/g, '');
-      const sizeEl =
-        doc.getElementsByTagNameNS('http://nextcloud.org/ns', 'metadata-photos-size')[0]?.textContent ?? '';
-      // Without the size of the original the photo is shown, but nothing can
-      // be marked on it: the size of the preview would put it elsewhere.
-      let w = 0,
-        h = 0;
-      const m = sizeEl.match(/(\d+)[^\d]+(\d+)/);
-      if (m) {
-        w = parseInt(m[1], 10);
-        h = parseInt(m[2], 10);
-      }
-      return { fileid, etag, w, h };
+      return { fileid, etag };
     },
 
     onRect(rect: Rect | null) {
