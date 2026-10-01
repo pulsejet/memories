@@ -9,7 +9,6 @@
       'is-slideshow': !!slideshowTimer,
       'force-metadata': !!slideshowTimer && config.metadata_in_slideshow,
     }"
-    :style="{ width: outerWidth }"
     @fullscreenchange="fullscreenChange"
   >
     <ImageEditor v-if="editorOpen && currentPhoto" :photo="currentPhoto" @close="editorOpen = false" />
@@ -1501,7 +1500,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .outer {
   z-index: 2020;
-  width: 100vw;
+  width: v-bind(outerWidth);
   height: 100vh;
   position: fixed;
   top: 0;

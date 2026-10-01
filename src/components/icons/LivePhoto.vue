@@ -3,7 +3,6 @@
     v-bind="$attrs"
     :aria-hidden="!title"
     :aria-label="title"
-    :style="{ width: sizePx, height: sizePx }"
     class="material-design-icon live-photo-icon"
     :class="{ spin }"
     role="img"
@@ -79,6 +78,8 @@ export default defineComponent({
 .live-photo-icon {
   position: relative;
   pointer-events: none;
+  width: v-bind(sizePx);
+  height: v-bind(sizePx);
 
   > svg {
     position: absolute;
