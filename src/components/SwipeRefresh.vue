@@ -50,9 +50,13 @@ export default defineComponent({
     /** Is active interaction */
     on: false,
     /** Start touch Y coordinate */
-    start: 0,
+    startY: 0,
     /** End touch Y coordinate */
-    end: 0,
+    endY: 0,
+    /** Start touch X coordinate */
+    startX: 0,
+    /** End touch X coordinate */
+    endX: 0,
     /** Percentage progress to show in swiping */
     progress: 0,
     /** Next update frame reference */
@@ -146,13 +150,15 @@ export default defineComponent({
     /** Start gesture on container (passive) */
     touchstart(event: TouchEvent) {
       if (!this.allowSwipe) return;
+      if (event.touches.length !== 1) return;
       const touch = event.touches[0];
 
       // Check if top element matches selector
       if (this.match && !(<HTMLElement>touch.target).closest(this.match)) return;
 
       // Start swipe action
-      this.end = this.start = touch.clientY;
+      this.endY = this.startY = touch.clientY;
+      this.endX = this.startX = touch.clientX;
       this.progress = 0;
       this.on = true;
     },
@@ -160,15 +166,34 @@ export default defineComponent({
     /** Execute gesture on container (passive) */
     touchmove(event: TouchEvent) {
       if (!this.allowSwipe || !this.on) return;
+
+      // Ignore multi-touch gestures (e.g. pinch zoom)
+      if (event.touches.length !== 1) {
+        return this.reset();
+      }
+
+      // Get the touch coordinates
       const touch = event.touches[0];
-      this.end = touch.clientY;
+      this.endY = touch.clientY;
+      this.endX = touch.clientX;
+
+      // Abort on mostly-horizontal gestures (e.g. swipe right)
+      if (Math.abs(this.endX - this.startX) > Math.abs(this.endY - this.startY)) {
+        return this.reset();
+      }
 
       // Update progress only once per frame
       this.updateFrame ||= window.requestAnimationFrame(async () => {
         this.updateFrame = 0;
+        if (!this.on) return;
+
+        // Re-check horizontal dominance with latest coordinates
+        if (Math.abs(this.endX - this.startX) > Math.abs(this.endY - this.startY)) {
+          return this.reset();
+        }
 
         // Compute percentage of swipe
-        const delta = (this.end - this.start) / SWIPE_PX;
+        const delta = (this.endY - this.startY) / SWIPE_PX;
         this.progress = Math.min(Math.max(0, delta * 100), 100);
 
         // Execute action on threshold
