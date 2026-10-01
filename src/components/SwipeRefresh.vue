@@ -1,6 +1,6 @@
 <template>
   <div @touchstart.passive="touchstart" @touchmove.passive="touchmove" @touchend.passive="touchend">
-    <div v-show="show" class="swipe-progress" :style="{ background: gradient }" :class="{ animate, wasSwiped }"></div>
+    <div v-show="show" class="swipe-progress" :class="{ animate, wasSwiped }"></div>
     <slot></slot>
   </div>
 </template>
@@ -116,19 +116,6 @@ export default defineComponent({
     show() {
       return (this.on && this.progress) || this.animate;
     },
-
-    gradient() {
-      if (this.animate) {
-        // CSS animation below
-        return undefined;
-      }
-
-      // Pull down progress
-      const p = this.progress;
-      const outer = 'transparent';
-      const inner = 'var(--color-primary)';
-      return `radial-gradient(circle at center, ${inner} 0, ${inner} ${p}%, ${outer} ${p}%, ${outer} 100%)`;
-    },
   },
 
   methods: {
@@ -228,6 +215,16 @@ export default defineComponent({
   width: 100%;
   height: 3px;
   pointer-events: none;
+
+  &:not(.animate) {
+    background: radial-gradient(
+      circle at center,
+      var(--color-primary) 0,
+      var(--color-primary) calc(v-bind(progress) * 1%),
+      transparent calc(v-bind(progress) * 1%),
+      transparent 100%
+    );
+  }
 
   &.animate {
     background-position: center;
