@@ -1,0 +1,29 @@
+// Spherical photo viewer.
+//
+// The canvas mounts on the slide's holder element rather than inside
+// PhotoSwipe's zoom-wrap: the zoom-wrap carries the pan and zoom transform,
+// which would drag the sphere around with it instead of letting the sphere
+// do its own looking. Being a sibling of the flat image also means the flat
+// path is untouched when no panorama is open.
+.memories-panorama {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  overflow: hidden;
+  background: #000;
+  touch-action: none; // the view handles its own gestures
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}

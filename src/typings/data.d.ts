@@ -151,6 +151,23 @@ declare module '@typings' {
   }
 
   export interface IExif {
+    /**
+     * GPano XMP -- spherical photo metadata.
+     * https://developers.google.com/streetview/spherical-metadata
+     *
+     * ProjectionType alone decides whether a photo is a sphere. The
+     * cropped-area fields place a *partial* panorama; without them a viewer
+     * stretches the crop around the whole sphere.
+     */
+    ProjectionType?: string;
+    UsePanoramaViewer?: boolean;
+    CroppedAreaImageWidthPixels?: number;
+    CroppedAreaImageHeightPixels?: number;
+    CroppedAreaLeftPixels?: number;
+    CroppedAreaTopPixels?: number;
+    FullPanoWidthPixels?: number;
+    FullPanoHeightPixels?: number;
+
     Rotation?: number;
     Orientation?: number;
     ImageWidth?: number;

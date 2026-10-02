@@ -134,6 +134,7 @@ import 'photoswipe/style.css';
 import PsImage from './PsImage';
 import PsVideo from './PsVideo';
 import PsLivePhoto from './PsLivePhoto';
+import PsPanorama, { panoramaInfo } from './PsPanorama';
 
 import type { IImageInfo, IPhoto, TimelineState } from '@typings';
 import type { PsContent } from './types';
@@ -148,6 +149,7 @@ import StarOutlineIcon from 'vue-material-design-icons/StarOutline.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
 import InfoIcon from 'vue-material-design-icons/InformationOutline.vue';
 import SidebarIcon from 'vue-material-design-icons/DockRight.vue';
+import PanoramaIcon from 'vue-material-design-icons/PanoramaSphere.vue';
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 import TuneIcon from 'vue-material-design-icons/Tune.vue';
 import SlideshowIcon from 'vue-material-design-icons/PlayBox.vue';
@@ -215,6 +217,8 @@ export default defineComponent({
     psVideo: null as PsVideo | null,
     psImage: null as PsImage | null,
     psLivePhoto: null as PsLivePhoto | null,
+    /** Spherical photo viewer */
+    psPanorama: null as PsPanorama | null,
 
     /** Live photo state */
     liveState: {
@@ -385,6 +389,13 @@ export default defineComponent({
           if: this.isLivePhoto,
         },
         {
+          id: 'view-panorama',
+          name: this.t('memories', 'View as panorama'),
+          icon: markRaw(PanoramaIcon),
+          callback: this.togglePanorama,
+          if: this.isPanorama,
+        },
+        {
           id: 'info',
           name: this.t('memories', 'Info'),
           icon: markRaw(InfoIcon),
@@ -477,6 +488,17 @@ export default defineComponent({
     /** Is the current slide a live photo */
     isLivePhoto(): boolean {
       return Boolean(this.currentPhoto?.liveid);
+    },
+
+    /**
+     * Is the current slide a spherical photo.
+     *
+     * Depends on imageInfo, which loads asynchronously, so this flips from
+     * false to true shortly after the slide opens. That is why the sphere is
+     * a toggle rather than automatic.
+     */
+    isPanorama(): boolean {
+      return panoramaInfo(this.currentPhoto) !== null;
     },
 
     /** Is the current slide a local photo */
@@ -792,6 +814,9 @@ export default defineComponent({
 
       // Live Photo support
       this.psLivePhoto = markRaw(new PsLivePhoto(<any>this.photoswipe, <any>this.psImage, this.liveState));
+
+      // Spherical photo support
+      this.psPanorama = markRaw(new PsPanorama(<any>this.photoswipe));
 
       // Patch the close button to stop the slideshow
       const _close = this.photoswipe.close.bind(this.photoswipe);
@@ -1133,6 +1158,7 @@ export default defineComponent({
         photo.h = data.h;
         photo.basename = data.basename;
         photo.mimetype = data.mimetype;
+        this.psImage?.metadataLoaded(photo);
       };
 
       // Get cached data first.
@@ -1245,6 +1271,11 @@ export default defineComponent({
       for (let i = idx - 3; i <= idx + 3; i++) {
         this.photoswipe!.refreshSlideContent(i + this.globalAnchor);
       }
+    },
+
+    /** Show or hide the current photo as a sphere */
+    togglePanorama() {
+      this.psPanorama?.toggle();
     },
 
     /** Play the current live photo */

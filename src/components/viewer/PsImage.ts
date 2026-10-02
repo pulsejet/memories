@@ -1,8 +1,10 @@
 import { isVideoContent } from './PsVideo';
+import { originalIsTheSameImage } from './PsPanorama';
 import { isLiveContent } from './PsLivePhoto';
 import * as ximg from '../frame/XImgCache';
 
 import type PhotoSwipe from 'photoswipe';
+import type { IPhoto } from '@typings';
 import type { PsContent, PsEvent, PsSlide } from './types';
 
 import errorsvg from '@assets/error.svg';
@@ -121,8 +123,30 @@ export default class ImageContentSetup {
     }
   }
 
+  /** Called by the viewer when a photo's metadata arrives. */
+  public metadataLoaded(photo: IPhoto) {
+    const slide = this.lightbox.currSlide as unknown as PsSlide | undefined;
+    if (slide?.data.photo?.fileid === photo.fileid && slide.data.highSrcCond === 'always') {
+      this.loadFullImage(slide);
+    }
+  }
+
   private async loadFullImage(slide: PsSlide) {
     if (!slide.data.highSrc.length) return;
+
+    // The "original" is not always the image on screen: a file can carry
+    // GPano for a panorama its own bytes do not hold, and swapping it in
+    // replaces the panorama with something else the moment someone zooms.
+    //
+    // 'unknown' means the metadata has not arrived. Leave highSrcCond alone
+    // rather than latching a decision on a race: the next zoom asks again, and
+    // metadataLoaded() retries for 'always', which gets no further zoom.
+    const same = originalIsTheSameImage(slide.data.photo);
+    if (same === 'unknown') return;
+    if (same === 'no') {
+      slide.data.highSrcCond = 'never';
+      return;
+    }
 
     // Get ximg element
     const img = slide.holderElement?.querySelector('.ximg:not(.ximg--full)') as HTMLImageElement;

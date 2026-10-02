@@ -77,6 +77,22 @@ final class ExifFields
         // Currently unused fields
         'ExifVersion' => true,
 
+        // Panorama (GPano XMP)
+        // https://developers.google.com/streetview/spherical-metadata
+        //
+        // ProjectionType alone decides whether a photo is a sphere; the
+        // cropped-area fields are needed to place a *partial* panorama
+        // correctly, and without them a viewer stretches the crop around the
+        // whole sphere -- a failure that looks plausible rather than broken.
+        'ProjectionType' => true,
+        'UsePanoramaViewer' => true,
+        'CroppedAreaImageWidthPixels' => true,
+        'CroppedAreaImageHeightPixels' => true,
+        'CroppedAreaLeftPixels' => true,
+        'CroppedAreaTopPixels' => true,
+        'FullPanoWidthPixels' => true,
+        'FullPanoHeightPixels' => true,
+
         // Video info
         'Duration' => true,
         'FrameRate' => true,
