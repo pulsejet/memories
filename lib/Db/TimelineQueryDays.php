@@ -46,8 +46,9 @@ trait TimelineQueryDays
         ;
 
         // Group and sort by dayid
+        $order = $reverse ? 'ASC' : 'DESC';
         $query->addGroupBy('m.dayid')
-            ->addOrderBy('m.dayid', 'DESC')
+            ->addOrderBy('m.dayid', $order)
         ;
 
         // Apply all transformations
@@ -62,14 +63,7 @@ trait TimelineQueryDays
         $rows = $this->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post process the days
-        $rows = $this->postProcessDays($rows, $monthView);
-
-        // Reverse order if needed
-        if ($reverse) {
-            $rows = array_reverse($rows);
-        }
-
-        return $rows;
+        return $this->postProcessDays($rows, $monthView);
     }
 
     /**
@@ -152,9 +146,10 @@ trait TimelineQueryDays
         $this->addFavoriteTag($query);
 
         // Group and sort by date taken
-        $query->addOrderBy('m.datetaken', 'DESC');
-        $query->addOrderBy('basename', 'DESC'); // https://github.com/pulsejet/memories/issues/985
-        $query->addOrderBy('m.fileid', 'DESC'); // unique tie-breaker
+        $order = $reverse ? 'ASC' : 'DESC';
+        $query->addOrderBy('m.datetaken', $order);
+        $query->addOrderBy('basename', $order); // https://github.com/pulsejet/memories/issues/985
+        $query->addOrderBy('m.fileid', $order); // unique tie-breaker
 
         // Apply all transformations
         foreach ($queryTransforms as $transform) {
@@ -180,11 +175,6 @@ trait TimelineQueryDays
         // Post process the day in-place
         foreach ($day as &$photo) {
             $this->postProcessDayPhoto($photo, $monthView);
-        }
-
-        // Reverse order if needed
-        if ($reverse) {
-            $day = array_reverse($day);
         }
 
         return $day;
