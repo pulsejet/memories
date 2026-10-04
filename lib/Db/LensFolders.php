@@ -88,7 +88,7 @@ final class LensFolders
     private function fetchScanBatch(int $cursor): array
     {
         $qb = $this->connection->getQueryBuilder();
-        $qb->select('m.fileid', 'm.isvideo', 'f.parent', 'f.mtime', 'f.etag')
+        $qb->select('m.fileid', 'm.isvideo', 'f.parent', 'm.mtime', 'f.etag')
             ->from('memories', 'm')
             ->innerJoin('m', 'filecache', 'f', $qb->expr()->eq('m.fileid', 'f.fileid'))
             ->where($qb->expr()->gt('m.fileid', $qb->createNamedParameter($cursor, IQueryBuilder::PARAM_INT)))

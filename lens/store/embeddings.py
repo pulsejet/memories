@@ -34,7 +34,7 @@ def failure_point_id(fileid: int) -> str:
 
 @dataclass(frozen=True)
 class FileMeta:
-    """Display metadata and source mtime stored alongside each embedding."""
+    """Display metadata and catalog mtime stored alongside each embedding."""
 
     w: int
     h: int

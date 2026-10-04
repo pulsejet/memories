@@ -89,7 +89,7 @@ final class LensController extends ApiController
             $meta = $this->getIndexMeta($fileid);
             $metadata = [
                 'etag' => $file->getEtag(),
-                'mtime' => $file->getMtime(),
+                'mtime' => $meta['mtime'],
                 'parent_id' => $meta['parent_id'],
                 'mimetype' => $file->getMimeType(),
                 'epoch' => $meta['epoch'],
@@ -200,17 +200,17 @@ final class LensController extends ApiController
     }
 
     /**
-     * Catalog dates and current storage parent, independent of the service user's mounts.
+     * Catalog revision/dates and current storage parent, independent of the service user's mounts.
      *
      * Best-effort: failures never break file serving.
      *
-     * @return array{epoch: ?int, dayid: ?int, parent_id: ?int}
+     * @return array{epoch: ?int, dayid: ?int, parent_id: ?int, mtime: ?int}
      */
     private function getIndexMeta(int $fileid): array
     {
         try {
             $qb = $this->connection->getQueryBuilder();
-            $qb->select('m.epoch', 'm.dayid', 'f.parent')
+            $qb->select('m.epoch', 'm.dayid', 'm.mtime', 'f.parent')
                 ->from('filecache', 'f')
                 ->leftJoin('f', 'memories', 'm', $qb->expr()->eq('f.fileid', 'm.fileid'))
                 ->where($qb->expr()->eq('f.fileid', $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)))
@@ -221,12 +221,13 @@ final class LensController extends ApiController
                     'epoch' => isset($row['epoch']) ? (int) $row['epoch'] : null,
                     'dayid' => isset($row['dayid']) ? (int) $row['dayid'] : null,
                     'parent_id' => (int) $row['parent'],
+                    'mtime' => isset($row['mtime']) ? (int) $row['mtime'] : null,
                 ];
             }
         } catch (\Throwable) {
         }
 
-        return ['epoch' => null, 'dayid' => null, 'parent_id' => null];
+        return ['epoch' => null, 'dayid' => null, 'parent_id' => null, 'mtime' => null];
     }
 
     /**
