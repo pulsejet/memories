@@ -153,7 +153,7 @@ class Indexer:
         stale = {fileid for fileid in failures.keys() & files.keys() if failures[fileid]["stage"] in ("image", "faces")}
         places = {fileid for fileid in failures.keys() & files.keys() if failures[fileid]["stage"] == "places"}
         repairs = set()
-        face_counts = {}
+        face_state = {}
 
         for collection in self.store.collections:
             try:
@@ -166,8 +166,11 @@ class Indexer:
                     meta = files[fileid]
                     if collection is self.store.embedding:
                         missing.discard(fileid)
-                    if collection is self.store.faces and payload.get("kind") == "face":
-                        face_counts[fileid] = face_counts.get(fileid, 0) + 1
+                        face_state[fileid] = (
+                            payload.get("face_count"),
+                            payload.get("face_version"),
+                            payload.get("face_owner"),
+                        )
                     if payload.get("mtime") != meta.mtime:
                         if collection is self.store.places:
                             places.add(fileid)
@@ -194,20 +197,13 @@ class Indexer:
 
             log.info("index metadata repaired %d in %s", fileid, collection.collection)
 
-        # Face completeness rides the single pipeline: a missing or disagreeing
-        # marker (or vector set) means a full reindex, never a face-only run.
-        markers = await self.store.faces.get_markers(list(files))
-
+        # Face completeness rides on the image point: its upsert clears face
+        # state and only the face phase restamps it. Anything unstamped,
+        # version-old or scope-moved means a full reindex, never a face-only run.
         for fileid, meta in files.items():
-            marker = markers.get(fileid)
+            count, version, owner = face_state.get(fileid, (None, None, None))
 
-            if (
-                marker is None
-                or marker.get("mtime") != meta.mtime
-                or marker.get("owner_id") != meta.owner
-                or marker.get("embed_version") != config.face.version
-                or marker.get("face_count") != face_counts.get(fileid, 0)
-            ):
+            if count is None or version != config.face.version or owner != meta.owner:
                 stale.add(fileid)
 
         return stale | missing, places
@@ -219,13 +215,21 @@ class Indexer:
 
         for fileid, res in files:
             try:
-                outcome = await self.face_indexer.process_file(fileid, res, parents[fileid])
+                outcome, count = await self.face_indexer.process_file(fileid, res, parents[fileid])
             except Exception as exc:  # noqa: BLE001
                 await self._fail(fileid, exc, stage="faces")
                 continue
 
             if outcome == "stale":
                 self.done(fileid, ok=None)
+                continue
+
+            try:
+                await self.store.embedding.set_face_state(
+                    fileid, res.metadata.owner or "", config.face.version, count,
+                )
+            except Exception as exc:  # noqa: BLE001
+                await self._fail(fileid, exc, stage="faces")
                 continue
 
             complete.append((fileid, res))

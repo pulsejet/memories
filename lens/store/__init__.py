@@ -4,7 +4,7 @@ from qdrant_client import AsyncQdrantClient
 
 from store.base import CompatMismatch
 from store.embeddings import FAILURE_KIND, EmbeddingStore, FileMeta, UpsertPoint
-from store.faces import FacePoint, FacesStore, face_point_id, marker_point_id
+from store.faces import FacePoint, FacesStore, face_point_id
 from store.places import PlacePoint, PlacesStore, place_point_id
 
 __all__ = [
@@ -19,7 +19,6 @@ __all__ = [
     "Store",
     "UpsertPoint",
     "face_point_id",
-    "marker_point_id",
     "place_point_id",
 ]
 

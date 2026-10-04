@@ -1,9 +1,10 @@
-"""Per-file detection phase: match, replace SQL, replace vectors, mark complete.
+"""Per-file detection phase: match, replace SQL, replace vectors, stamp complete.
 
 Detection never clusters: it reuses old face IDs through one-to-one geometry
 matching (echoing their clusters verbatim) and mints fresh IDs for the rest.
-A file is complete only when its marker, SQL rows and vectors agree; anything
-else goes through a full reindex, never a face-only run.
+A file is face-complete only when its image point carries fresh face state;
+the image upsert clears it, so anything else goes through a full reindex,
+never a face-only run.
 """
 
 import asyncio
@@ -102,8 +103,12 @@ class FaceIndexer:
         self.post_fn = post_fn or post_faces
         self.head_fn = head_fn or (lambda fileid: fetch_file(fileid, metadata_only=True).metadata)
 
-    async def process_file(self, fileid: int, res: FetchResult, parent_id: int) -> str:
-        """Detect, replace SQL/vectors and mark complete; "stale" when the source moved."""
+    async def process_file(self, fileid: int, res: FetchResult, parent_id: int) -> tuple[str, int]:
+        """Detect and replace SQL/vectors; returns the outcome with the face count.
+
+        "stale" means the source moved mid-flight; the caller stamps the image
+        point with the count only on "complete".
+        """
 
         owner = res.metadata.owner
 
@@ -114,8 +119,9 @@ class FaceIndexer:
         detections = await self.face_model.detect_async(image)
         vectors = await self.face_model.embed_async(image, detections)
         matched = match_faces(detections, res.metadata.faces, config.face.version)
-
-        await self.faces.delete_marker(fileid)
+        known = {face.id for face in res.metadata.faces if face.embed_version == config.face.version}
+        reused = sum(1 for face in matched if face["id"] in known)
+        log.info("faces matched for %d: %d reused, %d new", fileid, reused, len(matched) - reused)
 
         try:
             committed = await asyncio.to_thread(self.post_fn, fileid, owner, matched)
@@ -162,19 +168,11 @@ class FaceIndexer:
         if await self._source_moved(fileid, res):
             log.info("faces deferred for %d: source changed mid-flight", fileid)
 
-            return "stale"
+            return "stale", 0
 
-        await self.faces.put_marker(
-            fileid,
-            res.metadata.etag,
-            res.metadata.mtime,
-            owner,
-            config.face.version,
-            len(committed_ids),
-        )
         log.info("faces indexed for %d (%d faces)", fileid, len(committed_ids))
 
-        return "complete"
+        return "complete", len(committed_ids)
 
     async def _source_moved(self, fileid: int, res: FetchResult) -> bool:
         """Whether the source changed between download and writeback."""

@@ -17,7 +17,6 @@ from store.base import (
 )
 
 FACE_KIND = "face"
-MARKER_KIND = "face_file"
 
 
 def face_point_id(face_id: int) -> str:
@@ -26,10 +25,22 @@ def face_point_id(face_id: int) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_URL, f"lens_face:{face_id}"))
 
 
-def marker_point_id(fileid: int) -> str:
-    """Deterministic completion-marker ID, disjoint from face point IDs."""
+def _chunks(ids: list[str], size: int):
+    """Split point IDs for bounded retrieve calls."""
 
-    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"lens_face_file:{fileid}"))
+    for offset in range(0, len(ids), size):
+        yield ids[offset:offset + size]
+
+
+def _usable_vector(vector) -> bool:
+    """Stored vectors must be finite with nonzero norm; anything else is reindexed."""
+
+    if not vector:
+        return False
+
+    return all(v == v and v not in (float("inf"), float("-inf")) for v in vector) and any(
+        v != 0 for v in vector
+    )
 
 
 @dataclass(frozen=True)
@@ -136,7 +147,7 @@ class FacesStore(FileStore):
         )
 
     async def get_file_face_ids(self, fileid: int) -> list[int]:
-        """Current face IDs stored for one file, excluding the completion marker."""
+        """Current face IDs stored for one file."""
 
         return [
             point.payload["face_id"]
@@ -144,49 +155,175 @@ class FacesStore(FileStore):
             if point.payload.get("kind") == FACE_KIND
         ]
 
-    async def get_markers(self, fileids: list[int]) -> dict[int, dict]:
-        """Completion markers for a batch of files, keyed by fileid."""
+    async def get_batch_vectors(self, faces: list) -> dict[int, list[float]]:
+        """Vectors for due faces whose stored point still matches SQL scope/version.
 
-        if not fileids:
+        Faces with missing vectors, mismatched payloads or unusable vectors are
+        skipped: the single pipeline reindexes those files fully on its next
+        pass, grouping never repairs indexing inline.
+        """
+
+        ids = [face_point_id(face.id) for face in faces]
+        by_id = {face.id: face for face in faces}
+        vectors = {}
+
+        for chunk in _chunks(ids, 256):
+            points = await self.client.retrieve(
+                collection_name=self.collection,
+                ids=chunk,
+                with_payload=True,
+                with_vectors=True,
+            )
+
+            for point in points:
+                payload = point.payload or {}
+                face_id = payload.get("face_id")
+                face = by_id.get(face_id)
+
+                if (
+                    face is None
+                    or payload.get("kind") != FACE_KIND
+                    or payload.get("fileid") != face.fileid
+                    or payload.get("owner_id") != face.owner
+                    or payload.get("embed_version") != face.embed_version
+                    or not _usable_vector(point.vector)
+                ):
+                    continue
+
+                vectors[face_id] = list(point.vector)
+
+        return vectors
+
+    async def search_assigned_batch(
+        self, vectors: list[list[float]], owner: str, version: int, top_k: int,
+    ) -> list[list[dict]]:
+        """Nearest assigned faces for many vectors in few round trips.
+
+        Unassigned points cannot match: the assigned filter is server-side so
+        they never fill the per-query result limit.
+        """
+
+        filtr = models.Filter(must=[
+            models.FieldCondition(key="kind", match=models.MatchValue(value=FACE_KIND)),
+            models.FieldCondition(key="owner_id", match=models.MatchValue(value=owner)),
+            models.FieldCondition(key="embed_version", match=models.MatchValue(value=version)),
+        ], must_not=[
+            models.FieldCondition(key="cluster_id", is_null=True),
+        ])
+
+        hits = []
+
+        for offset in range(0, len(vectors), 128):
+            res = await self.client.query_batch_points(
+                collection_name=self.collection,
+                requests=[
+                    models.QueryRequest(
+                        query=vector,
+                        filter=filtr,
+                        limit=top_k,
+                        with_payload=["face_id", "cluster_id"],
+                        with_vector=False,
+                    )
+                    for vector in vectors[offset:offset + 128]
+                ],
+            )
+            hits.extend(
+                [point.payload for point in response.points if (point.payload or {}).get("cluster_id")]
+                for response in res
+            )
+
+        return hits
+
+    async def sample_clusters(
+        self, cluster_ids: list[int], owner: str, version: int, limit: int,
+    ) -> dict[int, dict[int, list[float]]]:
+        """Deterministic member vectors from distinct files for many clusters at once."""
+
+        if not cluster_ids:
             return {}
 
-        ids = {marker_point_id(fileid): fileid for fileid in fileids}
+        filtr = models.Filter(must=[
+            models.FieldCondition(key="kind", match=models.MatchValue(value=FACE_KIND)),
+            models.FieldCondition(key="owner_id", match=models.MatchValue(value=owner)),
+            models.FieldCondition(key="embed_version", match=models.MatchValue(value=version)),
+            models.FieldCondition(key="cluster_id", match=models.MatchAny(any=cluster_ids)),
+        ])
+
+        members: dict[int, set] = {}
+
+        async for point in self._scroll(filtr):
+            payload = point.payload or {}
+
+            if payload.get("face_id") and payload.get("fileid") and payload.get("cluster_id") is not None:
+                members.setdefault(payload["cluster_id"], set()).add((payload["face_id"], payload["fileid"]))
+
+        # Stable order, one member per file; there is no permanent seed class.
+        wanted: dict[str, tuple[int, int]] = {}
+
+        for cluster_id in cluster_ids:
+            files = set()
+
+            for face_id, fileid in sorted(members.get(cluster_id, ())):
+                if fileid not in files:
+                    files.add(fileid)
+                    wanted[face_point_id(face_id)] = (cluster_id, face_id)
+
+                if len(files) >= limit:
+                    break
+
+        samples: dict[int, dict[int, list[float]]] = {}
+
+        for chunk in _chunks(list(wanted), 256):
+            points = await self.client.retrieve(
+                collection_name=self.collection,
+                ids=chunk,
+                with_payload=True,
+                with_vectors=True,
+            )
+
+            for point in points:
+                payload = point.payload or {}
+                entry = wanted.get(point.id)
+
+                if entry is not None and _usable_vector(point.vector):
+                    cluster_id, face_id = entry
+                    samples.setdefault(cluster_id, {})[face_id] = list(point.vector)
+
+        return samples
+
+    async def set_face_clusters(self, mapping: dict[int, int]):
+        """Stamp cluster payloads, but only on points that are still unassigned.
+
+        A concurrent manual correction wins: its inline payload update already
+        assigned the point, so a stale grouping outcome never clobbers it here.
+        """
+
+        if not mapping:
+            return
+
         points = await self.client.retrieve(
             collection_name=self.collection,
-            ids=list(ids),
-            with_payload=True,
+            ids=[face_point_id(face_id) for face_id in mapping],
+            with_payload=["kind", "face_id", "cluster_id"],
             with_vectors=False,
         )
+        by_cluster = {}
 
-        return {ids[point.id]: point.payload for point in points if point.id in ids}
+        for point in points:
+            payload = point.payload or {}
+            face_id = payload.get("face_id", 0)
 
-    async def put_marker(
-        self,
-        fileid: int,
-        etag: str,
-        mtime: int | None,
-        owner_id: str,
-        embed_version: int,
-        face_count: int,
-    ):
-        """Stamp a file complete; a fixed dummy vector keeps cosine happy."""
+            if (
+                payload.get("kind") == FACE_KIND
+                and payload.get("cluster_id") is None
+                and mapping.get(face_id) is not None
+            ):
+                by_cluster.setdefault(mapping[face_id], []).append(point.id)
 
-        point = models.PointStruct(
-            id=marker_point_id(fileid),
-            vector=[1.0] + [0.0] * (self.dim - 1),
-            payload={
-                "kind": MARKER_KIND,
-                "etag": etag,
-                "mtime": mtime,
-                "owner_id": owner_id,
-                "embed_version": embed_version,
-                "face_count": face_count,
-            },
-        )
-
-        await self.client.upsert(self.collection, points=[point], wait=True)
-
-    async def delete_marker(self, fileid: int):
-        """Drop a file's completion marker before its results are replaced."""
-
-        await self.delete_points([marker_point_id(fileid)])
+        for cluster_id, point_ids in by_cluster.items():
+            await self.client.set_payload(
+                collection_name=self.collection,
+                payload={"cluster_id": cluster_id},
+                points=point_ids,
+                wait=True,
+            )

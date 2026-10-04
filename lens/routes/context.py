@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from models import EmbeddingModel, FaceModel, SchemaModel, SentenceModel
 
 if TYPE_CHECKING:
+    from faces import FaceGrouper
     from index import IndexQueue, Scanner
     from store import Store
 
@@ -19,6 +20,7 @@ class State:
     store: "Store | None" = None
     index_queue: "IndexQueue | None" = None
     scanner: "Scanner | None" = None
+    face_grouper: "FaceGrouper | None" = None
 
 
 embedding_model = EmbeddingModel()

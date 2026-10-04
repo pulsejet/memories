@@ -123,6 +123,16 @@ class EmbeddingStore(FileStore):
 
         await self.client.upsert(self.collection, points=structs, wait=True)
 
+    async def set_face_state(self, fileid: int, owner: str, version: int, count: int):
+        """Stamp face completion on the image point; the next image upsert clears it."""
+
+        await self.client.set_payload(
+            collection_name=self.collection,
+            payload={"face_count": count, "face_version": version, "face_owner": owner},
+            points=[int(fileid)],
+            wait=True,
+        )
+
     async def search(self, vector, folders, limit, osm_ids=None):
         """Nearest image vectors scoped to folders, low scores dropped, score desc."""
 

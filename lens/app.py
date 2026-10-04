@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from qdrant_client import AsyncQdrantClient
 
 from config import config
+from faces import FaceGrouper, run_periodically
 from index import Indexer, IndexQueue, Scanner
 from routes import routers
 from routes.context import embedding_model, face_model, schema_model, sentence_model, state
@@ -52,6 +53,7 @@ async def lifespan(_app: FastAPI):
     )
     scanner = Scanner(store, index_queue)
     state.scanner = scanner
+    state.face_grouper = FaceGrouper(store.faces)
 
     tasks = []
     try:
@@ -60,7 +62,13 @@ async def lifespan(_app: FastAPI):
 
         state.qdrant = "ok"
         state.ready = True
-        tasks = [index_queue.run(indexer.handle_batch), asyncio.create_task(scanner.run())]
+        tasks = [
+            index_queue.run(indexer.handle_batch),
+            asyncio.create_task(scanner.run()),
+            asyncio.create_task(run_periodically(
+                state.face_grouper, index_queue.mutation_lock, config.scan_interval,
+            )),
+        ]
 
         yield
     finally:

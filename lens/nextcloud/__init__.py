@@ -11,7 +11,7 @@ from nextcloud.client import (
     fetch_file,
     parse_metadata,
 )
-from nextcloud.faces import post_faces
+from nextcloud.faces import get_faces_batch, post_face_clusters, post_faces
 from nextcloud.scan import ScanBatch, ScanFile, fetch_scan_batch
 
 __all__ = [
@@ -26,6 +26,8 @@ __all__ = [
     "ScanFile",
     "fetch_file",
     "fetch_scan_batch",
+    "get_faces_batch",
     "parse_metadata",
+    "post_face_clusters",
     "post_faces",
 ]

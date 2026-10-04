@@ -1,0 +1,33 @@
+"""Trigger one bounded face-grouping pass; detection never runs here."""
+
+import logging
+
+from fastapi import APIRouter, BackgroundTasks, HTTPException
+
+from routes.context import state
+
+router = APIRouter()
+log = logging.getLogger("lens.app")
+
+
+@router.post("/v1/faces/cluster", status_code=202)
+async def cluster_faces(background_tasks: BackgroundTasks):
+    """Queue one grouping pass; 503 when the grouper is not ready."""
+
+    if state.face_grouper is None or state.index_queue is None:
+        raise HTTPException(status_code=503, detail="grouper not ready")
+
+    background_tasks.add_task(_run_cluster)
+
+    return {"status": "queued"}
+
+
+async def _run_cluster():
+    """Serialize the explicit trigger with indexing; failures stay visible in logs."""
+
+    try:
+        async with state.index_queue.mutation_lock:
+            await state.face_grouper.run_once()
+    except Exception:
+        log.exception("explicit faces grouping failed")
+        raise

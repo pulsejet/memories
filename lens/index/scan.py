@@ -103,6 +103,7 @@ class Scanner:
             now = int(time.time())
             found = set()
             indexed = set()
+            faced = set()
             stale = set()
             image_stale = set()
             repairs = set()
@@ -132,6 +133,9 @@ class Scanner:
                     # Places and faces are optional; only an image proves the file was indexed.
                     if collection is self.store.embedding:
                         indexed.add(fileid)
+
+                        if payload.get("face_count") is not None and payload.get("face_version") == config.face.version:
+                            faced.add(fileid)
                     if payload.get("mtime") != file.mtime:
                         stale.add(fileid)
                         if collection is self.store.embedding:
@@ -143,11 +147,10 @@ class Scanner:
             obsolete = found - files.keys()
             missing = files.keys() - indexed
 
-            # Marker-less files reindex fully, even with a fresh image.
-            markers = await self.store.faces.get_markers(list(files))
-
+            # Face state rides on the image point: its upsert clears it and only
+            # the face phase restamps it, so unstamped files reindex fully here.
             for fileid in files:
-                if fileid not in markers:
+                if fileid not in faced:
                     stale.add(fileid)
 
             for fileid in (found | pending) - files.keys():

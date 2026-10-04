@@ -62,6 +62,10 @@ class FileStore:
                     "stage",
                     "retry_at",
                     "face_id",
+                    "cluster_id",
+                    "face_count",
+                    "face_version",
+                    "face_owner",
                 ],
                 with_vectors=False,
             )
