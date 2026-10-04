@@ -5,6 +5,8 @@ import logging
 import time
 from dataclasses import replace
 
+from config import config
+from faces import FaceIndexer
 from nextcloud import NotFoundError, fetch_file
 from store import FAILURE_KIND, FileMeta, PlacePoint, UpsertPoint
 
@@ -14,11 +16,12 @@ log = logging.getLogger("lens.queue")
 class Indexer:
     """Index one batch at a time; completion is reported via the done callback."""
 
-    def __init__(self, embedding_model, sentence_model, store, done):
+    def __init__(self, embedding_model, sentence_model, store, done, face_model):
         self.embedding_model = embedding_model
         self.sentence_model = sentence_model
         self.store = store
         self.done = done
+        self.face_indexer = FaceIndexer(face_model, store.faces)
 
     async def handle_batch(self, batch):
         """Check current metadata first, then download and embed only files needing work."""
@@ -34,7 +37,7 @@ class Indexer:
         parents = dict(batch)
         now = int(time.time())
         for fileid, failure in failures.items():
-            if failure["stage"] == "image" and failure["retry_at"] > now:
+            if failure["stage"] in ("image", "faces") and failure["retry_at"] > now:
                 log.info("index deferred for %d until %d", fileid, failure["retry_at"])
                 del parents[fileid]
                 self.done(fileid, ok=None)
@@ -121,8 +124,13 @@ class Indexer:
                 len(res.metadata.places),
             )
 
-        await self._finish_places(
+        faced = await self._finish_faces(
             files=[(fileid, res) for fileid, res, _ in good],
+            parents=parents,
+        )
+
+        await self._finish_places(
+            files=faced,
             parents=parents,
             failures=failures,
         )
@@ -142,9 +150,10 @@ class Indexer:
             return set(), set()
 
         missing = set(files)
-        stale = {fileid for fileid in failures.keys() & files.keys() if failures[fileid]["stage"] == "image"}
+        stale = {fileid for fileid in failures.keys() & files.keys() if failures[fileid]["stage"] in ("image", "faces")}
         places = {fileid for fileid in failures.keys() & files.keys() if failures[fileid]["stage"] == "places"}
         repairs = set()
+        face_counts = {}
 
         for collection in self.store.collections:
             try:
@@ -157,6 +166,8 @@ class Indexer:
                     meta = files[fileid]
                     if collection is self.store.embedding:
                         missing.discard(fileid)
+                    if collection is self.store.faces and payload.get("kind") == "face":
+                        face_counts[fileid] = face_counts.get(fileid, 0) + 1
                     if payload.get("mtime") != meta.mtime:
                         if collection is self.store.places:
                             places.add(fileid)
@@ -183,7 +194,43 @@ class Indexer:
 
             log.info("index metadata repaired %d in %s", fileid, collection.collection)
 
+        # Face completeness rides the single pipeline: a missing or disagreeing
+        # marker (or vector set) means a full reindex, never a face-only run.
+        markers = await self.store.faces.get_markers(list(files))
+
+        for fileid, meta in files.items():
+            marker = markers.get(fileid)
+
+            if (
+                marker is None
+                or marker.get("mtime") != meta.mtime
+                or marker.get("owner_id") != meta.owner
+                or marker.get("embed_version") != config.face.version
+                or marker.get("face_count") != face_counts.get(fileid, 0)
+            ):
+                stale.add(fileid)
+
         return stale | missing, places
+
+    async def _finish_faces(self, files, parents):
+        """Run the detection phase after the image commit; failures keep old face state."""
+
+        complete = []
+
+        for fileid, res in files:
+            try:
+                outcome = await self.face_indexer.process_file(fileid, res, parents[fileid])
+            except Exception as exc:  # noqa: BLE001
+                await self._fail(fileid, exc, stage="faces")
+                continue
+
+            if outcome == "stale":
+                self.done(fileid, ok=None)
+                continue
+
+            complete.append((fileid, res))
+
+        return complete
 
     async def _fail(self, fileid, error, stage="image"):
         """Persist retry state before releasing the file from the indexing queue."""

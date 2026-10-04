@@ -5,15 +5,18 @@ from nextcloud.client import (
     FetchError,
     FetchResult,
     FileMetadata,
+    Face,
     NotFoundError,
     Place,
     fetch_file,
     parse_metadata,
 )
+from nextcloud.faces import post_faces
 from nextcloud.scan import ScanBatch, ScanFile, fetch_scan_batch
 
 __all__ = [
     "AuthError",
+    "Face",
     "FetchError",
     "FetchResult",
     "FileMetadata",
@@ -24,4 +27,5 @@ __all__ = [
     "fetch_file",
     "fetch_scan_batch",
     "parse_metadata",
+    "post_faces",
 ]

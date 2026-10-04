@@ -11,7 +11,7 @@ $(VENV):
 
 .PHONY: lint
 lint:
-	$(PY)/ruff check *.py store models nextcloud process routes index tests
+	$(PY)/ruff check *.py store models nextcloud process routes index tests faces
 
 .PHONY: test
 test:

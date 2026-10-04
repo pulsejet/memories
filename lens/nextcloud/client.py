@@ -132,6 +132,13 @@ def parse_metadata(value: str) -> FileMetadata:
             except DaciteError:
                 pass
             else:
-                return replace(meta, places=[p for p in meta.places if p.osm_id > 0 and p.name])
+                return _clean(meta)
 
     return FileMetadata(etag="", mimetype="", epoch=None, dayid=None, places=[], mtime=None, parent_id=None)
+
+
+def _clean(meta: FileMetadata) -> FileMetadata:
+    """Drop placeholder places."""
+
+    return replace(meta, places=[p for p in meta.places if p.osm_id > 0 and p.name])
+

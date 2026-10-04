@@ -48,6 +48,7 @@ async def lifespan(_app: FastAPI):
         sentence_model=sentence_model,
         store=store,
         done=index_queue.done,
+        face_model=face_model,
     )
     scanner = Scanner(store, index_queue)
     state.scanner = scanner
