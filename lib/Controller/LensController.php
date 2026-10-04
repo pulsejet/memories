@@ -224,6 +224,9 @@ final class LensController extends ApiController
 
     /**
      * Due unassigned faces for the Lens service account, storage-ordered.
+     *
+     * @param int<1, 5000> $limit daemon batch cap; declared because the
+     *                            framework default `limit` range (1-500) does not fit batch endpoints
      */
     #[NoAdminRequired]
     #[NoCSRFRequired]
