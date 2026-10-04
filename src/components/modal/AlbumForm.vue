@@ -222,6 +222,8 @@ export default defineComponent({
         }
 
         this.$emit('done', { album });
+      } catch (error) {
+        console.error(error);
       } finally {
         this.loading = false;
       }
@@ -241,6 +243,8 @@ export default defineComponent({
           });
         }
         this.$emit('done', { album });
+      } catch (error) {
+        console.error(error);
       } finally {
         this.loading = false;
       }
