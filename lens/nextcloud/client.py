@@ -78,7 +78,7 @@ class NotFoundError(FetchError):
 def fetch_file(fileid: int, *, metadata_only: bool = False) -> FetchResult:
     """Fetch file metadata via HEAD, or download bytes and metadata via GET."""
 
-    url = f"{config.nextcloud_url}/index.php/apps/memories/lens/file/{fileid}"
+    url = f"{config.nextcloud_url}/index.php/apps/memories/api/lens/file/{fileid}"
     method = "HEAD" if metadata_only else "GET"
 
     with httpx.Client(

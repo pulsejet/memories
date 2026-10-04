@@ -327,3 +327,27 @@ class FacesStore(FileStore):
                 points=point_ids,
                 wait=True,
             )
+
+    async def reassign_clusters(self, mapping: dict[int, int | None]) -> int:
+        """Overwrite cluster payloads from a user correction; intent wins.
+
+        Unlike grouping stamps, this applies unconditionally: SQL already
+        moved these faces, Qdrant must follow so the next grouping pass
+        samples them under the right cluster. A null target clears the key,
+        which reads back as unassigned everywhere else.
+        """
+
+        by_cluster: dict[int | None, list] = {}
+
+        for face_id, cluster_id in mapping.items():
+            by_cluster.setdefault(cluster_id, []).append(face_point_id(face_id))
+
+        for cluster_id, point_ids in by_cluster.items():
+            await self.client.set_payload(
+                collection_name=self.collection,
+                payload={"cluster_id": cluster_id},
+                points=point_ids,
+                wait=True,
+            )
+
+        return len(mapping)

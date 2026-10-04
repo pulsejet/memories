@@ -14,7 +14,7 @@ log = logging.getLogger("lens.nextcloud")
 def post_faces(fileid: int, owner: str, faces: list[dict]) -> list[dict]:
     """Replace one file's face rows; returns the committed ids and clusters."""
 
-    url = f"{config.nextcloud_url}/index.php/apps/memories/lens/faces"
+    url = f"{config.nextcloud_url}/index.php/apps/memories/api/lens/faces"
 
     with httpx.Client(
         timeout=TIMEOUT,
@@ -44,7 +44,7 @@ def post_faces(fileid: int, owner: str, faces: list[dict]) -> list[dict]:
 def get_faces_batch(limit: int) -> list[dict]:
     """Fetch due unassigned faces, storage-ordered with whole files; returns raw rows."""
 
-    url = f"{config.nextcloud_url}/index.php/apps/memories/lens/faces/batch"
+    url = f"{config.nextcloud_url}/index.php/apps/memories/api/lens/faces/batch"
 
     with httpx.Client(
         timeout=TIMEOUT,
@@ -74,7 +74,7 @@ def get_faces_batch(limit: int) -> list[dict]:
 def post_face_clusters(owner: str, assignments: list[dict], attempted: list[int]) -> dict:
     """Write grouping outcomes; returns the PHP-committed assigned/miss counts."""
 
-    url = f"{config.nextcloud_url}/index.php/apps/memories/lens/faces/clusters"
+    url = f"{config.nextcloud_url}/index.php/apps/memories/api/lens/faces/clusters"
 
     with httpx.Client(
         timeout=TIMEOUT,

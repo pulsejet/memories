@@ -216,6 +216,9 @@ class Indexer:
         for fileid, res in files:
             try:
                 outcome, count = await self.face_indexer.process_file(fileid, res, parents[fileid])
+            except NotFoundError:
+                await self._discard_missing(fileid)
+                continue
             except Exception as exc:  # noqa: BLE001
                 await self._fail(fileid, exc, stage="faces")
                 continue

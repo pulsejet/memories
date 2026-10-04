@@ -12,7 +12,7 @@ import logging
 import secrets
 
 from config import config
-from nextcloud import FetchResult, fetch_file, post_faces
+from nextcloud import FetchResult, NotFoundError, fetch_file, post_faces
 from store import FacePoint, face_point_id
 
 log = logging.getLogger("lens.faces")
@@ -179,6 +179,9 @@ class FaceIndexer:
 
         try:
             head = await asyncio.to_thread(self.head_fn, fileid)
+        except NotFoundError:
+            # Deleted mid-flight: let the caller discard, never retry.
+            raise
         except Exception as exc:
             raise FaceError(f"face freshness check failed for {fileid}: {exc}") from exc
 

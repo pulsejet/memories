@@ -49,7 +49,7 @@ class ScanBatch(BaseModel):
 async def fetch_scan_batch() -> ScanBatch:
     """Allocate the next PHP batch; HTTP or validation failures never become empty batches."""
 
-    url = f"{config.nextcloud_url}/index.php/apps/memories/lens/scan"
+    url = f"{config.nextcloud_url}/index.php/apps/memories/api/lens/scan"
 
     async with httpx.AsyncClient(
         timeout=TIMEOUT,
