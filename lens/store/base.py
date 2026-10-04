@@ -61,6 +61,7 @@ class FileStore:
                     "kind",
                     "stage",
                     "retry_at",
+                    "face_id",
                 ],
                 with_vectors=False,
             )
