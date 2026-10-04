@@ -2,7 +2,7 @@
 
 import base64
 import logging
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from http.cookiejar import CookieJar
 
 import httpx
@@ -27,6 +27,20 @@ class Place:
 
 
 @dataclass(frozen=True)
+class Face:
+    """One current face row from SQL, shipped for restore stability."""
+
+    id: int
+    x: float
+    y: float
+    w: float
+    h: float
+    det_score: float = 0
+    cluster_id: int | None = None
+    embed_version: int | None = None
+
+
+@dataclass(frozen=True)
 class FileMetadata:
     """File metadata from the X-Memories-Metadata header (empties when missing)."""
 
@@ -37,6 +51,8 @@ class FileMetadata:
     places: list[Place]
     mtime: int | None
     parent_id: int | None
+    faces: list[Face] = field(default_factory=list)
+    owner: str | None = None
 
 
 @dataclass(frozen=True)

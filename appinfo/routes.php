@@ -79,6 +79,10 @@ return [
         ['name' => 'Lens#file', 'url' => '/lens/file/{fileid}', 'verb' => 'GET', 'requirements' => ['fileid' => '\d+']],
         ['name' => 'Lens#scan', 'url' => '/lens/scan', 'verb' => 'POST'],
         ['name' => 'Lens#search', 'url' => '/api/lens/search', 'verb' => 'GET'],
+        ['name' => 'Lens#facesReplace', 'url' => '/lens/faces', 'verb' => 'POST'],
+        ['name' => 'Lens#facesBatch', 'url' => '/lens/faces/batch', 'verb' => 'GET'],
+        ['name' => 'Lens#facesClusters', 'url' => '/lens/faces/clusters', 'verb' => 'POST'],
+        ['name' => 'Lens#facesDelete', 'url' => '/lens/faces/{fileid}', 'verb' => 'DELETE', 'requirements' => ['fileid' => '\d+']],
 
         ['name' => 'Share#links', 'url' => '/api/share/links', 'verb' => 'GET'],
         ['name' => 'Share#createNode', 'url' => '/api/share/node', 'verb' => 'POST'],

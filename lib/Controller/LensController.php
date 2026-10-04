@@ -25,6 +25,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\FsManager;
+use OCA\Memories\Db\LensFaces;
 use OCA\Memories\Db\LensFolders;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
@@ -53,6 +54,7 @@ final class LensController extends ApiController
         protected TimelineQuery $tq,
         protected FsManager $fs,
         protected LensFolders $lensFolders,
+        protected LensFaces $lensFaces,
         protected IClientService $clientService,
         protected Lens $lens,
         protected ServiceManager $serviceManager,
@@ -95,6 +97,8 @@ final class LensController extends ApiController
                 'epoch' => $meta['epoch'],
                 'dayid' => $meta['dayid'],
                 'places' => $this->getLensPlaces($fileid),
+                'faces' => $this->getLensFaces($fileid),
+                'owner' => $file->getStorage()->getId(),
             ];
             $json = json_encode($metadata, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             if (\is_string($json)) {
@@ -200,6 +204,77 @@ final class LensController extends ApiController
     }
 
     /**
+     * Thin detection writeback for the Lens service account.
+     *
+     * Delete-all and recreate; geometry matching lives in the daemon.
+     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
+    #[PublicPage]
+    public function facesReplace(int $fileid, array $faces, string $owner): Http\Response
+    {
+        return $this->util->guardEx(function () use ($fileid, $faces, $owner) {
+            $this->serviceManager->guardLensServiceAccount();
+
+            return new DataResponse([
+                'faces' => $this->lensFaces->replaceFaces($fileid, $faces, $owner),
+            ]);
+        });
+    }
+
+    /**
+     * Due unassigned faces for the Lens service account, storage-ordered.
+     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
+    #[PublicPage]
+    public function facesBatch(int $limit = 1000): Http\Response
+    {
+        return $this->util->guardEx(function () use ($limit) {
+            $this->serviceManager->guardLensServiceAccount();
+
+            return new DataResponse([
+                'faces' => $this->lensFaces->getDueBatch($limit),
+            ]);
+        });
+    }
+
+    /**
+     * Grouping writeback for the Lens service account.
+     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
+    #[PublicPage]
+    public function facesClusters(array $assignments, array $attempted, string $owner): Http\Response
+    {
+        return $this->util->guardEx(function () use ($assignments, $attempted, $owner) {
+            $this->serviceManager->guardLensServiceAccount();
+
+            return new DataResponse([
+                'assigned' => $this->lensFaces->applyClusters($assignments, $owner),
+                'misses' => $this->lensFaces->backoffFaces($attempted),
+            ]);
+        });
+    }
+
+    /**
+     * Delete one file's face rows, called back by the daemon once its vectors are gone.
+     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
+    #[PublicPage]
+    public function facesDelete(int $fileid): Http\Response
+    {
+        return $this->util->guardEx(function () use ($fileid) {
+            $this->serviceManager->guardLensServiceAccount();
+
+            $this->lensFaces->deleteFileFaces($fileid);
+
+            return new DataResponse(['fileid' => $fileid, 'status' => 'deleted']);
+        });
+    }
+
+    /**
      * Catalog revision/dates and current storage parent, independent of the service user's mounts.
      *
      * Best-effort: failures never break file serving.
@@ -241,6 +316,22 @@ final class LensController extends ApiController
     {
         try {
             return $this->tq->getPlacesById($fileid);
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * Current face rows of a file for restore stability.
+     *
+     * Best-effort: failures never break file serving.
+     *
+     * @return list<array{id: int, x: float, y: float, w: float, h: float, det_score: float, cluster_id: ?int, embed_version: int, next_try: int, retries: int}>
+     */
+    private function getLensFaces(int $fileid): array
+    {
+        try {
+            return $this->lensFaces->getFacesByFileId($fileid);
         } catch (\Throwable) {
             return [];
         }
