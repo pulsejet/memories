@@ -142,6 +142,14 @@ class Scanner:
             pending = self.queue.fileids_in_range(batch.start, batch.end)
             obsolete = found - files.keys()
             missing = files.keys() - indexed
+
+            # Marker-less files reindex fully, even with a fresh image.
+            markers = await self.store.faces.get_markers(list(files))
+
+            for fileid in files:
+                if fileid not in markers:
+                    stale.add(fileid)
+
             for fileid in (found | pending) - files.keys():
                 self.queue.drop(fileid)
                 if fileid in found:
