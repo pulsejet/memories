@@ -127,6 +127,12 @@ e2e_setup_ci() {
     # Run repair steps.
     occ maintenance:repair
 
+    # Assert that we are running with full compatibility.
+    if [ "$(occ config:system:get memories.db.triggers.fcu)" != "true" ]; then
+        echo "ERROR: filecache trigger creation failed" >&2
+        return 1
+    fi
+
     # Enable Nextcloud debug mode.
     occ config:system:set --type bool --value true debug
     occ config:system:set loglevel --type integer --value 0

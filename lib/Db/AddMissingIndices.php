@@ -85,19 +85,24 @@ final class AddMissingIndices
      */
     public function createFilecacheTriggers(IOutput $output): void
     {
-        $provider = $this->connection->getDatabaseProvider();
+        $provider = $this->connection->getDatabaseProvider(true);
 
         // Trigger to update parent from filecache
         try {
             if (IDBConnection::PLATFORM_MYSQL === $provider) {
-                // MySQL has no upsert for triggers
+                // MySQL does not support REPLACE TRIGGER; just skip if it exists.
                 $this->connection->executeQuery(
-                    'DROP TRIGGER IF EXISTS memories_fcu_trg;',
+                    'CREATE TRIGGER IF NOT EXISTS memories_fcu_trg
+                    AFTER UPDATE ON *PREFIX*filecache
+                    FOR EACH ROW
+                        UPDATE *PREFIX*memories
+                        SET parent = NEW.parent
+                        WHERE fileid = NEW.fileid;',
                 );
-
-                // Create the trigger again
+            } elseif (IDBConnection::PLATFORM_MARIADB === $provider) {
+                // Safer than MySQL, always ensures that the trigger is current.
                 $this->connection->executeQuery(
-                    'CREATE TRIGGER memories_fcu_trg
+                    'CREATE OR REPLACE TRIGGER memories_fcu_trg
                     AFTER UPDATE ON *PREFIX*filecache
                     FOR EACH ROW
                         UPDATE *PREFIX*memories
@@ -130,10 +135,7 @@ final class AddMissingIndices
             } elseif (IDBConnection::PLATFORM_SQLITE === $provider) {
                 // Exactly the same as MySQL except for the BEGIN and END
                 $this->connection->executeQuery(
-                    'DROP TRIGGER IF EXISTS memories_fcu_trg;',
-                );
-                $this->connection->executeQuery(
-                    'CREATE TRIGGER memories_fcu_trg
+                    'CREATE TRIGGER IF NOT EXISTS memories_fcu_trg
                     AFTER UPDATE ON *PREFIX*filecache
                     FOR EACH ROW
                     BEGIN
