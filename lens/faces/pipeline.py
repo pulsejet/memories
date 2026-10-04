@@ -36,12 +36,14 @@ def mint_face_id() -> int:
     return face_id
 
 
-def match_faces(detections: list[dict], old_faces: list, version: int) -> list[dict]:
+def match_faces(detections: list[dict], old_faces: list, version: int, owner: str | None) -> list[dict]:
     """Match new detections one-to-one against current SQL rows.
 
     Only same-version rows participate; anything ambiguous or unmatched gets a
     fresh ID with a null cluster. Restored faces keep their ID and echo the
-    stored cluster verbatim. No next_try/retries are sent here.
+    stored cluster verbatim, but only when that cluster belongs to the
+    current storage scope: a cross-storage move retaining its file ID must
+    never resurrect a foreign cluster. No next_try/retries are sent here.
     """
 
     eligible = [face for face in old_faces if face.embed_version == version and face.w > 0 and face.h > 0]
@@ -62,7 +64,8 @@ def match_faces(detections: list[dict], old_faces: list, version: int) -> list[d
 
         if len(choices) == 1:
             old = eligible[choices[0]]
-            matched.append({**_geometry(det), "id": old.id, "cluster_id": old.cluster_id})
+            cluster = old.cluster_id if old.cluster_id is None or old.cluster_owner in (None, owner) else None
+            matched.append({**_geometry(det), "id": old.id, "cluster_id": cluster})
         else:
             matched.append({**_geometry(det), "id": mint_face_id(), "cluster_id": None})
 
@@ -118,7 +121,7 @@ class FaceIndexer:
         image = await asyncio.to_thread(self.face_model.decode_image, res.data)
         detections = await self.face_model.detect_async(image)
         vectors = await self.face_model.embed_async(image, detections)
-        matched = match_faces(detections, res.metadata.faces, config.face.version)
+        matched = match_faces(detections, res.metadata.faces, config.face.version, owner)
         known = {face.id for face in res.metadata.faces if face.embed_version == config.face.version}
         reused = sum(1 for face in matched if face["id"] in known)
         log.info("faces matched for %d: %d reused, %d new", fileid, reused, len(matched) - reused)

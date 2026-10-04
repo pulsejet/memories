@@ -50,7 +50,7 @@ final class LensFolders
     /**
      * Allocate the next inclusive fileid range; a null end covers the remaining tail.
      *
-     * @return array{start: int, end: ?int, done: bool, files: list<array{fileid: int, isvideo: bool, parentid: int, mtime: int, etag: string}>}
+     * @return array{start: int, end: ?int, done: bool, files: list<array{fileid: int, isvideo: bool, parentid: int, mtime: int, etag: string, owner: string}>}
      */
     public function nextScanBatch(): array
     {
@@ -83,14 +83,16 @@ final class LensFolders
     }
 
     /**
-     * @return list<array{fileid: int, isvideo: bool, parentid: int, mtime: int, etag: string}>
+     * @return list<array{fileid: int, isvideo: bool, parentid: int, mtime: int, etag: string, owner: string}>
      */
     private function fetchScanBatch(int $cursor): array
     {
         $qb = $this->connection->getQueryBuilder();
         $qb->select('m.fileid', 'm.isvideo', 'f.parent', 'm.mtime', 'f.etag')
+            ->selectAlias('s.id', 'owner')
             ->from('memories', 'm')
             ->innerJoin('m', 'filecache', 'f', $qb->expr()->eq('m.fileid', 'f.fileid'))
+            ->innerJoin('f', 'storages', 's', $qb->expr()->eq('f.storage', 's.numeric_id'))
             ->where($qb->expr()->gt('m.fileid', $qb->createNamedParameter($cursor, IQueryBuilder::PARAM_INT)))
             ->orderBy('m.fileid', 'ASC')
             ->setMaxResults(self::SCAN_BATCH_SIZE)
@@ -102,6 +104,7 @@ final class LensFolders
             'parentid' => (int) $row['parent'],
             'mtime' => (int) $row['mtime'],
             'etag' => (string) $row['etag'],
+            'owner' => (string) $row['owner'],
         ], $qb->executeQuery()->fetchAllAssociative());
     }
 }

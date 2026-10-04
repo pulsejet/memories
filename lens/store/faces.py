@@ -209,6 +209,7 @@ class FacesStore(FileStore):
             models.FieldCondition(key="embed_version", match=models.MatchValue(value=version)),
         ], must_not=[
             models.FieldCondition(key="cluster_id", is_null=True),
+            models.FieldCondition(key="cluster_id", is_empty=True),
         ])
 
         hits = []

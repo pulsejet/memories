@@ -37,6 +37,7 @@ class Face:
     h: float
     det_score: float = 0
     cluster_id: int | None = None
+    cluster_owner: str | None = None
     embed_version: int | None = None
 
 

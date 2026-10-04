@@ -41,6 +41,26 @@ def post_faces(fileid: int, owner: str, faces: list[dict]) -> list[dict]:
     return committed
 
 
+def delete_faces(fileid: int) -> None:
+    """Delete one file's SQL face rows; orphans clusters/persons server-side."""
+
+    url = f"{config.nextcloud_url}/index.php/apps/memories/api/lens/faces/{fileid}"
+
+    with httpx.Client(
+        timeout=TIMEOUT,
+        auth=(config.nc_user, config.nc_token),
+        cookies=cookie_jar,
+    ) as client:
+        res = client.delete(url)
+
+    if res.status_code == 401:
+        log.error("lens service account rejected (401); re-issue via occ user:auth-tokens:add")
+        raise AuthError(f"DELETE {url} -> 401")
+
+    if res.status_code != 200:
+        raise FetchError(f"DELETE {url} -> {res.status_code}")
+
+
 def get_faces_batch(limit: int) -> list[dict]:
     """Fetch due unassigned faces, storage-ordered with whole files; returns raw rows."""
 

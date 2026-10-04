@@ -5,7 +5,7 @@ import logging
 import time
 
 from config import config
-from nextcloud import ScanBatch, fetch_scan_batch
+from nextcloud import ScanBatch, delete_faces, fetch_scan_batch
 from store import FAILURE_KIND
 
 log = logging.getLogger("lens.scan")
@@ -134,7 +134,11 @@ class Scanner:
                     if collection is self.store.embedding:
                         indexed.add(fileid)
 
-                        if payload.get("face_count") is not None and payload.get("face_version") == config.face.version:
+                        # A scope-only change must reindex even when everything
+                        # else matches: the HEAD path already compares this.
+                        if payload.get("face_count") is not None \
+                                and payload.get("face_version") == config.face.version \
+                                and payload.get("face_owner") == file.owner:
                             faced.add(fileid)
                     if payload.get("mtime") != file.mtime:
                         stale.add(fileid)
@@ -159,6 +163,10 @@ class Scanner:
                     for collection in self.store.collections:
                         await collection.delete_fileid(fileid)
                     self.stats["deleted_total"] += 1
+                try:
+                    await asyncio.to_thread(delete_faces, fileid)
+                except Exception:
+                    log.exception("failed to clean up SQL faces for %d during scan", fileid)
 
             for file in files.values():
                 self.queue.refresh_parent(file.fileid, file.parentid)

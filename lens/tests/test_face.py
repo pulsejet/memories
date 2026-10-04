@@ -29,7 +29,9 @@ with patch.dict(os.environ, {
     "DEVICE": "cpu",
 }):
     from config import _face_config, config
+    from faces.pipeline import match_faces
     from models.face import DST_TEMPLATE, FaceModel, _decode_stride, _format_face, _similarity_matrix
+    from nextcloud.client import Face
 
 
 class FaceGeometryTest(unittest.TestCase):
@@ -249,6 +251,54 @@ class FaceRuntimeTest(unittest.TestCase):
             with patch.dict(os.environ, {"FACE_DET_THRESHOLD": value}):
                 with self.assertRaises(RuntimeError):
                     _face_config()
+
+
+class MatchFacesTest(unittest.TestCase):
+    """Geometry matching restores identity only within the storage scope."""
+
+    DET = {"x": 0.1, "y": 0.1, "w": 0.2, "h": 0.2, "det_score": 0.9}
+
+    def old(self, **kwargs):
+        """One stored face row; geometry matches DET unless overridden."""
+
+        params = {
+            "id": 5, "x": 0.1, "y": 0.1, "w": 0.2, "h": 0.2,
+            "cluster_id": 7, "cluster_owner": "home::a", "embed_version": 2,
+        }
+        params.update(kwargs)
+
+        return Face(**params)
+
+    def test_same_scope_restores_cluster(self):
+        """Identical geometry and owner keeps the id and cluster."""
+
+        [matched] = match_faces([self.DET], [self.old()], 2, "home::a")
+        self.assertEqual((matched["id"], matched["cluster_id"]), (5, 7))
+
+    def test_moved_scope_mints_unassigned(self):
+        """A cross-storage move keeps the id but drops the foreign cluster."""
+
+        [matched] = match_faces([self.DET], [self.old()], 2, "home::b")
+        self.assertEqual((matched["id"], matched["cluster_id"]), (5, None))
+
+    def test_unknown_owner_restores(self):
+        """Legacy rows without an owner behave exactly like before."""
+
+        [matched] = match_faces([self.DET], [self.old(cluster_owner=None)], 2, "home::b")
+        self.assertEqual((matched["id"], matched["cluster_id"]), (5, 7))
+
+    def test_unassigned_stays_unassigned(self):
+        """A stored null cluster is echoed, never invented."""
+
+        [matched] = match_faces([self.DET], [self.old(cluster_id=None)], 2, "home::a")
+        self.assertEqual((matched["id"], matched["cluster_id"]), (5, None))
+
+    def test_version_mismatch_mints_fresh(self):
+        """Stale-version rows do not participate at any scope."""
+
+        [matched] = match_faces([self.DET], [self.old(embed_version=1)], 2, "home::a")
+        self.assertEqual(matched["cluster_id"], None)
+        self.assertNotEqual(matched["id"], 5)
 
 
 def sessions():

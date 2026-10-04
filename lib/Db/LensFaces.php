@@ -7,6 +7,7 @@ namespace OCA\Memories\Db;
 use OCA\Memories\HttpResponseException;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
+use OCP\DB\Exception as DbException;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
@@ -25,20 +26,23 @@ final class LensFaces
      * Current face rows of one file, ordered by id.
      *
      * Shape matches the file-metadata faces for restore stability.
+     * cluster_owner is the owning storage scope of the face's cluster, if any.
      *
      * @return list<array{
      *  id: int, x: float, y: float, w: float, h: float,
-     *  det_score: float, cluster_id: ?int, embed_version: int,
-     *  next_try: int, retries: int
+     *  det_score: float, cluster_id: ?int, cluster_owner: ?string,
+     *  embed_version: int, next_try: int, retries: int
      * }>
      */
     public function getFacesByFileId(int $fileid): array
     {
         $qb = $this->connection->getQueryBuilder();
-        $rows = $qb->select('id', 'x', 'y', 'w', 'h', 'det_score', 'cluster_id', 'embed_version', 'next_try', 'retries')
-            ->from('memories_lens_faces')
-            ->where($qb->expr()->eq('fileid', $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)))
-            ->addOrderBy('id', 'ASC')
+        $rows = $qb->select('mlf.id', 'mlf.x', 'mlf.y', 'mlf.w', 'mlf.h', 'mlf.det_score', 'mlf.cluster_id', 'mlf.embed_version', 'mlf.next_try', 'mlf.retries')
+            ->selectAlias('mlc.owner_id', 'cluster_owner')
+            ->from('memories_lens_faces', 'mlf')
+            ->leftJoin('mlf', 'memories_lens_clusters', 'mlc', $qb->expr()->eq('mlc.id', 'mlf.cluster_id'))
+            ->where($qb->expr()->eq('mlf.fileid', $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)))
+            ->addOrderBy('mlf.id', 'ASC')
             ->executeQuery()
             ->fetchAllAssociative()
         ;
@@ -52,6 +56,10 @@ final class LensFaces
      * Geometry matching lives in the daemon: it re-provides reused face ids and
      * mints uint63 ids for new faces. PHP trusts the submitted owner and values.
      * Returns the ids for the daemon's vector upsert. Last writer wins.
+     *
+     * Deliberately transaction-free: a duplicate-key insert inside a transaction
+     * poisons PostgreSQL retries, and a crash mid-replace heals on the next
+     * detection pass, which replaces all rows again.
      *
      * @param mixed $faces raw daemon payload, cast here
      *
@@ -68,59 +76,49 @@ final class LensFaces
             );
         }
 
-        $this->connection->beginTransaction();
+        // Delete-all first: the daemon re-provides every current detection
+        // with stable ids, so there is nothing to match or diff.
+        $qb = $this->connection->getQueryBuilder();
+        $qb->delete('memories_lens_faces')
+            ->where($qb->expr()->eq('fileid', $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)))
+            ->executeStatement()
+        ;
 
-        try {
-            // Delete-all first: the daemon re-provides every current detection
-            // with stable ids, so there is nothing to match or diff.
-            $qb = $this->connection->getQueryBuilder();
-            $qb->delete('memories_lens_faces')
-                ->where($qb->expr()->eq('fileid', $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)))
-                ->executeStatement()
-            ;
-
-            // Recreate verbatim: ensure referenced clusters exist, then insert
-            // with the daemon-minted ids and zero backoff. Last writer wins.
-            $committed = [];
-            foreach (array_values($faces) as $face) {
-                if (!\is_array($face)) {
-                    continue;
-                }
-                $id = (int) ($face['id'] ?? 0);
-                if ($id <= 0) {
-                    continue;
-                }
-                $cluster = (int) ($face['cluster_id'] ?? 0);
-                $cluster = $cluster > 0 ? $cluster : null;
-                if (null !== $cluster) {
-                    $this->ensureCluster($cluster, $owner);
-                }
-
-                $qb = $this->connection->getQueryBuilder();
-                $qb->insert('memories_lens_faces')
-                    ->values([
-                        'id' => $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT),
-                        'fileid' => $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT),
-                        'x' => $qb->createNamedParameter((float) ($face['x'] ?? 0)),
-                        'y' => $qb->createNamedParameter((float) ($face['y'] ?? 0)),
-                        'w' => $qb->createNamedParameter((float) ($face['w'] ?? 0)),
-                        'h' => $qb->createNamedParameter((float) ($face['h'] ?? 0)),
-                        'det_score' => $qb->createNamedParameter((float) ($face['det_score'] ?? 0)),
-                        'embed_version' => $qb->createNamedParameter(self::FACE_VERSION, IQueryBuilder::PARAM_INT),
-                        'cluster_id' => null !== $cluster ? $qb->createNamedParameter($cluster, IQueryBuilder::PARAM_INT) : $qb->createNamedParameter(null, IQueryBuilder::PARAM_NULL),
-                        'next_try' => $qb->createNamedParameter(0, IQueryBuilder::PARAM_INT),
-                        'retries' => $qb->createNamedParameter(0, IQueryBuilder::PARAM_INT),
-                    ])
-                    ->executeStatement()
-                ;
-                $committed[] = ['id' => $id, 'cluster_id' => $cluster];
+        // Recreate verbatim: ensure referenced clusters exist, then insert
+        // with the daemon-minted ids and zero backoff. Last writer wins.
+        $committed = [];
+        foreach (array_values($faces) as $face) {
+            if (!\is_array($face)) {
+                continue;
+            }
+            $id = (int) ($face['id'] ?? 0);
+            if ($id <= 0) {
+                continue;
+            }
+            $cluster = (int) ($face['cluster_id'] ?? 0);
+            $cluster = $cluster > 0 ? $cluster : null;
+            if (null !== $cluster) {
+                $this->ensureCluster($cluster, $owner);
             }
 
-            $this->connection->commit();
-        } catch (\Throwable $e) {
-            $this->connection->rollBack();
-
-            throw $e;
+            $qb = $this->connection->getQueryBuilder();
+            $qb->insert('memories_lens_faces')
+                ->values([
+                    'id' => $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT),
+                    'fileid' => $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT),
+                    'x' => $qb->createNamedParameter((float) ($face['x'] ?? 0)),
+                    'y' => $qb->createNamedParameter((float) ($face['y'] ?? 0)),
+                    'w' => $qb->createNamedParameter((float) ($face['w'] ?? 0)),
+                    'h' => $qb->createNamedParameter((float) ($face['h'] ?? 0)),
+                    'det_score' => $qb->createNamedParameter((float) ($face['det_score'] ?? 0)),
+                    'embed_version' => $qb->createNamedParameter(self::FACE_VERSION, IQueryBuilder::PARAM_INT),
+                    'cluster_id' => null !== $cluster ? $qb->createNamedParameter($cluster, IQueryBuilder::PARAM_INT) : $qb->createNamedParameter(null, IQueryBuilder::PARAM_NULL),
+                    'next_try' => $qb->createNamedParameter(0, IQueryBuilder::PARAM_INT),
+                    'retries' => $qb->createNamedParameter(0, IQueryBuilder::PARAM_INT),
+                ])
+                ->executeStatement()
+            ;
+            $committed[] = ['id' => $id, 'cluster_id' => $cluster];
         }
 
         return $committed;
@@ -136,7 +134,7 @@ final class LensFaces
      *
      * @return list<array{
      *  id: int, fileid: int, x: float, y: float, w: float, h: float,
-     *  det_score: float, embed_version: int, cluster_id: ?int,
+     *  det_score: float, embed_version: int, cluster_id: ?int, cluster_owner: ?string,
      *  next_try: int, retries: int, owner: string, datetaken: int
      * }>
      */
@@ -537,19 +535,35 @@ final class LensFaces
     }
 
     /**
-     * @return array{clusters: int, persons: int}
+     * Drop face rows of deleted files, then clusters and persons left
+     * without references. Only ever runs off lens flows (daemon delete
+     * callback after Qdrant cleanup, person merge/remove), never file hooks.
+     *
+     * @return array{faces: int, clusters: int, persons: int}
      */
     public function sweepOrphans(): array
     {
-        $faces = $this->connection->getQueryBuilder();
-        $faces->select($faces->expr()->literal(1))
+        $gone = $this->connection->getQueryBuilder();
+        $gone->select($gone->expr()->literal(1))
+            ->from('filecache', 'f')
+            ->where($gone->expr()->eq('f.fileid', '*PREFIX*memories_lens_faces.fileid'))
+        ;
+
+        $qb = $this->connection->getQueryBuilder();
+        $faces = $qb->delete('memories_lens_faces')
+            ->where(SQL::notExists($qb, $gone))
+            ->executeStatement()
+        ;
+
+        $facesQb = $this->connection->getQueryBuilder();
+        $facesQb->select($facesQb->expr()->literal(1))
             ->from('memories_lens_faces', 'f')
-            ->where($faces->expr()->eq('f.cluster_id', '*PREFIX*memories_lens_clusters.id'))
+            ->where($facesQb->expr()->eq('f.cluster_id', '*PREFIX*memories_lens_clusters.id'))
         ;
 
         $qb = $this->connection->getQueryBuilder();
         $clusters = $qb->delete('memories_lens_clusters')
-            ->where(SQL::notExists($qb, $faces))
+            ->where(SQL::notExists($qb, $facesQb))
             ->executeStatement()
         ;
 
@@ -565,12 +579,13 @@ final class LensFaces
             ->executeStatement()
         ;
 
-        return ['clusters' => $clusters, 'persons' => $persons];
+        return ['faces' => $faces, 'clusters' => $clusters, 'persons' => $persons];
     }
 
     /**
      * Create an empty cluster under the given owner (usually the storage
-     * scope of its first face). Duplicate ids are ignored.
+     * scope of its first face). Concurrent duplicate inserts are ignored;
+     * anything else propagates (see ensureCluster).
      */
     public function createCluster(int $id, string $owner): void
     {
@@ -595,7 +610,10 @@ final class LensFaces
                 ])
                 ->executeStatement()
             ;
-        } catch (\Throwable) {
+        } catch (DbException $e) {
+            if (DbException::REASON_UNIQUE_CONSTRAINT_VIOLATION !== $e->getReason()) {
+                throw $e;
+            }
             // Concurrent insert wins; the row exists either way.
         }
     }
@@ -603,7 +621,7 @@ final class LensFaces
     /**
      * @param array<string, mixed> $row
      *
-     * @return array{id: int, x: float, y: float, w: float, h: float, det_score: float, cluster_id: ?int, embed_version: int, next_try: int, retries: int}
+     * @return array{id: int, x: float, y: float, w: float, h: float, det_score: float, cluster_id: ?int, cluster_owner: ?string, embed_version: int, next_try: int, retries: int}
      */
     private static function castFaceRow(array $row): array
     {
@@ -615,12 +633,19 @@ final class LensFaces
             'h' => (float) $row['h'],
             'det_score' => (float) ($row['det_score'] ?? 0),
             'cluster_id' => null !== ($row['cluster_id'] ?? null) ? (int) $row['cluster_id'] : null,
+            'cluster_owner' => isset($row['cluster_owner']) && null !== $row['cluster_owner'] ? (string) $row['cluster_owner'] : null,
             'embed_version' => (int) ($row['embed_version'] ?? 0),
             'next_try' => (int) ($row['next_try'] ?? 0),
             'retries' => (int) ($row['retries'] ?? 0),
         ];
     }
 
+    /**
+     * Register a cluster blindly; a concurrent insert winning the race is
+     * fine, anything else propagates. Only unique violations are swallowed:
+     * catching everything would hide dangling references, and a failed
+     * insert inside a transaction poisons PostgreSQL retries.
+     */
     private function ensureCluster(int $cluster, string $owner): void
     {
         try {
@@ -635,7 +660,10 @@ final class LensFaces
                 ])
                 ->executeStatement()
             ;
-        } catch (\Throwable) {
+        } catch (DbException $e) {
+            if (DbException::REASON_UNIQUE_CONSTRAINT_VIOLATION !== $e->getReason()) {
+                throw $e;
+            }
             // Concurrent insert wins; the daemon is trusted on scope.
         }
     }

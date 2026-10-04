@@ -7,7 +7,7 @@ from dataclasses import replace
 
 from config import config
 from faces import FaceIndexer
-from nextcloud import NotFoundError, fetch_file
+from nextcloud import NotFoundError, delete_faces, fetch_file
 from store import FAILURE_KIND, FileMeta, PlacePoint, UpsertPoint
 
 log = logging.getLogger("lens.queue")
@@ -319,6 +319,12 @@ class Indexer:
             log.exception("failed to clean up missing file %d; scanner will retry", fileid)
         finally:
             self.done(fileid, ok=None)
+
+        try:
+            await asyncio.to_thread(delete_faces, fileid)
+            log.info("removed missing file %d from SQL faces", fileid)
+        except Exception:
+            log.exception("failed to clean up SQL faces for %d; file hooks cover new deletions", fileid)
 
     async def _fetch_all(self, fileids, *, metadata_only=False):
         """Fetch one batch concurrently; metadata checks use HEAD instead of downloading."""

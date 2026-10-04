@@ -15,6 +15,7 @@ class ScanFile(BaseModel):
     mtime: int
     etag: str
     isvideo: bool
+    owner: str
 
 
 class ScanBatch(BaseModel):

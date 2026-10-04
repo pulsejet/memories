@@ -106,7 +106,7 @@ final class LensController extends ApiController
                 'dayid' => $meta['dayid'],
                 'places' => $this->getLensPlaces($fileid),
                 'faces' => $this->getLensFaces($fileid),
-                'owner' => $file->getStorage()->getId(),
+                'owner' => $meta['owner'] ?? $file->getStorage()->getId(),
             ];
             $json = json_encode($metadata, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             if (\is_string($json)) {
@@ -270,6 +270,8 @@ final class LensController extends ApiController
 
     /**
      * Delete one file's face rows, called back by the daemon once its vectors are gone.
+     *
+     * Sweeps clusters and persons orphaned by the deletion.
      */
     #[NoAdminRequired]
     #[NoCSRFRequired]
@@ -280,6 +282,7 @@ final class LensController extends ApiController
             $this->serviceManager->guardLensServiceAccount();
 
             $this->lensFaces->deleteFileFaces($fileid);
+            $this->lensFaces->sweepOrphans();
 
             return new DataResponse(['fileid' => $fileid, 'status' => 'deleted']);
         });
@@ -372,17 +375,22 @@ final class LensController extends ApiController
     /**
      * Catalog revision/dates and current storage parent, independent of the service user's mounts.
      *
+     * The owner is the canonical storages id (grouping batches use the same),
+     * never the raw backend id, which Nextcloud hashes past 64 bytes.
+     *
      * Best-effort: failures never break file serving.
      *
-     * @return array{epoch: ?int, dayid: ?int, parent_id: ?int, mtime: ?int}
+     * @return array{epoch: ?int, dayid: ?int, parent_id: ?int, mtime: ?int, owner: ?string}
      */
     private function getIndexMeta(int $fileid): array
     {
         try {
             $qb = $this->connection->getQueryBuilder();
             $qb->select('m.epoch', 'm.dayid', 'm.mtime', 'f.parent')
+                ->selectAlias('s.id', 'owner')
                 ->from('filecache', 'f')
                 ->leftJoin('f', 'memories', 'm', $qb->expr()->eq('f.fileid', 'm.fileid'))
+                ->leftJoin('f', 'storages', 's', $qb->expr()->eq('f.storage', 's.numeric_id'))
                 ->where($qb->expr()->eq('f.fileid', $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)))
             ;
             $row = $qb->executeQuery()->fetchAssociative();
@@ -392,12 +400,13 @@ final class LensController extends ApiController
                     'dayid' => isset($row['dayid']) ? (int) $row['dayid'] : null,
                     'parent_id' => (int) $row['parent'],
                     'mtime' => isset($row['mtime']) ? (int) $row['mtime'] : null,
+                    'owner' => isset($row['owner']) ? (string) $row['owner'] : null,
                 ];
             }
         } catch (\Throwable) {
         }
 
-        return ['epoch' => null, 'dayid' => null, 'parent_id' => null, 'mtime' => null];
+        return ['epoch' => null, 'dayid' => null, 'parent_id' => null, 'mtime' => null, 'owner' => null];
     }
 
     /**
@@ -421,7 +430,7 @@ final class LensController extends ApiController
      *
      * Best-effort: failures never break file serving.
      *
-     * @return list<array{id: int, x: float, y: float, w: float, h: float, det_score: float, cluster_id: ?int, embed_version: int, next_try: int, retries: int}>
+     * @return list<array{id: int, x: float, y: float, w: float, h: float, det_score: float, cluster_id: ?int, cluster_owner: ?string, embed_version: int, next_try: int, retries: int}>
      */
     private function getLensFaces(int $fileid): array
     {
