@@ -38,6 +38,14 @@ class IndexQueue:
                 self._space.clear()
                 await self._space.wait()
 
+    async def wait_idle(self):
+        """Wake when queued and in-flight work finishes, including newly enqueued jobs."""
+
+        while True:
+            await self._queue.join()
+            if self._queue.empty() and not self.in_flight:
+                return
+
     async def next(self):
         """Pop next queued item; skip entries dropped while queued."""
 

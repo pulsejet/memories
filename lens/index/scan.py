@@ -36,7 +36,7 @@ class Scanner:
         }
 
     async def run(self):
-        """Retain failed batches for retry, and pause between completed sweeps."""
+        """Scan only while indexing is idle; retain failed batches and pause between sweeps."""
 
         batch = None
         delay = RETRY_DELAY
@@ -45,11 +45,18 @@ class Scanner:
         try:
             while True:
                 try:
-                    self.stats["status"] = "scanning"
+                    self.stats["status"] = "waiting_queue"
+                    await self.queue.wait_idle()
+
                     if batch is None:
+                        self.stats["status"] = "scanning"
                         batch = await fetch_scan_batch()
 
-                    self.stats.update(start=batch.start, end=batch.end)
+                        # Uploads may have queued work while the PHP request was in flight.
+                        self.stats["status"] = "waiting_queue"
+                        await self.queue.wait_idle()
+
+                    self.stats.update(status="scanning", start=batch.start, end=batch.end)
                     await self.reconcile(batch)
                 except Exception as exc:
                     self.stats["errors_total"] += 1
