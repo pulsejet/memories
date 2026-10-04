@@ -3,6 +3,7 @@
 import base64
 import logging
 from dataclasses import dataclass, replace
+from http.cookiejar import CookieJar
 
 import httpx
 import orjson
@@ -13,6 +14,7 @@ from config import config
 log = logging.getLogger("lens.nextcloud")
 
 TIMEOUT = 30.0
+cookie_jar = CookieJar()
 
 
 @dataclass(frozen=True)
@@ -63,7 +65,7 @@ def fetch_file(fileid: int, *, metadata_only: bool = False) -> FetchResult:
     url = f"{config.nextcloud_url}/index.php/apps/memories/lens/file/{fileid}"
     method = "HEAD" if metadata_only else "GET"
 
-    with httpx.Client(timeout=TIMEOUT, auth=(config.nc_user, config.nc_token)) as client:
+    with httpx.Client(timeout=TIMEOUT, auth=(config.nc_user, config.nc_token), cookies=cookie_jar) as client:
         with client.stream(method, url) as res:
             if res.status_code == 401:
                 # Token expired/removed: loud, the runbook is re-issuing it.

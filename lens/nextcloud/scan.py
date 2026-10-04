@@ -4,7 +4,7 @@ import httpx
 from pydantic import BaseModel, Field, model_validator
 
 from config import config
-from nextcloud.client import TIMEOUT
+from nextcloud.client import TIMEOUT, cookie_jar
 
 
 class ScanFile(BaseModel):
@@ -44,7 +44,11 @@ async def fetch_scan_batch() -> ScanBatch:
 
     url = f"{config.nextcloud_url}/index.php/apps/memories/lens/scan"
 
-    async with httpx.AsyncClient(timeout=TIMEOUT, auth=(config.nc_user, config.nc_token)) as client:
+    async with httpx.AsyncClient(
+        timeout=TIMEOUT,
+        auth=(config.nc_user, config.nc_token),
+        cookies=cookie_jar,
+    ) as client:
         response = await client.post(url)
         response.raise_for_status()
 
