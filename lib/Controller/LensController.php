@@ -43,6 +43,7 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Http\Client\IClientService;
 use OCP\IDBConnection;
 use OCP\IRequest;
+use OCP\Lock\LockedException;
 
 final class LensController extends ApiController
 {
@@ -96,6 +97,27 @@ final class LensController extends ApiController
             }
 
             return $response;
+        });
+    }
+
+    /**
+     * Allocate the next catalog batch for daemon reconciliation.
+     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
+    #[PublicPage]
+    public function scan(): Http\Response
+    {
+        return $this->util->guardEx(function () {
+            $this->serviceManager->guardLensServiceAccount();
+
+            try {
+                return new DataResponse($this->lensFolders->nextScanBatch());
+            } catch (LockedException) {
+                return new DataResponse([
+                    'message' => 'Lens scan is busy',
+                ], Http::STATUS_SERVICE_UNAVAILABLE, ['Retry-After' => '5']);
+            }
         });
     }
 

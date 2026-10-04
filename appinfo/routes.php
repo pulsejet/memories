@@ -76,6 +76,7 @@ return [
         ['name' => 'Download#one', 'url' => '/api/stream/{fileid}', 'verb' => 'GET'],
 
         ['name' => 'Lens#file', 'url' => '/lens/file/{fileid}', 'verb' => 'GET', 'requirements' => ['fileid' => '\d+']],
+        ['name' => 'Lens#scan', 'url' => '/lens/scan', 'verb' => 'POST'],
         ['name' => 'Lens#search', 'url' => '/api/lens/search', 'verb' => 'GET'],
 
         ['name' => 'Share#links', 'url' => '/api/share/links', 'verb' => 'GET'],
