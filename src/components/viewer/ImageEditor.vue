@@ -148,15 +148,22 @@ export default defineComponent({
   },
 
   async mounted() {
-    await loadFilerobot();
-
-    const div = this.refs().editor!;
-    console.assert(!!div, 'ImageEditor container not found');
-
     // Directly use an HTML element to make sure the resolution
     // in the editor matches the original file, but we can work
     // with a preview instead
-    const source = await this.getImage();
+    let source: HTMLImageElement;
+    try {
+      await loadFilerobot();
+      source = await this.getImage();
+    } catch (error) {
+      console.error(error);
+      showError(this.t('memories', 'Failed to load image'));
+      this.$emit('close');
+      return;
+    }
+
+    const div = this.refs().editor;
+    if (!div) return;
     const config = { ...this.config, source };
 
     // Add observer to update nodes as added
@@ -208,9 +215,11 @@ export default defineComponent({
       const img = new Image();
       img.name = this.defaultSavedImageName;
 
-      await new Promise(async (resolve) => {
-        img.onload = resolve;
-        img.src = await fetchImage(<string>this.config.source);
+      const src = await fetchImage(<string>this.config.source);
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = src;
       });
 
       if (this.photo.w && this.photo.h) {
