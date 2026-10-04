@@ -66,10 +66,12 @@ export default defineComponent({
       try {
         if (this.routeIsRecognize) {
           await dav.recognizeDeleteFace(this.user, this.name);
+        } else if (this.routeIsLens) {
+          await dav.lensDeletePerson(this.name);
         } else {
           await dav.faceRecognitionSetPersonVisibility(this.name, false);
         }
-        this.$router.push({ name: this.$route.name?.toString() }); // "recognize" or "facerecognition"
+        this.$router.push({ name: this.$route.name?.toString() }); // "recognize", "facerecognition" or "lens"
         this.close();
       } catch (error) {
         console.error(error);

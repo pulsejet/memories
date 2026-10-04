@@ -24,6 +24,7 @@ export type RouteId =
   | 'ThisDay'
   | 'Recognize'
   | 'FaceRecognition'
+  | 'Lens'
   | 'Places'
   | 'Tags'
   | 'FolderShare'
@@ -101,6 +102,13 @@ export const routes: { [key in RouteId]: RouteRecordRaw } = {
     path: '/facerecognition/:user?/:name?',
     component: ClusterView,
     name: 'facerecognition',
+    props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'People') }),
+  },
+
+  Lens: {
+    path: '/lens/:user?/:name?',
+    component: ClusterView,
+    name: 'lens',
     props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'People') }),
   },
 
@@ -182,6 +190,7 @@ export type GlobalRouteCheckers = {
   routeIsPublic: boolean;
   routeIsPeople: boolean;
   routeIsRecognizeUnassigned: boolean;
+  routeIsLensUnassigned: boolean;
   routeIsPlacesUnassigned: boolean;
   routeIsCluster: boolean;
 };
@@ -218,11 +227,15 @@ for (const [key, value] of Object.entries(routes)) {
 // Extra route checkers
 defineRouteChecker('routeIsPublic', (route) => route?.name?.toString().endsWith('-share') ?? false);
 defineRouteChecker('routeIsPeople', (route) =>
-  [routes.Recognize.name, routes.FaceRecognition.name].includes(route?.name?.toString() ?? ''),
+  [routes.Recognize.name, routes.FaceRecognition.name, routes.Lens.name].includes(route?.name?.toString() ?? ''),
 );
 defineRouteChecker(
   'routeIsRecognizeUnassigned',
   (route) => route?.name === routes.Recognize.name && route!.params.name === c.FACE_NULL,
+);
+defineRouteChecker(
+  'routeIsLensUnassigned',
+  (route) => route?.name === routes.Lens.name && route!.params.name === c.FACE_NULL,
 );
 defineRouteChecker(
   'routeIsPlacesUnassigned',
@@ -233,6 +246,7 @@ defineRouteChecker('routeIsCluster', (route) =>
     routes.Albums.name,
     routes.Recognize.name,
     routes.FaceRecognition.name,
+    routes.Lens.name,
     routes.Places.name,
     routes.Tags.name,
   ].includes(route?.name?.toString() ?? ''),

@@ -419,6 +419,11 @@ export default defineComponent({
     people(): IFace[] {
       const clusters = this.baseInfo?.clusters;
 
+      // lens is the primary people source when enabled
+      if (this.routeIsLens || (this.config.lens_enabled && !this.routeIsRecognize && !this.routeIsFaceRecognition)) {
+        return clusters?.lens ?? [];
+      }
+
       // force face-recognition on its own route, or if recognize is disabled
       if (this.routeIsFaceRecognition || !this.config.recognize_enabled) {
         return clusters?.facerecognition ?? [];

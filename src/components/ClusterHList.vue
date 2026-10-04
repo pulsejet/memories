@@ -54,6 +54,7 @@ export default defineComponent({
       switch (cluster.cluster_type) {
         case 'recognize':
         case 'facerecognition':
+        case 'lens':
           return true;
         default:
           return false;

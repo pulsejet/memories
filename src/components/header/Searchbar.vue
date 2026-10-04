@@ -208,6 +208,7 @@ export default defineComponent({
         const noop = new Promise<ICluster[]>((r) => r([]));
 
         const results = await Promise.allSettled([
+          this.config.lens_enabled ? dav.getFaceList('lens') : noop,
           this.config.recognize_enabled ? dav.getFaceList('recognize') : noop,
           this.config.facerecognition_enabled ? dav.getFaceList('facerecognition') : noop,
           this.config.places_gis > 0 ? dav.getPlaces({ covers: 0 }) : noop,

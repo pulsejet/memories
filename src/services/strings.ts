@@ -11,6 +11,8 @@ export function emptyDescription(routeName: string): string {
       return t('memories', 'Memories from past years will appear here');
     case _m.routes.Recognize.name:
       return t('memories', 'Recognize is still working on your photos');
+    case _m.routes.Lens.name:
+      return t('memories', 'Lens is still working on your photos');
     case _m.routes.FaceRecognition.name:
       return staticConfig.getSync('facerecognition_enabled')
         ? t('memories', 'You will find your friends soon. Please be patient')
@@ -40,6 +42,7 @@ export function viewName(routeName: string): string {
       return t('memories', 'Favorites');
     case _m.routes.Recognize.name:
     case _m.routes.FaceRecognition.name:
+    case _m.routes.Lens.name:
       return t('memories', 'People');
     case _m.routes.Videos.name:
       return t('memories', 'Videos');

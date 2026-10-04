@@ -113,6 +113,16 @@ export default defineComponent({
         return;
       }
 
+      if (this.routeIsLens) {
+        const target = await dav.lensMergePersons(name, newName);
+        await this.close();
+        await this.$router.replace({
+          name: 'lens',
+          params: { user: face.user_id, name: target },
+        });
+        return;
+      }
+
       try {
         // Get all files for current face
         let res = (await client.getDirectoryContents(`/recognize/${user}/faces/${name}`, { details: true })) as any;

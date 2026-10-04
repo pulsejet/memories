@@ -9,8 +9,11 @@ export const clusterIs = {
   tag: (cluster: ICluster): cluster is ITag => cluster.cluster_type === 'tags',
   recognize: (cluster: ICluster): cluster is IFace => cluster.cluster_type === 'recognize',
   facerecognition: (cluster: ICluster): cluster is IFace => cluster.cluster_type === 'facerecognition',
+  lens: (cluster: ICluster): cluster is IFace => cluster.cluster_type === 'lens',
   face: (cluster: ICluster): cluster is IFace =>
-    cluster.cluster_type === 'recognize' || cluster.cluster_type === 'facerecognition',
+    cluster.cluster_type === 'recognize' ||
+    cluster.cluster_type === 'facerecognition' ||
+    cluster.cluster_type === 'lens',
 };
 
 /**
@@ -30,8 +33,9 @@ export function getClusterPreview(cluster: ICluster, size = 512) {
 
   // If a cover is fileid, directly use it if we don't need crop
   // Use the cover etag here since we forced a random cover below
+  // (face clusters never reach this: their covers are face ids, not file ids)
   if (cluster.cover && cluster.cover_etag && !clusterIs.face(cluster)) {
-    return preview(cluster.cover, cluster.cover_etag);
+    return preview(cluster.cover as number, cluster.cover_etag);
   }
 
   if (clusterIs.album(cluster)) {

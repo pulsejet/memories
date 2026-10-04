@@ -144,6 +144,7 @@ export function getImageInfoUrl(photo: IPhoto | number, config: IConfig): string
   if (!isPublic) {
     const parts = [
       config.albums_enabled ? 'albums' : null,
+      config.lens_enabled ? 'lens' : null,
       config.recognize_enabled ? 'recognize' : null,
       config.facerecognition_enabled ? 'facerecognition' : null,
     ].filter((c) => c);

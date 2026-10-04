@@ -120,6 +120,8 @@ export default defineComponent({
         return await dav.getFaceList('recognize');
       } else if (this.routeIsFaceRecognition) {
         return await dav.getFaceList('facerecognition');
+      } else if (this.routeIsLens) {
+        return await dav.getFaceList('lens');
       } else if (this.routeIsPlaces) {
         return await dav.getPlaces();
       } else {

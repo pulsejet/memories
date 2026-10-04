@@ -26,6 +26,7 @@ export const enum DaysFilterType {
   ALBUM = 'albums',
   RECOGNIZE = 'recognize',
   FACERECOGNITION = 'facerecognition',
+  LENS = 'lens',
   PLACE = 'places',
   TAG = 'tags',
   MAP_BOUNDS = 'mapbounds',
@@ -109,11 +110,11 @@ export class API {
     return gen(`${BASE}/tags/set/{fileid}`, { fileid });
   }
 
-  static FACE_LIST(app: 'recognize' | 'facerecognition') {
+  static FACE_LIST(app: 'recognize' | 'facerecognition' | 'lens') {
     return gen(`${BASE}/clusters/${app}`);
   }
 
-  static CLUSTER_PREVIEW(backend: ClusterTypes, name: string | number, cover: number, cover_etag: string) {
+  static CLUSTER_PREVIEW(backend: ClusterTypes, name: string | number, cover: number | string, cover_etag: string) {
     return API.Q(gen(`${BASE}/clusters/${backend}/preview`), { name, cover, cover_etag });
   }
 

@@ -110,20 +110,33 @@ export default defineComponent({
 
       try {
         // Create map to return IPhoto later
-        const map = new Map<number, IPhoto>();
+        const map = new Map<number | string, IPhoto>();
         for (const photo of this.photos.filter((p) => p.faceid)) {
           map.set(photo.faceid!, photo);
         }
-
-        // Run WebDAV query
         const photos = Array.from(map.values());
-        for await (let delIds of dav.recognizeMoveFaceImages(user, name, target, photos)) {
-          this.moved(
-            delIds
-              .filter(utils.truthy)
-              .map((id) => map.get(id))
-              .filter(utils.truthy),
-          );
+
+        // Lens moves by face id through the people API, always addressed
+        // by cluster id; a freshly created entry is named afterwards.
+        if (this.routeIsLens) {
+          const id = String(face.cluster_id);
+          for await (let movedId of dav.lensMoveFaces(Array.from(map.keys()), id)) {
+            const photo = map.get(movedId);
+            if (photo) this.moved([photo]);
+          }
+          if (face.name && isNaN(Number(face.name))) {
+            await dav.lensRenamePerson(id, face.name);
+          }
+        } else {
+          // Run WebDAV query
+          for await (let delIds of dav.recognizeMoveFaceImages(user, name, target, photos)) {
+            this.moved(
+              delIds
+                .filter(utils.truthy)
+                .map((id) => map.get(id))
+                .filter(utils.truthy),
+            );
+          }
         }
       } catch (error) {
         console.error(error);

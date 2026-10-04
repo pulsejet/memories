@@ -57,6 +57,7 @@ export default defineComponent({
           return markRaw(ClusterTopMatter);
         case _m.routes.Recognize.name:
         case _m.routes.FaceRecognition.name:
+        case _m.routes.Lens.name:
           return markRaw(FaceTopMatter);
         default:
           return null;

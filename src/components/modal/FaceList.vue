@@ -82,7 +82,7 @@ export default defineComponent({
     },
 
     backend() {
-      return this.$route.name as 'recognize' | 'facerecognition';
+      return this.$route.name as 'recognize' | 'facerecognition' | 'lens';
     },
 
     filteredList() {
@@ -105,6 +105,10 @@ export default defineComponent({
     },
 
     async addFace() {
+      if (this.backend === 'lens') {
+        return this.addLensPerson();
+      }
+
       let name = String();
 
       try {
@@ -126,6 +130,35 @@ export default defineComponent({
         if (e.status === 405) return this.selectNew(name);
 
         showError(this.t('memories', 'Failed to create face'));
+      }
+    },
+
+    async addLensPerson() {
+      let name: string | null;
+      try {
+        name = await utils.prompt({
+          message: this.t('memories', 'Create a new person with this name?'),
+          title: this.t('memories', 'Create new person'),
+          name: this.t('memories', 'Name'),
+        });
+      } catch {
+        return;
+      }
+      if (name === null) return;
+
+      // The id is minted server-side; the cluster is created by this call
+      // and the faces join it through the move.
+      try {
+        const person = await dav.lensCreatePerson(name.trim());
+        this.$emit('select', {
+          cluster_id: person.id,
+          cluster_type: 'lens',
+          count: 0,
+          name: person.name,
+          user_id: this.user,
+        });
+      } catch {
+        showError(this.t('memories', 'Failed to create person'));
       }
     },
 

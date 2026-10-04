@@ -93,8 +93,11 @@ export default defineComponent({
       if (!this.canSave) return;
 
       try {
+        let target = this.input;
         if (this.routeIsRecognize) {
           await dav.recognizeRenameFace(this.user, this.name, this.input);
+        } else if (this.routeIsLens) {
+          target = await dav.lensRenamePerson(this.name, this.input);
         } else {
           await dav.faceRecognitionRenamePerson(this.name, this.input);
         }
@@ -102,7 +105,7 @@ export default defineComponent({
         await this.close();
         await this.$router.replace({
           name: this.$route.name?.toString(),
-          params: { user: this.user, name: this.input },
+          params: { user: this.user, name: target },
         });
       } catch (error) {
         console.error(error);

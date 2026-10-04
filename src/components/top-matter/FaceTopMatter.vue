@@ -16,7 +16,7 @@
     <div class="right-actions">
       <NcActions :inline="0">
         <!-- root view (not cluster or unassigned) -->
-        <template v-if="!name && routeIsRecognize && !routeIsRecognizeUnassigned">
+        <template v-if="!name && (routeIsRecognize || routeIsLens) && !isUnassigned">
           <NcActionButton :aria-label="t('memories', 'Unassigned faces')" @click="openUnassigned" close-after-click>
             {{ t('memories', 'Unassigned faces') }}
             <template #icon> <UnassignedIcon :size="20" /> </template>
@@ -110,8 +110,12 @@ export default defineComponent({
       return this.name && this.name !== this.c.FACE_NULL;
     },
 
+    isUnassigned() {
+      return this.routeIsRecognizeUnassigned || this.routeIsLensUnassigned;
+    },
+
     displayName() {
-      if (this.routeIsRecognizeUnassigned) {
+      if (this.isUnassigned) {
         return this.t('memories', 'Unassigned faces');
       } else if (!this.name) {
         return this.t('memories', 'People');

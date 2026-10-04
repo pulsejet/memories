@@ -293,18 +293,21 @@ export default defineComponent({
         name: t('memories', 'Move to person'),
         icon: markRaw(MoveIcon),
         callback: this.moveSelectionToPerson.bind(this),
-        if: () => this.routeIsRecognize,
+        if: () => this.routeIsRecognize || this.routeIsLens,
       },
       {
         name: t('memories', 'Remove from person'),
         icon: markRaw(CloseIcon),
         callback: this.removeSelectionFromPerson.bind(this),
-        if: () => this.routeIsRecognize && !this.routeIsRecognizeUnassigned,
+        if: () =>
+          (this.routeIsRecognize || this.routeIsLens) &&
+          !this.routeIsRecognizeUnassigned &&
+          !this.routeIsLensUnassigned,
       },
     ];
 
     // Move face-move to start if unassigned faces
-    if (this.routeIsRecognizeUnassigned) {
+    if (this.routeIsRecognizeUnassigned || this.routeIsLensUnassigned) {
       const i = this.defaultActions.findIndex((a) => a.id === 'face-move');
       this.defaultActions.unshift(this.defaultActions.splice(i, 1)[0]);
     }
@@ -972,7 +975,7 @@ export default defineComponent({
      * Move selected photos to another person
      */
     async moveSelectionToPerson(selection: Selection) {
-      if (!this.config.show_face_rect && !this.routeIsRecognizeUnassigned) {
+      if (!this.config.show_face_rect && !this.routeIsRecognizeUnassigned && !this.routeIsLensUnassigned) {
         showError(this.t('memories', 'You must enable "Mark person in preview" to use this feature'));
         return;
       }
@@ -985,7 +988,7 @@ export default defineComponent({
     async removeSelectionFromPerson(selection: Selection) {
       // Make sure route is valid
       const { user, name } = this.$route.params;
-      if (!this.routeIsRecognize || !user || !name) return;
+      if ((!this.routeIsRecognize && !this.routeIsLens) || !user || !name) return;
 
       // Check photo ownership
       if (this.$route.params.user?.toString() !== utils.uid) {
@@ -994,13 +997,22 @@ export default defineComponent({
       }
 
       // Make map to get back photo from faceid
-      const map = new Map<number, IPhoto>();
+      const map = new Map<number | string, IPhoto>();
       for (const photo of selection.values()) {
         if (photo.faceid) {
           map.set(photo.faceid, photo);
         }
       }
       const photos = Array.from(map.values());
+
+      // Lens unassigns by face id through the people API
+      if (this.routeIsLens) {
+        for await (let id of dav.lensMoveFaces(Array.from(map.keys()), null)) {
+          const fileId = map.get(id)?.fileid;
+          if (fileId) this.deleteSelectedPhotosById([fileId], selection);
+        }
+        return;
+      }
 
       // Run WebDAV query
       for await (let delIds of dav.recognizeDeleteFaceImages(user.toString(), name.toString(), photos)) {

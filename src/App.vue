@@ -214,7 +214,7 @@ export default defineComponent({
         return false;
       }
 
-      if (this.config.facerecognition_installed) {
+      if (this.config.facerecognition_installed || this.config.lens_enabled) {
         return t('memories', 'People (Recognize)');
       }
 
@@ -226,8 +226,16 @@ export default defineComponent({
         return false;
       }
 
-      if (this.config.recognize_enabled) {
+      if (this.config.recognize_enabled || this.config.lens_enabled) {
         return t('memories', 'People (Face Recognition)');
+      }
+
+      return t('memories', 'People');
+    },
+
+    lens(): string | false {
+      if (!this.config.lens_enabled) {
+        return false;
       }
 
       return t('memories', 'People');
@@ -362,6 +370,12 @@ export default defineComponent({
           icon: markRaw(AlbumIcon),
           title: t('memories', 'Albums'),
           if: this.showAlbums,
+        },
+        {
+          name: 'lens',
+          icon: markRaw(PeopleIcon),
+          title: this.lens || '',
+          if: this.lens,
         },
         {
           name: 'recognize',

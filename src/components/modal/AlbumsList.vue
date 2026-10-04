@@ -99,7 +99,7 @@ export default defineComponent({
         });
 
       if (album.cover && album.cover_etag) {
-        return preview(album.cover, album.cover_etag);
+        return preview(album.cover as number, album.cover_etag);
       }
 
       if (album.last_added_photo && album.last_added_photo !== -1) {

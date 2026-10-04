@@ -6,7 +6,7 @@ declare module '@typings' {
     name: string;
   }
 
-  export type ClusterTypes = 'tags' | 'albums' | 'places' | 'recognize' | 'facerecognition' | 'plus';
+  export type ClusterTypes = 'tags' | 'albums' | 'places' | 'recognize' | 'facerecognition' | 'lens' | 'plus';
 
   export interface ICluster {
     /** A unique identifier for the cluster */
@@ -18,8 +18,8 @@ declare module '@typings' {
     /** Name of cluster */
     name: string;
 
-    /** Object ID of cover object */
-    cover?: number | null;
+    /** Object ID of cover object (string for uint63 lens ids) */
+    cover?: number | string | null;
     /** ETag of cover object */
     cover_etag?: string;
 

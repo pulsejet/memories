@@ -8,6 +8,12 @@
       <Searchbar v-if="isNative" class="searchbar" />
 
       <ClusterHList
+        v-if="lens.length"
+        :title="t('memories', 'People')"
+        link="/lens"
+        :clusters="lens"
+      />
+      <ClusterHList
         v-if="recognize.length"
         :title="t('memories', 'Recognize')"
         link="/recognize"
@@ -85,11 +91,13 @@ export default defineComponent({
     isNative: nativex.has(),
 
     config: {} as IConfig,
+    lens: [] as ICluster[],
     recognize: [] as ICluster[],
     facerecognition: [] as ICluster[],
     places: [] as ICluster[],
     tags: [] as ICluster[],
     loaded: {
+      lens: false,
       recognize: false,
       facerecognition: false,
       places: false,
@@ -172,6 +180,11 @@ export default defineComponent({
     },
 
     maybeLoad() {
+      if (this.config.lens_enabled && !this.loaded.lens) {
+        this.loaded.lens = true;
+        this.load(this.getLens);
+      }
+
       if (this.config.recognize_enabled && !this.loaded.recognize) {
         this.loaded.recognize = true;
         this.load(this.getRecognize);
@@ -201,6 +214,10 @@ export default defineComponent({
       } finally {
         this.loading--;
       }
+    },
+
+    async getLens() {
+      this.lens = (await dav.getFaceList('lens')).slice(0, 10);
     },
 
     async getRecognize() {

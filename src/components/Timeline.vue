@@ -677,7 +677,7 @@ export default defineComponent({
         set(filter, `${user}/${name}`);
 
         // Face rect
-        if (this.config.show_face_rect || this.routeIsRecognizeUnassigned) {
+        if (this.config.show_face_rect || this.routeIsRecognizeUnassigned || this.routeIsLensUnassigned) {
           set(DaysFilterType.FACE_RECT);
         }
       }
@@ -1300,7 +1300,7 @@ export default defineComponent({
       let rowY = headY + head.size;
 
       // Duplicate detection, e.g. for face rects
-      const seen = new Map<number, number>();
+      const seen = new Map<number | string, number>();
 
       // Previous justified row
       let prevJustifyTop = justify[0]?.top ?? 0;

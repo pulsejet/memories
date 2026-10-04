@@ -83,8 +83,8 @@ declare module '@typings' {
     /** Reference to exif object */
     imageInfo?: IImageInfo | null;
 
-    /** Face detection ID */
-    faceid?: number;
+    /** Face detection ID (string for uint63 lens ids) */
+    faceid?: number | string;
     /** Face dimensions */
     facerect?: IFaceRect;
 
@@ -152,6 +152,7 @@ declare module '@typings' {
       albums?: IAlbum[];
       recognize?: IFace[];
       facerecognition?: IFace[];
+      lens?: IFace[];
     };
   }
 

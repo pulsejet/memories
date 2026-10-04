@@ -15,7 +15,7 @@ import type { IFace, IPhoto } from '@typings';
  * Get list of faces
  * @param app Backend app to use
  */
-export async function getFaceList(app: 'recognize' | 'facerecognition') {
+export async function getFaceList(app: 'recognize' | 'facerecognition' | 'lens') {
   return (await axios.get<IFace[]>(API.FACE_LIST(app))).data;
 }
 
@@ -142,4 +142,66 @@ export async function recognizeRenameFace(user: string, name: string, target: st
  */
 export async function recognizeCreateFace(user: string, name: string) {
   return await client.createDirectory(`/recognize/${user}/faces/${name}`);
+}
+
+/**
+ * Create an empty lens person with a server-minted id, optionally named.
+ * Ids are uint63 strings end to end; JS floats cannot hold them.
+ */
+export async function lensCreatePerson(name: string): Promise<{ id: string; name: string }> {
+  const res = await axios.post<{ id: string; name: string }>(
+    generateUrl('/apps/memories/api/lens/people/create'),
+    { name },
+  );
+  return res.data;
+}
+
+/**
+ * Rename a lens person or cluster.
+ * @param name Name of person (or cluster ID)
+ * @param target Target name of person
+ * @returns New name of the person
+ */
+export async function lensRenamePerson(name: string, target: string) {
+  const res = await axios.post<{ name: string }>(generateUrl('/apps/memories/api/lens/people/rename'), {
+    name,
+    target,
+  });
+  return res.data.name;
+}
+
+/**
+ * Merge a lens person or cluster into another person or cluster.
+ * @param source Name of source person (or cluster ID)
+ * @param target Name of target person (or cluster ID)
+ * @returns Name of the surviving person
+ */
+export async function lensMergePersons(source: string, target: string) {
+  const res = await axios.post<{ name: string }>(generateUrl('/apps/memories/api/lens/people/merge'), {
+    source,
+    target,
+  });
+  return res.data.name;
+}
+
+/**
+ * Move lens faces to a person or cluster (target null unassigns).
+ * @param faces List of face IDs to move
+ * @param target Name of target person (or cluster ID), null to unassign
+ * @returns Generator for moved face IDs
+ */
+export async function* lensMoveFaces(faces: (number | string)[], target: string | null) {
+  const res = await axios.post<{ moved: string[] }>(generateUrl('/apps/memories/api/lens/people/move'), {
+    faces,
+    target,
+  });
+  yield* res.data.moved;
+}
+
+/**
+ * Remove a lens person entirely (faces become unassigned).
+ * @param name Name of person (or cluster ID)
+ */
+export async function lensDeletePerson(name: string) {
+  return await axios.post(generateUrl('/apps/memories/api/lens/people/delete'), { name });
 }
