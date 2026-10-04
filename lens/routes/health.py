@@ -46,9 +46,6 @@ def health():
             "device": face_model.device(),
             "det_threshold": config.face.det_threshold,
             "det_max_side": config.face.det_max_side,
-            "max_distance": config.face.max_distance,
-            "min_faces": config.face.min_faces,
-            "restore_center_frac": config.face.restore_center_frac,
         },
         "qdrant": state.qdrant,
     }

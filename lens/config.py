@@ -79,7 +79,7 @@ class PlacesConfig:
 
 @dataclass(frozen=True)
 class FaceConfig:
-    """Pinned YuNet/SFace checkpoints plus detection/clustering thresholds."""
+    """Pinned YuNet/SFace checkpoints and detection settings."""
 
     det_url: str
     det_sha: str
@@ -89,12 +89,6 @@ class FaceConfig:
     qdrant_collection: str
     det_threshold: float
     det_max_side: int
-    max_distance: float
-    min_faces: int
-    restore_center_frac: float
-    score_margin: float
-    suggest_samples: int
-    suggest_ttl: int
 
 
 @dataclass(frozen=True)
@@ -131,30 +125,6 @@ def _face_config() -> FaceConfig:
     if det_max_side < 320 or det_max_side > 8192:
         raise RuntimeError("FACE_DET_MAX_SIDE must be between 320 and 8192")
 
-    max_distance = _float("FACE_MAX_DISTANCE", 0.6)
-    if max_distance <= 0 or max_distance > 2:
-        raise RuntimeError("FACE_MAX_DISTANCE must be between 0 and 2")
-
-    min_faces = _int("FACE_MIN_FACES", 3)
-    if min_faces < 1:
-        raise RuntimeError("FACE_MIN_FACES must be at least 1")
-
-    restore_center_frac = _float("FACE_RESTORE_CENTER_FRAC", 0.25)
-    if restore_center_frac <= 0 or restore_center_frac > 1:
-        raise RuntimeError("FACE_RESTORE_CENTER_FRAC must be between 0 and 1")
-
-    score_margin = _float("FACE_SCORE_MARGIN", 0.1)
-    if score_margin < 0 or score_margin > 1:
-        raise RuntimeError("FACE_SCORE_MARGIN must be between 0 and 1")
-
-    suggest_samples = _int("SUGGEST_SAMPLES", 5)
-    if suggest_samples < 1:
-        raise RuntimeError("SUGGEST_SAMPLES must be at least 1")
-
-    suggest_ttl = _int("SUGGEST_TTL", 300)
-    if suggest_ttl < 0:
-        raise RuntimeError("SUGGEST_TTL must not be negative")
-
     return FaceConfig(
         det_url=os.environ["FACE_DET_URL"],
         det_sha=os.environ["FACE_DET_SHA"],
@@ -164,12 +134,6 @@ def _face_config() -> FaceConfig:
         qdrant_collection=os.environ.get("FACE_QDRANT_COLLECTION", "lens_faces"),
         det_threshold=det_threshold,
         det_max_side=det_max_side,
-        max_distance=max_distance,
-        min_faces=min_faces,
-        restore_center_frac=restore_center_frac,
-        score_margin=score_margin,
-        suggest_samples=suggest_samples,
-        suggest_ttl=suggest_ttl,
     )
 
 

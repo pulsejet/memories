@@ -1,10 +1,5 @@
 """Face detection + recognition backend: pinned YuNet/SFace ONNX, load, detect, embed."""
 
-# Provisioning mirrors sentence.py (URL+SHA files instead of an HF snapshot).
-# YuNet decode ports OpenCV's FaceDetectorYN postprocess; SFace alignment ports
-# FaceRecognizerSF's similarity warp. Both verified to parity against the cv2
-# wrappers (cosine 1.0) in the Phase 0 spike.
-
 import asyncio
 import hashlib
 import io
