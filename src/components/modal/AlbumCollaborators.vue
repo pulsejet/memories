@@ -96,7 +96,7 @@
           <NcButton
             class="manage-collaborators__public-link-button"
             :aria-label="t('memories', 'Copy the public link')"
-            :disabled="publicLink.id === ''"
+            :disabled="publicLink.id === '' || loadingAlbum"
             @click="copyPublicLink"
           >
             <template v-if="publicLinkCopied">
@@ -113,7 +113,7 @@
           <NcButton
             variant="tertiary"
             :aria-label="t('memories', 'Delete the public link')"
-            :disabled="publicLink.id === ''"
+            :disabled="publicLink.id === '' || loadingAlbum"
             @click="deletePublicLink"
           >
             <template #icon>
@@ -122,7 +122,12 @@
             </template>
           </NcButton>
         </template>
-        <NcButton v-else class="manage-collaborators__public-link-button" @click="createPublicLinkForAlbum">
+        <NcButton
+          v-else
+          class="manage-collaborators__public-link-button"
+          :disabled="loadingAlbum"
+          @click="createPublicLinkForAlbum"
+        >
           <template #icon>
             <Earth />
           </template>
@@ -341,6 +346,8 @@ export default defineComponent({
     },
 
     async createPublicLinkForAlbum() {
+      if (this.loadingAlbum) return;
+
       // Check if link already exists
       if (this.isPublicLinkSelected) {
         return await this.copyPublicLink();
@@ -348,7 +355,10 @@ export default defineComponent({
 
       // Create new link
       this.selectEntity(`${ShareType.Link}`);
-      await this.updateAlbumCollaborators();
+      if (!(await this.updateAlbumCollaborators())) {
+        this.unselectEntity(`${ShareType.Link}`);
+        return;
+      }
       try {
         this.loadingAlbum = true;
         this.errorFetchingAlbum = null;
@@ -371,6 +381,10 @@ export default defineComponent({
     },
 
     async deletePublicLink() {
+      if (this.loadingAlbum) return;
+      const collaborators = this.selectedCollaborators.filter((c) => c.type !== ShareType.Link);
+      if (!(await this.updateAlbumCollaborators(collaborators))) return;
+
       this.unselectEntity(`${ShareType.Link}`);
       this.availableCollaborators[3] = {
         id: '',
@@ -378,21 +392,24 @@ export default defineComponent({
         type: ShareType.Link,
       };
       this.publicLinkCopied = false;
-      await this.updateAlbumCollaborators();
     },
 
-    async updateAlbumCollaborators() {
+    async updateAlbumCollaborators(collaborators?: Collaborator[]): Promise<boolean> {
+      collaborators ??= this.selectedCollaborators;
       try {
-        if (!utils.uid) return;
+        if (!utils.uid) return false;
+        this.loadingAlbum = true;
         const album = await dav.getAlbum(utils.uid, this.albumName);
         await dav.updateAlbum(album, {
           albumName: this.albumName,
           properties: {
-            collaborators: this.selectedCollaborators,
+            collaborators,
           },
         });
+        return true;
       } catch (error) {
         showError(this.t('memories', 'Failed to update album.'));
+        return false;
       } finally {
         this.loadingAlbum = false;
       }
