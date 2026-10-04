@@ -29,7 +29,6 @@ MIN_GROUP_FILES = 5
 # these favor extra groups and unassigned faces over false identity merges.
 # Do not tune them by feel; replace them with calibrated values.
 ATTACH_MAX_DISTANCE = 0.35
-ATTACH_MARGIN = 0.1
 MINT_MAX_DISTANCE = 0.35
 
 
@@ -53,7 +52,7 @@ def mint_cluster_id() -> int:
 
 
 def select_cluster(scored: list[tuple[int, float]]) -> int | None:
-    """Best cluster passing the absolute gate with margin over the runner-up."""
+    """Best cluster passing the absolute gate."""
 
     if not scored:
         return None
@@ -62,9 +61,6 @@ def select_cluster(scored: list[tuple[int, float]]) -> int | None:
     cluster, best = ranked[0]
 
     if best > ATTACH_MAX_DISTANCE:
-        return None
-
-    if len(ranked) > 1 and ranked[1][1] - best < ATTACH_MARGIN:
         return None
 
     return cluster
