@@ -11,14 +11,12 @@ from config import config
 from index import Indexer, IndexQueue, Scanner
 from routes import routers
 from routes.context import embedding_model, face_model, schema_model, sentence_model, state
-from store import CompatMismatch, Store
-
-log = logging.getLogger("lens.app")
+from store import Store
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    """Load models, ensure collections, start worker; mismatch is fatal."""
+    """Load models and collections, then start jobs; initialization failures are fatal."""
 
     logging.basicConfig(
         level=logging.INFO,
@@ -54,24 +52,15 @@ async def lifespan(_app: FastAPI):
     scanner = Scanner(store, index_queue)
     state.scanner = scanner
 
+    tasks = []
     try:
         for collection in store.collections:
             await collection.ensure_collection()
-    except CompatMismatch:
-        await client.close()
-        raise
 
-    except Exception:
-        log.exception("qdrant unreachable, staying degraded")
-    else:
         state.qdrant = "ok"
         state.ready = True
+        tasks = [index_queue.run(indexer.handle_batch), asyncio.create_task(scanner.run())]
 
-    tasks = [index_queue.run(indexer.handle_batch)]
-    if state.ready:
-        tasks.append(asyncio.create_task(scanner.run()))
-
-    try:
         yield
     finally:
         state.ready = False
