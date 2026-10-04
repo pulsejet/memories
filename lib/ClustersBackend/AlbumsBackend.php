@@ -170,7 +170,7 @@ final class AlbumsBackend extends Backend
             return true;
         });
 
-        array_walk($list, function (array &$item) {
+        array_walk($list, function (array &$item): void {
             // Fall back cover to cover_owner if available
             if (empty($item['cover']) && !empty($item['cover_owner'] ?? null)) {
                 $item['cover'] = $item['cover_owner'];

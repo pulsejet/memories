@@ -260,7 +260,7 @@ final class TimelineWrite
      */
     private function getCurrentRow(int $fileId): ?array
     {
-        $fetch = function (string $table) use ($fileId): false|array {
+        $fetch = function (string $table) use ($fileId): array|false {
             $query = $this->connection->getQueryBuilder();
 
             return $query->select('*')

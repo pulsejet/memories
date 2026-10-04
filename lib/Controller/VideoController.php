@@ -227,7 +227,7 @@ final class VideoController extends ApiController
             $file = $this->fs->getUserFile($fileid);
             $etag = $file->getEtag();
 
-            return $this->util->guardExDirect(function (Http\IOutput $out) use ($client, $fileid, $profile, $etag, $liveid) {
+            return $this->util->guardExDirect(function (Http\IOutput $out) use ($client, $fileid, $profile, $etag, $liveid): void {
                 try {
                     $status = $this->getUpstream(
                         out: $out,

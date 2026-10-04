@@ -44,7 +44,7 @@ trait TimelineWriteOrphans
 
         // Unorphan all files on abort if we can
         if ($value) {
-            Util::registerInterruptHandler('orphanAll', function () {
+            Util::registerInterruptHandler('orphanAll', function (): void {
                 // If we are in a transaction, abort it.
                 if ($this->connection->inTransaction()) {
                     $this->connection->rollBack();

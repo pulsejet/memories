@@ -123,7 +123,7 @@ final class ImageController extends ApiController
     #[PublicPage]
     public function multipreview(array $files): Http\Response
     {
-        return $this->util->guardExDirect(function (Http\IOutput $out) use ($files) {
+        return $this->util->guardExDirect(function (Http\IOutput $out) use ($files): void {
             // Filter files with valid parameters
             $files = array_filter($files, static function (array $file) {
                 return isset($file['reqid'], $file['fileid'], $file['x'], $file['y'], $file['a'])

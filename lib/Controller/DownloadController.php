@@ -150,7 +150,7 @@ final class DownloadController extends ApiController
         bool $resumable = true,
         bool $attachment = false,
     ): Http\Response {
-        return $this->util->guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable, $attachment) {
+        return $this->util->guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable, $attachment): void {
             /** @var \OCP\Files\File $file */
             if ($token = $this->request->getHeader(ServiceManager::SERVICE_TOKEN_HEADER)) {
                 $file = $this->serviceManager->getServiceTokenFile($token, $fileid);
@@ -313,7 +313,7 @@ final class DownloadController extends ApiController
      */
     private function multiple(string $name, array $fileIds): Http\Response
     {
-        return $this->util->guardExDirect(function (Http\IOutput $out) use ($name, $fileIds) {
+        return $this->util->guardExDirect(function (Http\IOutput $out) use ($name, $fileIds): void {
             // Release the PHP session lock BEFORE streaming.
             // Prevents a deadlock on simultaneous connections.
             $this->closeSession();

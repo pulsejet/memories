@@ -120,7 +120,7 @@ final class MigrateGoogleTakeout extends Command
 
             $this->migrateUser($user);
         } else {
-            $this->userManager->callForSeenUsers(function (IUser $user) {
+            $this->userManager->callForSeenUsers(function (IUser $user): void {
                 $this->migrateUser($user);
             });
         }
