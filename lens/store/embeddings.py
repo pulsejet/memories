@@ -170,15 +170,16 @@ class EmbeddingStore(FileStore):
 
         return {point.payload["fileid"]: point.payload for point in points}
 
-    async def record_failure(self, fileid: int) -> dict:
-        """Increase persistent backoff from one hour up to ninety days."""
+    async def record_failure(self, fileid: int, stage: str) -> dict:
+        """Back off the failed stage; switching stages starts a fresh retry history."""
 
-        previous = (await self.get_failures([fileid])).get(fileid, {})
-        attempts = previous.get("attempts", 0) + 1
+        previous = (await self.get_failures([fileid])).get(fileid)
+        attempts = previous["attempts"] + 1 if previous and previous["stage"] == stage else 1
         delay = min(RETRY_INITIAL * 2 ** (attempts - 1), RETRY_MAX)
         payload = {
             "kind": FAILURE_KIND,
             "fileid": fileid,
+            "stage": stage,
             "attempts": attempts,
             "retry_at": int(time.time()) + delay,
         }

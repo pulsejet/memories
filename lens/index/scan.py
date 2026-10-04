@@ -104,8 +104,10 @@ class Scanner:
             found = set()
             indexed = set()
             stale = set()
+            image_stale = set()
             repairs = set()
             deferred = set()
+            places_deferred = set()
 
             for collection in self.store.collections:
                 async for point in collection.scroll_range(batch.start, batch.end):
@@ -119,7 +121,10 @@ class Scanner:
 
                     if payload.get("kind") == FAILURE_KIND:
                         if payload["retry_at"] > now:
-                            deferred.add(fileid)
+                            if payload["stage"] == "places":
+                                places_deferred.add(fileid)
+                            else:
+                                deferred.add(fileid)
                         else:
                             stale.add(fileid)
                         continue
@@ -129,6 +134,8 @@ class Scanner:
                         indexed.add(fileid)
                     if payload.get("mtime") != file.mtime:
                         stale.add(fileid)
+                        if collection is self.store.embedding:
+                            image_stale.add(fileid)
                     if payload.get("parent_id") != file.parentid or payload.get("etag") != file.etag:
                         repairs.add((collection, fileid))
 
@@ -150,7 +157,13 @@ class Scanner:
                 await collection.update_file_metadata(fileid, file.parentid, file.etag)
                 self.stats["repaired_total"] += 1
 
+            # Places backoff must not prevent a changed or missing image from being indexed.
+            deferred.update(places_deferred - (image_stale | missing))
             reindex = sorted((stale | missing) - deferred)
+
+            # Drop work enqueued during the awaited cleanup/repair requests as well.
+            for fileid in self.queue.fileids_in_range(batch.start, batch.end) - files.keys():
+                self.queue.drop(fileid)
 
         # A full queue must be allowed to drain while this batch waits for capacity.
         for fileid in reindex:

@@ -87,7 +87,7 @@ class IndexQueue:
         return batch
 
     def done(self, fileid, ok):
-        """Record completion; None means deferred without attempting to index."""
+        """Record completion; None means remaining work was deferred or the file disappeared."""
 
         self.in_flight.pop(fileid, None)
 

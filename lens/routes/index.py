@@ -62,9 +62,11 @@ async def _delete_file(fileid: int):
 
     try:
         async with state.index_queue.mutation_lock:
-            state.index_queue.drop(fileid)
-            for collection in state.store.collections:
-                await collection.delete_fileid(fileid)
+            try:
+                for collection in state.store.collections:
+                    await collection.delete_fileid(fileid)
+            finally:
+                state.index_queue.drop(fileid)
 
         log.info("deleted embeddings for %d", fileid)
     except Exception:
