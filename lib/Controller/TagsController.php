@@ -33,6 +33,7 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
+use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
 
 final class TagsController extends ApiController
@@ -41,6 +42,7 @@ final class TagsController extends ApiController
         IRequest $request,
         protected FsManager $fs,
         protected ISystemTagObjectMapper $tagObjectMapper,
+        protected ISystemTagManager $tagManager,
         protected SystemConfig $systemConfig,
         protected Util $util,
     ) {
@@ -69,6 +71,15 @@ final class TagsController extends ApiController
             // Check the file is updateable
             if (!$file->isUpdateable()) {
                 throw Exceptions::ForbiddenFileUpdate($file->getName());
+            }
+
+            // Validate permissions for all tags before changing any assignments.
+            $user = $this->util->getUser();
+            $tagIds = array_values(array_unique(array_merge($add ?? [], $remove ?? [])));
+            foreach ($this->tagManager->getTagsByIds($tagIds) as $tag) {
+                if (!$this->tagManager->canUserSeeTag($tag, $user) || !$this->tagManager->canUserAssignTag($tag, $user)) {
+                    throw Exceptions::Forbidden('Not allowed to assign or remove this tag');
+                }
             }
 
             // Add tags
