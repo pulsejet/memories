@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from qdrant_client import AsyncQdrantClient
 
 from config import config
-from index import Indexer, IndexQueue
+from index import Indexer, IndexQueue, Scanner
 from routes import routers
 from routes.context import embedding_model, face_model, schema_model, sentence_model, state
 from store import CompatMismatch, Store
@@ -51,14 +51,13 @@ async def lifespan(_app: FastAPI):
         store=store,
         done=index_queue.done,
     )
-    worker = index_queue.run(indexer.handle_batch)
+    scanner = Scanner(store, index_queue)
+    state.scanner = scanner
 
     try:
-        await store.embedding.ensure_collection()
-        await store.places.ensure_collection()
-        await store.faces.ensure_collection()
+        for collection in store.collections:
+            await collection.ensure_collection()
     except CompatMismatch:
-        worker.cancel()
         await client.close()
         raise
 
@@ -68,9 +67,18 @@ async def lifespan(_app: FastAPI):
         state.qdrant = "ok"
         state.ready = True
 
-    yield
-    worker.cancel()
-    await client.close()
+    tasks = [index_queue.run(indexer.handle_batch)]
+    if state.ready:
+        tasks.append(asyncio.create_task(scanner.run()))
+
+    try:
+        yield
+    finally:
+        state.ready = False
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        await client.close()
 
 
 app = FastAPI(title="Memories Lens", lifespan=lifespan)

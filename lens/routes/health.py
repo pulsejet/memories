@@ -65,4 +65,5 @@ def stats():
         "in_flight": sorted(queue.in_flight),
         "indexed_total": queue.indexed_total,
         "failed_total": queue.failed_total,
+        "scan": state.scanner.stats if state.scanner else None,
     }

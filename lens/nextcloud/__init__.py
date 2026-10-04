@@ -1,4 +1,4 @@
-"""Nextcloud file-bytes client (blocking; call via to_thread)."""
+"""Nextcloud file downloads and asynchronous catalog scanning."""
 
 from nextcloud.client import (
     AuthError,
@@ -10,6 +10,7 @@ from nextcloud.client import (
     fetch_file,
     parse_metadata,
 )
+from nextcloud.scan import ScanBatch, ScanFile, fetch_scan_batch
 
 __all__ = [
     "AuthError",
@@ -18,6 +19,9 @@ __all__ = [
     "FileMetadata",
     "NotFoundError",
     "Place",
+    "ScanBatch",
+    "ScanFile",
     "fetch_file",
+    "fetch_scan_batch",
     "parse_metadata",
 ]

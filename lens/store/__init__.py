@@ -29,3 +29,4 @@ class Store:
         self.embedding = EmbeddingStore(client, embedding_dim)
         self.places = PlacesStore(client, sentence_dim)
         self.faces = FacesStore(client, face_dim)
+        self.collections = (self.embedding, self.places, self.faces)

@@ -18,7 +18,7 @@ class IndexRequest(BaseModel):
 
 
 @router.post("/v1/index", status_code=202)
-def index(body: IndexRequest):
+async def index(body: IndexRequest):
     """Enqueue a file; 429 when the queue is full."""
 
     try:
@@ -40,9 +40,9 @@ def index(body: IndexRequest):
 async def delete_index(fileid: int = Path(gt=0)):
     """Delete a point and drop its queued entry, if any."""
 
-    await state.store.embedding.delete_fileid(fileid)
-    await state.store.places.delete_fileid(fileid)
-    await state.store.faces.delete_fileid(fileid)
-    state.index_queue.drop(fileid)
+    async with state.index_queue.mutation_lock:
+        state.index_queue.drop(fileid)
+        for collection in state.store.collections:
+            await collection.delete_fileid(fileid)
 
     return {"fileid": fileid, "status": "deleted"}
