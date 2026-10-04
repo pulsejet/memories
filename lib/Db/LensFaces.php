@@ -335,6 +335,208 @@ final class LensFaces
     }
 
     /**
+     * Viewer-scoped person id for a name, if the viewer named one.
+     */
+    public function findPersonId(string $viewerId, string $name): ?int
+    {
+        $qb = $this->connection->getQueryBuilder();
+        $id = $qb->select('person_id')
+            ->from('memories_lens_persons')
+            ->where($qb->expr()->eq('viewer_id', $qb->createNamedParameter($viewerId)))
+            ->andWhere($qb->expr()->eq('name', $qb->createNamedParameter($name)))
+            ->setMaxResults(1)
+            ->executeQuery()
+            ->fetchOne()
+        ;
+
+        return false !== $id ? (int) $id : null;
+    }
+
+    /**
+     * @return ?array{id: int, person_id: ?int, owner_id: string}
+     */
+    public function getCluster(int $id): ?array
+    {
+        $qb = $this->connection->getQueryBuilder();
+        $row = $qb->select('id', 'person_id', 'owner_id')
+            ->from('memories_lens_clusters')
+            ->where($qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT)))
+            ->setMaxResults(1)
+            ->executeQuery()
+            ->fetchAssociative()
+        ;
+
+        if (false === $row) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $row['id'],
+            'person_id' => null !== $row['person_id'] ? (int) $row['person_id'] : null,
+            'owner_id' => (string) $row['owner_id'],
+        ];
+    }
+
+    /**
+     * Cluster ids sharing one person, including the owning cluster itself.
+     *
+     * @return list<int>
+     */
+    public function clustersOfPerson(int $personId): array
+    {
+        $qb = $this->connection->getQueryBuilder();
+        $rows = $qb->select('id')
+            ->from('memories_lens_clusters')
+            ->where($qb->expr()->eq('person_id', $qb->createNamedParameter($personId, IQueryBuilder::PARAM_INT)))
+            ->orWhere($qb->expr()->eq('id', $qb->createNamedParameter($personId, IQueryBuilder::PARAM_INT)))
+            ->executeQuery()
+            ->fetchAllAssociative()
+        ;
+
+        return array_map(static fn ($row) => (int) $row['id'], $rows);
+    }
+
+    /**
+     * Face ids currently assigned to the given clusters.
+     *
+     * @param list<int> $clusterIds
+     *
+     * @return list<int>
+     */
+    public function faceIdsOfClusters(array $clusterIds): array
+    {
+        $ids = [];
+        foreach ($clusterIds as $id) {
+            $id = (int) (\is_array($id) ? ($id['id'] ?? 0) : $id);
+            if ($id > 0) {
+                $ids[] = $id;
+            }
+        }
+        $ids = array_values(array_unique($ids));
+        if ([] === $ids) {
+            return [];
+        }
+
+        $out = [];
+        foreach (array_chunk($ids, 250) as $batch) {
+            $qb = $this->connection->getQueryBuilder();
+            $rows = $qb->select('id')
+                ->from('memories_lens_faces')
+                ->where($qb->expr()->in('cluster_id', $qb->createNamedParameter($batch, IQueryBuilder::PARAM_INT_ARRAY)))
+                ->executeQuery()
+                ->fetchAllAssociative()
+            ;
+            foreach ($rows as $row) {
+                $out[] = (int) $row['id'];
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Point clusters at a person (null detaches back to unnamed).
+     */
+    public function setClustersPerson(array $clusterIds, ?int $personId): int
+    {
+        $ids = [];
+        foreach ($clusterIds as $id) {
+            $id = (int) (\is_array($id) ? ($id['id'] ?? 0) : $id);
+            if ($id > 0) {
+                $ids[] = $id;
+            }
+        }
+        $ids = array_values(array_unique($ids));
+        if ([] === $ids) {
+            return 0;
+        }
+
+        $updated = 0;
+        foreach (array_chunk($ids, 250) as $batch) {
+            $qb = $this->connection->getQueryBuilder();
+            $updated += $qb->update('memories_lens_clusters')
+                ->set('person_id', null !== $personId ? $qb->createNamedParameter($personId, IQueryBuilder::PARAM_INT) : $qb->createNamedParameter(null, IQueryBuilder::PARAM_NULL))
+                ->where($qb->expr()->in('id', $qb->createNamedParameter($batch, IQueryBuilder::PARAM_INT_ARRAY)))
+                ->executeStatement()
+            ;
+        }
+
+        return $updated;
+    }
+
+    /**
+     * Move faces to a cluster (null unassigns); the target cluster is
+     * registered blindly under the submitting owner like grouping does.
+     */
+    public function moveFaces(array $faceIds, ?int $clusterId, string $owner): int
+    {
+        $ids = [];
+        foreach ($faceIds as $id) {
+            $id = (int) (\is_array($id) ? ($id['id'] ?? 0) : $id);
+            if ($id > 0) {
+                $ids[] = $id;
+            }
+        }
+        $ids = array_values(array_unique($ids));
+        if ([] === $ids) {
+            return 0;
+        }
+
+        if (null !== $clusterId) {
+            $this->ensureCluster($clusterId, $owner);
+        }
+
+        $moved = 0;
+        foreach (array_chunk($ids, 250) as $batch) {
+            $qb = $this->connection->getQueryBuilder();
+            $moved += $qb->update('memories_lens_faces')
+                ->set('cluster_id', null !== $clusterId ? $qb->createNamedParameter($clusterId, IQueryBuilder::PARAM_INT) : $qb->createNamedParameter(null, IQueryBuilder::PARAM_NULL))
+                ->set('next_try', $qb->createNamedParameter(0, IQueryBuilder::PARAM_INT))
+                ->set('retries', $qb->createNamedParameter(0, IQueryBuilder::PARAM_INT))
+                ->where($qb->expr()->in('id', $qb->createNamedParameter($batch, IQueryBuilder::PARAM_INT_ARRAY)))
+                ->executeStatement()
+            ;
+        }
+
+        return $moved;
+    }
+
+    /**
+     * Remove a person: unassign every face of its clusters, detach the
+     * clusters back to unnamed, and drop the viewer's name row. Empty
+     * clusters and persons are swept separately.
+     *
+     * @return array{faces: int, clusters: int}
+     */
+    public function clearPerson(int $personId, string $viewerId): array
+    {
+        $clusterIds = $this->clustersOfPerson($personId);
+
+        $faces = 0;
+        foreach (array_chunk($clusterIds, 250) as $batch) {
+            $qb = $this->connection->getQueryBuilder();
+            $faces += $qb->update('memories_lens_faces')
+                ->set('cluster_id', $qb->createNamedParameter(null, IQueryBuilder::PARAM_NULL))
+                ->set('next_try', $qb->createNamedParameter(0, IQueryBuilder::PARAM_INT))
+                ->set('retries', $qb->createNamedParameter(0, IQueryBuilder::PARAM_INT))
+                ->where($qb->expr()->in('cluster_id', $qb->createNamedParameter($batch, IQueryBuilder::PARAM_INT_ARRAY)))
+                ->executeStatement()
+            ;
+        }
+
+        $clusters = $this->setClustersPerson($clusterIds, null);
+
+        $qb = $this->connection->getQueryBuilder();
+        $qb->delete('memories_lens_persons')
+            ->where($qb->expr()->eq('person_id', $qb->createNamedParameter($personId, IQueryBuilder::PARAM_INT)))
+            ->andWhere($qb->expr()->eq('viewer_id', $qb->createNamedParameter($viewerId)))
+            ->executeStatement()
+        ;
+
+        return ['faces' => $faces, 'clusters' => $clusters];
+    }
+
+    /**
      * @return array{clusters: int, persons: int}
      */
     public function sweepOrphans(): array
@@ -364,6 +566,38 @@ final class LensFaces
         ;
 
         return ['clusters' => $clusters, 'persons' => $persons];
+    }
+
+    /**
+     * Create an empty cluster under the given owner (usually the storage
+     * scope of its first face). Duplicate ids are ignored.
+     */
+    public function createCluster(int $id, string $owner): void
+    {
+        if ($id <= 0) {
+            throw new HttpResponseException(
+                new DataResponse(
+                    ['message' => 'Invalid cluster id'],
+                    Http::STATUS_UNPROCESSABLE_ENTITY,
+                ),
+            );
+        }
+
+        try {
+            $qb = $this->connection->getQueryBuilder();
+            $qb->insert('memories_lens_clusters')
+                ->values([
+                    'id' => $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT),
+                    'owner_id' => $qb->createNamedParameter($owner),
+                    'person_id' => $qb->createNamedParameter(null, IQueryBuilder::PARAM_NULL),
+                    'embed_version' => $qb->createNamedParameter(self::FACE_VERSION, IQueryBuilder::PARAM_INT),
+                    'created' => $qb->createNamedParameter(time(), IQueryBuilder::PARAM_INT),
+                ])
+                ->executeStatement()
+            ;
+        } catch (\Throwable) {
+            // Concurrent insert wins; the row exists either way.
+        }
     }
 
     /**

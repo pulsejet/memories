@@ -24,11 +24,13 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\ClustersBackend\LensBackend;
 use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\LensFaces;
 use OCA\Memories\Db\LensFolders;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Db\TimelineRoot;
+use OCA\Memories\Exceptions;
 use OCA\Memories\HttpResponseException;
 use OCA\Memories\Service\Lens;
 use OCA\Memories\Service\ServiceManager;
@@ -57,6 +59,7 @@ final class LensController extends ApiController
         protected LensFaces $lensFaces,
         protected IClientService $clientService,
         protected Lens $lens,
+        protected LensBackend $lensBackend,
         protected ServiceManager $serviceManager,
         protected Util $util,
     ) {
@@ -89,6 +92,11 @@ final class LensController extends ApiController
             $response->addHeader('Content-Type', $file->getMimeType());
 
             $meta = $this->getIndexMeta($fileid);
+            if (null === $meta['parent_id']) {
+                // The node exists but its filecache row vanished mid-flight:
+                // transient, the daemon retries and discards on 404.
+                throw new \Exception("Index metadata unavailable for {$fileid}");
+            }
             $metadata = [
                 'etag' => $file->getEtag(),
                 'mtime' => $meta['mtime'],
@@ -275,6 +283,90 @@ final class LensController extends ApiController
 
             return new DataResponse(['fileid' => $fileid, 'status' => 'deleted']);
         });
+    }
+
+    /**
+     * Create an empty lens person with a server-minted id, optionally named.
+     *
+     * Ids are uint63: minted server-side because JS floats cannot hold them.
+     */
+    #[NoAdminRequired]
+    public function personCreate(string $name = ''): Http\Response
+    {
+        return $this->util->guardEx(function () use ($name) {
+            $this->guardLensEnabled();
+
+            return new DataResponse($this->lensBackend->createPerson($name));
+        });
+    }
+
+    /**
+     * Rename a lens cluster or person to a viewer-scoped name.
+     */
+    #[NoAdminRequired]
+    public function personRename(string $name, string $target): Http\Response
+    {
+        return $this->util->guardEx(function () use ($name, $target) {
+            $this->guardLensEnabled();
+
+            return new DataResponse(['name' => $this->lensBackend->renamePerson($name, $target)]);
+        });
+    }
+
+    /**
+     * Merge the source lens person or cluster into the target.
+     */
+    #[NoAdminRequired]
+    public function personMerge(string $source, string $target): Http\Response
+    {
+        return $this->util->guardEx(function () use ($source, $target) {
+            $this->guardLensEnabled();
+
+            return new DataResponse(['name' => $this->lensBackend->mergePersons($source, $target)]);
+        });
+    }
+
+    /**
+     * Move faces to a lens person or cluster (target NULL unassigns).
+     *
+     * Moved ids are uint63: returned as strings, JS floats lose precision.
+     *
+     * @param array $faces raw face ids, cast in the backend
+     */
+    #[NoAdminRequired]
+    public function personFacesMove(array $faces, ?string $target = null): Http\Response
+    {
+        return $this->util->guardEx(function () use ($faces, $target) {
+            $this->guardLensEnabled();
+            $moved = $this->lensBackend->moveFaces($faces, $target);
+
+            return new DataResponse(['moved' => array_map(strval(...), $moved)]);
+        });
+    }
+
+    /**
+     * Remove a lens person: unassign its faces and drop the viewer's name.
+     */
+    #[NoAdminRequired]
+    public function personDelete(string $name): Http\Response
+    {
+        return $this->util->guardEx(function () use ($name) {
+            $this->guardLensEnabled();
+
+            return new DataResponse($this->lensBackend->removePerson($name));
+        });
+    }
+
+    /**
+     * People mutations need the daemon: moves sync Qdrant directly.
+     *
+     * @throws \OCA\Memories\HttpResponseException
+     */
+    private function guardLensEnabled(): void
+    {
+        if (!$this->lensBackend->isEnabled()) {
+            throw Exceptions::NotEnabled('Lens');
+        }
     }
 
     /**

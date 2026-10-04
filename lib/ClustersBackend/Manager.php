@@ -41,6 +41,7 @@ final class Manager
         PlacesBackend::CLUSTER_TYPE => PlacesBackend::class,
         RecognizeBackend::CLUSTER_TYPE => RecognizeBackend::class,
         FaceRecognitionBackend::CLUSTER_TYPE => FaceRecognitionBackend::class,
+        LensBackend::CLUSTER_TYPE => LensBackend::class,
     ];
 
     /**
