@@ -91,7 +91,12 @@ class Scanner:
         files = {file.fileid: file for file in batch.files if not file.isvideo}
         log.info(
             "scan batch: range=[%d,%s] received=%d images=%d videos=%d done=%s",
-            batch.start, batch.end, len(batch.files), len(files), len(batch.files) - len(files), batch.done,
+            batch.start,
+            batch.end,
+            len(batch.files),
+            len(files),
+            len(batch.files) - len(files),
+            batch.done,
         )
 
         async with self.queue.mutation_lock:
@@ -119,6 +124,7 @@ class Scanner:
                             stale.add(fileid)
                         continue
 
+                    # Places and faces are optional; only an image proves the file was indexed.
                     if collection is self.store.embedding:
                         indexed.add(fileid)
                     if payload.get("mtime") != file.mtime:
@@ -152,12 +158,23 @@ class Scanner:
             self.stats["enqueued_total"] += 1
 
         self.stats["deferred_total"] += len(deferred)
+        repaired_files = {fileid for _, fileid in repairs}
 
         log.info(
             "scan batch completed: range=[%d,%s] stored_files=%d missing_images=%d stale=%d "
             "enqueued=%d deferred=%d deleted=%d dropped_pending=%d repaired_files=%d repair_updates=%d "
             "queue_depth=%d elapsed=%.2fs",
-            batch.start, batch.end, len(found), len(missing), len(stale), len(reindex), len(deferred), len(obsolete),
-            len(pending - files.keys()), len({fileid for _, fileid in repairs}), len(repairs),
-            self.queue.depth, time.monotonic() - started,
+            batch.start,
+            batch.end,
+            len(found),
+            len(missing),
+            len(stale),
+            len(reindex),
+            len(deferred),
+            len(obsolete),
+            len(pending - files.keys()),
+            len(repaired_files),
+            len(repairs),
+            self.queue.depth,
+            time.monotonic() - started,
         )

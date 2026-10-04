@@ -116,7 +116,12 @@ class IndexQueue:
     def fileids_in_range(self, start, end):
         """Pending fileids in a scan range, including files without stored embeddings."""
 
-        return {i for i in self._queued.keys() | self.in_flight.keys() if i >= start and (end is None or i <= end)}
+        pending = self._queued.keys() | self.in_flight.keys()
+
+        return {
+            fileid for fileid in pending
+            if fileid >= start and (end is None or fileid <= end)
+        }
 
     @property
     def depth(self):

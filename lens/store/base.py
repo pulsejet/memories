@@ -30,12 +30,12 @@ class FileStore:
     def scroll_range(self, start: int, end: int | None):
         """Yield sync payloads in an inclusive fileid range; None includes the tail."""
 
-        filtr = models.Filter(must=[models.FieldCondition(
+        condition = models.FieldCondition(
             key="fileid",
             range=models.Range(gte=start, lte=end),
-        )])
+        )
 
-        return self._scroll(filtr)
+        return self._scroll(models.Filter(must=[condition]))
 
     def scroll_files(self, fileids: list[int]):
         """Yield sync payloads for explicit fileids, including every derived point."""
@@ -103,10 +103,12 @@ class FileStore:
     def _file_filter(fileids: list[int]) -> models.Filter:
         """Match file payloads; the metadata sentinel has no fileid."""
 
-        return models.Filter(must=[models.FieldCondition(
+        condition = models.FieldCondition(
             key="fileid",
             match=models.MatchAny(any=fileids),
-        )])
+        )
+
+        return models.Filter(must=[condition])
 
 
 async def ensure_collection(client: AsyncQdrantClient, name, dim):

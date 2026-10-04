@@ -50,10 +50,16 @@ class Indexer:
         for fileid, res in heads:
             parents[fileid] = res.metadata.parent_id
             if fileid not in reindex:
-                log.info("index skipped %d (mtime=%s mime=%s)", fileid, res.metadata.mtime, res.metadata.mimetype)
+                log.info(
+                    "index skipped %d (mtime=%s mime=%s)",
+                    fileid,
+                    res.metadata.mtime,
+                    res.metadata.mimetype,
+                )
                 self.done(fileid, ok=True)
 
-        pending = await self._fetch_all([fileid for fileid, _ in heads if fileid in reindex])
+        download_ids = [fileid for fileid, _ in heads if fileid in reindex]
+        pending = await self._fetch_all(download_ids)
         for fileid, res in pending:
             if res.metadata.parent_id is not None:
                 parents[fileid] = res.metadata.parent_id
@@ -71,6 +77,7 @@ class Indexer:
                 await self._fail(fileid, exc)
             return
 
+        # A places failure should not discard successful image embeddings.
         places_error = None
         try:
             await self._ensure_places(good, parents)
@@ -112,8 +119,13 @@ class Indexer:
 
             log.info(
                 "indexed %d (%dx%d %s epoch=%s dayid=%s places=%d)",
-                fileid, image.width, image.height, res.metadata.mimetype,
-                res.metadata.epoch, res.metadata.dayid, len(res.metadata.places),
+                fileid,
+                image.width,
+                image.height,
+                res.metadata.mimetype,
+                res.metadata.epoch,
+                res.metadata.dayid,
+                len(res.metadata.places),
             )
             self.done(fileid, ok=True)
 
@@ -166,7 +178,9 @@ class Indexer:
             failure = await self.store.embedding.record_failure(fileid)
             log.warning(
                 "index retry scheduled: fileid=%d attempts=%d retry_at=%d",
-                fileid, failure["attempts"], failure["retry_at"],
+                fileid,
+                failure["attempts"],
+                failure["retry_at"],
             )
         except Exception:
             log.exception("could not persist retry state for %d", fileid)
@@ -208,10 +222,11 @@ class Indexer:
     async def _fetch_all(self, fileids, *, metadata_only=False):
         """Fetch one batch concurrently; metadata checks use HEAD instead of downloading."""
 
-        results = await asyncio.gather(
-            *(asyncio.to_thread(fetch_file, fileid, metadata_only=metadata_only) for fileid in fileids),
-            return_exceptions=True,
-        )
+        fetches = [
+            asyncio.to_thread(fetch_file, fileid, metadata_only=metadata_only)
+            for fileid in fileids
+        ]
+        results = await asyncio.gather(*fetches, return_exceptions=True)
 
         pending = []
         for fileid, res in zip(fileids, results):

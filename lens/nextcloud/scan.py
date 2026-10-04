@@ -29,11 +29,18 @@ class ScanBatch(BaseModel):
     def validate_range(self):
         """Reject malformed ranges before they can drive cleanup."""
 
-        if self.done != (self.end is None) or (self.end is not None and self.end < self.start):
+        unbounded = self.end is None
+        reversed_range = self.end is not None and self.end < self.start
+        if self.done != unbounded or reversed_range:
             raise ValueError("invalid scan range")
 
-        ids = [file.fileid for file in self.files]
-        if ids != sorted(set(ids)) or any(i < self.start or (self.end is not None and i > self.end) for i in ids):
+        fileids = [file.fileid for file in self.files]
+        ordered_unique = fileids == sorted(set(fileids))
+        within_range = all(
+            fileid >= self.start and (self.end is None or fileid <= self.end)
+            for fileid in fileids
+        )
+        if not ordered_unique or not within_range:
             raise ValueError("scan files must be ordered, unique, and within the range")
 
         return self

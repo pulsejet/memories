@@ -65,7 +65,11 @@ def fetch_file(fileid: int, *, metadata_only: bool = False) -> FetchResult:
     url = f"{config.nextcloud_url}/index.php/apps/memories/lens/file/{fileid}"
     method = "HEAD" if metadata_only else "GET"
 
-    with httpx.Client(timeout=TIMEOUT, auth=(config.nc_user, config.nc_token), cookies=cookie_jar) as client:
+    with httpx.Client(
+        timeout=TIMEOUT,
+        auth=(config.nc_user, config.nc_token),
+        cookies=cookie_jar,
+    ) as client:
         with client.stream(method, url) as res:
             if res.status_code == 401:
                 # Token expired/removed: loud, the runbook is re-issuing it.
@@ -78,7 +82,7 @@ def fetch_file(fileid: int, *, metadata_only: bool = False) -> FetchResult:
             if res.status_code != 200:
                 raise FetchError(f"{method} {url} -> {res.status_code}")
 
-            metadata = parse_metadata(res.headers.get("x-memories-metadata", "") or "")
+            metadata = parse_metadata(res.headers.get("x-memories-metadata", ""))
 
             if metadata_only:
                 if metadata.mtime is None or metadata.parent_id is None:
