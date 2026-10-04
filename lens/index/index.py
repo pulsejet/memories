@@ -42,7 +42,7 @@ class Indexer:
         heads = await self._fetch_all(list(parents), metadata_only=True)
         try:
             reindex = await self._refresh_metadata(heads, failures)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             for fileid, _ in heads:
                 await self._fail(fileid, exc)
             return
@@ -66,7 +66,7 @@ class Indexer:
         try:
             images = [image for _, _, image in good]
             vectors = await self.embedding_model.embed_pil_images_async(images)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             for fileid, _, _ in good:
                 await self._fail(fileid, exc)
             return
@@ -74,7 +74,7 @@ class Indexer:
         places_error = None
         try:
             await self._ensure_places(good, parents)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             places_error = exc
 
         points = []
@@ -100,7 +100,7 @@ class Indexer:
             await self.store.embedding.upsert_many(points)
             if places_error is None:
                 await self.store.embedding.clear_failures([p.fileid for p in points if p.fileid in failures])
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             for fileid, _, _ in good:
                 await self._fail(fileid, exc)
             return
