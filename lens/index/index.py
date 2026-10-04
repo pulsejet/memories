@@ -1,7 +1,8 @@
-"""Batch indexing: fetch → decode → embed → upsert; failures count, never retry."""
+"""Batch indexing: fetch → decode → embed → upsert, with persistent failure backoff."""
 
 import asyncio
 import logging
+import time
 from dataclasses import replace
 
 from nextcloud import fetch_file
@@ -22,8 +23,23 @@ class Indexer:
     async def handle_batch(self, batch):
         """Fetch concurrently, decode each once, embed in one forward pass."""
 
+        try:
+            failures = await self.store.embedding.get_failures([fileid for fileid, _ in batch])
+        except Exception:
+            log.exception("cannot read retry state; deferring index batch")
+            for fileid, _ in batch:
+                self.done(fileid, ok=None)
+            return
+
         parents = dict(batch)
-        pending = await self._fetch_all([fileid for fileid, _ in batch])
+        now = int(time.time())
+        for fileid, failure in failures.items():
+            if failure["retry_at"] > now:
+                log.info("index deferred for %d until %d", fileid, failure["retry_at"])
+                del parents[fileid]
+                self.done(fileid, ok=None)
+
+        pending = await self._fetch_all(list(parents))
         good = await self._decode_all(pending)
 
         if not good:
@@ -34,14 +50,14 @@ class Indexer:
             vectors = await self.embedding_model.embed_pil_images_async(images)
         except Exception as exc:
             for fileid, _, _ in good:
-                log.exception("index failed for %d: %s", fileid, exc)
-                self.done(fileid, ok=False)
+                await self._fail(fileid, exc)
             return
 
+        places_error = None
         try:
             await self._ensure_places(good, parents)
         except Exception as exc:
-            log.exception("places ensure failed for batch: %s", exc)
+            places_error = exc
 
         points = []
 
@@ -64,19 +80,40 @@ class Indexer:
 
         try:
             await self.store.embedding.upsert_many(points)
+            if places_error is None:
+                await self.store.embedding.clear_failures([p.fileid for p in points if p.fileid in failures])
         except Exception as exc:
             for fileid, _, _ in good:
-                log.exception("index failed for %d: %s", fileid, exc)
-                self.done(fileid, ok=False)
+                await self._fail(fileid, exc)
             return
 
         for fileid, res, image in good:
+            if places_error is not None:
+                await self._fail(fileid, places_error)
+                continue
+
             log.info(
                 "indexed %d (%dx%d %s epoch=%s dayid=%s places=%d)",
                 fileid, image.width, image.height, res.metadata.mimetype,
                 res.metadata.epoch, res.metadata.dayid, len(res.metadata.places),
             )
             self.done(fileid, ok=True)
+
+    async def _fail(self, fileid, error):
+        """Persist retry state before releasing the file from the indexing queue."""
+
+        log.error("index failed for %d: %s", fileid, error, exc_info=error)
+
+        try:
+            failure = await self.store.embedding.record_failure(fileid)
+            log.warning(
+                "index retry scheduled: fileid=%d attempts=%d retry_at=%d",
+                fileid, failure["attempts"], failure["retry_at"],
+            )
+        except Exception:
+            log.exception("could not persist retry state for %d", fileid)
+        finally:
+            self.done(fileid, ok=False)
 
     async def _ensure_places(self, good, parents):
         """Embed current addresses and remove places no longer associated with each file."""
@@ -121,8 +158,7 @@ class Indexer:
         pending = []
         for fileid, res in zip(fileids, results):
             if isinstance(res, Exception):
-                log.error("index failed for %d: %s", fileid, res, exc_info=res)
-                self.done(fileid, ok=False)
+                await self._fail(fileid, res)
             else:
                 pending.append((fileid, res))
 
@@ -139,8 +175,7 @@ class Indexer:
         good = []
         for (fileid, res), image in zip(pending, images):
             if isinstance(image, Exception):
-                log.error("index failed for %d: %s", fileid, image, exc_info=image)
-                self.done(fileid, ok=False)
+                await self._fail(fileid, image)
             else:
                 good.append((fileid, res, image))
 

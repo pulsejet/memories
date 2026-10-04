@@ -6,6 +6,7 @@ import time
 
 from config import config
 from nextcloud import ScanBatch, fetch_scan_batch
+from store import FAILURE_KIND
 
 log = logging.getLogger("lens.scan")
 
@@ -29,6 +30,7 @@ class Scanner:
             "sweeps_total": 0,
             "files_total": 0,
             "enqueued_total": 0,
+            "deferred_total": 0,
             "deleted_total": 0,
             "repaired_total": 0,
             "errors_total": 0,
@@ -93,10 +95,12 @@ class Scanner:
         )
 
         async with self.queue.mutation_lock:
+            now = int(time.time())
             found = set()
             indexed = set()
             stale = set()
             repairs = set()
+            deferred = set()
 
             for collection in self.store.collections:
                 async for point in collection.scroll_range(batch.start, batch.end):
@@ -106,6 +110,13 @@ class Scanner:
                     file = files.get(fileid)
 
                     if file is None:
+                        continue
+
+                    if payload.get("kind") == FAILURE_KIND:
+                        if payload["retry_at"] > now:
+                            deferred.add(fileid)
+                        else:
+                            stale.add(fileid)
                         continue
 
                     if collection is self.store.embedding:
@@ -133,18 +144,20 @@ class Scanner:
                 await collection.update_file_metadata(fileid, file.parentid, file.etag)
                 self.stats["repaired_total"] += 1
 
-            reindex = sorted(stale | missing)
+            reindex = sorted((stale | missing) - deferred)
 
         # A full queue must be allowed to drain while this batch waits for capacity.
         for fileid in reindex:
             await self.queue.enqueue_wait(fileid, files[fileid].parentid)
             self.stats["enqueued_total"] += 1
 
+        self.stats["deferred_total"] += len(deferred)
+
         log.info(
             "scan batch completed: range=[%d,%s] stored_files=%d missing_images=%d stale=%d "
-            "enqueued=%d deleted=%d dropped_pending=%d repaired_files=%d repair_updates=%d "
+            "enqueued=%d deferred=%d deleted=%d dropped_pending=%d repaired_files=%d repair_updates=%d "
             "queue_depth=%d elapsed=%.2fs",
-            batch.start, batch.end, len(found), len(missing), len(stale), len(reindex), len(obsolete),
+            batch.start, batch.end, len(found), len(missing), len(stale), len(reindex), len(deferred), len(obsolete),
             len(pending - files.keys()), len({fileid for _, fileid in repairs}), len(repairs),
             self.queue.depth, time.monotonic() - started,
         )

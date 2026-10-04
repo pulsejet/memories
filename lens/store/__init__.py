@@ -3,11 +3,12 @@
 from qdrant_client import AsyncQdrantClient
 
 from store.base import CompatMismatch
-from store.embeddings import EmbeddingStore, FileMeta, UpsertPoint
+from store.embeddings import FAILURE_KIND, EmbeddingStore, FileMeta, UpsertPoint
 from store.faces import FacePoint, FacesStore, face_point_id
 from store.places import PlacePoint, PlacesStore, place_point_id
 
 __all__ = [
+    "FAILURE_KIND",
     "CompatMismatch",
     "EmbeddingStore",
     "FacePoint",

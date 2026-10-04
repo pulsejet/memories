@@ -42,7 +42,7 @@ class FileStore:
                 scroll_filter=filtr,
                 offset=offset,
                 limit=1000,
-                with_payload=["fileid", "parent_id", "mtime", "etag"],
+                with_payload=["fileid", "parent_id", "mtime", "etag", "kind", "retry_at"],
                 with_vectors=False,
             )
 

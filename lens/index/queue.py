@@ -16,6 +16,7 @@ class IndexQueue:
         self.mutation_lock = asyncio.Lock()
         self.indexed_total = 0
         self.failed_total = 0
+        self.deferred_total = 0
 
     def enqueue(self, fileid, parent_id):
         """Refresh queued entry or append; raise asyncio.QueueFull when full."""
@@ -86,11 +87,13 @@ class IndexQueue:
         return batch
 
     def done(self, fileid, ok):
-        """Record completion of one item."""
+        """Record completion; None means deferred without attempting to index."""
 
         self.in_flight.pop(fileid, None)
 
-        if ok:
+        if ok is None:
+            self.deferred_total += 1
+        elif ok:
             self.indexed_total += 1
         else:
             self.failed_total += 1
