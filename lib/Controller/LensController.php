@@ -62,7 +62,7 @@ final class LensController extends ApiController
     }
 
     /**
-     * Serve raw file bytes to the Lens service account by fileid.
+     * Serve file metadata and, for GET, raw bytes to the Lens service account.
      *
      * @param int $fileid file ID to serve
      */
@@ -75,18 +75,22 @@ final class LensController extends ApiController
             $this->serviceManager->guardLensServiceAccount();
             $file = $this->serviceManager->getServiceFile($fileid);
 
-            $handle = $file->fopen('rb');
-            if (false === $handle) {
-                throw new \Exception("Failed to open file {$fileid}");
+            $response = new Http\Response();
+            if ('HEAD' !== $this->request->getMethod()) {
+                $handle = $file->fopen('rb');
+                if (false === $handle) {
+                    throw new \Exception("Failed to open file {$fileid}");
+                }
+                $response = new StreamResponse($handle);
             }
 
-            $response = new StreamResponse($handle);
             $response->addHeader('Content-Type', $file->getMimeType());
 
             $meta = $this->getIndexMeta($fileid);
             $metadata = [
                 'etag' => $file->getEtag(),
                 'mtime' => $file->getMtime(),
+                'parent_id' => $meta['parent_id'],
                 'mimetype' => $file->getMimeType(),
                 'epoch' => $meta['epoch'],
                 'dayid' => $meta['dayid'],
@@ -196,31 +200,33 @@ final class LensController extends ApiController
     }
 
     /**
-     * Epoch and dayid of a file from the memories table, nulls when unknown.
+     * Catalog dates and current storage parent, independent of the service user's mounts.
      *
      * Best-effort: failures never break file serving.
      *
-     * @return array{epoch: ?int, dayid: ?int}
+     * @return array{epoch: ?int, dayid: ?int, parent_id: ?int}
      */
     private function getIndexMeta(int $fileid): array
     {
         try {
             $qb = $this->connection->getQueryBuilder();
-            $qb->select('epoch', 'dayid')
-                ->from('memories')
-                ->where($qb->expr()->eq('fileid', $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)))
+            $qb->select('m.epoch', 'm.dayid', 'f.parent')
+                ->from('filecache', 'f')
+                ->leftJoin('f', 'memories', 'm', $qb->expr()->eq('f.fileid', 'm.fileid'))
+                ->where($qb->expr()->eq('f.fileid', $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)))
             ;
             $row = $qb->executeQuery()->fetchAssociative();
             if (false !== $row) {
                 return [
                     'epoch' => isset($row['epoch']) ? (int) $row['epoch'] : null,
                     'dayid' => isset($row['dayid']) ? (int) $row['dayid'] : null,
+                    'parent_id' => (int) $row['parent'],
                 ];
             }
         } catch (\Throwable) {
         }
 
-        return ['epoch' => null, 'dayid' => null];
+        return ['epoch' => null, 'dayid' => null, 'parent_id' => null];
     }
 
     /**

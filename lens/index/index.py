@@ -6,7 +6,7 @@ import time
 from dataclasses import replace
 
 from nextcloud import fetch_file
-from store import FileMeta, PlacePoint, UpsertPoint
+from store import FAILURE_KIND, FileMeta, PlacePoint, UpsertPoint
 
 log = logging.getLogger("lens.queue")
 
@@ -21,7 +21,7 @@ class Indexer:
         self.done = done
 
     async def handle_batch(self, batch):
-        """Fetch concurrently, decode each once, embed in one forward pass."""
+        """Check current metadata first, then download and embed only files needing work."""
 
         try:
             failures = await self.store.embedding.get_failures([fileid for fileid, _ in batch])
@@ -39,7 +39,25 @@ class Indexer:
                 del parents[fileid]
                 self.done(fileid, ok=None)
 
-        pending = await self._fetch_all(list(parents))
+        heads = await self._fetch_all(list(parents), metadata_only=True)
+        try:
+            reindex = await self._refresh_metadata(heads, failures)
+        except Exception as exc:
+            for fileid, _ in heads:
+                await self._fail(fileid, exc)
+            return
+
+        for fileid, res in heads:
+            parents[fileid] = res.metadata.parent_id
+            if fileid not in reindex:
+                log.info("index skipped %d (mtime=%s mime=%s)", fileid, res.metadata.mtime, res.metadata.mimetype)
+                self.done(fileid, ok=True)
+
+        pending = await self._fetch_all([fileid for fileid, _ in heads if fileid in reindex])
+        for fileid, res in pending:
+            if res.metadata.parent_id is not None:
+                parents[fileid] = res.metadata.parent_id
+
         good = await self._decode_all(pending)
 
         if not good:
@@ -99,6 +117,46 @@ class Indexer:
             )
             self.done(fileid, ok=True)
 
+    async def _refresh_metadata(self, heads, failures):
+        """Repair parent/etag across collections and return files needing new embeddings."""
+
+        files = {}
+        for fileid, res in heads:
+            if res.metadata.mimetype.startswith("video/"):
+                for collection in self.store.collections:
+                    await collection.delete_fileid(fileid)
+            else:
+                files[fileid] = res.metadata
+
+        if not files:
+            return set()
+
+        missing = set(files)
+        stale = failures.keys() & files.keys()
+        repairs = set()
+
+        for collection in self.store.collections:
+            async for point in collection.scroll_files(list(files)):
+                payload = point.payload
+                if payload.get("kind") == FAILURE_KIND:
+                    continue
+
+                fileid = payload["fileid"]
+                meta = files[fileid]
+                if collection is self.store.embedding:
+                    missing.discard(fileid)
+                if payload.get("mtime") != meta.mtime:
+                    stale.add(fileid)
+                if payload.get("parent_id") != meta.parent_id or payload.get("etag") != meta.etag:
+                    repairs.add((collection, fileid))
+
+        for collection, fileid in repairs:
+            meta = files[fileid]
+            await collection.update_file_metadata(fileid, meta.parent_id, meta.etag)
+            log.info("index metadata repaired %d in %s", fileid, collection.collection)
+
+        return stale | missing
+
     async def _fail(self, fileid, error):
         """Persist retry state before releasing the file from the indexing queue."""
 
@@ -147,11 +205,11 @@ class Indexer:
             points=points,
         )
 
-    async def _fetch_all(self, fileids):
-        """Download one batch concurrently; fetch failures count immediately."""
+    async def _fetch_all(self, fileids, *, metadata_only=False):
+        """Fetch one batch concurrently; metadata checks use HEAD instead of downloading."""
 
         results = await asyncio.gather(
-            *(asyncio.to_thread(fetch_file, fileid) for fileid in fileids),
+            *(asyncio.to_thread(fetch_file, fileid, metadata_only=metadata_only) for fileid in fileids),
             return_exceptions=True,
         )
 
