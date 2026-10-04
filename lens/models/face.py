@@ -11,7 +11,7 @@ import urllib.request
 import cv2
 import numpy as np
 import onnxruntime as ort
-from PIL import Image
+from PIL import Image, ImageOps
 
 from config import config
 from models.common import inference_sem
@@ -23,6 +23,8 @@ DIVISOR = 32
 NMS_THRESHOLD = 0.3
 TOP_K = 5000
 ALIGN_SIZE = 112
+EMBED_DIM = 128
+MIN_FACE_SIZE = 20
 
 DST_TEMPLATE = np.array(
     [
@@ -126,16 +128,37 @@ class FaceModel:
         return paths["yunet"] + "," + paths["sface"]
 
     def load(self) -> int:
-        """Load both ORT sessions (CUDA preferred, CPU fallback); return dim D."""
+        """Load the pinned model contracts, respecting the shared device/thread settings."""
 
         det_path = self.snapshot_path("yunet")
         rec_path = self.snapshot_path("sface")
-        providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
+        providers = ["CPUExecutionProvider"]
+
+        if config.device in ("auto", "cuda") and "CUDAExecutionProvider" in ort.get_available_providers():
+            providers.insert(0, "CUDAExecutionProvider")
+        elif config.device == "cuda":
+            raise RuntimeError("DEVICE=cuda requires ONNX Runtime's CUDA provider")
+
+        options = ort.SessionOptions()
+        if config.torch_num_threads:
+            options.intra_op_num_threads = config.torch_num_threads
 
         log.info("loading face models from %s and %s", det_path, rec_path)
 
-        self._det = ort.InferenceSession(det_path, providers=providers)
-        self._rec = ort.InferenceSession(rec_path, providers=providers)
+        det = ort.InferenceSession(det_path, sess_options=options, providers=providers)
+        rec = ort.InferenceSession(rec_path, sess_options=options, providers=providers)
+        det_shape = det.get_inputs()[0].shape
+        if len(det_shape) != 4 or det_shape[:2] != [1, 3] or any(isinstance(d, int) for d in det_shape[2:]):
+            raise RuntimeError("YuNet must accept one BGR image with dynamic height and width")
+        expected_outputs = [f"{kind}_{stride}" for kind in ("cls", "obj", "bbox", "kps") for stride in STRIDES]
+        if [output.name for output in det.get_outputs()] != expected_outputs:
+            raise RuntimeError("YuNet must expose cls/obj/bbox/kps outputs at strides 8, 16 and 32")
+        if rec.get_inputs()[0].shape != [1, 3, ALIGN_SIZE, ALIGN_SIZE]:
+            raise RuntimeError("SFace must accept one 112x112 RGB image")
+        if rec.get_outputs()[0].shape != [1, EMBED_DIM]:
+            raise RuntimeError("SFace must produce one 128-dimensional vector")
+
+        self._det, self._rec = det, rec
         self._det_input = self._det.get_inputs()[0].name
         self._rec_input = self._rec.get_inputs()[0].name
         self._dim = int(self._rec.get_outputs()[0].shape[1])
@@ -148,9 +171,12 @@ class FaceModel:
 
     @staticmethod
     def decode_image(data: bytes) -> np.ndarray:
-        """Decode image bytes (any PIL format incl. HEIC) to BGR pixels."""
+        """Decode to display-oriented BGR pixels, including EXIF rotations and mirrors."""
 
-        return cv2.cvtColor(np.array(Image.open(io.BytesIO(data)).convert("RGB")), cv2.COLOR_RGB2BGR)
+        with Image.open(io.BytesIO(data)) as image:
+            rgb = np.array(ImageOps.exif_transpose(image).convert("RGB"))
+
+        return cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
 
     def detect_image(self, image: np.ndarray) -> list[dict]:
         """Detect faces in BGR pixels; boxes/landmarks as fractions, sorted by (x, y)."""
@@ -166,11 +192,12 @@ class FaceModel:
     def _preprocess(image: np.ndarray) -> tuple[np.ndarray, int, int, int]:
         """Downscale to the working cap, pad to a multiple of 32, build the BGR blob."""
 
+        _validate_image(image)
         height, width = image.shape[:2]
         scale = min(1.0, config.face.det_max_side / max(height, width))
 
         if scale < 1.0:
-            image = cv2.resize(image, (int(width * scale), int(height * scale)))
+            image = cv2.resize(image, (max(1, int(width * scale)), max(1, int(height * scale))))
 
         det_h, det_w = image.shape[:2]
         pad_w = ((det_w - 1) // DIVISOR + 1) * DIVISOR
@@ -182,15 +209,18 @@ class FaceModel:
     def _decode(self, outputs: list[np.ndarray], pad_w: int, det_w: int, det_h: int) -> list[dict]:
         """Port of OpenCV's YuNet postprocess (sqrt cls*obj score, exp boxes, NMS)."""
 
-        boxes, scores, landmarks = [], [], []
+        boxes, scores, faces = [], [], []
 
         for i, stride in enumerate(STRIDES):
             decoded = _decode_stride(outputs, i, stride, pad_w)
 
             if decoded is not None:
-                boxes.extend(decoded[0])
-                scores.extend(decoded[1])
-                landmarks.extend(decoded[2])
+                for box, score, landmarks in zip(*decoded):
+                    face = _format_face(box, score, landmarks, det_w, det_h)
+                    if face is not None:
+                        boxes.append(box)
+                        scores.append(score)
+                        faces.append(face)
 
         if not boxes:
             return []
@@ -198,10 +228,10 @@ class FaceModel:
         kept = cv2.dnn.NMSBoxes(boxes, scores, config.face.det_threshold, NMS_THRESHOLD, 1.0, TOP_K)
         kept = np.array(kept).reshape(-1)
 
-        return [_format_face(boxes[k], scores[k], landmarks[k], det_w, det_h) for k in kept]
+        return [faces[k] for k in kept]
 
     def embed_image_faces(self, image: np.ndarray, faces: list[dict]) -> list[list[float]]:
-        """Align each face to 112x112 and embed in one session run; L2-normed 128-d."""
+        """Align and recognize each face, preserving detection order."""
 
         return self.embed_crops(self.align_faces(image, faces))
 
@@ -209,19 +239,35 @@ class FaceModel:
     def align_faces(image: np.ndarray, faces: list[dict]) -> list[np.ndarray]:
         """Warp each face's landmarks to a 112x112 BGR crop (SFace reference geometry)."""
 
+        if not faces:
+            return []
+
+        _validate_image(image)
         height, width = image.shape[:2]
 
         return [_align_crop(image, face, width, height) for face in faces]
 
     def embed_crops(self, crops: list[np.ndarray]) -> list[list[float]]:
-        """Embed 112x112 BGR crops in one session run; L2-normed 128-d vectors."""
+        """Recognize crops at the pinned model's batch size of one; return unit vectors."""
 
-        batch = np.stack([cv2.cvtColor(crop, cv2.COLOR_BGR2RGB).astype(np.float32) for crop in crops])
-        batch = batch.transpose(0, 3, 1, 2)
-        vectors = self._rec.run(None, {self._rec_input: batch})[0].astype(np.float64)
-        vectors /= np.linalg.norm(vectors, axis=1, keepdims=True)
+        vectors = []
+        for crop in crops:
+            _validate_image(crop)
+            if crop.shape[:2] != (ALIGN_SIZE, ALIGN_SIZE):
+                raise ValueError("SFace crops must be 112x112")
 
-        return vectors.tolist()
+            blob = cv2.dnn.blobFromImage(crop, swapRB=True)
+            vector = self._rec.run(None, {self._rec_input: blob})[0].astype(np.float64)
+            if vector.shape != (1, EMBED_DIM) or not np.isfinite(vector).all():
+                raise ValueError("SFace returned an invalid embedding")
+
+            norm = np.linalg.norm(vector)
+            if not np.isfinite(norm) or norm == 0:
+                raise ValueError("SFace returned an invalid embedding norm")
+
+            vectors.append((vector[0] / norm).tolist())
+
+        return vectors
 
     async def detect_async(self, image: np.ndarray) -> list[dict]:
         """Serialize YuNet inference through the shared semaphore."""
@@ -230,7 +276,7 @@ class FaceModel:
             return await asyncio.to_thread(self.detect_image, image)
 
     async def embed_async(self, image: np.ndarray, faces: list[dict]) -> list[list[float]]:
-        """Serialize one batched SFace inference through the shared semaphore."""
+        """Serialize alignment and batch-one recognition through the shared semaphore."""
 
         async with inference_sem:
             return await asyncio.to_thread(self.embed_image_faces, image, faces)
@@ -257,17 +303,23 @@ def _decode_stride(
     cls = outputs[level].reshape(-1)
     obj = outputs[level + 3].reshape(-1)
     score = np.sqrt(np.clip(cls, 0, 1) * np.clip(obj, 0, 1))
-    keep = np.where(score >= config.face.det_threshold)[0]
+    keep = np.where(np.isfinite(cls) & np.isfinite(obj) & (score >= config.face.det_threshold))[0]
 
+    if keep.size == 0:
+        return None
+
+    bbox = outputs[level + 6].reshape(-1, 4)[keep]
+    kps = outputs[level + 9].reshape(-1, 10)[keep]
+    valid = np.isfinite(bbox).all(axis=1) & np.isfinite(kps).all(axis=1)
+    keep, bbox, kps = keep[valid], bbox[valid], kps[valid]
     if keep.size == 0:
         return None
 
     cols = pad_w // stride
     row, col = keep // cols, keep % cols
-    bbox = outputs[level + 6].reshape(-1, 4)[keep]
-    kps = outputs[level + 9].reshape(-1, 10)[keep]
-    width = np.exp(bbox[:, 2]) * stride
-    height = np.exp(bbox[:, 3]) * stride
+    with np.errstate(over="ignore", invalid="ignore"):
+        width = np.exp(bbox[:, 2]) * stride
+        height = np.exp(bbox[:, 3]) * stride
     boxes = np.stack([(col + bbox[:, 0]) * stride - width / 2, (row + bbox[:, 1]) * stride - height / 2,
                       width, height], axis=1).tolist()
     landmarks = (np.stack([kps[:, 0::2] + col[:, None], kps[:, 1::2] + row[:, None]], axis=2) * stride).tolist()
@@ -275,15 +327,27 @@ def _decode_stride(
     return boxes, score[keep].tolist(), landmarks
 
 
-def _format_face(box: list[float], score: float, landmarks: list, det_w: int, det_h: int) -> dict:
-    """One decoded detection as clamped fractions with landmark fractions."""
+def _format_face(box: list[float], score: float, landmarks: list, det_w: int, det_h: int) -> dict | None:
+    """Clip a detection to visible pixels; discard unusable boxes and landmarks."""
+
+    points = np.asarray(landmarks, dtype=np.float64)
+    if not np.isfinite(box).all() or not 0 <= score <= 1 or not _valid_landmarks(points):
+        return None
+
+    x1, y1 = np.clip(box[:2], [0, 0], [det_w, det_h])
+    x2, y2 = np.clip([box[0] + box[2], box[1] + box[3]], [0, 0], [det_w, det_h])
+    if min(x2 - x1, y2 - y1) < MIN_FACE_SIZE:
+        return None
+
+    x1, x2 = float(x1 / det_w), float(x2 / det_w)
+    y1, y2 = float(y1 / det_h), float(y2 / det_h)
 
     return {
-        "x": min(max(box[0] / det_w, 0.0), 1.0),
-        "y": min(max(box[1] / det_h, 0.0), 1.0),
-        "w": min(max(box[2] / det_w, 0.0), 1.0),
-        "h": min(max(box[3] / det_h, 0.0), 1.0),
-        "landmarks5": [[px / det_w, py / det_h] for px, py in landmarks],
+        "x": x1,
+        "y": y1,
+        "w": x2 - x1,
+        "h": y2 - y1,
+        "landmarks5": (points / [det_w, det_h]).tolist(),
         "det_score": score,
     }
 
@@ -299,6 +363,9 @@ def _align_crop(image: np.ndarray, face: dict, width: int, height: int) -> np.nd
 def _similarity_matrix(src: np.ndarray) -> np.ndarray:
     """Umeyama similarity src->DST_TEMPLATE; port of FaceRecognizerSF's warp fit."""
 
+    if not _valid_landmarks(src):
+        raise ValueError("Face alignment requires five finite, non-collinear landmarks")
+
     src_mean = src.mean(axis=0)
     src_demean = src - src_mean
     dst_demean = DST_TEMPLATE - DST_MEAN
@@ -307,6 +374,26 @@ def _similarity_matrix(src: np.ndarray) -> np.ndarray:
     mat_u, singular, vt = np.linalg.svd(mat)
     rotation = mat_u @ np.diag(adjust) @ vt
     scale = float((singular * adjust).sum() / ((src_demean**2).sum() / 5))
+    if not np.isfinite(scale) or scale <= 0:
+        raise ValueError("Face alignment produced an invalid scale")
+
     shift = DST_MEAN - scale * (rotation @ src_mean)
 
     return np.hstack([rotation * scale, shift[:, None]])
+
+
+def _valid_landmarks(points: np.ndarray) -> bool:
+    """Whether five landmarks can define a finite two-dimensional similarity fit."""
+
+    return (
+        points.shape == (5, 2)
+        and np.isfinite(points).all()
+        and np.linalg.matrix_rank(points - points.mean(axis=0)) == 2
+    )
+
+
+def _validate_image(image: np.ndarray) -> None:
+    """Require nonempty uint8 BGR pixels at model boundaries."""
+
+    if image.ndim != 3 or image.shape[2] != 3 or min(image.shape[:2]) == 0 or image.dtype != np.uint8:
+        raise ValueError("Face inference requires a nonempty uint8 BGR image")

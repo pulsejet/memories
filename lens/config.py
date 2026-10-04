@@ -118,7 +118,7 @@ def _face_config() -> FaceConfig:
     """Build the face section from env; raise on garbage."""
 
     det_threshold = _float("FACE_DET_THRESHOLD", 0.6)
-    if det_threshold < 0 or det_threshold > 1:
+    if not 0 <= det_threshold <= 1:
         raise RuntimeError("FACE_DET_THRESHOLD must be between 0 and 1")
 
     det_max_side = _int("FACE_DET_MAX_SIDE", 1920)
@@ -130,7 +130,7 @@ def _face_config() -> FaceConfig:
         det_sha=os.environ["FACE_DET_SHA"],
         rec_url=os.environ["FACE_REC_URL"],
         rec_sha=os.environ["FACE_REC_SHA"],
-        version=_int("FACE_VERSION", 1),
+        version=_int("FACE_VERSION", 2),
         qdrant_collection=os.environ.get("FACE_QDRANT_COLLECTION", "lens_faces"),
         det_threshold=det_threshold,
         det_max_side=det_max_side,

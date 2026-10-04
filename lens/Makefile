@@ -11,7 +11,11 @@ $(VENV):
 
 .PHONY: lint
 lint:
-	$(PY)/ruff check *.py store models nextcloud process routes index
+	$(PY)/ruff check *.py store models nextcloud process routes index tests
+
+.PHONY: test
+test:
+	$(PY)/python -m unittest discover -s tests -p 'test_*.py'
 
 .PHONY: dev
 dev:
