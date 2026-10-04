@@ -10,6 +10,7 @@ from config import config
 from process.scoring import drop_low_scores
 from store.base import (
     META_ID,
+    FileStore,
     check_meta,
     ensure_collection,
     ensure_integer_indexes,
@@ -34,6 +35,8 @@ class FacePoint:
     w: float
     h: float
     det_score: float
+    mtime: int | None
+    etag: str
     cluster_id: int | None = None
 
 
@@ -43,17 +46,18 @@ def face_point_id(fileid: int, face_idx: int) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_URL, f"lens_face:{int(fileid)}:{int(face_idx)}"))
 
 
-class FacesStore:
+class FacesStore(FileStore):
     """Faces collection handle; refuses to mix embedding spaces."""
 
     def __init__(self, client: AsyncQdrantClient, dim):
-        self.client = client
-        self.dim = dim
+        """Bind the faces collection."""
+
+        super().__init__(client, config.face.qdrant_collection, dim)
 
     async def ensure_collection(self):
         """Create the per-face collection, indexes, and sentinel; reruns are safe."""
 
-        name = config.face.qdrant_collection
+        name = self.collection
         info = await ensure_collection(self.client, name, self.dim)
         require_unnamed_vectors(info, name)
 
@@ -75,6 +79,8 @@ class FacesStore:
             payload = {
                 "fileid": int(point.fileid),
                 "parent_id": int(point.parent_id),
+                "mtime": point.mtime,
+                "etag": point.etag,
                 "face_idx": int(point.face_idx),
                 "x": point.x,
                 "y": point.y,
@@ -100,7 +106,13 @@ class FacesStore:
             )
 
         if structs:
-            await self.client.upsert(config.face.qdrant_collection, points=structs)
+            await self.client.upsert(self.collection, points=structs, wait=True)
+
+    async def replace_many(self, fileids: list[int], points: list[FacePoint]):
+        """Replace all faces for the given files, including files now without faces."""
+
+        await self.upsert_many(points)
+        await self._delete_stale(fileids, [face_point_id(p.fileid, p.face_idx) for p in points])
 
     async def search(self, vector, folders, limit):
         """Nearest face vectors scoped to folders, low scores dropped, score desc."""
@@ -112,7 +124,7 @@ class FacesStore:
         )])
 
         res = await self.client.query_points(
-            collection_name=config.face.qdrant_collection,
+            collection_name=self.collection,
             query=vector,
             query_filter=filtr,
             limit=limit,
@@ -145,7 +157,7 @@ class FacesStore:
         )])
 
         res = await self.client.query_points(
-            collection_name=config.face.qdrant_collection,
+            collection_name=self.collection,
             query=vector,
             query_filter=filtr,
             limit=limit,
@@ -167,20 +179,10 @@ class FacesStore:
         for cluster_id, point_ids in by_cluster.items():
             selector = models.PointIdsList(points=point_ids)
             await self.client.set_payload(
-                collection_name=config.face.qdrant_collection,
+                collection_name=self.collection,
                 payload={"cluster_id": cluster_id},
                 points=selector,
             )
-
-    async def delete_fileid(self, fileid: int):
-        """Remove all face embeddings for one file (all its hashed pairs)."""
-
-        selector = models.FilterSelector(filter=models.Filter(must=[models.FieldCondition(
-            key="fileid",
-            match=models.MatchValue(value=int(fileid)),
-        )]))
-
-        await self.client.delete(config.face.qdrant_collection, points_selector=selector)
 
     def _expected_meta(self):
         """Sentinel payload describing the face embedding space."""

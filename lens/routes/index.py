@@ -40,7 +40,7 @@ def index(body: IndexRequest):
 async def delete_index(fileid: int = Path(gt=0)):
     """Delete a point and drop its queued entry, if any."""
 
-    await state.store.embedding.delete(fileid)
+    await state.store.embedding.delete_fileid(fileid)
     await state.store.places.delete_fileid(fileid)
     await state.store.faces.delete_fileid(fileid)
     state.index_queue.drop(fileid)

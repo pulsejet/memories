@@ -8,14 +8,21 @@ from qdrant_client import AsyncQdrantClient, models
 
 from config import config
 from process.scoring import drop_low_scores
-from store.base import META_ID, check_meta, ensure_collection, ensure_integer_indexes, require_unnamed_vectors
+from store.base import (
+    META_ID,
+    FileStore,
+    check_meta,
+    ensure_collection,
+    ensure_integer_indexes,
+    require_unnamed_vectors,
+)
 
 log = logging.getLogger("lens.store")
 
 
 @dataclass(frozen=True)
 class FileMeta:
-    """Display metadata stored alongside each embedding."""
+    """Display metadata and source mtime stored alongside each embedding."""
 
     w: int
     h: int
@@ -23,6 +30,7 @@ class FileMeta:
     mimetype: str
     epoch: int | None
     dayid: int | None
+    mtime: int | None
 
 
 @dataclass(frozen=True)
@@ -36,17 +44,18 @@ class UpsertPoint:
     osm_ids: list[int] | None = None
 
 
-class EmbeddingStore:
+class EmbeddingStore(FileStore):
     """Image collection handle; refuses to mix embedding spaces."""
 
     def __init__(self, client: AsyncQdrantClient, dim):
-        self.client = client
-        self.dim = dim
+        """Bind the image collection."""
+
+        super().__init__(client, config.embedding.qdrant_collection, dim)
 
     async def ensure_collection(self):
         """Create collection, indexes, and sentinel step by step; reruns are safe."""
 
-        name = config.embedding.qdrant_collection
+        name = self.collection
         info = await ensure_collection(self.client, name, self.dim)
 
         # Clean break from the reset named-vectors attempt: refuse those
@@ -55,7 +64,7 @@ class EmbeddingStore:
 
         # Integer index on parent_id for folder-scoped search.
         # Integer index on osm_ids for place-filtered search.
-        await ensure_integer_indexes(self.client, name, info, ("parent_id", "osm_ids"))
+        await ensure_integer_indexes(self.client, name, info, ("parent_id", "osm_ids", "fileid"))
 
         # Sentinel guard: stamp when absent, refuse when the space differs.
         await check_meta(self.client, name, META_ID, self._expected_meta(), self.dim)
@@ -79,6 +88,7 @@ class EmbeddingStore:
                 "w": point.meta.w,
                 "h": point.meta.h,
                 "etag": point.meta.etag,
+                "mtime": point.meta.mtime,
                 "mimetype": point.meta.mimetype,
             }
 
@@ -99,7 +109,7 @@ class EmbeddingStore:
                 ),
             )
 
-        await self.client.upsert(config.embedding.qdrant_collection, points=structs)
+        await self.client.upsert(self.collection, points=structs, wait=True)
 
     async def search(self, vector, folders, limit, osm_ids=None):
         """Nearest image vectors scoped to folders, low scores dropped, score desc."""
@@ -117,7 +127,7 @@ class EmbeddingStore:
             ))
 
         res = await self.client.query_points(
-            collection_name=config.embedding.qdrant_collection,
+            collection_name=self.collection,
             query=vector,
             query_filter=models.Filter(must=must),
             limit=limit,
@@ -129,13 +139,6 @@ class EmbeddingStore:
         ]
 
         return drop_low_scores(hits, config.embedding.score_margin)
-
-    async def delete(self, fileid: int):
-        """Remove one file embedding."""
-
-        selector = models.PointIdsList(points=[int(fileid)])
-
-        await self.client.delete(config.embedding.qdrant_collection, points_selector=selector)
 
     def _expected_meta(self):
         """Sentinel payload describing the current embedding space."""

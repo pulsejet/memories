@@ -1,4 +1,4 @@
-"""Shared Qdrant collection guards: sentinel compat + index helpers."""
+"""Shared Qdrant file operations, compatibility guards, and payload indexes."""
 
 import logging
 
@@ -15,6 +15,87 @@ PAYLOAD_INDEX_TIMEOUT = 120
 
 class CompatMismatch(RuntimeError):
     """Stored embedding metadata differs from current config."""
+
+
+class FileStore:
+    """Common file-scoped operations for image, place, and face collections."""
+
+    def __init__(self, client: AsyncQdrantClient, collection: str, dim: int):
+        """Bind a collection and its vector dimension."""
+
+        self.client = client
+        self.collection = collection
+        self.dim = dim
+
+    async def scroll_range(self, start: int, end: int | None):
+        """Yield sync payloads in an inclusive fileid range; None includes the tail."""
+
+        filtr = models.Filter(must=[models.FieldCondition(
+            key="fileid",
+            range=models.Range(gte=start, lte=end),
+        )])
+        offset = None
+
+        while True:
+            points, offset = await self.client.scroll(
+                collection_name=self.collection,
+                scroll_filter=filtr,
+                offset=offset,
+                limit=1000,
+                with_payload=["fileid", "parent_id", "mtime", "etag"],
+                with_vectors=False,
+            )
+
+            for point in points:
+                yield point
+
+            if offset is None:
+                break
+
+    async def delete_fileid(self, fileid: int):
+        """Remove every embedding for one file, regardless of point ID scheme."""
+
+        await self.client.delete(
+            collection_name=self.collection,
+            points_selector=self._file_filter([fileid]),
+            wait=True,
+        )
+
+    async def update_file_metadata(self, fileid: int, parent_id: int, etag: str):
+        """Repair scope and etag without changing vectors or their indexed mtime."""
+
+        await self.client.set_payload(
+            collection_name=self.collection,
+            payload={"parent_id": parent_id, "etag": etag},
+            points=self._file_filter([fileid]),
+            wait=True,
+        )
+
+    async def _delete_stale(self, fileids: list[int], keep: list[str]):
+        """Remove superseded derived points after their replacements are written."""
+
+        if not fileids:
+            return
+
+        filtr = self._file_filter(fileids)
+
+        if keep:
+            filtr.must_not = [models.HasIdCondition(has_id=keep)]
+
+        await self.client.delete(
+            collection_name=self.collection,
+            points_selector=filtr,
+            wait=True,
+        )
+
+    @staticmethod
+    def _file_filter(fileids: list[int]) -> models.Filter:
+        """Match file payloads; the metadata sentinel has no fileid."""
+
+        return models.Filter(must=[models.FieldCondition(
+            key="fileid",
+            match=models.MatchAny(any=fileids),
+        )])
 
 
 async def ensure_collection(client: AsyncQdrantClient, name, dim):

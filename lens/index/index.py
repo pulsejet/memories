@@ -54,6 +54,7 @@ class Indexer:
                     w=image.width,
                     h=image.height,
                     etag=res.metadata.etag,
+                    mtime=res.metadata.mtime,
                     mimetype=res.metadata.mimetype,
                     epoch=res.metadata.epoch,
                     dayid=res.metadata.dayid,
@@ -78,7 +79,7 @@ class Indexer:
             self.done(fileid, ok=True)
 
     async def _ensure_places(self, good, parents):
-        """Embed every (file, place) address; re-index overwrites the same hashed pair."""
+        """Embed current addresses and remove places no longer associated with each file."""
 
         points = []
 
@@ -90,6 +91,8 @@ class Indexer:
                 points.append(PlacePoint(
                     fileid=fileid,
                     parent_id=parents[fileid],
+                    mtime=res.metadata.mtime,
+                    etag=res.metadata.etag,
                     osm_id=place.osm_id,
                     vector=[],
                     admin_level=place.admin_level,
@@ -97,15 +100,15 @@ class Indexer:
                     full_address=", ".join(names[idx:]),
                 ))
 
-        if not points:
-            return
+        if points:
+            addresses = [p.full_address for p in points]
+            vectors = await self.sentence_model.embed_passages_async(addresses)
+            points = [replace(point, vector=vector) for point, vector in zip(points, vectors)]
 
-        addresses = [p.full_address for p in points]
-        vectors = await self.sentence_model.embed_passages_async(addresses)
-
-        await self.store.places.upsert_many([
-            replace(point, vector=vector) for point, vector in zip(points, vectors)
-        ])
+        await self.store.places.replace_many(
+            fileids=[fileid for fileid, _, _ in good],
+            points=points,
+        )
 
     async def _fetch_all(self, fileids):
         """Download one batch concurrently; fetch failures count immediately."""

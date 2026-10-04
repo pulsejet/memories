@@ -33,6 +33,7 @@ class FileMetadata:
     epoch: int | None
     dayid: int | None
     places: list[Place]
+    mtime: int | None
 
 
 @dataclass(frozen=True)
@@ -103,4 +104,4 @@ def parse_metadata(value: str) -> FileMetadata:
             else:
                 return replace(meta, places=[p for p in meta.places if p.osm_id > 0 and p.name])
 
-    return FileMetadata(etag="", mimetype="", epoch=None, dayid=None, places=[])
+    return FileMetadata(etag="", mimetype="", epoch=None, dayid=None, places=[], mtime=None)

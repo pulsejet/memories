@@ -86,6 +86,7 @@ final class LensController extends ApiController
             $meta = $this->getIndexMeta($fileid);
             $metadata = [
                 'etag' => $file->getEtag(),
+                'mtime' => $file->getMtime(),
                 'mimetype' => $file->getMimeType(),
                 'epoch' => $meta['epoch'],
                 'dayid' => $meta['dayid'],
