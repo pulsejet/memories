@@ -28,8 +28,8 @@ MIN_GROUP_FILES = 5
 # PROVISIONAL cosine-distance gates: step-1 album calibration has not run yet, so
 # these favor extra groups and unassigned faces over false identity merges.
 # Do not tune them by feel; replace them with calibrated values.
-ATTACH_MAX_DISTANCE = 0.35
-MINT_MAX_DISTANCE = 0.35
+ATTACH_MAX_DISTANCE = 0.45
+MINT_MAX_DISTANCE = 0.45
 
 
 @dataclass(frozen=True)
