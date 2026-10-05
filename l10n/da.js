@@ -106,6 +106,7 @@ OC.L10N.register(
     "Remove" : "Fjern",
     "Password protected" : "Beskyttet med adgangskode",
     "Expires" : "Udløber",
+    "Editable" : "Kan redigeres",
     "Read only" : "Skrivebeskyttet",
     "Link copied to clipboard" : "Link kopieret til udklipsholder",
     "Share link" : "Del link",
