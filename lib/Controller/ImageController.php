@@ -357,7 +357,7 @@ final class ImageController extends ApiController
 
     /**
      * Get a full resolution decodable image for editing from a file.
-     * The returned image may be png / webp / jpeg / gif.
+     * The returned image may be png / webp / avif / jpeg / gif.
      * These formats are supported by all browsers.
      */
     #[NoAdminRequired]
@@ -374,19 +374,31 @@ final class ImageController extends ApiController
                 throw Exceptions::Forbidden('Not an image');
             }
 
+            // Skip conversion and streaming if the client already has this version
+            $etag = $file->getEtag();
+            if (trim(trim($this->request->getHeader('If-None-Match')), '"') === $etag) {
+                $response = new Http\Response(Http::STATUS_NOT_MODIFIED);
+                $response->setETag($etag);
+
+                return $response;
+            }
+
             // Stream directly if browser-decodable to avoid buffering into PHP
-            if (preg_match('/^image\/(png|webp|jpeg|gif)$/', $mimetype)) {
+            if (preg_match('/^image\/(png|webp|avif|jpeg|gif)$/', $mimetype)) {
                 $response = new Http\FileDisplayResponse($file, Http::STATUS_OK, ['Content-Type' => $mimetype]);
                 $response->cacheFor(3600 * 24, false, false);
 
                 return $response;
             }
 
-            // Convert image to JPEG (requires buffering for Imagick)
-            [$blob, $mimetype] = $this->getImageJPEG($file->getContent(), $mimetype);
+            // Convert image to JPEG (reads from local path to avoid buffering into PHP)
+            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+            [$blob, $mimetype] = $this->getImageJPEG($path, $mimetype);
 
             // Return the image
             $response = new Http\DataDownloadResponse($blob, $file->getName().'.jpg', $mimetype);
+            $response->setETag($etag);
+            $response->setLastModified((new \DateTime())->setTimestamp($file->getMTime()));
             $response->cacheFor(3600 * 24, false, false);
 
             return $response;
@@ -429,8 +441,9 @@ final class ImageController extends ApiController
                 throw Exceptions::ForbiddenFileUpdate($name);
             }
 
-            // Read the image
-            $image = self::getImagick($file->getContent());
+            // Read the image from the local path to avoid buffering into PHP
+            $path = $file->getStorage()->getLocalFile($file->getInternalPath());
+            $image = self::getImagick($path);
 
             // Due to a bug in filerobot, the provided width and height may be swapped
             // 1. If the user does not rotate the image, we're fine
@@ -504,21 +517,21 @@ final class ImageController extends ApiController
     }
 
     /**
-     * Given a blob of image data, return a JPEG blob.
+     * Given an image file, return a JPEG blob.
      *
-     * @param string $blob     Blob of image data in any format
+     * @param string $path     Local filesystem path of the image
      * @param string $mimetype Mimetype of image data
      *
      * @return string[] [blob, mimetype]
      *
      * @psalm-return list{string, string}
      */
-    private function getImageJPEG($blob, $mimetype): array
+    private function getImageJPEG(string $path, $mimetype): array
     {
         // TODO: Use imaginary if available (once HEIC isn't broken)
 
-        // Get an instance of Imagick
-        $image = self::getImagick($blob);
+        // Read from the local path to avoid buffering the file into PHP
+        $image = self::getImagick($path);
 
         // Convert to JPEG
         try {
@@ -583,13 +596,13 @@ final class ImageController extends ApiController
     }
 
     /**
-     * Get an instance of Imagick for the given blob.
+     * Get an instance of Imagick for the file at the given local path.
      *
-     * @param string $blob Blob of image data
+     * @param string $path Local filesystem path of the image
      *
      * @return \Imagick
      */
-    private static function getImagick(string $blob)
+    private static function getImagick(string $path)
     {
         // Check if Imagick is available
         if (!class_exists('Imagick')) {
@@ -600,13 +613,13 @@ final class ImageController extends ApiController
             $image = new \Imagick();
 
             // Check if image is safe
-            $image->pingImageBlob($blob);
+            $image->pingImage($path);
             if (!preg_match(IMAGICK_SAFE, $mime = $image->getImageMimeType())) {
                 throw Exceptions::Forbidden("Image type {$mime} not allowed");
             }
 
-            // Read the image blob
-            $image->readImageBlob($blob);
+            // Read the image file
+            $image->readImage($path);
 
             return $image;
         } catch (\ImagickException $e) {
