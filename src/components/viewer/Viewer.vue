@@ -1500,7 +1500,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .outer {
   z-index: 2020;
-  width: v-bind(outerWidth);
+  width: v-bind(outerWidth) !important;
   height: 100vh;
   position: fixed;
   top: 0;
