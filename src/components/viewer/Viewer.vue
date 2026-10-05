@@ -390,8 +390,7 @@ export default defineComponent({
         {
           id: 'view-panorama',
           name: this.t('memories', 'View panorama'),
-          icon:
-            this.currentPhoto?.pano === 2 ? markRaw(PanoramaSphereIcon) : markRaw(PanoramaHorizontalOutlineIcon),
+          icon: this.currentPhoto?.pano === 2 ? markRaw(PanoramaSphereIcon) : markRaw(PanoramaHorizontalOutlineIcon),
           callback: this.toggleSphere,
           if: this.isPanorama && !this.isVideo,
         },
