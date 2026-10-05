@@ -40,7 +40,8 @@ trait TimelineQueryFilters
 
     public function transformPanoFilter(IQueryBuilder &$query, bool $aggregate): void
     {
-        $query->andWhere($query->expr()->gt('m.pano', $query->expr()->literal(0)));
+        $query->andWhere($query->expr()->neq('m.pano', $query->expr()->literal(0)));
+        $query->andWhere($query->expr()->neq('m.isvideo', $query->expr()->literal(1)));
     }
 
     public function transformLimit(IQueryBuilder &$query, bool $aggregate, int $limit): void
