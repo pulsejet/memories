@@ -1,5 +1,7 @@
 """Face collection provisioning and file-scoped maintenance."""
 
+import logging
+import time
 import uuid
 from dataclasses import dataclass
 
@@ -15,6 +17,8 @@ from store.base import (
     ensure_keyword_indexes,
     require_unnamed_vectors,
 )
+
+log = logging.getLogger("lens.store")
 
 FACE_KIND = "face"
 
@@ -99,6 +103,7 @@ class FacesStore(FileStore):
     async def upsert_faces(self, points: list[FacePoint]):
         """Store committed detections; an empty batch writes nothing."""
 
+        started = time.monotonic()
         if not points:
             return
 
@@ -133,6 +138,7 @@ class FacesStore(FileStore):
             )
 
         await self.client.upsert(self.collection, points=structs, wait=True)
+        log.info("insert faces n=%d elapsed=%.2fs", len(structs), time.monotonic() - started)
 
     async def delete_points(self, point_ids: list[str]):
         """Remove obsolete points by ID; an empty batch writes nothing."""

@@ -1,6 +1,7 @@
 """Places collection: one sentence vector per (file, place) pair."""
 
 import logging
+import time
 import uuid
 from dataclasses import dataclass
 
@@ -64,6 +65,7 @@ class PlacesStore(FileStore):
     async def upsert_many(self, points: list[PlacePoint]):
         """Store per-(file, place) address embeddings; re-index overwrites the same pair."""
 
+        started = time.monotonic()
         structs = [
             models.PointStruct(
                 id=place_point_id(point.fileid, point.osm_id),
@@ -84,12 +86,20 @@ class PlacesStore(FileStore):
 
         if structs:
             await self.client.upsert(self.collection, points=structs, wait=True)
+        log.info("insert places n=%d elapsed=%.2fs", len(structs), time.monotonic() - started)
 
     async def replace_many(self, fileids: list[int], points: list[PlacePoint]):
         """Replace all places for the given files, including files now without places."""
 
+        started = time.monotonic()
         await self.upsert_many(points)
         await self._delete_stale(fileids, [place_point_id(p.fileid, p.osm_id) for p in points])
+        log.info(
+            "insert places replace files=%d n=%d elapsed=%.2fs",
+            len(fileids),
+            len(points),
+            time.monotonic() - started,
+        )
 
     async def search(self, vector, folders, limit):
         """Nearest per-(file, place) address embeddings in folders, one hit per osm_id."""

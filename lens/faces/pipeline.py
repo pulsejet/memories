@@ -10,6 +10,7 @@ never a face-only run.
 import asyncio
 import logging
 import secrets
+import time
 
 from config import config
 from nextcloud import FetchResult, NotFoundError, fetch_file, post_faces
@@ -118,19 +119,28 @@ class FaceIndexer:
         if not owner:
             raise FaceError(f"missing storage scope for {fileid}")
 
+        t0 = time.monotonic()
         image = await asyncio.to_thread(self.face_model.decode_image, res.data)
+        dt_decode = time.monotonic() - t0
+        t0 = time.monotonic()
         detections = await self.face_model.detect_async(image)
+        dt_detect = time.monotonic() - t0
+        t0 = time.monotonic()
         vectors = await self.face_model.embed_async(image, detections)
+        dt_embed = time.monotonic() - t0
         matched = match_faces(detections, res.metadata.faces, config.face.version, owner)
         known = {face.id for face in res.metadata.faces if face.embed_version == config.face.version}
         reused = sum(1 for face in matched if face["id"] in known)
         log.info("faces matched for %d: %d reused, %d new", fileid, reused, len(matched) - reused)
 
+        t0 = time.monotonic()
         try:
             committed = await asyncio.to_thread(self.post_fn, fileid, owner, matched)
         except Exception as exc:
             raise FaceError(f"face writeback failed for {fileid}: {exc}") from exc
+        dt_sql = time.monotonic() - t0
 
+        t0 = time.monotonic()
         by_id = {face["id"]: (face, vector) for face, vector in zip(matched, vectors)}
         committed_ids = []
 
@@ -167,13 +177,26 @@ class FaceIndexer:
         await self.faces.delete_points([
             face_point_id(face_id) for face_id in existing if face_id not in committed_ids
         ])
+        dt_qdrant = time.monotonic() - t0
 
+        t0 = time.monotonic()
         if await self._source_moved(fileid, res):
             log.info("faces deferred for %d: source changed mid-flight", fileid)
 
             return "stale", 0
+        dt_fresh = time.monotonic() - t0
 
-        log.info("faces indexed for %d (%d faces)", fileid, len(committed_ids))
+        log.info(
+            "faces indexed for %d (%d faces) decode=%.2fs detect=%.2fs embed=%.2fs sql=%.2fs qdrant=%.2fs fresh=%.2fs",
+            fileid,
+            len(committed_ids),
+            dt_decode,
+            dt_detect,
+            dt_embed,
+            dt_sql,
+            dt_qdrant,
+            dt_fresh,
+        )
 
         return "complete", len(committed_ids)
 

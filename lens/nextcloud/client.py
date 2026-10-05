@@ -2,6 +2,7 @@
 
 import base64
 import logging
+import time
 from dataclasses import dataclass, field, replace
 from http.cookiejar import CookieJar
 
@@ -81,6 +82,7 @@ def fetch_file(fileid: int, *, metadata_only: bool = False) -> FetchResult:
 
     url = f"{config.nextcloud_url}/index.php/apps/memories/api/lens/file/{fileid}"
     method = "HEAD" if metadata_only else "GET"
+    started = time.monotonic()
 
     with httpx.Client(
         timeout=TIMEOUT,
@@ -105,6 +107,8 @@ def fetch_file(fileid: int, *, metadata_only: bool = False) -> FetchResult:
                 if metadata.mtime is None or metadata.parent_id is None:
                     raise FetchError(f"HEAD {url} -> missing file metadata")
 
+                log.info("fetch HEAD %d elapsed=%.2fs", fileid, time.monotonic() - started)
+
                 return FetchResult(data=b"", metadata=metadata)
 
             chunks = []
@@ -112,8 +116,11 @@ def fetch_file(fileid: int, *, metadata_only: bool = False) -> FetchResult:
             for chunk in res.iter_bytes():
                 chunks.append(chunk)
 
+    data = b"".join(chunks)
+    log.info("fetch GET %d bytes=%d elapsed=%.2fs", fileid, len(data), time.monotonic() - started)
+
     return FetchResult(
-        data=b"".join(chunks),
+        data=data,
         metadata=metadata,
     )
 

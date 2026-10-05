@@ -89,6 +89,7 @@ class EmbeddingStore(FileStore):
     async def upsert_many(self, points: list[UpsertPoint]):
         """Store a batch of file embeddings in one request."""
 
+        started = time.monotonic()
         structs = []
         now = datetime.now(timezone.utc).isoformat()
 
@@ -122,16 +123,19 @@ class EmbeddingStore(FileStore):
             )
 
         await self.client.upsert(self.collection, points=structs, wait=True)
+        log.info("insert embeddings n=%d elapsed=%.2fs", len(structs), time.monotonic() - started)
 
     async def set_face_state(self, fileid: int, owner: str, version: int, count: int):
         """Stamp face completion on the image point; the next image upsert clears it."""
 
+        started = time.monotonic()
         await self.client.set_payload(
             collection_name=self.collection,
             payload={"face_count": count, "face_version": version, "face_owner": owner},
             points=[int(fileid)],
             wait=True,
         )
+        log.info("insert face-state %d elapsed=%.2fs", fileid, time.monotonic() - started)
 
     async def search(self, vector, folders, limit, osm_ids=None):
         """Nearest image vectors scoped to folders, low scores dropped, score desc."""

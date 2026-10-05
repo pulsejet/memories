@@ -175,9 +175,12 @@ class EmbeddingModel:
     def embed_pil_images(self, images: list[Image.Image]) -> list[list[float]]:
         """Encode decoded RGB images in one forward pass; order preserved."""
 
+        started = time.monotonic()
         inputs = self._processor(images=images, return_tensors="pt")
+        vectors = self._encode_batch(self._model.get_image_features, inputs)
+        log.info("infer images n=%d elapsed=%.2fs", len(images), time.monotonic() - started)
 
-        return self._encode_batch(self._model.get_image_features, inputs)
+        return vectors
 
     def embed_image(self, data: bytes) -> list[float]:
         """Decode image bytes (any PIL format incl. HEIC) to an L2-normed vector."""

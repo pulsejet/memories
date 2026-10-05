@@ -181,10 +181,12 @@ class FaceModel:
     def detect_image(self, image: np.ndarray) -> list[dict]:
         """Detect faces in BGR pixels; boxes/landmarks as fractions, sorted by (x, y)."""
 
+        started = time.monotonic()
         blob, det_w, det_h, pad_w = self._preprocess(image)
         outputs = self._det.run(None, {self._det_input: blob})
         faces = self._decode(outputs, pad_w, det_w, det_h)
         faces.sort(key=lambda face: (face["x"], face["y"]))
+        log.info("infer faces detect n=%d elapsed=%.2fs", len(faces), time.monotonic() - started)
 
         return faces
 
@@ -250,6 +252,7 @@ class FaceModel:
     def embed_crops(self, crops: list[np.ndarray]) -> list[list[float]]:
         """Recognize crops at the pinned model's batch size of one; return unit vectors."""
 
+        started = time.monotonic()
         vectors = []
         for crop in crops:
             _validate_image(crop)
@@ -266,6 +269,8 @@ class FaceModel:
                 raise ValueError("SFace returned an invalid embedding norm")
 
             vectors.append((vector[0] / norm).tolist())
+
+        log.info("infer faces embed n=%d elapsed=%.2fs", len(crops), time.monotonic() - started)
 
         return vectors
 

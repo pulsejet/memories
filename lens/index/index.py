@@ -26,6 +26,8 @@ class Indexer:
     async def handle_batch(self, batch):
         """Check current metadata first, then download and embed only files needing work."""
 
+        batch_start = time.monotonic()
+        t0 = time.monotonic()
         try:
             failures = await self.store.embedding.get_failures([fileid for fileid, _ in batch])
         except Exception:
@@ -33,6 +35,7 @@ class Indexer:
             for fileid, _ in batch:
                 self.done(fileid, ok=None)
             return
+        dt_failures = time.monotonic() - t0
 
         parents = dict(batch)
         now = int(time.time())
@@ -42,13 +45,17 @@ class Indexer:
                 del parents[fileid]
                 self.done(fileid, ok=None)
 
+        t0 = time.monotonic()
         heads = await self._fetch_all(list(parents), metadata_only=True)
+        dt_head = time.monotonic() - t0
+        t0 = time.monotonic()
         try:
             reindex, places_only = await self._refresh_metadata(heads, failures)
         except Exception as exc:  # noqa: BLE001
             for fileid, _ in heads:
                 await self._fail(fileid, exc)
             return
+        dt_refresh = time.monotonic() - t0
 
         for fileid, res in heads:
             parents[fileid] = res.metadata.parent_id
@@ -61,26 +68,46 @@ class Indexer:
                 )
                 self.done(fileid, ok=True)
 
+        t0 = time.monotonic()
         await self._finish_places(
             files=[(fileid, res) for fileid, res in heads if fileid in places_only and fileid not in reindex],
             parents=parents,
             failures=failures,
         )
+        dt_places_only = time.monotonic() - t0
 
+        t0 = time.monotonic()
         download_ids = [fileid for fileid, _ in heads if fileid in reindex]
         pending = await self._fetch_all(download_ids)
+        dt_fetch = time.monotonic() - t0
         for fileid, res in pending:
             if res.metadata.parent_id is not None:
                 parents[fileid] = res.metadata.parent_id
 
+        t0 = time.monotonic()
         good = await self._decode_all(pending)
+        dt_decode = time.monotonic() - t0
 
         if not good:
+            log.info(
+                "index batch perf n=%d failures=%.2fs head=%.2fs refresh=%.2fs "
+                "places_only=%.2fs fetch=%.2fs decode=%.2fs total=%.2fs (nothing to embed)",
+                len(batch),
+                dt_failures,
+                dt_head,
+                dt_refresh,
+                dt_places_only,
+                dt_fetch,
+                dt_decode,
+                time.monotonic() - batch_start,
+            )
             return
 
         try:
             images = [image for _, _, image in good]
+            t0 = time.monotonic()
             vectors = await self.embedding_model.embed_pil_images_async(images)
+            dt_infer = time.monotonic() - t0
         except Exception as exc:  # noqa: BLE001
             for fileid, _, _ in good:
                 await self._fail(fileid, exc)
@@ -106,7 +133,9 @@ class Indexer:
             ))
 
         try:
+            t0 = time.monotonic()
             await self.store.embedding.upsert_many(points)
+            dt_upsert = time.monotonic() - t0
         except Exception as exc:  # noqa: BLE001
             for fileid, _, _ in good:
                 await self._fail(fileid, exc)
@@ -124,15 +153,38 @@ class Indexer:
                 len(res.metadata.places),
             )
 
+        t0 = time.monotonic()
         faced = await self._finish_faces(
             files=[(fileid, res) for fileid, res, _ in good],
             parents=parents,
         )
+        dt_faces = time.monotonic() - t0
 
+        t0 = time.monotonic()
         await self._finish_places(
             files=faced,
             parents=parents,
             failures=failures,
+        )
+        dt_places = time.monotonic() - t0
+
+        log.info(
+            "index batch perf n=%d images=%d failures=%.2fs head=%.2fs refresh=%.2fs "
+            "places_only=%.2fs fetch=%.2fs decode=%.2fs infer=%.2fs upsert=%.2fs "
+            "faces=%.2fs places=%.2fs total=%.2fs",
+            len(batch),
+            len(good),
+            dt_failures,
+            dt_head,
+            dt_refresh,
+            dt_places_only,
+            dt_fetch,
+            dt_decode,
+            dt_infer,
+            dt_upsert,
+            dt_faces,
+            dt_places,
+            time.monotonic() - batch_start,
         )
 
     async def _refresh_metadata(self, heads, failures):
@@ -211,6 +263,7 @@ class Indexer:
     async def _finish_faces(self, files, parents):
         """Run the detection phase after the image commit; failures keep old face state."""
 
+        started = time.monotonic()
         complete = []
 
         for fileid, res in files:
@@ -236,6 +289,8 @@ class Indexer:
                 continue
 
             complete.append((fileid, res))
+
+        log.info("faces batch n=%d elapsed=%.2fs", len(files), time.monotonic() - started)
 
         return complete
 
@@ -268,6 +323,7 @@ class Indexer:
                 self.done(fileid, ok=None)
                 continue
 
+            started = time.monotonic()
             try:
                 await self._ensure_places(fileid, res.metadata, parents[fileid])
                 if failure:
@@ -276,7 +332,12 @@ class Indexer:
                 await self._fail(fileid, exc, stage="places")
                 continue
 
-            log.info("indexed places for %d (%d places)", fileid, len(res.metadata.places))
+            log.info(
+                "indexed places for %d (%d places) elapsed=%.2fs",
+                fileid,
+                len(res.metadata.places),
+                time.monotonic() - started,
+            )
             self.done(fileid, ok=True)
 
     async def _ensure_places(self, fileid, metadata, parent_id):
@@ -329,6 +390,7 @@ class Indexer:
     async def _fetch_all(self, fileids, *, metadata_only=False):
         """Fetch one batch concurrently; metadata checks use HEAD instead of downloading."""
 
+        started = time.monotonic()
         fetches = [
             asyncio.to_thread(fetch_file, fileid, metadata_only=metadata_only)
             for fileid in fileids
@@ -344,11 +406,21 @@ class Indexer:
             else:
                 pending.append((fileid, res))
 
+        log.info(
+            "fetch batch n=%d ok=%d metadata_only=%s bytes=%d elapsed=%.2fs",
+            len(fileids),
+            len(pending),
+            metadata_only,
+            sum(len(res.data) for _, res in pending),
+            time.monotonic() - started,
+        )
+
         return pending
 
     async def _decode_all(self, pending):
         """Decode each fetch once, off the event loop; decode failures count immediately."""
 
+        started = time.monotonic()
         images = await asyncio.gather(
             *(asyncio.to_thread(self.embedding_model.decode_image, res.data) for _, res in pending),
             return_exceptions=True,
@@ -360,5 +432,7 @@ class Indexer:
                 await self._fail(fileid, image)
             else:
                 good.append((fileid, res, image))
+
+        log.info("decode batch n=%d good=%d elapsed=%.2fs", len(pending), len(good), time.monotonic() - started)
 
         return good

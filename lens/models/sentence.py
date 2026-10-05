@@ -121,6 +121,7 @@ class SentenceModel:
     def embed_passages(self, texts: list[str]) -> list[list[float]]:
         """Encode passage texts with passage prefix to L2-normed vectors."""
 
+        started = time.monotonic()
         prefixed = [f"passage: {t}" for t in texts]
 
         with torch.inference_mode():
@@ -129,6 +130,8 @@ class SentenceModel:
                 normalize_embeddings=True,
                 show_progress_bar=False,
             )
+
+        log.info("infer places n=%d elapsed=%.2fs", len(texts), time.monotonic() - started)
 
         return arr.tolist()
 
