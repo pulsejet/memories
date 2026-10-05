@@ -346,6 +346,10 @@ final class ImageController extends ApiController
     {
         return $this->util->guardEx(function () use ($id) {
             $file = $this->fs->getUserFile($id);
+            if (!$file->isUpdateable()) {
+                throw Exceptions::ForbiddenFileUpdate($file->getName());
+            }
+
             $this->index->indexFile($file, failSkip: true, force: true);
 
             return new JSONResponse(
