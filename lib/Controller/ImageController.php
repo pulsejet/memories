@@ -374,20 +374,19 @@ final class ImageController extends ApiController
                 throw Exceptions::Forbidden('Not an image');
             }
 
-            /** @var string Blob of image */
-            $blob = $file->getContent();
+            // Stream directly if browser-decodable to avoid buffering into PHP
+            if (preg_match('/^image\/(png|webp|jpeg|gif)$/', $mimetype)) {
+                $response = new Http\FileDisplayResponse($file, Http::STATUS_OK, ['Content-Type' => $mimetype]);
+                $response->cacheFor(3600 * 24, false, false);
 
-            /** @var string Name of file */
-            $name = $file->getName();
-
-            // Convert image to JPEG if required
-            if (!preg_match('/^image\/(png|webp|jpeg|gif)$/', $mimetype)) {
-                [$blob, $mimetype] = $this->getImageJPEG($blob, $mimetype);
-                $name .= '.jpg';
+                return $response;
             }
 
+            // Convert image to JPEG (requires buffering for Imagick)
+            [$blob, $mimetype] = $this->getImageJPEG($file->getContent(), $mimetype);
+
             // Return the image
-            $response = new Http\DataDownloadResponse($blob, $name, $mimetype);
+            $response = new Http\DataDownloadResponse($blob, $file->getName().'.jpg', $mimetype);
             $response->cacheFor(3600 * 24, false, false);
 
             return $response;
