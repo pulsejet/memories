@@ -137,6 +137,11 @@ export async function generateDataset(dataset: IDatasetMap, baseAssetsDir: strin
       meta.GPSLongitudeRef = lon >= 0 ? 'E' : 'W';
     }
 
+    // Group-qualified tags (e.g. XMP-GPano:ProjectionType) are written as given
+    for (const [key, value] of Object.entries(entry.exif)) {
+      if (key.includes(':')) meta[key] = value;
+    }
+
     metadataList.push(meta);
   }
 

@@ -65,7 +65,10 @@ export default class PhotoSphereContentSetup {
     if (!holder || !photo) return;
 
     try {
-      const { Viewer } = await import('@photo-sphere-viewer/core');
+      const [{ Viewer }, { VisibleRangePlugin }] = await Promise.all([
+        import('@photo-sphere-viewer/core'),
+        import('@photo-sphere-viewer/visible-range-plugin'),
+      ]);
 
       if (this.viewer) return;
       if (this.dismissed.has(photo.fileid)) return;
@@ -91,6 +94,9 @@ export default class PhotoSphereContentSetup {
         panorama: API.IMAGE_DECODABLE(photo.fileid, photo.etag),
         loadingTxt: t('memories', 'Loading …'),
         navbar: false,
+        // A partial panorama covers only part of the sphere, and the default
+        // view may be outside it; keep the view on the image.
+        plugins: [[VisibleRangePlugin, { usePanoData: true }]],
       });
       this.container = container;
       this.content = content;
