@@ -47,7 +47,7 @@ export default class PhotoSphereContentSetup {
     if (this.content && this.content !== content) this.close();
     if (content.data?.type === 'video') return;
     const photo = content.data?.photo;
-    if (!photo || (photo.pano ?? 0) < 2) return;
+    if (!photo || photo.pano !== 2) return;
     if (this.dismissed.has(photo.fileid)) return;
 
     void this.show(content);

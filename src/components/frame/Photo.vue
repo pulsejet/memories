@@ -27,12 +27,16 @@
         </div>
         <div
           class="livephoto"
-          v-if="data.liveid"
+          v-else-if="data.liveid"
           @mouseenter.passive="playVideo"
           @mouseleave.passive="stopVideo"
           @touchstart.passive="touchVideo"
         >
           <LivePhotoIcon size="22px" :spin="liveState.waiting" :playing="liveState.playing" />
+        </div>
+        <div class="pano" v-else-if="(data.pano ?? 0) > 0">
+          <PanoramaSphereIcon v-if="data.pano === 2" :size="22" />
+          <PanoramaHorizontalOutlineIcon v-else :size="22" />
         </div>
       </div>
 
@@ -91,6 +95,8 @@ import LivePhotoIcon from '@components/icons/LivePhoto.vue';
 import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import VideoIcon from 'vue-material-design-icons/PlayCircleOutline.vue';
+import PanoramaSphereIcon from 'vue-material-design-icons/PanoramaSphereOutline.vue';
+import PanoramaHorizontalOutlineIcon from 'vue-material-design-icons/PanoramaHorizontalOutline.vue';
 import LocalIcon from 'vue-material-design-icons/CloudOff.vue';
 import RawIcon from 'vue-material-design-icons/Raw.vue';
 
@@ -105,6 +111,8 @@ export default defineComponent({
     LivePhotoIcon,
     CheckCircleIcon,
     VideoIcon,
+    PanoramaSphereIcon,
+    PanoramaHorizontalOutlineIcon,
     StarIcon,
     LocalIcon,
     RawIcon,
