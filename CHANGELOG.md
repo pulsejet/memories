@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Support multiple external transcoders with automatic load distribution.
 - **Feature**: File downloads are now resumable.
 - **Feature**: Allow admin and user to disable video autoplay ([#1230](https://github.com/pulsejet/memories/issues/1230))
+- **Feature**: Refresh metadata for selected photos ([#1095](https://github.com/pulsejet/memories/issues/1095))
 - **Fix**: Improved efficiency for indexing jobs ([#1315](https://github.com/pulsejet/memories/issues/1315))
 
 ## [v9.0.1] - 2026-09-15

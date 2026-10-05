@@ -30,6 +30,7 @@ use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
 use OCA\Memories\Service;
+use OCA\Memories\Service\Index;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\ApiController;
@@ -60,6 +61,7 @@ final class ImageController extends ApiController
         protected Exif $exif,
         protected SystemConfig $systemConfig,
         protected Util $util,
+        protected Index $index,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -333,6 +335,23 @@ final class ImageController extends ApiController
             }
 
             return $this->info($id, true);
+        });
+    }
+
+    /**
+     * Force reindex a single file (supports logged-in users only).
+     */
+    #[NoAdminRequired]
+    public function reindex(int $id): Http\Response
+    {
+        return $this->util->guardEx(function () use ($id) {
+            $file = $this->fs->getUserFile($id);
+            $this->index->indexFile($file, failSkip: true, force: true);
+
+            return new JSONResponse(
+                ['indexed' => true],
+                Http::STATUS_OK,
+            );
         });
     }
 

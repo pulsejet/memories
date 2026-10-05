@@ -673,3 +673,37 @@ export async function fillImageInfo(photos: IPhoto[], query?: { tags?: number },
     // nothing to do
   }
 }
+
+/**
+ * Force reindex the given photos, one file per request.
+ *
+ * @param photos list of photos to reindex
+ * @param progress callback to report number of files done
+ * @returns number of files successfully reindexed
+ */
+export async function reindexPhotos(photos: IPhoto[], progress?: (done: number) => void) {
+  const remote = photos.filter((p) => !utils.isLocalPhoto(p));
+
+  let done = photos.length - remote.length;
+  if (done > 0) progress?.(done);
+  let success = 0;
+
+  const calls = remote.map((p) => async () => {
+    try {
+      await axios.post(API.IMAGE_REINDEX(p.fileid));
+      success++;
+    } catch (error) {
+      console.error('Failed to reindex', p.fileid, error);
+      showError(t('memories', 'Failed to refresh metadata for {name}.', { name: p.basename ?? p.fileid }));
+    } finally {
+      done++;
+      progress?.(done);
+    }
+  });
+
+  for await (const _ of runInParallel(calls, 4)) {
+    // nothing to do
+  }
+
+  return success;
+}

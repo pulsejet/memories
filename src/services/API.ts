@@ -141,6 +141,10 @@ export class API {
     return tok(gen(`${BASE}/image/set-exif/{id}`, { id }));
   }
 
+  static IMAGE_REINDEX(id: number) {
+    return gen(`${BASE}/image/reindex/{id}`, { id });
+  }
+
   static IMAGE_DECODABLE(id: number, etag?: string) {
     return tok(API.Q(gen(`${BASE}/image/decodable/{id}`, { id }), { etag }));
   }

@@ -177,7 +177,7 @@ final class Index
     /**
      * Index a single file.
      */
-    public function indexFile(File $file, bool $failSkip = false): void
+    public function indexFile(File $file, bool $failSkip = false, bool $force = false): void
     {
         $path = $file->getPath();
 
@@ -200,8 +200,9 @@ final class Index
             $this->log("Indexing file {$path}", true);
             $this->tw->processFile(
                 file: $file,
-                validate: function () use ($file): bool {
-                    return !$this->indexQuery->isIndexed($file->getId(), $file->getMtime());
+                force: $force,
+                validate: function () use ($file, $force): bool {
+                    return $force || !$this->indexQuery->isIndexed($file->getId(), $file->getMtime());
                 },
             );
 

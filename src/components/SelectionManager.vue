@@ -62,6 +62,7 @@ import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import FolderMoveIcon from 'vue-material-design-icons/FolderMove.vue';
 import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
 import ImageCheckIcon from 'vue-material-design-icons/ImageCheck.vue';
+import RefreshIcon from 'vue-material-design-icons/Refresh.vue';
 
 import type { IDay, IHeadRow, IPhoto, IRow, IUploadNativeX } from '@typings';
 import type ScrollerManager from './ScrollerManager.vue';
@@ -255,6 +256,12 @@ export default defineComponent({
         name: t('memories', 'Rotate / Flip'),
         icon: markRaw(RotateLeftIcon),
         callback: () => this.editMetadataSelection(this.selection, [5]),
+      },
+      {
+        name: t('memories', 'Refresh metadata'),
+        icon: markRaw(RefreshIcon),
+        callback: this.reindexSelection.bind(this),
+        if: () => Array.from(this.selection.values()).some((p) => !utils.isLocalPhoto(p)),
       },
       {
         name: t('memories', 'View in folder'),
@@ -907,6 +914,13 @@ export default defineComponent({
      */
     async editMetadataSelection(selection: Selection, sections?: number[]) {
       _m.modals.editMetadata(selection.photosNoDupFileId(), sections);
+    },
+
+    /**
+     * Force reindex the currently selected photos
+     */
+    async reindexSelection(selection: Selection) {
+      _m.modals.reindex(selection.photosNoDupFileId());
     },
 
     /**
