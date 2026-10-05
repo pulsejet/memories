@@ -76,9 +76,13 @@ trait TimelineQuerySingleItem
             'dayid' => (int) $row['dayid'],
             'w' => (int) $row['w'],
             'h' => (int) $row['h'],
-            'pano' => (int) $row['pano'],
             'datetaken' => Util::sqlUtcToTimestamp($row['datetaken']),
         ];
+
+        // Only include pano for panoramas
+        if ($row['pano']) {
+            $info['pano'] = (int) $row['pano'];
+        }
 
         // Return if only basic info is needed
         if ($basic) {
