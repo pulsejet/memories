@@ -46,6 +46,10 @@ e2e_generate_datasets() {
         # Standalone video for video filter tests.
         mkdir -p "$E2E_DATASET_CACHE/primary/for-vid"
         cp "$MEMORIES_DIR/tests/assets/unknown_01.mp4" "$E2E_DATASET_CACHE/primary/for-vid/clip.mp4"
+
+        # Equirectangular panorama for sphere viewer tests (copied, not generated).
+        mkdir -p "$E2E_DATASET_CACHE/primary/for-sphere"
+        cp "$MEMORIES_DIR/tests/assets/unknown_pano_01.jpg" "$E2E_DATASET_CACHE/primary/for-sphere/"
     fi
 }
 
