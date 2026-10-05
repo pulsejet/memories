@@ -635,6 +635,11 @@ export default defineComponent({
         set(DaysFilterType.VIDEOS);
       }
 
+      // Panoramas
+      if (this.routeIsPanoramas) {
+        set(DaysFilterType.PANO);
+      }
+
       // Folder
       if (this.routeIsFolders || this.routeIsFolderShare) {
         const path = utils.getFolderRoutePath(this.config.folders_path);

@@ -55,6 +55,7 @@ import NcButton from '@nextcloud/vue/components/NcButton';
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import VideoIcon from 'vue-material-design-icons/PlayCircle.vue';
+import PanoramaIcon from 'vue-material-design-icons/PanoramaVariant.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import MapIcon from 'vue-material-design-icons/Map.vue';
@@ -110,6 +111,11 @@ export default defineComponent({
         name: t('memories', 'Videos'),
         icon: markRaw(VideoIcon),
         link: '/videos',
+      },
+      {
+        name: t('memories', 'Panoramas'),
+        icon: markRaw(PanoramaIcon),
+        link: '/panoramas',
       },
       {
         name: t('memories', 'Archive'),

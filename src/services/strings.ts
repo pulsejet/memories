@@ -17,6 +17,8 @@ export function emptyDescription(routeName: string): string {
         : t('memories', 'Face Recognition is disabled. Enable in settings to find your friends');
     case _m.routes.Videos.name:
       return t('memories', 'Your videos will appear here');
+    case _m.routes.Panoramas.name:
+      return t('memories', 'Your panoramas will appear here');
     case _m.routes.Albums.name:
       return _m.route.params.name?.toString()
         ? t('memories', 'Add photos to albums by selecting them on your timeline.')
@@ -41,6 +43,8 @@ export function viewName(routeName: string): string {
       return t('memories', 'People');
     case _m.routes.Videos.name:
       return t('memories', 'Videos');
+    case _m.routes.Panoramas.name:
+      return t('memories', 'Panoramas');
     case _m.routes.Albums.name:
       return t('memories', 'Albums');
     case _m.routes.Archive.name:

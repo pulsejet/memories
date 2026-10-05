@@ -18,6 +18,7 @@ export type RouteId =
   | 'Folders'
   | 'Favorites'
   | 'Videos'
+  | 'Panoramas'
   | 'Albums'
   | 'Archive'
   | 'ThisDay'
@@ -59,6 +60,13 @@ export const routes: { [key in RouteId]: RouteRecordRaw } = {
     component: Timeline,
     name: 'videos',
     props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Videos') }),
+  },
+
+  Panoramas: {
+    path: '/panoramas',
+    component: Timeline,
+    name: 'panoramas',
+    props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Panoramas') }),
   },
 
   Albums: {
