@@ -149,10 +149,9 @@ export async function recognizeCreateFace(user: string, name: string) {
  * Ids are uint63 strings end to end; JS floats cannot hold them.
  */
 export async function lensCreatePerson(name: string): Promise<{ id: string; name: string }> {
-  const res = await axios.post<{ id: string; name: string }>(
-    generateUrl('/apps/memories/api/lens/people/create'),
-    { name },
-  );
+  const res = await axios.post<{ id: string; name: string }>(generateUrl('/apps/memories/api/lens/people/create'), {
+    name,
+  });
   return res.data;
 }
 

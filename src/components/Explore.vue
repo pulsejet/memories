@@ -7,12 +7,7 @@
 
       <Searchbar v-if="isNative" class="searchbar" />
 
-      <ClusterHList
-        v-if="lens.length"
-        :title="t('memories', 'People')"
-        link="/lens"
-        :clusters="lens"
-      />
+      <ClusterHList v-if="lens.length" :title="t('memories', 'People')" link="/lens" :clusters="lens" />
       <ClusterHList
         v-if="recognize.length"
         :title="t('memories', 'Recognize')"
