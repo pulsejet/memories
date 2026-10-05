@@ -18,6 +18,10 @@ final class Exif
     public const EXIF_KEY_ROTATION = 'Rotation';
     public const EXIF_KEY_ORIENTATION = 'Orientation';
 
+    public const PANO_NONE = 0; // no
+    public const PANO_WIDE = 1; // maybe
+    public const PANO_SPHERE = 2; // confirmed
+
     private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'image/x-dcraw', 'video/MP2T']; // also update const.ts
     private const EXIFTOOL_TIMEOUT = 30000;
     private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-api', 'LargeFileSupport=1', '-n', '-json'];
@@ -305,6 +309,25 @@ final class Exif
         }
 
         return [$width, $height];
+    }
+
+    /**
+     * Classify a photo as panorama from EXIF and dimensions.
+     *
+     * @param array<string, mixed> $exif
+     */
+    public function getPanoType(array $exif, int $w, int $h): int
+    {
+        $projection = strtolower(trim((string) ($exif['ProjectionType'] ?? '')));
+        if (\in_array($projection, ['equirectangular', 'cylindrical'], true) || !empty($exif['UsePanoramaViewer'])) {
+            return self::PANO_SPHERE;
+        }
+
+        if ($h > 0 && $w >= 2 * $h) {
+            return self::PANO_WIDE;
+        }
+
+        return self::PANO_NONE;
     }
 
     /**

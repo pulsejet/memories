@@ -133,6 +133,7 @@ import 'photoswipe/style.css';
 import PsImage from './PsImage';
 import PsVideo from './PsVideo';
 import PsLivePhoto from './PsLivePhoto';
+import PsPhotoSphere from './PsPhotoSphere';
 
 import type { IImageInfo, IPhoto, TimelineState } from '@typings';
 import type { PsContent } from './types';
@@ -140,6 +141,8 @@ import type { MediaPlayerElement } from 'vidstack/elements';
 
 import LivePhotoIcon from '@components/icons/LivePhoto.vue';
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
+import PanoramaSphereIcon from 'vue-material-design-icons/PanoramaSphereOutline.vue';
+import PanoramaHorizontalOutlineIcon from 'vue-material-design-icons/PanoramaHorizontalOutline.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
@@ -214,6 +217,7 @@ export default defineComponent({
     psVideo: null as PsVideo | null,
     psImage: null as PsImage | null,
     psLivePhoto: null as PsLivePhoto | null,
+    psPhotoSphere: null as PsPhotoSphere | null,
 
     /** Live photo state */
     liveState: {
@@ -384,6 +388,14 @@ export default defineComponent({
           if: this.isLivePhoto,
         },
         {
+          id: 'view-panorama',
+          name: this.t('memories', 'View panorama'),
+          icon:
+            (this.currentPhoto?.pano ?? 0) >= 2 ? markRaw(PanoramaSphereIcon) : markRaw(PanoramaHorizontalOutlineIcon),
+          callback: this.toggleSphere,
+          if: this.isPanorama && !this.isVideo,
+        },
+        {
           id: 'info',
           name: this.t('memories', 'Info'),
           icon: markRaw(InfoIcon),
@@ -476,6 +488,11 @@ export default defineComponent({
     /** Is the current slide a live photo */
     isLivePhoto(): boolean {
       return Boolean(this.currentPhoto?.liveid);
+    },
+
+    /** Is the current slide a panorama */
+    isPanorama(): boolean {
+      return (this.currentPhoto?.pano ?? 0) > 0;
     },
 
     /** Is the current slide a local photo */
@@ -791,6 +808,9 @@ export default defineComponent({
 
       // Live Photo support
       this.psLivePhoto = markRaw(new PsLivePhoto(<any>this.photoswipe, <any>this.psImage, this.liveState));
+
+      // Panorama sphere support
+      this.psPhotoSphere = markRaw(new PsPhotoSphere(<any>this.photoswipe));
 
       // Patch the close button to stop the slideshow
       const _close = this.photoswipe.close.bind(this.photoswipe);
@@ -1251,6 +1271,11 @@ export default defineComponent({
       this.psLivePhoto?.play(this.photoswipe!.currSlide!.content as PsContent);
     },
 
+    /** Toggle the panorama sphere viewer */
+    toggleSphere() {
+      void this.psPhotoSphere?.toggle();
+    },
+
     /** Favorite the current photo */
     async favoriteCurrent() {
       const photo = this.currentPhoto!;
@@ -1689,11 +1714,10 @@ export default defineComponent({
     display: none;
   }
 
-  // Hide arrows on mobile
-  @media (max-width: 768px) {
-    .pswp__button--arrow {
-      opacity: 0 !important;
-    }
+  // Swipe is disabled in the sphere viewer, so keep arrows
+  // reachable on touch screens while it is open.
+  &:has(.memories-photosphere) .pswp__button--arrow {
+    visibility: visible;
   }
 }
 </style>
@@ -1701,6 +1725,7 @@ export default defineComponent({
 <style lang="scss">
 // Video styles
 @use './PsVideo.scss';
+@use './PsPhotoSphere.scss';
 
 // Prevent the popper from overlapping with the sidebar
 .pswp > div > .v-popper__wrapper {

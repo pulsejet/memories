@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- **Feature**: Support for PhotoSphere panorama viewing ([#931](https://github.com/pulsejet/memories/issues/931), [#1668](https://github.com/pulsejet/memories/issues/1668), [#1357](https://github.com/pulsejet/memories/pull/1357))
 - **Feature**: Video transcoding now works with external and object storage.
   - **Important**: Setups using Docker must add `links` to the `go-vod` container (see [docs](https://memories.gallery/hw-transcoding/#external-transcoder))
 - **Feature**: Direct play for browser-supported video codecs via codec detection.

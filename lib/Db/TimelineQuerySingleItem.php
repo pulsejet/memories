@@ -22,6 +22,7 @@ trait TimelineQuerySingleItem
             ->selectAlias('m.h', 'h')
             ->selectAlias('m.liveid', 'liveid')
             ->selectAlias('m.isvideo', 'isvideo')
+            ->selectAlias('m.pano', 'pano')
             ->selectAlias('m.video_duration', 'video_duration')
             ->selectAlias('f.etag', 'etag')
             ->selectAlias('f.name', 'basename')
@@ -55,7 +56,7 @@ trait TimelineQuerySingleItem
     public function getInfoById(int $id, bool $basic): array
     {
         $qb = $this->connection->getQueryBuilder();
-        $qb->select('fileid', 'dayid', 'datetaken', 'w', 'h')
+        $qb->select('fileid', 'dayid', 'datetaken', 'w', 'h', 'pano')
             ->from('memories')
             ->where($qb->expr()->eq('fileid', $qb->createNamedParameter($id, \PDO::PARAM_INT)))
         ;
@@ -75,6 +76,7 @@ trait TimelineQuerySingleItem
             'dayid' => (int) $row['dayid'],
             'w' => (int) $row['w'],
             'h' => (int) $row['h'],
+            'pano' => (int) $row['pano'],
             'datetaken' => Util::sqlUtcToTimestamp($row['datetaken']),
         ];
 

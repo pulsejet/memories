@@ -1,0 +1,32 @@
+// Sphere viewer styles (managed by PsPhotoSphere.ts). Scoped to the viewer
+// root; the sphere itself mounts in the PhotoSwipe slide holder below it,
+// so all viewer chrome stays visible and interactive above it.
+.memories-viewer {
+  .memories-photosphere {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    touch-action: none;
+
+    .psv-container {
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    canvas {
+      cursor: grab;
+      &:active {
+        cursor: grabbing;
+      }
+    }
+
+    .psv-loader-canvas {
+      color: transparent;
+    }
+
+    .psv-loader-text {
+      color: #fff;
+    }
+  }
+}

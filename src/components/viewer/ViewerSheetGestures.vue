@@ -159,13 +159,13 @@ export default defineComponent({
       e.preventDefault();
     },
 
-    /** Fallback swipe start; buttons keep their own behavior. */
+    /** Fallback swipe start; buttons and the sphere keep their own behavior. */
     onFallbackTouchStart(e: TouchEvent) {
       if (e.touches.length !== 1) {
         this.fbTracking = false;
         return;
       }
-      if ((e.target as HTMLElement).closest('button')) {
+      if ((e.target as HTMLElement).closest('button, .memories-photosphere')) {
         this.fbTracking = false;
         return;
       }

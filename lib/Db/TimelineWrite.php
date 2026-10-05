@@ -134,6 +134,9 @@ final class TimelineWrite
         // Get size of image
         [$w, $h] = $this->exif->getDimensions($exif);
 
+        // Check if the image is a panorama
+        $pano = $this->exif->getPanoType($exif, $w, $h);
+
         // Get live photo ID of video part
         $liveid = $this->livePhoto->getLivePhotoId($file, $exif);
 
@@ -159,6 +162,7 @@ final class TimelineWrite
             'video_duration' => $query->createNamedParameter($videoDuration, IQueryBuilder::PARAM_INT),
             'w' => $query->createNamedParameter($w, IQueryBuilder::PARAM_INT),
             'h' => $query->createNamedParameter($h, IQueryBuilder::PARAM_INT),
+            'pano' => $query->createNamedParameter($pano, IQueryBuilder::PARAM_INT),
             'exif' => $query->createNamedParameter($exifJson, IQueryBuilder::PARAM_STR),
             'liveid' => $query->createNamedParameter($liveid, IQueryBuilder::PARAM_STR),
             'lat' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),

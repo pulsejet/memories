@@ -128,6 +128,11 @@ final class DaysController extends ApiController
             $transforms[] = $this->tq->transformVideoFilter(...);
         }
 
+        // Filter only panoramas
+        if ($this->request->getParam('pano')) {
+            $transforms[] = $this->tq->transformPanoFilter(...);
+        }
+
         // Filter geographical bounds
         if ($bounds = $this->request->getParam('mapbounds')) {
             $transforms[] = function (IQueryBuilder &$query, bool $aggregate) use ($bounds): void {

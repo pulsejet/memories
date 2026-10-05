@@ -58,6 +58,8 @@ declare module '@typings' {
     h?: number;
     /** Live Photo identifier */
     liveid?: string;
+    /** Panorama type (see Exif::PANO_*) */
+    pano?: number;
     /** File owner display name */
     shared_by?: string;
     /** File size in bytes */

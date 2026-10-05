@@ -106,6 +106,7 @@ trait TimelineQueryDays
             ->selectAlias('m.h', 'h')
             ->selectAlias('m.liveid', 'liveid')
             ->selectAlias('m.isvideo', 'isvideo')
+            ->selectAlias('m.pano', 'pano')
             ->selectAlias('m.video_duration', 'video_duration')
             ->selectAlias('f.etag', 'etag')
             ->selectAlias('f.name', 'basename')
@@ -304,6 +305,7 @@ trait TimelineQueryDays
         $row['dayid'] = (int) $row['dayid'];
         $row['w'] = (int) $row['w'];
         $row['h'] = (int) $row['h'];
+        $row['pano'] = (int) ($row['pano'] ?? 0);
         $row['size'] = (int) $row['size'];
 
         // Optional fields
@@ -312,6 +314,9 @@ trait TimelineQueryDays
         }
         if (!$row['liveid']) {
             unset($row['liveid']);
+        }
+        if (!$row['pano']) {
+            unset($row['pano']);
         }
 
         // Favorite field, may not be present
