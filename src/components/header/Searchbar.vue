@@ -63,6 +63,7 @@ const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components
 const NcPopover = defineAsyncComponent(() => import('@nextcloud/vue/components/NcPopover'));
 
 import UserConfig from '@mixins/UserConfig';
+import CommonMixin from '@mixins/CommonMixin';
 
 import * as dav from '@services/dav';
 import * as lens from '@services/lens';
@@ -93,7 +94,7 @@ export default defineComponent({
     XLoadingIcon,
   },
 
-  mixins: [UserConfig],
+  mixins: [UserConfig, CommonMixin],
 
   emits: {
     select: () => true,
@@ -162,7 +163,7 @@ export default defineComponent({
 
     /** Live lens search hijacks typing only on desktop timeline/search views */
     isLensLive(): boolean {
-      return this.lensEnabled && (this.routeIsBase || this.routeIsSearch) && !utils.isMobile();
+      return this.lensEnabled && (this.routeIsBase || this.routeIsSearch) && !this.windowWidthIsMobile;
     },
 
     /** Explicit lens entry for anywhere live search does not apply */

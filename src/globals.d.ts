@@ -72,6 +72,7 @@ declare global {
     window: {
       innerWidth: number; // cache
       innerHeight: number; // cache
+      isMobile: boolean; // cache
     };
   };
 

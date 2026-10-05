@@ -137,7 +137,7 @@ export default defineComponent({
         icon: markRaw(CogIcon),
         link: undefined,
         click: _m.modals.showSettings,
-        if: () => utils.isMobile(),
+        if: () => _m.window.isMobile,
       },
     ] as {
       name: string;

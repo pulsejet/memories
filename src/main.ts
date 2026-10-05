@@ -31,6 +31,9 @@ globalThis._m = {
   window: reactive({
     innerWidth: window.innerWidth,
     innerHeight: window.innerHeight,
+    get isMobile() {
+      return this.innerWidth <= 768;
+    },
   }),
 };
 

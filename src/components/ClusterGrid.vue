@@ -30,6 +30,7 @@
 import { defineComponent } from 'vue';
 import { RecycleScroller } from 'vue-virtual-scroller';
 
+import CommonMixin from '@mixins/CommonMixin';
 import Cluster from '@components/frame/Cluster.vue';
 
 import type { ICluster } from '@typings';
@@ -42,6 +43,8 @@ export default defineComponent({
     Cluster,
     RecycleScroller,
   },
+
+  mixins: [CommonMixin],
 
   props: {
     items: {
@@ -98,7 +101,7 @@ export default defineComponent({
       if (this.routeIsAlbums) {
         // album view: add gap for text below album
         // 4px extra on mobile for mark#2147915
-        return this.width + (utils.isMobile() ? 46 : 42);
+        return this.width + (this.windowWidthIsMobile ? 46 : 42);
       }
 
       return this.width;

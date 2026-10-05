@@ -72,6 +72,7 @@ const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import UserConfig from '@mixins/UserConfig';
+import CommonMixin from '@mixins/CommonMixin';
 
 import Modal from './Modal.vue';
 import ModalMixin from './ModalMixin';
@@ -99,7 +100,7 @@ export default defineComponent({
     LinkIcon,
   },
 
-  mixins: [UserConfig, ModalMixin],
+  mixins: [UserConfig, ModalMixin, CommonMixin],
 
   emits: [],
 
@@ -115,7 +116,7 @@ export default defineComponent({
     },
 
     sidebar() {
-      return !this.isRoot && !utils.isMobile() ? this.filename : null;
+      return !this.isRoot && !this.windowWidthIsMobile ? this.filename : null;
     },
   },
 
@@ -233,7 +234,7 @@ export default defineComponent({
     },
 
     refreshSidebar() {
-      if (utils.isMobile()) return;
+      if (this.windowWidthIsMobile) return;
       _m.sidebar.close();
       _m.sidebar.open(0, this.filename, true);
     },

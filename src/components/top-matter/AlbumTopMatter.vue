@@ -83,7 +83,7 @@
         </NcActionRadio>
       </NcActions>
 
-      <NcActions :inline="isMobile ? 1 : 3">
+      <NcActions :inline="windowWidthIsMobile ? 1 : 3">
         <NcActionButton
           :aria-label="t('memories', 'Create new album')"
           :title="t('memories', 'Create new album')"
@@ -146,6 +146,7 @@
 import { defineComponent } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
+import CommonMixin from '@mixins/CommonMixin';
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import NcActionCheckbox from '@nextcloud/vue/components/NcActionCheckbox';
@@ -198,7 +199,7 @@ export default defineComponent({
     SortDateDIcon,
   },
 
-  mixins: [UserConfig],
+  mixins: [UserConfig, CommonMixin],
 
   computed: {
     isAlbumList(): boolean {
@@ -212,10 +213,6 @@ export default defineComponent({
     name(): string {
       // Album name is displayed in the dynamic top matter (timeline)
       return this.isAlbumList ? this.t('memories', 'Albums') : String();
-    },
-
-    isMobile(): boolean {
-      return utils.isMobile();
     },
 
     isDateSort(): boolean {

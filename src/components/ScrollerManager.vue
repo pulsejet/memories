@@ -53,6 +53,7 @@ import { defineComponent, type PropType } from 'vue';
 
 import * as utils from '@services/utils';
 import * as lens from '@services/lens';
+import CommonMixin from '@mixins/CommonMixin';
 
 import type { IRow, ITick } from '@typings';
 
@@ -69,6 +70,8 @@ export default defineComponent({
     ScrollUpIcon,
     ScrollDownIcon,
   },
+
+  mixins: [CommonMixin],
 
   props: {
     /** Rows from Timeline */
@@ -162,7 +165,7 @@ export default defineComponent({
 
     /** Position of hover cursor */
     hoverCursorTransform(): string {
-      const mob = utils.isMobile();
+      const mob = this.windowWidthIsMobile;
       const min = this.topPadding + (mob ? 2 : 0); // padding for curvature
       const max = this.fullHeight - (mob ? 6 : 0); // padding for shadow
       const val = this.hoverCursorY;
@@ -248,7 +251,7 @@ export default defineComponent({
 
       // Move hover cursor to same position unless hovering
       // Regardless, we need this call because the internal mapping might have changed
-      if (!utils.isMobile() && this.refs().scroller?.matches(':hover')) {
+      if (!this.windowWidthIsMobile && this.refs().scroller?.matches(':hover')) {
         this.moveHoverCursor(this.hoverCursorY);
       } else {
         this.moveHoverCursor(rtop);
@@ -452,7 +455,7 @@ export default defineComponent({
     setTicksTop(total: number) {
       // On mobile, move the ticks up by half the height of the cursor
       // so that the cursor is centered on the tick instead (on desktop, it's at the bottom)
-      const displayPadding = utils.isMobile() ? -MOBILE_CURSOR_HH : 0;
+      const displayPadding = this.windowWidthIsMobile ? -MOBILE_CURSOR_HH : 0;
 
       // Set topF (float) and top (rounded) values
       for (const tick of this.ticks) {

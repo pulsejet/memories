@@ -13,7 +13,7 @@ export default defineComponent({
     },
 
     windowWidthIsMobile(): boolean {
-      return _m.window.innerWidth <= 768;
+      return _m.window.isMobile;
     },
 
     windowDims(): { width: number; height: number } {

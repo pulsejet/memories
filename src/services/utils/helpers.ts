@@ -19,13 +19,6 @@ export const uid = String(getCurrentUser()?.uid || String()) || null;
  */
 export const isAdmin = Boolean(getCurrentUser()?.isAdmin);
 
-/**
- * Check if width <= 768px
- */
-export function isMobile() {
-  return _m.window.innerWidth <= 768;
-}
-
 /** Preview generation options */
 type PreviewOpts = {
   /** Photo object to create preview for */

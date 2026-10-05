@@ -433,7 +433,7 @@ export default defineComponent({
       utils.bus.emit('memories:sidebar:opened', null);
 
       // Use fragment navigation only on mobile
-      if (utils.isMobile()) {
+      if (_m.window.isMobile) {
         utils.fragment.push(utils.fragment.types.sidebar);
       }
     },
