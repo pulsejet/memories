@@ -1022,7 +1022,7 @@ export default defineComponent({
 .top-bar {
   position: absolute;
   top: 10px;
-  right: min(60px, 10%);
+  right: min(60px, 4%);
   padding: 8px;
   width: 400px;
   max-width: 80%;
