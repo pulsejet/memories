@@ -4,10 +4,10 @@
       {{ t('memories', 'Refresh metadata') }}
     </template>
 
-    <div>
+    <div class="reindex">
       <div>
         {{
-          n('memories', 'Refreshing metadata for {n} file …', 'Refreshing metadata for {n} files …', photos.length, {
+          n('memories', 'Processing {n} file', 'Processing {n} files', photos.length, {
             n: photos.length,
           })
         }}
@@ -79,3 +79,11 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.reindex {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+</style>
