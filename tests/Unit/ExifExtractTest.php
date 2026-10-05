@@ -550,6 +550,22 @@ final class ExifExtractTest extends TestCase
         self::assertSame(1678026107, $dt->getTimestamp());
     }
 
+    public function testUnknownPano01(): void
+    {
+        // Equirectangular panorama (Varaha Cave Temple)
+        $res = $this->extract('unknown_pano_01.jpg');
+        self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
+        self::assertSame('equirectangular', $res->exif['ProjectionType'] ?? null);
+        self::assertTrue($res->exif['UsePanoramaViewer'] ?? false);
+
+        [$w, $h] = self::$exif->getDimensions($res->exif);
+        self::assertSame(6000, $w);
+        self::assertSame(3000, $h);
+
+        self::assertSame(2, self::$exif->getPanoType($res->exif, $w, $h));
+        self::assertSame(Exif::PANO_SPHERE, self::$exif->getPanoType($res->exif, $w, $h));
+    }
+
     public function testSonyE566301(): void
     {
         // Sony Xperia M5 photo with no coordinates and local time only (no timezone info).
