@@ -85,7 +85,7 @@ class PlacesStore(FileStore):
         ]
 
         if structs:
-            await self.client.upsert(self.collection, points=structs, wait=True)
+            await self.client.upsert(self.collection, points=structs, wait=False)
         log.info("insert places n=%d elapsed=%.2fs", len(structs), time.monotonic() - started)
 
     async def replace_many(self, fileids: list[int], points: list[PlacePoint]):

@@ -82,7 +82,7 @@ class FileStore:
         await self.client.delete(
             collection_name=self.collection,
             points_selector=self._file_filter([fileid]),
-            wait=True,
+            wait=False,
         )
 
     async def update_file_metadata(self, fileid: int, parent_id: int, etag: str):
@@ -92,7 +92,7 @@ class FileStore:
             collection_name=self.collection,
             payload={"parent_id": parent_id, "etag": etag},
             points=self._file_filter([fileid]),
-            wait=True,
+            wait=False,
         )
 
     async def _delete_stale(self, fileids: list[int], keep: list[str]):
@@ -109,7 +109,7 @@ class FileStore:
         await self.client.delete(
             collection_name=self.collection,
             points_selector=filtr,
-            wait=True,
+            wait=False,
         )
 
     @staticmethod

@@ -122,7 +122,7 @@ class EmbeddingStore(FileStore):
                 ),
             )
 
-        await self.client.upsert(self.collection, points=structs, wait=True)
+        await self.client.upsert(self.collection, points=structs, wait=False)
         log.info("insert embeddings n=%d elapsed=%.2fs", len(structs), time.monotonic() - started)
 
     async def set_face_state(self, fileid: int, owner: str, version: int, count: int):
@@ -133,7 +133,7 @@ class EmbeddingStore(FileStore):
             collection_name=self.collection,
             payload={"face_count": count, "face_version": version, "face_owner": owner},
             points=[int(fileid)],
-            wait=True,
+            wait=False,
         )
         log.info("insert face-state %d elapsed=%.2fs", fileid, time.monotonic() - started)
 
@@ -202,7 +202,7 @@ class EmbeddingStore(FileStore):
             vector=[1.0] + [0.0] * (self.dim - 1),
             payload=payload,
         )
-        await self.client.upsert(self.collection, points=[point], wait=True)
+        await self.client.upsert(self.collection, points=[point], wait=False)
 
         return payload
 
@@ -215,7 +215,7 @@ class EmbeddingStore(FileStore):
         await self.client.delete(
             collection_name=self.collection,
             points_selector=models.PointIdsList(points=[failure_point_id(fileid) for fileid in fileids]),
-            wait=True,
+            wait=False,
         )
 
     def _expected_meta(self):

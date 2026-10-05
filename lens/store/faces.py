@@ -137,7 +137,7 @@ class FacesStore(FileStore):
                 ),
             )
 
-        await self.client.upsert(self.collection, points=structs, wait=True)
+        await self.client.upsert(self.collection, points=structs, wait=False)
         log.info("insert faces n=%d elapsed=%.2fs", len(structs), time.monotonic() - started)
 
     async def delete_points(self, point_ids: list[str]):
@@ -149,7 +149,7 @@ class FacesStore(FileStore):
         await self.client.delete(
             collection_name=self.collection,
             points_selector=models.PointIdsList(points=point_ids),
-            wait=True,
+            wait=False,
         )
 
     async def get_file_face_ids(self, fileid: int) -> list[int]:
@@ -332,7 +332,7 @@ class FacesStore(FileStore):
                 collection_name=self.collection,
                 payload={"cluster_id": cluster_id},
                 points=point_ids,
-                wait=True,
+                wait=False,
             )
 
     async def reassign_clusters(self, mapping: dict[int, int | None]) -> int:
@@ -354,7 +354,7 @@ class FacesStore(FileStore):
                 collection_name=self.collection,
                 payload={"cluster_id": cluster_id},
                 points=point_ids,
-                wait=True,
+                wait=False,
             )
 
         return len(mapping)
