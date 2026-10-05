@@ -268,7 +268,6 @@ export default defineComponent({
     const onResize = () => {
       _m.window.innerWidth = window.innerWidth;
       _m.window.innerHeight = window.innerHeight;
-      utils.bus.emit('memories:window:resize', null);
     };
     window.addEventListener('resize', () => {
       utils.setRenewingTimeout(this, 'resizeTimer', onResize, 100);

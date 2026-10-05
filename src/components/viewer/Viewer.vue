@@ -102,7 +102,11 @@
       </MobileBottomBar>
     </div>
 
-    <ViewerSheetGestures v-if="windowWidthIsMobile && photoswipe" :photoswipe="photoswipe" @open="setBottomSheet(true)" />
+    <ViewerSheetGestures
+      v-if="windowWidthIsMobile && photoswipe"
+      :photoswipe="photoswipe"
+      @open="setBottomSheet(true)"
+    />
     <ViewerBottomSheet v-if="sheetOpen && windowWidthIsMobile" :photo="currentPhoto" @close="setBottomSheet(false)" />
   </div>
 </template>
@@ -678,8 +682,8 @@ export default defineComponent({
           this.outerWidth = `calc(100vw - ${sidebarWidth}px)`;
 
           return {
-            x: _m.window.innerWidth - sidebarWidth,
-            y: _m.window.innerHeight,
+            x: this.windowWidth - sidebarWidth,
+            y: this.windowHeight,
           };
         },
         ...args,

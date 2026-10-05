@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="matter"
     :class="{
       'map-matter': true,
       'anim-markers': animMarkers,
@@ -34,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, markRaw } from 'vue';
 import { LMarker, LIcon } from '@vue-leaflet/vue-leaflet';
 
 import axios from '@nextcloud/axios';
@@ -67,20 +68,21 @@ export default defineComponent({
     clusters: [] as IMapCluster[],
     animMarkers: false,
     lastClick: 0, // fileid
+    resizeObserver: null as ResizeObserver | null,
   }),
 
   mounted() {
     if (this.refs().standalone?.getMap()) {
       this.onMapReady();
     }
-  },
 
-  created() {
-    utils.bus.on('memories:window:resize', this.handleContainerResize);
+    this.resizeObserver = markRaw(new ResizeObserver(this.handleContainerResize));
+    this.resizeObserver.observe(this.refs().matter);
   },
 
   beforeUnmount() {
-    utils.bus.off('memories:window:resize', this.handleContainerResize);
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
   },
 
   watch: {
@@ -93,6 +95,7 @@ export default defineComponent({
   methods: {
     refs() {
       return this.$refs as {
+        matter: HTMLDivElement;
         standalone: InstanceType<typeof MapStandalone>;
       };
     },

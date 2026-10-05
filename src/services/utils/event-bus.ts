@@ -19,8 +19,6 @@ export type BusEvent = {
   /** Final event after sidebar is closed */
   'memories:sidebar:closed': null;
 
-  /** Window was resized */
-  'memories:window:resize': null;
   /** User configuration was changed */
   'memories:user-config-changed': {
     setting: keyof IConfig;

@@ -1,6 +1,6 @@
 <template>
   <NcButton
-    v-if="isMobile"
+    v-if="windowWidthIsMobile"
     class="memories-menu-item search-menu"
     variant="tertiary-no-background"
     :title="t('memories', 'Search')"
@@ -20,7 +20,7 @@ import NcButton from '@nextcloud/vue/components/NcButton';
 
 import Searchbar from '@components/header/Searchbar.vue';
 
-import * as utils from '@services/utils';
+import CommonMixin from '@mixins/CommonMixin';
 
 import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 
@@ -32,13 +32,7 @@ export default defineComponent({
     MagnifyIcon,
   },
 
-  data: () => ({
-    isMobile: utils.isMobile(),
-  }),
-
-  mounted() {
-    utils.bus.on('memories:window:resize', () => (this.isMobile = utils.isMobile()));
-  },
+  mixins: [CommonMixin],
 
   methods: {
     search() {

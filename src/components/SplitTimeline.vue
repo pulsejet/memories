@@ -33,8 +33,6 @@ import Timeline from './Timeline.vue';
 const MapSplitMatter = defineAsyncComponent(() => import('./top-matter/MapSplitMatter.vue'));
 import Hammer from 'hammerjs';
 
-import * as utils from '@services/utils';
-
 export default defineComponent({
   name: 'SplitTimeline',
 
@@ -141,7 +139,6 @@ export default defineComponent({
       this.pointerDown = false;
       document.removeEventListener('pointermove', this.documentPointerMove);
       document.removeEventListener('pointerup', this.pointerUp);
-      utils.bus.emit('memories:window:resize', null);
     },
 
     setFlexBasis(pos: { clientX: number; clientY: number }) {
@@ -157,23 +154,10 @@ export default defineComponent({
 
     async mobileSwipeUp() {
       this.mobileOpen = Math.min(this.mobileOpen + 1, 2);
-
-      // When swiping up, immediately emit a resize event
-      // so that we can prepare in advance for showing more photos
-      // on the timeline
-      await this.$nextTick();
-      utils.bus.emit('memories:window:resize', null);
     },
 
     async mobileSwipeDown() {
       this.mobileOpen = Math.max(this.mobileOpen - 1, 0);
-
-      // When swiping down, wait for the animation to end, so that
-      // we don't hide the lower half of the timeline before the animation
-      // ends. Note that this is necesary: the height of the timeline inner
-      // div is also animated to the smaller size.
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      utils.bus.emit('memories:window:resize', null);
     },
   },
 });
