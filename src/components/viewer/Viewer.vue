@@ -102,8 +102,8 @@
       </MobileBottomBar>
     </div>
 
-    <ViewerSheetGestures v-if="isMobileLayout && photoswipe" :photoswipe="photoswipe" @open="setBottomSheet(true)" />
-    <ViewerBottomSheet v-if="sheetOpen && isMobileLayout" :photo="currentPhoto" @close="setBottomSheet(false)" />
+    <ViewerSheetGestures v-if="windowWidthIsMobile && photoswipe" :photoswipe="photoswipe" @open="setBottomSheet(true)" />
+    <ViewerBottomSheet v-if="sheetOpen && windowWidthIsMobile" :photo="currentPhoto" @close="setBottomSheet(false)" />
   </div>
 </template>
 
@@ -111,6 +111,7 @@
 import { defineComponent, markRaw } from 'vue';
 
 import UserConfig from '@mixins/UserConfig';
+import CommonMixin from '@mixins/CommonMixin';
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import NcButton from '@nextcloud/vue/components/NcButton';
@@ -190,7 +191,7 @@ export default defineComponent({
     XLoadingIcon,
   },
 
-  mixins: [UserConfig],
+  mixins: [UserConfig, CommonMixin],
 
   data: () => ({
     loading: 0,
@@ -207,7 +208,6 @@ export default defineComponent({
 
     /** Mobile bottom sheet with photo metadata */
     sheetOpen: false,
-    isMobileLayout: utils.isMobile(),
 
     /** User interaction detection */
     activityTimer: 0,
@@ -252,7 +252,6 @@ export default defineComponent({
     utils.bus.on('memories:sidebar:closed', this.handleAppSidebarClose);
     utils.bus.on('files:file:created', this.handleFileUpdated);
     utils.bus.on('files:file:updated', this.handleFileUpdated);
-    utils.bus.on('memories:window:resize', this.handleWindowResize);
     utils.bus.on('memories:fragment:pop:viewer', this.close);
 
     // The viewer is a singleton
@@ -276,14 +275,13 @@ export default defineComponent({
     utils.bus.off('memories:sidebar:closed', this.handleAppSidebarClose);
     utils.bus.off('files:file:created', this.handleFileUpdated);
     utils.bus.off('files:file:updated', this.handleFileUpdated);
-    utils.bus.off('memories:window:resize', this.handleWindowResize);
     utils.bus.off('memories:fragment:pop:viewer', this.close);
   },
 
   computed: {
     /** Number of top bar buttons to show inline */
     numInlineTopActions(): number {
-      if (this.isMobileLayout) {
+      if (this.windowWidthIsMobile) {
         return Math.min(this.topActions.length, 1);
       }
 
@@ -300,7 +298,7 @@ export default defineComponent({
 
     /** Top bar actions, excluding anything visible in the mobile bottom bar */
     topActions(): IViewerAction[] {
-      if (!this.isMobileLayout) {
+      if (!this.windowWidthIsMobile) {
         return this.actions;
       }
 
@@ -310,7 +308,7 @@ export default defineComponent({
 
     /** Bottom bar actions on mobile */
     bottomActions(): IViewerAction[] {
-      if (!this.isMobileLayout) {
+      if (!this.windowWidthIsMobile) {
         return [];
       }
 
@@ -406,7 +404,7 @@ export default defineComponent({
           name: this.t('memories', 'Sidebar'),
           icon: markRaw(SidebarIcon),
           callback: this.toggleSidebar,
-          if: this.isMobileLayout && !nativex.has(),
+          if: this.windowWidthIsMobile && !nativex.has(),
         },
         {
           id: 'edit',
@@ -575,6 +573,11 @@ export default defineComponent({
       this.photoswipe.options.pinchToClose = val;
       this.photoswipe.options.closeOnVerticalDrag = val;
     },
+
+    windowDims() {
+      this.sheetOpen &&= this.windowWidthIsMobile;
+      this.show && this.photoswipe?.updateSize();
+    },
   },
 
   methods: {
@@ -668,7 +671,7 @@ export default defineComponent({
         getViewportSizeFn: () => {
           // Ignore the sidebar if mobile or fullscreen
           const isFullscreen = Boolean(document.fullscreenElement);
-          const use = this.sidebarOpen && !this.isMobileLayout && !isFullscreen;
+          const use = this.sidebarOpen && !this.windowWidthIsMobile && !isFullscreen;
 
           // Calculate the sidebar width to use and outer width
           const sidebarWidth = use ? _m.sidebar.getWidth() : 0;
@@ -1367,12 +1370,6 @@ export default defineComponent({
       }
     },
 
-    handleWindowResize() {
-      this.isMobileLayout = utils.isMobile();
-      this.sheetOpen &&= this.isMobileLayout;
-      this.show && this.photoswipe?.updateSize();
-    },
-
     /** Hide the sidebar, without marking it as closed */
     hideSidebar() {
       _m.sidebar.close();
@@ -1397,7 +1394,7 @@ export default defineComponent({
 
     /** Toggle photo info: bottom sheet on mobile, sidebar otherwise */
     toggleInfo() {
-      if (this.isMobileLayout) {
+      if (this.windowWidthIsMobile) {
         this.setBottomSheet();
       } else {
         this.toggleSidebar();

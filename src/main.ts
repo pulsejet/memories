@@ -1,7 +1,7 @@
 import './bootstrap';
 import { registerGlobals } from './bootstrap';
 
-import { createApp } from 'vue';
+import { createApp, reactive } from 'vue';
 import App from './App.vue';
 import router, { routes, registerRouteCheckers } from './router';
 import * as nativex from '@native';
@@ -28,10 +28,10 @@ globalThis._m = {
   viewer: {} as any,
   video: {} as any,
 
-  window: {
+  window: reactive({
     innerWidth: window.innerWidth,
     innerHeight: window.innerHeight,
-  },
+  }),
 };
 
 // Generate client id for this instance
