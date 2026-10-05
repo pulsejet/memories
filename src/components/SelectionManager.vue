@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <Teleport to="body" :disabled="!windowWidthIsMobile">
     <div v-if="show" class="memories-top-bar top-bar">
       <NcActions :inline="1">
         <NcActionButton :aria-label="t('memories', 'Cancel')" @click="clear()">
@@ -28,7 +28,7 @@
         </NcActionButton>
       </NcActions>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <script lang="ts">
@@ -40,6 +40,7 @@ import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import UserConfig from '@mixins/UserConfig';
+import CommonMixin from '@mixins/CommonMixin';
 
 import { translate as t } from '@services/l10n';
 import * as dav from '@services/dav';
@@ -143,7 +144,7 @@ export default defineComponent({
     CloseIcon,
   },
 
-  mixins: [UserConfig],
+  mixins: [UserConfig, CommonMixin],
 
   props: {
     heads: {
@@ -1032,6 +1033,7 @@ export default defineComponent({
   display: flex;
   vertical-align: middle;
   z-index: 300; // above top-matter and scroller
+  box-sizing: border-box;
 
   > .text {
     flex-grow: 1;
