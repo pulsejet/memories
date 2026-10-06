@@ -97,6 +97,14 @@ export default class PhotoSphereContentSetup {
         // A partial panorama covers only part of the sphere, and the default
         // view may be outside it; keep the view on the image.
         plugins: [[VisibleRangePlugin, { usePanoData: true }]],
+        // The plugin's left/right range ignores the GPano compass heading,
+        // which turns the sphere, so a crop narrower than 360° with a heading
+        // would be limited to the wrong part of it. Drop the heading there;
+        // without a compass it only decides which way the view starts.
+        panoData: (_image, xmpData) => {
+          const narrow = !!xmpData?.croppedWidth && xmpData.croppedWidth < xmpData.fullWidth;
+          return narrow ? { ...xmpData, poseHeading: 0 } : xmpData!;
+        },
       });
       this.container = container;
       this.content = content;

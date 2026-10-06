@@ -406,7 +406,8 @@ export const FOR_MOVE_DATASET: IDatasetMap = {
 /**
  * Sphere viewer (734). A partial GPano panorama, 150 by 79 degrees, that
  * lies wholly away from where the viewer starts looking (yaw 0, pitch 0) and
- * is larger than the default field of view.
+ * is larger than the default field of view. It also has a compass heading,
+ * which turns the sphere.
  */
 export const FOR_SPHERE_DATASET: IDatasetMap = {
   'primary/for-sphere/partial_01.jpg': {
@@ -420,6 +421,7 @@ export const FOR_SPHERE_DATASET: IDatasetMap = {
       'XMP-GPano:CroppedAreaImageHeightPixels': 896,
       'XMP-GPano:CroppedAreaLeftPixels': 2304,
       'XMP-GPano:CroppedAreaTopPixels': 64,
+      'XMP-GPano:PoseHeadingDegrees': 90,
     },
   },
 };
