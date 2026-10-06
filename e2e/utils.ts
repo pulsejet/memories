@@ -58,11 +58,7 @@ export class DavClient {
 
   // Get props via WebDAV PROPFIND on the given path relative to the DAV root,
   // e.g. `files/${username}/Photos/test.jpg`. Returns the list of found props.
-  async propfind(
-    davPath: string,
-    props: Record<string, string>,
-    depth: number | 'infinity' = 0,
-  ): Promise<any[]> {
+  async propfind(davPath: string, props: Record<string, string>, depth: number | 'infinity' = 0): Promise<any[]> {
     const cleanPath = DavClient.encodeDavPath(davPath);
     const res = await this.request.fetch(`${baseUrl}/remote.php/dav/${cleanPath}`, {
       method: 'PROPFIND',
