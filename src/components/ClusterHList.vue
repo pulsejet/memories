@@ -20,47 +20,30 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+<script setup lang="ts">
+import { useRouteIsExplore } from '@services/route-checker';
 
-import Cluster from './frame/Cluster.vue';
+import Cluster from '@components/frame/Cluster.vue';
 
 import type { ICluster } from '@typings';
 
-export default defineComponent({
-  name: 'ClusterHList',
+defineProps<{
+  clusters: ICluster[];
+  title?: string;
+  link?: string;
+}>();
 
-  components: {
-    Cluster,
-  },
+const routeIsExplore = useRouteIsExplore();
 
-  props: {
-    clusters: {
-      type: Array as PropType<ICluster[]>,
-      required: true,
-    },
-    title: {
-      type: String,
-      required: false,
-    },
-    link: {
-      type: String,
-      required: false,
-    },
-  },
-
-  methods: {
-    circle(cluster: ICluster): boolean {
-      switch (cluster.cluster_type) {
-        case 'recognize':
-        case 'facerecognition':
-          return true;
-        default:
-          return false;
-      }
-    },
-  },
-});
+function circle(cluster: ICluster): boolean {
+  switch (cluster.cluster_type) {
+    case 'recognize':
+    case 'facerecognition':
+      return true;
+    default:
+      return false;
+  }
+}
 </script>
 
 <style lang="scss" scoped>
