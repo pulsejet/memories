@@ -4,7 +4,7 @@
       {{ t('memories', 'Remove person') }}
     </template>
 
-    <span>{{ t('memories', 'Are you sure you want to remove {name}?', { name }) }}</span>
+    <span>{{ t('memories', 'Are you sure you want to remove {name}?', { name: displayName }) }}</span>
 
     <template #buttons>
       <NcButton @click="save" class="button" variant="error">
@@ -43,6 +43,13 @@ export default defineComponent({
       return this.$route.params.name?.toString();
     },
 
+    displayName() {
+      if (utils.isNumber(this.name)) {
+        return this.t('memories', 'Unnamed person');
+      }
+      return this.name;
+    },
+
     user() {
       return this.$route.params.user?.toString();
     },
@@ -71,11 +78,11 @@ export default defineComponent({
         } else {
           await dav.faceRecognitionSetPersonVisibility(this.name, false);
         }
-        this.$router.push({ name: this.$route.name?.toString() }); // "recognize", "facerecognition" or "lens"
-        this.close();
+        await this.close();
+        await this.$router.push({ name: this.$route.name?.toString() }); // "recognize", "facerecognition" or "lens"
       } catch (error) {
         console.error(error);
-        showError(this.t('memories', 'Failed to delete {name}.', { name: this.name }));
+        showError(this.t('memories', 'Failed to delete {name}.', { name: this.displayName }));
       }
     },
   },
