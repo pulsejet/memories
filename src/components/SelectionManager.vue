@@ -1041,7 +1041,7 @@ export default defineComponent({
     padding-left: 8px;
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 768px) {
     // sidebar is hidden below this point
     top: 0;
     left: 0;
