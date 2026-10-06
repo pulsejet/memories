@@ -17,8 +17,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
 import * as utils from '@services/utils';
 
@@ -26,36 +26,25 @@ import type { IHeadRow } from '@typings';
 
 import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'RowHead',
-
-  components: {
-    CheckCircle,
-  },
-
-  props: {
-    item: {
-      type: Object as PropType<IHeadRow>,
-      required: true,
-    },
-  },
-
-  emits: {
-    click: (item: IHeadRow) => true,
-  },
-
-  computed: {
-    name() {
-      return utils.getHeadRowName(this.item);
-    },
-  },
-
-  methods: {
-    click() {
-      this.$emit('click', this.item);
-    },
-  },
 });
+
+const props = defineProps<{
+  item: IHeadRow;
+}>();
+
+const emit = defineEmits<{
+  click: [item: IHeadRow];
+}>();
+
+const name = computed(() => {
+  return utils.getHeadRowName(props.item);
+});
+
+function click() {
+  emit('click', props.item);
+}
 </script>
 
 <style lang="scss" scoped>
