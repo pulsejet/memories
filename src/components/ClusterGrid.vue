@@ -26,151 +26,117 @@
   </RecycleScroller>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { useRoute } from 'vue-router';
 import { RecycleScroller } from 'vue-virtual-scroller';
 
-import CommonMixin from '@mixins/CommonMixin';
 import Cluster from '@components/frame/Cluster.vue';
 
 import type { ICluster } from '@typings';
 import * as utils from '@services/utils';
 
-export default defineComponent({
-  name: 'ClusterGrid',
-
-  components: {
-    Cluster,
-    RecycleScroller,
+const props = withDefaults(
+  defineProps<{
+    items: ICluster[];
+    maxSize?: number;
+    minCols?: number;
+    link?: boolean;
+    plus?: boolean;
+    focus?: boolean;
+  }>(),
+  {
+    maxSize: 180,
+    minCols: 3,
+    link: true,
+    plus: false,
+    focus: false,
   },
+);
 
-  mixins: [CommonMixin],
+const emit = defineEmits<{
+  click: [item: ICluster];
+  plus: [];
+}>();
 
-  props: {
-    items: {
-      type: Array<ICluster>,
-      required: true,
-    },
-    maxSize: {
-      type: Number,
-      default: 180,
-    },
-    minCols: {
-      type: Number,
-      default: 3,
-    },
-    link: {
-      type: Boolean,
-      default: true,
-    },
-    plus: {
-      type: Boolean,
-      default: false,
-    },
-    focus: {
-      type: Boolean,
-      default: false,
-    },
-  },
+const route = useRoute();
+const routeIsAlbums = computed(() => route.name === _m.routes.Albums.name);
+const windowWidthIsMobile = computed(() => _m.window.isMobile);
 
-  emits: {
-    click: (item: ICluster) => true,
-    plus: () => true,
-  },
+const recycler = ref<VueRecyclerType>();
+const recyclerWidth = ref(300);
 
-  data: () => ({
-    recyclerWidth: 300,
-  }),
+/** Number of items horizontally */
+const gridItems = computed(() =>
+  // Restrict the number of columns between minCols and the size cap
+  Math.max(Math.floor(recyclerWidth.value / props.maxSize), props.minCols),
+);
 
-  mounted() {
-    this.resize();
-  },
+/** Width of the cluster */
+const width = computed(() => utils.round(recyclerWidth.value / gridItems.value, 2));
 
-  watch: {
-    async items() {
-      if (this.focus) {
-        await this.$nextTick();
-        this.refs().recycler?.$el.focus();
-      }
-    },
-  },
+/** Height of the cluster */
+const height = computed(() => {
+  if (routeIsAlbums.value) {
+    // album view: add gap for text below album
+    // 4px extra on mobile for mark#2147915
+    return width.value + (windowWidthIsMobile.value ? 46 : 42);
+  }
 
-  computed: {
-    /** Height of the cluster */
-    height() {
-      if (this.routeIsAlbums) {
-        // album view: add gap for text below album
-        // 4px extra on mobile for mark#2147915
-        return this.width + (this.windowWidthIsMobile ? 46 : 42);
-      }
-
-      return this.width;
-    },
-
-    /** Width of the cluster */
-    width() {
-      return utils.round(this.recyclerWidth / this.gridItems, 2);
-    },
-
-    /** Number of items horizontally */
-    gridItems() {
-      // Restrict the number of columns between minCols and the size cap
-      return Math.max(Math.floor(this.recyclerWidth / this.maxSize), this.minCols);
-    },
-
-    /** Classes list on object */
-    classList() {
-      return {
-        empty: !this.items.length,
-        'cluster--album': this.routeIsAlbums,
-      };
-    },
-
-    /** Whether the clusters should show counters */
-    counters() {
-      return !this.routeIsAlbums;
-    },
-
-    /** List of clusters to display */
-    clusters() {
-      const items = [...this.items];
-
-      // Add plus button if required
-      if (this.plus) {
-        items.unshift({
-          cluster_type: 'plus',
-          cluster_id: -1,
-          name: '',
-          count: 0,
-        });
-      }
-
-      return items;
-    },
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        recycler: VueRecyclerType;
-      };
-    },
-
-    click(item: ICluster) {
-      switch (item.cluster_type) {
-        case 'plus':
-          this.$emit('plus');
-          break;
-        default:
-          this.$emit('click', item);
-      }
-    },
-
-    resize() {
-      this.recyclerWidth = this.refs().recycler?.$el.clientWidth;
-    },
-  },
+  return width.value;
 });
+
+/** Classes list on object */
+const classList = computed(() => ({
+  empty: !props.items.length,
+  'cluster--album': routeIsAlbums.value,
+}));
+
+/** Whether the clusters should show counters */
+const counters = computed(() => !routeIsAlbums.value);
+
+/** List of clusters to display */
+const clusters = computed(() => {
+  const items = [...props.items];
+
+  // Add plus button if required
+  if (props.plus) {
+    items.unshift({
+      cluster_type: 'plus',
+      cluster_id: -1,
+      name: '',
+      count: 0,
+    });
+  }
+
+  return items;
+});
+
+function click(item: ICluster) {
+  switch (item.cluster_type) {
+    case 'plus':
+      emit('plus');
+      break;
+    default:
+      emit('click', item);
+  }
+}
+
+function resize() {
+  recyclerWidth.value = recycler.value?.$el.clientWidth ?? recyclerWidth.value;
+}
+
+onMounted(resize);
+
+watch(
+  () => props.items,
+  async () => {
+    if (props.focus) {
+      await nextTick();
+      recycler.value?.$el.focus();
+    }
+  },
+);
 </script>
 
 <style lang="scss" scoped>
