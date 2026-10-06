@@ -49,9 +49,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import type { PropType } from 'vue';
+<script setup lang="ts">
+import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
 
 import Metadata from '@components/Metadata.vue';
 
@@ -65,424 +64,417 @@ const CLOSE_ANIM_MS = 280;
 /** Visible peek height: 45vh capped for tall screens */
 const PEEK_PX = 340;
 
-export default defineComponent({
+defineOptions({
   name: 'ViewerBottomSheet',
-
-  components: {
-    Metadata,
-  },
-
-  props: {
-    photo: {
-      type: Object as PropType<IPhoto | null>,
-      default: null,
-    },
-  },
-
-  emits: ['close'],
-
-  data: () => ({
-    /** Docked at head/tail (vs peek) */
-    expanded: false,
-    dragging: false,
-    closing: false,
-    /** Resting top edge of the sheet in px */
-    top: 0,
-    /** Transient transform delta; always 0 at rest */
-    ty: 0,
-    dragStartY: 0,
-    dragBase: 0,
-    dragDy: 0,
-    lastY: 0,
-    lastT: 0,
-    velocity: 0,
-    startedOnHandle: false,
-    suppressClick: false,
-    /** Last known detents, to tell parked positions from free panning */
-    lastRest: 0,
-    lastHead: 0,
-    lastFull: 0,
-    resizeObserver: null as ResizeObserver | null,
-    resizeListener: null as (() => void) | null,
-    closeTimer: 0,
-    glideTimer: 0,
-    /** Transform glide in flight */
-    gliding: false,
-  }),
-
-  watch: {
-    photo: {
-      handler() {
-        this.refreshMetadata();
-      },
-    },
-  },
-
-  mounted() {
-    this.refreshMetadata();
-    this.$nextTick(() => this.enter());
-
-    this.refs().sheet?.addEventListener('touchmove', this.onDragMove, { passive: false });
-    // ResizeObserver batches per frame, so adjust synchronously
-    // (pre-paint) to avoid flashing raw growth for a frame.
-    this.resizeObserver = new ResizeObserver(() => this.layout());
-    this.resizeObserver.observe(this.refs().content);
-    this.resizeListener = () => this.layout();
-    window.addEventListener('resize', this.resizeListener);
-  },
-
-  beforeUnmount() {
-    this.refs().sheet?.removeEventListener('touchmove', this.onDragMove);
-    this.resizeObserver?.disconnect();
-    if (this.resizeListener) window.removeEventListener('resize', this.resizeListener);
-    window.clearTimeout(this.closeTimer);
-    window.clearTimeout(this.glideTimer);
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        sheet: HTMLDivElement;
-        content: HTMLDivElement;
-        metadata: InstanceType<typeof Metadata>;
-      };
-    },
-
-    /** Reload metadata for the current photo, then fit the sheet around it. */
-    async refreshMetadata() {
-      if (!this.photo || this.refs().metadata?.fileid === this.photo.fileid) return;
-      await this.refs().metadata?.update(this.photo);
-      this.layout();
-    },
-
-    /** Full height of the embedded content; the sheet always wraps it all */
-    fullHeight(): number {
-      return this.refs().sheet?.scrollHeight ?? 0;
-    },
-
-    /** Top edge with the content end docked at the viewport bottom */
-    tailTop(): number {
-      return window.innerHeight - this.fullHeight();
-    },
-
-    /** Visible peek height */
-    peekSize(): number {
-      return Math.min(Math.round(window.innerHeight * 0.45), PEEK_PX);
-    },
-
-    /** Top edge showing just the peek area */
-    peekTop(): number {
-      return window.innerHeight - this.peekSize();
-    },
-
-    /** Top edge with the head fullscreen (handle at the viewport top) */
-    headTop(): number {
-      return Math.max(this.tailTop(), 0);
-    },
-
-    /** Merged detent list: tail, head, peek */
-    spots(): number[] {
-      const out: number[] = [];
-      for (const s of [this.tailTop(), this.headTop(), this.peekTop()].sort((a, b) => a - b)) {
-        if (!out.length || s - out.at(-1)! >= DOCK_PX) out.push(s);
-      }
-      return out;
-    },
-
-    /** Remember current detents to recognize parked positions later. */
-    syncDetents() {
-      this.lastRest = this.peekTop();
-      this.lastHead = this.headTop();
-      this.lastFull = this.fullHeight();
-    },
-
-    applyPos() {
-      const sheet = this.refs().sheet;
-      if (!sheet) return;
-      sheet.style.setProperty('top', `${Math.round(this.top)}px`);
-      sheet.style.setProperty('transform', `translateY(${Math.round(this.ty)}px)`);
-    },
-
-    applyTransform() {
-      this.refs().sheet?.style.setProperty('transform', `translateY(${Math.round(this.ty)}px)`);
-    },
-
-    /** Live visual top edge, adopting any in-flight glide. */
-    liveTop(): number {
-      const sheet = this.refs().sheet;
-      if (!sheet) return this.top;
-      const cs = getComputedStyle(sheet);
-      const top = parseFloat(cs.top);
-      const m = cs.transform;
-      const dy = m && m !== 'none' ? new DOMMatrixReadOnly(m).m42 : 0;
-      return (Number.isFinite(top) ? top : this.top) + (Number.isFinite(dy) ? dy : 0);
-    },
-
-    /** Run fn with transitions off so the box jumps without animating. */
-    freeze(sheet: HTMLElement, fn: () => void) {
-      sheet.style.transition = 'none';
-      fn();
-      this.applyPos();
-      void sheet.offsetHeight;
-      sheet.style.transition = '';
-    },
-
-    /** Glide the visual top to target through transform; top stays
-     * exact throughout, so content reflows can't disturb the motion. */
-    glideTo(target: number, ms = 250, settle?: () => void) {
-      const sheet = this.refs().sheet;
-      const visual = this.liveTop();
-      this.cancelGlide();
-      this.top = target;
-      this.ty = 0;
-      if (!sheet || Math.abs(visual - target) < 1) {
-        this.applyPos();
-        this.syncDetents();
-        settle?.();
-        return;
-      }
-      this.gliding = true;
-      sheet.style.transition = 'none';
-      this.ty = visual - target;
-      this.applyPos();
-      void sheet.offsetHeight;
-      sheet.style.transition = `transform ${ms}ms ease-out`;
-      this.ty = 0;
-      this.applyTransform();
-      this.syncDetents();
-      this.glideTimer = window.setTimeout(() => {
-        if (!this.gliding) return;
-        this.gliding = false;
-        this.refs().sheet?.style.setProperty('transition', '');
-        this.ty = 0;
-        this.applyTransform();
-        this.syncDetents();
-        settle?.();
-      }, ms + 60);
-    },
-
-    /** Drop a pending glide without moving. */
-    cancelGlide() {
-      if (!this.gliding) return;
-      this.gliding = false;
-      window.clearTimeout(this.glideTimer);
-      this.refs().sheet?.style.setProperty('transition', '');
-    },
-
-    /** Initial slide-up from dismissed to peek. The travel is fixed,
-     * so content reflows mid-flight extend downward undisturbed. */
-    enter() {
-      const sheet = this.refs().sheet;
-      if (!sheet) return;
-      this.freeze(sheet, () => {
-        this.top = window.innerHeight;
-        this.ty = 0;
-      });
-      this.expanded = false;
-      const ms = Math.min(600, Math.max(200, Math.round(this.peekSize() / 1.5)));
-      this.glideTo(this.peekTop(), ms, () => this.snapPeek());
-    },
-
-    // A docked tail follows content growth so the end stays docked;
-    // peek and head are fixed viewport positions that growth extends
-    // downward from. A freely panned sheet keeps its top instead.
-    layout() {
-      if (this.dragging || this.closing || this.gliding) return;
-      const sheet = this.refs().sheet;
-      if (!sheet) return;
-
-      const full = this.fullHeight();
-      const tail = window.innerHeight - full;
-      const atTail = Math.abs(this.top - (window.innerHeight - this.lastFull)) < DOCK_PX;
-      const atRest = Math.abs(this.top - this.lastRest) < DOCK_PX;
-      const atHead = !atRest && Math.abs(this.top - this.lastHead) < DOCK_PX;
-      if (full !== this.lastFull && atTail) {
-        this.freeze(sheet, () => {
-          this.top = tail;
-          this.ty = 0;
-        });
-      }
-
-      if (atRest) this.snapPeek();
-      else if (atHead) this.snapHead();
-      else {
-        this.top = Math.min(window.innerHeight, Math.max(tail, this.top));
-        this.ty = 0;
-        this.syncDetents();
-        this.applyPos();
-      }
-    },
-
-    snapTo(top: number, expanded: boolean) {
-      this.expanded = expanded;
-      this.glideTo(top);
-    },
-
-    /** Dock at a top; anything but peek counts as expanded. */
-    snapValue(target: number) {
-      this.snapTo(target, target !== this.peekTop());
-    },
-
-    snapHead() {
-      this.snapTo(this.headTop(), true);
-    },
-
-    snapPeek() {
-      this.snapTo(this.peekTop(), false);
-    },
-
-    /** Handle tap/keyboard: alternate peek and head. */
-    toggleOpen() {
-      if (this.closing) return;
-      if (this.expanded) this.snapPeek();
-      else this.snapHead();
-    },
-
-    panTarget(e: TouchEvent) {
-      return (e.target as HTMLElement).closest('.sheet-handle-area') !== null;
-    },
-
-    onDragStart(e: TouchEvent) {
-      if (e.touches.length !== 1 || this.closing) return;
-      // Embedded interactive content keeps its own gestures (e.g. map pan).
-      if ((e.target as HTMLElement).closest('.leaflet-container')) return;
-      // Grab the live position so a mid-glide grab never jumps.
-      if (this.gliding) {
-        this.top = this.liveTop();
-        this.ty = 0;
-        this.cancelGlide();
-        this.syncDetents();
-        this.applyPos();
-      }
-      this.startPan(e.touches[0].clientY, this.panTarget(e));
-    },
-
-    onDragMove(e: TouchEvent) {
-      if (!this.dragging || e.touches.length !== 1) return;
-      // Take over the gesture so nothing behind scrolls or pans.
-      if (e.cancelable) e.preventDefault();
-      this.movePan(e.touches[0].clientY);
-    },
-
-    onDragEnd() {
-      if (!this.dragging) return;
-      this.finishPan();
-      this.dragging = false;
-    },
-
-    /** Abort the gesture: snap back to the current dock. */
-    onDragCancel() {
-      this.dragging = false;
-      this.snapTo(this.expanded ? this.headTop() : this.peekTop(), this.expanded);
-    },
-
-    /** Begin a 1:1 pan from the current top. */
-    startPan(clientY: number, onHandle: boolean) {
-      this.dragging = true;
-      this.dragStartY = clientY;
-      this.dragBase = this.top;
-      this.dragDy = 0;
-      this.lastY = clientY;
-      this.lastT = Date.now();
-      this.velocity = 0;
-      this.startedOnHandle = onHandle;
-      this.suppressClick = false;
-    },
-
-    movePan(clientY: number) {
-      const now = Date.now();
-      this.dragDy = clientY - this.dragStartY;
-      if (Math.abs(this.dragDy) > TAP_SLOP) {
-        this.suppressClick = true;
-      }
-
-      const dt = Math.max(1, now - this.lastT);
-      this.velocity = 0.7 * this.velocity + (0.3 * (clientY - this.lastY)) / dt;
-      this.lastY = clientY;
-      this.lastT = now;
-
-      // Follow the finger 1:1 through transform across the whole box,
-      // from the tail down to dismissed. The handle may travel above
-      // the viewport on long sheets; the sheet never lifts past
-      // its own tail.
-      const tail = window.innerHeight - this.fullHeight();
-      this.ty = Math.min(window.innerHeight, Math.max(tail, this.dragBase + this.dragDy)) - this.top;
-      this.applyTransform();
-    },
-
-    // Release: tap toggles, fling steps detents, far-down dismisses,
-    // otherwise dock nearby or stay where dropped.
-    finishPan() {
-      // Commit the finger position first; with transitions off while
-      // dragging this moves nothing, so the snaps below start live.
-      this.top += this.ty;
-      this.ty = 0;
-      this.applyPos();
-
-      const dy = this.dragDy;
-      const vel = this.velocity;
-      const rest = this.peekTop();
-
-      // Taps on the handle toggle; taps elsewhere do nothing so
-      // embedded links and buttons keep working normally.
-      if (Math.abs(dy) < TAP_SLOP) {
-        if (this.startedOnHandle) this.toggleOpen();
-        return;
-      }
-
-      if (vel < -FLING_PX_MS) this.snapNeighbor(-1);
-      else if (vel > FLING_PX_MS) this.snapNeighbor(1);
-      else if (this.top > rest + CLOSE_PX) this.dismiss();
-      else if (!this.snapNearest()) this.syncDetents();
-    },
-
-    // Step to the neighboring detent (+1 down, -1 up),
-    // falling off the bottom edge into dismiss.
-    snapNeighbor(dir: 1 | -1) {
-      const spots = this.spots();
-      let idx = 0;
-      spots.forEach((s, i) => {
-        if (s <= this.top + DOCK_PX) idx = i;
-      });
-      const next = idx + dir;
-      if (next >= spots.length) {
-        this.dismiss();
-        return;
-      }
-      this.snapValue(spots[Math.max(0, next)]);
-    },
-
-    // Dock to a nearby detent; false to stay exactly where released.
-    snapNearest() {
-      const spots = this.spots();
-      let near = spots[0];
-      for (const s of spots) {
-        if (Math.abs(s - this.top) < Math.abs(near - this.top)) near = s;
-      }
-      if (Math.abs(near - this.top) < DOCK_PX) {
-        this.snapValue(near);
-        return true;
-      }
-      return false;
-    },
-
-    /** Glide off-screen, then ask the parent to close. */
-    dismiss() {
-      this.closing = true;
-      this.glideTo(window.innerHeight);
-      this.closeTimer = window.setTimeout(() => this.$emit('close'), CLOSE_ANIM_MS);
-    },
-
-    onClickCapture(e: Event) {
-      // A drag starting on a link would otherwise navigate on release.
-      if (this.suppressClick) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.suppressClick = false;
-      }
-    },
-  },
 });
+
+const props = withDefaults(
+  defineProps<{
+    photo?: IPhoto | null;
+  }>(),
+  {
+    photo: null,
+  },
+);
+
+const emit = defineEmits<{
+  close: [];
+}>();
+
+const sheet = useTemplateRef<HTMLDivElement>('sheet');
+const content = useTemplateRef<HTMLDivElement>('content');
+const metadata = useTemplateRef<InstanceType<typeof Metadata>>('metadata');
+
+/** Docked at head/tail (vs peek) */
+const expanded = ref(false);
+const dragging = ref(false);
+const closing = ref(false);
+/** Resting top edge of the sheet in px */
+const top = ref(0);
+/** Transient transform delta; always 0 at rest */
+const ty = ref(0);
+const dragStartY = ref(0);
+const dragBase = ref(0);
+const dragDy = ref(0);
+const lastY = ref(0);
+const lastT = ref(0);
+const velocity = ref(0);
+const startedOnHandle = ref(false);
+const suppressClick = ref(false);
+/** Last known detents, to tell parked positions from free panning */
+const lastRest = ref(0);
+const lastHead = ref(0);
+const lastFull = ref(0);
+
+let resizeObserver: ResizeObserver | null = null;
+let resizeListener: (() => void) | null = null;
+let closeTimer = 0;
+let glideTimer = 0;
+/** Transform glide in flight */
+let gliding = false;
+
+watch(
+  () => props.photo,
+  () => {
+    refreshMetadata();
+  },
+);
+
+onMounted(() => {
+  refreshMetadata();
+  nextTick(() => enter());
+
+  sheet.value?.addEventListener('touchmove', onDragMove, { passive: false });
+  // ResizeObserver batches per frame, so adjust synchronously
+  // (pre-paint) to avoid flashing raw growth for a frame.
+  resizeObserver = new ResizeObserver(() => layout());
+  if (content.value) resizeObserver.observe(content.value);
+  resizeListener = () => layout();
+  window.addEventListener('resize', resizeListener);
+});
+
+onBeforeUnmount(() => {
+  sheet.value?.removeEventListener('touchmove', onDragMove);
+  resizeObserver?.disconnect();
+  if (resizeListener) window.removeEventListener('resize', resizeListener);
+  window.clearTimeout(closeTimer);
+  window.clearTimeout(glideTimer);
+});
+
+/** Reload metadata for the current photo, then fit the sheet around it. */
+async function refreshMetadata() {
+  const photo = props.photo;
+  if (!photo || metadata.value?.fileid === photo.fileid) return;
+  await metadata.value?.update(photo);
+  layout();
+}
+
+/** Full height of the embedded content; the sheet always wraps it all */
+function fullHeight(): number {
+  return sheet.value?.scrollHeight ?? 0;
+}
+
+/** Top edge with the content end docked at the viewport bottom */
+function tailTop(): number {
+  return window.innerHeight - fullHeight();
+}
+
+/** Visible peek height */
+function peekSize(): number {
+  return Math.min(Math.round(window.innerHeight * 0.45), PEEK_PX);
+}
+
+/** Top edge showing just the peek area */
+function peekTop(): number {
+  return window.innerHeight - peekSize();
+}
+
+/** Top edge with the head fullscreen (handle at the viewport top) */
+function headTop(): number {
+  return Math.max(tailTop(), 0);
+}
+
+/** Merged detent list: tail, head, peek */
+function spots(): number[] {
+  const out: number[] = [];
+  for (const s of [tailTop(), headTop(), peekTop()].sort((a, b) => a - b)) {
+    if (!out.length || s - out.at(-1)! >= DOCK_PX) out.push(s);
+  }
+  return out;
+}
+
+/** Remember current detents to recognize parked positions later. */
+function syncDetents() {
+  lastRest.value = peekTop();
+  lastHead.value = headTop();
+  lastFull.value = fullHeight();
+}
+
+function applyPos() {
+  const el = sheet.value;
+  if (!el) return;
+  el.style.setProperty('top', `${Math.round(top.value)}px`);
+  el.style.setProperty('transform', `translateY(${Math.round(ty.value)}px)`);
+}
+
+function applyTransform() {
+  sheet.value?.style.setProperty('transform', `translateY(${Math.round(ty.value)}px)`);
+}
+
+/** Live visual top edge, adopting any in-flight glide. */
+function liveTop(): number {
+  const el = sheet.value;
+  if (!el) return top.value;
+  const cs = getComputedStyle(el);
+  const topPx = parseFloat(cs.top);
+  const m = cs.transform;
+  const dy = m && m !== 'none' ? new DOMMatrixReadOnly(m).m42 : 0;
+  return (Number.isFinite(topPx) ? topPx : top.value) + (Number.isFinite(dy) ? dy : 0);
+}
+
+/** Run fn with transitions off so the box jumps without animating. */
+function freeze(el: HTMLElement, fn: () => void) {
+  el.style.transition = 'none';
+  fn();
+  applyPos();
+  void el.offsetHeight;
+  el.style.transition = '';
+}
+
+/** Glide the visual top to target through transform; top stays
+ * exact throughout, so content reflows can't disturb the motion. */
+function glideTo(target: number, ms = 250, settle?: () => void) {
+  const el = sheet.value;
+  const visual = liveTop();
+  cancelGlide();
+  top.value = target;
+  ty.value = 0;
+  if (!el || Math.abs(visual - target) < 1) {
+    applyPos();
+    syncDetents();
+    settle?.();
+    return;
+  }
+  gliding = true;
+  el.style.transition = 'none';
+  ty.value = visual - target;
+  applyPos();
+  void el.offsetHeight;
+  el.style.transition = `transform ${ms}ms ease-out`;
+  ty.value = 0;
+  applyTransform();
+  syncDetents();
+  glideTimer = window.setTimeout(() => {
+    if (!gliding) return;
+    gliding = false;
+    sheet.value?.style.setProperty('transition', '');
+    ty.value = 0;
+    applyTransform();
+    syncDetents();
+    settle?.();
+  }, ms + 60);
+}
+
+/** Drop a pending glide without moving. */
+function cancelGlide() {
+  if (!gliding) return;
+  gliding = false;
+  window.clearTimeout(glideTimer);
+  sheet.value?.style.setProperty('transition', '');
+}
+
+/** Initial slide-up from dismissed to peek. The travel is fixed,
+ * so content reflows mid-flight extend downward undisturbed. */
+function enter() {
+  const el = sheet.value;
+  if (!el) return;
+  freeze(el, () => {
+    top.value = window.innerHeight;
+    ty.value = 0;
+  });
+  expanded.value = false;
+  const ms = Math.min(600, Math.max(200, Math.round(peekSize() / 1.5)));
+  glideTo(peekTop(), ms, () => snapPeek());
+}
+
+// A docked tail follows content growth so the end stays docked;
+// peek and head are fixed viewport positions that growth extends
+// downward from. A freely panned sheet keeps its top instead.
+function layout() {
+  if (dragging.value || closing.value || gliding) return;
+  const el = sheet.value;
+  if (!el) return;
+
+  const full = fullHeight();
+  const tail = window.innerHeight - full;
+  const atTail = Math.abs(top.value - (window.innerHeight - lastFull.value)) < DOCK_PX;
+  const atRest = Math.abs(top.value - lastRest.value) < DOCK_PX;
+  const atHead = !atRest && Math.abs(top.value - lastHead.value) < DOCK_PX;
+  if (full !== lastFull.value && atTail) {
+    freeze(el, () => {
+      top.value = tail;
+      ty.value = 0;
+    });
+  }
+
+  if (atRest) snapPeek();
+  else if (atHead) snapHead();
+  else {
+    top.value = Math.min(window.innerHeight, Math.max(tail, top.value));
+    ty.value = 0;
+    syncDetents();
+    applyPos();
+  }
+}
+
+function snapTo(topPx: number, expand: boolean) {
+  expanded.value = expand;
+  glideTo(topPx);
+}
+
+/** Dock at a top; anything but peek counts as expanded. */
+function snapValue(target: number) {
+  snapTo(target, target !== peekTop());
+}
+
+function snapHead() {
+  snapTo(headTop(), true);
+}
+
+function snapPeek() {
+  snapTo(peekTop(), false);
+}
+
+/** Handle tap/keyboard: alternate peek and head. */
+function toggleOpen() {
+  if (closing.value) return;
+  if (expanded.value) snapPeek();
+  else snapHead();
+}
+
+function panTarget(e: TouchEvent) {
+  return (e.target as HTMLElement).closest('.sheet-handle-area') !== null;
+}
+
+function onDragStart(e: TouchEvent) {
+  if (e.touches.length !== 1 || closing.value) return;
+  // Embedded interactive content keeps its own gestures (e.g. map pan).
+  if ((e.target as HTMLElement).closest('.leaflet-container')) return;
+  // Grab the live position so a mid-glide grab never jumps.
+  if (gliding) {
+    top.value = liveTop();
+    ty.value = 0;
+    cancelGlide();
+    syncDetents();
+    applyPos();
+  }
+  startPan(e.touches[0].clientY, panTarget(e));
+}
+
+function onDragMove(e: TouchEvent) {
+  if (!dragging.value || e.touches.length !== 1) return;
+  // Take over the gesture so nothing behind scrolls or pans.
+  if (e.cancelable) e.preventDefault();
+  movePan(e.touches[0].clientY);
+}
+
+function onDragEnd() {
+  if (!dragging.value) return;
+  finishPan();
+  dragging.value = false;
+}
+
+/** Abort the gesture: snap back to the current dock. */
+function onDragCancel() {
+  dragging.value = false;
+  snapTo(expanded.value ? headTop() : peekTop(), expanded.value);
+}
+
+/** Begin a 1:1 pan from the current top. */
+function startPan(clientY: number, onHandle: boolean) {
+  dragging.value = true;
+  dragStartY.value = clientY;
+  dragBase.value = top.value;
+  dragDy.value = 0;
+  lastY.value = clientY;
+  lastT.value = Date.now();
+  velocity.value = 0;
+  startedOnHandle.value = onHandle;
+  suppressClick.value = false;
+}
+
+function movePan(clientY: number) {
+  const now = Date.now();
+  dragDy.value = clientY - dragStartY.value;
+  if (Math.abs(dragDy.value) > TAP_SLOP) {
+    suppressClick.value = true;
+  }
+
+  const dt = Math.max(1, now - lastT.value);
+  velocity.value = 0.7 * velocity.value + (0.3 * (clientY - lastY.value)) / dt;
+  lastY.value = clientY;
+  lastT.value = now;
+
+  // Follow the finger 1:1 through transform across the whole box,
+  // from the tail down to dismissed. The handle may travel above
+  // the viewport on long sheets; the sheet never lifts past
+  // its own tail.
+  const tail = window.innerHeight - fullHeight();
+  ty.value = Math.min(window.innerHeight, Math.max(tail, dragBase.value + dragDy.value)) - top.value;
+  applyTransform();
+}
+
+// Release: tap toggles, fling steps detents, far-down dismisses,
+// otherwise dock nearby or stay where dropped.
+function finishPan() {
+  // Commit the finger position first; with transitions off while
+  // dragging this moves nothing, so the snaps below start live.
+  top.value += ty.value;
+  ty.value = 0;
+  applyPos();
+
+  const dy = dragDy.value;
+  const vel = velocity.value;
+  const rest = peekTop();
+
+  // Taps on the handle toggle; taps elsewhere do nothing so
+  // embedded links and buttons keep working normally.
+  if (Math.abs(dy) < TAP_SLOP) {
+    if (startedOnHandle.value) toggleOpen();
+    return;
+  }
+
+  if (vel < -FLING_PX_MS) snapNeighbor(-1);
+  else if (vel > FLING_PX_MS) snapNeighbor(1);
+  else if (top.value > rest + CLOSE_PX) dismiss();
+  else if (!snapNearest()) syncDetents();
+}
+
+// Step to the neighboring detent (+1 down, -1 up),
+// falling off the bottom edge into dismiss.
+function snapNeighbor(dir: 1 | -1) {
+  const spotList = spots();
+  let idx = 0;
+  spotList.forEach((s, i) => {
+    if (s <= top.value + DOCK_PX) idx = i;
+  });
+  const next = idx + dir;
+  if (next >= spotList.length) {
+    dismiss();
+    return;
+  }
+  snapValue(spotList[Math.max(0, next)]);
+}
+
+// Dock to a nearby detent; false to stay exactly where released.
+function snapNearest() {
+  const spotList = spots();
+  let near = spotList[0];
+  for (const s of spotList) {
+    if (Math.abs(s - top.value) < Math.abs(near - top.value)) near = s;
+  }
+  if (Math.abs(near - top.value) < DOCK_PX) {
+    snapValue(near);
+    return true;
+  }
+  return false;
+}
+
+/** Glide off-screen, then ask the parent to close. */
+function dismiss() {
+  closing.value = true;
+  glideTo(window.innerHeight);
+  closeTimer = window.setTimeout(() => emit('close'), CLOSE_ANIM_MS);
+}
+
+function onClickCapture(e: Event) {
+  // A drag starting on a link would otherwise navigate on release.
+  if (suppressClick.value) {
+    e.preventDefault();
+    e.stopPropagation();
+    suppressClick.value = false;
+  }
+}
 </script>
 
 <style lang="scss" scoped>
