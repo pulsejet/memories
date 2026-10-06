@@ -322,9 +322,9 @@ export default defineComponent({
       }
 
       // Check if viewer is supposed to be open
-      if (from?.hash !== to.hash && !_m.viewer.isOpen && utils.fragment.viewer) {
+      if (from?.hash !== to.hash && !_m.viewer.isOpen && (utils.fragment.viewer || utils.fragment.day)) {
         // Open viewer
-        const [dayidStr, key] = utils.fragment.viewer.args;
+        const [dayidStr, key] = utils.fragment.viewer?.args || utils.fragment.day!.args;
         const dayid = parseInt(dayidStr);
         if (isNaN(dayid) || !key) return;
 
@@ -340,15 +340,19 @@ export default defineComponent({
         const photo = day?.detail?.find((p) => p.key === key);
         if (!photo) return;
 
-        // Scroll to photo if initializing
-        if (!from) {
+        // Scroll to photo if initializing, or if just a scroll change.
+        if (!from || utils.fragment.day) {
           const index = this.list.findIndex((r) => r.day.dayid === dayid && r.photos?.includes(photo));
           if (index !== -1) {
             this.refs().recycler?.scrollToItem(index);
           }
         }
 
-        _m.viewer.openDynamic(photo, this);
+        if (utils.fragment.viewer) {
+          _m.viewer.openDynamic(photo, this);
+        } else if (utils.fragment.day) {
+          utils.fragment.clear();
+        }
       }
     },
 

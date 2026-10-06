@@ -63,13 +63,7 @@
       </div>
 
       <div class="top-date" v-if="photoswipe">
-        <div class="date-line" v-if="currentDateStr">
-          {{ currentDateStr }}
-        </div>
-        <div class="time-line" v-if="currentTimeStr">
-          {{ currentTimeStr }}
-          <template v-if="currentAddressShort"> • {{ currentAddressShort }}</template>
-        </div>
+        <ViewerDateAddress :photo="currentPhoto" :two-lines="true" />
       </div>
 
       <div class="bottom-bar" v-if="photoswipe">
@@ -79,9 +73,7 @@
         <div class="exif description" v-if="currentPhoto?.imageInfo?.exif?.Description">
           {{ currentPhoto.imageInfo.exif.Description }}
         </div>
-        <div class="exif date" v-if="currentDateTaken">
-          {{ currentDateTaken }}<template v-if="currentAddressShort"> • {{ currentAddressShort }}</template>
-        </div>
+        <ViewerDateAddress :photo="currentPhoto" :two-lines="false" />
       </div>
 
       <MobileBottomBar v-if="photoswipe && bottomActions.length" class="viewer-mobile-actions" dark>
@@ -129,6 +121,7 @@ import * as nativex from '@native';
 import { makeTapPatch } from '@services/patches/mobile-click';
 
 import ImageEditor from './ImageEditor.vue';
+import ViewerDateAddress from './ViewerDateAddress.vue';
 import ViewerBottomSheet from './ViewerBottomSheet.vue';
 import ViewerSheetGestures from './ViewerSheetGestures.vue';
 import MobileBottomBar from '@components/MobileBottomBar.vue';
@@ -189,6 +182,7 @@ export default defineComponent({
     NcButton,
     BackIcon,
     ImageEditor,
+    ViewerDateAddress,
     MobileBottomBar,
     ViewerBottomSheet,
     ViewerSheetGestures,
@@ -246,7 +240,14 @@ export default defineComponent({
     /** Tap-to-click patch handlers for viewer chrome buttons */
     tapPatch: markRaw(
       makeTapPatch({
-        containers: ['.top-bar', '.top-bar-left', '.viewer-mobile-actions', '.v-popper__popper'],
+        selectors: [
+          '.top-bar button',
+          '.top-bar-left button',
+          '.top-date .date-line',
+          '.bottom-bar .exif.date',
+          '.viewer-mobile-actions button',
+          '.v-popper__popper button, .v-popper__popper a',
+        ],
       }),
     ),
   }),
@@ -511,32 +512,6 @@ export default defineComponent({
     /** Allow closing the viewer */
     allowClose(): boolean {
       return !this.editorOpen && !dav.isSingleItem() && !this.slideshowTimer;
-    },
-
-    /** Get date taken date line */
-    currentDateStr(): string | null {
-      const date = this.currentPhoto?.imageInfo?.datetaken;
-      if (!date) return null;
-      return utils.getDateStr(new Date(date * 1000));
-    },
-
-    /** Get date taken time line */
-    currentTimeStr(): string | null {
-      const date = this.currentPhoto?.imageInfo?.datetaken;
-      if (!date) return null;
-      return utils.getTimeStr(new Date(date * 1000));
-    },
-
-    /** Get date taken string */
-    currentDateTaken(): string | null {
-      const date = this.currentPhoto?.imageInfo?.datetaken;
-      if (!date) return null;
-      return utils.getLongDateStr(new Date(date * 1000), false, true);
-    },
-
-    /** Get short place name for current photo */
-    currentAddressShort(): string | null {
-      return this.currentPhoto?.imageInfo?.address_short ?? null;
     },
 
     /** Show edit buttons */
@@ -1586,19 +1561,6 @@ export default defineComponent({
   opacity: 0;
   .memories-viewer:has(.pswp--ui-visible):not(.is-slideshow) & {
     opacity: 1;
-  }
-
-  .date-line {
-    font-size: 1em;
-    font-weight: 500;
-  }
-  .time-line {
-    font-size: 0.85em;
-    opacity: 0.85;
-    max-width: calc(100vw - 220px);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
 
