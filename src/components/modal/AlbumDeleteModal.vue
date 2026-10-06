@@ -20,63 +20,52 @@
   </Modal>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed, useTemplateRef } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import { showError } from '@nextcloud/dialogs';
 import NcButton from '@nextcloud/vue/components/NcButton';
 
 import Modal from './Modal.vue';
-import ModalMixin from './ModalMixin';
 
+import { useModal } from '@services/modal';
+import { t } from '@services/l10n';
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
 import client from '@services/dav/client';
 
-export default defineComponent({
+defineOptions({
   name: 'AlbumDeleteModal',
-  components: {
-    NcButton,
-    Modal,
-  },
-
-  mixins: [ModalMixin],
-
-  emits: [],
-
-  computed: {
-    user() {
-      return this.$route.params.user?.toString();
-    },
-
-    name() {
-      return this.$route.params.name?.toString();
-    },
-
-    owned() {
-      return this.user === utils.uid;
-    },
-  },
-
-  methods: {
-    open() {
-      this.show = true;
-    },
-
-    cleanup() {
-      this.show = false;
-    },
-
-    async save() {
-      try {
-        await client.deleteFile(dav.getAlbumPath(this.user, this.name));
-        await this.close();
-        await this.$router.push({ name: 'albums' });
-      } catch (error) {
-        console.error(error);
-        showError(this.t('memories', 'Failed to delete {name}.', { name: this.name }));
-      }
-    },
-  },
 });
+
+const route = useRoute();
+const router = useRouter();
+const modal = useTemplateRef('modal');
+const { show, close } = useModal(modal);
+
+const user = computed(() => route.params.user?.toString());
+const name = computed(() => route.params.name?.toString());
+const owned = computed(() => user.value === utils.uid);
+
+function open() {
+  show.value = true;
+}
+
+function cleanup() {
+  show.value = false;
+}
+
+async function save() {
+  try {
+    await client.deleteFile(dav.getAlbumPath(user.value, name.value));
+    await close();
+    await router.push({ name: 'albums' });
+  } catch (error) {
+    console.error(error);
+    showError(t('memories', 'Failed to delete {name}.', { name: name.value }));
+  }
+}
+
+defineExpose({ open });
 </script>
