@@ -63,8 +63,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { computed, ref, onMounted, defineAsyncComponent } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
@@ -74,6 +74,8 @@ import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
+
+import { t } from '@services/l10n';
 
 import type { IPhoto } from '@typings';
 
@@ -91,159 +93,131 @@ type NLocation = {
   lon: string;
 };
 
-export default defineComponent({
-  components: {
-    NcActions,
-    NcActionButton,
-    NcTextField,
-    NcListItem,
-    MagnifyIcon,
-    CloseIcon,
-    UndoIcon,
-    XLoadingIcon,
-  },
+const props = defineProps<{
+  photos: IPhoto[];
+  disabled?: boolean;
+}>();
 
-  props: {
-    photos: {
-      type: Array<IPhoto>,
-      required: true,
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
-  },
+const dirty = ref(false);
+const lat = ref<number | null>(null);
+const lon = ref<number | null>(null);
+const searchBar = ref('');
+const loading = ref(false);
 
-  data: () => ({
-    dirty: false,
-    lat: null as number | null,
-    lon: null as number | null,
-    searchBar: '',
-    loading: false,
+const options = ref<NLocation[]>([]);
 
-    options: [] as NLocation[],
-  }),
-
-  computed: {
-    loc() {
-      if (this.lat && this.lon) {
-        return `${this.lat.toFixed(6)}, ${this.lon.toFixed(6)}`;
-      }
-      return this.t('memories', 'No coordinates');
-    },
-
-    searchBase() {
-      return staticConfig.getSync('places_search_url').trim();
-    },
-
-    isNominatim() {
-      return this.searchBase.toLowerCase().includes('nominatim');
-    },
-  },
-
-  mounted() {
-    this.reset();
-  },
-
-  methods: {
-    reset() {
-      this.dirty = false;
-      const photos = this.photos as IPhoto[];
-
-      let lat = 0,
-        lon = 0,
-        count = 0;
-      for (const photo of photos) {
-        const exif = photo.imageInfo?.exif;
-        if (!exif) {
-          continue;
-        }
-
-        if (exif.GPSLatitude && exif.GPSLongitude) {
-          lat += Number(exif.GPSLatitude);
-          lon += Number(exif.GPSLongitude);
-          count++;
-        }
-      }
-
-      if (count > 0) {
-        this.lat = lat / count;
-        this.lon = lon / count;
-      } else {
-        this.lat = this.lon = null;
-      }
-    },
-
-    async search() {
-      if (this.loading || this.searchBar.length === 0) {
-        return;
-      }
-
-      // Check if searchbar is already a coordinate
-      const coords = this.searchBar.split(',');
-      if (coords.length === 2) {
-        const lat = Number(coords[0].trim());
-        const lon = Number(coords[1].trim());
-        if (!isNaN(lat) && !isNaN(lon)) {
-          return this.select({
-            osm_id: 0,
-            display_name: `${lat.toFixed(6)}, ${lon.toFixed(6)}`,
-            lat: lat.toFixed(6),
-            lon: lon.toFixed(6),
-          });
-        }
-      }
-
-      // No search provider configured.
-      if (!this.searchBase) return;
-
-      this.loading = true;
-      const q = window.encodeURIComponent(this.searchBar);
-      try {
-        const response = await axios.get<NLocation[]>(`${this.searchBase}/search?q=${q}&format=jsonv2`);
-        this.options = response.data.filter((x) => x.lat && x.lon && x.display_name);
-      } catch (error) {
-        console.error(error);
-        showError(this.t('memories', 'Failed to search for location.'));
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    clear() {
-      this.dirty = true;
-      this.lat = 0;
-      this.lon = 0;
-    },
-
-    select(option: NLocation) {
-      this.dirty = true;
-      this.lat = Number(option.lat);
-      this.lon = Number(option.lon);
-      this.options = [];
-      this.searchBar = '';
-    },
-
-    result() {
-      if (!this.dirty || this.lat === null || this.lon === null) return null;
-
-      const lat = this.lat.toFixed(6);
-      const lon = this.lon.toFixed(6);
-
-      // Exiftool is actually supposed to pick up the reference from
-      // a signed set of coordinates: https://exiftool.org/faq.html#Q14
-      // But it doesn't seem to work for some very specific files, so
-      // we'll just set it manually to N/S and E/W
-      return {
-        GPSLatitude: lat,
-        GPSLongitude: lon,
-        GPSLatitudeRef: this.lat >= 0 ? 'N' : 'S',
-        GPSLongitudeRef: this.lon >= 0 ? 'E' : 'W',
-        GPSCoordinates: `${lat}, ${lon}`,
-      };
-    },
-  },
+const loc = computed(() => {
+  if (lat.value && lon.value) {
+    return `${lat.value.toFixed(6)}, ${lon.value.toFixed(6)}`;
+  }
+  return t('memories', 'No coordinates');
 });
+
+const searchBase = computed(() => staticConfig.getSync('places_search_url').trim());
+const isNominatim = computed(() => searchBase.value.toLowerCase().includes('nominatim'));
+
+onMounted(() => {
+  reset();
+});
+
+function reset() {
+  dirty.value = false;
+  const photos = props.photos as IPhoto[];
+
+  let latSum = 0,
+    lonSum = 0,
+    count = 0;
+  for (const photo of photos) {
+    const exif = photo.imageInfo?.exif;
+    if (!exif) {
+      continue;
+    }
+
+    if (exif.GPSLatitude && exif.GPSLongitude) {
+      latSum += Number(exif.GPSLatitude);
+      lonSum += Number(exif.GPSLongitude);
+      count++;
+    }
+  }
+
+  if (count > 0) {
+    lat.value = latSum / count;
+    lon.value = lonSum / count;
+  } else {
+    lat.value = lon.value = null;
+  }
+}
+
+async function search() {
+  if (loading.value || searchBar.value.length === 0) {
+    return;
+  }
+
+  // Check if searchbar is already a coordinate
+  const coords = searchBar.value.split(',');
+  if (coords.length === 2) {
+    const coordLat = Number(coords[0].trim());
+    const coordLon = Number(coords[1].trim());
+    if (!isNaN(coordLat) && !isNaN(coordLon)) {
+      return select({
+        osm_id: 0,
+        display_name: `${coordLat.toFixed(6)}, ${coordLon.toFixed(6)}`,
+        lat: coordLat.toFixed(6),
+        lon: coordLon.toFixed(6),
+      });
+    }
+  }
+
+  // No search provider configured.
+  if (!searchBase.value) return;
+
+  loading.value = true;
+  const q = window.encodeURIComponent(searchBar.value);
+  try {
+    const response = await axios.get<NLocation[]>(`${searchBase.value}/search?q=${q}&format=jsonv2`);
+    options.value = response.data.filter((x) => x.lat && x.lon && x.display_name);
+  } catch (error) {
+    console.error(error);
+    showError(t('memories', 'Failed to search for location.'));
+  } finally {
+    loading.value = false;
+  }
+}
+
+function clear() {
+  dirty.value = true;
+  lat.value = 0;
+  lon.value = 0;
+}
+
+function select(option: NLocation) {
+  dirty.value = true;
+  lat.value = Number(option.lat);
+  lon.value = Number(option.lon);
+  options.value = [];
+  searchBar.value = '';
+}
+
+function result() {
+  if (!dirty.value || lat.value === null || lon.value === null) return null;
+
+  const resultLat = lat.value.toFixed(6);
+  const resultLon = lon.value.toFixed(6);
+
+  // Exiftool is actually supposed to pick up the reference from
+  // a signed set of coordinates: https://exiftool.org/faq.html#Q14
+  // But it doesn't seem to work for some very specific files, so
+  // we'll just set it manually to N/S and E/W
+  return {
+    GPSLatitude: resultLat,
+    GPSLongitude: resultLon,
+    GPSLatitudeRef: lat.value >= 0 ? 'N' : 'S',
+    GPSLongitudeRef: lon.value >= 0 ? 'E' : 'W',
+    GPSCoordinates: `${resultLat}, ${resultLon}`,
+  };
+}
+
+defineExpose({ result });
 </script>
 
 <style scoped lang="scss">
