@@ -3,7 +3,7 @@
     <NcAppSettingsDialog
       id="memories-settings"
       class="memories-modal"
-      :open="open"
+      :open="props.open"
       :show-navigation="true"
       :name="names.header"
       @update:open="onClose"
@@ -267,14 +267,15 @@ input[type='text'] {
 }
 </style>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue';
+import { useRouter } from 'vue-router';
 
-import UserConfig from '@mixins/UserConfig';
-import { translate as t } from '@services/l10n';
+import { useUserConfig } from '@services/user-config';
 import staticConfig from '@services/static-config';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
+import { t } from '@services/l10n';
 import { showError } from '@nextcloud/dialogs';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
@@ -286,256 +287,236 @@ const NcChip = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCh
 
 import type { IConfig, IMapTileServer } from '@typings';
 
-export default defineComponent({
-  name: 'Settings',
+const props = defineProps<{
+  open: boolean;
+}>();
 
-  components: {
-    NcButton,
-    NcTextField,
-    NcAppSettingsDialog,
-    NcAppSettingsSection,
-    NcCheckboxRadioSwitch,
-    NcChip,
-  },
+const emit = defineEmits<{
+  (e: 'update:open', open: boolean): void;
+}>();
 
-  mixins: [UserConfig],
+const router = useRouter();
+const { config, updateSetting } = useUserConfig();
 
-  emits: {
-    'update:open': (open: boolean) => true,
-  },
+const localFolders = ref<nativex.LocalFolderConfig[]>([]);
+const names = {
+  header: t('memories', 'Settings'),
+  general: t('memories', 'General'),
+  viewer: t('memories', 'Photo Viewer'),
+  onthisday: t('memories', 'On This Day'),
+  account: t('memories', 'Account'),
+  folders: t('memories', 'Folders'),
+  albums: t('memories', 'Albums'),
+  map: t('memories', 'Map Tiles'),
+};
 
-  data: () => ({
-    localFolders: [] as nativex.LocalFolderConfig[],
-    names: {
-      header: t('memories', 'Settings'),
-      general: t('memories', 'General'),
-      viewer: t('memories', 'Photo Viewer'),
-      onthisday: t('memories', 'On This Day'),
-      account: t('memories', 'Account'),
-      folders: t('memories', 'Folders'),
-      albums: t('memories', 'Albums'),
-      map: t('memories', 'Map Tiles'),
-    },
-  }),
-
-  props: {
-    open: {
-      type: Boolean,
-      required: true,
-    },
-  },
-
-  computed: {
-    timelinePaths(): string[] {
-      return (this.config.timeline_path || '').split(';').filter((p) => p && !p.startsWith('_'));
-    },
-
-    isNative(): boolean {
-      return nativex.has();
-    },
-
-    user(): string {
-      return utils.uid ?? String();
-    },
-
-    highResCond(): IConfig['high_res_cond_default'] {
-      return this.config.high_res_cond || this.config.high_res_cond_default || 'zoom';
-    },
-
-    tileServers(): IMapTileServer[] {
-      return staticConfig.getSync('map_tile_servers') || [];
-    },
-  },
-
-  watch: {
-    open(value: boolean) {
-      utils.fragment.if(value, utils.fragment.types.settings);
-    },
-  },
-
-  mounted() {
-    if (this.isNative) {
-      this.refreshNativeConfig();
-    }
-
-    // Fragment navigation
-    utils.bus.on('memories:fragment:pop:settings', this.onClose);
-  },
-
-  beforeUnmount() {
-    utils.bus.off('memories:fragment:pop:settings', this.onClose);
-  },
-
-  methods: {
-    onClose() {
-      this.$emit('update:open', false);
-    },
-
-    // Paths settings
-    async addTimelinePath() {
-      let folder: string;
-      try {
-        folder = await utils.chooseNcFolder(this.t('memories', 'Add a root to your timeline'));
-      } catch {
-        return;
-      }
-
-      if (!folder || this.timelinePaths.includes(folder)) return;
-      await this.saveTimelinePaths([...this.timelinePaths, folder]);
-    },
-
-    async removeTimelinePath(path: string) {
-      const paths = this.timelinePaths.filter((p) => p !== path);
-      if (!paths.length) {
-        showError(this.t('memories', 'At least one timeline path is required'));
-        return;
-      }
-      await this.saveTimelinePaths(paths);
-    },
-
-    async saveTimelinePaths(paths: string[]) {
-      const newPath = paths.join(';');
-      if (newPath !== this.config.timeline_path) {
-        this.config.timeline_path = newPath;
-        await this.updateSetting('timeline_path', 'timelinePath');
-      }
-    },
-
-    async chooseFoldersPath() {
-      const newPath = await utils.chooseNcFolder(
-        this.t('memories', 'Choose the root for the folders view'),
-        this.config.folders_path,
-      );
-
-      if (newPath !== this.config.folders_path) {
-        this.config.folders_path = newPath;
-        await this.updateSetting('folders_path', 'foldersPath');
-      }
-    },
-
-    // General settings
-    async updateSquareThumbs() {
-      await this.updateSetting('square_thumbs');
-    },
-
-    async updateEnableTopMemories() {
-      await this.updateSetting('enable_top_memories', 'enableTopMemories');
-    },
-
-    async updateStackRawFiles() {
-      await this.updateSetting('stack_raw_files', 'stackRawFiles');
-    },
-
-    async updateDedupIdentical() {
-      await this.updateSetting('dedup_identical', 'dedupIdentical');
-    },
-
-    async updateShowOwnerNameTimeline() {
-      await this.updateSetting('show_owner_name_timeline', 'showOwnerNameTimeline');
-    },
-
-    // Viewer settings
-    async updateHighResCond(val: IConfig['high_res_cond']) {
-      this.config.high_res_cond = val;
-      await this.updateSetting('high_res_cond');
-    },
-
-    async updateLivephotoAutoplay() {
-      await this.updateSetting('livephoto_autoplay', 'livephotoAutoplay');
-    },
-
-    async updateLivephotoLoop() {
-      await this.updateSetting('livephoto_loop', 'livephotoLoop');
-    },
-
-    async updateVideoLoop() {
-      await this.updateSetting('video_loop', 'videoLoop');
-    },
-
-    async updateVideoAutoplay(val: boolean) {
-      this.config.video_autoplay = val ? 'true' : 'false';
-      await this.updateSetting('video_autoplay', 'videoAutoplay');
-    },
-
-    async updateSidebarFilepath() {
-      await this.updateSetting('sidebar_filepath', 'sidebarFilepath');
-    },
-
-    async updateMetadataInSlideshow() {
-      await this.updateSetting('metadata_in_slideshow', 'metadataInSlideshow');
-    },
-
-    async updateSlideshowDuration(val: string | number) {
-      const n = typeof val === 'number' ? val : parseFloat(val);
-      if (!Number.isFinite(n)) return;
-      this.config.slideshow_duration = Math.min(60, Math.max(1, Math.round(n)));
-      await this.updateSetting('slideshow_duration', 'slideshowDuration');
-    },
-
-    // On This Day settings
-    async updateOnThisDayRange(val: string | number) {
-      const n = typeof val === 'number' ? val : parseFloat(val);
-      if (!Number.isFinite(n)) return;
-      this.config.onthisday_day_range = Math.min(7, Math.max(0, Math.round(n)));
-      await this.updateSetting('onthisday_day_range', 'onthisdayDayRange');
-    },
-
-    async updateOnThisDayPhotos(val: string | number) {
-      const n = typeof val === 'number' ? val : parseFloat(val);
-      if (!Number.isFinite(n)) return;
-      this.config.onthisday_photos_per_year = Math.min(50, Math.max(1, Math.round(n)));
-      await this.updateSetting('onthisday_photos_per_year', 'onthisdayPhotosPerYear');
-    },
-
-    // Folders settings
-    async updateShowHidden() {
-      await this.updateSetting('show_hidden_folders', 'showHidden');
-      await this.updateSetting('show_hidden_albums', 'showHiddenAlbums');
-    },
-
-    async updateSortFolderMonth() {
-      await this.updateSetting('sort_folder_month', 'sortFolderMonth');
-    },
-
-    // Albums settings
-    async updateSortAlbumMonth() {
-      await this.updateSetting('sort_album_month', 'sortAlbumMonth');
-    },
-
-    // Map settings
-    async updateMapTileServer(val: string) {
-      this.config.map_tile_server_url = val;
-      await this.updateSetting('map_tile_server_url', 'mapTileServerUrl');
-    },
-
-    // --------------- Native APIs start -----------------------------
-    refreshNativeConfig() {
-      this.localFolders = nativex.getLocalFolders();
-    },
-
-    updateDeviceFolders() {
-      nativex.setLocalFolders(this.localFolders);
-    },
-
-    runNxSetup() {
-      this.$router.replace('/nxsetup');
-    },
-
-    async logout() {
-      if (
-        await utils.confirmDestructive({
-          title: this.t('memories', 'Sign out'),
-          message: this.t('memories', 'Are you sure you want to log out {user}?', { user: this.user }),
-          confirm: this.t('memories', 'Sign out'),
-          confirmClasses: 'error',
-          cancel: this.t('memories', 'Cancel'),
-        })
-      ) {
-        nativex.logout();
-      }
-    },
-  },
+const timelinePaths = computed((): string[] => {
+  return (config.timeline_path || '').split(';').filter((p) => p && !p.startsWith('_'));
 });
+
+const isNative = computed((): boolean => {
+  return nativex.has();
+});
+
+const user = computed((): string => {
+  return utils.uid ?? String();
+});
+
+const highResCond = computed((): IConfig['high_res_cond_default'] => {
+  return config.high_res_cond || config.high_res_cond_default || 'zoom';
+});
+
+const tileServers = computed((): IMapTileServer[] => {
+  return staticConfig.getSync('map_tile_servers') || [];
+});
+
+watch(
+  () => props.open,
+  (value: boolean) => {
+    utils.fragment.if(value, utils.fragment.types.settings);
+  },
+);
+
+onMounted(() => {
+  if (isNative.value) {
+    refreshNativeConfig();
+  }
+
+  // Fragment navigation
+  utils.bus.on('memories:fragment:pop:settings', onClose);
+});
+
+onBeforeUnmount(() => {
+  utils.bus.off('memories:fragment:pop:settings', onClose);
+});
+
+function onClose() {
+  emit('update:open', false);
+}
+
+// Paths settings
+async function addTimelinePath() {
+  let folder: string;
+  try {
+    folder = await utils.chooseNcFolder(t('memories', 'Add a root to your timeline'));
+  } catch {
+    return;
+  }
+
+  if (!folder || timelinePaths.value.includes(folder)) return;
+  await saveTimelinePaths([...timelinePaths.value, folder]);
+}
+
+async function removeTimelinePath(path: string) {
+  const paths = timelinePaths.value.filter((p) => p !== path);
+  if (!paths.length) {
+    showError(t('memories', 'At least one timeline path is required'));
+    return;
+  }
+  await saveTimelinePaths(paths);
+}
+
+async function saveTimelinePaths(paths: string[]) {
+  const newPath = paths.join(';');
+  if (newPath !== config.timeline_path) {
+    config.timeline_path = newPath;
+    await updateSetting('timeline_path', 'timelinePath');
+  }
+}
+
+async function chooseFoldersPath() {
+  const newPath = await utils.chooseNcFolder(
+    t('memories', 'Choose the root for the folders view'),
+    config.folders_path,
+  );
+
+  if (newPath !== config.folders_path) {
+    config.folders_path = newPath;
+    await updateSetting('folders_path', 'foldersPath');
+  }
+}
+
+// General settings
+async function updateSquareThumbs() {
+  await updateSetting('square_thumbs');
+}
+
+async function updateEnableTopMemories() {
+  await updateSetting('enable_top_memories', 'enableTopMemories');
+}
+
+async function updateStackRawFiles() {
+  await updateSetting('stack_raw_files', 'stackRawFiles');
+}
+
+async function updateDedupIdentical() {
+  await updateSetting('dedup_identical', 'dedupIdentical');
+}
+
+async function updateShowOwnerNameTimeline() {
+  await updateSetting('show_owner_name_timeline', 'showOwnerNameTimeline');
+}
+
+// Viewer settings
+async function updateHighResCond(val: IConfig['high_res_cond']) {
+  config.high_res_cond = val;
+  await updateSetting('high_res_cond');
+}
+
+async function updateLivephotoAutoplay() {
+  await updateSetting('livephoto_autoplay', 'livephotoAutoplay');
+}
+
+async function updateLivephotoLoop() {
+  await updateSetting('livephoto_loop', 'livephotoLoop');
+}
+
+async function updateVideoLoop() {
+  await updateSetting('video_loop', 'videoLoop');
+}
+
+async function updateVideoAutoplay(val: boolean) {
+  config.video_autoplay = val ? 'true' : 'false';
+  await updateSetting('video_autoplay', 'videoAutoplay');
+}
+
+async function updateSidebarFilepath() {
+  await updateSetting('sidebar_filepath', 'sidebarFilepath');
+}
+
+async function updateMetadataInSlideshow() {
+  await updateSetting('metadata_in_slideshow', 'metadataInSlideshow');
+}
+
+async function updateSlideshowDuration(val: string | number) {
+  const n = typeof val === 'number' ? val : parseFloat(val);
+  if (!Number.isFinite(n)) return;
+  config.slideshow_duration = Math.min(60, Math.max(1, Math.round(n)));
+  await updateSetting('slideshow_duration', 'slideshowDuration');
+}
+
+// On This Day settings
+async function updateOnThisDayRange(val: string | number) {
+  const n = typeof val === 'number' ? val : parseFloat(val);
+  if (!Number.isFinite(n)) return;
+  config.onthisday_day_range = Math.min(7, Math.max(0, Math.round(n)));
+  await updateSetting('onthisday_day_range', 'onthisdayDayRange');
+}
+
+async function updateOnThisDayPhotos(val: string | number) {
+  const n = typeof val === 'number' ? val : parseFloat(val);
+  if (!Number.isFinite(n)) return;
+  config.onthisday_photos_per_year = Math.min(50, Math.max(1, Math.round(n)));
+  await updateSetting('onthisday_photos_per_year', 'onthisdayPhotosPerYear');
+}
+
+// Folders settings
+async function updateShowHidden() {
+  await updateSetting('show_hidden_folders', 'showHidden');
+  await updateSetting('show_hidden_albums', 'showHiddenAlbums');
+}
+
+async function updateSortFolderMonth() {
+  await updateSetting('sort_folder_month', 'sortFolderMonth');
+}
+
+// Albums settings
+async function updateSortAlbumMonth() {
+  await updateSetting('sort_album_month', 'sortAlbumMonth');
+}
+
+// Map settings
+async function updateMapTileServer(val: string) {
+  config.map_tile_server_url = val;
+  await updateSetting('map_tile_server_url', 'mapTileServerUrl');
+}
+
+// --------------- Native APIs start -----------------------------
+function refreshNativeConfig() {
+  localFolders.value = nativex.getLocalFolders();
+}
+
+function updateDeviceFolders() {
+  nativex.setLocalFolders(localFolders.value);
+}
+
+function runNxSetup() {
+  router.replace('/nxsetup');
+}
+
+async function logout() {
+  if (
+    await utils.confirmDestructive({
+      title: t('memories', 'Sign out'),
+      message: t('memories', 'Are you sure you want to log out {user}?', { user: user.value }),
+      confirm: t('memories', 'Sign out'),
+      confirmClasses: 'error',
+      cancel: t('memories', 'Cancel'),
+    })
+  ) {
+    nativex.logout();
+  }
+}
 </script>
 
 <style lang="scss" scoped>
