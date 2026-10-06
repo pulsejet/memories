@@ -407,7 +407,7 @@ export default defineComponent({
 
       // Bail if the user was scrolling the recycler recently
       // https://github.com/pulsejet/memories/issues/1066
-      if (this.scrollerManager?.scrollingRecyclerNowTimer) return;
+      if (this.scrollerManager?.scrollingRecyclerNowTimer.pending) return;
 
       // Prevent this element from being removed from the DOM
       // If it gets removed then subsequent touch events are not triggered
