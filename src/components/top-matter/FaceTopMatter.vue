@@ -31,7 +31,7 @@
           </NcActionButton>
           <NcActionButton
             :aria-label="t('memories', 'Merge with different person')"
-            @click="refs().mergeModal.open()"
+            @click="mergeModal?.open()"
             close-after-click
           >
             {{ t('memories', 'Merge with different person') }}
@@ -44,11 +44,7 @@
           >
             {{ t('memories', 'Mark person in preview') }}
           </NcActionCheckbox>
-          <NcActionButton
-            :aria-label="t('memories', 'Remove person')"
-            @click="refs().deleteModal.open()"
-            close-after-click
-          >
+          <NcActionButton :aria-label="t('memories', 'Remove person')" @click="deleteModal?.open()" close-after-click>
             {{ t('memories', 'Remove person') }}
             <template #icon> <DeleteIcon :size="20" /> </template>
           </NcActionButton>
@@ -62,10 +58,9 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-import UserConfig from '@mixins/UserConfig';
+<script setup lang="ts">
+import { computed, useTemplateRef } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
@@ -75,7 +70,11 @@ import FaceEditModal from '@components/modal/FaceEditModal.vue';
 import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';
 import FaceMergeModal from '@components/modal/FaceMergeModal.vue';
 
+import { useRouteIsRecognize, useRouteIsRecognizeUnassigned } from '@services/route-checker';
+import { useUserConfig } from '@services/user-config';
 import * as utils from '@services/utils';
+import { constants as c } from '@services/utils';
+import { t } from '@services/l10n';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
@@ -83,77 +82,60 @@ import DeleteIcon from 'vue-material-design-icons/Close.vue';
 import MergeIcon from 'vue-material-design-icons/Merge.vue';
 import UnassignedIcon from 'vue-material-design-icons/AccountQuestion.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'FaceTopMatter',
-  components: {
-    NcActions,
-    NcActionButton,
-    NcActionCheckbox,
-    FaceEditModal,
-    FaceDeleteModal,
-    FaceMergeModal,
-    BackIcon,
-    EditIcon,
-    DeleteIcon,
-    MergeIcon,
-    UnassignedIcon,
-  },
-
-  mixins: [UserConfig],
-
-  computed: {
-    name() {
-      return this.$route.params.name?.toString() || '';
-    },
-
-    isReal() {
-      return this.name && this.name !== this.c.FACE_NULL;
-    },
-
-    displayName() {
-      if (this.routeIsRecognizeUnassigned) {
-        return this.t('memories', 'Unassigned faces');
-      } else if (!this.name) {
-        return this.t('memories', 'People');
-      } else if (utils.isNumber(this.name)) {
-        return this.t('memories', 'Unnamed person');
-      }
-      return this.name;
-    },
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        editModal: InstanceType<typeof FaceEditModal>;
-        deleteModal: InstanceType<typeof FaceDeleteModal>;
-        mergeModal: InstanceType<typeof FaceMergeModal>;
-      };
-    },
-
-    back() {
-      this.$router.go(-1);
-    },
-
-    rename() {
-      if (this.isReal) this.refs().editModal.open();
-    },
-
-    openUnassigned() {
-      this.$router.push({
-        name: this.$route.name?.toString(),
-        params: {
-          user: utils.uid as string,
-          name: this.c.FACE_NULL,
-        },
-      });
-    },
-
-    changeShowFaceRect() {
-      this.config.show_face_rect = !this.config.show_face_rect;
-      this.updateSetting('show_face_rect');
-      utils.bus.emit('memories:timeline:hard-refresh', null);
-    },
-  },
 });
+
+const route = useRoute();
+const router = useRouter();
+const { config, updateSetting } = useUserConfig();
+const routeIsRecognize = useRouteIsRecognize();
+const routeIsRecognizeUnassigned = useRouteIsRecognizeUnassigned();
+
+const editModal = useTemplateRef<InstanceType<typeof FaceEditModal>>('editModal');
+const deleteModal = useTemplateRef<InstanceType<typeof FaceDeleteModal>>('deleteModal');
+const mergeModal = useTemplateRef<InstanceType<typeof FaceMergeModal>>('mergeModal');
+
+const name = computed(() => {
+  return route.params.name?.toString() || '';
+});
+
+const isReal = computed(() => {
+  return name.value && name.value !== c.FACE_NULL;
+});
+
+const displayName = computed(() => {
+  if (routeIsRecognizeUnassigned.value) {
+    return t('memories', 'Unassigned faces');
+  } else if (!name.value) {
+    return t('memories', 'People');
+  } else if (utils.isNumber(name.value)) {
+    return t('memories', 'Unnamed person');
+  }
+  return name.value;
+});
+
+function back() {
+  router.go(-1);
+}
+
+function rename() {
+  if (isReal.value) editModal.value?.open();
+}
+
+function openUnassigned() {
+  router.push({
+    name: route.name?.toString(),
+    params: {
+      user: utils.uid as string,
+      name: c.FACE_NULL,
+    },
+  });
+}
+
+function changeShowFaceRect() {
+  config.show_face_rect = !config.show_face_rect;
+  updateSetting('show_face_rect');
+  utils.bus.emit('memories:timeline:hard-refresh', null);
+}
 </script>
