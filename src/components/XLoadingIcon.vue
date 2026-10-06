@@ -8,14 +8,6 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'XLoadingIcon',
-});
-</script>
-
 <style lang="scss">
 .loading-icon.centered,
 .loading-icon > div > div.stage {
