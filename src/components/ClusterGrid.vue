@@ -28,8 +28,10 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
-import { useRoute } from 'vue-router';
 import { RecycleScroller } from 'vue-virtual-scroller';
+
+import { useRouteIsAlbums } from '@services/route-checker';
+import { useWindowWidthIsMobile } from '@services/common';
 
 import Cluster from '@components/frame/Cluster.vue';
 
@@ -59,9 +61,8 @@ const emit = defineEmits<{
   plus: [];
 }>();
 
-const route = useRoute();
-const routeIsAlbums = computed(() => route.name === _m.routes.Albums.name);
-const windowWidthIsMobile = computed(() => _m.window.isMobile);
+const routeIsAlbums = useRouteIsAlbums();
+const windowWidthIsMobile = useWindowWidthIsMobile();
 
 const recycler = ref<VueRecyclerType>();
 const recyclerWidth = ref(300);
