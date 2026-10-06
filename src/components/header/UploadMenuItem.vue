@@ -12,23 +12,13 @@
   </NcButton>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script setup lang="ts">
 import NcButton from '@nextcloud/vue/components/NcButton';
 import UploadIcon from 'vue-material-design-icons/CloudUpload.vue';
 
-export default defineComponent({
-  name: 'UploadMenuItem',
-  components: {
-    NcButton,
-    UploadIcon,
-  },
+import { t } from '@services/l10n';
 
-  methods: {
-    upload() {
-      _m.modals.upload();
-    },
-  },
-});
+function upload() {
+  _m.modals.upload();
+}
 </script>

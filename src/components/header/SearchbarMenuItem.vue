@@ -13,31 +13,19 @@
   <Searchbar v-else />
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script setup lang="ts">
 import NcButton from '@nextcloud/vue/components/NcButton';
 
 import Searchbar from '@components/header/Searchbar.vue';
 
-import CommonMixin from '@mixins/CommonMixin';
+import { useWindowWidthIsMobile } from '@services/common';
+import { t } from '@services/l10n';
 
 import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 
-export default defineComponent({
-  name: 'SearchbarMenuItem',
-  components: {
-    NcButton,
-    Searchbar,
-    MagnifyIcon,
-  },
+const windowWidthIsMobile = useWindowWidthIsMobile();
 
-  mixins: [CommonMixin],
-
-  methods: {
-    search() {
-      _m.modals.search();
-    },
-  },
-});
+function search() {
+  _m.modals.search();
+}
 </script>
