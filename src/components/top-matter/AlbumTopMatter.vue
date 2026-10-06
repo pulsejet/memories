@@ -87,7 +87,7 @@
         <NcActionButton
           :aria-label="t('memories', 'Create new album')"
           :title="t('memories', 'Create new album')"
-          @click="refs().createModal.open(false)"
+          @click="createModal?.open(false)"
           close-after-click
           v-if="isAlbumList"
         >
@@ -117,7 +117,7 @@
         <NcActionButton
           :aria-label="t('memories', 'Edit album details')"
           :title="t('memories', 'Edit album details')"
-          @click="refs().createModal.open(true)"
+          @click="createModal?.open(true)"
           close-after-click
           v-if="canEditAlbum"
         >
@@ -127,7 +127,7 @@
         <NcActionButton
           :aria-label="t('memories', 'Remove album')"
           :title="t('memories', 'Remove album')"
-          @click="refs().deleteModal.open()"
+          @click="deleteModal?.open()"
           close-after-click
           v-if="!isAlbumList"
         >
@@ -142,14 +142,12 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed, useTemplateRef } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-import UserConfig from '@mixins/UserConfig';
-import CommonMixin from '@mixins/CommonMixin';
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
-import NcActionCheckbox from '@nextcloud/vue/components/NcActionCheckbox';
 import NcActionRadio from '@nextcloud/vue/components/NcActionRadio';
 import NcActionSeparator from '@nextcloud/vue/components/NcActionSeparator';
 
@@ -160,7 +158,11 @@ import AlbumDeleteModal from '@components/modal/AlbumDeleteModal.vue';
 
 import { downloadWithHandle } from '@services/dav';
 import { API } from '@services/API';
+import { useWindowWidthIsMobile } from '@services/common';
+import { useUserConfig } from '@services/user-config';
 import * as utils from '@services/utils';
+import { constants as c } from '@services/utils';
+import { t } from '@services/l10n';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
@@ -174,110 +176,81 @@ import SlotAlphabeticalDIcon from 'vue-material-design-icons/SortAlphabeticalDes
 import SortDateAIcon from 'vue-material-design-icons/SortCalendarAscending.vue';
 import SortDateDIcon from 'vue-material-design-icons/SortCalendarDescending.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'AlbumTopMatter',
-  components: {
-    NcActions,
-    NcActionButton,
-    NcActionCheckbox,
-    NcActionRadio,
-    NcActionSeparator,
-
-    AlbumCreateModal,
-    AlbumDeleteModal,
-
-    BackIcon,
-    DownloadIcon,
-    EditIcon,
-    DeleteIcon,
-    PlusIcon,
-    ShareIcon,
-    SortIcon,
-    SlotAlphabeticalAIcon,
-    SlotAlphabeticalDIcon,
-    SortDateAIcon,
-    SortDateDIcon,
-  },
-
-  mixins: [UserConfig, CommonMixin],
-
-  computed: {
-    isAlbumList(): boolean {
-      return !this.$route.params.name?.toString();
-    },
-
-    canEditAlbum(): boolean {
-      return !this.isAlbumList && this.$route.params.user?.toString() === utils.uid;
-    },
-
-    name(): string {
-      // Album name is displayed in the dynamic top matter (timeline)
-      return this.isAlbumList ? this.t('memories', 'Albums') : String();
-    },
-
-    isDateSort(): boolean {
-      return (
-        !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.CREATED) ||
-        !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.LAST_UPDATE)
-      );
-    },
-
-    isDescending(): boolean {
-      return !!(this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.DESCENDING);
-    },
-
-    sortField(): string {
-      if (this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.CREATED) return 'created';
-      if (this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.NAME) return 'name';
-      return 'last_update';
-    },
-
-    sortDir(): string {
-      return this.isDescending ? 'desc' : 'asc';
-    },
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        createModal: InstanceType<typeof AlbumCreateModal>;
-        deleteModal: InstanceType<typeof AlbumDeleteModal>;
-      };
-    },
-
-    back() {
-      this.$router.go(-1);
-    },
-
-    openShareModal() {
-      _m.modals.albumShare(this.$route.params.user?.toString(), this.$route.params.name?.toString());
-    },
-
-    async downloadAlbum() {
-      const res = await axios.post(
-        API.ALBUM_DOWNLOAD(this.$route.params.user?.toString(), this.$route.params.name?.toString()),
-      );
-      if (res.status === 200 && res.data.handle) {
-        downloadWithHandle(res.data.handle, this.$route.params.name?.toString());
-      }
-    },
-
-    /** Set sort choice */
-    changeSort(flag: number) {
-      const dir = this.config.album_list_sort & this.c.ALBUM_SORT_FLAGS.DESCENDING;
-      this.config.album_list_sort = flag | dir;
-      this.updateSetting('album_list_sort');
-    },
-
-    /** Set sort direction */
-    setDescending(val: boolean) {
-      if (val) {
-        this.config.album_list_sort |= this.c.ALBUM_SORT_FLAGS.DESCENDING;
-      } else {
-        this.config.album_list_sort &= ~this.c.ALBUM_SORT_FLAGS.DESCENDING;
-      }
-      this.updateSetting('album_list_sort');
-    },
-  },
 });
+
+const route = useRoute();
+const router = useRouter();
+const { config, updateSetting } = useUserConfig();
+const windowWidthIsMobile = useWindowWidthIsMobile();
+
+const createModal = useTemplateRef<InstanceType<typeof AlbumCreateModal>>('createModal');
+const deleteModal = useTemplateRef<InstanceType<typeof AlbumDeleteModal>>('deleteModal');
+
+const isAlbumList = computed((): boolean => {
+  return !route.params.name?.toString();
+});
+
+const canEditAlbum = computed((): boolean => {
+  return !isAlbumList.value && route.params.user?.toString() === utils.uid;
+});
+
+const name = computed((): string => {
+  // Album name is displayed in the dynamic top matter (timeline)
+  return isAlbumList.value ? t('memories', 'Albums') : String();
+});
+
+const isDateSort = computed((): boolean => {
+  return (
+    !!(config.album_list_sort & c.ALBUM_SORT_FLAGS.CREATED) ||
+    !!(config.album_list_sort & c.ALBUM_SORT_FLAGS.LAST_UPDATE)
+  );
+});
+
+const isDescending = computed((): boolean => {
+  return !!(config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING);
+});
+
+const sortField = computed((): string => {
+  if (config.album_list_sort & c.ALBUM_SORT_FLAGS.CREATED) return 'created';
+  if (config.album_list_sort & c.ALBUM_SORT_FLAGS.NAME) return 'name';
+  return 'last_update';
+});
+
+const sortDir = computed((): string => {
+  return isDescending.value ? 'desc' : 'asc';
+});
+
+function back() {
+  router.go(-1);
+}
+
+function openShareModal() {
+  _m.modals.albumShare(route.params.user?.toString(), route.params.name?.toString());
+}
+
+async function downloadAlbum() {
+  const res = await axios.post(API.ALBUM_DOWNLOAD(route.params.user?.toString(), route.params.name?.toString()));
+  if (res.status === 200 && res.data.handle) {
+    downloadWithHandle(res.data.handle, route.params.name?.toString());
+  }
+}
+
+/** Set sort choice */
+function changeSort(flag: number) {
+  const dir = config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING;
+  config.album_list_sort = flag | dir;
+  updateSetting('album_list_sort');
+}
+
+/** Set sort direction */
+function setDescending(val: boolean) {
+  if (val) {
+    config.album_list_sort |= c.ALBUM_SORT_FLAGS.DESCENDING;
+  } else {
+    config.album_list_sort &= ~c.ALBUM_SORT_FLAGS.DESCENDING;
+  }
+  updateSetting('album_list_sort');
+}
 </script>
