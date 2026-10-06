@@ -338,6 +338,7 @@ trait TimelineQueryDays
         unset($row['datetaken']);
         // Convert dayId to monthId if needed
         if ($monthView) {
+            $row['dayid_real'] = $row['dayid'];
             $row['dayid'] = $this->dayIdToMonthId($row['dayid']);
         }
 

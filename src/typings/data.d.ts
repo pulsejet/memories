@@ -52,6 +52,8 @@ declare module '@typings' {
     flag: number;
     /** DayID from server */
     dayid: number;
+    /** DayID (real, dayid=monthid) */
+    dayid_real?: number;
     /** Width of full image */
     w?: number;
     /** Height of full image */

@@ -48,6 +48,7 @@ function hitToPhoto(hit: ILensHit, dayid: number): IPhoto {
   return {
     fileid: hit.fileid,
     dayid,
+    dayid_real: hit.dayid,
     key: dayid === TOP_RESULTS_DAYID ? `top-${hit.fileid}` : `${hit.fileid}`,
     w: hit.w ?? undefined,
     h: hit.h ?? undefined,

@@ -4,6 +4,7 @@
     <div
       v-if="dateStr && !routeIsPublic"
       class="date-line"
+      :class="{ 'is-link': dayTo }"
       :title="t('memories', 'Show in timeline')"
       :aria-label="t('memories', 'Show in timeline')"
       @click.stop="jumpToTimeline"
@@ -20,6 +21,7 @@
     <div
       v-if="dateTaken && !routeIsPublic"
       class="exif date"
+      :class="{ 'is-link': dayTo }"
       :title="t('memories', 'Show in timeline')"
       :aria-label="t('memories', 'Show in timeline')"
       @click.stop="jumpToTimeline"
@@ -83,10 +85,22 @@ export default defineComponent({
 
     dayTo() {
       if (!this.photo?.imageInfo?.intimeline) return undefined;
-      if (!this.photo?.dayid || !this.photo?.key) return undefined;
+
+      // We need the real dayid to jump to anywhere in the timeline,
+      // even if the current view is a month view. Note that this means
+      // the target view cannot be a month view :/
+      const dayid = this.photo.dayid_real ?? this.photo.dayid;
+
+      // We use the fileid, not the key. The key may not be the same as the
+      // timeline's fileid, for example on faces where the key is the faceid.
+      const fileid = this.photo.fileid;
+
+      // Both parameters are required for jumping.
+      if (!dayid || !fileid) return undefined;
+
       return {
         name: 'timeline',
-        hash: `#${utils.fragment.types.day}/${this.photo?.dayid}/${this.photo?.key}`,
+        hash: `#${utils.fragment.types.day}/${dayid}/${fileid}`,
       };
     },
   },
@@ -132,8 +146,6 @@ export default defineComponent({
   font-weight: 500;
   position: relative;
   display: inline-block;
-  cursor: pointer;
-  pointer-events: auto;
 
   // Chevron pokes out right without affecting centering.
   :deep(.chev) {
@@ -152,9 +164,6 @@ export default defineComponent({
   text-overflow: ellipsis;
 }
 .date {
-  cursor: pointer;
-  pointer-events: auto;
-
   @media (max-width: 768px) {
     display: none;
   }
@@ -164,5 +173,10 @@ export default defineComponent({
     vertical-align: middle;
     height: 20px;
   }
+}
+
+.is-link {
+  cursor: pointer;
+  pointer-events: auto;
 }
 </style>
