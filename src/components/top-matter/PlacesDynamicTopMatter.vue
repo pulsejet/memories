@@ -1,76 +1,73 @@
 <template>
   <div class="places-dtm">
     <div class="place-btn" v-for="place of places" :key="place.cluster_id">
-      <NcButton class="place" :to="route(place)">{{ place.name }}</NcButton>
+      <NcButton class="place" :to="routeTo(place)">{{ place.name }}</NcButton>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 import axios from '@nextcloud/axios';
 import NcButton from '@nextcloud/vue/components/NcButton';
 
 import { API } from '@services/API';
+import { useRouteIsPlacesUnassigned } from '@services/route-checker';
 import * as utils from '@services/utils';
 
 import type { ICluster } from '@typings';
 
-export default defineComponent({
+defineOptions({
   name: 'PlacesDynamicTopMatter',
-
-  data: () => ({
-    places: [] as ICluster[],
-  }),
-
-  components: {
-    NcButton,
-  },
-
-  computed: {
-    placeId(): number {
-      return Number(utils.routeParamToString(this.$route.params.name).split('-')[0]) || -1;
-    },
-  },
-
-  methods: {
-    async refresh(): Promise<boolean> {
-      // Clear subplaces
-      this.places = [];
-
-      // Skip if unidentified location view
-      if (this.routeIsPlacesUnassigned) return false;
-
-      // Get ID of place from URL
-      const placeId = this.placeId;
-      const url = API.Q(API.PLACE_LIST(), { inside: placeId });
-
-      // Make API call to get subplaces
-      try {
-        const data = (await axios.get<ICluster[]>(url)).data;
-        if (placeId !== this.placeId) {
-          return false;
-        }
-        this.places = data;
-      } catch (e) {
-        console.error(e);
-        return false;
-      }
-
-      return this.places.length > 0;
-    },
-
-    route(place: ICluster) {
-      return {
-        name: _m.routes.Places.name,
-        params: {
-          name: place.cluster_id + '-' + place.name,
-        },
-      };
-    },
-  },
 });
+
+const route = useRoute();
+const routeIsPlacesUnassigned = useRouteIsPlacesUnassigned();
+
+const places = ref<ICluster[]>([]);
+
+const placeId = computed((): number => {
+  return Number(utils.routeParamToString(route.params.name).split('-')[0]) || -1;
+});
+
+async function refresh(): Promise<boolean> {
+  // Clear subplaces
+  places.value = [];
+
+  // Skip if unidentified location view
+  if (routeIsPlacesUnassigned.value) return false;
+
+  // Get ID of place from URL
+  const placeIdVal = placeId.value;
+  const url = API.Q(API.PLACE_LIST(), { inside: placeIdVal });
+
+  // Make API call to get subplaces
+  try {
+    const data = (await axios.get<ICluster[]>(url)).data;
+    if (placeIdVal !== placeId.value) {
+      return false;
+    }
+    places.value = data;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+
+  return places.value.length > 0;
+}
+
+function routeTo(place: ICluster) {
+  return {
+    name: _m.routes.Places.name,
+    params: {
+      name: place.cluster_id + '-' + place.name,
+    },
+  };
+}
+
+defineExpose({ refresh });
 </script>
 
 <style lang="scss" scoped>
