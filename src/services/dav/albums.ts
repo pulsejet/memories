@@ -7,7 +7,7 @@ import { getLanguage } from '@nextcloud/l10n';
 import { translate as t, translatePlural as n } from '@services/l10n';
 import { API } from '@services/API';
 import client from '@services/dav/client';
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import * as utils from '@services/utils';
 
 import type { IAlbum, IFileInfo, IPhoto } from '@typings';
@@ -43,12 +43,12 @@ export async function getAlbums(fileid?: number) {
   let data = res.data;
 
   // Remove hidden albums unless specified
-  if (!userConfig.use().show_hidden_albums) {
+  if (!config.show_hidden_albums) {
     data = data.filter((a) => !a.name.startsWith('.'));
   }
 
   // Sort the response
-  const sort = userConfig.use().album_list_sort;
+  const sort = config.album_list_sort;
   if (sort & utils.constants.ALBUM_SORT_FLAGS.NAME) {
     data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
   } else if (sort & utils.constants.ALBUM_SORT_FLAGS.LAST_UPDATE) {

@@ -131,7 +131,7 @@ import SearchModal from '@components/modal/SearchModal.vue';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 import { translate as t } from '@services/l10n';
-import userConfig from '@services/user-config';
+import { config, hasVersionChanged } from '@services/user-config';
 
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
@@ -158,7 +158,6 @@ defineOptions({
 });
 
 const route = useRoute();
-const config = userConfig.use();
 const routeIsAlbums = useRouteIsAlbums();
 const routeIsBase = useRouteIsBase();
 const routeIsExplore = useRouteIsExplore();
@@ -291,7 +290,7 @@ onBeforeMount(async () => {
         console.info('SW registered: ', registration);
 
         // Check for updates
-        if (await userConfig.hasVersionChanged()) {
+        if (await hasVersionChanged()) {
           await registration.update();
         }
       } catch (error) {

@@ -1,4 +1,4 @@
-import userConfig from './user-config';
+import { config } from './user-config';
 import { translate as t } from '@services/l10n';
 
 export function emptyDescription(routeName: string): string {
@@ -12,7 +12,7 @@ export function emptyDescription(routeName: string): string {
     case _m.routes.Recognize.name:
       return t('memories', 'Recognize is still working on your photos');
     case _m.routes.FaceRecognition.name:
-      return userConfig.use().facerecognition_enabled
+      return config.facerecognition_enabled
         ? t('memories', 'You will find your friends soon. Please be patient')
         : t('memories', 'Face Recognition is disabled. Enable in settings to find your friends');
     case _m.routes.Videos.name:

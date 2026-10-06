@@ -63,7 +63,7 @@ import { useRoute, useRouter } from 'vue-router';
 const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 const NcPopover = defineAsyncComponent(() => import('@nextcloud/vue/components/NcPopover'));
 
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import { useWindowWidthIsMobile } from '@services/common';
 import { useRouteIsBase, useRouteIsSearch } from '@services/route-checker';
 import { t } from '@services/l10n';
@@ -98,7 +98,6 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const router = useRouter();
-const config = userConfig.use();
 const windowWidthIsMobile = useWindowWidthIsMobile();
 const routeIsBase = useRouteIsBase();
 const routeIsSearch = useRouteIsSearch();

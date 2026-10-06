@@ -9,7 +9,7 @@
 import { computed, markRaw, nextTick, useTemplateRef, type Component } from 'vue';
 import { useRoute } from 'vue-router';
 
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import {
   useRouteIsAlbums,
   useRouteIsBase,
@@ -40,7 +40,6 @@ defineEmits<{
 }>();
 
 const route = useRoute();
-const config = userConfig.use();
 const routeIsFolders = useRouteIsFolders();
 const routeIsFolderShare = useRouteIsFolderShare();
 const routeIsPlaces = useRouteIsPlaces();

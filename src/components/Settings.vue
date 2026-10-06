@@ -287,7 +287,7 @@ input[type='text'] {
 import { ref, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue';
 import { useRouter } from 'vue-router';
 
-import userConfig from '@services/user-config';
+import { config, setConfig } from '@services/user-config';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 import { t } from '@services/l10n';
@@ -311,7 +311,6 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
-const config = userConfig.use();
 
 const localFolders = ref<nativex.LocalFolderConfig[]>([]);
 const names = {
@@ -342,7 +341,7 @@ const highResCond = computed((): IConfig['high_res_cond_default'] => {
 });
 
 const tileServers = computed(() => {
-  return [...(userConfig.use().map_tile_servers || [])];
+  return [...(config.map_tile_servers || [])];
 });
 
 watch(
@@ -394,7 +393,7 @@ async function removeTimelinePath(path: string) {
 async function saveTimelinePaths(paths: string[]) {
   const newPath = paths.join(';');
   if (newPath !== config.timeline_path) {
-    await userConfig.set('timeline_path', newPath, 'timelinePath');
+    await setConfig('timeline_path', newPath);
   }
 }
 
@@ -405,104 +404,100 @@ async function chooseFoldersPath() {
   );
 
   if (newPath !== config.folders_path) {
-    await userConfig.set('folders_path', newPath, 'foldersPath');
+    await setConfig('folders_path', newPath);
   }
 }
 
 // General settings
 async function updateSquareThumbs(val: boolean) {
-  await userConfig.set('square_thumbs', val);
+  await setConfig('square_thumbs', val);
 }
 
 async function updateEnableTopMemories(val: boolean) {
-  await userConfig.set('enable_top_memories', val, 'enableTopMemories');
+  await setConfig('enable_top_memories', val);
 }
 
 async function updateStackRawFiles(val: boolean) {
-  await userConfig.set('stack_raw_files', val, 'stackRawFiles');
+  await setConfig('stack_raw_files', val);
 }
 
 async function updateDedupIdentical(val: boolean) {
-  await userConfig.set('dedup_identical', val, 'dedupIdentical');
+  await setConfig('dedup_identical', val);
 }
 
 async function updateShowOwnerNameTimeline(val: boolean) {
-  await userConfig.set('show_owner_name_timeline', val, 'showOwnerNameTimeline');
+  await setConfig('show_owner_name_timeline', val);
 }
 
 // Viewer settings
 async function updateHighResCond(val: IConfig['high_res_cond']) {
-  await userConfig.set('high_res_cond', val);
+  await setConfig('high_res_cond', val);
 }
 
 async function updateLivephotoAutoplay(val: boolean) {
-  await userConfig.set('livephoto_autoplay', val, 'livephotoAutoplay');
+  await setConfig('livephoto_autoplay', val);
 }
 
 async function updateLivephotoLoop(val: boolean) {
-  await userConfig.set('livephoto_loop', val, 'livephotoLoop');
+  await setConfig('livephoto_loop', val);
 }
 
 async function updateVideoLoop(val: boolean) {
-  await userConfig.set('video_loop', val, 'videoLoop');
+  await setConfig('video_loop', val);
 }
 
 async function updateVideoAutoplay(val: boolean) {
-  await userConfig.set('video_autoplay', val ? 'true' : 'false', 'videoAutoplay');
+  await setConfig('video_autoplay', val ? 'true' : 'false');
 }
 
 async function updateSidebarFilepath(val: boolean) {
-  await userConfig.set('sidebar_filepath', val, 'sidebarFilepath');
+  await setConfig('sidebar_filepath', val);
 }
 
 async function updateMetadataInSlideshow(val: boolean) {
-  await userConfig.set('metadata_in_slideshow', val, 'metadataInSlideshow');
+  await setConfig('metadata_in_slideshow', val);
 }
 
 async function updateSlideshowDuration(val: string | number) {
   const n = typeof val === 'number' ? val : parseFloat(val);
   if (!Number.isFinite(n)) return;
-  await userConfig.set('slideshow_duration', Math.min(60, Math.max(1, Math.round(n))), 'slideshowDuration');
+  await setConfig('slideshow_duration', Math.min(60, Math.max(1, Math.round(n))));
 }
 
 // On This Day settings
 async function updateOnThisDayRange(val: string | number) {
   const n = typeof val === 'number' ? val : parseFloat(val);
   if (!Number.isFinite(n)) return;
-  await userConfig.set('onthisday_day_range', Math.min(7, Math.max(0, Math.round(n))), 'onthisdayDayRange');
+  await setConfig('onthisday_day_range', Math.min(7, Math.max(0, Math.round(n))));
 }
 
 async function updateOnThisDayPhotos(val: string | number) {
   const n = typeof val === 'number' ? val : parseFloat(val);
   if (!Number.isFinite(n)) return;
-  await userConfig.set(
-    'onthisday_photos_per_year',
-    Math.min(50, Math.max(1, Math.round(n))),
-    'onthisdayPhotosPerYear',
-  );
+  await setConfig('onthisday_photos_per_year', Math.min(50, Math.max(1, Math.round(n))));
 }
 
 // Folders settings
 async function updateShowHiddenFolders(val: boolean) {
-  await userConfig.set('show_hidden_folders', val, 'showHidden');
+  await setConfig('show_hidden_folders', val);
 }
 
 async function updateShowHiddenAlbums(val: boolean) {
-  await userConfig.set('show_hidden_albums', val, 'showHiddenAlbums');
+  await setConfig('show_hidden_albums', val);
 }
 
 async function updateSortFolderMonth(val: boolean) {
-  await userConfig.set('sort_folder_month', val, 'sortFolderMonth');
+  await setConfig('sort_folder_month', val);
 }
 
 // Albums settings
 async function updateSortAlbumMonth(val: boolean) {
-  await userConfig.set('sort_album_month', val, 'sortAlbumMonth');
+  await setConfig('sort_album_month', val);
 }
 
 // Map settings
 async function updateMapTileServer(val: string) {
-  await userConfig.set('map_tile_server_url', val, 'mapTileServerUrl');
+  await setConfig('map_tile_server_url', val);
 }
 
 // --------------- Native APIs start -----------------------------

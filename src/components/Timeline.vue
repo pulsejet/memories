@@ -120,7 +120,7 @@ import { showError } from '@nextcloud/dialogs';
 
 import { getLayout } from '@services/layout';
 
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import {
   useRouteIsAlbumShare,
   useRouteIsAlbums,
@@ -173,7 +173,6 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const config = userConfig.use();
 const routeIsAlbumShare = useRouteIsAlbumShare();
 const routeIsAlbums = useRouteIsAlbums();
 const routeIsArchive = useRouteIsArchive();

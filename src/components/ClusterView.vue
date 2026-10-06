@@ -34,7 +34,7 @@ import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import * as dav from '@services/dav';
 
 import type { ICluster } from '@typings';
@@ -92,7 +92,7 @@ async function refresh() {
 onMounted(refresh);
 watch(() => route.path, refresh);
 
-watch(userConfig.use(), refresh);
+watch(config, refresh);
 </script>
 
 <style lang="scss" scoped>

@@ -73,7 +73,7 @@ import axios from '@nextcloud/axios';
 
 import { useModal } from '@services/modal';
 import { t, n } from '@services/l10n';
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import { constants as c } from '@services/utils';
 import { API } from '@services/API';
 import * as dav from '@services/dav';
@@ -83,7 +83,6 @@ import type { IExif, IImageInfo, IPhoto } from '@typings';
 
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
-const config = userConfig.use();
 const editDate = useTemplateRef<InstanceType<typeof EditDate>>('editDate');
 const editTags = useTemplateRef<InstanceType<typeof EditTags>>('editTags');
 const editExif = useTemplateRef<InstanceType<typeof EditExif>>('editExif');

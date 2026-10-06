@@ -21,7 +21,7 @@ import Modal from './Modal.vue';
 
 import { useModal } from '@services/modal';
 import { t, n } from '@services/l10n';
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 
@@ -33,7 +33,6 @@ defineOptions({
 
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
-const config = userConfig.use();
 
 const photos = ref<IPhoto[]>([]);
 const photosDone = ref(0);

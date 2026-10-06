@@ -79,7 +79,7 @@ import { showError } from '@nextcloud/dialogs';
 
 import { useModal } from '@services/modal';
 import { t, n } from '@services/l10n';
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import { useRouteIsFolders, useRouteIsPublic } from '@services/route-checker';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
@@ -98,7 +98,6 @@ defineOptions({
 const router = useRouter();
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
-const config = userConfig.use();
 const routeIsFolders = useRouteIsFolders();
 const routeIsPublic = useRouteIsPublic();
 const tags = useTemplateRef<InstanceType<typeof EditTags>>('tags');

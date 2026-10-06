@@ -36,15 +36,13 @@ import { ref, computed } from 'vue';
 import { LMap, LTileLayer, LMarker, LIcon } from '@vue-leaflet/vue-leaflet';
 import { latLngBounds } from 'leaflet';
 
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-edgebuffer';
 
 const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const OSM_ATTRIBUTION = '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors';
-
-const config = userConfig.use();
 
 const props = withDefaults(
   defineProps<{

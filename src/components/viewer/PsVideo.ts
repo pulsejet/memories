@@ -1,7 +1,7 @@
 import { showError } from '@nextcloud/dialogs';
 
 import { translate as t } from '@services/l10n';
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 import { API } from '@services/API';
@@ -175,7 +175,7 @@ class VideoContentSetup {
     const local = this.getLocalSrc(content);
     if (local) {
       return { src: local, videoIsHls: false };
-    } else if (!userConfig.use().vod_disable) {
+    } else if (!config.vod_disable) {
       return { src: this.getHLSsrc(content), videoIsHls: true };
     } else {
       return { src: this.getDirectSrc(content), videoIsHls: false };
@@ -220,7 +220,7 @@ class VideoContentSetup {
     player.title = content.data.photo.basename ?? '';
     player.playsInline = true;
 
-    if (userConfig.use().video_autoplay === 'true') {
+    if (config.video_autoplay === 'true') {
       player.preload = 'metadata';
       player.autoPlay = true;
     } else {
@@ -229,7 +229,7 @@ class VideoContentSetup {
       player.autoPlay = false;
     }
 
-    if (userConfig.use().video_loop) {
+    if (config.video_loop) {
       player.loop = true;
     }
 
@@ -304,7 +304,7 @@ class VideoContentSetup {
   onPlayerError(content: VideoContent, _e: MediaErrorEvent) {
     if (!isVideoContent(content) || content.videoFailedOver || content.videoHasPlayed) return;
     if (utils.isLocalPhoto(content.data.photo)) return; // local-only
-    if (userConfig.use().vod_disable) return;
+    if (config.vod_disable) return;
 
     const player = content.videoPlayer;
     if (!player) return;
@@ -468,7 +468,7 @@ class VideoContentSetup {
 
   /** Start at the admin default quality ('-1' = original). */
   pickInitialLevel(hls: Hls) {
-    const spec = userConfig.use().video_default_quality;
+    const spec = config.video_default_quality;
     if (!spec || spec === '0') return;
 
     const Events = (hls.constructor as typeof Hls).Events;

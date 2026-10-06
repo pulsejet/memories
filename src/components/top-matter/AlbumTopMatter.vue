@@ -159,7 +159,7 @@ import AlbumDeleteModal from '@components/modal/AlbumDeleteModal.vue';
 import { downloadWithHandle } from '@services/dav';
 import { API } from '@services/API';
 import { useWindowWidthIsMobile } from '@services/common';
-import userConfig from '@services/user-config';
+import { config, setConfig } from '@services/user-config';
 import * as utils from '@services/utils';
 import { constants as c } from '@services/utils';
 import { t } from '@services/l10n';
@@ -182,7 +182,6 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const config = userConfig.use();
 const windowWidthIsMobile = useWindowWidthIsMobile();
 
 const createModal = useTemplateRef<InstanceType<typeof AlbumCreateModal>>('createModal');
@@ -240,7 +239,7 @@ async function downloadAlbum() {
 /** Set sort choice */
 function changeSort(flag: number) {
   const dir = config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING;
-  userConfig.set('album_list_sort', flag | dir);
+  setConfig('album_list_sort', flag | dir);
 }
 
 /** Set sort direction */
@@ -251,6 +250,6 @@ function setDescending(val: boolean) {
   } else {
     sort &= ~c.ALBUM_SORT_FLAGS.DESCENDING;
   }
-  userConfig.set('album_list_sort', sort);
+  setConfig('album_list_sort', sort);
 }
 </script>

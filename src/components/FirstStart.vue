@@ -50,7 +50,7 @@ import NcButton from '@nextcloud/vue/components/NcButton';
 import XImg from '@components/frame/XImg.vue';
 import * as nativex from '@native';
 
-import userConfig from '@services/user-config';
+import { setConfig } from '@services/user-config';
 
 import axios from '@nextcloud/axios';
 
@@ -109,7 +109,7 @@ async function begin() {
 async function finish() {
   show.value = false;
   await new Promise((resolve) => setTimeout(resolve, 500));
-  await userConfig.set('timeline_path', chosenPath.value, 'timelinePath');
+  await setConfig('timeline_path', chosenPath.value);
 }
 
 onMounted(() => {

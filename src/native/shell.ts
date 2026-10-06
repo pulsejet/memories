@@ -2,7 +2,7 @@ import { watch, type DeepReadonly } from 'vue';
 
 import { isRTL, register as registerTranslations, setLanguage, setLocale } from '@nextcloud/l10n';
 
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import { nativex } from './api';
 
 import type { IConfig } from '@typings';
@@ -36,7 +36,6 @@ function registerPackedL10N(language: string): void {
  */
 export function initShellSync(): void {
   if (!nativex) return;
-  const config = userConfig.use();
   applyShellConfig(config);
   registerPackedL10N(config.language);
 

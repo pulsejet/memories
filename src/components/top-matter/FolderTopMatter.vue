@@ -70,7 +70,7 @@ import PublicUploadHandler from '@components/upload/PublicUploadHandler.vue';
 
 import { t } from '@services/l10n';
 import { useRouteIsPublic } from '@services/route-checker';
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import * as utils from '@services/utils';
 import { initstate } from '@services/utils';
 
@@ -87,7 +87,6 @@ defineOptions({
 const route = useRoute();
 const router = useRouter();
 const routeIsPublic = useRouteIsPublic();
-const config = userConfig.use();
 
 const uploadHandler = useTemplateRef<InstanceType<typeof PublicUploadHandler>>('uploadHandler');
 

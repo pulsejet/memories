@@ -28,7 +28,7 @@ import { showError } from '@nextcloud/dialogs';
 
 import { API } from '@services/API';
 import * as utils from '@services/utils';
-import userConfig from '@services/user-config';
+import { config as liveConfig, waitForConfig } from '@services/user-config';
 import { t } from '@services/l10n';
 
 import Help from './sections/Help.vue';
@@ -104,8 +104,8 @@ async function refreshStatus() {
 async function refreshUserConfig() {
   try {
     loading.value++;
-    await userConfig.wait();
-    sconfig.value = userConfig.use();
+    await waitForConfig();
+    sconfig.value = liveConfig;
   } catch (e: any) {
     showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
     console.error(e);

@@ -1,6 +1,6 @@
 import axios from '@nextcloud/axios';
 import { API } from '@services/API';
-import userConfig from '@services/user-config';
+import { config, waitForConfig } from '@services/user-config';
 
 /**
  * One-shot fetch of the Recognize API key.
@@ -10,8 +10,8 @@ import userConfig from '@services/user-config';
  */
 export function onRecognizeApiKeyUpdate(callback: (key?: string) => void): void {
   (async (): Promise<string | undefined> => {
-    await userConfig.wait();
-    if (!userConfig.use().recognize_enabled) {
+    await waitForConfig();
+    if (!config.recognize_enabled) {
       return undefined;
     }
 

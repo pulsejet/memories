@@ -62,7 +62,7 @@ import MapIcon from 'vue-material-design-icons/Map.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
 
 import { translate as t } from '@services/l10n';
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import * as dav from '@services/dav';
 import * as nativex from '@native';
 
@@ -79,7 +79,6 @@ type Category = {
 const loading = ref(0);
 const isNative = nativex.has();
 
-const config = userConfig.use();
 const recognize = ref([] as ICluster[]);
 const facerecognition = ref([] as ICluster[]);
 const places = ref([] as ICluster[]);

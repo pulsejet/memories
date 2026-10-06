@@ -37,7 +37,7 @@ import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import type { IPhoto } from '@typings';
 
 import LeftMoveIcon from 'vue-material-design-icons/ChevronLeft.vue';
@@ -69,7 +69,7 @@ const scrollStack = ref<number[]>([]);
 let resizeObserver: ResizeObserver | null = null;
 
 const photosPerYear = computed((): number => {
-  return userConfig.use().onthisday_photos_per_year;
+  return config.onthisday_photos_per_year;
 });
 
 onMounted(() => {

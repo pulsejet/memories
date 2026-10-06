@@ -68,7 +68,7 @@ import { computed, ref, onMounted, defineAsyncComponent } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
-import userConfig from '@services/user-config';
+import { config } from '@services/user-config';
 import { t } from '@services/l10n';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
@@ -111,7 +111,7 @@ const loc = computed(() => {
   return t('memories', 'No coordinates');
 });
 
-const searchBase = computed(() => userConfig.use().places_search_url.trim());
+const searchBase = computed(() => config.places_search_url.trim());
 const isNominatim = computed(() => searchBase.value.toLowerCase().includes('nominatim'));
 
 onMounted(() => {
