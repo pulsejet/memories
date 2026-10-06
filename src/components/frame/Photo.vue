@@ -10,12 +10,7 @@
         [`p-outer--${data.key}`]: true,
       }"
     >
-      <div
-        class="select"
-        v-once
-        v-if="!(data.flag & c.FLAG_PLACEHOLDER)"
-        @pointerdown.passive="$emit('select', $event)"
-      >
+      <div class="select" v-once v-if="!(data.flag & c.FLAG_PLACEHOLDER)" @pointerdown.passive="emit('select', $event)">
         <CheckCircleIcon :size="18" />
       </div>
 
@@ -52,11 +47,11 @@
         class="img-outer fill-block"
         :class="{ 'memories-livephoto': data.liveid }"
         @contextmenu="contextmenu"
-        @pointerdown.passive="$emit('pointerdown', $event)"
-        @touchstart.passive="$emit('touchstart', $event)"
-        @touchmove="$emit('touchmove', $event)"
-        @touchend.passive="$emit('touchend', $event)"
-        @touchcancel.passive="$emit('touchend', $event)"
+        @pointerdown.passive="emit('pointerdown', $event)"
+        @touchstart.passive="emit('touchstart', $event)"
+        @touchmove="emit('touchmove', $event)"
+        @touchend.passive="emit('touchend', $event)"
+        @touchcancel.passive="emit('touchend', $event)"
       >
         <XImg
           v-if="src"
@@ -84,11 +79,24 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+<script setup lang="ts">
+import {
+  computed,
+  getCurrentInstance,
+  onBeforeUnmount,
+  onMounted,
+  onUpdated,
+  reactive,
+  ref,
+  useTemplateRef,
+  watch,
+} from 'vue';
 
 import * as utils from '@services/utils';
+import { constants as c } from '@services/utils';
 import staticConfig from '@services/static-config';
+import { t } from '@services/l10n';
+import { useRouteIsBase } from '@services/route-checker';
 
 import LivePhotoIcon from '@components/icons/LivePhoto.vue';
 import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue';
@@ -103,265 +111,237 @@ import XImg from '@components/frame/XImg.vue';
 
 import errorsvg from '@assets/error.svg';
 
-export default defineComponent({
+defineOptions({
   name: 'Photo',
-  components: {
-    LivePhotoIcon,
-    CheckCircleIcon,
-    VideoIcon,
-    PanoramaSphereIcon,
-    StarIcon,
-    LocalIcon,
-    RawIcon,
-    XImg,
-  },
-
-  props: {
-    data: {
-      type: Object as PropType<IPhoto>,
-      required: true,
-    },
-    day: {
-      type: Object as PropType<IDay>,
-      required: true,
-    },
-  },
-
-  emits: {
-    select: (e: PointerEvent) => true,
-    pointerdown: (e: PointerEvent) => true,
-    touchstart: (e: TouchEvent) => true,
-    touchmove: (e: TouchEvent) => true,
-    touchend: (e: TouchEvent) => true,
-  },
-
-  data: () => ({
-    touchTimer: 0,
-    liveState: {
-      playTimer: 0,
-      playing: false,
-      waiting: false,
-      requested: false,
-    },
-    faceSrc: null as string | null,
-  }),
-
-  watch: {
-    data(newData: IPhoto, oldData: IPhoto) {
-      // Copy flags relevant to this component
-      if (oldData && newData) {
-        newData.flag |= oldData.flag & (this.c.FLAG_SELECTED | this.c.FLAG_LOAD_FAIL);
-      }
-    },
-  },
-
-  mounted() {
-    this.faceSrc = null;
-    this.exposePhoto();
-
-    // Setup video hooks
-    const video = this.refs().video;
-    if (video) {
-      utils.setupLivePhotoHooks(video, this.liveState);
-    }
-  },
-
-  updated() {
-    this.exposePhoto();
-  },
-
-  /** Clear timers */
-  beforeUnmount() {
-    clearTimeout(this.touchTimer);
-    clearTimeout(this.liveState.playTimer);
-
-    // Clean up blob url if face rect was created
-    if (this.faceSrc) {
-      URL.revokeObjectURL(this.faceSrc);
-    }
-  },
-
-  computed: {
-    videoDuration(): string | null {
-      if (this.data.video_duration) {
-        return utils.getDurationStr(this.data.video_duration);
-      }
-      return null;
-    },
-
-    videoUrl(): string | null {
-      if (this.data.liveid) {
-        return utils.getLivePhotoVideoUrl(this.data, true);
-      }
-      return null;
-    },
-
-    src(): string | null {
-      this.data.etag; // dependency
-
-      if (this.data.flag & this.c.FLAG_PLACEHOLDER) {
-        return null;
-      } else if (this.data.flag & this.c.FLAG_LOAD_FAIL) {
-        return errorsvg;
-      } else if (this.faceSrc) {
-        return this.faceSrc;
-      } else {
-        return this.url();
-      }
-    },
-
-    isRaw(): boolean {
-      return !!this.data.stackraw || this.data.mimetype === this.c.MIME_RAW;
-    },
-
-    showOwnerName(): boolean {
-      if (this.routeIsBase && !staticConfig.getSync('show_owner_name_timeline')) {
-        return false;
-      }
-      return true;
-    },
-
-    sharedBy(): string | null {
-      if (this.data.shared_by == '[unknown]') {
-        return this.t('memories', 'Shared');
-      } else if (this.data.shared_by) {
-        return this.data.shared_by;
-      }
-      return null;
-    },
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        ximg?: InstanceType<typeof XImg> & { $el: HTMLImageElement };
-        video?: HTMLVideoElement;
-      };
-    },
-
-    exposePhoto() {
-      (this.$el as any).__photo = this.data;
-    },
-
-    /** Get url of the photo */
-    url() {
-      let base: 256 | 512 = 256;
-
-      // Check if displayed size is larger than the image
-      if (this.data.dispH! > base * 0.9 && this.data.dispW! > base * 0.9) {
-        // Get a bigger image
-        // 1. No trickery here, just get one size bigger. This is to
-        //    ensure that the images can be cached even after reflow.
-        // 2. Nextcloud only allows 4**x sized images, so technically
-        //    this ends up being equivalent to 1024x1024.
-        base = 512;
-      }
-
-      return utils.getPreviewUrl({
-        photo: this.data,
-        msize: base,
-      });
-    },
-
-    /** Set src with overlay face rect */
-    async addFaceRect() {
-      if (!this.data.facerect || this.faceSrc) return;
-
-      const img = this.refs().ximg?.$el;
-      if (!img) return;
-
-      // This is a hack to check if img is actually loaded.
-      //   XImg loads an empty image, which may sometimes show up here
-      //   If the size is less than 5px it is probably this dummy image
-      //   Either way, the user cannot see anything if the image is this small
-      //   so there's no point in trying to draw the face rect
-      if (!img || img.naturalWidth < 5) return;
-
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      if (!context) return; // failed to create canvas
-
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      context.drawImage(img, 0, 0);
-      context.strokeStyle = '#00ff00';
-      context.lineWidth = 2;
-      context.strokeRect(
-        this.data.facerect.x * img.naturalWidth,
-        this.data.facerect.y * img.naturalHeight,
-        this.data.facerect.w * img.naturalWidth,
-        this.data.facerect.h * img.naturalHeight,
-      );
-
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) return;
-          this.faceSrc = URL.createObjectURL(blob);
-        },
-        'image/jpeg',
-        0.95,
-      );
-    },
-
-    /** Post load tasks */
-    load() {
-      this.addFaceRect();
-    },
-
-    /** Error in loading image */
-    error(e: Error) {
-      this.data.flag |= this.c.FLAG_LOAD_FAIL;
-    },
-
-    contextmenu(e: Event) {
-      e.preventDefault();
-      e.stopPropagation();
-    },
-
-    /** Start preview video */
-    playVideo() {
-      if (this.data.flag & this.c.FLAG_SELECTED) return;
-      this.liveState.waiting = true;
-
-      // Quickly moving over the icon causes unnecessary
-      // transcoding requests which are expensive
-      utils.setRenewingTimeout(
-        this.liveState,
-        'playTimer',
-        async () => {
-          const video = this.refs().video;
-          if (!video || this.data.flag & this.c.FLAG_SELECTED) return;
-
-          try {
-            this.liveState.requested = true;
-            video.currentTime = 0;
-            video.loop = true;
-            await video.play();
-          } catch (e) {
-            // ignore, pause was probably called too soon
-          } finally {
-            this.liveState.waiting = false;
-          }
-        },
-        this.liveState.requested ? 0 : 300, // delay only the first play
-      );
-    },
-
-    /** Stop preview video */
-    stopVideo() {
-      this.refs().video?.pause();
-      window.clearTimeout(this.liveState.playTimer);
-      this.liveState.playTimer = 0;
-      this.liveState.waiting = false;
-    },
-
-    /** Start/stop preview video for touchscreens */
-    touchVideo() {
-      if (this.liveState.playing) this.stopVideo();
-      else this.playVideo();
-    },
-  },
 });
+
+const props = defineProps<{
+  data: IPhoto;
+  day: IDay;
+}>();
+
+const emit = defineEmits<{
+  select: [e: PointerEvent];
+  pointerdown: [e: PointerEvent];
+  touchstart: [e: TouchEvent];
+  touchmove: [e: TouchEvent];
+  touchend: [e: TouchEvent];
+}>();
+
+const routeIsBase = useRouteIsBase();
+const instance = getCurrentInstance();
+const ximg = useTemplateRef<InstanceType<typeof XImg> & { $el: HTMLImageElement }>('ximg');
+const video = useTemplateRef<HTMLVideoElement>('video');
+
+let touchTimer = 0;
+const liveState = reactive({
+  playing: false,
+  waiting: false,
+  requested: false,
+});
+const livePlayTimer = new utils.RenewingTimeout();
+const faceSrc = ref<string | null>(null);
+
+watch(
+  () => props.data,
+  (newData: IPhoto, oldData: IPhoto) => {
+    // Copy flags relevant to this component
+    if (oldData && newData) {
+      newData.flag |= oldData.flag & (c.FLAG_SELECTED | c.FLAG_LOAD_FAIL);
+    }
+  },
+);
+
+onMounted(() => {
+  faceSrc.value = null;
+  exposePhoto();
+
+  // Setup video hooks
+  if (video.value) {
+    utils.setupLivePhotoHooks(video.value, liveState);
+  }
+});
+
+onUpdated(() => {
+  exposePhoto();
+});
+
+/** Clear timers */
+onBeforeUnmount(() => {
+  clearTimeout(touchTimer);
+  livePlayTimer.clear();
+
+  // Clean up blob url if face rect was created
+  if (faceSrc.value) {
+    URL.revokeObjectURL(faceSrc.value);
+  }
+});
+
+const videoDuration = computed((): string | null => {
+  if (props.data.video_duration) {
+    return utils.getDurationStr(props.data.video_duration);
+  }
+  return null;
+});
+
+const videoUrl = computed((): string | null => {
+  if (props.data.liveid) {
+    return utils.getLivePhotoVideoUrl(props.data, true);
+  }
+  return null;
+});
+
+const src = computed((): string | null => {
+  props.data.etag; // dependency
+
+  if (props.data.flag & c.FLAG_PLACEHOLDER) {
+    return null;
+  } else if (props.data.flag & c.FLAG_LOAD_FAIL) {
+    return errorsvg;
+  } else if (faceSrc.value) {
+    return faceSrc.value;
+  } else {
+    return url();
+  }
+});
+
+const isRaw = computed((): boolean => {
+  return !!props.data.stackraw || props.data.mimetype === c.MIME_RAW;
+});
+
+const showOwnerName = computed((): boolean => {
+  if (routeIsBase.value && !staticConfig.getSync('show_owner_name_timeline')) {
+    return false;
+  }
+  return true;
+});
+
+const sharedBy = computed((): string | null => {
+  if (props.data.shared_by == '[unknown]') {
+    return t('memories', 'Shared');
+  } else if (props.data.shared_by) {
+    return props.data.shared_by;
+  }
+  return null;
+});
+
+function exposePhoto() {
+  (instance?.proxy?.$el as any).__photo = props.data;
+}
+
+/** Get url of the photo */
+function url() {
+  let base: 256 | 512 = 256;
+
+  // Check if displayed size is larger than the image
+  if (props.data.dispH! > base * 0.9 && props.data.dispW! > base * 0.9) {
+    // Get a bigger image
+    // 1. No trickery here, just get one size bigger. This is to
+    //    ensure that the images can be cached even after reflow.
+    // 2. Nextcloud only allows 4**x sized images, so technically
+    //    this ends up being equivalent to 1024x1024.
+    base = 512;
+  }
+
+  return utils.getPreviewUrl({
+    photo: props.data,
+    msize: base,
+  });
+}
+
+/** Set src with overlay face rect */
+async function addFaceRect() {
+  if (!props.data.facerect || faceSrc.value) return;
+
+  const img = ximg.value?.$el;
+  if (!img) return;
+
+  // This is a hack to check if img is actually loaded.
+  //   XImg loads an empty image, which may sometimes show up here
+  //   If the size is less than 5px it is probably this dummy image
+  //   Either way, the user cannot see anything if the image is this small
+  //   so there's no point in trying to draw the face rect
+  if (!img || img.naturalWidth < 5) return;
+
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) return; // failed to create canvas
+
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  context.drawImage(img, 0, 0);
+  context.strokeStyle = '#00ff00';
+  context.lineWidth = 2;
+  context.strokeRect(
+    props.data.facerect.x * img.naturalWidth,
+    props.data.facerect.y * img.naturalHeight,
+    props.data.facerect.w * img.naturalWidth,
+    props.data.facerect.h * img.naturalHeight,
+  );
+
+  canvas.toBlob(
+    (blob) => {
+      if (!blob) return;
+      faceSrc.value = URL.createObjectURL(blob);
+    },
+    'image/jpeg',
+    0.95,
+  );
+}
+
+/** Post load tasks */
+function load() {
+  addFaceRect();
+}
+
+/** Error in loading image */
+function error(e: Error) {
+  props.data.flag |= c.FLAG_LOAD_FAIL;
+}
+
+function contextmenu(e: Event) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+/** Start preview video */
+function playVideo() {
+  if (props.data.flag & c.FLAG_SELECTED) return;
+  liveState.waiting = true;
+
+  // Quickly moving over the icon causes unnecessary
+  // transcoding requests which are expensive
+  livePlayTimer.set(
+    async () => {
+      if (!video.value || props.data.flag & c.FLAG_SELECTED) return;
+
+      try {
+        liveState.requested = true;
+        video.value.currentTime = 0;
+        video.value.loop = true;
+        await video.value.play();
+      } catch (e) {
+        // ignore, pause was probably called too soon
+      } finally {
+        liveState.waiting = false;
+      }
+    },
+    liveState.requested ? 0 : 300, // delay only the first play
+  );
+}
+
+/** Stop preview video */
+function stopVideo() {
+  video.value?.pause();
+  livePlayTimer.clear();
+  liveState.waiting = false;
+}
+
+/** Start/stop preview video for touchscreens */
+function touchVideo() {
+  if (liveState.playing) stopVideo();
+  else playVideo();
+}
 </script>
 
 <style lang="scss" scoped>
