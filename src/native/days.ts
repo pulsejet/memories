@@ -115,36 +115,33 @@ export function processFreshServerDay(dayId: number, photos: IPhoto[]): void {
   }
 
   // Debounce
-  pfsdTimer.set(
-    () => {
-      const auidsa: string[] = [],
-        buidsa: string[] = [];
+  pfsdTimer.set(() => {
+    const auidsa: string[] = [],
+      buidsa: string[] = [];
 
-      // Only keep the seen AUIDs and BUIDs
-      for (const auid of pfsdAuids) {
-        if (seenABUIDs.has(auid)) {
-          auidsa.push(auid);
-          seenABUIDs.delete(auid);
-        }
+    // Only keep the seen AUIDs and BUIDs
+    for (const auid of pfsdAuids) {
+      if (seenABUIDs.has(auid)) {
+        auidsa.push(auid);
+        seenABUIDs.delete(auid);
       }
-      for (const buid of pfsdBuids) {
-        if (seenABUIDs.has(buid)) {
-          buidsa.push(buid);
-          seenABUIDs.delete(buid);
-        }
+    }
+    for (const buid of pfsdBuids) {
+      if (seenABUIDs.has(buid)) {
+        buidsa.push(buid);
+        seenABUIDs.delete(buid);
       }
+    }
 
-      // Nothing to do?
-      if (auidsa.length || buidsa.length) {
-        nativex.setHasRemote(JSON.stringify(auidsa), JSON.stringify(buidsa), true);
-      }
+    // Nothing to do?
+    if (auidsa.length || buidsa.length) {
+      nativex.setHasRemote(JSON.stringify(auidsa), JSON.stringify(buidsa), true);
+    }
 
-      // Done
-      pfsdAuids.clear();
-      pfsdBuids.clear();
-    },
-    1000,
-  );
+    // Done
+    pfsdAuids.clear();
+    pfsdBuids.clear();
+  }, 1000);
 }
 
 /**
