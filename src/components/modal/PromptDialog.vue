@@ -10,80 +10,62 @@
   </NcDialog>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed, ref, useTemplateRef, onMounted } from 'vue';
 
 import NcDialog from '@nextcloud/vue/components/NcDialog';
 import NcTextField from '@nextcloud/vue/components/NcTextField';
 
 import { translate as t } from '@services/l10n';
 
-export default defineComponent({
+defineOptions({
   name: 'PromptDialog',
-
-  components: {
-    NcDialog,
-    NcTextField,
-  },
-
-  props: {
-    title: {
-      type: String,
-      default: '',
-    },
-
-    message: {
-      type: String,
-      default: '',
-    },
-
-    label: {
-      type: String,
-      default: '',
-    },
-
-    password: {
-      type: Boolean,
-      default: false,
-    },
-  },
-
-  emits: {
-    close: (_value: string | null) => true,
-  },
-
-  data: () => ({
-    value: '',
-  }),
-
-  computed: {
-    buttons() {
-      return [
-        {
-          label: t('memories', 'Cancel'),
-          callback: () => this.close(null),
-        },
-        {
-          label: t('memories', 'OK'),
-          variant: 'primary' as const,
-          callback: () => this.submit(),
-        },
-      ];
-    },
-  },
-
-  mounted() {
-    (this.$refs.input as unknown as { focus?: () => void })?.focus?.();
-  },
-
-  methods: {
-    submit() {
-      this.close(this.value);
-    },
-
-    close(value: string | null) {
-      this.$emit('close', value);
-    },
-  },
 });
+
+const props = withDefaults(
+  defineProps<{
+    title?: string;
+    message?: string;
+    label?: string;
+    password?: boolean;
+  }>(),
+  {
+    title: '',
+    message: '',
+    label: '',
+    password: false,
+  },
+);
+
+const emit = defineEmits<{
+  (e: 'close', value: string | null): void;
+}>();
+
+const input = useTemplateRef<{ focus?: () => void }>('input');
+
+const value = ref('');
+
+const buttons = computed(() => [
+  {
+    label: t('memories', 'Cancel'),
+    callback: () => close(null),
+  },
+  {
+    label: t('memories', 'OK'),
+    variant: 'primary' as const,
+    callback: () => submit(),
+  },
+]);
+
+onMounted(() => {
+  input.value?.focus?.();
+});
+
+function submit() {
+  close(value.value);
+}
+
+function close(closeValue: string | null) {
+  emit('close', closeValue);
+}
 </script>
