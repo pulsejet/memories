@@ -34,24 +34,32 @@
           </div>
         </div>
 
-        <NcCheckboxRadioSwitch v-model="config.square_thumbs" @update:model-value="updateSquareThumbs" type="switch">
+        <NcCheckboxRadioSwitch
+          :model-value="config.square_thumbs"
+          @update:model-value="updateSquareThumbs"
+          type="switch"
+        >
           {{ t('memories', 'Square grid mode') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
-          v-model="config.enable_top_memories"
+          :model-value="config.enable_top_memories"
           @update:model-value="updateEnableTopMemories"
           type="switch"
         >
           {{ t('memories', 'Show past photos on top of timeline') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch v-model="config.stack_raw_files" @update:model-value="updateStackRawFiles" type="switch">
+        <NcCheckboxRadioSwitch
+          :model-value="config.stack_raw_files"
+          @update:model-value="updateStackRawFiles"
+          type="switch"
+        >
           {{ t('memories', 'Stack RAW files with same name') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
-          v-model="config.dedup_identical"
+          :model-value="config.dedup_identical"
           @update:model-value="updateDedupIdentical"
           type="switch"
         >
@@ -59,7 +67,7 @@
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
-          v-model="config.show_owner_name_timeline"
+          :model-value="config.show_owner_name_timeline"
           @update:model-value="updateShowOwnerNameTimeline"
           type="switch"
         >
@@ -69,14 +77,18 @@
 
       <NcAppSettingsSection id="viewer-settings" :name="names.viewer">
         <NcCheckboxRadioSwitch
-          v-model="config.livephoto_autoplay"
+          :model-value="config.livephoto_autoplay"
           @update:model-value="updateLivephotoAutoplay"
           type="switch"
         >
           {{ t('memories', 'Autoplay Live Photos') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch v-model="config.livephoto_loop" @update:model-value="updateLivephotoLoop" type="switch">
+        <NcCheckboxRadioSwitch
+          :model-value="config.livephoto_loop"
+          @update:model-value="updateLivephotoLoop"
+          type="switch"
+        >
           {{ t('memories', 'Loop Live Photos') }}
         </NcCheckboxRadioSwitch>
 
@@ -89,12 +101,12 @@
           {{ t('memories', 'Autoplay Videos') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch v-model="config.video_loop" @update:model-value="updateVideoLoop" type="switch">
+        <NcCheckboxRadioSwitch :model-value="config.video_loop" @update:model-value="updateVideoLoop" type="switch">
           {{ t('memories', 'Loop Videos') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
-          v-model="config.sidebar_filepath"
+          :model-value="config.sidebar_filepath"
           @update:model-value="updateSidebarFilepath"
           type="switch"
         >
@@ -102,7 +114,7 @@
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
-          v-model="config.metadata_in_slideshow"
+          :model-value="config.metadata_in_slideshow"
           @update:model-value="updateMetadataInSlideshow"
           type="switch"
         >
@@ -181,21 +193,21 @@
         <NcTextField
           :label="t('memories', 'Folders Path')"
           :label-visible="true"
-          v-model="config.folders_path"
+          :model-value="config.folders_path"
           @click="chooseFoldersPath"
           readonly
         />
 
         <NcCheckboxRadioSwitch
-          v-model="config.show_hidden_folders"
-          @update:model-value="updateShowHidden"
+          :model-value="config.show_hidden_folders"
+          @update:model-value="updateShowHiddenFolders"
           type="switch"
         >
           {{ t('memories', 'Show hidden folders') }}
         </NcCheckboxRadioSwitch>
 
         <NcCheckboxRadioSwitch
-          v-model="config.sort_folder_month"
+          :model-value="config.sort_folder_month"
           @update:model-value="updateSortFolderMonth"
           type="switch"
         >
@@ -205,14 +217,18 @@
 
       <NcAppSettingsSection id="albums-settings" :name="names.albums">
         <NcCheckboxRadioSwitch
-          v-model="config.sort_album_month"
+          :model-value="config.sort_album_month"
           @update:model-value="updateSortAlbumMonth"
           type="switch"
         >
           {{ t('memories', 'Sort albums oldest-first') }}
         </NcCheckboxRadioSwitch>
 
-        <NcCheckboxRadioSwitch v-model="config.show_hidden_albums" @update:model-value="updateShowHidden" type="switch">
+        <NcCheckboxRadioSwitch
+          :model-value="config.show_hidden_albums"
+          @update:model-value="updateShowHiddenAlbums"
+          type="switch"
+        >
           {{ t('memories', 'Show hidden albums') }}
         </NcCheckboxRadioSwitch>
       </NcAppSettingsSection>
@@ -271,8 +287,7 @@ input[type='text'] {
 import { ref, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { useUserConfig } from '@services/user-config';
-import staticConfig from '@services/static-config';
+import userConfig from '@services/user-config';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 import { t } from '@services/l10n';
@@ -285,7 +300,7 @@ const NcAppSettingsSection = defineAsyncComponent(() => import('@nextcloud/vue/c
 const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
 const NcChip = defineAsyncComponent(() => import('@nextcloud/vue/components/NcChip'));
 
-import type { IConfig, IMapTileServer } from '@typings';
+import type { IConfig } from '@typings';
 
 const props = defineProps<{
   open: boolean;
@@ -296,7 +311,7 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
-const { config, updateSetting } = useUserConfig();
+const config = userConfig.use();
 
 const localFolders = ref<nativex.LocalFolderConfig[]>([]);
 const names = {
@@ -326,8 +341,8 @@ const highResCond = computed((): IConfig['high_res_cond_default'] => {
   return config.high_res_cond || config.high_res_cond_default || 'zoom';
 });
 
-const tileServers = computed((): IMapTileServer[] => {
-  return staticConfig.getSync('map_tile_servers') || [];
+const tileServers = computed(() => {
+  return [...(userConfig.use().map_tile_servers || [])];
 });
 
 watch(
@@ -379,8 +394,7 @@ async function removeTimelinePath(path: string) {
 async function saveTimelinePaths(paths: string[]) {
   const newPath = paths.join(';');
   if (newPath !== config.timeline_path) {
-    config.timeline_path = newPath;
-    await updateSetting('timeline_path', 'timelinePath');
+    await userConfig.set('timeline_path', newPath, 'timelinePath');
   }
 }
 
@@ -391,104 +405,104 @@ async function chooseFoldersPath() {
   );
 
   if (newPath !== config.folders_path) {
-    config.folders_path = newPath;
-    await updateSetting('folders_path', 'foldersPath');
+    await userConfig.set('folders_path', newPath, 'foldersPath');
   }
 }
 
 // General settings
-async function updateSquareThumbs() {
-  await updateSetting('square_thumbs');
+async function updateSquareThumbs(val: boolean) {
+  await userConfig.set('square_thumbs', val);
 }
 
-async function updateEnableTopMemories() {
-  await updateSetting('enable_top_memories', 'enableTopMemories');
+async function updateEnableTopMemories(val: boolean) {
+  await userConfig.set('enable_top_memories', val, 'enableTopMemories');
 }
 
-async function updateStackRawFiles() {
-  await updateSetting('stack_raw_files', 'stackRawFiles');
+async function updateStackRawFiles(val: boolean) {
+  await userConfig.set('stack_raw_files', val, 'stackRawFiles');
 }
 
-async function updateDedupIdentical() {
-  await updateSetting('dedup_identical', 'dedupIdentical');
+async function updateDedupIdentical(val: boolean) {
+  await userConfig.set('dedup_identical', val, 'dedupIdentical');
 }
 
-async function updateShowOwnerNameTimeline() {
-  await updateSetting('show_owner_name_timeline', 'showOwnerNameTimeline');
+async function updateShowOwnerNameTimeline(val: boolean) {
+  await userConfig.set('show_owner_name_timeline', val, 'showOwnerNameTimeline');
 }
 
 // Viewer settings
 async function updateHighResCond(val: IConfig['high_res_cond']) {
-  config.high_res_cond = val;
-  await updateSetting('high_res_cond');
+  await userConfig.set('high_res_cond', val);
 }
 
-async function updateLivephotoAutoplay() {
-  await updateSetting('livephoto_autoplay', 'livephotoAutoplay');
+async function updateLivephotoAutoplay(val: boolean) {
+  await userConfig.set('livephoto_autoplay', val, 'livephotoAutoplay');
 }
 
-async function updateLivephotoLoop() {
-  await updateSetting('livephoto_loop', 'livephotoLoop');
+async function updateLivephotoLoop(val: boolean) {
+  await userConfig.set('livephoto_loop', val, 'livephotoLoop');
 }
 
-async function updateVideoLoop() {
-  await updateSetting('video_loop', 'videoLoop');
+async function updateVideoLoop(val: boolean) {
+  await userConfig.set('video_loop', val, 'videoLoop');
 }
 
 async function updateVideoAutoplay(val: boolean) {
-  config.video_autoplay = val ? 'true' : 'false';
-  await updateSetting('video_autoplay', 'videoAutoplay');
+  await userConfig.set('video_autoplay', val ? 'true' : 'false', 'videoAutoplay');
 }
 
-async function updateSidebarFilepath() {
-  await updateSetting('sidebar_filepath', 'sidebarFilepath');
+async function updateSidebarFilepath(val: boolean) {
+  await userConfig.set('sidebar_filepath', val, 'sidebarFilepath');
 }
 
-async function updateMetadataInSlideshow() {
-  await updateSetting('metadata_in_slideshow', 'metadataInSlideshow');
+async function updateMetadataInSlideshow(val: boolean) {
+  await userConfig.set('metadata_in_slideshow', val, 'metadataInSlideshow');
 }
 
 async function updateSlideshowDuration(val: string | number) {
   const n = typeof val === 'number' ? val : parseFloat(val);
   if (!Number.isFinite(n)) return;
-  config.slideshow_duration = Math.min(60, Math.max(1, Math.round(n)));
-  await updateSetting('slideshow_duration', 'slideshowDuration');
+  await userConfig.set('slideshow_duration', Math.min(60, Math.max(1, Math.round(n))), 'slideshowDuration');
 }
 
 // On This Day settings
 async function updateOnThisDayRange(val: string | number) {
   const n = typeof val === 'number' ? val : parseFloat(val);
   if (!Number.isFinite(n)) return;
-  config.onthisday_day_range = Math.min(7, Math.max(0, Math.round(n)));
-  await updateSetting('onthisday_day_range', 'onthisdayDayRange');
+  await userConfig.set('onthisday_day_range', Math.min(7, Math.max(0, Math.round(n))), 'onthisdayDayRange');
 }
 
 async function updateOnThisDayPhotos(val: string | number) {
   const n = typeof val === 'number' ? val : parseFloat(val);
   if (!Number.isFinite(n)) return;
-  config.onthisday_photos_per_year = Math.min(50, Math.max(1, Math.round(n)));
-  await updateSetting('onthisday_photos_per_year', 'onthisdayPhotosPerYear');
+  await userConfig.set(
+    'onthisday_photos_per_year',
+    Math.min(50, Math.max(1, Math.round(n))),
+    'onthisdayPhotosPerYear',
+  );
 }
 
 // Folders settings
-async function updateShowHidden() {
-  await updateSetting('show_hidden_folders', 'showHidden');
-  await updateSetting('show_hidden_albums', 'showHiddenAlbums');
+async function updateShowHiddenFolders(val: boolean) {
+  await userConfig.set('show_hidden_folders', val, 'showHidden');
 }
 
-async function updateSortFolderMonth() {
-  await updateSetting('sort_folder_month', 'sortFolderMonth');
+async function updateShowHiddenAlbums(val: boolean) {
+  await userConfig.set('show_hidden_albums', val, 'showHiddenAlbums');
+}
+
+async function updateSortFolderMonth(val: boolean) {
+  await userConfig.set('sort_folder_month', val, 'sortFolderMonth');
 }
 
 // Albums settings
-async function updateSortAlbumMonth() {
-  await updateSetting('sort_album_month', 'sortAlbumMonth');
+async function updateSortAlbumMonth(val: boolean) {
+  await userConfig.set('sort_album_month', val, 'sortAlbumMonth');
 }
 
 // Map settings
 async function updateMapTileServer(val: string) {
-  config.map_tile_server_url = val;
-  await updateSetting('map_tile_server_url', 'mapTileServerUrl');
+  await userConfig.set('map_tile_server_url', val, 'mapTileServerUrl');
 }
 
 // --------------- Native APIs start -----------------------------

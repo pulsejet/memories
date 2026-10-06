@@ -21,14 +21,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, markRaw } from 'vue';
+import { ref, onMounted, markRaw, type DeepReadonly } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 
 import { API } from '@services/API';
 import * as utils from '@services/utils';
-import staticConfig from '@services/static-config';
+import userConfig from '@services/user-config';
 import { t } from '@services/l10n';
 
 import Help from './sections/Help.vue';
@@ -51,7 +51,7 @@ const loading = ref(0);
 
 const status = ref<ISystemStatus | null>(null);
 const config = ref<ISystemConfig | null>(null);
-const sconfig = ref<IConfig | null>(null);
+const sconfig = ref<DeepReadonly<IConfig> | null>(null);
 
 const refreshTimer = new utils.RenewingTimeout();
 
@@ -72,12 +72,7 @@ const components = [
 onMounted(() => {
   refreshSystemConfig();
   refreshStatus();
-  refreshStaticConfig();
-  utils.bus.on('memories:user-config-changed', refreshStaticConfig);
-});
-
-onBeforeUnmount(() => {
-  utils.bus.off('memories:user-config-changed', refreshStaticConfig);
+  refreshUserConfig();
 });
 
 async function refreshSystemConfig() {
@@ -106,10 +101,11 @@ async function refreshStatus() {
   }
 }
 
-async function refreshStaticConfig() {
+async function refreshUserConfig() {
   try {
     loading.value++;
-    sconfig.value = await staticConfig.getAll();
+    await userConfig.wait();
+    sconfig.value = userConfig.use();
   } catch (e: any) {
     showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
     console.error(e);

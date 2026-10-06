@@ -123,7 +123,7 @@ import NcButton from '@nextcloud/vue/components/NcButton';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
-import { useUserConfig } from '@services/user-config';
+import userConfig from '@services/user-config';
 import { useWindowDims, useWindowHeight, useWindowWidth, useWindowWidthIsMobile } from '@services/common';
 import { useRouteIsAlbums, useRouteIsPublic } from '@services/route-checker';
 import { API } from '@services/API';
@@ -192,7 +192,7 @@ defineOptions({
   name: 'Viewer',
 });
 
-const { config } = useUserConfig();
+const config = userConfig.use();
 const windowDims = useWindowDims();
 const windowWidth = useWindowWidth();
 const windowHeight = useWindowHeight();

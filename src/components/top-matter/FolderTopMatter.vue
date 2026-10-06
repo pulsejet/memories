@@ -70,10 +70,9 @@ import PublicUploadHandler from '@components/upload/PublicUploadHandler.vue';
 
 import { t } from '@services/l10n';
 import { useRouteIsPublic } from '@services/route-checker';
-import { useUserConfig } from '@services/user-config';
+import userConfig from '@services/user-config';
 import * as utils from '@services/utils';
 import { initstate } from '@services/utils';
-import * as nativex from '@native';
 
 import HomeIcon from 'vue-material-design-icons/Home.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
@@ -88,7 +87,7 @@ defineOptions({
 const route = useRoute();
 const router = useRouter();
 const routeIsPublic = useRouteIsPublic();
-const { config } = useUserConfig();
+const config = userConfig.use();
 
 const uploadHandler = useTemplateRef<InstanceType<typeof PublicUploadHandler>>('uploadHandler');
 

@@ -80,7 +80,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import { useModal } from '@services/modal';
 import { t, n } from '@services/l10n';
-import { useUserConfig } from '@services/user-config';
+import userConfig from '@services/user-config';
 import { useRouteIsAlbums } from '@services/route-checker';
 import { API } from '@services/API';
 import * as dav from '@services/dav';
@@ -100,7 +100,7 @@ defineOptions({
 
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
-const { config } = useUserConfig();
+const config = userConfig.use();
 const routeIsAlbums = useRouteIsAlbums();
 
 const photos = ref<IPhoto[] | null>(null);

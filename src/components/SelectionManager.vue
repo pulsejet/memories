@@ -40,7 +40,7 @@ import { showError } from '@nextcloud/dialogs';
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
-import { useUserConfig } from '@services/user-config';
+import userConfig from '@services/user-config';
 import { useWindowWidthIsMobile } from '@services/common';
 import {
   useRouteIsAlbums,
@@ -163,7 +163,7 @@ const emit = defineEmits<{
   updateLoading: [delta: number];
 }>();
 
-const { config } = useUserConfig();
+const config = userConfig.use();
 const windowWidthIsMobile = useWindowWidthIsMobile();
 const route = useRoute();
 const routeIsAlbums = useRouteIsAlbums();

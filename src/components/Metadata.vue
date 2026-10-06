@@ -85,7 +85,7 @@ import axios from '@nextcloud/axios';
 import { getCanonicalLocale } from '@nextcloud/l10n';
 import { DateTime } from 'luxon';
 
-import { useUserConfig } from '@services/user-config';
+import userConfig from '@services/user-config';
 import { useRouteIsFaceRecognition } from '@services/route-checker';
 
 import Cluster from '@components/frame/Cluster.vue';
@@ -127,7 +127,7 @@ const props = defineProps<{
   view?: IView;
 }>();
 
-const { config } = useUserConfig();
+const config = userConfig.use();
 const routeIsFaceRecognition = useRouteIsFaceRecognition();
 
 const fileid = ref<number | null>(null);

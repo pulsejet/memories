@@ -36,8 +36,7 @@ import { ref, computed } from 'vue';
 import { LMap, LTileLayer, LMarker, LIcon } from '@vue-leaflet/vue-leaflet';
 import { latLngBounds } from 'leaflet';
 
-import { useUserConfig } from '@services/user-config';
-import staticConfig from '@services/static-config';
+import userConfig from '@services/user-config';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-edgebuffer';
@@ -45,7 +44,7 @@ import 'leaflet-edgebuffer';
 const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const OSM_ATTRIBUTION = '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors';
 
-const { config } = useUserConfig();
+const config = userConfig.use();
 
 const props = withDefaults(
   defineProps<{
@@ -82,7 +81,7 @@ const markerOptions = {
 
 /** Tile layer configuration */
 const tileServer = computed(() => {
-  const tiles = staticConfig.getSync('map_tile_servers') || [];
+  const tiles = config.map_tile_servers || [];
   return tiles.find((t) => t.url === config.map_tile_server_url);
 });
 const tileurl = computed(() => {

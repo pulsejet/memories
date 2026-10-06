@@ -1,7 +1,7 @@
 import axios from '@nextcloud/axios';
 
 import * as utils from '@services/utils';
-import staticConfig from '@services/static-config';
+import userConfig from '@services/user-config';
 import { API } from '@services/API';
 
 import type { IDay, IPhoto } from '@typings';
@@ -14,7 +14,7 @@ export async function getOnThisDayRaw() {
   const now = new Date();
   const nowUTC = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
 
-  const dayRange = staticConfig.getSync('onthisday_day_range');
+  const dayRange = userConfig.use().onthisday_day_range;
 
   // Populate dayIds
   for (let i = 1; i <= 120; i++) {

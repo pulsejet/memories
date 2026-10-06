@@ -50,7 +50,7 @@ import NcButton from '@nextcloud/vue/components/NcButton';
 import XImg from '@components/frame/XImg.vue';
 import * as nativex from '@native';
 
-import { useUserConfig } from '@services/user-config';
+import userConfig from '@services/user-config';
 
 import axios from '@nextcloud/axios';
 
@@ -61,8 +61,6 @@ import { API } from '@services/API';
 import { t, n } from '@services/l10n';
 
 import type { IDay } from '@typings';
-
-const { config, updateSetting } = useUserConfig();
 
 const error = ref('');
 const info = ref('');
@@ -111,8 +109,7 @@ async function begin() {
 async function finish() {
   show.value = false;
   await new Promise((resolve) => setTimeout(resolve, 500));
-  config.timeline_path = chosenPath.value;
-  await updateSetting('timeline_path', 'timelinePath');
+  await userConfig.set('timeline_path', chosenPath.value, 'timelinePath');
 }
 
 onMounted(() => {

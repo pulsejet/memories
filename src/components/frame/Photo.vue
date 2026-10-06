@@ -94,7 +94,7 @@ import {
 
 import * as utils from '@services/utils';
 import { constants as c } from '@services/utils';
-import staticConfig from '@services/static-config';
+import userConfig from '@services/user-config';
 import { t } from '@services/l10n';
 import { useRouteIsBase } from '@services/route-checker';
 
@@ -210,7 +210,7 @@ const isRaw = computed((): boolean => {
 });
 
 const showOwnerName = computed((): boolean => {
-  if (routeIsBase.value && !staticConfig.getSync('show_owner_name_timeline')) {
+  if (routeIsBase.value && !userConfig.use().show_owner_name_timeline) {
     return false;
   }
   return true;

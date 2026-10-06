@@ -159,7 +159,7 @@ import AlbumDeleteModal from '@components/modal/AlbumDeleteModal.vue';
 import { downloadWithHandle } from '@services/dav';
 import { API } from '@services/API';
 import { useWindowWidthIsMobile } from '@services/common';
-import { useUserConfig } from '@services/user-config';
+import userConfig from '@services/user-config';
 import * as utils from '@services/utils';
 import { constants as c } from '@services/utils';
 import { t } from '@services/l10n';
@@ -182,7 +182,7 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const { config, updateSetting } = useUserConfig();
+const config = userConfig.use();
 const windowWidthIsMobile = useWindowWidthIsMobile();
 
 const createModal = useTemplateRef<InstanceType<typeof AlbumCreateModal>>('createModal');
@@ -240,17 +240,17 @@ async function downloadAlbum() {
 /** Set sort choice */
 function changeSort(flag: number) {
   const dir = config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING;
-  config.album_list_sort = flag | dir;
-  updateSetting('album_list_sort');
+  userConfig.set('album_list_sort', flag | dir);
 }
 
 /** Set sort direction */
 function setDescending(val: boolean) {
+  let sort = config.album_list_sort;
   if (val) {
-    config.album_list_sort |= c.ALBUM_SORT_FLAGS.DESCENDING;
+    sort |= c.ALBUM_SORT_FLAGS.DESCENDING;
   } else {
-    config.album_list_sort &= ~c.ALBUM_SORT_FLAGS.DESCENDING;
+    sort &= ~c.ALBUM_SORT_FLAGS.DESCENDING;
   }
-  updateSetting('album_list_sort');
+  userConfig.set('album_list_sort', sort);
 }
 </script>

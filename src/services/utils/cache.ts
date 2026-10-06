@@ -1,9 +1,9 @@
-import config from '../static-config';
+import userConfig from '../user-config';
 import { uid } from './helpers';
 
 /** Cache keys */
 function getCacheName() {
-  const ver = config.getSync('version');
+  const ver = userConfig.use().version;
   return `memories-data-${ver}-${uid}`;
 }
 

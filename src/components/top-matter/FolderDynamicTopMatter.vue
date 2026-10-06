@@ -11,7 +11,7 @@ import { getLanguage } from '@nextcloud/l10n';
 
 import FolderGrid from './FolderGrid.vue';
 
-import { useUserConfig } from '@services/user-config';
+import userConfig from '@services/user-config';
 import * as utils from '@services/utils';
 import { API } from '@services/API';
 
@@ -22,7 +22,7 @@ defineOptions({
 });
 
 const route = useRoute();
-const { config } = useUserConfig();
+const config = userConfig.use();
 
 const folders = ref<IFolder[]>([]);
 const currentFolder = ref('<none>');

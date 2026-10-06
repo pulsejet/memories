@@ -71,7 +71,7 @@ import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';
 import FaceMergeModal from '@components/modal/FaceMergeModal.vue';
 
 import { useRouteIsRecognize, useRouteIsRecognizeUnassigned } from '@services/route-checker';
-import { useUserConfig } from '@services/user-config';
+import userConfig from '@services/user-config';
 import * as utils from '@services/utils';
 import { constants as c } from '@services/utils';
 import { t } from '@services/l10n';
@@ -88,7 +88,7 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const { config, updateSetting } = useUserConfig();
+const config = userConfig.use();
 const routeIsRecognize = useRouteIsRecognize();
 const routeIsRecognizeUnassigned = useRouteIsRecognizeUnassigned();
 
@@ -134,8 +134,7 @@ function openUnassigned() {
 }
 
 function changeShowFaceRect() {
-  config.show_face_rect = !config.show_face_rect;
-  updateSetting('show_face_rect');
+  userConfig.set('show_face_rect', !config.show_face_rect);
   utils.bus.emit('memories:timeline:hard-refresh', null);
 }
 </script>

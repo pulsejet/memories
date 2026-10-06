@@ -1,5 +1,6 @@
 import { getCurrentUser } from '@nextcloud/auth';
 import { Md5 } from 'ts-md5';
+import type { DeepReadonly } from 'vue';
 
 import { constants as c } from './const';
 import { getPlayableVideoCodecsSync } from './video';
@@ -124,7 +125,7 @@ export function isVideo(photo: IPhoto): boolean {
  * @param photo Photo object or fileid (remote only)
  * @param config User config to derive tags/clusters params
  */
-export function getImageInfoUrl(photo: IPhoto | number, config: IConfig): string {
+export function getImageInfoUrl(photo: IPhoto | number, config: DeepReadonly<IConfig>): string {
   const fileid = typeof photo === 'number' ? photo : photo.fileid;
 
   // Base URL for getting image info.

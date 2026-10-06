@@ -20,7 +20,7 @@ import { computed, markRaw } from 'vue';
 
 import * as nativex from '@native';
 
-import { useUserConfig } from '@services/user-config';
+import userConfig from '@services/user-config';
 import { t } from '@services/l10n';
 import MobileBottomBar from '@components/MobileBottomBar.vue';
 
@@ -28,7 +28,7 @@ import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import SearchIcon from 'vue-material-design-icons/Magnify.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 
-const { config } = useUserConfig();
+const config = userConfig.use();
 
 const links = computed(() => {
   const list = [

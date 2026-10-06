@@ -102,7 +102,6 @@ const NcAppNavigationItem = defineAsyncComponent(() => import('@nextcloud/vue/co
 
 import { generateUrl } from '@nextcloud/router';
 
-import { useUserConfig } from '@services/user-config';
 import {
   useRouteIsAlbums,
   useRouteIsBase,
@@ -132,7 +131,7 @@ import SearchModal from '@components/modal/SearchModal.vue';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 import { translate as t } from '@services/l10n';
-import staticConfig from '@services/static-config';
+import userConfig from '@services/user-config';
 
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
@@ -159,7 +158,7 @@ defineOptions({
 });
 
 const route = useRoute();
-const { config } = useUserConfig();
+const config = userConfig.use();
 const routeIsAlbums = useRouteIsAlbums();
 const routeIsBase = useRouteIsBase();
 const routeIsExplore = useRouteIsExplore();
@@ -245,7 +244,7 @@ window.addEventListener('resize', () => {
 });
 
 // Register navigation items on config change
-utils.bus.on('memories:user-config-changed', refreshNav);
+watch(config, refreshNav);
 
 // Register global functions
 _m.modals.showSettings = showSettings;
@@ -292,7 +291,7 @@ onBeforeMount(async () => {
         console.info('SW registered: ', registration);
 
         // Check for updates
-        if (await staticConfig.hasVersionChanged()) {
+        if (await userConfig.hasVersionChanged()) {
           await registration.update();
         }
       } catch (error) {

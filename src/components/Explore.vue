@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount, markRaw } from 'vue';
+import { ref, reactive, onMounted, markRaw, watch } from 'vue';
 import type { Component } from 'vue';
 
 import Searchbar from '@components/header/Searchbar.vue';
@@ -62,12 +62,11 @@ import MapIcon from 'vue-material-design-icons/Map.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
 
 import { translate as t } from '@services/l10n';
-import config from '@services/static-config';
+import userConfig from '@services/user-config';
 import * as dav from '@services/dav';
-import * as utils from '@services/utils';
 import * as nativex from '@native';
 
-import type { ICluster, IConfig } from '@typings';
+import type { ICluster } from '@typings';
 
 type Category = {
   name: string;
@@ -80,7 +79,7 @@ type Category = {
 const loading = ref(0);
 const isNative = nativex.has();
 
-const localConfig = ref({} as IConfig);
+const config = userConfig.use();
 const recognize = ref([] as ICluster[]);
 const facerecognition = ref([] as ICluster[]);
 const places = ref([] as ICluster[]);
@@ -165,47 +164,35 @@ async function getTags() {
 }
 
 function maybeLoad() {
-  if (localConfig.value.recognize_enabled && !loaded.recognize) {
+  if (config.recognize_enabled && !loaded.recognize) {
     loaded.recognize = true;
     load(getRecognize);
   }
 
-  if (localConfig.value.facerecognition_enabled && !loaded.facerecognition) {
+  if (config.facerecognition_enabled && !loaded.facerecognition) {
     loaded.facerecognition = true;
     load(getFaceRecognition);
   }
 
-  if (localConfig.value.places_gis > 0 && !loaded.places) {
+  if (config.places_gis > 0 && !loaded.places) {
     loaded.places = true;
     load(getPlaces);
   }
 
-  if (localConfig.value.systemtags_enabled && !loaded.tags) {
+  if (config.systemtags_enabled && !loaded.tags) {
     loaded.tags = true;
     load(getTags);
   }
 }
 
-function onConfigChanged() {
-  localConfig.value = { ...config.getDefault() };
-  maybeLoad();
-}
-
-onMounted(async () => {
-  const res: IConfig | undefined = await load(config.getAll.bind(config));
-  if (!res) return;
-  localConfig.value = res;
+onMounted(() => {
   maybeLoad();
 
   // Server copy may differ from cache; load newly enabled sections.
-  utils.bus.on('memories:user-config-changed', onConfigChanged);
+  watch(config, maybeLoad);
 
   // Remove categories that should not be shown
   categories.value = categories.value.filter((c) => !c.if || c.if());
-});
-
-onBeforeUnmount(() => {
-  utils.bus.off('memories:user-config-changed', onConfigChanged);
 });
 </script>
 

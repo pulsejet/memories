@@ -120,7 +120,7 @@ import { showError } from '@nextcloud/dialogs';
 
 import { getLayout } from '@services/layout';
 
-import { useUserConfig } from '@services/user-config';
+import userConfig from '@services/user-config';
 import {
   useRouteIsAlbumShare,
   useRouteIsAlbums,
@@ -173,7 +173,7 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const { config } = useUserConfig();
+const config = userConfig.use();
 const routeIsAlbumShare = useRouteIsAlbumShare();
 const routeIsAlbums = useRouteIsAlbums();
 const routeIsArchive = useRouteIsArchive();
@@ -278,7 +278,7 @@ onUnmounted(() => {
   resizeObserver?.disconnect();
 });
 
-utils.bus.on('memories:user-config-changed', softRefresh);
+watch(config, softRefresh);
 utils.bus.on('files:file:created', softRefresh);
 utils.bus.on('memories:timeline:fetch-day', fetchDay);
 utils.bus.on('memories:timeline:deleted', deleteFromViewWithAnimation);
@@ -286,7 +286,6 @@ utils.bus.on('memories:timeline:soft-refresh', softRefresh);
 utils.bus.on('memories:timeline:hard-refresh', refresh);
 
 onBeforeUnmount(() => {
-  utils.bus.off('memories:user-config-changed', softRefresh);
   utils.bus.off('files:file:created', softRefresh);
   utils.bus.off('memories:timeline:fetch-day', fetchDay);
   utils.bus.off('memories:timeline:deleted', deleteFromViewWithAnimation);

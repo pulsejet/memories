@@ -1,6 +1,6 @@
 import { emit, subscribe, unsubscribe } from '@nextcloud/event-bus';
 import type { FragmentName, Fragment } from './fragment';
-import type { IConfig, IPhoto } from '@typings';
+import type { IPhoto } from '@typings';
 
 export type BusEvent = {
   /** Open/close the navigation drawer */
@@ -18,12 +18,6 @@ export type BusEvent = {
   'memories:sidebar:opened': null;
   /** Final event after sidebar is closed */
   'memories:sidebar:closed': null;
-
-  /** User configuration was changed */
-  'memories:user-config-changed': {
-    setting: keyof IConfig;
-    value: IConfig[keyof IConfig];
-  } | null;
 
   /**
    * Remove these photos from the timeline.

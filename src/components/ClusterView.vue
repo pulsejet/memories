@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 
 import {
@@ -34,8 +34,8 @@ import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
+import userConfig from '@services/user-config';
 import * as dav from '@services/dav';
-import * as utils from '@services/utils';
 
 import type { ICluster } from '@typings';
 
@@ -92,10 +92,7 @@ async function refresh() {
 onMounted(refresh);
 watch(() => route.path, refresh);
 
-utils.bus.on('memories:user-config-changed', refresh);
-onBeforeUnmount(() => {
-  utils.bus.off('memories:user-config-changed', refresh);
-});
+watch(userConfig.use(), refresh);
 </script>
 
 <style lang="scss" scoped>

@@ -1,4 +1,4 @@
-import { computed, type PropType } from 'vue';
+import { computed, type DeepReadonly, type PropType } from 'vue';
 import axios from '@nextcloud/axios';
 
 import { t } from '@services/l10n';
@@ -18,7 +18,7 @@ export const adminSectionProps = {
     required: true,
   },
   sconfig: {
-    type: Object as PropType<IConfig>,
+    type: Object as PropType<DeepReadonly<IConfig>>,
     required: true,
   },
 } as const;
