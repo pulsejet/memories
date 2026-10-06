@@ -77,7 +77,7 @@ declare global {
   };
 
   // Typings for external libraries below
-  type VueRecyclerType = ComponentPublicInstance & {
+  type VueRecyclerType = Omit<ComponentPublicInstance, '$el'> & {
     $el: HTMLDivElement;
     scrollToPosition: (position: number) => void;
     scrollToItem: (index: number) => void;
@@ -91,7 +91,7 @@ declare global {
     availableTags: any[];
   };
 
-  type VueHTMLComponent = ComponentPublicInstance & {
+  type VueHTMLComponent = Omit<ComponentPublicInstance, '$el'> & {
     $el: HTMLElement;
   };
 }
