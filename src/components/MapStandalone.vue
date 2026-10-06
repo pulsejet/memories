@@ -31,12 +31,12 @@
   </LMap>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
 import { LMap, LTileLayer, LMarker, LIcon } from '@vue-leaflet/vue-leaflet';
 import { latLngBounds } from 'leaflet';
 
-import UserConfig from '@mixins/UserConfig';
+import { useUserConfig } from '@services/user-config';
 import staticConfig from '@services/static-config';
 
 import 'leaflet/dist/leaflet.css';
@@ -45,90 +45,67 @@ import 'leaflet-edgebuffer';
 const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const OSM_ATTRIBUTION = '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors';
 
-export default defineComponent({
-  name: 'MapStandalone',
-  mixins: [UserConfig],
-  components: {
-    LMap,
-    LTileLayer,
-    LMarker,
-    LIcon,
+const { config } = useUserConfig();
+
+const props = withDefaults(
+  defineProps<{
+    center?: [number, number];
+    zoom?: number;
+    pins?: [number, number][];
+    scrollWheelZoom?: boolean;
+  }>(),
+  {
+    zoom: 14,
+    scrollWheelZoom: false,
   },
-  emits: ['ready', 'moveend', 'zoomend'],
+);
 
-  props: {
-    center: {
-      type: Array as unknown as PropType<[number, number]>,
-      required: false,
-      default: undefined,
-    },
-    zoom: {
-      type: Number,
-      required: false,
-      default: 14,
-    },
-    /** Simple pin markers; the default slot is always rendered inside the map too */
-    pins: {
-      type: Array as unknown as PropType<[number, number][]>,
-      required: false,
-      default: undefined,
-    },
-    scrollWheelZoom: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
+const emit = defineEmits<{
+  ready: [map: NonNullable<InstanceType<typeof LMap>['leafletObject']>];
+  moveend: [];
+  zoomend: [];
+}>();
 
-  data: () => ({
-    markerOptions: {
-      interactive: false,
-      keyboard: false,
-    },
-  }),
+/** Main map instance and configuration */
+const map = ref<InstanceType<typeof LMap>>();
+const mapOptions = computed(() => ({
+  maxBounds: latLngBounds([-90, -180], [90, 180]),
+  maxBoundsViscosity: 0.9,
+  scrollWheelZoom: props.scrollWheelZoom,
+}));
 
-  computed: {
-    mapOptions() {
-      return {
-        maxBounds: latLngBounds([-90, -180], [90, 180]),
-        maxBoundsViscosity: 0.9,
-        scrollWheelZoom: this.scrollWheelZoom,
-      };
-    },
+/** Static pins configuration */
+const markerOptions = {
+  interactive: false,
+  keyboard: false,
+};
 
-    tileServer() {
-      const tiles = staticConfig.getSync('map_tile_servers') || [];
-      return tiles.find((t) => t.url === this.config.map_tile_server_url);
-    },
-
-    tileurl(): string {
-      return this.config.map_tile_server_url || OSM_TILE_URL;
-    },
-
-    attribution(): string {
-      return this.tileServer?.attribution || OSM_ATTRIBUTION;
-    },
-
-    tileLayerOptions(): { referrerPolicy: string; maxZoom: number; maxNativeZoom: number } {
-      return {
-        referrerPolicy: 'origin',
-        maxZoom: this.tileServer?.maxZoom ?? 19,
-        maxNativeZoom: this.tileServer?.maxZoom ?? 19,
-      };
-    },
-  },
-
-  methods: {
-    getMap() {
-      const map = this.$refs.map as InstanceType<typeof LMap> | undefined;
-      return map?.leafletObject;
-    },
-
-    onReady(map: NonNullable<InstanceType<typeof LMap>['leafletObject']>) {
-      this.$emit('ready', map);
-    },
-  },
+/** Tile layer configuration */
+const tileServer = computed(() => {
+  const tiles = staticConfig.getSync('map_tile_servers') || [];
+  return tiles.find((t) => t.url === config.map_tile_server_url);
 });
+const tileurl = computed(() => {
+  return config.map_tile_server_url || OSM_TILE_URL;
+});
+const attribution = computed(() => {
+  return tileServer.value?.attribution || OSM_ATTRIBUTION;
+});
+const tileLayerOptions = computed(() => ({
+  referrerPolicy: 'origin',
+  maxZoom: tileServer.value?.maxZoom ?? 19,
+  maxNativeZoom: tileServer.value?.maxZoom ?? 19,
+}));
+
+function onReady(map: NonNullable<InstanceType<typeof LMap>['leafletObject']>) {
+  emit('ready', map);
+}
+
+function getMap() {
+  return map.value?.leafletObject;
+}
+
+defineExpose({ getMap });
 </script>
 
 <style lang="scss" scoped>
