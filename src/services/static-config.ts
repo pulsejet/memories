@@ -209,11 +209,7 @@ class StaticConfig {
   }
 
   private notifyVersionChanged(version: string) {
-    showInfo(
-      t('memories', 'Memories has been updated to {version}. Reload to get the new version.', {
-        version,
-      }),
-    );
+    showInfo(t('memories', 'Memories has been updated to {version}. Reload to get the new version.', { version }));
   }
 }
 

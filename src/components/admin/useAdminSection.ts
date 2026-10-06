@@ -43,42 +43,23 @@ export function useAdminSection(
       sanitize: false,
     };
     if (status === 'ok') {
-      return t('memories', '{name} binary exists and is executable.', {
-        name,
-      });
+      return t('memories', '{name} binary exists and is executable.', { name });
     } else if (status === 'not_found') {
       return t('memories', '{name} binary not found.', { name });
     } else if (status === 'not_executable') {
-      return t('memories', '{name} binary is not executable.', {
-        name,
-      });
+      return t('memories', '{name} binary is not executable.', { name });
     } else if (status.startsWith('test_fail')) {
-      return t(
-        'memories',
-        '{name} failed test: {info}.',
-        {
-          name,
-          info: status.slice(10),
-        },
-        0,
-        noescape,
-      );
+      return t('memories', '{name} failed test: {info}.', { name, info: status.slice(10) }, 0, noescape);
     } else if (status.startsWith('test_ok')) {
       return t(
         'memories',
         '{name} binary exists and is usable ({info}).',
-        {
-          name,
-          info: status.slice(8),
-        },
+        { name, info: status.slice(8) },
         0,
         noescape,
       );
     } else {
-      return t('memories', '{name} binary status: {status}.', {
-        name,
-        status,
-      });
+      return t('memories', '{name} binary status: {status}.', { name, status });
     }
   }
 
