@@ -103,22 +103,36 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, markRaw } from 'vue';
+<script setup lang="ts">
+import {
+  computed,
+  getCurrentInstance,
+  markRaw,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  useTemplateRef,
+  watch,
+} from 'vue';
 
-import UserConfig from '@mixins/UserConfig';
-import CommonMixin from '@mixins/CommonMixin';
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import NcButton from '@nextcloud/vue/components/NcButton';
 import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
+import { useUserConfig } from '@services/user-config';
+import { useWindowDims, useWindowHeight, useWindowWidth, useWindowWidthIsMobile } from '@services/common';
+import { useRouteIsAlbums, useRouteIsPublic } from '@services/route-checker';
 import { API } from '@services/API';
+import { t } from '@services/l10n';
+import { constants as c, initstate } from '@services/utils';
+import { makeTapPatch } from '@services/patches/mobile-click';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
-import { makeTapPatch } from '@services/patches/mobile-click';
 
 import ImageEditor from './ImageEditor.vue';
 import ViewerDateAddress from './ViewerDateAddress.vue';
@@ -174,1327 +188,1302 @@ type IViewerAction = {
 const DEFAULT_SLIDESHOW_MS = 5000;
 const SIDEBAR_DEBOUNCE_MS = 350;
 
-export default defineComponent({
+defineOptions({
   name: 'Viewer',
-  components: {
-    NcActions,
-    NcActionButton,
-    NcButton,
-    BackIcon,
-    ImageEditor,
-    ViewerDateAddress,
-    MobileBottomBar,
-    ViewerBottomSheet,
-    ViewerSheetGestures,
-    XLoadingIcon,
-  },
+});
 
-  mixins: [UserConfig, CommonMixin],
+const { config } = useUserConfig();
+const windowDims = useWindowDims();
+const windowWidth = useWindowWidth();
+const windowHeight = useWindowHeight();
+const windowWidthIsMobile = useWindowWidthIsMobile();
+const routeIsAlbums = useRouteIsAlbums();
+const routeIsPublic = useRouteIsPublic();
+const instance = getCurrentInstance();
+const outer = useTemplateRef<HTMLDivElement>('outer');
+const inner = useTemplateRef<HTMLDivElement>('inner');
 
-  data: () => ({
-    loading: 0,
-    isOpen: false,
-    originalTitle: null as string | null,
-    editorOpen: false,
-    editorSrc: '',
+const loading = ref(0);
+const isOpen = ref(false);
+let originalTitle: string | null = null;
+const editorOpen = ref(false);
 
-    show: false,
-    fullyOpened: false,
-    sidebarOpen: false,
-    sidebarWidth: 400,
-    outerWidth: '100vw',
+const show = ref(false);
+const fullyOpened = ref(false);
+const sidebarOpen = ref(false);
+const outerWidth = ref('100vw');
 
-    /** Mobile bottom sheet with photo metadata */
-    sheetOpen: false,
+/** Mobile bottom sheet with photo metadata */
+const sheetOpen = ref(false);
 
-    /** User interaction detection */
-    activityTimer: 0,
+/** User interaction detection */
+let activityTimer = 0;
 
-    /** Base dialog */
-    photoswipe: null as PhotoSwipe | null,
-    psVideo: null as PsVideo | null,
-    psImage: null as PsImage | null,
-    psLivePhoto: null as PsLivePhoto | null,
-    psPhotoSphere: null as PsPhotoSphere | null,
+/** Base dialog */
+const photoswipe = ref<PhotoSwipe | null>(null);
+const psVideo = ref<PsVideo | null>(null);
+const psImage = ref<PsImage | null>(null);
+const psLivePhoto = ref<PsLivePhoto | null>(null);
+const psPhotoSphere = ref<PsPhotoSphere | null>(null);
 
-    /** Live photo state */
-    liveState: {
-      playing: false,
-      waiting: false,
-    },
+/** Live photo state */
+const liveState = reactive({
+  playing: false,
+  waiting: false,
+});
 
-    /** List globals */
-    list: [] as IPhoto[],
-    globalCount: 0,
-    globalAnchor: -1,
-    currIndex: -1,
+/** List globals */
+const list = ref<IPhoto[]>([]);
+const globalCount = ref(0);
+const globalAnchor = ref(-1);
+const currIndex = ref(-1);
 
-    /** Timer to move to next photo */
-    slideshowTimer: 0,
-    /** Timer to debounce changes to sidebar */
-    sidebarUpdateTimer: 0,
+/** Timer to move to next photo */
+const slideshowTimer = ref(0);
+/** Timer to debounce changes to sidebar */
+const sidebarUpdateTimer = new utils.RenewingTimeout();
 
-    /** Photo keys for which an imageInfo request is currently ongoing */
-    imageInfoLoading: new Set<string>(),
+/** Photo keys for which an imageInfo request is currently ongoing */
+const imageInfoLoading = new Set<string>();
 
-    /** Tap-to-click patch handlers for viewer chrome buttons */
-    tapPatch: markRaw(
-      makeTapPatch({
-        selectors: [
-          '.top-bar button',
-          '.top-bar-left button',
-          '.top-date .date-line',
-          '.bottom-bar .exif.date',
-          '.viewer-mobile-actions button',
-          '.v-popper__popper button, .v-popper__popper a',
-        ],
-      }),
-    ),
+/** Tap-to-click patch handlers for viewer chrome buttons */
+const tapPatch = markRaw(
+  makeTapPatch({
+    selectors: [
+      '.top-bar button',
+      '.top-bar-left button',
+      '.top-date .date-line',
+      '.bottom-bar .exif.date',
+      '.viewer-mobile-actions button',
+      '.v-popper__popper button, .v-popper__popper a',
+    ],
   }),
+);
 
-  mounted() {
-    utils.bus.on('memories:sidebar:opened', this.handleAppSidebarOpen);
-    utils.bus.on('memories:sidebar:closed', this.handleAppSidebarClose);
-    utils.bus.on('files:file:created', this.handleFileUpdated);
-    utils.bus.on('files:file:updated', this.handleFileUpdated);
-    utils.bus.on('memories:fragment:pop:viewer', this.close);
+onMounted(() => {
+  utils.bus.on('memories:sidebar:opened', handleAppSidebarOpen);
+  utils.bus.on('memories:sidebar:closed', handleAppSidebarClose);
+  utils.bus.on('files:file:created', handleFileUpdated);
+  utils.bus.on('files:file:updated', handleFileUpdated);
+  utils.bus.on('memories:fragment:pop:viewer', close);
 
-    // The viewer is a singleton
-    const self = this;
-    _m.viewer = {
-      open: this.setFragment.bind(this) as typeof this.setFragment,
-      openDynamic: this.openDynamic.bind(this) as typeof this.openDynamic,
-      openStatic: this.openStatic.bind(this) as typeof this.openStatic,
-      close: this.close.bind(this) as typeof this.close,
-      get isOpen() {
-        return self.isOpen;
+  // The viewer is a singleton
+  _m.viewer = {
+    open: setFragment,
+    openDynamic: openDynamic,
+    openStatic: openStatic,
+    close: close,
+    get isOpen() {
+      return isOpen.value;
+    },
+    get currentPhoto() {
+      return currentPhoto.value;
+    },
+  };
+});
+
+onBeforeUnmount(() => {
+  utils.bus.off('memories:sidebar:opened', handleAppSidebarOpen);
+  utils.bus.off('memories:sidebar:closed', handleAppSidebarClose);
+  utils.bus.off('files:file:created', handleFileUpdated);
+  utils.bus.off('files:file:updated', handleFileUpdated);
+  utils.bus.off('memories:fragment:pop:viewer', close);
+});
+
+/** Number of top bar buttons to show inline */
+const numInlineTopActions = computed((): number => {
+  if (windowWidthIsMobile.value) {
+    return Math.min(topActions.value.length, 1);
+  }
+
+  let base = 3;
+  if (canShare.value) {
+    base++;
+  }
+  if (canEdit.value) {
+    base++;
+  }
+
+  return Math.min(base, 5);
+});
+
+/** Top bar actions, excluding anything visible in the mobile bottom bar */
+const topActions = computed((): IViewerAction[] => {
+  if (!windowWidthIsMobile.value) {
+    return actions.value;
+  }
+
+  const bottomIds = new Set(bottomActions.value.map((action) => action.id));
+  return actions.value.filter((action) => !bottomIds.has(action.id));
+});
+
+/** Bottom bar actions on mobile */
+const bottomActions = computed((): IViewerAction[] => {
+  if (!windowWidthIsMobile.value) {
+    return [];
+  }
+
+  // Bottom bar uses a fixed independent order.
+  const edit = actions.value.some((a) => a.id === 'edit') ? 'edit' : 'edit-metadata';
+  const order = ['share', edit, 'add-to-album', 'delete', 'remove-from-album'];
+
+  // Get all actions available in this order.
+  return actions.value
+    .filter((action) => order.includes(action.id))
+    .sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))
+    .map((action) => {
+      // Some names may be too long for the bottom bar.
+      if (action.id === 'add-to-album') {
+        return { ...action, name: t('memories', 'Add to') };
+      } else if (action.id === 'remove-from-album') {
+        return { ...action, name: t('memories', 'Remove') };
+      } else if (action.id === 'edit-metadata') {
+        return { ...action, name: t('memories', 'Edit') };
+      }
+      return action;
+    });
+});
+
+/** Get the currently open photo */
+const currentPhoto = computed((): IPhoto | null => {
+  if (!list.value.length || !photoswipe.value) return null;
+
+  const idx = currIndex.value - globalAnchor.value;
+  if (idx < 0 || idx >= list.value.length) return null;
+
+  return list.value[idx];
+});
+
+/** Get all actions to show */
+const actions = computed((): IViewerAction[] => {
+  return [
+    {
+      id: 'favorite',
+      name: t('memories', 'Favorite'),
+      icon: isFavorite.value ? markRaw(StarIcon) : markRaw(StarOutlineIcon),
+      callback: favoriteCurrent,
+      if: !routeIsPublic.value && !isLocal.value,
+    },
+    {
+      id: 'share',
+      name: t('memories', 'Share'),
+      icon: markRaw(ShareIcon),
+      callback: shareCurrent,
+      if: canShare.value,
+    },
+    {
+      id: 'delete',
+      name: t('memories', 'Delete'),
+      icon: markRaw(DeleteIcon),
+      callback: deleteCurrent,
+      if: !routeIsAlbums.value && canDelete.value,
+    },
+    {
+      id: 'remove-from-album',
+      name: t('memories', 'Remove from album'),
+      icon: markRaw(AlbumRemoveIcon),
+      callback: deleteCurrent,
+      if: routeIsAlbums.value,
+    },
+    {
+      id: 'play-live-photo',
+      name: t('memories', 'Play Live Photo'),
+      icon: markRaw(LivePhotoIcon),
+      iconArgs: {
+        playing: liveState.playing,
+        spin: liveState.waiting,
       },
-      get currentPhoto() {
-        return self.currentPhoto;
-      },
-    };
-  },
-
-  beforeUnmount() {
-    utils.bus.off('memories:sidebar:opened', this.handleAppSidebarOpen);
-    utils.bus.off('memories:sidebar:closed', this.handleAppSidebarClose);
-    utils.bus.off('files:file:created', this.handleFileUpdated);
-    utils.bus.off('files:file:updated', this.handleFileUpdated);
-    utils.bus.off('memories:fragment:pop:viewer', this.close);
-  },
-
-  computed: {
-    /** Number of top bar buttons to show inline */
-    numInlineTopActions(): number {
-      if (this.windowWidthIsMobile) {
-        return Math.min(this.topActions.length, 1);
-      }
-
-      let base = 3;
-      if (this.canShare) {
-        base++;
-      }
-      if (this.canEdit) {
-        base++;
-      }
-
-      return Math.min(base, 5);
+      callback: playLivePhoto,
+      if: isLivePhoto.value,
     },
-
-    /** Top bar actions, excluding anything visible in the mobile bottom bar */
-    topActions(): IViewerAction[] {
-      if (!this.windowWidthIsMobile) {
-        return this.actions;
-      }
-
-      const bottomIds = new Set(this.bottomActions.map((action) => action.id));
-      return this.actions.filter((action) => !bottomIds.has(action.id));
+    {
+      id: 'view-panorama',
+      name: t('memories', 'View panorama'),
+      icon: currentPhoto.value?.pano === 2 ? markRaw(PanoramaSphereIcon) : markRaw(PanoramaHorizontalOutlineIcon),
+      callback: toggleSphere,
+      if: isPanorama.value && !isVideo.value,
     },
+    {
+      id: 'info',
+      name: t('memories', 'Info'),
+      icon: markRaw(InfoIcon),
+      callback: toggleInfo,
+      if: true,
+    },
+    {
+      id: 'sidebar',
+      name: t('memories', 'Sidebar'),
+      icon: markRaw(SidebarIcon),
+      callback: toggleSidebar,
+      if: windowWidthIsMobile.value && !nativex.has(),
+    },
+    {
+      id: 'edit',
+      name: t('memories', 'Edit'),
+      icon: markRaw(TuneIcon),
+      callback: openEditor,
+      if: canEdit.value && !isVideo.value,
+    },
+    {
+      id: 'download',
+      name: t('memories', 'Download'),
+      icon: markRaw(DownloadIcon),
+      callback: downloadCurrent,
+      if: canDownload.value,
+    },
+    {
+      id: 'download-video',
+      name: t('memories', 'Download Video'),
+      icon: markRaw(DownloadIcon),
+      callback: downloadCurrentLiveVideo,
+      if: canDownload.value && !!currentPhoto.value?.liveid,
+    },
+    ...stackedRaw.value.map((raw) => ({
+      id: `download-raw-${raw.fileid}`,
+      name: t('memories', 'Download {ext}', { ext: raw.extension }),
+      icon: markRaw(DownloadIcon),
+      callback: () => downloadByFileId(raw.fileid),
+      if: canDownload.value,
+    })),
+    {
+      id: 'view-in-folder',
+      name: t('memories', 'View in folder'),
+      icon: markRaw(OpenInNewIcon),
+      callback: viewInFolder,
+      if: !routeIsPublic.value && !routeIsAlbums.value && !isLocal.value,
+    },
+    {
+      id: 'slideshow',
+      name: t('memories', 'Slideshow'),
+      icon: markRaw(SlideshowIcon),
+      callback: startSlideshow,
+      if: globalCount.value > 1,
+    },
+    {
+      id: 'edit-metadata',
+      name: t('memories', 'Edit metadata'),
+      icon: markRaw(EditFileIcon),
+      callback: () => editMetadata(),
+      if: canEdit.value,
+    },
+    {
+      id: 'rotate-flip',
+      name: t('memories', 'Rotate / Flip'),
+      icon: markRaw(RotateLeftIcon),
+      callback: () => editMetadata([5]),
+      if: canEdit.value && !isVideo.value,
+    },
+    {
+      id: 'add-to-album',
+      name: t('memories', 'Add to album'),
+      icon: markRaw(AlbumIcon),
+      callback: updateAlbums,
+      if:
+        config.albums_enabled &&
+        !isLocal.value &&
+        !routeIsPublic.value &&
+        canShare.value &&
+        !!currentPhoto.value?.imageInfo?.filename,
+    },
+  ].filter((action) => action.if);
+});
 
-    /** Bottom bar actions on mobile */
-    bottomActions(): IViewerAction[] {
-      if (!this.windowWidthIsMobile) {
-        return [];
-      }
+/** Is the current slide a video */
+const isVideo = computed((): boolean => {
+  return Boolean((currentPhoto.value?.flag ?? 0) & c.FLAG_IS_VIDEO);
+});
 
-      // Bottom bar uses a fixed independent order.
-      const edit = this.actions.some((a) => a.id === 'edit') ? 'edit' : 'edit-metadata';
-      const order = ['share', edit, 'add-to-album', 'delete', 'remove-from-album'];
+/** Is the current slide a live photo */
+const isLivePhoto = computed((): boolean => {
+  return Boolean(currentPhoto.value?.liveid);
+});
 
-      // Get all actions available in this order.
-      return this.actions
-        .filter((action) => order.includes(action.id))
-        .sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))
-        .map((action) => {
-          // Some names may be too long for the bottom bar.
-          if (action.id === 'add-to-album') {
-            return { ...action, name: this.t('memories', 'Add to') };
-          } else if (action.id === 'remove-from-album') {
-            return { ...action, name: this.t('memories', 'Remove') };
-          } else if (action.id === 'edit-metadata') {
-            return { ...action, name: this.t('memories', 'Edit') };
+/** Is the current slide a panorama */
+const isPanorama = computed((): boolean => {
+  return (currentPhoto.value?.pano ?? 0) > 0;
+});
+
+/** Is the current slide a local photo */
+const isLocal = computed((): boolean => {
+  return utils.isLocalPhoto(currentPhoto.value!);
+});
+
+/** Is the current photo a favorite */
+const isFavorite = computed(() => {
+  const p = currentPhoto.value;
+  if (!p) return false;
+  return Boolean(p.flag & c.FLAG_IS_FAVORITE);
+});
+
+/** Allow closing the viewer */
+const allowClose = computed((): boolean => {
+  return !editorOpen.value && !dav.isSingleItem() && !slideshowTimer.value;
+});
+
+/** Show edit buttons */
+const canEdit = computed((): boolean => {
+  return currentPhoto.value?.imageInfo?.permissions?.includes('U') ?? false;
+});
+
+/** Show delete button */
+const canDelete = computed((): boolean => {
+  return currentPhoto.value?.imageInfo?.permissions?.includes('D') ?? false;
+});
+
+/** Show share button and add to album button */
+const canShare = computed((): boolean => {
+  return !!currentPhoto.value;
+});
+
+/** Show download button */
+const canDownload = computed((): boolean => {
+  return !currentPhoto.value?.imageInfo?.permissions?.includes('L') && !initstate.noDownload && !isLocal.value;
+});
+
+/** Stacked RAW photos */
+const stackedRaw = computed((): { extension: string; fileid: number }[] => {
+  const photo = currentPhoto.value;
+  if (!photo || !photo.stackraw?.length) return [];
+
+  return photo.stackraw.map((raw) => ({
+    extension: (raw.basename?.split('.').pop() ?? '?').toUpperCase(),
+    fileid: raw.fileid,
+  }));
+});
+
+watch(allowClose, (val) => {
+  if (!photoswipe.value) return;
+  photoswipe.value.options.pinchToClose = val;
+  photoswipe.value.options.closeOnVerticalDrag = val;
+});
+
+watch(windowDims, () => {
+  if (sheetOpen.value) sheetOpen.value = windowWidthIsMobile.value;
+  if (show.value) photoswipe.value?.updateSize();
+});
+
+function updateLoading(delta: number) {
+  loading.value += delta;
+}
+
+/** Update the document title */
+function updateTitle(photo: IPhoto | undefined) {
+  originalTitle ||= document.title;
+  if (photo) {
+    document.title = `${photo.basename} - ${originalTitle}`;
+  } else {
+    document.title = originalTitle;
+    originalTitle = null;
+  }
+}
+
+/** Event on file changed */
+function handleFileUpdated({ fileid }: { fileid: number }) {
+  const photo = currentPhoto.value;
+  const isvideo = (photo?.flag ?? 0) & c.FLAG_IS_VIDEO;
+  if (photo?.fileid === fileid && !isvideo) {
+    photoswipe.value?.refreshSlideContent(currIndex.value);
+  }
+}
+
+/** User interacted with the page with mouse */
+function setUiVisible(event: PointerEvent | false) {
+  clearTimeout(activityTimer);
+  if (event) {
+    // If directly triggered, always update ui visibility
+    // If triggered through a pointer event, only update if this is not
+    // a touch event (i.e. a mouse move).
+    // On touch devices, tapAction directly handles the ui visibility
+    // through Photoswipe.
+    const isPointer = event instanceof PointerEvent;
+    const isMouse = isPointer && event.pointerType !== 'touch';
+    if (isOpen.value && (!isPointer || isMouse)) {
+      photoswipe.value?.template?.classList.add('pswp--ui-visible');
+
+      if (isMouse) {
+        activityTimer = window.setTimeout(() => {
+          if (isOpen.value) {
+            photoswipe.value?.template?.classList.remove('pswp--ui-visible');
           }
-          return action;
-        });
-    },
-
-    /** Get the currently open photo */
-    currentPhoto(): IPhoto | null {
-      if (!this.list.length || !this.photoswipe) return null;
-
-      const idx = this.currIndex - this.globalAnchor;
-      if (idx < 0 || idx >= this.list.length) return null;
-
-      return this.list[idx];
-    },
-
-    /** Get all actions to show */
-    actions(): IViewerAction[] {
-      return [
-        {
-          id: 'favorite',
-          name: this.t('memories', 'Favorite'),
-          icon: this.isFavorite ? markRaw(StarIcon) : markRaw(StarOutlineIcon),
-          callback: this.favoriteCurrent,
-          if: !this.routeIsPublic && !this.isLocal,
-        },
-        {
-          id: 'share',
-          name: this.t('memories', 'Share'),
-          icon: markRaw(ShareIcon),
-          callback: this.shareCurrent,
-          if: this.canShare,
-        },
-        {
-          id: 'delete',
-          name: this.t('memories', 'Delete'),
-          icon: markRaw(DeleteIcon),
-          callback: this.deleteCurrent,
-          if: !this.routeIsAlbums && this.canDelete,
-        },
-        {
-          id: 'remove-from-album',
-          name: this.t('memories', 'Remove from album'),
-          icon: markRaw(AlbumRemoveIcon),
-          callback: this.deleteCurrent,
-          if: this.routeIsAlbums,
-        },
-        {
-          id: 'play-live-photo',
-          name: this.t('memories', 'Play Live Photo'),
-          icon: markRaw(LivePhotoIcon),
-          iconArgs: {
-            playing: this.liveState.playing,
-            spin: this.liveState.waiting,
-          },
-          callback: this.playLivePhoto,
-          if: this.isLivePhoto,
-        },
-        {
-          id: 'view-panorama',
-          name: this.t('memories', 'View panorama'),
-          icon: this.currentPhoto?.pano === 2 ? markRaw(PanoramaSphereIcon) : markRaw(PanoramaHorizontalOutlineIcon),
-          callback: this.toggleSphere,
-          if: this.isPanorama && !this.isVideo,
-        },
-        {
-          id: 'info',
-          name: this.t('memories', 'Info'),
-          icon: markRaw(InfoIcon),
-          callback: this.toggleInfo,
-          if: true,
-        },
-        {
-          id: 'sidebar',
-          name: this.t('memories', 'Sidebar'),
-          icon: markRaw(SidebarIcon),
-          callback: this.toggleSidebar,
-          if: this.windowWidthIsMobile && !nativex.has(),
-        },
-        {
-          id: 'edit',
-          name: this.t('memories', 'Edit'),
-          icon: markRaw(TuneIcon),
-          callback: this.openEditor,
-          if: this.canEdit && !this.isVideo,
-        },
-        {
-          id: 'download',
-          name: this.t('memories', 'Download'),
-          icon: markRaw(DownloadIcon),
-          callback: this.downloadCurrent,
-          if: this.canDownload,
-        },
-        {
-          id: 'download-video',
-          name: this.t('memories', 'Download Video'),
-          icon: markRaw(DownloadIcon),
-          callback: this.downloadCurrentLiveVideo,
-          if: this.canDownload && !!this.currentPhoto?.liveid,
-        },
-        ...this.stackedRaw.map((raw) => ({
-          id: `download-raw-${raw.fileid}`,
-          name: this.t('memories', 'Download {ext}', { ext: raw.extension }),
-          icon: markRaw(DownloadIcon),
-          callback: () => this.downloadByFileId(raw.fileid),
-          if: this.canDownload,
-        })),
-        {
-          id: 'view-in-folder',
-          name: this.t('memories', 'View in folder'),
-          icon: markRaw(OpenInNewIcon),
-          callback: this.viewInFolder,
-          if: !this.routeIsPublic && !this.routeIsAlbums && !this.isLocal,
-        },
-        {
-          id: 'slideshow',
-          name: this.t('memories', 'Slideshow'),
-          icon: markRaw(SlideshowIcon),
-          callback: this.startSlideshow,
-          if: this.globalCount > 1,
-        },
-        {
-          id: 'edit-metadata',
-          name: this.t('memories', 'Edit metadata'),
-          icon: markRaw(EditFileIcon),
-          callback: () => this.editMetadata(),
-          if: this.canEdit,
-        },
-        {
-          id: 'rotate-flip',
-          name: this.t('memories', 'Rotate / Flip'),
-          icon: markRaw(RotateLeftIcon),
-          callback: () => this.editMetadata([5]),
-          if: this.canEdit && !this.isVideo,
-        },
-        {
-          id: 'add-to-album',
-          name: this.t('memories', 'Add to album'),
-          icon: markRaw(AlbumIcon),
-          callback: this.updateAlbums,
-          if:
-            this.config.albums_enabled &&
-            !this.isLocal &&
-            !this.routeIsPublic &&
-            this.canShare &&
-            !!this.currentPhoto?.imageInfo?.filename,
-        },
-      ].filter((action) => action.if);
-    },
-
-    /** Is the current slide a video */
-    isVideo(): boolean {
-      return Boolean((this.currentPhoto?.flag ?? 0) & this.c.FLAG_IS_VIDEO);
-    },
-
-    /** Is the current slide a live photo */
-    isLivePhoto(): boolean {
-      return Boolean(this.currentPhoto?.liveid);
-    },
-
-    /** Is the current slide a panorama */
-    isPanorama(): boolean {
-      return (this.currentPhoto?.pano ?? 0) > 0;
-    },
-
-    /** Is the current slide a local photo */
-    isLocal(): boolean {
-      return utils.isLocalPhoto(this.currentPhoto!);
-    },
-
-    /** Is the current photo a favorite */
-    isFavorite() {
-      const p = this.currentPhoto;
-      if (!p) return false;
-      return Boolean(p.flag & this.c.FLAG_IS_FAVORITE);
-    },
-
-    /** Allow closing the viewer */
-    allowClose(): boolean {
-      return !this.editorOpen && !dav.isSingleItem() && !this.slideshowTimer;
-    },
-
-    /** Show edit buttons */
-    canEdit(): boolean {
-      return this.currentPhoto?.imageInfo?.permissions?.includes('U') ?? false;
-    },
-
-    /** Show delete button */
-    canDelete(): boolean {
-      return this.currentPhoto?.imageInfo?.permissions?.includes('D') ?? false;
-    },
-
-    /** Show share button and add to album button */
-    canShare(): boolean {
-      return !!this.currentPhoto;
-    },
-
-    /** Show download button */
-    canDownload(): boolean {
-      return !this.currentPhoto?.imageInfo?.permissions?.includes('L') && !this.initstate.noDownload && !this.isLocal;
-    },
-
-    /** Stacked RAW photos */
-    stackedRaw(): { extension: string; fileid: number }[] {
-      const photo = this.currentPhoto;
-      if (!photo || !photo.stackraw?.length) return [];
-
-      return photo.stackraw.map((raw) => ({
-        extension: (raw.basename?.split('.').pop() ?? '?').toUpperCase(),
-        fileid: raw.fileid,
-      }));
-    },
-  },
-
-  watch: {
-    allowClose(val) {
-      if (!this.photoswipe) return;
-      this.photoswipe.options.pinchToClose = val;
-      this.photoswipe.options.closeOnVerticalDrag = val;
-    },
-
-    windowDims() {
-      this.sheetOpen &&= this.windowWidthIsMobile;
-      this.show && this.photoswipe?.updateSize();
-    },
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        outer: HTMLDivElement;
-        inner: HTMLDivElement;
-      };
-    },
-
-    updateLoading(delta: number) {
-      this.loading += delta;
-    },
-
-    /** Update the document title */
-    updateTitle(photo: IPhoto | undefined) {
-      this.originalTitle ||= document.title;
-      if (photo) {
-        document.title = `${photo.basename} - ${this.originalTitle}`;
-      } else {
-        document.title = this.originalTitle;
-        this.originalTitle = null;
+        }, 2000);
       }
-    },
-
-    /** Event on file changed */
-    handleFileUpdated({ fileid }: { fileid: number }) {
-      const photo = this.currentPhoto;
-      const isvideo = (photo?.flag ?? 0) & this.c.FLAG_IS_VIDEO;
-      if (photo?.fileid === fileid && !isvideo) {
-        this.photoswipe?.refreshSlideContent(this.currIndex);
-      }
-    },
-
-    /** User interacted with the page with mouse */
-    setUiVisible(event: PointerEvent | false) {
-      clearTimeout(this.activityTimer);
-      if (event) {
-        // If directly triggered, always update ui visibility
-        // If triggered through a pointer event, only update if this is not
-        // a touch event (i.e. a mouse move).
-        // On touch devices, tapAction directly handles the ui visibility
-        // through Photoswipe.
-        const isPointer = event instanceof PointerEvent;
-        const isMouse = isPointer && event.pointerType !== 'touch';
-        if (this.isOpen && (!isPointer || isMouse)) {
-          this.photoswipe?.template?.classList.add('pswp--ui-visible');
-
-          if (isMouse) {
-            this.activityTimer = window.setTimeout(() => {
-              if (this.isOpen) {
-                this.photoswipe?.template?.classList.remove('pswp--ui-visible');
-              }
-            }, 2000);
-          }
-        }
-      } else {
-        this.photoswipe?.template?.classList.remove('pswp--ui-visible');
-      }
-    },
-
-    /** Create the base photoswipe object */
-    async createBase(args: PhotoSwipeOptions) {
-      this.show = true;
-      this.sheetOpen = false;
-      await this.$nextTick();
-
-      const photoswipe = new PhotoSwipe({
-        counter: false,
-        close: false,
-        zoom: false,
-        loop: false,
-        wheelToZoom: true,
-        bgOpacity: 1,
-        appendToEl: this.refs().inner!,
-        preload: [2, 2],
-        bgClickAction: 'toggle-controls',
-
-        clickToCloseNonZoomable: false,
-        pinchToClose: this.allowClose,
-        closeOnVerticalDrag: this.allowClose,
-
-        easing: 'cubic-bezier(.49,.85,.55,1)',
-        showHideAnimationType: 'zoom',
-        showAnimationDuration: 250,
-        hideAnimationDuration: 250,
-
-        closeTitle: this.t('memories', 'Close'),
-        arrowPrevTitle: this.t('memories', 'Previous'),
-        arrowNextTitle: this.t('memories', 'Next'),
-        getViewportSizeFn: () => {
-          // Ignore the sidebar if mobile or fullscreen
-          const isFullscreen = Boolean(document.fullscreenElement);
-          const use = this.sidebarOpen && !this.windowWidthIsMobile && !isFullscreen;
-
-          // Calculate the sidebar width to use and outer width
-          const sidebarWidth = use ? _m.sidebar.getWidth() : 0;
-          this.outerWidth = `calc(100vw - ${sidebarWidth}px)`;
-
-          return {
-            x: this.windowWidth - sidebarWidth,
-            y: this.windowHeight,
-          };
-        },
-        ...args,
-      });
-
-      // PhotoSwipe relies on object identity internally, and Vue's
-      // reactivity proxying breaks it. All photoswipe-related objects
-      // MUST use markRaw() if stored in data.
-      this.photoswipe = markRaw(photoswipe);
-
-      // Debugging only
-      _m.viewer.photoswipe = this.photoswipe;
-
-      // Check if someone else is trapping focus
-      const hasNestedTrap = (e: Event): Element | null => {
-        const selectors = ['#app-sidebar-vue', '#app-sidebar-native', '.v-popper__popper', '.modal-mask', '.oc-dialog'];
-        if (e.target instanceof Element) {
-          return e.target.closest(selectors.join(','));
-        }
-        return null;
-      };
-
-      // Monkey patch for focus trapping in sidebar
-      const psKeyboard = this.photoswipe.keyboard as any;
-      const _onFocusIn = psKeyboard['_onFocusIn'];
-      console.assert(_onFocusIn, 'Missing _onFocusIn for monkey patch');
-      psKeyboard['_onFocusIn'] = (e: FocusEvent) => {
-        if (hasNestedTrap(e)) return;
-        _onFocusIn.call(this.photoswipe!.keyboard, e);
-      };
-
-      // Refresh sidebar on change
-      this.photoswipe.on('change', () => {
-        if (this.sidebarOpen) {
-          this.openSidebar();
-        }
-      });
-
-      // Handle keydown
-      this.photoswipe.on('keydown', (e) => {
-        if (e.defaultPrevented) return;
-
-        // Check if someone else is trapping focus.
-        // For the sidebar, however, we want to continue executing our actions.
-        // https://github.com/pulsejet/memories/issues/1414
-        const nested = hasNestedTrap(e.originalEvent);
-        if (nested && nested.id !== 'app-sidebar-vue' && nested.id !== 'app-sidebar-native') {
-          e.preventDefault();
-          return;
-        }
-
-        this.keydown(e.originalEvent);
-      });
-
-      // Make sure buttons are styled properly
-      this.photoswipe.addFilter('uiElement', (element, data) => {
-        // add button-vue class if button
-        if (element.classList.contains('pswp__button')) {
-          element.classList.add('button-vue');
-        }
-        return element;
-      });
-
-      // Total number of photos in this view
-      this.photoswipe.addFilter('numItems', () => this.globalCount);
-
-      // Put viewer over everything else
-      const navElem = document.getElementById('app-navigation-vue');
-      this.photoswipe.on('beforeOpen', () => {
-        navElem?.style.setProperty('z-index', '0');
-      });
-      this.photoswipe.on('openingAnimationStart', () => {
-        this.isOpen = true;
-        this.fullyOpened = false;
-        if (this.sidebarOpen) {
-          this.openSidebar();
-        }
-        nativex.setTheme('#000000', true); // viewer is always dark
-      });
-      this.photoswipe.on('openingAnimationEnd', () => {
-        this.fullyOpened = true;
-      });
-      this.photoswipe.on('close', () => {
-        this.isOpen = false;
-        this.fullyOpened = false;
-        this.sheetOpen = false;
-        this.setUiVisible(false);
-        this.hideSidebar();
-        this.setFragment(null);
-        this.updateTitle(undefined);
-        nativex.setTheme(); // reset
-      });
-      this.photoswipe.on('destroy', () => {
-        navElem?.style.setProperty('z-index', '');
-
-        // reset everything
-        this.show = false;
-        this.isOpen = false;
-        this.fullyOpened = false;
-        this.editorOpen = false;
-        this.sheetOpen = false;
-        this.photoswipe = null;
-        this.list = [];
-        this.globalCount = 0;
-        this.globalAnchor = -1;
-        clearTimeout(this.slideshowTimer);
-        this.slideshowTimer = 0;
-      });
-
-      // Update vue route for deep linking
-      this.photoswipe.on('slideActivate', (e) => {
-        this.currIndex = this.photoswipe!.currIndex;
-        const photo = e.slide?.data?.photo;
-        this.setFragment(photo);
-        this.updateTitle(photo);
-
-        // Remove active class from others and add to this one
-        this.photoswipe!.element?.querySelectorAll('.pswp__item').forEach((el) => el.classList.remove('active'));
-        e.slide.holderElement?.classList.add('active');
-      });
-
-      // Video support
-      const psVideo = new PsVideo(<any>this.photoswipe);
-      this.psVideo = markRaw(psVideo);
-
-      // Image support
-      this.psImage = markRaw(new PsImage(<any>this.photoswipe));
-
-      // Live Photo support
-      this.psLivePhoto = markRaw(new PsLivePhoto(<any>this.photoswipe, <any>this.psImage, this.liveState));
-
-      // Panorama sphere support
-      this.psPhotoSphere = markRaw(new PsPhotoSphere(<any>this.photoswipe));
-
-      // Patch the close button to stop the slideshow
-      const _close = this.photoswipe.close.bind(this.photoswipe);
-      this.photoswipe.close = () => {
-        if (this.slideshowTimer) {
-          this.stopSlideshow();
-        } else {
-          _close();
-        }
-      };
-
-      // Patch the next/prev buttons to reset slideshow timer
-      const _next = this.photoswipe.next.bind(this.photoswipe);
-      const _prev = this.photoswipe.prev.bind(this.photoswipe);
-      this.photoswipe.next = () => {
-        this.resetSlideshowTimer();
-        _next();
-      };
-      this.photoswipe.prev = () => {
-        this.resetSlideshowTimer();
-        _prev();
-      };
-
-      return this.photoswipe;
-    },
-
-    /** Set the route hash to the given photo */
-    setFragment(photo: IPhoto | null) {
-      // Add or update fragment
-      if (photo) {
-        return utils.fragment.push(utils.fragment.types.viewer, String(photo.dayid), photo.key!);
-      }
-
-      // Remove fragment if closed
-      if (!this.isOpen) {
-        return utils.fragment.pop(utils.fragment.types.viewer);
-      }
-    },
-
-    /** Open using start photo and rows list */
-    async openDynamic(anchorPhoto: IPhoto, timeline: TimelineState) {
-      const detail = anchorPhoto.d?.detail;
-      if (!detail?.length) {
-        console.error('Attempted to open viewer with no detail list!');
-        return;
-      }
-
-      // Helper to compute the global anchor and count
-      // Anchor is the global index of the first list item
-      const computeGlobals = () => {
-        const dayIds = new Array<number>(timeline.heads.size);
-        let count = 0;
-        let anchor = -1;
-        let iter = 0;
-
-        // Iterate the heads to get the anchor and count.
-        const anchorDayId = this.list[0].dayid;
-        for (const [dayId, row] of timeline.heads) {
-          // Compute this hear so we can do single pass
-          dayIds[iter++] = dayId;
-
-          // Get the global index of the anchor
-          if (dayId == anchorDayId) {
-            anchor = count;
-          }
-
-          // Add count of this day
-          count += row.day.count;
-        }
-
-        return { dayIds, anchor, count };
-      };
-
-      // Create initial list
-      this.list = [...detail];
-
-      // Compute globals
-      let globals = computeGlobals();
-      this.globalAnchor = globals.anchor;
-      this.globalCount = globals.count;
-
-      // Create basic viewer
-      const startIndex = detail.indexOf(anchorPhoto);
-      const photoswipe = await this.createBase({
-        index: this.globalAnchor + startIndex,
-      });
-
-      // Lazy-generate item data. This is called for each item in the list
-      photoswipe.addFilter('itemData', (itemData, index) => {
-        if (!this.list) return {};
-        const { dayIds } = globals;
-
-        // Once every cycle, refresh the globals
-        utils.setRenewingTimeout(
-          this,
-          '_odgt',
-          () => {
-            if (!this.photoswipe) return;
-            globals = computeGlobals();
-            let goTo: null | number = null; // final index of photoswipe
-
-            // If the anchor shifts to the left, we need to shift the index
-            // by the same amount. This happens synchronously, so update first.
-            // Also check if the current position is invalid here
-            if (globals.anchor != this.globalAnchor) {
-              goTo = this.photoswipe.currIndex - (this.globalAnchor - globals.anchor);
-            } else if (this.photoswipe.currIndex >= globals.count || this.photoswipe.currIndex < 0) {
-              goTo = this.photoswipe.currIndex; // equivalent to above
-            }
-
-            // Update the global anchor and count
-            this.globalCount = globals.count;
-            this.globalAnchor = globals.anchor;
-
-            // Go to the new index if needed
-            if (goTo === null) {
-              // no change
-            } else {
-              // Change the index to the new one with clamp
-              goTo = utils.clamp(goTo, 0, globals.count - 1);
-              this.photoswipe.goTo(goTo);
-
-              // Make sure the slide is current, since this call is deferred
-              // https://github.com/pulsejet/memories/issues/1194
-              this.photoswipe.refreshSlideContent(goTo);
-            }
-          },
-          0,
-        );
-
-        // Get photo object from list
-        let idx = index - this.globalAnchor;
-        if (idx < 0) {
-          // Load previous day
-          const firstDayId = this.list[0].dayid;
-          const firstDayIdx = utils.binarySearch(dayIds, firstDayId);
-          if (firstDayIdx === 0) {
-            // No previous day
-            return {};
-          }
-          const prevDayId = dayIds[firstDayIdx - 1];
-          const prevDay = timeline.heads.get(prevDayId)?.day;
-          if (!prevDay?.detail) {
-            console.error('[BUG] No detail for previous day');
-            return {};
-          }
-          this.list.unshift(...prevDay.detail);
-          this.globalAnchor -= prevDay.count;
-        } else if (idx >= this.list.length) {
-          // Load next day
-          const lastDayId = this.list.at(-1)!.dayid;
-          const lastDayIdx = utils.binarySearch(dayIds, lastDayId);
-          if (lastDayIdx === dayIds.length - 1) {
-            // No next day
-            return {};
-          }
-          const nextDayId = dayIds[lastDayIdx + 1];
-          const nextDay = timeline.heads.get(nextDayId)?.day;
-          if (!nextDay?.detail) {
-            console.error('[BUG] No detail for next day');
-            return {};
-          }
-          this.list.push(...nextDay.detail);
-        }
-
-        idx = index - this.globalAnchor;
-        const photo = this.list[idx];
-
-        // Something went really wrong
-        console.assert(!!photo, 'Missing photo for index', index, 'and global anchor', this.globalAnchor);
-        if (!photo) return {};
-
-        // Get index of current day in dayIds list
-        const dayIdx = utils.binarySearch(dayIds, photo.dayid);
-
-        // Preload next and previous 3 days
-        for (let idx = dayIdx - 3; idx <= dayIdx + 3; idx++) {
-          if (idx < 0 || idx >= dayIds.length || idx === dayIdx) continue;
-
-          const day = timeline.heads.get(dayIds[idx])?.day;
-          if (day && !day?.detail) {
-            // duplicate requests are skipped by Timeline
-            utils.bus.emit('memories:timeline:fetch-day', day.dayid);
-          }
-        }
-
-        const data = this.getItemData(photo);
-        data.msrc = this.thumbElem(photo)?.getAttribute('src') ?? utils.getPreviewUrl({ photo, msize: 256 });
-        return data;
-      });
-
-      // Get the thumbnail image
-      photoswipe.addFilter('thumbEl', (thumbEl, data, index) => {
-        const photo = this.list[index - this.globalAnchor];
-        if (!photo || !photo.w || !photo.h) return thumbEl as HTMLElement;
-        return this.thumbElem(photo) ?? (thumbEl as HTMLElement); // bug in PhotoSwipe types
-      });
-
-      photoswipe.on('slideActivate', (e) => {
-        // Scroll to keep the thumbnail in view
-        const thumb = this.thumbElem(e.slide.data?.photo);
-        if (thumb && this.fullyOpened) {
-          const rect = thumb.getBoundingClientRect();
-          if (rect.bottom < 50 || rect.top > _m.window.innerHeight - 50) {
-            thumb.scrollIntoView({ block: 'center' });
-          }
-        }
-      });
-
-      photoswipe.init();
-    },
-
-    /** Close the viewer */
-    close() {
-      if (!this.isOpen) return;
-      this.photoswipe?.close();
-    },
-
-    /** Play native tap sound on button press */
-    beep() {
-      nativex.playTouchSound();
-    },
-
-    /** Open with a static list of photos */
-    async openStatic(photo: IPhoto, list: IPhoto[], thumbSize?: 256 | 512) {
-      this.list = list;
-      const photoswipe = await this.createBase({
-        index: list.findIndex((p) => p.fileid === photo.fileid),
-      });
-
-      this.globalCount = list.length;
-      this.globalAnchor = 0;
-
-      photoswipe.addFilter('itemData', (itemData, index) => ({
-        ...this.getItemData(this.list[index]),
-        msrc: thumbSize ? utils.getPreviewUrl({ photo: this.list[index], msize: thumbSize }) : undefined,
-      }));
-
-      this.isOpen = true;
-      photoswipe.init();
-    },
-
-    /** Get base data object */
-    getItemData(photo: IPhoto): PsContent['data'] {
-      let previewUrl = utils.getPreviewUrl({ photo, size: 'screen' });
-      const isvideo = photo.flag & this.c.FLAG_IS_VIDEO;
-
-      // Preview aren't animated
-      if (isvideo || photo.mimetype === 'image/gif') {
-        previewUrl = dav.getDownloadLink(photo);
-      }
-
-      // Get height and width
-      let w = photo.w;
-      let h = photo.h;
-
-      if (isvideo && w && h) {
-        // For videos, make sure the screen is filled up,
-        // by scaling up the video by a maximum of 4x
-        w *= 4;
-        h *= 4;
-      }
-
-      // Lazy load the rest of EXIF data
-      this.loadMetadata(photo);
-
-      // Get full image URL
-      const highSrc: string[] = [];
-      if (!isvideo) {
-        // Try local file if NativeX is available
-        if (photo.auid && nativex.has()) {
-          highSrc.push(nativex.NAPI.IMAGE_FULL(photo.auid));
-        }
-
-        // Decodable full resolution image
-        highSrc.push(API.IMAGE_DECODABLE(photo.fileid, photo.etag));
-      }
-
-      // Condition of loading full resolution image
-      const highSrcCond = this.config.high_res_cond || this.config.high_res_cond_default || 'zoom';
+    }
+  } else {
+    photoswipe.value?.template?.classList.remove('pswp--ui-visible');
+  }
+}
+
+/** Create the base photoswipe object */
+async function createBase(args: PhotoSwipeOptions) {
+  show.value = true;
+  sheetOpen.value = false;
+  await nextTick();
+
+  const pswp = new PhotoSwipe({
+    counter: false,
+    close: false,
+    zoom: false,
+    loop: false,
+    wheelToZoom: true,
+    bgOpacity: 1,
+    appendToEl: inner.value!,
+    preload: [2, 2],
+    bgClickAction: 'toggle-controls',
+
+    clickToCloseNonZoomable: false,
+    pinchToClose: allowClose.value,
+    closeOnVerticalDrag: allowClose.value,
+
+    easing: 'cubic-bezier(.49,.85,.55,1)',
+    showHideAnimationType: 'zoom',
+    showAnimationDuration: 250,
+    hideAnimationDuration: 250,
+
+    closeTitle: t('memories', 'Close'),
+    arrowPrevTitle: t('memories', 'Previous'),
+    arrowNextTitle: t('memories', 'Next'),
+    getViewportSizeFn: () => {
+      // Ignore the sidebar if mobile or fullscreen
+      const isFullscreen = Boolean(document.fullscreenElement);
+      const use = sidebarOpen.value && !windowWidthIsMobile.value && !isFullscreen;
+
+      // Calculate the sidebar width to use and outer width
+      const sidebarWidth = use ? _m.sidebar.getWidth() : 0;
+      outerWidth.value = `calc(100vw - ${sidebarWidth}px)`;
 
       return {
-        src: previewUrl,
-        highSrc: highSrc,
-        highSrcCond: highSrcCond,
-        width: w || undefined,
-        height: h || undefined,
-        thumbCropped: true,
-        photo: photo,
-        type: isvideo ? 'video' : 'image',
+        x: windowWidth.value - sidebarWidth,
+        y: windowHeight.value,
       };
     },
+    ...args,
+  });
 
-    /** Get element for thumbnail if it exists */
-    thumbElem(photo: IPhoto): HTMLImageElement | undefined {
-      if (!photo) return;
-      const elems = Array.from(document.querySelectorAll(`.memories-thumb-${photo.key}`));
+  // PhotoSwipe relies on object identity internally, and Vue's
+  // reactivity proxying breaks it. All photoswipe-related objects
+  // MUST use markRaw() if stored in data.
+  photoswipe.value = markRaw(pswp);
 
-      if (elems.length === 0) return;
-      if (elems.length === 1) return elems[0] as HTMLImageElement;
+  // Debugging only
+  _m.viewer.photoswipe = photoswipe.value;
 
-      // Find if any element has the important class
-      const important = elems.filter((e) => e.classList.contains('memories-thumb-important'));
-      if (important.length > 0) return important[0] as HTMLImageElement;
+  // Check if someone else is trapping focus
+  const hasNestedTrap = (e: Event): Element | null => {
+    const selectors = ['#app-sidebar-vue', '#app-sidebar-native', '.v-popper__popper', '.modal-mask', '.oc-dialog'];
+    if (e.target instanceof Element) {
+      return e.target.closest(selectors.join(','));
+    }
+    return null;
+  };
 
-      // Find element within 500px of the screen top
-      let elem: HTMLImageElement | undefined;
-      elems.forEach((e) => {
-        const rect = e.getBoundingClientRect();
-        if (rect.top > -500) {
-          elem = e as HTMLImageElement;
-        }
-      });
+  // Monkey patch for focus trapping in sidebar
+  const psKeyboard = photoswipe.value.keyboard as any;
+  const _onFocusIn = psKeyboard['_onFocusIn'];
+  console.assert(_onFocusIn, 'Missing _onFocusIn for monkey patch');
+  psKeyboard['_onFocusIn'] = (e: FocusEvent) => {
+    if (hasNestedTrap(e)) return;
+    _onFocusIn.call(photoswipe.value!.keyboard, e);
+  };
 
-      return elem;
-    },
+  // Refresh sidebar on change
+  photoswipe.value.on('change', () => {
+    if (sidebarOpen.value) {
+      openSidebar();
+    }
+  });
 
-    /**
-     * Load the metadata (image info) for a photo asynchronously
-     */
-    async loadMetadata(photo: IPhoto) {
-      // Check if already loaded
-      if (photo.imageInfo) return;
+  // Handle keydown
+  photoswipe.value.on('keydown', (e) => {
+    if (e.defaultPrevented) return;
 
-      // Check if already loading
-      const key = photo.key ?? photo.fileid.toString();
-      if (this.imageInfoLoading.has(key)) return;
+    // Check if someone else is trapping focus.
+    // For the sidebar, however, we want to continue executing our actions.
+    // https://github.com/pulsejet/memories/issues/1414
+    const nested = hasNestedTrap(e.originalEvent);
+    if (nested && nested.id !== 'app-sidebar-vue' && nested.id !== 'app-sidebar-native') {
+      e.preventDefault();
+      return;
+    }
 
-      // Mark as loading
-      this.imageInfoLoading.add(key);
+    keydown(e.originalEvent);
+  });
 
-      // Get a consistent URL so we can cache.
-      const url = utils.getImageInfoUrl(photo, this.config);
+  // Make sure buttons are styled properly
+  photoswipe.value.addFilter('uiElement', (element, data) => {
+    // add button-vue class if button
+    if (element.classList.contains('pswp__button')) {
+      element.classList.add('button-vue');
+    }
+    return element;
+  });
 
-      // Apply image data onto the photo.
-      const applyImageInfo = (data: IImageInfo) => {
-        photo.imageInfo = data;
-        photo.w = data.w;
-        photo.h = data.h;
-        photo.basename = data.basename;
-        photo.mimetype = data.mimetype;
-      };
+  // Total number of photos in this view
+  photoswipe.value.addFilter('numItems', () => globalCount.value);
 
-      // Get cached data first.
-      let wasCached = false;
-      try {
-        const cached = await utils.getCachedData<IImageInfo>(url);
-        if (cached) {
-          applyImageInfo(cached);
-          wasCached = true;
-        }
-      } catch {
-        // cache miss
+  // Put viewer over everything else
+  const navElem = document.getElementById('app-navigation-vue');
+  photoswipe.value.on('beforeOpen', () => {
+    navElem?.style.setProperty('z-index', '0');
+  });
+  photoswipe.value.on('openingAnimationStart', () => {
+    isOpen.value = true;
+    fullyOpened.value = false;
+    if (sidebarOpen.value) {
+      openSidebar();
+    }
+    nativex.setTheme('#000000', true); // viewer is always dark
+  });
+  photoswipe.value.on('openingAnimationEnd', () => {
+    fullyOpened.value = true;
+  });
+  photoswipe.value.on('close', () => {
+    isOpen.value = false;
+    fullyOpened.value = false;
+    sheetOpen.value = false;
+    setUiVisible(false);
+    hideSidebar();
+    setFragment(null);
+    updateTitle(undefined);
+    nativex.setTheme(); // reset
+  });
+  photoswipe.value.on('destroy', () => {
+    navElem?.style.setProperty('z-index', '');
+
+    // reset everything
+    show.value = false;
+    isOpen.value = false;
+    fullyOpened.value = false;
+    editorOpen.value = false;
+    sheetOpen.value = false;
+    photoswipe.value = null;
+    list.value = [];
+    globalCount.value = 0;
+    globalAnchor.value = -1;
+    clearTimeout(slideshowTimer.value);
+    slideshowTimer.value = 0;
+  });
+
+  // Update vue route for deep linking
+  photoswipe.value.on('slideActivate', (e) => {
+    currIndex.value = photoswipe.value!.currIndex;
+    const photo = e.slide?.data?.photo;
+    setFragment(photo);
+    updateTitle(photo);
+
+    // Remove active class from others and add to this one
+    photoswipe.value!.element?.querySelectorAll('.pswp__item').forEach((el) => el.classList.remove('active'));
+    e.slide.holderElement?.classList.add('active');
+  });
+
+  // Video support
+  const psVideoInstance = new PsVideo(<any>photoswipe.value);
+  psVideo.value = markRaw(psVideoInstance);
+
+  // Image support
+  psImage.value = markRaw(new PsImage(<any>photoswipe.value));
+
+  // Live Photo support
+  psLivePhoto.value = markRaw(new PsLivePhoto(<any>photoswipe.value, <any>psImage.value, liveState));
+
+  // Panorama sphere support
+  psPhotoSphere.value = markRaw(new PsPhotoSphere(<any>photoswipe.value));
+
+  // Patch the close button to stop the slideshow
+  const _close = photoswipe.value.close.bind(photoswipe.value);
+  photoswipe.value.close = () => {
+    if (slideshowTimer.value) {
+      stopSlideshow();
+    } else {
+      _close();
+    }
+  };
+
+  // Patch the next/prev buttons to reset slideshow timer
+  const _next = photoswipe.value.next.bind(photoswipe.value);
+  const _prev = photoswipe.value.prev.bind(photoswipe.value);
+  photoswipe.value.next = () => {
+    resetSlideshowTimer();
+    _next();
+  };
+  photoswipe.value.prev = () => {
+    resetSlideshowTimer();
+    _prev();
+  };
+
+  return photoswipe.value;
+}
+
+/** Set the route hash to the given photo */
+function setFragment(photo: IPhoto | null) {
+  // Add or update fragment
+  if (photo) {
+    return utils.fragment.push(utils.fragment.types.viewer, String(photo.dayid), photo.key!);
+  }
+
+  // Remove fragment if closed
+  if (!isOpen.value) {
+    return utils.fragment.pop(utils.fragment.types.viewer);
+  }
+}
+
+/** Open using start photo and rows list */
+async function openDynamic(anchorPhoto: IPhoto, timeline: TimelineState) {
+  const detail = anchorPhoto.d?.detail;
+  if (!detail?.length) {
+    console.error('Attempted to open viewer with no detail list!');
+    return;
+  }
+
+  // Helper to compute the global anchor and count
+  // Anchor is the global index of the first list item
+  const computeGlobals = () => {
+    const dayIds = new Array<number>(timeline.heads.size);
+    let count = 0;
+    let anchor = -1;
+    let iter = 0;
+
+    // Iterate the heads to get the anchor and count.
+    const anchorDayId = list.value[0].dayid;
+    for (const [dayId, row] of timeline.heads) {
+      // Compute this hear so we can do single pass
+      dayIds[iter++] = dayId;
+
+      // Get the global index of the anchor
+      if (dayId == anchorDayId) {
+        anchor = count;
       }
 
-      // Attempt to refresh the cached data.
-      try {
-        const res = await axios.get<IImageInfo>(url);
-        applyImageInfo(res.data);
-        utils.cacheData(url, res.data);
-      } catch (e) {
-        if (wasCached) return;
-        throw e;
-      } finally {
-        // Allow another chance in case this failed
-        this.imageInfoLoading.delete(key);
-      }
-    },
+      // Add count of this day
+      count += row.day.count;
+    }
 
-    async openEditor() {
-      // Only for JPEG for now
-      if (!this.canEdit) return;
+    return { dayIds, anchor, count };
+  };
 
-      // Prevent editing Live Photos
-      if (this.isLivePhoto) {
-        showError(this.t('memories', 'Editing is currently disabled for Live Photos'));
-        return;
-      }
+  // Create initial list
+  list.value = [...detail];
 
-      // Open editor
-      this.editorOpen = true;
-    },
+  // Compute globals
+  let globals = computeGlobals();
+  globalAnchor.value = globals.anchor;
+  globalCount.value = globals.count;
 
-    /** Share the current photo externally */
-    shareCurrent() {
-      _m.modals.sharePhotos([this.currentPhoto!]);
-    },
+  // Create basic viewer
+  const startIndex = detail.indexOf(anchorPhoto);
+  const pswp = await createBase({
+    index: globalAnchor.value + startIndex,
+  });
 
-    /** Key press events */
-    keydown(e: KeyboardEvent) {
-      if (e.defaultPrevented) return;
+  // Debounce the global recompute to once per cycle
+  const refreshGlobals = new utils.RenewingTimeout();
 
-      if (e.key === 'Delete') {
-        this.deleteCurrent();
-      }
+  // Lazy-generate item data. This is called for each item in the list
+  pswp!.addFilter('itemData', (itemData, index) => {
+    if (!list.value) return {};
+    const { dayIds } = globals;
 
-      if (e.key === 'Tab') {
-        this.photoswipe?.element?.classList.add('pswp--ui-visible');
-      }
+    // Once every cycle, refresh the globals
+    refreshGlobals.set(() => {
+      if (!photoswipe.value) return;
+      globals = computeGlobals();
+      let goTo: null | number = null; // final index of photoswipe
 
-      if (e.key === 'F' && e.shiftKey) {
-        this.refs().outer?.requestFullscreen();
+      // If the anchor shifts to the left, we need to shift the index
+      // by the same amount. This happens synchronously, so update first.
+      // Also check if the current position is invalid here
+      if (globals.anchor != globalAnchor.value) {
+        goTo = photoswipe.value.currIndex - (globalAnchor.value - globals.anchor);
+      } else if (photoswipe.value.currIndex >= globals.count || photoswipe.value.currIndex < 0) {
+        goTo = photoswipe.value.currIndex; // equivalent to above
       }
 
-      if (e.key === 'A' && e.shiftKey) {
-        this.updateAlbums();
-      }
+      // Update the global anchor and count
+      globalCount.value = globals.count;
+      globalAnchor.value = globals.anchor;
 
-      if (e.key === 'M' && e.shiftKey) {
-        this.editMetadata();
-      }
-    },
-
-    /** Delete this photo and refresh */
-    async deleteCurrent() {
-      let idx = this.photoswipe!.currIndex - this.globalAnchor;
-      const photo = this.list[idx];
-      if (!photo) return;
-
-      // Delete with WebDAV
-      try {
-        this.updateLoading(1);
-        for await (const p of dav.deletePhotos([photo])) {
-          if (!p[0]) return;
-        }
-      } catch {
-        return;
-      } finally {
-        this.updateLoading(-1);
-      }
-
-      // Remove from main view
-      utils.bus.emit('memories:timeline:deleted', [photo]);
-
-      // If this is the only photo, close viewer
-      if (this.list.length === 1) {
-        return this.close();
-      }
-
-      // If this is the last photo, move to the previous photo first
-      // https://github.com/pulsejet/memories/issues/269
-      if (idx === this.list.length - 1) {
-        this.photoswipe!.prev();
-
-        // Some photos might lazy load, so recompute idx for the next element
-        idx = this.photoswipe!.currIndex + 1 - this.globalAnchor;
-      }
-
-      this.list.splice(idx, 1);
-      this.globalCount--;
-      for (let i = idx - 3; i <= idx + 3; i++) {
-        this.photoswipe!.refreshSlideContent(i + this.globalAnchor);
-      }
-    },
-
-    /** Play the current live photo */
-    playLivePhoto() {
-      this.psLivePhoto?.play(this.photoswipe!.currSlide!.content as PsContent);
-    },
-
-    /** Toggle the panorama sphere viewer */
-    toggleSphere() {
-      void this.psPhotoSphere?.toggle();
-    },
-
-    /** Favorite the current photo */
-    async favoriteCurrent() {
-      const photo = this.currentPhoto!;
-      const val = !this.isFavorite;
-      try {
-        this.updateLoading(1);
-        for await (const p of dav.favoritePhotos([photo], val)) {
-          // Do nothing
-        }
-      } finally {
-        this.updateLoading(-1);
-      }
-      this.$forceUpdate();
-    },
-
-    /** Download a file by file ID */
-    async downloadByFileId(fileId: number) {
-      dav.downloadFiles([fileId]);
-    },
-
-    /** Download the current photo */
-    async downloadCurrent() {
-      const photo = this.currentPhoto;
-      if (!photo) return;
-      this.downloadByFileId(photo.fileid);
-    },
-
-    /** Download live part of current video */
-    async downloadCurrentLiveVideo() {
-      const photo = this.currentPhoto;
-      if (!photo) return;
-      dav.downloadFromUrl(utils.getLivePhotoVideoUrl(photo, false));
-    },
-
-    /**
-     * Open the sidebar.
-     *
-     * Calls to this function are debounced to prevent too many updates
-     * to the sidebar while the user is scrolling through photos.
-     */
-    async openSidebar() {
-      const photo = this.currentPhoto;
-      if (!photo) return;
-      const abort = () => !this.isOpen || photo !== this.currentPhoto;
-
-      // Invalidate currently open metadata
-      _m.sidebar.invalidateUnless(photo.fileid);
-
-      // Update the sidebar, first call immediate
-      utils.setRenewingTimeout(
-        this,
-        '_sidebarUpdateTimer',
-        async () => {
-          if (abort()) return;
-
-          if (!_m.sidebar.isOpen()) {
-            _m.sidebar.setTab('memories-metadata');
-          }
-
-          if (this.routeIsPublic || this.isLocal) {
-            _m.sidebar.open(photo);
-          } else {
-            const fileInfo = (await dav.getFiles([photo]))[0];
-            if (!fileInfo || abort()) return;
-
-            // get attributes
-            const filename = fileInfo?.filename;
-            const useNative = fileInfo?.originalFilename?.startsWith('/files/');
-
-            // open sidebar
-            _m.sidebar.open(photo, filename, useNative);
-          }
-        },
-        SIDEBAR_DEBOUNCE_MS,
-        true,
-      );
-    },
-
-    handleAppSidebarOpen() {
-      if (this.show && this.photoswipe) {
-        this.sidebarOpen = true;
-        this.photoswipe.updateSize();
-      }
-    },
-
-    handleAppSidebarClose() {
-      if (this.show && this.photoswipe && this.fullyOpened) {
-        this.sidebarOpen = false;
-        this.photoswipe.updateSize();
-      }
-    },
-
-    /** Hide the sidebar, without marking it as closed */
-    hideSidebar() {
-      _m.sidebar.close();
-    },
-
-    /** Close the sidebar */
-    closeSidebar() {
-      this.hideSidebar();
-      this.sidebarOpen = false;
-      this.photoswipe?.updateSize();
-    },
-
-    /** Toggle the sidebar visibility */
-    toggleSidebar() {
-      if (this.sidebarOpen) {
-        this.closeSidebar();
+      // Go to the new index if needed
+      if (goTo === null) {
+        // no change
       } else {
-        this.setBottomSheet(false);
-        this.openSidebar();
-      }
-    },
+        // Change the index to the new one with clamp
+        goTo = utils.clamp(goTo, 0, globals.count - 1);
+        photoswipe.value.goTo(goTo);
 
-    /** Toggle photo info: bottom sheet on mobile, sidebar otherwise */
-    toggleInfo() {
-      if (this.windowWidthIsMobile) {
-        this.setBottomSheet();
+        // Make sure the slide is current, since this call is deferred
+        // https://github.com/pulsejet/memories/issues/1194
+        photoswipe.value.refreshSlideContent(goTo);
+      }
+    }, 0);
+
+    // Get photo object from list
+    let idx = index - globalAnchor.value;
+    if (idx < 0) {
+      // Load previous day
+      const firstDayId = list.value[0].dayid;
+      const firstDayIdx = utils.binarySearch(dayIds, firstDayId);
+      if (firstDayIdx === 0) {
+        // No previous day
+        return {};
+      }
+      const prevDayId = dayIds[firstDayIdx - 1];
+      const prevDay = timeline.heads.get(prevDayId)?.day;
+      if (!prevDay?.detail) {
+        console.error('[BUG] No detail for previous day');
+        return {};
+      }
+      list.value.unshift(...prevDay.detail);
+      globalAnchor.value -= prevDay.count;
+    } else if (idx >= list.value.length) {
+      // Load next day
+      const lastDayId = list.value.at(-1)!.dayid;
+      const lastDayIdx = utils.binarySearch(dayIds, lastDayId);
+      if (lastDayIdx === dayIds.length - 1) {
+        // No next day
+        return {};
+      }
+      const nextDayId = dayIds[lastDayIdx + 1];
+      const nextDay = timeline.heads.get(nextDayId)?.day;
+      if (!nextDay?.detail) {
+        console.error('[BUG] No detail for next day');
+        return {};
+      }
+      list.value.push(...nextDay.detail);
+    }
+
+    idx = index - globalAnchor.value;
+    const photo = list.value[idx];
+
+    // Something went really wrong
+    console.assert(!!photo, 'Missing photo for index', index, 'and global anchor', globalAnchor.value);
+    if (!photo) return {};
+
+    // Get index of current day in dayIds list
+    const dayIdx = utils.binarySearch(dayIds, photo.dayid);
+
+    // Preload next and previous 3 days
+    for (let idx = dayIdx - 3; idx <= dayIdx + 3; idx++) {
+      if (idx < 0 || idx >= dayIds.length || idx === dayIdx) continue;
+
+      const day = timeline.heads.get(dayIds[idx])?.day;
+      if (day && !day?.detail) {
+        // duplicate requests are skipped by Timeline
+        utils.bus.emit('memories:timeline:fetch-day', day.dayid);
+      }
+    }
+
+    const data = getItemData(photo);
+    data.msrc = thumbElem(photo)?.getAttribute('src') ?? utils.getPreviewUrl({ photo, msize: 256 });
+    return data;
+  });
+
+  // Get the thumbnail image
+  pswp!.addFilter('thumbEl', (thumbEl, data, index) => {
+    const photo = list.value[index - globalAnchor.value];
+    if (!photo || !photo.w || !photo.h) return thumbEl as HTMLElement;
+    return thumbElem(photo) ?? (thumbEl as HTMLElement); // bug in PhotoSwipe types
+  });
+
+  pswp!.on('slideActivate', (e) => {
+    // Scroll to keep the thumbnail in view
+    const thumb = thumbElem(e.slide.data?.photo);
+    if (thumb && fullyOpened.value) {
+      const rect = thumb.getBoundingClientRect();
+      if (rect.bottom < 50 || rect.top > _m.window.innerHeight - 50) {
+        thumb.scrollIntoView({ block: 'center' });
+      }
+    }
+  });
+
+  pswp!.init();
+}
+
+/** Close the viewer */
+function close() {
+  if (!isOpen.value) return;
+  photoswipe.value?.close();
+}
+
+/** Play native tap sound on button press */
+function beep() {
+  nativex.playTouchSound();
+}
+
+/** Open with a static list of photos */
+async function openStatic(photo: IPhoto, listArg: IPhoto[], thumbSize?: 256 | 512) {
+  list.value = listArg;
+  const pswp = await createBase({
+    index: listArg.findIndex((p) => p.fileid === photo.fileid),
+  });
+
+  globalCount.value = listArg.length;
+  globalAnchor.value = 0;
+
+  pswp!.addFilter('itemData', (itemData, index) => ({
+    ...getItemData(list.value[index]),
+    msrc: thumbSize ? utils.getPreviewUrl({ photo: list.value[index], msize: thumbSize }) : undefined,
+  }));
+
+  isOpen.value = true;
+  pswp!.init();
+}
+
+/** Get base data object */
+function getItemData(photo: IPhoto): PsContent['data'] {
+  let previewUrl = utils.getPreviewUrl({ photo, size: 'screen' });
+  const isvideo = photo.flag & c.FLAG_IS_VIDEO;
+
+  // Preview aren't animated
+  if (isvideo || photo.mimetype === 'image/gif') {
+    previewUrl = dav.getDownloadLink(photo);
+  }
+
+  // Get height and width
+  let w = photo.w;
+  let h = photo.h;
+
+  if (isvideo && w && h) {
+    // For videos, make sure the screen is filled up,
+    // by scaling up the video by a maximum of 4x
+    w *= 4;
+    h *= 4;
+  }
+
+  // Lazy load the rest of EXIF data
+  loadMetadata(photo);
+
+  // Get full image URL
+  const highSrc: string[] = [];
+  if (!isvideo) {
+    // Try local file if NativeX is available
+    if (photo.auid && nativex.has()) {
+      highSrc.push(nativex.NAPI.IMAGE_FULL(photo.auid));
+    }
+
+    // Decodable full resolution image
+    highSrc.push(API.IMAGE_DECODABLE(photo.fileid, photo.etag));
+  }
+
+  // Condition of loading full resolution image
+  const highSrcCond = config.high_res_cond || config.high_res_cond_default || 'zoom';
+
+  return {
+    src: previewUrl,
+    highSrc: highSrc,
+    highSrcCond: highSrcCond,
+    width: w || undefined,
+    height: h || undefined,
+    thumbCropped: true,
+    photo: photo,
+    type: isvideo ? 'video' : 'image',
+  };
+}
+
+/** Get element for thumbnail if it exists */
+function thumbElem(photo: IPhoto): HTMLImageElement | undefined {
+  if (!photo) return;
+  const elems = Array.from(document.querySelectorAll(`.memories-thumb-${photo.key}`));
+
+  if (elems.length === 0) return;
+  if (elems.length === 1) return elems[0] as HTMLImageElement;
+
+  // Find if any element has the important class
+  const important = elems.filter((e) => e.classList.contains('memories-thumb-important'));
+  if (important.length > 0) return important[0] as HTMLImageElement;
+
+  // Find element within 500px of the screen top
+  let elem: HTMLImageElement | undefined;
+  elems.forEach((e) => {
+    const rect = e.getBoundingClientRect();
+    if (rect.top > -500) {
+      elem = e as HTMLImageElement;
+    }
+  });
+
+  return elem;
+}
+
+/**
+ * Load the metadata (image info) for a photo asynchronously
+ */
+async function loadMetadata(photo: IPhoto) {
+  // Check if already loaded
+  if (photo.imageInfo) return;
+
+  // Check if already loading
+  const key = photo.key ?? photo.fileid.toString();
+  if (imageInfoLoading.has(key)) return;
+
+  // Mark as loading
+  imageInfoLoading.add(key);
+
+  // Get a consistent URL so we can cache.
+  const url = utils.getImageInfoUrl(photo, config);
+
+  // Apply image data onto the photo.
+  const applyImageInfo = (data: IImageInfo) => {
+    photo.imageInfo = data;
+    photo.w = data.w;
+    photo.h = data.h;
+    photo.basename = data.basename;
+    photo.mimetype = data.mimetype;
+  };
+
+  // Get cached data first.
+  let wasCached = false;
+  try {
+    const cached = await utils.getCachedData<IImageInfo>(url);
+    if (cached) {
+      applyImageInfo(cached);
+      wasCached = true;
+    }
+  } catch {
+    // cache miss
+  }
+
+  // Attempt to refresh the cached data.
+  try {
+    const res = await axios.get<IImageInfo>(url);
+    applyImageInfo(res.data);
+    utils.cacheData(url, res.data);
+  } catch (e) {
+    if (wasCached) return;
+    throw e;
+  } finally {
+    // Allow another chance in case this failed
+    imageInfoLoading.delete(key);
+  }
+}
+
+async function openEditor() {
+  // Only for JPEG for now
+  if (!canEdit.value) return;
+
+  // Prevent editing Live Photos
+  if (isLivePhoto.value) {
+    showError(t('memories', 'Editing is currently disabled for Live Photos'));
+    return;
+  }
+
+  // Open editor
+  editorOpen.value = true;
+}
+
+/** Share the current photo externally */
+function shareCurrent() {
+  _m.modals.sharePhotos([currentPhoto.value!]);
+}
+
+/** Key press events */
+function keydown(e: KeyboardEvent) {
+  if (e.defaultPrevented) return;
+
+  if (e.key === 'Delete') {
+    deleteCurrent();
+  }
+
+  if (e.key === 'Tab') {
+    photoswipe.value?.element?.classList.add('pswp--ui-visible');
+  }
+
+  if (e.key === 'F' && e.shiftKey) {
+    outer.value?.requestFullscreen();
+  }
+
+  if (e.key === 'A' && e.shiftKey) {
+    updateAlbums();
+  }
+
+  if (e.key === 'M' && e.shiftKey) {
+    editMetadata();
+  }
+}
+
+/** Delete this photo and refresh */
+async function deleteCurrent() {
+  let idx = photoswipe.value!.currIndex - globalAnchor.value;
+  const photo = list.value[idx];
+  if (!photo) return;
+
+  // Delete with WebDAV
+  try {
+    updateLoading(1);
+    for await (const p of dav.deletePhotos([photo])) {
+      if (!p[0]) return;
+    }
+  } catch {
+    return;
+  } finally {
+    updateLoading(-1);
+  }
+
+  // Remove from main view
+  utils.bus.emit('memories:timeline:deleted', [photo]);
+
+  // If this is the only photo, close viewer
+  if (list.value.length === 1) {
+    return close();
+  }
+
+  // If this is the last photo, move to the previous photo first
+  // https://github.com/pulsejet/memories/issues/269
+  if (idx === list.value.length - 1) {
+    photoswipe.value!.prev();
+
+    // Some photos might lazy load, so recompute idx for the next element
+    idx = photoswipe.value!.currIndex + 1 - globalAnchor.value;
+  }
+
+  list.value.splice(idx, 1);
+  globalCount.value--;
+  for (let i = idx - 3; i <= idx + 3; i++) {
+    photoswipe.value!.refreshSlideContent(i + globalAnchor.value);
+  }
+}
+
+/** Play the current live photo */
+function playLivePhoto() {
+  psLivePhoto.value?.play(photoswipe.value!.currSlide!.content as PsContent);
+}
+
+/** Toggle the panorama sphere viewer */
+function toggleSphere() {
+  void psPhotoSphere.value?.toggle();
+}
+
+/** Favorite the current photo */
+async function favoriteCurrent() {
+  const photo = currentPhoto.value!;
+  const val = !isFavorite.value;
+  try {
+    updateLoading(1);
+    for await (const p of dav.favoritePhotos([photo], val)) {
+      // Do nothing
+    }
+  } finally {
+    updateLoading(-1);
+  }
+  instance?.proxy?.$forceUpdate();
+}
+
+/** Download a file by file ID */
+async function downloadByFileId(fileId: number) {
+  dav.downloadFiles([fileId]);
+}
+
+/** Download the current photo */
+async function downloadCurrent() {
+  const photo = currentPhoto.value;
+  if (!photo) return;
+  downloadByFileId(photo.fileid);
+}
+
+/** Download live part of current video */
+async function downloadCurrentLiveVideo() {
+  const photo = currentPhoto.value;
+  if (!photo) return;
+  dav.downloadFromUrl(utils.getLivePhotoVideoUrl(photo, false));
+}
+
+/**
+ * Open the sidebar.
+ *
+ * Calls to this function are debounced to prevent too many updates
+ * to the sidebar while the user is scrolling through photos.
+ */
+async function openSidebar() {
+  const photo = currentPhoto.value;
+  if (!photo) return;
+  const abort = () => !isOpen.value || photo !== currentPhoto.value;
+
+  // Invalidate currently open metadata
+  _m.sidebar.invalidateUnless(photo.fileid);
+
+  // Update the sidebar, first call immediate
+  sidebarUpdateTimer.set(
+    async () => {
+      if (abort()) return;
+
+      if (!_m.sidebar.isOpen()) {
+        _m.sidebar.setTab('memories-metadata');
+      }
+
+      if (routeIsPublic.value || isLocal.value) {
+        _m.sidebar.open(photo);
       } else {
-        this.toggleSidebar();
+        const fileInfo = (await dav.getFiles([photo]))[0];
+        if (!fileInfo || abort()) return;
+
+        // get attributes
+        const filename = fileInfo?.filename;
+        const useNative = fileInfo?.originalFilename?.startsWith('/files/');
+
+        // open sidebar
+        _m.sidebar.open(photo, filename, useNative);
       }
     },
+    SIDEBAR_DEBOUNCE_MS,
+    true,
+  );
+}
 
-    /** Open, close, or toggle the mobile bottom sheet */
-    setBottomSheet(want?: boolean) {
-      want ??= !this.sheetOpen;
-      if (want === this.sheetOpen) return;
-      if (want && (!this.currentPhoto || this.editorOpen)) return;
-      if (want && this.sidebarOpen) this.closeSidebar();
-      this.sheetOpen = want;
-    },
+function handleAppSidebarOpen() {
+  if (show.value && photoswipe.value) {
+    sidebarOpen.value = true;
+    photoswipe.value.updateSize();
+  }
+}
 
-    /**
-     * Open the files app with the current file.
-     */
-    async viewInFolder() {
-      dav.viewInFolder(this.currentPhoto!);
-    },
+function handleAppSidebarClose() {
+  if (show.value && photoswipe.value && fullyOpened.value) {
+    sidebarOpen.value = false;
+    photoswipe.value.updateSize();
+  }
+}
 
-    /**
-     * Start a slideshow
-     */
-    async startSlideshow() {
-      // Full screen the outer element
-      if (!this.refs().outer?.requestFullscreen()) return;
+/** Hide the sidebar, without marking it as closed */
+function hideSidebar() {
+  _m.sidebar.close();
+}
 
-      // Hide controls
-      setTimeout(() => this.setUiVisible(false), 1);
+/** Close the sidebar */
+function closeSidebar() {
+  hideSidebar();
+  sidebarOpen.value = false;
+  photoswipe.value?.updateSize();
+}
 
-      // Start slideshow
-      this.slideshowTimer = window.setTimeout(this.slideshowTimerFired, this.getSlideshowMs());
-    },
+/** Toggle the sidebar visibility */
+function toggleSidebar() {
+  if (sidebarOpen.value) {
+    closeSidebar();
+  } else {
+    setBottomSheet(false);
+    openSidebar();
+  }
+}
 
-    /**
-     * Event of slideshow timer fire
-     */
-    slideshowTimerFired() {
-      // Cancel if timer doesn't exist anymore
-      // This can happen e.g. due to videos
-      if (!this.slideshowTimer) return;
+/** Toggle photo info: bottom sheet on mobile, sidebar otherwise */
+function toggleInfo() {
+  if (windowWidthIsMobile.value) {
+    setBottomSheet();
+  } else {
+    toggleSidebar();
+  }
+}
 
-      // If this is a video, wait for it to finish
-      if (this.isVideo) {
-        // Get active player element
-        const player = this.photoswipe?.element?.querySelector<MediaPlayerElement>('.pswp__item.active media-player');
+/** Open, close, or toggle the mobile bottom sheet */
+function setBottomSheet(want?: boolean) {
+  want ??= !sheetOpen.value;
+  if (want === sheetOpen.value) return;
+  if (want && (!currentPhoto.value || editorOpen.value)) return;
+  if (want && sidebarOpen.value) closeSidebar();
+  sheetOpen.value = want;
+}
 
-        // If no player is found by now, something likely went wrong. Just skip ahead.
-        // Otherwise check if video is not ended yet
-        if ((player?.currentTime ?? Infinity) < (player?.duration ?? 0) - 0.1) {
-          // Wait for video to finish
-          player?.addEventListener('ended', this.slideshowTimerFired, { once: true });
-          return;
-        }
-      }
+/**
+ * Open the files app with the current file.
+ */
+async function viewInFolder() {
+  dav.viewInFolder(currentPhoto.value!);
+}
 
-      this.photoswipe?.next();
-      // no need to set the timer again, since next
-      // calls resetSlideshowTimer anyway
-    },
+/**
+ * Start a slideshow
+ */
+async function startSlideshow() {
+  // Full screen the outer element
+  if (!outer.value?.requestFullscreen()) return;
 
-    /**
-     * Restart the slideshow timer
-     */
-    resetSlideshowTimer() {
-      if (this.slideshowTimer) {
-        window.clearTimeout(this.slideshowTimer);
-        this.slideshowTimer = window.setTimeout(this.slideshowTimerFired, this.getSlideshowMs());
-      }
-    },
+  // Hide controls
+  setTimeout(() => setUiVisible(false), 1);
 
-    /**
-     * Get the slideshow interval in milliseconds from user config
-     */
-    getSlideshowMs() {
-      const secs = Number(this.config.slideshow_duration);
-      if (!Number.isFinite(secs)) return DEFAULT_SLIDESHOW_MS;
-      return utils.clamp(Math.round(secs), 1, 60) * 1000;
-    },
+  // Start slideshow
+  slideshowTimer.value = window.setTimeout(slideshowTimerFired, getSlideshowMs());
+}
 
-    /**
-     * Stop the slideshow
-     */
-    stopSlideshow() {
-      window.clearTimeout(this.slideshowTimer);
-      this.slideshowTimer = 0;
+/**
+ * Event of slideshow timer fire
+ */
+function slideshowTimerFired() {
+  // Cancel if timer doesn't exist anymore
+  // This can happen e.g. due to videos
+  if (!slideshowTimer.value) return;
 
-      // exit full screen
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      }
-    },
+  // If this is a video, wait for it to finish
+  if (isVideo.value) {
+    // Get active player element
+    const player = photoswipe.value?.element?.querySelector<MediaPlayerElement>('.pswp__item.active media-player');
 
-    /**
-     * Detect change in fullscreen
-     */
-    fullscreenChange() {
-      if (!document.fullscreenElement) {
-        this.stopSlideshow();
-      }
-      this.photoswipe?.updateSize();
-      this.photoswipe?.template?.focus();
-    },
+    // If no player is found by now, something likely went wrong. Just skip ahead.
+    // Otherwise check if video is not ended yet
+    if ((player?.currentTime ?? Infinity) < (player?.duration ?? 0) - 0.1) {
+      // Wait for video to finish
+      player?.addEventListener('ended', slideshowTimerFired, { once: true });
+      return;
+    }
+  }
 
-    /**
-     * Edit metadata for current photo
-     */
-    editMetadata(sections?: number[]) {
-      _m.modals.editMetadata([this.currentPhoto!], sections);
-    },
+  photoswipe.value?.next();
+  // no need to set the timer again, since next
+  // calls resetSlideshowTimer anyway
+}
 
-    /**
-     * Update album selection for current photo
-     */
-    updateAlbums() {
-      _m.modals.updateAlbums([this.currentPhoto!]);
-    },
-  },
-});
+/**
+ * Restart the slideshow timer
+ */
+function resetSlideshowTimer() {
+  if (slideshowTimer.value) {
+    window.clearTimeout(slideshowTimer.value);
+    slideshowTimer.value = window.setTimeout(slideshowTimerFired, getSlideshowMs());
+  }
+}
+
+/**
+ * Get the slideshow interval in milliseconds from user config
+ */
+function getSlideshowMs() {
+  const secs = Number(config.slideshow_duration);
+  if (!Number.isFinite(secs)) return DEFAULT_SLIDESHOW_MS;
+  return utils.clamp(Math.round(secs), 1, 60) * 1000;
+}
+
+/**
+ * Stop the slideshow
+ */
+function stopSlideshow() {
+  window.clearTimeout(slideshowTimer.value);
+  slideshowTimer.value = 0;
+
+  // exit full screen
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  }
+}
+
+/**
+ * Detect change in fullscreen
+ */
+function fullscreenChange() {
+  if (!document.fullscreenElement) {
+    stopSlideshow();
+  }
+  photoswipe.value?.updateSize();
+  photoswipe.value?.template?.focus();
+}
+
+/**
+ * Edit metadata for current photo
+ */
+function editMetadata(sections?: number[]) {
+  _m.modals.editMetadata([currentPhoto.value!], sections);
+}
+
+/**
+ * Update album selection for current photo
+ */
+function updateAlbums() {
+  _m.modals.updateAlbums([currentPhoto.value!]);
+}
 </script>
 
 <style lang="scss" scoped>
