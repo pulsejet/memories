@@ -3,10 +3,10 @@
     class="scroller"
     ref="scroller"
     v-bind:class="{
-      'scrolling-recycler-now': scrollingRecyclerNowTimer,
-      'scrolling-recycler': scrollingRecyclerTimer,
-      'scrolling-now': scrollingNowTimer,
-      scrolling: scrollingTimer,
+      'scrolling-recycler-now': scrollingRecyclerNowTimer.pending,
+      'scrolling-recycler': scrollingRecyclerTimer.pending,
+      'scrolling-now': scrollingNowTimer.pending,
+      scrolling: scrollingTimer.pending,
     }"
     @mousemove.passive="mousemove"
     @mouseleave.passive="mouseleave"
@@ -48,12 +48,12 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+<script setup lang="ts">
+import { ref, computed, nextTick } from 'vue';
 
 import * as utils from '@services/utils';
 import * as lens from '@services/lens';
-import CommonMixin from '@mixins/CommonMixin';
+import { useWindowWidthIsMobile } from '@services/common';
 
 import type { IRow, ITick } from '@typings';
 
@@ -64,553 +64,525 @@ const SNAP_OFFSET = -5; // Pixels to snap at
 const SNAP_MIN_ROWS = 1000; // Minimum rows to snap at
 const MOBILE_CURSOR_HH = 22; // Half height of the mobile cursor (CSS)
 
-export default defineComponent({
-  name: 'ScrollerManager',
-  components: {
-    ScrollUpIcon,
-    ScrollDownIcon,
-  },
+const props = defineProps<{
+  /** Rows from Timeline */
+  rows: IRow[];
+  /** Total height */
+  fullHeight: number;
+  /** Actual recycler component */
+  recycler?: VueRecyclerType;
+  /** Recycler before slot component */
+  recyclerBefore?: HTMLDivElement;
+}>();
 
-  mixins: [CommonMixin],
+const emit = defineEmits<{
+  interactend: [];
+  scroll: [event: { current: number; previous: number }];
+}>();
 
-  props: {
-    /** Rows from Timeline */
-    rows: {
-      type: Array as PropType<IRow[]>,
-      required: true,
-    },
-    /** Total height */
-    fullHeight: {
-      type: Number,
-      required: true,
-    },
-    /** Actual recycler component */
-    recycler: {
-      type: Object as PropType<VueRecyclerType>,
-      required: false,
-    },
-    /** Recycler before slot component */
-    recyclerBefore: {
-      type: HTMLDivElement,
-      required: false,
-    },
-  },
+const windowWidthIsMobile = useWindowWidthIsMobile();
 
-  emits: {
-    interactend: () => true,
-    scroll: (event: { current: number; previous: number }) => true,
-  },
+const scroller = ref<HTMLDivElement>();
+const cursorSt = ref<HTMLSpanElement>();
+const hoverCursor = ref<HTMLSpanElement>();
 
-  data: () => ({
-    /** Last known height at adjustment */
-    lastAdjustHeight: 0,
-    /** Height of the entire photo view */
-    recyclerHeight: 100,
-    /** Height of the dynamic top matter */
-    dynTopMatterHeight: 0,
-    /** Space to leave at the top (for the hover cursor) */
-    topPadding: 0,
-    /** Rect of scroller */
-    scrollerRect: null as DOMRect | null,
-    /** Computed ticks */
-    ticks: [] as ITick[],
-    /** Computed cursor top */
-    cursorY: 0,
-    /** Hover cursor top */
-    hoverCursorY: -5,
-    /** Hover cursor text */
-    hoverCursorText: '',
-    /** Scrolling using the scroller */
-    scrollingTimer: 0,
-    /** Scrolling now using the scroller */
-    scrollingNowTimer: 0,
-    /** Scrolling recycler */
-    scrollingRecyclerTimer: 0,
-    /** Scrolling recycler now */
-    scrollingRecyclerNowTimer: 0,
-    /** Recycler scrolling throttle */
-    scrollingRecyclerUpdateTimer: 0,
-    /** View size reflow timer */
-    reflowRequest: false,
-    /** Tick adjust timer */
-    adjustRequest: false,
-    /** Scroller is being moved with interaction */
-    interacting: false,
-    /** Last known scroll position of the recycler */
-    lastKnownRecyclerScroll: 0,
-    /** Track the last requested y position when interacting */
-    lastRequestedRecyclerY: 0,
-  }),
+/** Last known height at adjustment */
+const lastAdjustHeight = ref(0);
+/** Height of the entire photo view */
+const recyclerHeight = ref(100);
+/** Height of the dynamic top matter */
+const dynTopMatterHeight = ref(0);
+/** Space to leave at the top (for the hover cursor) */
+const topPadding = ref(0);
+/** Rect of scroller */
+const scrollerRect = ref<DOMRect | null>(null);
+/** Computed ticks */
+const ticks = ref([] as ITick[]);
+/** Computed cursor top */
+const cursorY = ref(0);
+/** Hover cursor top */
+const hoverCursorY = ref(-5);
+/** Hover cursor text */
+const hoverCursorText = ref('');
+/** Scrolling using the scroller */
+const scrollingTimer = new utils.RenewingTimeout();
+/** Scrolling now using the scroller */
+const scrollingNowTimer = new utils.RenewingTimeout();
+/** Scrolling recycler */
+const scrollingRecyclerTimer = new utils.RenewingTimeout();
+/** Scrolling recycler now */
+const scrollingRecyclerNowTimer = new utils.RenewingTimeout();
+/** Recycler scrolling throttle */
+const scrollingRecyclerUpdateTimer = ref(0);
+/** View size reflow timer */
+const reflowRequest = ref(false);
+/** Tick adjust timer */
+const adjustRequest = ref(false);
+/** Scroller is being moved with interaction */
+const interacting = ref(false);
+/** Last known scroll position of the recycler */
+const lastKnownRecyclerScroll = ref(0);
+/** Track the last requested y position when interacting */
+const lastRequestedRecyclerY = ref(0);
 
-  computed: {
-    /** Get the visible ticks */
-    visibleTicks(): ITick[] {
-      let key = 9999999900;
-      return this.ticks
-        .filter((tick) => tick.s)
-        .map((tick) => {
-          if (tick.text) {
-            tick.key = key = tick.dayId * 100;
-          } else {
-            tick.key = ++key; // days are sorted descending
-          }
-          return tick;
-        });
-    },
-
-    /** Height of usable area */
-    height(): number {
-      return this.fullHeight - this.topPadding;
-    },
-
-    /** Position of hover cursor */
-    hoverCursorTransform(): string {
-      const mob = this.windowWidthIsMobile;
-      const min = this.topPadding + (mob ? 2 : 0); // padding for curvature
-      const max = this.fullHeight - (mob ? 6 : 0); // padding for shadow
-      const val = this.hoverCursorY;
-      const clamp = Math.max(min, Math.min(max, val)); // clamp(min, val, max)
-      return `translateY(calc(${clamp}px - 100%))`;
-    },
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        scroller?: HTMLDivElement;
-        cursorSt?: HTMLSpanElement;
-        hoverCursor?: HTMLSpanElement;
-      };
-    },
-
-    /** Reset state */
-    reset() {
-      this.ticks = [];
-      this.cursorY = 0;
-      this.hoverCursorY = -5;
-      this.hoverCursorText = '';
-      this.reflowRequest = false;
-
-      // Clear all timers
-      clearTimeout(this.scrollingTimer);
-      clearTimeout(this.scrollingNowTimer);
-      clearTimeout(this.scrollingRecyclerTimer);
-      clearTimeout(this.scrollingRecyclerNowTimer);
-      clearTimeout(this.scrollingRecyclerUpdateTimer);
-      this.scrollingTimer = 0;
-      this.scrollingNowTimer = 0;
-      this.scrollingRecyclerTimer = 0;
-      this.scrollingRecyclerNowTimer = 0;
-      this.scrollingRecyclerUpdateTimer = 0;
-    },
-
-    /** Query height of the recycler */
-    recyclerHeightDOM(): number {
-      return this.recycler?.$el?.scrollHeight ?? 0;
-    },
-
-    /** Recycler scroll event, must be called by timeline */
-    recyclerScrolled(event: Event | null) {
-      // This isn't a renewing timer, it's a scheduled task
-      if (this.scrollingRecyclerUpdateTimer) return;
-      this.scrollingRecyclerUpdateTimer = window.setTimeout(() => {
-        this.scrollingRecyclerUpdateTimer = 0;
-        this.updateFromRecyclerScroll();
-      }, 100);
-
-      // Update that we're scrolling with the recycler
-      utils.setRenewingTimeout(this, 'scrollingRecyclerNowTimer', null, 200);
-      utils.setRenewingTimeout(this, 'scrollingRecyclerTimer', null, 1500);
-    },
-
-    /** Update cursor position from recycler scroll position */
-    updateFromRecyclerScroll() {
-      // Ignore if dragging the scroller
-      if (this.interacting) return;
-
-      // Get the scroll position
-      const scroll = this.recycler?.$el?.scrollTop ?? 0;
-
-      // Emit scroll event
-      const event = {
-        current: scroll,
-        previous: this.lastKnownRecyclerScroll,
-        dynTopMatterVisible: scroll < this.dynTopMatterHeight,
-      };
-      utils.bus.emit('memories.recycler.scroll', event);
-      this.$emit('scroll', event);
-      this.lastKnownRecyclerScroll = scroll;
-
-      // Get cursor px position
-      const { top1, top2, y1, y2 } = this.getCoords(scroll, 'y');
-      const topfrac = y2 === y1 ? 0 : (scroll - y1) / (y2 - y1);
-      const rtop = top1 + (top2 - top1) * (topfrac || 0);
-
-      // Always move static cursor to right position
-      this.cursorY = rtop;
-
-      // Move hover cursor to same position unless hovering
-      // Regardless, we need this call because the internal mapping might have changed
-      if (!this.windowWidthIsMobile && this.refs().scroller?.matches(':hover')) {
-        this.moveHoverCursor(this.hoverCursorY);
+/** Get the visible ticks */
+const visibleTicks = computed(() => {
+  let key = 9999999900;
+  return ticks.value
+    .filter((tick) => tick.s)
+    .map((tick) => {
+      if (tick.text) {
+        tick.key = key = tick.dayId * 100;
       } else {
-        this.moveHoverCursor(rtop);
+        tick.key = ++key; // days are sorted descending
       }
-    },
+      return tick;
+    });
+});
 
-    /** Re-create tick data in the next frame */
-    async reflow() {
-      if (this.reflowRequest) return;
-      this.reflowRequest = true;
-      await this.$nextTick();
-      this.reflowNow();
-      this.reflowRequest = false;
-    },
+/** Height of usable area */
+const height = computed(() => props.fullHeight - topPadding.value);
 
-    /** Re-create tick data */
-    reflowNow() {
-      // Ignore if not initialized
-      if (!this.recycler?.$el) return;
+/** Position of hover cursor */
+const hoverCursorTransform = computed(() => {
+  const mob = windowWidthIsMobile.value;
+  const min = topPadding.value + (mob ? 2 : 0); // padding for curvature
+  const max = props.fullHeight - (mob ? 6 : 0); // padding for shadow
+  const val = hoverCursorY.value;
+  const clamp = Math.max(min, Math.min(max, val)); // clamp(min, val, max)
+  return `translateY(calc(${clamp}px - 100%))`;
+});
 
-      // Refresh height of recycler
-      this.recyclerHeight = this.recyclerHeightDOM();
+/** Reset state */
+function reset() {
+  ticks.value = [];
+  cursorY.value = 0;
+  hoverCursorY.value = -5;
+  hoverCursorText.value = '';
+  reflowRequest.value = false;
 
-      // Recreate ticks data
-      this.recreate();
+  // Clear all timers
+  scrollingTimer.clear();
+  scrollingNowTimer.clear();
+  scrollingRecyclerTimer.clear();
+  scrollingRecyclerNowTimer.clear();
+  clearTimeout(scrollingRecyclerUpdateTimer.value);
+  scrollingRecyclerUpdateTimer.value = 0;
+}
 
-      // Adjust top
-      this.adjustNow();
-    },
+/** Query height of the recycler */
+function recyclerHeightDOM(): number {
+  return props.recycler?.$el?.scrollHeight ?? 0;
+}
 
-    /** Recreate from scratch */
-    recreate() {
-      // Clear and override any adjust timer
-      this.ticks = [];
-      this.lastAdjustHeight = 0;
+/** Recycler scroll event, must be called by timeline */
+function recyclerScrolled(event: Event | null) {
+  // This isn't a renewing timer, it's a scheduled task
+  if (scrollingRecyclerUpdateTimer.value) return;
+  scrollingRecyclerUpdateTimer.value = window.setTimeout(() => {
+    scrollingRecyclerUpdateTimer.value = 0;
+    updateFromRecyclerScroll();
+  }, 100);
 
-      // Ticks
-      let prevYear = 9999;
-      let prevMonth = 0;
+  // Update that we're scrolling with the recycler
+  scrollingRecyclerNowTimer.set(null, 200);
+  scrollingRecyclerTimer.set(null, 1500);
+}
 
-      // Get a new tick
-      const getTick = (dayId: number, isMonth = false, text?: string | number): ITick => ({
-        dayId,
-        isMonth,
-        text,
-        y: 0,
-        count: 0,
-        topF: 0,
-        top: 0,
-        s: false,
-      });
+/** Update cursor position from recycler scroll position */
+function updateFromRecyclerScroll() {
+  // Ignore if dragging the scroller
+  if (interacting.value) return;
 
-      // Iterate over rows
-      for (const row of this.rows) {
-        if (row.type === 0) {
-          // Make date string
-          const dateTaken = utils.dayIdToDate(row.dayId);
+  // Get the scroll position
+  const scroll = props.recycler?.$el?.scrollTop ?? 0;
 
-          // Create tick
-          const dtYear = dateTaken.getUTCFullYear();
-          const dtMonth = dateTaken.getUTCMonth();
-          const isMonth = dtMonth !== prevMonth || dtYear !== prevYear;
-          const text = dtYear === prevYear ? undefined : dtYear;
-          this.ticks.push(getTick(row.dayId, isMonth, text));
+  // Emit scroll event
+  const event = {
+    current: scroll,
+    previous: lastKnownRecyclerScroll.value,
+    dynTopMatterVisible: scroll < dynTopMatterHeight.value,
+  };
+  utils.bus.emit('memories.recycler.scroll', event);
+  emit('scroll', event);
+  lastKnownRecyclerScroll.value = scroll;
 
-          prevMonth = dtMonth;
-          prevYear = dtYear;
-        }
+  // Get cursor px position
+  const { top1, top2, y1, y2 } = getCoords(scroll, 'y');
+  const topfrac = y2 === y1 ? 0 : (scroll - y1) / (y2 - y1);
+  const rtop = top1 + (top2 - top1) * (topfrac || 0);
+
+  // Always move static cursor to right position
+  cursorY.value = rtop;
+
+  // Move hover cursor to same position unless hovering
+  // Regardless, we need this call because the internal mapping might have changed
+  if (!windowWidthIsMobile.value && scroller.value?.matches(':hover')) {
+    moveHoverCursor(hoverCursorY.value);
+  } else {
+    moveHoverCursor(rtop);
+  }
+}
+
+/** Re-create tick data in the next frame */
+async function reflow() {
+  if (reflowRequest.value) return;
+  reflowRequest.value = true;
+  await nextTick();
+  reflowNow();
+  reflowRequest.value = false;
+}
+
+/** Re-create tick data */
+function reflowNow() {
+  // Ignore if not initialized
+  if (!props.recycler?.$el) return;
+
+  // Refresh height of recycler
+  recyclerHeight.value = recyclerHeightDOM();
+
+  // Recreate ticks data
+  recreate();
+
+  // Adjust top
+  adjustNow();
+}
+
+/** Recreate from scratch */
+function recreate() {
+  // Clear and override any adjust timer
+  ticks.value = [];
+  lastAdjustHeight.value = 0;
+
+  // Ticks
+  let prevYear = 9999;
+  let prevMonth = 0;
+
+  // Get a new tick
+  const getTick = (dayId: number, isMonth = false, text?: string | number): ITick => ({
+    dayId,
+    isMonth,
+    text,
+    y: 0,
+    count: 0,
+    topF: 0,
+    top: 0,
+    s: false,
+  });
+
+  // Iterate over rows
+  for (const row of props.rows) {
+    if (row.type === 0) {
+      // Make date string
+      const dateTaken = utils.dayIdToDate(row.dayId);
+
+      // Create tick
+      const dtYear = dateTaken.getUTCFullYear();
+      const dtMonth = dateTaken.getUTCMonth();
+      const isMonth = dtMonth !== prevMonth || dtYear !== prevYear;
+      const text = dtYear === prevYear ? undefined : dtYear;
+      ticks.value.push(getTick(row.dayId, isMonth, text));
+
+      prevMonth = dtMonth;
+      prevYear = dtYear;
+    }
+  }
+}
+
+/**
+ * Update tick positions without truncating the list
+ * This is much cheaper than reflowing the whole thing
+ */
+async function adjust() {
+  if (adjustRequest.value) return;
+  adjustRequest.value = true;
+  await nextTick();
+  adjustNow();
+  adjustRequest.value = false;
+}
+
+/** Do adjustment synchronously */
+function adjustNow() {
+  // Refresh height of recycler
+  recyclerHeight.value = recyclerHeightDOM();
+  dynTopMatterHeight.value = props.recyclerBefore?.clientHeight ?? 0;
+
+  // Exclude hover cursor height
+  topPadding.value = hoverCursor.value?.offsetHeight ?? 0;
+
+  // Add extra padding for any top elements (top matter, mobile header)
+  document.querySelectorAll('.timeline-scroller-gap').forEach((el) => {
+    topPadding.value += el.clientHeight + 1;
+  });
+
+  // Start with the first tick. Walk over all rows counting the
+  // y position. When you hit a row with the tick, update y and
+  // top values and move to the next tick.
+  let tickId = 0;
+  let y = dynTopMatterHeight.value;
+  let count = 0;
+
+  // We only need to recompute top and visible ticks if count
+  // of some tick has changed.
+  let needRecomputeTop = false;
+
+  // Check if height changed
+  if (lastAdjustHeight.value !== height.value) {
+    needRecomputeTop = true;
+    lastAdjustHeight.value = height.value;
+  }
+
+  for (const row of props.rows) {
+    // Check if tick is valid
+    if (tickId >= ticks.value.length) break;
+
+    // Check if we hit the next tick
+    const tick = ticks.value[tickId];
+    if (tick.dayId === row.dayId) {
+      tick.y = y;
+
+      // Check if count has changed
+      needRecomputeTop ||= tick.count !== count;
+      tick.count = count;
+
+      // Move to next tick
+      count += row.day.count;
+      tickId++;
+    }
+
+    y += row.size;
+  }
+
+  // Compute visible ticks
+  if (needRecomputeTop) {
+    setTicksTop(count);
+    computeVisibleTicks();
+  }
+}
+
+/** Mark ticks as visible or invisible */
+function computeVisibleTicks() {
+  // Kind of unrelated here, but refresh rect
+  scrollerRect.value = scroller.value!.getBoundingClientRect();
+
+  // Do another pass to figure out which points are visible
+  // This is not as bad as it looks, it's actually 12*O(n)
+  // because there are only 12 months in a year
+  const fontSizePx = parseFloat(getComputedStyle(cursorSt.value!).fontSize);
+  const minGap = fontSizePx + (_m.window.innerWidth <= 768 ? 5 : 2);
+  let prevShow = -9999;
+  for (const [idx, tick] of ticks.value.entries()) {
+    // Conservative
+    tick.s = false;
+
+    // These aren't for showing
+    if (!tick.isMonth) continue;
+
+    // You can't see these anyway, why bother?
+    const minTop = topPadding.value + minGap;
+    const maxTop = props.fullHeight - minGap;
+    if (tick.top < minTop || tick.top > maxTop) continue;
+
+    // Will overlap with the previous tick. Skip anyway.
+    if (tick.top - prevShow < minGap) continue;
+
+    // This is a labelled tick then show it anyway for the sake of best effort
+    if (tick.text) {
+      prevShow = tick.top;
+      tick.s = true;
+      continue;
+    }
+
+    // Lookahead for next labelled tick
+    // If showing this tick would overlap the next one, don't show this one
+    let i = idx + 1;
+    while (i < ticks.value.length) {
+      if (ticks.value[i].text) {
+        break;
       }
-    },
-
-    /**
-     * Update tick positions without truncating the list
-     * This is much cheaper than reflowing the whole thing
-     */
-    async adjust() {
-      if (this.adjustRequest) return;
-      this.adjustRequest = true;
-      await this.$nextTick();
-      this.adjustNow();
-      this.adjustRequest = false;
-    },
-
-    /** Do adjustment synchronously */
-    adjustNow() {
-      // Refresh height of recycler
-      this.recyclerHeight = this.recyclerHeightDOM();
-      this.dynTopMatterHeight = this.recyclerBefore?.clientHeight ?? 0;
-
-      // Exclude hover cursor height
-      const hoverCursor = this.refs().hoverCursor;
-      this.topPadding = hoverCursor?.offsetHeight ?? 0;
-
-      // Add extra padding for any top elements (top matter, mobile header)
-      document.querySelectorAll('.timeline-scroller-gap').forEach((el) => {
-        this.topPadding += el.clientHeight + 1;
-      });
-
-      // Start with the first tick. Walk over all rows counting the
-      // y position. When you hit a row with the tick, update y and
-      // top values and move to the next tick.
-      let tickId = 0;
-      let y = this.dynTopMatterHeight;
-      let count = 0;
-
-      // We only need to recompute top and visible ticks if count
-      // of some tick has changed.
-      let needRecomputeTop = false;
-
-      // Check if height changed
-      if (this.lastAdjustHeight !== this.height) {
-        needRecomputeTop = true;
-        this.lastAdjustHeight = this.height;
+      i++;
+    }
+    if (i < ticks.value.length) {
+      // A labelled tick was found
+      const nextLabelledTick = ticks.value[i];
+      if (tick.top + minGap > nextLabelledTick.top && nextLabelledTick.top < height.value - minGap) {
+        // make sure this will be shown
+        continue;
       }
+    }
 
-      for (const row of this.rows) {
-        // Check if tick is valid
-        if (tickId >= this.ticks.length) break;
+    // Show this tick
+    tick.s = true;
+    prevShow = tick.top;
+  }
+}
 
-        // Check if we hit the next tick
-        const tick = this.ticks[tickId];
-        if (tick.dayId === row.dayId) {
-          tick.y = y;
+function setTicksTop(total: number) {
+  // On mobile, move the ticks up by half the height of the cursor
+  // so that the cursor is centered on the tick instead (on desktop, it's at the bottom)
+  const displayPadding = windowWidthIsMobile.value ? -MOBILE_CURSOR_HH : 0;
 
-          // Check if count has changed
-          needRecomputeTop ||= tick.count !== count;
-          tick.count = count;
+  // Set topF (float) and top (rounded) values
+  for (const tick of ticks.value) {
+    tick.topF = topPadding.value + height.value * (tick.count / total);
+    tick.top = utils.roundHalf(tick.topF) + displayPadding;
+  }
+}
 
-          // Move to next tick
-          count += row.day.count;
-          tickId++;
-        }
+/** Change actual position of the hover cursor */
+function moveHoverCursor(y: number) {
+  hoverCursorY.value = y;
 
-        y += row.size;
-      }
+  // Get index of previous tick
+  let idx = utils.binarySearch(ticks.value, y, 'topF');
+  if (idx === 0) {
+    // use this tick
+  } else if (idx >= 1 && idx <= ticks.value.length) {
+    idx = idx - 1;
+  } else {
+    return;
+  }
 
-      // Compute visible ticks
-      if (needRecomputeTop) {
-        this.setTicksTop(count);
-        this.computeVisibleTicks();
-      }
-    },
+  // DayId of current hover
+  const dayId = ticks.value[idx]?.dayId;
 
-    /** Mark ticks as visible or invisible */
-    computeVisibleTicks() {
-      // Kind of unrelated here, but refresh rect
-      this.scrollerRect = this.refs().scroller!.getBoundingClientRect();
+  // Special days
+  if (dayId === undefined) {
+    hoverCursorText.value = '';
+    return;
+  } else if (dayId === lens.TOP_RESULTS_DAYID) {
+    hoverCursorText.value = lens.TOP_RESULTS_TEXT;
+    return;
+  }
 
-      // Do another pass to figure out which points are visible
-      // This is not as bad as it looks, it's actually 12*O(n)
-      // because there are only 12 months in a year
-      const fontSizePx = parseFloat(getComputedStyle(this.refs().cursorSt!).fontSize);
-      const minGap = fontSizePx + (_m.window.innerWidth <= 768 ? 5 : 2);
-      let prevShow = -9999;
-      for (const [idx, tick] of this.ticks.entries()) {
-        // Conservative
-        tick.s = false;
+  const date = utils.dayIdToDate(dayId);
+  hoverCursorText.value = utils.getShortDateStr(date) ?? '';
+}
 
-        // These aren't for showing
-        if (!tick.isMonth) continue;
+/** Handle mouse hover */
+function mousemove(event: MouseEvent) {
+  if (event.buttons) {
+    mousedown(event);
+  }
+  moveHoverCursor(event.offsetY);
+}
 
-        // You can't see these anyway, why bother?
-        const minTop = this.topPadding + minGap;
-        const maxTop = this.fullHeight - minGap;
-        if (tick.top < minTop || tick.top > maxTop) continue;
+/** Handle mouse leave */
+function mouseleave(event: MouseEvent) {
+  interactend();
+  moveHoverCursor(cursorY.value);
+}
 
-        // Will overlap with the previous tick. Skip anyway.
-        if (tick.top - prevShow < minGap) continue;
+/** Binary search and get coords surrounding position */
+function getCoords(y: number, field: 'topF' | 'y') {
+  // If no ticks are available, return a linear interpolation
+  if (!ticks.value.length) {
+    // Include the dynamic top matter height here because
+    // this will likely be used when there are zero rows
+    return {
+      top1: topPadding.value,
+      top2: props.fullHeight,
+      y1: 0,
+      y2: recyclerHeight.value + dynTopMatterHeight.value,
+    };
+  }
 
-        // This is a labelled tick then show it anyway for the sake of best effort
-        if (tick.text) {
-          prevShow = tick.top;
-          tick.s = true;
-          continue;
-        }
+  // Get index of previous tick
+  const idx = utils.binarySearch(ticks.value, y, field);
 
-        // Lookahead for next labelled tick
-        // If showing this tick would overlap the next one, don't show this one
-        let i = idx + 1;
-        while (i < this.ticks.length) {
-          if (this.ticks[i].text) {
-            break;
-          }
-          i++;
-        }
-        if (i < this.ticks.length) {
-          // A labelled tick was found
-          const nextLabelledTick = this.ticks[i];
-          if (tick.top + minGap > nextLabelledTick.top && nextLabelledTick.top < this.height - minGap) {
-            // make sure this will be shown
-            continue;
-          }
-        }
+  // Position is before the first tick; choose first
+  if (idx <= 0) {
+    const tick = ticks.value[0];
+    return {
+      top1: topPadding.value,
+      top2: tick.topF,
+      y1: 0,
+      y2: tick.y,
+    };
+  }
 
-        // Show this tick
-        tick.s = true;
-        prevShow = tick.top;
-      }
-    },
+  // Position is after the last tick; choose last
+  if (idx >= ticks.value.length) {
+    const tick = ticks.value.at(-1)!;
+    return {
+      top1: tick.topF,
+      top2: props.fullHeight,
+      y1: tick.y,
+      y2: recyclerHeight.value,
+    };
+  }
 
-    setTicksTop(total: number) {
-      // On mobile, move the ticks up by half the height of the cursor
-      // so that the cursor is centered on the tick instead (on desktop, it's at the bottom)
-      const displayPadding = this.windowWidthIsMobile ? -MOBILE_CURSOR_HH : 0;
+  // Somewhere in the middle
+  const tick1 = ticks.value[idx - 1];
+  const tick2 = ticks.value[idx];
+  return {
+    top1: tick1.topF,
+    top2: tick2.topF,
+    y1: tick1.y,
+    y2: tick2.y,
+  };
+}
 
-      // Set topF (float) and top (rounded) values
-      for (const tick of this.ticks) {
-        tick.topF = this.topPadding + this.height * (tick.count / total);
-        tick.top = utils.roundHalf(tick.topF) + displayPadding;
-      }
-    },
+/** Move to given scroller Y */
+function moveto(y: number, snap: boolean) {
+  // Move cursor immediately to prevent jank
+  cursorY.value = y;
+  hoverCursorY.value = y;
 
-    /** Change actual position of the hover cursor */
-    moveHoverCursor(y: number) {
-      this.hoverCursorY = y;
+  const { top1, top2, y1, y2 } = getCoords(y, 'topF');
+  const yfrac = top2 === top1 ? 0 : (y - top1) / (top2 - top1);
+  const ry = y1 + (y2 - y1) * (yfrac || 0);
+  const targetY = snap ? y1 + SNAP_OFFSET : ry;
 
-      // Get index of previous tick
-      let idx = utils.binarySearch(this.ticks, y, 'topF');
-      if (idx === 0) {
-        // use this tick
-      } else if (idx >= 1 && idx <= this.ticks.length) {
-        idx = idx - 1;
-      } else {
-        return;
-      }
+  if (lastRequestedRecyclerY.value !== targetY) {
+    lastRequestedRecyclerY.value = targetY;
+    props.recycler?.scrollToPosition(targetY);
+  }
 
-      // DayId of current hover
-      const dayId = this.ticks[idx]?.dayId;
+  handleScroll();
+}
 
-      // Special days
-      if (dayId === undefined) {
-        this.hoverCursorText = '';
-        return;
-      } else if (dayId === lens.TOP_RESULTS_DAYID) {
-        this.hoverCursorText = lens.TOP_RESULTS_TEXT;
-        return;
-      }
+/** Handle mouse click */
+function mousedown(event: MouseEvent) {
+  interactstart(); // end called on mouseup
+  moveto(event.offsetY, false);
+}
 
-      const date = utils.dayIdToDate(dayId);
-      this.hoverCursorText = utils.getShortDateStr(date) ?? '';
-    },
+/** Handle touch */
+function touchmove(event: TouchEvent) {
+  if (!scrollerRect.value) return;
+  let y = event.targetTouches[0].pageY - scrollerRect.value.top;
+  y = Math.max(topPadding.value, y + MOBILE_CURSOR_HH); // middle of touch finger
 
-    /** Handle mouse hover */
-    mousemove(event: MouseEvent) {
-      if (event.buttons) {
-        this.mousedown(event);
-      }
-      this.moveHoverCursor(event.offsetY);
-    },
+  // Snap to nearest tick if there are a lot of rows
+  const snap = props.rows.length > SNAP_MIN_ROWS;
+  moveto(y, snap);
+}
 
-    /** Handle mouse leave */
-    mouseleave(event: MouseEvent) {
-      this.interactend();
-      this.moveHoverCursor(this.cursorY);
-    },
+function interactstart() {
+  interacting.value = true;
+}
 
-    /** Binary search and get coords surrounding position */
-    getCoords(y: number, field: 'topF' | 'y') {
-      // If no ticks are available, return a linear interpolation
-      if (!this.ticks.length) {
-        // Include the dynamic top matter height here because
-        // this will likely be used when there are zero rows
-        return {
-          top1: this.topPadding,
-          top2: this.fullHeight,
-          y1: 0,
-          y2: this.recyclerHeight + this.dynTopMatterHeight,
-        };
-      }
+function interactend() {
+  interacting.value = false;
+  recyclerScrolled(null); // make sure final position is correct
+  emit('interactend'); // tell recycler to load stuff
+  props.recycler?.$el.focus(); // give focus back to recycler
+}
 
-      // Get index of previous tick
-      const idx = utils.binarySearch(this.ticks, y, field);
+/** Update scroller is being used to scroll recycler */
+function handleScroll() {
+  scrollingNowTimer.set(null, 200);
+  scrollingTimer.set(null, 1500);
+}
 
-      // Position is before the first tick; choose first
-      if (idx <= 0) {
-        const tick = this.ticks[0];
-        return {
-          top1: this.topPadding,
-          top2: tick.topF,
-          y1: 0,
-          y2: tick.y,
-        };
-      }
-
-      // Position is after the last tick; choose last
-      if (idx >= this.ticks.length) {
-        const tick = this.ticks.at(-1)!;
-        return {
-          top1: tick.topF,
-          top2: this.fullHeight,
-          y1: tick.y,
-          y2: this.recyclerHeight,
-        };
-      }
-
-      // Somewhere in the middle
-      const tick1 = this.ticks[idx - 1];
-      const tick2 = this.ticks[idx];
-      return {
-        top1: tick1.topF,
-        top2: tick2.topF,
-        y1: tick1.y,
-        y2: tick2.y,
-      };
-    },
-
-    /** Move to given scroller Y */
-    moveto(y: number, snap: boolean) {
-      // Move cursor immediately to prevent jank
-      this.cursorY = y;
-      this.hoverCursorY = y;
-
-      const { top1, top2, y1, y2 } = this.getCoords(y, 'topF');
-      const yfrac = top2 === top1 ? 0 : (y - top1) / (top2 - top1);
-      const ry = y1 + (y2 - y1) * (yfrac || 0);
-      const targetY = snap ? y1 + SNAP_OFFSET : ry;
-
-      if (this.lastRequestedRecyclerY !== targetY) {
-        this.lastRequestedRecyclerY = targetY;
-        this.recycler?.scrollToPosition(targetY);
-      }
-
-      this.handleScroll();
-    },
-
-    /** Handle mouse click */
-    mousedown(event: MouseEvent) {
-      this.interactstart(); // end called on mouseup
-      this.moveto(event.offsetY, false);
-    },
-
-    /** Handle touch */
-    touchmove(event: TouchEvent) {
-      if (!this.scrollerRect) return;
-      let y = event.targetTouches[0].pageY - this.scrollerRect.top;
-      y = Math.max(this.topPadding, y + MOBILE_CURSOR_HH); // middle of touch finger
-
-      // Snap to nearest tick if there are a lot of rows
-      const snap = this.rows.length > SNAP_MIN_ROWS;
-      this.moveto(y, snap);
-    },
-
-    interactstart() {
-      this.interacting = true;
-    },
-
-    interactend() {
-      this.interacting = false;
-      this.recyclerScrolled(null); // make sure final position is correct
-      this.$emit('interactend'); // tell recycler to load stuff
-      this.recycler?.$el.focus(); // give focus back to recycler
-    },
-
-    /** Update scroller is being used to scroll recycler */
-    handleScroll() {
-      utils.setRenewingTimeout(this, 'scrollingNowTimer', null, 200);
-      utils.setRenewingTimeout(this, 'scrollingTimer', null, 1500);
-    },
-  },
+defineExpose({
+  reset,
+  reflow,
+  adjust,
+  recyclerScrolled,
+  interacting,
+  scrollingRecyclerNowTimer,
 });
 </script>
 
