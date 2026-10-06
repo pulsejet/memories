@@ -32,112 +32,109 @@
   </template>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 import * as utils from '@services/utils';
 import * as nativex from '@native';
+import { useRouteIsBase } from '@services/route-checker';
 
 import ChevronRightIcon from 'vue-material-design-icons/ChevronRight.vue';
 
 import type { IPhoto } from '@typings';
 
-export default defineComponent({
+defineOptions({
   name: 'ViewerDateAddress',
-
-  components: {
-    ChevronRightIcon,
-  },
-
-  props: {
-    photo: {
-      type: Object as PropType<IPhoto | null>,
-      default: null,
-    },
-    twoLines: {
-      type: Boolean,
-      default: false,
-    },
-  },
-
-  computed: {
-    dateStr(): string | null {
-      const date = this.photo?.imageInfo?.datetaken;
-      if (!date) return null;
-      return utils.getDateStr(new Date(date * 1000));
-    },
-
-    timeStr(): string | null {
-      const date = this.photo?.imageInfo?.datetaken;
-      if (!date) return null;
-      return utils.getTimeStr(new Date(date * 1000));
-    },
-
-    dateTaken(): string | null {
-      const date = this.photo?.imageInfo?.datetaken;
-      if (!date) return null;
-      return utils.getLongDateStr(new Date(date * 1000), false, true);
-    },
-
-    addressShort(): string | null {
-      return this.photo?.imageInfo?.address_short ?? null;
-    },
-
-    dayTo() {
-      if (!this.photo?.imageInfo?.intimeline) return undefined;
-
-      // We need the real dayid to jump to anywhere in the timeline,
-      // even if the current view is a month view. Note that this means
-      // the target view cannot be a month view :/
-      const dayid = this.photo.dayid_real ?? this.photo.dayid;
-
-      // We use the fileid, not the key. The key may not be the same as the
-      // timeline's fileid, for example on faces where the key is the faceid.
-      const fileid = this.photo.fileid;
-
-      // Both parameters are required for jumping.
-      if (!dayid || !fileid) return undefined;
-
-      return {
-        name: 'timeline',
-        hash: `#${utils.fragment.types.day}/${dayid}/${fileid}`,
-      };
-    },
-  },
-
-  methods: {
-    async jumpToTimeline() {
-      if (!this.dayTo) return;
-      this.beep();
-
-      // If we are already on the timeline, just close the viewer.
-      // This way we don't unnecessarily accumulate history entries.
-      if (this.routeIsBase) {
-        await utils.fragment.pop(utils.fragment.types.viewer);
-
-        // Check if the image is alraedy in the viewport, and scroll only if not.
-        // This is to avoid the annoying "jump" when closing the viewer.
-        const photoEl = document.querySelector<HTMLDivElement>(`.p-outer--${this.photo?.key}`);
-        if (!photoEl || !utils.isPartiallyInViewport(photoEl)) {
-          await this.$router.replace(this.dayTo);
-        }
-        return;
-      }
-
-      // On another route - push an entry in navigation so that pressing
-      // back will bring us back to an open viewer at the same spot.
-      try {
-        await this.$router.push(this.dayTo);
-      } catch {
-        // e.g. duplicated navigation; nothing to do
-      }
-    },
-
-    beep() {
-      nativex.playTouchSound();
-    },
-  },
 });
+
+const props = withDefaults(
+  defineProps<{
+    photo?: IPhoto | null;
+    twoLines?: boolean;
+  }>(),
+  {
+    photo: null,
+    twoLines: false,
+  },
+);
+
+const router = useRouter();
+const routeIsBase = useRouteIsBase();
+
+const dateStr = computed((): string | null => {
+  const date = props.photo?.imageInfo?.datetaken;
+  if (!date) return null;
+  return utils.getDateStr(new Date(date * 1000));
+});
+
+const timeStr = computed((): string | null => {
+  const date = props.photo?.imageInfo?.datetaken;
+  if (!date) return null;
+  return utils.getTimeStr(new Date(date * 1000));
+});
+
+const dateTaken = computed((): string | null => {
+  const date = props.photo?.imageInfo?.datetaken;
+  if (!date) return null;
+  return utils.getLongDateStr(new Date(date * 1000), false, true);
+});
+
+const addressShort = computed((): string | null => {
+  return props.photo?.imageInfo?.address_short ?? null;
+});
+
+const dayTo = computed(() => {
+  if (!props.photo?.imageInfo?.intimeline) return undefined;
+
+  // We need the real dayid to jump to anywhere in the timeline,
+  // even if the current view is a month view. Note that this means
+  // the target view cannot be a month view :/
+  const dayid = props.photo.dayid_real ?? props.photo.dayid;
+
+  // We use the fileid, not the key. The key may not be the same as the
+  // timeline's fileid, for example on faces where the key is the faceid.
+  const fileid = props.photo.fileid;
+
+  // Both parameters are required for jumping.
+  if (!dayid || !fileid) return undefined;
+
+  return {
+    name: 'timeline',
+    hash: `#${utils.fragment.types.day}/${dayid}/${fileid}`,
+  };
+});
+
+async function jumpToTimeline() {
+  if (!dayTo.value) return;
+  beep();
+
+  // If we are already on the timeline, just close the viewer.
+  // This way we don't unnecessarily accumulate history entries.
+  if (routeIsBase.value) {
+    await utils.fragment.pop(utils.fragment.types.viewer);
+
+    // Check if the image is alraedy in the viewport, and scroll only if not.
+    // This is to avoid the annoying "jump" when closing the viewer.
+    const photoEl = document.querySelector<HTMLDivElement>(`.p-outer--${props.photo?.key}`);
+    if (!photoEl || !utils.isPartiallyInViewport(photoEl)) {
+      await router.replace(dayTo.value);
+    }
+    return;
+  }
+
+  // On another route - push an entry in navigation so that pressing
+  // back will bring us back to an open viewer at the same spot.
+  try {
+    await router.push(dayTo.value);
+  } catch {
+    // e.g. duplicated navigation; nothing to do
+  }
+}
+
+function beep() {
+  nativex.playTouchSound();
+}
 </script>
 
 <style lang="scss" scoped>
