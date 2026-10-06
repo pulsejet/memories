@@ -16,8 +16,9 @@
   </Modal>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { ref, useTemplateRef, defineAsyncComponent } from 'vue';
+import { useRoute } from 'vue-router';
 
 import { showError } from '@nextcloud/dialogs';
 
@@ -28,112 +29,100 @@ import Cluster from '@components/frame/Cluster.vue';
 import FaceList from './FaceList.vue';
 
 import Modal from './Modal.vue';
-import ModalMixin from './ModalMixin';
 
+import { useModal } from '@services/modal';
+import { t } from '@services/l10n';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 
 import type { IPhoto, IFace } from '@typings';
 
-export default defineComponent({
+defineOptions({
   name: 'FaceMoveModal',
-  components: {
-    NcButton,
-    NcTextField,
-    Modal,
-    Cluster,
-    FaceList,
-  },
-
-  mixins: [ModalMixin],
-
-  emits: [],
-
-  data: () => ({
-    photos: [] as IPhoto[],
-  }),
-
-  created() {
-    console.assert(!_m.modals.moveToFace, 'FaceMoveModal created twice');
-    _m.modals.moveToFace = this.open;
-  },
-
-  methods: {
-    open(photos: IPhoto[]) {
-      if (this.photos.length) {
-        // is processing
-        return;
-      }
-
-      // check ownership
-      const user = this.$route.params.user?.toString() || '';
-      if (this.$route.params.user?.toString() !== utils.uid) {
-        showError(
-          this.t('memories', 'Only user "{user}" can update this person', {
-            user,
-          }),
-        );
-        return;
-      }
-
-      this.show = true;
-      this.photos = photos;
-    },
-
-    cleanup() {
-      this.show = false;
-      this.photos = [];
-    },
-
-    moved(photos: IPhoto[]) {
-      utils.bus.emit('memories:timeline:deleted', photos);
-    },
-
-    async clickFace(face: IFace) {
-      const user = this.$route.params.user?.toString() || '';
-      const name = this.$route.params.name?.toString() || '';
-      const target = String(face.name || face.cluster_id);
-
-      if (
-        !(await utils.confirmDestructive({
-          title: this.t('memories', 'Move to person'),
-          message: this.t('memories', 'Move the selected photos to {target}?', {
-            target: utils.isNumber(target) ? this.t('memories', 'Unnamed person') : target,
-          }),
-          confirm: this.t('memories', 'Move'),
-          confirmClasses: 'primary',
-          cancel: this.t('memories', 'Cancel'),
-        }))
-      ) {
-        return;
-      }
-
-      try {
-        // Create map to return IPhoto later
-        const map = new Map<number, IPhoto>();
-        for (const photo of this.photos.filter((p) => p.faceid)) {
-          map.set(photo.faceid!, photo);
-        }
-
-        // Run WebDAV query
-        const photos = Array.from(map.values());
-        for await (let delIds of dav.recognizeMoveFaceImages(user, name, target, photos)) {
-          this.moved(
-            delIds
-              .filter(utils.truthy)
-              .map((id) => map.get(id))
-              .filter(utils.truthy),
-          );
-        }
-      } catch (error) {
-        console.error(error);
-        showError(this.t('memories', 'An error occurred while moving photos from {name}.', { name }));
-      } finally {
-        this.close();
-      }
-    },
-  },
 });
+
+const route = useRoute();
+const modal = useTemplateRef('modal');
+const { show, close } = useModal(modal);
+
+const photos = ref<IPhoto[]>([]);
+
+console.assert(!_m.modals.moveToFace, 'FaceMoveModal created twice');
+_m.modals.moveToFace = open;
+
+function open(photosIn: IPhoto[]) {
+  if (photos.value.length) {
+    // is processing
+    return;
+  }
+
+  // check ownership
+  const user = route.params.user?.toString() || '';
+  if (route.params.user?.toString() !== utils.uid) {
+    showError(
+      t('memories', 'Only user "{user}" can update this person', {
+        user,
+      }),
+    );
+    return;
+  }
+
+  show.value = true;
+  photos.value = photosIn;
+}
+
+function cleanup() {
+  show.value = false;
+  photos.value = [];
+}
+
+function moved(photosIn: IPhoto[]) {
+  utils.bus.emit('memories:timeline:deleted', photosIn);
+}
+
+async function clickFace(face: IFace) {
+  const user = route.params.user?.toString() || '';
+  const name = route.params.name?.toString() || '';
+  const target = String(face.name || face.cluster_id);
+
+  if (
+    !(await utils.confirmDestructive({
+      title: t('memories', 'Move to person'),
+      message: t('memories', 'Move the selected photos to {target}?', {
+        target: utils.isNumber(target) ? t('memories', 'Unnamed person') : target,
+      }),
+      confirm: t('memories', 'Move'),
+      confirmClasses: 'primary',
+      cancel: t('memories', 'Cancel'),
+    }))
+  ) {
+    return;
+  }
+
+  try {
+    // Create map to return IPhoto later
+    const map = new Map<number, IPhoto>();
+    for (const photo of photos.value.filter((p) => p.faceid)) {
+      map.set(photo.faceid!, photo);
+    }
+
+    // Run WebDAV query
+    const photosArr = Array.from(map.values());
+    for await (let delIds of dav.recognizeMoveFaceImages(user, name, target, photosArr)) {
+      moved(
+        delIds
+          .filter(utils.truthy)
+          .map((id) => map.get(id))
+          .filter(utils.truthy),
+      );
+    }
+  } catch (error) {
+    console.error(error);
+    showError(t('memories', 'An error occurred while moving photos from {name}.', { name }));
+  } finally {
+    close();
+  }
+}
 </script>
 
 <style lang="scss" scoped>
