@@ -132,6 +132,7 @@ import * as utils from '@services/utils';
 import * as nativex from '@native';
 import { translate as t } from '@services/l10n';
 import { config, hasVersionChanged } from '@services/user-config';
+import { windowDims } from '@services/common';
 
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
@@ -166,7 +167,6 @@ const routeIsPublic = useRouteIsPublic();
 
 const navItems = ref<NavItem[]>([]);
 const settingsOpen = ref(false);
-const resizeTimer = new utils.RenewingTimeout();
 
 watch(
   () => route.params.token,
@@ -231,15 +231,6 @@ const showNavigation = computed((): boolean => {
 
 const hasMobileHeader = computed((): boolean => {
   return native.value && showNavigation.value && routeIsBase.value;
-});
-
-// No real need to unbind these, as the app is never destroyed
-const onResize = () => {
-  _m.window.innerWidth = window.innerWidth;
-  _m.window.innerHeight = window.innerHeight;
-};
-window.addEventListener('resize', () => {
-  resizeTimer.set(onResize, 100);
 });
 
 // Register navigation items on config change
@@ -375,7 +366,7 @@ function refreshNav() {
 }
 
 function linkClick() {
-  if (_m.window.innerWidth <= 1024) {
+  if (windowDims.width <= 1024) {
     utils.bus.emit('toggle-navigation', { open: false });
   }
 }

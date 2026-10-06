@@ -63,6 +63,7 @@ import CogIcon from 'vue-material-design-icons/Cog.vue';
 
 import { translate as t } from '@services/l10n';
 import { config } from '@services/user-config';
+import { windowDims } from '@services/common';
 import * as dav from '@services/dav';
 import * as nativex from '@native';
 
@@ -131,7 +132,7 @@ const categories = ref([
     icon: markRaw(CogIcon),
     link: undefined,
     click: _m.modals.showSettings,
-    if: () => _m.window.isMobile,
+    if: () => windowDims.isMobile,
   },
 ] as Category[]);
 

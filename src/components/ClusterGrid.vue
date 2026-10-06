@@ -31,7 +31,7 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { RecycleScroller } from 'vue-virtual-scroller';
 
 import { useRouteIsAlbums } from '@services/route-checker';
-import { useWindowWidthIsMobile } from '@services/common';
+import { windowDims } from '@services/common';
 
 import Cluster from '@components/frame/Cluster.vue';
 
@@ -62,7 +62,6 @@ const emit = defineEmits<{
 }>();
 
 const routeIsAlbums = useRouteIsAlbums();
-const windowWidthIsMobile = useWindowWidthIsMobile();
 
 const recycler = ref<VueRecyclerType>();
 const recyclerWidth = ref(300);
@@ -81,7 +80,7 @@ const height = computed(() => {
   if (routeIsAlbums.value) {
     // album view: add gap for text below album
     // 4px extra on mobile for mark#2147915
-    return width.value + (windowWidthIsMobile.value ? 46 : 42);
+    return width.value + (windowDims.isMobile ? 46 : 42);
   }
 
   return width.value;

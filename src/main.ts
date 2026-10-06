@@ -1,7 +1,7 @@
 import './bootstrap';
 import { registerGlobals } from './bootstrap';
 
-import { createApp, reactive } from 'vue';
+import { createApp } from 'vue';
 import App from './App.vue';
 import router, { routes, registerRouteCheckers } from './router';
 import * as nativex from '@native';
@@ -27,14 +27,6 @@ globalThis._m = {
   sidebar: {} as any,
   viewer: {} as any,
   video: {} as any,
-
-  window: reactive({
-    innerWidth: window.innerWidth,
-    innerHeight: window.innerHeight,
-    get isMobile() {
-      return this.innerWidth <= 768;
-    },
-  }),
 };
 
 // Generate client id for this instance

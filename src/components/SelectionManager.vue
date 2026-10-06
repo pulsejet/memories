@@ -1,5 +1,5 @@
 <template>
-  <Teleport to="body" :disabled="!windowWidthIsMobile">
+  <Teleport to="body" :disabled="!windowDims.isMobile">
     <div v-if="show" class="memories-top-bar top-bar">
       <NcActions :inline="1">
         <NcActionButton :aria-label="t('memories', 'Cancel')" @click="clear()">
@@ -41,7 +41,7 @@ import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import { config } from '@services/user-config';
-import { useWindowWidthIsMobile } from '@services/common';
+import { windowDims } from '@services/common';
 import {
   useRouteIsAlbums,
   useRouteIsPublic,
@@ -163,7 +163,6 @@ const emit = defineEmits<{
   updateLoading: [delta: number];
 }>();
 
-const windowWidthIsMobile = useWindowWidthIsMobile();
 const route = useRoute();
 const routeIsAlbums = useRouteIsAlbums();
 const routeIsPublic = useRouteIsPublic();
@@ -502,13 +501,13 @@ function touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
 
   // Scroll if at top or bottom
   const scrollUp = touch.clientY < TOUCH_SELECT_CLAMP.top;
-  const scrollDown = touch.clientY > _m.window.innerHeight - TOUCH_SELECT_CLAMP.bottom;
+  const scrollDown = touch.clientY > windowDims.height - TOUCH_SELECT_CLAMP.bottom;
   if (scrollUp || scrollDown) {
     if (scrollUp) {
       touchScrollDelta.value = Math.max((touch.clientY - TOUCH_SELECT_CLAMP.top) / 3, -TOUCH_SELECT_CLAMP.maxDelta);
     } else {
       touchScrollDelta.value = Math.min(
-        (touch.clientY - _m.window.innerHeight + TOUCH_SELECT_CLAMP.bottom) / 3,
+        (touch.clientY - windowDims.height + TOUCH_SELECT_CLAMP.bottom) / 3,
         TOUCH_SELECT_CLAMP.maxDelta,
       );
     }

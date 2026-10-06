@@ -76,7 +76,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
-import { useWindowWidthIsMobile } from '@services/common';
+import { windowDims } from '@services/common';
 import { API } from '@services/API';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
@@ -92,14 +92,13 @@ defineOptions({
 
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
-const windowWidthIsMobile = useWindowWidthIsMobile();
 
 const filename = ref('');
 const loading = ref(false);
 const shares = ref<IShare[]>([]);
 
 const isRoot = computed(() => filename.value === '/' || filename.value === '');
-const sidebar = computed(() => (!isRoot.value && !windowWidthIsMobile.value ? filename.value : null));
+const sidebar = computed(() => (!isRoot.value && !windowDims.isMobile ? filename.value : null));
 
 console.assert(!_m.modals.shareNodeLink, 'NodeShareModal created twice');
 _m.modals.shareNodeLink = open;
@@ -212,7 +211,7 @@ async function copy(url: string) {
 }
 
 function refreshSidebar() {
-  if (windowWidthIsMobile.value) return;
+  if (windowDims.isMobile) return;
   _m.sidebar.close();
   _m.sidebar.open(0, filename.value, true);
 }

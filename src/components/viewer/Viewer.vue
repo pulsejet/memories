@@ -95,11 +95,11 @@
     </div>
 
     <ViewerSheetGestures
-      v-if="windowWidthIsMobile && photoswipe"
+      v-if="windowDims.isMobile && photoswipe"
       :photoswipe="photoswipe"
       @open="setBottomSheet(true)"
     />
-    <ViewerBottomSheet v-if="sheetOpen && windowWidthIsMobile" :photo="currentPhoto" @close="setBottomSheet(false)" />
+    <ViewerBottomSheet v-if="sheetOpen && windowDims.isMobile" :photo="currentPhoto" @close="setBottomSheet(false)" />
   </div>
 </template>
 
@@ -124,7 +124,7 @@ import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
 import { config } from '@services/user-config';
-import { useWindowDims, useWindowHeight, useWindowWidth, useWindowWidthIsMobile } from '@services/common';
+import { windowDims } from '@services/common';
 import { useRouteIsAlbums, useRouteIsPublic } from '@services/route-checker';
 import { API } from '@services/API';
 import { t } from '@services/l10n';
@@ -192,10 +192,6 @@ defineOptions({
   name: 'Viewer',
 });
 
-const windowDims = useWindowDims();
-const windowWidth = useWindowWidth();
-const windowHeight = useWindowHeight();
-const windowWidthIsMobile = useWindowWidthIsMobile();
 const routeIsAlbums = useRouteIsAlbums();
 const routeIsPublic = useRouteIsPublic();
 const instance = getCurrentInstance();
@@ -291,7 +287,7 @@ onBeforeUnmount(() => {
 
 /** Number of top bar buttons to show inline */
 const numInlineTopActions = computed((): number => {
-  if (windowWidthIsMobile.value) {
+  if (windowDims.isMobile) {
     return Math.min(topActions.value.length, 1);
   }
 
@@ -308,7 +304,7 @@ const numInlineTopActions = computed((): number => {
 
 /** Top bar actions, excluding anything visible in the mobile bottom bar */
 const topActions = computed((): IViewerAction[] => {
-  if (!windowWidthIsMobile.value) {
+  if (!windowDims.isMobile) {
     return actions.value;
   }
 
@@ -318,7 +314,7 @@ const topActions = computed((): IViewerAction[] => {
 
 /** Bottom bar actions on mobile */
 const bottomActions = computed((): IViewerAction[] => {
-  if (!windowWidthIsMobile.value) {
+  if (!windowDims.isMobile) {
     return [];
   }
 
@@ -414,7 +410,7 @@ const actions = computed((): IViewerAction[] => {
       name: t('memories', 'Sidebar'),
       icon: markRaw(SidebarIcon),
       callback: toggleSidebar,
-      if: windowWidthIsMobile.value && !nativex.has(),
+      if: windowDims.isMobile && !nativex.has(),
     },
     {
       id: 'edit',
@@ -557,7 +553,7 @@ watch(allowClose, (val) => {
 });
 
 watch(windowDims, () => {
-  if (sheetOpen.value) sheetOpen.value = windowWidthIsMobile.value;
+  if (sheetOpen.value) sheetOpen.value = windowDims.isMobile;
   if (show.value) photoswipe.value?.updateSize();
 });
 
@@ -644,15 +640,15 @@ async function createBase(args: PhotoSwipeOptions) {
     getViewportSizeFn: () => {
       // Ignore the sidebar if mobile or fullscreen
       const isFullscreen = Boolean(document.fullscreenElement);
-      const use = sidebarOpen.value && !windowWidthIsMobile.value && !isFullscreen;
+      const use = sidebarOpen.value && !windowDims.isMobile && !isFullscreen;
 
       // Calculate the sidebar width to use and outer width
       const sidebarWidth = use ? _m.sidebar.getWidth() : 0;
       outerWidth.value = `calc(100vw - ${sidebarWidth}px)`;
 
       return {
-        x: windowWidth.value - sidebarWidth,
-        y: windowHeight.value,
+        x: windowDims.width - sidebarWidth,
+        y: windowDims.height,
       };
     },
     ...args,
@@ -987,7 +983,7 @@ async function openDynamic(anchorPhoto: IPhoto, timeline: TimelineState) {
     const thumb = thumbElem(e.slide.data?.photo);
     if (thumb && fullyOpened.value) {
       const rect = thumb.getBoundingClientRect();
-      if (rect.bottom < 50 || rect.top > _m.window.innerHeight - 50) {
+      if (rect.bottom < 50 || rect.top > windowDims.height - 50) {
         thumb.scrollIntoView({ block: 'center' });
       }
     }
@@ -1363,7 +1359,7 @@ function toggleSidebar() {
 
 /** Toggle photo info: bottom sheet on mobile, sidebar otherwise */
 function toggleInfo() {
-  if (windowWidthIsMobile.value) {
+  if (windowDims.isMobile) {
     setBottomSheet();
   } else {
     toggleSidebar();

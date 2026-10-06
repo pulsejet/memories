@@ -64,7 +64,7 @@ const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components
 const NcPopover = defineAsyncComponent(() => import('@nextcloud/vue/components/NcPopover'));
 
 import { config } from '@services/user-config';
-import { useWindowWidthIsMobile } from '@services/common';
+import { windowDims } from '@services/common';
 import { useRouteIsBase, useRouteIsSearch } from '@services/route-checker';
 import { t } from '@services/l10n';
 
@@ -98,7 +98,6 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const router = useRouter();
-const windowWidthIsMobile = useWindowWidthIsMobile();
 const routeIsBase = useRouteIsBase();
 const routeIsSearch = useRouteIsSearch();
 
@@ -151,7 +150,7 @@ const lensEnabled = computed((): boolean => {
 
 /** Live lens search hijacks typing only on desktop timeline/search views */
 const isLensLive = computed((): boolean => {
-  return lensEnabled.value && (routeIsBase.value || routeIsSearch.value) && !windowWidthIsMobile.value;
+  return lensEnabled.value && (routeIsBase.value || routeIsSearch.value) && !windowDims.isMobile;
 });
 
 /** Explicit lens entry for anywhere live search does not apply */

@@ -124,6 +124,7 @@ import { registerGlobals } from '../bootstrap';
 import router, { registerRouteCheckers } from '../router';
 
 import * as utils from '@services/utils';
+import { windowDims } from '@services/common';
 
 import type { IImageInfo, IPhoto } from '@typings';
 import type { IFolder, INode, ISidebarContext, ISidebarTab, IView } from '@nextcloud/files';
@@ -412,7 +413,7 @@ function handleOpen() {
   utils.bus.emit('memories:sidebar:opened', null);
 
   // Use fragment navigation only on mobile
-  if (_m.window.isMobile) {
+  if (windowDims.isMobile) {
     utils.fragment.push(utils.fragment.types.sidebar);
   }
 }

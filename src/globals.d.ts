@@ -68,12 +68,6 @@ declare global {
       clientId: string;
       clientIdPersistent: string;
     };
-
-    window: {
-      innerWidth: number; // cache
-      innerHeight: number; // cache
-      isMobile: boolean; // cache
-    };
   };
 
   // Typings for external libraries below

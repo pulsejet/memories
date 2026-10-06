@@ -83,7 +83,7 @@
         </NcActionRadio>
       </NcActions>
 
-      <NcActions :inline="windowWidthIsMobile ? 1 : 3">
+      <NcActions :inline="windowDims.isMobile ? 1 : 3">
         <NcActionButton
           :aria-label="t('memories', 'Create new album')"
           :title="t('memories', 'Create new album')"
@@ -158,7 +158,7 @@ import AlbumDeleteModal from '@components/modal/AlbumDeleteModal.vue';
 
 import { downloadWithHandle } from '@services/dav';
 import { API } from '@services/API';
-import { useWindowWidthIsMobile } from '@services/common';
+import { windowDims } from '@services/common';
 import { config, setConfig } from '@services/user-config';
 import * as utils from '@services/utils';
 import { constants as c } from '@services/utils';
@@ -182,7 +182,6 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const windowWidthIsMobile = useWindowWidthIsMobile();
 
 const createModal = useTemplateRef<InstanceType<typeof AlbumCreateModal>>('createModal');
 const deleteModal = useTemplateRef<InstanceType<typeof AlbumDeleteModal>>('deleteModal');

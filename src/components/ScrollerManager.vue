@@ -53,7 +53,7 @@ import { ref, computed, nextTick } from 'vue';
 
 import * as utils from '@services/utils';
 import * as lens from '@services/lens';
-import { useWindowWidthIsMobile } from '@services/common';
+import { windowDims } from '@services/common';
 
 import type { IRow, ITick } from '@typings';
 
@@ -79,8 +79,6 @@ const emit = defineEmits<{
   interactend: [];
   scroll: [event: { current: number; previous: number }];
 }>();
-
-const windowWidthIsMobile = useWindowWidthIsMobile();
 
 const scroller = ref<HTMLDivElement>();
 const cursorSt = ref<HTMLSpanElement>();
@@ -145,7 +143,7 @@ const height = computed(() => props.fullHeight - topPadding.value);
 
 /** Position of hover cursor */
 const hoverCursorTransform = computed(() => {
-  const mob = windowWidthIsMobile.value;
+  const mob = windowDims.isMobile;
   const min = topPadding.value + (mob ? 2 : 0); // padding for curvature
   const max = props.fullHeight - (mob ? 6 : 0); // padding for shadow
   const val = hoverCursorY.value;
@@ -217,7 +215,7 @@ function updateFromRecyclerScroll() {
 
   // Move hover cursor to same position unless hovering
   // Regardless, we need this call because the internal mapping might have changed
-  if (!windowWidthIsMobile.value && scroller.value?.matches(':hover')) {
+  if (!windowDims.isMobile && scroller.value?.matches(':hover')) {
     moveHoverCursor(hoverCursorY.value);
   } else {
     moveHoverCursor(rtop);
@@ -369,7 +367,7 @@ function computeVisibleTicks() {
   // This is not as bad as it looks, it's actually 12*O(n)
   // because there are only 12 months in a year
   const fontSizePx = parseFloat(getComputedStyle(cursorSt.value!).fontSize);
-  const minGap = fontSizePx + (_m.window.innerWidth <= 768 ? 5 : 2);
+  const minGap = fontSizePx + (windowDims.isMobile ? 5 : 2);
   let prevShow = -9999;
   for (const [idx, tick] of ticks.value.entries()) {
     // Conservative
@@ -420,7 +418,7 @@ function computeVisibleTicks() {
 function setTicksTop(total: number) {
   // On mobile, move the ticks up by half the height of the cursor
   // so that the cursor is centered on the tick instead (on desktop, it's at the bottom)
-  const displayPadding = windowWidthIsMobile.value ? -MOBILE_CURSOR_HH : 0;
+  const displayPadding = windowDims.isMobile ? -MOBILE_CURSOR_HH : 0;
 
   // Set topF (float) and top (rounded) values
   for (const tick of ticks.value) {

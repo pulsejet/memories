@@ -38,6 +38,7 @@ import { useRouter } from 'vue-router';
 
 import * as utils from '@services/utils';
 import * as nativex from '@native';
+import { isPartiallyInViewport } from '@services/common';
 import { useRouteIsBase } from '@services/route-checker';
 
 import ChevronRightIcon from 'vue-material-design-icons/ChevronRight.vue';
@@ -117,7 +118,7 @@ async function jumpToTimeline() {
     // Check if the image is alraedy in the viewport, and scroll only if not.
     // This is to avoid the annoying "jump" when closing the viewer.
     const photoEl = document.querySelector<HTMLDivElement>(`.p-outer--${props.photo?.key}`);
-    if (!photoEl || !utils.isPartiallyInViewport(photoEl)) {
+    if (!photoEl || !isPartiallyInViewport(photoEl)) {
       await router.replace(dayTo.value);
     }
     return;

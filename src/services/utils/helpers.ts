@@ -277,16 +277,3 @@ export function onDOMLoaded(callback: () => void) {
   }
 }
 
-/**
- * Check if a element is at least partially in the viewport.
- * @param el Element to check
- */
-export function isPartiallyInViewport(el: HTMLElement): boolean {
-  const boundingRect = el.getBoundingClientRect();
-  return (
-    boundingRect.top < _m.window.innerHeight &&
-    boundingRect.bottom > 0 &&
-    boundingRect.left < _m.window.innerWidth &&
-    boundingRect.right > 0
-  );
-}

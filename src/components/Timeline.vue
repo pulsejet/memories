@@ -121,6 +121,7 @@ import { showError } from '@nextcloud/dialogs';
 import { getLayout } from '@services/layout';
 
 import { config } from '@services/user-config';
+import { windowDims } from '@services/common';
 import {
   useRouteIsAlbumShare,
   useRouteIsAlbums,
@@ -396,7 +397,7 @@ function isMobileLayout() {
 }
 
 function allowBreakout() {
-  return _m.window.innerWidth <= 600 && !config.square_thumbs;
+  return windowDims.width <= 600 && !config.square_thumbs;
 }
 
 /** Create new state */
