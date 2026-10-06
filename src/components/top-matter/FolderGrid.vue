@@ -6,30 +6,18 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-import UserConfig from '@mixins/UserConfig';
+<script setup lang="ts">
 import Folder from '@components/frame/Folder.vue';
 
 import type { IFolder } from '@typings';
 
-export default defineComponent({
+defineOptions({
   name: 'ClusterGrid',
-
-  components: {
-    Folder,
-  },
-
-  mixins: [UserConfig],
-
-  props: {
-    items: {
-      type: Array<IFolder>,
-      required: true,
-    },
-  },
 });
+
+defineProps<{
+  items: Array<IFolder>;
+}>();
 </script>
 
 <style lang="scss" scoped>
