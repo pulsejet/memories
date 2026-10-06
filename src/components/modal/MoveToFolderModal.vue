@@ -10,114 +10,102 @@
   </Modal>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { ref, useTemplateRef, defineAsyncComponent } from 'vue';
 
 import { showInfo } from '@nextcloud/dialogs';
 
 const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 
-import UserConfig from '@mixins/UserConfig';
-
 import Modal from './Modal.vue';
-import ModalMixin from './ModalMixin';
 
+import { useModal } from '@services/modal';
+import { t, n } from '@services/l10n';
+import { useUserConfig } from '@services/user-config';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 
 import type { IPhoto } from '@typings';
 
-export default defineComponent({
+defineOptions({
   name: 'MoveToFolderModal',
-  components: {
-    NcProgressBar,
-    Modal,
-  },
-
-  mixins: [UserConfig, ModalMixin],
-
-  data: () => ({
-    photos: [] as IPhoto[],
-    photosDone: 0,
-  }),
-
-  created() {
-    console.assert(!_m.modals.moveToFolder, 'MoveToFolderModal created twice');
-    _m.modals.moveToFolder = this.open;
-  },
-
-  methods: {
-    open(photos: IPhoto[]) {
-      this.photosDone = 0;
-      this.show = false;
-      this.photos = photos;
-      this.chooseFolderPath();
-    },
-
-    cleanup() {
-      this.show = false;
-      this.photos = [];
-    },
-
-    async chooseFolderPath() {
-      enum Mode {
-        Move = 1,
-        Copy = 2,
-        Organise = 3,
-      }
-      let mode: Mode = Mode.Move as Mode;
-      let destination = await utils.chooseNcFolder(
-        this.t('memories', 'Choose a folder'),
-        this.config.folders_path,
-        () => [
-          {
-            label: 'Move and organise',
-            callback: () => void (mode = Mode.Organise),
-          },
-          {
-            label: 'Copy',
-            callback: () => void (mode = Mode.Copy),
-          },
-          {
-            label: 'Move',
-            type: 'primary',
-            callback: () => void (mode = Mode.Move),
-          },
-        ],
-      );
-
-      // Fails if the target exists, same behavior with Nextcloud files implementation.
-      let gen = (() => {
-        switch (mode) {
-          case Mode.Organise: {
-            return dav.movePhotosByDate(this.photos, destination, false);
-          }
-          case Mode.Copy: {
-            return dav.copyPhotos(this.photos, destination, false);
-          }
-          case Mode.Move: {
-            return dav.movePhotos(this.photos, destination, false);
-          }
-        }
-      })();
-
-      this.show = true;
-
-      for await (const fids of gen) {
-        this.photosDone += fids.filter(Boolean).length;
-        utils.bus.emit('memories:timeline:soft-refresh', null);
-      }
-
-      const n = this.photosDone;
-      if (mode === Mode.Copy) {
-        showInfo(this.n('memories', '{n} item copied to folder', '{n} items copied to folder', n, { n }));
-      } else {
-        showInfo(this.n('memories', '{n} item moved to folder', '{n} items moved to folder', n, { n }));
-      }
-      this.close();
-    },
-  },
 });
+
+const modal = useTemplateRef('modal');
+const { show, close } = useModal(modal);
+const { config } = useUserConfig();
+
+const photos = ref<IPhoto[]>([]);
+const photosDone = ref(0);
+
+console.assert(!_m.modals.moveToFolder, 'MoveToFolderModal created twice');
+_m.modals.moveToFolder = open;
+
+function open(photosIn: IPhoto[]) {
+  photosDone.value = 0;
+  show.value = false;
+  photos.value = photosIn;
+  chooseFolderPath();
+}
+
+function cleanup() {
+  show.value = false;
+  photos.value = [];
+}
+
+async function chooseFolderPath() {
+  enum Mode {
+    Move = 1,
+    Copy = 2,
+    Organise = 3,
+  }
+  let mode: Mode = Mode.Move as Mode;
+  let destination = await utils.chooseNcFolder(t('memories', 'Choose a folder'), config.folders_path, () => [
+    {
+      label: 'Move and organise',
+      callback: () => void (mode = Mode.Organise),
+    },
+    {
+      label: 'Copy',
+      callback: () => void (mode = Mode.Copy),
+    },
+    {
+      label: 'Move',
+      type: 'primary',
+      callback: () => void (mode = Mode.Move),
+    },
+  ]);
+
+  // Fails if the target exists, same behavior with Nextcloud files implementation.
+  let gen = (() => {
+    switch (mode) {
+      case Mode.Organise: {
+        return dav.movePhotosByDate(photos.value, destination, false);
+      }
+      case Mode.Copy: {
+        return dav.copyPhotos(photos.value, destination, false);
+      }
+      case Mode.Move: {
+        return dav.movePhotos(photos.value, destination, false);
+      }
+    }
+  })();
+
+  show.value = true;
+
+  for await (const fids of gen) {
+    photosDone.value += fids.filter(Boolean).length;
+    utils.bus.emit('memories:timeline:soft-refresh', null);
+  }
+
+  const nPhotos = photosDone.value;
+  if (mode === Mode.Copy) {
+    showInfo(n('memories', '{n} item copied to folder', '{n} items copied to folder', nPhotos, { n: nPhotos }));
+  } else {
+    showInfo(n('memories', '{n} item moved to folder', '{n} items moved to folder', nPhotos, { n: nPhotos }));
+  }
+  close();
+}
 </script>
 
 <style lang="scss" scoped>
