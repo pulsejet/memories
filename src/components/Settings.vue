@@ -9,13 +9,30 @@
       @update:open="onClose"
     >
       <NcAppSettingsSection id="general-settings" :name="names.general">
-        <NcTextField
-          :label="t('memories', 'Timeline Path')"
-          :label-visible="true"
-          v-model="config.timeline_path"
-          @click="chooseTimelinePath"
-          readonly
-        />
+        <div class="radio-group timeline-paths">
+          <div class="title">{{ t('memories', 'Timeline Path') }}</div>
+          <div class="chips">
+            <NcChip
+              v-for="path in timelinePaths"
+              :key="path"
+              :text="path"
+              :aria-label-close="t('memories', 'Remove {path} from timeline', { path })"
+              @close="removeTimelinePath(path)"
+            />
+            <NcChip
+              class="add-chip"
+              :text="t('memories', 'Add path')"
+              :aria-label="t('memories', 'Add a folder to the timeline')"
+              variant="tertiary"
+              no-close
+              role="button"
+              tabindex="0"
+              @click="addTimelinePath"
+              @keydown.enter="addTimelinePath"
+              @keydown.space.prevent="addTimelinePath"
+            />
+          </div>
+        </div>
 
         <NcCheckboxRadioSwitch v-model="config.square_thumbs" @update:model-value="updateSquareThumbs" type="switch">
           {{ t('memories', 'Square grid mode') }}
@@ -241,8 +258,6 @@
         />
       </NcAppSettingsSection>
     </NcAppSettingsDialog>
-
-    <MultiPathSelectionModal ref="multiPathModal" :title="pathSelTitle" @close="saveTimelinePath" />
   </div>
 </template>
 
@@ -260,14 +275,14 @@ import { translate as t } from '@services/l10n';
 import staticConfig from '@services/static-config';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
+import { showError } from '@nextcloud/dialogs';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 const NcAppSettingsDialog = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAppSettingsDialog'));
 const NcAppSettingsSection = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAppSettingsSection'));
 const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
-
-import MultiPathSelectionModal from '@components/modal/MultiPathSelectionModal.vue';
+const NcChip = defineAsyncComponent(() => import('@nextcloud/vue/components/NcChip'));
 
 import type { IConfig, IMapTileServer } from '@typings';
 
@@ -280,7 +295,7 @@ export default defineComponent({
     NcAppSettingsDialog,
     NcAppSettingsSection,
     NcCheckboxRadioSwitch,
-    MultiPathSelectionModal,
+    NcChip,
   },
 
   mixins: [UserConfig],
@@ -311,8 +326,8 @@ export default defineComponent({
   },
 
   computed: {
-    pathSelTitle(): string {
-      return this.t('memories', 'Choose Timeline Paths');
+    timelinePaths(): string[] {
+      return (this.config.timeline_path || '').split(';').filter((p) => p && !p.startsWith('_'));
     },
 
     isNative(): boolean {
@@ -352,24 +367,33 @@ export default defineComponent({
   },
 
   methods: {
-    refs() {
-      return this.$refs as {
-        multiPathModal: InstanceType<typeof MultiPathSelectionModal>;
-      };
-    },
-
     onClose() {
       this.$emit('update:open', false);
     },
 
     // Paths settings
-    async chooseTimelinePath() {
-      this.refs().multiPathModal.open(this.config.timeline_path.split(';'));
+    async addTimelinePath() {
+      let folder: string;
+      try {
+        folder = await utils.chooseNcFolder(this.t('memories', 'Add a root to your timeline'));
+      } catch {
+        return;
+      }
+
+      if (!folder || this.timelinePaths.includes(folder)) return;
+      await this.saveTimelinePaths([...this.timelinePaths, folder]);
     },
 
-    async saveTimelinePath(paths: string[]) {
-      if (!paths || !paths.length) return;
+    async removeTimelinePath(path: string) {
+      const paths = this.timelinePaths.filter((p) => p !== path);
+      if (!paths.length) {
+        showError(this.t('memories', 'At least one timeline path is required'));
+        return;
+      }
+      await this.saveTimelinePaths(paths);
+    },
 
+    async saveTimelinePaths(paths: string[]) {
       const newPath = paths.join(';');
       if (newPath !== this.config.timeline_path) {
         this.config.timeline_path = newPath;
@@ -549,6 +573,35 @@ export default defineComponent({
       }
       .input-field {
         width: calc(100% - 22px);
+      }
+    }
+  }
+
+  .timeline-paths {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    .title {
+      font-weight: bold;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+
+      :deep(.nc-chip) {
+        padding: 3px;
+        height: auto;
+      }
+      :deep(button.nc-chip__actions) {
+        height: var(--chip-size);
+      }
+      :deep(.add-chip),
+      :deep(.add-chip *) {
+        cursor: pointer;
       }
     }
   }
