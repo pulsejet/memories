@@ -99,8 +99,8 @@
   </NcAppSidebar>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineCustomElement } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount, nextTick, useTemplateRef, defineCustomElement } from 'vue';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
@@ -135,310 +135,287 @@ import InfoSvg from '@assets/info.svg';
 const SIDEBAR_TAB_ID = 'memories-metadata';
 const SIDEBAR_TAG_NAME = 'memories-files-sidebar-tab';
 
-registerSidebarTab({
-  id: SIDEBAR_TAB_ID,
-  order: 50,
-  displayName: t('memories', 'Info'),
-  iconSvgInline: window.atob(InfoSvg.split(',')[1]), // base64 to svg
-  enabled: () => true,
-  tagName: SIDEBAR_TAG_NAME,
-  async onInit() {
-    if (window.customElements.get(SIDEBAR_TAG_NAME)) {
-      // element already defined
-      return;
-    }
-    const { default: MetadataTab } = await import('@components/Metadata.vue');
-    window.customElements.define(
-      SIDEBAR_TAG_NAME,
-      defineCustomElement(MetadataTab, {
-        configureApp: (app) => {
-          registerGlobals(app);
-          registerRouteCheckers(app);
-          app.use(router);
-        },
-        shadowRoot: false,
-      }),
-    );
-  },
-});
-
-export default defineComponent({
-  name: 'Sidebar',
-  components: {
-    Metadata,
-    NcActions,
-    NcActionButton,
-    NcAppSidebar,
-    NcAppSidebarTab,
-    CloseIcon,
-    XLoadingIcon,
-    SidebarSubtitle,
-  },
-
-  data: () => ({
-    nativeOpen: false,
-    reducedOpen: false,
-    info: null as null | IImageInfo,
-    lastKnownWidth: 0,
-    pendingTab: null as string | null,
-    nativeTab: null as ISidebarTab | null,
-    nativeNode: null as INode | null,
-    nativeFolder: null as IFolder | null,
-    nativeView: null as IView | null,
-    readyTabs: new Set<string>(),
-    utils: Object.freeze(utils),
-  }),
-
-  computed: {
-    /** Tabs from the global registry enabled for the current native node */
-    availableTabs(): ISidebarTab[] {
-      if (!this.nativeNode || !this.nativeFolder || !this.nativeView) return [];
-      const context: ISidebarContext = {
-        node: this.nativeNode,
-        folder: this.nativeFolder,
-        view: this.nativeView,
-      };
-      return getSidebarTabs()
-        .filter((tab) => {
-          try {
-            return !tab.enabled || tab.enabled(context);
-          } catch (e) {
-            return false;
-          }
-        })
-        .sort((a, b) => a.order - b.order);
-    },
-  },
-
-  mounted() {
-    utils.bus.on('memories:fragment:pop:sidebar', this.close);
-
-    _m.sidebar = {
-      open: this.open.bind(this),
-      close: this.close.bind(this),
-      isOpen: this.isOpen.bind(this),
-      setTab: this.setTab.bind(this),
-      invalidateUnless: this.invalidateUnless.bind(this),
-      getWidth: this.getWidth.bind(this),
-    };
-
-    // Remove after https://github.com/nextcloud/server/pull/51077
-    registerDavProperty('nc:share-attributes');
-  },
-
-  beforeUnmount() {
-    utils.bus.off('memories:fragment:pop:sidebar', this.close);
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        metadata?: InstanceType<typeof Metadata>;
-      };
-    },
-
-    async open(photo: IPhoto | number, filename?: string, useNative = false) {
-      if ((!photo || useNative) && filename && (await this.openNative(photo, filename))) {
+if (!getSidebarTabs().some((tab) => tab.id === SIDEBAR_TAB_ID)) {
+  registerSidebarTab({
+    id: SIDEBAR_TAB_ID,
+    order: 50,
+    displayName: t('memories', 'Info'),
+    iconSvgInline: window.atob(InfoSvg.split(',')[1]), // base64 to svg
+    enabled: () => true,
+    tagName: SIDEBAR_TAG_NAME,
+    async onInit() {
+      if (window.customElements.get(SIDEBAR_TAG_NAME)) {
+        // element already defined
         return;
       }
-
-      if (!photo) return;
-
-      // Open reduced sidebar
-      this.nativeOpen = false;
-      this.nativeTab = null;
-      this.reducedOpen = true;
-      await this.$nextTick();
-
-      // Update metadata compoenent
-      this.info = (await this.refs().metadata?.update(photo)) ?? null;
-      if (!this.info) return; // failure or state change
-      this.handleOpen();
+      const { default: MetadataTab } = await import('@components/Metadata.vue');
+      window.customElements.define(
+        SIDEBAR_TAG_NAME,
+        defineCustomElement(MetadataTab, {
+          configureApp: (app) => {
+            registerGlobals(app);
+            registerRouteCheckers(app);
+            app.use(router);
+          },
+          shadowRoot: false,
+        }),
+      );
     },
+  });
+}
 
-    /**
-     * Show a native sidebar tab for the given file.
-     * @returns true if a native tab was shown
-     */
-    async openNative(photo: IPhoto | number, filename: string): Promise<boolean> {
-      // Resolve the requested tab first to avoid a WebDAV roundtrip
-      // when it isn't registered (falls back to reduced below).
-      const wanted = this.pendingTab ?? this.nativeTab?.id;
-      if (wanted && !getSidebarTabs().some((tab) => tab.id === wanted)) {
-        console.warn(`Not showing native sidebar tab: '${wanted}' is not registered`);
-        this.pendingTab = null;
+const metadataRef = useTemplateRef<InstanceType<typeof Metadata>>('metadata');
+
+const nativeOpen = ref(false);
+const reducedOpen = ref(false);
+const info = ref<null | IImageInfo>(null);
+const lastKnownWidth = ref(0);
+const pendingTab = ref<string | null>(null);
+const nativeTab = ref<ISidebarTab | null>(null);
+const nativeNode = ref<INode | null>(null);
+const nativeFolder = ref<IFolder | null>(null);
+const nativeView = ref<IView | null>(null);
+const readyTabs = ref(new Set<string>());
+
+/** Tabs from the global registry enabled for the current native node */
+const availableTabs = computed((): ISidebarTab[] => {
+  if (!nativeNode.value || !nativeFolder.value || !nativeView.value) return [];
+  const context: ISidebarContext = {
+    node: nativeNode.value,
+    folder: nativeFolder.value,
+    view: nativeView.value,
+  };
+  return getSidebarTabs()
+    .filter((tab) => {
+      try {
+        return !tab.enabled || tab.enabled(context);
+      } catch (e) {
         return false;
       }
-
-      const fileid = typeof photo === 'number' ? photo : photo?.fileid;
-      const photoObj = typeof photo === 'object' ? photo : undefined;
-
-      // Resolve a full node via WebDAV so tabs get permissions, mime, etc.
-      let node: INode | null = null;
-      try {
-        const res = (await getClient().stat(`${getRootPath()}${filename}`, {
-          data: getDefaultPropfind(),
-          details: true,
-        })) as ResponseDataDetailed<FileStat>;
-        node = resultToNode(res.data, getRootPath(), getRemoteURL());
-      } catch (e) {
-        // Fall back to a minimal node if the fileid is known
-        if (!fileid) {
-          console.warn('Not showing native sidebar tab: cannot resolve', filename);
-          return false;
-        }
-        node = new File({
-          source: `${getRemoteURL()}${getRootPath()}${filename}`,
-          id: fileid,
-          root: getRootPath(),
-          owner: utils.uid,
-          mime: photoObj?.mimetype,
-          displayname: photoObj?.basename,
-        });
-      }
-
-      const dir = filename.slice(0, filename.lastIndexOf('/')) || '/';
-      const folder: IFolder = new Folder({
-        source: `${getRemoteURL()}${getRootPath()}${dir}`,
-        root: getRootPath(),
-        owner: node.owner,
-      });
-      const view: IView = {
-        id: 'memories',
-        name: 'Memories',
-        icon: '',
-        getContents: async () => ({ contents: [], folder }),
-      };
-
-      this.nativeNode = node;
-      this.nativeFolder = folder;
-      this.nativeView = view;
-
-      const tab =
-        this.availableTabs.find((t) => t.id === wanted) ??
-        this.availableTabs.find((t) => t.id === this.nativeTab?.id) ??
-        this.availableTabs[0];
-      if (!tab) {
-        console.warn('Not showing native sidebar: no enabled tabs for', filename);
-        this.nativeNode = null;
-        this.nativeFolder = null;
-        this.nativeView = null;
-        return false;
-      }
-
-      this.nativeTab = tab;
-      this.pendingTab = null;
-      this.info = {
-        basename: node.displayname,
-        size: node.size ?? 0,
-        mtime: (node.mtime?.getTime() ?? 0) / 1000,
-      } as IImageInfo;
-
-      this.reducedOpen = false;
-      this.nativeOpen = true;
-      void this.initNativeTab(tab);
-      // Wait for the shell to render so getWidth() measures correctly
-      // and the viewer resizes instead of being overlaid.
-      await this.$nextTick();
-      this.handleOpen();
-      return true;
-    },
-
-    /** Lazily initialize a tab's web component, mirroring the Files app */
-    async initNativeTab(tab: ISidebarTab) {
-      try {
-        if (!window.customElements.get(tab.tagName)) {
-          await tab.onInit?.();
-          await window.customElements.whenDefined(tab.tagName);
-        }
-        if (this.nativeTab?.tagName === tab.tagName) {
-          this.readyTabs.add(tab.tagName);
-        }
-      } catch (e) {
-        if (window.customElements.get(tab.tagName) && this.nativeTab?.tagName === tab.tagName) {
-          this.readyTabs.add(tab.tagName);
-        } else {
-          console.warn(`Failed to initialize native sidebar tab '${tab.id}': `, e);
-        }
-      }
-    },
-
-    async close() {
-      if (this.nativeOpen || this.nativeTab) {
-        this.nativeOpen = false;
-        this.nativeTab = null;
-        this.nativeNode = null;
-        this.nativeFolder = null;
-        this.nativeView = null;
-        this.pendingTab = null;
-        // Wait for teardown so getWidth() no longer measures the shell.
-        await this.$nextTick();
-      }
-      if (this.reducedOpen) {
-        this.reducedOpen = false;
-        await this.$nextTick();
-      }
-      this.handleClose();
-    },
-
-    isOpen() {
-      return this.reducedOpen || this.nativeOpen;
-    },
-
-    setTab(tab: string) {
-      this.pendingTab = tab;
-      if (this.nativeOpen) {
-        const found = this.availableTabs.find((t) => t.id === tab);
-        if (found) {
-          this.nativeTab = found;
-          void this.initNativeTab(found);
-        } else {
-          console.warn(`Not showing native sidebar tab: '${tab}' is not available`);
-        }
-      }
-    },
-
-    invalidateUnless(fileid: number) {
-      this.refs().metadata?.invalidateUnless(fileid);
-    },
-
-    getWidth() {
-      const sidebar = document.getElementById('app-sidebar-vue') ?? document.getElementById('app-sidebar-native');
-      this.lastKnownWidth = sidebar?.offsetWidth || this.lastKnownWidth;
-      return (this.lastKnownWidth || 2) - 2;
-    },
-
-    handleClose() {
-      utils.bus.emit('memories:sidebar:closed', null);
-      utils.fragment.pop(utils.fragment.types.sidebar);
-    },
-
-    handleOpen() {
-      // Stop sidebar typing from leaking outside
-      const sidebar = document.getElementById('app-sidebar-vue') ?? document.getElementById('app-sidebar-native');
-      sidebar?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === 'Tab') {
-          e.stopPropagation();
-          return;
-        }
-
-        const element = e.target as HTMLElement;
-        if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable) {
-          e.stopPropagation();
-          return;
-        }
-      });
-
-      // Emit event
-      utils.bus.emit('memories:sidebar:opened', null);
-
-      // Use fragment navigation only on mobile
-      if (_m.window.isMobile) {
-        utils.fragment.push(utils.fragment.types.sidebar);
-      }
-    },
-  },
+    })
+    .sort((a, b) => a.order - b.order);
 });
+
+onMounted(() => {
+  utils.bus.on('memories:fragment:pop:sidebar', close);
+
+  _m.sidebar = {
+    open,
+    close,
+    isOpen,
+    setTab,
+    invalidateUnless,
+    getWidth,
+  };
+
+  // Remove after https://github.com/nextcloud/server/pull/51077
+  registerDavProperty('nc:share-attributes');
+});
+
+onBeforeUnmount(() => {
+  utils.bus.off('memories:fragment:pop:sidebar', close);
+});
+
+async function open(photo: IPhoto | number, filename?: string, useNative = false) {
+  if ((!photo || useNative) && filename && (await openNative(photo, filename))) {
+    return;
+  }
+
+  if (!photo) return;
+
+  // Open reduced sidebar
+  nativeOpen.value = false;
+  nativeTab.value = null;
+  reducedOpen.value = true;
+  await nextTick();
+
+  // Update metadata compoenent
+  info.value = (await metadataRef.value?.update(photo)) ?? null;
+  if (!info.value) return; // failure or state change
+  handleOpen();
+}
+
+/**
+ * Show a native sidebar tab for the given file.
+ * @returns true if a native tab was shown
+ */
+async function openNative(photo: IPhoto | number, filename: string): Promise<boolean> {
+  // Resolve the requested tab first to avoid a WebDAV roundtrip
+  // when it isn't registered (falls back to reduced below).
+  const wanted = pendingTab.value ?? nativeTab.value?.id;
+  if (wanted && !getSidebarTabs().some((tab) => tab.id === wanted)) {
+    console.warn(`Not showing native sidebar tab: '${wanted}' is not registered`);
+    pendingTab.value = null;
+    return false;
+  }
+
+  const fileid = typeof photo === 'number' ? photo : photo?.fileid;
+  const photoObj = typeof photo === 'object' ? photo : undefined;
+
+  // Resolve a full node via WebDAV so tabs get permissions, mime, etc.
+  let node: INode | null = null;
+  try {
+    const res = (await getClient().stat(`${getRootPath()}${filename}`, {
+      data: getDefaultPropfind(),
+      details: true,
+    })) as ResponseDataDetailed<FileStat>;
+    node = resultToNode(res.data, getRootPath(), getRemoteURL());
+  } catch (e) {
+    // Fall back to a minimal node if the fileid is known
+    if (!fileid) {
+      console.warn('Not showing native sidebar tab: cannot resolve', filename);
+      return false;
+    }
+    node = new File({
+      source: `${getRemoteURL()}${getRootPath()}${filename}`,
+      id: fileid,
+      root: getRootPath(),
+      owner: utils.uid,
+      mime: photoObj?.mimetype,
+      displayname: photoObj?.basename,
+    });
+  }
+
+  const dir = filename.slice(0, filename.lastIndexOf('/')) || '/';
+  const folder: IFolder = new Folder({
+    source: `${getRemoteURL()}${getRootPath()}${dir}`,
+    root: getRootPath(),
+    owner: node.owner,
+  });
+  const view: IView = {
+    id: 'memories',
+    name: 'Memories',
+    icon: '',
+    getContents: async () => ({ contents: [], folder }),
+  };
+
+  nativeNode.value = node;
+  nativeFolder.value = folder;
+  nativeView.value = view;
+
+  const tab =
+    availableTabs.value.find((t) => t.id === wanted) ??
+    availableTabs.value.find((t) => t.id === nativeTab.value?.id) ??
+    availableTabs.value[0];
+  if (!tab) {
+    console.warn('Not showing native sidebar: no enabled tabs for', filename);
+    nativeNode.value = null;
+    nativeFolder.value = null;
+    nativeView.value = null;
+    return false;
+  }
+
+  nativeTab.value = tab;
+  pendingTab.value = null;
+  info.value = {
+    basename: node.displayname,
+    size: node.size ?? 0,
+    mtime: (node.mtime?.getTime() ?? 0) / 1000,
+  } as IImageInfo;
+
+  reducedOpen.value = false;
+  nativeOpen.value = true;
+  void initNativeTab(tab);
+  // Wait for the shell to render so getWidth() measures correctly
+  // and the viewer resizes instead of being overlaid.
+  await nextTick();
+  handleOpen();
+  return true;
+}
+
+/** Lazily initialize a tab's web component, mirroring the Files app */
+async function initNativeTab(tab: ISidebarTab) {
+  try {
+    if (!window.customElements.get(tab.tagName)) {
+      await tab.onInit?.();
+      await window.customElements.whenDefined(tab.tagName);
+    }
+    if (nativeTab.value?.tagName === tab.tagName) {
+      readyTabs.value.add(tab.tagName);
+    }
+  } catch (e) {
+    if (window.customElements.get(tab.tagName) && nativeTab.value?.tagName === tab.tagName) {
+      readyTabs.value.add(tab.tagName);
+    } else {
+      console.warn(`Failed to initialize native sidebar tab '${tab.id}': `, e);
+    }
+  }
+}
+
+async function close() {
+  if (nativeOpen.value || nativeTab.value) {
+    nativeOpen.value = false;
+    nativeTab.value = null;
+    nativeNode.value = null;
+    nativeFolder.value = null;
+    nativeView.value = null;
+    pendingTab.value = null;
+    // Wait for teardown so getWidth() no longer measures the shell.
+    await nextTick();
+  }
+  if (reducedOpen.value) {
+    reducedOpen.value = false;
+    await nextTick();
+  }
+  handleClose();
+}
+
+function isOpen() {
+  return reducedOpen.value || nativeOpen.value;
+}
+
+function setTab(tab: string) {
+  pendingTab.value = tab;
+  if (nativeOpen.value) {
+    const found = availableTabs.value.find((t) => t.id === tab);
+    if (found) {
+      nativeTab.value = found;
+      void initNativeTab(found);
+    } else {
+      console.warn(`Not showing native sidebar tab: '${tab}' is not available`);
+    }
+  }
+}
+
+function invalidateUnless(fileid: number) {
+  metadataRef.value?.invalidateUnless(fileid);
+}
+
+function getWidth() {
+  const sidebar = document.getElementById('app-sidebar-vue') ?? document.getElementById('app-sidebar-native');
+  lastKnownWidth.value = sidebar?.offsetWidth || lastKnownWidth.value;
+  return (lastKnownWidth.value || 2) - 2;
+}
+
+function handleClose() {
+  utils.bus.emit('memories:sidebar:closed', null);
+  utils.fragment.pop(utils.fragment.types.sidebar);
+}
+
+function handleOpen() {
+  // Stop sidebar typing from leaking outside
+  const sidebar = document.getElementById('app-sidebar-vue') ?? document.getElementById('app-sidebar-native');
+  sidebar?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.stopPropagation();
+      return;
+    }
+
+    const element = e.target as HTMLElement;
+    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable) {
+      e.stopPropagation();
+      return;
+    }
+  });
+
+  // Emit event
+  utils.bus.emit('memories:sidebar:opened', null);
+
+  // Use fragment navigation only on mobile
+  if (_m.window.isMobile) {
+    utils.fragment.push(utils.fragment.types.sidebar);
+  }
+}
 </script>
 
 <style scoped lang="scss">

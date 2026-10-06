@@ -5,33 +5,21 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script setup lang="ts">
 import * as utils from '@services/utils';
 
-export default defineComponent({
-  name: 'SidebarSubtitle',
-
-  props: {
+withDefaults(
+  defineProps<{
     /** File size in bytes, 0 hides the field */
-    size: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
+    size?: number;
     /** Modification time as epoch seconds, 0 hides the field */
-    mtime: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
+    mtime?: number;
+  }>(),
+  {
+    size: 0,
+    mtime: 0,
   },
-
-  data: () => ({
-    utils: Object.freeze(utils),
-  }),
-});
+);
 </script>
 
 <style lang="scss" scoped>
