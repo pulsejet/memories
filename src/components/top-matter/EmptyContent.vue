@@ -10,11 +10,13 @@
   </NcEmptyContent>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent';
 
+import { useRouteIsAlbums, useRouteIsArchive, useRouteIsMap, useRouteIsPeople } from '@services/route-checker';
 import * as strings from '@services/strings';
 
 import PeopleIcon from 'vue-material-design-icons/AccountMultiple.vue';
@@ -23,23 +25,17 @@ import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import MapIcon from 'vue-material-design-icons/Map.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'EmptyContent',
+});
 
-  components: {
-    NcEmptyContent,
+const route = useRoute();
+const routeIsPeople = useRouteIsPeople();
+const routeIsArchive = useRouteIsArchive();
+const routeIsAlbums = useRouteIsAlbums();
+const routeIsMap = useRouteIsMap();
 
-    PeopleIcon,
-    ArchiveIcon,
-    ImageMultipleIcon,
-    AlbumIcon,
-    MapIcon,
-  },
-
-  computed: {
-    emptyViewDescription(): string {
-      return strings.emptyDescription(this.$route.name?.toString() ?? '');
-    },
-  },
+const emptyViewDescription = computed((): string => {
+  return strings.emptyDescription(route.name?.toString() ?? '');
 });
 </script>
