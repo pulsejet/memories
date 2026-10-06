@@ -404,29 +404,6 @@ export const FOR_MOVE_DATASET: IDatasetMap = {
 };
 
 /**
- * Sphere viewer (734). A partial GPano panorama, 150 by 79 degrees, that
- * lies wholly away from where the viewer starts looking (yaw 0, pitch 0) and
- * is larger than the default field of view. It also has a compass heading,
- * which turns the sphere.
- */
-export const FOR_SPHERE_DATASET: IDatasetMap = {
-  'primary/for-sphere/partial_01.jpg': {
-    size: [1707, 896],
-    exif: {
-      DateTimeOriginal: '2023:07:14 10:00:00+00:00',
-      'XMP-GPano:ProjectionType': 'equirectangular',
-      'XMP-GPano:FullPanoWidthPixels': 4096,
-      'XMP-GPano:FullPanoHeightPixels': 2048,
-      'XMP-GPano:CroppedAreaImageWidthPixels': 1707,
-      'XMP-GPano:CroppedAreaImageHeightPixels': 896,
-      'XMP-GPano:CroppedAreaLeftPixels': 2304,
-      'XMP-GPano:CroppedAreaTopPixels': 64,
-      'XMP-GPano:PoseHeadingDegrees': 90,
-    },
-  },
-};
-
-/**
  * Photos under blocklisted folder names and .nomedia/.nomemories folders.
  * These must never be indexed (see 103-excluded.spec.ts). Kept outside the
  * timeline path so golden day measurements are unaffected.
@@ -1733,7 +1710,6 @@ export const DATASET: IDatasetMap = {
   ...FOR_UPLOAD_DATASET,
   ...FOR_DELETE_DATASET,
   ...FOR_MOVE_DATASET,
-  ...FOR_SPHERE_DATASET,
   ...FOR_ONTHISDAY_DATASET,
   ...FOR_EXCLUDED_DATASET,
   ...GEO_DATASET,
