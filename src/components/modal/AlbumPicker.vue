@@ -74,8 +74,17 @@
   />
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType, defineAsyncComponent, markRaw } from 'vue';
+<script setup lang="ts">
+import {
+  computed,
+  ref,
+  useTemplateRef,
+  onMounted,
+  nextTick,
+  markRaw,
+  getCurrentInstance,
+  defineAsyncComponent,
+} from 'vue';
 
 import Fuse from 'fuse.js';
 
@@ -95,168 +104,136 @@ import PlusIcon from 'vue-material-design-icons/Plus.vue';
 import CheckIcon from 'vue-material-design-icons/Check.vue';
 import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'AlbumPicker',
-  props: {
-    /** List of pictures that are selected */
-    photos: {
-      type: Array as PropType<IPhoto[]>,
-      required: true,
-    },
-
-    /** Disable controls */
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
-
-    /** Initial album selection */
-    initialSelection: {
-      type: Array as PropType<IAlbum[]>,
-      required: false,
-    },
-  },
-
-  emits: {
-    select: (selection: IAlbum[], deselection: IAlbum[]) => true,
-  },
-
-  components: {
-    AlbumForm,
-    AlbumsList,
-    NcButton,
-    NcListItem,
-    NcTextField,
-    XLoadingIcon,
-
-    PlusIcon,
-    CheckIcon,
-    MagnifyIcon,
-  },
-
-  data: () => ({
-    showAlbumCreationForm: false,
-    loadingAlbums: true,
-    /** List of all albums */
-    albums: [] as IAlbum[],
-    /** Search provider for list to show */
-    fuse: null as Fuse<IAlbum> | null,
-    /** Initial selection */
-    initSelection: new Set<IAlbum>(),
-    /** Selected albums */
-    selection: new Set<IAlbum>(),
-    /** Deselected albums that were initially selected */
-    deselection: new Set<IAlbum>(),
-    /** Search term */
-    search: String(),
-  }),
-
-  mounted() {
-    this.loadAlbums();
-    this.$nextTick(() => {
-      // prevent autofocus on search bar for mobile
-      this.$el.closest('.modal-mask')?.focus?.();
-    });
-  },
-
-  computed: {
-    filteredList() {
-      if (!this.albums || !this.search || !this.fuse) return this.albums ?? [];
-      return this.fuse.search(this.search).map((r) => r.item);
-    },
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        albumsList?: VueHTMLComponent;
-      };
-    },
-
-    async albumCreatedHandler({ album }: { album: { basename: string } }) {
-      this.showAlbumCreationForm = false;
-      await this.loadAlbums(true);
-
-      // select the newly created album
-      const newAlbum = this.albums.find((a) => a.name === album.basename);
-      if (newAlbum) {
-        this.selection.add(newAlbum);
-        this.forceUpdate();
-      }
-    },
-
-    async loadAlbums(preserveSelection: boolean = false) {
-      try {
-        this.loadingAlbums = true;
-
-        // FIXME: preserve deselection too; but then this is only
-        // applicable for single photo selection ... at least for now
-        const prevSel = new Set(Array.from(this.selection).map((a) => a.album_id));
-
-        // get all albums
-        this.albums = await dav.getAlbums();
-
-        // create search provider
-        this.fuse = markRaw(new Fuse(this.albums, { keys: ['name'] }));
-
-        // get initial selection
-        let initSelIds: number[] = [];
-        const singleFileId = this.photos.length === 1 ? this.photos[0].fileid : 0;
-
-        if (this.initialSelection) {
-          // check if selection was passed as a prop
-          initSelIds = this.initialSelection.map((a) => a.album_id);
-        } else if (singleFileId) {
-          // if only one photo is selected, get the albums of that photo
-          const pAlbums = await dav.getAlbums(singleFileId);
-          initSelIds = pAlbums.map((a) => a.album_id);
-        }
-
-        // initialize all sets
-        this.initSelection = new Set(this.albums.filter((a) => initSelIds.includes(a.album_id)));
-        this.selection = new Set(this.initSelection);
-        this.deselection = new Set();
-
-        // restore selection
-        if (preserveSelection) {
-          this.albums.filter((a) => prevSel.has(a.album_id)).forEach(this.selection.add, this.selection);
-        }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        this.loadingAlbums = false;
-        this.forceUpdate();
-      }
-    },
-
-    toggleAlbumSelection(album: IAlbum) {
-      if (this.disabled) return;
-
-      if (this.selection.has(album)) {
-        this.selection.delete(album);
-
-        // deselection only if originally selected
-        if (this.initSelection.has(album)) {
-          this.deselection.add(album);
-        }
-      } else {
-        this.selection.add(album);
-        this.deselection.delete(album);
-      }
-
-      this.forceUpdate();
-    },
-
-    submit() {
-      this.$emit('select', Array.from(this.selection), Array.from(this.deselection));
-    },
-
-    forceUpdate() {
-      this.$forceUpdate(); // sets do not trigger reactivity
-      this.refs().albumsList?.$forceUpdate();
-    },
-  },
 });
+
+const props = defineProps<{
+  /** List of pictures that are selected */
+  photos: IPhoto[];
+  /** Disable controls */
+  disabled?: boolean;
+  /** Initial album selection */
+  initialSelection?: IAlbum[];
+}>();
+
+const emit = defineEmits<{
+  (e: 'select', selection: IAlbum[], deselection: IAlbum[]): void;
+}>();
+
+const albumsList = useTemplateRef<InstanceType<typeof AlbumsList>>('albumsList');
+const instance = getCurrentInstance();
+
+const showAlbumCreationForm = ref(false);
+const loadingAlbums = ref(true);
+/** List of all albums */
+const albums = ref<IAlbum[]>([]);
+/** Search provider for list to show */
+const fuse = ref<Fuse<IAlbum> | null>(null);
+/** Initial selection */
+const initSelection = ref(new Set<IAlbum>());
+/** Selected albums */
+const selection = ref(new Set<IAlbum>());
+/** Deselected albums that were initially selected */
+const deselection = ref(new Set<IAlbum>());
+/** Search term */
+const search = ref(String());
+
+const filteredList = computed(() => {
+  if (!albums.value || !search.value || !fuse.value) return albums.value ?? [];
+  return fuse.value.search(search.value).map((r) => r.item);
+});
+
+onMounted(() => {
+  loadAlbums();
+  nextTick(() => {
+    // prevent autofocus on search bar for mobile
+    instance?.proxy?.$el.closest('.modal-mask')?.focus?.();
+  });
+});
+
+async function albumCreatedHandler({ album }: { album: { basename: string } }) {
+  showAlbumCreationForm.value = false;
+  await loadAlbums(true);
+
+  // select the newly created album
+  const newAlbum = albums.value.find((a) => a.name === album.basename);
+  if (newAlbum) {
+    selection.value.add(newAlbum);
+    forceUpdate();
+  }
+}
+
+async function loadAlbums(preserveSelection: boolean = false) {
+  try {
+    loadingAlbums.value = true;
+
+    // FIXME: preserve deselection too; but then this is only
+    // applicable for single photo selection ... at least for now
+    const prevSel = new Set(Array.from(selection.value).map((a) => a.album_id));
+
+    // get all albums
+    albums.value = await dav.getAlbums();
+
+    // create search provider
+    fuse.value = markRaw(new Fuse(albums.value, { keys: ['name'] }));
+
+    // get initial selection
+    let initSelIds: number[] = [];
+    const singleFileId = props.photos.length === 1 ? props.photos[0].fileid : 0;
+
+    if (props.initialSelection) {
+      // check if selection was passed as a prop
+      initSelIds = props.initialSelection.map((a) => a.album_id);
+    } else if (singleFileId) {
+      // if only one photo is selected, get the albums of that photo
+      const pAlbums = await dav.getAlbums(singleFileId);
+      initSelIds = pAlbums.map((a) => a.album_id);
+    }
+
+    // initialize all sets
+    initSelection.value = new Set(albums.value.filter((a) => initSelIds.includes(a.album_id)));
+    selection.value = new Set(initSelection.value);
+    deselection.value = new Set();
+
+    // restore selection
+    if (preserveSelection) {
+      albums.value.filter((a) => prevSel.has(a.album_id)).forEach((a) => selection.value.add(a));
+    }
+  } catch (e) {
+    console.error(e);
+  } finally {
+    loadingAlbums.value = false;
+    forceUpdate();
+  }
+}
+
+function toggleAlbumSelection(album: IAlbum) {
+  if (props.disabled) return;
+
+  if (selection.value.has(album)) {
+    selection.value.delete(album);
+
+    // deselection only if originally selected
+    if (initSelection.value.has(album)) {
+      deselection.value.add(album);
+    }
+  } else {
+    selection.value.add(album);
+    deselection.value.delete(album);
+  }
+
+  forceUpdate();
+}
+
+function submit() {
+  emit('select', Array.from(selection.value), Array.from(deselection.value));
+}
+
+function forceUpdate() {
+  getCurrentInstance()?.proxy?.$forceUpdate(); // sets do not trigger reactivity
+  albumsList.value?.$forceUpdate();
+}
 </script>
 
 <style lang="scss" scoped>
