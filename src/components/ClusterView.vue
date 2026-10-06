@@ -91,7 +91,6 @@ async function refresh() {
 
 onMounted(refresh);
 watch(() => route.path, refresh);
-
 watch(config, refresh);
 </script>
 

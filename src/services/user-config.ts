@@ -1,4 +1,5 @@
 import { reactive, readonly, type DeepReadonly } from 'vue';
+import { dequal } from 'dequal';
 
 import axios from '@nextcloud/axios';
 import { showInfo, showError } from '@nextcloud/dialogs';
@@ -187,10 +188,17 @@ function loadCached(): IConfig {
     if (value == null) return;
 
     if (typeof defaults[key] === 'boolean') {
-      defaults[key] = (value === 'true') as V;
+      defaults[key] = (value === String(true)) as V;
     } else if (typeof defaults[key] === 'number') {
-      const n = Number(value);
-      if (Number.isFinite(n)) defaults[key] = n as V;
+      if (Number.isFinite(Number(value))) {
+        defaults[key] = Number(value) as V;
+      }
+    } else if (defaults[key] !== null && typeof defaults[key] === 'object') {
+      try {
+        defaults[key] = JSON.parse(value) as V;
+      } catch {
+        console.warn(`Failed to parse cached config value for ${key}: ${value}`);
+      }
     } else {
       defaults[key] = value as V;
     }
@@ -223,6 +231,7 @@ function notifyVersionChanged(version: string) {
 /**
  * Persist one setting to the server (unless local-only) and propagate it
  * into the live config. All readers update automatically.
+ * Only primitive values are allowed; objects are server-read-only.
  * @param setting setting to update.
  * @param value new value to store.
  */
@@ -238,21 +247,23 @@ export async function setConfig<K extends keyof IConfig>(setting: K, value: ICon
 
 /**
  * Write one setting into the live config and mirror it to browser storage.
- * Objects are kept in memory only; null removes the stored value.
+ * Objects are serialized as JSON; null removes the stored value.
  * @param key setting to write.
  * @param value new value to store.
  */
 function propagate<K extends keyof IConfig>(key: K, value: IConfig[K]) {
-  currentConfig[key] = value;
+  // Write the new value to the live config and trigger reactivity.
+  if (!dequal(currentConfig[key], value)) {
+    currentConfig[key] = value;
+  }
 
+  // Persist to browser storage.
+  const storageKey = `memories_${key}`;
   if (value == null) {
-    storage.removeItem(`memories_${key}`);
-    return;
+    storage.removeItem(storageKey);
+  } else if (typeof value === 'object') {
+    storage.setItem(storageKey, JSON.stringify(value));
+  } else {
+    storage.setItem(storageKey, value.toString());
   }
-
-  if (typeof value === 'object') {
-    return;
-  }
-
-  storage.setItem(`memories_${key}`, value.toString());
 }
