@@ -25,8 +25,9 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { computed, defineAsyncComponent, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
@@ -36,58 +37,49 @@ const NcAvatar = defineAsyncComponent(() => import('@nextcloud/vue/components/Nc
 import MapMarkerOutlineIcon from 'vue-material-design-icons/MapMarkerOutline.vue';
 import LinkIcon from 'vue-material-design-icons/Link.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'AlbumDynamicTopMatter',
-
-  components: {
-    NcAvatar,
-    MapMarkerOutlineIcon,
-    LinkIcon,
-  },
-
-  data: () => ({
-    album: null as dav.IDavAlbum | null,
-    utils: utils,
-  }),
-
-  computed: {
-    albumUser(): string {
-      return this.$route.params.user?.toString() ?? '';
-    },
-
-    albumName(): string {
-      return this.$route.params.name?.toString() ?? '';
-    },
-  },
-
-  methods: {
-    async refresh(): Promise<boolean> {
-      // Skip everything if user is not logged in
-      if (!utils.uid) return false;
-
-      // Skip if we are not on an album (e.g. on the list)
-      const user = this.albumUser;
-      const name = this.albumName;
-      if (!user || !name) return false;
-
-      // Get DAV album for collaborators
-      try {
-        const album = await dav.getAlbum(user, name);
-        if (user !== this.albumUser || name !== this.albumName) {
-          return false;
-        }
-        this.album = album;
-      } catch (e) {
-        console.warn('Failed to fetch album:', e);
-      }
-
-      // The album header is metadata, not standalone content,
-      // so always return false. If true, an empty album would
-      // suppress the timeline empty view.
-      return false;
-    },
-  },
 });
+
+const route = useRoute();
+
+const album = ref<dav.IDavAlbum | null>(null);
+
+const albumUser = computed(() => {
+  return route.params.user?.toString() ?? '';
+});
+
+const albumName = computed(() => {
+  return route.params.name?.toString() ?? '';
+});
+
+async function refresh(): Promise<boolean> {
+  // Skip everything if user is not logged in
+  if (!utils.uid) return false;
+
+  // Skip if we are not on an album (e.g. on the list)
+  const user = albumUser.value;
+  const name = albumName.value;
+  if (!user || !name) return false;
+
+  // Get DAV album for collaborators
+  try {
+    const albumData = await dav.getAlbum(user, name);
+    if (user !== albumUser.value || name !== albumName.value) {
+      return false;
+    }
+    album.value = albumData;
+  } catch (e) {
+    console.warn('Failed to fetch album:', e);
+  }
+
+  // The album header is metadata, not standalone content,
+  // so always return false. If true, an empty album would
+  // suppress the timeline empty view.
+  return false;
+}
+
+defineExpose({ refresh });
 </script>
 
 <style lang="scss" scoped>
