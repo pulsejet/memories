@@ -16,11 +16,17 @@
   <Timeline v-else />
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import type { RouteLocationNormalized } from 'vue-router';
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { useRoute } from 'vue-router';
 
-import UserConfig from '@mixins/UserConfig';
+import {
+  useRouteIsAlbums,
+  useRouteIsTags,
+  useRouteIsRecognize,
+  useRouteIsFaceRecognition,
+  useRouteIsPlaces,
+} from '@services/route-checker';
 import TopMatter from '@components/top-matter/TopMatter.vue';
 import ClusterGrid from '@components/ClusterGrid.vue';
 import Timeline from '@components/Timeline.vue';
@@ -33,100 +39,62 @@ import * as utils from '@services/utils';
 
 import type { ICluster } from '@typings';
 
-export default defineComponent({
-  name: 'ClusterView',
+const route = useRoute();
+const routeIsAlbums = useRouteIsAlbums();
+const routeIsTags = useRouteIsTags();
+const routeIsRecognize = useRouteIsRecognize();
+const routeIsFaceRecognition = useRouteIsFaceRecognition();
+const routeIsPlaces = useRouteIsPlaces();
 
-  components: {
-    TopMatter,
-    ClusterGrid,
-    Timeline,
-    EmptyContent,
-    DynamicTopMatter,
-    XLoadingIcon,
-  },
+const dtm = ref<InstanceType<typeof DynamicTopMatter>>();
+const items = ref<ICluster[]>([]);
+const loading = ref(0);
 
-  mixins: [UserConfig],
+const noParams = computed(() => !route.params.name?.toString() && !route.params.user?.toString());
+const minCols = computed(() => (routeIsAlbums.value ? 2 : 3));
+const maxSize = computed(() => (routeIsAlbums.value ? 250 : 180));
 
-  data: () => ({
-    items: [] as ICluster[],
-    loading: 0,
-  }),
+async function fetchClusters(): Promise<ICluster[]> {
+  if (routeIsAlbums.value) {
+    return await dav.getAlbums();
+  } else if (routeIsTags.value) {
+    return await dav.getTags();
+  } else if (routeIsRecognize.value) {
+    return await dav.getFaceList('recognize');
+  } else if (routeIsFaceRecognition.value) {
+    return await dav.getFaceList('facerecognition');
+  } else if (routeIsPlaces.value) {
+    return await dav.getPlaces();
+  } else {
+    return [];
+  }
+}
 
-  computed: {
-    noParams() {
-      return !this.$route.params.name?.toString() && !this.$route.params.user?.toString();
-    },
+async function refresh() {
+  await nextTick();
+  if (!noParams.value || !!loading.value) return;
 
-    minCols() {
-      return this.routeIsAlbums ? 2 : 3;
-    },
+  try {
+    items.value = [];
+    loading.value++;
 
-    maxSize() {
-      return this.routeIsAlbums ? 250 : 180;
-    },
-  },
+    await nextTick();
 
-  mounted() {
-    this.refresh();
-  },
+    // Refresh the DTM in parallel with loading our own data,
+    // but wait for it to complete to avoid glitches.
+    const [, newItems] = await Promise.all([dtm.value?.refresh?.(), fetchClusters()]);
+    items.value = newItems;
+  } finally {
+    loading.value--;
+  }
+}
 
-  created() {
-    utils.bus.on('memories:user-config-changed', this.refresh);
-  },
+onMounted(refresh);
+watch(() => route.path, refresh);
 
-  beforeUnmount() {
-    utils.bus.off('memories:user-config-changed', this.refresh);
-  },
-
-  watch: {
-    async $route(to: RouteLocationNormalized, from: RouteLocationNormalized) {
-      if (to.path === from.path) return;
-      await this.refresh();
-    },
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        dtm?: InstanceType<typeof DynamicTopMatter>;
-      };
-    },
-
-    async refresh() {
-      await this.$nextTick();
-      if (!this.noParams || !!this.loading) return;
-
-      try {
-        this.items = [];
-        this.loading++;
-
-        await this.$nextTick();
-
-        // Refresh the DTM in parallel with loading our own data,
-        // but wait for it to complete to avoid glitches.
-        const [, items] = await Promise.all([this.refs().dtm?.refresh?.(), this.fetchClusters()]);
-        this.items = items;
-      } finally {
-        this.loading--;
-      }
-    },
-
-    async fetchClusters(): Promise<ICluster[]> {
-      if (this.routeIsAlbums) {
-        return await dav.getAlbums();
-      } else if (this.routeIsTags) {
-        return await dav.getTags();
-      } else if (this.routeIsRecognize) {
-        return await dav.getFaceList('recognize');
-      } else if (this.routeIsFaceRecognition) {
-        return await dav.getFaceList('facerecognition');
-      } else if (this.routeIsPlaces) {
-        return await dav.getPlaces();
-      } else {
-        return [];
-      }
-    },
-  },
+utils.bus.on('memories:user-config-changed', refresh);
+onBeforeUnmount(() => {
+  utils.bus.off('memories:user-config-changed', refresh);
 });
 </script>
 
