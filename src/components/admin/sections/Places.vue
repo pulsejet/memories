@@ -23,12 +23,12 @@
           }}
         </NcNoteCard>
         <NcNoteCard
-          v-if="typeof config['memories.gis_type'] !== 'number' || config['memories.gis_type'] < 0"
+          v-if="typeof systemConfig['memories.gis_type'] !== 'number' || systemConfig['memories.gis_type'] < 0"
           type="warning"
         >
           {{
             t('memories', 'Reverse geocoding has not been configured ({status}).', {
-              status: config['memories.gis_type'],
+              status: systemConfig['memories.gis_type'],
             })
           }}
         </NcNoteCard>
@@ -63,7 +63,7 @@
         :label="t('memories', 'Location search endpoint for metadata editor')"
         :label-visible="true"
         placeholder="https://nominatim.openstreetmap.org"
-        :model-value="config['memories.places.search.url']"
+        :model-value="systemConfig['memories.places.search.url']"
         @change="update('memories.places.search.url', $event.target.value.trim())"
       />
     </div>

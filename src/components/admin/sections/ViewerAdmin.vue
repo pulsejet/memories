@@ -8,7 +8,7 @@
     <br />
 
     <NcCheckboxRadioSwitch
-      v-model="config['memories.viewer.high_res_cond_default']"
+      v-model="systemConfig['memories.viewer.high_res_cond_default']"
       value="zoom"
       name="vhrc_radio"
       type="radio"
@@ -16,7 +16,7 @@
       >{{ t('memories', 'Load high resolution image on zoom') }}
     </NcCheckboxRadioSwitch>
     <NcCheckboxRadioSwitch
-      v-model="config['memories.viewer.high_res_cond_default']"
+      v-model="systemConfig['memories.viewer.high_res_cond_default']"
       value="always"
       name="vhrc_radio"
       type="radio"
@@ -24,7 +24,7 @@
       >{{ t('memories', 'Always load high resolution image (not recommended if using HEIC/TIFF)') }}
     </NcCheckboxRadioSwitch>
     <NcCheckboxRadioSwitch
-      v-model="config['memories.viewer.high_res_cond_default']"
+      v-model="systemConfig['memories.viewer.high_res_cond_default']"
       value="never"
       name="vhrc_radio"
       type="radio"
@@ -38,7 +38,7 @@
     <br />
 
     <NcCheckboxRadioSwitch
-      v-model="config['memories.viewer.video.autoplay']"
+      v-model="systemConfig['memories.viewer.video.autoplay']"
       value="true"
       name="vauto_radio"
       type="radio"
@@ -46,7 +46,7 @@
       >{{ t('memories', 'Autoplay videos') }}
     </NcCheckboxRadioSwitch>
     <NcCheckboxRadioSwitch
-      v-model="config['memories.viewer.video.autoplay']"
+      v-model="systemConfig['memories.viewer.video.autoplay']"
       value="false"
       name="vauto_radio"
       type="radio"
@@ -54,7 +54,7 @@
       >{{ t('memories', 'Do not autoplay videos') }}
     </NcCheckboxRadioSwitch>
     <NcCheckboxRadioSwitch
-      v-model="config['memories.viewer.video.autoplay']"
+      v-model="systemConfig['memories.viewer.video.autoplay']"
       value="disallow"
       name="vauto_radio"
       type="radio"

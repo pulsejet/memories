@@ -1,5 +1,5 @@
 <template>
-  <div class="outer" v-if="config && sconfig">
+  <div class="outer" v-if="systemConfig">
     <XLoadingIcon class="loading-icon" v-show="loading" />
 
     <div class="left-pane">
@@ -9,8 +9,7 @@
         :key="c.name"
         :is="c"
         :status="status"
-        :config="config"
-        :sconfig="sconfig"
+        :systemConfig="systemConfig"
         @update="update"
       />
     </div>
@@ -21,14 +20,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, markRaw, type DeepReadonly } from 'vue';
+import { ref, onMounted, markRaw } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 
 import { API } from '@services/API';
 import * as utils from '@services/utils';
-import { config as liveConfig, waitForConfig } from '@services/user-config';
+import { waitForConfig } from '@services/user-config';
 import { t } from '@services/l10n';
 
 import Help from './sections/Help.vue';
@@ -45,13 +44,11 @@ import VideoAccel from './sections/VideoAccel.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import type { ISystemConfig, ISystemStatus } from './AdminTypes';
-import type { IConfig } from '@typings';
 
 const loading = ref(0);
 
 const status = ref<ISystemStatus | null>(null);
-const config = ref<ISystemConfig | null>(null);
-const sconfig = ref<DeepReadonly<IConfig> | null>(null);
+const systemConfig = ref<ISystemConfig | null>(null);
 
 const refreshTimer = new utils.RenewingTimeout();
 
@@ -79,7 +76,7 @@ async function refreshSystemConfig() {
   try {
     loading.value++;
     const res = await axios.get<ISystemConfig>(API.SYSTEM_CONFIG(null));
-    config.value = res.data;
+    systemConfig.value = res.data;
   } catch (e: any) {
     showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
     console.error(e);
@@ -105,7 +102,6 @@ async function refreshUserConfig() {
   try {
     loading.value++;
     await waitForConfig();
-    sconfig.value = liveConfig;
   } catch (e: any) {
     showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
     console.error(e);
@@ -115,14 +111,14 @@ async function refreshUserConfig() {
 }
 
 async function update<K extends keyof ISystemConfig>(key: K, value: ISystemConfig[K] | null = null) {
-  if (!config.value || !Object.hasOwn(config.value, key)) {
+  if (!systemConfig.value || !Object.hasOwn(systemConfig.value, key)) {
     console.error('Unknown setting', key);
     return;
   }
 
   // Get final value
-  value ??= config.value[key];
-  config.value[key] = value;
+  value ??= systemConfig.value[key];
+  systemConfig.value[key] = value;
 
   try {
     loading.value++;

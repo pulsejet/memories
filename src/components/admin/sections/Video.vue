@@ -32,7 +32,7 @@
       <NcTextField
         :label="t('memories', 'ffmpeg path')"
         :label-visible="true"
-        :model-value="config['memories.vod.ffmpeg']"
+        :model-value="systemConfig['memories.vod.ffmpeg']"
         @change="update('memories.vod.ffmpeg', $event.target.value)"
         :disabled="!enableTranscoding"
       />
@@ -40,7 +40,7 @@
       <NcTextField
         :label="t('memories', 'ffprobe path')"
         :label-visible="true"
-        :model-value="config['memories.vod.ffprobe']"
+        :model-value="systemConfig['memories.vod.ffprobe']"
         @change="update('memories.vod.ffprobe', $event.target.value)"
         :disabled="!enableTranscoding"
       />
@@ -49,7 +49,7 @@
       {{ t('memories', 'Global default video quality (user may override)') }}
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
-        v-model="config['memories.video_default_quality']"
+        v-model="systemConfig['memories.video_default_quality']"
         value="0"
         name="vdq_radio"
         type="radio"
@@ -58,7 +58,7 @@
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
-        v-model="config['memories.video_default_quality']"
+        v-model="systemConfig['memories.video_default_quality']"
         value="-1"
         name="vdq_radio"
         type="radio"

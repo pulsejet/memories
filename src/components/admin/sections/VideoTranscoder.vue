@@ -23,7 +23,7 @@
 
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding"
-        v-model="config['memories.vod.external']"
+        v-model="systemConfig['memories.vod.external']"
         @update:model-value="update('memories.vod.external')"
         type="switch"
       >
@@ -31,34 +31,34 @@
       </NcCheckboxRadioSwitch>
 
       <NcTextField
-        :disabled="!enableTranscoding || config['memories.vod.external']"
+        :disabled="!enableTranscoding || systemConfig['memories.vod.external']"
         :label="t('memories', 'Binary path (local only)')"
         :label-visible="true"
-        :model-value="config['memories.vod.path']"
+        :model-value="systemConfig['memories.vod.path']"
         @change="update('memories.vod.path', $event.target.value)"
       />
 
       <NcTextField
-        :disabled="!enableTranscoding || config['memories.vod.external']"
+        :disabled="!enableTranscoding || systemConfig['memories.vod.external']"
         :label="t('memories', 'Bind address (local only)')"
         :label-visible="true"
-        :model-value="config['memories.vod.bind']"
+        :model-value="systemConfig['memories.vod.bind']"
         @change="update('memories.vod.bind', $event.target.value)"
       />
 
       <NcTextField
-        :disabled="!enableTranscoding || config['memories.vod.external']"
+        :disabled="!enableTranscoding || systemConfig['memories.vod.external']"
         :label="t('memories', 'Nextcloud URL for transcoder (local only)')"
         :label-visible="true"
-        :model-value="config['memories.vod.nc_url']"
+        :model-value="systemConfig['memories.vod.nc_url']"
         @change="update('memories.vod.nc_url', $event.target.value)"
       />
 
       <NcTextField
-        :disabled="!enableTranscoding || !config['memories.vod.external']"
+        :disabled="!enableTranscoding || !systemConfig['memories.vod.external']"
         :label="t('memories', 'Connection addresses (comma separated)')"
         :label-visible="true"
-        :model-value="config['memories.vod.connect'].join(', ')"
+        :model-value="systemConfig['memories.vod.connect'].join(', ')"
         @change="updateConnect($event.target.value)"
       />
 
@@ -70,7 +70,7 @@
         :disabled="!enableTranscoding"
         :label="t('memories', 'Quality Factor (15 - 45) (default 25)')"
         :label-visible="true"
-        :model-value="String(config['memories.vod.qf'])"
+        :model-value="String(systemConfig['memories.vod.qf'])"
         @change="update('memories.vod.qf', Number($event.target.value))"
       />
     </p>

@@ -56,7 +56,7 @@
         )
       }}
       <NcCheckboxRadioSwitch
-        v-model="config['memories.index.mode']"
+        v-model="systemConfig['memories.index.mode']"
         value="1"
         name="idxm_radio"
         type="radio"
@@ -64,7 +64,7 @@
         >{{ t('memories', 'Index all media automatically (recommended)') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
-        v-model="config['memories.index.mode']"
+        v-model="systemConfig['memories.index.mode']"
         value="2"
         name="idxm_radio"
         type="radio"
@@ -72,7 +72,7 @@
         >{{ t('memories', 'Index per-user timeline folders (not recommended)') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
-        v-model="config['memories.index.mode']"
+        v-model="systemConfig['memories.index.mode']"
         value="3"
         name="idxm_radio"
         type="radio"
@@ -80,7 +80,7 @@
         >{{ t('memories', 'Index a fixed relative path') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
-        v-model="config['memories.index.mode']"
+        v-model="systemConfig['memories.index.mode']"
         value="0"
         name="idxm_radio"
         type="radio"
@@ -91,9 +91,9 @@
       <NcTextField
         :label="t('memories', 'Indexing path (relative, all users)')"
         :label-visible="true"
-        :model-value="config['memories.index.path']"
+        :model-value="systemConfig['memories.index.path']"
         @change="update('memories.index.path', $event.target.value)"
-        v-if="config['memories.index.mode'] === '3'"
+        v-if="systemConfig['memories.index.mode'] === '3'"
       />
     </div>
 
@@ -161,10 +161,10 @@ const { update } = useAdminSection(props, emit);
 
 const blocklistText = computed({
   get(): string {
-    return (props.config['memories.index.folder.blocklist'] ?? []).join(', ');
+    return (props.systemConfig['memories.index.folder.blocklist'] ?? []).join(', ');
   },
   set(value: string) {
-    props.config['memories.index.folder.blocklist'] = value
+    props.systemConfig['memories.index.folder.blocklist'] = value
       .split(',')
       .map((s) => s.trim())
       .filter((s) => s !== '');

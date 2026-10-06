@@ -11,7 +11,7 @@
     <NcTextField
       :label="t('memories', 'Path to packaged exiftool binary')"
       :label-visible="true"
-      :model-value="config['memories.exiftool']"
+      :model-value="systemConfig['memories.exiftool']"
       @change="update('memories.exiftool', $event.target.value)"
       readonly
     />
@@ -24,7 +24,7 @@
     </template>
 
     <NcCheckboxRadioSwitch
-      v-model="config['memories.exiftool_no_local']"
+      v-model="systemConfig['memories.exiftool_no_local']"
       @update:model-value="update('memories.exiftool_no_local')"
       type="switch"
     >

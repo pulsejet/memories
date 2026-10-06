@@ -23,14 +23,14 @@
     </p>
 
     <p>
-      <NcNoteCard :type="config['memories.db.triggers.fcu'] ? 'success' : 'error'">
+      <NcNoteCard :type="systemConfig['memories.db.triggers.fcu'] ? 'success' : 'error'">
         {{
-          config['memories.db.triggers.fcu']
+          systemConfig['memories.db.triggers.fcu']
             ? t('memories', 'Database triggers are set up correctly.')
             : t('memories', 'Database triggers not set up; {m} mode in use.', { m: 'trigger compatibility' })
         }}
         <br />
-        <template v-if="!config['memories.db.triggers.fcu']">
+        <template v-if="!systemConfig['memories.db.triggers.fcu']">
           {{ t('memories', 'See the documentation for information on how to resolve this.') }}
           <a target="_blank" href="https://memories.gallery/troubleshooting/#trigger-compatibility-mode">{{
             t('memories', 'External Link')

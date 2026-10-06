@@ -1,10 +1,9 @@
-import { computed, type DeepReadonly, type PropType } from 'vue';
+import { computed, type PropType } from 'vue';
 import axios from '@nextcloud/axios';
 
 import { t } from '@services/l10n';
 
 import type { IBinaryStatus, IServiceStatus, ISystemConfig, ISystemStatus } from './AdminTypes';
-import type { IConfig } from '@typings';
 
 /** Props shared by all admin sections. */
 export const adminSectionProps = {
@@ -13,12 +12,8 @@ export const adminSectionProps = {
     default: null,
     required: false,
   },
-  config: {
+  systemConfig: {
     type: Object as PropType<ISystemConfig>,
-    required: true,
-  },
-  sconfig: {
-    type: Object as PropType<DeepReadonly<IConfig>>,
     required: true,
   },
 } as const;
@@ -30,7 +25,7 @@ export type AdminSectionEmits = {
 
 /** Composition replacement for AdminMixin. */
 export function useAdminSection(
-  props: { status: ISystemStatus | null; config: ISystemConfig },
+  props: { status: ISystemStatus | null; systemConfig: ISystemConfig },
   emit: AdminSectionEmits,
 ) {
   function update(key: keyof ISystemConfig, value: any = null) {
@@ -107,9 +102,9 @@ export function useAdminSection(
 
   /** Reverse of memories.vod.disable, unfortunately */
   const enableTranscoding = computed({
-    get: () => !props.config['memories.vod.disable'],
+    get: () => !props.systemConfig['memories.vod.disable'],
     set: (value: boolean) => {
-      props.config['memories.vod.disable'] = !value;
+      props.systemConfig['memories.vod.disable'] = !value;
     },
   });
 

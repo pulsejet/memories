@@ -66,7 +66,7 @@
       class="preview-box"
       v-for="size in previewSizes"
       :key="size"
-      :model-value="String(config['preview_max_x'])"
+      :model-value="String(systemConfig['preview_max_x'])"
       :value="String(size)"
       name="previewsize_radio"
       type="radio"
@@ -79,7 +79,7 @@
       placeholder="1024"
       :label="t('memories', 'Max memory for preview generation (MB)')"
       :label-visible="true"
-      :model-value="String(config['preview_max_memory'])"
+      :model-value="String(systemConfig['preview_max_memory'])"
       @change="update('preview_max_memory', Number($event.target.value))"
     />
 
@@ -88,7 +88,7 @@
       placeholder="50"
       :label="t('memories', 'Max size of file to generate previews for (MB)')"
       :label-visible="true"
-      :model-value="String(config['preview_max_filesize_image'])"
+      :model-value="String(systemConfig['preview_max_filesize_image'])"
       @change="update('preview_max_filesize_image', Number($event.target.value))"
     />
   </div>
@@ -134,7 +134,7 @@ const knownPreviewProviders = {
 const previewSizes = [512, 1024, 2048, 4096, 8192];
 
 function providers() {
-  return props.config['enabledPreviewProviders'];
+  return props.systemConfig['enabledPreviewProviders'];
 }
 
 function hasProvider(klass: string): boolean {
@@ -147,7 +147,7 @@ function updateProvider(klass: string, enabled: boolean) {
   if (enabled) {
     providers().push(klass);
   } else {
-    props.config['enabledPreviewProviders'] = providers().filter((k) => k !== klass);
+    props.systemConfig['enabledPreviewProviders'] = providers().filter((k) => k !== klass);
   }
 
   update('enabledPreviewProviders');
