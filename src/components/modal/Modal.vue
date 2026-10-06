@@ -26,119 +26,122 @@
   </NcModal>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent, markRaw } from 'vue';
-import type { PropType } from 'vue';
+<script setup lang="ts">
+import {
+  ref,
+  useTemplateRef,
+  computed,
+  markRaw,
+  onBeforeMount,
+  onBeforeUnmount,
+  onMounted,
+  defineAsyncComponent,
+} from 'vue';
 
 const NcModal = defineAsyncComponent(() => import('@nextcloud/vue/components/NcModal'));
 
 import * as utils from '@services/utils';
 
-export default defineComponent({
+defineOptions({
   name: 'Modal',
-  components: {
-    NcModal,
-  },
-
-  props: {
-    size: {
-      type: String as PropType<'small' | 'normal' | 'large' | 'full'>,
-      default: 'small' as const,
-    },
-    sidebar: {
-      type: String as PropType<string | null>,
-      default: null,
-    },
-    canClose: {
-      type: Boolean,
-      default: true,
-    },
-  },
-
-  data: () => ({
-    isSidebarShown: false,
-    sidebarWidth: 400,
-    trapElements: [] as HTMLElement[],
-    _mutationObserver: null! as MutationObserver,
-  }),
-
-  beforeMount() {
-    if (this.sidebar) {
-      utils.bus.on('memories:sidebar:opened', this.handleAppSidebarOpen);
-      utils.bus.on('memories:sidebar:closed', this.handleAppSidebarClose);
-    }
-    this._mutationObserver = markRaw(new MutationObserver(this.handleBodyMutation));
-    this._mutationObserver.observe(document.body, { childList: true });
-  },
-
-  beforeUnmount() {
-    if (this.sidebar) {
-      utils.bus.off('memories:sidebar:opened', this.handleAppSidebarOpen);
-      utils.bus.off('memories:sidebar:closed', this.handleAppSidebarClose);
-      _m.sidebar.close();
-    }
-    this._mutationObserver.disconnect();
-  },
-
-  mounted() {
-    if (this.sidebar) {
-      _m.sidebar.open(0, this.sidebar, true);
-
-      // Adjust width anyway in case the sidebar is already open
-      this.handleAppSidebarOpen();
-    }
-  },
-
-  methods: {
-    close() {
-      const modal: any = this.$refs.modal;
-      if (modal?.close) {
-        modal.close();
-      } else {
-        // Premature calls, before the modal is mounted
-        this.cleanup();
-      }
-    },
-
-    cleanup() {
-      this.$emit('close');
-    },
-
-    /**
-     * Watch out for Popover inject in document root
-     * That way we can adjust the focusTrap
-     */
-    handleBodyMutation(mutations: MutationRecord[]) {
-      const test = (node: Node): node is HTMLElement =>
-        node instanceof HTMLElement && node?.classList?.contains('v-popper__popper');
-
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          Array.from(mutation.addedNodes)
-            .filter(test)
-            .forEach((node) => this.trapElements.push(node));
-          Array.from(mutation.removedNodes)
-            .filter(test)
-            .forEach((node) => (this.trapElements = this.trapElements.filter((el) => el !== node)));
-        }
-      });
-    },
-
-    handleAppSidebarOpen() {
-      const sidebar = document.getElementById('app-sidebar-vue') ?? document.getElementById('app-sidebar-native');
-      if (sidebar) {
-        this.isSidebarShown = true;
-        this.sidebarWidth = sidebar.offsetWidth;
-        this.trapElements = [sidebar];
-      }
-    },
-
-    handleAppSidebarClose() {
-      this.isSidebarShown = false;
-      this.trapElements = [];
-    },
-  },
 });
+
+const props = defineProps<{
+  size?: 'small' | 'normal' | 'large' | 'full';
+  sidebar?: string | null;
+  canClose?: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'close'): void;
+}>();
+
+const size = computed(() => props.size ?? 'small');
+const sidebar = computed(() => props.sidebar ?? null);
+const canClose = computed(() => props.canClose ?? true);
+
+const modal = useTemplateRef<{ close?: () => void }>('modal');
+
+const isSidebarShown = ref(false);
+const sidebarWidth = ref(400);
+const trapElements = ref<HTMLElement[]>([]);
+let _mutationObserver!: MutationObserver;
+
+onBeforeMount(() => {
+  if (sidebar.value) {
+    utils.bus.on('memories:sidebar:opened', handleAppSidebarOpen);
+    utils.bus.on('memories:sidebar:closed', handleAppSidebarClose);
+  }
+  _mutationObserver = markRaw(new MutationObserver(handleBodyMutation));
+  _mutationObserver.observe(document.body, { childList: true });
+});
+
+onBeforeUnmount(() => {
+  if (sidebar.value) {
+    utils.bus.off('memories:sidebar:opened', handleAppSidebarOpen);
+    utils.bus.off('memories:sidebar:closed', handleAppSidebarClose);
+    _m.sidebar.close();
+  }
+  _mutationObserver.disconnect();
+});
+
+onMounted(() => {
+  if (sidebar.value) {
+    _m.sidebar.open(0, sidebar.value, true);
+
+    // Adjust width anyway in case the sidebar is already open
+    handleAppSidebarOpen();
+  }
+});
+
+function close() {
+  if (modal.value?.close) {
+    modal.value.close();
+  } else {
+    // Premature calls, before the modal is mounted
+    cleanup();
+  }
+}
+
+function cleanup() {
+  emit('close');
+}
+
+/**
+ * Watch out for Popover inject in document root
+ * That way we can adjust the focusTrap
+ */
+function handleBodyMutation(mutations: MutationRecord[]) {
+  const test = (node: Node): node is HTMLElement =>
+    node instanceof HTMLElement && node?.classList?.contains('v-popper__popper');
+
+  mutations.forEach((mutation) => {
+    if (mutation.type === 'childList') {
+      Array.from(mutation.addedNodes)
+        .filter(test)
+        .forEach((node) => trapElements.value.push(node));
+      Array.from(mutation.removedNodes)
+        .filter(test)
+        .forEach((node) => (trapElements.value = trapElements.value.filter((el) => el !== node)));
+    }
+  });
+}
+
+function handleAppSidebarOpen() {
+  const sidebarEl = document.getElementById('app-sidebar-vue') ?? document.getElementById('app-sidebar-native');
+  if (sidebarEl) {
+    isSidebarShown.value = true;
+    sidebarWidth.value = sidebarEl.offsetWidth;
+    trapElements.value = [sidebarEl];
+  }
+}
+
+function handleAppSidebarClose() {
+  isSidebarShown.value = false;
+  trapElements.value = [];
+}
+
+defineExpose({ close });
 </script>
 
 <style lang="scss" scoped>
