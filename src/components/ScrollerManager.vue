@@ -70,9 +70,9 @@ const props = defineProps<{
   /** Total height */
   fullHeight: number;
   /** Actual recycler component */
-  recycler?: VueRecyclerType;
+  recycler?: VueRecyclerType | null;
   /** Recycler before slot component */
-  recyclerBefore?: HTMLDivElement;
+  recyclerBefore?: HTMLDivElement | null;
 }>();
 
 const emit = defineEmits<{

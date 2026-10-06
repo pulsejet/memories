@@ -154,9 +154,9 @@ const props = defineProps<{
   /** Rows are in ascending order (desc is normal) */
   isreverse: boolean;
   /** Recycler element to scroll during touch multi-select */
-  recycler?: HTMLDivElement;
+  recycler?: HTMLDivElement | null;
   /** Scroller manager associated with the timeline */
-  scrollerManager?: InstanceType<typeof ScrollerManager>;
+  scrollerManager?: InstanceType<typeof ScrollerManager> | null;
 }>();
 
 const emit = defineEmits<{
