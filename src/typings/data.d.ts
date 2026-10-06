@@ -139,6 +139,7 @@ declare module '@typings' {
     ownername: string;
 
     filename?: string;
+    intimeline?: boolean;
     address?: string;
     address_short?: string;
     tags?: { [id: string]: string };

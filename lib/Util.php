@@ -210,6 +210,26 @@ final class Util extends StaticUtil
     }
 
     /**
+     * Check if path matches any of the given prefixes.
+     */
+    public static function matchesAnyPrefix(?string $path, array $prefixes): bool
+    {
+        if (!$path) {
+            return false;
+        }
+
+        $rel = trim($path, '/');
+        foreach ($prefixes as $prefix) {
+            $pfx = trim($prefix, '/');
+            if ('' === $pfx || str_starts_with($rel, $pfx.'/')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Get the version of the native caller.
      */
     public function callerNativeVersion(): ?string

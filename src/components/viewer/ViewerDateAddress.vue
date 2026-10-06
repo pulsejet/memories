@@ -82,6 +82,7 @@ export default defineComponent({
     },
 
     dayTo() {
+      if (!this.photo?.imageInfo?.intimeline) return undefined;
       if (!this.photo?.dayid || !this.photo?.key) return undefined;
       return {
         name: 'timeline',

@@ -254,7 +254,15 @@ final class ImageController extends ApiController
                 // "/admin/files/Photos/Camera/20230821_135017.jpg" => "/Photos/..."
                 $parts = explode('/', $file->getPath());
                 if (\count($parts) > 3 && 'files' === $parts[2] && $parts[1] === $user->getUID()) {
-                    $info['filename'] = '/'.implode('/', \array_slice($parts, 3));
+                    $filename = '/'.implode('/', \array_slice($parts, 3));
+                    $info['filename'] = $filename;
+
+                    try {
+                        $timelinePaths = $this->systemConfig->getTimelinePaths($user->getUID());
+                        $info['intimeline'] = Util::matchesAnyPrefix($filename, $timelinePaths);
+                    } catch (\Throwable) {
+                        // ignore errors, assume not in timeline
+                    }
                 }
 
                 // Get list of tags for this file

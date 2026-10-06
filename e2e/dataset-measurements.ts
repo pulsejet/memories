@@ -155,5 +155,6 @@ export function goldImageInfo(relPath: string): IImageInfo {
     owneruid: '<uid>',
     ownername: '<uid>',
     filename: relPath.replace(/^primary/, ''),
+    intimeline: relPath.startsWith('primary/for-default/'),
   };
 }
