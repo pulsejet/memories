@@ -7,8 +7,8 @@
   ></div>
 </template>
 
-<script lang="ts">
-import { defineComponent, markRaw, type PropType } from 'vue';
+<script setup lang="ts">
+import { computed, markRaw, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError, showSuccess } from '@nextcloud/dialogs';
@@ -21,6 +21,7 @@ import translations from './ImageEditorTranslations';
 import { fetchImage } from '@components/frame/XImgCache';
 
 import { API } from '@services/API';
+import { t } from '@services/l10n';
 import * as utils from '@services/utils';
 
 import type { IImageInfo, IPhoto } from '@typings';
@@ -38,336 +39,320 @@ async function loadFilerobot() {
   return FilerobotImageEditor;
 }
 
-export default defineComponent({
-  props: {
-    photo: {
-      type: Object as PropType<IPhoto>,
-      required: true,
-    },
-  },
+const props = defineProps<{
+  photo: IPhoto;
+}>();
 
-  emits: {
-    close: () => true,
-  },
+const emit = defineEmits<{
+  close: [];
+}>();
 
-  data: () => ({
-    exif: null as Object | null,
-    imageEditor: null as FilerobotImageEditor | null,
-  }),
+const editor = useTemplateRef<HTMLDivElement>('editor');
 
-  computed: {
-    config(): FilerobotImageEditorConfig & { theme: any } {
-      return {
-        source:
-          this.photo.h && this.photo.w
-            ? utils.getPreviewUrl({ photo: this.photo, size: 'screen' })
-            : API.IMAGE_DECODABLE(this.photo.fileid, this.photo.etag),
+const imageEditor = ref<FilerobotImageEditor | null>(null);
 
-        defaultSavedImageName: this.defaultSavedImageName,
-        defaultSavedImageType: this.defaultSavedImageType,
-        // We use our own translations
-        useBackendTranslations: false,
+const config = computed((): FilerobotImageEditorConfig & { theme: any } => {
+  return {
+    source:
+      props.photo.h && props.photo.w
+        ? utils.getPreviewUrl({ photo: props.photo, size: 'screen' })
+        : API.IMAGE_DECODABLE(props.photo.fileid, props.photo.etag),
 
-        // Watch resize
-        observePluginContainerSize: true,
+    defaultSavedImageName: defaultSavedImageName.value,
+    defaultSavedImageType: defaultSavedImageType.value,
+    // We use our own translations
+    useBackendTranslations: false,
 
-        // Default tab and tool
-        defaultTabId: TABS.ADJUST,
-        defaultToolId: TOOLS.CROP,
+    // Watch resize
+    observePluginContainerSize: true,
 
-        // Displayed tabs, disabling watermark and draw
-        tabsIds: Object.values(TABS)
-          .filter((tab) => ![TABS.WATERMARK, TABS.ANNOTATE].includes(tab))
-          .sort((a: string, b: string) => a.localeCompare(b, getLanguage())) as any[],
+    // Default tab and tool
+    defaultTabId: TABS.ADJUST,
+    defaultToolId: TOOLS.CROP,
 
-        onClose: this.onClose,
-        onSave: this.onSave,
+    // Displayed tabs, disabling watermark and draw
+    tabsIds: Object.values(TABS)
+      .filter((tab) => ![TABS.WATERMARK, TABS.ANNOTATE].includes(tab))
+      .sort((a: string, b: string) => a.localeCompare(b, getLanguage())) as any[],
 
-        Rotate: {
-          angle: 90,
-          componentType: 'buttons',
-        },
+    onClose: onClose,
+    onSave: onSave,
 
-        // Translations
-        translations,
-
-        theme: {
-          palette: {
-            'bg-secondary': 'var(--color-main-background)',
-            'bg-primary': 'var(--color-background-dark)',
-            'bg-hover': 'var(--color-background-hover)',
-            'bg-stateless': 'var(--color-background-dark)',
-
-            'accent-primary': 'var(--color-primary)',
-            'accent-stateless': 'var(--color-primary-element)',
-            'border-active-bottom': 'var(--color-primary)',
-
-            'bg-primary-active': 'var(--color-background-dark)',
-            'bg-primary-hover': 'var(--color-background-hover)',
-            'accent-primary-active': 'var(--color-main-text)',
-            'accent-primary-hover': 'var(--color-primary)',
-
-            warning: 'var(--color-error)',
-          },
-          typography: {
-            fontFamily: 'var(--font-face)',
-          },
-        },
-
-        savingPixelRatio: window.devicePixelRatio,
-        previewPixelRatio: window.devicePixelRatio,
-      };
+    Rotate: {
+      angle: 90,
+      componentType: 'buttons',
     },
 
-    defaultSavedImageName(): string {
-      return this.photo.basename || '';
-    },
+    // Translations
+    translations,
 
-    defaultSavedImageType(): 'jpg' | 'png' | 'webp' {
-      if (['image/png', 'image/webp'].includes(this.photo.mimetype!)) {
-        return this.photo.mimetype!.split('/')[1] as any;
-      }
-      return 'jpg';
-    },
+    theme: {
+      palette: {
+        'bg-secondary': 'var(--color-main-background)',
+        'bg-primary': 'var(--color-background-dark)',
+        'bg-hover': 'var(--color-background-hover)',
+        'bg-stateless': 'var(--color-background-dark)',
 
-    hasHighContrastEnabled(): boolean {
-      const themes = globalThis.OCA?.Theming?.enabledThemes || [];
-      return themes.some((theme: string) => theme.includes('highcontrast'));
-    },
+        'accent-primary': 'var(--color-primary)',
+        'accent-stateless': 'var(--color-primary-element)',
+        'border-active-bottom': 'var(--color-primary)',
 
-    themeDataAttr(): Record<string, boolean> {
-      if (this.hasHighContrastEnabled) {
-        return {
-          'data-theme-dark-highcontrast': true,
-        };
-      }
-      return {
-        'data-theme-dark': true,
-      };
-    },
-  },
+        'bg-primary-active': 'var(--color-background-dark)',
+        'bg-primary-hover': 'var(--color-background-hover)',
+        'accent-primary-active': 'var(--color-main-text)',
+        'accent-primary-hover': 'var(--color-primary)',
 
-  async mounted() {
-    // Directly use an HTML element to make sure the resolution
-    // in the editor matches the original file, but we can work
-    // with a preview instead
-    let source: HTMLImageElement;
-    try {
-      await loadFilerobot();
-      source = await this.getImage();
-    } catch (error) {
-      console.error(error);
-      showError(this.t('memories', 'Failed to load image'));
-      this.$emit('close');
-      return;
-    }
-
-    const div = this.refs().editor;
-    if (!div) return;
-    const config = { ...this.config, source };
-
-    // Add observer to update nodes as added
-    new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (!(node instanceof Element)) return;
-
-          node.querySelectorAll('.FIE_tools-bar button').forEach((node) => {
-            // Do not apply parent styles
-            node.classList.add('button-vue');
-          });
-        });
-      });
-    }).observe(div, { childList: true, subtree: true });
-
-    // Create the editor
-    this.imageEditor = markRaw(new FilerobotImageEditor(div, config));
-    this.imageEditor.render();
-
-    // Handle keyboard
-    window.addEventListener('keydown', this.handleKeydown, true);
-
-    // Fragment navigation
-    utils.fragment.push(utils.fragment.types.editor);
-    utils.bus.on('memories:fragment:pop:editor', this.warnUnsaved);
-  },
-
-  beforeUnmount() {
-    // Cleanup
-    this.imageEditor?.terminate();
-
-    // Remove keyboard handler
-    window.removeEventListener('keydown', this.handleKeydown, true);
-
-    // Fragment navigation
-    utils.fragment.pop(utils.fragment.types.editor);
-    utils.bus.off('memories:fragment:pop:editor', this.warnUnsaved);
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        editor?: HTMLDivElement;
-      };
-    },
-
-    async getImage(): Promise<HTMLImageElement> {
-      const img = new Image();
-      img.name = this.defaultSavedImageName;
-
-      const src = await fetchImage(<string>this.config.source);
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error('Failed to load image'));
-        img.src = src;
-      });
-
-      if (this.photo.w && this.photo.h) {
-        img.height = this.photo.h;
-        img.width = this.photo.w;
-      }
-
-      return img;
-    },
-
-    onClose(closingReason: any, haveNotSavedChanges: boolean) {
-      // Prevent the hook from being called again since we
-      // are going to quit now
-      utils.bus.off('memories:fragment:pop:editor', this.warnUnsaved);
-
-      // Cleanup
-      this.imageEditor?.terminate();
-      window.removeEventListener('keydown', this.handleKeydown, true);
-      this.$emit('close');
-    },
-
-    /**
-     * User saved the image
-     *
-     * @see https://github.com/scaleflex/filerobot-image-editor#onsave
-     */
-    async onSave(
-      data: {
-        name: string;
-        extension: string;
-        width?: number;
-        height?: number;
-        quality?: number;
-        fullName?: string;
-        imageBase64?: string;
+        warning: 'var(--color-error)',
       },
-      state: any,
-    ): Promise<void> {
-      // Copy state
-      state = structuredClone(state);
-
-      // Convert crop to relative values
-      if (state?.adjustments?.crop) {
-        const iw = state.shownImageDimensions.width;
-        const ih = state.shownImageDimensions.height;
-        const { x, y, width, height } = state.adjustments.crop;
-        state.adjustments.crop = {
-          x: x / iw,
-          y: y / ih,
-          width: width / iw,
-          height: height / ih,
-        };
-      }
-
-      // Suffix a different format so it saves as a copy
-      // https://github.com/pulsejet/memories/issues/1611
-      let name = data.name;
-      const nameLower = name.toLowerCase();
-      const ext = data.extension.toLowerCase() === 'jpeg' ? 'jpg' : data.extension.toLowerCase();
-      if (!nameLower.endsWith('.' + ext) && !(ext === 'jpg' && nameLower.endsWith('.jpeg'))) {
-        name += '.' + data.extension;
-      }
-
-      try {
-        const res = await axios.put<IImageInfo>(API.IMAGE_EDIT(this.photo.fileid), {
-          name: name,
-          width: data.width,
-          height: data.height,
-          quality: data.quality,
-          extension: data.extension,
-          state: state,
-        });
-        const fileid = res.data.fileid;
-
-        // Success, emit an appropriate event
-        showSuccess(this.t('memories', 'Image saved successfully'));
-
-        if (fileid !== this.photo.fileid) {
-          utils.bus.emit('files:file:created', { fileid });
-        } else {
-          utils.updatePhotoFromImageInfo(this.photo, res.data);
-          utils.bus.emit('files:file:updated', { fileid });
-        }
-        this.onClose(undefined, false);
-      } catch (err: any) {
-        showError(
-          this.t('memories', 'Error saving image: {error}', {
-            error: err?.response?.data?.message ?? err?.message ?? this.t('memories', 'Unknown'),
-          }),
-        );
-        console.error(err);
-      }
+      typography: {
+        fontFamily: 'var(--font-face)',
+      },
     },
 
-    /** Show warning for unsaved changes */
-    async warnUnsaved() {
-      // This method is only used when pressing the back button
-
-      // To find whether there are unsaved changes, just check
-      // if the reset button is enabled
-      const noChanges = this.refs().editor?.querySelector('button[title="Reset"]')?.hasAttribute('disabled');
-
-      if (
-        noChanges ||
-        (await utils.confirmDestructive({
-          title: this.t('memories', 'Unsaved changes'),
-          message: translations.discardChangesWarningHint,
-          confirm: this.t('memories', 'Drop changes'),
-          confirmClasses: 'error',
-          cancel: translations.cancel,
-        }))
-      ) {
-        this.onClose('warning-ignored', false);
-      } else {
-        // User cancelled, put the fragment back
-        utils.fragment.push(utils.fragment.types.editor);
-      }
-    },
-
-    // Key Handlers, override default Viewer arrow and escape key
-    handleKeydown(event: KeyboardEvent) {
-      event.stopImmediatePropagation();
-      // escape key
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        this.close();
-      }
-
-      // ctrl + S = save
-      if (event.ctrlKey && event.key === 's') {
-        event.preventDefault();
-        (document.querySelector('.FIE_topbar-save-button') as HTMLElement)?.click();
-      }
-
-      // ctrl + Z = undo
-      if (event.ctrlKey && event.key === 'z') {
-        event.preventDefault();
-        (document.querySelector('.FIE_topbar-undo-button') as HTMLElement)?.click();
-      }
-    },
-
-    close() {
-      // Since we cannot call the closeMethod and know if there
-      // are unsaved changes, let's fake a close button trigger.
-      (document.querySelector('.FIE_topbar-close-button') as HTMLElement)?.click();
-    },
-  },
+    savingPixelRatio: window.devicePixelRatio,
+    previewPixelRatio: window.devicePixelRatio,
+  };
 });
+
+const defaultSavedImageName = computed((): string => {
+  return props.photo.basename || '';
+});
+
+const defaultSavedImageType = computed((): 'jpg' | 'png' | 'webp' => {
+  if (['image/png', 'image/webp'].includes(props.photo.mimetype!)) {
+    return props.photo.mimetype!.split('/')[1] as any;
+  }
+  return 'jpg';
+});
+
+const hasHighContrastEnabled = computed((): boolean => {
+  const themes = globalThis.OCA?.Theming?.enabledThemes || [];
+  return themes.some((theme: string) => theme.includes('highcontrast'));
+});
+
+const themeDataAttr = computed((): Record<string, boolean> => {
+  if (hasHighContrastEnabled.value) {
+    return {
+      'data-theme-dark-highcontrast': true,
+    };
+  }
+  return {
+    'data-theme-dark': true,
+  };
+});
+
+onMounted(async () => {
+  // Directly use an HTML element to make sure the resolution
+  // in the editor matches the original file, but we can work
+  // with a preview instead
+  let source: HTMLImageElement;
+  try {
+    await loadFilerobot();
+    source = await getImage();
+  } catch (error) {
+    console.error(error);
+    showError(t('memories', 'Failed to load image'));
+    emit('close');
+    return;
+  }
+
+  const div = editor.value;
+  if (!div) return;
+  const editorConfig = { ...config.value, source };
+
+  // Add observer to update nodes as added
+  new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (!(node instanceof Element)) return;
+
+        node.querySelectorAll('.FIE_tools-bar button').forEach((node) => {
+          // Do not apply parent styles
+          node.classList.add('button-vue');
+        });
+      });
+    });
+  }).observe(div, { childList: true, subtree: true });
+
+  // Create the editor
+  imageEditor.value = markRaw(new FilerobotImageEditor(div, editorConfig));
+  imageEditor.value.render();
+
+  // Handle keyboard
+  window.addEventListener('keydown', handleKeydown, true);
+
+  // Fragment navigation
+  utils.fragment.push(utils.fragment.types.editor);
+  utils.bus.on('memories:fragment:pop:editor', warnUnsaved);
+});
+
+onBeforeUnmount(() => {
+  // Cleanup
+  imageEditor.value?.terminate();
+
+  // Remove keyboard handler
+  window.removeEventListener('keydown', handleKeydown, true);
+
+  // Fragment navigation
+  utils.fragment.pop(utils.fragment.types.editor);
+  utils.bus.off('memories:fragment:pop:editor', warnUnsaved);
+});
+
+async function getImage(): Promise<HTMLImageElement> {
+  const img = new Image();
+  img.name = defaultSavedImageName.value;
+
+  const src = await fetchImage(<string>config.value.source);
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.src = src;
+  });
+
+  if (props.photo.w && props.photo.h) {
+    img.height = props.photo.h;
+    img.width = props.photo.w;
+  }
+
+  return img;
+}
+
+function onClose(closingReason: any, haveNotSavedChanges: boolean) {
+  // Prevent the hook from being called again since we
+  // are going to quit now
+  utils.bus.off('memories:fragment:pop:editor', warnUnsaved);
+
+  // Cleanup
+  imageEditor.value?.terminate();
+  window.removeEventListener('keydown', handleKeydown, true);
+  emit('close');
+}
+
+/**
+ * User saved the image
+ *
+ * @see https://github.com/scaleflex/filerobot-image-editor#onsave
+ */
+async function onSave(
+  data: {
+    name: string;
+    extension: string;
+    width?: number;
+    height?: number;
+    quality?: number;
+    fullName?: string;
+    imageBase64?: string;
+  },
+  state: any,
+): Promise<void> {
+  // Copy state
+  state = structuredClone(state);
+
+  // Convert crop to relative values
+  if (state?.adjustments?.crop) {
+    const iw = state.shownImageDimensions.width;
+    const ih = state.shownImageDimensions.height;
+    const { x, y, width, height } = state.adjustments.crop;
+    state.adjustments.crop = {
+      x: x / iw,
+      y: y / ih,
+      width: width / iw,
+      height: height / ih,
+    };
+  }
+
+  // Suffix a different format so it saves as a copy
+  // https://github.com/pulsejet/memories/issues/1611
+  let name = data.name;
+  const nameLower = name.toLowerCase();
+  const ext = data.extension.toLowerCase() === 'jpeg' ? 'jpg' : data.extension.toLowerCase();
+  if (!nameLower.endsWith('.' + ext) && !(ext === 'jpg' && nameLower.endsWith('.jpeg'))) {
+    name += '.' + data.extension;
+  }
+
+  try {
+    const res = await axios.put<IImageInfo>(API.IMAGE_EDIT(props.photo.fileid), {
+      name: name,
+      width: data.width,
+      height: data.height,
+      quality: data.quality,
+      extension: data.extension,
+      state: state,
+    });
+    const fileid = res.data.fileid;
+
+    // Success, emit an appropriate event
+    showSuccess(t('memories', 'Image saved successfully'));
+
+    if (fileid !== props.photo.fileid) {
+      utils.bus.emit('files:file:created', { fileid });
+    } else {
+      utils.updatePhotoFromImageInfo(props.photo, res.data);
+      utils.bus.emit('files:file:updated', { fileid });
+    }
+    onClose(undefined, false);
+  } catch (err: any) {
+    showError(
+      t('memories', 'Error saving image: {error}', {
+        error: err?.response?.data?.message ?? err?.message ?? t('memories', 'Unknown'),
+      }),
+    );
+    console.error(err);
+  }
+}
+
+/** Show warning for unsaved changes */
+async function warnUnsaved() {
+  // This method is only used when pressing the back button
+
+  // To find whether there are unsaved changes, just check
+  // if the reset button is enabled
+  const noChanges = editor.value?.querySelector('button[title="Reset"]')?.hasAttribute('disabled');
+
+  if (
+    noChanges ||
+    (await utils.confirmDestructive({
+      title: t('memories', 'Unsaved changes'),
+      message: translations.discardChangesWarningHint,
+      confirm: t('memories', 'Drop changes'),
+      confirmClasses: 'error',
+      cancel: translations.cancel,
+    }))
+  ) {
+    onClose('warning-ignored', false);
+  } else {
+    // User cancelled, put the fragment back
+    utils.fragment.push(utils.fragment.types.editor);
+  }
+}
+
+// Key Handlers, override default Viewer arrow and escape key
+function handleKeydown(event: KeyboardEvent) {
+  event.stopImmediatePropagation();
+  // escape key
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    close();
+  }
+
+  // ctrl + S = save
+  if (event.ctrlKey && event.key === 's') {
+    event.preventDefault();
+    (document.querySelector('.FIE_topbar-save-button') as HTMLElement)?.click();
+  }
+
+  // ctrl + Z = undo
+  if (event.ctrlKey && event.key === 'z') {
+    event.preventDefault();
+    (document.querySelector('.FIE_topbar-undo-button') as HTMLElement)?.click();
+  }
+}
+
+function close() {
+  // Since we cannot call the closeMethod and know if there
+  // are unsaved changes, let's fake a close button trigger.
+  (document.querySelector('.FIE_topbar-close-button') as HTMLElement)?.click();
+}
 </script>
 
 <style lang="scss" scoped>
