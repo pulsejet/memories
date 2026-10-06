@@ -89,7 +89,6 @@ import {
 import Fuse from 'fuse.js';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
-const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
 const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import AlbumForm from './AlbumForm.vue';
@@ -231,7 +230,7 @@ function submit() {
 }
 
 function forceUpdate() {
-  getCurrentInstance()?.proxy?.$forceUpdate(); // sets do not trigger reactivity
+  instance?.proxy?.$forceUpdate(); // sets do not trigger reactivity
   albumsList.value?.$forceUpdate();
 }
 </script>
