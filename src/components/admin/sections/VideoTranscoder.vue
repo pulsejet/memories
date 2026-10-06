@@ -94,8 +94,10 @@ defineOptions({
 const props = defineProps(adminSectionProps);
 const emit = defineEmits<AdminSectionEmits>();
 
-const { update, binaryStatus, binaryStatusType, serviceStatus, serviceStatusType, enableTranscoding } =
-  useAdminSection(props, emit);
+const { update, binaryStatus, binaryStatusType, serviceStatus, serviceStatusType, enableTranscoding } = useAdminSection(
+  props,
+  emit,
+);
 
 function updateConnect(value: string) {
   const array = value.split(',').map((s) => s.trim());
