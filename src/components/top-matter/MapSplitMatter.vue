@@ -34,13 +34,13 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, markRaw } from 'vue';
+<script setup lang="ts">
+import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { LMarker, LIcon } from '@vue-leaflet/vue-leaflet';
 
 import axios from '@nextcloud/axios';
 
-import UserConfig from '@mixins/UserConfig';
 import { API } from '@services/API';
 import * as utils from '@services/utils';
 
@@ -52,342 +52,333 @@ import type { IMapCluster } from '@typings';
 // CSS transition time for zooming in/out cluster animation
 const CLUSTER_TRANSITION_TIME = 300;
 
-export default defineComponent({
+defineOptions({
   name: 'MapSplitMatter',
-  mixins: [UserConfig],
-  components: {
-    MapStandalone,
-    LMarker,
-    LIcon,
-    XImg,
+});
+
+const route = useRoute();
+const router = useRouter();
+
+const matter = useTemplateRef<HTMLDivElement>('matter');
+const standalone = useTemplateRef<InstanceType<typeof MapStandalone>>('standalone');
+
+const zoom = ref(2);
+const oldZoom = ref(2);
+const clusters = ref<IMapCluster[]>([]);
+const animMarkers = ref(false);
+const lastClick = ref(0); // fileid
+let resizeObserver: ResizeObserver | null = null;
+
+onMounted(() => {
+  if (standalone.value?.getMap()) {
+    onMapReady();
+  }
+
+  resizeObserver = new ResizeObserver(handleContainerResize);
+  resizeObserver.observe(matter.value!);
+});
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+  resizeObserver = null;
+});
+
+watch(
+  () => [route.query.b, route.query.z],
+  (curr, old) => {
+    if (curr[0] === old[0] && curr[1] === old[1]) return;
+    initialize(true);
   },
+);
 
-  data: () => ({
-    zoom: 2,
-    oldZoom: 2,
-    clusters: [] as IMapCluster[],
-    animMarkers: false,
-    lastClick: 0, // fileid
-    resizeObserver: null as ResizeObserver | null,
-  }),
+function onMapReady() {
+  // Make sure the zoom control doesn't overlap with the navbar
+  standalone.value!.getMap()!.zoomControl.setPosition('topright');
 
-  mounted() {
-    if (this.refs().standalone?.getMap()) {
-      this.onMapReady();
+  // Initialize
+  initialize();
+}
+/**
+ * Get initial coordinates for display and set them.
+ * Then fetch clusters.
+ */
+async function initialize(reinit: boolean = false) {
+  // Check if we have bounds and zoom in query
+  if (route.query.b && route.query.z) {
+    if (!reinit) {
+      setBoundsFromQuery();
+    }
+    return await fetchClusters();
+  }
+
+  // Otherwise, get location from server
+  try {
+    const init = await axios.get<{
+      pos?: {
+        lat?: number;
+        lon?: number;
+      };
+    }>(API.MAP_INIT());
+
+    // Init data contains position information
+    const map = standalone.value!.getMap();
+    const pos = init?.data?.pos;
+    if (!pos?.lat || !pos?.lon) {
+      throw new Error('No position data');
     }
 
-    this.resizeObserver = markRaw(new ResizeObserver(this.handleContainerResize));
-    this.resizeObserver.observe(this.refs().matter);
-  },
+    // This will trigger route change -> fetchClusters
+    map!.setView([pos.lat, pos.lon], 11);
+  } catch (e) {
+    // We will initialize clusters anyway
+  } finally {
+    refresh();
+  }
+}
 
-  beforeUnmount() {
-    this.resizeObserver?.disconnect();
-    this.resizeObserver = null;
-  },
+const refreshTimer = new utils.RenewingTimeout();
 
-  watch: {
-    $route(curr, old) {
-      if (curr.query.b === old.query.b && curr.query.z === old.query.z) return;
-      this.initialize(true);
-    },
-  },
+async function refreshDebounced() {
+  refreshTimer.set(refresh, 250);
+}
 
-  methods: {
-    refs() {
-      return this.$refs as {
-        matter: HTMLDivElement;
-        standalone: InstanceType<typeof MapStandalone>;
-      };
-    },
+async function refresh() {
+  const map = standalone.value!.getMap();
+  if (!map) return;
 
-    onMapReady() {
-      // Make sure the zoom control doesn't overlap with the navbar
-      this.refs().standalone.getMap()!.zoomControl.setPosition('topright');
+  // Get boundaries of the map
+  const boundary = map.getBounds();
+  let minLat = boundary.getSouth();
+  let maxLat = boundary.getNorth();
+  let minLon = boundary.getWest();
+  let maxLon = boundary.getEast();
 
-      // Initialize
-      this.initialize();
-    },
-    /**
-     * Get initial coordinates for display and set them.
-     * Then fetch clusters.
-     */
-    async initialize(reinit: boolean = false) {
-      // Check if we have bounds and zoom in query
-      if (this.$route.query.b && this.$route.query.z) {
-        if (!reinit) {
-          this.setBoundsFromQuery();
-        }
-        return await this.fetchClusters();
-      }
+  // Set query parameters to route if required
+  const bounds = boundsToStr({ minLat, maxLat, minLon, maxLon });
 
-      // Otherwise, get location from server
-      try {
-        const init = await axios.get<{
-          pos?: {
-            lat?: number;
-            lon?: number;
-          };
-        }>(API.MAP_INIT());
+  // Zoom level
+  zoom.value = Math.round(map.getZoom());
 
-        // Init data contains position information
-        const map = this.refs().standalone.getMap();
-        const pos = init?.data?.pos;
-        if (!pos?.lat || !pos?.lon) {
-          throw new Error('No position data');
-        }
+  // Construct query
+  const query = {
+    b: bounds,
+    z: zoom.value.toString(),
+  };
 
-        // This will trigger route change -> fetchClusters
-        map!.setView([pos.lat, pos.lon], 11);
-      } catch (e) {
-        // We will initialize clusters anyway
-      } finally {
-        this.refresh();
-      }
-    },
+  // If the query parameters are the same, don't do anything
+  if (route.query.b === query.b && route.query.z === query.z) {
+    return;
+  }
 
-    async refreshDebounced() {
-      utils.setRenewingTimeout(this, 'refreshTimer', this.refresh, 250);
-    },
+  // Add new query keeping old hash for viewer
+  router.replace({
+    query: query,
+    hash: route.hash,
+  });
+}
 
-    async refresh() {
-      const map = this.refs().standalone.getMap();
-      if (!map) return;
+async function fetchClusters() {
+  const oldZoomVal = oldZoom.value;
+  const qbounds = route.query.b;
+  const zoomParam = route.query.z?.toString();
+  const paramsChanged = () => route.query.b !== qbounds || route.query.z !== zoomParam;
 
-      // Get boundaries of the map
-      const boundary = map.getBounds();
-      let minLat = boundary.getSouth();
-      let maxLat = boundary.getNorth();
-      let minLon = boundary.getWest();
-      let maxLon = boundary.getEast();
+  let { minLat, maxLat, minLon, maxLon } = boundsFromQuery();
 
-      // Set query parameters to route if required
-      const bounds = this.boundsToStr({ minLat, maxLat, minLon, maxLon });
+  // Extend bounds by 25% beyond the map
+  const latDiff = Math.abs(maxLat - minLat);
+  const lonDiff = Math.abs(maxLon - minLon);
+  minLat -= latDiff * 0.25;
+  maxLat += latDiff * 0.25;
+  minLon -= lonDiff * 0.25;
+  maxLon += lonDiff * 0.25;
 
-      // Zoom level
-      this.zoom = Math.round(map.getZoom());
+  // Get bounds with expanded margins
+  const bounds = boundsToStr({ minLat, maxLat, minLon, maxLon });
 
-      // Construct query
-      const query = {
-        b: bounds,
-        z: this.zoom.toString(),
-      };
+  // Make API call
+  const url = API.Q(API.MAP_CLUSTERS(), { bounds, zoom: zoomParam });
 
-      // If the query parameters are the same, don't do anything
-      if (this.$route.query.b === query.b && this.$route.query.z === query.z) {
-        return;
-      }
+  // Params have changed, quit
+  const res = await axios.get<IMapCluster[]>(url);
+  if (paramsChanged()) return;
 
-      // Add new query keeping old hash for viewer
-      this.$router.replace({
-        query: query,
-        hash: this.$route.hash,
+  // Mark currently loaded zoom level
+  oldZoom.value = zoom.value;
+
+  if (zoom.value > oldZoomVal) {
+    setClustersZoomIn(res.data, oldZoomVal);
+  } else if (zoom.value < oldZoomVal) {
+    setClustersZoomOut(res.data);
+  } else {
+    clusters.value = res.data;
+  }
+
+  // Animate markers
+  animateMarkers();
+}
+
+function boundsFromQuery() {
+  const bounds = (route.query.b?.toString() ?? '').split(',');
+  return {
+    minLat: parseFloat(bounds[0]),
+    maxLat: parseFloat(bounds[1]),
+    minLon: parseFloat(bounds[2]),
+    maxLon: parseFloat(bounds[3]),
+  };
+}
+
+function boundsToStr({
+  minLat,
+  maxLat,
+  minLon,
+  maxLon,
+}: {
+  minLat: number;
+  maxLat: number;
+  minLon: number;
+  maxLon: number;
+}) {
+  const s = (x: number) => x.toFixed(6);
+  return `${s(minLat)},${s(maxLat)},${s(minLon)},${s(maxLon)}`;
+}
+
+function setBoundsFromQuery() {
+  const map = standalone.value!.getMap();
+  const { minLat, maxLat, minLon, maxLon } = boundsFromQuery();
+  map!.fitBounds([
+    [minLat, minLon],
+    [maxLat, maxLon],
+  ]);
+}
+
+function clusterPreviewUrl(cluster: IMapCluster) {
+  return utils.getPreviewUrl({
+    photo: cluster.preview,
+    msize: 256,
+  });
+}
+
+function clusterIconClass(cluster: IMapCluster) {
+  return cluster.dummy ? 'dummy' : '';
+}
+
+function zoomTo(cluster: IMapCluster) {
+  // At high zoom levels, open the photo
+  if (zoom.value >= 12 && cluster.preview) {
+    // Set the thum key and important class so this zooms in.
+    // Reset it later so the next click is unambiguous.
+    cluster.preview.key = cluster.preview.fileid.toString();
+    lastClick.value = cluster.preview.fileid;
+    setTimeout(() => (lastClick.value = 0), 500);
+    // Open viewer with this photo.
+    _m.viewer.open(cluster.preview);
+    return;
+  }
+
+  // Zoom in
+  const map = standalone.value!.getMap();
+  const factor = globalThis.innerWidth >= 768 ? 2 : 1;
+  const zoomVal = map!.getZoom() + factor;
+  map!.setView(cluster.center, zoomVal, { animate: true });
+}
+
+function getGridKey(center: [number, number], zoomVal: number) {
+  // Calcluate grid length
+  const clusterDensity = 1;
+  const oldGridLen = 180.0 / (2 ** zoomVal * clusterDensity);
+
+  // Get map key
+  const latGid = Math.floor(center[0] / oldGridLen);
+  const lonGid = Math.floor(center[1] / oldGridLen);
+  return `${latGid}-${lonGid}`;
+}
+
+function getGridMap(clustersVal: IMapCluster[], zoomVal: number) {
+  const gridMap = new Map<string, IMapCluster>();
+  for (const cluster of clustersVal) {
+    const key = getGridKey(cluster.center, zoomVal);
+    gridMap.set(key, cluster);
+  }
+  return gridMap;
+}
+
+async function setClustersZoomIn(clustersVal: IMapCluster[], oldZoomVal: number) {
+  // Create GID-map for old clusters
+  const oldClusters = getGridMap(clusters.value, oldZoomVal);
+
+  // Dummy clusters to animate markers
+  const dummyClusters: IMapCluster[] = [];
+
+  // Iterate new clusters
+  for (const cluster of clustersVal) {
+    // Check if cluster already exists
+    const key = getGridKey(cluster.center, oldZoomVal);
+    const oldCluster = oldClusters.get(key);
+    if (oldCluster) {
+      // Copy cluster and set location to old cluster
+      dummyClusters.push({
+        ...cluster,
+        center: oldCluster.center,
       });
-    },
+    } else {
+      // Just show it
+      dummyClusters.push(cluster);
+    }
+  }
 
-    async fetchClusters() {
-      const oldZoom = this.oldZoom;
-      const qbounds = this.$route.query.b;
-      const zoom = this.$route.query.z?.toString();
-      const paramsChanged = () => this.$route.query.b !== qbounds || this.$route.query.z !== zoom;
+  // Set clusters
+  clusters.value = dummyClusters;
+  await nextTick();
+  await new Promise((r) => setTimeout(r, 0));
+  clusters.value = clustersVal;
+}
 
-      let { minLat, maxLat, minLon, maxLon } = this.boundsFromQuery();
+async function setClustersZoomOut(clustersVal: IMapCluster[]) {
+  // Get GID-map for new clusters
+  const newClustersGid = getGridMap(clustersVal, zoom.value);
 
-      // Extend bounds by 25% beyond the map
-      const latDiff = Math.abs(maxLat - minLat);
-      const lonDiff = Math.abs(maxLon - minLon);
-      minLat -= latDiff * 0.25;
-      maxLat += latDiff * 0.25;
-      minLon -= lonDiff * 0.25;
-      maxLon += lonDiff * 0.25;
+  // Get ID-map for new clusters
+  const newClustersId = new Map<number, IMapCluster>();
+  for (const cluster of clustersVal) {
+    newClustersId.set(cluster.id, cluster);
+  }
 
-      // Get bounds with expanded margins
-      const bounds = this.boundsToStr({ minLat, maxLat, minLon, maxLon });
+  // Dummy clusters to animate markers
+  const dummyClusters: IMapCluster[] = [...clustersVal];
 
-      // Make API call
-      const url = API.Q(API.MAP_CLUSTERS(), { bounds, zoom });
-
-      // Params have changed, quit
-      const res = await axios.get<IMapCluster[]>(url);
-      if (paramsChanged()) return;
-
-      // Mark currently loaded zoom level
-      this.oldZoom = this.zoom;
-
-      if (this.zoom > oldZoom) {
-        this.setClustersZoomIn(res.data, oldZoom);
-      } else if (this.zoom < oldZoom) {
-        this.setClustersZoomOut(res.data);
-      } else {
-        this.clusters = res.data;
+  // Iterate old clusters
+  for (const oldCluster of clusters.value) {
+    // Process only clusters that are not in the new clusters
+    const newCluster = newClustersId.get(oldCluster.id);
+    if (!newCluster) {
+      // Get the new cluster at the same GID
+      const key = getGridKey(oldCluster.center, zoom.value);
+      const newCluster = newClustersGid.get(key);
+      if (newCluster) {
+        // No need to copy; it is gone anyway
+        oldCluster.center = newCluster.center;
+        oldCluster.dummy = true;
+        dummyClusters.push(oldCluster);
       }
+    }
+  }
 
-      // Animate markers
-      this.animateMarkers();
-    },
+  // Set clusters
+  clusters.value = dummyClusters;
+  await new Promise((r) => setTimeout(r, CLUSTER_TRANSITION_TIME)); // wait for animation
+  clusters.value = clustersVal;
+}
 
-    boundsFromQuery() {
-      const bounds = (this.$route.query.b?.toString() ?? '').split(',');
-      return {
-        minLat: parseFloat(bounds[0]),
-        maxLat: parseFloat(bounds[1]),
-        minLon: parseFloat(bounds[2]),
-        maxLon: parseFloat(bounds[3]),
-      };
-    },
+async function animateMarkers() {
+  animMarkers.value = true;
+  await new Promise((r) => setTimeout(r, CLUSTER_TRANSITION_TIME)); // wait for animation
+  animMarkers.value = false;
+}
 
-    boundsToStr({
-      minLat,
-      maxLat,
-      minLon,
-      maxLon,
-    }: {
-      minLat: number;
-      maxLat: number;
-      minLon: number;
-      maxLon: number;
-    }) {
-      const s = (x: number) => x.toFixed(6);
-      return `${s(minLat)},${s(maxLat)},${s(minLon)},${s(maxLon)}`;
-    },
-
-    setBoundsFromQuery() {
-      const map = this.refs().standalone.getMap();
-      const { minLat, maxLat, minLon, maxLon } = this.boundsFromQuery();
-      map!.fitBounds([
-        [minLat, minLon],
-        [maxLat, maxLon],
-      ]);
-    },
-
-    clusterPreviewUrl(cluster: IMapCluster) {
-      return utils.getPreviewUrl({
-        photo: cluster.preview,
-        msize: 256,
-      });
-    },
-
-    clusterIconClass(cluster: IMapCluster) {
-      return cluster.dummy ? 'dummy' : '';
-    },
-
-    zoomTo(cluster: IMapCluster) {
-      // At high zoom levels, open the photo
-      if (this.zoom >= 12 && cluster.preview) {
-        // Set the thum key and important class so this zooms in.
-        // Reset it later so the next click is unambiguous.
-        cluster.preview.key = cluster.preview.fileid.toString();
-        this.lastClick = cluster.preview.fileid;
-        setTimeout(() => (this.lastClick = 0), 500);
-        // Open viewer with this photo.
-        _m.viewer.open(cluster.preview);
-        return;
-      }
-
-      // Zoom in
-      const map = this.refs().standalone.getMap();
-      const factor = globalThis.innerWidth >= 768 ? 2 : 1;
-      const zoom = map!.getZoom() + factor;
-      map!.setView(cluster.center, zoom, { animate: true });
-    },
-
-    getGridKey(center: [number, number], zoom: number) {
-      // Calcluate grid length
-      const clusterDensity = 1;
-      const oldGridLen = 180.0 / (2 ** zoom * clusterDensity);
-
-      // Get map key
-      const latGid = Math.floor(center[0] / oldGridLen);
-      const lonGid = Math.floor(center[1] / oldGridLen);
-      return `${latGid}-${lonGid}`;
-    },
-
-    getGridMap(clusters: IMapCluster[], zoom: number) {
-      const gridMap = new Map<string, IMapCluster>();
-      for (const cluster of clusters) {
-        const key = this.getGridKey(cluster.center, zoom);
-        gridMap.set(key, cluster);
-      }
-      return gridMap;
-    },
-
-    async setClustersZoomIn(clusters: IMapCluster[], oldZoom: number) {
-      // Create GID-map for old clusters
-      const oldClusters = this.getGridMap(this.clusters, oldZoom);
-
-      // Dummy clusters to animate markers
-      const dummyClusters: IMapCluster[] = [];
-
-      // Iterate new clusters
-      for (const cluster of clusters) {
-        // Check if cluster already exists
-        const key = this.getGridKey(cluster.center, oldZoom);
-        const oldCluster = oldClusters.get(key);
-        if (oldCluster) {
-          // Copy cluster and set location to old cluster
-          dummyClusters.push({
-            ...cluster,
-            center: oldCluster.center,
-          });
-        } else {
-          // Just show it
-          dummyClusters.push(cluster);
-        }
-      }
-
-      // Set clusters
-      this.clusters = dummyClusters;
-      await this.$nextTick();
-      await new Promise((r) => setTimeout(r, 0));
-      this.clusters = clusters;
-    },
-
-    async setClustersZoomOut(clusters: IMapCluster[]) {
-      // Get GID-map for new clusters
-      const newClustersGid = this.getGridMap(clusters, this.zoom);
-
-      // Get ID-map for new clusters
-      const newClustersId = new Map<number, IMapCluster>();
-      for (const cluster of clusters) {
-        newClustersId.set(cluster.id, cluster);
-      }
-
-      // Dummy clusters to animate markers
-      const dummyClusters: IMapCluster[] = [...clusters];
-
-      // Iterate old clusters
-      for (const oldCluster of this.clusters) {
-        // Process only clusters that are not in the new clusters
-        const newCluster = newClustersId.get(oldCluster.id);
-        if (!newCluster) {
-          // Get the new cluster at the same GID
-          const key = this.getGridKey(oldCluster.center, this.zoom);
-          const newCluster = newClustersGid.get(key);
-          if (newCluster) {
-            // No need to copy; it is gone anyway
-            oldCluster.center = newCluster.center;
-            oldCluster.dummy = true;
-            dummyClusters.push(oldCluster);
-          }
-        }
-      }
-
-      // Set clusters
-      this.clusters = dummyClusters;
-      await new Promise((r) => setTimeout(r, CLUSTER_TRANSITION_TIME)); // wait for animation
-      this.clusters = clusters;
-    },
-
-    async animateMarkers() {
-      this.animMarkers = true;
-      await new Promise((r) => setTimeout(r, CLUSTER_TRANSITION_TIME)); // wait for animation
-      this.animMarkers = false;
-    },
-
-    handleContainerResize() {
-      this.refs().standalone?.getMap()?.invalidateSize(true);
-    },
-  },
-});
+function handleContainerResize() {
+  standalone.value?.getMap()?.invalidateSize(true);
+}
 </script>
 
 <style lang="scss" scoped>
