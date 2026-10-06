@@ -74,10 +74,10 @@ import axios from '@nextcloud/axios';
 import { useModal } from '@services/modal';
 import { t, n } from '@services/l10n';
 import { useUserConfig } from '@services/user-config';
-import * as dav from '@services/dav';
-import * as utils from '@services/utils';
 import { constants as c } from '@services/utils';
 import { API } from '@services/API';
+import * as dav from '@services/dav';
+import * as utils from '@services/utils';
 
 import type { IExif, IImageInfo, IPhoto } from '@typings';
 

@@ -68,8 +68,8 @@ import axios from '@nextcloud/axios';
 import { showError, showSuccess } from '@nextcloud/dialogs';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
-const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
+const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
 
 import Modal from './Modal.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';

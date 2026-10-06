@@ -69,13 +69,11 @@ import { computed, ref, onMounted, defineAsyncComponent } from 'vue';
 import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 import staticConfig from '@services/static-config';
+import { t } from '@services/l10n';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
-const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
-
-import { t } from '@services/l10n';
 
 import type { IPhoto } from '@typings';
 

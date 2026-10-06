@@ -26,7 +26,7 @@ import { ref, onMounted, defineAsyncComponent } from 'vue';
 
 const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
-import { translate as t } from '@services/l10n';
+import { t } from '@services/l10n';
 
 import type { IExif, IPhoto } from '@typings';
 

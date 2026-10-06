@@ -17,17 +17,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, useTemplateRef, defineAsyncComponent } from 'vue';
+import { ref, useTemplateRef } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { showError } from '@nextcloud/dialogs';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
-import Cluster from '@components/frame/Cluster.vue';
 import FaceList from './FaceList.vue';
-
 import Modal from './Modal.vue';
 
 import { useModal } from '@services/modal';

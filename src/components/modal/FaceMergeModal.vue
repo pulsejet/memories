@@ -27,10 +27,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { showError } from '@nextcloud/dialogs';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 
-import Cluster from '@components/frame/Cluster.vue';
 import Modal from './Modal.vue';
 import FaceList from './FaceList.vue';
 

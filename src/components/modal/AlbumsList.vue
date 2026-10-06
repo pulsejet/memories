@@ -33,7 +33,6 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue';
 
-import NcButton from '@nextcloud/vue/components/NcButton';
 const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
 
 import * as utils from '@services/utils';
