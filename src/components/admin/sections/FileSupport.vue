@@ -94,68 +94,70 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import NcTextField from '@nextcloud/vue/components/NcTextField';
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch';
 
-import { translate as t } from '@services/l10n';
+import { t } from '@services/l10n';
 
-import AdminMixin from '../AdminMixin';
+import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
 
-export default defineComponent({
+defineOptions({
   name: 'FileSupport',
   title: t('memories', 'File Support'),
-  mixins: [AdminMixin],
-
-  data: () => ({
-    knownPreviewProviders: {
-      'OC\\Preview\\Image': {
-        name: t('memories', 'Images (JPEG, PNG, GIF, BMP)'),
-      },
-      'OC\\Preview\\HEIC': {
-        name: t('memories', 'HEIC (Imagick)'),
-      },
-      'OC\\Preview\\TIFF': {
-        name: t('memories', 'TIFF (Imagick)'),
-      },
-      'OC\\Preview\\Movie': {
-        name: t('memories', 'Videos (ffmpeg)'),
-      },
-      'OC\\Preview\\Imaginary': {
-        name: t('memories', 'Imaginary (not recommended)'),
-      },
-    },
-
-    previewSizes: [512, 1024, 2048, 4096, 8192],
-  }),
-
-  methods: {
-    providers() {
-      return this.config['enabledPreviewProviders'];
-    },
-
-    hasProvider(klass: string): boolean {
-      return this.providers().includes(klass);
-    },
-
-    updateProvider(klass: string, enabled: boolean) {
-      if (enabled === this.hasProvider(klass)) return;
-
-      if (enabled) {
-        this.providers().push(klass);
-      } else {
-        this.config['enabledPreviewProviders'] = this.providers().filter((k) => k !== klass);
-      }
-
-      this.update('enabledPreviewProviders');
-    },
-
-    async updatePreviewSize(size: number | string) {
-      this.update('preview_max_x', Number(size));
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Hack to prevent config race
-      this.update('preview_max_y', Number(size));
-    },
-  },
 });
+
+const props = defineProps(adminSectionProps);
+const emit = defineEmits<AdminSectionEmits>();
+
+const { update, binaryStatus, binaryStatusType, binaryStatusOk } = useAdminSection(props, emit);
+
+const knownPreviewProviders = {
+  'OC\\Preview\\Image': {
+    name: t('memories', 'Images (JPEG, PNG, GIF, BMP)'),
+  },
+  'OC\\Preview\\HEIC': {
+    name: t('memories', 'HEIC (Imagick)'),
+  },
+  'OC\\Preview\\TIFF': {
+    name: t('memories', 'TIFF (Imagick)'),
+  },
+  'OC\\Preview\\Movie': {
+    name: t('memories', 'Videos (ffmpeg)'),
+  },
+  'OC\\Preview\\Imaginary': {
+    name: t('memories', 'Imaginary (not recommended)'),
+  },
+};
+
+const previewSizes = [512, 1024, 2048, 4096, 8192];
+
+function providers() {
+  return props.config['enabledPreviewProviders'];
+}
+
+function hasProvider(klass: string): boolean {
+  return providers().includes(klass);
+}
+
+function updateProvider(klass: string, enabled: boolean) {
+  if (enabled === hasProvider(klass)) return;
+
+  if (enabled) {
+    providers().push(klass);
+  } else {
+    props.config['enabledPreviewProviders'] = providers().filter((k) => k !== klass);
+  }
+
+  update('enabledPreviewProviders');
+}
+
+async function updatePreviewSize(size: number | string) {
+  update('preview_max_x', Number(size));
+  await new Promise((resolve) => setTimeout(resolve, 1000)); // Hack to prevent config race
+  update('preview_max_y', Number(size));
+}
 </script>
 
 <style lang="scss" scoped>

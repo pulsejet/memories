@@ -37,18 +37,18 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { t } from '@services/l10n';
 
-import { translate as t } from '@services/l10n';
+import { adminSectionProps, type AdminSectionEmits } from '../useAdminSection';
 
-import AdminMixin from '../AdminMixin';
-
-export default defineComponent({
+defineOptions({
   name: 'Support',
   title: t('memories', 'Help & Support'),
-  mixins: [AdminMixin],
 });
+
+defineProps(adminSectionProps);
+defineEmits<AdminSectionEmits>();
 </script>
 
 <style lang="scss" scoped>

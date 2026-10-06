@@ -64,16 +64,20 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch';
 
-import { translate as t } from '@services/l10n';
+import { t } from '@services/l10n';
 
-import AdminMixin from '../AdminMixin';
+import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
 
-export default defineComponent({
+defineOptions({
   name: 'Viewer',
   title: t('memories', 'Photo Viewer'),
-  mixins: [AdminMixin],
 });
+
+const props = defineProps(adminSectionProps);
+const emit = defineEmits<AdminSectionEmits>();
+
+const { update } = useAdminSection(props, emit);
 </script>

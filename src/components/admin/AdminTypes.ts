@@ -60,7 +60,7 @@ export type ISystemStatus = {
   last_index_job_start: number;
   last_index_job_duration: number;
   last_index_job_status: string;
-  last_index_job_status_type: string;
+  last_index_job_status_type: 'success' | 'warning' | 'error';
 
   bad_encryption: boolean;
   db_is_sqlite?: boolean;

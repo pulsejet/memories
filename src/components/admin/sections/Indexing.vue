@@ -137,33 +137,37 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
-import { translate as t } from '@services/l10n';
+import NcTextField from '@nextcloud/vue/components/NcTextField';
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch';
+
+import { t } from '@services/l10n';
 import { API } from '@services/API';
 
-import AdminMixin from '../AdminMixin';
+import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
 
-export default defineComponent({
+defineOptions({
   name: 'Indexing',
   title: t('memories', 'Media Indexing'),
-  mixins: [AdminMixin],
+});
 
-  data: () => ({ API }),
+const props = defineProps(adminSectionProps);
+const emit = defineEmits<AdminSectionEmits>();
 
-  computed: {
-    blocklistText: {
-      get(): string {
-        return (this.config['memories.index.folder.blocklist'] ?? []).join(', ');
-      },
-      set(value: string) {
-        this.config['memories.index.folder.blocklist'] = value
-          .split(',')
-          .map((s) => s.trim())
-          .filter((s) => s !== '');
-      },
-    },
+const { update } = useAdminSection(props, emit);
+
+const blocklistText = computed({
+  get(): string {
+    return (props.config['memories.index.folder.blocklist'] ?? []).join(', ');
+  },
+  set(value: string) {
+    props.config['memories.index.folder.blocklist'] = value
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s !== '');
   },
 });
 </script>

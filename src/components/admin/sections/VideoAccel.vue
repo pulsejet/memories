@@ -165,39 +165,45 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
-import { translate as t } from '@services/l10n';
+import NcTextField from '@nextcloud/vue/components/NcTextField';
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch';
 
-import AdminMixin from '../AdminMixin';
+import { t } from '@services/l10n';
 
-export default defineComponent({
+import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
+
+defineOptions({
   name: 'VideoAccel',
   title: t('memories', 'HW Acceleration'),
-  mixins: [AdminMixin],
+});
 
-  computed: {
-    vaapiStatusText(): string {
-      if (!this.status) return '';
+const props = defineProps(adminSectionProps);
+const emit = defineEmits<AdminSectionEmits>();
 
-      const dev = this.config['memories.vod.vaapi.device'] || '/dev/dri/renderD128';
-      if (this.status.vaapi_dev === 'ok') {
-        return this.t('memories', 'VA-API device ({dev}) is readable', { dev });
-      } else if (this.status.vaapi_dev === 'not_found') {
-        return this.t('memories', 'VA-API device ({dev}) not found', { dev });
-      } else if (this.status.vaapi_dev === 'not_readable') {
-        return this.t('memories', 'VA-API device ({dev}) has incorrect permissions', { dev });
-      } else {
-        return this.t('memories', 'VA-API device status: {status}', {
-          status: this.status.vaapi_dev,
-        });
-      }
-    },
+const { update, enableTranscoding } = useAdminSection(props, emit);
 
-    vaapiStatusType(): string {
-      return this.status?.vaapi_dev === 'ok' ? 'success' : 'error';
-    },
-  },
+const vaapiStatusText = computed((): string => {
+  if (!props.status) return '';
+
+  const dev = props.config['memories.vod.vaapi.device'] || '/dev/dri/renderD128';
+  if (props.status.vaapi_dev === 'ok') {
+    return t('memories', 'VA-API device ({dev}) is readable', { dev });
+  } else if (props.status.vaapi_dev === 'not_found') {
+    return t('memories', 'VA-API device ({dev}) not found', { dev });
+  } else if (props.status.vaapi_dev === 'not_readable') {
+    return t('memories', 'VA-API device ({dev}) has incorrect permissions', { dev });
+  } else {
+    return t('memories', 'VA-API device status: {status}', {
+      status: props.status.vaapi_dev,
+    });
+  }
+});
+
+const vaapiStatusType = computed((): 'success' | 'error' => {
+  return props.status?.vaapi_dev === 'ok' ? 'success' : 'error';
 });
 </script>

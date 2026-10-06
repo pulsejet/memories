@@ -69,16 +69,22 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import NcTextField from '@nextcloud/vue/components/NcTextField';
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch';
 
-import { translate as t } from '@services/l10n';
+import { t } from '@services/l10n';
 
-import AdminMixin from '../AdminMixin';
+import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
 
-export default defineComponent({
+defineOptions({
   name: 'Video',
   title: t('memories', 'Video Streaming'),
-  mixins: [AdminMixin],
 });
+
+const props = defineProps(adminSectionProps);
+const emit = defineEmits<AdminSectionEmits>();
+
+const { update, binaryStatus, binaryStatusType, enableTranscoding } = useAdminSection(props, emit);
 </script>

@@ -33,16 +33,18 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
 
-import { translate as t } from '@services/l10n';
+import { t } from '@services/l10n';
 
-import AdminMixin from '../AdminMixin';
+import { adminSectionProps, type AdminSectionEmits } from '../useAdminSection';
 
-export default defineComponent({
+defineOptions({
   name: 'Apps',
   title: t('memories', 'Recommended Apps'),
-  mixins: [AdminMixin],
 });
+
+defineProps(adminSectionProps);
+defineEmits<AdminSectionEmits>();
 </script>

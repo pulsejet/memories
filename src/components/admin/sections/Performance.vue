@@ -58,41 +58,41 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
-import { translate as t } from '@services/l10n';
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
 
-import AdminMixin from '../AdminMixin';
+import { t } from '@services/l10n';
 
-export default defineComponent({
+import { adminSectionProps, type AdminSectionEmits } from '../useAdminSection';
+
+defineOptions({
   name: 'Performance',
   title: t('memories', 'Performance'),
-  mixins: [AdminMixin],
-
-  computed: {
-    isHttps(): boolean {
-      return window.location.protocol === 'https:';
-    },
-
-    httpVer(): string {
-      const entry = window.performance?.getEntriesByType?.('navigation')?.[0] as PerformanceNavigationTiming;
-      return entry?.nextHopProtocol || this.t('memories', 'Unknown');
-    },
-
-    httpVerOk(): boolean {
-      return this.httpVer === 'h2' || this.httpVer === 'h3';
-    },
-
-    recommendedBufferPoolSize(): number {
-      return 2 * 1024 ** 3; // 2 GiB
-    },
-  },
-
-  methods: {
-    gibibytes(bytes: number): string {
-      return (bytes / 1024 ** 3).toFixed(1);
-    },
-  },
 });
+
+defineProps(adminSectionProps);
+defineEmits<AdminSectionEmits>();
+
+const isHttps = computed((): boolean => {
+  return window.location.protocol === 'https:';
+});
+
+const httpVer = computed((): string => {
+  const entry = window.performance?.getEntriesByType?.('navigation')?.[0] as PerformanceNavigationTiming;
+  return entry?.nextHopProtocol || t('memories', 'Unknown');
+});
+
+const httpVerOk = computed((): boolean => {
+  return httpVer.value === 'h2' || httpVer.value === 'h3';
+});
+
+const recommendedBufferPoolSize = computed((): number => {
+  return 2 * 1024 ** 3; // 2 GiB
+});
+
+function gibibytes(bytes: number): string {
+  return (bytes / 1024 ** 3).toFixed(1);
+}
 </script>

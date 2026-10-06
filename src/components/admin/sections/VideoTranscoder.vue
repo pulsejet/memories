@@ -77,23 +77,28 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import NcTextField from '@nextcloud/vue/components/NcTextField';
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch';
 
-import { translate as t } from '@services/l10n';
+import { t } from '@services/l10n';
 
-import AdminMixin from '../AdminMixin';
+import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
 
-export default defineComponent({
+defineOptions({
   name: 'VideoTranscoder',
   title: t('memories', 'Transcoder'),
-  mixins: [AdminMixin],
-
-  methods: {
-    updateConnect(value: string) {
-      const array = value.split(',').map((s) => s.trim());
-      this.update('memories.vod.connect', array.filter(Boolean));
-    },
-  },
 });
+
+const props = defineProps(adminSectionProps);
+const emit = defineEmits<AdminSectionEmits>();
+
+const { update, binaryStatus, binaryStatusType, serviceStatus, serviceStatusType, enableTranscoding } =
+  useAdminSection(props, emit);
+
+function updateConnect(value: string) {
+  const array = value.split(',').map((s) => s.trim());
+  update('memories.vod.connect', array.filter(Boolean));
+}
 </script>
