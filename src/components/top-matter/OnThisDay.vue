@@ -29,8 +29,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, markRaw } from 'vue';
+<script setup lang="ts">
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
@@ -52,167 +52,150 @@ interface IYear {
   text: string;
 }
 
-export default defineComponent({
+defineOptions({
   name: 'OnThisDay',
-  components: {
-    NcActions,
-    NcActionButton,
-    LeftMoveIcon,
-    RightMoveIcon,
-    XImg,
-  },
-
-  emits: {
-    load: () => true,
-  },
-
-  data: () => ({
-    years: [] as IYear[],
-    hasRight: false,
-    hasLeft: false,
-    scrollStack: [] as number[],
-    resizeObserver: null! as ResizeObserver,
-  }),
-
-  computed: {
-    photosPerYear(): number {
-      return staticConfig.getSync('onthisday_photos_per_year');
-    },
-  },
-
-  mounted() {
-    const inner = this.refs().inner!;
-
-    inner.addEventListener('scroll', this.onScroll.bind(this), {
-      passive: true,
-    });
-
-    this.resizeObserver = markRaw(new ResizeObserver(this.onScroll.bind(this)));
-    this.resizeObserver.observe(inner);
-
-    this.refreshNow();
-  },
-
-  beforeUnmount() {
-    this.resizeObserver?.disconnect();
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        inner?: HTMLDivElement;
-      };
-    },
-
-    onload() {
-      this.$emit('load');
-    },
-
-    async refreshNow() {
-      // Look for cache
-      const dayIdToday = utils.dateToDayId(new Date());
-      const cacheUrl = `/onthisday/${dayIdToday}`;
-      const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
-      utils.applyAuids(cache);
-      if (cache) this.process(cache);
-
-      // Network request
-      const photos = await dav.getOnThisDayRaw();
-      utils.applyAuids(photos);
-      utils.cacheData(cacheUrl, photos);
-
-      // Check if exactly same as cache
-      if (cache?.length === photos.length && cache.every((p, i) => p.fileid === photos[i].fileid)) return;
-      this.process(photos);
-    },
-
-    async process(photos: IPhoto[]) {
-      this.years = [];
-
-      let currentText = '';
-      let prevDayId = Number.MAX_SAFE_INTEGER;
-
-      for (const photo of photos) {
-        // Skip hidden files
-        if (!photo.dayid) continue;
-        if (photo.ishidden) continue;
-        if (photo.basename?.startsWith('.')) continue;
-
-        photo.key = `${photo.fileid}`;
-
-        // New anniversary, not calendar year (breaks at year boundary).
-        // Mirrors Timeline.vue. DateTime calls are expensive.
-        if (Math.abs(prevDayId - photo.dayid) > 30) {
-          const dateTaken = utils.dayIdToDate(photo.dayid);
-          const year = dateTaken.getUTCFullYear();
-          const text = utils.getFromNowStr(dateTaken, { padding: 10 });
-          if (text !== currentText) {
-            this.years.push({
-              year,
-              text,
-              url: '',
-              preview: null!,
-              photos: [],
-            });
-            currentText = text;
-          }
-        }
-        prevDayId = photo.dayid;
-
-        const yearObj = this.years[this.years.length - 1];
-        yearObj.photos.push(photo);
-      }
-
-      // For each year, randomly choose 10 photos to display
-      for (const year of this.years) {
-        year.photos = utils.randomSubarray(year.photos, this.photosPerYear);
-      }
-
-      // Choose preview photo
-      for (const year of this.years) {
-        year.preview ||= utils.randomChoice(year.photos);
-        year.url = utils.getPreviewUrl({
-          photo: year.preview,
-          msize: 512,
-        });
-      }
-
-      await this.$nextTick();
-      this.onScroll();
-      this.onload();
-    },
-
-    moveLeft() {
-      const inner = this.refs().inner!;
-      inner.scrollBy(-(this.scrollStack.pop() ?? inner.clientWidth), 0);
-    },
-
-    moveRight() {
-      const inner = this.refs().inner!;
-      const innerRect = inner.getBoundingClientRect();
-      const nextChild = Array.from(inner.children)
-        .map((c) => c.getBoundingClientRect())
-        .find((rect) => rect.right > innerRect.right);
-
-      let scroll = nextChild ? nextChild.left - innerRect.left : inner.clientWidth;
-      scroll = Math.min(inner.scrollWidth - inner.scrollLeft - inner.clientWidth, scroll);
-      this.scrollStack.push(scroll);
-      inner.scrollBy(scroll, 0);
-    },
-
-    onScroll() {
-      const inner = this.refs().inner;
-      if (!inner) return;
-      this.hasLeft = inner.scrollLeft > 0;
-      this.hasRight = inner.clientWidth + inner.scrollLeft < inner.scrollWidth - 20;
-    },
-
-    click(year: IYear) {
-      const allPhotos = this.years.flatMap((y) => y.photos);
-      _m.viewer.openStatic(year.preview, allPhotos, 512);
-    },
-  },
 });
+
+const emit = defineEmits<{
+  load: [];
+}>();
+
+const inner = useTemplateRef<HTMLDivElement>('inner');
+
+const years = ref<IYear[]>([]);
+const hasRight = ref(false);
+const hasLeft = ref(false);
+const scrollStack = ref<number[]>([]);
+let resizeObserver: ResizeObserver | null = null;
+
+const photosPerYear = computed((): number => {
+  return staticConfig.getSync('onthisday_photos_per_year');
+});
+
+onMounted(() => {
+  const innerVal = inner.value!;
+
+  innerVal.addEventListener('scroll', onScroll, {
+    passive: true,
+  });
+
+  resizeObserver = new ResizeObserver(onScroll);
+  resizeObserver.observe(innerVal);
+
+  refreshNow();
+});
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+});
+
+function onload() {
+  emit('load');
+}
+
+async function refreshNow() {
+  // Look for cache
+  const dayIdToday = utils.dateToDayId(new Date());
+  const cacheUrl = `/onthisday/${dayIdToday}`;
+  const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
+  utils.applyAuids(cache);
+  if (cache) process(cache);
+
+  // Network request
+  const photos = await dav.getOnThisDayRaw();
+  utils.applyAuids(photos);
+  utils.cacheData(cacheUrl, photos);
+
+  // Check if exactly same as cache
+  if (cache?.length === photos.length && cache.every((p, i) => p.fileid === photos[i].fileid)) return;
+  process(photos);
+}
+
+async function process(photos: IPhoto[]) {
+  years.value = [];
+
+  let currentText = '';
+  let prevDayId = Number.MAX_SAFE_INTEGER;
+
+  for (const photo of photos) {
+    // Skip hidden files
+    if (!photo.dayid) continue;
+    if (photo.ishidden) continue;
+    if (photo.basename?.startsWith('.')) continue;
+
+    photo.key = `${photo.fileid}`;
+
+    // New anniversary, not calendar year (breaks at year boundary).
+    // Mirrors Timeline.vue. DateTime calls are expensive.
+    if (Math.abs(prevDayId - photo.dayid) > 30) {
+      const dateTaken = utils.dayIdToDate(photo.dayid);
+      const year = dateTaken.getUTCFullYear();
+      const text = utils.getFromNowStr(dateTaken, { padding: 10 });
+      if (text !== currentText) {
+        years.value.push({
+          year,
+          text,
+          url: '',
+          preview: null!,
+          photos: [],
+        });
+        currentText = text;
+      }
+    }
+    prevDayId = photo.dayid;
+
+    const yearObj = years.value[years.value.length - 1];
+    yearObj.photos.push(photo);
+  }
+
+  // For each year, randomly choose 10 photos to display
+  for (const year of years.value) {
+    year.photos = utils.randomSubarray(year.photos, photosPerYear.value);
+  }
+
+  // Choose preview photo
+  for (const year of years.value) {
+    year.preview ||= utils.randomChoice(year.photos);
+    year.url = utils.getPreviewUrl({
+      photo: year.preview,
+      msize: 512,
+    });
+  }
+
+  await nextTick();
+  onScroll();
+  onload();
+}
+
+function moveLeft() {
+  const innerVal = inner.value!;
+  innerVal.scrollBy(-(scrollStack.value.pop() ?? innerVal.clientWidth), 0);
+}
+
+function moveRight() {
+  const innerVal = inner.value!;
+  const innerRect = innerVal.getBoundingClientRect();
+  const nextChild = Array.from(innerVal.children)
+    .map((c) => c.getBoundingClientRect())
+    .find((rect) => rect.right > innerRect.right);
+
+  let scroll = nextChild ? nextChild.left - innerRect.left : innerVal.clientWidth;
+  scroll = Math.min(innerVal.scrollWidth - innerVal.scrollLeft - innerVal.clientWidth, scroll);
+  scrollStack.value.push(scroll);
+  innerVal.scrollBy(scroll, 0);
+}
+
+function onScroll() {
+  const innerVal = inner.value;
+  if (!innerVal) return;
+  hasLeft.value = innerVal.scrollLeft > 0;
+  hasRight.value = innerVal.clientWidth + innerVal.scrollLeft < innerVal.scrollWidth - 20;
+}
+
+function click(year: IYear) {
+  const allPhotos = years.value.flatMap((y) => y.photos);
+  _m.viewer.openStatic(year.preview, allPhotos, 512);
+}
 </script>
 
 <style lang="scss" scoped>
