@@ -26,8 +26,9 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent, markRaw } from 'vue';
+<script setup lang="ts">
+import { computed, ref, onMounted, markRaw, defineAsyncComponent } from 'vue';
+import { useRoute } from 'vue-router';
 import Fuse from 'fuse.js';
 
 import { showError } from '@nextcloud/dialogs';
@@ -36,6 +37,7 @@ const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components
 
 import ClusterGrid from '@components/ClusterGrid.vue';
 
+import { t } from '@services/l10n';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 
@@ -43,107 +45,87 @@ import type { ICluster, IFace } from '@typings';
 
 import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'FaceList',
-  components: {
-    ClusterGrid,
-    NcTextField,
-    MagnifyIcon,
-  },
-
-  props: {
-    plus: {
-      type: Boolean,
-      default: false,
-    },
-  },
-
-  emits: {
-    select: (face: IFace) => true,
-  },
-
-  data: () => ({
-    list: null as IFace[] | null,
-    fuse: null as Fuse<IFace> | null,
-    search: String(),
-  }),
-
-  mounted() {
-    this.refresh();
-  },
-
-  computed: {
-    user() {
-      return this.$route.params.user?.toString();
-    },
-
-    name() {
-      return this.$route.params.name?.toString();
-    },
-
-    backend() {
-      return this.$route.name as 'recognize' | 'facerecognition';
-    },
-
-    filteredList() {
-      if (!this.list || !this.search || !this.fuse) return this.list ?? [];
-      return this.fuse.search(this.search).map((r) => r.item);
-    },
-  },
-
-  methods: {
-    async refresh() {
-      try {
-        this.list = null;
-        const faces = await dav.getFaceList(this.backend);
-        this.list = faces.filter((c: IFace) => c.user_id === this.user && String(c.name || c.cluster_id) !== this.name);
-        this.fuse = markRaw(new Fuse(this.list, { keys: ['name'] }));
-      } catch (e) {
-        showError(this.t('memories', 'Failed to load faces'));
-        console.error(e);
-      }
-    },
-
-    async addFace() {
-      let name = String();
-
-      try {
-        const input = await utils.prompt({
-          message: this.t('memories', 'Create a new face with this name?'),
-          title: this.t('memories', 'Create new face'),
-          name: this.t('memories', 'Name'),
-        });
-
-        name = input?.trim() ?? String();
-        if (!name) return;
-
-        // Create new directory in WebDAV
-        await dav.recognizeCreateFace(this.user, name);
-
-        return this.selectNew(name);
-      } catch (e: any) {
-        // Directory already exists
-        if (e.status === 405) return this.selectNew(name);
-
-        showError(this.t('memories', 'Failed to create face'));
-      }
-    },
-
-    selectNew(name: string) {
-      this.$emit('select', {
-        cluster_id: name,
-        cluster_type: 'recognize',
-        count: 0,
-        name: name,
-        user_id: this.user,
-      });
-    },
-
-    click(item: ICluster) {
-      this.$emit('select', item as IFace);
-    },
-  },
 });
+
+const props = defineProps<{
+  plus?: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'select', face: IFace): void;
+}>();
+
+const route = useRoute();
+
+const list = ref<IFace[] | null>(null);
+const fuse = ref<Fuse<IFace> | null>(null);
+const search = ref(String());
+
+const user = computed(() => route.params.user?.toString());
+const name = computed(() => route.params.name?.toString());
+const backend = computed(() => route.name as 'recognize' | 'facerecognition');
+
+const filteredList = computed(() => {
+  if (!list.value || !search.value || !fuse.value) return list.value ?? [];
+  return fuse.value.search(search.value).map((r) => r.item);
+});
+
+onMounted(() => {
+  refresh();
+});
+
+async function refresh() {
+  try {
+    list.value = null;
+    const faces = await dav.getFaceList(backend.value);
+    list.value = faces.filter((c: IFace) => c.user_id === user.value && String(c.name || c.cluster_id) !== name.value);
+    fuse.value = markRaw(new Fuse(list.value, { keys: ['name'] }));
+  } catch (e) {
+    showError(t('memories', 'Failed to load faces'));
+    console.error(e);
+  }
+}
+
+async function addFace() {
+  let name = String();
+
+  try {
+    const input = await utils.prompt({
+      message: t('memories', 'Create a new face with this name?'),
+      title: t('memories', 'Create new face'),
+      name: t('memories', 'Name'),
+    });
+
+    name = input?.trim() ?? String();
+    if (!name) return;
+
+    // Create new directory in WebDAV
+    await dav.recognizeCreateFace(user.value, name);
+
+    return selectNew(name);
+  } catch (e: any) {
+    // Directory already exists
+    if (e.status === 405) return selectNew(name);
+
+    showError(t('memories', 'Failed to create face'));
+  }
+}
+
+function selectNew(faceName: string) {
+  emit('select', {
+    cluster_id: faceName,
+    cluster_type: 'recognize',
+    count: 0,
+    name: faceName,
+    user_id: user.value,
+  });
+}
+
+function click(item: ICluster) {
+  emit('select', item as IFace);
+}
 </script>
 
 <style lang="scss" scoped>
