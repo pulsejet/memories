@@ -95,37 +95,39 @@ export function mergeDay(remote: IPhoto[], local: IPhoto[]): void {
   remote.sort((a, b) => (b.epoch ?? 0) - (a.epoch ?? 0));
 }
 
+/** AUIDs and BUIDs seen on server, pending report to native */
+const pfsdAuids = new Set<string>();
+const pfsdBuids = new Set<string>();
+
+/** Debounce timer for reporting seen remote files to native */
+const pfsdTimer = new utils.RenewingTimeout();
+
 /**
  * Run internal hooks on fresh day received from server
  * Does not update the passed objects in any way
  * @param current Photos from day response
  */
-export function processFreshServerDay(this: any, dayId: number, photos: IPhoto[]): void {
-  const auids: Set<string> = (this.pfsdaq ??= new Set<string>());
-  const buids: Set<string> = (this.pfsdbq ??= new Set<string>());
-
+export function processFreshServerDay(dayId: number, photos: IPhoto[]): void {
   // Add to queue
   for (const photo of photos) {
-    if (photo.auid) auids.add(photo.auid);
-    if (photo.buid) buids.add(photo.buid);
+    if (photo.auid) pfsdAuids.add(photo.auid);
+    if (photo.buid) pfsdBuids.add(photo.buid);
   }
 
   // Debounce
-  utils.setRenewingTimeout(
-    this,
-    'pfsdq_timer',
+  pfsdTimer.set(
     () => {
       const auidsa: string[] = [],
         buidsa: string[] = [];
 
       // Only keep the seen AUIDs and BUIDs
-      for (const auid of auids) {
+      for (const auid of pfsdAuids) {
         if (seenABUIDs.has(auid)) {
           auidsa.push(auid);
           seenABUIDs.delete(auid);
         }
       }
-      for (const buid of buids) {
+      for (const buid of pfsdBuids) {
         if (seenABUIDs.has(buid)) {
           buidsa.push(buid);
           seenABUIDs.delete(buid);
@@ -138,8 +140,8 @@ export function processFreshServerDay(this: any, dayId: number, photos: IPhoto[]
       }
 
       // Done
-      auids.clear();
-      buids.clear();
+      pfsdAuids.clear();
+      pfsdBuids.clear();
     },
     1000,
   );
