@@ -17,67 +17,57 @@
   </Modal>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { ref, useTemplateRef, defineAsyncComponent } from 'vue';
 
 import { showInfo } from '@nextcloud/dialogs';
 
 const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 
-import UserConfig from '@mixins/UserConfig';
-
 import Modal from './Modal.vue';
-import ModalMixin from './ModalMixin';
 
+import { useModal } from '@services/modal';
+import { n } from '@services/l10n';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 
 import type { IPhoto } from '@typings';
 
-export default defineComponent({
+defineOptions({
   name: 'ReindexModal',
-  components: {
-    NcProgressBar,
-    Modal,
-  },
-
-  mixins: [UserConfig, ModalMixin],
-
-  data: () => ({
-    photos: [] as IPhoto[],
-    photosDone: 0,
-  }),
-
-  created() {
-    console.assert(!_m.modals.reindex, 'ReindexModal created twice');
-    _m.modals.reindex = this.open;
-  },
-
-  methods: {
-    open(photos: IPhoto[]) {
-      this.photos = photos;
-      this.photosDone = 0;
-      if (!photos.length) return;
-      this.show = true;
-      void this.run();
-    },
-
-    cleanup() {
-      this.show = false;
-      this.photos = [];
-    },
-
-    async run() {
-      const ok = await dav.reindexPhotos(this.photos, (done) => {
-        this.photosDone = done;
-      });
-
-      showInfo(this.n('memories', '{n} file refreshed', '{n} files refreshed', ok, { n: ok }));
-      this.close();
-      utils.bus.emit('memories:timeline:soft-refresh', null);
-    },
-  },
 });
+
+const modal = useTemplateRef('modal');
+const { show, close } = useModal(modal);
+
+const photos = ref<IPhoto[]>([]);
+const photosDone = ref(0);
+
+console.assert(!_m.modals.reindex, 'ReindexModal created twice');
+_m.modals.reindex = open;
+
+function open(photosIn: IPhoto[]) {
+  photos.value = photosIn;
+  photosDone.value = 0;
+  if (!photosIn.length) return;
+  show.value = true;
+  void run();
+}
+
+function cleanup() {
+  show.value = false;
+  photos.value = [];
+}
+
+async function run() {
+  const ok = await dav.reindexPhotos(photos.value, (done) => {
+    photosDone.value = done;
+  });
+
+  showInfo(n('memories', '{n} file refreshed', '{n} files refreshed', ok, { n: ok }));
+  close();
+  utils.bus.emit('memories:timeline:soft-refresh', null);
+}
 </script>
 
 <style lang="scss" scoped>
