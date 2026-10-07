@@ -63,7 +63,7 @@
         :label="t('memories', 'Location search endpoint for metadata editor')"
         :label-visible="true"
         placeholder="https://nominatim.openstreetmap.org"
-        :model-value="systemConfig['memories.places.search.url']"
+        :model-value="systemConfig!['memories.places.search.url']"
         @change="update('memories.places.search.url', $event.target.value.trim())"
       />
     </div>
