@@ -12,7 +12,7 @@ import { getLanguage } from '@nextcloud/l10n';
 import FolderGrid from './FolderGrid.vue';
 
 import { config } from '@services/user-config';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import { API } from '@services/API';
 
 import type { IFolder } from '@typings';

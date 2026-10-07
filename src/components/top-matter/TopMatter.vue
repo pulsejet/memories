@@ -21,7 +21,7 @@ import AlbumTopMatter from './AlbumTopMatter.vue';
 import PlacesTopMatter from './PlacesTopMatter.vue';
 
 import initstate from '@services/init-state';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 defineOptions({
   name: 'TopMatter',

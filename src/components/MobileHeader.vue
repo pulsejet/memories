@@ -25,7 +25,7 @@ import UploadMenuItem from '@components/header/UploadMenuItem.vue';
 import SearchbarMenuItem from '@components/header/SearchbarMenuItem.vue';
 import XImg from '@components/frame/XImg.vue';
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 import banner from '@assets/banner.svg';
 

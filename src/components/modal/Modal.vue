@@ -40,7 +40,7 @@ import {
 
 const NcModal = defineAsyncComponent(() => import('@nextcloud/vue/components/NcModal'));
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 defineOptions({
   name: 'Modal',

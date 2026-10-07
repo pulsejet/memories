@@ -72,7 +72,7 @@ import FaceMergeModal from '@components/modal/FaceMergeModal.vue';
 
 import { routeIs } from '@services/router';
 import { config, setConfig } from '@services/user-config';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import { constants } from '@services/constants';
 import { t } from '@services/l10n';
 

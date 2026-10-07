@@ -37,7 +37,7 @@ import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import { t } from '@services/l10n';
 import { routeIs } from '@services/router';
 import * as strings from '@services/strings';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import { constants } from '@services/constants';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';

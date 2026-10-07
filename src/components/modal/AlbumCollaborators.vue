@@ -165,7 +165,7 @@ const NcListItemIcon = defineAsyncComponent(() => import('@nextcloud/vue/compone
 
 import { t } from '@services/l10n';
 import * as dav from '@services/dav';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 
 import { ShareType } from '@nextcloud/sharing';

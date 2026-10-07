@@ -79,7 +79,7 @@ import NcButton from '@nextcloud/vue/components/NcButton';
 import { API } from '@services/API';
 
 import { t } from '@services/l10n';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
 

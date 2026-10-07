@@ -22,7 +22,7 @@ import { fetchImage } from '@components/frame/XImgCache';
 
 import { API } from '@services/API';
 import { t } from '@services/l10n';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 import type { IImageInfo, IPhoto } from '@typings';
 

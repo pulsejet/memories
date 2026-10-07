@@ -156,7 +156,7 @@ import { computed, ref, onMounted, watch, defineAsyncComponent } from 'vue';
 const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 
 import { t } from '@services/l10n';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 import type { IPhoto } from '@typings';
 

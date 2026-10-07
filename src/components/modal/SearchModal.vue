@@ -11,7 +11,7 @@ import { useRouter } from 'vue-router';
 import Searchbar from '@components/header/Searchbar.vue';
 import SearchbarMenuItem from '@components/header/SearchbarMenuItem.vue';
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 defineOptions({
   name: 'SearchModal',

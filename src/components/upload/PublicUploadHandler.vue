@@ -16,7 +16,7 @@ import { showError, showSuccess } from '@nextcloud/dialogs';
 
 import { routeIs } from '@services/router';
 import { t, n } from '@services/l10n';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import initstate from '@services/init-state';
 import { createClient, type FileStat } from 'webdav';
 

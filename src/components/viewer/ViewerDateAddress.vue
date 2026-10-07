@@ -36,7 +36,7 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 import { t } from '@services/l10n';
 import { isPartiallyInViewport } from '@services/common';

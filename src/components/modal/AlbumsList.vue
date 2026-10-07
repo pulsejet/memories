@@ -35,7 +35,7 @@ import { defineAsyncComponent } from 'vue';
 
 const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
 import type { IAlbum, IPhoto } from '@typings';

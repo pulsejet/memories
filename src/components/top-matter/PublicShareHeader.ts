@@ -1,4 +1,4 @@
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import initstate from '@services/init-state';
 
 // Shown in dynamic top matter (Timeline::viewName)

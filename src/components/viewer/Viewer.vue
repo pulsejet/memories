@@ -132,7 +132,7 @@ import { constants } from '@services/constants';
 import initstate from '@services/init-state';
 import { makeTapPatch } from '@services/patches/mobile-click';
 import * as dav from '@services/dav';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import { cacheData, getCachedData } from '@services/cache';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import * as nativex from '@native';

@@ -9,7 +9,7 @@ import { API } from '@services/API';
 import client from '@services/dav/client';
 import { config } from '@services/user-config';
 import { constants } from '@services/constants';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 import type { IAlbum, IFileInfo, IPhoto } from '@typings';
 

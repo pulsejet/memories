@@ -23,7 +23,7 @@ import { useModal } from '@services/modal';
 import { t, n } from '@services/l10n';
 import { config } from '@services/user-config';
 import * as dav from '@services/dav';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 import type { IPhoto } from '@typings';
 

@@ -100,10 +100,10 @@ import ImageIcon from 'vue-material-design-icons/Image.vue';
 import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
 
-import * as utils from '@services/utils';
-import { cacheData, getCachedData } from '@services/cache';
-import * as dav from '@services/dav';
 import { t } from '@services/l10n';
+import { cacheData, getCachedData } from '@services/cache';
+import * as utils from '@services/utils/common';
+import * as dav from '@services/dav';
 
 import type { IImageInfo, IPhoto, IExif } from '@typings';
 import type { IFolder, INode, IView } from '@nextcloud/files';

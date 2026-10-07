@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 withDefaults(
   defineProps<{

@@ -1,5 +1,5 @@
 import { API } from '@services/API';
-import { onDOMLoaded } from '@services/utils';
+import { onDOMLoaded } from '@services/utils/common';
 import { importWorker } from 'webworker-typed';
 import type XImgWorker from './XImgWorker';
 

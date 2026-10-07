@@ -35,8 +35,9 @@ import { windowDims } from '@services/common';
 
 import Cluster from '@components/frame/Cluster.vue';
 
+import * as utils from '@services/utils/common';
+
 import type { ICluster } from '@typings';
-import * as utils from '@services/utils';
 
 const props = withDefaults(
   defineProps<{

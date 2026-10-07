@@ -1,6 +1,6 @@
 import { onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue';
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 /**
  * Shared logic for modal dialogs.

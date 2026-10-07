@@ -82,7 +82,7 @@ import { t, n } from '@services/l10n';
 import { config } from '@services/user-config';
 import { routeIs } from '@services/router';
 import * as dav from '@services/dav';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 import { API } from '@services/API';
 

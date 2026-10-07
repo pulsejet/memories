@@ -135,13 +135,13 @@ import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
 import TimelineTopOverlay from '@components/top-matter/TimelineTopOverlay.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
-import * as dav from '@services/dav';
-import * as utils from '@services/utils';
 import { cacheData, getCachedData } from '@services/cache';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { constants, convertFlags, copyPhotoFlags } from '@services/constants';
-import * as nativex from '@native';
 import { t } from '@services/l10n';
+import * as dav from '@services/dav';
+import * as utils from '@services/utils/common';
+import * as nativex from '@native';
 
 import { API, DaysFilterType } from '@services/API';
 import * as lens from '@services/lens';

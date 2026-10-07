@@ -100,7 +100,7 @@ import AlbumCollaborators from './AlbumCollaborators.vue';
 
 import { DateTime } from 'luxon';
 import { t } from '@services/l10n';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
 import Send from 'vue-material-design-icons/Send.vue';

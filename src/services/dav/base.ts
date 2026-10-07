@@ -7,7 +7,7 @@ import client, { remotePath } from './client';
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
 import { routeIs } from '@services/router';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 
 import type { IFileInfo, IImageInfo, IPhoto } from '@typings';

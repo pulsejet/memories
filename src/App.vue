@@ -122,7 +122,7 @@ import AlbumShareModal from '@components/modal/AlbumShareModal.vue';
 import UploadModal from '@components/modal/UploadModal.vue';
 import SearchModal from '@components/modal/SearchModal.vue';
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 import { translate as t } from '@services/l10n';
 import { config, hasVersionChanged } from '@services/user-config';

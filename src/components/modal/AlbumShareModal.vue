@@ -61,7 +61,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
 import { routeIs } from '@services/router';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
 defineOptions({

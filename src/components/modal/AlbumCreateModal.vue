@@ -26,7 +26,7 @@ import AlbumForm from './AlbumForm.vue';
 
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
 defineOptions({

@@ -119,7 +119,7 @@ import { useRouter } from 'vue-router';
 import NcButton from '@nextcloud/vue/components/NcButton';
 const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
 
-import * as util from '@services/utils';
+import * as util from '@services/utils/common';
 import * as nativex from '@native';
 import { t } from '@services/l10n';
 import XImg from '@components/frame/XImg.vue';

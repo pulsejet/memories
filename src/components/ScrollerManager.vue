@@ -51,10 +51,10 @@
 <script setup lang="ts">
 import { ref, computed, nextTick } from 'vue';
 
-import * as utils from '@services/utils';
-import { RenewingTimeout } from '@services/utils/renewing-timeout';
-import * as lens from '@services/lens';
 import { windowDims } from '@services/common';
+import { RenewingTimeout } from '@services/utils/renewing-timeout';
+import * as utils from '@services/utils/common';
+import * as lens from '@services/lens';
 
 import type { IRow, ITick } from '@typings';
 

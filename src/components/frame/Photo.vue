@@ -97,12 +97,12 @@ import {
   watch,
 } from 'vue';
 
-import * as utils from '@services/utils';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { constants } from '@services/constants';
 import { config } from '@services/user-config';
 import { t } from '@services/l10n';
 import { routeIs } from '@services/router';
+import * as utils from '@services/utils/common';
 
 import LivePhotoIcon from '@components/icons/LivePhoto.vue';
 import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue';

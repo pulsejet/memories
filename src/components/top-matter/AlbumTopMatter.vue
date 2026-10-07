@@ -160,7 +160,7 @@ import { downloadWithHandle } from '@services/dav';
 import { API } from '@services/API';
 import { windowDims } from '@services/common';
 import { config, setConfig } from '@services/user-config';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import { constants } from '@services/constants';
 import { t } from '@services/l10n';
 

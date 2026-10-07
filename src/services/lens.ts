@@ -1,7 +1,7 @@
 import axios from '@nextcloud/axios';
 
 import { API } from '@services/API';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import { translate as t } from '@services/l10n';
 
 import type { IDay, IHeadRow, IPhoto } from '@typings';

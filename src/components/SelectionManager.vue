@@ -45,10 +45,10 @@ import { windowDims } from '@services/common';
 import { routeIs } from '@services/router';
 
 import { t, n } from '@services/l10n';
-import * as dav from '@services/dav';
-import * as utils from '@services/utils';
 import { constants } from '@services/constants';
 import initstate from '@services/init-state';
+import * as dav from '@services/dav';
+import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';

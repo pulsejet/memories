@@ -35,7 +35,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } f
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import { cacheData, getCachedData } from '@services/cache';
 import * as dav from '@services/dav';
 import { t } from '@services/l10n';

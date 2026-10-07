@@ -288,10 +288,10 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent 
 import { useRouter } from 'vue-router';
 
 import { config, setConfig } from '@services/user-config';
-import * as utils from '@services/utils';
-import * as nativex from '@native';
 import { t } from '@services/l10n';
 import { showError } from '@nextcloud/dialogs';
+import * as utils from '@services/utils/common';
+import * as nativex from '@native';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));

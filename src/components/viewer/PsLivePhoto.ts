@@ -1,7 +1,7 @@
 import PhotoSwipe from 'photoswipe';
 import PsImage from './PsImage';
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import { config } from '@services/user-config';
 
 import type { PsContent, PsEvent } from './types';

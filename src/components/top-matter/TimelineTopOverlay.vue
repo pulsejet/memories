@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 import type { IHeadRow, IPhoto } from '@typings';
 

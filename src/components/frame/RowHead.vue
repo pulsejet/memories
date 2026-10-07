@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 import type { IHeadRow } from '@typings';
 

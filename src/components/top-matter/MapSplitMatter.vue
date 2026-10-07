@@ -42,7 +42,7 @@ import { LMarker, LIcon } from '@vue-leaflet/vue-leaflet';
 import axios from '@nextcloud/axios';
 
 import { API } from '@services/API';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 
 import MapStandalone from '@components/MapStandalone.vue';

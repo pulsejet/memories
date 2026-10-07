@@ -39,7 +39,7 @@ import ClusterGrid from '@components/ClusterGrid.vue';
 
 import { t } from '@services/l10n';
 import * as dav from '@services/dav';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 import type { ICluster, IFace } from '@typings';
 

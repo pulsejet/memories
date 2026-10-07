@@ -71,7 +71,7 @@ import PublicUploadHandler from '@components/upload/PublicUploadHandler.vue';
 import { t } from '@services/l10n';
 import { routeIs } from '@services/router';
 import { config } from '@services/user-config';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import initstate from '@services/init-state';
 
 import HomeIcon from 'vue-material-design-icons/Home.vue';

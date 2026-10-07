@@ -1,5 +1,5 @@
 import { API } from '@services/API';
-import { getPreviewUrl } from '@services/utils';
+import { getPreviewUrl } from '@services/utils/common';
 
 import type { IAlbum, ICluster, IFace, IPhoto, IPlace, ITag } from '@typings';
 

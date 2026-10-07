@@ -29,7 +29,7 @@
 import { computed, defineAsyncComponent, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
 const NcAvatar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAvatar'));

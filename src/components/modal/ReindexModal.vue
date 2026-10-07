@@ -29,7 +29,7 @@ import Modal from './Modal.vue';
 import { useModal } from '@services/modal';
 import { n, t } from '@services/l10n';
 import * as dav from '@services/dav';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 import type { IPhoto } from '@typings';
 

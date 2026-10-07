@@ -15,7 +15,7 @@ import NcButton from '@nextcloud/vue/components/NcButton';
 
 import { API } from '@services/API';
 import { routeIs } from '@services/router';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 import type { ICluster } from '@typings';
 

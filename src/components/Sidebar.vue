@@ -122,8 +122,8 @@ import SidebarSubtitle from '@components/SidebarSubtitle.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 import router from '@services/router';
 
-import * as utils from '@services/utils';
 import { windowDims } from '@services/common';
+import * as utils from '@services/utils/common';
 
 import type { IImageInfo, IPhoto } from '@typings';
 import type { IFolder, INode, ISidebarContext, ISidebarTab, IView } from '@nextcloud/files';

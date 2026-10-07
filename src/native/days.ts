@@ -2,7 +2,7 @@ import { NAPI, nativex } from './api';
 import { has } from './api';
 
 import { API } from '@services/API';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 
 import type { IDay, IPhoto } from '@typings';

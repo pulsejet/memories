@@ -78,7 +78,7 @@ import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
 import { windowDims } from '@services/common';
 import { API } from '@services/API';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 
 import type { IShare } from '@typings';
