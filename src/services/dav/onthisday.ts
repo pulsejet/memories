@@ -1,6 +1,6 @@
 import axios from '@nextcloud/axios';
 
-import * as utils from '@services/utils';
+import { convertFlags } from '@services/constants';
 import { config } from '@services/user-config';
 import { API } from '@services/API';
 
@@ -30,7 +30,7 @@ export async function getOnThisDayRaw() {
 
   const res = await axios.post<IPhoto[]>(API.DAYS(), { dayIds });
 
-  res.data.forEach(utils.convertFlags);
+  res.data.forEach(convertFlags);
   return res.data;
 }
 

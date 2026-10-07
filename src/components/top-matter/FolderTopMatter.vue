@@ -72,7 +72,7 @@ import { t } from '@services/l10n';
 import { routeIs } from '@services/router';
 import { config } from '@services/user-config';
 import * as utils from '@services/utils';
-import { initstate } from '@services/utils';
+import initstate from '@services/init-state';
 
 import HomeIcon from 'vue-material-design-icons/Home.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';

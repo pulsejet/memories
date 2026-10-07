@@ -137,7 +137,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
-import { constants as c } from '@services/utils';
+import { constants, convertFlags, copyPhotoFlags } from '@services/constants';
 import * as nativex from '@native';
 import { t } from '@services/l10n';
 
@@ -543,7 +543,7 @@ function scrollChange(startIndex: number, endIndex: number, force = false) {
         // Any row that has placeholders has ONLY placeholders
         // so we can calculate the display width
         row.photos[j] = {
-          flag: c.FLAG_PLACEHOLDER,
+          flag: constants.FLAG_PLACEHOLDER,
           fileid: Math.random(),
           dayid: row.dayId,
           dispW: utils.roundHalf(rowWidth / numCols),
@@ -680,8 +680,8 @@ function getQuery() {
     if (name?.includes('-')) {
       const id = name.split('-', 1)[0];
       set(DaysFilterType.PLACE, id);
-    } else if (name === c.PLACES_NULL) {
-      set(DaysFilterType.PLACE, c.PLACES_NULL);
+    } else if (name === constants.PLACES_NULL) {
+      set(DaysFilterType.PLACE, constants.PLACES_NULL);
     } else {
       throw new Error('Invalid place route');
     }
@@ -1095,10 +1095,10 @@ async function fetchDayExpire() {
           if (curr.fileid === now.fileid && curr.etag === now.etag) {
             // copy over any properties that might have changed
             // this way we don't need to iterate again for this
-            utils.convertFlags(now);
+            convertFlags(now);
 
             // copy over flags
-            utils.copyPhotoFlags(now, curr);
+            copyPhotoFlags(now, curr);
 
             // keep merged local copy up to date
             curr.local_photo = now.local_photo;
@@ -1166,7 +1166,7 @@ function preprocessDay(dayId: number, data: IPhoto[]): IPhoto[] {
     if (!basename) continue; // huh?
 
     // Store RAW files for stacking
-    if (config.stack_raw_files && photo.mimetype === c.MIME_RAW) {
+    if (config.stack_raw_files && photo.mimetype === constants.MIME_RAW) {
       // Google's RAW naming is inconsistent and retarded.
       // We will handle this on a case-to-case basis, unless there's
       // a strong argument to always take the basename only upto the
@@ -1196,7 +1196,7 @@ function preprocessDay(dayId: number, data: IPhoto[]): IPhoto[] {
 
   // Second pass -- stack files
   for (const photo of res1) {
-    if (photo.mimetype === c.MIME_RAW) {
+    if (photo.mimetype === constants.MIME_RAW) {
       continue; // never stack over RAW
     }
 
@@ -1242,7 +1242,7 @@ function processDay(dayId: number, data: IPhoto[]) {
   sizedDays.add(dayId);
 
   // Convert server flags to bitflags
-  data.forEach(utils.convertFlags);
+  data.forEach(convertFlags);
 
   // Set and make reactive
   day.count = data.length;
@@ -1496,7 +1496,7 @@ async function deleteFromViewWithAnimation(delPhotos: IPhoto[]) {
 
   // Animate the deletion
   for (const photo of delPhotos) {
-    photo.flag |= c.FLAG_LEAVING;
+    photo.flag |= constants.FLAG_LEAVING;
   }
 
   // wait for 200ms

@@ -38,7 +38,7 @@ import { t } from '@services/l10n';
 import { routeIs } from '@services/router';
 import * as strings from '@services/strings';
 import * as utils from '@services/utils';
-import { constants as c } from '@services/utils';
+import { constants } from '@services/constants';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import UnassignedIcon from 'vue-material-design-icons/MapMarkerOff.vue';
@@ -69,7 +69,7 @@ function openUnassigned() {
   router.push({
     name: _m.routes.Places.name,
     params: {
-      name: c.PLACES_NULL,
+      name: constants.PLACES_NULL,
     },
   });
 }

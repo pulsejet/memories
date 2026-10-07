@@ -3,20 +3,20 @@
     <div
       class="p-outer fill-block"
       :class="{
-        selected: data.flag & c.FLAG_SELECTED,
-        placeholder: data.flag & c.FLAG_PLACEHOLDER,
-        leaving: data.flag & c.FLAG_LEAVING,
-        error: data.flag & c.FLAG_LOAD_FAIL,
+        selected: data.flag & constants.FLAG_SELECTED,
+        placeholder: data.flag & constants.FLAG_PLACEHOLDER,
+        leaving: data.flag & constants.FLAG_LEAVING,
+        error: data.flag & constants.FLAG_LOAD_FAIL,
         [`p-outer--${data.key}`]: true,
       }"
     >
-      <div class="select" v-once v-if="!(data.flag & c.FLAG_PLACEHOLDER)" @pointerdown.passive="emit('select', $event)">
+      <div class="select" v-once v-if="!(data.flag & constants.FLAG_PLACEHOLDER)" @pointerdown.passive="emit('select', $event)">
         <CheckCircleIcon :size="18" />
       </div>
 
       <div class="flag top-right">
         <RawIcon class="raw" v-if="isRaw" :size="28" />
-        <div class="video" v-if="data.flag & c.FLAG_IS_VIDEO">
+        <div class="video" v-if="data.flag & constants.FLAG_IS_VIDEO">
           <span class="time" v-if="data.video_duration">{{ videoDuration }}</span>
           <VideoIcon :size="22" />
         </div>
@@ -35,8 +35,8 @@
       </div>
 
       <div class="flag bottom-right">
-        <StarIcon :size="22" v-if="data.flag & c.FLAG_IS_FAVORITE" />
-        <LocalIcon :size="22" v-if="data.flag & c.FLAG_IS_LOCAL" />
+        <StarIcon :size="22" v-if="data.flag & constants.FLAG_IS_FAVORITE" />
+        <LocalIcon :size="22" v-if="data.flag & constants.FLAG_IS_LOCAL" />
       </div>
 
       <div class="flag bottom-left">
@@ -93,7 +93,7 @@ import {
 } from 'vue';
 
 import * as utils from '@services/utils';
-import { constants as c } from '@services/utils';
+import { constants } from '@services/constants';
 import { config } from '@services/user-config';
 import { t } from '@services/l10n';
 import { routeIs } from '@services/router';
@@ -145,7 +145,7 @@ watch(
   (newData: IPhoto, oldData: IPhoto) => {
     // Copy flags relevant to this component
     if (oldData && newData) {
-      newData.flag |= oldData.flag & (c.FLAG_SELECTED | c.FLAG_LOAD_FAIL);
+      newData.flag |= oldData.flag & (constants.FLAG_SELECTED | constants.FLAG_LOAD_FAIL);
     }
   },
 );
@@ -192,9 +192,9 @@ const videoUrl = computed((): string | null => {
 const src = computed((): string | null => {
   props.data.etag; // dependency
 
-  if (props.data.flag & c.FLAG_PLACEHOLDER) {
+  if (props.data.flag & constants.FLAG_PLACEHOLDER) {
     return null;
-  } else if (props.data.flag & c.FLAG_LOAD_FAIL) {
+  } else if (props.data.flag & constants.FLAG_LOAD_FAIL) {
     return errorsvg;
   } else if (faceSrc.value) {
     return faceSrc.value;
@@ -204,7 +204,7 @@ const src = computed((): string | null => {
 });
 
 const isRaw = computed((): boolean => {
-  return !!props.data.stackraw || props.data.mimetype === c.MIME_RAW;
+  return !!props.data.stackraw || props.data.mimetype === constants.MIME_RAW;
 });
 
 const showOwnerName = computed((): boolean => {
@@ -294,7 +294,7 @@ function load() {
 
 /** Error in loading image */
 function error(e: Error) {
-  props.data.flag |= c.FLAG_LOAD_FAIL;
+  props.data.flag |= constants.FLAG_LOAD_FAIL;
 }
 
 function contextmenu(e: Event) {
@@ -304,14 +304,14 @@ function contextmenu(e: Event) {
 
 /** Start preview video */
 function playVideo() {
-  if (props.data.flag & c.FLAG_SELECTED) return;
+  if (props.data.flag & constants.FLAG_SELECTED) return;
   liveState.waiting = true;
 
   // Quickly moving over the icon causes unnecessary
   // transcoding requests which are expensive
   livePlayTimer.set(
     async () => {
-      if (!video.value || props.data.flag & c.FLAG_SELECTED) return;
+      if (!video.value || props.data.flag & constants.FLAG_SELECTED) return;
 
       try {
         liveState.requested = true;

@@ -11,7 +11,7 @@ import { useRoute } from 'vue-router';
 
 import { config } from '@services/user-config';
 import { routeIs } from '@services/router';
-import { initstate } from '@services/utils';
+import initstate from '@services/init-state';
 
 import AlbumDynamicTopMatter from './AlbumDynamicTopMatter.vue';
 import FolderDynamicTopMatter from './FolderDynamicTopMatter.vue';

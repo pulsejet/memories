@@ -128,7 +128,8 @@ import { windowDims } from '@services/common';
 import { routeIs } from '@services/router';
 import { API } from '@services/API';
 import { t } from '@services/l10n';
-import { constants as c, initstate } from '@services/utils';
+import { constants } from '@services/constants';
+import initstate from '@services/init-state';
 import { makeTapPatch } from '@services/patches/mobile-click';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
@@ -482,7 +483,7 @@ const actions = computed((): IViewerAction[] => {
 
 /** Is the current slide a video */
 const isVideo = computed((): boolean => {
-  return Boolean((currentPhoto.value?.flag ?? 0) & c.FLAG_IS_VIDEO);
+  return Boolean((currentPhoto.value?.flag ?? 0) & constants.FLAG_IS_VIDEO);
 });
 
 /** Is the current slide a live photo */
@@ -504,7 +505,7 @@ const isLocal = computed((): boolean => {
 const isFavorite = computed(() => {
   const p = currentPhoto.value;
   if (!p) return false;
-  return Boolean(p.flag & c.FLAG_IS_FAVORITE);
+  return Boolean(p.flag & constants.FLAG_IS_FAVORITE);
 });
 
 /** Allow closing the viewer */
@@ -572,7 +573,7 @@ function updateTitle(photo: IPhoto | undefined) {
 /** Event on file changed */
 function handleFileUpdated({ fileid }: { fileid: number }) {
   const photo = currentPhoto.value;
-  const isvideo = (photo?.flag ?? 0) & c.FLAG_IS_VIDEO;
+  const isvideo = (photo?.flag ?? 0) & constants.FLAG_IS_VIDEO;
   if (photo?.fileid === fileid && !isvideo) {
     photoswipe.value?.refreshSlideContent(currIndex.value);
   }
@@ -1022,7 +1023,7 @@ async function openStatic(photo: IPhoto, listArg: IPhoto[], thumbSize?: 256 | 51
 /** Get base data object */
 function getItemData(photo: IPhoto): PsContent['data'] {
   let previewUrl = utils.getPreviewUrl({ photo, size: 'screen' });
-  const isvideo = photo.flag & c.FLAG_IS_VIDEO;
+  const isvideo = photo.flag & constants.FLAG_IS_VIDEO;
 
   // Preview aren't animated
   if (isvideo || photo.mimetype === 'image/gif') {

@@ -20,7 +20,7 @@ import FaceTopMatter from './FaceTopMatter.vue';
 import AlbumTopMatter from './AlbumTopMatter.vue';
 import PlacesTopMatter from './PlacesTopMatter.vue';
 
-import { initstate } from '@services/utils';
+import initstate from '@services/init-state';
 import * as utils from '@services/utils';
 
 defineOptions({

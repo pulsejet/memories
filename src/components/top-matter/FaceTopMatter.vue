@@ -73,7 +73,7 @@ import FaceMergeModal from '@components/modal/FaceMergeModal.vue';
 import { routeIs } from '@services/router';
 import { config, setConfig } from '@services/user-config';
 import * as utils from '@services/utils';
-import { constants as c } from '@services/utils';
+import { constants } from '@services/constants';
 import { t } from '@services/l10n';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
@@ -97,7 +97,7 @@ const name = computed(() => {
 });
 
 const isReal = computed(() => {
-  return name.value && name.value !== c.FACE_NULL;
+  return name.value && name.value !== constants.FACE_NULL;
 });
 
 const displayName = computed(() => {
@@ -124,7 +124,7 @@ function openUnassigned() {
     name: route.name?.toString(),
     params: {
       user: utils.uid as string,
-      name: c.FACE_NULL,
+      name: constants.FACE_NULL,
     },
   });
 }

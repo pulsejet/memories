@@ -8,6 +8,7 @@ import { translate as t, translatePlural as n } from '@services/l10n';
 import { API } from '@services/API';
 import client from '@services/dav/client';
 import { config } from '@services/user-config';
+import { constants } from '@services/constants';
 import * as utils from '@services/utils';
 
 import type { IAlbum, IFileInfo, IPhoto } from '@typings';
@@ -49,9 +50,9 @@ export async function getAlbums(fileid?: number) {
 
   // Sort the response
   const sort = config.album_list_sort;
-  if (sort & utils.constants.ALBUM_SORT_FLAGS.NAME) {
+  if (sort & constants.ALBUM_SORT_FLAGS.NAME) {
     data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
-  } else if (sort & utils.constants.ALBUM_SORT_FLAGS.LAST_UPDATE) {
+  } else if (sort & constants.ALBUM_SORT_FLAGS.LAST_UPDATE) {
     data.sort((a, b) => (a.update_id ?? Number.MAX_SAFE_INTEGER) - (b.update_id ?? Number.MAX_SAFE_INTEGER));
   } else {
     // fall back to created date
@@ -59,7 +60,7 @@ export async function getAlbums(fileid?: number) {
   }
 
   // Sort descending if needed
-  if (sort & utils.constants.ALBUM_SORT_FLAGS.DESCENDING) {
+  if (sort & constants.ALBUM_SORT_FLAGS.DESCENDING) {
     data.reverse();
   }
 

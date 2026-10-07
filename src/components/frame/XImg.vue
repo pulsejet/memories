@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { constants } from '@services/utils/const';
+import { constants } from '@services/constants';
 import { fetchImage, sticky } from './XImgCache';
 
 const BLANK_IMG: string = constants.BLANK_IMG;

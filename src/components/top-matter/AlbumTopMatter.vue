@@ -16,7 +16,7 @@
             <SortDateDIcon v-if="isDescending" :size="20" />
             <SortDateAIcon v-else :size="20" />
           </template>
-          <template v-else-if="config.album_list_sort & c.ALBUM_SORT_FLAGS.NAME">
+          <template v-else-if="config.album_list_sort & constants.ALBUM_SORT_FLAGS.NAME">
             <SlotAlphabeticalDIcon v-if="isDescending" :size="20" />
             <SlotAlphabeticalAIcon v-else :size="20" />
           </template>
@@ -30,7 +30,7 @@
           :aria-label="t('memories', 'Last updated')"
           :model-value="sortField"
           value="last_update"
-          @change="changeSort(c.ALBUM_SORT_FLAGS.LAST_UPDATE)"
+          @change="changeSort(constants.ALBUM_SORT_FLAGS.LAST_UPDATE)"
           close-after-click
         >
           {{ t('memories', 'Last updated') }}
@@ -41,7 +41,7 @@
           :aria-label="t('memories', 'Creation date')"
           :model-value="sortField"
           value="created"
-          @change="changeSort(c.ALBUM_SORT_FLAGS.CREATED)"
+          @change="changeSort(constants.ALBUM_SORT_FLAGS.CREATED)"
           close-after-click
         >
           {{ t('memories', 'Creation date') }}
@@ -52,7 +52,7 @@
           :aria-label="t('memories', 'Album name')"
           :model-value="sortField"
           value="name"
-          @change="changeSort(c.ALBUM_SORT_FLAGS.NAME)"
+          @change="changeSort(constants.ALBUM_SORT_FLAGS.NAME)"
           close-after-click
         >
           {{ t('memories', 'Album name') }}
@@ -161,7 +161,7 @@ import { API } from '@services/API';
 import { windowDims } from '@services/common';
 import { config, setConfig } from '@services/user-config';
 import * as utils from '@services/utils';
-import { constants as c } from '@services/utils';
+import { constants } from '@services/constants';
 import { t } from '@services/l10n';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
@@ -201,18 +201,18 @@ const name = computed((): string => {
 
 const isDateSort = computed((): boolean => {
   return (
-    !!(config.album_list_sort & c.ALBUM_SORT_FLAGS.CREATED) ||
-    !!(config.album_list_sort & c.ALBUM_SORT_FLAGS.LAST_UPDATE)
+    !!(config.album_list_sort & constants.ALBUM_SORT_FLAGS.CREATED) ||
+    !!(config.album_list_sort & constants.ALBUM_SORT_FLAGS.LAST_UPDATE)
   );
 });
 
 const isDescending = computed((): boolean => {
-  return !!(config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING);
+  return !!(config.album_list_sort & constants.ALBUM_SORT_FLAGS.DESCENDING);
 });
 
 const sortField = computed((): string => {
-  if (config.album_list_sort & c.ALBUM_SORT_FLAGS.CREATED) return 'created';
-  if (config.album_list_sort & c.ALBUM_SORT_FLAGS.NAME) return 'name';
+  if (config.album_list_sort & constants.ALBUM_SORT_FLAGS.CREATED) return 'created';
+  if (config.album_list_sort & constants.ALBUM_SORT_FLAGS.NAME) return 'name';
   return 'last_update';
 });
 
@@ -237,7 +237,7 @@ async function downloadAlbum() {
 
 /** Set sort choice */
 function changeSort(flag: number) {
-  const dir = config.album_list_sort & c.ALBUM_SORT_FLAGS.DESCENDING;
+  const dir = config.album_list_sort & constants.ALBUM_SORT_FLAGS.DESCENDING;
   setConfig('album_list_sort', flag | dir);
 }
 
@@ -245,9 +245,9 @@ function changeSort(flag: number) {
 function setDescending(val: boolean) {
   let sort = config.album_list_sort;
   if (val) {
-    sort |= c.ALBUM_SORT_FLAGS.DESCENDING;
+    sort |= constants.ALBUM_SORT_FLAGS.DESCENDING;
   } else {
-    sort &= ~c.ALBUM_SORT_FLAGS.DESCENDING;
+    sort &= ~constants.ALBUM_SORT_FLAGS.DESCENDING;
   }
   setConfig('album_list_sort', sort);
 }

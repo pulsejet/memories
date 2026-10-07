@@ -74,7 +74,7 @@ import axios from '@nextcloud/axios';
 import { useModal } from '@services/modal';
 import { t, n } from '@services/l10n';
 import { config } from '@services/user-config';
-import { constants as c } from '@services/utils';
+import { constants } from '@services/constants';
 import { API } from '@services/API';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
@@ -110,7 +110,7 @@ async function open(photosIn: IPhoto[], sectionsIn: number[] = [1, 2, 3, 4]) {
 
   // Filter out forbidden MIME types
   filtered = filtered.filter((p) => {
-    if (c.FORBIDDEN_EDIT_MIMES.includes(p.mimetype ?? String())) {
+    if (constants.FORBIDDEN_EDIT_MIMES.includes(p.mimetype ?? String())) {
       showError(t('memories', 'Cannot edit {name} of type {type}', { name: p.basename!, type: p.mimetype! }));
       return false;
     }

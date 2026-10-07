@@ -47,7 +47,8 @@ import { routeIs } from '@services/router';
 import { t, n } from '@services/l10n';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
-import { constants as c, initstate } from '@services/utils';
+import { constants } from '@services/constants';
+import initstate from '@services/init-state';
 import * as nativex from '@native';
 
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
@@ -360,7 +361,7 @@ async function click(action: ISelectionAction) {
 
 /** Clicking on photo */
 function clickPhoto(photo: IPhoto, event: PointerEvent | null, rowIdx: number) {
-  if (photo.flag & c.FLAG_PLACEHOLDER) return;
+  if (photo.flag & constants.FLAG_PLACEHOLDER) return;
   if (event?.pointerType === 'touch') return; // let touch events handle this
   if (event?.pointerType === 'mouse' && event?.button !== 0) return; // only left click for mouse
 
@@ -382,7 +383,7 @@ function clickSelectionIcon(photo: IPhoto, event: PointerEvent | null, rowIdx: n
 
 /** Tap on */
 function touchstartPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
-  if (photo.flag & c.FLAG_PLACEHOLDER) return;
+  if (photo.flag & constants.FLAG_PLACEHOLDER) return;
 
   // Bail if the user was scrolling the recycler recently
   // https://github.com/pulsejet/memories/issues/1066
@@ -409,7 +410,7 @@ function touchstartPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
 
 /** Tap off */
 function touchendPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
-  if (photo.flag & c.FLAG_PLACEHOLDER) return;
+  if (photo.flag & constants.FLAG_PLACEHOLDER) return;
   delete props.rows[rowIdx].virtualSticky;
 
   if (touchTimer.value && !touchMoved.value) {
@@ -442,7 +443,7 @@ function resetTouchParams() {
  * photo and rowIdx are that of the *anchor*
  */
 function touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
-  if (anchor.flag & c.FLAG_PLACEHOLDER) return;
+  if (anchor.flag & constants.FLAG_PLACEHOLDER) return;
 
   // Use first touch -- can't do much
   const touch: Touch = event.touches[0];
@@ -547,7 +548,7 @@ function touchMoveSelect(touch: Touch, rowIdx: number) {
     .elementsFromPoint(touch.clientX, clampedY)
     .find((e) => e.classList.contains('p-outer-super'));
   let overPhoto: IPhoto | null = elem?.__photo;
-  if ((overPhoto?.flag ?? 0) & c.FLAG_PLACEHOLDER) overPhoto = null;
+  if ((overPhoto?.flag ?? 0) & constants.FLAG_PLACEHOLDER) overPhoto = null;
 
   // Do multi-selection "till" overPhoto "from" anchor
   // This logic is completely different from the desktop because of the
@@ -597,7 +598,7 @@ function touchMoveSelect(touch: Touch, rowIdx: number) {
       newSelection.addBy(photo);
 
       // Perf: only update heads if not selected
-      if (!(photo.flag & c.FLAG_SELECTED)) {
+      if (!(photo.flag & constants.FLAG_SELECTED)) {
         selectPhoto(photo, true, true);
         updatedDays.add(photo.dayid);
       }
@@ -629,17 +630,17 @@ function touchMoveSelect(touch: Touch, rowIdx: number) {
 
 /** Add a photo to selection list */
 function selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
-  if (photo.flag & c.FLAG_PLACEHOLDER) {
+  if (photo.flag & constants.FLAG_PLACEHOLDER) {
     return; // ignore placeholders
   }
 
   const nval = val ?? !selection.value.hasBy(photo);
   if (nval) {
-    photo.flag |= c.FLAG_SELECTED;
+    photo.flag |= constants.FLAG_SELECTED;
     selection.value.addBy(photo);
     selectionChanged();
   } else {
-    photo.flag &= ~c.FLAG_SELECTED;
+    photo.flag &= ~constants.FLAG_SELECTED;
     selection.value.deleteBy(photo);
     selectionChanged();
   }
@@ -684,9 +685,9 @@ function selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
       const j_e = delta < 0 ? 0 : row.photos.length; // j-end
       for (let j = j_s; delta < 0 ? j >= j_e : j < j_e; j += delta) {
         const p = row.photos[j];
-        if (p.flag & c.FLAG_PLACEHOLDER || !p.fileid) continue;
+        if (p.flag & constants.FLAG_PLACEHOLDER || !p.fileid) continue;
 
-        if (p.flag & c.FLAG_SELECTED) {
+        if (p.flag & constants.FLAG_SELECTED) {
           // Found a selected photo, return everything excluding this
           return result;
         }
@@ -718,7 +719,7 @@ function selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
     const i_s = detail.indexOf(photo) - delta; // i-start
     const i_e = delta < 0 ? detail.length : 0; // i-end
     for (let i = i_s; delta < 0 ? i < i_e : i >= i_e; i -= delta) {
-      if (detail[i].flag & c.FLAG_SELECTED) {
+      if (detail[i].flag & constants.FLAG_SELECTED) {
         deselect(detail[i]);
       }
     }
@@ -774,7 +775,7 @@ function updateHeadSelected(head: IHeadRow) {
   // Check if all photos are selected
   for (const row of head.day.rows ?? []) {
     for (const photo of row.photos ?? []) {
-      if (!(photo.flag & c.FLAG_SELECTED)) {
+      if (!(photo.flag & constants.FLAG_SELECTED)) {
         selected = false;
         break;
       }
@@ -794,7 +795,7 @@ function clear() {
 function deselect(photos: IPhoto[]) {
   const heads = new Set<IHeadRow>();
   photos.forEach((photo: IPhoto) => {
-    photo.flag &= ~c.FLAG_SELECTED;
+    photo.flag &= ~constants.FLAG_SELECTED;
     heads.add(props.heads.get(photo.dayid)!);
     selection.value.deleteBy(photo);
     selectionChanged();
@@ -826,7 +827,7 @@ function restoreDay(day: IDay) {
 
     // Update the photo object
     selection.value.addBy(newPhoto);
-    newPhoto.flag |= c.FLAG_SELECTED;
+    newPhoto.flag |= constants.FLAG_SELECTED;
   });
 
   selectionChanged();
@@ -855,7 +856,7 @@ async function uploadLocalSelection(sel: Selection) {
  * Check if all files selected currently are favorites
  */
 function allSelectedFavorites(sel: Selection) {
-  return Array.from(sel.values()).every((p) => p.flag & c.FLAG_IS_FAVORITE);
+  return Array.from(sel.values()).every((p) => p.flag & constants.FLAG_IS_FAVORITE);
 }
 
 /**

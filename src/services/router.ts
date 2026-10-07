@@ -10,7 +10,7 @@ import ClusterView from '@components/ClusterView.vue';
 import NativeXSetup from '@native/Setup.vue';
 
 import { translate as t } from '@services/l10n';
-import { constants as c } from '@services/utils';
+import { constants } from '@services/constants';
 
 // Routes are defined here
 export type RouteId =
@@ -257,9 +257,9 @@ export const routeIs = reactive({
     );
   },
   get RecognizeUnassigned(): boolean {
-    return isName(routes.Recognize.name) && router.currentRoute.value.params.name === c.FACE_NULL;
+    return isName(routes.Recognize.name) && router.currentRoute.value.params.name === constants.FACE_NULL;
   },
   get PlacesUnassigned(): boolean {
-    return isName(routes.Places.name) && router.currentRoute.value.params.name === c.PLACES_NULL;
+    return isName(routes.Places.name) && router.currentRoute.value.params.name === constants.PLACES_NULL;
   },
 });

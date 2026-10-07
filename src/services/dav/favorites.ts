@@ -4,7 +4,7 @@ import client from './client';
 import * as base from './base';
 
 import { translate as t } from '@services/l10n';
-import { constants as c } from '@services/utils';
+import { constants } from '@services/constants';
 
 import type { IFileInfo, IPhoto } from '@typings';
 
@@ -86,8 +86,8 @@ export async function* favoritePhotos(photos: IPhoto[], favoriteState: boolean) 
  */
 export function favoriteSetFlag(photo: IPhoto, val: boolean) {
   if (val) {
-    photo.flag |= c.FLAG_IS_FAVORITE;
+    photo.flag |= constants.FLAG_IS_FAVORITE;
   } else {
-    photo.flag &= ~c.FLAG_IS_FAVORITE;
+    photo.flag &= ~constants.FLAG_IS_FAVORITE;
   }
 }

@@ -3,6 +3,7 @@ import { showError } from '@nextcloud/dialogs';
 import { translate as t } from '@services/l10n';
 import { config } from '@services/user-config';
 import * as utils from '@services/utils';
+import { constants } from '@services/constants';
 import * as nativex from '@native';
 import { API } from '@services/API';
 
@@ -265,7 +266,7 @@ class VideoContentSetup {
       }
 
       // Prevent showing any default poster like a big play button.
-      providerEl.querySelector('video')?.setAttribute('poster', utils.constants.BLANK_IMG);
+      providerEl.querySelector('video')?.setAttribute('poster', constants.BLANK_IMG);
     });
 
     player.addEventListener('hls-instance', (e: Event) => {

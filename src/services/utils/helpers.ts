@@ -3,7 +3,7 @@ import { Md5 } from 'ts-md5';
 
 import { getCurrentUser } from '@nextcloud/auth';
 
-import { constants } from './const';
+import { constants } from '@services/constants';
 import { getPlayableVideoCodecsSync } from './video';
 
 import { API } from '@services/API';
