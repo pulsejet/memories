@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-section">
+  <div v-if="systemConfig" class="admin-section">
     <h2>{{ $options.title }}</h2>
 
     {{ t('memories', 'Default high resolution image loading behavior of the photo viewer.') }}
@@ -69,15 +69,12 @@ import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwit
 
 import { t } from '@services/l10n';
 
-import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
+import { useAdminSection } from '../useAdminSection';
 
 defineOptions({
   name: 'Viewer',
   title: t('memories', 'Photo Viewer'),
 });
 
-const props = defineProps(adminSectionProps);
-const emit = defineEmits<AdminSectionEmits>();
-
-const { update } = useAdminSection(props, emit);
+const { systemConfig, update } = useAdminSection();
 </script>

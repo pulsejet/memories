@@ -39,13 +39,8 @@ import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
 import { config as userConfig } from '@services/user-config';
 import { t } from '@services/l10n';
 
-import { adminSectionProps, type AdminSectionEmits } from '../useAdminSection';
-
 defineOptions({
   name: 'Apps',
   title: t('memories', 'Recommended Apps'),
 });
-
-defineProps(adminSectionProps);
-defineEmits<AdminSectionEmits>();
 </script>

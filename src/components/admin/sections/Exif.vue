@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-section">
+  <div v-if="systemConfig" class="admin-section">
     <h2>{{ $options.title }}</h2>
 
     <template v-if="status">
@@ -40,15 +40,13 @@ import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwit
 
 import { t } from '@services/l10n';
 
-import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
+import { useAdminSection } from '../useAdminSection';
+import { binaryStatus, binaryStatusType } from '../admin-utils';
 
 defineOptions({
   name: 'Exif',
   title: t('memories', 'EXIF Extraction'),
 });
 
-const props = defineProps(adminSectionProps);
-const emit = defineEmits<AdminSectionEmits>();
-
-const { update, binaryStatus, binaryStatusType } = useAdminSection(props, emit);
+const { status, systemConfig, update } = useAdminSection();
 </script>

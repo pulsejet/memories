@@ -1,122 +1,43 @@
-import { computed, type PropType } from 'vue';
-import axios from '@nextcloud/axios';
+import { computed, inject, provide, type InjectionKey, type Ref } from 'vue';
 
-import { t } from '@services/l10n';
+import type { ISystemConfig, ISystemStatus } from './AdminTypes';
 
-import type { IBinaryStatus, IServiceStatus, ISystemConfig, ISystemStatus } from './AdminTypes';
+/** Updater provided by AdminMain, implemented as PUT to SYSTEM_CONFIG. */
+type AdminUpdateFn = <K extends keyof ISystemConfig>(key: K, value?: ISystemConfig[K] | null) => void | Promise<void>;
 
-/** Props shared by all admin sections. */
-export const adminSectionProps = {
-  status: {
-    type: Object as PropType<ISystemStatus | null>,
-    default: null,
-    required: false,
-  },
-  systemConfig: {
-    type: Object as PropType<ISystemConfig>,
-    required: true,
-  },
-} as const;
-
-/** Emits shared by all admin sections. */
-export type AdminSectionEmits = {
-  (e: 'update', key: keyof ISystemConfig, value: any): void;
+/** Shared admin state injected into all sections. */
+type AdminContext = {
+  status: Ref<ISystemStatus | null>;
+  systemConfig: Ref<ISystemConfig | null>;
+  update: AdminUpdateFn;
 };
 
+/** Injection key for the shared admin state; provided by AdminMain. */
+const adminContextKey: InjectionKey<AdminContext> = Symbol('memories-admin-context');
+
+/** Provide admin context; must be called synchronously in AdminMain setup. */
+export function provideAdminContext(context: AdminContext) {
+  provide(adminContextKey, context);
+}
+
 /** Shared logic for admin sections. */
-export function useAdminSection(
-  props: { status: ISystemStatus | null; systemConfig: ISystemConfig },
-  emit: AdminSectionEmits,
-) {
-  function update(key: keyof ISystemConfig, value: any = null) {
-    emit('update', key, value);
+export function useAdminSection() {
+  const ctx = inject(adminContextKey);
+  if (!ctx) {
+    throw new Error('useAdminSection() must be used within AdminMain');
   }
-
-  function binaryStatus(name: string, status: IBinaryStatus): string {
-    const noescape = {
-      escape: false,
-      sanitize: false,
-    };
-    if (status === 'ok') {
-      return t('memories', '{name} binary exists and is executable.', { name });
-    } else if (status === 'not_found') {
-      return t('memories', '{name} binary not found.', { name });
-    } else if (status === 'not_executable') {
-      return t('memories', '{name} binary is not executable.', { name });
-    } else if (status.startsWith('test_fail')) {
-      return t('memories', '{name} failed test: {info}.', { name, info: status.slice(10) }, 0, noescape);
-    } else if (status.startsWith('test_ok')) {
-      return t(
-        'memories',
-        '{name} binary exists and is usable ({info}).',
-        { name, info: status.slice(8) },
-        0,
-        noescape,
-      );
-    } else {
-      return t('memories', '{name} binary status: {status}.', { name, status });
-    }
-  }
-
-  function binaryStatusType(status: IBinaryStatus, critical = true): 'success' | 'warning' | 'error' {
-    if (binaryStatusOk(status)) {
-      return 'success';
-    } else if (status === 'not_found' || status === 'not_executable' || status.startsWith('test_fail')) {
-      return critical ? 'error' : 'warning';
-    } else {
-      return 'warning';
-    }
-  }
-
-  function binaryStatusOk(status: IBinaryStatus): boolean {
-    return status === 'ok' || status.startsWith('test_ok');
-  }
-
-  function serviceStatus(s: IServiceStatus): string {
-    if (s.healthy) {
-      if (s.latencyMs !== undefined && s.latencyMs !== null) {
-        return t('memories', '{srv} - Healthy ({version}, latency={latency}ms).', {
-          srv: s.server,
-          version: s.detail,
-          latency: s.latencyMs,
-        });
-      }
-      return t('memories', '{srv} - Healthy ({version}).', {
-        srv: s.server,
-        version: s.detail,
-      });
-    }
-    return t('memories', '{srv} - Unhealthy ({info}).', {
-      srv: s.server,
-      info: s.detail,
-    });
-  }
-
-  function serviceStatusType(s: IServiceStatus): 'success' | 'error' {
-    return s.healthy ? 'success' : 'error';
-  }
-
-  const requestToken = computed(() => (<any>axios.defaults.headers).requesttoken);
-
-  const actionToken = computed(() => props.status?.action_token || '');
-
-  /** Reverse of memories.vod.disable, unfortunately */
-  const enableTranscoding = computed({
-    get: () => !props.systemConfig['memories.vod.disable'],
-    set: (value: boolean) => {
-      props.systemConfig['memories.vod.disable'] = !value;
-    },
-  });
 
   return {
-    update,
-    binaryStatus,
-    binaryStatusType,
-    binaryStatusOk,
-    serviceStatus,
-    serviceStatusType,
-    requestToken,
-    actionToken,
-    enableTranscoding,
+    status: ctx.status,
+    systemConfig: ctx.systemConfig,
+    update: ctx.update,
+    enableTranscoding: computed({
+      get: () => !ctx.systemConfig.value?.['memories.vod.disable'],
+      set: (value: boolean) => {
+        if (ctx.systemConfig.value) {
+          ctx.systemConfig.value['memories.vod.disable'] = !value;
+        }
+      },
+    }),
   };
 }

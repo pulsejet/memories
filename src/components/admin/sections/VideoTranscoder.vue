@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-section">
+  <div v-if="systemConfig" class="admin-section">
     <h3>{{ $options.title }}</h3>
     <p>
       {{
@@ -84,20 +84,15 @@ import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwit
 
 import { t } from '@services/l10n';
 
-import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
+import { useAdminSection } from '../useAdminSection';
+import { binaryStatus, binaryStatusType, serviceStatus, serviceStatusType } from '../admin-utils';
 
 defineOptions({
   name: 'VideoTranscoder',
   title: t('memories', 'Transcoder'),
 });
 
-const props = defineProps(adminSectionProps);
-const emit = defineEmits<AdminSectionEmits>();
-
-const { update, binaryStatus, binaryStatusType, serviceStatus, serviceStatusType, enableTranscoding } = useAdminSection(
-  props,
-  emit,
-);
+const { status, systemConfig, update, enableTranscoding } = useAdminSection();
 
 function updateConnect(value: string) {
   const array = value.split(',').map((s) => s.trim());

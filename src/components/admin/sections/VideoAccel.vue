@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-section">
+  <div v-if="systemConfig" class="admin-section">
     <h3>{{ $options.title }}</h3>
 
     <p>
@@ -178,36 +178,33 @@ import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwit
 
 import { t } from '@services/l10n';
 
-import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
+import { useAdminSection } from '../useAdminSection';
 
 defineOptions({
   name: 'VideoAccel',
   title: t('memories', 'HW Acceleration'),
 });
 
-const props = defineProps(adminSectionProps);
-const emit = defineEmits<AdminSectionEmits>();
-
-const { update, enableTranscoding } = useAdminSection(props, emit);
+const { status, systemConfig, update, enableTranscoding } = useAdminSection();
 
 const vaapiStatusText = computed((): string => {
-  if (!props.status) return '';
+  if (!status.value) return '';
 
-  const dev = props.systemConfig['memories.vod.vaapi.device'] || '/dev/dri/renderD128';
-  if (props.status.vaapi_dev === 'ok') {
+  const dev = systemConfig.value?.['memories.vod.vaapi.device'] || '/dev/dri/renderD128';
+  if (status.value.vaapi_dev === 'ok') {
     return t('memories', 'VA-API device ({dev}) is readable', { dev });
-  } else if (props.status.vaapi_dev === 'not_found') {
+  } else if (status.value.vaapi_dev === 'not_found') {
     return t('memories', 'VA-API device ({dev}) not found', { dev });
-  } else if (props.status.vaapi_dev === 'not_readable') {
+  } else if (status.value.vaapi_dev === 'not_readable') {
     return t('memories', 'VA-API device ({dev}) has incorrect permissions', { dev });
   } else {
     return t('memories', 'VA-API device status: {status}', {
-      status: props.status.vaapi_dev,
+      status: status.value.vaapi_dev,
     });
   }
 });
 
 const vaapiStatusType = computed((): 'success' | 'error' => {
-  return props.status?.vaapi_dev === 'ok' ? 'success' : 'error';
+  return status.value?.vaapi_dev === 'ok' ? 'success' : 'error';
 });
 </script>

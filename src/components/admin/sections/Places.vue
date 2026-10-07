@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-section">
+  <div v-if="systemConfig" class="admin-section">
     <h2>{{ $options.title }}</h2>
 
     <p>
@@ -73,6 +73,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
+import axios from '@nextcloud/axios';
 import NcTextField from '@nextcloud/vue/components/NcTextField';
 import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
 import NcButton from '@nextcloud/vue/components/NcButton';
@@ -81,36 +82,36 @@ import { API } from '@services/API';
 import { t } from '@services/l10n';
 import * as utils from '@services/utils/common';
 
-import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
+import { useAdminSection } from '../useAdminSection';
 
 defineOptions({
   name: 'Places',
   title: t('memories', 'Reverse Geocoding'),
 });
 
-const props = defineProps(adminSectionProps);
-const emit = defineEmits<AdminSectionEmits>();
+const { status, systemConfig, update } = useAdminSection();
 
-const { update, requestToken, actionToken } = useAdminSection(props, emit);
+const requestToken = computed(() => (<any>axios.defaults.headers).requesttoken);
+const actionToken = computed(() => status.value?.action_token || '');
 
 const gisStatus = computed(() => {
-  if (!props.status) return '';
+  if (!status.value) return '';
 
-  if (typeof props.status.gis_type !== 'number') {
-    return props.status.gis_type;
+  if (typeof status.value.gis_type !== 'number') {
+    return status.value.gis_type;
   }
 
-  if (props.status.gis_type <= 0) {
+  if (status.value.gis_type <= 0) {
     return t('memories', 'Geometry support was not detected in your database');
-  } else if (props.status.gis_type === 1) {
+  } else if (status.value.gis_type === 1) {
     return t('memories', 'MySQL-like geometry support was detected ');
-  } else if (props.status.gis_type === 2) {
+  } else if (status.value.gis_type === 2) {
     return t('memories', 'Postgres native geometry support was detected');
   }
 });
 
 const gisStatusType = computed(() => {
-  return typeof props.status?.gis_type !== 'number' || props.status.gis_type <= 0 ? 'error' : 'success';
+  return typeof status.value?.gis_type !== 'number' || status.value.gis_type <= 0 ? 'error' : 'success';
 });
 
 const placesSetupUrl = computed(() => {
@@ -125,7 +126,7 @@ async function placesSetup(event: Event) {
   );
   const warnLong = t('memories', 'You are about to download the planet database. This may take a while.');
   const warnReindex = t('memories', 'This may also cause all photos to be re-indexed!');
-  const msg = (props.status?.gis_count ? warnSetup : warnLong) + ' ' + warnReindex;
+  const msg = (status.value?.gis_count ? warnSetup : warnLong) + ' ' + warnReindex;
 
   // ask the user
   if (

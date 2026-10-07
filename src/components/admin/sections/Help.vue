@@ -40,15 +40,10 @@
 <script setup lang="ts">
 import { t } from '@services/l10n';
 
-import { adminSectionProps, type AdminSectionEmits } from '../useAdminSection';
-
 defineOptions({
   name: 'Support',
   title: t('memories', 'Help & Support'),
 });
-
-defineProps(adminSectionProps);
-defineEmits<AdminSectionEmits>();
 </script>
 
 <style lang="scss" scoped>

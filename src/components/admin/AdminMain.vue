@@ -3,15 +3,7 @@
     <XLoadingIcon class="loading-icon" v-show="loading" />
 
     <div class="left-pane">
-      <component
-        v-for="c in components"
-        :id="c.name"
-        :key="c.name"
-        :is="c"
-        :status="status"
-        :systemConfig="systemConfig"
-        @update="update"
-      />
+      <component v-for="c in components" :id="c.name" :key="c.name" :is="c" />
     </div>
     <div class="right-pane">
       <a class="sec-link" v-for="c in components" :key="c.name" :href="`#${c.name}`">{{ c.title ?? c.name }}</a>
@@ -29,6 +21,7 @@ import { API } from '@services/API';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { waitForConfig } from '@services/user-config';
 import { t } from '@services/l10n';
+import { provideAdminContext } from './useAdminSection';
 
 import Help from './sections/Help.vue';
 import Exif from './sections/Exif.vue';
@@ -46,11 +39,9 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 import type { ISystemConfig, ISystemStatus } from './AdminTypes';
 
 const loading = ref(0);
-
+const refreshTimer = new RenewingTimeout();
 const status = ref<ISystemStatus | null>(null);
 const systemConfig = ref<ISystemConfig | null>(null);
-
-const refreshTimer = new RenewingTimeout();
 
 const components = [
   markRaw(Help),
@@ -132,6 +123,9 @@ async function update<K extends keyof ISystemConfig>(key: K, value: ISystemConfi
     loading.value--;
   }
 }
+
+// Provide shared context to all sections.
+provideAdminContext({ status, systemConfig, update });
 </script>
 
 <style lang="scss" scoped>

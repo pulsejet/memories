@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-section">
+  <div v-if="systemConfig" class="admin-section">
     <h2>{{ $options.title }}</h2>
 
     <p>
@@ -65,15 +65,14 @@ import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
 
 import { t } from '@services/l10n';
 
-import { adminSectionProps, type AdminSectionEmits } from '../useAdminSection';
+import { useAdminSection } from '../useAdminSection';
 
 defineOptions({
   name: 'Performance',
   title: t('memories', 'Performance'),
 });
 
-defineProps(adminSectionProps);
-defineEmits<AdminSectionEmits>();
+const { status, systemConfig } = useAdminSection();
 
 const isHttps = computed((): boolean => {
   return window.location.protocol === 'https:';

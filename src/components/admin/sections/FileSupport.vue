@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-section">
+  <div v-if="systemConfig" class="admin-section">
     <h2>{{ $options.title }}</h2>
 
     {{ t('memories', 'You can configure the enabled Nextcloud preview providers below.') }}
@@ -101,17 +101,15 @@ import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwit
 
 import { t } from '@services/l10n';
 
-import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
+import { useAdminSection } from '../useAdminSection';
+import { binaryStatus, binaryStatusOk, binaryStatusType } from '../admin-utils';
 
 defineOptions({
   name: 'FileSupport',
   title: t('memories', 'File Support'),
 });
 
-const props = defineProps(adminSectionProps);
-const emit = defineEmits<AdminSectionEmits>();
-
-const { update, binaryStatus, binaryStatusType, binaryStatusOk } = useAdminSection(props, emit);
+const { status, systemConfig, update } = useAdminSection();
 
 const knownPreviewProviders = {
   'OC\\Preview\\Image': {
@@ -134,7 +132,7 @@ const knownPreviewProviders = {
 const previewSizes = [512, 1024, 2048, 4096, 8192];
 
 function providers() {
-  return props.systemConfig['enabledPreviewProviders'];
+  return systemConfig.value?.['enabledPreviewProviders'] ?? [];
 }
 
 function hasProvider(klass: string): boolean {
@@ -142,12 +140,12 @@ function hasProvider(klass: string): boolean {
 }
 
 function updateProvider(klass: string, enabled: boolean) {
-  if (enabled === hasProvider(klass)) return;
+  if (!systemConfig.value || enabled === hasProvider(klass)) return;
 
   if (enabled) {
     providers().push(klass);
   } else {
-    props.systemConfig['enabledPreviewProviders'] = providers().filter((k) => k !== klass);
+    systemConfig.value['enabledPreviewProviders'] = providers().filter((k) => k !== klass);
   }
 
   update('enabledPreviewProviders');

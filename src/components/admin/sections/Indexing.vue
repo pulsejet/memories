@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-section">
+  <div v-if="systemConfig" class="admin-section">
     <h2>{{ $options.title }}</h2>
 
     <template v-if="status">
@@ -147,24 +147,22 @@ import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwit
 import { t } from '@services/l10n';
 import { API } from '@services/API';
 
-import { adminSectionProps, useAdminSection, type AdminSectionEmits } from '../useAdminSection';
+import { useAdminSection } from '../useAdminSection';
 
 defineOptions({
   name: 'Indexing',
   title: t('memories', 'Media Indexing'),
 });
 
-const props = defineProps(adminSectionProps);
-const emit = defineEmits<AdminSectionEmits>();
-
-const { update } = useAdminSection(props, emit);
+const { status, systemConfig, update } = useAdminSection();
 
 const blocklistText = computed({
   get(): string {
-    return (props.systemConfig['memories.index.folder.blocklist'] ?? []).join(', ');
+    return (systemConfig.value?.['memories.index.folder.blocklist'] ?? []).join(', ');
   },
   set(value: string) {
-    props.systemConfig['memories.index.folder.blocklist'] = value
+    if (!systemConfig.value) return;
+    systemConfig.value['memories.index.folder.blocklist'] = value
       .split(',')
       .map((s) => s.trim())
       .filter((s) => s !== '');
