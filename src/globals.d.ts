@@ -75,14 +75,6 @@ declare global {
     scrollToItem: (index: number) => void;
   };
 
-  type VueNcPopover = ComponentPublicInstance & {
-    $refs: { popover: { show(): void; hide(): void } };
-  };
-
-  type VueNcSelectTags = ComponentPublicInstance & {
-    availableTags: any[];
-  };
-
   type VueHTMLComponent = Omit<ComponentPublicInstance, '$el'> & {
     $el: HTMLElement;
   };
