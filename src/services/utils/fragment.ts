@@ -1,5 +1,5 @@
 import { bus } from './event-bus';
-import { onDOMLoaded } from './helpers';
+import { onDOMLoaded } from './dom';
 
 /** Mapping of route name to key type */
 enum FragmentType {

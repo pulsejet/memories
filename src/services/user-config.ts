@@ -8,7 +8,7 @@ import { getBuilder } from '@nextcloud/browser-storage';
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
 import { constants } from '@services/constants';
-import { isNetworkError } from '@services/utils/helpers';
+import { isNetworkError } from '@services/utils/network';
 import { nativex } from '@native/api';
 
 import type { IConfig } from '@typings';

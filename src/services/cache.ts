@@ -1,5 +1,5 @@
 import { config } from '@services/user-config';
-import { uid } from '@services/utils/helpers';
+import { uid } from '@services/utils/auth';
 
 /** Cache keys */
 function getCacheName() {

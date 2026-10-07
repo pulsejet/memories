@@ -26,7 +26,7 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
-import * as utils from '@services/utils/helpers';
+import * as utils from '@services/utils/common';
 
 import type { IFolder, IPhoto } from '@typings';
 

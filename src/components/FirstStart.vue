@@ -56,7 +56,7 @@ import axios from '@nextcloud/axios';
 
 import banner from '@assets/banner.svg';
 
-import { isAdmin } from '@services/utils/helpers';
+import { isAdmin } from '@services/utils/auth';
 import { chooseNcFolder } from '@services/utils/dialog';
 import { API } from '@services/API';
 import { t, n } from '@services/l10n';

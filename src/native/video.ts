@@ -2,7 +2,7 @@ import { NAPI, nativex } from './api';
 import { addOrigin } from './basic';
 import { has } from './api';
 import { config } from '@services/user-config';
-import { isLikelySamePhoto, isLocalPhoto } from '@services/utils/helpers';
+import { isLikelySamePhoto, isLocalPhoto } from '@services/utils/photo';
 import type { IPhoto } from '@typings';
 
 /**
