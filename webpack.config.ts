@@ -102,7 +102,7 @@ export default {
 
   performance: {
     maxAssetSize: (isDev ? 15 : 3) * MiB,
-    maxEntrypointSize: (isDev ? 10 : 2.2) * MiB,
+    maxEntrypointSize: (isDev ? 10 : 1.9) * MiB,
     hints: 'error',
   },
 
@@ -119,7 +119,11 @@ export default {
       {
         test: /\.s?css$/,
         sideEffects: true,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
+        use: [
+          { loader: 'style-loader' },
+          { loader: 'css-loader', options: { sourceMap: isDev } },
+          { loader: 'sass-loader', options: { sourceMap: isDev } },
+        ],
       },
       {
         test: /\.vue$/,
