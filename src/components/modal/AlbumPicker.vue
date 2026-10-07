@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!showAlbumCreationForm" class="album-picker">
+  <div v-if="!showAlbumCreationForm" ref="root" class="album-picker">
     <XLoadingIcon v-if="loadingAlbums" class="loading-icon centered" />
 
     <div class="search">
@@ -14,7 +14,7 @@
     </div>
 
     <div class="albums-container">
-      <AlbumsList ref="albumsList" :albums="filteredList" :link="false" @click="toggleAlbumSelection">
+      <AlbumsList :albums="filteredList" :link="false" @click="toggleAlbumSelection">
         <template #extra="{ album }">
           <div
             :class="{
@@ -78,11 +78,10 @@
 import {
   computed,
   ref,
-  useTemplateRef,
   onMounted,
   nextTick,
   markRaw,
-  getCurrentInstance,
+  useTemplateRef,
   defineAsyncComponent,
 } from 'vue';
 
@@ -121,8 +120,7 @@ const emit = defineEmits<{
   (e: 'select', selection: IAlbum[], deselection: IAlbum[]): void;
 }>();
 
-const albumsList = useTemplateRef<InstanceType<typeof AlbumsList>>('albumsList');
-const instance = getCurrentInstance();
+const root = useTemplateRef<HTMLDivElement>('root');
 
 const showAlbumCreationForm = ref(false);
 const loadingAlbums = ref(true);
@@ -144,12 +142,11 @@ const filteredList = computed(() => {
   return fuse.value.search(search.value).map((r) => r.item);
 });
 
-onMounted(() => {
-  loadAlbums();
-  nextTick(() => {
-    // prevent autofocus on search bar for mobile
-    instance?.proxy?.$el.closest('.modal-mask')?.focus?.();
-  });
+onMounted(async () => {
+  void loadAlbums();
+  await nextTick();
+  // prevent autofocus on search bar for mobile
+  (root.value?.closest('.modal-mask') as HTMLElement | null)?.focus?.();
 });
 
 async function albumCreatedHandler({ album }: { album: { basename: string } }) {
@@ -160,7 +157,6 @@ async function albumCreatedHandler({ album }: { album: { basename: string } }) {
   const newAlbum = albums.value.find((a) => a.name === album.basename);
   if (newAlbum) {
     selection.value.add(newAlbum);
-    forceUpdate();
   }
 }
 
@@ -204,7 +200,6 @@ async function loadAlbums(preserveSelection: boolean = false) {
     console.error(e);
   } finally {
     loadingAlbums.value = false;
-    forceUpdate();
   }
 }
 
@@ -222,17 +217,10 @@ function toggleAlbumSelection(album: IAlbum) {
     selection.value.add(album);
     deselection.value.delete(album);
   }
-
-  forceUpdate();
 }
 
 function submit() {
   emit('select', Array.from(selection.value), Array.from(deselection.value));
-}
-
-function forceUpdate() {
-  instance?.proxy?.$forceUpdate(); // sets do not trigger reactivity
-  albumsList.value?.$forceUpdate();
 }
 </script>
 

@@ -106,7 +106,6 @@
 <script setup lang="ts">
 import {
   computed,
-  getCurrentInstance,
   markRaw,
   nextTick,
   onBeforeUnmount,
@@ -194,7 +193,6 @@ const SIDEBAR_DEBOUNCE_MS = 350;
 defineOptions({
   name: 'Viewer',
 });
-const instance = getCurrentInstance();
 const outer = useTemplateRef<HTMLDivElement>('outer');
 const inner = useTemplateRef<HTMLDivElement>('inner');
 
@@ -1257,7 +1255,6 @@ async function favoriteCurrent() {
   } finally {
     updateLoading(-1);
   }
-  instance?.proxy?.$forceUpdate();
 }
 
 /** Download a file by file ID */

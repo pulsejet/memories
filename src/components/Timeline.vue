@@ -102,7 +102,6 @@
 <script setup lang="ts">
 import {
   computed,
-  getCurrentInstance,
   nextTick,
   onBeforeUnmount,
   onMounted,
@@ -159,7 +158,6 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const instance = getCurrentInstance();
 const container = useTemplateRef<InstanceType<typeof SwipeRefresh>>('container');
 const topmatter = useTemplateRef<InstanceType<typeof TopMatter>>('topmatter');
 const dtm = useTemplateRef<InstanceType<typeof DynamicTopMatter>>('dtm');
@@ -236,11 +234,6 @@ onMounted(() => {
     resizeObserver = new ResizeObserver(() => handleResizeWithDelay());
     resizeObserver.observe(container.value.$el);
   }
-
-  // Template refs ($refs) are not reactive in Vue 3, so prop bindings
-  // like :recycler="recycler" evaluated during the initial render
-  // stay undefined. Re-render once now that all refs are populated.
-  instance?.proxy?.$forceUpdate();
 });
 
 onUnmounted(() => {

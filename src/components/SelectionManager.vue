@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount, getCurrentInstance, markRaw } from 'vue';
+import { ref, watch, onMounted, onBeforeUnmount, markRaw } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { showError } from '@nextcloud/dialogs';
@@ -172,13 +172,6 @@ const touchScrollInterval = ref(0);
 const touchScrollDelta = ref(0);
 const touchMoveSelFrame = ref(0);
 const multiSelectDelta = ref<1 | -1 | null>(null);
-
-const instance = getCurrentInstance();
-
-/** Photo flags are not reactive, so re-render manually */
-function forceUpdate() {
-  instance?.proxy?.$forceUpdate();
-}
 
 const defaultActions: ISelectionAction[] = [
   {
@@ -623,8 +616,6 @@ function touchMoveSelect(touch: Touch, rowIdx: number) {
     for (const dayid of updatedDays) {
       updateHeadSelected(props.heads.get(dayid)!);
     }
-
-    forceUpdate();
   }
 }
 
@@ -647,7 +638,6 @@ function selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
 
   if (!noUpdate) {
     updateHeadSelected(props.heads.get(photo.dayid)!);
-    forceUpdate();
   }
 }
 
@@ -749,12 +739,10 @@ function selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
   const delta = multiSelectDelta.value ?? -1;
   backtrack(delta) || backtrack(-delta as typeof delta) || select(photo);
 
-  // Force update for all days that were touched
+  // Update all days that were touched
   for (const dayid of touchedDays) {
     updateHeadSelected(props.heads.get(dayid)!);
   }
-
-  forceUpdate(); // set changes
 }
 
 /** Select or deselect all photos in a head */
@@ -765,7 +753,6 @@ function selectHead(head: IHeadRow) {
       selectPhoto(photo, head.selected, true);
     }
   }
-  forceUpdate();
 }
 
 /** Check if the day for a photo is selected entirely */
@@ -801,7 +788,6 @@ function deselect(photos: IPhoto[]) {
     selectionChanged();
   });
   heads.forEach(updateHeadSelected);
-  forceUpdate();
 }
 
 /** Restore selections from new day object */
