@@ -1,6 +1,6 @@
 import { getFiles } from './base';
 import { generateUrl } from '@nextcloud/router';
-import { showError, showSuccess } from '@nextcloud/dialogs';
+import { showError, showSuccess } from '@services/utils/dialog';
 import axios from '@nextcloud/axios';
 
 import { API } from '@services/API';

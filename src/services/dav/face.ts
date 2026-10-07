@@ -1,5 +1,5 @@
 import axios from '@nextcloud/axios';
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 import { generateUrl } from '@nextcloud/router';
 
 import client from './client';

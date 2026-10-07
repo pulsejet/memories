@@ -68,7 +68,7 @@ import EditExif from './EditExif.vue';
 import EditLocation from './EditLocation.vue';
 import EditOrientation from './EditOrientation.vue';
 
-import { showWarning, showError } from '@nextcloud/dialogs';
+import { showWarning, showError } from '@services/utils/dialog';
 import axios from '@nextcloud/axios';
 
 import { useModal } from '@services/modal';

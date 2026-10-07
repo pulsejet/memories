@@ -19,7 +19,7 @@
 import { ref, useTemplateRef } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 import Modal from './Modal.vue';
 import AlbumForm from './AlbumForm.vue';

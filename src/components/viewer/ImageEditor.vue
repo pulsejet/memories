@@ -11,7 +11,7 @@
 import { computed, markRaw, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 
 import axios from '@nextcloud/axios';
-import { showError, showSuccess } from '@nextcloud/dialogs';
+import { showError, showSuccess } from '@services/utils/dialog';
 import { getLanguage } from '@nextcloud/l10n';
 
 import type { FilerobotImageEditorConfig } from 'react-filerobot-image-editor';

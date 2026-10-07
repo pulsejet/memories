@@ -106,7 +106,7 @@ import type { RouteLocationNormalized } from 'vue-router';
 import { RecycleScroller } from 'vue-virtual-scroller';
 
 import axios from '@nextcloud/axios';
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 import { getLayout } from '@services/layout';
 

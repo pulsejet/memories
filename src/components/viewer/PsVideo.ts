@@ -1,4 +1,4 @@
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 import { translate as t } from '@services/l10n';
 import { config } from '@services/user-config';

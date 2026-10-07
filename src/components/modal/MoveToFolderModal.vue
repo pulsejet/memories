@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { ref, useTemplateRef, defineAsyncComponent } from 'vue';
 
-import { showInfo } from '@nextcloud/dialogs';
+import { showInfo } from '@services/utils/dialog';
 
 const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 

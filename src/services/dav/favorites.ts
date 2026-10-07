@@ -1,4 +1,4 @@
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 import client from './client';
 import * as base from './base';

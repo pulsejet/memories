@@ -35,7 +35,7 @@
 import { ref, watch, onMounted, onBeforeUnmount, markRaw } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';

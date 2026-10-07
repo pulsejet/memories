@@ -31,7 +31,7 @@ import { computed, ref, onMounted, markRaw, defineAsyncComponent } from 'vue';
 import { useRoute } from 'vue-router';
 import Fuse from 'fuse.js';
 
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 

@@ -15,7 +15,7 @@
 import { ref, onMounted, markRaw } from 'vue';
 
 import axios from '@nextcloud/axios';
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 import { API } from '@services/API';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';

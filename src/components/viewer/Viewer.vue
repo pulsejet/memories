@@ -109,7 +109,7 @@ import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, reactive, ref,
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import NcButton from '@nextcloud/vue/components/NcButton';
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 import axios from '@nextcloud/axios';
 
 import { config } from '@services/user-config';

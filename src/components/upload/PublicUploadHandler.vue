@@ -12,7 +12,7 @@ const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/componen
 
 import { Uploader } from '@nextcloud/upload';
 import { Folder, Permission } from '@nextcloud/files';
-import { showError, showSuccess } from '@nextcloud/dialogs';
+import { showError, showSuccess } from '@services/utils/dialog';
 
 import { routeIs } from '@services/router';
 import { t, n } from '@services/l10n';

@@ -289,7 +289,7 @@ import { useRouter } from 'vue-router';
 
 import { config, setConfig } from '@services/user-config';
 import { t } from '@services/l10n';
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 

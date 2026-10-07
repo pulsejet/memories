@@ -70,7 +70,7 @@
 <script setup lang="ts">
 import { computed, ref, useTemplateRef, defineAsyncComponent } from 'vue';
 
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 import axios from '@nextcloud/axios';
 
 const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));

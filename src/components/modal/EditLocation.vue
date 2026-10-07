@@ -67,7 +67,7 @@
 import { computed, ref, onMounted, defineAsyncComponent } from 'vue';
 
 import axios from '@nextcloud/axios';
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 import { config } from '@services/user-config';
 import { t } from '@services/l10n';
 

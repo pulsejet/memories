@@ -2,7 +2,7 @@ import { reactive, readonly, type DeepReadonly } from 'vue';
 import { dequal } from 'dequal';
 
 import axios from '@nextcloud/axios';
-import { showInfo, showError } from '@nextcloud/dialogs';
+import { showInfo, showError } from '@services/utils/dialog';
 import { getBuilder } from '@nextcloud/browser-storage';
 
 import { API } from '@services/API';

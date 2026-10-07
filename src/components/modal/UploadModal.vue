@@ -75,7 +75,7 @@ const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/
 
 import axios from '@nextcloud/axios';
 import { getUploader } from '@nextcloud/upload';
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 import { useModal } from '@services/modal';
 import { t, n } from '@services/l10n';

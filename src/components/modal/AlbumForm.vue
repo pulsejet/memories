@@ -92,7 +92,7 @@
 <script setup lang="ts">
 import { computed, ref, useTemplateRef, onMounted, nextTick, defineAsyncComponent } from 'vue';
 
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 import NcButton from '@nextcloud/vue/components/NcButton';
 const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
 

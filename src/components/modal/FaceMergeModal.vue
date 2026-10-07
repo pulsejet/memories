@@ -24,7 +24,7 @@
 import { ref, useTemplateRef, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));

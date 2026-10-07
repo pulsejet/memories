@@ -154,7 +154,7 @@ import Earth from 'vue-material-design-icons/Earth.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import axios from '@nextcloud/axios';
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 import { generateOcsUrl, generateUrl } from '@nextcloud/router';
 
 import NcButton from '@nextcloud/vue/components/NcButton';

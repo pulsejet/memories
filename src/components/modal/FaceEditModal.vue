@@ -28,7 +28,7 @@
 import { computed, ref, useTemplateRef, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));

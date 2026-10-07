@@ -18,7 +18,7 @@
 import { computed, ref, useTemplateRef, defineAsyncComponent } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { showInfo } from '@nextcloud/dialogs';
+import { showInfo } from '@services/utils/dialog';
 const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 
 import Modal from './Modal.vue';

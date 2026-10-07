@@ -65,7 +65,7 @@
 import { computed, ref, useTemplateRef, defineAsyncComponent } from 'vue';
 
 import axios from '@nextcloud/axios';
-import { showError, showSuccess } from '@nextcloud/dialogs';
+import { showError, showSuccess } from '@services/utils/dialog';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
