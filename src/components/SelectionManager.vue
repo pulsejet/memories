@@ -378,6 +378,15 @@ function clickSelectionIcon(photo: IPhoto, event: PointerEvent | null, rowIdx: n
 function touchstartPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
   if (photo.flag & constants.FLAG_PLACEHOLDER) return;
 
+  // Note that the usage of touch events over pointer events is deliberate.
+  //
+  // https://developer.mozilla.org/en-US/docs/Web/API/Element/pointermove_event
+  // > The pointermove event is fired when a pointer changes coordinates,
+  // > and the pointer has not been canceled by a browser touch-action.
+  //
+  // On scroll, pointer events get cancelled immediately, and setting
+  // CSS `touch-action: none` breaks native scrolling.
+
   // Bail if the user was scrolling the recycler recently
   // https://github.com/pulsejet/memories/issues/1066
   if (props.scrollerManager?.scrollingRecyclerNowTimer.pending) return;
