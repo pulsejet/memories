@@ -10,7 +10,12 @@
         [`p-outer--${data.key}`]: true,
       }"
     >
-      <div class="select" v-once v-if="!(data.flag & constants.FLAG_PLACEHOLDER)" @pointerdown.passive="emit('select', $event)">
+      <div
+        class="select"
+        v-once
+        v-if="!(data.flag & constants.FLAG_PLACEHOLDER)"
+        @pointerdown.passive="emit('select', $event)"
+      >
         <CheckCircleIcon :size="18" />
       </div>
 
