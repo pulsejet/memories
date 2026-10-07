@@ -102,7 +102,7 @@ export default {
 
   performance: {
     maxAssetSize: (isDev ? 15 : 3) * MiB,
-    maxEntrypointSize: (isDev ? 15 : 3) * MiB,
+    maxEntrypointSize: (isDev ? 10 : 2.2) * MiB,
     hints: 'error',
   },
 
