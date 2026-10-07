@@ -1,5 +1,5 @@
 <template>
-  <div class="p-outer-super">
+  <div ref="root" class="p-outer-super">
     <div
       class="p-outer fill-block"
       :class="{
@@ -85,17 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  getCurrentInstance,
-  onBeforeUnmount,
-  onMounted,
-  onUpdated,
-  reactive,
-  ref,
-  useTemplateRef,
-  watch,
-} from 'vue';
+import { computed, onBeforeUnmount, onMounted, onUpdated, reactive, ref, useTemplateRef, watch } from 'vue';
 
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { constants } from '@services/constants';
@@ -133,7 +123,7 @@ const emit = defineEmits<{
   touchmove: [e: TouchEvent];
   touchend: [e: TouchEvent];
 }>();
-const instance = getCurrentInstance();
+const root = useTemplateRef<HTMLDivElement>('root');
 const ximg = useTemplateRef<InstanceType<typeof XImg> & { $el: HTMLImageElement }>('ximg');
 const video = useTemplateRef<HTMLVideoElement>('video');
 
@@ -230,7 +220,7 @@ const sharedBy = computed((): string | null => {
 });
 
 function exposePhoto() {
-  (instance?.proxy?.$el as any).__photo = props.data;
+  (root.value as any).__photo = props.data;
 }
 
 /** Get url of the photo */
