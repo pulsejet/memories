@@ -101,6 +101,7 @@ import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
 
 import * as utils from '@services/utils';
+import { cacheData, getCachedData } from '@services/cache';
 import * as dav from '@services/dav';
 import { t } from '@services/l10n';
 
@@ -429,7 +430,7 @@ async function update(photo: number | IPhoto): Promise<IImageInfo | null> {
   let wasCached = false;
   try {
     const snapshot = state.value;
-    const cached = await utils.getCachedData<IImageInfo>(url);
+    const cached = await getCachedData<IImageInfo>(url);
     if (cached && snapshot === state.value) {
       applyImageInfo(cached);
       wasCached = true;
@@ -441,7 +442,7 @@ async function update(photo: number | IPhoto): Promise<IImageInfo | null> {
     const res = await guardState(axios.get<IImageInfo>(url));
     if (!res) return null;
     applyImageInfo(res.data);
-    utils.cacheData(url, res.data);
+    cacheData(url, res.data);
   } catch (err) {
     if (wasCached) {
       error.value = false;

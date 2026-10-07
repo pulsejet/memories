@@ -36,6 +36,7 @@ import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import * as utils from '@services/utils';
+import { cacheData, getCachedData } from '@services/cache';
 import * as dav from '@services/dav';
 import { t } from '@services/l10n';
 import { config } from '@services/user-config';
@@ -98,14 +99,14 @@ async function refreshNow() {
   // Look for cache
   const dayIdToday = utils.dateToDayId(new Date());
   const cacheUrl = `/onthisday/${dayIdToday}`;
-  const cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
+  const cache = await getCachedData<IPhoto[]>(cacheUrl);
   utils.applyAuids(cache);
   if (cache) process(cache);
 
   // Network request
   const photos = await dav.getOnThisDayRaw();
   utils.applyAuids(photos);
-  utils.cacheData(cacheUrl, photos);
+  cacheData(cacheUrl, photos);
 
   // Check if exactly same as cache
   if (cache?.length === photos.length && cache.every((p, i) => p.fileid === photos[i].fileid)) return;

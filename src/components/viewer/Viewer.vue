@@ -133,6 +133,7 @@ import initstate from '@services/init-state';
 import { makeTapPatch } from '@services/patches/mobile-click';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
+import { cacheData, getCachedData } from '@services/cache';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import * as nativex from '@native';
 
@@ -1125,7 +1126,7 @@ async function loadMetadata(photo: IPhoto) {
   // Get cached data first.
   let wasCached = false;
   try {
-    const cached = await utils.getCachedData<IImageInfo>(url);
+    const cached = await getCachedData<IImageInfo>(url);
     if (cached) {
       applyImageInfo(cached);
       wasCached = true;
@@ -1138,7 +1139,7 @@ async function loadMetadata(photo: IPhoto) {
   try {
     const res = await axios.get<IImageInfo>(url);
     applyImageInfo(res.data);
-    utils.cacheData(url, res.data);
+    cacheData(url, res.data);
   } catch (e) {
     if (wasCached) return;
     throw e;

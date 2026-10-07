@@ -137,6 +137,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
+import { cacheData, getCachedData } from '@services/cache';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { constants, convertFlags, copyPhotoFlags } from '@services/constants';
 import * as nativex from '@native';
@@ -763,7 +764,7 @@ async function fetchDays(noCache = false) {
       // Try the cache
       if (!noCache || routeHasNative.value) {
         try {
-          cache = await utils.getCachedData(cacheUrl);
+          cache = await getCachedData(cacheUrl);
 
           // On native, treat a missing remote cache as empty.
           if (routeHasNative.value) {
@@ -787,7 +788,7 @@ async function fetchDays(noCache = false) {
     }
 
     // Put back into cache
-    utils.cacheData(cacheUrl, data);
+    cacheData(cacheUrl, data);
 
     // Extend with native days
     if (routeHasNative.value) {
@@ -953,7 +954,7 @@ async function fetchDay(dayId: number, now = false) {
   // Look for cache
   const cacheUrl = getDayUrl([dayId]);
   try {
-    let cache = await utils.getCachedData<IPhoto[]>(cacheUrl);
+    let cache = await getCachedData<IPhoto[]>(cacheUrl);
     utils.applyAuids(cache);
 
     // On native, treat a missing remote cache as empty.
@@ -1023,7 +1024,7 @@ async function fetchDayExpire() {
           const res = await Promise.all(
             dayIds.map(async (dayId) => {
               const cacheUrl = getDayUrl([dayId]);
-              const data = await utils.getCachedData<IPhoto[]>(cacheUrl);
+              const data = await getCachedData<IPhoto[]>(cacheUrl);
               return data ?? [];
             }),
           );
@@ -1057,7 +1058,7 @@ async function fetchDayExpire() {
     // empty caches will not be processed if the view is fresh.
     if (!isCached) {
       for (const [dayId, photos] of dayMap) {
-        utils.cacheData(getDayUrl([dayId]), photos);
+        cacheData(getDayUrl([dayId]), photos);
       }
     }
 
