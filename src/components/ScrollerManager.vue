@@ -180,7 +180,7 @@ function recyclerScrolled(event: Event | null) {
   if (scrollingRecyclerUpdateTimer.value) return;
   scrollingRecyclerUpdateTimer.value = window.setTimeout(() => {
     scrollingRecyclerUpdateTimer.value = 0;
-    updateFromRecyclerScroll();
+    requestAnimationFrame(updateFromRecyclerScroll);
   }, 100);
 
   // Update that we're scrolling with the recycler
