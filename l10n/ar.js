@@ -23,6 +23,7 @@ OC.L10N.register(
     "Settings" : "الإعدادات",
     "View all" : "عرض الكل",
     "Videos" : "مقاطع الفيديو",
+    "Panoramas" : "نظرات شاملة",
     "Recognize" : "التعرف على",
     "Face Recognition" : "التعرُّف علي الوجوه",
     "Choose the root of your timeline" : "إختَر الدليل الأساسي لخطك الزمني ",
