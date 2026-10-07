@@ -56,6 +56,12 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
+defineSlots<{
+  default(): any;
+  title(): any;
+  buttons(): any;
+}>();
+
 const size = computed(() => props.size ?? 'small');
 const sidebar = computed(() => props.sidebar ?? null);
 const canClose = computed(() => props.canClose ?? true);

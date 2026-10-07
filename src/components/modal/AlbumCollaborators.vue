@@ -186,6 +186,10 @@ const props = defineProps<{
   allowPublicLink?: boolean;
 }>();
 
+defineSlots<{
+  default(props: { collaborators: Collaborator[] }): any;
+}>();
+
 const searchText = ref('');
 const showPopover = ref(false);
 const availableCollaborators = ref({} as { [key: string]: Collaborator });

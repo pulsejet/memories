@@ -61,6 +61,10 @@ const emit = defineEmits<{
   (e: 'click', item: IAlbum): void;
 }>();
 
+defineSlots<{
+  extra(props: { album: IAlbum }): any;
+}>();
+
 function click($event: Event, album: IAlbum) {
   if (!props.link) {
     $event.preventDefault();
