@@ -63,11 +63,7 @@ export default class PhotoSphereContentSetup {
     if (!holder || !photo) return;
 
     try {
-      const [{ Viewer }, { VisibleRangePlugin }] = await Promise.all([
-        import('@photo-sphere-viewer/core'),
-        import('@photo-sphere-viewer/visible-range-plugin'),
-        import('@photo-sphere-viewer/core/index.css'),
-      ]);
+      const { Viewer, VisibleRangePlugin } = await import('./PsPhotoSphereLib');
 
       if (this.viewer) return;
       if (this.dismissed.has(photo.fileid)) return;
