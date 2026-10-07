@@ -74,7 +74,6 @@ const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/componen
 const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
 
 import axios from '@nextcloud/axios';
-import { getUploader } from '@nextcloud/upload';
 import { showError } from '@services/utils/dialog';
 
 import { useModal } from '@services/modal';
@@ -273,6 +272,7 @@ async function uploadI() {
   const remaining = [] as UploadSource[];
 
   // Start upload process
+  const { getUploader } = await import('@nextcloud/upload');
   const uploader = getUploader();
   for (const source of queue) {
     guardOpen();

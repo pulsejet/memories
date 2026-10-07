@@ -10,7 +10,6 @@ import { ref, computed, onBeforeUnmount, defineAsyncComponent } from 'vue';
 import { useRoute } from 'vue-router';
 const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 
-import { Uploader } from '@nextcloud/upload';
 import { Folder, Permission } from '@nextcloud/files';
 import { showError, showSuccess } from '@services/utils/dialog';
 
@@ -152,6 +151,7 @@ async function uploadFiles(files: File[]) {
     });
     // @nextcloud/upload bundles its own copy of @nextcloud/files,
     // so its Folder type differs from ours despite identical shape.
+    const { Uploader } = await import('@nextcloud/upload');
     const uploader = new Uploader(true, <any>destination);
 
     // Track upload progress
