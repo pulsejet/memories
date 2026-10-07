@@ -7,8 +7,8 @@ function getCacheName() {
   return `memories-data-${ver}-${uid}`;
 }
 
-// Clear all caches except the current one
-(async function clearCaches() {
+// Clear all caches except the current one.
+window.queueMicrotask(async () => {
   if (!uid) return;
 
   const keys = await window.caches?.keys();
@@ -21,7 +21,7 @@ function getCacheName() {
       window.caches.delete(key);
     }
   }
-})();
+});
 
 /** Singleton cache instance */
 let staticCache: Cache | null = null;

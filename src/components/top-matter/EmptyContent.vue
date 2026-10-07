@@ -17,6 +17,7 @@ import { useRoute } from 'vue-router';
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent';
 
 import { routeIs } from '@services/router';
+import { t } from '@services/l10n';
 import * as strings from '@services/strings';
 
 import PeopleIcon from 'vue-material-design-icons/AccountMultiple.vue';

@@ -21,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+import { t } from '@services/l10n';
 import { routeIs } from '@services/router';
 
 import Cluster from '@components/frame/Cluster.vue';

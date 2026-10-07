@@ -25,7 +25,7 @@ import Modal from './Modal.vue';
 import AlbumPicker from './AlbumPicker.vue';
 
 import { useModal } from '@services/modal';
-import { n } from '@services/l10n';
+import { n, t } from '@services/l10n';
 import { routeIs } from '@services/router';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';

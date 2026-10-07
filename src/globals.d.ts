@@ -2,8 +2,6 @@ import type { Router, RouteLocationNormalized } from 'vue-router';
 import type { ComponentPublicInstance } from 'vue';
 
 import type { IPhoto, IUploadNativeX, TimelineState } from '@typings';
-import type { constants, initstate } from '@services/utils';
-import type { translate, translatePlural } from '@services/l10n';
 import type { routes } from '@services/router';
 
 // Global exposed variables
@@ -88,17 +86,6 @@ declare global {
   type VueHTMLComponent = Omit<ComponentPublicInstance, '$el'> & {
     $el: HTMLElement;
   };
-}
-
-// types present on all components (bootstrap.ts)
-declare module 'vue' {
-  interface ComponentCustomProperties {
-    t: typeof translate;
-    n: typeof translatePlural;
-
-    c: typeof constants;
-    initstate: typeof initstate;
-  }
 }
 
 export {};

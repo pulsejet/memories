@@ -46,6 +46,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 
+import { t } from '@services/l10n';
 import * as utils from '@services/utils';
 
 import NcActions from '@nextcloud/vue/components/NcActions';

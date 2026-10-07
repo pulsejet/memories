@@ -1,5 +1,4 @@
 import './bootstrap';
-import { registerGlobals } from './bootstrap';
 
 import { createApp } from 'vue';
 import App from './App.vue';
@@ -37,7 +36,6 @@ localStorage.setItem('videoClientIdPersistent', _m.video.clientIdPersistent);
 
 // Register global components and plugins
 const app = createApp(App);
-registerGlobals(app);
 app.use(router);
 app.use(VueVirtualScroller);
 

@@ -54,6 +54,7 @@ import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from
 
 import Metadata from '@components/Metadata.vue';
 
+import { t } from '@services/l10n';
 import type { IPhoto } from '@typings';
 
 const TAP_SLOP = 10;

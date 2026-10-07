@@ -120,7 +120,6 @@ import { translate as t } from '@services/l10n';
 import Metadata from '@components/Metadata.vue';
 import SidebarSubtitle from '@components/SidebarSubtitle.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
-import { registerGlobals } from '../bootstrap';
 import router from '@services/router';
 
 import * as utils from '@services/utils';
@@ -154,7 +153,6 @@ if (!getSidebarTabs().some((tab) => tab.id === SIDEBAR_TAB_ID)) {
         SIDEBAR_TAG_NAME,
         defineCustomElement(MetadataTab, {
           configureApp: (app) => {
-            registerGlobals(app);
             app.use(router);
           },
           shadowRoot: false,

@@ -85,7 +85,6 @@ import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 import { API } from '@services/API';
-import { registerGlobals } from '../../bootstrap';
 
 import type { IAlbum, IPhoto, IUploadNativeX } from '@typings';
 import type PCancelable from 'p-cancelable';
@@ -129,8 +128,7 @@ if (header && utils.uid) {
   const div = document.createElement('div');
   header.prepend(div);
   const headerApp = createApp(UploadMenuItem);
-  // Share globals and router with header button
-  registerGlobals(headerApp);
+  // Share router with header button
   try {
     headerApp.use(router);
   } catch {}

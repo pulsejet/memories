@@ -12,7 +12,6 @@ import Searchbar from '@components/header/Searchbar.vue';
 import SearchbarMenuItem from '@components/header/SearchbarMenuItem.vue';
 
 import * as utils from '@services/utils';
-import { registerGlobals } from '../../bootstrap';
 
 defineOptions({
   name: 'SearchModal',
@@ -33,7 +32,6 @@ if (header && utils.uid) {
   const div = document.createElement('div');
   header.prepend(div);
   const headerApp = createApp(SearchbarMenuItem);
-  registerGlobals(headerApp);
   try {
     headerApp.use(router);
   } catch {}

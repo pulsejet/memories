@@ -27,7 +27,7 @@ const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/componen
 import Modal from './Modal.vue';
 
 import { useModal } from '@services/modal';
-import { n } from '@services/l10n';
+import { n, t } from '@services/l10n';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 

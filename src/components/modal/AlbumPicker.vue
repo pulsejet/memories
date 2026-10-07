@@ -96,6 +96,7 @@ import AlbumsList from './AlbumsList.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import * as dav from '@services/dav';
+import { n, t } from '@services/l10n';
 
 import type { IAlbum, IPhoto } from '@typings';
 
