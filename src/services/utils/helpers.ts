@@ -4,7 +4,7 @@ import { Md5 } from 'ts-md5';
 import { getCurrentUser } from '@nextcloud/auth';
 
 import { constants } from '@services/constants';
-import { getPlayableVideoCodecsSync } from './video';
+import { getPlayableVideoCodecsSync } from '@services/video/codec';
 
 import { API } from '@services/API';
 import { has as hasNativeX, NAPI } from '@native/api';

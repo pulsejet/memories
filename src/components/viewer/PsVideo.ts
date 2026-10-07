@@ -2,8 +2,9 @@ import { showError } from '@nextcloud/dialogs';
 
 import { translate as t } from '@services/l10n';
 import { config } from '@services/user-config';
-import * as utils from '@services/utils';
 import { constants } from '@services/constants';
+import { getPlayableVideoCodecsSync } from '@services/video/codec';
+import * as utils from '@services/utils';
 import * as nativex from '@native';
 import { API } from '@services/API';
 
@@ -102,7 +103,7 @@ class VideoContentSetup {
   wakeLock: WakeLockSentinel | null = null;
 
   /** Vidstack chunk, prefetched so controls mount instantly on activation */
-  private vidstack = import('@services/vidstack');
+  private vidstack = import('@services/video/vidstack');
 
   constructor(lightbox: PhotoSwipe) {
     this.initLightboxEvents(lightbox);
@@ -157,7 +158,7 @@ class VideoContentSetup {
   getHLSsrc(content: VideoContent): PlayerSrc {
     const fileid = content.data.photo.fileid;
     return {
-      src: API.VIDEO_TRANSCODE(fileid, 'index.m3u8', utils.getPlayableVideoCodecsSync()),
+      src: API.VIDEO_TRANSCODE(fileid, 'index.m3u8', getPlayableVideoCodecsSync()),
       type: 'application/x-mpegurl',
     };
   }

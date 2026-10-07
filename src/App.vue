@@ -127,6 +127,7 @@ import * as nativex from '@native';
 import { translate as t } from '@services/l10n';
 import { config, hasVersionChanged } from '@services/user-config';
 import { windowDims } from '@services/common';
+import { getPlayableVideoCodecs } from '@services/video/codec';
 
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
@@ -228,7 +229,7 @@ watch(config, refreshNav);
 _m.modals.showSettings = showSettings;
 
 // Warm codec detection for video URLs
-void utils.getPlayableVideoCodecs();
+void getPlayableVideoCodecs();
 
 onMounted(() => {
   refreshNav();
