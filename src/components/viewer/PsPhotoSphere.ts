@@ -5,8 +5,6 @@ import type PhotoSwipe from 'photoswipe';
 import type { Viewer as PhotoSphereViewer } from '@photo-sphere-viewer/core';
 import type { PsContent } from './types';
 
-import '@photo-sphere-viewer/core/index.css';
-
 export default class PhotoSphereContentSetup {
   private viewer: PhotoSphereViewer | null = null;
   private container: HTMLElement | null = null;
@@ -68,6 +66,7 @@ export default class PhotoSphereContentSetup {
       const [{ Viewer }, { VisibleRangePlugin }] = await Promise.all([
         import('@photo-sphere-viewer/core'),
         import('@photo-sphere-viewer/visible-range-plugin'),
+        import('@photo-sphere-viewer/core/index.css'),
       ]);
 
       if (this.viewer) return;
