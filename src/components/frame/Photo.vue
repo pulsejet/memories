@@ -85,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, onUpdated, reactive, ref, useTemplateRef, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef, watch } from 'vue';
 
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { constants } from '@services/constants';
@@ -148,16 +148,14 @@ watch(
 
 onMounted(() => {
   faceSrc.value = null;
-  exposePhoto();
+
+  // Expose the IPhoto on the DOM element directly
+  Object.defineProperty(root.value, '__photo', { get: () => props.data });
 
   // Setup video hooks
   if (video.value) {
     utils.setupLivePhotoHooks(video.value, liveState);
   }
-});
-
-onUpdated(() => {
-  exposePhoto();
 });
 
 /** Clear timers */
@@ -218,10 +216,6 @@ const sharedBy = computed((): string | null => {
   }
   return null;
 });
-
-function exposePhoto() {
-  (root.value as any).__photo = props.data;
-}
 
 /** Get url of the photo */
 function url() {
