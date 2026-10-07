@@ -44,6 +44,7 @@
     "@nextcloud/upload": "^2.0.0-rc.0",
     "@nextcloud/vue": "^9.13.1",
     "@photo-sphere-viewer/core": "^5.11.1",
+    "@photo-sphere-viewer/visible-range-plugin": "^5.15.1",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
     "dequal": "^2.0.3",
     "filerobot-image-editor": "^4.8.1",

@@ -65,7 +65,10 @@ export default class PhotoSphereContentSetup {
     if (!holder || !photo) return;
 
     try {
-      const { Viewer } = await import('@photo-sphere-viewer/core');
+      const [{ Viewer }, { VisibleRangePlugin }] = await Promise.all([
+        import('@photo-sphere-viewer/core'),
+        import('@photo-sphere-viewer/visible-range-plugin'),
+      ]);
 
       if (this.viewer) return;
       if (this.dismissed.has(photo.fileid)) return;
@@ -91,6 +94,17 @@ export default class PhotoSphereContentSetup {
         panorama: API.IMAGE_DECODABLE(photo.fileid, photo.etag),
         loadingTxt: t('memories', 'Loading …'),
         navbar: false,
+        // A partial panorama covers only part of the sphere, and the default
+        // view may be outside it; keep the view on the image.
+        plugins: [[VisibleRangePlugin, { usePanoData: true }]],
+        // The plugin's left/right range ignores the GPano compass heading,
+        // which turns the sphere, so a crop narrower than 360° with a heading
+        // would be limited to the wrong part of it. Drop the heading there;
+        // without a compass it only decides which way the view starts.
+        panoData: (_image, xmpData) => {
+          const narrow = !!xmpData?.croppedWidth && xmpData.croppedWidth < xmpData.fullWidth;
+          return narrow ? { ...xmpData, poseHeading: 0 } : xmpData!;
+        },
       });
       this.container = container;
       this.content = content;
