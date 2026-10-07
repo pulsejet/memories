@@ -3,7 +3,7 @@ import { onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue';
 import * as utils from '@services/utils';
 
 /**
- * Shared logic for modal dialogs (replaces ModalMixin).
+ * Shared logic for modal dialogs.
  *
  * @param modal ref of the inner Modal component, used to play the close animation
  */

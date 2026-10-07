@@ -276,4 +276,3 @@ export function onDOMLoaded(callback: () => void) {
     setTimeout(callback, 0);
   }
 }
-

@@ -270,8 +270,7 @@ const isMonthView = computed((): boolean => {
   if (route.query.sort === 'timeline') return false;
   if (route.query.sort === 'album') return true;
   return (
-    (config.sort_album_month && (routeIs.Albums || routeIs.AlbumShare)) ||
-    (config.sort_folder_month && routeIs.Folders)
+    (config.sort_album_month && (routeIs.Albums || routeIs.AlbumShare)) || (config.sort_folder_month && routeIs.Folders)
   );
 });
 

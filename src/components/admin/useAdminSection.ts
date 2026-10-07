@@ -23,7 +23,7 @@ export type AdminSectionEmits = {
   (e: 'update', key: keyof ISystemConfig, value: any): void;
 };
 
-/** Composition replacement for AdminMixin. */
+/** Shared logic for admin sections. */
 export function useAdminSection(
   props: { status: ISystemStatus | null; systemConfig: ISystemConfig },
   emit: AdminSectionEmits,

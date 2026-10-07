@@ -212,7 +212,6 @@ export default {
       '@services': path.resolve(__dirname, 'src', 'services'),
       '@assets': path.resolve(__dirname, 'src', 'assets'),
       '@components': path.resolve(__dirname, 'src', 'components'),
-      '@mixins': path.resolve(__dirname, 'src', 'mixins'),
       '@native': path.resolve(__dirname, 'src', 'native'),
     },
     fallback: {

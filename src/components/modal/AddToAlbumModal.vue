@@ -63,9 +63,7 @@ function cleanup() {
 }
 
 function routeIsAlbum(album: IAlbum) {
-  return (
-    routeIs.Albums && route.params.user?.toString() === album.user && route.params.name?.toString() === album.name
-  );
+  return routeIs.Albums && route.params.user?.toString() === album.user && route.params.name?.toString() === album.name;
 }
 
 async function update(selection: IAlbum[], deselection: IAlbum[]) {
