@@ -1,5 +1,5 @@
 import { NAPI, nativex } from './api';
-import { has } from './basic';
+import { has } from './api';
 
 import { API } from '@services/API';
 import * as utils from '@services/utils';

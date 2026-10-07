@@ -1,12 +1,13 @@
-import { getCurrentUser } from '@nextcloud/auth';
-import { Md5 } from 'ts-md5';
 import type { DeepReadonly } from 'vue';
+import { Md5 } from 'ts-md5';
 
-import { constants as c } from './const';
+import { getCurrentUser } from '@nextcloud/auth';
+
+import { constants } from './const';
 import { getPlayableVideoCodecsSync } from './video';
 
 import { API } from '@services/API';
-import { has as hasNativeX, NAPI } from '@native';
+import { has as hasNativeX, NAPI } from '@native/api';
 
 import type { IConfig, IImageInfo, IPhoto } from '@typings';
 
@@ -108,7 +109,7 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
  * @param photo Photo object
  */
 export function isLocalPhoto(photo: IPhoto): boolean {
-  return Boolean(photo?.fileid) && Boolean((photo?.flag ?? 0) & c.FLAG_IS_LOCAL);
+  return Boolean(photo?.fileid) && Boolean((photo?.flag ?? 0) & constants.FLAG_IS_LOCAL);
 }
 
 /**
@@ -116,7 +117,7 @@ export function isLocalPhoto(photo: IPhoto): boolean {
  * @param photo Photo object
  */
 export function isVideo(photo: IPhoto): boolean {
-  return !!photo?.mimetype?.startsWith('video/') || !!(photo.flag & c.FLAG_IS_VIDEO);
+  return !!photo?.mimetype?.startsWith('video/') || !!(photo.flag & constants.FLAG_IS_VIDEO);
 }
 
 /**

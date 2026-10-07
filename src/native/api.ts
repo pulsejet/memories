@@ -1,3 +1,7 @@
+// Leaf module: must not depend on anything at all (no imports).
+// utils/helpers imports from here while sitting inside an import
+// cycle with @native; any dependency added here risks a TDZ crash
+// at module evaluation time.
 const euc = encodeURIComponent;
 
 /** Access NativeX over localhost */
@@ -237,3 +241,10 @@ export type NativeX = {
 
 /** The native interface is a global object that is injected by the native app. */
 export const nativex: NativeX = (<any>globalThis).nativex;
+
+/**
+ * @returns Whether the native interface is available.
+ */
+export function has() {
+  return !!nativex;
+}
