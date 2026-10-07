@@ -26,7 +26,7 @@ import axios from '@nextcloud/axios';
 import { showError } from '@nextcloud/dialogs';
 
 import { API } from '@services/API';
-import * as utils from '@services/utils';
+import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { waitForConfig } from '@services/user-config';
 import { t } from '@services/l10n';
 
@@ -50,7 +50,7 @@ const loading = ref(0);
 const status = ref<ISystemStatus | null>(null);
 const systemConfig = ref<ISystemConfig | null>(null);
 
-const refreshTimer = new utils.RenewingTimeout();
+const refreshTimer = new RenewingTimeout();
 
 const components = [
   markRaw(Help),

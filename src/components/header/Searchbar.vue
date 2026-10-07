@@ -70,7 +70,7 @@ import { t } from '@services/l10n';
 
 import * as dav from '@services/dav';
 import * as lens from '@services/lens';
-import * as utils from '@services/utils';
+import { RenewingTimeout } from '@services/utils/renewing-timeout';
 
 import Fuse from 'fuse.js';
 
@@ -108,7 +108,7 @@ const prompt = ref(String());
 const pHidden = ref(false);
 
 // Pending live lens navigation (debounced)
-const lensTimer = new utils.RenewingTimeout();
+const lensTimer = new RenewingTimeout();
 
 const clusters = ref<ICluster[] | null>(null);
 const clustersLoad = ref(false);

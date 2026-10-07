@@ -93,6 +93,7 @@ import {
 } from 'vue';
 
 import * as utils from '@services/utils';
+import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { constants } from '@services/constants';
 import { config } from '@services/user-config';
 import { t } from '@services/l10n';
@@ -137,7 +138,7 @@ const liveState = reactive({
   waiting: false,
   requested: false,
 });
-const livePlayTimer = new utils.RenewingTimeout();
+const livePlayTimer = new RenewingTimeout();
 const faceSrc = ref<string | null>(null);
 
 watch(

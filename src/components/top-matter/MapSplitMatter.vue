@@ -43,6 +43,7 @@ import axios from '@nextcloud/axios';
 
 import { API } from '@services/API';
 import * as utils from '@services/utils';
+import { RenewingTimeout } from '@services/utils/renewing-timeout';
 
 import MapStandalone from '@components/MapStandalone.vue';
 import XImg from '@components/frame/XImg.vue';
@@ -136,7 +137,7 @@ async function initialize(reinit: boolean = false) {
   }
 }
 
-const refreshTimer = new utils.RenewingTimeout();
+const refreshTimer = new RenewingTimeout();
 
 async function refreshDebounced() {
   refreshTimer.set(refresh, 250);

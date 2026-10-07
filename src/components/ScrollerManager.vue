@@ -52,6 +52,7 @@
 import { ref, computed, nextTick } from 'vue';
 
 import * as utils from '@services/utils';
+import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import * as lens from '@services/lens';
 import { windowDims } from '@services/common';
 
@@ -103,13 +104,13 @@ const hoverCursorY = ref(-5);
 /** Hover cursor text */
 const hoverCursorText = ref('');
 /** Scrolling using the scroller */
-const scrollingTimer = new utils.RenewingTimeout();
+const scrollingTimer = new RenewingTimeout();
 /** Scrolling now using the scroller */
-const scrollingNowTimer = new utils.RenewingTimeout();
+const scrollingNowTimer = new RenewingTimeout();
 /** Scrolling recycler */
-const scrollingRecyclerTimer = new utils.RenewingTimeout();
+const scrollingRecyclerTimer = new RenewingTimeout();
 /** Scrolling recycler now */
-const scrollingRecyclerNowTimer = new utils.RenewingTimeout();
+const scrollingRecyclerNowTimer = new RenewingTimeout();
 /** Recycler scrolling throttle */
 const scrollingRecyclerUpdateTimer = ref(0);
 /** View size reflow timer */

@@ -133,6 +133,7 @@ import initstate from '@services/init-state';
 import { makeTapPatch } from '@services/patches/mobile-click';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
+import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import * as nativex from '@native';
 
 import ImageEditor from './ImageEditor.vue';
@@ -234,7 +235,7 @@ const currIndex = ref(-1);
 /** Timer to move to next photo */
 const slideshowTimer = ref(0);
 /** Timer to debounce changes to sidebar */
-const sidebarUpdateTimer = new utils.RenewingTimeout();
+const sidebarUpdateTimer = new RenewingTimeout();
 
 /** Photo keys for which an imageInfo request is currently ongoing */
 const imageInfoLoading = new Set<string>();
@@ -868,7 +869,7 @@ async function openDynamic(anchorPhoto: IPhoto, timeline: TimelineState) {
   });
 
   // Debounce the global recompute to once per cycle
-  const refreshGlobals = new utils.RenewingTimeout();
+  const refreshGlobals = new RenewingTimeout();
 
   // Lazy-generate item data. This is called for each item in the list
   pswp!.addFilter('itemData', (itemData, index) => {

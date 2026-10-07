@@ -137,6 +137,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
+import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { constants, convertFlags, copyPhotoFlags } from '@services/constants';
 import * as nativex from '@native';
 import { t } from '@services/l10n';
@@ -212,11 +213,11 @@ let fetchDayQueue: number[] = [];
 let fetchDayTimer: number | null = null;
 
 /** Resizing timer */
-const resizeTimer = new utils.RenewingTimeout();
+const resizeTimer = new RenewingTimeout();
 /** Timer to debounce scroll loads */
-const scrollChangeTimer = new utils.RenewingTimeout();
+const scrollChangeTimer = new RenewingTimeout();
 /** Timer to debounce soft refreshes */
-const softRefreshTimer = new utils.RenewingTimeout();
+const softRefreshTimer = new RenewingTimeout();
 
 /** State for request cancellations */
 const state = ref(Math.random());

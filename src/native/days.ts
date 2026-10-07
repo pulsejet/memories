@@ -3,6 +3,7 @@ import { has } from './api';
 
 import { API } from '@services/API';
 import * as utils from '@services/utils';
+import { RenewingTimeout } from '@services/utils/renewing-timeout';
 
 import type { IDay, IPhoto } from '@typings';
 
@@ -100,7 +101,7 @@ const pfsdAuids = new Set<string>();
 const pfsdBuids = new Set<string>();
 
 /** Debounce timer for reporting seen remote files to native */
-const pfsdTimer = new utils.RenewingTimeout();
+const pfsdTimer = new RenewingTimeout();
 
 /**
  * Run internal hooks on fresh day received from server

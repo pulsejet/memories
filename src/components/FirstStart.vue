@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 import XImg from '@components/frame/XImg.vue';
@@ -56,7 +56,8 @@ import axios from '@nextcloud/axios';
 
 import banner from '@assets/banner.svg';
 
-import * as utils from '@services/utils';
+import { isAdmin } from '@services/utils/helpers';
+import { chooseNcFolder } from '@services/utils/dialog';
 import { API } from '@services/API';
 import { t, n } from '@services/l10n';
 
@@ -67,10 +68,8 @@ const info = ref('');
 const show = ref(false);
 const chosenPath = ref('');
 
-const isAdmin = computed(() => utils.isAdmin);
-
 async function begin() {
-  const path = await utils.chooseNcFolder(t('memories', 'Choose the root of your timeline'));
+  const path = await chooseNcFolder(t('memories', 'Choose the root of your timeline'));
 
   // Get folder days
   error.value = '';
@@ -99,7 +98,7 @@ async function begin() {
       '\n' +
       t('memories', 'This can happen because your media is still indexing.');
 
-    if (isAdmin.value) {
+    if (isAdmin) {
       error.value += '\n\n' + t('memories', 'Visit the admin panel to make sure Memories is configured correctly.');
     }
     return;
