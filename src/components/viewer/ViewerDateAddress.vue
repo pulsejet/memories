@@ -2,7 +2,7 @@
   <!-- Mobile top bar, two lines DATE,TIME+ADDR -->
   <template v-if="twoLines">
     <div
-      v-if="dateStr && !routeIsPublic"
+      v-if="dateStr && !routeIs.Public"
       class="date-line"
       :class="{ 'is-link': dayTo }"
       :title="t('memories', 'Show in timeline')"
@@ -19,7 +19,7 @@
   <!-- Desktop bottom bar, one line DATE+TIME+ADDR -->
   <template v-else>
     <div
-      v-if="dateTaken && !routeIsPublic"
+      v-if="dateTaken && !routeIs.Public"
       class="exif date"
       :class="{ 'is-link': dayTo }"
       :title="t('memories', 'Show in timeline')"
@@ -39,7 +39,7 @@ import { useRouter } from 'vue-router';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 import { isPartiallyInViewport } from '@services/common';
-import { useRouteIsBase } from '@services/route-checker';
+import { routeIs } from '@services/router';
 
 import ChevronRightIcon from 'vue-material-design-icons/ChevronRight.vue';
 
@@ -61,8 +61,6 @@ const props = withDefaults(
 );
 
 const router = useRouter();
-const routeIsBase = useRouteIsBase();
-
 const dateStr = computed((): string | null => {
   const date = props.photo?.imageInfo?.datetaken;
   if (!date) return null;
@@ -112,7 +110,7 @@ async function jumpToTimeline() {
 
   // If we are already on the timeline, just close the viewer.
   // This way we don't unnecessarily accumulate history entries.
-  if (routeIsBase.value) {
+  if (routeIs.Base) {
     await utils.fragment.pop(utils.fragment.types.viewer);
 
     // Check if the image is alraedy in the viewport, and scroll only if not.

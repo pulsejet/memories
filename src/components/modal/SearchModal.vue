@@ -13,7 +13,6 @@ import SearchbarMenuItem from '@components/header/SearchbarMenuItem.vue';
 
 import * as utils from '@services/utils';
 import { registerGlobals } from '../../bootstrap';
-import { registerRouteCheckers } from '../../router';
 
 defineOptions({
   name: 'SearchModal',
@@ -35,7 +34,6 @@ if (header && utils.uid) {
   header.prepend(div);
   const headerApp = createApp(SearchbarMenuItem);
   registerGlobals(headerApp);
-  registerRouteCheckers(headerApp);
   try {
     headerApp.use(router);
   } catch {}

@@ -10,16 +10,7 @@ import { computed, markRaw, nextTick, useTemplateRef, type Component } from 'vue
 import { useRoute } from 'vue-router';
 
 import { config } from '@services/user-config';
-import {
-  useRouteIsAlbums,
-  useRouteIsBase,
-  useRouteIsFolderShare,
-  useRouteIsFolders,
-  useRouteIsPeople,
-  useRouteIsPlaces,
-  useRouteIsPublic,
-  useRouteIsTags,
-} from '@services/route-checker';
+import { routeIs } from '@services/router';
 import { initstate } from '@services/utils';
 
 import AlbumDynamicTopMatter from './AlbumDynamicTopMatter.vue';
@@ -40,25 +31,16 @@ defineEmits<{
 }>();
 
 const route = useRoute();
-const routeIsFolders = useRouteIsFolders();
-const routeIsFolderShare = useRouteIsFolderShare();
-const routeIsPlaces = useRouteIsPlaces();
-const routeIsAlbums = useRouteIsAlbums();
-const routeIsBase = useRouteIsBase();
-const routeIsPublic = useRouteIsPublic();
-const routeIsTags = useRouteIsTags();
-const routeIsPeople = useRouteIsPeople();
-
 const child = useTemplateRef<{ refresh?(): Promise<boolean> }>('child');
 
 const currentmatter = computed((): Component | null => {
-  if (routeIsFolders.value || (routeIsFolderShare.value && initstate.shareType === 'folder')) {
+  if (routeIs.Folders || (routeIs.FolderShare && initstate.shareType === 'folder')) {
     return markRaw(FolderDynamicTopMatter);
-  } else if (routeIsPlaces.value) {
+  } else if (routeIs.Places) {
     return markRaw(PlacesDynamicTopMatterVue);
-  } else if (routeIsAlbums.value) {
+  } else if (routeIs.Albums) {
     return markRaw(AlbumDynamicTopMatter);
-  } else if (routeIsBase.value && config.enable_top_memories) {
+  } else if (routeIs.Base && config.enable_top_memories) {
     return markRaw(OnThisDay);
   }
 
@@ -68,18 +50,18 @@ const currentmatter = computed((): Component | null => {
 /** Get view name for dynamic top matter */
 const viewName = computed((): string => {
   // Show album name for album view
-  if (routeIsAlbums.value) {
+  if (routeIs.Albums) {
     return strings.albumDisplayName(route.params.name?.toString() ?? String());
   }
 
   // Show share name for public shares, except for folder share,
   // because the name is already present in the breadcrumbs
-  if (routeIsPublic.value && !routeIsFolderShare.value) {
+  if (routeIs.Public && !routeIs.FolderShare) {
     return initstate.shareTitle;
   }
 
   // Only static top matter for these routes
-  if (routeIsTags.value || routeIsPeople.value || routeIsPlaces.value) {
+  if (routeIs.Tags || routeIs.People || routeIs.Places) {
     return String();
   }
 

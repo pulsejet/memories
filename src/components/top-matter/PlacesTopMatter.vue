@@ -12,7 +12,7 @@
     <div class="right-actions">
       <NcActions :inline="0">
         <!-- root view (not cluster or unassigned) -->
-        <template v-if="!name && !routeIsPlacesUnassigned">
+        <template v-if="!name && !routeIs.PlacesUnassigned">
           <NcActionButton
             :aria-label="t('memories', 'Files without location')"
             @click="openUnassigned"
@@ -35,7 +35,7 @@ import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import { t } from '@services/l10n';
-import { useRouteIsPlacesUnassigned } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import * as strings from '@services/strings';
 import * as utils from '@services/utils';
 import { constants as c } from '@services/utils';
@@ -49,14 +49,12 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const routeIsPlacesUnassigned = useRouteIsPlacesUnassigned();
-
 const viewname = computed((): string => {
   return strings.viewName(route.name?.toString() ?? '');
 });
 
 const name = computed((): string | null => {
-  if (routeIsPlacesUnassigned.value) {
+  if (routeIs.PlacesUnassigned) {
     return t('memories', 'Unidentified location');
   }
 

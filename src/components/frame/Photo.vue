@@ -96,7 +96,7 @@ import * as utils from '@services/utils';
 import { constants as c } from '@services/utils';
 import { config } from '@services/user-config';
 import { t } from '@services/l10n';
-import { useRouteIsBase } from '@services/route-checker';
+import { routeIs } from '@services/router';
 
 import LivePhotoIcon from '@components/icons/LivePhoto.vue';
 import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue';
@@ -127,8 +127,6 @@ const emit = defineEmits<{
   touchmove: [e: TouchEvent];
   touchend: [e: TouchEvent];
 }>();
-
-const routeIsBase = useRouteIsBase();
 const instance = getCurrentInstance();
 const ximg = useTemplateRef<InstanceType<typeof XImg> & { $el: HTMLImageElement }>('ximg');
 const video = useTemplateRef<HTMLVideoElement>('video');
@@ -210,7 +208,7 @@ const isRaw = computed((): boolean => {
 });
 
 const showOwnerName = computed((): boolean => {
-  if (routeIsBase.value && !config.show_owner_name_timeline) {
+  if (routeIs.Base && !config.show_owner_name_timeline) {
     return false;
   }
   return true;

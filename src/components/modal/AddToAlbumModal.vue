@@ -26,7 +26,7 @@ import AlbumPicker from './AlbumPicker.vue';
 
 import { useModal } from '@services/modal';
 import { n } from '@services/l10n';
-import { useRouteIsAlbums } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 
@@ -39,8 +39,6 @@ defineOptions({
 const route = useRoute();
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
-const routeIsAlbums = useRouteIsAlbums();
-
 const photos = ref<IPhoto[]>([]);
 const opsDone = ref(0);
 const opsTotal = ref(0);
@@ -66,7 +64,7 @@ function cleanup() {
 
 function routeIsAlbum(album: IAlbum) {
   return (
-    routeIsAlbums.value && route.params.user?.toString() === album.user && route.params.name?.toString() === album.name
+    routeIs.Albums && route.params.user?.toString() === album.user && route.params.name?.toString() === album.name
   );
 }
 

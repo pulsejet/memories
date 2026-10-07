@@ -1,5 +1,5 @@
+import { reactive } from 'vue';
 import { createRouter, createWebHistory, type RouteLocationNormalized, type RouteRecordRaw } from 'vue-router';
-import type { App } from 'vue';
 
 import { generateUrl } from '@nextcloud/router';
 
@@ -33,7 +33,7 @@ export type RouteId =
   | 'Search'
   | 'NxSetup';
 
-export const routes: { [key in RouteId]: RouteRecordRaw } = {
+export const routes = {
   Base: {
     path: '/',
     component: Timeline,
@@ -159,7 +159,10 @@ export const routes: { [key in RouteId]: RouteRecordRaw } = {
     name: 'nxsetup',
     props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Setup') }),
   },
-};
+} as const satisfies Record<RouteId, RouteRecordRaw>;
+
+/** Union of all route names, derived from the route table. */
+export type RouteName = (typeof routes)[RouteId]['name'];
 
 const router = createRouter({
   history: createWebHistory(
@@ -173,67 +176,90 @@ const router = createRouter({
 
 export default router;
 
-// Define global route checkers
-// Injected through globals.d.ts
-export type GlobalRouteCheckers = {
-  [key in `routeIs${RouteId}`]: boolean;
-} & {
-  // Extra, special route checkers
-  routeIsPublic: boolean;
-  routeIsPeople: boolean;
-  routeIsRecognizeUnassigned: boolean;
-  routeIsPlacesUnassigned: boolean;
-  routeIsCluster: boolean;
-};
-
-// Implement getters for route checkers
-const routeCheckerDefs: { key: keyof GlobalRouteCheckers; condition: (route?: RouteLocationNormalized) => boolean }[] =
-  [];
-
-function defineRouteChecker(key: keyof GlobalRouteCheckers, condition: (route?: RouteLocationNormalized) => boolean) {
-  routeCheckerDefs.push({ key, condition });
+/** Check the current route name against the given route names. */
+function isName(...names: RouteName[]): boolean {
+  const name = router.currentRoute.value.name;
+  return !!name && (names as (string | symbol)[]).includes(name);
 }
 
-// Register the checkers defined above as a global mixin (Options API compatible).
-// Each checker reads this.$route reactively via computed.
-// Note: Vue invokes Options-API computed getters with the component instance
-// as both `this` and the first argument, so the condition is wrapped to drop
-// that argument (it would otherwise shadow the route lookup).
-export function registerRouteCheckers(app: App) {
-  const computed: Record<string, (this: { $route?: RouteLocationNormalized }) => boolean> = {};
-  for (const { key, condition } of routeCheckerDefs) {
-    computed[key] = function (this) {
-      return condition(this.$route);
-    };
-  }
-  app.mixin({ computed });
-}
-
-// Build basic route checkers
-for (const [key, value] of Object.entries(routes)) {
-  const key_ = key as RouteId;
-  defineRouteChecker(`routeIs${key_}`, (route) => route?.name === value.name);
-}
-
-// Extra route checkers
-defineRouteChecker('routeIsPublic', (route) => route?.name?.toString().endsWith('-share') ?? false);
-defineRouteChecker('routeIsPeople', (route) =>
-  [routes.Recognize.name, routes.FaceRecognition.name].includes(route?.name?.toString() ?? ''),
-);
-defineRouteChecker(
-  'routeIsRecognizeUnassigned',
-  (route) => route?.name === routes.Recognize.name && route!.params.name === c.FACE_NULL,
-);
-defineRouteChecker(
-  'routeIsPlacesUnassigned',
-  (route) => route?.name === routes.Places.name && route!.params.name === c.PLACES_NULL,
-);
-defineRouteChecker('routeIsCluster', (route) =>
-  [
-    routes.Albums.name,
-    routes.Recognize.name,
-    routes.FaceRecognition.name,
-    routes.Places.name,
-    routes.Tags.name,
-  ].includes(route?.name?.toString() ?? ''),
-);
+/**
+ * Shared reactive route checks, keyed by route id.
+ * Prefer this over per-component useRoute() wrappers.
+ */
+export const routeIs = reactive({
+  get Base(): boolean {
+    return isName(routes.Base.name);
+  },
+  get Folders(): boolean {
+    return isName(routes.Folders.name);
+  },
+  get Favorites(): boolean {
+    return isName(routes.Favorites.name);
+  },
+  get Videos(): boolean {
+    return isName(routes.Videos.name);
+  },
+  get Panoramas(): boolean {
+    return isName(routes.Panoramas.name);
+  },
+  get Albums(): boolean {
+    return isName(routes.Albums.name);
+  },
+  get Archive(): boolean {
+    return isName(routes.Archive.name);
+  },
+  get ThisDay(): boolean {
+    return isName(routes.ThisDay.name);
+  },
+  get Recognize(): boolean {
+    return isName(routes.Recognize.name);
+  },
+  get FaceRecognition(): boolean {
+    return isName(routes.FaceRecognition.name);
+  },
+  get Places(): boolean {
+    return isName(routes.Places.name);
+  },
+  get Tags(): boolean {
+    return isName(routes.Tags.name);
+  },
+  get FolderShare(): boolean {
+    return isName(routes.FolderShare.name);
+  },
+  get AlbumShare(): boolean {
+    return isName(routes.AlbumShare.name);
+  },
+  get Map(): boolean {
+    return isName(routes.Map.name);
+  },
+  get Explore(): boolean {
+    return isName(routes.Explore.name);
+  },
+  get Search(): boolean {
+    return isName(routes.Search.name);
+  },
+  get NxSetup(): boolean {
+    return isName(routes.NxSetup.name);
+  },
+  get Public(): boolean {
+    return isName(routes.AlbumShare.name, routes.FolderShare.name);
+  },
+  get People(): boolean {
+    return isName(routes.Recognize.name, routes.FaceRecognition.name);
+  },
+  get Cluster(): boolean {
+    return isName(
+      routes.Albums.name,
+      routes.Recognize.name,
+      routes.FaceRecognition.name,
+      routes.Places.name,
+      routes.Tags.name,
+    );
+  },
+  get RecognizeUnassigned(): boolean {
+    return isName(routes.Recognize.name) && router.currentRoute.value.params.name === c.FACE_NULL;
+  },
+  get PlacesUnassigned(): boolean {
+    return isName(routes.Places.name) && router.currentRoute.value.params.name === c.PLACES_NULL;
+  },
+});

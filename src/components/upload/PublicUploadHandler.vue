@@ -14,15 +14,13 @@ import { Uploader } from '@nextcloud/upload';
 import { Folder, Permission } from '@nextcloud/files';
 import { showError, showSuccess } from '@nextcloud/dialogs';
 
-import { useRouteIsPublic } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import { t, n } from '@services/l10n';
 import * as utils from '@services/utils';
 import { initstate } from '@services/utils';
 import { createClient, type FileStat } from 'webdav';
 
 const route = useRoute();
-const routeIsPublic = useRouteIsPublic();
-
 const processing = ref(false);
 const progress = ref(0);
 const progressNote = ref(String());
@@ -35,7 +33,7 @@ onBeforeUnmount(() => {
 });
 
 const canUpload = computed((): boolean => {
-  return routeIsPublic.value && initstate.allow_upload === true;
+  return routeIs.Public && initstate.allow_upload === true;
 });
 
 /**

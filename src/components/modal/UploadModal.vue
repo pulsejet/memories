@@ -80,13 +80,12 @@ import { showError } from '@nextcloud/dialogs';
 import { useModal } from '@services/modal';
 import { t, n } from '@services/l10n';
 import { config } from '@services/user-config';
-import { useRouteIsFolders, useRouteIsPublic } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 import { API } from '@services/API';
 import { registerGlobals } from '../../bootstrap';
-import { registerRouteCheckers } from '../../router';
 
 import type { IAlbum, IPhoto, IUploadNativeX } from '@typings';
 import type PCancelable from 'p-cancelable';
@@ -98,8 +97,6 @@ defineOptions({
 const router = useRouter();
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
-const routeIsFolders = useRouteIsFolders();
-const routeIsPublic = useRouteIsPublic();
 const tags = useTemplateRef<InstanceType<typeof EditTags>>('tags');
 
 const files = ref<File[]>([]);
@@ -134,7 +131,6 @@ if (header && utils.uid) {
   const headerApp = createApp(UploadMenuItem);
   // Share globals and router with header button
   registerGlobals(headerApp);
-  registerRouteCheckers(headerApp);
   try {
     headerApp.use(router);
   } catch {}
@@ -143,7 +139,7 @@ if (header && utils.uid) {
 
 function open(localsIn?: IUploadNativeX[]) {
   // cannot upload to public shares
-  if (routeIsPublic.value) return;
+  if (routeIs.Public) return;
 
   // Upload local files natively (NativeX)
   if (localsIn?.length) {
@@ -184,7 +180,7 @@ function resetState() {
   uploadPath.value = config.timeline_path.split(';')?.[0] ?? '/';
 
   // choose current folder if in folders view
-  if (routeIsFolders.value) {
+  if (routeIs.Folders) {
     uploadPath.value = utils.getFolderRoutePath(config.folders_path);
   }
 }

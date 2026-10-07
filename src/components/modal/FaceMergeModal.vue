@@ -34,7 +34,7 @@ import FaceList from './FaceList.vue';
 
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
-import { useRouteIsFaceRecognition } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import client from '@services/dav/client';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
@@ -49,8 +49,6 @@ const route = useRoute();
 const router = useRouter();
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
-const routeIsFaceRecognition = useRouteIsFaceRecognition();
-
 const processing = ref(0);
 const processingTotal = ref(0);
 
@@ -92,7 +90,7 @@ async function clickFace(face: IFace) {
     return;
   }
 
-  if (routeIsFaceRecognition.value) {
+  if (routeIs.FaceRecognition) {
     if (Number.isInteger(Number(newName))) {
       showError(t('memories', 'You can only merge with a named person'));
       return;

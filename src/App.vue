@@ -13,7 +13,7 @@
       Some routes may desire to skip everything inside and only show their
       own content view. Enlist these routes here.
     -->
-    <router-view v-if="routeIsNxSetup" />
+    <router-view v-if="routeIs.NxSetup" />
 
     <!--
       Timline path is not set: short circuit and only show the first start.
@@ -102,13 +102,7 @@ const NcAppNavigationItem = defineAsyncComponent(() => import('@nextcloud/vue/co
 
 import { generateUrl } from '@nextcloud/router';
 
-import {
-  useRouteIsAlbums,
-  useRouteIsBase,
-  useRouteIsExplore,
-  useRouteIsNxSetup,
-  useRouteIsPublic,
-} from '@services/route-checker';
+import { routeIs } from '@services/router';
 
 import Settings from '@components/Settings.vue';
 import FirstStart from '@components/FirstStart.vue';
@@ -159,12 +153,6 @@ defineOptions({
 });
 
 const route = useRoute();
-const routeIsAlbums = useRouteIsAlbums();
-const routeIsBase = useRouteIsBase();
-const routeIsExplore = useRouteIsExplore();
-const routeIsNxSetup = useRouteIsNxSetup();
-const routeIsPublic = useRouteIsPublic();
-
 const navItems = ref<NavItem[]>([]);
 const settingsOpen = ref(false);
 
@@ -205,7 +193,7 @@ const facerecognition = computed((): string | false => {
 });
 
 const isFirstStart = computed((): boolean => {
-  return config.timeline_path === '_empty_' && !routeIsPublic.value && !route.query.noinit;
+  return config.timeline_path === '_empty_' && !routeIs.Public && !route.query.noinit;
 });
 
 const isConfigUnknown = computed((): boolean => {
@@ -217,20 +205,20 @@ const showAlbums = computed((): boolean => {
 });
 
 const showNavigation = computed((): boolean => {
-  if (routeIsPublic.value || isFirstStart.value) {
+  if (routeIs.Public || isFirstStart.value) {
     return false;
   }
 
   if (native.value) {
     // Only show navigation on "main" tabs
-    return routeIsBase.value || routeIsExplore.value || (routeIsAlbums.value && !route.params.name);
+    return routeIs.Base || routeIs.Explore || (routeIs.Albums && !route.params.name);
   }
 
   return true;
 });
 
 const hasMobileHeader = computed((): boolean => {
-  return native.value && showNavigation.value && routeIsBase.value;
+  return native.value && showNavigation.value && routeIs.Base;
 });
 
 // Register navigation items on config change
@@ -253,7 +241,7 @@ onMounted(() => {
 
   // Set theme color to default
   // Skip on nxsetup and firststart to avoid flashing white on initial setup.
-  if (!routeIsNxSetup.value && !isFirstStart.value) {
+  if (!routeIs.NxSetup && !isFirstStart.value) {
     nativex.setTheme();
   }
 

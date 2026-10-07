@@ -26,7 +26,7 @@ import Modal from './Modal.vue';
 
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
-import { useRouteIsRecognize } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
 
@@ -38,8 +38,6 @@ const route = useRoute();
 const router = useRouter();
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
-const routeIsRecognize = useRouteIsRecognize();
-
 const name = computed(() => route.params.name?.toString());
 const user = computed(() => route.params.user?.toString());
 
@@ -58,7 +56,7 @@ function cleanup() {
 
 async function save() {
   try {
-    if (routeIsRecognize.value) {
+    if (routeIs.Recognize) {
       await dav.recognizeDeleteFace(user.value, name.value);
     } else {
       await dav.faceRecognitionSetPersonVisibility(name.value, false);

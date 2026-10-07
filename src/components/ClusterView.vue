@@ -20,13 +20,7 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 
-import {
-  useRouteIsAlbums,
-  useRouteIsTags,
-  useRouteIsRecognize,
-  useRouteIsFaceRecognition,
-  useRouteIsPlaces,
-} from '@services/route-checker';
+import { routeIs } from '@services/router';
 import TopMatter from '@components/top-matter/TopMatter.vue';
 import ClusterGrid from '@components/ClusterGrid.vue';
 import Timeline from '@components/Timeline.vue';
@@ -40,30 +34,24 @@ import * as dav from '@services/dav';
 import type { ICluster } from '@typings';
 
 const route = useRoute();
-const routeIsAlbums = useRouteIsAlbums();
-const routeIsTags = useRouteIsTags();
-const routeIsRecognize = useRouteIsRecognize();
-const routeIsFaceRecognition = useRouteIsFaceRecognition();
-const routeIsPlaces = useRouteIsPlaces();
-
 const dtm = ref<InstanceType<typeof DynamicTopMatter>>();
 const items = ref<ICluster[]>([]);
 const loading = ref(0);
 
 const noParams = computed(() => !route.params.name?.toString() && !route.params.user?.toString());
-const minCols = computed(() => (routeIsAlbums.value ? 2 : 3));
-const maxSize = computed(() => (routeIsAlbums.value ? 250 : 180));
+const minCols = computed(() => (routeIs.Albums ? 2 : 3));
+const maxSize = computed(() => (routeIs.Albums ? 250 : 180));
 
 async function fetchClusters(): Promise<ICluster[]> {
-  if (routeIsAlbums.value) {
+  if (routeIs.Albums) {
     return await dav.getAlbums();
-  } else if (routeIsTags.value) {
+  } else if (routeIs.Tags) {
     return await dav.getTags();
-  } else if (routeIsRecognize.value) {
+  } else if (routeIs.Recognize) {
     return await dav.getFaceList('recognize');
-  } else if (routeIsFaceRecognition.value) {
+  } else if (routeIs.FaceRecognition) {
     return await dav.getFaceList('facerecognition');
-  } else if (routeIsPlaces.value) {
+  } else if (routeIs.Places) {
     return await dav.getPlaces();
   } else {
     return [];

@@ -1,9 +1,9 @@
 <template>
   <div class="top-matter">
     <NcBreadcrumbs :key="route.path">
-      <NcBreadcrumb :name="rootFolderName" :to="getRoute([])" :force-icon-text="routeIsPublic">
+      <NcBreadcrumb :name="rootFolderName" :to="getRoute([])" :force-icon-text="routeIs.Public">
         <template #icon>
-          <ShareIcon v-if="routeIsPublic" :size="20" />
+          <ShareIcon v-if="routeIs.Public" :size="20" />
           <HomeIcon v-else :size="20" />
         </template>
       </NcBreadcrumb>
@@ -16,7 +16,7 @@
 
       <NcActions :inline="3">
         <NcActionButton
-          v-if="!routeIsPublic"
+          v-if="!routeIs.Public"
           :aria-label="t('memories', 'Share folder')"
           @click="share()"
           close-after-click
@@ -26,7 +26,7 @@
         </NcActionButton>
 
         <NcActionButton
-          v-if="!routeIsPublic"
+          v-if="!routeIs.Public"
           :aria-label="t('memories', 'Upload files')"
           @click="upload()"
           close-after-click
@@ -69,7 +69,7 @@ import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import PublicUploadHandler from '@components/upload/PublicUploadHandler.vue';
 
 import { t } from '@services/l10n';
-import { useRouteIsPublic } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import { config } from '@services/user-config';
 import * as utils from '@services/utils';
 import { initstate } from '@services/utils';
@@ -86,8 +86,6 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const routeIsPublic = useRouteIsPublic();
-
 const uploadHandler = useTemplateRef<InstanceType<typeof PublicUploadHandler>>('uploadHandler');
 
 const list = computed(
@@ -115,11 +113,11 @@ const recursive = computed((): boolean => {
 });
 
 const rootFolderName = computed((): string => {
-  return routeIsPublic.value ? initstate.shareTitle : t('memories', 'Home');
+  return routeIs.Public ? initstate.shareTitle : t('memories', 'Home');
 });
 
 const allowPublicUpload = computed((): boolean => {
-  return routeIsPublic.value && initstate.allow_upload === true;
+  return routeIs.Public && initstate.allow_upload === true;
 });
 
 function share(): void {

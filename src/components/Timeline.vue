@@ -122,24 +122,7 @@ import { getLayout } from '@services/layout';
 
 import { config } from '@services/user-config';
 import { windowDims } from '@services/common';
-import {
-  useRouteIsAlbumShare,
-  useRouteIsAlbums,
-  useRouteIsArchive,
-  useRouteIsBase,
-  useRouteIsFavorites,
-  useRouteIsFolderShare,
-  useRouteIsFolders,
-  useRouteIsMap,
-  useRouteIsPanoramas,
-  useRouteIsPeople,
-  useRouteIsPlaces,
-  useRouteIsRecognizeUnassigned,
-  useRouteIsSearch,
-  useRouteIsTags,
-  useRouteIsThisDay,
-  useRouteIsVideos,
-} from '@services/route-checker';
+import { routeIs } from '@services/router';
 import RowHead from '@components/frame/RowHead.vue';
 import Photo from '@components/frame/Photo.vue';
 import ScrollerManager from '@components/ScrollerManager.vue';
@@ -174,22 +157,6 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const routeIsAlbumShare = useRouteIsAlbumShare();
-const routeIsAlbums = useRouteIsAlbums();
-const routeIsArchive = useRouteIsArchive();
-const routeIsBase = useRouteIsBase();
-const routeIsFavorites = useRouteIsFavorites();
-const routeIsFolderShare = useRouteIsFolderShare();
-const routeIsFolders = useRouteIsFolders();
-const routeIsMap = useRouteIsMap();
-const routeIsPanoramas = useRouteIsPanoramas();
-const routeIsPeople = useRouteIsPeople();
-const routeIsPlaces = useRouteIsPlaces();
-const routeIsRecognizeUnassigned = useRouteIsRecognizeUnassigned();
-const routeIsSearch = useRouteIsSearch();
-const routeIsTags = useRouteIsTags();
-const routeIsThisDay = useRouteIsThisDay();
-const routeIsVideos = useRouteIsVideos();
 const instance = getCurrentInstance();
 const container = useTemplateRef<InstanceType<typeof SwipeRefresh>>('container');
 const topmatter = useTemplateRef<InstanceType<typeof TopMatter>>('topmatter');
@@ -296,15 +263,15 @@ onBeforeUnmount(() => {
 });
 
 const routeHasNative = computed((): boolean => {
-  return routeIsBase.value && nativex.has();
+  return routeIs.Base && nativex.has();
 });
 
 const isMonthView = computed((): boolean => {
   if (route.query.sort === 'timeline') return false;
   if (route.query.sort === 'album') return true;
   return (
-    (config.sort_album_month && (routeIsAlbums.value || routeIsAlbumShare.value)) ||
-    (config.sort_folder_month && routeIsFolders.value)
+    (config.sort_album_month && (routeIs.Albums || routeIs.AlbumShare)) ||
+    (config.sort_folder_month && routeIs.Folders)
   );
 });
 
@@ -655,22 +622,22 @@ function getQuery() {
   const set = (filter: DaysFilterType, value: string = '1') => (query[filter] = value);
 
   // Favorites
-  if (routeIsFavorites.value) {
+  if (routeIs.Favorites) {
     set(DaysFilterType.FAVORITES);
   }
 
   // Videos
-  if (routeIsVideos.value) {
+  if (routeIs.Videos) {
     set(DaysFilterType.VIDEOS);
   }
 
   // Panoramas
-  if (routeIsPanoramas.value) {
+  if (routeIs.Panoramas) {
     set(DaysFilterType.PANO);
   }
 
   // Folder
-  if (routeIsFolders.value || routeIsFolderShare.value) {
+  if (routeIs.Folders || routeIs.FolderShare) {
     const path = utils.getFolderRoutePath(config.folders_path);
     set(DaysFilterType.FOLDER, path);
     if (route.query.recursive) {
@@ -679,14 +646,14 @@ function getQuery() {
   }
 
   // Archive
-  if (routeIsArchive.value) {
+  if (routeIs.Archive) {
     set(DaysFilterType.ARCHIVE);
   }
 
   // Albums
   const user = utils.routeParamToString(route.params.user);
   const name = utils.routeParamToString(route.params.name);
-  if (routeIsAlbums.value) {
+  if (routeIs.Albums) {
     if (!user || !name) {
       throw new Error('Invalid album route');
     }
@@ -694,7 +661,7 @@ function getQuery() {
   }
 
   // People
-  if (routeIsPeople.value) {
+  if (routeIs.People) {
     if (!user || !name) {
       throw new Error('Invalid face route');
     }
@@ -704,13 +671,13 @@ function getQuery() {
     set(filter, `${user}/${name}`);
 
     // Face rect
-    if (config.show_face_rect || routeIsRecognizeUnassigned.value) {
+    if (config.show_face_rect || routeIs.RecognizeUnassigned) {
       set(DaysFilterType.FACE_RECT);
     }
   }
 
   // Places
-  if (routeIsPlaces.value) {
+  if (routeIs.Places) {
     if (name?.includes('-')) {
       const id = name.split('-', 1)[0];
       set(DaysFilterType.PLACE, id);
@@ -722,7 +689,7 @@ function getQuery() {
   }
 
   // Tags
-  if (routeIsTags.value) {
+  if (routeIs.Tags) {
     if (!name) {
       throw new Error('Invalid tag route');
     }
@@ -730,7 +697,7 @@ function getQuery() {
   }
 
   // Map Bounds
-  if (routeIsMap.value) {
+  if (routeIs.Map) {
     const bounds = route.query.b?.toString();
     if (!bounds) {
       throw new Error('Missing map bounds');
@@ -763,7 +730,7 @@ async function fetchDays(noCache = false) {
   }
 
   // Lens search mode serves a fake day, not the days API
-  if (routeIsSearch.value) {
+  if (routeIs.Search) {
     return await fetchLensSearch();
   }
 
@@ -787,7 +754,7 @@ async function fetchDays(noCache = false) {
     const startState = state.value;
 
     let data: IDay[] = [];
-    if (routeIsThisDay.value) {
+    if (routeIs.ThisDay) {
       data = await dav.getOnThisDayData();
     } else if (dav.isSingleItem()) {
       data = await dav.getSingleItemData();
@@ -888,7 +855,7 @@ async function processDays(data: IDay[], cache: boolean) {
     if (isMonthView.value) head.ismonth = true;
 
     // Special headers
-    if (routeIsThisDay.value && (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)) {
+    if (routeIs.ThisDay && (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)) {
       // thisday view with new year title
       head.size = 67;
       head.super = utils.getFromNowStr(utils.dayIdToDate(day.dayid), { padding: 10 });

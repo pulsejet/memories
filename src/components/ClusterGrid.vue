@@ -30,7 +30,7 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { RecycleScroller } from 'vue-virtual-scroller';
 
-import { useRouteIsAlbums } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import { windowDims } from '@services/common';
 
 import Cluster from '@components/frame/Cluster.vue';
@@ -60,9 +60,6 @@ const emit = defineEmits<{
   click: [item: ICluster];
   plus: [];
 }>();
-
-const routeIsAlbums = useRouteIsAlbums();
-
 const recycler = ref<VueRecyclerType>();
 const recyclerWidth = ref(300);
 
@@ -77,7 +74,7 @@ const width = computed(() => utils.round(recyclerWidth.value / gridItems.value, 
 
 /** Height of the cluster */
 const height = computed(() => {
-  if (routeIsAlbums.value) {
+  if (routeIs.Albums) {
     // album view: add gap for text below album
     // 4px extra on mobile for mark#2147915
     return width.value + (windowDims.isMobile ? 46 : 42);
@@ -89,11 +86,11 @@ const height = computed(() => {
 /** Classes list on object */
 const classList = computed(() => ({
   empty: !props.items.length,
-  'cluster--album': routeIsAlbums.value,
+  'cluster--album': routeIs.Albums,
 }));
 
 /** Whether the clusters should show counters */
-const counters = computed(() => !routeIsAlbums.value);
+const counters = computed(() => !routeIs.Albums);
 
 /** List of clusters to display */
 const clusters = computed(() => {

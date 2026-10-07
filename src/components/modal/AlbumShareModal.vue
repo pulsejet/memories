@@ -60,7 +60,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
-import { useRouteIsAlbums } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
 
@@ -72,7 +72,6 @@ const route = useRoute();
 const router = useRouter();
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
-const routeIsAlbums = useRouteIsAlbums();
 const collaborators = useTemplateRef<InstanceType<typeof AlbumCollaborators>>('collaborators');
 
 const album = ref<any>(null);
@@ -126,7 +125,7 @@ async function save(collaboratorsIn: any[]) {
       await dav.renameAlbum(album.value, album.value.basename, albumName.value);
 
       // Change route to new album name if we're on album page
-      if (routeIsAlbums.value) {
+      if (routeIs.Albums) {
         // Do not await but proceed to close modal instantly
         router.replace({
           name: route.name!,

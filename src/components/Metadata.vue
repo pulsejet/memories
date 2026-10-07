@@ -86,7 +86,7 @@ import { getCanonicalLocale } from '@nextcloud/l10n';
 import { DateTime } from 'luxon';
 
 import { config } from '@services/user-config';
-import { useRouteIsFaceRecognition } from '@services/route-checker';
+import { routeIs } from '@services/router';
 
 import Cluster from '@components/frame/Cluster.vue';
 import AlbumsList from '@components/modal/AlbumsList.vue';
@@ -126,9 +126,6 @@ const props = defineProps<{
   // eslint-disable-next-line vue/no-unused-properties -- Required on the web component interface
   view?: IView;
 }>();
-
-const routeIsFaceRecognition = useRouteIsFaceRecognition();
-
 const fileid = ref<number | null>(null);
 const filename = ref('');
 const exif = ref({} as IExif);
@@ -315,7 +312,7 @@ const people = computed(() => {
   const clusters = baseInfo.value?.clusters;
 
   // force face-recognition on its own route, or if recognize is disabled
-  if (routeIsFaceRecognition.value || !config.recognize_enabled) {
+  if (routeIs.FaceRecognition || !config.recognize_enabled) {
     return clusters?.facerecognition ?? [];
   }
 

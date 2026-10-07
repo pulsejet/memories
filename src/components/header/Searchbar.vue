@@ -65,7 +65,7 @@ const NcPopover = defineAsyncComponent(() => import('@nextcloud/vue/components/N
 
 import { config } from '@services/user-config';
 import { windowDims } from '@services/common';
-import { useRouteIsBase, useRouteIsSearch } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import { t } from '@services/l10n';
 
 import * as dav from '@services/dav';
@@ -98,9 +98,6 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const router = useRouter();
-const routeIsBase = useRouteIsBase();
-const routeIsSearch = useRouteIsSearch();
-
 const textFieldRef = useTemplateRef<any>('textField');
 
 const prompt = ref(String());
@@ -150,7 +147,7 @@ const lensEnabled = computed((): boolean => {
 
 /** Live lens search hijacks typing only on desktop timeline/search views */
 const isLensLive = computed((): boolean => {
-  return lensEnabled.value && (routeIsBase.value || routeIsSearch.value) && !windowDims.isMobile;
+  return lensEnabled.value && (routeIs.Base || routeIs.Search) && !windowDims.isMobile;
 });
 
 /** Explicit lens entry for anywhere live search does not apply */
@@ -210,7 +207,7 @@ async function load() {
 
 /** Mirror ?q= into the box when on the search view (e.g. direct open). */
 function syncPromptFromRoute() {
-  const query = routeIsSearch.value ? lens.routeQueryText(route.query.q) : String();
+  const query = routeIs.Search ? lens.routeQueryText(route.query.q) : String();
   if (query !== prompt.value) prompt.value = query;
 }
 
@@ -235,7 +232,7 @@ function queueLensSearch() {
 function routeToLens() {
   if (!lensEnabled.value) return;
   if (!prompt.value) {
-    if (!routeIsBase.value) {
+    if (!routeIs.Base) {
       router.replace({ name: 'timeline' });
     }
   } else {

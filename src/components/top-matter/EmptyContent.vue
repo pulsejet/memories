@@ -1,10 +1,10 @@
 <template>
   <NcEmptyContent :name="t('memories', 'Nothing to show here')" :description="emptyViewDescription">
     <template #icon>
-      <PeopleIcon v-if="routeIsPeople" />
-      <ArchiveIcon v-else-if="routeIsArchive" />
-      <AlbumIcon v-else-if="routeIsAlbums" />
-      <MapIcon v-else-if="routeIsMap" />
+      <PeopleIcon v-if="routeIs.People" />
+      <ArchiveIcon v-else-if="routeIs.Archive" />
+      <AlbumIcon v-else-if="routeIs.Albums" />
+      <MapIcon v-else-if="routeIs.Map" />
       <ImageMultipleIcon v-else />
     </template>
   </NcEmptyContent>
@@ -16,7 +16,7 @@ import { useRoute } from 'vue-router';
 
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent';
 
-import { useRouteIsAlbums, useRouteIsArchive, useRouteIsMap, useRouteIsPeople } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import * as strings from '@services/strings';
 
 import PeopleIcon from 'vue-material-design-icons/AccountMultiple.vue';
@@ -30,11 +30,6 @@ defineOptions({
 });
 
 const route = useRoute();
-const routeIsPeople = useRouteIsPeople();
-const routeIsArchive = useRouteIsArchive();
-const routeIsAlbums = useRouteIsAlbums();
-const routeIsMap = useRouteIsMap();
-
 const emptyViewDescription = computed((): string => {
   return strings.emptyDescription(route.name?.toString() ?? '');
 });

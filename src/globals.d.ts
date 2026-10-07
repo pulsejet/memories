@@ -4,7 +4,7 @@ import type { ComponentPublicInstance } from 'vue';
 import type { IPhoto, IUploadNativeX, TimelineState } from '@typings';
 import type { constants, initstate } from '@services/utils';
 import type { translate, translatePlural } from '@services/l10n';
-import type { GlobalRouteCheckers, routes } from './router';
+import type { routes } from '@services/router';
 
 // Global exposed variables
 declare global {
@@ -90,9 +90,9 @@ declare global {
   };
 }
 
-// types present on all components (bootstrap.ts, router.ts)
+// types present on all components (bootstrap.ts)
 declare module 'vue' {
-  interface ComponentCustomProperties extends GlobalRouteCheckers {
+  interface ComponentCustomProperties {
     t: typeof translate;
     n: typeof translatePlural;
 

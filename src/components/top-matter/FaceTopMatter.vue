@@ -16,7 +16,7 @@
     <div class="right-actions">
       <NcActions :inline="0">
         <!-- root view (not cluster or unassigned) -->
-        <template v-if="!name && routeIsRecognize && !routeIsRecognizeUnassigned">
+        <template v-if="!name && routeIs.Recognize && !routeIs.RecognizeUnassigned">
           <NcActionButton :aria-label="t('memories', 'Unassigned faces')" @click="openUnassigned" close-after-click>
             {{ t('memories', 'Unassigned faces') }}
             <template #icon> <UnassignedIcon :size="20" /> </template>
@@ -70,7 +70,7 @@ import FaceEditModal from '@components/modal/FaceEditModal.vue';
 import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';
 import FaceMergeModal from '@components/modal/FaceMergeModal.vue';
 
-import { useRouteIsRecognize, useRouteIsRecognizeUnassigned } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import { config, setConfig } from '@services/user-config';
 import * as utils from '@services/utils';
 import { constants as c } from '@services/utils';
@@ -88,9 +88,6 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const routeIsRecognize = useRouteIsRecognize();
-const routeIsRecognizeUnassigned = useRouteIsRecognizeUnassigned();
-
 const editModal = useTemplateRef<InstanceType<typeof FaceEditModal>>('editModal');
 const deleteModal = useTemplateRef<InstanceType<typeof FaceDeleteModal>>('deleteModal');
 const mergeModal = useTemplateRef<InstanceType<typeof FaceMergeModal>>('mergeModal');
@@ -104,7 +101,7 @@ const isReal = computed(() => {
 });
 
 const displayName = computed(() => {
-  if (routeIsRecognizeUnassigned.value) {
+  if (routeIs.RecognizeUnassigned) {
     return t('memories', 'Unassigned faces');
   } else if (!name.value) {
     return t('memories', 'People');

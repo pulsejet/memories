@@ -37,7 +37,7 @@ import Modal from './Modal.vue';
 
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
-import { useRouteIsRecognize } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import * as utils from '@services/utils';
 import * as dav from '@services/dav';
 
@@ -49,8 +49,6 @@ const route = useRoute();
 const router = useRouter();
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
-const routeIsRecognize = useRouteIsRecognize();
-
 const rawInput = ref(String());
 
 const name = computed(() => route.params.name?.toString());
@@ -82,7 +80,7 @@ async function save() {
   if (!canSave.value) return;
 
   try {
-    if (routeIsRecognize.value) {
+    if (routeIs.Recognize) {
       await dav.recognizeRenameFace(user.value, name.value, input.value);
     } else {
       await dav.faceRecognitionRenamePerson(name.value, input.value);

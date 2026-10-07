@@ -42,15 +42,7 @@ import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import { config } from '@services/user-config';
 import { windowDims } from '@services/common';
-import {
-  useRouteIsAlbums,
-  useRouteIsPublic,
-  useRouteIsArchive,
-  useRouteIsFolders,
-  useRouteIsCluster,
-  useRouteIsRecognize,
-  useRouteIsRecognizeUnassigned,
-} from '@services/route-checker';
+import { routeIs } from '@services/router';
 
 import { t, n } from '@services/l10n';
 import * as dav from '@services/dav';
@@ -164,14 +156,6 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
-const routeIsAlbums = useRouteIsAlbums();
-const routeIsPublic = useRouteIsPublic();
-const routeIsArchive = useRouteIsArchive();
-const routeIsFolders = useRouteIsFolders();
-const routeIsCluster = useRouteIsCluster();
-const routeIsRecognize = useRouteIsRecognize();
-const routeIsRecognizeUnassigned = useRouteIsRecognizeUnassigned();
-
 const show = ref(false);
 const size = ref(0);
 const loading = ref(0);
@@ -207,19 +191,19 @@ const defaultActions: ISelectionAction[] = [
     icon: markRaw(DeleteIcon),
     callback: deleteSelection,
     allowPublic: true,
-    if: () => !routeIsAlbums.value && (!routeIsPublic.value || initstate.allow_delete),
+    if: () => !routeIs.Albums && (!routeIs.Public || initstate.allow_delete),
   },
   {
     name: t('memories', 'Remove from album'),
     icon: markRaw(AlbumRemoveIcon),
     callback: deleteSelection,
-    if: () => routeIsAlbums.value,
+    if: () => routeIs.Albums,
   },
   {
     name: t('memories', 'Share'),
     icon: markRaw(ShareIcon),
     callback: shareSelection,
-    if: () => !routeIsAlbums.value,
+    if: () => !routeIs.Albums,
   },
   {
     name: t('memories', 'Download'),
@@ -237,7 +221,7 @@ const defaultActions: ISelectionAction[] = [
     name: t('memories', 'Archive'),
     icon: markRaw(ArchiveIcon),
     callback: archiveSelection,
-    if: () => !routeIsArchiveFolder() && !routeIsAlbums.value,
+    if: () => !routeIsArchiveFolder() && !routeIs.Albums,
   },
   {
     name: t('memories', 'Unarchive'),
@@ -265,43 +249,43 @@ const defaultActions: ISelectionAction[] = [
     name: t('memories', 'View in folder'),
     icon: markRaw(OpenInNewIcon),
     callback: viewInFolder,
-    if: () => selection.value.size === 1 && !routeIsAlbums.value,
+    if: () => selection.value.size === 1 && !routeIs.Albums,
   },
   {
     name: t('memories', 'Set as cover image'),
     icon: markRaw(ImageCheckIcon),
     callback: setClusterCover,
-    if: () => selection.value.size === 1 && routeIsCluster.value && !routeIsRecognizeUnassigned.value,
+    if: () => selection.value.size === 1 && routeIs.Cluster && !routeIs.RecognizeUnassigned,
   },
   {
     name: t('memories', 'Move to folder'),
     icon: markRaw(FolderMoveIcon),
     callback: moveToFolder,
-    if: () => !routeIsAlbums.value && !routeIsArchiveFolder(),
+    if: () => !routeIs.Albums && !routeIsArchiveFolder(),
   },
   {
     name: t('memories', 'Add to album'),
     icon: markRaw(AlbumsIcon),
     callback: addToAlbum,
-    if: () => config.albums_enabled && !routeIsAlbums.value,
+    if: () => config.albums_enabled && !routeIs.Albums,
   },
   {
     id: 'face-move',
     name: t('memories', 'Move to person'),
     icon: markRaw(MoveIcon),
     callback: moveSelectionToPerson,
-    if: () => routeIsRecognize.value,
+    if: () => routeIs.Recognize,
   },
   {
     name: t('memories', 'Remove from person'),
     icon: markRaw(CloseIcon),
     callback: removeSelectionFromPerson,
-    if: () => routeIsRecognize.value && !routeIsRecognizeUnassigned.value,
+    if: () => routeIs.Recognize && !routeIs.RecognizeUnassigned,
   },
 ];
 
 // Move face-move to start if unassigned faces
-if (routeIsRecognizeUnassigned.value) {
+if (routeIs.RecognizeUnassigned) {
   const i = defaultActions.findIndex((a) => a.id === 'face-move');
   defaultActions.unshift(defaultActions.splice(i, 1)[0]);
 }
@@ -334,10 +318,10 @@ function updateLoading(delta: number) {
 /** Is archive route */
 function routeIsArchiveFolder(): boolean {
   // Check if the route itself is archive
-  if (routeIsArchive.value) return true;
+  if (routeIs.Archive) return true;
 
   // Check if route is folder and the path contains .archive
-  if (routeIsFolders.value) {
+  if (routeIs.Folders) {
     let path = route.params.path || '';
     if (Array.isArray(path)) path = path.join('/');
     return ('/' + path + '/').includes('/.archive/');
@@ -359,7 +343,7 @@ function empty(): boolean {
 
 /** Get the actions list */
 function getActions(): ISelectionAction[] {
-  return defaultActions.filter((a) => (!a.if || a.if()) && (!routeIsPublic.value || a.allowPublic));
+  return defaultActions.filter((a) => (!a.if || a.if()) && (!routeIs.Public || a.allowPublic));
 }
 
 /** Click on an action */
@@ -932,7 +916,7 @@ async function viewInFolder(sel: Selection) {
  * Set the cover image for the current cluster
  */
 async function setClusterCover(sel: Selection) {
-  if (sel.size !== 1 || !routeIsCluster.value) return;
+  if (sel.size !== 1 || !routeIs.Cluster) return;
   if (await dav.setClusterCover(sel.values().next().value!)) {
     clear();
   }
@@ -944,7 +928,7 @@ async function setClusterCover(sel: Selection) {
 async function archiveSelection(sel: Selection) {
   if (sel.size >= 50 && !(await utils.dialogs.moveItems(sel.size))) return;
 
-  for await (let delIds of dav.archiveFilesByIds(sel.photosNoDupFileId(), !routeIsArchive.value)) {
+  for await (let delIds of dav.archiveFilesByIds(sel.photosNoDupFileId(), !routeIs.Archive)) {
     deleteSelectedPhotosById(delIds, sel);
   }
 }
@@ -967,7 +951,7 @@ async function moveToFolder(sel: Selection) {
  * Move selected photos to another person
  */
 async function moveSelectionToPerson(sel: Selection) {
-  if (!config.show_face_rect && !routeIsRecognizeUnassigned.value) {
+  if (!config.show_face_rect && !routeIs.RecognizeUnassigned) {
     showError(t('memories', 'You must enable "Mark person in preview" to use this feature'));
     return;
   }
@@ -980,7 +964,7 @@ async function moveSelectionToPerson(sel: Selection) {
 async function removeSelectionFromPerson(sel: Selection) {
   // Make sure route is valid
   const { user, name } = route.params;
-  if (!routeIsRecognize.value || !user || !name) return;
+  if (!routeIs.Recognize || !user || !name) return;
 
   // Check photo ownership
   if (route.params.user?.toString() !== utils.uid) {

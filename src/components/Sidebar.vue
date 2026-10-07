@@ -121,7 +121,7 @@ import Metadata from '@components/Metadata.vue';
 import SidebarSubtitle from '@components/SidebarSubtitle.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 import { registerGlobals } from '../bootstrap';
-import router, { registerRouteCheckers } from '../router';
+import router from '@services/router';
 
 import * as utils from '@services/utils';
 import { windowDims } from '@services/common';
@@ -155,7 +155,6 @@ if (!getSidebarTabs().some((tab) => tab.id === SIDEBAR_TAB_ID)) {
         defineCustomElement(MetadataTab, {
           configureApp: (app) => {
             registerGlobals(app);
-            registerRouteCheckers(app);
             app.use(router);
           },
           shadowRoot: false,

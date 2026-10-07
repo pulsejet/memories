@@ -3,7 +3,7 @@ import { registerGlobals } from './bootstrap';
 
 import { createApp } from 'vue';
 import App from './App.vue';
-import router, { routes, registerRouteCheckers } from './router';
+import router, { routes } from '@services/router';
 import * as nativex from '@native';
 
 // Global components
@@ -38,7 +38,6 @@ localStorage.setItem('videoClientIdPersistent', _m.video.clientIdPersistent);
 // Register global components and plugins
 const app = createApp(App);
 registerGlobals(app);
-registerRouteCheckers(app);
 app.use(router);
 app.use(VueVirtualScroller);
 

@@ -81,7 +81,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 import { useModal } from '@services/modal';
 import { t, n } from '@services/l10n';
 import { config } from '@services/user-config';
-import { useRouteIsAlbums } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import { API } from '@services/API';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils';
@@ -100,8 +100,6 @@ defineOptions({
 
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
-const routeIsAlbums = useRouteIsAlbums();
-
 const photos = ref<IPhoto[] | null>(null);
 const loading = ref(0);
 
@@ -123,7 +121,7 @@ const canShareHighRes = computed(
 );
 
 const canShareLink = computed(() => {
-  if (routeIsAlbums.value || !photos.value?.length || hasLocal.value) return false;
+  if (routeIs.Albums || !photos.value?.length || hasLocal.value) return false;
 
   // Check if all imageInfos are loaded (e.g. on viewer)
   // Then check if all images can be shared

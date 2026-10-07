@@ -14,7 +14,7 @@ import axios from '@nextcloud/axios';
 import NcButton from '@nextcloud/vue/components/NcButton';
 
 import { API } from '@services/API';
-import { useRouteIsPlacesUnassigned } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import * as utils from '@services/utils';
 
 import type { ICluster } from '@typings';
@@ -24,8 +24,6 @@ defineOptions({
 });
 
 const route = useRoute();
-const routeIsPlacesUnassigned = useRouteIsPlacesUnassigned();
-
 const places = ref<ICluster[]>([]);
 
 const placeId = computed((): number => {
@@ -37,7 +35,7 @@ async function refresh(): Promise<boolean> {
   places.value = [];
 
   // Skip if unidentified location view
-  if (routeIsPlacesUnassigned.value) return false;
+  if (routeIs.PlacesUnassigned) return false;
 
   // Get ID of place from URL
   const placeIdVal = placeId.value;

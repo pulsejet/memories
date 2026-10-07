@@ -14,14 +14,14 @@
         :key="item.cluster_id"
         v-for="item of clusters"
       >
-        <Cluster :data="item" :link="true" :counters="!routeIsExplore" />
+        <Cluster :data="item" :link="true" :counters="!routeIs.Explore" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useRouteIsExplore } from '@services/route-checker';
+import { routeIs } from '@services/router';
 
 import Cluster from '@components/frame/Cluster.vue';
 
@@ -32,9 +32,6 @@ defineProps<{
   title?: string;
   link?: string;
 }>();
-
-const routeIsExplore = useRouteIsExplore();
-
 function circle(cluster: ICluster): boolean {
   switch (cluster.cluster_type) {
     case 'recognize':

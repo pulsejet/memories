@@ -6,6 +6,7 @@ import client, { remotePath } from './client';
 
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
+import { routeIs } from '@services/router';
 import * as utils from '@services/utils';
 import * as nativex from '@native';
 
@@ -277,9 +278,9 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   const confirmationCount = photos.length;
 
   // Extend with stack unless this is an album
-  const routeIsAlbums = _m.route.name === _m.routes.Albums.name;
+  const isAlbum = routeIs.Albums;
   let livePhotoVideoFileIds = new Set<number>();
-  if (!routeIsAlbums) {
+  if (!isAlbum) {
     const extended = await extendWithStack(photos);
     photos = extended.photos;
     livePhotoVideoFileIds = extended.livePhotoVideoFileIds;
@@ -295,7 +296,7 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
 
   // Check for locally available files and delete them.
   // For albums, we are not actually deleting.
-  const hasNative = nativex.has() && !routeIsAlbums;
+  const hasNative = nativex.has() && !isAlbum;
 
   // Check if native confirmation is available
   if (hasNative) {
@@ -304,7 +305,7 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
 
   // Show confirmation dialog if required
   if (confirm) {
-    if (routeIsAlbums) {
+    if (isAlbum) {
       if (!(await utils.dialogs.removeFromAlbum(confirmationCount))) {
         throw new Error('User cancelled removal');
       }

@@ -125,7 +125,7 @@ import axios from '@nextcloud/axios';
 
 import { config } from '@services/user-config';
 import { windowDims } from '@services/common';
-import { useRouteIsAlbums, useRouteIsPublic } from '@services/route-checker';
+import { routeIs } from '@services/router';
 import { API } from '@services/API';
 import { t } from '@services/l10n';
 import { constants as c, initstate } from '@services/utils';
@@ -191,9 +191,6 @@ const SIDEBAR_DEBOUNCE_MS = 350;
 defineOptions({
   name: 'Viewer',
 });
-
-const routeIsAlbums = useRouteIsAlbums();
-const routeIsPublic = useRouteIsPublic();
 const instance = getCurrentInstance();
 const outer = useTemplateRef<HTMLDivElement>('outer');
 const inner = useTemplateRef<HTMLDivElement>('inner');
@@ -357,7 +354,7 @@ const actions = computed((): IViewerAction[] => {
       name: t('memories', 'Favorite'),
       icon: isFavorite.value ? markRaw(StarIcon) : markRaw(StarOutlineIcon),
       callback: favoriteCurrent,
-      if: !routeIsPublic.value && !isLocal.value,
+      if: !routeIs.Public && !isLocal.value,
     },
     {
       id: 'share',
@@ -371,14 +368,14 @@ const actions = computed((): IViewerAction[] => {
       name: t('memories', 'Delete'),
       icon: markRaw(DeleteIcon),
       callback: deleteCurrent,
-      if: !routeIsAlbums.value && canDelete.value,
+      if: !routeIs.Albums && canDelete.value,
     },
     {
       id: 'remove-from-album',
       name: t('memories', 'Remove from album'),
       icon: markRaw(AlbumRemoveIcon),
       callback: deleteCurrent,
-      if: routeIsAlbums.value,
+      if: routeIs.Albums,
     },
     {
       id: 'play-live-photo',
@@ -445,7 +442,7 @@ const actions = computed((): IViewerAction[] => {
       name: t('memories', 'View in folder'),
       icon: markRaw(OpenInNewIcon),
       callback: viewInFolder,
-      if: !routeIsPublic.value && !routeIsAlbums.value && !isLocal.value,
+      if: !routeIs.Public && !routeIs.Albums && !isLocal.value,
     },
     {
       id: 'slideshow',
@@ -476,7 +473,7 @@ const actions = computed((): IViewerAction[] => {
       if:
         config.albums_enabled &&
         !isLocal.value &&
-        !routeIsPublic.value &&
+        !routeIs.Public &&
         canShare.value &&
         !!currentPhoto.value?.imageInfo?.filename,
     },
@@ -1302,7 +1299,7 @@ async function openSidebar() {
         _m.sidebar.setTab('memories-metadata');
       }
 
-      if (routeIsPublic.value || isLocal.value) {
+      if (routeIs.Public || isLocal.value) {
         _m.sidebar.open(photo);
       } else {
         const fileInfo = (await dav.getFiles([photo]))[0];
