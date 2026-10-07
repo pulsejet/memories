@@ -75,15 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  ref,
-  onMounted,
-  nextTick,
-  markRaw,
-  useTemplateRef,
-  defineAsyncComponent,
-} from 'vue';
+import { computed, ref, onMounted, nextTick, markRaw, useTemplateRef, defineAsyncComponent } from 'vue';
 
 import Fuse from 'fuse.js';
 
