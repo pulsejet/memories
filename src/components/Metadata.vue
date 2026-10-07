@@ -91,7 +91,7 @@ import { routeIs } from '@services/router';
 import Cluster from '@components/frame/Cluster.vue';
 import AlbumsList from '@components/modal/AlbumsList.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
-import MapStandalone from '@components/MapStandalone.vue';
+const MapStandalone = defineAsyncComponent(() => import('@components/MapStandalone.vue'));
 
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
