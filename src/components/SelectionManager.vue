@@ -41,7 +41,7 @@ import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import { config } from '@services/user-config';
-import { windowDims } from '@services/common';
+import { windowDims } from '@services/viewport';
 import { routeIs } from '@services/router';
 
 import { t, n } from '@services/l10n';

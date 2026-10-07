@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import { ref, computed, nextTick } from 'vue';
 
-import { windowDims } from '@services/common';
+import { windowDims } from '@services/viewport';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import * as utils from '@services/utils/common';
 import * as lens from '@services/lens';

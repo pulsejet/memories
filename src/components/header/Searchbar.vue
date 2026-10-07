@@ -64,7 +64,7 @@ const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components
 const NcPopover = defineAsyncComponent(() => import('@nextcloud/vue/components/NcPopover'));
 
 import { config } from '@services/user-config';
-import { windowDims } from '@services/common';
+import { windowDims } from '@services/viewport';
 import { routeIs } from '@services/router';
 import { t } from '@services/l10n';
 

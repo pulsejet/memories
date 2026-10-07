@@ -124,7 +124,7 @@ import { showError } from '@nextcloud/dialogs';
 import axios from '@nextcloud/axios';
 
 import { config } from '@services/user-config';
-import { windowDims } from '@services/common';
+import { windowDims } from '@services/viewport';
 import { routeIs } from '@services/router';
 import { API } from '@services/API';
 import { t } from '@services/l10n';

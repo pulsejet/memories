@@ -39,7 +39,7 @@ import { useRouter } from 'vue-router';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 import { t } from '@services/l10n';
-import { isPartiallyInViewport } from '@services/common';
+import { isPartiallyInViewport } from '@services/viewport';
 import { routeIs } from '@services/router';
 
 import ChevronRightIcon from 'vue-material-design-icons/ChevronRight.vue';

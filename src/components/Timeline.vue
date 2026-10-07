@@ -121,7 +121,7 @@ import { showError } from '@nextcloud/dialogs';
 import { getLayout } from '@services/layout';
 
 import { config } from '@services/user-config';
-import { windowDims } from '@services/common';
+import { windowDims } from '@services/viewport';
 import { routeIs } from '@services/router';
 import RowHead from '@components/frame/RowHead.vue';
 import Photo from '@components/frame/Photo.vue';

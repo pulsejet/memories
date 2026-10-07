@@ -63,7 +63,7 @@ import CogIcon from 'vue-material-design-icons/Cog.vue';
 
 import { translate as t } from '@services/l10n';
 import { config } from '@services/user-config';
-import { windowDims } from '@services/common';
+import { windowDims } from '@services/viewport';
 import * as dav from '@services/dav';
 import * as nativex from '@native';
 

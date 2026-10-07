@@ -31,7 +31,7 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { RecycleScroller } from 'vue-virtual-scroller';
 
 import { routeIs } from '@services/router';
-import { windowDims } from '@services/common';
+import { windowDims } from '@services/viewport';
 
 import Cluster from '@components/frame/Cluster.vue';
 

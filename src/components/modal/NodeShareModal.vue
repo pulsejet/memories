@@ -76,7 +76,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
-import { windowDims } from '@services/common';
+import { windowDims } from '@services/viewport';
 import { API } from '@services/API';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';

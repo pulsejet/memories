@@ -18,7 +18,7 @@ import NcButton from '@nextcloud/vue/components/NcButton';
 
 import Searchbar from '@components/header/Searchbar.vue';
 
-import { windowDims } from '@services/common';
+import { windowDims } from '@services/viewport';
 import { t } from '@services/l10n';
 
 import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';

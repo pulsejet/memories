@@ -126,7 +126,7 @@ import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 import { translate as t } from '@services/l10n';
 import { config, hasVersionChanged } from '@services/user-config';
-import { windowDims } from '@services/common';
+import { windowDims } from '@services/viewport';
 import { getPlayableVideoCodecs } from '@services/video/codec';
 
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';

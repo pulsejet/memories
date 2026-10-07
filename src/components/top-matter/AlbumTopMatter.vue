@@ -158,7 +158,7 @@ import AlbumDeleteModal from '@components/modal/AlbumDeleteModal.vue';
 
 import { downloadWithHandle } from '@services/dav';
 import { API } from '@services/API';
-import { windowDims } from '@services/common';
+import { windowDims } from '@services/viewport';
 import { config, setConfig } from '@services/user-config';
 import * as utils from '@services/utils/common';
 import { constants } from '@services/constants';

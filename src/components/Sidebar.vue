@@ -122,7 +122,7 @@ import SidebarSubtitle from '@components/SidebarSubtitle.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 import router from '@services/router';
 
-import { windowDims } from '@services/common';
+import { windowDims } from '@services/viewport';
 import * as utils from '@services/utils/common';
 
 import type { IImageInfo, IPhoto } from '@typings';
