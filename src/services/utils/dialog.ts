@@ -11,12 +11,9 @@ import type { IFilePickerButton, ToastHandle, ToastOptions } from '@nextcloud/di
  * Lazy-load the @nextcloud/dialogs library on first use.
  * The chunk is very large (stat size = 3M).
  */
-let dialogsPromise: Promise<typeof import('@nextcloud/dialogs')> | null = null;
-function loadDialogs(): Promise<typeof import('@nextcloud/dialogs')> {
-  dialogsPromise ??= (async () => {
-    const [lib] = await Promise.all([import('@nextcloud/dialogs'), import('@nextcloud/dialogs/style.css')]);
-    return lib;
-  })();
+let dialogsPromise: Promise<typeof import('./dialog-lib')> | null = null;
+function loadDialogs(): Promise<typeof import('./dialog-lib')> {
+  dialogsPromise ??= import('./dialog-lib');
   return dialogsPromise;
 }
 
