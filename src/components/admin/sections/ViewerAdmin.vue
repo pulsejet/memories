@@ -69,12 +69,12 @@ import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwit
 
 import { t } from '@services/l10n';
 
-import { useAdminSection } from '../useAdminSection';
+import { useAdminContext } from '../admin-context';
 
 defineOptions({
   name: 'Viewer',
   title: t('memories', 'Photo Viewer'),
 });
 
-const { systemConfig, update } = useAdminSection();
+const { systemConfig, update } = useAdminContext();
 </script>

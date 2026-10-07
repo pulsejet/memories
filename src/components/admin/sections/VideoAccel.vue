@@ -178,14 +178,14 @@ import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwit
 
 import { t } from '@services/l10n';
 
-import { useAdminSection } from '../useAdminSection';
+import { useAdminContext } from '../admin-context';
 
 defineOptions({
   name: 'VideoAccel',
   title: t('memories', 'HW Acceleration'),
 });
 
-const { status, systemConfig, update, enableTranscoding } = useAdminSection();
+const { status, systemConfig, update, enableTranscoding } = useAdminContext();
 
 const vaapiStatusText = computed((): string => {
   if (!status.value) return '';

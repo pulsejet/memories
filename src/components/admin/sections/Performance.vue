@@ -65,14 +65,14 @@ import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
 
 import { t } from '@services/l10n';
 
-import { useAdminSection } from '../useAdminSection';
+import { useAdminContext } from '../admin-context';
 
 defineOptions({
   name: 'Performance',
   title: t('memories', 'Performance'),
 });
 
-const { status, systemConfig } = useAdminSection();
+const { status, systemConfig } = useAdminContext();
 
 const isHttps = computed((): boolean => {
   return window.location.protocol === 'https:';

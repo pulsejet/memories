@@ -76,7 +76,7 @@ import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwit
 
 import { t } from '@services/l10n';
 
-import { useAdminSection } from '../useAdminSection';
+import { useAdminContext } from '../admin-context';
 import { binaryStatus, binaryStatusType } from '../admin-utils';
 
 defineOptions({
@@ -84,5 +84,5 @@ defineOptions({
   title: t('memories', 'Video Streaming'),
 });
 
-const { status, systemConfig, update, enableTranscoding } = useAdminSection();
+const { status, systemConfig, update, enableTranscoding } = useAdminContext();
 </script>

@@ -21,7 +21,7 @@ import { API } from '@services/API';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { waitForConfig } from '@services/user-config';
 import { t } from '@services/l10n';
-import { provideAdminContext } from './useAdminSection';
+import { provideAdminContext } from './admin-context';
 
 import Help from './sections/Help.vue';
 import Exif from './sections/Exif.vue';

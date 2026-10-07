@@ -82,14 +82,14 @@ import { API } from '@services/API';
 import { t } from '@services/l10n';
 import * as utils from '@services/utils/common';
 
-import { useAdminSection } from '../useAdminSection';
+import { useAdminContext } from '../admin-context';
 
 defineOptions({
   name: 'Places',
   title: t('memories', 'Reverse Geocoding'),
 });
 
-const { status, systemConfig, update } = useAdminSection();
+const { status, systemConfig, update } = useAdminContext();
 
 const requestToken = computed(() => (<any>axios.defaults.headers).requesttoken);
 const actionToken = computed(() => status.value?.action_token || '');

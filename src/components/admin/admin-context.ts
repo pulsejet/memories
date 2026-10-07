@@ -21,10 +21,10 @@ export function provideAdminContext(context: AdminContext) {
 }
 
 /** Shared logic for admin sections. */
-export function useAdminSection() {
+export function useAdminContext() {
   const ctx = inject(adminContextKey);
   if (!ctx) {
-    throw new Error('useAdminSection() must be used within AdminMain');
+    throw new Error('useAdminContext() must be used within AdminMain');
   }
 
   return {

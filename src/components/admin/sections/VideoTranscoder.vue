@@ -84,7 +84,7 @@ import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwit
 
 import { t } from '@services/l10n';
 
-import { useAdminSection } from '../useAdminSection';
+import { useAdminContext } from '../admin-context';
 import { binaryStatus, binaryStatusType, serviceStatus, serviceStatusType } from '../admin-utils';
 
 defineOptions({
@@ -92,7 +92,7 @@ defineOptions({
   title: t('memories', 'Transcoder'),
 });
 
-const { status, systemConfig, update, enableTranscoding } = useAdminSection();
+const { status, systemConfig, update, enableTranscoding } = useAdminContext();
 
 function updateConnect(value: string) {
   const array = value.split(',').map((s) => s.trim());

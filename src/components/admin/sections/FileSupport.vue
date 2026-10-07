@@ -101,7 +101,7 @@ import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwit
 
 import { t } from '@services/l10n';
 
-import { useAdminSection } from '../useAdminSection';
+import { useAdminContext } from '../admin-context';
 import { binaryStatus, binaryStatusOk, binaryStatusType } from '../admin-utils';
 
 defineOptions({
@@ -109,7 +109,7 @@ defineOptions({
   title: t('memories', 'File Support'),
 });
 
-const { status, systemConfig, update } = useAdminSection();
+const { status, systemConfig, update } = useAdminContext();
 
 const knownPreviewProviders = {
   'OC\\Preview\\Image': {

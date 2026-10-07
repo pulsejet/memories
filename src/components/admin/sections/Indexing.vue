@@ -147,14 +147,14 @@ import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwit
 import { t } from '@services/l10n';
 import { API } from '@services/API';
 
-import { useAdminSection } from '../useAdminSection';
+import { useAdminContext } from '../admin-context';
 
 defineOptions({
   name: 'Indexing',
   title: t('memories', 'Media Indexing'),
 });
 
-const { status, systemConfig, update } = useAdminSection();
+const { status, systemConfig, update } = useAdminContext();
 
 const blocklistText = computed({
   get(): string {
