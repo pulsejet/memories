@@ -130,7 +130,7 @@ import { API } from '@services/API';
 import { t } from '@services/l10n';
 import { constants } from '@services/constants';
 import initstate from '@services/init-state';
-import { makeTapPatch } from '@services/patches/mobile-click';
+import { makeTapPatch } from '@services/compat/mobile-click';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 import { cacheData, getCachedData } from '@services/cache';

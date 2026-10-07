@@ -1,8 +1,6 @@
 import { getDialogBuilder, getFilePickerBuilder, showError } from '@nextcloud/dialogs';
 import { spawnDialog } from '@nextcloud/vue/functions/dialog';
 
-import PromptDialog from '@components/modal/PromptDialog.vue';
-
 import { translatePlural as n, translate as t } from '@services/l10n';
 import { bus } from './event-bus';
 import { fragment } from './fragment';
@@ -87,7 +85,9 @@ type PromptOptions = {
   password?: boolean;
 };
 
-export function prompt(opts: PromptOptions): Promise<string | null> {
+export async function prompt(opts: PromptOptions): Promise<string | null> {
+  // Lazy-load on first use so the modal is not part of the initial bundle
+  const { default: PromptDialog } = await import('@components/modal/PromptDialog.vue');
   return fragment.wrap(
     spawnDialog(PromptDialog, {
       title: opts.title ?? '',
