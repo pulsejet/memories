@@ -9,18 +9,32 @@
 
       <ClusterHList
         v-if="recognize.length"
+        state-key="recognize"
         :title="t('memories', 'Recognize')"
         link="/recognize"
         :clusters="recognize"
       />
       <ClusterHList
         v-if="facerecognition.length"
+        state-key="facerecognition"
         :title="t('memories', 'Face Recognition')"
         link="/facerecognition"
         :clusters="facerecognition"
       />
-      <ClusterHList v-if="places.length" :title="t('memories', 'Places')" link="/places" :clusters="places" />
-      <ClusterHList v-if="tags.length" :title="t('memories', 'Tags')" link="/tags" :clusters="tags" />
+      <ClusterHList
+        v-if="places.length"
+        state-key="places"
+        :title="t('memories', 'Places')"
+        link="/places"
+        :clusters="places"
+      />
+      <ClusterHList
+        v-if="tags.length"
+        state-key="systemtags"
+        :title="t('memories', 'Tags')"
+        link="/tags"
+        :clusters="tags"
+      />
 
       <div class="link-list">
         <NcButton

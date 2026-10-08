@@ -1,18 +1,18 @@
 <template>
   <div class="cluster-hlist">
     <div class="title" v-if="title">
-      <div class="name">{{ title }}</div>
+      <div class="name">{{ props.title }}</div>
       <div class="action">
-        <router-link v-if="link" :to="link">{{ t('memories', 'View all') }}</router-link>
+        <router-link v-if="props.link" :to="props.link">{{ t('memories', 'View all') }}</router-link>
       </div>
     </div>
 
-    <div class="hlist hide-scrollbar">
+    <div ref="hlist" class="hlist hide-scrollbar">
       <div
         class="item cluster--rounded"
         :class="{ 'cluster--circle': circle(item) }"
         :key="item.cluster_id"
-        v-for="item of clusters"
+        v-for="item of props.clusters"
       >
         <Cluster :data="item" :link="true" :counters="!routeIs.Explore" />
       </div>
@@ -21,18 +21,30 @@
 </template>
 
 <script setup lang="ts">
+import { useTemplateRef } from 'vue';
+
 import { t } from '@services/l10n';
 import { routeIs } from '@services/router';
+import { useRouteState } from '@services/route-state';
 
 import Cluster from '@components/frame/Cluster.vue';
 
 import type { ICluster } from '@typings';
 
-defineProps<{
+const props = defineProps<{
+  stateKey: string;
   clusters: ICluster[];
   title?: string;
   link?: string;
 }>();
+
+const hlistRef = useTemplateRef<HTMLDivElement>('hlist');
+
+useRouteState({
+  instance: props.stateKey,
+  scroll: { hlistRef },
+});
+
 function circle(cluster: ICluster): boolean {
   switch (cluster.cluster_type) {
     case 'recognize':
