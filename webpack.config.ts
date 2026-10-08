@@ -85,13 +85,14 @@ export default {
     splitChunks: {
       automaticNameDelimiter: '-',
       cacheGroups: {
+        // Disabled: it carves third-party code out of async chunks even
+        // when used by only one chunk (unnecessary).
+        defaultVendors: false,
         // Single chunk to avoid creating a lot of small locale chunks.
         // This is only a non-critical transitive dep anyway.
         'date-fns': {
           test: /[\\/]node_modules[\\/]date-fns[\\/]/,
           name: 'date-fns',
-          chunks: 'async',
-          enforce: true,
         },
       },
     },
