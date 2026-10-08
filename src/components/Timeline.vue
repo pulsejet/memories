@@ -180,6 +180,8 @@ let containerSize: [number, number] = [0, 0];
 let rowHeight = 100;
 /** Computed row width */
 let rowWidth = 100;
+/** Height of the recycler before slot */
+let beforeHeight = 0;
 
 /** Current start index */
 const currentStart = ref(0);
@@ -187,7 +189,7 @@ const currentStart = ref(0);
 const currentEnd = ref(0);
 /** Current physical scroll position */
 const currentScroll = ref(0);
-/** Resize observer on the outer container */
+/** Resize observer on the outer container and before slot */
 let resizeObserver: ResizeObserver | null = null;
 /** Height of the scroller */
 const scrollerHeight = ref(100);
@@ -209,7 +211,7 @@ const scrollChangeTimer = new RenewingTimeout();
 const softRefreshTimer = new RenewingTimeout();
 
 /** State for request cancellations */
-const state = ref(Math.random());
+const state = ref(1);
 
 watch(router.currentRoute, async (to, from) => {
   await routeChange(to, from);
@@ -219,10 +221,20 @@ onMounted(() => {
   // Trigger initial state load
   void routeChange(route);
 
-  // Start resize observer on container
+  // Observe container and before slot sizes
   if (container.value?.$el) {
-    resizeObserver = new ResizeObserver(() => handleResizeWithDelay());
+    resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.target === recyclerBefore.value) {
+          beforeHeight = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+          scrollerManager.value?.adjust();
+        } else {
+          handleResizeWithDelay();
+        }
+      }
+    });
     resizeObserver.observe(container.value.$el);
+    resizeObserver.observe(recyclerBefore.value!, { box: 'border-box' });
   }
 });
 
@@ -244,7 +256,6 @@ onBeforeUnmount(() => {
   utils.bus.off('memories:timeline:soft-refresh', softRefresh);
   utils.bus.off('memories:timeline:hard-refresh', refresh);
   resetState();
-  state.value = 0;
 });
 
 const routeHasNative = computed((): boolean => {
@@ -288,7 +299,11 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
 
   // Do a soft refresh if the query changes
   else if (JSON.stringify(from.query) !== JSON.stringify(to.query)) {
+    state.value++;
+    const startState = state.value;
+    loading.value = 0;
     await softRefreshSync();
+    if (state.value !== startState) return;
   }
 
   // Check if viewer is supposed to be open
@@ -353,11 +368,14 @@ function allowBreakout() {
 
 /** Create new state */
 async function createState() {
+  const startState = state.value;
   // Wait for one tick before doing anything
   await nextTick();
+  if (state.value !== startState) return;
 
   // Fit to window
   recomputeSizes();
+  beforeHeight = recyclerBefore.value!.getBoundingClientRect().height;
 
   // Timeline recycler init
   recycler.value?.$el.addEventListener('scroll', scrollPositionChange, { passive: true });
@@ -367,7 +385,7 @@ async function createState() {
 }
 
 /** Reset all state */
-async function resetState() {
+function resetState() {
   selectionManager.value?.clear();
   scrollerManager.value?.reset();
   loading.value = 0;
@@ -375,17 +393,25 @@ async function resetState() {
   heads.value = new Map();
   currentStart.value = 0;
   currentEnd.value = 0;
-  state.value = Math.random();
+  currentScroll.value = 0;
+  daysIsCache = false;
+  state.value++;
   loadedDays.clear();
   sizedDays.clear();
   fetchDayQueue = [];
   window.clearTimeout(fetchDayTimer ?? 0);
+  fetchDayTimer = null;
   resizeTimer.clear();
+  scrollChangeTimer.clear();
+  softRefreshTimer.clear();
 }
 
 /** Recreate everything */
 async function refresh() {
-  await resetState();
+  resetState();
+  const startState = state.value;
+  await nextTick();
+  if (state.value !== startState) return;
   await createState();
 }
 
@@ -700,14 +726,16 @@ function getQuery() {
 
 /** Fetch timeline main call */
 async function fetchDays(noCache = false) {
+  const startState = state.value;
   // Wait for DTM to be ready, it must render first to prevent layout shift.
   try {
     updateLoading(1);
-    const stateVal = state.value;
     await until(() => dtm.value?.isReady).toBeTruthy({ timeout: 2000 });
-    if (state.value !== stateVal) return;
+    if (state.value !== startState) return;
   } finally {
-    updateLoading(-1);
+    if (state.value === startState) {
+      updateLoading(-1);
+    }
   }
 
   // Lens search mode serves a fake day, not the days API
@@ -732,27 +760,32 @@ async function fetchDays(noCache = false) {
 
   try {
     updateLoading(1);
-    const startState = state.value;
-
     let data: IDay[] = [];
     if (routeIs.ThisDay) {
       data = await dav.getOnThisDayData();
     } else if (dav.isSingleItem()) {
       data = await dav.getSingleItemData();
-      setTimeout(() => _m.viewer.open(data[0]!.detail![0]), 0);
+      if (state.value !== startState) return;
+      setTimeout(() => {
+        if (state.value !== startState) return;
+        _m.viewer.open(data[0]!.detail![0]);
+      }, 0);
     } else {
       // Try the cache
       if (!noCache || routeHasNative.value) {
         try {
           cache = await getCachedData(cacheUrl);
+          if (state.value !== startState) return;
 
           // On native, treat a missing remote cache as empty.
           if (routeHasNative.value) {
             cache = nativex.mergeDays(cache ?? [], await nativex.getLocalDays());
           }
+          if (state.value !== startState) return;
 
           if (cache) {
             await processDays(cache, true);
+            if (state.value !== startState) return;
             updateLoading(-1);
           }
         } catch {
@@ -760,6 +793,7 @@ async function fetchDays(noCache = false) {
           cache = null;
         }
       }
+      if (state.value !== startState) return;
 
       // Get from network
       const res = await axios.get<IDay[]>(url);
@@ -779,13 +813,15 @@ async function fetchDays(noCache = false) {
     if (state.value !== startState) return;
     await processDays(data, false);
   } catch (e: any) {
-    if (!utils.isNetworkError(e)) {
+    if (state.value === startState && !utils.isNetworkError(e)) {
       showError(e?.response?.data?.message ?? e.message);
       console.error(e);
     }
   } finally {
     // If cache is set here, loading was already decremented
-    if (!cache) updateLoading(-1);
+    if (state.value === startState && !cache) {
+      updateLoading(-1);
+    }
   }
 }
 
@@ -796,6 +832,7 @@ async function fetchDays(noCache = false) {
  */
 async function processDays(data: IDay[], cache: boolean) {
   if (!data || !state.value) return;
+  const startState = state.value;
 
   const newList: IRow[] = [];
   const newHeads: Map<number, IHeadRow> = new Map();
@@ -898,6 +935,7 @@ async function processDays(data: IDay[], cache: boolean) {
 
   // Fix view height variable
   await scrollerManager.value?.reflow();
+  if (state.value !== startState) return;
   scrollPositionChange();
 
   // Trigger a view refresh. This will load any new placeholders too.
@@ -926,6 +964,7 @@ async function fetchDay(dayId: number, now = false) {
   // Get head to ensure the day exists / is valid
   const head = heads.value.get(dayId);
   if (!head) return;
+  const startState = state.value;
 
   // Do this in advance to prevent duplicate requests
   loadedDays.add(dayId);
@@ -935,12 +974,14 @@ async function fetchDay(dayId: number, now = false) {
   const cacheUrl = getDayUrl([dayId]);
   try {
     let cache = await getCachedData<IPhoto[]>(cacheUrl);
+    if (state.value !== startState) return;
     utils.applyAuids(cache);
 
     // On native, treat a missing remote cache as empty.
     if (routeHasNative.value && head.day?.haslocal) {
       nativex.mergeDay((cache ??= []), await nativex.getLocalDay(dayId));
     }
+    if (state.value !== startState) return;
 
     // Process the cache
     if (cache) {
@@ -960,6 +1001,7 @@ async function fetchDay(dayId: number, now = false) {
   } catch (e) {
     console.warn(`Failed or skipped processing day cache: ${cacheUrl}`, e);
   }
+  if (state.value !== startState) return;
 
   // Aggregate fetch requests
   fetchDayQueue.push(dayId);
@@ -981,6 +1023,7 @@ async function fetchDay(dayId: number, now = false) {
 
 async function fetchDayExpire() {
   if (fetchDayQueue.length === 0) return;
+  const startState = state.value;
 
   // Map of dayId to photos
   const dayIds = fetchDayQueue;
@@ -992,7 +1035,6 @@ async function fetchDayExpire() {
   fetchDayQueue = [];
 
   try {
-    const startState = state.value;
     const [data, isCached] = await (async () => {
       try {
         const res = await axios.get<IPhoto[]>(url);
@@ -1059,6 +1101,7 @@ async function fetchDayExpire() {
         });
       if (promises.length) await Promise.all(promises);
     }
+    if (state.value !== startState) return;
 
     // Process each day as needed
     for (let [dayId, photos] of dayMap) {
@@ -1102,7 +1145,7 @@ async function fetchDayExpire() {
       processDay(dayId, photos);
     }
   } catch (e) {
-    if (!utils.isNetworkError(e)) {
+    if (state.value === startState && !utils.isNetworkError(e)) {
       showError(t('memories', 'Failed to load some photos'));
       console.error(e);
     }
@@ -1265,7 +1308,7 @@ function processDay(dayId: number, data: IPhoto[]) {
 
   // Get index and Y position of header in O(n)
   let headIdx = 0;
-  let headY = 0;
+  let headY = beforeHeight;
   for (const row of list.value) {
     if (row === head) break;
     headIdx++;
@@ -1468,6 +1511,7 @@ function addRow(day: IDay): IPhotoRow {
  * @param delPhotos photos to delete
  */
 async function deleteFromViewWithAnimation(delPhotos: IPhoto[]) {
+  const startState = state.value;
   // Only keep photos with day
   delPhotos = delPhotos.filter((p) => p?.d);
   if (delPhotos.length === 0) return;
@@ -1483,6 +1527,7 @@ async function deleteFromViewWithAnimation(delPhotos: IPhoto[]) {
 
   // wait for 200ms
   await new Promise((resolve) => setTimeout(resolve, 200));
+  if (state.value !== startState) return;
 
   // clear selection at this point
   selectionManager.value?.deselect(delPhotos);
@@ -1497,25 +1542,28 @@ async function deleteFromViewWithAnimation(delPhotos: IPhoto[]) {
 /** Fetch lens search results into top + month days */
 async function fetchLensSearch() {
   const query = lens.routeQueryText(route.query.q).trim();
+  const startState = state.value;
 
   try {
     updateLoading(1);
-    const stateVal = state.value;
     const days = await lens.getLensSearchDays(query);
-    if (state.value !== stateVal) return;
+    if (state.value !== startState) return;
     await processDays(days, false);
+    if (state.value !== startState) return;
 
     // Title the top day; month days get month titles via head.ismonth
     for (const day of days) {
       lens.markSearchHead(day, heads.value.get(day.dayid));
     }
   } catch (e: any) {
-    if (!utils.isNetworkError(e)) {
+    if (state.value === startState && !utils.isNetworkError(e)) {
       showError(e?.response?.data?.message ?? e.message);
       console.error(e);
     }
   } finally {
-    updateLoading(-1);
+    if (state.value === startState) {
+      updateLoading(-1);
+    }
   }
 }
 </script>
