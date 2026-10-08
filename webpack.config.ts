@@ -84,6 +84,16 @@ export default {
     realContentHash: true,
     splitChunks: {
       automaticNameDelimiter: '-',
+      cacheGroups: {
+        // Single chunk to avoid creating a lot of small locale chunks.
+        // This is only a non-critical transitive dep anyway.
+        'date-fns': {
+          test: /[\\/]node_modules[\\/]date-fns[\\/]/,
+          name: 'date-fns',
+          chunks: 'async',
+          enforce: true,
+        },
+      },
     },
     minimize: !isDev,
     minimizer: [
