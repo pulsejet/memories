@@ -16,15 +16,15 @@ type RouteState<T extends InnerState> = {
   /** Stable namespace; defaults to the component's explicit or inferred SFC name. */
   instance?: string;
   /** Named refs whose raw values are cloned and saved on navigation. */
-  state: T;
+  state?: T;
   /** Named shallow template refs whose scroll offsets are saved and restored after the state. */
   scroll?: Record<string, ShallowRef<ScrollTarget>>;
 };
 
 /** The shared cache holds snapshots from composable instances with different T types. */
 type Snapshot = {
-  state: Record<string, unknown>;
-  scroll: Record<string, Pick<HTMLElement, 'scrollTop' | 'scrollLeft'>>;
+  state?: Record<string, unknown>;
+  scroll?: Record<string, Pick<HTMLElement, 'scrollTop' | 'scrollLeft'>>;
 };
 
 // Keep snapshots across component remounts, evicting the least recently used entries.
@@ -38,7 +38,8 @@ function getElement(target: ScrollTarget): HTMLElement | null {
 }
 
 /** Deep-clone the state inside the route state object */
-function cloneState<T extends InnerState>(state: T) {
+function cloneState<T extends InnerState>(state: T | undefined) {
+  if (state === undefined) return undefined;
   return Object.fromEntries(
     Object.entries(state).map(([name, ref]) => {
       return [name, structuredClone(toRaw(toValue(ref)))];
@@ -104,26 +105,33 @@ export function useRouteState<T extends InnerState>(options: RouteState<T>): voi
       let active = true;
       onCleanup(() => (active = false));
 
-      // Restore the saved state values, or defaults.
+      // Get the saved state for this route and instance.
       const saved = states.get(routeKey);
-      for (const [name, ref] of Object.entries(options.state)) {
-        if (saved && Object.hasOwn(saved.state ?? {}, name)) {
-          ref.value = structuredClone(saved.state[name]);
-        } else {
-          ref.value = structuredClone(defaults[name]);
+
+      // Restore the saved state values, or defaults.
+      if (options.state) {
+        for (const [name, ref] of Object.entries(options.state)) {
+          if (saved && Object.hasOwn(saved.state ?? {}, name)) {
+            ref.value = structuredClone(saved.state![name]);
+          } else if (defaults) {
+            ref.value = structuredClone(defaults[name]);
+          }
         }
       }
 
-      // Wait for the components to render.
-      await nextTick();
-      if (!active || routeKey !== key(route)) return;
+      // Restore the saved scroll offsets.
+      if (options.scroll) {
+        // Wait for the components to render.
+        await nextTick();
+        if (!active || routeKey !== key(route)) return;
 
-      // Restore scroll positions of mounted elements.
-      for (const [name, ref] of Object.entries(options.scroll ?? {})) {
-        const element = getElement(ref.value);
-        if (element) {
-          element.scrollTop = saved?.scroll[name]?.scrollTop ?? 0;
-          element.scrollLeft = saved?.scroll[name]?.scrollLeft ?? 0;
+        // Restore scroll positions of mounted elements.
+        for (const [name, ref] of Object.entries(options.scroll)) {
+          const element = getElement(ref.value);
+          if (element) {
+            element.scrollTop = saved?.scroll?.[name]?.scrollTop ?? 0;
+            element.scrollLeft = saved?.scroll?.[name]?.scrollLeft ?? 0;
+          }
         }
       }
     },
