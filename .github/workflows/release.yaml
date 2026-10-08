@@ -40,6 +40,7 @@ jobs:
           make patch-external
           make js-lint
           make build-js-production
+          ./scripts/verify-js-manifest.ts --prod
         env:
           MANIFEST_SIGNING_KEY: ${{ secrets.MANIFEST_SIGNING_KEY }}
 
