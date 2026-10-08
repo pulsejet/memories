@@ -169,10 +169,9 @@ final class OtherController extends ApiController
 
             // Static file manifests
             if ('1' === $this->request->getParam('manifest')) {
-                $manifest = @file_get_contents(__DIR__.'/../../js/memories-manifest.json');
-                $info['jsManifest'] = false !== $manifest ? base64_encode($manifest) : null;
-                $manifestSig = @file_get_contents(__DIR__.'/../../js/memories-manifest.sig.json');
-                $info['jsManifestSig'] = false !== $manifestSig ? base64_encode($manifestSig) : null;
+                $manifest = @file_get_contents(__DIR__.'/../../js/memories-manifest.dsse.json');
+                $decoded = false !== $manifest ? json_decode($manifest, true) : null;
+                $info['jsManifest'] = \is_array($decoded) ? $decoded : null;
                 $info['cssManifest'] = $pageController->getLinkHeaders();
             }
 

@@ -82,6 +82,10 @@
   "devDependencies": {
     "@napi-rs/canvas": "^1.0.10",
     "@playwright/test": "^1.63.0",
+    "@sigstore/core": "^3.2.1",
+    "@sigstore/protobuf-specs": "^0.5.2",
+    "@tufjs/canonical-json": "^2.0.0",
+    "@tufjs/models": "^4.1.1",
     "@types/hammerjs": "^2.0.46",
     "@types/justified-layout": "^4.1.4",
     "@types/leaflet": "^1.9.22",

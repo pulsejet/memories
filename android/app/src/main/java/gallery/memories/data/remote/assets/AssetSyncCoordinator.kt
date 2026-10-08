@@ -276,14 +276,18 @@ class AssetSyncCoordinator(
 
     @Throws(Exception::class)
     private fun parseJsAssets(describe: JSONObject): List<JsAsset> {
-        val jsB64 = describe.optString("jsManifest", "").ifEmpty { null } ?: throw Exception("Server has no asset manifest")
-        val jsJson = JSONObject(String(Base64.decode(jsB64, Base64.DEFAULT)))
-        return jsJson.keys().asSequence()
+        val envelope = describe.optJSONObject("jsManifest") ?: throw Exception("Server has no asset manifest")
+        val payload = Base64.decode(envelope.getString("payload"), Base64.DEFAULT)
+        val targets = JSONObject(String(payload, Charsets.UTF_8)).getJSONObject("targets")
+        return targets.keys().asSequence()
             .filter { it.endsWith(".js") || it.endsWith(".mjs") }
             .mapNotNull {
-                val o = jsJson.getJSONObject(it)
-                val hash = o.optString("hash", "").ifEmpty { null } ?: return@mapNotNull null
-                JsAsset(it, hash, o.getString("href"))
+                val o = targets.getJSONObject(it)
+                val hash = o.optJSONObject("hashes")?.optString("sha256", "")?.ifEmpty { null }
+                    ?: return@mapNotNull null
+                val href = o.optJSONObject("custom")?.optString("href", "")?.ifEmpty { null }
+                    ?: return@mapNotNull null
+                JsAsset(it, hash, href)
             }.toList()
     }
 

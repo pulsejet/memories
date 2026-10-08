@@ -66,4 +66,6 @@ dependencies {
     implementation "io.ktor:ktor-server-core:$ktor_version"
     implementation "io.ktor:ktor-server-cio:$ktor_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.86'
 }

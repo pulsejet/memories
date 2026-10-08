@@ -26,7 +26,7 @@ const isDev = buildMode === 'development';
 console.info('Building', appName, appVersion, '\n');
 
 const manifestFileName = `${appName}-manifest.json`;
-const manifestSigFileName = `${appName}-manifest.sig.json`;
+const manifestDsseFileName = `${appName}-manifest.dsse.json`;
 
 export default {
   target: 'web',
@@ -189,12 +189,12 @@ export default {
     // Bundle all l10n/*.json into memories-l10n.js as globalThis.__packed_l10n.
     new L10nBundlePlugin(appName, path.resolve(__dirname, 'l10n')),
 
-    // Manifest of all built files (base name -> {hash, href}).
+    // Bare TUF targets of all built files (URL in each target's custom.href).
     // The standalone shell uses this to know every chunk up front.
     new ManifestPlugin(manifestFileName),
 
-    // Signature over manifest with a pinned public key.
-    new ManifestSignPlugin(manifestFileName, manifestSigFileName),
+    // Ed25519 signature over the TUF targets as a DSSE envelope.
+    new ManifestSignPlugin(manifestFileName, manifestDsseFileName),
 
     // @nextcloud/dialogs depends on path
     // This is really frustrating, but it's the only way

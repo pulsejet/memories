@@ -103,9 +103,9 @@ class AssetCache(private val ctx: Context) {
         }
     }
 
-    /** Raw JS manifest: catches upstream rebuilds that keep the version number. */
+    /** DSSE payload of the JS manifest: catches upstream rebuilds that keep the version number. */
     fun jsKey(describe: JSONObject): String =
-        describe.optString("jsManifest", "")
+        describe.optJSONObject("jsManifest")?.optString("payload", "") ?: ""
 
     /** Hrefs of the CSS manifest, order-sensitive like the shell renderer. */
     fun cssKey(describe: JSONObject): String {
