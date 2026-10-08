@@ -172,7 +172,7 @@ async function handleCreateAlbum(collaborators: any[] = []) {
       nbItems: 0,
       location: albumLocation.value,
       lastPhoto: -1,
-      date: DateTime.now().toFormat('MMMM YYYY'),
+      date: DateTime.now().toFormat('MMMM yyyy'),
       collaborators,
     };
     await dav.createAlbum(album.basename);
