@@ -63,12 +63,12 @@
     <FaceEditModal ref="editModal" />
     <FaceDeleteModal ref="deleteModal" />
     <FaceMergeModal ref="mergeModal" />
-    <FaceManualAddModal ref="manualAddModal" @added="onManualAdded" />
+    <component :is="manualAddDialog" v-if="manualAddDialog" ref="manualAddModal" @added="onManualAdded" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue';
+import { computed, nextTick, shallowRef, useTemplateRef } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
@@ -78,7 +78,7 @@ import NcActionCheckbox from '@nextcloud/vue/components/NcActionCheckbox';
 import FaceEditModal from '@components/modal/FaceEditModal.vue';
 import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';
 import FaceMergeModal from '@components/modal/FaceMergeModal.vue';
-import FaceManualAddModal from '@components/modal/FaceManualAddModal.vue';
+import type FaceManualAddModal from '@components/modal/FaceManualAddModal.vue';
 
 import { routeIs } from '@services/router';
 import { config, setConfig } from '@services/user-config';
@@ -103,6 +103,8 @@ const editModal = useTemplateRef<InstanceType<typeof FaceEditModal>>('editModal'
 const deleteModal = useTemplateRef<InstanceType<typeof FaceDeleteModal>>('deleteModal');
 const mergeModal = useTemplateRef<InstanceType<typeof FaceMergeModal>>('mergeModal');
 const manualAddModal = useTemplateRef<InstanceType<typeof FaceManualAddModal>>('manualAddModal');
+/** The marking dialog, loaded on first use */
+const manualAddDialog = shallowRef<typeof FaceManualAddModal | null>(null);
 
 const name = computed(() => {
   return route.params.name?.toString() || '';
@@ -146,7 +148,9 @@ function changeShowFaceRect() {
   utils.bus.emit('memories:timeline:hard-refresh', null);
 }
 
-function openManualAdd() {
+async function openManualAdd() {
+  manualAddDialog.value ??= (await import('@components/modal/FaceManualAddModal.vue')).default;
+  await nextTick();
   manualAddModal.value?.open();
 }
 

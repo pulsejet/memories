@@ -43,7 +43,7 @@
       </div>
     </div>
 
-    <FaceManualAddModal ref="manualAddModal" @added="refresh" />
+    <component :is="manualAddDialog" v-if="manualAddDialog" ref="manualAddModal" @added="refresh" />
 
     <div v-if="albums.length">
       <div class="section-title">{{ t('memories', 'Albums') }}</div>
@@ -99,7 +99,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent, markRaw, useTemplateRef } from 'vue';
+import {
+  ref,
+  shallowRef,
+  computed,
+  watch,
+  nextTick,
+  onMounted,
+  onBeforeUnmount,
+  defineAsyncComponent,
+  markRaw,
+  useTemplateRef,
+} from 'vue';
 import type { Component } from 'vue';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
@@ -114,7 +125,7 @@ import { config } from '@services/user-config';
 
 import Cluster from '@components/frame/Cluster.vue';
 import AlbumsList from '@components/modal/AlbumsList.vue';
-import FaceManualAddModal from '@components/modal/FaceManualAddModal.vue';
+import type FaceManualAddModal from '@components/modal/FaceManualAddModal.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 const MapStandalone = defineAsyncComponent(() => import('@components/MapStandalone.vue'));
 
@@ -158,6 +169,8 @@ const filename = ref('');
 const exif = ref({} as IExif);
 const baseInfo = ref({} as IImageInfo);
 const error = ref(false);
+/** The marking dialog, loaded on first use */
+const manualAddDialog = shallowRef<typeof FaceManualAddModal | null>(null);
 const manualAddModal = useTemplateRef<InstanceType<typeof FaceManualAddModal>>('manualAddModal');
 
 const loading = ref(0);
@@ -507,7 +520,9 @@ function editGeo() {
 }
 
 /** Open the marking dialog on this photo */
-function openManualAdd() {
+async function openManualAdd() {
+  manualAddDialog.value ??= (await import('@components/modal/FaceManualAddModal.vue')).default;
+  await nextTick();
   const modal = manualAddModal.value;
   if (!modal) return;
   if (fileid.value) {
