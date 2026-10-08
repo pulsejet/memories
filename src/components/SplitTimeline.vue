@@ -36,8 +36,6 @@ import { t } from '@services/l10n';
 import Timeline from '@components/Timeline.vue';
 const MapSplitMatter = defineAsyncComponent(() => import('@components/top-matter/MapSplitMatter.vue'));
 
-import Hammer from 'hammerjs';
-
 const route = useRoute();
 
 const containerRef = useTemplateRef<HTMLDivElement>('container');
@@ -72,20 +70,26 @@ const headerClass = computed(() => {
 });
 
 onMounted(() => {
-  // Set up hammerjs hooks
-  hammer = markRaw(new Hammer(timelineHeaderRef.value!));
-  hammer.get('swipe').set({
-    direction: Hammer.DIRECTION_VERTICAL,
-    threshold: 3,
-  });
-  hammer.on('swipeup', mobileSwipeUp);
-  hammer.on('swipedown', mobileSwipeDown);
+  void setupGestures();
 });
 
 onBeforeUnmount(() => {
   pointerUp();
   hammer?.destroy();
 });
+
+async function setupGestures() {
+  const { default: Hammer } = await import('hammerjs');
+  if (!timelineHeaderRef.value) return;
+
+  hammer = new Hammer(timelineHeaderRef.value);
+  hammer.get('swipe').set({
+    direction: Hammer.DIRECTION_VERTICAL,
+    threshold: 3,
+  });
+  hammer.on('swipeup', mobileSwipeUp);
+  hammer.on('swipedown', mobileSwipeDown);
+}
 
 function isVertical() {
   return false; // for future
