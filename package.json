@@ -105,7 +105,6 @@
     "vue-tsc": "^3.3.11",
     "webpack": "^5.111.1",
     "webpack-cli": "^7.2.3",
-    "webpack-manifest-plugin": "^6.0.1",
     "workbox-webpack-plugin": "^7.4.1"
   }
 }

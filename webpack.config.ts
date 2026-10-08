@@ -5,14 +5,13 @@ import webpack from 'webpack';
 import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import { VueLoaderPlugin } from 'vue-loader';
-import { WebpackManifestPlugin } from 'webpack-manifest-plugin';
 import WorkboxPlugin from 'workbox-webpack-plugin';
 
 // Explicit `.ts` extensions are required by Node's ESM loader.
 // @ts-expect-error TS5097: extension is intentional, do not drop it
 import { L10nBundlePlugin } from './webpack.l10n-bundle-plugin.ts';
 // @ts-expect-error TS5097: extension is intentional, do not drop it
-import { ManifestSignPlugin } from './webpack.manifest-sign-plugin.ts';
+import { ManifestPlugin, ManifestSignPlugin } from './webpack.manifest-sign-plugin.ts';
 
 // npm i --no-save webpack-bundle-analyzer to enable
 // import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
@@ -192,17 +191,7 @@ export default {
 
     // Manifest of all built files (base name -> {hash, href}).
     // The standalone shell uses this to know every chunk up front.
-    new WebpackManifestPlugin({
-      fileName: manifestFileName,
-      generate: (seed: any, files: any[]) =>
-        Object.fromEntries(
-          files.map((file) => {
-            const name = file.path.split('/').pop() ?? '';
-            const [basename, hash] = name.split('?v=');
-            return [basename, { hash: hash ?? '', href: file.path }];
-          }),
-        ),
-    }),
+    new ManifestPlugin(manifestFileName),
 
     // Signature over manifest with a pinned public key.
     new ManifestSignPlugin(manifestFileName, manifestSigFileName),
