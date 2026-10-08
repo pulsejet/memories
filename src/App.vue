@@ -31,7 +31,7 @@
             :key="item.name"
             :to="{ name: item.name }"
             :name="item.title"
-            :active="$route.name === item.name"
+            :active="isNavActive(item.name)"
             @click="linkClick"
             exact
           >
@@ -281,6 +281,23 @@ onBeforeMount(async () => {
   }
 });
 
+function isNavActive(name: string): boolean {
+  switch (name) {
+    case 'albums-list':
+      return routeIs.Albums;
+    case 'recognize-list':
+      return routeIs.Recognize;
+    case 'facerecognition-list':
+      return routeIs.FaceRecognition;
+    case 'places-list':
+      return routeIs.Places;
+    case 'tags-list':
+      return routeIs.Tags;
+    default:
+      return route.name === name;
+  }
+}
+
 function refreshNav() {
   const items = [
     {
@@ -304,19 +321,19 @@ function refreshNav() {
       title: t('memories', 'Favorites'),
     },
     {
-      name: 'albums',
+      name: 'albums-list',
       icon: markRaw(AlbumIcon),
       title: t('memories', 'Albums'),
       if: showAlbums.value,
     },
     {
-      name: 'recognize',
+      name: 'recognize-list',
       icon: markRaw(PeopleIcon),
       title: recognize.value || '',
       if: recognize.value,
     },
     {
-      name: 'facerecognition',
+      name: 'facerecognition-list',
       icon: markRaw(PeopleIcon),
       title: facerecognition.value || '',
       if: facerecognition.value,
@@ -332,7 +349,7 @@ function refreshNav() {
       title: t('memories', 'On this day'),
     },
     {
-      name: 'places',
+      name: 'places-list',
       icon: markRaw(MarkerIcon),
       title: t('memories', 'Places'),
       if: config.places_gis > 0,
@@ -343,7 +360,7 @@ function refreshNav() {
       title: t('memories', 'Map'),
     },
     {
-      name: 'tags',
+      name: 'tags-list',
       icon: markRaw(TagsIcon),
       title: t('memories', 'Tags'),
       if: config.systemtags_enabled,

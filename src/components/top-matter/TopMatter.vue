@@ -45,13 +45,18 @@ const currentmatter = computed(() => {
       return markRaw(FolderTopMatter);
     case _m.routes.FolderShare.name:
       return initstate.shareType === 'folder' ? markRaw(FolderTopMatter) : null;
+    case _m.routes.AlbumsList.name:
     case _m.routes.Albums.name:
       return markRaw(AlbumTopMatter);
+    case _m.routes.PlacesList.name:
     case _m.routes.Places.name:
       return markRaw(PlacesTopMatter);
+    case _m.routes.TagsList.name:
     case _m.routes.Tags.name:
       return markRaw(ClusterTopMatter);
+    case _m.routes.RecognizeList.name:
     case _m.routes.Recognize.name:
+    case _m.routes.FaceRecognitionList.name:
     case _m.routes.FaceRecognition.name:
       return markRaw(FaceTopMatter);
     default:

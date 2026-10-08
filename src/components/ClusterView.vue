@@ -1,5 +1,5 @@
 <template>
-  <div v-if="noParams" class="container no-user-select cluster-view">
+  <div class="container no-user-select cluster-view">
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
 
     <TopMatter />
@@ -12,8 +12,6 @@
       </template>
     </ClusterGrid>
   </div>
-
-  <Timeline v-else />
 </template>
 
 <script setup lang="ts">
@@ -25,7 +23,6 @@ import { routeIs } from '@services/router';
 import { useRouteState } from '@services/route-state';
 import TopMatter from '@components/top-matter/TopMatter.vue';
 import ClusterGrid from '@components/ClusterGrid.vue';
-import Timeline from '@components/Timeline.vue';
 import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
@@ -47,7 +44,6 @@ useRouteState({
   scroll: { gridRef },
 });
 
-const noParams = computed(() => !route.params.name?.toString() && !route.params.user?.toString());
 const minCols = computed(() => (routeIs.Albums ? 2 : 3));
 const maxSize = computed(() => (routeIs.Albums ? 250 : 180));
 
@@ -69,7 +65,6 @@ async function fetchClusters(): Promise<ICluster[]> {
 
 async function refresh() {
   const requestIdVal = ++requestId;
-  if (!noParams.value) return;
 
   try {
     loading.value++;

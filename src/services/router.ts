@@ -19,12 +19,17 @@ export type RouteId =
   | 'Favorites'
   | 'Videos'
   | 'Panoramas'
+  | 'AlbumsList'
   | 'Albums'
   | 'Archive'
   | 'ThisDay'
+  | 'RecognizeList'
   | 'Recognize'
+  | 'FaceRecognitionList'
   | 'FaceRecognition'
+  | 'PlacesList'
   | 'Places'
+  | 'TagsList'
   | 'Tags'
   | 'FolderShare'
   | 'AlbumShare'
@@ -69,9 +74,16 @@ export const routes = {
     props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Panoramas') }),
   },
 
-  Albums: {
-    path: '/albums/:user?/:name?',
+  AlbumsList: {
+    path: '/albums',
     component: ClusterView,
+    name: 'albums-list',
+    props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Albums') }),
+  },
+
+  Albums: {
+    path: '/albums/:user/:name',
+    component: Timeline,
     name: 'albums',
     props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Albums') }),
   },
@@ -90,30 +102,58 @@ export const routes = {
     props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'On this day') }),
   },
 
-  Recognize: {
-    path: '/recognize/:user?/:name?',
+  RecognizeList: {
+    path: '/recognize',
     component: ClusterView,
+    name: 'recognize-list',
+    props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'People') }),
+  },
+
+  Recognize: {
+    path: '/recognize/:user/:name',
+    component: Timeline,
     name: 'recognize',
     props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'People') }),
   },
 
-  FaceRecognition: {
-    path: '/facerecognition/:user?/:name?',
+  FaceRecognitionList: {
+    path: '/facerecognition',
     component: ClusterView,
+    name: 'facerecognition-list',
+    props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'People') }),
+  },
+
+  FaceRecognition: {
+    path: '/facerecognition/:user/:name',
+    component: Timeline,
     name: 'facerecognition',
     props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'People') }),
   },
 
-  Places: {
-    path: '/places/:name(.*)*',
+  PlacesList: {
+    path: '/places',
     component: ClusterView,
+    name: 'places-list',
+    props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Places') }),
+  },
+
+  Places: {
+    path: '/places/:name(.+)',
+    component: Timeline,
     name: 'places',
     props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Places') }),
   },
 
-  Tags: {
-    path: '/tags/:name(.*)*',
+  TagsList: {
+    path: '/tags',
     component: ClusterView,
+    name: 'tags-list',
+    props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Tags') }),
+  },
+
+  Tags: {
+    path: '/tags/:name(.+)',
+    component: Timeline,
     name: 'tags',
     props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Tags') }),
   },
@@ -203,7 +243,7 @@ export const routeIs = reactive({
     return isName(routes.Panoramas.name);
   },
   get Albums(): boolean {
-    return isName(routes.Albums.name);
+    return isName(routes.AlbumsList.name, routes.Albums.name);
   },
   get Archive(): boolean {
     return isName(routes.Archive.name);
@@ -212,16 +252,16 @@ export const routeIs = reactive({
     return isName(routes.ThisDay.name);
   },
   get Recognize(): boolean {
-    return isName(routes.Recognize.name);
+    return isName(routes.RecognizeList.name, routes.Recognize.name);
   },
   get FaceRecognition(): boolean {
-    return isName(routes.FaceRecognition.name);
+    return isName(routes.FaceRecognitionList.name, routes.FaceRecognition.name);
   },
   get Places(): boolean {
-    return isName(routes.Places.name);
+    return isName(routes.PlacesList.name, routes.Places.name);
   },
   get Tags(): boolean {
-    return isName(routes.Tags.name);
+    return isName(routes.TagsList.name, routes.Tags.name);
   },
   get FolderShare(): boolean {
     return isName(routes.FolderShare.name);
@@ -245,14 +285,24 @@ export const routeIs = reactive({
     return isName(routes.AlbumShare.name, routes.FolderShare.name);
   },
   get People(): boolean {
-    return isName(routes.Recognize.name, routes.FaceRecognition.name);
+    return isName(
+      routes.RecognizeList.name,
+      routes.Recognize.name,
+      routes.FaceRecognitionList.name,
+      routes.FaceRecognition.name,
+    );
   },
   get Cluster(): boolean {
     return isName(
+      routes.AlbumsList.name,
       routes.Albums.name,
+      routes.RecognizeList.name,
       routes.Recognize.name,
+      routes.FaceRecognitionList.name,
       routes.FaceRecognition.name,
+      routes.PlacesList.name,
       routes.Places.name,
+      routes.TagsList.name,
       routes.Tags.name,
     );
   },

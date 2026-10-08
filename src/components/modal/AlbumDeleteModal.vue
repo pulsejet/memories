@@ -60,7 +60,7 @@ async function save() {
   try {
     await client.deleteFile(dav.getAlbumPath(user.value, name.value));
     await close();
-    await router.push({ name: 'albums' });
+    await router.push({ name: 'albums-list' });
   } catch (error) {
     console.error(error);
     showError(t('memories', 'Failed to delete {name}.', { name: name.value }));

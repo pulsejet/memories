@@ -50,7 +50,7 @@ export function getClusterPreview(cluster: ICluster, size = 512) {
 /**
  * Get the target route name and params for the cluster
  * @param cluster Cluster object
- * @returns {string} The target route name and params for the cluster
+ * @returns The target route name and params for the cluster
  */
 export function getClusterLinkTarget(cluster: ICluster) {
   if (clusterIs.album(cluster)) {
