@@ -46,13 +46,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, nextTick, defineAsyncComponent } from 'vue';
+import { computed, ref, useTemplateRef, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { showError } from '@services/utils/dialog';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
 
 import Modal from './Modal.vue';
 import AlbumCollaborators from './AlbumCollaborators.vue';

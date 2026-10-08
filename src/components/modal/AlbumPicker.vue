@@ -75,12 +75,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, nextTick, markRaw, useTemplateRef, defineAsyncComponent } from 'vue';
+import { computed, ref, onMounted, nextTick, markRaw, useTemplateRef } from 'vue';
 
 import Fuse from 'fuse.js';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
 
 import AlbumForm from './AlbumForm.vue';
 import AlbumsList from './AlbumsList.vue';

@@ -57,11 +57,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, useTemplateRef, defineAsyncComponent } from 'vue';
+import { ref, computed, watch, onMounted, useTemplateRef } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
-const NcPopover = defineAsyncComponent(() => import('@nextcloud/vue/components/NcPopover'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
+import NcPopover from '@nextcloud/vue/components/NcPopover';
 
 import { config } from '@services/user-config';
 import { windowDims } from '@services/viewport';

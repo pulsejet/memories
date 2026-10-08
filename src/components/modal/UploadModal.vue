@@ -69,7 +69,7 @@ import EditTags from '@components/modal/EditTags.vue';
 import UploadMenuItem from '@components/header/UploadMenuItem.vue';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
 const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
 

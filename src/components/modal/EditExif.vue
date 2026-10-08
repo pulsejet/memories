@@ -22,9 +22,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, defineAsyncComponent } from 'vue';
+import { ref, onMounted } from 'vue';
 
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
 
 import { t } from '@services/l10n';
 

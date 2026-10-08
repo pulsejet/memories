@@ -64,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, defineAsyncComponent } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@services/utils/dialog';
@@ -73,7 +73,7 @@ import { t } from '@services/l10n';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
 
 import type { IPhoto } from '@typings';
 

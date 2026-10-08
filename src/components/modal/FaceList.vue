@@ -27,13 +27,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, markRaw, defineAsyncComponent } from 'vue';
+import { computed, ref, onMounted, markRaw } from 'vue';
 import { useRoute } from 'vue-router';
 import Fuse from 'fuse.js';
 
 import { showError } from '@services/utils/dialog';
 
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
 
 import ClusterGrid from '@components/ClusterGrid.vue';
 

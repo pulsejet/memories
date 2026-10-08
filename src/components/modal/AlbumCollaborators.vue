@@ -159,8 +159,8 @@ import { generateOcsUrl, generateUrl } from '@nextcloud/router';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent';
-const NcPopover = defineAsyncComponent(() => import('@nextcloud/vue/components/NcPopover'));
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcPopover from '@nextcloud/vue/components/NcPopover';
+import NcTextField from '@nextcloud/vue/components/NcTextField';
 const NcListItemIcon = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItemIcon'));
 
 import { t } from '@services/l10n';

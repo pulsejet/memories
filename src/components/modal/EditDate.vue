@@ -151,9 +151,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, watch, defineAsyncComponent } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
 
 import { t } from '@services/l10n';
 import * as utils from '@services/utils/common';
