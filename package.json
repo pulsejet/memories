@@ -60,6 +60,7 @@
     "photoswipe": "^5.4.4",
     "react-filerobot-image-editor": "^4.9.1",
     "stream-browserify": "^3.0.0",
+    "tiny-lru": "^13.1.0",
     "ts-md5": "^2.0.1",
     "vidstack": "^1.15.6",
     "vue": "^3.5.43",

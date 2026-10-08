@@ -1,8 +1,8 @@
 <template>
-  <div class="explore-outer hide-scrollbar-mobile">
-    <XLoadingIcon v-if="loading" class="fill-block" />
+  <div ref="container" class="explore-outer hide-scrollbar-mobile">
+    <XLoadingIcon v-if="loading" class="fill-block top-left" />
 
-    <div v-else>
+    <div>
       <div class="title">{{ t('memories', 'Explore') }}</div>
 
       <Searchbar v-if="isNative" class="searchbar" />
@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, markRaw, watch } from 'vue';
+import { ref, useTemplateRef, reactive, onMounted, markRaw, watch } from 'vue';
 import type { Component } from 'vue';
 
 import Searchbar from '@components/header/Searchbar.vue';
@@ -64,6 +64,7 @@ import CogIcon from 'vue-material-design-icons/Cog.vue';
 import { translate as t } from '@services/l10n';
 import { config } from '@services/user-config';
 import { windowDims } from '@services/viewport';
+import { useRouteState } from '@services/route-state';
 import * as dav from '@services/dav';
 import * as nativex from '@native';
 
@@ -79,11 +80,18 @@ type Category = {
 
 const loading = ref(0);
 const isNative = nativex.has();
+const containerRef = useTemplateRef<HTMLDivElement>('container');
 
 const recognize = ref([] as ICluster[]);
 const facerecognition = ref([] as ICluster[]);
 const places = ref([] as ICluster[]);
 const tags = ref([] as ICluster[]);
+
+useRouteState({
+  state: { recognize, facerecognition, places, tags },
+  scroll: { containerRef },
+});
+
 const loaded = reactive({
   recognize: false,
   facerecognition: false,
@@ -198,6 +206,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .explore-outer {
+  position: relative;
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;

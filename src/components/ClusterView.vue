@@ -6,7 +6,7 @@
 
     <EmptyContent v-if="!items.length && !loading" />
 
-    <ClusterGrid :items="items" :minCols="minCols" :maxSize="maxSize" :focus="true">
+    <ClusterGrid ref="grid" :items="items" :minCols="minCols" :maxSize="maxSize" :focus="true">
       <template #before>
         <DynamicTopMatter class="cv-dtm" ref="dtm" />
       </template>
@@ -17,10 +17,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { ref, useTemplateRef, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { routeIs } from '@services/router';
+import { useRouteState } from '@services/route-state';
 import TopMatter from '@components/top-matter/TopMatter.vue';
 import ClusterGrid from '@components/ClusterGrid.vue';
 import Timeline from '@components/Timeline.vue';
@@ -34,9 +35,16 @@ import * as dav from '@services/dav';
 import type { ICluster } from '@typings';
 
 const route = useRoute();
-const dtm = ref<InstanceType<typeof DynamicTopMatter>>();
+const dtmRef = useTemplateRef<InstanceType<typeof DynamicTopMatter>>('dtm');
+const gridRef = useTemplateRef<VueHTMLComponent>('grid');
 const items = ref<ICluster[]>([]);
 const loading = ref(0);
+let requestId = 0;
+
+useRouteState({
+  state: { items },
+  scroll: { gridRef },
+});
 
 const noParams = computed(() => !route.params.name?.toString() && !route.params.user?.toString());
 const minCols = computed(() => (routeIs.Albums ? 2 : 3));
@@ -59,18 +67,16 @@ async function fetchClusters(): Promise<ICluster[]> {
 }
 
 async function refresh() {
-  await nextTick();
-  if (!noParams.value || !!loading.value) return;
+  const requestIdVal = ++requestId;
+  if (!noParams.value) return;
 
   try {
-    items.value = [];
     loading.value++;
-
-    await nextTick();
 
     // Refresh the DTM in parallel with loading our own data,
     // but wait for it to complete to avoid glitches.
-    const [, newItems] = await Promise.all([dtm.value?.refresh?.(), fetchClusters()]);
+    const [, newItems] = await Promise.all([dtmRef.value?.refresh?.(), fetchClusters()]);
+    if (requestIdVal !== requestId) return;
     items.value = newItems;
   } finally {
     loading.value--;
@@ -78,7 +84,8 @@ async function refresh() {
 }
 
 onMounted(refresh);
-watch(() => route.path, refresh);
+onBeforeUnmount(() => requestId++);
+watch(() => route.path, refresh, { flush: 'post' });
 watch(config, refresh);
 </script>
 
