@@ -1,6 +1,6 @@
 import { lru } from 'tiny-lru';
 import { getCurrentInstance, nextTick, toRaw, toValue, watch, type Ref, type ShallowRef } from 'vue';
-import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, type RouteLocationNormalized } from 'vue-router';
+import { useRoute, type RouteLocationNormalized } from 'vue-router';
 
 /** Template refs may contain a component, a native element, or no mounted target. */
 type ScrollTarget = VueHTMLComponent | HTMLElement | null | undefined;
@@ -92,18 +92,13 @@ export function useRouteState<T extends InnerState>(options: RouteState<T>): voi
     });
   }
 
-  // Preserve the state before the route changes.
-  onBeforeRouteLeave((to, from) => {
-    if (key(to) !== key(from)) preserve(key(from));
-  });
-  onBeforeRouteUpdate((to, from) => {
-    if (key(to) !== key(from)) preserve(key(from));
-  });
-
   // Restore the state after the route changes.
   watch(
     () => key(route),
-    async (routeKey, _, onCleanup) => {
+    async (routeKey, oldKey, onCleanup) => {
+      // Save the old route's state; guards miss reused instances.
+      if (oldKey && oldKey !== routeKey) preserve(oldKey);
+
       // Cancel pending scrolling if route changes.
       let active = true;
       onCleanup(() => (active = false));
@@ -138,6 +133,6 @@ export function useRouteState<T extends InnerState>(options: RouteState<T>): voi
         }
       }
     },
-    { immediate: true },
+    { immediate: true, flush: 'sync' },
   );
 }
