@@ -1,5 +1,5 @@
 <template>
-  <div class="album-dtm">
+  <div v-if="isReady && album" class="album-dtm">
     <div v-if="album?.location" class="subtitle">
       <MapMarkerOutlineIcon class="icon" :size="18" />
       <span>{{ album.location }}</span>
@@ -26,11 +26,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, ref } from 'vue';
+import { computed, defineAsyncComponent, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
+import { useRouteState } from '@services/route-state';
 
 const NcAvatar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAvatar'));
 
@@ -41,9 +42,24 @@ defineOptions({
   name: 'AlbumDynamicTopMatter',
 });
 
+const emit = defineEmits<{
+  load: [];
+}>();
+
 const route = useRoute();
 
 const album = ref<dav.IDavAlbum | null>(null);
+
+useRouteState({
+  state: { album },
+});
+
+const isAvailable = computed((): boolean => !!utils.uid && !!albumUser.value && !!albumName.value);
+const isReady = computed((): boolean => !isAvailable.value || !!album.value);
+
+// Always return false since this is not "real" content.
+// This way the empty view of the timeline will show on empty albums.
+const isContent = computed((): boolean => false);
 
 const albumUser = computed(() => {
   return route.params.user?.toString() ?? '';
@@ -53,33 +69,34 @@ const albumName = computed(() => {
   return route.params.name?.toString() ?? '';
 });
 
-async function refresh(): Promise<boolean> {
+async function refresh(): Promise<void> {
   // Skip everything if user is not logged in
-  if (!utils.uid) return false;
+  if (!utils.uid) return;
 
   // Skip if we are not on an album (e.g. on the list)
   const user = albumUser.value;
   const name = albumName.value;
-  if (!user || !name) return false;
+  if (!user || !name) return;
 
   // Get DAV album for collaborators
   try {
     const albumData = await dav.getAlbum(user, name);
-    if (user !== albumUser.value || name !== albumName.value) {
-      return false;
-    }
+    if (user !== albumUser.value || name !== albumName.value) return;
     album.value = albumData;
+    emit('load');
   } catch (e) {
     console.warn('Failed to fetch album:', e);
+  } finally {
+    album.value ??= {
+      collaborators: [],
+      location: '',
+    };
   }
-
-  // The album header is metadata, not standalone content,
-  // so always return false. If true, an empty album would
-  // suppress the timeline empty view.
-  return false;
 }
 
-defineExpose({ refresh });
+onMounted(refresh);
+
+defineExpose({ isReady, isContent, refresh });
 </script>
 
 <style lang="scss" scoped>

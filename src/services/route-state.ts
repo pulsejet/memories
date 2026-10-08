@@ -47,6 +47,11 @@ function cloneState<T extends InnerState>(state: T | undefined) {
   ) as InnerStateVals<T>;
 }
 
+/** Compute the key to use for storing the state */
+export function routerStatePath(route: RouteLocationNormalized, instance?: string) {
+  return `${route.fullPath.split('#')[0]}#${instance}`;
+}
+
 /**
  * Restore refs during setup and on route changes, using defaults for missing keys.
  * After one render tick, restore the mounted scroll targets to their saved offsets.
@@ -62,9 +67,7 @@ export function useRouteState<T extends InnerState>(options: RouteState<T>): voi
   const defaults = cloneState(options.state);
 
   // Queries distinguish views; viewer hashes share the underlying page's state.
-  const key = (route: RouteLocationNormalized) => {
-    return `${route.fullPath.split('#')[0]}#${instance}`;
-  };
+  const key = (route: RouteLocationNormalized) => routerStatePath(route, instance);
 
   /** Capture ref values and mounted scroll targets before route-driven watchers run. */
   function preserve(routeKey: string) {

@@ -1,9 +1,9 @@
 <template>
-  <FolderGrid v-if="show" :items="folders" />
+  <FolderGrid v-if="isReady && isContent && folders" :items="folders" />
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, shallowRef, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 import axios from '@nextcloud/axios';
@@ -12,8 +12,9 @@ import { getLanguage } from '@nextcloud/l10n';
 import FolderGrid from './FolderGrid.vue';
 
 import { config } from '@services/user-config';
-import * as utils from '@services/utils/common';
+import { useRouteState } from '@services/route-state';
 import { API } from '@services/API';
+import * as utils from '@services/utils/common';
 
 import type { IFolder } from '@typings';
 
@@ -21,26 +22,33 @@ defineOptions({
   name: 'FolderDynamicTopMatter',
 });
 
+const emit = defineEmits<{
+  load: [];
+}>();
+
 const route = useRoute();
 
-const folders = ref<IFolder[]>([]);
+const folders = shallowRef<IFolder[] | null>(null);
 const currentFolder = ref('<none>');
 
-const show = computed(() => {
-  return folders.value.length && !route.query.recursive;
+useRouteState({
+  state: { folders, currentFolder },
 });
+
+const isReady = computed((): boolean => folders.value !== null);
+const isContent = computed((): boolean => !!folders.value?.length && !route.query.recursive);
 
 function folder(): string {
   return utils.getFolderRoutePath(config.folders_path);
 }
 
-async function refresh(): Promise<boolean> {
+async function refresh(): Promise<void> {
   const folderVal = folder();
 
   // Clear folders if switching to a different folder, otherwise just refresh
   if (currentFolder.value !== folderVal) {
     currentFolder.value = folderVal;
-    folders.value = [];
+    folders.value = null;
   }
 
   // Get subfolders URL
@@ -49,13 +57,13 @@ async function refresh(): Promise<boolean> {
   // Make API call to get subfolders
   try {
     const data = (await axios.get<IFolder[]>(url)).data;
-    if (folderVal !== folder()) {
-      return false;
-    }
+    if (folderVal !== folder()) return;
     folders.value = data;
   } catch (e) {
     console.error(e);
-    return false;
+    return;
+  } finally {
+    folders.value ??= [];
   }
 
   // Filter out hidden folders
@@ -66,8 +74,10 @@ async function refresh(): Promise<boolean> {
   // Sort folders by name, case insensitive and natural
   folders.value.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
 
-  return folders.value.length > 0;
+  emit('load');
 }
 
-defineExpose({ refresh });
+onMounted(refresh);
+
+defineExpose({ isReady, isContent, refresh });
 </script>

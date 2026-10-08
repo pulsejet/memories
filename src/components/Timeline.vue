@@ -104,6 +104,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, onUnmounted, ref, useTe
 import { useRoute, useRouter } from 'vue-router';
 import type { RouteLocationNormalized } from 'vue-router';
 import { RecycleScroller } from 'vue-virtual-scroller';
+import { until } from '@vueuse/core';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@services/utils/dialog';
@@ -166,8 +167,6 @@ const emit = defineEmits<{
 const loading = ref(0);
 /** Main list of rows */
 const list = ref<IRow[]>([]);
-/** Dynamic top matter has standalone content */
-const dtmContent = ref(false);
 /** Computed number of columns */
 let numCols = 0;
 /** Ordered header rows for dayId key  */
@@ -262,7 +261,7 @@ const isMonthView = computed((): boolean => {
 
 /** Nothing to show here */
 const empty = computed((): boolean => {
-  return !list.value.length && !dtmContent.value;
+  return !list.value.length && !dtm.value?.isContent;
 });
 
 /** Show the empty content box and hide the scrollbar */
@@ -373,7 +372,6 @@ async function resetState() {
   scrollerManager.value?.reset();
   loading.value = 0;
   list.value = [];
-  dtmContent.value = false;
   heads.value = new Map();
   currentStart.value = 0;
   currentEnd.value = 0;
@@ -702,14 +700,12 @@ function getQuery() {
 
 /** Fetch timeline main call */
 async function fetchDays(noCache = false) {
-  // Awaiting this is important because the folders must render
-  // before the timeline to prevent glitches
+  // Wait for DTM to be ready, it must render first to prevent layout shift.
   try {
     updateLoading(1);
     const stateVal = state.value;
-    const res = await dtm.value?.refresh();
+    await until(() => dtm.value?.isReady).toBeTruthy({ timeout: 2000 });
     if (state.value !== stateVal) return;
-    dtmContent.value = res ?? false;
   } finally {
     updateLoading(-1);
   }

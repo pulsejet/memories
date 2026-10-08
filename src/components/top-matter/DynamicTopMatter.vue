@@ -1,23 +1,30 @@
 <template>
   <div class="dtm-container" v-if="currentmatter || viewName">
     <div v-if="viewName" class="header">{{ viewName }}</div>
-    <component ref="child" v-if="currentmatter" :is="currentmatter" @load="$emit('load')" />
+    <component
+      ref="child"
+      v-if="currentmatter"
+      :is="currentmatter"
+      :key="routerStatePath(route)"
+      @load="emit('load')"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, markRaw, nextTick, useTemplateRef, type Component } from 'vue';
+import { computed, markRaw, useTemplateRef, watch, type Component } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { config } from '@services/user-config';
 import { routeIs } from '@services/router';
+import { routerStatePath } from '@services/route-state';
 import initstate from '@services/init-state';
+import * as strings from '@services/strings';
 
 import AlbumDynamicTopMatter from './AlbumDynamicTopMatter.vue';
 import FolderDynamicTopMatter from './FolderDynamicTopMatter.vue';
 import PlacesDynamicTopMatterVue from './PlacesDynamicTopMatter.vue';
 import OnThisDay from './OnThisDay.vue';
-import * as strings from '@services/strings';
 
 // Auto-hide top header on public shares if redundant
 import './PublicShareHeader';
@@ -26,12 +33,17 @@ defineOptions({
   name: 'DynamicTopMatter',
 });
 
-defineEmits<{
+const emit = defineEmits<{
   load: [];
 }>();
 
 const route = useRoute();
-const child = useTemplateRef<{ refresh?(): Promise<boolean> }>('child');
+
+const child = useTemplateRef<{
+  isReady: boolean;
+  isContent: boolean;
+  refresh(): Promise<void>;
+}>('child');
 
 const currentmatter = computed((): Component | null => {
   if (routeIs.Folders || (routeIs.FolderShare && initstate.shareType === 'folder')) {
@@ -45,6 +57,16 @@ const currentmatter = computed((): Component | null => {
   }
 
   return null;
+});
+
+/** Check if the component has loaded */
+const isReady = computed((): boolean => {
+  return !currentmatter.value || (child.value?.isReady ?? false);
+});
+
+/** Check if the component is content */
+const isContent = computed((): boolean => {
+  return !!currentmatter.value && (child.value?.isContent ?? false);
 });
 
 /** Get view name for dynamic top matter */
@@ -68,16 +90,19 @@ const viewName = computed((): string => {
   return strings.viewName(route.name?.toString() ?? '');
 });
 
-async function refresh(): Promise<boolean> {
-  if (currentmatter.value) {
-    await nextTick();
-    return (await child.value?.refresh?.()) ?? false;
-  }
-
-  return false;
+async function refresh(): Promise<void> {
+  await child.value?.refresh?.();
 }
 
-defineExpose({ refresh });
+watch(
+  isReady,
+  (newVal) => {
+    if (newVal) emit('load');
+  },
+  { immediate: true },
+);
+
+defineExpose({ isReady, isContent, refresh });
 </script>
 
 <style lang="scss" scoped>

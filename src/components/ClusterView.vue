@@ -19,6 +19,7 @@
 <script setup lang="ts">
 import { ref, useTemplateRef, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
+import { until } from '@vueuse/core';
 
 import { routeIs } from '@services/router';
 import { useRouteState } from '@services/route-state';
@@ -75,7 +76,10 @@ async function refresh() {
 
     // Refresh the DTM in parallel with loading our own data,
     // but wait for it to complete to avoid glitches.
-    const [, newItems] = await Promise.all([dtmRef.value?.refresh?.(), fetchClusters()]);
+    const [, newItems] = await Promise.all([
+      until(() => dtmRef.value?.isReady).toBeTruthy({ timeout: 2000 }),
+      fetchClusters(),
+    ]);
     if (requestIdVal !== requestId) return;
     items.value = newItems;
   } finally {

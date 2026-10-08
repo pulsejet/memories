@@ -161,6 +161,10 @@ function reset() {
   hoverCursorY.value = -5;
   hoverCursorText.value = '';
   reflowRequest.value = false;
+  adjustRequest.value = false;
+  interacting.value = false;
+  lastKnownRecyclerScroll.value = 0;
+  lastRequestedRecyclerY.value = 0;
 
   // Clear all timers
   scrollingTimer.clear();

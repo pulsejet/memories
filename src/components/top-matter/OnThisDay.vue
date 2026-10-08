@@ -1,5 +1,5 @@
 <template>
-  <div class="outer" v-show="years.length > 0">
+  <div class="outer" v-show="isReady && isContent">
     <div class="inner hide-scrollbar" ref="inner">
       <div v-for="year of years" class="group" :key="year.text" @click="click(year)">
         <XImg class="fill-block" :src="year.url" />
@@ -30,21 +30,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
+import { nextTick, computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
-import * as utils from '@services/utils/common';
 import { cacheData, getCachedData } from '@services/cache';
-import * as dav from '@services/dav';
 import { t } from '@services/l10n';
 import { config } from '@services/user-config';
-import type { IPhoto } from '@typings';
+import { useRouteState } from '@services/route-state';
+import * as utils from '@services/utils/common';
+import * as dav from '@services/dav';
 
 import LeftMoveIcon from 'vue-material-design-icons/ChevronLeft.vue';
 import RightMoveIcon from 'vue-material-design-icons/ChevronRight.vue';
 import XImg from '@components/frame/XImg.vue';
+
+import type { IPhoto } from '@typings';
 
 interface IYear {
   year: number;
@@ -64,44 +66,43 @@ const emit = defineEmits<{
 
 const inner = useTemplateRef<HTMLDivElement>('inner');
 
-const years = ref<IYear[]>([]);
+const years = ref<IYear[] | null>(null);
 const hasRight = ref(false);
 const hasLeft = ref(false);
 const scrollStack = ref<number[]>([]);
 let resizeObserver: ResizeObserver | null = null;
 
-const photosPerYear = computed((): number => {
-  return config.onthisday_photos_per_year;
-});
+useRouteState({ state: { years }, scroll: { inner } });
+
+const isReady = computed(() => years.value !== null);
+const isContent = computed(() => !!years.value?.length);
 
 onMounted(() => {
-  const innerVal = inner.value!;
-
-  innerVal.addEventListener('scroll', onScroll, {
-    passive: true,
-  });
-
+  inner.value!.addEventListener('scroll', onScroll, { passive: true });
   resizeObserver = new ResizeObserver(onScroll);
-  resizeObserver.observe(innerVal);
-
-  refreshNow();
+  resizeObserver.observe(inner.value!);
+  refresh();
 });
 
 onBeforeUnmount(() => {
   resizeObserver?.disconnect();
 });
 
-function onload() {
-  emit('load');
+async function refresh(): Promise<void> {
+  try {
+    await refreshInternal();
+  } finally {
+    years.value ??= [];
+  }
 }
 
-async function refreshNow() {
+async function refreshInternal(): Promise<void> {
   // Look for cache
   const dayIdToday = utils.dateToDayId(new Date());
   const cacheUrl = `/onthisday/${dayIdToday}`;
   const cache = await getCachedData<IPhoto[]>(cacheUrl);
   utils.applyAuids(cache);
-  if (cache) process(cache);
+  if (cache) await process(cache);
 
   // Network request
   const photos = await dav.getOnThisDayRaw();
@@ -110,7 +111,7 @@ async function refreshNow() {
 
   // Check if exactly same as cache
   if (cache?.length === photos.length && cache.every((p, i) => p.fileid === photos[i].fileid)) return;
-  process(photos);
+  await process(photos);
 }
 
 async function process(photos: IPhoto[]) {
@@ -152,7 +153,7 @@ async function process(photos: IPhoto[]) {
 
   // For each year, randomly choose 10 photos to display
   for (const year of years.value) {
-    year.photos = utils.randomSubarray(year.photos, photosPerYear.value);
+    year.photos = utils.randomSubarray(year.photos, config.onthisday_photos_per_year);
   }
 
   // Choose preview photo
@@ -164,9 +165,9 @@ async function process(photos: IPhoto[]) {
     });
   }
 
+  emit('load');
   await nextTick();
   onScroll();
-  onload();
 }
 
 function moveLeft() {
@@ -188,16 +189,17 @@ function moveRight() {
 }
 
 function onScroll() {
-  const innerVal = inner.value;
-  if (!innerVal) return;
-  hasLeft.value = innerVal.scrollLeft > 0;
-  hasRight.value = innerVal.clientWidth + innerVal.scrollLeft < innerVal.scrollWidth - 20;
+  if (!inner.value) return;
+  hasLeft.value = inner.value.scrollLeft > 0;
+  hasRight.value = inner.value.clientWidth + inner.value.scrollLeft < inner.value.scrollWidth - 20;
 }
 
 function click(year: IYear) {
-  const allPhotos = years.value.flatMap((y) => y.photos);
+  const allPhotos = years.value?.flatMap((y) => y.photos) ?? [];
   _m.viewer.openStatic(year.preview, allPhotos, 512);
 }
+
+defineExpose({ isReady, isContent, refresh });
 </script>
 
 <style lang="scss" scoped>
