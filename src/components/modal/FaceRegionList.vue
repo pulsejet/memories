@@ -29,16 +29,15 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import type { PropType } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
 
 import DeleteIcon from 'vue-material-design-icons/Delete.vue';
 
-import { translate as t } from '@services/l10n';
+import { t } from '@services/l10n';
 import { faceRecognitionDeleteRegions, type IManualRegion } from '@services/dav/face';
 
 import { errorText, regionText } from './faceMarking';
@@ -47,68 +46,58 @@ import { errorText, regionText } from './faceMarking';
  * The areas of the photo drawn to be searched, with what came of each, and
  * removing one of them. The pointer on an entry shows its area on the photo.
  */
-export default defineComponent({
+defineOptions({
   name: 'FaceRegionList',
-  components: { NcButton, NcNoteCard, DeleteIcon },
-
-  props: {
-    regions: {
-      type: Array as PropType<IManualRegion[]>,
-      required: true,
-    },
-  },
-
-  emits: {
-    /** The area to show on the photo, or none */
-    highlight: (_regionId: number | null) => true,
-    /** An area was removed; the text says so, for the user */
-    done: (_message: string) => true,
-  },
-
-  data: () => ({
-    /** The area whose remove button was clicked once, and waits for the second click */
-    confirming: null as number | null,
-    removing: false,
-    error: '',
-  }),
-
-  methods: {
-    regionText,
-
-    removeLabel(region: IManualRegion): string {
-      return region.state === 'pending'
-        ? t('memories', 'Remove this area; it is not searched then')
-        : t('memories', 'Remove this area; the faces found in it stay');
-    },
-
-    /** Removes an area, on the second click: the first one asks. */
-    async remove(region: IManualRegion): Promise<void> {
-      if (this.removing) return;
-      if (this.confirming !== region.id) {
-        this.confirming = region.id;
-        return;
-      }
-      this.removing = true;
-      this.error = '';
-      try {
-        await faceRecognitionDeleteRegions([region.id]);
-        this.$emit('highlight', null);
-        this.$emit(
-          'done',
-          region.state === 'pending'
-            ? t('memories', 'Area removed. It is not searched.')
-            : t('memories', 'Area removed. The faces found in it stay.'),
-        );
-      } catch (e) {
-        console.error(e);
-        this.error = errorText(e, t('memories', 'The area could not be removed.'));
-      } finally {
-        this.removing = false;
-        this.confirming = null;
-      }
-    },
-  },
 });
+
+defineProps<{
+  regions: IManualRegion[];
+}>();
+
+const emit = defineEmits<{
+  /** The area to show on the photo, or none */
+  highlight: [regionId: number | null];
+  /** An area was removed; the text says so, for the user */
+  done: [message: string];
+}>();
+
+/** The area whose remove button was clicked once, and waits for the second click */
+const confirming = ref<number | null>(null);
+const removing = ref(false);
+const error = ref('');
+
+function removeLabel(region: IManualRegion): string {
+  return region.state === 'pending'
+    ? t('memories', 'Remove this area; it is not searched then')
+    : t('memories', 'Remove this area; the faces found in it stay');
+}
+
+/** Removes an area, on the second click: the first one asks. */
+async function remove(region: IManualRegion): Promise<void> {
+  if (removing.value) return;
+  if (confirming.value !== region.id) {
+    confirming.value = region.id;
+    return;
+  }
+  removing.value = true;
+  error.value = '';
+  try {
+    await faceRecognitionDeleteRegions([region.id]);
+    emit('highlight', null);
+    emit(
+      'done',
+      region.state === 'pending'
+        ? t('memories', 'Area removed. It is not searched.')
+        : t('memories', 'Area removed. The faces found in it stay.'),
+    );
+  } catch (e) {
+    console.error(e);
+    error.value = errorText(e, t('memories', 'The area could not be removed.'));
+  } finally {
+    removing.value = false;
+    confirming.value = null;
+  }
+}
 </script>
 
 <style lang="scss" scoped>

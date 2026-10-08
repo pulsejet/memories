@@ -18,7 +18,7 @@
       <div v-else class="draw-step">
         <!-- Suggestions of already-known person names for the name fields below -->
         <datalist id="memories-manual-face-names">
-          <option v-for="n in knownNames" :key="n" :value="n" />
+          <option v-for="known in knownNames" :key="known" :value="known" />
         </datalist>
 
         <NcNoteCard v-if="loadError" type="error">
@@ -141,23 +141,23 @@
   </Modal>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { computed, nextTick, ref, useTemplateRef } from 'vue';
 import axios from '@nextcloud/axios';
-import { getFilePickerBuilder } from '@nextcloud/dialogs';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
 
 import Modal from './Modal.vue';
-import ModalMixin from './ModalMixin';
 import FaceMarkingStage from './FaceMarkingStage.vue';
 import FaceSelectionPanel from './FaceSelectionPanel.vue';
 import FaceRegionList from './FaceRegionList.vue';
 
 import { API } from '@services/API';
-import { translate as t } from '@services/l10n';
+import { useModal } from '@services/modal';
+import { t } from '@services/l10n';
+import * as utils from '@services/utils/common';
 import {
   faceRecognitionAddManualFace,
   faceRecognitionAddManualRegion,
@@ -172,13 +172,11 @@ import {
   errorText,
   focusWithoutScrolling,
   inputOf,
-  markingScope,
-  regionScope,
+  markingScope as markingScopeOf,
+  regionScope as regionScopeText,
   stageFaceOf,
   stageRegionOf,
   type Rect,
-  type StageFace,
-  type StageRegion,
 } from './faceMarking';
 
 import type { IImageInfo } from '@typings';
@@ -186,451 +184,429 @@ import type { IImageInfo } from '@typings';
 /** How long a saved marking is announced over the photo */
 const NOTICE_MS = 4000;
 
-export default defineComponent({
+defineOptions({
   name: 'FaceManualAddModal',
-  components: { NcButton, NcNoteCard, NcTextField, Modal, FaceMarkingStage, FaceSelectionPanel, FaceRegionList },
+});
 
-  mixins: [ModalMixin],
+const emit = defineEmits<{
+  /** Faces were added or moved while the dialog was open; sent when it closes */
+  added: [];
+}>();
 
-  emits: {
-    /** Faces were added or moved while the dialog was open; sent when it closes */
-    added: () => true,
-  },
+const modal = useTemplateRef('modal');
+const nameField = useTemplateRef('nameField');
+const panel = useTemplateRef<InstanceType<typeof FaceSelectionPanel>>('panel');
+const { show } = useModal(modal);
 
-  data: () => ({
-    fileId: 0,
-    imageSrc: '',
-    imageNatW: 0,
-    imageNatH: 0,
-    faces: [] as IFaceRectForFile[],
-    regions: null as IManualRegion[] | null,
-    limits: null as IFaceLimits | null,
-    legacy: false,
-    loadError: '',
-    rect: null as Rect | null,
-    rawInput: '',
-    saving: false,
-    saveError: '',
-    /** The faces selected, in the order they were picked; several with Ctrl+click */
-    selectedFaceIds: [] as number[],
-    /** The searched area the pointer is on in the list, shown on the photo */
-    highlightedRegionId: null as number | null,
-    knownNames: [] as string[],
-    navigationError: false,
-    /** What was just saved, shown over the photo for a moment */
-    notice: '',
-    noticeTimer: 0,
-    /**
-     * Whether anything was saved. The sidebar and the timeline are told when
-     * the dialog closes, not on each save: the sidebar reloads by dropping
-     * its content, and this dialog with it.
-     */
-    changed: false,
-  }),
+const fileId = ref(0);
+const imageSrc = ref('');
+const imageNatW = ref(0);
+const imageNatH = ref(0);
+const faces = ref<IFaceRectForFile[]>([]);
+const regions = ref<IManualRegion[] | null>(null);
+const limits = ref<IFaceLimits | null>(null);
+const legacy = ref(false);
+const loadError = ref('');
+const rect = ref<Rect | null>(null);
+const rawInput = ref('');
+const saving = ref(false);
+const saveError = ref('');
+/** The faces selected, in the order they were picked; several with Ctrl+click */
+const selectedFaceIds = ref<number[]>([]);
+/** The searched area the pointer is on in the list, shown on the photo */
+const highlightedRegionId = ref<number | null>(null);
+const knownNames = ref<string[]>([]);
+const navigationError = ref(false);
+/** What was just saved, shown over the photo for a moment */
+const notice = ref('');
+let noticeTimer = 0;
+/**
+ * Whether anything was saved. The sidebar and the timeline are told when
+ * the dialog closes, not on each save: the sidebar reloads by dropping
+ * its content, and this dialog with it.
+ */
+let changed = false;
 
-  computed: {
-    /** The size of the original photo, which every marking is measured against. */
-    dimensionsKnown(): boolean {
-      return this.imageNatW > 0 && this.imageNatH > 0;
-    },
+/** The size of the original photo, which every marking is measured against. */
+const dimensionsKnown = computed(() => imageNatW.value > 0 && imageNatH.value > 0);
 
-    canDraw(): boolean {
-      return this.dimensionsKnown && !this.saving;
-    },
+const canDraw = computed(() => dimensionsKnown.value && !saving.value);
 
-    name(): string {
-      return this.rawInput.trim();
-    },
+const name = computed(() => rawInput.value.trim());
 
-    canSaveNamed(): boolean {
-      return !!this.rect && !!this.name && !this.saving && this.dimensionsKnown;
-    },
+const canSaveNamed = computed(() => !!rect.value && !!name.value && !saving.value && dimensionsKnown.value);
 
-    canSaveUnnamed(): boolean {
-      return !this.legacy;
-    },
+const canSaveUnnamed = computed(() => !legacy.value);
 
-    canSearchRegion(): boolean {
-      return !this.legacy && this.regions !== null;
-    },
+const canSearchRegion = computed(() => !legacy.value && regions.value !== null);
 
-    hint(): string {
-      if (!this.dimensionsKnown) return '';
-      if (this.selectedFaces.length > 1) {
-        return t(
-          'memories',
-          'Ctrl+click adds a face or takes it out again. Draw a new rectangle to mark another face.',
-        );
-      }
-      if (this.selectedFaces.length === 1) {
-        return t(
-          'memories',
-          'Draw a new rectangle to mark another face. Ctrl+click selects several faces, to ignore or delete them together.',
-        );
-      }
-      if (this.rect) {
-        return t('memories', 'Enter a name, or save without one. You can redraw by dragging again.');
-      }
-      return t(
-        'memories',
-        'Drag on the photo to mark a face, or an area with several faces to search again. Zoom with the mouse wheel or two fingers, and move with the middle mouse button or two fingers. Click a face to see its state or rename it, Ctrl+click to select several.',
-      );
-    },
+/** The faces selected that are on the photo, in the order they were picked. */
+const selectedFaces = computed(() =>
+  selectedFaceIds.value
+    .map((id) => faces.value.find((face) => face.id === id))
+    .filter((face): face is IFaceRectForFile => !!face),
+);
 
-    stageFaces(): StageFace[] {
-      if (!this.dimensionsKnown) return [];
-      return this.faces.map((face) =>
-        stageFaceOf(face, this.imageNatW, this.imageNatH, this.limits, this.selectedFaceIds.includes(face.id)),
-      );
-    },
+const hint = computed(() => {
+  if (!dimensionsKnown.value) return '';
+  if (selectedFaces.value.length > 1) {
+    return t('memories', 'Ctrl+click adds a face or takes it out again. Draw a new rectangle to mark another face.');
+  }
+  if (selectedFaces.value.length === 1) {
+    return t(
+      'memories',
+      'Draw a new rectangle to mark another face. Ctrl+click selects several faces, to ignore or delete them together.',
+    );
+  }
+  if (rect.value) {
+    return t('memories', 'Enter a name, or save without one. You can redraw by dragging again.');
+  }
+  return t(
+    'memories',
+    'Drag on the photo to mark a face, or an area with several faces to search again. Zoom with the mouse wheel or two fingers, and move with the middle mouse button or two fingers. Click a face to see its state or rename it, Ctrl+click to select several.',
+  );
+});
 
-    stageRegions(): StageRegion[] {
-      if (!this.dimensionsKnown || !this.regions) return [];
-      return this.regions.map((region) =>
-        stageRegionOf(region, this.imageNatW, this.imageNatH, region.id === this.highlightedRegionId),
-      );
-    },
+const stageFaces = computed(() => {
+  if (!dimensionsKnown.value) return [];
+  return faces.value.map((face) =>
+    stageFaceOf(face, imageNatW.value, imageNatH.value, limits.value, selectedFaceIds.value.includes(face.id)),
+  );
+});
 
-    markingScope(): string {
-      return markingScope(this.name, this.knownNames);
-    },
+const stageRegions = computed(() => {
+  if (!dimensionsKnown.value || !regions.value) return [];
+  return regions.value.map((region) =>
+    stageRegionOf(region, imageNatW.value, imageNatH.value, region.id === highlightedRegionId.value),
+  );
+});
 
-    regionScope(): string {
-      return regionScope();
-    },
+const markingScope = computed(() => markingScopeOf(name.value, knownNames.value));
 
-    /** The faces selected that are on the photo, in the order they were picked. */
-    selectedFaces(): IFaceRectForFile[] {
-      return this.selectedFaceIds
-        .map((id) => this.faces.find((face) => face.id === id))
-        .filter((face): face is IFaceRectForFile => !!face);
-    },
-  },
+const regionScope = computed(() => regionScopeText());
 
-  methods: {
-    open() {
-      this.resetAll();
-      this.changed = false;
-      this.show = true;
-      this.loadKnownNames();
-    },
+function open() {
+  resetAll();
+  changed = false;
+  show.value = true;
+  loadKnownNames();
+}
 
-    async openForFile(info: { fileid: number; etag?: string; w?: number; h?: number }) {
-      this.resetAll();
-      this.changed = false;
-      this.show = true;
-      this.loadKnownNames();
-      if (!info?.fileid) return;
+async function openForFile(info: { fileid: number; etag?: string; w?: number; h?: number }) {
+  resetAll();
+  changed = false;
+  show.value = true;
+  loadKnownNames();
+  if (!info?.fileid) return;
 
-      this.fileId = info.fileid;
-      // Only the size of the original is any good: a marking is measured
-      // against it, and the preview is scaled down.
-      this.imageNatW = info.w ?? 0;
-      this.imageNatH = info.h ?? 0;
-      this.imageSrc = this.previewOf(this.fileId, info.etag);
-      await this.loadFaces();
-    },
+  fileId.value = info.fileid;
+  // Only the size of the original is any good: a marking is measured
+  // against it, and the preview is scaled down.
+  imageNatW.value = info.w ?? 0;
+  imageNatH.value = info.h ?? 0;
+  imageSrc.value = previewOf(fileId.value, info.etag);
+  await loadFaces();
+}
 
-    cleanup() {
-      this.show = false;
-      this.resetAll();
-      if (this.changed) {
-        this.changed = false;
-        this.$emit('added');
-      }
-    },
+function cleanup() {
+  show.value = false;
+  resetAll();
+  if (changed) {
+    changed = false;
+    emit('added');
+  }
+}
 
-    /** Shows what was just saved over the photo, for a few seconds. */
-    showNotice(text: string) {
-      window.clearTimeout(this.noticeTimer);
-      this.notice = text;
-      this.noticeTimer = window.setTimeout(() => (this.notice = ''), NOTICE_MS);
-    },
+/** Shows what was just saved over the photo, for a few seconds. */
+function showNotice(text: string) {
+  window.clearTimeout(noticeTimer);
+  notice.value = text;
+  noticeTimer = window.setTimeout(() => (notice.value = ''), NOTICE_MS);
+}
 
-    /** Puts the cursor in the name field of a new marking, without scrolling to it. */
-    focusName() {
-      this.$nextTick(() => focusWithoutScrolling(() => inputOf(this.$refs.nameField)));
-    },
+/** Puts the cursor in the name field of a new marking, without scrolling to it. */
+function focusName() {
+  nextTick(() => focusWithoutScrolling(() => inputOf(nameField.value)));
+}
 
-    previewOf(fileId: number, etag?: string): string {
-      return API.Q(API.IMAGE_PREVIEW(fileId), { c: etag, x: 2048, y: 2048, a: '1' });
-    },
+function previewOf(id: number, etag?: string): string {
+  return API.Q(API.IMAGE_PREVIEW(id), { c: etag, x: 2048, y: 2048, a: '1' });
+}
 
-    /**
-     * Load the faces of the photo, with their state, and the regions queued
-     * on it. A failure is shown here, and leaves the rest of the app alone.
-     */
-    async loadFaces(): Promise<void> {
-      const fileId = this.fileId;
-      if (!fileId) return;
-      this.loadError = '';
-      try {
-        const result = await faceRecognitionGetFacesForFile(fileId);
-        // The dialog moved on to another photo, or was closed, meanwhile.
-        if (fileId !== this.fileId) return;
-        this.faces = result.faces;
-        this.regions = result.regions;
-        this.limits = result.limits;
-        this.legacy = result.legacy;
-        this.selectedFaceIds = this.selectedFaceIds.filter((id) => this.faces.some((face) => face.id === id));
-      } catch (e) {
-        console.error(e);
-        if (fileId !== this.fileId) return;
-        this.loadError = errorText(e, t('memories', 'The faces of this photo could not be loaded.'));
-      }
-    },
+/**
+ * Load the faces of the photo, with their state, and the regions queued
+ * on it. A failure is shown here, and leaves the rest of the app alone.
+ */
+async function loadFaces(): Promise<void> {
+  const id = fileId.value;
+  if (!id) return;
+  loadError.value = '';
+  try {
+    const result = await faceRecognitionGetFacesForFile(id);
+    // The dialog moved on to another photo, or was closed, meanwhile.
+    if (id !== fileId.value) return;
+    faces.value = result.faces;
+    regions.value = result.regions;
+    limits.value = result.limits;
+    legacy.value = result.legacy;
+    selectedFaceIds.value = selectedFaceIds.value.filter((faceId) => faces.value.some((face) => face.id === faceId));
+  } catch (e) {
+    console.error(e);
+    if (id !== fileId.value) return;
+    loadError.value = errorText(e, t('memories', 'The faces of this photo could not be loaded.'));
+  }
+}
 
-    /**
-     * Load the names of already-known persons so the name fields can offer
-     * autocompletion — mirrors how naming an unknown cluster suggests existing names.
-     * Failure is non-fatal: it just means no suggestions are shown.
-     */
-    async loadKnownNames(): Promise<void> {
-      try {
-        const faces = await getFaceList('facerecognition');
-        const names = faces
-          .map((f) => f.name)
-          // Keep only real names; unnamed clusters expose a numeric id as their name.
-          .filter((n): n is string => !!n && Number.isNaN(Number(n)));
-        this.knownNames = Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
-      } catch (e) {
-        console.error(e);
-        this.knownNames = [];
-      }
-    },
+/**
+ * Load the names of already-known persons so the name fields can offer
+ * autocompletion — mirrors how naming an unknown cluster suggests existing names.
+ * Failure is non-fatal: it just means no suggestions are shown.
+ */
+async function loadKnownNames(): Promise<void> {
+  try {
+    const list = await getFaceList('facerecognition');
+    const names = list
+      .map((f) => f.name)
+      // Keep only real names; unnamed clusters expose a numeric id as their name.
+      .filter((known): known is string => !!known && Number.isNaN(Number(known)));
+    knownNames.value = Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
+  } catch (e) {
+    console.error(e);
+    knownNames.value = [];
+  }
+}
 
-    resetAll() {
-      this.resetFile();
-      this.knownNames = [];
-      this.navigationError = false;
-    },
+function resetAll() {
+  resetFile();
+  knownNames.value = [];
+  navigationError.value = false;
+}
 
-    resetFile() {
-      this.fileId = 0;
-      this.imageSrc = '';
-      this.imageNatW = 0;
-      this.imageNatH = 0;
-      this.faces = [];
-      this.regions = null;
-      this.limits = null;
-      this.legacy = false;
-      this.loadError = '';
-      this.rect = null;
-      this.rawInput = '';
-      this.saving = false;
-      this.saveError = '';
-      this.selectedFaceIds = [];
-      this.highlightedRegionId = null;
-      window.clearTimeout(this.noticeTimer);
-      this.notice = '';
-    },
+function resetFile() {
+  fileId.value = 0;
+  imageSrc.value = '';
+  imageNatW.value = 0;
+  imageNatH.value = 0;
+  faces.value = [];
+  regions.value = null;
+  limits.value = null;
+  legacy.value = false;
+  loadError.value = '';
+  rect.value = null;
+  rawInput.value = '';
+  saving.value = false;
+  saveError.value = '';
+  selectedFaceIds.value = [];
+  highlightedRegionId.value = null;
+  window.clearTimeout(noticeTimer);
+  notice.value = '';
+}
 
-    async pickFile(): Promise<void> {
-      const picker = getFilePickerBuilder(t('memories', 'Choose photo'))
-        .setMultiSelect(false)
-        .addMimeTypeFilter('image/jpeg')
-        .addMimeTypeFilter('image/png')
-        .addMimeTypeFilter('image/webp')
-        .addMimeTypeFilter('image/heic')
-        .addMimeTypeFilter('image/heif')
-        .setType(1)
-        .allowDirectories(false)
-        .build();
+async function pickFile(): Promise<void> {
+  // @nextcloud/dialogs is large, and loaded on first use only
+  const { getFilePickerBuilder } = await import('@services/utils/dialog-lib');
+  const picker = getFilePickerBuilder(t('memories', 'Choose photo'))
+    .setMultiSelect(false)
+    .addMimeTypeFilter('image/jpeg')
+    .addMimeTypeFilter('image/png')
+    .addMimeTypeFilter('image/webp')
+    .addMimeTypeFilter('image/heic')
+    .addMimeTypeFilter('image/heif')
+    .setType(1)
+    .allowDirectories(false)
+    .build();
 
-      let path: string;
-      try {
-        path = (await picker.pick()) as string;
-      } catch (e) {
-        return; // user cancelled
-      }
-      if (!path) return;
+  let path: string;
+  try {
+    path = (await utils.fragment.wrap(picker.pick(), utils.fragment.types.dialog)) as string;
+  } catch (e) {
+    return; // user cancelled
+  }
+  if (!path) return;
 
-      await this.loadPhotoByPath(path);
-    },
+  await loadPhotoByPath(path);
+}
 
-    async loadPhotoByPath(path: string): Promise<void> {
-      let file: { fileid: number; etag: string };
-      try {
-        // Memories' IMAGE_INFO requires a fileid, so the file is looked up via WebDAV.
-        file = await this.webdavFileInfo(path);
-      } catch (e) {
-        console.error(e);
-        this.resetFile();
-        this.loadError = t('memories', 'Failed to load the selected photo.');
-        return;
-      }
-      const size = await this.indexedSize(file.fileid);
-      this.fileId = file.fileid;
-      this.imageNatW = size.w;
-      this.imageNatH = size.h;
-      this.imageSrc = this.previewOf(this.fileId, file.etag);
-      await this.loadFaces();
-    },
+async function loadPhotoByPath(path: string): Promise<void> {
+  let file: { fileid: number; etag: string };
+  try {
+    // Memories' IMAGE_INFO requires a fileid, so the file is looked up via WebDAV.
+    file = await webdavFileInfo(path);
+  } catch (e) {
+    console.error(e);
+    resetFile();
+    loadError.value = t('memories', 'Failed to load the selected photo.');
+    return;
+  }
+  const size = await indexedSize(file.fileid);
+  fileId.value = file.fileid;
+  imageNatW.value = size.w;
+  imageNatH.value = size.h;
+  imageSrc.value = previewOf(fileId.value, file.etag);
+  await loadFaces();
+}
 
-    /**
-     * The size of the original as Memories indexed it, the same the sidebar
-     * opens the dialog with. A photo not indexed yet has none: it is shown,
-     * but nothing can be marked on it, since the size of the preview would
-     * put the marking elsewhere.
-     */
-    async indexedSize(fileId: number): Promise<{ w: number; h: number }> {
-      try {
-        const { data } = await axios.get<IImageInfo>(API.Q(API.IMAGE_INFO(fileId), { basic: 1 }));
-        return { w: data.w || 0, h: data.h || 0 };
-      } catch (e) {
-        console.warn(e);
-        return { w: 0, h: 0 };
-      }
-    },
+/**
+ * The size of the original as Memories indexed it, the same the sidebar
+ * opens the dialog with. A photo not indexed yet has none: it is shown,
+ * but nothing can be marked on it, since the size of the preview would
+ * put the marking elsewhere.
+ */
+async function indexedSize(id: number): Promise<{ w: number; h: number }> {
+  try {
+    const { data } = await axios.get<IImageInfo>(API.Q(API.IMAGE_INFO(id), { basic: 1 }));
+    return { w: data.w || 0, h: data.h || 0 };
+  } catch (e) {
+    console.warn(e);
+    return { w: 0, h: 0 };
+  }
+}
 
-    async webdavFileInfo(path: string): Promise<{ fileid: number; etag: string }> {
-      const url = `/remote.php/dav/files/${encodeURIComponent((window as any).OC?.getCurrentUser?.().uid || '')}${path
-        .split('/')
-        .map(encodeURIComponent)
-        .join('/')}`;
-      const body = `<?xml version="1.0"?>
+async function webdavFileInfo(path: string): Promise<{ fileid: number; etag: string }> {
+  const url = `/remote.php/dav/files/${encodeURIComponent(utils.uid ?? '')}${path
+    .split('/')
+    .map(encodeURIComponent)
+    .join('/')}`;
+  const body = `<?xml version="1.0"?>
 <d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns">
   <d:prop>
     <oc:fileid/>
     <d:getetag/>
   </d:prop>
 </d:propfind>`;
-      const res = await axios.request({
-        method: 'PROPFIND',
-        url,
-        data: body,
-        headers: { Depth: '0', 'Content-Type': 'application/xml' },
-      });
-      const text = typeof res.data === 'string' ? res.data : new XMLSerializer().serializeToString(res.data);
-      const doc = new DOMParser().parseFromString(text, 'application/xml');
-      const fileid = parseInt(
-        doc.getElementsByTagNameNS('http://owncloud.org/ns', 'fileid')[0]?.textContent ?? '0',
-        10,
-      );
-      const etag = (doc.getElementsByTagNameNS('DAV:', 'getetag')[0]?.textContent ?? '').replace(/"/g, '');
-      return { fileid, etag };
-    },
+  const res = await axios.request({
+    method: 'PROPFIND',
+    url,
+    data: body,
+    headers: { Depth: '0', 'Content-Type': 'application/xml' },
+  });
+  const text = typeof res.data === 'string' ? res.data : new XMLSerializer().serializeToString(res.data);
+  const doc = new DOMParser().parseFromString(text, 'application/xml');
+  const fileid = parseInt(doc.getElementsByTagNameNS('http://owncloud.org/ns', 'fileid')[0]?.textContent ?? '0', 10);
+  const etag = (doc.getElementsByTagNameNS('DAV:', 'getetag')[0]?.textContent ?? '').replace(/"/g, '');
+  return { fileid, etag };
+}
 
-    onRect(rect: Rect | null) {
-      this.rect = rect;
-      if (rect) {
-        this.selectedFaceIds = [];
-        this.saveError = '';
-        this.focusName();
-      }
-    },
+function onRect(drawn: Rect | null) {
+  rect.value = drawn;
+  if (drawn) {
+    selectedFaceIds.value = [];
+    saveError.value = '';
+    focusName();
+  }
+}
 
-    /**
-     * Selects a face, or with Ctrl+click adds it to the faces selected or
-     * takes it out of them.
-     */
-    selectFace(faceId: number, additive = false) {
-      // While saving, the rectangle has to stay, to try again if it fails.
-      if (this.saving) return;
-      if (!this.faces.some((f) => f.id === faceId)) return;
-      this.rect = null;
-      this.saveError = '';
-      if (additive) {
-        this.selectedFaceIds = this.selectedFaceIds.includes(faceId)
-          ? this.selectedFaceIds.filter((id) => id !== faceId)
-          : [...this.selectedFaceIds, faceId];
-      } else {
-        this.selectedFaceIds = [faceId];
-      }
-      if (this.selectedFaceIds.length === 1) {
-        this.$nextTick(() => (this.$refs.panel as InstanceType<typeof FaceSelectionPanel> | undefined)?.focusName());
-      }
-    },
+/**
+ * Selects a face, or with Ctrl+click adds it to the faces selected or
+ * takes it out of them.
+ */
+function selectFace(faceId: number, additive = false) {
+  // While saving, the rectangle has to stay, to try again if it fails.
+  if (saving.value) return;
+  if (!faces.value.some((f) => f.id === faceId)) return;
+  rect.value = null;
+  saveError.value = '';
+  if (additive) {
+    selectedFaceIds.value = selectedFaceIds.value.includes(faceId)
+      ? selectedFaceIds.value.filter((id) => id !== faceId)
+      : [...selectedFaceIds.value, faceId];
+  } else {
+    selectedFaceIds.value = [faceId];
+  }
+  if (selectedFaceIds.value.length === 1) {
+    nextTick(() => panel.value?.focusName());
+  }
+}
 
-    /** A searched area was removed from the list: tell, and read the photo again. */
-    async onRegionRemoved(message: string): Promise<void> {
-      this.showNotice(message);
-      this.highlightedRegionId = null;
-      await this.loadFaces();
-    },
+/** A searched area was removed from the list: tell, and read the photo again. */
+async function onRegionRemoved(message: string): Promise<void> {
+  showNotice(message);
+  highlightedRegionId.value = null;
+  await loadFaces();
+}
 
-    clearSelection() {
-      this.selectedFaceIds = [];
-    },
+function clearSelection() {
+  selectedFaceIds.value = [];
+}
 
-    /** The panel of the selected faces changed them: tell, and read the faces again. */
-    async onSelectionDone(message: string): Promise<void> {
-      this.showNotice(message);
-      this.selectedFaceIds = [];
-      this.changed = true;
-      await this.loadFaces();
-    },
+/** The panel of the selected faces changed them: tell, and read the faces again. */
+async function onSelectionDone(message: string): Promise<void> {
+  showNotice(message);
+  selectedFaceIds.value = [];
+  changed = true;
+  await loadFaces();
+}
 
-    /** The rectangle as the server takes it, measured against the original. */
-    manualRect() {
-      const rect = this.rect!;
-      return {
-        fileId: this.fileId,
-        x: rect.x,
-        y: rect.y,
-        width: rect.w,
-        height: rect.h,
-        imageWidth: this.imageNatW,
-        imageHeight: this.imageNatH,
-      };
-    },
+/** The rectangle as the server takes it, measured against the original. */
+function manualRect() {
+  const drawn = rect.value!;
+  return {
+    fileId: fileId.value,
+    x: drawn.x,
+    y: drawn.y,
+    width: drawn.w,
+    height: drawn.h,
+    imageWidth: imageNatW.value,
+    imageHeight: imageNatH.value,
+  };
+}
 
-    saveNamed(): Promise<void> {
-      return this.canSaveNamed ? this.saveMarking(this.name) : Promise.resolve();
-    },
+function saveNamed(): Promise<void> {
+  return canSaveNamed.value ? saveMarking(name.value) : Promise.resolve();
+}
 
-    saveUnnamed(): Promise<void> {
-      return this.canSaveUnnamed ? this.saveMarking('') : Promise.resolve();
-    },
+function saveUnnamed(): Promise<void> {
+  return canSaveUnnamed.value ? saveMarking('') : Promise.resolve();
+}
 
-    /**
-     * Saves the rectangle as a face, and keeps the dialog open for the next
-     * one. If saving fails, the rectangle stays, to try again.
-     */
-    async saveMarking(personName: string): Promise<void> {
-      if (!this.rect || !this.fileId || !this.dimensionsKnown || this.saving) return;
-      this.saving = true;
-      this.saveError = '';
-      try {
-        await faceRecognitionAddManualFace({ ...this.manualRect(), personName });
-        this.showNotice(
-          personName
-            ? t('memories', 'Person "{name}" tagged.', { name: personName })
-            : t('memories', 'Saved. The face recognition will look for the person on its next run.'),
-        );
-        this.rect = null;
-        this.rawInput = '';
-        this.changed = true;
-      } catch (e) {
-        console.error(e);
-        this.saveError = errorText(e, t('memories', 'Failed to save the manual face.'));
-        return;
-      } finally {
-        this.saving = false;
-      }
-      await this.loadFaces();
-    },
+/**
+ * Saves the rectangle as a face, and keeps the dialog open for the next
+ * one. If saving fails, the rectangle stays, to try again.
+ */
+async function saveMarking(personName: string): Promise<void> {
+  if (!rect.value || !fileId.value || !dimensionsKnown.value || saving.value) return;
+  saving.value = true;
+  saveError.value = '';
+  try {
+    await faceRecognitionAddManualFace({ ...manualRect(), personName });
+    showNotice(
+      personName
+        ? t('memories', 'Person "{name}" tagged.', { name: personName })
+        : t('memories', 'Saved. The face recognition will look for the person on its next run.'),
+    );
+    rect.value = null;
+    rawInput.value = '';
+    changed = true;
+  } catch (e) {
+    console.error(e);
+    saveError.value = errorText(e, t('memories', 'Failed to save the manual face.'));
+    return;
+  } finally {
+    saving.value = false;
+  }
+  await loadFaces();
+}
 
-    async saveRegion(): Promise<void> {
-      if (!this.rect || !this.fileId || !this.dimensionsKnown || this.saving || !this.canSearchRegion) return;
-      this.saving = true;
-      this.saveError = '';
-      try {
-        await faceRecognitionAddManualRegion(this.manualRect());
-        this.showNotice(t('memories', 'The area will be searched for faces on the next run of the face recognition.'));
-        this.rect = null;
-        this.rawInput = '';
-      } catch (e) {
-        console.error(e);
-        this.saveError = errorText(e, t('memories', 'The area could not be queued for a search.'));
-        return;
-      } finally {
-        this.saving = false;
-      }
-      await this.loadFaces();
-    },
-  },
-});
+async function saveRegion(): Promise<void> {
+  if (!rect.value || !fileId.value || !dimensionsKnown.value || saving.value || !canSearchRegion.value) return;
+  saving.value = true;
+  saveError.value = '';
+  try {
+    await faceRecognitionAddManualRegion(manualRect());
+    showNotice(t('memories', 'The area will be searched for faces on the next run of the face recognition.'));
+    rect.value = null;
+    rawInput.value = '';
+  } catch (e) {
+    console.error(e);
+    saveError.value = errorText(e, t('memories', 'The area could not be queued for a search.'));
+    return;
+  } finally {
+    saving.value = false;
+  }
+  await loadFaces();
+}
+
+defineExpose({ open, openForFile });
 </script>
 
 <style lang="scss" scoped>

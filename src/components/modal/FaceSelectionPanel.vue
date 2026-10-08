@@ -74,19 +74,19 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
-import type { PropType } from 'vue';
+<script setup lang="ts">
+import { computed, defineAsyncComponent, nextTick, ref, useTemplateRef, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
 const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
 
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 
-import { translate as t, translatePlural as n } from '@services/l10n';
-import * as utils from '@services/utils';
+import { t, n } from '@services/l10n';
+import * as utils from '@services/utils/common';
 import {
   faceRecognitionAssignCluster,
   faceRecognitionDeleteFaces,
@@ -98,7 +98,7 @@ import {
 } from '@services/dav/face';
 
 import {
-  canDelete,
+  canDelete as isDeletable,
   errorText,
   focusWithoutScrolling,
   hintsOf,
@@ -116,276 +116,234 @@ import {
  * for one or several, deleting or ignoring them. What is done here is told
  * with 'done', and the dialog then reads the faces of the photo again.
  */
-export default defineComponent({
+defineOptions({
   name: 'FaceSelectionPanel',
-  components: { NcButton, NcNoteCard, NcTextField, NcCheckboxRadioSwitch, OpenInNewIcon },
-
-  props: {
-    /** The faces selected, at least one */
-    faces: {
-      type: Array as PropType<IFaceRectForFile[]>,
-      required: true,
-    },
-    limits: {
-      type: Object as PropType<IFaceLimits | null>,
-      default: null,
-    },
-    /** Face Recognition on the server does not report the state of the faces */
-    legacy: {
-      type: Boolean,
-      default: false,
-    },
-    knownNames: {
-      type: Array as PropType<string[]>,
-      default: () => [],
-    },
-  },
-
-  emits: {
-    /** Something was changed on the server; the text says what, for the user */
-    done: (_message: string) => true,
-    cancel: () => true,
-  },
-
-  data: () => ({
-    editName: '',
-    wholeGroup: false,
-    /** Delete was clicked once, and waits for the second click that confirms it */
-    confirmDelete: false,
-    saving: false,
-    error: '',
-  }),
-
-  computed: {
-    /** The one face selected, or null when there are several. */
-    face(): IFaceRectForFile | null {
-      return this.faces.length === 1 ? this.faces[0] : null;
-    },
-
-    /** Which faces are selected, so that a change of the selection starts afresh */
-    selection(): string {
-      return this.faces.map((face) => face.id).join(',');
-    },
-
-    ignored(): boolean {
-      return !!this.face && isIgnored(this.face);
-    },
-
-    participation(): string {
-      return this.face ? participationText(this.face, this.limits) : '';
-    },
-
-    hints(): string[] {
-      return this.face ? hintsOf(this.face) : [];
-    },
-
-    /** A face can only be moved to a person through its group. */
-    canReassign(): boolean {
-      return this.face?.cluster !== null && this.face?.cluster !== undefined;
-    },
-
-    /**
-     * A face in no group, like a marking saved without a name, is named on
-     * its own and gets a group for that person. Face Recognition before this
-     * change has no way to do that.
-     */
-    canName(): boolean {
-      return !!this.face && !this.canReassign && !this.legacy;
-    },
-
-    canEditName(): boolean {
-      return this.canReassign || this.canName;
-    },
-
-    target(): string {
-      return this.editName.trim();
-    },
-
-    groupSize(): number | null {
-      return this.face?.clusterSize ?? null;
-    },
-
-    /** Moving the whole group is offered when there is more in it than this face. */
-    canMoveGroup(): boolean {
-      return !this.legacy && this.groupSize !== null && this.groupSize > 1 && !this.ignored;
-    },
-
-    groupHref(): string {
-      const cluster = this.face?.cluster;
-      if (cluster === null || cluster === undefined) return '';
-      return this.$router.resolve({ name: 'facerecognition', params: { user: utils.uid ?? '', name: String(cluster) } })
-        .href;
-    },
-
-    /** What saving the name changes, for a face in a group or in none */
-    editScope(): string {
-      return this.canName
-        ? markingScope(this.target, this.knownNames)
-        : reassignScope(this.target, this.wholeGroup && this.canMoveGroup, this.groupSize);
-    },
-
-    canSaveName(): boolean {
-      return this.canEditName && !!this.target && !this.saving;
-    },
-
-    /** Only what was put there by hand can be deleted, and all of the selection or nothing. */
-    canDelete(): boolean {
-      return !this.legacy && this.faces.every(canDelete);
-    },
-
-    canIgnore(): boolean {
-      return !this.legacy && this.faces.some((face) => !isIgnored(face));
-    },
-
-    canUnignore(): boolean {
-      return !this.legacy && this.faces.every(isIgnored);
-    },
-
-    deleteLabel(): string {
-      const count = this.faces.length;
-      return this.confirmDelete
-        ? n('memories', 'Really delete {count} face', 'Really delete {count} faces', count, { count })
-        : t('memories', 'Delete');
-    },
-
-    /** What is worth knowing about the faces selected together. */
-    notes(): string[] {
-      const notes: string[] = [];
-      if (!this.legacy && !this.faces.every(canDelete)) {
-        notes.push(
-          t(
-            'memories',
-            'Faces found by the automatic analysis cannot be deleted, since its next run on the photo would find them again. They can be ignored.',
-          ),
-        );
-      }
-      if (this.canIgnore) {
-        notes.push(
-          t(
-            'memories',
-            'Ignored faces stay on the photo, faintly, but they are nobody: they do not show among the people, and the automatic recognition leaves them alone.',
-          ),
-        );
-      }
-      return notes;
-    },
-  },
-
-  watch: {
-    selection: {
-      immediate: true,
-      handler() {
-        // A single face can be named, and the field starts with its name.
-        this.editName = this.face?.personName ?? '';
-        // Only this face, unless the user says otherwise.
-        this.wholeGroup = false;
-        this.confirmDelete = false;
-        this.error = '';
-      },
-    },
-  },
-
-  methods: {
-    nameOf,
-    originText,
-
-    /** Puts the cursor in the name field, when there is one, without scrolling to it. */
-    focusName() {
-      this.$nextTick(() => focusWithoutScrolling(() => inputOf(this.$refs.editField)));
-    },
-
-    async saveName(): Promise<void> {
-      const face = this.face;
-      if (!this.canSaveName || !face) return;
-      const target = this.target;
-      const wholeGroup = this.wholeGroup && this.canMoveGroup;
-      await this.run(
-        async () => {
-          if (face.cluster === null) {
-            await faceRecognitionNameFace(face.id, target);
-            return t('memories', 'Person "{name}" tagged.', { name: target });
-          }
-          await faceRecognitionAssignCluster(face.cluster, target, wholeGroup ? undefined : face.id);
-          return wholeGroup
-            ? t('memories', 'Group assigned to "{name}".', { name: target })
-            : t('memories', 'Face reassigned to "{name}".', { name: target });
-        },
-        t('memories', 'Failed to reassign the face.'),
-      );
-    },
-
-    /** Deletes the faces, on the second click: the first one asks. */
-    async remove(): Promise<void> {
-      if (!this.canDelete) return;
-      if (!this.confirmDelete) {
-        this.confirmDelete = true;
-        return;
-      }
-      await this.run(
-        async () => {
-          const { faceIds } = await faceRecognitionDeleteFaces(this.ids());
-          return n('memories', '{count} face deleted.', '{count} faces deleted.', faceIds.length, {
-            count: faceIds.length,
-          });
-        },
-        t('memories', 'The faces could not be deleted.'),
-      );
-    },
-
-    async ignore(): Promise<void> {
-      if (!this.canIgnore) return;
-      await this.run(
-        async () => {
-          const { faceIds } = await faceRecognitionIgnoreFaces(this.ids());
-          return n('memories', '{count} face ignored.', '{count} faces ignored.', faceIds.length, {
-            count: faceIds.length,
-          });
-        },
-        t('memories', 'The faces could not be ignored.'),
-      );
-    },
-
-    async unignore(): Promise<void> {
-      if (!this.canUnignore) return;
-      await this.run(
-        async () => {
-          const { faceIds } = await faceRecognitionUnignoreFaces(this.ids());
-          return n(
-            'memories',
-            '{count} face is not ignored any more. The face recognition places it on its next run.',
-            '{count} faces are not ignored any more. The face recognition places them on its next run.',
-            faceIds.length,
-            { count: faceIds.length },
-          );
-        },
-        t('memories', 'The faces could not be changed.'),
-      );
-    },
-
-    ids(): number[] {
-      return this.faces.map((face) => face.id);
-    },
-
-    /**
-     * Runs a change on the server, and tells the dialog what came of it. On
-     * a failure the selection stays, to try again.
-     */
-    async run(change: () => Promise<string>, failed: string): Promise<void> {
-      if (this.saving) return;
-      this.saving = true;
-      this.error = '';
-      try {
-        this.$emit('done', await change());
-      } catch (e) {
-        console.error(e);
-        this.error = errorText(e, failed);
-      } finally {
-        this.saving = false;
-        this.confirmDelete = false;
-      }
-    },
-  },
 });
+
+const props = withDefaults(
+  defineProps<{
+    /** The faces selected, at least one */
+    faces: IFaceRectForFile[];
+    limits?: IFaceLimits | null;
+    /** Face Recognition on the server does not report the state of the faces */
+    legacy?: boolean;
+    knownNames?: string[];
+  }>(),
+  {
+    limits: null,
+    legacy: false,
+    knownNames: () => [],
+  },
+);
+
+const emit = defineEmits<{
+  /** Something was changed on the server; the text says what, for the user */
+  done: [message: string];
+  cancel: [];
+}>();
+
+const router = useRouter();
+const editField = useTemplateRef('editField');
+
+const editName = ref('');
+const wholeGroup = ref(false);
+/** Delete was clicked once, and waits for the second click that confirms it */
+const confirmDelete = ref(false);
+const saving = ref(false);
+const error = ref('');
+
+/** The one face selected, or null when there are several. */
+const face = computed(() => (props.faces.length === 1 ? props.faces[0] : null));
+
+/** Which faces are selected, so that a change of the selection starts afresh */
+const selection = computed(() => props.faces.map((f) => f.id).join(','));
+
+const ignored = computed(() => !!face.value && isIgnored(face.value));
+
+const participation = computed(() => (face.value ? participationText(face.value, props.limits) : ''));
+
+const hints = computed(() => (face.value ? hintsOf(face.value) : []));
+
+/** A face can only be moved to a person through its group. */
+const canReassign = computed(() => face.value?.cluster !== null && face.value?.cluster !== undefined);
+
+/**
+ * A face in no group, like a marking saved without a name, is named on
+ * its own and gets a group for that person. Face Recognition before this
+ * change has no way to do that.
+ */
+const canName = computed(() => !!face.value && !canReassign.value && !props.legacy);
+
+const canEditName = computed(() => canReassign.value || canName.value);
+
+const target = computed(() => editName.value.trim());
+
+const groupSize = computed(() => face.value?.clusterSize ?? null);
+
+/** Moving the whole group is offered when there is more in it than this face. */
+const canMoveGroup = computed(() => !props.legacy && groupSize.value !== null && groupSize.value > 1 && !ignored.value);
+
+const groupHref = computed(() => {
+  const cluster = face.value?.cluster;
+  if (cluster === null || cluster === undefined) return '';
+  return router.resolve({ name: 'facerecognition', params: { user: utils.uid ?? '', name: String(cluster) } }).href;
+});
+
+/** What saving the name changes, for a face in a group or in none */
+const editScope = computed(() =>
+  canName.value
+    ? markingScope(target.value, props.knownNames)
+    : reassignScope(target.value, wholeGroup.value && canMoveGroup.value, groupSize.value),
+);
+
+const canSaveName = computed(() => canEditName.value && !!target.value && !saving.value);
+
+/** Only what was put there by hand can be deleted, and all of the selection or nothing. */
+const canDelete = computed(() => !props.legacy && props.faces.every(isDeletable));
+
+const canIgnore = computed(() => !props.legacy && props.faces.some((f) => !isIgnored(f)));
+
+const canUnignore = computed(() => !props.legacy && props.faces.every(isIgnored));
+
+const deleteLabel = computed(() => {
+  const count = props.faces.length;
+  return confirmDelete.value
+    ? n('memories', 'Really delete {count} face', 'Really delete {count} faces', count, { count })
+    : t('memories', 'Delete');
+});
+
+/** What is worth knowing about the faces selected together. */
+const notes = computed(() => {
+  const list: string[] = [];
+  if (!props.legacy && !props.faces.every(isDeletable)) {
+    list.push(
+      t(
+        'memories',
+        'Faces found by the automatic analysis cannot be deleted, since its next run on the photo would find them again. They can be ignored.',
+      ),
+    );
+  }
+  if (canIgnore.value) {
+    list.push(
+      t(
+        'memories',
+        'Ignored faces stay on the photo, faintly, but they are nobody: they do not show among the people, and the automatic recognition leaves them alone.',
+      ),
+    );
+  }
+  return list;
+});
+
+watch(
+  selection,
+  () => {
+    // A single face can be named, and the field starts with its name.
+    editName.value = face.value?.personName ?? '';
+    // Only this face, unless the user says otherwise.
+    wholeGroup.value = false;
+    confirmDelete.value = false;
+    error.value = '';
+  },
+  { immediate: true },
+);
+
+/** Puts the cursor in the name field, when there is one, without scrolling to it. */
+function focusName() {
+  nextTick(() => focusWithoutScrolling(() => inputOf(editField.value)));
+}
+
+async function saveName(): Promise<void> {
+  const selected = face.value;
+  if (!canSaveName.value || !selected) return;
+  const name = target.value;
+  const moveGroup = wholeGroup.value && canMoveGroup.value;
+  await run(
+    async () => {
+      if (selected.cluster === null) {
+        await faceRecognitionNameFace(selected.id, name);
+        return t('memories', 'Person "{name}" tagged.', { name });
+      }
+      await faceRecognitionAssignCluster(selected.cluster, name, moveGroup ? undefined : selected.id);
+      return moveGroup
+        ? t('memories', 'Group assigned to "{name}".', { name })
+        : t('memories', 'Face reassigned to "{name}".', { name });
+    },
+    t('memories', 'Failed to reassign the face.'),
+  );
+}
+
+/** Deletes the faces, on the second click: the first one asks. */
+async function remove(): Promise<void> {
+  if (!canDelete.value) return;
+  if (!confirmDelete.value) {
+    confirmDelete.value = true;
+    return;
+  }
+  await run(
+    async () => {
+      const { faceIds } = await faceRecognitionDeleteFaces(ids());
+      return n('memories', '{count} face deleted.', '{count} faces deleted.', faceIds.length, {
+        count: faceIds.length,
+      });
+    },
+    t('memories', 'The faces could not be deleted.'),
+  );
+}
+
+async function ignore(): Promise<void> {
+  if (!canIgnore.value) return;
+  await run(
+    async () => {
+      const { faceIds } = await faceRecognitionIgnoreFaces(ids());
+      return n('memories', '{count} face ignored.', '{count} faces ignored.', faceIds.length, {
+        count: faceIds.length,
+      });
+    },
+    t('memories', 'The faces could not be ignored.'),
+  );
+}
+
+async function unignore(): Promise<void> {
+  if (!canUnignore.value) return;
+  await run(
+    async () => {
+      const { faceIds } = await faceRecognitionUnignoreFaces(ids());
+      return n(
+        'memories',
+        '{count} face is not ignored any more. The face recognition places it on its next run.',
+        '{count} faces are not ignored any more. The face recognition places them on its next run.',
+        faceIds.length,
+        { count: faceIds.length },
+      );
+    },
+    t('memories', 'The faces could not be changed.'),
+  );
+}
+
+function ids(): number[] {
+  return props.faces.map((f) => f.id);
+}
+
+/**
+ * Runs a change on the server, and tells the dialog what came of it. On
+ * a failure the selection stays, to try again.
+ */
+async function run(change: () => Promise<string>, failed: string): Promise<void> {
+  if (saving.value) return;
+  saving.value = true;
+  error.value = '';
+  try {
+    emit('done', await change());
+  } catch (e) {
+    console.error(e);
+    error.value = errorText(e, failed);
+  } finally {
+    saving.value = false;
+    confirmDelete.value = false;
+  }
+}
+
+defineExpose({ focusName });
 </script>
 
 <style lang="scss" scoped>

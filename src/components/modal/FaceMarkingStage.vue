@@ -73,11 +73,12 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue';
-import Hammer from 'hammerjs';
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
+
+import { t } from '@services/l10n';
 
 import type { Rect, StageFace, StageRegion } from './faceMarking';
 import { rectFromPoints, toCss } from './faceMarking';
@@ -91,12 +92,6 @@ const MIN_DRAWN = 0.01;
 type Point = { x: number; y: number };
 
 /**
- * The hammerjs manager of each stage, kept out of the data of the component:
- * Vue would walk and observe the whole object graph of it, for nothing.
- */
-const hammers = new WeakMap<object, HammerManager>();
-
-/**
  * A photo to mark faces on: one pointer draws a rectangle, and the photo can
  * be zoomed and moved without switching modes. Two fingers move and zoom, and
  * so do the mouse wheel and the middle mouse button; the primary button and a
@@ -106,300 +101,307 @@ const hammers = new WeakMap<object, HammerManager>();
  * element that is zoomed, so the boxes stay on their faces at any zoom, and a
  * rectangle is measured against what is shown, wherever the photo was moved.
  */
-export default defineComponent({
+defineOptions({
   name: 'FaceMarkingStage',
-  components: { NcButton },
-
-  props: {
-    src: { type: String, required: true },
-    faces: { type: Array as PropType<StageFace[]>, default: () => [] },
-    regions: { type: Array as PropType<StageRegion[]>, default: () => [] },
-    rect: { type: Object as PropType<Rect | null>, default: null },
-    drawingEnabled: { type: Boolean, default: true },
-  },
-
-  emits: {
-    'update:rect': (_rect: Rect | null) => true,
-    /** A face was clicked; with Ctrl (Cmd on a Mac) it is added to the ones selected, or taken out */
-    select: (_faceId: number, _additive: boolean) => true,
-    'navigation-error': () => true,
-    'image-error': () => true,
-  },
-
-  data: () => ({
-    MIN_SCALE,
-    MAX_SCALE,
-    ZOOM_STEP,
-    scale: MIN_SCALE,
-    tx: 0,
-    ty: 0,
-    /** Pointers down on the photo, to tell one finger from two */
-    pointerIds: [] as number[],
-    /**
-     * The rectangle being drawn, shown here while the pointer moves and only
-     * reported when it is let go: the dialog shows its fields for a reported
-     * one, and doing that halfway through the drag moved the page under it.
-     */
-    draw: null as { pointerId: number; start: Point; current: Rect | null } | null,
-    /** The photo being moved with the middle mouse button */
-    pan: null as { pointerId: number; start: Point; tx: number; ty: number } | null,
-    /** A two finger gesture: what the photo was at its start */
-    gesture: null as { scale: number; anchor: Point } | null,
-  }),
-
-  computed: {
-    /** While drawing, the rectangle being drawn; otherwise the one there is. */
-    shownRect(): Rect | null {
-      return this.draw?.current ?? this.rect;
-    },
-
-    contentStyle(): Record<string, string> {
-      return { transform: `translate(${this.tx}px, ${this.ty}px) scale(${this.scale})` };
-    },
-  },
-
-  watch: {
-    src() {
-      this.resetView();
-    },
-  },
-
-  mounted() {
-    // Two fingers are the only thing that needs hammerjs. If it cannot be set
-    // up, drawing does not depend on it, and the wheel and buttons still zoom.
-    try {
-      const hammer = new Hammer.Manager(this.$refs.viewport as HTMLElement, { touchAction: 'none' });
-      const pinch = new Hammer.Pinch({ pointers: 2, threshold: 0 });
-      const pan = new Hammer.Pan({ pointers: 2, threshold: 0, direction: Hammer.DIRECTION_ALL });
-      pinch.recognizeWith(pan);
-      hammer.add([pan, pinch]);
-      hammer.on('panstart pinchstart', this.onGestureStart);
-      hammer.on('panmove pinchmove', this.onGestureMove);
-      hammer.on('panend pinchend pancancel pinchcancel', this.onGestureEnd);
-      hammers.set(this, hammer);
-    } catch (e) {
-      console.error(e);
-      this.$emit('navigation-error');
-    }
-  },
-
-  beforeUnmount() {
-    try {
-      hammers.get(this)?.destroy();
-    } catch (e) {
-      console.error(e);
-    }
-    hammers.delete(this);
-  },
-
-  methods: {
-    toCss,
-
-    resetView() {
-      this.scale = MIN_SCALE;
-      this.tx = 0;
-      this.ty = 0;
-    },
-
-    /** A point of the screen as fractions of the photo as it is shown now. */
-    photoPoint(clientX: number, clientY: number): Point | null {
-      const image = this.$refs.image as HTMLImageElement | undefined;
-      if (!image) return null;
-      const box = image.getBoundingClientRect();
-      if (!box.width || !box.height) return null;
-      return {
-        x: Math.max(0, Math.min(1, (clientX - box.left) / box.width)),
-        y: Math.max(0, Math.min(1, (clientY - box.top) / box.height)),
-      };
-    },
-
-    /** A point of the screen in pixels of the viewport. */
-    viewportPoint(clientX: number, clientY: number): Point {
-      const box = (this.$refs.viewport as HTMLElement).getBoundingClientRect();
-      return { x: clientX - box.left, y: clientY - box.top };
-    },
-
-    /** Moves the photo, but never so far that its edge leaves the viewport. */
-    moveTo(tx: number, ty: number) {
-      const viewport = this.$refs.viewport as HTMLElement | undefined;
-      const width = viewport?.clientWidth ?? 0;
-      const height = viewport?.clientHeight ?? 0;
-      this.tx = Math.min(0, Math.max(width - width * this.scale, tx));
-      this.ty = Math.min(0, Math.max(height - height * this.scale, ty));
-    },
-
-    /** Zooms so that the point of the photo under $at stays where it is. */
-    zoomAround(scale: number, at: Point) {
-      const next = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale));
-      const anchor = { x: (at.x - this.tx) / this.scale, y: (at.y - this.ty) / this.scale };
-      this.scale = next;
-      this.moveTo(at.x - anchor.x * next, at.y - anchor.y * next);
-    },
-
-    zoomBy(factor: number) {
-      const viewport = this.$refs.viewport as HTMLElement;
-      this.zoomAround(this.scale * factor, { x: viewport.clientWidth / 2, y: viewport.clientHeight / 2 });
-    },
-
-    onWheel(ev: WheelEvent) {
-      this.zoomAround(this.scale * Math.exp(-ev.deltaY * 0.0015), this.viewportPoint(ev.clientX, ev.clientY));
-    },
-
-    /** The arrow keys move the photo, and + and - zoom it, for those without a pointer. */
-    onKeyDown(ev: KeyboardEvent) {
-      const viewport = this.$refs.viewport as HTMLElement;
-      const step = Math.max(20, Math.round(viewport.clientWidth / 10));
-      switch (ev.key) {
-        case 'ArrowLeft':
-          this.moveTo(this.tx + step, this.ty);
-          break;
-        case 'ArrowRight':
-          this.moveTo(this.tx - step, this.ty);
-          break;
-        case 'ArrowUp':
-          this.moveTo(this.tx, this.ty + step);
-          break;
-        case 'ArrowDown':
-          this.moveTo(this.tx, this.ty - step);
-          break;
-        case '+':
-        case '=':
-          this.zoomBy(ZOOM_STEP);
-          break;
-        case '-':
-          this.zoomBy(1 / ZOOM_STEP);
-          break;
-        case '0':
-          this.resetView();
-          break;
-        default:
-          return;
-      }
-      ev.preventDefault();
-    },
-
-    onPointerDown(ev: PointerEvent) {
-      // The first pointer of a touch, or any mouse press, starts afresh, so a
-      // pointer whose release got lost cannot count as a second finger forever.
-      if (ev.isPrimary) {
-        this.pointerIds = [];
-      }
-      if (!this.pointerIds.includes(ev.pointerId)) {
-        this.pointerIds.push(ev.pointerId);
-      }
-
-      // A second finger is not drawing: it is the start of a gesture.
-      if (this.pointerIds.length > 1) {
-        this.cancelDrawing();
-        return;
-      }
-
-      if (ev.pointerType === 'mouse' && ev.button === 1) {
-        ev.preventDefault();
-        this.pan = { pointerId: ev.pointerId, start: { x: ev.clientX, y: ev.clientY }, tx: this.tx, ty: this.ty };
-        this.capture(ev);
-        return;
-      }
-
-      // A pointer on a face picks that face, and draws nothing. It still
-      // reaches hammerjs, so it can be one of the two fingers of a gesture.
-      if ((ev.target as Element | null)?.closest?.('.face-box.existing')) return;
-
-      if (ev.button !== 0 || !this.drawingEnabled) return;
-
-      const point = this.photoPoint(ev.clientX, ev.clientY);
-      if (!point) return;
-      this.draw = { pointerId: ev.pointerId, start: point, current: null };
-      this.capture(ev);
-    },
-
-    onPointerMove(ev: PointerEvent) {
-      if (this.pan && ev.pointerId === this.pan.pointerId) {
-        this.moveTo(this.pan.tx + ev.clientX - this.pan.start.x, this.pan.ty + ev.clientY - this.pan.start.y);
-        return;
-      }
-
-      if (this.draw && ev.pointerId === this.draw.pointerId) {
-        const point = this.photoPoint(ev.clientX, ev.clientY);
-        if (point) {
-          this.draw.current = rectFromPoints(this.draw.start, point);
-        }
-      }
-    },
-
-    onPointerUp(ev: PointerEvent) {
-      this.release(ev);
-
-      if (this.pan && ev.pointerId === this.pan.pointerId) {
-        this.pan = null;
-        return;
-      }
-
-      if (this.draw && ev.pointerId === this.draw.pointerId) {
-        const drawn = this.draw.current;
-        this.draw = null;
-        // A click is not a rectangle, and must not lose the one there was.
-        if (drawn && drawn.w >= MIN_DRAWN && drawn.h >= MIN_DRAWN) {
-          this.$emit('update:rect', drawn);
-        }
-      }
-    },
-
-    onPointerCancel(ev: PointerEvent) {
-      this.release(ev);
-      if (this.pan && ev.pointerId === this.pan.pointerId) {
-        this.pan = null;
-      }
-      if (this.draw && ev.pointerId === this.draw.pointerId) {
-        this.cancelDrawing();
-      }
-    },
-
-    /** Stops drawing; the rectangle there was before was never replaced. */
-    cancelDrawing() {
-      this.draw = null;
-    },
-
-    capture(ev: PointerEvent) {
-      try {
-        (this.$refs.viewport as HTMLElement).setPointerCapture(ev.pointerId);
-      } catch {
-        // Capture only keeps the drag alive outside the photo.
-      }
-    },
-
-    release(ev: PointerEvent) {
-      this.pointerIds = this.pointerIds.filter((id) => id !== ev.pointerId);
-      try {
-        (this.$refs.viewport as HTMLElement).releasePointerCapture(ev.pointerId);
-      } catch {
-        // Not captured.
-      }
-    },
-
-    onGestureStart(ev: HammerInput) {
-      if (this.gesture) return;
-      this.cancelDrawing();
-      const center = this.viewportPoint(ev.center.x, ev.center.y);
-      this.gesture = {
-        scale: this.scale,
-        anchor: { x: (center.x - this.tx) / this.scale, y: (center.y - this.ty) / this.scale },
-      };
-    },
-
-    onGestureMove(ev: HammerInput) {
-      if (!this.gesture) return;
-      const center = this.viewportPoint(ev.center.x, ev.center.y);
-      const scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, this.gesture.scale * (ev.scale || 1)));
-      this.scale = scale;
-      this.moveTo(center.x - this.gesture.anchor.x * scale, center.y - this.gesture.anchor.y * scale);
-    },
-
-    onGestureEnd() {
-      this.gesture = null;
-    },
-  },
 });
+
+const props = withDefaults(
+  defineProps<{
+    src: string;
+    faces?: StageFace[];
+    regions?: StageRegion[];
+    rect?: Rect | null;
+    drawingEnabled?: boolean;
+  }>(),
+  {
+    faces: () => [],
+    regions: () => [],
+    rect: null,
+    drawingEnabled: true,
+  },
+);
+
+const emit = defineEmits<{
+  'update:rect': [rect: Rect | null];
+  /** A face was clicked; with Ctrl (Cmd on a Mac) it is added to the ones selected, or taken out */
+  select: [faceId: number, additive: boolean];
+  'navigation-error': [];
+  'image-error': [];
+}>();
+
+const viewport = useTemplateRef<HTMLElement>('viewport');
+const image = useTemplateRef<HTMLImageElement>('image');
+
+const scale = ref(MIN_SCALE);
+const tx = ref(0);
+const ty = ref(0);
+/**
+ * The rectangle being drawn, shown here while the pointer moves and only
+ * reported when it is let go: the dialog shows its fields for a reported
+ * one, and doing that halfway through the drag moved the page under it.
+ */
+const draw = ref<{ pointerId: number; start: Point; current: Rect | null } | null>(null);
+/** The photo being moved with the middle mouse button */
+const pan = ref<{ pointerId: number; start: Point; tx: number; ty: number } | null>(null);
+
+/** Pointers down on the photo, to tell one finger from two */
+let pointerIds: number[] = [];
+/** A two finger gesture: what the photo was at its start */
+let gesture: { scale: number; anchor: Point } | null = null;
+/** The hammerjs manager, outside of the reactive state: Vue would observe all of it, for nothing */
+let hammer: HammerManager | null = null;
+
+/** While drawing, the rectangle being drawn; otherwise the one there is. */
+const shownRect = computed(() => draw.value?.current ?? props.rect);
+
+const contentStyle = computed(() => ({
+  transform: `translate(${tx.value}px, ${ty.value}px) scale(${scale.value})`,
+}));
+
+watch(
+  () => props.src,
+  () => resetView(),
+);
+
+onMounted(() => {
+  void setupGestures();
+});
+
+onBeforeUnmount(() => {
+  try {
+    hammer?.destroy();
+  } catch (e) {
+    console.error(e);
+  }
+  hammer = null;
+});
+
+/**
+ * Two fingers are the only thing that needs hammerjs, so it is loaded here.
+ * If it cannot be set up, drawing does not depend on it, and the wheel and
+ * buttons still zoom.
+ */
+async function setupGestures() {
+  try {
+    const { default: Hammer } = await import('hammerjs');
+    if (!viewport.value) return; // unmounted meanwhile
+
+    hammer = new Hammer.Manager(viewport.value, { touchAction: 'none' });
+    const pinch = new Hammer.Pinch({ pointers: 2, threshold: 0 });
+    const twoFingerPan = new Hammer.Pan({ pointers: 2, threshold: 0, direction: Hammer.DIRECTION_ALL });
+    pinch.recognizeWith(twoFingerPan);
+    hammer.add([twoFingerPan, pinch]);
+    hammer.on('panstart pinchstart', onGestureStart);
+    hammer.on('panmove pinchmove', onGestureMove);
+    hammer.on('panend pinchend pancancel pinchcancel', onGestureEnd);
+  } catch (e) {
+    console.error(e);
+    emit('navigation-error');
+  }
+}
+
+function resetView() {
+  scale.value = MIN_SCALE;
+  tx.value = 0;
+  ty.value = 0;
+}
+
+/** A point of the screen as fractions of the photo as it is shown now. */
+function photoPoint(clientX: number, clientY: number): Point | null {
+  if (!image.value) return null;
+  const box = image.value.getBoundingClientRect();
+  if (!box.width || !box.height) return null;
+  return {
+    x: Math.max(0, Math.min(1, (clientX - box.left) / box.width)),
+    y: Math.max(0, Math.min(1, (clientY - box.top) / box.height)),
+  };
+}
+
+/** A point of the screen in pixels of the viewport. */
+function viewportPoint(clientX: number, clientY: number): Point {
+  const box = viewport.value!.getBoundingClientRect();
+  return { x: clientX - box.left, y: clientY - box.top };
+}
+
+/** Moves the photo, but never so far that its edge leaves the viewport. */
+function moveTo(x: number, y: number) {
+  const width = viewport.value?.clientWidth ?? 0;
+  const height = viewport.value?.clientHeight ?? 0;
+  tx.value = Math.min(0, Math.max(width - width * scale.value, x));
+  ty.value = Math.min(0, Math.max(height - height * scale.value, y));
+}
+
+/** Zooms so that the point of the photo under $at stays where it is. */
+function zoomAround(next: number, at: Point) {
+  const clamped = Math.max(MIN_SCALE, Math.min(MAX_SCALE, next));
+  const anchor = { x: (at.x - tx.value) / scale.value, y: (at.y - ty.value) / scale.value };
+  scale.value = clamped;
+  moveTo(at.x - anchor.x * clamped, at.y - anchor.y * clamped);
+}
+
+function zoomBy(factor: number) {
+  const el = viewport.value!;
+  zoomAround(scale.value * factor, { x: el.clientWidth / 2, y: el.clientHeight / 2 });
+}
+
+function onWheel(ev: WheelEvent) {
+  zoomAround(scale.value * Math.exp(-ev.deltaY * 0.0015), viewportPoint(ev.clientX, ev.clientY));
+}
+
+/** The arrow keys move the photo, and + and - zoom it, for those without a pointer. */
+function onKeyDown(ev: KeyboardEvent) {
+  const step = Math.max(20, Math.round(viewport.value!.clientWidth / 10));
+  switch (ev.key) {
+    case 'ArrowLeft':
+      moveTo(tx.value + step, ty.value);
+      break;
+    case 'ArrowRight':
+      moveTo(tx.value - step, ty.value);
+      break;
+    case 'ArrowUp':
+      moveTo(tx.value, ty.value + step);
+      break;
+    case 'ArrowDown':
+      moveTo(tx.value, ty.value - step);
+      break;
+    case '+':
+    case '=':
+      zoomBy(ZOOM_STEP);
+      break;
+    case '-':
+      zoomBy(1 / ZOOM_STEP);
+      break;
+    case '0':
+      resetView();
+      break;
+    default:
+      return;
+  }
+  ev.preventDefault();
+}
+
+function onPointerDown(ev: PointerEvent) {
+  // The first pointer of a touch, or any mouse press, starts afresh, so a
+  // pointer whose release got lost cannot count as a second finger forever.
+  if (ev.isPrimary) {
+    pointerIds = [];
+  }
+  if (!pointerIds.includes(ev.pointerId)) {
+    pointerIds = [...pointerIds, ev.pointerId];
+  }
+
+  // A second finger is not drawing: it is the start of a gesture.
+  if (pointerIds.length > 1) {
+    cancelDrawing();
+    return;
+  }
+
+  if (ev.pointerType === 'mouse' && ev.button === 1) {
+    ev.preventDefault();
+    pan.value = { pointerId: ev.pointerId, start: { x: ev.clientX, y: ev.clientY }, tx: tx.value, ty: ty.value };
+    capture(ev);
+    return;
+  }
+
+  // A pointer on a face picks that face, and draws nothing. It still
+  // reaches hammerjs, so it can be one of the two fingers of a gesture.
+  if ((ev.target as Element | null)?.closest?.('.face-box.existing')) return;
+
+  if (ev.button !== 0 || !props.drawingEnabled) return;
+
+  const point = photoPoint(ev.clientX, ev.clientY);
+  if (!point) return;
+  draw.value = { pointerId: ev.pointerId, start: point, current: null };
+  capture(ev);
+}
+
+function onPointerMove(ev: PointerEvent) {
+  const panning = pan.value;
+  if (panning && ev.pointerId === panning.pointerId) {
+    moveTo(panning.tx + ev.clientX - panning.start.x, panning.ty + ev.clientY - panning.start.y);
+    return;
+  }
+
+  const drawing = draw.value;
+  if (drawing && ev.pointerId === drawing.pointerId) {
+    const point = photoPoint(ev.clientX, ev.clientY);
+    if (point) {
+      draw.value = { ...drawing, current: rectFromPoints(drawing.start, point) };
+    }
+  }
+}
+
+function onPointerUp(ev: PointerEvent) {
+  release(ev);
+
+  if (pan.value && ev.pointerId === pan.value.pointerId) {
+    pan.value = null;
+    return;
+  }
+
+  if (draw.value && ev.pointerId === draw.value.pointerId) {
+    const drawn = draw.value.current;
+    draw.value = null;
+    // A click is not a rectangle, and must not lose the one there was.
+    if (drawn && drawn.w >= MIN_DRAWN && drawn.h >= MIN_DRAWN) {
+      emit('update:rect', drawn);
+    }
+  }
+}
+
+function onPointerCancel(ev: PointerEvent) {
+  release(ev);
+  if (pan.value && ev.pointerId === pan.value.pointerId) {
+    pan.value = null;
+  }
+  if (draw.value && ev.pointerId === draw.value.pointerId) {
+    cancelDrawing();
+  }
+}
+
+/** Stops drawing; the rectangle there was before was never replaced. */
+function cancelDrawing() {
+  draw.value = null;
+}
+
+function capture(ev: PointerEvent) {
+  try {
+    viewport.value?.setPointerCapture(ev.pointerId);
+  } catch {
+    // Capture only keeps the drag alive outside the photo.
+  }
+}
+
+function release(ev: PointerEvent) {
+  pointerIds = pointerIds.filter((id) => id !== ev.pointerId);
+  try {
+    viewport.value?.releasePointerCapture(ev.pointerId);
+  } catch {
+    // Not captured.
+  }
+}
+
+function onGestureStart(ev: HammerInput) {
+  if (gesture) return;
+  cancelDrawing();
+  const center = viewportPoint(ev.center.x, ev.center.y);
+  gesture = {
+    scale: scale.value,
+    anchor: { x: (center.x - tx.value) / scale.value, y: (center.y - ty.value) / scale.value },
+  };
+}
+
+function onGestureMove(ev: HammerInput) {
+  if (!gesture) return;
+  const center = viewportPoint(ev.center.x, ev.center.y);
+  const next = Math.max(MIN_SCALE, Math.min(MAX_SCALE, gesture.scale * (ev.scale || 1)));
+  scale.value = next;
+  moveTo(center.x - gesture.anchor.x * next, center.y - gesture.anchor.y * next);
+}
+
+function onGestureEnd() {
+  gesture = null;
+}
 </script>
 
 <style lang="scss" scoped>
