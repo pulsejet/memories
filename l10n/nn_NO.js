@@ -55,8 +55,8 @@ OC.L10N.register(
     "Image" : "Bilete",
     "Text" : "Tekst",
     "Size" : "Storleik",
-    "Setup" : "Oppsett",
     "_{n} item_::_{n} items_" : ["{n} oppføring","{n} oppføringar"],
+    "Setup" : "Oppsett",
     "Choose {file}" : "Vel {file}",
     "Choose" : "Vel"
 },
