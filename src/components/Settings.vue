@@ -1,280 +1,275 @@
 <template>
-  <div>
-    <NcAppSettingsDialog
-      id="memories-settings"
-      class="memories-modal"
-      :open="props.open"
-      :show-navigation="true"
-      :name="names.header"
-      @update:open="onClose"
-    >
-      <NcAppSettingsSection id="general-settings" :name="names.general">
-        <div class="radio-group timeline-paths">
-          <div class="title">{{ t('memories', 'Timeline Path') }}</div>
-          <div class="chips">
-            <NcChip
-              v-for="path in timelinePaths"
-              :key="path"
-              :text="path"
-              :aria-label-close="t('memories', 'Remove {path} from timeline', { path })"
-              @close="removeTimelinePath(path)"
-            />
-            <NcChip
-              class="add-chip"
-              :text="t('memories', 'Add path')"
-              :aria-label="t('memories', 'Add a folder to the timeline')"
-              variant="tertiary"
-              no-close
-              role="button"
-              tabindex="0"
-              @click="addTimelinePath"
-              @keydown.enter="addTimelinePath"
-              @keydown.space.prevent="addTimelinePath"
-            />
-          </div>
+  <NcAppSettingsDialog
+    v-if="props.open"
+    id="memories-settings"
+    class="memories-modal"
+    :open="props.open"
+    :show-navigation="true"
+    :name="names.header"
+    @update:open="onClose"
+  >
+    <NcAppSettingsSection id="general-settings" :name="names.general">
+      <div class="radio-group timeline-paths">
+        <div class="title">{{ t('memories', 'Timeline Path') }}</div>
+        <div class="chips">
+          <NcChip
+            v-for="path in timelinePaths"
+            :key="path"
+            :text="path"
+            :aria-label-close="t('memories', 'Remove {path} from timeline', { path })"
+            @close="removeTimelinePath(path)"
+          />
+          <NcChip
+            class="add-chip"
+            :text="t('memories', 'Add path')"
+            :aria-label="t('memories', 'Add a folder to the timeline')"
+            variant="tertiary"
+            no-close
+            role="button"
+            tabindex="0"
+            @click="addTimelinePath"
+            @keydown.enter="addTimelinePath"
+            @keydown.space.prevent="addTimelinePath"
+          />
         </div>
+      </div>
 
+      <NcCheckboxRadioSwitch :model-value="config.square_thumbs" @update:model-value="updateSquareThumbs" type="switch">
+        {{ t('memories', 'Square grid mode') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
+        :model-value="config.enable_top_memories"
+        @update:model-value="updateEnableTopMemories"
+        type="switch"
+      >
+        {{ t('memories', 'Show past photos on top of timeline') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
+        :model-value="config.stack_raw_files"
+        @update:model-value="updateStackRawFiles"
+        type="switch"
+      >
+        {{ t('memories', 'Stack RAW files with same name') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
+        :model-value="config.dedup_identical"
+        @update:model-value="updateDedupIdentical"
+        type="switch"
+      >
+        {{ t('memories', 'De-duplicate identical files') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
+        :model-value="config.show_owner_name_timeline"
+        @update:model-value="updateShowOwnerNameTimeline"
+        type="switch"
+      >
+        {{ t('memories', 'Show photo owner name on timeline') }}
+      </NcCheckboxRadioSwitch>
+    </NcAppSettingsSection>
+
+    <NcAppSettingsSection id="viewer-settings" :name="names.viewer">
+      <NcCheckboxRadioSwitch
+        :model-value="config.livephoto_autoplay"
+        @update:model-value="updateLivephotoAutoplay"
+        type="switch"
+      >
+        {{ t('memories', 'Autoplay Live Photos') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
+        :model-value="config.livephoto_loop"
+        @update:model-value="updateLivephotoLoop"
+        type="switch"
+      >
+        {{ t('memories', 'Loop Live Photos') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
+        :model-value="config.video_autoplay === 'true'"
+        :disabled="config.video_autoplay === 'disallow'"
+        @update:model-value="updateVideoAutoplay"
+        type="switch"
+      >
+        {{ t('memories', 'Autoplay Videos') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch :model-value="config.video_loop" @update:model-value="updateVideoLoop" type="switch">
+        {{ t('memories', 'Loop Videos') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
+        :model-value="config.sidebar_filepath"
+        @update:model-value="updateSidebarFilepath"
+        type="switch"
+      >
+        {{ t('memories', 'Show full file path in sidebar') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
+        :model-value="config.metadata_in_slideshow"
+        @update:model-value="updateMetadataInSlideshow"
+        type="switch"
+      >
+        {{ t('memories', 'Show metadata in slideshow') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcTextField
+        :label="t('memories', 'Slideshow Duration (1-60 seconds)')"
+        :label-visible="true"
+        :model-value="config.slideshow_duration"
+        type="number"
+        min="1"
+        max="60"
+        step="1"
+        @update:model-value="updateSlideshowDuration"
+      />
+
+      <div class="radio-group">
+        <div class="title">{{ t('memories', 'High resolution image loading behavior') }}</div>
         <NcCheckboxRadioSwitch
-          :model-value="config.square_thumbs"
-          @update:model-value="updateSquareThumbs"
+          :model-value="highResCond"
+          value="zoom"
+          name="vhrc_radio"
+          type="radio"
+          @update:model-value="updateHighResCond($event)"
+          >{{ t('memories', 'Load high resolution image on zoom') }}
+        </NcCheckboxRadioSwitch>
+        <NcCheckboxRadioSwitch
+          :model-value="highResCond"
+          value="always"
+          name="vhrc_radio"
+          type="radio"
+          @update:model-value="updateHighResCond($event)"
+          >{{ t('memories', 'Always load high resolution image (not recommended)') }}
+        </NcCheckboxRadioSwitch>
+        <NcCheckboxRadioSwitch
+          :model-value="highResCond"
+          value="never"
+          name="vhrc_radio"
+          type="radio"
+          @update:model-value="updateHighResCond($event)"
+          >{{ t('memories', 'Never load high resolution image') }}
+        </NcCheckboxRadioSwitch>
+      </div>
+    </NcAppSettingsSection>
+
+    <NcAppSettingsSection id="account-settings" :name="names.account" v-if="isNative">
+      <div class="radio-group">
+        {{ t('memories', 'Logged in as {user}', { user }) }}
+        <NcButton class="setting-button" @click="logout">
+          {{ t('memories', 'Sign out') }}
+        </NcButton>
+      </div>
+    </NcAppSettingsSection>
+
+    <NcAppSettingsSection id="device-settings" :name="t('memories', 'Device Folders')" v-if="isNative">
+      <div class="radio-group">
+        {{ t('memories', 'Local folders to include in the timeline view') }}
+        <NcCheckboxRadioSwitch
+          v-for="folder in localFolders"
+          :key="folder.id"
+          v-model="folder.enabled"
+          @update:model-value="updateDeviceFolders"
           type="switch"
         >
-          {{ t('memories', 'Square grid mode') }}
+          {{ folder.name }}
         </NcCheckboxRadioSwitch>
 
+        <NcButton class="setting-button" @click="runNxSetup()" variant="secondary">
+          {{ t('memories', 'Run initial device setup') }}
+        </NcButton>
+      </div>
+    </NcAppSettingsSection>
+
+    <NcAppSettingsSection id="folders-settings" :name="names.folders">
+      <NcTextField
+        :label="t('memories', 'Folders Path')"
+        :label-visible="true"
+        :model-value="config.folders_path"
+        @click="chooseFoldersPath"
+        readonly
+      />
+
+      <NcCheckboxRadioSwitch
+        :model-value="config.show_hidden_folders"
+        @update:model-value="updateShowHiddenFolders"
+        type="switch"
+      >
+        {{ t('memories', 'Show hidden folders') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
+        :model-value="config.sort_folder_month"
+        @update:model-value="updateSortFolderMonth"
+        type="switch"
+      >
+        {{ t('memories', 'Sort folders oldest-first') }}
+      </NcCheckboxRadioSwitch>
+    </NcAppSettingsSection>
+
+    <NcAppSettingsSection id="albums-settings" :name="names.albums">
+      <NcCheckboxRadioSwitch
+        :model-value="config.sort_album_month"
+        @update:model-value="updateSortAlbumMonth"
+        type="switch"
+      >
+        {{ t('memories', 'Sort albums oldest-first') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
+        :model-value="config.show_hidden_albums"
+        @update:model-value="updateShowHiddenAlbums"
+        type="switch"
+      >
+        {{ t('memories', 'Show hidden albums') }}
+      </NcCheckboxRadioSwitch>
+    </NcAppSettingsSection>
+
+    <NcAppSettingsSection id="map-settings" :name="names.map" v-if="tileServers.length > 0">
+      <div class="radio-group">
         <NcCheckboxRadioSwitch
-          :model-value="config.enable_top_memories"
-          @update:model-value="updateEnableTopMemories"
-          type="switch"
-        >
-          {{ t('memories', 'Show past photos on top of timeline') }}
+          v-for="tile in tileServers"
+          :key="tile.name"
+          :model-value="config.map_tile_server_url"
+          :value="tile.url"
+          name="map_style_radio"
+          type="radio"
+          @update:model-value="updateMapTileServer($event)"
+          >{{ tile.name }}
         </NcCheckboxRadioSwitch>
+      </div>
+    </NcAppSettingsSection>
 
-        <NcCheckboxRadioSwitch
-          :model-value="config.stack_raw_files"
-          @update:model-value="updateStackRawFiles"
-          type="switch"
-        >
-          {{ t('memories', 'Stack RAW files with same name') }}
-        </NcCheckboxRadioSwitch>
+    <NcAppSettingsSection id="onthisday-settings" :name="names.onthisday">
+      <NcTextField
+        :label="t('memories', 'Day range (0-7)')"
+        :label-visible="true"
+        :model-value="config.onthisday_day_range"
+        type="number"
+        min="0"
+        max="7"
+        step="1"
+        @update:model-value="updateOnThisDayRange"
+        :helper-text="t('memories', 'Number of days before and after each anniversary')"
+      />
 
-        <NcCheckboxRadioSwitch
-          :model-value="config.dedup_identical"
-          @update:model-value="updateDedupIdentical"
-          type="switch"
-        >
-          {{ t('memories', 'De-duplicate identical files') }}
-        </NcCheckboxRadioSwitch>
-
-        <NcCheckboxRadioSwitch
-          :model-value="config.show_owner_name_timeline"
-          @update:model-value="updateShowOwnerNameTimeline"
-          type="switch"
-        >
-          {{ t('memories', 'Show photo owner name on timeline') }}
-        </NcCheckboxRadioSwitch>
-      </NcAppSettingsSection>
-
-      <NcAppSettingsSection id="viewer-settings" :name="names.viewer">
-        <NcCheckboxRadioSwitch
-          :model-value="config.livephoto_autoplay"
-          @update:model-value="updateLivephotoAutoplay"
-          type="switch"
-        >
-          {{ t('memories', 'Autoplay Live Photos') }}
-        </NcCheckboxRadioSwitch>
-
-        <NcCheckboxRadioSwitch
-          :model-value="config.livephoto_loop"
-          @update:model-value="updateLivephotoLoop"
-          type="switch"
-        >
-          {{ t('memories', 'Loop Live Photos') }}
-        </NcCheckboxRadioSwitch>
-
-        <NcCheckboxRadioSwitch
-          :model-value="config.video_autoplay === 'true'"
-          :disabled="config.video_autoplay === 'disallow'"
-          @update:model-value="updateVideoAutoplay"
-          type="switch"
-        >
-          {{ t('memories', 'Autoplay Videos') }}
-        </NcCheckboxRadioSwitch>
-
-        <NcCheckboxRadioSwitch :model-value="config.video_loop" @update:model-value="updateVideoLoop" type="switch">
-          {{ t('memories', 'Loop Videos') }}
-        </NcCheckboxRadioSwitch>
-
-        <NcCheckboxRadioSwitch
-          :model-value="config.sidebar_filepath"
-          @update:model-value="updateSidebarFilepath"
-          type="switch"
-        >
-          {{ t('memories', 'Show full file path in sidebar') }}
-        </NcCheckboxRadioSwitch>
-
-        <NcCheckboxRadioSwitch
-          :model-value="config.metadata_in_slideshow"
-          @update:model-value="updateMetadataInSlideshow"
-          type="switch"
-        >
-          {{ t('memories', 'Show metadata in slideshow') }}
-        </NcCheckboxRadioSwitch>
-
-        <NcTextField
-          :label="t('memories', 'Slideshow Duration (1-60 seconds)')"
-          :label-visible="true"
-          :model-value="config.slideshow_duration"
-          type="number"
-          min="1"
-          max="60"
-          step="1"
-          @update:model-value="updateSlideshowDuration"
-        />
-
-        <div class="radio-group">
-          <div class="title">{{ t('memories', 'High resolution image loading behavior') }}</div>
-          <NcCheckboxRadioSwitch
-            :model-value="highResCond"
-            value="zoom"
-            name="vhrc_radio"
-            type="radio"
-            @update:model-value="updateHighResCond($event)"
-            >{{ t('memories', 'Load high resolution image on zoom') }}
-          </NcCheckboxRadioSwitch>
-          <NcCheckboxRadioSwitch
-            :model-value="highResCond"
-            value="always"
-            name="vhrc_radio"
-            type="radio"
-            @update:model-value="updateHighResCond($event)"
-            >{{ t('memories', 'Always load high resolution image (not recommended)') }}
-          </NcCheckboxRadioSwitch>
-          <NcCheckboxRadioSwitch
-            :model-value="highResCond"
-            value="never"
-            name="vhrc_radio"
-            type="radio"
-            @update:model-value="updateHighResCond($event)"
-            >{{ t('memories', 'Never load high resolution image') }}
-          </NcCheckboxRadioSwitch>
-        </div>
-      </NcAppSettingsSection>
-
-      <NcAppSettingsSection id="account-settings" :name="names.account" v-if="isNative">
-        <div class="radio-group">
-          {{ t('memories', 'Logged in as {user}', { user }) }}
-          <NcButton class="setting-button" @click="logout">
-            {{ t('memories', 'Sign out') }}
-          </NcButton>
-        </div>
-      </NcAppSettingsSection>
-
-      <NcAppSettingsSection id="device-settings" :name="t('memories', 'Device Folders')" v-if="isNative">
-        <div class="radio-group">
-          {{ t('memories', 'Local folders to include in the timeline view') }}
-          <NcCheckboxRadioSwitch
-            v-for="folder in localFolders"
-            :key="folder.id"
-            v-model="folder.enabled"
-            @update:model-value="updateDeviceFolders"
-            type="switch"
-          >
-            {{ folder.name }}
-          </NcCheckboxRadioSwitch>
-
-          <NcButton class="setting-button" @click="runNxSetup()" variant="secondary">
-            {{ t('memories', 'Run initial device setup') }}
-          </NcButton>
-        </div>
-      </NcAppSettingsSection>
-
-      <NcAppSettingsSection id="folders-settings" :name="names.folders">
-        <NcTextField
-          :label="t('memories', 'Folders Path')"
-          :label-visible="true"
-          :model-value="config.folders_path"
-          @click="chooseFoldersPath"
-          readonly
-        />
-
-        <NcCheckboxRadioSwitch
-          :model-value="config.show_hidden_folders"
-          @update:model-value="updateShowHiddenFolders"
-          type="switch"
-        >
-          {{ t('memories', 'Show hidden folders') }}
-        </NcCheckboxRadioSwitch>
-
-        <NcCheckboxRadioSwitch
-          :model-value="config.sort_folder_month"
-          @update:model-value="updateSortFolderMonth"
-          type="switch"
-        >
-          {{ t('memories', 'Sort folders oldest-first') }}
-        </NcCheckboxRadioSwitch>
-      </NcAppSettingsSection>
-
-      <NcAppSettingsSection id="albums-settings" :name="names.albums">
-        <NcCheckboxRadioSwitch
-          :model-value="config.sort_album_month"
-          @update:model-value="updateSortAlbumMonth"
-          type="switch"
-        >
-          {{ t('memories', 'Sort albums oldest-first') }}
-        </NcCheckboxRadioSwitch>
-
-        <NcCheckboxRadioSwitch
-          :model-value="config.show_hidden_albums"
-          @update:model-value="updateShowHiddenAlbums"
-          type="switch"
-        >
-          {{ t('memories', 'Show hidden albums') }}
-        </NcCheckboxRadioSwitch>
-      </NcAppSettingsSection>
-
-      <NcAppSettingsSection id="map-settings" :name="names.map" v-if="tileServers.length > 0">
-        <div class="radio-group">
-          <NcCheckboxRadioSwitch
-            v-for="tile in tileServers"
-            :key="tile.name"
-            :model-value="config.map_tile_server_url"
-            :value="tile.url"
-            name="map_style_radio"
-            type="radio"
-            @update:model-value="updateMapTileServer($event)"
-            >{{ tile.name }}
-          </NcCheckboxRadioSwitch>
-        </div>
-      </NcAppSettingsSection>
-
-      <NcAppSettingsSection id="onthisday-settings" :name="names.onthisday">
-        <NcTextField
-          :label="t('memories', 'Day range (0-7)')"
-          :label-visible="true"
-          :model-value="config.onthisday_day_range"
-          type="number"
-          min="0"
-          max="7"
-          step="1"
-          @update:model-value="updateOnThisDayRange"
-          :helper-text="t('memories', 'Number of days before and after each anniversary')"
-        />
-
-        <NcTextField
-          :label="t('memories', 'Photos per year (1-50)')"
-          :label-visible="true"
-          :model-value="config.onthisday_photos_per_year"
-          type="number"
-          min="1"
-          max="50"
-          step="1"
-          @update:model-value="updateOnThisDayPhotos"
-          :helper-text="t('memories', 'Maximum number of photos to include per year')"
-        />
-      </NcAppSettingsSection>
-    </NcAppSettingsDialog>
-  </div>
+      <NcTextField
+        :label="t('memories', 'Photos per year (1-50)')"
+        :label-visible="true"
+        :model-value="config.onthisday_photos_per_year"
+        type="number"
+        min="1"
+        max="50"
+        step="1"
+        @update:model-value="updateOnThisDayPhotos"
+        :helper-text="t('memories', 'Maximum number of photos to include per year')"
+      />
+    </NcAppSettingsSection>
+  </NcAppSettingsDialog>
 </template>
 
 <style scoped>

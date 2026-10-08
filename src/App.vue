@@ -98,14 +98,13 @@ import { defineAsyncComponent } from 'vue';
 import NcContent from '@nextcloud/vue/components/NcContent';
 import NcAppContent from '@nextcloud/vue/components/NcAppContent';
 import NcAppNavigation from '@nextcloud/vue/components/NcAppNavigation';
-const NcAppNavigationItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAppNavigationItem'));
+import NcAppNavigationItem from '@nextcloud/vue/components/NcAppNavigationItem';
 
 import { generateUrl } from '@nextcloud/router';
-
 import { routeIs } from '@services/router';
 
+const FirstStart = defineAsyncComponent(() => import('@components/FirstStart.vue'));
 import Settings from '@components/Settings.vue';
-import FirstStart from '@components/FirstStart.vue';
 import Viewer from '@components/viewer/Viewer.vue';
 import Sidebar from '@components/Sidebar.vue';
 import MobileNav from '@components/MobileNav.vue';
