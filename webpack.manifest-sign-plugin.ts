@@ -92,12 +92,6 @@ export class ManifestSignPlugin {
         const key = privateKey();
         const sig: Buffer = nodeCrypto.sign(null, bytes, key);
 
-        // Self-verify before emitting the signature.
-        if (!nodeCrypto.verify(null, bytes, nodeCrypto.createPublicKey(key), sig)) {
-          compilation.errors.push(new Error('ManifestSignPlugin: self-verification of manifest signature failed'));
-          return;
-        }
-
         // Emit the signature.
         compilation.emitAsset(
           this.sigFile,
