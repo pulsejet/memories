@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-section">
+  <div v-if="systemConfig" class="admin-section">
     <h2>{{ $options.title }}</h2>
 
     <p>
@@ -23,12 +23,12 @@
           }}
         </NcNoteCard>
         <NcNoteCard
-          v-if="typeof config['memories.gis_type'] !== 'number' || config['memories.gis_type'] < 0"
+          v-if="typeof systemConfig['memories.gis_type'] !== 'number' || systemConfig['memories.gis_type'] < 0"
           type="warning"
         >
           {{
             t('memories', 'Reverse geocoding has not been configured ({status}).', {
-              status: config['memories.gis_type'],
+              status: systemConfig['memories.gis_type'],
             })
           }}
         </NcNoteCard>
@@ -63,78 +63,83 @@
         :label="t('memories', 'Location search endpoint for metadata editor')"
         :label-visible="true"
         placeholder="https://nominatim.openstreetmap.org"
-        :model-value="config['memories.places.search.url']"
+        :model-value="systemConfig!['memories.places.search.url']"
         @change="update('memories.places.search.url', $event.target.value.trim())"
       />
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+
+import axios from '@nextcloud/axios';
+import NcTextField from '@nextcloud/vue/components/NcTextField';
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
+import NcButton from '@nextcloud/vue/components/NcButton';
 import { API } from '@services/API';
 
-import { translate as t } from '@services/l10n';
-import * as utils from '@services/utils';
+import { t } from '@services/l10n';
+import * as utils from '@services/utils/common';
 
-import AdminMixin from '../AdminMixin';
+import { useAdminContext } from '../admin-context';
 
-export default defineComponent({
+defineOptions({
   name: 'Places',
   title: t('memories', 'Reverse Geocoding'),
-  mixins: [AdminMixin],
-
-  computed: {
-    gisStatus() {
-      if (!this.status) return '';
-
-      if (typeof this.status.gis_type !== 'number') {
-        return this.status.gis_type;
-      }
-
-      if (this.status.gis_type <= 0) {
-        return this.t('memories', 'Geometry support was not detected in your database');
-      } else if (this.status.gis_type === 1) {
-        return this.t('memories', 'MySQL-like geometry support was detected ');
-      } else if (this.status.gis_type === 2) {
-        return this.t('memories', 'Postgres native geometry support was detected');
-      }
-    },
-
-    gisStatusType() {
-      return typeof this.status?.gis_type !== 'number' || this.status.gis_type <= 0 ? 'error' : 'success';
-    },
-
-    placesSetupUrl() {
-      return API.OCC_PLACES_SETUP();
-    },
-  },
-
-  methods: {
-    async placesSetup(event: Event) {
-      // construct warning
-      const warnSetup = this.t(
-        'memories',
-        'Looks like the database is already setup. Are you sure you want to redownload planet data?',
-      );
-      const warnLong = this.t('memories', 'You are about to download the planet database. This may take a while.');
-      const warnReindex = this.t('memories', 'This may also cause all photos to be re-indexed!');
-      const msg = (this.status?.gis_count ? warnSetup : warnLong) + ' ' + warnReindex;
-
-      // ask the user
-      if (
-        await utils.confirmDestructive({
-          title: this.t('memories', 'Download planet database'),
-          message: msg,
-          confirm: this.t('memories', 'Continue'),
-          confirmClasses: 'error',
-          cancel: this.t('memories', 'Cancel'),
-        })
-      ) {
-        // submit the form
-        (event.target as HTMLFormElement).submit();
-      }
-    },
-  },
 });
+
+const { status, systemConfig, update } = useAdminContext();
+
+const requestToken = computed(() => (<any>axios.defaults.headers).requesttoken);
+const actionToken = computed(() => status.value?.action_token || '');
+
+const gisStatus = computed(() => {
+  if (!status.value) return '';
+
+  if (typeof status.value.gis_type !== 'number') {
+    return status.value.gis_type;
+  }
+
+  if (status.value.gis_type <= 0) {
+    return t('memories', 'Geometry support was not detected in your database');
+  } else if (status.value.gis_type === 1) {
+    return t('memories', 'MySQL-like geometry support was detected ');
+  } else if (status.value.gis_type === 2) {
+    return t('memories', 'Postgres native geometry support was detected');
+  }
+});
+
+const gisStatusType = computed(() => {
+  return typeof status.value?.gis_type !== 'number' || status.value.gis_type <= 0 ? 'error' : 'success';
+});
+
+const placesSetupUrl = computed(() => {
+  return API.OCC_PLACES_SETUP();
+});
+
+async function placesSetup(event: Event) {
+  // construct warning
+  const warnSetup = t(
+    'memories',
+    'Looks like the database is already setup. Are you sure you want to redownload planet data?',
+  );
+  const warnLong = t('memories', 'You are about to download the planet database. This may take a while.');
+  const warnReindex = t('memories', 'This may also cause all photos to be re-indexed!');
+  const msg = (status.value?.gis_count ? warnSetup : warnLong) + ' ' + warnReindex;
+
+  // ask the user
+  if (
+    await utils.confirmDestructive({
+      title: t('memories', 'Download planet database'),
+      message: msg,
+      confirm: t('memories', 'Continue'),
+      confirmClasses: 'error',
+      cancel: t('memories', 'Cancel'),
+    })
+  ) {
+    // submit the form
+    (event.target as HTMLFormElement).submit();
+  }
+}
 </script>

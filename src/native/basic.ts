@@ -1,15 +1,8 @@
 import axios from '@nextcloud/axios';
 import { generateUrl } from '@nextcloud/router';
-import { nativex } from './api';
+import { has, nativex } from './api';
 import { initShellSync } from './shell';
 import { getBuilder as storageBuilder } from '@nextcloud/browser-storage';
-
-/**
- * @returns Whether the native interface is available.
- */
-export function has() {
-  return !!nativex;
-}
 
 /**
  * Perform initial setup steps if in native app.

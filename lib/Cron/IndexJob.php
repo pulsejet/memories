@@ -93,7 +93,7 @@ final class IndexJob extends TimedJob
      */
     private function indexAllUsers(): void
     {
-        $this->userManager->callForSeenUsers(function ($user) {
+        $this->userManager->callForSeenUsers(function ($user): void {
             try {
                 $this->service->indexUser($user);
             } catch (Service\ProcessClosedException $e) {

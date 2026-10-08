@@ -17,51 +17,31 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { generateUrl } from '@nextcloud/router';
 
 import UploadMenuItem from '@components/header/UploadMenuItem.vue';
 import SearchbarMenuItem from '@components/header/SearchbarMenuItem.vue';
 import XImg from '@components/frame/XImg.vue';
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 import banner from '@assets/banner.svg';
 
-export default defineComponent({
-  name: 'MobileHeader',
-  components: {
-    UploadMenuItem,
-    SearchbarMenuItem,
-    XImg,
-  },
+const isScrollDown = ref(false);
+const homeUrl = generateUrl('/');
 
-  data: () => ({
-    banner,
-    isScrollDown: false,
-    logo: null as string | null,
-  }),
+function onScroll({ current, previous }: utils.BusEvent['memories.recycler.scroll']) {
+  isScrollDown.value = (isScrollDown.value && previous - current < 40) || current - previous > 40; // momentum scroll
+}
 
-  computed: {
-    homeUrl(): string {
-      return generateUrl('/');
-    },
-  },
+onMounted(() => {
+  utils.bus.on('memories.recycler.scroll', onScroll);
+});
 
-  mounted() {
-    utils.bus.on('memories.recycler.scroll', this.onScroll);
-  },
-
-  beforeUnmount() {
-    utils.bus.off('memories.recycler.scroll', this.onScroll);
-  },
-
-  methods: {
-    onScroll({ current, previous }: utils.BusEvent['memories.recycler.scroll']) {
-      this.isScrollDown = (this.isScrollDown && previous - current < 40) || current - previous > 40; // momentum scroll
-    },
-  },
+onBeforeUnmount(() => {
+  utils.bus.off('memories.recycler.scroll', onScroll);
 });
 </script>
 

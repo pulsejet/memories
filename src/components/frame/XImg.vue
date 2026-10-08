@@ -6,114 +6,107 @@
   <img v-else :alt="alt" :src="dataSrc" @load="load" />
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import { constants } from '@services/utils/const';
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { constants } from '@services/constants';
 import { fetchImage, sticky } from './XImgCache';
 
 const BLANK_IMG: string = constants.BLANK_IMG;
 
-export default defineComponent({
+defineOptions({
   name: 'XImg',
-  props: {
-    src: {
-      type: String,
-      required: false,
-    },
-    alt: {
-      type: String,
-      default: '',
-    },
-    svgTag: {
-      type: Boolean,
-      default: false,
-    },
-  },
-
-  emits: {
-    load: (src: string) => true,
-    error: (error: Error) => true,
-  },
-
-  data: () => ({
-    dataSrc: BLANK_IMG,
-    _blobLocked: false,
-    _state: 0,
-  }),
-
-  watch: {
-    src() {
-      this.loadImage();
-    },
-  },
-
-  mounted() {
-    this.loadImage();
-  },
-
-  beforeUnmount() {
-    this._state = -1;
-
-    // Free up the blob if it was locked
-    this.freeBlob();
-  },
-
-  computed: {
-    svg() {
-      if (this.svgTag && this.dataSrc.startsWith('data:image/svg+xml')) {
-        return window.atob(this.dataSrc.split(',')[1]);
-      }
-      return null;
-    },
-  },
-
-  methods: {
-    async loadImage() {
-      if (!this.src) return;
-
-      // Free up current blob if it was locked
-      this.freeBlob();
-
-      // Just set src if not http
-      if (this.src.startsWith('data:') || this.src.startsWith('blob:')) {
-        this.dataSrc = this.src;
-        return;
-      }
-
-      // Fetch image with worker
-      try {
-        const state = (this._state = Math.random());
-        const blobSrc = await fetchImage(this.src);
-        if (state !== this._state) return; // aborted
-        this.dataSrc = blobSrc;
-
-        // Locking is needed primary for thumbnails,
-        // since photoswipe uses the thumb url for the animated zoom-in
-        this.lockBlob();
-      } catch (error: any) {
-        this.dataSrc = BLANK_IMG;
-        this.$emit('error', error);
-        console.error('Failed to load XImg', error);
-      }
-    },
-
-    load() {
-      if (this.dataSrc === BLANK_IMG) return;
-      this.$emit('load', this.dataSrc);
-    },
-
-    lockBlob() {
-      sticky(this.dataSrc, 1);
-      this._blobLocked = true;
-    },
-
-    freeBlob() {
-      if (!this._blobLocked) return;
-      sticky(this.dataSrc, -1);
-      this._blobLocked = false;
-    },
-  },
 });
+
+const props = withDefaults(
+  defineProps<{
+    src?: string;
+    alt?: string;
+    svgTag?: boolean;
+  }>(),
+  {
+    alt: '',
+    svgTag: false,
+  },
+);
+
+const emit = defineEmits<{
+  load: [src: string];
+  error: [error: Error];
+}>();
+
+const dataSrc = ref(BLANK_IMG);
+let blobLocked = false;
+let state: number = 0;
+
+watch(
+  () => props.src,
+  () => {
+    loadImage();
+  },
+);
+
+onMounted(() => {
+  loadImage();
+});
+
+onBeforeUnmount(() => {
+  state = -1;
+
+  // Free up the blob if it was locked
+  freeBlob();
+});
+
+const svg = computed(() => {
+  if (props.svgTag && dataSrc.value.startsWith('data:image/svg+xml')) {
+    return window.atob(dataSrc.value.split(',')[1]);
+  }
+  return null;
+});
+
+async function loadImage() {
+  if (!props.src) return;
+
+  // Free up current blob if it was locked
+  freeBlob();
+
+  // Just set src if not http
+  if (props.src.startsWith('data:') || props.src.startsWith('blob:')) {
+    dataSrc.value = props.src;
+    return;
+  }
+
+  // Fetch image with worker
+  try {
+    const currentState = (state = Math.random());
+    const blobSrc = await fetchImage(props.src);
+    if (currentState !== state) return; // aborted
+    dataSrc.value = blobSrc;
+
+    // Locking is needed primary for thumbnails,
+    // since photoswipe uses the thumb url for the animated zoom-in
+    lockBlob();
+  } catch (error: any) {
+    dataSrc.value = BLANK_IMG;
+    emit('error', error);
+    console.error('Failed to load XImg', error);
+  }
+}
+
+function load() {
+  if (dataSrc.value === BLANK_IMG) return;
+  emit('load', dataSrc.value);
+}
+
+function lockBlob() {
+  sticky(dataSrc.value, 1);
+  blobLocked = true;
+}
+
+function freeBlob() {
+  if (!blobLocked) return;
+  sticky(dataSrc.value, -1);
+  blobLocked = false;
+}
 </script>
 
 <style lang="scss" scoped>

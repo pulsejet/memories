@@ -13,7 +13,7 @@
       Some routes may desire to skip everything inside and only show their
       own content view. Enlist these routes here.
     -->
-    <router-view v-if="routeIsNxSetup" />
+    <router-view v-if="routeIs.NxSetup" />
 
     <!--
       Timline path is not set: short circuit and only show the first start.
@@ -86,24 +86,25 @@
     <AlbumShareModal />
     <UploadModal />
     <SearchModal />
+    <ReindexModal />
   </NcContent>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent, markRaw } from 'vue';
+<script setup lang="ts">
+import { computed, markRaw, onBeforeMount, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { defineAsyncComponent } from 'vue';
 
 import NcContent from '@nextcloud/vue/components/NcContent';
 import NcAppContent from '@nextcloud/vue/components/NcAppContent';
 import NcAppNavigation from '@nextcloud/vue/components/NcAppNavigation';
-const NcAppNavigationItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAppNavigationItem'));
+import NcAppNavigationItem from '@nextcloud/vue/components/NcAppNavigationItem';
 
 import { generateUrl } from '@nextcloud/router';
+import { routeIs } from '@services/router';
 
-import UserConfig from '@mixins/UserConfig';
-
-import Timeline from '@components/Timeline.vue';
+const FirstStart = defineAsyncComponent(() => import('@components/FirstStart.vue'));
 import Settings from '@components/Settings.vue';
-import FirstStart from '@components/FirstStart.vue';
 import Viewer from '@components/viewer/Viewer.vue';
 import Sidebar from '@components/Sidebar.vue';
 import MobileNav from '@components/MobileNav.vue';
@@ -114,20 +115,22 @@ import AddToAlbumModal from '@components/modal/AddToAlbumModal.vue';
 import NodeShareModal from '@components/modal/NodeShareModal.vue';
 import ShareModal from '@components/modal/ShareModal.vue';
 import MoveToFolderModal from '@components/modal/MoveToFolderModal.vue';
+import ReindexModal from '@components/modal/ReindexModal.vue';
 import FaceMoveModal from '@components/modal/FaceMoveModal.vue';
 import AlbumShareModal from '@components/modal/AlbumShareModal.vue';
 import UploadModal from '@components/modal/UploadModal.vue';
 import SearchModal from '@components/modal/SearchModal.vue';
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 import { translate as t } from '@services/l10n';
-import staticConfig from '@services/static-config';
+import { config, hasVersionChanged } from '@services/user-config';
+import { windowDims } from '@services/viewport';
+import { getPlayableVideoCodecs } from '@services/video/codec';
 
 import ImageMultiple from 'vue-material-design-icons/ImageMultiple.vue';
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
 import Star from 'vue-material-design-icons/Star.vue';
-import Video from 'vue-material-design-icons/PlayCircle.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
@@ -145,289 +148,232 @@ type NavItem = {
   if?: any;
 };
 
-export default defineComponent({
+defineOptions({
   name: 'App',
-  components: {
-    NcContent,
-    NcAppContent,
-    NcAppNavigation,
-    NcAppNavigationItem,
-
-    Timeline,
-    Settings,
-    FirstStart,
-    Viewer,
-    Sidebar,
-    MobileNav,
-    MobileHeader,
-    SearchModal,
-
-    EditMetadataModal,
-    AddToAlbumModal,
-    NodeShareModal,
-    ShareModal,
-    MoveToFolderModal,
-    FaceMoveModal,
-    AlbumShareModal,
-    UploadModal,
-
-    ImageMultiple,
-    FolderIcon,
-    Star,
-    Video,
-    AlbumIcon,
-    ArchiveIcon,
-    CalendarIcon,
-    PeopleIcon,
-    MarkerIcon,
-    TagsIcon,
-    MapIcon,
-    CogIcon,
-  },
-
-  mixins: [UserConfig],
-
-  watch: {
-    '$route.params.token': {
-      immediate: true,
-      handler(token?: string | string[]) {
-        this.syncSharingToken(token?.toString());
-      },
-    },
-  },
-
-  data: () => ({
-    navItems: [] as NavItem[],
-    settingsOpen: false,
-  }),
-
-  computed: {
-    native(): boolean {
-      return nativex.has();
-    },
-
-    recognize(): string | false {
-      if (!this.config.recognize_enabled) {
-        return false;
-      }
-
-      if (this.config.facerecognition_installed) {
-        return t('memories', 'People (Recognize)');
-      }
-
-      return t('memories', 'People');
-    },
-
-    facerecognition(): string | false {
-      if (!this.config.facerecognition_installed) {
-        return false;
-      }
-
-      if (this.config.recognize_enabled) {
-        return t('memories', 'People (Face Recognition)');
-      }
-
-      return t('memories', 'People');
-    },
-
-    isFirstStart(): boolean {
-      return this.config.timeline_path === '_empty_' && !this.routeIsPublic && !this.$route.query.noinit;
-    },
-
-    isConfigUnknown(): boolean {
-      return this.config.timeline_path === '_unknown_';
-    },
-
-    showAlbums(): boolean {
-      return this.config.albums_enabled;
-    },
-
-    showNavigation(): boolean {
-      if (this.routeIsPublic || this.isFirstStart) {
-        return false;
-      }
-
-      if (this.native) {
-        // Only show navigation on "main" tabs
-        return this.routeIsBase || this.routeIsExplore || (this.routeIsAlbums && !this.$route.params.name);
-      }
-
-      return true;
-    },
-
-    hasMobileHeader(): boolean {
-      return this.native && this.showNavigation && this.routeIsBase;
-    },
-  },
-
-  created() {
-    // No real need to unbind these, as the app is never destroyed
-    const onResize = () => {
-      _m.window.innerWidth = window.innerWidth;
-      _m.window.innerHeight = window.innerHeight;
-      utils.bus.emit('memories:window:resize', null);
-    };
-    window.addEventListener('resize', () => {
-      utils.setRenewingTimeout(this, 'resizeTimer', onResize, 100);
-    });
-
-    // Register navigation items on config change
-    utils.bus.on('memories:user-config-changed', this.refreshNav);
-
-    // Register global functions
-    _m.modals.showSettings = this.showSettings;
-
-    // Warm codec detection for video URLs
-    void utils.getPlayableVideoCodecs();
-  },
-
-  mounted() {
-    this.refreshNav();
-
-    // Store CSS variables modified
-    const root = document.documentElement;
-    const colorPrimary = getComputedStyle(root).getPropertyValue('--color-primary');
-    root.style.setProperty('--color-primary-select-light', `${colorPrimary}40`);
-    root.style.setProperty('--media-brand', colorPrimary);
-
-    // Set theme color to default
-    // Skip on nxsetup and firststart to avoid flashing white on initial setup.
-    if (!this.routeIsNxSetup && !this.isFirstStart) {
-      nativex.setTheme();
-    }
-
-    // Check for native interface
-    if (this.native) {
-      document.documentElement.classList.add('native');
-    }
-
-    // Close navigation by default if init is disabled
-    // This is the case for public folder/album shares
-    if (this.$route.query.noinit) {
-      utils.bus.emit('toggle-navigation', { open: false });
-    }
-  },
-
-  async beforeMount() {
-    if ('serviceWorker' in navigator && !nativex.has()) {
-      // Use the window load event to keep the page load performant
-      window.addEventListener('load', async () => {
-        try {
-          const url = generateUrl('/apps/memories/static/service-worker.js');
-          const registration = await navigator.serviceWorker.register(url, {
-            scope: generateUrl('/apps/memories'),
-          });
-          console.info('SW registered: ', registration);
-
-          // Check for updates
-          if (await staticConfig.hasVersionChanged()) {
-            await registration.update();
-          }
-        } catch (error) {
-          console.error('SW registration failed: ', error);
-        }
-      });
-    } else {
-      console.debug('Service Worker is not enabled on this browser.');
-    }
-  },
-
-  methods: {
-    refreshNav() {
-      const navItems = [
-        {
-          name: 'timeline',
-          icon: markRaw(ImageMultiple),
-          title: t('memories', 'Timeline'),
-        },
-        {
-          name: 'explore',
-          icon: markRaw(SearchIcon),
-          title: t('memories', 'Explore'),
-        },
-        {
-          name: 'folders',
-          icon: markRaw(FolderIcon),
-          title: t('memories', 'Folders'),
-        },
-        {
-          name: 'favorites',
-          icon: markRaw(Star),
-          title: t('memories', 'Favorites'),
-        },
-        {
-          name: 'albums',
-          icon: markRaw(AlbumIcon),
-          title: t('memories', 'Albums'),
-          if: this.showAlbums,
-        },
-        {
-          name: 'recognize',
-          icon: markRaw(PeopleIcon),
-          title: this.recognize || '',
-          if: this.recognize,
-        },
-        {
-          name: 'facerecognition',
-          icon: markRaw(PeopleIcon),
-          title: this.facerecognition || '',
-          if: this.facerecognition,
-        },
-        {
-          name: 'archive',
-          icon: markRaw(ArchiveIcon),
-          title: t('memories', 'Archive'),
-        },
-        {
-          name: 'thisday',
-          icon: markRaw(CalendarIcon),
-          title: t('memories', 'On this day'),
-        },
-        {
-          name: 'places',
-          icon: markRaw(MarkerIcon),
-          title: t('memories', 'Places'),
-          if: this.config.places_gis > 0,
-        },
-        {
-          name: 'map',
-          icon: markRaw(MapIcon),
-          title: t('memories', 'Map'),
-        },
-        {
-          name: 'tags',
-          icon: markRaw(TagsIcon),
-          title: t('memories', 'Tags'),
-          if: this.config.systemtags_enabled,
-        },
-      ];
-
-      this.navItems = navItems.filter((item) => item.if === undefined || Boolean(item.if));
-    },
-
-    linkClick() {
-      if (_m.window.innerWidth <= 1024) {
-        utils.bus.emit('toggle-navigation', { open: false });
-      }
-    },
-
-    showSettings() {
-      this.settingsOpen = true;
-    },
-
-    // https://github.com/pulsejet/memories/issues/1634
-    syncSharingToken(token?: string) {
-      document.querySelector('input#sharingToken')?.remove();
-      if (!token) return;
-
-      const el = document.createElement('input');
-      el.id = 'sharingToken';
-      el.type = 'hidden';
-      el.value = token;
-      document.body.appendChild(el);
-    },
-  },
 });
+
+const route = useRoute();
+const navItems = ref<NavItem[]>([]);
+const settingsOpen = ref(false);
+
+watch(
+  () => route.params.token,
+  (token?: string | string[]) => {
+    syncSharingToken(token?.toString());
+  },
+  { immediate: true },
+);
+
+const native = computed((): boolean => {
+  return nativex.has();
+});
+
+const recognize = computed((): string | false => {
+  if (!config.recognize_enabled) {
+    return false;
+  }
+
+  if (config.facerecognition_installed) {
+    return t('memories', 'People (Recognize)');
+  }
+
+  return t('memories', 'People');
+});
+
+const facerecognition = computed((): string | false => {
+  if (!config.facerecognition_installed) {
+    return false;
+  }
+
+  if (config.recognize_enabled) {
+    return t('memories', 'People (Face Recognition)');
+  }
+
+  return t('memories', 'People');
+});
+
+const isFirstStart = computed((): boolean => {
+  return config.timeline_path === '_empty_' && !routeIs.Public && !route.query.noinit;
+});
+
+const isConfigUnknown = computed((): boolean => {
+  return config.timeline_path === '_unknown_';
+});
+
+const showAlbums = computed((): boolean => {
+  return config.albums_enabled;
+});
+
+const showNavigation = computed((): boolean => {
+  if (routeIs.Public || isFirstStart.value) {
+    return false;
+  }
+
+  if (native.value) {
+    // Only show navigation on "main" tabs
+    return routeIs.Base || routeIs.Explore || (routeIs.Albums && !route.params.name);
+  }
+
+  return true;
+});
+
+const hasMobileHeader = computed((): boolean => {
+  return native.value && showNavigation.value && routeIs.Base;
+});
+
+// Register navigation items on config change
+watch(config, refreshNav);
+
+// Register global functions
+_m.modals.showSettings = showSettings;
+
+// Warm codec detection for video URLs
+void getPlayableVideoCodecs();
+
+onMounted(() => {
+  refreshNav();
+
+  // Store CSS variables modified
+  const root = document.documentElement;
+  const colorPrimary = getComputedStyle(root).getPropertyValue('--color-primary');
+  root.style.setProperty('--color-primary-select-light', `${colorPrimary}40`);
+  root.style.setProperty('--media-brand', colorPrimary);
+
+  // Set theme color to default
+  // Skip on nxsetup and firststart to avoid flashing white on initial setup.
+  if (!routeIs.NxSetup && !isFirstStart.value) {
+    nativex.setTheme();
+  }
+
+  // Check for native interface
+  if (native.value) {
+    document.documentElement.classList.add('native');
+  }
+
+  // Close navigation by default if init is disabled
+  // This is the case for public folder/album shares
+  if (route.query.noinit) {
+    utils.bus.emit('toggle-navigation', { open: false });
+  }
+});
+
+onBeforeMount(async () => {
+  if ('serviceWorker' in navigator && !nativex.has()) {
+    // Use the window load event to keep the page load performant
+    window.addEventListener('load', async () => {
+      try {
+        const url = generateUrl('/apps/memories/static/service-worker.js');
+        const registration = await navigator.serviceWorker.register(url, {
+          scope: generateUrl('/apps/memories'),
+        });
+        console.info('SW registered: ', registration);
+
+        // Check for updates
+        if (await hasVersionChanged()) {
+          await registration.update();
+        }
+      } catch (error) {
+        console.error('SW registration failed: ', error);
+      }
+    });
+  } else {
+    console.debug('Service Worker is not enabled on this browser.');
+  }
+});
+
+function refreshNav() {
+  const items = [
+    {
+      name: 'timeline',
+      icon: markRaw(ImageMultiple),
+      title: t('memories', 'Timeline'),
+    },
+    {
+      name: 'explore',
+      icon: markRaw(SearchIcon),
+      title: t('memories', 'Explore'),
+    },
+    {
+      name: 'folders',
+      icon: markRaw(FolderIcon),
+      title: t('memories', 'Folders'),
+    },
+    {
+      name: 'favorites',
+      icon: markRaw(Star),
+      title: t('memories', 'Favorites'),
+    },
+    {
+      name: 'albums',
+      icon: markRaw(AlbumIcon),
+      title: t('memories', 'Albums'),
+      if: showAlbums.value,
+    },
+    {
+      name: 'recognize',
+      icon: markRaw(PeopleIcon),
+      title: recognize.value || '',
+      if: recognize.value,
+    },
+    {
+      name: 'facerecognition',
+      icon: markRaw(PeopleIcon),
+      title: facerecognition.value || '',
+      if: facerecognition.value,
+    },
+    {
+      name: 'archive',
+      icon: markRaw(ArchiveIcon),
+      title: t('memories', 'Archive'),
+    },
+    {
+      name: 'thisday',
+      icon: markRaw(CalendarIcon),
+      title: t('memories', 'On this day'),
+    },
+    {
+      name: 'places',
+      icon: markRaw(MarkerIcon),
+      title: t('memories', 'Places'),
+      if: config.places_gis > 0,
+    },
+    {
+      name: 'map',
+      icon: markRaw(MapIcon),
+      title: t('memories', 'Map'),
+    },
+    {
+      name: 'tags',
+      icon: markRaw(TagsIcon),
+      title: t('memories', 'Tags'),
+      if: config.systemtags_enabled,
+    },
+  ];
+
+  navItems.value = items.filter((item) => item.if === undefined || Boolean(item.if));
+}
+
+function linkClick() {
+  if (windowDims.width <= 1024) {
+    utils.bus.emit('toggle-navigation', { open: false });
+  }
+}
+
+function showSettings() {
+  settingsOpen.value = true;
+}
+
+// https://github.com/pulsejet/memories/issues/1634
+function syncSharingToken(token?: string) {
+  document.querySelector('input#sharingToken')?.remove();
+  if (!token) return;
+
+  const el = document.createElement('input');
+  el.id = 'sharingToken';
+  el.type = 'hidden';
+  el.value = token;
+  document.body.appendChild(el);
+}
 </script>
 
 <style scoped lang="scss">

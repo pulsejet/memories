@@ -1,9 +1,8 @@
 import './bootstrap';
-import { registerGlobals } from './bootstrap';
 
 import { createApp } from 'vue';
 import App from './App.vue';
-import router, { routes, registerRouteCheckers } from './router';
+import router, { routes } from '@services/router';
 import * as nativex from '@native';
 
 // Global components
@@ -11,7 +10,6 @@ import VueVirtualScroller from 'vue-virtual-scroller';
 
 // CSS for components
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
-import '@nextcloud/dialogs/style.css';
 
 // Initialize global memories object
 globalThis._m = {
@@ -27,11 +25,6 @@ globalThis._m = {
   sidebar: {} as any,
   viewer: {} as any,
   video: {} as any,
-
-  window: {
-    innerWidth: window.innerWidth,
-    innerHeight: window.innerHeight,
-  },
 };
 
 // Generate client id for this instance
@@ -42,8 +35,6 @@ localStorage.setItem('videoClientIdPersistent', _m.video.clientIdPersistent);
 
 // Register global components and plugins
 const app = createApp(App);
-registerGlobals(app);
-registerRouteCheckers(app);
 app.use(router);
 app.use(VueVirtualScroller);
 

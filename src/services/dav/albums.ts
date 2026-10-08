@@ -1,14 +1,15 @@
 import * as base from './base';
 
 import axios from '@nextcloud/axios';
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 import { getLanguage } from '@nextcloud/l10n';
 
 import { translate as t, translatePlural as n } from '@services/l10n';
 import { API } from '@services/API';
 import client from '@services/dav/client';
-import staticConfig from '@services/static-config';
-import * as utils from '@services/utils';
+import { config } from '@services/user-config';
+import { constants } from '@services/constants';
+import * as utils from '@services/utils/common';
 
 import type { IAlbum, IFileInfo, IPhoto } from '@typings';
 
@@ -43,15 +44,15 @@ export async function getAlbums(fileid?: number) {
   let data = res.data;
 
   // Remove hidden albums unless specified
-  if (!staticConfig.getSync('show_hidden_albums')) {
+  if (!config.show_hidden_albums) {
     data = data.filter((a) => !a.name.startsWith('.'));
   }
 
   // Sort the response
-  const sort = staticConfig.getSync('album_list_sort');
-  if (sort & utils.constants.ALBUM_SORT_FLAGS.NAME) {
+  const sort = config.album_list_sort;
+  if (sort & constants.ALBUM_SORT_FLAGS.NAME) {
     data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
-  } else if (sort & utils.constants.ALBUM_SORT_FLAGS.LAST_UPDATE) {
+  } else if (sort & constants.ALBUM_SORT_FLAGS.LAST_UPDATE) {
     data.sort((a, b) => (a.update_id ?? Number.MAX_SAFE_INTEGER) - (b.update_id ?? Number.MAX_SAFE_INTEGER));
   } else {
     // fall back to created date
@@ -59,7 +60,7 @@ export async function getAlbums(fileid?: number) {
   }
 
   // Sort descending if needed
-  if (sort & utils.constants.ALBUM_SORT_FLAGS.DESCENDING) {
+  if (sort & constants.ALBUM_SORT_FLAGS.DESCENDING) {
     data.reverse();
   }
 

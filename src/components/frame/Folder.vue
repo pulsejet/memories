@@ -22,78 +22,66 @@
   </router-link>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
-import UserConfig from '@mixins/UserConfig';
-
-import * as utils from '@services/utils/helpers';
+import * as utils from '@services/utils/common';
 
 import type { IFolder, IPhoto } from '@typings';
 
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
 import XImg from '@components/frame/XImg.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'Folder',
-  components: {
-    FolderIcon,
-    XImg,
-  },
-
-  mixins: [UserConfig],
-
-  props: {
-    data: {
-      type: Object as PropType<IFolder>,
-      required: true,
-    },
-  },
-
-  computed: {
-    /** Open folder */
-    target() {
-      let path: string[] | string = this.$route.params.path || [];
-      if (typeof path === 'string') {
-        path = path.split('/');
-      }
-
-      path = [...path, this.data.name]; // intentional copy
-      return {
-        name: this.$route.name,
-        params: { ...this.$route.params, path },
-        query: this.$route.query,
-      };
-    },
-
-    previews(): IPhoto[] {
-      const previews = this.data.previews;
-      if (!previews?.length) {
-        return [];
-      }
-
-      if (previews.length > 0 && previews.length < 4) {
-        return [previews[0]];
-      } else {
-        return previews.slice(0, 4);
-      }
-    },
-
-    sanitizedName(): string {
-      return this.data.name.replaceAll(/[^a-zA-Z0-9-_]/g, '');
-    },
-  },
-
-  methods: {
-    /** Get preview url */
-    previewUrl(info: IPhoto) {
-      return utils.getPreviewUrl({
-        photo: info,
-        sqsize: 256,
-      });
-    },
-  },
 });
+
+const props = defineProps<{
+  data: IFolder;
+}>();
+
+const route = useRoute();
+
+/** Open folder */
+const target = computed(() => {
+  let path: string[] | string = route.params.path || [];
+  if (typeof path === 'string') {
+    path = path.split('/');
+  }
+
+  path = [...path, props.data.name]; // intentional copy
+  return {
+    name: route.name,
+    params: { ...route.params, path },
+    query: route.query,
+  };
+});
+
+const previews = computed((): IPhoto[] => {
+  const previews = props.data.previews;
+  if (!previews?.length) {
+    return [];
+  }
+
+  if (previews.length > 0 && previews.length < 4) {
+    return [previews[0]];
+  } else {
+    return previews.slice(0, 4);
+  }
+});
+
+const sanitizedName = computed((): string => {
+  return props.data.name.replaceAll(/[^a-zA-Z0-9-_]/g, '');
+});
+
+/** Get preview url */
+function previewUrl(info: IPhoto) {
+  return utils.getPreviewUrl({
+    photo: info,
+    sqsize: 256,
+  });
+}
 </script>
 
 <style lang="scss" scoped>

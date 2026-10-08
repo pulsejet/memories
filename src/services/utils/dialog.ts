@@ -1,14 +1,45 @@
-import { getDialogBuilder, getFilePickerBuilder, showError } from '@nextcloud/dialogs';
 import { spawnDialog } from '@nextcloud/vue/functions/dialog';
-
-import PromptDialog from '@components/modal/PromptDialog.vue';
 
 import { translatePlural as n, translate as t } from '@services/l10n';
 import { bus } from './event-bus';
 import { fragment } from './fragment';
 
 import type { INode } from '@nextcloud/files';
-import type { IFilePickerButton } from '@nextcloud/dialogs';
+import type { IFilePickerButton, ToastHandle, ToastOptions } from '@nextcloud/dialogs';
+
+/**
+ * Lazy-load the @nextcloud/dialogs library on first use.
+ * The chunk is very large (stat size = 3M).
+ */
+let dialogsPromise: Promise<typeof import('./dialog-lib')> | null = null;
+function loadDialogs(): Promise<typeof import('./dialog-lib')> {
+  dialogsPromise ??= import('./dialog-lib');
+  return dialogsPromise;
+}
+
+/** Show a toast message with error styling */
+export async function showError(text: string, options?: ToastOptions): Promise<ToastHandle> {
+  const lib = await loadDialogs();
+  return lib.showError(text, options);
+}
+
+/** Show a toast message with warning styling */
+export async function showWarning(text: string, options?: ToastOptions): Promise<ToastHandle> {
+  const lib = await loadDialogs();
+  return lib.showWarning(text, options);
+}
+
+/** Show a toast message with info styling */
+export async function showInfo(text: string, options?: ToastOptions): Promise<ToastHandle> {
+  const lib = await loadDialogs();
+  return lib.showInfo(text, options);
+}
+
+/** Show a toast message with success styling */
+export async function showSuccess(text: string, options?: ToastOptions): Promise<ToastHandle> {
+  const lib = await loadDialogs();
+  return lib.showSuccess(text, options);
+}
 
 type ConfirmOptions = {
   /** Title of dialog */
@@ -38,7 +69,7 @@ bus.on('memories:fragment:pop:dialog', () => {
   button.click();
 });
 
-export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
+export async function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
   const opts: ConfirmOptions = {
     title: '',
     message: '',
@@ -49,7 +80,9 @@ export function confirmDestructive(options: ConfirmOptions): Promise<boolean> {
   };
 
   let result = false;
-  const dialog = getDialogBuilder(opts.title ?? '')
+  const lib = await loadDialogs();
+  const dialog = lib
+    .getDialogBuilder(opts.title ?? '')
     .setText(opts.message ?? '')
     .setSeverity('error')
     .setButtons([
@@ -87,7 +120,9 @@ type PromptOptions = {
   password?: boolean;
 };
 
-export function prompt(opts: PromptOptions): Promise<string | null> {
+export async function prompt(opts: PromptOptions): Promise<string | null> {
+  // Lazy-load on first use so the modal is not part of the initial bundle
+  const { default: PromptDialog } = await import('@components/modal/PromptDialog.vue');
   return fragment.wrap(
     spawnDialog(PromptDialog, {
       title: opts.title ?? '',
@@ -126,7 +161,9 @@ export async function chooseNcFolder(
   initial: string = '/',
   buttonFactory = chooseButtonFactory,
 ): Promise<string> {
-  const picker = getFilePickerBuilder(title)
+  const lib = await loadDialogs();
+  const picker = lib
+    .getFilePickerBuilder(title)
     .setMultiSelect(false)
     .setButtonFactory(buttonFactory)
     .addMimeTypeFilter('httpd/unix-directory')
@@ -148,7 +185,7 @@ export async function chooseNcFolder(
 
   // Look for any trailing or leading whitespace
   if (folder.trim() !== folder) {
-    showError(
+    await showError(
       t(
         'memories',
         'The folder name "{folder}" has a leading or trailing whitespace. This may lead to errors and should be corrected.',

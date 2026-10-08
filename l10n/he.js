@@ -74,12 +74,12 @@ OC.L10N.register(
     "Update" : "עדכון",
     "Loading …" : "בטעינה…",
     "Move" : "העברה",
-    "Remove" : "הסרה",
     "Password protected" : "מוגן בססמה",
     "Expires" : "תפוגה",
     "Read only" : "קריאה בלבד",
     "Link copied to clipboard" : "הקישור הועתק ללוח הגזירים",
     "Share link" : "שיתוף קישור",
+    "Remove" : "הסרה",
     "Refresh" : "רענון",
     "OK" : "OK",
     "Failed to upload {file}" : "העלאת {file} נכשלה",
@@ -125,8 +125,8 @@ OC.L10N.register(
     "Extension" : "הרחבה",
     "Name is required." : "נדרש שם.",
     "Quality" : "איכות",
-    "Setup" : "הגדרות",
     "Shared by {user}" : "שותפה על ידי {user}",
+    "Setup" : "הגדרות",
     "Choose" : "בחר"
 },
 "nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: 2;");

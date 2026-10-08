@@ -1,12 +1,13 @@
 import axios from '@nextcloud/axios';
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 import { getAlbumFileInfos } from './albums';
 import client, { remotePath } from './client';
 
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
-import * as utils from '@services/utils';
+import { routeIs } from '@services/router';
+import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 
 import type { IFileInfo, IImageInfo, IPhoto } from '@typings';
@@ -277,9 +278,9 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   const confirmationCount = photos.length;
 
   // Extend with stack unless this is an album
-  const routeIsAlbums = _m.route.name === _m.routes.Albums.name;
+  const isAlbum = routeIs.Albums;
   let livePhotoVideoFileIds = new Set<number>();
-  if (!routeIsAlbums) {
+  if (!isAlbum) {
     const extended = await extendWithStack(photos);
     photos = extended.photos;
     livePhotoVideoFileIds = extended.livePhotoVideoFileIds;
@@ -295,7 +296,7 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
 
   // Check for locally available files and delete them.
   // For albums, we are not actually deleting.
-  const hasNative = nativex.has() && !routeIsAlbums;
+  const hasNative = nativex.has() && !isAlbum;
 
   // Check if native confirmation is available
   if (hasNative) {
@@ -304,7 +305,7 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
 
   // Show confirmation dialog if required
   if (confirm) {
-    if (routeIsAlbums) {
+    if (isAlbum) {
       if (!(await utils.dialogs.removeFromAlbum(confirmationCount))) {
         throw new Error('User cancelled removal');
       }
@@ -672,4 +673,38 @@ export async function fillImageInfo(photos: IPhoto[], query?: { tags?: number },
   for await (const _ of runInParallel(calls, 8)) {
     // nothing to do
   }
+}
+
+/**
+ * Force reindex the given photos, one file per request.
+ *
+ * @param photos list of photos to reindex
+ * @param progress callback to report number of files done
+ * @returns number of files successfully reindexed
+ */
+export async function reindexPhotos(photos: IPhoto[], progress?: (done: number) => void) {
+  const remote = photos.filter((p) => !utils.isLocalPhoto(p));
+
+  let done = photos.length - remote.length;
+  if (done > 0) progress?.(done);
+  let success = 0;
+
+  const calls = remote.map((p) => async () => {
+    try {
+      await axios.post(API.IMAGE_REINDEX(p.fileid));
+      success++;
+    } catch (error) {
+      console.error('Failed to reindex', p.fileid, error);
+      showError(t('memories', 'Failed to refresh metadata for {name}.', { name: p.basename ?? p.fileid }));
+    } finally {
+      done++;
+      progress?.(done);
+    }
+  });
+
+  for await (const _ of runInParallel(calls, 4)) {
+    // nothing to do
+  }
+
+  return success;
 }

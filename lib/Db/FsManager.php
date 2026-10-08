@@ -310,7 +310,7 @@ final class FsManager
                 // Public shares may allow editing
                 // Just use the same permissions as the share
                 if ($share instanceof File) {
-                    return $share;
+                    return $share->getId() === $id ? $share : null;
                 }
                 if ($share instanceof Folder) {
                     return $this->getOneFileFromFolder($share, $id, $share->getPermissions());

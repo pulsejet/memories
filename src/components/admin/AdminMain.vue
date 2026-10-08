@@ -1,18 +1,9 @@
 <template>
-  <div class="outer" v-if="config && sconfig">
+  <div class="outer" v-if="systemConfig">
     <XLoadingIcon class="loading-icon" v-show="loading" />
 
     <div class="left-pane">
-      <component
-        v-for="c in components"
-        :id="c.name"
-        :key="c.name"
-        :is="c"
-        :status="status"
-        :config="config"
-        :sconfig="sconfig"
-        @update="update"
-      />
+      <component v-for="c in components" :id="c.name" :key="c.name" :is="c" />
     </div>
     <div class="right-pane">
       <a class="sec-link" v-for="c in components" :key="c.name" :href="`#${c.name}`">{{ c.title ?? c.name }}</a>
@@ -20,15 +11,17 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, markRaw } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, markRaw } from 'vue';
 
 import axios from '@nextcloud/axios';
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 import { API } from '@services/API';
-import * as utils from '@services/utils';
-import staticConfig from '@services/static-config';
+import { RenewingTimeout } from '@services/utils/renewing-timeout';
+import { waitForConfig } from '@services/user-config';
+import { t } from '@services/l10n';
+import { provideAdminContext } from './admin-context';
 
 import Help from './sections/Help.vue';
 import Exif from './sections/Exif.vue';
@@ -44,110 +37,95 @@ import VideoAccel from './sections/VideoAccel.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import type { ISystemConfig, ISystemStatus } from './AdminTypes';
-import type { IConfig } from '@typings';
 
-export default defineComponent({
-  name: 'Admin',
-  components: {
-    XLoadingIcon,
-  },
+const loading = ref(0);
+const refreshTimer = new RenewingTimeout();
+const status = ref<ISystemStatus | null>(null);
+const systemConfig = ref<ISystemConfig | null>(null);
 
-  data: () => ({
-    loading: 0,
+const components = [
+  markRaw(Help),
+  markRaw(Exif),
+  markRaw(Indexing),
+  markRaw(FileSupport),
+  markRaw(Viewer),
+  markRaw(Performance),
+  markRaw(Apps),
+  markRaw(Places),
+  markRaw(Video),
+  markRaw(VideoTranscoder),
+  markRaw(VideoAccel),
+];
 
-    status: null as ISystemStatus | null,
-    config: null as ISystemConfig | null,
-    sconfig: null as IConfig | null,
-
-    components: [
-      markRaw(Help),
-      markRaw(Exif),
-      markRaw(Indexing),
-      markRaw(FileSupport),
-      markRaw(Viewer),
-      markRaw(Performance),
-      markRaw(Apps),
-      markRaw(Places),
-      markRaw(Video),
-      markRaw(VideoTranscoder),
-      markRaw(VideoAccel),
-    ],
-  }),
-
-  mounted() {
-    this.refreshSystemConfig();
-    this.refreshStatus();
-    this.refreshStaticConfig();
-    utils.bus.on('memories:user-config-changed', this.refreshStaticConfig);
-  },
-
-  beforeUnmount() {
-    utils.bus.off('memories:user-config-changed', this.refreshStaticConfig);
-  },
-
-  methods: {
-    async refreshSystemConfig() {
-      try {
-        this.loading++;
-        const res = await axios.get<ISystemConfig>(API.SYSTEM_CONFIG(null));
-        this.config = res.data;
-      } catch (e: any) {
-        showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
-        console.error(e);
-      } finally {
-        this.loading--;
-      }
-    },
-
-    async refreshStatus() {
-      try {
-        this.loading++;
-        const res = await axios.get<ISystemStatus>(API.SYSTEM_STATUS());
-        this.status = res.data;
-      } catch (e: any) {
-        showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
-        console.error(e);
-      } finally {
-        this.loading--;
-      }
-    },
-
-    async refreshStaticConfig() {
-      try {
-        this.loading++;
-        this.sconfig = await staticConfig.getAll();
-      } catch (e: any) {
-        showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
-        console.error(e);
-      } finally {
-        this.loading--;
-      }
-    },
-
-    async update<K extends keyof ISystemConfig>(key: K, value: ISystemConfig[K] | null = null) {
-      if (!this.config || !Object.hasOwn(this.config, key)) {
-        console.error('Unknown setting', key);
-        return;
-      }
-
-      // Get final value
-      value ??= this.config[key];
-      this.config[key] = value;
-
-      try {
-        this.loading++;
-        await axios.put(API.SYSTEM_CONFIG(key), { value });
-
-        utils.setRenewingTimeout(this, '_refreshTimer', this.refreshStatus.bind(this), 500);
-      } catch (err) {
-        console.error(err);
-        showError(this.t('memories', 'Failed to update setting'));
-      } finally {
-        this.loading--;
-      }
-    },
-  },
+onMounted(() => {
+  refreshSystemConfig();
+  refreshStatus();
+  refreshUserConfig();
 });
+
+async function refreshSystemConfig() {
+  try {
+    loading.value++;
+    const res = await axios.get<ISystemConfig>(API.SYSTEM_CONFIG(null));
+    systemConfig.value = res.data;
+  } catch (e: any) {
+    showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
+    console.error(e);
+  } finally {
+    loading.value--;
+  }
+}
+
+async function refreshStatus() {
+  try {
+    loading.value++;
+    const res = await axios.get<ISystemStatus>(API.SYSTEM_STATUS());
+    status.value = res.data;
+  } catch (e: any) {
+    showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
+    console.error(e);
+  } finally {
+    loading.value--;
+  }
+}
+
+async function refreshUserConfig() {
+  try {
+    loading.value++;
+    await waitForConfig();
+  } catch (e: any) {
+    showError(JSON.stringify(e.response?.data?.message ?? e.response?.data ?? e));
+    console.error(e);
+  } finally {
+    loading.value--;
+  }
+}
+
+async function update<K extends keyof ISystemConfig>(key: K, value: ISystemConfig[K] | null = null) {
+  if (!systemConfig.value || !Object.hasOwn(systemConfig.value, key)) {
+    console.error('Unknown setting', key);
+    return;
+  }
+
+  // Get final value
+  value ??= systemConfig.value[key];
+  systemConfig.value[key] = value;
+
+  try {
+    loading.value++;
+    await axios.put(API.SYSTEM_CONFIG(key), { value });
+
+    refreshTimer.set(refreshStatus, 500);
+  } catch (err) {
+    console.error(err);
+    showError(t('memories', 'Failed to update setting'));
+  } finally {
+    loading.value--;
+  }
+}
+
+// Provide shared context to all sections.
+provideAdminContext({ status, systemConfig, update });
 </script>
 
 <style lang="scss" scoped>

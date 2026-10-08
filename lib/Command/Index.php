@@ -210,7 +210,7 @@ final class Index extends Command
      */
     protected function runIndex(): void
     {
-        $this->runForUsers(function (IUser $user) {
+        $this->runForUsers(function (IUser $user): void {
             try {
                 $this->indexer->indexUser($user, $this->opts->path);
             } catch (\Exception $e) {

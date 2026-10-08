@@ -12,7 +12,7 @@
     <div class="right-actions">
       <NcActions :inline="0">
         <!-- root view (not cluster or unassigned) -->
-        <template v-if="!name && !routeIsPlacesUnassigned">
+        <template v-if="!name && !routeIs.PlacesUnassigned">
           <NcActionButton
             :aria-label="t('memories', 'Files without location')"
             @click="openUnassigned"
@@ -27,54 +27,50 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
+import { t } from '@services/l10n';
+import { routeIs } from '@services/router';
 import * as strings from '@services/strings';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
+import { constants } from '@services/constants';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import UnassignedIcon from 'vue-material-design-icons/MapMarkerOff.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'PlacesTopMatter',
-  components: {
-    NcActions,
-    NcActionButton,
-    BackIcon,
-    UnassignedIcon,
-  },
-
-  computed: {
-    viewname(): string {
-      return strings.viewName(this.$route.name?.toString() ?? '');
-    },
-
-    name(): string | null {
-      if (this.routeIsPlacesUnassigned) {
-        return this.t('memories', 'Unidentified location');
-      }
-
-      return utils.routeParamToString(this.$route.params.name).split('-').slice(1).join('-');
-    },
-  },
-
-  methods: {
-    back() {
-      this.$router.go(-1);
-    },
-
-    openUnassigned() {
-      this.$router.push({
-        name: _m.routes.Places.name,
-        params: {
-          name: this.c.PLACES_NULL,
-        },
-      });
-    },
-  },
 });
+
+const route = useRoute();
+const router = useRouter();
+const viewname = computed((): string => {
+  return strings.viewName(route.name?.toString() ?? '');
+});
+
+const name = computed((): string | null => {
+  if (routeIs.PlacesUnassigned) {
+    return t('memories', 'Unidentified location');
+  }
+
+  return utils.routeParamToString(route.params.name).split('-').slice(1).join('-');
+});
+
+function back() {
+  router.go(-1);
+}
+
+function openUnassigned() {
+  router.push({
+    name: _m.routes.Places.name,
+    params: {
+      name: constants.PLACES_NULL,
+    },
+  });
+}
 </script>

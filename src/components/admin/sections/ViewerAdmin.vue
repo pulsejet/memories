@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-section">
+  <div v-if="systemConfig" class="admin-section">
     <h2>{{ $options.title }}</h2>
 
     {{ t('memories', 'Default high resolution image loading behavior of the photo viewer.') }}
@@ -8,7 +8,7 @@
     <br />
 
     <NcCheckboxRadioSwitch
-      v-model="config['memories.viewer.high_res_cond_default']"
+      v-model="systemConfig['memories.viewer.high_res_cond_default']"
       value="zoom"
       name="vhrc_radio"
       type="radio"
@@ -16,7 +16,7 @@
       >{{ t('memories', 'Load high resolution image on zoom') }}
     </NcCheckboxRadioSwitch>
     <NcCheckboxRadioSwitch
-      v-model="config['memories.viewer.high_res_cond_default']"
+      v-model="systemConfig['memories.viewer.high_res_cond_default']"
       value="always"
       name="vhrc_radio"
       type="radio"
@@ -24,7 +24,7 @@
       >{{ t('memories', 'Always load high resolution image (not recommended if using HEIC/TIFF)') }}
     </NcCheckboxRadioSwitch>
     <NcCheckboxRadioSwitch
-      v-model="config['memories.viewer.high_res_cond_default']"
+      v-model="systemConfig['memories.viewer.high_res_cond_default']"
       value="never"
       name="vhrc_radio"
       type="radio"
@@ -38,7 +38,7 @@
     <br />
 
     <NcCheckboxRadioSwitch
-      v-model="config['memories.viewer.video.autoplay']"
+      v-model="systemConfig['memories.viewer.video.autoplay']"
       value="true"
       name="vauto_radio"
       type="radio"
@@ -46,7 +46,7 @@
       >{{ t('memories', 'Autoplay videos') }}
     </NcCheckboxRadioSwitch>
     <NcCheckboxRadioSwitch
-      v-model="config['memories.viewer.video.autoplay']"
+      v-model="systemConfig['memories.viewer.video.autoplay']"
       value="false"
       name="vauto_radio"
       type="radio"
@@ -54,7 +54,7 @@
       >{{ t('memories', 'Do not autoplay videos') }}
     </NcCheckboxRadioSwitch>
     <NcCheckboxRadioSwitch
-      v-model="config['memories.viewer.video.autoplay']"
+      v-model="systemConfig['memories.viewer.video.autoplay']"
       value="disallow"
       name="vauto_radio"
       type="radio"
@@ -64,16 +64,17 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch';
 
-import { translate as t } from '@services/l10n';
+import { t } from '@services/l10n';
 
-import AdminMixin from '../AdminMixin';
+import { useAdminContext } from '../admin-context';
 
-export default defineComponent({
+defineOptions({
   name: 'Viewer',
   title: t('memories', 'Photo Viewer'),
-  mixins: [AdminMixin],
 });
+
+const { systemConfig, update } = useAdminContext();
 </script>

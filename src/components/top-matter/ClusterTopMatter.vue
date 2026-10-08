@@ -10,43 +10,39 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
+import { t } from '@services/l10n';
 import * as strings from '@services/strings';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'ClusterTopMatter',
-  components: {
-    NcActions,
-    NcActionButton,
-    BackIcon,
-  },
-
-  computed: {
-    viewname(): string {
-      return strings.viewName(this.$route.name?.toString() ?? '');
-    },
-
-    name(): string | null {
-      switch (this.$route.name) {
-        case _m.routes.Tags.name:
-          return this.t('recognize', this.$route.params.name?.toString());
-        default:
-          return null;
-      }
-    },
-  },
-
-  methods: {
-    back() {
-      this.$router.go(-1);
-    },
-  },
 });
+
+const route = useRoute();
+const router = useRouter();
+
+const viewname = computed((): string => {
+  return strings.viewName(route.name?.toString() ?? '');
+});
+
+const name = computed((): string | null => {
+  switch (route.name) {
+    case _m.routes.Tags.name:
+      return t('recognize', route.params.name?.toString());
+    default:
+      return null;
+  }
+});
+
+function back() {
+  router.go(-1);
+}
 </script>

@@ -1,8 +1,9 @@
 import { NAPI, nativex } from './api';
-import { has } from './basic';
+import { has } from './api';
 
 import { API } from '@services/API';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
+import { RenewingTimeout } from '@services/utils/renewing-timeout';
 
 import type { IDay, IPhoto } from '@typings';
 
@@ -95,54 +96,53 @@ export function mergeDay(remote: IPhoto[], local: IPhoto[]): void {
   remote.sort((a, b) => (b.epoch ?? 0) - (a.epoch ?? 0));
 }
 
+/** AUIDs and BUIDs seen on server, pending report to native */
+const pfsdAuids = new Set<string>();
+const pfsdBuids = new Set<string>();
+
+/** Debounce timer for reporting seen remote files to native */
+const pfsdTimer = new RenewingTimeout();
+
 /**
  * Run internal hooks on fresh day received from server
  * Does not update the passed objects in any way
  * @param current Photos from day response
  */
-export function processFreshServerDay(this: any, dayId: number, photos: IPhoto[]): void {
-  const auids: Set<string> = (this.pfsdaq ??= new Set<string>());
-  const buids: Set<string> = (this.pfsdbq ??= new Set<string>());
-
+export function processFreshServerDay(dayId: number, photos: IPhoto[]): void {
   // Add to queue
   for (const photo of photos) {
-    if (photo.auid) auids.add(photo.auid);
-    if (photo.buid) buids.add(photo.buid);
+    if (photo.auid) pfsdAuids.add(photo.auid);
+    if (photo.buid) pfsdBuids.add(photo.buid);
   }
 
   // Debounce
-  utils.setRenewingTimeout(
-    this,
-    'pfsdq_timer',
-    () => {
-      const auidsa: string[] = [],
-        buidsa: string[] = [];
+  pfsdTimer.set(() => {
+    const auidsa: string[] = [],
+      buidsa: string[] = [];
 
-      // Only keep the seen AUIDs and BUIDs
-      for (const auid of auids) {
-        if (seenABUIDs.has(auid)) {
-          auidsa.push(auid);
-          seenABUIDs.delete(auid);
-        }
+    // Only keep the seen AUIDs and BUIDs
+    for (const auid of pfsdAuids) {
+      if (seenABUIDs.has(auid)) {
+        auidsa.push(auid);
+        seenABUIDs.delete(auid);
       }
-      for (const buid of buids) {
-        if (seenABUIDs.has(buid)) {
-          buidsa.push(buid);
-          seenABUIDs.delete(buid);
-        }
+    }
+    for (const buid of pfsdBuids) {
+      if (seenABUIDs.has(buid)) {
+        buidsa.push(buid);
+        seenABUIDs.delete(buid);
       }
+    }
 
-      // Nothing to do?
-      if (auidsa.length || buidsa.length) {
-        nativex.setHasRemote(JSON.stringify(auidsa), JSON.stringify(buidsa), true);
-      }
+    // Nothing to do?
+    if (auidsa.length || buidsa.length) {
+      nativex.setHasRemote(JSON.stringify(auidsa), JSON.stringify(buidsa), true);
+    }
 
-      // Done
-      auids.clear();
-      buids.clear();
-    },
-    1000,
-  );
+    // Done
+    pfsdAuids.clear();
+    pfsdBuids.clear();
+  }, 1000);
 }
 
 /**

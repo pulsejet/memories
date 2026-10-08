@@ -3,7 +3,6 @@
     v-bind="$attrs"
     :aria-hidden="!title"
     :aria-label="title"
-    :style="{ width: sizePx, height: sizePx }"
     class="material-design-icon live-photo-icon"
     :class="{ spin }"
     role="img"
@@ -40,38 +39,32 @@
   </span>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
-export default defineComponent({
-  name: 'LivePhoto',
-  emits: ['click'],
-  props: {
-    title: {
-      type: String,
-    },
-    fillColor: {
-      type: String,
-      default: 'currentColor',
-    },
-    size: {
-      type: [String, Number],
-      default: '24px',
-    },
-    spin: {
-      type: Boolean,
-      default: false,
-    },
-    playing: {
-      type: Boolean,
-      default: false,
-    },
+const props = withDefaults(
+  defineProps<{
+    title?: string;
+    fillColor?: string;
+    size?: string | number;
+    spin?: boolean;
+    playing?: boolean;
+  }>(),
+  {
+    title: undefined,
+    fillColor: 'currentColor',
+    size: '24px',
+    spin: false,
+    playing: false,
   },
-  computed: {
-    sizePx(): string {
-      return typeof this.size === 'number' ? `${this.size}px` : this.size;
-    },
-  },
+);
+
+defineEmits<{
+  (e: 'click', event: MouseEvent): void;
+}>();
+
+const sizePx = computed((): string => {
+  return typeof props.size === 'number' ? `${props.size}px` : props.size;
 });
 </script>
 
@@ -79,6 +72,8 @@ export default defineComponent({
 .live-photo-icon {
   position: relative;
   pointer-events: none;
+  width: v-bind(sizePx);
+  height: v-bind(sizePx);
 
   > svg {
     position: absolute;

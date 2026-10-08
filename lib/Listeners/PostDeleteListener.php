@@ -22,6 +22,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Listeners;
 
 use OCA\Memories\Db\TimelineWrite;
+use OCA\Memories\Service\Lens;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Files\Events\Node\NodeDeletedEvent;
@@ -32,7 +33,10 @@ use OCP\Files\File;
  */
 final class PostDeleteListener implements IEventListener
 {
-    public function __construct(private TimelineWrite $tw) {}
+    public function __construct(
+        private TimelineWrite $tw,
+        private Lens $lens,
+    ) {}
 
     #[\Override]
     public function handle(Event $event): void
@@ -47,5 +51,6 @@ final class PostDeleteListener implements IEventListener
         }
 
         $this->tw->deleteFile($node);
+        $this->lens->delete($node);
     }
 }

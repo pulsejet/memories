@@ -73,4 +73,24 @@ final class Lens
             $this->logger->warning('Lens enqueue failed: '.$e->getMessage());
         }
     }
+
+    /**
+     * Remove a deleted file's embeddings; daemon failures never break file deletion.
+     */
+    public function delete(File $file): void
+    {
+        try {
+            $base = $this->daemonUrl();
+            if ('' === $base) {
+                return;
+            }
+
+            $this->clientService->newClient()->delete($base.'/v1/index/'.$file->getId().'?async=true', [
+                'timeout' => 2,
+                'nextcloud' => ['allow_local_address' => true],
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->warning('Lens delete failed: '.$e->getMessage());
+        }
+    }
 }

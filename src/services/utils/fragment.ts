@@ -1,5 +1,5 @@
 import { bus } from './event-bus';
-import { onDOMLoaded } from './helpers';
+import { onDOMLoaded } from './dom';
 
 /** Mapping of route name to key type */
 enum FragmentType {
@@ -10,6 +10,7 @@ enum FragmentType {
   editor = 'e',
   settings = 'ss',
   dialog = 'd',
+  day = 'day',
 }
 
 /** Names of fragments */
@@ -145,6 +146,16 @@ export const fragment = {
   },
 
   /**
+   * Drop all the fragments from the route.
+   */
+  async clear() {
+    _m.router.replace({
+      path: _m.route.path,
+      query: _m.route.query,
+    });
+  },
+
+  /**
    * Sync a fragment with a boolean condition.
    */
   async if(condition: boolean, type: FragmentType, ...args: string[]) {
@@ -171,6 +182,10 @@ export const fragment = {
 
   get viewer() {
     return this.get(FragmentType.viewer);
+  },
+
+  get day() {
+    return this.get(FragmentType.day);
   },
 };
 
@@ -264,13 +279,10 @@ onDOMLoaded(() => {
   // The back button will still take the user back to
   // the previous page but this is fine.
   if (fragment.list.length) {
-    const contextual = fragment.list.filter((frag) => frag.type === FragmentType.viewer);
+    const contextual = fragment.list.filter((frag) => [FragmentType.viewer, FragmentType.day].includes(frag.type));
 
     // Remove the currently present fragments
-    _m.router.replace({
-      path: _m.route.path,
-      query: _m.route.query,
-    });
+    fragment.clear();
 
     // Only contextual fragments should be present on page load
     if (contextual.length) {

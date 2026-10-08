@@ -10,14 +10,7 @@ test.use({
   }),
 });
 
-const YEAR_TEXTS = [
-  '1 year ago',
-  '2 years ago',
-  '3 years ago',
-  '4 years ago',
-  '5 years ago',
-  '6 years ago',
-];
+const YEAR_TEXTS = ['1 year ago', '2 years ago', '3 years ago', '4 years ago', '5 years ago', '6 years ago'];
 
 test.describe('@ui On this day carousel', () => {
   // The 2-years-ago photos are on Jul 30 and Aug 1, matched by the default day range.

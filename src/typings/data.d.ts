@@ -52,12 +52,16 @@ declare module '@typings' {
     flag: number;
     /** DayID from server */
     dayid: number;
+    /** DayID (real, dayid=monthid) */
+    dayid_real?: number;
     /** Width of full image */
     w?: number;
     /** Height of full image */
     h?: number;
     /** Live Photo identifier */
     liveid?: string;
+    /** Panorama type (see Exif::PANO_*) */
+    pano?: number;
     /** File owner display name */
     shared_by?: string;
     /** File size in bytes */
@@ -137,6 +141,7 @@ declare module '@typings' {
     ownername: string;
 
     filename?: string;
+    intimeline?: boolean;
     address?: string;
     address_short?: string;
     tags?: { [id: string]: string };

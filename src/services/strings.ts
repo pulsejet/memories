@@ -1,4 +1,4 @@
-import staticConfig from './static-config';
+import { config } from './user-config';
 import { translate as t } from '@services/l10n';
 
 export function emptyDescription(routeName: string): string {
@@ -12,11 +12,13 @@ export function emptyDescription(routeName: string): string {
     case _m.routes.Recognize.name:
       return t('memories', 'Recognize is still working on your photos');
     case _m.routes.FaceRecognition.name:
-      return staticConfig.getSync('facerecognition_enabled')
+      return config.facerecognition_enabled
         ? t('memories', 'You will find your friends soon. Please be patient')
         : t('memories', 'Face Recognition is disabled. Enable in settings to find your friends');
     case _m.routes.Videos.name:
       return t('memories', 'Your videos will appear here');
+    case _m.routes.Panoramas.name:
+      return t('memories', 'Your panoramas will appear here');
     case _m.routes.Albums.name:
       return _m.route.params.name?.toString()
         ? t('memories', 'Add photos to albums by selecting them on your timeline.')
@@ -41,6 +43,8 @@ export function viewName(routeName: string): string {
       return t('memories', 'People');
     case _m.routes.Videos.name:
       return t('memories', 'Videos');
+    case _m.routes.Panoramas.name:
+      return t('memories', 'Panoramas');
     case _m.routes.Albums.name:
       return t('memories', 'Albums');
     case _m.routes.Archive.name:

@@ -169,12 +169,16 @@ test.describe('@api Timeline', () => {
     revDayUrl.searchParams.set('reverse', '1');
     const revDay: IPhoto[] = await (await request.get(revDayUrl.toString())).json();
     expect(revDay.map((p) => p.basename)).toStrictEqual(
-      goldDayPhotos(TIMELINE_PATH, dayId).map((p) => p.basename).reverse(),
+      goldDayPhotos(TIMELINE_PATH, dayId)
+        .map((p) => p.basename)
+        .reverse(),
     );
   });
 
   test('Limit day query', async ({ request }) => {
-    const dayIds = goldDays(TIMELINE_PATH).slice(0, 3).map((d) => d.dayid);
+    const dayIds = goldDays(TIMELINE_PATH)
+      .slice(0, 3)
+      .map((d) => d.dayid);
     const expected = dayIds.reduce((n, id) => n + goldDayPhotos(TIMELINE_PATH, id).length, 0);
     expect(expected).toBeGreaterThan(1);
 
@@ -204,11 +208,23 @@ test.describe('@api Timeline', () => {
       const monthId = Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), 1) / 86400000;
       expected.set(monthId, (expected.get(monthId) ?? 0) + d.count);
     }
-    const gold = [...expected.entries()]
-      .map(([dayid, count]) => ({ dayid, count }))
-      .sort((a, b) => b.dayid - a.dayid);
+    const gold = [...expected.entries()].map(([dayid, count]) => ({ dayid, count })).sort((a, b) => b.dayid - a.dayid);
 
     expect(months).toStrictEqual(gold);
+  });
+
+  test('Month view day detail', async ({ request }) => {
+    const url = new URL(`${appUrl}/api/days`);
+    url.searchParams.set('monthView', '1');
+    const res = await request.post(url.toString(), { data: { dayIds: [20666] } });
+    expect(res.ok()).toBeTruthy();
+
+    const data: IPhoto[] = await res.json();
+    expect(data).toHaveLength(5);
+    for (const photo of data) {
+      expect(photo.dayid).toBe(20666);
+      expect(photo.dayid_real).toBe(20696);
+    }
   });
 });
 

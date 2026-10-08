@@ -4,19 +4,15 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'MobileBottomBar',
-
-  props: {
-    dark: {
-      type: Boolean,
-      default: false,
-    },
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    dark?: boolean;
+  }>(),
+  {
+    dark: false,
   },
-});
+);
 </script>
 
 <style lang="scss" scoped>

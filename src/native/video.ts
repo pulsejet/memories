@@ -1,7 +1,8 @@
 import { NAPI, nativex } from './api';
-import { addOrigin, has } from './basic';
-import staticConfig from '@services/static-config';
-import { isLikelySamePhoto, isLocalPhoto } from '@services/utils/helpers';
+import { addOrigin } from './basic';
+import { has } from './api';
+import { config } from '@services/user-config';
+import { isLikelySamePhoto, isLocalPhoto } from '@services/utils/photo';
 import type { IPhoto } from '@typings';
 
 /**
@@ -10,7 +11,7 @@ import type { IPhoto } from '@typings';
  * @param urls URLs to play (remote)
  */
 export async function playVideo(photo: IPhoto, urls: string[]) {
-  const loop = staticConfig.getSync('video_loop') || false;
+  const loop = config.video_loop || false;
   if (typeof nativex?.playVideo2 === 'function') {
     nativex?.playVideo2?.(photo.auid ?? String(), photo.fileid, JSON.stringify(urls.map(addOrigin)), loop);
   } else {

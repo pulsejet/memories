@@ -129,10 +129,13 @@ final class TimelineWrite
         // We need to use the local time in UTC for the dayId
         // This way two photos in different timezones on the same date locally
         // end up in the same dayId group
-        $dayId = intdiv($dateLocalUtc, 86400);
+        $dayId = (int) floor($dateLocalUtc / 86400);
 
         // Get size of image
         [$w, $h] = $this->exif->getDimensions($exif);
+
+        // Check if the image is a panorama
+        $pano = $this->exif->getPanoType($exif, $w, $h);
 
         // Get live photo ID of video part
         $liveid = $this->livePhoto->getLivePhotoId($file, $exif);
@@ -159,6 +162,7 @@ final class TimelineWrite
             'video_duration' => $query->createNamedParameter($videoDuration, IQueryBuilder::PARAM_INT),
             'w' => $query->createNamedParameter($w, IQueryBuilder::PARAM_INT),
             'h' => $query->createNamedParameter($h, IQueryBuilder::PARAM_INT),
+            'pano' => $query->createNamedParameter($pano, IQueryBuilder::PARAM_INT),
             'exif' => $query->createNamedParameter($exifJson, IQueryBuilder::PARAM_STR),
             'liveid' => $query->createNamedParameter($liveid, IQueryBuilder::PARAM_STR),
             'lat' => $query->createNamedParameter($lat, IQueryBuilder::PARAM_STR),
@@ -260,7 +264,7 @@ final class TimelineWrite
      */
     private function getCurrentRow(int $fileId): ?array
     {
-        $fetch = function (string $table) use ($fileId): false|array {
+        $fetch = function (string $table) use ($fileId): array|false {
             $query = $this->connection->getQueryBuilder();
 
             return $query->select('*')

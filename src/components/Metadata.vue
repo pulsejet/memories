@@ -98,9 +98,9 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent, markRaw } from 'vue';
-import type { Component, PropType } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent, markRaw, useTemplateRef } from 'vue';
+import type { Component } from 'vue';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
@@ -110,12 +110,13 @@ import axios from '@nextcloud/axios';
 import { getCanonicalLocale } from '@nextcloud/l10n';
 import { DateTime } from 'luxon';
 
-import UserConfig from '@mixins/UserConfig';
+import { config } from '@services/user-config';
+
 import Cluster from '@components/frame/Cluster.vue';
 import AlbumsList from '@components/modal/AlbumsList.vue';
 import FaceManualAddModal from '@components/modal/FaceManualAddModal.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
-import MapStandalone from '@components/MapStandalone.vue';
+const MapStandalone = defineAsyncComponent(() => import('@components/MapStandalone.vue'));
 
 import AddIcon from 'vue-material-design-icons/AccountPlus.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
@@ -125,10 +126,12 @@ import ImageIcon from 'vue-material-design-icons/Image.vue';
 import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
 
-import * as utils from '@services/utils';
+import { t } from '@services/l10n';
+import { cacheData, getCachedData } from '@services/cache';
+import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
-import type { IAlbum, IFace, IImageInfo, IPhoto, IExif } from '@typings';
+import type { IImageInfo, IPhoto, IExif } from '@typings';
 import type { IFolder, INode, IView } from '@nextcloud/files';
 
 interface TopField {
@@ -140,457 +143,414 @@ interface TopField {
   edit?: () => void;
 }
 
-export default defineComponent({
-  name: 'Metadata',
-  components: {
-    NcActions,
-    NcActionButton,
-    NcAvatar,
-    AlbumsList,
-    Cluster,
-    FaceManualAddModal,
-    AddIcon,
-    EditIcon,
-    XLoadingIcon,
-    MapStandalone,
-  },
+const props = defineProps<{
+  /** File node when mounted as Files sidebar tab (custom element) */
+  node?: INode;
+  // eslint-disable-next-line vue/no-unused-properties -- Required on the web component interface
+  active?: boolean;
+  // eslint-disable-next-line vue/no-unused-properties -- Required on the web component interface
+  folder?: IFolder;
+  // eslint-disable-next-line vue/no-unused-properties -- Required on the web component interface
+  view?: IView;
+}>();
+const fileid = ref<number | null>(null);
+const filename = ref('');
+const exif = ref({} as IExif);
+const baseInfo = ref({} as IImageInfo);
+const error = ref(false);
+const manualAddModal = useTemplateRef<InstanceType<typeof FaceManualAddModal>>('manualAddModal');
 
-  mixins: [UserConfig],
+const loading = ref(0);
+const state = ref(0);
 
-  props: {
-    /** File node when mounted as Files sidebar tab (custom element) */
-    node: {
-      type: Object as PropType<INode>,
-      required: false,
-      default: undefined,
-    },
-    // eslint-disable-next-line vue/no-unused-properties -- Required on the web component interface
-    active: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    // eslint-disable-next-line vue/no-unused-properties -- Required on the web component interface
-    folder: {
-      type: Object as PropType<IFolder>,
-      required: false,
-      default: undefined,
-    },
-    // eslint-disable-next-line vue/no-unused-properties -- Required on the web component interface
-    view: {
-      type: Object as PropType<IView>,
-      required: false,
-      default: undefined,
-    },
-  },
+/** Whether the current user may edit this file */
+const canEdit = computed(() => baseInfo.value?.permissions?.includes('U'));
 
-  data: () => ({
-    fileid: null as number | null,
-    filename: '',
-    exif: {} as IExif,
-    baseInfo: {} as IImageInfo,
-    error: false,
+/** Title EXIF value */
+const title = computed(() => exif.value.Title || null);
 
-    loading: 0,
-    state: 0,
-  }),
+/** Description EXIF value */
+const description = computed(() => exif.value.Description || null);
 
-  mounted() {
-    utils.bus.on('files:file:updated', this.handleFileUpdated);
-    utils.bus.on('memories:albums:update', this.refresh);
-  },
+/** Date taken info */
+const dateOriginal = computed(() => {
+  // Try to get timezone info
+  let dateWithTz: DateTime | null = null;
+  const valid = () => dateWithTz?.isValid;
 
-  beforeUnmount() {
-    utils.bus.off('files:file:updated', this.handleFileUpdated);
-    utils.bus.off('memories:albums:update', this.refresh);
-  },
+  // If we have an actual epoch, we can shift the date to the correct timezone
+  if (!valid() && exif.value.DateTimeEpoch) {
+    const date = DateTime.fromSeconds(exif.value.DateTimeEpoch);
+    if (date.isValid) {
+      const tzOffset = exif.value.OffsetTimeOriginal || exif.value.OffsetTime; // e.g. -05:00
+      const tzId = exif.value.LocationTZID; // e.g. America/New_York
 
-  computed: {
-    topFields(): TopField[] {
-      let list: TopField[] = [];
-
-      if (this.dateOriginal) {
-        list.push({
-          id: 'date',
-          title: this.dateOriginalStr!,
-          subtitle: this.dateOriginalTime!,
-          icon: markRaw(CalendarIcon),
-          edit: this.editDate,
-        });
+      // Use timezone offset if available
+      if (!valid() && tzOffset) {
+        dateWithTz = date.setZone(`UTC${tzOffset}`);
       }
 
-      if (this.camera) {
-        list.push({
-          id: 'camera',
-          title: this.camera,
-          subtitle: this.cameraSub,
-          icon: markRaw(CameraIrisIcon),
-        });
+      // Fall back to tzId
+      if (!valid() && tzId) {
+        dateWithTz = date.setZone(tzId);
       }
+    }
+  }
 
-      if (this.imageInfoTitle) {
-        list.push({
-          id: 'image-info', // adds class
-          title: this.imageInfoTitle,
-          subtitle: this.imageInfoSub,
-          icon: markRaw(ImageIcon),
-          href: this.filepath
-            ? dav.viewInFolderUrl({
-                fileid: this.fileid!,
-                filename: this.filepath,
-              })
-            : undefined,
-        });
-      }
+  // If tz info is unavailable / wrong, we will show the local time only
+  // In this case, use the datetaken instead, which is guaranteed to be local, shifted to UTC
+  if (!valid() && baseInfo.value.datetaken) {
+    const date = DateTime.fromSeconds(baseInfo.value.datetaken);
+    if (date.isValid) {
+      dateWithTz = date.setZone('UTC');
+    }
+  }
 
-      if (this.tagNamesStr) {
-        list.push({
-          id: 'tags',
-          title: this.tagNamesStr,
-          subtitle: [],
-          icon: markRaw(TagIcon),
-          edit: this.editTags,
-        });
-      }
-
-      if (this.address || this.canEdit) {
-        list.push({
-          id: 'location',
-          title: this.address || this.t('memories', 'No coordinates'),
-          subtitle: this.address ? [] : [this.t('memories', 'Click edit to set location')],
-          icon: markRaw(LocationIcon),
-          href: this.address ? this.mapFullUrl : undefined,
-          edit: this.editGeo,
-        });
-      }
-
-      return list;
-    },
-
-    canEdit(): boolean {
-      return this.baseInfo?.permissions?.includes('U');
-    },
-
-    /** Title EXIF value */
-    title(): string | null {
-      return this.exif.Title || null;
-    },
-
-    /** Description EXIF value */
-    description(): string | null {
-      return this.exif.Description || null;
-    },
-
-    /** Date taken info */
-    dateOriginal(): DateTime | null {
-      // Try to get timezone info
-      let dateWithTz: DateTime | null = null;
-      const valid = () => dateWithTz?.isValid;
-
-      // If we have an actual epoch, we can shift the date to the correct timezone
-      if (!valid() && this.exif.DateTimeEpoch) {
-        const date = DateTime.fromSeconds(this.exif.DateTimeEpoch);
-        if (date.isValid) {
-          const tzOffset = this.exif.OffsetTimeOriginal || this.exif.OffsetTime; // e.g. -05:00
-          const tzId = this.exif.LocationTZID; // e.g. America/New_York
-
-          // Use timezone offset if available
-          if (!valid() && tzOffset) {
-            dateWithTz = date.setZone(`UTC${tzOffset}`);
-          }
-
-          // Fall back to tzId
-          if (!valid() && tzId) {
-            dateWithTz = date.setZone(tzId);
-          }
-        }
-      }
-
-      // If tz info is unavailable / wrong, we will show the local time only
-      // In this case, use the datetaken instead, which is guaranteed to be local, shifted to UTC
-      if (!valid() && this.baseInfo.datetaken) {
-        const date = DateTime.fromSeconds(this.baseInfo.datetaken);
-        if (date.isValid) {
-          dateWithTz = date.setZone('UTC');
-        }
-      }
-
-      // Return only if we found a valid date
-      return valid() ? dateWithTz : null;
-    },
-
-    dateOriginalStr(): string | null {
-      return utils.getLongDateStr(new Date(this.baseInfo.datetaken * 1000), true);
-    },
-
-    dateOriginalTime(): string[] | null {
-      if (!this.dateOriginal) return null;
-
-      const fields: (keyof IExif)[] = ['OffsetTimeOriginal', 'OffsetTime', 'LocationTZID'];
-      const hasTz = fields.some((key) => this.exif[key]);
-
-      const format = 't' + (hasTz ? ' ZZ' : '');
-
-      return [this.dateOriginal.toFormat(format, { locale: getCanonicalLocale() })];
-    },
-
-    /** Camera make and model info */
-    camera(): string | null {
-      const make = this.exif.Make;
-      const model = this.exif.Model;
-      if (!make || !model) return null;
-      if (model.startsWith(make)) return model;
-      return `${make} ${model}`;
-    },
-
-    cameraSub(): string[] {
-      const f = this.exif.FNumber || this.exif.Aperture;
-      const s = this.shutterSpeed;
-      const len = this.exif.FocalLength;
-      const iso = this.exif.ISO;
-
-      const parts: string[] = [];
-      if (f) parts.push(`f/${f}`);
-      if (s) parts.push(`${s}`);
-      if (len) parts.push(`${len}mm`);
-      if (iso) parts.push(`ISO${iso}`);
-      return parts;
-    },
-
-    /** Convert shutter speed decimal to 1/x format */
-    shutterSpeed(): string | null {
-      const speed = Number(this.exif.ShutterSpeedValue || this.exif.ShutterSpeed || this.exif.ExposureTime);
-      if (!speed) return null;
-
-      if (speed < 1) {
-        return `1/${Math.round(1 / speed)}`;
-      } else {
-        return `${Math.round(speed * 10) / 10}s`;
-      }
-    },
-
-    /** Image info */
-    imageInfoTitle(): string | null {
-      if (this.config.sidebar_filepath && this.filepath) {
-        return this.filepath.replace(/^\//, ''); // remove leading slash
-      }
-
-      return this.baseInfo.basename;
-    },
-
-    /** Path to file excluding user directory */
-    filepath(): string | null {
-      return this.baseInfo?.filename ?? null;
-    },
-
-    imageInfoSub(): string[] {
-      let parts: string[] = [];
-      let mp = Number(this.exif.Megapixels);
-
-      if (this.baseInfo.w && this.baseInfo.h) {
-        parts.push(`${this.baseInfo.w}x${this.baseInfo.h}`);
-
-        if (!mp) {
-          mp = (this.baseInfo.w * this.baseInfo.h) / 1000000;
-        }
-      }
-
-      if (mp) {
-        parts.unshift(`${mp.toFixed(1)}MP`);
-      }
-
-      return parts;
-    },
-
-    address(): string | undefined {
-      if (this.baseInfo.address) {
-        return this.baseInfo.address;
-      }
-
-      if (this.lat && this.lon) {
-        return `${this.lat.toFixed(6)}, ${this.lon.toFixed(6)}`;
-      }
-
-      return undefined;
-    },
-
-    lat(): number {
-      return Number(this.exif.GPSLatitude);
-    },
-
-    lon(): number {
-      return Number(this.exif.GPSLongitude);
-    },
-
-    tagNames(): string[] {
-      return Object.values(this.baseInfo?.tags || {}).map((tag: string) => this.t('recognize', tag));
-    },
-
-    tagNamesStr(): string | null {
-      return this.tagNames.length > 0 ? this.tagNames.join(', ') : null;
-    },
-
-    mapFullUrl(): string {
-      return `https://www.openstreetmap.org/?mlat=${this.lat}&mlon=${this.lon}#map=18/${this.lat}/${this.lon}`;
-    },
-
-    albums(): IAlbum[] {
-      let albums = this.baseInfo?.clusters?.albums ?? [];
-
-      // Filter out hidden albums
-      if (!this.config.show_hidden_albums) {
-        albums = albums.filter((a) => !a.name.startsWith('.'));
-      }
-
-      return albums;
-    },
-
-    people(): IFace[] {
-      return this.baseInfo?.clusters?.recognize ?? [];
-    },
-
-    facerecognitionPeople(): IFace[] {
-      return this.baseInfo?.clusters?.facerecognition ?? [];
-    },
-
-    /**
-     * The server could not build the face recognition clusters for this file.
-     * The rest of the metadata is still valid, so only this section degrades.
-     */
-    facerecognitionFailed(): boolean {
-      return this.baseInfo?.clustersFailed?.includes('facerecognition') ?? false;
-    },
-
-    isShared(): boolean {
-      return !!this.baseInfo.owneruid && this.baseInfo.owneruid !== utils.uid;
-    },
-  },
-
-  watch: {
-    node: {
-      immediate: true,
-      handler() {
-        const fileid = Number(this.node?.fileid ?? this.node?.id ?? 0);
-        if (fileid) {
-          this.update(fileid);
-        }
-      },
-    },
-  },
-
-  methods: {
-    async update(photo: number | IPhoto): Promise<IImageInfo | null> {
-      this.invalidateUnless(0);
-
-      // Use a consistent URL for metadata.
-      const url = utils.getImageInfoUrl(photo, this.config);
-
-      // Helper to apply additional fields.
-      const applyImageInfo = (data: IImageInfo) => {
-        this.baseInfo = data;
-        this.fileid = data.fileid;
-        this.filename = data.basename;
-        this.exif = data.exif ?? {};
-      };
-
-      // Attempt to get it from the cache first.
-      let wasCached = false;
-      try {
-        const state = this.state;
-        const cached = await utils.getCachedData<IImageInfo>(url);
-        if (cached && state === this.state) {
-          applyImageInfo(cached);
-          wasCached = true;
-        }
-      } catch {}
-
-      // Always refresh the metadata from server.
-      try {
-        const res = await this.guardState(axios.get<IImageInfo>(url));
-        if (!res) return null;
-        applyImageInfo(res.data);
-        utils.cacheData(url, res.data);
-      } catch (err) {
-        if (wasCached) {
-          this.error = false;
-        } else {
-          throw err;
-        }
-      }
-
-      return this.baseInfo;
-    },
-
-    async refresh() {
-      if (this.fileid) await this.update(this.fileid);
-    },
-
-    /**
-     * Invalidate metadata for a future change
-     * @param fileid Invalidate metadata unless this is the current fileid
-     */
-    invalidateUnless(fileid: number) {
-      if (this.fileid === fileid) return;
-      this.state = Math.random();
-      this.loading = 0;
-      this.error = false;
-      this.fileid = null;
-      this.exif = {};
-    },
-
-    editDate() {
-      _m.modals.editMetadata([_m.viewer.currentPhoto!], [1]);
-    },
-
-    editTags() {
-      _m.modals.editMetadata([_m.viewer.currentPhoto!], [2]);
-    },
-
-    editEXIF() {
-      _m.modals.editMetadata([_m.viewer.currentPhoto!], [3]);
-    },
-
-    editGeo() {
-      _m.modals.editMetadata([_m.viewer.currentPhoto!], [4]);
-    },
-
-    openManualAdd() {
-      const modal = this.$refs.manualAddModal as InstanceType<typeof FaceManualAddModal> | undefined;
-      if (!modal) return;
-      if (this.fileid) {
-        modal.openForFile({
-          fileid: this.fileid,
-          etag: this.baseInfo?.etag,
-          w: this.baseInfo?.w,
-          h: this.baseInfo?.h,
-        });
-      } else {
-        modal.open();
-      }
-    },
-
-    handleFileUpdated({ fileid }: utils.BusEvent['files:file:updated']) {
-      if (fileid && this.fileid === fileid) {
-        this.refresh();
-      }
-    },
-
-    async guardState<T>(promise: Promise<T>): Promise<T | null> {
-      const state = this.state;
-      try {
-        this.loading++;
-        const res = await promise;
-        if (state === this.state) return res;
-        return null;
-      } catch (err) {
-        this.error = true;
-        throw err;
-      } finally {
-        if (state === this.state) this.loading--;
-      }
-    },
-  },
+  // Return only if we found a valid date
+  return valid() ? dateWithTz : null;
 });
+
+/** Localized long date string */
+const dateOriginalStr = computed(() => utils.getLongDateStr(new Date(baseInfo.value.datetaken * 1000), true));
+
+/** Localized time string, with zone when known */
+const dateOriginalTime = computed(() => {
+  if (!dateOriginal.value) return null;
+
+  const fields: (keyof IExif)[] = ['OffsetTimeOriginal', 'OffsetTime', 'LocationTZID'];
+  const hasTz = fields.some((key) => exif.value[key]);
+
+  const format = 't' + (hasTz ? ' ZZ' : '');
+
+  return [dateOriginal.value.toFormat(format, { locale: getCanonicalLocale() })];
+});
+
+/** Camera make and model info */
+const camera = computed(() => {
+  const make = exif.value.Make;
+  const model = exif.value.Model;
+  if (!make || !model) return null;
+  if (model.startsWith(make)) return model;
+  return `${make} ${model}`;
+});
+
+/** Aperture, shutter, focal length and ISO parts */
+const cameraSub = computed(() => {
+  const f = exif.value.FNumber || exif.value.Aperture;
+  const s = shutterSpeed.value;
+  const len = exif.value.FocalLength;
+  const iso = exif.value.ISO;
+
+  const parts: string[] = [];
+  if (f) parts.push(`f/${f}`);
+  if (s) parts.push(`${s}`);
+  if (len) parts.push(`${len}mm`);
+  if (iso) parts.push(`ISO${iso}`);
+  return parts;
+});
+
+/** Convert shutter speed decimal to 1/x format */
+const shutterSpeed = computed(() => {
+  const speed = Number(exif.value.ShutterSpeedValue || exif.value.ShutterSpeed || exif.value.ExposureTime);
+  if (!speed) return null;
+
+  if (speed < 1) {
+    return `1/${Math.round(1 / speed)}`;
+  } else {
+    return `${Math.round(speed * 10) / 10}s`;
+  }
+});
+
+/** Image info */
+const imageInfoTitle = computed(() => {
+  if (config.sidebar_filepath && filepath.value) {
+    return filepath.value.replace(/^\//, ''); // remove leading slash
+  }
+
+  return baseInfo.value.basename;
+});
+
+/** Path to file excluding user directory */
+const filepath = computed(() => baseInfo.value?.filename ?? null);
+
+/** Dimensions and megapixel parts */
+const imageInfoSub = computed(() => {
+  const parts: string[] = [];
+  let mp = Number(exif.value.Megapixels);
+
+  if (baseInfo.value.w && baseInfo.value.h) {
+    parts.push(`${baseInfo.value.w}x${baseInfo.value.h}`);
+
+    if (!mp) {
+      mp = (baseInfo.value.w * baseInfo.value.h) / 1000000;
+    }
+  }
+
+  if (mp) {
+    parts.unshift(`${mp.toFixed(1)}MP`);
+  }
+
+  return parts;
+});
+
+/** GPS latitude as number */
+const lat = computed(() => Number(exif.value.GPSLatitude));
+
+/** GPS longitude as number */
+const lon = computed(() => Number(exif.value.GPSLongitude));
+
+/** Human address, falling back to coordinates */
+const address = computed(() => {
+  if (baseInfo.value.address) {
+    return baseInfo.value.address;
+  }
+
+  if (lat.value && lon.value) {
+    return `${lat.value.toFixed(6)}, ${lon.value.toFixed(6)}`;
+  }
+
+  return undefined;
+});
+
+/** Localized tag names */
+const tagNames = computed(() => Object.values(baseInfo.value?.tags || {}).map((tag: string) => t('recognize', tag)));
+
+/** Comma-joined tag names */
+const tagNamesStr = computed(() => (tagNames.value.length > 0 ? tagNames.value.join(', ') : null));
+
+/** OpenStreetMap link for the coordinates */
+const mapFullUrl = computed(
+  () => `https://www.openstreetmap.org/?mlat=${lat.value}&mlon=${lon.value}#map=18/${lat.value}/${lon.value}`,
+);
+
+/** Albums containing this file, minus hidden ones unless configured */
+const albums = computed(() => {
+  let list = baseInfo.value?.clusters?.albums ?? [];
+
+  // Filter out hidden albums
+  if (!config.show_hidden_albums) {
+    list = list.filter((a) => !a.name.startsWith('.'));
+  }
+
+  return list;
+});
+
+/** Faces of Recognize for this file; Face Recognition has a section of its own */
+const people = computed(() => baseInfo.value?.clusters?.recognize ?? []);
+
+/** Faces of Face Recognition for this file */
+const facerecognitionPeople = computed(() => baseInfo.value?.clusters?.facerecognition ?? []);
+
+/**
+ * The server could not build the face recognition clusters for this file.
+ * The rest of the metadata is still valid, so only this section degrades.
+ */
+const facerecognitionFailed = computed(() => baseInfo.value?.clustersFailed?.includes('facerecognition') ?? false);
+
+/** Whether this file is shared by someone else */
+const isShared = computed(() => !!baseInfo.value.owneruid && baseInfo.value.owneruid !== utils.uid);
+
+/** Rows shown in the metadata section */
+const topFields = computed(() => {
+  const list: TopField[] = [];
+
+  if (dateOriginal.value) {
+    list.push({
+      id: 'date',
+      title: dateOriginalStr.value!,
+      subtitle: dateOriginalTime.value!,
+      icon: markRaw(CalendarIcon),
+      edit: editDate,
+    });
+  }
+
+  if (camera.value) {
+    list.push({
+      id: 'camera',
+      title: camera.value,
+      subtitle: cameraSub.value,
+      icon: markRaw(CameraIrisIcon),
+    });
+  }
+
+  if (imageInfoTitle.value) {
+    list.push({
+      id: 'image-info', // adds class
+      title: imageInfoTitle.value,
+      subtitle: imageInfoSub.value,
+      icon: markRaw(ImageIcon),
+      href: filepath.value
+        ? dav.viewInFolderUrl({
+            fileid: fileid.value!,
+            filename: filepath.value,
+          })
+        : undefined,
+    });
+  }
+
+  if (tagNamesStr.value) {
+    list.push({
+      id: 'tags',
+      title: tagNamesStr.value,
+      subtitle: [],
+      icon: markRaw(TagIcon),
+      edit: editTags,
+    });
+  }
+
+  if (address.value || canEdit.value) {
+    list.push({
+      id: 'location',
+      title: address.value || t('memories', 'No coordinates'),
+      subtitle: address.value ? [] : [t('memories', 'Click edit to set location')],
+      icon: markRaw(LocationIcon),
+      href: address.value ? mapFullUrl.value : undefined,
+      edit: editGeo,
+    });
+  }
+
+  return list;
+});
+
+/** Await a promise, dropping the result if superseded by a newer load */
+async function guardState<T>(promise: Promise<T>): Promise<T | null> {
+  const snapshot = state.value;
+  try {
+    loading.value++;
+    const res = await promise;
+    if (snapshot === state.value) return res;
+    return null;
+  } catch (err) {
+    error.value = true;
+    throw err;
+  } finally {
+    if (snapshot === state.value) loading.value--;
+  }
+}
+
+/** Reset state unless the given file is already current */
+function invalidateUnless(id: number) {
+  if (fileid.value === id) return;
+  state.value = Math.random();
+  loading.value = 0;
+  error.value = false;
+  fileid.value = null;
+  exif.value = {};
+}
+
+/** Load metadata for a photo, cache-first then server */
+async function update(photo: number | IPhoto): Promise<IImageInfo | null> {
+  invalidateUnless(0);
+
+  // Use a consistent URL for metadata.
+  const url = utils.getImageInfoUrl(photo, config);
+
+  // Helper to apply additional fields.
+  const applyImageInfo = (data: IImageInfo) => {
+    baseInfo.value = data;
+    fileid.value = data.fileid;
+    filename.value = data.basename;
+    exif.value = data.exif ?? {};
+  };
+
+  // Attempt to get it from the cache first.
+  let wasCached = false;
+  try {
+    const snapshot = state.value;
+    const cached = await getCachedData<IImageInfo>(url);
+    if (cached && snapshot === state.value) {
+      applyImageInfo(cached);
+      wasCached = true;
+    }
+  } catch {}
+
+  // Always refresh the metadata from server.
+  try {
+    const res = await guardState(axios.get<IImageInfo>(url));
+    if (!res) return null;
+    applyImageInfo(res.data);
+    cacheData(url, res.data);
+  } catch (err) {
+    if (wasCached) {
+      error.value = false;
+    } else {
+      throw err;
+    }
+  }
+
+  return baseInfo.value;
+}
+
+/** Reload metadata for the current file */
+async function refresh() {
+  if (fileid.value) await update(fileid.value);
+}
+
+/** Open the edit dialog on the date section */
+function editDate() {
+  _m.modals.editMetadata([_m.viewer.currentPhoto!], [1]);
+}
+
+/** Open the edit dialog on the tags section */
+function editTags() {
+  _m.modals.editMetadata([_m.viewer.currentPhoto!], [2]);
+}
+
+/** Open the edit dialog on the EXIF section */
+function editEXIF() {
+  _m.modals.editMetadata([_m.viewer.currentPhoto!], [3]);
+}
+
+/** Open the edit dialog on the location section */
+function editGeo() {
+  _m.modals.editMetadata([_m.viewer.currentPhoto!], [4]);
+}
+
+/** Open the marking dialog on this photo */
+function openManualAdd() {
+  const modal = manualAddModal.value;
+  if (!modal) return;
+  if (fileid.value) {
+    modal.openForFile({
+      fileid: fileid.value,
+      etag: baseInfo.value?.etag,
+      w: baseInfo.value?.w,
+      h: baseInfo.value?.h,
+    });
+  } else {
+    modal.open();
+  }
+}
+
+/** Refresh when the current file changes on disk */
+function handleFileUpdated({ fileid: updated }: utils.BusEvent['files:file:updated']) {
+  if (updated && fileid.value === updated) {
+    refresh();
+  }
+}
+
+onMounted(() => {
+  utils.bus.on('files:file:updated', handleFileUpdated);
+  utils.bus.on('memories:albums:update', refresh);
+});
+
+onBeforeUnmount(() => {
+  utils.bus.off('files:file:updated', handleFileUpdated);
+  utils.bus.off('memories:albums:update', refresh);
+});
+
+watch(
+  () => props.node,
+  () => {
+    const id = Number(props.node?.fileid ?? props.node?.id ?? 0);
+    if (id) {
+      update(id);
+    }
+  },
+  { immediate: true },
+);
+
+defineExpose({ fileid, update, invalidateUnless });
 </script>
 
 <style lang="scss" scoped>
@@ -696,7 +656,7 @@ a {
     margin-right: 10px;
 
     :deep(.material-design-icon) {
-      color: var(--color-text-lighter);
+      color: var(--color-text-maxcontrast);
     }
   }
   .edit {

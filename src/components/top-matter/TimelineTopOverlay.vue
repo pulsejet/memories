@@ -2,79 +2,66 @@
   <div class="top-overlay" :style="{ top }" :class="{ show: !!text }">{{ text }}</div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 
 import type { IHeadRow, IPhoto } from '@typings';
 
-export default defineComponent({
+defineOptions({
   name: 'TimelineTopOverlay',
-
-  data: () => ({
-    text: String(),
-    top: String(),
-  }),
-
-  props: {
-    heads: {
-      type: Map as PropType<Map<number, IHeadRow>>,
-      required: true,
-    },
-
-    container: {
-      type: Element,
-      required: false,
-    },
-
-    recycler: {
-      type: Element,
-      required: false,
-    },
-  },
-
-  methods: {
-    refresh() {
-      this.text = this.getText() ?? String();
-    },
-
-    getText() {
-      // Get position of recycler
-      const rrect = this.recycler?.getBoundingClientRect();
-      if (!rrect) return; // ??
-
-      // Get position of container
-      const crect = this.container?.getBoundingClientRect();
-      if (!crect) return; // ??
-      this.top = `${rrect.top - crect.top}px`;
-
-      // Get photo just below the top of the container
-      const elem: any = document
-        .elementsFromPoint(rrect.left + 5, rrect.top + 50)
-        .find((e) => e.classList.contains('p-outer-super'));
-      const overPhoto: IPhoto | null = elem?.__photo;
-
-      // If no photo is round, no overlay to show
-      if (!overPhoto) return;
-
-      // If this is the first photo, there is an extra condition
-      // to check if the photo is actually above the container
-      if (overPhoto.dispRowNum === 0 && elem.getBoundingClientRect().top > crect.top) {
-        return;
-      }
-
-      // Get the header from the dayid of the photo
-      // Do not show overlay for single-row days
-      const head = this.heads.get(overPhoto.dayid);
-      if (!head || (head.day?.rows?.length ?? 0) <= 1) {
-        return;
-      }
-
-      return utils.getHeadRowName(head);
-    },
-  },
 });
+
+const props = defineProps<{
+  heads: Map<number, IHeadRow>;
+  container?: Element;
+  recycler?: Element;
+}>();
+
+const text = ref(String());
+const top = ref(String());
+
+function refresh() {
+  text.value = getText() ?? String();
+}
+
+function getText() {
+  // Get position of recycler
+  const rrect = props.recycler?.getBoundingClientRect();
+  if (!rrect) return; // ??
+
+  // Get position of container
+  const crect = props.container?.getBoundingClientRect();
+  if (!crect) return; // ??
+  top.value = `${rrect.top - crect.top}px`;
+
+  // Get photo just below the top of the container
+  const elem: any = document
+    .elementsFromPoint(rrect.left + 5, rrect.top + 50)
+    .find((e) => e.classList.contains('p-outer-super'));
+  const overPhoto: IPhoto | null = elem?.__photo;
+
+  // If no photo is round, no overlay to show
+  if (!overPhoto) return;
+
+  // If this is the first photo, there is an extra condition
+  // to check if the photo is actually above the container
+  if (overPhoto.dispRowNum === 0 && elem.getBoundingClientRect().top > crect.top) {
+    return;
+  }
+
+  // Get the header from the dayid of the photo
+  // Do not show overlay for single-row days
+  const head = props.heads.get(overPhoto.dayid);
+  if (!head || (head.day?.rows?.length ?? 0) <= 1) {
+    return;
+  }
+
+  return utils.getHeadRowName(head);
+}
+
+defineExpose({ refresh });
 </script>
 
 <style lang="scss" scoped>

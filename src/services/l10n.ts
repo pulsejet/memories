@@ -12,3 +12,5 @@ type TranslatePluralType = (app: TranslateApps, ...args: DropFirst<Parameters<ty
 
 export const translate = t as TranslateType;
 export const translatePlural = n as TranslatePluralType;
+
+export { translate as t, translatePlural as n };

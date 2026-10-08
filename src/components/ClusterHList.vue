@@ -14,53 +14,34 @@
         :key="item.cluster_id"
         v-for="item of clusters"
       >
-        <Cluster :data="item" :link="true" :counters="!routeIsExplore" />
+        <Cluster :data="item" :link="true" :counters="!routeIs.Explore" />
       </div>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+<script setup lang="ts">
+import { t } from '@services/l10n';
+import { routeIs } from '@services/router';
 
-import Cluster from './frame/Cluster.vue';
+import Cluster from '@components/frame/Cluster.vue';
 
 import type { ICluster } from '@typings';
 
-export default defineComponent({
-  name: 'ClusterHList',
-
-  components: {
-    Cluster,
-  },
-
-  props: {
-    clusters: {
-      type: Array as PropType<ICluster[]>,
-      required: true,
-    },
-    title: {
-      type: String,
-      required: false,
-    },
-    link: {
-      type: String,
-      required: false,
-    },
-  },
-
-  methods: {
-    circle(cluster: ICluster): boolean {
-      switch (cluster.cluster_type) {
-        case 'recognize':
-        case 'facerecognition':
-          return true;
-        default:
-          return false;
-      }
-    },
-  },
-});
+defineProps<{
+  clusters: ICluster[];
+  title?: string;
+  link?: string;
+}>();
+function circle(cluster: ICluster): boolean {
+  switch (cluster.cluster_type) {
+    case 'recognize':
+    case 'facerecognition':
+      return true;
+    default:
+      return false;
+  }
+}
 </script>
 
 <style lang="scss" scoped>

@@ -27,156 +27,132 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineAsyncComponent, defineComponent, markRaw } from 'vue';
-import Timeline from './Timeline.vue';
-const MapSplitMatter = defineAsyncComponent(() => import('./top-matter/MapSplitMatter.vue'));
-import Hammer from 'hammerjs';
+<script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount, useTemplateRef, defineAsyncComponent, markRaw } from 'vue';
+import { useRoute } from 'vue-router';
 
-import * as utils from '@services/utils';
+import { t } from '@services/l10n';
 
-export default defineComponent({
-  name: 'SplitTimeline',
+import Timeline from '@components/Timeline.vue';
+const MapSplitMatter = defineAsyncComponent(() => import('@components/top-matter/MapSplitMatter.vue'));
 
-  components: {
-    Timeline,
-  },
+const route = useRoute();
 
-  data: () => ({
-    pointerDown: false,
-    primaryPos: 0,
-    containerSize: 0,
-    mobileOpen: 1,
-    hammer: null as HammerManager | null,
-    photoCount: 0,
-  }),
+const containerRef = useTemplateRef<HTMLDivElement>('container');
+const primaryRef = useTemplateRef<HTMLDivElement>('primary');
+const timelineHeaderRef = useTemplateRef<HTMLDivElement>('timelineHeader');
 
-  computed: {
-    primary() {
-      switch (this.$route.name) {
-        case _m.routes.Map.name:
-          return markRaw(MapSplitMatter);
-        default:
-          return null;
-      }
-    },
+const pointerDown = ref(false);
+const primaryPos = ref(0);
+const containerSize = ref(0);
+const mobileOpen = ref(1);
+const photoCount = ref(0);
+let hammer: HammerManager | null = null;
 
-    headerClass() {
-      switch (this.mobileOpen) {
-        case 0:
-          return 'm-zero';
-        case 1:
-          return 'm-one';
-        case 2:
-          return 'm-two';
-      }
-    },
-  },
-
-  mounted() {
-    // Set up hammerjs hooks
-    this.hammer = markRaw(new Hammer(this.refs().timelineHeader!));
-    this.hammer.get('swipe').set({
-      direction: Hammer.DIRECTION_VERTICAL,
-      threshold: 3,
-    });
-    this.hammer.on('swipeup', this.mobileSwipeUp);
-    this.hammer.on('swipedown', this.mobileSwipeDown);
-  },
-
-  beforeUnmount() {
-    this.pointerUp();
-    this.hammer?.destroy();
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        container?: HTMLDivElement;
-        primary?: HTMLDivElement;
-        separator?: HTMLDivElement;
-        timelineHeader?: HTMLDivElement;
-      };
-    },
-
-    isVertical() {
-      return false; // for future
-    },
-
-    sepDown(event: PointerEvent) {
-      this.pointerDown = true;
-
-      // Get position of primary element
-      const rect = this.refs().primary!.getBoundingClientRect();
-      this.primaryPos = this.isVertical() ? rect.top : rect.left;
-
-      // Get size of container element
-      const cRect = this.refs().container!.getBoundingClientRect();
-      this.containerSize = this.isVertical() ? cRect.height : cRect.width;
-
-      // Let touch handle itself
-      if (event.pointerType === 'touch') return;
-
-      // Otherwise, handle pointer events on document
-      document.addEventListener('pointermove', this.documentPointerMove);
-      document.addEventListener('pointerup', this.pointerUp);
-
-      // Prevent text selection
-      event.preventDefault();
-      event.stopPropagation();
-    },
-
-    sepTouchMove(event: TouchEvent) {
-      if (!this.pointerDown) return;
-      this.setFlexBasis(event.touches[0]);
-    },
-
-    documentPointerMove(event: PointerEvent) {
-      if (!this.pointerDown || !event.buttons) return this.pointerUp();
-      this.setFlexBasis(event);
-    },
-
-    pointerUp() {
-      // Get rid of listeners on document quickly
-      this.pointerDown = false;
-      document.removeEventListener('pointermove', this.documentPointerMove);
-      document.removeEventListener('pointerup', this.pointerUp);
-      utils.bus.emit('memories:window:resize', null);
-    },
-
-    setFlexBasis(pos: { clientX: number; clientY: number }) {
-      const ref = this.isVertical() ? pos.clientY : pos.clientX;
-      const newSize = Math.max(ref - this.primaryPos, 50);
-      const pctSize = (newSize / this.containerSize) * 100;
-      this.refs().primary!.style.flexBasis = `${pctSize}%`;
-    },
-
-    daysLoaded({ count }: { count: number }) {
-      this.photoCount = count;
-    },
-
-    async mobileSwipeUp() {
-      this.mobileOpen = Math.min(this.mobileOpen + 1, 2);
-
-      // When swiping up, immediately emit a resize event
-      // so that we can prepare in advance for showing more photos
-      // on the timeline
-      await this.$nextTick();
-      utils.bus.emit('memories:window:resize', null);
-    },
-
-    async mobileSwipeDown() {
-      this.mobileOpen = Math.max(this.mobileOpen - 1, 0);
-
-      // When swiping down, wait for the animation to end, so that
-      // we don't hide the lower half of the timeline before the animation
-      // ends. Note that this is necesary: the height of the timeline inner
-      // div is also animated to the smaller size.
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      utils.bus.emit('memories:window:resize', null);
-    },
-  },
+const primary = computed(() => {
+  switch (route.name) {
+    case _m.routes.Map.name:
+      return markRaw(MapSplitMatter);
+    default:
+      return null;
+  }
 });
+
+const headerClass = computed(() => {
+  switch (mobileOpen.value) {
+    case 0:
+      return 'm-zero';
+    case 1:
+      return 'm-one';
+    case 2:
+      return 'm-two';
+  }
+});
+
+onMounted(() => {
+  void setupGestures();
+});
+
+onBeforeUnmount(() => {
+  pointerUp();
+  hammer?.destroy();
+});
+
+async function setupGestures() {
+  const { default: Hammer } = await import('hammerjs');
+  if (!timelineHeaderRef.value) return;
+
+  hammer = new Hammer(timelineHeaderRef.value);
+  hammer.get('swipe').set({
+    direction: Hammer.DIRECTION_VERTICAL,
+    threshold: 3,
+  });
+  hammer.on('swipeup', mobileSwipeUp);
+  hammer.on('swipedown', mobileSwipeDown);
+}
+
+function isVertical() {
+  return false; // for future
+}
+
+function sepDown(event: PointerEvent) {
+  pointerDown.value = true;
+
+  // Get position of primary element
+  const rect = primaryRef.value!.getBoundingClientRect();
+  primaryPos.value = isVertical() ? rect.top : rect.left;
+
+  // Get size of container element
+  const cRect = containerRef.value!.getBoundingClientRect();
+  containerSize.value = isVertical() ? cRect.height : cRect.width;
+
+  // Let touch handle itself
+  if (event.pointerType === 'touch') return;
+
+  // Otherwise, handle pointer events on document
+  document.addEventListener('pointermove', documentPointerMove);
+  document.addEventListener('pointerup', pointerUp);
+
+  // Prevent text selection
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+function sepTouchMove(event: TouchEvent) {
+  if (!pointerDown.value) return;
+  setFlexBasis(event.touches[0]);
+}
+
+function documentPointerMove(event: PointerEvent) {
+  if (!pointerDown.value || !event.buttons) return pointerUp();
+  setFlexBasis(event);
+}
+
+function pointerUp() {
+  // Get rid of listeners on document quickly
+  pointerDown.value = false;
+  document.removeEventListener('pointermove', documentPointerMove);
+  document.removeEventListener('pointerup', pointerUp);
+}
+
+function setFlexBasis(pos: { clientX: number; clientY: number }) {
+  const ref = isVertical() ? pos.clientY : pos.clientX;
+  const newSize = Math.max(ref - primaryPos.value, 50);
+  const pctSize = (newSize / containerSize.value) * 100;
+  primaryRef.value!.style.flexBasis = `${pctSize}%`;
+}
+
+function daysLoaded({ count }: { count: number }) {
+  photoCount.value = count;
+}
+
+async function mobileSwipeUp() {
+  mobileOpen.value = Math.min(mobileOpen.value + 1, 2);
+}
+
+async function mobileSwipeDown() {
+  mobileOpen.value = Math.max(mobileOpen.value - 1, 0);
+}
 </script>
 
 <style lang="scss" scoped>
@@ -300,7 +276,7 @@ export default defineComponent({
           width: 22px;
           height: 4px;
           border-radius: 40px;
-          background-color: var(--color-text-light);
+          background-color: var(--color-text-maxcontrast);
           z-index: 1;
           opacity: 0.75;
           pointer-events: none;

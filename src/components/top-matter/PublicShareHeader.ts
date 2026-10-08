@@ -1,10 +1,11 @@
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
+import initstate from '@services/init-state';
 
 // Shown in dynamic top matter (Timeline::viewName)
-const title = utils.initstate.shareTitle;
+const title = initstate.shareTitle;
 
 // Hide on album shares only
-const hide = utils.initstate.shareType === 'album';
+const hide = initstate.shareType === 'album';
 
 // Set up hook to monitor recycler scroll to show/hide header
 if (title && hide) {

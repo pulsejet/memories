@@ -56,17 +56,21 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, useTemplateRef } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
-const NcPopover = defineAsyncComponent(() => import('@nextcloud/vue/components/NcPopover'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
+import NcPopover from '@nextcloud/vue/components/NcPopover';
 
-import UserConfig from '@mixins/UserConfig';
+import { config } from '@services/user-config';
+import { windowDims } from '@services/viewport';
+import { routeIs } from '@services/router';
+import { t } from '@services/l10n';
 
 import * as dav from '@services/dav';
 import * as lens from '@services/lens';
-import * as utils from '@services/utils';
+import { RenewingTimeout } from '@services/utils/renewing-timeout';
 
 import Fuse from 'fuse.js';
 
@@ -79,191 +83,168 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import type { ICluster } from '@typings';
 
-export default defineComponent({
-  name: 'Searchbar',
-
-  components: {
-    NcTextField,
-    NcPopover,
-    MagnifyIcon,
-    AlbumIcon,
-    LocationIcon,
-    TagIcon,
-    XImg,
-    XLoadingIcon,
+const props = withDefaults(
+  defineProps<{
+    autoFocus?: boolean;
+  }>(),
+  {
+    autoFocus: false,
   },
+);
 
-  mixins: [UserConfig],
+const emit = defineEmits<{
+  (e: 'select'): void;
+}>();
 
-  emits: {
-    select: () => true,
-  },
+const route = useRoute();
+const router = useRouter();
+const textFieldRef = useTemplateRef<any>('textField');
 
-  props: {
-    autoFocus: {
-      type: Boolean,
-      default: false,
-    },
-  },
+const prompt = ref(String());
 
-  data: () => ({
-    prompt: String(),
+// Popover can be hidden by clicking outside and
+// so subsequent changes to prompt do not trigger
+// it to show again. This flag is used to force it.
+const pHidden = ref(false);
 
-    // Popover can be hidden by clicking outside and
-    // so subsequent changes to prompt do not trigger
-    // it to show again. This flag is used to force it.
-    pHidden: false,
+// Pending live lens navigation (debounced)
+const lensTimer = new RenewingTimeout();
 
-    // Pending live lens navigation (debounced)
-    lensTimer: null as number | null,
+const clusters = ref<ICluster[] | null>(null);
+const clustersLoad = ref(false);
+const clusterIs = dav.clusterIs;
+const clusterPreview = dav.getClusterPreview;
+const clusterTarget = dav.getClusterLinkTarget;
 
-    clusters: null as ICluster[] | null,
-    clustersLoad: false,
-    clusterIs: dav.clusterIs,
-    clusterPreview: dav.getClusterPreview,
-    clusterTarget: dav.getClusterLinkTarget,
-  }),
-
-  mounted() {
-    this.syncPromptFromRoute();
-    setTimeout(() => {
-      this.syncPromptFromRoute();
-      if (this.autoFocus) {
-        (<any>this.$refs.textField)?.focus();
-      }
-    }, 100); // wait for opacity transition
-  },
-
-  computed: {
-    refs() {
-      return {
-        outer: this.$refs.outer as HTMLDivElement,
-      };
-    },
-
-    shown() {
-      // Live search mode navigates directly; no popover needed
-      return !this.pHidden && !!this.prompt.length;
-    },
-
-    clustersResult(): ICluster[] {
-      if (!this.prompt) return [];
-      return this.clustersFuse.search(this.prompt, { limit: 6 }).map((r) => r.item);
-    },
-
-    clustersFuse() {
-      return new Fuse(this.clusters ?? [], { keys: ['name', 'display_name'], threshold: 0.3 });
-    },
-
-    /** Lens backend available (daemon URL configured) */
-    lensEnabled(): boolean {
-      return !!this.config.lens_enabled;
-    },
-
-    /** Live lens search hijacks typing only on desktop timeline/search views */
-    isLensLive(): boolean {
-      return this.lensEnabled && (this.routeIsBase || this.routeIsSearch) && !utils.isMobile();
-    },
-
-    /** Explicit lens entry for anywhere live search does not apply */
-    showLensEntry(): boolean {
-      return !!this.prompt && this.lensEnabled && !this.isLensLive;
-    },
-
-    lensEntryText(): string {
-      return this.t('memories', 'Find photos matching “{query}”', { query: this.prompt });
-    },
-  },
-
-  watch: {
-    prompt(val: string) {
-      this.pHidden = false;
-      if (val) {
-        this.load(); // load clusters
-      }
-
-      // Queue lens search if route changed.
-      if (lens.routeQueryText(this.$route.query.q) !== val) {
-        this.queueLensSearch();
-      }
-    },
-
-    '$route.query.q'() {
-      this.syncPromptFromRoute();
-    },
-  },
-
-  methods: {
-    select() {
-      this.prompt = String();
-      this.$emit('select');
-    },
-
-    async load() {
-      // Load all clusters that we can search in
-      if (!this.clustersLoad) {
-        this.clustersLoad = true;
-
-        const noop = new Promise<ICluster[]>((r) => r([]));
-
-        const results = await Promise.allSettled([
-          this.config.recognize_enabled ? dav.getFaceList('recognize') : noop,
-          this.config.facerecognition_enabled ? dav.getFaceList('facerecognition') : noop,
-          this.config.places_gis > 0 ? dav.getPlaces({ covers: 0 }) : noop,
-          this.config.systemtags_enabled ? dav.getTags() : noop,
-          this.config.albums_enabled ? dav.getAlbums() : noop,
-        ]);
-
-        // Ignore all errors and flatten
-        this.clusters = results
-          .flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
-          .filter((c) => !!(c.name || c.display_name));
-      }
-    },
-
-    /** Mirror ?q= into the box when on the search view (e.g. direct open). */
-    syncPromptFromRoute() {
-      const query = this.routeIsSearch ? lens.routeQueryText(this.$route.query.q) : String();
-      if (query !== this.prompt) this.prompt = query;
-    },
-
-    /** Open the search view for the current prompt */
-    openSearch() {
-      const q = this.prompt.trim();
-      if (!q || !this.lensEnabled || this.isLensLive) return;
-      window.clearTimeout(this.lensTimer ?? 0);
-      this.lensTimer = null;
-      this.$router.push({ name: 'search', query: { q } });
-      this.prompt = q;
-      this.pHidden = true;
-      this.$emit('select');
-    },
-
-    /** Live lens search on desktop timeline/search views */
-    queueLensSearch() {
-      if (!this.isLensLive) return;
-      utils.setRenewingTimeout(this, 'lensTimer', this.routeToLens, 500);
-    },
-
-    /** Run the pending live lens navigation */
-    routeToLens() {
-      if (!this.lensEnabled) return;
-      if (!this.prompt) {
-        if (!this.routeIsBase) {
-          this.$router.replace({ name: 'timeline' });
-        }
-      } else {
-        this.$router.replace({
-          name: 'search',
-          query: {
-            ...this.$route.query,
-            q: this.prompt,
-          },
-        });
-      }
-    },
-  },
+onMounted(() => {
+  syncPromptFromRoute();
+  setTimeout(() => {
+    syncPromptFromRoute();
+    if (props.autoFocus) {
+      textFieldRef.value?.focus();
+    }
+  }, 100); // wait for opacity transition
 });
+
+const shown = computed(() => {
+  // Live search mode navigates directly; no popover needed
+  return !pHidden.value && !!prompt.value.length;
+});
+
+const clustersResult = computed((): ICluster[] => {
+  if (!prompt.value) return [];
+  return clustersFuse.value.search(prompt.value, { limit: 6 }).map((r) => r.item);
+});
+
+const clustersFuse = computed(() => {
+  return new Fuse(clusters.value ?? [], { keys: ['name', 'display_name'], threshold: 0.3 });
+});
+
+/** Lens backend available (daemon URL configured) */
+const lensEnabled = computed((): boolean => {
+  return !!config.lens_enabled;
+});
+
+/** Live lens search hijacks typing only on desktop timeline/search views */
+const isLensLive = computed((): boolean => {
+  return lensEnabled.value && (routeIs.Base || routeIs.Search) && !windowDims.isMobile;
+});
+
+/** Explicit lens entry for anywhere live search does not apply */
+const showLensEntry = computed((): boolean => {
+  return !!prompt.value && lensEnabled.value && !isLensLive.value;
+});
+
+const lensEntryText = computed((): string => {
+  return t('memories', 'Find photos matching “{query}”', { query: prompt.value });
+});
+
+watch(prompt, (val: string) => {
+  pHidden.value = false;
+  if (val) {
+    load(); // load clusters
+  }
+
+  // Queue lens search if route changed.
+  if (lens.routeQueryText(route.query.q) !== val) {
+    queueLensSearch();
+  }
+});
+
+watch(
+  () => route.query.q,
+  () => {
+    syncPromptFromRoute();
+  },
+);
+
+function select() {
+  prompt.value = String();
+  emit('select');
+}
+
+async function load() {
+  // Load all clusters that we can search in
+  if (!clustersLoad.value) {
+    clustersLoad.value = true;
+
+    const noop = new Promise<ICluster[]>((r) => r([]));
+
+    const results = await Promise.allSettled([
+      config.recognize_enabled ? dav.getFaceList('recognize') : noop,
+      config.facerecognition_enabled ? dav.getFaceList('facerecognition') : noop,
+      config.places_gis > 0 ? dav.getPlaces({ covers: 0 }) : noop,
+      config.systemtags_enabled ? dav.getTags() : noop,
+      config.albums_enabled ? dav.getAlbums() : noop,
+    ]);
+
+    // Ignore all errors and flatten
+    clusters.value = results
+      .flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+      .filter((c) => !!(c.name || c.display_name));
+  }
+}
+
+/** Mirror ?q= into the box when on the search view (e.g. direct open). */
+function syncPromptFromRoute() {
+  const query = routeIs.Search ? lens.routeQueryText(route.query.q) : String();
+  if (query !== prompt.value) prompt.value = query;
+}
+
+/** Open the search view for the current prompt */
+function openSearch() {
+  const q = prompt.value.trim();
+  if (!q || !lensEnabled.value || isLensLive.value) return;
+  lensTimer.clear();
+  router.push({ name: 'search', query: { q } });
+  prompt.value = q;
+  pHidden.value = true;
+  emit('select');
+}
+
+/** Live lens search on desktop timeline/search views */
+function queueLensSearch() {
+  if (!isLensLive.value) return;
+  lensTimer.set(routeToLens, 500);
+}
+
+/** Run the pending live lens navigation */
+function routeToLens() {
+  if (!lensEnabled.value) return;
+  if (!prompt.value) {
+    if (!routeIs.Base) {
+      router.replace({ name: 'timeline' });
+    }
+  } else {
+    router.replace({
+      name: 'search',
+      query: {
+        ...route.query,
+        q: prompt.value,
+      },
+    });
+  }
+}
 </script>
 
 <style lang="scss" scoped>

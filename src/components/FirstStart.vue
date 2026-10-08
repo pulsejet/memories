@@ -43,106 +43,85 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 import XImg from '@components/frame/XImg.vue';
 import * as nativex from '@native';
 
-import UserConfig from '@mixins/UserConfig';
+import { setConfig } from '@services/user-config';
 
 import axios from '@nextcloud/axios';
 
 import banner from '@assets/banner.svg';
 
-import * as utils from '@services/utils';
+import { isAdmin } from '@services/utils/auth';
+import { chooseNcFolder } from '@services/utils/dialog';
 import { API } from '@services/API';
+import { t, n } from '@services/l10n';
 
 import type { IDay } from '@typings';
 
-export default defineComponent({
-  name: 'FirstStart',
-  components: {
-    NcButton,
-    XImg,
-  },
+const error = ref('');
+const info = ref('');
+const show = ref(false);
+const chosenPath = ref('');
 
-  mixins: [UserConfig],
+async function begin() {
+  const path = await chooseNcFolder(t('memories', 'Choose the root of your timeline'));
 
-  data: () => ({
-    banner,
-    error: '',
-    info: '',
-    show: false,
-    chosenPath: '',
-  }),
+  // Get folder days
+  error.value = '';
+  info.value = '';
+  const url = API.Q(API.DAYS(), { folder: path, recursive: 1 });
+  const res = await axios.get<IDay[]>(url);
 
-  mounted() {
-    nativex.setTheme('#174a7d', true);
-    document.getElementById('content')?.classList.add('no-margins');
-    window.setTimeout(() => {
-      this.show = true;
-    }, 300);
-  },
+  // Check response
+  if (res.status !== 200) {
+    error.value = t('memories', 'The selected folder does not seem to be valid. Try again.');
+    return;
+  }
 
-  beforeUnmount() {
-    nativex.setTheme(); // restore server theme
-    document.getElementById('content')?.classList.remove('no-margins');
-  },
+  // Count total photos
+  const count = res.data.reduce((acc, day) => acc + day.count, 0);
+  info.value = n('memories', 'Found {n} item in {path}', 'Found {n} items in {path}', count, {
+    n: count,
+    path,
+  });
+  chosenPath.value = path;
 
-  computed: {
-    isAdmin(): boolean {
-      return utils.isAdmin;
-    },
-  },
+  // Check if nothing was found
+  if (count === 0) {
+    error.value =
+      t('memories', 'No photos were found in the selected folder.') +
+      '\n' +
+      t('memories', 'This can happen because your media is still indexing.');
 
-  methods: {
-    async begin() {
-      const path = await utils.chooseNcFolder(this.t('memories', 'Choose the root of your timeline'));
+    if (isAdmin) {
+      error.value += '\n\n' + t('memories', 'Visit the admin panel to make sure Memories is configured correctly.');
+    }
+    return;
+  }
+}
 
-      // Get folder days
-      this.error = '';
-      this.info = '';
-      const url = API.Q(API.DAYS(), { folder: path, recursive: 1 });
-      const res = await axios.get<IDay[]>(url);
+async function finish() {
+  show.value = false;
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  await setConfig('timeline_path', chosenPath.value);
+}
 
-      // Check response
-      if (res.status !== 200) {
-        this.error = this.t('memories', 'The selected folder does not seem to be valid. Try again.');
-        return;
-      }
+onMounted(() => {
+  nativex.setTheme('#174a7d', true);
+  document.getElementById('content')?.classList.add('no-margins');
+  window.setTimeout(() => {
+    show.value = true;
+  }, 300);
+});
 
-      // Count total photos
-      const n = res.data.reduce((acc, day) => acc + day.count, 0);
-      this.info = this.n('memories', 'Found {n} item in {path}', 'Found {n} items in {path}', n, {
-        n,
-        path,
-      });
-      this.chosenPath = path;
-
-      // Check if nothing was found
-      if (n === 0) {
-        this.error =
-          this.t('memories', 'No photos were found in the selected folder.') +
-          '\n' +
-          this.t('memories', 'This can happen because your media is still indexing.');
-
-        if (this.isAdmin) {
-          this.error +=
-            '\n\n' + this.t('memories', 'Visit the admin panel to make sure Memories is configured correctly.');
-        }
-        return;
-      }
-    },
-
-    async finish() {
-      this.show = false;
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      this.config.timeline_path = this.chosenPath;
-      await this.updateSetting('timeline_path', 'timelinePath');
-    },
-  },
+onBeforeUnmount(() => {
+  nativex.setTheme(); // restore server theme
+  document.getElementById('content')?.classList.remove('no-margins');
 });
 </script>
 

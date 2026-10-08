@@ -14,9 +14,11 @@ ul.nc-select__dropdown {
   z-index: 10000;
 }
 
-// Fix toast position when navigation is closed
+// Fix toast position when navigation is closed.
 // https://github.com/nextcloud-libraries/nextcloud-dialogs/pull/2600
-body:has(.app-navigation--closed) div[class*='toastContainer_navOpen'] {
+body:has(> #content > #content-vue > div.app-navigation.app-navigation--closed)
+  > div
+  > div[class*='toastContainer_navOpen'] {
   left: var(--body-container-margin);
 }
 

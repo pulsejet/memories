@@ -1,7 +1,7 @@
 import axios from '@nextcloud/axios';
 
 import { API } from '@services/API';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import { translate as t } from '@services/l10n';
 
 import type { IDay, IHeadRow, IPhoto } from '@typings';
@@ -48,6 +48,7 @@ function hitToPhoto(hit: ILensHit, dayid: number): IPhoto {
   return {
     fileid: hit.fileid,
     dayid,
+    dayid_real: hit.dayid,
     key: dayid === TOP_RESULTS_DAYID ? `top-${hit.fileid}` : `${hit.fileid}`,
     w: hit.w ?? undefined,
     h: hit.h ?? undefined,

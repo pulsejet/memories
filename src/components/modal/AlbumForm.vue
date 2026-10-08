@@ -89,168 +89,136 @@
   </AlbumCollaborators>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { computed, ref, useTemplateRef, onMounted, nextTick } from 'vue';
 
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 import NcButton from '@nextcloud/vue/components/NcButton';
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
 
 import AlbumCollaborators from './AlbumCollaborators.vue';
 
 import { DateTime } from 'luxon';
-import * as utils from '@services/utils';
+import { t } from '@services/l10n';
+import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
 import Send from 'vue-material-design-icons/Send.vue';
 import AccountMultiplePlus from 'vue-material-design-icons/AccountMultiplePlus.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'AlbumForm',
-  components: {
-    NcButton,
-    NcTextField,
-    AlbumCollaborators,
-    XLoadingIcon,
-
-    Send,
-    AccountMultiplePlus,
-  },
-
-  props: {
-    album: {
-      type: Object as PropType<any>,
-      default: null,
-    },
-    displayBackButton: {
-      type: Boolean,
-      default: false,
-    },
-  },
-
-  emits: {
-    done: (album: any) => true,
-    back: () => true,
-  },
-
-  data: () => ({
-    collaborators: [],
-    showCollaboratorView: false,
-    albumName: '',
-    albumLocation: '',
-    loading: false,
-  }),
-
-  computed: {
-    /**
-     * @return Whether sharing is enabled.
-     */
-    editMode(): boolean {
-      return Boolean(this.album);
-    },
-
-    saveText(): string {
-      return this.editMode ? this.t('memories', 'Save') : this.t('memories', 'Create album');
-    },
-
-    /**
-     * @return Whether sharing is enabled.
-     */
-    sharingEnabled(): boolean {
-      return true; // todo
-    },
-  },
-
-  mounted() {
-    if (this.editMode) {
-      this.albumName = this.album.basename;
-      this.albumLocation = this.album.location;
-    }
-    this.$nextTick(() => {
-      this.refs().nameInput?.$el.getElementsByTagName('input')[0].focus();
-    });
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        nameInput?: VueHTMLComponent;
-      };
-    },
-
-    submit(collaborators: any[] = []) {
-      if (this.albumName === '' || this.loading) {
-        return;
-      }
-
-      // Validate the album name, it shouldn't contain any slash
-      if (this.albumName.includes('/')) {
-        showError(this.t('memories', 'Invalid album name; should not contain any slashes.'));
-        return;
-      }
-
-      if (this.editMode) {
-        this.handleUpdateAlbum();
-      } else {
-        this.handleCreateAlbum(collaborators);
-      }
-    },
-
-    async handleCreateAlbum(collaborators: any[] = []) {
-      try {
-        this.loading = true;
-        let album = {
-          basename: this.albumName,
-          filename: `/photos/${utils.uid}/albums/${this.albumName}`,
-          nbItems: 0,
-          location: this.albumLocation,
-          lastPhoto: -1,
-          date: DateTime.now().toFormat('MMMM YYYY'),
-          collaborators,
-        };
-        await dav.createAlbum(album.basename);
-
-        if (this.albumLocation !== '' || collaborators.length !== 0) {
-          album = await dav.updateAlbum(album, {
-            albumName: this.albumName,
-            properties: {
-              location: this.albumLocation,
-              collaborators,
-            },
-          });
-        }
-
-        this.$emit('done', { album });
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    async handleUpdateAlbum() {
-      try {
-        this.loading = true;
-        let album = { ...this.album };
-        if (album.basename !== this.albumName) {
-          album = await dav.renameAlbum(album, album.basename, this.albumName);
-        }
-        if (album.location !== this.albumLocation) {
-          album.location = await dav.updateAlbum(album, {
-            albumName: album.basename,
-            properties: { location: this.albumLocation },
-          });
-        }
-        this.$emit('done', { album });
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    back() {
-      this.$emit('back');
-    },
-  },
 });
+
+const props = defineProps<{
+  album?: any;
+  displayBackButton?: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'done', data: { album: any }): void;
+  (e: 'back'): void;
+}>();
+
+const nameInput = useTemplateRef<VueHTMLComponent>('nameInput');
+
+const showCollaboratorView = ref(false);
+const albumName = ref('');
+const albumLocation = ref('');
+const loading = ref(false);
+
+/** Whether sharing is enabled. */
+const editMode = computed(() => Boolean(props.album));
+const saveText = computed(() => (editMode.value ? t('memories', 'Save') : t('memories', 'Create album')));
+
+/** Whether sharing is enabled. */
+const sharingEnabled = computed(() => true); // todo
+
+onMounted(() => {
+  if (editMode.value) {
+    albumName.value = props.album.basename;
+    albumLocation.value = props.album.location;
+  }
+  nextTick(() => {
+    nameInput.value?.$el.getElementsByTagName('input')[0].focus();
+  });
+});
+
+function submit(collaborators: any[] = []) {
+  if (albumName.value === '' || loading.value) {
+    return;
+  }
+
+  // Validate the album name, it shouldn't contain any slash
+  if (albumName.value.includes('/')) {
+    showError(t('memories', 'Invalid album name; should not contain any slashes.'));
+    return;
+  }
+
+  if (editMode.value) {
+    handleUpdateAlbum();
+  } else {
+    handleCreateAlbum(collaborators);
+  }
+}
+
+async function handleCreateAlbum(collaborators: any[] = []) {
+  try {
+    loading.value = true;
+    let album = {
+      basename: albumName.value,
+      filename: `/photos/${utils.uid}/albums/${albumName.value}`,
+      nbItems: 0,
+      location: albumLocation.value,
+      lastPhoto: -1,
+      date: DateTime.now().toFormat('MMMM yyyy'),
+      collaborators,
+    };
+    await dav.createAlbum(album.basename);
+
+    if (albumLocation.value !== '' || collaborators.length !== 0) {
+      album = await dav.updateAlbum(album, {
+        albumName: albumName.value,
+        properties: {
+          location: albumLocation.value,
+          collaborators,
+        },
+      });
+    }
+
+    emit('done', { album });
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function handleUpdateAlbum() {
+  try {
+    loading.value = true;
+    let album = { ...props.album };
+    if (album.basename !== albumName.value) {
+      album = await dav.renameAlbum(album, album.basename, albumName.value);
+    }
+    if (album.location !== albumLocation.value) {
+      album.location = await dav.updateAlbum(album, {
+        albumName: album.basename,
+        properties: { location: albumLocation.value },
+      });
+    }
+    emit('done', { album });
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
+}
+
+function back() {
+  emit('back');
+}
 </script>
 <style lang="scss" scoped>
 .album-form {
@@ -262,7 +230,7 @@ export default defineComponent({
     font-weight: bold;
   }
   .form-subtitle {
-    color: var(--color-text-lighter);
+    color: var(--color-text-maxcontrast);
   }
   .form-inputs {
     flex-grow: 1;

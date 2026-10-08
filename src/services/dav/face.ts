@@ -1,12 +1,12 @@
 import axios from '@nextcloud/axios';
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 import { generateUrl } from '@nextcloud/router';
 
 import client from './client';
 import * as base from './base';
 
 import { translate as t } from '@services/l10n';
-import { constants as c } from '@services/utils';
+import { constants } from '@services/constants';
 import { API } from '@services/API';
 
 import type { IFace, IPhoto } from '@typings';
@@ -96,7 +96,7 @@ export async function* recognizeMoveFaceImages(user: string, face: string, targe
 
       // NULL source needs special handling
       let source = `/recognize/${user}/faces/${face}`;
-      if (face === c.FACE_NULL) {
+      if (face === constants.FACE_NULL) {
         source = `/recognize/${user}/unassigned-faces`;
       }
 

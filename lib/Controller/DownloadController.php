@@ -150,7 +150,7 @@ final class DownloadController extends ApiController
         bool $resumable = true,
         bool $attachment = false,
     ): Http\Response {
-        return $this->util->guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable, $attachment) {
+        return $this->util->guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable, $attachment): void {
             /** @var \OCP\Files\File $file */
             if ($token = $this->request->getHeader(ServiceManager::SERVICE_TOKEN_HEADER)) {
                 $file = $this->serviceManager->getServiceTokenFile($token, $fileid);
@@ -313,7 +313,7 @@ final class DownloadController extends ApiController
      */
     private function multiple(string $name, array $fileIds): Http\Response
     {
-        return $this->util->guardExDirect(function (Http\IOutput $out) use ($name, $fileIds) {
+        return $this->util->guardExDirect(function (Http\IOutput $out) use ($name, $fileIds): void {
             // Release the PHP session lock BEFORE streaming.
             // Prevents a deadlock on simultaneous connections.
             $this->closeSession();
@@ -366,19 +366,7 @@ final class DownloadController extends ApiController
                     }
 
                     // Handle duplicate names
-                    if (isset($nameCounts[$name])) {
-                        ++$nameCounts[$name];
-
-                        // add count before extension
-                        $extpos = strrpos($name, '.');
-                        if (false === $extpos) {
-                            $name .= " ({$nameCounts[$name]})";
-                        } else {
-                            $name = substr($name, 0, $extpos)." ({$nameCounts[$name]})".substr($name, $extpos);
-                        }
-                    } else {
-                        $nameCounts[$name] = 0;
-                    }
+                    $name = $this->uniqueZipName($name, $nameCounts);
 
                     // Add file to zip
                     if (!$streamer->addFileFromStream($handle, $name, [])) {
@@ -395,7 +383,8 @@ final class DownloadController extends ApiController
                         fwrite($dummy, $e->getMessage());
                         rewind($dummy);
 
-                        if (!$streamer->addFileFromStream($dummy, "{$name}_error.txt", [])) {
+                        $errorName = $this->uniqueZipName("{$name}_error.txt", $nameCounts);
+                        if (!$streamer->addFileFromStream($dummy, $errorName, [])) {
                             throw new \Exception('Failed to add file to zip');
                         }
                     } finally {
@@ -414,6 +403,23 @@ final class DownloadController extends ApiController
             // Done
             $streamer->finalize();
         });
+    }
+
+    private function uniqueZipName(string $name, array &$nameCounts): string
+    {
+        $original = $name;
+        $count = $nameCounts[$original] ?? 0;
+        $extpos = strrpos($original, '.');
+        while (isset($nameCounts[$name])) {
+            ++$count;
+            $name = false === $extpos
+                ? "{$original} ({$count})"
+                : substr($original, 0, $extpos)." ({$count})".substr($original, $extpos);
+        }
+        $nameCounts[$original] = $count;
+        $nameCounts[$name] = 0;
+
+        return $name;
     }
 
     private function closeSession(): void

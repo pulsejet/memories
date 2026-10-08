@@ -2,9 +2,7 @@ import type { Router, RouteLocationNormalized } from 'vue-router';
 import type { ComponentPublicInstance } from 'vue';
 
 import type { IPhoto, IUploadNativeX, TimelineState } from '@typings';
-import type { constants, initstate } from '@services/utils';
-import type { translate, translatePlural } from '@services/l10n';
-import type { GlobalRouteCheckers, routes } from './router';
+import type { routes } from '@services/router';
 
 // Global exposed variables
 declare global {
@@ -38,6 +36,7 @@ declare global {
       shareNodeLink: (path: string, immediate?: boolean) => Promise<void>;
       moveToFolder: (photos: IPhoto[]) => void;
       moveToFace: (photos: IPhoto[]) => void;
+      reindex: (photos: IPhoto[]) => void;
       albumShare: (user: string, name: string, link?: boolean) => Promise<void>;
       showSettings: () => void;
       upload: (locals?: IUploadNativeX[]) => void;
@@ -67,42 +66,18 @@ declare global {
       clientId: string;
       clientIdPersistent: string;
     };
-
-    window: {
-      innerWidth: number; // cache
-      innerHeight: number; // cache
-    };
   };
 
   // Typings for external libraries below
-  type VueRecyclerType = ComponentPublicInstance & {
+  type VueRecyclerType = Omit<ComponentPublicInstance, '$el'> & {
     $el: HTMLDivElement;
     scrollToPosition: (position: number) => void;
     scrollToItem: (index: number) => void;
   };
 
-  type VueNcPopover = ComponentPublicInstance & {
-    $refs: { popover: { show(): void; hide(): void } };
-  };
-
-  type VueNcSelectTags = ComponentPublicInstance & {
-    availableTags: any[];
-  };
-
-  type VueHTMLComponent = ComponentPublicInstance & {
+  type VueHTMLComponent = Omit<ComponentPublicInstance, '$el'> & {
     $el: HTMLElement;
   };
-}
-
-// types present on all components (bootstrap.ts, router.ts)
-declare module 'vue' {
-  interface ComponentCustomProperties extends GlobalRouteCheckers {
-    t: typeof translate;
-    n: typeof translatePlural;
-
-    c: typeof constants;
-    initstate: typeof initstate;
-  }
 }
 
 export {};

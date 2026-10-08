@@ -20,6 +20,7 @@ function tok(url: string) {
 export const enum DaysFilterType {
   FAVORITES = 'fav',
   VIDEOS = 'vid',
+  PANO = 'pano',
   FOLDER = 'folder',
   ARCHIVE = 'archive',
   ALBUM = 'albums',
@@ -138,6 +139,10 @@ export class API {
 
   static IMAGE_SETEXIF(id: number) {
     return tok(gen(`${BASE}/image/set-exif/{id}`, { id }));
+  }
+
+  static IMAGE_REINDEX(id: number) {
+    return gen(`${BASE}/image/reindex/{id}`, { id });
   }
 
   static IMAGE_DECODABLE(id: number, etag?: string) {

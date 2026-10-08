@@ -1,11 +1,5 @@
-import type { App } from 'vue';
-
 import { generateFilePath } from '@nextcloud/router';
 import { getRequestToken } from '@nextcloud/auth';
-
-// Locals
-import { constants, initstate } from '@services/utils';
-import { translate, translatePlural } from '@services/l10n';
 
 // Global CSS
 import './styles/global.scss';
@@ -22,13 +16,4 @@ __webpack_public_path__ = generateFilePath('memories', '', 'js/');
 // Turn on virtual keyboard support
 if ('virtualKeyboard' in navigator) {
   (<any>navigator.virtualKeyboard).overlaysContent = true;
-}
-
-// Register global components and plugins
-export function registerGlobals(app: App) {
-  // Register global constants and functions
-  app.config.globalProperties.c = constants;
-  app.config.globalProperties.initstate = initstate;
-  app.config.globalProperties.t = translate;
-  app.config.globalProperties.n = translatePlural;
 }

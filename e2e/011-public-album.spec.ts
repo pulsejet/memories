@@ -188,7 +188,10 @@ class AlbumShareAPI {
 
   async addPhoto(album: string, srcPath: string, basename: string): Promise<void> {
     const dav = new DavClient(this.request);
-    await dav.copy(`files/${username}/${srcPath.replace(/^\/+/, '')}`, `photos/${username}/albums/${album}/${basename}`);
+    await dav.copy(
+      `files/${username}/${srcPath.replace(/^\/+/, '')}`,
+      `photos/${username}/albums/${album}/${basename}`,
+    );
   }
 
   async createPublicLink(name: string): Promise<void> {

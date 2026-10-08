@@ -117,6 +117,7 @@ class Config:
     port: int
     torch_num_threads: int | None
     index_batch_size: int
+    scan_interval: int
 
 
 def _face_config() -> FaceConfig:
@@ -189,6 +190,10 @@ def load_config() -> Config:
     if batch_size < 1 or batch_size > 32:
         raise RuntimeError("INDEX_BATCH_SIZE must be between 1 and 32")
 
+    scan_interval = _int("SCAN_INTERVAL", 900)
+    if scan_interval < 1:
+        raise RuntimeError("SCAN_INTERVAL must be positive")
+
     embedding = EmbeddingConfig(
         model_id=os.environ.get("EMBEDDING_MODEL_ID", "google/siglip2-base-patch16-256"),
         model_revision=os.environ["EMBEDDING_MODEL_REVISION"],
@@ -245,6 +250,7 @@ def load_config() -> Config:
         port=_int("PORT", 47789),
         torch_num_threads=int(threads) if threads else None,
         index_batch_size=batch_size,
+        scan_interval=scan_interval,
     )
 
 

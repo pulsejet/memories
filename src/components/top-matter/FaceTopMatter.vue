@@ -16,7 +16,7 @@
     <div class="right-actions">
       <NcActions :inline="0">
         <!-- root view (not cluster or unassigned) -->
-        <template v-if="!name && routeIsRecognize && !routeIsRecognizeUnassigned">
+        <template v-if="!name && routeIs.Recognize && !routeIs.RecognizeUnassigned">
           <NcActionButton :aria-label="t('memories', 'Unassigned faces')" @click="openUnassigned" close-after-click>
             {{ t('memories', 'Unassigned faces') }}
             <template #icon> <UnassignedIcon :size="20" /> </template>
@@ -24,7 +24,7 @@
         </template>
 
         <!-- face-recognition root view: add a manually tagged person -->
-        <template v-if="!name && routeIsFaceRecognition">
+        <template v-if="!name && routeIs.FaceRecognition">
           <NcActionButton :aria-label="t('memories', 'Add person')" @click="openManualAdd" close-after-click>
             {{ t('memories', 'Add person') }}
             <template #icon> <AddIcon :size="20" /> </template>
@@ -39,7 +39,7 @@
           </NcActionButton>
           <NcActionButton
             :aria-label="t('memories', 'Merge with different person')"
-            @click="refs().mergeModal.open()"
+            @click="mergeModal?.open()"
             close-after-click
           >
             {{ t('memories', 'Merge with different person') }}
@@ -52,11 +52,7 @@
           >
             {{ t('memories', 'Mark person in preview') }}
           </NcActionCheckbox>
-          <NcActionButton
-            :aria-label="t('memories', 'Remove person')"
-            @click="refs().deleteModal.open()"
-            close-after-click
-          >
+          <NcActionButton :aria-label="t('memories', 'Remove person')" @click="deleteModal?.open()" close-after-click>
             {{ t('memories', 'Remove person') }}
             <template #icon> <DeleteIcon :size="20" /> </template>
           </NcActionButton>
@@ -71,10 +67,9 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-import UserConfig from '@mixins/UserConfig';
+<script setup lang="ts">
+import { computed, useTemplateRef } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
@@ -85,7 +80,11 @@ import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';
 import FaceMergeModal from '@components/modal/FaceMergeModal.vue';
 import FaceManualAddModal from '@components/modal/FaceManualAddModal.vue';
 
-import * as utils from '@services/utils';
+import { routeIs } from '@services/router';
+import { config, setConfig } from '@services/user-config';
+import * as utils from '@services/utils/common';
+import { constants } from '@services/constants';
+import { t } from '@services/l10n';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
@@ -94,88 +93,64 @@ import MergeIcon from 'vue-material-design-icons/Merge.vue';
 import UnassignedIcon from 'vue-material-design-icons/AccountQuestion.vue';
 import AddIcon from 'vue-material-design-icons/AccountPlus.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'FaceTopMatter',
-  components: {
-    NcActions,
-    NcActionButton,
-    NcActionCheckbox,
-    FaceEditModal,
-    FaceDeleteModal,
-    FaceMergeModal,
-    FaceManualAddModal,
-    BackIcon,
-    EditIcon,
-    DeleteIcon,
-    MergeIcon,
-    UnassignedIcon,
-    AddIcon,
-  },
-
-  mixins: [UserConfig],
-
-  computed: {
-    name() {
-      return this.$route.params.name?.toString() || '';
-    },
-
-    isReal() {
-      return this.name && this.name !== this.c.FACE_NULL;
-    },
-
-    displayName() {
-      if (this.routeIsRecognizeUnassigned) {
-        return this.t('memories', 'Unassigned faces');
-      } else if (!this.name) {
-        return this.t('memories', 'People');
-      } else if (utils.isNumber(this.name)) {
-        return this.t('memories', 'Unnamed person');
-      }
-      return this.name;
-    },
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        editModal: InstanceType<typeof FaceEditModal>;
-        deleteModal: InstanceType<typeof FaceDeleteModal>;
-        mergeModal: InstanceType<typeof FaceMergeModal>;
-        manualAddModal: InstanceType<typeof FaceManualAddModal>;
-      };
-    },
-
-    back() {
-      this.$router.go(-1);
-    },
-
-    rename() {
-      if (this.isReal) this.refs().editModal.open();
-    },
-
-    openUnassigned() {
-      this.$router.push({
-        name: this.$route.name?.toString(),
-        params: {
-          user: utils.uid as string,
-          name: this.c.FACE_NULL,
-        },
-      });
-    },
-
-    changeShowFaceRect() {
-      this.config.show_face_rect = !this.config.show_face_rect;
-      this.updateSetting('show_face_rect');
-      utils.bus.emit('memories:timeline:hard-refresh', null);
-    },
-
-    openManualAdd() {
-      this.refs().manualAddModal.open();
-    },
-
-    onManualAdded() {
-      utils.bus.emit('memories:timeline:hard-refresh', null);
-    },
-  },
 });
+
+const route = useRoute();
+const router = useRouter();
+const editModal = useTemplateRef<InstanceType<typeof FaceEditModal>>('editModal');
+const deleteModal = useTemplateRef<InstanceType<typeof FaceDeleteModal>>('deleteModal');
+const mergeModal = useTemplateRef<InstanceType<typeof FaceMergeModal>>('mergeModal');
+const manualAddModal = useTemplateRef<InstanceType<typeof FaceManualAddModal>>('manualAddModal');
+
+const name = computed(() => {
+  return route.params.name?.toString() || '';
+});
+
+const isReal = computed(() => {
+  return name.value && name.value !== constants.FACE_NULL;
+});
+
+const displayName = computed(() => {
+  if (routeIs.RecognizeUnassigned) {
+    return t('memories', 'Unassigned faces');
+  } else if (!name.value) {
+    return t('memories', 'People');
+  } else if (utils.isNumber(name.value)) {
+    return t('memories', 'Unnamed person');
+  }
+  return name.value;
+});
+
+function back() {
+  router.go(-1);
+}
+
+function rename() {
+  if (isReal.value) editModal.value?.open();
+}
+
+function openUnassigned() {
+  router.push({
+    name: route.name?.toString(),
+    params: {
+      user: utils.uid as string,
+      name: constants.FACE_NULL,
+    },
+  });
+}
+
+function changeShowFaceRect() {
+  setConfig('show_face_rect', !config.show_face_rect);
+  utils.bus.emit('memories:timeline:hard-refresh', null);
+}
+
+function openManualAdd() {
+  manualAddModal.value?.open();
+}
+
+function onManualAdded() {
+  utils.bus.emit('memories:timeline:hard-refresh', null);
+}
 </script>

@@ -1,6 +1,6 @@
 import * as base from './base';
 
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 import axios from '@nextcloud/axios';
 
 import { translate as t } from '@services/l10n';

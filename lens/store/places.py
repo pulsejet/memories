@@ -7,7 +7,14 @@ from dataclasses import dataclass
 from qdrant_client import AsyncQdrantClient, models
 
 from config import config
-from store.base import META_ID, check_meta, ensure_collection, ensure_integer_indexes, require_unnamed_vectors
+from store.base import (
+    META_ID,
+    FileStore,
+    check_meta,
+    ensure_collection,
+    ensure_integer_indexes,
+    require_unnamed_vectors,
+)
 
 log = logging.getLogger("lens.store")
 
@@ -23,6 +30,8 @@ class PlacePoint:
     admin_level: int
     name: str
     full_address: str
+    mtime: int | None
+    etag: str
 
 
 def place_point_id(fileid: int, osm_id: int) -> str:
@@ -31,17 +40,18 @@ def place_point_id(fileid: int, osm_id: int) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_URL, f"lens_places:{int(fileid)}:{int(osm_id)}"))
 
 
-class PlacesStore:
+class PlacesStore(FileStore):
     """Places collection handle; refuses to mix embedding spaces."""
 
     def __init__(self, client: AsyncQdrantClient, dim):
-        self.client = client
-        self.dim = dim
+        """Bind the places collection."""
+
+        super().__init__(client, config.places.qdrant_collection, dim)
 
     async def ensure_collection(self):
         """Create the per-file places collection, indexes, and sentinel; reruns are safe."""
 
-        name = config.places.qdrant_collection
+        name = self.collection
         info = await ensure_collection(self.client, name, self.dim)
         require_unnamed_vectors(info, name)
 
@@ -61,6 +71,8 @@ class PlacesStore:
                 payload={
                     "fileid": int(point.fileid),
                     "parent_id": int(point.parent_id),
+                    "mtime": point.mtime,
+                    "etag": point.etag,
                     "osm_id": int(point.osm_id),
                     "admin_level": point.admin_level,
                     "name": point.name,
@@ -71,7 +83,13 @@ class PlacesStore:
         ]
 
         if structs:
-            await self.client.upsert(config.places.qdrant_collection, points=structs)
+            await self.client.upsert(self.collection, points=structs, wait=True)
+
+    async def replace_many(self, fileids: list[int], points: list[PlacePoint]):
+        """Replace all places for the given files, including files now without places."""
+
+        await self.upsert_many(points)
+        await self._delete_stale(fileids, [place_point_id(p.fileid, p.osm_id) for p in points])
 
     async def search(self, vector, folders, limit):
         """Nearest per-(file, place) address embeddings in folders, one hit per osm_id."""
@@ -83,7 +101,7 @@ class PlacesStore:
         )])
 
         res = await self.client.query_points_groups(
-            collection_name=config.places.qdrant_collection,
+            collection_name=self.collection,
             group_by="osm_id",
             query=vector,
             query_filter=filtr,
@@ -101,16 +119,6 @@ class PlacesStore:
             hits.append({**(best.payload or {}), "score": best.score})
 
         return hits
-
-    async def delete_fileid(self, fileid: int):
-        """Remove all address embeddings for one file (all its hashed pairs)."""
-
-        selector = models.FilterSelector(filter=models.Filter(must=[models.FieldCondition(
-            key="fileid",
-            match=models.MatchValue(value=int(fileid)),
-        )]))
-
-        await self.client.delete(config.places.qdrant_collection, points_selector=selector)
 
     def _expected_meta(self):
         """Sentinel payload describing the places sentence space."""

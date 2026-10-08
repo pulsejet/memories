@@ -16,8 +16,8 @@
  */
 
 export type TapClickPatchOptions = {
-  /** Button containers to cover, matched with closest() */
-  containers: string[];
+  /** Elements to patch, matched with closest() */
+  selectors: string[];
   /** Max finger travel in px to still count as a tap */
   slopPx?: number;
   /** Max press duration in ms to still count as a tap */
@@ -36,8 +36,8 @@ type PendingTap = {
  * Only single-finger touch taps are patched; mouse, pen, multi-touch
  * and keyboard keep the native path.
  */
-export function makeTapPatch({ containers, slopPx = 12, timeoutMs = 600 }: TapClickPatchOptions) {
-  const buttonSelector = containers.map((c) => `${c} button`).join(', ');
+export function makeTapPatch({ selectors, slopPx = 12, timeoutMs = 600 }: TapClickPatchOptions) {
+  const selector = selectors.join(', ');
   let pendingTap: PendingTap = null;
 
   const onTouchStart = (e: TouchEvent) => {
@@ -46,7 +46,7 @@ export function makeTapPatch({ containers, slopPx = 12, timeoutMs = 600 }: TapCl
       return;
     }
     const touch = e.touches[0];
-    const button = (e.target as Element | null)?.closest(buttonSelector) as HTMLElement | null;
+    const button = (e.target as Element | null)?.closest(selector) as HTMLElement | null;
     pendingTap = button ? { startX: touch.clientX, startY: touch.clientY, startTime: performance.now(), button } : null;
   };
 
@@ -57,7 +57,7 @@ export function makeTapPatch({ containers, slopPx = 12, timeoutMs = 600 }: TapCl
     const touch = e.changedTouches[0];
     if (!touch || performance.now() - tap.startTime > timeoutMs) return;
     if (Math.hypot(touch.clientX - tap.startX, touch.clientY - tap.startY) > slopPx) return;
-    if ((e.target as Element | null)?.closest('button') !== tap.button) return;
+    if ((e.target as Element | null)?.closest(selector) !== tap.button) return;
 
     // Swallow the native compatibility click and fire our own.
     e.preventDefault();

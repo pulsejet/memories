@@ -1,8 +1,8 @@
 import PhotoSwipe from 'photoswipe';
 import PsImage from './PsImage';
 
-import * as utils from '@services/utils';
-import staticConfig from '@services/static-config';
+import * as utils from '@services/utils/common';
+import { config } from '@services/user-config';
 
 import type { PsContent, PsEvent } from './types';
 
@@ -62,7 +62,7 @@ class LivePhotoContentSetup {
     video.playsInline = true;
     video.disableRemotePlayback = true;
     video.autoplay = false;
-    video.loop = !!staticConfig.getSync('livephoto_loop');
+    video.loop = !!config.livephoto_loop;
     video.src = utils.getLivePhotoVideoUrl(photo, true);
 
     const div = document.createElement('div');
@@ -81,7 +81,7 @@ class LivePhotoContentSetup {
   onContentActivate({ content }: { content: PsContent }) {
     if (!isLiveContent(content)) return;
 
-    if (staticConfig.getSync('livephoto_autoplay')) {
+    if (config.livephoto_autoplay) {
       this.play(content);
     }
   }

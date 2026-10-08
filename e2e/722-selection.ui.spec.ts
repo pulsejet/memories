@@ -172,10 +172,7 @@ test.describe('@ui Photo selection', () => {
     // the recycler and detaches them again.
     const selectors = ids.map((id) => `.p-outer--${id}`);
     await page.locator(selectors[2]).scrollIntoViewIfNeeded();
-    await page.waitForFunction(
-      (sels) => sels.every((s) => !!document.querySelector(s)),
-      selectors,
-    );
+    await page.waitForFunction((sels) => sels.every((s) => !!document.querySelector(s)), selectors);
     for (const selector of selectors) {
       await expect(page.locator(selector)).toBeVisible();
     }
@@ -343,5 +340,4 @@ test.describe('@ui Photo selection touch', () => {
     expect(box, 'tapped photo should have a bounding box').not.toBeNull();
     await page.touchscreen.tap(box!.x + box!.width / 2, box!.y + box!.height / 2);
   }
-
 });

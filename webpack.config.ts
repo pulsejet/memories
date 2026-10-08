@@ -5,14 +5,13 @@ import webpack from 'webpack';
 import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import { VueLoaderPlugin } from 'vue-loader';
-import { WebpackManifestPlugin } from 'webpack-manifest-plugin';
 import WorkboxPlugin from 'workbox-webpack-plugin';
 
 // Explicit `.ts` extensions are required by Node's ESM loader.
 // @ts-expect-error TS5097: extension is intentional, do not drop it
 import { L10nBundlePlugin } from './webpack.l10n-bundle-plugin.ts';
 // @ts-expect-error TS5097: extension is intentional, do not drop it
-import { ManifestSignPlugin } from './webpack.manifest-sign-plugin.ts';
+import { ManifestPlugin, ManifestSignPlugin } from './webpack.manifest-sign-plugin.ts';
 
 // npm i --no-save webpack-bundle-analyzer to enable
 // import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
@@ -84,6 +83,17 @@ export default {
     realContentHash: true,
     splitChunks: {
       automaticNameDelimiter: '-',
+      cacheGroups: {
+        // Disabled: it carves third-party code out of async chunks even
+        // when used by only one chunk (unnecessary).
+        defaultVendors: false,
+        // Single chunk to avoid creating a lot of small locale chunks.
+        // This is only a non-critical transitive dep anyway.
+        'date-fns': {
+          test: /[\\/]node_modules[\\/]date-fns[\\/]/,
+          name: 'date-fns',
+        },
+      },
     },
     minimize: !isDev,
     minimizer: [
@@ -97,12 +107,34 @@ export default {
         },
         extractComments: true,
       }),
+
+      // We depend on some internal state of filerobot.
+      new TerserPlugin({
+        include: [/filerobot-image-editor/],
+        terserOptions: {
+          ecma: 2022,
+          compress: {
+            keep_fnames: true,
+            keep_classnames: true,
+            evaluate: false,
+            reduce_vars: false,
+          },
+          mangle: {
+            keep_fnames: true,
+            keep_classnames: true,
+          },
+          output: {
+            comments: false,
+          },
+        },
+        extractComments: true,
+      }),
     ],
   },
 
   performance: {
     maxAssetSize: (isDev ? 15 : 3) * MiB,
-    maxEntrypointSize: (isDev ? 15 : 3) * MiB,
+    maxEntrypointSize: (isDev ? 10 : 1.9) * MiB,
     hints: 'error',
   },
 
@@ -119,7 +151,11 @@ export default {
       {
         test: /\.s?css$/,
         sideEffects: true,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
+        use: [
+          { loader: 'style-loader' },
+          { loader: 'css-loader', options: { sourceMap: isDev } },
+          { loader: 'sass-loader', options: { sourceMap: isDev } },
+        ],
       },
       {
         test: /\.vue$/,
@@ -155,17 +191,7 @@ export default {
 
     // Manifest of all built files (base name -> {hash, href}).
     // The standalone shell uses this to know every chunk up front.
-    new WebpackManifestPlugin({
-      fileName: manifestFileName,
-      generate: (seed: any, files: any[]) =>
-        Object.fromEntries(
-          files.map((file) => {
-            const name = file.path.split('/').pop() ?? '';
-            const [basename, hash] = name.split('?v=');
-            return [basename, { hash: hash ?? '', href: file.path }];
-          }),
-        ),
-    }),
+    new ManifestPlugin(manifestFileName),
 
     // Signature over manifest with a pinned public key.
     new ManifestSignPlugin(manifestFileName, manifestSigFileName),
@@ -212,7 +238,6 @@ export default {
       '@services': path.resolve(__dirname, 'src', 'services'),
       '@assets': path.resolve(__dirname, 'src', 'assets'),
       '@components': path.resolve(__dirname, 'src', 'components'),
-      '@mixins': path.resolve(__dirname, 'src', 'mixins'),
       '@native': path.resolve(__dirname, 'src', 'native'),
     },
     fallback: {

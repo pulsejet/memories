@@ -10,8 +10,9 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, markRaw } from 'vue';
+<script setup lang="ts">
+import { computed, markRaw, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 import FolderTopMatter from './FolderTopMatter.vue';
 import ClusterTopMatter from './ClusterTopMatter.vue';
@@ -19,57 +20,48 @@ import FaceTopMatter from './FaceTopMatter.vue';
 import AlbumTopMatter from './AlbumTopMatter.vue';
 import PlacesTopMatter from './PlacesTopMatter.vue';
 
-import * as utils from '@services/utils';
+import initstate from '@services/init-state';
+import * as utils from '@services/utils/common';
 
-export default defineComponent({
+defineOptions({
   name: 'TopMatter',
-  components: {
-    FolderTopMatter,
-    ClusterTopMatter,
-    FaceTopMatter,
-    AlbumTopMatter,
-  },
-
-  data: () => ({
-    dynamicVisible: true,
-  }),
-
-  mounted() {
-    utils.bus.on('memories.recycler.scroll', this.onRecyclerScroll);
-  },
-
-  beforeUnmount() {
-    utils.bus.off('memories.recycler.scroll', this.onRecyclerScroll);
-  },
-
-  computed: {
-    currentmatter() {
-      switch (this.$route.name) {
-        case _m.routes.Folders.name:
-          return markRaw(FolderTopMatter);
-        case _m.routes.FolderShare.name:
-          return this.initstate.shareType === 'folder' ? markRaw(FolderTopMatter) : null;
-        case _m.routes.Albums.name:
-          return markRaw(AlbumTopMatter);
-        case _m.routes.Places.name:
-          return markRaw(PlacesTopMatter);
-        case _m.routes.Tags.name:
-          return markRaw(ClusterTopMatter);
-        case _m.routes.Recognize.name:
-        case _m.routes.FaceRecognition.name:
-          return markRaw(FaceTopMatter);
-        default:
-          return null;
-      }
-    },
-  },
-
-  methods: {
-    onRecyclerScroll({ dynTopMatterVisible }: utils.BusEvent['memories.recycler.scroll']) {
-      this.dynamicVisible = dynTopMatterVisible;
-    },
-  },
 });
+
+const route = useRoute();
+
+const dynamicVisible = ref(true);
+
+onMounted(() => {
+  utils.bus.on('memories.recycler.scroll', onRecyclerScroll);
+});
+
+onBeforeUnmount(() => {
+  utils.bus.off('memories.recycler.scroll', onRecyclerScroll);
+});
+
+const currentmatter = computed(() => {
+  switch (route.name) {
+    case _m.routes.Folders.name:
+      return markRaw(FolderTopMatter);
+    case _m.routes.FolderShare.name:
+      return initstate.shareType === 'folder' ? markRaw(FolderTopMatter) : null;
+    case _m.routes.Albums.name:
+      return markRaw(AlbumTopMatter);
+    case _m.routes.Places.name:
+      return markRaw(PlacesTopMatter);
+    case _m.routes.Tags.name:
+      return markRaw(ClusterTopMatter);
+    case _m.routes.Recognize.name:
+    case _m.routes.FaceRecognition.name:
+      return markRaw(FaceTopMatter);
+    default:
+      return null;
+  }
+});
+
+function onRecyclerScroll({ dynTopMatterVisible }: utils.BusEvent['memories.recycler.scroll']) {
+  dynamicVisible.value = dynTopMatterVisible;
+}
 </script>
 
 <style lang="scss" scoped>

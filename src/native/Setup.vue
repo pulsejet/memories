@@ -112,95 +112,86 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { defineAsyncComponent, nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 const NcCheckboxRadioSwitch = defineAsyncComponent(() => import('@nextcloud/vue/components/NcCheckboxRadioSwitch'));
 
-import * as util from '@services/utils';
+import * as util from '@services/utils/common';
 import * as nativex from '@native';
+import { t } from '@services/l10n';
 import XImg from '@components/frame/XImg.vue';
 
 import banner from '@assets/banner.svg';
 
-export default defineComponent({
+defineOptions({
   name: 'NXSetup',
-
-  components: {
-    NcButton,
-    NcCheckboxRadioSwitch,
-    XImg,
-  },
-
-  data: () => ({
-    banner,
-    hasMediaPermission: false,
-    step: util.uid ? 1 : 0,
-    localFolders: [] as nativex.LocalFolderConfig[],
-    syncStatus: -1,
-    syncStatusWatch: 0,
-  }),
-
-  watch: {
-    step() {
-      switch (this.step) {
-        case 2:
-          this.hasMediaPermission = nativex.configHasMediaPermission();
-          break;
-        case 3:
-          this.localFolders = nativex.getLocalFolders();
-          break;
-        case 4:
-          this.$router.replace('/');
-          break;
-      }
-    },
-  },
-
-  beforeMount() {
-    if (!nativex.has() || !this.step) {
-      this.$router.replace('/');
-    }
-  },
-
-  async mounted() {
-    await this.$nextTick();
-
-    // Match system bars to the auth pages (same as welcome/waiting)
-    nativex.setTheme('#174a7d', true);
-
-    // set up sync status watcher
-    this.syncStatusWatch = window.setInterval(() => {
-      if (this.hasMediaPermission && this.step === 3) {
-        const newStatus = nativex.nativex.getSyncStatus();
-
-        // Refresh local folders if newly reached state -1
-        if (newStatus === -1 && this.syncStatus !== -1) {
-          this.localFolders = nativex.getLocalFolders();
-        }
-
-        this.syncStatus = newStatus;
-      }
-    }, 500);
-  },
-
-  beforeUnmount() {
-    nativex.setTheme(); // reset theme
-    window.clearInterval(this.syncStatusWatch);
-  },
-
-  methods: {
-    updateDeviceFolders() {
-      nativex.setLocalFolders(this.localFolders);
-    },
-
-    async grantMediaPermission() {
-      await nativex.configAllowMedia();
-      this.hasMediaPermission = nativex.configHasMediaPermission();
-    },
-  },
 });
+
+const router = useRouter();
+
+const hasMediaPermission = ref(false);
+const step = ref(util.uid ? 1 : 0);
+const localFolders = ref<nativex.LocalFolderConfig[]>([]);
+const syncStatus = ref(-1);
+let syncStatusWatch = 0;
+
+watch(step, () => {
+  switch (step.value) {
+    case 2:
+      hasMediaPermission.value = nativex.configHasMediaPermission();
+      break;
+    case 3:
+      localFolders.value = nativex.getLocalFolders();
+      break;
+    case 4:
+      router.replace('/');
+      break;
+  }
+});
+
+onBeforeMount(() => {
+  if (!nativex.has() || !step.value) {
+    router.replace('/');
+  }
+});
+
+onMounted(async () => {
+  await nextTick();
+
+  // Match system bars to the auth pages (same as welcome/waiting)
+  nativex.setTheme('#174a7d', true);
+
+  // set up sync status watcher
+  syncStatusWatch = window.setInterval(() => {
+    if (hasMediaPermission.value && step.value === 3) {
+      const newStatus = nativex.nativex.getSyncStatus();
+
+      // Refresh local folders if newly reached state -1
+      if (newStatus === -1 && syncStatus.value !== -1) {
+        localFolders.value = nativex.getLocalFolders();
+      }
+
+      syncStatus.value = newStatus;
+    }
+  }, 500);
+});
+
+onBeforeUnmount(() => {
+  nativex.setTheme(); // reset theme
+  window.clearInterval(syncStatusWatch);
+});
+
+function updateDeviceFolders() {
+  nativex.setLocalFolders(localFolders.value);
+}
+
+async function grantMediaPermission() {
+  await nativex.configAllowMedia();
+  hasMediaPermission.value = nativex.configHasMediaPermission();
+}
 </script>
 
 <style lang="scss" scoped>

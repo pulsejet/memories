@@ -30,13 +30,12 @@
   </ul>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { defineAsyncComponent } from 'vue';
 
-import NcButton from '@nextcloud/vue/components/NcButton';
 const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
 
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
 import type { IAlbum, IPhoto } from '@typings';
@@ -44,76 +43,70 @@ import type { IAlbum, IPhoto } from '@typings';
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import XImg from '@components/frame/XImg.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'AlbumsList',
-  components: {
-    NcListItem,
-    NcButton,
-
-    ImageMultipleIcon,
-    XImg,
-  },
-
-  props: {
-    albums: {
-      type: Array as PropType<IAlbum[]>,
-      required: true,
-    },
-    link: {
-      type: Boolean,
-      default: true,
-    },
-  },
-
-  emits: {
-    click: (item: IAlbum) => true,
-  },
-
-  methods: {
-    click($event: Event, album: IAlbum) {
-      if (!this.link) {
-        $event.preventDefault();
-      }
-      this.$emit('click', album);
-    },
-
-    linkTarget(album: IAlbum) {
-      return {
-        name: _m.routes.Albums.name,
-        params: {
-          name: album.name,
-          user: album.user,
-        },
-      };
-    },
-
-    toCoverUrl(album: IAlbum): string | undefined {
-      // See Cluster.vue for the original implementation
-      const preview = (fileid: number, etag: string | number) =>
-        utils.getPreviewUrl({
-          photo: {
-            fileid: fileid,
-            etag: etag.toString(),
-          } as IPhoto,
-          sqsize: 512,
-        });
-
-      if (album.cover && album.cover_etag) {
-        return preview(album.cover, album.cover_etag);
-      }
-
-      if (album.last_added_photo && album.last_added_photo !== -1) {
-        return preview(album.last_added_photo, album.last_added_photo_etag ?? album.album_id);
-      }
-
-      return undefined;
-    },
-
-    getSubtitle(album: IAlbum) {
-      return dav.getAlbumSubtitle(album);
-    },
-  },
 });
+
+const props = withDefaults(
+  defineProps<{
+    albums: IAlbum[];
+    link?: boolean;
+  }>(),
+  {
+    link: true,
+  },
+);
+
+const emit = defineEmits<{
+  (e: 'click', item: IAlbum): void;
+}>();
+
+defineSlots<{
+  extra(props: { album: IAlbum }): any;
+}>();
+
+function click($event: Event, album: IAlbum) {
+  if (!props.link) {
+    $event.preventDefault();
+  }
+  emit('click', album);
+}
+
+function linkTarget(album: IAlbum) {
+  return {
+    name: _m.routes.Albums.name,
+    params: {
+      name: album.name,
+      user: album.user,
+    },
+  };
+}
+
+function toCoverUrl(album: IAlbum): string | undefined {
+  // See Cluster.vue for the original implementation
+  const preview = (fileid: number, etag: string | number) =>
+    utils.getPreviewUrl({
+      photo: {
+        fileid: fileid,
+        etag: etag.toString(),
+      } as IPhoto,
+      sqsize: 512,
+    });
+
+  if (album.cover && album.cover_etag) {
+    return preview(album.cover, album.cover_etag);
+  }
+
+  if (album.last_added_photo && album.last_added_photo !== -1) {
+    return preview(album.last_added_photo, album.last_added_photo_etag ?? album.album_id);
+  }
+
+  return undefined;
+}
+
+function getSubtitle(album: IAlbum) {
+  return dav.getAlbumSubtitle(album);
+}
 </script>
 
 <style lang="scss" scoped>

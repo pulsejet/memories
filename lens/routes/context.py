@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from models import EmbeddingModel, FaceModel, SchemaModel, SentenceModel
 
 if TYPE_CHECKING:
-    from index import IndexQueue
+    from index import IndexQueue, Scanner
     from store import Store
 
 
@@ -18,6 +18,7 @@ class State:
     qdrant: str = "unknown"
     store: "Store | None" = None
     index_queue: "IndexQueue | None" = None
+    scanner: "Scanner | None" = None
 
 
 embedding_model = EmbeddingModel()

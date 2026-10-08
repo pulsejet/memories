@@ -255,7 +255,7 @@ final class AdminController extends ApiController
     #[NoCSRFRequired]
     public function getFailureLogs(): Http\Response
     {
-        return $this->util->guardExDirect(function (Http\IOutput $out) {
+        return $this->util->guardExDirect(function (Http\IOutput $out): void {
             $out->setHeader('Content-Type: text/plain');
             $out->setHeader('X-Accel-Buffering: no');
             $out->setHeader('Cache-Control: no-cache');
@@ -283,7 +283,7 @@ final class AdminController extends ApiController
         // Reset action token
         $this->actionToken(true);
 
-        return $this->util->guardExDirect(function (Http\IOutput $out) {
+        return $this->util->guardExDirect(function (Http\IOutput $out): void {
             try {
                 // Set PHP timeout to infinite
                 set_time_limit(0);

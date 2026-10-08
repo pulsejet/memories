@@ -45,128 +45,109 @@
   </Modal>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { computed, ref, useTemplateRef, nextTick } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
 
 import Modal from './Modal.vue';
-import ModalMixin from './ModalMixin';
 import AlbumCollaborators from './AlbumCollaborators.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
-import * as utils from '@services/utils';
+import { useModal } from '@services/modal';
+import { t } from '@services/l10n';
+import { routeIs } from '@services/router';
+import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
-export default defineComponent({
+defineOptions({
   name: 'AlbumShareModal',
-  components: {
-    NcButton,
-    NcTextField,
-    Modal,
-    AlbumCollaborators,
-    XLoadingIcon,
-  },
-
-  mixins: [ModalMixin],
-
-  emits: [],
-
-  data: () => ({
-    album: null as any,
-    albumName: String(),
-    loadingAddCollaborators: false,
-    collaborators: [] as any[],
-  }),
-
-  computed: {
-    showEditFields() {
-      return this.album?.basename?.startsWith('.link-');
-    },
-  },
-
-  created() {
-    console.assert(!_m.modals.albumShare, 'AlbumShareModal created twice');
-    _m.modals.albumShare = this.open;
-  },
-
-  methods: {
-    refs() {
-      return this.$refs as {
-        collaborators?: InstanceType<typeof AlbumCollaborators>;
-      };
-    },
-
-    async open(user: string, name: string, link?: boolean) {
-      this.show = true;
-
-      // Load album info
-      try {
-        this.loadingAddCollaborators = true;
-        this.albumName = name;
-        this.album = await dav.getAlbum(user, name);
-      } catch {
-        showError(this.t('memories', 'Failed to load album info: {name}', { name }));
-      } finally {
-        this.loadingAddCollaborators = false;
-      }
-
-      // Check if we immediately want to share a link
-      if (link) {
-        await this.$nextTick(); // load collaborators component
-        this.refs().collaborators?.createPublicLinkForAlbum();
-      }
-    },
-
-    cleanup() {
-      this.show = false;
-      this.album = null;
-      this.albumName = String();
-    },
-
-    async save(collaborators: any[]) {
-      try {
-        this.loadingAddCollaborators = true;
-
-        // Update album collaborators
-        await dav.updateAlbum(this.album, {
-          albumName: this.album.basename,
-          properties: { collaborators },
-        });
-
-        // Update album name if changed
-        if (this.album.basename !== this.albumName) {
-          await dav.renameAlbum(this.album, this.album.basename, this.albumName);
-
-          // Change route to new album name if we're on album page
-          if (this.routeIsAlbums) {
-            // Do not await but proceed to close modal instantly
-            this.$router.replace({
-              name: this.$route.name!,
-              params: {
-                user: this.$route.params.user?.toString(),
-                name: this.albumName,
-              },
-            });
-          }
-        }
-
-        // Refresh timeline for metadata changes
-        utils.bus.emit('memories:timeline:soft-refresh', null);
-
-        // Close modal
-        await this.close();
-      } catch (error) {
-        console.error(error);
-      } finally {
-        this.loadingAddCollaborators = false;
-      }
-    },
-  },
 });
+
+const route = useRoute();
+const router = useRouter();
+const modal = useTemplateRef('modal');
+const { show, close } = useModal(modal);
+const collaborators = useTemplateRef<InstanceType<typeof AlbumCollaborators>>('collaborators');
+
+const album = ref<any>(null);
+const albumName = ref(String());
+const loadingAddCollaborators = ref(false);
+
+const showEditFields = computed(() => album.value?.basename?.startsWith('.link-'));
+
+console.assert(!_m.modals.albumShare, 'AlbumShareModal created twice');
+_m.modals.albumShare = open;
+
+async function open(user: string, name: string, link?: boolean) {
+  show.value = true;
+
+  // Load album info
+  try {
+    loadingAddCollaborators.value = true;
+    albumName.value = name;
+    album.value = await dav.getAlbum(user, name);
+  } catch {
+    showError(t('memories', 'Failed to load album info: {name}', { name }));
+  } finally {
+    loadingAddCollaborators.value = false;
+  }
+
+  // Check if we immediately want to share a link
+  if (link) {
+    await nextTick(); // load collaborators component
+    collaborators.value?.createPublicLinkForAlbum();
+  }
+}
+
+function cleanup() {
+  show.value = false;
+  album.value = null;
+  albumName.value = String();
+}
+
+async function save(collaboratorsIn: any[]) {
+  try {
+    loadingAddCollaborators.value = true;
+
+    // Update album collaborators
+    await dav.updateAlbum(album.value, {
+      albumName: album.value.basename,
+      properties: { collaborators: collaboratorsIn },
+    });
+
+    // Update album name if changed
+    if (album.value.basename !== albumName.value) {
+      await dav.renameAlbum(album.value, album.value.basename, albumName.value);
+
+      // Change route to new album name if we're on album page
+      if (routeIs.Albums) {
+        // Do not await but proceed to close modal instantly
+        router.replace({
+          name: route.name!,
+          params: {
+            user: route.params.user?.toString(),
+            name: albumName.value,
+          },
+        });
+      }
+    }
+
+    // Refresh timeline for metadata changes
+    utils.bus.emit('memories:timeline:soft-refresh', null);
+
+    // Close modal
+    await close();
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loadingAddCollaborators.value = false;
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -175,6 +156,6 @@ export default defineComponent({
 }
 
 span.field-title {
-  color: var(--color-text-lighter);
+  color: var(--color-text-maxcontrast);
 }
 </style>

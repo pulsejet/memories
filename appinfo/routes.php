@@ -63,6 +63,7 @@ return [
         ['name' => 'Image#multipreview', 'url' => '/api/image/multipreview', 'verb' => 'POST'],
         ['name' => 'Image#info', 'url' => '/api/image/info/{id}', 'verb' => 'GET'],
         ['name' => 'Image#setExif', 'url' => '/api/image/set-exif/{id}', 'verb' => 'PATCH'],
+        ['name' => 'Image#reindex', 'url' => '/api/image/reindex/{id}', 'verb' => 'POST'],
         ['name' => 'Image#decodable', 'url' => '/api/image/decodable/{id}', 'verb' => 'GET'],
         ['name' => 'Image#editImage', 'url' => '/api/image/edit/{id}', 'verb' => 'PUT'],
         ['name' => 'Image#deleteFile', 'url' => '/api/image/delete/{id}', 'verb' => 'DELETE'],
@@ -76,6 +77,7 @@ return [
         ['name' => 'Download#one', 'url' => '/api/stream/{fileid}', 'verb' => 'GET'],
 
         ['name' => 'Lens#file', 'url' => '/lens/file/{fileid}', 'verb' => 'GET', 'requirements' => ['fileid' => '\d+']],
+        ['name' => 'Lens#scan', 'url' => '/lens/scan', 'verb' => 'POST'],
         ['name' => 'Lens#search', 'url' => '/api/lens/search', 'verb' => 'GET'],
 
         ['name' => 'Share#links', 'url' => '/api/share/links', 'verb' => 'GET'],

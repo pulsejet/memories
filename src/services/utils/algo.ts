@@ -80,36 +80,6 @@ export function randomSubarray<T>(arr: T[], size: number): T[] {
   return shuffled.slice(min);
 }
 
-/**
- * Set a timer that renews if existing .
- *
- * @param ctx Context to store the timeout in
- * @param name Name of the timeout
- * @param callback Callback to call when the timeout expires
- * @param delay Delay in milliseconds
- * @param immediate If true, call the callback immediately if no timeout exists
- */
-export function setRenewingTimeout(
-  ctx: any,
-  name: string,
-  callback: (() => void) | null,
-  delay: number,
-  immediate?: boolean,
-): void {
-  // Call immediately if no timeout exists
-  if (immediate && !ctx[name]) {
-    callback?.();
-    callback = null;
-  }
-
-  // Clear existing timeout and set a new one
-  if (ctx[name]) window.clearTimeout(ctx[name]);
-  ctx[name] = window.setTimeout(() => {
-    ctx[name] = 0;
-    callback?.();
-  }, delay);
-}
-
 /** Checks if an object is numeric */
 export function isNumber<T>(num: T): boolean {
   const cast = Number(num);
@@ -136,4 +106,11 @@ export function humanFileSize(size: number): string {
   if (size === 0) return '0 B';
   const i = Math.floor(Math.log(size) / Math.log(1024));
   return `${(size / 1024 ** i).toFixed(2)} ${['B', 'kB', 'MB', 'GB', 'TB'][i]}`;
+}
+
+/**
+ * Remove the extension from a filename
+ */
+export function removeExtension(filename: string) {
+  return filename.replace(/\.[^/.]+$/, '');
 }

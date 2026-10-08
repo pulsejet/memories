@@ -32,8 +32,8 @@
   </component>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
 import NcCounterBubble from '@nextcloud/vue/components/NcCounterBubble';
 import XImg from '@components/frame/XImg.vue';
@@ -46,80 +46,69 @@ import * as dav from '@services/dav';
 
 import type { ICluster } from '@typings';
 
-export default defineComponent({
+defineOptions({
   name: 'Cluster',
-  components: {
-    NcCounterBubble,
-    XImg,
-  },
-
-  props: {
-    data: {
-      type: Object as PropType<ICluster>,
-      required: true,
-    },
-    link: {
-      type: Boolean,
-      default: true,
-    },
-    counters: {
-      type: Boolean,
-      default: true,
-    },
-  },
-
-  emits: {
-    click: (item: ICluster) => true,
-  },
-
-  computed: {
-    previewUrl() {
-      if (this.error) return errorsvg;
-      if (this.plus) return plussvg;
-      return dav.getClusterPreview(this.data);
-    },
-
-    title() {
-      return this.data.display_name || this.data.name;
-    },
-
-    subtitle() {
-      if (dav.clusterIs.album(this.data)) {
-        return dav.getAlbumSubtitle(this.data);
-      }
-
-      return String();
-    },
-
-    plus() {
-      return this.data.cluster_type === 'plus';
-    },
-
-    /** Target URL to navigate to */
-    target() {
-      if (!this.link || this.plus) return {};
-      return dav.getClusterLinkTarget(this.data);
-    },
-
-    error() {
-      return !!this.data.previewError || (dav.clusterIs.album(this.data) && this.data.last_added_photo <= 0);
-    },
-  },
-
-  methods: {
-    failed() {
-      (this.data as any).previewError = true;
-    },
-
-    click() {
-      this.$emit('click', this.data);
-    },
-
-    clickPreview() {
-      nativex.playTouchSound();
-    },
-  },
 });
+
+const props = withDefaults(
+  defineProps<{
+    data: ICluster;
+    link?: boolean;
+    counters?: boolean;
+  }>(),
+  {
+    link: true,
+    counters: true,
+  },
+);
+
+const emit = defineEmits<{
+  click: [item: ICluster];
+}>();
+
+const previewUrl = computed(() => {
+  if (error.value) return errorsvg;
+  if (plus.value) return plussvg;
+  return dav.getClusterPreview(props.data);
+});
+
+const title = computed(() => {
+  return props.data.display_name || props.data.name;
+});
+
+const subtitle = computed(() => {
+  if (dav.clusterIs.album(props.data)) {
+    return dav.getAlbumSubtitle(props.data);
+  }
+
+  return String();
+});
+
+const plus = computed(() => {
+  return props.data.cluster_type === 'plus';
+});
+
+/** Target URL to navigate to */
+const target = computed(() => {
+  if (!props.link || plus.value) return {};
+  return dav.getClusterLinkTarget(props.data);
+});
+
+const error = computed(() => {
+  return !!props.data.previewError || (dav.clusterIs.album(props.data) && props.data.last_added_photo <= 0);
+});
+
+function failed() {
+  (props.data as any).previewError = true;
+}
+
+function click() {
+  emit('click', props.data);
+}
+
+function clickPreview() {
+  nativex.playTouchSound();
+}
 </script>
 
 <style lang="scss" scoped>
@@ -160,6 +149,7 @@ $namemargin: 10px;
   // multiline ellipsis
   > .title {
     display: -webkit-box;
+    line-clamp: 5;
     -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -201,7 +191,7 @@ $namemargin: 10px;
     }
 
     > .subtitle {
-      color: var(--color-text-lighter);
+      color: var(--color-text-maxcontrast);
     }
   }
 

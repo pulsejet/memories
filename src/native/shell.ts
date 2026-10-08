@@ -1,13 +1,14 @@
+import { watch, type DeepReadonly } from 'vue';
+
 import { isRTL, register as registerTranslations, setLanguage, setLocale } from '@nextcloud/l10n';
 
-import staticConfig from '@services/static-config';
-import { bus } from '@services/utils/event-bus';
+import { config } from '@services/user-config';
 import { nativex } from './api';
 
 import type { IConfig } from '@typings';
 
 /** Apply the cached config, which is assumed to be correct. */
-export function applyShellConfig(cfg: IConfig) {
+export function applyShellConfig(cfg: DeepReadonly<IConfig>) {
   // Mirror of core/layout.user.php html attributes for the given language
   if (cfg.language) {
     setLanguage(cfg.language.replaceAll('_', '-'));
@@ -35,16 +36,11 @@ function registerPackedL10N(language: string): void {
  */
 export function initShellSync(): void {
   if (!nativex) return;
-  const cfg = staticConfig.getDefault();
-  applyShellConfig(cfg);
-  registerPackedL10N(cfg.language);
+  applyShellConfig(config);
+  registerPackedL10N(config.language);
 
   // Any change in language needs a full reload.
-  let appliedSnap = JSON.stringify([cfg.language, cfg.locale]);
-  bus.on('memories:user-config-changed', () => {
-    const fresh = staticConfig.getDefault();
-    const snap = JSON.stringify([fresh.language, fresh.locale]);
-    if (snap === appliedSnap) return;
+  watch([() => config.language, () => config.locale], () => {
     window.location.reload();
   });
 }

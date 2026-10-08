@@ -4,16 +4,11 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { t } from '@services/l10n';
 
-import { translate as t } from '@services/l10n';
-
-import AdminMixin from '../AdminMixin';
-
-export default defineComponent({
+defineOptions({
   name: 'Template',
   title: t('memories', 'Template'),
-  mixins: [AdminMixin],
 });
 </script>

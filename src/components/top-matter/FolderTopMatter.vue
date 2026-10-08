@@ -1,9 +1,9 @@
 <template>
   <div class="top-matter">
-    <NcBreadcrumbs :key="$route.path">
-      <NcBreadcrumb :name="rootFolderName" :to="getRoute([])" :force-icon-text="routeIsPublic">
+    <NcBreadcrumbs :key="route.path">
+      <NcBreadcrumb :name="rootFolderName" :to="getRoute([])" :force-icon-text="routeIs.Public">
         <template #icon>
-          <ShareIcon v-if="routeIsPublic" :size="20" />
+          <ShareIcon v-if="routeIs.Public" :size="20" />
           <HomeIcon v-else :size="20" />
         </template>
       </NcBreadcrumb>
@@ -16,7 +16,7 @@
 
       <NcActions :inline="3">
         <NcActionButton
-          v-if="!routeIsPublic"
+          v-if="!routeIs.Public"
           :aria-label="t('memories', 'Share folder')"
           @click="share()"
           close-after-click
@@ -26,7 +26,7 @@
         </NcActionButton>
 
         <NcActionButton
-          v-if="!routeIsPublic"
+          v-if="!routeIs.Public"
           :aria-label="t('memories', 'Upload files')"
           @click="upload()"
           close-after-click
@@ -39,8 +39,8 @@
         <NcActionButton
           v-if="allowPublicUpload"
           :aria-label="t('memories', 'Upload files')"
-          :disabled="uploadHandler()?.processing"
-          @click="uploadHandler()?.startUpload()"
+          :disabled="uploadHandler?.processing"
+          @click="uploadHandler?.startUpload()"
         >
           {{ t('memories', 'Upload files') }}
           <template #icon> <UploadIcon :size="20" /> </template>
@@ -58,10 +58,9 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-import UserConfig from '@mixins/UserConfig';
+<script setup lang="ts">
+import { computed, useTemplateRef } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import NcBreadcrumbs from '@nextcloud/vue/components/NcBreadcrumbs';
 import NcBreadcrumb from '@nextcloud/vue/components/NcBreadcrumb';
@@ -69,8 +68,11 @@ import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import PublicUploadHandler from '@components/upload/PublicUploadHandler.vue';
 
-import * as utils from '@services/utils';
-import * as nativex from '@native';
+import { t } from '@services/l10n';
+import { routeIs } from '@services/router';
+import { config } from '@services/user-config';
+import * as utils from '@services/utils/common';
+import initstate from '@services/init-state';
 
 import HomeIcon from 'vue-material-design-icons/Home.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
@@ -78,91 +80,70 @@ import TimelineIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import FoldersIcon from 'vue-material-design-icons/FolderMultiple.vue';
 import UploadIcon from 'vue-material-design-icons/Upload.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'FolderTopMatter',
-
-  components: {
-    NcBreadcrumbs,
-    NcBreadcrumb,
-    NcActions,
-    NcActionButton,
-    PublicUploadHandler,
-    HomeIcon,
-    ShareIcon,
-    TimelineIcon,
-    FoldersIcon,
-    UploadIcon,
-  },
-
-  mixins: [UserConfig],
-
-  computed: {
-    list(): {
-      text: string;
-      path: string[];
-      idx: number;
-    }[] {
-      let path: string[] | string = this.$route.params.path || '';
-      if (typeof path === 'string') {
-        path = path.split('/');
-      }
-
-      return path
-        .filter(Boolean) // non-empty
-        .map((text, idx, arr) => {
-          const path = arr.slice(0, idx + 1);
-          return { text, path, idx };
-        });
-    },
-
-    recursive(): boolean {
-      return !!this.$route.query.recursive;
-    },
-
-    rootFolderName(): string {
-      return this.routeIsPublic ? this.initstate.shareTitle : this.t('memories', 'Home');
-    },
-
-    isNative(): boolean {
-      return nativex.has();
-    },
-
-    allowPublicUpload(): boolean {
-      return this.routeIsPublic && this.initstate.allow_upload === true;
-    },
-  },
-
-  methods: {
-    share(): void {
-      _m.modals.shareNodeLink(utils.getFolderRoutePath(this.config.folders_path));
-    },
-
-    upload(): void {
-      _m.modals.upload();
-    },
-
-    toggleRecursive(): void {
-      this.$router.replace({
-        query: {
-          ...this.$router.currentRoute.value.query,
-          recursive: this.recursive ? undefined : String(1),
-        },
-      });
-    },
-
-    getRoute(path: string[]): object {
-      return {
-        name: this.$route.name,
-        params: { ...this.$route.params, path },
-        query: this.$route.query,
-      };
-    },
-
-    uploadHandler(): InstanceType<typeof PublicUploadHandler> | null {
-      return (this.$refs.uploadHandler as InstanceType<typeof PublicUploadHandler>) || null;
-    },
-  },
 });
+
+const route = useRoute();
+const router = useRouter();
+const uploadHandler = useTemplateRef<InstanceType<typeof PublicUploadHandler>>('uploadHandler');
+
+const list = computed(
+  (): {
+    text: string;
+    path: string[];
+    idx: number;
+  }[] => {
+    let path: string[] | string = route.params.path || '';
+    if (typeof path === 'string') {
+      path = path.split('/');
+    }
+
+    return path
+      .filter(Boolean) // non-empty
+      .map((text, idx, arr) => {
+        const path = arr.slice(0, idx + 1);
+        return { text, path, idx };
+      });
+  },
+);
+
+const recursive = computed((): boolean => {
+  return !!route.query.recursive;
+});
+
+const rootFolderName = computed((): string => {
+  return routeIs.Public ? initstate.shareTitle : t('memories', 'Home');
+});
+
+const allowPublicUpload = computed((): boolean => {
+  return routeIs.Public && initstate.allow_upload === true;
+});
+
+function share(): void {
+  _m.modals.shareNodeLink(utils.getFolderRoutePath(config.folders_path));
+}
+
+function upload(): void {
+  _m.modals.upload();
+}
+
+function toggleRecursive(): void {
+  router.replace({
+    query: {
+      ...router.currentRoute.value.query,
+      recursive: recursive.value ? undefined : String(1),
+    },
+  });
+}
+
+function getRoute(path: string[]): object {
+  return {
+    name: route.name,
+    params: { ...route.params, path },
+    query: route.query,
+  };
+}
 </script>
 
 <style lang="scss" scoped>

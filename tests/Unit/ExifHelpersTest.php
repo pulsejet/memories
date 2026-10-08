@@ -93,4 +93,16 @@ final class ExifHelpersTest extends TestCase
             Exif::EXIF_KEY_IMAGE_HEIGHT => 200000,
         ]));
     }
+
+    public function testGetPanoType(): void
+    {
+        self::assertSame(Exif::PANO_SPHERE, $this->exif->getPanoType(['ProjectionType' => 'equirectangular'], 4000, 2000));
+        self::assertSame(Exif::PANO_SPHERE, $this->exif->getPanoType(['ProjectionType' => 'cylindrical'], 4000, 2000));
+        self::assertSame(Exif::PANO_SPHERE, $this->exif->getPanoType(['ProjectionType' => ' Equirectangular '], 4000, 3000));
+        self::assertSame(Exif::PANO_SPHERE, $this->exif->getPanoType(['UsePanoramaViewer' => true], 4000, 3000));
+        self::assertSame(Exif::PANO_WIDE, $this->exif->getPanoType([], 4000, 2000));
+        self::assertSame(Exif::PANO_WIDE, $this->exif->getPanoType([], 6000, 3000));
+        self::assertSame(Exif::PANO_NONE, $this->exif->getPanoType([], 4000, 3000));
+        self::assertSame(Exif::PANO_NONE, $this->exif->getPanoType([], 0, 0));
+    }
 }

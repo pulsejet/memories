@@ -21,6 +21,52 @@ export function manifestPublicKey(): string {
   return der.subarray(-32).toString('base64');
 }
 
+export class ManifestPlugin {
+  private manifestFile: string;
+
+  constructor(manifestFile: string) {
+    this.manifestFile = manifestFile;
+  }
+
+  apply(compiler: any): void {
+    compiler.hooks.thisCompilation.tap('ManifestPlugin', (compilation: any) => {
+      // Must stay registered before ManifestSignPlugin (tap order).
+      compilation.hooks.afterProcessAssets.tap('ManifestPlugin', () => {
+        // Resolve public path prefix for hrefs.
+        let publicPath: string = compilation.outputOptions.publicPath ?? '';
+        if (publicPath && !publicPath.endsWith('/')) publicPath += '/';
+
+        // Hash every emitted JS file by content, including the Workbox
+        // service worker (fixed filename, no ?v=[contenthash]).
+        const manifest: Record<string, { hash: string; href: string }> = {};
+        for (const { name, source } of compilation.getAssets()) {
+          const m = /^(.*\.js)(\?.*)?$/.exec(name);
+          if (!m) continue;
+
+          // Hash the emitted source bytes directly.
+          const src = source.source();
+          const bytes = Buffer.isBuffer(src) ? src : Buffer.from(src as string, 'utf8');
+          const hash = nodeCrypto.createHash('sha256').update(bytes).digest('hex');
+
+          // Guard against webpack filenames drifting from content hashes.
+          if (m[2] && m[2] !== `?v=${hash}`) {
+            compilation.errors.push(new Error(`Manifest: content hash mismatch for ${name}`));
+            return;
+          }
+
+          manifest[m[1]] = { hash, href: `${publicPath}${m[1]}?v=${hash}` };
+        }
+
+        // Emit the manifest for signing.
+        compilation.emitAsset(
+          this.manifestFile,
+          new compiler.webpack.sources.RawSource(JSON.stringify(manifest, null, 2)),
+        );
+      });
+    });
+  }
+}
+
 export class ManifestSignPlugin {
   private manifestFile: string;
   private sigFile: string;
@@ -33,19 +79,20 @@ export class ManifestSignPlugin {
   apply(compiler: any): void {
     console.info('Manifest signing public key:', manifestPublicKey());
     compiler.hooks.thisCompilation.tap('ManifestSignPlugin', (compilation: any) => {
-      // afterProcessAssets: WebpackManifestPlugin emits at processAssets stage
-      // Infinity, so the manifest is only guaranteed to exist here.
+      // afterProcessAssets: ManifestPlugin emits at afterProcessAssets too
+      // but is registered first, so the manifest exists here.
       compilation.hooks.afterProcessAssets.tap('ManifestSignPlugin', () => {
+        // Read the emitted manifest.
         const asset = compilation.getAsset(this.manifestFile);
         if (!asset) return;
         const src = asset.source.source();
         const bytes = Buffer.isBuffer(src) ? src : Buffer.from(src as string, 'utf8');
+
+        // Sign the manifest bytes.
         const key = privateKey();
         const sig: Buffer = nodeCrypto.sign(null, bytes, key);
-        if (!nodeCrypto.verify(null, bytes, nodeCrypto.createPublicKey(key), sig)) {
-          compilation.errors.push(new Error('ManifestSignPlugin: self-verification of manifest signature failed'));
-          return;
-        }
+
+        // Emit the signature.
         compilation.emitAsset(
           this.sigFile,
           new compiler.webpack.sources.RawSource(JSON.stringify({ curve25519: sig.toString('base64') }, null, 2)),

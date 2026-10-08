@@ -43,6 +43,7 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Http\Client\IClientService;
 use OCP\IDBConnection;
 use OCP\IRequest;
+use OCP\Lock\LockedException;
 
 final class LensController extends ApiController
 {
@@ -61,7 +62,7 @@ final class LensController extends ApiController
     }
 
     /**
-     * Serve raw file bytes to the Lens service account by fileid.
+     * Serve file metadata and, for GET, raw bytes to the Lens service account.
      *
      * @param int $fileid file ID to serve
      */
@@ -74,17 +75,22 @@ final class LensController extends ApiController
             $this->serviceManager->guardLensServiceAccount();
             $file = $this->serviceManager->getServiceFile($fileid);
 
-            $handle = $file->fopen('rb');
-            if (false === $handle) {
-                throw new \Exception("Failed to open file {$fileid}");
+            $response = new Http\Response();
+            if ('HEAD' !== $this->request->getMethod()) {
+                $handle = $file->fopen('rb');
+                if (false === $handle) {
+                    throw new \Exception("Failed to open file {$fileid}");
+                }
+                $response = new StreamResponse($handle);
             }
 
-            $response = new StreamResponse($handle);
             $response->addHeader('Content-Type', $file->getMimeType());
 
             $meta = $this->getIndexMeta($fileid);
             $metadata = [
                 'etag' => $file->getEtag(),
+                'mtime' => $meta['mtime'],
+                'parent_id' => $meta['parent_id'],
                 'mimetype' => $file->getMimeType(),
                 'epoch' => $meta['epoch'],
                 'dayid' => $meta['dayid'],
@@ -96,6 +102,27 @@ final class LensController extends ApiController
             }
 
             return $response;
+        });
+    }
+
+    /**
+     * Allocate the next catalog batch for daemon reconciliation.
+     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
+    #[PublicPage]
+    public function scan(): Http\Response
+    {
+        return $this->util->guardEx(function () {
+            $this->serviceManager->guardLensServiceAccount();
+
+            try {
+                return new DataResponse($this->lensFolders->nextScanBatch());
+            } catch (LockedException) {
+                return new DataResponse([
+                    'message' => 'Lens scan is busy',
+                ], Http::STATUS_SERVICE_UNAVAILABLE, ['Retry-After' => '5']);
+            }
         });
     }
 
@@ -173,31 +200,34 @@ final class LensController extends ApiController
     }
 
     /**
-     * Epoch and dayid of a file from the memories table, nulls when unknown.
+     * Catalog revision/dates and current storage parent, independent of the service user's mounts.
      *
      * Best-effort: failures never break file serving.
      *
-     * @return array{epoch: ?int, dayid: ?int}
+     * @return array{epoch: ?int, dayid: ?int, parent_id: ?int, mtime: ?int}
      */
     private function getIndexMeta(int $fileid): array
     {
         try {
             $qb = $this->connection->getQueryBuilder();
-            $qb->select('epoch', 'dayid')
-                ->from('memories')
-                ->where($qb->expr()->eq('fileid', $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)))
+            $qb->select('m.epoch', 'm.dayid', 'm.mtime', 'f.parent')
+                ->from('filecache', 'f')
+                ->leftJoin('f', 'memories', 'm', $qb->expr()->eq('f.fileid', 'm.fileid'))
+                ->where($qb->expr()->eq('f.fileid', $qb->createNamedParameter($fileid, IQueryBuilder::PARAM_INT)))
             ;
             $row = $qb->executeQuery()->fetchAssociative();
             if (false !== $row) {
                 return [
                     'epoch' => isset($row['epoch']) ? (int) $row['epoch'] : null,
                     'dayid' => isset($row['dayid']) ? (int) $row['dayid'] : null,
+                    'parent_id' => (int) $row['parent'],
+                    'mtime' => isset($row['mtime']) ? (int) $row['mtime'] : null,
                 ];
             }
         } catch (\Throwable) {
         }
 
-        return ['epoch' => null, 'dayid' => null];
+        return ['epoch' => null, 'dayid' => null, 'parent_id' => null, 'mtime' => null];
     }
 
     /**

@@ -3,6 +3,7 @@
 import base64
 import logging
 from dataclasses import dataclass, replace
+from http.cookiejar import CookieJar
 
 import httpx
 import orjson
@@ -13,6 +14,7 @@ from config import config
 log = logging.getLogger("lens.nextcloud")
 
 TIMEOUT = 30.0
+cookie_jar = CookieJar()
 
 
 @dataclass(frozen=True)
@@ -33,6 +35,8 @@ class FileMetadata:
     epoch: int | None
     dayid: int | None
     places: list[Place]
+    mtime: int | None
+    parent_id: int | None
 
 
 @dataclass(frozen=True)
@@ -55,25 +59,36 @@ class NotFoundError(FetchError):
     """No such fileid (404)."""
 
 
-def fetch_file(fileid: int) -> FetchResult:
-    """Download raw file bytes plus validators for one fileid; raise on any failure."""
+def fetch_file(fileid: int, *, metadata_only: bool = False) -> FetchResult:
+    """Fetch file metadata via HEAD, or download bytes and metadata via GET."""
 
     url = f"{config.nextcloud_url}/index.php/apps/memories/lens/file/{fileid}"
+    method = "HEAD" if metadata_only else "GET"
 
-    with httpx.Client(timeout=TIMEOUT, auth=(config.nc_user, config.nc_token)) as client:
-        with client.stream("GET", url) as res:
+    with httpx.Client(
+        timeout=TIMEOUT,
+        auth=(config.nc_user, config.nc_token),
+        cookies=cookie_jar,
+    ) as client:
+        with client.stream(method, url) as res:
             if res.status_code == 401:
                 # Token expired/removed: loud, the runbook is re-issuing it.
                 log.error("lens service account rejected (401); re-issue via occ user:auth-tokens:add")
-                raise AuthError(f"GET {url} -> 401")
+                raise AuthError(f"{method} {url} -> 401")
 
             if res.status_code == 404:
-                raise NotFoundError(f"GET {url} -> 404")
+                raise NotFoundError(f"{method} {url} -> 404")
 
             if res.status_code != 200:
-                raise FetchError(f"GET {url} -> {res.status_code}")
+                raise FetchError(f"{method} {url} -> {res.status_code}")
 
-            metadata = parse_metadata(res.headers.get("x-memories-metadata", "") or "")
+            metadata = parse_metadata(res.headers.get("x-memories-metadata", ""))
+
+            if metadata_only:
+                if metadata.mtime is None or metadata.parent_id is None:
+                    raise FetchError(f"HEAD {url} -> missing file metadata")
+
+                return FetchResult(data=b"", metadata=metadata)
 
             chunks = []
 
@@ -103,4 +118,4 @@ def parse_metadata(value: str) -> FileMetadata:
             else:
                 return replace(meta, places=[p for p in meta.places if p.osm_id > 0 and p.name])
 
-    return FileMetadata(etag="", mimetype="", epoch=None, dayid=None, places=[])
+    return FileMetadata(etag="", mimetype="", epoch=None, dayid=None, places=[], mtime=None, parent_id=None)

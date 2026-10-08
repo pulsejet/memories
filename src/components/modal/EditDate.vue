@@ -18,7 +18,7 @@
         :placeholder="t('memories', 'Year')"
         :disabled="disabled"
         @input="newestChange()"
-        @keypress.enter="$emit('save')"
+        @keypress.enter="emit('save')"
       />
       <NcTextField
         class="field"
@@ -31,7 +31,7 @@
         :placeholder="t('memories', 'Month')"
         :disabled="disabled"
         @input="newestChange()"
-        @keypress.enter="$emit('save')"
+        @keypress.enter="emit('save')"
       />
       <NcTextField
         class="field"
@@ -44,7 +44,7 @@
         :placeholder="t('memories', 'Day')"
         :disabled="disabled"
         @input="newestChange()"
-        @keypress.enter="$emit('save')"
+        @keypress.enter="emit('save')"
       />
       <NcTextField
         class="field"
@@ -57,7 +57,7 @@
         :placeholder="t('memories', 'Hour')"
         :disabled="disabled"
         @input="newestChange(true)"
-        @keypress.enter="$emit('save')"
+        @keypress.enter="emit('save')"
       />
       <NcTextField
         class="field"
@@ -69,7 +69,7 @@
         :placeholder="t('memories', 'Minute')"
         :disabled="disabled"
         @input="newestChange(true)"
-        @keypress.enter="$emit('save')"
+        @keypress.enter="emit('save')"
       />
     </div>
 
@@ -92,7 +92,7 @@
           :placeholder="t('memories', 'Year')"
           :disabled="disabled"
           @input="oldestChange()"
-          @keypress.enter="$emit('save')"
+          @keypress.enter="emit('save')"
         />
         <NcTextField
           class="field"
@@ -105,7 +105,7 @@
           :placeholder="t('memories', 'Month')"
           :disabled="disabled"
           @input="oldestChange()"
-          @keypress.enter="$emit('save')"
+          @keypress.enter="emit('save')"
         />
         <NcTextField
           class="field"
@@ -118,7 +118,7 @@
           :placeholder="t('memories', 'Day')"
           :disabled="disabled"
           @input="oldestChange()"
-          @keypress.enter="$emit('save')"
+          @keypress.enter="emit('save')"
         />
         <NcTextField
           class="field"
@@ -131,7 +131,7 @@
           :placeholder="t('memories', 'Hour')"
           :disabled="disabled"
           @input="oldestChange()"
-          @keypress.enter="$emit('save')"
+          @keypress.enter="emit('save')"
         />
         <NcTextField
           class="field"
@@ -143,246 +143,213 @@
           :placeholder="t('memories', 'Minute')"
           :disabled="disabled"
           @input="oldestChange()"
-          @keypress.enter="$emit('save')"
+          @keypress.enter="emit('save')"
         />
       </div>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { computed, ref, onMounted, watch } from 'vue';
 
-const NcTextField = defineAsyncComponent(() => import('@nextcloud/vue/components/NcTextField'));
+import NcTextField from '@nextcloud/vue/components/NcTextField';
 
-import * as utils from '@services/utils';
+import { t } from '@services/l10n';
+import * as utils from '@services/utils/common';
 
 import type { IPhoto } from '@typings';
 
-export default defineComponent({
+defineOptions({
   name: 'EditDate',
-  components: {
-    NcTextField,
-  },
-
-  props: {
-    photos: {
-      type: Array<IPhoto>,
-      required: true,
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
-  },
-
-  emits: {
-    save: () => true,
-  },
-
-  data: () => ({
-    sortedPhotos: [] as IPhoto[],
-
-    year: '0',
-    month: '0',
-    day: '0',
-    hour: '0',
-    minute: '0',
-    second: '0',
-
-    yearLast: '0',
-    monthLast: '0',
-    dayLast: '0',
-    hourLast: '0',
-    minuteLast: '0',
-    secondLast: '0',
-
-    newestDirty: false,
-    oldestDirty: false,
-  }),
-
-  mounted() {
-    this.init();
-  },
-
-  watch: {
-    photos() {
-      this.init();
-    },
-  },
-
-  computed: {
-    date() {
-      return this.makeDate(this.year, this.month, this.day, this.hour, this.minute, this.second);
-    },
-
-    dateLast() {
-      return this.makeDate(
-        this.yearLast,
-        this.monthLast,
-        this.dayLast,
-        this.hourLast,
-        this.minuteLast,
-        this.secondLast,
-      );
-    },
-
-    dateDiff() {
-      return this.date && this.dateLast ? this.date.getTime() - this.dateLast.getTime() : 0;
-    },
-
-    origDateNewest() {
-      return new Date(this.sortedPhotos[0].datetaken! * 1000);
-    },
-
-    origDateOldest() {
-      return new Date(this.sortedPhotos.at(-1)!.datetaken! * 1000);
-    },
-
-    origDateDiff() {
-      return this.origDateNewest.getTime() - this.origDateOldest.getTime();
-    },
-
-    scaleFactor() {
-      return this.origDateDiff > 0 ? this.dateDiff / this.origDateDiff : 0;
-    },
-
-    longDateStr() {
-      return this.date ? utils.getLongDateStr(this.date, false, true) : this.t('memories', 'Invalid Date');
-    },
-
-    longDateStrLast() {
-      return this.dateLast ? utils.getLongDateStr(this.dateLast, false, true) : this.t('memories', 'Invalid Date');
-    },
-  },
-
-  methods: {
-    init() {
-      // Filter out only photos that have a datetaken
-      const photos = (this.sortedPhotos = this.photos.filter((photo) => photo.datetaken !== undefined));
-
-      // Sort photos by datetaken descending
-      photos.sort((a, b) => b.datetaken! - a.datetaken!);
-
-      // Get date of newest photo
-      let date = new Date(photos[0].datetaken! * 1000);
-      this.year = date.getUTCFullYear().toString();
-      this.month = (date.getUTCMonth() + 1).toString();
-      this.day = date.getUTCDate().toString();
-      this.hour = date.getUTCHours().toString();
-      this.minute = date.getUTCMinutes().toString();
-      this.second = date.getUTCSeconds().toString();
-
-      // Get date of oldest photo
-      if (photos.length > 1) {
-        date = new Date(photos.at(-1)!.datetaken! * 1000);
-        this.yearLast = date.getUTCFullYear().toString();
-        this.monthLast = (date.getUTCMonth() + 1).toString();
-        this.dayLast = date.getUTCDate().toString();
-        this.hourLast = date.getUTCHours().toString();
-        this.minuteLast = date.getUTCMinutes().toString();
-        this.secondLast = date.getUTCSeconds().toString();
-      }
-    },
-
-    validate() {
-      if (!this.date) {
-        throw new Error(this.t('memories', 'Invalid Date'));
-      }
-
-      if (this.photos.length > 1) {
-        if (!this.dateLast) {
-          throw new Error(this.t('memories', 'Invalid Date'));
-        }
-
-        if (this.dateDiff < -60000) {
-          // 1 minute
-          throw new Error(this.t('memories', 'Newest date is older than oldest date'));
-        }
-      }
-    },
-
-    result(photo: IPhoto): undefined | string {
-      if (!this.oldestDirty && !this.newestDirty) {
-        return undefined;
-      }
-
-      if (this.sortedPhotos.length === 0 || !this.date) {
-        return undefined;
-      }
-
-      if (this.sortedPhotos.length === 1) {
-        return utils.getExifDateStr(this.date);
-      }
-
-      // Interpolate date
-      const dT = this.date.getTime();
-      const doT = this.origDateNewest.getTime();
-      const offset = ((photo.datetaken ?? 0) * 1000 || doT) - doT;
-      return utils.getExifDateStr(new Date(dT + offset * this.scaleFactor));
-    },
-
-    newestChange(time = false) {
-      if (this.sortedPhotos.length === 0 || !this.date) {
-        return;
-      }
-
-      this.newestDirty = true;
-
-      // Set the last date to have the same offset to newest date
-      try {
-        const dateNew = this.date;
-        const offset = dateNew.getTime() - this.origDateNewest.getTime();
-        const dateLastNew = new Date(this.origDateOldest.getTime() + offset);
-
-        this.yearLast = dateLastNew.getUTCFullYear().toString();
-        this.monthLast = (dateLastNew.getUTCMonth() + 1).toString();
-        this.dayLast = dateLastNew.getUTCDate().toString();
-
-        if (time) {
-          this.hourLast = dateLastNew.getUTCHours().toString();
-          this.minuteLast = dateLastNew.getUTCMinutes().toString();
-          this.secondLast = dateLastNew.getUTCSeconds().toString();
-        }
-      } catch (error) {}
-    },
-
-    oldestChange() {
-      this.oldestDirty = true;
-    },
-
-    makeDate(yearS: string, monthS: string, dayS: string, hourS: string, minuteS: string, secondS: string) {
-      const year = parseInt(yearS, 10);
-      const month = parseInt(monthS, 10) - 1;
-      const day = parseInt(dayS, 10);
-      const hour = parseInt(hourS, 10);
-      const minute = parseInt(minuteS, 10);
-      let second = parseInt(secondS, 10) || 0; // needs validation
-
-      if (isNaN(year)) return null;
-      if (isNaN(month)) return null;
-      if (isNaN(day)) return null;
-      if (isNaN(hour)) return null;
-      if (isNaN(minute)) return null;
-      if (isNaN(second)) return null;
-
-      // Validate date
-      if (year < 0 || year > 5000) return null;
-      if (month < 0 || month > 11) return null;
-
-      // Number of days in month
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      if (day < 1 || day > daysInMonth) return null;
-
-      // Validate time
-      if (hour < 0 || hour > 23) return null;
-      if (minute < 0 || minute > 59) return null;
-      if (second < 0 || second > 59) second = 0;
-
-      return new Date(Date.UTC(year, month, day, hour, minute, second));
-    },
-  },
 });
+
+const props = defineProps<{
+  photos: IPhoto[];
+  disabled?: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'save'): void;
+}>();
+
+const sortedPhotos = ref<IPhoto[]>([]);
+
+const year = ref('0');
+const month = ref('0');
+const day = ref('0');
+const hour = ref('0');
+const minute = ref('0');
+const second = ref('0');
+
+const yearLast = ref('0');
+const monthLast = ref('0');
+const dayLast = ref('0');
+const hourLast = ref('0');
+const minuteLast = ref('0');
+const secondLast = ref('0');
+
+const newestDirty = ref(false);
+const oldestDirty = ref(false);
+
+const date = computed(() => makeDate(year.value, month.value, day.value, hour.value, minute.value, second.value));
+
+const dateLast = computed(() =>
+  makeDate(yearLast.value, monthLast.value, dayLast.value, hourLast.value, minuteLast.value, secondLast.value),
+);
+
+const dateDiff = computed(() => (date.value && dateLast.value ? date.value.getTime() - dateLast.value.getTime() : 0));
+
+const origDateNewest = computed(() => new Date(sortedPhotos.value[0].datetaken! * 1000));
+const origDateOldest = computed(() => new Date(sortedPhotos.value.at(-1)!.datetaken! * 1000));
+const origDateDiff = computed(() => origDateNewest.value.getTime() - origDateOldest.value.getTime());
+const scaleFactor = computed(() => (origDateDiff.value > 0 ? dateDiff.value / origDateDiff.value : 0));
+
+const longDateStr = computed(() =>
+  date.value ? utils.getLongDateStr(date.value, false, true) : t('memories', 'Invalid Date'),
+);
+
+const longDateStrLast = computed(() =>
+  dateLast.value ? utils.getLongDateStr(dateLast.value, false, true) : t('memories', 'Invalid Date'),
+);
+
+onMounted(() => {
+  init();
+});
+
+watch(
+  () => props.photos,
+  () => {
+    init();
+  },
+);
+
+function init() {
+  // Filter out only photos that have a datetaken
+  const photos = (sortedPhotos.value = props.photos.filter((photo) => photo.datetaken !== undefined));
+
+  // Sort photos by datetaken descending
+  photos.sort((a, b) => b.datetaken! - a.datetaken!);
+
+  // Get date of newest photo
+  let date = new Date(photos[0].datetaken! * 1000);
+  year.value = date.getUTCFullYear().toString();
+  month.value = (date.getUTCMonth() + 1).toString();
+  day.value = date.getUTCDate().toString();
+  hour.value = date.getUTCHours().toString();
+  minute.value = date.getUTCMinutes().toString();
+  second.value = date.getUTCSeconds().toString();
+
+  // Get date of oldest photo
+  if (photos.length > 1) {
+    date = new Date(photos.at(-1)!.datetaken! * 1000);
+    yearLast.value = date.getUTCFullYear().toString();
+    monthLast.value = (date.getUTCMonth() + 1).toString();
+    dayLast.value = date.getUTCDate().toString();
+    hourLast.value = date.getUTCHours().toString();
+    minuteLast.value = date.getUTCMinutes().toString();
+    secondLast.value = date.getUTCSeconds().toString();
+  }
+}
+
+function validate() {
+  if (!date.value) {
+    throw new Error(t('memories', 'Invalid Date'));
+  }
+
+  if (props.photos.length > 1) {
+    if (!dateLast.value) {
+      throw new Error(t('memories', 'Invalid Date'));
+    }
+
+    if (dateDiff.value < -60000) {
+      // 1 minute
+      throw new Error(t('memories', 'Newest date is older than oldest date'));
+    }
+  }
+}
+
+function result(photo: IPhoto): undefined | string {
+  if (!oldestDirty.value && !newestDirty.value) {
+    return undefined;
+  }
+
+  if (sortedPhotos.value.length === 0 || !date.value) {
+    return undefined;
+  }
+
+  if (sortedPhotos.value.length === 1) {
+    return utils.getExifDateStr(date.value);
+  }
+
+  // Interpolate date
+  const dT = date.value.getTime();
+  const doT = origDateNewest.value.getTime();
+  const offset = ((photo.datetaken ?? 0) * 1000 || doT) - doT;
+  return utils.getExifDateStr(new Date(dT + offset * scaleFactor.value));
+}
+
+function newestChange(time = false) {
+  if (sortedPhotos.value.length === 0 || !date.value) {
+    return;
+  }
+
+  newestDirty.value = true;
+
+  // Set the last date to have the same offset to newest date
+  try {
+    const dateNew = date.value;
+    const offset = dateNew.getTime() - origDateNewest.value.getTime();
+    const dateLastNew = new Date(origDateOldest.value.getTime() + offset);
+
+    yearLast.value = dateLastNew.getUTCFullYear().toString();
+    monthLast.value = (dateLastNew.getUTCMonth() + 1).toString();
+    dayLast.value = dateLastNew.getUTCDate().toString();
+
+    if (time) {
+      hourLast.value = dateLastNew.getUTCHours().toString();
+      minuteLast.value = dateLastNew.getUTCMinutes().toString();
+      secondLast.value = dateLastNew.getUTCSeconds().toString();
+    }
+  } catch (error) {}
+}
+
+function oldestChange() {
+  oldestDirty.value = true;
+}
+
+function makeDate(yearS: string, monthS: string, dayS: string, hourS: string, minuteS: string, secondS: string) {
+  const year = parseInt(yearS, 10);
+  const month = parseInt(monthS, 10) - 1;
+  const day = parseInt(dayS, 10);
+  const hour = parseInt(hourS, 10);
+  const minute = parseInt(minuteS, 10);
+  let second = parseInt(secondS, 10) || 0; // needs validation
+
+  if (isNaN(year)) return null;
+  if (isNaN(month)) return null;
+  if (isNaN(day)) return null;
+  if (isNaN(hour)) return null;
+  if (isNaN(minute)) return null;
+  if (isNaN(second)) return null;
+
+  // Validate date
+  if (year < 0 || year > 5000) return null;
+  if (month < 0 || month > 11) return null;
+
+  // Number of days in month
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  if (day < 1 || day > daysInMonth) return null;
+
+  // Validate time
+  if (hour < 0 || hour > 23) return null;
+  if (minute < 0 || minute > 59) return null;
+  if (second < 0 || second > 59) second = 0;
+
+  return new Date(Date.UTC(year, month, day, hour, minute, second));
+}
+
+defineExpose({ validate, result });
 </script>
 
 <style scoped lang="scss">

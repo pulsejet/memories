@@ -1,14 +1,14 @@
-import config from '../static-config';
-import { uid } from './helpers';
+import { config } from '@services/user-config';
+import { uid } from '@services/utils/auth';
 
 /** Cache keys */
 function getCacheName() {
-  const ver = config.getSync('version');
+  const ver = config.version;
   return `memories-data-${ver}-${uid}`;
 }
 
-// Clear all caches except the current one
-(async function clearCaches() {
+// Clear all caches except the current one.
+window.queueMicrotask(async () => {
   if (!uid) return;
 
   const keys = await window.caches?.keys();
@@ -21,7 +21,7 @@ function getCacheName() {
       window.caches.delete(key);
     }
   }
-})();
+});
 
 /** Singleton cache instance */
 let staticCache: Cache | null = null;

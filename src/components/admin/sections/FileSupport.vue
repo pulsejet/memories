@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-section">
+  <div v-if="systemConfig" class="admin-section">
     <h2>{{ $options.title }}</h2>
 
     {{ t('memories', 'You can configure the enabled Nextcloud preview providers below.') }}
@@ -66,7 +66,7 @@
       class="preview-box"
       v-for="size in previewSizes"
       :key="size"
-      :model-value="String(config['preview_max_x'])"
+      :model-value="String(systemConfig['preview_max_x'])"
       :value="String(size)"
       name="previewsize_radio"
       type="radio"
@@ -79,7 +79,7 @@
       placeholder="1024"
       :label="t('memories', 'Max memory for preview generation (MB)')"
       :label-visible="true"
-      :model-value="String(config['preview_max_memory'])"
+      :model-value="String(systemConfig['preview_max_memory'])"
       @change="update('preview_max_memory', Number($event.target.value))"
     />
 
@@ -88,74 +88,74 @@
       placeholder="50"
       :label="t('memories', 'Max size of file to generate previews for (MB)')"
       :label-visible="true"
-      :model-value="String(config['preview_max_filesize_image'])"
+      :model-value="String(systemConfig['preview_max_filesize_image'])"
       @change="update('preview_max_filesize_image', Number($event.target.value))"
     />
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import NcTextField from '@nextcloud/vue/components/NcTextField';
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch';
 
-import { translate as t } from '@services/l10n';
+import { t } from '@services/l10n';
 
-import AdminMixin from '../AdminMixin';
+import { useAdminContext } from '../admin-context';
+import { binaryStatus, binaryStatusOk, binaryStatusType } from '../admin-utils';
 
-export default defineComponent({
+defineOptions({
   name: 'FileSupport',
   title: t('memories', 'File Support'),
-  mixins: [AdminMixin],
-
-  data: () => ({
-    knownPreviewProviders: {
-      'OC\\Preview\\Image': {
-        name: t('memories', 'Images (JPEG, PNG, GIF, BMP)'),
-      },
-      'OC\\Preview\\HEIC': {
-        name: t('memories', 'HEIC (Imagick)'),
-      },
-      'OC\\Preview\\TIFF': {
-        name: t('memories', 'TIFF (Imagick)'),
-      },
-      'OC\\Preview\\Movie': {
-        name: t('memories', 'Videos (ffmpeg)'),
-      },
-      'OC\\Preview\\Imaginary': {
-        name: t('memories', 'Imaginary (not recommended)'),
-      },
-    },
-
-    previewSizes: [512, 1024, 2048, 4096, 8192],
-  }),
-
-  methods: {
-    providers() {
-      return this.config['enabledPreviewProviders'];
-    },
-
-    hasProvider(klass: string): boolean {
-      return this.providers().includes(klass);
-    },
-
-    updateProvider(klass: string, enabled: boolean) {
-      if (enabled === this.hasProvider(klass)) return;
-
-      if (enabled) {
-        this.providers().push(klass);
-      } else {
-        this.config['enabledPreviewProviders'] = this.providers().filter((k) => k !== klass);
-      }
-
-      this.update('enabledPreviewProviders');
-    },
-
-    async updatePreviewSize(size: number | string) {
-      this.update('preview_max_x', Number(size));
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Hack to prevent config race
-      this.update('preview_max_y', Number(size));
-    },
-  },
 });
+
+const { status, systemConfig, update } = useAdminContext();
+
+const knownPreviewProviders = {
+  'OC\\Preview\\Image': {
+    name: t('memories', 'Images (JPEG, PNG, GIF, BMP)'),
+  },
+  'OC\\Preview\\HEIC': {
+    name: t('memories', 'HEIC (Imagick)'),
+  },
+  'OC\\Preview\\TIFF': {
+    name: t('memories', 'TIFF (Imagick)'),
+  },
+  'OC\\Preview\\Movie': {
+    name: t('memories', 'Videos (ffmpeg)'),
+  },
+  'OC\\Preview\\Imaginary': {
+    name: t('memories', 'Imaginary (not recommended)'),
+  },
+};
+
+const previewSizes = [512, 1024, 2048, 4096, 8192];
+
+function providers() {
+  return systemConfig.value?.['enabledPreviewProviders'] ?? [];
+}
+
+function hasProvider(klass: string): boolean {
+  return providers().includes(klass);
+}
+
+function updateProvider(klass: string, enabled: boolean) {
+  if (!systemConfig.value || enabled === hasProvider(klass)) return;
+
+  if (enabled) {
+    providers().push(klass);
+  } else {
+    systemConfig.value['enabledPreviewProviders'] = providers().filter((k) => k !== klass);
+  }
+
+  update('enabledPreviewProviders');
+}
+
+async function updatePreviewSize(size: number | string) {
+  update('preview_max_x', Number(size));
+  await new Promise((resolve) => setTimeout(resolve, 1000)); // Hack to prevent config race
+  update('preview_max_y', Number(size));
+}
 </script>
 
 <style lang="scss" scoped>

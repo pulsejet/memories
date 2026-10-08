@@ -46,8 +46,9 @@ trait TimelineQueryDays
         ;
 
         // Group and sort by dayid
+        $order = $reverse ? 'ASC' : 'DESC';
         $query->addGroupBy('m.dayid')
-            ->addOrderBy('m.dayid', 'DESC')
+            ->addOrderBy('m.dayid', $order)
         ;
 
         // Apply all transformations
@@ -62,14 +63,7 @@ trait TimelineQueryDays
         $rows = $this->executeQueryWithCTEs($query)->fetchAllAssociative();
 
         // Post process the days
-        $rows = $this->postProcessDays($rows, $monthView);
-
-        // Reverse order if needed
-        if ($reverse) {
-            $rows = array_reverse($rows);
-        }
-
-        return $rows;
+        return $this->postProcessDays($rows, $monthView);
     }
 
     /**
@@ -112,6 +106,7 @@ trait TimelineQueryDays
             ->selectAlias('m.h', 'h')
             ->selectAlias('m.liveid', 'liveid')
             ->selectAlias('m.isvideo', 'isvideo')
+            ->selectAlias('m.pano', 'pano')
             ->selectAlias('m.video_duration', 'video_duration')
             ->selectAlias('f.etag', 'etag')
             ->selectAlias('f.name', 'basename')
@@ -152,9 +147,10 @@ trait TimelineQueryDays
         $this->addFavoriteTag($query);
 
         // Group and sort by date taken
-        $query->addOrderBy('m.datetaken', 'DESC');
-        $query->addOrderBy('basename', 'DESC'); // https://github.com/pulsejet/memories/issues/985
-        $query->addOrderBy('m.fileid', 'DESC'); // unique tie-breaker
+        $order = $reverse ? 'ASC' : 'DESC';
+        $query->addOrderBy('m.datetaken', $order);
+        $query->addOrderBy('basename', $order); // https://github.com/pulsejet/memories/issues/985
+        $query->addOrderBy('m.fileid', $order); // unique tie-breaker
 
         // Apply all transformations
         foreach ($queryTransforms as $transform) {
@@ -180,11 +176,6 @@ trait TimelineQueryDays
         // Post process the day in-place
         foreach ($day as &$photo) {
             $this->postProcessDayPhoto($photo, $monthView);
-        }
-
-        // Reverse order if needed
-        if ($reverse) {
-            $day = array_reverse($day);
         }
 
         return $day;
@@ -314,6 +305,7 @@ trait TimelineQueryDays
         $row['dayid'] = (int) $row['dayid'];
         $row['w'] = (int) $row['w'];
         $row['h'] = (int) $row['h'];
+        $row['pano'] = (int) ($row['pano'] ?? 0);
         $row['size'] = (int) $row['size'];
 
         // Optional fields
@@ -322,6 +314,9 @@ trait TimelineQueryDays
         }
         if (!$row['liveid']) {
             unset($row['liveid']);
+        }
+        if (!$row['pano']) {
+            unset($row['pano']);
         }
 
         // Favorite field, may not be present
@@ -343,6 +338,7 @@ trait TimelineQueryDays
         unset($row['datetaken']);
         // Convert dayId to monthId if needed
         if ($monthView) {
+            $row['dayid_real'] = $row['dayid'];
             $row['dayid'] = $this->dayIdToMonthId($row['dayid']);
         }
 

@@ -1,6 +1,6 @@
 <template>
   <NcButton
-    v-if="isMobile"
+    v-if="windowDims.isMobile"
     class="memories-menu-item search-menu"
     variant="tertiary-no-background"
     :title="t('memories', 'Search')"
@@ -13,37 +13,17 @@
   <Searchbar v-else />
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script setup lang="ts">
 import NcButton from '@nextcloud/vue/components/NcButton';
 
 import Searchbar from '@components/header/Searchbar.vue';
 
-import * as utils from '@services/utils';
+import { windowDims } from '@services/viewport';
+import { t } from '@services/l10n';
 
 import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 
-export default defineComponent({
-  name: 'SearchbarMenuItem',
-  components: {
-    NcButton,
-    Searchbar,
-    MagnifyIcon,
-  },
-
-  data: () => ({
-    isMobile: utils.isMobile(),
-  }),
-
-  mounted() {
-    utils.bus.on('memories:window:resize', () => (this.isMobile = utils.isMobile()));
-  },
-
-  methods: {
-    search() {
-      _m.modals.search();
-    },
-  },
-});
+function search() {
+  _m.modals.search();
+}
 </script>

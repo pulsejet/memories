@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-section">
+  <div v-if="systemConfig" class="admin-section">
     <h2>{{ $options.title }}</h2>
 
     <template v-if="status">
@@ -56,7 +56,7 @@
         )
       }}
       <NcCheckboxRadioSwitch
-        v-model="config['memories.index.mode']"
+        v-model="systemConfig['memories.index.mode']"
         value="1"
         name="idxm_radio"
         type="radio"
@@ -64,7 +64,7 @@
         >{{ t('memories', 'Index all media automatically (recommended)') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
-        v-model="config['memories.index.mode']"
+        v-model="systemConfig['memories.index.mode']"
         value="2"
         name="idxm_radio"
         type="radio"
@@ -72,7 +72,7 @@
         >{{ t('memories', 'Index per-user timeline folders (not recommended)') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
-        v-model="config['memories.index.mode']"
+        v-model="systemConfig['memories.index.mode']"
         value="3"
         name="idxm_radio"
         type="radio"
@@ -80,7 +80,7 @@
         >{{ t('memories', 'Index a fixed relative path') }}
       </NcCheckboxRadioSwitch>
       <NcCheckboxRadioSwitch
-        v-model="config['memories.index.mode']"
+        v-model="systemConfig['memories.index.mode']"
         value="0"
         name="idxm_radio"
         type="radio"
@@ -91,9 +91,9 @@
       <NcTextField
         :label="t('memories', 'Indexing path (relative, all users)')"
         :label-visible="true"
-        :model-value="config['memories.index.path']"
+        :model-value="systemConfig['memories.index.path']"
         @change="update('memories.index.path', $event.target.value)"
-        v-if="config['memories.index.mode'] === '3'"
+        v-if="systemConfig['memories.index.mode'] === '3'"
       />
     </div>
 
@@ -137,33 +137,35 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
-import { translate as t } from '@services/l10n';
+import NcTextField from '@nextcloud/vue/components/NcTextField';
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch';
+
+import { t } from '@services/l10n';
 import { API } from '@services/API';
 
-import AdminMixin from '../AdminMixin';
+import { useAdminContext } from '../admin-context';
 
-export default defineComponent({
+defineOptions({
   name: 'Indexing',
   title: t('memories', 'Media Indexing'),
-  mixins: [AdminMixin],
+});
 
-  data: () => ({ API }),
+const { status, systemConfig, update } = useAdminContext();
 
-  computed: {
-    blocklistText: {
-      get(): string {
-        return (this.config['memories.index.folder.blocklist'] ?? []).join(', ');
-      },
-      set(value: string) {
-        this.config['memories.index.folder.blocklist'] = value
-          .split(',')
-          .map((s) => s.trim())
-          .filter((s) => s !== '');
-      },
-    },
+const blocklistText = computed({
+  get(): string {
+    return (systemConfig.value?.['memories.index.folder.blocklist'] ?? []).join(', ');
+  },
+  set(value: string) {
+    if (!systemConfig.value) return;
+    systemConfig.value['memories.index.folder.blocklist'] = value
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s !== '');
   },
 });
 </script>

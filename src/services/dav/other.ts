@@ -1,6 +1,6 @@
 import { getFiles } from './base';
 import { generateUrl } from '@nextcloud/router';
-import { showError, showSuccess } from '@nextcloud/dialogs';
+import { showError, showSuccess } from '@services/utils/dialog';
 import axios from '@nextcloud/axios';
 
 import { API } from '@services/API';
@@ -53,7 +53,8 @@ export async function setClusterCover(photo: IPhoto): Promise<boolean> {
   const { fileid } = photo;
   let { user, name } = _m.route.params;
 
-  if ([_m.routes.Recognize.name, _m.routes.Albums.name].includes(_m.route.name ?? String())) {
+  const routeName = _m.route.name?.toString();
+  if (routeName === _m.routes.Recognize.name || routeName === _m.routes.Albums.name) {
     name = `${user}/${name}`;
   }
 

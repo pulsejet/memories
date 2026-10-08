@@ -61,24 +61,24 @@
   </Modal>
 </template>
 
-<script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+<script setup lang="ts">
+import { computed, ref, useTemplateRef, defineAsyncComponent } from 'vue';
 
 import axios from '@nextcloud/axios';
-import { showError, showSuccess } from '@nextcloud/dialogs';
+import { showError, showSuccess } from '@services/utils/dialog';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
-const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
-
-import UserConfig from '@mixins/UserConfig';
+const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
 
 import Modal from './Modal.vue';
-import ModalMixin from './ModalMixin';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
+import { useModal } from '@services/modal';
+import { t } from '@services/l10n';
+import { windowDims } from '@services/viewport';
 import { API } from '@services/API';
-import * as utils from '@services/utils';
+import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 
 import type { IShare } from '@typings';
@@ -86,159 +86,135 @@ import type { IShare } from '@typings';
 import CloseIcon from 'vue-material-design-icons/Close.vue';
 import LinkIcon from 'vue-material-design-icons/LinkVariant.vue';
 
-export default defineComponent({
+defineOptions({
   name: 'NodeShareModal',
-  components: {
-    Modal,
-    NcButton,
-    NcListItem,
-    NcActionButton,
-    XLoadingIcon,
-
-    CloseIcon,
-    LinkIcon,
-  },
-
-  mixins: [UserConfig, ModalMixin],
-
-  emits: [],
-
-  data: () => ({
-    filename: '',
-    loading: false,
-    shares: [] as IShare[],
-  }),
-
-  computed: {
-    isRoot(): boolean {
-      return this.filename === '/' || this.filename === '';
-    },
-
-    sidebar() {
-      return !this.isRoot && !utils.isMobile() ? this.filename : null;
-    },
-  },
-
-  created() {
-    console.assert(!_m.modals.shareNodeLink, 'NodeShareModal created twice');
-    _m.modals.shareNodeLink = this.open;
-  },
-
-  methods: {
-    async open(path: string, immediate?: boolean) {
-      this.filename = path;
-      this.show = true;
-      this.shares = [];
-      _m.sidebar.setTab('sharing');
-
-      // Get current shares
-      await this.refreshUrls();
-
-      // Immediate sharing
-      // If an existing share is found, just share it directly if it's
-      // not password protected. Otherwise create a new share.
-      if (immediate) {
-        // create a new share if none exists
-        if (this.shares.length === 0) {
-          await this.createLink();
-        } else {
-          // find share with no password
-          const share = this.shares.find((s) => !s.hasPassword);
-          if (share) this.shareOrCopy(share.url);
-        }
-      }
-    },
-
-    async shareOrCopy(url: string) {
-      if (nativex.has()) {
-        return await nativex.shareUrl(url);
-      }
-
-      await this.copy(url);
-      await window.navigator?.share?.({ title: this.filename, url: url });
-    },
-
-    cleanup() {
-      this.show = false;
-    },
-
-    async refreshUrls() {
-      this.loading = true;
-      try {
-        this.shares = (await axios.get(API.Q(API.SHARE_LINKS(), { path: this.filename }))).data;
-      } catch (e) {
-        this.shares = [];
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    getShareLabels(share: IShare): string {
-      const labels: string[] = [];
-      if (share.hasPassword) {
-        labels.push(this.t('memories', 'Password protected'));
-      }
-
-      if (share.expiration) {
-        const exp = utils.getLongDateStr(new Date(share.expiration * 1000));
-        const kw = this.t('memories', 'Expires');
-        labels.push(`${kw} ${exp}`);
-      }
-
-      if (share.editable) {
-        labels.push(this.t('memories', 'Editable'));
-      }
-
-      if (labels.length > 0) {
-        return `${labels.join(', ')}`;
-      }
-
-      return this.t('memories', 'Read only');
-    },
-
-    async createLink(): Promise<IShare> {
-      this.loading = true;
-      try {
-        const res = await axios.post<IShare>(API.SHARE_NODE(), {
-          path: this.filename,
-        });
-        const share = res.data;
-        this.shares.push(share);
-        this.refreshSidebar();
-        this.shareOrCopy(share.url);
-        return share;
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    async deleteLink(share: IShare) {
-      this.loading = true;
-      try {
-        await axios.post(API.SHARE_DELETE(), { id: share.id });
-      } finally {
-        this.loading = false;
-      }
-      this.refreshUrls();
-      this.refreshSidebar();
-    },
-
-    async copy(url: string) {
-      try {
-        await window.navigator.clipboard.writeText(url);
-        showSuccess(this.t('memories', 'Link copied to clipboard'));
-      } catch (e) {
-        showError(this.t('memories', 'Failed to copy link to clipboard'));
-      }
-    },
-
-    refreshSidebar() {
-      if (utils.isMobile()) return;
-      _m.sidebar.close();
-      _m.sidebar.open(0, this.filename, true);
-    },
-  },
 });
+
+const modal = useTemplateRef('modal');
+const { show, close } = useModal(modal);
+
+const filename = ref('');
+const loading = ref(false);
+const shares = ref<IShare[]>([]);
+
+const isRoot = computed(() => filename.value === '/' || filename.value === '');
+const sidebar = computed(() => (!isRoot.value && !windowDims.isMobile ? filename.value : null));
+
+console.assert(!_m.modals.shareNodeLink, 'NodeShareModal created twice');
+_m.modals.shareNodeLink = open;
+
+async function open(path: string, immediate?: boolean) {
+  filename.value = path;
+  show.value = true;
+  shares.value = [];
+  _m.sidebar.setTab('sharing');
+
+  // Get current shares
+  await refreshUrls();
+
+  // Immediate sharing
+  // If an existing share is found, just share it directly if it's
+  // not password protected. Otherwise create a new share.
+  if (immediate) {
+    // create a new share if none exists
+    if (shares.value.length === 0) {
+      await createLink();
+    } else {
+      // find share with no password
+      const share = shares.value.find((s) => !s.hasPassword);
+      if (share) shareOrCopy(share.url);
+    }
+  }
+}
+
+async function shareOrCopy(url: string) {
+  if (nativex.has()) {
+    return await nativex.shareUrl(url);
+  }
+
+  await copy(url);
+  await window.navigator?.share?.({ title: filename.value, url: url });
+}
+
+function cleanup() {
+  show.value = false;
+}
+
+async function refreshUrls() {
+  loading.value = true;
+  try {
+    shares.value = (await axios.get(API.Q(API.SHARE_LINKS(), { path: filename.value }))).data;
+  } catch (e) {
+    shares.value = [];
+  } finally {
+    loading.value = false;
+  }
+}
+
+function getShareLabels(share: IShare): string {
+  const labels: string[] = [];
+  if (share.hasPassword) {
+    labels.push(t('memories', 'Password protected'));
+  }
+
+  if (share.expiration) {
+    const exp = utils.getLongDateStr(new Date(share.expiration * 1000));
+    const kw = t('memories', 'Expires');
+    labels.push(`${kw} ${exp}`);
+  }
+
+  if (share.editable) {
+    labels.push(t('memories', 'Editable'));
+  }
+
+  if (labels.length > 0) {
+    return `${labels.join(', ')}`;
+  }
+
+  return t('memories', 'Read only');
+}
+
+async function createLink(): Promise<IShare> {
+  loading.value = true;
+  try {
+    const res = await axios.post<IShare>(API.SHARE_NODE(), {
+      path: filename.value,
+    });
+    const share = res.data;
+    shares.value.push(share);
+    refreshSidebar();
+    shareOrCopy(share.url);
+    return share;
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function deleteLink(share: IShare) {
+  loading.value = true;
+  try {
+    await axios.post(API.SHARE_DELETE(), { id: share.id });
+  } finally {
+    loading.value = false;
+  }
+  refreshUrls();
+  refreshSidebar();
+}
+
+async function copy(url: string) {
+  try {
+    await window.navigator.clipboard.writeText(url);
+    showSuccess(t('memories', 'Link copied to clipboard'));
+  } catch (e) {
+    showError(t('memories', 'Failed to copy link to clipboard'));
+  }
+}
+
+function refreshSidebar() {
+  if (windowDims.isMobile) return;
+  _m.sidebar.close();
+  _m.sidebar.open(0, filename.value, true);
+}
 </script>
 
 <style lang="scss" scoped>

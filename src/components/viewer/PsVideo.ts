@@ -1,8 +1,10 @@
-import { showError } from '@nextcloud/dialogs';
+import { showError } from '@services/utils/dialog';
 
 import { translate as t } from '@services/l10n';
-import staticConfig from '@services/static-config';
-import * as utils from '@services/utils';
+import { config } from '@services/user-config';
+import { constants } from '@services/constants';
+import { getPlayableVideoCodecsSync } from '@services/video/codec';
+import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 import { API } from '@services/API';
 
@@ -101,7 +103,7 @@ class VideoContentSetup {
   wakeLock: WakeLockSentinel | null = null;
 
   /** Vidstack chunk, prefetched so controls mount instantly on activation */
-  private vidstack = import('@services/vidstack');
+  private vidstack = import('@services/video/vidstack');
 
   constructor(lightbox: PhotoSwipe) {
     this.initLightboxEvents(lightbox);
@@ -156,7 +158,7 @@ class VideoContentSetup {
   getHLSsrc(content: VideoContent): PlayerSrc {
     const fileid = content.data.photo.fileid;
     return {
-      src: API.VIDEO_TRANSCODE(fileid, 'index.m3u8', utils.getPlayableVideoCodecsSync()),
+      src: API.VIDEO_TRANSCODE(fileid, 'index.m3u8', getPlayableVideoCodecsSync()),
       type: 'application/x-mpegurl',
     };
   }
@@ -175,7 +177,7 @@ class VideoContentSetup {
     const local = this.getLocalSrc(content);
     if (local) {
       return { src: local, videoIsHls: false };
-    } else if (!staticConfig.getSync('vod_disable')) {
+    } else if (!config.vod_disable) {
       return { src: this.getHLSsrc(content), videoIsHls: true };
     } else {
       return { src: this.getDirectSrc(content), videoIsHls: false };
@@ -220,7 +222,7 @@ class VideoContentSetup {
     player.title = content.data.photo.basename ?? '';
     player.playsInline = true;
 
-    if (staticConfig.getSync('video_autoplay') === 'true') {
+    if (config.video_autoplay === 'true') {
       player.preload = 'metadata';
       player.autoPlay = true;
     } else {
@@ -229,7 +231,7 @@ class VideoContentSetup {
       player.autoPlay = false;
     }
 
-    if (staticConfig.getSync('video_loop')) {
+    if (config.video_loop) {
       player.loop = true;
     }
 
@@ -265,7 +267,7 @@ class VideoContentSetup {
       }
 
       // Prevent showing any default poster like a big play button.
-      providerEl.querySelector('video')?.setAttribute('poster', utils.constants.BLANK_IMG);
+      providerEl.querySelector('video')?.setAttribute('poster', constants.BLANK_IMG);
     });
 
     player.addEventListener('hls-instance', (e: Event) => {
@@ -304,7 +306,7 @@ class VideoContentSetup {
   onPlayerError(content: VideoContent, _e: MediaErrorEvent) {
     if (!isVideoContent(content) || content.videoFailedOver || content.videoHasPlayed) return;
     if (utils.isLocalPhoto(content.data.photo)) return; // local-only
-    if (staticConfig.getSync('vod_disable')) return;
+    if (config.vod_disable) return;
 
     const player = content.videoPlayer;
     if (!player) return;
@@ -468,7 +470,7 @@ class VideoContentSetup {
 
   /** Start at the admin default quality ('-1' = original). */
   pickInitialLevel(hls: Hls) {
-    const spec = staticConfig.getSync('video_default_quality');
+    const spec = config.video_default_quality;
     if (!spec || spec === '0') return;
 
     const Events = (hls.constructor as typeof Hls).Events;

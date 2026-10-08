@@ -38,8 +38,8 @@
     "Name" : "Namn",
     "Update" : "Oppdater",
     "Move" : "Move",
-    "Remove" : "Fjern",
     "Password protected" : "Passordverna",
+    "Remove" : "Fjern",
     "Refresh" : "Last inn på nytt",
     "OK" : "OK",
     "Oldest first" : "Eldste fyrst",
@@ -53,8 +53,8 @@
     "Image" : "Bilete",
     "Text" : "Tekst",
     "Size" : "Storleik",
-    "Setup" : "Oppsett",
     "_{n} item_::_{n} items_" : ["{n} oppføring","{n} oppføringar"],
+    "Setup" : "Oppsett",
     "Choose {file}" : "Vel {file}",
     "Choose" : "Vel"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"

@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-section">
+  <div v-if="systemConfig" class="admin-section">
     <h2>{{ $options.title }}</h2>
 
     <template v-if="status">
@@ -11,7 +11,7 @@
     <NcTextField
       :label="t('memories', 'Path to packaged exiftool binary')"
       :label-visible="true"
-      :model-value="config['memories.exiftool']"
+      :model-value="systemConfig['memories.exiftool']"
       @change="update('memories.exiftool', $event.target.value)"
       readonly
     />
@@ -24,7 +24,7 @@
     </template>
 
     <NcCheckboxRadioSwitch
-      v-model="config['memories.exiftool_no_local']"
+      v-model="systemConfig['memories.exiftool_no_local']"
       @update:model-value="update('memories.exiftool_no_local')"
       type="switch"
     >
@@ -33,16 +33,20 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import NcTextField from '@nextcloud/vue/components/NcTextField';
+import NcNoteCard from '@nextcloud/vue/components/NcNoteCard';
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch';
 
-import { translate as t } from '@services/l10n';
+import { t } from '@services/l10n';
 
-import AdminMixin from '../AdminMixin';
+import { useAdminContext } from '../admin-context';
+import { binaryStatus, binaryStatusType } from '../admin-utils';
 
-export default defineComponent({
+defineOptions({
   name: 'Exif',
   title: t('memories', 'EXIF Extraction'),
-  mixins: [AdminMixin],
 });
+
+const { status, systemConfig, update } = useAdminContext();
 </script>

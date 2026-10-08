@@ -42,8 +42,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, markRaw } from 'vue';
+<script setup lang="ts">
+import { ref, reactive, onMounted, markRaw, watch } from 'vue';
 import type { Component } from 'vue';
 
 import Searchbar from '@components/header/Searchbar.vue';
@@ -55,164 +55,144 @@ import NcButton from '@nextcloud/vue/components/NcButton';
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import VideoIcon from 'vue-material-design-icons/PlayCircle.vue';
+import PanoramaIcon from 'vue-material-design-icons/PanoramaVariant.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import MapIcon from 'vue-material-design-icons/Map.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
 
 import { translate as t } from '@services/l10n';
-import config from '@services/static-config';
+import { config } from '@services/user-config';
+import { windowDims } from '@services/viewport';
 import * as dav from '@services/dav';
-import * as utils from '@services/utils';
 import * as nativex from '@native';
 
-import type { ICluster, IConfig } from '@typings';
+import type { ICluster } from '@typings';
 
-export default defineComponent({
-  name: 'Explore',
+type Category = {
+  name: string;
+  icon: Component;
+  link?: string;
+  click?: () => void;
+  if?: () => boolean;
+};
 
-  components: {
-    Searchbar,
-    ClusterHList,
-    NcButton,
-    StarIcon,
-    XLoadingIcon,
+const loading = ref(0);
+const isNative = nativex.has();
+
+const recognize = ref([] as ICluster[]);
+const facerecognition = ref([] as ICluster[]);
+const places = ref([] as ICluster[]);
+const tags = ref([] as ICluster[]);
+const loaded = reactive({
+  recognize: false,
+  facerecognition: false,
+  places: false,
+  tags: false,
+});
+
+const categories = ref([
+  {
+    name: t('memories', 'Folders'),
+    icon: markRaw(FolderIcon),
+    link: '/folders',
   },
-
-  data: () => ({
-    loading: 0,
-    isNative: nativex.has(),
-
-    config: {} as IConfig,
-    recognize: [] as ICluster[],
-    facerecognition: [] as ICluster[],
-    places: [] as ICluster[],
-    tags: [] as ICluster[],
-    loaded: {
-      recognize: false,
-      facerecognition: false,
-      places: false,
-      tags: false,
-    },
-
-    categories: [
-      {
-        name: t('memories', 'Folders'),
-        icon: markRaw(FolderIcon),
-        link: '/folders',
-      },
-      {
-        name: t('memories', 'Favorites'),
-        icon: markRaw(StarIcon),
-        link: '/favorites',
-      },
-      {
-        name: t('memories', 'Videos'),
-        icon: markRaw(VideoIcon),
-        link: '/videos',
-      },
-      {
-        name: t('memories', 'Archive'),
-        icon: markRaw(ArchiveIcon),
-        link: '/archive',
-      },
-      {
-        name: t('memories', 'On this day'),
-        icon: markRaw(CalendarIcon),
-        link: '/thisday',
-      },
-      {
-        name: t('memories', 'Map'),
-        icon: markRaw(MapIcon),
-        link: '/map',
-      },
-      {
-        name: t('memories', 'Settings'),
-        icon: markRaw(CogIcon),
-        link: undefined,
-        click: _m.modals.showSettings,
-        if: () => utils.isMobile(),
-      },
-    ] as {
-      name: string;
-      icon: Component;
-      link?: string;
-      click?: () => void;
-      if?: () => boolean;
-    }[],
-  }),
-
-  async mounted() {
-    const res: IConfig | undefined = await this.load(config.getAll.bind(config));
-    if (!res) return;
-    this.config = res;
-    this.maybeLoad();
-
-    // Server copy may differ from cache; load newly enabled sections.
-    utils.bus.on('memories:user-config-changed', this.onConfigChanged);
-
-    // Remove categories that should not be shown
-    this.categories = this.categories.filter((c) => !c.if || c.if());
+  {
+    name: t('memories', 'Favorites'),
+    icon: markRaw(StarIcon),
+    link: '/favorites',
   },
-
-  beforeUnmount() {
-    utils.bus.off('memories:user-config-changed', this.onConfigChanged);
+  {
+    name: t('memories', 'Videos'),
+    icon: markRaw(VideoIcon),
+    link: '/videos',
   },
-
-  methods: {
-    onConfigChanged() {
-      this.config = { ...config.getDefault() };
-      this.maybeLoad();
-    },
-
-    maybeLoad() {
-      if (this.config.recognize_enabled && !this.loaded.recognize) {
-        this.loaded.recognize = true;
-        this.load(this.getRecognize);
-      }
-
-      if (this.config.facerecognition_enabled && !this.loaded.facerecognition) {
-        this.loaded.facerecognition = true;
-        this.load(this.getFaceRecognition);
-      }
-
-      if (this.config.places_gis > 0 && !this.loaded.places) {
-        this.loaded.places = true;
-        this.load(this.getPlaces);
-      }
-
-      if (this.config.systemtags_enabled && !this.loaded.tags) {
-        this.loaded.tags = true;
-        this.load(this.getTags);
-      }
-    },
-    async load<T>(fun: () => Promise<T>) {
-      try {
-        this.loading++;
-        return await fun();
-      } catch (e) {
-        console.error(e);
-      } finally {
-        this.loading--;
-      }
-    },
-
-    async getRecognize() {
-      this.recognize = (await dav.getFaceList('recognize')).slice(0, 10);
-    },
-
-    async getFaceRecognition() {
-      this.facerecognition = (await dav.getFaceList('facerecognition')).slice(0, 10);
-    },
-
-    async getPlaces() {
-      this.places = (await dav.getPlaces()).slice(0, 10);
-    },
-
-    async getTags() {
-      this.tags = (await dav.getTags()).sort((a, b) => b.count - a.count).slice(0, 10);
-    },
+  {
+    name: t('memories', 'Panoramas'),
+    icon: markRaw(PanoramaIcon),
+    link: '/panoramas',
   },
+  {
+    name: t('memories', 'Archive'),
+    icon: markRaw(ArchiveIcon),
+    link: '/archive',
+  },
+  {
+    name: t('memories', 'On this day'),
+    icon: markRaw(CalendarIcon),
+    link: '/thisday',
+  },
+  {
+    name: t('memories', 'Map'),
+    icon: markRaw(MapIcon),
+    link: '/map',
+  },
+  {
+    name: t('memories', 'Settings'),
+    icon: markRaw(CogIcon),
+    link: undefined,
+    click: _m.modals.showSettings,
+    if: () => windowDims.isMobile,
+  },
+] as Category[]);
+
+async function load<T>(fun: () => Promise<T>) {
+  try {
+    loading.value++;
+    return await fun();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    loading.value--;
+  }
+}
+
+async function getRecognize() {
+  recognize.value = (await dav.getFaceList('recognize')).slice(0, 10);
+}
+
+async function getFaceRecognition() {
+  facerecognition.value = (await dav.getFaceList('facerecognition')).slice(0, 10);
+}
+
+async function getPlaces() {
+  places.value = (await dav.getPlaces()).slice(0, 10);
+}
+
+async function getTags() {
+  tags.value = (await dav.getTags()).sort((a, b) => b.count - a.count).slice(0, 10);
+}
+
+function maybeLoad() {
+  if (config.recognize_enabled && !loaded.recognize) {
+    loaded.recognize = true;
+    load(getRecognize);
+  }
+
+  if (config.facerecognition_enabled && !loaded.facerecognition) {
+    loaded.facerecognition = true;
+    load(getFaceRecognition);
+  }
+
+  if (config.places_gis > 0 && !loaded.places) {
+    loaded.places = true;
+    load(getPlaces);
+  }
+
+  if (config.systemtags_enabled && !loaded.tags) {
+    loaded.tags = true;
+    load(getTags);
+  }
+}
+
+onMounted(() => {
+  maybeLoad();
+
+  // Server copy may differ from cache; load newly enabled sections.
+  watch(config, maybeLoad);
+
+  // Remove categories that should not be shown
+  categories.value = categories.value.filter((c) => !c.if || c.if());
 });
 </script>
 

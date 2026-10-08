@@ -1,198 +1,189 @@
 <template>
   <div @touchstart.passive="touchstart" @touchmove.passive="touchmove" @touchend.passive="touchend">
-    <div v-show="show" class="swipe-progress" :style="{ background: gradient }" :class="{ animate, wasSwiped }"></div>
+    <div v-show="show" class="swipe-progress" :class="{ animate, wasSwiped }"></div>
     <slot></slot>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 
 const SWIPE_PX = 250;
 
-export default defineComponent({
-  name: 'SwipeRefresh',
-
-  props: {
+const props = withDefaults(
+  defineProps<{
     /** Callback to execute when the user swipes down */
-    refresh: {
-      type: Function as PropType<() => Promise<any>>,
-      required: true,
-    },
+    refresh: () => Promise<any>;
 
     /** Whether to allow the swipe action */
-    allowSwipe: {
-      type: Boolean,
-      default: true,
-    },
+    allowSwipe?: boolean;
 
     /**
      * A unique identifier for the swipe action.
      * If the state changes, the swipe action is reset.
      */
-    state: {
-      type: Number,
-      default: Math.random(),
-    },
+    state?: number;
 
     /**
      * An ancestor element of the touch action
      * target must match this query selector to be
      * eligible for the swipe action.
      */
-    match: {
-      type: String,
-      default: '',
-    },
+    match?: string;
+  }>(),
+  {
+    allowSwipe: true,
+    state: Math.random(),
+    match: '',
   },
+);
 
-  data: () => ({
-    /** Is active interaction */
-    on: false,
-    /** Start touch Y coordinate */
-    start: 0,
-    /** End touch Y coordinate */
-    end: 0,
-    /** Percentage progress to show in swiping */
-    progress: 0,
-    /** Next update frame reference */
-    updateFrame: 0,
+/** Is active interaction */
+const on = ref(false);
+/** Start touch Y coordinate */
+const startY = ref(0);
+/** End touch Y coordinate */
+const endY = ref(0);
+/** Start touch X coordinate */
+const startX = ref(0);
+/** End touch X coordinate */
+const endX = ref(0);
+/** Percentage progress to show in swiping */
+const progress = ref(0);
+/** Next update frame reference */
+const updateFrame = ref(0);
 
-    // Loading animation state
-    loading: false,
-    animate: false,
-    wasSwiped: true,
-    firstcycle: 0,
-  }),
+// Loading animation state
+const loading = ref(false);
+const animate = ref(false);
+const wasSwiped = ref(true);
+const firstcycle = ref(0);
 
-  emits: [],
-
-  mounted() {
-    this.animate = this.loading; // start if needed
-  },
-
-  beforeUnmount() {
-    this.reset();
-  },
-
-  watch: {
-    state() {
-      this.reset();
-    },
-
-    loading() {
-      this.wasSwiped = this.progress >= 100;
-      if (!this.wasSwiped) {
-        // The loading animation was triggered from elsewhere
-        // let it continue normally
-        this.animate = this.loading;
-        return;
-      }
-
-      // Let the animation run for at least half cycle
-      // if the user pulled down, so we provide good feedback
-      // that something actually happened
-      if (this.loading) {
-        if (!this.animate) {
-          this.firstcycle = window.setTimeout(() => {
-            this.firstcycle = 0;
-            this.animate = this.loading;
-          }, 750);
-        }
-        this.animate = this.loading;
-      } else {
-        if (!this.firstcycle) {
-          this.animate = this.loading;
-        }
-      }
-    },
-  },
-
-  computed: {
-    show() {
-      return (this.on && this.progress) || this.animate;
-    },
-
-    gradient() {
-      if (this.animate) {
-        // CSS animation below
-        return undefined;
-      }
-
-      // Pull down progress
-      const p = this.progress;
-      const outer = 'transparent';
-      const inner = 'var(--color-primary)';
-      return `radial-gradient(circle at center, ${inner} 0, ${inner} ${p}%, ${outer} ${p}%, ${outer} 100%)`;
-    },
-  },
-
-  methods: {
-    reset() {
-      // Clear events
-      window.cancelAnimationFrame(this.updateFrame);
-      window.clearTimeout(this.firstcycle);
-
-      // Reset state
-      this.on = false;
-      this.progress = 0;
-      this.updateFrame = 0;
-      this.loading = false;
-      this.animate = false;
-      this.wasSwiped = true;
-      this.firstcycle = 0;
-    },
-
-    /** Start gesture on container (passive) */
-    touchstart(event: TouchEvent) {
-      if (!this.allowSwipe) return;
-      const touch = event.touches[0];
-
-      // Check if top element matches selector
-      if (this.match && !(<HTMLElement>touch.target).closest(this.match)) return;
-
-      // Start swipe action
-      this.end = this.start = touch.clientY;
-      this.progress = 0;
-      this.on = true;
-    },
-
-    /** Execute gesture on container (passive) */
-    touchmove(event: TouchEvent) {
-      if (!this.allowSwipe || !this.on) return;
-      const touch = event.touches[0];
-      this.end = touch.clientY;
-
-      // Update progress only once per frame
-      this.updateFrame ||= window.requestAnimationFrame(async () => {
-        this.updateFrame = 0;
-
-        // Compute percentage of swipe
-        const delta = (this.end - this.start) / SWIPE_PX;
-        this.progress = Math.min(Math.max(0, delta * 100), 100);
-
-        // Execute action on threshold
-        if (this.progress >= 100) {
-          this.on = false;
-          const state = this.state;
-          try {
-            this.loading = true;
-            await this.refresh();
-          } finally {
-            if (this.state === state) {
-              this.loading = false;
-            }
-          }
-        }
-      });
-    },
-
-    /** End gesture on container (passive) */
-    touchend(event: TouchEvent) {
-      this.on = false;
-    },
-  },
+onMounted(() => {
+  animate.value = loading.value; // start if needed
 });
+
+onBeforeUnmount(() => {
+  reset();
+});
+
+watch(() => props.state, reset);
+
+watch(loading, () => {
+  wasSwiped.value = progress.value >= 100;
+  if (!wasSwiped.value) {
+    // The loading animation was triggered from elsewhere
+    // let it continue normally
+    animate.value = loading.value;
+    return;
+  }
+
+  // Let the animation run for at least half cycle
+  // if the user pulled down, so we provide good feedback
+  // that something actually happened
+  if (loading.value) {
+    if (!animate.value) {
+      firstcycle.value = window.setTimeout(() => {
+        firstcycle.value = 0;
+        animate.value = loading.value;
+      }, 750);
+    }
+    animate.value = loading.value;
+  } else {
+    if (!firstcycle.value) {
+      animate.value = loading.value;
+    }
+  }
+});
+
+const show = computed(() => {
+  return (on.value && progress.value) || animate.value;
+});
+
+function reset() {
+  // Clear events
+  window.cancelAnimationFrame(updateFrame.value);
+  window.clearTimeout(firstcycle.value);
+
+  // Reset state
+  on.value = false;
+  progress.value = 0;
+  updateFrame.value = 0;
+  loading.value = false;
+  animate.value = false;
+  wasSwiped.value = true;
+  firstcycle.value = 0;
+}
+
+/** Start gesture on container (passive) */
+function touchstart(event: TouchEvent) {
+  if (!props.allowSwipe) return;
+  if (event.touches.length !== 1) return;
+  const touch = event.touches[0];
+
+  // Check if top element matches selector
+  if (props.match && !(<HTMLElement>touch.target).closest(props.match)) return;
+
+  // Start swipe action
+  endY.value = startY.value = touch.clientY;
+  endX.value = startX.value = touch.clientX;
+  progress.value = 0;
+  on.value = true;
+}
+
+/** Execute gesture on container (passive) */
+function touchmove(event: TouchEvent) {
+  if (!props.allowSwipe || !on.value) return;
+
+  // Ignore multi-touch gestures (e.g. pinch zoom)
+  if (event.touches.length !== 1) {
+    return reset();
+  }
+
+  // Get the touch coordinates
+  const touch = event.touches[0];
+  endY.value = touch.clientY;
+  endX.value = touch.clientX;
+
+  // Abort on mostly-horizontal gestures (e.g. swipe right)
+  if (Math.abs(endX.value - startX.value) > Math.abs(endY.value - startY.value)) {
+    return reset();
+  }
+
+  // Update progress only once per frame
+  updateFrame.value ||= window.requestAnimationFrame(async () => {
+    updateFrame.value = 0;
+    if (!on.value) return;
+
+    // Re-check horizontal dominance with latest coordinates
+    if (Math.abs(endX.value - startX.value) > Math.abs(endY.value - startY.value)) {
+      return reset();
+    }
+
+    // Compute percentage of swipe
+    const delta = (endY.value - startY.value) / SWIPE_PX;
+    progress.value = Math.min(Math.max(0, delta * 100), 100);
+
+    // Execute action on threshold
+    if (progress.value >= 100) {
+      on.value = false;
+      const state = props.state;
+      try {
+        loading.value = true;
+        await props.refresh();
+      } finally {
+        if (props.state === state) {
+          loading.value = false;
+        }
+      }
+    }
+  });
+}
+
+/** End gesture on container (passive) */
+function touchend(event: TouchEvent) {
+  on.value = false;
+}
 </script>
 
 <style lang="scss" scoped>
@@ -203,6 +194,16 @@ export default defineComponent({
   width: 100%;
   height: 3px;
   pointer-events: none;
+
+  &:not(.animate) {
+    background: radial-gradient(
+      circle at center,
+      var(--color-primary) 0,
+      var(--color-primary) calc(v-bind(progress) * 1%),
+      transparent calc(v-bind(progress) * 1%),
+      transparent 100%
+    );
+  }
 
   &.animate {
     background-position: center;

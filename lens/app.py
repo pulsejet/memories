@@ -8,17 +8,15 @@ from fastapi import FastAPI
 from qdrant_client import AsyncQdrantClient
 
 from config import config
-from index import Indexer, IndexQueue
+from index import Indexer, IndexQueue, Scanner
 from routes import routers
 from routes.context import embedding_model, face_model, schema_model, sentence_model, state
-from store import CompatMismatch, Store
-
-log = logging.getLogger("lens.app")
+from store import Store
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    """Load models, ensure collections, start worker; mismatch is fatal."""
+    """Load models and collections, then start jobs; initialization failures are fatal."""
 
     logging.basicConfig(
         level=logging.INFO,
@@ -51,26 +49,25 @@ async def lifespan(_app: FastAPI):
         store=store,
         done=index_queue.done,
     )
-    worker = index_queue.run(indexer.handle_batch)
+    scanner = Scanner(store, index_queue)
+    state.scanner = scanner
 
+    tasks = []
     try:
-        await store.embedding.ensure_collection()
-        await store.places.ensure_collection()
-        await store.faces.ensure_collection()
-    except CompatMismatch:
-        worker.cancel()
-        await client.close()
-        raise
+        for collection in store.collections:
+            await collection.ensure_collection()
 
-    except Exception:
-        log.exception("qdrant unreachable, staying degraded")
-    else:
         state.qdrant = "ok"
         state.ready = True
+        tasks = [index_queue.run(indexer.handle_batch), asyncio.create_task(scanner.run())]
 
-    yield
-    worker.cancel()
-    await client.close()
+        yield
+    finally:
+        state.ready = False
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        await client.close()
 
 
 app = FastAPI(title="Memories Lens", lifespan=lifespan)
