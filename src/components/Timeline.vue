@@ -499,7 +499,7 @@ async function refresh() {
  * when changing the configuration
  */
 function softRefresh() {
-  _softRefreshInternal(false);
+  void _softRefreshInternal(false);
 }
 
 /** Fetch and re-process days (sync can be awaited) */
@@ -517,9 +517,12 @@ async function _softRefreshInternal(sync: boolean) {
 
   // Fetch days
   if (sync) {
-    await fetchDays(true);
+    await Promise.all([fetchDays(true), dtm.value?.refresh()]);
   } else {
-    softRefreshTimer.set(() => fetchDays(true), 30);
+    softRefreshTimer.set(() => {
+      void fetchDays(true);
+      void dtm.value?.refresh();
+    }, 30);
   }
 }
 

@@ -112,6 +112,8 @@ async function refresh(): Promise<void> {
     if (cache?.length === photos.length && cache.every((p, i) => p.fileid === photos[i].fileid)) return;
     years.value = process(photos);
     void onLoad();
+  } catch (e) {
+    console.error('Failed to fetch On This Day:', e);
   } finally {
     if (myRequestId === requestId) {
       years.value ??= [];

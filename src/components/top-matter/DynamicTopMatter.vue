@@ -91,7 +91,11 @@ const viewName = computed((): string => {
 });
 
 async function refresh(): Promise<void> {
-  await child.value?.refresh?.();
+  try {
+    await child.value?.refresh?.();
+  } catch (e) {
+    console.error('[BUG] Disallowed throw in DynamicTopMatter::refresh():', e);
+  }
 }
 
 watch(
