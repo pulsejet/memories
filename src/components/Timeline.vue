@@ -111,7 +111,6 @@
 import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue';
 import { onBeforeUnmount, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import type { RouteLocationNormalized } from 'vue-router';
 import { RecycleScroller } from 'vue-virtual-scroller';
 import { until } from '@vueuse/core';
 
@@ -148,6 +147,7 @@ import * as nativex from '@native';
 import { API, DaysFilterType } from '@services/API';
 import * as lens from '@services/lens';
 
+import type { RouteLocationNormalized } from 'vue-router';
 import type { IDay, IHeadRow, IPhoto, IPhotoRow, IRow } from '@typings';
 
 const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
