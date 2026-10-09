@@ -30,7 +30,8 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
+import { nextTick, computed, onMounted, ref, useTemplateRef } from 'vue';
+import { useResizeObserver } from '@vueuse/core';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
@@ -67,8 +68,9 @@ const years = ref<IYear[] | null>(null);
 const hasRight = ref(false);
 const hasLeft = ref(false);
 const scrollStack = ref<number[]>([]);
-let resizeObserver: ResizeObserver | null = null;
 const abort = useAbort();
+
+useResizeObserver(inner, onScroll);
 
 useRouteState({ state: { years }, scroll: { inner } });
 
@@ -77,13 +79,7 @@ const isContent = computed(() => !!years.value?.length);
 
 onMounted(() => {
   inner.value!.addEventListener('scroll', onScroll, { passive: true });
-  resizeObserver = new ResizeObserver(onScroll);
-  resizeObserver.observe(inner.value!);
   void refresh();
-});
-
-onBeforeUnmount(() => {
-  resizeObserver?.disconnect();
 });
 
 async function refresh(): Promise<void> {
