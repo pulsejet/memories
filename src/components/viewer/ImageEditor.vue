@@ -9,6 +9,7 @@
 
 <script setup lang="ts">
 import { computed, markRaw, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
+import { useMutationObserver } from '@vueuse/core';
 
 import axios from '@nextcloud/axios';
 import { showError, showSuccess } from '@services/utils/dialog';
@@ -160,20 +161,6 @@ onMounted(async () => {
   if (!div) return;
   const editorConfig = { ...config.value, source };
 
-  // Add observer to update nodes as added
-  new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      mutation.addedNodes.forEach((node) => {
-        if (!(node instanceof Element)) return;
-
-        node.querySelectorAll('.FIE_tools-bar button').forEach((node) => {
-          // Do not apply parent styles
-          node.classList.add('button-vue');
-        });
-      });
-    });
-  }).observe(div, { childList: true, subtree: true });
-
   // Create the editor
   imageEditor.value = markRaw(new FilerobotImageEditor(div, editorConfig));
   imageEditor.value.render();
@@ -197,6 +184,22 @@ onBeforeUnmount(() => {
   utils.fragment.pop(utils.fragment.types.editor);
   utils.bus.off('memories:fragment:pop:editor', warnUnsaved);
 });
+
+// Prevent editor buttons from being styled by global CSS
+useMutationObserver(
+  editor,
+  (mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (!(node instanceof Element)) return;
+        node.querySelectorAll('.FIE_tools-bar button').forEach((node) => {
+          node.classList.add('button-vue');
+        });
+      });
+    });
+  },
+  { childList: true, subtree: true },
+);
 
 async function getImage(): Promise<HTMLImageElement> {
   const img = new Image();
