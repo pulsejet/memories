@@ -50,6 +50,7 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, useTemplateRef } from 'vue';
+import { useVibrate, useThrottleFn } from '@vueuse/core';
 
 import { windowDims } from '@services/viewport';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
@@ -126,10 +127,8 @@ const adjustRequest = ref(false);
 const interacting = ref(false);
 /** Last known scroll position of the recycler */
 const lastKnownRecyclerScroll = ref(0);
-/** Track the last requested y position when interacting */
+/** Last requested y position when interacting */
 const lastRequestedRecyclerY = ref(NaN);
-/** Last time a haptic tick was emitted while dragging the handle */
-const lastVibrateTime = ref(0);
 
 /** Get the visible ticks */
 const visibleTicks = computed(() => {
@@ -596,18 +595,10 @@ function handleScroll() {
 }
 
 /** Tiny haptic tick while dragging the handle on mobile */
-function vibrateTick() {
-  if (!windowDims.isMobile) return;
-  if (!('vibrate' in navigator)) return;
-  const now = performance.now();
-  if (now - lastVibrateTime.value < VIBRATE_THROTTLE_MS) return;
-  lastVibrateTime.value = now;
-  try {
-    navigator.vibrate(VIBRATE_MS);
-  } catch {
-    // ignore
-  }
-}
+const { vibrate } = useVibrate({ pattern: VIBRATE_MS });
+const vibrateTick = useThrottleFn(() => {
+  if (windowDims.isMobile) vibrate();
+}, VIBRATE_THROTTLE_MS);
 
 defineExpose({
   reset,
