@@ -256,6 +256,9 @@ function reflowNow() {
 
   // Adjust top
   adjustNow();
+
+  // Update cursors
+  updateFromRecyclerScroll();
 }
 
 /** Recreate from scratch */
