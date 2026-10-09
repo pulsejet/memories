@@ -2,7 +2,7 @@
   <div class="outer" v-show="isReady && isContent">
     <div class="inner hide-scrollbar" ref="inner">
       <div v-for="year of years" class="group" :key="year.text" @click="click(year)">
-        <XImg class="fill-block" :src="year.url" />
+        <XImgFade class="fill-block" :src="year.url" duration="700ms" />
 
         <div class="overlay top-left fill-block">
           {{ year.text }}
@@ -44,7 +44,7 @@ import * as dav from '@services/dav';
 
 import LeftMoveIcon from 'vue-material-design-icons/ChevronLeft.vue';
 import RightMoveIcon from 'vue-material-design-icons/ChevronRight.vue';
-import XImg from '@components/frame/XImg.vue';
+import XImgFade from '@components/frame/XImgFade.vue';
 
 import type { IPhoto } from '@typings';
 
@@ -55,10 +55,6 @@ interface IYear {
   photos: IPhoto[];
   text: string;
 }
-
-defineOptions({
-  name: 'OnThisDay',
-});
 
 const emit = defineEmits<{
   load: [];
@@ -71,6 +67,7 @@ const hasRight = ref(false);
 const hasLeft = ref(false);
 const scrollStack = ref<number[]>([]);
 let resizeObserver: ResizeObserver | null = null;
+let requestId = 0;
 
 useRouteState({ state: { years }, scroll: { inner } });
 
@@ -81,41 +78,49 @@ onMounted(() => {
   inner.value!.addEventListener('scroll', onScroll, { passive: true });
   resizeObserver = new ResizeObserver(onScroll);
   resizeObserver.observe(inner.value!);
-  refresh();
+  void refresh();
 });
 
 onBeforeUnmount(() => {
+  requestId++;
   resizeObserver?.disconnect();
 });
 
 async function refresh(): Promise<void> {
+  const myRequestId = ++requestId;
+
   try {
-    await refreshInternal();
+    // Look for cache
+    const dayIdToday = utils.dateToDayId(new Date());
+    const cacheUrl = `/onthisday/${dayIdToday}`;
+    const cache = await getCachedData<IPhoto[]>(cacheUrl);
+    if (myRequestId !== requestId) return;
+    utils.applyAuids(cache);
+    if (cache) {
+      years.value = process(cache);
+      void onLoad();
+    }
+    if (myRequestId !== requestId) return;
+
+    // Network request
+    const photos = await dav.getOnThisDayRaw();
+    if (myRequestId !== requestId) return;
+    utils.applyAuids(photos);
+    cacheData(cacheUrl, photos);
+
+    // Check if exactly same as cache
+    if (cache?.length === photos.length && cache.every((p, i) => p.fileid === photos[i].fileid)) return;
+    years.value = process(photos);
+    void onLoad();
   } finally {
-    years.value ??= [];
+    if (myRequestId === requestId) {
+      years.value ??= [];
+    }
   }
 }
 
-async function refreshInternal(): Promise<void> {
-  // Look for cache
-  const dayIdToday = utils.dateToDayId(new Date());
-  const cacheUrl = `/onthisday/${dayIdToday}`;
-  const cache = await getCachedData<IPhoto[]>(cacheUrl);
-  utils.applyAuids(cache);
-  if (cache) await process(cache);
-
-  // Network request
-  const photos = await dav.getOnThisDayRaw();
-  utils.applyAuids(photos);
-  cacheData(cacheUrl, photos);
-
-  // Check if exactly same as cache
-  if (cache?.length === photos.length && cache.every((p, i) => p.fileid === photos[i].fileid)) return;
-  await process(photos);
-}
-
-async function process(photos: IPhoto[]) {
-  years.value = [];
+function process(photos: IPhoto[]): IYear[] {
+  const list: IYear[] = [];
 
   let currentText = '';
   let prevDayId = Number.MAX_SAFE_INTEGER;
@@ -135,7 +140,7 @@ async function process(photos: IPhoto[]) {
       const year = dateTaken.getUTCFullYear();
       const text = utils.getFromNowStr(dateTaken, { padding: 10 });
       if (text !== currentText) {
-        years.value.push({
+        list.push({
           year,
           text,
           url: '',
@@ -147,17 +152,17 @@ async function process(photos: IPhoto[]) {
     }
     prevDayId = photo.dayid;
 
-    const yearObj = years.value[years.value.length - 1];
+    const yearObj = list[list.length - 1];
     yearObj.photos.push(photo);
   }
 
   // For each year, randomly choose 10 photos to display
-  for (const year of years.value) {
+  for (const year of list) {
     year.photos = utils.randomSubarray(year.photos, config.onthisday_photos_per_year);
   }
 
   // Choose preview photo
-  for (const year of years.value) {
+  for (const year of list) {
     year.preview ||= utils.randomChoice(year.photos);
     year.url = utils.getPreviewUrl({
       photo: year.preview,
@@ -165,6 +170,10 @@ async function process(photos: IPhoto[]) {
     });
   }
 
+  return list;
+}
+
+async function onLoad(): Promise<void> {
   emit('load');
   await nextTick();
   onScroll();
@@ -274,7 +283,7 @@ $mobHeight: 165px;
     margin-right: 8px;
   }
 
-  img {
+  :deep(img) {
     cursor: inherit;
     object-fit: cover;
     border-radius: 10px;
