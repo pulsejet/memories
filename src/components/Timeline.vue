@@ -225,6 +225,9 @@ onMounted(() => {
   // Trigger initial state load
   void routeChange(route);
 
+  // Timeline recycler init.
+  recycler.value?.$el.addEventListener('scroll', scrollPositionChange, { passive: true });
+
   // Observe container and before slot sizes
   if (container.value?.$el) {
     resizeObserver = new ResizeObserver((entries) => {
@@ -251,6 +254,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  recycler.value?.$el.removeEventListener('scroll', scrollPositionChange);
   resizeObserver?.disconnect();
 });
 
@@ -436,9 +440,6 @@ async function createState() {
   // Fit to window without loading.
   recomputeSizes(false);
   beforeHeight = recyclerBefore.value!.getBoundingClientRect().height;
-
-  // Timeline recycler init
-  recycler.value?.$el.addEventListener('scroll', scrollPositionChange, { passive: true });
 
   // Wait until router state has applied the saved scroll position.
   await until(routeState.restoring).toBe(false);
