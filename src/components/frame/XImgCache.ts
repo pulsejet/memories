@@ -1,8 +1,10 @@
-import { API } from '@services/API';
-import { onDOMLoaded } from '@services/utils/common';
 import { importWorker } from 'webworker-typed';
 
-import type XImgWorker from './XImgWorker';
+import { API } from '@services/API';
+import { onDOMLoaded } from '@services/utils/common';
+import { isAbortError, runWithAbortToken } from '@services/utils/abort';
+
+import type XImgWorker from '@components/frame/XImgWorker';
 import type { AbortOpts } from '@services/utils/abort';
 
 // Global web worker to fetch images
@@ -70,8 +72,20 @@ export async function fetchImage(url: string, opts?: AbortOpts) {
   if (entry) return entry[1];
 
   // Fetch image
-  const blobUrl = await worker.fetchImageSrc(url);
-  opts?.signal?.throwIfAborted();
+  let blobUrl: string | undefined;
+  try {
+    blobUrl = await runWithAbortToken(
+      opts?.signal,
+      (token) => worker.fetchImageSrc(url, token),
+      (token) => void worker.abortImageSrc(token),
+    );
+    opts?.signal?.throwIfAborted();
+  } catch (error) {
+    if (blobUrl && isAbortError(error)) {
+      URL.revokeObjectURL(blobUrl);
+    }
+    throw error;
+  }
 
   // Check memcache entry again and revoke if it was added in the meantime
   if ((entry = BLOB_CACHE.get(url))) {

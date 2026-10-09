@@ -1,5 +1,6 @@
 import { CacheExpiration } from 'workbox-expiration';
 import { exportWorker } from 'webworker-typed';
+import { AbortTokenManager, createAbortError, isAbortError } from '@services/utils/abort';
 
 declare var self: ServiceWorkerGlobalScope;
 
@@ -14,12 +15,14 @@ interface FetchPreviewObject {
   url: URL;
   fileid: number;
   reqid: number;
+  abortToken?: number;
+  callback: BlobCallback;
   done?: boolean;
 }
 let fetchPreviewQueue: FetchPreviewObject[] = [];
 
-// Pending requests
-const pendingUrls = new Map<string, BlobCallback[]>();
+// Controllers for cancelable single fetches, keyed by abortToken
+const abortTokens = new AbortTokenManager();
 
 // Cache for preview images
 const cacheName = 'memories-images';
@@ -57,11 +60,11 @@ async function flushPreviewQueue() {
   if (fetchPreviewQueue.length === 0) return;
 
   // Copy queue and clear
-  const fetchPreviewQueueCopy = fetchPreviewQueue;
+  let fetchPreviewQueueCopy = fetchPreviewQueue;
   fetchPreviewQueue = [];
 
   // Respond to URL
-  const resolve = async (url: string, res: Response, blob?: Blob) => {
+  const resolve = async (request: FetchPreviewObject, res: Response, blob?: Blob) => {
     // Response body can be read only once
     const clone = res.clone();
 
@@ -70,27 +73,43 @@ async function flushPreviewQueue() {
     // it came from a multipreview, so that we can try fetching
     // the single image instead
     blob ??= await res.blob();
-    pendingUrls.get(url)?.forEach((cb) => cb?.resolve?.(blob!));
-    pendingUrls.delete(url);
+    request.callback.resolve(blob);
+    request.done = true;
+    abortTokens.delete(request.abortToken);
 
     // Cache response
-    cacheResponse(url, clone);
+    cacheResponse(request.origUrl, clone);
   };
 
   // Throw error on URL
-  const reject = (url: string, e: any): void => {
-    pendingUrls.get(url)?.forEach((cb) => cb?.reject?.(e));
-    pendingUrls.delete(url);
+  const reject = (request: FetchPreviewObject, error: any): void => {
+    request.callback.reject(error);
+    request.done = true;
+    abortTokens.delete(request.abortToken);
   };
 
   // Make a single-file request
-  const fetchOneSafe = async (p: FetchPreviewObject) => {
+  const fetchOneSafe = async (request: FetchPreviewObject) => {
     try {
-      await resolve(p.origUrl, await fetchOneImage(p.origUrl));
+      const signal = abortTokens.signal(request.abortToken);
+      signal?.throwIfAborted();
+      await resolve(request, await fetchOneImage(request.origUrl, signal));
     } catch (e) {
-      reject(p.origUrl, e);
+      reject(request, e);
     }
   };
+
+  // Drop and reject cancelled requests.
+  fetchPreviewQueueCopy = fetchPreviewQueueCopy.filter((request) => {
+    if (abortTokens.isAborted(request.abortToken)) {
+      reject(request, createAbortError());
+      return false;
+    }
+    return true;
+  });
+
+  // Check again in case we dropped all requests.
+  if (fetchPreviewQueueCopy.length === 0) return;
 
   // Check if only one request, not worth a multipreview
   if (fetchPreviewQueueCopy.length === 1) {
@@ -99,12 +118,12 @@ async function flushPreviewQueue() {
   }
 
   // Create aggregated request body
-  const files = fetchPreviewQueueCopy.map((p) => ({
-    fileid: p.fileid,
-    x: Number(p.url.searchParams.get('x')),
-    y: Number(p.url.searchParams.get('y')),
-    a: p.url.searchParams.get('a'),
-    reqid: p.reqid,
+  const files = fetchPreviewQueueCopy.map((request) => ({
+    fileid: request.fileid,
+    x: Number(request.url.searchParams.get('x')),
+    y: Number(request.url.searchParams.get('y')),
+    a: request.url.searchParams.get('a'),
+    reqid: request.reqid,
   }));
 
   try {
@@ -185,13 +204,17 @@ async function flushPreviewQueue() {
         idx += params!.len;
 
         // Initiate callbacks
-        for (const p of fetchPreviewQueueCopy) {
-          if (p.reqid === params.reqid && !p.done) {
+        for (const request of fetchPreviewQueueCopy) {
+          if (request.reqid === params.reqid && !request.done) {
             try {
+              const signal = abortTokens.signal(request.abortToken);
+              signal?.throwIfAborted();
               const dummy = getResponse(imgBlob, params!.type, headers);
-              await resolve(p.origUrl, dummy, imgBlob);
-              p.done = true;
-            } catch (e) {
+              await resolve(request, dummy, imgBlob);
+            } catch (error) {
+              if (isAbortError(error)) {
+                reject(request, error);
+              }
               // In case of error, we want to try fetching the single
               // image instead, so we don't reject here
             }
@@ -207,21 +230,34 @@ async function flushPreviewQueue() {
   }
 
   // Initiate callbacks for failed requests
-  fetchPreviewQueueCopy.filter((p) => !p.done).forEach(fetchOneSafe);
+  fetchPreviewQueueCopy.filter((request) => !request.done).forEach(fetchOneSafe);
 }
 
 /** Accepts a URL and returns a promise with a blob */
-async function fetchImage(url: string): Promise<Blob> {
+async function fetchImage(url: string, abortToken?: number): Promise<Blob> {
+  const signal = abortTokens.create(abortToken);
+
   // Check if in cache
   const cache = await imageCache?.match(url);
-  if (cache) return await cache.blob();
+  if (cache) {
+    try {
+      signal?.throwIfAborted();
+      return await cache.blob();
+    } finally {
+      abortTokens.delete(abortToken);
+    }
+  }
 
   // Just fetch if not a preview
   const regex = /\/memories\/api\/image\/preview\/\d+(\?.*)?$/;
   if (!regex.test(url)) {
-    const res = await fetchOneImage(url);
-    cacheResponse(url, res);
-    return await res.blob();
+    try {
+      const res = await fetchOneImage(url, signal);
+      cacheResponse(url, res);
+      return await res.blob();
+    } finally {
+      abortTokens.delete(abortToken);
+    }
   }
 
   // Get file id from URL
@@ -229,35 +265,36 @@ async function fetchImage(url: string): Promise<Blob> {
   const fileid = Number(urlObj.pathname.split('/').pop());
 
   return await new Promise((resolve, reject) => {
-    if (pendingUrls.has(url)) {
-      // Already in queue, just add callback
-      pendingUrls.get(url)?.push({ resolve, reject });
-    } else {
-      // Add to queue
-      fetchPreviewQueue.push({
-        origUrl: url,
-        url: urlObj,
-        fileid,
-        reqid: Math.round(Math.random() * 1e8),
-      });
+    // Add to queue
+    fetchPreviewQueue.push({
+      origUrl: url,
+      url: urlObj,
+      fileid,
+      reqid: Math.round(Math.random() * 1e8),
+      abortToken,
+      callback: { resolve, reject },
+    });
 
-      // Add to pending
-      pendingUrls.set(url, [{ resolve, reject }]);
+    // Start timer for flushing queue
+    if (!fetchPreviewTimer) {
+      fetchPreviewTimer = self.setTimeout(flushPreviewQueue, 20);
+    }
 
-      // Start timer for flushing queue
-      if (!fetchPreviewTimer) {
-        fetchPreviewTimer = self.setTimeout(flushPreviewQueue, 20);
-      }
-
-      // If queue has >20 items, flush immediately
-      // This will internally clear the timer
-      if (fetchPreviewQueue.length >= 20) {
-        flushPreviewQueue();
-      }
+    // If queue has >20 items, flush immediately
+    // This will internally clear the timer
+    if (fetchPreviewQueue.length >= 20) {
+      flushPreviewQueue();
     }
   });
 }
 
+/** Abort a request by abortToken */
+function abortImageSrc(abortToken: number) {
+  abortTokens.abort(abortToken);
+  return true;
+}
+
+/** Cache a response for a URL */
 function cacheResponse(url: string, res: Response) {
   try {
     // Skip if no-cache is present
@@ -292,8 +329,8 @@ function getResponse(blob: Blob, type: string | null, headers: any = {}) {
 }
 
 /** Fetch single image with axios */
-async function fetchOneImage(url: string) {
-  const res = await fetch(url);
+async function fetchOneImage(url: string, signal?: AbortSignal) {
+  const res = await fetch(url, signal ? { signal } : undefined);
   if (res.status !== 200 || !res.body) {
     const text = res.body ? await res.text() : 'unknown';
     throw new Error(`Error fetching single preview: ${text}`);
@@ -317,9 +354,9 @@ function configure(_config: typeof config) {
 }
 
 /** Get BLOB url for image */
-async function fetchImageSrc(url: string) {
-  return URL.createObjectURL(await fetchImage(url));
+async function fetchImageSrc(url: string, abortToken?: number) {
+  return URL.createObjectURL(await fetchImage(url, abortToken));
 }
 
 // Exports to main thread
-export default exportWorker({ fetchImageSrc, configure });
+export default exportWorker({ fetchImageSrc, abortImageSrc, configure });
