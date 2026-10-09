@@ -25,6 +25,11 @@ declare module '@typings' {
     heads: Map<number, IHeadRow>;
   }
 
+  export type IRowSavedState = {
+    size: number;
+    pct?: number;
+  };
+
   /** Type of IRow (0 = head, 1 = photos) */
   export type IRowType = 0 | 1;
 

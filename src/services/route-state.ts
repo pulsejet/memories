@@ -1,5 +1,6 @@
 import { lru } from 'tiny-lru';
-import { getCurrentInstance, nextTick, toRaw, toValue, watch, type Ref, type ShallowRef } from 'vue';
+import { getCurrentInstance, nextTick, onScopeDispose, ref, toRaw, toValue, watch } from 'vue';
+import type { Ref, ShallowRef } from 'vue';
 import { useRoute, type RouteLocationNormalized } from 'vue-router';
 
 /** Template refs may contain a component, a native element, or no mounted target. */
@@ -15,6 +16,8 @@ type InnerStateVals<T extends InnerState> = {
 type RouteState<T extends InnerState> = {
   /** Stable namespace; defaults to the component's explicit or inferred SFC name. */
   instance?: string;
+  /** Route identity; defaults to path and query without the hash. */
+  key?: (route: RouteLocationNormalized) => string;
   /** Named refs whose raw values are cloned and saved on navigation. */
   state?: T;
   /** Named shallow template refs whose scroll offsets are saved and restored after the state. */
@@ -57,9 +60,11 @@ export function routerStatePath(route: RouteLocationNormalized, instance?: strin
  * After one render tick, restore the mounted scroll targets to their saved offsets.
  * Navigation guards save the current ref values and scroll offsets before leaving the route.
  * Use an explicit instance when multiple copies of the same component share a route.
+ * Returns a restoring ref, true until state and scroll offsets have been applied.
  */
-export function useRouteState<T extends InnerState>(options: RouteState<T>): void {
+export function useRouteState<T extends InnerState>(options: RouteState<T>) {
   const route = useRoute();
+  const restoring = ref(false);
   const component = getCurrentInstance()?.type;
   const instance = options.instance ?? component?.name ?? component?.__name;
 
@@ -67,7 +72,8 @@ export function useRouteState<T extends InnerState>(options: RouteState<T>): voi
   const defaults = cloneState(options.state);
 
   // Queries distinguish views; viewer hashes share the underlying page's state.
-  const key = (route: RouteLocationNormalized) => routerStatePath(route, instance);
+  const key = (route: RouteLocationNormalized) =>
+    options.key ? `${options.key(route)}#${instance}` : routerStatePath(route, instance);
 
   /** Capture ref values and mounted scroll targets before route-driven watchers run. */
   function preserve(routeKey: string) {
@@ -96,43 +102,54 @@ export function useRouteState<T extends InnerState>(options: RouteState<T>): voi
   watch(
     () => key(route),
     async (routeKey, oldKey, onCleanup) => {
-      // Save the old route's state; guards miss reused instances.
-      if (oldKey && oldKey !== routeKey) preserve(oldKey);
-
       // Cancel pending scrolling if route changes.
       let active = true;
       onCleanup(() => (active = false));
+      restoring.value = true;
 
-      // Get the saved state for this route and instance.
-      const saved = states.get(routeKey);
+      try {
+        // Save the old route's state; guards miss reused instances.
+        if (oldKey && oldKey !== routeKey) preserve(oldKey);
 
-      // Restore the saved state values, or defaults.
-      if (options.state) {
-        for (const [name, ref] of Object.entries(options.state)) {
-          if (saved && Object.hasOwn(saved.state ?? {}, name)) {
-            ref.value = structuredClone(saved.state![name]);
-          } else if (defaults) {
-            ref.value = structuredClone(defaults[name]);
+        // Get the saved state for this route and instance.
+        const saved = states.get(routeKey);
+
+        // Restore the saved state values, or defaults.
+        if (options.state) {
+          for (const [name, ref] of Object.entries(options.state)) {
+            if (saved && Object.hasOwn(saved.state ?? {}, name)) {
+              ref.value = structuredClone(saved.state![name]);
+            } else if (defaults) {
+              ref.value = structuredClone(defaults[name]);
+            }
           }
         }
-      }
 
-      // Restore the saved scroll offsets.
-      if (options.scroll) {
-        // Wait for the components to render.
-        await nextTick();
-        if (!active || routeKey !== key(route)) return;
+        // Restore the saved scroll offsets.
+        if (options.scroll) {
+          // Wait for the components to render.
+          await nextTick();
+          if (!active || routeKey !== key(route)) return;
 
-        // Restore scroll positions of mounted elements.
-        for (const [name, ref] of Object.entries(options.scroll)) {
-          const element = getElement(ref.value);
-          if (element) {
-            element.scrollTop = saved?.scroll?.[name]?.scrollTop ?? 0;
-            element.scrollLeft = saved?.scroll?.[name]?.scrollLeft ?? 0;
+          // Restore scroll positions of mounted elements.
+          for (const [name, ref] of Object.entries(options.scroll)) {
+            const element = getElement(ref.value);
+            if (element) {
+              element.scrollTop = saved?.scroll?.[name]?.scrollTop ?? 0;
+              element.scrollLeft = saved?.scroll?.[name]?.scrollLeft ?? 0;
+            }
           }
+        }
+      } finally {
+        if (active) {
+          restoring.value = false;
         }
       }
     },
     { immediate: true, flush: 'sync' },
   );
+
+  onScopeDispose(() => (restoring.value = false));
+
+  return { restoring };
 }

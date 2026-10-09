@@ -26,6 +26,8 @@ declare module '@typings' {
     count: number;
     /** Rows in the day */
     rows?: IRow[];
+    /** Saved row geometry for route restoration (client-only) */
+    savedRows?: IRowSavedState[];
     /** List of photos for this day */
     detail?: IPhoto[];
     /** This day has some local photos */

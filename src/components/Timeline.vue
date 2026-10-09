@@ -127,6 +127,7 @@ import TimelineTopOverlay from '@components/top-matter/TimelineTopOverlay.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import { cacheData, getCachedData } from '@services/cache';
+import { useRouteState } from '@services/route-state';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { constants, convertFlags, copyPhotoFlags } from '@services/constants';
 import { t } from '@services/l10n';
@@ -213,9 +214,12 @@ const softRefreshTimer = new RenewingTimeout();
 /** State for request cancellations */
 const state = ref(1);
 
-watch(router.currentRoute, async (to, from) => {
-  await routeChange(to, from);
-});
+/**
+ * Run after restored geometry renders. Like onMounted, createState
+ * initializes layout and listeners before scroll restoration,
+ * then waits for route state restore to complete before fetch.
+ */
+watch(router.currentRoute, routeChange, { flush: 'post' });
 
 onMounted(() => {
   // Trigger initial state load
@@ -226,9 +230,17 @@ onMounted(() => {
     resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         if (entry.target === recyclerBefore.value) {
-          beforeHeight = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+          // Preserve the visible photo position when top matter changes height.
+          const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+          const element = recycler.value?.$el;
+          if (element && element.scrollTop >= beforeHeight) {
+            element.scrollTop += height - beforeHeight;
+          }
+          // Cache the height for row scroll compensation.
+          beforeHeight = height;
           scrollerManager.value?.adjust();
         } else {
+          // Recalculate photo layout debounced.
           handleResizeWithDelay();
         }
       }
@@ -285,19 +297,70 @@ const allowSwipe = computed((): boolean => {
   return !loading.value && currentScroll.value === 0;
 });
 
+/** Timeline state used for scroll restoration */
+const savedView = computed<IDay[]>({
+  /** Save day counts and row geometry without photos */
+  get: () =>
+    Array.from(heads.value.values(), ({ day }) => ({
+      dayid: day.dayid,
+      count: day.count,
+      haslocal: day.haslocal,
+      savedRows: (day.rows ?? []).map((row) => ({
+        size: row.size,
+        pct: row.pct ?? row.photos?.length ?? 0,
+      })),
+    })),
+  /**
+   * Rebuild headers and placeholders synchronously via processDays,
+   * so scroll can be restored before photo details reload.
+   */
+  set: (days) => {
+    resetState();
+
+    // Disable restore state on search routes, since the individual
+    // day objects cannot be fetched from the server.
+    if (routeIs.Search) return;
+
+    // Process sparse days including geometry.
+    void processDays(days, false);
+  },
+});
+
+const routeState = useRouteState({
+  // Skip query on map route (pans preserve scroll), use it elsewhere.
+  key: timelineRouteKey,
+  state: { savedView },
+  scroll: { recycler },
+});
+
+/** Route identity for Timeline. */
+function timelineRouteKey(route: RouteLocationNormalized): string {
+  // For map, we use query params for pan and zoom, so exclude
+  // them from the route state key.
+  if (route.name === 'map') return route.path;
+
+  // Includes everything except fragment.
+  return route.fullPath.split('#')[0];
+}
+
 async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNormalized) {
-  // Always do a hard refresh if the path changes
-  if (from?.path !== to.path) {
-    await refresh();
+  const startState = state.value;
+  const fromKey = from ? timelineRouteKey(from) : null;
+  const toKey = timelineRouteKey(to);
+
+  // Path or query changed; hard refresh or expect state restore.
+  if (!from || fromKey !== toKey) {
+    await createState();
+    if (state.value !== startState) return;
 
     // Focus on the recycler (e.g. after navigation click)
     // Unless the user is typing in the search box
     if (!document.activeElement?.closest?.('.memories-searchbar')) {
-      recycler.value?.$el.focus();
+      recycler.value?.$el.focus({ preventScroll: true });
     }
   }
 
-  // Do a soft refresh if the query changes
+  // Query changed on same key - soft refresh, preserve scroll.
   else if (JSON.stringify(from.query) !== JSON.stringify(to.query)) {
     state.value++;
     const startState = state.value;
@@ -369,19 +432,25 @@ function allowBreakout() {
 /** Create new state */
 async function createState() {
   const startState = state.value;
-  // Wait for one tick before doing anything
-  await nextTick();
-  if (state.value !== startState) return;
 
-  // Fit to window
-  recomputeSizes();
+  // Fit to window without loading.
+  recomputeSizes(false);
   beforeHeight = recyclerBefore.value!.getBoundingClientRect().height;
 
   // Timeline recycler init
   recycler.value?.$el.addEventListener('scroll', scrollPositionChange, { passive: true });
 
-  // Get data
-  await fetchDays();
+  // Wait until router state has applied the saved scroll position.
+  await until(routeState.restoring).toBe(false);
+  if (state.value !== startState) return;
+
+  // Initialize scrollbar ticks for the restored rows.
+  scrollerManager.value?.reflow();
+
+  // Restored geometry already provides the initial view. An older days cache
+  // could remove days, shrink the timeline and clamp the restored scroll.
+  const noCache = list.value.length > 0;
+  await fetchDays(noCache);
 }
 
 /** Reset all state */
@@ -394,6 +463,7 @@ function resetState() {
   currentStart.value = 0;
   currentEnd.value = 0;
   currentScroll.value = 0;
+  numCols = 0;
   daysIsCache = false;
   state.value++;
   loadedDays.clear();
@@ -447,11 +517,14 @@ async function _softRefreshInternal(sync: boolean) {
 
 /** Do resize after some time */
 function handleResizeWithDelay() {
-  resizeTimer.set(recomputeSizes, 100);
+  resizeTimer.set(() => recomputeSizes(true), 100);
 }
 
-/** Recompute static sizes of containers */
-function recomputeSizes() {
+/**
+ * Recompute static sizes of containers
+ * @param load Whether to load or reflow visible days after recalculating layout
+ */
+function recomputeSizes(load: boolean) {
   // Get the container element
   const containerEl = container.value?.$el;
   if (!containerEl) return;
@@ -482,7 +555,7 @@ function recomputeSizes() {
     rowWidth = targetWidth;
   }
 
-  if (!heightChanged && !widthChanged) {
+  if (numCols && !heightChanged && !widthChanged) {
     // If the target size is the same, nothing else could have
     // possibly changed either, so just skip
     return;
@@ -506,7 +579,7 @@ function recomputeSizes() {
 
   // Reflow if there are elements (this isn't an init call)
   // An init call reaches here when the top matter size changes
-  if (list.value.length > 0) {
+  if (list.value.length > 0 && load) {
     // At this point we're sure the size has changed, so we need
     // to invalidate everything related to sizes
     sizedDays.clear();
@@ -533,6 +606,10 @@ function scrollChangeRecycler(startIndex: number, endIndex: number) {
 
 /** Trigger when recycler view changes to refresh view */
 function scrollChange(startIndex: number, endIndex: number, force = false) {
+  // Defer during state restoration till layout.
+  if (!numCols) return;
+
+  // Check if we reached the start or end.
   if (startIndex === currentStart.value && endIndex === currentEnd.value && !force) {
     return;
   }
@@ -558,7 +635,7 @@ function scrollChange(startIndex: number, endIndex: number, force = false) {
           dayid: row.dayId,
           dispW: utils.roundHalf(rowWidth / numCols),
           dispX: utils.roundHalf((j * rowWidth) / numCols),
-          dispH: rowHeight,
+          dispH: row.size,
           dispY: 0,
         };
       }
@@ -584,6 +661,9 @@ function scrollChange(startIndex: number, endIndex: number, force = false) {
 
 /** Load image data for given view (index based) */
 function loadScrollView(startIndex?: number, endIndex?: number) {
+  // During restoration, defer loading until layout init.
+  if (!numCols) return;
+
   // Default values if not defined
   startIndex ??= currentStart.value;
   endIndex ??= currentEnd.value;
@@ -872,11 +952,16 @@ async function processDays(data: IDay[], cache: boolean) {
     // Mark month view to change the header title
     if (isMonthView.value) head.ismonth = true;
 
-    // Special headers
+    // Special headers - on this day
     if (routeIs.ThisDay && (!prevDay || Math.abs(prevDay.dayid - day.dayid) > 30)) {
       // thisday view with new year title
       head.size = 67;
       head.super = utils.getFromNowStr(utils.dayIdToDate(day.dayid), { padding: 10 });
+    }
+
+    // Special headers - lens search
+    if (routeIs.Search) {
+      lens.markSearchHead(day, head);
     }
 
     // Add header to list
@@ -884,11 +969,25 @@ async function processDays(data: IDay[], cache: boolean) {
     newList.push(head);
 
     // Dummy rows for placeholders
-    let nrows = Math.ceil(day.count / numCols);
+    let nrows = 0;
 
     // Check if already loaded - we can learn
     const prevRows = heads.value.get(day.dayid)?.day?.rows;
-    nrows = prevRows?.length || nrows;
+    if (prevRows?.length) {
+      nrows = prevRows.length;
+    }
+
+    // Check if the geometry was preserved.
+    const savedRows = day.savedRows;
+    if (savedRows) {
+      delete day.savedRows;
+      nrows = savedRows.length;
+    }
+
+    // Fall back to dummy rows for placeholders.
+    if (!nrows && numCols > 0) {
+      nrows = Math.ceil(day.count / numCols);
+    }
 
     // Add rows
     for (let i = 0; i < nrows; i++) {
@@ -900,11 +999,18 @@ async function processDays(data: IDay[], cache: boolean) {
       row.pct = Math.max(0, Math.min(numCols, leftNum));
       row.photos = [];
 
-      // Learn from existing row
-      if (prevRows && i < prevRows.length && !prevRows[i].pct) {
+      // Restore saved geometry or learn from existing row
+      if (savedRows) {
+        row.size = savedRows[i].size;
+        row.pct = savedRows[i].pct ?? row.pct;
+      } else if (prevRows && i < prevRows.length) {
         row.size = prevRows[i].size;
-        row.photos = prevRows[i].photos;
-        delete row.pct;
+        if (prevRows[i].pct !== undefined) {
+          row.pct = prevRows[i].pct;
+        } else {
+          row.photos = prevRows[i].photos;
+          delete row.pct;
+        }
       }
     }
 
@@ -932,6 +1038,9 @@ async function processDays(data: IDay[], cache: boolean) {
   emit('daysLoaded', {
     count: data.reduce((acc, day) => acc + day.count, 0),
   });
+
+  // During restoration, handle layout after restoring scroll.
+  if (!numCols) return;
 
   // Fix view height variable
   await scrollerManager.value?.reflow();
@@ -1549,12 +1658,6 @@ async function fetchLensSearch() {
     const days = await lens.getLensSearchDays(query);
     if (state.value !== startState) return;
     await processDays(days, false);
-    if (state.value !== startState) return;
-
-    // Title the top day; month days get month titles via head.ismonth
-    for (const day of days) {
-      lens.markSearchHead(day, heads.value.get(day.dayid));
-    }
   } catch (e: any) {
     if (state.value === startState && !utils.isNetworkError(e)) {
       showError(e?.response?.data?.message ?? e.message);
