@@ -73,6 +73,7 @@ declare global {
     $el: HTMLDivElement;
     scrollToPosition: (position: number) => void;
     scrollToItem: (index: number) => void;
+    findItemIndex: (offset: number) => number;
   };
 
   type VueHTMLComponent = Omit<ComponentPublicInstance, '$el'> & {

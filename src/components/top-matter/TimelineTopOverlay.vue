@@ -1,5 +1,5 @@
 <template>
-  <div class="top-overlay" :style="{ top }" :class="{ show: !!text }">{{ text }}</div>
+  <div class="top-overlay" :class="{ show: !!text }">{{ text }}</div>
 </template>
 
 <script setup lang="ts">
@@ -7,7 +7,7 @@ import { ref } from 'vue';
 
 import * as utils from '@services/utils/common';
 
-import type { IHeadRow, IPhoto } from '@typings';
+import type { IHeadRow, IRow } from '@typings';
 
 defineOptions({
   name: 'TimelineTopOverlay',
@@ -15,45 +15,41 @@ defineOptions({
 
 const props = defineProps<{
   heads: Map<number, IHeadRow>;
-  container?: Element;
-  recycler?: Element;
+  list: IRow[];
+  beforeHeight: number;
+  recycler?: VueRecyclerType | null;
 }>();
 
 const text = ref(String());
-const top = ref(String());
 
 function refresh() {
   text.value = getText() ?? String();
 }
 
 function getText() {
-  // Get position of recycler
-  const rrect = props.recycler?.getBoundingClientRect();
-  if (!rrect) return; // ??
+  if (!props.recycler?.$el || !props.list.length) return;
 
-  // Get position of container
-  const crect = props.container?.getBoundingClientRect();
-  if (!crect) return; // ??
-  top.value = `${rrect.top - crect.top}px`;
+  // Read the scroll position of the recycler (layout).
+  const scrollTop = props.recycler.$el.scrollTop;
 
-  // Get photo just below the top of the container
-  const elem: any = document
-    .elementsFromPoint(rrect.left + 5, rrect.top + 50)
-    .find((e) => e.classList.contains('p-outer-super'));
-  const overPhoto: IPhoto | null = elem?.__photo;
+  // Still over the before slot: nothing to show.
+  if (scrollTop < props.beforeHeight) return;
 
-  // If no photo is round, no overlay to show
-  if (!overPhoto) return;
+  // Row at the top edge (offsets exclude the before slot).
+  const topRowIdx = props.recycler.findItemIndex(scrollTop - props.beforeHeight);
+  const topRow = props.list[topRowIdx];
+  if (!topRow) return;
 
-  // If this is the first photo, there is an extra condition
-  // to check if the photo is actually above the container
-  if (overPhoto.dispRowNum === 0 && elem.getBoundingClientRect().top > crect.top) {
-    return;
-  }
+  // A visible header needs no overlay.
+  if (topRow.type === 0) return;
 
-  // Get the header from the dayid of the photo
-  // Do not show overlay for single-row days
-  const head = props.heads.get(overPhoto.dayid);
+  // Avoid barely-visible rows, must have minimum height.
+  const belowIdx = props.recycler.findItemIndex(50 + scrollTop - props.beforeHeight);
+  const belowRow = props.list[belowIdx];
+  if (belowRow?.dayId !== topRow.dayId) return;
+
+  // Do not show overlay for single-row days.
+  const head = props.heads.get(topRow.dayId);
   if (!head || (head.day?.rows?.length ?? 0) <= 1) {
     return;
   }

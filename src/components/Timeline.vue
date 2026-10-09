@@ -16,61 +16,69 @@
     <!-- No content found and nothing is loading -->
     <EmptyContent v-if="showEmpty" />
 
-    <!-- Top overlay showing date -->
-    <TimelineTopOverlay ref="topOverlay" :heads="heads" :container="container?.$el" :recycler="recycler?.$el" />
+    <div class="recycler-wrap">
+      <!-- Top overlay showing date -->
+      <TimelineTopOverlay
+        ref="topOverlay"
+        :heads="heads"
+        :list="list"
+        :before-height="beforeHeight"
+        :recycler="recycler"
+      />
 
-    <!-- Main recycler view for rows -->
-    <RecycleScroller
-      ref="recycler"
-      class="recycler hide-scrollbar"
-      tabindex="1"
-      :class="{ empty }"
-      :items="list"
-      :emit-update="true"
-      :buffer="800"
-      :skipHover="true"
-      key-field="id"
-      size-field="size"
-      type-field="type"
-      :disableTransform="true"
-      :updateInterval="100"
-      @update="scrollChangeRecycler"
-    >
-      <template #before>
-        <!-- Dynamic top matter, e.g. album or view name -->
-        <div class="recycler-before" ref="recyclerBefore">
-          <!-- Gap for mobile header -->
-          <div class="mobile-header-top-gap"></div>
+      <!-- Main recycler view for rows -->
+      <RecycleScroller
+        ref="recycler"
+        class="recycler hide-scrollbar"
+        tabindex="1"
+        :class="{ empty }"
+        :items="list"
+        :emit-update="true"
+        :buffer="800"
+        :skipHover="true"
+        key-field="id"
+        size-field="size"
+        type-field="type"
+        :disableTransform="true"
+        :updateInterval="100"
+        @update="scrollChangeRecycler"
+      >
+        <template #before>
+          <!-- Dynamic top matter, e.g. album or view name -->
+          <div class="recycler-before" ref="recyclerBefore">
+            <!-- Gap for mobile header -->
+            <div class="mobile-header-top-gap"></div>
 
-          <!-- Route-specific top matter -->
-          <DynamicTopMatter ref="dtm" @load="scrollerManager?.adjust()" />
-        </div>
-      </template>
-
-      <template v-slot="{ item, index }">
-        <RowHead v-if="item.type === 0" :item="item" @click="selectionManager?.selectHead(item)" />
-
-        <template v-else>
-          <Photo
-            class="photo top-left"
-            v-for="photo of item.photos ?? []"
-            :key="photo.key"
-            :style="{
-              height: `${photo.dispH}px`,
-              width: `${photo.dispW}px`,
-              transform: `translate(${photo.dispX}px, ${photo.dispY}px)`,
-            }"
-            :data="photo"
-            :day="item.day"
-            @select="selectionManager?.clickSelectionIcon(photo, $event, index)"
-            @pointerdown="selectionManager?.clickPhoto(photo, $event, index)"
-            @touchstart="selectionManager?.touchstartPhoto(photo, $event, index)"
-            @touchend="selectionManager?.touchendPhoto(photo, $event, index)"
-            @touchmove="selectionManager?.touchmovePhoto(photo, $event, index)"
-          />
+            <!-- Route-specific top matter -->
+            <DynamicTopMatter ref="dtm" @load="scrollerManager?.adjust()" />
+          </div>
         </template>
-      </template>
-    </RecycleScroller>
+
+        <template v-slot="{ item, index }">
+          <RowHead v-if="item.type === 0" :item="item" @click="selectionManager?.selectHead(item)" />
+
+          <template v-else>
+            <Photo
+              class="photo top-left"
+              v-for="photo of item.photos ?? []"
+              :key="photo.key"
+              :style="{
+                height: `${photo.dispH}px`,
+                width: `${photo.dispW}px`,
+                transform: `translate(${photo.dispX}px, ${photo.dispY}px)`,
+              }"
+              :data="photo"
+              :day="item.day"
+              @select="selectionManager?.clickSelectionIcon(photo, $event, index)"
+              @pointerdown="selectionManager?.clickPhoto(photo, $event, index)"
+              @touchstart="selectionManager?.touchstartPhoto(photo, $event, index)"
+              @touchend="selectionManager?.touchendPhoto(photo, $event, index)"
+              @touchmove="selectionManager?.touchmovePhoto(photo, $event, index)"
+            />
+          </template>
+        </template>
+      </RecycleScroller>
+    </div>
 
     <!-- Managers -->
     <ScrollerManager
@@ -1752,6 +1760,11 @@ async function fetchLensSearch({
     margin-left: -1px;
     width: calc(100% + 3px); // 1px extra here for sub-pixel rounding
   }
+}
+
+.recycler-wrap {
+  position: relative;
+  width: 100%;
 }
 
 .recycler {
