@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, useTemplateRef } from 'vue';
 
 import { windowDims } from '@services/viewport';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
@@ -84,9 +84,9 @@ const emit = defineEmits<{
   scroll: [event: { current: number; previous: number }];
 }>();
 
-const scroller = ref<HTMLDivElement>();
-const cursorSt = ref<HTMLSpanElement>();
-const hoverCursor = ref<HTMLSpanElement>();
+const scroller = useTemplateRef<HTMLDivElement>('scroller');
+const cursorSt = useTemplateRef<HTMLSpanElement>('cursorSt');
+const hoverCursor = useTemplateRef<HTMLSpanElement>('hoverCursor');
 
 /** Last known height at adjustment */
 const lastAdjustHeight = ref(0);

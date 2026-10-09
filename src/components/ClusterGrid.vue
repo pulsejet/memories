@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, nextTick, useTemplateRef } from 'vue';
 import { RecycleScroller } from 'vue-virtual-scroller';
 
 import { routeIs } from '@services/router';
@@ -61,7 +61,7 @@ const emit = defineEmits<{
   click: [item: ICluster];
   plus: [];
 }>();
-const recycler = ref<VueRecyclerType>();
+const recycler = useTemplateRef<VueRecyclerType>('recycler');
 const recyclerWidth = ref(300);
 
 /** Number of items horizontally */

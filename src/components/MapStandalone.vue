@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed, useTemplateRef } from 'vue';
 import { LMap, LTileLayer, LMarker, LIcon } from '@vue-leaflet/vue-leaflet';
 import { latLngBounds } from 'leaflet';
 
@@ -64,7 +64,7 @@ const emit = defineEmits<{
 }>();
 
 /** Main map instance and configuration */
-const map = ref<InstanceType<typeof LMap>>();
+const map = useTemplateRef<InstanceType<typeof LMap>>('map');
 const mapOptions = computed(() => ({
   maxBounds: latLngBounds([-90, -180], [90, 180]),
   maxBoundsViscosity: 0.9,
