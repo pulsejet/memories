@@ -236,7 +236,7 @@ onMounted(() => {
           // Preserve the visible photo position when top matter changes height.
           const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
           const element = recycler.value?.$el;
-          if (element && element.scrollTop >= beforeHeight) {
+          if (element && element.scrollTop > beforeHeight) {
             element.scrollTop += height - beforeHeight;
           }
           // Cache the height for row scroll compensation.
