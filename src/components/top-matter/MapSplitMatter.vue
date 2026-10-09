@@ -35,7 +35,8 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { nextTick, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { useResizeObserver } from '@vueuse/core';
 import { useRoute, useRouter } from 'vue-router';
 import { LMarker, LIcon } from '@vue-leaflet/vue-leaflet';
 
@@ -68,20 +69,13 @@ const oldZoom = ref(2);
 const clusters = ref<IMapCluster[]>([]);
 const animMarkers = ref(false);
 const lastClick = ref(0); // fileid
-let resizeObserver: ResizeObserver | null = null;
+
+useResizeObserver(matter, handleContainerResize);
 
 onMounted(() => {
   if (standalone.value?.getMap()) {
     onMapReady();
   }
-
-  resizeObserver = new ResizeObserver(handleContainerResize);
-  resizeObserver.observe(matter.value!);
-});
-
-onBeforeUnmount(() => {
-  resizeObserver?.disconnect();
-  resizeObserver = null;
 });
 
 watch(
