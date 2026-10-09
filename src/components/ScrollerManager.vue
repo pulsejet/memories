@@ -205,9 +205,6 @@ function recyclerScrolled(event: Event | null) {
 
 /** Update cursor position from recycler scroll position */
 function updateFromRecyclerScroll() {
-  // Ignore if dragging the scroller
-  if (interacting.value) return;
-
   // Get the scroll position
   const scroll = props.recycler?.$el?.scrollTop ?? 0;
 
@@ -220,6 +217,9 @@ function updateFromRecyclerScroll() {
   utils.bus.emit('memories.recycler.scroll', event);
   emit('scroll', event);
   lastKnownRecyclerScroll.value = scroll;
+
+  // Ignore if dragging the scroller
+  if (interacting.value) return;
 
   // Get cursor px position
   const { top1, top2, y1, y2 } = getCoords(scroll, 'y');
