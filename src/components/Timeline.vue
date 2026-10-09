@@ -463,6 +463,9 @@ async function createState(signal: AbortSignal) {
   // Initialize scrollbar ticks for the restored rows.
   scrollerManager.value?.reflow();
 
+  // Fire the initial scroll change to load the visible rows.
+  scrollChange(currentStart.value, currentEnd.value, true);
+
   // Restored geometry already provides the initial view. An older days cache
   // could remove days, shrink the timeline and clamp the restored scroll.
   const noCache = list.value.length > 0;
@@ -640,7 +643,11 @@ function scrollChangeRecycler(
 /** Trigger when recycler view changes to refresh view */
 function scrollChange(startIndex: number, endIndex: number, force = false) {
   // Defer during state restoration till layout.
-  if (!numCols) return;
+  if (!numCols) {
+    currentStart.value = startIndex;
+    currentEnd.value = endIndex;
+    return;
+  }
 
   // Check if we reached the start or end.
   if (startIndex === currentStart.value && endIndex === currentEnd.value && !force) {
