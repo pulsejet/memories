@@ -182,7 +182,7 @@ let rowHeight = 100;
 /** Computed row width */
 let rowWidth = 100;
 /** Height of the recycler before slot */
-let beforeHeight = 0;
+const beforeHeight = ref(0);
 
 /** Current start index */
 const currentStart = ref(0);
@@ -233,14 +233,8 @@ onMounted(() => {
     resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         if (entry.target === recyclerBefore.value) {
-          // Preserve the visible photo position when top matter changes height.
-          const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
-          const element = recycler.value?.$el;
-          if (element && element.scrollTop > beforeHeight) {
-            element.scrollTop += height - beforeHeight;
-          }
           // Cache the height for row scroll compensation.
-          beforeHeight = height;
+          beforeHeight.value = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
           scrollerManager.value?.adjust();
         } else {
           // Recalculate photo layout debounced.
@@ -328,7 +322,7 @@ const savedView = computed<IDay[]>({
 const routeState = useRouteState({
   // Skip query on map route (pans preserve scroll), use it elsewhere.
   key: timelineRouteKey,
-  state: { savedView },
+  state: { savedView, beforeHeight },
   scroll: { recycler },
 });
 
@@ -440,11 +434,23 @@ async function createState() {
 
   // Fit to window without loading.
   recomputeSizes(false);
-  beforeHeight = recyclerBefore.value!.getBoundingClientRect().height;
+
+  // Get the initial height of the before slot.
+  const restoredBeforeHeight = beforeHeight.value;
+  beforeHeight.value = recyclerBefore.value!.getBoundingClientRect().height;
 
   // Wait until router state has applied the saved scroll position.
   await until(routeState.restoring).toBe(false);
   if (state.value !== startState) return;
+
+  // If we stored the scroll position and the beforeHeight changed, we
+  // need to compensate the scroll position to keep the same viewport.
+  if (restoredBeforeHeight && restoredBeforeHeight !== beforeHeight.value) {
+    const element = recycler.value?.$el;
+    if (element && element.scrollTop > restoredBeforeHeight) {
+      element.scrollTop += beforeHeight.value - restoredBeforeHeight;
+    }
+  }
 
   // Initialize scrollbar ticks for the restored rows.
   scrollerManager.value?.reflow();
@@ -1419,7 +1425,7 @@ function processDay(dayId: number, data: IPhoto[]) {
 
   // Get index and Y position of header in O(n)
   let headIdx = 0;
-  let headY = beforeHeight;
+  let headY = beforeHeight.value;
   for (const row of list.value) {
     if (row === head) break;
     headIdx++;
