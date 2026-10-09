@@ -31,7 +31,7 @@ type Snapshot = {
 };
 
 // Keep snapshots across component remounts, evicting the least recently used entries.
-const states = lru<Snapshot>(500);
+const states = lru<Snapshot>(150);
 
 // Flag on start of key to disable.
 const FLAG_DISABLE = '__disable_persistence__';
