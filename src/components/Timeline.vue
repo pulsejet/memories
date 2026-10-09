@@ -608,8 +608,14 @@ function scrollPositionChange(event?: Event) {
 }
 
 /** Trigger when recycler view changes (for callback) */
-function scrollChangeRecycler(startIndex: number, endIndex: number) {
-  return scrollChange(startIndex, endIndex);
+function scrollChangeRecycler(
+  startIndex: number,
+  endIndex: number,
+  visibleStartIndex: number,
+  visibleEndIndex: number,
+) {
+  // Render range overshoots by the top-matter height; visible range accounts for it.
+  return scrollChange(visibleStartIndex ?? startIndex, visibleEndIndex ?? endIndex);
 }
 
 /** Trigger when recycler view changes to refresh view */
