@@ -44,6 +44,7 @@ use OCP\IRequest;
 use OCP\IUserSession;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
+use Psr\Log\LoggerInterface;
 
 const IMAGICK_SAFE = '/^image\/(x-)?(png|jpeg|gif|bmp|tiff|webp|hei(f|c)|avif|dcraw)$/';
 
@@ -62,6 +63,7 @@ final class ImageController extends ApiController
         protected SystemConfig $systemConfig,
         protected Util $util,
         protected Index $index,
+        protected LoggerInterface $logger,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -278,13 +280,31 @@ final class ImageController extends ApiController
                 // Get clusters for this file
                 if ($clusters) {
                     $clist = [];
+                    $cfailed = [];
                     foreach (explode(',', $clusters) as $type) {
-                        $backend = \OCA\Memories\ClustersBackend\Manager::get($type);
-                        if ($backend->isEnabled()) {
-                            $clist[$type] = $backend->getClusters($id);
+                        // One broken backend must not take down the whole
+                        // metadata response. This happens in practice when a
+                        // companion app (e.g. facerecognition) changes its
+                        // schema underneath us: report that single feature as
+                        // unavailable and keep serving everything else.
+                        try {
+                            $backend = \OCA\Memories\ClustersBackend\Manager::get($type);
+                            if ($backend->isEnabled()) {
+                                $clist[$type] = $backend->getClusters($id);
+                            }
+                        } catch (\Throwable $e) {
+                            $cfailed[] = $type;
+                            $this->logger->warning("Clusters backend \"{$type}\" failed for file {$id}: ".$e->getMessage(), [
+                                'exception' => $e,
+                                'app' => 'memories',
+                            ]);
                         }
                     }
                     $info['clusters'] = $clist;
+
+                    if ($cfailed) {
+                        $info['clustersFailed'] = $cfailed;
+                    }
                 }
             } elseif ($shareNode = $this->fs->getShareNode()) {
                 // For public shares, get path relative to share root

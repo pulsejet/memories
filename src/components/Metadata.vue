@@ -20,6 +20,31 @@
       </div>
     </div>
 
+    <div v-if="config.facerecognition_enabled" class="people face-recognition">
+      <div class="section-header">
+        <div class="section-title">{{ t('memories', 'Face Recognition') }}</div>
+        <NcActions :inline="1" v-if="!facerecognitionFailed">
+          <NcActionButton :aria-label="t('memories', 'Add person')" @click="openManualAdd" close-after-click>
+            {{ t('memories', 'Add person') }}
+            <template #icon> <AddIcon :size="20" /> </template>
+          </NcActionButton>
+        </NcActions>
+      </div>
+      <div v-if="facerecognitionFailed" class="error-hint">
+        {{ t('memories', 'Face Recognition is unavailable. The app may need an update to match its database schema.') }}
+      </div>
+      <template v-else-if="facerecognitionPeople.length">
+        <div class="container" v-for="face of facerecognitionPeople" :key="face.cluster_id">
+          <Cluster class="cluster--rounded" :data="face" :counters="false"> </Cluster>
+        </div>
+      </template>
+      <div v-else class="empty-hint">
+        {{ t('memories', 'No faces detected — click + to tag manually') }}
+      </div>
+    </div>
+
+    <component :is="manualAddDialog" v-if="manualAddDialog" ref="manualAddModal" @added="refresh" />
+
     <div v-if="albums.length">
       <div class="section-title">{{ t('memories', 'Albums') }}</div>
       <AlbumsList class="albums" :albums="albums" />
@@ -74,7 +99,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent, markRaw } from 'vue';
+import {
+  ref,
+  shallowRef,
+  computed,
+  watch,
+  nextTick,
+  onMounted,
+  onBeforeUnmount,
+  defineAsyncComponent,
+  markRaw,
+  useTemplateRef,
+} from 'vue';
 import type { Component } from 'vue';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
@@ -86,13 +122,14 @@ import { getCanonicalLocale } from '@nextcloud/l10n';
 import { DateTime } from 'luxon';
 
 import { config } from '@services/user-config';
-import { routeIs } from '@services/router';
 
 import Cluster from '@components/frame/Cluster.vue';
 import AlbumsList from '@components/modal/AlbumsList.vue';
+import type FaceManualAddModal from '@components/modal/FaceManualAddModal.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 const MapStandalone = defineAsyncComponent(() => import('@components/MapStandalone.vue'));
 
+import AddIcon from 'vue-material-design-icons/AccountPlus.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import CameraIrisIcon from 'vue-material-design-icons/CameraIris.vue';
@@ -132,6 +169,9 @@ const filename = ref('');
 const exif = ref({} as IExif);
 const baseInfo = ref({} as IImageInfo);
 const error = ref(false);
+/** The marking dialog, loaded on first use */
+const manualAddDialog = shallowRef<typeof FaceManualAddModal | null>(null);
+const manualAddModal = useTemplateRef<InstanceType<typeof FaceManualAddModal>>('manualAddModal');
 
 const loading = ref(0);
 const state = ref(0);
@@ -308,17 +348,17 @@ const albums = computed(() => {
   return list;
 });
 
-/** Faces for this file, backend depends on route and config */
-const people = computed(() => {
-  const clusters = baseInfo.value?.clusters;
+/** Faces of Recognize for this file; Face Recognition has a section of its own */
+const people = computed(() => baseInfo.value?.clusters?.recognize ?? []);
 
-  // force face-recognition on its own route, or if recognize is disabled
-  if (routeIs.FaceRecognition || !config.recognize_enabled) {
-    return clusters?.facerecognition ?? [];
-  }
+/** Faces of Face Recognition for this file */
+const facerecognitionPeople = computed(() => baseInfo.value?.clusters?.facerecognition ?? []);
 
-  return clusters?.recognize ?? [];
-});
+/**
+ * The server could not build the face recognition clusters for this file.
+ * The rest of the metadata is still valid, so only this section degrades.
+ */
+const facerecognitionFailed = computed(() => baseInfo.value?.clustersFailed?.includes('facerecognition') ?? false);
 
 /** Whether this file is shared by someone else */
 const isShared = computed(() => !!baseInfo.value.owneruid && baseInfo.value.owneruid !== utils.uid);
@@ -479,6 +519,24 @@ function editGeo() {
   _m.modals.editMetadata([_m.viewer.currentPhoto!], [4]);
 }
 
+/** Open the marking dialog on this photo */
+async function openManualAdd() {
+  manualAddDialog.value ??= (await import('@components/modal/FaceManualAddModal.vue')).default;
+  await nextTick();
+  const modal = manualAddModal.value;
+  if (!modal) return;
+  if (fileid.value) {
+    modal.openForFile({
+      fileid: fileid.value,
+      etag: baseInfo.value?.etag,
+      w: baseInfo.value?.w,
+      h: baseInfo.value?.h,
+    });
+  } else {
+    modal.open();
+  }
+}
+
 /** Refresh when the current file changes on disk */
 function handleFileUpdated({ fileid: updated }: utils.BusEvent['files:file:updated']) {
   if (updated && fileid.value === updated) {
@@ -557,6 +615,17 @@ a {
   > .section-title {
     margin-bottom: 4px;
   }
+  > .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 4px;
+    margin-bottom: 4px;
+
+    > .section-title {
+      flex: 1;
+    }
+  }
   > .container {
     width: calc(100% / 3);
     aspect-ratio: 1;
@@ -568,6 +637,17 @@ a {
     @media (max-width: 768px) {
       font-size: 0.95em;
     }
+  }
+  > .empty-hint {
+    padding: 6px 8px 10px;
+    font-size: 0.9em;
+    color: var(--color-text-lighter);
+  }
+
+  > .error-hint {
+    padding: 6px 8px 10px;
+    font-size: 0.9em;
+    color: var(--color-error-text, var(--color-error));
   }
 }
 

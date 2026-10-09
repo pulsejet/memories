@@ -155,6 +155,9 @@ declare module '@typings' {
       recognize?: IFace[];
       facerecognition?: IFace[];
     };
+
+    /** Cluster backends that threw while building this response. */
+    clustersFailed?: string[];
   }
 
   export interface IExif {
