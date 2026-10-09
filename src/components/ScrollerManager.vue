@@ -65,6 +65,9 @@ const SNAP_OFFSET = -5; // Pixels to snap at
 const SNAP_MIN_ROWS = 1000; // Minimum rows to snap at
 const MOBILE_CURSOR_HH = 22; // Half height of the mobile cursor (CSS)
 
+const VIBRATE_MS = 10; // Duration of tick haptic on mobile
+const VIBRATE_THROTTLE_MS = 40; // Minimum gap between haptic vibrations
+
 const props = defineProps<{
   /** Rows from Timeline */
   rows: IRow[];
@@ -125,6 +128,8 @@ const interacting = ref(false);
 const lastKnownRecyclerScroll = ref(0);
 /** Track the last requested y position when interacting */
 const lastRequestedRecyclerY = ref(NaN);
+/** Last time a haptic tick was emitted while dragging the handle */
+const lastVibrateTime = ref(0);
 
 /** Get the visible ticks */
 const visibleTicks = computed(() => {
@@ -550,6 +555,7 @@ function moveto(y: number, snap: boolean) {
   if (lastRequestedRecyclerY.value !== targetY) {
     lastRequestedRecyclerY.value = targetY;
     props.recycler?.scrollToPosition(targetY);
+    vibrateTick();
   }
 
   handleScroll();
@@ -587,6 +593,20 @@ function interactend() {
 function handleScroll() {
   scrollingNowTimer.set(null, 200);
   scrollingTimer.set(null, 1500);
+}
+
+/** Tiny haptic tick while dragging the handle on mobile */
+function vibrateTick() {
+  if (!windowDims.isMobile) return;
+  if (!('vibrate' in navigator)) return;
+  const now = performance.now();
+  if (now - lastVibrateTime.value < VIBRATE_THROTTLE_MS) return;
+  lastVibrateTime.value = now;
+  try {
+    navigator.vibrate(VIBRATE_MS);
+  } catch {
+    // ignore
+  }
 }
 
 defineExpose({
