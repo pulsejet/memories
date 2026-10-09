@@ -127,7 +127,7 @@ import TimelineTopOverlay from '@components/top-matter/TimelineTopOverlay.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import { cacheData, getCachedData } from '@services/cache';
-import { useRouteState } from '@services/route-state';
+import { routerStatePath, useRouteState, disableRouterStatePersistence } from '@services/route-state';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { constants, convertFlags, copyPhotoFlags } from '@services/constants';
 import { t } from '@services/l10n';
@@ -319,13 +319,8 @@ const savedView = computed<IDay[]>({
    * so scroll can be restored before photo details reload.
    */
   set: (days) => {
-    resetState();
-
-    // Disable restore state on search routes, since the individual
-    // day objects cannot be fetched from the server.
-    if (routeIs.Search) return;
-
     // Process sparse days including geometry.
+    resetState();
     void processDays(days, false);
   },
 });
@@ -341,10 +336,16 @@ const routeState = useRouteState({
 function timelineRouteKey(route: RouteLocationNormalized): string {
   // For map, we use query params for pan and zoom, so exclude
   // them from the route state key.
-  if (route.name === 'map') return route.path;
+  if (route.name === _m.routes.Map.name) return route.path;
+
+  // For search, we don't want to restore state, since the
+  // individual day objects cannot be fetched from the server.
+  if (route.name === _m.routes.Search.name) {
+    return disableRouterStatePersistence(routerStatePath(route));
+  }
 
   // Includes everything except fragment.
-  return route.fullPath.split('#')[0];
+  return routerStatePath(route);
 }
 
 async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNormalized) {

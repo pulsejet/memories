@@ -33,6 +33,9 @@ type Snapshot = {
 // Keep snapshots across component remounts, evicting the least recently used entries.
 const states = lru<Snapshot>(500);
 
+// Flag on start of key to disable.
+const FLAG_DISABLE = '__disable_persistence__';
+
 /** Resolve the scrolling element, ignoring unmounted refs and non-HTML component roots. */
 function getElement(target: ScrollTarget): HTMLElement | null {
   if (!target) return null;
@@ -51,8 +54,13 @@ function cloneState<T extends InnerState>(state: T | undefined) {
 }
 
 /** Compute the key to use for storing the state */
-export function routerStatePath(route: RouteLocationNormalized, instance?: string) {
-  return `${route.fullPath.split('#')[0]}#${instance}`;
+export function routerStatePath(route: RouteLocationNormalized) {
+  return route.fullPath.split('#')[0];
+}
+
+/** Wrapper for key to disable state persistence */
+export function disableRouterStatePersistence(key: string): string {
+  return `${FLAG_DISABLE}/${key}`;
 }
 
 /**
@@ -72,11 +80,16 @@ export function useRouteState<T extends InnerState>(options: RouteState<T>) {
   const defaults = cloneState(options.state);
 
   // Queries distinguish views; viewer hashes share the underlying page's state.
-  const key = (route: RouteLocationNormalized) =>
-    options.key ? `${options.key(route)}#${instance}` : routerStatePath(route, instance);
+  const key = (route: RouteLocationNormalized) => {
+    const k = options.key ? options.key(route) : routerStatePath(route);
+    return `${k}#${instance}`;
+  };
 
   /** Capture ref values and mounted scroll targets before route-driven watchers run. */
   function preserve(routeKey: string) {
+    // Check if explicitly disabled.
+    if (routeKey.includes(FLAG_DISABLE)) return;
+
     // Preserve old offsets for gone targets (v-if).
     const scroll = states.get(routeKey)?.scroll ?? {};
 
