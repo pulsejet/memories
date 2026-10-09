@@ -1,7 +1,9 @@
 import { API } from '@services/API';
 import { onDOMLoaded } from '@services/utils/common';
 import { importWorker } from 'webworker-typed';
+
 import type XImgWorker from './XImgWorker';
+import type { AbortOpts } from '@services/utils/abort';
 
 // Global web worker to fetch images
 let worker: typeof XImgWorker;
@@ -58,9 +60,10 @@ export async function sticky(url: string, delta: number) {
   }
 }
 
-export async function fetchImage(url: string) {
+export async function fetchImage(url: string, opts?: AbortOpts) {
   // Start worker
   startWorker();
+  opts?.signal?.throwIfAborted();
 
   // Check memcache entry
   let entry = BLOB_CACHE.get(url);
@@ -68,6 +71,7 @@ export async function fetchImage(url: string) {
 
   // Fetch image
   const blobUrl = await worker.fetchImageSrc(url);
+  opts?.signal?.throwIfAborted();
 
   // Check memcache entry again and revoke if it was added in the meantime
   if ((entry = BLOB_CACHE.get(url))) {

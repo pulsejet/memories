@@ -9,6 +9,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { constants } from '@services/constants';
+import { isAbortError, useAbort } from '@services/utils/abort';
 import { fetchImage, sticky } from './XImgCache';
 
 const BLANK_IMG: string = constants.BLANK_IMG;
@@ -36,7 +37,7 @@ const emit = defineEmits<{
 
 const dataSrc = ref(BLANK_IMG);
 let blobLocked = false;
-let state: number = 0;
+const abort = useAbort();
 
 watch(
   () => props.src,
@@ -50,8 +51,6 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  state = -1;
-
   // Free up the blob if it was locked
   freeBlob();
 });
@@ -77,15 +76,16 @@ async function loadImage() {
 
   // Fetch image with worker
   try {
-    const currentState = (state = Math.random());
-    const blobSrc = await fetchImage(props.src);
-    if (currentState !== state) return; // aborted
+    const signal = abort.renew();
+    const blobSrc = await fetchImage(props.src, { signal });
+    signal.throwIfAborted();
     dataSrc.value = blobSrc;
 
     // Locking is needed primary for thumbnails,
     // since photoswipe uses the thumb url for the animated zoom-in
     lockBlob();
   } catch (error: any) {
+    if (isAbortError(error)) return;
     dataSrc.value = BLANK_IMG;
     emit('error', error);
     console.error('Failed to load XImg', error);

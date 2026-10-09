@@ -7,11 +7,13 @@ import client, { remotePath } from './client';
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
 import { routeIs } from '@services/router';
+import { isAbortError } from '@services/utils/abort';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 
 import type { IFileInfo, IImageInfo, IPhoto } from '@typings';
 import type { ResponseDataDetailed, SearchResult } from 'webdav';
+import type { AbortOpts } from '@services/utils/abort';
 
 const GET_FILE_CHUNK_SIZE = 50;
 
@@ -20,7 +22,7 @@ type GetFilesOpts = {
   cache?: boolean;
   /** Get original route-independent filename for current user only (default false) */
   ignoreRoute?: boolean;
-};
+} & AbortOpts;
 
 /**
  * Get file infos for list of files given Ids
@@ -74,13 +76,14 @@ export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<I
   }
 
   // Get file infos for the rest
-  return [...cache, ...(await getFilesInternal1(rest))];
+  opts?.signal?.throwIfAborted();
+  return [...cache, ...(await getFilesInternal1(rest, opts))];
 }
 
-async function getFilesInternal1(photos: IPhoto[]): Promise<IFileInfo[]> {
+async function getFilesInternal1(photos: IPhoto[], opts?: AbortOpts): Promise<IFileInfo[]> {
   // For public shares, use API instead of WebDAV SEARCH (which requires user auth)
   if (!utils.uid) {
-    return getFilesViaAPI(photos);
+    return getFilesViaAPI(photos, opts);
   }
 
   // Get file IDs array
@@ -93,21 +96,23 @@ async function getFilesInternal1(photos: IPhoto[]): Promise<IFileInfo[]> {
   }
 
   // Get file infos for each chunk
-  return (await Promise.all(chunks.map(getFilesInternal2))).flat();
+  return (await Promise.all(chunks.map((c) => getFilesInternal2(c, opts)))).flat();
 }
 
 /**
  * Get file infos for public shares via API (instead of WebDAV SEARCH)
  * This is needed because WebDAV SEARCH requires user authentication
  */
-async function getFilesViaAPI(photos: IPhoto[]): Promise<IFileInfo[]> {
+async function getFilesViaAPI(photos: IPhoto[], opts?: AbortOpts): Promise<IFileInfo[]> {
   const fileInfos: IFileInfo[] = [];
   const token = _m.route.params.token?.toString();
+  const signal = opts?.signal;
 
   for (const photo of photos) {
     try {
+      signal?.throwIfAborted();
       const url = API.IMAGE_INFO(photo.fileid);
-      const res = await axios.get<IImageInfo>(url);
+      const res = await axios.get<IImageInfo>(url, { signal });
       const filename = res.data.filename;
 
       if (filename) {
@@ -121,6 +126,7 @@ async function getFilesViaAPI(photos: IPhoto[]): Promise<IFileInfo[]> {
         });
       }
     } catch (error) {
+      if (isAbortError(error)) throw error;
       console.error('Failed to get file info via API', photo.fileid, error);
     }
   }
@@ -128,10 +134,11 @@ async function getFilesViaAPI(photos: IPhoto[]): Promise<IFileInfo[]> {
   return fileInfos;
 }
 
-async function getFilesInternal2(fileIds: number[]): Promise<IFileInfo[]> {
+async function getFilesInternal2(fileIds: number[], opts?: AbortOpts): Promise<IFileInfo[]> {
   // This function is only called for authenticated users (not public shares)
   // Public shares use getFilesViaAPI instead to avoid WebDAV SEARCH auth issues
   const prefixPath = `/files/${utils.uid}`;
+  const signal = opts?.signal;
 
   // IMPORTANT: if this isn't there, then a blank
   // returns EVERYTHING on the server!
@@ -146,7 +153,11 @@ async function getFilesInternal2(fileIds: number[]): Promise<IFileInfo[]> {
 
   // Make Search request
   const xml = `<?xml version="1.0" encoding="UTF-8"?><d:searchrequest xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns" xmlns:ns="https://github.com/icewind1991/SearchDAV/ns" xmlns:ocs="http://open-collaboration-services.org/ns"><d:basicsearch><d:select><d:prop><oc:fileid /></d:prop></d:select><d:from><d:scope><d:href>${prefixPath}</d:href><d:depth>0</d:depth></d:scope></d:from><d:where><d:or>${filter}</d:or></d:where></d:basicsearch></d:searchrequest>`;
-  const response = (await client.search('', { data: xml, details: true })) as ResponseDataDetailed<SearchResult>;
+  const response = (await client.search('', {
+    data: xml,
+    details: true,
+    signal,
+  })) as ResponseDataDetailed<SearchResult>;
 
   return response.data.results
     .filter((file) => file.props?.fileid)
@@ -171,10 +182,11 @@ async function getFilesInternal2(fileIds: number[]): Promise<IFileInfo[]> {
  * Run promises in parallel, but only n at a time
  * @param promises Array of promise generator funnction (async functions)
  * @param n Number of promises to run in parallel
- * @details Each promise returned MUST resolve and not throw an error
+ * @details Tasks MUST resolve rather than throw. Abort errors propagate out
+ * and stop iteration; any other task error is logged and skipped.
  * @returns Generator of lists of results. Each list is of length n.
  */
-export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: number) {
+export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: number, opts?: AbortOpts) {
   if (!promises.length) return;
 
   promises.reverse(); // reverse so we can use pop() efficiently
@@ -183,23 +195,34 @@ export async function* runInParallel<T>(promises: (() => Promise<T>)[], n: numbe
   const running: Promise<void>[] = [];
 
   while (true) {
+    opts?.signal?.throwIfAborted();
+
     // add one promise per iteration
     if (promises.length) {
       let task!: Promise<void>;
       running.push(
         (task = (async () => {
-          // run the promise
-          results.push(await promises.pop()!());
-
-          // remove the promise from the running list
-          running.splice(running.indexOf(task), 1);
+          try {
+            // run the promise
+            results.push(await promises.pop()!());
+          } finally {
+            // remove the promise from the running list
+            running.splice(running.indexOf(task), 1);
+          }
         })()),
       );
     }
 
     // wait for one of the promises to finish
     if (running.length >= n || !promises.length) {
-      await Promise.race(running);
+      try {
+        await Promise.race(running);
+      } catch (e) {
+        // Genuine cancellation of our generation: propagate it.
+        if (isAbortError(e) && opts?.signal?.aborted) throw e;
+        // Anything else is unexpected: log it and continue.
+        console.error('[BUG] runInParallel: uncaught task error', e);
+      }
     }
 
     // yield the results if the threshold is reached
@@ -227,24 +250,27 @@ type ExtendedStack = {
  *
  * @returns expanded photos and the IDs of Live Photo video parts
  */
-export async function extendWithStack(photos: IPhoto[]): Promise<ExtendedStack> {
-  // Add Live Photos files
+export async function extendWithStack(photos: IPhoto[], opts?: AbortOpts): Promise<ExtendedStack> {
+  const signal = opts?.signal;
   const livePhotos: IPhoto[] = [];
   for await (const res of runInParallel(
     photos
       .filter((p) => p.liveid && !p.liveid.startsWith('self__'))
       .map((p) => async () => {
         try {
+          signal?.throwIfAborted();
           const base = utils.getLivePhotoVideoUrl(p, false);
           const url = API.Q(base, { format: 'json' });
-          const res = await axios.get<IPhoto>(url);
+          const res = await axios.get<IPhoto>(url, { signal });
           return res.data;
         } catch (error) {
+          if (isAbortError(error)) throw error;
           console.error(error);
           return null;
         }
       }),
     10,
+    opts,
   )) {
     livePhotos.push(...res.filter(utils.truthy));
   }
@@ -646,9 +672,15 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
  * @param query.tags whether to include tags in the response
  * @param progress callback to report progress
  */
-export async function fillImageInfo(photos: IPhoto[], query?: { tags?: number }, progress?: (count: number) => void) {
+export async function fillImageInfo(
+  photos: IPhoto[],
+  query?: { tags?: number },
+  progress?: (count: number) => void,
+  opts?: AbortOpts,
+) {
   // Filter out photos that are local only
   const remote = photos.filter((p) => !utils.isLocalPhoto(p));
+  const signal = opts?.signal;
 
   // Number of photos done
   let done = photos.length - remote.length;
@@ -657,11 +689,13 @@ export async function fillImageInfo(photos: IPhoto[], query?: { tags?: number },
   // Load metadata for all photos
   const calls = remote.map((p) => async () => {
     try {
+      signal?.throwIfAborted();
       const url = API.Q(API.IMAGE_INFO(p.fileid), query ?? {});
-      const res = await axios.get<IImageInfo>(url);
+      const res = await axios.get<IImageInfo>(url, { signal });
       p.datetaken = res.data.datetaken;
       p.imageInfo = res.data;
     } catch (error) {
+      if (isAbortError(error)) throw error;
       console.error('Failed to get image info', p, error);
       showError(t('memories', 'Failed to load image info: {name}', { name: p.basename ?? p.fileid }));
     } finally {
@@ -670,7 +704,7 @@ export async function fillImageInfo(photos: IPhoto[], query?: { tags?: number },
     }
   });
 
-  for await (const _ of runInParallel(calls, 8)) {
+  for await (const _ of runInParallel(calls, 8, opts)) {
     // nothing to do
   }
 }
@@ -682,8 +716,9 @@ export async function fillImageInfo(photos: IPhoto[], query?: { tags?: number },
  * @param progress callback to report number of files done
  * @returns number of files successfully reindexed
  */
-export async function reindexPhotos(photos: IPhoto[], progress?: (done: number) => void) {
+export async function reindexPhotos(photos: IPhoto[], progress?: (done: number) => void, opts?: AbortOpts) {
   const remote = photos.filter((p) => !utils.isLocalPhoto(p));
+  const signal = opts?.signal;
 
   let done = photos.length - remote.length;
   if (done > 0) progress?.(done);
@@ -691,9 +726,11 @@ export async function reindexPhotos(photos: IPhoto[], progress?: (done: number) 
 
   const calls = remote.map((p) => async () => {
     try {
-      await axios.post(API.IMAGE_REINDEX(p.fileid));
+      signal?.throwIfAborted();
+      await axios.post(API.IMAGE_REINDEX(p.fileid), undefined, { signal });
       success++;
     } catch (error) {
+      if (isAbortError(error)) throw error;
       console.error('Failed to reindex', p.fileid, error);
       showError(t('memories', 'Failed to refresh metadata for {name}.', { name: p.basename ?? p.fileid }));
     } finally {
@@ -702,7 +739,7 @@ export async function reindexPhotos(photos: IPhoto[], progress?: (done: number) 
     }
   });
 
-  for await (const _ of runInParallel(calls, 4)) {
+  for await (const _ of runInParallel(calls, 4, opts)) {
     // nothing to do
   }
 

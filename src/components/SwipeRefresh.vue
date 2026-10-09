@@ -19,10 +19,10 @@ const props = withDefaults(
     allowSwipe?: boolean;
 
     /**
-     * A unique identifier for the swipe action.
-     * If the state changes, the swipe action is reset.
+     * AbortSignal for the current timeline generation.
+     * If aborted, the swipe action is reset.
      */
-    state?: number;
+    signal?: AbortSignal;
 
     /**
      * An ancestor element of the touch action
@@ -33,7 +33,6 @@ const props = withDefaults(
   }>(),
   {
     allowSwipe: true,
-    state: Math.random(),
     match: '',
   },
 );
@@ -61,13 +60,25 @@ const firstcycle = ref(0);
 
 onMounted(() => {
   animate.value = loading.value; // start if needed
+  props.signal?.addEventListener('abort', reset, { once: true });
 });
 
 onBeforeUnmount(() => {
+  props.signal?.removeEventListener('abort', reset);
   reset();
 });
 
-watch(() => props.state, reset);
+// A new signal means a new parent generation: drop any in-progress
+// gesture and progress tied to the old one, so stale coordinates
+// can't trigger a refresh or leave the progress bar stuck.
+watch(
+  () => props.signal,
+  (signal, prev) => {
+    prev?.removeEventListener('abort', reset);
+    signal?.addEventListener('abort', reset, { once: true });
+    reset();
+  },
+);
 
 watch(loading, () => {
   wasSwiped.value = progress.value >= 100;
@@ -167,12 +178,12 @@ function touchmove(event: TouchEvent) {
     // Execute action on threshold
     if (progress.value >= 100) {
       on.value = false;
-      const state = props.state;
+      const signal = props.signal;
       try {
         loading.value = true;
         await props.refresh();
       } finally {
-        if (props.state === state) {
+        if (signal !== props.signal || !signal?.aborted) {
           loading.value = false;
         }
       }

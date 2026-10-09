@@ -37,8 +37,9 @@ export type ILensHit = {
 };
 
 /** Run a lens text search; hits stay in score order. */
-export async function searchLens(text: string, limit = 200): Promise<ILensHit[]> {
-  const res = await axios.get<ILensHit[]>(API.Q(API.LENS_SEARCH(), { text, limit }));
+export async function searchLens(text: string, opts?: { limit?: number; signal?: AbortSignal }): Promise<ILensHit[]> {
+  const { limit = 200, signal } = opts ?? {};
+  const res = await axios.get<ILensHit[]>(API.Q(API.LENS_SEARCH(), { text, limit }), { signal });
   if (res.status !== 200) throw res;
   return res.data;
 }
@@ -98,9 +99,14 @@ export function markSearchHead(day: IDay, head: IHeadRow | undefined): void {
 }
 
 /** Search and wrap hits as days: top hits first, all hits grouped by month. */
-export async function getLensSearchDays(text: string, limit = 200): Promise<IDay[]> {
+export async function getLensSearchDays(
+  text: string,
+  opts?: { limit?: number; signal?: AbortSignal },
+): Promise<IDay[]> {
   if (!text.trim()) return [];
-  const hits = await searchLens(text, limit);
+  const { limit = 200, signal } = opts ?? {};
+  const hits = await searchLens(text, { limit, signal });
+  signal?.throwIfAborted();
   if (!hits.length) return [];
 
   const cutoff = findTopCutoff(hits);

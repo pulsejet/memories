@@ -28,6 +28,7 @@ import Modal from './Modal.vue';
 
 import { useModal } from '@services/modal';
 import { n, t } from '@services/l10n';
+import { isAbortError, useAbort } from '@services/utils/abort';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 
@@ -42,6 +43,7 @@ const { show, close } = useModal(modal);
 
 const photos = ref<IPhoto[]>([]);
 const photosDone = ref(0);
+const abort = useAbort();
 
 console.assert(!_m.modals.reindex, 'ReindexModal created twice');
 _m.modals.reindex = open;
@@ -55,18 +57,32 @@ function open(photosIn: IPhoto[]) {
 }
 
 function cleanup() {
+  abort.abort();
   show.value = false;
   photos.value = [];
 }
 
 async function run() {
-  const ok = await dav.reindexPhotos(photos.value, (done) => {
-    photosDone.value = done;
-  });
+  const signal = abort.renew();
+  try {
+    const ok = await dav.reindexPhotos(
+      photos.value,
+      (done) => {
+        if (!signal.aborted) {
+          photosDone.value = done;
+        }
+      },
+      { signal },
+    );
+    signal.throwIfAborted();
 
-  showInfo(n('memories', '{n} file refreshed', '{n} files refreshed', ok, { n: ok }));
-  close();
-  utils.bus.emit('memories:timeline:soft-refresh', null);
+    showInfo(n('memories', '{n} file refreshed', '{n} files refreshed', ok, { n: ok }));
+    close();
+    utils.bus.emit('memories:timeline:soft-refresh', null);
+  } catch (e) {
+    if (isAbortError(e)) return;
+    throw e;
+  }
 }
 </script>
 

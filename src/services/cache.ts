@@ -1,6 +1,8 @@
 import { config } from '@services/user-config';
 import { uid } from '@services/utils/auth';
 
+import type { AbortOpts } from '@services/utils/abort';
+
 /** Cache keys */
 function getCacheName() {
   const ver = config.version;
@@ -34,13 +36,16 @@ export async function openCache() {
 }
 
 /** Get data from the cache */
-export async function getCachedData<T>(url: string): Promise<T | null> {
+export async function getCachedData<T>(url: string, opts?: AbortOpts): Promise<T | null> {
   if (!window.caches) return null;
+  opts?.signal?.throwIfAborted();
   const cache = staticCache ?? (await openCache());
   if (!cache) return null;
+  opts?.signal?.throwIfAborted();
 
   const cachedResponse = await cache.match(url);
   if (!cachedResponse || !cachedResponse.ok) return null;
+  opts?.signal?.throwIfAborted();
   return await cachedResponse.json();
 }
 

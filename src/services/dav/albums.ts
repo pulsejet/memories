@@ -12,6 +12,7 @@ import { constants } from '@services/constants';
 import * as utils from '@services/utils/common';
 
 import type { IAlbum, IFileInfo, IPhoto } from '@typings';
+import type { AbortOpts } from '@services/utils/abort';
 
 export type IDavAlbum = {
   location: string;
@@ -36,11 +37,12 @@ export function getAlbumPath(user: string, name: string) {
 
 /**
  * Get list of albums.
- * @param fileid Optional file ID to get albums for
+ * @param opts.fileid Optional file ID to get albums for
  */
-export async function getAlbums(fileid?: number) {
+export async function getAlbums(opts?: { fileid?: number } & AbortOpts) {
+  const { fileid, signal } = opts ?? {};
   const url = API.Q(API.ALBUM_LIST(), { fileid });
-  const res = await axios.get<IAlbum[]>(url);
+  const res = await axios.get<IAlbum[]>(url, { signal });
   let data = res.data;
 
   // Remove hidden albums unless specified
@@ -200,7 +202,7 @@ export async function updateAlbum(album: any, { albumName, properties }: any) {
  * @param user Owner of album
  * @param name Name of album (or ID)
  */
-export async function getAlbum(user: string, name: string): Promise<IDavAlbum> {
+export async function getAlbum(user: string, name: string, opts?: AbortOpts): Promise<IDavAlbum> {
   const req = `<?xml version="1.0"?>
         <d:propfind xmlns:d="DAV:"
             xmlns:oc="http://owncloud.org/ns"
@@ -214,6 +216,7 @@ export async function getAlbum(user: string, name: string): Promise<IDavAlbum> {
   let album = (await client.stat(getAlbumPath(user, name), {
     data: req,
     details: true,
+    signal: opts?.signal,
   })) as any;
 
   // Post processing

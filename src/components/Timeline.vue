@@ -5,7 +5,7 @@
     match=".recycler"
     :refresh="softRefreshSync"
     :allowSwipe="allowSwipe"
-    :state="state"
+    :signal="abortSignal"
   >
     <!-- Loading indicator -->
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
@@ -100,7 +100,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue';
+import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue';
+import { onBeforeUnmount, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { RouteLocationNormalized } from 'vue-router';
 import { RecycleScroller } from 'vue-virtual-scroller';
@@ -114,6 +115,7 @@ import { getLayout } from '@services/layout';
 import { config } from '@services/user-config';
 import { windowDims } from '@services/viewport';
 import { routeIs } from '@services/router';
+import { ignoreAbort, isAbortError, raceWithAbort, useAbort } from '@services/utils/abort';
 import RowHead from '@components/frame/RowHead.vue';
 import Photo from '@components/frame/Photo.vue';
 import ScrollerManager from '@components/ScrollerManager.vue';
@@ -212,7 +214,15 @@ const scrollChangeTimer = new RenewingTimeout();
 const softRefreshTimer = new RenewingTimeout();
 
 /** State for request cancellations */
-const state = ref(1);
+const abort = useAbort();
+const abortSignal = shallowRef<AbortSignal>(abort.signal);
+
+/** Renew the abort generation and publish the new signal for SwipeRefresh. */
+function renewAbort(): AbortSignal {
+  const signal = abort.renew();
+  abortSignal.value = signal;
+  return signal;
+}
 
 /**
  * Run after restored geometry renders. Like onMounted, createState
@@ -315,7 +325,8 @@ const savedView = computed<IDay[]>({
   set: (days) => {
     // Process sparse days including geometry.
     resetState();
-    void processDays(days, false);
+    const signal = renewAbort();
+    void ignoreAbort(processDays(days, false, signal));
   },
 });
 
@@ -343,14 +354,14 @@ function timelineRouteKey(route: RouteLocationNormalized): string {
 }
 
 async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNormalized) {
-  const startState = state.value;
   const fromKey = from ? timelineRouteKey(from) : null;
   const toKey = timelineRouteKey(to);
 
   // Path or query changed; hard refresh or expect state restore.
   if (!from || fromKey !== toKey) {
-    await createState();
-    if (state.value !== startState) return;
+    const signal = renewAbort();
+    await ignoreAbort(createState(signal));
+    if (signal.aborted) return;
 
     // Focus on the recycler (e.g. after navigation click)
     // Unless the user is typing in the search box
@@ -361,11 +372,10 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
 
   // Query changed on same key - soft refresh, preserve scroll.
   else if (JSON.stringify(from.query) !== JSON.stringify(to.query)) {
-    state.value++;
-    const startState = state.value;
+    const signal = renewAbort();
     loading.value = 0;
-    await softRefreshSync();
-    if (state.value !== startState) return;
+    await ignoreAbort(softRefreshSync(signal));
+    if (signal.aborted) return;
   }
 
   // Check if viewer is supposed to be open
@@ -378,9 +388,9 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
     // Get day
     const day = heads.value.get(dayid)?.day;
     if (day && !day.detail) {
-      const stateVal = state.value;
-      await fetchDay(dayid, true);
-      if (stateVal !== state.value) return;
+      const signal = abort.signal;
+      await ignoreAbort(fetchDay(dayid, { now: true, signal }));
+      if (signal.aborted) return;
     }
 
     // Find photo
@@ -429,9 +439,7 @@ function allowBreakout() {
 }
 
 /** Create new state */
-async function createState() {
-  const startState = state.value;
-
+async function createState(signal: AbortSignal) {
   // Fit to window without loading.
   recomputeSizes(false);
 
@@ -440,8 +448,8 @@ async function createState() {
   beforeHeight.value = recyclerBefore.value!.getBoundingClientRect().height;
 
   // Wait until router state has applied the saved scroll position.
-  await until(routeState.restoring).toBe(false);
-  if (state.value !== startState) return;
+  await raceWithAbort(signal, until(routeState.restoring).toBe(false));
+  signal.throwIfAborted();
 
   // If we stored the scroll position and the beforeHeight changed, we
   // need to compensate the scroll position to keep the same viewport.
@@ -458,11 +466,12 @@ async function createState() {
   // Restored geometry already provides the initial view. An older days cache
   // could remove days, shrink the timeline and clamp the restored scroll.
   const noCache = list.value.length > 0;
-  await fetchDays(noCache);
+  await fetchDays({ noCache, signal });
 }
 
 /** Reset all state */
 function resetState() {
+  abort.abort();
   selectionManager.value?.clear();
   scrollerManager.value?.reset();
   loading.value = 0;
@@ -473,7 +482,6 @@ function resetState() {
   currentScroll.value = 0;
   numCols = 0;
   daysIsCache = false;
-  state.value++;
   loadedDays.clear();
   sizedDays.clear();
   fetchDayQueue = [];
@@ -487,10 +495,10 @@ function resetState() {
 /** Recreate everything */
 async function refresh() {
   resetState();
-  const startState = state.value;
+  const signal = renewAbort();
   await nextTick();
-  if (state.value !== startState) return;
-  await createState();
+  if (signal.aborted) return;
+  await ignoreAbort(createState(signal));
 }
 
 /**
@@ -503,24 +511,32 @@ function softRefresh() {
 }
 
 /** Fetch and re-process days (sync can be awaited) */
-async function softRefreshSync() {
-  await _softRefreshInternal(true);
+async function softRefreshSync(signal?: AbortSignal) {
+  await _softRefreshInternal(true, { signal });
 }
 
 /**
  * Fetch and re-process days (can be awaited if sync).
  * Do not pass this function as a callback directly.
  */
-async function _softRefreshInternal(sync: boolean) {
+async function _softRefreshInternal(
+  sync: boolean,
+  {
+    signal = abort.signal,
+  }: {
+    signal?: AbortSignal;
+  } = {},
+) {
   selectionManager.value?.clear();
   fetchDayQueue = []; // reset queue
 
   // Fetch days
   if (sync) {
-    await Promise.all([fetchDays(true), dtm.value?.refresh()]);
+    await Promise.all([fetchDays({ noCache: true, signal }), dtm.value?.refresh()]);
   } else {
     softRefreshTimer.set(() => {
-      void fetchDays(true);
+      if (signal.aborted) return;
+      void fetchDays({ noCache: true, signal });
       void dtm.value?.refresh();
     }, 30);
   }
@@ -822,22 +838,28 @@ function getQuery() {
 }
 
 /** Fetch timeline main call */
-async function fetchDays(noCache = false) {
-  const startState = state.value;
+async function fetchDays({
+  noCache = false,
+  signal = abort.signal,
+}: {
+  noCache?: boolean;
+  signal?: AbortSignal;
+} = {}) {
   // Wait for DTM to be ready, it must render first to prevent layout shift.
   try {
     updateLoading(1);
-    await until(() => dtm.value?.isReady).toBeTruthy({ timeout: 2000 });
-    if (state.value !== startState) return;
+    await raceWithAbort(signal, until(() => dtm.value?.isReady).toBeTruthy({ timeout: 2000 }));
+    signal.throwIfAborted();
+  } catch (e) {
+    if (isAbortError(e)) return;
+    throw e;
   } finally {
-    if (state.value === startState) {
-      updateLoading(-1);
-    }
+    updateLoading(-1);
   }
 
   // Lens search mode serves a fake day, not the days API
   if (routeIs.Search) {
-    return await fetchLensSearch();
+    return await fetchLensSearch({ signal });
   }
 
   // Get URL an cache identifier
@@ -855,45 +877,51 @@ async function fetchDays(noCache = false) {
   // Try cache first
   let cache: IDay[] | null = null;
 
+  // For cache, we want to immediately hide loading.
+  let needLoadingDecrement = true;
+  updateLoading(1);
+
   try {
-    updateLoading(1);
     let data: IDay[] = [];
     if (routeIs.ThisDay) {
-      data = await dav.getOnThisDayData();
+      data = await dav.getOnThisDayData({ signal });
+      signal.throwIfAborted();
     } else if (dav.isSingleItem()) {
       data = await dav.getSingleItemData();
-      if (state.value !== startState) return;
+      signal.throwIfAborted();
       setTimeout(() => {
-        if (state.value !== startState) return;
+        if (signal.aborted) return;
         _m.viewer.open(data[0]!.detail![0]);
       }, 0);
     } else {
       // Try the cache
       if (!noCache || routeHasNative.value) {
         try {
-          cache = await getCachedData(cacheUrl);
-          if (state.value !== startState) return;
+          cache = await getCachedData(cacheUrl, { signal });
+          signal.throwIfAborted();
 
           // On native, treat a missing remote cache as empty.
           if (routeHasNative.value) {
             cache = nativex.mergeDays(cache ?? [], await nativex.getLocalDays());
           }
-          if (state.value !== startState) return;
+          signal.throwIfAborted();
 
           if (cache) {
-            await processDays(cache, true);
-            if (state.value !== startState) return;
+            await processDays(cache, true, signal);
+            signal.throwIfAborted();
             updateLoading(-1);
+            needLoadingDecrement = false;
           }
-        } catch {
+        } catch (e) {
+          if (isAbortError(e)) return;
           console.warn(`Failed to process days cache: ${cacheUrl}`);
           cache = null;
         }
       }
-      if (state.value !== startState) return;
+      signal.throwIfAborted();
 
       // Get from network
-      const res = await axios.get<IDay[]>(url);
+      const res = await axios.get<IDay[]>(url, { signal });
       if (res.status !== 200) throw res; // don't cache this
       data = res.data;
     }
@@ -905,18 +933,19 @@ async function fetchDays(noCache = false) {
     if (routeHasNative.value) {
       data = nativex.mergeDays(data, await nativex.getLocalDays());
     }
+    signal.throwIfAborted();
 
     // Make sure we're still on the same page
-    if (state.value !== startState) return;
-    await processDays(data, false);
+    await processDays(data, false, signal);
   } catch (e: any) {
-    if (state.value === startState && !utils.isNetworkError(e)) {
+    if (isAbortError(e)) return;
+    if (!utils.isNetworkError(e)) {
       showError(e?.response?.data?.message ?? e.message);
       console.error(e);
     }
   } finally {
     // If cache is set here, loading was already decremented
-    if (state.value === startState && !cache) {
+    if (needLoadingDecrement) {
       updateLoading(-1);
     }
   }
@@ -927,9 +956,9 @@ async function fetchDays(noCache = false) {
  * @param data Days data
  * @param cache Whether the data was from cache
  */
-async function processDays(data: IDay[], cache: boolean) {
-  if (!data || !state.value) return;
-  const startState = state.value;
+async function processDays(data: IDay[], cache: boolean, signal?: AbortSignal) {
+  if (!data) return;
+  signal?.throwIfAborted();
 
   const newList: IRow[] = [];
   const newHeads: Map<number, IHeadRow> = new Map();
@@ -1061,7 +1090,7 @@ async function processDays(data: IDay[], cache: boolean) {
 
   // Fix view height variable
   await scrollerManager.value?.reflow();
-  if (state.value !== startState) return;
+  signal?.throwIfAborted();
   scrollPositionChange();
 
   // Trigger a view refresh. This will load any new placeholders too.
@@ -1084,13 +1113,22 @@ function getDayUrl(dayIds: number[]) {
 }
 
 /** Fetch image data for one dayId */
-async function fetchDay(dayId: number, now = false) {
+async function fetchDay(
+  dayId: number,
+  {
+    now = false,
+    signal = abort.signal,
+  }: {
+    now?: boolean;
+    signal?: AbortSignal;
+  } = {},
+) {
   if (!now && loadedDays.has(dayId)) return;
 
   // Get head to ensure the day exists / is valid
   const head = heads.value.get(dayId);
   if (!head) return;
-  const startState = state.value;
+  if (signal.aborted) return;
 
   // Do this in advance to prevent duplicate requests
   loadedDays.add(dayId);
@@ -1099,15 +1137,15 @@ async function fetchDay(dayId: number, now = false) {
   // Look for cache
   const cacheUrl = getDayUrl([dayId]);
   try {
-    let cache = await getCachedData<IPhoto[]>(cacheUrl);
-    if (state.value !== startState) return;
+    let cache = await getCachedData<IPhoto[]>(cacheUrl, { signal });
+    if (signal.aborted) return;
     utils.applyAuids(cache);
 
     // On native, treat a missing remote cache as empty.
     if (routeHasNative.value && head.day?.haslocal) {
       nativex.mergeDay((cache ??= []), await nativex.getLocalDay(dayId));
     }
-    if (state.value !== startState) return;
+    if (signal.aborted) return;
 
     // Process the cache
     if (cache) {
@@ -1125,9 +1163,10 @@ async function fetchDay(dayId: number, now = false) {
       processDay(dayId, cache);
     }
   } catch (e) {
+    if (isAbortError(e)) return;
     console.warn(`Failed or skipped processing day cache: ${cacheUrl}`, e);
   }
-  if (state.value !== startState) return;
+  if (signal.aborted) return;
 
   // Aggregate fetch requests
   fetchDayQueue.push(dayId);
@@ -1138,18 +1177,17 @@ async function fetchDay(dayId: number, now = false) {
   now ||= fetchDayQueue.reduce((sum, dayId) => sum + (heads.value.get(dayId)?.day?.count ?? 0), 0) > 256;
 
   // Process immediately
-  if (now) return await fetchDayExpire();
+  if (now) return await fetchDayExpire(signal);
 
   // Defer for aggregation
   fetchDayTimer ??= window.setTimeout(() => {
     fetchDayTimer = null;
-    fetchDayExpire();
+    void ignoreAbort(fetchDayExpire());
   }, 150);
 }
 
-async function fetchDayExpire() {
+async function fetchDayExpire(signal: AbortSignal = abort.signal) {
   if (fetchDayQueue.length === 0) return;
-  const startState = state.value;
 
   // Map of dayId to photos
   const dayIds = fetchDayQueue;
@@ -1163,16 +1201,17 @@ async function fetchDayExpire() {
   try {
     const [data, isCached] = await (async () => {
       try {
-        const res = await axios.get<IPhoto[]>(url);
+        const res = await axios.get<IPhoto[]>(url, { signal });
         if (res.status !== 200) throw res;
         return [res.data, false];
       } catch (e: any) {
+        if (isAbortError(e)) throw e;
         // Force a cache read with nativex to update local.
         if (nativex.has()) {
           const res = await Promise.all(
             dayIds.map(async (dayId) => {
               const cacheUrl = getDayUrl([dayId]);
-              const data = await getCachedData<IPhoto[]>(cacheUrl);
+              const data = await getCachedData<IPhoto[]>(cacheUrl, { signal });
               return data ?? [];
             }),
           );
@@ -1183,10 +1222,9 @@ async function fetchDayExpire() {
     })();
     utils.applyAuids(data);
 
-    // Check if the state has changed
-    if (state.value !== startState || getDayUrl(dayIds) !== url) {
-      return;
-    }
+    // Cancelled or query changed mid-flight.
+    signal.throwIfAborted();
+    if (getDayUrl(dayIds) !== url) return;
 
     // Bin the data into separate days
     // It is already sorted in dayid DESC
@@ -1227,7 +1265,7 @@ async function fetchDayExpire() {
         });
       if (promises.length) await Promise.all(promises);
     }
-    if (state.value !== startState) return;
+    signal.throwIfAborted();
 
     // Process each day as needed
     for (let [dayId, photos] of dayMap) {
@@ -1271,7 +1309,8 @@ async function fetchDayExpire() {
       processDay(dayId, photos);
     }
   } catch (e) {
-    if (state.value === startState && !utils.isNetworkError(e)) {
+    if (isAbortError(e)) return;
+    if (!utils.isNetworkError(e)) {
       showError(t('memories', 'Failed to load some photos'));
       console.error(e);
     }
@@ -1383,7 +1422,7 @@ function preprocessDay(dayId: number, data: IPhoto[]): IPhoto[] {
  * Process items from day response.
  */
 function processDay(dayId: number, data: IPhoto[]) {
-  if (!data || !state.value) return;
+  if (!data) return;
 
   const head = heads.value.get(dayId);
   if (!head) return;
@@ -1637,7 +1676,7 @@ function addRow(day: IDay): IPhotoRow {
  * @param delPhotos photos to delete
  */
 async function deleteFromViewWithAnimation(delPhotos: IPhoto[]) {
-  const startState = state.value;
+  const signal = abort.signal;
   // Only keep photos with day
   delPhotos = delPhotos.filter((p) => p?.d);
   if (delPhotos.length === 0) return;
@@ -1652,8 +1691,8 @@ async function deleteFromViewWithAnimation(delPhotos: IPhoto[]) {
   }
 
   // wait for 200ms
-  await new Promise((resolve) => setTimeout(resolve, 200));
-  if (state.value !== startState) return;
+  await ignoreAbort(raceWithAbort(signal, new Promise((resolve) => setTimeout(resolve, 200))));
+  if (signal.aborted) return;
 
   // clear selection at this point
   selectionManager.value?.deselect(delPhotos);
@@ -1666,24 +1705,26 @@ async function deleteFromViewWithAnimation(delPhotos: IPhoto[]) {
 }
 
 /** Fetch lens search results into top + month days */
-async function fetchLensSearch() {
+async function fetchLensSearch({
+  signal = abort.signal,
+}: {
+  signal?: AbortSignal;
+} = {}) {
   const query = lens.routeQueryText(route.query.q).trim();
-  const startState = state.value;
 
   try {
     updateLoading(1);
-    const days = await lens.getLensSearchDays(query);
-    if (state.value !== startState) return;
-    await processDays(days, false);
+    const days = await lens.getLensSearchDays(query, { limit: 200, signal });
+    signal.throwIfAborted();
+    await processDays(days, false, signal);
   } catch (e: any) {
-    if (state.value === startState && !utils.isNetworkError(e)) {
+    if (isAbortError(e)) return;
+    if (!utils.isNetworkError(e)) {
       showError(e?.response?.data?.message ?? e.message);
       console.error(e);
     }
   } finally {
-    if (state.value === startState) {
-      updateLoading(-1);
-    }
+    updateLoading(-1);
   }
 }
 </script>

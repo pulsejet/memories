@@ -7,6 +7,7 @@ import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
 
 import type { ICluster } from '@typings';
+import type { AbortOpts } from '@services/utils/abort';
 
 export interface ITag {
   id: number;
@@ -19,8 +20,9 @@ export interface ITag {
 /**
  * Get list of tags.
  */
-export async function getTags() {
-  const tags = (await axios.get<ICluster[]>(API.TAG_LIST())).data;
+export async function getTags(opts?: AbortOpts) {
+  const signal = opts?.signal;
+  const tags = (await axios.get<ICluster[]>(API.TAG_LIST(), { signal })).data;
 
   // Translate tag names
   tags.forEach((tag) => (tag.display_name = t('recognize', tag.name)));

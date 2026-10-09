@@ -39,6 +39,7 @@ import { cacheData, getCachedData } from '@services/cache';
 import { t } from '@services/l10n';
 import { config } from '@services/user-config';
 import { useRouteState } from '@services/route-state';
+import { isAbortError, useAbort } from '@services/utils/abort';
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
@@ -67,7 +68,7 @@ const hasRight = ref(false);
 const hasLeft = ref(false);
 const scrollStack = ref<number[]>([]);
 let resizeObserver: ResizeObserver | null = null;
-let requestId = 0;
+const abort = useAbort();
 
 useRouteState({ state: { years }, scroll: { inner } });
 
@@ -82,29 +83,28 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  requestId++;
   resizeObserver?.disconnect();
 });
 
 async function refresh(): Promise<void> {
-  const myRequestId = ++requestId;
+  const signal = abort.renew();
 
   try {
     // Look for cache
     const dayIdToday = utils.dateToDayId(new Date());
     const cacheUrl = `/onthisday/${dayIdToday}`;
-    const cache = await getCachedData<IPhoto[]>(cacheUrl);
-    if (myRequestId !== requestId) return;
+    const cache = await getCachedData<IPhoto[]>(cacheUrl, { signal });
+    signal.throwIfAborted();
     utils.applyAuids(cache);
     if (cache) {
       years.value = process(cache);
       void onLoad();
     }
-    if (myRequestId !== requestId) return;
+    signal.throwIfAborted();
 
     // Network request
-    const photos = await dav.getOnThisDayRaw();
-    if (myRequestId !== requestId) return;
+    const photos = await dav.getOnThisDayRaw({ signal });
+    signal.throwIfAborted();
     utils.applyAuids(photos);
     cacheData(cacheUrl, photos);
 
@@ -113,9 +113,10 @@ async function refresh(): Promise<void> {
     years.value = process(photos);
     void onLoad();
   } catch (e) {
+    if (isAbortError(e)) return;
     console.error('Failed to fetch On This Day:', e);
   } finally {
-    if (myRequestId === requestId) {
+    if (!signal.aborted) {
       years.value ??= [];
     }
   }

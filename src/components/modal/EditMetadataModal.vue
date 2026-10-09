@@ -76,6 +76,7 @@ import { t, n } from '@services/l10n';
 import { config } from '@services/user-config';
 import { constants } from '@services/constants';
 import { API } from '@services/API';
+import { isAbortError, useAbort } from '@services/utils/abort';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 
@@ -93,13 +94,13 @@ const photos = ref<IPhoto[] | null>(null);
 const sections = ref<number[]>([]);
 const processing = ref(false);
 const progress = ref(0);
-const state = ref(0);
+const abort = useAbort();
 
 console.assert(!_m.modals.editMetadata, 'EditMetadataModal created twice');
 _m.modals.editMetadata = open;
 
 async function open(photosIn: IPhoto[], sectionsIn: number[] = [1, 2, 3, 4]) {
-  const current = (state.value = Math.random());
+  const signal = abort.renew();
   show.value = true;
   processing.value = true;
   sections.value = sectionsIn;
@@ -135,12 +136,24 @@ async function open(photosIn: IPhoto[], sectionsIn: number[] = [1, 2, 3, 4]) {
   });
 
   // Load metadata for all photos
-  await dav.fillImageInfo(filtered, { tags: 1 }, (count) => {
-    progress.value = Math.round((count * 100) / filtered.length);
-  });
+  try {
+    await dav.fillImageInfo(
+      filtered,
+      { tags: 1 },
+      (count) => {
+        if (!signal.aborted) {
+          progress.value = Math.round((count * 100) / filtered.length);
+        }
+      },
+      { signal },
+    );
+  } catch (e) {
+    if (isAbortError(e)) return;
+    throw e;
+  }
 
   // Check if already quit
-  if (!show.value || state.value !== current) return;
+  if (!show.value || signal.aborted) return;
 
   // Use valid photos
   const valid = filterValid(filtered);
@@ -159,6 +172,7 @@ async function open(photosIn: IPhoto[], sectionsIn: number[] = [1, 2, 3, 4]) {
 }
 
 function cleanup() {
+  abort.abort();
   show.value = false;
   photos.value = null;
   processing.value = false;

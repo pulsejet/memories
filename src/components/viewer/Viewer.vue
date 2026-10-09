@@ -123,6 +123,7 @@ import { makeTapPatch } from '@services/compat/mobile-click';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 import { cacheData, getCachedData } from '@services/cache';
+import { isAbortError, useAbort } from '@services/utils/abort';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import * as nativex from '@native';
 
@@ -225,6 +226,8 @@ const currIndex = ref(-1);
 const slideshowTimer = ref(0);
 /** Timer to debounce changes to sidebar */
 const sidebarUpdateTimer = new RenewingTimeout();
+/** Abort scope for sidebar loads; renewed per photo */
+const sidebarAbort = useAbort();
 
 /** Photo keys for which an imageInfo request is currently ongoing */
 const imageInfoLoading = new Set<string>();
@@ -724,6 +727,7 @@ async function createBase(args: PhotoSwipeOptions) {
     fullyOpened.value = false;
     sheetOpen.value = false;
     setUiVisible(false);
+    sidebarAbort.abort();
     hideSidebar();
     setFragment(null);
     updateTitle(undefined);
@@ -1275,7 +1279,7 @@ async function downloadCurrentLiveVideo() {
 async function openSidebar() {
   const photo = currentPhoto.value;
   if (!photo) return;
-  const abort = () => !isOpen.value || photo !== currentPhoto.value;
+  const signal = sidebarAbort.renew();
 
   // Invalidate currently open metadata
   _m.sidebar.invalidateUnless(photo.fileid);
@@ -1283,7 +1287,7 @@ async function openSidebar() {
   // Update the sidebar, first call immediate
   sidebarUpdateTimer.set(
     async () => {
-      if (abort()) return;
+      if (signal.aborted || !isOpen.value) return;
 
       if (!_m.sidebar.isOpen()) {
         _m.sidebar.setTab('memories-metadata');
@@ -1292,15 +1296,21 @@ async function openSidebar() {
       if (routeIs.Public || isLocal.value) {
         _m.sidebar.open(photo);
       } else {
-        const fileInfo = (await dav.getFiles([photo]))[0];
-        if (!fileInfo || abort()) return;
+        try {
+          const fileInfo = (await dav.getFiles([photo], { signal }))[0];
+          signal.throwIfAborted();
+          if (!fileInfo) return;
 
-        // get attributes
-        const filename = fileInfo?.filename;
-        const useNative = fileInfo?.originalFilename?.startsWith('/files/');
+          // get attributes
+          const filename = fileInfo?.filename;
+          const useNative = fileInfo?.originalFilename?.startsWith('/files/');
 
-        // open sidebar
-        _m.sidebar.open(photo, filename, useNative);
+          // open sidebar
+          _m.sidebar.open(photo, filename, useNative);
+        } catch (e) {
+          if (isAbortError(e)) return;
+          throw e;
+        }
       }
     },
     SIDEBAR_DEBOUNCE_MS,

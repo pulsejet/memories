@@ -10,13 +10,15 @@ import { constants } from '@services/constants';
 import { API } from '@services/API';
 
 import type { IFace, IPhoto } from '@typings';
+import type { AbortOpts } from '@services/utils/abort';
 
 /**
  * Get list of faces
  * @param app Backend app to use
  */
-export async function getFaceList(app: 'recognize' | 'facerecognition') {
-  return (await axios.get<IFace[]>(API.FACE_LIST(app))).data;
+export async function getFaceList(app: 'recognize' | 'facerecognition', opts?: AbortOpts) {
+  const signal = opts?.signal;
+  return (await axios.get<IFace[]>(API.FACE_LIST(app), { signal })).data;
 }
 
 /**

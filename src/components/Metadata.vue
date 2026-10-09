@@ -102,6 +102,7 @@ import TagIcon from 'vue-material-design-icons/Tag.vue';
 
 import { t } from '@services/l10n';
 import { cacheData, getCachedData } from '@services/cache';
+import { isAbortError, useAbort } from '@services/utils/abort';
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
@@ -134,7 +135,7 @@ const baseInfo = ref({} as IImageInfo);
 const error = ref(false);
 
 const loading = ref(0);
-const state = ref(0);
+const abort = useAbort();
 
 /** Whether the current user may edit this file */
 const canEdit = computed(() => baseInfo.value?.permissions?.includes('U'));
@@ -385,35 +386,19 @@ const topFields = computed(() => {
   return list;
 });
 
-/** Await a promise, dropping the result if superseded by a newer load */
-async function guardState<T>(promise: Promise<T>): Promise<T | null> {
-  const snapshot = state.value;
-  try {
-    loading.value++;
-    const res = await promise;
-    if (snapshot === state.value) return res;
-    return null;
-  } catch (err) {
-    error.value = true;
-    throw err;
-  } finally {
-    if (snapshot === state.value) loading.value--;
-  }
-}
-
 /** Reset state unless the given file is already current */
-function invalidateUnless(id: number) {
-  if (fileid.value === id) return;
-  state.value = Math.random();
-  loading.value = 0;
+function invalidateUnless(id: number): AbortSignal | null {
+  if (fileid.value === id) return null;
+  const signal = abort.renew();
   error.value = false;
   fileid.value = null;
   exif.value = {};
+  return signal;
 }
 
 /** Load metadata for a photo, cache-first then server */
 async function update(photo: number | IPhoto): Promise<IImageInfo | null> {
-  invalidateUnless(0);
+  const signal = invalidateUnless(0)!;
 
   // Use a consistent URL for metadata.
   const url = utils.getImageInfoUrl(photo, config);
@@ -429,26 +414,33 @@ async function update(photo: number | IPhoto): Promise<IImageInfo | null> {
   // Attempt to get it from the cache first.
   let wasCached = false;
   try {
-    const snapshot = state.value;
-    const cached = await getCachedData<IImageInfo>(url);
-    if (cached && snapshot === state.value) {
+    const cached = await getCachedData<IImageInfo>(url, { signal });
+    signal.throwIfAborted();
+    if (cached) {
       applyImageInfo(cached);
       wasCached = true;
     }
-  } catch {}
+  } catch (e) {
+    if (isAbortError(e)) return null;
+  }
 
   // Always refresh the metadata from server.
   try {
-    const res = await guardState(axios.get<IImageInfo>(url));
-    if (!res) return null;
+    loading.value++;
+    const res = await axios.get<IImageInfo>(url, { signal });
+    signal.throwIfAborted();
     applyImageInfo(res.data);
     cacheData(url, res.data);
   } catch (err) {
+    if (isAbortError(err)) return null;
     if (wasCached) {
       error.value = false;
     } else {
+      error.value = true;
       throw err;
     }
+  } finally {
+    loading.value--;
   }
 
   return baseInfo.value;

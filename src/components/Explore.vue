@@ -79,6 +79,7 @@ import { translate as t } from '@services/l10n';
 import { config } from '@services/user-config';
 import { windowDims } from '@services/viewport';
 import { useRouteState } from '@services/route-state';
+import { isAbortError, useAbort } from '@services/utils/abort';
 import * as dav from '@services/dav';
 import * as nativex from '@native';
 
@@ -95,6 +96,7 @@ type Category = {
 const loading = ref(0);
 const isNative = nativex.has();
 const containerRef = useTemplateRef<HTMLDivElement>('container');
+const abort = useAbort();
 
 const recognize = ref([] as ICluster[]);
 const facerecognition = ref([] as ICluster[]);
@@ -158,31 +160,33 @@ const categories = ref([
   },
 ] as Category[]);
 
-async function load<T>(fun: () => Promise<T>) {
+async function load<T>(fun: (signal: AbortSignal) => Promise<T>) {
+  const signal = abort.signal;
   try {
     loading.value++;
-    return await fun();
+    return await fun(signal);
   } catch (e) {
+    if (isAbortError(e)) return;
     console.error(e);
   } finally {
     loading.value--;
   }
 }
 
-async function getRecognize() {
-  recognize.value = (await dav.getFaceList('recognize')).slice(0, 10);
+async function getRecognize(signal: AbortSignal) {
+  recognize.value = (await dav.getFaceList('recognize', { signal })).slice(0, 10);
 }
 
-async function getFaceRecognition() {
-  facerecognition.value = (await dav.getFaceList('facerecognition')).slice(0, 10);
+async function getFaceRecognition(signal: AbortSignal) {
+  facerecognition.value = (await dav.getFaceList('facerecognition', { signal })).slice(0, 10);
 }
 
-async function getPlaces() {
-  places.value = (await dav.getPlaces()).slice(0, 10);
+async function getPlaces(signal: AbortSignal) {
+  places.value = (await dav.getPlaces({ signal })).slice(0, 10);
 }
 
-async function getTags() {
-  tags.value = (await dav.getTags()).sort((a, b) => b.count - a.count).slice(0, 10);
+async function getTags(signal: AbortSignal) {
+  tags.value = (await dav.getTags({ signal })).sort((a, b) => b.count - a.count).slice(0, 10);
 }
 
 function maybeLoad() {

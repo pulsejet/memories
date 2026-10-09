@@ -5,11 +5,13 @@ import { config } from '@services/user-config';
 import { API } from '@services/API';
 
 import type { IDay, IPhoto } from '@typings';
+import type { AbortOpts } from '@services/utils/abort';
 
 /**
  * Get original onThisDay response.
  */
-export async function getOnThisDayRaw() {
+export async function getOnThisDayRaw(opts?: AbortOpts) {
+  const signal = opts?.signal;
   const dayIds: number[] = [];
   const now = new Date();
   const nowUTC = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
@@ -28,7 +30,7 @@ export async function getOnThisDayRaw() {
     }
   }
 
-  const res = await axios.post<IPhoto[]>(API.DAYS(), { dayIds });
+  const res = await axios.post<IPhoto[]>(API.DAYS(), { dayIds }, { signal });
 
   res.data.forEach(convertFlags);
   return res.data;
@@ -38,9 +40,10 @@ export async function getOnThisDayRaw() {
  * Get the onThisDay data
  * Query for last 120 years; should be enough
  */
-export async function getOnThisDayData(): Promise<IDay[]> {
+export async function getOnThisDayData(opts?: AbortOpts): Promise<IDay[]> {
   // Query for photos
-  let data = await getOnThisDayRaw();
+  let data = await getOnThisDayRaw(opts);
+  opts?.signal?.throwIfAborted();
 
   // Group photos by day
   const ans: IDay[] = [];

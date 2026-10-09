@@ -87,6 +87,7 @@ import AlbumsList from './AlbumsList.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import * as dav from '@services/dav';
+import { isAbortError, useAbort } from '@services/utils/abort';
 import { n, t } from '@services/l10n';
 
 import type { IAlbum, IPhoto } from '@typings';
@@ -115,7 +116,7 @@ const emit = defineEmits<{
 const root = useTemplateRef<HTMLDivElement>('root');
 
 const showAlbumCreationForm = ref(false);
-const loadingAlbums = ref(true);
+const loadingAlbums = ref(0);
 /** List of all albums */
 const albums = ref<IAlbum[]>([]);
 /** Search provider for list to show */
@@ -128,6 +129,8 @@ const selection = ref(new Set<IAlbum>());
 const deselection = ref(new Set<IAlbum>());
 /** Search term */
 const search = ref(String());
+/** Abort controller */
+const abort = useAbort();
 
 const filteredList = computed(() => {
   if (!albums.value || !search.value || !fuse.value) return albums.value ?? [];
@@ -153,15 +156,17 @@ async function albumCreatedHandler({ album }: { album: { basename: string } }) {
 }
 
 async function loadAlbums(preserveSelection: boolean = false) {
+  const signal = abort.renew();
   try {
-    loadingAlbums.value = true;
+    loadingAlbums.value++;
 
     // FIXME: preserve deselection too; but then this is only
     // applicable for single photo selection ... at least for now
     const prevSel = new Set(Array.from(selection.value).map((a) => a.album_id));
 
     // get all albums
-    albums.value = await dav.getAlbums();
+    albums.value = await dav.getAlbums({ signal });
+    signal.throwIfAborted();
 
     // create search provider
     fuse.value = markRaw(new Fuse(albums.value, { keys: ['name'] }));
@@ -175,7 +180,8 @@ async function loadAlbums(preserveSelection: boolean = false) {
       initSelIds = props.initialSelection.map((a) => a.album_id);
     } else if (singleFileId) {
       // if only one photo is selected, get the albums of that photo
-      const pAlbums = await dav.getAlbums(singleFileId);
+      const pAlbums = await dav.getAlbums({ fileid: singleFileId, signal });
+      signal.throwIfAborted();
       initSelIds = pAlbums.map((a) => a.album_id);
     }
 
@@ -189,9 +195,10 @@ async function loadAlbums(preserveSelection: boolean = false) {
       albums.value.filter((a) => prevSel.has(a.album_id)).forEach((a) => selection.value.add(a));
     }
   } catch (e) {
+    if (isAbortError(e)) return;
     console.error(e);
   } finally {
-    loadingAlbums.value = false;
+    loadingAlbums.value--;
   }
 }
 

@@ -16,6 +16,7 @@ import NcButton from '@nextcloud/vue/components/NcButton';
 import { API } from '@services/API';
 import { routeIs } from '@services/router';
 import { useRouteState } from '@services/route-state';
+import { isAbortError, useAbort } from '@services/utils/abort';
 import * as utils from '@services/utils/common';
 
 import type { ICluster } from '@typings';
@@ -31,6 +32,7 @@ const emit = defineEmits<{
 const route = useRoute();
 
 const places = ref<ICluster[] | null>(null);
+const abort = useAbort();
 
 useRouteState({
   state: { places },
@@ -51,17 +53,21 @@ async function refresh(): Promise<void> {
   // Get ID of place from URL
   const placeIdVal = placeId.value;
   const url = API.Q(API.PLACE_LIST(), { inside: placeIdVal });
+  const signal = abort.renew();
 
   // Make API call to get subplaces
   try {
-    const data = (await axios.get<ICluster[]>(url)).data;
-    if (placeIdVal !== placeId.value) return;
+    const data = (await axios.get<ICluster[]>(url, { signal })).data;
+    signal.throwIfAborted();
     places.value = data;
     emit('load');
   } catch (e) {
+    if (isAbortError(e)) return;
     console.error(e);
   } finally {
-    places.value ??= [];
+    if (!signal.aborted) {
+      places.value ??= [];
+    }
   }
 }
 

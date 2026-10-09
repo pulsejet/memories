@@ -70,6 +70,7 @@ import { t } from '@services/l10n';
 
 import * as dav from '@services/dav';
 import * as lens from '@services/lens';
+import { isAbortError, useAbort } from '@services/utils/abort';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 
 import Fuse from 'fuse.js';
@@ -115,6 +116,7 @@ const clustersLoad = ref(false);
 const clusterIs = dav.clusterIs;
 const clusterPreview = dav.getClusterPreview;
 const clusterTarget = dav.getClusterLinkTarget;
+const abort = useAbort();
 
 onMounted(() => {
   syncPromptFromRoute();
@@ -187,21 +189,28 @@ async function load() {
   // Load all clusters that we can search in
   if (!clustersLoad.value) {
     clustersLoad.value = true;
+    const signal = abort.signal;
 
     const noop = new Promise<ICluster[]>((r) => r([]));
 
-    const results = await Promise.allSettled([
-      config.recognize_enabled ? dav.getFaceList('recognize') : noop,
-      config.facerecognition_enabled ? dav.getFaceList('facerecognition') : noop,
-      config.places_gis > 0 ? dav.getPlaces({ covers: 0 }) : noop,
-      config.systemtags_enabled ? dav.getTags() : noop,
-      config.albums_enabled ? dav.getAlbums() : noop,
-    ]);
+    try {
+      const results = await Promise.allSettled([
+        config.recognize_enabled ? dav.getFaceList('recognize', { signal }) : noop,
+        config.facerecognition_enabled ? dav.getFaceList('facerecognition', { signal }) : noop,
+        config.places_gis > 0 ? dav.getPlaces({ covers: 0, signal }) : noop,
+        config.systemtags_enabled ? dav.getTags({ signal }) : noop,
+        config.albums_enabled ? dav.getAlbums({ signal }) : noop,
+      ]);
+      signal.throwIfAborted();
 
-    // Ignore all errors and flatten
-    clusters.value = results
-      .flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
-      .filter((c) => !!(c.name || c.display_name));
+      // Ignore all errors and flatten
+      clusters.value = results
+        .flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+        .filter((c) => !!(c.name || c.display_name));
+    } catch (e) {
+      if (isAbortError(e)) return;
+      console.error(e);
+    }
   }
 }
 

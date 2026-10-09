@@ -32,6 +32,7 @@ import { useRoute } from 'vue-router';
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 import { useRouteState } from '@services/route-state';
+import { isAbortError, useAbort } from '@services/utils/abort';
 
 const NcAvatar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAvatar'));
 
@@ -49,6 +50,7 @@ const emit = defineEmits<{
 const route = useRoute();
 
 const album = ref<dav.IDavAlbum | null>(null);
+const abort = useAbort();
 
 useRouteState({
   state: { album },
@@ -78,19 +80,25 @@ async function refresh(): Promise<void> {
   const name = albumName.value;
   if (!user || !name) return;
 
+  // Create an abort signal.
+  const signal = abort.renew();
+
   // Get DAV album for collaborators
   try {
-    const albumData = await dav.getAlbum(user, name);
-    if (user !== albumUser.value || name !== albumName.value) return;
+    const albumData = await dav.getAlbum(user, name, { signal });
+    signal.throwIfAborted();
     album.value = albumData;
     emit('load');
   } catch (e) {
+    if (isAbortError(e)) return;
     console.warn('Failed to fetch album:', e);
   } finally {
-    album.value ??= {
-      collaborators: [],
-      location: '',
-    };
+    if (!signal.aborted) {
+      album.value ??= {
+        collaborators: [],
+        location: '',
+      };
+    }
   }
 }
 

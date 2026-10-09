@@ -14,6 +14,7 @@ import FolderGrid from './FolderGrid.vue';
 import { config } from '@services/user-config';
 import { useRouteState } from '@services/route-state';
 import { API } from '@services/API';
+import { isAbortError, useAbort } from '@services/utils/abort';
 import * as utils from '@services/utils/common';
 
 import type { IFolder } from '@typings';
@@ -30,6 +31,7 @@ const route = useRoute();
 
 const folders = shallowRef<IFolder[] | null>(null);
 const currentFolder = ref('<none>');
+const abort = useAbort();
 
 useRouteState({
   state: { folders, currentFolder },
@@ -51,19 +53,25 @@ async function refresh(): Promise<void> {
     folders.value = null;
   }
 
+  // Create an abort signal for this request.
+  const signal = abort.renew();
+
   // Get subfolders URL
   const url = API.Q(API.FOLDERS_SUB(), { folder: folderVal });
 
   // Make API call to get subfolders
   try {
-    const data = (await axios.get<IFolder[]>(url)).data;
-    if (folderVal !== folder()) return;
+    const data = (await axios.get<IFolder[]>(url, { signal })).data;
+    signal.throwIfAborted();
     folders.value = data;
   } catch (e) {
+    if (isAbortError(e)) return;
     console.error(e);
     return;
   } finally {
-    folders.value ??= [];
+    if (!signal.aborted) {
+      folders.value ??= [];
+    }
   }
 
   // Filter out hidden folders
