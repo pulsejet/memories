@@ -124,7 +124,7 @@ const interacting = ref(false);
 /** Last known scroll position of the recycler */
 const lastKnownRecyclerScroll = ref(0);
 /** Track the last requested y position when interacting */
-const lastRequestedRecyclerY = ref(0);
+const lastRequestedRecyclerY = ref(NaN);
 
 /** Get the visible ticks */
 const visibleTicks = computed(() => {
@@ -164,7 +164,7 @@ function reset() {
   adjustRequest.value = false;
   interacting.value = false;
   lastKnownRecyclerScroll.value = 0;
-  lastRequestedRecyclerY.value = 0;
+  lastRequestedRecyclerY.value = NaN;
 
   // Clear all timers
   scrollingTimer.clear();
