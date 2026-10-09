@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { constants } from '@services/constants';
-import { isAbortError, useAbort } from '@services/utils/abort';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import { fetchImage, sticky } from './XImgCache';
 
 const BLANK_IMG: string = constants.BLANK_IMG;

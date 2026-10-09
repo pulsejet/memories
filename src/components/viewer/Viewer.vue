@@ -123,7 +123,7 @@ import { makeTapPatch } from '@services/compat/mobile-click';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 import { cacheData, getCachedData } from '@services/cache';
-import { isAbortError, useAbort } from '@services/utils/abort';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import * as nativex from '@native';
 

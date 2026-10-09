@@ -115,7 +115,7 @@ import { getLayout } from '@services/layout';
 import { config } from '@services/user-config';
 import { windowDims } from '@services/viewport';
 import { routeIs } from '@services/router';
-import { ignoreAbort, isAbortError, raceWithAbort, useAbort } from '@services/utils/abort';
+import { ignoreAbort, isAbortError, raceWithAbort, useAbort } from '@services/utils/abort-vue';
 import RowHead from '@components/frame/RowHead.vue';
 import Photo from '@components/frame/Photo.vue';
 import ScrollerManager from '@components/ScrollerManager.vue';

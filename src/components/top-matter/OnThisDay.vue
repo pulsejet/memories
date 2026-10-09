@@ -39,7 +39,7 @@ import { cacheData, getCachedData } from '@services/cache';
 import { t } from '@services/l10n';
 import { config } from '@services/user-config';
 import { useRouteState } from '@services/route-state';
-import { isAbortError, useAbort } from '@services/utils/abort';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 

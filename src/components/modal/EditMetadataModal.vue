@@ -76,7 +76,7 @@ import { t, n } from '@services/l10n';
 import { config } from '@services/user-config';
 import { constants } from '@services/constants';
 import { API } from '@services/API';
-import { isAbortError, useAbort } from '@services/utils/abort';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 

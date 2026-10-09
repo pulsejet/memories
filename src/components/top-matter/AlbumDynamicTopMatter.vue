@@ -32,7 +32,7 @@ import { useRoute } from 'vue-router';
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 import { useRouteState } from '@services/route-state';
-import { isAbortError, useAbort } from '@services/utils/abort';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 
 const NcAvatar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAvatar'));
 

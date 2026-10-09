@@ -102,7 +102,7 @@ import TagIcon from 'vue-material-design-icons/Tag.vue';
 
 import { t } from '@services/l10n';
 import { cacheData, getCachedData } from '@services/cache';
-import { isAbortError, useAbort } from '@services/utils/abort';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 

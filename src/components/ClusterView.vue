@@ -21,7 +21,7 @@ import { until } from '@vueuse/core';
 
 import { routeIs } from '@services/router';
 import { useRouteState } from '@services/route-state';
-import { isAbortError, raceWithAbort, useAbort } from '@services/utils/abort';
+import { isAbortError, raceWithAbort, useAbort } from '@services/utils/abort-vue';
 import TopMatter from '@components/top-matter/TopMatter.vue';
 import ClusterGrid from '@components/ClusterGrid.vue';
 import EmptyContent from '@components/top-matter/EmptyContent.vue';

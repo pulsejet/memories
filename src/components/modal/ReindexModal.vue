@@ -28,7 +28,7 @@ import Modal from './Modal.vue';
 
 import { useModal } from '@services/modal';
 import { n, t } from '@services/l10n';
-import { isAbortError, useAbort } from '@services/utils/abort';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 

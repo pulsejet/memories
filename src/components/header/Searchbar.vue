@@ -70,7 +70,7 @@ import { t } from '@services/l10n';
 
 import * as dav from '@services/dav';
 import * as lens from '@services/lens';
-import { isAbortError, useAbort } from '@services/utils/abort';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 
 import Fuse from 'fuse.js';

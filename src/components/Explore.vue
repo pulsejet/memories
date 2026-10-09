@@ -79,7 +79,7 @@ import { translate as t } from '@services/l10n';
 import { config } from '@services/user-config';
 import { windowDims } from '@services/viewport';
 import { useRouteState } from '@services/route-state';
-import { isAbortError, useAbort } from '@services/utils/abort';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as dav from '@services/dav';
 import * as nativex from '@native';
 

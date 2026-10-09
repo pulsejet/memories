@@ -14,7 +14,7 @@ import FolderGrid from './FolderGrid.vue';
 import { config } from '@services/user-config';
 import { useRouteState } from '@services/route-state';
 import { API } from '@services/API';
-import { isAbortError, useAbort } from '@services/utils/abort';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
 
 import type { IFolder } from '@typings';

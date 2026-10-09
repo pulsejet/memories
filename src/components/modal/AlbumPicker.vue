@@ -87,7 +87,7 @@ import AlbumsList from './AlbumsList.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import * as dav from '@services/dav';
-import { isAbortError, useAbort } from '@services/utils/abort';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import { n, t } from '@services/l10n';
 
 import type { IAlbum, IPhoto } from '@typings';
