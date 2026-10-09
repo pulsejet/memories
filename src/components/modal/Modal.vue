@@ -27,16 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  useTemplateRef,
-  computed,
-  markRaw,
-  onBeforeMount,
-  onBeforeUnmount,
-  onMounted,
-  defineAsyncComponent,
-} from 'vue';
+import { ref, useTemplateRef, computed, onBeforeMount, onBeforeUnmount, onMounted, defineAsyncComponent } from 'vue';
 
 const NcModal = defineAsyncComponent(() => import('@nextcloud/vue/components/NcModal'));
 
@@ -71,15 +62,12 @@ const modal = useTemplateRef<{ close?: () => void }>('modal');
 const isSidebarShown = ref(false);
 const sidebarWidth = ref(400);
 const trapElements = ref<HTMLElement[]>([]);
-let _mutationObserver!: MutationObserver;
 
 onBeforeMount(() => {
   if (sidebar.value) {
     utils.bus.on('memories:sidebar:opened', handleAppSidebarOpen);
     utils.bus.on('memories:sidebar:closed', handleAppSidebarClose);
   }
-  _mutationObserver = markRaw(new MutationObserver(handleBodyMutation));
-  _mutationObserver.observe(document.body, { childList: true });
 });
 
 onBeforeUnmount(() => {
@@ -88,7 +76,6 @@ onBeforeUnmount(() => {
     utils.bus.off('memories:sidebar:closed', handleAppSidebarClose);
     _m.sidebar.close();
   }
-  _mutationObserver.disconnect();
 });
 
 onMounted(() => {
@@ -111,26 +98,6 @@ function close() {
 
 function cleanup() {
   emit('close');
-}
-
-/**
- * Watch out for Popover inject in document root
- * That way we can adjust the focusTrap
- */
-function handleBodyMutation(mutations: MutationRecord[]) {
-  const test = (node: Node): node is HTMLElement =>
-    node instanceof HTMLElement && node?.classList?.contains('v-popper__popper');
-
-  mutations.forEach((mutation) => {
-    if (mutation.type === 'childList') {
-      Array.from(mutation.addedNodes)
-        .filter(test)
-        .forEach((node) => trapElements.value.push(node));
-      Array.from(mutation.removedNodes)
-        .filter(test)
-        .forEach((node) => (trapElements.value = trapElements.value.filter((el) => el !== node)));
-    }
-  });
 }
 
 function handleAppSidebarOpen() {
