@@ -51,6 +51,7 @@
 
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { useResizeObserver } from '@vueuse/core';
 
 import Metadata from '@components/Metadata.vue';
 
@@ -107,7 +108,10 @@ const lastRest = ref(0);
 const lastHead = ref(0);
 const lastFull = ref(0);
 
-let resizeObserver: ResizeObserver | null = null;
+// ResizeObserver batches per frame, so adjust synchronously
+// (pre-paint) to avoid flashing raw growth for a frame.
+useResizeObserver(content, () => layout());
+
 let resizeListener: (() => void) | null = null;
 let closeTimer = 0;
 let glideTimer = 0;
@@ -126,17 +130,12 @@ onMounted(() => {
   nextTick(() => enter());
 
   sheet.value?.addEventListener('touchmove', onDragMove, { passive: false });
-  // ResizeObserver batches per frame, so adjust synchronously
-  // (pre-paint) to avoid flashing raw growth for a frame.
-  resizeObserver = new ResizeObserver(() => layout());
-  if (content.value) resizeObserver.observe(content.value);
   resizeListener = () => layout();
   window.addEventListener('resize', resizeListener);
 });
 
 onBeforeUnmount(() => {
   sheet.value?.removeEventListener('touchmove', onDragMove);
-  resizeObserver?.disconnect();
   if (resizeListener) window.removeEventListener('resize', resizeListener);
   window.clearTimeout(closeTimer);
   window.clearTimeout(glideTimer);
