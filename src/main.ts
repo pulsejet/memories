@@ -5,9 +5,6 @@ import App from './App.vue';
 import router, { routes } from '@services/router';
 import * as nativex from '@native';
 
-// Global components
-import VueVirtualScroller from 'vue-virtual-scroller';
-
 // CSS for components
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 
@@ -36,7 +33,6 @@ localStorage.setItem('videoClientIdPersistent', _m.video.clientIdPersistent);
 // Register global components and plugins
 const app = createApp(App);
 app.use(router);
-app.use(VueVirtualScroller);
 
 // Initialize NativeX globals
 nativex.initialize();
