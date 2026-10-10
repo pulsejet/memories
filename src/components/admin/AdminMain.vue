@@ -109,6 +109,7 @@ async function update<K extends keyof ISystemConfig>(key: K, value: ISystemConfi
 
   // Get final value
   value ??= systemConfig.value[key];
+  const prev = systemConfig.value[key];
   systemConfig.value[key] = value;
 
   try {
@@ -119,6 +120,7 @@ async function update<K extends keyof ISystemConfig>(key: K, value: ISystemConfi
   } catch (err) {
     console.error(err);
     showError(t('memories', 'Failed to update setting'));
+    systemConfig.value[key] = prev;
   } finally {
     loading.value--;
   }
