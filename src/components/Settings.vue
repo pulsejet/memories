@@ -388,10 +388,14 @@ async function saveTimelinePaths(paths: string[]) {
 }
 
 async function chooseFoldersPath() {
-  const newPath = await utils.chooseNcFolder(
-    t('memories', 'Choose the root for the folders view'),
-    config.folders_path,
-  );
+  let newPath: string;
+  try {
+    const prompt = t('memories', 'Choose the root for the folders view');
+    newPath = await utils.chooseNcFolder(prompt, config.folders_path);
+  } catch (e) {
+    console.warn('chooseNcFolder cancelled', e);
+    return;
+  }
 
   if (newPath !== config.folders_path) {
     await setConfig('folders_path', newPath);
