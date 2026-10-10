@@ -64,8 +64,16 @@ registerRoute(
   ({ url }) => url.origin === self.location.origin && !netonly.some((regex) => regex.test(url.pathname)),
   new NetworkFirst({
     cacheName: 'memories-pages',
+    plugins: [
+      new ExpirationPlugin({
+        maxAgeSeconds: 3600 * 24 * 7, // days
+        maxEntries: 200, // pages
+      }),
+    ],
   }),
 );
+
+self.skipWaiting();
 
 self.addEventListener('activate', (event) => {
   // Take control of all pages under this SW's scope immediately,
