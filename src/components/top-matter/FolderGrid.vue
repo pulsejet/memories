@@ -11,10 +11,6 @@ import Folder from '@components/frame/Folder.vue';
 
 import type { IFolder } from '@typings';
 
-defineOptions({
-  name: 'ClusterGrid',
-});
-
 defineProps<{
   items: Array<IFolder>;
 }>();
