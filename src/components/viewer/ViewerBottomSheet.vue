@@ -145,8 +145,13 @@ onBeforeUnmount(() => {
 async function refreshMetadata() {
   const photo = props.photo;
   if (!photo || metadata.value?.fileid === photo.fileid) return;
-  await metadata.value?.update(photo);
-  layout();
+  try {
+    await metadata.value?.update(photo);
+  } catch {
+    // Metadata shows its own error state.
+  } finally {
+    layout();
+  }
 }
 
 /** Full height of the embedded content; the sheet always wraps it all */

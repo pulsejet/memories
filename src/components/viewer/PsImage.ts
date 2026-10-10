@@ -148,7 +148,7 @@ export default class ImageContentSetup {
         const blobSrc = await ximg.fetchImage(src);
 
         // Check if destroyed already
-        if (!slide.content.element) return;
+        if (!slide.content.element) break;
 
         // Show image and prevent garbage collection.
         img.src = blobSrc;

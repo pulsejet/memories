@@ -227,6 +227,7 @@ function onClose(closingReason: any, haveNotSavedChanges: boolean) {
 
   // Cleanup
   imageEditor.value?.terminate();
+  imageEditor.value = null;
   window.removeEventListener('keydown', handleKeydown, true);
   emit('close');
 }

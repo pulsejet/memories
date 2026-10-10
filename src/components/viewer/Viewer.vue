@@ -990,9 +990,9 @@ function beep() {
 /** Open with a static list of photos */
 async function openStatic(photo: IPhoto, listArg: IPhoto[], thumbSize?: 256 | 512) {
   list.value = listArg;
-  const pswp = await createBase({
-    index: listArg.findIndex((p) => p.fileid === photo.fileid),
-  });
+  let index = listArg.findIndex((p) => p.fileid === photo.fileid);
+  if (index < 0) index = 0;
+  const pswp = await createBase({ index });
 
   globalCount.value = listArg.length;
   globalAnchor.value = 0;
@@ -1028,7 +1028,7 @@ function getItemData(photo: IPhoto): PsContent['data'] {
   }
 
   // Lazy load the rest of EXIF data
-  loadMetadata(photo);
+  loadMetadata(photo).catch(() => undefined);
 
   // Get full image URL
   const highSrc: string[] = [];
@@ -1376,7 +1376,12 @@ async function viewInFolder() {
  */
 async function startSlideshow() {
   // Full screen the outer element
-  if (!outer.value?.requestFullscreen()) return;
+  if (!outer.value) return;
+  try {
+    await outer.value.requestFullscreen();
+  } catch {
+    return;
+  }
 
   // Hide controls
   setTimeout(() => setUiVisible(false), 1);
@@ -1399,8 +1404,8 @@ function slideshowTimerFired() {
     const player = photoswipe.value?.element?.querySelector<MediaPlayerElement>('.pswp__item.active media-player');
 
     // If no player is found by now, something likely went wrong. Just skip ahead.
-    // Otherwise check if video is not ended yet
-    if ((player?.currentTime ?? Infinity) < (player?.duration ?? 0) - 0.1) {
+    // Otherwise check if video is not ended yet.
+    if (!player?.loop && (player?.currentTime ?? Infinity) < (player?.duration ?? 0) - 0.1) {
       // Wait for video to finish
       player?.addEventListener('ended', slideshowTimerFired, { once: true });
       return;

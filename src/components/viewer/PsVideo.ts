@@ -473,8 +473,7 @@ class VideoContentSetup {
     const spec = config.video_default_quality;
     if (!spec || spec === '0') return;
 
-    const Events = (hls.constructor as typeof Hls).Events;
-    hls.once(Events.MANIFEST_PARSED, () => {
+    const applyLevel = () => {
       const levels = hls.levels;
       if (!levels?.length) return;
 
@@ -493,7 +492,14 @@ class VideoContentSetup {
       } catch {
         // Player may be gone by the time the manifest parses.
       }
-    });
+    };
+
+    if (hls.levels?.length) {
+      applyLevel();
+    } else {
+      const { Events } = hls.constructor as typeof Hls;
+      hls.once(Events.MANIFEST_PARSED, applyLevel);
+    }
   }
 }
 

@@ -224,8 +224,13 @@ async function open(photo: IPhoto | number, filename?: string, useNative = false
   await nextTick();
 
   // Update metadata compoenent
-  info.value = (await metadataRef.value?.update(photo)) ?? null;
-  if (!info.value) return; // failure or state change
+  try {
+    const metadata = await metadataRef.value?.update(photo);
+    if (!metadata) return;
+    info.value = metadata;
+  } catch {
+    return;
+  }
   handleOpen();
 }
 
