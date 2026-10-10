@@ -4,6 +4,8 @@
     class="folder fill-block"
     :class="{
       [`folder--${sanitizedName}`]: true,
+      'has-previews': previews.length > 0,
+      'single-preview': previews.length === 1,
     }"
     :to="target"
   >
@@ -118,7 +120,7 @@ function previewUrl(info: IPhoto) {
   }
 
   // Make it white if there is a preview
-  .folder:has(.previews .img-outer) > & {
+  .folder.has-previews > & {
     .folder-icon {
       opacity: 1;
       filter: invert(1) brightness(100);
@@ -132,7 +134,7 @@ function previewUrl(info: IPhoto) {
   .folder:hover > & > .folder-icon {
     opacity: 0.8;
   }
-  .folder:has(.previews .img-outer):hover > & {
+  .folder.has-previews:hover > & {
     opacity: 0;
   }
 
@@ -163,7 +165,7 @@ function previewUrl(info: IPhoto) {
     height: 50%;
     display: inline-block;
 
-    .folder:has(.preview-container > .img-outer:only-child) > & {
+    .folder.single-preview > & {
       width: 100%;
       height: 100%;
     }
