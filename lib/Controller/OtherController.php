@@ -130,6 +130,7 @@ final class OtherController extends ApiController
                 'video_autoplay' => $this->systemConfig->getUserVideoAutoplay(),
                 'video_loop' => 'true' === $this->systemConfig->getUserConfigValue('videoLoop', 'false'),
                 'sidebar_filepath' => 'true' === $this->systemConfig->getUserConfigValue('sidebarFilepath', 'false'),
+                'metadata_in_slideshow' => 'true' === $this->systemConfig->getUserConfigValue('metadataInSlideshow', 'false'),
                 'slideshow_duration' => (int) $this->systemConfig->getUserConfigValue('slideshowDuration', '5'),
 
                 // on this day settings
