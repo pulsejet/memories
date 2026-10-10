@@ -153,7 +153,7 @@ function open(localsIn?: IUploadNativeX[]) {
   const input = document.createElement('input');
   input.type = 'file';
   input.multiple = true;
-  input.accept = 'image/*,image/heic,/image/tiff,video/*';
+  input.accept = 'image/*,image/heic,image/tiff,video/*';
   input.addEventListener('cancel', () => input.remove());
   input.addEventListener('change', () => {
     files.value = Array.from(input.files ?? []);
@@ -191,9 +191,13 @@ function cleanup() {
 }
 
 async function chooseUploadPath() {
-  uploadPath.value =
-    (await utils.chooseNcFolder(t('memories', 'Choose the destination folder for the upload'), uploadPath.value)) ||
-    uploadPath.value;
+  try {
+    const prompt = t('memories', 'Choose the destination folder for the upload');
+    const selected = await utils.chooseNcFolder(prompt, uploadPath.value);
+    uploadPath.value = selected || uploadPath.value;
+  } catch (e) {
+    console.log('chooseNcFolder cancelled', e);
+  }
 }
 
 function selectAlbums(selection: IAlbum[]) {
