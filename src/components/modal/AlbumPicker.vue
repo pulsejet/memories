@@ -22,7 +22,7 @@
               'check-circle-icon': true,
               'check-circle-icon--active': selection.has(album),
             }"
-            @click="toggleAlbumSelection(album)"
+            @click.stop="toggleAlbumSelection(album)"
           >
             <CheckIcon :size="20" />
           </div>
@@ -160,9 +160,8 @@ async function loadAlbums(preserveSelection: boolean = false) {
   try {
     loadingAlbums.value++;
 
-    // FIXME: preserve deselection too; but then this is only
-    // applicable for single photo selection ... at least for now
     const prevSel = new Set(Array.from(selection.value).map((a) => a.album_id));
+    const prevDesel = new Set(Array.from(deselection.value).map((a) => a.album_id));
 
     // get all albums
     albums.value = await dav.getAlbums({ signal });
@@ -192,7 +191,17 @@ async function loadAlbums(preserveSelection: boolean = false) {
 
     // restore selection
     if (preserveSelection) {
-      albums.value.filter((a) => prevSel.has(a.album_id)).forEach((a) => selection.value.add(a));
+      albums.value
+        .filter((a) => prevSel.has(a.album_id))
+        .forEach((a) => {
+          selection.value.add(a);
+        });
+      albums.value
+        .filter((a) => prevDesel.has(a.album_id))
+        .forEach((a) => {
+          selection.value.delete(a);
+          deselection.value.add(a);
+        });
     }
   } catch (e) {
     if (isAbortError(e)) return;
