@@ -9,7 +9,7 @@ import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
 import { constants } from '@services/constants';
 import { isNetworkError } from '@services/utils/network';
-import { nativex } from '@native/api';
+import { has as hasNative } from '@native/api';
 
 import type { IConfig } from '@typings';
 
@@ -87,7 +87,7 @@ async function fetchServer() {
 
     // Let the user know they might need a page refresh to get a new version.
     // None of the callers know about the old version, so we need to do this here.
-    if (!nativex && old.version) {
+    if (!hasNative() && old.version) {
       notifyVersionChanged(server.version);
     }
 

@@ -3,7 +3,7 @@ import { watch, type DeepReadonly } from 'vue';
 import { isRTL, register as registerTranslations, setLanguage, setLocale } from '@nextcloud/l10n';
 
 import { config } from '@services/user-config';
-import { nativex } from './api';
+import { has as hasNative } from './api';
 
 import type { IConfig } from '@typings';
 
@@ -35,7 +35,7 @@ function registerPackedL10N(language: string): void {
  * in the native shell such as language.
  */
 export function initShellSync(): void {
-  if (!nativex) return;
+  if (!hasNative()) return;
   applyShellConfig(config);
   registerPackedL10N(config.language);
 
