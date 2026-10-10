@@ -27,6 +27,7 @@ import Modal from './Modal.vue';
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
 import { routeIs } from '@services/router';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
@@ -40,6 +41,7 @@ const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
 const name = computed(() => route.params.name?.toString());
 const user = computed(() => route.params.user?.toString());
+const abort = useAbort();
 
 function open() {
   if (user.value !== utils.uid) {
@@ -51,19 +53,23 @@ function open() {
 }
 
 function cleanup() {
+  abort.abort();
   show.value = false;
 }
 
 async function save() {
+  const signal = abort.renew();
   try {
     if (routeIs.Recognize) {
-      await dav.recognizeDeleteFace(user.value, name.value);
+      await dav.recognizeDeleteFace(user.value, name.value, { signal });
     } else {
-      await dav.faceRecognitionSetPersonVisibility(name.value, false);
+      await dav.faceRecognitionSetPersonVisibility(name.value, false, { signal });
     }
+    signal.throwIfAborted();
     router.push({ name: route.name?.toString() }); // "recognize" or "facerecognition"
     close();
   } catch (error) {
+    if (isAbortError(error)) return;
     console.error(error);
     showError(t('memories', 'Failed to delete {name}.', { name: name.value }));
   }

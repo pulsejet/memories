@@ -8,6 +8,7 @@ import * as base from './base';
 import { translate as t } from '@services/l10n';
 import { constants } from '@services/constants';
 import { API } from '@services/API';
+import { isAbortError } from '@services/utils/abort';
 
 import type { IFace, IPhoto } from '@typings';
 import type { AbortOpts } from '@services/utils/abort';
@@ -26,11 +27,15 @@ export async function getFaceList(app: 'recognize' | 'facerecognition', opts?: A
  * @param name Name of face (or ID)
  * @param params Parameters to update
  */
-export async function faceRecognitionUpdatePerson(name: string, params: object) {
+export async function faceRecognitionUpdatePerson(name: string, params: object, opts?: AbortOpts) {
   if (Number.isInteger(Number(name))) {
-    return await axios.put(generateUrl(`/apps/facerecognition/api/2.0/cluster/${name}`), params);
+    return await axios.put(generateUrl(`/apps/facerecognition/api/2.0/cluster/${name}`), params, {
+      signal: opts?.signal,
+    });
   } else {
-    return await axios.put(generateUrl(`/apps/facerecognition/api/2.0/person/${name}`), params);
+    return await axios.put(generateUrl(`/apps/facerecognition/api/2.0/person/${name}`), params, {
+      signal: opts?.signal,
+    });
   }
 }
 
@@ -39,8 +44,8 @@ export async function faceRecognitionUpdatePerson(name: string, params: object) 
  * @param name Name of face (or ID)
  * @param target Target name of face
  */
-export async function faceRecognitionRenamePerson(name: string, target: string) {
-  return await faceRecognitionUpdatePerson(name, { name: target });
+export async function faceRecognitionRenamePerson(name: string, target: string, opts?: AbortOpts) {
+  return await faceRecognitionUpdatePerson(name, { name: target }, opts);
 }
 
 /**
@@ -48,8 +53,8 @@ export async function faceRecognitionRenamePerson(name: string, target: string) 
  * @param name Name of face (or ID)
  * @param visible Visibility of face
  */
-export async function faceRecognitionSetPersonVisibility(name: string, visible: boolean) {
-  return await faceRecognitionUpdatePerson(name, { visible });
+export async function faceRecognitionSetPersonVisibility(name: string, visible: boolean, opts?: AbortOpts) {
+  return await faceRecognitionUpdatePerson(name, { visible }, opts);
 }
 
 /**
@@ -60,13 +65,17 @@ export async function faceRecognitionSetPersonVisibility(name: string, visible: 
  * @param photos List of photos to remove
  * @returns Generator for face IDs
  */
-export async function* recognizeDeleteFaceImages(user: string, name: string, photos: IPhoto[]) {
+export async function* recognizeDeleteFaceImages(user: string, name: string, photos: IPhoto[], opts?: AbortOpts) {
   // Remove each file
   const calls = photos.map((p) => async () => {
     try {
-      await client.deleteFile(`/recognize/${user}/faces/${name}/${p.faceid}-${p.basename}`);
+      opts?.signal?.throwIfAborted();
+      await client.deleteFile(`/recognize/${user}/faces/${name}/${p.faceid}-${p.basename}`, {
+        signal: opts?.signal,
+      });
       return p.faceid!;
     } catch (e) {
+      if (isAbortError(e)) throw e;
       console.error(e);
       showError(
         t('memories', 'Failed to remove {filename} from face.', {
@@ -77,7 +86,7 @@ export async function* recognizeDeleteFaceImages(user: string, name: string, pho
     }
   });
 
-  yield* base.runInParallel(calls, 10);
+  yield* base.runInParallel(calls, 10, opts);
 }
 
 /**
@@ -89,10 +98,17 @@ export async function* recognizeDeleteFaceImages(user: string, name: string, pho
  * @param photos List of photos to move
  * @returns Generator for face IDs
  */
-export async function* recognizeMoveFaceImages(user: string, face: string, target: string, photos: IPhoto[]) {
+export async function* recognizeMoveFaceImages(
+  user: string,
+  face: string,
+  target: string,
+  photos: IPhoto[],
+  opts?: AbortOpts,
+) {
   // Remove each file
   const calls = photos.map((p) => async () => {
     try {
+      opts?.signal?.throwIfAborted();
       const dest = `/recognize/${user}/faces/${target}`;
       const name = `${p.faceid}-${p.basename}`;
 
@@ -102,9 +118,12 @@ export async function* recognizeMoveFaceImages(user: string, face: string, targe
         source = `/recognize/${user}/unassigned-faces`;
       }
 
-      await client.moveFile(`${source}/${name}`, `${dest}/${name}`);
+      await client.moveFile(`${source}/${name}`, `${dest}/${name}`, {
+        signal: opts?.signal,
+      });
       return p.faceid!;
     } catch (e) {
+      if (isAbortError(e)) throw e;
       console.error(e);
       showError(
         t('memories', 'Failed to move {filename} from face.', {
@@ -115,7 +134,7 @@ export async function* recognizeMoveFaceImages(user: string, face: string, targe
     }
   });
 
-  yield* base.runInParallel(calls, 10);
+  yield* base.runInParallel(calls, 10, opts);
 }
 
 /**
@@ -124,8 +143,10 @@ export async function* recognizeMoveFaceImages(user: string, face: string, targe
  * @param user User ID of face
  * @param name Name of face (or ID)
  */
-export async function recognizeDeleteFace(user: string, name: string) {
-  return await client.deleteFile(`/recognize/${user}/faces/${name}`);
+export async function recognizeDeleteFace(user: string, name: string, opts?: AbortOpts) {
+  return await client.deleteFile(`/recognize/${user}/faces/${name}`, {
+    signal: opts?.signal,
+  });
 }
 
 /**
@@ -135,13 +156,17 @@ export async function recognizeDeleteFace(user: string, name: string) {
  * @param name Name of face (or ID)
  * @param target Target name of face
  */
-export async function recognizeRenameFace(user: string, name: string, target: string) {
-  return await client.moveFile(`/recognize/${user}/faces/${name}`, `/recognize/${user}/faces/${target}`);
+export async function recognizeRenameFace(user: string, name: string, target: string, opts?: AbortOpts) {
+  return await client.moveFile(`/recognize/${user}/faces/${name}`, `/recognize/${user}/faces/${target}`, {
+    signal: opts?.signal,
+  });
 }
 
 /**
  * Create a new face in recognize.
  */
-export async function recognizeCreateFace(user: string, name: string) {
-  return await client.createDirectory(`/recognize/${user}/faces/${name}`);
+export async function recognizeCreateFace(user: string, name: string, opts?: AbortOpts) {
+  return await client.createDirectory(`/recognize/${user}/faces/${name}`, {
+    signal: opts?.signal,
+  });
 }

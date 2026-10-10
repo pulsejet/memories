@@ -6,9 +6,10 @@ import { getLanguage } from '@nextcloud/l10n';
 
 import { translate as t, translatePlural as n } from '@services/l10n';
 import { API } from '@services/API';
-import client from '@services/dav/client';
 import { config } from '@services/user-config';
 import { constants } from '@services/constants';
+import { isAbortError } from '@services/utils/abort';
+import client from '@services/dav/client';
 import * as utils from '@services/utils/common';
 
 import type { IAlbum, IFileInfo, IPhoto } from '@typings';
@@ -77,17 +78,19 @@ export async function getAlbums(opts?: { fileid?: number } & AbortOpts) {
  * @param photos List of photos to add
  * @returns Generator
  */
-export async function* addToAlbum(user: string, name: string, photos: IPhoto[]) {
+export async function* addToAlbum(user: string, name: string, photos: IPhoto[], opts?: AbortOpts) {
   // Get files data
-  const fileInfos = await base.getFiles(photos, { ignoreRoute: true });
+  const fileInfos = await base.getFiles(photos, { ignoreRoute: true, signal: opts?.signal });
   const albumPath = getAlbumPath(user, name);
 
   // Add each file
   const calls = fileInfos.map((f) => async () => {
     try {
-      await client.copyFile(f.originalFilename, `${albumPath}/${f.basename}`);
+      opts?.signal?.throwIfAborted();
+      await client.copyFile(f.originalFilename, `${albumPath}/${f.basename}`, { signal: opts?.signal });
       return f.fileid;
     } catch (e: any) {
+      if (isAbortError(e)) throw e;
       if (e.response?.status === 409) {
         // File already exists, all good
         return f.fileid;
@@ -99,7 +102,7 @@ export async function* addToAlbum(user: string, name: string, photos: IPhoto[]) 
     }
   });
 
-  yield* base.runInParallel(calls, 10);
+  yield* base.runInParallel(calls, 10, opts);
 }
 
 /**
@@ -110,17 +113,19 @@ export async function* addToAlbum(user: string, name: string, photos: IPhoto[]) 
  * @param photos List of photos to remove
  * @returns Generator
  */
-export async function* removeFromAlbum(user: string, name: string, photos: IPhoto[]) {
+export async function* removeFromAlbum(user: string, name: string, photos: IPhoto[], opts?: AbortOpts) {
   // Get files data
-  const fileInfos = await base.getFiles(photos, { ignoreRoute: true });
+  const fileInfos = await base.getFiles(photos, { ignoreRoute: true, signal: opts?.signal });
   const albumPath = getAlbumPath(user, name);
 
   // Remove each file
   const calls = fileInfos.map((f) => async () => {
     try {
-      await client.deleteFile(`${albumPath}/${f.fileid}-${f.basename}`);
+      opts?.signal?.throwIfAborted();
+      await client.deleteFile(`${albumPath}/${f.fileid}-${f.basename}`, { signal: opts?.signal });
       return f.fileid;
     } catch (e) {
+      if (isAbortError(e)) throw e;
       showError(
         t('memories', 'Failed to remove {filename}.', {
           filename: f.basename ?? f.fileid,
@@ -130,16 +135,17 @@ export async function* removeFromAlbum(user: string, name: string, photos: IPhot
     }
   });
 
-  yield* base.runInParallel(calls, 10);
+  yield* base.runInParallel(calls, 10, opts);
 }
 
 /**
  * Create an album.
  */
-export async function createAlbum(albumName: string, opts?: { rethrow: boolean }) {
+export async function createAlbum(albumName: string, opts?: { rethrow?: boolean } & AbortOpts) {
   try {
-    await client.createDirectory(`/photos/${utils.uid}/albums/${albumName}`);
+    await client.createDirectory(`/photos/${utils.uid}/albums/${albumName}`, { signal: opts?.signal });
   } catch (error) {
+    if (isAbortError(error)) throw error;
     if (opts?.rethrow) throw error;
     console.error(error);
     showError(t('memories', 'Failed to create {albumName}.', { albumName }));
@@ -154,7 +160,7 @@ export async function createAlbum(albumName: string, opts?: { rethrow: boolean }
  * @param {string} data.albumName - The name of the album.
  * @param {object} data.properties - The properties to update.
  */
-export async function updateAlbum(album: any, { albumName, properties }: any) {
+export async function updateAlbum(album: any, { albumName, properties }: any, opts?: AbortOpts) {
   const stringifiedProperties = Object.entries(properties)
     .map(([name, valueRaw]) => {
       let value: string;
@@ -172,6 +178,7 @@ export async function updateAlbum(album: any, { albumName, properties }: any) {
     .join('');
 
   try {
+    opts?.signal?.throwIfAborted();
     await client.customRequest(album.filename, {
       method: 'PROPPATCH',
       data: `<?xml version="1.0"?>
@@ -185,10 +192,12 @@ export async function updateAlbum(album: any, { albumName, properties }: any) {
                             </d:prop>
                         </d:set>
                         </d:propertyupdate>`,
+      signal: opts?.signal,
     });
 
     return album;
   } catch (error) {
+    if (isAbortError(error)) throw error;
     console.error(error);
     showError(
       t('memories', 'Failed to update properties of {albumName} with {properties}.', {
@@ -239,15 +248,17 @@ export async function getAlbum(user: string, name: string, opts?: AbortOpts): Pr
 }
 
 /** Rename an album */
-export async function renameAlbum(album: any, currentAlbumName: string, newAlbumName: string) {
+export async function renameAlbum(album: any, currentAlbumName: string, newAlbumName: string, opts?: AbortOpts) {
   const newAlbum = { ...album, basename: newAlbumName };
   try {
+    opts?.signal?.throwIfAborted();
     const filenameBefore = `/photos/${utils.uid}/albums/${currentAlbumName}`;
     const filenameAfter = `/photos/${utils.uid}/albums/${newAlbumName}`;
-    await client.moveFile(filenameBefore, filenameAfter);
+    await client.moveFile(filenameBefore, filenameAfter, { signal: opts?.signal });
     newAlbum.filename = filenameAfter;
     return newAlbum;
   } catch (error) {
+    if (isAbortError(error)) throw error;
     console.error(error);
     showError(
       t('memories', 'Failed to rename {currentAlbumName} to {newAlbumName}.', {

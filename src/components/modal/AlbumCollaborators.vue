@@ -144,6 +144,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, watch, defineAsyncComponent } from 'vue';
+import { useClipboard } from '@vueuse/core';
 
 import Magnify from 'vue-material-design-icons/Magnify.vue';
 import Close from 'vue-material-design-icons/Close.vue';
@@ -164,6 +165,7 @@ import NcTextField from '@nextcloud/vue/components/NcTextField';
 const NcListItemIcon = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItemIcon'));
 
 import { t } from '@services/l10n';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
@@ -200,7 +202,9 @@ const errorFetchingAlbum = ref<number | null>(null);
 const loadingCollaborators = ref(false);
 const errorFetchingCollaborators = ref(null);
 const randomId = Math.random().toString().slice(2, 10);
-const publicLinkCopied = ref(false);
+const { copy: webCopy, copied: publicLinkCopied } = useClipboard({ copiedDuring: 2000, legacy: true });
+const searchAbort = useAbort();
+const albumAbort = useAbort();
 const config = {
   minSearchStringLength: parseInt(window.OC.config['sharing.minSearchStringLength'], 10) || 0,
 };
@@ -243,6 +247,7 @@ async function searchCollaborators() {
     showPopover.value = true;
   }
 
+  const signal = searchAbort.renew();
   try {
     if (searchText.value.length < config.minSearchStringLength) {
       return;
@@ -255,7 +260,9 @@ async function searchCollaborators() {
         itemType: 'share-recipients',
         shareTypes: [ShareType.User, ShareType.Group],
       },
+      signal,
     });
+    signal.throwIfAborted();
 
     currentSearchResults.value = response.data.ocs.data.map((collaborator: any) => {
       switch (collaborator.source) {
@@ -281,10 +288,11 @@ async function searchCollaborators() {
       ...currentSearchResults.value.reduce(indexCollaborators, {}),
     };
   } catch (error: any) {
+    if (isAbortError(error)) return;
     errorFetchingCollaborators.value = error;
     showError(t('memories', 'Failed to fetch collaborators list.'));
   } finally {
-    loadingCollaborators.value = false;
+    if (!signal.aborted) loadingCollaborators.value = false;
   }
 }
 
@@ -320,9 +328,10 @@ async function createPublicLinkForAlbum() {
     return await copyPublicLink();
   }
 
+  const signal = albumAbort.renew();
   // Create new link
   selectEntity(`${ShareType.Link}`);
-  if (!(await updateAlbumCollaborators())) {
+  if (!(await updateAlbumCollaborators(undefined, signal))) {
     unselectEntity(`${ShareType.Link}`);
     return;
   }
@@ -331,10 +340,12 @@ async function createPublicLinkForAlbum() {
     errorFetchingAlbum.value = null;
 
     if (!utils.uid) return;
-    const album = await dav.getAlbum(utils.uid, props.albumName);
+    const album = await dav.getAlbum(utils.uid, props.albumName, { signal });
+    signal.throwIfAborted();
     populateCollaborators(album.collaborators);
     await copyPublicLink();
   } catch (error: any) {
+    if (isAbortError(error)) return;
     if (error.response?.status === 404) {
       errorFetchingAlbum.value = 404;
     } else {
@@ -343,14 +354,15 @@ async function createPublicLinkForAlbum() {
 
     showError(t('memories', 'Failed to fetch album.'));
   } finally {
-    loadingAlbum.value = false;
+    if (!signal.aborted) loadingAlbum.value = false;
   }
 }
 
 async function deletePublicLink() {
   if (loadingAlbum.value) return;
+  const signal = albumAbort.renew();
   const collaborators = selectedCollaborators.value.filter((c) => c.type !== ShareType.Link);
-  if (!(await updateAlbumCollaborators(collaborators))) return;
+  if (!(await updateAlbumCollaborators(collaborators, signal))) return;
 
   unselectEntity(`${ShareType.Link}`);
   availableCollaborators.value[3] = {
@@ -358,27 +370,34 @@ async function deletePublicLink() {
     label: t('memories', 'Public link'),
     type: ShareType.Link,
   };
-  publicLinkCopied.value = false;
 }
 
-async function updateAlbumCollaborators(collaborators?: Collaborator[]): Promise<boolean> {
+async function updateAlbumCollaborators(collaborators?: Collaborator[], signal?: AbortSignal): Promise<boolean> {
   collaborators ??= selectedCollaborators.value;
+  signal ??= albumAbort.signal;
   try {
     if (!utils.uid) return false;
     loadingAlbum.value = true;
-    const album = await dav.getAlbum(utils.uid, props.albumName);
-    await dav.updateAlbum(album, {
-      albumName: props.albumName,
-      properties: {
-        collaborators,
+    const album = await dav.getAlbum(utils.uid, props.albumName, { signal });
+    signal.throwIfAborted();
+    await dav.updateAlbum(
+      album,
+      {
+        albumName: props.albumName,
+        properties: {
+          collaborators,
+        },
       },
-    });
+      { signal },
+    );
+    signal.throwIfAborted();
     return true;
   } catch (error) {
+    if (isAbortError(error)) return false;
     showError(t('memories', 'Failed to update album.'));
     return false;
   } finally {
-    loadingAlbum.value = false;
+    if (!signal.aborted) loadingAlbum.value = false;
   }
 }
 
@@ -389,10 +408,12 @@ async function copyPublicLink() {
     return await nativex.shareUrl(link);
   }
 
-  await navigator.clipboard.writeText(link);
-  publicLinkCopied.value = true;
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-  publicLinkCopied.value = false;
+  try {
+    await webCopy(link);
+  } catch (e) {
+    if (isAbortError(e)) return;
+    showError(t('memories', 'Failed to copy link to clipboard'));
+  }
 }
 
 function selectEntity(collaboratorKey: string) {

@@ -100,6 +100,7 @@ import AlbumCollaborators from './AlbumCollaborators.vue';
 
 import { DateTime } from 'luxon';
 import { t } from '@services/l10n';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
@@ -127,6 +128,7 @@ const showCollaboratorView = ref(false);
 const albumName = ref('');
 const albumLocation = ref('');
 const loading = ref(false);
+const abort = useAbort();
 
 /** Whether sharing is enabled. */
 const editMode = computed(() => Boolean(props.album));
@@ -164,6 +166,7 @@ function submit(collaborators: any[] = []) {
 }
 
 async function handleCreateAlbum(collaborators: any[] = []) {
+  const signal = abort.renew();
   try {
     loading.value = true;
     let album = {
@@ -175,46 +178,61 @@ async function handleCreateAlbum(collaborators: any[] = []) {
       date: DateTime.now().toFormat('MMMM yyyy'),
       collaborators,
     };
-    await dav.createAlbum(album.basename);
+    await dav.createAlbum(album.basename, { signal });
+    signal.throwIfAborted();
 
     if (albumLocation.value !== '' || collaborators.length !== 0) {
-      album = await dav.updateAlbum(album, {
-        albumName: albumName.value,
-        properties: {
-          location: albumLocation.value,
-          collaborators,
+      album = await dav.updateAlbum(
+        album,
+        {
+          albumName: albumName.value,
+          properties: {
+            location: albumLocation.value,
+            collaborators,
+          },
         },
-      });
+        { signal },
+      );
+      signal.throwIfAborted();
     }
 
     emit('done', { album });
   } catch (error) {
+    if (isAbortError(error)) return;
     console.error(error);
     showError(t('memories', 'Failed to create album.'));
   } finally {
-    loading.value = false;
+    if (!signal.aborted) loading.value = false;
   }
 }
 
 async function handleUpdateAlbum() {
+  const signal = abort.renew();
   try {
     loading.value = true;
     let album = { ...props.album };
     if (album.basename !== albumName.value) {
-      album = await dav.renameAlbum(album, album.basename, albumName.value);
+      album = await dav.renameAlbum(album, album.basename, albumName.value, { signal });
+      signal.throwIfAborted();
     }
     if (album.location !== albumLocation.value) {
-      album.location = await dav.updateAlbum(album, {
-        albumName: album.basename,
-        properties: { location: albumLocation.value },
-      });
+      album.location = await dav.updateAlbum(
+        album,
+        {
+          albumName: album.basename,
+          properties: { location: albumLocation.value },
+        },
+        { signal },
+      );
+      signal.throwIfAborted();
     }
     emit('done', { album });
   } catch (error) {
+    if (isAbortError(error)) return;
     console.error(error);
     showError(t('memories', 'Failed to update album.'));
   } finally {
-    loading.value = false;
+    if (!signal.aborted) loading.value = false;
   }
 }
 

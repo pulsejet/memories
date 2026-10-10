@@ -34,7 +34,7 @@
             {{ getShareLabels(share) }}
           </template>
           <template #actions>
-            <NcActionButton @click="deleteLink(share)" :disabled="loading">
+            <NcActionButton @click="deleteLink(share)" :disabled="!!loading">
               {{ t('memories', 'Remove') }}
 
               <template #icon>
@@ -50,10 +50,10 @@
 
     <template #buttons>
       <div class="button-grid">
-        <NcButton class="primary" :disabled="loading" @click="createLink">
+        <NcButton class="primary" :disabled="!!loading" @click="createLink">
           {{ t('memories', 'Create Link') }}
         </NcButton>
-        <NcButton class="primary" :disabled="loading" @click="refreshUrls">
+        <NcButton class="primary" :disabled="!!loading" @click="refreshUrls">
           {{ t('memories', 'Refresh') }}
         </NcButton>
       </div>
@@ -63,6 +63,7 @@
 
 <script setup lang="ts">
 import { computed, ref, useTemplateRef, defineAsyncComponent } from 'vue';
+import { useClipboard } from '@vueuse/core';
 
 import axios from '@nextcloud/axios';
 import { showError, showSuccess } from '@services/utils/dialog';
@@ -71,13 +72,14 @@ import NcButton from '@nextcloud/vue/components/NcButton';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/NcListItem'));
 
-import Modal from './Modal.vue';
+import Modal from '@components/modal/Modal.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
 import { windowDims } from '@services/viewport';
 import { API } from '@services/API';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 
@@ -91,11 +93,14 @@ defineOptions({
 });
 
 const modal = useTemplateRef('modal');
-const { show, close } = useModal(modal);
+const { show } = useModal(modal);
 
 const filename = ref('');
-const loading = ref(false);
+const loading = ref(0);
 const shares = ref<IShare[]>([]);
+
+const abort = useAbort();
+const { copy: copyText } = useClipboard({ legacy: true });
 
 const isRoot = computed(() => filename.value === '/' || filename.value === '');
 const sidebar = computed(() => (!isRoot.value && !windowDims.isMobile ? filename.value : null));
@@ -133,21 +138,31 @@ async function shareOrCopy(url: string) {
   }
 
   await copy(url);
-  await window.navigator?.share?.({ title: filename.value, url: url });
+
+  try {
+    await window.navigator?.share?.({ title: filename.value, url: url });
+  } catch (e) {
+    if (isAbortError(e)) return;
+    console.error(e);
+  }
 }
 
 function cleanup() {
+  abort.abort();
   show.value = false;
 }
 
 async function refreshUrls() {
-  loading.value = true;
+  const signal = abort.renew();
+  loading.value++;
   try {
-    shares.value = (await axios.get(API.Q(API.SHARE_LINKS(), { path: filename.value }))).data;
+    shares.value = (await axios.get(API.Q(API.SHARE_LINKS(), { path: filename.value }), { signal })).data;
+    signal.throwIfAborted();
   } catch (e) {
+    if (isAbortError(e)) return;
     shares.value = [];
   } finally {
-    loading.value = false;
+    loading.value--;
   }
 }
 
@@ -175,31 +190,39 @@ function getShareLabels(share: IShare): string {
 }
 
 async function createLink(): Promise<IShare | null> {
-  loading.value = true;
+  const signal = abort.renew();
+  loading.value++;
   try {
-    const res = await axios.post<IShare>(API.SHARE_NODE(), {
-      path: filename.value,
-    });
-    const share = res.data;
-    shares.value.push(share);
+    const res = await axios.post<IShare>(API.SHARE_NODE(), { path: filename.value }, { signal });
+    const newShare = res.data;
+    signal.throwIfAborted();
+    shares.value.push(newShare);
     refreshSidebar();
-    shareOrCopy(share.url);
-    return share;
+    shareOrCopy(newShare.url);
+    return newShare;
   } catch (e) {
+    if (isAbortError(e)) return null;
     console.error(e);
     showError(t('memories', 'Failed to create share link'));
     return null;
   } finally {
-    loading.value = false;
+    loading.value--;
   }
 }
 
 async function deleteLink(share: IShare) {
-  loading.value = true;
+  const signal = abort.renew();
+  loading.value++;
   try {
-    await axios.post(API.SHARE_DELETE(), { id: share.id });
+    await axios.post(API.SHARE_DELETE(), { id: share.id }, { signal });
+    signal.throwIfAborted();
+  } catch (e) {
+    if (isAbortError(e)) return;
+    console.error(e);
+    showError(t('memories', 'Failed to delete share link'));
+    return;
   } finally {
-    loading.value = false;
+    loading.value--;
   }
   refreshUrls();
   refreshSidebar();
@@ -207,9 +230,10 @@ async function deleteLink(share: IShare) {
 
 async function copy(url: string) {
   try {
-    await window.navigator.clipboard.writeText(url);
+    await copyText(url);
     showSuccess(t('memories', 'Link copied to clipboard'));
   } catch (e) {
+    if (isAbortError(e)) return;
     showError(t('memories', 'Failed to copy link to clipboard'));
   }
 }

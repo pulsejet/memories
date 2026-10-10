@@ -35,6 +35,7 @@ import FaceList from './FaceList.vue';
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
 import { routeIs } from '@services/router';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import client from '@services/dav/client';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
@@ -51,6 +52,7 @@ const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
 const processing = ref(0);
 const processingTotal = ref(0);
+const abort = useAbort();
 
 function open() {
   const user = route.params.user?.toString() || '';
@@ -66,7 +68,10 @@ function open() {
 }
 
 function cleanup() {
+  abort.abort();
   show.value = false;
+  processing.value = 0;
+  processingTotal.value = 0;
 }
 
 async function clickFace(face: IFace) {
@@ -95,18 +100,31 @@ async function clickFace(face: IFace) {
       showError(t('memories', 'You can only merge with a named person'));
       return;
     }
-    await dav.faceRecognitionRenamePerson(name, newName);
-    await close();
-    await router.replace({
-      name: 'facerecognition',
-      params: { user: face.user_id, name: newName },
-    });
+    try {
+      const signal = abort.renew();
+      await dav.faceRecognitionRenamePerson(name, newName, { signal });
+      signal.throwIfAborted();
+      await close();
+      await router.replace({
+        name: 'facerecognition',
+        params: { user: face.user_id, name: newName },
+      });
+    } catch (error) {
+      if (isAbortError(error)) return;
+      console.error(error);
+      showError(t('memories', 'Failed to move {name}.', { name }));
+    }
     return;
   }
 
   try {
     // Get all files for current face
-    let res = (await client.getDirectoryContents(`/recognize/${user}/faces/${name}`, { details: true })) as any;
+    const signal = abort.renew();
+    let res = (await client.getDirectoryContents(`/recognize/${user}/faces/${name}`, {
+      details: true,
+      signal,
+    })) as any;
+    signal.throwIfAborted();
     let data: IFileInfo[] = res.data;
     processingTotal.value = data.length;
 
@@ -121,24 +139,28 @@ async function clickFace(face: IFace) {
         failures++;
       }
       if (failures >= 10) return;
+      signal.throwIfAborted();
 
       // Move to new face with webdav
       try {
         await client.moveFile(
           `/recognize/${user}/faces/${name}/${p.basename}`,
           `/recognize/${face.user_id}/faces/${newName}/${p.basename}`,
+          { signal },
         );
       } catch (e) {
+        if (isAbortError(e)) throw e;
         console.error(e);
         showError(t('memories', 'Error while moving {basename}', p));
         failures++;
       } finally {
-        processing.value++;
+        if (!signal.aborted) processing.value++;
       }
     });
-    for await (const _ of dav.runInParallel(calls, 10)) {
+    for await (const _ of dav.runInParallel(calls, 10, { signal })) {
       // nothing to do
     }
+    signal.throwIfAborted();
 
     // Go to new face
     if (failures === 0) {
@@ -149,6 +171,7 @@ async function clickFace(face: IFace) {
       });
     }
   } catch (error) {
+    if (isAbortError(error)) return;
     console.error(error);
     showError(t('memories', 'Failed to move {name}.', { name }));
   }

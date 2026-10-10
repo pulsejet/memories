@@ -26,6 +26,7 @@ import AlbumForm from './AlbumForm.vue';
 
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
@@ -39,16 +40,20 @@ const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
 
 const album = ref<any>(null);
+const abort = useAbort();
 
 /**
  * Open the modal
  * @param edit If true, the modal will be opened in edit mode
  */
 async function open(edit: boolean) {
+  const signal = abort.renew();
   if (edit) {
     try {
-      album.value = await dav.getAlbum(route.params.user?.toString(), route.params.name?.toString());
+      album.value = await dav.getAlbum(route.params.user?.toString(), route.params.name?.toString(), { signal });
+      signal.throwIfAborted();
     } catch (e) {
+      if (isAbortError(e)) return;
       console.error(e);
       showError(t('memories', 'Could not load the selected album'));
       return;
@@ -61,6 +66,7 @@ async function open(edit: boolean) {
 }
 
 function cleanup() {
+  abort.abort();
   show.value = false;
 }
 

@@ -83,6 +83,7 @@ import { t, n } from '@services/l10n';
 import { config } from '@services/user-config';
 import { routeIs } from '@services/router';
 import { API } from '@services/API';
+import { ignoreAbort, isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
@@ -102,6 +103,7 @@ const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
 const photos = ref<IPhoto[] | null>(null);
 const loading = ref(0);
+const abort = useAbort();
 
 const isSingle = computed(() => photos.value?.length === 1);
 const hasVideos = computed(() => Boolean(photos.value?.some(utils.isVideo)));
@@ -143,6 +145,7 @@ function open(photosIn: IPhoto[]) {
 }
 
 function cleanup() {
+  abort.abort();
   show.value = false;
   photos.value = null;
 }
@@ -190,9 +193,11 @@ async function shareOriginal() {
 async function shareLink() {
   // Check if we have photos
   if (!photos.value) return;
+  const signal = abort.renew();
 
   // Fill in image infos to get permissions and paths
-  await l(async () => await dav.fillImageInfo(photos.value!));
+  await ignoreAbort(l(async () => await dav.fillImageInfo(photos.value!, undefined, undefined, { signal })));
+  if (signal.aborted) return;
 
   // Check if permissions allow sharing
   for (const photo of photos.value!) {
@@ -222,24 +227,29 @@ async function shareLink() {
   const name = `.link-${(Math.random() + 1).toString(36).slice(2)}`;
 
   // Create hidden album if multiple files are selected
-  await l(async () => {
-    // Create album using WebDAV
-    try {
-      await dav.createAlbum(name, { rethrow: true });
-    } catch (e) {
-      showError(t('memories', 'Failed to create album for public link'));
-      return null;
-    }
+  await ignoreAbort(
+    l(async () => {
+      // Create album using WebDAV
+      try {
+        signal.throwIfAborted();
+        await dav.createAlbum(name, { rethrow: true, signal });
+      } catch (e) {
+        if (isAbortError(e)) return null;
+        showError(t('memories', 'Failed to create album for public link'));
+        return null;
+      }
 
-    // Album is created, now add photos to it
-    for await (const _ of dav.addToAlbum(utils.uid!, name, photos.value!)) {
-      // do nothing
-    }
+      // Album is created, now add photos to it
+      for await (const _ of dav.addToAlbum(utils.uid!, name, photos.value!, { signal })) {
+        signal.throwIfAborted();
+      }
+      signal.throwIfAborted();
 
-    // Open album share modal
-    await close(); // wait till transition is done
-    await _m.modals.albumShare(utils.uid!, name, true);
-  });
+      // Open album share modal
+      await close(); // wait till transition is done (aborts signal via cleanup)
+      await _m.modals.albumShare(utils.uid!, name, true);
+    }),
+  );
 }
 
 /**
@@ -254,10 +264,13 @@ async function shareWithHref(
     href: string;
   }[],
 ) {
+  const signal = abort.renew();
+
   if (nativex.has()) {
     try {
       return await l(async () => nativex.shareBlobs(objects));
     } catch (e) {
+      if (isAbortError(e)) return;
       showError(t('memories', 'Failed to download file for sharing'));
       return;
     }
@@ -267,8 +280,10 @@ async function shareWithHref(
   const calls = objects.map((obj) => async () => {
     return await l(async () => {
       try {
-        return await axios.get(obj.href, { responseType: 'blob' });
+        signal.throwIfAborted();
+        return await axios.get(obj.href, { responseType: 'blob', signal });
       } catch (e) {
+        if (isAbortError(e)) throw e;
         showError(t('memories', 'Failed to download file {href}', { href: obj.href }));
         return null;
       }
@@ -277,25 +292,31 @@ async function shareWithHref(
 
   // Get all blobs from parallel calls
   const files: File[] = [];
-  for await (const responses of dav.runInParallel(calls, 8)) {
-    for (const res of responses.filter(Boolean)) {
-      const blob = res!.data;
-      const ext = blob.type.split('/').pop() || 'bin';
-      const cd = res!.headers['content-disposition'] ?? '';
-      const filename = cd.match(/filename="?([^";]+)"?/)?.[1] ?? `download.${ext}`;
-      files.push(new File([blob], filename, { type: blob.type }));
-    }
-  }
-  if (!files.length) return;
+  await ignoreAbort(
+    (async () => {
+      for await (const responses of dav.runInParallel(calls, 8, { signal })) {
+        for (const res of responses.filter(Boolean)) {
+          const blob = res!.data;
+          const ext = blob.type.split('/').pop() || 'bin';
+          const cd = res!.headers['content-disposition'] ?? '';
+          const filename = cd.match(/filename="?([^";]+)"?/)?.[1] ?? `download.${ext}`;
+          files.push(new File([blob], filename, { type: blob.type }));
+        }
+      }
+    })(),
+  );
+  if (!files.length || signal.aborted) return;
 
   // Check if we can share this type of data
-  if (!navigator.canShare({ files })) {
+  if (typeof navigator.canShare === 'function' && !navigator.canShare({ files })) {
     showError(t('memories', 'Cannot share this type of data'));
+    return;
   }
 
   try {
     await navigator.share({ files });
   } catch (e) {
+    if (isAbortError(e)) return;
     // Don't show this error because it's silly stuff
     // like "share canceled"
     console.error(e);

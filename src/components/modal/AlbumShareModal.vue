@@ -61,6 +61,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
 import { routeIs } from '@services/router';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
@@ -77,6 +78,7 @@ const collaborators = useTemplateRef<InstanceType<typeof AlbumCollaborators>>('c
 const album = ref<any>(null);
 const albumName = ref(String());
 const loadingAddCollaborators = ref(false);
+const abort = useAbort();
 
 const showEditFields = computed(() => album.value?.basename?.startsWith('.link-'));
 
@@ -84,19 +86,22 @@ console.assert(!_m.modals.albumShare, 'AlbumShareModal created twice');
 _m.modals.albumShare = open;
 
 async function open(user: string, name: string, link?: boolean) {
+  const signal = abort.renew();
   show.value = true;
 
   // Load album info
   try {
     loadingAddCollaborators.value = true;
     albumName.value = name;
-    album.value = await dav.getAlbum(user, name);
-  } catch {
+    album.value = await dav.getAlbum(user, name, { signal });
+    signal.throwIfAborted();
+  } catch (e) {
+    if (isAbortError(e)) return;
     showError(t('memories', 'Failed to load album info: {name}', { name }));
     show.value = false;
     return;
   } finally {
-    loadingAddCollaborators.value = false;
+    if (!signal.aborted) loadingAddCollaborators.value = false;
   }
 
   // Check if we immediately want to share a link
@@ -107,24 +112,33 @@ async function open(user: string, name: string, link?: boolean) {
 }
 
 function cleanup() {
+  abort.abort();
   show.value = false;
   album.value = null;
   albumName.value = String();
+  loadingAddCollaborators.value = false;
 }
 
 async function save(collaboratorsIn: any[]) {
+  const signal = abort.renew();
   try {
     loadingAddCollaborators.value = true;
 
     // Update album collaborators
-    await dav.updateAlbum(album.value, {
-      albumName: album.value.basename,
-      properties: { collaborators: collaboratorsIn },
-    });
+    await dav.updateAlbum(
+      album.value,
+      {
+        albumName: album.value.basename,
+        properties: { collaborators: collaboratorsIn },
+      },
+      { signal },
+    );
+    signal.throwIfAborted();
 
     // Update album name if changed
     if (album.value.basename !== albumName.value) {
-      await dav.renameAlbum(album.value, album.value.basename, albumName.value);
+      await dav.renameAlbum(album.value, album.value.basename, albumName.value, { signal });
+      signal.throwIfAborted();
 
       // Change route to new album name if we're on album page
       if (routeIs.Albums) {
@@ -145,10 +159,11 @@ async function save(collaboratorsIn: any[]) {
     // Close modal
     await close();
   } catch (error) {
+    if (isAbortError(error)) return;
     console.error(error);
     showError(t('memories', 'Failed to update album.'));
   } finally {
-    loadingAddCollaborators.value = false;
+    if (!signal.aborted) loadingAddCollaborators.value = false;
   }
 }
 </script>

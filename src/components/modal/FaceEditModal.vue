@@ -38,6 +38,7 @@ import Modal from './Modal.vue';
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
 import { routeIs } from '@services/router';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
 
@@ -51,6 +52,7 @@ const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
 const rawInput = ref(String());
 const saving = ref(false);
+const abort = useAbort();
 
 const name = computed(() => route.params.name?.toString());
 const user = computed(() => route.params.user?.toString());
@@ -76,19 +78,23 @@ function open() {
 }
 
 function cleanup() {
+  abort.abort();
   show.value = false;
+  saving.value = false;
 }
 
 async function save() {
   if (!canSave.value || saving.value) return;
   saving.value = true;
+  const signal = abort.renew();
 
   try {
     if (routeIs.Recognize) {
-      await dav.recognizeRenameFace(user.value, name.value, input.value);
+      await dav.recognizeRenameFace(user.value, name.value, input.value, { signal });
     } else {
-      await dav.faceRecognitionRenamePerson(name.value, input.value);
+      await dav.faceRecognitionRenamePerson(name.value, input.value, { signal });
     }
+    signal.throwIfAborted();
 
     await close();
     await router.replace({
@@ -96,6 +102,7 @@ async function save() {
       params: { user: user.value, name: input.value },
     });
   } catch (error) {
+    if (isAbortError(error)) return;
     console.error(error);
     showError(
       t('memories', 'Failed to rename {oldName} to {name}.', {
@@ -104,7 +111,7 @@ async function save() {
       }),
     );
   } finally {
-    saving.value = false;
+    if (!signal.aborted) saving.value = false;
   }
 }
 

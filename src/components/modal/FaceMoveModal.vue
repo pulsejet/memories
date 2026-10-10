@@ -29,6 +29,7 @@ import Modal from './Modal.vue';
 
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 
@@ -43,6 +44,7 @@ const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
 
 const photos = ref<IPhoto[]>([]);
+const abort = useAbort();
 
 console.assert(!_m.modals.moveToFace, 'FaceMoveModal created twice');
 _m.modals.moveToFace = open;
@@ -69,6 +71,7 @@ function open(photosIn: IPhoto[]) {
 }
 
 function cleanup() {
+  abort.abort();
   show.value = false;
   photos.value = [];
 }
@@ -104,8 +107,10 @@ async function clickFace(face: IFace) {
     }
 
     // Run WebDAV query
+    const signal = abort.renew();
     const photosArr = Array.from(map.values());
-    for await (let delIds of dav.recognizeMoveFaceImages(user, name, target, photosArr)) {
+    for await (let delIds of dav.recognizeMoveFaceImages(user, name, target, photosArr, { signal })) {
+      signal.throwIfAborted();
       moved(
         delIds
           .filter(utils.truthy)
@@ -114,6 +119,7 @@ async function clickFace(face: IFace) {
       );
     }
   } catch (error) {
+    if (isAbortError(error)) return;
     console.error(error);
     showError(t('memories', 'An error occurred while moving photos from {name}.', { name }));
   } finally {
