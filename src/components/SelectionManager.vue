@@ -819,7 +819,12 @@ function restoreDay(day: IDay) {
  */
 async function downloadSelection(sel: Selection) {
   if (sel.size >= 100 && !(await utils.dialogs.downloadItems(sel.size))) return;
-  await dav.downloadFiles(sel.photosNoDupFileId().map((p) => p.fileid));
+  try {
+    await dav.downloadFiles(sel.photosNoDupFileId().map((p) => p.fileid));
+  } catch (e) {
+    console.error(e);
+    utils.showError(t('memories', 'Failed to download files'));
+  }
 }
 
 /**
