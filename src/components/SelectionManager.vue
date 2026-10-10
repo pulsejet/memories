@@ -135,7 +135,7 @@ type ISelectionAction = {
   /** Action to perform */
   callback: (selection: Selection) => Promise<void>;
   /** Reactive condition for including */
-  if?: ComputedRef<boolean>;
+  if: ComputedRef<boolean>;
   /** Allow for public routes (default false) */
   allowPublic?: boolean;
 };
@@ -211,6 +211,7 @@ const defaultActions: ISelectionAction[] = [
     name: t('memories', 'Favorite'),
     icon: markRaw(StarIcon),
     callback: favoriteSelection,
+    if: computed(() => true),
   },
   {
     name: t('memories', 'Archive'),
@@ -228,11 +229,13 @@ const defaultActions: ISelectionAction[] = [
     name: t('memories', 'Edit metadata'),
     icon: markRaw(EditFileIcon),
     callback: editMetadataSelection,
+    if: computed(() => true),
   },
   {
     name: t('memories', 'Rotate / Flip'),
     icon: markRaw(RotateLeftIcon),
     callback: () => editMetadataSelection(selection.value, [5]),
+    if: computed(() => true),
   },
   {
     name: t('memories', 'Refresh metadata'),
@@ -311,7 +314,7 @@ function empty(): boolean {
 
 /** Get the actions list (reactive) */
 const currentActions = computed((): ISelectionAction[] => {
-  const actions = defaultActions.filter((a) => (!a.if || a.if.value) && (!routeIs.Public || a.allowPublic));
+  const actions = defaultActions.filter((a) => a.if.value && (!routeIs.Public || a.allowPublic));
 
   // Move face-move to start if unassigned faces
   if (routeIs.RecognizeUnassigned) {
