@@ -14,7 +14,7 @@
 
       <NcActions :inline="3">
         <NcActionButton
-          v-for="action of getActions()"
+          v-for="action of currentActions"
           :key="action.name"
           :aria-label="action.name"
           :disabled="!!loading"
@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, markRaw } from 'vue';
+import { computed, ref, watch, markRaw, type ComputedRef } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { showError } from '@services/utils/dialog';
@@ -134,8 +134,8 @@ type ISelectionAction = {
   icon: any;
   /** Action to perform */
   callback: (selection: Selection) => Promise<void>;
-  /** Condition to check for including */
-  if?: (self?: any) => boolean;
+  /** Reactive condition for including */
+  if?: ComputedRef<boolean>;
   /** Allow for public routes (default false) */
   allowPublic?: boolean;
 };
@@ -161,6 +161,7 @@ const show = ref(false);
 const size = ref(0);
 const loading = ref(0);
 const selection = ref(new Selection());
+const numLocal = ref(0);
 
 const touchAnchor = ref<IPhoto | null>(null);
 const prevTouch = ref<Touch | null>(null);
@@ -178,33 +179,33 @@ const defaultActions: ISelectionAction[] = [
     name: t('memories', 'Upload Local'),
     icon: markRaw(UploadIcon),
     callback: uploadLocalSelection,
-    if: () => nativex.has() && Array.from(selection.value.values()).some((p) => utils.isLocalPhoto(p)),
+    if: computed(() => nativex.has() && numLocal.value > 0),
   },
   {
     name: t('memories', 'Delete'),
     icon: markRaw(DeleteIcon),
     callback: deleteSelection,
     allowPublic: true,
-    if: () => !routeIs.Albums && (!routeIs.Public || initstate.allow_delete),
+    if: computed(() => !routeIs.Albums && (!routeIs.Public || initstate.allow_delete)),
   },
   {
     name: t('memories', 'Remove from album'),
     icon: markRaw(AlbumRemoveIcon),
     callback: deleteSelection,
-    if: () => routeIs.Albums,
+    if: computed(() => routeIs.Albums),
   },
   {
     name: t('memories', 'Share'),
     icon: markRaw(ShareIcon),
     callback: shareSelection,
-    if: () => !routeIs.Albums,
+    if: computed(() => !routeIs.Albums),
   },
   {
     name: t('memories', 'Download'),
     icon: markRaw(DownloadIcon),
     callback: downloadSelection,
     allowPublic: true,
-    if: () => !initstate.noDownload,
+    if: computed(() => !initstate.noDownload),
   },
   {
     name: t('memories', 'Favorite'),
@@ -215,13 +216,13 @@ const defaultActions: ISelectionAction[] = [
     name: t('memories', 'Archive'),
     icon: markRaw(ArchiveIcon),
     callback: archiveSelection,
-    if: () => !routeIsArchiveFolder() && !routeIs.Albums,
+    if: computed(() => !routeIs.ArchiveFolder && !routeIs.Albums),
   },
   {
     name: t('memories', 'Unarchive'),
     icon: markRaw(UnarchiveIcon),
     callback: archiveSelection,
-    if: () => routeIsArchiveFolder(),
+    if: computed(() => routeIs.ArchiveFolder),
   },
   {
     name: t('memories', 'Edit metadata'),
@@ -237,52 +238,46 @@ const defaultActions: ISelectionAction[] = [
     name: t('memories', 'Refresh metadata'),
     icon: markRaw(RefreshIcon),
     callback: reindexSelection,
-    if: () => Array.from(selection.value.values()).some((p) => !utils.isLocalPhoto(p)),
+    if: computed(() => numLocal.value < size.value),
   },
   {
     name: t('memories', 'View in folder'),
     icon: markRaw(OpenInNewIcon),
     callback: viewInFolder,
-    if: () => selection.value.size === 1 && !routeIs.Albums,
+    if: computed(() => size.value === 1 && !routeIs.Albums),
   },
   {
     name: t('memories', 'Set as cover image'),
     icon: markRaw(ImageCheckIcon),
     callback: setClusterCover,
-    if: () => selection.value.size === 1 && routeIs.Cluster && !routeIs.RecognizeUnassigned,
+    if: computed(() => size.value === 1 && routeIs.Cluster && !routeIs.RecognizeUnassigned),
   },
   {
     name: t('memories', 'Move to folder'),
     icon: markRaw(FolderMoveIcon),
     callback: moveToFolder,
-    if: () => !routeIs.Albums && !routeIsArchiveFolder(),
+    if: computed(() => !routeIs.Albums && !routeIs.ArchiveFolder),
   },
   {
     name: t('memories', 'Add to album'),
     icon: markRaw(AlbumsIcon),
     callback: addToAlbum,
-    if: () => config.albums_enabled && !routeIs.Albums,
+    if: computed(() => config.albums_enabled && !routeIs.Albums),
   },
   {
     id: 'face-move',
     name: t('memories', 'Move to person'),
     icon: markRaw(MoveIcon),
     callback: moveSelectionToPerson,
-    if: () => routeIs.Recognize,
+    if: computed(() => routeIs.Recognize),
   },
   {
     name: t('memories', 'Remove from person'),
     icon: markRaw(CloseIcon),
     callback: removeSelectionFromPerson,
-    if: () => routeIs.Recognize && !routeIs.RecognizeUnassigned,
+    if: computed(() => routeIs.Recognize && !routeIs.RecognizeUnassigned),
   },
 ];
-
-// Move face-move to start if unassigned faces
-if (routeIs.RecognizeUnassigned) {
-  const i = defaultActions.findIndex((a) => a.id === 'face-move');
-  defaultActions.unshift(defaultActions.splice(i, 1)[0]);
-}
 
 // Subscribe to global events
 utils.useBus('memories:albums:update', clear);
@@ -301,25 +296,12 @@ function updateLoading(delta: number) {
   emit('updateLoading', delta); // timeline (loading icon)
 }
 
-/** Is archive route */
-function routeIsArchiveFolder(): boolean {
-  // Check if the route itself is archive
-  if (routeIs.Archive) return true;
-
-  // Check if route is folder and the path contains .archive
-  if (routeIs.Folders) {
-    let path = route.params.path || '';
-    if (Array.isArray(path)) path = path.join('/');
-    return ('/' + path + '/').includes('/.archive/');
-  }
-
-  return false;
-}
-
 /** Trigger to update props from selection set */
 function selectionChanged() {
-  show.value = selection.value.size > 0;
-  size.value = selection.value.size;
+  const selected = Array.from(selection.value.values());
+  show.value = selected.length > 0;
+  size.value = selected.length;
+  numLocal.value = selected.filter(utils.isLocalPhoto).length;
 }
 
 /** Is the selection empty */
@@ -327,10 +309,18 @@ function empty(): boolean {
   return !selection.value.size;
 }
 
-/** Get the actions list */
-function getActions(): ISelectionAction[] {
-  return defaultActions.filter((a) => (!a.if || a.if()) && (!routeIs.Public || a.allowPublic));
-}
+/** Get the actions list (reactive) */
+const currentActions = computed((): ISelectionAction[] => {
+  const actions = defaultActions.filter((a) => (!a.if || a.if.value) && (!routeIs.Public || a.allowPublic));
+
+  // Move face-move to start if unassigned faces
+  if (routeIs.RecognizeUnassigned) {
+    const i = actions.findIndex((a) => a.id === 'face-move');
+    if (i > 0) actions.unshift(actions.splice(i, 1)[0]);
+  }
+
+  return actions;
+});
 
 /** Click on an action */
 async function click(action: ISelectionAction) {

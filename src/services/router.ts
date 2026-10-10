@@ -248,6 +248,15 @@ export const routeIs = reactive({
   get Archive(): boolean {
     return isName(routes.Archive.name);
   },
+  get ArchiveFolder(): boolean {
+    if (isName(routes.Archive.name)) return true;
+    if (isName(routes.Folders.name)) {
+      let path = router.currentRoute.value.params.path || String();
+      if (Array.isArray(path)) path = path.join('/');
+      return `/${path}/`.includes('/.archive/');
+    }
+    return false;
+  },
   get ThisDay(): boolean {
     return isName(routes.ThisDay.name);
   },
