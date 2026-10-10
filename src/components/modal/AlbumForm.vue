@@ -45,7 +45,7 @@
           </template>
           {{ t('memories', 'Add collaborators') }}
         </NcButton>
-        <NcButton :aria-label="saveText" variant="primary" :disabled="albumName === '' || loading" @click="submit()">
+        <NcButton :aria-label="saveText" variant="primary" :disabled="!albumName.trim() || loading" @click="submit()">
           <template #icon>
             <XLoadingIcon v-if="loading" />
             <Send v-else />
@@ -146,7 +146,7 @@ onMounted(() => {
 });
 
 function submit(collaborators: any[] = []) {
-  if (albumName.value === '' || loading.value) {
+  if (!albumName.value.trim() || loading.value) {
     return;
   }
 
@@ -190,6 +190,7 @@ async function handleCreateAlbum(collaborators: any[] = []) {
     emit('done', { album });
   } catch (error) {
     console.error(error);
+    showError(t('memories', 'Failed to create album.'));
   } finally {
     loading.value = false;
   }
@@ -211,6 +212,7 @@ async function handleUpdateAlbum() {
     emit('done', { album });
   } catch (error) {
     console.error(error);
+    showError(t('memories', 'Failed to update album.'));
   } finally {
     loading.value = false;
   }
