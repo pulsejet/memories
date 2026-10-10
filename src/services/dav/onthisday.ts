@@ -23,8 +23,8 @@ export async function getOnThisDayRaw(opts?: AbortOpts) {
     // +- 3 days from this day
     for (let j = -dayRange; j <= dayRange; j++) {
       const d = new Date(nowUTC);
-      d.setFullYear(d.getFullYear() - i);
-      d.setDate(d.getDate() + j);
+      d.setUTCFullYear(d.getUTCFullYear() - i);
+      d.setUTCDate(d.getUTCDate() + j);
       const dayId = Math.floor(d.getTime() / 1000 / 86400);
       dayIds.push(dayId);
     }
