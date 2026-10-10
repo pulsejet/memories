@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount, markRaw } from 'vue';
+import { ref, watch, markRaw } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { showError } from '@services/utils/dialog';
@@ -284,17 +284,9 @@ if (routeIs.RecognizeUnassigned) {
   defaultActions.unshift(defaultActions.splice(i, 1)[0]);
 }
 
-onMounted(() => {
-  // Subscribe to global events
-  utils.bus.on('memories:albums:update', clear);
-  utils.bus.on('memories:fragment:pop:selection', clear);
-});
-
-onBeforeUnmount(() => {
-  // Unsubscribe from global events
-  utils.bus.off('memories:albums:update', clear);
-  utils.bus.off('memories:fragment:pop:selection', clear);
-});
+// Subscribe to global events
+utils.useBus('memories:albums:update', clear);
+utils.useBus('memories:fragment:pop:selection', clear);
 
 watch(show, (value) => {
   utils.fragment.if(value, utils.fragment.types.selection);

@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, nextTick, useTemplateRef, defineCustomElement } from 'vue';
+import { ref, computed, onMounted, nextTick, useTemplateRef, defineCustomElement } from 'vue';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
@@ -195,8 +195,6 @@ const availableTabs = computed((): ISidebarTab[] => {
 });
 
 onMounted(() => {
-  utils.bus.on('memories:fragment:pop:sidebar', close);
-
   _m.sidebar = {
     open,
     close,
@@ -210,9 +208,7 @@ onMounted(() => {
   registerDavProperty('nc:share-attributes');
 });
 
-onBeforeUnmount(() => {
-  utils.bus.off('memories:fragment:pop:sidebar', close);
-});
+utils.useBus('memories:fragment:pop:sidebar', close);
 
 async function open(photo: IPhoto | number, filename?: string, useNative = false) {
   if ((!photo || useNative) && filename && (await openNative(photo, filename))) {

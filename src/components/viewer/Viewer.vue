@@ -104,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef, watch } from 'vue';
+import { computed, markRaw, nextTick, onMounted, reactive, ref, useTemplateRef, watch } from 'vue';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
@@ -247,12 +247,6 @@ const tapPatch = markRaw(
 );
 
 onMounted(() => {
-  utils.bus.on('memories:sidebar:opened', handleAppSidebarOpen);
-  utils.bus.on('memories:sidebar:closed', handleAppSidebarClose);
-  utils.bus.on('files:file:created', handleFileUpdated);
-  utils.bus.on('files:file:updated', handleFileUpdated);
-  utils.bus.on('memories:fragment:pop:viewer', close);
-
   // The viewer is a singleton
   _m.viewer = {
     open: setFragment,
@@ -268,13 +262,11 @@ onMounted(() => {
   };
 });
 
-onBeforeUnmount(() => {
-  utils.bus.off('memories:sidebar:opened', handleAppSidebarOpen);
-  utils.bus.off('memories:sidebar:closed', handleAppSidebarClose);
-  utils.bus.off('files:file:created', handleFileUpdated);
-  utils.bus.off('files:file:updated', handleFileUpdated);
-  utils.bus.off('memories:fragment:pop:viewer', close);
-});
+utils.useBus('memories:sidebar:opened', handleAppSidebarOpen);
+utils.useBus('memories:sidebar:closed', handleAppSidebarClose);
+utils.useBus('files:file:created', handleFileUpdated);
+utils.useBus('files:file:updated', handleFileUpdated);
+utils.useBus('memories:fragment:pop:viewer', close);
 
 /** Number of top bar buttons to show inline */
 const numInlineTopActions = computed((): number => {

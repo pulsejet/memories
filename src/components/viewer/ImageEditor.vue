@@ -170,7 +170,6 @@ onMounted(async () => {
 
   // Fragment navigation
   utils.fragment.push(utils.fragment.types.editor);
-  utils.bus.on('memories:fragment:pop:editor', warnUnsaved);
 });
 
 onBeforeUnmount(() => {
@@ -182,8 +181,9 @@ onBeforeUnmount(() => {
 
   // Fragment navigation
   utils.fragment.pop(utils.fragment.types.editor);
-  utils.bus.off('memories:fragment:pop:editor', warnUnsaved);
 });
+
+utils.useBus('memories:fragment:pop:editor', warnUnsaved);
 
 // Prevent editor buttons from being styled by global CSS
 useMutationObserver(

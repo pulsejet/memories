@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent, markRaw } from 'vue';
+import { ref, computed, watch, defineAsyncComponent, markRaw } from 'vue';
 import type { Component } from 'vue';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
@@ -478,15 +478,8 @@ function handleFileUpdated({ fileid: updated }: utils.BusEvent['files:file:updat
   }
 }
 
-onMounted(() => {
-  utils.bus.on('files:file:updated', handleFileUpdated);
-  utils.bus.on('memories:albums:update', refresh);
-});
-
-onBeforeUnmount(() => {
-  utils.bus.off('files:file:updated', handleFileUpdated);
-  utils.bus.off('memories:albums:update', refresh);
-});
+utils.useBus('files:file:updated', handleFileUpdated);
+utils.useBus('memories:albums:update', refresh);
 
 watch(
   () => props.node,

@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, useTemplateRef, computed, onBeforeMount, onBeforeUnmount, onMounted, defineAsyncComponent } from 'vue';
+import { ref, useTemplateRef, computed, onBeforeUnmount, onMounted, defineAsyncComponent } from 'vue';
 
 const NcModal = defineAsyncComponent(() => import('@nextcloud/vue/components/NcModal'));
 
@@ -63,17 +63,13 @@ const isSidebarShown = ref(false);
 const sidebarWidth = ref(400);
 const trapElements = ref<HTMLElement[]>([]);
 
-onBeforeMount(() => {
-  if (sidebar.value) {
-    utils.bus.on('memories:sidebar:opened', handleAppSidebarOpen);
-    utils.bus.on('memories:sidebar:closed', handleAppSidebarClose);
-  }
-});
+if (sidebar.value) {
+  utils.useBus('memories:sidebar:opened', handleAppSidebarOpen);
+  utils.useBus('memories:sidebar:closed', handleAppSidebarClose);
+}
 
 onBeforeUnmount(() => {
   if (sidebar.value) {
-    utils.bus.off('memories:sidebar:opened', handleAppSidebarOpen);
-    utils.bus.off('memories:sidebar:closed', handleAppSidebarClose);
     _m.sidebar.close();
   }
 });

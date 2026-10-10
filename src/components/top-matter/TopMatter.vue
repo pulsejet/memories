@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, markRaw, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, markRaw, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import FolderTopMatter from './FolderTopMatter.vue';
@@ -31,13 +31,7 @@ const route = useRoute();
 
 const dynamicVisible = ref(true);
 
-onMounted(() => {
-  utils.bus.on('memories.recycler.scroll', onRecyclerScroll);
-});
-
-onBeforeUnmount(() => {
-  utils.bus.off('memories.recycler.scroll', onRecyclerScroll);
-});
+utils.useBus('memories.recycler.scroll', onRecyclerScroll);
 
 const currentmatter = computed(() => {
   switch (route.name) {

@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref } from 'vue';
 import { generateUrl } from '@nextcloud/router';
 
 import UploadMenuItem from '@components/header/UploadMenuItem.vue';
@@ -36,13 +36,7 @@ function onScroll({ current, previous }: utils.BusEvent['memories.recycler.scrol
   isScrollDown.value = (isScrollDown.value && previous - current < 40) || current - previous > 40; // momentum scroll
 }
 
-onMounted(() => {
-  utils.bus.on('memories.recycler.scroll', onScroll);
-});
-
-onBeforeUnmount(() => {
-  utils.bus.off('memories.recycler.scroll', onScroll);
-});
+utils.useBus('memories.recycler.scroll', onScroll);
 </script>
 
 <style lang="scss">

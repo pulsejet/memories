@@ -271,20 +271,16 @@ onUnmounted(() => {
 });
 
 watch(config, softRefresh);
-utils.bus.on('files:file:created', softRefresh);
-utils.bus.on('memories:timeline:fetch-day', fetchDay);
-utils.bus.on('memories:timeline:deleted', deleteFromViewWithAnimation);
-utils.bus.on('memories:timeline:soft-refresh', softRefresh);
-utils.bus.on('memories:timeline:hard-refresh', refresh);
 
 onBeforeUnmount(() => {
-  utils.bus.off('files:file:created', softRefresh);
-  utils.bus.off('memories:timeline:fetch-day', fetchDay);
-  utils.bus.off('memories:timeline:deleted', deleteFromViewWithAnimation);
-  utils.bus.off('memories:timeline:soft-refresh', softRefresh);
-  utils.bus.off('memories:timeline:hard-refresh', refresh);
   resetState();
 });
+
+utils.useBus('files:file:created', softRefresh);
+utils.useBus('memories:timeline:fetch-day', fetchDay);
+utils.useBus('memories:timeline:deleted', deleteFromViewWithAnimation);
+utils.useBus('memories:timeline:soft-refresh', softRefresh);
+utils.useBus('memories:timeline:hard-refresh', refresh);
 
 const routeHasNative = computed((): boolean => {
   return routeIs.Base && nativex.has();

@@ -1,4 +1,5 @@
 import { emit, subscribe, unsubscribe } from '@nextcloud/event-bus';
+import { onBeforeUnmount, onMounted } from 'vue';
 import type { FragmentName, Fragment } from './fragment';
 import type { IPhoto } from '@typings';
 
@@ -81,3 +82,15 @@ export const bus = {
     unsubscribe(name, callback);
   },
 };
+
+/**
+ * Subscribe to an event for the lifetime of the calling component.
+ * Listens on mount and unsubscribes automatically on unmount.
+ *
+ * @param name Name of event
+ * @param callback Callback to be called when the event is emitted
+ */
+export function useBus<T extends keyof BusEvent>(name: T, callback: (data: BusEvent[T]) => void): void {
+  onMounted(() => bus.on(name, callback));
+  onBeforeUnmount(() => bus.off(name, callback));
+}

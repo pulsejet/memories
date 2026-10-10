@@ -1,4 +1,4 @@
-import { onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue';
+import { ref, watch, type Ref } from 'vue';
 
 import * as utils from '@services/utils/common';
 
@@ -38,13 +38,7 @@ export function useModal(modal?: Ref<{ close?: () => void } | null>) {
     }
   }
 
-  onMounted(() => {
-    utils.bus.on('memories:fragment:pop:modal', close);
-  });
-
-  onBeforeUnmount(() => {
-    utils.bus.off('memories:fragment:pop:modal', close);
-  });
+  utils.useBus('memories:fragment:pop:modal', close);
 
   watch(show, (value) => {
     utils.fragment.if(value, utils.fragment.types.modal);

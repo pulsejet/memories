@@ -279,7 +279,7 @@ input[type='text'] {
 </style>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue';
+import { ref, computed, watch, onMounted, defineAsyncComponent } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { config, setConfig } from '@services/user-config';
@@ -350,14 +350,9 @@ onMounted(() => {
   if (isNative.value) {
     refreshNativeConfig();
   }
-
-  // Fragment navigation
-  utils.bus.on('memories:fragment:pop:settings', onClose);
 });
 
-onBeforeUnmount(() => {
-  utils.bus.off('memories:fragment:pop:settings', onClose);
-});
+utils.useBus('memories:fragment:pop:settings', onClose);
 
 function onClose() {
   emit('update:open', false);
