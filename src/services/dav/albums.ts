@@ -156,17 +156,20 @@ export async function createAlbum(albumName: string, opts?: { rethrow: boolean }
  */
 export async function updateAlbum(album: any, { albumName, properties }: any) {
   const stringifiedProperties = Object.entries(properties)
-    .map(([name, value]) => {
-      switch (typeof value) {
+    .map(([name, valueRaw]) => {
+      let value: string;
+      switch (typeof valueRaw) {
         case 'string':
+          value = utils.escapeXml(valueRaw);
           return `<nc:${name}>${value}</nc:${name}>`;
         case 'object':
-          return `<nc:${name}>${JSON.stringify(value)}</nc:${name}>`;
+          value = utils.escapeXml(JSON.stringify(valueRaw));
+          return `<nc:${name}>${value}</nc:${name}>`;
         default:
-          return '';
+          return String();
       }
     })
-    .join();
+    .join('');
 
   try {
     await client.customRequest(album.filename, {

@@ -114,3 +114,13 @@ export function humanFileSize(size: number): string {
 export function removeExtension(filename: string) {
   return filename.replace(/\.[^/.]+$/, '');
 }
+
+/** Escape XML special characters */
+export function escapeXml(input: string) {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
