@@ -127,7 +127,6 @@ const root = useTemplateRef<HTMLDivElement>('root');
 const ximg = useTemplateRef<InstanceType<typeof XImg> & { $el: HTMLImageElement }>('ximg');
 const video = useTemplateRef<HTMLVideoElement>('video');
 
-let touchTimer = 0;
 const liveState = reactive({
   playing: false,
   waiting: false,
@@ -160,7 +159,6 @@ onMounted(() => {
 
 /** Clear timers */
 onBeforeUnmount(() => {
-  clearTimeout(touchTimer);
   livePlayTimer.clear();
 
   // Clean up blob url if face rect was created
