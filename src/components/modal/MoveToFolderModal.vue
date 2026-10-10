@@ -5,7 +5,7 @@
     </template>
 
     <div class="outer">
-      <NcProgressBar :value="Math.round((photosDone * 100) / photos.length)" :error="true" />
+      <NcProgressBar :value="Math.round((photosDone * 100) / Math.max(photos.length, 1))" :error="true" />
     </div>
   </Modal>
 </template>
