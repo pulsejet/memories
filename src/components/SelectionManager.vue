@@ -808,6 +808,7 @@ function restoreDay(day: IDay) {
     // Remove all selections that are not in the new day
     const newPhoto = dayMap.get(key);
     if (!newPhoto) {
+      photo.flag &= ~constants.FLAG_SELECTED;
       selection.value.delete(key);
       return;
     }
