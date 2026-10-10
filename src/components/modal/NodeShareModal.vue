@@ -174,7 +174,7 @@ function getShareLabels(share: IShare): string {
   return t('memories', 'Read only');
 }
 
-async function createLink(): Promise<IShare> {
+async function createLink(): Promise<IShare | null> {
   loading.value = true;
   try {
     const res = await axios.post<IShare>(API.SHARE_NODE(), {
@@ -185,6 +185,10 @@ async function createLink(): Promise<IShare> {
     refreshSidebar();
     shareOrCopy(share.url);
     return share;
+  } catch (e) {
+    console.error(e);
+    showError(t('memories', 'Failed to create share link'));
+    return null;
   } finally {
     loading.value = false;
   }
