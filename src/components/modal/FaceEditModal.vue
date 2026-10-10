@@ -50,6 +50,7 @@ const router = useRouter();
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
 const rawInput = ref(String());
+const saving = ref(false);
 
 const name = computed(() => route.params.name?.toString());
 const user = computed(() => route.params.user?.toString());
@@ -60,7 +61,9 @@ const input = computed(() => {
   return rawInput.value.trim();
 });
 
-const canSave = computed(() => input.value && name.value !== input.value && isNaN(Number(input.value)));
+const canSave = computed(
+  () => input.value && name.value !== input.value && isNaN(Number(input.value)) && !saving.value,
+);
 
 function open() {
   if (user.value !== utils.uid) {
@@ -77,7 +80,8 @@ function cleanup() {
 }
 
 async function save() {
-  if (!canSave.value) return;
+  if (!canSave.value || saving.value) return;
+  saving.value = true;
 
   try {
     if (routeIs.Recognize) {
@@ -99,6 +103,8 @@ async function save() {
         name: input.value,
       }),
     );
+  } finally {
+    saving.value = false;
   }
 }
 

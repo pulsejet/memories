@@ -88,7 +88,7 @@ function createOption(newDisplayName: string): dav.ITag {
 
 function getAvailable(): dav.ITag[] {
   // FIXME: this is extremely fragile
-  return selectTags.value!.availableTags;
+  return selectTags.value?.availableTags ?? [];
 }
 
 function handleCreate(newTag: dav.ITag) {

@@ -93,6 +93,8 @@ async function open(user: string, name: string, link?: boolean) {
     album.value = await dav.getAlbum(user, name);
   } catch {
     showError(t('memories', 'Failed to load album info: {name}', { name }));
+    show.value = false;
+    return;
   } finally {
     loadingAddCollaborators.value = false;
   }
@@ -144,6 +146,7 @@ async function save(collaboratorsIn: any[]) {
     await close();
   } catch (error) {
     console.error(error);
+    showError(t('memories', 'Failed to update album.'));
   } finally {
     loadingAddCollaborators.value = false;
   }
