@@ -5,7 +5,7 @@
       <span>{{ album.location }}</span>
     </div>
 
-    <div class="avatars" v-if="album?.collaborators.length ?? 0 > 1">
+    <div class="avatars" v-if="(album?.collaborators.length ?? 0) > 1">
       <!-- Show own user only if we have other collaborators -->
       <NcAvatar :user="utils.uid!" :showUserStatus="false" />
 
