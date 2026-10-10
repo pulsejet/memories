@@ -1,0 +1,14 @@
+# Backport of https://github.com/nextcloud-libraries/nextcloud-dialogs/pull/2600
+# Drop this file once @nextcloud/dialogs includes that PR (check the dist
+# chunk for "app-navigation--closed" instead of "app-navigation--close").
+--- ./node_modules/@nextcloud/dialogs/dist/chunks/index.mjs
++++ ./node_modules/@nextcloud/dialogs/dist/chunks/index.mjs
+@@ -409,7 +409,7 @@
+     onMounted(() => {
+       const navEl = document.querySelector(".app-navigation");
+       if (navEl) {
+-        navOpen.value = !navEl.classList.contains("app-navigation--close");
++        navOpen.value = !navEl.classList.contains("app-navigation--closed");
+       }
+       subscribe("navigation-toggled", handleNavigationToggle);
+     });
