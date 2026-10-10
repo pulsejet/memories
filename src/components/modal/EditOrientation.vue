@@ -84,8 +84,8 @@ const transform = computed(() => {
   return `${transform1.value} rotate(${d * 360 * f}deg)`;
 });
 
-const transform1 = computed((): string | null => {
-  if (props.disabled) return null;
+const transform1 = computed((): string => {
+  if (props.disabled) return String();
 
   /**
    * 1 = Horizontal (normal)
@@ -99,7 +99,7 @@ const transform1 = computed((): string | null => {
    */
   if (state.value < 1 || state.value > 8) {
     console.error('Invalid orientation state', state.value);
-    return null;
+    return String();
   }
 
   switch (state.value) {
@@ -121,7 +121,7 @@ const transform1 = computed((): string | null => {
       return 'rotate(270deg)';
   }
 
-  return null;
+  return String();
 });
 
 /** Reset state to initial */
