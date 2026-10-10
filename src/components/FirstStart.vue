@@ -69,22 +69,36 @@ const show = ref(false);
 const chosenPath = ref('');
 
 async function begin() {
-  const path = await chooseNcFolder(t('memories', 'Choose the root of your timeline'));
+  let path: string;
+  try {
+    path = await chooseNcFolder(t('memories', 'Choose the root of your timeline'));
+  } catch (e) {
+    console.warn('chooseNcFolder cancelled', e);
+    return;
+  }
 
   // Get folder days
   error.value = '';
   info.value = '';
-  const url = API.Q(API.DAYS(), { folder: path, recursive: 1 });
-  const res = await axios.get<IDay[]>(url);
+  let data: IDay[];
+  try {
+    const url = API.Q(API.DAYS(), { folder: path, recursive: 1 });
+    const res = await axios.get<IDay[]>(url);
 
-  // Check response
-  if (res.status !== 200) {
+    // Check response
+    if (res.status !== 200) {
+      throw new Error(`Unexpected response code ${res.status}`);
+    }
+
+    data = res.data;
+  } catch (e) {
+    console.error(e);
     error.value = t('memories', 'The selected folder does not seem to be valid. Try again.');
     return;
   }
 
   // Count total photos
-  const count = res.data.reduce((acc, day) => acc + day.count, 0);
+  const count = data.reduce((acc, day) => acc + day.count, 0);
   info.value = n('memories', 'Found {n} item in {path}', 'Found {n} items in {path}', count, {
     n: count,
     path,
