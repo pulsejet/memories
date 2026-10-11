@@ -1,12 +1,10 @@
 <template>
   <div class="container no-user-select cluster-view">
-    <XLoadingIcon class="loading-icon centered" v-if="loading" />
-
     <TopMatter />
 
     <EmptyContent v-if="!items.length && !loading" />
 
-    <ClusterGrid ref="grid" :items="items" :minCols="minCols" :maxSize="maxSize" :focus="true">
+    <ClusterGrid ref="grid" :items="items" :minCols="minCols" :maxSize="maxSize" :focus="true" :loading="!!loading">
       <template #before>
         <DynamicTopMatter class="cv-dtm" ref="dtm" />
       </template>
@@ -26,7 +24,6 @@ import TopMatter from '@components/top-matter/TopMatter.vue';
 import ClusterGrid from '@components/ClusterGrid.vue';
 import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
-import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import { config } from '@services/user-config';
 import * as dav from '@services/dav';

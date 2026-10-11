@@ -2,7 +2,7 @@
   <div
     v-if="show"
     ref="outer"
-    class="memories-viewer outer remove-gap"
+    class="memories-viewer viewer-outer"
     :class="{
       'fully-opened': fullyOpened,
       'is-video': isVideo,
@@ -1476,7 +1476,7 @@ function updateAlbums() {
 </script>
 
 <style lang="scss" scoped>
-.outer {
+.viewer-outer {
   z-index: 2020;
   width: v-bind(outerWidth) !important;
   height: 100vh;

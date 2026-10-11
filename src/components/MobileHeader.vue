@@ -32,20 +32,15 @@ import banner from '@assets/banner.svg';
 const isScrollDown = ref(false);
 const homeUrl = generateUrl('/');
 
-function onScroll({ current, previous }: utils.BusEvent['memories.recycler.scroll']) {
+utils.useBus('memories.recycler.scroll', ({ current, previous }) => {
   isScrollDown.value = (isScrollDown.value && previous - current < 40) || current - previous > 40; // momentum scroll
-}
-
-utils.useBus('memories.recycler.scroll', onScroll);
+});
 </script>
 
 <style lang="scss">
 .mobile-header-top-gap {
-  display: none;
-  .has-mobile-header & {
-    display: block;
-    height: 45px;
-  }
+  display: block;
+  height: 45px;
 }
 </style>
 

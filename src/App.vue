@@ -55,17 +55,19 @@
       <NcAppContent :allowSwipeNavigation="false">
         <div
           :class="{
-            outer: true,
+            'app-outer': true,
             'router-outlet': true,
             'has-nav': showNavigation,
-            'has-mobile-header': hasMobileHeader,
             'is-native': native,
           }"
         >
-          <router-view />
+          <router-view v-slot="{ Component, route: routeFromSlot }">
+            <Transition :name="routeTransition" :css="true">
+              <component :is="Component" :key="routeFromSlot.path" />
+            </Transition>
+          </router-view>
         </div>
 
-        <MobileHeader v-if="hasMobileHeader" />
         <MobileNav v-if="showNavigation" />
       </NcAppContent>
 
@@ -102,13 +104,13 @@ import NcAppNavigationItem from '@nextcloud/vue/components/NcAppNavigationItem';
 
 import { generateUrl } from '@nextcloud/router';
 import { routeIs } from '@services/router';
+import { useRouteTransition } from '@services/route-transition';
 
 const FirstStart = defineAsyncComponent(() => import('@components/FirstStart.vue'));
 import Settings from '@components/Settings.vue';
 import Viewer from '@components/viewer/Viewer.vue';
 import Sidebar from '@components/Sidebar.vue';
 import MobileNav from '@components/MobileNav.vue';
-import MobileHeader from '@components/MobileHeader.vue';
 
 import EditMetadataModal from '@components/modal/EditMetadataModal.vue';
 import AddToAlbumModal from '@components/modal/AddToAlbumModal.vue';
@@ -153,6 +155,8 @@ defineOptions({
 });
 
 const route = useRoute();
+const routeTransition = useRouteTransition();
+
 const navItems = ref<NavItem[]>([]);
 const settingsOpen = ref(false);
 
@@ -215,10 +219,6 @@ const showNavigation = computed((): boolean => {
   }
 
   return true;
-});
-
-const hasMobileHeader = computed((): boolean => {
-  return native.value && showNavigation.value && routeIs.Base;
 });
 
 // Register navigation items on config change
@@ -394,20 +394,20 @@ function syncSharingToken(token?: string) {
 </script>
 
 <style scoped lang="scss">
-.outer {
-  padding: 0 0 0 44px;
+.app-outer {
+  --app-outer-margin-left: 44px;
+  margin: 0;
+  margin-left: var(--app-outer-margin-left);
   height: 100%;
-  width: 100%;
+  width: calc(100% - var(--app-outer-margin-left));
+  position: relative;
 
-  &.remove-gap,
   &:has(.map-matter) {
-    padding: 0; // gap on map left
+    --app-outer-margin-left: 0px; // gap on map left
   }
-}
 
-@media (max-width: 768px) {
-  .outer {
-    padding: 0px;
+  @media (max-width: 768px) {
+    --app-outer-margin-left: 0px;
   }
 }
 

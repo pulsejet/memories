@@ -278,6 +278,11 @@ $mobHeight: 165px;
   position: relative;
   cursor: pointer;
 
+  border-radius: 10px;
+  background-color: var(--color-background-dark);
+  background-clip: padding-box, content-box;
+  overflow: hidden;
+
   &:not(:last-of-type) {
     margin-right: 8px;
   }
@@ -285,9 +290,6 @@ $mobHeight: 165px;
   :deep(img) {
     cursor: inherit;
     object-fit: cover;
-    border-radius: 10px;
-    background-color: var(--color-background-dark);
-    background-clip: padding-box, content-box;
   }
 
   .overlay {

@@ -1,7 +1,5 @@
 <template>
   <div ref="container" class="explore-outer hide-scrollbar-mobile">
-    <XLoadingIcon v-if="loading" class="fill-block top-left" />
-
     <div>
       <div class="title">{{ t('memories', 'Explore') }}</div>
 
@@ -13,6 +11,7 @@
         :title="t('memories', 'Recognize')"
         link="/recognize"
         :clusters="recognize"
+        :circle="true"
       />
       <ClusterHList
         v-if="facerecognition.length"
@@ -20,6 +19,7 @@
         :title="t('memories', 'Face Recognition')"
         link="/facerecognition"
         :clusters="facerecognition"
+        :circle="true"
       />
       <ClusterHList
         v-if="places.length"
@@ -62,7 +62,6 @@ import type { Component } from 'vue';
 
 import Searchbar from '@components/header/Searchbar.vue';
 import ClusterHList from '@components/ClusterHList.vue';
-import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 
@@ -192,21 +191,33 @@ async function getTags(signal: AbortSignal) {
 function maybeLoad() {
   if (config.recognize_enabled && !loaded.recognize) {
     loaded.recognize = true;
+    if (!recognize.value.length) {
+      recognize.value = dav.getPlaceholderClusters(10);
+    }
     load(getRecognize);
   }
 
   if (config.facerecognition_enabled && !loaded.facerecognition) {
     loaded.facerecognition = true;
+    if (!facerecognition.value.length) {
+      facerecognition.value = dav.getPlaceholderClusters(10);
+    }
     load(getFaceRecognition);
   }
 
   if (config.places_gis > 0 && !loaded.places) {
     loaded.places = true;
+    if (!places.value.length) {
+      places.value = dav.getPlaceholderClusters(10);
+    }
     load(getPlaces);
   }
 
   if (config.systemtags_enabled && !loaded.tags) {
     loaded.tags = true;
+    if (!tags.value.length) {
+      tags.value = dav.getPlaceholderClusters(10);
+    }
     load(getTags);
   }
 }

@@ -27,7 +27,12 @@ declare global {
     mode: 'admin' | 'user';
     route: RouteLocationNormalized;
     router: Router;
-    routes: typeof routes;
+    routes: {
+      [K in keyof typeof routes]: {
+        path: (typeof routes)[K]['path'];
+        name: (typeof routes)[K]['name'];
+      };
+    };
 
     modals: {
       editMetadata: (photos: IPhoto[], sections?: number[]) => void;

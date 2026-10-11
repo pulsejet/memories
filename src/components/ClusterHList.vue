@@ -10,7 +10,7 @@
     <div ref="hlist" class="hlist hide-scrollbar">
       <div
         class="item cluster--rounded"
-        :class="{ 'cluster--circle': circle(item) }"
+        :class="{ 'cluster--circle': props.circle }"
         :key="item.cluster_id"
         v-for="item of props.clusters"
       >
@@ -36,6 +36,7 @@ const props = defineProps<{
   clusters: ICluster[];
   title?: string;
   link?: string;
+  circle?: boolean;
 }>();
 
 const hlistRef = useTemplateRef<HTMLDivElement>('hlist');
@@ -44,16 +45,6 @@ useRouteState({
   instance: props.stateKey,
   scroll: { hlistRef },
 });
-
-function circle(cluster: ICluster): boolean {
-  switch (cluster.cluster_type) {
-    case 'recognize':
-    case 'facerecognition':
-      return true;
-    default:
-      return false;
-  }
-}
 </script>
 
 <style lang="scss" scoped>
