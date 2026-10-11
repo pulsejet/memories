@@ -32,10 +32,10 @@ import { RecycleScroller } from 'vue-virtual-scroller';
 
 import { routeIs } from '@services/router';
 import { windowDims } from '@services/viewport';
+import { getPlaceholderClusters } from '@services/dav';
+import * as utils from '@services/utils/common';
 
 import Cluster from '@components/frame/Cluster.vue';
-
-import * as utils from '@services/utils/common';
 
 import type { ICluster } from '@typings';
 
@@ -67,12 +67,7 @@ const recycler = useTemplateRef<VueRecyclerType>('recycler');
 const recyclerWidth = ref(300);
 
 /** Placeholders to show while loading */
-const placeholders: ICluster[] = Array.from({ length: 30 }, (_, idx) => ({
-  cluster_type: 'placeholder' as const,
-  cluster_id: idx,
-  name: String(),
-  count: 0,
-}));
+const placeholders: ICluster[] = getPlaceholderClusters(30);
 
 /** Number of items horizontally */
 const gridItems = computed(() =>

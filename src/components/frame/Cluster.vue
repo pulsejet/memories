@@ -1,8 +1,8 @@
 <template>
   <component
-    :is="link ? 'router-link' : 'div'"
+    :is="link && !placeholder ? 'router-link' : 'div'"
     draggable="false"
-    tabindex="1"
+    :tabindex="placeholder ? -1 : 1"
     :aria-label="title"
     class="cluster fill-block"
     :class="{ error }"
@@ -280,6 +280,11 @@ $namemargin: 10px;
       :deep(svg) {
         cursor: pointer;
       }
+    }
+
+    &.ph-shimmer {
+      pointer-events: none;
+      cursor: default;
     }
 
     > img {

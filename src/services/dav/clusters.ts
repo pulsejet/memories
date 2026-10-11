@@ -14,6 +14,19 @@ export const clusterIs = {
 };
 
 /**
+ * Create dummy placeholder tiles shown while clusters are loading.
+ * @param count number of placeholder tiles to create.
+ */
+export function getPlaceholderClusters(count: number): ICluster[] {
+  return Array.from({ length: count }, (_, idx) => ({
+    cluster_type: 'placeholder' as const,
+    cluster_id: idx,
+    name: String(),
+    count: 0,
+  }));
+}
+
+/**
  * Get the preview URL for a cluster
  * @param cluster Cluster object
  */
