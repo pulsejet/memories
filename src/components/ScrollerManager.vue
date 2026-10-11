@@ -554,7 +554,7 @@ function moveto(y: number, snap: boolean) {
   if (lastRequestedRecyclerY.value !== targetY) {
     lastRequestedRecyclerY.value = targetY;
     props.recycler?.scrollToPosition(targetY);
-    vibrateTick();
+    if (snap) vibrateTick();
   }
 
   handleScroll();
