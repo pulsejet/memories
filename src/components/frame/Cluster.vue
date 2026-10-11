@@ -13,13 +13,14 @@
       <NcCounterBubble :count="data.count" />
     </div>
     <div class="name">
-      <div class="title">{{ title }}</div>
+      <div class="title" v-if="title">{{ title }}</div>
       <div class="subtitle" v-if="subtitle">{{ subtitle }}</div>
     </div>
 
     <div class="previews fill-block" ref="previews" @click="clickPreview">
-      <div class="img-outer" :class="{ plus }">
+      <div class="img-outer" :class="{ plus, 'ph-shimmer': placeholder }" :style="imgOuterStyle">
         <XImg
+          v-if="previewUrl"
           draggable="false"
           class="fill-block"
           :key="data.cluster_id"
@@ -68,6 +69,7 @@ const emit = defineEmits<{
 }>();
 
 const previewUrl = computed(() => {
+  if (placeholder.value) return String();
   if (error.value) return errorsvg;
   if (plus.value) return plussvg;
   return dav.getClusterPreview(props.data);
@@ -97,6 +99,15 @@ const target = computed(() => {
 
 const error = computed(() => {
   return !!props.data.previewError || (dav.clusterIs.album(props.data) && props.data.last_added_photo <= 0);
+});
+
+const placeholder = computed(() => {
+  return props.data.cluster_type === 'placeholder';
+});
+
+const imgOuterStyle = computed(() => {
+  const idx = props.data.cluster_id as number;
+  return placeholder.value ? { animationDelay: `${idx * 0.1}s` } : {};
 });
 
 function failed() {

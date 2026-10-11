@@ -1,0 +1,10 @@
+@keyframes ph-shimmer {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.ph-shimmer {
+  background-color: var(--color-background-dark);
+  animation: ph-shimmer 1.6s ease-in-out infinite;
+}

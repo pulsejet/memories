@@ -2,13 +2,13 @@
   <div class="timeline-skeleton" aria-hidden="true">
     <div v-for="row in rows" :key="row.id">
       <div class="sk-head">
-        <div class="sk-bar" :style="{ width: `${row.headWidth}px` }" />
+        <div class="sk-bar ph-shimmer" :style="{ width: `${row.headWidth}px` }" />
       </div>
       <div class="sk-photos">
         <div
           v-for="(width, i) in row.widths"
           :key="i"
-          class="sk-photo"
+          class="sk-photo ph-shimmer"
           :style="{
             flexGrow: width,
             animationDelay: `${(row.id * 0.12 + i * 0.05).toFixed(2)}s`,
@@ -69,12 +69,6 @@ const rows = Array.from({ length: NUM_ROWS }, (_, r) => {
     border-radius: 3px;
   }
 
-  .sk-bar,
-  .sk-photo {
-    background-color: var(--color-background-dark);
-    animation: timeline-skeleton-pulse 1.6s ease-in-out infinite;
-  }
-
   .sk-bar {
     height: 16px;
     border-radius: 8px;
@@ -96,12 +90,6 @@ const rows = Array.from({ length: NUM_ROWS }, (_, r) => {
         display: none;
       }
     }
-  }
-}
-
-@keyframes timeline-skeleton-pulse {
-  50% {
-    opacity: 0.45;
   }
 }
 </style>

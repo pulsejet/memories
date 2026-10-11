@@ -47,6 +47,7 @@ const props = withDefaults(
     link?: boolean;
     plus?: boolean;
     focus?: boolean;
+    loading?: boolean;
   }>(),
   {
     maxSize: 180,
@@ -54,6 +55,7 @@ const props = withDefaults(
     link: true,
     plus: false,
     focus: false,
+    loading: false,
   },
 );
 
@@ -63,6 +65,14 @@ const emit = defineEmits<{
 }>();
 const recycler = useTemplateRef<VueRecyclerType>('recycler');
 const recyclerWidth = ref(300);
+
+/** Placeholders to show while loading */
+const placeholders: ICluster[] = Array.from({ length: 30 }, (_, idx) => ({
+  cluster_type: 'placeholder' as const,
+  cluster_id: idx,
+  name: String(),
+  count: 0,
+}));
 
 /** Number of items horizontally */
 const gridItems = computed(() =>
@@ -86,7 +96,7 @@ const height = computed(() => {
 
 /** Classes list on object */
 const classList = computed(() => ({
-  empty: !props.items.length,
+  empty: !props.items.length && !props.loading,
   'cluster--album': routeIs.Albums,
 }));
 
@@ -95,6 +105,12 @@ const counters = computed(() => !routeIs.Albums);
 
 /** List of clusters to display */
 const clusters = computed(() => {
+  // Show placeholders when loading.
+  if (props.loading && !props.items.length) {
+    return placeholders;
+  }
+
+  // Avoid mutating original props.
   const items = [...props.items];
 
   // Add plus button if required
@@ -112,9 +128,11 @@ const clusters = computed(() => {
 
 function click(item: ICluster) {
   switch (item.cluster_type) {
+    case 'placeholder':
+      return;
     case 'plus':
       emit('plus');
-      break;
+      return;
     default:
       emit('click', item);
   }
