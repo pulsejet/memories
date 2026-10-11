@@ -31,11 +31,12 @@ Very important.
 ## Main Release Flow
 - *Confirm each step with user*.
 - Verify versions in info.xml and package.json are committed (`git show HEAD:...`).
+- Update CHANGELOG.md with the release version and date (move `[Unreleased]` entries under it) before tagging.
 - On master: `git fetch origin`, check in sync with origin/master and development. Dirty tree OK if tag targets clean HEAD.
 - `git tag vX.X.X`, `git push origin vX.X.X`. Check tag absent first, `ls-remote` after.
 - Push branches before tagging/releasing; push only the new tag, never `--tags` (publishes stale local tags).
-- `gh release create <tag> --title <tag> --generate-notes --notes <CHANGELOG-URL> --notes-start-tag <prev-stable> --verify-tag`, plus `--prerelease` for alpha/beta/rc.
-  - `--notes` prepends changelog pointer to auto notes.
+- `gh release create <tag> --title <tag> --generate-notes --notes <NOTES> --notes-start-tag <prev-stable> --verify-tag`, plus `--prerelease` for alpha/beta/rc.
+  - `--notes` must contain the full release changelog text from CHANGELOG.md AND the changelog URL (both), prepended to auto notes.
   - `--notes-start-tag` must be last stable (auto picks newest tag by date, e.g. go-vod/*).
   - Fix wrong base via `gh api .../generate-notes -f previous_tag_name=<prev>` + `gh release edit --notes-file`.
 
