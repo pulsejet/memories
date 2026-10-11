@@ -7,16 +7,16 @@
     :allowSwipe="allowSwipe"
     :signal="abortSignal"
   >
-    <!-- Loading indicator -->
-    <XLoadingIcon class="loading-icon centered" v-if="loading" />
-
     <!-- Static top matter -->
     <TopMatter ref="topmatter" />
+
+    <!-- Skeleton placeholder rows during initial load -->
+    <TimelineSkeleton v-if="showSkeleton" />
 
     <!-- No content found and nothing is loading -->
     <EmptyContent v-if="showEmpty" />
 
-    <div class="recycler-wrap">
+    <div class="recycler-wrap" v-show="!showSkeleton">
       <!-- Top overlay showing date -->
       <TimelineTopOverlay
         ref="topOverlay"
@@ -133,7 +133,7 @@ import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import TopMatter from '@components/top-matter/TopMatter.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
 import TimelineTopOverlay from '@components/top-matter/TimelineTopOverlay.vue';
-import XLoadingIcon from '@components/XLoadingIcon.vue';
+import TimelineSkeleton from '@components/TimelineSkeleton.vue';
 
 import { cacheData, getCachedData } from '@services/cache';
 import { routerStatePath, useRouteState, disableRouterStatePersistence } from '@services/route-state';
@@ -302,6 +302,11 @@ const empty = computed((): boolean => {
 /** Show the empty content box and hide the scrollbar */
 const showEmpty = computed((): boolean => {
   return !loading.value && empty.value;
+});
+
+/** Show skeleton placeholder rows on initial load */
+const showSkeleton = computed((): boolean => {
+  return loading.value > 0 && list.value.length === 0;
 });
 
 /** Whether to allow swipe refresh */
@@ -917,7 +922,7 @@ async function fetchDays({
           }
           signal.throwIfAborted();
 
-          if (cache) {
+          if (cache?.length) {
             await processDays(cache, true, signal);
             signal.throwIfAborted();
             updateLoading(-1);
