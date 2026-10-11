@@ -32,7 +32,7 @@ const rows = Array.from({ length: NUM_ROWS }, (_, r) => {
   return {
     id: r,
     widths,
-    headWidth: 100 + ((r * 37) % 80),
+    headWidth: 50 + ((r * 17) % 80),
   };
 });
 </script>
