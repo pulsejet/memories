@@ -1,0 +1,103 @@
+// Desktop: fade only
+.route-fade-enter-active,
+.route-fade-leave-active {
+  transition: opacity 0.18s ease;
+}
+.route-fade-enter-from,
+.route-fade-leave-to {
+  opacity: 0;
+}
+.route-fade-leave-active {
+  position: absolute !important;
+  inset: 0;
+}
+
+// Mobile tabs (timeline, explore, albums-list): fade + slight rise
+.route-tab-enter-active,
+.route-tab-leave-active {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+  will-change: opacity, transform;
+}
+.route-tab-enter-from {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.route-tab-leave-to {
+  opacity: 0;
+}
+.route-tab-leave-active {
+  position: absolute !important;
+  inset: 0;
+}
+
+// Mobile drill-in forward (e.g. list -> album):
+// new slides in from right over old shifting left
+.route-push-enter-active,
+.route-push-leave-active {
+  transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
+  background: var(--color-main-background);
+}
+.route-push-enter-from {
+  transform: translateX(100%);
+}
+.route-push-enter-active {
+  position: relative;
+  z-index: 2;
+  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.18);
+}
+.route-push-leave-active {
+  position: absolute !important;
+  inset: 0;
+  z-index: 1;
+}
+.route-push-leave-from {
+  transform: translateX(0);
+}
+.route-push-leave-to {
+  transform: translateX(-25%);
+}
+
+// Mobile drill-in back (e.g. album -> list):
+// top view slides out to right revealing previous view
+.route-pop-enter-active,
+.route-pop-leave-active {
+  transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
+  background: var(--color-main-background);
+}
+.route-pop-enter-from {
+  transform: translateX(-25%);
+}
+.route-pop-enter-active {
+  position: relative;
+  z-index: 1;
+}
+.route-pop-leave-active {
+  position: absolute !important;
+  inset: 0;
+  z-index: 2;
+  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.18);
+}
+.route-pop-leave-from {
+  transform: translateX(0);
+}
+.route-pop-leave-to {
+  transform: translateX(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-fade-enter-active,
+  .route-fade-leave-active,
+  .route-tab-enter-active,
+  .route-tab-leave-active,
+  .route-push-enter-active,
+  .route-push-leave-active,
+  .route-pop-enter-active,
+  .route-pop-leave-active {
+    transition: none !important;
+    transform: none !important;
+  }
+}
