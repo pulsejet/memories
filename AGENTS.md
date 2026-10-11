@@ -39,10 +39,10 @@ Very important.
   - `--notes-start-tag` must be last stable (auto picks newest tag by date, e.g. go-vod/*).
   - Fix wrong base via `gh api .../generate-notes -f previous_tag_name=<prev>` + `gh release edit --notes-file`.
 
-## go-vod Release Flow (two phases, in order)
-- Phase 1: commit Go-only bump (`go-vod/main.go` `VERSION`, e.g. `chore(go-vod): bump version to 0.6.1`), push master + dev, tag `go-vod/X.Y.Z`, push only that tag. Tag CI builds binaries into the GitHub release. Never bump `GOVOD_VER` here.
-- Phase 2 (separate commit, only after release binaries exist): bump `GOVOD_VER` in `lib/Service/BinExt.php` (e.g. `chore(go-vod): bump BinExt GOVOD_VER to 0.6.1`), which repoints downloads and the exact-match version gate at the new release.
-- `main.go VERSION`, `GOVOD_VER`, and the tag must all agree once both phases land; `scripts/get-bin-ext.sh` and `testGoVod` enforce this.
+## go-vod Release Flow (two phases)
+- Phase 1: bump `VERSION` in `go-vod/main.go` only, push master + dev, tag `go-vod/X.Y.Z` (CI builds release binaries). Keep `GOVOD_VER` untouched.
+- Phase 2 (after binaries exist): bump `GOVOD_VER` in `lib/Service/BinExt.php` in a separate commit.
+- `VERSION`, `GOVOD_VER`, and tag must all agree; enforced by `get-bin-ext.sh` and `testGoVod`.
 
 ## Unit Testing
 - `vendor/autoload.php` alone is insufficient.
