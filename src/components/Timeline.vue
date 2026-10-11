@@ -7,6 +7,9 @@
     :allowSwipe="allowSwipe"
     :signal="abortSignal"
   >
+    <!-- Mobile header for native app -->
+    <MobileHeader v-if="routeHasNative" />
+
     <!-- Static top matter -->
     <TopMatter ref="topmatter" />
 
@@ -47,7 +50,7 @@
           <!-- Dynamic top matter, e.g. album or view name -->
           <div class="recycler-before" ref="recyclerBefore">
             <!-- Gap for mobile header -->
-            <div class="mobile-header-top-gap"></div>
+            <div v-if="routeHasNative" class="mobile-header-top-gap"></div>
 
             <!-- Route-specific top matter -->
             <DynamicTopMatter ref="dtm" @load="scrollerManager?.adjust()" />
@@ -134,6 +137,7 @@ import TopMatter from '@components/top-matter/TopMatter.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
 import TimelineTopOverlay from '@components/top-matter/TimelineTopOverlay.vue';
 import TimelineSkeleton from '@components/TimelineSkeleton.vue';
+import MobileHeader from '@components/MobileHeader.vue';
 
 import { cacheData, getCachedData } from '@services/cache';
 import { routerStatePath, useRouteState, disableRouterStatePersistence } from '@services/route-state';
@@ -282,10 +286,12 @@ utils.useBus('memories:timeline:deleted', deleteFromViewWithAnimation);
 utils.useBus('memories:timeline:soft-refresh', softRefresh);
 utils.useBus('memories:timeline:hard-refresh', refresh);
 
+/** Whether the current route should show native files. */
 const routeHasNative = computed((): boolean => {
   return routeIs.Base && nativex.has();
 });
 
+/** Group by month rather than by day. */
 const isMonthView = computed((): boolean => {
   if (route.query.sort === 'timeline') return false;
   if (route.query.sort === 'album') return true;

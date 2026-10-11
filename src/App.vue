@@ -58,7 +58,6 @@
             'app-outer': true,
             'router-outlet': true,
             'has-nav': showNavigation,
-            'has-mobile-header': hasMobileHeader,
             'is-native': native,
           }"
         >
@@ -69,7 +68,6 @@
           </router-view>
         </div>
 
-        <MobileHeader v-if="hasMobileHeader" />
         <MobileNav v-if="showNavigation" />
       </NcAppContent>
 
@@ -113,7 +111,6 @@ import Settings from '@components/Settings.vue';
 import Viewer from '@components/viewer/Viewer.vue';
 import Sidebar from '@components/Sidebar.vue';
 import MobileNav from '@components/MobileNav.vue';
-import MobileHeader from '@components/MobileHeader.vue';
 
 import EditMetadataModal from '@components/modal/EditMetadataModal.vue';
 import AddToAlbumModal from '@components/modal/AddToAlbumModal.vue';
@@ -222,10 +219,6 @@ const showNavigation = computed((): boolean => {
   }
 
   return true;
-});
-
-const hasMobileHeader = computed((): boolean => {
-  return native.value && showNavigation.value && routeIs.Base;
 });
 
 // Register navigation items on config change
