@@ -62,9 +62,12 @@
           }"
         >
           <router-view v-slot="{ Component, route: routeFromSlot }">
-            <Transition :name="routeTransition" :css="true">
+            <Transition v-if="!isE2E" :name="routeTransition" :css="true">
               <component :is="Component" :key="routeFromSlot.path" />
             </Transition>
+            <template v-else>
+              <component :is="Component" :key="routeFromSlot.path" />
+            </template>
           </router-view>
         </div>
 
@@ -156,6 +159,9 @@ defineOptions({
 
 const route = useRoute();
 const routeTransition = useRouteTransition();
+
+// Disable route transitions on E2E to avoid flakiness.
+const isE2E = !!window.navigator?.webdriver;
 
 const navItems = ref<NavItem[]>([]);
 const settingsOpen = ref(false);

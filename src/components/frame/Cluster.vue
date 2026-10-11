@@ -5,7 +5,7 @@
     :tabindex="placeholder ? -1 : 1"
     :aria-label="title"
     class="cluster fill-block"
-    :class="{ error }"
+    :class="{ error, placeholder }"
     :to="target"
     @click="click"
   >

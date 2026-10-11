@@ -46,12 +46,12 @@ test.describe('@ui Places view', () => {
   test('Places clusters load', async ({ page }) => {
     await page.goto(`${appUrl}/places`);
     await expect(page).toHaveURL(`${appUrl}/places`);
-    await expect(page.locator('.cluster').first()).toBeVisible();
+    await expect(page.locator('.cluster:not(.placeholder)').first()).toBeVisible();
   });
 
   test('Place timeline survives refresh', async ({ page }) => {
     await page.goto(`${appUrl}/places`);
-    await page.locator('.cluster').first().click();
+    await page.locator('.cluster:not(.placeholder)').first().click();
     await page.waitForSelector('.p-outer');
     await page.reload();
     await page.waitForSelector('.p-outer');
