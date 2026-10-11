@@ -41,7 +41,7 @@ Very important.
 
 ## go-vod Release Flow (two phases)
 - Phase 1: bump `VERSION` in `go-vod/main.go` only, push master + dev, tag `go-vod/X.Y.Z` (CI builds release binaries). Keep `GOVOD_VER` untouched.
-- Phase 2 (after binaries exist): bump `GOVOD_VER` in `lib/Service/BinExt.php` in a separate commit.
+- Phase 2 (after binaries exist): bump `GOVOD_VER` in `lib/Service/BinExt.php` in a separate commit, then run `make bin-ext` to refresh the dev env.
 - `VERSION`, `GOVOD_VER`, and tag must all agree; enforced by `get-bin-ext.sh` and `testGoVod`.
 
 ## Unit Testing
