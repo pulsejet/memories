@@ -1,5 +1,5 @@
 <template>
-  <Modal ref="modal" @close="cleanup" size="normal" v-if="show">
+  <Modal ref="modal" @close="cleanup" size="small" v-if="show">
     <template #title>
       <template v-if="!album">
         {{ t('memories', 'Create new album') }}
@@ -96,7 +96,7 @@ defineExpose({ open });
 
 <style lang="scss" scoped>
 .outer {
-  margin-top: 15px;
+  margin-top: 6px;
 }
 
 .info-pad {

@@ -8,9 +8,8 @@
         autofocus="true"
         v-model="albumName"
         :required="true"
-        :label="t('memories', 'Album Name')"
+        :label="t('memories', 'Album name')"
         :label-visible="true"
-        :placeholder="t('memories', 'Album Name')"
       />
       <NcTextField
         name="location"
@@ -18,7 +17,6 @@
         v-model="albumLocation"
         :label="t('memories', 'Location')"
         :label-visible="true"
-        :placeholder="t('memories', 'Location of the album')"
       />
     </div>
     <div class="form-buttons">
@@ -244,45 +242,53 @@ function back() {
 .album-form {
   display: flex;
   flex-direction: column;
-  height: 230px;
-  padding: 16px;
-  .form-title {
-    font-weight: bold;
-  }
-  .form-subtitle {
-    color: var(--color-text-maxcontrast);
-  }
+  gap: 12px;
+  padding: 4px 2px 2px;
+
   .form-inputs {
-    flex-grow: 1;
-    justify-items: flex-end;
-    input {
-      width: 100%;
-    }
-    label {
-      display: flex;
-      margin-top: 16px;
-      :deep(svg) {
-        margin-right: 12px;
-      }
-    }
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
+
   .form-buttons {
     display: flex;
+    flex-direction: row;
+    align-items: center;
     justify-content: space-between;
-    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+
     .left-buttons,
     .right-buttons {
       display: flex;
+      align-items: center;
+      gap: 8px;
     }
+
+    .left-buttons {
+      flex-grow: 1;
+    }
+
     .right-buttons {
       justify-content: flex-end;
-    }
-    button {
-      margin-right: 16px;
+      flex-wrap: wrap;
     }
   }
 }
+
+// Footer buttons when the collaborator view is shown
+// (these spans are slotted into AlbumCollaborators' .actions__slot)
 .left-buttons {
+  display: flex;
+  align-items: center;
   flex-grow: 1;
+}
+
+.right-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
 }
 </style>
