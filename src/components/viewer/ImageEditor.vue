@@ -127,17 +127,7 @@ const defaultSavedImageType = computed((): 'jpg' | 'png' | 'webp' => {
   return 'jpg';
 });
 
-const hasHighContrastEnabled = computed((): boolean => {
-  const themes = globalThis.OCA?.Theming?.enabledThemes || [];
-  return themes.some((theme: string) => theme.includes('highcontrast'));
-});
-
 const themeDataAttr = computed((): Record<string, boolean> => {
-  if (hasHighContrastEnabled.value) {
-    return {
-      'data-theme-dark-highcontrast': true,
-    };
-  }
   return {
     'data-theme-dark': true,
   };

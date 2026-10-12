@@ -11,12 +11,6 @@ declare global {
 
   var OC: Nextcloud.Common.OC;
   var OCP: Nextcloud.Common.OCP;
-  var OCA: {
-    Theming?: {
-      name: string;
-      enabledThemes: any[];
-    };
-  };
 
   /**
    * Global Memories object. Initialized in main.ts
