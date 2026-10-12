@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -28,6 +29,14 @@ const (
 // ErrCopyPending means the keyframe probe is still running; answer 409
 // so the client fails over and retries later once the grid is warm.
 var ErrCopyPending = errors.New("keyframe probe pending")
+
+// isValidStreamRe matches 8-128 hex chars, safe for use in a temp dir name.
+var isValidStreamRe = regexp.MustCompile(`^[0-9a-fA-F]{8,128}$`)
+
+// IsValidStreamID reports whether id is safe for use in a temp dir name.
+func IsValidStreamID(id string) bool {
+	return isValidStreamRe.MatchString(id)
+}
 
 type Manager struct {
 	// c is the shared server config.

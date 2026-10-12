@@ -137,7 +137,7 @@ func TestVodBadRequests(t *testing.T) {
 		require.Equal(t, http.StatusBadRequest, w.Code, body)
 	}
 
-	w = postVod(s, `{"client":"c","fileid":7,"profile":"bogus","config":{"chunkSize":3}}`)
+	w = postVod(s, `{"client":"deadbeef","fileid":7,"profile":"bogus","config":{"chunkSize":3}}`)
 	require.Equal(t, http.StatusNotFound, w.Code)
 
 	// GET is gone entirely.
@@ -208,12 +208,12 @@ func TestVodCodecsQueryParam(t *testing.T) {
 	})
 
 	// Without playable codecs an HEVC source only offers a transcode.
-	w := postVod(s, `{"client":"s1","fileid":7,"profile":"index.m3u8","config":{"chunkSize":3}}`)
+	w := postVod(s, `{"client":"cafef00d","fileid":7,"profile":"index.m3u8","config":{"chunkSize":3}}`)
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Contains(t, w.Body.String(), "max.m3u8")
 	require.NotContains(t, w.Body.String(), "direct.m3u8")
 
-	w = postVod(s, `{"client":"s2","fileid":7,"profile":"index.m3u8","query":{"token":"abc","codecs":"h264,hevc"},"config":{"chunkSize":3}}`)
+	w = postVod(s, `{"client":"feedface","fileid":7,"profile":"index.m3u8","query":{"token":"abc","codecs":"h264,hevc"},"config":{"chunkSize":3}}`)
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Contains(t, w.Body.String(), "direct.m3u8")
 	require.NotContains(t, w.Body.String(), "max.m3u8")
@@ -242,7 +242,7 @@ func TestVodLivephotoFullVideo(t *testing.T) {
 
 	// A temp-file live part is served directly from disk,
 	// never a redirect back to PHP.
-	w := postVod(s, `{"client":"live","fileid":7,"serviceToken":"tok-1","profile":"livephoto.mp4","query":{"codecs":"h264","liveid":"self__trailer"},"config":{"chunkSize":3}}`)
+	w := postVod(s, `{"client":"01234567","fileid":7,"serviceToken":"tok-1","profile":"livephoto.mp4","query":{"codecs":"h264","liveid":"self__trailer"},"config":{"chunkSize":3}}`)
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Empty(t, w.Header().Get(core.StreamOriginalHeader))
 	require.Equal(t, "live-video-bytes", w.Body.String())
@@ -277,14 +277,14 @@ func TestVodReusesManagerOnConfigChange(t *testing.T) {
 	})
 	fileURL := s.cfg.FileURL(7)
 
-	w := postVod(s, `{"client":"cfg","fileid":7,"profile":"index.m3u8","config":{"chunkSize":3,"qf":24}}`)
+	w := postVod(s, `{"client":"89abcdef","fileid":7,"profile":"index.m3u8","config":{"chunkSize":3,"qf":24}}`)
 	require.Equal(t, http.StatusOK, w.Code)
-	m1, err := s.reg.GetOrCreate(newTestParams("cfg", fileURL, 24))
+	m1, err := s.reg.GetOrCreate(newTestParams("89abcdef", fileURL, 24))
 	require.NoError(t, err)
 
-	w = postVod(s, `{"client":"cfg","fileid":7,"profile":"index.m3u8","config":{"chunkSize":3,"qf":30}}`)
+	w = postVod(s, `{"client":"89abcdef","fileid":7,"profile":"index.m3u8","config":{"chunkSize":3,"qf":30}}`)
 	require.Equal(t, http.StatusOK, w.Code)
-	m2, err := s.reg.GetOrCreate(newTestParams("cfg", fileURL, 30))
+	m2, err := s.reg.GetOrCreate(newTestParams("89abcdef", fileURL, 30))
 	require.NoError(t, err)
 	require.Same(t, m1, m2)
 }
@@ -293,14 +293,14 @@ func TestVersionGuard(t *testing.T) {
 	s := testServer(t, func(c *config.Config) { c.VersionMonitor = true })
 	go func() { <-s.idle }()
 
-	r := httptest.NewRequest("POST", "/vod", strings.NewReader(`{"client":"c","fileid":7,"profile":"test","config":{"chunkSize":3}}`))
+	r := httptest.NewRequest("POST", "/vod", strings.NewReader(`{"client":"beefbeef","fileid":7,"profile":"test","config":{"chunkSize":3}}`))
 	r.Header.Set("X-Go-Vod-Version", "wrong")
 	w := httptest.NewRecorder()
 	s.routes().ServeHTTP(w, r)
 	require.Equal(t, http.StatusServiceUnavailable, w.Code)
 	require.Equal(t, 12, s.exitCode)
 
-	r = httptest.NewRequest("POST", "/vod", strings.NewReader(`{"client":"c","fileid":7,"profile":"test","config":{"chunkSize":3}}`))
+	r = httptest.NewRequest("POST", "/vod", strings.NewReader(`{"client":"beefbeef","fileid":7,"profile":"test","config":{"chunkSize":3}}`))
 	r.Header.Set("X-Go-Vod-Version", "test")
 	w = httptest.NewRecorder()
 	s.routes().ServeHTTP(w, r)

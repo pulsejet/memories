@@ -78,6 +78,11 @@ func (s *Server) handleVod(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	if !core.IsValidStreamID(req.Client) {
+		log.Println("Invalid vod client", req.Client)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	if err := req.TConfig.Validate(); err != nil {
 		log.Println("Invalid vod config", err)
 		w.WriteHeader(http.StatusBadRequest)

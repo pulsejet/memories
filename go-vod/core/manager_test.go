@@ -209,3 +209,10 @@ func TestManagerNonLiveStillStreams(t *testing.T) {
 		break
 	}
 }
+
+func TestIsValidStreamID(t *testing.T) {
+	require.True(t, IsValidStreamID("0123456789abcdef"))
+	for _, id := range []string{"", "abc", "../test", "zzzzzzzz"} {
+		require.False(t, IsValidStreamID(id), id)
+	}
+}
