@@ -1,9 +1,11 @@
+import type { RouteLocationNormalized } from 'vue-router';
+
 /**
  * Get the path of the folder on folders route
  * This function does not check if this is the folder route
  */
-export function getFolderRoutePath(basePath: string) {
-  let path = (_m.route.params.path || '/') as string | string[];
+export function getFolderRoutePath(basePath: string, opts: { route: RouteLocationNormalized }) {
+  let path = (opts.route.params.path || '/') as string | string[];
   path = typeof path === 'string' ? path : path.join('/');
   path = `${basePath}/${path}`;
   path = path.replaceAll(/\/\/+/g, '/'); // Remove double slashes

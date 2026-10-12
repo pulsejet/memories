@@ -105,6 +105,7 @@
 
 <script setup lang="ts">
 import { computed, markRaw, nextTick, onMounted, reactive, ref, useTemplateRef, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
@@ -187,6 +188,7 @@ defineOptions({
 });
 const outer = useTemplateRef<HTMLDivElement>('outer');
 const inner = useTemplateRef<HTMLDivElement>('inner');
+const route = useRoute();
 
 const loading = ref(0);
 const isOpen = ref(false);
@@ -1097,7 +1099,7 @@ async function loadMetadata(photo: IPhoto) {
   imageInfoLoading.add(key);
 
   // Get a consistent URL so we can cache.
-  const url = utils.getImageInfoUrl(photo, config);
+  const url = utils.getImageInfoUrl(photo, config, { route });
 
   // Apply image data onto the photo.
   const applyImageInfo = (data: IImageInfo) => {
@@ -1187,7 +1189,7 @@ async function deleteCurrent() {
   // Delete with WebDAV
   try {
     updateLoading(1);
-    for await (const p of dav.deletePhotos([photo])) {
+    for await (const p of dav.deletePhotos([photo], { route })) {
       if (!p[0]) return;
     }
   } catch {
@@ -1236,7 +1238,7 @@ async function favoriteCurrent() {
   const val = !isFavorite.value;
   try {
     updateLoading(1);
-    for await (const p of dav.favoritePhotos([photo], val)) {
+    for await (const p of dav.favoritePhotos([photo], val, { route })) {
       // Do nothing
     }
   } finally {
@@ -1290,7 +1292,7 @@ async function openSidebar() {
         _m.sidebar.open(photo);
       } else {
         try {
-          const fileInfo = (await dav.getFiles([photo], { signal }))[0];
+          const fileInfo = (await dav.getFiles([photo], { signal, route }))[0];
           signal.throwIfAborted();
           if (!fileInfo) return;
 
@@ -1369,7 +1371,7 @@ function setBottomSheet(want?: boolean) {
  * Open the files app with the current file.
  */
 async function viewInFolder() {
-  dav.viewInFolder(currentPhoto.value!);
+  dav.viewInFolder(currentPhoto.value!, { route });
 }
 
 /**

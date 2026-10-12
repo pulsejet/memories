@@ -12,6 +12,7 @@
 
 <script setup lang="ts">
 import { ref, useTemplateRef, defineAsyncComponent } from 'vue';
+import { useRoute } from 'vue-router';
 
 import { showInfo } from '@services/utils/dialog';
 
@@ -33,6 +34,7 @@ defineOptions({
 
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
+const route = useRoute();
 
 const photos = ref<IPhoto[]>([]);
 const photosDone = ref(0);
@@ -79,13 +81,13 @@ async function chooseFolderPath() {
   let gen = (() => {
     switch (mode) {
       case Mode.Organise: {
-        return dav.movePhotosByDate(photos.value, destination, false);
+        return dav.movePhotosByDate(photos.value, destination, false, { route });
       }
       case Mode.Copy: {
-        return dav.copyPhotos(photos.value, destination, false);
+        return dav.copyPhotos(photos.value, destination, false, { route });
       }
       case Mode.Move: {
-        return dav.movePhotos(photos.value, destination, false);
+        return dav.movePhotos(photos.value, destination, false, { route });
       }
     }
   })();

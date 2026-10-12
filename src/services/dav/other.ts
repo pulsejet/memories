@@ -6,15 +6,16 @@ import axios from '@nextcloud/axios';
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
 
+import type { RouteLocationNormalized } from 'vue-router';
 import type { ClusterTypes, IPhoto } from '@typings';
 
 /**
  * Open the files app with the given photo
  * Opens a new window.
  */
-export async function viewInFolder(photo: IPhoto) {
+export async function viewInFolder(photo: IPhoto, opts: { route: RouteLocationNormalized }) {
   if (!photo) return;
-  const files = await getFiles([photo]);
+  const files = await getFiles([photo], { route: opts.route });
   if (files.length === 0) return;
 
   const url = viewInFolderUrl(files[0]);
@@ -43,17 +44,17 @@ export function viewInFolderUrl({ filename, fileid }: { filename: string; fileid
  *
  * @param photo The photo to set as the cover
  */
-export async function setClusterCover(photo: IPhoto): Promise<boolean> {
+export async function setClusterCover(photo: IPhoto, opts: { route: RouteLocationNormalized }): Promise<boolean> {
   if (!photo) return false;
 
   // Get cluster type from route name (fragile)
-  const clusterType = _m.route.name as ClusterTypes;
+  const clusterType = opts.route.name as ClusterTypes;
 
   // Get other parameters
   const { fileid } = photo;
-  let { user, name } = _m.route.params;
+  let { user, name } = opts.route.params;
 
-  const routeName = _m.route.name?.toString();
+  const routeName = opts.route.name?.toString();
   if (routeName === _m.routes.Recognize.name || routeName === _m.routes.Albums.name) {
     name = `${user}/${name}`;
   }

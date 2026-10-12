@@ -1,4 +1,5 @@
 import type { DeepReadonly } from 'vue';
+import type { RouteLocationNormalized } from 'vue-router';
 
 import { API } from '@services/API';
 import { NAPI } from '@native/api';
@@ -95,8 +96,13 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
  *
  * @param photo Photo object or fileid (remote only)
  * @param config User config to derive tags/clusters params
+ * @param opts.route Current route to derive public share state
  */
-export function getImageInfoUrl(photo: IPhoto | number, config: DeepReadonly<IConfig>): string {
+export function getImageInfoUrl(
+  photo: IPhoto | number,
+  config: DeepReadonly<IConfig>,
+  opts: { route: RouteLocationNormalized },
+): string {
   const fileid = typeof photo === 'number' ? photo : photo.fileid;
 
   // Base URL for getting image info.
@@ -108,7 +114,7 @@ export function getImageInfoUrl(photo: IPhoto | number, config: DeepReadonly<ICo
   }
 
   // Public share route should not show clusters.
-  const routeName = _m.route?.name?.toString() ?? '';
+  const routeName = opts.route.name?.toString() ?? '';
   const isPublic = routeName.endsWith('-share');
 
   // Include clusters like people and albums.

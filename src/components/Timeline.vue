@@ -783,7 +783,7 @@ function getQuery() {
 
   // Folder
   if (routeIs.Folders || routeIs.FolderShare) {
-    const path = utils.getFolderRoutePath(config.folders_path);
+    const path = utils.getFolderRoutePath(config.folders_path, { route });
     set(DaysFilterType.FOLDER, path);
     if (route.query.recursive) {
       set(DaysFilterType.RECURSIVE);

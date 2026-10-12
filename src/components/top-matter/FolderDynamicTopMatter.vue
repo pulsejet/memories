@@ -41,7 +41,7 @@ const isReady = computed((): boolean => folders.value !== null);
 const isContent = computed((): boolean => !!folders.value?.length && !route.query.recursive);
 
 function folder(): string {
-  return utils.getFolderRoutePath(config.folders_path);
+  return utils.getFolderRoutePath(config.folders_path, { route });
 }
 
 async function refresh(): Promise<void> {

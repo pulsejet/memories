@@ -61,7 +61,7 @@
 
 <script setup lang="ts">
 import { computed, ref, useTemplateRef, createApp, defineAsyncComponent } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import Modal from '@components/modal/Modal.vue';
 import AlbumPicker from '@components/modal/AlbumPicker.vue';
@@ -93,6 +93,7 @@ defineOptions({
 });
 
 const router = useRouter();
+const route = useRoute();
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
 const tags = useTemplateRef<InstanceType<typeof EditTags>>('tags');
@@ -178,7 +179,7 @@ function resetState() {
 
   // choose current folder if in folders view
   if (routeIs.Folders) {
-    uploadPath.value = utils.getFolderRoutePath(config.folders_path);
+    uploadPath.value = utils.getFolderRoutePath(config.folders_path, { route });
   }
 }
 

@@ -11,6 +11,7 @@ import { isAbortError } from '@services/utils/abort';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 
+import type { RouteLocationNormalized } from 'vue-router';
 import type { IFileInfo, IImageInfo, IPhoto } from '@typings';
 import type { ResponseDataDetailed, SearchResult } from 'webdav';
 import type { AbortOpts } from '@services/utils/abort';
@@ -22,6 +23,8 @@ type GetFilesOpts = {
   cache?: boolean;
   /** Get original route-independent filename for current user only (default false) */
   ignoreRoute?: boolean;
+  /** Current route for album and public share handling (not needed with ignoreRoute) */
+  route?: RouteLocationNormalized;
 } & AbortOpts;
 
 /**
@@ -33,9 +36,9 @@ type GetFilesOpts = {
  */
 export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<IFileInfo[]> {
   // Some routes may have special handling of filenames
-  if (!opts?.ignoreRoute) {
-    if (_m.route.name === _m.routes.AlbumsList.name || _m.route.name === _m.routes.Albums.name) {
-      return getAlbumFileInfos(photos, _m.route.params.user?.toString(), _m.route.params.name?.toString());
+  if (!opts?.ignoreRoute && opts?.route) {
+    if (opts.route.name === _m.routes.AlbumsList.name || opts.route.name === _m.routes.Albums.name) {
+      return getAlbumFileInfos(photos, opts.route.params.user?.toString(), opts.route.params.name?.toString());
     }
   }
 
@@ -58,7 +61,7 @@ export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<I
           originalFilename = `/files/${utils.uid}${filename}`;
         } else {
           // Public share: use token-based WebDAV path
-          const token = _m.route.params.token?.toString();
+          const token = opts?.route?.params.token?.toString();
           originalFilename = `/files/${token}${filename}`;
         }
 
@@ -77,10 +80,11 @@ export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<I
 
   // Get file infos for the rest
   opts?.signal?.throwIfAborted();
-  return [...cache, ...(await getFilesInternal1(rest, opts))];
+  const token = opts?.route?.params.token?.toString();
+  return [...cache, ...(await getFilesInternal1(rest, { ...opts, token }))];
 }
 
-async function getFilesInternal1(photos: IPhoto[], opts?: AbortOpts): Promise<IFileInfo[]> {
+async function getFilesInternal1(photos: IPhoto[], opts?: AbortOpts & { token?: string }): Promise<IFileInfo[]> {
   // For public shares, use API instead of WebDAV SEARCH (which requires user auth)
   if (!utils.uid) {
     return getFilesViaAPI(photos, opts);
@@ -103,10 +107,10 @@ async function getFilesInternal1(photos: IPhoto[], opts?: AbortOpts): Promise<IF
  * Get file infos for public shares via API (instead of WebDAV SEARCH)
  * This is needed because WebDAV SEARCH requires user authentication
  */
-async function getFilesViaAPI(photos: IPhoto[], opts?: AbortOpts): Promise<IFileInfo[]> {
+async function getFilesViaAPI(photos: IPhoto[], opts?: AbortOpts & { token?: string }): Promise<IFileInfo[]> {
   const fileInfos: IFileInfo[] = [];
-  const token = _m.route.params.token?.toString();
   const signal = opts?.signal;
+  const token = opts?.token;
 
   for (const photo of photos) {
     try {
@@ -294,14 +298,20 @@ export async function extendWithStack(photos: IPhoto[], opts?: AbortOpts): Promi
  * Delete all files in a given list of Ids
  *
  * @param photos list of photos to delete
- * @param confirm whether to show a confirmation dialog (default true)
+ * @param opts.confirm whether to show a confirmation dialog (default true)
+ * @param opts.route current route for file info handling
  * @returns list of file ids that were deleted
  */
-export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
+export async function* deletePhotos(
+  photos: IPhoto[],
+  opts: { confirm?: boolean; route: RouteLocationNormalized },
+) {
   if (photos.length === 0) return;
 
   // Use user selected count for confirmation
   const confirmationCount = photos.length;
+  let confirm = opts.confirm ?? true;
+  const route = opts.route;
 
   // Extend with stack unless this is an album
   const isAlbum = routeIs.Albums;
@@ -316,7 +326,7 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
   const fileIdsSet = new Set(photos.map((p) => p.fileid));
 
   // Get files data. The double filter ensures we never delete something accidentally.
-  const fileInfos = (await getFiles(photos)).filter((f) => fileIdsSet.has(f.fileid));
+  const fileInfos = (await getFiles(photos, { route })).filter((f) => fileIdsSet.has(f.fileid));
   const regularFileInfos = fileInfos.filter((f) => !livePhotoVideoFileIds.has(f.fileid));
   const livePhotoFileInfos = fileInfos.filter((f) => livePhotoVideoFileIds.has(f.fileid));
 
@@ -396,7 +406,12 @@ export async function* deletePhotos(photos: IPhoto[], confirm: boolean = true) {
  * @param overwrite behaviour if the target exists. `true` overwrites, `false` fails.
  * @returns list of file ids that were copied
  */
-export async function* copyPhotos(photos: IPhoto[], destination: string, overwrite: boolean) {
+export async function* copyPhotos(
+  photos: IPhoto[],
+  destination: string,
+  overwrite: boolean,
+  opts: { route: RouteLocationNormalized },
+) {
   if (photos.length === 0) {
     return;
   }
@@ -417,7 +432,7 @@ export async function* copyPhotos(photos: IPhoto[], destination: string, overwri
   // Get files data
   let fileInfos: IFileInfo[] = [];
   try {
-    fileInfos = await getFiles(photos);
+    fileInfos = await getFiles(photos, { route: opts.route });
   } catch (e) {
     console.error('Failed to get file info for files to copy', photos, e);
     showError(t('memories', 'Failed to copy files.'));
@@ -475,7 +490,12 @@ export async function* copyPhotos(photos: IPhoto[], destination: string, overwri
  * @param overwrite behaviour if the target exists. `true` overwrites, `false` fails.
  * @returns list of file ids that were moved
  */
-export async function* movePhotos(photos: IPhoto[], destination: string, overwrite: boolean) {
+export async function* movePhotos(
+  photos: IPhoto[],
+  destination: string,
+  overwrite: boolean,
+  opts: { route: RouteLocationNormalized },
+) {
   if (photos.length === 0) {
     return;
   }
@@ -496,7 +516,7 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
   // Get files data
   let fileInfos: IFileInfo[] = [];
   try {
-    fileInfos = await getFiles(photos);
+    fileInfos = await getFiles(photos, { route: opts.route });
   } catch (e) {
     console.error('Failed to get file info for files to move', photos, e);
     showError(t('memories', 'Failed to move files.'));
@@ -554,7 +574,12 @@ export async function* movePhotos(photos: IPhoto[], destination: string, overwri
  * @param overwrite behaviour if the target exists. `true` overwrites, `false` fails.
  * @returns list of file ids that were moved
  */
-export async function* movePhotosByDate(photos: IPhoto[], destination: string, overwrite: boolean) {
+export async function* movePhotosByDate(
+  photos: IPhoto[],
+  destination: string,
+  overwrite: boolean,
+  opts: { route: RouteLocationNormalized },
+) {
   if (photos.length === 0) {
     return;
   }
@@ -570,7 +595,7 @@ export async function* movePhotosByDate(photos: IPhoto[], destination: string, o
 
   let fileInfos: IFileInfo[] = [];
   try {
-    fileInfos = await getFiles(photos);
+    fileInfos = await getFiles(photos, { route: opts.route });
   } catch (e) {
     console.error('Failed to get file info for files to move', photos, e);
     showError(t('memories', 'Failed to move files.'));

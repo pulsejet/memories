@@ -76,6 +76,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, defineAsyncComponent, markRaw } from 'vue';
 import type { Component } from 'vue';
+import { useRoute } from 'vue-router';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
@@ -130,6 +131,7 @@ const props = defineProps<{
 }>();
 const fileid = ref<number | null>(null);
 const filename = ref('');
+const route = useRoute();
 const exif = ref({} as IExif);
 const baseInfo = ref({} as IImageInfo);
 const error = ref(false);
@@ -401,7 +403,7 @@ async function update(photo: number | IPhoto): Promise<IImageInfo | null> {
   const signal = invalidateUnless(0)!;
 
   // Use a consistent URL for metadata.
-  const url = utils.getImageInfoUrl(photo, config);
+  const url = utils.getImageInfoUrl(photo, config, { route });
 
   // Helper to apply additional fields.
   const applyImageInfo = (data: IImageInfo) => {

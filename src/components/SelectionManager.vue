@@ -851,7 +851,7 @@ function allSelectedFavorites(sel: Selection) {
  */
 async function favoriteSelection(sel: Selection) {
   const val = !allSelectedFavorites(sel);
-  for await (const ids of dav.favoritePhotos(sel.photosNoDupFileId(), val)) {
+  for await (const ids of dav.favoritePhotos(sel.photosNoDupFileId(), val, { route })) {
     sel.photosFromFileIds(ids).forEach((photo) => dav.favoriteSetFlag(photo, val));
   }
   clear();
@@ -862,7 +862,7 @@ async function favoriteSelection(sel: Selection) {
  */
 async function deleteSelection(sel: Selection) {
   try {
-    for await (const delIds of dav.deletePhotos(sel.photosNoDupFileId())) {
+    for await (const delIds of dav.deletePhotos(sel.photosNoDupFileId(), { route })) {
       deleteSelectedPhotosById(delIds, sel);
     }
   } catch (e) {
@@ -897,7 +897,7 @@ async function reindexSelection(sel: Selection) {
  */
 async function viewInFolder(sel: Selection) {
   if (sel.size !== 1) return;
-  dav.viewInFolder(sel.values().next().value!);
+  dav.viewInFolder(sel.values().next().value!, { route });
 }
 
 /**
@@ -905,7 +905,7 @@ async function viewInFolder(sel: Selection) {
  */
 async function setClusterCover(sel: Selection) {
   if (sel.size !== 1 || !routeIs.Cluster) return;
-  if (await dav.setClusterCover(sel.values().next().value!)) {
+  if (await dav.setClusterCover(sel.values().next().value!, { route })) {
     clear();
   }
 }

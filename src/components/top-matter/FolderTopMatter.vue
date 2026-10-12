@@ -121,7 +121,7 @@ const allowPublicUpload = computed((): boolean => {
 });
 
 function share(): void {
-  _m.modals.shareNodeLink(utils.getFolderRoutePath(config.folders_path));
+  _m.modals.shareNodeLink(utils.getFolderRoutePath(config.folders_path, { route }));
 }
 
 function upload(): void {

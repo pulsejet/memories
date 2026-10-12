@@ -6,6 +6,7 @@ import * as base from './base';
 import { translate as t } from '@services/l10n';
 import { constants } from '@services/constants';
 
+import type { RouteLocationNormalized } from 'vue-router';
 import type { IFileInfo, IPhoto } from '@typings';
 
 /**
@@ -39,7 +40,11 @@ export function favoriteFile(fileName: string, favoriteState: boolean) {
  * @param favoriteState the new favorite state
  * @returns generator of lists of file ids that were state-changed
  */
-export async function* favoritePhotos(photos: IPhoto[], favoriteState: boolean) {
+export async function* favoritePhotos(
+  photos: IPhoto[],
+  favoriteState: boolean,
+  opts: { route: RouteLocationNormalized },
+) {
   if (photos.length === 0) {
     return;
   }
@@ -47,7 +52,7 @@ export async function* favoritePhotos(photos: IPhoto[], favoriteState: boolean) 
   // Get files data
   let fileInfos: IFileInfo[] = [];
   try {
-    fileInfos = await base.getFiles(photos);
+    fileInfos = await base.getFiles(photos, { route: opts.route });
   } catch (e) {
     console.error('Failed to get file info', photos, e);
     showError(t('memories', 'Failed to favorite files.'));

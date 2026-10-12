@@ -13,10 +13,6 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 // Initialize global memories object
 globalThis._m = {
   mode: 'user',
-
-  get route() {
-    return router.currentRoute.value;
-  },
   routes: routes,
 
   modals: {} as any,
