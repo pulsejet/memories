@@ -25,6 +25,7 @@ final class Exif
     private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'image/x-dcraw', 'video/MP2T']; // also update const.ts
     private const EXIFTOOL_TIMEOUT = 30000;
     private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-api', 'LargeFileSupport=1', '-n', '-json'];
+    private const INVALID_PATH_PATTERN = '/[\r\n\x00]/';
 
     /** Opened instance of exiftool when running in command mode */
     /** @var ?resource */
@@ -110,14 +111,9 @@ final class Exif
             throw new \Exception("Failed to get local file: {$ex->getMessage()}");
         }
 
-        // Check if path is valid
+        // Check if path is found
         if (!\is_string($path)) {
             throw new \Exception('Failed to get local file path');
-        }
-
-        // Check if file is readable
-        if (!is_readable($path)) {
-            throw new \Exception("File is not readable: {$path}");
         }
 
         $exif = $this->getExifFromLocalPath($path);
@@ -138,6 +134,8 @@ final class Exif
      */
     public function getExifFromLocalPath(string $path): array
     {
+        $this->assertValidLocalFile($path);
+
         if (null !== $this->staticProc) {
             $this->ensureStaticExiftoolProc();
 
@@ -365,6 +363,8 @@ final class Exif
      */
     public function setExif(string $path, array $data): void
     {
+        $this->assertValidLocalFile($path);
+
         $data['SourceFile'] = $path;
         $raw = json_encode([$data], JSON_UNESCAPED_UNICODE);
         $cmd = array_merge($this->getExiftool(), [
@@ -430,6 +430,8 @@ final class Exif
 
     public function getBinaryExifProp(string $path, string $prop): string
     {
+        $this->assertValidLocalFile($path);
+
         $cmd = array_merge($this->getExiftool(), [$prop, '-n', '-b', $path]);
 
         try {
@@ -557,6 +559,16 @@ final class Exif
             if (!\is_string($exif[$field]) || str_starts_with($exif[$field], '0000:00:00')) {
                 unset($exif[$field]);
             }
+        }
+    }
+
+    private function assertValidLocalFile(string $path): void
+    {
+        if (preg_match(self::INVALID_PATH_PATTERN, $path)) {
+            throw new \Exception('Invalid file path');
+        }
+        if (!is_file($path) || !is_readable($path)) {
+            throw new \Exception("File is not readable: {$path}");
         }
     }
 }
