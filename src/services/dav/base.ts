@@ -302,10 +302,7 @@ export async function extendWithStack(photos: IPhoto[], opts?: AbortOpts): Promi
  * @param opts.route current route for file info handling
  * @returns list of file ids that were deleted
  */
-export async function* deletePhotos(
-  photos: IPhoto[],
-  opts: { confirm?: boolean; route: RouteLocationNormalized },
-) {
+export async function* deletePhotos(photos: IPhoto[], opts: { confirm?: boolean; route: RouteLocationNormalized }) {
   if (photos.length === 0) return;
 
   // Use user selected count for confirmation
