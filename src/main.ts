@@ -2,7 +2,9 @@ import './bootstrap';
 
 import { createApp } from 'vue';
 import App from './App.vue';
+
 import router, { routes } from '@services/router';
+import { bootstrapVideo } from '@services/video/bootstrap';
 import * as nativex from '@native';
 
 // CSS for components
@@ -24,11 +26,8 @@ globalThis._m = {
   video: {} as any,
 };
 
-// Generate client id for this instance
-// Does not need to be cryptographically secure
-_m.video.clientId = Math.random().toString(36).slice(2, 15).padEnd(12, '0');
-_m.video.clientIdPersistent = localStorage.getItem('videoClientIdPersistent') ?? _m.video.clientId;
-localStorage.setItem('videoClientIdPersistent', _m.video.clientIdPersistent);
+// Initialize video client
+bootstrapVideo();
 
 // Register global components and plugins
 const app = createApp(App);

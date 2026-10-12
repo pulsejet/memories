@@ -219,7 +219,7 @@ final class VideoController extends ApiController
             }
 
             // Check client identifier is 8 characters or more
-            if (\strlen($client) < 8) {
+            if (!preg_match('/^[0-9a-fA-F]{8,128}$/', $client)) {
                 throw Exceptions::MissingParameter('client (invalid)');
             }
 
