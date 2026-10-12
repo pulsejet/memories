@@ -30,7 +30,7 @@ const route = useRoute();
 const router = useRouter();
 
 const viewname = computed((): string => {
-  return strings.viewName(route.name?.toString() ?? '');
+  return strings.viewName(route);
 });
 
 const name = computed((): string | null => {

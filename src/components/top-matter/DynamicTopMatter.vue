@@ -87,7 +87,7 @@ const viewName = computed((): string => {
     return String();
   }
 
-  return strings.viewName(route.name?.toString() ?? '');
+  return strings.viewName(route);
 });
 
 async function refresh(): Promise<void> {
