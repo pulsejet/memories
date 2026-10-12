@@ -3,7 +3,7 @@ import './bootstrap';
 import { createApp } from 'vue';
 import App from './App.vue';
 
-import router, { routes } from '@services/router';
+import router from '@services/router';
 import { bootstrapVideo } from '@services/video/bootstrap';
 import * as nativex from '@native';
 
@@ -13,7 +13,6 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 // Initialize global memories object
 globalThis._m = {
   mode: 'user',
-  routes: routes,
 
   modals: {} as any,
   sidebar: {} as any,

@@ -1,7 +1,6 @@
 import type { ComponentPublicInstance } from 'vue';
 
 import type { IPhoto, IUploadNativeX, TimelineState } from '@typings';
-import type { routes } from '@services/router';
 
 // Global exposed variables
 declare global {
@@ -18,12 +17,6 @@ declare global {
    */
   var _m: {
     mode: 'admin' | 'user';
-    routes: {
-      [K in keyof typeof routes]: {
-        path: (typeof routes)[K]['path'];
-        name: (typeof routes)[K]['name'];
-      };
-    };
 
     modals: {
       editMetadata: (photos: IPhoto[], sections?: number[]) => void;

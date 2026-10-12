@@ -18,6 +18,7 @@ import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import { t } from '@services/l10n';
+import { routes } from '@services/router';
 import * as strings from '@services/strings';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
@@ -35,7 +36,7 @@ const viewname = computed((): string => {
 
 const name = computed((): string | null => {
   switch (route.name) {
-    case _m.routes.Tags.name:
+    case routes.Tags.name:
       return t('recognize', route.params.name?.toString());
     default:
       return null;

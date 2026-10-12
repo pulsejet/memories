@@ -1,4 +1,5 @@
 import { API } from '@services/API';
+import { routes } from '@services/router';
 import { getPreviewUrl } from '@services/utils/common';
 
 import type { IAlbum, ICluster, IFace, IPhoto, IPlace, ITag } from '@typings';
@@ -68,7 +69,7 @@ export function getClusterPreview(cluster: ICluster, size = 512) {
 export function getClusterLinkTarget(cluster: ICluster) {
   if (clusterIs.album(cluster)) {
     const { user, name } = cluster;
-    return { name: _m.routes.Albums.name, params: { user, name } };
+    return { name: routes.Albums.name, params: { user, name } };
   }
 
   if (clusterIs.face(cluster)) {
@@ -81,11 +82,11 @@ export function getClusterLinkTarget(cluster: ICluster) {
     const id = cluster.cluster_id;
     const placeName = cluster.name || id;
     const name = `${id}-${placeName}`;
-    return { name: _m.routes.Places.name, params: { name } };
+    return { name: routes.Places.name, params: { name } };
   }
 
   if (clusterIs.tag(cluster)) {
-    return { name: _m.routes.Tags.name, params: { name: cluster.name } };
+    return { name: routes.Tags.name, params: { name: cluster.name } };
   }
 
   return {};

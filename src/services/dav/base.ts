@@ -7,6 +7,7 @@ import client, { remotePath } from './client';
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
 import { routeIs } from '@services/route-is';
+import { routes } from '@services/router';
 import { isAbortError } from '@services/utils/abort';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
@@ -37,7 +38,7 @@ type GetFilesOpts = {
 export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<IFileInfo[]> {
   // Some routes may have special handling of filenames
   if (!opts?.ignoreRoute && opts?.route) {
-    if (opts.route.name === _m.routes.AlbumsList.name || opts.route.name === _m.routes.Albums.name) {
+    if (opts.route.name === routes.AlbumsList.name || opts.route.name === routes.Albums.name) {
       return getAlbumFileInfos(photos, opts.route.params.user?.toString(), opts.route.params.name?.toString());
     }
   }

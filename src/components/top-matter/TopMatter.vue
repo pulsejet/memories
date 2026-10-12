@@ -21,6 +21,7 @@ import AlbumTopMatter from './AlbumTopMatter.vue';
 import PlacesTopMatter from './PlacesTopMatter.vue';
 
 import initstate from '@services/init-state';
+import { routes } from '@services/router';
 import * as utils from '@services/utils/common';
 
 defineOptions({
@@ -35,23 +36,23 @@ utils.useBus('memories.recycler.scroll', onRecyclerScroll);
 
 const currentmatter = computed(() => {
   switch (route.name) {
-    case _m.routes.Folders.name:
+    case routes.Folders.name:
       return markRaw(FolderTopMatter);
-    case _m.routes.FolderShare.name:
+    case routes.FolderShare.name:
       return initstate.shareType === 'folder' ? markRaw(FolderTopMatter) : null;
-    case _m.routes.AlbumsList.name:
-    case _m.routes.Albums.name:
+    case routes.AlbumsList.name:
+    case routes.Albums.name:
       return markRaw(AlbumTopMatter);
-    case _m.routes.PlacesList.name:
-    case _m.routes.Places.name:
+    case routes.PlacesList.name:
+    case routes.Places.name:
       return markRaw(PlacesTopMatter);
-    case _m.routes.TagsList.name:
-    case _m.routes.Tags.name:
+    case routes.TagsList.name:
+    case routes.Tags.name:
       return markRaw(ClusterTopMatter);
-    case _m.routes.RecognizeList.name:
-    case _m.routes.Recognize.name:
-    case _m.routes.FaceRecognitionList.name:
-    case _m.routes.FaceRecognition.name:
+    case routes.RecognizeList.name:
+    case routes.Recognize.name:
+    case routes.FaceRecognitionList.name:
+    case routes.FaceRecognition.name:
       return markRaw(FaceTopMatter);
     default:
       return null;

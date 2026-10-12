@@ -32,6 +32,7 @@ import { ref, computed, onMounted, onBeforeUnmount, useTemplateRef, defineAsyncC
 import { useRoute } from 'vue-router';
 
 import { t } from '@services/l10n';
+import { routes } from '@services/router';
 
 import Timeline from '@components/Timeline.vue';
 const MapSplitMatter = defineAsyncComponent(() => import('@components/top-matter/MapSplitMatter.vue'));
@@ -51,7 +52,7 @@ let hammer: HammerManager | null = null;
 
 const primary = computed(() => {
   switch (route.name) {
-    case _m.routes.Map.name:
+    case routes.Map.name:
       return markRaw(MapSplitMatter);
     default:
       return null;

@@ -142,6 +142,7 @@ import MobileHeader from '@components/MobileHeader.vue';
 
 import { cacheData, getCachedData } from '@services/cache';
 import { routerStatePath, useRouteState, disableRouterStatePersistence } from '@services/route-state';
+import { routes } from '@services/router';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { constants, convertFlags, copyPhotoFlags } from '@services/constants';
 import { t } from '@services/l10n';
@@ -358,11 +359,11 @@ const routeState = useRouteState({
 function timelineRouteKey(route: RouteLocationNormalized): string {
   // For map, we use query params for pan and zoom, so exclude
   // them from the route state key.
-  if (route.name === _m.routes.Map.name) return route.path;
+  if (route.name === routes.Map.name) return route.path;
 
   // For search, we don't want to restore state, since the
   // individual day objects cannot be fetched from the server.
-  if (route.name === _m.routes.Search.name) {
+  if (route.name === routes.Search.name) {
     return disableRouterStatePersistence(routerStatePath(route));
   }
 

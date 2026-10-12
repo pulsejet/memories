@@ -5,6 +5,7 @@ import axios from '@nextcloud/axios';
 
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
+import { routes } from '@services/router';
 
 import type { RouteLocationNormalized } from 'vue-router';
 import type { ClusterTypes, IPhoto } from '@typings';
@@ -55,7 +56,7 @@ export async function setClusterCover(photo: IPhoto, opts: { route: RouteLocatio
   let { user, name } = opts.route.params;
 
   const routeName = opts.route.name?.toString();
-  if (routeName === _m.routes.Recognize.name || routeName === _m.routes.Albums.name) {
+  if (routeName === routes.Recognize.name || routeName === routes.Albums.name) {
     name = `${user}/${name}`;
   }
 

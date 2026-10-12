@@ -37,6 +37,7 @@ const NcListItem = defineAsyncComponent(() => import('@nextcloud/vue/components/
 
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
+import { routes } from '@services/router';
 
 import type { IAlbum, IPhoto } from '@typings';
 
@@ -74,7 +75,7 @@ function click($event: Event, album: IAlbum) {
 
 function linkTarget(album: IAlbum) {
   return {
-    name: _m.routes.Albums.name,
+    name: routes.Albums.name,
     params: {
       name: album.name,
       user: album.user,

@@ -2,6 +2,7 @@ import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { windowDims } from '@services/viewport';
+import { routes } from '@services/router';
 
 import type { Ref } from 'vue';
 
@@ -65,7 +66,7 @@ function resolveTransition(
   if (!windowDims.isMobile) return 'route-fade';
 
   // Tab routes on mobile, fade and slightly rise.
-  const tabRoutes: string[] = [_m.routes.Base.name, _m.routes.Explore.name, _m.routes.AlbumsList.name];
+  const tabRoutes: string[] = [routes.Base.name, routes.Explore.name, routes.AlbumsList.name];
   const isTabRoute = (name: string | undefined) => !!name && tabRoutes.includes(name);
   const toTab = isTabRoute(toName);
   const fromTab = isTabRoute(fromName);

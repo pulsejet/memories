@@ -36,6 +36,7 @@ import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import { t } from '@services/l10n';
 import { useRouteIs } from '@services/route-is';
+import { routes } from '@services/router';
 import * as strings from '@services/strings';
 import * as utils from '@services/utils/common';
 import { constants } from '@services/constants';
@@ -68,7 +69,7 @@ function back() {
 
 function openUnassigned() {
   router.push({
-    name: _m.routes.Places.name,
+    name: routes.Places.name,
     params: {
       name: constants.PLACES_NULL,
     },

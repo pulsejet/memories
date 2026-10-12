@@ -1,5 +1,5 @@
 import { generateUrl } from '@nextcloud/router';
-import router from '@services/router';
+import router, { routes } from '@services/router';
 import type { ClusterTypes } from '@typings';
 
 const BASE = '/apps/memories/api';
@@ -10,9 +10,9 @@ const gen = generateUrl;
 function tok(url: string) {
   const token = router.currentRoute.value.params.token as string | undefined;
   switch (router.currentRoute.value.name) {
-    case _m.routes.FolderShare.name:
+    case routes.FolderShare.name:
       return API.Q(url, { token });
-    case _m.routes.AlbumShare.name:
+    case routes.AlbumShare.name:
       return API.Q(url, { token, albums: token });
   }
   return url;

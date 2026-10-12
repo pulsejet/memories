@@ -15,6 +15,7 @@ import NcButton from '@nextcloud/vue/components/NcButton';
 
 import { API } from '@services/API';
 import { useRouteIs } from '@services/route-is';
+import { routes } from '@services/router';
 import { useRouteState } from '@services/route-state';
 import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
@@ -74,7 +75,7 @@ async function refresh(): Promise<void> {
 
 function routeTo(place: ICluster) {
   return {
-    name: _m.routes.Places.name,
+    name: routes.Places.name,
     params: {
       name: place.cluster_id + '-' + place.name,
     },
