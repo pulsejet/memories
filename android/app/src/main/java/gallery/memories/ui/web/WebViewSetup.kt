@@ -31,6 +31,12 @@ object WebViewSetup {
         s.setSupportZoom(false)
         s.builtInZoomControls = false
         s.displayZoomControls = false
+        s.useWideViewPort = true
+        s.allowFileAccess = false
+        s.allowContentAccess = false
+        // Disabled: don't send URL hashes to Google; WebView only loads first-party content.
+        s.safeBrowsingEnabled = false
+        webview.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false)
         webview.addJavascriptInterface(jsInterface, "nativex")
         webview.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         webview.setBackgroundColor(Color.TRANSPARENT)
