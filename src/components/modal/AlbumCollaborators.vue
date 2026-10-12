@@ -446,6 +446,7 @@ defineExpose({ createPublicLinkForAlbum });
 
   &__subtitle {
     color: var(--color-text-maxcontrast);
+    margin-bottom: 8px;
   }
 
   &__public-link-button {
