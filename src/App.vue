@@ -61,13 +61,18 @@
             'is-native': native,
           }"
         >
-          <router-view v-slot="{ Component, route: routeFromSlot }">
-            <Transition v-if="!isE2E" :name="routeTransition" :css="true">
-              <component :is="Component" :key="routeFromSlot.path" />
-            </Transition>
-            <template v-else>
-              <component :is="Component" :key="routeFromSlot.path" />
-            </template>
+          <router-view v-slot="{ Component, route: slotRoute }">
+            <RouteTransition :route-transition="routeTransition">
+              <div
+                :class="{
+                  'route-view': true,
+                  'route-view--map': slotRoute.name === 'map',
+                }"
+                :key="slotRoute.path"
+              >
+                <component :is="Component" />
+              </div>
+            </RouteTransition>
           </router-view>
         </div>
 
@@ -114,6 +119,7 @@ import Settings from '@components/Settings.vue';
 import Viewer from '@components/viewer/Viewer.vue';
 import Sidebar from '@components/Sidebar.vue';
 import MobileNav from '@components/MobileNav.vue';
+import RouteTransition from '@components/RouteTransition.vue';
 
 import EditMetadataModal from '@components/modal/EditMetadataModal.vue';
 import AddToAlbumModal from '@components/modal/AddToAlbumModal.vue';
@@ -159,9 +165,6 @@ defineOptions({
 
 const route = useRoute();
 const routeTransition = useRouteTransition();
-
-// Disable route transitions on E2E to avoid flakiness.
-const isE2E = !!window.navigator?.webdriver;
 
 const navItems = ref<NavItem[]>([]);
 const settingsOpen = ref(false);
@@ -401,19 +404,23 @@ function syncSharingToken(token?: string) {
 
 <style scoped lang="scss">
 .app-outer {
-  --app-outer-margin-left: 44px;
-  margin: 0;
-  margin-left: var(--app-outer-margin-left);
   height: 100%;
-  width: calc(100% - var(--app-outer-margin-left));
+  width: 100%;
   position: relative;
+  margin: 0;
 
-  &:has(.map-matter) {
-    --app-outer-margin-left: 0px; // gap on map left
-  }
+  .route-view {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
 
-  @media (max-width: 768px) {
-    --app-outer-margin-left: 0px;
+    padding-left: 44px;
+    &--map {
+      padding-left: 0; // gap on map left
+    }
+    @media (max-width: 768px) {
+      padding-left: 0;
+    }
   }
 }
 
