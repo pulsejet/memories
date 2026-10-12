@@ -37,20 +37,14 @@
       />
 
       <div class="link-list">
-        <NcButton
-          class="link"
+        <ExploreButton
           v-for="category of categories"
-          :ariaLabel="category.name"
           :key="category.name"
           :to="category.link"
+          :icon="category.icon"
+          :label="category.name"
           @click="category.click?.()"
-          variant="tertiary-no-background"
-        >
-          <template #icon>
-            <component :is="category.icon" />
-          </template>
-          {{ category.name }}
-        </NcButton>
+        />
       </div>
     </div>
   </div>
@@ -62,8 +56,7 @@ import type { Component } from 'vue';
 
 import Searchbar from '@components/header/Searchbar.vue';
 import ClusterHList from '@components/ClusterHList.vue';
-
-import NcButton from '@nextcloud/vue/components/NcButton';
+import ExploreButton from '@components/ExploreButton.vue';
 
 import FolderIcon from 'vue-material-design-icons/Folder.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
@@ -248,10 +241,6 @@ onMounted(() => {
     font-weight: 400;
     line-height: 42px;
     border-bottom: 1px solid var(--color-border-dark);
-
-    @media (max-width: 768px) {
-      display: none;
-    }
   }
 
   .searchbar {
@@ -270,24 +259,19 @@ onMounted(() => {
   }
 
   .link-list {
-    padding: 10px 4px;
-    line-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+    padding: 10px 24px 10px 4px;
 
     @media (max-width: 768px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       padding: 6px 7px;
       margin-bottom: 6px;
     }
 
-    > .link {
-      line-height: initial;
-      display: inline-block;
-      margin: 3px;
-      opacity: 0.8;
-      @media (max-width: 768px) {
-        width: calc(50% - 6px);
-        border-radius: 10px;
-        opacity: 1;
-      }
+    @media (max-width: 360px) {
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 }
