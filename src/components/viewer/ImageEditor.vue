@@ -22,6 +22,7 @@ import translations from './ImageEditorTranslations';
 import { fetchImage } from '@components/frame/XImgCache';
 
 import { API } from '@services/API';
+import { fragment } from '@services/route-fragment';
 import { t } from '@services/l10n';
 import * as utils from '@services/utils/common';
 
@@ -169,7 +170,7 @@ onMounted(async () => {
   window.addEventListener('keydown', handleKeydown, true);
 
   // Fragment navigation
-  utils.fragment.push(utils.fragment.types.editor);
+  fragment.push(fragment.types.editor);
 });
 
 onBeforeUnmount(() => {
@@ -180,7 +181,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown, true);
 
   // Fragment navigation
-  utils.fragment.pop(utils.fragment.types.editor);
+  fragment.pop(fragment.types.editor);
 });
 
 utils.useBus('memories:fragment:pop:editor', warnUnsaved);
@@ -326,7 +327,7 @@ async function warnUnsaved() {
     onClose('warning-ignored', false);
   } else {
     // User cancelled, put the fragment back
-    utils.fragment.push(utils.fragment.types.editor);
+    fragment.push(fragment.types.editor);
   }
 }
 

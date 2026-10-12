@@ -1,5 +1,6 @@
-import { bus } from './event-bus';
-import { onDOMLoaded } from './dom';
+import router from '@services/router';
+import { bus } from '@services/utils/event-bus';
+import { onDOMLoaded } from '@services/utils/dom';
 
 /** Mapping of route name to key type */
 enum FragmentType {
@@ -85,7 +86,7 @@ function serialized<T>(fn: () => Promise<T>): Promise<T> {
 function waitForHistoryGo(go: () => void): Promise<void> {
   return new Promise<void>((resolve) => {
     let done = false;
-    const off = _m.router.afterEach(() => {
+    const off = router.afterEach(() => {
       if (done) return;
       done = true;
       off();
@@ -113,8 +114,8 @@ export const fragment = {
    * @returns List of fragments
    */
   get list(): Fragment[] {
-    if (cache.hash !== _m.route.hash) {
-      cache.hash = _m.route.hash;
+    if (cache.hash !== router.currentRoute.value.hash) {
+      cache.hash = router.currentRoute.value.hash;
       cache.list = decodeFragment(cache.hash ?? String());
     }
 
@@ -149,9 +150,10 @@ export const fragment = {
    * Drop all the fragments from the route.
    */
   async clear() {
-    _m.router.replace({
-      path: _m.route.path,
-      query: _m.route.query,
+    if (_m.mode !== 'user') return;
+    router.replace({
+      path: router.currentRoute.value.path,
+      query: router.currentRoute.value.query,
     });
   },
 
@@ -193,8 +195,8 @@ export const fragment = {
  * Implementation of push (runs inside the fragment mutex).
  */
 async function pushCore(type: FragmentType, ...args: string[]) {
-  // Skip if no route (e.g. admin)
-  if (!_m.route) return;
+  // Skip if not in user mode (e.g. admin)
+  if (_m.mode !== 'user') return;
 
   const frag: Fragment = { type, args };
   const list = fragment.list;
@@ -209,12 +211,12 @@ async function pushCore(type: FragmentType, ...args: string[]) {
     const hash = encodeFragment(list);
 
     // Avoid redundant route changes
-    if (hash === _m.route.hash) return;
+    if (hash === router.currentRoute.value.hash) return;
 
     // Replace the route with the new fragment
-    await _m.router.replace({
-      path: _m.route.path,
-      query: _m.route.query,
+    await router.replace({
+      path: router.currentRoute.value.path,
+      query: router.currentRoute.value.query,
       hash: hash,
     });
 
@@ -228,9 +230,9 @@ async function pushCore(type: FragmentType, ...args: string[]) {
 
   // Add fragment to route
   list.push(frag);
-  await _m.router.push({
-    path: _m.route.path,
-    query: _m.route.query,
+  await router.push({
+    path: router.currentRoute.value.path,
+    query: router.currentRoute.value.query,
     hash: encodeFragment(list),
   });
 
@@ -242,8 +244,8 @@ async function pushCore(type: FragmentType, ...args: string[]) {
  * Implementation of pop (runs inside the fragment mutex).
  */
 async function popCore(type: FragmentType) {
-  // Skip if no route (e.g. admin)
-  if (!_m.route) return;
+  // Skip if not in user mode (e.g. admin)
+  if (_m.mode !== 'user') return;
 
   // Get the index of this fragment from the end
   const frag = fragment.get(type);
@@ -253,15 +255,15 @@ async function popCore(type: FragmentType) {
   // below observes the post-navigation state and not a stale URL.
   // Without this, concurrent pops compute duplicate relative jumps
   // against the same stale URL and over-consume history entries.
-  await waitForHistoryGo(() => _m.router.go(-frag.index! - 1));
+  await waitForHistoryGo(() => router.go(-frag.index! - 1));
 
   // Check if the fragment still exists
   // In that case, replace the route to remove the fragment
   const sfrag = fragment.get(type);
   if (sfrag) {
-    await _m.router.replace({
-      path: _m.route.path,
-      query: _m.route.query,
+    await router.replace({
+      path: router.currentRoute.value.path,
+      query: router.currentRoute.value.query,
       hash: encodeFragment(fragment.list.slice(0, -sfrag.index! - 1)),
     });
   }
@@ -286,9 +288,9 @@ onDOMLoaded(() => {
 
     // Only contextual fragments should be present on page load
     if (contextual.length) {
-      _m.router.push({
-        path: _m.route.path,
-        query: _m.route.query,
+      router.push({
+        path: router.currentRoute.value.path,
+        query: router.currentRoute.value.query,
         hash: encodeFragment(contextual),
       });
     }
@@ -299,7 +301,7 @@ onDOMLoaded(() => {
    * @param to Switching to this route
    * @param from Switching from this route
    */
-  _m.router.afterEach((to, from) => {
+  router.afterEach((to, from) => {
     const toF = decodeFragment(to.hash);
     const fromF = decodeFragment(from.hash);
 

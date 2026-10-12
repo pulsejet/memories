@@ -1,8 +1,8 @@
 import { spawnDialog } from '@nextcloud/vue/functions/dialog';
 
 import { translatePlural as n, translate as t } from '@services/l10n';
-import { bus } from './event-bus';
-import { fragment } from './fragment';
+import { bus } from '@services/utils/event-bus';
+import { fragment } from '@services/route-fragment';
 
 import type { INode } from '@nextcloud/files';
 import type { IFilePickerButton, ToastHandle, ToastOptions } from '@nextcloud/dialogs';

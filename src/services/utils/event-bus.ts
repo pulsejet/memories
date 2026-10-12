@@ -1,6 +1,6 @@
 import { emit, subscribe, unsubscribe } from '@nextcloud/event-bus';
 import { onBeforeUnmount, onMounted } from 'vue';
-import type { FragmentName, Fragment } from './fragment';
+import type { FragmentName, Fragment } from '@services/route-fragment';
 import type { IPhoto } from '@typings';
 
 export type BusEvent = {

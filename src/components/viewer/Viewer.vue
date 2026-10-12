@@ -113,6 +113,7 @@ import { showError } from '@services/utils/dialog';
 import axios from '@nextcloud/axios';
 
 import { config } from '@services/user-config';
+import { fragment } from '@services/route-fragment';
 import { windowDims } from '@services/viewport';
 import { routeIs } from '@services/router';
 import { API } from '@services/API';
@@ -796,12 +797,12 @@ async function createBase(args: PhotoSwipeOptions) {
 function setFragment(photo: IPhoto | null) {
   // Add or update fragment
   if (photo) {
-    return utils.fragment.push(utils.fragment.types.viewer, String(photo.dayid), photo.key!);
+    return fragment.push(fragment.types.viewer, String(photo.dayid), photo.key!);
   }
 
   // Remove fragment if closed
   if (!isOpen.value) {
-    return utils.fragment.pop(utils.fragment.types.viewer);
+    return fragment.pop(fragment.types.viewer);
   }
 }
 

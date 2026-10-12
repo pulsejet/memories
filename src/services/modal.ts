@@ -1,5 +1,6 @@
 import { ref, watch, type Ref } from 'vue';
 
+import { fragment } from '@services/route-fragment';
 import * as utils from '@services/utils/common';
 
 /**
@@ -23,7 +24,7 @@ export function useModal(modal?: Ref<{ close?: () => void } | null>) {
 
       try {
         // pop the fragment immediately
-        await utils.fragment.pop(utils.fragment.types.modal);
+        await fragment.pop(fragment.types.modal);
 
         // close the modal with animation
         modal?.value?.close?.();
@@ -41,7 +42,7 @@ export function useModal(modal?: Ref<{ close?: () => void } | null>) {
   utils.useBus('memories:fragment:pop:modal', close);
 
   watch(show, (value) => {
-    utils.fragment.if(value, utils.fragment.types.modal);
+    fragment.if(value, fragment.types.modal);
 
     if (!value) {
       _closing?.(null);

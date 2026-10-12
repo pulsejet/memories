@@ -41,6 +41,7 @@ import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import { config } from '@services/user-config';
+import { fragment } from '@services/route-fragment';
 import { windowDims } from '@services/viewport';
 import { routeIs } from '@services/router';
 
@@ -287,7 +288,7 @@ utils.useBus('memories:albums:update', clear);
 utils.useBus('memories:fragment:pop:selection', clear);
 
 watch(show, (value) => {
-  utils.fragment.if(value, utils.fragment.types.selection);
+  fragment.if(value, fragment.types.selection);
 });
 
 function deleteSelectedPhotosById(delIds: number[], sel: Selection) {

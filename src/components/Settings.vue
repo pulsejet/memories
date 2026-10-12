@@ -283,6 +283,7 @@ import { ref, computed, watch, onMounted, defineAsyncComponent } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { config, setConfig } from '@services/user-config';
+import { fragment } from '@services/route-fragment';
 import { t } from '@services/l10n';
 import { showError } from '@services/utils/dialog';
 import * as utils from '@services/utils/common';
@@ -342,7 +343,7 @@ const tileServers = computed(() => {
 watch(
   () => props.open,
   (value: boolean) => {
-    utils.fragment.if(value, utils.fragment.types.settings);
+    fragment.if(value, fragment.types.settings);
   },
 );
 

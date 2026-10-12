@@ -123,6 +123,7 @@ import { showError } from '@services/utils/dialog';
 import { getLayout } from '@services/layout';
 
 import { config } from '@services/user-config';
+import { fragment } from '@services/route-fragment';
 import { windowDims } from '@services/viewport';
 import { routeIs } from '@services/router';
 import { ignoreAbort, isAbortError, raceWithAbort, useAbort } from '@services/utils/abort-vue';
@@ -394,9 +395,9 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
   }
 
   // Check if viewer is supposed to be open
-  if (from?.hash !== to.hash && !_m.viewer.isOpen && (utils.fragment.viewer || utils.fragment.day)) {
+  if (from?.hash !== to.hash && !_m.viewer.isOpen && (fragment.viewer || fragment.day)) {
     // Open viewer
-    const [dayidStr, key] = utils.fragment.viewer?.args || utils.fragment.day!.args;
+    const [dayidStr, key] = fragment.viewer?.args || fragment.day!.args;
     const dayid = parseInt(dayidStr);
     if (isNaN(dayid) || !key) return;
 
@@ -413,14 +414,14 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
     if (!photo) return;
 
     // Scroll to photo if initializing, or if just a scroll change.
-    if (!from || utils.fragment.day) {
+    if (!from || fragment.day) {
       const index = list.value.findIndex((r) => r.day.dayid === dayid && r.photos?.includes(photo));
       if (index !== -1) {
         recycler.value?.scrollToItem(index);
       }
     }
 
-    if (utils.fragment.viewer) {
+    if (fragment.viewer) {
       // Pass a getter-backed state so the viewer always reads the
       // current collections, even after a refresh replaces them.
       _m.viewer.openDynamic(photo, {
@@ -431,8 +432,8 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
           return heads.value;
         },
       });
-    } else if (utils.fragment.day) {
-      utils.fragment.clear();
+    } else if (fragment.day) {
+      fragment.clear();
     }
   }
 }

@@ -123,6 +123,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 import router from '@services/router';
 
 import { windowDims } from '@services/viewport';
+import { fragment } from '@services/route-fragment';
 import * as utils from '@services/utils/common';
 
 import type { IImageInfo, IPhoto } from '@typings';
@@ -388,7 +389,7 @@ function getWidth() {
 
 function handleClose() {
   utils.bus.emit('memories:sidebar:closed', null);
-  utils.fragment.pop(utils.fragment.types.sidebar);
+  fragment.pop(fragment.types.sidebar);
 }
 
 function handleOpen() {
@@ -412,7 +413,7 @@ function handleOpen() {
 
   // Use fragment navigation only on mobile
   if (windowDims.isMobile) {
-    utils.fragment.push(utils.fragment.types.sidebar);
+    fragment.push(fragment.types.sidebar);
   }
 }
 </script>

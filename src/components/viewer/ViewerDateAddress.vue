@@ -36,11 +36,12 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
-import * as utils from '@services/utils/common';
-import * as nativex from '@native';
 import { t } from '@services/l10n';
 import { isPartiallyInViewport } from '@services/viewport';
 import { routeIs } from '@services/router';
+import { fragment } from '@services/route-fragment';
+import * as utils from '@services/utils/common';
+import * as nativex from '@native';
 
 import ChevronRightIcon from 'vue-material-design-icons/ChevronRight.vue';
 
@@ -101,7 +102,7 @@ const dayTo = computed(() => {
 
   return {
     name: 'timeline',
-    hash: `#${utils.fragment.types.day}/${dayid}/${fileid}`,
+    hash: `#${fragment.types.day}/${dayid}/${fileid}`,
   };
 });
 
@@ -112,7 +113,7 @@ async function jumpToTimeline() {
   // If we are already on the timeline, just close the viewer.
   // This way we don't unnecessarily accumulate history entries.
   if (routeIs.Base) {
-    await utils.fragment.pop(utils.fragment.types.viewer);
+    await fragment.pop(fragment.types.viewer);
 
     // Check if the image is alraedy in the viewport, and scroll only if not.
     // This is to avoid the annoying "jump" when closing the viewer.
