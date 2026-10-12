@@ -37,10 +37,6 @@ class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient(
         return handleMainFrame(view, request.url)
     }
 
-    @Suppress("DEPRECATION")
-    override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean =
-        handleMainFrame(view, Uri.parse(url))
-
     private fun handleMainFrame(view: WebView, url: Uri): Boolean {
         if (url.scheme == "about") return false
         if (isLoopback(url)) return handleLoopback(view, url)
