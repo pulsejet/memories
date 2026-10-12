@@ -28,64 +28,17 @@ Very important.
 - Ship to master: `git fetch origin`, rebase `development` on `origin/master`, fast-forward `master`, push `master`.
 - Never force-push unless explicitly asked.
 
-## Main Release Flow
-- *Confirm each step with user*.
-- Bump `appinfo/info.xml` + `package.json` and move CHANGELOG `[Unreleased]` to versioned section in one commit.
-- On master: `git fetch origin`, check in sync with origin/master and development. Dirty tree OK if tag targets clean HEAD.
-- `git tag vX.X.X`, `git push origin vX.X.X`. Check tag absent first, `ls-remote` after.
-- Push branches before tagging/releasing; push only the new tag, never `--tags` (publishes stale local tags).
-- `gh release create <tag> --title <tag> --generate-notes --notes <NOTES> --notes-start-tag <prev-stable> --verify-tag`, plus `--prerelease` for alpha/beta/rc.
-  - `--notes` must contain the full release changelog text from CHANGELOG.md AND the changelog URL (both), prepended to auto notes.
-  - `--notes-start-tag` must be last stable (auto picks newest tag by date, e.g. go-vod/*).
-  - Fix wrong base via `gh api .../generate-notes -f previous_tag_name=<prev>` + `gh release edit --notes-file`.
+## Releases
+- For any release, load the `release` skill first and follow it exactly.
+- Confirm each step with user.
 
-## go-vod Release Flow (two phases)
-- Phase 1: bump `VERSION` in `go-vod/main.go` only, push master + dev, tag `go-vod/X.Y.Z` (CI builds release binaries). Keep `GOVOD_VER` untouched.
-- Phase 2 (after binaries exist): bump `GOVOD_VER` in `lib/Service/BinExt.php` in a separate commit, then run `make bin-ext` to refresh the dev env.
-- `VERSION`, `GOVOD_VER`, and tag must all agree; enforced by `get-bin-ext.sh` and `testGoVod`.
-
-## Unit Testing
-- `vendor/autoload.php` alone is insufficient.
-  - `OC\*`, `OCP\*` and app namespaces come from Nextcloud's environment.
-- Unit tests and standalone scripts/REPL must bootstrap via `tests/bootstrap.php`.
-  - Loads Nextcloud `lib/base.php`, registers the app container.
-- Before asserting on sample assets in `tests/assets/`, inspect them first.
-  - Check raw metadata, stream offsets, or binary properties.
-  - Use a `tests/bootstrap.php` one-liner.
-- Metadata/transcoding tests rely on external binaries via `OCA\Memories\Service\BinExt`.
-- Run one test: `vendor/bin/phpunit --filter <TestClassOrMethod>`.
-- Run all tests: bare `vendor/bin/phpunit`.
-- After adding/editing tests always run `make php-lint` (`php-cs-fixer`).
-
-## E2E Testing
-- Playwright suite in `e2e/`, run by `scripts/e2e.sh`.
-- Configured in `playwright.config.ts`.
-- Auth runs once via `auth.setup.ts`.
-- Derive expected API responses dynamically, never hardcode.
-  - Use `goldXXX()` from `e2e/dataset-measurements.ts`.
-  - Strip non-deterministic fields before asserting.
-- Full suite: `make e2e`.
-- Reuse a user: `E2E_USER="test-user" make e2e`.
-- Single spec: `npx playwright test e2e/<spec-file>`.
+## Testing
+- For unit tests, load the `unit-testing` skill first and follow it exactly.
+- For e2e tests, load the `e2e-testing` skill first and follow it exactly.
 - Never run e2e unless the user explicitly asks.
-- Create test users via functions in `scripts/e2e.sh`.
-- Record the info in `.agent.yaml` and re-read it at the beginning.
-- This reuses the context; don't teardown/recreate users unnecessarily.
-- Prefer subsets over the full suite.
-- Specs run over HTTP only; assume a remote runner.
-- File changes index reactively; never wait/poll for indexing.
-- Never run `occ` in spec.
-- Put helpers bottom of spec, after all tests.
 
-## GitHub Interaction
-- Only for *GitHub*, not general Git stuff.
-- Use `gh` CLI, prompt user if not installed.
-- View/list: `gh issue view <num>`, `gh issue list --label "<label>"`, `gh label list`.
-- Edit labels: `gh issue edit <num> --add-label "<label>" --remove-label "<label>"`.
-  - `bug`, `feature`, `regression`, `performance`, `android`, 
-  - `duplicate`, `wontfix`, `needs details`, `documentation`
-- Triage issues with `needs triage` label.
-  - Don't relabel unless confirmed bug or regression.
+## GitHub
+- For any GitHub interaction, load the `github` skill first and follow it exactly.
 - NEVER comment on issues/PRs without explicit user consent.
 
 ## Key Subsystems & Architecture
