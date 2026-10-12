@@ -119,19 +119,19 @@ func TestVodBadRequests(t *testing.T) {
 	for _, body := range []string{
 		`{}`,
 		`{"client":"","fileid":7,"profile":"test"}`,
-		`{"client":"c","profile":"test"}`,
-		`{"client":"c","fileid":0,"profile":"test"}`,
-		`{"client":"c","fileid":7,"profile":""}`,
+		`{"client":"deadbeef","profile":"test"}`,
+		`{"client":"deadbeef","fileid":0,"profile":"test"}`,
+		`{"client":"deadbeef","fileid":7,"profile":""}`,
 	} {
 		w := postVod(s, body)
 		require.Equal(t, http.StatusBadRequest, w.Code, body)
 	}
 
 	for _, body := range []string{
-		`{"client":"c","fileid":7,"profile":"index.m3u8","config":{"chunkSize":0}}`,
-		`{"client":"c","fileid":7,"profile":"index.m3u8","config":{"chunkSize":3,"vaapi":true,"nvenc":true,"nvencScale":"cuda"}}`,
-		`{"client":"c","fileid":7,"profile":"index.m3u8","config":{"chunkSize":3,"nvenc":true}}`,
-		`{"client":"c","fileid":7,"profile":"index.m3u8","config":{"chunkSize":3,"nvenc":true,"nvencScale":"vulkan"}}`,
+		`{"client":"deadbeef","fileid":7,"profile":"index.m3u8","config":{"chunkSize":0}}`,
+		`{"client":"deadbeef","fileid":7,"profile":"index.m3u8","config":{"chunkSize":3,"vaapi":true,"nvenc":true,"nvencScale":"cuda"}}`,
+		`{"client":"deadbeef","fileid":7,"profile":"index.m3u8","config":{"chunkSize":3,"nvenc":true}}`,
+		`{"client":"deadbeef","fileid":7,"profile":"index.m3u8","config":{"chunkSize":3,"nvenc":true,"nvencScale":"vulkan"}}`,
 	} {
 		w := postVod(s, body)
 		require.Equal(t, http.StatusBadRequest, w.Code, body)
@@ -189,7 +189,7 @@ func TestVodRequiresFileID(t *testing.T) {
 
 	// Without a fileid there is no URL to stream and no cache dir.
 	for _, leaf := range []string{"storyboard.vtt", "storyboard-0.jpg", "index.m3u8"} {
-		w := postVod(s, `{"client":"s","profile":"`+leaf+`","config":{"chunkSize":3}}`)
+		w := postVod(s, `{"client":"cafef00d","profile":"`+leaf+`","config":{"chunkSize":3}}`)
 		require.Equal(t, http.StatusBadRequest, w.Code, leaf)
 	}
 }
