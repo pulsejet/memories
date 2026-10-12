@@ -17,7 +17,6 @@ globalThis._m = {
   get route() {
     return router.currentRoute.value;
   },
-  router: router,
   routes: routes,
 
   modals: {} as any,

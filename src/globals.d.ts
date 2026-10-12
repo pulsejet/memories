@@ -1,4 +1,4 @@
-import type { Router, RouteLocationNormalized } from 'vue-router';
+import type { RouteLocationNormalized } from 'vue-router';
 import type { ComponentPublicInstance } from 'vue';
 
 import type { IPhoto, IUploadNativeX, TimelineState } from '@typings';
@@ -26,7 +26,6 @@ declare global {
   var _m: {
     mode: 'admin' | 'user';
     route: RouteLocationNormalized;
-    router: Router;
     routes: {
       [K in keyof typeof routes]: {
         path: (typeof routes)[K]['path'];
