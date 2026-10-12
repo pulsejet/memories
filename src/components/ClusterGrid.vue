@@ -30,7 +30,7 @@
 import { ref, computed, watch, onMounted, nextTick, useTemplateRef } from 'vue';
 import { RecycleScroller } from 'vue-virtual-scroller';
 
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { windowDims } from '@services/viewport';
 import { getPlaceholderClusters } from '@services/dav';
 import * as utils from '@services/utils/common';
@@ -64,6 +64,7 @@ const emit = defineEmits<{
   plus: [];
 }>();
 const recycler = useTemplateRef<VueRecyclerType>('recycler');
+const routeIs = useRouteIs();
 const recyclerWidth = ref(300);
 
 /** Placeholders to show while loading */

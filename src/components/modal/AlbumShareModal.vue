@@ -60,7 +60,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
 import * as dav from '@services/dav';
@@ -71,6 +71,7 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
+const routeIs = useRouteIs();
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
 const collaborators = useTemplateRef<InstanceType<typeof AlbumCollaborators>>('collaborators');

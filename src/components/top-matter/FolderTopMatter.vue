@@ -69,7 +69,7 @@ import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import PublicUploadHandler from '@components/upload/PublicUploadHandler.vue';
 
 import { t } from '@services/l10n';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { config } from '@services/user-config';
 import * as utils from '@services/utils/common';
 import initstate from '@services/init-state';
@@ -86,6 +86,7 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
+const routeIs = useRouteIs();
 const uploadHandler = useTemplateRef<InstanceType<typeof PublicUploadHandler>>('uploadHandler');
 
 const list = computed(

@@ -38,7 +38,7 @@ import { useRouter } from 'vue-router';
 
 import { t } from '@services/l10n';
 import { isPartiallyInViewport } from '@services/viewport';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { fragment } from '@services/route-fragment';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
@@ -63,6 +63,7 @@ const props = withDefaults(
 );
 
 const router = useRouter();
+const routeIs = useRouteIs();
 const dateStr = computed((): string | null => {
   const date = props.photo?.imageInfo?.datetaken;
   if (!date) return null;

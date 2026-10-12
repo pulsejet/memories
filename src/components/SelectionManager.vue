@@ -43,7 +43,7 @@ import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import { config } from '@services/user-config';
 import { fragment } from '@services/route-fragment';
 import { windowDims } from '@services/viewport';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 
 import { t, n } from '@services/l10n';
 import { constants } from '@services/constants';
@@ -158,6 +158,7 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
+const routeIs = useRouteIs();
 const show = ref(false);
 const size = ref(0);
 const loading = ref(0);

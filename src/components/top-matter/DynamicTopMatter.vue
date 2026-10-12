@@ -16,7 +16,7 @@ import { computed, markRaw, useTemplateRef, watch, type Component } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { config } from '@services/user-config';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { routerStatePath } from '@services/route-state';
 import initstate from '@services/init-state';
 import * as strings from '@services/strings';
@@ -38,6 +38,7 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
+const routeIs = useRouteIs();
 
 const child = useTemplateRef<{
   isReady: boolean;

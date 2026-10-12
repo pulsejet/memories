@@ -35,7 +35,7 @@ import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import { t } from '@services/l10n';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import * as strings from '@services/strings';
 import * as utils from '@services/utils/common';
 import { constants } from '@services/constants';
@@ -49,6 +49,7 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
+const routeIs = useRouteIs();
 const viewname = computed((): string => {
   return strings.viewName(route);
 });

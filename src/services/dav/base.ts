@@ -6,7 +6,7 @@ import client, { remotePath } from './client';
 
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
-import { routeIs } from '@services/router';
+import { routeIs } from '@services/route-is';
 import { isAbortError } from '@services/utils/abort';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
@@ -314,7 +314,7 @@ export async function* deletePhotos(
   const route = opts.route;
 
   // Extend with stack unless this is an album
-  const isAlbum = routeIs.Albums;
+  const isAlbum = routeIs(opts.route).Albums;
   let livePhotoVideoFileIds = new Set<number>();
   if (!isAlbum) {
     const extended = await extendWithStack(photos);

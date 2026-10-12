@@ -24,7 +24,7 @@
 import { useTemplateRef } from 'vue';
 
 import { t } from '@services/l10n';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { useRouteState } from '@services/route-state';
 
 import Cluster from '@components/frame/Cluster.vue';
@@ -40,6 +40,7 @@ const props = defineProps<{
 }>();
 
 const hlistRef = useTemplateRef<HTMLDivElement>('hlist');
+const routeIs = useRouteIs();
 
 useRouteState({
   instance: props.stateKey,

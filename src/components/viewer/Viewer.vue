@@ -116,7 +116,7 @@ import axios from '@nextcloud/axios';
 import { config } from '@services/user-config';
 import { fragment } from '@services/route-fragment';
 import { windowDims } from '@services/viewport';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { API } from '@services/API';
 import { t } from '@services/l10n';
 import { constants } from '@services/constants';
@@ -189,6 +189,7 @@ defineOptions({
 const outer = useTemplateRef<HTMLDivElement>('outer');
 const inner = useTemplateRef<HTMLDivElement>('inner');
 const route = useRoute();
+const routeIs = useRouteIs();
 
 const loading = ref(0);
 const isOpen = ref(false);

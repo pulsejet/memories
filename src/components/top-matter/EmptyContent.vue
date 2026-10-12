@@ -16,7 +16,7 @@ import { useRoute } from 'vue-router';
 
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent';
 
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { t } from '@services/l10n';
 import { config } from '@services/user-config';
 
@@ -31,6 +31,7 @@ defineOptions({
 });
 
 const route = useRoute();
+const routeIs = useRouteIs();
 const emptyViewDescription = computed((): string => {
   if (routeIs.Base) {
     return t('memories', 'Upload some photos and make sure the timeline path is configured');

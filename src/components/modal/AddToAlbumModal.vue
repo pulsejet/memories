@@ -26,7 +26,7 @@ import AlbumPicker from './AlbumPicker.vue';
 
 import { useModal } from '@services/modal';
 import { n, t } from '@services/l10n';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 
@@ -37,6 +37,7 @@ defineOptions({
 });
 
 const route = useRoute();
+const routeIs = useRouteIs();
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
 const photos = ref<IPhoto[]>([]);

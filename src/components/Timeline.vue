@@ -125,7 +125,7 @@ import { getLayout } from '@services/layout';
 import { config } from '@services/user-config';
 import { fragment } from '@services/route-fragment';
 import { windowDims } from '@services/viewport';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { ignoreAbort, isAbortError, raceWithAbort, useAbort } from '@services/utils/abort-vue';
 import RowHead from '@components/frame/RowHead.vue';
 import Photo from '@components/frame/Photo.vue';
@@ -166,6 +166,7 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
+const routeIs = useRouteIs();
 const container = useTemplateRef<InstanceType<typeof SwipeRefresh>>('container');
 const topmatter = useTemplateRef<InstanceType<typeof TopMatter>>('topmatter');
 const dtm = useTemplateRef<InstanceType<typeof DynamicTopMatter>>('dtm');

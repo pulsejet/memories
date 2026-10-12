@@ -111,7 +111,7 @@ import NcAppNavigation from '@nextcloud/vue/components/NcAppNavigation';
 import NcAppNavigationItem from '@nextcloud/vue/components/NcAppNavigationItem';
 
 import { generateUrl } from '@nextcloud/router';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { useRouteTransition } from '@services/route-transition';
 
 const FirstStart = defineAsyncComponent(() => import('@components/FirstStart.vue'));
@@ -164,6 +164,7 @@ defineOptions({
 });
 
 const route = useRoute();
+const routeIs = useRouteIs();
 const routeTransition = useRouteTransition();
 
 const navItems = ref<NavItem[]>([]);

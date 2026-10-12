@@ -13,13 +13,14 @@ const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/componen
 import { Folder, Permission } from '@nextcloud/files';
 import { showError, showSuccess } from '@services/utils/dialog';
 
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { t, n } from '@services/l10n';
 import * as utils from '@services/utils/common';
 import initstate from '@services/init-state';
 import { createClient, type FileStat } from 'webdav';
 
 const route = useRoute();
+const routeIs = useRouteIs();
 const processing = ref(false);
 const progress = ref(0);
 const progressNote = ref(String());

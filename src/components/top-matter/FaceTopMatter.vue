@@ -70,7 +70,7 @@ import FaceEditModal from '@components/modal/FaceEditModal.vue';
 import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';
 import FaceMergeModal from '@components/modal/FaceMergeModal.vue';
 
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { config, setConfig } from '@services/user-config';
 import * as utils from '@services/utils/common';
 import { constants } from '@services/constants';
@@ -88,6 +88,7 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
+const routeIs = useRouteIs();
 const editModal = useTemplateRef<InstanceType<typeof FaceEditModal>>('editModal');
 const deleteModal = useTemplateRef<InstanceType<typeof FaceDeleteModal>>('deleteModal');
 const mergeModal = useTemplateRef<InstanceType<typeof FaceMergeModal>>('mergeModal');

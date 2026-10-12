@@ -17,7 +17,7 @@ import { ref, useTemplateRef, computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { until } from '@vueuse/core';
 
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { useRouteState } from '@services/route-state';
 import { isAbortError, raceWithAbort, useAbort } from '@services/utils/abort-vue';
 import TopMatter from '@components/top-matter/TopMatter.vue';
@@ -31,6 +31,7 @@ import * as dav from '@services/dav';
 import type { ICluster } from '@typings';
 
 const route = useRoute();
+const routeIs = useRouteIs();
 const dtmRef = useTemplateRef<InstanceType<typeof DynamicTopMatter>>('dtm');
 const gridRef = useTemplateRef<VueHTMLComponent>('grid');
 const items = ref<ICluster[]>([]);

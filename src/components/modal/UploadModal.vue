@@ -79,7 +79,7 @@ import { showError } from '@services/utils/dialog';
 import { useModal } from '@services/modal';
 import { t, n } from '@services/l10n';
 import { config } from '@services/user-config';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
@@ -94,6 +94,7 @@ defineOptions({
 
 const router = useRouter();
 const route = useRoute();
+const routeIs = useRouteIs();
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
 const tags = useTemplateRef<InstanceType<typeof EditTags>>('tags');

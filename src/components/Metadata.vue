@@ -87,7 +87,7 @@ import { getCanonicalLocale } from '@nextcloud/l10n';
 import { DateTime } from 'luxon';
 
 import { config } from '@services/user-config';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 
 import Cluster from '@components/frame/Cluster.vue';
 import AlbumsList from '@components/modal/AlbumsList.vue';
@@ -132,6 +132,7 @@ const props = defineProps<{
 const fileid = ref<number | null>(null);
 const filename = ref('');
 const route = useRoute();
+const routeIs = useRouteIs();
 const exif = ref({} as IExif);
 const baseInfo = ref({} as IImageInfo);
 const error = ref(false);

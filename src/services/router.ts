@@ -1,10 +1,8 @@
-import { reactive } from 'vue';
 import { createRouter, createWebHistory, createMemoryHistory } from 'vue-router';
 
 import { generateUrl } from '@nextcloud/router';
 
 import { translate as t } from '@services/l10n';
-import { constants } from '@services/constants';
 
 import type { RouteLocationNormalized, RouteRecordRaw } from 'vue-router';
 
@@ -185,113 +183,3 @@ const router = createRouter({
 });
 
 export default router;
-
-/** Union of all route names, derived from the route table. */
-type RouteName = (typeof routes)[keyof typeof routes]['name'];
-
-/** Check the current route name against the given route names. */
-function isName(...names: RouteName[]): boolean {
-  const name = router.currentRoute.value.name;
-  return !!name && (names as (string | symbol)[]).includes(name);
-}
-
-/**
- * Shared reactive route checks, keyed by route id.
- * Prefer this over per-component useRoute() wrappers.
- */
-export const routeIs = reactive({
-  get Base(): boolean {
-    return isName(routes.Base.name);
-  },
-  get Folders(): boolean {
-    return isName(routes.Folders.name);
-  },
-  get Favorites(): boolean {
-    return isName(routes.Favorites.name);
-  },
-  get Videos(): boolean {
-    return isName(routes.Videos.name);
-  },
-  get Panoramas(): boolean {
-    return isName(routes.Panoramas.name);
-  },
-  get Albums(): boolean {
-    return isName(routes.AlbumsList.name, routes.Albums.name);
-  },
-  get Archive(): boolean {
-    return isName(routes.Archive.name);
-  },
-  get ArchiveFolder(): boolean {
-    if (isName(routes.Archive.name)) return true;
-    if (isName(routes.Folders.name)) {
-      let path = router.currentRoute.value.params.path || String();
-      if (Array.isArray(path)) path = path.join('/');
-      return `/${path}/`.includes('/.archive/');
-    }
-    return false;
-  },
-  get ThisDay(): boolean {
-    return isName(routes.ThisDay.name);
-  },
-  get Recognize(): boolean {
-    return isName(routes.RecognizeList.name, routes.Recognize.name);
-  },
-  get FaceRecognition(): boolean {
-    return isName(routes.FaceRecognitionList.name, routes.FaceRecognition.name);
-  },
-  get Places(): boolean {
-    return isName(routes.PlacesList.name, routes.Places.name);
-  },
-  get Tags(): boolean {
-    return isName(routes.TagsList.name, routes.Tags.name);
-  },
-  get FolderShare(): boolean {
-    return isName(routes.FolderShare.name);
-  },
-  get AlbumShare(): boolean {
-    return isName(routes.AlbumShare.name);
-  },
-  get Map(): boolean {
-    return isName(routes.Map.name);
-  },
-  get Explore(): boolean {
-    return isName(routes.Explore.name);
-  },
-  get Search(): boolean {
-    return isName(routes.Search.name);
-  },
-  get NxSetup(): boolean {
-    return isName(routes.NxSetup.name);
-  },
-  get Public(): boolean {
-    return isName(routes.AlbumShare.name, routes.FolderShare.name);
-  },
-  get People(): boolean {
-    return isName(
-      routes.RecognizeList.name,
-      routes.Recognize.name,
-      routes.FaceRecognitionList.name,
-      routes.FaceRecognition.name,
-    );
-  },
-  get Cluster(): boolean {
-    return isName(
-      routes.AlbumsList.name,
-      routes.Albums.name,
-      routes.RecognizeList.name,
-      routes.Recognize.name,
-      routes.FaceRecognitionList.name,
-      routes.FaceRecognition.name,
-      routes.PlacesList.name,
-      routes.Places.name,
-      routes.TagsList.name,
-      routes.Tags.name,
-    );
-  },
-  get RecognizeUnassigned(): boolean {
-    return isName(routes.Recognize.name) && router.currentRoute.value.params.name === constants.FACE_NULL;
-  },
-  get PlacesUnassigned(): boolean {
-    return isName(routes.Places.name) && router.currentRoute.value.params.name === constants.PLACES_NULL;
-  },
-});

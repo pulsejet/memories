@@ -65,7 +65,7 @@ import NcPopover from '@nextcloud/vue/components/NcPopover';
 
 import { config } from '@services/user-config';
 import { windowDims } from '@services/viewport';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { t } from '@services/l10n';
 
 import * as dav from '@services/dav';
@@ -99,6 +99,7 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const router = useRouter();
+const routeIs = useRouteIs();
 const textFieldRef = useTemplateRef<any>('textField');
 
 const prompt = ref(String());

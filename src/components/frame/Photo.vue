@@ -91,7 +91,7 @@ import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { constants } from '@services/constants';
 import { config } from '@services/user-config';
 import { t } from '@services/l10n';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import * as utils from '@services/utils/common';
 
 import LivePhotoIcon from '@components/icons/LivePhoto.vue';
@@ -124,6 +124,7 @@ const emit = defineEmits<{
   touchend: [e: TouchEvent];
 }>();
 const root = useTemplateRef<HTMLDivElement>('root');
+const routeIs = useRouteIs();
 const ximg = useTemplateRef<InstanceType<typeof XImg> & { $el: HTMLImageElement }>('ximg');
 const video = useTemplateRef<HTMLVideoElement>('video');
 

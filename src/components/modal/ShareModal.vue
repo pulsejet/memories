@@ -81,7 +81,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 import { useModal } from '@services/modal';
 import { t, n } from '@services/l10n';
 import { config } from '@services/user-config';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { API } from '@services/API';
 import { ignoreAbort, isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as dav from '@services/dav';
@@ -104,6 +104,7 @@ const { show, close } = useModal(modal);
 const photos = ref<IPhoto[] | null>(null);
 const loading = ref(0);
 const abort = useAbort();
+const routeIs = useRouteIs();
 
 const isSingle = computed(() => photos.value?.length === 1);
 const hasVideos = computed(() => Boolean(photos.value?.some(utils.isVideo)));

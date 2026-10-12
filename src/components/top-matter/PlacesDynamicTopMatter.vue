@@ -14,7 +14,7 @@ import axios from '@nextcloud/axios';
 import NcButton from '@nextcloud/vue/components/NcButton';
 
 import { API } from '@services/API';
-import { routeIs } from '@services/router';
+import { useRouteIs } from '@services/route-is';
 import { useRouteState } from '@services/route-state';
 import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
@@ -30,6 +30,7 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
+const routeIs = useRouteIs();
 
 const places = ref<ICluster[] | null>(null);
 const abort = useAbort();
