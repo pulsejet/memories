@@ -328,9 +328,12 @@ function adjustNow() {
   topPadding.value = hoverCursor.value?.offsetHeight ?? 0;
 
   // Add extra padding for any top elements (top matter, mobile header)
-  document.querySelectorAll('.timeline-scroller-gap').forEach((el) => {
-    topPadding.value += el.clientHeight + 1;
-  });
+  scroller.value
+    ?.closest('.memories-timeline.container')
+    ?.querySelectorAll('.timeline-scroller-gap')
+    .forEach((el) => {
+      topPadding.value += el.clientHeight + 1;
+    });
 
   // Start with the first tick. Walk over all rows counting the
   // y position. When you hit a row with the tick, update y and
