@@ -303,7 +303,7 @@ export function getAlbumSubtitle(album: IAlbum) {
     text = `${text} | ${sharer}`;
   } else if (album.shared) {
     const shared = t('memories', 'Shared Album');
-    text = `${text} | ${shared}`;
+    text = `${text} • ${shared}`;
   }
 
   return text;
