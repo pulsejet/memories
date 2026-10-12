@@ -435,6 +435,11 @@ final class ImageController extends ApiController
             // Check if creating a copy
             $copy = $name !== $file->getName();
 
+            // Single-file shares must not allow copy-edit.
+            if ($copy && $this->fs->getShareNode() instanceof \OCP\Files\File) {
+                throw Exceptions::ForbiddenFileUpdate($name);
+            }
+
             // Check if user has permissions to do this
             if (!$file->isUpdateable() || ($copy && !$file->getParent()->isCreatable())) {
                 throw Exceptions::ForbiddenFileUpdate($file->getName());
