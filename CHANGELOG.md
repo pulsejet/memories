@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v10.0.0] - 2026-10-11
+
 - **Notice**: The next version of the Android app will be incomptible with older versions of Memories.
 - **Feature**: Support for PhotoSphere panorama viewing ([#931](https://github.com/pulsejet/memories/issues/931), [#1668](https://github.com/pulsejet/memories/issues/1668), [#1357](https://github.com/pulsejet/memories/pull/1357))
 - **Feature**: Scroll position preservation when navigating in the app.

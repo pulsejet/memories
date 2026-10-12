@@ -30,8 +30,7 @@ Very important.
 
 ## Main Release Flow
 - *Confirm each step with user*.
-- Verify versions in info.xml and package.json are committed (`git show HEAD:...`).
-- Update CHANGELOG.md with the release version and date (move `[Unreleased]` entries under it) before tagging.
+- Bump `appinfo/info.xml` + `package.json` and move CHANGELOG `[Unreleased]` to versioned section in one commit.
 - On master: `git fetch origin`, check in sync with origin/master and development. Dirty tree OK if tag targets clean HEAD.
 - `git tag vX.X.X`, `git push origin vX.X.X`. Check tag absent first, `ls-remote` after.
 - Push branches before tagging/releasing; push only the new tag, never `--tags` (publishes stale local tags).
