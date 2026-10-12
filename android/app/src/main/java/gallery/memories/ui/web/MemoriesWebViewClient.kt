@@ -15,6 +15,7 @@ import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
+import androidx.core.net.toUri
 
 @UnstableApi
 /** Only loopback pages load inside; everything else goes to the browser or is blocked. */
@@ -59,14 +60,14 @@ class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient(
         } catch (_: Exception) {
             null
         } ?: return false
-        openExternal(view, Uri.parse(external))
+        openExternal(view, external.toUri())
         return true
     }
 
     private fun openExternal(view: WebView, url: Uri) {
         try {
             Intent(Intent.ACTION_VIEW, url).apply { activity.startActivity(this) }
-        } catch (e: ActivityNotFoundException) {
+        } catch (_: ActivityNotFoundException) {
             Toast.makeText(view.context, "No app found to open this link", Toast.LENGTH_SHORT).show()
         }
     }
