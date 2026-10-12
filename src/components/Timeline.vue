@@ -889,8 +889,7 @@ async function fetchDays({
   try {
     url = API.Q(API.DAYS(), getQuery());
   } catch (err) {
-    // Likely invalid route; just quit doing anything
-    return;
+    return; // likely invalid route
   }
 
   // URL for cached data
@@ -1157,7 +1156,13 @@ async function fetchDay(
   sizedDays.add(dayId);
 
   // Look for cache
-  const cacheUrl = getDayUrl([dayId]);
+  let cacheUrl: string;
+  try {
+    cacheUrl = getDayUrl([dayId]);
+  } catch {
+    return; // likely invalid route
+  }
+
   try {
     let cache = await getCachedData<IPhoto[]>(cacheUrl, { signal });
     if (signal.aborted) return;
