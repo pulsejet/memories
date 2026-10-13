@@ -178,6 +178,9 @@ final class AdminController extends ApiController
                 $status['innodb_buffer_pool_size'] = 0;
             }
 
+            // Check PHP-FPM pool status for performance
+            $status['fpm'] = $this->getPhpFpmStatus();
+
             try {
                 $status['gis_type'] = $this->places->detectGisType();
                 $status['gis_count'] = $this->places->geomCount();
@@ -356,5 +359,33 @@ final class AdminController extends ApiController
         $this->session->set('memories_action_token', $token);
 
         return $token;
+    }
+
+    /** Get PHP-FPM "max children reached" counter, or null if unavailable. */
+    private function getPhpFpmStatus(): ?array
+    {
+        if (!\function_exists('fpm_get_status')) {
+            return null;
+        }
+
+        try {
+            $raw = fpm_get_status();
+            if (\is_array($raw)) {
+                foreach ($raw as $key => $value) {
+                    if (!\is_string($key)) {
+                        continue;
+                    }
+
+                    $normalizedKey = strtolower(str_replace([' ', '-'], '_', $key));
+                    if ('max_children_reached' === $normalizedKey) {
+                        return ['max_children_reached' => (int) $value];
+                    }
+                }
+            }
+        } catch (\Throwable) {
+            // Fall through to null
+        }
+
+        return null;
     }
 }

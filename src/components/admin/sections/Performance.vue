@@ -55,6 +55,22 @@
         }}
       </NcNoteCard>
     </p>
+
+    <p v-if="status && status.fpm">
+      <NcNoteCard v-if="status.fpm.max_children_reached > 0" type="warning">
+        {{
+          t(
+            'memories',
+            'PHP-FPM has hit the pm.max_children limit {count} time(s) since the last restart. Increase the limit (minimum recommended: {minimum}).',
+            { count: status.fpm.max_children_reached, minimum: 50 },
+          )
+        }}
+      </NcNoteCard>
+
+      <NcNoteCard v-else type="success">
+        {{ t('memories', 'PHP-FPM has not hit the pm.max_children limit since the last restart.') }}
+      </NcNoteCard>
+    </p>
   </div>
 </template>
 

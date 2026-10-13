@@ -66,6 +66,10 @@ export type ISystemStatus = {
   db_is_sqlite?: boolean;
   innodb_buffer_pool_size?: number;
 
+  fpm?: {
+    max_children_reached: number;
+  } | null;
+
   indexed_count: number;
   failure_count: number;
   mimes: string[];

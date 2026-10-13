@@ -27,6 +27,7 @@ Memories is very fast, but its performance largely depends on how well the Nextc
 - Enable and configure the APCu cache.
 - Enable and configure Redis for transactional file locking.
 - Enable gzip compression on your HTTP server for static assets (CSS/JS).
+- On PHP-FPM, set `pm.max_children` to at least `50`.
 
 ## No photos are shown
 
