@@ -155,7 +155,7 @@ function open(localsIn?: IUploadNativeX[]) {
   const input = document.createElement('input');
   input.type = 'file';
   input.multiple = true;
-  input.accept = 'image/*,image/heic,image/tiff,video/*';
+  input.accept = 'image/*,image/heic,image/tiff,image/jp2,image/jxl,video/*';
   input.addEventListener('cancel', () => input.remove());
   input.addEventListener('change', () => {
     files.value = Array.from(input.files ?? []);

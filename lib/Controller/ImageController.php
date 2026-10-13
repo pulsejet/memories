@@ -45,7 +45,7 @@ use OCP\IUserSession;
 use OCP\SystemTag\ISystemTagManager;
 use OCP\SystemTag\ISystemTagObjectMapper;
 
-const IMAGICK_SAFE = '/^image\/(x-)?(png|jpeg|gif|bmp|tiff|webp|hei(f|c)|avif|dcraw)$/';
+const IMAGICK_SAFE = '/^image\/(x-)?(png|jpeg|gif|bmp|tiff|webp|hei(f|c)|avif|jp2|jxl|dcraw)$/';
 
 final class ImageController extends ApiController
 {

@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- **Feature**: Bundled VIPS image decoder for previews.
+- **Feature**: Support for AVIF, JXL, and JP2 formats.
+
 ## [v10.0.0] - 2026-10-11
 
 - **Notice**: The next version of the Android app will be incomptible with older versions of Memories.

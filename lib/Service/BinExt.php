@@ -12,6 +12,7 @@ final class BinExt
 {
     public const EXIFTOOL_VER = '13.59';
     public const GOVOD_VER = '0.6.2';
+    public const VIPS_VER = 'v8.18.5-2';
     public const NX_VER_MIN = '1.1';
 
     private const GO_VOD_PID_FILE = '/tmp/go-vod.pid';
@@ -61,7 +62,7 @@ final class BinExt
             return $this->getTempBin($path, $name, false);
         }
 
-        throw new \Exception("failed to find exiftool temp binary {$target}");
+        throw new \Exception("failed to find temp binary {$target}");
     }
 
     /** Get the name for a binary */
@@ -429,6 +430,58 @@ final class BinExt
         }
 
         return $goVodPath;
+    }
+
+    /**
+     * Get temp binary for vips.
+     */
+    public function getVipsBin(): string
+    {
+        $path = $this->systemConfig->get('memories.vips.path');
+        if (empty($path)) {
+            throw new \Exception('vips binary is not configured (run occ maintenance:repair)');
+        }
+
+        return $this->getTempBin($path, $this->getName('vips', self::VIPS_VER));
+    }
+
+    public function testVipsBin(string $path): string
+    {
+        $version = Util::execSafe([$path, '--help'], 3000) ?: '';
+        if (!preg_match('/vips=(\S*)/', $version, $matches)) {
+            throw new \Exception("failed to detect version, found {$version}");
+        }
+
+        return $matches[1];
+    }
+
+    /**
+     * Detect the vips binary to use.
+     */
+    public function detectVips(): false|string
+    {
+        $vipsPath = $this->systemConfig->get('memories.vips.path');
+
+        if (empty($vipsPath) || !file_exists($vipsPath)) {
+            // Detect architecture
+            $arch = \OCA\Memories\Util::getArch();
+            $path = __DIR__."/../../bin-ext/vips-{$arch}";
+            $vipsPath = realpath($path);
+
+            if (!$vipsPath) {
+                return false;
+            }
+
+            // Set config
+            $this->systemConfig->set('memories.vips.path', $vipsPath);
+
+            // Make executable
+            if (!is_executable($vipsPath)) {
+                @chmod($vipsPath, 0o755);
+            }
+        }
+
+        return $vipsPath;
     }
 
     public function detectFFmpeg(): ?string

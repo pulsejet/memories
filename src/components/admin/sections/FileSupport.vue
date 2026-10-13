@@ -2,13 +2,21 @@
   <div v-if="systemConfig" class="admin-section">
     <h2>{{ $options.title }}</h2>
 
+    {{ t('memories', 'Memories ships a built-in preview generator (VIPS) covering various image formats.') }}
     {{ t('memories', 'You can configure the enabled Nextcloud preview providers below.') }}
-    {{ t('memories', 'If you are using Imaginary for preview generation, you can ignore this section.') }}
     {{ t('memories', 'To enable RAW support, install the Camera RAW Previews app.') }}
-    <a href="https://memories.gallery/file-types/" target="_blank">
-      {{ t('memories', 'Documentation.') }}
-    </a>
+    <a href="https://memories.gallery/file-types/" target="_blank">{{ t('memories', 'Documentation.') }}</a>
     <br />
+    <NcCheckboxRadioSwitch type="switch" :model-value="vipsEnabled()" @update:model-value="updateVips($event)"
+      >{{ t('memories', 'Built-in image previews (VIPS)') }}
+    </NcCheckboxRadioSwitch>
+
+    <NcTextField
+      :label="t('memories', 'Path to packaged vips binary')"
+      :label-visible="true"
+      :model-value="systemConfig['memories.vips.path']"
+      readonly
+    />
 
     <template v-if="status">
       <NcNoteCard v-if="status.imagick" type="success">
@@ -18,6 +26,10 @@
         {{ t('memories', 'PHP-Imagick is not available.') }}
         {{ t('memories', 'Image editing will not work correctly.') }}
         {{ t('memories', 'Thumbnail generation may not work for some formats (HEIC, TIFF).') }}
+      </NcNoteCard>
+
+      <NcNoteCard :type="binaryStatusType(status.vips)">
+        {{ binaryStatus('vips', status.vips) }}
       </NcNoteCard>
 
       <NcNoteCard :type="binaryStatusType(status.ffmpeg_preview)">
@@ -148,6 +160,25 @@ function updateProvider(klass: string, enabled: boolean) {
     systemConfig.value['enabledPreviewProviders'] = providers().filter((k) => k !== klass);
   }
 
+  update('enabledPreviewProviders');
+}
+
+// Image providers superseded by vips (videos are always kept)
+const vipsImageProviders = ['OC\\Preview\\Image', 'OC\\Preview\\HEIC', 'OC\\Preview\\TIFF', 'OC\\Preview\\Imaginary'];
+
+function vipsEnabled(): boolean {
+  return systemConfig.value?.['memories.vips.enabled'] ?? true;
+}
+
+function updateVips(enabled: boolean) {
+  if (!systemConfig.value || enabled === vipsEnabled()) return;
+
+  systemConfig.value['memories.vips.enabled'] = enabled;
+  if (enabled) {
+    systemConfig.value['enabledPreviewProviders'] = providers().filter((k) => !vipsImageProviders.includes(k));
+  }
+
+  update('memories.vips.enabled');
   update('enabledPreviewProviders');
 }
 

@@ -40,6 +40,9 @@ export type ISystemConfig = {
 
   'memories.db.triggers.fcu': boolean;
 
+  'memories.vips.enabled': boolean;
+  'memories.vips.path': string;
+
   enabledPreviewProviders: string[];
   preview_max_x: number;
   preview_max_y: number;
@@ -70,6 +73,7 @@ export type ISystemStatus = {
   failure_count: number;
   mimes: string[];
   imagick: string | false;
+  vips: IBinaryStatus;
   gis_type: number;
   gis_count?: number;
   exiftool: IBinaryStatus;

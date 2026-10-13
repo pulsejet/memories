@@ -96,6 +96,12 @@ final class SystemConfig
         // Path to go-vod binary
         'memories.vod.path' => '',
 
+        // Path to vips binary
+        'memories.vips.path' => '',
+
+        // Use the built-in vips binary for image preview generation
+        'memories.vips.enabled' => true,
+
         // Path to use for transcoded files (/tmp/go-vod/instanceid)
         // Make sure this has plenty of space
         'memories.vod.tempdir' => '',

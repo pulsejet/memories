@@ -21,6 +21,7 @@ arch() {
 
 EXIFTOOL_VER=$(binExtVar EXIFTOOL_VER)
 GOVOD_VER=$(binExtVar GOVOD_VER)
+VIPS_VER=$(binExtVar VIPS_VER)
 
 # Clear up existing binaries.
 rm -rf bin-ext
@@ -47,6 +48,11 @@ echo "Getting go-vod $GOVOD_VER"
 wget -q "https://github.com/pulsejet/memories/releases/download/go-vod/$GOVOD_VER/go-vod-amd64" & pid_vod_amd64=$!
 wget -q "https://github.com/pulsejet/memories/releases/download/go-vod/$GOVOD_VER/go-vod-aarch64" & pid_vod_aarch64=$!
 
+# Get prebuilt vips binaries (static musl, runs on musl and glibc>=2.28).
+echo "Getting vips $VIPS_VER"
+wget -q "https://github.com/pulsejet/memories-vips/releases/download/$VIPS_VER/vips-cli-linux-x64-static.tar.gz" -O vips-x64.tar.gz & pid_vips_x64=$!
+wget -q "https://github.com/pulsejet/memories-vips/releases/download/$VIPS_VER/vips-cli-linux-arm64-static.tar.gz" -O vips-arm64.tar.gz & pid_vips_arm64=$!
+
 wait "$pid_et_amd64_musl"
 wait "$pid_et_amd64_glibc"
 wait "$pid_et_aarch64_musl"
@@ -54,8 +60,18 @@ wait "$pid_et_aarch64_glibc"
 wait "$pid_et_src"
 wait "$pid_vod_amd64"
 wait "$pid_vod_aarch64"
+wait "$pid_vips_x64"
+wait "$pid_vips_arm64"
 
-chmod 755 exiftool/exiftool eperl-* go-vod-*
+# Extract vips binaries (each tarball contains vips-preview + versions.json).
+mkdir -p vips-x64 vips-arm64
+tar xzf vips-x64.tar.gz -C vips-x64
+tar xzf vips-arm64.tar.gz -C vips-arm64
+mv vips-x64/vips-preview vips-amd64
+mv vips-arm64/vips-preview vips-aarch64
+rm -rf vips-x64.tar.gz vips-arm64.tar.gz vips-x64 vips-arm64
+
+chmod 755 exiftool/exiftool eperl-* go-vod-* vips-*
 
 # Check the version of go-vod is correct internally
 if [ "$(./go-vod-$(arch) -version)" != "go-vod $GOVOD_VER" ]; then
