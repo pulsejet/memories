@@ -71,6 +71,7 @@ import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';
 import FaceMergeModal from '@components/modal/FaceMergeModal.vue';
 
 import { useRouteIs } from '@services/route-is';
+import { routes } from '@services/router';
 import { config, setConfig } from '@services/user-config';
 import * as utils from '@services/utils/common';
 import { constants } from '@services/constants';
@@ -122,9 +123,9 @@ function rename() {
 
 function openUnassigned() {
   router.push({
-    name: route.name?.toString(),
+    name: routes.Recognize.name,
     params: {
-      user: utils.uid as string,
+      user: utils.uid!,
       name: constants.FACE_NULL,
     },
   });

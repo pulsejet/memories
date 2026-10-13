@@ -25,6 +25,7 @@ import NcButton from '@nextcloud/vue/components/NcButton';
 import Modal from './Modal.vue';
 
 import { useModal } from '@services/modal';
+import { routes } from '@services/router';
 import { t } from '@services/l10n';
 import { useRouteIs } from '@services/route-is';
 import { isAbortError, useAbort } from '@services/utils/abort-vue';
@@ -67,7 +68,7 @@ async function save() {
       await dav.faceRecognitionSetPersonVisibility(name.value, false, { signal });
     }
     signal.throwIfAborted();
-    router.push({ name: route.name?.toString() }); // "recognize" or "facerecognition"
+    router.push({ name: routeIs.Recognize ? routes.RecognizeList.name : routes.FaceRecognitionList.name });
     close();
   } catch (error) {
     if (isAbortError(error)) return;
