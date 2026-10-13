@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v10.0.1] - 2026-10-13
+
+- Hotfix release
+
 ## [v10.0.0] - 2026-10-11
 
 - **Notice**: The next version of the Android app will be incomptible with older versions of Memories.
