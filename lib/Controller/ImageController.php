@@ -29,6 +29,7 @@ use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
+use OCA\Memories\Preview\VipsPatcher;
 use OCA\Memories\Service;
 use OCA\Memories\Service\Index;
 use OCA\Memories\Settings\SystemConfig;
@@ -58,6 +59,7 @@ final class ImageController extends ApiController
         protected PreviewService $previewService,
         protected ISystemTagObjectMapper $tagObjectMapper,
         protected ISystemTagManager $tagManager,
+        protected VipsPatcher $vipsPatcher,
         protected Exif $exif,
         protected SystemConfig $systemConfig,
         protected Util $util,
@@ -97,6 +99,11 @@ final class ImageController extends ApiController
                 // This exception is thrown if no generator is found,
                 // throw an HTTP exception to prevent spamming admin log.
                 throw Exceptions::NotFound($e->getMessage());
+            }
+
+            // Patch non-vips cache rows, re-reading when replaced
+            if ($this->vipsPatcher->patch($file, $preview)) {
+                $preview = $this->preview->getPreview($file, $x, $y, !$a, $mode);
             }
 
             // Stream the preview file directly without buffering into PHP
@@ -175,6 +182,12 @@ final class ImageController extends ApiController
                     // Add this preview to the response
                     $file = $this->fs->getUserFile($fileid);
                     $preview = $this->preview->getPreview($file, $x, $y, !$a, \OCP\IPreview::MODE_FILL);
+
+                    // Patch non-vips cache rows, re-reading when replaced
+                    if ($this->vipsPatcher->patch($file, $preview, $availablePreviews[$fileid] ?? [])) {
+                        $preview = $this->preview->getPreview($file, $x, $y, !$a, \OCP\IPreview::MODE_FILL);
+                    }
+
                     $size = (int) $preview->getSize();
                     if ($size <= 0) {
                         continue;

@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
 - **Feature**: High precision map markers setting ([#1701](https://github.com/pulsejet/memories/issues/1701))
 - **Feature**: Media management grant for silent local file operations on Android ([#1033](https://github.com/pulsejet/memories/pull/1033))
 - **Feature**: Option to skip delete confirmation in viewer ([#1687](https://github.com/pulsejet/memories/issues/1687), [#1689](https://github.com/pulsejet/memories/issues/1689), [#1246](https://github.com/pulsejet/memories/issues/1246))
+- **Feature**: Bundled VIPS image decoder for previews.
+- **Feature**: Support for AVIF format.
 
 ## [v10.2.0] - 2026-10-23
 

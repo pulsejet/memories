@@ -27,6 +27,7 @@ use OCA\Memories\Listeners\BeforeTemplateListener;
 use OCA\Memories\Listeners\PostDeleteListener;
 use OCA\Memories\Listeners\PostLogoutListener;
 use OCA\Memories\Listeners\PostWriteListener;
+use OCA\Memories\Preview\Vips;
 use OCA\Memories\Util;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -37,6 +38,7 @@ use OCP\Files\Events\Node\NodeCopiedEvent;
 use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
 use OCP\Files\Events\Node\NodeWrittenEvent;
+use OCP\Files\IMimeTypeDetector;
 use OCP\User\Events\UserLoggedOutEvent;
 
 const AUTH_HEADER = 'HTTP_AUTHORIZATION';
@@ -91,6 +93,18 @@ final class Application extends App implements IBootstrap
         // Register other global hooks
         $context->registerEventListener(BeforeTemplateRenderedEvent::class, BeforeTemplateListener::class);
         $context->registerEventListener(UserLoggedOutEvent::class, PostLogoutListener::class);
+
+        // Register vips-based preview providers for common image formats.
+        if (\OCP\Server::get(\OCP\IConfig::class)->getSystemValueBool('memories.vips.enabled', true)) {
+            $detector = \OCP\Server::get(IMimeTypeDetector::class);
+            if ($detector instanceof \OC\Files\Type\Detection) {
+                $detector->getAllMappings(); // is really needed
+                $detector->registerTypeArray([
+                    'avif' => ['image/avif'],
+                ]);
+            }
+            $context->registerPreviewProvider(Vips::class, Vips::MIME_REGEX);
+        }
 
         // Extra hooks for native extension calls
         if (Util::callerIsNative()) {

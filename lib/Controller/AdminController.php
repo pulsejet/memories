@@ -159,6 +159,12 @@ final class AdminController extends ApiController
             // Check for PHP Imagick
             $status['imagick'] = class_exists('\Imagick') ? \Imagick::getVersion()['versionString'] : false;
 
+            // Check vips binary
+            $status['vips'] = $this->getExecutableStatus(
+                fn () => $this->binExt->getVipsBin(),
+                fn ($p) => $this->binExt->testVipsBin($p),
+            );
+
             // Check for bad encryption module
             $status['bad_encryption'] = $this->systemConfig->isEncryptionEnabled();
 
