@@ -131,18 +131,27 @@ final class ServiceManager
             throw Exceptions::NotFoundFile($fileid);
         }
 
-        try {
-            // getById only sees set-up mounts, which are the caller's;
-            // find a user whose mounts contain this file and look up inside theirs.
-            $userFolder = $this->rootFolder->getUserFolder($this->getFileOwner($fileid));
-            $nodes = $userFolder->getById($fileid);
-        } catch (NotFoundException $e) {
-            throw Exceptions::NotFoundFile($fileid);
-        }
+        // getById only sees set-up mounts, which are the caller's, so try
+        // every user whose mounts contain this file and return a usable one.
+        // https://github.com/pulsejet/memories/issues/1742
+        $triedUids = [];
+        foreach ($this->mountCache->getMountsForFileId($fileid) as $info) {
+            $uid = $info->getUser()->getUID();
+            if (isset($triedUids[$uid])) {
+                continue;
+            }
+            $triedUids[$uid] = true;
 
-        foreach ($nodes as $node) {
-            if ($node instanceof File) {
-                return $node;
+            try {
+                $nodes = $this->rootFolder->getUserFolder($uid)->getById($fileid);
+            } catch (NotFoundException) {
+                continue;
+            }
+
+            foreach ($nodes as $node) {
+                if ($node instanceof File && $node->isReadable()) {
+                    return $node;
+                }
             }
         }
 
@@ -157,20 +166,5 @@ final class ServiceManager
         }
 
         return $this->userSession->getUser()?->getUID() === $serviceUser;
-    }
-
-    /**
-     * UID of a user whose mounts contain this fileid.
-     *
-     * Any mount serves identical bytes; the auth guard already ran,
-     * so this reveals nothing about the file to the caller.
-     */
-    private function getFileOwner(int $fileid): string
-    {
-        foreach ($this->mountCache->getMountsForFileId($fileid) as $info) {
-            return $info->getUser()->getUID();
-        }
-
-        throw Exceptions::NotFoundFile($fileid);
     }
 }
