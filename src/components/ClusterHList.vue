@@ -7,25 +7,34 @@
       </div>
     </div>
 
-    <div ref="hlist" class="hlist hide-scrollbar">
-      <div
-        class="item cluster--rounded"
-        :class="{ 'cluster--circle': props.circle }"
-        :key="item.cluster_id"
-        v-for="item of props.clusters"
-      >
-        <Cluster :data="item" :link="true" :counters="!routeIs.Explore" />
-      </div>
-    </div>
+    <RecycleScroller
+      ref="recycler"
+      class="hlist hide-scrollbar"
+      direction="horizontal"
+      :items="props.clusters"
+      key-field="cluster_id"
+      :item-size="itemSize"
+      :skip-hover="true"
+      :style="{ height: `${listHeight}px` }"
+      :disable-transform="true"
+    >
+      <template #default="{ item }">
+        <div class="item cluster--rounded" :class="{ 'cluster--circle': props.circle }">
+          <Cluster :data="item" :link="true" :counters="!routeIs.Explore" />
+        </div>
+      </template>
+    </RecycleScroller>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useTemplateRef } from 'vue';
+import { computed, useTemplateRef } from 'vue';
+import { RecycleScroller } from 'vue-virtual-scroller';
 
 import { t } from '@services/l10n';
 import { useRouteIs } from '@services/route-is';
 import { useRouteState } from '@services/route-state';
+import { windowDims } from '@services/viewport';
 
 import Cluster from '@components/frame/Cluster.vue';
 
@@ -39,13 +48,27 @@ const props = defineProps<{
   circle?: boolean;
 }>();
 
-const hlistRef = useTemplateRef<HTMLDivElement>('hlist');
+const recycler = useTemplateRef<VueRecyclerType>('recycler');
 const routeIs = useRouteIs();
 
 useRouteState({
   instance: props.stateKey,
-  scroll: { hlistRef },
+  scroll: { recycler },
 });
+
+const CLUSTER_SIZE = 140;
+const CLUSTER_SIZE_MOBILE = 120;
+const CIRCLE_HEIGHT = 176;
+const CIRCLE_HEIGHT_MOBILE = 152;
+const ITEM_GAP = 4; // 2px margin on each side
+
+const clusterSize = computed(() => (windowDims.isMobile ? CLUSTER_SIZE_MOBILE : CLUSTER_SIZE));
+const circleHeight = computed(() => (windowDims.isMobile ? CIRCLE_HEIGHT_MOBILE : CIRCLE_HEIGHT));
+
+const itemSize = computed(() => clusterSize.value + ITEM_GAP);
+const clusterWidth = computed(() => `${clusterSize.value}px`);
+const circleHeightPx = computed(() => `${circleHeight.value}px`);
+const listHeight = computed(() => (props.circle ? circleHeight.value : clusterSize.value));
 </script>
 
 <style lang="scss" scoped>
@@ -74,49 +97,26 @@ useRouteState({
   }
 
   > .hlist {
-    $clusterSize: 140px;
-    $circleHeight: 176px;
-    $clusterSizeM: 120px;
-    $circleHeightM: 152px;
-
     width: 100%;
     padding: 0 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
 
-    @media (min-width: 769px) {
-      overflow: hidden;
-      display: grid;
-      grid-gap: 10px;
-      grid-template-columns: repeat(auto-fill, minmax(calc(min(50%, $clusterSize) - 5px), 1fr));
-
-      max-height: $clusterSize;
-      &:has(.cluster--circle) {
-        max-height: $circleHeight;
-      }
+    :deep(.vue-recycle-scroller__item-view) {
+      display: flex;
     }
 
-    @media (max-width: 768px) {
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-
-    > .item {
-      display: inline-block;
+    .item {
+      flex: 1;
       margin: 0 2px;
       aspect-ratio: 1;
       position: relative;
 
-      width: $clusterSize;
-      @media (max-width: 768px) {
-        width: $clusterSizeM;
-      }
+      width: v-bind(clusterWidth);
 
       &.cluster--circle {
-        height: $circleHeight;
+        height: v-bind(circleHeightPx);
         aspect-ratio: unset;
-
-        @media (max-width: 768px) {
-          height: $circleHeightM; // font-size: 0.9em;
-        }
       }
     }
   }

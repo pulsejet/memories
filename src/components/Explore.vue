@@ -166,19 +166,19 @@ async function load<T>(fun: (signal: AbortSignal) => Promise<T>) {
 }
 
 async function getRecognize(signal: AbortSignal) {
-  recognize.value = (await dav.getFaceList('recognize', { signal })).slice(0, 10);
+  recognize.value = await dav.getFaceList('recognize', { signal });
 }
 
 async function getFaceRecognition(signal: AbortSignal) {
-  facerecognition.value = (await dav.getFaceList('facerecognition', { signal })).slice(0, 10);
+  facerecognition.value = await dav.getFaceList('facerecognition', { signal });
 }
 
 async function getPlaces(signal: AbortSignal) {
-  places.value = (await dav.getPlaces({ signal })).slice(0, 10);
+  places.value = await dav.getPlaces({ signal });
 }
 
 async function getTags(signal: AbortSignal) {
-  tags.value = (await dav.getTags({ signal })).sort((a, b) => b.count - a.count).slice(0, 10);
+  tags.value = (await dav.getTags({ signal })).sort((a, b) => b.count - a.count);
 }
 
 function maybeLoad() {
