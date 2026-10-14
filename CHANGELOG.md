@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- **Feature**: Per-user setting to show photo filename on timeline ([#1557](https://github.com/pulsejet/memories/issues/1557))
+
 ## [v10.0.1] - 2026-10-13
 
 - Hotfix release

@@ -24,6 +24,7 @@ const remoteNames: Partial<Record<keyof IConfig, string>> = {
   stack_raw_files: 'stackRawFiles',
   dedup_identical: 'dedupIdentical',
   show_owner_name_timeline: 'showOwnerNameTimeline',
+  show_photo_basename: 'showPhotoBasename',
   livephoto_autoplay: 'livephotoAutoplay',
   livephoto_loop: 'livephotoLoop',
   video_autoplay: 'videoAutoplay',
@@ -148,6 +149,7 @@ function loadCached(): IConfig {
     stack_raw_files: true,
     dedup_identical: false,
     show_owner_name_timeline: false,
+    show_photo_basename: false,
 
     // viewer settings
     high_res_cond_default: 'zoom',

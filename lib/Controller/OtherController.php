@@ -122,6 +122,7 @@ final class OtherController extends ApiController
                 'stack_raw_files' => 'true' === $this->systemConfig->getUserConfigValue('stackRawFiles', 'true'),
                 'dedup_identical' => 'true' === $this->systemConfig->getUserConfigValue('dedupIdentical', 'false'),
                 'show_owner_name_timeline' => 'true' === $this->systemConfig->getUserConfigValue('showOwnerNameTimeline', 'false'),
+                'show_photo_basename' => 'true' === $this->systemConfig->getUserConfigValue('showPhotoBasename', 'false'),
 
                 // viewer settings
                 'high_res_cond_default' => $this->systemConfig->get('memories.viewer.high_res_cond_default'),

@@ -46,6 +46,7 @@
 
       <div class="flag bottom-left">
         <span class="shared-by" v-if="showOwnerName && sharedBy">{{ sharedBy }}</span>
+        <span class="basename" v-if="showBasename">{{ data.basename }}</span>
       </div>
 
       <div
@@ -78,7 +79,8 @@
           playsinline
           disableRemotePlayback
         ></video>
-        <div class="overlay top-left fill-block"></div>
+        <div class="overlay overlay-top top-left fill-block"></div>
+        <div class="overlay overlay-bottom top-left fill-block" v-if="hasBottomText"></div>
       </div>
     </div>
   </div>
@@ -207,6 +209,10 @@ const showOwnerName = computed((): boolean => {
   return true;
 });
 
+const showBasename = computed((): boolean => {
+  return !!config.show_photo_basename && !!props.data.basename;
+});
+
 const sharedBy = computed((): string | null => {
   if (props.data.shared_by == '[unknown]') {
     return t('memories', 'Shared');
@@ -214,6 +220,10 @@ const sharedBy = computed((): string | null => {
     return props.data.shared_by;
   }
   return null;
+});
+
+const hasBottomText = computed((): boolean => {
+  return (showOwnerName.value && !!sharedBy.value) || showBasename.value;
 });
 
 /** Get url of the photo */
@@ -429,6 +439,9 @@ $icon-size: $icon-half-size * 2;
   &.bottom-left {
     bottom: var(--icon-dist);
     left: var(--icon-dist);
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: calc(100% - var(--icon-dist) * 2);
     .p-outer.selected > & {
       transform: translate($icon-size, -$icon-size);
     }
@@ -442,11 +455,16 @@ $icon-size: $icon-half-size * 2;
     }
   }
 
-  > .shared-by {
+  > .shared-by,
+  > .basename {
     font-size: 0.75em;
-    line-height: 0.75em;
+    line-height: 1.1em;
     font-weight: 400;
     margin: 2px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   > .video {
@@ -515,15 +533,23 @@ div.img-outer {
   > .overlay {
     pointer-events: none;
     z-index: 3;
+    transition: border-radius 0.1s ease-in;
+  }
+
+  > .overlay-top {
+    display: none;
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, transparent 30%);
 
-    display: none;
-    transition: border-radius 0.1s ease-in;
     @media (hover: hover) and (pointer: fine) {
       .p-outer:not(.selected):hover > & {
         display: block;
       }
     }
+  }
+
+  > .overlay-bottom {
+    display: block;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, transparent 30%);
   }
 
   > * {

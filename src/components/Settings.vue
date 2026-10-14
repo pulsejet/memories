@@ -69,6 +69,14 @@
       >
         {{ t('memories', 'Show photo owner name on timeline') }}
       </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
+        :model-value="config.show_photo_basename"
+        @update:model-value="updateShowPhotoBasename"
+        type="switch"
+      >
+        {{ t('memories', 'Show photo filename on timeline') }}
+      </NcCheckboxRadioSwitch>
     </NcAppSettingsSection>
 
     <NcAppSettingsSection id="viewer-settings" :name="names.viewer">
@@ -422,6 +430,10 @@ async function updateDedupIdentical(val: boolean) {
 
 async function updateShowOwnerNameTimeline(val: boolean) {
   await setConfig('show_owner_name_timeline', val);
+}
+
+async function updateShowPhotoBasename(val: boolean) {
+  await setConfig('show_photo_basename', val);
 }
 
 // Viewer settings
