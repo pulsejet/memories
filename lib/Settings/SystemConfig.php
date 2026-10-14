@@ -181,6 +181,12 @@ final class SystemConfig
         // Get the value from the config
         $value = $this->config->getSystemValue($key, $default);
 
+        // Also accept plain string for a single downstream server
+        // https://github.com/pulsejet/memories/issues/1743
+        if ('memories.vod.connect' === $key && \is_string($value)) {
+            $value = empty(trim($value)) ? $default : [trim($value)];
+        }
+
         // Check if the value has the correct type
         if (($got = \gettype($value)) !== ($exp = \gettype($default))) {
             throw new \InvalidArgumentException("Invalid type for system config {$key}, expected {$exp}, got {$got}");
