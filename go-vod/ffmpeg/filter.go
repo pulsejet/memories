@@ -142,7 +142,8 @@ func (b *FilterBuilder) tonemapCpu() {
 		"zscale=t=linear:npl=100",
 		"format=gbrpf32le",
 		"zscale=p=bt709",
-		"tonemap=hable",
+		// The default desat=2 washes out bright scenes
+		"tonemap=hable:desat=0",
 		"zscale=t=bt709:m=bt709:range=tv",
 	)
 }

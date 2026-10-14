@@ -150,7 +150,7 @@ func TestBuildArgsTonemap(t *testing.T) {
 	sw.HDR = true
 	c := cmd(sw, BuildArgs(sw))
 	require.Contains(t, c, "scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=t=linear")
-	require.Contains(t, c, "tonemap=hable")
+	require.Contains(t, c, "tonemap=hable:desat=0,")
 	require.Contains(t, c, "zscale=t=bt709:m=bt709:range=tv,format=nv12")
 	require.NotContains(t, c, "format=nv12,scale=")
 
@@ -158,7 +158,7 @@ func TestBuildArgsTonemap(t *testing.T) {
 	vaapi.HDR, vaapi.VAAPI = true, true
 	c = cmd(vaapi, BuildArgs(vaapi))
 	require.Contains(t, c, "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
-	require.Contains(t, c, "tonemap=hable")
+	require.Contains(t, c, "tonemap=hable:desat=0,")
 	require.Contains(t, c, "format=nv12|vaapi,hwupload")
 	require.NotContains(t, c, "hwupload,scale_vaapi=")
 
@@ -166,7 +166,7 @@ func TestBuildArgsTonemap(t *testing.T) {
 	nvenc.HDR, nvenc.NVENC, nvenc.NVENCScale = true, true, "cuda"
 	c = cmd(nvenc, BuildArgs(nvenc))
 	require.Contains(t, c, "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
-	require.Contains(t, c, "tonemap=hable")
+	require.Contains(t, c, "tonemap=hable:desat=0,")
 	require.Contains(t, c, "format=nv12|cuda,hwupload")
 	require.NotContains(t, c, "hwupload,scale_cuda=")
 
