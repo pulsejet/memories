@@ -313,11 +313,6 @@ const showEmpty = computed((): boolean => {
   return !loading.value && empty.value;
 });
 
-/** Show skeleton placeholder rows on initial load */
-const showSkeleton = computed((): boolean => {
-  return loading.value > 0 && list.value.length === 0;
-});
-
 /** Whether to allow swipe refresh */
 const allowSwipe = computed((): boolean => {
   return !loading.value && currentScroll.value === 0;
@@ -353,6 +348,11 @@ const routeState = useRouteState({
   key: timelineRouteKey,
   state: { savedView, beforeHeight },
   scroll: { recycler },
+});
+
+/** Show skeleton placeholder rows on initial load */
+const showSkeleton = computed((): boolean => {
+  return loading.value > 0 && list.value.length === 0 && !routeState.hasState.value;
 });
 
 /** Route identity for Timeline. */
@@ -486,7 +486,7 @@ async function createState(signal: AbortSignal) {
 
   // Restored geometry already provides the initial view. An older days cache
   // could remove days, shrink the timeline and clamp the restored scroll.
-  const noCache = list.value.length > 0;
+  const noCache = routeState.hasState.value || list.value.length > 0;
   await fetchDays({ noCache, signal });
 }
 

@@ -71,8 +71,10 @@ export function disableRouterStatePersistence(key: string): string {
  * Returns a restoring ref, true until state and scroll offsets have been applied.
  */
 export function useRouteState<T extends InnerState>(options: RouteState<T>) {
-  const route = useRoute();
   const restoring = ref(false);
+  const hasState = ref(false);
+
+  const route = useRoute();
   const component = getCurrentInstance()?.type;
   const instance = options.instance ?? component?.name ?? component?.__name;
 
@@ -126,6 +128,7 @@ export function useRouteState<T extends InnerState>(options: RouteState<T>) {
 
         // Get the saved state for this route and instance.
         const saved = states.get(routeKey);
+        hasState.value = !!saved;
 
         // Restore the saved state values, or defaults.
         if (options.state) {
@@ -164,5 +167,5 @@ export function useRouteState<T extends InnerState>(options: RouteState<T>) {
 
   onScopeDispose(() => (restoring.value = false));
 
-  return { restoring };
+  return { restoring, hasState };
 }
