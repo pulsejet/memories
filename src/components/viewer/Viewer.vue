@@ -110,7 +110,6 @@ import { useRoute } from 'vue-router';
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import NcButton from '@nextcloud/vue/components/NcButton';
-import { showError } from '@services/utils/dialog';
 import axios from '@nextcloud/axios';
 
 import { config } from '@services/user-config';
@@ -122,11 +121,12 @@ import { t } from '@services/l10n';
 import { constants } from '@services/constants';
 import initstate from '@services/init-state';
 import { makeTapPatch } from '@services/compat/mobile-click';
-import * as dav from '@services/dav';
-import * as utils from '@services/utils/common';
+import { confirmDestructive } from '@services/utils/dialog';
 import { cacheData, getCachedData } from '@services/cache';
 import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
+import * as dav from '@services/dav';
+import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 
 import ImageEditor from './ImageEditor.vue';
@@ -1141,10 +1141,15 @@ async function openEditor() {
   // Only for JPEG for now
   if (!canEdit.value) return;
 
-  // Prevent editing Live Photos
+  // Warn before editing Live Photos
   if (isLivePhoto.value) {
-    showError(t('memories', 'Editing is currently disabled for Live Photos'));
-    return;
+    const ok = await confirmDestructive({
+      title: t('memories', 'Edit Live Photo'),
+      message: t('memories', 'Live Photo will be turned off and edits will apply to the still photo only'),
+      confirm: t('memories', 'Continue'),
+      cancel: t('memories', 'Cancel'),
+    });
+    if (!ok) return;
   }
 
   // Open editor

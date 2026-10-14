@@ -428,6 +428,36 @@ final class Exif
         $file->touch();
     }
 
+    /**
+     * Strip live photo identifiers from an image blob.
+     *
+     * @param string $blob image data
+     *
+     * @return string cleaned image data
+     */
+    public function stripLivePhotoTags(string $blob): string
+    {
+        $cmd = array_merge($this->getExiftool(), [
+            '-ContentIdentifier=',
+            '-MediaGroupUUID=',
+            '-MotionPhotoVideo=',
+            '-EmbeddedVideoType=',
+            '-EmbeddedVideoFile=',
+            '-MicroVideo=',
+            '-MicroVideoOffset=',
+            '-MicroVideoVersion=',
+            '-MicroVideoPresentationTimestampUs=',
+            '-MotionPhoto=',
+            '-MotionPhotoVersion=',
+            '-MotionPhotoPresentationTimestampUs=',
+            '-o', '-',
+            '-',
+        ]);
+
+        return Util::execSafe($cmd, self::EXIFTOOL_TIMEOUT, $blob)
+            ?: throw new \Exception('Failed to strip live photo tags');
+    }
+
     public function getBinaryExifProp(string $path, string $prop): string
     {
         $this->assertValidLocalFile($path);

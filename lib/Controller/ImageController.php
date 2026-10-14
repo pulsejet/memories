@@ -432,6 +432,12 @@ final class ImageController extends ApiController
             // Get the file
             $file = $this->fs->getUserFile($id);
 
+            // Live photos must always be saved as a copy.
+            $isLivePhoto = (bool) $this->tq->getLiveId($file->getId());
+            if ($isLivePhoto && $name === $file->getName()) {
+                $name = $file->getParent()->getNonExistingName($name);
+            }
+
             // Check if creating a copy
             $copy = $name !== $file->getName();
 
@@ -495,6 +501,11 @@ final class ImageController extends ApiController
 
             // Save the image
             $blob = $image->getImageBlob();
+
+            // Strip live photo identifiers.
+            if ($isLivePhoto) {
+                $blob = $this->exif->stripLivePhotoTags($blob);
+            }
 
             // Save the file
             if ($copy) {
