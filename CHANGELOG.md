@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [v10.1.0] - 2026-10-14
 
 - **Feature**: Per-user setting to show photo filename on timeline ([#1557](https://github.com/pulsejet/memories/issues/1557))
 - **Feature**: Allow editing Live Photos with a copy ([#456](https://github.com/pulsejet/memories/issues/456))
