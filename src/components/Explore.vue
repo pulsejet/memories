@@ -6,7 +6,7 @@
       <Searchbar v-if="isNative" class="searchbar" />
 
       <ClusterHList
-        v-if="recognize.length"
+        v-if="recognize?.length"
         state-key="recognize"
         :title="t('memories', 'Recognize')"
         link="/recognize"
@@ -14,7 +14,7 @@
         :circle="true"
       />
       <ClusterHList
-        v-if="facerecognition.length"
+        v-if="facerecognition?.length"
         state-key="facerecognition"
         :title="t('memories', 'Face Recognition')"
         link="/facerecognition"
@@ -22,14 +22,14 @@
         :circle="true"
       />
       <ClusterHList
-        v-if="places.length"
+        v-if="places?.length"
         state-key="places"
         :title="t('memories', 'Places')"
         link="/places"
         :clusters="places"
       />
       <ClusterHList
-        v-if="tags.length"
+        v-if="tags?.length"
         state-key="systemtags"
         :title="t('memories', 'Tags')"
         link="/tags"
@@ -90,10 +90,10 @@ const isNative = nativex.has();
 const containerRef = useTemplateRef<HTMLDivElement>('container');
 const abort = useAbort();
 
-const recognize = ref([] as ICluster[]);
-const facerecognition = ref([] as ICluster[]);
-const places = ref([] as ICluster[]);
-const tags = ref([] as ICluster[]);
+const recognize = ref<ICluster[] | null>(null);
+const facerecognition = ref<ICluster[] | null>(null);
+const places = ref<ICluster[] | null>(null);
+const tags = ref<ICluster[] | null>(null);
 
 useRouteState({
   state: { recognize, facerecognition, places, tags },
@@ -184,7 +184,7 @@ async function getTags(signal: AbortSignal) {
 function maybeLoad() {
   if (config.recognize_enabled && !loaded.recognize) {
     loaded.recognize = true;
-    if (!recognize.value.length) {
+    if (recognize.value === null) {
       recognize.value = dav.getPlaceholderClusters(10);
     }
     load(getRecognize);
@@ -192,7 +192,7 @@ function maybeLoad() {
 
   if (config.facerecognition_enabled && !loaded.facerecognition) {
     loaded.facerecognition = true;
-    if (!facerecognition.value.length) {
+    if (facerecognition.value === null) {
       facerecognition.value = dav.getPlaceholderClusters(10);
     }
     load(getFaceRecognition);
@@ -200,7 +200,7 @@ function maybeLoad() {
 
   if (config.places_gis > 0 && !loaded.places) {
     loaded.places = true;
-    if (!places.value.length) {
+    if (places.value === null) {
       places.value = dav.getPlaceholderClusters(10);
     }
     load(getPlaces);
@@ -208,7 +208,7 @@ function maybeLoad() {
 
   if (config.systemtags_enabled && !loaded.tags) {
     loaded.tags = true;
-    if (!tags.value.length) {
+    if (tags.value === null) {
       tags.value = dav.getPlaceholderClusters(10);
     }
     load(getTags);
