@@ -153,7 +153,7 @@ func (b *FilterBuilder) tonemapCpu() {
 func (b *FilterBuilder) tonemapOpenCL() {
 	b.append(
 		"hwmap=derive_device=opencl",
-		"tonemap_opencl=tonemap=hable:format=nv12:primaries=bt709:transfer=bt709:matrix=bt709:range=tv",
+		"tonemap_opencl=tonemap=hable:desat=0:format=nv12:primaries=bt709:transfer=bt709:matrix=bt709:range=tv",
 		"hwmap=derive_device=vaapi:reverse=1",
 	)
 }

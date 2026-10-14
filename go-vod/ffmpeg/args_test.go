@@ -249,7 +249,7 @@ func TestBuildArgsVAAPIOpenCL(t *testing.T) {
 				scale += ":w=1280:h=1280"
 			}
 			want := scale + ",hwmap=derive_device=opencl," +
-				"tonemap_opencl=tonemap=hable:format=nv12:primaries=bt709:transfer=bt709:matrix=bt709:range=tv," +
+				"tonemap_opencl=tonemap=hable:desat=0:format=nv12:primaries=bt709:transfer=bt709:matrix=bt709:range=tv," +
 				"hwmap=derive_device=vaapi:reverse=1"
 			switch rotation {
 			case -90:
