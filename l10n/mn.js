@@ -58,7 +58,6 @@ OC.L10N.register(
     "Save" : "–•–∞–¥–≥–∞–ª–∞—Ö",
     "Create album" : "Цомог үүсгэх",
     "Location" : "–ë–∞–π—Ä—à–∏–ª",
-    "Location of the album" : "Цомгийн байршил",
     "Back" : "–±—É—Ü–∞—Ö",
     "Add collaborators" : "Хамтрагч нэмэх",
     "Save changes" : "Өөрчлөлт хадгалах",

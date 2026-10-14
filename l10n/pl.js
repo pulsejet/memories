@@ -248,7 +248,6 @@ OC.L10N.register(
     "Create album" : "Utwórz album",
     "Invalid album name; should not contain any slashes." : "Nieprawidłowa nazwa albumu; nie powinna zawierać ukośników.",
     "Location" : "Lokalizacja",
-    "Location of the album" : "Lokalizacja albumu",
     "Go back to the previous view." : "Wróć do poprzedniego widoku.",
     "Back" : "Poprzednia",
     "Go to the add collaborators view." : "Przejdź do widoku dodawania współpracowników.",

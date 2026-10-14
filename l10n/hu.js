@@ -236,7 +236,6 @@ OC.L10N.register(
     "Create album" : "Album létrehozása",
     "Invalid album name; should not contain any slashes." : "Érvénytelen albumnév; ne tartalmazzon / karaktert.",
     "Location" : "Hely",
-    "Location of the album" : "Az album helye",
     "Go back to the previous view." : "Ugrás vissza az előző nézethez.",
     "Back" : "Vissza",
     "Go to the add collaborators view." : "Ugrás a közreműködők hozzáadása nézethez.",

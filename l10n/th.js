@@ -33,7 +33,6 @@ OC.L10N.register(
     "Save" : "บันทึก",
     "Create album" : "สร้างอัลบั้ม",
     "Location" : "ตำแหน่ง",
-    "Location of the album" : "ตำแหน่งของอัลบั้ม",
     "Go back to the previous view." : "กลับไปยังมุมมองก่อนหน้า",
     "Back" : "ย้อนกลับ",
     "Back to the new album form." : "กลับไปยังแบบฟอร์มอัลบั้มใหม่",

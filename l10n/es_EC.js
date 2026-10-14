@@ -197,7 +197,6 @@ OC.L10N.register(
     "Create album" : "Crear álbum",
     "Invalid album name; should not contain any slashes." : "Nombre de álbum no válido; no debe contener barras inclinadas.",
     "Location" : "Ubicación",
-    "Location of the album" : "Ubicación del álbum",
     "Go back to the previous view." : "Volver a la vista anterior.",
     "Back" : "Atrás",
     "Go to the add collaborators view." : "Ir a la vista de agregar colaboradores.",

@@ -65,7 +65,6 @@ OC.L10N.register(
     "Save" : "Vista",
     "Create album" : "Búa til albúm",
     "Location" : "Staðsetning",
-    "Location of the album" : "Staðsetning albúmsins",
     "Go back to the previous view." : "Fara til baka á fyrri sýn.",
     "Back" : "Til baka",
     "Go to the add collaborators view." : "Skipta yfir í sýn með samstarfsfólki.",

@@ -57,7 +57,6 @@ OC.L10N.register(
     "New album" : "Novi album",
     "Save" : "Spremi",
     "Create album" : "Stvori album",
-    "Location of the album" : "Lokacija albuma",
     "Back" : "Natrag",
     "Add collaborators" : "Dodaj suradnike",
     "Save changes" : "Spremi promjene",

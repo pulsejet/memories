@@ -67,7 +67,6 @@ OC.L10N.register(
     "Save" : "Simpan",
     "Create album" : "Buat album",
     "Location" : "Lokasi",
-    "Location of the album" : "Lokasi album",
     "Go back to the previous view." : "Kembali ke tampilan sebelumnya",
     "Back" : "Kembali",
     "Go to the add collaborators view." : "Pergi ke tampilan kolaborator.",

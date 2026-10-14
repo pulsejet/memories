@@ -63,7 +63,6 @@ OC.L10N.register(
     "Save" : "Hifadhi",
     "Create album" : "Tengeneza albamu",
     "Location" : "Mahali/eneo",
-    "Location of the album" : "Eneo la albamu",
     "Back" : "Rudi",
     "Add collaborators" : "Add collaborators",
     "Save changes" : "Save changes",

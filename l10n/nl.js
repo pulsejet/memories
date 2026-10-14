@@ -139,7 +139,6 @@ OC.L10N.register(
     "Save" : "Opslaan",
     "Create album" : "Album aanmaken",
     "Location" : "Locatie",
-    "Location of the album" : "Locatie van het album",
     "Go back to the previous view." : "Ga terug naar de vorige weergave.",
     "Back" : "Terug",
     "Go to the add collaborators view." : "Ga naar de bijdragers toevoegen weergave.",

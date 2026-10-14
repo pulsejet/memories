@@ -78,7 +78,6 @@ OC.L10N.register(
     "Save" : "Guardar",
     "Create album" : "Crear un álbum",
     "Location" : "Llocalización",
-    "Location of the album" : "Llocalización el álbum",
     "Go back to the previous view." : "Volver a la vista anterior.",
     "Back" : "Atrás",
     "Go to the add collaborators view." : "Va a la vista p'amestar collaboradores.",

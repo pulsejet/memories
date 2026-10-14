@@ -245,7 +245,6 @@ OC.L10N.register(
     "Save" : "Shrani",
     "Create album" : "Ustvari album",
     "Location" : "Mesto",
-    "Location of the album" : "Mesto albuma",
     "Go back to the previous view." : "Vrni na predhodni pogled.",
     "Back" : "Nazaj",
     "Go to the add collaborators view." : "Skoči na pogled dodajanja sodelujočih.",

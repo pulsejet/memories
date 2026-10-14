@@ -66,7 +66,6 @@ OC.L10N.register(
     "Save" : "Desa",
     "Create album" : "Crea l'àlbum",
     "Location" : "Ubicació",
-    "Location of the album" : "Lloc de l'àlbum",
     "Go back to the previous view." : "Torneu a la visualització anterior.",
     "Back" : "Torna",
     "Go to the add collaborators view." : "Aneu a la visualització Afegeix col·laboradors.",

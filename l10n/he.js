@@ -53,7 +53,6 @@ OC.L10N.register(
     "Save" : "שמירה",
     "Create album" : "יצירת אלבום",
     "Location" : "מיקום",
-    "Location of the album" : "מיקום גיאוגראפי של האלבום",
     "Back" : "חזרה",
     "Go to the add collaborators view." : "מעבר לתצוגה של הוספת שותפים",
     "Add collaborators" : "הוספת שותפים",
