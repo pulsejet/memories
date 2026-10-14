@@ -181,6 +181,12 @@ final class SystemConfig
         // Get the value from the config
         $value = $this->config->getSystemValue($key, $default);
 
+        // Accept a single string where a list is expected, as older
+        // versions stored memories.vod.connect (and AIO still writes it)
+        if (\is_array($default) && \is_string($value)) {
+            $value = [trim($value)];
+        }
+
         // Check if the value has the correct type
         if (($got = \gettype($value)) !== ($exp = \gettype($default))) {
             throw new \InvalidArgumentException("Invalid type for system config {$key}, expected {$exp}, got {$got}");
