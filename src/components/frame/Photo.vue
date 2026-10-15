@@ -349,7 +349,6 @@ function touchVideo() {
     --icon-dist: 8px;
 
     transition:
-      background-color 0.15s ease,
       opacity 0.2s ease-in,
       transform 0.2s ease-in;
   }
