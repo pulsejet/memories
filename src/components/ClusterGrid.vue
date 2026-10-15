@@ -5,6 +5,7 @@
     type-field="cluster_type"
     key-field="cluster_id"
     class="grid-recycler hide-scrollbar-mobile"
+    direction="vertical"
     :class="classList"
     :items="clusters"
     :skipHover="true"

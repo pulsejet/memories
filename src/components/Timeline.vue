@@ -39,6 +39,7 @@
         :emit-update="true"
         :buffer="800"
         :skipHover="true"
+        direction="vertical"
         key-field="id"
         size-field="size"
         type-field="type"
