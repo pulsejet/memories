@@ -444,6 +444,7 @@ $icon-size: $icon-half-size * 2;
     max-width: calc(100% - var(--icon-dist) * 2);
     .p-outer.selected > & {
       transform: translate($icon-size, -$icon-size);
+      max-width: calc(100% - var(--icon-dist) * 2 - ($icon-size * 2));
     }
   }
 
