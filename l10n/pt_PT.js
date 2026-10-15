@@ -441,7 +441,6 @@ OC.L10N.register(
     "Slideshow" : "Apresentação de diapositivos",
     "Previous" : "Anterior",
     "Next" : "Seguinte",
-    "Editing is currently disabled for Live Photos" : "A edição está atualmente desativada para Live Photos",
     "You are now logged in to the server!" : "Está agora autenticado no servidor!",
     "You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue." : "Pode configurar carregamentos automáticos deste dispositivo com a aplicação Nextcloud. Toque no botão abaixo para descarregar a aplicação ou salte este passo e continue.",
     "Set up automatic upload" : "Configurar carregamento automático",

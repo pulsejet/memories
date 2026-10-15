@@ -447,7 +447,6 @@ OC.L10N.register(
     "Slideshow" : "幻灯片",
     "Previous" : "上一个",
     "Next" : "下一个",
-    "Editing is currently disabled for Live Photos" : "实况照片编辑功能已禁用",
     "You are now logged in to the server!" : "您已登录服务器！",
     "You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue." : "您可以使用 Nextcloud 的手机应用从此设备设置自动上传。点击下面的按钮以下载手机应用，或跳过该操作并继续。",
     "Set up automatic upload" : "设置自动上传",

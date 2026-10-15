@@ -474,7 +474,6 @@ OC.L10N.register(
     "Slideshow" : "Slideshow",
     "Previous" : "Previous",
     "Next" : "Next",
-    "Editing is currently disabled for Live Photos" : "Editing is currently disabled for Live Photos",
     "Collapse details" : "Collapse details",
     "Expand details" : "Expand details",
     "You are now logged in to the server!" : "You are now logged in to the server!",

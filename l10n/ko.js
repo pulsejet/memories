@@ -432,7 +432,6 @@ OC.L10N.register(
     "Slideshow" : "슬라이드쇼",
     "Previous" : "이전",
     "Next" : "다음",
-    "Editing is currently disabled for Live Photos" : "현재 라이브 사진을 수정할 수 없습니다.",
     "You are now logged in to the server!" : "당신은 현재 서버에 로그인했습니다!",
     "You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue." : "Nextcloud 모바일 앱을 사용해 자동 업로드를 설정할 수 있습니다. 아래의 버튼을 클릭해 앱을 다운로드하거나, 이 단계를 건너뛰고 계속하세요.",
     "Set up automatic upload" : "자동 업로드 설정",

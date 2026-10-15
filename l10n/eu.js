@@ -299,7 +299,6 @@ OC.L10N.register(
     "Slideshow" : "Diapositiba-aurkezpena",
     "Previous" : "Aurrekoa",
     "Next" : "Hurrengoa",
-    "Editing is currently disabled for Live Photos" : "Zuzeneko argazkiak editatzeko aukera desgaituta dago",
     "Grant permissions" : "Eman baimenak",
     "Finish" : "Amaitu",
     "Save as" : "Gorde honela",

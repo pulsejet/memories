@@ -360,7 +360,6 @@ OC.L10N.register(
     "Slideshow" : "Diaesitys",
     "Previous" : "Edellinen",
     "Next" : "Seuraava",
-    "Editing is currently disabled for Live Photos" : "Muokkaus ei ole tällä hetkellä käytössä Livekuville",
     "Collapse details" : "Supista yksityiskohdat",
     "Expand details" : "Laajenna yksityiskohdat",
     "You are now logged in to the server!" : "Olet nyt kirjautuneena palvelimelle!",

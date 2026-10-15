@@ -310,7 +310,6 @@ OC.L10N.register(
     "Slideshow" : "Слайдшоу",
     "Previous" : "Предишно",
     "Next" : "Следващо",
-    "Editing is currently disabled for Live Photos" : "В момента редактирането е забранено за /живи снимки/ Live Photos",
     "Finish" : "Край",
     "{name} binary exists and is executable." : "{name} двоиченият файл съществува и е изпълним.",
     "{name} binary not found." : "{name} двоичният файл не е намерен.",

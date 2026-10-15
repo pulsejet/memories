@@ -446,7 +446,6 @@ OC.L10N.register(
     "Slideshow" : "Bildspel",
     "Previous" : "Föregående",
     "Next" : "Nästa",
-    "Editing is currently disabled for Live Photos" : "Redigering är för närvarande inaktiverad för Live Photos",
     "You are now logged in to the server!" : "Du är nu inloggad!",
     "You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue." : "Du kan konfigurera automatisk uppladdning från den här enheten med Nextclouds mobilapp. Klicka på knappen nedan för att hämta appen eller hoppa över steget och fortsätt.",
     "Set up automatic upload" : "Konfigurera automatisk uppladdning",

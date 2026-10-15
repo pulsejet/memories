@@ -357,7 +357,6 @@ OC.L10N.register(
     "Slideshow" : "Diavetítés",
     "Previous" : "Előző",
     "Next" : "Következő",
-    "Editing is currently disabled for Live Photos" : "A szerkesztés jelenleg tiltott az élő fényképek esetén",
     "You are now logged in to the server!" : "Bejelentkezett a kiszolgálóra!",
     "Set up automatic upload" : "Automatikus feltöltés beállítása",
     "Access to media has been granted." : "A médiához a hozzáférés megadva",

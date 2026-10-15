@@ -487,7 +487,6 @@ OC.L10N.register(
     "Slideshow" : "Apresentação de slides",
     "Previous" : "Anterior",
     "Next" : "Próxima",
-    "Editing is currently disabled for Live Photos" : "No momento, a edição está desativada para Fotos ao Vivo",
     "Collapse details" : "Recolher detalhes",
     "Expand details" : "Expandir detalhes",
     "Show in timeline" : "Mostrar na linho do tempo",

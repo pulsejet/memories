@@ -447,7 +447,6 @@ OC.L10N.register(
     "Slideshow" : "Skaidrių rodymas",
     "Previous" : "Ankstesnis",
     "Next" : "Kitas",
-    "Editing is currently disabled for Live Photos" : "„Gyvųjų nuotraukų“ redagavimas šiuo metu išjungtas",
     "You are now logged in to the server!" : "Dabar esate prisijungę prie serverio!",
     "You can set up automatic uploads from this device using the Nextcloud mobile app. Click the button below to download the app, or skip this step and continue." : "Naudodamiesi „Nextcloud“ mobiliąja programėle galite nustatyti automatinį failų įkėlimą iš šio įrenginio. Spustelėkite žemiau esantį mygtuką, kad atsisiųstumėte programėlę, arba praleiskite šį žingsnį ir tęskite toliau.",
     "Set up automatic upload" : "Nustatykite automatinį įkėlimą",

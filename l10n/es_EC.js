@@ -303,7 +303,6 @@ OC.L10N.register(
     "Download {ext}" : "Descargar {ext}",
     "Slideshow" : "Presentación de Diapositivas",
     "Previous" : "Previo",
-    "Editing is currently disabled for Live Photos" : "La edición está deshabilitada actualmente para las Fotos en Vivo",
     "{name} binary exists and is executable." : "{name} el binario existe y es ejecutable.",
     "{name} binary not found." : "No se encontró el binario {name}.",
     "{name} binary is not executable." : "El binario {name} no es ejecutable.",

@@ -484,7 +484,6 @@ OC.L10N.register(
     "Slideshow" : "Taispeántas sleamhnán",
     "Previous" : "Roimhe Seo",
     "Next" : "Ar aghaidh",
-    "Editing is currently disabled for Live Photos" : "Tá an eagarthóireacht díchumasaithe faoi láthair le haghaidh Grianghraif Beo",
     "Collapse details" : "Laghdaigh sonraí",
     "Expand details" : "Leathnaigh sonraí",
     "Show in timeline" : "Taispeáin ar an líne ama",
