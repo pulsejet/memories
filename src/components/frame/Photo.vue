@@ -344,14 +344,19 @@ function touchVideo() {
 <style lang="scss" scoped>
 /* Container and selection */
 .p-outer {
-  & {
-    padding: 2px;
-    --icon-dist: 8px;
+  background-clip: content-box;
+  padding: 2px;
+  --icon-dist: 8px;
 
-    transition:
-      opacity 0.2s ease-in,
-      transform 0.2s ease-in;
-  }
+  transition:
+    opacity 0.2s ease-in,
+    transform 0.2s ease-in,
+    background-color 0s ease-in;
+
+  // Delay background-color transition when de-selecting.
+  // No delay during selection (overridden below).
+  // Delay duration must match padding transition.
+  transition-delay: 0s, 0s, 0.15s;
 
   @media (max-width: 768px) {
     padding: 1px;
@@ -365,7 +370,7 @@ function touchVideo() {
 
   &.selected {
     background-color: var(--color-primary-select-light);
-    background-clip: content-box;
+    transition-delay: 0s, 0s, 0s;
   }
 }
 
