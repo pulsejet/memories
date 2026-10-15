@@ -48,6 +48,9 @@ const expirationManager = new CacheExpiration(cacheName, {
 // Start fetching with multipreview
 let fetchPreviewTimer: number;
 
+// Monotonic request ID counter for multipreview requests.
+let requestIdCounter = Math.round(Math.random() * 1e8);
+
 /** Flushes the queue of preview image requests */
 async function flushPreviewQueue() {
   // Clear timer
@@ -270,7 +273,7 @@ async function fetchImage(url: string, abortToken?: number): Promise<Blob> {
       origUrl: url,
       url: urlObj,
       fileid,
-      reqid: Math.round(Math.random() * 1e8),
+      reqid: ++requestIdCounter,
       abortToken,
       callback: { resolve, reject },
     });

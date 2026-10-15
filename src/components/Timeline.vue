@@ -192,6 +192,8 @@ let numCols = 0;
 const heads = ref(new Map<number, IHeadRow>());
 /** Current list (days response) was loaded from cache */
 let daysIsCache = false;
+/** Monotonic placeholder ID */
+let placeholderId = 0;
 
 /** Size of outer container [w, h] */
 let containerSize: [number, number] = [0, 0];
@@ -690,7 +692,8 @@ function scrollChange(startIndex: number, endIndex: number, force = false) {
         // so we can calculate the display width
         row.photos[j] = {
           flag: constants.FLAG_PLACEHOLDER,
-          fileid: Math.random(),
+          fileid: ++placeholderId,
+          key: `p-${placeholderId}`,
           dayid: row.dayId,
           dispW: utils.roundHalf(rowWidth / numCols),
           dispX: utils.roundHalf((j * rowWidth) / numCols),
