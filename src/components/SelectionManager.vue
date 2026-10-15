@@ -165,16 +165,16 @@ const loading = ref(0);
 const selection = ref(new Selection());
 const numLocal = ref(0);
 
-const touchAnchor = ref<IPhoto | null>(null);
-const prevTouch = ref<Touch | null>(null);
-const touchTimer = ref(0);
-const touchMoved = ref(false);
-const touchPrevSel = ref<Selection | null>(null);
-const prevOver = ref<IPhoto | null>(null);
-const touchScrollInterval = ref(0);
-const touchScrollDelta = ref(0);
-const touchMoveSelFrame = ref(0);
-const multiSelectDelta = ref<1 | -1 | null>(null);
+let touchAnchor: IPhoto | null = null;
+let prevTouch: Touch | null = null;
+let touchTimer = 0;
+let touchMoved = false;
+let touchPrevSel: Selection | null = null;
+let prevOver: IPhoto | null = null;
+let touchScrollInterval = 0;
+let touchScrollDelta = 0;
+let touchMoveSelFrame = 0;
+let multiSelectDelta: 1 | -1 | null = null;
 
 const defaultActions: ISelectionAction[] = [
   {
@@ -384,16 +384,16 @@ function touchstartPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
 
   resetTouchParams();
 
-  touchAnchor.value = photo;
-  prevOver.value = photo;
-  prevTouch.value = event.touches[0];
-  touchPrevSel.value = selection.value.clone();
-  touchMoved.value = false;
-  touchTimer.value = window.setTimeout(() => {
-    if (touchAnchor.value === photo) {
+  touchAnchor = photo;
+  prevOver = photo;
+  prevTouch = event.touches[0];
+  touchPrevSel = selection.value.clone();
+  touchMoved = false;
+  touchTimer = window.setTimeout(() => {
+    if (touchAnchor === photo) {
       selectPhoto(photo, true);
     }
-    touchTimer.value = 0;
+    touchTimer = 0;
   }, 600);
 }
 
@@ -402,7 +402,7 @@ function touchendPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
   if (photo.flag & constants.FLAG_PLACEHOLDER) return;
   delete props.rows[rowIdx].virtualSticky;
 
-  if (touchTimer.value && !touchMoved.value) {
+  if (touchTimer && !touchMoved) {
     // Register a single tap, only if the touch hadn't moved at all
     clickPhoto(photo, null, rowIdx);
   }
@@ -411,20 +411,20 @@ function touchendPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
 }
 
 function resetTouchParams() {
-  touchAnchor.value = null;
-  touchMoved.value = false;
-  prevOver.value = null;
+  touchAnchor = null;
+  touchMoved = false;
+  prevOver = null;
 
-  window.clearTimeout(touchTimer.value);
-  touchTimer.value = 0;
+  window.clearTimeout(touchTimer);
+  touchTimer = 0;
 
-  window.cancelAnimationFrame(touchScrollInterval.value);
-  touchScrollInterval.value = 0;
+  window.cancelAnimationFrame(touchScrollInterval);
+  touchScrollInterval = 0;
 
-  window.cancelAnimationFrame(touchMoveSelFrame.value);
-  touchMoveSelFrame.value = 0;
+  window.cancelAnimationFrame(touchMoveSelFrame);
+  touchMoveSelFrame = 0;
 
-  prevTouch.value = null;
+  prevTouch = null;
 }
 
 /**
@@ -437,30 +437,30 @@ function touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
   // Use first touch -- can't do much
   const touch: Touch = event.touches[0];
 
-  if (touchTimer.value) {
+  if (touchTimer) {
     // Regardless of whether we continue to run the timer,
     // we still need to mark that the touch had moved.
     // This is so that we can disregard the event if only
     // registering a tap event (not a long press).
     // https://github.com/pulsejet/memories/issues/516
-    touchMoved.value = true;
+    touchMoved = true;
 
     // To be more forgiving, check if touch is still
     // within 30px of anchor touch (prevTouch)
     if (
-      prevTouch.value &&
-      Math.abs(prevTouch.value.clientX - touch.clientX) < 30 &&
-      Math.abs(prevTouch.value.clientY - touch.clientY) < 30
+      prevTouch &&
+      Math.abs(prevTouch.clientX - touch.clientX) < 30 &&
+      Math.abs(prevTouch.clientY - touch.clientY) < 30
     ) {
       return;
     }
 
     // Touch is not held, just cancel
-    window.clearTimeout(touchTimer.value);
-    touchTimer.value = 0;
-    touchAnchor.value = null;
+    window.clearTimeout(touchTimer);
+    touchTimer = 0;
+    touchAnchor = null;
     return;
-  } else if (!touchAnchor.value) {
+  } else if (!touchAnchor) {
     // Touch was previously cancelled
     return;
   }
@@ -471,50 +471,50 @@ function touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
 
   // This should never happen
   if (!touch) return;
-  prevTouch.value = touch;
+  prevTouch = touch;
 
   // Scroll if at top or bottom
   const scrollUp = touch.clientY < TOUCH_SELECT_CLAMP.top;
   const scrollDown = touch.clientY > windowDims.height - TOUCH_SELECT_CLAMP.bottom;
   if (scrollUp || scrollDown) {
     if (scrollUp) {
-      touchScrollDelta.value = Math.max((touch.clientY - TOUCH_SELECT_CLAMP.top) / 3, -TOUCH_SELECT_CLAMP.maxDelta);
+      touchScrollDelta = Math.max((touch.clientY - TOUCH_SELECT_CLAMP.top) / 3, -TOUCH_SELECT_CLAMP.maxDelta);
     } else {
-      touchScrollDelta.value = Math.min(
+      touchScrollDelta = Math.min(
         (touch.clientY - windowDims.height + TOUCH_SELECT_CLAMP.bottom) / 3,
         TOUCH_SELECT_CLAMP.maxDelta,
       );
     }
 
-    if (touchAnchor.value && !touchScrollInterval.value) {
+    if (touchAnchor && !touchScrollInterval) {
       let frameCount = 3;
 
       const fun = () => {
-        if (!prevTouch.value) return;
-        props.recycler!.scrollTop += touchScrollDelta.value;
+        if (!prevTouch) return;
+        props.recycler!.scrollTop += touchScrollDelta;
 
         if (frameCount++ >= 3) {
-          touchMoveSelect(prevTouch.value, rowIdx);
+          touchMoveSelect(prevTouch, rowIdx);
           frameCount = 0;
         }
 
-        if (touchScrollInterval.value) {
-          touchScrollInterval.value = window.requestAnimationFrame(fun);
+        if (touchScrollInterval) {
+          touchScrollInterval = window.requestAnimationFrame(fun);
         }
       };
-      touchScrollInterval.value = window.requestAnimationFrame(fun);
+      touchScrollInterval = window.requestAnimationFrame(fun);
     }
-  } else if (touchScrollInterval.value) {
-    window.cancelAnimationFrame(touchScrollInterval.value);
-    touchScrollInterval.value = 0;
+  } else if (touchScrollInterval) {
+    window.cancelAnimationFrame(touchScrollInterval);
+    touchScrollInterval = 0;
   }
 
   // Trigger multiselection update in next frame
   // If there's no anchor then this is pointless cause it gets cancelled
   // If already scrolling up/down then the effect will be called anyway
-  if (touchAnchor.value && !touchScrollInterval.value && !touchMoveSelFrame.value) {
-    touchMoveSelFrame.value = window.requestAnimationFrame(() => {
-      touchMoveSelFrame.value = 0;
+  if (touchAnchor && !touchScrollInterval && !touchMoveSelFrame) {
+    touchMoveSelFrame = window.requestAnimationFrame(() => {
+      touchMoveSelFrame = 0;
       touchMoveSelect(touch, rowIdx);
     });
   }
@@ -523,7 +523,7 @@ function touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
 /** Multi-select triggered by touchmove */
 function touchMoveSelect(touch: Touch, rowIdx: number) {
   // Assertions
-  if (!touchAnchor.value) return;
+  if (!touchAnchor) return;
 
   // Clamp the Y value to lie inside the recycler area
   const recyclerRect = props.recycler?.getBoundingClientRect();
@@ -543,28 +543,28 @@ function touchMoveSelect(touch: Touch, rowIdx: number) {
   // This logic is completely different from the desktop because of the
   // existence of a definitive "anchor" element. We just need to find
   // everything between the anchor and the current photo
-  if (overPhoto && prevOver.value !== overPhoto) {
-    prevOver.value = overPhoto;
+  if (overPhoto && prevOver !== overPhoto) {
+    prevOver = overPhoto;
 
     // days reverse XOR rows reverse
     let reverse: boolean;
-    if (overPhoto.dayid === touchAnchor.value.dayid) {
+    if (overPhoto.dayid === touchAnchor.dayid) {
       const l = overPhoto?.d?.detail;
       if (!l) return; // Shouldn't happen
-      const ai = l.indexOf(touchAnchor.value);
+      const ai = l.indexOf(touchAnchor);
       const oi = l.indexOf(overPhoto);
       if (ai === -1 || oi === -1) return; // Shouldn't happen
       reverse = ai > oi;
     } else {
-      reverse = overPhoto.dayid > touchAnchor.value.dayid != props.isreverse;
+      reverse = overPhoto.dayid > touchAnchor.dayid != props.isreverse;
     }
 
-    const newSelection = touchPrevSel.value!.clone();
+    const newSelection = touchPrevSel!.clone();
     const updatedDays = new Set<number>();
 
     // Walk over rows
     let i = rowIdx;
-    let j = props.rows[i].photos?.indexOf(touchAnchor.value) ?? -2;
+    let j = props.rows[i].photos?.indexOf(touchAnchor) ?? -2;
     if (j === -2) return; // row is not initialized yet?!
     while (true) {
       if (j < 0) {
@@ -725,14 +725,14 @@ function selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
     }
 
     // Do subsequent actions in the same direction
-    multiSelectDelta.value = delta;
+    multiSelectDelta = delta;
     return true;
   };
 
   // Prefer to select photos behind, i.e. moving ahead
   // If nothing behind is found, try ahead
   // Fall back to select the photo that was clicked
-  const delta = multiSelectDelta.value ?? -1;
+  const delta = multiSelectDelta ?? -1;
   backtrack(delta) || backtrack(-delta as typeof delta) || select(photo);
 
   // Update all days that were touched
