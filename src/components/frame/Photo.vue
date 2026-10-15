@@ -16,7 +16,7 @@
         v-if="!(data.flag & constants.FLAG_PLACEHOLDER)"
         @pointerdown.passive="emit('select', $event)"
       >
-        <CheckCircleIcon :size="16" />
+        <CheckCircleIcon :size="22" />
       </div>
 
       <div class="flag top-right">
@@ -383,10 +383,9 @@ $icon-size: $icon-half-size * 2;
 // translate when selected, and changes color
 .select {
   position: absolute;
-  top: calc(var(--icon-dist) + 2px);
-  left: calc(var(--icon-dist) + 2px);
+  top: calc(var(--icon-dist) - 1px);
+  left: calc(var(--icon-dist) - 1px);
   z-index: 100;
-  border-radius: 50%;
   display: none;
   opacity: 0.7;
 
@@ -408,23 +407,12 @@ $icon-size: $icon-half-size * 2;
   .p-outer.selected > & {
     @include visible;
     filter: invert(0);
-    background-color: white;
+    background: radial-gradient(circle, white 50%, transparent 50%);
     color: var(--color-primary);
   }
 
   .check-circle-icon {
     cursor: pointer;
-
-    :deep(svg) {
-      overflow: visible;
-    }
-
-    // Extremely ugly way to fill up the space.
-    // If this isn't done, bg has a border.
-    // Scaled up 16px -> 22px, so move origin by -3px.
-    :deep(path) {
-      transform: scale(1.375) translate(-3px, -3px);
-    }
   }
 }
 
