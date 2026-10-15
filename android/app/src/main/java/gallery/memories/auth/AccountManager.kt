@@ -1,7 +1,5 @@
 package gallery.memories.auth
 
-import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
@@ -39,6 +37,8 @@ class AccountManager(
     /** Invalidates in-flight login polls on retry/logout so only the latest can transition UI. */
     @Volatile private var loginGeneration = 0
 
+    private val tabs = LoginCustomTab(activity)
+
     /** Validates the server, starts a non-blocking asset sync, then hands off to the browser login flow. */
     fun login(url: String, trustAll: Boolean) {
         try {
@@ -66,7 +66,7 @@ class AccountManager(
         }
     }
 
-    /** Starts the browser-based login flow for an already-validated server. */
+    /** Starts the Custom Tab login flow for an already-validated server. */
     private fun loginFlow(baseUrl: String, loginFlowUrl: String) {
         val res = api.postLoginFlow(loginFlowUrl)
         if (res.code != 200) {
@@ -78,31 +78,46 @@ class AccountManager(
         val pollToken = pollObj.getString("token")
         val pollUrl = pollObj.getString("endpoint")
         val loginUrl = body.getString("login")
-        activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl)))
         val gen = loginGeneration
+        tabs.close()
+        tabs.open(loginUrl) {
+            if (gen != loginGeneration) return@open
+            loginGeneration++
+            toast("Error: failed to open browser")
+            activity.loadDefaultUrl()
+        }
         Thread { pollLogin(pollUrl, pollToken, baseUrl, gen) }.start()
     }
 
-    /** Polls every 3s for up to 30min. Success boots into setup; timeout resets to welcome. Stale generations do nothing. */
+    /** Polls every 2s for up to 5min. Success boots into setup; timeout resets to welcome. Stale generations do nothing. */
     private fun pollLogin(pollUrl: String, pollToken: String, baseUrl: String, gen: Int) {
         activity.binding.webview.post {
             activity.applyTheme(ThemeManager.ENTRY_THEME_COLOR, true)
             activity.binding.webview.loadUrl(activity.localStaticUrl("waiting.html") + "?login=1")
         }
-        // Counts elapsed seconds, not polls: incremented by the 3s sleep below.
+        // Counts elapsed seconds, not polls: incremented by the 2s sleep below.
         var polledSeconds = 0
-        while (polledSeconds < 10 * 60 && gen == loginGeneration) {
-            polledSeconds += 3
-            Thread.sleep(3000)
+        while (polledSeconds < 5 * 60 && gen == loginGeneration) {
+            polledSeconds += 2
+            Thread.sleep(2000)
             try {
                 val response = api.getPollLogin(pollUrl, pollToken)
+                val code = response.code
+                if (code == 404) {
+                    response.close()
+                    Log.v(TAG, "pollLogin: waiting ($polledSeconds s): pending")
+                    continue
+                }
+                if (code != 200) {
+                    response.close()
+                    throw Exception("poll HTTP $code")
+                }
                 val body = api.bodyJson(response) ?: throw Exception("Failed to parse login flow response")
-                Log.v(TAG, "pollLogin: Got status code ${response.code}")
-                if (response.code != 200) throw Exception("Failed to poll login flow")
                 val loginName = body.getString("loginName")
                 val appPassword = body.getString("appPassword")
                 activity.runOnUiThread {
                     if (gen != loginGeneration) return@runOnUiThread
+                    tabs.close()
                     storeCredentials(baseUrl, loginName, appPassword)
                     activity.startLocalApp(toNxSetup = true)
                 }
@@ -116,6 +131,7 @@ class AccountManager(
         if (gen != loginGeneration) return
         activity.runOnUiThread {
             if (gen != loginGeneration) return@runOnUiThread
+            tabs.close()
             toast(activity.getString(R.string.err_login_timeout))
             activity.loadDefaultUrl()
         }
@@ -149,6 +165,7 @@ class AccountManager(
     /** Clears credentials and returns to the welcome page. Safe to call from any thread. */
     fun loggedOut() {
         loginGeneration++
+        tabs.close()
         toast(activity.getString(R.string.err_logged_out))
         deleteCredentials()
         activity.runOnUiThread { activity.loadDefaultUrl() }
@@ -180,4 +197,6 @@ class AccountManager(
     private fun toast(message: String) {
         activity.runOnUiThread { Toast.makeText(activity, message, Toast.LENGTH_LONG).show() }
     }
+
+    fun onDestroy() = tabs.unbind()
 }

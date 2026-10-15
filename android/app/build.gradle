@@ -52,6 +52,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui-ktx:2.9.6'
 
     implementation 'androidx.exifinterface:exifinterface:1.4.2'
+    implementation 'androidx.browser:browser:1.10.0'
     implementation "androidx.media3:media3-exoplayer:$media_version"
     implementation "androidx.media3:media3-ui:$media_version"
     implementation "androidx.media3:media3-exoplayer-hls:$media_version"

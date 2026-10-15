@@ -49,6 +49,7 @@ class NativeX(private val mCtx: MainActivity) {
 
     fun destroy() {
         shareManager = null
+        account.onDestroy()
         local.stop()
         timeline.destroy()
     }
