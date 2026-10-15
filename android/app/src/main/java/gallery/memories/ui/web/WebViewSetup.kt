@@ -1,6 +1,8 @@
 package gallery.memories.ui.web
 
 import android.annotation.SuppressLint
+import android.os.Build
+import android.view.View
 import android.webkit.WebView
 import android.widget.Toast
 import gallery.memories.NativeX
@@ -37,6 +39,9 @@ object WebViewSetup {
         s.safeBrowsingEnabled = false
         webview.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false)
         webview.addJavascriptInterface(jsInterface, "nativex")
+        if (Build.VERSION.SDK_INT >= 35) {
+            webview.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_HIGH)
+        }
         if (debug) {
             Toast.makeText(webview.context, "Debugging enabled", Toast.LENGTH_SHORT).show()
             webview.clearCache(true)
