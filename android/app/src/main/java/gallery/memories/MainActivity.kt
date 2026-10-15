@@ -81,7 +81,6 @@ class MainActivity : AppCompatActivity() {
 
         nativex.doMediaSync(false)
         initializeWebView()
-        player.hideInitial()
     }
 
     override fun onDestroy() {
@@ -108,15 +107,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         binding.webview.onResume()
         binding.webview.resumeTimers()
-        val uris = player.urisForRestore()
-        val uid = player.uidForRestore()
-        if (uris != null && uid != null) player.restoreIfNeeded(uris, uid)
         eventBus.onResumeRefresh()
-    }
-
-    public override fun onStop() {
-        super.onStop()
-        player.releasePlayer()
     }
 
     @SuppressLint("GestureBackNavigation")
@@ -132,14 +123,9 @@ class MainActivity : AppCompatActivity() {
         if (binding.webview.canGoBack()) binding.webview.goBack() else finish()
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     private fun initializeWebView() {
         binding.webview.webViewClient = MemoriesWebViewClient(this)
         binding.webview.webChromeClient = MemoriesWebChromeClient(this, chooser)
-        binding.webview.setOnTouchListener { _, event ->
-            player.dispatchTouch(event)
-            false
-        }
         val userAgent = getString(R.string.ua_app_prefix) + BuildConfig.VERSION_NAME + " " + WebSettings.getDefaultUserAgent(this)
         WebViewSetup.setup(binding.webview, userAgent, nativex, BuildConfig.DEBUG)
         nativex.account.refreshCredentials()

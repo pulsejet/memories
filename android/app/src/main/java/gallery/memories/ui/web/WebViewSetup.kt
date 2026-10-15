@@ -1,15 +1,15 @@
 package gallery.memories.ui.web
 
 import android.annotation.SuppressLint
-import android.graphics.Color
 import android.webkit.WebView
 import android.widget.Toast
 import gallery.memories.NativeX
 
 /**
- * One-time WebView configuration. Transparent background: pages paint over
- * the themed root. Popups stay in the same window so MemoriesWebViewClient
- * can route them (loopback inside, everything else to the browser).
+ * One-time WebView configuration. Default opaque background (no alpha
+ * blending with the themed root). Popups stay in the same window so
+ * MemoriesWebViewClient can route them (loopback inside, everything
+ * else to the browser).
  */
 object WebViewSetup {
     /**
@@ -37,7 +37,6 @@ object WebViewSetup {
         s.safeBrowsingEnabled = false
         webview.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false)
         webview.addJavascriptInterface(jsInterface, "nativex")
-        webview.setBackgroundColor(Color.TRANSPARENT)
         if (debug) {
             Toast.makeText(webview.context, "Debugging enabled", Toast.LENGTH_SHORT).show()
             webview.clearCache(true)
