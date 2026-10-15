@@ -612,6 +612,7 @@ function touchMoveSelect(touch: Touch, rowIdx: number) {
     for (const dayid of updatedDays) {
       updateHeadSelected(props.heads.get(dayid)!);
     }
+    selectionChanged();
   }
 }
 
@@ -625,15 +626,14 @@ function selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
   if (nval) {
     photo.flag |= constants.FLAG_SELECTED;
     selection.value.addBy(photo);
-    selectionChanged();
   } else {
     photo.flag &= ~constants.FLAG_SELECTED;
     selection.value.deleteBy(photo);
-    selectionChanged();
   }
 
   if (!noUpdate) {
     updateHeadSelected(props.heads.get(photo.dayid)!);
+    selectionChanged();
   }
 }
 
@@ -739,6 +739,7 @@ function selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
   for (const dayid of touchedDays) {
     updateHeadSelected(props.heads.get(dayid)!);
   }
+  selectionChanged();
 }
 
 /** Select or deselect all photos in a head */
@@ -749,6 +750,7 @@ function selectHead(head: IHeadRow) {
       selectPhoto(photo, head.selected, true);
     }
   }
+  selectionChanged();
 }
 
 /** Check if the day for a photo is selected entirely */
