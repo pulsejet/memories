@@ -16,7 +16,7 @@
         v-if="!(data.flag & constants.FLAG_PLACEHOLDER)"
         @pointerdown.passive="emit('select', $event)"
       >
-        <CheckCircleIcon :size="18" />
+        <CheckCircleIcon :size="16" />
       </div>
 
       <div class="flag top-right">
@@ -411,10 +411,15 @@ $icon-size: $icon-half-size * 2;
   .check-circle-icon {
     cursor: pointer;
 
-    // Extremely ugly way to fill up the space
-    // If this isn't done, bg has a border
+    :deep(svg) {
+      overflow: visible;
+    }
+
+    // Extremely ugly way to fill up the space.
+    // If this isn't done, bg has a border.
+    // Scaled up 16px -> 22px, so move origin by -3px.
     :deep(path) {
-      transform: scale(1.2) translate(-2px, -2px);
+      transform: scale(1.375) translate(-3px, -3px);
     }
   }
 }
