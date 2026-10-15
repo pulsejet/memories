@@ -2,7 +2,6 @@ package gallery.memories.ui.web
 
 import android.annotation.SuppressLint
 import android.graphics.Color
-import android.view.View
 import android.webkit.WebView
 import android.widget.Toast
 import gallery.memories.NativeX
@@ -38,7 +37,6 @@ object WebViewSetup {
         s.safeBrowsingEnabled = false
         webview.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false)
         webview.addJavascriptInterface(jsInterface, "nativex")
-        webview.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         webview.setBackgroundColor(Color.TRANSPARENT)
         if (debug) {
             Toast.makeText(webview.context, "Debugging enabled", Toast.LENGTH_SHORT).show()
