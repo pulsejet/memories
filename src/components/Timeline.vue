@@ -112,7 +112,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue';
+import { computed, nextTick, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue';
 import { onBeforeUnmount, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { RecycleScroller } from 'vue-virtual-scroller';
@@ -1510,8 +1510,8 @@ function processDay(dayId: number, data: IPhoto[]) {
   // Get index and Y position of header in O(n)
   let headIdx = 0;
   let headY = beforeHeight.value;
-  for (const row of list.value) {
-    if (row === head) break;
+  for (const row of toRaw(list.value)) {
+    if (row.dayId === dayId && row.type === 0) break;
     headIdx++;
     headY += row.size;
   }
