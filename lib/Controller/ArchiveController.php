@@ -187,7 +187,7 @@ final class ArchiveController extends ApiController
 
         // Attempt to create the folder
         if (!$parent->nodeExists($name)) {
-            $pathHash = md5($finalPath);
+            $pathHash = hash('xxh3', $finalPath);
             $lockKey = "memories/create/{$pathHash}";
             $lockType = ILockingProvider::LOCK_EXCLUSIVE;
             $locked = false;

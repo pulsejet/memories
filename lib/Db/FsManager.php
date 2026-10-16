@@ -173,7 +173,7 @@ final class FsManager
             //        => .nomedia
             //        => external-mount   <-- this is a separate topFolder in the CTE
             //           => photo2        <-- this should be excluded, but CTE cannot find this
-            $root->excludePaths($this->getNoMediaFolders($userFolder, md5($etag), $user));
+            $root->excludePaths($this->getNoMediaFolders($userFolder, hash('xxh3', $etag), $user));
         }
 
         return $root;
