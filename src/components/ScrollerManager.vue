@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, shallowRef, nextTick, useTemplateRef } from 'vue';
+import { ref, computed, shallowRef, nextTick, useTemplateRef, toRaw } from 'vue';
 import { useVibrate, useThrottleFn } from '@vueuse/core';
 
 import { windowDims } from '@services/viewport';
@@ -290,7 +290,7 @@ function recreate() {
   });
 
   // Iterate over rows
-  for (const row of props.rows) {
+  for (const row of toRaw(props.rows)) {
     if (row.type === 0) {
       // Make date string
       const dateTaken = utils.dayIdToDate(row.dayId);
@@ -353,7 +353,7 @@ function adjustNow() {
     lastAdjustHeight.value = height.value;
   }
 
-  for (const row of props.rows) {
+  for (const row of toRaw(props.rows)) {
     // Check if tick is valid
     if (tickId >= ticks.length) break;
 
