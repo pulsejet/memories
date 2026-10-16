@@ -76,8 +76,8 @@ const props = defineProps<{
   fullHeight: number;
   /** Actual recycler component */
   recycler?: VueRecyclerType | null;
-  /** Recycler before slot component */
-  recyclerBefore?: HTMLDivElement | null;
+  /** Recycler before slot component height */
+  beforeHeight: number;
 }>();
 
 const emit = defineEmits<{
@@ -93,8 +93,6 @@ const hoverCursor = useTemplateRef<HTMLSpanElement>('hoverCursor');
 const lastAdjustHeight = ref(0);
 /** Height of the entire photo view */
 const recyclerHeight = ref(100);
-/** Height of the dynamic top matter */
-const dynTopMatterHeight = ref(0);
 /** Space to leave at the top (for the hover cursor) */
 const topPadding = ref(0);
 /** Rect of scroller */
@@ -215,7 +213,7 @@ function updateFromRecyclerScroll() {
   const event = {
     current: scroll,
     previous: lastKnownRecyclerScroll.value,
-    dynTopMatterVisible: scroll < dynTopMatterHeight.value,
+    dynTopMatterVisible: scroll < props.beforeHeight,
   };
   utils.bus.emit('memories.recycler.scroll', event);
   emit('scroll', event);
@@ -326,7 +324,6 @@ async function adjust() {
 function adjustNow() {
   // Refresh height of recycler
   recyclerHeight.value = recyclerHeightDOM();
-  dynTopMatterHeight.value = props.recyclerBefore?.clientHeight ?? 0;
 
   // Exclude hover cursor height
   topPadding.value = hoverCursor.value?.offsetHeight ?? 0;
@@ -343,7 +340,7 @@ function adjustNow() {
   // y position. When you hit a row with the tick, update y and
   // top values and move to the next tick.
   let tickId = 0;
-  let y = dynTopMatterHeight.value;
+  let y = props.beforeHeight;
   let count = 0;
 
   // We only need to recompute top and visible ticks if count
@@ -508,7 +505,7 @@ function getCoords(y: number, field: 'topF' | 'y') {
       top1: topPadding.value,
       top2: props.fullHeight,
       y1: 0,
-      y2: recyclerHeight.value + dynTopMatterHeight.value,
+      y2: recyclerHeight.value + props.beforeHeight,
     };
   }
 

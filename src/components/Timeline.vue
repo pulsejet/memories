@@ -91,7 +91,7 @@
       :rows="list"
       :fullHeight="scrollerHeight"
       :recycler="recycler"
-      :recyclerBefore="recyclerBefore"
+      :beforeHeight="beforeHeight"
       @interactend="loadScrollView"
       @scroll="
         currentScroll = $event.current;
