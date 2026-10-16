@@ -40,8 +40,8 @@
         :buffer="800"
         :skipHover="true"
         direction="vertical"
-        key-field="id"
-        size-field="size"
+        :key-field="getRowKey"
+        :item-size="getRowSize"
         type-field="type"
         :disableTransform="true"
         :updateInterval="100"
@@ -112,7 +112,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue';
+import { computed, nextTick, reactive, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue';
 import { onBeforeUnmount, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { RecycleScroller } from 'vue-virtual-scroller';
@@ -185,7 +185,19 @@ const emit = defineEmits<{
 /** Loading days response */
 const loading = ref(0);
 /** Main list of rows */
-const list = ref<IRow[]>([]);
+const list = shallowRef<IRow[]>([]);
+/** Version counter for internal recycler sizes. */
+const sizesVersion = ref(0);
+/** Resolve row key without tracking row fields. */
+const getRowKey = (row: IRow): string => {
+  void sizesVersion.value; // dependency
+  return toRaw(row).id!;
+};
+/** Resolve row size without tracking row fields. */
+const getRowSize = (row: IRow): number => {
+  void sizesVersion.value; // dependency
+  return toRaw(row).size;
+};
 /** Computed number of columns */
 let numCols = 0;
 /** Ordered header rows for dayId key  */
@@ -208,6 +220,7 @@ let _processDayState: {
   scrollTop: number;
   needAdjust: boolean;
   needReflow: boolean;
+  needFresh: boolean;
 } | null = null;
 
 /** Current start index */
@@ -1019,7 +1032,7 @@ async function processDays(data: IDay[], cache: boolean, signal?: AbortSignal) {
     }
 
     // Create header for this day
-    const head: IHeadRow = {
+    const head = reactive<IHeadRow>({
       id: `${day.dayid}-head`,
       num: -1,
       size: 40,
@@ -1027,7 +1040,7 @@ async function processDays(data: IDay[], cache: boolean, signal?: AbortSignal) {
       selected: false,
       dayId: day.dayid,
       day: day,
-    };
+    });
 
     // Mark month view to change the header title
     if (isMonthView.value) head.ismonth = true;
@@ -1677,6 +1690,9 @@ function processDay(dayId: number, data: IPhoto[]) {
     const idx = day.rows.indexOf(row);
     if (idx >= 0) day.rows.splice(idx, 1);
   }
+
+  // Mark structural changes.
+  state.needFresh ||= addedRows.length > 0 || removedRows.length > 0;
 }
 
 function processDayGetState() {
@@ -1694,18 +1710,38 @@ function processDayGetState() {
       },
       needAdjust: false,
       needReflow: false,
+      needFresh: false,
     });
 
     // Set up the flush after rendering is done.
-    nextTick(() => {
+    nextTick(async () => {
       _processDayState = null;
+
+      // Refresh recycler item bookkeeping only when rows are added or removed.
+      if (newState.needFresh) {
+        list.value = list.value.slice();
+      }
+
+      // Force re-calculation of the recycler internal size state.
+      if (newState.needAdjust || newState.needReflow) {
+        sizesVersion.value++;
+      }
+
+      // Await yet another tick if we ended up changing layout
+      if (newState.needFresh || newState.needAdjust || newState.needReflow) {
+        await nextTick();
+      }
+
+      // Update the scroll position after DOM update.
       if (_scrollDirty && _scrollTop !== null && recycler.value) {
         recycler.value.$el.scrollTop = _scrollTop;
       }
+
+      // Update scrollbar ticks.
       if (newState.needReflow) {
-        void scrollerManager.value?.reflow();
+        await scrollerManager.value?.reflow();
       } else if (newState.needAdjust) {
-        void scrollerManager.value?.adjust();
+        await scrollerManager.value?.adjust();
       }
     });
   }
@@ -1719,7 +1755,7 @@ function addRow(day: IDay): IPhotoRow {
   day.rows ??= [];
 
   // Create new row
-  const row: IPhotoRow = {
+  const row = reactive<IPhotoRow>({
     id: `${day.dayid}-${day.rows.length}`,
     num: day.rows.length,
     photos: [],
@@ -1727,7 +1763,7 @@ function addRow(day: IDay): IPhotoRow {
     size: rowHeight,
     dayId: day.dayid,
     day: day,
-  };
+  });
 
   // Add to day
   day.rows.push(row);
