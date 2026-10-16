@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, useTemplateRef } from 'vue';
+import { ref, computed, shallowRef, nextTick, useTemplateRef } from 'vue';
 import { useVibrate, useThrottleFn } from '@vueuse/core';
 
 import { windowDims } from '@services/viewport';
@@ -99,8 +99,10 @@ const dynTopMatterHeight = ref(0);
 const topPadding = ref(0);
 /** Rect of scroller */
 const scrollerRect = ref<DOMRect | null>(null);
-/** Computed ticks */
-const ticks = ref([] as ITick[]);
+/** All available ticks */
+let ticks: ITick[] = [];
+/** Visible ticks  */
+const visibleTicks = shallowRef<ITick[]>([]);
 /** Computed cursor top */
 const cursorY = ref(0);
 /** Hover cursor top */
@@ -119,10 +121,10 @@ const scrollingRecyclerNowTimer = new RenewingTimeout();
 const scrollingRecyclerUpdateTimer = ref(0);
 /** Recycler scrolling animation frame */
 const scrollingRecyclerUpdateFrame = ref(0);
-/** View size reflow timer */
-const reflowRequest = ref(false);
-/** Tick adjust timer */
-const adjustRequest = ref(false);
+/** View size reflow requested */
+let reflowRequest = false;
+/** Tick adjust requested */
+let adjustRequest = false;
 /** Scroller is being moved with interaction */
 const interacting = ref(false);
 /** Last known scroll position of the recycler */
@@ -130,10 +132,10 @@ const lastKnownRecyclerScroll = ref(0);
 /** Last requested y position when interacting */
 const lastRequestedRecyclerY = ref(NaN);
 
-/** Get the visible ticks */
-const visibleTicks = computed(() => {
+/** Refresh visible ticks from ticks */
+function updateVisibleTicks() {
   let key = 9999999900;
-  return ticks.value
+  visibleTicks.value = ticks
     .filter((tick) => tick.s)
     .map((tick) => {
       if (tick.text) {
@@ -143,7 +145,7 @@ const visibleTicks = computed(() => {
       }
       return tick;
     });
-});
+}
 
 /** Height of usable area */
 const height = computed(() => props.fullHeight - topPadding.value);
@@ -160,12 +162,13 @@ const hoverCursorTransform = computed(() => {
 
 /** Reset state */
 function reset() {
-  ticks.value = [];
+  ticks = [];
+  visibleTicks.value = [];
   cursorY.value = 0;
   hoverCursorY.value = -5;
   hoverCursorText.value = '';
-  reflowRequest.value = false;
-  adjustRequest.value = false;
+  reflowRequest = false;
+  adjustRequest = false;
   interacting.value = false;
   lastKnownRecyclerScroll.value = 0;
   lastRequestedRecyclerY.value = NaN;
@@ -240,11 +243,11 @@ function updateFromRecyclerScroll() {
 
 /** Re-create tick data in the next frame */
 async function reflow() {
-  if (reflowRequest.value) return;
-  reflowRequest.value = true;
+  if (reflowRequest) return;
+  reflowRequest = true;
   await nextTick();
   reflowNow();
-  reflowRequest.value = false;
+  reflowRequest = false;
 }
 
 /** Re-create tick data */
@@ -268,7 +271,8 @@ function reflowNow() {
 /** Recreate from scratch */
 function recreate() {
   // Clear and override any adjust timer
-  ticks.value = [];
+  ticks = [];
+  visibleTicks.value = [];
   lastAdjustHeight.value = 0;
 
   // Ticks
@@ -298,7 +302,7 @@ function recreate() {
       const dtMonth = dateTaken.getUTCMonth();
       const isMonth = dtMonth !== prevMonth || dtYear !== prevYear;
       const text = dtYear === prevYear ? undefined : dtYear;
-      ticks.value.push(getTick(row.dayId, isMonth, text));
+      ticks.push(getTick(row.dayId, isMonth, text));
 
       prevMonth = dtMonth;
       prevYear = dtYear;
@@ -311,11 +315,11 @@ function recreate() {
  * This is much cheaper than reflowing the whole thing
  */
 async function adjust() {
-  if (adjustRequest.value) return;
-  adjustRequest.value = true;
+  if (adjustRequest) return;
+  adjustRequest = true;
   await nextTick();
   adjustNow();
-  adjustRequest.value = false;
+  adjustRequest = false;
 }
 
 /** Do adjustment synchronously */
@@ -354,10 +358,10 @@ function adjustNow() {
 
   for (const row of props.rows) {
     // Check if tick is valid
-    if (tickId >= ticks.value.length) break;
+    if (tickId >= ticks.length) break;
 
     // Check if we hit the next tick
-    const tick = ticks.value[tickId];
+    const tick = ticks[tickId];
     if (tick.dayId === row.dayId) {
       tick.y = y;
 
@@ -377,6 +381,7 @@ function adjustNow() {
   if (needRecomputeTop) {
     setTicksTop(count);
     computeVisibleTicks();
+    updateVisibleTicks();
   }
 }
 
@@ -391,7 +396,7 @@ function computeVisibleTicks() {
   const fontSizePx = parseFloat(getComputedStyle(cursorSt.value!).fontSize);
   const minGap = fontSizePx + (windowDims.isMobile ? 5 : 2);
   let prevShow = -9999;
-  for (const [idx, tick] of ticks.value.entries()) {
+  for (const [idx, tick] of ticks.entries()) {
     // Conservative
     tick.s = false;
 
@@ -416,15 +421,15 @@ function computeVisibleTicks() {
     // Lookahead for next labelled tick
     // If showing this tick would overlap the next one, don't show this one
     let i = idx + 1;
-    while (i < ticks.value.length) {
-      if (ticks.value[i].text) {
+    while (i < ticks.length) {
+      if (ticks[i].text) {
         break;
       }
       i++;
     }
-    if (i < ticks.value.length) {
+    if (i < ticks.length) {
       // A labelled tick was found
-      const nextLabelledTick = ticks.value[i];
+      const nextLabelledTick = ticks[i];
       if (tick.top + minGap > nextLabelledTick.top && nextLabelledTick.top < height.value - minGap) {
         // make sure this will be shown
         continue;
@@ -443,7 +448,7 @@ function setTicksTop(total: number) {
   const displayPadding = windowDims.isMobile ? -MOBILE_CURSOR_HH : 0;
 
   // Set topF (float) and top (rounded) values
-  for (const tick of ticks.value) {
+  for (const tick of ticks) {
     tick.topF = topPadding.value + height.value * (tick.count / total);
     tick.top = utils.roundHalf(tick.topF) + displayPadding;
   }
@@ -454,17 +459,17 @@ function moveHoverCursor(y: number) {
   hoverCursorY.value = y;
 
   // Get index of previous tick
-  let idx = utils.binarySearch(ticks.value, y, 'topF');
+  let idx = utils.binarySearch(ticks, y, 'topF');
   if (idx === 0) {
     // use this tick
-  } else if (idx >= 1 && idx <= ticks.value.length) {
+  } else if (idx >= 1 && idx <= ticks.length) {
     idx = idx - 1;
   } else {
     return;
   }
 
   // DayId of current hover
-  const dayId = ticks.value[idx]?.dayId;
+  const dayId = ticks[idx]?.dayId;
 
   // Special days
   if (dayId === undefined) {
@@ -496,7 +501,7 @@ function mouseleave(event: MouseEvent) {
 /** Binary search and get coords surrounding position */
 function getCoords(y: number, field: 'topF' | 'y') {
   // If no ticks are available, return a linear interpolation
-  if (!ticks.value.length) {
+  if (!ticks.length) {
     // Include the dynamic top matter height here because
     // this will likely be used when there are zero rows
     return {
@@ -508,11 +513,11 @@ function getCoords(y: number, field: 'topF' | 'y') {
   }
 
   // Get index of previous tick
-  const idx = utils.binarySearch(ticks.value, y, field);
+  const idx = utils.binarySearch(ticks, y, field);
 
   // Position is before the first tick; choose first
   if (idx <= 0) {
-    const tick = ticks.value[0];
+    const tick = ticks[0];
     return {
       top1: topPadding.value,
       top2: tick.topF,
@@ -522,8 +527,8 @@ function getCoords(y: number, field: 'topF' | 'y') {
   }
 
   // Position is after the last tick; choose last
-  if (idx >= ticks.value.length) {
-    const tick = ticks.value.at(-1)!;
+  if (idx >= ticks.length) {
+    const tick = ticks.at(-1)!;
     return {
       top1: tick.topF,
       top2: props.fullHeight,
@@ -533,8 +538,8 @@ function getCoords(y: number, field: 'topF' | 'y') {
   }
 
   // Somewhere in the middle
-  const tick1 = ticks.value[idx - 1];
-  const tick2 = ticks.value[idx];
+  const tick1 = ticks[idx - 1];
+  const tick2 = ticks[idx];
   return {
     top1: tick1.topF,
     top2: tick2.topF,
