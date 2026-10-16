@@ -203,6 +203,12 @@ let rowHeight = 100;
 let rowWidth = 100;
 /** Height of the recycler before slot */
 const beforeHeight = ref(0);
+/** Current scroll position for batching processDay */
+let _processDayState: {
+  scrollTop: number;
+  needAdjust: boolean;
+  needReflow: boolean;
+} | null = null;
 
 /** Current start index */
 const currentStart = ref(0);
@@ -1498,9 +1504,8 @@ function processDay(dayId: number, data: IPhoto[]) {
     },
   );
 
-  // Recycler scroll top
-  let scrollTop = recycler.value!.$el.scrollTop;
-  let needAdjust = false;
+  // Share state across multiple runs of this method.
+  const state = processDayGetState();
 
   // Get index and Y position of header in O(n)
   let headIdx = 0;
@@ -1538,10 +1543,10 @@ function processDay(dayId: number, data: IPhoto[]) {
       addedRows.push(newRow);
 
       // Scroll down if new row is above the current visible position
-      if (rowY < scrollTop) {
-        scrollTop += newRow.size;
+      if (rowY < state.scrollTop) {
+        state.scrollTop += newRow.size;
       }
-      needAdjust = true;
+      state.needAdjust = true;
     }
 
     // If a new row was added, use the last one.
@@ -1564,10 +1569,10 @@ function processDay(dayId: number, data: IPhoto[]) {
     // If the difference is too small, it's not worth risking an adjustment
     // especially on square layouts on mobile. Also don't do this if animating.
     if (Math.abs(delta) > 0) {
-      if (rowY < scrollTop) {
-        scrollTop += delta;
+      if (rowY < state.scrollTop) {
+        state.scrollTop += delta;
       }
-      needAdjust = true;
+      state.needAdjust = true;
       row.size = jH;
     }
 
@@ -1641,14 +1646,13 @@ function processDay(dayId: number, data: IPhoto[]) {
 
   // Rows that were removed
   const removedRows: IRow[] = [];
-  let headRemoved = false;
 
   // No rows, splice everything including the header
   if (data.length === 0) {
     removedRows.push(...list.value.splice(headIdx, 1));
     rowIdx = headIdx - 1;
-    headRemoved = true;
     heads.value.delete(dayId);
+    state.needReflow = true;
   }
 
   // Get rid of any extra rows
@@ -1662,33 +1666,51 @@ function processDay(dayId: number, data: IPhoto[]) {
 
   // Update size delta for removed rows and remove from day
   for (const row of removedRows) {
-    needAdjust = true;
+    state.needAdjust = true;
 
     // Scroll up if if above visible range
-    if (rowY < scrollTop) {
-      scrollTop -= row.size;
+    if (rowY < state.scrollTop) {
+      state.scrollTop -= row.size;
     }
 
     // Remove from day
     const idx = day.rows.indexOf(row);
     if (idx >= 0) day.rows.splice(idx, 1);
   }
+}
 
-  // This will be true even if the head is being spliced
-  // because one row is always removed in that case
-  if (needAdjust) {
-    if (headRemoved) {
-      // If the head was removed, we need a reflow,
-      // or adjust isn't going to work right
-      void scrollerManager.value?.reflow();
-    } else {
-      // Otherwise just adjust the ticks
-      void scrollerManager.value?.adjust();
-    }
+function processDayGetState() {
+  if (!_processDayState) {
+    // Create a new state if it does not exist.
+    let _scrollTop: number | null = null;
+    let _scrollDirty = false;
+    const newState = (_processDayState = {
+      get scrollTop() {
+        return (_scrollTop ??= recycler.value!.$el.scrollTop);
+      },
+      set scrollTop(value) {
+        _scrollTop = value;
+        _scrollDirty = true;
+      },
+      needAdjust: false,
+      needReflow: false,
+    });
 
-    // Scroll to new position
-    recycler.value!.$el.scrollTop = scrollTop;
+    // Set up the flush after rendering is done.
+    nextTick(() => {
+      _processDayState = null;
+      if (_scrollDirty && _scrollTop !== null && recycler.value) {
+        recycler.value.$el.scrollTop = _scrollTop;
+      }
+      if (newState.needReflow) {
+        void scrollerManager.value?.reflow();
+      } else if (newState.needAdjust) {
+        void scrollerManager.value?.adjust();
+      }
+    });
   }
+
+  return _processDayState;
 }
 
 /** Add and get a new blank photos row */
