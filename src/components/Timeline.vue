@@ -1680,10 +1680,10 @@ function processDay(dayId: number, data: IPhoto[]) {
     if (headRemoved) {
       // If the head was removed, we need a reflow,
       // or adjust isn't going to work right
-      scrollerManager.value?.reflow();
+      void scrollerManager.value?.reflow();
     } else {
       // Otherwise just adjust the ticks
-      scrollerManager.value?.adjust();
+      void scrollerManager.value?.adjust();
     }
 
     // Scroll to new position
