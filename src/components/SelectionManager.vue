@@ -487,15 +487,26 @@ function touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
     }
 
     if (touchAnchor && !touchScrollInterval) {
-      let frameCount = 3;
+      let skipCount = 3;
+      let prevFrame = 0;
+      let currentScrollTop = props.recycler!.scrollTop;
 
-      const fun = () => {
+      const fun: FrameRequestCallback = (frame) => {
         if (!prevTouch) return;
-        props.recycler!.scrollTop += touchScrollDelta;
 
-        if (frameCount++ >= 3) {
+        if (prevFrame) {
+          // Animation is calibrated on a 120hz display.
+          const scaledDelta = touchScrollDelta * ((frame - prevFrame) / (1000 / 120));
+          // Clamp to avoid jank when a frame takes too long to render.
+          currentScrollTop += Math.min(Math.max(scaledDelta, -50), 50);
+          // We are the only writer to scroll top here.
+          props.recycler!.scrollTop = currentScrollTop;
+        }
+        prevFrame = frame;
+
+        if (skipCount++ >= 3) {
           touchMoveSelect(prevTouch, rowIdx);
-          frameCount = 0;
+          skipCount = 0;
         }
 
         if (touchScrollInterval) {
