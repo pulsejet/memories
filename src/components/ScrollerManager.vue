@@ -133,16 +133,17 @@ const lastRequestedRecyclerY = ref(NaN);
 /** Refresh visible ticks from ticks */
 function updateVisibleTicks() {
   let key = 9999999900;
-  visibleTicks.value = ticks
-    .filter((tick) => tick.s)
-    .map((tick) => {
-      if (tick.text) {
-        tick.key = key = tick.dayId * 100;
-      } else {
-        tick.key = ++key; // days are sorted descending
-      }
-      return tick;
-    });
+  const visible: ITick[] = [];
+  for (const tick of ticks) {
+    if (!tick.s) continue;
+    if (tick.text) {
+      tick.key = key = tick.dayId * 100;
+    } else {
+      tick.key = ++key; // days are sorted descending
+    }
+    visible.push(tick);
+  }
+  visibleTicks.value = visible;
 }
 
 /** Height of usable area */
