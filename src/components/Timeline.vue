@@ -769,7 +769,7 @@ function loadScrollView(startIndex?: number, endIndex?: number) {
       continue;
     }
 
-    fetchDay(item.dayId);
+    void fetchDay(item.dayId);
   }
 }
 
