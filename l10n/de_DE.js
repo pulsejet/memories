@@ -489,6 +489,7 @@ OC.L10N.register(
     "Slideshow" : "Diashow",
     "Previous" : "Zurück",
     "Next" : "Nächstes",
+    "Edit Live Photo" : "Live-Foto bearbeiten",
     "Collapse details" : "Details zusammenklappen",
     "Expand details" : "Details aufklappen",
     "Show in timeline" : "In Zeitleiste anzeigen",
