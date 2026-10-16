@@ -80,9 +80,15 @@ import type ScrollerManager from './ScrollerManager.vue';
 const TOUCH_SELECT_CLAMP = {
   top: 110, // min top for scrolling
   bottom: 110, // min bottom for scrolling
-  maxDelta: 10, // max speed of touch scroll
+  maxDelta: 10, // max speed of touch scroll (120hz)
+  maxDeltaF: 50, // max speed of touch scroll (actual)
   bufferPx: 5, // number of pixels to clamp inside recycler area
 };
+
+// Clamp scroll speed further on E2E to prevent flakiness.
+if (window.navigator?.webdriver) {
+  TOUCH_SELECT_CLAMP.maxDeltaF = 10;
+}
 
 class Selection extends Map<string, IPhoto> {
   addBy(photo: IPhoto): this {
@@ -498,7 +504,10 @@ function touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
           // Animation is calibrated on a 120hz display.
           const scaledDelta = touchScrollDelta * ((frame - prevFrame) / (1000 / 120));
           // Clamp to avoid jank when a frame takes too long to render.
-          currentScrollTop += Math.min(Math.max(scaledDelta, -50), 50);
+          currentScrollTop += Math.min(
+            Math.max(scaledDelta, -TOUCH_SELECT_CLAMP.maxDeltaF),
+            TOUCH_SELECT_CLAMP.maxDeltaF,
+          );
           // We are the only writer to scroll top here.
           props.recycler!.scrollTop = currentScrollTop;
         }
