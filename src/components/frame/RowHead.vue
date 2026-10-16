@@ -2,7 +2,7 @@
   <div
     class="head-row no-user-select"
     :class="{
-      selected: item.selected,
+      selected: item.state.selected,
       [`head-row--${item.dayId}`]: true,
     }"
     :style="{ height: `${item.size}px` }"

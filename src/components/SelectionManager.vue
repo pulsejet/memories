@@ -764,10 +764,10 @@ function selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
 
 /** Select or deselect all photos in a head */
 function selectHead(head: IHeadRow) {
-  head.selected = !head.selected;
+  head.state.selected = !head.state.selected;
   for (const row of head.day.rows ?? []) {
     for (const photo of row.photos ?? []) {
-      selectPhoto(photo, head.selected, true);
+      selectPhoto(photo, head.state.selected, true);
     }
   }
   selectionChanged();
@@ -788,7 +788,7 @@ function updateHeadSelected(head: IHeadRow) {
   }
 
   // Update head
-  head.selected = selected;
+  head.state.selected = selected;
 }
 
 /** Clear all selected photos */

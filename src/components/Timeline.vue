@@ -112,7 +112,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, reactive, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue';
+import { computed, markRaw, nextTick, reactive, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue';
 import { onBeforeUnmount, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { RecycleScroller } from 'vue-virtual-scroller';
@@ -191,12 +191,12 @@ const sizesVersion = ref(0);
 /** Resolve row key without tracking row fields. */
 const getRowKey = (row: IRow): string => {
   void sizesVersion.value; // dependency
-  return toRaw(row).id!;
+  return row.id!; // non-reactive
 };
 /** Resolve row size without tracking row fields. */
 const getRowSize = (row: IRow): number => {
   void sizesVersion.value; // dependency
-  return toRaw(row).size;
+  return row.size; // non-reactive
 };
 /** Computed number of columns */
 let numCols = 0;
@@ -343,8 +343,10 @@ const allowSwipe = computed((): boolean => {
 /** Timeline state used for scroll restoration */
 const savedView = computed<IDay[]>({
   /** Save day counts and row geometry without photos */
-  get: () =>
-    Array.from(heads.value.values(), ({ day }) => ({
+  get: () => {
+    void sizesVersion.value;
+    void list.value;
+    return Array.from(heads.value.values(), ({ day }) => ({
       dayid: day.dayid,
       count: day.count,
       haslocal: day.haslocal,
@@ -352,7 +354,8 @@ const savedView = computed<IDay[]>({
         size: row.size,
         pct: row.pct ?? row.photos?.length ?? 0,
       })),
-    })),
+    }));
+  },
   /**
    * Rebuild headers and placeholders synchronously via processDays,
    * so scroll can be restored before photo details reload.
@@ -698,28 +701,26 @@ function scrollChange(startIndex: number, endIndex: number, force = false) {
   const rmin = Math.max(0, startIndex - ROW_NUM_LPAD);
   const rmax = Math.min(list.value.length, endIndex + ROW_NUM_LPAD);
   for (let i = rmin; i < rmax; i++) {
-    const row = list.value[i];
-    if (!row) {
+    const row = list.value[i] as IPhotoRow;
+    if (row.type !== 1 || !row.pct || row.photos.length) {
       continue;
     }
 
     // Initialize photos and add placeholders
-    if (row.pct && !row.photos?.length) {
-      row.photos = new Array(row.pct);
-      for (let j = 0; j < row.pct; j++) {
-        // Any row that has placeholders has ONLY placeholders
-        // so we can calculate the display width
-        row.photos[j] = {
-          flag: constants.FLAG_PLACEHOLDER,
-          fileid: ++placeholderId,
-          key: `p-${placeholderId}`,
-          dayid: row.dayId,
-          dispW: utils.roundHalf(rowWidth / numCols),
-          dispX: utils.roundHalf((j * rowWidth) / numCols),
-          dispH: row.size,
-          dispY: 0,
-        };
-      }
+    row.photos.length = row.pct;
+    for (let j = 0; j < row.pct; j++) {
+      // Any row that has placeholders has ONLY placeholders
+      // so we can calculate the display width
+      row.photos[j] = {
+        flag: constants.FLAG_PLACEHOLDER,
+        fileid: ++placeholderId,
+        key: `p-${placeholderId}`,
+        dayid: row.dayId,
+        dispW: utils.roundHalf(rowWidth / numCols),
+        dispX: utils.roundHalf((j * rowWidth) / numCols),
+        dispH: row.size,
+        dispY: 0,
+      };
     }
 
     // No need for the fake count regardless of what happened above
@@ -1011,8 +1012,7 @@ async function processDays(data: IDay[], cache: boolean, signal?: AbortSignal) {
   const newHeads: Map<number, IHeadRow> = new Map();
 
   // Store the preloads in a separate map.
-  // This is required since otherwise the inner detail objects
-  // do not become reactive (which happens only after assignment).
+  // processDay makes the photos reactive explicitly.
   const preloads = new Map<number, IPhoto[]>();
 
   let prevDay: IDay | null = null;
@@ -1032,12 +1032,14 @@ async function processDays(data: IDay[], cache: boolean, signal?: AbortSignal) {
     }
 
     // Create header for this day
-    const head = reactive<IHeadRow>({
+    const head = markRaw<IHeadRow>({
       id: `${day.dayid}-head`,
       num: -1,
       size: 40,
       type: 0, // head
-      selected: false,
+      state: reactive({
+        selected: false,
+      }),
       dayId: day.dayid,
       day: day,
     });
@@ -1090,7 +1092,7 @@ async function processDays(data: IDay[], cache: boolean, signal?: AbortSignal) {
       // Add placeholder count
       const leftNum = day.count - i * numCols;
       row.pct = Math.max(0, Math.min(numCols, leftNum));
-      row.photos = [];
+      row.photos.length = 0;
 
       // Restore saved geometry or learn from existing row
       if (savedRows) {
@@ -1101,7 +1103,9 @@ async function processDays(data: IDay[], cache: boolean, signal?: AbortSignal) {
         if (prevRows[i].pct !== undefined) {
           row.pct = prevRows[i].pct;
         } else {
-          row.photos = prevRows[i].photos;
+          if (prevRows[i].photos?.length) {
+            row.photos.push(...prevRows[i].photos!);
+          }
           delete row.pct;
         }
       }
@@ -1121,7 +1125,6 @@ async function processDays(data: IDay[], cache: boolean, signal?: AbortSignal) {
   daysIsCache = cache;
 
   // Iterate the preload map
-  // Now the inner detail objects are reactive
   for (let [dayId, photos] of preloads) {
     photos = preprocessDay(dayId, photos);
     processDay(dayId, photos);
@@ -1487,14 +1490,17 @@ function processDay(dayId: number, data: IPhoto[]) {
   // Convert server flags to bitflags
   data.forEach(convertFlags);
 
-  // Set and make reactive
+  // Make the photos reactive.
+  data = reactive(data);
+
+  // Set counts and store list in day.
   day.count = data.length;
   day.detail = data;
   day.rows ??= [];
 
   // Reset rows including placeholders
   for (const row of day.rows) {
-    row.photos = [];
+    row.photos!.length = 0;
   }
 
   // Force all to square
@@ -1755,10 +1761,10 @@ function addRow(day: IDay): IPhotoRow {
   day.rows ??= [];
 
   // Create new row
-  const row = reactive<IPhotoRow>({
+  const row = markRaw<IPhotoRow>({
     id: `${day.dayid}-${day.rows.length}`,
     num: day.rows.length,
-    photos: [],
+    photos: reactive([]),
     type: 1, // photos
     size: rowHeight,
     dayId: day.dayid,

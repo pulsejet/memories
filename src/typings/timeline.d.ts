@@ -44,7 +44,7 @@ declare module '@typings' {
     day: IDay;
     /** Height in px of the row */
     size: number;
-    /** Main list of photo items */
+    /** Main list of photo items (reactive) */
     photos?: IPhoto[];
     /** Count of placeholders to create */
     pct?: number;
@@ -55,6 +55,8 @@ declare module '@typings' {
   export type IPhotoRow = IRowBase & {
     /** Type of row (1 = photos) */
     type: 1;
+    /** Photos are required on photo rows */
+    photos: IPhoto[];
   };
 
   export type IHeadRow = IRowBase & {
@@ -64,8 +66,11 @@ declare module '@typings' {
     name?: string;
     /** Header is for a month instead of day */
     ismonth?: boolean;
-    /**  Boolean if the entire day is selected */
-    selected: boolean;
+    /** Reactive state */
+    state: {
+      /**  Boolean if the entire day is selected */
+      selected: boolean;
+    };
     /** Bigger header text */
     super?: string;
   };
