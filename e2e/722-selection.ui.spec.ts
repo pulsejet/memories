@@ -108,10 +108,11 @@ test.describe('@ui Photo selection', () => {
 
       // Scroll smoothly right to the end so every day in between loads.
       const lastSelector = `.p-outer--${lastId}`;
-      for (let i = 0; i < 60; i++) {
+      for (let i = 0; i < 10; i++) {
         if ((await page.locator(lastSelector).count()) > 0) break;
         await page.mouse.wheel(0, 1500);
-        await page.waitForTimeout(250);
+        await page.waitForTimeout(50); // let placeholder attach
+        await expect(page.locator('.p-outer.placeholder')).toHaveCount(0);
       }
       await expect(page.locator(lastSelector)).toBeVisible();
 
