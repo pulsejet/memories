@@ -1498,9 +1498,6 @@ function processDay(dayId: number, data: IPhoto[]) {
     },
   );
 
-  // Check if some rows were added
-  let addedRows: IRow[] = [];
-
   // Recycler scroll top
   let scrollTop = recycler.value!.$el.scrollTop;
   let needAdjust = false;
@@ -1523,17 +1520,22 @@ function processDay(dayId: number, data: IPhoto[]) {
   // Duplicate detection, e.g. for face rects
   const seen = new Map<number, number>();
 
+  // Check if some rows were added
+  let addedRows: IRow[] = [];
+
   // Previous justified row
   let prevJustifyTop = justify[0]?.top ?? 0;
 
   // Add all rows
   let dataIdx = 0;
   while (dataIdx < data.length) {
+    // Get the current row we are working under
+    let row = list.value[rowIdx - addedRows.length];
+
     // Check if we ran out of rows
-    if (rowIdx >= list.value.length || list.value[rowIdx].type === 0) {
+    if (!row || row.type === 0) {
       const newRow = addRow(day);
       addedRows.push(newRow);
-      list.value.splice(rowIdx, 0, newRow);
 
       // Scroll down if new row is above the current visible position
       if (rowY < scrollTop) {
@@ -1542,8 +1544,10 @@ function processDay(dayId: number, data: IPhoto[]) {
       needAdjust = true;
     }
 
-    // Get row
-    const row = list.value[rowIdx];
+    // If a new row was added, use the last one.
+    if (addedRows.length) {
+      row = addedRows[addedRows.length - 1];
+    }
 
     // Go to the next row
     const jbox = justify[dataIdx];
@@ -1625,6 +1629,11 @@ function processDay(dayId: number, data: IPhoto[]) {
     // Add photo to row
     row.photos!.push(photo);
     delete row.pct;
+  }
+
+  // Batch-add all new rows.
+  if (addedRows.length) {
+    list.value.splice(rowIdx - addedRows.length + 1, 0, ...addedRows);
   }
 
   // Restore selection day
