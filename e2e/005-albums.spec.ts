@@ -198,7 +198,7 @@ test.describe.serial('Albums', () => {
     await snap(page, 'album-list');
 
     await page.getByRole('link', { name: renamedAlbumName }).click();
-    await page.getByRole('button', { name: 'Actions' }).click();
+    await page.locator('.memories-timeline').getByRole('button', { name: 'Actions' }).click();
     await page.getByRole('menuitem', { name: 'Remove album' }).click();
     await page.getByRole('button', { name: 'Delete' }).click();
 
