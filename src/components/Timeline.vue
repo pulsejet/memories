@@ -1513,6 +1513,10 @@ function processDay(dayId: number, data: IPhoto[]) {
     headIdx++;
     headY += row.size;
   }
+  if (headIdx >= list.value.length) {
+    throw new Error(`Header not found in list ${dayId}`);
+  }
+
   let rowIdx = headIdx + 1;
   let rowY = headY + head.size;
 
