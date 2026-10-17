@@ -682,8 +682,9 @@ defineExpose({
 
     @include phone {
       background-color: var(--color-main-background);
-      padding: 4px;
+      padding: 5px;
       border-radius: 4px;
+      font-size: 0.85em;
     }
   }
 
@@ -746,7 +747,7 @@ defineExpose({
     }
 
     > .ticks-container > .tick {
-      right: 40px;
+      right: 50px;
     }
     &:not(.scrolling):not(.interacting) {
       > .ticks-container {
