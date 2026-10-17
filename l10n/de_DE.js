@@ -85,6 +85,7 @@ OC.L10N.register(
     "Stack RAW files with same name" : "RAW-Dateien mit demselben Namen stapeln",
     "De-duplicate identical files" : "Identische Dateien deduplizieren",
     "Show photo owner name on timeline" : "Name des Foto-Besitzers auf der Zeitleiste anzeigen",
+    "Show photo filename on timeline" : "Fotodateiname auf der Zeitleiste anzeigen",
     "Autoplay Live Photos" : "Live-Fotos automatisch abspielen",
     "Loop Live Photos" : "Live-Photos in Schleife abspielen",
     "Autoplay Videos" : "Videos automatisch abspielen",
