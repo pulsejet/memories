@@ -211,7 +211,9 @@ const showOwnerName = computed((): boolean => {
 });
 
 const showBasename = computed((): boolean => {
-  return !!config.show_photo_basename && !!props.data.basename;
+  if (!props.data.basename) return false;
+  if (props.data.trashInfo) return true;
+  return config.show_photo_basename;
 });
 
 const sharedBy = computed((): string | null => {
