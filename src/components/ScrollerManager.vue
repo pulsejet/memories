@@ -7,6 +7,7 @@
       'scrolling-recycler': scrollingRecyclerTimer.pending,
       'scrolling-now': scrollingNowTimer.pending,
       scrolling: scrollingTimer.pending,
+      interacting: interacting,
     }"
     @mousemove.passive="mousemove"
     @mouseleave.passive="mouseleave"
@@ -640,7 +641,8 @@ defineExpose({
 
   // Show on hover or scroll of main window
   &:hover,
-  &.scrolling-recycler {
+  &.scrolling-recycler,
+  &.interacting {
     opacity: 1;
     visibility: visible;
   }
@@ -746,7 +748,7 @@ defineExpose({
     > .ticks-container > .tick {
       right: 40px;
     }
-    &:not(.scrolling) {
+    &:not(.scrolling):not(.interacting) {
       > .ticks-container {
         display: none;
       }
