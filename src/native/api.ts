@@ -144,6 +144,12 @@ export type NativeX = {
   playTouchSound: () => void;
 
   /**
+   * Vibrate for UI interaction.
+   * @param duration Duration in milliseconds
+   */
+  vibrate: (duration: number) => void;
+
+  /**
    * Make a native toast to the user.
    * @param message Message to show
    * @param long Whether the toast should be shown for a long time

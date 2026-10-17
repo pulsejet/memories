@@ -67,6 +67,17 @@ export async function playTouchSound() {
 }
 
 /**
+ * Vibrate through NativeX or fallback to browser.
+ */
+export function vibrate(duration: number) {
+  if (nativex?.vibrate) {
+    nativex.vibrate(duration);
+  } else {
+    navigator.vibrate?.(duration);
+  }
+}
+
+/**
  * Log out from Nextcloud and pass ahead.
  */
 export async function logout() {

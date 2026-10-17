@@ -1,6 +1,8 @@
 package gallery.memories
 
 import android.net.Uri
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import android.view.SoundEffectConstants
 import android.webkit.JavascriptInterface
@@ -87,6 +89,14 @@ class NativeX(private val mCtx: MainActivity) {
     @JavascriptInterface
     fun playTouchSound() {
         mCtx.runOnUiThread { mCtx.binding.webview.playSoundEffect(SoundEffectConstants.CLICK) }
+    }
+
+    @JavascriptInterface
+    fun vibrate(duration: Long) {
+        if (duration <= 0) return
+        mCtx.getSystemService(Vibrator::class.java)?.vibrate(
+            VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE)
+        )
     }
 
     /** Short or long toast on the UI thread. Safe to call from any thread. */

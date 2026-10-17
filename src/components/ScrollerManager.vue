@@ -51,12 +51,13 @@
 
 <script setup lang="ts">
 import { ref, computed, shallowRef, nextTick, useTemplateRef, toRaw } from 'vue';
-import { useVibrate, useThrottleFn } from '@vueuse/core';
+import { useThrottleFn } from '@vueuse/core';
 
 import { windowDims } from '@services/viewport';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import * as utils from '@services/utils/common';
 import * as lens from '@services/lens';
+import * as nativex from '@native';
 
 import type { IRow, ITick } from '@typings';
 
@@ -604,9 +605,8 @@ function handleScroll() {
 }
 
 /** Tiny haptic tick while dragging the handle on mobile */
-const { vibrate } = useVibrate({ pattern: VIBRATE_MS });
 const vibrateTick = useThrottleFn(() => {
-  if (windowDims.isMobile) vibrate();
+  if (windowDims.isMobile) nativex.vibrate(VIBRATE_MS);
 }, VIBRATE_THROTTLE_MS);
 
 defineExpose({
