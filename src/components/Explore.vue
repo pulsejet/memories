@@ -63,6 +63,7 @@ import StarIcon from 'vue-material-design-icons/Star.vue';
 import VideoIcon from 'vue-material-design-icons/PlayCircle.vue';
 import PanoramaIcon from 'vue-material-design-icons/PanoramaVariant.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
+import TrashIcon from 'vue-material-design-icons/Delete.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import MapIcon from 'vue-material-design-icons/Map.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
@@ -142,6 +143,12 @@ const categories = ref([
     name: t('memories', 'Map'),
     icon: markRaw(MapIcon),
     link: '/map',
+  },
+  {
+    name: t('memories', 'Trash'),
+    icon: markRaw(TrashIcon),
+    link: '/trash',
+    if: () => windowDims.isMobile,
   },
   {
     name: t('memories', 'Settings'),
