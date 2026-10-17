@@ -312,6 +312,7 @@ class VideoContentSetup {
   onPlayerError(content: VideoContent, _e: MediaErrorEvent) {
     if (!isVideoContent(content) || content.videoFailedOver || content.videoHasPlayed) return;
     if (utils.isLocalPhoto(content.data.photo)) return; // local-only
+    if (content.data.photo.trashInfo) return; // trash
     if (config.vod_disable) return;
 
     const player = content.videoPlayer;
