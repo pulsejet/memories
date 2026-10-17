@@ -551,7 +551,7 @@ function getCoords(y: number, field: 'topF' | 'y') {
 function moveto(y: number, snap: boolean) {
   // Move cursor immediately to prevent jank
   cursorY.value = y;
-  hoverCursorY.value = y;
+  moveHoverCursor(y);
 
   const { top1, top2, y1, y2 } = getCoords(y, 'topF');
   const yfrac = top2 === top1 ? 0 : (y - top1) / (top2 - top1);
@@ -751,15 +751,6 @@ defineExpose({
     > .ticks-container > .tick {
       right: 50px;
     }
-    &:not(.scrolling):not(.interacting) {
-      > .ticks-container {
-        opacity: 0;
-        visibility: hidden;
-        transition:
-          opacity 0.1s ease-out,
-          visibility 0s 0.1s;
-      }
-    }
 
     .cursor.hv {
       left: 6px;
@@ -768,12 +759,40 @@ defineExpose({
       height: 44px;
       width: 44px;
       border-radius: 22px;
+
       > .text {
-        display: none;
+        position: absolute;
+        right: 64px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 101;
+        pointer-events: none;
+        background-color: var(--color-main-background);
+        box-shadow: -1px 2px 11px -5px #000;
+        border-radius: 6px;
+        padding: 2px 6px;
+        font-size: 1.1em;
+        white-space: nowrap;
       }
       > .icon {
         display: block;
       }
+    }
+
+    > .ticks-container,
+    .cursor.hv > .text {
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.1s ease-out,
+        visibility 0s 0.1s;
+    }
+
+    &:is(.scrolling, .interacting) > .ticks-container,
+    &:is(.scrolling, .interacting) .cursor.hv > .text {
+      opacity: 1;
+      visibility: visible;
+      transition: none;
     }
 
     .cursor.st {
