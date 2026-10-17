@@ -126,6 +126,10 @@ export class API {
     return gen(`${BASE}/archive/{fileid}`, { fileid });
   }
 
+  static TRASH_LIST() {
+    return gen(`${BASE}/trash/list`);
+  }
+
   static IMAGE_PREVIEW(fileid: number) {
     return tok(gen(`${BASE}/image/preview/{fileid}`, { fileid }));
   }

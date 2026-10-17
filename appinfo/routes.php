@@ -59,6 +59,7 @@ return [
         ['name' => 'Map#init', 'url' => '/api/map/init', 'verb' => 'GET'],
 
         ['name' => 'Archive#archive', 'url' => '/api/archive/{id}', 'verb' => 'PATCH'],
+        ['name' => 'Trash#list', 'url' => '/api/trash/list', 'verb' => 'GET'],
 
         ['name' => 'Image#preview', 'url' => '/api/image/preview/{id}', 'verb' => 'GET'],
         ['name' => 'Image#multipreview', 'url' => '/api/image/multipreview', 'verb' => 'POST'],
