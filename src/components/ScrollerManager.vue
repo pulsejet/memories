@@ -753,7 +753,11 @@ defineExpose({
     }
     &:not(.scrolling):not(.interacting) {
       > .ticks-container {
-        display: none;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.1s ease-out,
+          visibility 0s 0.1s;
       }
     }
 
