@@ -14,6 +14,9 @@
     <div class="time-line" v-if="timeStr">
       {{ timeStr }}<template v-if="addressShort"> &bull; {{ addressShort }}</template>
     </div>
+    <div class="path-line" v-if="filePath">
+      {{ filePath }}
+    </div>
   </template>
 
   <!-- Desktop bottom bar, one line DATE+TIME+ADDR -->
@@ -28,6 +31,9 @@
     >
       {{ dateTaken }}<template v-if="addressShort"> &bull; {{ addressShort }}</template>
       <ChevronRightIcon v-if="dayTo" class="chev" :size="18" />
+    </div>
+    <div class="exif description" v-if="filePath">
+      {{ filePath }}
     </div>
   </template>
 </template>
@@ -84,6 +90,10 @@ const dateTaken = computed((): string | null => {
 
 const addressShort = computed((): string | null => {
   return props.photo?.imageInfo?.address_short ?? null;
+});
+
+const filePath = computed((): string | null => {
+  return props.photo?.trashInfo?.origPath ?? null;
 });
 
 const dayTo = computed(() => {
@@ -154,13 +164,18 @@ function beep() {
     transform: translateY(-50%);
   }
 }
-.time-line {
+.time-line,
+.path-line {
   font-size: 0.85em;
   opacity: 0.85;
   max-width: calc(100vw - 220px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.path-line {
+  white-space: normal;
+  word-break: break-all;
 }
 .date {
   @media (max-width: 768px) {
