@@ -359,6 +359,7 @@ final class ImageController extends ApiController
             }
 
             $this->index->indexFile($file, failSkip: true, force: true);
+            $this->refreshPreviews($file);
 
             return new JSONResponse(
                 ['indexed' => true],

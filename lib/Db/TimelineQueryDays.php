@@ -109,6 +109,7 @@ trait TimelineQueryDays
             ->selectAlias('m.pano', 'pano')
             ->selectAlias('m.video_duration', 'video_duration')
             ->selectAlias('f.etag', 'etag')
+            ->selectAlias('m.indexed_at', 'indexed_at')
             ->selectAlias('f.name', 'basename')
             ->selectAlias('f.size', 'size')
             ->selectAlias('m.epoch', 'epoch')
@@ -307,6 +308,7 @@ trait TimelineQueryDays
         $row['h'] = (int) $row['h'];
         $row['pano'] = (int) ($row['pano'] ?? 0);
         $row['size'] = (int) $row['size'];
+        $row['indexed_at'] = (int) $row['indexed_at'];
 
         // Optional fields
         if (!$row['isvideo']) {

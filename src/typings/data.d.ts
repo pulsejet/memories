@@ -46,6 +46,8 @@ declare module '@typings' {
     key?: string;
     /** Etag from server */
     etag?: string;
+    /** Unix timestamp of last index */
+    indexed_at?: number;
     /** Base name of file */
     basename?: string;
     /** Mime type of file */

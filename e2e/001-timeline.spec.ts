@@ -236,8 +236,12 @@ function cleanupPhoto(item: IPhoto): void {
   if (typeof item.fileid !== 'number' || item.fileid <= 0) {
     throw new Error(`Invalid fileid: ${item.fileid}`);
   }
+  if (typeof item.indexed_at !== 'number') {
+    throw new Error(`Invalid indexed_at: ${item.indexed_at}`);
+  }
 
   delete item.etag;
+  delete item.indexed_at;
   item.fileid = 0;
   item.flag = 0;
 }

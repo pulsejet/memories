@@ -158,6 +158,7 @@ final class TimelineWrite
             'datetaken' => $query->createNamedParameter($dateTakenStr, IQueryBuilder::PARAM_STR),
             'epoch' => $query->createNamedParameter($epoch, IQueryBuilder::PARAM_INT),
             'mtime' => $query->createNamedParameter($mtime, IQueryBuilder::PARAM_INT),
+            'indexed_at' => $query->createNamedParameter(time(), IQueryBuilder::PARAM_INT),
             'isvideo' => $query->createNamedParameter($isvideo, IQueryBuilder::PARAM_INT),
             'video_duration' => $query->createNamedParameter($videoDuration, IQueryBuilder::PARAM_INT),
             'w' => $query->createNamedParameter($w, IQueryBuilder::PARAM_INT),

@@ -186,6 +186,7 @@ const videoUrl = computed((): string | null => {
 
 const src = computed((): string | null => {
   props.data.etag; // dependency
+  props.data.indexed_at; // dependency
 
   if (props.data.flag & constants.FLAG_PLACEHOLDER) {
     return null;

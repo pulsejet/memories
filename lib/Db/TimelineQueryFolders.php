@@ -22,7 +22,7 @@ trait TimelineQueryFolders
         $query = $this->connection->getQueryBuilder();
 
         // SELECT all photos
-        $query->select('m.fileid', 'f.etag')->from('memories', 'm');
+        $query->select('m.fileid', 'f.etag', 'm.indexed_at')->from('memories', 'm');
 
         // JOIN with the filecache table
         $query->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
@@ -39,6 +39,7 @@ trait TimelineQueryFolders
         // Post-process
         foreach ($rows as &$row) {
             $row['fileid'] = (int) $row['fileid'];
+            $row['indexed_at'] = (int) $row['indexed_at'];
         }
 
         return $rows;

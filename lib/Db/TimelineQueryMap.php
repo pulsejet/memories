@@ -102,7 +102,7 @@ trait TimelineQueryMap
 
         // SELECT these files from the filecache
         $query = $this->connection->getQueryBuilder();
-        $files = $query->select('m.fileid', 'm.dayid', 'm.mapcluster', 'm.h', 'm.w', 'f.etag')
+        $files = $query->select('m.fileid', 'm.dayid', 'm.mapcluster', 'm.h', 'm.w', 'm.indexed_at', 'f.etag')
             ->from('memories', 'm')
             ->innerJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'))
             ->where($query->expr()->in('m.fileid', $query->createNamedParameter($fileIds, IQueryBuilder::PARAM_INT_ARRAY)))
@@ -117,6 +117,7 @@ trait TimelineQueryMap
             $row['dayid'] = (int) $row['dayid'];
             $row['h'] = (int) $row['h'];
             $row['w'] = (int) $row['w'];
+            $row['indexed_at'] = (int) $row['indexed_at'];
         }
 
         return $files;

@@ -79,6 +79,7 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
   const [x, y] = typeof size === 'number' ? [size, size] : size!;
   const a = square ? '0' : '1';
   const c = photo.etag;
+  const ix = photo.indexed_at;
 
   // NativeX preview
   if (isLocalPhoto(photo)) {
@@ -88,7 +89,7 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
   }
 
   // Preview from server
-  return API.Q(API.IMAGE_PREVIEW(photo.fileid), { c, x, y, a });
+  return API.Q(API.IMAGE_PREVIEW(photo.fileid), { c, x, y, a, ix });
 }
 
 /**

@@ -1337,7 +1337,7 @@ async function fetchDayExpire(signal: AbortSignal = abort.signal) {
         // newer props that are reactive.
         const isSame = head.day.detail.every((curr, i) => {
           const now = photos[i];
-          if (curr.fileid === now.fileid && curr.etag === now.etag) {
+          if (curr.fileid === now.fileid && curr.etag === now.etag && curr.indexed_at === now.indexed_at) {
             // copy over any properties that might have changed
             // this way we don't need to iterate again for this
             convertFlags(now);

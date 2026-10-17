@@ -25,6 +25,7 @@ trait TimelineQuerySingleItem
             ->selectAlias('m.pano', 'pano')
             ->selectAlias('m.video_duration', 'video_duration')
             ->selectAlias('f.etag', 'etag')
+            ->selectAlias('m.indexed_at', 'indexed_at')
             ->selectAlias('f.name', 'basename')
             ->selectAlias('f.size', 'size')
             ->selectAlias('m.epoch', 'epoch')
