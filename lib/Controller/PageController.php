@@ -109,6 +109,13 @@ final class PageController extends Controller
 
     #[NoAdminRequired]
     #[NoCSRFRequired]
+    public function trash(): Response
+    {
+        return $this->main();
+    }
+
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function thisday(): Response
     {
         return $this->main();

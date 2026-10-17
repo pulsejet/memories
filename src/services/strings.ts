@@ -21,6 +21,8 @@ export function viewName(route: RouteLocationNormalized): string {
       return t('memories', 'Albums');
     case routes.Archive.name:
       return t('memories', 'Archive');
+    case routes.Trash.name:
+      return t('memories', 'Trash');
     case routes.ThisDay.name:
       return t('memories', 'On this day');
     case routes.TagsList.name:

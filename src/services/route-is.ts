@@ -45,6 +45,9 @@ export function routeIs(route: RouteLocation) {
     get Archive(): boolean {
       return isName(route, routes.Archive.name);
     },
+    get Trash(): boolean {
+      return isName(route, routes.Trash.name);
+    },
     get ArchiveFolder(): boolean {
       if (isName(route, routes.Archive.name)) return true;
       if (isName(route, routes.Folders.name)) {

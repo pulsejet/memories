@@ -81,11 +81,13 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
   const c = photo.etag;
   const ix = photo.indexed_at;
 
-  // NativeX preview
+  // Special previews
   if (isLocalPhoto(photo)) {
     return API.Q(NAPI.IMAGE_PREVIEW(photo.fileid), { c, x, y });
   } else if (isLikelySamePhoto(photo, photo.local_photo)) {
     return API.Q(NAPI.IMAGE_PREVIEW(photo.local_photo.fileid), { c, x, y });
+  } else if (photo.trashInfo) {
+    return API.TRASH_PREVIEW(photo.fileid, x, y, a);
   }
 
   // Preview from server

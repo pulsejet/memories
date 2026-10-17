@@ -134,6 +134,10 @@ export class API {
     return tok(gen(`${BASE}/image/multipreview`));
   }
 
+  static TRASH_PREVIEW(fileid: number, x: number | string, y: number | string, a: string) {
+    return gen('/apps/files_trashbin/preview?fileId={fileid}&x={x}&y={y}&a={a}', { fileid, x, y, a });
+  }
+
   static IMAGE_INFO(id: number) {
     return tok(gen(`${BASE}/image/info/{id}`, { id }));
   }

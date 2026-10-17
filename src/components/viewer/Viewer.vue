@@ -152,6 +152,7 @@ import PanoramaSphereIcon from 'vue-material-design-icons/PanoramaSphereOutline.
 import PanoramaHorizontalOutlineIcon from 'vue-material-design-icons/PanoramaHorizontalOutline.vue';
 import ShareIcon from 'vue-material-design-icons/ShareVariant.vue';
 import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';
+import RestoreIcon from 'vue-material-design-icons/History.vue';
 import StarIcon from 'vue-material-design-icons/Star.vue';
 import StarOutlineIcon from 'vue-material-design-icons/StarOutline.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
@@ -179,6 +180,13 @@ type IViewerAction = {
   /** Condition to check for including */
   if: boolean;
 };
+
+/** Delete action types */
+const enum DeleteAction {
+  Delete,
+  TrashDelete,
+  TrashRestore,
+}
 
 const DEFAULT_SLIDESHOW_MS = 5000;
 const SIDEBAR_DEBOUNCE_MS = 350;
@@ -305,6 +313,11 @@ const bottomActions = computed((): IViewerAction[] => {
     return [];
   }
 
+  // Small number of actions, all at bottom.
+  if (routeIs.Trash) {
+    return trashActions.value;
+  }
+
   // Bottom bar uses a fixed independent order.
   const edit = actions.value.some((a) => a.id === 'edit') ? 'edit' : 'edit-metadata';
   const order = ['share', edit, 'add-to-album', 'delete', 'remove-from-album'];
@@ -336,8 +349,34 @@ const currentPhoto = computed((): IPhoto | null => {
   return list.value[idx];
 });
 
+/** Actions for the trash route only */
+const trashActions = computed((): IViewerAction[] => {
+  return [
+    {
+      id: 'restore',
+      name: t('memories', 'Restore'),
+      icon: markRaw(RestoreIcon),
+      callback: () => deleteCurrent(DeleteAction.TrashRestore),
+      if: true,
+    },
+    {
+      id: 'delete-permanently',
+      name: t('memories', 'Delete'),
+      icon: markRaw(DeleteIcon),
+      callback: () => deleteCurrent(DeleteAction.TrashDelete),
+      if: true,
+    },
+  ];
+});
+
 /** Get all actions to show */
 const actions = computed((): IViewerAction[] => {
+  // Trash has its own dedicated actions.
+  if (routeIs.Trash) {
+    return trashActions.value;
+  }
+
+  // Filter out the available actions for this image.
   return [
     {
       id: 'favorite',
@@ -962,7 +1001,7 @@ async function openDynamic(anchorPhoto: IPhoto, timeline: TimelineState) {
   // Get the thumbnail image
   pswp!.addFilter('thumbEl', (thumbEl, data, index) => {
     const photo = list.value[index - globalAnchor.value];
-    if (!photo || !photo.w || !photo.h) return thumbEl as HTMLElement;
+    if (!photo) return thumbEl as HTMLElement;
     return thumbElem(photo) ?? (thumbEl as HTMLElement); // bug in PhotoSwipe types
   });
 
@@ -1016,7 +1055,7 @@ function getItemData(photo: IPhoto): PsContent['data'] {
   const isvideo = photo.flag & constants.FLAG_IS_VIDEO;
 
   // Preview aren't animated
-  if (isvideo || photo.mimetype === 'image/gif') {
+  if (!photo.trashInfo && (isvideo || photo.mimetype === 'image/gif')) {
     previewUrl = dav.getDownloadLink(photo);
   }
 
@@ -1031,12 +1070,21 @@ function getItemData(photo: IPhoto): PsContent['data'] {
     h *= 4;
   }
 
+  // If no width/height, try to get from thumbnail element.
+  if (!w && !h) {
+    const thumb = thumbElem(photo);
+    if (thumb?.naturalWidth && thumb?.naturalHeight) {
+      w = thumb.naturalWidth;
+      h = thumb.naturalHeight;
+    }
+  }
+
   // Lazy load the rest of EXIF data
   loadMetadata(photo).catch(() => undefined);
 
   // Get full image URL
   const highSrc: string[] = [];
-  if (!isvideo) {
+  if (!isvideo && !photo.trashInfo) {
     // Try local file if NativeX is available
     if (photo.auid && nativex.has()) {
       highSrc.push(nativex.NAPI.IMAGE_FULL(photo.auid));
@@ -1089,8 +1137,8 @@ function thumbElem(photo: IPhoto): HTMLImageElement | undefined {
  * Load the metadata (image info) for a photo asynchronously
  */
 async function loadMetadata(photo: IPhoto) {
-  // Check if already loaded
-  if (photo.imageInfo) return;
+  // Check if forbidden or already loaded
+  if (photo.trashInfo || photo.imageInfo) return;
 
   // Check if already loading
   const key = photo.key ?? photo.fileid.toString();
@@ -1166,7 +1214,11 @@ function keydown(e: KeyboardEvent) {
   if (e.defaultPrevented) return;
 
   if (e.key === 'Delete') {
-    deleteCurrent();
+    if (routeIs.Trash) {
+      deleteCurrent(DeleteAction.TrashDelete);
+    } else {
+      deleteCurrent(DeleteAction.Delete);
+    }
   }
 
   if (e.key === 'Tab') {
@@ -1187,18 +1239,32 @@ function keydown(e: KeyboardEvent) {
 }
 
 /** Delete this photo and refresh */
-async function deleteCurrent() {
+async function deleteCurrent(action: DeleteAction = DeleteAction.Delete) {
   let idx = photoswipe.value!.currIndex - globalAnchor.value;
   const photo = list.value[idx];
   if (!photo) return;
+  if (action === DeleteAction.TrashDelete && !(await utils.dialogs.confirmDeletePermanently(1))) return;
 
   // Delete with WebDAV
   try {
     updateLoading(1);
-    for await (const p of dav.deletePhotos([photo], { route })) {
-      if (!p[0]) return;
+    if (action === DeleteAction.Delete) {
+      for await (const p of dav.deletePhotos([photo], { route })) {
+        if (!p[0]) return;
+      }
+    } else if (action === DeleteAction.TrashDelete) {
+      for await (const ids of dav.deleteTrashPhotos([photo])) {
+        if (!ids.some((id) => id !== 0)) return;
+      }
+    } else if (action === DeleteAction.TrashRestore) {
+      for await (const ids of dav.restoreTrashPhotos([photo])) {
+        if (!ids.some((id) => id !== 0)) return;
+      }
+    } else {
+      throw new Error('Unknown viewer delete action');
     }
-  } catch {
+  } catch (e) {
+    console.error(e);
     return;
   } finally {
     updateLoading(-1);

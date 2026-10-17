@@ -3,6 +3,7 @@
     <template #icon>
       <PeopleIcon v-if="routeIs.People" />
       <ArchiveIcon v-else-if="routeIs.Archive" />
+      <TrashIcon v-else-if="routeIs.Trash" />
       <AlbumIcon v-else-if="routeIs.Albums" />
       <MapIcon v-else-if="routeIs.Map" />
       <ImageMultipleIcon v-else />
@@ -23,6 +24,7 @@ import { config } from '@services/user-config';
 import PeopleIcon from 'vue-material-design-icons/AccountMultiple.vue';
 import ImageMultipleIcon from 'vue-material-design-icons/ImageMultiple.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
+import TrashIcon from 'vue-material-design-icons/Delete.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import MapIcon from 'vue-material-design-icons/Map.vue';
 
@@ -63,6 +65,9 @@ const emptyViewDescription = computed((): string => {
   }
   if (routeIs.Archive) {
     return t('memories', "Archive photos you don't want to see in your timeline");
+  }
+  if (routeIs.Trash) {
+    return t('memories', 'Deleted photos will appear here.');
   }
   if (routeIs.Tags) {
     return t('memories', 'Tag photos to find them easily');

@@ -63,6 +63,13 @@ export const routes = {
     props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Archive') }),
   },
 
+  Trash: {
+    path: '/trash',
+    component: () => import('@components/Timeline.vue'),
+    name: 'trash',
+    props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Trash') }),
+  },
+
   ThisDay: {
     path: '/thisday',
     component: () => import('@components/Timeline.vue'),

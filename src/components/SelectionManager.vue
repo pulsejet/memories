@@ -57,6 +57,7 @@ import StarIcon from 'vue-material-design-icons/Star.vue';
 import DownloadIcon from 'vue-material-design-icons/Download.vue';
 import UploadIcon from 'vue-material-design-icons/CloudUpload.vue';
 import DeleteIcon from 'vue-material-design-icons/TrashCanOutline.vue';
+import RestoreIcon from 'vue-material-design-icons/History.vue';
 import EditFileIcon from 'vue-material-design-icons/FileEdit.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
 import UnarchiveIcon from 'vue-material-design-icons/PackageUp.vue';
@@ -290,6 +291,22 @@ const defaultActions: ISelectionAction[] = [
   },
 ];
 
+/** Actions for the trash route only */
+const trashActions: ISelectionAction[] = [
+  {
+    name: t('memories', 'Restore'),
+    icon: markRaw(RestoreIcon),
+    callback: restoreTrashSelection,
+    if: computed(() => true),
+  },
+  {
+    name: t('memories', 'Delete permanently'),
+    icon: markRaw(DeleteIcon),
+    callback: deleteTrashSelection,
+    if: computed(() => true),
+  },
+];
+
 // Subscribe to global events
 utils.useBus('memories:albums:update', clear);
 utils.useBus('memories:fragment:pop:selection', clear);
@@ -322,6 +339,12 @@ function empty(): boolean {
 
 /** Get the actions list (reactive) */
 const currentActions = computed((): ISelectionAction[] => {
+  // Trash has its own actions, ignore the default ones
+  if (routeIs.Trash) {
+    return trashActions.filter((a) => a.if.value);
+  }
+
+  // Filter out actions that are not allowed for the current route
   const actions = defaultActions.filter((a) => a.if.value && (!routeIs.Public || a.allowPublic));
 
   // Move face-move to start if unassigned faces
@@ -996,6 +1019,35 @@ async function removeSelectionFromPerson(sel: Selection) {
   for await (let delIds of dav.recognizeDeleteFaceImages(user.toString(), name.toString(), photos)) {
     const fileIds = delIds.map((id) => map.get(id)?.fileid).filter(utils.truthy);
     deleteSelectedPhotosById(fileIds, sel);
+  }
+}
+
+/**
+ * Restore the currently selected trash photos
+ */
+async function restoreTrashSelection(sel: Selection) {
+  try {
+    for await (const ids of dav.restoreTrashPhotos(sel.photosNoDupFileId())) {
+      deleteSelectedPhotosById(ids, sel);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+/**
+ * Permanently delete the currently selected trash photos
+ */
+async function deleteTrashSelection(sel: Selection) {
+  if (sel.size === 0) return;
+  if (!(await utils.dialogs.confirmDeletePermanently(sel.size))) return;
+
+  try {
+    for await (const ids of dav.deleteTrashPhotos(sel.photosNoDupFileId())) {
+      deleteSelectedPhotosById(ids, sel);
+    }
+  } catch (e) {
+    console.error(e);
   }
 }
 

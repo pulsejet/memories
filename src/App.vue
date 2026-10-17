@@ -144,6 +144,7 @@ import FolderIcon from 'vue-material-design-icons/Folder.vue';
 import Star from 'vue-material-design-icons/Star.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
 import ArchiveIcon from 'vue-material-design-icons/PackageDown.vue';
+import TrashIcon from 'vue-material-design-icons/Delete.vue';
 import CalendarIcon from 'vue-material-design-icons/Calendar.vue';
 import PeopleIcon from 'vue-material-design-icons/AccountBoxMultiple.vue';
 import MarkerIcon from 'vue-material-design-icons/MapMarker.vue';
@@ -374,6 +375,11 @@ function refreshNav() {
       icon: markRaw(TagsIcon),
       title: t('memories', 'Tags'),
       if: config.systemtags_enabled,
+    },
+    {
+      name: 'trash',
+      icon: markRaw(TrashIcon),
+      title: t('memories', 'Trash'),
     },
   ];
 

@@ -16,9 +16,26 @@ const xmlBuilder = new XMLBuilder({
   suppressEmptyNode: true,
 });
 
+export type TrashEntry = {
+  href: string;
+  fileid: number;
+  originalLocation: string;
+};
+
 // WebDAV and API client for e2e tests.
 export class DavClient {
   constructor(private request: APIRequestContext) {}
+
+  // Raw WebDAV request without the default e2e headers.
+  private async fetch(davPath: string, method: string, headers: Record<string, string>, body?: string) {
+    const cleanPath = DavClient.encodeDavPath(davPath);
+    const res = await this.request.fetch(`${baseUrl}/remote.php/dav/${cleanPath}`, {
+      method,
+      headers,
+      ...(body ? { data: body } : {}),
+    });
+    return { status: res.status(), text: await res.text() };
+  }
 
   // Delete the collection or file at the given path relative to the DAV root
   // using WebDAV DELETE, e.g. `photos/${username}/albums/${albumName}`.
@@ -186,6 +203,69 @@ export class DavClient {
       throw new Error(`propfind: failed to parse fileid for ${davPath}`);
     }
     return parseInt(String(fileid), 10);
+  }
+
+  // Delete by user file path without SKIP-TRASHBIN, so the file lands in the trashbin.
+  async trashDelete(userPath: string): Promise<void> {
+    const { status } = await this.fetch(`files/${username}/${userPath}`, 'DELETE', {
+      'OCS-APIREQUEST': 'true',
+    });
+    if (status !== 204) {
+      throw new Error(`trashDelete failed for ${userPath}: ${status}`);
+    }
+  }
+
+  // List trashbin entries for the current user.
+  async listTrash(): Promise<TrashEntry[]> {
+    const { status, text } = await this.fetch(
+      `trashbin/${username}/trash`,
+      'PROPFIND',
+      {
+        'OCS-APIREQUEST': 'true',
+        'Content-Type': 'application/xml',
+        Depth: '1',
+      },
+      xmlBuilder.build({
+        '?xml': {
+          '@_version': '1.0',
+          '@_encoding': 'UTF-8',
+        },
+        'd:propfind': {
+          '@_xmlns:d': 'DAV:',
+          '@_xmlns:oc': 'http://owncloud.org/ns',
+          '@_xmlns:nc': 'http://nextcloud.org/ns',
+          'd:prop': {
+            'oc:fileid': '',
+            'nc:trashbin-original-location': '',
+          },
+        },
+      }),
+    );
+    if (status !== 207) throw new Error(`listTrash failed: ${status}`);
+
+    const responses = xmlParser.parse(text)?.multistatus?.response;
+    const entries: TrashEntry[] = [];
+    for (const r of Array.isArray(responses) ? responses : [responses]) {
+      const propstats = Array.isArray(r?.propstat) ? r.propstat : [r?.propstat];
+      const ok = propstats.find((ps: any) => String(ps?.status ?? '').includes('200')) ?? propstats[0];
+      const href = String(r?.href ?? '');
+      const fileid = parseInt(String(ok?.prop?.fileid ?? ''), 10);
+      const originalLocation = String(ok?.prop?.['trashbin-original-location'] ?? '');
+      if (href && Number.isFinite(fileid) && originalLocation) {
+        entries.push({ href, fileid, originalLocation });
+      }
+    }
+    return entries;
+  }
+
+  // Delete trash entries matching the given original locations.
+  async cleanupTrashEntries(originalLocations: string[]): Promise<void> {
+    const targets = new Set(originalLocations.map((l) => psub(l).replace(/^\/+/, '')));
+    for (const entry of await this.listTrash()) {
+      if (!targets.has(entry.originalLocation)) continue;
+      const name = decodeURIComponent(entry.href.split('/').pop() ?? '');
+      if (name) await this.del(`trashbin/${username}/trash/${name}`, true);
+    }
   }
 
   // Get image info by fileid from the image info endpoint.

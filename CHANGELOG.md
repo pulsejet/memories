@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Feature**: Trash view to restore or permanently delete photos ([#208](https://github.com/pulsejet/memories/issues/208))
+
 ## [v10.1.0] - 2026-10-14
 
 - **Feature**: Per-user setting to show photo filename on timeline ([#1557](https://github.com/pulsejet/memories/issues/1557))

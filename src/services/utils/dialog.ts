@@ -236,4 +236,14 @@ export const dialogs = {
       confirm: t('memories', 'Continue'),
       cancel: t('memories', 'Cancel'),
     }),
+
+  confirmDeletePermanently: (count: number) =>
+    confirmDestructive({
+      title: n('memories', 'Delete {count} item permanently?', 'Delete {count} items permanently?', count, {
+        count,
+      }),
+      message: t('memories', 'This action cannot be undone.'),
+      confirm: t('memories', 'Delete'),
+      cancel: t('memories', 'Cancel'),
+    }),
 };

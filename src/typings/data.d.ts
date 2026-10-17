@@ -86,6 +86,8 @@ declare module '@typings' {
     d?: IDay;
     /** Reference to exif object */
     imageInfo?: IImageInfo | null;
+    /** Trash info (trash view only) */
+    trashInfo?: ITrashInfo;
 
     /** Face detection ID */
     faceid?: number;
@@ -205,4 +207,11 @@ declare module '@typings' {
     expiration: number | null;
     editable: number;
   };
+
+  export interface ITrashInfo {
+    /** Trash DAV path */
+    trashPath: string;
+    /** Original location before deletion */
+    origPath?: string;
+  }
 }

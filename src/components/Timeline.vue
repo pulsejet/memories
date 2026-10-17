@@ -386,9 +386,9 @@ function timelineRouteKey(route: RouteLocationNormalized): string {
   // them from the route state key.
   if (route.name === routes.Map.name) return route.path;
 
-  // For search, we don't want to restore state, since the
+  // For some views, we don't want to restore state, since the
   // individual day objects cannot be fetched from the server.
-  if (route.name === routes.Search.name) {
+  if (route.name === routes.Search.name || route.name === routes.Trash.name) {
     return disableRouterStatePersistence(routerStatePath(route));
   }
 
@@ -475,10 +475,6 @@ function isMobile() {
 
 function isMobileLayout() {
   return containerSize[0] <= 600;
-}
-
-function allowBreakout() {
-  return windowDims.width <= 600 && !config.square_thumbs;
 }
 
 /** Create new state */
@@ -906,9 +902,9 @@ async function fetchDays({
     updateLoading(-1);
   }
 
-  // Lens search mode serves a fake day, not the days API
-  if (routeIs.Search) {
-    return await fetchLensSearch({ signal });
+  // Lens search and trash modes serve fake days, not the days API
+  if (routeIs.Search || routeIs.Trash) {
+    return await fetchFakeDays({ signal });
   }
 
   // Get URL an cache identifier
@@ -1518,7 +1514,7 @@ function processDay(dayId: number, data: IPhoto[]) {
       rowHeight: rowHeight,
       squareMode: squareMode,
       numCols: numCols,
-      allowBreakout: allowBreakout(),
+      allowBreakout: windowDims.width <= 600 && !config.square_thumbs && !routeIs.Trash,
       seed: dayId,
     },
   );
@@ -1815,17 +1811,22 @@ async function deleteFromViewWithAnimation(delPhotos: IPhoto[]) {
   }
 }
 
-/** Fetch lens search results into top + month days */
-async function fetchLensSearch({
+/** Fetch fake days with preloaded detail (special routes) */
+async function fetchFakeDays({
   signal = abort.signal,
 }: {
   signal?: AbortSignal;
 } = {}) {
-  const query = lens.routeQueryText(route.query.q).trim();
-
   try {
     updateLoading(1);
-    const days = await lens.getLensSearchDays(query, { limit: 200, signal });
+    let days: IDay[];
+    if (routeIs.Trash) {
+      days = await dav.getTrashDays({ signal });
+    } else if (routeIs.Search) {
+      days = await lens.getLensSearchDays(lens.routeQueryText(route.query.q).trim(), { limit: 200, signal });
+    } else {
+      throw new Error('Expected fake day route');
+    }
     signal.throwIfAborted();
     await processDays(days, false, signal);
   } catch (e: any) {

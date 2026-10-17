@@ -19,6 +19,7 @@ import ClusterTopMatter from './ClusterTopMatter.vue';
 import FaceTopMatter from './FaceTopMatter.vue';
 import AlbumTopMatter from './AlbumTopMatter.vue';
 import PlacesTopMatter from './PlacesTopMatter.vue';
+import TrashTopMatter from './TrashTopMatter.vue';
 
 import initstate from '@services/init-state';
 import { routes } from '@services/router';
@@ -49,6 +50,8 @@ const currentmatter = computed(() => {
     case routes.TagsList.name:
     case routes.Tags.name:
       return markRaw(ClusterTopMatter);
+    case routes.Trash.name:
+      return markRaw(TrashTopMatter);
     case routes.RecognizeList.name:
     case routes.Recognize.name:
     case routes.FaceRecognitionList.name:

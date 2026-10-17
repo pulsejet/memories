@@ -84,7 +84,7 @@ const viewName = computed((): string => {
   }
 
   // Only static top matter for these routes
-  if (routeIs.Tags || routeIs.People || routeIs.Places) {
+  if (routeIs.Trash || routeIs.Tags || routeIs.People || routeIs.Places) {
     return String();
   }
 
