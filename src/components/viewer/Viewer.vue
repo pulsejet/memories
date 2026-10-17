@@ -1055,8 +1055,12 @@ function getItemData(photo: IPhoto): PsContent['data'] {
   const isvideo = photo.flag & constants.FLAG_IS_VIDEO;
 
   // Preview aren't animated
-  if (!photo.trashInfo && (isvideo || photo.mimetype === 'image/gif')) {
-    previewUrl = dav.getDownloadLink(photo);
+  if (isvideo || photo.mimetype === 'image/gif') {
+    if (photo.trashInfo) {
+      previewUrl = dav.getTrashDownloadLink(photo);
+    } else {
+      previewUrl = dav.getDownloadLink(photo);
+    }
   }
 
   // Get height and width

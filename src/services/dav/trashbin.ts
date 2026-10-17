@@ -239,6 +239,11 @@ export async function* deleteTrashPhotos(photos: IPhoto[], opts?: AbortOpts) {
   yield* runInParallel(calls, 5, opts);
 }
 
+/** Direct download link for a trashed file (e.g. for video playback, no transcoding) */
+export function getTrashDownloadLink(photo: IPhoto): string {
+  return client.getFileDownloadLink(photo.trashInfo!.trashPath);
+}
+
 /** Empty entire trashbin */
 export async function emptyTrashbin(opts?: AbortOpts): Promise<boolean> {
   try {

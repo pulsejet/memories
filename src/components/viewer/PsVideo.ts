@@ -174,6 +174,12 @@ class VideoContentSetup {
 
   /** Initial source: HLS unless transcoding is disabled */
   getPreferredSrc(content: VideoContent): { src: PlayerSrc; videoIsHls: boolean } {
+    // Trash has no transcoding, play the file directly.
+    if (content.data.photo.trashInfo) {
+      return { src: this.getDirectSrc(content), videoIsHls: false };
+    }
+
+    // Check if a local file is available (NativeX).
     const local = this.getLocalSrc(content);
     if (local) {
       return { src: local, videoIsHls: false };
