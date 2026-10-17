@@ -11,6 +11,7 @@ import { useRoute } from 'vue-router';
 const NcProgressBar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcProgressBar'));
 
 import { Folder, Permission } from '@nextcloud/files';
+import { getBaseUrl } from '@nextcloud/router';
 import { showError, showSuccess } from '@services/utils/dialog';
 
 import { useRouteIs } from '@services/route-is';
@@ -40,8 +41,7 @@ const canUpload = computed((): boolean => {
  * Get the base URL including any subdirectory where Nextcloud is installed
  */
 const baseUrl = computed((): string => {
-  const webroot = (window as any).OC?.webroot || '';
-  return window.location.origin + webroot;
+  return getBaseUrl();
 });
 
 /**
@@ -130,18 +130,12 @@ async function uploadFiles(files: File[]) {
     const currentPath = getCurrentPath();
 
     // Build the absolute URL properly
-    const protocol = window.location.protocol;
-    const host = window.location.host;
-    const webroot = (window as any).OC?.webroot || '';
-
-    // Construct the full URL ensuring it's absolute
-    const baseURL = `${protocol}//${host}${webroot}`;
     const davPath = '/public.php/dav';
     const rootPath = `/files/${token}`;
     const fullPath = `${rootPath}${currentPath}`;
 
     // The source must be a complete URL
-    const folderSource = `${baseURL}${davPath}${fullPath}`;
+    const folderSource = `${baseUrl.value}${davPath}${fullPath}`;
 
     const destination = new Folder({
       id: 0,

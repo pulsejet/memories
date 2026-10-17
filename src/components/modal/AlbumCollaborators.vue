@@ -155,6 +155,7 @@ import Earth from 'vue-material-design-icons/Earth.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
 
 import axios from '@nextcloud/axios';
+import { getCapabilities } from '@nextcloud/capabilities';
 import { showError } from '@services/utils/dialog';
 import { generateOcsUrl, generateUrl } from '@nextcloud/router';
 
@@ -205,8 +206,9 @@ const randomId = Math.random().toString().slice(2, 10);
 const { copy: webCopy, copied: publicLinkCopied } = useClipboard({ copiedDuring: 2000, legacy: true });
 const searchAbort = useAbort();
 const albumAbort = useAbort();
+const capabilities = getCapabilities() as any;
 const config = {
-  minSearchStringLength: parseInt(window.OC.config['sharing.minSearchStringLength'], 10) || 0,
+  minSearchStringLength: Number(capabilities?.files_sharing?.sharee?.minSearchStringLength ?? 0) || 0,
 };
 
 const searchResults = computed(() =>
