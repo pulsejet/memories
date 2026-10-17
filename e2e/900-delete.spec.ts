@@ -58,7 +58,9 @@ test.describe('@ui Timeline photo deletion', () => {
 
     // Get the the current active image so we can recheck.
     const activeSelector = '.pswp__item.active img.ximg';
-    const activePrev = await page.locator(activeSelector).getAttribute('src');
+    const activeImg = page.locator(activeSelector);
+    await expect(activeImg).toHaveAttribute('src', /.+/);
+    const activePrev = await activeImg.getAttribute('src');
     expect(activePrev).toBeTruthy();
 
     await test.step('Delete image', async () => {
@@ -68,8 +70,13 @@ test.describe('@ui Timeline photo deletion', () => {
     });
 
     await test.step('Wait for viewer to change', async () => {
-      await expect(page.locator(activeSelector)).not.toHaveAttribute('src', activePrev!);
-      const activeNew = await page.locator(activeSelector).getAttribute('src');
+      await expect
+        .poll(async () => {
+          const src = await activeImg.getAttribute('src');
+          return !!src && src !== activePrev;
+        })
+        .toBe(true);
+      const activeNew = await activeImg.getAttribute('src');
       expect(activeNew).toBeTruthy();
       expect(activeNew).not.toEqual(activePrev);
     });
