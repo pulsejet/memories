@@ -748,8 +748,9 @@ defineExpose({
       pointer-events: all;
     }
 
+    $ticks-right: 58px;
     > .ticks-container > .tick {
-      right: 50px;
+      right: $ticks-right;
     }
 
     .cursor.hv {
@@ -762,7 +763,7 @@ defineExpose({
 
       > .text {
         position: absolute;
-        right: 64px;
+        right: $ticks-right + 14px;
         top: 50%;
         transform: translateY(-50%);
         z-index: 101;
