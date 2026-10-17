@@ -115,7 +115,7 @@
 import { computed, markRaw, nextTick, reactive, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue';
 import { onBeforeUnmount, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { RecycleScroller } from 'vue-virtual-scroller';
+import { RecycleScroller } from '@radialapps/vue-virtual-scroller';
 import { until } from '@vueuse/core';
 
 import axios from '@nextcloud/axios';

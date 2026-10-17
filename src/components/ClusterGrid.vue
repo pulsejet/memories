@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick, useTemplateRef } from 'vue';
-import { RecycleScroller } from 'vue-virtual-scroller';
+import { RecycleScroller } from '@radialapps/vue-virtual-scroller';
 
 import { useRouteIs } from '@services/route-is';
 import { windowDims } from '@services/viewport';

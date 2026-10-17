@@ -8,7 +8,7 @@ import { bootstrapVideo } from '@services/video/bootstrap';
 import * as nativex from '@native';
 
 // CSS for components
-import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
+import '@radialapps/vue-virtual-scroller/dist/vue-virtual-scroller.css';
 
 // Initialize global memories object
 globalThis._m = {
