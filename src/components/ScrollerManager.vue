@@ -769,7 +769,7 @@ defineExpose({
         z-index: 101;
         pointer-events: none;
         background-color: var(--color-main-background);
-        box-shadow: -1px 2px 11px -5px #000;
+        box-shadow: -1px 2px 8px -5px #000;
         border-radius: 6px;
         padding: 2px 6px;
         font-size: 1.1em;
