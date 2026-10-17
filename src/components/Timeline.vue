@@ -157,7 +157,7 @@ import * as lens from '@services/lens';
 import type { RouteLocationNormalized } from 'vue-router';
 import type { IDay, IHeadRow, IPhoto, IPhotoRow, IRow } from '@typings';
 
-const SCROLL_LOAD_DELAY = 100; // Delay in loading data when scrolling
+const SCROLL_LOAD_DELAY = 400; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop
 const MOBILE_ROW_HEIGHT = 120; // Approx row height on mobile
 const ROW_NUM_LPAD = 16; // Number of rows to load before and after viewport
