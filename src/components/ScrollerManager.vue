@@ -590,6 +590,8 @@ function interactstart() {
 
 function interactend() {
   interacting.value = false;
+  scrollingTimer.clear();
+  scrollingNowTimer.clear();
   recyclerScrolled(null); // make sure final position is correct
   emit('interactend'); // tell recycler to load stuff
   props.recycler?.$el.focus(); // give focus back to recycler
