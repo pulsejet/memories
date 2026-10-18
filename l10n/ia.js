@@ -11,6 +11,8 @@ OC.L10N.register(
     "Share" : "Compartir",
     "Favorite" : "Favorite",
     "View in folder" : "Vider in dossier",
+    "Restore" : "Restaurar",
+    "Delete permanently" : "Deler permanentemente",
     "Cancel" : "Cancellar",
     "General" : "General",
     "Info" : "Info",

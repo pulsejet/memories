@@ -61,6 +61,7 @@ OC.L10N.register(
     "Add to album" : "Zum Album hinzufügen",
     "Move to person" : "Zu einer Person verschieben",
     "Remove from person" : "Von der Person entfernen",
+    "Restore" : "Wiederherstellen",
     "Failed to download files" : "Dateien konnten nicht heruntergeladen werden",
     "You must enable \"Mark person in preview\" to use this feature" : "Du musst \"Person in Vorschau markieren\" aktivieren, um diese Funktion nutzen zu können",
     "Only user \"{user}\" can update this person" : "Nur der Benutzer \"{user}\" kann diese Person aktualisieren",
@@ -491,6 +492,7 @@ OC.L10N.register(
     "Previous" : "Zurück",
     "Next" : "Nächstes",
     "Edit Live Photo" : "Live-Foto bearbeiten",
+    "Live Photo will be turned off and edits will apply to the still photo only" : "“Live Photo“ wird deaktiviert und Änderungen werden nur auf das Standbild angewendet.",
     "Collapse details" : "Details zusammenklappen",
     "Expand details" : "Details aufklappen",
     "Show in timeline" : "In Zeitleiste anzeigen",
@@ -642,6 +644,7 @@ OC.L10N.register(
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["{count} Element aus Album entfernen?","{count} Elemente aus Album entfernen?"],
     "This will not delete your original files." : "Dies wird deine Originaldateien nicht löschen.",
     "_You are about to download {count} item._::_You are about to download {count} items._" : ["Du bist dabei, {count} Element herunterzuladen.","Du bist dabei, {count} Elemente herunterzuladen."],
-    "_You are about to move {count} item._::_You are about to move {count} items._" : ["Du bist dabei, {count} Element zu verschieben.","Du bist dabei, {count} Elemente zu verschieben."]
+    "_You are about to move {count} item._::_You are about to move {count} items._" : ["Du bist dabei, {count} Element zu verschieben.","Du bist dabei, {count} Elemente zu verschieben."],
+    "This action cannot be undone." : "Dies kann nicht rückgängig gemacht werden."
 },
 "nplurals=2; plural=(n != 1);");

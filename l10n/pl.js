@@ -18,6 +18,7 @@ OC.L10N.register(
     "Places" : "Miejsca",
     "Map" : "Mapa",
     "Tags" : "Etykiety",
+    "Trash" : "Kosz",
     "Navigation" : "Nawigacja",
     "Settings" : "Ustawienia",
     "View all" : "Zobacz wszystkie",
@@ -56,6 +57,8 @@ OC.L10N.register(
     "Add to album" : "Dodaj do albumu",
     "Move to person" : "Przenieś do osoby",
     "Remove from person" : "Usuń z osoby",
+    "Restore" : "Przywróć",
+    "Delete permanently" : "Usuń bezpowrotnie",
     "Failed to download files" : "Nie udało się pobrać plików",
     "You must enable \"Mark person in preview\" to use this feature" : "Musisz włączyć \"Zaznacz osobę w podglądzie\" aby skorzystać z tej funkcji",
     "Only user \"{user}\" can update this person" : "Tylko użytkownik \"{user}\" może zaktualizować tą osobę",
@@ -485,6 +488,7 @@ OC.L10N.register(
     "Yes" : "Tak",
     "No" : "Nie",
     "Choose {file}" : "Wybierz {file}",
-    "Choose" : "Wybierz"
+    "Choose" : "Wybierz",
+    "This action cannot be undone." : "Tej operacji nie można cofnąć."
 },
 "nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);");

@@ -11,6 +11,7 @@ OC.L10N.register(
     "Share" : "බෙදාගන්න",
     "Favorite" : "ප්‍රියතම",
     "View in folder" : "බහාලුමේ බලන්න",
+    "Restore" : "ප්‍රතිෂ්ථාපනය",
     "Cancel" : "අවලංගු කරන්න",
     "General" : "සමාන්‍යය",
     "Account" : "ගිණුම",

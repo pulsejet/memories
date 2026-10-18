@@ -18,6 +18,7 @@ OC.L10N.register(
     "Places" : "Locaties",
     "Map" : "Kaart",
     "Tags" : "Tags",
+    "Trash" : "Verwijderen",
     "Navigation" : "Navigatie",
     "Settings" : "Instellingen",
     "View all" : "Toon alles",
@@ -58,6 +59,8 @@ OC.L10N.register(
     "Add to album" : "Toevoegen aan album",
     "Move to person" : "Verplaats naar persoon",
     "Remove from person" : "Verwijder van persoon",
+    "Restore" : "Herstellen",
+    "Delete permanently" : "Permanent verwijderen",
     "Only user \"{user}\" can update this person" : "Alleen gebruiker \"{user}\" kan deze persoon bewerken",
     "Cancel" : "Annuleren",
     "_{n} selected_::_{n} selected_" : ["{n} geselecteerd","{n} geselecteerd"],
@@ -292,6 +295,7 @@ OC.L10N.register(
     "Yes" : "Ja",
     "No" : "Nee",
     "Choose {file}" : "Kies {file}",
-    "Choose" : "Kies"
+    "Choose" : "Kies",
+    "This action cannot be undone." : "Deze actie kan niet ongedaan worden gemaakt."
 },
 "nplurals=2; plural=(n != 1);");

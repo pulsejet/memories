@@ -14,6 +14,7 @@ OC.L10N.register(
     "Places" : "Tempat",
     "Map" : "Peta",
     "Tags" : "Tag",
+    "Trash" : "Tempat Sampah",
     "Navigation" : "Navigasi",
     "Settings" : "Setelan",
     "View all" : "Lihat semua",
@@ -29,6 +30,8 @@ OC.L10N.register(
     "Edit metadata" : "Sunting metadata",
     "View in folder" : "Lihat dalam folder",
     "Add to album" : "Tambahkan album",
+    "Restore" : "Pulihkan",
+    "Delete permanently" : "Hapus secara permanen",
     "Cancel" : "Membatalkan",
     "_{n} selected_::_{n} selected_" : ["{n} dipilih"],
     "General" : "Umum",
@@ -217,6 +220,7 @@ OC.L10N.register(
     "Yes" : "Ya",
     "No" : "Tidak",
     "Choose {file}" : "Pilih {file}",
-    "Choose" : "Pilih"
+    "Choose" : "Pilih",
+    "This action cannot be undone." : "Tindakan ini tidak dapat dibatalkan."
 },
 "nplurals=1; plural=0;");

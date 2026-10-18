@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Paikat",
     "Map" : "Kartta",
     "Tags" : "Tunnisteet",
+    "Trash" : "Roskakori",
     "Navigation" : "Navigointi",
     "Settings" : "Asetukset",
     "View all" : "Näytä kaikki",
@@ -58,6 +59,8 @@ OC.L10N.register(
     "Add to album" : "Lisää albumiin",
     "Move to person" : "Siirrä henkilölle",
     "Remove from person" : "Poista henkilöltä",
+    "Restore" : "Palauta",
+    "Delete permanently" : "Poista pysyvästi",
     "Failed to download files" : "Tiedostojen lataus epäonnistui",
     "Only user \"{user}\" can update this person" : "Vain käyttäjä \"{user}\" voi päivittää tätä henkilöä",
     "Cancel" : "Peruuta",
@@ -488,6 +491,7 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Siirretäänkö {count} kohde roskakoriin?","Siirretäänkö {count} kohdetta roskakoriin?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Roskakorissa olevat tiedostot voidaan poistaa automaattisesti määritellyn ajan jälkeen.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Poistetaanko {count} kohde albumista?","Poistetaanko {count} kohdetta albumista?"],
-    "This will not delete your original files." : "Tämä ei poista alkuperäisiä tiedostojasi."
+    "This will not delete your original files." : "Tämä ei poista alkuperäisiä tiedostojasi.",
+    "This action cannot be undone." : "Tätä toimintoa ei voi perua."
 },
 "nplurals=2; plural=(n != 1);");

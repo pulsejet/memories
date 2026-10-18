@@ -17,6 +17,7 @@
     "Places" : "Lugares",
     "Map" : "Mapa",
     "Tags" : "Etiquetas",
+    "Trash" : "Cesto do lixo",
     "Navigation" : "Navegación",
     "Settings" : "Axustes",
     "View all" : "Ver todo",
@@ -57,6 +58,8 @@
     "Add to album" : "Engadir ao álbum",
     "Move to person" : "Mover a persona",
     "Remove from person" : "Retirar da persoa",
+    "Restore" : "Restaurar",
+    "Delete permanently" : "Eliminar definitivamente",
     "Failed to download files" : "Produciuse un fallo ao descargar os ficheiros",
     "You must enable \"Mark person in preview\" to use this feature" : "Active «Marcar persoa na vista previa» para usar esta función",
     "Only user \"{user}\" can update this person" : "Só o usuario «{user}» pode actualizar esta persoa",
@@ -585,6 +588,7 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Quere mover {count} elemento ao lixo?","Quere mover {count} elementos ao lixo?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Os ficheiros do lixo pódense eliminar automaticamente após un período de tempo determinado.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Quere retirar {count} elemento do álbum?","Quere retirar {count} elementos do álbum?"],
-    "This will not delete your original files." : "Isto non eliminará os ficheiros orixinais."
+    "This will not delete your original files." : "Isto non eliminará os ficheiros orixinais.",
+    "This action cannot be undone." : "Esta acción non é posíbel desfacela."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

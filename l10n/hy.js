@@ -8,6 +8,8 @@ OC.L10N.register(
     "Photos" : "Նկարներ",
     "Delete" : "հեռացնել",
     "Share" : "Կիսվել",
+    "Restore" : "Վերականգնել",
+    "Delete permanently" : "Ջնջել ընդմիշտ",
     "Cancel" : "ընդհատել",
     "General" : "Ընդհանուր",
     "Info" : "Info",

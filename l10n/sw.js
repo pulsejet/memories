@@ -28,6 +28,8 @@ OC.L10N.register(
     "Favorite" : "Kipendwa",
     "View in folder" : "Angalia ndani ya kisanduku",
     "Add to album" : "Ongeza kwenye albamu",
+    "Restore" : "Hifadhi upya",
+    "Delete permanently" : "Futa moja kwa moja",
     "Cancel" : "Cancel",
     "_{n} selected_::_{n} selected_" : ["{n} selected","{n} selected"],
     "General" : "Kuu",
@@ -197,6 +199,7 @@ OC.L10N.register(
     "Yes" : "Ndiyo",
     "No" : "Hapana",
     "Choose {file}" : "Chagua {file}",
-    "Choose" : "Chagua"
+    "Choose" : "Chagua",
+    "This action cannot be undone." : "Kitendo hiki hakiwezi kutenduliwa."
 },
 "nplurals=2; plural=(n != 1);");

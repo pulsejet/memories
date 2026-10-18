@@ -17,6 +17,7 @@
     "Places" : "Steder",
     "Map" : "Kort",
     "Tags" : "Mærker",
+    "Trash" : "Papirkurv",
     "Navigation" : "Navigation",
     "Settings" : "Indstillinger",
     "View all" : "Vis alle",
@@ -59,6 +60,7 @@
     "Add to album" : "Tilføj til album",
     "Move to person" : "Flyt til person",
     "Remove from person" : "Fjern fra person",
+    "Restore" : "Gendan",
     "Failed to download files" : "Filerne kunne ikke hentes",
     "You must enable \"Mark person in preview\" to use this feature" : "Du skal slå \"Markér person i forhåndsvisning\" til for at bruge denne funktion",
     "Only user \"{user}\" can update this person" : "Kun brugeren \"{user}\" kan opdatere denne person",
@@ -452,6 +454,7 @@
     "Add photos to albums by selecting them on your timeline." : "Føj billeder til album ved at markere dem på din tidslinje.",
     "Create an album to get started" : "Opret et album for at komme i gang",
     "Archive photos you don't want to see in your timeline" : "Arkivér billeder, du ikke vil se på din tidslinje",
+    "Deleted photos will appear here." : "Slettede fotos vises her.",
     "Tag photos to find them easily" : "Giv billeder mærker, så du nemt kan finde dem",
     "Places you have been to will appear here" : "Steder, du har været, vises her",
     "Nothing to show here" : "Her er intet at vise",
@@ -467,6 +470,8 @@
     "Move right" : "Flyt til højre",
     "Unidentified location" : "Ukendt placering",
     "Files without location" : "Filer uden placering",
+    "Empty trash?" : "Vil du tømme papirkurven?",
+    "Empty trash" : "Tøm papirkurven",
     "Upload not permitted" : "Overførsel er ikke tilladt",
     "_Skipped {n} file that already exists_::_Skipped {n} files that already exist_" : ["Sprang {n} fil over, der allerede findes","Sprang {n} filer over, der allerede findes"],
     "Uploading {file} ({current}/{total})" : "Overfører {file} ({current}/{total})",
@@ -627,6 +632,7 @@
     "Failed to set cover image" : "Forsidebilledet kunne ikke angives",
     "No content-location header found" : "Der blev ikke fundet nogen Content-Location-header",
     "Failed to create tag {name}: {error}" : "Mærket {name} kunne ikke oprettes: {error}",
+    "Trash emptied" : "Papirkurven er tømt",
     "Top results" : "Bedste resultater",
     "Shared Folder" : "Delt mappe",
     "Setup" : "Opsætning",
@@ -641,6 +647,7 @@
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Vil du fjerne {count} element fra albummet?","Vil du fjerne {count} elementer fra albummet?"],
     "This will not delete your original files." : "Dine originale filer bliver ikke slettet.",
     "_You are about to download {count} item._::_You are about to download {count} items._" : ["Du er ved at hente {count} element.","Du er ved at hente {count} elementer."],
-    "_You are about to move {count} item._::_You are about to move {count} items._" : ["Du er ved at flytte {count} element.","Du er ved at flytte {count} elementer."]
+    "_You are about to move {count} item._::_You are about to move {count} items._" : ["Du er ved at flytte {count} element.","Du er ved at flytte {count} elementer."],
+    "This action cannot be undone." : "Denne handling kan ikke fortrydes."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

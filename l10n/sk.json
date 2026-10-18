@@ -17,6 +17,7 @@
     "Places" : "Miesta",
     "Map" : "Mapa",
     "Tags" : "Štítky",
+    "Trash" : "Kôš",
     "Navigation" : "Navigácia",
     "Settings" : "Nastavenia",
     "View all" : "Zobraziť všetko",
@@ -59,6 +60,8 @@
     "Add to album" : "Pridať do albumu",
     "Move to person" : "Prejsť na osobu",
     "Remove from person" : "Odobrať z osoby",
+    "Restore" : "Obnoviť",
+    "Delete permanently" : "Zmazať natrvalo",
     "Failed to download files" : "Sťahovanie súborov zlyhalo",
     "You must enable \"Mark person in preview\" to use this feature" : "Ak chcete použiť túto funkciu, musíte povoliť možnosť „Označiť osobu v ukážke“.",
     "Only user \"{user}\" can update this person" : "Túto osobu môže aktualizovať iba používateľ „{user}“.",
@@ -452,6 +455,7 @@
     "Add photos to albums by selecting them on your timeline." : "Pridajte fotografie do albumov ich výberom na časovej osi.",
     "Create an album to get started" : "Začnite vytvorením albumu",
     "Archive photos you don't want to see in your timeline" : "Archivujte fotografie, ktoré nechcete vidieť na časovej osi",
+    "Deleted photos will appear here." : "Odstránené fotografie sa zobrazia tu.",
     "Tag photos to find them easily" : "Označte fotografie štítkom, aby ste ich ľahko našli",
     "Places you have been to will appear here" : "Tu sa zobrazia miesta, kde ste boli",
     "Nothing to show here" : "Nie je tu nič na zobrazenie",
@@ -467,6 +471,8 @@
     "Move right" : "Presunúť doprava",
     "Unidentified location" : "Neidentifikovaná lokalita",
     "Files without location" : "Súbory bez umiestnenia",
+    "Empty trash?" : "Vyprázdniť kôš?",
+    "Empty trash" : "Vyprázdniť kôš",
     "Upload not permitted" : "Nahrávanie nie je povolené",
     "_Skipped {n} file that already exists_::_Skipped {n} files that already exist_" : ["Vynechaný {n} súbor ktorý už existuje","Vynechaných {n} súborov ktoré už existujú","Vynechaných {n} súborov ktoré už existujú","Vynechané {n} súbory ktoré už existujú"],
     "Uploading {file} ({current}/{total})" : "Nahráva sa {file} ({current}/{total})",
@@ -627,6 +633,7 @@
     "Failed to set cover image" : "Nepodarilo sa nastaviť titulný obrázok",
     "No content-location header found" : "Nenašla sa hlavička umiestnenia obsahu",
     "Failed to create tag {name}: {error}" : "Nepodarilo sa vytvoriť značku {name}: {error}",
+    "Trash emptied" : "Kôš vyprázdnený",
     "Top results" : "Najlepšie výsledky",
     "Shared Folder" : "Zdieľať priečinok",
     "Setup" : "Nastavenie",
@@ -641,6 +648,7 @@
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Odstrániť {count} položku z albumu?","Odstrániť {count} položky z albumu?","Odstrániť {count} položiek z albumu?","Odstrániť {count} položky z albumu?"],
     "This will not delete your original files." : "Týmto sa neodstránia vaše pôvodné súbory.",
     "_You are about to download {count} item._::_You are about to download {count} items._" : ["Chystáte sa stiahnuť {count} položku.","Chystáte sa stiahnuť {count} položky.","Chystáte sa stiahnuť {count} položiek.","Chystáte sa stiahnuť {count} položiek."],
-    "_You are about to move {count} item._::_You are about to move {count} items._" : ["Chystáte sa presunúť {count} položku.","Chystáte sa presunúť {count} položky.","Chystáte sa presunúť {count} položiek.","Chystáte sa presunúť {count} položiek."]
+    "_You are about to move {count} item._::_You are about to move {count} items._" : ["Chystáte sa presunúť {count} položku.","Chystáte sa presunúť {count} položky.","Chystáte sa presunúť {count} položiek.","Chystáte sa presunúť {count} položiek."],
+    "This action cannot be undone." : "Túto akciu nemožno vrátiť späť."
 },"pluralForm" :"nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);"
 }

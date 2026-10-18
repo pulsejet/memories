@@ -11,6 +11,7 @@ OC.L10N.register(
     "Delete" : "Obriši",
     "Share" : "Podeli",
     "Favorite" : "Omiljene",
+    "Delete permanently" : "Obriši zauvek",
     "Cancel" : "Otkaži",
     "General" : "Opšte",
     "Info" : "Info",

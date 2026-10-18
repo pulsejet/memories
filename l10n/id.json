@@ -12,6 +12,7 @@
     "Places" : "Tempat",
     "Map" : "Peta",
     "Tags" : "Tag",
+    "Trash" : "Tempat Sampah",
     "Navigation" : "Navigasi",
     "Settings" : "Setelan",
     "View all" : "Lihat semua",
@@ -27,6 +28,8 @@
     "Edit metadata" : "Sunting metadata",
     "View in folder" : "Lihat dalam folder",
     "Add to album" : "Tambahkan album",
+    "Restore" : "Pulihkan",
+    "Delete permanently" : "Hapus secara permanen",
     "Cancel" : "Membatalkan",
     "_{n} selected_::_{n} selected_" : ["{n} dipilih"],
     "General" : "Umum",
@@ -215,6 +218,7 @@
     "Yes" : "Ya",
     "No" : "Tidak",
     "Choose {file}" : "Pilih {file}",
-    "Choose" : "Pilih"
+    "Choose" : "Pilih",
+    "This action cannot be undone." : "Tindakan ini tidak dapat dibatalkan."
 },"pluralForm" :"nplurals=1; plural=0;"
 }

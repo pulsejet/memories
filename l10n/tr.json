@@ -17,6 +17,7 @@
     "Places" : "Yerler",
     "Map" : "Harita",
     "Tags" : "Etiketler",
+    "Trash" : "Çöp kutusu",
     "Navigation" : "Gezinme",
     "Settings" : "Ayarlar",
     "View all" : "Tümünü görüntüle",
@@ -59,6 +60,8 @@
     "Add to album" : "Albüme ekle",
     "Move to person" : "Kişiye taşı",
     "Remove from person" : "Kişiden kaldır",
+    "Restore" : "Geri yükle",
+    "Delete permanently" : "Kalıcı olarak sil",
     "Failed to download files" : "Dosyalar indirilemedi",
     "You must enable \"Mark person in preview\" to use this feature" : "Bu özelliği kullanabilmek için \"Kişi ön izlemede işaretlensin\" seçeneğini açmalısınız",
     "Only user \"{user}\" can update this person" : "Bu kişiyi yalnızca \"{user}\" kullanıcısı güncelleyebilir",
@@ -452,6 +455,7 @@
     "Add photos to albums by selecting them on your timeline." : "Fotoğrafları zaman tünelinizden seçerek albümlere ekleyin.",
     "Create an album to get started" : "Başlamak için bir albüm oluşturun",
     "Archive photos you don't want to see in your timeline" : "Zaman tünelinizde görmek istemediğiniz fotoğrafları arşivleyin",
+    "Deleted photos will appear here." : "Silinmiş fotoğraflar burada görüntülenir.",
     "Tag photos to find them easily" : "Fotoğrafları kolayca bulabilmek için etiketleyin",
     "Places you have been to will appear here" : "Bulunduğunuz yerler burada görüntülenecek",
     "Nothing to show here" : "Burada görüntülenebilecek bir şey yok",
@@ -467,6 +471,8 @@
     "Move right" : "Sağa taşı",
     "Unidentified location" : "Konum belirlenemedi",
     "Files without location" : "Konumu olmayan dosyalar",
+    "Empty trash?" : "Çöp boşaltılsın mı?",
+    "Empty trash" : "Çöpü boşalt",
     "Upload not permitted" : "Yüklemeye izin verilmiyor",
     "_Skipped {n} file that already exists_::_Skipped {n} files that already exist_" : ["Zaten var olan {n} dosya atlandı","Zaten var olan {n} dosya atlandı"],
     "Uploading {file} ({current}/{total})" : "{file} yükleniyor ({current}/{total})",
@@ -627,6 +633,7 @@
     "Failed to set cover image" : "Kapak görseli ayarlanamadı",
     "No content-location header found" : "content-location üst bilgisi bulunamadı",
     "Failed to create tag {name}: {error}" : "{name} etiketi oluşturulamadı: {error}",
+    "Trash emptied" : "Çöp boşaltıldı",
     "Top results" : "En uygun sonuçlar",
     "Shared Folder" : "Paylaşılmış klasör",
     "Setup" : "Kur",
@@ -641,6 +648,7 @@
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["{count} öge albümden kaldırılsın mı?","{count} öge albümden kaldırılsın mı?"],
     "This will not delete your original files." : "Bu işlem özgün dosyalarınızı silmez.",
     "_You are about to download {count} item._::_You are about to download {count} items._" : ["{count} ögeyi indirmek üzeresiniz.","{count} ögeyi indirmek üzeresiniz."],
-    "_You are about to move {count} item._::_You are about to move {count} items._" : ["{count} ögeyi taşımak üzeresiniz.","{count} ögeyi taşımak üzeresiniz."]
+    "_You are about to move {count} item._::_You are about to move {count} items._" : ["{count} ögeyi taşımak üzeresiniz.","{count} ögeyi taşımak üzeresiniz."],
+    "This action cannot be undone." : "Bu işlem geri alınamaz."
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

@@ -16,6 +16,8 @@ OC.L10N.register(
     "Delete" : "O'chirish",
     "Share" : "Ulashish",
     "Favorite" : "Favorite",
+    "Restore" : "Qayta tiklangan",
+    "Delete permanently" : "Butunlay o'chirish",
     "Cancel" : "Bekor qilish",
     "_{n} selected_::_{n} selected_" : ["{n} tanlangan"],
     "General" : "Umumiy",

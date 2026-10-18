@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Місця",
     "Map" : "Мапа",
     "Tags" : "Мітки",
+    "Trash" : "Кошик",
     "Navigation" : "Навігація",
     "Settings" : "Налаштування",
     "View all" : "Переглянути всі",
@@ -59,6 +60,8 @@ OC.L10N.register(
     "Add to album" : "Додати в альбом",
     "Move to person" : "Перейдіть до особи",
     "Remove from person" : "Видалити з особи",
+    "Restore" : "Відновити",
+    "Delete permanently" : "Вилучити назавжди",
     "Failed to download files" : "Не вдалося звантажити файли",
     "You must enable \"Mark person in preview\" to use this feature" : "Щоб скористатися цією функцією, ви повинні ввімкнути \"Позначити особу в попередньому перегляді\"",
     "Only user \"{user}\" can update this person" : "Тільки користувач \"{user}\" може оновлювати цю особу",
@@ -579,6 +582,7 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Перемістити {count} елемент(-и,ів) до кошика?","Перемістити {count} елементів до кошика?","Перемістити {count} елементів до кошика?","Перемістити {count} елемент(-и,ів) до кошика?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Файли в кошику буде автоматично вилучено через певний проміжок часу.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Видалити {count} елементів з альбому?","Видалити {count} елементів з альбому?","Видалити {count} елемент(-и,ів) з альбому?","Вилучити {count} елемент(-и,ів) з альбому?"],
-    "This will not delete your original files." : "Це не призведе до вилучення ваших оригінальних файлів."
+    "This will not delete your original files." : "Це не призведе до вилучення ваших оригінальних файлів.",
+    "This action cannot be undone." : "Цю дію не можна скасувати."
 },
 "nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);");

@@ -17,6 +17,7 @@
     "Places" : "Τοποθεσίες",
     "Map" : "Χάρτης",
     "Tags" : "Ετικέτες",
+    "Trash" : "Απορρίμματα",
     "Navigation" : "Πλοήγηση",
     "Settings" : "Ρυθμίσεις",
     "View all" : "Προβολή όλων",
@@ -57,6 +58,7 @@
     "Add to album" : "Προσθήκη στο άλμπουμ",
     "Move to person" : "Μετακίνηση σε άτομο",
     "Remove from person" : "Αφαίρεση από άτομο",
+    "Restore" : "Επαναφορά",
     "Failed to download files" : "Αποτυχία λήψης αρχείων",
     "You must enable \"Mark person in preview\" to use this feature" : "Πρέπει να ενεργοποιήσετε τη \"Σήμανση ατόμου στην προεπισκόπηση\" για να χρησιμοποιήσετε αυτή τη λειτουργία",
     "Only user \"{user}\" can update this person" : "Μόνο ο χρήστης \"{user}\" μπορεί να ενημερώσει αυτό το άτομο",
@@ -409,6 +411,7 @@
     "Add photos to albums by selecting them on your timeline." : "Προσθέστε φωτογραφίες σε άλμπουμ επιλέγοντάς τες στο χρονολόγιό σας.",
     "Create an album to get started" : "Δημιουργήστε ένα άλμπουμ για να ξεκινήσετε",
     "Archive photos you don't want to see in your timeline" : "Αρχειοθετήστε φωτογραφίες που δεν θέλετε να βλέπετε στο χρονολόγιό σας",
+    "Deleted photos will appear here." : "Οι διαγραμμένες φωτογραφίες θα εμφανιστούν εδώ.",
     "Tag photos to find them easily" : "Ετικετώστε φωτογραφίες για να τις βρίσκετε εύκολα",
     "Places you have been to will appear here" : "Τοποθεσίες που έχετε επισκεφτεί θα εμφανίζονται εδώ",
     "Nothing to show here" : "Δεν υπάρχει τίποτα να εμφανιστεί εδώ",
@@ -424,6 +427,8 @@
     "Move right" : "Μετακίνηση προς τα δεξιά",
     "Unidentified location" : "Απροσδιόριστη τοποθεσία",
     "Files without location" : "Αρχεία χωρίς τοποθεσία",
+    "Empty trash?" : "Άδειασμα απορριμμάτων;",
+    "Empty trash" : "Άδειασμα απορριμμάτων",
     "Upload failed" : "Η μεταφόρτωση απέτυχε",
     "Image saved successfully" : "Η εικόνα αποθηκεύτηκε επιτυχώς",
     "Error saving image: {error}" : "Σφάλμα αποθήκευσης εικόνας: {error}",
@@ -565,6 +570,7 @@
     "Failed to set cover image" : "Αποτυχία ορισμού εικόνας εξωφύλλου",
     "No content-location header found" : "Δεν βρέθηκε κεφαλίδα content-location",
     "Failed to create tag {name}: {error}" : "Αποτυχία δημιουργίας ετικέτας {name}: {error}",
+    "Trash emptied" : "Τα απορρίμματα αδειάστηκαν",
     "Shared Folder" : "Κοινόχρηστος Φάκελος",
     "Setup" : "Ρύθμιση",
     "Memories has been updated to {version}. Reload to get the new version." : "Το Memories ενημερώθηκε στην έκδοση {version}. Ανανεώστε για να λάβετε τη νέα έκδοση.",
@@ -576,6 +582,7 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Μετακίνηση {count} αντικειμένου στα απορρίμματα;","Μετακίνηση {count} αντικειμένων στα απορρίμματα;"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Τα αρχεία στα απορρίμματα μπορεί να διαγραφούν αυτόματα μετά από ένα σταθερό χρονικό διάστημα.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Αφαίρεση {count} αντικειμένου από άλμπουμ;","Αφαίρεση {count} αντικειμένων από άλμπουμ;"],
-    "This will not delete your original files." : "Αυτό δεν θα διαγράψει τα αρχικά αρχεία σας."
+    "This will not delete your original files." : "Αυτό δεν θα διαγράψει τα αρχικά αρχεία σας.",
+    "This action cannot be undone." : "Αυτή η ενέργεια δεν μπορεί να αναιρεθεί."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

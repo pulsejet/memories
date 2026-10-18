@@ -13,6 +13,7 @@ OC.L10N.register(
     "Places" : "Imeḍqan",
     "Map" : "Tagertilt",
     "Tags" : "Tibzimin",
+    "Trash" : "Iḍumman",
     "Navigation" : "Tunigin",
     "Settings" : "Iɣewwaṛen",
     "View all" : "Wali-ten akk",
@@ -26,6 +27,8 @@ OC.L10N.register(
     "Unarchive" : "Kkes aɣbar",
     "Edit metadata" : "Ẓreg iɣefisefka",
     "Add to album" : "Rnu ɣer walbum",
+    "Restore" : "Err-it-id",
+    "Delete permanently" : "Kkes-it i lebda",
     "Cancel" : "Sefsex",
     "General" : "Amatu",
     "Account" : "Amiḍan",
@@ -154,6 +157,7 @@ OC.L10N.register(
     "Yes" : "Ih",
     "No" : "Uhu",
     "Choose {file}" : "Fren {file}",
-    "Choose" : "Fren"
+    "Choose" : "Fren",
+    "This action cannot be undone." : "Tigawt-agi ulamek ara tettwasefsex."
 },
 "nplurals=2; plural=(n != 1);");

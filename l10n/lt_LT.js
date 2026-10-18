@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Vietos",
     "Map" : "Žemėlapis",
     "Tags" : "Žymos",
+    "Trash" : "Šiukšlinė",
     "Navigation" : "Naršymas",
     "Settings" : "Nustatymai",
     "View all" : "Žiūrėti viską",
@@ -59,6 +60,8 @@ OC.L10N.register(
     "Add to album" : "Pridėti į albumą",
     "Move to person" : "Perkelti prie asmens",
     "Remove from person" : "Pašalinti nuo asmens",
+    "Restore" : "Atkurti",
+    "Delete permanently" : "Ištrinti visam laikui",
     "Failed to download files" : "Nepavyko atsisiųsti failų",
     "You must enable \"Mark person in preview\" to use this feature" : "Norėdami naudotis šia funkcija, turite įjungti parinktį „Pažymėti asmenį peržiūroje“",
     "Only user \"{user}\" can update this person" : "Tik vartotojas „{user}“ gali atnaujinti šio asmens duomenis",
@@ -588,6 +591,7 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Perkelti {count} elementą į šiukšlinę?","Perkelti {count} elementus į šiukšlinę?","Perkelti {count} elementų į šiukšlinę?","Perkelti {count} elementą į šiukšlinę?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Šiukšlinėje esantys failai gali būti automatiškai ištrinti praėjus nustatytam laikui.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Pašalinti {count} elementą iš albumo?","Pašalinti {count} elementus iš albumo?","Pašalinti {count} elementų iš albumo?","Pašalinti {count} elementų iš albumo?"],
-    "This will not delete your original files." : "Tai neištrins jūsų originalių failų."
+    "This will not delete your original files." : "Tai neištrins jūsų originalių failų.",
+    "This action cannot be undone." : "Šio veiksmo negalima atšaukti."
 },
 "nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);");

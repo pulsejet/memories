@@ -18,6 +18,7 @@ OC.L10N.register(
     "Places" : "場所",
     "Map" : "地図",
     "Tags" : "タグ",
+    "Trash" : "ゴミ箱",
     "Navigation" : "ナビゲーション",
     "Settings" : "設定",
     "Videos" : "動画",
@@ -33,6 +34,8 @@ OC.L10N.register(
     "Unarchive" : "アーカイブを解除",
     "View in folder" : "フォルダー内で表示",
     "Add to album" : "アルバムに追加",
+    "Restore" : "復元",
+    "Delete permanently" : "完全に削除する",
     "Cancel" : "キャンセル",
     "_{n} selected_::_{n} selected_" : ["{n}選択されています"],
     "General" : "一般",
@@ -244,6 +247,7 @@ OC.L10N.register(
     "Yes" : "はい",
     "No" : "いいえ",
     "Choose {file}" : "{file}を選択",
-    "Choose" : "選択"
+    "Choose" : "選択",
+    "This action cannot be undone." : "これは取り消すことができません"
 },
 "nplurals=1; plural=0;");

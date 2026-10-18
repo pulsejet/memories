@@ -18,6 +18,7 @@ OC.L10N.register(
     "Places" : "Lugares",
     "Map" : "Mapa",
     "Tags" : "Etiquetas",
+    "Trash" : "Basura",
     "Navigation" : "Navegación",
     "Settings" : "Ajustes",
     "View all" : "Ver todo",
@@ -54,6 +55,8 @@ OC.L10N.register(
     "Add to album" : "Agregar al álbum",
     "Move to person" : "Mover a persona",
     "Remove from person" : "Eliminar de persona",
+    "Restore" : "Restaurar",
+    "Delete permanently" : "Borrar permanentemente",
     "Failed to download files" : "Error al descargar archivos",
     "You must enable \"Mark person in preview\" to use this feature" : "Debes habilitar \"Marcar persona en la vista previa\" para usar esta función",
     "Only user \"{user}\" can update this person" : "Solo el usuario \"{user}\" puede actualizar esta persona",
@@ -407,6 +410,7 @@ OC.L10N.register(
     "Shared Folder" : "Carpeta Compartida",
     "Setup" : "Ajustes",
     "Memories has been updated to {version}. Reload to get the new version." : "Memories ha sido actualizado a {version}. Recarga para obtener la nueva versión.",
-    "Choose" : "Seleccionar"
+    "Choose" : "Seleccionar",
+    "This action cannot be undone." : "Esta acción no se puede deshacer."
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

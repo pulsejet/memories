@@ -10,6 +10,8 @@ OC.L10N.register(
     "Delete" : "நீக்குக",
     "Share" : "பகிர்வு",
     "Favorite" : "விருப்பமான",
+    "Restore" : "மீட்டெடு",
+    "Delete permanently" : "நிரந்தரமாக நீக்கவும்",
     "Cancel" : "இரத்து செய்க",
     "General" : "பொதுவான",
     "Info" : "Info",

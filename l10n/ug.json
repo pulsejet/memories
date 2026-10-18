@@ -17,6 +17,7 @@
     "Places" : "جايلار",
     "Map" : "خەرىتە",
     "Tags" : "بەلگەلەر",
+    "Trash" : "ئەخلەت ساندۇقى",
     "Navigation" : "يول باشلاش",
     "Settings" : "تەڭشەكلەر",
     "View all" : "ھەممىنى كۆرۈش",
@@ -57,6 +58,8 @@
     "Add to album" : "ئالبۇمغا قوشۇڭ",
     "Move to person" : "ئادەمگە يۆتكەڭ",
     "Remove from person" : "ئادەمدىن چىقىرىۋېتىڭ",
+    "Restore" : "ئەسلىگە كەلتۈرۈش",
+    "Delete permanently" : "مەڭگۈلۈك ئۆچۈرۈڭ",
     "Failed to download files" : "ھۆججەتلەرنى چۈشۈرۈش مەغلۇب بولدى",
     "You must enable \"Mark person in preview\" to use this feature" : "بۇ ئىقتىدارنى ئىشلىتىش ئۈچۈن چوقۇم «ئالدىن كۆرۈشنى بەلگە قىلىش» نى قوزغىتىشىڭىز كېرەك",
     "Only user \"{user}\" can update this person" : "پەقەت «{user}» ئىشلەتكۈچىلا بۇ ئادەمنى يېڭىلىيالايدۇ",
@@ -584,6 +587,7 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["{count} تۈرنى ئەخلەت ساندۇقىغا يۆتكەمسىز؟","{count} تۈرنى ئەخلەت ساندۇقىغا يۆتكەمسىز؟"],
     "Files in trash may be automatically deleted after a fixed period of time." : "ئەخلەت ساندۇقىدىكى ھۆججەتلەر بەلگىلەنگەن ۋاقىتتىن كېيىن ئاپتوماتىك ئۆچۈرۈلۈشى مۇمكىن.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["{count} تۈرنى ئالبومدىن چىقىرۋېتەمسىز؟","{count} تۈرنى ئالبومدىن چىقىرۋېتەمسىز؟"],
-    "This will not delete your original files." : "بۇ ئەسلى ھۆججەتلىرىڭىزنى ئۆچۈرمەيدۇ."
+    "This will not delete your original files." : "بۇ ئەسلى ھۆججەتلىرىڭىزنى ئۆچۈرمەيدۇ.",
+    "This action cannot be undone." : "بۇ ھەرىكەتنى بىكار قىلغىلى بولمايدۇ."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

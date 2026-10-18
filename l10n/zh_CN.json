@@ -17,6 +17,7 @@
     "Places" : "地点",
     "Map" : "地图",
     "Tags" : "标签",
+    "Trash" : "回收站",
     "Navigation" : "导航",
     "Settings" : "设置",
     "View all" : "查看全部",
@@ -57,6 +58,8 @@
     "Add to album" : "添加至相册",
     "Move to person" : "移动到人",
     "Remove from person" : "从人中移除",
+    "Restore" : "恢复",
+    "Delete permanently" : "彻底删除",
     "Failed to download files" : "下载文件失败",
     "You must enable \"Mark person in preview\" to use this feature" : "你必须启用“在预览中标记人物”才能使用此功能",
     "Only user \"{user}\" can update this person" : "仅用户“{user}”可以更新此人",
@@ -581,6 +584,7 @@
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["将 {count} 个项目移动至回收站？"],
     "Files in trash may be automatically deleted after a fixed period of time." : "回收站中的文件可能会在固定时间后被自动删除。",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["从相册中移除 {count} 个项目？"],
-    "This will not delete your original files." : "这不会删除您原先的文件。"
+    "This will not delete your original files." : "这不会删除您原先的文件。",
+    "This action cannot be undone." : "此操作无法撤消。"
 },"pluralForm" :"nplurals=1; plural=0;"
 }

@@ -13,6 +13,8 @@ OC.L10N.register(
     "Share" : "Deelen",
     "Favorite" : "Favorit",
     "View in folder" : "Kuk am Dossier ",
+    "Restore" : "Restauréieren",
+    "Delete permanently" : "Permanent läschen",
     "Cancel" : "Ofbriechen",
     "General" : "Allgemeng",
     "Account" : "Kont",

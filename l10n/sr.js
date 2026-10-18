@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Места",
     "Map" : "Мапа",
     "Tags" : "Ознаке",
+    "Trash" : "Смеће",
     "Navigation" : "Навигација",
     "Settings" : "Поставке",
     "View all" : "Прикажи све",
@@ -59,6 +60,8 @@ OC.L10N.register(
     "Add to album" : "Додај у албум",
     "Move to person" : "Премести у особу",
     "Remove from person" : "Уклони из особе",
+    "Restore" : "Врати",
+    "Delete permanently" : "Обриши заувек",
     "Failed to download files" : "Фајлови не могу да се преузму",
     "You must enable \"Mark person in preview\" to use this feature" : "Да бисте користили ову могућност, морате да укључите „Означи особу у прегледу”",
     "Only user \"{user}\" can update this person" : "Ову особу може да ажурира само „{user}”",
@@ -580,6 +583,7 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Желите ли да се {count} ставка премести у отпад?","Желите ли да се {count} ставке преместе у отпад?","Желите ли да се {count} ставки премести у отпад?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Фајлови у отпаду могу аутоматски да се обришу након фиксног временског периода.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Желите ли да се {count} ставка уклони из албума?","Желите ли да се {count} ставке уклоне из албума?","Желите ли да се {count} ставки уклони из албума?"],
-    "This will not delete your original files." : "Ово неће да обрише ваше оригиналне фајлове."
+    "This will not delete your original files." : "Ово неће да обрише ваше оригиналне фајлове.",
+    "This action cannot be undone." : "Ова радња не може да се поништи."
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);");

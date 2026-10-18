@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "地點",
     "Map" : "地圖",
     "Tags" : "標籤",
+    "Trash" : "回收筒",
     "Navigation" : "導覽列",
     "Settings" : "設定",
     "View all" : "檢視全部",
@@ -61,6 +62,8 @@ OC.L10N.register(
     "Add to album" : "新增至相簿",
     "Move to person" : "移動到人",
     "Remove from person" : "從人中移除",
+    "Restore" : "還原",
+    "Delete permanently" : "永久刪除",
     "Failed to download files" : "下載檔案失敗",
     "You must enable \"Mark person in preview\" to use this feature" : "您必須啟用「在預覽中標記人」以使用此功能",
     "Only user \"{user}\" can update this person" : "僅使用者「{user}」可以更新此人",
@@ -643,6 +646,7 @@ OC.L10N.register(
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["從相簿中移除 {count} 個項目？"],
     "This will not delete your original files." : "這不會刪除您原先的檔案。",
     "_You are about to download {count} item._::_You are about to download {count} items._" : ["您將要下載 {count} 個項目。"],
-    "_You are about to move {count} item._::_You are about to move {count} items._" : ["您將要移動 {count} 個項目。"]
+    "_You are about to move {count} item._::_You are about to move {count} items._" : ["您將要移動 {count} 個項目。"],
+    "This action cannot be undone." : "此動作無法還原。"
 },
 "nplurals=1; plural=0;");

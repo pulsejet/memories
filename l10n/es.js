@@ -19,6 +19,7 @@ OC.L10N.register(
     "Places" : "Lugares",
     "Map" : "Mapa",
     "Tags" : "Etiquetas",
+    "Trash" : "Papelera",
     "Navigation" : "Navegación",
     "Settings" : "Ajustes",
     "View all" : "Ver todo",
@@ -59,6 +60,8 @@ OC.L10N.register(
     "Add to album" : "Añadir al álbum",
     "Move to person" : "Mover a persona",
     "Remove from person" : "Quitar de la persona",
+    "Restore" : "Restaurar",
+    "Delete permanently" : "Eliminar de forma permanente",
     "Failed to download files" : "Fallo al descargar archivos",
     "You must enable \"Mark person in preview\" to use this feature" : "Debe habilitar \"Marcar persona en la vista previa\" para utilizar esta característica",
     "Only user \"{user}\" can update this person" : "Solo el usuario \"{user}\" puede actualizar esta persona",
@@ -579,6 +582,7 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["¿Mover {count} ítem a la papelera?","¿Mover {count} ítems a la papelera?","¿Mover {count} ítems a la papelera?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Los archivos en la papelera podrían ser eliminados automáticamente después de un período fijo de tiempo.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["¿Quitar {count} ítem del álbum?","¿Quitar {count} ítems del álbum?","¿Quitar {count} ítems del álbum?"],
-    "This will not delete your original files." : "Esto no eliminará sus archivos originales."
+    "This will not delete your original files." : "Esto no eliminará sus archivos originales.",
+    "This action cannot be undone." : "Esta acción no se puede deshacer."
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
