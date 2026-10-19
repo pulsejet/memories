@@ -8,9 +8,7 @@
         </NcActionButton>
       </NcActions>
 
-      <div class="text">
-        {{ n('memories', '{n} selected', '{n} selected', size, { n: size }) }}
-      </div>
+      <div class="text" v-fast-text="selectedText"></div>
 
       <NcActions :inline="3">
         <NcActionButton
@@ -39,6 +37,8 @@ import { showError } from '@services/utils/dialog';
 
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
+
+import { vFastText } from '@directives/vFastText';
 
 import { config } from '@services/user-config';
 import { fragment } from '@services/route-fragment';
@@ -371,6 +371,21 @@ const currentActions = computed((): ISelectionAction[] => {
 
   return actions;
 });
+
+/** Selected count text */
+const selectedText = computed(() =>
+  n(
+    'memories',
+    '{n} selected',
+    '{n} selected',
+    size.value,
+    { n: size.value },
+    {
+      escape: false,
+      sanitize: false,
+    },
+  ),
+);
 
 /** Click on an action */
 async function click(action: ISelectionAction) {
@@ -1108,6 +1123,7 @@ defineExpose({
     flex-grow: 1;
     line-height: 42px;
     padding-left: 8px;
+    contain: layout style;
   }
 
   @media (max-width: 768px) {
