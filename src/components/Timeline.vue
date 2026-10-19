@@ -1713,7 +1713,7 @@ function processDayGetState() {
     let _scrollDirty = false;
     const newState = (_processDayState = {
       get scrollTop() {
-        return (_scrollTop ??= recycler.value!.$el.scrollTop);
+        return (_scrollTop ??= recyclerScrollTop.value);
       },
       set scrollTop(value) {
         _scrollTop = value;
