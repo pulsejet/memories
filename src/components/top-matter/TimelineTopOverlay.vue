@@ -18,6 +18,7 @@ const props = defineProps<{
   heads: Map<number, IHeadRow>;
   list: IRow[];
   beforeHeight: number;
+  recyclerScrollTop: number;
   recycler?: VueRecyclerType | null;
 }>();
 
@@ -30,14 +31,11 @@ function refresh() {
 function getText() {
   if (!props.recycler?.$el || !props.list.length) return;
 
-  // Read the scroll position of the recycler (layout).
-  const scrollTop = props.recycler.$el.scrollTop;
-
   // Still over the before slot: nothing to show.
-  if (scrollTop < props.beforeHeight) return;
+  if (props.recyclerScrollTop < props.beforeHeight) return;
 
   // Row at the top edge (offsets exclude the before slot).
-  const topRowIdx = props.recycler.findItemIndex(scrollTop - props.beforeHeight);
+  const topRowIdx = props.recycler.findItemIndex(props.recyclerScrollTop - props.beforeHeight);
   const topRow = props.list[topRowIdx];
   if (!topRow) return;
 
@@ -45,7 +43,7 @@ function getText() {
   if (topRow.type === 0) return;
 
   // Avoid barely-visible rows, must have minimum height.
-  const belowIdx = props.recycler.findItemIndex(50 + scrollTop - props.beforeHeight);
+  const belowIdx = props.recycler.findItemIndex(50 + props.recyclerScrollTop - props.beforeHeight);
   const belowRow = props.list[belowIdx];
   if (belowRow?.dayId !== topRow.dayId) return;
 

@@ -79,6 +79,10 @@ const props = defineProps<{
   fullHeight: number;
   /** Actual recycler component */
   recycler?: VueRecyclerType | null;
+  /** Wrapper height of the recycler component */
+  recyclerWrapperHeight: number;
+  /** Scroll position of the recycler component */
+  recyclerScrollTop: number;
   /** Recycler before slot component height */
   beforeHeight: number;
 }>();
@@ -94,8 +98,6 @@ const hoverCursor = useTemplateRef<HTMLSpanElement>('hoverCursor');
 
 /** Last known height at adjustment */
 const lastAdjustHeight = ref(0);
-/** Height of the entire photo view */
-const recyclerHeight = ref(100);
 /** Space to leave at the top (for the hover cursor) */
 const topPadding = ref(0);
 /** Rect of scroller */
@@ -186,11 +188,6 @@ function reset() {
   scrollingRecyclerUpdateFrame = 0;
 }
 
-/** Query height of the recycler */
-function recyclerHeightDOM(): number {
-  return props.recycler?.$el?.scrollHeight ?? 0;
-}
-
 /** Recycler scroll event, must be called by timeline */
 function recyclerScrolled(event: Event | null) {
   // This isn't a renewing timer, it's a scheduled task
@@ -211,7 +208,7 @@ function recyclerScrolled(event: Event | null) {
 /** Update cursor position from recycler scroll position */
 function updateFromRecyclerScroll() {
   // Get the scroll position
-  const scroll = props.recycler?.$el?.scrollTop ?? 0;
+  const scroll = props.recyclerScrollTop;
 
   // Emit scroll event
   const event = {
@@ -256,9 +253,6 @@ async function reflow() {
 function reflowNow() {
   // Ignore if not initialized
   if (!props.recycler?.$el) return;
-
-  // Refresh height of recycler
-  recyclerHeight.value = recyclerHeightDOM();
 
   // Recreate ticks data
   recreate();
@@ -326,9 +320,6 @@ async function adjust() {
 
 /** Do adjustment synchronously */
 function adjustNow() {
-  // Refresh height of recycler
-  recyclerHeight.value = recyclerHeightDOM();
-
   // Exclude hover cursor height
   topPadding.value = hoverCursor.value?.offsetHeight ?? 0;
 
@@ -509,7 +500,7 @@ function getCoords(y: number, field: 'topF' | 'y') {
       top1: topPadding.value,
       top2: props.fullHeight,
       y1: 0,
-      y2: recyclerHeight.value + props.beforeHeight,
+      y2: props.recyclerWrapperHeight + props.beforeHeight,
     };
   }
 
@@ -534,7 +525,7 @@ function getCoords(y: number, field: 'topF' | 'y') {
       top1: tick.topF,
       top2: props.fullHeight,
       y1: tick.y,
-      y2: recyclerHeight.value,
+      y2: props.recyclerWrapperHeight + props.beforeHeight,
     };
   }
 

@@ -26,6 +26,7 @@
         :heads="heads"
         :list="list"
         :before-height="beforeHeight"
+        :recycler-scroll-top="recyclerScrollTop"
         :recycler="recycler"
       />
 
@@ -44,7 +45,6 @@
         :item-size="getRowSize"
         type-field="type"
         :disableTransform="true"
-        :updateInterval="100"
         @update="scrollChangeRecycler"
       >
         <template #before>
@@ -91,6 +91,8 @@
       :rows="list"
       :fullHeight="scrollerHeight"
       :recycler="recycler"
+      :recyclerWrapperHeight="recyclerWrapperHeight"
+      :recyclerScrollTop="recyclerScrollTop"
       :beforeHeight="beforeHeight"
       @interactend="loadScrollView"
       @scroll="
@@ -233,6 +235,10 @@ const currentScroll = ref(0);
 let resizeObserver: ResizeObserver | null = null;
 /** Height of the scroller */
 const scrollerHeight = ref(100);
+/** Scroll height of the recycler */
+const recyclerWrapperHeight = ref(0);
+/** Scroll position of the recycler */
+const recyclerScrollTop = ref(0);
 
 /** Set of dayIds for which images loaded */
 const loadedDays = new Set<number>();
@@ -272,9 +278,6 @@ onMounted(() => {
   // Trigger initial state load
   void routeChange(route);
 
-  // Timeline recycler init.
-  recycler.value?.$el.addEventListener('scroll', scrollPositionChange, { passive: true });
-
   // Observe container and before slot sizes
   if (container.value?.$el) {
     resizeObserver = new ResizeObserver((entries) => {
@@ -295,7 +298,6 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  recycler.value?.$el.removeEventListener('scroll', scrollPositionChange);
   resizeObserver?.disconnect();
 });
 
@@ -667,6 +669,7 @@ function recomputeSizes(load: boolean) {
 function scrollPositionChange(event?: Event) {
   scrollerManager.value?.recyclerScrolled(event ?? null);
 }
+watch(recyclerScrollTop, () => scrollPositionChange());
 
 /** Trigger when recycler view changes (for callback) */
 function scrollChangeRecycler(
@@ -674,7 +677,13 @@ function scrollChangeRecycler(
   endIndex: number,
   visibleStartIndex: number,
   visibleEndIndex: number,
+  scrollTop: number,
+  wrapperHeight: number,
 ) {
+  // These are cheap to read here and don't cause a second layout.
+  recyclerWrapperHeight.value = wrapperHeight;
+  recyclerScrollTop.value = scrollTop;
+
   // Render range overshoots by the top-matter height; visible range accounts for it.
   return scrollChange(visibleStartIndex ?? startIndex, visibleEndIndex ?? endIndex);
 }
@@ -1737,6 +1746,7 @@ function processDayGetState() {
       // Update the scroll position after DOM update.
       if (_scrollDirty && _scrollTop !== null && recycler.value) {
         recycler.value.$el.scrollTop = _scrollTop;
+        recyclerScrollTop.value = _scrollTop;
       }
 
       // Update scrollbar ticks.
