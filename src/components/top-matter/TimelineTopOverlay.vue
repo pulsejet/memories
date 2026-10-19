@@ -1,10 +1,11 @@
 <template>
-  <div class="top-overlay" :class="{ show: !!text }">{{ text }}</div>
+  <div class="top-overlay" :class="{ show: !!text }" v-fast-text="text"></div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 
+import { vFastText } from '@directives/vFastText';
 import * as utils from '@services/utils/common';
 
 import type { IHeadRow, IRow } from '@typings';

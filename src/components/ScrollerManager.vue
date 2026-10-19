@@ -29,7 +29,7 @@
       @touchend.passive="interactend"
       @touchcancel.passive="interactend"
     >
-      <div class="text">{{ hoverCursorText }}</div>
+      <div class="text" v-fast-text="hoverCursorText"></div>
       <div class="icon">
         <ScrollUpIcon v-once :size="22" />
         <ScrollDownIcon v-once :size="22" />
@@ -53,6 +53,7 @@
 import { ref, computed, shallowRef, nextTick, useTemplateRef, toRaw } from 'vue';
 import { useThrottleFn } from '@vueuse/core';
 
+import { vFastText } from '@directives/vFastText';
 import { windowDims } from '@services/viewport';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import * as utils from '@services/utils/common';
