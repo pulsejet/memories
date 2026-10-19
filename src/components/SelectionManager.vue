@@ -179,7 +179,7 @@ let touchTimer = 0;
 let touchMoved = false;
 let touchPrevSel: Selection | null = null;
 let prevOver: IPhoto | null = null;
-let touchScrollInterval = 0;
+let touchScrollInterval = ref(0);
 let touchScrollDelta = 0;
 let touchMoveSelFrame = 0;
 let multiSelectDelta: 1 | -1 | null = null;
@@ -482,8 +482,8 @@ function resetTouchParams() {
   window.clearTimeout(touchTimer);
   touchTimer = 0;
 
-  window.cancelAnimationFrame(touchScrollInterval);
-  touchScrollInterval = 0;
+  window.cancelAnimationFrame(touchScrollInterval.value);
+  touchScrollInterval.value = 0;
 
   window.cancelAnimationFrame(touchMoveSelFrame);
   touchMoveSelFrame = 0;
@@ -550,12 +550,15 @@ function touchmovePhoto(anchor: IPhoto, event: TouchEvent) {
       );
     }
 
-    if (touchAnchor && !touchScrollInterval) {
+    if (touchAnchor && !touchScrollInterval.value) {
       let skipCount = 3;
       let prevFrame = 0;
 
       const fun: FrameRequestCallback = (frame) => {
-        if (!prevTouch) return;
+        if (!prevTouch) {
+          touchScrollInterval.value = 0;
+          return;
+        }
 
         if (prevFrame) {
           // Animation is calibrated on a 120hz display.
@@ -573,21 +576,21 @@ function touchmovePhoto(anchor: IPhoto, event: TouchEvent) {
           skipCount = 0;
         }
 
-        if (touchScrollInterval) {
-          touchScrollInterval = window.requestAnimationFrame(fun);
+        if (touchScrollInterval.value) {
+          touchScrollInterval.value = window.requestAnimationFrame(fun);
         }
       };
-      touchScrollInterval = window.requestAnimationFrame(fun);
+      touchScrollInterval.value = window.requestAnimationFrame(fun);
     }
-  } else if (touchScrollInterval) {
-    window.cancelAnimationFrame(touchScrollInterval);
-    touchScrollInterval = 0;
+  } else if (touchScrollInterval.value) {
+    window.cancelAnimationFrame(touchScrollInterval.value);
+    touchScrollInterval.value = 0;
   }
 
   // Trigger multiselection update in next frame
   // If there's no anchor then this is pointless cause it gets cancelled
   // If already scrolling up/down then the effect will be called anyway
-  if (touchAnchor && !touchScrollInterval && !touchMoveSelFrame) {
+  if (touchAnchor && !touchScrollInterval.value && !touchMoveSelFrame) {
     touchMoveSelFrame = window.requestAnimationFrame(() => {
       touchMoveSelFrame = 0;
       touchMoveSelect(touch, touchAnchorRowIdx.value);
@@ -1105,6 +1108,7 @@ defineExpose({
   clear,
   restoreDay,
   deselect,
+  touchScrollInterval,
 });
 </script>
 

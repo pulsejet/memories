@@ -27,6 +27,7 @@
         :list="list"
         :before-height="beforeHeight"
         :recycler-scroll-top="recyclerScrollTop"
+        :recycler-start-offset="recyclerStartOffset"
         :recycler="recycler"
       />
 
@@ -45,6 +46,7 @@
         :item-size="getRowSize"
         type-field="type"
         :disableTransform="true"
+        :start-offset="recyclerStartOffset"
         @update="scrollChangeRecycler"
       >
         <template #before>
@@ -93,6 +95,7 @@
       :recycler="recycler"
       :recyclerWrapperHeight="recyclerWrapperHeight"
       :recyclerScrollTop="recyclerScrollTop"
+      :recyclerStartOffset="recyclerStartOffset"
       :beforeHeight="beforeHeight"
       @interactend="loadScrollView"
       @scroll="
@@ -239,6 +242,8 @@ const scrollerHeight = ref(100);
 const recyclerWrapperHeight = ref(0);
 /** Scroll position of the recycler */
 const recyclerScrollTop = ref(0);
+/** Pending scroll compensation, flushed on scrollend. */
+const recyclerStartOffset = ref(0);
 
 /** Set of dayIds for which images loaded */
 const loadedDays = new Set<number>();
@@ -278,6 +283,9 @@ onMounted(() => {
   // Trigger initial state load
   void routeChange(route);
 
+  // Schedule a offset flush on scroll end.
+  recycler.value?.$el?.addEventListener('scrollend', flushStartOffset, { passive: true });
+
   // Observe container and before slot sizes
   if (container.value?.$el) {
     resizeObserver = new ResizeObserver((entries) => {
@@ -298,6 +306,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  recycler.value?.$el?.removeEventListener('scrollend', flushStartOffset);
   resizeObserver?.disconnect();
 });
 
@@ -497,7 +506,7 @@ async function createState(signal: AbortSignal) {
   if (restoredBeforeHeight && restoredBeforeHeight !== beforeHeight.value) {
     const element = recycler.value?.$el;
     if (element && element.scrollTop > restoredBeforeHeight) {
-      element.scrollTop += beforeHeight.value - restoredBeforeHeight;
+      recyclerStartOffset.value -= beforeHeight.value - restoredBeforeHeight;
     }
   }
 
@@ -524,6 +533,7 @@ function resetState() {
   currentStart = 0;
   currentEnd = 0;
   currentScroll.value = 0;
+  recyclerStartOffset.value = 0;
   numCols = 0;
   daysIsCache = false;
   loadedDays.clear();
@@ -686,6 +696,29 @@ function scrollChangeRecycler(
 
   // Render range overshoots by the top-matter height; visible range accounts for it.
   return scrollChange(visibleStartIndex ?? startIndex, visibleEndIndex ?? endIndex);
+}
+
+/**
+ * Flush pending start offset into scrollTop.
+ * This is both better for performance and prevents iOS Safari from breaking
+ * momentum scrolling due to scrollTop update, by doing the update at the end.
+ */
+async function flushStartOffset() {
+  if (!recyclerStartOffset.value || !recycler.value) return;
+  const target = recycler.value.$el.scrollTop - recyclerStartOffset.value;
+
+  // Expand the range and wait for DOM update.
+  recyclerStartOffset.value = 0;
+  await nextTick();
+
+  // Convert the virtual offset into real.
+  if (!recycler.value) return;
+  recycler.value.$el.scrollTop = target;
+  recyclerScrollTop.value = recycler.value.$el.scrollTop;
+
+  // Propagate updates to other components.
+  void scrollerManager.value?.adjust();
+  topOverlay.value?.refresh();
 }
 
 /** Trigger when recycler view changes to refresh view */
@@ -1533,7 +1566,7 @@ function processDay(dayId: number, data: IPhoto[]) {
 
   // Get index and Y position of header in O(n)
   let headIdx = 0;
-  let headY = beforeHeight.value;
+  let headY = beforeHeight.value + recyclerStartOffset.value;
   for (const row of toRaw(list.value)) {
     if (row.type === 0 && row.dayId === dayId) break;
     headIdx++;
@@ -1739,6 +1772,17 @@ function processDayGetState() {
       // Force re-calculation of the recycler internal size state.
       if (newState.needAdjust || newState.needReflow) {
         sizesVersion.value++;
+      }
+
+      // Accumulate scroll compensation.
+      if (
+        _scrollDirty &&
+        _scrollTop !== null &&
+        !scrollerManager.value?.interacting &&
+        !selectionManager.value?.touchScrollInterval
+      ) {
+        recyclerStartOffset.value -= _scrollTop - recyclerScrollTop.value;
+        _scrollDirty = false;
       }
 
       // Await yet another tick if we ended up changing layout

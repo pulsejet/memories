@@ -19,6 +19,7 @@ const props = defineProps<{
   list: IRow[];
   beforeHeight: number;
   recyclerScrollTop: number;
+  recyclerStartOffset: number;
   recycler?: VueRecyclerType | null;
 }>();
 
@@ -32,7 +33,7 @@ function getText() {
   if (!props.recycler?.$el || !props.list.length) return;
 
   // Still over the before slot: nothing to show.
-  if (props.recyclerScrollTop < props.beforeHeight) return;
+  if (props.recyclerScrollTop < props.beforeHeight + props.recyclerStartOffset) return;
 
   // Row at the top edge (offsets exclude the before slot).
   const topRowIdx = props.recycler.findItemIndex(props.recyclerScrollTop - props.beforeHeight);

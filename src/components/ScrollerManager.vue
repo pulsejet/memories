@@ -83,6 +83,8 @@ const props = defineProps<{
   recyclerWrapperHeight: number;
   /** Scroll position of the recycler component */
   recyclerScrollTop: number;
+  /** Pending start offset compensation */
+  recyclerStartOffset: number;
   /** Recycler before slot component height */
   beforeHeight: number;
 }>();
@@ -335,7 +337,7 @@ function adjustNow() {
   // y position. When you hit a row with the tick, update y and
   // top values and move to the next tick.
   let tickId = 0;
-  let y = props.beforeHeight;
+  let y = props.beforeHeight + props.recyclerStartOffset;
   let count = 0;
 
   // We only need to recompute top and visible ticks if count

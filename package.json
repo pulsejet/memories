@@ -46,7 +46,7 @@
     "@nextcloud/vue": "^9.13.1",
     "@photo-sphere-viewer/core": "^5.11.1",
     "@photo-sphere-viewer/visible-range-plugin": "^5.15.1",
-    "@radialapps/vue-virtual-scroller": "^3.0.5-3",
+    "@radialapps/vue-virtual-scroller": "3.0.5-4",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
     "@vueuse/core": "^15.0.0",
     "dequal": "^2.0.3",
