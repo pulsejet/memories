@@ -119,9 +119,9 @@ const scrollingRecyclerTimer = new RenewingTimeout();
 /** Scrolling recycler now */
 const scrollingRecyclerNowTimer = new RenewingTimeout();
 /** Recycler scrolling throttle */
-const scrollingRecyclerUpdateTimer = ref(0);
+let scrollingRecyclerUpdateTimer = 0;
 /** Recycler scrolling animation frame */
-const scrollingRecyclerUpdateFrame = ref(0);
+let scrollingRecyclerUpdateFrame = 0;
 /** View size reflow requested */
 let reflowRequest = false;
 /** Tick adjust requested */
@@ -180,10 +180,10 @@ function reset() {
   scrollingNowTimer.clear();
   scrollingRecyclerTimer.clear();
   scrollingRecyclerNowTimer.clear();
-  clearTimeout(scrollingRecyclerUpdateTimer.value);
-  scrollingRecyclerUpdateTimer.value = 0;
-  cancelAnimationFrame(scrollingRecyclerUpdateFrame.value);
-  scrollingRecyclerUpdateFrame.value = 0;
+  clearTimeout(scrollingRecyclerUpdateTimer);
+  scrollingRecyclerUpdateTimer = 0;
+  cancelAnimationFrame(scrollingRecyclerUpdateFrame);
+  scrollingRecyclerUpdateFrame = 0;
 }
 
 /** Query height of the recycler */
@@ -194,11 +194,11 @@ function recyclerHeightDOM(): number {
 /** Recycler scroll event, must be called by timeline */
 function recyclerScrolled(event: Event | null) {
   // This isn't a renewing timer, it's a scheduled task
-  if (scrollingRecyclerUpdateTimer.value || scrollingRecyclerUpdateFrame.value) return;
-  scrollingRecyclerUpdateTimer.value = window.setTimeout(() => {
-    scrollingRecyclerUpdateTimer.value = 0;
-    scrollingRecyclerUpdateFrame.value = window.requestAnimationFrame(() => {
-      scrollingRecyclerUpdateFrame.value = 0;
+  if (scrollingRecyclerUpdateTimer || scrollingRecyclerUpdateFrame) return;
+  scrollingRecyclerUpdateTimer = window.setTimeout(() => {
+    scrollingRecyclerUpdateTimer = 0;
+    scrollingRecyclerUpdateFrame = window.requestAnimationFrame(() => {
+      scrollingRecyclerUpdateFrame = 0;
       updateFromRecyclerScroll();
     });
   }, 100);
