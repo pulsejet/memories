@@ -61,10 +61,10 @@
         <template v-slot="{ item, index }">
           <RowHead v-if="item.type === 0" :item="item" @click="selectionManager?.selectHead(item)" />
 
-          <template v-else>
+          <template v-else-if="item.type === 1">
             <Photo
               class="photo top-left"
-              v-for="photo of item.photos ?? []"
+              v-for="photo of item.photos"
               :key="photo.key"
               :style="{
                 height: `${photo.dispH}px`,
@@ -193,7 +193,7 @@ const sizesVersion = ref(0);
 /** Resolve row key without tracking row fields. */
 const getRowKey = (row: IRow): string => {
   void sizesVersion.value; // dependency
-  return row.id!; // non-reactive
+  return row.id; // non-reactive
 };
 /** Resolve row size without tracking row fields. */
 const getRowSize = (row: IRow): number => {
@@ -354,7 +354,7 @@ const savedView = computed<IDay[]>({
       haslocal: day.haslocal,
       savedRows: (day.rows ?? []).map((row) => ({
         size: row.size,
-        pct: row.pct ?? row.photos?.length ?? 0,
+        pct: row.pct ?? row.photos.length,
       })),
     }));
   },
@@ -444,7 +444,7 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
 
     // Scroll to photo if initializing, or if just a scroll change.
     if (!from || fragment.day) {
-      const index = list.value.findIndex((r) => r.day.dayid === dayid && r.photos?.includes(photo));
+      const index = list.value.findIndex((r) => r.type === 1 && r.day.dayid === dayid && r.photos.includes(photo));
       if (index !== -1) {
         recycler.value?.scrollToItem(index);
       }
@@ -706,8 +706,8 @@ function scrollChange(startIndex: number, endIndex: number, force = false) {
   const rmin = Math.max(0, startIndex - ROW_NUM_LPAD);
   const rmax = Math.min(list.value.length, endIndex + ROW_NUM_LPAD);
   for (let i = rmin; i < rmax; i++) {
-    const row = list.value[i] as IPhotoRow;
-    if (row.type !== 1 || !row.pct || row.photos.length) {
+    const row = list.value[i];
+    if (!row || row.type !== 1 || !row.pct || row.photos.length) {
       continue;
     }
 
@@ -1108,8 +1108,8 @@ async function processDays(data: IDay[], cache: boolean, signal?: AbortSignal) {
         if (prevRows[i].pct !== undefined) {
           row.pct = prevRows[i].pct;
         } else {
-          if (prevRows[i].photos?.length) {
-            row.photos.push(...prevRows[i].photos!);
+          if (prevRows[i].photos.length) {
+            row.photos.push(...prevRows[i].photos);
           }
           delete row.pct;
         }
@@ -1505,7 +1505,7 @@ function processDay(dayId: number, data: IPhoto[]) {
 
   // Reset rows including placeholders
   for (const row of day.rows) {
-    row.photos!.length = 0;
+    row.photos.length = 0;
   }
 
   // Force all to square
@@ -1535,7 +1535,7 @@ function processDay(dayId: number, data: IPhoto[]) {
   let headIdx = 0;
   let headY = beforeHeight.value;
   for (const row of toRaw(list.value)) {
-    if (row.dayId === dayId && row.type === 0) break;
+    if (row.type === 0 && row.dayId === dayId) break;
     headIdx++;
     headY += row.size;
   }
@@ -1550,7 +1550,7 @@ function processDay(dayId: number, data: IPhoto[]) {
   const seen = new Map<number, number>();
 
   // Check if some rows were added
-  let addedRows: IRow[] = [];
+  let addedRows: IPhotoRow[] = [];
 
   // Previous justified row
   let prevJustifyTop = justify[0]?.top ?? 0;
@@ -1565,6 +1565,7 @@ function processDay(dayId: number, data: IPhoto[]) {
     if (!row || row.type === 0) {
       const newRow = addRow(day);
       addedRows.push(newRow);
+      row = newRow;
 
       // Scroll down if new row is above the current visible position
       if (rowY < state.scrollTop) {
@@ -1656,7 +1657,7 @@ function processDay(dayId: number, data: IPhoto[]) {
     }
 
     // Add photo to row
-    row.photos!.push(photo);
+    row.photos.push(photo);
     delete row.pct;
   }
 
@@ -1698,8 +1699,10 @@ function processDay(dayId: number, data: IPhoto[]) {
     }
 
     // Remove from day
-    const idx = day.rows.indexOf(row);
-    if (idx >= 0) day.rows.splice(idx, 1);
+    if (row.type === 1) {
+      const idx = day.rows.indexOf(row);
+      if (idx >= 0) day.rows.splice(idx, 1);
+    }
   }
 
   // Mark structural changes.

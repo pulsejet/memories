@@ -24,8 +24,8 @@ declare module '@typings' {
     dayid: number;
     /** Number of photos in this day */
     count: number;
-    /** Rows in the day */
-    rows?: IRow[];
+    /** Photo rows in the day */
+    rows?: IPhotoRow[];
     /** Saved row geometry for route restoration (client-only) */
     savedRows?: IRowSavedState[];
     /** List of photos for this day */

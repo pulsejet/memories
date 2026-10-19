@@ -71,7 +71,7 @@ import RotateLeftIcon from 'vue-material-design-icons/RotateLeft.vue';
 import ImageCheckIcon from 'vue-material-design-icons/ImageCheck.vue';
 import RefreshIcon from 'vue-material-design-icons/Refresh.vue';
 
-import type { IDay, IHeadRow, IPhoto, IRow, IUploadNativeX } from '@typings';
+import type { IDay, IHeadRow, IPhoto, IPhotoRow, IRow, IUploadNativeX } from '@typings';
 import type ScrollerManager from './ScrollerManager.vue';
 
 /**
@@ -637,25 +637,30 @@ function touchMoveSelect(touch: Touch, rowIdx: number) {
     const newSelection = touchPrevSel!.clone();
     const updatedDays = new Set<number>();
 
+    // Check if this is a PhotoRow.
+    const prAt = (idx: number): IPhotoRow | null => {
+      return props.rows[idx]?.type === 1 ? props.rows[idx] : null;
+    };
+
     // Walk over rows
     let i = rowIdx;
-    let j = props.rows[i].photos?.indexOf(touchAnchor) ?? -2;
+    let j = prAt(i)?.photos.indexOf(touchAnchor) ?? -2;
     if (j === -2) return; // row is not initialized yet?!
     while (true) {
       if (j < 0) {
-        while (i > 0 && !props.rows[--i].photos);
-        const plen = props.rows[i].photos?.length;
+        while (i > 0 && !prAt(--i)?.photos);
+        const plen = prAt(i)?.photos.length;
         if (!plen) break;
         j = plen - 1;
         continue;
-      } else if (j >= props.rows[i].photos!.length) {
-        while (i < props.rows.length - 1 && !props.rows[++i].photos);
-        if (!props.rows[i].photos) break;
+      } else if (j >= prAt(i)!.photos.length) {
+        while (i < props.rows.length - 1 && !prAt(++i)?.photos);
+        if (!prAt(i)?.photos) break;
         j = 0;
         continue;
       }
 
-      const photo = props.rows[i]?.photos?.[j];
+      const photo = prAt(i)?.photos[j];
       if (!photo) break; // shouldn't happen, ever
 
       // This is there now
@@ -715,7 +720,8 @@ function selectPhoto(photo: IPhoto, val?: boolean, noUpdate?: boolean) {
 /** Multi-select */
 function selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
   const pRow = rows[rowIdx];
-  const pIdx = pRow.photos?.indexOf(photo) ?? -1;
+  if (!pRow || pRow.type !== 1) return;
+  const pIdx = pRow.photos.indexOf(photo);
   if (pIdx === -1) return;
 
   // Set of dayIds to update at the end of this method
@@ -739,7 +745,7 @@ function selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
       if (row.type !== 1) continue; // skip non-photo rows
 
       // Give up if unloaded rows are found
-      if (!row.photos?.length) break;
+      if (!row.photos.length) break;
 
       // Iterate photos in this row from the end
       const j_s = i === rowIdx ? pIdx : delta < 0 ? row.photos.length - 1 : 0; // j-start
@@ -821,7 +827,7 @@ function selectMulti(photo: IPhoto, rows: IRow[], rowIdx: number) {
 function selectHead(head: IHeadRow) {
   head.state.selected = !head.state.selected;
   for (const row of head.day.rows ?? []) {
-    for (const photo of row.photos ?? []) {
+    for (const photo of row.photos) {
       selectPhoto(photo, head.state.selected, true);
     }
   }
@@ -834,7 +840,7 @@ function updateHeadSelected(head: IHeadRow) {
 
   // Check if all photos are selected
   for (const row of head.day.rows ?? []) {
-    for (const photo of row.photos ?? []) {
+    for (const photo of row.photos) {
       if (!(photo.flag & constants.FLAG_SELECTED)) {
         selected = false;
         break;
