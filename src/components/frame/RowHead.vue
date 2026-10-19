@@ -7,12 +7,10 @@
     }"
     :style="{ height: `${item.size}px` }"
   >
-    <div class="super" v-if="item.super !== undefined">
-      {{ item.super }}
-    </div>
+    <div class="super" v-if="item.super" v-fast-text="item.super"></div>
     <div class="main" @click="click">
       <CheckCircle v-once :size="20" class="select" />
-      <span class="name"> {{ name }} </span>
+      <span class="name" v-fast-text="name"></span>
     </div>
   </div>
 </template>
@@ -20,11 +18,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
+import { vFastText } from '@directives/vFastText';
 import * as utils from '@services/utils/common';
 
-import type { IHeadRow } from '@typings';
-
 import CheckCircle from 'vue-material-design-icons/CheckCircle.vue';
+
+import type { IHeadRow } from '@typings';
 
 defineOptions({
   name: 'RowHead',
@@ -57,6 +56,7 @@ function click() {
   > div {
     position: relative;
     &.super {
+      contain: layout style;
       font-size: 1.4em;
       font-weight: bold;
       margin-bottom: 4px;

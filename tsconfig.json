@@ -20,6 +20,7 @@
       "@assets": ["./src/assets"],
       "@assets/*": ["./src/assets/*"],
       "@components/*": ["./src/components/*"],
+      "@directives/*": ["./src/directives/*"],
       "@native": ["./src/native", "./src/native/*"],
       "@native/*": ["./src/native/*"]
     }
