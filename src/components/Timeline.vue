@@ -224,9 +224,9 @@ let _processDayState: {
 } | null = null;
 
 /** Current start index */
-const currentStart = ref(0);
+let currentStart = 0;
 /** Current end index */
-const currentEnd = ref(0);
+let currentEnd = 0;
 /** Current physical scroll position */
 const currentScroll = ref(0);
 /** Resize observer on the outer container and before slot */
@@ -503,7 +503,7 @@ async function createState(signal: AbortSignal) {
   scrollerManager.value?.reflow();
 
   // Fire the initial scroll change to load the visible rows.
-  scrollChange(currentStart.value, currentEnd.value, true);
+  scrollChange(currentStart, currentEnd, true);
 
   // Restored geometry already provides the initial view. An older days cache
   // could remove days, shrink the timeline and clamp the restored scroll.
@@ -519,8 +519,8 @@ function resetState() {
   loading.value = 0;
   list.value = [];
   heads.value = new Map();
-  currentStart.value = 0;
-  currentEnd.value = 0;
+  currentStart = 0;
+  currentEnd = 0;
   currentScroll.value = 0;
   numCols = 0;
   daysIsCache = false;
@@ -683,13 +683,13 @@ function scrollChangeRecycler(
 function scrollChange(startIndex: number, endIndex: number, force = false) {
   // Defer during state restoration till layout.
   if (!numCols) {
-    currentStart.value = startIndex;
-    currentEnd.value = endIndex;
+    currentStart = startIndex;
+    currentEnd = endIndex;
     return;
   }
 
   // Check if we reached the start or end.
-  if (startIndex === currentStart.value && endIndex === currentEnd.value && !force) {
+  if (startIndex === currentStart && endIndex === currentEnd && !force) {
     return;
   }
 
@@ -727,8 +727,8 @@ function scrollChange(startIndex: number, endIndex: number, force = false) {
   const scrolling = scrollerManager.value?.interacting;
 
   // Make sure we don't do this too often
-  currentStart.value = startIndex;
-  currentEnd.value = endIndex;
+  currentStart = startIndex;
+  currentEnd = endIndex;
 
   // Check if we can do this immediately
   const delay = force || !scrolling ? 0 : SCROLL_LOAD_DELAY;
@@ -743,8 +743,8 @@ function loadScrollView(startIndex?: number, endIndex?: number) {
   if (!numCols) return;
 
   // Default values if not defined
-  startIndex ??= currentStart.value;
-  endIndex ??= currentEnd.value;
+  startIndex ??= currentStart;
+  endIndex ??= currentEnd;
 
   // Check if any side needs a padding.
   // Whenever less than half rows are loaded, we need to pad with full
@@ -1140,7 +1140,7 @@ async function processDays(data: IDay[], cache: boolean, signal?: AbortSignal) {
   scrollPositionChange();
 
   // Trigger a view refresh. This will load any new placeholders too.
-  scrollChange(currentStart.value, currentEnd.value, true);
+  scrollChange(currentStart, currentEnd, true);
 }
 
 /** API url for Day call */
