@@ -58,6 +58,8 @@ OC.L10N.register(
     "Add to album" : "Добавяне към албум",
     "Move to person" : "Преместване към лице",
     "Remove from person" : "Премахване от лице",
+    "Restore" : "Възстановяне",
+    "Delete permanently" : "Изтрий завинаги",
     "Failed to download files" : "Неуспешно изтегляне на файлове",
     "You must enable \"Mark person in preview\" to use this feature" : "За да използвате тази функция, трябва да активирате \"Маркиране на лице в предварителен преглед\".",
     "Only user \"{user}\" can update this person" : "Само потребителят \"{user}\" може да актуализира това лице",

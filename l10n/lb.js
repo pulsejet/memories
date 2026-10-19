@@ -50,6 +50,7 @@ OC.L10N.register(
     "Value" : "Wäert",
     "Text" : "Text",
     "Size" : "Gréisst",
+    "Shared by {user}" : "Gedeelt vu(n) {user}",
     "Setup" : "Setup",
     "Yes" : "Jo",
     "No" : "Nee",

@@ -61,7 +61,7 @@
     "Move to person" : "Mover para pessoa",
     "Remove from person" : "Remover da pessoa",
     "Restore" : "Restaurar",
-    "Delete permanently" : "Excluir permanentemente",
+    "Delete permanently" : "Excluir definitivamente",
     "Failed to download files" : "Falha ao baixar arquivos",
     "You must enable \"Mark person in preview\" to use this feature" : "Você deve ativar \"Marcar pessoa na visualização\" para usar este recurso",
     "Only user \"{user}\" can update this person" : "Apenas o usuário \"{user}\" pode atualizar esta pessoa",
@@ -472,6 +472,7 @@
     "Unidentified location" : "Localização não identificada",
     "Files without location" : "Arquivos sem localização",
     "Empty trash?" : "Esvaziar a lixeira?",
+    "All files in trash will be permanently deleted. This action cannot be undone." : "Todos os arquivos na lixeira serão excluídos permanentemente. Essa ação não pode ser desfeita.",
     "Empty trash" : "Esvaziar lixeira",
     "Upload not permitted" : "Upload não permitido",
     "_Skipped {n} file that already exists_::_Skipped {n} files that already exist_" : ["Ignorou {n} arquivo que já existe","Ignorou {n} de arquivos que já existem","Ignorou {n} arquivos que já existem"],
@@ -633,7 +634,9 @@
     "Failed to set cover image" : "Falha ao definir a imagem da capa",
     "No content-location header found" : "Cabeçalho Content-Location não encontrado",
     "Failed to create tag {name}: {error}" : "Falha ao criar a etiqueta {name}: {error}",
+    "Failed to restore {fileName}." : "Falha ao restaurar {fileName}.",
     "Trash emptied" : "Lixeira esvaziada",
+    "Failed to empty trash." : "Falha ao esvaziar a lixeira.",
     "Top results" : "Principais resultados",
     "Shared Folder" : "Pasta Compartilhada",
     "Setup" : "Configuração",
@@ -649,6 +652,7 @@
     "This will not delete your original files." : "Isso não excluirá seus arquivos originais.",
     "_You are about to download {count} item._::_You are about to download {count} items._" : ["Você está prestes a baixar {count} item.","Você está prestes a baixar {count} de itens.","Você está prestes a baixar {count} itens."],
     "_You are about to move {count} item._::_You are about to move {count} items._" : ["Você está prestes a mover {count} item.","Você está prestes a mover {count} de itens.","Você está prestes a mover {count} itens."],
+    "_Delete {count} item permanently?_::_Delete {count} items permanently?_" : ["Deseja excluir {count} item definitivamente?","Deseja excluir {count} de itens definitivamente?","Deseja excluir {count} itens definitivamente?"],
     "This action cannot be undone." : "Esta ação não pode ser desfeita."
 },"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }

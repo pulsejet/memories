@@ -22,6 +22,8 @@ OC.L10N.register(
     "Favorite" : "Абранае",
     "View in folder" : "Праглядзець у папцы",
     "Add to album" : "Дадаць у альбом",
+    "Restore" : "Аднавіць",
+    "Delete permanently" : "Выдаліць назаўжды",
     "Cancel" : "Скасаваць",
     "_{n} selected_::_{n} selected_" : ["Выбраны {n}","Выбраны {n}","Выбрана {n}","Выбрана {n}"],
     "General" : "Агульныя",

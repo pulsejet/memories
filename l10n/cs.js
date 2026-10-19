@@ -59,6 +59,8 @@ OC.L10N.register(
     "Add to album" : "Přidat do alba",
     "Move to person" : "Přesunout pod osobu",
     "Remove from person" : "Odebrat z osoby",
+    "Restore" : "Obnovit",
+    "Delete permanently" : "Nevratně smazat",
     "Failed to download files" : "Soubory se nepodařilo stáhnout",
     "You must enable \"Mark person in preview\" to use this feature" : "Aby bylo možné používat tuto funkci, je třeba zapnout „Označovat osobu v náhledu",
     "Only user \"{user}\" can update this person" : "Tuto osobu může aktualizovat pouze uživatel „{user}“",
@@ -582,6 +584,7 @@ OC.L10N.register(
     "Failed to set cover image" : "Nepodařilo se nastavit obrázek na přebal",
     "No content-location header found" : "Nenalezena žádná hlavička content-location (umístění obsahu)",
     "Failed to create tag {name}: {error}" : "Nepodařilo se vytvořit štítek {name}: {error}",
+    "Trash emptied" : "Koš vyprázdněn",
     "Shared Folder" : "Sdílená složka",
     "Setup" : "Nastavení",
     "Memories has been updated to {version}. Reload to get the new version." : "Vzpomínky byly zaktualizovány na {version}. Načtěte stránku znovu, aby se změna projevila.",
@@ -593,6 +596,7 @@ OC.L10N.register(
     "_Move {count} item to trash?_::_Move {count} items to trash?_" : ["Přesunout {count} položku do Koše?","Přesunout {count} položky do Koše?","Přesunout {count} položek do Koše?","Přesunout {count} položky do Koše?"],
     "Files in trash may be automatically deleted after a fixed period of time." : "Soubory v Koši budou po dané době automaticky smazány.",
     "_Remove {count} item from album?_::_Remove {count} items from album?_" : ["Odebrat {count} položku z alba?","Odebrat {count} položky z alba?","Odebrat {count} položek z alba?","Odebrat {count} položky z alba?"],
-    "This will not delete your original files." : "Toto nesmaže vaše původní soubory."
+    "This will not delete your original files." : "Toto nesmaže vaše původní soubory.",
+    "This action cannot be undone." : "Tuto akci není možné vzít zpět."
 },
 "nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;");

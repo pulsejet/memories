@@ -474,6 +474,7 @@ OC.L10N.register(
     "Unidentified location" : "Неустановленное местоположение",
     "Files without location" : "Файлы без местоположения",
     "Empty trash?" : "Очистить корзину?",
+    "All files in trash will be permanently deleted. This action cannot be undone." : "Все файлы в корзине будут удалены навсегда. Это действие нельзя отменить.",
     "Empty trash" : "Очистить корзину",
     "Upload not permitted" : "Загрузка не разрешена",
     "_Skipped {n} file that already exists_::_Skipped {n} files that already exist_" : ["Пропущен {n} файл, который уже есть","Пропущено {n} файла, которые уже есть","Пропущено {n} файлов, которые уже есть","Пропущено {n} файла, которые уже есть"],
@@ -635,7 +636,9 @@ OC.L10N.register(
     "Failed to set cover image" : "Не удалось установить обложку",
     "No content-location header found" : "Заголовок content-location не найден",
     "Failed to create tag {name}: {error}" : "Не удалось создать метку «{name}»: {error}",
+    "Failed to restore {fileName}." : "Не удалось восстановить {fileName}.",
     "Trash emptied" : "Корзина очищена",
+    "Failed to empty trash." : "Не удалось очистить корзину.",
     "Top results" : "Лучшие результаты",
     "Shared Folder" : "Общая папка",
     "Setup" : "Настройка",
@@ -651,6 +654,7 @@ OC.L10N.register(
     "This will not delete your original files." : "Исходные файлы удалены не будут.",
     "_You are about to download {count} item._::_You are about to download {count} items._" : ["Будет скачан {count} элемент.","Будет скачано {count} элемента.","Будет скачано {count} элементов.","Будет скачано {count} элемента."],
     "_You are about to move {count} item._::_You are about to move {count} items._" : ["Будет перемещён {count} элемент.","Будет перемещено {count} элемента.","Будет перемещено {count} элементов.","Будет перемещено {count} элемента."],
+    "_Delete {count} item permanently?_::_Delete {count} items permanently?_" : ["Удалить {count} элемент навсегда?","Удалить {count} элемента навсегда?","Удалить {count} элементов навсегда?","Удалить {count} элемента навсегда?"],
     "This action cannot be undone." : "Это действие нельзя отменить."
 },
 "nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);");

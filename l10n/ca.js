@@ -29,6 +29,8 @@ OC.L10N.register(
     "Unarchive" : "Desbloquejar",
     "View in folder" : "Visualitza-ho a la carpeta",
     "Add to album" : "Afegeix a l'àlbum",
+    "Restore" : "Restaura",
+    "Delete permanently" : "Suprimir permanentment",
     "Cancel" : "Cancel·la",
     "General" : "General",
     "On This Day" : "Aquest mateix dia",
@@ -214,6 +216,7 @@ OC.L10N.register(
     "Yes" : "Sí",
     "No" : "No",
     "Choose {file}" : "Tria {file}",
-    "Choose" : "Tria"
+    "Choose" : "Tria",
+    "This action cannot be undone." : "Aquesta acció no es pot desfer."
 },
 "nplurals=2; plural=(n != 1);");

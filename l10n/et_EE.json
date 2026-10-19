@@ -61,7 +61,7 @@
     "Move to person" : "Tõsta konkreetse inimese juurde",
     "Remove from person" : "Eemalda konkreetse inimese juurest",
     "Restore" : "Taasta",
-    "Delete permanently" : "Kustuta jäädavalt",
+    "Delete permanently" : "Kustuta lõplikult",
     "Failed to download files" : "Faili allalaadimine ei õnnestunud",
     "You must enable \"Mark person in preview\" to use this feature" : "Selle funktsionaalsuse kasutamiseks palun lülita sisse eelistus „Märgi eelvaates nähtav inimene“",
     "Only user \"{user}\" can update this person" : "Vaid kasutaja „{user}“ võib selle isiku andmeid uuendada",
@@ -472,6 +472,7 @@
     "Unidentified location" : "Määratlemata asukoht",
     "Files without location" : "Ilma asukohata failid",
     "Empty trash?" : "Kas tühjendad prügikasti?",
+    "All files in trash will be permanently deleted. This action cannot be undone." : "Kogu prügikasti sisu kustutatakse lõplikult. Seda tegevust ei saa tagasi pöörata.",
     "Empty trash" : "Tühjenda prügikast",
     "Upload not permitted" : "Üleslaadimine pole lubatud",
     "_Skipped {n} file that already exists_::_Skipped {n} files that already exist_" : ["Jätsin vahele {n} faili, mis juba on olemas","Jätsin vahele {n} faili, mis juba on olemas"],
@@ -633,7 +634,9 @@
     "Failed to set cover image" : "Kaanepildi lisamine ei õnnestunud",
     "No content-location header found" : "Ühtegi „content-location“ päisekirjet ei leidu",
     "Failed to create tag {name}: {error}" : "{name} sildi loomine ei õnnestunud: {error}",
+    "Failed to restore {fileName}." : "{fileName} faili taastamine ei õnnestunud.",
     "Trash emptied" : "Tegid prügikasti tühjaks",
+    "Failed to empty trash." : "Prügikasti tühjendamine ei õnnestunud",
     "Top results" : "Olulisemad tulemused",
     "Shared Folder" : "Jagatud kaust",
     "Setup" : "Seadista",
@@ -649,6 +652,7 @@
     "This will not delete your original files." : "Sellega sa ei kustuta algseid faile.",
     "_You are about to download {count} item._::_You are about to download {count} items._" : ["Sa oled laadimas alla {count} objekti.","Sa oled laadimas alla {count} objekti."],
     "_You are about to move {count} item._::_You are about to move {count} items._" : ["Sa oled teisaldamas {count} objekti.","Sa oled teisaldamas {count} objekti."],
+    "_Delete {count} item permanently?_::_Delete {count} items permanently?_" : ["Kas kustutad {count} objekti lõplikult?","Kas kustutad {count} objekti lõplikult?"],
     "This action cannot be undone." : "Seda tegevust ei saa tagasi võtta."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

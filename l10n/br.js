@@ -13,6 +13,7 @@ OC.L10N.register(
     "Share" : "Rannan",
     "Favorite" : "Pennrollañ",
     "View in folder" : "Diskwel en teuliad",
+    "Delete permanently" : "Dilemel da viken",
     "Cancel" : "Nullañ",
     "General" : "Hollek",
     "Account" : "Kont",

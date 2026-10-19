@@ -61,6 +61,7 @@
     "Move to person" : "Zu einer Person verschieben",
     "Remove from person" : "Von der Person entfernen",
     "Restore" : "Wiederherstellen",
+    "Delete permanently" : "Endgültig löschen",
     "Failed to download files" : "Dateien konnten nicht heruntergeladen werden",
     "You must enable \"Mark person in preview\" to use this feature" : "Sie müssen \"Person in Vorschau markieren\" aktivieren, um diese Funktion nutzen zu können",
     "Only user \"{user}\" can update this person" : "Nur der Benutzer \"{user}\" kann diese Person aktualisieren",
@@ -471,6 +472,7 @@
     "Unidentified location" : "Unbekannter Standort",
     "Files without location" : "Dateien ohne Standort",
     "Empty trash?" : "Papierkorb leeren?",
+    "All files in trash will be permanently deleted. This action cannot be undone." : "Alle Dateien im Papierkorb werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
     "Empty trash" : "Papierkorb leeren",
     "Upload not permitted" : "Hochladen unzulässig",
     "_Skipped {n} file that already exists_::_Skipped {n} files that already exist_" : ["{n} Datei übersprungen, die bereits existiert","{n} Dateien übersprungen, die bereits existieren"],
@@ -632,7 +634,9 @@
     "Failed to set cover image" : "Titelbild konnte nicht festgelegt werden",
     "No content-location header found" : "Kein Content-Location-Header gefunden",
     "Failed to create tag {name}: {error}" : "Schlagwort {name} konnte nicht erstellt werden. Fehler: {error}",
+    "Failed to restore {fileName}." : "{fileName} konnte nicht wiederhergestellt werden.",
     "Trash emptied" : "Papierkorb geleert",
+    "Failed to empty trash." : "Papierkorb konnte nicht geleert werden.",
     "Top results" : "Top-Ergebnisse",
     "Shared Folder" : "Geteilter Ordner",
     "Setup" : "Einrichten",
@@ -648,6 +652,7 @@
     "This will not delete your original files." : "Dies wird ihre Originaldateien nicht löschen.",
     "_You are about to download {count} item._::_You are about to download {count} items._" : ["Sie sind dabei, {count} Element herunterzuladen.","Sie sind dabei, {count} Elemente herunterzuladen."],
     "_You are about to move {count} item._::_You are about to move {count} items._" : ["Sie sind dabei, {count} Element zu verschieben.","Sie sind dabei, {count} Elemente zu verschieben."],
+    "_Delete {count} item permanently?_::_Delete {count} items permanently?_" : ["{count}  Element endgültig löschen?","{count} Elemente endgültig löschen?"],
     "This action cannot be undone." : "Dies kann nicht rückgängig gemacht werden."
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
