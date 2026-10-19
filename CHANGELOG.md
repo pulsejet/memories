@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - **Feature**: Trash view to restore or permanently delete photos ([#208](https://github.com/pulsejet/memories/issues/208))
+- Performance improvements and bug fixes.
+- Improved scrolling UX on mobile.
 
 ## [v10.1.0] - 2026-10-14
 
