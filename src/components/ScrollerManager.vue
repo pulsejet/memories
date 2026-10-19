@@ -254,6 +254,17 @@ function reflowNow() {
   // Ignore if not initialized
   if (!props.recycler?.$el) return;
 
+  // Exclude hover cursor height
+  topPadding.value = hoverCursor.value?.offsetHeight ?? 0;
+
+  // Add extra padding for any top elements (top matter, mobile header)
+  scroller.value
+    ?.closest('.memories-timeline.container')
+    ?.querySelectorAll('.timeline-scroller-gap')
+    .forEach((el) => {
+      topPadding.value += el.clientHeight + 1;
+    });
+
   // Recreate ticks data
   recreate();
 
@@ -320,17 +331,6 @@ async function adjust() {
 
 /** Do adjustment synchronously */
 function adjustNow() {
-  // Exclude hover cursor height
-  topPadding.value = hoverCursor.value?.offsetHeight ?? 0;
-
-  // Add extra padding for any top elements (top matter, mobile header)
-  scroller.value
-    ?.closest('.memories-timeline.container')
-    ?.querySelectorAll('.timeline-scroller-gap')
-    .forEach((el) => {
-      topPadding.value += el.clientHeight + 1;
-    });
-
   // Start with the first tick. Walk over all rows counting the
   // y position. When you hit a row with the tick, update y and
   // top values and move to the next tick.
