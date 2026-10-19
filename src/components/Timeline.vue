@@ -707,11 +707,12 @@ async function flushStartOffset() {
   if (!recyclerStartOffset.value || !recycler.value) return;
   const target = recycler.value.$el.scrollTop - recyclerStartOffset.value;
 
-  // Expand the range and wait for DOM update.
+  // Expand the range and convert virtual offset into real.
   recyclerStartOffset.value = 0;
+  recycler.value.$el.scrollTop = target;
   await nextTick();
 
-  // Convert the virtual offset into real.
+  // Do it again in case previous update got clamped.
   if (!recycler.value) return;
   recycler.value.$el.scrollTop = target;
   recyclerScrollTop.value = recycler.value.$el.scrollTop;
