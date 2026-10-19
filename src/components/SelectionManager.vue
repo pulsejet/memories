@@ -173,6 +173,7 @@ const selection = ref(new Selection());
 const numLocal = ref(0);
 
 let touchAnchor: IPhoto | null = null;
+let touchAnchorRow: IRow | null = null;
 let prevTouch: Touch | null = null;
 let touchTimer = 0;
 let touchMoved = false;
@@ -182,6 +183,21 @@ let touchScrollInterval = 0;
 let touchScrollDelta = 0;
 let touchMoveSelFrame = 0;
 let multiSelectDelta: 1 | -1 | null = null;
+
+const touchAnchorRowIdx = {
+  _v: -1,
+  get value(): number {
+    if (!touchAnchorRow) {
+      this._v = -1;
+    } else if (props.rows[this._v] !== touchAnchorRow) {
+      this._v = props.rows.indexOf(touchAnchorRow);
+    }
+    return this._v;
+  },
+  set value(val: number) {
+    this._v = val;
+  },
+};
 
 const defaultActions: ISelectionAction[] = [
   {
@@ -414,6 +430,8 @@ function touchstartPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
   resetTouchParams();
 
   touchAnchor = photo;
+  touchAnchorRow = props.rows[rowIdx];
+  touchAnchorRowIdx.value = rowIdx;
   prevOver = photo;
   prevTouch = event.touches[0];
   touchPrevSel = selection.value.clone();
@@ -427,13 +445,13 @@ function touchstartPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
 }
 
 /** Tap off */
-function touchendPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
+function touchendPhoto(photo: IPhoto, event: TouchEvent) {
   if (photo.flag & constants.FLAG_PLACEHOLDER) return;
-  delete props.rows[rowIdx].virtualSticky;
+  delete touchAnchorRow?.virtualSticky;
 
   if (touchTimer && !touchMoved) {
     // Register a single tap, only if the touch hadn't moved at all
-    clickPhoto(photo, null, rowIdx);
+    clickPhoto(photo, null, touchAnchorRowIdx.value);
   }
 
   resetTouchParams();
@@ -441,6 +459,8 @@ function touchendPhoto(photo: IPhoto, event: TouchEvent, rowIdx: number) {
 
 function resetTouchParams() {
   touchAnchor = null;
+  touchAnchorRow = null;
+  touchAnchorRowIdx.value = -1;
   touchMoved = false;
   prevOver = null;
 
@@ -458,9 +478,9 @@ function resetTouchParams() {
 
 /**
  * Tap over
- * photo and rowIdx are that of the *anchor*
+ * @param photo is the *anchor*
  */
-function touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
+function touchmovePhoto(anchor: IPhoto, event: TouchEvent) {
   if (anchor.flag & constants.FLAG_PLACEHOLDER) return;
 
   // Use first touch -- can't do much
@@ -534,7 +554,7 @@ function touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
         prevFrame = frame;
 
         if (skipCount++ >= 3) {
-          touchMoveSelect(prevTouch, rowIdx);
+          touchMoveSelect(prevTouch, touchAnchorRowIdx.value);
           skipCount = 0;
         }
 
@@ -555,7 +575,7 @@ function touchmovePhoto(anchor: IPhoto, event: TouchEvent, rowIdx: number) {
   if (touchAnchor && !touchScrollInterval && !touchMoveSelFrame) {
     touchMoveSelFrame = window.requestAnimationFrame(() => {
       touchMoveSelFrame = 0;
-      touchMoveSelect(touch, rowIdx);
+      touchMoveSelect(touch, touchAnchorRowIdx.value);
     });
   }
 }

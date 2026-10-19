@@ -76,8 +76,8 @@
               @select="selectionManager?.clickSelectionIcon(photo, $event, index)"
               @pointerdown="selectionManager?.clickPhoto(photo, $event, index)"
               @touchstart="selectionManager?.touchstartPhoto(photo, $event, index)"
-              @touchend="selectionManager?.touchendPhoto(photo, $event, index)"
-              @touchmove="selectionManager?.touchmovePhoto(photo, $event, index)"
+              @touchend="selectionManager?.touchendPhoto(photo, $event)"
+              @touchmove="selectionManager?.touchmovePhoto(photo, $event)"
             />
           </template>
         </template>
