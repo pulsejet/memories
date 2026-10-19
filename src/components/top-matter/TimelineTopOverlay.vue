@@ -39,8 +39,8 @@ function getText() {
   const topRow = props.list[topRowIdx];
   if (!topRow) return;
 
-  // A visible header needs no overlay.
-  if (topRow.type === 0) return;
+  // Only photo rows get an overlay.
+  if (topRow.type !== 1) return;
 
   // Avoid barely-visible rows, must have minimum height.
   const belowIdx = props.recycler.findItemIndex(50 + props.recyclerScrollTop - props.beforeHeight);
