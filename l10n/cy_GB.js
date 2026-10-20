@@ -15,6 +15,7 @@ OC.L10N.register(
     "Share" : "Rhannu",
     "Favorite" : "Ffefryn",
     "Restore" : "Adfer",
+    "Delete permanently" : "Dileu'n barhaol",
     "Cancel" : "Diddymu",
     "General" : "Cyffredinol",
     "Account" : "Cyfrif",
