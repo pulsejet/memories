@@ -118,6 +118,14 @@
       </NcCheckboxRadioSwitch>
 
       <NcCheckboxRadioSwitch
+        :model-value="config.show_exif_on_mobile"
+        @update:model-value="updateShowExifOnMobile"
+        type="switch"
+      >
+        {{ t('memories', 'Show EXIF info on mobile') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
         :model-value="config.metadata_in_slideshow"
         @update:model-value="updateMetadataInSlideshow"
         type="switch"
@@ -459,6 +467,10 @@ async function updateVideoAutoplay(val: boolean) {
 
 async function updateSidebarFilepath(val: boolean) {
   await setConfig('sidebar_filepath', val);
+}
+
+async function updateShowExifOnMobile(val: boolean) {
+  await setConfig('show_exif_on_mobile', val);
 }
 
 async function updateMetadataInSlideshow(val: boolean) {

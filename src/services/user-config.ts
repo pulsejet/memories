@@ -30,6 +30,7 @@ const remoteNames: Partial<Record<keyof IConfig, string>> = {
   video_autoplay: 'videoAutoplay',
   video_loop: 'videoLoop',
   sidebar_filepath: 'sidebarFilepath',
+  show_exif_on_mobile: 'showExifOnMobile',
   metadata_in_slideshow: 'metadataInSlideshow',
   slideshow_duration: 'slideshowDuration',
   onthisday_day_range: 'onthisdayDayRange',
@@ -158,6 +159,7 @@ function loadCached(): IConfig {
     video_autoplay: 'true',
     video_loop: false,
     sidebar_filepath: false,
+    show_exif_on_mobile: false,
     metadata_in_slideshow: false,
     slideshow_duration: 5,
 

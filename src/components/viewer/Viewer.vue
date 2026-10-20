@@ -66,7 +66,7 @@
         <ViewerDateAddress :photo="currentPhoto" :two-lines="true" />
       </div>
 
-      <div class="bottom-bar" v-if="photoswipe">
+      <div class="bottom-bar" v-if="photoswipe && showBottomBarExif">
         <div class="exif title" v-if="currentPhoto?.imageInfo?.exif?.Title">
           {{ currentPhoto.imageInfo.exif.Title }}
         </div>
@@ -347,6 +347,14 @@ const currentPhoto = computed((): IPhoto | null => {
   if (idx < 0 || idx >= list.value.length) return null;
 
   return list.value[idx];
+});
+
+/** Whether the EXIF bottom bar may show */
+const showBottomBarExif = computed((): boolean => {
+  if (!windowDims.isMobile) return true;
+  if (!config.show_exif_on_mobile) return false;
+  const exif = currentPhoto.value?.imageInfo?.exif;
+  return !!exif?.Title || !!exif?.Description;
 });
 
 /** Actions for the trash route only */
@@ -1638,10 +1646,15 @@ function updateAlbums() {
     opacity: 1;
   }
 
-  .exif {
-    @media (max-width: 768px) {
-      display: none;
+  @media (max-width: 768px) {
+    background: rgba(0, 0, 0, 0.3);
+    &:has(+ .viewer-mobile-actions) {
+      // 62px approx. height of .viewer-mobile-actions.
+      bottom: calc(62px + max(10px, env(safe-area-inset-bottom)));
     }
+  }
+
+  .exif {
     &.title {
       font-weight: bold;
       font-size: 0.9em;

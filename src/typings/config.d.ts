@@ -39,6 +39,7 @@ declare module '@typings' {
     video_autoplay: VideoAutoplayOpts;
     video_loop: boolean;
     sidebar_filepath: boolean;
+    show_exif_on_mobile: boolean;
     metadata_in_slideshow: boolean;
     slideshow_duration: number;
 
