@@ -692,6 +692,7 @@ defineExpose({
     min-width: 100%;
     min-height: 1.5px;
     will-change: transform;
+    contain: layout style;
 
     &.st {
       font-size: 0.75em;
