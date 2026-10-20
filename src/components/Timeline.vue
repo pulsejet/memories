@@ -1762,7 +1762,7 @@ function processDayGetState() {
 
       // Refresh recycler item bookkeeping only when rows are added or removed.
       if (newState.needFresh) {
-        list.value = list.value.slice();
+        recycler.value?.updateVisibleItems(true);
       }
 
       // Force re-calculation of the recycler internal size state.

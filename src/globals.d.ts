@@ -63,6 +63,7 @@ declare global {
     scrollToPosition: (position: number) => void;
     scrollToItem: (index: number) => void;
     findItemIndex: (offset: number) => number;
+    updateVisibleItems: (itemsChanged: boolean, checkPositionDiff?: boolean) => { continuous: boolean };
   };
 
   type VueHTMLComponent = Omit<ComponentPublicInstance, '$el'> & {
