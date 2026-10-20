@@ -98,10 +98,7 @@
       :recyclerStartOffset="recyclerStartOffset"
       :beforeHeight="beforeHeight"
       @interactend="loadScrollView"
-      @scroll="
-        currentScroll = $event.current;
-        topOverlay?.refresh();
-      "
+      @scroll="topOverlay?.refresh()"
     />
 
     <SelectionManager
@@ -232,8 +229,6 @@ let _processDayState: {
 let currentStart = 0;
 /** Current end index */
 let currentEnd = 0;
-/** Current physical scroll position */
-const currentScroll = ref(0);
 /** Resize observer on the outer container and before slot */
 let resizeObserver: ResizeObserver | null = null;
 /** Height of the scroller */
@@ -348,7 +343,7 @@ const showEmpty = computed((): boolean => {
 
 /** Whether to allow swipe refresh */
 const allowSwipe = computed((): boolean => {
-  return !loading.value && currentScroll.value === 0;
+  return !loading.value && recyclerScrollTop.value === 0;
 });
 
 /** Timeline state used for scroll restoration */
@@ -532,7 +527,7 @@ function resetState() {
   heads.value = new Map();
   currentStart = 0;
   currentEnd = 0;
-  currentScroll.value = 0;
+  recyclerScrollTop.value = 0;
   recyclerStartOffset.value = 0;
   numCols = 0;
   daysIsCache = false;
