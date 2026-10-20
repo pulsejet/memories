@@ -1665,7 +1665,6 @@ function updateAlbums() {
       margin-top: -2px;
       margin-bottom: 2px;
       font-size: 0.9em;
-      max-width: 90%;
       word-break: break-word;
       line-height: 1.2em;
     }
