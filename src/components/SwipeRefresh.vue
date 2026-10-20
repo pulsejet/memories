@@ -1,6 +1,16 @@
 <template>
-  <div @touchstart.passive="touchstart" @touchmove.passive="touchmove" @touchend.passive="touchend">
-    <div v-show="show" class="swipe-progress" :class="{ animate, wasSwiped }"></div>
+  <div
+    @touchstart.passive="touchstart"
+    @touchmove.passive="touchmove"
+    @touchend.passive="touchend"
+    @touchcancel.passive="touchend"
+  >
+    <div
+      v-if="show"
+      class="swipe-progress"
+      :class="{ animate, wasSwiped }"
+      :style="{ '--swipe-progress': progress }"
+    ></div>
     <slot></slot>
   </div>
 </template>
@@ -108,7 +118,7 @@ watch(loading, () => {
 });
 
 const show = computed(() => {
-  return (on.value && progress.value) || animate.value;
+  return Boolean((on.value && progress.value) || animate.value);
 });
 
 function reset() {
@@ -193,6 +203,8 @@ function touchmove(event: TouchEvent) {
 
 /** End gesture on container (passive) */
 function touchend(event: TouchEvent) {
+  window.cancelAnimationFrame(updateFrame.value);
+  updateFrame.value = 0;
   on.value = false;
 }
 </script>
@@ -210,8 +222,8 @@ function touchend(event: TouchEvent) {
     background: radial-gradient(
       circle at center,
       var(--color-primary) 0,
-      var(--color-primary) calc(v-bind(progress) * 1%),
-      transparent calc(v-bind(progress) * 1%),
+      var(--color-primary) calc(var(--swipe-progress) * 1%),
+      transparent calc(var(--swipe-progress) * 1%),
       transparent 100%
     );
   }
