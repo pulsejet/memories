@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue';
+import { onScopeDispose, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { windowDims } from '@services/viewport';
@@ -14,6 +14,17 @@ export function useRouteTransition(): Ref<string> {
   let awaitingInitialNavigation = route.matched.length === 0;
   let lastHistoryPosition: number | null = historyPosition();
 
+  // URL of the navigation the UA already animated (e.g. back swipe), if any.
+  let uaTransitionedUrl: string | null = null;
+  const onNavigate = (event: NavigateEvent) => {
+    uaTransitionedUrl = null;
+    if (event.hasUAVisualTransition) {
+      uaTransitionedUrl = event.destination.url;
+    }
+  };
+  window.navigation?.addEventListener('navigate', onNavigate);
+  onScopeDispose(() => window.navigation?.removeEventListener('navigate', onNavigate));
+
   watch(
     [() => route.name, () => route.path, () => windowDims.isMobile],
     ([toName, toPath], fromVal) => {
@@ -28,6 +39,14 @@ export function useRouteTransition(): Ref<string> {
       }
 
       try {
+        // UA already animated this navigation, don't double-animate.
+        const uaUrl = uaTransitionedUrl;
+        uaTransitionedUrl = null;
+        if (uaUrl && uaUrl === window.location.href) {
+          routeTransition.value = 'route-initial';
+          return;
+        }
+
         // Never animate first paint.
         if (awaitingInitialNavigation) {
           awaitingInitialNavigation = false;
