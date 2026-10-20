@@ -1,4 +1,8 @@
-import { translate as t, translatePlural as n } from '@nextcloud/l10n';
+import {
+  translate as ncTranslate,
+  translatePlural as ncTranslatePlural,
+  getCanonicalLocale as ncGetCanonicalLocale,
+} from '@nextcloud/l10n';
 
 // apps for translation
 type TranslateApps = 'memories' | 'recognize';
@@ -7,10 +11,15 @@ type TranslateApps = 'memories' | 'recognize';
 type DropFirst<T extends unknown[]> = T extends [any, ...infer U] ? U : never;
 
 // Prevent typos in translations
-type TranslateType = (app: TranslateApps, ...args: DropFirst<Parameters<typeof t>>) => string;
-type TranslatePluralType = (app: TranslateApps, ...args: DropFirst<Parameters<typeof n>>) => string;
+type TranslateType = (app: TranslateApps, ...args: DropFirst<Parameters<typeof ncTranslate>>) => string;
+type TranslatePluralType = (app: TranslateApps, ...args: DropFirst<Parameters<typeof ncTranslatePlural>>) => string;
 
-export const translate = t as TranslateType;
-export const translatePlural = n as TranslatePluralType;
+export const translate = ncTranslate as TranslateType;
+export const translatePlural = ncTranslatePlural as TranslatePluralType;
+export const t = translate;
+export const n = translatePlural;
 
-export { translate as t, translatePlural as n };
+let _canonicalLocale: string | null = null;
+export function getCanonicalLocale(): string {
+  return (_canonicalLocale ||= ncGetCanonicalLocale());
+}

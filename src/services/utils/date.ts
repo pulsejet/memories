@@ -1,4 +1,4 @@
-import { getCanonicalLocale } from '@nextcloud/l10n';
+import { getCanonicalLocale } from '@services/l10n';
 import { DateTime } from 'luxon';
 import type { IHeadRow } from '@typings';
 

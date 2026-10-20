@@ -83,7 +83,6 @@ import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 const NcAvatar = defineAsyncComponent(() => import('@nextcloud/vue/components/NcAvatar'));
 
 import axios from '@nextcloud/axios';
-import { getCanonicalLocale } from '@nextcloud/l10n';
 import { DateTime } from 'luxon';
 
 import { config } from '@services/user-config';
@@ -101,7 +100,7 @@ import ImageIcon from 'vue-material-design-icons/Image.vue';
 import LocationIcon from 'vue-material-design-icons/MapMarker.vue';
 import TagIcon from 'vue-material-design-icons/Tag.vue';
 
-import { t } from '@services/l10n';
+import { t, getCanonicalLocale } from '@services/l10n';
 import { cacheData, getCachedData } from '@services/cache';
 import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
