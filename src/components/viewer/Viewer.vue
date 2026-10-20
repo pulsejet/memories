@@ -352,6 +352,7 @@ const currentPhoto = computed((): IPhoto | null => {
 /** Whether the EXIF bottom bar may show */
 const showBottomBarExif = computed((): boolean => {
   if (!windowDims.isMobile) return true;
+  if (currentPhoto.value?.trashInfo?.origPath) return true;
   if (!config.show_exif_on_mobile) return false;
   const exif = currentPhoto.value?.imageInfo?.exif;
   return !!exif?.Title || !!exif?.Description;
@@ -1633,6 +1634,7 @@ function updateAlbums() {
   background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.3));
   width: inherit;
   padding: 10px;
+  box-sizing: border-box;
   z-index: 100001;
   position: fixed;
   bottom: 0;

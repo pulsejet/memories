@@ -14,9 +14,6 @@
     <div class="time-line" v-if="timeStr">
       {{ timeStr }}<template v-if="addressShort"> &bull; {{ addressShort }}</template>
     </div>
-    <div class="path-line" v-if="filePath">
-      {{ filePath }}
-    </div>
   </template>
 
   <!-- Desktop bottom bar, one line DATE+TIME+ADDR -->
@@ -32,7 +29,7 @@
       {{ dateTaken }}<template v-if="addressShort"> &bull; {{ addressShort }}</template>
       <ChevronRightIcon v-if="dayTo" class="chev" :size="18" />
     </div>
-    <div class="exif description" v-if="filePath">
+    <div class="exif description path-line" v-if="filePath">
       {{ filePath }}
     </div>
   </template>
@@ -164,8 +161,7 @@ function beep() {
     transform: translateY(-50%);
   }
 }
-.time-line,
-.path-line {
+.time-line {
   font-size: 0.85em;
   opacity: 0.85;
   max-width: calc(100vw - 220px);
