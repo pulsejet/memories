@@ -474,6 +474,7 @@ OC.L10N.register(
     "Unidentified location" : "Neidentifikovaná lokalita",
     "Files without location" : "Súbory bez umiestnenia",
     "Empty trash?" : "Vyprázdniť kôš?",
+    "All files in trash will be permanently deleted. This action cannot be undone." : "Všetky súbory v koši budú natrvalo odstránené. Túto akciu nie je možné vrátiť späť.",
     "Empty trash" : "Vyprázdniť kôš",
     "Upload not permitted" : "Nahrávanie nie je povolené",
     "_Skipped {n} file that already exists_::_Skipped {n} files that already exist_" : ["Vynechaný {n} súbor ktorý už existuje","Vynechaných {n} súborov ktoré už existujú","Vynechaných {n} súborov ktoré už existujú","Vynechané {n} súbory ktoré už existujú"],
@@ -635,7 +636,9 @@ OC.L10N.register(
     "Failed to set cover image" : "Nepodarilo sa nastaviť titulný obrázok",
     "No content-location header found" : "Nenašla sa hlavička umiestnenia obsahu",
     "Failed to create tag {name}: {error}" : "Nepodarilo sa vytvoriť značku {name}: {error}",
+    "Failed to restore {fileName}." : "Nepodarilo sa obnoviť {fileName}.",
     "Trash emptied" : "Kôš vyprázdnený",
+    "Failed to empty trash." : "Nepodarilo sa vyprázdniť kôš.",
     "Top results" : "Najlepšie výsledky",
     "Shared Folder" : "Zdieľať priečinok",
     "Setup" : "Nastavenie",
@@ -651,6 +654,7 @@ OC.L10N.register(
     "This will not delete your original files." : "Týmto sa neodstránia vaše pôvodné súbory.",
     "_You are about to download {count} item._::_You are about to download {count} items._" : ["Chystáte sa stiahnuť {count} položku.","Chystáte sa stiahnuť {count} položky.","Chystáte sa stiahnuť {count} položiek.","Chystáte sa stiahnuť {count} položiek."],
     "_You are about to move {count} item._::_You are about to move {count} items._" : ["Chystáte sa presunúť {count} položku.","Chystáte sa presunúť {count} položky.","Chystáte sa presunúť {count} položiek.","Chystáte sa presunúť {count} položiek."],
+    "_Delete {count} item permanently?_::_Delete {count} items permanently?_" : ["Natrvalo odstrániť {count} položku?","Natrvalo odstrániť {count} položky?","Natrvalo odstrániť {count} položiek?","Natrvalo odstrániť {count} položiek?"],
     "This action cannot be undone." : "Túto akciu nemožno vrátiť späť."
 },
 "nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);");
