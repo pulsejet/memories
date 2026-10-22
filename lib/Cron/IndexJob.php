@@ -58,6 +58,9 @@ final class IndexJob extends TimedJob
             return (microtime(true) - $startTime) < MAX_RUN_TIME;
         };
 
+        // Clean up temp files after each indexed file.
+        $this->service->cleanupTemp = true;
+
         // Index with static exiftool process
         // This is sub-optimal: the process may not be required at all.
         try {

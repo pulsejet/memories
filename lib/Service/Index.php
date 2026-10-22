@@ -50,10 +50,11 @@ final class Index
     /**
      * Callback to check if the process should continue.
      * This is called before every file is indexed.
-     *
-     * @var ?\Closure(): bool
      */
     public ?\Closure $continueCheck = null;
+
+    /** Clean temp files after each file. */
+    public bool $cleanupTemp = false;
 
     public function __construct(
         private IRootFolder $rootFolder,
@@ -214,7 +215,9 @@ final class Index
             $this->error("Failed to index file {$path}: {$e->getMessage()}");
             $this->tw->markFailed($file, $e->getMessage());
         } finally {
-            $this->tempManager->clean();
+            if ($this->cleanupTemp) {
+                $this->tempManager->clean();
+            }
         }
     }
 

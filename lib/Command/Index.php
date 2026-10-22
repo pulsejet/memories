@@ -115,6 +115,9 @@ final class Index extends Command
         $this->indexer->section = $output->section();
         $this->indexer->verbose = $output->isVerbose();
 
+        // Clean up temp files after each indexed file.
+        $this->indexer->cleanupTemp = true;
+
         try {
             // Use static exiftool process
             $this->exif->ensureStaticExiftoolProc();
