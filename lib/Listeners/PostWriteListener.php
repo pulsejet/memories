@@ -22,6 +22,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Listeners;
 
 use OCA\Memories\Service\Index;
+use OCA\Memories\Service\MIME;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use OCP\Files\Events\Node\NodeCopiedEvent;
@@ -37,6 +38,7 @@ final class PostWriteListener implements IEventListener
 {
     public function __construct(
         private Index $indexer,
+        private MIME $mime,
     ) {}
 
     #[\Override]
@@ -53,6 +55,10 @@ final class PostWriteListener implements IEventListener
             }
         } elseif ($event instanceof NodeCopiedEvent) {
             $node = $event->getTarget();
+        }
+
+        if ($node instanceof File && !$this->mime->isSupported($node)) {
+            return;
         }
 
         if ($node instanceof File) {
