@@ -26,8 +26,7 @@
         :heads="heads"
         :list="list"
         :before-height="beforeHeight"
-        :recycler-scroll-top="recyclerScrollTop"
-        :recycler-start-offset="recyclerStartOffset"
+        :recycler-state="recyclerState"
         :recycler="recycler"
       />
 
@@ -46,7 +45,7 @@
         :item-size="getRowSize"
         type-field="type"
         :disableTransform="true"
-        :start-offset="recyclerStartOffset"
+        :start-offset="recyclerState.startOffset"
         @update="scrollChangeRecycler"
       >
         <template #before>
@@ -91,11 +90,8 @@
       ref="scrollerManager"
       v-show="!showEmpty"
       :rows="list"
-      :fullHeight="scrollerHeight"
       :recycler="recycler"
-      :recyclerWrapperHeight="recyclerWrapperHeight"
-      :recyclerScrollTop="recyclerScrollTop"
-      :recyclerStartOffset="recyclerStartOffset"
+      :recycler-state="recyclerState"
       :beforeHeight="beforeHeight"
       @interactend="loadScrollView"
       @scroll="topOverlay?.refresh()"
@@ -157,7 +153,7 @@ import { API, DaysFilterType } from '@services/API';
 import * as lens from '@services/lens';
 
 import type { RouteLocationNormalized } from 'vue-router';
-import type { IDay, IHeadRow, IPhoto, IPhotoRow, IRow } from '@typings';
+import type { IDay, IHeadRow, IPhoto, IPhotoRow, IRecyclerState, IRow } from '@typings';
 
 const SCROLL_LOAD_DELAY = 400; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop
@@ -231,14 +227,13 @@ let currentStart = 0;
 let currentEnd = 0;
 /** Resize observer on the outer container and before slot */
 let resizeObserver: ResizeObserver | null = null;
-/** Height of the scroller */
-const scrollerHeight = ref(100);
-/** Scroll height of the recycler */
-const recyclerWrapperHeight = ref(0);
-/** Scroll position of the recycler */
-const recyclerScrollTop = ref(0);
-/** Pending scroll compensation, flushed on scrollend. */
-const recyclerStartOffset = ref(0);
+/** Shared recycler geometry (mutated in place, no re-render) */
+const recyclerState = reactive<IRecyclerState>({
+  scrollTop: 0,
+  startOffset: 0,
+  scrollerHeight: 100,
+  wrapperHeight: 0,
+});
 
 /** Set of dayIds for which images loaded */
 const loadedDays = new Set<number>();
@@ -343,7 +338,7 @@ const showEmpty = computed((): boolean => {
 
 /** Whether to allow swipe refresh */
 const allowSwipe = computed((): boolean => {
-  return !loading.value && recyclerScrollTop.value === 0;
+  return !loading.value && recyclerState.scrollTop === 0;
 });
 
 /** Timeline state used for scroll restoration */
@@ -501,7 +496,7 @@ async function createState(signal: AbortSignal) {
   if (restoredBeforeHeight && restoredBeforeHeight !== beforeHeight.value) {
     const element = recycler.value?.$el;
     if (element && element.scrollTop > restoredBeforeHeight) {
-      recyclerStartOffset.value -= beforeHeight.value - restoredBeforeHeight;
+      recyclerState.startOffset -= beforeHeight.value - restoredBeforeHeight;
     }
   }
 
@@ -527,8 +522,8 @@ function resetState() {
   heads.value = new Map();
   currentStart = 0;
   currentEnd = 0;
-  recyclerScrollTop.value = 0;
-  recyclerStartOffset.value = 0;
+  recyclerState.scrollTop = 0;
+  recyclerState.startOffset = 0;
   numCols = 0;
   daysIsCache = false;
   loadedDays.clear();
@@ -611,7 +606,7 @@ function recomputeSizes(load: boolean) {
   containerSize = [width, height];
 
   // Scroller spans the container height
-  scrollerHeight.value = height;
+  recyclerState.scrollerHeight = height;
 
   // Static top matter to exclude from recycler height
   const tmHeight = topmatter.value?.$el?.clientHeight ?? 0;
@@ -674,7 +669,10 @@ function recomputeSizes(load: boolean) {
 function scrollPositionChange(event?: Event) {
   scrollerManager.value?.recyclerScrolled(event ?? null);
 }
-watch(recyclerScrollTop, () => scrollPositionChange());
+watch(
+  () => recyclerState.scrollTop,
+  () => scrollPositionChange(),
+);
 
 /** Trigger when recycler view changes (for callback) */
 function scrollChangeRecycler(
@@ -686,8 +684,8 @@ function scrollChangeRecycler(
   wrapperHeight: number,
 ) {
   // These are cheap to read here and don't cause a second layout.
-  recyclerWrapperHeight.value = wrapperHeight;
-  recyclerScrollTop.value = scrollTop;
+  recyclerState.wrapperHeight = wrapperHeight;
+  recyclerState.scrollTop = scrollTop;
 
   // Render range overshoots by the top-matter height; visible range accounts for it.
   return scrollChange(visibleStartIndex ?? startIndex, visibleEndIndex ?? endIndex);
@@ -699,18 +697,18 @@ function scrollChangeRecycler(
  * momentum scrolling due to scrollTop update, by doing the update at the end.
  */
 async function flushStartOffset() {
-  if (!recyclerStartOffset.value || !recycler.value) return;
-  const target = recycler.value.$el.scrollTop - recyclerStartOffset.value;
+  if (!recyclerState.startOffset || !recycler.value) return;
+  const target = recycler.value.$el.scrollTop - recyclerState.startOffset;
 
   // Expand the range and convert virtual offset into real.
-  recyclerStartOffset.value = 0;
+  recyclerState.startOffset = 0;
   recycler.value.$el.scrollTop = target;
   await nextTick();
 
   // Do it again in case previous update got clamped.
   if (!recycler.value) return;
   recycler.value.$el.scrollTop = target;
-  recyclerScrollTop.value = recycler.value.$el.scrollTop;
+  recyclerState.scrollTop = recycler.value.$el.scrollTop;
 
   // Propagate updates to other components.
   void scrollerManager.value?.adjust();
@@ -1562,7 +1560,7 @@ function processDay(dayId: number, data: IPhoto[]) {
 
   // Get index and Y position of header in O(n)
   let headIdx = 0;
-  let headY = beforeHeight.value + recyclerStartOffset.value;
+  let headY = beforeHeight.value + recyclerState.startOffset;
   for (const row of toRaw(list.value)) {
     if (row.type === 0 && row.dayId === dayId) break;
     headIdx++;
@@ -1745,7 +1743,7 @@ function processDayGetState() {
     let _scrollDirty = false;
     const newState = (_processDayState = {
       get scrollTop() {
-        return (_scrollTop ??= recyclerScrollTop.value);
+        return (_scrollTop ??= recyclerState.scrollTop);
       },
       set scrollTop(value) {
         _scrollTop = value;
@@ -1777,7 +1775,7 @@ function processDayGetState() {
         !scrollerManager.value?.interacting &&
         !selectionManager.value?.touchScrollInterval
       ) {
-        recyclerStartOffset.value -= _scrollTop - recyclerScrollTop.value;
+        recyclerState.startOffset -= _scrollTop - recyclerState.scrollTop;
         _scrollDirty = false;
       }
 
@@ -1789,7 +1787,7 @@ function processDayGetState() {
       // Update the scroll position after DOM update.
       if (_scrollDirty && _scrollTop !== null && recycler.value) {
         recycler.value.$el.scrollTop = _scrollTop;
-        recyclerScrollTop.value = _scrollTop;
+        recyclerState.scrollTop = _scrollTop;
       }
 
       // Update scrollbar ticks.

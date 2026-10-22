@@ -8,7 +8,7 @@ import { ref } from 'vue';
 import { vFastText } from '@directives/vFastText';
 import * as utils from '@services/utils/common';
 
-import type { IHeadRow, IRow } from '@typings';
+import type { IHeadRow, IRecyclerState, IRow } from '@typings';
 
 defineOptions({
   name: 'TimelineTopOverlay',
@@ -18,8 +18,7 @@ const props = defineProps<{
   heads: Map<number, IHeadRow>;
   list: IRow[];
   beforeHeight: number;
-  recyclerScrollTop: number;
-  recyclerStartOffset: number;
+  recyclerState: IRecyclerState;
   recycler?: VueRecyclerType | null;
 }>();
 
@@ -33,10 +32,10 @@ function getText() {
   if (!props.recycler?.$el || !props.list.length) return;
 
   // Still over the before slot: nothing to show.
-  if (props.recyclerScrollTop < props.beforeHeight + props.recyclerStartOffset) return;
+  if (props.recyclerState.scrollTop < props.beforeHeight + props.recyclerState.startOffset) return;
 
   // Row at the top edge (offsets exclude the before slot).
-  const topRowIdx = props.recycler.findItemIndex(props.recyclerScrollTop - props.beforeHeight);
+  const topRowIdx = props.recycler.findItemIndex(props.recyclerState.scrollTop - props.beforeHeight);
   const topRow = props.list[topRowIdx];
   if (!topRow) return;
 
@@ -44,7 +43,7 @@ function getText() {
   if (topRow.type !== 1) return;
 
   // Avoid barely-visible rows, must have minimum height.
-  const belowIdx = props.recycler.findItemIndex(50 + props.recyclerScrollTop - props.beforeHeight);
+  const belowIdx = props.recycler.findItemIndex(50 + props.recyclerState.scrollTop - props.beforeHeight);
   const belowRow = props.list[belowIdx];
   if (belowRow?.dayId !== topRow.dayId) return;
 

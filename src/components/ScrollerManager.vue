@@ -60,7 +60,7 @@ import * as utils from '@services/utils/common';
 import * as lens from '@services/lens';
 import * as nativex from '@native';
 
-import type { IRow, ITick } from '@typings';
+import type { IRecyclerState, IRow, ITick } from '@typings';
 
 import ScrollUpIcon from 'vue-material-design-icons/MenuUp.vue';
 import ScrollDownIcon from 'vue-material-design-icons/MenuDown.vue';
@@ -75,16 +75,10 @@ const VIBRATE_THROTTLE_MS = 40; // Minimum gap between haptic vibrations
 const props = defineProps<{
   /** Rows from Timeline */
   rows: IRow[];
-  /** Total height */
-  fullHeight: number;
   /** Actual recycler component */
   recycler?: VueRecyclerType | null;
-  /** Wrapper height of the recycler component */
-  recyclerWrapperHeight: number;
-  /** Scroll position of the recycler component */
-  recyclerScrollTop: number;
-  /** Pending start offset compensation */
-  recyclerStartOffset: number;
+  /** Shared recycler geometry (mutated in place) */
+  recyclerState: IRecyclerState;
   /** Recycler before slot component height */
   beforeHeight: number;
 }>();
@@ -154,13 +148,13 @@ function updateVisibleTicks() {
 }
 
 /** Height of usable area */
-const height = computed(() => props.fullHeight - topPadding.value);
+const height = computed(() => props.recyclerState.scrollerHeight - topPadding.value);
 
 /** Position of hover cursor */
 const hoverCursorTransform = computed(() => {
   const mob = windowDims.isMobile;
   const min = topPadding.value + (mob ? 2 : 0); // padding for curvature
-  const max = props.fullHeight - (mob ? 6 : 0); // padding for shadow
+  const max = props.recyclerState.scrollerHeight - (mob ? 6 : 0); // padding for shadow
   const val = hoverCursorY.value;
   const clamp = Math.max(min, Math.min(max, val)); // clamp(min, val, max)
   return `translateY(calc(${clamp}px - 100%))`;
@@ -210,7 +204,7 @@ function recyclerScrolled(event: Event | null) {
 /** Update cursor position from recycler scroll position */
 function updateFromRecyclerScroll() {
   // Get the scroll position
-  const scroll = props.recyclerScrollTop;
+  const scroll = props.recyclerState.scrollTop;
 
   // Emit scroll event
   const event = {
@@ -337,7 +331,7 @@ function adjustNow() {
   // y position. When you hit a row with the tick, update y and
   // top values and move to the next tick.
   let tickId = 0;
-  let y = props.beforeHeight + props.recyclerStartOffset;
+  let y = props.beforeHeight + props.recyclerState.startOffset;
   let count = 0;
 
   // We only need to recompute top and visible ticks if count
@@ -399,7 +393,7 @@ function computeVisibleTicks() {
 
     // You can't see these anyway, why bother?
     const minTop = topPadding.value + minGap;
-    const maxTop = props.fullHeight - minGap;
+    const maxTop = props.recyclerState.scrollerHeight - minGap;
     if (tick.top < minTop || tick.top > maxTop) continue;
 
     // Will overlap with the previous tick. Skip anyway.
@@ -500,9 +494,9 @@ function getCoords(y: number, field: 'topF' | 'y') {
     // this will likely be used when there are zero rows
     return {
       top1: topPadding.value,
-      top2: props.fullHeight,
+      top2: props.recyclerState.scrollerHeight,
       y1: 0,
-      y2: props.recyclerWrapperHeight + props.beforeHeight,
+      y2: props.recyclerState.wrapperHeight + props.beforeHeight,
     };
   }
 
@@ -525,9 +519,9 @@ function getCoords(y: number, field: 'topF' | 'y') {
     const tick = ticks.at(-1)!;
     return {
       top1: tick.topF,
-      top2: props.fullHeight,
+      top2: props.recyclerState.scrollerHeight,
       y1: tick.y,
-      y2: props.recyclerWrapperHeight + props.beforeHeight,
+      y2: props.recyclerState.wrapperHeight + props.beforeHeight,
     };
   }
 

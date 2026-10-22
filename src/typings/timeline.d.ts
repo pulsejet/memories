@@ -79,4 +79,12 @@ declare module '@typings' {
 
   /** A timeline row, discriminated by `type` so templates narrow with v-if */
   export type IRow = IHeadRow | IPhotoRow;
+
+  /** Shared mutable recycler geometry. */
+  export type IRecyclerState = {
+    scrollTop: number;
+    startOffset: number;
+    scrollerHeight: number;
+    wrapperHeight: number;
+  };
 }
