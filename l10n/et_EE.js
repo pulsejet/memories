@@ -94,6 +94,7 @@ OC.L10N.register(
     "Autoplay Videos" : "Esita videoid automaatselt",
     "Loop Videos" : "Näita videoid katkematus tsüklis",
     "Show full file path in sidebar" : "Näita külgpaanis täielikku asukohta",
+    "Show EXIF info on mobile" : "Näita nutiseadmes EXIF-teavet",
     "Show metadata in slideshow" : "Näita slaidiesitluses metateavet",
     "Slideshow Duration (1-60 seconds)" : "Slaidiesitluse kestus (1-60 sekundit)",
     "High resolution image loading behavior" : "Tegevus kõrgresolutsiooniga piltide laadimisel",

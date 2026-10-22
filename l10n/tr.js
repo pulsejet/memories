@@ -94,6 +94,7 @@ OC.L10N.register(
     "Autoplay Videos" : "Görüntüler otomatik oynatılsın",
     "Loop Videos" : "Görüntüleri sürekli oynat",
     "Show full file path in sidebar" : "Kenar çubuğunda tam dosya yolu görüntülensin",
+    "Show EXIF info on mobile" : "Mobilde EXIF bilgileri görüntülensin",
     "Show metadata in slideshow" : "Slayt sunumunda üst veriler görüntülensin",
     "Slideshow Duration (1-60 seconds)" : "Slayt sunumu süresi (1-60 saniye)",
     "High resolution image loading behavior" : "Yüksek çözünürlüklü görsel yükleme davranışı",

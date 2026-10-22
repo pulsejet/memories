@@ -94,6 +94,7 @@ OC.L10N.register(
     "Autoplay Videos" : "Afspil videoer automatisk",
     "Loop Videos" : "Afspil videoer i løkke",
     "Show full file path in sidebar" : "Vis den fulde filsti i sidepanelet",
+    "Show EXIF info on mobile" : "Vis EXIF-oplysninger på mobile enheder",
     "Show metadata in slideshow" : "Vis metadata i slideshowet",
     "Slideshow Duration (1-60 seconds)" : "Varighed for slideshow (1-60 sekunder)",
     "High resolution image loading behavior" : "Indlæsning af billeder i høj opløsning",

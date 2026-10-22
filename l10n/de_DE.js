@@ -94,6 +94,7 @@ OC.L10N.register(
     "Autoplay Videos" : "Videos automatisch abspielen",
     "Loop Videos" : "Videos in Schleife abspielen",
     "Show full file path in sidebar" : "Vollständigen Dateipfad in der Seitenleiste anzeigen",
+    "Show EXIF info on mobile" : "EXIF-Informationen auf Mobilgeräten anzeigen",
     "Show metadata in slideshow" : "Metadaten in Diashow anzeigen",
     "Slideshow Duration (1-60 seconds)" : "Dauer der Diashow (1-60 Sekunden)",
     "High resolution image loading behavior" : "Verhalten beim Laden hochauflösender Bilder",
