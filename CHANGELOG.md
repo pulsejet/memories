@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Feature**: High precision map markers setting ([#1701](https://github.com/pulsejet/memories/issues/1701))
+
 ## [v10.2.0] - 2026-10-23
 
 - **Feature**: Trash view to restore or permanently delete photos ([#208](https://github.com/pulsejet/memories/issues/208))
