@@ -14,7 +14,7 @@
     @mousedown.passive="mousedown"
     @mouseup.passive="interactend"
     @touchmove.prevent="touchmove"
-    @touchstart.passive="interactstart"
+    @touchstart.passive="touchstart"
     @touchend.passive="interactend"
     @touchcancel.passive="interactend"
   >
@@ -25,7 +25,7 @@
       class="cursor hv"
       :style="{ transform: hoverCursorTransform }"
       @touchmove.prevent="touchmove"
-      @touchstart.passive="interactstart"
+      @touchstart.passive="touchstart"
       @touchend.passive="interactend"
       @touchcancel.passive="interactend"
     >
@@ -97,7 +97,7 @@ const lastAdjustHeight = ref(0);
 /** Space to leave at the top (for the hover cursor) */
 const topPadding = ref(0);
 /** Rect of scroller */
-const scrollerRect = ref<DOMRect | null>(null);
+let scrollerRect: DOMRect | null = null;
 /** All available ticks */
 let ticks: ITick[] = [];
 /** Visible ticks  */
@@ -369,9 +369,6 @@ function adjustNow() {
 
 /** Mark ticks as visible or invisible */
 function computeVisibleTicks() {
-  // Kind of unrelated here, but refresh rect
-  scrollerRect.value = scroller.value!.getBoundingClientRect();
-
   // Do another pass to figure out which points are visible
   // This is not as bad as it looks, it's actually 12*O(n)
   // because there are only 12 months in a year
@@ -571,11 +568,16 @@ function mousedown(event: MouseEvent) {
   interactstart(); // end called on mouseup
   moveto(event.offsetY, false);
 }
+/** Handle touch start */
+function touchstart(event: TouchEvent) {
+  scrollerRect = scroller.value?.getBoundingClientRect() ?? null;
+  interactstart();
+}
 
-/** Handle touch */
+/** Handle touch move */
 function touchmove(event: TouchEvent) {
-  if (!scrollerRect.value) return;
-  let y = event.targetTouches[0].pageY - scrollerRect.value.top;
+  if (!scrollerRect) return;
+  let y = event.targetTouches[0].clientY - scrollerRect.top;
   y = Math.max(topPadding.value, y + MOBILE_CURSOR_HH); // middle of touch finger
 
   // Snap to nearest tick if there are a lot of rows
