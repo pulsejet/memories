@@ -133,6 +133,14 @@
         {{ t('memories', 'Show metadata in slideshow') }}
       </NcCheckboxRadioSwitch>
 
+      <NcCheckboxRadioSwitch
+        :model-value="config.skip_viewer_delete_confirm"
+        @update:model-value="updateSkipViewerDeleteConfirm"
+        type="switch"
+      >
+        {{ t('memories', 'Skip delete confirmation in viewer') }}
+      </NcCheckboxRadioSwitch>
+
       <NcTextField
         :label="t('memories', 'Slideshow Duration (1-60 seconds)')"
         :label-visible="true"
@@ -484,6 +492,10 @@ async function updateShowExifOnMobile(val: boolean) {
 
 async function updateMetadataInSlideshow(val: boolean) {
   await setConfig('metadata_in_slideshow', val);
+}
+
+async function updateSkipViewerDeleteConfirm(val: boolean) {
+  await setConfig('skip_viewer_delete_confirm', val);
 }
 
 async function updateSlideshowDuration(val: string | number) {

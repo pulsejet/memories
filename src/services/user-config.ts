@@ -47,7 +47,12 @@ const remoteNames: Partial<Record<keyof IConfig, string>> = {
  * Settings stored locally only, never sent to the server.
  * These are still persisted to browser storage via propagate().
  */
-const localSettings: (keyof IConfig)[] = ['square_thumbs', 'high_res_cond', 'show_face_rect'];
+const localSettings: (keyof IConfig)[] = [
+  'square_thumbs',
+  'high_res_cond',
+  'show_face_rect',
+  'skip_viewer_delete_confirm',
+];
 
 /** Namespaced browser storage for cached config values. Cleared on logout. */
 const storage = getBuilder('memories').clearOnLogout().persist().build();
@@ -183,6 +188,7 @@ function loadCached(): IConfig {
     square_thumbs: false,
     high_res_cond: null,
     show_face_rect: false,
+    skip_viewer_delete_confirm: false,
   };
 
   /**

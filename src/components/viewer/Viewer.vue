@@ -1262,7 +1262,10 @@ async function deleteCurrent(action: DeleteAction = DeleteAction.Delete) {
   try {
     updateLoading(1);
     if (action === DeleteAction.Delete) {
-      for await (const p of dav.deletePhotos([photo], { route })) {
+      for await (const p of dav.deletePhotos([photo], {
+        route: route,
+        confirm: !config.skip_viewer_delete_confirm,
+      })) {
         if (!p[0]) return;
       }
     } else if (action === DeleteAction.TrashDelete) {

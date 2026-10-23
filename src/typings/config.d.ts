@@ -62,6 +62,7 @@ declare module '@typings' {
     high_res_cond: HighResCond | null;
     show_face_rect: boolean;
     album_list_sort: number;
+    skip_viewer_delete_confirm: boolean;
   };
 
   export type IMapTileServer = {
