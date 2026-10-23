@@ -224,6 +224,9 @@ export type NativeX = {
    */
   configGetLocalFolders: () => string;
 
+  /** Get the native platform. */
+  getPlatform?: () => 'android' | 'ios';
+
   /**
    * Check if the user has allowed media access.
    * @returns Whether the user has allowed media access.

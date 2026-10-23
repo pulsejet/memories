@@ -16,11 +16,7 @@
           <br />
 
           <div class="buttons">
-            <NcButton
-              variant="secondary"
-              class="button button-white"
-              href="https://play.google.com/store/apps/details?id=com.nextcloud.client"
-            >
+            <NcButton variant="secondary" class="button button-white" :href="autoUploadAppUrl">
               {{ t('memories', 'Set up automatic upload') }}
             </NcButton>
 
@@ -137,6 +133,11 @@ const step = ref(util.uid ? 1 : 0);
 const localFolders = ref<nativex.LocalFolderConfig[]>([]);
 const syncStatus = ref(-1);
 let syncStatusWatch = 0;
+
+const autoUploadAppUrl =
+  nativex.platform() === 'ios'
+    ? 'https://apps.apple.com/app/nextcloud/id1125420102'
+    : 'https://play.google.com/store/apps/details?id=com.nextcloud.client';
 
 watch(step, () => {
   switch (step.value) {

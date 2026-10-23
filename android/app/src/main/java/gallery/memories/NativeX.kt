@@ -76,6 +76,9 @@ class NativeX(private val mCtx: MainActivity) {
     @JavascriptInterface
     fun isNative(): Boolean = true
 
+    @JavascriptInterface
+    fun getPlatform(): String = "android"
+
     /** Persists the theme once per login, then just applies it. */
     @JavascriptInterface
     fun setThemeColor(color: String?, isDark: Boolean) {

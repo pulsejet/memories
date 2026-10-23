@@ -77,6 +77,11 @@ export function vibrate(duration: number) {
   }
 }
 
+/** Get the native platform. */
+export function platform(): 'android' | 'ios' {
+  return nativex?.getPlatform?.() ?? 'android';
+}
+
 /**
  * Log out from Nextcloud and pass ahead.
  */
