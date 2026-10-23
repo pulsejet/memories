@@ -366,14 +366,23 @@ final class Exif
         $this->assertValidLocalFile($path);
 
         $data['SourceFile'] = $path;
-        $raw = json_encode([$data], JSON_UNESCAPED_UNICODE);
         $cmd = array_merge($this->getExiftool(), [
             '-overwrite_original_in_place', '-n',
-            '-api', 'LargeFileSupport=1',
-            '-json=-', $path,
+            '-api', 'LargeFileSupport=1', '-json=-',
         ]);
 
+        if ($this->injectQuickTimeGps($data)) {
+            // The legacy 3GP LocationInformation (loci) tag takes precedence over
+            // GPSCoordinates when reading, so delete it in the same call.
+            // https://github.com/pulsejet/memories/issues/1757
+            $cmd[] = '-LocationInformation=';
+        }
+
+        // Operate directly on the local file.
+        $cmd[] = $path;
+
         try {
+            $raw = json_encode([$data], JSON_UNESCAPED_UNICODE);
             $output = Util::execSafe2($cmd, self::EXIFTOOL_TIMEOUT, $raw, true, true);
             $stdout = $output[0];
             $stderr = $output[1];
@@ -600,5 +609,37 @@ final class Exif
         if (!is_file($path) || !is_readable($path)) {
             throw new \Exception("File is not readable: {$path}");
         }
+    }
+
+    /**
+     * Mirror GPS coordinates to QuickTime locations for video files.
+     *
+     * Bare GPSLatitude/GPSLongitude writes go to XMP for MP4/MOV, which is
+     * ignored by the Composite GPS tags in favor of QuickTime:GPSCoordinates.
+     * Inject ISO6709 GPSCoordinates for all QuickTime locations so the edit
+     * is visible on re-read. Harmless for non-QuickTime files (ignored).
+     *
+     * @param array<string, mixed> $data exif data (modified in place)
+     *
+     * @return bool true if valid coordinates were found and injected
+     */
+    private function injectQuickTimeGps(array &$data): bool
+    {
+        $lat = filter_var($data['GPSLatitude'] ?? null, FILTER_VALIDATE_FLOAT);
+        $lon = filter_var($data['GPSLongitude'] ?? null, FILTER_VALIDATE_FLOAT);
+        if (false === $lat || false === $lon) {
+            return false;
+        }
+        if (abs($lat) > 90 || abs($lon) > 180) {
+            return false;
+        }
+
+        // ISO6709, e.g. +48.858844+002.294351/
+        $iso = \sprintf('%+.6f%+.6f/', $lat, $lon);
+        $data['Keys:GPSCoordinates'] = $iso;
+        $data['UserData:GPSCoordinates'] = $iso;
+        $data['ItemList:GPSCoordinates'] = $iso;
+
+        return true;
     }
 }

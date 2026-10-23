@@ -657,6 +657,42 @@ final class ExifExtractTest extends TestCase
         }
     }
 
+    public function testSetExifVideoWithLocationInformation(): void
+    {
+        // https://github.com/pulsejet/memories/issues/1757
+        // Legacy 3GP LocationInformation blocks coordinate updates on videos.
+        // Sample from https://github.com/exiftool/exiftool/issues/391, which
+        // only stores its location in LocationInformation (no GPSCoordinates).
+        $tmpFile = tempnam(sys_get_temp_dir(), 'memories_exif_test_').'.mp4';
+        copy(__DIR__.'/../assets/unknown_02.mp4', $tmpFile);
+
+        try {
+            $exif = self::$exif->getExifFromLocalPath($tmpFile);
+            self::assertArrayHasKey('LocationInformation', $exif);
+            self::assertEqualsWithDelta(37.40388, (float) ($exif['GPSLatitude'] ?? 0), 0.0001);
+            self::assertEqualsWithDelta(-122.01309, (float) ($exif['GPSLongitude'] ?? 0), 0.0001);
+
+            // Edit coordinates the same way the UI does (EditLocation.vue)
+            self::$exif->setExif($tmpFile, [
+                'GPSLatitude' => '48.858844',
+                'GPSLongitude' => '2.294351',
+                'GPSLatitudeRef' => 'N',
+                'GPSLongitudeRef' => 'E',
+                'GPSCoordinates' => '48.858844, 2.294351',
+            ]);
+
+            // Re-read and verify the new coordinates took effect
+            $exif = self::$exif->getExifFromLocalPath($tmpFile);
+            self::assertEqualsWithDelta(48.858844, (float) ($exif['GPSLatitude'] ?? 0), 0.0001);
+            self::assertEqualsWithDelta(2.294351, (float) ($exif['GPSLongitude'] ?? 0), 0.0001);
+            self::assertArrayNotHasKey('LocationInformation', $exif);
+        } finally {
+            if (file_exists($tmpFile)) {
+                unlink($tmpFile);
+            }
+        }
+    }
+
     private function extract(string $filename): ExtractResult
     {
         $path = __DIR__.'/../assets/'.$filename;
