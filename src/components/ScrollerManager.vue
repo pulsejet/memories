@@ -127,9 +127,9 @@ let adjustRequest = false;
 /** Scroller is being moved with interaction */
 const interacting = ref(false);
 /** Last known scroll position of the recycler */
-const lastKnownRecyclerScroll = ref(0);
+let lastRecyclerLogicalScroll = 0;
 /** Last requested y position when interacting */
-const lastRequestedRecyclerY = ref(NaN);
+let lastRequestedRecyclerY = NaN;
 
 /** Height of usable area */
 const height = computed(() => props.recyclerState.scrollerHeight - topPadding.value);
@@ -154,8 +154,8 @@ function reset() {
   reflowRequest = false;
   adjustRequest = false;
   interacting.value = false;
-  lastKnownRecyclerScroll.value = 0;
-  lastRequestedRecyclerY.value = NaN;
+  lastRecyclerLogicalScroll = 0;
+  lastRequestedRecyclerY = NaN;
 
   // Clear all timers
   scrollingTimer.clear();
@@ -189,17 +189,18 @@ function recyclerScrolled(event: Event | null) {
 function updateFromRecyclerScroll() {
   // Get the scroll position
   const scroll = props.recyclerState.scrollTop;
+  const logicalScroll = scroll - props.recyclerState.startOffset;
 
   // Emit scroll event
   const event = {
-    current: scroll,
-    previous: lastKnownRecyclerScroll.value,
-    dynTopMatterVisible: scroll < props.beforeHeight,
+    current: logicalScroll,
+    previous: lastRecyclerLogicalScroll,
+    dynTopMatterVisible: logicalScroll < props.beforeHeight,
     scrollerInteracting: interacting.value,
   };
+  lastRecyclerLogicalScroll = logicalScroll;
   utils.bus.emit('memories.recycler.scroll', event);
   emit('scroll', event);
-  lastKnownRecyclerScroll.value = scroll;
 
   // Ignore if dragging the scroller
   if (interacting.value) return;
@@ -555,8 +556,8 @@ function moveto(y: number, snap: boolean) {
   const ry = y1 + (y2 - y1) * (yfrac || 0);
   const targetY = snap ? y1 + SNAP_OFFSET : ry;
 
-  if (lastRequestedRecyclerY.value !== targetY) {
-    lastRequestedRecyclerY.value = targetY;
+  if (lastRequestedRecyclerY !== targetY) {
+    lastRequestedRecyclerY = targetY;
     props.recycler?.scrollToPosition(targetY);
     if (snap) vibrateTick();
   }
