@@ -36,7 +36,7 @@ func TestEncoder(t *testing.T) {
 func TestBuildArgsSoftware(t *testing.T) {
 	c := cmd(baseSpec(), BuildArgs(baseSpec()))
 	require.Contains(t, c, `"-c:v" libx264 -preset faster -crf 25`)
-	require.Contains(t, c, "scale=force_original_aspect_ratio=decrease:w=1280:h=1280")
+	require.Contains(t, c, "scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280")
 	require.NotContains(t, c, "-hwaccel")
 	require.NotContains(t, c, "-ss")
 	require.NotContains(t, c, "-noautorotate")
@@ -85,7 +85,7 @@ func TestBuildArgsVAAPI(t *testing.T) {
 	s.VAAPI, s.VAAPILowPower = true, true
 	c := cmd(s, BuildArgs(s))
 	require.Contains(t, c, "-hwaccel vaapi")
-	require.Contains(t, c, "scale_vaapi=force_original_aspect_ratio=decrease:format=nv12")
+	require.Contains(t, c, "scale_vaapi=force_original_aspect_ratio=decrease:force_divisible_by=2:format=nv12")
 	require.Contains(t, c, "-global_quality 25 -low_power 1")
 	require.Contains(t, c, "vaapi=memories:/dev/dri/renderD128")
 
@@ -133,7 +133,7 @@ func TestBuildArgsNVENC(t *testing.T) {
 	s := baseSpec()
 	s.NVENC, s.NVENCScale, s.NVENCTemporalAQ = true, "cuda", true
 	c := cmd(s, BuildArgs(s))
-	require.Contains(t, c, "scale_cuda=force_original_aspect_ratio=decrease:format=nv12:passthrough=0")
+	require.Contains(t, c, "scale_cuda=force_original_aspect_ratio=decrease:force_divisible_by=2:format=nv12:passthrough=0")
 	require.Contains(t, c, "-preset p6 -tune ll -rc vbr")
 	require.Contains(t, c, "-temporal-aq 1")
 
@@ -141,7 +141,19 @@ func TestBuildArgsNVENC(t *testing.T) {
 	for _, scale := range []string{"cuda", "npp"} {
 		deep := baseSpec()
 		deep.BitDepth, deep.NVENC, deep.NVENCScale = 10, true, scale
-		require.Contains(t, cmd(deep, BuildArgs(deep)), "scale_"+scale+"=force_original_aspect_ratio=decrease:format=nv12")
+		require.Contains(t, cmd(deep, BuildArgs(deep)), "scale_"+scale+"=force_original_aspect_ratio=decrease:force_divisible_by=2:format=nv12")
+	}
+}
+
+func TestBuildArgsEvenDimensions(t *testing.T) {
+	// Scaled sizes must stay even; odd sizes (e.g. 854x641) break encoders (#1208).
+	vaapi, hdr, cl, nvenc := baseSpec(), baseSpec(), baseSpec(), baseSpec()
+	vaapi.VAAPI = true
+	hdr.HDR, hdr.BitDepth, hdr.VAAPI = true, 10, true
+	cl.HDR, cl.VAAPI, cl.VAAPIOpenCL = true, true, true
+	nvenc.NVENC, nvenc.NVENCScale = true, "cuda"
+	for _, s := range []Spec{baseSpec(), vaapi, hdr, cl, nvenc} {
+		require.Contains(t, cmd(s, BuildArgs(s)), "force_divisible_by=2")
 	}
 }
 
@@ -149,7 +161,7 @@ func TestBuildArgsTonemap(t *testing.T) {
 	sw := baseSpec()
 	sw.HDR = true
 	c := cmd(sw, BuildArgs(sw))
-	require.Contains(t, c, "scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=t=linear")
+	require.Contains(t, c, "scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=t=linear")
 	require.Contains(t, c, "tonemap=hable:desat=0,")
 	require.Contains(t, c, "zscale=t=bt709:m=bt709:range=tv,format=nv12")
 	require.NotContains(t, c, "format=nv12,scale=")
@@ -157,7 +169,7 @@ func TestBuildArgsTonemap(t *testing.T) {
 	vaapi := baseSpec()
 	vaapi.HDR, vaapi.VAAPI = true, true
 	c = cmd(vaapi, BuildArgs(vaapi))
-	require.Contains(t, c, "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
+	require.Contains(t, c, "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=")
 	require.Contains(t, c, "tonemap=hable:desat=0,")
 	require.Contains(t, c, "format=nv12|vaapi,hwupload")
 	require.NotContains(t, c, "hwupload,scale_vaapi=")
@@ -165,7 +177,7 @@ func TestBuildArgsTonemap(t *testing.T) {
 	nvenc := baseSpec()
 	nvenc.HDR, nvenc.NVENC, nvenc.NVENCScale = true, true, "cuda"
 	c = cmd(nvenc, BuildArgs(nvenc))
-	require.Contains(t, c, "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
+	require.Contains(t, c, "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=")
 	require.Contains(t, c, "tonemap=hable:desat=0,")
 	require.Contains(t, c, "format=nv12|cuda,hwupload")
 	require.NotContains(t, c, "hwupload,scale_cuda=")
@@ -182,23 +194,23 @@ func TestBuildArgsTonemapDepth(t *testing.T) {
 		deep := baseSpec()
 		deep.HDR, deep.BitDepth, deep.NVENC, deep.NVENCScale = true, 10, true, scale
 		c := cmd(deep, BuildArgs(deep))
-		require.Contains(t, c, "hwdownload,format=p010le,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
+		require.Contains(t, c, "hwdownload,format=p010le,scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=")
 		require.Contains(t, c, "format=nv12|cuda,hwupload")
 		require.NotContains(t, c, "hwupload,scale_"+scale)
 
 		deep12 := baseSpec()
 		deep12.HDR, deep12.BitDepth, deep12.NVENC, deep12.NVENCScale = true, 12, true, scale
-		require.Contains(t, cmd(deep12, BuildArgs(deep12)), "hwdownload,format=p012le,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
+		require.Contains(t, cmd(deep12, BuildArgs(deep12)), "hwdownload,format=p012le,scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=")
 
 		shallow := baseSpec()
 		shallow.HDR, shallow.NVENC, shallow.NVENCScale = true, true, scale
-		require.Contains(t, cmd(shallow, BuildArgs(shallow)), "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
+		require.Contains(t, cmd(shallow, BuildArgs(shallow)), "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=")
 	}
 
 	vaapi := baseSpec()
 	vaapi.HDR, vaapi.BitDepth, vaapi.VAAPI = true, 10, true
 	c := cmd(vaapi, BuildArgs(vaapi))
-	require.Contains(t, c, "hwdownload,format=p010le,scale=force_original_aspect_ratio=decrease:w=1280:h=1280,zscale=")
+	require.Contains(t, c, "hwdownload,format=p010le,scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=")
 	require.Contains(t, c, "format=nv12|vaapi,hwupload")
 	require.NotContains(t, c, "hwupload,scale_vaapi")
 
@@ -244,7 +256,7 @@ func TestBuildArgsVAAPIOpenCL(t *testing.T) {
 			require.Contains(t, args, "opencl=memories_opencl@memories")
 			require.Equal(t, "memories_opencl", args[slices.Index(args, "-filter_hw_device")+1])
 			filter := args[slices.Index(args, "-vf")+1]
-			scale := "scale_vaapi=force_original_aspect_ratio=decrease:format=p010"
+			scale := "scale_vaapi=force_original_aspect_ratio=decrease:force_divisible_by=2:format=p010"
 			if quality != QualityMax {
 				scale += ":w=1280:h=1280"
 			}

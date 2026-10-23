@@ -103,9 +103,11 @@ func (b *FilterBuilder) scaleEncode(format string) {
 		panic("unknown encoder: " + b.cv)
 	}
 
-	// Base args always preserve aspect ratio.
+	// Base args preserve aspect ratio with even dimensions
+	// (odd output like 854x641 breaks encoders; see #1208).
 	args := []string{
 		"force_original_aspect_ratio=decrease",
+		"force_divisible_by=2",
 	}
 
 	// Convert to the encode format, except on software where the
@@ -130,6 +132,7 @@ func (b *FilterBuilder) scaleEncode(format string) {
 func (b *FilterBuilder) scaleCpu() {
 	args := []string{
 		"force_original_aspect_ratio=decrease",
+		"force_divisible_by=2",
 	}
 	args = append(args, b.scaleDims()...)
 	b.append(fmt.Sprintf("scale=%s", strings.Join(args, ":")))
