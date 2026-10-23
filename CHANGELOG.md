@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - **Feature**: High precision map markers setting ([#1701](https://github.com/pulsejet/memories/issues/1701))
+- **Feature**: Media management grant for silent local file operations on Android ([#1033](https://github.com/pulsejet/memories/pull/1033))
 
 ## [v10.2.0] - 2026-10-23
 

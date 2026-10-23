@@ -1,7 +1,6 @@
 package gallery.memories.timeline
 
 import android.net.Uri
-import android.os.Build
 import android.util.Log
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.data.local.db.PhotoDao
@@ -143,13 +142,13 @@ class TimelineRepositoryImpl(
 
     /**
      * Deletes device files. dry only counts; confirms reports whether the OS
-     * will ask the user (R+) versus deleting silently.
+     * will ask the user versus deleting silently (media management granted).
      */
     override fun delete(auids: List<String>, dry: Boolean): JSONObject {
         val response = JSONObject().put("message", "ok")
         val sysImgs = getSystemImagesByAUIDs(auids)
         response.put("count", sysImgs.size)
-        response.put("confirms", Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+        response.put("confirms", !deleter.canManageMedia())
         if (dry || sysImgs.isEmpty()) return response
         deleter.deleteUris(sysImgs.map { it.uri })
         dao.deleteFileIds(sysImgs.map { it.fileId })

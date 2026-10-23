@@ -35,3 +35,18 @@ export function configHasMediaPermission() {
 export async function configAllowMedia(val: boolean = true) {
   return await fetch(NAPI.CONFIG_ALLOW_MEDIA(val));
 }
+
+/**
+ * Check if silent local delete is allowed (no OS prompt).
+ * @returns Whether the app is a media management app, or null if unsupported.
+ */
+export function canManageMedia(): boolean | null {
+  return nativex?.canManageMedia?.() ?? null;
+}
+
+/**
+ * Open the system media-management-apps screen for media management grant.
+ */
+export async function configAllowManageMedia() {
+  return await fetch(NAPI.CONFIG_ALLOW_MANAGE_MEDIA());
+}

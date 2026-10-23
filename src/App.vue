@@ -261,6 +261,11 @@ onMounted(() => {
     document.documentElement.classList.add('native');
   }
 
+  // One-time prompt for media management grant (silent local delete)
+  if (!routeIs.NxSetup && !routeIs.Public) {
+    void nativex.maybeAskManageMedia();
+  }
+
   // Close navigation by default if init is disabled
   // This is the case for public folder/album shares
   if (route.query.noinit) {

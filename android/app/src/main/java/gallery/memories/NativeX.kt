@@ -70,6 +70,7 @@ class NativeX(private val mCtx: MainActivity) {
         val SHARE_BLOB = Regex("^/api/share/blobs$")
         val UPLOAD_LOCAL = Regex("^/api/upload/local$")
         val CONFIG_ALLOW_MEDIA = Regex("^/api/config/allow_media/\\d+$")
+        val CONFIG_ALLOW_MANAGE_MEDIA = Regex("^/api/config/allow_manage_media$")
         val ASSETS_PROGRESS = Regex("^/api/assets/progress$")
     }
 
@@ -199,6 +200,10 @@ class NativeX(private val mCtx: MainActivity) {
     @JavascriptInterface
     fun configHasMediaPermission(): Boolean =
         permissions.hasAllowMedia() && permissions.hasMediaPermission()
+
+    /** True when silent local delete is allowed (no OS prompt). */
+    @JavascriptInterface
+    fun canManageMedia(): Boolean = permissions.canManageMedia()
 
     /** Indexed-file count, or -1 when no sync is running. */
     @JavascriptInterface

@@ -116,6 +116,13 @@ export const NAPI = {
   CONFIG_ALLOW_MEDIA: (val: boolean) => `${BASE_URL}/api/config/allow_media/${val ? '1' : '0'}`,
 
   /**
+   * Allow media management (opens system media-management-apps screen)
+   * @regex ^/api/config/allow_manage_media$
+   * @returns
+   */
+  CONFIG_ALLOW_MANAGE_MEDIA: () => `${BASE_URL}/api/config/allow_manage_media`,
+
+  /**
    * Offline asset download progress.
    * @regex ^/api/assets/progress$
    * @returns {status, done, total, error} of the web asset sync.
@@ -232,6 +239,12 @@ export type NativeX = {
    * @returns Whether the user has allowed media access.
    */
   configHasMediaPermission: () => boolean;
+
+  /**
+   * Check if silent local delete is allowed (no OS prompt).
+   * @returns Whether the app is a media management app.
+   */
+  canManageMedia?: () => boolean;
 
   /**
    * Get the current sync status.

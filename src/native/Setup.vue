@@ -43,6 +43,15 @@
                 )
           }}
 
+          <template v-if="canManageMedia !== null">
+            <br /><br />
+            {{
+              canManageMedia
+                ? t('memories', 'Memories can manage media on this device.')
+                : t('memories', 'Allow Memories to manage media on this device.')
+            }}
+          </template>
+
           <div class="buttons">
             <NcButton
               variant="secondary"
@@ -51,6 +60,15 @@
               v-if="!hasMediaPermission"
             >
               {{ t('memories', 'Grant permissions') }}
+            </NcButton>
+
+            <NcButton
+              variant="secondary"
+              class="button button-white"
+              @click="grantManageMedia"
+              v-if="canManageMedia === false"
+            >
+              {{ t('memories', 'Grant media management') }}
             </NcButton>
 
             <NcButton
@@ -129,6 +147,7 @@ defineOptions({
 const router = useRouter();
 
 const hasMediaPermission = ref(false);
+const canManageMedia = ref<boolean | null>(null);
 const step = ref(util.uid ? 1 : 0);
 const localFolders = ref<nativex.LocalFolderConfig[]>([]);
 const syncStatus = ref(-1);
@@ -143,6 +162,7 @@ watch(step, () => {
   switch (step.value) {
     case 2:
       hasMediaPermission.value = nativex.configHasMediaPermission();
+      canManageMedia.value = nativex.canManageMedia();
       break;
     case 3:
       localFolders.value = nativex.getLocalFolders();
@@ -165,8 +185,15 @@ onMounted(async () => {
   // Match system bars to the auth pages (same as welcome/waiting)
   nativex.setTheme('#174a7d', true);
 
+  // Check if we have media management permissions.
+  canManageMedia.value = nativex.canManageMedia();
+
   // set up sync status watcher
   syncStatusWatch = window.setInterval(() => {
+    if (canManageMedia.value === false) {
+      canManageMedia.value = nativex.canManageMedia();
+    }
+
     if (hasMediaPermission.value && step.value === 3) {
       const newStatus = nativex.nativex.getSyncStatus();
 
@@ -192,6 +219,11 @@ function updateDeviceFolders() {
 async function grantMediaPermission() {
   await nativex.configAllowMedia();
   hasMediaPermission.value = nativex.configHasMediaPermission();
+}
+
+async function grantManageMedia() {
+  await nativex.configAllowManageMedia();
+  canManageMedia.value = nativex.canManageMedia();
 }
 </script>
 

@@ -1,8 +1,11 @@
 package gallery.memories.ui.permissions
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.MediaStore
+import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -122,6 +125,16 @@ class PermissionsManager(
 
     /** Whether the user opted into showing device files (setup UI). */
     fun hasAllowMedia(): Boolean = prefs.allowMedia
+
+    /** True when the app is a media management app (silent trash/delete, no OS prompt). */
+    fun canManageMedia(): Boolean = MediaStore.canManageMedia(activity)
+
+    /** Opens the system media-management-apps screen so the user can grant [canManageMedia]. */
+    fun requestManageMedia() {
+        activity.runOnUiThread {
+            activity.startActivity(Intent(Settings.ACTION_REQUEST_MANAGE_MEDIA))
+        }
+    }
 
     fun setAllowMedia(v: Boolean) {
         prefs.allowMedia = v

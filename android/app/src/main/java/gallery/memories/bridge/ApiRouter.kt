@@ -73,6 +73,10 @@ class ApiRouter(
                 if (permissions.requestMediaPermissionSync()) onAllowMedia()
                 BridgeResponses.json("done")
             }
+            path.matches(NativeX.API.CONFIG_ALLOW_MANAGE_MEDIA) -> {
+                permissions.requestManageMedia()
+                BridgeResponses.json("done")
+            }
             path.matches(NativeX.API.ASSETS_PROGRESS) -> BridgeResponses.json(assets.progressJson())
             else -> throw Exception("Path did not match any known API route: $path")
         }
