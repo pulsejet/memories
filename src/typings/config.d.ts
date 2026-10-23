@@ -11,6 +11,7 @@ declare module '@typings' {
     places_search_url: string;
     map_tile_servers: IMapTileServer[];
     map_tile_server_url: string;
+    map_cluster_density: number;
     language: string;
     locale: string;
 

@@ -246,7 +246,16 @@
     </NcAppSettingsSection>
 
     <NcAppSettingsSection id="map-settings" :name="names.map" v-if="tileServers.length > 0">
+      <NcCheckboxRadioSwitch
+        :model-value="config.map_cluster_density > 1"
+        @update:model-value="updateMapHighPrecision"
+        type="switch"
+      >
+        {{ t('memories', 'Enable high precision markers') }}
+      </NcCheckboxRadioSwitch>
+
       <div class="radio-group">
+        {{ t('memories', 'Map tile server') }}
         <NcCheckboxRadioSwitch
           v-for="tile in tileServers"
           :key="tile.name"
@@ -333,7 +342,7 @@ const names = {
   account: t('memories', 'Account'),
   folders: t('memories', 'Folders'),
   albums: t('memories', 'Albums'),
-  map: t('memories', 'Map Tiles'),
+  map: t('memories', 'Map View'),
 };
 
 const timelinePaths = computed((): string[] => {
@@ -517,6 +526,10 @@ async function updateSortAlbumMonth(val: boolean) {
 // Map settings
 async function updateMapTileServer(val: string) {
   await setConfig('map_tile_server_url', val);
+}
+
+async function updateMapHighPrecision(val: boolean) {
+  await setConfig('map_cluster_density', val ? 4 : 1);
 }
 
 // --------------- Native APIs start -----------------------------

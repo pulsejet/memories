@@ -26,6 +26,7 @@ namespace OCA\Memories\Controller;
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
@@ -39,6 +40,7 @@ final class MapController extends ApiController
         IRequest $request,
         protected TimelineQuery $tq,
         protected Util $util,
+        protected SystemConfig $systemConfig,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -55,7 +57,7 @@ final class MapController extends ApiController
 
             // A tweakable parameter to determine the number of boxes in the map
             // Note: these parameters need to be changed in MapSplitMatter.vue as well
-            $clusterDensity = 1;
+            $clusterDensity = $this->systemConfig->getUserMapClusterDensity();
             $gridLen = 180.0 / (2.0 ** (float) $zoom * (float) $clusterDensity);
 
             $clusters = $this->tq->getMapClusters($gridLen, $bounds);

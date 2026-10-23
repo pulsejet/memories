@@ -45,6 +45,7 @@ import axios from '@nextcloud/axios';
 import { API } from '@services/API';
 import * as utils from '@services/utils/common';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
+import { config } from '@services/user-config';
 
 import MapStandalone from '@components/MapStandalone.vue';
 import XImg from '@components/frame/XImg.vue';
@@ -84,6 +85,11 @@ watch(
     if (curr[0] === old[0] && curr[1] === old[1]) return;
     initialize(true);
   },
+);
+
+watch(
+  () => config.map_cluster_density,
+  () => fetchClusters(),
 );
 
 function onMapReady() {
@@ -280,7 +286,7 @@ function zoomTo(cluster: IMapCluster) {
 
 function getGridKey(center: [number, number], zoomVal: number) {
   // Calcluate grid length
-  const clusterDensity = 1;
+  const clusterDensity = config.map_cluster_density;
   const oldGridLen = 180.0 / (2 ** zoomVal * clusterDensity);
 
   // Get map key

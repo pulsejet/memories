@@ -103,6 +103,7 @@ final class OtherController extends ApiController
                 'places_search_url' => $this->systemConfig->get('memories.places.search.url'),
                 'map_tile_servers' => $this->systemConfig->get('memories.map.tile_servers'),
                 'map_tile_server_url' => $this->systemConfig->getUserMapTileServerUrl(),
+                'map_cluster_density' => $this->systemConfig->getUserMapClusterDensity(),
                 'language' => $language,
                 'locale' => $locale,
 

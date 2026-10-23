@@ -40,6 +40,7 @@ const remoteNames: Partial<Record<keyof IConfig, string>> = {
   sort_folder_month: 'sortFolderMonth',
   sort_album_month: 'sortAlbumMonth',
   map_tile_server_url: 'mapTileServerUrl',
+  map_cluster_density: 'mapClusterDensity',
 };
 
 /**
@@ -131,6 +132,7 @@ function loadCached(): IConfig {
     places_search_url: 'https://nominatim.openstreetmap.org',
     map_tile_servers: [],
     map_tile_server_url: String(),
+    map_cluster_density: 1,
     language: String(),
     locale: String(),
 

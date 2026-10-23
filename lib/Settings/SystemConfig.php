@@ -301,6 +301,14 @@ final class SystemConfig
         return $url;
     }
 
+    /** Get the user's map cluster density, clamped to a sane range. */
+    public function getUserMapClusterDensity(): int
+    {
+        $density = (int) $this->getUserConfigValue('mapClusterDensity', '1');
+
+        return min(16, max(1, $density));
+    }
+
     /** Get the effective video autoplay state for a user. */
     public function getUserVideoAutoplay(): string
     {
