@@ -9,8 +9,10 @@ Note: this package provides bespoke functionality for Memories. As such it is no
 You need go and ffmpeg/ffprobe installed
 
 ```bash
+# Build go-vod binary
 CGO_ENABLED=0 go build -ldflags="-s -w"
-./go-vod
+# Run go-vod locally
+NEXTCLOUD_HOST=http://localhost CACHE_DIR=/tmp/go-vod-cache CGO_ENABLED=0  go run -ldflags="-s -w" .
 ```
 
 The server exposes all files as HLS streams, at the URL

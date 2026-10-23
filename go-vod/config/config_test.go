@@ -12,6 +12,7 @@ import (
 func TestDefaultsValid(t *testing.T) {
 	c := Defaults("test")
 	c.FFmpeg, c.FFprobe, c.TempDir = "/bin/ffmpeg", "/bin/ffprobe", t.TempDir()
+	c.CacheDir_ = t.TempDir()
 	c.NextcloudURL = "http://localhost"
 	require.NoError(t, c.Validate())
 }
@@ -36,6 +37,7 @@ func TestLiveURL(t *testing.T) {
 func TestNextcloudEnvPriority(t *testing.T) {
 	c := Defaults("test")
 	c.FFmpeg, c.FFprobe, c.TempDir = "/bin/ffmpeg", "/bin/ffprobe", t.TempDir()
+	c.CacheDir_ = t.TempDir()
 	c.NextcloudURL = "http://file"
 
 	t.Setenv("NEXTCLOUD_HOST", "http://env")
@@ -95,11 +97,14 @@ func TestValidate(t *testing.T) {
 		{"missing paths", func(c *Config) { c.FFmpeg, c.FFprobe, c.TempDir = "", "", "" }, false},
 		{"missing nextcloud", func(c *Config) { c.NextcloudURL = "" }, false},
 		{"bad nextcloud url", func(c *Config) { c.NextcloudURL = "notaurl" }, false},
+		{"missing cachedir", func(c *Config) { c.CacheDir_ = "" }, false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Setenv("CACHE_DIR", "")
 			c := Defaults("test")
 			c.FFmpeg, c.FFprobe, c.TempDir = "/bin/ffmpeg", "/bin/ffprobe", t.TempDir()
+			c.CacheDir_ = t.TempDir()
 			c.NextcloudURL = "http://localhost"
 			tc.mutate(c)
 			if tc.ok {

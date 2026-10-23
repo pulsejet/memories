@@ -60,7 +60,13 @@ func (c *Config) LoadFile(path string) error {
 var validate = validator.New()
 
 func (c *Config) Validate() error {
-	return validate.Struct(c)
+	if err := validate.Struct(c); err != nil {
+		return err
+	}
+	if c.CacheDir() == "" {
+		return fmt.Errorf("cache dir is required (set cacheDir or CACHE_DIR)")
+	}
+	return nil
 }
 
 func (c *Config) CacheDir() string {
