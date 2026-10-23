@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, shallowRef, nextTick, useTemplateRef, toRaw } from 'vue';
+import { ref, computed, shallowRef, nextTick, useTemplateRef, toRaw, watch } from 'vue';
 import { useThrottleFn } from '@vueuse/core';
 
 import { vFastText } from '@directives/vFastText';
@@ -130,22 +130,6 @@ const interacting = ref(false);
 const lastKnownRecyclerScroll = ref(0);
 /** Last requested y position when interacting */
 const lastRequestedRecyclerY = ref(NaN);
-
-/** Refresh visible ticks from ticks */
-function updateVisibleTicks() {
-  let key = 9999999900;
-  const visible: ITick[] = [];
-  for (const tick of ticks) {
-    if (!tick.s) continue;
-    if (tick.text) {
-      tick.key = key = tick.dayId * 100;
-    } else {
-      tick.key = ++key; // days are sorted descending
-    }
-    visible.push(tick);
-  }
-  visibleTicks.value = visible;
-}
 
 /** Height of usable area */
 const height = computed(() => props.recyclerState.scrollerHeight - topPadding.value);
@@ -236,6 +220,24 @@ function updateFromRecyclerScroll() {
   }
 }
 
+/** Compute space to leave at the top (hover cursor + gaps) */
+function computeTopPadding() {
+  topPadding.value = hoverCursor.value?.offsetHeight ?? 0;
+
+  // Add extra padding for any top elements (top matter, mobile header)
+  scroller.value
+    ?.closest('.memories-timeline.container')
+    ?.querySelectorAll('.timeline-scroller-gap')
+    .forEach((el) => (topPadding.value += el.clientHeight + 1));
+}
+
+/** Recompute top padding when scroller geometry changes. */
+watch(
+  () => [props.recyclerState.scrollerWidth, props.recyclerState.scrollerHeight],
+  () => computeTopPadding(),
+  { flush: 'sync' },
+);
+
 /** Re-create tick data in the next frame */
 async function reflow() {
   if (reflowRequest) return;
@@ -251,15 +253,7 @@ function reflowNow() {
   if (!props.recycler?.$el) return;
 
   // Exclude hover cursor height
-  topPadding.value = hoverCursor.value?.offsetHeight ?? 0;
-
-  // Add extra padding for any top elements (top matter, mobile header)
-  scroller.value
-    ?.closest('.memories-timeline.container')
-    ?.querySelectorAll('.timeline-scroller-gap')
-    .forEach((el) => {
-      topPadding.value += el.clientHeight + 1;
-    });
+  computeTopPadding();
 
   // Recreate ticks data
   recreate();
@@ -428,6 +422,22 @@ function computeVisibleTicks() {
     tick.s = true;
     prevShow = tick.top;
   }
+}
+
+/** Refresh visible ticks from ticks */
+function updateVisibleTicks() {
+  let key = 9999999900;
+  const visible: ITick[] = [];
+  for (const tick of ticks) {
+    if (!tick.s) continue;
+    if (tick.text) {
+      tick.key = key = tick.dayId * 100;
+    } else {
+      tick.key = ++key; // days are sorted descending
+    }
+    visible.push(tick);
+  }
+  visibleTicks.value = visible;
 }
 
 function setTicksTop(total: number) {

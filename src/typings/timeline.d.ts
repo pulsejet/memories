@@ -85,6 +85,7 @@ declare module '@typings' {
     scrollTop: number;
     startOffset: number;
     scrollerHeight: number;
+    scrollerWidth: number;
     wrapperHeight: number;
   };
 }

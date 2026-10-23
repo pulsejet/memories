@@ -232,6 +232,7 @@ const recyclerState = reactive<IRecyclerState>({
   scrollTop: 0,
   startOffset: 0,
   scrollerHeight: 100,
+  scrollerWidth: 0,
   wrapperHeight: 0,
 });
 
@@ -607,6 +608,7 @@ function recomputeSizes(load: boolean) {
 
   // Scroller spans the container height
   recyclerState.scrollerHeight = height;
+  recyclerState.scrollerWidth = width;
 
   // Static top matter to exclude from recycler height
   const tmHeight = topmatter.value?.$el?.clientHeight ?? 0;
