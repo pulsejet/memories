@@ -72,9 +72,6 @@ final class Version602003Date20240310203729 extends SimpleMigrationStep
             $table->addIndex(['fileid', 'mtime'], 'memories_fail_fid_mt_idx');
         }
 
-        // This version changes the geometry of planet
-        $this->systemConfig->set('memories.gis_type', -1);
-
         return $schema;
     }
 
@@ -82,5 +79,9 @@ final class Version602003Date20240310203729 extends SimpleMigrationStep
      * @param \Closure(): ISchemaWrapper $schemaClosure
      */
     #[\Override]
-    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void {}
+    public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
+    {
+        // This version changes the geometry of planet.
+        $this->systemConfig->set('memories.gis_type', -1);
+    }
 }
