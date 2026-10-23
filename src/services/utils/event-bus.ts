@@ -36,6 +36,7 @@ export type BusEvent = {
     current: number;
     previous: number;
     dynTopMatterVisible: boolean;
+    scrollerInteracting: boolean;
   };
 
   /** Albums were updated for these photos */

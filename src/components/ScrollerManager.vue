@@ -85,7 +85,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   interactend: [];
-  scroll: [event: { current: number; previous: number }];
+  scroll: [event: utils.BusEvent['memories.recycler.scroll']];
 }>();
 
 const scroller = useTemplateRef<HTMLDivElement>('scroller');
@@ -195,6 +195,7 @@ function updateFromRecyclerScroll() {
     current: scroll,
     previous: lastKnownRecyclerScroll.value,
     dynTopMatterVisible: scroll < props.beforeHeight,
+    scrollerInteracting: interacting.value,
   };
   utils.bus.emit('memories.recycler.scroll', event);
   emit('scroll', event);

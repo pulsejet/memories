@@ -3,7 +3,7 @@
     id="mobile-header"
     class="timeline-scroller-gap"
     :class="{
-      visible: !isScrollDown,
+      visible,
     }"
   >
     <div class="logo">
@@ -29,11 +29,21 @@ import * as utils from '@services/utils/common';
 
 import banner from '@assets/banner.svg';
 
-const isScrollDown = ref(false);
+const visible = ref(true);
 const homeUrl = generateUrl('/');
+let wasScrollerInteracting = false;
 
-utils.useBus('memories.recycler.scroll', ({ current, previous }) => {
-  isScrollDown.value = (isScrollDown.value && previous - current < 40) || current - previous > 40; // momentum scroll
+utils.useBus('memories.recycler.scroll', ({ current, previous, scrollerInteracting }) => {
+  if (current <= 40) {
+    visible.value = true; // top of page
+    wasScrollerInteracting = false;
+  } else if (scrollerInteracting || wasScrollerInteracting) {
+    visible.value = false; // dragging scroller
+    wasScrollerInteracting = scrollerInteracting;
+  } else {
+    const delta = current - previous;
+    visible.value = (visible.value || delta <= -40) && delta <= 40; // momentum scroll
+  }
 });
 </script>
 
