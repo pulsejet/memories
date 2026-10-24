@@ -288,6 +288,9 @@ async function grantManageMedia() {
     padding: 12px 14px;
     margin-top: 15px;
     text-align: left;
+    max-height: min(38vh, 320px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
 
     .checkbox-radio-switch {
       margin-left: 10px;
