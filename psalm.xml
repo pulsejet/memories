@@ -30,6 +30,8 @@
         <directory name="../../3rdparty/psr" />
         <directory name="../../3rdparty/guzzlehttp" />
         <directory name="../../3rdparty/deepdiver" />
+        <directory name="../../3rdparty/symfony/http-foundation" />
+        <directory name="../../3rdparty/symfony/string" />
     </extraFiles>
     <stubs>
         <file name="stubs/recognize.phpstub" />
