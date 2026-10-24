@@ -10,10 +10,15 @@ use OC\Files\Search\SearchQuery;
 use OCP\Files\Node;
 use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\String\UnicodeString;
 
 class StaticUtil
 {
     public const string ARCHIVE_FOLDER = '.archive';
+
+    public const string DISPOSITION_INLINE = 'inline';
+    public const string DISPOSITION_ATTACHMENT = 'attachment';
 
     /**
      * Get host CPU architecture (amd64 or aarch64).
@@ -315,5 +320,21 @@ class StaticUtil
         }
 
         throw new \Exception('Timeout');
+    }
+
+    /**
+     * Get RFC 6266 Content-Disposition header value for a filename.
+     *
+     * @param self::DISPOSITION_* $disposition
+     */
+    public static function getContentDisposition(
+        string $filename,
+        string $disposition = self::DISPOSITION_INLINE,
+    ): string {
+        $sanitized = str_replace(['/', '\\'], '-', $filename);
+        $ascii = (new UnicodeString($sanitized))->ascii()->toString();
+        $fallback = preg_replace(['/%/', '/[^\x20-\x7e]/'], ['', '_'], $ascii) ?: 'file';
+
+        return HeaderUtils::makeDisposition($disposition, $sanitized, $fallback);
     }
 }
