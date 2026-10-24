@@ -14,6 +14,29 @@ Memories supports the file types supported by Nextcloud. File type support is de
 
 If you add support for any one of the file types below, you must run `occ memories:index` to index these files.
 
+## VIPS (built-in)
+
+*Requires Memories v10.1 or later.*
+
+!!! warning "No configuration needed"
+
+    Memories ships statically-linked `vips` binaries and registers preview providers for common image formats out-of-the-box. When enabled, you do **not** need to configure anything below for image formats.
+
+The following formats are covered with no extra dependencies:
+
+```
+JPEG (image/jpeg)
+PNG (image/png)
+GIF (image/gif)
+WebP (image/webp)
+AVIF (image/avif)
+HEIC (image/heic)
+HEIF (image/heif)
+TIFF (image/tiff)
+```
+
+These providers take priority over the Nextcloud core providers: if vips successfully generates a preview, it is used; otherwise generation falls through to the next matching provider.
+
 ## Common Formats
 
 ```
@@ -50,6 +73,6 @@ These are enabled by inclusion of the following value in `config.php`'s `enabled
 
 You must also install `ffmpeg` and add the video config to `config.php`.
 
-## RAW images
+## RAW files
 
 Install the [camera raw previews](https://github.com/ariselseng/camerarawpreviews) app from the Nextcloud app store.

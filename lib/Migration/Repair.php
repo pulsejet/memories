@@ -53,6 +53,13 @@ final class Repair implements IRepairStep
             $output->warning('go-vod binary could not be configured');
         }
 
+        // detect vips
+        if ($path = $this->binExt->detectVips()) {
+            $output->info("VIPS binary is configured: {$path}");
+        } else {
+            $output->warning('VIPS binary could not be configured');
+        }
+
         // detect ffmpeg
         if ($path = $this->binExt->detectFFmpeg()) {
             $output->info("ffmpeg binary is configured: {$path}");
