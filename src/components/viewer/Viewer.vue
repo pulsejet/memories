@@ -1750,9 +1750,11 @@ function updateAlbums() {
     }
   }
 
-  .memories-viewer.fully-opened & div.pswp__img:has(> .ximg--full) > img.ximg {
-    &--full {
-      display: block;
+  .memories-viewer.fully-opened & div.pswp__item.active {
+    div.pswp__img:has(> .ximg--full) > img.ximg {
+      &--full {
+        display: block;
+      }
     }
   }
 
