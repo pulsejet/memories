@@ -16,8 +16,8 @@
   width: 100%;
   min-height: 100dvh;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   /* Extra bottom padding biases the centered card ~15px above center. */
   padding: calc(24px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-right, 0px))
     calc(54px + env(safe-area-inset-bottom, 0px)) calc(16px + env(safe-area-inset-left, 0px));
@@ -37,6 +37,7 @@
   position: relative;
   width: 100%;
   max-width: 420px;
+  margin: auto;
   text-align: center;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.22);
