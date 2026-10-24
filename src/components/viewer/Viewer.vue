@@ -1740,21 +1740,32 @@ function updateAlbums() {
     position: absolute;
     top: 0;
     left: 0;
-    &--preview {
+
+    &--thumbnail {
       z-index: 10;
       display: block;
     }
-    &--full {
+    &--preview {
       z-index: 20;
+      display: block;
+    }
+    &--full {
+      z-index: 30;
       display: none;
     }
   }
 
-  .memories-viewer.fully-opened & div.pswp__item.active {
-    div.pswp__img:has(> .ximg--full) > img.ximg {
-      &--full {
-        display: block;
-      }
+  .memories-viewer.fully-opened & {
+    // Show the full image only when fully opened + active
+    div.pswp__item.active div.pswp__img > img.ximg--full {
+      display: block;
+    }
+  }
+
+  .memories-viewer:not(.fully-opened) & {
+    // Hide the preview image while closing when thumbnail exists.
+    div.pswp__img > img.ximg--thumbnail ~ img.ximg--preview {
+      display: none;
     }
   }
 
