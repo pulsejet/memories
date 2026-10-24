@@ -99,6 +99,11 @@ final class ImageController extends ApiController
                 throw Exceptions::NotFound($e->getMessage());
             }
 
+            // Stream the preview file directly without buffering into PHP
+            $response = new Http\FileDisplayResponse($preview, Http::STATUS_OK, [
+                'Content-Type' => $preview->getMimeType(),
+            ]);
+
             // Get the filename. We need to move the extension from
             // the preview file to the filename's end if it's not there
             // Do the comparison case-insensitive
@@ -108,9 +113,7 @@ final class ImageController extends ApiController
                     $filename .= '.'.$ext;
                 }
             }
-
-            // Generate response with proper content-disposition
-            $response = new Http\DataDownloadResponse($preview->getContent(), $filename, $preview->getMimeType());
+            $response->addHeader('Content-Disposition', Util::getContentDisposition($filename));
             $response->cacheFor(3600 * 24, false, true);
 
             return $response;
@@ -172,29 +175,35 @@ final class ImageController extends ApiController
                     // Add this preview to the response
                     $file = $this->fs->getUserFile($fileid);
                     $preview = $this->preview->getPreview($file, $x, $y, !$a, \OCP\IPreview::MODE_FILL);
-                    $content = $preview->getContent();
-                    if (empty($content)) {
+                    $size = (int) $preview->getSize();
+                    if ($size <= 0) {
                         continue;
                     }
 
-                    ob_start();
+                    $stream = $preview->read();
+                    if (false === $stream) {
+                        continue;
+                    }
+
                     // Encode parameters
                     $json = json_encode([
                         'reqid' => $reqid,
-                        'len' => \strlen($content),
+                        'len' => $size,
                         'type' => $preview->getMimeType(),
                     ]);
 
                     // Send the length of the json as a single byte
-                    if (\strlen($json) > 255) {
+                    if (false === $json || \strlen($json) > 255) {
+                        fclose($stream);
+
                         continue;
                     }
                     $out->setOutput(\chr(\strlen($json)));
                     $out->setOutput($json);
 
-                    // Send the image
-                    $out->setOutput($content);
-                    ob_end_flush();
+                    // Stream the image
+                    $out->setReadfile($stream);
+                    fclose($stream);
                 } catch (\OCP\Files\NotFoundException $e) {
                     continue;
                 } catch (\Exception $e) {

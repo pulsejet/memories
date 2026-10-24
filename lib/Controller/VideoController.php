@@ -202,7 +202,7 @@ final class VideoController extends ApiController
             $response = new DataDisplayResponse($blob, Http::STATUS_OK, []);
             $response->setHeaders([
                 'Content-Type' => 'video/mp4',
-                'Content-Disposition' => "attachment; filename=\"{$file->getName()}.mp4\"",
+                'Content-Disposition' => Util::getContentDisposition($file->getName().'.mp4', Util::DISPOSITION_ATTACHMENT),
             ]);
             $response->cacheFor(3600 * 24, false, false);
 
