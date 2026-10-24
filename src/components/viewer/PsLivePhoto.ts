@@ -66,16 +66,13 @@ class LivePhotoContentSetup {
     video.src = utils.getLivePhotoVideoUrl(photo, true);
 
     const div = document.createElement('div');
-    div.className = 'memories-livephoto';
+    div.classList.add('pswp__img', 'memories-livephoto');
     div.appendChild(video);
     content.element = div;
 
     utils.setupLivePhotoHooks(video, this.liveState);
 
-    const img = this.psImage.getXImgElem(content, () => content.onLoaded());
-    div.appendChild(img);
-
-    content.element = div;
+    this.psImage.createPreviewElement(content);
   }
 
   onContentActivate({ content }: { content: PsContent }) {

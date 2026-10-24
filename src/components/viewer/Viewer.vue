@@ -1733,8 +1733,27 @@ function updateAlbums() {
     width: 100%;
   }
 
-  img.pswp__img {
+  div.pswp__img > img.ximg {
+    height: 100%;
+    width: 100%;
     object-fit: contain;
+    position: absolute;
+    top: 0;
+    left: 0;
+    &--preview {
+      z-index: 10;
+      display: block;
+    }
+    &--full {
+      z-index: 20;
+      display: none;
+    }
+  }
+
+  .memories-viewer.fully-opened & div.pswp__img:has(> .ximg--full) > img.ximg {
+    &--full {
+      display: block;
+    }
   }
 
   .pswp__button {
