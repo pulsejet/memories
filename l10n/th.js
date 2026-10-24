@@ -73,6 +73,7 @@ OC.L10N.register(
     "Text" : "ข้อความ",
     "Size" : "ขนาด",
     "Position" : "ตำแหน่ง",
+    "Not now" : "ไม่ใช่ตอนนี้",
     "No items" : "ไม่มีรายการ",
     "Setup" : "ตั้งค่า",
     "Yes" : "ใช่",

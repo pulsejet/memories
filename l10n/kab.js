@@ -152,6 +152,7 @@ OC.L10N.register(
     "Stroke" : "Stroke",
     "Extension" : "Asiɣzef",
     "Quality" : "Taɣara",
+    "Not now" : "Mačči tura",
     "No items" : "Ulac iferdisen",
     "Setup" : "Sbadu",
     "Yes" : "Ih",

@@ -188,6 +188,7 @@
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Tenga en cuenta que el área a recortar es menor al redimensionamiento aplicado, lo que puede causar pérdida de calidad",
     "Actual size (100%)" : "Tamaño real (100%)",
     "Fit size" : "Ajustar tamaño",
+    "Not now" : "No ahora",
     "Failed to create {albumName}." : "No se pudo crear {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "No se pudo renombrar {currentAlbumName} a {newAlbumName}.",
     "No items" : "No hay elementos",

@@ -455,6 +455,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Tényleges méret (100%)",
     "Fit size" : "Illeszkedő méret",
     "Transcoding failed, check Nextcloud logs." : "Az átkódolás sikertelen, ellenőrizze a Nextcloud naplóit.",
+    "Not now" : "Most nem",
     "Failed to remove {filename}." : "A(z) {fileName} törlése sikertelen volt.",
     "Failed to create {albumName}." : "A(z) {albumName} létrehozása sikertelen.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "A(z) {currentAlbumName} átnevezése a következőre sikertelen: {newAlbumName}.",

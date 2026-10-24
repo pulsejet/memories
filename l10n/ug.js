@@ -550,6 +550,7 @@ OC.L10N.register(
     "Actual size (100%)" : "ئەمەلىي چوڭلۇقى (%100)",
     "Fit size" : "ماس كېلىدىغان چوڭلۇقى",
     "Transcoding failed, check Nextcloud logs." : "كودلاش مەغلۇب بولدى ، Nextcloud خاتىرىسىنى تەكشۈرۈڭ.",
+    "Not now" : "ھازىر ئەمەس",
     "Failed to add {filename} to album." : "{filename} نى ئالبومغا قوشۇش مەغلۇپ بولدى.",
     "Failed to remove {filename}." : "{filename} نامىنى ئۆچۈرەلمىدى.",
     "Failed to create {albumName}." : "{albumName} create نى قۇرالمىدى.",

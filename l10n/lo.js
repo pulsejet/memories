@@ -547,6 +547,7 @@ OC.L10N.register(
     "Actual size (100%)" : "ຂະໜາດຈິງ (100%)",
     "Fit size" : "ຂະໜາດພໍດີ",
     "Transcoding failed, check Nextcloud logs." : "ການແປງລະຫັດລົ້ມເຫຼວ, ກວດສອບລັອກຂອງ Nextcloud.",
+    "Not now" : "ເທື່ອໜ້າ",
     "Failed to add {filename} to album." : "ເພີ່ມ {filename} ໃສ່ອາລະບ້ຳບໍ່ສຳເລັດ.",
     "Failed to remove {filename}." : "ລຶບ {filename} ບໍ່ສຳເລັດ.",
     "Failed to create {albumName}." : "ສ້າງ {albumName} ບໍ່ສຳເລັດ.",

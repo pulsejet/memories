@@ -62,6 +62,7 @@ OC.L10N.register(
     "Text" : "Texto",
     "Size" : "Tamaño",
     "Position" : "Posición",
+    "Not now" : "No ahora",
     "Setup" : "Ajustes",
     "Choose" : "Seleccionar"
 },

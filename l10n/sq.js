@@ -68,6 +68,7 @@ OC.L10N.register(
     "Size" : "Madhësi",
     "Position" : "Pozicion",
     "Name is required." : "Emri është i domosdoshëm",
+    "Not now" : "Jo tani",
     "Setup" : "Rregullim",
     "Yes" : "Po",
     "Choose" : "Zgjidhni"

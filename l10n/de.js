@@ -73,7 +73,6 @@ OC.L10N.register(
     "Photo Viewer" : "Fotobetrachter",
     "On This Day" : "An diesem Tag",
     "Account" : "Konto",
-    "Map Tiles" : "Kartenkacheln",
     "Add a root to your timeline" : "Einen Start deiner Zeitleiste hinzufügen",
     "At least one timeline path is required" : "Mindestens ein Zeitachsenverlauf erforderlich",
     "Choose the root for the folders view" : "Wähle das Stammverzeichnis für die Ordneransicht",

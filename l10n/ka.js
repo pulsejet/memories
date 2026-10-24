@@ -77,6 +77,7 @@ OC.L10N.register(
     "Text" : "Text",
     "Size" : "Size",
     "Position" : "Position",
+    "Not now" : "Not now",
     "No items" : "No items",
     "Setup" : "Setup",
     "Yes" : "Yes",

@@ -549,6 +549,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Tamanho real (100%)",
     "Fit size" : "Ajustar tamanho",
     "Transcoding failed, check Nextcloud logs." : "Falha na transcodificação, verifique os registos do Nextcloud.",
+    "Not now" : "Agora não",
     "Failed to add {filename} to album." : "Falha ao adicionar {filename} ao álbum.",
     "Failed to remove {filename}." : "Falha ao remover {filename}.",
     "Failed to create {albumName}." : "Falha ao criar {albumName}.",

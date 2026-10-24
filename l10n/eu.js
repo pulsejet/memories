@@ -385,6 +385,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Benetako tamaina (% 100)",
     "Fit size" : "Egokitu tamaina",
     "Transcoding failed, check Nextcloud logs." : "Transkodetzeak huts egin du, egiaztatu Nextcloud erregistroak.",
+    "Not now" : "Orain ez",
     "Failed to create {albumName}." : "Ezin izan da {albumName} sortu.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Ezin izan da {currentAlbumName} berrizendatu {newAlbumName} gisa.",
     "No items" : "Elementurik ez",

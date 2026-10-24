@@ -65,6 +65,7 @@ OC.L10N.register(
     "Text" : "ტექსტი",
     "Size" : "ზომა",
     "Position" : "პოზიცია",
+    "Not now" : "ახლა არა",
     "Setup" : "დაყენება",
     "Yes" : "დიახ",
     "Choose" : "აირჩიეთ"

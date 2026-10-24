@@ -540,6 +540,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Faktisk størrelse (100 %)",
     "Fit size" : "Tilpass størrelse",
     "Transcoding failed, check Nextcloud logs." : "Transkoding feilet, sjekk Nextcloud-logger.",
+    "Not now" : "Ikke nå",
     "Failed to remove {filename}." : "Kunne ikke fjerne {filename}.",
     "Failed to create {albumName}." : "Kunne ikke opprette {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Kunne ikke endre navn på {currentAlbumName} til {newAlbumName}.",

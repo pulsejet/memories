@@ -127,6 +127,7 @@ OC.L10N.register(
     "Extension" : "הרחבה",
     "Name is required." : "נדרש שם.",
     "Quality" : "איכות",
+    "Not now" : "לא כעת",
     "Shared by {user}" : "שותפה על ידי {user}",
     "Setup" : "הגדרות",
     "Choose" : "בחר"

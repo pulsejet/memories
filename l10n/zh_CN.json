@@ -550,6 +550,7 @@
     "Actual size (100%)" : "实际尺寸（100%）",
     "Fit size" : "适合尺寸",
     "Transcoding failed, check Nextcloud logs." : "转码失败，检查Nextcloud日志。",
+    "Not now" : "以后再说",
     "Failed to add {filename} to album." : "新增 {filename} 至相册失败。",
     "Failed to remove {filename}." : "删除 {filename} 失败。",
     "Failed to create {albumName}." : "创建{albumName}失败",

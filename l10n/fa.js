@@ -552,6 +552,7 @@ OC.L10N.register(
     "Actual size (100%)" : "اندازه واقعی (100%)",
     "Fit size" : "اندازه متناسب",
     "Transcoding failed, check Nextcloud logs." : "تبدیل ناموفق بود، گزارش‌های نکست‌کلود را بررسی کنید.",
+    "Not now" : "اکنون نه",
     "Failed to add {filename} to album." : "افزودن {filename} به آلبوم ناموفق بود.",
     "Failed to remove {filename}." : "حذف {filename} ناموفق بود.",
     "Failed to create {albumName}." : "ایجاد {albumName} ناموفق بود.",

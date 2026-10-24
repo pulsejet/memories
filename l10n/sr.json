@@ -542,6 +542,7 @@
     "Actual size (100%)" : "Стварна величина (100%)",
     "Fit size" : "Уклопи величину",
     "Transcoding failed, check Nextcloud logs." : "Транскодирање није успело, погледајте Nextcloud дневнике.",
+    "Not now" : "Не сад",
     "Failed to add {filename} to album." : "{filename} не може да се дода у албум.",
     "Failed to remove {filename}." : "Није успело уклањање {filename}.",
     "Failed to create {albumName}." : "{albumName} није могао да се креира.",

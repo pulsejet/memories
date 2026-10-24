@@ -234,6 +234,7 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "選択されたクロップエリアは、適用されたリサイズよりも低いため、品質が低下する可能性があることに注意してください",
     "Actual size (100%)" : "実際のサイズ（100％）",
     "Fit size" : "適合サイズ",
+    "Not now" : "あとで",
     "Failed to create {albumName}." : "{albumName} の作成に失敗しました。",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "{currentAlbumName} から {newAlbumName} への名前の変更に失敗しました。",
     "No items" : "アイテムがありません",

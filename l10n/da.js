@@ -73,7 +73,6 @@ OC.L10N.register(
     "Photo Viewer" : "Billedfremviser",
     "On This Day" : "På denne dag",
     "Account" : "Konto",
-    "Map Tiles" : "Kortfliser",
     "Add a root to your timeline" : "Tilføj en rodmappe til din tidslinje",
     "At least one timeline path is required" : "Der skal være mindst én sti til tidslinjen",
     "Choose the root for the folders view" : "Vælg rodmappen til mappevisningen",

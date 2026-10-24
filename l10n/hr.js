@@ -185,6 +185,7 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Odabrano područje izrezivanja manje je od nove veličine, što može smanjiti kvalitetu.",
     "Actual size (100%)" : "Stvarna veličina (100%)",
     "Fit size" : "Prilagodi veličinu",
+    "Not now" : "Ne sada",
     "No items" : "Nema stavki",
     "_{n} item_::_{n} items_" : ["%d datoteka","%d datoteke","%d datoteka"],
     "Shared by {user}" : "Dijeli {user}",

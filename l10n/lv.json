@@ -152,6 +152,7 @@
     "Saved image size (width x height)" : "Saglabātā attēla izmērs (platums x augstums)",
     "Actual size (100%)" : "Faktiskais izmērs (100%)",
     "Fit size" : "Atbilst izmēram",
+    "Not now" : "Ne tagad",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Neizdevās pārdēvēt {currentAlbumName} par {newAlbumName}.",
     "Failed to delete {fileName}." : "Neizdevās izdzēst {fileName}",
     "Failed to favorite files." : "Neizdevās pievienot datnes izlasei.",

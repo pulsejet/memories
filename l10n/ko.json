@@ -535,6 +535,7 @@
     "Actual size (100%)" : "실제 크기 (100%)",
     "Fit size" : "크기 맞추기",
     "Transcoding failed, check Nextcloud logs." : "트랜스코딩 실패, Nextcloud 로그를 확인하세요.",
+    "Not now" : "지금은 하지 않음",
     "Failed to remove {filename}." : "{filename}(을) 삭제하지 못했습니다.",
     "Failed to create {albumName}." : "{albumName}(을)를 만들지 못했습니다.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "{currentAlbumName}에서 {newAlbumName}(으)로 이름을 바꾸지 못했습니다.",

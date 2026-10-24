@@ -550,6 +550,7 @@
     "Actual size (100%)" : "Tikrasis dydis (100 %)",
     "Fit size" : "Tinkamo dydžio",
     "Transcoding failed, check Nextcloud logs." : "Perkodavimas nepavyko, patikrinkite „Nextcloud“ žurnalus.",
+    "Not now" : "Ne dabar",
     "Failed to add {filename} to album." : "Nepavyko pridėti {filename} prie albumo.",
     "Failed to remove {filename}." : "Nepavyko pašalinti {filename}.",
     "Failed to create {albumName}." : "Nepavyko sukurti {albumName}.",

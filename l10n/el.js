@@ -545,6 +545,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Πραγματικό μέγεθος (100%)",
     "Fit size" : "Προσαρμογή στο μέγεθος",
     "Transcoding failed, check Nextcloud logs." : "Η μετακωδικοποίηση απέτυχε, ελέγξτε τα αρχεία καταγραφής του Nextcloud.",
+    "Not now" : "Όχι τώρα",
     "Failed to add {filename} to album." : "Αποτυχία προσθήκης {filename} στο άλμπουμ.",
     "Failed to remove {filename}." : "Αποτυχία αφαίρεσης {filename}.",
     "Failed to create {albumName}." : "Απέτυχε η δημιουργία {albumName}.",

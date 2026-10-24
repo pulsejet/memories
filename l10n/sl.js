@@ -420,6 +420,7 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Izbrano polje obreza je manjše od uveljavljene spremembe velikosti, kar lahko vpliva na zmanjšanje kakovosti slike.",
     "Actual size (100%)" : "Prava velikost (100%)",
     "Fit size" : "Prilagodi velikosti",
+    "Not now" : "Ne zdaj",
     "Failed to remove {filename}." : "Datoteke {filename} ni bilo mogoče odstraniti.",
     "Failed to create {albumName}." : "Ustvarjanje albuma {albumName} je spodletelo.",
     "No items" : "Ni predmetov",

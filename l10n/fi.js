@@ -462,6 +462,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Todellinen koko (100 %)",
     "Fit size" : "Sovita koko",
     "Transcoding failed, check Nextcloud logs." : "Transkoodaus epäonnistui, katso lisätiedot Nextcloudin lokeista.",
+    "Not now" : "Ei nyt",
     "Failed to remove {filename}." : "Ei voitu poistaa {filename}.",
     "Failed to create {albumName}." : "Albumin {albumName} luominen epäonnistui.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Albumin {currentAlbumName} nimen muuttaminen muotoon {newAlbumName} epäonnistui.",
