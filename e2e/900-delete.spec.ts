@@ -57,7 +57,7 @@ test.describe('@ui Timeline photo deletion', () => {
     });
 
     // Get the the current active image so we can recheck.
-    const activeSelector = '.pswp__item.active img.ximg';
+    const activeSelector = '.pswp__item.active img.ximg--preview';
     const activeImg = page.locator(activeSelector);
     await expect(activeImg).toHaveAttribute('src', /.+/);
     const activePrev = await activeImg.getAttribute('src');
