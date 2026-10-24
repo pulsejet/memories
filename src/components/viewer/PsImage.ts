@@ -41,7 +41,7 @@ export default class ImageContentSetup {
     e.content.element = container;
 
     // Lazy create the preview element
-    this.createPreviewElement(e.content);
+    void this.createPreviewElement(e.content);
   }
 
   public onContentLoadImage(e: PsEvent) {
@@ -82,24 +82,45 @@ export default class ImageContentSetup {
 
     try {
       // Fetch with Axios
-      img.src = await ximg.fetchImage(content.data.src);
+      const blobUrl = await ximg.fetchImage(content.data.src);
 
       // Prevent garbage collection of the blob URL
       if (content.element) {
-        this.setSticky(content.data.photo.fileid, img.src);
+        this.setSticky(content.data.photo.fileid, blobUrl);
       }
 
       // Force decoding off-screen.
+      img.src = blobUrl;
       await img.decode();
     } catch (e) {
       img.src = errorsvg;
       console.error('Error loading PsImage:', e);
     }
 
-    if (content.element) {
-      content.element.appendChild(img);
-      content.onLoaded();
-      this.slideActivate();
+    // Add the preview image to the main content.
+    if (!content.element) return;
+    content.element.appendChild(img);
+    content.onLoaded();
+    this.slideActivate();
+
+    // Create a lightweight preview for closing animation.
+    // Especially relevant when the main preview is U-HDR.
+    void this.createLightPreviewElement(content);
+  }
+
+  private async createLightPreviewElement(content: PsContent) {
+    if (!content.data.msrc?.startsWith('blob:')) return;
+
+    try {
+      const thumbImg = document.createElement('img');
+      thumbImg.src = content.data.msrc;
+      thumbImg.classList.add('ximg', 'ximg--thumbnail');
+      await thumbImg.decode();
+
+      if (!content.element) return;
+      content.element.prepend(thumbImg);
+    } catch (e) {
+      console.error('Error creating light preview:', e);
     }
   }
 
@@ -142,10 +163,11 @@ export default class ImageContentSetup {
         await image.decode();
 
         // Check if destroyed already
-        if (!slide.content.element) break;
+        const container = slide.content.element;
+        if (!container) break;
 
         // Show image and prevent garbage collection.
-        slide.content.element.appendChild(image);
+        container.appendChild(image);
 
         // If the preview was already loaded, then it will automatically be released.
         this.setSticky(slide.data.photo.fileid, blobSrc);

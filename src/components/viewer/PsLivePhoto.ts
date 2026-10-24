@@ -72,7 +72,7 @@ class LivePhotoContentSetup {
 
     utils.setupLivePhotoHooks(video, this.liveState);
 
-    this.psImage.createPreviewElement(content);
+    void this.psImage.createPreviewElement(content);
   }
 
   onContentActivate({ content }: { content: PsContent }) {
