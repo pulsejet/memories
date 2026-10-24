@@ -132,15 +132,20 @@ final class ImageController extends ApiController
             // Filter files with valid parameters
             $files = array_filter($files, static function (array $file) {
                 return isset($file['reqid'], $file['fileid'], $file['x'], $file['y'], $file['a'])
-                    && (int) $file['fileid'] > 0
-                    && (int) $file['x'] > 0
-                    && (int) $file['y'] > 0;
+                    && ((int) $file['fileid'] > 0)
+                    && ((int) $file['x'] > 0 || -1 === (int) $file['y'])
+                    && ((int) $file['y'] > 0 || -1 === (int) $file['x']);
             });
 
             // Sort files by size, ascending
             usort($files, static function (array $a, array $b) {
-                $aArea = (int) $a['x'] * (int) $a['y'];
-                $bArea = (int) $b['x'] * (int) $b['y'];
+                $ax = (int) $a['x'];
+                $ay = (int) $a['y'];
+                $bx = (int) $b['x'];
+                $by = (int) $b['y'];
+
+                $aArea = $ax > 0 && $ay > 0 ? $ax * $ay : PHP_INT_MAX;
+                $bArea = $bx > 0 && $by > 0 ? $bx * $by : PHP_INT_MAX;
 
                 return $aArea <=> $bArea;
             });
