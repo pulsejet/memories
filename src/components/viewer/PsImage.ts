@@ -33,10 +33,15 @@ export default class ImageContentSetup {
 
   public onContentLoad(e: PsEvent) {
     if (isVideoContent(e.content) || isLiveContent(e.content)) return;
-
-    // Insert image throgh XImgCache
     e.preventDefault();
-    e.content.element = this.getXImgElem(e.content, () => e.content.onLoaded());
+
+    // Create container
+    const container = document.createElement('div');
+    container.classList.add('pswp__img');
+    e.content.element = container;
+
+    // Lazy create the preview element
+    this.createPreviewElement(e.content);
   }
 
   public onContentLoadImage(e: PsEvent) {
@@ -71,39 +76,31 @@ export default class ImageContentSetup {
     return placeholderSrc;
   }
 
-  public getXImgElem(content: PsContent, onLoad: () => void): HTMLImageElement {
+  public async createPreviewElement(content: PsContent) {
     const img = document.createElement('img');
-    img.classList.add('pswp__img', 'ximg');
-    img.style.visibility = 'hidden';
+    img.classList.add('ximg', 'ximg--preview');
 
-    // Callback on error or load
-    img.onerror = img.onload = () => {
-      img.onerror = img.onload = null;
-      img.style.visibility = 'visible';
-      onLoad();
-      this.slideActivate();
-    };
+    try {
+      // Fetch with Axios
+      img.src = await ximg.fetchImage(content.data.src);
 
-    // Set src on element if content is available
-    const src = (url: string) => {
+      // Prevent garbage collection of the blob URL
       if (content.element) {
-        img.src = url;
-
-        // Prevent garbage collection of the blob URL
-        this.setSticky(content.data.photo.fileid, url);
+        this.setSticky(content.data.photo.fileid, img.src);
       }
-    };
 
-    // Fetch with Axios
-    ximg
-      .fetchImage(content.data.src)
-      .then(src)
-      .catch((e) => {
-        src(errorsvg);
-        console.error('Error loading PsImage:', e);
-      });
+      // Force decoding off-screen.
+      await img.decode();
+    } catch (e) {
+      img.src = errorsvg;
+      console.error('Error loading PsImage:', e);
+    }
 
-    return img;
+    if (content.element) {
+      content.element.appendChild(img);
+      content.onLoaded();
+      this.slideActivate();
+    }
   }
 
   public zoomPanUpdate({ slide }: { slide: PsSlide }) {
@@ -128,17 +125,10 @@ export default class ImageContentSetup {
   }
 
   private async loadFullImage(slide: PsSlide) {
-    if (!slide.data.highSrc.length) return;
-
-    // Get ximg element
-    const img = slide.holderElement?.querySelector('.ximg:not(.ximg--full)') as HTMLImageElement;
-    if (!img) return;
+    if (!slide.data.highSrc.length || slide.data.highSrcCond === 'never') return;
 
     // Don't load again
     slide.data.highSrcCond = 'never';
-
-    // Load full image at secondary zoom level
-    img.classList.add('ximg--full');
 
     this.loading++;
     this.lightbox.ui?.updatePreloaderVisibility();
@@ -146,12 +136,16 @@ export default class ImageContentSetup {
     for (const src of slide.data.highSrc) {
       try {
         const blobSrc = await ximg.fetchImage(src);
+        const image = new Image();
+        image.src = blobSrc;
+        image.classList.add('ximg', 'ximg--full');
+        await image.decode();
 
         // Check if destroyed already
         if (!slide.content.element) break;
 
         // Show image and prevent garbage collection.
-        img.src = blobSrc;
+        slide.content.element.appendChild(image);
 
         // If the preview was already loaded, then it will automatically be released.
         this.setSticky(slide.data.photo.fileid, blobSrc);
