@@ -260,9 +260,8 @@ final class DownloadController extends ApiController
             $out->setHeader('Cache-Control: private, max-age=3600');
 
             // Play media inline for in-browser playback; force a download for everything else
-            $filename = str_replace('"', '\"', $file->getName());
-            $disposition = !$attachment && $isMedia && $resumable ? 'inline' : 'attachment';
-            $out->setHeader("Content-Disposition: {$disposition}; filename=\"{$filename}\"");
+            $disposition = !$attachment && $isMedia && $resumable ? Util::DISPOSITION_INLINE : Util::DISPOSITION_ATTACHMENT;
+            $out->setHeader('Content-Disposition: '.Util::getContentDisposition($file->getName(), $disposition));
 
             // Quit if HEAD request or empty file
             if ('HEAD' === $this->request->getMethod() || 0 === $size) {
