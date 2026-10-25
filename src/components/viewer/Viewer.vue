@@ -1710,9 +1710,11 @@ function updateAlbums() {
 
 .inner {
   width: inherit;
-  :deep(.pswp) {
-    width: inherit;
-  }
+}
+
+.inner :deep(.pswp) {
+  contain: strict;
+  width: inherit;
 
   :deep(.pswp__top-bar) {
     background: linear-gradient(0deg, transparent, rgba(0, 0, 0, 0.3));
@@ -1721,17 +1723,6 @@ function updateAlbums() {
       display: none;
     }
   }
-
-  :deep(.video-container.error) {
-    color: red;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-.inner :deep(.pswp) {
-  contain: strict;
 
   .pswp__zoom-wrap {
     width: 100%;
