@@ -154,7 +154,7 @@ export type NativeX = {
    * Vibrate for UI interaction.
    * @param duration Duration in milliseconds
    */
-  vibrate: (duration: number) => void;
+  vibrate?: (duration: number) => void;
 
   /**
    * Make a native toast to the user.
@@ -269,4 +269,23 @@ export const nativex: NativeX = (<any>globalThis).nativex;
  */
 export function has() {
   return !!nativex;
+}
+
+/** NativeX asynchronous (fire-and-forget) API over WebMessage. */
+export type NativeXAsync = Pick<NativeX, 'setThemeColor' | 'playTouchSound' | 'vibrate' | 'toast' | 'setHasRemote'>;
+
+/** Get a fire-and-forget caller for one async method. */
+export function nxAsync<M extends keyof NativeXAsync>(method: M): NativeXAsync[M] | null {
+  // Feature detection: all async methods exist on the sync handler.
+  if (!nativex?.[method]) return null;
+
+  // Return a function that posts a message to the native app.
+  return (...args: unknown[]) => {
+    // The async native interface for fire-and-forget interactions.
+    const nativexAsync = (<any>globalThis).nativex_async;
+    // Legacy compatibility when the async bridge is not found.
+    if (!nativexAsync) (nativex[method] as (...a: unknown[]) => void)(...args);
+    // Modern async bridge: post a message to the native app.
+    else nativexAsync.postMessage(JSON.stringify({ method, args }));
+  };
 }
