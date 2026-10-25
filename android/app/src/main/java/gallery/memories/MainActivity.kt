@@ -136,6 +136,7 @@ class MainActivity : AppCompatActivity() {
             nativex.toast("Local server failed to start", true)
             return
         }
+        nativex.attachAsyncMessages()
         // Per-process secret as HttpOnly cookie: without it the local server rejects everything. Load only after it lands.
         CookieManager.getInstance().setCookie("http://127.0.0.1/", nativex.local.authCookie()) {
             runOnUiThread { startup.onLocalCookieReady() }

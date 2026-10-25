@@ -1,6 +1,6 @@
 import axios from '@nextcloud/axios';
 import { generateUrl } from '@nextcloud/router';
-import { has, nativex } from './api';
+import { has, nativex, nxAsync } from './api';
 import { initShellSync } from './shell';
 import { getBuilder as storageBuilder } from '@nextcloud/browser-storage';
 
@@ -56,14 +56,15 @@ export async function setTheme(color?: string, dark?: boolean) {
       hasAttr('data-theme-dark') ||
       hasAttr('data-theme-dark-highcontrast');
   }
-  nativex?.setThemeColor?.(color, dark);
+
+  nxAsync('setThemeColor')?.(color, dark);
 }
 
 /**
  * Play touch sound.
  */
 export async function playTouchSound() {
-  nativex?.playTouchSound?.();
+  nxAsync('playTouchSound')?.();
 }
 
 /**
@@ -71,7 +72,7 @@ export async function playTouchSound() {
  */
 export function vibrate(duration: number) {
   if (nativex?.vibrate) {
-    nativex.vibrate(duration);
+    nxAsync('vibrate')?.(duration);
   } else {
     navigator.vibrate?.(duration);
   }

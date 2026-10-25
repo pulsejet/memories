@@ -1,4 +1,4 @@
-import { NAPI, nativex } from './api';
+import { NAPI, nxAsync } from './api';
 import { has } from './api';
 
 import { API } from '@services/API';
@@ -136,7 +136,7 @@ export function processFreshServerDay(dayId: number, photos: IPhoto[]): void {
 
     // Nothing to do?
     if (auidsa.length || buidsa.length) {
-      nativex.setHasRemote(JSON.stringify(auidsa), JSON.stringify(buidsa), true);
+      nxAsync('setHasRemote')?.(JSON.stringify(auidsa), JSON.stringify(buidsa), true);
     }
 
     // Done

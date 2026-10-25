@@ -24,8 +24,14 @@ import java.io.ByteArrayInputStream
 class NativeX(private val mCtx: MainActivity) {
     private var themeStored = false
 
-    val container = AppContainer(mCtx, bridge = { method, url -> handleBridge(method, url) }, onAllowMedia = { doMediaSync(true) })
+    /** Application container to bridge API calls. */
+    val container = AppContainer(mCtx, bridge = {
+        method, url -> handleBridge(method, url)
+    }, onAllowMedia = {
+        doMediaSync(true)
+    })
 
+    /** Expose various services from the container. */
     val timeline get() = container.timeline
     val image get() = container.image
     val auth get() = container.auth
@@ -35,6 +41,9 @@ class NativeX(private val mCtx: MainActivity) {
     val permissions get() = container.permissions
     val router get() = container.router
     val share: ShareManager get() = container.share
+
+    /** Async listener for NativeX fire-and-forget interactions */
+    private val asyncListener = NativeXAsync(mCtx, this)
 
     init {
         shareManager = container.share
@@ -50,11 +59,16 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     fun destroy() {
+        detachAsyncMessages()
         shareManager = null
         account.onDestroy()
         local.stop()
         timeline.destroy()
     }
+
+    /** Fire-and-forget `nativex_async` WebMessage bridge. See [NativeXAsync]. */
+    fun attachAsyncMessages() = asyncListener.attach()
+    fun detachAsyncMessages() = asyncListener.detach()
 
     /** Bridge path patterns. Must stay in sync with the @regex docs in src/native/api.ts. */
     object API {
