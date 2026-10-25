@@ -36,7 +36,7 @@ jobs:
 
       - name: Install SDK packages
         run: |
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+          sdkmanager "platforms;android-37.2" "build-tools;36.0.0"
 
       - name: Build debug and release
         working-directory: android
