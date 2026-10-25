@@ -150,6 +150,7 @@ OC.L10N.register(
     "Save image as" : "Захаваць відарыс як",
     "Extension" : "Пашырэнне",
     "Quality" : "Якасць",
+    "Not now" : "Не цяпер",
     "_{n} item_::_{n} items_" : ["{n} элемент","{n} элементы","{n} элементаў","{n} элементаў"],
     "Shared by {user}" : "Абагуліў(-ла) {user}",
     "Error: {msg}" : "Памылка: {msg}",

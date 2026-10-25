@@ -539,6 +539,7 @@ OC.L10N.register(
     "Actual size (100%)" : "الحجم الفعلي (100%)",
     "Fit size" : "حجم ملائم fit size",
     "Transcoding failed, check Nextcloud logs." : "فشل في تحويل الترميز Transcoding. راجع سجل الحركات log في نكست كلاود.",
+    "Not now" : "ليس الآن",
     "Failed to remove {filename}." : "تعذّر حذف الملف {filename}.",
     "Failed to create {albumName}." : "تعذّر إنشاء {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "تعذّر تغيير تسمية {currentAlbumName}  إلى {newAlbumName}.",

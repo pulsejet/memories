@@ -399,6 +399,7 @@
     "Actual size (100%)" : "Действителен размер (100%)",
     "Fit size" : "Подходящ размер",
     "Transcoding failed, check Nextcloud logs." : "Транскодирането е неуспешно, проверете дневниците/журнали/ на Nextcloud.",
+    "Not now" : "Не сега",
     "Failed to create {albumName}." : "Неуспешно създаване на {albumName}.",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Неуспешно преименуване от {currentAlbumName} на {newAlbumName}.",
     "No items" : "Без/няма елементи",

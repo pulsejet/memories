@@ -214,6 +214,7 @@ OC.L10N.register(
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Decátate que l'área de recorte seleicionada ye menor que la redimensión aplicada lo que ye posible que cause una perda de calidá",
     "Actual size (100%)" : "Tamañu actual (100%)",
     "Fit size" : "Axustar el tamañu",
+    "Not now" : "Agora non",
     "Failed to create {albumName}." : "Nun se pue crear «{albumName}».",
     "Failed to rename {currentAlbumName} to {newAlbumName}." : "Nun se pue renomar «{albumName}» a «{newAlbumName}».",
     "No items" : "Nun hai nengún elementu",

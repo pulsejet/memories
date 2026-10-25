@@ -556,6 +556,7 @@ OC.L10N.register(
     "Actual size (100%)" : "Skutečná velikost (100%)",
     "Fit size" : "Přizpůsobit velikost",
     "Transcoding failed, check Nextcloud logs." : "Převod mezi formáty se nezdařil – podívejte se do záznamů událostí v Nextcloud.",
+    "Not now" : "Teď ne",
     "Failed to add {filename} to album." : "Nepodařilo se přidat {filename} do alba ",
     "Failed to remove {filename}." : "{filename} se nepodařilo odebrat.",
     "Failed to create {albumName}." : "Nepodařilo se vytvořit {albumName}.",

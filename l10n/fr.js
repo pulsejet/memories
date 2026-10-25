@@ -635,7 +635,9 @@ OC.L10N.register(
     "Failed to set cover image" : "Impossible de définir l'image de couverture",
     "No content-location header found" : "Aucun en-tête content-location trouvé",
     "Failed to create tag {name}: {error}" : "Échec de la création de la balise {name} : {error}",
+    "Failed to restore {fileName}." : "Échec de la restauration de {fileName}.",
     "Trash emptied" : "Corbeille vidée",
+    "Failed to empty trash." : "Échec du vidage de la corbeille.",
     "Top results" : "Meilleurs résultats",
     "Shared Folder" : "Dossier partagé",
     "Setup" : "Configuration",
@@ -651,6 +653,7 @@ OC.L10N.register(
     "This will not delete your original files." : "Ceci ne supprimera pas les fichiers originaux.",
     "_You are about to download {count} item._::_You are about to download {count} items._" : ["Vous êtes sur le point de télécharger {count} élément.","Vous êtes sur le point de télécharger {count} éléments.","Vous êtes sur le point de télécharger {count} éléments."],
     "_You are about to move {count} item._::_You are about to move {count} items._" : ["Vous êtes sur le point de déplacer {count} élément.","Vous êtes sur le point de déplacer {count} éléments.","Vous êtes sur le point de déplacer {count} éléments."],
+    "_Delete {count} item permanently?_::_Delete {count} items permanently?_" : ["Supprimer définitivement {count} élément ?","Supprimer définitivement {count} éléments ?","Supprimer définitivement {count} éléments ?"],
     "This action cannot be undone." : "Cette action ne peut pas être annulée"
 },
 "nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
