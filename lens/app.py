@@ -4,9 +4,11 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from qdrant_client import AsyncQdrantClient
 
+from auth import bearer_matches
 from config import config
 from index import Indexer, IndexQueue, Scanner
 from routes import routers
@@ -71,6 +73,26 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="Memories Lens", lifespan=lifespan)
+
+
+@app.middleware("http")
+async def require_daemon_token(request: Request, call_next):
+    """Require the shared bearer token on every route, including debug."""
+
+    header = request.headers.get("authorization", "")
+    if not bearer_matches(header, config.daemon_token):
+        peer = request.client.host if request.client else "-"
+        logging.getLogger("lens.auth").warning(
+            "rejected %s %s from %s",
+            request.method,
+            request.url.path,
+            peer,
+        )
+
+        return JSONResponse(status_code=401, content={"detail": "unauthorized"})
+
+    return await call_next(request)
+
 
 for router in routers:
     app.include_router(router)

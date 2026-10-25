@@ -22,6 +22,7 @@ the service account and the daemon:
 ```bash
 occ config:system:set memories.lens.service_user --value="lens" --type=string
 occ config:system:set memories.lens.daemon_url --value="http://lens:47789" --type=string
+occ config:system:set memories.lens.token --value="same-value-as-LENS_TOKEN" --type=string
 ```
 
 The daemon URL must be reachable from Nextcloud (use the compose service
@@ -45,6 +46,7 @@ services:
       NEXTCLOUD_URL: "https://cloud.example.com"
       NC_USER: "lens"
       NC_TOKEN: "token-from-step-1"
+      LENS_TOKEN: "same-value-as-memories.lens.token"
       QDRANT_URL: "http://qdrant:6333"
       EMBEDDING_MODEL_ID: "google/siglip2-base-patch16-256"
       EMBEDDING_MODEL_REVISION: "3f9f96cb90da5dbc758b01813f2f6f1aee24c1ab"
