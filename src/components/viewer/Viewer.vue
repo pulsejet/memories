@@ -1716,6 +1716,10 @@ function updateAlbums() {
 
   :deep(.pswp__top-bar) {
     background: linear-gradient(0deg, transparent, rgba(0, 0, 0, 0.3));
+
+    .pswp__preloader {
+      display: none;
+    }
   }
 
   :deep(.video-container.error) {
