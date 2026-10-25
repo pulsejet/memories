@@ -1726,7 +1726,7 @@ function updateAlbums() {
   }
 }
 
-:deep(.pswp) {
+.inner :deep(.pswp) {
   contain: strict;
 
   .pswp__zoom-wrap {
