@@ -2,7 +2,13 @@
   <Teleport to="body" :disabled="!windowDims.isMobile">
     <div v-if="show" class="memories-top-bar top-bar">
       <NcActions :inline="1">
-        <NcActionButton :aria-label="t('memories', 'Cancel')" @click="clear()">
+        <NcActionButton
+          :aria-label="t('memories', 'Cancel')"
+          @click="
+            nativex.playTouchSound();
+            clear();
+          "
+        >
           {{ t('memories', 'Cancel') }}
           <template #icon> <CloseIcon :size="20" /> </template>
         </NcActionButton>
