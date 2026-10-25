@@ -128,6 +128,11 @@ final class DaysController extends ApiController
             $transforms[] = $this->tq->transformVideoFilter(...);
         }
 
+        // Filter only images
+        if ($this->request->getParam('img')) {
+            $transforms[] = $this->tq->transformImageFilter(...);
+        }
+
         // Filter only panoramas
         if ($this->request->getParam('pano')) {
             $transforms[] = $this->tq->transformPanoFilter(...);

@@ -19,10 +19,11 @@ export interface ITag {
 
 /**
  * Get list of tags.
+ * @param opts.folder Only list tags used in this folder (recursively)
  */
-export async function getTags(opts?: AbortOpts) {
+export async function getTags(opts?: AbortOpts & { folder?: string }) {
   const signal = opts?.signal;
-  const tags = (await axios.get<ICluster[]>(API.TAG_LIST(), { signal })).data;
+  const tags = (await axios.get<ICluster[]>(API.TAG_LIST(opts?.folder), { signal })).data;
 
   // Translate tag names
   tags.forEach((tag) => (tag.display_name = t('recognize', tag.name)));
