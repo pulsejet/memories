@@ -252,18 +252,17 @@ onMounted(() => {
 
   // Set theme color to default
   // Skip on nxsetup and firststart to avoid flashing white on initial setup.
-  if (!routeIs.NxSetup && !isFirstStart.value) {
+  // For some reason route is not properly read here during init.
+  if (!routeIs.NxSetup && !isFirstStart.value && !window.location.href.includes('/nxsetup')) {
     nativex.setTheme();
+
+    // One-time prompt for media management grant.
+    void nativex.maybeAskManageMedia();
   }
 
   // Check for native interface
   if (native.value) {
     document.documentElement.classList.add('native');
-  }
-
-  // One-time prompt for media management grant (silent local delete)
-  if (!routeIs.NxSetup && !routeIs.Public) {
-    void nativex.maybeAskManageMedia();
   }
 
   // Close navigation by default if init is disabled
