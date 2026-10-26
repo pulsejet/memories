@@ -408,6 +408,8 @@
     "Create Link" : "創建連結",
     "Refresh" : "刷新",
     "OK" : "OK",
+    "_{n} file refreshed_::_{n} files refreshed_" : ["已重新整理 {n} 個檔案"],
+    "_Processing {n} file_::_Processing {n} files_" : ["正在處理 {n} 個檔案"],
     "Not allowed to share file: {name}" : "不允許分享檔案：{name}",
     "Failed to create album for public link" : "無法為公開連結建立相簿",
     "Failed to download file for sharing" : "無法下載分享檔案。",
@@ -660,6 +662,7 @@
     "This will not delete your original files." : "這不會刪除您原先的檔案。",
     "_You are about to download {count} item._::_You are about to download {count} items._" : ["您將要下載 {count} 個項目。"],
     "_You are about to move {count} item._::_You are about to move {count} items._" : ["您將要移動 {count} 個項目。"],
+    "_Delete {count} item permanently?_::_Delete {count} items permanently?_" : ["永久刪除 {count} 個項目？"],
     "This action cannot be undone." : "此操作無法撤銷。"
 },"pluralForm" :"nplurals=1; plural=0;"
 }
