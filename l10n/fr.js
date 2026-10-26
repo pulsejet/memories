@@ -1,6 +1,13 @@
 OC.L10N.register(
     "memories",
     {
+    "Also with ..." : "Aussi avec…",
+    "Photos containing all selected people" : "Photos contenant toutes les personnes sélectionnées",
+    "People filters: + present, - not identified" : "Filtres : + présent, − non identifié",
+    "Remove {name} from filter" : "Retirer {name} du filtre",
+    "Search people: + together, - without" : "Rechercher des personnes : + ensemble, - sans",
+    "Use Name+Name or Name-Name. Put names containing + or - in double quotes." : "Utilisez Nom+Nom ou Nom-Nom. Placez les noms contenant + ou - entre guillemets doubles.",
+    "Person unknown, ambiguous or contradictory: {name}" : "Personne inconnue, ambiguë ou contradictoire : {name}",
     "Shared Link" : "Lien partagé",
     "Download" : "Télécharger",
     "Memories" : "Souvenirs",

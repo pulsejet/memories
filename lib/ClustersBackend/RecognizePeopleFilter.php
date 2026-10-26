@@ -23,7 +23,7 @@ final class RecognizePeopleFilter
             throw new \InvalidArgumentException('Too many people');
         }
         foreach ($values as $id) {
-            if (!preg_match('/^[1-9][0-9]{0,17}$/D', $id)) {
+            if (!preg_match('/^-?[1-9][0-9]{0,17}$/D', $id)) {
                 throw new \InvalidArgumentException('Invalid person ID');
             }
         }
@@ -50,11 +50,11 @@ final class RecognizePeopleFilter
                     $sub->expr()->eq('people_cluster.id', 'people_detection.cluster_id'),
                 )
                 ->where($sub->expr()->eq('people_detection.file_id', 'm.fileid'))
-                ->andWhere($sub->expr()->eq('people_cluster.id', $query->createNamedParameter($id, \PDO::PARAM_INT)))
+                ->andWhere($sub->expr()->eq('people_cluster.id', $query->createNamedParameter(abs($id), \PDO::PARAM_INT)))
                 ->andWhere($sub->expr()->eq('people_cluster.user_id', $query->createNamedParameter($uid)))
                 ->andWhere($sub->expr()->eq('people_detection.user_id', $query->createNamedParameter($uid)))
             ;
-            $query->andWhere(SQL::exists($query, $sub));
+            $query->andWhere($id < 0 ? SQL::notExists($query, $sub) : SQL::exists($query, $sub));
         }
     }
 }

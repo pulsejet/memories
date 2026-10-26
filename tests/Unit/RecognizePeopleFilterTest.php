@@ -27,9 +27,14 @@ final class RecognizePeopleFilterTest extends TestCase
         self::assertSame([12, 34], RecognizePeopleFilter::parse('12,34,12'));
     }
 
+    public function testExcludedPeopleAreAccepted(): void
+    {
+        self::assertSame([12, -34], RecognizePeopleFilter::parse('12,-34,-34'));
+    }
+
     public function testInvalidIdsAreRejected(): void
     {
-        foreach (['0', '-1', '1.2', '01', '1,,2', '1 OR 1=1', '9999999999999999999', ['1'], true, 1] as $value) {
+        foreach (['0', '-0', '--1', '1.2', '01', '1,,2', '1 OR 1=1', '9999999999999999999', ['1'], true, 1] as $value) {
             try {
                 RecognizePeopleFilter::parse($value);
                 self::fail('Invalid people filter was accepted');
@@ -79,6 +84,13 @@ final class RecognizePeopleFilterTest extends TestCase
         $stmt = $db->prepare($sql);
         $stmt->execute($query->getParameters());
         self::assertSame([1], array_map(intval(...), $stmt->fetchAll(\PDO::FETCH_COLUMN)));
+
+        $query = $connection->getQueryBuilder();
+        $query->select('m.fileid')->from('memories', 'm');
+        RecognizePeopleFilter::apply($query, $connection->getQueryBuilder(...), 'alice', '10,-20');
+        $stmt = $db->prepare(str_replace('*PREFIX*', '', $query->getSQL()));
+        $stmt->execute($query->getParameters());
+        self::assertSame([2, 4], array_map(intval(...), $stmt->fetchAll(\PDO::FETCH_COLUMN)));
 
         $query = $connection->getQueryBuilder();
         $query->select($query->func()->count('m.fileid'))->from('memories', 'm');

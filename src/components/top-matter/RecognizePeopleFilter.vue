@@ -3,14 +3,14 @@
     <NcButton :disabled="selected.length >= 8" @click="open">
       {{ t('memories', 'Also with ...') }}
     </NcButton>
-    <span v-if="selected.length">{{ t('memories', 'Photos containing all selected people') }}</span>
+    <span v-if="selected.length">{{ t('memories', 'People filters: + present, - not identified') }}</span>
     <NcButton
       v-for="id in selected"
       :key="id"
       :aria-label="t('memories', 'Remove {name} from filter', { name: label(id) })"
       @click="remove(id)"
     >
-      {{ label(id) }} &times;
+      {{ id.startsWith('-') ? '−' : '+' }} {{ label(id) }} &times;
     </NcButton>
     <Modal v-if="show" ref="modal" size="large" @close="show = false">
       <template #title>{{ t('memories', 'Also with ...') }}</template>
@@ -41,11 +41,16 @@ const { show, close } = useModal(modal);
 const faces = ref<IFace[]>([]);
 const selected = computed(() => {
   const value = route.query.recognizePeople;
-  return typeof value === 'string' ? [...new Set(value.split(',').filter((id) => /^[1-9][0-9]{0,17}$/.test(id)))] : [];
+  return typeof value === 'string'
+    ? [...new Set(value.split(',').filter((id) => /^-?[1-9][0-9]{0,17}$/.test(id)))]
+    : [];
 });
 
 function label(id: string) {
-  return faces.value.find((face) => String(face.cluster_id) === id)?.name || t('memories', 'Unnamed person');
+  return (
+    faces.value.find((face) => String(face.cluster_id) === id.replace(/^-/, ''))?.name ||
+    t('memories', 'Unnamed person')
+  );
 }
 
 async function loadFaces() {

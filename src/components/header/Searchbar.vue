@@ -21,6 +21,9 @@
       </template>
 
       <div class="searchbar-results" v-if="!isLensLive">
+        <button v-if="isPeopleExpression" class="cluster people-search" @click="openSearch">
+          {{ t('memories', 'Search people: + together, - without') }}
+        </button>
         <div v-if="showLensEntry" class="cluster" @click="openSearch">
           <div class="icon">
             <MagnifyIcon :size="22" />
@@ -67,6 +70,8 @@ import { config } from '@services/user-config';
 import { windowDims } from '@services/viewport';
 import { useRouteIs } from '@services/route-is';
 import { t } from '@services/l10n';
+import { parsePeopleSearch, resolvePeopleSearch } from '@services/people-search';
+import { showError } from '@services/utils/dialog';
 
 import * as dav from '@services/dav';
 import * as lens from '@services/lens';
@@ -103,6 +108,7 @@ const routeIs = useRouteIs();
 const textFieldRef = useTemplateRef<any>('textField');
 
 const prompt = ref(String());
+const isPeopleExpression = computed(() => config.recognize_enabled && /[+-]/.test(prompt.value));
 
 // Popover can be hidden by clicking outside and
 // so subsequent changes to prompt do not trigger
@@ -150,7 +156,7 @@ const lensEnabled = computed((): boolean => {
 
 /** Live lens search hijacks typing only on desktop timeline/search views */
 const isLensLive = computed((): boolean => {
-  return lensEnabled.value && (routeIs.Base || routeIs.Search) && !windowDims.isMobile;
+  return !isPeopleExpression.value && lensEnabled.value && (routeIs.Base || routeIs.Search) && !windowDims.isMobile;
 });
 
 /** Explicit lens entry for anywhere live search does not apply */
@@ -222,8 +228,41 @@ function syncPromptFromRoute() {
 }
 
 /** Open the search view for the current prompt */
-function openSearch() {
+async function openSearch() {
   const q = prompt.value.trim();
+  if (isPeopleExpression.value) {
+    lensTimer.clear();
+    try {
+      let terms;
+      try {
+        terms = parsePeopleSearch(q);
+      } catch {
+        showError(t('memories', 'Use Name+Name or Name-Name. Put names containing + or - in double quotes.'));
+        return;
+      }
+      if (!terms) return;
+      const people = await dav.getFaceList('recognize');
+      let result;
+      try {
+        result = resolvePeopleSearch(terms, people);
+      } catch (error) {
+        showError(
+          t('memories', 'Person unknown, ambiguous or contradictory: {name}', { name: (error as Error).message }),
+        );
+        return;
+      }
+      await router.push({
+        name: 'recognize',
+        params: { user: result.primary.user_id, name: String(result.primary.cluster_id) },
+        query: { recognizePeople: result.filters.length ? result.filters.join(',') : undefined },
+      });
+      select();
+      pHidden.value = true;
+    } catch {
+      showError(t('memories', 'Failed to load faces'));
+    }
+    return;
+  }
   if (!q || !lensEnabled.value || isLensLive.value) return;
   lensTimer.clear();
   router.push({ name: 'search', query: { q } });
@@ -240,7 +279,7 @@ function queueLensSearch() {
 
 /** Run the pending live lens navigation */
 function routeToLens() {
-  if (!lensEnabled.value) return;
+  if (!lensEnabled.value || isPeopleExpression.value) return;
   if (!prompt.value) {
     if (!routeIs.Base) {
       router.replace({ name: 'timeline' });
@@ -332,6 +371,14 @@ function routeToLens() {
     &:has(.loading-icon) {
       margin: 12px;
     }
+  }
+
+  .people-search {
+    width: 100%;
+    border: 0;
+    text-align: start;
+    background: transparent;
+    color: var(--color-main-text);
   }
 
   .cluster {
