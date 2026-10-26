@@ -1,8 +1,11 @@
 package gallery.memories.ui.image
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.PointF
 import android.view.View
+import android.widget.ImageView
 import androidx.exifinterface.media.ExifInterface
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
@@ -30,6 +33,7 @@ class NativeHoleImage(private val mCtx: MainActivity) {
 
     /** Cached view + density for the per-frame rect path. */
     private val view: SubsamplingScaleImageView by lazy { mCtx.binding.nativeImage }
+    private val preview: ImageView by lazy { mCtx.binding.nativeImagePreview }
     private val density: Float by lazy { mCtx.resources.displayMetrics.density }
 
     /** Serializes replacements so a stale load cannot orphan the next one. */
@@ -40,8 +44,11 @@ class NativeHoleImage(private val mCtx: MainActivity) {
 
     /** Currently displayed file; deleted after replacement. */
     private var currentFile: java.io.File? = null
+    private var previewBitmap: Bitmap? = null
+    private var lastRect: FloatArray? = null
 
     fun show(show: Boolean) {
+        if (!show) hidePreview()
         view.visibility = if (show) View.VISIBLE else View.INVISIBLE
     }
 
@@ -53,6 +60,7 @@ class NativeHoleImage(private val mCtx: MainActivity) {
     fun setRect(x: Float, y: Float, w: Float, h: Float) {
         if (!x.isFinite() || !y.isFinite() || !w.isFinite() || !h.isFinite()) {
             view.visibility = View.INVISIBLE
+            hidePreview()
             return
         }
         // Clamp to a sane CSS px range; the hole may extend past the
@@ -63,8 +71,10 @@ class NativeHoleImage(private val mCtx: MainActivity) {
         val ch = h.coerceIn(0f, 1000000f)
         if (cw <= 0 || ch <= 0) {
             view.visibility = View.INVISIBLE
+            hidePreview()
             return
         }
+        lastRect = floatArrayOf(cx, cy, cw, ch)
         if (view.isReady) applyRect(cx, cy, cw, ch)
     }
 
@@ -224,16 +234,19 @@ class NativeHoleImage(private val mCtx: MainActivity) {
                     ensureConfigured()
                     // Visible while decoding so the draw pass fires onReady.
                     view.visibility = View.VISIBLE
+                    snapshotToPreview()
                     // Free the previous image; throws when empty.
                     runCatching { view.recycle() }
                     view.setOnImageEventListener(object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
                         override fun onReady() {
+                            lastRect?.let { r -> applyRect(r[0], r[1], r[2], r[3]) }
                             if (cont.isActive) cont.resume(Unit)
                         }
 
                         override fun onImageLoadError(e: Exception) {
                             android.util.Log.w(TAG, "onImageLoadError", e)
                             view.visibility = View.INVISIBLE
+                            hidePreview()
                             if (cont.isActive) cont.resumeWithException(e)
                         }
                     })
@@ -242,6 +255,7 @@ class NativeHoleImage(private val mCtx: MainActivity) {
                     view.setImage(source)
                 } catch (e: Exception) {
                     view.visibility = View.INVISIBLE
+                    hidePreview()
                     if (cont.isActive) cont.resumeWithException(e)
                 }
             }
@@ -278,5 +292,29 @@ class NativeHoleImage(private val mCtx: MainActivity) {
         if (!center.x.isFinite() || !center.y.isFinite()) return
         img.setScaleAndCenter(scale, center)
         img.visibility = View.VISIBLE
+        hidePreview()
+    }
+
+    // Keep the old frame on screen while the new one decodes.
+    private fun snapshotToPreview() {
+        if (!view.isReady || view.visibility != View.VISIBLE) return
+        val w = view.width
+        val h = view.height
+        if (w <= 0 || h <= 0 || w > 4096 || h > 4096) return
+        runCatching {
+            val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+            view.draw(Canvas(bmp))
+            previewBitmap?.recycle()
+            previewBitmap = bmp
+            preview.setImageBitmap(bmp)
+            preview.visibility = View.VISIBLE
+        }
+    }
+
+    private fun hidePreview() {
+        preview.visibility = View.INVISIBLE
+        preview.setImageDrawable(null)
+        previewBitmap?.recycle()
+        previewBitmap = null
     }
 }
