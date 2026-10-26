@@ -1,6 +1,6 @@
 <template>
   <div v-if="available" class="search-places">
-    <NcButton :disabled="selected.length >= 8" @click="open">{{ t('memories', 'Add a place') }}</NcButton>
+    <NcButton v-if="canAdd" :disabled="selected.length >= 8" @click="open">{{ t('memories', 'Add a place') }}</NcButton>
     <span v-if="selected.length">{{ t('memories', 'Place filters') }}</span>
     <NcButton
       v-for="id in selected"
@@ -42,6 +42,7 @@ import Modal from '@components/modal/Modal.vue';
 import { useModal } from '@services/modal';
 import { config } from '@services/user-config';
 import { routes } from '@services/router';
+import { constants } from '@services/constants';
 import Fuse from 'fuse.js';
 import { t } from '@services/l10n';
 import * as dav from '@services/dav';
@@ -55,14 +56,14 @@ const { show, close } = useModal(modal);
 const search = ref('');
 const loading = ref(false);
 const failed = ref(false);
-const available = computed(
+const canAdd = computed(
   () =>
     config.places_gis > 0 &&
-    (selected.value.length > 0 ||
-      route.name === routes.Recognize.name ||
-      route.name === routes.Base.name ||
-      route.name === routes.Places.name),
+    route.name === routes.Recognize.name &&
+    !!route.params.name &&
+    route.params.name !== constants.FACE_NULL,
 );
+const available = computed(() => config.places_gis > 0 && (selected.value.length > 0 || canAdd.value));
 const places = ref<ICluster[]>([]);
 const selected = computed(() =>
   typeof route.query.searchPlaces === 'string'
