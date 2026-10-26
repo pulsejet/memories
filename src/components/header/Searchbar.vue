@@ -257,7 +257,9 @@ function chooseCluster(cluster: ICluster) {
 
 function moveSuggestion(delta: number) {
   const count = clustersResult.value.length;
-  if (count) activeSuggestion.value = (activeSuggestion.value + delta + count) % count;
+  if (count)
+    activeSuggestion.value =
+      activeSuggestion.value < 0 ? (delta > 0 ? 0 : count - 1) : (activeSuggestion.value + delta + count) % count;
 }
 
 function submitSearch() {
