@@ -138,7 +138,7 @@ export default class PsNativeHole {
       this.revealTimer.set(() => {
         this.holderElement?.classList.add('nativex-hole');
         nativex.nxAsync('setHdrColorMode')?.(true);
-      }, 100);
+      }, 50);
     }
 
     const key = `${x1},${y1},${x2 - x1},${y2 - y1}`;
