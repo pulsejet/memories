@@ -29,7 +29,7 @@ final class RecognizePeopleFilterTest extends TestCase
 
     public function testInvalidIdsAreRejected(): void
     {
-        foreach (['0', '-1', '1.2', '01', '1,,2', '1 OR 1=1', '9999999999999999999', ['1']] as $value) {
+        foreach (['0', '-1', '1.2', '01', '1,,2', '1 OR 1=1', '9999999999999999999', ['1'], true, 1] as $value) {
             try {
                 RecognizePeopleFilter::parse($value);
                 self::fail('Invalid people filter was accepted');
@@ -37,6 +37,17 @@ final class RecognizePeopleFilterTest extends TestCase
                 self::assertTrue(true);
             }
         }
+    }
+
+    public function testEightAdditionalPeopleAreAccepted(): void
+    {
+        self::assertSame([1, 2, 3, 4, 5, 6, 7, 8], RecognizePeopleFilter::parse('1,2,3,4,5,6,7,8'));
+    }
+
+    public function testOversizedInputIsRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        RecognizePeopleFilter::parse(str_repeat('1', 161));
     }
 
     public function testPeopleLimit(): void
