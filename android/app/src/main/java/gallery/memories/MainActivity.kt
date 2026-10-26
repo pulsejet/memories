@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity() {
         CookieManager.getInstance().flush()
     }
 
-    /** Clears back history once after a main-page load; clearHistory() before loadUrl() alone does not. */
+    /** Clears back history once the main page lands; clearHistory() before loadUrl() alone does not. */
     fun consumeClearHistoryFlag(view: WebView) {
         if (clearHistoryOnLoad) {
             clearHistoryOnLoad = false
