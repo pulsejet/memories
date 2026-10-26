@@ -10,21 +10,20 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
-        <!-- Native image shown through the webview hole. -->
+        <!-- Native images shown through the webview hole. -->
         <!-- Invisible (not gone) to allow decoding. -->
         <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
-            android:id="@+id/nativeImage"
+            android:id="@+id/nativeImageA"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="invisible"
         />
 
-        <!-- Old frame snapshot, covers the swap gap. -->
-        <ImageView
-            android:id="@+id/nativeImagePreview"
+        <!-- Ping-pong counterpart for the view above. -->
+        <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+            android:id="@+id/nativeImageB"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="fitXY"
             android:visibility="invisible"
         />
 
