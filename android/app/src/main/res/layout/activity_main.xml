@@ -19,6 +19,15 @@
             android:visibility="invisible"
         />
 
+        <!-- Old frame snapshot, covers the swap gap. -->
+        <ImageView
+            android:id="@+id/nativeImagePreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:visibility="invisible"
+        />
+
         <WebView
             android:id="@+id/webview"
             android:layout_width="match_parent"
