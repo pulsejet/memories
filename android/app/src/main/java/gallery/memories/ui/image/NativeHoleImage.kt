@@ -27,8 +27,6 @@ import kotlin.coroutines.resumeWithException
  */
 class NativeHoleImage(private val mCtx: MainActivity) {
     companion object {
-        private const val MAX_FLIPPED_DIMEN = 4096
-        private const val MAX_FLIPPED_PX = 12_000_000
         private const val TAG = "NativeHoleImage"
     }
 
@@ -109,16 +107,9 @@ class NativeHoleImage(private val mCtx: MainActivity) {
         }.getOrNull()?.getAttributeInt(
             ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL,
         ) ?: ExifInterface.ORIENTATION_NORMAL
-        val flipped = orientation == ExifInterface.ORIENTATION_FLIP_HORIZONTAL ||
-            orientation == ExifInterface.ORIENTATION_FLIP_VERTICAL ||
-            orientation == ExifInterface.ORIENTATION_TRANSPOSE ||
-            orientation == ExifInterface.ORIENTATION_TRANSVERSE
         val file = withContext(Dispatchers.IO) {
             val dir = java.io.File(mCtx.cacheDir, "native-image").apply { mkdirs() }
-            java.io.File(dir, "img-$seq").apply {
-                if (!flipped) writeBytes(bytes)
-                else writeFlippedBytes(this, bytes, orientation, bounds)
-            }
+            java.io.File(dir, "img-$seq").apply { writeBytes(bytes) }
         }
         imageMutex.withLock {
             if (seq < lastSeq) {
@@ -127,8 +118,7 @@ class NativeHoleImage(private val mCtx: MainActivity) {
             }
             lastSeq = seq
             try {
-                val viewOrientation = if (flipped) SubsamplingScaleImageView.ORIENTATION_0
-                    else exifToViewOrientation(orientation)
+                val viewOrientation = exifToViewOrientation(orientation)
                 val tiling = mCtx.shouldUseTiling(bounds.outWidth, bounds.outHeight)
                 val source = ImageSource.uri(android.net.Uri.fromFile(file))
                     .tiling(tiling)
@@ -188,45 +178,6 @@ class NativeHoleImage(private val mCtx: MainActivity) {
     /** Render a URI source; the view owns the decode. Caller must hold [imageMutex]. */
     private suspend fun displayLocked(source: ImageSource, orientation: Int) {
         awaitImage(source, orientation)
-    }
-
-    private fun writeFlippedBytes(
-        file: java.io.File,
-        bytes: ByteArray,
-        orientation: Int,
-        bounds: BitmapFactory.Options,
-    ) {
-        var sample = 1
-        while (maxOf(bounds.outWidth, bounds.outHeight) / sample > MAX_FLIPPED_DIMEN ||
-            (bounds.outWidth / sample).toLong() * (bounds.outHeight / sample) > MAX_FLIPPED_PX
-        ) sample *= 2
-        val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
-            ?: throw IllegalArgumentException("cannot decode image")
-        val matrix = android.graphics.Matrix().apply {
-            when (orientation) {
-                ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> preScale(-1f, 1f)
-                ExifInterface.ORIENTATION_FLIP_VERTICAL -> preScale(1f, -1f)
-                ExifInterface.ORIENTATION_TRANSPOSE -> {
-                    preRotate(90f)
-                    preScale(-1f, 1f)
-                }
-                ExifInterface.ORIENTATION_TRANSVERSE -> {
-                    preRotate(270f)
-                    preScale(-1f, 1f)
-                }
-            }
-        }
-        val flipped = android.graphics.Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
-        if (flipped !== bmp) bmp.recycle()
-        try {
-            java.io.FileOutputStream(file).use {
-                if (!flipped.compress(android.graphics.Bitmap.CompressFormat.JPEG, 92, it)) {
-                    throw java.io.IOException("compress failed")
-                }
-            }
-        } finally {
-            flipped.recycle()
-        }
     }
 
     private fun sweepNativeImageDir(keep: java.io.File?) {
