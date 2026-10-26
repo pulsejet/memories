@@ -18,7 +18,6 @@ export default class PsNativeHole {
 
     const updateEvents = [
       'zoomPanUpdate',
-      'initialZoomPan',
       'firstZoomPan',
       'change',
       'slideActivate',
@@ -33,6 +32,12 @@ export default class PsNativeHole {
     for (const e of updateEvents) {
       lightbox.on(e, () => this.scheduleClipUpdate());
     }
+
+    // We (ab-)use this event to indicate a force update should happen.
+    lightbox.on('initialZoomPan', (e) => {
+      this.lastNative = null;
+      this.scheduleClipUpdate();
+    });
 
     const resetEvents = ['close', 'closingAnimationStart', 'destroy'] as const;
     for (const e of resetEvents) {
