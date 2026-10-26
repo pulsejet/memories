@@ -7,6 +7,7 @@ import android.net.Uri
 import android.net.http.SslError
 import android.util.Log
 import android.webkit.SslErrorHandler
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -80,6 +81,15 @@ class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient(
     override fun doUpdateVisitedHistory(view: WebView, url: String?, isReload: Boolean) {
         super.doUpdateVisitedHistory(view, url, isReload)
         if (!isReload) activity.consumeClearHistoryFlag(view)
+    }
+
+    override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
+        Log.w(TAG, "Renderer gone (crashed=${detail.didCrash()}), reloading ${view.url}")
+        activity.clearHistoryOnLoad = false
+        if (!activity.isFinishing && !activity.isDestroyed) {
+            view.reload()
+        }
+        return true
     }
 
     /** Main-frame network failures otherwise render as a silent blank page. */
