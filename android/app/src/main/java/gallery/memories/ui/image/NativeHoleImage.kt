@@ -1,14 +1,18 @@
 package gallery.memories.ui.image
 
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.graphics.PointF
 import android.view.View
+import androidx.exifinterface.media.ExifInterface
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import gallery.memories.MainActivity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -100,31 +104,108 @@ class NativeHoleImage(private val mCtx: MainActivity) {
             ) {
                 throw IllegalArgumentException("image too large")
             }
+            // Rotation only swaps axes, so the bounds check above still holds.
+            val orientation = runCatching {
+                ExifInterface(java.io.ByteArrayInputStream(bytes))
+            }.getOrNull()?.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL,
+            ) ?: ExifInterface.ORIENTATION_NORMAL
             var bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                 ?: throw IllegalArgumentException("cannot decode image")
-            if (DEBUG_MODE) {
-                val tinted = bmp.copy(android.graphics.Bitmap.Config.ARGB_8888, true)
-                if (tinted != null) {
-                    if (tinted !== bmp) bmp.recycle()
-                    android.graphics.Canvas(tinted).drawColor(android.graphics.Color.argb(80, 255, 0, 0))
-                    bmp = tinted
-                }
-            }
-            try {
-                awaitImage(ImageSource.bitmap(bmp).tilingDisabled())
-            } catch (e: Exception) {
-                runCatching { bmp.recycle() }
-                throw e
-            }
-            val old = currentBmp
-            currentBmp = bmp
-            old?.let { runCatching { it.recycle() } }
+            bmp = applyOrientation(bmp, orientation)
+            bmp = maybeTint(bmp)
+            displayLocked(bmp, SubsamplingScaleImageView.ORIENTATION_0)
             return true
         }
     }
 
+    /**
+     * Show a MediaStore image in the hole view. The view decodes the URI
+     * itself (tiled, any size). EXIF is read here because the view only
+     * understands the deprecated MediaStore orientation column for
+     * content URIs. Stale counters are ignored. True if rendered.
+     */
+    suspend fun setImageUri(uri: android.net.Uri, seq: Long): Boolean {
+        val orientation = withContext(Dispatchers.IO) {
+            mCtx.contentResolver.openInputStream(uri)?.use {
+                runCatching { ExifInterface(it) }.getOrNull()?.getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL,
+                )
+            } ?: ExifInterface.ORIENTATION_NORMAL
+        }.let(::exifToViewOrientation)
+        imageMutex.withLock {
+            if (seq < lastSeq) return false
+            lastSeq = seq
+            displayLocked(ImageSource.uri(uri), orientation)
+            return true
+        }
+    }
+
+    /** View orientations are right angles only; flips stay unrotated, as the view does. */
+    private fun exifToViewOrientation(orientation: Int): Int = when (orientation) {
+        ExifInterface.ORIENTATION_ROTATE_90 -> SubsamplingScaleImageView.ORIENTATION_90
+        ExifInterface.ORIENTATION_ROTATE_180 -> SubsamplingScaleImageView.ORIENTATION_180
+        ExifInterface.ORIENTATION_ROTATE_270 -> SubsamplingScaleImageView.ORIENTATION_270
+        else -> SubsamplingScaleImageView.ORIENTATION_0
+    }
+
+    /** Rotate/flip per EXIF orientation; recycles the source on copy. */
+    private fun applyOrientation(bmp: android.graphics.Bitmap, orientation: Int): android.graphics.Bitmap {
+        val matrix = Matrix().apply {
+            when (orientation) {
+                ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> preScale(-1f, 1f)
+                ExifInterface.ORIENTATION_ROTATE_180 -> preRotate(180f)
+                ExifInterface.ORIENTATION_FLIP_VERTICAL -> preScale(1f, -1f)
+                ExifInterface.ORIENTATION_TRANSPOSE -> {
+                    preRotate(90f)
+                    preScale(-1f, 1f)
+                }
+                ExifInterface.ORIENTATION_ROTATE_90 -> preRotate(90f)
+                ExifInterface.ORIENTATION_TRANSVERSE -> {
+                    preRotate(270f)
+                    preScale(-1f, 1f)
+                }
+                ExifInterface.ORIENTATION_ROTATE_270 -> preRotate(270f)
+                else -> return bmp
+            }
+        }
+        val rotated = android.graphics.Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
+        if (rotated !== bmp) bmp.recycle()
+        return rotated
+    }
+
+    /** Red-tint a bitmap when debugging; recycles the original on copy. */
+    private fun maybeTint(bmp: android.graphics.Bitmap): android.graphics.Bitmap {
+        if (!DEBUG_MODE) return bmp
+        val tinted = bmp.copy(android.graphics.Bitmap.Config.ARGB_8888, true) ?: return bmp
+        if (tinted !== bmp) bmp.recycle()
+        android.graphics.Canvas(tinted).drawColor(android.graphics.Color.argb(80, 255, 0, 0))
+        return tinted
+    }
+
+    /** Render [bmp] and swap it in; caller must hold [imageMutex]. */
+    private suspend fun displayLocked(bmp: android.graphics.Bitmap, orientation: Int) {
+        try {
+            awaitImage(ImageSource.bitmap(bmp).tilingDisabled(), orientation)
+        } catch (e: Exception) {
+            runCatching { bmp.recycle() }
+            throw e
+        }
+        val old = currentBmp
+        currentBmp = bmp
+        old?.let { runCatching { it.recycle() } }
+    }
+
+    /** Render a URI source; the view owns the decode. Caller must hold [imageMutex]. */
+    private suspend fun displayLocked(source: ImageSource, orientation: Int) {
+        awaitImage(source, orientation)
+        val old = currentBmp
+        currentBmp = null
+        old?.let { runCatching { it.recycle() } }
+    }
+
     /** Set the source on the UI thread; resume once rendered or failed. */
-    private suspend fun awaitImage(source: ImageSource) =
+    private suspend fun awaitImage(source: ImageSource, orientation: Int) =
         suspendCancellableCoroutine { cont ->
             mCtx.runOnUiThread {
                 try {
@@ -144,6 +225,8 @@ class NativeHoleImage(private val mCtx: MainActivity) {
                             if (cont.isActive) cont.resumeWithException(e)
                         }
                     })
+                    // Orientation before source so EXIF tiles load correctly.
+                    view.setOrientation(orientation)
                     view.setImage(source)
                 } catch (e: Exception) {
                     view.visibility = View.INVISIBLE
@@ -155,8 +238,11 @@ class NativeHoleImage(private val mCtx: MainActivity) {
     /** Mirror a hole box (CSS px) onto the view with cover scale + center. */
     private fun applyRect(x: Float, y: Float, w: Float, h: Float) {
         val img = view
-        val sw = img.sWidth.toFloat()
-        val sh = img.sHeight.toFloat()
+        // sWidth/sHeight ignore rotation; swap for the displayed dims.
+        val swap = img.appliedOrientation == SubsamplingScaleImageView.ORIENTATION_90 ||
+            img.appliedOrientation == SubsamplingScaleImageView.ORIENTATION_270
+        val sw = (if (swap) img.sHeight else img.sWidth).toFloat()
+        val sh = (if (swap) img.sWidth else img.sHeight).toFloat()
         if (sw <= 0 || sh <= 0) return
         val d = density
         val wd = w * d

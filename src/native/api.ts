@@ -89,6 +89,18 @@ export const NAPI = {
   VIEW_IMAGE: (seq: number) => `${BASE_URL}/api/view/image?seq=${seq}`,
 
   /**
+   * Put the on-device copy of an indexed photo into the native view.
+   * POST JSON {uri} with the MediaStore URI from the day response.
+   * Resolves only after the native view has rendered the image.
+   * Shares the upload sequence counter.
+   * @regex ^/api/view/image/local$
+   * @param seq Monotonic upload counter for ordering (query)
+   * @param uri MediaStore content URI of the photo
+   * @returns {void}
+   */
+  VIEW_IMAGE_LOCAL: (seq: number) => `${BASE_URL}/api/view/image/local?seq=${seq}`,
+
+  /**
    * Upload a local file to Nextcloud natively, without routing
    * bytes through the WebView.
    * @regex ^/api/upload/local$

@@ -112,6 +112,8 @@ declare module '@typings' {
     auid?: string;
     /** BUID of file (optional, NativeX) */
     buid?: string;
+    /** MediaStore URI of file (optional, NativeX) */
+    local_uri?: string;
     /** Epoch of file (optional, NativeX) */
     epoch?: number;
     /** Local copy matched by AUID/BUID (post-merge) */
