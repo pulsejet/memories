@@ -1,5 +1,6 @@
 package gallery.memories.ui.image
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -128,7 +129,10 @@ class NativeHoleImage(private val mCtx: MainActivity) {
             try {
                 val viewOrientation = if (flipped) SubsamplingScaleImageView.ORIENTATION_0
                     else exifToViewOrientation(orientation)
-                displayLocked(ImageSource.uri(android.net.Uri.fromFile(file)), viewOrientation)
+                val tiling = mCtx.shouldUseTiling(bounds.outWidth, bounds.outHeight)
+                val source = ImageSource.uri(android.net.Uri.fromFile(file))
+                    .tiling(tiling)
+                displayLocked(source, viewOrientation)
             } catch (e: Exception) {
                 runCatching { file.delete() }
                 throw e
@@ -148,17 +152,25 @@ class NativeHoleImage(private val mCtx: MainActivity) {
      * content URIs. Stale counters are ignored. True if rendered.
      */
     suspend fun setImageUri(uri: android.net.Uri, seq: Long): Boolean {
-        val orientation = withContext(Dispatchers.IO) {
-            mCtx.contentResolver.openInputStream(uri)?.use {
+        val (orientation, width, height) = withContext(Dispatchers.IO) {
+            val orientation = mCtx.contentResolver.openInputStream(uri)?.use {
                 runCatching { ExifInterface(it) }.getOrNull()?.getAttributeInt(
                     ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL,
                 )
             } ?: ExifInterface.ORIENTATION_NORMAL
-        }.let(::exifToViewOrientation)
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            mCtx.contentResolver.openInputStream(uri)?.use {
+                runCatching { BitmapFactory.decodeStream(it, null, bounds) }
+            }
+            Triple(orientation, bounds.outWidth, bounds.outHeight)
+        }
         imageMutex.withLock {
             if (seq < lastSeq) return false
             lastSeq = seq
-            displayLocked(ImageSource.uri(uri), orientation)
+            val tiling = mCtx.shouldUseTiling(width, height)
+            val source = ImageSource.uri(uri)
+                .tiling(tiling)
+            displayLocked(source, exifToViewOrientation(orientation))
             currentFile = null
             sweepNativeImageDir(null)
             return true
@@ -316,5 +328,20 @@ class NativeHoleImage(private val mCtx: MainActivity) {
         preview.setImageDrawable(null)
         previewBitmap?.recycle()
         previewBitmap = null
+    }
+
+    private fun Context.shouldUseTiling(
+        imageWidth: Int,
+        imageHeight: Int,
+        bytesPerPixel: Int = 4,
+    ): Boolean {
+        // Single draw call cannot exceed the GPU texture size.
+        val maxTextureSize = Canvas().maximumBitmapWidth.coerceAtLeast(4096)
+        if (imageWidth > maxTextureSize || imageHeight > maxTextureSize) return true
+
+        // Single bitmap must fit under the memory ceiling.
+        val bitmapBytes = imageWidth.toLong() * imageHeight * bytesPerPixel
+        if (bitmapBytes > 80L * 1024 * 1024) return true
+        return false
     }
 }
