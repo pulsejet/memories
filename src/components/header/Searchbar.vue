@@ -11,7 +11,10 @@
             :label-outside="true"
             :label="t('memories', 'Search your photos …')"
             :placeholder="t('memories', 'Search your photos …')"
-            @keydown.enter="openSearch"
+            @keydown.enter.prevent="submitSearch"
+            @keydown.down.prevent="moveSuggestion(1)"
+            @keydown.up.prevent="moveSuggestion(-1)"
+            @keydown.esc="pHidden = true"
           >
             <template #icon>
               <MagnifyIcon :size="16" />
@@ -22,7 +25,7 @@
 
       <div class="searchbar-results" v-if="!isLensLive">
         <button v-if="isPeopleExpression" class="cluster people-search" @click="openSearch">
-          {{ t('memories', 'Search people: + together, - without') }}
+          {{ t('memories', 'Search: + together, - without, place: location') }}
         </button>
         <div v-if="showLensEntry" class="cluster" @click="openSearch">
           <div class="icon">
@@ -42,7 +45,14 @@
         </div>
 
         <template v-for="cluster of clustersResult">
-          <router-link class="cluster" :to="clusterTarget(cluster)" @click.native="select()">
+          <component
+            :is="isPeopleExpression ? 'button' : 'router-link'"
+            class="cluster"
+            :class="{ 'suggestion-active': activeSuggestion === clustersResult.indexOf(cluster) }"
+            :to="isPeopleExpression ? undefined : clusterTarget(cluster)"
+            :type="isPeopleExpression ? 'button' : undefined"
+            @click="chooseCluster(cluster)"
+          >
             <div class="icon">
               <AlbumIcon v-if="clusterIs.album(cluster)" :size="22" />
               <LocationIcon v-else-if="clusterIs.place(cluster)" :size="22" />
@@ -52,7 +62,7 @@
             </div>
 
             {{ cluster.display_name ?? cluster.name }}
-          </router-link>
+          </component>
         </template>
       </div>
     </NcPopover>
@@ -70,7 +80,13 @@ import { config } from '@services/user-config';
 import { windowDims } from '@services/viewport';
 import { useRouteIs } from '@services/route-is';
 import { t } from '@services/l10n';
-import { parsePeopleSearch, resolvePeopleSearch } from '@services/people-search';
+import {
+  isPhotoExpression,
+  parsePhotoSearch,
+  resolvePhotoSearch,
+  completionTerm,
+  completePhotoSearch,
+} from '@services/photo-search';
 import { showError } from '@services/utils/dialog';
 
 import * as dav from '@services/dav';
@@ -108,7 +124,8 @@ const routeIs = useRouteIs();
 const textFieldRef = useTemplateRef<any>('textField');
 
 const prompt = ref(String());
-const isPeopleExpression = computed(() => config.recognize_enabled && /[+-]/.test(prompt.value));
+const isPeopleExpression = computed(() => isPhotoExpression(prompt.value));
+const activeSuggestion = ref(-1);
 
 // Popover can be hidden by clicking outside and
 // so subsequent changes to prompt do not trigger
@@ -142,7 +159,15 @@ const shown = computed(() => {
 
 const clustersResult = computed((): ICluster[] => {
   if (!prompt.value) return [];
-  return clustersFuse.value.search(prompt.value, { limit: 6 }).map((r) => r.item);
+  if (!isPeopleExpression.value) return clustersFuse.value.search(prompt.value, { limit: 6 }).map((r) => r.item);
+  const term = completionTerm(prompt.value);
+  const candidates = (clusters.value ?? []).filter(
+    (c) => c.cluster_type === (term.kind === 'place' ? 'places' : 'recognize'),
+  );
+  if (!term.query.trim()) return candidates.slice(0, 6);
+  return new Fuse(candidates, { keys: ['name', 'display_name'], threshold: 0.3 })
+    .search(term.query, { limit: 6 })
+    .map((r) => r.item);
 });
 
 const clustersFuse = computed(() => {
@@ -161,7 +186,7 @@ const isLensLive = computed((): boolean => {
 
 /** Explicit lens entry for anywhere live search does not apply */
 const showLensEntry = computed((): boolean => {
-  return !!prompt.value && lensEnabled.value && !isLensLive.value;
+  return !!prompt.value && lensEnabled.value && !isLensLive.value && !isPeopleExpression.value;
 });
 
 const lensEntryText = computed((): string => {
@@ -170,6 +195,7 @@ const lensEntryText = computed((): string => {
 
 watch(prompt, (val: string) => {
   pHidden.value = false;
+  activeSuggestion.value = -1;
   if (val) {
     load(); // load clusters
   }
@@ -192,14 +218,14 @@ function select() {
   emit('select');
 }
 
-async function load() {
-  // Load all clusters that we can search in
-  if (!clustersLoad.value) {
-    clustersLoad.value = true;
-    const signal = abort.signal;
-
-    const noop = new Promise<ICluster[]>((r) => r([]));
-
+let loading: Promise<void> | null = null;
+async function load(): Promise<void> {
+  if (clusters.value) return;
+  if (loading) return loading;
+  clustersLoad.value = true;
+  const signal = abort.signal;
+  loading = (async () => {
+    const noop = Promise.resolve<ICluster[]>([]);
     try {
       const results = await Promise.allSettled([
         config.recognize_enabled ? dav.getFaceList('recognize', { signal }) : noop,
@@ -209,16 +235,38 @@ async function load() {
         config.albums_enabled ? dav.getAlbums({ signal }) : noop,
       ]);
       signal.throwIfAborted();
-
-      // Ignore all errors and flatten
       clusters.value = results
         .flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
         .filter((c) => !!(c.name || c.display_name));
     } catch (e) {
-      if (isAbortError(e)) return;
-      console.error(e);
+      if (!isAbortError(e)) console.error(e);
+    } finally {
+      clustersLoad.value = false;
+      loading = null;
     }
-  }
+  })();
+  return loading;
+}
+
+function chooseCluster(cluster: ICluster) {
+  if (!isPeopleExpression.value) return select();
+  prompt.value = completePhotoSearch(prompt.value, cluster.name);
+  pHidden.value = false;
+  textFieldRef.value?.focus();
+}
+
+function moveSuggestion(delta: number) {
+  const count = clustersResult.value.length;
+  if (count) activeSuggestion.value = (activeSuggestion.value + delta + count) % count;
+}
+
+function submitSearch() {
+  const cluster = clustersResult.value[activeSuggestion.value];
+  if (cluster && isPeopleExpression.value) chooseCluster(cluster);
+  else if (cluster) {
+    void router.push(clusterTarget(cluster));
+    select();
+  } else void openSearch();
 }
 
 /** Mirror ?q= into the box when on the search view (e.g. direct open). */
@@ -235,26 +283,33 @@ async function openSearch() {
     try {
       let terms;
       try {
-        terms = parsePeopleSearch(q);
+        terms = parsePhotoSearch(q);
       } catch {
-        showError(t('memories', 'Use Name+Name or Name-Name. Put names containing + or - in double quotes.'));
+        showError(t('memories', 'Use Name+Name, Name-Name or Name place:City. Quote names containing operators.'));
         return;
       }
       if (!terms) return;
-      const people = await dav.getFaceList('recognize');
+      await load();
       let result;
       try {
-        result = resolvePeopleSearch(terms, people);
+        result = resolvePhotoSearch(terms, clusters.value ?? []);
       } catch (error) {
         showError(
-          t('memories', 'Person unknown, ambiguous or contradictory: {name}', { name: (error as Error).message }),
+          t('memories', 'Person or place unknown, ambiguous or contradictory: {name}', {
+            name: (error as Error).message,
+          }),
         );
         return;
       }
+      const primary = result.primary;
+      if (primary && !dav.clusterIs.recognize(primary)) throw new Error('Invalid primary person');
       await router.push({
-        name: 'recognize',
-        params: { user: result.primary.user_id, name: result.primary.name || String(result.primary.cluster_id) },
-        query: { recognizePeople: result.filters.length ? result.filters.join(',') : undefined },
+        name: primary ? 'recognize' : 'timeline',
+        params: primary ? { user: primary.user_id, name: primary.name || String(primary.cluster_id) } : {},
+        query: {
+          recognizePeople: result.people.length ? result.people.join(',') : undefined,
+          searchPlaces: result.places.length ? result.places.join(',') : undefined,
+        },
       });
       select();
       pHidden.value = true;
@@ -381,8 +436,19 @@ function routeToLens() {
     color: var(--color-main-text);
   }
 
+  .suggestion-active {
+    background-color: var(--color-background-hover);
+    outline: 2px solid var(--color-primary-element);
+    outline-offset: -2px;
+  }
+
   .cluster {
     display: block;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    text-align: start;
+    color: var(--color-main-text);
     padding: 8px 14px;
     cursor: pointer;
     text-overflow: ellipsis;

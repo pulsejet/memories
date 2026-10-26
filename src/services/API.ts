@@ -29,6 +29,7 @@ export const enum DaysFilterType {
   RECOGNIZE_PEOPLE = 'recognizePeople',
   FACERECOGNITION = 'facerecognition',
   PLACE = 'places',
+  SEARCH_PLACES = 'searchPlaces',
   TAG = 'tags',
   MAP_BOUNDS = 'mapbounds',
 

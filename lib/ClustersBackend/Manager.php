@@ -78,6 +78,14 @@ final class Manager
             }
         }
 
+        if (null !== $request->getParam('searchPlaces')) {
+            $backend = \OCP\Server::get(PlacesBackend::class);
+            if (!$backend->isEnabled()) {
+                throw \OCA\Memories\Exceptions::BadRequest('Places are not enabled');
+            }
+            $transforms[] = $backend->transformSearchQuery(...);
+        }
+
         return $transforms;
     }
 

@@ -865,6 +865,10 @@ function getQuery() {
     set(DaysFilterType.ALBUM, `${user}/${name}`);
   }
 
+  if (route.query.searchPlaces != null) {
+    set(DaysFilterType.SEARCH_PLACES, route.query.searchPlaces.toString());
+  }
+
   // People
   if (routeIs.People) {
     if (!user || !name) {

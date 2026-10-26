@@ -1,5 +1,5 @@
 <template>
-  <div class="dtm-container" v-if="currentmatter || viewName">
+  <div class="dtm-container" v-if="currentmatter || viewName || route.query.searchPlaces">
     <div v-if="viewName" class="header">{{ viewName }}</div>
     <component
       ref="child"
@@ -8,6 +8,7 @@
       :key="routerStatePath(route)"
       @load="emit('load')"
     />
+    <SearchPlacesFilter @load="emit('load')" />
   </div>
 </template>
 
@@ -25,6 +26,7 @@ import AlbumDynamicTopMatter from './AlbumDynamicTopMatter.vue';
 import FolderDynamicTopMatter from './FolderDynamicTopMatter.vue';
 import PlacesDynamicTopMatterVue from './PlacesDynamicTopMatter.vue';
 import OnThisDay from './OnThisDay.vue';
+import SearchPlacesFilter from './SearchPlacesFilter.vue';
 
 // Auto-hide top header on public shares if redundant
 import './PublicShareHeader';
