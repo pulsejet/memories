@@ -26,6 +26,7 @@ export const enum DaysFilterType {
   ARCHIVE = 'archive',
   ALBUM = 'albums',
   RECOGNIZE = 'recognize',
+  RECOGNIZE_PEOPLE = 'recognizePeople',
   FACERECOGNITION = 'facerecognition',
   PLACE = 'places',
   TAG = 'tags',

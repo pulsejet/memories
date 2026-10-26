@@ -874,6 +874,9 @@ function getQuery() {
     // name is "recognize" or "facerecognition"
     const filter = <DaysFilterType>route.name;
     set(filter, `${user}/${name}`);
+    if (routeIs.Recognize && route.query.recognizePeople != null) {
+      set(DaysFilterType.RECOGNIZE_PEOPLE, route.query.recognizePeople.toString());
+    }
 
     // Face rect
     if (config.show_face_rect || routeIs.RecognizeUnassigned) {
