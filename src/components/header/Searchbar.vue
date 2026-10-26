@@ -37,7 +37,7 @@
         <div class="empty" v-else-if="!clusters && clustersLoad">
           <XLoadingIcon class="fill-block" />
         </div>
-        <div class="empty" v-else-if="clustersResult.length === 0">
+        <div class="empty" v-else-if="clustersResult.length === 0 && !isPeopleExpression">
           {{ t('memories', 'No results found') }}
         </div>
 
@@ -253,7 +253,7 @@ async function openSearch() {
       }
       await router.push({
         name: 'recognize',
-        params: { user: result.primary.user_id, name: String(result.primary.cluster_id) },
+        params: { user: result.primary.user_id, name: result.primary.name || String(result.primary.cluster_id) },
         query: { recognizePeople: result.filters.length ? result.filters.join(',') : undefined },
       });
       select();
