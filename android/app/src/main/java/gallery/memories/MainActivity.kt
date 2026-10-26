@@ -107,7 +107,17 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         binding.webview.onResume()
         binding.webview.resumeTimers()
+        binding.webview.invalidate()
         eventBus.onResumeRefresh()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus && !isFinishing && !isDestroyed) {
+            binding.webview.onResume()
+            binding.webview.resumeTimers()
+            binding.webview.invalidate()
+        }
     }
 
     @SuppressLint("GestureBackNavigation")
