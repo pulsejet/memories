@@ -10,6 +10,8 @@
     "Use Name+Name, Name-Name or Name place:City. Quote names containing operators." : "Utilisez Nom+Nom, Nom-Nom ou Nom lieu:Ville. Placez les noms contenant des opérateurs entre guillemets.",
     "Person or place unknown, ambiguous or contradictory: {name}" : "Personne ou lieu inconnu, ambigu ou contradictoire : {name}",
     "Place filters" : "Filtres de lieux",
+    "Add a place" : "Ajouter un lieu",
+    "Failed to load places" : "Impossible de charger les lieux",
     "Shared Link" : "Lien partagé",
     "Download" : "Télécharger",
     "Memories" : "Souvenirs",

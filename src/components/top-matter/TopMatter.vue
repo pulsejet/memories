@@ -4,7 +4,7 @@
     :class="{
       'dynamic-visible': dynamicVisible,
     }"
-    v-if="currentmatter || route.query.searchPlaces"
+    v-if="currentmatter || route.query.searchPlaces || (route.name === routes.Base.name && config.places_gis > 0)"
   >
     <component v-if="currentmatter" :is="currentmatter" />
     <SearchPlacesFilter />
@@ -24,6 +24,7 @@ import TrashTopMatter from './TrashTopMatter.vue';
 import SearchPlacesFilter from './SearchPlacesFilter.vue';
 
 import initstate from '@services/init-state';
+import { config } from '@services/user-config';
 import { routes } from '@services/router';
 import * as utils from '@services/utils/common';
 
