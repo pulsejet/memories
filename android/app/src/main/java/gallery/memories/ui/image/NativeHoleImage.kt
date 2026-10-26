@@ -1,12 +1,10 @@
 package gallery.memories.ui.image
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.PointF
 import android.view.View
-import android.widget.ImageView
 import androidx.exifinterface.media.ExifInterface
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
@@ -30,10 +28,15 @@ class NativeHoleImage(private val mCtx: MainActivity) {
         private const val TAG = "NativeHoleImage"
     }
 
-    /** Cached view + density for the per-frame rect path. */
-    private val view: SubsamplingScaleImageView by lazy { mCtx.binding.nativeImage }
-    private val preview: ImageView by lazy { mCtx.binding.nativeImagePreview }
+    /** Cached views + density for the per-frame rect path. */
+    private val viewA: SubsamplingScaleImageView by lazy { mCtx.binding.nativeImageA }
+    private val viewB: SubsamplingScaleImageView by lazy { mCtx.binding.nativeImageB }
     private val density: Float by lazy { mCtx.resources.displayMetrics.density }
+
+    /** Active view shows the current frame; the idle one stages the next. */
+    private var useA = true
+    private fun activeView() = if (useA) viewA else viewB
+    private fun idleView() = if (useA) viewB else viewA
 
     /** Serializes replacements so a stale load cannot orphan the next one. */
     private val imageMutex = Mutex()
@@ -43,12 +46,15 @@ class NativeHoleImage(private val mCtx: MainActivity) {
 
     /** Currently displayed file; deleted after replacement. */
     private var currentFile: java.io.File? = null
-    private var previewBitmap: Bitmap? = null
     private var lastRect: FloatArray? = null
 
     fun show(show: Boolean) {
-        if (!show) hidePreview()
-        view.visibility = if (show) View.VISIBLE else View.INVISIBLE
+        if (!show) {
+            viewA.visibility = View.INVISIBLE
+            viewB.visibility = View.INVISIBLE
+        } else {
+            activeView().visibility = View.VISIBLE
+        }
     }
 
     /**
@@ -58,8 +64,8 @@ class NativeHoleImage(private val mCtx: MainActivity) {
      */
     fun setRect(x: Float, y: Float, w: Float, h: Float) {
         if (!x.isFinite() || !y.isFinite() || !w.isFinite() || !h.isFinite()) {
-            view.visibility = View.INVISIBLE
-            hidePreview()
+            viewA.visibility = View.INVISIBLE
+            viewB.visibility = View.INVISIBLE
             return
         }
         // Clamp to a sane CSS px range; the hole may extend past the
@@ -69,17 +75,17 @@ class NativeHoleImage(private val mCtx: MainActivity) {
         val cw = w.coerceIn(0f, 1000000f)
         val ch = h.coerceIn(0f, 1000000f)
         if (cw <= 0 || ch <= 0) {
-            view.visibility = View.INVISIBLE
-            hidePreview()
+            viewA.visibility = View.INVISIBLE
+            viewB.visibility = View.INVISIBLE
             return
         }
         lastRect = floatArrayOf(cx, cy, cw, ch)
-        if (view.isReady) applyRect(cx, cy, cw, ch)
+        val active = activeView()
+        if (active.isReady) applyRect(active, cx, cy, cw, ch)
     }
 
-    private fun ensureConfigured() {
-        if (configured) return
-        configured = true
+    private fun ensureConfigured(view: SubsamplingScaleImageView) {
+        if (!configured.add(view)) return
         view.setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_OUTSIDE)
         view.setPanEnabled(false)
         view.setZoomEnabled(false)
@@ -91,7 +97,7 @@ class NativeHoleImage(private val mCtx: MainActivity) {
         view.setMinScale(0.01f)
     }
 
-    private var configured = false
+    private val configured = mutableSetOf<SubsamplingScaleImageView>()
 
     /**
      * Replace the hole content with raw preview bytes. Resolves once rendered;
@@ -189,44 +195,71 @@ class NativeHoleImage(private val mCtx: MainActivity) {
         }
     }
 
-    /** Set the source on the UI thread; resume once rendered or failed. */
+    /** Set the source on the UI thread; resume once rendered (and promoted) or failed. */
     private suspend fun awaitImage(source: ImageSource, orientation: Int) =
         suspendCancellableCoroutine { cont ->
+            var targetView: SubsamplingScaleImageView? = null
+            cont.invokeOnCancellation {
+                mCtx.runOnUiThread {
+                    targetView?.let {
+                        it.setOnImageEventListener(null)
+                        it.visibility = View.INVISIBLE
+                    }
+                }
+            }
             mCtx.runOnUiThread {
+                if (!cont.isActive) return@runOnUiThread
+                // Ping-pong only when the active view is already showing;
+                // otherwise load straight into it. Selection stays on the
+                // UI thread so readiness/visibility reads are safe.
+                val front = activeView()
+                val pingPong = front.isReady && front.visibility == View.VISIBLE
+                val target = if (pingPong) idleView() else front
+                targetView = target
                 try {
-                    ensureConfigured()
+                    ensureConfigured(target)
                     // Visible while decoding so the draw pass fires onReady.
-                    view.visibility = View.VISIBLE
-                    snapshotToPreview()
+                    // The old frame stays painted until promotion below.
+                    target.visibility = View.VISIBLE
                     // Free the previous image; throws when empty.
-                    runCatching { view.recycle() }
-                    view.setOnImageEventListener(object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
+                    runCatching { target.recycle() }
+                    target.setOnImageEventListener(object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
                         override fun onReady() {
-                            lastRect?.let { r -> applyRect(r[0], r[1], r[2], r[3]) }
-                            if (cont.isActive) cont.resume(Unit)
+                            if (!cont.isActive) return
+                            lastRect?.let { r -> applyRect(target, r[0], r[1], r[2], r[3]) }
+                            if (pingPong) promote(target)
+                            cont.resume(Unit)
                         }
 
                         override fun onImageLoadError(e: Exception) {
                             android.util.Log.w(TAG, "onImageLoadError", e)
-                            view.visibility = View.INVISIBLE
-                            hidePreview()
+                            target.visibility = View.INVISIBLE
                             if (cont.isActive) cont.resumeWithException(e)
                         }
                     })
                     // Orientation before source so EXIF tiles load correctly.
-                    view.setOrientation(orientation)
-                    view.setImage(source)
+                    target.setOrientation(orientation)
+                    target.setImage(source)
                 } catch (e: Exception) {
-                    view.visibility = View.INVISIBLE
-                    hidePreview()
+                    target.visibility = View.INVISIBLE
                     if (cont.isActive) cont.resumeWithException(e)
                 }
             }
         }
 
+    /** Swap the ready target to front and destroy the old frame. Runs on UI thread. */
+    private fun promote(target: SubsamplingScaleImageView) {
+        val old = activeView()
+        if (old !== target) {
+            useA = target === viewA
+            old.visibility = View.INVISIBLE
+            runCatching { old.recycle() }
+        }
+        target.visibility = View.VISIBLE
+    }
+
     /** Mirror a hole box (CSS px) onto the view with cover scale + center. */
-    private fun applyRect(x: Float, y: Float, w: Float, h: Float) {
-        val img = view
+    private fun applyRect(img: SubsamplingScaleImageView, x: Float, y: Float, w: Float, h: Float) {
         // sWidth/sHeight ignore rotation; swap for the displayed dims.
         val swap = img.appliedOrientation == SubsamplingScaleImageView.ORIENTATION_90 ||
             img.appliedOrientation == SubsamplingScaleImageView.ORIENTATION_270
@@ -255,30 +288,6 @@ class NativeHoleImage(private val mCtx: MainActivity) {
         if (!center.x.isFinite() || !center.y.isFinite()) return
         img.setScaleAndCenter(scale, center)
         img.visibility = View.VISIBLE
-        hidePreview()
-    }
-
-    // Keep the old frame on screen while the new one decodes.
-    private fun snapshotToPreview() {
-        if (!view.isReady || view.visibility != View.VISIBLE) return
-        val w = view.width
-        val h = view.height
-        if (w <= 0 || h <= 0 || w > 4096 || h > 4096) return
-        runCatching {
-            val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-            view.draw(Canvas(bmp))
-            previewBitmap?.recycle()
-            previewBitmap = bmp
-            preview.setImageBitmap(bmp)
-            preview.visibility = View.VISIBLE
-        }
-    }
-
-    private fun hidePreview() {
-        preview.visibility = View.INVISIBLE
-        preview.setImageDrawable(null)
-        previewBitmap?.recycle()
-        previewBitmap = null
     }
 
     private fun Context.shouldUseTiling(
