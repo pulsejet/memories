@@ -1,6 +1,7 @@
 import { isVideoContent } from './PsVideo';
 import { isLiveContent } from './PsLivePhoto';
-import * as ximg from '../frame/XImgCache';
+import * as ximg from '@components/frame/XImgCache';
+import * as nativex from '@native';
 
 import type PhotoSwipe from 'photoswipe';
 import type { PsContent, PsEvent, PsSlide } from './types';
@@ -22,7 +23,8 @@ export default class ImageContentSetup {
     lightbox.on('contentDestroy', (e) => this.onContentDestroy(e as unknown as PsEvent));
     lightbox.on('destroy', () => this.onDestroy());
     lightbox.on('zoomPanUpdate', (e) => this.zoomPanUpdate(e as unknown as { slide: PsSlide }));
-    lightbox.on('slideActivate', () => this.slideActivate());
+    lightbox.on('slideActivate', (e) => this.slideActivate(e.slide as unknown as PsSlide));
+    lightbox.on('slideDeactivate', (e) => this.slideDeactivate(e.slide as unknown as PsSlide));
     lightbox.addFilter('isContentLoading', (l, c) => this.isContentLoading(l, c as unknown as PsContent));
     lightbox.addFilter('placeholderSrc', (s, c) => this.placeholderSrc(s, c as unknown as PsContent));
   }
@@ -101,7 +103,6 @@ export default class ImageContentSetup {
     if (!content.element) return;
     content.element.appendChild(img);
     content.onLoaded();
-    this.slideActivate();
 
     // Create a lightweight preview for closing animation.
     // Especially relevant when the main preview is U-HDR.
@@ -138,11 +139,18 @@ export default class ImageContentSetup {
     }
   }
 
-  public slideActivate() {
-    const slide = this.lightbox.currSlide as unknown as PsSlide | undefined;
-    if (slide?.data.highSrcCond === 'always') {
-      this.loadFullImage(slide);
+  public slideActivate(slide: PsSlide) {
+    if (nativex.viewImageIsEnabled() && !slide.data.nxImageState && !isVideoContent(slide.content)) {
+      void this.nxViewImageUpload(slide, slide.data.src);
     }
+
+    if (slide.data.highSrcCond === 'always') {
+      void this.loadFullImage(slide);
+    }
+  }
+
+  public slideDeactivate(slide: PsSlide) {
+    slide.data.nxImageState = undefined;
   }
 
   private async loadFullImage(slide: PsSlide) {
@@ -197,5 +205,23 @@ export default class ImageContentSetup {
     if (!src) return;
     ximg.sticky(src, -1);
     this.stickySrcs.delete(fileid);
+  }
+
+  /** Fetch the preview blob and POST it. */
+  private async nxViewImageUpload(slide: PsSlide, src: string) {
+    try {
+      slide.data.nxImageState = 'loading';
+      const blobUrl = await ximg.fetchImage(src);
+      const res = await fetch(blobUrl);
+      const blob = await res.blob();
+      await nativex.viewImageUpload(blob);
+      if (slide.data.nxImageState !== 'loading') return;
+
+      slide.data.nxImageState = 'loaded';
+      this.lightbox.dispatch('initialZoomPan');
+    } catch (e) {
+      slide.data.nxImageState = 'error';
+      console.error('Error uploading image to native viewer:', e);
+    }
   }
 }

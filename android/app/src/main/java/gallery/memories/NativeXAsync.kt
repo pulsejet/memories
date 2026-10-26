@@ -120,6 +120,14 @@ class NativeXAsync(private val mCtx: MainActivity, private val nativex: NativeX)
                 args.optString(1),
                 args.optBoolean(2, false),
             )
+            "showNativeImage" -> nativex.showNativeImage(args.optBoolean(0, false))
+            "setHdrColorMode" -> nativex.setHdrColorMode(args.optBoolean(0, false))
+            "setNativeImageRect" -> nativex.setNativeImageRect(
+                args.optDouble(0, 0.0).toFloat(),
+                args.optDouble(1, 0.0).toFloat(),
+                args.optDouble(2, 0.0).toFloat(),
+                args.optDouble(3, 0.0).toFloat(),
+            )
             else -> Log.w(TAG, "nativex_async: unknown method: $method")
         }
     }
