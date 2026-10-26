@@ -29,6 +29,7 @@ import gallery.memories.share.InAppDownloader
 import gallery.memories.share.ShareManager
 import gallery.memories.timeline.TimelineRepository
 import gallery.memories.timeline.TimelineRepositoryImpl
+import gallery.memories.ui.image.NativeHoleImage
 import gallery.memories.ui.permissions.PermissionsManager
 import gallery.memories.upload.UploadService
 
@@ -66,6 +67,7 @@ class AppContainer(
     val folders = FolderSettings(dao, prefs)
     val deleter = MediaDeleter(activity)
     val permissions = PermissionsManager(activity, prefs).register()
+    val holeImage = NativeHoleImage(activity)
 
     val timeline: TimelineRepository
     val observer: MediaObserver
@@ -75,7 +77,7 @@ class AppContainer(
     val upload: UploadService
     val share: ShareManager
     val account = AccountManager(activity, auth, clients, api, assets, secure)
-    val local = LocalHttpServer(activity, auth, clients, assets, dataSource, bridge)
+    val local = LocalHttpServer(activity, auth, clients, assets, dataSource, holeImage, bridge)
     val router: ApiRouter
 
     init {

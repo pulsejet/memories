@@ -135,12 +135,15 @@ import ViewerBottomSheet from './ViewerBottomSheet.vue';
 import ViewerSheetGestures from './ViewerSheetGestures.vue';
 import MobileBottomBar from '@components/MobileBottomBar.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
+
 import PhotoSwipe, { type PhotoSwipeOptions } from 'photoswipe';
 import 'photoswipe/style.css';
+
 import PsImage from './PsImage';
 import PsVideo from './PsVideo';
 import PsLivePhoto from './PsLivePhoto';
 import PsPhotoSphere from './PsPhotoSphere';
+import PsNativeHole from './PsNativeHole';
 
 import type { IImageInfo, IPhoto, TimelineState } from '@typings';
 import type { PsContent } from './types';
@@ -217,10 +220,11 @@ let activityTimer = 0;
 
 /** Base dialog */
 const photoswipe = ref<PhotoSwipe | null>(null);
-const psVideo = ref<PsVideo | null>(null);
-const psImage = ref<PsImage | null>(null);
-const psLivePhoto = ref<PsLivePhoto | null>(null);
-const psPhotoSphere = ref<PsPhotoSphere | null>(null);
+let psNativeHole: PsNativeHole | null = null;
+let psImage: PsImage | null = null;
+let psLivePhoto: PsLivePhoto | null = null;
+let psVideo: PsVideo | null = null;
+let psPhotoSphere: PsPhotoSphere | null = null;
 
 /** Live photo state */
 const liveState = reactive({
@@ -806,18 +810,20 @@ async function createBase(args: PhotoSwipeOptions) {
     e.slide.holderElement?.classList.add('active');
   });
 
-  // Video support
-  const psVideoInstance = new PsVideo(<any>photoswipe.value);
-  psVideo.value = markRaw(psVideoInstance);
+  // Native hole below the WebView, mirrors the active slide box
+  psNativeHole = new PsNativeHole(<any>photoswipe.value);
 
   // Image support
-  psImage.value = markRaw(new PsImage(<any>photoswipe.value));
+  psImage = new PsImage(<any>photoswipe.value);
 
   // Live Photo support
-  psLivePhoto.value = markRaw(new PsLivePhoto(<any>photoswipe.value, <any>psImage.value, liveState));
+  psLivePhoto = new PsLivePhoto(<any>photoswipe.value, <any>psImage, liveState);
+
+  // Video support
+  psVideo = new PsVideo(<any>photoswipe.value);
 
   // Panorama sphere support
-  psPhotoSphere.value = markRaw(new PsPhotoSphere(<any>photoswipe.value));
+  psPhotoSphere = new PsPhotoSphere(<any>photoswipe.value);
 
   // Patch the close button to stop the slideshow
   const _close = photoswipe.value.close.bind(photoswipe.value);
@@ -1312,12 +1318,12 @@ async function deleteCurrent(action: DeleteAction = DeleteAction.Delete) {
 
 /** Play the current live photo */
 function playLivePhoto() {
-  psLivePhoto.value?.play(photoswipe.value!.currSlide!.content as PsContent);
+  psLivePhoto?.play(photoswipe.value!.currSlide!.content as PsContent);
 }
 
 /** Toggle the panorama sphere viewer */
 function toggleSphere() {
-  void psPhotoSphere.value?.toggle();
+  void psPhotoSphere?.toggle();
 }
 
 /** Favorite the current photo */

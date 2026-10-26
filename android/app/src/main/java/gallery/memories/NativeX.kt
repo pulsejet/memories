@@ -1,5 +1,6 @@
 package gallery.memories
 
+import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -82,6 +83,7 @@ class NativeX(private val mCtx: MainActivity) {
         val VIDEO_FULL = Regex("^/video/full/\\d+$")
         val SHARE_URL = Regex("^/api/share/url/.+$")
         val SHARE_BLOB = Regex("^/api/share/blobs$")
+        val VIEW_IMAGE = Regex("^/api/view/image$")
         val UPLOAD_LOCAL = Regex("^/api/upload/local$")
         val CONFIG_ALLOW_MEDIA = Regex("^/api/config/allow_media/\\d+$")
         val CONFIG_ALLOW_MANAGE_MEDIA = Regex("^/api/config/allow_manage_media$")
@@ -107,6 +109,28 @@ class NativeX(private val mCtx: MainActivity) {
     @JavascriptInterface
     fun playTouchSound() {
         mCtx.runOnUiThread { mCtx.binding.webview.playSoundEffect(SoundEffectConstants.CLICK) }
+    }
+
+    /** Toggle HDR rendering for the activity window; off restores the default. */
+    @JavascriptInterface
+    fun setHdrColorMode(enabled: Boolean) {
+        mCtx.runOnUiThread {
+            mCtx.window.colorMode =
+                if (enabled) ActivityInfo.COLOR_MODE_HDR
+                else ActivityInfo.COLOR_MODE_DEFAULT
+        }
+    }
+
+    /** Show/hide the native image below the WebView. */
+    @JavascriptInterface
+    fun showNativeImage(show: Boolean) {
+        mCtx.runOnUiThread { container.holeImage.show(show) }
+    }
+
+    /** Move/resize the native image to the hole box (CSS px, may extend past the viewport). */
+    @JavascriptInterface
+    fun setNativeImageRect(x: Float, y: Float, w: Float, h: Float) {
+        mCtx.runOnUiThread { container.holeImage.setRect(x, y, w, h) }
     }
 
     @JavascriptInterface

@@ -103,6 +103,10 @@ export default class PhotoSphereContentSetup {
       });
       this.container = container;
       this.content = content;
+
+      // Disable the native image when sphere is active.
+      content.data.nxImageDisabled = true;
+      this.lightbox.dispatch('initialZoomPan');
     } catch (e) {
       console.error('PsPhotoSphere: failed to show panorama', e);
     }
@@ -117,7 +121,13 @@ export default class PhotoSphereContentSetup {
     this.container?.remove();
     this.viewer = null;
     this.container = null;
-    this.content = null;
+
+    // Re-enable the native image when sphere is closed.
+    if (this.content) {
+      this.content.data.nxImageDisabled = false;
+      this.lightbox.dispatch('initialZoomPan');
+      this.content = null;
+    }
   }
 
   private onTapStart(e: PointerEvent): void {

@@ -19,6 +19,10 @@ type PsSlideData = _SlideData & {
   highSrcCond: IConfig['high_res_cond'];
   /** The type of content. */
   type: 'image' | 'video';
+  /** Native image data state. */
+  nxImageState?: 'loading' | 'loaded' | 'error';
+  /** Native image should be disabled */
+  nxImageDisabled?: boolean;
 };
 
 export type PsContent = Omit<Content, 'data'> & {

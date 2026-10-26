@@ -78,6 +78,17 @@ export const NAPI = {
   VIDEO_FULL: (fileId: number) => `${BASE_URL}/video/full/${fileId}`,
 
   /**
+   * Put an image into the native image view below the WebView.
+   * POST raw image bytes (e.g. JPEG preview). Resolves only after
+   * the native image view has rendered the image.
+   * @regex ^/api/view/image$
+   * @param seq Monotonic upload counter for ordering (query)
+   * @param blob Image bytes
+   * @returns {void}
+   */
+  VIEW_IMAGE: (seq: number) => `${BASE_URL}/api/view/image?seq=${seq}`,
+
+  /**
    * Upload a local file to Nextcloud natively, without routing
    * bytes through the WebView.
    * @regex ^/api/upload/local$
@@ -259,6 +270,24 @@ export type NativeX = {
    * @param value Value of remote
    */
   setHasRemote: (auids: string, buids: string, value: boolean) => void;
+
+  /** Show/hide the native image below the WebView. */
+  showNativeImage?: (show: boolean) => void;
+
+  /**
+   * Toggle HDR color mode for the activity window.
+   * @param enabled True for HDR, false for default
+   */
+  setHdrColorMode?: (enabled: boolean) => void;
+
+  /**
+   * Move/resize the native dummy image to the hole rect.
+   * @param x Left in CSS px
+   * @param y Top in CSS px
+   * @param w Width in CSS px
+   * @param h Height in CSS px
+   */
+  setNativeImageRect?: (x: number, y: number, w: number, h: number) => void;
 };
 
 /** The native interface is a global object that is injected by the native app. */
@@ -272,7 +301,17 @@ export function has() {
 }
 
 /** NativeX asynchronous (fire-and-forget) API over WebMessage. */
-export type NativeXAsync = Pick<NativeX, 'setThemeColor' | 'playTouchSound' | 'vibrate' | 'toast' | 'setHasRemote'>;
+export type NativeXAsync = Pick<
+  NativeX,
+  | 'setThemeColor'
+  | 'playTouchSound'
+  | 'vibrate'
+  | 'toast'
+  | 'setHasRemote'
+  | 'showNativeImage'
+  | 'setNativeImageRect'
+  | 'setHdrColorMode'
+>;
 
 /** Get a fire-and-forget caller for one async method. */
 export function nxAsync<M extends keyof NativeXAsync>(method: M): NativeXAsync[M] | null {
