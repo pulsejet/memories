@@ -170,7 +170,17 @@ export default class ImageContentSetup {
 
     for (const src of slide.data.highSrc) {
       try {
+        // Do this first always to ensure the image exists.
         const blobSrc = await ximg.fetchImage(src);
+
+        // If we have a native view upload there directly.
+        if (nativex.viewImageIsEnabled()) {
+          if (await this.nxViewImageUpload(slide, src, undefined)) {
+            break; // success
+          }
+        }
+
+        // Create HTML image and pre-decode.
         const image = new Image();
         image.src = blobSrc;
         image.classList.add('ximg', 'ximg--full');
@@ -215,9 +225,11 @@ export default class ImageContentSetup {
 
   /** Fetch the preview blob and POST it. */
   private async nxViewImageUpload(slide: PsSlide, remote: string, local: string | undefined) {
-    slide.data.nxImageState = 'loading';
+    if (slide.data.nxImageState !== 'loaded') {
+      slide.data.nxImageState = 'loading';
+    }
     const onload = () => {
-      if (slide.data.nxImageState !== 'loading') return;
+      if (!slide.data.nxImageState) return; // slide deactivated
       slide.data.nxImageState = 'loaded';
       this.lightbox.dispatch('initialZoomPan');
     };
@@ -225,8 +237,9 @@ export default class ImageContentSetup {
     if (local) {
       try {
         await nativex.viewImageLocal(local);
+        slide.data.highSrcCond = 'never'; // already max-res
         onload();
-        return;
+        return true;
       } catch (e) {
         console.warn('Failed to view image locally.', e);
       }
@@ -238,9 +251,14 @@ export default class ImageContentSetup {
       const blob = await res.blob();
       await nativex.viewImageUpload(blob);
       onload();
+      return true;
     } catch (e) {
-      slide.data.nxImageState = 'error';
       console.error('Error uploading image to native viewer:', e);
+      if (slide.data.nxImageState !== 'loaded') {
+        slide.data.nxImageState = 'error';
+      }
     }
+
+    return false;
   }
 }

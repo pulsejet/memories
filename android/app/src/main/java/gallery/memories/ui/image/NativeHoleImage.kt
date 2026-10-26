@@ -1,7 +1,6 @@
 package gallery.memories.ui.image
 
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.graphics.PointF
 import android.view.View
 import androidx.exifinterface.media.ExifInterface
@@ -18,17 +17,15 @@ import kotlin.coroutines.resumeWithException
 
 /**
  * Native image shown through the WebView hole, mirroring PhotoSwipe zoom/pan.
- * Preview-sized uploads only; larger ones are rejected. Hidden with INVISIBLE,
+ * Bytes are staged to a tiled cache file, so any size renders. Hidden with INVISIBLE,
  * never GONE (a GONE view never fires onReady). [setRect]/[show] run on the
  * UI thread; [setImageBytes] may be called from any thread.
  */
 class NativeHoleImage(private val mCtx: MainActivity) {
     companion object {
-        /** Untiled cap: fits any GPU texture and stays ~48MB max as ARGB_8888. */
-        private const val MAX_UNTILED_DIMEN = 4096
-        private const val MAX_UNTILED_PX = 12_000_000
+        private const val MAX_FLIPPED_DIMEN = 4096
+        private const val MAX_FLIPPED_PX = 12_000_000
         private const val TAG = "NativeHoleImage"
-        private const val DEBUG_MODE = false
     }
 
     /** Cached view + density for the per-frame rect path. */
@@ -41,8 +38,8 @@ class NativeHoleImage(private val mCtx: MainActivity) {
     /** Highest upload counter rendered so far; lower ones are ignored. */
     private var lastSeq = 0L
 
-    /** Currently displayed bitmap; recycled after replacement. */
-    private var currentBmp: android.graphics.Bitmap? = null
+    /** Currently displayed file; deleted after replacement. */
+    private var currentFile: java.io.File? = null
 
     fun show(show: Boolean) {
         view.visibility = if (show) View.VISIBLE else View.INVISIBLE
@@ -93,28 +90,43 @@ class NativeHoleImage(private val mCtx: MainActivity) {
      */
     suspend fun setImageBytes(bytes: ByteArray, seq: Long): Boolean {
         if (bytes.isEmpty()) throw IllegalArgumentException("empty image")
-        imageMutex.withLock {
-            if (seq < lastSeq) return false
-            lastSeq = seq
-            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-            BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
-            if (bounds.outWidth !in 1..MAX_UNTILED_DIMEN ||
-                bounds.outHeight !in 1..MAX_UNTILED_DIMEN ||
-                bounds.outWidth.toLong() * bounds.outHeight.toLong() > MAX_UNTILED_PX
-            ) {
-                throw IllegalArgumentException("image too large")
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+        if (bounds.outWidth < 1 || bounds.outHeight < 1) throw IllegalArgumentException("cannot decode image")
+        val orientation = runCatching {
+            ExifInterface(java.io.ByteArrayInputStream(bytes))
+        }.getOrNull()?.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL,
+        ) ?: ExifInterface.ORIENTATION_NORMAL
+        val flipped = orientation == ExifInterface.ORIENTATION_FLIP_HORIZONTAL ||
+            orientation == ExifInterface.ORIENTATION_FLIP_VERTICAL ||
+            orientation == ExifInterface.ORIENTATION_TRANSPOSE ||
+            orientation == ExifInterface.ORIENTATION_TRANSVERSE
+        val file = withContext(Dispatchers.IO) {
+            val dir = java.io.File(mCtx.cacheDir, "native-image").apply { mkdirs() }
+            java.io.File(dir, "img-$seq").apply {
+                if (!flipped) writeBytes(bytes)
+                else writeFlippedBytes(this, bytes, orientation, bounds)
             }
-            // Rotation only swaps axes, so the bounds check above still holds.
-            val orientation = runCatching {
-                ExifInterface(java.io.ByteArrayInputStream(bytes))
-            }.getOrNull()?.getAttributeInt(
-                ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL,
-            ) ?: ExifInterface.ORIENTATION_NORMAL
-            var bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                ?: throw IllegalArgumentException("cannot decode image")
-            bmp = applyOrientation(bmp, orientation)
-            bmp = maybeTint(bmp)
-            displayLocked(bmp, SubsamplingScaleImageView.ORIENTATION_0)
+        }
+        imageMutex.withLock {
+            if (seq < lastSeq) {
+                file.delete()
+                return false
+            }
+            lastSeq = seq
+            try {
+                val viewOrientation = if (flipped) SubsamplingScaleImageView.ORIENTATION_0
+                    else exifToViewOrientation(orientation)
+                displayLocked(ImageSource.uri(android.net.Uri.fromFile(file)), viewOrientation)
+            } catch (e: Exception) {
+                runCatching { file.delete() }
+                throw e
+            }
+            val old = currentFile
+            currentFile = file
+            old?.let { runCatching { it.delete() } }
+            sweepNativeImageDir(file)
             return true
         }
     }
@@ -137,6 +149,8 @@ class NativeHoleImage(private val mCtx: MainActivity) {
             if (seq < lastSeq) return false
             lastSeq = seq
             displayLocked(ImageSource.uri(uri), orientation)
+            currentFile = null
+            sweepNativeImageDir(null)
             return true
         }
     }
@@ -149,59 +163,57 @@ class NativeHoleImage(private val mCtx: MainActivity) {
         else -> SubsamplingScaleImageView.ORIENTATION_0
     }
 
-    /** Rotate/flip per EXIF orientation; recycles the source on copy. */
-    private fun applyOrientation(bmp: android.graphics.Bitmap, orientation: Int): android.graphics.Bitmap {
-        val matrix = Matrix().apply {
+    /** Render a URI source; the view owns the decode. Caller must hold [imageMutex]. */
+    private suspend fun displayLocked(source: ImageSource, orientation: Int) {
+        awaitImage(source, orientation)
+    }
+
+    private fun writeFlippedBytes(
+        file: java.io.File,
+        bytes: ByteArray,
+        orientation: Int,
+        bounds: BitmapFactory.Options,
+    ) {
+        var sample = 1
+        while (maxOf(bounds.outWidth, bounds.outHeight) / sample > MAX_FLIPPED_DIMEN ||
+            (bounds.outWidth / sample).toLong() * (bounds.outHeight / sample) > MAX_FLIPPED_PX
+        ) sample *= 2
+        val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
+            ?: throw IllegalArgumentException("cannot decode image")
+        val matrix = android.graphics.Matrix().apply {
             when (orientation) {
                 ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> preScale(-1f, 1f)
-                ExifInterface.ORIENTATION_ROTATE_180 -> preRotate(180f)
                 ExifInterface.ORIENTATION_FLIP_VERTICAL -> preScale(1f, -1f)
                 ExifInterface.ORIENTATION_TRANSPOSE -> {
                     preRotate(90f)
                     preScale(-1f, 1f)
                 }
-                ExifInterface.ORIENTATION_ROTATE_90 -> preRotate(90f)
                 ExifInterface.ORIENTATION_TRANSVERSE -> {
                     preRotate(270f)
                     preScale(-1f, 1f)
                 }
-                ExifInterface.ORIENTATION_ROTATE_270 -> preRotate(270f)
-                else -> return bmp
             }
         }
-        val rotated = android.graphics.Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
-        if (rotated !== bmp) bmp.recycle()
-        return rotated
-    }
-
-    /** Red-tint a bitmap when debugging; recycles the original on copy. */
-    private fun maybeTint(bmp: android.graphics.Bitmap): android.graphics.Bitmap {
-        if (!DEBUG_MODE) return bmp
-        val tinted = bmp.copy(android.graphics.Bitmap.Config.ARGB_8888, true) ?: return bmp
-        if (tinted !== bmp) bmp.recycle()
-        android.graphics.Canvas(tinted).drawColor(android.graphics.Color.argb(80, 255, 0, 0))
-        return tinted
-    }
-
-    /** Render [bmp] and swap it in; caller must hold [imageMutex]. */
-    private suspend fun displayLocked(bmp: android.graphics.Bitmap, orientation: Int) {
+        val flipped = android.graphics.Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
+        if (flipped !== bmp) bmp.recycle()
         try {
-            awaitImage(ImageSource.bitmap(bmp).tilingDisabled(), orientation)
-        } catch (e: Exception) {
-            runCatching { bmp.recycle() }
-            throw e
+            java.io.FileOutputStream(file).use {
+                if (!flipped.compress(android.graphics.Bitmap.CompressFormat.JPEG, 92, it)) {
+                    throw java.io.IOException("compress failed")
+                }
+            }
+        } finally {
+            flipped.recycle()
         }
-        val old = currentBmp
-        currentBmp = bmp
-        old?.let { runCatching { it.recycle() } }
     }
 
-    /** Render a URI source; the view owns the decode. Caller must hold [imageMutex]. */
-    private suspend fun displayLocked(source: ImageSource, orientation: Int) {
-        awaitImage(source, orientation)
-        val old = currentBmp
-        currentBmp = null
-        old?.let { runCatching { it.recycle() } }
+    private fun sweepNativeImageDir(keep: java.io.File?) {
+        runCatching {
+            java.io.File(mCtx.cacheDir, "native-image").listFiles()?.forEach {
+                val n = it.name.removePrefix("img-").toLongOrNull() ?: return@forEach
+                if (it != keep && n < lastSeq) runCatching { it.delete() }
+            }
+        }
     }
 
     /** Set the source on the UI thread; resume once rendered or failed. */
