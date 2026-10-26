@@ -2,6 +2,7 @@ import { isVideoContent } from './PsVideo';
 import { isLiveContent } from './PsLivePhoto';
 import * as ximg from '@components/frame/XImgCache';
 import * as nativex from '@native';
+import { isLikelySamePhoto } from '@services/utils/photo';
 
 import type PhotoSwipe from 'photoswipe';
 import type { PsContent, PsEvent, PsSlide } from './types';
@@ -141,7 +142,12 @@ export default class ImageContentSetup {
 
   public slideActivate(slide: PsSlide) {
     if (nativex.viewImageIsEnabled() && !slide.data.nxImageState && !isVideoContent(slide.content)) {
-      void this.nxViewImageUpload(slide, slide.data.src);
+      const photo = slide.data.photo;
+      let localUri = photo.local_uri;
+      if (!localUri && isLikelySamePhoto(photo, photo.local_photo)) {
+        localUri = photo.local_photo.local_uri;
+      }
+      void this.nxViewImageUpload(slide, slide.data.src, localUri);
     }
 
     if (slide.data.highSrcCond === 'always') {
@@ -208,17 +214,30 @@ export default class ImageContentSetup {
   }
 
   /** Fetch the preview blob and POST it. */
-  private async nxViewImageUpload(slide: PsSlide, src: string) {
+  private async nxViewImageUpload(slide: PsSlide, remote: string, local: string | undefined) {
+    slide.data.nxImageState = 'loading';
+    const onload = () => {
+      if (slide.data.nxImageState !== 'loading') return;
+      slide.data.nxImageState = 'loaded';
+      this.lightbox.dispatch('initialZoomPan');
+    };
+
+    if (local) {
+      try {
+        await nativex.viewImageLocal(local);
+        onload();
+        return;
+      } catch (e) {
+        console.warn('Failed to view image locally.', e);
+      }
+    }
+
     try {
-      slide.data.nxImageState = 'loading';
-      const blobUrl = await ximg.fetchImage(src);
+      const blobUrl = await ximg.fetchImage(remote);
       const res = await fetch(blobUrl);
       const blob = await res.blob();
       await nativex.viewImageUpload(blob);
-      if (slide.data.nxImageState !== 'loading') return;
-
-      slide.data.nxImageState = 'loaded';
-      this.lightbox.dispatch('initialZoomPan');
+      onload();
     } catch (e) {
       slide.data.nxImageState = 'error';
       console.error('Error uploading image to native viewer:', e);

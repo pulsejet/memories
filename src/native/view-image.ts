@@ -20,3 +20,16 @@ export async function viewImageUpload(blob: Blob): Promise<void> {
     throw new Error(`native image upload failed: ${res.status} ${text}`);
   }
 }
+
+/** POST the MediaStore URI to show the on-device copy. Resolves after render. */
+export async function viewImageLocal(uri: string): Promise<void> {
+  const res = await fetch(NAPI.VIEW_IMAGE_LOCAL(++currentSeq), {
+    method: 'POST',
+    body: JSON.stringify({ uri }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`native local image failed: ${res.status} ${text}`);
+  }
+}
