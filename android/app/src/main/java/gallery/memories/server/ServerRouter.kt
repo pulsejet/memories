@@ -66,6 +66,10 @@ class ServerRouter(
                 ViewImageController.serveImage(call, holeImage)
                 return
             }
+            if (ViewImageController.isViewImageLocal(rawPath)) {
+                ViewImageController.serveLocalImage(call, holeImage)
+                return
+            }
             if (BridgeController.isBridge(rawPath)) {
                 bridge.handle(call)
                 return

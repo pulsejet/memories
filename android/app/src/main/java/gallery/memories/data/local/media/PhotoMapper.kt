@@ -143,6 +143,7 @@ class PhotoMapper(private val ctx: Context) {
             .put(TimelineJson.Photo.SIZE, image.size)
             .put(TimelineJson.Photo.ETAG, image.mtime.toString())
             .put(TimelineJson.Photo.EPOCH, image.epoch)
+            .put(TimelineJson.Photo.LOCAL_URI, image.uri.toString())
         if (image.isVideo) {
             obj.put(TimelineJson.Photo.ISVIDEO, 1)
                 .put(TimelineJson.Photo.VIDEO_DURATION, image.videoDuration / 1000)
