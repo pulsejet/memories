@@ -1,4 +1,5 @@
 import * as nativex from '@native';
+import { RenewingTimeout } from '@services/utils/renewing-timeout';
 
 import type PhotoSwipe from 'photoswipe';
 import type { PsSlide } from './types';
@@ -6,6 +7,7 @@ import type { PsSlide } from './types';
 export default class PsNativeHole {
   private clipRaf = 0;
   private hideRaf = 0;
+  private revealTimer = new RenewingTimeout();
   private lastClip: string | null = null;
   private lastNative: string | null = null;
   private holeElements: HTMLElement[] = [];
@@ -60,12 +62,15 @@ export default class PsNativeHole {
   }
 
   private hide() {
+    this.holderElement?.classList.remove('nativex-hole');
+    this.holderElement = null;
+    this.revealTimer.clear();
+
     if (this.lastClip === 'none') return;
     this.lastClip = 'none';
     this.lastNative = null;
     this.setClip('none');
-    this.holderElement?.classList.remove('nativex-hole');
-    this.holderElement = null;
+
     if (!this.hideRaf) {
       this.hideRaf = requestAnimationFrame(() => {
         this.hideRaf = 0;
@@ -122,13 +127,18 @@ export default class PsNativeHole {
     if (this.holderElement !== holderElement) {
       this.holderElement?.classList.remove('nativex-hole');
       this.holderElement = holderElement;
-      this.holderElement.classList.add('nativex-hole');
+
+      // Unfortunately there's no way to know when the native image has actually
+      // finished tiled rendering, so we just wait a bit before revealing it.
+      this.revealTimer.set(() => {
+        this.holderElement?.classList.add('nativex-hole');
+        nativex.nxAsync('setHdrColorMode')?.(true);
+      }, 100);
     }
 
     const key = `${x1},${y1},${x2 - x1},${y2 - y1}`;
     if (key === this.lastNative) return;
     this.lastNative = key;
-    nativex.nxAsync('setHdrColorMode')?.(true);
     nativex.nxAsync('setNativeImageRect')?.(x1, y1, x2 - x1, y2 - y1);
     nativex.nxAsync('showNativeImage')?.(true);
     if (this.hideRaf) {
