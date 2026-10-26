@@ -10,11 +10,20 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
+        <!-- Native image shown through the webview hole. -->
+        <!-- Invisible (not gone) to allow decoding. -->
+        <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+            android:id="@+id/nativeImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+        />
+
         <WebView
             android:id="@+id/webview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/black"
+            android:background="@android:color/transparent"
             android:soundEffectsEnabled="true"
         />
 
