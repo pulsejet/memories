@@ -59,8 +59,7 @@ function isPipSupported(video?: HTMLVideoElement | null) {
     return document.pictureInPictureEnabled === true;
   }
   return (
-    typeof HTMLVideoElement !== 'undefined' &&
-    typeof HTMLVideoElement.prototype.requestPictureInPicture === 'function'
+    typeof HTMLVideoElement !== 'undefined' && typeof HTMLVideoElement.prototype.requestPictureInPicture === 'function'
   );
 }
 
