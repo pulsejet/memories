@@ -8,7 +8,8 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
-import { getCanonicalLocale, t } from '@services/l10n';
+import { t } from '@services/l10n';
+import * as vutils from './utils';
 
 const props = defineProps<{
   video?: HTMLVideoElement | null;
@@ -17,26 +18,9 @@ const props = defineProps<{
 const currentTime = ref(0);
 const duration = ref(0);
 
-const digits1 = new Intl.NumberFormat(getCanonicalLocale(), { useGrouping: false });
-const digits2 = new Intl.NumberFormat(getCanonicalLocale(), { useGrouping: false, minimumIntegerDigits: 2 });
-
-function formatMediaTime(sec: number, showHours: boolean) {
-  if (!Number.isFinite(sec) || sec < 0) {
-    sec = 0;
-  }
-  sec = Math.floor(sec);
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = sec % 60;
-  if (showHours || h > 0) {
-    return `${digits1.format(h)}:${digits2.format(m)}:${digits2.format(s)}`;
-  }
-  return `${digits1.format(m)}:${digits2.format(s)}`;
-}
-
 const showHours = computed(() => duration.value >= 3600);
-const elapsedStr = computed(() => formatMediaTime(currentTime.value, showHours.value));
-const totalStr = computed(() => formatMediaTime(duration.value, showHours.value));
+const elapsedStr = computed(() => vutils.formatMediaTime(currentTime.value, showHours.value));
+const totalStr = computed(() => vutils.formatMediaTime(duration.value, showHours.value));
 const tickerText = computed(() =>
   t('memories', '{elapsed} / {total}', { elapsed: elapsedStr.value, total: totalStr.value }),
 );
