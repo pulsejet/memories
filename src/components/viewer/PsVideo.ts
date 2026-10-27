@@ -295,7 +295,9 @@ class VideoContentSetup {
     source.src = src.src;
     source.type = src.type;
     player.appendChild(source);
-    player.load();
+    if (config.video_autoplay === 'true') {
+      player.load();
+    }
   }
 
   async attachHlsSource(content: VideoContent, player: HTMLVideoElement, url: string) {
@@ -306,7 +308,9 @@ class VideoContentSetup {
     // Native HLS (Safari): no hls.js needed.
     if (this.canPlayHls(player)) {
       player.src = url;
-      player.load();
+      if (config.video_autoplay === 'true') {
+        player.load();
+      }
       return;
     }
 
@@ -328,8 +332,12 @@ class VideoContentSetup {
 
     const hls = new Hls({ ...HLS_LIVE_CONFIG });
     content.videoHls = hls;
-    hls.loadSource(url);
     hls.attachMedia(player);
+    if (config.video_autoplay === 'true') {
+      hls.loadSource(url);
+    } else {
+      player.addEventListener('play', () => hls.loadSource(url), { once: true });
+    }
     attachVideoQualityHlsJs(player, hls);
     this.pickInitialLevel(hls);
 
@@ -371,12 +379,15 @@ class VideoContentSetup {
     } else {
       console.warn('PsVideo: Direct video stream could not be opened, trying HLS');
       await this.attachHlsSource(content, player, this.getHLSsrc(content).src);
-      if (!isVideoContent(content) || content.videoPlayer !== player) return;
     }
 
-    if (config.video_autoplay === 'true' && content.slide?.isActive) {
-      utils.runCatching(() => player.play());
+    if (!isVideoContent(content) || content.videoPlayer !== player || !content.slide?.isActive) {
+      return;
     }
+    if (wasHLS) {
+      utils.runCatching(() => player.load());
+    }
+    utils.runCatching(() => player.play());
   }
 
   destroyPlayer(content: VideoContent) {
