@@ -7,6 +7,7 @@
       <Volume :video="video" />
       <TimeTicker :video="video" />
       <FullscreenButton :video="video" />
+      <PipButton :video="video" />
     </div>
   </div>
 </template>
@@ -14,6 +15,7 @@
 <script setup lang="ts">
 import PlayButton from './PlayButton.vue';
 import FullscreenButton from './FullscreenButton.vue';
+import PipButton from './PipButton.vue';
 import TimeTicker from './TimeTicker.vue';
 import Track from './Track.vue';
 import Volume from './Volume.vue';
