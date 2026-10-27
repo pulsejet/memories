@@ -1,17 +1,5 @@
 import type Hls from 'hls.js';
-
-/** Single quality level exposed to the video controls. */
-export interface QualityOption {
-  id: string;
-  size: number;
-  bitrate?: number;
-}
-
-/** Video element with quality selection state for the settings menu. */
-export interface QualityAwareVideoElement extends HTMLVideoElement {
-  currentQuality: string;
-  readonly qualityList: QualityOption[];
-}
+import type { QualityOption } from '@typings';
 
 /** Internal quality hooks stored directly on the video element. */
 interface QualityHooks extends HTMLVideoElement {

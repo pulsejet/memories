@@ -30,8 +30,10 @@ import TimeTicker from './TimeTicker.vue';
 import Track from './Track.vue';
 import Volume from './Volume.vue';
 
+import type { VideoController } from '@typings';
+
 defineProps<{
-  video?: HTMLVideoElement | null;
+  video?: VideoController | null;
   thumbnails?: string | null;
 }>();
 </script>

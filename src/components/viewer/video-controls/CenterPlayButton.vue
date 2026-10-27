@@ -20,8 +20,10 @@ import PlayIcon from 'vue-material-design-icons/Play.vue';
 
 import { t } from '@services/l10n';
 
+import type { VideoController } from '@typings';
+
 const props = defineProps<{
-  video?: HTMLVideoElement | null;
+  video?: VideoController | null;
 }>();
 
 const isPlaying = ref(false);
@@ -59,7 +61,7 @@ function attachVideo() {
   props.video.addEventListener('ended', onEnded);
 }
 
-function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+function detachVideo(el: VideoController | null | undefined = props.video) {
   el?.removeEventListener('play', onPlay);
   el?.removeEventListener('playing', onPlaying);
   el?.removeEventListener('pause', onPause);

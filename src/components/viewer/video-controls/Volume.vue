@@ -42,8 +42,10 @@ import VolumeOffIcon from 'vue-material-design-icons/VolumeOff.vue';
 
 import { t } from '@services/l10n';
 
+import type { VideoController } from '@typings';
+
 const props = defineProps<{
-  video?: HTMLVideoElement | null;
+  video?: VideoController | null;
 }>();
 
 const volume = ref(1);
@@ -78,7 +80,7 @@ function attachVideo() {
   props.video.addEventListener('volumechange', onVolumeChange);
 }
 
-function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+function detachVideo(el: VideoController | null | undefined = props.video) {
   el?.removeEventListener('volumechange', onVolumeChange);
 }
 

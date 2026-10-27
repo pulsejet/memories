@@ -21,8 +21,10 @@ import PauseIcon from 'vue-material-design-icons/Pause.vue';
 
 import { t } from '@services/l10n';
 
+import type { VideoController } from '@typings';
+
 const props = defineProps<{
-  video?: HTMLVideoElement | null;
+  video?: VideoController | null;
 }>();
 
 const isPlaying = ref(false);
@@ -55,7 +57,7 @@ function attachVideo() {
   props.video.addEventListener('pause', onVideoPause);
 }
 
-function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+function detachVideo(el: VideoController | null | undefined = props.video) {
   el?.removeEventListener('play', onVideoPlay);
   el?.removeEventListener('pause', onVideoPause);
   isPlaying.value = false;

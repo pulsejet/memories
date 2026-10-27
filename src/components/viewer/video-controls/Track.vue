@@ -48,8 +48,10 @@ import { t } from '@services/l10n';
 import TrackThumbnail from './TrackThumbnail.vue';
 import * as vutils from './utils';
 
+import type { VideoController } from '@typings';
+
 const props = defineProps<{
-  video?: HTMLVideoElement | null;
+  video?: VideoController | null;
   thumbnails?: string | null;
 }>();
 
@@ -208,7 +210,7 @@ function attachVideo() {
   props.video.addEventListener('progress', onVideoProgress);
 }
 
-function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+function detachVideo(el: VideoController | null | undefined = props.video) {
   el?.removeEventListener('timeupdate', onVideoTimeUpdate);
   el?.removeEventListener('durationchange', onVideoDurationChange);
   el?.removeEventListener('loadedmetadata', onVideoDurationChange);

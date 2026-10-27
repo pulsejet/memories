@@ -8,9 +8,11 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import * as vutils from './utils';
 import * as thumbUtils from './thumbnails';
 
+import type { VideoController } from '@typings';
+
 // Hover position and track geometry from the seek bar.
 const props = defineProps<{
-  video?: HTMLVideoElement | null;
+  video?: VideoController | null;
   thumbnails?: string | null;
   time: number;
   ratio: number;
@@ -102,7 +104,7 @@ function attachVideo() {
   }
 }
 
-function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+function detachVideo(el: VideoController | null | undefined = props.video) {
   el?.removeEventListener('canplay', onCanPlay);
   abortThumbLoad();
 }
