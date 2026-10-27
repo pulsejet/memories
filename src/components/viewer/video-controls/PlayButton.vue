@@ -6,8 +6,8 @@
     @click="togglePlay"
   >
     <template #icon>
-      <PauseIcon v-if="isPlaying" :size="24" />
-      <PlayIcon v-else :size="24" />
+      <PauseIcon v-if="isPlaying" :size="26" />
+      <PlayIcon v-else :size="26" />
     </template>
   </NcButton>
 </template>
