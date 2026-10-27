@@ -4,6 +4,7 @@ import { translate as t } from '@services/l10n';
 import { config } from '@services/user-config';
 import { constants } from '@services/constants';
 import { getPlayableVideoCodecsSync } from '@services/video/codec';
+import { attachVideoQualityHlsJs, detachVideoQuality } from './PsVideoQuality';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 import { API } from '@services/API';
@@ -281,6 +282,7 @@ class VideoContentSetup {
       const hls = (e as CustomEvent).detail as Hls;
       Object.assign(hls.config, HLS_LIVE_CONFIG);
       this.pickInitialLevel(hls);
+      attachVideoQualityHlsJs(providerEl.querySelector('video')!, hls);
     });
 
     player.addEventListener('playing', () => {
@@ -308,7 +310,7 @@ class VideoContentSetup {
     // We need to actually ensure that the controls are added to the DOM
     // so that the Vue component is mounted.
     const viewerControls = document.createElement('viewer-controls') as ViewerControlsCE;
-    viewerControls.video = content.element.querySelector('video');
+    viewerControls.video = providerEl.querySelector('video');
     viewerControls.style.position = 'absolute';
     viewerControls.style.top = '100px';
     viewerControls.style.left = '20px';
@@ -362,6 +364,7 @@ class VideoContentSetup {
     // Removal triggers vidstack's own teardown via disconnect.
     // Do NOT call player.destroy() here: it nulls shared player state
     // before descendants dispose, which throws inside layout disposal.
+    detachVideoQuality(content.element?.querySelector('video'));
     content.videoPlayer?.remove();
     content.videoPlayer = null;
     content.videoFailedOver = false;
