@@ -1,7 +1,7 @@
 <template>
   <NcActions v-model:open="menuOpen" :aria-label="t('memories', 'Settings')" placement="top" @open="view = 'main'">
     <template #icon>
-      <CogIcon :size="26" />
+      <CogIcon :size="24" />
     </template>
 
     <template v-if="view === 'main'">

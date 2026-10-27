@@ -8,10 +8,10 @@
     >
       <template #icon>
         <span class="m-vc-volume-icon">
-          <VolumeOffIcon v-if="muted || volume === 0" :size="26" class="m-vc-volume-icon--off" />
-          <VolumeLowIcon v-else-if="volume < 0.34" :size="26" class="m-vc-volume-icon--low" />
-          <VolumeMediumIcon v-else-if="volume < 0.67" :size="26" class="m-vc-volume-icon--medium" />
-          <VolumeHighIcon v-else :size="26" class="m-vc-volume-icon--high" />
+          <VolumeOffIcon v-if="muted || volume === 0" :size="24" class="m-vc-volume-icon--off" />
+          <VolumeLowIcon v-else-if="volume < 0.34" :size="24" class="m-vc-volume-icon--low" />
+          <VolumeMediumIcon v-else-if="volume < 0.67" :size="24" class="m-vc-volume-icon--medium" />
+          <VolumeHighIcon v-else :size="24" class="m-vc-volume-icon--high" />
         </span>
       </template>
     </NcButton>
@@ -94,8 +94,8 @@ onBeforeUnmount(detachVideo);
 
 .m-vc-volume-icon {
   display: inline-flex;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   align-items: center;
   justify-content: center;
 
