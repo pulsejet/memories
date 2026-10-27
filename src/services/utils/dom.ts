@@ -11,6 +11,24 @@ export function onDOMLoaded(callback: () => void) {
 }
 
 /**
+ * Run a callback, logging and swallowing any error it throws.
+ * Async rejections (e.g. blocked autoplay) are logged and swallowed too.
+ * Returns the callback's result, or null if it threw.
+ */
+export function runCatching<T>(callback: () => T): T | null {
+  try {
+    const result = callback();
+    if (result instanceof Promise) {
+      result.catch((e) => console.warn('runCatching: ignored error', e));
+    }
+    return result;
+  } catch (e) {
+    console.warn('runCatching: ignored error', e);
+    return null;
+  }
+}
+
+/**
  * Unwrap a CustomEvent detail payload. Vue custom elements dispatch
  * emit args wrapped in an array, so normalize both shapes.
  */

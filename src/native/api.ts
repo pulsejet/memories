@@ -70,7 +70,7 @@ export const NAPI = {
   IMAGE_FULL: (auid: string) => `${BASE_URL}/image/full/${auid}`,
 
   /**
-   * Local video file API (range-aware, for <video> / vidstack).
+   * Local video file API (range-aware, for <video>).
    * @regex ^/video/full/\d+$
    * @param fileId MediaStore file ID of the local video
    * @returns {Blob} Original video bytes of the photo.
