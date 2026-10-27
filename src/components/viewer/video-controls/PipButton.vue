@@ -1,5 +1,6 @@
 <template>
   <NcButton
+    v-if="isSupported"
     variant="tertiary-no-background"
     :aria-label="isPip ? t('memories', 'Exit picture-in-picture') : t('memories', 'Enter picture-in-picture')"
     :title="isPip ? t('memories', 'Exit picture-in-picture') : t('memories', 'Enter picture-in-picture')"
@@ -30,6 +31,42 @@ const props = defineProps<{
 }>();
 
 const isPip = ref(false);
+const isSupported = ref(false);
+
+function isPipSupported(video?: HTMLVideoElement | null) {
+  const el = video ?? props.video;
+  if (el) {
+    if (typeof el.requestPictureInPicture === 'function' && !el.disablePictureInPicture) {
+      if ('pictureInPictureEnabled' in document) {
+        return document.pictureInPictureEnabled === true;
+      }
+      return true;
+    }
+    const webkitEl = el as unknown as WebkitPip;
+    if (typeof webkitEl.webkitSupportsPresentationMode === 'function') {
+      try {
+        return webkitEl.webkitSupportsPresentationMode('picture-in-picture');
+      } catch {
+        return true;
+      }
+    }
+    if (typeof webkitEl.webkitSetPresentationMode === 'function') {
+      return true;
+    }
+    return false;
+  }
+  if ('pictureInPictureEnabled' in document) {
+    return document.pictureInPictureEnabled === true;
+  }
+  return (
+    typeof HTMLVideoElement !== 'undefined' &&
+    typeof HTMLVideoElement.prototype.requestPictureInPicture === 'function'
+  );
+}
+
+function updateSupport() {
+  isSupported.value = isPipSupported();
+}
 
 function onEnterPip() {
   isPip.value = true;
@@ -89,6 +126,7 @@ async function togglePip() {
 }
 
 function attachVideo() {
+  updateSupport();
   if (!props.video) return;
   isPip.value =
     document.pictureInPictureElement === props.video ||
