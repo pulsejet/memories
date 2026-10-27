@@ -11,14 +11,22 @@
         :close-after-click="false"
         :name="qualityRow"
         @click="view = 'quality'"
-      />
+      >
+        <template #icon>
+          <TuneIcon :size="20" />
+        </template>
+      </NcActionButton>
       <NcActionButton
         key="m-vc-nav-speed"
         is-menu
         :close-after-click="false"
         :name="speedRow"
         @click="view = 'speed'"
-      />
+      >
+        <template #icon>
+          <SpeedometerIcon :size="20" />
+        </template>
+      </NcActionButton>
     </template>
 
     <template v-else-if="view === 'quality'">
@@ -82,6 +90,8 @@ import NcActionRadio from '@nextcloud/vue/components/NcActionRadio';
 import NcActions from '@nextcloud/vue/components/NcActions';
 import ArrowLeftIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
+import TuneIcon from 'vue-material-design-icons/Tune.vue';
+import SpeedometerIcon from 'vue-material-design-icons/Speedometer.vue';
 
 import { t } from '@services/l10n';
 
