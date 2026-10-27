@@ -21,12 +21,8 @@ import PauseIcon from 'vue-material-design-icons/Pause.vue';
 
 import { t } from '@services/l10n';
 
-import type { MediaPlayerElement } from 'vidstack/elements';
-
-type VideoElement = HTMLVideoElement | MediaPlayerElement;
-
 const props = defineProps<{
-  video?: VideoElement | null;
+  video?: HTMLVideoElement | null;
 }>();
 
 const isPlaying = ref(false);
@@ -39,6 +35,19 @@ function onVideoPause() {
   isPlaying.value = false;
 }
 
+async function togglePlay() {
+  if (!props.video) return;
+  try {
+    if (props.video.paused) {
+      await props.video.play();
+    } else {
+      props.video.pause();
+    }
+  } catch (e) {
+    console.warn('Failed to toggle play/pause', e);
+  }
+}
+
 function attachVideo() {
   if (!props.video) return;
   isPlaying.value = !props.video.paused;
@@ -46,23 +55,10 @@ function attachVideo() {
   props.video.addEventListener('pause', onVideoPause);
 }
 
-function detachVideo() {
-  props.video?.removeEventListener('play', onVideoPlay);
-  props.video?.removeEventListener('pause', onVideoPause);
+function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+  el?.removeEventListener('play', onVideoPlay);
+  el?.removeEventListener('pause', onVideoPause);
   isPlaying.value = false;
-}
-
-async function togglePlay() {
-  if (!props.video) return;
-  if (props.video.paused) {
-    try {
-      await props.video.play();
-    } catch {}
-  } else {
-    try {
-      await props.video.pause();
-    } catch {}
-  }
 }
 
 onMounted(attachVideo);
