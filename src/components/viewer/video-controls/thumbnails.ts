@@ -1,3 +1,5 @@
+import { WebVTTParser } from 'webvtt-parser';
+
 /** Single storyboard thumbnail cue parsed from a VTT file. */
 export interface ThumbnailCue {
   startTime: number;
@@ -22,71 +24,28 @@ function parseThumbnailText(text: string, base: string): Omit<ThumbnailCue, 'sta
   const m = hash?.match(/^xywh=(\d+),(\d+),(\d+),(\d+)$/);
   if (m) {
     const [, x, y, w, h] = m.map(Number);
-    if (w > 0 && h > 0) {
-      Object.assign(thumb, { x, y, w, h });
-    }
+    if (w > 0 && h > 0) Object.assign(thumb, { x, y, w, h });
   }
   return thumb;
 }
 
-/** Attach a hidden metadata track so the browser parses the storyboard VTT. */
-export function attachThumbnailTrack(video: HTMLVideoElement, vttUrl: string): HTMLTrackElement {
-  const track = document.createElement('track');
-  track.kind = 'metadata';
-  track.src = vttUrl;
-  video.appendChild(track);
-  track.track.mode = 'hidden';
-  return track;
-}
-
-/** Read parsed storyboard cues from a loaded metadata track. */
-export function readThumbnailCues(track: HTMLTrackElement): ThumbnailCue[] {
-  if (track.readyState !== HTMLTrackElement.LOADED || !track.track.cues) return [];
-  const base = track.src;
-  const cues: ThumbnailCue[] = [];
-  for (const cue of Array.from(track.track.cues)) {
-    if (!(cue instanceof VTTCue)) continue;
-    const parsed = parseThumbnailText(cue.text, base);
-    if (parsed) {
-      cues.push({
-        startTime: cue.startTime,
-        endTime: cue.endTime,
-        ...parsed,
-      });
-    }
+/** Fetch and parse a storyboard VTT with the W3C reference parser. */
+export async function loadThumbnailCues(vttUrl: string, signal?: AbortSignal): Promise<ThumbnailCue[]> {
+  try {
+    const res = await fetch(vttUrl, { signal });
+    if (!res.ok) return [];
+    const { cues } = new WebVTTParser().parse(await res.text(), 'metadata');
+    return cues.flatMap((cue) => {
+      const parsed = parseThumbnailText(cue.text, vttUrl);
+      return parsed ? [{ startTime: cue.startTime, endTime: cue.endTime, ...parsed }] : [];
+    });
+  } catch {
+    // Aborted or unloadable: fall back to the time-only tooltip.
+    return [];
   }
-  return cues;
 }
 
 /** Active storyboard cue for a playback time, if any. */
 export function findThumbnailCue(cues: ThumbnailCue[], time: number): ThumbnailCue | undefined {
   return cues.find((c) => time >= c.startTime && time < c.endTime);
-}
-
-/** Fetch and parse a storyboard VTT using the browser's own parser. */
-export function loadThumbnailCues(
-  video: HTMLVideoElement,
-  vttUrl: string,
-  signal?: AbortSignal,
-): Promise<ThumbnailCue[]> {
-  return new Promise((resolve) => {
-    if (signal?.aborted) {
-      resolve([]);
-      return;
-    }
-
-    // Hidden metadata track: the browser fetches and parses the VTT.
-    const track = attachThumbnailTrack(video, vttUrl);
-
-    // Done with the element once cues are copied out (or loading failed).
-    const done = (cues: ThumbnailCue[]) => {
-      track.remove();
-      resolve(cues);
-    };
-    track.addEventListener('load', () => done(readThumbnailCues(track)), { once: true });
-    track.addEventListener('error', () => done([]), { once: true });
-
-    // Aborted (URL changed or unmounted): drop the element, keep no cues.
-    signal?.addEventListener('abort', () => done([]), { once: true });
-  });
 }
