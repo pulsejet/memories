@@ -3,13 +3,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import * as vutils from './utils';
 import * as thumbUtils from './thumbnails';
 
 // Hover position and track geometry from the seek bar.
 const props = defineProps<{
+  video?: HTMLVideoElement | null;
   thumbnails?: string | null;
   time: number;
   ratio: number;
@@ -59,16 +60,22 @@ const previewStyle = computed(() => {
   };
 });
 
+const loadStarted = ref(false);
+
+function onCanPlay() {
+  loadStarted.value = true;
+}
+
 // Let the browser parse the storyboard VTT into cues.
 watch(
-  () => props.thumbnails,
-  async (url) => {
+  [() => props.thumbnails, loadStarted],
+  async ([url, started]) => {
     // Start clean: abort the previous load when the URL changes.
     abortThumbLoad();
     thumbCues.value = [];
 
     // Nothing to load without a storyboard URL.
-    if (!url) return;
+    if (!url || !started) return;
 
     // Parsed cues land here; the guard drops stale loads.
     const ctrl = new AbortController();
@@ -87,7 +94,21 @@ function abortThumbLoad() {
   thumbAbort = null;
 }
 
-onBeforeUnmount(abortThumbLoad);
+function attachVideo() {
+  if (!props.video) return;
+  props.video.addEventListener('canplay', onCanPlay, { once: true });
+  if (props.video.readyState >= 3) {
+    loadStarted.value = true;
+  }
+}
+
+function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+  el?.removeEventListener('canplay', onCanPlay);
+  abortThumbLoad();
+}
+
+onMounted(attachVideo);
+onBeforeUnmount(detachVideo);
 </script>
 
 <style lang="scss" scoped>
