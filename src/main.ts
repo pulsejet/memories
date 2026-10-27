@@ -1,4 +1,5 @@
 import './bootstrap';
+import '@components/custom-elements';
 
 import { createApp } from 'vue';
 import App from './App.vue';

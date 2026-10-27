@@ -8,6 +8,7 @@ import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 import { API } from '@services/API';
 
+import type { ViewerControlsCE } from '@components/custom-elements';
 import type PhotoSwipe from 'photoswipe';
 import type { PsContent, PsEvent, PsSlide } from './types';
 import type { MediaPlayerElement } from 'vidstack/elements';
@@ -303,6 +304,12 @@ class VideoContentSetup {
     // Full-viewport player in the slide holder; onZoomPanUpdate mirrors
     // PhotoSwipe's native slide values onto the picture layer.
     content.slide?.holderElement?.appendChild(content.element);
+
+    // We need to actually ensure that the controls are added to the DOM
+    // so that the Vue component is mounted.
+    const controlsDiv = document.createElement('viewer-controls') as ViewerControlsCE;
+    controlsDiv.video = content.element.querySelector('video');
+    content.element.appendChild(controlsDiv);
   }
 
   /**
