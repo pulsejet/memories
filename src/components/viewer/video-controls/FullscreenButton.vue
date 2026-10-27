@@ -21,6 +21,8 @@ import FullscreenExitIcon from 'vue-material-design-icons/FullscreenExit.vue';
 
 import { t } from '@services/l10n';
 
+import type { VideoController } from '@typings';
+
 interface WebkitContainer extends HTMLElement {
   webkitRequestFullscreen?: () => Promise<void> | void;
 }
@@ -30,13 +32,8 @@ interface WebkitDoc extends Document {
   webkitExitFullscreen?: () => Promise<void> | void;
 }
 
-interface WebkitVideo extends HTMLVideoElement {
-  webkitEnterFullscreen?: () => void;
-  webkitSupportsFullscreen?: boolean;
-}
-
 const props = defineProps<{
-  video?: HTMLVideoElement | null;
+  video?: VideoController | null;
 }>();
 
 const isFullscreen = ref(false);
@@ -73,7 +70,7 @@ async function enterFullscreen(container: HTMLElement) {
   } else if ((container as WebkitContainer).webkitRequestFullscreen) {
     await (container as WebkitContainer).webkitRequestFullscreen?.();
   } else {
-    const video = props.video as WebkitVideo | null | undefined;
+    const video = props.video;
     if (video && typeof video.webkitEnterFullscreen === 'function') {
       video.webkitEnterFullscreen();
       return;
@@ -128,7 +125,7 @@ function attachVideo() {
   isFullscreen.value = isFullscreenActive();
 }
 
-function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+function detachVideo(el: VideoController | null | undefined = props.video) {
   document.removeEventListener('fullscreenchange', onFullscreenChange);
   document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
   el?.removeEventListener('webkitbeginfullscreen', onNativeBegin);

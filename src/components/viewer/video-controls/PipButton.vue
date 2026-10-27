@@ -20,20 +20,16 @@ import PictureInPictureBottomRightIcon from 'vue-material-design-icons/PictureIn
 
 import { t } from '@services/l10n';
 
-interface WebkitPip {
-  webkitSetPresentationMode?: (mode: 'picture-in-picture' | 'inline') => void;
-  webkitPresentationMode?: string;
-  webkitSupportsPresentationMode?: (mode: string) => boolean;
-}
+import type { VideoController } from '@typings';
 
 const props = defineProps<{
-  video?: HTMLVideoElement | null;
+  video?: VideoController | null;
 }>();
 
 const isPip = ref(false);
 const isSupported = ref(false);
 
-function isPipSupported(video?: HTMLVideoElement | null) {
+function isPipSupported(video?: VideoController | null) {
   const el = video ?? props.video;
   if (el) {
     if (typeof el.requestPictureInPicture === 'function' && !el.disablePictureInPicture) {
@@ -42,15 +38,14 @@ function isPipSupported(video?: HTMLVideoElement | null) {
       }
       return true;
     }
-    const webkitEl = el as unknown as WebkitPip;
-    if (typeof webkitEl.webkitSupportsPresentationMode === 'function') {
+    if (typeof el.webkitSupportsPresentationMode === 'function') {
       try {
-        return webkitEl.webkitSupportsPresentationMode('picture-in-picture');
+        return el.webkitSupportsPresentationMode('picture-in-picture');
       } catch {
         return true;
       }
     }
-    if (typeof webkitEl.webkitSetPresentationMode === 'function') {
+    if (typeof el.webkitSetPresentationMode === 'function') {
       return true;
     }
     return false;
@@ -76,34 +71,32 @@ function onLeavePip() {
 }
 
 function onWebkitModeChange() {
-  isPip.value =
-    (props.video as unknown as WebkitPip | null | undefined)?.webkitPresentationMode === 'picture-in-picture';
+  isPip.value = props.video?.webkitPresentationMode === 'picture-in-picture';
 }
 
-async function enterPip(video: HTMLVideoElement) {
+async function enterPip(video: VideoController) {
   if (video.requestPictureInPicture && !video.disablePictureInPicture) {
     await video.requestPictureInPicture();
     return;
   }
-  const webkitVideo = video as unknown as WebkitPip;
-  if (typeof webkitVideo.webkitSetPresentationMode === 'function') {
-    if (webkitVideo.webkitSupportsPresentationMode?.('picture-in-picture') === false) {
+  if (typeof video.webkitSetPresentationMode === 'function') {
+    if (video.webkitSupportsPresentationMode?.('picture-in-picture') === false) {
       throw new Error('Picture-in-picture not supported');
     }
-    webkitVideo.webkitSetPresentationMode('picture-in-picture');
+    video.webkitSetPresentationMode('picture-in-picture');
     return;
   }
   throw new Error('Picture-in-picture not supported');
 }
 
-async function exitPip(el: HTMLVideoElement | null | undefined = props.video) {
+async function exitPip(el: VideoController | null | undefined = props.video) {
   if (document.pictureInPictureElement) {
-    if (!el || document.pictureInPictureElement === el) {
+    if (!el || document.pictureInPictureElement === (el as unknown as Element)) {
       await document.exitPictureInPicture();
     }
     return;
   }
-  const video = el as unknown as WebkitPip | null | undefined;
+  const video = el;
   if (
     video &&
     typeof video.webkitSetPresentationMode === 'function' &&
@@ -130,14 +123,14 @@ function attachVideo() {
   updateSupport();
   if (!props.video) return;
   isPip.value =
-    document.pictureInPictureElement === props.video ||
-    (props.video as unknown as WebkitPip).webkitPresentationMode === 'picture-in-picture';
+    document.pictureInPictureElement === (props.video as unknown as Element) ||
+    props.video.webkitPresentationMode === 'picture-in-picture';
   props.video.addEventListener('enterpictureinpicture', onEnterPip);
   props.video.addEventListener('leavepictureinpicture', onLeavePip);
   props.video.addEventListener('webkitpresentationmodechanged', onWebkitModeChange);
 }
 
-function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+function detachVideo(el: VideoController | null | undefined = props.video) {
   if (isPip.value) void exitPip(el).catch(() => {});
   el?.removeEventListener('enterpictureinpicture', onEnterPip);
   el?.removeEventListener('leavepictureinpicture', onLeavePip);

@@ -105,12 +105,12 @@ import UltraHighDefinitionIcon from 'vue-material-design-icons/UltraHighDefiniti
 import SpeedometerIcon from 'vue-material-design-icons/Speedometer.vue';
 import StandardDefinitionIcon from 'vue-material-design-icons/StandardDefinition.vue';
 
-import type { QualityAwareVideoElement, QualityOption } from '../PsVideoQuality';
+import type { QualityOption, VideoController } from '@typings';
 
 import { t } from '@services/l10n';
 
 const props = defineProps<{
-  video?: HTMLVideoElement | QualityAwareVideoElement | null;
+  video?: VideoController | null;
 }>();
 
 const menuOpen = ref(false);
@@ -160,15 +160,11 @@ function onRateChange() {
 }
 
 function onQualityList() {
-  if (!props.video || !('qualityList' in props.video)) {
-    qualityList.value = [];
-    return;
-  }
-  qualityList.value = props.video.qualityList;
+  qualityList.value = props.video?.qualityList ?? [];
 }
 
 function onQualitySelected() {
-  if (props.video && 'currentQuality' in props.video) {
+  if (props.video?.currentQuality !== undefined) {
     quality.value = props.video.currentQuality;
   }
 }
@@ -183,14 +179,14 @@ function attachVideo() {
   props.video.addEventListener('quality-selected', onQualitySelected);
 }
 
-function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+function detachVideo(el: VideoController | null | undefined = props.video) {
   el?.removeEventListener('ratechange', onRateChange);
   el?.removeEventListener('quality-list', onQualityList);
   el?.removeEventListener('quality-selected', onQualitySelected);
 }
 
 watch(quality, (value) => {
-  if (props.video && 'currentQuality' in props.video) {
+  if (props.video && props.video.currentQuality !== undefined) {
     props.video.currentQuality = value;
   }
 });
