@@ -26,6 +26,14 @@
       />
       <div class="m-vc-track-played" :style="{ width: `${playedPct}%` }" />
       <div class="m-vc-track-thumb" :style="{ left: `${playedPct}%` }" />
+      <TrackThumbnail
+        :video="video"
+        :thumbnails="thumbnails"
+        :time="tooltipRatio * clampedDuration"
+        :ratio="tooltipRatio"
+        :track-width="trackWidth"
+        :visible="tooltipVisible"
+      />
       <div v-show="tooltipVisible" class="m-vc-track-tooltip" aria-hidden="true" :style="{ left: `${tooltipPct}%` }">
         {{ tooltipText }}
       </div>
@@ -37,10 +45,12 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 import { t } from '@services/l10n';
+import TrackThumbnail from './TrackThumbnail.vue';
 import * as vutils from './utils';
 
 const props = defineProps<{
   video?: HTMLVideoElement | null;
+  thumbnails?: string | null;
 }>();
 
 const trackEl = ref<HTMLDivElement | null>(null);
@@ -51,6 +61,7 @@ const scrubbing = ref(false);
 const scrubRatio = ref(0);
 const hovering = ref(false);
 const hoverRatio = ref(0);
+const trackWidth = ref(0);
 
 const clampedDuration = computed(() => (Number.isFinite(duration.value) && duration.value > 0 ? duration.value : 0));
 
@@ -89,6 +100,7 @@ function ratioFromEvent(e: PointerEvent) {
   if (!el) return 0;
   const rect = el.getBoundingClientRect();
   if (rect.width <= 0) return 0;
+  trackWidth.value = rect.width;
   return vutils.clamp01((e.clientX - rect.left) / rect.width);
 }
 
@@ -268,7 +280,7 @@ onBeforeUnmount(detachVideo);
     bottom: calc(100% + 12px);
     padding: 2px 6px;
     border-radius: 4px;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.5);
     color: #fff;
     font-size: 12px;
     font-variant-numeric: tabular-nums;

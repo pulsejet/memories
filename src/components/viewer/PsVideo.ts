@@ -259,9 +259,10 @@ class VideoContentSetup {
     const layout = document.createElement('media-video-layout');
     layout.setAttribute('small-when', 'never');
 
-    if (videoIsHls) {
-      const vtt = new URL(API.VIDEO_STORYBOARD(content.data.photo.fileid, 'storyboard.vtt'), window.location.href);
-      layout.setAttribute('thumbnails', vtt.href);
+    const storyboardApi = API.VIDEO_STORYBOARD(content.data.photo.fileid, 'storyboard.vtt');
+    const storyboardUrl = videoIsHls ? new URL(storyboardApi, window.location.href) : null;
+    if (storyboardUrl?.href) {
+      layout.setAttribute('thumbnails', storyboardUrl.href);
     }
 
     player.addEventListener('provider-change', (e: Event) => {
@@ -311,6 +312,7 @@ class VideoContentSetup {
     // so that the Vue component is mounted.
     const viewerControls = document.createElement('viewer-controls') as ViewerControlsCE;
     viewerControls.video = providerEl.querySelector('video');
+    viewerControls.thumbnails = storyboardUrl?.href;
     viewerControls.style.position = 'absolute';
     viewerControls.style.top = '100px';
     viewerControls.style.left = '20px';
