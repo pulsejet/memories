@@ -307,9 +307,12 @@ class VideoContentSetup {
 
     // We need to actually ensure that the controls are added to the DOM
     // so that the Vue component is mounted.
-    const controlsDiv = document.createElement('viewer-controls') as ViewerControlsCE;
-    controlsDiv.video = content.element.querySelector('video');
-    content.element.appendChild(controlsDiv);
+    const viewerControls = document.createElement('viewer-controls') as ViewerControlsCE;
+    viewerControls.video = content.element.querySelector('video');
+    viewerControls.style.position = 'absolute';
+    viewerControls.style.top = '100px';
+    viewerControls.style.left = '100px';
+    content.element.appendChild(viewerControls);
   }
 
   /**
