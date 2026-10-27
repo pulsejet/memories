@@ -123,6 +123,7 @@ onBeforeUnmount(detachVideo);
     margin 0.2s ease-in-out;
 
   input {
+    display: block;
     width: 80px;
     height: 12px;
     padding: 0;

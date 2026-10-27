@@ -20,3 +20,9 @@ defineProps<{
   video?: HTMLVideoElement | null;
 }>();
 </script>
+
+<style lang="scss" scoped>
+:deep(.button-vue) {
+  background-color: transparent !important;
+}
+</style>
