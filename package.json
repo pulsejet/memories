@@ -70,6 +70,7 @@
     "vue-material-design-icons": "^5.4.0",
     "vue-router": "^5.4.0",
     "webdav": "^5.11.0",
+    "webvtt-parser": "^2.2.0",
     "webworker-typed": "^1.1.0"
   },
   "engines": {
@@ -93,6 +94,7 @@
     "@types/leaflet": "^1.9.22",
     "@types/luxon": "^3.7.6",
     "@types/url-parse": "^1.4.11",
+    "@types/webvtt-parser": "^2.2.0",
     "@typescript/native": "npm:typescript@^7.0.2",
     "@vue/compiler-sfc": "^3.5.44",
     "css-loader": "^7.1.5",
