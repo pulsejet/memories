@@ -1,15 +1,16 @@
 <template>
   <div class="m-vc-controls">
-    <Track :video="video" />
-
     <div class="m-vc-controls-row">
       <PlayButton :video="video" />
-      <Volume :video="video" />
+      <Volume :video="video" class="m-vc-controls-volume" />
       <TimeTicker :video="video" />
-      <FullscreenButton :video="video" />
-      <PipButton :video="video" />
+      <div class="m-vc-controls-spacer" />
       <SettingsMenu :video="video" />
+      <PipButton :video="video" />
+      <FullscreenButton :video="video" />
     </div>
+
+    <Track :video="video" />
   </div>
 </template>
 
@@ -28,7 +29,32 @@ defineProps<{
 </script>
 
 <style lang="scss" scoped>
-:deep(.button-vue) {
-  background-color: transparent !important;
+.m-vc-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+
+  &-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+    margin: 0 -9px 0 -12px;
+  }
+
+  &-spacer {
+    flex: 1 1 auto;
+  }
+
+  &-volume {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  :deep(.button-vue) {
+    background-color: transparent !important;
+  }
 }
 </style>

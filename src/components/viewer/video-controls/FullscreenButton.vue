@@ -6,8 +6,8 @@
     @click="toggleFullscreen"
   >
     <template #icon>
-      <FullscreenExitIcon v-if="isFullscreen" :size="26" />
-      <FullscreenIcon v-else :size="26" />
+      <FullscreenExitIcon v-if="isFullscreen" :size="24" />
+      <FullscreenIcon v-else :size="24" />
     </template>
   </NcButton>
 </template>
