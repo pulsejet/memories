@@ -1,5 +1,5 @@
 <template>
-  <NcActions v-model:open="menuOpen" :aria-label="t('memories', 'Settings')" placement="top" @closed="view = 'main'">
+  <NcActions v-model:open="menuOpen" :aria-label="t('memories', 'Settings')" placement="top" @open="view = 'main'">
     <template #icon>
       <CogIcon :size="26" />
     </template>
@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import NcActionCaption from '@nextcloud/vue/components/NcActionCaption';
@@ -85,7 +85,7 @@ import CogIcon from 'vue-material-design-icons/Cog.vue';
 
 import { t } from '@services/l10n';
 
-defineProps<{
+const props = defineProps<{
   video?: HTMLVideoElement | null;
 }>();
 
@@ -107,4 +107,29 @@ function speedLabel(option: string) {
 
 const qualityRow = computed(() => `${t('memories', 'Quality')} · ${qualityLabel(quality.value)}`);
 const speedRow = computed(() => `${t('memories', 'Speed')} · ${speedLabel(speed.value)}`);
+
+function onRateChange() {
+  if (props.video) {
+    speed.value = String(props.video.playbackRate);
+  }
+}
+
+function attachVideo() {
+  if (!props.video) return;
+  speed.value = String(props.video.playbackRate);
+  props.video.addEventListener('ratechange', onRateChange);
+}
+
+function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+  el?.removeEventListener('ratechange', onRateChange);
+}
+
+watch(speed, (value) => {
+  if (props.video && props.video.playbackRate !== parseFloat(value)) {
+    props.video.playbackRate = parseFloat(value);
+  }
+});
+
+onMounted(attachVideo);
+onBeforeUnmount(detachVideo);
 </script>
