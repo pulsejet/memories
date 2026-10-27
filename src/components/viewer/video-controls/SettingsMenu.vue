@@ -6,7 +6,7 @@
 
     <template v-if="view === 'main'">
       <NcActionButton
-        v-if="qualityOptions.length > 1"
+        v-if="qualityList.length > 1"
         key="m-vc-nav-quality"
         is-menu
         :close-after-click="false"
@@ -17,13 +17,7 @@
           <TuneIcon :size="20" />
         </template>
       </NcActionButton>
-      <NcActionButton
-        key="m-vc-nav-speed"
-        is-menu
-        :close-after-click="false"
-        :name="speedRow"
-        @click="view = 'speed'"
-      >
+      <NcActionButton key="m-vc-nav-speed" is-menu :close-after-click="false" :name="speedRow" @click="view = 'speed'">
         <template #icon>
           <SpeedometerIcon :size="20" />
         </template>
@@ -44,11 +38,11 @@
       </NcActionButton>
       <NcActionCaption :name="t('memories', 'Quality')" />
       <NcActionButton
-        v-for="option in qualityOptions"
-        :key="option.label"
+        v-for="option in qualityList"
+        :key="option.id"
         type="radio"
         v-model="quality"
-        :value="option.label"
+        :value="option.id"
         :name="qualityLabel(option)"
         @click="menuOpen = false"
       >
@@ -105,10 +99,12 @@ import UltraHighDefinitionIcon from 'vue-material-design-icons/UltraHighDefiniti
 import SpeedometerIcon from 'vue-material-design-icons/Speedometer.vue';
 import StandardDefinitionIcon from 'vue-material-design-icons/StandardDefinition.vue';
 
+import type { QualityAwareVideoElement, QualityOption } from '../PsVideoQuality';
+
 import { t } from '@services/l10n';
 
 const props = defineProps<{
-  video?: HTMLVideoElement | null;
+  video?: HTMLVideoElement | QualityAwareVideoElement | null;
 }>();
 
 const menuOpen = ref(false);
@@ -116,23 +112,21 @@ const view = ref<'main' | 'quality' | 'speed'>('main');
 const quality = ref('auto');
 const speed = ref('1');
 
-interface QualityOption {
-  label: string;
-  size: number;
-}
-
-const qualityOptions: QualityOption[] = [
-  { label: 'auto', size: -1 },
-  { label: '2160p', size: 2160 },
-  { label: '1080p', size: 1080 },
-  { label: '720p', size: 720 },
-  { label: '480p', size: 480 },
-  { label: '360p', size: 360 },
-];
+const qualityList = ref<QualityOption[]>([]);
 const speedOptions = ['0.5', '0.75', '1', '1.25', '1.5', '2.0'];
 
-function qualityLabel(option: QualityOption) {
-  return option.label === 'auto' ? t('memories', 'Auto') : option.label;
+function formatBitrate(bps: number) {
+  if (bps >= 1000000) return `${(bps / 1000000).toFixed(1)} Mbps`;
+  return `${Math.round(bps / 1000)} kbps`;
+}
+
+function qualityLabel(option: QualityOption, withBitrate = true) {
+  if (option.id === 'auto') return t('memories', 'Auto');
+  let label = option.size + 'p';
+  if (withBitrate && option.bitrate) {
+    label += ' \u00B7 ' + formatBitrate(option.bitrate);
+  }
+  return label;
 }
 
 function qualityIcon(size: number) {
@@ -148,10 +142,10 @@ function speedLabel(option: string) {
 }
 
 const qualityRow = computed(() => {
-  const current = qualityOptions.find((option) => option.label === quality.value) ?? qualityOptions[0];
-  return `${t('memories', 'Quality')} · ${qualityLabel(current)}`;
+  const current = qualityList.value.find((option) => option.id === quality.value) ?? qualityList.value[0];
+  return current ? `${t('memories', 'Quality')} \u00B7 ${qualityLabel(current, false)}` : t('memories', 'Quality');
 });
-const speedRow = computed(() => `${t('memories', 'Speed')} · ${speedLabel(speed.value)}`);
+const speedRow = computed(() => `${t('memories', 'Speed')} \u00B7 ${speedLabel(speed.value)}`);
 
 function onRateChange() {
   if (!props.video) return;
@@ -159,15 +153,41 @@ function onRateChange() {
   speed.value = speedOptions.find((option) => parseFloat(option) === rate) ?? String(rate);
 }
 
+function onQualityList() {
+  if (!props.video || !('qualityList' in props.video)) {
+    qualityList.value = [];
+    return;
+  }
+  qualityList.value = props.video.qualityList;
+}
+
+function onQualitySelected() {
+  if (props.video && 'currentQuality' in props.video) {
+    quality.value = props.video.currentQuality;
+  }
+}
+
 function attachVideo() {
   if (!props.video) return;
   onRateChange();
+  onQualityList();
+  onQualitySelected();
   props.video.addEventListener('ratechange', onRateChange);
+  props.video.addEventListener('quality-list', onQualityList);
+  props.video.addEventListener('quality-selected', onQualitySelected);
 }
 
 function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
   el?.removeEventListener('ratechange', onRateChange);
+  el?.removeEventListener('quality-list', onQualityList);
+  el?.removeEventListener('quality-selected', onQualitySelected);
 }
+
+watch(quality, (value) => {
+  if (props.video && 'currentQuality' in props.video) {
+    props.video.currentQuality = value;
+  }
+});
 
 watch(speed, (value) => {
   if (props.video && props.video.playbackRate !== parseFloat(value)) {
