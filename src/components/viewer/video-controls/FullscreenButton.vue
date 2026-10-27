@@ -50,11 +50,7 @@ function containerEl() {
 }
 
 function isFullscreenActive() {
-  return (
-    !!document.fullscreenElement ||
-    !!(document as WebkitDoc).webkitFullscreenElement ||
-    nativeFullscreen.value
-  );
+  return !!document.fullscreenElement || !!(document as WebkitDoc).webkitFullscreenElement || nativeFullscreen.value;
 }
 
 function onFullscreenChange() {
