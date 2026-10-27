@@ -3,6 +3,7 @@ package ffmpeg
 import (
 	"context"
 	"fmt"
+	"math"
 	"os/exec"
 	"strings"
 	"time"
@@ -17,8 +18,8 @@ const (
 	// StoryboardCols x StoryboardRows tiles per sprite sheet.
 	StoryboardCols = 10
 	StoryboardRows = 10
-	// StoryboardWidth x StoryboardHeight is the fixed tile size;
-	// sources are letterboxed to fit.
+	// StoryboardWidth x StoryboardHeight is the default tile size for
+	// 16:9 sources and the fallback when source dimensions are unknown.
 	StoryboardWidth  = 160
 	StoryboardHeight = 90
 	// StoryboardQuality is the MJPEG q:v for sprites (2-5 sane).
@@ -43,9 +44,44 @@ type StoryboardPlan struct {
 	Duration float64
 }
 
+// StoryboardDisplaySize applies rotation to coded dimensions.
+// Autorotation is on for storyboards (no -noautorotate), so thumbs
+// match this display orientation.
+func StoryboardDisplaySize(w, h, rotation int) (int, int) {
+	if rotation == 90 || rotation == -90 || rotation == 270 || rotation == -270 {
+		return h, w
+	}
+	return w, h
+}
+
+// StoryboardTileSize derives uniform tile dimensions from the display
+// aspect, keeping the pixel count of StoryboardWidth x StoryboardHeight.
+func StoryboardTileSize(srcW, srcH int) (int, int) {
+	if srcW <= 0 || srcH <= 0 {
+		return StoryboardWidth, StoryboardHeight
+	}
+	aspect := float64(srcW) / float64(srcH)
+	if aspect <= 0 || math.IsNaN(aspect) || math.IsInf(aspect, 0) {
+		return StoryboardWidth, StoryboardHeight
+	}
+	area := float64(StoryboardWidth * StoryboardHeight)
+	w := math.Sqrt(area * aspect)
+	h := math.Sqrt(area / aspect)
+	tw := int(math.Round(w/2) * 2)
+	th := int(math.Round(h/2) * 2)
+	if tw < 2 {
+		tw = 2
+	}
+	if th < 2 {
+		th = 2
+	}
+	return tw, th
+}
+
 // PlanStoryboard spaces thumbs at least StoryboardInterval apart,
 // thinning out long videos to stay under StoryboardMaxThumbs.
-func PlanStoryboard(duration time.Duration) StoryboardPlan {
+// srcW x srcH is the display size; tiles follow its aspect.
+func PlanStoryboard(duration time.Duration, srcW, srcH int) StoryboardPlan {
 	secs := duration.Seconds()
 	if secs <= 0 {
 		secs = StoryboardInterval
@@ -64,12 +100,13 @@ func PlanStoryboard(duration time.Duration) StoryboardPlan {
 	}
 	per := StoryboardCols * rows
 	sprites := (count + per - 1) / per
+	tw, th := StoryboardTileSize(srcW, srcH)
 	return StoryboardPlan{
 		Interval: interval,
 		Count:    count,
 		Sprites:  sprites,
-		ThumbW:   StoryboardWidth,
-		ThumbH:   StoryboardHeight,
+		ThumbW:   tw,
+		ThumbH:   th,
 		Cols:     StoryboardCols,
 		GridRows: rows,
 		PerGrid:  per,
@@ -120,14 +157,16 @@ func FormatVTTTime(s float64) string {
 
 // StoryboardArgs renders one argv element per entry (bin excluded, same
 // convention as BuildArgs). A single pass decodes keyframes only
-// (-skip_frame nokey), picks frames at the planned interval, scales and
-// tiles them into sprite sheets at pattern (printf-style, e.g. storyboard-%d.jpg).
-func StoryboardArgs(input, headers string, interval float64, cols, rows, sprites int, pattern string) []string {
+// (-skip_frame nokey), picks frames at the planned interval, scales
+// exactly to the planned tile size and tiles them into sprite sheets
+// at pattern (printf-style, e.g. storyboard-%d.jpg).
+func StoryboardArgs(input, headers string, interval float64, thumbW, thumbH, cols, rows, sprites int, pattern string) []string {
 	// format=yuv420p keeps 10-bit/HDR sources away from the mjpeg encoder;
 	// eof_action=pass flushes the last frame so clips shorter than the
 	// interval still yield a sprite instead of no filtered frames.
-	filter := fmt.Sprintf("fps=1/%.6f:eof_action=pass,scale=%d:%d:force_original_aspect_ratio=decrease,format=yuv420p,pad=%d:%d:(ow-iw)/2:(oh-ih)/2,tile=%dx%d",
-		interval, StoryboardWidth, StoryboardHeight, StoryboardWidth, StoryboardHeight,
+	// No pad: tiles match the source aspect.
+	filter := fmt.Sprintf("fps=1/%.6f:eof_action=pass,scale=%d:%d,format=yuv420p,tile=%dx%d",
+		interval, thumbW, thumbH,
 		cols, rows)
 	args := []string{
 		"-hide_banner", "-loglevel", "warning",
@@ -161,7 +200,7 @@ func BuildStoryboard(ctx context.Context, bin, input, headers string, plan Story
 	defer cancel()
 
 	// StoryboardArgs excludes bin (same convention as BuildArgs).
-	cmd := exec.CommandContext(ctx, bin, StoryboardArgs(input, headers, plan.Interval, plan.Cols, plan.GridRows, plan.Sprites, pattern)...)
+	cmd := exec.CommandContext(ctx, bin, StoryboardArgs(input, headers, plan.Interval, plan.ThumbW, plan.ThumbH, plan.Cols, plan.GridRows, plan.Sprites, pattern)...)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("storyboard %s: %w: %s", input, err, strings.TrimSpace(string(out)))
 	}

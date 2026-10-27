@@ -33,7 +33,8 @@ const previewStyle = computed(() => {
   if (!thumb) return {};
 
   const pct = vutils.clamp01(props.ratio) * 100;
-  const half = props.trackWidth > 0 ? ((160 / 2 + 8) / props.trackWidth) * 100 : 0;
+  const thumbW = thumb.w ?? 160;
+  const half = props.trackWidth > 0 ? ((thumbW / 2 + 8) / props.trackWidth) * 100 : 0;
   const left = `${Math.min(Math.max(pct, half), 100 - half)}%`;
 
   // Sprite tile: offset into the shared sheet.
