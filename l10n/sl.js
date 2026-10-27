@@ -23,6 +23,7 @@ OC.L10N.register(
     "Settings" : "Nastavitve",
     "View all" : "Poglej vse",
     "Videos" : "Video posnetki",
+    "Panoramas" : "Panorame",
     "Recognize" : "Prepoznava",
     "Face Recognition" : "Prepoznava obrazov",
     "Choose the root of your timeline" : "Izberite koren časovnice",

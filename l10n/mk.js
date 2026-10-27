@@ -24,6 +24,7 @@ OC.L10N.register(
     "Settings" : "Параметри",
     "View all" : "Види ги сите",
     "Videos" : "Видеа",
+    "Panoramas" : "Панорами",
     "Recognize" : "Препознавање",
     "Face Recognition" : "Препознавање на лице",
     "Choose the root of your timeline" : "Изберете го коренот на вашиот времеплов",

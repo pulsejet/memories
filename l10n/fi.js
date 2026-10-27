@@ -24,6 +24,7 @@ OC.L10N.register(
     "Settings" : "Asetukset",
     "View all" : "Näytä kaikki",
     "Videos" : "Videot",
+    "Panoramas" : "Panoramat",
     "Recognize" : "Recognize",
     "Face Recognition" : "Face Recognition",
     "Choose the root of your timeline" : "Valitse aikajanan juurihakemisto",

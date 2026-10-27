@@ -21,6 +21,7 @@ OC.L10N.register(
     "Settings" : "Impostazioni",
     "View all" : "Vedi tutto",
     "Videos" : "Video",
+    "Panoramas" : "Panorami",
     "Recognize" : "Riconosci",
     "Face Recognition" : "Riconoscimento Facciale",
     "The selected folder does not seem to be valid. Try again." : "La cartella selezionata non sembra essere valida. Riprova.",
