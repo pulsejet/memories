@@ -10,7 +10,7 @@
       <FullscreenButton :video="video" />
     </div>
 
-    <Track :video="video" />
+    <Track :video="video" :thumbnails="thumbnails" />
   </div>
 </template>
 
@@ -25,6 +25,7 @@ import Volume from './Volume.vue';
 
 defineProps<{
   video?: HTMLVideoElement | null;
+  thumbnails?: string | null;
 }>();
 </script>
 
