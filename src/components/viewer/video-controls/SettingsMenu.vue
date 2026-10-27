@@ -1,5 +1,11 @@
 <template>
-  <NcActions v-model:open="menuOpen" :aria-label="t('memories', 'Settings')" placement="top" @open="view = 'main'">
+  <NcActions
+    v-model:open="menuOpen"
+    :aria-label="t('memories', 'Settings')"
+    placement="top"
+    force-menu
+    @open="view = 'main'"
+  >
     <template #icon>
       <CogIcon :size="24" />
     </template>

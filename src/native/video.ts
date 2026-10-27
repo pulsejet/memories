@@ -27,7 +27,7 @@ export async function destroyVideo(photo: IPhoto) {
 }
 
 /**
- * Local video URL for vidstack, if the photo should play from device.
+ * Local video URL for the native player, if the photo should play from device.
  * Returns null for remote-only videos (use HLS / direct instead).
  */
 export function getLocalVideoUrl(photo: IPhoto): string | null {

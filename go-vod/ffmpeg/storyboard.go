@@ -131,7 +131,7 @@ func (p StoryboardPlan) Cue(i int) (start, end float64, sprite string, x, y int)
 }
 
 // VTT renders the plan as a WebVTT storyboard with relative sprite URLs,
-// in the format vidstack consumes (see files.vidstack.io/sprite-fight).
+// using sprite tiles with #xywh fragments.
 // Query carries the encoded passthrough (e.g. share tokens, same as
 // m3u8 playlists) into every sprite URL; the plan is stored as JSON and
 // the VTT is rendered per request because of it.

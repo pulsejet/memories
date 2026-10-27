@@ -70,28 +70,39 @@ function onNativeEnd() {
 async function enterFullscreen(container: HTMLElement) {
   if (container.requestFullscreen) {
     await container.requestFullscreen();
-    return;
-  }
-  if ((container as WebkitContainer).webkitRequestFullscreen) {
+  } else if ((container as WebkitContainer).webkitRequestFullscreen) {
     await (container as WebkitContainer).webkitRequestFullscreen?.();
-    return;
+  } else {
+    const video = props.video as WebkitVideo | null | undefined;
+    if (video && typeof video.webkitEnterFullscreen === 'function') {
+      video.webkitEnterFullscreen();
+      return;
+    }
+    throw new Error('Fullscreen not supported');
   }
-  const video = props.video as WebkitVideo | null | undefined;
-  if (video && typeof video.webkitEnterFullscreen === 'function') {
-    video.webkitEnterFullscreen();
-    return;
+
+  try {
+    if (props.video?.videoWidth && props.video?.videoHeight) {
+      const orientation = props.video.videoWidth >= props.video.videoHeight ? 'landscape' : 'portrait';
+      await screen.orientation.lock(orientation);
+    }
+  } catch {
+    // Ignore
   }
-  throw new Error('Fullscreen not supported');
 }
 
 async function exitFullscreen() {
+  try {
+    screen.orientation.unlock();
+  } catch {
+    // Ignore
+  }
   if (document.fullscreenElement) {
     await document.exitFullscreen();
-    return;
   }
-  const doc = document as WebkitDoc;
-  if (doc.webkitFullscreenElement) {
-    await doc.webkitExitFullscreen?.();
+  const wkDoc = document as WebkitDoc;
+  if (wkDoc.webkitFullscreenElement) {
+    await wkDoc.webkitExitFullscreen?.();
   }
 }
 
