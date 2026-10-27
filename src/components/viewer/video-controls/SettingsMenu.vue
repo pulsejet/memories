@@ -42,16 +42,15 @@
         </template>
       </NcActionButton>
       <NcActionCaption :name="t('memories', 'Quality')" />
-      <NcActionRadio
+      <NcActionButton
         v-for="option in qualityOptions"
         :key="option"
+        type="radio"
         v-model="quality"
-        name="m-vc-quality"
         :value="option"
-        @change="menuOpen = false"
-      >
-        {{ qualityLabel(option) }}
-      </NcActionRadio>
+        :name="qualityLabel(option)"
+        @click="menuOpen = false"
+      />
     </template>
 
     <template v-else>
@@ -67,16 +66,19 @@
         </template>
       </NcActionButton>
       <NcActionCaption :name="t('memories', 'Speed')" />
-      <NcActionRadio
+      <NcActionButton
         v-for="option in speedOptions"
         :key="option"
+        type="radio"
         v-model="speed"
-        name="m-vc-speed"
         :value="option"
-        @change="menuOpen = false"
+        :name="speedLabel(option)"
+        @click="menuOpen = false"
       >
-        {{ speedLabel(option) }}
-      </NcActionRadio>
+        <template v-if="option === '1'" #icon>
+          <PlayIcon :size="20" />
+        </template>
+      </NcActionButton>
     </template>
   </NcActions>
 </template>
@@ -86,10 +88,10 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import NcActionCaption from '@nextcloud/vue/components/NcActionCaption';
-import NcActionRadio from '@nextcloud/vue/components/NcActionRadio';
 import NcActions from '@nextcloud/vue/components/NcActions';
 import ArrowLeftIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
+import PlayIcon from 'vue-material-design-icons/Play.vue';
 import TuneIcon from 'vue-material-design-icons/Tune.vue';
 import SpeedometerIcon from 'vue-material-design-icons/Speedometer.vue';
 
@@ -105,7 +107,7 @@ const quality = ref('auto');
 const speed = ref('1');
 
 const qualityOptions = ['auto', '1080p', '720p', '480p', '360p'];
-const speedOptions = ['0.5', '0.75', '1', '1.25', '1.5', '2'];
+const speedOptions = ['0.5', '0.75', '1', '1.25', '1.5', '2.0'];
 
 function qualityLabel(option: string) {
   return option === 'auto' ? t('memories', 'Auto') : option;
@@ -119,9 +121,9 @@ const qualityRow = computed(() => `${t('memories', 'Quality')} · ${qualityLabel
 const speedRow = computed(() => `${t('memories', 'Speed')} · ${speedLabel(speed.value)}`);
 
 function onRateChange() {
-  if (props.video) {
-    speed.value = String(props.video.playbackRate);
-  }
+  if (!props.video) return;
+  const rate = props.video.playbackRate;
+  speed.value = speedOptions.find((option) => parseFloat(option) === rate) ?? String(rate);
 }
 
 function attachVideo() {
