@@ -96,12 +96,14 @@ async function enterPip(video: HTMLVideoElement) {
   throw new Error('Picture-in-picture not supported');
 }
 
-async function exitPip() {
+async function exitPip(el: HTMLVideoElement | null | undefined = props.video) {
   if (document.pictureInPictureElement) {
-    await document.exitPictureInPicture();
+    if (!el || document.pictureInPictureElement === el) {
+      await document.exitPictureInPicture();
+    }
     return;
   }
-  const video = props.video as unknown as WebkitPip | null | undefined;
+  const video = el as unknown as WebkitPip | null | undefined;
   if (
     video &&
     typeof video.webkitSetPresentationMode === 'function' &&
@@ -136,6 +138,7 @@ function attachVideo() {
 }
 
 function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+  if (isPip.value) void exitPip(el).catch(() => {});
   el?.removeEventListener('enterpictureinpicture', onEnterPip);
   el?.removeEventListener('leavepictureinpicture', onLeavePip);
   el?.removeEventListener('webkitpresentationmodechanged', onWebkitModeChange);
