@@ -311,8 +311,8 @@ class VideoContentSetup {
     viewerControls.video = content.element.querySelector('video');
     viewerControls.style.position = 'absolute';
     viewerControls.style.top = '100px';
-    viewerControls.style.left = '100px';
-    viewerControls.style.width = '300px';
+    viewerControls.style.left = '20px';
+    viewerControls.style.width = '600px';
     content.element.appendChild(viewerControls);
   }
 

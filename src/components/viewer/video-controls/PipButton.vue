@@ -6,7 +6,7 @@
     @click="togglePip"
   >
     <template #icon>
-      <PictureInPictureBottomRightIcon :size="26" />
+      <PictureInPictureBottomRightIcon :size="24" />
     </template>
   </NcButton>
 </template>
