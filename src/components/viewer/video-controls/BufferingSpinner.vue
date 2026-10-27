@@ -7,8 +7,10 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
+import type { VideoController } from '@typings';
+
 const props = defineProps<{
-  video?: HTMLVideoElement | null;
+  video?: VideoController | null;
 }>();
 
 const isBuffering = ref(true);
@@ -66,7 +68,7 @@ function attachVideo() {
   v.addEventListener('emptied', onEmptied);
 }
 
-function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+function detachVideo(el: VideoController | null | undefined = props.video) {
   el?.removeEventListener('play', onPlay);
   el?.removeEventListener('playing', onPlaying);
   el?.removeEventListener('pause', onPause);

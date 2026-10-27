@@ -11,8 +11,10 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { t } from '@services/l10n';
 import * as vutils from './utils';
 
+import type { VideoController } from '@typings';
+
 const props = defineProps<{
-  video?: HTMLVideoElement | null;
+  video?: VideoController | null;
 }>();
 
 const currentTime = ref(0);
@@ -48,7 +50,7 @@ function attachVideo() {
   props.video.addEventListener('loadedmetadata', onVideoDurationChange);
 }
 
-function detachVideo(el: HTMLVideoElement | null | undefined = props.video) {
+function detachVideo(el: VideoController | null | undefined = props.video) {
   el?.removeEventListener('timeupdate', onVideoTimeUpdate);
   el?.removeEventListener('durationchange', onVideoDurationChange);
   el?.removeEventListener('loadedmetadata', onVideoDurationChange);
