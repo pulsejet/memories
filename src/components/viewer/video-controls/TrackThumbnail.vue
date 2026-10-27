@@ -10,7 +10,6 @@ import * as thumbUtils from './thumbnails';
 
 // Hover position and track geometry from the seek bar.
 const props = defineProps<{
-  video?: HTMLVideoElement | null;
   thumbnails?: string | null;
   time: number;
   ratio: number;
@@ -67,13 +66,13 @@ watch(
     abortThumbLoad();
     thumbCues.value = [];
 
-    // Nothing to load without a storyboard URL or a video element.
-    if (!url || !props.video) return;
+    // Nothing to load without a storyboard URL.
+    if (!url) return;
 
-    // Parsed cues land here; settled loads clean up their own element.
+    // Parsed cues land here; the guard drops stale loads.
     const ctrl = new AbortController();
     thumbAbort = ctrl;
-    const cues = await thumbUtils.loadThumbnailCues(props.video, url, ctrl.signal);
+    const cues = await thumbUtils.loadThumbnailCues(url, ctrl.signal);
     if (!ctrl.signal.aborted) {
       thumbCues.value = cues;
     }
@@ -81,7 +80,7 @@ watch(
   { immediate: true },
 );
 
-// Abort any in-flight load; settled loads clean up their own element.
+// Abort any in-flight fetch.
 function abortThumbLoad() {
   thumbAbort?.abort();
   thumbAbort = null;

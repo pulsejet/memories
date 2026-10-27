@@ -27,7 +27,6 @@
       <div class="m-vc-track-played" :style="{ width: `${playedPct}%` }" />
       <div class="m-vc-track-thumb" :style="{ left: `${playedPct}%` }" />
       <TrackThumbnail
-        :video="video"
         :thumbnails="thumbnails"
         :time="tooltipRatio * clampedDuration"
         :ratio="tooltipRatio"
