@@ -87,15 +87,14 @@ export function attachVideoQualityHlsJs(video: HTMLVideoElement | null, hls: Hls
     return;
   }
 
-  // Cleanup any previous quality hooks if they exist.
   detachVideoQuality(video);
 
   const hooks = video as QualityHooks;
   hooks._qualityHls = hls;
   hooks._qualitySelected = 'auto';
   hooks._qualityHlsOnManifestParsed = () => {
-    video.dispatchEvent(new CustomEvent('quality-list'));
     syncHlsQualitySelection(video);
+    video.dispatchEvent(new CustomEvent('quality-list'));
   };
   hooks._qualityHlsOnLevelSwitched = () => {
     syncHlsQualitySelection(video);
@@ -107,16 +106,15 @@ export function attachVideoQualityHlsJs(video: HTMLVideoElement | null, hls: Hls
 
   Object.defineProperty(video, 'currentQuality', {
     configurable: true,
-    get: () => (video as QualityHooks)._qualitySelected ?? 'auto',
+    get: () => hooks._qualitySelected ?? 'auto',
     set: (id: string) => selectHlsQuality(video, id),
   });
 
   Object.defineProperty(video, 'qualityList', {
     configurable: true,
     get: (): QualityOption[] => {
-      const hls = (video as QualityHooks)._qualityHls;
-      if (!hls) return [];
-      return [{ id: 'auto', size: -1 }, ...buildHlsQualityList(hls)];
+      if (!hooks._qualityHls) return [];
+      return [{ id: 'auto', size: -1 }, ...buildHlsQualityList(hooks._qualityHls)];
     },
   });
 
