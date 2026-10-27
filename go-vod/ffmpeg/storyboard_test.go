@@ -10,16 +10,18 @@ import (
 )
 
 func TestPlanStoryboardShort(t *testing.T) {
-	p := PlanStoryboard(70 * time.Second)
+	p := PlanStoryboard(70*time.Second, 1920, 1080)
 	require.InDelta(t, 5.0, p.Interval, 1e-9)
 	require.Equal(t, 14, p.Count)
 	require.Equal(t, 1, p.Sprites)
 	require.Equal(t, 2, p.GridRows)
 	require.Equal(t, 20, p.PerGrid)
+	require.Equal(t, 160, p.ThumbW)
+	require.Equal(t, 90, p.ThumbH)
 }
 
 func TestPlanStoryboardLong(t *testing.T) {
-	p := PlanStoryboard(2 * time.Hour)
+	p := PlanStoryboard(2*time.Hour, 1920, 1080)
 	require.GreaterOrEqual(t, p.Interval, 5.0)
 	require.LessOrEqual(t, p.Count, StoryboardMaxThumbs)
 	require.Equal(t, 150, p.Count)
@@ -28,14 +30,14 @@ func TestPlanStoryboardLong(t *testing.T) {
 }
 
 func TestPlanStoryboardTiny(t *testing.T) {
-	p := PlanStoryboard(2 * time.Second)
+	p := PlanStoryboard(2*time.Second, 1920, 1080)
 	require.Equal(t, 1, p.Count)
 	require.Equal(t, 1, p.Sprites)
 	require.Equal(t, 1, p.GridRows)
 }
 
 func TestStoryboardVTT(t *testing.T) {
-	p := PlanStoryboard(12 * time.Second)
+	p := PlanStoryboard(12*time.Second, 1920, 1080)
 	require.Equal(t, 3, p.Count)
 
 	vtt := p.VTT("")
@@ -50,7 +52,7 @@ func TestStoryboardVTT(t *testing.T) {
 }
 
 func TestStoryboardCueMultisprite(t *testing.T) {
-	p := PlanStoryboard(2 * time.Hour)
+	p := PlanStoryboard(2*time.Hour, 1920, 1080)
 	_, _, sprite, _, _ := p.Cue(0)
 	require.Equal(t, "storyboard-0.jpg", sprite)
 	_, _, sprite, _, _ = p.Cue(99)
@@ -71,7 +73,7 @@ func TestFormatVTTTime(t *testing.T) {
 }
 
 func TestStoryboardArgs(t *testing.T) {
-	args := StoryboardArgs("http://nc/file/7", "", 5, 10, 2, 1, "storyboard-%d.jpg")
+	args := StoryboardArgs("http://nc/file/7", "", 5, 160, 90, 10, 2, 1, "storyboard-%d.jpg")
 	require.Equal(t, []string{
 		"-hide_banner", "-loglevel", "warning",
 		"-skip_frame", "nokey",
@@ -87,7 +89,7 @@ func TestStoryboardArgs(t *testing.T) {
 		"-respect_retry_after", "1",
 		"-i", "http://nc/file/7",
 		"-an",
-		"-vf", "fps=1/5.000000:eof_action=pass,scale=160:90:force_original_aspect_ratio=decrease,format=yuv420p,pad=160:90:(ow-iw)/2:(oh-ih)/2,tile=10x2",
+		"-vf", "fps=1/5.000000:eof_action=pass,scale=160:90,format=yuv420p,tile=10x2",
 		"-start_number", "0",
 		"-frames:v", "1",
 		"-q:v", "4",
@@ -95,7 +97,7 @@ func TestStoryboardArgs(t *testing.T) {
 		"storyboard-%d.jpg",
 	}, args)
 
-	args = StoryboardArgs("http://nc/file/7", "Authorization: Basic eA==\r\n", 5, 10, 2, 1, "storyboard-%d.jpg")
+	args = StoryboardArgs("http://nc/file/7", "Authorization: Basic eA==\r\n", 5, 160, 90, 10, 2, 1, "storyboard-%d.jpg")
 	require.Equal(t, "http://nc/file/7", args[slices.Index(args, "-i")+1])
 	require.Equal(t, "Authorization: Basic eA==\r\n", args[slices.Index(args, "-headers")+1])
 	require.Less(t, slices.Index(args, "-headers"), slices.Index(args, "-i"))

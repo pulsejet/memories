@@ -32,6 +32,8 @@ type StoryboardInput struct {
 	Input        string
 	Headers      string
 	Duration     time.Duration
+	Width        int
+	Height       int
 	FFmpeg       string
 	LogID        string
 }
@@ -61,7 +63,7 @@ type storyboardFile struct {
 }
 
 func (m *Manager) storyboardInput() StoryboardInput {
-	return StoryboardInput{
+	in := StoryboardInput{
 		CacheDir:     m.c.CacheDir(),
 		FileID:       m.fileid,
 		Etag:         m.etag,
@@ -69,10 +71,14 @@ func (m *Manager) storyboardInput() StoryboardInput {
 		ServiceToken: m.getServiceToken(),
 		Input:        m.ffmpegInput(),
 		Headers:      m.inputHeaders(),
-		Duration:     m.probe.Duration,
 		FFmpeg:       m.c.FFmpeg,
 		LogID:        m.id,
 	}
+	if m.probe != nil {
+		in.Duration = m.probe.Duration
+		in.Width, in.Height = ffmpeg.StoryboardDisplaySize(m.probe.Width, m.probe.Height, m.probe.Rotation)
+	}
+	return in
 }
 
 // ServeStoryboard builds the storyboard on first view and serves the VTT
@@ -163,7 +169,7 @@ func LoadStoryboardPlan(cacheDir string, fileid int64, etag string) (storyboardF
 }
 
 func (s *storyboardService) build(dir string, in StoryboardInput) error {
-	plan := ffmpeg.PlanStoryboard(in.Duration)
+	plan := ffmpeg.PlanStoryboard(in.Duration, in.Width, in.Height)
 	start := time.Now()
 	log.Printf("%s: building storyboard (%d thumbs @ %.1fs)", in.LogID, plan.Count, plan.Interval)
 
