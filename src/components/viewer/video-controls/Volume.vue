@@ -135,11 +135,7 @@ onBeforeUnmount(detachVideo);
     &::-webkit-slider-runnable-track {
       height: 4px;
       border-radius: 2px;
-      background: linear-gradient(
-        to right,
-        #fff var(--m-vc-fill, 0%),
-        rgba(255, 255, 255, 0.35) var(--m-vc-fill, 0%)
-      );
+      background: linear-gradient(to right, #fff var(--m-vc-fill, 0%), rgba(255, 255, 255, 0.35) var(--m-vc-fill, 0%));
     }
 
     &::-webkit-slider-thumb {
