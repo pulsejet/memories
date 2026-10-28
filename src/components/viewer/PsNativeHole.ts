@@ -10,11 +10,12 @@ export default class PsNativeHole {
   private revealTimer = new RenewingTimeout();
   private lastClip: string | null = null;
   private lastNative: string | null = null;
+  private lastType: 'image' | 'video' | null = null;
   private holeElements: HTMLElement[] = [];
   private holderElement: HTMLElement | null = null;
 
   constructor(private lightbox: PhotoSwipe) {
-    if (!nativex.viewImageIsEnabled()) return;
+    if (!nativex.viewImageIsEnabled() && !nativex.viewVideoIsEnabled()) return;
 
     const updateEvents = [
       'zoomPanUpdate',
@@ -71,19 +72,26 @@ export default class PsNativeHole {
     this.holderElement = null;
     this.revealTimer.clear();
 
-    if (this.lastClip === 'none') return;
+    if (this.lastClip === 'none' && !this.lastType) return;
     this.lastClip = 'none';
     this.lastNative = null;
+    this.lastType = null;
     this.setClip('none');
 
     if (!this.hideRaf) {
       this.hideRaf = requestAnimationFrame(() => {
         this.hideRaf = 0;
         nativex.nxAsync('setHdrColorMode')?.(false);
-        nativex.nxAsync('setNativeImageRect')?.(0, 0, 0, 0);
-        nativex.nxAsync('showNativeImage')?.(false);
+        this.clearNative();
       });
     }
+  }
+
+  private clearNative() {
+    nativex.nxAsync('setNativeImageRect')?.(0, 0, 0, 0);
+    nativex.nxAsync('showNativeImage')?.(false);
+    nativex.nxAsync('setNativeVideoRect')?.(0, 0, 0, 0);
+    nativex.nxAsync('showNativeVideo')?.(false);
   }
 
   private scheduleClipUpdate() {
@@ -96,12 +104,28 @@ export default class PsNativeHole {
 
   private updateClip() {
     const slide = this.lightbox.currSlide as unknown as PsSlide | undefined;
-    if (slide?.data.nxImageState !== 'loaded' || slide?.data.nxImageDisabled) {
+    const slideType = slide?.data.type;
+    if (!slideType) {
+      return this.hide();
+    } else if (slideType === 'image') {
+      if (!nativex.viewImageIsEnabled() || slide?.data.nxImageState !== 'loaded' || slide?.data.nxImageDisabled) {
+        return this.hide();
+      }
+    } else if (slideType === 'video') {
+      if (!nativex.viewVideoIsEnabled() || slide?.data.nxVideoState === 'error') {
+        return this.hide();
+      }
+    } else {
       return this.hide();
     }
 
-    const element = slide.content?.element;
     const holderElement = slide.holderElement;
+
+    let element: HTMLElement | null | undefined = slide.content?.element;
+    if (slideType === 'video') {
+      element = element?.querySelector?.<HTMLElement>('viewer-video-native-hole');
+    }
+
     const box = element?.getBoundingClientRect();
     if (!holderElement || !element || !box || !box.width || !box.height) {
       return this.hide();
@@ -141,11 +165,21 @@ export default class PsNativeHole {
       }, 50);
     }
 
-    const key = `${x1},${y1},${x2 - x1},${y2 - y1}`;
+    if (this.lastType !== slideType) {
+      this.clearNative();
+      this.lastType = slideType;
+    }
+
+    const key = `${slideType}:${x1},${y1},${x2 - x1},${y2 - y1}`;
     if (key === this.lastNative) return;
     this.lastNative = key;
-    nativex.nxAsync('setNativeImageRect')?.(x1, y1, x2 - x1, y2 - y1);
-    nativex.nxAsync('showNativeImage')?.(true);
+    if (slideType === 'video') {
+      nativex.nxAsync('setNativeVideoRect')?.(x1, y1, x2 - x1, y2 - y1);
+      nativex.nxAsync('showNativeVideo')?.(true);
+    } else {
+      nativex.nxAsync('setNativeImageRect')?.(x1, y1, x2 - x1, y2 - y1);
+      nativex.nxAsync('showNativeImage')?.(true);
+    }
     if (this.hideRaf) {
       cancelAnimationFrame(this.hideRaf);
       this.hideRaf = 0;
