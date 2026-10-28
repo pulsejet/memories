@@ -278,6 +278,72 @@ func TestBuildArgsVAAPIOpenCL(t *testing.T) {
 	}
 }
 
+func TestBuildArgsNVENCCUDA(t *testing.T) {
+	for _, scaler := range []string{"cuda", "npp"} {
+		for _, quality := range []string{"720p", QualityMax} {
+			for _, rotation := range []int{0, -90, 90, 180, -180} {
+				for _, forceSw := range []bool{false, true} {
+					s := baseSpec()
+					s.NVENC, s.HDR, s.NVENCCUDA, s.UseTranspose = true, true, true, true
+					s.NVENCScale, s.Quality, s.Rotation, s.BitDepth = scaler, quality, rotation, 10
+					s.ForceSwTranspose = forceSw
+					args := BuildArgs(s)
+					filter := args[slices.Index(args, "-vf")+1]
+					want := "scale_" + scaler + "=force_original_aspect_ratio=decrease:force_divisible_by=2:format=p010le"
+					if scaler == "cuda" {
+						want += ":passthrough=0"
+					}
+					if quality != QualityMax {
+						want += ":w=1280:h=1280"
+					}
+					want += ",tonemap_cuda=tonemap=hable:desat=0:format=nv12:primaries=bt709:transfer=bt709:matrix=bt709:range=tv"
+					if rotation != 0 {
+						transposer := "transpose_npp"
+						software := forceSw || scaler == "cuda"
+						if software {
+							want += ",hwdownload,format=nv12"
+							transposer = "transpose"
+						}
+						switch rotation {
+						case -90:
+							want += "," + transposer + "=1"
+						case 90:
+							want += "," + transposer + "=2"
+						case 180, -180:
+							want += "," + transposer + "=1," + transposer + "=1"
+						}
+						if software {
+							want += ",format=nv12|cuda,hwupload"
+						}
+					}
+					require.Equal(t, want, filter)
+					require.Equal(t, "memories", args[slices.Index(args, "-filter_hw_device")+1])
+					require.Equal(t, EncoderNVENC, args[slices.Index(args, "-c:v")+1])
+					require.NotContains(t, filter, "zscale")
+				}
+			}
+		}
+	}
+
+	for _, kind := range []string{"sdr", "software", "vaapi", "copy"} {
+		t.Run(kind, func(t *testing.T) {
+			s := baseSpec()
+			s.NVENC, s.HDR, s.NVENCCUDA, s.NVENCScale = true, true, true, "cuda"
+			switch kind {
+			case "sdr":
+				s.HDR = false
+			case "software":
+				s.NVENC = false
+			case "vaapi":
+				s.VAAPI = true
+			case "copy":
+				s.Copy = true
+			}
+			require.NotContains(t, strings.Join(BuildArgs(s), " "), "tonemap_cuda")
+		})
+	}
+}
+
 func TestBuildArgsAudioCopy(t *testing.T) {
 	s := baseSpec()
 	s.Audio = AudioInfo{CodecName: "aac", Channels: 2, SampleRate: 48000, BitRate: 128000}

@@ -46,6 +46,7 @@ type Stream struct {
 
 	tonemapOnce sync.Once
 	vaapiOpenCL bool
+	nvencCUDA   bool
 
 	inactive int
 	stop     chan bool
