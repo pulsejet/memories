@@ -71,7 +71,6 @@ final class Util extends StaticUtil
                     ($this->closure)($output);
                 } catch (\OCA\Memories\HttpResponseException $e) {
                     $res = $e->response;
-                    $output->setHttpResponseCode($res->getStatus());
                     $output->setHeader($this->getStatusHeader($res->getStatus()));
                     if ($res instanceof Http\DataResponse) {
                         $output->setHeader('Content-Type: application/json');
@@ -80,7 +79,6 @@ final class Util extends StaticUtil
                         $output->setOutput($res->render());
                     }
                 } catch (\Exception $e) {
-                    $output->setHttpResponseCode(Http::STATUS_INTERNAL_SERVER_ERROR);
                     $output->setHeader($this->getStatusHeader(Http::STATUS_INTERNAL_SERVER_ERROR));
                     $output->setHeader('Content-Type: application/json');
                     $output->setOutput(json_encode([

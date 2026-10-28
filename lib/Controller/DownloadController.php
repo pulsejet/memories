@@ -178,7 +178,6 @@ final class DownloadController extends ApiController
             $seekEnd = max(0, $size - 1);
 
             $sendRangeNotSatisfiable = static function () use ($out, $size): void {
-                $out->setHttpResponseCode(416);
                 $out->setHeader('HTTP/1.1 416 Range Not Satisfiable');
                 $out->setHeader("Content-Range: bytes */{$size}");
                 $out->setHeader('Accept-Ranges: bytes');
@@ -234,7 +233,6 @@ final class DownloadController extends ApiController
 
             // Send partial content header if a range was requested
             if ($isRange) {
-                $out->setHttpResponseCode(206); // see Util::guardExDirect
                 $out->setHeader('HTTP/1.1 206 Partial Content');
                 $out->setHeader("Content-Range: bytes {$seekStart}-{$seekEnd}/{$size}");
             }
