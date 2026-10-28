@@ -172,7 +172,7 @@ class NativeHoleVideo(
         lastError = null
         userPaused = false
         repeatLoop = loop
-        if (url.isNotEmpty() && url != currentUrl) {
+        if (url.isNotEmpty() && (url != currentUrl || player == null || player?.playbackState == Player.STATE_IDLE)) {
             setVideoUrlLocked(url, ++lastSeq)
         } else {
             ensurePlayer()
