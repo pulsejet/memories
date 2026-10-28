@@ -101,7 +101,7 @@ class VideoContentSetup {
   /** hls.js chunk, prefetched so the player mounts fast on activation */
   private hls = import('hls.js');
 
-  constructor(lightbox: PhotoSwipe) {
+  constructor(private lightbox: PhotoSwipe) {
     this.initLightboxEvents(lightbox);
     lightbox.on('init', () => {
       this.initPswpEvents(lightbox);
@@ -235,7 +235,8 @@ class VideoContentSetup {
       () => {
         if (signal.aborted) return;
         content.videoHasPlayed = true;
-        player.dataset.started = 'true';
+        content.data.nxVideoState = 'loaded';
+        this.lightbox.dispatch('initialZoomPan');
         this.getWakeLock();
       },
       { signal },
@@ -243,6 +244,7 @@ class VideoContentSetup {
     player.addEventListener(
       'error',
       () => {
+        content.data.nxVideoState = 'error';
         void this.tryFailover(content);
       },
       { signal },

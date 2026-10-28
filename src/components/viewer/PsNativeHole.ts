@@ -112,7 +112,7 @@ export default class PsNativeHole {
         return this.hide();
       }
     } else if (slideType === 'video') {
-      if (!nativex.viewVideoIsEnabled() || slide?.data.nxVideoState === 'error') {
+      if (!nativex.viewVideoIsEnabled() || slide?.data.nxVideoState !== 'loaded') {
         return this.hide();
       }
     } else {

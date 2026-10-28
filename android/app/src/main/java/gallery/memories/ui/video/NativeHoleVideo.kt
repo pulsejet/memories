@@ -85,7 +85,7 @@ class NativeHoleVideo(
         val exo = player
         if (!show) {
             setVisible(false)
-            exo?.playWhenReady = false
+            if (hasFrame) exo?.playWhenReady = false
         } else {
             // Never resume a user-paused video on clip updates.
             if (!userPaused) exo?.playWhenReady = true
@@ -196,6 +196,7 @@ class NativeHoleVideo(
     private fun stopPlayback(url: String) {
         if (!targetsCurrent(url)) return
         userPaused = true
+        hasFrame = false
         player?.playWhenReady = false
         player?.seekTo(0)
         seeking = false
@@ -326,7 +327,7 @@ class NativeHoleVideo(
         } else {
             exo.setMediaItem(mediaItem)
         }
-        exo.playWhenReady = wantShow
+        exo.playWhenReady = true
         exo.prepare()
     }
 
