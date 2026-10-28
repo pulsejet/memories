@@ -75,6 +75,12 @@ final class Vips implements IProviderV2
         private LoggerInterface $logger,
     ) {}
 
+    public function isEnabled(): bool
+    {
+        return (bool) $this->config->get('memories.vips.enabled')
+            && (bool) $this->config->get('memories.vips.path');
+    }
+
     #[\Override]
     public function getMimeType(): string
     {
@@ -84,8 +90,7 @@ final class Vips implements IProviderV2
     #[\Override]
     public function isAvailable(FileInfo $file): bool
     {
-        if (!$this->config->get('memories.vips.enabled')
-            || !$this->config->get('memories.vips.path')) {
+        if (!$this->isEnabled()) {
             return false;
         }
 
@@ -126,7 +131,7 @@ final class Vips implements IProviderV2
      * Thumbnail an image at a local path. The only vips entry point.
      * Throws on any failure; callers catch.
      */
-    public function getThumbnailFromPath(string $input, int $width, int $height): IImage
+    public function getThumbnailFromPath(string $inputPath, int $width, int $height): IImage
     {
         $vips = $this->binExt->getVipsBin();
 
@@ -136,7 +141,7 @@ final class Vips implements IProviderV2
         // JSON on stdin; OUTPUT picks the format, stdout:true streams the bytes.
         $stdin = json_encode([
             'cmd' => 'thumbnail',
-            'input' => $input,
+            'input' => $inputPath,
             'output' => 'output.jpg',
             'stdout' => true,
             'width' => max(1, $width),
@@ -173,6 +178,35 @@ final class Vips implements IProviderV2
         // StreamImage ensures that the file is written without re-encode,
         // preserving U-HDR and ICC profiles.
         return new StreamImage($out, 'image/jpeg', $width, $height);
+    }
+
+    /**
+     * Convert image via vips `convert` (full decode, no resize).
+     * Output extension picks the saver (e.g. output.jpg).
+     * Throws on failure.
+     */
+    public function convertFormat(string $inputPath, string $output, int $quality = 85): string
+    {
+        $vips = $this->binExt->getVipsBin();
+
+        $stdin = json_encode([
+            'cmd' => 'convert',
+            'input' => $inputPath,
+            'output' => $output,
+            'stdout' => true,
+            'quality' => min(100, max(10, $quality)),
+        ]);
+        if (!\is_string($stdin)) {
+            throw new \Exception('failed to encode vips request');
+        }
+
+        [$data, $stderr] = Util::execSafe2([$vips], 30000, $stdin, true, true);
+
+        if (!\is_string($data) || '' === $data) {
+            throw new \Exception(self::vipsError((string) $stderr) ?: 'empty output from vips');
+        }
+
+        return $data;
     }
 
     /** Extract the error message from vips stderr, if any. */
