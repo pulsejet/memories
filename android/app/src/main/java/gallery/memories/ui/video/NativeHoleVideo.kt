@@ -45,8 +45,6 @@ class NativeHoleVideo(
     /** Fullscreen hole view; surface below the WebView, shown through the hole. */
     private val view: PlayerView by lazy { mCtx.binding.nativeVideo }
 
-    /** TEMP: red tint riding the same rect as the video, so the hole is obvious. */
-    private val tint: View by lazy { mCtx.binding.nativeVideoTint }
     private val density: Float by lazy { mCtx.resources.displayMetrics.density }
 
     private var player: ExoPlayer? = null
@@ -444,8 +442,6 @@ class NativeHoleVideo(
         val ty = holeCy - dstH / 2f
 
         view.applyTransform(dstW / 2f, dstH / 2f, scale, tx, ty)
-        // TEMP: tint rides the exact same rect as the video.
-        tint.applyTransform(dstW / 2f, dstH / 2f, scale, tx, ty)
         if (wantShow) setVisible(true)
     }
 
@@ -461,9 +457,7 @@ class NativeHoleVideo(
     }
 
     private fun setVisible(visible: Boolean) {
-        val v = if (visible) View.VISIBLE else View.INVISIBLE
-        view.visibility = v
-        tint.visibility = v
+        view.visibility = if (visible) View.VISIBLE else View.INVISIBLE
     }
 
     private fun reapplyRect() {
@@ -488,7 +482,6 @@ class NativeHoleVideo(
 
     private fun resetViewTransform() {
         view.resetTransform()
-        tint.resetTransform()
     }
 
     private fun isRemote(uri: Uri): Boolean = uri.scheme == "http" || uri.scheme == "https"
