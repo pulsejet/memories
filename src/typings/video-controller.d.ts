@@ -82,4 +82,28 @@ declare module '@typings' {
   // Compile-time check: the DOM player must stay assignable to VideoController.
   type _AssertTrue<T extends true> = T;
   type _HtmlVideoIsVideoController = _AssertTrue<HTMLVideoElement extends VideoController ? true : false>;
+
+  /** Snapshot of the native hole video player. */
+  export interface NativeXVideoState {
+    url: string | null; // current
+
+    paused: boolean;
+    playing: boolean;
+    ended: boolean;
+    seeking: boolean; // seek in-flight
+
+    currentTime: number;
+    duration: number | null;
+
+    volume: number;
+    muted: boolean;
+    playbackRate: number;
+
+    readyState: HTMLMediaElement['readyState'];
+    videoWidth: number | null;
+    videoHeight: number | null;
+    bufferedEnd: number;
+
+    error: string | null; // last error
+  }
 }

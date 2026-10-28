@@ -1,10 +1,13 @@
 package gallery.memories.ui.video
 
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.webkit.CookieManager
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
@@ -18,6 +21,7 @@ import androidx.media3.ui.PlayerView
 import gallery.memories.MainActivity
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.TlsTrust
+import org.json.JSONObject
 
 @UnstableApi
 /**
@@ -56,6 +60,26 @@ class NativeHoleVideo(
     private var wantShow = false
     private var currentUrl: String? = null
 
+    // Web-driven control state; applied to the player when present.
+    private var userPaused = true
+    private var volume = 1f
+    private var muted = false
+    private var rate = 1f
+    private var repeatLoop = true
+    private var seeking = false
+    private var lastError: String? = null
+
+    // ~4Hz position ticker while playing, so the web progress keeps moving.
+    private val stateHandler = Handler(Looper.getMainLooper())
+    private var ticking = false
+    private val timeTick = Runnable {
+        ticking = false
+        if (player?.isPlaying == true) {
+            emitVideoState()
+            startTicker()
+        }
+    }
+
     fun show(show: Boolean) {
         wantShow = show
         val exo = player
@@ -63,7 +87,8 @@ class NativeHoleVideo(
             setVisible(false)
             exo?.playWhenReady = false
         } else {
-            exo?.playWhenReady = true
+            // Never resume a user-paused video on clip updates.
+            if (!userPaused) exo?.playWhenReady = true
             // Visible immediately; the first frame paints over black.
             setVisible(true)
             reapplyRect()
@@ -104,10 +129,11 @@ class NativeHoleVideo(
     }
 
     fun resume() {
-        if (wantShow) player?.playWhenReady = true
+        if (wantShow && !userPaused) player?.playWhenReady = true
     }
 
     fun release() {
+        stopTicker()
         runCatching { player?.release() }
         player = null
         currentUrl = null
@@ -115,22 +141,146 @@ class NativeHoleVideo(
         videoW = 0
         videoH = 0
         wantShow = false
+        userPaused = true
+        seeking = false
+        lastError = null
         lastRect = null
         resetViewTransform()
         runCatching { setVisible(false) }
+    }
+
+    /** Runs one JSON control command from the web player. Runs on the UI thread. */
+    fun handleCommand(json: String) {
+        try {
+            val cmd = JSONObject(json)
+            when (cmd.optString("action")) {
+                "play" -> playCommand(cmd.optString("url"), cmd.optBoolean("loop", true))
+                "pause" -> pauseVideo()
+                "seek" -> seekTo(cmd.optDouble("position", 0.0))
+                "volume" -> setVolume(cmd.optDouble("volume", 1.0).toFloat())
+                "mute" -> setMuted(cmd.optBoolean("muted", false))
+                "rate" -> setPlaybackRate(cmd.optDouble("rate", 1.0).toFloat())
+                else -> Log.w(TAG, "unknown video command: $json")
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "video command failed: $json", e)
+        }
+    }
+
+    /** Play, loading the URL first when it changed. Runs on the UI thread. */
+    private fun playCommand(url: String, loop: Boolean) {
+        lastError = null
+        userPaused = false
+        repeatLoop = loop
+        if (url.isNotEmpty() && url != currentUrl) {
+            setVideoUrlLocked(url, ++lastSeq)
+        } else {
+            ensurePlayer()
+            player?.repeatMode = if (loop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+            player?.playWhenReady = true
+        }
+        emitVideoState()
+    }
+
+    /** Pause from the web controls. Runs on the UI thread. */
+    private fun pauseVideo() {
+        userPaused = true
+        player?.playWhenReady = false
+        emitVideoState()
+    }
+
+    /** Seek to seconds. Runs on the UI thread. */
+    private fun seekTo(positionSec: Double) {
+        val exo = player ?: return
+        if (!positionSec.isFinite()) return
+        seeking = true
+        exo.seekTo((positionSec.coerceAtLeast(0.0) * 1000).toLong())
+        emitVideoState()
+    }
+
+    /** Set volume 0..1. Runs on the UI thread. */
+    private fun setVolume(v: Float) {
+        if (!v.isFinite()) return
+        volume = v.coerceIn(0f, 1f)
+        applyVolume()
+        emitVideoState()
+    }
+
+    /** Mute switch. Runs on the UI thread. */
+    private fun setMuted(m: Boolean) {
+        muted = m
+        applyVolume()
+        emitVideoState()
+    }
+
+    /** Playback speed. Runs on the UI thread. */
+    private fun setPlaybackRate(r: Float) {
+        if (!r.isFinite() || r <= 0) return
+        rate = r
+        player?.setPlaybackParameters(PlaybackParameters(r))
+        emitVideoState()
+    }
+
+    private fun applyVolume() {
+        player?.volume = if (muted) 0f else volume
+    }
+
+    private fun startTicker() {
+        if (!ticking) {
+            ticking = true
+            stateHandler.postDelayed(timeTick, 250)
+        }
+    }
+
+    private fun stopTicker() {
+        stateHandler.removeCallbacks(timeTick)
+        ticking = false
+    }
+
+    /** Pushes a full player snapshot to the web event bus. */
+    private fun emitVideoState() {
+        val exo = player
+        val durationMs = exo?.duration?.takeIf { it > 0 }
+        val state = JSONObject()
+            .put("url", currentUrl ?: JSONObject.NULL)
+            .put("paused", userPaused || exo?.playbackState == Player.STATE_ENDED)
+            .put("playing", exo?.isPlaying == true)
+            .put("ended", exo?.playbackState == Player.STATE_ENDED)
+            .put("seeking", seeking)
+            .put("currentTime", (exo?.currentPosition ?: 0) / 1000.0)
+            .put("duration", durationMs?.let { it / 1000.0 } ?: JSONObject.NULL)
+            .put("volume", volume)
+            .put("muted", muted)
+            .put("playbackRate", exo?.playbackParameters?.speed ?: rate)
+            .put("readyState", readyState(exo))
+            .put("videoWidth", videoW.takeIf { it > 0 } ?: JSONObject.NULL)
+            .put("videoHeight", videoH.takeIf { it > 0 } ?: JSONObject.NULL)
+            .put("bufferedEnd", (exo?.bufferedPosition ?: 0) / 1000.0)
+            .put("error", lastError ?: JSONObject.NULL)
+        mCtx.eventBus.busEmit("nativex:video:state", state)
+    }
+
+    private fun readyState(exo: Player?): Int = when (exo?.playbackState) {
+        Player.STATE_READY -> if (exo.isPlaying) 4 else 3
+        Player.STATE_BUFFERING -> if (exo.duration > 0) 2 else 1
+        Player.STATE_ENDED -> 4
+        else -> 0
     }
 
     private fun setVideoUrlLocked(url: String, seq: Long) {
         if (seq < lastSeq) return
         lastSeq = seq
         if (url == currentUrl && player != null) {
-            if (wantShow) player?.playWhenReady = true
+            if (wantShow && !userPaused) player?.playWhenReady = true
             return
         }
         currentUrl = url
         hasFrame = false
         videoW = 0
         videoH = 0
+        userPaused = false
+        seeking = false
+        lastError = null
         setVisible(false)
         resetViewTransform()
         val exo = ensurePlayer()
@@ -163,24 +313,56 @@ class NativeHoleVideo(
             view.useController = false
             view.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT)
             view.player = exo
-            exo.repeatMode = Player.REPEAT_MODE_ONE
+            exo.volume = if (muted) 0f else volume
+            exo.setPlaybackParameters(PlaybackParameters(rate))
+            exo.repeatMode = if (repeatLoop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
             exo.addListener(object : Player.Listener {
                 override fun onVideoSizeChanged(videoSize: VideoSize) {
                     if (videoSize.width > 0 && videoSize.height > 0) {
                         videoW = videoSize.width
                         videoH = videoSize.height
                         reapplyRect()
+                        emitVideoState()
                     }
                 }
 
                 override fun onRenderedFirstFrame() {
                     hasFrame = true
                     reapplyRect()
+                    emitVideoState()
+                }
+
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_ENDED) userPaused = true
+                    emitVideoState()
+                }
+
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    if (isPlaying) startTicker() else stopTicker()
+                    emitVideoState()
+                }
+
+                override fun onPositionDiscontinuity(
+                    oldPosition: Player.PositionInfo,
+                    newPosition: Player.PositionInfo,
+                    reason: Int,
+                ) {
+                    if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                        seeking = false
+                        emitVideoState()
+                    }
+                }
+
+                override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
+                    rate = playbackParameters.speed
+                    emitVideoState()
                 }
 
                 override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                     Log.w(TAG, "Hole video error", error)
+                    lastError = error.message
                     setVisible(false)
+                    emitVideoState()
                 }
             })
             player = exo

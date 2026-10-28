@@ -152,6 +152,13 @@ class NativeX(private val mCtx: MainActivity) {
         mCtx.runOnUiThread { container.holeVideo.setRect(x, y, w, h) }
     }
 
+    /** Forwards one hole video control command; demuxed in [NativeHoleVideo]. */
+    @JavascriptInterface
+    fun nativeVideoCommand(json: String?) {
+        if (json == null) return
+        mCtx.runOnUiThread { container.holeVideo.handleCommand(json) }
+    }
+
     @JavascriptInterface
     fun vibrate(duration: Long) {
         if (duration <= 0) return
