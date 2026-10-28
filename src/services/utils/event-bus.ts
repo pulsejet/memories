@@ -1,7 +1,7 @@
 import { emit, subscribe, unsubscribe } from '@nextcloud/event-bus';
 import { onBeforeUnmount, onMounted } from 'vue';
 import type { FragmentName, Fragment } from '@services/route-fragment';
-import type { IPhoto } from '@typings';
+import type { IPhoto, NativeXVideoState } from '@typings';
 
 export type BusEvent = {
   /** Open/close the navigation drawer */
@@ -44,6 +44,9 @@ export type BusEvent = {
 
   /** NativeX database was updated */
   'nativex:db:updated': null;
+
+  /** Native hole video player snapshot */
+  'nativex:video:state': NativeXVideoState;
 } & {
   /** A fragment was removed from the route */
   [key in `memories:fragment:pop:${FragmentName}`]: Fragment;
