@@ -6,11 +6,12 @@ import { nxAsync } from './api';
  */
 export type NativeVideoCommand =
   | { action: 'play'; url: string; loop: boolean }
-  | { action: 'pause' }
-  | { action: 'seek'; position: number }
-  | { action: 'volume'; volume: number }
-  | { action: 'mute'; muted: boolean }
-  | { action: 'rate'; rate: number };
+  | { action: 'stop'; url: string }
+  | { action: 'pause'; url: string }
+  | { action: 'seek'; url: string; position: number }
+  | { action: 'volume'; url: string; volume: number }
+  | { action: 'mute'; url: string; muted: boolean }
+  | { action: 'rate'; url: string; rate: number };
 
 /** Send one control command to the native hole video player. */
 export function videoCommand(cmd: NativeVideoCommand): void {
