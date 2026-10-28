@@ -91,11 +91,18 @@ function timeRanges(): TimeRanges {
 }
 
 function setVolumeCommand(v: number) {
-  if (Number.isFinite(v)) videoCommand({ action: 'volume', volume: v });
+  if (!props.src || !Number.isFinite(v)) return;
+  videoCommand({ action: 'volume', url: props.src, volume: v });
 }
 
 function setRateCommand(v: number) {
-  if (Number.isFinite(v)) videoCommand({ action: 'rate', rate: v });
+  if (!props.src || !Number.isFinite(v)) return;
+  videoCommand({ action: 'rate', url: props.src, rate: v });
+}
+
+function setMutedCommand(v: boolean) {
+  if (!props.src) return;
+  videoCommand({ action: 'mute', url: props.src, muted: !!v });
 }
 
 /** Expose the VideoController surface on the custom element itself. */
@@ -109,7 +116,7 @@ function installControllerApi() {
     volume: { get: () => state.volume, set: setVolumeCommand, configurable: true },
     muted: {
       get: () => state.muted,
-      set: (v: boolean) => videoCommand({ action: 'mute', muted: !!v }),
+      set: setMutedCommand,
       configurable: true,
     },
     playbackRate: { get: () => state.rate, set: setRateCommand, configurable: true },
@@ -132,11 +139,15 @@ async function play(): Promise<void> {
 }
 
 function pause(): void {
-  videoCommand({ action: 'pause' });
+  if (!props.src) return;
+  videoCommand({ action: 'pause', url: props.src });
 }
 
-/** Reset to the initial state; the native side is already paused by destroyPlayer. */
+/** Reset to the initial state and rewind native. */
 function load(): void {
+  if (props.src) {
+    videoCommand({ action: 'stop', url: props.src });
+  }
   Object.assign(state, {
     paused: true,
     playing: false,
@@ -152,10 +163,10 @@ function load(): void {
 }
 
 function seekTo(value: number) {
-  if (!Number.isFinite(value)) return;
+  if (!props.src || !Number.isFinite(value)) return;
   state.seeking = true;
   emitDom('seeking');
-  videoCommand({ action: 'seek', position: Math.max(0, value) });
+  videoCommand({ action: 'seek', url: props.src, position: Math.max(0, value) });
 }
 
 defineExpose({ play, pause, load });

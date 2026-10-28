@@ -153,13 +153,15 @@ class NativeHoleVideo(
     fun handleCommand(json: String) {
         try {
             val cmd = JSONObject(json)
+            val url = cmd.optString("url")
             when (cmd.optString("action")) {
-                "play" -> playCommand(cmd.optString("url"), cmd.optBoolean("loop", true))
-                "pause" -> pauseVideo()
-                "seek" -> seekTo(cmd.optDouble("position", 0.0))
-                "volume" -> setVolume(cmd.optDouble("volume", 1.0).toFloat())
-                "mute" -> setMuted(cmd.optBoolean("muted", false))
-                "rate" -> setPlaybackRate(cmd.optDouble("rate", 1.0).toFloat())
+                "play" -> playCommand(url, cmd.optBoolean("loop", true))
+                "stop" -> stopPlayback(url)
+                "pause" -> pauseVideo(url)
+                "seek" -> seekTo(url, cmd.optDouble("position", 0.0))
+                "volume" -> setVolume(url, cmd.optDouble("volume", 1.0).toFloat())
+                "mute" -> setMuted(url, cmd.optBoolean("muted", false))
+                "rate" -> setPlaybackRate(url, cmd.optDouble("rate", 1.0).toFloat())
                 else -> Log.w(TAG, "unknown video command: $json")
             }
         } catch (e: Exception) {
@@ -183,14 +185,32 @@ class NativeHoleVideo(
     }
 
     /** Pause from the web controls. Runs on the UI thread. */
-    private fun pauseVideo() {
+    private fun pauseVideo(url: String) {
+        if (!targetsCurrent(url)) return
         userPaused = true
         player?.playWhenReady = false
         emitVideoState()
     }
 
+    /** Stop from the web controls: pause and rewind. Runs on the UI thread. */
+    private fun stopPlayback(url: String) {
+        if (!targetsCurrent(url)) return
+        userPaused = true
+        player?.playWhenReady = false
+        player?.seekTo(0)
+        seeking = false
+        emitVideoState()
+    }
+
+    /** True when the command targets the loaded video (or nothing is loaded). */
+    private fun targetsCurrent(url: String): Boolean {
+        val current = currentUrl
+        return current == null || url.isEmpty() || url == current
+    }
+
     /** Seek to seconds. Runs on the UI thread. */
-    private fun seekTo(positionSec: Double) {
+    private fun seekTo(url: String, positionSec: Double) {
+        if (!targetsCurrent(url)) return
         val exo = player ?: return
         if (!positionSec.isFinite()) return
         seeking = true
@@ -199,7 +219,8 @@ class NativeHoleVideo(
     }
 
     /** Set volume 0..1. Runs on the UI thread. */
-    private fun setVolume(v: Float) {
+    private fun setVolume(url: String, v: Float) {
+        if (!targetsCurrent(url)) return
         if (!v.isFinite()) return
         volume = v.coerceIn(0f, 1f)
         applyVolume()
@@ -207,14 +228,16 @@ class NativeHoleVideo(
     }
 
     /** Mute switch. Runs on the UI thread. */
-    private fun setMuted(m: Boolean) {
+    private fun setMuted(url: String, m: Boolean) {
+        if (!targetsCurrent(url)) return
         muted = m
         applyVolume()
         emitVideoState()
     }
 
     /** Playback speed. Runs on the UI thread. */
-    private fun setPlaybackRate(r: Float) {
+    private fun setPlaybackRate(url: String, r: Float) {
+        if (!targetsCurrent(url)) return
         if (!r.isFinite() || r <= 0) return
         rate = r
         player?.setPlaybackParameters(PlaybackParameters(r))
