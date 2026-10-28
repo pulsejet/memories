@@ -157,10 +157,22 @@ export default class ImageContentSetup {
 
   public slideDeactivate(slide: PsSlide) {
     slide.data.nxImageState = undefined;
+
+    // The native view is actually destroyed, so we'll need to load
+    // full res image again if we come back to this slide.
+    if (slide.data.highSrcCondRestore) {
+      slide.data.highSrcCond = slide.data.highSrcCondRestore;
+      slide.data.highSrcCondRestore = undefined;
+    }
   }
 
   private async loadFullImage(slide: PsSlide) {
     if (!slide.data.highSrc.length || slide.data.highSrcCond === 'never') return;
+
+    // Reset view on deactivate on native (no preservation).
+    if (nativex.viewImageIsEnabled()) {
+      slide.data.highSrcCondRestore = slide.data.highSrcCond;
+    }
 
     // Don't load again
     slide.data.highSrcCond = 'never';
@@ -178,6 +190,7 @@ export default class ImageContentSetup {
           if (await this.nxViewImageUpload(slide, src, undefined)) {
             break; // success
           }
+          continue;
         }
 
         // Create HTML image and pre-decode.

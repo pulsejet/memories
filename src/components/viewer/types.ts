@@ -17,6 +17,8 @@ type PsSlideData = _SlideData & {
   highSrc: string[];
   /** The condition for loading the high resolution image. */
   highSrcCond: IConfig['high_res_cond'];
+  /** Initial highSrcCond value for restore (nativex). */
+  highSrcCondRestore?: IConfig['high_res_cond'];
   /** The type of content. */
   type: 'image' | 'video';
   /** Native image data state. */
