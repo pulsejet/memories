@@ -9,7 +9,7 @@ import * as nativex from '@native';
 import { API } from '@services/API';
 
 import type { ViewerControlsCE, ViewerVideoNativeHoleCE } from '@components/custom-elements';
-import type { VideoControllerElement } from '@typings';
+import type { VideoController, VideoControllerElement } from '@typings';
 import type PhotoSwipe from 'photoswipe';
 import type { PsContent, PsEvent, PsSlide } from './types';
 import type Hls from 'hls.js';
@@ -19,6 +19,9 @@ type VideoSource = {
   src: string;
   type: string;
 };
+
+/** Native hole custom element plus the VideoController methods it exposes. */
+type NativeHolePlayer = ViewerVideoNativeHoleCE & Pick<VideoController, 'play' | 'pause' | 'load'>;
 
 type VideoContent = PsContent & {
   videoPlayer: VideoControllerElement | null;
@@ -297,7 +300,7 @@ class VideoContentSetup {
     return element as any;
   }
 
-  /** Attach the preferred source: element srcs for the native hole, HLS/direct for web. */
+  /** Attach the preferred source: element src for the native hole, HLS/direct for web. */
   private async attachPlayerSource(content: VideoContent, player: VideoControllerElement, signal: AbortSignal) {
     // Late mount: media loads since the slide is active.
     const { src, videoIsHls } = this.getPreferredSrc(content);
@@ -310,11 +313,11 @@ class VideoContentSetup {
         this.attachDirectSource(player, src);
       }
     } else if (this.isNativeHolePlayer(player)) {
-      player.srcs = [nativex.addOrigin(src.src)];
+      player.src = nativex.addOrigin(src.src);
     }
   }
 
-  private isNativeHolePlayer(player: HTMLElement): player is ViewerVideoNativeHoleCE {
+  private isNativeHolePlayer(player: HTMLElement): player is NativeHolePlayer {
     return player.tagName === 'VIEWER-VIDEO-NATIVE-HOLE';
   }
 
@@ -391,9 +394,16 @@ class VideoContentSetup {
 
     const player = content.videoPlayer;
     const signal = content.videoAbort?.signal;
-    if (!signal || !(player instanceof HTMLVideoElement)) return;
+    if (!signal || !player) return;
     content.videoFailedOver = true;
+    if (player instanceof HTMLVideoElement) {
+      await this.tryFailoverWeb(content, player, signal);
+    } else if (this.isNativeHolePlayer(player)) {
+      this.tryFailoverNativeHole(content, player);
+    }
+  }
 
+  private async tryFailoverWeb(content: VideoContent, player: HTMLVideoElement, signal: AbortSignal) {
     const wasHLS = content.videoIsHls;
     content.videoIsHls = !wasHLS;
 
@@ -417,6 +427,20 @@ class VideoContentSetup {
     if (wasHLS) {
       utils.runCatching(() => player.load());
     }
+    utils.runCatching(() => player.play());
+  }
+
+  private tryFailoverNativeHole(content: VideoContent, player: NativeHolePlayer) {
+    const wasHLS = content.videoIsHls;
+    content.videoIsHls = !wasHLS;
+
+    const src = wasHLS ? this.getDirectSrc(content).src : this.getHLSsrc(content).src;
+    if (wasHLS) {
+      console.warn('PsVideo: Native hole HLS stream failed, falling back to direct');
+    } else {
+      console.warn('PsVideo: Native hole direct stream could not be opened, trying HLS');
+    }
+    player.src = nativex.addOrigin(src);
     utils.runCatching(() => player.play());
   }
 

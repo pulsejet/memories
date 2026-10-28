@@ -18,7 +18,7 @@ import type { IPhoto } from '@typings';
 
 const props = withDefaults(
   defineProps<{
-    srcs?: string[] | null;
+    src?: string | null;
     photo?: IPhoto | null;
     preload?: string;
     autoplay?: boolean;
@@ -75,10 +75,6 @@ const state = reactive({
 
 let host: HTMLElement | null = null;
 
-function currentUrl(): string | null {
-  return props.srcs?.[0] ?? null;
-}
-
 function emitDom(type: string) {
   host?.dispatchEvent(new Event(type));
 }
@@ -129,7 +125,7 @@ function installControllerApi() {
 // ---------------------------------------------------------------------------
 
 async function play(): Promise<void> {
-  const src = currentUrl();
+  const src = props.src;
   if (!src) throw new Error('ViewerVideoNativeHole: missing src');
   state.lastError = null;
   videoCommand({ action: 'play', url: src, loop: props.loop });
@@ -236,7 +232,7 @@ function applyError(s: NativeXVideoState) {
 }
 
 function onNativeState(s: NativeXVideoState) {
-  if (!s || s.url !== currentUrl()) return;
+  if (!s || s.url !== props.src) return;
   applyMetadata(s);
   applyAudio(s);
   applyProgress(s);
