@@ -110,6 +110,7 @@ function installControllerApi() {
   host = frameEl.value?.closest?.('viewer-video-native-hole') as HTMLElement | null;
   if (!host) return;
   Object.defineProperties(host, {
+    disallowFullscreen: { value: true, configurable: true },
     paused: { get: () => state.paused, configurable: true },
     currentTime: { get: () => state.time, set: seekTo, configurable: true },
     duration: { get: () => state.duration, configurable: true },
