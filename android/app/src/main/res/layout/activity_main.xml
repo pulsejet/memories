@@ -5,6 +5,7 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/coordinator"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -25,6 +26,27 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="invisible"
+        />
+
+        <!-- Native video shown through the webview hole. -->
+        <!-- Invisible (not gone) to keep the surface alive. -->
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/nativeVideo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+            app:surface_type="surface_view"
+            app:use_controller="false"
+        />
+
+        <!-- TEMP: transparent red over the hole video, same rect, so the
+            hole is visually obvious during the experiment. -->
+        <View
+            android:id="@+id/nativeVideoTint"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+            android:background="#1AFF0000"
         />
 
         <WebView

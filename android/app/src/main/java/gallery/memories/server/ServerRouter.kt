@@ -7,8 +7,10 @@ import gallery.memories.data.remote.assets.AssetSyncCoordinator
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.server.controllers.BridgeController
 import gallery.memories.server.controllers.ViewImageController
+import gallery.memories.server.controllers.ViewVideoController
 import gallery.memories.server.controllers.ProxyController
 import gallery.memories.ui.image.NativeHoleImage
+import gallery.memories.ui.video.NativeHoleVideo
 import gallery.memories.server.controllers.ShellController
 import gallery.memories.server.controllers.StaticController
 import gallery.memories.server.controllers.UpstreamNetworkException
@@ -38,6 +40,7 @@ class ServerRouter(
     private val proxy: ProxyController,
     private val dataSource: MediaStoreDataSource,
     private val holeImage: NativeHoleImage,
+    private val holeVideo: NativeHoleVideo,
     private val configProvider: () -> ServerConfig?,
 ) {
     companion object {
@@ -68,6 +71,10 @@ class ServerRouter(
             }
             if (ViewImageController.isViewImageLocal(rawPath)) {
                 ViewImageController.serveLocalImage(call, holeImage)
+                return
+            }
+            if (ViewVideoController.isViewVideo(rawPath)) {
+                ViewVideoController.serveVideo(call, holeVideo)
                 return
             }
             if (BridgeController.isBridge(rawPath)) {

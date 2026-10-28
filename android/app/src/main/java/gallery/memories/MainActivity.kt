@@ -101,6 +101,7 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         binding.webview.onPause()
         binding.webview.pauseTimers()
+        runCatching { nativex.container.holeVideo.pause() }
     }
 
     public override fun onResume() {
@@ -109,6 +110,7 @@ class MainActivity : AppCompatActivity() {
         binding.webview.resumeTimers()
         binding.webview.invalidate()
         eventBus.onResumeRefresh()
+        runCatching { nativex.container.holeVideo.resume() }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
