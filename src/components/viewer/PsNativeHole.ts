@@ -11,7 +11,8 @@ export default class PsNativeHole {
   private lastClip: string | null = null;
   private lastNative: string | null = null;
   private lastType: 'image' | 'video' | null = null;
-  private holeElements: HTMLElement[] = [];
+  private bgElement: HTMLElement | null = null;
+  private contentElement: HTMLElement | null = null;
   private holderElement: HTMLElement | null = null;
 
   constructor(private lightbox: PhotoSwipe) {
@@ -48,15 +49,15 @@ export default class PsNativeHole {
     // Get the elements to put a hole in after fully opened.
     // Do not use tricks like CSS vars to prevent style invalidation.
     lightbox.on('openingAnimationEnd', () => {
-      this.holeElements = Array.from(document.querySelectorAll('.pswp__bg, body > #content'));
+      this.bgElement = this.lightbox.bg ?? null;
+      this.contentElement = document.querySelector<HTMLElement>('body > #content');
       this.setClip(this.lastClip ?? 'none');
     });
   }
 
   private setClip(clip: string) {
-    for (const el of this.holeElements) {
-      el.style.clipPath = clip;
-    }
+    if (this.bgElement) this.bgElement.style.clipPath = clip;
+    if (this.contentElement) this.contentElement.style.clipPath = clip;
   }
 
   private reset() {
