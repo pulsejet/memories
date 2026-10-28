@@ -1,4 +1,5 @@
 import * as nativex from '@native';
+import { windowDims } from '@services/viewport';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 
 import type PhotoSwipe from 'photoswipe';
@@ -132,8 +133,8 @@ export default class PsNativeHole {
       return this.hide();
     }
 
-    const W = window.innerWidth;
-    const H = window.innerHeight;
+    const W = windowDims.width;
+    const H = windowDims.height;
     if (!W || !H) return this.hide();
 
     const x1 = PsNativeHole.snapPx(box.left);
