@@ -29,6 +29,7 @@ use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
+use OCA\Memories\Preview\Vips;
 use OCA\Memories\Service;
 use OCA\Memories\Service\Index;
 use OCA\Memories\Settings\SystemConfig;
@@ -62,6 +63,7 @@ final class ImageController extends ApiController
         protected SystemConfig $systemConfig,
         protected Util $util,
         protected Index $index,
+        protected Vips $vips,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -420,13 +422,17 @@ final class ImageController extends ApiController
 
             // Convert image to JPEG (reads from local path to avoid buffering into PHP)
             $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-            [$blob, $mimetype] = $this->getImageJPEG($path, $mimetype);
+            [$blob, $mimetype, $provider] = $this->getImageJPEG($path, $mimetype);
 
             // Return the image
             $response = new Http\DataDownloadResponse($blob, $file->getName().'.jpg', $mimetype);
             $response->setETag($etag);
             $response->setLastModified((new \DateTime())->setTimestamp($file->getMTime()));
             $response->cacheFor(3600 * 24, false, false);
+
+            if ($this->systemConfig->get('debug')) {
+                $response->addHeader('X-Preview-Provider', $provider);
+            }
 
             return $response;
         });
@@ -565,13 +571,20 @@ final class ImageController extends ApiController
      * @param string $path     Local filesystem path of the image
      * @param string $mimetype Mimetype of image data
      *
-     * @return string[] [blob, mimetype]
+     * @return string[] [blob, mimetype, provider]
      *
-     * @psalm-return list{string, string}
+     * @psalm-return list{string, string, string}
      */
     private function getImageJPEG(string $path, $mimetype): array
     {
-        // TODO: Use imaginary if available (once HEIC isn't broken)
+        // Prefer vips convert when available (faster, no imagick needed)
+        if ($this->vips->isEnabled()) {
+            try {
+                return [$this->vips->convertFormat($path, 'output.jpg', 85), 'image/jpeg', 'vips'];
+            } catch (\Throwable) {
+                // fall through to imagick
+            }
+        }
 
         // Read from the local path to avoid buffering the file into PHP
         $image = self::getImagick($path);
@@ -589,7 +602,7 @@ final class ImageController extends ApiController
             $image->clear();
         }
 
-        return [$blob, $mimetype];
+        return [$blob, $mimetype, 'imagick'];
     }
 
     /**
