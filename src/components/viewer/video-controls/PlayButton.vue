@@ -33,7 +33,15 @@ function onVideoPlay() {
   isPlaying.value = true;
 }
 
+function onVideoPlaying() {
+  isPlaying.value = true;
+}
+
 function onVideoPause() {
+  isPlaying.value = false;
+}
+
+function onVideoEnded() {
   isPlaying.value = false;
 }
 
@@ -54,12 +62,16 @@ function attachVideo() {
   if (!props.video) return;
   isPlaying.value = !props.video.paused;
   props.video.addEventListener('play', onVideoPlay);
+  props.video.addEventListener('playing', onVideoPlaying);
   props.video.addEventListener('pause', onVideoPause);
+  props.video.addEventListener('ended', onVideoEnded);
 }
 
 function detachVideo(el: VideoController | null | undefined = props.video) {
   el?.removeEventListener('play', onVideoPlay);
+  el?.removeEventListener('playing', onVideoPlaying);
   el?.removeEventListener('pause', onVideoPause);
+  el?.removeEventListener('ended', onVideoEnded);
   isPlaying.value = false;
 }
 
