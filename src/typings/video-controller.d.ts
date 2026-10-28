@@ -39,6 +39,9 @@ declare module '@typings' {
     /** Element traversal used to find the containing .video-container. */
     closest?: Element['closest'];
 
+    /** Opt-out flag for renderers that cannot go fullscreen (e.g. native hole). */
+    disallowFullscreen?: boolean;
+
     /** Safari legacy fullscreen. */
     webkitEnterFullscreen?: () => void;
     webkitSupportsFullscreen?: boolean;

@@ -1,5 +1,6 @@
 <template>
   <NcButton
+    v-if="!video?.disallowFullscreen"
     variant="tertiary-no-background"
     :aria-label="isFullscreen ? t('memories', 'Exit fullscreen') : t('memories', 'Fullscreen')"
     :title="isFullscreen ? t('memories', 'Exit fullscreen') : t('memories', 'Fullscreen')"
