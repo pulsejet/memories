@@ -7,5 +7,6 @@ export * from './permissions';
 export * from './share';
 export * from './shell';
 export * from './video';
+export * from './video-hole';
 export * from './view-image';
 export * from './view-video';

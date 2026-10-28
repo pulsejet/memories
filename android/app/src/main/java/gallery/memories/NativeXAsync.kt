@@ -137,6 +137,7 @@ class NativeXAsync(private val mCtx: MainActivity, private val nativex: NativeX)
                 args.optDouble(2, 0.0).toFloat(),
                 args.optDouble(3, 0.0).toFloat(),
             )
+            "nativeVideoCommand" -> nativex.nativeVideoCommand(args.optString(0))
             else -> Log.w(TAG, "nativex_async: unknown method: $method")
         }
     }

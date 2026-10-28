@@ -297,6 +297,12 @@ export type NativeX = {
    */
   setHasRemote: (auids: string, buids: string, value: boolean) => void;
 
+  /**
+   * Control the native hole video player (play/pause/seek/volume/mute/rate).
+   * @param json JSON-encoded NativeVideoCommand
+   */
+  nativeVideoCommand: (json: string) => void;
+
   /** Show/hide the native image below the WebView. */
   showNativeImage?: (show: boolean) => void;
 
@@ -351,6 +357,7 @@ export type NativeXAsync = Pick<
   | 'setNativeImageRect'
   | 'showNativeVideo'
   | 'setNativeVideoRect'
+  | 'nativeVideoCommand'
   | 'setHdrColorMode'
 >;
 
