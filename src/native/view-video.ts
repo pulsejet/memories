@@ -23,3 +23,15 @@ export async function viewVideoUrl(url: string): Promise<void> {
     throw new Error(`native hole video failed: ${res.status} ${text}`);
   }
 }
+
+// ExoPlayer codecs, queried once. Falls back to h264 when falsy.
+let cachedCodecs: string[] | undefined;
+
+/** Codecs to request from go-vod for the native hole player. */
+export function getNativePlayableCodecsSync(): string[] {
+  try {
+    return (cachedCodecs ??= JSON.parse(nativex?.getPlayableVideoCodecs?.() ?? 'null') || ['h264']);
+  } catch {
+    return (cachedCodecs ??= ['h264']);
+  }
+}
