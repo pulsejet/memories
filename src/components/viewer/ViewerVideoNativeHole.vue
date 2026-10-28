@@ -7,6 +7,7 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 
 import { bus } from '@services/utils/event-bus';
+import { windowDims } from '@services/viewport';
 import { videoCommand } from '@native/video-hole';
 
 import type { NativeXVideoState } from '@typings';
@@ -37,8 +38,8 @@ const frameBox = computed((): readonly [number, number] | null => {
   const photo = props.photo;
   const vw = photo?.w && photo?.h ? photo.w : 16;
   const vh = photo?.w && photo?.h ? photo.h : 9;
-  const cw = window.innerWidth;
-  const ch = window.innerHeight;
+  const cw = windowDims.width;
+  const ch = windowDims.height;
   if (!cw || !ch) return null;
   const s = Math.min(cw / vw, ch / vh);
   if (!Number.isFinite(s) || s <= 0) return null;
