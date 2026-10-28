@@ -237,6 +237,7 @@ class VideoContentSetup {
         if (signal.aborted) return;
         content.videoHasPlayed = true;
         content.data.nxVideoState = 'loaded';
+        player.dataset.started = 'true';
         this.lightbox.dispatch('initialZoomPan');
         this.getWakeLock();
       },
