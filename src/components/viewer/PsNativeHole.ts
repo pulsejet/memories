@@ -136,10 +136,11 @@ export default class PsNativeHole {
     const H = window.innerHeight;
     if (!W || !H) return this.hide();
 
-    const x1 = Math.round(box.left);
-    const y1 = Math.round(box.top);
-    const x2 = Math.round(box.right);
-    const y2 = Math.round(box.bottom);
+    const x1 = PsNativeHole.snapPx(box.left);
+    const y1 = PsNativeHole.snapPx(box.top);
+    const x2 = PsNativeHole.snapPx(box.right);
+    const y2 = PsNativeHole.snapPx(box.bottom);
+    if (x2 <= x1 || y2 <= y1) return this.hide();
 
     const cx1 = Math.max(0, Math.min(W, x1));
     const cy1 = Math.max(0, Math.min(H, y1));
@@ -186,5 +187,16 @@ export default class PsNativeHole {
       cancelAnimationFrame(this.hideRaf);
       this.hideRaf = 0;
     }
+  }
+
+  /**
+   * Snap a CSS px value to the device pixel grid.
+   * Integer CSS px still lands between physical pixels on
+   * fractional DPR, producing an AA fringe in the hole.
+   */
+  private static snapPx(v: number) {
+    const dpr = window.devicePixelRatio || 1;
+    const devicePx = Math.round(v * dpr);
+    return Math.round(devicePx * (1000 / dpr)) / 1000;
   }
 }
