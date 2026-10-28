@@ -1,5 +1,5 @@
 import type Hls from 'hls.js';
-import type { QualityOption } from '@typings';
+import type { QualityOption, VideoController } from '@typings';
 
 /** Internal quality hooks stored directly on the video element. */
 interface QualityHooks extends HTMLVideoElement {
@@ -110,7 +110,7 @@ export function attachVideoQualityHlsJs(video: HTMLVideoElement | null, hls: Hls
   video.dispatchEvent(new CustomEvent('quality-list'));
 }
 
-export function detachVideoQuality(video: HTMLVideoElement | null | undefined) {
+export function detachVideoQuality(video: VideoController | null | undefined) {
   if (!video) return;
   const hooks = video as QualityHooks;
 

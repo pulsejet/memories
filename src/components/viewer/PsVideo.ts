@@ -8,7 +8,8 @@ import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 import { API } from '@services/API';
 
-import type { ViewerControlsCE } from '@components/custom-elements';
+import type { ViewerControlsCE, ViewerVideoNativeHoleCE } from '@components/custom-elements';
+import type { VideoControllerElement } from '@typings';
 import type PhotoSwipe from 'photoswipe';
 import type { PsContent, PsEvent, PsSlide } from './types';
 import type Hls from 'hls.js';
@@ -20,15 +21,15 @@ type VideoSource = {
 };
 
 type VideoContent = PsContent & {
-  videoPlayer: HTMLVideoElement | null;
+  videoPlayer: VideoControllerElement | null;
   videoHls: Hls | null;
-  /** Player creation in progress (sync guard for async chunk load) */
-  videoStarting: boolean;
   videoIsHls: boolean;
   /** Source fallback already attempted */
   videoFailedOver: boolean;
   /** Playback started at least once (don't fail over mid-playback) */
   videoHasPlayed: boolean;
+  /** Abort for in-flight setup; renewed on activate, aborted on destroy. */
+  videoAbort: AbortController | null;
 };
 
 type PsVideoEvent = PsEvent & {
@@ -202,36 +203,47 @@ class VideoContentSetup {
   }
 
   async initPlayer(content: VideoContent) {
-    if (!isVideoContent(content) || content.videoPlayer || content.videoStarting) {
-      return;
-    }
-    content.videoStarting = true;
-
-    try {
-      await this.initPlayerInner(content);
-    } finally {
-      content.videoStarting = false;
-    }
-  }
-
-  async initPlayerInner(content: VideoContent) {
     // Slide may have been destroyed while waiting for activation
     if (!isVideoContent(content) || content.videoPlayer || !content.element || !content.slide?.isActive) {
       return;
     }
 
-    // Late mount: controls render now, media loads since the slide is active.
-    const { src, videoIsHls } = this.getPreferredSrc(content);
+    // Clean up in case old state is remaining.
+    utils.runCatching(() => content.videoHls?.destroy());
+    content.videoHls = null;
+
+    // Fresh abort for this setup; destroy aborts it.
+    content.videoAbort?.abort();
+    content.videoAbort = new AbortController();
+    const signal = content.videoAbort.signal;
 
     // Make elements.
     const stage = document.createElement('div');
     stage.className = 'memories-video-stage';
 
-    const player = document.createElement('video');
-    player.className = 'memories-video';
-    player.poster = this.getPosterSrc(content);
-    player.playsInline = true;
-    player.controls = false;
+    // Backing player: native hole view when available, else the web video tag.
+    const player: VideoControllerElement = nativex.viewVideoIsEnabled()
+      ? this.initPlayerNativeHole(content)
+      : this.initPlayerWeb(content);
+    if (!player || signal.aborted) return;
+
+    player.addEventListener(
+      'playing',
+      () => {
+        if (signal.aborted) return;
+        content.videoHasPlayed = true;
+        player.dataset.started = 'true';
+        this.getWakeLock();
+      },
+      { signal },
+    );
+    player.addEventListener(
+      'error',
+      () => {
+        void this.tryFailover(content);
+      },
+      { signal },
+    );
 
     if (config.video_autoplay === 'true') {
       player.preload = 'metadata';
@@ -245,31 +257,12 @@ class VideoContentSetup {
       player.loop = true;
     }
 
+    await this.attachPlayerSource(content, player, signal);
+    if (signal.aborted) return;
+    content.videoPlayer = player;
+
     stage.appendChild(player);
     content.element.appendChild(stage);
-    content.videoPlayer = player;
-    content.videoIsHls = videoIsHls;
-
-    player.addEventListener('playing', () => {
-      if (!isVideoContent(content) || content.videoPlayer !== player) return;
-      content.videoHasPlayed = true;
-      player.dataset.started = 'true';
-      this.getWakeLock();
-    });
-    player.addEventListener('error', () => {
-      void this.tryFailover(content);
-    });
-
-    if (videoIsHls) {
-      await this.attachHlsSource(content, player, src.src);
-    } else {
-      this.attachDirectSource(player, src);
-    }
-
-    // Slide may have been destroyed or deactivated while loading hls.js
-    if (!isVideoContent(content) || content.videoPlayer !== player || !content.slide?.isActive) {
-      return;
-    }
 
     // Full-viewport player in the slide holder; onZoomPanUpdate mirrors
     // PhotoSwipe's native slide values onto the picture layer.
@@ -287,6 +280,44 @@ class VideoContentSetup {
     }
   }
 
+  /** Backing web player: video tag. */
+  private initPlayerWeb(content: VideoContent): VideoControllerElement {
+    const player = document.createElement('video');
+    player.className = 'memories-video';
+    player.poster = this.getPosterSrc(content);
+    player.playsInline = true;
+    player.controls = false;
+    return player;
+  }
+
+  /** Backing fake element for native player. */
+  private initPlayerNativeHole(content: VideoContent): VideoControllerElement {
+    const element = document.createElement('viewer-video-native-hole') as ViewerVideoNativeHoleCE;
+    element.photo = content.data.photo;
+    return element as any;
+  }
+
+  /** Attach the preferred source: element srcs for the native hole, HLS/direct for web. */
+  private async attachPlayerSource(content: VideoContent, player: VideoControllerElement, signal: AbortSignal) {
+    // Late mount: media loads since the slide is active.
+    const { src, videoIsHls } = this.getPreferredSrc(content);
+    content.videoIsHls = videoIsHls;
+
+    if (player instanceof HTMLVideoElement) {
+      if (videoIsHls) {
+        await this.attachHlsSource(content, player, src.src, signal);
+      } else {
+        this.attachDirectSource(player, src);
+      }
+    } else if (this.isNativeHolePlayer(player)) {
+      player.srcs = [nativex.addOrigin(src.src)];
+    }
+  }
+
+  private isNativeHolePlayer(player: HTMLElement): player is ViewerVideoNativeHoleCE {
+    return player.tagName === 'VIEWER-VIDEO-NATIVE-HOLE';
+  }
+
   attachDirectSource(player: HTMLVideoElement, src: VideoSource) {
     // <source type> preserves the mp4 masquerade for quicktime.
     player.removeAttribute('src');
@@ -300,7 +331,7 @@ class VideoContentSetup {
     }
   }
 
-  async attachHlsSource(content: VideoContent, player: HTMLVideoElement, url: string) {
+  async attachHlsSource(content: VideoContent, player: HTMLVideoElement, url: string, signal: AbortSignal) {
     // Clear any previous source (e.g. direct failover) so it can't win.
     player.removeAttribute('src');
     player.innerHTML = '';
@@ -318,7 +349,7 @@ class VideoContentSetup {
     const mod = await this.hls;
 
     // Slide may have been destroyed while loading hls.js
-    if (!isVideoContent(content) || content.videoPlayer !== player) {
+    if (signal.aborted) {
       return;
     }
 
@@ -336,7 +367,7 @@ class VideoContentSetup {
     if (config.video_autoplay === 'true') {
       hls.loadSource(url);
     } else {
-      player.addEventListener('play', () => hls.loadSource(url), { once: true });
+      player.addEventListener('play', () => hls.loadSource(url), { once: true, signal });
     }
     attachVideoQualityHlsJs(player, hls);
     this.pickInitialLevel(hls);
@@ -359,7 +390,8 @@ class VideoContentSetup {
     if (config.vod_disable) return;
 
     const player = content.videoPlayer;
-    if (!player) return;
+    const signal = content.videoAbort?.signal;
+    if (!signal || !(player instanceof HTMLVideoElement)) return;
     content.videoFailedOver = true;
 
     const wasHLS = content.videoIsHls;
@@ -378,12 +410,10 @@ class VideoContentSetup {
       this.attachDirectSource(player, this.getDirectSrc(content));
     } else {
       console.warn('PsVideo: Direct video stream could not be opened, trying HLS');
-      await this.attachHlsSource(content, player, this.getHLSsrc(content).src);
+      await this.attachHlsSource(content, player, this.getHLSsrc(content).src, signal);
     }
 
-    if (!isVideoContent(content) || content.videoPlayer !== player || !content.slide?.isActive) {
-      return;
-    }
+    if (signal.aborted) return;
     if (wasHLS) {
       utils.runCatching(() => player.load());
     }
@@ -392,6 +422,7 @@ class VideoContentSetup {
 
   destroyPlayer(content: VideoContent) {
     if (!isVideoContent(content)) return;
+    content.videoAbort?.abort();
 
     this.releaseWakeLock();
 
@@ -414,6 +445,7 @@ class VideoContentSetup {
     content.videoPlayer = null;
     content.videoFailedOver = false;
     content.videoHasPlayed = false;
+    content.data.nxVideoState = undefined;
   }
 
   onContentDestroy({ content }: PsVideoEvent) {
