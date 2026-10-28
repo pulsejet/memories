@@ -11,6 +11,7 @@ import gallery.memories.data.remote.http.HttpClients
 import gallery.memories.server.controllers.BridgeController
 import gallery.memories.server.controllers.ProxyController
 import gallery.memories.ui.image.NativeHoleImage
+import gallery.memories.ui.video.NativeHoleVideo
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
 import io.ktor.server.cio.CIO
@@ -39,6 +40,7 @@ class LocalHttpServer(
     private val assets: AssetSyncCoordinator,
     private val dataSource: MediaStoreDataSource,
     private val holeImage: NativeHoleImage,
+    private val holeVideo: NativeHoleVideo,
     private val bridge: (method: String, url: Uri) -> WebResourceResponse,
 ) {
     companion object {
@@ -61,7 +63,7 @@ class LocalHttpServer(
     private val proxy = ProxyController(auth, clients) { origin() }
     private val router = ServerRouter(
         appCtx, auth, assets, guard, bridgeController,
-        proxy, dataSource, holeImage) { cfg }
+        proxy, dataSource, holeImage, holeVideo) { cfg }
 
     /** HttpOnly cookie value the WebView must present; see [AuthGuard]. */
     fun authCookie(): String = guard.cookieHeader()
