@@ -107,7 +107,7 @@ function ratioFromEvent(e: PointerEvent) {
 }
 
 function onPointerDown(e: PointerEvent) {
-  if (!props.video || clampedDuration.value <= 0) return;
+  if (e.button !== 0 || !props.video || clampedDuration.value <= 0) return;
   scrubbing.value = true;
   scrubRatio.value = ratioFromEvent(e);
   hoverRatio.value = scrubRatio.value;
