@@ -99,6 +99,10 @@ class NativeX(private val mCtx: MainActivity) {
     @JavascriptInterface
     fun getPlatform(): String = "android"
 
+    /** No-op for feature detection; real registration happens via [NativeXAsync]. */
+    @JavascriptInterface
+    fun setupEventBus() = Unit
+
     /** Persists the theme once per login, then just applies it. */
     @JavascriptInterface
     fun setThemeColor(color: String?, isDark: Boolean) {

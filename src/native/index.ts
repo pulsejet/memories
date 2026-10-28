@@ -2,6 +2,7 @@ export * from './api';
 export * from './basic';
 export * from './config';
 export * from './days';
+export * from './event-bus';
 export * from './permissions';
 export * from './share';
 export * from './shell';
