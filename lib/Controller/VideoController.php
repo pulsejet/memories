@@ -310,7 +310,6 @@ final class VideoController extends ApiController
         $returnCode = $response->getStatusCode();
 
         if (204 === $returnCode && $response->getHeader('X-Go-Vod-Original')) {
-            $out->setHttpResponseCode(303); // see Util::guardExDirect
             $out->setHeader('HTTP/1.1 303 See Other');
             $out->setHeader('Location: '.$this->downloadUrl($fileid));
 
@@ -318,10 +317,6 @@ final class VideoController extends ApiController
         }
 
         if (200 === $returnCode) {
-            if (200 !== $out->getHttpResponseCode()) {
-                $out->setHttpResponseCode(200);
-            }
-
             foreach (['Content-Type', 'Content-Length'] as $name) {
                 $value = $response->getHeader($name);
                 if ('' !== $value) {
