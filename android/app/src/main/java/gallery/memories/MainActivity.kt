@@ -48,7 +48,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var themes: ThemeManager
     private lateinit var edges: EdgeToEdgeController
-    private lateinit var eventBus: JsEventBus
+    lateinit var eventBus: JsEventBus
+        private set
     private lateinit var player: VideoPlayerManager
     private lateinit var chooser: FileChooserHandler
     private lateinit var startup: AppStartupCoordinator

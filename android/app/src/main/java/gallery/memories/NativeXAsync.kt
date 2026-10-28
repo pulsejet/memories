@@ -15,7 +15,7 @@ import org.json.JSONObject
 @UnstableApi
 /**
  * Fire-and-forget async bridge, exposed to the page as `window.nativex_async`.
- * Takes JSON postMessages; no replies are ever sent.
+ * Takes JSON postMessages; replies go back over the reply proxy for the event bus.
  * Serves as a high-performance alternative for passing state to NativeX.
  */
 class NativeXAsync(private val mCtx: MainActivity, private val nativex: NativeX) {
@@ -58,6 +58,7 @@ class NativeXAsync(private val mCtx: MainActivity, private val nativex: NativeX)
             }
         } catch (_: Exception) {
         }
+        runCatching { mCtx.eventBus.replyProxy = null }
     }
 
     private inner class Listener : WebViewCompat.WebMessageListener {
@@ -78,12 +79,12 @@ class NativeXAsync(private val mCtx: MainActivity, private val nativex: NativeX)
                 return
             }
             val raw = message.data ?: return
-            mCtx.runOnUiThread { handleMessage(raw) }
+            mCtx.runOnUiThread { handleMessage(raw, replyProxy) }
         }
     }
 
     /** Parses one JSON postMessage and runs it. */
-    private fun handleMessage(raw: String) {
+    private fun handleMessage(raw: String, replyProxy: JavaScriptReplyProxy) {
         val payload = try {
             JSONObject(raw)
         } catch (e: JSONException) {
@@ -96,15 +97,16 @@ class NativeXAsync(private val mCtx: MainActivity, private val nativex: NativeX)
             return
         }
         try {
-            dispatch(method, payload.optJSONArray("args") ?: JSONArray())
+            dispatch(method, payload.optJSONArray("args") ?: JSONArray(), replyProxy)
         } catch (e: Exception) {
             Log.w(TAG, "nativex_async: $method failed", e)
         }
     }
 
     /** Runs one fire-and-forget method on the UI thread. */
-    private fun dispatch(method: String, args: JSONArray) {
+    private fun dispatch(method: String, args: JSONArray, replyProxy: JavaScriptReplyProxy) {
         when (method) {
+            "setupEventBus" -> mCtx.eventBus.replyProxy = replyProxy
             "setThemeColor" -> nativex.setThemeColor(
                 args.opt(0)?.takeIf { it != JSONObject.NULL }?.toString(),
                 args.optBoolean(1, false),
