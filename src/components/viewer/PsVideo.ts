@@ -195,6 +195,7 @@ class VideoContentSetup {
   }
 
   getStoryboardUrl(content: VideoContent): string | null {
+    if (utils.isLocalPhoto(content.data.photo)) return null;
     const api = API.VIDEO_STORYBOARD(content.data.photo.fileid, 'storyboard.vtt');
     return utils.runCatching(() => new URL(api, window.location.href).href);
   }
