@@ -101,17 +101,6 @@ export const NAPI = {
   VIEW_IMAGE_LOCAL: (seq: number) => `${BASE_URL}/api/view/image/local?seq=${seq}`,
 
   /**
-   * Point the native hole video at a URL (remote https or local content://).
-   * POST JSON {url}. Responds immediately without waiting for the first
-   * frame; shares the upload sequence counter.
-   * @regex ^/api/view/video$
-   * @param seq Monotonic upload counter for ordering (query)
-   * @param url Video URL to play
-   * @returns {void}
-   */
-  VIEW_VIDEO: (seq: number) => `${BASE_URL}/api/view/video?seq=${seq}`,
-
-  /**
    * Upload a local file to Nextcloud natively, without routing
    * bytes through the WebView.
    * @regex ^/api/upload/local$
@@ -222,36 +211,6 @@ export type NativeX = {
    * @details The SHARE_BLOB API must be called immediately after this call.
    */
   setShareBlobs: (objects: string) => void;
-
-  /**
-   * This signature is kept for backward compatibility.
-   * Play a video from the given AUID or URL(s).
-   * @param auid AUID of file (will play local if available)
-   * @param fileid File ID of the video (only used for file tracking)
-   * @param urlArray JSON-encoded array of URLs to play
-   * @details The URL array may contain multiple URLs, e.g. direct playback
-   * and HLS separately. The native client must try to play the first URL.
-   */
-  playVideo: (auid: string, fileid: number, urlArray: string) => void;
-
-  /**
-   * Play a video from the given AUID or URL(s).
-   * @param auid AUID of file (will play local if available)
-   * @param fileid File ID of the video (only used for file tracking)
-   * @param urlArray JSON-encoded array of URLs to play
-   * @param loop Whether the video should loop
-   * @details The URL array may contain multiple URLs, e.g. direct playback
-   * and HLS separately. The native client must try to play the first URL.
-   */
-  playVideo2: (auid: string, fileid: number, urlArray: string, loop?: boolean) => void;
-
-  /**
-   * Destroy the video player.
-   * @param fileid File ID of the video
-   * @details The native client must destroy the video player and free up resources.
-   * If the fileid doesn't match the playing video, the call must be ignored.
-   */
-  destroyVideo: (fileid: number) => void;
 
   /**
    * Set the local folders configuration to show in the timeline.
