@@ -28,12 +28,11 @@ import org.json.JSONObject
 @UnstableApi
 /**
  * Native video shown through the WebView hole, mirroring PhotoSwipe zoom/pan.
- * Unlike the image hole (which uploads bytes and waits for render), this one
- * takes a URL and starts playback immediately; the view appears on the first
- * frame. The PlayerView is fullscreen and the hole box is mirrored with a
- * cover scale + translate, same visual as NativeHoleImage.
- * [show]/[setRect] run on the UI thread; [setVideoUrl] may be called from
- * any thread.
+ * The web side drives playback through control commands; the URL loads on
+ * play and the view appears on the first frame. The PlayerView is fullscreen
+ * and the hole box is mirrored with a cover scale + translate, same visual
+ * as NativeHoleImage.
+ * All methods run on the UI thread.
  */
 class NativeHoleVideo(
     private val mCtx: MainActivity,
@@ -51,9 +50,6 @@ class NativeHoleVideo(
     private val density: Float by lazy { mCtx.resources.displayMetrics.density }
 
     private var player: ExoPlayer? = null
-
-    /** Highest upload counter rendered so far; lower ones are ignored. */
-    private var lastSeq = 0L
 
     private var lastRect: FloatArray? = null
     private var videoW = 0
@@ -152,11 +148,6 @@ class NativeHoleVideo(
         if (videoW > 0 && videoH > 0) applyRect(cx, cy, cw, ch)
     }
 
-    /** Play the given URL immediately; the view appears on the first frame. */
-    fun setVideoUrl(url: String, seq: Long) {
-        mCtx.runOnUiThread { setVideoUrlLocked(url, seq) }
-    }
-
     fun pause() {
         player?.playWhenReady = false
     }
@@ -208,7 +199,7 @@ class NativeHoleVideo(
         userPaused = false
         repeatLoop = loop
         if (url.isNotEmpty() && (url != currentUrl || player == null || player?.playbackState == Player.STATE_IDLE)) {
-            setVideoUrlLocked(url, ++lastSeq)
+            setVideoUrlLocked(url)
         } else {
             ensurePlayer()
             player?.repeatMode = if (loop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
@@ -324,9 +315,7 @@ class NativeHoleVideo(
         else -> 0
     }
 
-    private fun setVideoUrlLocked(url: String, seq: Long) {
-        if (seq < lastSeq) return
-        lastSeq = seq
+    private fun setVideoUrlLocked(url: String) {
         if (url == currentUrl && player != null) {
             if (wantShow && !userPaused) player?.playWhenReady = true
             return
