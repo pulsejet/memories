@@ -31,6 +31,10 @@
         pointer-events: none;
         background: transparent !important;
       }
+
+      viewer-video-native-hole {
+        display: block;
+      }
     }
 
     viewer-controls {
