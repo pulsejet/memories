@@ -225,6 +225,9 @@ function applyTransport(s: NativeXVideoState) {
   if (s.paused !== state.paused) {
     state.paused = s.paused;
     emitDom(s.paused ? 'pause' : 'play');
+    if (!s.paused && !s.playing) {
+      emitDom('waiting');
+    }
   }
   if (s.playing !== state.playing) {
     state.playing = s.playing;
