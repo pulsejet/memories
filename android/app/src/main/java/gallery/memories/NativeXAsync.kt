@@ -128,6 +128,13 @@ class NativeXAsync(private val mCtx: MainActivity, private val nativex: NativeX)
                 args.optDouble(2, 0.0).toFloat(),
                 args.optDouble(3, 0.0).toFloat(),
             )
+            "showNativeVideo" -> nativex.showNativeVideo(args.optBoolean(0, false))
+            "setNativeVideoRect" -> nativex.setNativeVideoRect(
+                args.optDouble(0, 0.0).toFloat(),
+                args.optDouble(1, 0.0).toFloat(),
+                args.optDouble(2, 0.0).toFloat(),
+                args.optDouble(3, 0.0).toFloat(),
+            )
             else -> Log.w(TAG, "nativex_async: unknown method: $method")
         }
     }

@@ -63,6 +63,7 @@ class NativeX(private val mCtx: MainActivity) {
         detachAsyncMessages()
         shareManager = null
         account.onDestroy()
+        container.holeVideo.release()
         local.stop()
         timeline.destroy()
     }
@@ -85,6 +86,7 @@ class NativeX(private val mCtx: MainActivity) {
         val SHARE_BLOB = Regex("^/api/share/blobs$")
         val VIEW_IMAGE = Regex("^/api/view/image$")
         val VIEW_IMAGE_LOCAL = Regex("^/api/view/image/local$")
+        val VIEW_VIDEO = Regex("^/api/view/video$")
         val UPLOAD_LOCAL = Regex("^/api/upload/local$")
         val CONFIG_ALLOW_MEDIA = Regex("^/api/config/allow_media/\\d+$")
         val CONFIG_ALLOW_MANAGE_MEDIA = Regex("^/api/config/allow_manage_media$")
@@ -132,6 +134,18 @@ class NativeX(private val mCtx: MainActivity) {
     @JavascriptInterface
     fun setNativeImageRect(x: Float, y: Float, w: Float, h: Float) {
         mCtx.runOnUiThread { container.holeImage.setRect(x, y, w, h) }
+    }
+
+    /** Show/hide the native video below the WebView. */
+    @JavascriptInterface
+    fun showNativeVideo(show: Boolean) {
+        mCtx.runOnUiThread { container.holeVideo.show(show) }
+    }
+
+    /** Move/resize the native video to the hole box (CSS px, may extend past the viewport). */
+    @JavascriptInterface
+    fun setNativeVideoRect(x: Float, y: Float, w: Float, h: Float) {
+        mCtx.runOnUiThread { container.holeVideo.setRect(x, y, w, h) }
     }
 
     @JavascriptInterface
