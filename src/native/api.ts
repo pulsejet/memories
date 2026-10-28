@@ -268,6 +268,9 @@ export type NativeX = {
   /** Get the native platform. */
   getPlatform?: () => 'android' | 'ios';
 
+  /** No-op on the sync bridge. */
+  setupEventBus?: () => void;
+
   /**
    * Check if the user has allowed media access.
    * @returns Whether the user has allowed media access.
@@ -338,6 +341,7 @@ export function has() {
 /** NativeX asynchronous (fire-and-forget) API over WebMessage. */
 export type NativeXAsync = Pick<
   NativeX,
+  | 'setupEventBus'
   | 'setThemeColor'
   | 'playTouchSound'
   | 'vibrate'

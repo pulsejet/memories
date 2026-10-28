@@ -1,6 +1,7 @@
 import axios from '@nextcloud/axios';
 import { generateUrl } from '@nextcloud/router';
 import { has, nativex, nxAsync } from './api';
+import { initEventBus } from './event-bus';
 import { initShellSync } from './shell';
 import { getBuilder as storageBuilder } from '@nextcloud/browser-storage';
 
@@ -19,6 +20,9 @@ export async function initialize() {
 
   // Replicate the server template
   initShellSync();
+
+  // Register for native-to-web events.
+  initEventBus();
 
   // System theme changes need a native bar update (CSS follows on its own).
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setTheme());
