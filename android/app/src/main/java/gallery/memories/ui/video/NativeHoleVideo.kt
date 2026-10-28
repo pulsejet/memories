@@ -362,7 +362,12 @@ class NativeHoleVideo(
                 }
 
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    if (isPlaying) startTicker() else stopTicker()
+                    if (isPlaying) {
+                        userPaused = false
+                        startTicker()
+                    } else {
+                        stopTicker()
+                    }
                     emitVideoState()
                 }
 
