@@ -1,7 +1,6 @@
 package gallery.memories
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.util.Log
@@ -14,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.data.local.prefs.PreferencesStore
 import gallery.memories.databinding.ActivityMainBinding
-import gallery.memories.ui.player.VideoPlayerManager
 import gallery.memories.ui.startup.AppStartupCoordinator
 import gallery.memories.ui.theme.EdgeToEdgeController
 import gallery.memories.ui.theme.ThemeManager
@@ -50,7 +48,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var edges: EdgeToEdgeController
     lateinit var eventBus: JsEventBus
         private set
-    private lateinit var player: VideoPlayerManager
     private lateinit var chooser: FileChooserHandler
     private lateinit var startup: AppStartupCoordinator
 
@@ -65,7 +62,6 @@ class MainActivity : AppCompatActivity() {
         nativex = NativeX(this)
         themes = ThemeManager(this, nativex.container.prefs)
         edges = EdgeToEdgeController(this)
-        player = VideoPlayerManager(this, nativex.auth)
         chooser = FileChooserHandler(this).also { it.register() }
         startup = AppStartupCoordinator(this, nativex.auth, nativex.assets, nativex.local) { msg, long ->
             nativex.toast(msg, long)
@@ -175,10 +171,6 @@ class MainActivity : AppCompatActivity() {
 
     /** URL of a static entry page (welcome/waiting) bundled in the APK. */
     fun localStaticUrl(name: String): String = startup.localStaticUrl(name)
-
-    fun initializePlayer(uris: Array<Uri>, uid: Long, loop: Boolean = false) = player.initializePlayer(uris, uid, loop)
-
-    fun destroyPlayer(uid: Long) = player.destroyPlayer(uid)
 
     fun storeTheme(color: String?, isDark: Boolean) = themes.storeTheme(color, isDark)
 

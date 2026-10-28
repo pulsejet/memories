@@ -86,7 +86,6 @@ class NativeX(private val mCtx: MainActivity) {
         val SHARE_BLOB = Regex("^/api/share/blobs$")
         val VIEW_IMAGE = Regex("^/api/view/image$")
         val VIEW_IMAGE_LOCAL = Regex("^/api/view/image/local$")
-        val VIEW_VIDEO = Regex("^/api/view/video$")
         val UPLOAD_LOCAL = Regex("^/api/upload/local$")
         val CONFIG_ALLOW_MEDIA = Regex("^/api/config/allow_media/\\d+$")
         val CONFIG_ALLOW_MANAGE_MEDIA = Regex("^/api/config/allow_manage_media$")
@@ -219,34 +218,6 @@ class NativeX(private val mCtx: MainActivity) {
     fun setShareBlobs(objects: String?) {
         if (objects == null) return
         shareManager?.setShareBlobs(JSONArray(objects))
-    }
-
-    /** Backwards-compatible alias of [playVideo2] without looping. */
-    @JavascriptInterface
-    fun playVideo(auid: String, fileid: Long, urlsArray: String) {
-        this.playVideo2(auid, fileid, urlsArray, false)
-    }
-
-    /** Plays the on-device copy when indexed, else the provided remote URLs. */
-    @JavascriptInterface
-    fun playVideo2(auid: String, fileid: Long, urlsArray: String, loop: Boolean = false) {
-        mCtx.threadPool.submit {
-            val urls = JSONArray(urlsArray)
-            val list = Array(urls.length()) { Uri.parse(urls.getString(it)) }
-            val videos = timeline.getSystemImagesByAUIDs(arrayListOf(auid))
-            mCtx.runOnUiThread {
-                if (videos.isNotEmpty()) {
-                    mCtx.initializePlayer(arrayOf(videos[0].uri), fileid, loop)
-                } else {
-                    mCtx.initializePlayer(list, fileid, loop)
-                }
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun destroyVideo(fileid: Long) {
-        mCtx.runOnUiThread { mCtx.destroyPlayer(fileid) }
     }
 
     /** Persists the folder selection from the setup UI. */
