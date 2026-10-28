@@ -1,24 +1,21 @@
 <template>
-  <div
-    @touchstart.passive="touchstart"
-    @touchmove.passive="touchmove"
-    @touchend.passive="touchend"
-    @touchcancel.passive="touchend"
-  >
+  <div ref="root">
     <div
-      v-if="show"
+      v-if="showRefreshProgress"
       class="swipe-progress"
-      :class="{ animate, wasSwiped }"
-      :style="{ '--swipe-progress': progress }"
+      :class="{ animate: refreshAnimate, wasSwiped: refreshWasSwiped }"
+      :style="{ '--swipe-progress': refreshProgress }"
     ></div>
     <slot></slot>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount, useTemplateRef } from 'vue';
 
-const SWIPE_PX = 250;
+const REFRESH_SWIPE_PX = 250;
+// Pan must start moving before it counts, so parked touches never show progress.
+const REFRESH_PAN_THRESHOLD_PX = 10;
 
 const props = withDefaults(
   defineProps<{
@@ -47,34 +44,35 @@ const props = withDefaults(
   },
 );
 
+const root = useTemplateRef<HTMLElement>('root');
+let hammer: HammerManager | null = null;
+
 /** Is active interaction */
-const on = ref(false);
-/** Start touch Y coordinate */
-const startY = ref(0);
-/** End touch Y coordinate */
-const endY = ref(0);
-/** Start touch X coordinate */
-const startX = ref(0);
-/** End touch X coordinate */
-const endX = ref(0);
+const refreshActive = ref(false);
+/** Cumulative pan displacement since panstart */
+const refreshDeltaX = ref(0);
+const refreshDeltaY = ref(0);
 /** Percentage progress to show in swiping */
-const progress = ref(0);
+const refreshProgress = ref(0);
 /** Next update frame reference */
-const updateFrame = ref(0);
+const refreshUpdateFrame = ref(0);
 
 // Loading animation state
-const loading = ref(false);
-const animate = ref(false);
-const wasSwiped = ref(true);
-const firstcycle = ref(0);
+const refreshLoading = ref(false);
+const refreshAnimate = ref(false);
+const refreshWasSwiped = ref(true);
+const refreshFirstCycle = ref(0);
 
 onMounted(() => {
-  animate.value = loading.value; // start if needed
+  refreshAnimate.value = refreshLoading.value; // start if needed
   props.signal?.addEventListener('abort', reset, { once: true });
+  void setupHammer();
 });
 
 onBeforeUnmount(() => {
   props.signal?.removeEventListener('abort', reset);
+  hammer?.destroy();
+  hammer = null;
   reset();
 });
 
@@ -90,122 +88,140 @@ watch(
   },
 );
 
-watch(loading, () => {
-  wasSwiped.value = progress.value >= 100;
-  if (!wasSwiped.value) {
+watch(refreshLoading, () => {
+  refreshWasSwiped.value = refreshProgress.value >= 100;
+  if (!refreshWasSwiped.value) {
     // The loading animation was triggered from elsewhere
     // let it continue normally
-    animate.value = loading.value;
+    refreshAnimate.value = refreshLoading.value;
     return;
   }
 
   // Let the animation run for at least half cycle
   // if the user pulled down, so we provide good feedback
   // that something actually happened
-  if (loading.value) {
-    if (!animate.value) {
-      firstcycle.value = window.setTimeout(() => {
-        firstcycle.value = 0;
-        animate.value = loading.value;
+  if (refreshLoading.value) {
+    if (!refreshAnimate.value) {
+      refreshFirstCycle.value = window.setTimeout(() => {
+        refreshFirstCycle.value = 0;
+        refreshAnimate.value = refreshLoading.value;
       }, 750);
     }
-    animate.value = loading.value;
+    refreshAnimate.value = refreshLoading.value;
   } else {
-    if (!firstcycle.value) {
-      animate.value = loading.value;
+    if (!refreshFirstCycle.value) {
+      refreshAnimate.value = refreshLoading.value;
     }
   }
 });
 
-const show = computed(() => {
-  return Boolean((on.value && progress.value) || animate.value);
+const showRefreshProgress = computed(() => {
+  return Boolean((refreshActive.value && refreshProgress.value) || refreshAnimate.value);
 });
+
+/** Watch vertical pans without stealing scroll: TouchInput survives
+ * the pointercancel that kills PointerEventInput during native scroll. */
+async function setupHammer() {
+  if (!root.value || hammer) return;
+  const { default: Hammer } = await import('hammerjs');
+  if (!root.value || hammer) return;
+
+  hammer = new Hammer(root.value, {
+    touchAction: 'auto',
+    inputClass: Hammer.TouchInput,
+  });
+  hammer.get('pan').set({
+    direction: Hammer.DIRECTION_VERTICAL,
+    threshold: REFRESH_PAN_THRESHOLD_PX,
+  });
+  hammer.on('panstart', onPanStart);
+  hammer.on('panmove', onPanMove);
+  hammer.on('panend pancancel', onPanEnd);
+}
 
 function reset() {
   // Clear events
-  window.cancelAnimationFrame(updateFrame.value);
-  window.clearTimeout(firstcycle.value);
+  window.cancelAnimationFrame(refreshUpdateFrame.value);
+  window.clearTimeout(refreshFirstCycle.value);
 
   // Reset state
-  on.value = false;
-  progress.value = 0;
-  updateFrame.value = 0;
-  loading.value = false;
-  animate.value = false;
-  wasSwiped.value = true;
-  firstcycle.value = 0;
+  refreshActive.value = false;
+  refreshProgress.value = 0;
+  refreshUpdateFrame.value = 0;
+  refreshLoading.value = false;
+  refreshAnimate.value = false;
+  refreshWasSwiped.value = true;
+  refreshFirstCycle.value = 0;
 }
 
-/** Start gesture on container (passive) */
-function touchstart(event: TouchEvent) {
+/** Start gesture; ignores anything outside the matched scroll area */
+function onPanStart(e: HammerInput) {
   if (!props.allowSwipe) return;
-  if (event.touches.length !== 1) return;
-  const touch = event.touches[0];
+  if (e.maxPointers > 1) return;
 
   // Check if top element matches selector
-  if (props.match && !(<HTMLElement>touch.target).closest(props.match)) return;
+  if (props.match && !e.target.closest(props.match)) return;
 
   // Start swipe action
-  endY.value = startY.value = touch.clientY;
-  endX.value = startX.value = touch.clientX;
-  progress.value = 0;
-  on.value = true;
+  refreshDeltaX.value = 0;
+  refreshDeltaY.value = 0;
+  refreshProgress.value = 0;
+  refreshActive.value = true;
 }
 
-/** Execute gesture on container (passive) */
-function touchmove(event: TouchEvent) {
-  if (!props.allowSwipe || !on.value) return;
+/** Execute gesture; aborts on multi-touch or horizontal dominance */
+function onPanMove(e: HammerInput) {
+  if (!props.allowSwipe || !refreshActive.value) return;
 
   // Ignore multi-touch gestures (e.g. pinch zoom)
-  if (event.touches.length !== 1) {
+  if (e.maxPointers > 1) {
     return reset();
   }
 
-  // Get the touch coordinates
-  const touch = event.touches[0];
-  endY.value = touch.clientY;
-  endX.value = touch.clientX;
+  // Get the cumulative displacement
+  refreshDeltaX.value = e.deltaX;
+  refreshDeltaY.value = e.deltaY;
 
   // Abort on mostly-horizontal gestures (e.g. swipe right)
-  if (Math.abs(endX.value - startX.value) > Math.abs(endY.value - startY.value)) {
+  if (Math.abs(refreshDeltaX.value) > Math.abs(refreshDeltaY.value)) {
     return reset();
   }
 
   // Update progress only once per frame
-  updateFrame.value ||= window.requestAnimationFrame(async () => {
-    updateFrame.value = 0;
-    if (!on.value) return;
+  refreshUpdateFrame.value ||= window.requestAnimationFrame(async () => {
+    refreshUpdateFrame.value = 0;
+    if (!refreshActive.value) return;
 
     // Re-check horizontal dominance with latest coordinates
-    if (Math.abs(endX.value - startX.value) > Math.abs(endY.value - startY.value)) {
+    if (Math.abs(refreshDeltaX.value) > Math.abs(refreshDeltaY.value)) {
       return reset();
     }
 
     // Compute percentage of swipe
-    const delta = (endY.value - startY.value) / SWIPE_PX;
-    progress.value = Math.min(Math.max(0, delta * 100), 100);
+    const delta = refreshDeltaY.value / REFRESH_SWIPE_PX;
+    refreshProgress.value = Math.min(Math.max(0, delta * 100), 100);
 
     // Execute action on threshold
-    if (progress.value >= 100) {
-      on.value = false;
+    if (refreshProgress.value >= 100) {
+      refreshActive.value = false;
       const signal = props.signal;
       try {
-        loading.value = true;
+        refreshLoading.value = true;
         await props.refresh();
       } finally {
         if (signal !== props.signal || !signal?.aborted) {
-          loading.value = false;
+          refreshLoading.value = false;
         }
       }
     }
   });
 }
 
-/** End gesture on container (passive) */
-function touchend(event: TouchEvent) {
-  window.cancelAnimationFrame(updateFrame.value);
-  updateFrame.value = 0;
-  on.value = false;
+/** End gesture */
+function onPanEnd() {
+  window.cancelAnimationFrame(refreshUpdateFrame.value);
+  refreshUpdateFrame.value = 0;
+  refreshActive.value = false;
 }
 </script>
 
