@@ -147,7 +147,8 @@ export default class PsNativeHole {
 
     if (cx2 <= cx1 || cy2 <= cy1) return this.hide();
 
-    const clip = `path(evenodd, 'M0 0 H${W} V${H} H0 Z M${cx1} ${cy1} H${cx2} V${cy2} H${cx1} Z')`;
+    // Add 1px additionally on each side to avoid clipping issues.
+    const clip = `path(evenodd, 'M-1 -1 H${W + 1} V${H + 1} H-1 Z M${cx1} ${cy1} H${cx2} V${cy2} H${cx1} Z')`;
     if (clip !== this.lastClip) {
       this.lastClip = clip;
       this.setClip(clip);
