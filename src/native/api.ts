@@ -283,6 +283,9 @@ export type NativeX = {
    */
   canManageMedia?: () => boolean;
 
+  /** Playable video codecs for ExoPlayer as JSON array of ffprobe names. */
+  getPlayableVideoCodecs?: () => string;
+
   /**
    * Get the current sync status.
    * @returns number of file synced or -1

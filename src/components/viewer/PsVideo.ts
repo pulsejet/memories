@@ -152,10 +152,10 @@ class VideoContentSetup {
     };
   }
 
-  getHLSsrc(content: VideoContent): VideoSource {
+  getHLSsrc(content: VideoContent, codecs?: string[]): VideoSource {
     const fileid = content.data.photo.fileid;
     return {
-      src: API.VIDEO_TRANSCODE(fileid, 'index.m3u8', getPlayableVideoCodecsSync()),
+      src: API.VIDEO_TRANSCODE(fileid, 'index.m3u8', codecs),
       type: 'application/x-mpegurl',
     };
   }
@@ -170,7 +170,7 @@ class VideoContentSetup {
   }
 
   /** Initial source: HLS unless transcoding is disabled */
-  getPreferredSrc(content: VideoContent): { src: VideoSource; videoIsHls: boolean } {
+  getPreferredSrc(content: VideoContent, codecs?: string[]): { src: VideoSource; videoIsHls: boolean } {
     // Trash has no transcoding, play the file directly.
     if (content.data.photo.trashInfo) {
       return { src: this.getDirectSrc(content), videoIsHls: false };
@@ -181,7 +181,7 @@ class VideoContentSetup {
     if (local) {
       return { src: local, videoIsHls: false };
     } else if (!config.vod_disable) {
-      return { src: this.getHLSsrc(content), videoIsHls: true };
+      return { src: this.getHLSsrc(content, codecs), videoIsHls: true };
     } else {
       return { src: this.getDirectSrc(content), videoIsHls: false };
     }
@@ -305,7 +305,10 @@ class VideoContentSetup {
   /** Attach the preferred source: element src for the native hole, HLS/direct for web. */
   private async attachPlayerSource(content: VideoContent, player: VideoControllerElement, signal: AbortSignal) {
     // Late mount: media loads since the slide is active.
-    const { src, videoIsHls } = this.getPreferredSrc(content);
+    const codecs = this.isNativeHolePlayer(player)
+      ? nativex.getNativePlayableCodecsSync()
+      : getPlayableVideoCodecsSync();
+    const { src, videoIsHls } = this.getPreferredSrc(content, codecs);
     content.videoIsHls = videoIsHls;
 
     if (player instanceof HTMLVideoElement) {
@@ -422,7 +425,7 @@ class VideoContentSetup {
       this.attachDirectSource(player, this.getDirectSrc(content));
     } else {
       console.warn('PsVideo: Direct video stream could not be opened, trying HLS');
-      await this.attachHlsSource(content, player, this.getHLSsrc(content).src, signal);
+      await this.attachHlsSource(content, player, this.getHLSsrc(content, getPlayableVideoCodecsSync()).src, signal);
     }
 
     if (signal.aborted) return;
@@ -436,7 +439,8 @@ class VideoContentSetup {
     const wasHLS = content.videoIsHls;
     content.videoIsHls = !wasHLS;
 
-    const src = wasHLS ? this.getDirectSrc(content).src : this.getHLSsrc(content).src;
+    const codecs = nativex.getNativePlayableCodecsSync();
+    const src = wasHLS ? this.getDirectSrc(content).src : this.getHLSsrc(content, codecs).src;
     if (wasHLS) {
       console.warn('PsVideo: Native hole HLS stream failed, falling back to direct');
     } else {

@@ -269,6 +269,10 @@ class NativeX(private val mCtx: MainActivity) {
     @JavascriptInterface
     fun canManageMedia(): Boolean = permissions.canManageMedia()
 
+    /** Playable video codecs, probed by the hole video player. */
+    @JavascriptInterface
+    fun getPlayableVideoCodecs(): String = container.holeVideo.getPlayableVideoCodecs()
+
     /** Indexed-file count, or -1 when no sync is running. */
     @JavascriptInterface
     fun getSyncStatus(): Int = timeline.syncStatus

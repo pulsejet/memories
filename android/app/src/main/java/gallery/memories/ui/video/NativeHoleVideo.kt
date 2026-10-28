@@ -1,5 +1,6 @@
 package gallery.memories.ui.video
 
+import android.media.MediaCodecList
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -21,6 +22,7 @@ import androidx.media3.ui.PlayerView
 import gallery.memories.MainActivity
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.TlsTrust
+import org.json.JSONArray
 import org.json.JSONObject
 
 @UnstableApi
@@ -68,6 +70,37 @@ class NativeHoleVideo(
     private var repeatLoop = true
     private var seeking = false
     private var lastError: String? = null
+
+    /** ExoPlayer decodes via platform decoders; queried once. Must match ffprobe codec_name. */
+    private val playableVideoCodecs: List<String> by lazy {
+        val candidates = listOf(
+            "video/avc" to "h264",
+            "video/hevc" to "hevc",
+            "video/x-vnd.on2.vp8" to "vp8",
+            "video/x-vnd.on2.vp9" to "vp9",
+            "video/av01" to "av1",
+        )
+        try {
+            val supported = MediaCodecList(MediaCodecList.REGULAR_CODECS).codecInfos
+                .filter { !it.isEncoder }
+                .flatMap { it.supportedTypes.asList() }
+                .toSet()
+            candidates.filter { (mime, _) -> mime in supported }.map { (_, codec) -> codec }
+                .ifEmpty { listOf("h264") }
+        } catch (_: Exception) {
+            listOf("h264")
+        }
+    }
+
+    /** Playable video codecs as JSON array of ffprobe names, e.g. '["h264","hevc"]'. */
+    fun getPlayableVideoCodecs(): String {
+        return try {
+            JSONArray(playableVideoCodecs).toString()
+        } catch (e: Exception) {
+            Log.w(TAG, "getPlayableVideoCodecs failed", e)
+            JSONArray(listOf("h264")).toString()
+        }
+    }
 
     // ~4Hz position ticker while playing, so the web progress keeps moving.
     private val stateHandler = Handler(Looper.getMainLooper())
