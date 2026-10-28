@@ -39,16 +39,6 @@
             app:use_controller="false"
         />
 
-        <!-- TEMP: transparent red over the hole video, same rect, so the
-            hole is visually obvious during the experiment. -->
-        <View
-            android:id="@+id/nativeVideoTint"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="invisible"
-            android:background="#1AFF0000"
-        />
-
         <WebView
             android:id="@+id/webview"
             android:layout_width="match_parent"
