@@ -161,6 +161,10 @@ func (b *FilterBuilder) tonemapOpenCL() {
 	)
 }
 
+func (b *FilterBuilder) tonemapCUDA() {
+	b.append("tonemap_cuda=tonemap=hable:desat=0:format=nv12:primaries=bt709:transfer=bt709:matrix=bt709:range=tv")
+}
+
 // transposePlan resolves Rotation to filters; sw reports CPU transpose,
 // forced around broken hardware filters and always for transpose_cuda.
 func (b *FilterBuilder) transposePlan() (filters []string, sw bool) {

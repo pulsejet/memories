@@ -23,6 +23,16 @@ func (s *Stream) transcodeSpec(startAt float64, isHLS bool) ffmpeg.Spec {
 		})
 		spec.VAAPIOpenCL = s.vaapiOpenCL
 	}
+	if ffmpeg.Encoder(spec) == ffmpeg.EncoderNVENC && spec.HDR {
+		s.tonemapOnce.Do(func() {
+			if err := ffmpeg.ProbeNVENCCUDA(context.Background(), spec); err != nil {
+				log.Printf("%s-%s: using software HDR tonemapping: %v", s.m.id, s.quality, err)
+				return
+			}
+			s.nvencCUDA = true
+		})
+		spec.NVENCCUDA = s.nvencCUDA
+	}
 
 	return spec
 }

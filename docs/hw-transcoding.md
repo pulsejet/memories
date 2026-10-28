@@ -16,6 +16,14 @@ To configure VAAPI, you need to have `/dev/dri` available to the Nextcloud insta
 
 NVIDIA GPUs support hardware transcoding using NVENC.
 
+For HDR sources, go-vod automatically tries GPU tone mapping with NVENC when
+FFmpeg provides `tonemap_cuda` (for example, in Jellyfin FFmpeg). It tests the
+complete pipeline on one frame per rendition before enabling it. If the filter,
+configured scaler, or GPU cannot run that pipeline, it falls back to CPU tone
+mapping while retaining NVENC encoding. Selecting the CUDA scaler alone does
+not guarantee GPU tone mapping; check the transcoder logs for `tonemap_cuda`
+or a software HDR tone mapping fallback message.
+
 !!! tip "Hardware acceleration is optional"
 
     Hardware acceleration is optional and not required for Memories to function. If you do not have hardware acceleration, Memories will use the CPU for transcoding.

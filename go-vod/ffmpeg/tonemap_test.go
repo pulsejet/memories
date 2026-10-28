@@ -45,3 +45,39 @@ func TestProbeVAAPIOpenCLFailure(t *testing.T) {
 	defer cancel()
 	require.ErrorIs(t, ProbeVAAPIOpenCL(ctx, s), context.DeadlineExceeded)
 }
+
+func TestProbeNVENCCUDA(t *testing.T) {
+	dir := t.TempDir()
+	argsPath := filepath.Join(dir, "args")
+	t.Setenv("PROBE_ARGS", argsPath)
+	s := baseSpec()
+	s.NVENC, s.HDR, s.UseTranspose, s.Rotation = true, true, true, -90
+	s.NVENCScale, s.BitDepth, s.StartAt = "cuda", 10, 12
+	s.Bin = filepath.Join(dir, "ffmpeg")
+	require.NoError(t, os.WriteFile(s.Bin, []byte("#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$PROBE_ARGS\"\n"), 0755))
+	require.NoError(t, ProbeNVENCCUDA(context.Background(), s))
+	data, err := os.ReadFile(argsPath)
+	require.NoError(t, err)
+	args := strings.Split(strings.TrimSpace(string(data)), "\n")
+	require.Equal(t, "12.000000", args[slices.Index(args, "-ss")+1])
+	require.Contains(t, args, "cuda=memories")
+	filter := args[slices.Index(args, "-vf")+1]
+	require.Contains(t, filter, "tonemap_cuda=")
+	require.Contains(t, filter, "hwdownload,format=nv12,transpose=1,format=nv12|cuda,hwupload")
+	require.NotContains(t, args, "-c:a")
+	require.Equal(t, []string{"-nostdin", "-abort_on", "empty_output", "-frames:v", "1", "-an", "-f", "null", "-"}, args[len(args)-9:])
+	require.False(t, s.NVENCCUDA, "probing must not mutate the caller's spec")
+}
+
+func TestProbeNVENCCUDAFailure(t *testing.T) {
+	s := baseSpec()
+	s.NVENC, s.HDR, s.NVENCScale = true, true, "cuda"
+	s.Bin = filepath.Join(t.TempDir(), "ffmpeg")
+	require.NoError(t, os.WriteFile(s.Bin, []byte("#!/bin/sh\necho 'No such filter: tonemap_cuda' >&2\nexit 1\n"), 0755))
+	require.ErrorContains(t, ProbeNVENCCUDA(context.Background(), s), "No such filter: tonemap_cuda")
+
+	require.NoError(t, os.WriteFile(s.Bin, []byte("#!/bin/sh\nexec sleep 30\n"), 0755))
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+	require.ErrorIs(t, ProbeNVENCCUDA(ctx, s), context.DeadlineExceeded)
+}

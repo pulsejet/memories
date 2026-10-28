@@ -67,6 +67,8 @@ type Spec struct {
 	// ("cuda" or "npp"); NVENCTemporalAQ enables temporal AQ.
 	NVENC, NVENCTemporalAQ bool
 	NVENCScale             string
+	// NVENCCUDA enables GPU HDR tonemapping after a successful pipeline probe.
+	NVENCCUDA bool
 
 	// UseTranspose disables ffmpeg autorotation (-noautorotate) and rotates
 	// manually instead. Autorotation fails silently on some hardware paths
@@ -213,6 +215,10 @@ func BuildArgs(s Spec) []string {
 			// Scale first in 10-bit so the GPU tonemap sees fewer pixels.
 			b.scaleEncode("p010")
 			b.tonemapOpenCL()
+			b.bitDepth = 8
+		case s.HDR && cv == EncoderNVENC && s.NVENCCUDA:
+			b.scaleEncode("p010le")
+			b.tonemapCUDA()
 			b.bitDepth = 8
 		case s.HDR:
 			// CPU tonemap between decode and encode; the download
