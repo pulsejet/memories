@@ -104,6 +104,7 @@ final class OtherController extends ApiController
                 'map_tile_servers' => $this->systemConfig->get('memories.map.tile_servers'),
                 'map_tile_server_url' => $this->systemConfig->getUserMapTileServerUrl(),
                 'map_cluster_density' => $this->systemConfig->getUserMapClusterDensity(),
+                'cast_app_id' => $this->systemConfig->get('memories.cast.app_id'),
                 'language' => $language,
                 'locale' => $locale,
 
@@ -135,6 +136,7 @@ final class OtherController extends ApiController
                 'show_exif_on_mobile' => 'true' === $this->systemConfig->getUserConfigValue('showExifOnMobile', 'false'),
                 'metadata_in_slideshow' => 'true' === $this->systemConfig->getUserConfigValue('metadataInSlideshow', 'false'),
                 'slideshow_duration' => (int) $this->systemConfig->getUserConfigValue('slideshowDuration', '5'),
+                'cast_quality' => $this->systemConfig->getUserConfigValue('castQuality', 'auto'),
 
                 // on this day settings
                 'onthisday_day_range' => (int) $this->systemConfig->getUserConfigValue('onthisdayDayRange', '3'),

@@ -209,6 +209,14 @@ export class API {
     return tok(gen(`${BASE}/stream/{fileid}`, { fileid }));
   }
 
+  static CAST_TOKENS() {
+    return gen(`${BASE}/cast/tokens`);
+  }
+
+  static CAST_FILE(fileid: number, token: string, size?: number) {
+    return API.Q(gen(`${BASE}/cast/file/{fileid}`, { fileid }), { t: token, size });
+  }
+
   static SHARE_LINKS() {
     return gen(`${BASE}/share/links`);
   }

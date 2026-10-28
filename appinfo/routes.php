@@ -78,6 +78,10 @@ return [
         ['name' => 'Download#file', 'url' => '/api/download/{handle}', 'verb' => 'GET'],
         ['name' => 'Download#one', 'url' => '/api/stream/{fileid}', 'verb' => 'GET'],
 
+        ['name' => 'Cast#receiver', 'url' => '/cast/receiver', 'verb' => 'GET'],
+        ['name' => 'Cast#tokens', 'url' => '/api/cast/tokens', 'verb' => 'POST'],
+        ['name' => 'Cast#file', 'url' => '/api/cast/file/{fileid}', 'verb' => 'GET'],
+
         ['name' => 'Lens#file', 'url' => '/lens/file/{fileid}', 'verb' => 'GET', 'requirements' => ['fileid' => '\d+']],
         ['name' => 'Lens#scan', 'url' => '/lens/scan', 'verb' => 'POST'],
         ['name' => 'Lens#search', 'url' => '/api/lens/search', 'verb' => 'GET'],

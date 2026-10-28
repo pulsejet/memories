@@ -1,6 +1,7 @@
 declare module '@typings' {
   type HighResCond = 'always' | 'zoom' | 'never';
   type VideoAutoplayOpts = 'true' | 'false' | 'disallow';
+  type CastQuality = 'auto' | 'standard' | 'high';
 
   export type IConfig = {
     // general stuff
@@ -12,6 +13,7 @@ declare module '@typings' {
     map_tile_servers: IMapTileServer[];
     map_tile_server_url: string;
     map_cluster_density: number;
+    cast_app_id: string;
     language: string;
     locale: string;
 
@@ -43,6 +45,7 @@ declare module '@typings' {
     show_exif_on_mobile: boolean;
     metadata_in_slideshow: boolean;
     slideshow_duration: number;
+    cast_quality: CastQuality;
 
     // on this day settings
     onthisday_day_range: number;

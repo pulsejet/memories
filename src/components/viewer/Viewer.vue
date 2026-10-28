@@ -128,6 +128,7 @@ import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
+import * as cast from '@services/cast';
 
 import ImageEditor from './ImageEditor.vue';
 import ViewerDateAddress from './ViewerDateAddress.vue';
@@ -161,6 +162,8 @@ import SidebarIcon from 'vue-material-design-icons/DockRight.vue';
 import OpenInNewIcon from 'vue-material-design-icons/OpenInNew.vue';
 import TuneIcon from 'vue-material-design-icons/Tune.vue';
 import SlideshowIcon from 'vue-material-design-icons/PlayBox.vue';
+import CastIcon from 'vue-material-design-icons/Cast.vue';
+import CastConnectedIcon from 'vue-material-design-icons/CastConnected.vue';
 import EditFileIcon from 'vue-material-design-icons/FileEdit.vue';
 import AlbumRemoveIcon from 'vue-material-design-icons/BookRemove.vue';
 import AlbumIcon from 'vue-material-design-icons/ImageAlbum.vue';
@@ -272,6 +275,8 @@ onMounted(() => {
       return currentPhoto.value;
     },
   };
+
+  cast.init();
 });
 
 utils.useBus('memories:sidebar:opened', handleAppSidebarOpen);
@@ -387,6 +392,15 @@ const actions = computed((): IViewerAction[] => {
 
   // Filter out the available actions for this image.
   return [
+    {
+      id: 'cast',
+      name: cast.state.connected
+        ? t('memories', 'Stop casting to {device}', { device: cast.state.device })
+        : t('memories', 'Cast to TV'),
+      icon: cast.state.connected ? markRaw(CastConnectedIcon) : markRaw(CastIcon),
+      callback: toggleCast,
+      if: (cast.state.available || cast.state.connected) && !routeIs.Public && !isLocal.value,
+    },
     {
       id: 'favorite',
       name: t('memories', 'Favorite'),
@@ -1466,16 +1480,18 @@ async function viewInFolder() {
  * Start a slideshow
  */
 async function startSlideshow() {
-  // Full screen the outer element
+  // Full screen the outer element; not needed while the TV shows the slideshow
   if (!outer.value) return;
-  try {
-    await outer.value.requestFullscreen();
-  } catch {
-    return;
-  }
+  if (!cast.state.connected) {
+    try {
+      await outer.value.requestFullscreen();
+    } catch {
+      return;
+    }
 
-  // Hide controls
-  setTimeout(() => setUiVisible(false), 1);
+    // Hide controls
+    setTimeout(() => setUiVisible(false), 1);
+  }
 
   // Start slideshow
   slideshowTimer.value = window.setTimeout(slideshowTimerFired, getSlideshowMs());
@@ -1488,6 +1504,17 @@ function slideshowTimerFired() {
   // Cancel if timer doesn't exist anymore
   // This can happen e.g. due to videos
   if (!slideshowTimer.value) return;
+
+  // If the TV is playing a video, wait for it to finish there
+  if (isVideo.value && cast.state.connected) {
+    const fileid = currentPhoto.value?.fileid ?? 0;
+    cast.waitVideoEnd(fileid).then(() => {
+      if (slideshowTimer.value && currentPhoto.value?.fileid === fileid) {
+        photoswipe.value?.next();
+      }
+    });
+    return;
+  }
 
   // If this is a video, wait for it to finish
   if (isVideo.value) {
@@ -1539,6 +1566,56 @@ function stopSlideshow() {
     document.exitFullscreen();
   }
 }
+
+/**
+ * Start or stop casting to a TV
+ */
+function toggleCast() {
+  if (cast.state.connected) {
+    cast.disconnect();
+  } else {
+    cast.connect();
+  }
+}
+
+/**
+ * Mirror the current photo on the TV
+ */
+function castCurrent() {
+  const photo = currentPhoto.value;
+  if (!cast.state.connected || !photo || isLocal.value) return;
+
+  const datetaken = photo.imageInfo?.datetaken;
+  const date = datetaken
+    ? `${utils.getDateStr(new Date(datetaken * 1000))}, ${utils.getTimeStr(new Date(datetaken * 1000))}`
+    : undefined;
+
+  // Preload the next few images on the TV
+  const idx = currIndex.value - globalAnchor.value;
+  const castable = (p: IPhoto) => !utils.isLocalPhoto(p);
+  const upcoming = list.value
+    .slice(idx + 1, idx + 4)
+    .filter((p) => castable(p) && !(p.flag & constants.FLAG_IS_VIDEO))
+    .map((p) => p.fileid);
+  const nearby = list.value
+    .slice(Math.max(0, idx - 5), idx + 15)
+    .filter(castable)
+    .map((p) => p.fileid);
+
+  cast.show(
+    {
+      fileid: photo.fileid,
+      video: isVideo.value,
+      mime: photo.mimetype,
+      date,
+      place: photo.imageInfo?.address_short ?? photo.imageInfo?.address,
+    },
+    upcoming,
+    nearby,
+  );
+}
+
+watch(() => [cast.state.connected, currentPhoto.value?.fileid, currentPhoto.value?.imageInfo?.datetaken], castCurrent);
 
 /**
  * Detect change in fullscreen

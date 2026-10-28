@@ -33,6 +33,7 @@ const remoteNames: Partial<Record<keyof IConfig, string>> = {
   show_exif_on_mobile: 'showExifOnMobile',
   metadata_in_slideshow: 'metadataInSlideshow',
   slideshow_duration: 'slideshowDuration',
+  cast_quality: 'castQuality',
   onthisday_day_range: 'onthisdayDayRange',
   onthisday_photos_per_year: 'onthisdayPhotosPerYear',
   show_hidden_folders: 'showHidden',
@@ -138,6 +139,7 @@ function loadCached(): IConfig {
     map_tile_servers: [],
     map_tile_server_url: String(),
     map_cluster_density: 1,
+    cast_app_id: String(),
     language: String(),
     locale: String(),
 
@@ -169,6 +171,7 @@ function loadCached(): IConfig {
     show_exif_on_mobile: false,
     metadata_in_slideshow: false,
     slideshow_duration: 5,
+    cast_quality: 'auto',
 
     // on this day settings
     onthisday_day_range: 3,

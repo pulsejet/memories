@@ -71,6 +71,10 @@ final class SystemConfig
         // Valid values: 'true' | 'false' | 'disallow'
         'memories.viewer.video.autoplay' => 'true',
 
+        // Google Cast receiver application ID for the custom receiver at /apps/memories/cast/receiver.
+        // Empty to use Google's default media receiver (no registration, no custom UI).
+        'memories.cast.app_id' => '',
+
         // Disable transcoding
         'memories.vod.disable' => true,
 
@@ -458,6 +462,9 @@ final class SystemConfig
 
         // Native communication
         $addImageDomain('http://127.0.0.1');
+
+        // Google Cast sender SDK
+        $policy->addAllowedScriptDomain('https://www.gstatic.com');
 
         // Allow configured location search provider
         $searchHost = parse_url((string) $this->get('memories.places.search.url'), PHP_URL_HOST);

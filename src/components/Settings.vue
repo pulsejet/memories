@@ -179,6 +179,36 @@
           >{{ t('memories', 'Never load high resolution image') }}
         </NcCheckboxRadioSwitch>
       </div>
+
+      <div class="radio-group" v-if="!isNative">
+        <div class="title">{{ t('memories', 'Casting quality') }}</div>
+        <NcCheckboxRadioSwitch
+          v-if="config.cast_app_id"
+          :model-value="castQuality"
+          value="auto"
+          name="cast_quality_radio"
+          type="radio"
+          @update:model-value="updateCastQuality($event)"
+          >{{ t('memories', 'Automatic (detected by the TV)') }}
+        </NcCheckboxRadioSwitch>
+        <NcCheckboxRadioSwitch
+          :model-value="castQuality"
+          value="standard"
+          name="cast_quality_radio"
+          type="radio"
+          @update:model-value="updateCastQuality($event)"
+          >{{ t('memories', 'Standard (faster, recommended for older Chromecasts)') }}
+        </NcCheckboxRadioSwitch>
+        <NcCheckboxRadioSwitch
+          :model-value="castQuality"
+          value="high"
+          name="cast_quality_radio"
+          type="radio"
+          @update:model-value="updateCastQuality($event)"
+          >{{ t('memories', 'High (sharper on large and 4K TVs, needs a newer device)') }}
+        </NcCheckboxRadioSwitch>
+        <div class="hint">{{ t('memories', 'If photos change slowly on the TV, choose Standard.') }}</div>
+      </div>
     </NcAppSettingsSection>
 
     <NcAppSettingsSection id="account-settings" :name="names.account" v-if="isNative">
@@ -369,6 +399,12 @@ const highResCond = computed((): IConfig['high_res_cond_default'] => {
   return config.high_res_cond || config.high_res_cond_default || 'zoom';
 });
 
+/** Automatic needs the custom receiver, which reports its screen size */
+const castQuality = computed((): IConfig['cast_quality'] => {
+  if (config.cast_quality === 'auto' && !config.cast_app_id) return 'standard';
+  return config.cast_quality;
+});
+
 const tileServers = computed(() => {
   return [...(config.map_tile_servers || [])];
 });
@@ -464,6 +500,10 @@ async function updateShowPhotoBasename(val: boolean) {
 // Viewer settings
 async function updateHighResCond(val: IConfig['high_res_cond']) {
   await setConfig('high_res_cond', val);
+}
+
+async function updateCastQuality(val: IConfig['cast_quality']) {
+  await setConfig('cast_quality', val);
 }
 
 async function updateLivephotoAutoplay(val: boolean) {
@@ -593,6 +633,12 @@ async function logout() {
 
     .input-field__helper-text-message {
       font-size: 0.8em;
+    }
+
+    .radio-group .hint {
+      font-size: 0.8em;
+      color: var(--color-text-maxcontrast);
+      margin-top: 4px;
     }
 
     input[readonly] {
