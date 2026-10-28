@@ -20,6 +20,10 @@
     />
 
     <template v-if="status">
+      <NcNoteCard :type="binaryStatusType(status.vips)">
+        {{ binaryStatus('vips', status.vips) }}
+      </NcNoteCard>
+
       <NcNoteCard v-if="status.imagick" type="success">
         {{ t('memories', 'PHP-Imagick is available [{version}].', { version: status.imagick }) }}
       </NcNoteCard>
@@ -27,10 +31,6 @@
         {{ t('memories', 'PHP-Imagick is not available.') }}
         {{ t('memories', 'Image editing will not work correctly.') }}
         {{ t('memories', 'Thumbnail generation may not work for some formats (HEIC, TIFF).') }}
-      </NcNoteCard>
-
-      <NcNoteCard :type="binaryStatusType(status.vips)">
-        {{ binaryStatus('vips', status.vips) }}
       </NcNoteCard>
 
       <NcNoteCard :type="binaryStatusType(status.ffmpeg_preview)">
