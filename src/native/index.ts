@@ -7,3 +7,4 @@ export * from './share';
 export * from './shell';
 export * from './video';
 export * from './view-image';
+export * from './view-video';

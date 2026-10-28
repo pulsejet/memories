@@ -101,6 +101,17 @@ export const NAPI = {
   VIEW_IMAGE_LOCAL: (seq: number) => `${BASE_URL}/api/view/image/local?seq=${seq}`,
 
   /**
+   * Point the native hole video at a URL (remote https or local content://).
+   * POST JSON {url}. Responds immediately without waiting for the first
+   * frame; shares the upload sequence counter.
+   * @regex ^/api/view/video$
+   * @param seq Monotonic upload counter for ordering (query)
+   * @param url Video URL to play
+   * @returns {void}
+   */
+  VIEW_VIDEO: (seq: number) => `${BASE_URL}/api/view/video?seq=${seq}`,
+
+  /**
    * Upload a local file to Nextcloud natively, without routing
    * bytes through the WebView.
    * @regex ^/api/upload/local$
@@ -286,6 +297,9 @@ export type NativeX = {
   /** Show/hide the native image below the WebView. */
   showNativeImage?: (show: boolean) => void;
 
+  /** Show/hide the native video below the WebView. */
+  showNativeVideo?: (show: boolean) => void;
+
   /**
    * Toggle HDR color mode for the activity window.
    * @param enabled True for HDR, false for default
@@ -300,6 +314,15 @@ export type NativeX = {
    * @param h Height in CSS px
    */
   setNativeImageRect?: (x: number, y: number, w: number, h: number) => void;
+
+  /**
+   * Move/resize the native hole video to the hole rect.
+   * @param x Left in CSS px
+   * @param y Top in CSS px
+   * @param w Width in CSS px
+   * @param h Height in CSS px
+   */
+  setNativeVideoRect?: (x: number, y: number, w: number, h: number) => void;
 };
 
 /** The native interface is a global object that is injected by the native app. */
@@ -322,6 +345,8 @@ export type NativeXAsync = Pick<
   | 'setHasRemote'
   | 'showNativeImage'
   | 'setNativeImageRect'
+  | 'showNativeVideo'
+  | 'setNativeVideoRect'
   | 'setHdrColorMode'
 >;
 

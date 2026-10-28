@@ -77,6 +77,12 @@
         }
       }
     }
+
+    .pswp__item:has(video[data-started]) {
+      .pswp__img--placeholder {
+        display: none;
+      }
+    }
   }
 
   &:has(.pswp--ui-visible) .video-container .m-vc-controls {
@@ -96,11 +102,5 @@
   .video-container .m-vc:has(.m-vc-buffering) .m-vc-center {
     opacity: 0;
     visibility: hidden;
-  }
-}
-
-.memories-viewer.fully-opened:has(video[data-started]) {
-  .pswp__img--placeholder {
-    display: none;
   }
 }

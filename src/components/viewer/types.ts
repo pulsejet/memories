@@ -21,6 +21,8 @@ type PsSlideData = _SlideData & {
   type: 'image' | 'video';
   /** Native image data state. */
   nxImageState?: 'loading' | 'loaded' | 'error';
+  /** Native hole video state. */
+  nxVideoState?: 'loading' | 'loaded' | 'error';
   /** Native image should be disabled */
   nxImageDisabled?: boolean;
 };

@@ -29,6 +29,8 @@ declare module '@typings' {
         | 'buffered'
         | 'play'
         | 'pause'
+        | 'load'
+        | 'loop'
       >,
       Partial<Pick<HTMLMediaElement, 'preload' | 'autoplay'>>,
       Partial<
@@ -73,6 +75,9 @@ declare module '@typings' {
 
   /** Closed set of event names the controls subscribe to (DOM media + PiP + custom quality). */
   export type VideoControllerEventType = keyof VideoControllerEventMap;
+
+  /** Backing player for a video slide: an element behind the controls surface. */
+  export type VideoControllerElement = HTMLElement & VideoController;
 
   // Compile-time check: the DOM player must stay assignable to VideoController.
   type _AssertTrue<T extends true> = T;
