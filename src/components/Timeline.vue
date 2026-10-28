@@ -615,7 +615,7 @@ function recomputeSizes(load: boolean) {
 
   // Recycler height
   const recyclerEl = recycler.value!;
-  const targetHeight = height - tmHeight - 4;
+  const targetHeight = Math.max(0, height - tmHeight);
   const targetWidth = isMobile() ? width : width - 40;
   const heightChanged = recyclerEl.$el.clientHeight !== targetHeight;
   const widthChanged = rowWidth !== targetWidth;
