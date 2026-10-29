@@ -127,6 +127,25 @@ export function getDurationStr(sec: number) {
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
+/** Fuzzily parse a day ID or date string into a day ID. */
+export function tryParseDayId(input: string | undefined): number | undefined {
+  input = input?.trim();
+  if (!input) return undefined;
+
+  // Short circuit if the input is already a day ID.
+  if (/^-?\d{1,6}$/.test(input)) {
+    return Number(input);
+  }
+
+  // Parse the date from the input string.
+  const date = new Date(input);
+  if (isNaN(date.getTime())) {
+    return undefined;
+  }
+
+  return dateToDayId(date);
+}
+
 /**
  * Get the header text from a row header
  * @param head Head row object
