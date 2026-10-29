@@ -388,13 +388,16 @@ final class ImageController extends ApiController
      * Get a full resolution decodable image for editing from a file.
      * The returned image may be png / webp / avif / jpeg / gif.
      * These formats are supported by all browsers.
+     *
+     * @param string $id   the FileID of the image
+     * @param bool   $hevc whether the client supports HEVC
      */
     #[NoAdminRequired]
     #[NoCSRFRequired]
     #[PublicPage]
-    public function decodable(string $id): Http\Response
+    public function decodable(string $id, bool $hevc = false): Http\Response
     {
-        return $this->util->guardEx(function () use ($id) {
+        return $this->util->guardEx(function () use ($id, $hevc) {
             $file = $this->fs->getUserFile((int) $id);
 
             // Check if valid image
@@ -413,7 +416,27 @@ final class ImageController extends ApiController
             }
 
             // Stream directly if browser-decodable to avoid buffering into PHP
-            if (preg_match('/^image\/(png|webp|avif|jpeg|gif)$/', $mimetype)) {
+            $directMimes = [
+                'image/png',
+                'image/webp',
+                'image/avif',
+                'image/jpeg',
+                'image/gif',
+            ];
+
+            // Client can indicate support for HEVC images.
+            if ($hevc) {
+                array_push(
+                    $directMimes,
+                    'image/heic',
+                    'image/heif',
+                    'image/x-heic',
+                    'image/x-heif',
+                );
+            }
+
+            // Stream directly if mimetype matches.
+            if (\in_array($mimetype, $directMimes, true)) {
                 $response = new Http\FileDisplayResponse($file, Http::STATUS_OK, ['Content-Type' => $mimetype]);
                 $response->cacheFor(3600 * 24, false, false);
 
