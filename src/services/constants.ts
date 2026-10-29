@@ -17,7 +17,7 @@ export const constants = Object.freeze({
   PLACES_NULL: 'NULL',
 
   MIME_RAW: 'image/x-dcraw',
-  FORBIDDEN_EDIT_MIMES: ['image/bmp', 'image/x-dcraw', 'video/MP2T'], // Exif.php
+  FORBIDDEN_EDIT_MIMES: ['image/bmp', 'video/MP2T'], // Exif.php
 
   BLANK_IMG: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
 

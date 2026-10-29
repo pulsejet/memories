@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Bundled VIPS image decoder with Ultra-HDR, Samsung HDR and ICC profile support ([#1110](https://github.com/pulsejet/memories/issues/1110), [#1645](https://github.com/pulsejet/memories/issues/1645)).
 - **Feature**: Support for AVIF format via VIPS.
 - **Feature**: Support for camera RAW formats via VIPS.
+- **Feature**: Support editing metadata of RAW files including stacked JPEG+RAW pairs ([#1222](https://github.com/pulsejet/memories/issues/1222)).
 - **Feature**: High precision map markers setting ([#1701](https://github.com/pulsejet/memories/issues/1701))
 - **Feature**: Media management grant for silent local file operations on Android ([#1033](https://github.com/pulsejet/memories/pull/1033))
 - **Feature**: Option to skip delete confirmation in viewer ([#1687](https://github.com/pulsejet/memories/issues/1687), [#1689](https://github.com/pulsejet/memories/issues/1689), [#1246](https://github.com/pulsejet/memories/issues/1246))
