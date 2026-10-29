@@ -41,8 +41,9 @@ export type ISystemConfig = {
 
   'memories.db.triggers.fcu': boolean;
 
-  'memories.vips.enabled': boolean;
   'memories.vips.path': string;
+  'memories.vips.enabled': boolean;
+  'memories.vips.raw.enabled': boolean;
 
   enabledPreviewProviders: string[];
   preview_max_x: number;

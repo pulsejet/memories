@@ -52,7 +52,7 @@ final class VipsPreviewTest extends TestCase
         self::assertFileExists($path);
 
         $version = $this->binExt->testVipsBin($path);
-        $upstream = preg_replace('/^v|-.*$/', '', BinExt::VIPS_VER);
+        $upstream = preg_replace('/^v/', '', BinExt::VIPS_VER);
         self::assertSame($upstream, $version);
     }
 

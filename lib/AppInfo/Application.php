@@ -103,17 +103,32 @@ final class Application extends App implements IBootstrap
         $config = \OCP\Server::get(\OCP\IConfig::class);
         if ($config->getSystemValueBool('memories.vips.enabled', true)
             && !empty($config->getSystemValueString('memories.vips.path'))) {
+            // Check if RAW is enabled for VIPS.
+            $rawEnabled = $config->getSystemValueBool('memories.vips.raw.enabled', true);
+
             // Register additional MIME types supported by VIPS.
             $detector = \OCP\Server::get(IMimeTypeDetector::class);
             if ($detector instanceof \OC\Files\Type\Detection) {
                 $detector->getAllMappings(); // is really needed
-                $detector->registerTypeArray([
+                $mappings = [
                     'avif' => ['image/avif'],
-                ]);
+                ];
+                if ($rawEnabled) {
+                    $rawExts = [
+                        '3fr', 'arw', 'cr2', 'cr3', 'crw', 'dng', 'erf',
+                        'fff', 'iiq', 'kdc', 'mdc', 'mos', 'mrw', 'nef',
+                        'nrw', 'orf', 'ori', 'pef', 'raf', 'raw',
+                        'rw2', 'rwl', 'sr2', 'srf', 'srw',
+                    ];
+                    foreach ($rawExts as $ext) {
+                        $mappings[$ext] = ['image/x-dcraw'];
+                    }
+                }
+                $detector->registerTypeArray($mappings);
             }
 
             // Register VIPS preview provider.
-            $context->registerPreviewProvider(Vips::class, Vips::MIME_REGEX);
+            $context->registerPreviewProvider(Vips::class, Vips::mimeRegex($rawEnabled));
         }
     }
 

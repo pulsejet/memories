@@ -103,6 +103,9 @@ final class SystemConfig
         // Use the built-in VIPS binary for previews
         'memories.vips.enabled' => true,
 
+        // Use the built-in VIPS binary for camera RAW previews
+        'memories.vips.raw.enabled' => true,
+
         // Path to use for transcoded files (/tmp/go-vod/instanceid)
         // Make sure this has plenty of space
         'memories.vod.tempdir' => '',
