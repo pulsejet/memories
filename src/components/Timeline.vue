@@ -865,6 +865,10 @@ function getQuery() {
     set(DaysFilterType.ALBUM, `${user}/${name}`);
   }
 
+  if (route.query.searchPlaces != null) {
+    set(DaysFilterType.SEARCH_PLACES, route.query.searchPlaces.toString());
+  }
+
   // People
   if (routeIs.People) {
     if (!user || !name) {
@@ -874,6 +878,9 @@ function getQuery() {
     // name is "recognize" or "facerecognition"
     const filter = <DaysFilterType>route.name;
     set(filter, `${user}/${name}`);
+    if (routeIs.Recognize && route.query.recognizePeople != null) {
+      set(DaysFilterType.RECOGNIZE_PEOPLE, route.query.recognizePeople.toString());
+    }
 
     // Face rect
     if (config.show_face_rect || routeIs.RecognizeUnassigned) {

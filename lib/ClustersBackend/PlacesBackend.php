@@ -79,6 +79,11 @@ final class PlacesBackend extends Backend
         ));
     }
 
+    public function transformSearchQuery(IQueryBuilder &$query, bool $aggregate): void
+    {
+        PlacesSearchFilter::apply($query, $this->tq->getBuilder(...), $this->request->getParam('searchPlaces'));
+    }
+
     #[\Override]
     public function getClustersInternal(int $fileid = 0): array
     {
