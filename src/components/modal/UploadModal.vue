@@ -79,6 +79,7 @@ import { showError } from '@services/utils/dialog';
 import { useModal } from '@services/modal';
 import { t, n } from '@services/l10n';
 import { config } from '@services/user-config';
+import { constants } from '@services/constants';
 import { useRouteIs } from '@services/route-is';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
@@ -155,7 +156,7 @@ function open(localsIn?: IUploadNativeX[]) {
   const input = document.createElement('input');
   input.type = 'file';
   input.multiple = true;
-  input.accept = 'image/*,image/heic,image/tiff,video/*';
+  input.accept = constants.UPLOAD_ACCEPT.join(',');
   input.addEventListener('cancel', () => input.remove());
   input.addEventListener('change', () => {
     files.value = Array.from(input.files ?? []);
