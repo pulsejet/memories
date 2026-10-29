@@ -2,6 +2,7 @@ import { isVideoContent } from './PsVideo';
 import { isLiveContent } from './PsLivePhoto';
 import * as ximg from '@components/frame/XImgCache';
 import * as nativex from '@native';
+import { API } from '@services/API';
 import { isLikelySamePhoto } from '@services/utils/photo';
 
 import type PhotoSwipe from 'photoswipe';
@@ -182,12 +183,15 @@ export default class ImageContentSetup {
 
     for (const src of slide.data.highSrc) {
       try {
+        // Native clients decode HEVC, so request the original file directly.
+        const url = nativex.viewImageIsEnabled() ? API.Q(src, { hevc: true }) : src;
+
         // Do this first always to ensure the image exists.
-        const blobSrc = await ximg.fetchImage(src);
+        const blobSrc = await ximg.fetchImage(url);
 
         // If we have a native view upload there directly.
         if (nativex.viewImageIsEnabled()) {
-          if (await this.nxViewImageUpload(slide, src, undefined)) {
+          if (await this.nxViewImageUpload(slide, url, undefined)) {
             break; // success
           }
           continue;
