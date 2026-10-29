@@ -17,10 +17,14 @@ export function dateToDayId(date: Date) {
   return Math.floor(date.getTime() / (86400 * 1000));
 }
 
+/** Get month ID from JS date */
+export function dateToMonthId(date: Date) {
+  return Math.floor(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1) / (86400 * 1000));
+}
+
 /** Day ID of the first day of the month containing dayId (UTC) */
 export function dayIdToMonthId(dayId: number) {
-  const date = dayIdToDate(dayId);
-  return Math.floor(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1) / 86400000);
+  return dateToMonthId(dayIdToDate(dayId));
 }
 
 /** Get month name from number */
@@ -128,11 +132,11 @@ export function getDurationStr(sec: number) {
 }
 
 /** Fuzzily parse a day ID or date string into a day ID. */
-export function tryParseDayId(input: string | undefined): number | undefined {
+export function tryParseDayId(input: string | undefined, asMonthId?: boolean): number | undefined {
   input = input?.trim();
   if (!input) return undefined;
 
-  // Short circuit if the input is already a day ID.
+  // Short circuit if the input is numeric, assume programmatic.
   if (/^-?\d{1,6}$/.test(input)) {
     return Number(input);
   }
@@ -143,7 +147,7 @@ export function tryParseDayId(input: string | undefined): number | undefined {
     return undefined;
   }
 
-  return dateToDayId(date);
+  return asMonthId ? dateToMonthId(date) : dateToDayId(date);
 }
 
 /**

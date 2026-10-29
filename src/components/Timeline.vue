@@ -427,7 +427,7 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
   if (from?.hash !== to.hash && !_m.viewer.isOpen && (fragment.viewer || fragment.day)) {
     // Open viewer
     const [dayidStr, key] = fragment.viewer?.args || fragment.day!.args;
-    const dayid = utils.tryParseDayId(dayidStr);
+    const dayid = utils.tryParseDayId(dayidStr, isMonthView.value);
     if (dayid === undefined) {
       console.warn('Failed to parse DayID from fragment:', dayidStr);
       return;
