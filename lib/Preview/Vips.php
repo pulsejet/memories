@@ -153,18 +153,19 @@ final class Vips implements IProviderV2
             throw new \Exception('failed to encode vips request');
         }
 
-        [1 => $data, 2 => $stderr] = Util::execSafe2([$vips], 30000, $stdin, [1, 2]);
+        [1 => $data, 3 => $json] = Util::execSafe2([$vips], 30000, $stdin, [1, 3]);
+        $json = trim((string) $json);
 
         if (!\is_string($data) || empty($data)) {
-            throw new \Exception(self::vipsError((string) $stderr) ?: 'empty output from vips');
+            throw new \Exception(self::vipsError($json) ?: 'empty output from vips');
         }
 
-        // Thumbnail/info JSON is printed on stderr.
-        $meta = json_decode(trim((string) $stderr), true);
+        // Thumbnail/info JSON is printed on fd 3.
+        $meta = json_decode($json, true);
         $width = (int) ($meta['width'] ?? 0);
         $height = (int) ($meta['height'] ?? 0);
         if ($width <= 0 || $height <= 0) {
-            throw new \Exception(self::vipsError((string) $stderr) ?: 'invalid info from vips');
+            throw new \Exception(self::vipsError($json) ?: 'invalid info from vips');
         }
 
         // Wrap the output in a stream.
@@ -200,28 +201,28 @@ final class Vips implements IProviderV2
             throw new \Exception('failed to encode vips request');
         }
 
-        [1 => $data, 2 => $stderr] = Util::execSafe2([$vips], 30000, $stdin, [1, 2]);
+        [1 => $data, 3 => $json] = Util::execSafe2([$vips], 30000, $stdin, [1, 3]);
 
         if (!\is_string($data) || '' === $data) {
-            throw new \Exception(self::vipsError((string) $stderr) ?: 'empty output from vips');
+            throw new \Exception(self::vipsError(trim((string) $json)) ?: 'empty output from vips');
         }
 
         return $data;
     }
 
-    /** Extract the error message from vips stderr, if any. */
-    private static function vipsError(string $stderr): ?string
+    /** Extract the error message from vips fd 3 output, if any. */
+    private static function vipsError(string $output): ?string
     {
-        $stderr = trim($stderr);
-        if ('' === $stderr) {
+        $output = trim($output);
+        if ('' === $output) {
             return null;
         }
 
-        $meta = json_decode($stderr, true);
+        $meta = json_decode($output, true);
         if (\is_array($meta) && isset($meta['error']) && \is_string($meta['error']) && '' !== trim($meta['error'])) {
             return trim($meta['error']);
         }
 
-        return $stderr;
+        return $output;
     }
 }
