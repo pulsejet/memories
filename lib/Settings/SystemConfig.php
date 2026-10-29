@@ -134,6 +134,10 @@ final class SystemConfig
         // UID of the dedicated Lens service account (empty = endpoint disabled)
         'memories.lens.service_user' => '',
 
+        // Shared secret Nextcloud sends as Authorization: Bearer on daemon calls.
+        // Empty disables those calls. Not the Lens user's app password.
+        'memories.lens.token' => '',
+
         // Availability of database features, e.g. triggers
         'memories.db.triggers.fcu' => false,
 
