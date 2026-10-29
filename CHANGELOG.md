@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- **Feature**: Bundled VIPS image decoder with Ultra-HDR and ICC profile support.
+- **Feature**: Bundled VIPS image decoder with Ultra-HDR, Samsung HDR and ICC profile support.
 - **Feature**: Support for AVIF format.
 - **Feature**: High precision map markers setting ([#1701](https://github.com/pulsejet/memories/issues/1701))
 - **Feature**: Media management grant for silent local file operations on Android ([#1033](https://github.com/pulsejet/memories/pull/1033))
