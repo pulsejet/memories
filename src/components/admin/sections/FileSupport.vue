@@ -11,7 +11,11 @@
       >{{ t('memories', 'Built-in image previews (VIPS)') }}
     </NcCheckboxRadioSwitch>
 
-    <NcCheckboxRadioSwitch type="switch" :model-value="vipsRawEnabled()" :disabled="!vipsEnabled()" @update:model-value="updateVipsRaw($event)"
+    <NcCheckboxRadioSwitch
+      type="switch"
+      :model-value="vipsRawEnabled()"
+      :disabled="!vipsEnabled()"
+      @update:model-value="updateVipsRaw($event)"
       >{{ t('memories', 'Camera RAW previews (VIPS)') }}
     </NcCheckboxRadioSwitch>
 
