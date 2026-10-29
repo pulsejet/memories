@@ -428,7 +428,7 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
     // Open viewer
     const [dayidStr, key] = fragment.viewer?.args || fragment.day!.args;
     const dayid = parseInt(dayidStr);
-    if (isNaN(dayid) || !key) return;
+    if (isNaN(dayid)) return;
 
     // Get day
     const day = heads.value.get(dayid)?.day;
@@ -440,17 +440,18 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
 
     // Find photo
     const photo = day?.detail?.find((p) => p.key === key);
-    if (!photo) return;
 
     // Scroll to photo if initializing, or if just a scroll change.
     if (!from || fragment.day) {
-      const index = list.value.findIndex((r) => r.type === 1 && r.day.dayid === dayid && r.photos.includes(photo));
+      const index = list.value.findIndex((r) => {
+        return r.type === 1 && r.day.dayid === dayid && (!photo || r.photos.includes(photo));
+      });
       if (index !== -1) {
         recycler.value?.scrollToItem(index);
       }
     }
 
-    if (fragment.viewer) {
+    if (fragment.viewer && photo) {
       // Pass a getter-backed state so the viewer always reads the
       // current collections, even after a refresh replaces them.
       _m.viewer.openDynamic(photo, {
