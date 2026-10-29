@@ -33,6 +33,7 @@ export type ISystemConfig = {
   'memories.vod.nvenc': boolean;
   'memories.vod.nvenc.temporal_aq': boolean;
   'memories.vod.nvenc.scale': string;
+  'memories.vod.nvenc.tonemap_cuda': boolean;
 
   'memories.vod.use_transpose': boolean;
   'memories.vod.use_transpose.force_sw': boolean;

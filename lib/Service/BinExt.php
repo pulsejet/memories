@@ -220,6 +220,7 @@ final class BinExt
             'nvenc' => $this->systemConfig->get('memories.vod.nvenc'),
             'nvencTemporalAQ' => $this->systemConfig->get('memories.vod.nvenc.temporal_aq'),
             'nvencScale' => $this->systemConfig->get('memories.vod.nvenc.scale'),
+            'nvencTonemapCUDA' => $this->systemConfig->get('memories.vod.nvenc.tonemap_cuda'),
 
             'useTranspose' => $this->systemConfig->get('memories.vod.use_transpose'),
             'forceSwTranspose' => $this->systemConfig->get('memories.vod.use_transpose.force_sw'),

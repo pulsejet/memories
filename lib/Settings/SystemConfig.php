@@ -83,6 +83,7 @@ final class SystemConfig
         'memories.vod.nvenc' => false,  // Transcode with NVIDIA NVENC
         'memories.vod.nvenc.temporal_aq' => false,
         'memories.vod.nvenc.scale' => 'cuda', // cuda or npp
+        'memories.vod.nvenc.tonemap_cuda' => true, // tonemap_cuda (jellyfin/ffmpeg)
 
         // Extra streaming configuration
         'memories.vod.use_transpose' => false,

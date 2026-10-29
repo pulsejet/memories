@@ -98,6 +98,15 @@
 
       <NcCheckboxRadioSwitch
         :disabled="!enableTranscoding || !systemConfig['memories.vod.nvenc']"
+        v-model="systemConfig['memories.vod.nvenc.tonemap_cuda']"
+        @update:model-value="update('memories.vod.nvenc.tonemap_cuda')"
+        type="switch"
+      >
+        {{ t('memories', 'Enable HDR tonemap_cuda (Jellyfin FFmpeg)') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
+        :disabled="!enableTranscoding || !systemConfig['memories.vod.nvenc']"
         v-model="systemConfig['memories.vod.nvenc.scale']"
         value="cuda"
         name="nvence_scaler_radio"

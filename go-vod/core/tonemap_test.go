@@ -90,7 +90,10 @@ func TestCUDATonemapSelection(t *testing.T) {
 	for _, fail := range []bool{false, true} {
 		for _, forceSw := range []bool{false, true} {
 			s, count := tonemapStream(t, fail)
-			s.m.tc.VAAPI, s.m.tc.NVENC, s.m.tc.NVENCScale = false, true, "cuda"
+			s.m.tc.VAAPI = false
+			s.m.tc.NVENC = true
+			s.m.tc.NVENCScale = "cuda"
+			s.m.tc.NVENCTonemapCUDA = true
 			s.m.tc.ForceSwTranspose = forceSw
 			s.m.probe.BitDepth = 10
 			results := make(chan ffmpeg.Spec, 8)

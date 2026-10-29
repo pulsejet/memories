@@ -24,7 +24,7 @@ func (s *Stream) transcodeSpec(startAt float64, isHLS bool) ffmpeg.Spec {
 		spec.VAAPIOpenCL = s.vaapiOpenCL
 	}
 	// The CUDA graph stays on one device, so probe regardless of transpose mode.
-	if ffmpeg.Encoder(spec) == ffmpeg.EncoderNVENC && spec.HDR {
+	if ffmpeg.Encoder(spec) == ffmpeg.EncoderNVENC && spec.HDR && s.m.tc.NVENCTonemapCUDA {
 		s.tonemapOnce.Do(func() {
 			if err := ffmpeg.ProbeNVENCCUDA(context.Background(), spec); err != nil {
 				log.Printf("%s-%s: using software HDR tonemapping: %v", s.m.id, s.quality, err)

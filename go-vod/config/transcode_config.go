@@ -12,9 +12,10 @@ type TCfg struct {
 	VAAPILowPower bool   `json:"vaapiLowPower"`
 	VAAPIDevice   string `json:"vaapiDevice"`
 
-	NVENC           bool   `json:"nvenc"`
-	NVENCTemporalAQ bool   `json:"nvencTemporalAQ"`
-	NVENCScale      string `json:"nvencScale" validate:"required_if=NVENC true,omitempty,oneof=cuda npp"`
+	NVENC            bool   `json:"nvenc"`
+	NVENCTemporalAQ  bool   `json:"nvencTemporalAQ"`
+	NVENCScale       string `json:"nvencScale" validate:"required_if=NVENC true,omitempty,oneof=cuda npp"`
+	NVENCTonemapCUDA bool   `json:"nvencTonemapCUDA"`
 
 	UseTranspose     bool `json:"useTranspose"`
 	ForceSwTranspose bool `json:"forceSwTranspose"`
