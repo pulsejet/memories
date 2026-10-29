@@ -5,11 +5,14 @@
     {{ t('memories', 'Memories ships a built-in preview generator (VIPS) covering various image formats.') }}
     {{ t('memories', 'Using VIPS is recommended to support Ultra-HDR and ICC profiles.') }}
     {{ t('memories', 'You can configure the enabled Nextcloud preview providers below.') }}
-    {{ t('memories', 'To enable RAW support, install the Camera RAW Previews app.') }}
     <a href="https://memories.gallery/file-types/" target="_blank">{{ t('memories', 'Documentation.') }}</a>
     <br />
     <NcCheckboxRadioSwitch type="switch" :model-value="vipsEnabled()" @update:model-value="updateVips($event)"
       >{{ t('memories', 'Built-in image previews (VIPS)') }}
+    </NcCheckboxRadioSwitch>
+
+    <NcCheckboxRadioSwitch type="switch" :model-value="vipsRawEnabled()" :disabled="!vipsEnabled()" @update:model-value="updateVipsRaw($event)"
+      >{{ t('memories', 'Camera RAW previews (VIPS)') }}
     </NcCheckboxRadioSwitch>
 
     <NcTextField
@@ -172,6 +175,16 @@ function updateVips(enabled: boolean) {
   if (!systemConfig.value || enabled === vipsEnabled()) return;
   systemConfig.value['memories.vips.enabled'] = enabled;
   update('memories.vips.enabled');
+}
+
+function vipsRawEnabled(): boolean {
+  return systemConfig.value?.['memories.vips.raw.enabled'] ?? true;
+}
+
+function updateVipsRaw(enabled: boolean) {
+  if (!systemConfig.value || enabled === vipsRawEnabled()) return;
+  systemConfig.value['memories.vips.raw.enabled'] = enabled;
+  update('memories.vips.raw.enabled');
 }
 
 async function updatePreviewSize(size: number | string) {

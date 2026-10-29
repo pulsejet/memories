@@ -44,29 +44,6 @@ use Psr\Log\LoggerInterface;
  */
 final class Vips implements IProviderV2
 {
-    /** MIME types thumbnailable by the static build. */
-    public const MIME_TYPES = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'image/webp',
-        'image/avif',
-        'image/heic',
-        'image/heif',
-        'image/x-heic',
-        'image/x-heif',
-        'image/tiff',
-    ];
-
-    /**
-     * Registration regex covering all MIME_TYPES.
-     *
-     * Deliberately long: the preview manager tries providers in descending
-     * order of regex length, so this sorts before the core single-format
-     * keys and vips takes priority over the core providers.
-     */
-    public const MIME_REGEX = '/image\/(jpeg|png|gif|webp|avif|(x-)?hei[cf]|tiff)/';
-
     public function __construct(
         private BinExt $binExt,
         private SystemConfig $config,
@@ -75,16 +52,38 @@ final class Vips implements IProviderV2
         private LoggerInterface $logger,
     ) {}
 
+    /**
+     * Registration regex covering all supported types.
+     *
+     * Deliberately long: the preview manager tries providers in descending
+     * order of regex length, so this sorts before the core single-format
+     * keys and vips takes priority over the core providers.
+     */
+    public static function mimeRegex(bool $raw): string
+    {
+        $types = 'jpeg|png|gif|webp|avif|(x-)?hei[cf]|tiff';
+        if ($raw) {
+            $types .= '|x-dcraw';
+        }
+
+        return "/image\\/({$types})/";
+    }
+
     public function isEnabled(): bool
     {
         return (bool) $this->config->get('memories.vips.enabled')
             && (bool) $this->config->get('memories.vips.path');
     }
 
+    public function isRawEnabled(): bool
+    {
+        return (bool) $this->config->get('memories.vips.raw.enabled');
+    }
+
     #[\Override]
     public function getMimeType(): string
     {
-        return self::MIME_REGEX;
+        return self::mimeRegex($this->isRawEnabled());
     }
 
     #[\Override]

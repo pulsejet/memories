@@ -12,7 +12,7 @@ final class BinExt
 {
     public const EXIFTOOL_VER = '13.59';
     public const GOVOD_VER = '0.6.3';
-    public const VIPS_VER = 'v8.18.7-9';
+    public const VIPS_VER = 'v8.18.7-10';
     public const NX_VER_MIN = '1.1';
 
     private const GO_VOD_PID_FILE = '/tmp/go-vod.pid';
@@ -449,11 +449,11 @@ final class BinExt
     public function testVipsBin(string $path): string
     {
         $version = trim(Util::execSafe([$path, '--version'], 3000) ?: '');
-        if (!preg_match('/^\d+\.\d+\.\d+$/', $version)) {
+        if (!preg_match('/^\d+\.\d+\.\d+(-\d+)?$/', $version)) {
             throw new \Exception("failed to detect version, found {$version}");
         }
 
-        $target = (string) preg_replace('/^v|-.*$/', '', self::VIPS_VER);
+        $target = (string) preg_replace('/^v/', '', self::VIPS_VER);
         if (!version_compare($version, $target, '=')) {
             throw new \Exception("version does not match: expected {$target} but found {$version}");
         }

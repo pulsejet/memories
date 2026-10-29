@@ -78,7 +78,7 @@ if [ "$(./go-vod-$(arch) -version)" != "go-vod $GOVOD_VER" ]; then
 fi
 
 # Check the version of vips is correct internally
-VIPS_UPSTREAM=$(echo "$VIPS_VER" | sed -e 's/^v//' -e 's/-.*$//')
+VIPS_UPSTREAM=$(echo "$VIPS_VER" | sed -e 's/^v//')
 if [ "$(./vips-$(arch) --version)" != "$VIPS_UPSTREAM" ]; then
     echo "[BUG] vips binary version mismatch"
     exit 1

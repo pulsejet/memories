@@ -33,9 +33,12 @@ AVIF (image/avif)
 HEIC (image/heic)
 HEIF (image/heif)
 TIFF (image/tiff)
+RAW (image/x-dcraw)
 ```
 
 These providers take priority over the Nextcloud core providers: if vips successfully generates a preview, it is used; otherwise generation falls through to the next matching provider.
+
+Camera RAW previews can be disabled in the admin interface (`memories.vips.raw.enabled`).
 
 ## Common Formats
 
@@ -75,4 +78,5 @@ You must also install `ffmpeg` and add the video config to `config.php`.
 
 ## RAW files
 
-Install the [camera raw previews](https://github.com/ariselseng/camerarawpreviews) app from the Nextcloud app store.
+Covered by VIPS out-of-the-box (see above). If VIPS RAW support is disabled,
+install the [camera raw previews](https://github.com/ariselseng/camerarawpreviews) app from the Nextcloud app store.
