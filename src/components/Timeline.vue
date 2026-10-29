@@ -427,8 +427,11 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
   if (from?.hash !== to.hash && !_m.viewer.isOpen && (fragment.viewer || fragment.day)) {
     // Open viewer
     const [dayidStr, key] = fragment.viewer?.args || fragment.day!.args;
-    const dayid = parseInt(dayidStr);
-    if (isNaN(dayid)) return;
+    const dayid = utils.tryParseDayId(dayidStr);
+    if (dayid === undefined) {
+      console.warn('Failed to parse DayID from fragment:', dayidStr);
+      return;
+    }
 
     // Get day
     const day = heads.value.get(dayid)?.day;
@@ -443,10 +446,13 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
 
     // Scroll to photo if initializing, or if just a scroll change.
     if (!from || fragment.day) {
-      const index = list.value.findIndex((r) => {
-        return r.type === 1 && r.day.dayid === dayid && (!photo || r.photos.includes(photo));
-      });
-      if (index !== -1) {
+      let index = list.value.findIndex(
+        (r) => r.type === 1 && r.dayId === dayid && (!photo || r.photos.includes(photo)),
+      );
+      if (index === -1) {
+        index = utils.binarySearch(list.value, dayid, 'dayId');
+      }
+      if (index >= 0 && index < list.value.length) {
         recycler.value?.scrollToItem(index);
       }
     }
