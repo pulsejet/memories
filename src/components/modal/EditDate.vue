@@ -17,7 +17,6 @@
         :label-visible="true"
         :placeholder="t('memories', 'Year')"
         :disabled="disabled"
-        @input="newestChange()"
         @keypress.enter="emit('save')"
       />
       <NcTextField
@@ -30,7 +29,6 @@
         :label-visible="true"
         :placeholder="t('memories', 'Month')"
         :disabled="disabled"
-        @input="newestChange()"
         @keypress.enter="emit('save')"
       />
       <NcTextField
@@ -43,7 +41,6 @@
         :label-visible="true"
         :placeholder="t('memories', 'Day')"
         :disabled="disabled"
-        @input="newestChange()"
         @keypress.enter="emit('save')"
       />
       <NcTextField
@@ -56,7 +53,6 @@
         :label-visible="true"
         :placeholder="t('memories', 'Hour')"
         :disabled="disabled"
-        @input="newestChange(true)"
         @keypress.enter="emit('save')"
       />
       <NcTextField
@@ -68,7 +64,6 @@
         :label="t('memories', 'Minute')"
         :placeholder="t('memories', 'Minute')"
         :disabled="disabled"
-        @input="newestChange(true)"
         @keypress.enter="emit('save')"
       />
     </div>
@@ -91,7 +86,6 @@
           :label-visible="true"
           :placeholder="t('memories', 'Year')"
           :disabled="disabled"
-          @input="oldestChange()"
           @keypress.enter="emit('save')"
         />
         <NcTextField
@@ -104,7 +98,6 @@
           :label-visible="true"
           :placeholder="t('memories', 'Month')"
           :disabled="disabled"
-          @input="oldestChange()"
           @keypress.enter="emit('save')"
         />
         <NcTextField
@@ -117,7 +110,6 @@
           :label-visible="true"
           :placeholder="t('memories', 'Day')"
           :disabled="disabled"
-          @input="oldestChange()"
           @keypress.enter="emit('save')"
         />
         <NcTextField
@@ -130,7 +122,6 @@
           :label-visible="true"
           :placeholder="t('memories', 'Hour')"
           :disabled="disabled"
-          @input="oldestChange()"
           @keypress.enter="emit('save')"
         />
         <NcTextField
@@ -142,7 +133,6 @@
           :label="t('memories', 'Minute')"
           :placeholder="t('memories', 'Minute')"
           :disabled="disabled"
-          @input="oldestChange()"
           @keypress.enter="emit('save')"
         />
       </div>
@@ -191,6 +181,8 @@ const secondLast = ref('0');
 
 const newestDirty = ref(false);
 const oldestDirty = ref(false);
+let isInitializing = false;
+let isSyncingOldest = false;
 
 const date = computed(() => makeDate(year.value, month.value, day.value, hour.value, minute.value, second.value));
 
@@ -213,18 +205,27 @@ const longDateStrLast = computed(() =>
   dateLast.value ? utils.getLongDateStr(dateLast.value, false, true) : t('memories', 'Invalid Date'),
 );
 
-onMounted(() => {
-  init();
-});
-
+onMounted(() => init());
 watch(
   () => props.photos,
-  () => {
-    init();
-  },
+  () => init(),
 );
+watch([year, month, day], () => newestChange(), { flush: 'sync' });
+watch([hour, minute], () => newestChange(true), { flush: 'sync' });
+watch([yearLast, monthLast, dayLast, hourLast, minuteLast], () => oldestChange(), { flush: 'sync' });
 
 function init() {
+  try {
+    isInitializing = true;
+    newestDirty.value = false;
+    oldestDirty.value = false;
+    init_();
+  } finally {
+    isInitializing = false;
+  }
+}
+
+function init_() {
   // Filter out only photos that have a datetaken
   const photos = (sortedPhotos.value = props.photos.filter((photo) => photo.datetaken !== undefined));
 
@@ -290,14 +291,15 @@ function result(photo: IPhoto): undefined | string {
 }
 
 function newestChange(time = false) {
-  if (sortedPhotos.value.length === 0 || !date.value) {
-    return;
-  }
+  if (isInitializing) return;
+  if (sortedPhotos.value.length === 0) return;
+  if (!date.value) return;
 
   newestDirty.value = true;
 
   // Set the last date to have the same offset to newest date
   try {
+    isSyncingOldest = true;
     const dateNew = date.value;
     const offset = dateNew.getTime() - origDateNewest.value.getTime();
     const dateLastNew = new Date(origDateOldest.value.getTime() + offset);
@@ -311,10 +313,15 @@ function newestChange(time = false) {
       minuteLast.value = dateLastNew.getUTCMinutes().toString();
       secondLast.value = dateLastNew.getUTCSeconds().toString();
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isSyncingOldest = false;
+  }
 }
 
 function oldestChange() {
+  if (isInitializing || isSyncingOldest) return;
   oldestDirty.value = true;
 }
 
