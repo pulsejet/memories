@@ -32,7 +32,7 @@ export default {
   target: 'web',
   mode: buildMode,
   devtool: 'source-map',
-  cache: isDev,
+  cache: isDev ? { type: 'filesystem' } : false,
 
   context: path.resolve(__dirname, 'src'),
 
@@ -74,7 +74,7 @@ export default {
   },
 
   watchOptions: {
-    ignored: /node_modules/,
+    ignored: /node_modules|\/js\//,
     aggregateTimeout: 300,
   },
 
@@ -213,6 +213,7 @@ export default {
       swSrc: path.resolve(path.join('src', 'service-worker.ts')),
       swDest: 'memories-service-worker.js',
       maximumFileSizeToCacheInBytes: (isDev ? 50 : 20) * MiB,
+      exclude: [/\.map$/],
     }),
 
     // Make appName & appVersion available as a constant
