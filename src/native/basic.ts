@@ -18,7 +18,10 @@ export async function initialize() {
   // https://github.com/nextcloud/server/blob/8af5e06b6239102cb6905ed5717a62565b3bdfcc/core/src/utils/RedirectUnsupportedBrowsers.js#L9
   coreStore.setItem('unsupported-browser-ignore', 'true');
 
-  // Replicate the server template
+  // General bootstrapping / resets.
+  nxAsync('bootstrap')?.();
+
+  // Replicate the server template.
   initShellSync();
 
   // Register for native-to-web events.

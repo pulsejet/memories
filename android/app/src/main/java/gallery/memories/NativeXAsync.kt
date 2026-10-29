@@ -106,6 +106,7 @@ class NativeXAsync(private val mCtx: MainActivity, private val nativex: NativeX)
     /** Runs one fire-and-forget method on the UI thread. */
     private fun dispatch(method: String, args: JSONArray, replyProxy: JavaScriptReplyProxy) {
         when (method) {
+            "bootstrap" -> nativex.bootstrap()
             "setupEventBus" -> mCtx.eventBus.replyProxy = replyProxy
             "setThemeColor" -> nativex.setThemeColor(
                 args.opt(0)?.takeIf { it != JSONObject.NULL }?.toString(),
