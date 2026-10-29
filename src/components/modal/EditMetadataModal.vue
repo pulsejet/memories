@@ -68,7 +68,7 @@ import EditExif from './EditExif.vue';
 import EditLocation from './EditLocation.vue';
 import EditOrientation from './EditOrientation.vue';
 
-import { showWarning, showError } from '@services/utils/dialog';
+import { showError } from '@services/utils/dialog';
 import axios from '@nextcloud/axios';
 
 import { useModal } from '@services/modal';
@@ -107,7 +107,12 @@ async function open(photosIn: IPhoto[], sectionsIn: number[] = [1, 2, 3, 4]) {
   progress.value = 0;
 
   // Include identical copies hidden by de-duplication (#1299)
+  // and stacked RAW files (#1222, both JPEG and RAW are edited)
   let filtered = photosIn.flatMap((p) => [p, ...(p.dups ?? [])]);
+  filtered = filtered.flatMap((p) => [p, ...(p.stackraw ?? []).flatMap((s) => [s, ...(s.dups ?? [])])]);
+
+  // De-duplicate by fileid (same RAW may be stacked under multiple selections)
+  filtered = filtered.filter((p, i, arr) => arr.findIndex((q) => q.fileid === p.fileid) === i);
 
   // Filter out forbidden MIME types
   filtered = filtered.filter((p) => {
@@ -160,11 +165,6 @@ async function open(photosIn: IPhoto[], sectionsIn: number[] = [1, 2, 3, 4]) {
   if (valid.length === 0) {
     close();
     return;
-  }
-
-  // Warn user if any raw stacks are present
-  if (valid.some((p) => p.stackraw?.length)) {
-    showWarning(t('memories', 'Some selected items have stacked RAW files.\nRAW files will not be edited.'));
   }
 
   photos.value = valid;

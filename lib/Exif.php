@@ -23,7 +23,7 @@ final class Exif
     public const PANO_SPHERE = 2; // confirmed
 
     /** @var list<string> */
-    private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'image/x-dcraw', 'video/MP2T']; // also update const.ts
+    private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'video/MP2T']; // also update const.ts
     private const EXIFTOOL_TIMEOUT = 30000;
 
     /** @var list<string> */
