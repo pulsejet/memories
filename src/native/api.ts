@@ -161,6 +161,15 @@ export type NativeX = {
    */
   isNative: () => boolean;
 
+  /** General setup after boot. */
+  bootstrap?: () => void;
+
+  /** Get the native platform. */
+  getPlatform?: () => 'android' | 'ios';
+
+  /** No-op on the sync bridge. */
+  setupEventBus?: () => void;
+
   /**
    * Set the theme color of the app.
    * @param color Color to set
@@ -223,12 +232,6 @@ export type NativeX = {
    * @returns JSON-encoded array of LocalFolderConfig
    */
   configGetLocalFolders: () => string;
-
-  /** Get the native platform. */
-  getPlatform?: () => 'android' | 'ios';
-
-  /** No-op on the sync bridge. */
-  setupEventBus?: () => void;
 
   /**
    * Check if the user has allowed media access.
@@ -309,6 +312,7 @@ export function has() {
 /** NativeX asynchronous (fire-and-forget) API over WebMessage. */
 export type NativeXAsync = Pick<
   NativeX,
+  | 'bootstrap'
   | 'setupEventBus'
   | 'setThemeColor'
   | 'playTouchSound'

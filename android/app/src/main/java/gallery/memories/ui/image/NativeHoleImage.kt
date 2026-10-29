@@ -42,11 +42,16 @@ class NativeHoleImage(private val mCtx: MainActivity) {
     private val imageMutex = Mutex()
 
     /** Highest upload counter rendered so far; lower ones are ignored. */
-    private var lastSeq = 0L
+    @Volatile
+    private var lastSeq = -1L
 
     /** Currently displayed file; deleted after replacement. */
     private var currentFile: java.io.File? = null
     private var lastRect: FloatArray? = null
+
+    fun resetSequence() {
+        lastSeq = -1L
+    }
 
     fun show(show: Boolean) {
         if (!show) {

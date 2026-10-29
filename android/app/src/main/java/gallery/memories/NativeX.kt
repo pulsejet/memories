@@ -98,6 +98,16 @@ class NativeX(private val mCtx: MainActivity) {
     @JavascriptInterface
     fun getPlatform(): String = "android"
 
+    /** Bootstraps a fresh page session on the native side. */
+    @JavascriptInterface
+    fun bootstrap() {
+        mCtx.runOnUiThread {
+            container.holeImage.show(false)
+            container.holeVideo.release()
+            container.holeImage.resetSequence()
+        }
+    }
+
     /** No-op for feature detection; real registration happens via [NativeXAsync]. */
     @JavascriptInterface
     fun setupEventBus() = Unit
