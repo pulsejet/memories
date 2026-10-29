@@ -16,6 +16,7 @@ import { showError, showSuccess } from '@services/utils/dialog';
 
 import { useRouteIs } from '@services/route-is';
 import { t, n } from '@services/l10n';
+import { constants } from '@services/constants';
 import * as utils from '@services/utils/common';
 import initstate from '@services/init-state';
 import { createClient, type FileStat } from 'webdav';
@@ -56,7 +57,7 @@ function startUpload() {
   const input = document.createElement('input');
   input.type = 'file';
   input.multiple = true;
-  input.accept = 'image/*,image/heic,image/tiff,video/*';
+  input.accept = constants.UPLOAD_ACCEPT.join(',');
 
   input.addEventListener('cancel', () => input.remove());
   input.addEventListener('change', async () => {
