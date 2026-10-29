@@ -153,7 +153,7 @@ final class Vips implements IProviderV2
             throw new \Exception('failed to encode vips request');
         }
 
-        [$data, $stderr] = Util::execSafe2([$vips], 30000, $stdin, true, true);
+        [1 => $data, 2 => $stderr] = Util::execSafe2([$vips], 30000, $stdin, [1, 2]);
 
         if (!\is_string($data) || empty($data)) {
             throw new \Exception(self::vipsError((string) $stderr) ?: 'empty output from vips');
@@ -200,7 +200,7 @@ final class Vips implements IProviderV2
             throw new \Exception('failed to encode vips request');
         }
 
-        [$data, $stderr] = Util::execSafe2([$vips], 30000, $stdin, true, true);
+        [1 => $data, 2 => $stderr] = Util::execSafe2([$vips], 30000, $stdin, [1, 2]);
 
         if (!\is_string($data) || '' === $data) {
             throw new \Exception(self::vipsError((string) $stderr) ?: 'empty output from vips');

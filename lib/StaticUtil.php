@@ -46,11 +46,11 @@ class StaticUtil
     public static function getLibc(): ?string
     {
         // glibc -> stdout, musl -> stderr
-        $output = self::execSafe2(['ldd', '--version'], 3000, null, true, true);
+        $output = self::execSafe2(['ldd', '--version'], 3000, null, [1, 2]);
 
         // check in either
-        $ldd = strtolower($output[0] ?? '')
-            .strtolower($output[1] ?? '');
+        $ldd = strtolower($output[1] ?? '')
+            .strtolower($output[2] ?? '');
 
         if (str_contains($ldd, 'musl')) {
             return 'musl';
@@ -216,26 +216,43 @@ class StaticUtil
     /**
      * Execute a command safely.
      *
-     * @param string[] $cmd     command to execute
-     * @param int      $timeout milliseconds
-     * @param ?string  $stdin   standard input
+     * @param list<string> $cmd     command to execute
+     * @param int          $timeout milliseconds
+     * @param ?string      $stdin   standard input
      *
-     * @return string standard output
+     * @return ?string standard output
      *
      * @throws \Exception on error
      */
     public static function execSafe(array $cmd, int $timeout, ?string $stdin = null): ?string
     {
-        return self::execSafe2($cmd, $timeout, $stdin, true, false)[0];
+        return self::execSafe2($cmd, $timeout, $stdin, [1])[1] ?? null;
     }
 
-    /** Exec safe with extra options */
-    public static function execSafe2(array $cmd, int $timeout, ?string $stdin, bool $rstdout, bool $rstderr): array
+    /**
+     * Exec safe with extra options.
+     *
+     * @param list<string> $cmd     command to execute
+     * @param int          $timeout milliseconds
+     * @param ?string      $stdin   standard input
+     * @param list<int>    $capture FD numbers to capture, e.g. [1, 2]
+     *
+     * @return array<int,?string> captured output keyed by FD
+     *
+     * @throws \Exception on error
+     */
+    public static function execSafe2(array $cmd, int $timeout, ?string $stdin, array $capture): array
     {
-        $config = [
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ];
+        $config = [];
+        foreach ($capture as $fd) {
+            $config[$fd] = ['pipe', 'w'];
+        }
+
+        foreach ([1, 2] as $fd) {
+            if (!isset($config[$fd])) {
+                $config[$fd] = ['file', '/dev/null', 'w'];
+            }
+        }
         if (null !== $stdin) {
             $config[0] = ['pipe', 'r'];
         }
@@ -245,8 +262,9 @@ class StaticUtil
         if (!\is_resource($proc)) {
             throw new \Exception('proc_open failed: '.implode(' ', $cmd));
         }
-        stream_set_blocking($pipes[1], false);
-        stream_set_blocking($pipes[2], false);
+        foreach ($capture as $fd) {
+            stream_set_blocking($pipes[$fd], false);
+        }
 
         if (null !== $stdin) {
             fwrite($pipes[0], $stdin);
@@ -254,21 +272,16 @@ class StaticUtil
         }
 
         try {
-            $output = [null, null];
-
-            if ($rstdout) {
-                $output[0] = self::readOrTimeout($pipes[1], $timeout);
-            }
-            if ($rstderr) {
-                $output[1] = self::readOrTimeout($pipes[2], $timeout);
+            $output = [];
+            foreach ($capture as $fd) {
+                $output[$fd] = self::readOrTimeout($pipes[$fd], $timeout);
             }
 
             return $output;
-        } catch (\Exception $ex) {
-            throw $ex;
         } finally {
-            fclose($pipes[1]);
-            fclose($pipes[2]);
+            foreach ($capture as $fd) {
+                fclose($pipes[$fd]);
+            }
             proc_terminate($proc);
             proc_close($proc);
         }

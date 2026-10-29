@@ -22,8 +22,11 @@ final class Exif
     public const PANO_WIDE = 1; // maybe
     public const PANO_SPHERE = 2; // confirmed
 
+    /** @var list<string> */
     private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'image/x-dcraw', 'video/MP2T']; // also update const.ts
     private const EXIFTOOL_TIMEOUT = 30000;
+
+    /** @var list<string> */
     private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-api', 'LargeFileSupport=1', '-n', '-json'];
     private const INVALID_PATH_PATTERN = '/[\r\n\x00]/';
 
@@ -383,9 +386,9 @@ final class Exif
 
         try {
             $raw = json_encode([$data], JSON_UNESCAPED_UNICODE);
-            $output = Util::execSafe2($cmd, self::EXIFTOOL_TIMEOUT, $raw, true, true);
-            $stdout = $output[0];
-            $stderr = $output[1];
+            $output = Util::execSafe2($cmd, self::EXIFTOOL_TIMEOUT, $raw, [1, 2]);
+            $stdout = $output[1];
+            $stderr = $output[2];
         } catch (\Exception $ex) {
             error_log("Timeout reading from exiftool: [{$path}]");
 
@@ -482,6 +485,7 @@ final class Exif
         }
     }
 
+    /** @return list<string> */
     private function getExiftool(): array
     {
         return $this->binExt->getExiftool();
@@ -540,6 +544,10 @@ final class Exif
         }
     }
 
+    /**
+     * @param string       $path      the local file path to read EXIF data from
+     * @param list<string> $extraArgs additional arguments to pass to exiftool
+     */
     private function getExifFromLocalPathWithSeparateProc(string $path, array $extraArgs = []): array
     {
         $cmd = array_merge($this->getExiftool(), self::EXIFTOOL_ARGS, $extraArgs, [$path]);
