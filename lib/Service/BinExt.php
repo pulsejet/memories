@@ -132,7 +132,7 @@ final class BinExt
     /**
      * Get path to exiftool binary for proc_open.
      *
-     * @return string[]
+     * @return list<string>
      */
     public function getExiftool(): array
     {
