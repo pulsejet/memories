@@ -1,6 +1,7 @@
 package gallery.memories.ui.image
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.PointF
@@ -91,6 +92,9 @@ class NativeHoleImage(private val mCtx: MainActivity) {
 
     private fun ensureConfigured(view: SubsamplingScaleImageView) {
         if (!configured.add(view)) return
+        SubsamplingScaleImageView.setPreferredBitmapConfig(
+            if (useF16) Bitmap.Config.RGBA_F16 else Bitmap.Config.ARGB_8888,
+        )
         view.setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_OUTSIDE)
         view.setPanEnabled(false)
         view.setZoomEnabled(false)
@@ -103,6 +107,17 @@ class NativeHoleImage(private val mCtx: MainActivity) {
     }
 
     private val configured = mutableSetOf<SubsamplingScaleImageView>()
+
+    /** Half-float decode when the screen can show it and RAM allows. */
+    private val useF16: Boolean by lazy {
+        val configuration = mCtx.resources.configuration
+        val wideColor = configuration.isScreenWideColorGamut ||
+            (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R &&
+                configuration.isScreenHdr)
+        val lowRam =
+            mCtx.getSystemService(android.app.ActivityManager::class.java)?.isLowRamDevice ?: true
+        wideColor && !lowRam
+    }
 
     /**
      * Replace the hole content with raw preview bytes. Resolves once rendered;
