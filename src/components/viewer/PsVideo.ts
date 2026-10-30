@@ -236,7 +236,9 @@ class VideoContentSetup {
       () => {
         if (signal.aborted) return;
         content.videoHasPlayed = true;
-        content.data.nxVideoState = 'loaded';
+        if (content.slide) {
+          content.slide.data.nxVideoState = 'loaded';
+        }
         player.dataset.started = 'true';
         this.lightbox.dispatch('initialZoomPan');
         this.getWakeLock();
@@ -246,7 +248,9 @@ class VideoContentSetup {
     player.addEventListener(
       'error',
       () => {
-        content.data.nxVideoState = 'error';
+        if (content.slide) {
+          content.slide.data.nxVideoState = 'error';
+        }
         void this.tryFailover(content);
       },
       { signal },
@@ -474,10 +478,12 @@ class VideoContentSetup {
     if (content.element) {
       content.element.innerHTML = '';
     }
+    if (content.slide) {
+      content.slide.data.nxVideoState = undefined;
+    }
     content.videoPlayer = null;
     content.videoFailedOver = false;
     content.videoHasPlayed = false;
-    content.data.nxVideoState = undefined;
   }
 
   onContentDestroy({ content }: PsVideoEvent) {

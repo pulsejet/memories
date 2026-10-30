@@ -107,18 +107,16 @@ export default class PsNativeHole {
   private updateClip() {
     const slide = this.lightbox.currSlide as unknown as PsSlide | undefined;
     const slideType = slide?.data.type;
-    if (!slideType) {
+    if (!slide || !slideType) {
       return this.hide();
     } else if (slideType === 'image') {
-      if (!nativex.viewImageIsEnabled() || slide?.data.nxImageState !== 'loaded' || slide?.data.nxImageDisabled) {
+      if (!nativex.viewImageIsEnabled() || slide.data.nxImageState !== 'loaded' || slide.data.nxImageDisabled) {
         return this.hide();
       }
     } else if (slideType === 'video') {
-      if (!nativex.viewVideoIsEnabled() || slide?.data.nxVideoState !== 'loaded') {
+      if (!nativex.viewVideoIsEnabled() || slide.data.nxVideoState !== 'loaded') {
         return this.hide();
       }
-    } else {
-      return this.hide();
     }
 
     const holderElement = slide.holderElement;
