@@ -106,7 +106,7 @@ export const FILTERS: FilterDef[] = [
 
 export const RATIOS: RatioDef[] = [
   { id: 'free', label: 'Free' },
-  { id: 'orig', label: 'Orig' },
+  { id: 'orig', label: 'Original' },
   { id: '1', label: '1:1' },
   { id: '1.333', label: '4:3' },
   { id: '1.5', label: '3:2' },
