@@ -40,6 +40,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   close: [];
+  ready: [];
 }>();
 
 const editor = useTemplateRef('editor');
@@ -119,6 +120,7 @@ async function loadSource(url: string) {
     lastEditsJson = '';
     if (editor.value) onChange({ ...editor.value.state });
     ready.value = true;
+    emit('ready');
   } catch (e) {
     console.error('Photo editor preview failed', e);
   }

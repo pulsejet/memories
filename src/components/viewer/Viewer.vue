@@ -11,7 +11,13 @@
     }"
     @fullscreenchange="fullscreenChange"
   >
-    <PhotoEditor v-if="editorOpen && currentPhoto" :photo="currentPhoto" @close="editorOpen = false" />
+    <PhotoEditor
+      v-if="editorOpen && currentPhoto"
+      v-show="editorReady"
+      :photo="currentPhoto"
+      @ready="editorReady = true"
+      @close="closeEditor"
+    />
 
     <!-- Loading indicator -->
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
@@ -19,7 +25,7 @@
     <div
       ref="inner"
       class="inner"
-      v-show="!editorOpen"
+      v-show="!(editorOpen && editorReady)"
       @pointermove.passive="setUiVisible"
       @pointerdown.passive="setUiVisible"
       @touchstart.passive="tapPatch.onTouchStart"
@@ -205,6 +211,7 @@ const loading = ref(0);
 const isOpen = ref(false);
 let originalTitle: string | null = null;
 const editorOpen = ref(false);
+const editorReady = ref(false);
 
 const show = ref(false);
 const fullyOpened = ref(false);
@@ -788,6 +795,7 @@ async function createBase(args: PhotoSwipeOptions) {
     isOpen.value = false;
     fullyOpened.value = false;
     editorOpen.value = false;
+    editorReady.value = false;
     sheetOpen.value = false;
     photoswipe.value = null;
     list.value = [];
@@ -1219,7 +1227,14 @@ async function openEditor() {
   }
 
   // Open editor
+  editorReady.value = false;
   editorOpen.value = true;
+}
+
+/** Close the editor and reset its ready gate */
+function closeEditor() {
+  editorOpen.value = false;
+  editorReady.value = false;
 }
 
 /** Share the current photo externally */
