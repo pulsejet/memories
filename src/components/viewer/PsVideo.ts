@@ -2,6 +2,7 @@ import { showError } from '@services/utils/dialog';
 
 import { translate as t } from '@services/l10n';
 import { config } from '@services/user-config';
+import { state as castState } from '@services/cast';
 import { constants } from '@services/constants';
 import { getPlayableVideoCodecsSync } from '@services/video/codec';
 import * as utils from '@services/utils/common';
@@ -228,7 +229,8 @@ class VideoContentSetup {
     player.title = content.data.photo.basename ?? '';
     player.playsInline = true;
 
-    if (config.video_autoplay === 'true') {
+    // Don't play along locally while the TV plays the video
+    if (config.video_autoplay === 'true' && !castState.connected) {
       player.preload = 'metadata';
       player.autoPlay = true;
     } else {
