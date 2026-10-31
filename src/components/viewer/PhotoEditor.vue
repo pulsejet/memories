@@ -275,7 +275,7 @@ function onKeydown(e: KeyboardEvent) {
     e.stopImmediatePropagation();
     onBack();
   } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-    if (!ready.value || saveModalOpen.value) return;
+    if (!ready.value || saveModalOpen.value || !isDirty()) return;
     e.preventDefault();
     e.stopImmediatePropagation();
     if (editor.value) onSave({ ...editor.value.state });
