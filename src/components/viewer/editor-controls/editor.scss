@@ -710,6 +710,11 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     &:hover {
       filter: brightness(1.22);
     }
+
+    &:disabled {
+      opacity: 0.4;
+      filter: none;
+    }
   }
 
   // --- sidebar ----------------------------------------------------------------------

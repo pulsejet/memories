@@ -12,7 +12,7 @@
           <slot name="preview" />
         </EditorCropStage>
 
-        <EditorFloatActions :save-label="saveLabel" @close="emit('back')" @save="onSave" />
+        <EditorFloatActions :save-label="saveLabel" :disabled="!hasEdits" @close="emit('back')" @save="onSave" />
         <EditorMobileBar
           :state="state"
           :defaults="defaults"
@@ -94,6 +94,15 @@ const defaults = reactive<Record<string, number>>({ ...DEFAULT_PARAMS });
 const section = ref<EditorSection>('crop');
 /** Slider currently loaded in the mobile ruler pill. Null = nothing selected. */
 const mobileKey = ref<string | null>(null);
+
+/** Whether the state differs from the pristine defaults (drives the save button). */
+const hasEdits = computed(() => {
+  for (const key of Object.keys(INITIAL_STATE) as (keyof EditorState)[]) {
+    if (key === 'comparing') continue;
+    if (state[key] !== INITIAL_STATE[key]) return true;
+  }
+  return false;
+});
 
 const cropStage = useTemplateRef('cropStage');
 
