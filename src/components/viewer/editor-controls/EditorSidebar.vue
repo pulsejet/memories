@@ -115,7 +115,7 @@
               @click="onPreset(f.id)"
             >
               <span class="me-thumb" :style="thumbStyle">
-                <slot name="filter-thumb" :filter="f" :index="filterIndex(f)" />
+                <slot name="filter-thumb" :filter="f" :edits="editsFor(f)" :index="filterIndex(f)" />
               </span>
               <span class="me-filter-name">{{ f.name }}</span>
             </button>
@@ -138,8 +138,10 @@ import Tune from 'vue-material-design-icons/Tune.vue';
 import EditorSlider from './EditorSlider.vue';
 import * as nativex from '@native';
 import { iconFor } from './paramIcons';
-import { FILTERS, FILTER_GROUPS, RATIOS, SLIDER_DEFS, filtersInGroup } from './types';
+import { stateToEdits } from './stateToEdits';
+import { FILTERS, FILTER_GROUPS, INITIAL_STATE, RATIOS, SLIDER_DEFS, filtersInGroup } from './types';
 import type { EditorParams, EditorSection, EditorState, FilterDef } from './types';
+import type { Edit } from '@radialapps/memories-vips-editor';
 
 const props = defineProps<{
   state: EditorState;
@@ -231,6 +233,18 @@ function onPreset(id: string) {
 /** Flat FILTERS index for the filter-thumb slot (was the v-for index). */
 function filterIndex(f: FilterDef): number {
   return FILTERS.indexOf(f);
+}
+
+// Pure-preset edits per filter for the filter-thumb slot, memoized:
+// stateToEdits is pure, so each preset maps to one stable list.
+const presetEditsCache = new Map<string, Edit[]>();
+function editsFor(f: FilterDef): Edit[] {
+  let e = presetEditsCache.get(f.id);
+  if (!e) {
+    e = stateToEdits({ ...INITIAL_STATE, preset: f.id });
+    presetEditsCache.set(f.id, e);
+  }
+  return e;
 }
 
 // Sliding Material indicator, positioned in px like the mockup.
