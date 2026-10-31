@@ -788,6 +788,12 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
   }
+  // Divider between filter groups (hot / cold / gray); no text labels.
+  .me-filter-sep {
+    height: 1px;
+    background: var(--me-line);
+    margin: 12px 0;
+  }
   .me-filter-card {
     border-radius: 0;
     overflow: visible;
@@ -857,6 +863,14 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     &::-webkit-scrollbar {
       display: none;
     }
+  }
+  // Divider between filter groups in the mobile chip strip.
+  .me-bar-sep {
+    flex: none;
+    width: 1px;
+    align-self: stretch;
+    margin: 8px 2px;
+    background: rgba(255, 255, 255, 0.12);
   }
   .me-m-tab {
     flex: none;

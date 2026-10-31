@@ -21,9 +21,12 @@ export interface SliderDef {
   group: 'light' | 'color' | 'crop';
 }
 
+export type FilterGroup = 'base' | 'hot' | 'cold' | 'gray';
+
 export interface FilterDef {
   id: string;
   name: string;
+  group: FilterGroup;
 }
 
 export interface RatioDef {
@@ -94,15 +97,39 @@ export const INITIAL_STATE: EditorState = {
   cropH: 1,
 };
 
+export const FILTER_GROUPS: FilterGroup[] = ['base', 'hot', 'cold', 'gray'];
+
 export const FILTERS: FilterDef[] = [
-  { id: '', name: 'None' },
-  { id: 'vivid', name: 'Vivid' },
-  { id: 'warm', name: 'Warm' },
-  { id: 'cool', name: 'Cool' },
-  { id: 'fade', name: 'Fade' },
-  { id: 'mono', name: 'Mono' },
-  { id: 'noir', name: 'Noir' },
+  // Neutral starting point + gentle all-rounders.
+  { id: '', name: 'None', group: 'base' },
+  { id: 'vivid', name: 'Vivid', group: 'base' },
+  { id: 'bold', name: 'Bold', group: 'base' },
+  // Warm grades.
+  { id: 'warm', name: 'Warm', group: 'hot' },
+  { id: 'vividWarm', name: 'Vivid Warm', group: 'hot' },
+  { id: 'sepia', name: 'Sepia', group: 'hot' },
+  { id: 'valencia', name: 'Valencia', group: 'hot' },
+  { id: 'boldWarm', name: 'Bold Warm', group: 'hot' },
+  { id: 'xpro2', name: 'X-Pro II', group: 'hot' },
+  // Cool grades.
+  { id: 'cool', name: 'Cool', group: 'cold' },
+  { id: 'vividCool', name: 'Vivid Cool', group: 'cold' },
+  { id: 'clarendon', name: 'Clarendon', group: 'cold' },
+  { id: 'lark', name: 'Lark', group: 'cold' },
+  { id: 'boldCool', name: 'Bold Cool', group: 'cold' },
+  { id: 'gingham', name: 'Gingham', group: 'cold' },
+  // Black & white, matte and special.
+  { id: 'mono', name: 'Mono', group: 'gray' },
+  { id: 'noir', name: 'Noir', group: 'gray' },
+  { id: 'silvertone', name: 'Silvertone', group: 'gray' },
+  { id: 'inkwell', name: 'Inkwell', group: 'gray' },
+  { id: 'fade', name: 'Fade', group: 'gray' },
+  { id: 'invert', name: 'Negative', group: 'gray' },
 ];
+
+export function filtersInGroup(group: FilterGroup): FilterDef[] {
+  return FILTERS.filter((f) => f.group === group);
+}
 
 export const RATIOS: RatioDef[] = [
   { id: 'free', label: 'Free' },

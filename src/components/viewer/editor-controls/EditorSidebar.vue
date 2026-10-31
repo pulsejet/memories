@@ -104,20 +104,23 @@
 
       <section class="me-panel" :class="{ 'is-active': section === 'filters' }" role="tabpanel">
         <div class="me-group-label">Presets</div>
-        <div class="me-filter-grid">
-          <button
-            v-for="(f, i) in FILTERS"
-            :key="f.id"
-            class="me-filter-card me-clickable button-vue"
-            :class="{ 'is-active': state.preset === f.id }"
-            @click="onPreset(f.id)"
-          >
-            <span class="me-thumb" :style="thumbStyle">
-              <slot name="filter-thumb" :filter="f" :index="i" />
-            </span>
-            <span class="me-filter-name">{{ f.name }}</span>
-          </button>
-        </div>
+        <template v-for="(group, gi) in FILTER_GROUPS" :key="group">
+          <div v-if="gi > 0" class="me-filter-sep" role="separator" />
+          <div class="me-filter-grid">
+            <button
+              v-for="f in filtersInGroup(group)"
+              :key="f.id"
+              class="me-filter-card me-clickable button-vue"
+              :class="{ 'is-active': state.preset === f.id }"
+              @click="onPreset(f.id)"
+            >
+              <span class="me-thumb" :style="thumbStyle">
+                <slot name="filter-thumb" :filter="f" :index="filterIndex(f)" />
+              </span>
+              <span class="me-filter-name">{{ f.name }}</span>
+            </button>
+          </div>
+        </template>
       </section>
     </div>
   </aside>
@@ -135,8 +138,8 @@ import Tune from 'vue-material-design-icons/Tune.vue';
 import EditorSlider from './EditorSlider.vue';
 import * as nativex from '@native';
 import { iconFor } from './paramIcons';
-import { FILTERS, RATIOS, SLIDER_DEFS } from './types';
-import type { EditorParams, EditorSection, EditorState } from './types';
+import { FILTERS, FILTER_GROUPS, RATIOS, SLIDER_DEFS, filtersInGroup } from './types';
+import type { EditorParams, EditorSection, EditorState, FilterDef } from './types';
 
 const props = defineProps<{
   state: EditorState;
@@ -223,6 +226,11 @@ function onFlipV() {
 function onPreset(id: string) {
   nativex.playTouchSound();
   emit('update:preset', id);
+}
+
+/** Flat FILTERS index for the filter-thumb slot (was the v-for index). */
+function filterIndex(f: FilterDef): number {
+  return FILTERS.indexOf(f);
 }
 
 // Sliding Material indicator, positioned in px like the mockup.
