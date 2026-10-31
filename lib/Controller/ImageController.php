@@ -468,19 +468,15 @@ final class ImageController extends ApiController
         string $extension,
         array $edits = [],
         int $quality = 90,
+        bool $copy = false,
     ): Http\Response {
-        return $this->util->guardEx(function () use ($id, $name, $extension, $edits, $quality) {
+        return $this->util->guardEx(function () use ($id, $name, $extension, $edits, $quality, $copy) {
             // Get the file
             $file = $this->fs->getUserFile($id);
 
             // Live photos must always be saved as a copy.
             $isLivePhoto = (bool) $this->tq->getLiveId($file->getId());
-            if ($isLivePhoto && $name === $file->getName()) {
-                $name = $file->getParent()->getNonExistingName($name);
-            }
-
-            // Check if creating a copy
-            $copy = $name !== $file->getName();
+            $copy = $copy || $isLivePhoto || $name !== $file->getName();
 
             // Single-file shares must not allow copy-edit.
             if ($copy && $this->fs->getShareNode() instanceof \OCP\Files\File) {
@@ -504,9 +500,9 @@ final class ImageController extends ApiController
                 throw Exceptions::BadRequest('Invalid quality');
             }
 
-            // Check if target copy file exists
-            if ($copy && $file->getParent()->nodeExists($name)) {
-                throw Exceptions::ForbiddenFileUpdate($name);
+            // Copies never overwrite, pick the next free name.
+            if ($copy && ($name === $file->getName() || $file->getParent()->nodeExists($name))) {
+                $name = $file->getParent()->getNonExistingName($name);
             }
 
             // Read the image from the local path to avoid buffering into PHP
