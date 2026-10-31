@@ -32,6 +32,18 @@
       </div>
     </div>
 
+    <div v-if="showRatioPill" class="me-bar me-glass" aria-label="Crop ratios">
+      <button
+        v-for="r in RATIOS"
+        :key="r.id"
+        class="me-chip me-clickable button-vue"
+        :class="{ 'is-active': state.ratio === r.id }"
+        @click="onPickRatio(r.id)"
+      >
+        <span>{{ r.label }}</span>
+      </button>
+    </div>
+
     <div class="me-bar me-glass" aria-label="Options">
       <template v-if="section === 'adjust'">
         <button
@@ -47,14 +59,11 @@
         </button>
       </template>
       <template v-else-if="section === 'crop'">
-        <button
-          v-for="r in RATIOS"
-          :key="r.id"
-          class="me-chip me-clickable button-vue"
-          :class="{ 'is-active': state.ratio === r.id }"
-          @click="emit('update:ratio', r.id)"
-        >
-          <span>{{ r.label }}</span>
+        <button class="me-chip me-clickable button-vue" @click="emit('rotate-left')">
+          <span class="me-chip-icon"><RotateLeft :size="17" /></span><span>−90°</span>
+        </button>
+        <button class="me-chip me-clickable button-vue" @click="emit('rotate-right')">
+          <span class="me-chip-icon"><RotateRight :size="17" /></span><span>+90°</span>
         </button>
         <button
           class="me-chip me-clickable button-vue"
@@ -65,17 +74,20 @@
           <span>Straighten</span>
           <span class="me-chip-val">{{ formatParamValue('straighten', state.straighten) }}</span>
         </button>
-        <button class="me-chip me-clickable button-vue" @click="emit('rotate-left')">
-          <span class="me-chip-icon"><RotateLeft :size="17" /></span><span>−90°</span>
-        </button>
-        <button class="me-chip me-clickable button-vue" @click="emit('rotate-right')">
-          <span class="me-chip-icon"><RotateRight :size="17" /></span><span>+90°</span>
-        </button>
         <button class="me-chip me-clickable button-vue" @click="emit('flip-h')">
           <span class="me-chip-icon"><FlipHorizontal :size="17" /></span><span>Flip H</span>
         </button>
         <button class="me-chip me-clickable button-vue" @click="emit('flip-v')">
           <span class="me-chip-icon"><FlipVertical :size="17" /></span><span>Flip V</span>
+        </button>
+        <button
+          class="me-chip me-clickable button-vue"
+          :class="{ 'is-active': mobileKey === 'ratio' }"
+          @click="emit('update:mobile-key', 'ratio')"
+        >
+          <span class="me-chip-icon"><AspectRatio :size="17" /></span>
+          <span>Ratio</span>
+          <span class="me-chip-val">{{ ratioLabel }}</span>
         </button>
       </template>
       <template v-else>
@@ -108,6 +120,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import AspectRatio from 'vue-material-design-icons/AspectRatio.vue';
 import AutoFix from 'vue-material-design-icons/AutoFix.vue';
 import Crop from 'vue-material-design-icons/Crop.vue';
 import FlipHorizontal from 'vue-material-design-icons/FlipHorizontal.vue';
@@ -128,7 +141,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:section': [s: EditorSection];
-  'update:mobile-key': [k: string];
+  'update:mobile-key': [k: string | null];
   'update:param': [key: string, v: number];
   'reset:param': [key: string];
   'update:preset': [id: string];
@@ -145,7 +158,9 @@ const tabs = [
   { id: 'filters' as EditorSection, label: 'Filters', icon: AutoFix },
 ];
 
-const showRuler = computed(() => props.section !== 'filters' && !!props.mobileKey);
+const showRuler = computed(() => props.section !== 'filters' && !!rulerDef.value);
+const showRatioPill = computed(() => props.section === 'crop' && props.mobileKey === 'ratio');
+const ratioLabel = computed(() => RATIOS.find((r) => r.id === props.state.ratio)?.label ?? '');
 const rulerDef = computed(() => (props.mobileKey ? PARAM_DEFS[props.mobileKey] : undefined));
 const rulerValue = computed(() => (props.mobileKey ? (props.state as any)[props.mobileKey] : 0));
 const rulerText = computed(() => (props.mobileKey ? formatParamValue(props.mobileKey, rulerValue.value) : ''));
@@ -328,6 +343,11 @@ function onRulerKey(e: KeyboardEvent) {
 
 function onRulerReset() {
   if (props.mobileKey && rulerChanged.value) emit('reset:param', props.mobileKey);
+}
+
+function onPickRatio(id: string) {
+  emit('update:ratio', id);
+  emit('update:mobile-key', null);
 }
 
 watch(() => props.mobileKey, buildRuler);
