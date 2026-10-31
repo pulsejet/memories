@@ -13,8 +13,8 @@ import type { EditorState } from './types';
  *
  * Only parameters with a clean VIPS mapping in
  * @radialapps/memories-vips-editor are translated. Geometry (rotate,
- * straighten, crop) is handled separately by stateToSaveEdits; flip has no
- * vips edit yet and is preview-only.
+ * straighten, flip, crop) is handled separately by stateToSaveEdits, which
+ * appends the vips-side equivalents the CSS stage applies to the canvas.
  */
 
 const P_EXPOSURE = 10;
@@ -241,11 +241,10 @@ function normAngle(angle: number): number {
  * Map an EditorState snapshot to the full vips save payload.
  *
  * Pixel edits come from stateToEdits (preview WYSIWYG). Geometry that vips
- * supports (rotate incl. straighten, crop) is appended after the pixels so
- * the backend renders `pixels -> rotate -> crop`, matching the editor where
- * the WebGL pixels are cropped/rotated by the CSS stage.
+ * supports (rotate incl. straighten, flip, crop) is appended after the pixels
+ * so the backend renders `pixels -> rotate -> flip -> crop`, matching the
+ * editor where the WebGL pixels are flipped/rotated/cropped by the CSS stage.
  *
- * Flip has no vips edit yet and is dropped for now (preview-only).
  * Comparing mode is ignored: saving always persists the actual edits.
  */
 export function stateToSaveEdits(state: EditorState, natW: number, natH: number): Edit[] {
@@ -257,9 +256,24 @@ export function stateToSaveEdits(state: EditorState, natW: number, natH: number)
   }
 
   // Straighten folds into the rotate edit (single resample, no double band).
-  const angle = normAngle((state.rotate || 0) + (state.straighten || 0));
+  // A mirror reverses rotation direction (F·R(θ) = R(−θ)·F), so with exactly
+  // one flip axis the straighten contribution flips sign: the CSS stage
+  // tilts after flipping, the backend fuses before it.
+  const flipH = (state.flipH ?? 1) < 0;
+  const flipV = (state.flipV ?? 1) < 0;
+  const angle = normAngle((state.rotate || 0) + (flipH !== flipV ? -1 : 1) * (state.straighten || 0));
   if (Math.abs(angle) > 1e-9) {
     edits.push({ edit: 'rotate', angle });
+  }
+
+  // Flip mirrors the CSS stage (scale after rotate): one edit per mirrored
+  // axis, after rotate and before crop. toggleFlipH/V already mirror the
+  // crop center, so crop fractions stay valid.
+  if (flipH) {
+    edits.push({ edit: 'flip', direction: 'horizontal' });
+  }
+  if (flipV) {
+    edits.push({ edit: 'flip', direction: 'vertical' });
   }
 
   // Crop is stored center-based in oriented space, but the vips rotate
