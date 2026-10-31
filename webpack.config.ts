@@ -98,31 +98,8 @@ export default {
     minimize: !isDev,
     minimizer: [
       new TerserPlugin({
-        exclude: [/filerobot-image-editor/],
         terserOptions: {
           ecma: 2022,
-          output: {
-            comments: false,
-          },
-        },
-        extractComments: true,
-      }),
-
-      // We depend on some internal state of filerobot.
-      new TerserPlugin({
-        include: [/filerobot-image-editor/],
-        terserOptions: {
-          ecma: 2022,
-          compress: {
-            keep_fnames: true,
-            keep_classnames: true,
-            evaluate: false,
-            reduce_vars: false,
-          },
-          mangle: {
-            keep_fnames: true,
-            keep_classnames: true,
-          },
           output: {
             comments: false,
           },
