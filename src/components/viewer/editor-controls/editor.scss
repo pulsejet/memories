@@ -865,6 +865,10 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     border-radius: 999px;
     background: var(--me-glass-bg);
     scrollbar-width: none;
+    // Hug the controls and center: no trailing blank when chips fit.
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
 
     &::-webkit-scrollbar {
       display: none;
