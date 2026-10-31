@@ -7,13 +7,14 @@
       @back="onBack"
       @save="onSave"
       @change="onChange"
+      @section="onSection"
     >
       <template #preview>
         <img v-if="!ready" class="me-photo-preview" :src="previewUrl" alt="" />
         <canvas ref="canvasRef" v-show="ready" class="me-photo-canvas" />
       </template>
-      <template #filter-thumb>
-        <img :src="thumbUrl" alt="" />
+      <template #filter-thumb="{ filter }">
+        <img :src="filterPreviews[filter.id] ?? previewUrl" alt="" />
       </template>
     </EditorControls>
 
@@ -33,7 +34,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
 
-import { EditPipeline } from '@radialapps/memories-vips-editor';
+import { EditPipeline, SmallPreview } from '@radialapps/memories-vips-editor';
 
 import EditorControls from '@components/viewer/editor-controls/EditorControls.vue';
 import { stateToEdits } from '@components/viewer/editor-controls/stateToEdits';
@@ -46,7 +47,7 @@ import * as utils from '@services/utils/common';
 import { confirmDestructive } from '@services/utils/dialog';
 
 import type { IImageInfo, IPhoto } from '@typings';
-import { INITIAL_STATE, type EditorState } from '@components/viewer/editor-controls/types';
+import { INITIAL_STATE, FILTERS, type EditorState, type EditorSection } from '@components/viewer/editor-controls/types';
 
 const props = defineProps<{
   photo: IPhoto;
@@ -62,11 +63,15 @@ const canvasRef = useTemplateRef<HTMLCanvasElement>('canvasRef');
 
 /** Screen-size preview shown behind the editor controls */
 const previewUrl = computed(() => utils.getPreviewUrl({ photo: props.photo, size: 'screen' }));
-/** Small preview for the editor filter preset cards */
-const thumbUrl = computed(() => utils.getPreviewUrl({ photo: props.photo, msize: 256 }));
 
 /** Live WebGL preview pipeline; null until the canvas and source are ready. */
 let pipeline: EditPipeline | null = null;
+
+/** Shared downscaled renderer for the filter cards; source set once per photo. */
+let smallPreview: SmallPreview | null = null;
+
+/** Live per-filter thumbnails (SmallPreview renders), keyed by preset id. */
+const filterPreviews = ref<Record<string, string>>({});
 
 /** True once the source image is on the GPU and the canvas takes over. */
 const ready = ref(false);
@@ -84,6 +89,15 @@ const isLivePhoto = computed(() => Boolean(props.photo.liveid));
 /** Monotonic load generation; drops stale async loads after photo switches. */
 let loadGen = 0;
 let lastEditsJson = '';
+
+/** Generation guard for async thumbnail builds across photo switches. */
+let thumbGen = 0;
+
+/** Preview URL the filter thumbnails were built for; null when stale. */
+let previewsForUrl: string | null = null;
+
+/** EditorControls section mirror (starts on 'crop'); drives lazy thumb builds. */
+let currentSection: EditorSection = 'crop';
 
 function close() {
   emit('close');
@@ -153,6 +167,17 @@ function onChange(state: EditorState) {
 }
 
 /**
+ * Build filter thumbnails lazily on first opening the filters tab
+ * (once per photo); the cards fall back to the plain preview until then.
+ */
+function onSection(s: EditorSection) {
+  currentSection = s;
+  if (s === 'filters' && previewsForUrl !== previewUrl.value) {
+    void buildFilterPreviews();
+  }
+}
+
+/**
  * Save the editor state via the vips backend.
  * Opens the save modal (name + format + copy) instead of closing: the modal
  * translates the EditorState to vips edits and PUTs to IMAGE_EDIT.
@@ -170,6 +195,43 @@ function closeSaveModal() {
 function onSaved(_info: IImageInfo, _isCopy: boolean) {
   closeSaveModal();
   close();
+}
+
+/** Render one live SmallPreview thumbnail per preset; cards fall back to the plain preview. */
+async function buildFilterPreviews() {
+  const gen = ++thumbGen;
+  try {
+    // Full-res screen preview: SmallPreview downscales to <=256 on upload,
+    // and the blob is already cached by the main pipeline load.
+    const blobUrl = await fetchImage(previewUrl.value);
+    if (gen !== thumbGen) return;
+
+    const img = new Image();
+    img.src = blobUrl;
+    await img.decode();
+    if (gen !== thumbGen) return;
+
+    smallPreview ??= new SmallPreview(256);
+    smallPreview.setSource(img);
+    if (gen !== thumbGen) return;
+
+    // Programs stay compiled across renders; each card pays edit passes only.
+    const out: Record<string, string> = {};
+    for (const f of FILTERS) {
+      if (gen !== thumbGen) return;
+      try {
+        const canvas = smallPreview.render(stateToEdits({ ...INITIAL_STATE, preset: f.id }));
+        out[f.id] = canvas.toDataURL('image/jpeg', 0.8);
+      } catch (e) {
+        console.error('Photo editor filter preview failed', f.id, e);
+      }
+    }
+    if (gen !== thumbGen) return;
+    filterPreviews.value = out;
+    previewsForUrl = previewUrl.value;
+  } catch (e) {
+    console.error('Photo editor filter previews failed', e);
+  }
 }
 
 /** Upload the current photo into the pipeline (CORS-safe via blob cache). */
@@ -235,15 +297,21 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydown, true);
   window.removeEventListener('beforeunload', onBeforeUnload);
   loadGen++;
+  thumbGen++;
   pipeline = null;
+  smallPreview?.dispose();
+  smallPreview = null;
 });
 
 // Reload the source if the edited photo changes underneath the editor.
 watch(previewUrl, (url) => {
   ready.value = false;
+  filterPreviews.value = {};
+  previewsForUrl = null;
   imgW.value = props.photo.w || 0;
   imgH.value = props.photo.h || 0;
   void loadSource(url);
+  if (currentSection === 'filters') void buildFilterPreviews();
 });
 
 utils.useBus('memories:fragment:pop:editor', onFragmentPop);

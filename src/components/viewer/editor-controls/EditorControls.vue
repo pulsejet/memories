@@ -47,8 +47,8 @@
         @flip-h="toggleFlipH"
         @flip-v="toggleFlipV"
       >
-        <template #filter-thumb="{ filter, index }">
-          <slot name="filter-thumb" :filter="filter" :index="index" />
+        <template #filter-thumb="{ filter, edits, index }">
+          <slot name="filter-thumb" :filter="filter" :edits="edits" :index="index" />
         </template>
       </EditorSidebar>
     </div>
@@ -81,6 +81,7 @@ const emit = defineEmits<{
   back: [];
   save: [state: EditorState];
   change: [state: EditorState];
+  section: [s: EditorSection];
   'update:modelValue': [state: EditorState];
 }>();
 
@@ -151,6 +152,7 @@ function setRatio(id: string) {
 function setSection(s: EditorSection) {
   section.value = s;
   mobileKey.value = null;
+  emit('section', s);
 }
 
 function onSave() {
