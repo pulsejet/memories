@@ -38,6 +38,7 @@ trait TimelineQueryMap
         // Get the average location of each cluster
         $query->selectAlias($query->func()->max('c.id'), 'id')
             ->selectAlias($query->func()->count('m.fileid'), 'count')
+            ->selectAlias($query->func()->max('m.fileid'), 'preview_fileid')
             ->selectAlias(SQL::average($query, 'c.lat'), 'lat')
             ->selectAlias(SQL::average($query, 'c.lon'), 'lon')
             ->from('memories_mapclusters', 'c')
@@ -69,38 +70,21 @@ trait TimelineQueryMap
                 (float) $row['lon'],
             ],
             'count' => (int) $row['count'],
+            'preview_fileid' => null !== $row['preview_fileid'] ? (int) $row['preview_fileid'] : null,
         ], $res);
     }
 
     /**
-     * Gets previews for a list of map clusters.
+     * Gets preview rows for map cluster markers.
      *
-     * @param int[] $clusterIds
+     * @param int[] $fileIds File IDs from {@see getMapClusters} (already folder-filtered)
      */
-    public function getMapClusterPreviews(array $clusterIds): array
+    public function getMapClusterPreviews(array $fileIds): array
     {
-        $query = $this->connection->getQueryBuilder();
+        if ([] === $fileIds) {
+            return [];
+        }
 
-        // SELECT all photos in these map clusters
-        $query->selectAlias($query->func()->max('m.fileid'), 'fileid')
-            ->from('memories', 'm')
-            ->where($query->expr()->in('m.mapcluster', $query->createNamedParameter(
-                $clusterIds,
-                IQueryBuilder::PARAM_INT_ARRAY,
-            )))
-        ;
-
-        // WHERE these photos are in the user's requested folder recursively
-        $query = $this->filterFilecache($query);
-
-        // GROUP BY the cluster
-        $query->groupBy('m.mapcluster');
-
-        // Get the fileIds
-        $cursor = $this->executeQueryWithCTEs($query);
-        $fileIds = $cursor->fetchFirstColumn();
-
-        // SELECT these files from the filecache
         $query = $this->connection->getQueryBuilder();
         $files = $query->select('m.fileid', 'm.dayid', 'm.mapcluster', 'm.h', 'm.w', 'm.indexed_at', 'f.etag')
             ->from('memories', 'm')

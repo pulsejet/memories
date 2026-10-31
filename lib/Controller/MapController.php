@@ -62,17 +62,23 @@ final class MapController extends ApiController
 
             $clusters = $this->tq->getMapClusters($gridLen, $bounds);
 
-            // Get previews for each cluster
-            $clusterIds = array_map(static fn ($cluster) => (int) $cluster['id'], $clusters);
-            $previews = $this->tq->getMapClusterPreviews($clusterIds);
+            // Load preview rows for file IDs chosen during cluster aggregation
+            $previewFileIds = array_values(array_filter(array_map(
+                static fn (array $cluster) => $cluster['preview_fileid'],
+                $clusters,
+            )));
+            $previews = $this->tq->getMapClusterPreviews($previewFileIds);
 
-            // Merge the responses
             $fileMap = [];
-            foreach ($previews as &$preview) {
-                $fileMap[$preview['mapcluster']] = $preview;
+            foreach ($previews as $preview) {
+                $fileMap[$preview['fileid']] = $preview;
             }
             foreach ($clusters as &$cluster) {
-                $cluster['preview'] = $fileMap[$cluster['id']] ?? null;
+                $previewFileId = $cluster['preview_fileid'];
+                unset($cluster['preview_fileid']);
+                $cluster['preview'] = (null !== $previewFileId && isset($fileMap[$previewFileId]))
+                    ? $fileMap[$previewFileId]
+                    : null;
             }
 
             return new JSONResponse($clusters);
