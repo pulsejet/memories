@@ -133,17 +133,15 @@ test.describe('@api Image edit copy', () => {
   test('Edit to a copy creates new file', async ({ request }) => {
     const dav = new DavClient(request);
     const fileid = await dav.fileid(src);
-    const info: IImageInfo = await dav.imageInfo(fileid);
     const copyName = psub('for-api-edit-copy-%wid.jpg');
 
     const res = await request.put(`${appUrl}/api/image/edit/${fileid}`, {
       data: {
         name: copyName,
-        width: info.w,
-        height: info.h,
-        quality: 0.9,
         extension: 'jpg',
-        state: [],
+        edits: [],
+        quality: 90,
+        copy: true,
       },
     });
     expect(res.ok()).toBeTruthy();
