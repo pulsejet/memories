@@ -659,7 +659,7 @@ async function createBase(args: PhotoSwipeOptions) {
   sheetOpen.value = false;
   await nextTick();
 
-  const pswp = new PhotoSwipe({
+  const pswp_ = new PhotoSwipe({
     counter: false,
     close: false,
     zoom: false,
@@ -702,10 +702,11 @@ async function createBase(args: PhotoSwipeOptions) {
   // PhotoSwipe relies on object identity internally, and Vue's
   // reactivity proxying breaks it. All photoswipe-related objects
   // MUST use markRaw() if stored in data.
-  photoswipe.value = markRaw(pswp) as PsPhotoSwipe;
+  const pswp = markRaw(pswp_) as PsPhotoSwipe;
+  photoswipe.value = pswp;
 
   // Debugging only
-  _m.viewer.photoswipe = photoswipe.value;
+  _m.viewer.photoswipe = pswp;
 
   // Check if someone else is trapping focus
   const hasNestedTrap = (e: Event): Element | null => {
@@ -724,23 +725,22 @@ async function createBase(args: PhotoSwipeOptions) {
   };
 
   // Monkey patch for focus trapping in sidebar
-  const psKeyboard = photoswipe.value.keyboard as any;
-  const _onFocusIn = psKeyboard['_onFocusIn'];
+  const _onFocusIn = pswp.keyboard['_onFocusIn'];
   console.assert(_onFocusIn, 'Missing _onFocusIn for monkey patch');
-  psKeyboard['_onFocusIn'] = (e: FocusEvent) => {
+  pswp.keyboard['_onFocusIn'] = (e: FocusEvent) => {
     if (hasNestedTrap(e)) return;
-    _onFocusIn.call(photoswipe.value!.keyboard, e);
+    _onFocusIn.call(pswp.keyboard, e);
   };
 
   // Refresh sidebar on change
-  photoswipe.value.on('change', () => {
+  pswp.on('change', () => {
     if (sidebarOpen.value) {
       openSidebar();
     }
   });
 
   // Handle keydown
-  photoswipe.value.on('keydown', (e) => {
+  pswp.on('keydown', (e) => {
     if (e.defaultPrevented) return;
 
     // The photo editor owns all keyboard input while open.
@@ -762,7 +762,7 @@ async function createBase(args: PhotoSwipeOptions) {
   });
 
   // Make sure buttons are styled properly
-  photoswipe.value.addFilter('uiElement', (element, data) => {
+  pswp.addFilter('uiElement', (element, data) => {
     // add button-vue class if button
     if (element.classList.contains('pswp__button')) {
       element.classList.add('button-vue');
@@ -771,14 +771,14 @@ async function createBase(args: PhotoSwipeOptions) {
   });
 
   // Total number of photos in this view
-  photoswipe.value.addFilter('numItems', () => globalCount.value);
+  pswp.addFilter('numItems', () => globalCount.value);
 
   // Put viewer over everything else
   const navElem = document.getElementById('app-navigation-vue');
-  photoswipe.value.on('beforeOpen', () => {
+  pswp.on('beforeOpen', () => {
     navElem?.style.setProperty('z-index', '0');
   });
-  photoswipe.value.on('openingAnimationStart', () => {
+  pswp.on('openingAnimationStart', () => {
     isOpen.value = true;
     fullyOpened.value = false;
     if (sidebarOpen.value) {
@@ -786,10 +786,10 @@ async function createBase(args: PhotoSwipeOptions) {
     }
     nativex.setTheme('#000000', true); // viewer is always dark
   });
-  photoswipe.value.on('openingAnimationEnd', () => {
+  pswp.on('openingAnimationEnd', () => {
     fullyOpened.value = true;
   });
-  photoswipe.value.on('close', () => {
+  pswp.on('close', () => {
     isOpen.value = false;
     fullyOpened.value = false;
     sheetOpen.value = false;
@@ -800,7 +800,7 @@ async function createBase(args: PhotoSwipeOptions) {
     updateTitle(undefined);
     nativex.setTheme(); // reset
   });
-  photoswipe.value.on('destroy', () => {
+  pswp.on('destroy', () => {
     navElem?.style.setProperty('z-index', '');
 
     // reset everything
@@ -819,35 +819,35 @@ async function createBase(args: PhotoSwipeOptions) {
   });
 
   // Update vue route for deep linking
-  photoswipe.value.on('slideActivate', (e) => {
-    currIndex.value = photoswipe.value!.currIndex;
+  pswp.on('slideActivate', (e) => {
+    currIndex.value = pswp.currIndex;
     const photo = e.slide?.data?.photo;
     setFragment(photo);
     updateTitle(photo);
 
     // Remove active class from others and add to this one
-    photoswipe.value!.element?.querySelectorAll('.pswp__item').forEach((el) => el.classList.remove('active'));
+    pswp.element?.querySelectorAll('.pswp__item').forEach((el) => el.classList.remove('active'));
     e.slide.holderElement?.classList.add('active');
   });
 
   // Native hole below the WebView, mirrors the active slide box
-  psNativeHole = new PsNativeHole(<any>photoswipe.value);
+  psNativeHole = new PsNativeHole(pswp);
 
   // Image support
-  psImage = new PsImage(<any>photoswipe.value);
+  psImage = new PsImage(pswp);
 
   // Live Photo support
-  psLivePhoto = new PsLivePhoto(<any>photoswipe.value, psImage, liveState);
+  psLivePhoto = new PsLivePhoto(pswp, psImage, liveState);
 
   // Video support
-  psVideo = new PsVideo(<any>photoswipe.value);
+  psVideo = new PsVideo(pswp);
 
   // Panorama sphere support
-  psPhotoSphere = new PsPhotoSphere(<any>photoswipe.value);
+  psPhotoSphere = new PsPhotoSphere(pswp);
 
   // Patch the close button to stop the slideshow
-  const _close = photoswipe.value.close.bind(photoswipe.value);
-  photoswipe.value.close = () => {
+  const _close = pswp.close.bind(pswp);
+  pswp.close = () => {
     if (slideshowTimer.value) {
       stopSlideshow();
     } else {
@@ -856,18 +856,18 @@ async function createBase(args: PhotoSwipeOptions) {
   };
 
   // Patch the next/prev buttons to reset slideshow timer
-  const _next = photoswipe.value.next.bind(photoswipe.value);
-  const _prev = photoswipe.value.prev.bind(photoswipe.value);
-  photoswipe.value.next = () => {
+  const _next = pswp.next.bind(pswp);
+  const _prev = pswp.prev.bind(pswp);
+  pswp.next = () => {
     resetSlideshowTimer();
     _next();
   };
-  photoswipe.value.prev = () => {
+  pswp.prev = () => {
     resetSlideshowTimer();
     _prev();
   };
 
-  return photoswipe.value;
+  return pswp;
 }
 
 /** Set the route hash to the given photo */
