@@ -255,6 +255,7 @@ function refreshSidebar() {
 }
 div.button-grid {
   display: flex;
-  gap: 1em;
+  flex: 1;
+  gap: 8px;
 }
 </style>

@@ -125,7 +125,9 @@ defineExpose({ close });
 
   :deep(.buttons) {
     margin-top: 10px;
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
 
     > button {
       display: inline-block !important;
