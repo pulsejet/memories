@@ -19,7 +19,7 @@
           :section="section"
           :mobile-key="mobileKey"
           @update:section="setSection"
-          @update:mobile-key="(k) => (mobileKey = k)"
+          @update:mobile-key="(k) => (mobileKey = k === mobileKey ? null : k)"
           @update:param="setParam"
           @reset:param="resetParam"
           @update:preset="(id) => (state.preset = id)"
@@ -88,8 +88,8 @@ const state = reactive<EditorState>({ ...INITIAL_STATE });
 const defaults = reactive<Record<string, number>>({ ...DEFAULT_PARAMS });
 
 const section = ref<EditorSection>('crop');
-/** Slider currently loaded in the mobile ruler pill. */
-const mobileKey = ref<string>('straighten');
+/** Slider currently loaded in the mobile ruler pill. Null = nothing selected. */
+const mobileKey = ref<string | null>(null);
 
 const cropStage = useTemplateRef('cropStage');
 
@@ -148,8 +148,7 @@ function setRatio(id: string) {
 
 function setSection(s: EditorSection) {
   section.value = s;
-  if (s === 'adjust') mobileKey.value = 'brightness';
-  else if (s === 'crop') mobileKey.value = 'straighten';
+  mobileKey.value = null;
 }
 
 function onSave() {
