@@ -9,7 +9,7 @@
         :class="{ 'is-active': section === t.id }"
         role="tab"
         :aria-selected="section === t.id"
-        @click="emit('update:section', t.id)"
+        @click="onSection(t.id)"
       >
         <component :is="t.icon" :size="21" />
         {{ t.label }}
@@ -59,7 +59,7 @@
             :key="r.id"
             class="me-ratio-btn me-clickable button-vue"
             :class="{ 'is-active': state.ratio === r.id }"
-            @click="emit('update:ratio', r.id)"
+            @click="onRatio(r.id)"
           >
             <span class="me-box" :style="boxStyle(r.id)" />
             {{ r.label }}
@@ -79,23 +79,23 @@
         />
         <div class="me-group-label">Transform</div>
         <div class="me-tool-grid">
-          <button class="me-tool-btn me-clickable button-vue" @click="emit('rotate-left')">
+          <button class="me-tool-btn me-clickable button-vue" @click="onRotateLeft">
             <RotateLeft :size="20" />−90°
           </button>
-          <button class="me-tool-btn me-clickable button-vue" @click="emit('rotate-right')">
+          <button class="me-tool-btn me-clickable button-vue" @click="onRotateRight">
             <RotateRight :size="20" />+90°
           </button>
           <button
             class="me-tool-btn me-clickable button-vue"
             :class="{ 'is-active': state.flipH < 0 }"
-            @click="emit('flip-h')"
+            @click="onFlipH"
           >
             <FlipHorizontal :size="20" />Flip H
           </button>
           <button
             class="me-tool-btn me-clickable button-vue"
             :class="{ 'is-active': state.flipV < 0 }"
-            @click="emit('flip-v')"
+            @click="onFlipV"
           >
             <FlipVertical :size="20" />Flip V
           </button>
@@ -110,7 +110,7 @@
             :key="f.id"
             class="me-filter-card me-clickable button-vue"
             :class="{ 'is-active': state.preset === f.id }"
-            @click="emit('update:preset', f.id)"
+            @click="onPreset(f.id)"
           >
             <span class="me-thumb">
               <slot name="filter-thumb" :filter="f" :index="i" />
@@ -133,6 +133,7 @@ import RotateLeft from 'vue-material-design-icons/RotateLeft.vue';
 import RotateRight from 'vue-material-design-icons/RotateRight.vue';
 import Tune from 'vue-material-design-icons/Tune.vue';
 import EditorSlider from './EditorSlider.vue';
+import * as nativex from '@native';
 import { iconFor } from './paramIcons';
 import { FILTERS, RATIOS, SLIDER_DEFS } from './types';
 import type { EditorParams, EditorSection, EditorState } from './types';
@@ -177,6 +178,41 @@ const RATIO_BOX: Record<string, string> = {
 
 function boxStyle(id: string): string {
   return RATIO_BOX[id] ?? 'width:20px;height:20px';
+}
+
+function onSection(s: EditorSection) {
+  nativex.playTouchSound();
+  emit('update:section', s);
+}
+
+function onRatio(id: string) {
+  nativex.playTouchSound();
+  emit('update:ratio', id);
+}
+
+function onRotateLeft() {
+  nativex.playTouchSound();
+  emit('rotate-left');
+}
+
+function onRotateRight() {
+  nativex.playTouchSound();
+  emit('rotate-right');
+}
+
+function onFlipH() {
+  nativex.playTouchSound();
+  emit('flip-h');
+}
+
+function onFlipV() {
+  nativex.playTouchSound();
+  emit('flip-v');
+}
+
+function onPreset(id: string) {
+  nativex.playTouchSound();
+  emit('update:preset', id);
 }
 
 // Sliding Material indicator, positioned in px like the mockup.
