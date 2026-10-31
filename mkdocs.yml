@@ -55,6 +55,7 @@ nav:
       - 'troubleshooting.md'
       - 'system-config.md'
       - 'occ-commands.md'
+      - 'api.md'
   - Support:
       - 'faq.md'
       - 'changelog.md'
