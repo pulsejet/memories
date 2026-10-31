@@ -39,9 +39,14 @@ trait TimelineQueryDays
     ): array {
         $query = $this->connection->getQueryBuilder();
 
+        // DISTINCT is only needed when transforms add 1:N joins
+        $count = empty($queryTransforms)
+            ? $query->func()->count('m.fileid')
+            : $query->func()->count(SQL::distinct($query, 'm.fileid'));
+
         // Get all entries also present in filecache
         $query->select('m.dayid')
-            ->selectAlias($query->func()->count(SQL::distinct($query, 'm.fileid')), 'count')
+            ->selectAlias($count, 'count')
             ->from('memories', 'm')
         ;
 
