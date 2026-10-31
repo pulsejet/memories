@@ -193,7 +193,6 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
       font-size: 12px;
       color: var(--me-text-2);
       text-align: right;
-      font-family: 'Roboto Mono', ui-monospace, monospace;
       font-variant-numeric: tabular-nums;
     }
     &.is-changed .me-val {
@@ -367,9 +366,6 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
       border-color 0.15s,
       color 0.15s,
       background 0.15s;
-  }
-  .me-ratio-btn {
-    font-family: 'Roboto Mono', ui-monospace, monospace;
   }
   .me-tool-btn {
     gap: 6px;
@@ -926,7 +922,6 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     .me-chip-val {
       font-size: 11px;
       color: var(--me-text-3);
-      font-family: 'Roboto Mono', ui-monospace, monospace;
       font-variant-numeric: tabular-nums;
     }
     &.is-changed .me-chip-val {
