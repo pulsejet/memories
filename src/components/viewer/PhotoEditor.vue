@@ -299,6 +299,7 @@ async function loadSource(url: string) {
 
 /** Capture Escape / Ctrl+S while the editor is open (mirrors PhotoSwipe) */
 function onKeydown(e: KeyboardEvent) {
+  if (confirmingDiscard) return;
   if (e.key === 'Escape') {
     e.preventDefault();
     e.stopImmediatePropagation();
