@@ -35,6 +35,8 @@
         :state="state"
         :defaults="defaults"
         :section="section"
+        :image-width="imageWidth"
+        :image-height="imageHeight"
         @update:section="setSection"
         @update:param="setParam"
         @reset:param="resetParam"

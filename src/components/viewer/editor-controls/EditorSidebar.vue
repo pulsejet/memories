@@ -112,7 +112,7 @@
             :class="{ 'is-active': state.preset === f.id }"
             @click="onPreset(f.id)"
           >
-            <span class="me-thumb">
+            <span class="me-thumb" :style="thumbStyle">
               <slot name="filter-thumb" :filter="f" :index="i" />
             </span>
             <span class="me-filter-name">{{ f.name }}</span>
@@ -124,7 +124,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import AutoFix from 'vue-material-design-icons/AutoFix.vue';
 import Crop from 'vue-material-design-icons/Crop.vue';
 import FlipHorizontal from 'vue-material-design-icons/FlipHorizontal.vue';
@@ -142,6 +142,8 @@ const props = defineProps<{
   state: EditorState;
   defaults: Record<string, number>;
   section: EditorSection;
+  imageWidth?: number;
+  imageHeight?: number;
 }>();
 
 const emit = defineEmits<{
@@ -158,6 +160,14 @@ const emit = defineEmits<{
 
 const lightSliders = SLIDER_DEFS.filter((d) => d.group === 'light');
 const colorSliders = SLIDER_DEFS.filter((d) => d.group === 'color');
+
+// Filter thumbs keep the provided image's aspect ratio instead of a fixed box.
+const thumbStyle = computed(() => {
+  const w = props.imageWidth ?? 0;
+  const h = props.imageHeight ?? 0;
+  if (w > 0 && h > 0) return { aspectRatio: `${w} / ${h}` };
+  return {};
+});
 
 const tabs = [
   { id: 'crop' as EditorSection, label: 'Crop', icon: Crop },
