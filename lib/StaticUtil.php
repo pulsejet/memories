@@ -346,6 +346,7 @@ class StaticUtil
     ): string {
         $sanitized = str_replace(['/', '\\'], '-', $filename);
         $ascii = (new UnicodeString($sanitized))->ascii()->toString();
+        $ascii = str_replace(['/', '\\'], '-', $ascii);
         $fallback = preg_replace(['/%/', '/[^\x20-\x7e]/'], ['', '_'], $ascii) ?: 'file';
 
         return HeaderUtils::makeDisposition($disposition, $sanitized, $fallback);
