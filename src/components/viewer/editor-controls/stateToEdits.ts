@@ -25,6 +25,8 @@ const P_HIGHLIGHTS = 24;
 const P_HUE_SATURATION = 30;
 const P_WARMTH = 35;
 const P_VIBRANCE = 40;
+const P_BLUR = 42;
+const P_SHARPEN = 44;
 const P_PRESET = 50;
 
 function nonZero(v: number): boolean {
@@ -202,6 +204,20 @@ export function stateToEdits(state: EditorState): Edit[] {
     ordered.push({
       priority: P_VIBRANCE,
       edit: { edit: 'vibrance', amount: state.vibrance / 100 },
+    });
+  }
+
+  if (nonZero(state.blur)) {
+    ordered.push({
+      priority: P_BLUR,
+      edit: { edit: 'blur', radius: state.blur },
+    });
+  }
+
+  if (nonZero(state.sharpen)) {
+    ordered.push({
+      priority: P_SHARPEN,
+      edit: { edit: 'sharpen', radius: 2, amount: state.sharpen / 20 },
     });
   }
 
