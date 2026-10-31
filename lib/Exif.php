@@ -23,7 +23,7 @@ final class Exif
     public const PANO_SPHERE = 2; // confirmed
 
     private const FORBIDDEN_EDIT_MIMES = ['image/bmp', 'image/x-dcraw', 'video/MP2T']; // also update const.ts
-    private const EXIFTOOL_TIMEOUT = 30000;
+    private const EXIFTOOL_TIMEOUT = 120000;
     private const EXIFTOOL_ARGS = ['-api', 'QuickTimeUTC=1', '-api', 'LargeFileSupport=1', '-n', '-json'];
     private const INVALID_PATH_PATTERN = '/[\r\n\x00]/';
 
