@@ -467,8 +467,9 @@ final class ImageController extends ApiController
         string $name,
         string $extension,
         array $edits = [],
+        int $quality = 90,
     ): Http\Response {
-        return $this->util->guardEx(function () use ($id, $name, $extension, $edits) {
+        return $this->util->guardEx(function () use ($id, $name, $extension, $edits, $quality) {
             // Get the file
             $file = $this->fs->getUserFile($id);
 
@@ -499,6 +500,9 @@ final class ImageController extends ApiController
             if (!\in_array($extLower, ['jpeg', 'jpg', 'png', 'webp', 'avif'], true)) {
                 throw Exceptions::BadRequest('Invalid image format');
             }
+            if ($quality < 1 || $quality > 100) {
+                throw Exceptions::BadRequest('Invalid quality');
+            }
 
             // Check if target copy file exists
             if ($copy && $file->getParent()->nodeExists($name)) {
@@ -509,7 +513,7 @@ final class ImageController extends ApiController
             $path = $file->getStorage()->getLocalFile($file->getInternalPath());
 
             // Apply the vips-editor edits via the static vips binary.
-            $blob = $this->editImageVips($path, $extLower, $edits);
+            $blob = $this->editImageVips($path, $extLower, $edits, $quality);
 
             // Strip live photo identifiers.
             if ($isLivePhoto) {
@@ -558,7 +562,7 @@ final class ImageController extends ApiController
      *
      * @param array<int, array<string, mixed>> $edits
      */
-    private function editImageVips(string $path, string $extension, array $edits): string
+    private function editImageVips(string $path, string $extension, array $edits, int $quality): string
     {
         // Basic shape check so vips errors stay actionable.
         foreach ($edits as $edit) {
@@ -581,8 +585,9 @@ final class ImageController extends ApiController
             throw Exceptions::BadRequest('Invalid image format');
         }
 
-        // Vips convert quality (JPEG/WebP/AVIF). PNG ignores it.
-        $qualityInt = 90;
+        // Vips convert quality for lossy formats (JPEG/WebP/AVIF).
+        // PNG is lossless and ignores it.
+        $qualityInt = min(100, max(1, $quality));
 
         try {
             $blob = $this->vips->convertFormat($path, $output, $qualityInt, array_values($edits));
