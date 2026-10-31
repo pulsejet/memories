@@ -28,7 +28,11 @@
           @rotate-right="rotateBy(90)"
           @flip-h="toggleFlipH"
           @flip-v="toggleFlipV"
-        />
+        >
+          <template #filter-thumb="{ filter }">
+            <slot name="filter-thumb" :filter="filter" />
+          </template>
+        </EditorMobileBar>
       </div>
 
       <EditorSidebar
