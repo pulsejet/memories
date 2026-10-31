@@ -24,6 +24,7 @@ declare module '@typings' {
     facerecognition_enabled: boolean;
     lens_enabled: boolean;
     preview_generator_enabled: boolean;
+    vips_enabled: boolean;
 
     // general settings
     timeline_path: string;

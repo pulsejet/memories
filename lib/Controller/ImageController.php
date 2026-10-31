@@ -471,6 +471,11 @@ final class ImageController extends ApiController
         bool $copy = false,
     ): Http\Response {
         return $this->util->guardEx(function () use ($id, $name, $extension, $edits, $quality, $copy) {
+            // The editor runs entirely through the static vips binary.
+            if (!$this->vips->isEnabled()) {
+                throw Exceptions::Forbidden('VIPS is not available');
+            }
+
             // Get the file
             $file = $this->fs->getUserFile($id);
 

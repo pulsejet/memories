@@ -462,7 +462,7 @@ const actions = computed((): IViewerAction[] => {
       name: t('memories', 'Edit'),
       icon: markRaw(TuneIcon),
       callback: openEditor,
-      if: canEdit.value && !isVideo.value,
+      if: canEdit.value && !isVideo.value && config.vips_enabled,
     },
     {
       id: 'download',
@@ -1225,8 +1225,8 @@ async function loadMetadata(photo: IPhoto) {
 }
 
 async function openEditor() {
-  // Only for JPEG for now
-  if (!canEdit.value) return;
+  // The editor runs entirely through vips; hide it when unavailable.
+  if (!canEdit.value || !config.vips_enabled) return;
 
   // Warn before editing Live Photos
   if (isLivePhoto.value) {

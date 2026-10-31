@@ -25,6 +25,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Exceptions;
+use OCA\Memories\Preview\Vips;
 use OCA\Memories\Service\Lens;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
@@ -54,6 +55,7 @@ final class OtherController extends ApiController
         protected IConfig $config,
         protected SystemConfig $systemConfig,
         protected Lens $lens,
+        protected Vips $vips,
         protected Util $util,
     ) {
         parent::__construct(Application::APPNAME, $request);
@@ -116,6 +118,7 @@ final class OtherController extends ApiController
                 'facerecognition_enabled' => $this->systemConfig->facerecognitionIsEnabled(),
                 'lens_enabled' => '' !== trim($this->lens->daemonUrl()),
                 'preview_generator_enabled' => $this->systemConfig->previewGeneratorIsEnabled(),
+                'vips_enabled' => $this->vips->isEnabled(),
 
                 // general settings
                 'timeline_path' => $this->systemConfig->getUserConfigValue('timelinePath', $this->systemConfig->get('memories.timeline.default_path')),

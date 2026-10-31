@@ -150,6 +150,7 @@ function loadCached(): IConfig {
     facerecognition_enabled: false,
     lens_enabled: false,
     preview_generator_enabled: false,
+    vips_enabled: false,
 
     // general settings
     timeline_path: '_unknown_',
