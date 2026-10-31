@@ -797,7 +797,9 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
 
     .me-thumb {
       display: block;
-      height: 64px;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      max-height: 120px;
       padding: 0;
       border-radius: 0;
       overflow: hidden;
@@ -1124,9 +1126,6 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   }
   .me-root .me-filter-grid {
     gap: 8px;
-  }
-  .me-root .me-filter-card .me-thumb {
-    height: 56px;
   }
   .me-root .me-group-label {
     margin-top: 16px;
