@@ -4,7 +4,7 @@
       ref="editor"
       :image-width="imgW"
       :image-height="imgH"
-      @back="close"
+      @back="onBack"
       @save="onSave"
       @change="onChange"
     >
@@ -16,6 +16,17 @@
         <img :src="thumbUrl" alt="" />
       </template>
     </EditorControls>
+
+    <PhotoEditorSaveModal
+      v-if="saveModalOpen && pendingState"
+      :photo="props.photo"
+      :state="pendingState"
+      :image-width="imgW"
+      :image-height="imgH"
+      :is-live-photo="isLivePhoto"
+      @close="closeSaveModal"
+      @saved="onSaved"
+    />
   </div>
 </template>
 
@@ -26,13 +37,16 @@ import { EditPipeline } from '@radialapps/memories-vips-editor';
 
 import EditorControls from '@components/viewer/editor-controls/EditorControls.vue';
 import { stateToEdits } from '@components/viewer/editor-controls/stateToEdits';
+import PhotoEditorSaveModal from './PhotoEditorSaveModal.vue';
 import { fetchImage } from '@components/frame/XImgCache';
 
 import { fragment } from '@services/route-fragment';
+import { t } from '@services/l10n';
 import * as utils from '@services/utils/common';
+import { confirmDestructive } from '@services/utils/dialog';
 
-import type { IPhoto } from '@typings';
-import type { EditorState } from '@components/viewer/editor-controls/types';
+import type { IImageInfo, IPhoto } from '@typings';
+import { INITIAL_STATE, type EditorState } from '@components/viewer/editor-controls/types';
 
 const props = defineProps<{
   photo: IPhoto;
@@ -60,12 +74,64 @@ const ready = ref(false);
 const imgW = ref(props.photo.w || 0);
 const imgH = ref(props.photo.h || 0);
 
+/** Save modal state; opened from EditorControls save (or Ctrl+S). */
+const saveModalOpen = ref(false);
+const pendingState = ref<EditorState | null>(null);
+
+/** Live photos are always saved as a copy backend-side. */
+const isLivePhoto = computed(() => Boolean(props.photo.liveid));
+
 /** Monotonic load generation; drops stale async loads after photo switches. */
 let loadGen = 0;
 let lastEditsJson = '';
 
 function close() {
   emit('close');
+}
+
+/** Whether the editor holds any unsaved edits (hold-to-compare excluded). */
+function isDirty(): boolean {
+  const s = editor.value?.state;
+  if (!s) return false;
+  for (const key of Object.keys(INITIAL_STATE) as (keyof EditorState)[]) {
+    if (key === 'comparing') continue;
+    if (s[key] !== INITIAL_STATE[key]) return true;
+  }
+  return false;
+}
+
+function confirmDiscard(): Promise<boolean> {
+  return confirmDestructive({
+    title: t('memories', 'Unsaved changes'),
+    message: t('memories', 'Your edits will be lost'),
+    confirm: t('memories', 'Drop changes'),
+    cancel: t('memories', 'Cancel'),
+  });
+}
+
+async function onBack() {
+  if (saveModalOpen.value) {
+    closeSaveModal();
+    return;
+  }
+  if (isDirty() && !(await confirmDiscard())) return;
+  close();
+}
+
+async function onFragmentPop() {
+  // Back navigation with the save modal open dismisses the modal first.
+  if (saveModalOpen.value) {
+    closeSaveModal();
+    // The pop already removed the editor fragment; put it back.
+    fragment.push(fragment.types.editor);
+    return;
+  }
+  if (isDirty() && !(await confirmDiscard())) {
+    // User kept the edits; restore the popped fragment.
+    fragment.push(fragment.types.editor);
+    return;
+  }
+  close();
 }
 
 /**
@@ -87,12 +153,22 @@ function onChange(state: EditorState) {
 }
 
 /**
- * Save the editor state.
- * TODO: translate EditorState to the backend edit payload. The filerobot
- * state shape consumed by FileRobotMagick no longer exists, so saving is
- * currently a no-op that just closes the editor.
+ * Save the editor state via the vips backend.
+ * Opens the save modal (name + format + copy) instead of closing: the modal
+ * translates the EditorState to vips edits and PUTs to IMAGE_EDIT.
  */
-function onSave(_state: EditorState) {
+function onSave(state: EditorState) {
+  pendingState.value = { ...state };
+  saveModalOpen.value = true;
+}
+
+function closeSaveModal() {
+  saveModalOpen.value = false;
+  pendingState.value = null;
+}
+
+function onSaved(_info: IImageInfo, _isCopy: boolean) {
+  closeSaveModal();
   close();
 }
 
@@ -131,17 +207,25 @@ function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     e.preventDefault();
     e.stopImmediatePropagation();
-    close();
+    onBack();
   } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
     e.preventDefault();
     e.stopImmediatePropagation();
+    if (saveModalOpen.value) return;
     if (editor.value) onSave({ ...editor.value.state });
   }
+}
+
+/** Warn on tab close / reload while edits are unsaved. */
+function onBeforeUnload(e: BeforeUnloadEvent) {
+  if (!isDirty()) return;
+  e.preventDefault();
 }
 
 onMounted(async () => {
   fragment.push(fragment.types.editor);
   window.addEventListener('keydown', onKeydown, true);
+  window.addEventListener('beforeunload', onBeforeUnload);
   await nextTick();
   await loadSource(previewUrl.value);
 });
@@ -149,6 +233,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   fragment.pop(fragment.types.editor);
   window.removeEventListener('keydown', onKeydown, true);
+  window.removeEventListener('beforeunload', onBeforeUnload);
   loadGen++;
   pipeline = null;
 });
@@ -161,7 +246,7 @@ watch(previewUrl, (url) => {
   void loadSource(url);
 });
 
-utils.useBus('memories:fragment:pop:editor', close);
+utils.useBus('memories:fragment:pop:editor', onFragmentPop);
 </script>
 
 <style lang="scss" scoped>

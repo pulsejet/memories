@@ -183,9 +183,12 @@ final class Vips implements IProviderV2
     /**
      * Convert image via vips `convert` (full decode, no resize).
      * Output extension picks the saver (e.g. output.jpg).
+     * Edits are the ordered vips-editor list applied before saving.
      * Throws on failure.
+     *
+     * @param array<int, array<string, mixed>> $edits
      */
-    public function convertFormat(string $inputPath, string $output, int $quality = 85): string
+    public function convertFormat(string $inputPath, string $output, int $quality = 85, array $edits = []): string
     {
         $vips = $this->binExt->getVipsBin();
 
@@ -195,6 +198,7 @@ final class Vips implements IProviderV2
             'output' => $output,
             'stdout' => true,
             'quality' => min(100, max(10, $quality)),
+            'edits' => array_values($edits),
         ]);
         if (!\is_string($stdin)) {
             throw new \Exception('failed to encode vips request');
