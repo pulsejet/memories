@@ -123,8 +123,12 @@ function presetEdits(preset: string): Edit[] {
       return [{ edit: 'grayscale' }, { edit: 'brightnessContrast', brightness: -0.03, contrast: 0.3 }];
     case 'silvertone':
       return [{ edit: 'grayscale' }, { edit: 'brightnessContrast', brightness: 0.07, contrast: -0.12 }];
-    case 'inkwell':
-      return [{ edit: 'grayscale' }, { edit: 'brightnessContrast', brightness: -0.02, contrast: 0.35 }];
+    case 'willow':
+      return [
+        { edit: 'grayscale' },
+        { edit: 'brightnessContrast', brightness: 0.12, contrast: -0.25 },
+        { edit: 'highlights', amount: 0.1 },
+      ];
     case 'fade':
       return [
         { edit: 'brightnessContrast', brightness: 0.08, contrast: -0.22 },
