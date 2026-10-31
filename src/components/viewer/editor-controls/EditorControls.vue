@@ -1,5 +1,5 @@
 <template>
-  <div ref="rootEl" class="me-root" :style="accentStyle">
+  <div ref="rootEl" class="me-root">
     <div class="me-workspace">
       <div class="me-side">
         <EditorCropStage
@@ -75,7 +75,7 @@ const props = withDefaults(
     imageWidth?: number;
     imageHeight?: number;
   }>(),
-  { accent: '#4a9eff', imageWidth: 0, imageHeight: 0 },
+  { accent: 'var(--color-primary-element, #4a9eff)', imageWidth: 0, imageHeight: 0 },
 );
 
 const emit = defineEmits<{
@@ -163,9 +163,6 @@ watch(
   { deep: true },
 );
 
-// Accent is a plain CSS color prop; the dim variant derives from it in CSS.
-const accentStyle = computed(() => ({ '--me-accent': props.accent }) as Record<string, string>);
-
 defineExpose({
   state,
   resetAll,
@@ -176,4 +173,10 @@ defineExpose({
 
 <style lang="scss">
 @use './editor.scss';
+</style>
+
+<style lang="scss" scoped>
+.me-root {
+  --me-accent: v-bind(props.accent);
+}
 </style>
