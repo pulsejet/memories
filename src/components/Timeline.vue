@@ -159,6 +159,8 @@ const SCROLL_LOAD_DELAY = 400; // Delay in loading data when scrolling
 const DESKTOP_ROW_HEIGHT = 200; // Height of row on desktop
 const MOBILE_ROW_HEIGHT = 120; // Approx row height on mobile
 const ROW_NUM_LPAD = 16; // Number of rows to load before and after viewport
+/** Soft-refresh debounce for map pan/zoom; longer than MapSplitMatter's 250ms URL update. */
+const MAP_BOUNDS_SOFT_REFRESH_DELAY = 600;
 
 defineOptions({
   name: 'Timeline',
@@ -251,6 +253,8 @@ const resizeTimer = new RenewingTimeout();
 const scrollChangeTimer = new RenewingTimeout();
 /** Timer to debounce soft refreshes */
 const softRefreshTimer = new RenewingTimeout();
+/** Timer to debounce timeline soft refresh on map bounds pan/zoom */
+const mapBoundsSoftRefreshTimer = new RenewingTimeout();
 
 /** State for request cancellations */
 const abort = useAbort();
@@ -404,6 +408,7 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
 
   // Path or query changed; hard refresh or expect state restore.
   if (!from || fromKey !== toKey) {
+    mapBoundsSoftRefreshTimer.clear();
     const signal = renewAbort();
     await ignoreAbort(createState(signal));
     if (signal.aborted) return;
@@ -417,10 +422,17 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
 
   // Query changed on same key - soft refresh, preserve scroll.
   else if (JSON.stringify(from.query) !== JSON.stringify(to.query)) {
-    const signal = renewAbort();
-    loading.value = 0;
-    await ignoreAbort(softRefreshSync(signal));
-    if (signal.aborted) return;
+    // Map pan/zoom only updates b/z; debounce so the days API is not hit on every settle.
+    // Markers still refresh via MapSplitMatter; the photo timeline catches up after idle.
+    if (to.name === routes.Map.name && onlyMapBoundsQueryChanged(from.query, to.query)) {
+      scheduleMapBoundsSoftRefresh();
+    } else {
+      mapBoundsSoftRefreshTimer.clear();
+      const signal = renewAbort();
+      loading.value = 0;
+      await ignoreAbort(softRefreshSync(signal));
+      if (signal.aborted) return;
+    }
   }
 
   // Check if viewer is supposed to be open
@@ -542,6 +554,31 @@ function resetState() {
   resizeTimer.clear();
   scrollChangeTimer.clear();
   softRefreshTimer.clear();
+  mapBoundsSoftRefreshTimer.clear();
+}
+
+/** True when the only query diffs are map bounds / zoom (`b` / `z`). */
+function onlyMapBoundsQueryChanged(
+  from: RouteLocationNormalized['query'],
+  to: RouteLocationNormalized['query'],
+): boolean {
+  const keys = new Set([...Object.keys(from), ...Object.keys(to)]);
+  for (const key of keys) {
+    if (key === 'b' || key === 'z') continue;
+    if (String(from[key] ?? '') !== String(to[key] ?? '')) return false;
+  }
+  return String(from.b ?? '') !== String(to.b ?? '') || String(from.z ?? '') !== String(to.z ?? '');
+}
+
+/** Debounce days soft-refresh while the user pans/zooms the map. */
+function scheduleMapBoundsSoftRefresh() {
+  // Drop any in-flight soft refresh from a previous settle.
+  renewAbort();
+  mapBoundsSoftRefreshTimer.set(() => {
+    const signal = renewAbort();
+    loading.value = 0;
+    void ignoreAbort(softRefreshSync(signal));
+  }, MAP_BOUNDS_SOFT_REFRESH_DELAY);
 }
 
 /** Recreate everything */
