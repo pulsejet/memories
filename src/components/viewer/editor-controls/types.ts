@@ -55,7 +55,6 @@ export interface EditorState extends EditorParams {
   rotate: number;
   flipH: 1 | -1;
   flipV: 1 | -1;
-  zoom: number;
   preset: string;
   ratio: string;
   comparing: boolean;
@@ -91,7 +90,6 @@ export const INITIAL_STATE: EditorState = {
   rotate: 0,
   flipH: 1,
   flipV: 1,
-  zoom: 1,
   preset: '',
   ratio: 'free',
   comparing: false,

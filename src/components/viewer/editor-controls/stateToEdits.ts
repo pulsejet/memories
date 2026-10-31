@@ -12,10 +12,9 @@ import type { EditorState } from './types';
  * first, then tonal, then color, then creative preset grades.
  *
  * Only parameters with a clean VIPS mapping in
- * @radialapps/memories-vips-editor are translated. Rotate / crop members
- * (rotate, flipH/V, zoom, ratio, straighten) are intentionally excluded, as
- * is flip, which has no vips edit yet. Those sliders remain live state for
- * a future backend transform.
+ * @radialapps/memories-vips-editor are translated. Geometry (rotate,
+ * straighten, crop) is handled separately by stateToSaveEdits; flip has no
+ * vips edit yet and is preview-only.
  */
 
 const P_EXPOSURE = 10;

@@ -51,8 +51,8 @@
         @flip-h="toggleFlipH"
         @flip-v="toggleFlipV"
       >
-        <template #filter-thumb="{ filter, edits, index }">
-          <slot name="filter-thumb" :filter="filter" :edits="edits" :index="index" />
+        <template #filter-thumb="{ filter }">
+          <slot name="filter-thumb" :filter="filter" />
         </template>
       </EditorSidebar>
     </div>
@@ -73,12 +73,10 @@ const props = withDefaults(
     saveLabel?: string;
     /** Accent color for sliders, tabs and highlights. Any CSS color. */
     accent?: string;
-    /** Controlled state snapshot. Omit for uncontrolled (internal) state. */
-    modelValue?: EditorState | null;
     imageWidth?: number;
     imageHeight?: number;
   }>(),
-  { saveLabel: 'Save', accent: '#4a9eff', modelValue: null, imageWidth: 0, imageHeight: 0 },
+  { saveLabel: 'Save', accent: '#4a9eff', imageWidth: 0, imageHeight: 0 },
 );
 
 const emit = defineEmits<{
@@ -86,11 +84,10 @@ const emit = defineEmits<{
   save: [state: EditorState];
   change: [state: EditorState];
   section: [s: EditorSection];
-  'update:modelValue': [state: EditorState];
 }>();
 
 // Single source of truth: ALL editor state lives here. Every mutation is
-// forwarded to the host as a full snapshot via `change` / `update:modelValue`.
+// forwarded to the host as a full snapshot via `change`.
 const state = reactive<EditorState>({ ...INITIAL_STATE });
 const defaults = reactive<Record<string, number>>({ ...DEFAULT_PARAMS });
 
@@ -99,20 +96,6 @@ const section = ref<EditorSection>('crop');
 const mobileKey = ref<string | null>(null);
 
 const cropStage = useTemplateRef('cropStage');
-
-// Controlled mode: reflect an external snapshot into the internal store.
-// Uncontrolled (default): the store is the source of truth.
-// Guarded so echoing our own `update:modelValue` back does not loop.
-watch(
-  () => props.modelValue,
-  (snap) => {
-    if (!snap) return;
-    for (const k of Object.keys(snap) as (keyof EditorState)[]) {
-      if ((state as any)[k] !== (snap as any)[k]) (state as any)[k] = (snap as any)[k];
-    }
-  },
-  { deep: true },
-);
 
 function setParam(key: string, v: number) {
   (state as any)[key] = v;
@@ -130,7 +113,6 @@ function resetAll() {
   state.rotate = 0;
   state.flipH = 1;
   state.flipV = 1;
-  state.zoom = 1;
   state.preset = '';
   state.ratio = 'free';
   state.comparing = false;
@@ -163,13 +145,12 @@ function onSave() {
   emit('save', toRaw(state) as EditorState);
 }
 
-// Forward every edit as `change` + v-model update (controls-only: no rendering).
+// Forward every edit as `change` (controls-only: no rendering).
 watch(
   state,
   () => {
     const snap = { ...toRaw(state) };
     emit('change', snap);
-    emit('update:modelValue', snap);
   },
   { deep: true },
 );
