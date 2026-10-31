@@ -847,6 +847,17 @@ function getQuery() {
     set(DaysFilterType.FOLDER, path);
     if (route.query.recursive) {
       set(DaysFilterType.RECURSIVE);
+
+      // Filters available in the recursive folder view
+      const tag = route.query.tag?.toString();
+      if (tag) {
+        set(DaysFilterType.TAG, tag);
+      }
+      if (route.query.type === 'video') {
+        set(DaysFilterType.VIDEOS);
+      } else if (route.query.type === 'photo') {
+        set(DaysFilterType.IMAGES);
+      }
     }
   }
 
