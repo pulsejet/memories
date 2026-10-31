@@ -864,6 +864,10 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
       display: none;
     }
   }
+  // Tall filter cards need a smaller corner radius than the pill bars.
+  .me-bar.is-filters {
+    border-radius: 20px;
+  }
   // Divider between filter groups in the mobile chip strip.
   .me-bar-sep {
     flex: none;
@@ -871,6 +875,37 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     align-self: stretch;
     margin: 8px 2px;
     background: rgba(255, 255, 255, 0.12);
+  }
+  // Filter preview thumb inside mobile chips (same slot as sidebar cards).
+  .me-chip-thumb {
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: 8px;
+    overflow: hidden;
+    line-height: 0;
+    background: var(--me-bg-4);
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+  // Mobile filter chips are vertical mini-cards with a large preview.
+  .me-chip.me-chip-filter {
+    flex-direction: column;
+    gap: 5px;
+    padding: 7px;
+    border-radius: 12px;
+    font-size: 11px;
+
+    .me-chip-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 10px;
+    }
   }
   .me-m-tab {
     flex: none;

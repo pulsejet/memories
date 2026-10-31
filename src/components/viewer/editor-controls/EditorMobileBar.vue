@@ -44,7 +44,7 @@
       </button>
     </div>
 
-    <div class="me-bar me-glass" aria-label="Options">
+    <div class="me-bar me-glass" :class="{ 'is-filters': section === 'filters' }" aria-label="Options">
       <template v-if="section === 'adjust'">
         <button
           v-for="k in ADJUST_KEYS"
@@ -96,10 +96,11 @@
           <button
             v-for="f in filtersInGroup(group)"
             :key="f.id"
-            class="me-chip me-clickable button-vue"
+            class="me-chip me-chip-filter me-clickable button-vue"
             :class="{ 'is-active': state.preset === f.id }"
             @click="onPreset(f.id)"
           >
+            <span class="me-chip-thumb"><slot name="filter-thumb" :filter="f" /></span>
             <span>{{ f.name }}</span>
           </button>
         </template>
