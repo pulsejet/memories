@@ -12,7 +12,7 @@
           <slot name="preview" />
         </EditorCropStage>
 
-        <EditorFloatActions :save-label="saveLabel" :disabled="!hasEdits" @close="emit('back')" @save="onSave" />
+        <EditorFloatActions :disabled="!hasEdits" @close="emit('back')" @save="onSave" />
         <EditorMobileBar
           :state="state"
           :defaults="defaults"
@@ -70,13 +70,12 @@ import type { EditorSection, EditorState } from './types';
 
 const props = withDefaults(
   defineProps<{
-    saveLabel?: string;
     /** Accent color for sliders, tabs and highlights. Any CSS color. */
     accent?: string;
     imageWidth?: number;
     imageHeight?: number;
   }>(),
-  { saveLabel: 'Save', accent: '#4a9eff', imageWidth: 0, imageHeight: 0 },
+  { accent: '#4a9eff', imageWidth: 0, imageHeight: 0 },
 );
 
 const emit = defineEmits<{

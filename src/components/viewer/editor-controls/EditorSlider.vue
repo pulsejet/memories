@@ -2,9 +2,9 @@
   <div class="me-slider-row" :class="{ 'is-changed': changed }" :data-key="paramKey">
     <span
       :class="['me-s-icon', { 'me-clickable': changed }]"
-      :title="iconTitle"
+      :title="label"
       :role="changed ? 'button' : undefined"
-      :aria-label="changed ? `Reset ${label}` : undefined"
+      :aria-label="changed ? t('memories', 'Reset {name}', { name: label }) : undefined"
       :tabindex="changed ? 0 : undefined"
       @click="onIconClick"
       @keydown.enter="onIconKey"
@@ -34,10 +34,11 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import type { Component } from 'vue';
 import * as nativex from '@native';
-import { capitalize, formatParamValue } from './types';
+import { t } from '@services/l10n';
+import { PARAM_NAMES, formatParamValue, type ParamKey } from './types';
 
 const props = defineProps<{
-  paramKey: string;
+  paramKey: ParamKey;
   modelValue: number;
   defaultValue: number;
   min: number;
@@ -55,10 +56,9 @@ const emit = defineEmits<{
 
 const inputEl = ref<HTMLInputElement | null>(null);
 const step = computed(() => props.step ?? 1);
-const label = computed(() => props.label ?? capitalize(props.paramKey));
+const label = computed(() => props.label ?? PARAM_NAMES[props.paramKey]);
 const changed = computed(() => props.modelValue !== props.defaultValue);
 const display = computed(() => formatParamValue(props.paramKey, props.modelValue));
-const iconTitle = computed(() => (changed.value ? `Reset ${label.value}` : label.value));
 
 function paint() {
   const el = inputEl.value;
