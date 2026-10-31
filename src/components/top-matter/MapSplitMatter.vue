@@ -44,6 +44,7 @@ import axios from '@nextcloud/axios';
 
 import { API } from '@services/API';
 import * as utils from '@services/utils/common';
+import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import { config } from '@services/user-config';
 
@@ -70,6 +71,7 @@ const oldZoom = ref(2);
 const clusters = ref<IMapCluster[]>([]);
 const animMarkers = ref(false);
 const lastClick = ref(0); // fileid
+const abort = useAbort();
 
 useResizeObserver(matter, handleContainerResize);
 
@@ -179,10 +181,9 @@ async function refresh() {
 }
 
 async function fetchClusters() {
+  const signal = abort.renew();
   const oldZoomVal = oldZoom.value;
-  const qbounds = route.query.b;
   const zoomParam = route.query.z?.toString();
-  const paramsChanged = () => route.query.b !== qbounds || route.query.z !== zoomParam;
 
   let { minLat, maxLat, minLon, maxLon } = boundsFromQuery();
 
@@ -197,26 +198,30 @@ async function fetchClusters() {
   // Get bounds with expanded margins
   const bounds = boundsToStr({ minLat, maxLat, minLon, maxLon });
 
-  // Make API call
+  // Make API call; abort previous in-flight request on pan/zoom
   const url = API.Q(API.MAP_CLUSTERS(), { bounds, zoom: zoomParam });
 
-  // Params have changed, quit
-  const res = await axios.get<IMapCluster[]>(url);
-  if (paramsChanged()) return;
+  try {
+    const res = await axios.get<IMapCluster[]>(url, { signal });
+    signal.throwIfAborted();
 
-  // Mark currently loaded zoom level
-  oldZoom.value = zoom.value;
+    // Mark currently loaded zoom level
+    oldZoom.value = zoom.value;
 
-  if (zoom.value > oldZoomVal) {
-    setClustersZoomIn(res.data, oldZoomVal);
-  } else if (zoom.value < oldZoomVal) {
-    setClustersZoomOut(res.data);
-  } else {
-    clusters.value = res.data;
+    if (zoom.value > oldZoomVal) {
+      setClustersZoomIn(res.data, oldZoomVal);
+    } else if (zoom.value < oldZoomVal) {
+      setClustersZoomOut(res.data);
+    } else {
+      clusters.value = res.data;
+    }
+
+    // Animate markers
+    animateMarkers();
+  } catch (e) {
+    if (isAbortError(e)) return;
+    throw e;
   }
-
-  // Animate markers
-  animateMarkers();
 }
 
 function boundsFromQuery() {
