@@ -14,14 +14,16 @@ import type { EditorState } from './types';
  * Only parameters with a clean VIPS mapping in
  * @radialapps/memories-vips-editor are translated. Rotate / crop members
  * (rotate, flipH/V, zoom, ratio, straighten) are intentionally excluded, as
- * are highlights / shadows / temperature, which need curves or white-balance
- * support that the library does not provide yet (see its README excluded
- * list). Those sliders remain live state for a future backend transform.
+ * is flip, which has no vips edit yet. Those sliders remain live state for
+ * a future backend transform.
  */
 
 const P_EXPOSURE = 10;
 const P_BRIGHTNESS_CONTRAST = 20;
+const P_SHADOWS = 22;
+const P_HIGHLIGHTS = 24;
 const P_HUE_SATURATION = 30;
+const P_WARMTH = 35;
 const P_VIBRANCE = 40;
 const P_PRESET = 50;
 
@@ -87,6 +89,20 @@ export function stateToEdits(state: EditorState): Edit[] {
     });
   }
 
+  if (nonZero(state.shadows)) {
+    ordered.push({
+      priority: P_SHADOWS,
+      edit: { edit: 'shadows', amount: state.shadows / 100 },
+    });
+  }
+
+  if (nonZero(state.highlights)) {
+    ordered.push({
+      priority: P_HIGHLIGHTS,
+      edit: { edit: 'highlights', amount: state.highlights / 100 },
+    });
+  }
+
   if (nonZero(state.hue) || nonZero(state.saturation)) {
     ordered.push({
       priority: P_HUE_SATURATION,
@@ -95,6 +111,13 @@ export function stateToEdits(state: EditorState): Edit[] {
         hue: state.hue / 180,
         saturation: state.saturation / 100,
       },
+    });
+  }
+
+  if (nonZero(state.temperature)) {
+    ordered.push({
+      priority: P_WARMTH,
+      edit: { edit: 'warmth', amount: state.temperature / 100 },
     });
   }
 
