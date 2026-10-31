@@ -2,7 +2,7 @@
   <button class="me-float-close me-icon-btn me-clickable button-vue" aria-label="Close" title="Close" @click="onClose">
     <Close :size="20" />
   </button>
-  <button class="me-float-save me-glass me-clickable button-vue" @click="onSave">
+  <button class="me-float-save me-glass me-clickable button-vue" :disabled="disabled" @click="onSave">
     {{ saveLabel }}
   </button>
 </template>
@@ -11,11 +11,12 @@
 import Close from 'vue-material-design-icons/Close.vue';
 import * as nativex from '@native';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     saveLabel?: string;
+    disabled?: boolean;
   }>(),
-  { saveLabel: 'Save' },
+  { saveLabel: 'Save', disabled: false },
 );
 
 const emit = defineEmits<{
@@ -29,6 +30,7 @@ function onClose() {
 }
 
 function onSave() {
+  if (props.disabled) return;
   nativex.playTouchSound();
   emit('save');
 }
