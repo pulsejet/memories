@@ -15,7 +15,7 @@
       v-if="editorOpen && currentPhoto"
       v-show="editorReady"
       :photo="currentPhoto"
-      @ready="editorReady = true"
+      @ready="onEditorReady"
       @close="closeEditor"
     />
 
@@ -152,7 +152,7 @@ import PsPhotoSphere from './PsPhotoSphere';
 import PsNativeHole from './PsNativeHole';
 
 import type { IImageInfo, IPhoto, TimelineState } from '@typings';
-import type { PsContent } from './types';
+import type { PsContent, PsPhotoSwipe } from './types';
 
 import LivePhotoIcon from '@components/icons/LivePhoto.vue';
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
@@ -225,7 +225,7 @@ const sheetOpen = ref(false);
 let activityTimer = 0;
 
 /** Base dialog */
-const photoswipe = ref<PhotoSwipe | null>(null);
+const photoswipe = ref<PsPhotoSwipe | null>(null);
 let psNativeHole: PsNativeHole | null = null;
 let psImage: PsImage | null = null;
 let psLivePhoto: PsLivePhoto | null = null;
@@ -702,7 +702,7 @@ async function createBase(args: PhotoSwipeOptions) {
   // PhotoSwipe relies on object identity internally, and Vue's
   // reactivity proxying breaks it. All photoswipe-related objects
   // MUST use markRaw() if stored in data.
-  photoswipe.value = markRaw(pswp);
+  photoswipe.value = markRaw(pswp) as PsPhotoSwipe;
 
   // Debugging only
   _m.viewer.photoswipe = photoswipe.value;
@@ -837,7 +837,7 @@ async function createBase(args: PhotoSwipeOptions) {
   psImage = new PsImage(<any>photoswipe.value);
 
   // Live Photo support
-  psLivePhoto = new PsLivePhoto(<any>photoswipe.value, <any>psImage, liveState);
+  psLivePhoto = new PsLivePhoto(<any>photoswipe.value, psImage, liveState);
 
   // Video support
   psVideo = new PsVideo(<any>photoswipe.value);
@@ -1244,8 +1244,25 @@ async function openEditor() {
   editorOpen.value = true;
 }
 
+function onEditorReady() {
+  // Force-hide the native image view to prevent glitches.
+  if (!editorReady.value && photoswipe.value?.currSlide) {
+    photoswipe.value.currSlide.data.nxImageDisabled ??= 0;
+    photoswipe.value.currSlide.data.nxImageDisabled++;
+    photoswipe.value.dispatch('initialZoomPan');
+  }
+
+  editorReady.value = true;
+}
+
 /** Close the editor and reset its ready gate */
 function closeEditor() {
+  if (editorReady.value && photoswipe.value?.currSlide) {
+    photoswipe.value.currSlide.data.nxImageDisabled ??= 1;
+    photoswipe.value.currSlide.data.nxImageDisabled--;
+    photoswipe.value.dispatch('initialZoomPan');
+  }
+
   editorOpen.value = false;
   editorReady.value = false;
 }

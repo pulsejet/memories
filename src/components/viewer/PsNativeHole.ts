@@ -2,8 +2,7 @@ import * as nativex from '@native';
 import { windowDims } from '@services/viewport';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 
-import type PhotoSwipe from 'photoswipe';
-import type { PsSlide } from './types';
+import type { PsPhotoSwipe, PsSlide } from './types';
 
 export default class PsNativeHole {
   private clipRaf = 0;
@@ -16,7 +15,7 @@ export default class PsNativeHole {
   private contentElement: HTMLElement | null = null;
   private holderElement: HTMLElement | null = null;
 
-  constructor(private lightbox: PhotoSwipe) {
+  constructor(private lightbox: PsPhotoSwipe) {
     if (!nativex.viewImageIsEnabled() && !nativex.viewVideoIsEnabled()) return;
 
     const updateEvents = [
