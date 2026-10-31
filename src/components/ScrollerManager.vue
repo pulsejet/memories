@@ -275,36 +275,54 @@ function recreate() {
   lastAdjustHeight.value = 0;
 
   // Ticks
-  let prevYear = 9999;
-  let prevMonth = 0;
-
-  // Get a new tick
-  const getTick = (dayId: number, isMonth = false, text?: string | number): ITick => ({
-    dayId,
-    isMonth,
-    text,
-    y: 0,
-    count: 0,
-    topF: 0,
-    top: 0,
-    s: false,
-  });
+  let prevYear = Number.MAX_SAFE_INTEGER;
+  let prevMonth = Number.MAX_SAFE_INTEGER;
+  let prevDayId = Number.MAX_SAFE_INTEGER;
 
   // Iterate over rows
   for (const row of toRaw(props.rows)) {
     if (row.type === 0) {
-      // Make date string
-      const dateTaken = utils.dayIdToDate(row.dayId);
-
       // Create tick
+      const tick: ITick = {
+        dayId: row.dayId,
+        isMonth: false,
+        text: undefined,
+        y: 0,
+        count: 0,
+        topF: 0,
+        top: 0,
+        s: false,
+      };
+
+      // Check if this should be shown.
+      const dateTaken = utils.dayIdToDate(row.dayId);
       const dtYear = dateTaken.getUTCFullYear();
       const dtMonth = dateTaken.getUTCMonth();
-      const isMonth = dtMonth !== prevMonth || dtYear !== prevYear;
-      const text = dtYear === prevYear ? undefined : dtYear;
-      ticks.push(getTick(row.dayId, isMonth, text));
+      const dtDayId = row.dayId;
 
-      prevMonth = dtMonth;
+      // Mark a tick visible whenever the month or year changes.
+      if (dtMonth !== prevMonth || dtYear !== prevYear) {
+        tick.isMonth = true;
+      }
+
+      // Show the year when it changes. In DESC sort, we assign the year
+      // from the previous tick here, so it shows at the lower boundary of
+      // the previous year. This means that the tick text is deliberately
+      // mismatched with the year / row that it actually matches.
+      if (dtYear !== prevYear) {
+        const textDayId = dtDayId > prevDayId ? dtDayId : prevDayId;
+        const textYear = dtDayId > prevDayId ? dtYear : prevYear;
+
+        // Never set the year for special fake days with meaningless dayIds.
+        if (textDayId !== Number.MAX_SAFE_INTEGER && textDayId !== lens.TOP_RESULTS_DAYID) {
+          tick.text = textYear;
+        }
+      }
+
+      ticks.push(tick);
       prevYear = dtYear;
+      prevMonth = dtMonth;
+      prevDayId = dtDayId;
     }
   }
 }
