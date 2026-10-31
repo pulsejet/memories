@@ -33,6 +33,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
 import type { Component } from 'vue';
+import * as nativex from '@native';
 import { capitalize, formatParamValue } from './types';
 
 const props = defineProps<{
@@ -71,15 +72,24 @@ function onInput(e: Event) {
 }
 
 function onReset() {
-  if (changed.value) emit('reset');
+  if (changed.value) {
+    nativex.playTouchSound();
+    emit('reset');
+  }
 }
 
 function onIconClick() {
-  if (changed.value) emit('reset');
+  if (changed.value) {
+    nativex.playTouchSound();
+    emit('reset');
+  }
 }
 
 function onIconKey() {
-  if (changed.value) emit('reset');
+  if (changed.value) {
+    nativex.playTouchSound();
+    emit('reset');
+  }
 }
 
 watch(() => props.modelValue, paint);

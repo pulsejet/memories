@@ -51,7 +51,7 @@
           :key="k"
           class="me-chip me-clickable button-vue"
           :class="{ 'is-active': k === mobileKey, 'is-changed': isChanged(k) }"
-          @click="emit('update:mobile-key', k)"
+          @click="onMobileKey(k)"
         >
           <span class="me-chip-icon"><component :is="iconFor(k)" :size="17" /></span>
           <span>{{ capitalize(k) }}</span>
@@ -59,31 +59,31 @@
         </button>
       </template>
       <template v-else-if="section === 'crop'">
-        <button class="me-chip me-clickable button-vue" @click="emit('rotate-left')">
+        <button class="me-chip me-clickable button-vue" @click="onRotateLeft">
           <span class="me-chip-icon"><RotateLeft :size="17" /></span><span>−90°</span>
         </button>
-        <button class="me-chip me-clickable button-vue" @click="emit('rotate-right')">
+        <button class="me-chip me-clickable button-vue" @click="onRotateRight">
           <span class="me-chip-icon"><RotateRight :size="17" /></span><span>+90°</span>
         </button>
         <button
           class="me-chip me-clickable button-vue"
           :class="{ 'is-active': mobileKey === 'straighten', 'is-changed': isChanged('straighten') }"
-          @click="emit('update:mobile-key', 'straighten')"
+          @click="onMobileKey('straighten')"
         >
           <span class="me-chip-icon"><component :is="iconFor('straighten')" :size="17" /></span>
           <span>Straighten</span>
           <span class="me-chip-val">{{ formatParamValue('straighten', state.straighten) }}</span>
         </button>
-        <button class="me-chip me-clickable button-vue" @click="emit('flip-h')">
+        <button class="me-chip me-clickable button-vue" @click="onFlipH">
           <span class="me-chip-icon"><FlipHorizontal :size="17" /></span><span>Flip H</span>
         </button>
-        <button class="me-chip me-clickable button-vue" @click="emit('flip-v')">
+        <button class="me-chip me-clickable button-vue" @click="onFlipV">
           <span class="me-chip-icon"><FlipVertical :size="17" /></span><span>Flip V</span>
         </button>
         <button
           class="me-chip me-clickable button-vue"
           :class="{ 'is-active': mobileKey === 'ratio' }"
-          @click="emit('update:mobile-key', 'ratio')"
+          @click="onMobileKey('ratio')"
         >
           <span class="me-chip-icon"><AspectRatio :size="17" /></span>
           <span>Ratio</span>
@@ -96,7 +96,7 @@
           :key="f.id"
           class="me-chip me-clickable button-vue"
           :class="{ 'is-active': state.preset === f.id }"
-          @click="emit('update:preset', f.id)"
+          @click="onPreset(f.id)"
         >
           <span>{{ f.name }}</span>
         </button>
@@ -109,7 +109,7 @@
         :key="t.id"
         class="me-m-tab me-clickable button-vue"
         :class="{ 'is-active': section === t.id }"
-        @click="emit('update:section', t.id)"
+        @click="onSection(t.id)"
       >
         <component :is="t.icon" :size="18" />
         {{ t.label }}
@@ -129,6 +129,7 @@ import RotateLeft from 'vue-material-design-icons/RotateLeft.vue';
 import RotateRight from 'vue-material-design-icons/RotateRight.vue';
 import Tune from 'vue-material-design-icons/Tune.vue';
 import { iconFor } from './paramIcons';
+import * as nativex from '@native';
 import { ADJUST_KEYS, FILTERS, PARAM_DEFS, RATIOS, capitalize, formatParamValue } from './types';
 import type { EditorParams, EditorSection, EditorState } from './types';
 
@@ -342,12 +343,49 @@ function onRulerKey(e: KeyboardEvent) {
 }
 
 function onRulerReset() {
+  nativex.playTouchSound();
   if (props.mobileKey && rulerChanged.value) emit('reset:param', props.mobileKey);
 }
 
 function onPickRatio(id: string) {
+  nativex.playTouchSound();
   emit('update:ratio', id);
   emit('update:mobile-key', null);
+}
+
+function onSection(s: EditorSection) {
+  nativex.playTouchSound();
+  emit('update:section', s);
+}
+
+function onMobileKey(k: string | null) {
+  nativex.playTouchSound();
+  emit('update:mobile-key', k);
+}
+
+function onPreset(id: string) {
+  nativex.playTouchSound();
+  emit('update:preset', id);
+}
+
+function onRotateLeft() {
+  nativex.playTouchSound();
+  emit('rotate-left');
+}
+
+function onRotateRight() {
+  nativex.playTouchSound();
+  emit('rotate-right');
+}
+
+function onFlipH() {
+  nativex.playTouchSound();
+  emit('flip-h');
+}
+
+function onFlipV() {
+  nativex.playTouchSound();
+  emit('flip-v');
 }
 
 watch(() => props.mobileKey, buildRuler);
