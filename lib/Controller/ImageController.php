@@ -30,7 +30,6 @@ use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Exif;
 use OCA\Memories\Preview\Vips;
-use OCA\Memories\Service;
 use OCA\Memories\Service\Index;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
@@ -466,13 +465,10 @@ final class ImageController extends ApiController
     public function editImage(
         int $id,
         string $name,
-        int $width,
-        int $height,
-        ?float $quality,
         string $extension,
-        array $state,
+        array $edits = [],
     ): Http\Response {
-        return $this->util->guardEx(function () use ($id, $name, $width, $height, $quality, $extension, $state) {
+        return $this->util->guardEx(function () use ($id, $name, $extension, $edits) {
             // Get the file
             $file = $this->fs->getUserFile($id);
 
@@ -499,7 +495,8 @@ final class ImageController extends ApiController
             if ('.' === $name || '..' === $name || !preg_match('/^[^\/\0[:cntrl:]]+\z/u', $name)) {
                 throw Exceptions::BadRequest('Invalid file name');
             }
-            if (!\in_array(strtolower($extension), ['jpeg', 'jpg', 'png', 'webp'], true)) {
+            $extLower = strtolower($extension);
+            if (!\in_array($extLower, ['jpeg', 'jpg', 'png', 'webp', 'avif'], true)) {
                 throw Exceptions::BadRequest('Invalid image format');
             }
 
@@ -510,41 +507,9 @@ final class ImageController extends ApiController
 
             // Read the image from the local path to avoid buffering into PHP
             $path = $file->getStorage()->getLocalFile($file->getInternalPath());
-            $image = self::getImagick($path);
 
-            // Due to a bug in filerobot, the provided width and height may be swapped
-            // 1. If the user does not rotate the image, we're fine
-            // 2. If image is rotated and user doesn't change the save resolution,
-            //    the wxh corresponds to the original image, not the rotated one
-            // 3. If image is rotated and user changes the save resolution,
-            //    the wxh corresponds to the rotated image.
-            $iw = $image->getImageWidth();
-            $ih = $image->getImageHeight();
-            $shouldResize = $width !== $iw || $height !== $ih;
-
-            // Apply the edits
-            (new Service\FileRobotMagick($image, $state))->apply();
-
-            // Resize the image
-            $iw = $image->getImageWidth();
-            $ih = $image->getImageHeight();
-            if ($shouldResize && $width && $height && ($iw !== $width || $ih !== $height)) {
-                if ($width < 1 || $height < 1 || $width > 100000 || $height > 100000) {
-                    throw Exceptions::BadRequest('Invalid image dimensions');
-                }
-                $image->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, true);
-            }
-
-            // Set image format
-            $image->setImageFormat($extension);
-
-            // Set quality if specified
-            if (null !== $quality && $quality >= 0 && $quality <= 1) {
-                $image->setImageCompressionQuality((int) round(100.0 * $quality));
-            }
-
-            // Save the image
-            $blob = $image->getImageBlob();
+            // Apply the vips-editor edits via the static vips binary.
+            $blob = $this->editImageVips($path, $extLower, $edits);
 
             // Strip live photo identifiers.
             if ($isLivePhoto) {
@@ -586,6 +551,51 @@ final class ImageController extends ApiController
 
             return new JSONResponse(['deleted' => true], Http::STATUS_OK);
         });
+    }
+
+    /**
+     * Apply vips-editor edits via the static vips binary.
+     *
+     * @param array<int, array<string, mixed>> $edits
+     */
+    private function editImageVips(string $path, string $extension, array $edits): string
+    {
+        // Basic shape check so vips errors stay actionable.
+        foreach ($edits as $edit) {
+            if (!\is_array($edit) || !isset($edit['edit']) || !\is_string($edit['edit'])) {
+                throw Exceptions::BadRequest('Invalid edit entry');
+            }
+        }
+
+        // Saver is picked from the output extension.
+        $outputMap = [
+            'jpeg' => 'output.jpg',
+            'jpg' => 'output.jpg',
+            'png' => 'output.png',
+            'webp' => 'output.webp',
+            'avif' => 'output.avif',
+        ];
+        $output = $outputMap[$extension] ?? null;
+        if (null === $output) {
+            throw Exceptions::BadRequest('Invalid image format');
+        }
+
+        // Vips convert quality (JPEG/WebP/AVIF). PNG ignores it.
+        $qualityInt = 90;
+
+        try {
+            $blob = $this->vips->convertFormat($path, $output, $qualityInt, array_values($edits));
+        } catch (\Throwable $e) {
+            $msg = $e->getMessage();
+            // Edit validation errors come from the vips edits parser.
+            if (str_contains($msg, 'edits')) {
+                throw Exceptions::BadRequest($msg);
+            }
+
+            throw Exceptions::Forbidden('VIPS failed: '.$msg);
+        }
+
+        return $blob;
     }
 
     /**
