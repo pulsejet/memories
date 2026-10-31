@@ -1,6 +1,13 @@
 <template>
   <div class="me-photo-editor">
-    <EditorControls ref="editor" @back="close" @save="onSave" @change="onChange">
+    <EditorControls
+      ref="editor"
+      :image-width="imgW"
+      :image-height="imgH"
+      @back="close"
+      @save="onSave"
+      @change="onChange"
+    >
       <template #preview>
         <img v-if="!ready" class="me-photo-preview" :src="previewUrl" alt="" />
         <canvas ref="canvasRef" v-show="ready" class="me-photo-canvas" />
@@ -49,8 +56,12 @@ let pipeline: EditPipeline | null = null;
 /** True once the source image is on the GPU and the canvas takes over. */
 const ready = ref(false);
 
+const imgW = ref(props.photo.w || 0);
+const imgH = ref(props.photo.h || 0);
+
 /** Monotonic load generation; drops stale async loads after photo switches. */
 let loadGen = 0;
+let lastEditsJson = '';
 
 function close() {
   emit('close');
@@ -64,7 +75,11 @@ function close() {
 function onChange(state: EditorState) {
   if (!pipeline) return;
   try {
-    pipeline.setEdits(state.comparing ? [] : stateToEdits(state));
+    const edits = state.comparing ? [] : stateToEdits(state);
+    const json = JSON.stringify(edits);
+    if (json === lastEditsJson) return;
+    lastEditsJson = json;
+    pipeline.setEdits(edits);
   } catch (e) {
     console.error('Photo editor preview failed', e);
   }
@@ -99,6 +114,9 @@ async function loadSource(url: string) {
 
     pipeline ??= new EditPipeline(canvas);
     pipeline.setImage(img);
+    imgW.value = pipeline.width || img.naturalWidth;
+    imgH.value = pipeline.height || img.naturalHeight;
+    lastEditsJson = '';
     if (editor.value) onChange({ ...editor.value.state });
     ready.value = true;
   } catch (e) {
@@ -136,6 +154,8 @@ onBeforeUnmount(() => {
 // Reload the source if the edited photo changes underneath the editor.
 watch(previewUrl, (url) => {
   ready.value = false;
+  imgW.value = props.photo.w || 0;
+  imgH.value = props.photo.h || 0;
   void loadSource(url);
 });
 
@@ -153,18 +173,13 @@ utils.useBus('memories:fragment:pop:editor', close);
   background-color: black;
 }
 
-.me-photo-preview {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-// The pipeline auto-sizes the canvas backing store to the rendered output;
-// CSS just makes it fill all available space in the preview area.
+.me-photo-preview,
 .me-photo-canvas {
   width: 100%;
   height: 100%;
-  object-fit: contain;
   display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
 }
 </style>
