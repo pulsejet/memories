@@ -7,6 +7,8 @@
 
 export type EditorSection = 'adjust' | 'crop' | 'filters';
 
+export type CropHandle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
+
 export interface SliderDef {
   key: string;
   min: number;
@@ -52,6 +54,10 @@ export interface EditorState extends EditorParams {
   preset: string;
   ratio: string;
   comparing: boolean;
+  cropX: number;
+  cropY: number;
+  cropW: number;
+  cropH: number;
 }
 
 export const SLIDER_DEFS: SliderDef[] = [
@@ -82,6 +88,10 @@ export const INITIAL_STATE: EditorState = {
   preset: '',
   ratio: 'free',
   comparing: false,
+  cropX: 0,
+  cropY: 0,
+  cropW: 1,
+  cropH: 1,
 };
 
 export const FILTERS: FilterDef[] = [

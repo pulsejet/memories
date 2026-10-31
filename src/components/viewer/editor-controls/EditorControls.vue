@@ -2,7 +2,16 @@
   <div ref="rootEl" class="me-root" :style="accentStyle">
     <div class="me-workspace">
       <div class="me-side">
-        <slot name="preview" />
+        <EditorCropStage
+          ref="cropStage"
+          :state="state"
+          :section="section"
+          :image-width="imageWidth"
+          :image-height="imageHeight"
+        >
+          <slot name="preview" />
+        </EditorCropStage>
+
         <EditorFloatActions :save-label="saveLabel" @close="emit('back')" @save="onSave" />
         <EditorMobileBar
           :state="state"
@@ -14,7 +23,7 @@
           @update:param="setParam"
           @reset:param="resetParam"
           @update:preset="(id) => (state.preset = id)"
-          @update:ratio="(id) => (state.ratio = id)"
+          @update:ratio="setRatio"
           @rotate-left="rotateBy(-90)"
           @rotate-right="rotateBy(90)"
           @flip-h="toggleFlipH"
@@ -30,7 +39,7 @@
         @update:param="setParam"
         @reset:param="resetParam"
         @update:preset="(id) => (state.preset = id)"
-        @update:ratio="(id) => (state.ratio = id)"
+        @update:ratio="setRatio"
         @rotate-left="rotateBy(-90)"
         @rotate-right="rotateBy(90)"
         @flip-h="toggleFlipH"
@@ -45,7 +54,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, toRaw, watch } from 'vue';
+import { computed, reactive, ref, toRaw, useTemplateRef, watch } from 'vue';
+import EditorCropStage from './EditorCropStage.vue';
 import EditorMobileBar from './EditorMobileBar.vue';
 import EditorSidebar from './EditorSidebar.vue';
 import EditorFloatActions from './EditorFloatActions.vue';
@@ -59,8 +69,10 @@ const props = withDefaults(
     accent?: string;
     /** Controlled state snapshot. Omit for uncontrolled (internal) state. */
     modelValue?: EditorState | null;
+    imageWidth?: number;
+    imageHeight?: number;
   }>(),
-  { saveLabel: 'Save', accent: '#4a9eff', modelValue: null },
+  { saveLabel: 'Save', accent: '#4a9eff', modelValue: null, imageWidth: 0, imageHeight: 0 },
 );
 
 const emit = defineEmits<{
@@ -78,6 +90,8 @@ const defaults = reactive<Record<string, number>>({ ...DEFAULT_PARAMS });
 const section = ref<EditorSection>('crop');
 /** Slider currently loaded in the mobile ruler pill. */
 const mobileKey = ref<string>('straighten');
+
+const cropStage = useTemplateRef('cropStage');
 
 // Controlled mode: reflect an external snapshot into the internal store.
 // Uncontrolled (default): the store is the source of truth.
@@ -98,7 +112,10 @@ function setParam(key: string, v: number) {
 }
 
 function resetParam(key: string) {
-  if (defaults[key] !== undefined) (state as any)[key] = defaults[key];
+  if (defaults[key] !== undefined) {
+    if (key === 'straighten') cropStage.value?.settle();
+    (state as any)[key] = defaults[key];
+  }
 }
 
 function resetAll() {
@@ -110,18 +127,23 @@ function resetAll() {
   state.preset = '';
   state.ratio = 'free';
   state.comparing = false;
+  cropStage.value?.resetCrop();
 }
 
 function rotateBy(deg: number) {
-  state.rotate += deg;
+  cropStage.value?.rotateBy(deg);
 }
 
 function toggleFlipH() {
-  state.flipH = (state.flipH * -1) as 1 | -1;
+  cropStage.value?.toggleFlipH();
 }
 
 function toggleFlipV() {
-  state.flipV = (state.flipV * -1) as 1 | -1;
+  cropStage.value?.toggleFlipV();
+}
+
+function setRatio(id: string) {
+  cropStage.value?.setRatio(id);
 }
 
 function setSection(s: EditorSection) {

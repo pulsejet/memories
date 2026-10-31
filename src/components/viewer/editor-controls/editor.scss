@@ -416,6 +416,251 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     align-items: center;
     justify-content: center;
     min-height: 0;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  // --- crop stage, media & handles -------------------------------------------
+  .me-crop-stage {
+    position: absolute;
+    inset: 0;
+    touch-action: none;
+
+    &.is-crop-mode {
+      inset: 68px 80px;
+      cursor: grab;
+    }
+    &.is-crop-mode.is-interacting {
+      cursor: grabbing;
+    }
+  }
+
+  .me-crop-turntable {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-origin: 50% 50%;
+
+    &.is-animated {
+      transition: transform 0.28s cubic-bezier(0.2, 0, 0, 1);
+    }
+  }
+
+  .me-crop-media {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-origin: 50% 50%;
+    pointer-events: none;
+    will-change: transform;
+
+    &.is-animated {
+      transition: transform 0.26s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    img,
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+  }
+
+  .me-crop-box {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 3;
+    pointer-events: none;
+    box-shadow: 0 0 0 9999px var(--me-bg);
+    transition: box-shadow 0.2s ease;
+
+    &.is-animated {
+      transition:
+        width 0.26s cubic-bezier(0.2, 0, 0, 1),
+        height 0.26s cubic-bezier(0.2, 0, 0, 1),
+        transform 0.26s cubic-bezier(0.2, 0, 0, 1),
+        box-shadow 0.2s ease;
+    }
+
+    &.is-crop-mode {
+      pointer-events: auto;
+      cursor: grab;
+      box-shadow: 0 0 0 9999px rgba(10, 10, 11, 0.65);
+      outline: 1.5px solid rgba(255, 255, 255, 0.88);
+    }
+
+    &.is-crop-mode.is-active {
+      cursor: grabbing;
+      box-shadow: 0 0 0 9999px rgba(10, 10, 11, 0.55);
+    }
+  }
+
+  .me-crop-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .me-grid-line {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.32);
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.35);
+    transition: background 0.15s;
+
+    &.is-v {
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      transform: translateX(-0.5px);
+    }
+    &.is-h {
+      left: 0;
+      right: 0;
+      height: 1px;
+      transform: translateY(-0.5px);
+    }
+    &.is-fine {
+      background: rgba(255, 255, 255, 0.16);
+      box-shadow: none;
+    }
+  }
+
+  .me-crop-box.is-active .me-grid-line:not(.is-fine) {
+    background: rgba(255, 255, 255, 0.56);
+  }
+
+  .me-crop-handle {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    z-index: 4;
+    touch-action: none;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      background: #fff;
+      border-radius: 1.5px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+    }
+
+    &.is-nw,
+    &.is-ne,
+    &.is-se,
+    &.is-sw {
+      &::before {
+        width: 18px;
+        height: 3px;
+      }
+      &::after {
+        width: 3px;
+        height: 18px;
+      }
+    }
+    &.is-nw,
+    &.is-ne {
+      top: -16px;
+      &::before,
+      &::after {
+        top: 13px;
+      }
+    }
+    &.is-sw,
+    &.is-se {
+      bottom: -16px;
+      &::before,
+      &::after {
+        bottom: 13px;
+      }
+    }
+    &.is-nw,
+    &.is-sw {
+      left: -16px;
+      &::before,
+      &::after {
+        left: 13px;
+      }
+    }
+    &.is-ne,
+    &.is-se {
+      right: -16px;
+      &::before,
+      &::after {
+        right: 13px;
+      }
+    }
+    &.is-nw,
+    &.is-se {
+      cursor: nwse-resize;
+    }
+    &.is-ne,
+    &.is-sw {
+      cursor: nesw-resize;
+    }
+
+    &.is-n,
+    &.is-s {
+      left: 50%;
+      transform: translateX(-50%);
+      width: 44px;
+      cursor: ns-resize;
+      &::before {
+        left: 50%;
+        transform: translateX(-50%);
+        width: 22px;
+        height: 3px;
+      }
+      &::after {
+        display: none;
+      }
+    }
+    &.is-n {
+      top: -16px;
+      &::before {
+        top: 13px;
+      }
+    }
+    &.is-s {
+      bottom: -16px;
+      &::before {
+        bottom: 13px;
+      }
+    }
+
+    &.is-w,
+    &.is-e {
+      top: 50%;
+      transform: translateY(-50%);
+      height: 44px;
+      cursor: ew-resize;
+      &::before {
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 22px;
+      }
+      &::after {
+        display: none;
+      }
+    }
+    &.is-w {
+      left: -16px;
+      &::before {
+        left: 13px;
+      }
+    }
+    &.is-e {
+      right: -16px;
+      &::before {
+        right: 13px;
+      }
+    }
   }
 
   // --- floating actions (close + save replace the old top bar) ------------------
@@ -845,6 +1090,9 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   .me-root .me-side {
     flex: 1 1 46%;
   }
+  .me-root .me-crop-stage.is-crop-mode {
+    inset: 52px 52px 32px;
+  }
   .me-root .me-sidebar {
     width: 100%;
     flex: 1 1 54%;
@@ -894,6 +1142,9 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   }
   .me-root .me-side {
     flex: 1 1 auto;
+  }
+  .me-root .me-crop-stage.is-crop-mode {
+    inset: 60px 36px 180px;
   }
   .me-root .me-mobile-ui {
     display: flex;
