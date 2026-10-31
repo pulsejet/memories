@@ -246,6 +246,7 @@
     "No automated tests are available for NVIDIA acceleration." : "Pre akceleráciu NVIDIA nie sú k dispozícii žiadne automatické testy.",
     "Enable acceleration with NVENC" : "Povoľte akceleráciu pomocou NVENC",
     "Enable NVENC Temporal AQ" : "Povoliť NVENC Temporal AQ",
+    "Enable HDR tonemap_cuda (Jellyfin FFmpeg)" : "Povoliť HDR tonemap_cuda (Jellyfin FFmpeg)",
     "CUDA scaler" : "CUDA scaler",
     "NPP scaler" : "NPP scaler",
     "Due to a bug in certain hardware drivers, videos may appear in incorrect orientations when streaming. This can be resolved in some cases by rotating the video on the accelerator." : "Kvôli chybe v určitých hardvérových ovládačoch sa môžu videá pri streamovaní zobrazovať v nesprávnej orientácii. V niektorých prípadoch sa to dá vyriešiť otočením videa na akcelerátore.",

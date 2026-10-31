@@ -248,6 +248,7 @@ OC.L10N.register(
     "No automated tests are available for NVIDIA acceleration." : "Nu sunt disponibile teste automate pentru accelerarea NVIDIA.",
     "Enable acceleration with NVENC" : "Activează accelerarea cu NVENC",
     "Enable NVENC Temporal AQ" : "Activează NVENC Temporal AQ",
+    "Enable HDR tonemap_cuda (Jellyfin FFmpeg)" : "Activează HDR tonemap_cuda (Jellyfin FFmpeg)",
     "CUDA scaler" : "Scaler CUDA",
     "NPP scaler" : "Scaler NPP",
     "Due to a bug in certain hardware drivers, videos may appear in incorrect orientations when streaming. This can be resolved in some cases by rotating the video on the accelerator." : "Din cauza unei erori în anumite drivere hardware, videoclipurile pot apărea cu orientare greșită la streaming. În unele cazuri, problema poate fi rezolvată prin rotirea videoclipului pe accelerator.",
