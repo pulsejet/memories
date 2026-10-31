@@ -1,11 +1,11 @@
 <template>
-  <div class="me-mobile-ui" aria-label="Mobile editor controls">
+  <div class="me-mobile-ui" :aria-label="t('memories', 'Mobile editor controls')">
     <div class="me-slider-pill me-glass" :class="{ 'is-on': showRuler }">
       <button
         class="me-s-pill-icon button-vue"
         :class="{ 'is-changed': rulerChanged, 'me-clickable': rulerChanged }"
-        :title="rulerChanged ? `Reset ${rulerLabel}` : rulerLabel"
-        aria-label="Reset adjustment"
+        :title="rulerLabel"
+        :aria-label="t('memories', 'Reset adjustment')"
         @click="onRulerReset"
       >
         <component :is="rulerIcon" v-if="rulerIcon" :size="17" />
@@ -32,7 +32,7 @@
       </div>
     </div>
 
-    <div v-if="showRatioPill" class="me-bar me-glass" aria-label="Crop ratios">
+    <div v-if="showRatioPill" class="me-bar me-glass" :aria-label="t('memories', 'Crop ratios')">
       <button
         v-for="r in RATIOS"
         :key="r.id"
@@ -44,7 +44,11 @@
       </button>
     </div>
 
-    <div class="me-bar me-glass" :class="{ 'is-filters': section === 'filters' }" aria-label="Options">
+    <div
+      class="me-bar me-glass"
+      :class="{ 'is-filters': section === 'filters' }"
+      :aria-label="t('memories', 'Options')"
+    >
       <template v-if="section === 'adjust'">
         <button
           v-for="k in ADJUST_KEYS"
@@ -54,7 +58,7 @@
           @click="onMobileKey(k)"
         >
           <span class="me-chip-icon"><component :is="iconFor(k)" :size="17" /></span>
-          <span>{{ capitalize(k) }}</span>
+          <span>{{ PARAM_NAMES[k] }}</span>
           <span class="me-chip-val">{{ formatParamValue(k, state[k as keyof EditorParams]) }}</span>
         </button>
       </template>
@@ -71,14 +75,14 @@
           @click="onMobileKey('straighten')"
         >
           <span class="me-chip-icon"><component :is="iconFor('straighten')" :size="17" /></span>
-          <span>Straighten</span>
+          <span>{{ t('memories', 'Straighten') }}</span>
           <span class="me-chip-val">{{ formatParamValue('straighten', state.straighten) }}</span>
         </button>
         <button class="me-chip me-clickable button-vue" @click="onFlipH">
-          <span class="me-chip-icon"><FlipHorizontal :size="17" /></span><span>Flip H</span>
+          <span class="me-chip-icon"><FlipHorizontal :size="17" /></span><span>{{ t('memories', 'Flip H') }}</span>
         </button>
         <button class="me-chip me-clickable button-vue" @click="onFlipV">
-          <span class="me-chip-icon"><FlipVertical :size="17" /></span><span>Flip V</span>
+          <span class="me-chip-icon"><FlipVertical :size="17" /></span><span>{{ t('memories', 'Flip V') }}</span>
         </button>
         <button
           class="me-chip me-clickable button-vue"
@@ -86,7 +90,7 @@
           @click="onMobileKey('ratio')"
         >
           <span class="me-chip-icon"><AspectRatio :size="17" /></span>
-          <span>Ratio</span>
+          <span>{{ t('memories', 'Ratio') }}</span>
           <span class="me-chip-val">{{ ratioLabel }}</span>
         </button>
       </template>
@@ -107,7 +111,7 @@
       </template>
     </div>
 
-    <nav class="me-bar me-glass" aria-label="Editor sections">
+    <nav class="me-bar me-glass" :aria-label="t('memories', 'Editor sections')">
       <button
         v-for="t in tabs"
         :key="t.id"
@@ -134,8 +138,9 @@ import RotateRight from 'vue-material-design-icons/RotateRight.vue';
 import Tune from 'vue-material-design-icons/Tune.vue';
 import { iconFor } from './paramIcons';
 import * as nativex from '@native';
-import { ADJUST_KEYS, FILTER_GROUPS, PARAM_DEFS, RATIOS, capitalize, formatParamValue, filtersInGroup } from './types';
-import type { EditorParams, EditorSection, EditorState } from './types';
+import { t } from '@services/l10n';
+import { ADJUST_KEYS, FILTER_GROUPS, PARAM_DEFS, PARAM_NAMES, RATIOS, formatParamValue, filtersInGroup } from './types';
+import type { EditorParams, EditorSection, EditorState, ParamKey } from './types';
 
 const props = defineProps<{
   state: EditorState;
@@ -158,9 +163,9 @@ const emit = defineEmits<{
 }>();
 
 const tabs = [
-  { id: 'crop' as EditorSection, label: 'Crop', icon: Crop },
-  { id: 'adjust' as EditorSection, label: 'Adjust', icon: Tune },
-  { id: 'filters' as EditorSection, label: 'Filters', icon: AutoFix },
+  { id: 'crop' as EditorSection, label: t('memories', 'Crop'), icon: Crop },
+  { id: 'adjust' as EditorSection, label: t('memories', 'Adjust'), icon: Tune },
+  { id: 'filters' as EditorSection, label: t('memories', 'Filters'), icon: AutoFix },
 ];
 
 const showRuler = computed(() => props.section !== 'filters' && !!rulerDef.value);
@@ -169,7 +174,7 @@ const ratioLabel = computed(() => RATIOS.find((r) => r.id === props.state.ratio)
 const rulerDef = computed(() => (props.mobileKey ? PARAM_DEFS[props.mobileKey] : undefined));
 const rulerValue = computed(() => (props.mobileKey ? (props.state as any)[props.mobileKey] : 0));
 const rulerText = computed(() => (props.mobileKey ? formatParamValue(props.mobileKey, rulerValue.value) : ''));
-const rulerLabel = computed(() => (props.mobileKey ? capitalize(props.mobileKey) : ''));
+const rulerLabel = computed(() => (props.mobileKey ? PARAM_NAMES[props.mobileKey as ParamKey] : ''));
 const rulerIcon = computed(() => (props.mobileKey ? iconFor(props.mobileKey) : ''));
 const rulerChanged = computed(
   () =>

@@ -1,6 +1,6 @@
 <template>
   <aside class="me-sidebar">
-    <nav class="me-tabs" role="tablist" aria-label="Editor sections">
+    <nav class="me-tabs" role="tablist" :aria-label="t('memories', 'Editor sections')">
       <button
         v-for="t in tabs"
         :key="t.id"
@@ -19,7 +19,7 @@
 
     <div class="me-panel-scroll">
       <section class="me-panel" :class="{ 'is-active': section === 'adjust' }" role="tabpanel">
-        <div class="me-group-label">Light</div>
+        <div class="me-group-label">{{ t('memories', 'Light') }}</div>
         <EditorSlider
           v-for="d in lightSliders"
           :key="d.key"
@@ -34,7 +34,7 @@
           @update:model-value="(v) => emit('update:param', d.key, v)"
           @reset="emit('reset:param', d.key)"
         />
-        <div class="me-group-label">Color</div>
+        <div class="me-group-label">{{ t('memories', 'Color') }}</div>
         <EditorSlider
           v-for="d in colorSliders"
           :key="d.key"
@@ -49,7 +49,7 @@
           @update:model-value="(v) => emit('update:param', d.key, v)"
           @reset="emit('reset:param', d.key)"
         />
-        <div class="me-group-label">Detail</div>
+        <div class="me-group-label">{{ t('memories', 'Detail') }}</div>
         <EditorSlider
           v-for="d in detailSliders"
           :key="d.key"
@@ -67,7 +67,7 @@
       </section>
 
       <section class="me-panel" :class="{ 'is-active': section === 'crop' }" role="tabpanel">
-        <div class="me-group-label">Aspect ratio</div>
+        <div class="me-group-label">{{ t('memories', 'Aspect ratio') }}</div>
         <div class="me-ratio-grid">
           <button
             v-for="r in RATIOS"
@@ -80,7 +80,7 @@
             {{ r.label }}
           </button>
         </div>
-        <div class="me-group-label">Straighten</div>
+        <div class="me-group-label">{{ t('memories', 'Straighten') }}</div>
         <EditorSlider
           param-key="straighten"
           :model-value="state.straighten"
@@ -92,7 +92,7 @@
           @update:model-value="(v) => emit('update:param', 'straighten', v)"
           @reset="emit('reset:param', 'straighten')"
         />
-        <div class="me-group-label">Transform</div>
+        <div class="me-group-label">{{ t('memories', 'Transform') }}</div>
         <div class="me-tool-grid">
           <button class="me-tool-btn me-clickable button-vue" @click="onRotateLeft">
             <RotateLeft :size="20" />−90°
@@ -105,20 +105,20 @@
             :class="{ 'is-active': state.flipH < 0 }"
             @click="onFlipH"
           >
-            <FlipHorizontal :size="20" />Flip H
+            <FlipHorizontal :size="20" />{{ t('memories', 'Flip H') }}
           </button>
           <button
             class="me-tool-btn me-clickable button-vue"
             :class="{ 'is-active': state.flipV < 0 }"
             @click="onFlipV"
           >
-            <FlipVertical :size="20" />Flip V
+            <FlipVertical :size="20" />{{ t('memories', 'Flip V') }}
           </button>
         </div>
       </section>
 
       <section class="me-panel" :class="{ 'is-active': section === 'filters' }" role="tabpanel">
-        <div class="me-group-label">Presets</div>
+        <div class="me-group-label">{{ t('memories', 'Presets') }}</div>
         <template v-for="(group, gi) in FILTER_GROUPS" :key="group">
           <div v-if="gi > 0" class="me-filter-sep" role="separator" />
           <div class="me-filter-grid">
@@ -152,6 +152,7 @@ import RotateRight from 'vue-material-design-icons/RotateRight.vue';
 import Tune from 'vue-material-design-icons/Tune.vue';
 import EditorSlider from './EditorSlider.vue';
 import * as nativex from '@native';
+import { t } from '@services/l10n';
 import { iconFor } from './paramIcons';
 import { FILTER_GROUPS, RATIOS, SLIDER_DEFS, filtersInGroup } from './types';
 import type { EditorParams, EditorSection, EditorState } from './types';
@@ -189,9 +190,9 @@ const thumbStyle = computed(() => {
 });
 
 const tabs = [
-  { id: 'crop' as EditorSection, label: 'Crop', icon: Crop },
-  { id: 'adjust' as EditorSection, label: 'Adjust', icon: Tune },
-  { id: 'filters' as EditorSection, label: 'Filters', icon: AutoFix },
+  { id: 'crop' as EditorSection, label: t('memories', 'Crop'), icon: Crop },
+  { id: 'adjust' as EditorSection, label: t('memories', 'Adjust'), icon: Tune },
+  { id: 'filters' as EditorSection, label: t('memories', 'Filters'), icon: AutoFix },
 ];
 
 const RATIO_BOX: Record<string, string> = {
