@@ -47,6 +47,7 @@ export interface EditorParams {
   temperature: number;
   blur: number;
   sharpen: number;
+  vignette: number;
   straighten: number;
 }
 
@@ -76,6 +77,7 @@ export const SLIDER_DEFS: SliderDef[] = [
   { key: 'temperature', min: -100, max: 100, val: 0, cls: 'grad-warm', group: 'color' },
   { key: 'blur', min: 0, max: 100, val: 0, group: 'detail' },
   { key: 'sharpen', min: 0, max: 100, val: 0, group: 'detail' },
+  { key: 'vignette', min: 0, max: 100, val: 0, group: 'detail' },
   { key: 'straighten', min: -45, max: 45, val: 0, step: 0.5, group: 'crop' },
 ];
 
@@ -156,6 +158,7 @@ export const ADJUST_KEYS = [
   'temperature',
   'blur',
   'sharpen',
+  'vignette',
 ] as const;
 
 export function formatParamValue(key: string, v: number): string {

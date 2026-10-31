@@ -26,6 +26,7 @@ const P_WARMTH = 35;
 const P_VIBRANCE = 40;
 const P_BLUR = 42;
 const P_SHARPEN = 44;
+const P_VIGNETTE = 46;
 const P_PRESET = 50;
 
 function nonZero(v: number): boolean {
@@ -217,6 +218,13 @@ export function stateToEdits(state: EditorState): Edit[] {
     ordered.push({
       priority: P_SHARPEN,
       edit: { edit: 'sharpen', radius: 2, amount: state.sharpen / 20 },
+    });
+  }
+
+  if (nonZero(state.vignette)) {
+    ordered.push({
+      priority: P_VIGNETTE,
+      edit: { edit: 'vignette', amount: state.vignette / 100 },
     });
   }
 

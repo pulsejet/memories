@@ -7,6 +7,7 @@ import Contrast from 'vue-material-design-icons/Contrast.vue';
 import Highlights from 'vue-material-design-icons/WeatherSunny.vue';
 import Hue from 'vue-material-design-icons/InvertColors.vue';
 import Focus from 'vue-material-design-icons/ImageFilterCenterFocus.vue';
+import Vignette from 'vue-material-design-icons/ImageFilterCenterFocusWeak.vue';
 import Palette from 'vue-material-design-icons/Palette.vue';
 import PaletteSwatch from 'vue-material-design-icons/PaletteSwatch.vue';
 import Shadows from 'vue-material-design-icons/WeatherNight.vue';
@@ -29,6 +30,7 @@ export const PARAM_ICONS: Record<string, Component> = {
   temperature: Thermometer,
   blur: Blur,
   sharpen: Focus,
+  vignette: Vignette,
   straighten: AngleAcute,
 };
 
