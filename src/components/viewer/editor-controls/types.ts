@@ -122,7 +122,7 @@ export const FILTERS: FilterDef[] = [
   { id: 'mono', name: 'Mono', group: 'gray' },
   { id: 'noir', name: 'Noir', group: 'gray' },
   { id: 'silvertone', name: 'Silvertone', group: 'gray' },
-  { id: 'inkwell', name: 'Inkwell', group: 'gray' },
+  { id: 'willow', name: 'Willow', group: 'gray' },
   { id: 'fade', name: 'Fade', group: 'gray' },
   { id: 'invert', name: 'Negative', group: 'gray' },
 ];
