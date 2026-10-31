@@ -1,5 +1,5 @@
 <template>
-  <div class="me-photo-editor">
+  <div class="me-photo-editor" @keydown.stop>
     <EditorControls
       ref="editor"
       :key="props.photo.fileid"
