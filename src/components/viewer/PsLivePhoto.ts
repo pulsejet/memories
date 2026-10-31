@@ -1,10 +1,9 @@
-import PhotoSwipe from 'photoswipe';
 import PsImage from './PsImage';
 
 import * as utils from '@services/utils/common';
 import { config } from '@services/user-config';
 
-import type { PsContent, PsEvent } from './types';
+import type { PsContent, PsEvent, PsPhotoSwipe } from './types';
 
 export function isLiveContent(content: PsContent): boolean {
   // Do not play Live Photo if the slideshow is
@@ -18,7 +17,7 @@ export function isLiveContent(content: PsContent): boolean {
 
 class LivePhotoContentSetup {
   constructor(
-    lightbox: PhotoSwipe,
+    lightbox: PsPhotoSwipe,
     private psImage: PsImage,
     private liveState: { playing: boolean; waiting: boolean },
   ) {

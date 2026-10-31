@@ -21,6 +21,7 @@ type PsData = Pick<SlideData, 'msrc' | 'width' | 'height' | 'thumbCropped'> & {
 
 export type PsContent = Omit<Content, 'data'> & {
   data: PsData;
+  slide?: PsSlide;
 };
 
 export type PsSlide = Omit<Slide, 'data' | 'content'> & {
@@ -32,9 +33,13 @@ export type PsSlide = Omit<Slide, 'data' | 'content'> & {
     /** Native hole video state. */
     nxVideoState?: 'loading' | 'loaded' | 'error';
     /** Native image should be disabled */
-    nxImageDisabled?: boolean;
+    nxImageDisabled?: number;
   };
   content: PsContent;
+};
+
+export type PsPhotoSwipe = PhotoSwipe & {
+  currSlide?: PsSlide;
 };
 
 export type PsEvent = {

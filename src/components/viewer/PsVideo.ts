@@ -10,8 +10,7 @@ import { API } from '@services/API';
 
 import type { ViewerControlsCE, ViewerVideoNativeHoleCE } from '@components/custom-elements';
 import type { VideoController, VideoControllerElement } from '@typings';
-import type PhotoSwipe from 'photoswipe';
-import type { PsContent, PsEvent, PsSlide } from './types';
+import type { PsContent, PsEvent, PsPhotoSwipe, PsSlide } from './types';
 import type Hls from 'hls.js';
 import type { HlsConfig } from 'hls.js';
 
@@ -101,14 +100,14 @@ class VideoContentSetup {
   /** hls.js chunk, prefetched so the player mounts fast on activation */
   private hls = import('hls.js');
 
-  constructor(private lightbox: PhotoSwipe) {
+  constructor(private lightbox: PsPhotoSwipe) {
     this.initLightboxEvents(lightbox);
     lightbox.on('init', () => {
       this.initPswpEvents(lightbox);
     });
   }
 
-  initLightboxEvents(lightbox: PhotoSwipe) {
+  initLightboxEvents(lightbox: PsPhotoSwipe) {
     lightbox.on('contentLoad', (e) => this.onContentLoad(e as unknown as PsVideoEvent));
     lightbox.on('contentDestroy', (e) => this.onContentDestroy(e as unknown as PsVideoEvent));
     lightbox.on('contentActivate', (e) => this.onContentActivate(e as unknown as PsVideoEvent));
@@ -121,7 +120,7 @@ class VideoContentSetup {
     lightbox.addFilter('useContentPlaceholder', (u, c) => this.useContentPlaceholder(u, c as unknown as PsContent));
   }
 
-  initPswpEvents(pswp: PhotoSwipe) {
+  initPswpEvents(pswp: PsPhotoSwipe) {
     // Drags starting on player UI (controls, sliders, menus) belong to the
     // player; keep PhotoSwipe from dragging the slide underneath.
     pswp.on('pointerDown', (e) => {

@@ -5,8 +5,7 @@ import * as nativex from '@native';
 import { API } from '@services/API';
 import { isLikelySamePhoto } from '@services/utils/photo';
 
-import type PhotoSwipe from 'photoswipe';
-import type { PsContent, PsEvent, PsSlide } from './types';
+import type { PsContent, PsEvent, PsPhotoSwipe, PsSlide } from './types';
 
 import errorsvg from '@assets/error.svg';
 
@@ -19,7 +18,7 @@ export default class ImageContentSetup {
    */
   private stickySrcs = new Map<number, string>();
 
-  constructor(private lightbox: PhotoSwipe) {
+  constructor(private lightbox: PsPhotoSwipe) {
     lightbox.on('contentLoad', (e) => this.onContentLoad(e as unknown as PsEvent));
     lightbox.on('contentLoadImage', (e) => this.onContentLoadImage(e as unknown as PsEvent));
     lightbox.on('contentDestroy', (e) => this.onContentDestroy(e as unknown as PsEvent));
