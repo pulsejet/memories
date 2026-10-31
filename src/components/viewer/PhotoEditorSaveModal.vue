@@ -245,7 +245,6 @@ async function onSave() {
     });
     const info = res.data;
     const isCopy = info.fileid !== props.photo.fileid;
-    showSuccess(t('memories', 'Image saved successfully'));
     if (!isCopy) {
       utils.updatePhotoFromImageInfo(props.photo, info);
     }
