@@ -474,6 +474,12 @@ final class ImageController extends ApiController
             // Get the file
             $file = $this->fs->getUserFile($id);
 
+            // Only images may be edited (restores the old getImagick IMAGICK_SAFE gate).
+            $mime = $file->getMimeType();
+            if (!\in_array($mime, Application::IMAGE_MIMES, true)) {
+                throw Exceptions::Forbidden('Not an image');
+            }
+
             // Live photos must always be saved as a copy.
             $isLivePhoto = (bool) $this->tq->getLiveId($file->getId());
             $copy = $copy || $isLivePhoto || $name !== $file->getName();
@@ -561,11 +567,22 @@ final class ImageController extends ApiController
     private function editImageVips(string $path, string $extension, array $edits, int $quality): string
     {
         // Basic shape check so vips errors stay actionable.
+        // Cap count and payload size: editImage runs under a 30s exec budget.
+        if (\count($edits) > 32) {
+            throw Exceptions::BadRequest('Too many edits');
+        }
         foreach ($edits as $edit) {
             /** @psalm-suppress DocblockTypeContradiction */
             if (!\is_array($edit) || !isset($edit['edit']) || !\is_string($edit['edit'])) {
                 throw Exceptions::BadRequest('Invalid edit entry');
             }
+            if (\strlen($edit['edit']) > 64) {
+                throw Exceptions::BadRequest('Invalid edit entry');
+            }
+        }
+        $raw = json_encode($edits);
+        if (!\is_string($raw) || \strlen($raw) > 1024 * 1024) {
+            throw Exceptions::BadRequest('Edits payload too large');
         }
 
         // Saver is picked from the output extension.

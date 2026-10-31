@@ -2,6 +2,7 @@
   <div class="me-photo-editor">
     <EditorControls
       ref="editor"
+      :key="props.photo.fileid"
       :image-width="imgW"
       :image-height="imgH"
       @back="onBack"
@@ -44,7 +45,7 @@ import { fetchImage } from '@components/frame/XImgCache';
 import { fragment } from '@services/route-fragment';
 import { t } from '@services/l10n';
 import * as utils from '@services/utils/common';
-import { confirmDestructive } from '@services/utils/dialog';
+import { confirmDestructive, showError } from '@services/utils/dialog';
 
 import type { IImageInfo, IPhoto } from '@typings';
 import { INITIAL_STATE, FILTERS, type EditorState, type EditorSection } from '@components/viewer/editor-controls/types';
@@ -183,6 +184,7 @@ function onSection(s: EditorSection) {
  * translates the EditorState to vips edits and PUTs to IMAGE_EDIT.
  */
 function onSave(state: EditorState) {
+  if (!ready.value) return;
   pendingState.value = { ...state };
   saveModalOpen.value = true;
 }
@@ -261,6 +263,8 @@ async function loadSource(url: string) {
     emit('ready');
   } catch (e) {
     console.error('Photo editor preview failed', e);
+    showError(t('memories', 'Could not load image for editing'));
+    close();
   }
 }
 
@@ -271,9 +275,9 @@ function onKeydown(e: KeyboardEvent) {
     e.stopImmediatePropagation();
     onBack();
   } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    if (!ready.value || saveModalOpen.value) return;
     e.preventDefault();
     e.stopImmediatePropagation();
-    if (saveModalOpen.value) return;
     if (editor.value) onSave({ ...editor.value.state });
   }
 }
@@ -305,6 +309,7 @@ onBeforeUnmount(() => {
 
 // Reload the source if the edited photo changes underneath the editor.
 watch(previewUrl, (url) => {
+  closeSaveModal();
   ready.value = false;
   filterPreviews.value = {};
   previewsForUrl = null;
