@@ -11,7 +11,7 @@
     }"
     @fullscreenchange="fullscreenChange"
   >
-    <ImageEditor v-if="editorOpen && currentPhoto" :photo="currentPhoto" @close="editorOpen = false" />
+    <PhotoEditor v-if="editorOpen && currentPhoto" :photo="currentPhoto" @close="editorOpen = false" />
 
     <!-- Loading indicator -->
     <XLoadingIcon class="loading-icon centered" v-if="loading" />
@@ -129,7 +129,7 @@ import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 
-import ImageEditor from './ImageEditor.vue';
+import PhotoEditor from './PhotoEditor.vue';
 import ViewerDateAddress from './ViewerDateAddress.vue';
 import ViewerBottomSheet from './ViewerBottomSheet.vue';
 import ViewerSheetGestures from './ViewerSheetGestures.vue';
@@ -1576,6 +1576,7 @@ function updateAlbums() {
   z-index: 2020;
   width: v-bind(outerWidth) !important;
   height: 100vh;
+  height: 100dvh;
   position: fixed;
   top: 0;
   left: 0;

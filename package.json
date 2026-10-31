@@ -50,7 +50,6 @@
     "@vue-leaflet/vue-leaflet": "^0.10.1",
     "@vueuse/core": "^15.0.0",
     "dequal": "^2.0.3",
-    "filerobot-image-editor": "^4.8.1",
     "focus-trap": "^8.2.3",
     "fuse.js": "^7.5.0",
     "hammerjs": "^2.0.8",
@@ -61,7 +60,6 @@
     "luxon": "^3.7.2",
     "path-posix": "^1.0.0",
     "photoswipe": "^5.4.4",
-    "react-filerobot-image-editor": "^4.9.1",
     "stream-browserify": "^3.0.0",
     "tiny-lru": "^13.1.1",
     "ts-md5": "^2.0.1",
@@ -75,11 +73,6 @@
   "engines": {
     "node": ">=24.0.0",
     "npm": ">=8.0.0"
-  },
-  "overrides": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-konva": "^18.2.16"
   },
   "devDependencies": {
     "@napi-rs/canvas": "^1.0.13",

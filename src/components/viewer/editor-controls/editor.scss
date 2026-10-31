@@ -1,0 +1,901 @@
+/**
+ * Shared design tokens + reusable control styles.
+ *
+ * Scoped by construction: everything lives under `.me-root`, which is the
+ * shadow-root entry (container-type: inline-size). No `:root`, no element
+ * selectors, no Nextcloud variables — safe to mount as a custom element
+ * with `shadowRoot: true`.
+ */
+
+// ---------------------------------------------------------------------------
+// Tokens. Only --me-accent is set from outside (Editor `accent` prop);
+// --me-accent-dim derives from it via color-mix, with a static fallback
+// for browsers without color-mix support.
+// ---------------------------------------------------------------------------
+$me-bg: #0a0a0b;
+$me-bg-2: #111113;
+$me-bg-3: #17171a;
+$me-bg-4: #1f1f23;
+$me-line: rgba(255, 255, 255, 0.08);
+$me-line-2: rgba(255, 255, 255, 0.14);
+$me-text: #f2f2f3;
+$me-text-2: #a7a7ad;
+$me-text-3: #6d6d74;
+$me-accent: #4a9eff;
+$me-btn-grey: #3e3e46;
+$me-btn-grey-text: #ededf0;
+$me-track: #333338;
+$me-thumb: #ffffff;
+$me-glass-bg: rgba(17, 17, 20, 0.55);
+$me-glass-strong: rgba(20, 20, 23, 0.86);
+$me-glass-border: rgba(255, 255, 255, 0.13);
+$me-glass-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+$me-changed-bg: rgba(255, 255, 255, 0.13);
+$me-changed-bg-hover: rgba(255, 255, 255, 0.2);
+
+.me-root {
+  --me-bg: #{$me-bg};
+  --me-bg-2: #{$me-bg-2};
+  --me-bg-3: #{$me-bg-3};
+  --me-bg-4: #{$me-bg-4};
+  --me-line: #{$me-line};
+  --me-line-2: #{$me-line-2};
+  --me-text: #{$me-text};
+  --me-text-2: #{$me-text-2};
+  --me-text-3: #{$me-text-3};
+  --me-accent: #{$me-accent};
+  // Static fallback first; overridden by color-mix where supported so any
+  // accent color passed via the Editor prop gets a matching dim variant.
+  --me-accent-dim: rgba(74, 158, 255, 0.18);
+  --me-accent-dim: color-mix(in srgb, var(--me-accent) 18%, transparent);
+  --me-btn-grey: #{$me-btn-grey};
+  --me-btn-grey-text: #{$me-btn-grey-text};
+  --me-track: #{$me-track};
+  --me-thumb: #{$me-thumb};
+  --me-glass-bg: #{$me-glass-bg};
+  --me-glass-strong: #{$me-glass-strong};
+  --me-glass-border: #{$me-glass-border};
+  --me-glass-shadow: #{$me-glass-shadow};
+  --me-changed-bg: #{$me-changed-bg};
+  --me-changed-bg-hover: #{$me-changed-bg-hover};
+  --me-radius: 14px;
+  --me-sidebar: 324px;
+
+  color-scheme: dark;
+  container-type: inline-size;
+  container-name: me-editor;
+
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  background: var(--me-bg);
+  color: var(--me-text);
+  font-family: inherit;
+  overflow: hidden;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  svg {
+    display: block;
+    flex: none;
+  }
+
+  // vue-material-design-icons wraps its svg in an inline span.
+  .material-design-icon {
+    display: inline-flex;
+    line-height: 0;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--me-accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  // --- icon button ---------------------------------------------------------
+  .me-icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: var(--me-text-2);
+    transition:
+      background 0.15s,
+      color 0.15s;
+    position: relative;
+
+    &:hover {
+      background: var(--me-bg-4);
+      color: var(--me-text);
+    }
+    &:active {
+      background: #26262b;
+    }
+    &.is-disabled {
+      color: var(--me-text-3);
+      opacity: 0.45;
+      pointer-events: none;
+    }
+  }
+
+  // --- glass pill -----------------------------------------------------------
+  .me-glass {
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    backdrop-filter: blur(18px) saturate(1.4);
+    border: 1px solid var(--me-glass-border);
+    box-shadow: var(--me-glass-shadow);
+  }
+
+  // --- clickable controls -----------------------------------------------------
+  // Nextcloud server CSS only grants pointer cursors to children of
+  // non-.button-vue buttons, so pin the cursor on clickable controls
+  // and everything inside them (e.g. MDI icon spans / svgs).
+  .me-clickable,
+  .me-clickable * {
+    cursor: pointer !important;
+  }
+
+  // --- slider row ------------------------------------------------------------
+  .me-slider-row {
+    display: grid;
+    grid-template-columns: 26px 1fr 34px;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-radius: 10px;
+
+    .me-s-icon {
+      color: var(--me-text-2);
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      transition:
+        color 0.15s,
+        background 0.15s,
+        transform 0.12s,
+        box-shadow 0.15s;
+    }
+    &:hover .me-s-icon {
+      color: var(--me-text);
+    }
+    &.is-changed .me-s-icon {
+      background: var(--me-changed-bg);
+      color: var(--me-text);
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    }
+    &.is-changed .me-s-icon:hover {
+      background: var(--me-changed-bg-hover);
+    }
+    &.is-changed .me-s-icon:active {
+      transform: scale(0.9);
+    }
+    .me-val {
+      font-size: 12px;
+      color: var(--me-text-2);
+      text-align: right;
+      font-family: 'Roboto Mono', ui-monospace, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    &.is-changed .me-val {
+      color: var(--me-text);
+    }
+  }
+
+  .me-slider-input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 28px;
+    background: transparent;
+    cursor: pointer;
+    margin: 0;
+    --me-p: 50%;
+
+    &::-webkit-slider-runnable-track {
+      height: 3px;
+      border-radius: 2px;
+      background: linear-gradient(to right, var(--me-accent) var(--me-p), var(--me-track) var(--me-p));
+    }
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 7px;
+      height: 26px;
+      border-radius: 4px;
+      background: var(--me-thumb);
+      margin-top: -11.5px;
+      border: 0;
+      box-shadow:
+        0 1px 5px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(0, 0, 0, 0.35);
+      cursor: ew-resize;
+      transition:
+        width 0.12s,
+        height 0.12s;
+    }
+    &:hover::-webkit-slider-thumb,
+    &:active::-webkit-slider-thumb {
+      width: 9px;
+      height: 28px;
+      margin-top: -12.5px;
+    }
+    &::-moz-range-track {
+      height: 3px;
+      border-radius: 2px;
+      background: var(--me-track);
+    }
+    &::-moz-range-progress {
+      height: 3px;
+      border-radius: 2px;
+      background: var(--me-accent);
+    }
+    &::-moz-range-thumb {
+      width: 7px;
+      height: 26px;
+      border-radius: 4px;
+      background: var(--me-thumb);
+      border: 0;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.75);
+      cursor: ew-resize;
+      transition:
+        width 0.12s,
+        height 0.12s;
+    }
+    &:hover::-moz-range-thumb,
+    &:active::-moz-range-thumb {
+      width: 9px;
+      height: 28px;
+    }
+
+    &.me-grad-warm::-webkit-slider-runnable-track {
+      background: linear-gradient(to right, #5b8def, #3a3a3f 48%, #ffb03a);
+    }
+    &.me-grad-warm::-moz-range-track {
+      background: linear-gradient(to right, #5b8def, #3a3a3f 48%, #ffb03a);
+    }
+    &.me-grad-warm::-moz-range-progress {
+      background: transparent;
+    }
+    &.me-grad-tint::-webkit-slider-runnable-track {
+      background: linear-gradient(to right, #69c24a, #3a3a3f 48%, #d95fb0);
+    }
+    &.me-grad-tint::-moz-range-track {
+      background: linear-gradient(to right, #69c24a, #3a3a3f 48%, #d95fb0);
+    }
+    &.me-grad-tint::-moz-range-progress {
+      background: transparent;
+    }
+    &.me-grad-sat::-webkit-slider-runnable-track {
+      background: linear-gradient(to right, #4c4c52, #8a8a90 35%, #ff7847 75%, #ff3d2e);
+    }
+    &.me-grad-sat::-moz-range-track {
+      background: linear-gradient(to right, #4c4c52, #8a8a90 35%, #ff7847 75%, #ff3d2e);
+    }
+    &.me-grad-sat::-moz-range-progress {
+      background: transparent;
+    }
+    &.me-grad-hue::-webkit-slider-runnable-track {
+      background: linear-gradient(
+        to right,
+        hsl(0, 100%, 55%),
+        hsl(45, 100%, 52%),
+        hsl(90, 100%, 48%),
+        hsl(135, 100%, 42%),
+        hsl(180, 100%, 42%),
+        hsl(225, 100%, 62%),
+        hsl(270, 100%, 62%),
+        hsl(315, 100%, 55%),
+        hsl(360, 100%, 55%)
+      );
+    }
+    &.me-grad-hue::-moz-range-track {
+      background: linear-gradient(
+        to right,
+        hsl(0, 100%, 55%),
+        hsl(45, 100%, 52%),
+        hsl(90, 100%, 48%),
+        hsl(135, 100%, 42%),
+        hsl(180, 100%, 42%),
+        hsl(225, 100%, 62%),
+        hsl(270, 100%, 62%),
+        hsl(315, 100%, 55%),
+        hsl(360, 100%, 55%)
+      );
+    }
+    &.me-grad-hue::-moz-range-progress {
+      background: transparent;
+    }
+  }
+
+  // --- group label ------------------------------------------------------------
+  .me-group-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--me-text-3);
+    margin: 20px 0 6px;
+
+    &:first-child {
+      margin-top: 0;
+    }
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--me-line);
+    }
+  }
+
+  // --- option tiles ------------------------------------------------------------
+  .me-ratio-btn,
+  .me-tool-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 11px 2px 9px;
+    background: var(--me-bg-3);
+    border: 1px solid var(--me-line);
+    border-radius: 12px;
+    color: var(--me-text-2);
+    font-size: 10.5px;
+    transition:
+      border-color 0.15s,
+      color 0.15s,
+      background 0.15s;
+  }
+  .me-ratio-btn {
+    font-family: 'Roboto Mono', ui-monospace, monospace;
+  }
+  .me-tool-btn {
+    gap: 6px;
+  }
+  .me-ratio-btn:hover,
+  .me-tool-btn:hover {
+    color: var(--me-text);
+    border-color: var(--me-line-2);
+  }
+  .me-ratio-btn.is-active,
+  .me-tool-btn.is-active {
+    color: var(--me-accent);
+    border-color: var(--me-accent);
+    background: var(--me-accent-dim);
+  }
+  .me-ratio-btn .me-box {
+    border: 1.5px solid currentColor;
+    border-radius: 2px;
+  }
+  .me-ratio-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 2px;
+  }
+  .me-tool-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  // --- layout --------------------------------------------------------------------
+  .me-workspace {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+    position: relative;
+  }
+  .me-side {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+  }
+
+  // --- floating actions (close + save replace the old top bar) ------------------
+  .me-float-close {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 6;
+    background: none;
+    border: 0;
+    color: #fff;
+
+    &:hover {
+      color: #fff;
+    }
+  }
+  .me-float-save {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 6;
+    border: 0;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 999px;
+    background: rgba(62, 62, 70, 0.65);
+    background: color-mix(in srgb, var(--me-btn-grey) 65%, transparent);
+    color: var(--me-btn-grey-text);
+    font-weight: 500;
+    font-size: 13px;
+    transition: filter 0.15s;
+
+    &:hover {
+      filter: brightness(1.22);
+    }
+  }
+
+  // --- sidebar ----------------------------------------------------------------------
+  .me-sidebar {
+    width: var(--me-sidebar);
+    flex: none;
+    background: var(--me-bg-2);
+    border-left: 1px solid var(--me-line);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    z-index: 20;
+  }
+  .me-tabs {
+    display: flex;
+    position: relative;
+    flex: none;
+    border-bottom: 1px solid var(--me-line);
+    padding: 0 6px;
+  }
+  .me-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 11px 2px 9px;
+    color: var(--me-text-2);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition: color 0.18s;
+    position: relative;
+    border-radius: 8px 8px 0 0;
+
+    &:hover {
+      color: var(--me-text);
+      background: rgba(255, 255, 255, 0.03);
+    }
+    &.is-active {
+      color: var(--me-text);
+    }
+    &.is-active svg {
+      color: var(--me-accent);
+    }
+  }
+  .me-tab-indicator {
+    position: absolute;
+    bottom: -1px;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: var(--me-accent);
+    transition:
+      left 0.28s cubic-bezier(0.2, 0, 0, 1),
+      width 0.28s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .me-panel-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #333 transparent;
+
+    &::-webkit-scrollbar {
+      width: 5px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #2e2e33;
+      border-radius: 4px;
+    }
+  }
+  .me-panel {
+    display: none;
+    padding: 18px 20px 22px;
+    animation: me-fade 0.18s ease;
+  }
+  .me-panel.is-active {
+    display: block;
+  }
+  .me-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .me-filter-card {
+    border-radius: 0;
+    overflow: visible;
+    text-align: center;
+    position: relative;
+    padding: 0;
+
+    .me-thumb {
+      display: block;
+      height: 64px;
+      padding: 0;
+      border-radius: 0;
+      overflow: hidden;
+      border: 2px solid transparent;
+      transition: border-color 0.15s;
+      line-height: 0;
+      background: var(--me-bg-4);
+
+      img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+    .me-filter-name {
+      display: block;
+      font-size: 11px;
+      color: var(--me-text-2);
+      padding: 6px 0 2px;
+      transition: color 0.15s;
+    }
+    &:hover .me-filter-name {
+      color: var(--me-text);
+    }
+    &.is-active .me-thumb {
+      border-color: var(--me-accent);
+    }
+    &.is-active .me-filter-name {
+      color: var(--me-accent);
+      font-weight: 500;
+    }
+  }
+  // --- mobile --------------------------------------------------------------------------
+  .me-mobile-ui {
+    display: none;
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 18px;
+    z-index: 15;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .me-bar {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 6px;
+    border-radius: 999px;
+    background: var(--me-glass-bg);
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+  .me-m-tab {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    border-radius: 999px;
+    color: var(--me-text-2);
+    font-size: 12.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition:
+      background 0.18s,
+      color 0.18s;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+    &:active {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    &.is-active {
+      background: var(--me-btn-grey);
+      color: var(--me-btn-grey-text);
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+    }
+  }
+  .me-chip {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 13px;
+    border-radius: 999px;
+    color: var(--me-text-2);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition:
+      background 0.15s,
+      color 0.15s,
+      border-color 0.15s;
+
+    &:active {
+      background: rgba(255, 255, 255, 0.13);
+    }
+    &.is-active {
+      background: rgba(255, 255, 255, 0.19);
+      color: var(--me-text);
+      border-color: rgba(255, 255, 255, 0.24);
+    }
+    .me-chip-icon {
+      display: grid;
+      place-items: center;
+      color: inherit;
+    }
+    .me-chip-icon svg {
+      width: 17px;
+      height: 17px;
+    }
+    .me-chip-val {
+      font-size: 11px;
+      color: var(--me-text-3);
+      font-family: 'Roboto Mono', ui-monospace, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    &.is-changed .me-chip-val {
+      color: var(--me-text);
+    }
+  }
+  .me-slider-pill {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 22px;
+    background: rgba(17, 17, 20, 0.6);
+    touch-action: pan-x;
+    overscroll-behavior: none;
+
+    &.is-on {
+      display: flex;
+    }
+  }
+  .me-s-pill-icon {
+    width: 30px;
+    height: 30px;
+    flex: none;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--me-text-2);
+    transition:
+      background 0.15s,
+      color 0.15s,
+      transform 0.12s;
+
+    svg {
+      width: 17px;
+      height: 17px;
+    }
+    &.is-changed {
+      background: rgba(255, 255, 255, 0.17);
+      color: var(--me-text);
+      cursor: pointer;
+    }
+    &.is-changed:active {
+      transform: scale(0.9);
+    }
+  }
+  .me-slider-main {
+    flex: 1;
+    min-width: 0;
+  }
+  .me-ruler {
+    position: relative;
+    height: 30px;
+    overflow: hidden;
+    border-radius: 8px;
+    outline-offset: -2px;
+    touch-action: pan-x;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+  }
+  .me-ruler-scroll {
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: none;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+  .me-ruler-track {
+    position: relative;
+    height: 100%;
+    flex: none;
+  }
+  .me-tick {
+    position: absolute;
+    bottom: 4px;
+    width: 1px;
+    margin-left: -0.5px;
+    border-radius: 1px;
+    height: 11px;
+    background: rgba(255, 255, 255, 0.3);
+
+    &.is-major {
+      height: 15px;
+      background: rgba(255, 255, 255, 0.58);
+    }
+    &.is-hl {
+      background: var(--me-accent);
+      opacity: 1;
+    }
+    &.is-major.is-hl {
+      background: var(--me-accent);
+    }
+    &.is-def::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -4px;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.55);
+    }
+  }
+  .me-ruler-grad {
+    position: absolute;
+    top: 2px;
+    height: 6px;
+    border-radius: 3px;
+    pointer-events: none;
+    opacity: 0.95;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  }
+  .me-ruler-center {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    z-index: 2;
+    pointer-events: none;
+    width: 1.5px;
+    height: 100%;
+    border-radius: 2px;
+    background: #9a9aa3;
+    box-shadow:
+      0 0 6px rgba(255, 255, 255, 0.12),
+      0 1px 5px rgba(0, 0, 0, 0.55);
+    transition: width 0.12s;
+  }
+  .me-ruler.is-scrolling .me-ruler-center {
+    width: 2px;
+  }
+}
+
+@keyframes me-fade {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .me-root .me-panel {
+    animation: none;
+  }
+  .me-root .me-tab-indicator {
+    transition: none;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Container queries (not viewport): `.me-root` is the query container.
+// ---------------------------------------------------------------------------
+@container me-editor (max-width: 860px) {
+  .me-root .me-workspace {
+    flex-direction: column;
+  }
+  .me-root .me-side {
+    flex: 1 1 46%;
+  }
+  .me-root .me-sidebar {
+    width: 100%;
+    flex: 1 1 54%;
+    border-left: 0;
+    border-top: 1px solid var(--me-line);
+  }
+  .me-root .me-panel {
+    padding: 14px 16px 18px;
+  }
+}
+
+@container me-editor (max-width: 520px) {
+  .me-root .me-tab {
+    font-size: 10.5px;
+    padding: 10px 1px 8px;
+  }
+  .me-root .me-side {
+    flex-basis: 42%;
+  }
+  .me-root .me-sidebar {
+    flex-basis: 58%;
+  }
+  .me-root .me-ratio-grid,
+  .me-root .me-tool-grid {
+    gap: 6px;
+  }
+  .me-root .me-filter-grid {
+    gap: 8px;
+  }
+  .me-root .me-filter-card .me-thumb {
+    height: 56px;
+  }
+  .me-root .me-group-label {
+    margin-top: 16px;
+  }
+}
+
+// NB: cascade order matters — this 640px block must stay AFTER the 520px
+// block above. At phone widths both match, and these rules win.
+@container me-editor (max-width: 640px) {
+  .me-root .me-workspace {
+    flex-direction: column;
+    position: relative;
+  }
+  .me-root .me-sidebar {
+    display: none;
+  }
+  .me-root .me-side {
+    flex: 1 1 auto;
+  }
+  .me-root .me-mobile-ui {
+    display: flex;
+  }
+}
