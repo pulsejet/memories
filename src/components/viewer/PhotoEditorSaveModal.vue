@@ -23,6 +23,37 @@
         <option value="avif">AVIF</option>
       </select>
 
+      <div class="me-save-quality">
+        <div class="me-save-label">{{ t('memories', 'Quality') }}</div>
+        <NcCheckboxRadioSwitch
+          v-model="quality"
+          :value="90"
+          name="me-save-quality"
+          type="radio"
+          :disabled="saving || format === 'png'"
+        >
+          {{ t('memories', 'Best quality') }} (90)
+        </NcCheckboxRadioSwitch>
+        <NcCheckboxRadioSwitch
+          v-model="quality"
+          :value="85"
+          name="me-save-quality"
+          type="radio"
+          :disabled="saving || format === 'png'"
+        >
+          {{ t('memories', 'Balanced') }} (85)
+        </NcCheckboxRadioSwitch>
+        <NcCheckboxRadioSwitch
+          v-model="quality"
+          :value="75"
+          name="me-save-quality"
+          type="radio"
+          :disabled="saving || format === 'png'"
+        >
+          {{ t('memories', 'Space saving') }} (75)
+        </NcCheckboxRadioSwitch>
+      </div>
+
       <NcCheckboxRadioSwitch v-model="saveAsCopy" type="checkbox" :disabled="saving || forceCopy">
         {{ t('memories', 'Save as a copy') }}
       </NcCheckboxRadioSwitch>
@@ -128,6 +159,8 @@ const originalMatched = computed<SaveFormat | null>(() => matchFormat(originalNa
 
 const name = ref(originalName.value);
 const format = ref<SaveFormat>(originalMatched.value ?? 'jpg');
+/** Output quality for lossy formats (JPEG/AVIF); PNG is lossless. */
+const quality = ref(90);
 // Unmatched basenames can never overwrite: start ticked (watch keeps it so).
 const saveAsCopy = ref(props.isLivePhoto || originalMatched.value === null);
 const saving = ref(false);
@@ -208,6 +241,7 @@ async function onSave() {
       name: finalName.value,
       extension: format.value,
       edits,
+      quality: quality.value,
     });
     const info = res.data;
     const isCopy = info.fileid !== props.photo.fileid;
@@ -240,6 +274,10 @@ async function onSave() {
   font-size: 0.85em;
   font-weight: 500;
   margin-bottom: -6px;
+}
+
+.me-save-quality .me-save-label {
+  margin-bottom: 4px;
 }
 
 .me-save-select {
