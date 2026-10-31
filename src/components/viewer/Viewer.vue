@@ -709,7 +709,14 @@ async function createBase(args: PhotoSwipeOptions) {
 
   // Check if someone else is trapping focus
   const hasNestedTrap = (e: Event): Element | null => {
-    const selectors = ['#app-sidebar-vue', '#app-sidebar-native', '.v-popper__popper', '.modal-mask', '.oc-dialog'];
+    const selectors = [
+      '#app-sidebar-vue',
+      '#app-sidebar-native',
+      '.v-popper__popper',
+      '.modal-mask',
+      '.oc-dialog',
+      '.me-photo-editor',
+    ];
     if (e.target instanceof Element) {
       return e.target.closest(selectors.join(','));
     }
@@ -735,6 +742,12 @@ async function createBase(args: PhotoSwipeOptions) {
   // Handle keydown
   photoswipe.value.on('keydown', (e) => {
     if (e.defaultPrevented) return;
+
+    // The photo editor owns all keyboard input while open.
+    if (editorOpen.value) {
+      e.preventDefault();
+      return;
+    }
 
     // Check if someone else is trapping focus.
     // For the sidebar, however, we want to continue executing our actions.
@@ -1245,6 +1258,7 @@ function shareCurrent() {
 /** Key press events */
 function keydown(e: KeyboardEvent) {
   if (e.defaultPrevented) return;
+  if (editorOpen.value) return;
 
   if (e.key === 'Delete') {
     if (routeIs.Trash) {
