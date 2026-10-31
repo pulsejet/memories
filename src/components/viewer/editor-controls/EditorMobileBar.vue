@@ -183,6 +183,8 @@ function isChanged(k: string): boolean {
 // value = min + round(scrollLeft / SPACING) * step.
 // ---------------------------------------------------------------------------
 const SPACING = 2;
+const VIBRATE_MS = 10; // Duration of tick haptic while dragging the ruler
+const VIBRATE_EVERY = 5; // Vibrate every time the value changes by this much
 const RULER_GRADIENTS: Record<string, string> = {
   'grad-hue':
     'linear-gradient(to right,hsl(0,100%,55%),hsl(45,100%,52%),hsl(90,100%,48%),hsl(135,100%,42%),hsl(180,100%,42%),hsl(225,100%,62%),hsl(270,100%,62%),hsl(315,100%,55%),hsl(360,100%,55%))',
@@ -203,6 +205,7 @@ let fromScroll = false;
 let inSession = false;
 let snapTimer: ReturnType<typeof setTimeout> | null = null;
 let ro: ResizeObserver | null = null;
+let lastVibrateValue = 0;
 
 function buildRuler() {
   const key = props.mobileKey;
@@ -214,6 +217,7 @@ function buildRuler() {
   const step = def.step ?? 1;
   rulerSteps = Math.round((def.max - def.min) / step);
   rulerHalf = -1; // force tick repositioning for the new range
+  lastVibrateValue = (props.state as any)[key] ?? 0;
   let html = '';
   if (def.cls && RULER_GRADIENTS[def.cls]) {
     html += `<span class="me-ruler-grad" style="background:${RULER_GRADIENTS[def.cls]}"></span>`;
@@ -276,7 +280,13 @@ function rulerSet(v: number) {
   const step = def.step ?? 1;
   v = Math.min(def.max, Math.max(def.min, v));
   v = Math.round(v / step) * step;
-  if (Math.abs(v - (props.state as any)[key]) > 1e-9) emit('update:param', key, v);
+  if (Math.abs(v - (props.state as any)[key]) > 1e-9) {
+    if (Math.abs(v - lastVibrateValue) >= VIBRATE_EVERY) {
+      lastVibrateValue = v;
+      nativex.vibrate(VIBRATE_MS);
+    }
+    emit('update:param', key, v);
+  }
 }
 
 function endRulerScroll() {
