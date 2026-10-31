@@ -562,6 +562,7 @@ final class ImageController extends ApiController
     {
         // Basic shape check so vips errors stay actionable.
         foreach ($edits as $edit) {
+            /** @psalm-suppress DocblockTypeContradiction */
             if (!\is_array($edit) || !isset($edit['edit']) || !\is_string($edit['edit'])) {
                 throw Exceptions::BadRequest('Invalid edit entry');
             }
