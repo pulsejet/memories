@@ -937,7 +937,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     display: none;
     align-items: center;
     gap: 10px;
-    padding: 7px 12px;
+    padding: 0 7px;
     border-radius: 22px;
     background: rgba(17, 17, 20, 0.6);
     touch-action: pan-x;
@@ -980,7 +980,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   }
   .me-ruler {
     position: relative;
-    height: 30px;
+    height: 44px;
     overflow: hidden;
     border-radius: 8px;
     outline-offset: -2px;
@@ -1008,7 +1008,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   }
   .me-tick {
     position: absolute;
-    bottom: 4px;
+    bottom: 11px;
     width: 1px;
     margin-left: -0.5px;
     border-radius: 1px;
