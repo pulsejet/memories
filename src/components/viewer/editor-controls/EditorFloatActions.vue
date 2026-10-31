@@ -1,10 +1,5 @@
 <template>
-  <button
-    class="me-float-close me-icon-btn me-clickable button-vue"
-    aria-label="Close"
-    title="Close"
-    @click="onClose"
-  >
+  <button class="me-float-close me-icon-btn me-clickable button-vue" aria-label="Close" title="Close" @click="onClose">
     <Close :size="20" />
   </button>
   <button class="me-float-save me-glass me-clickable button-vue" @click="onSave">
