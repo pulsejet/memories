@@ -45,6 +45,7 @@
     </div>
 
     <div
+      ref="optionsBarEl"
       class="me-bar me-glass"
       :class="{ 'is-filters': section === 'filters' }"
       :aria-label="t('memories', 'Options')"
@@ -205,6 +206,8 @@ const RULER_GRADIENTS: Record<string, string> = {
 const rulerEl = ref<HTMLElement | null>(null);
 const scrollerEl = ref<HTMLElement | null>(null);
 const trackEl = ref<HTMLElement | null>(null);
+const optionsBarEl = ref<HTMLElement | null>(null);
+const scrollLefts: Partial<Record<EditorSection, number>> = {};
 const rulerHtml = ref('');
 const scrolling = ref(false);
 
@@ -408,6 +411,16 @@ function onFlipV() {
 }
 
 watch(() => props.mobileKey, buildRuler);
+watch(
+  () => props.section,
+  async (s, prev) => {
+    if (optionsBarEl.value) {
+      if (prev) scrollLefts[prev] = optionsBarEl.value.scrollLeft;
+      await nextTick();
+      optionsBarEl.value?.scrollTo({ left: scrollLefts[s] ?? 0 });
+    }
+  },
+);
 watch(
   () => [props.state, props.defaults],
   () => nextTick(layoutRuler),
