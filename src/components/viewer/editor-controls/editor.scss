@@ -198,6 +198,12 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     &.is-changed .me-val {
       color: var(--me-text);
     }
+    &.is-disabled {
+      opacity: 0.45;
+      .me-slider-input {
+        cursor: not-allowed;
+      }
+    }
   }
 
   .me-slider-input {
@@ -1136,51 +1142,8 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
 
 // ---------------------------------------------------------------------------
 // Container queries (not viewport): `.me-root` is the query container.
+// Two stages only: full sidebar, or mobile UI at 860px and below.
 // ---------------------------------------------------------------------------
-@container me-editor (max-width: 860px) {
-  .me-root .me-workspace {
-    flex-direction: column;
-  }
-  .me-root .me-side {
-    flex: 1 1 46%;
-  }
-  .me-root .me-crop-stage.is-crop-mode {
-    inset: 52px 52px 32px;
-  }
-  .me-root .me-sidebar {
-    width: 100%;
-    flex: 1 1 54%;
-    border-left: 0;
-    border-top: 1px solid var(--me-line);
-  }
-  .me-root .me-panel {
-    padding: 14px 16px 18px;
-  }
-}
-
-@container me-editor (max-width: 520px) {
-  .me-root .me-tab {
-    font-size: 10.5px;
-    padding: 10px 1px 8px;
-  }
-  .me-root .me-side {
-    flex-basis: 42%;
-  }
-  .me-root .me-sidebar {
-    flex-basis: 58%;
-  }
-  .me-root .me-ratio-grid,
-  .me-root .me-tool-grid {
-    gap: 6px;
-  }
-  .me-root .me-filter-grid {
-    gap: 8px;
-  }
-  .me-root .me-group-label {
-    margin-top: 16px;
-  }
-}
-
 @media (pointer: coarse) {
   .me-root .me-crop-stage {
     --h-out: 30px;
@@ -1191,9 +1154,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   }
 }
 
-// NB: cascade order matters — this 640px block must stay AFTER the 520px
-// block above. At phone widths both match, and these rules win.
-@container me-editor (max-width: 640px) {
+@container me-editor (max-width: 860px) {
   .me-root .me-workspace {
     flex-direction: column;
     position: relative;
