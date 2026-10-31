@@ -27,7 +27,7 @@
         <div class="me-save-label">{{ t('memories', 'Quality') }}</div>
         <NcCheckboxRadioSwitch
           v-model="quality"
-          :value="90"
+          value="90"
           name="me-save-quality"
           type="radio"
           :disabled="saving || format === 'png'"
@@ -36,7 +36,7 @@
         </NcCheckboxRadioSwitch>
         <NcCheckboxRadioSwitch
           v-model="quality"
-          :value="85"
+          value="85"
           name="me-save-quality"
           type="radio"
           :disabled="saving || format === 'png'"
@@ -45,7 +45,7 @@
         </NcCheckboxRadioSwitch>
         <NcCheckboxRadioSwitch
           v-model="quality"
-          :value="75"
+          value="75"
           name="me-save-quality"
           type="radio"
           :disabled="saving || format === 'png'"
@@ -160,7 +160,7 @@ const originalMatched = computed<SaveFormat | null>(() => matchFormat(originalNa
 const name = ref(originalName.value);
 const format = ref<SaveFormat>(originalMatched.value ?? 'jpg');
 /** Output quality for lossy formats (JPEG/AVIF); PNG is lossless. */
-const quality = ref(90);
+const quality = ref('90');
 // Unmatched basenames can never overwrite: start ticked (watch keeps it so).
 const saveAsCopy = ref(props.isLivePhoto || originalMatched.value === null);
 const saving = ref(false);
@@ -242,7 +242,7 @@ async function onSave() {
       name: finalName.value,
       extension: format.value,
       edits,
-      quality: quality.value,
+      quality: Number(quality.value),
       copy: willCopy.value,
     });
     const info = res.data;
