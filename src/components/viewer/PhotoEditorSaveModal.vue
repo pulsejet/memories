@@ -221,8 +221,7 @@ const willCopy = computed(() => props.isLivePhoto || saveAsCopy.value || finalNa
 
 const canSave = computed(() => {
   if (!finalName.value.trim()) return false;
-  // Non-live copies need a distinct name; live photos are auto-renamed backend-side.
-  if (saveAsCopy.value && !props.isLivePhoto && finalName.value === originalName.value) return false;
+  // Copies with a colliding name are auto-renamed backend-side.
   return true;
 });
 
@@ -242,6 +241,7 @@ async function onSave() {
       extension: format.value,
       edits,
       quality: quality.value,
+      copy: willCopy.value,
     });
     const info = res.data;
     const isCopy = info.fileid !== props.photo.fileid;
