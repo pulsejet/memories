@@ -1,10 +1,12 @@
 import type { Component } from 'vue';
 import AngleAcute from 'vue-material-design-icons/AngleAcute.vue';
+import Blur from 'vue-material-design-icons/Blur.vue';
 import Brightness from 'vue-material-design-icons/WhiteBalanceSunny.vue';
 import CameraIris from 'vue-material-design-icons/CameraIris.vue';
 import Contrast from 'vue-material-design-icons/Contrast.vue';
 import Highlights from 'vue-material-design-icons/WeatherSunny.vue';
 import Hue from 'vue-material-design-icons/InvertColors.vue';
+import Focus from 'vue-material-design-icons/ImageFilterCenterFocus.vue';
 import Palette from 'vue-material-design-icons/Palette.vue';
 import PaletteSwatch from 'vue-material-design-icons/PaletteSwatch.vue';
 import Shadows from 'vue-material-design-icons/WeatherNight.vue';
@@ -25,6 +27,8 @@ export const PARAM_ICONS: Record<string, Component> = {
   vibrance: PaletteSwatch,
   hue: Hue,
   temperature: Thermometer,
+  blur: Blur,
+  sharpen: Focus,
   straighten: AngleAcute,
 };
 

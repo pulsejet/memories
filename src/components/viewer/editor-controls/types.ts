@@ -18,7 +18,7 @@ export interface SliderDef {
   step?: number;
   /** gradient track modifier, e.g. "grad-warm" */
   cls?: string;
-  group: 'light' | 'color' | 'crop';
+  group: 'light' | 'color' | 'detail' | 'crop';
 }
 
 export type FilterGroup = 'base' | 'hot' | 'cold' | 'gray';
@@ -45,6 +45,8 @@ export interface EditorParams {
   vibrance: number;
   hue: number;
   temperature: number;
+  blur: number;
+  sharpen: number;
   straighten: number;
 }
 
@@ -73,6 +75,8 @@ export const SLIDER_DEFS: SliderDef[] = [
   { key: 'vibrance', min: -100, max: 100, val: 0, group: 'color' },
   { key: 'hue', min: -180, max: 180, val: 0, cls: 'grad-hue', group: 'color' },
   { key: 'temperature', min: -100, max: 100, val: 0, cls: 'grad-warm', group: 'color' },
+  { key: 'blur', min: 0, max: 100, val: 0, group: 'detail' },
+  { key: 'sharpen', min: 0, max: 100, val: 0, group: 'detail' },
   { key: 'straighten', min: -45, max: 45, val: 0, step: 0.5, group: 'crop' },
 ];
 
@@ -152,6 +156,8 @@ export const ADJUST_KEYS = [
   'vibrance',
   'hue',
   'temperature',
+  'blur',
+  'sharpen',
 ] as const;
 
 export function formatParamValue(key: string, v: number): string {

@@ -49,6 +49,21 @@
           @update:model-value="(v) => emit('update:param', d.key, v)"
           @reset="emit('reset:param', d.key)"
         />
+        <div class="me-group-label">Detail</div>
+        <EditorSlider
+          v-for="d in detailSliders"
+          :key="d.key"
+          :param-key="d.key"
+          :model-value="state[d.key as keyof EditorParams]"
+          :default-value="defaults[d.key] ?? d.val"
+          :min="d.min"
+          :max="d.max"
+          :step="d.step"
+          :icon="iconFor(d.key)"
+          :track-class="d.cls ? `me-${d.cls}` : undefined"
+          @update:model-value="(v) => emit('update:param', d.key, v)"
+          @reset="emit('reset:param', d.key)"
+        />
       </section>
 
       <section class="me-panel" :class="{ 'is-active': section === 'crop' }" role="tabpanel">
@@ -165,6 +180,7 @@ const emit = defineEmits<{
 
 const lightSliders = SLIDER_DEFS.filter((d) => d.group === 'light');
 const colorSliders = SLIDER_DEFS.filter((d) => d.group === 'color');
+const detailSliders = SLIDER_DEFS.filter((d) => d.group === 'detail');
 
 // Filter thumbs keep the provided image's aspect ratio instead of a fixed box.
 const thumbStyle = computed(() => {
