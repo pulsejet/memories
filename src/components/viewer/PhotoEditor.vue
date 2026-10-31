@@ -21,6 +21,7 @@
 
     <PhotoEditorSaveModal
       v-if="saveModalOpen && pendingState"
+      ref="saveModal"
       :photo="props.photo"
       :state="pendingState"
       :image-width="imgW"
@@ -83,6 +84,15 @@ const imgH = ref(props.photo.h || 0);
 /** Save modal state; opened from EditorControls save (or Ctrl+S). */
 const saveModalOpen = ref(false);
 const pendingState = ref<EditorState | null>(null);
+const saveModal = useTemplateRef<{ isSaving: () => boolean }>('saveModal');
+
+/** True while the save modal is uploading; it must not be unmounted then. */
+function isSaving(): boolean {
+  return saveModal.value?.isSaving() ?? false;
+}
+
+/** True while a discard confirmation is pending; blocks re-entrant backs. */
+let confirmingDiscard = false;
 
 /** Live photos are always saved as a copy backend-side. */
 const isLivePhoto = computed(() => Boolean(props.photo.liveid));
@@ -124,24 +134,43 @@ function confirmDiscard(): Promise<boolean> {
   });
 }
 
+/**
+ * Confirm once: concurrent backs (e.g. mashed Escape) share one dialog
+ * instead of stacking one per keypress.
+ */
+async function confirmDiscardOnce(): Promise<boolean> {
+  if (confirmingDiscard) return false;
+  confirmingDiscard = true;
+  try {
+    return await confirmDiscard();
+  } finally {
+    confirmingDiscard = false;
+  }
+}
+
 async function onBack() {
+  // Never unmount the save modal mid-save: the in-flight request would
+  // lose its saved event and retrying would apply the edits twice.
   if (saveModalOpen.value) {
+    if (isSaving()) return;
     closeSaveModal();
     return;
   }
-  if (isDirty() && !(await confirmDiscard())) return;
+  if (isDirty() && !(await confirmDiscardOnce())) return;
   close();
 }
 
 async function onFragmentPop() {
   // Back navigation with the save modal open dismisses the modal first.
   if (saveModalOpen.value) {
-    closeSaveModal();
-    // The pop already removed the editor fragment; put it back.
+    // A save in flight must keep its modal: re-push the editor fragment
+    // that the pop just removed and wait for the saved event.
     fragment.push(fragment.types.editor);
+    if (isSaving()) return;
+    closeSaveModal();
     return;
   }
-  if (isDirty() && !(await confirmDiscard())) {
+  if (isDirty() && !(await confirmDiscardOnce())) {
     // User kept the edits; restore the popped fragment.
     fragment.push(fragment.types.editor);
     return;

@@ -165,6 +165,8 @@ const quality = ref(90);
 const saveAsCopy = ref(props.isLivePhoto || originalMatched.value === null);
 const saving = ref(false);
 const saveError = ref('');
+/** Whether a save upload is in flight; the parent must not unmount us then. */
+defineExpose({ isSaving: () => saving.value });
 /** Format whose extension we last suffixed onto the name (for de-stacking). */
 const suffixed = ref<SaveFormat | null>(null);
 
