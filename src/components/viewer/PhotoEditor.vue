@@ -117,7 +117,7 @@ function isDirty(): boolean {
 function confirmDiscard(): Promise<boolean> {
   return confirmDestructive({
     title: t('memories', 'Unsaved changes'),
-    message: t('memories', 'Your edits will be lost'),
+    message: t('memories', 'Your unsaved edits will be lost if you leave the editor.'),
     confirm: t('memories', 'Drop changes'),
     cancel: t('memories', 'Cancel'),
   });
