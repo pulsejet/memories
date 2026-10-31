@@ -28,7 +28,6 @@
         :straightening="straightening"
         :animated="animateTransform"
         @handle-down="onHandleStart"
-        @pan-down="onPanStart"
       />
     </div>
   </div>
@@ -94,6 +93,7 @@ let turntableTimer: ReturnType<typeof setTimeout> | null = null;
 let straightenTimer: ReturnType<typeof setTimeout> | null = null;
 let stageRo: ResizeObserver | null = null;
 let mediaMo: MutationObserver | null = null;
+let activePointerId: number | null = null;
 let cleanupDrag: (() => void) | null = null;
 
 const isCropMode = computed(() => props.section === 'crop' && !props.state.comparing);
@@ -261,12 +261,14 @@ function resetCrop() {
 }
 
 function onHandleStart(handle: CropHandle, e: PointerEvent) {
-  if (!isCropMode.value || (e.button !== 0 && e.pointerType === 'mouse')) return;
-  cleanupDrag?.();
+  if (!isCropMode.value || !e.isPrimary || activePointerId !== null) return;
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
 
   if (settleTimer) clearTimeout(settleTimer);
   animateTransform.value = false;
   interacting.value = true;
+  const pointerId = e.pointerId;
+  activePointerId = pointerId;
 
   const g = geom.value;
   const { W, H } = dims.value;
@@ -353,6 +355,7 @@ function onHandleStart(handle: CropHandle, e: PointerEvent) {
   };
 
   const onMove = (ev: PointerEvent) => {
+    if (ev.pointerId !== pointerId) return;
     lastClientX = ev.clientX;
     lastClientY = ev.clientY;
     const res = applyDrag();
@@ -362,10 +365,9 @@ function onHandleStart(handle: CropHandle, e: PointerEvent) {
     }
   };
 
-  const onUp = () => {
+  const onUp = (ev: PointerEvent) => {
+    if (ev.pointerId !== pointerId) return;
     cleanup();
-    handleDragView.value = null;
-    interacting.value = false;
     settle(280);
   };
 
@@ -377,6 +379,9 @@ function onHandleStart(handle: CropHandle, e: PointerEvent) {
     window.removeEventListener('pointermove', onMove);
     window.removeEventListener('pointerup', onUp);
     window.removeEventListener('pointercancel', onUp);
+    activePointerId = null;
+    handleDragView.value = null;
+    interacting.value = false;
     cleanupDrag = null;
   };
 
@@ -387,13 +392,15 @@ function onHandleStart(handle: CropHandle, e: PointerEvent) {
 }
 
 function onPanStart(e: PointerEvent) {
-  if (!isCropMode.value || (e.button !== 0 && e.pointerType === 'mouse')) return;
+  if (!isCropMode.value || !e.isPrimary || activePointerId !== null) return;
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
   e.preventDefault();
-  cleanupDrag?.();
 
   if (settleTimer) clearTimeout(settleTimer);
   animateTransform.value = false;
   interacting.value = true;
+  const pointerId = e.pointerId;
+  activePointerId = pointerId;
 
   const startX = e.clientX;
   const startY = e.clientY;
@@ -404,6 +411,7 @@ function onPanStart(e: PointerEvent) {
   const curScale = scaleSettled.value;
 
   const onMove = (ev: PointerEvent) => {
+    if (ev.pointerId !== pointerId) return;
     const dx = ev.clientX - startX;
     const dy = ev.clientY - startY;
     const next = applyPanDelta(
@@ -424,15 +432,17 @@ function onPanStart(e: PointerEvent) {
     props.state.cropH = next.cropH;
   };
 
-  const onUp = () => {
+  const onUp = (ev: PointerEvent) => {
+    if (ev.pointerId !== pointerId) return;
     cleanup();
-    interacting.value = false;
   };
 
   const cleanup = () => {
     window.removeEventListener('pointermove', onMove);
     window.removeEventListener('pointerup', onUp);
     window.removeEventListener('pointercancel', onUp);
+    activePointerId = null;
+    interacting.value = false;
     cleanupDrag = null;
   };
 

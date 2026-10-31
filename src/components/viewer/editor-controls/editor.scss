@@ -425,6 +425,12 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     position: absolute;
     inset: 0;
     touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    --h-out: 20px;
+    --h-in: 16px;
+    --h-arm: 18px;
+    --h-bar: 22px;
+    --h-thick: 3px;
 
     &.is-crop-mode {
       inset: 68px 80px;
@@ -536,10 +542,9 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
 
   .me-crop-handle {
     position: absolute;
-    width: 32px;
-    height: 32px;
     z-index: 4;
     touch-action: none;
+    -webkit-tap-highlight-color: transparent;
 
     &::before,
     &::after {
@@ -554,45 +559,48 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     &.is-ne,
     &.is-se,
     &.is-sw {
+      width: calc(var(--h-out) + var(--h-in));
+      height: calc(var(--h-out) + var(--h-in));
+      z-index: 5;
       &::before {
-        width: 18px;
-        height: 3px;
+        width: var(--h-arm);
+        height: var(--h-thick);
       }
       &::after {
-        width: 3px;
-        height: 18px;
+        width: var(--h-thick);
+        height: var(--h-arm);
       }
     }
     &.is-nw,
     &.is-ne {
-      top: -16px;
+      top: calc(-1 * var(--h-out));
       &::before,
       &::after {
-        top: 13px;
+        top: calc(var(--h-out) - var(--h-thick));
       }
     }
     &.is-sw,
     &.is-se {
-      bottom: -16px;
+      bottom: calc(-1 * var(--h-out));
       &::before,
       &::after {
-        bottom: 13px;
+        bottom: calc(var(--h-out) - var(--h-thick));
       }
     }
     &.is-nw,
     &.is-sw {
-      left: -16px;
+      left: calc(-1 * var(--h-out));
       &::before,
       &::after {
-        left: 13px;
+        left: calc(var(--h-out) - var(--h-thick));
       }
     }
     &.is-ne,
     &.is-se {
-      right: -16px;
+      right: calc(-1 * var(--h-out));
       &::before,
       &::after {
-        right: 13px;
+        right: calc(var(--h-out) - var(--h-thick));
       }
     }
     &.is-nw,
@@ -606,59 +614,59 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
 
     &.is-n,
     &.is-s {
-      left: 50%;
-      transform: translateX(-50%);
-      width: 44px;
+      left: var(--h-in);
+      right: var(--h-in);
+      height: calc(var(--h-out) + var(--h-in));
       cursor: ns-resize;
       &::before {
         left: 50%;
         transform: translateX(-50%);
-        width: 22px;
-        height: 3px;
+        width: var(--h-bar);
+        height: var(--h-thick);
       }
       &::after {
         display: none;
       }
     }
     &.is-n {
-      top: -16px;
+      top: calc(-1 * var(--h-out));
       &::before {
-        top: 13px;
+        top: calc(var(--h-out) - var(--h-thick));
       }
     }
     &.is-s {
-      bottom: -16px;
+      bottom: calc(-1 * var(--h-out));
       &::before {
-        bottom: 13px;
+        bottom: calc(var(--h-out) - var(--h-thick));
       }
     }
 
     &.is-w,
     &.is-e {
-      top: 50%;
-      transform: translateY(-50%);
-      height: 44px;
+      top: var(--h-in);
+      bottom: var(--h-in);
+      width: calc(var(--h-out) + var(--h-in));
       cursor: ew-resize;
       &::before {
         top: 50%;
         transform: translateY(-50%);
-        width: 3px;
-        height: 22px;
+        width: var(--h-thick);
+        height: var(--h-bar);
       }
       &::after {
         display: none;
       }
     }
     &.is-w {
-      left: -16px;
+      left: calc(-1 * var(--h-out));
       &::before {
-        left: 13px;
+        left: calc(var(--h-out) - var(--h-thick));
       }
     }
     &.is-e {
-      right: -16px;
+      right: calc(-1 * var(--h-out));
       &::before {
-        right: 13px;
+        right: calc(var(--h-out) - var(--h-thick));
       }
     }
   }
@@ -1130,6 +1138,16 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   }
 }
 
+@media (pointer: coarse) {
+  .me-root .me-crop-stage {
+    --h-out: 30px;
+    --h-in: 22px;
+    --h-arm: 22px;
+    --h-bar: 26px;
+    --h-thick: 3.5px;
+  }
+}
+
 // NB: cascade order matters — this 640px block must stay AFTER the 520px
 // block above. At phone widths both match, and these rules win.
 @container me-editor (max-width: 640px) {
@@ -1143,8 +1161,15 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   .me-root .me-side {
     flex: 1 1 auto;
   }
+  .me-root .me-crop-stage {
+    --h-out: 30px;
+    --h-in: 22px;
+    --h-arm: 22px;
+    --h-bar: 26px;
+    --h-thick: 3.5px;
+  }
   .me-root .me-crop-stage.is-crop-mode {
-    inset: 60px 36px 180px;
+    inset: 62px 28px 180px;
   }
   .me-root .me-mobile-ui {
     display: flex;
