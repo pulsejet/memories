@@ -91,15 +91,18 @@
         </button>
       </template>
       <template v-else>
-        <button
-          v-for="f in FILTERS"
-          :key="f.id"
-          class="me-chip me-clickable button-vue"
-          :class="{ 'is-active': state.preset === f.id }"
-          @click="onPreset(f.id)"
-        >
-          <span>{{ f.name }}</span>
-        </button>
+        <template v-for="(group, gi) in FILTER_GROUPS" :key="group">
+          <span v-if="gi > 0" class="me-bar-sep" aria-hidden="true" />
+          <button
+            v-for="f in filtersInGroup(group)"
+            :key="f.id"
+            class="me-chip me-clickable button-vue"
+            :class="{ 'is-active': state.preset === f.id }"
+            @click="onPreset(f.id)"
+          >
+            <span>{{ f.name }}</span>
+          </button>
+        </template>
       </template>
     </div>
 
@@ -130,7 +133,7 @@ import RotateRight from 'vue-material-design-icons/RotateRight.vue';
 import Tune from 'vue-material-design-icons/Tune.vue';
 import { iconFor } from './paramIcons';
 import * as nativex from '@native';
-import { ADJUST_KEYS, FILTERS, PARAM_DEFS, RATIOS, capitalize, formatParamValue } from './types';
+import { ADJUST_KEYS, FILTER_GROUPS, PARAM_DEFS, RATIOS, capitalize, formatParamValue, filtersInGroup } from './types';
 import type { EditorParams, EditorSection, EditorState } from './types';
 
 const props = defineProps<{

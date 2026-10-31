@@ -36,29 +36,102 @@ function presetEdits(preset: string): Edit[] {
   switch (preset) {
     case 'vivid':
       return [
-        { edit: 'brightnessContrast', contrast: 0.18 },
-        { edit: 'hueSaturation', saturation: 0.3 },
-        { edit: 'vibrance', amount: 0.2 },
+        { edit: 'brightnessContrast', contrast: 0.1 },
+        { edit: 'hueSaturation', saturation: 0.15 },
+        { edit: 'vibrance', amount: 0.1 },
+      ];
+    case 'bold':
+      return [
+        { edit: 'brightnessContrast', contrast: 0.28 },
+        { edit: 'hueSaturation', saturation: -0.12 },
+        { edit: 'shadows', amount: -0.1 },
+        { edit: 'highlights', amount: -0.08 },
       ];
     case 'warm':
       return [
         { edit: 'sepia', amount: 0.35 },
         { edit: 'hueSaturation', saturation: 0.1 },
       ];
+    case 'vividWarm':
+      return [
+        { edit: 'brightnessContrast', contrast: 0.1 },
+        { edit: 'hueSaturation', saturation: 0.15 },
+        { edit: 'warmth', amount: 0.25 },
+      ];
+    case 'sepia':
+      return [{ edit: 'sepia', amount: 0.9 }];
+    case 'valencia':
+      return [
+        { edit: 'brightnessContrast', brightness: 0.06, contrast: -0.12 },
+        { edit: 'warmth', amount: 0.22 },
+        { edit: 'hueSaturation', saturation: -0.05 },
+      ];
+    case 'boldWarm':
+      return [
+        { edit: 'brightnessContrast', brightness: -0.02, contrast: 0.25 },
+        { edit: 'warmth', amount: 0.2 },
+        { edit: 'shadows', amount: -0.08 },
+      ];
+    case 'xpro2':
+      return [
+        { edit: 'brightnessContrast', contrast: 0.2 },
+        { edit: 'warmth', amount: 0.25 },
+        { edit: 'hueSaturation', saturation: 0.1 },
+        { edit: 'shadows', amount: -0.12 },
+        { edit: 'vignette', size: 0.55, amount: 0.55 },
+      ];
     case 'cool':
       return [
         { edit: 'exposure', stops: 0.15 },
         { edit: 'hueSaturation', hue: 0.05, saturation: 0.06 },
       ];
-    case 'fade':
+    case 'vividCool':
       return [
-        { edit: 'brightnessContrast', brightness: 0.08, contrast: -0.22 },
-        { edit: 'hueSaturation', saturation: -0.3 },
+        { edit: 'brightnessContrast', contrast: 0.1 },
+        { edit: 'hueSaturation', saturation: 0.15 },
+        { edit: 'warmth', amount: -0.25 },
+      ];
+    case 'clarendon':
+      return [
+        { edit: 'brightnessContrast', contrast: 0.15 },
+        { edit: 'vibrance', amount: 0.15 },
+        { edit: 'warmth', amount: -0.18 },
+        { edit: 'highlights', amount: -0.08 },
+      ];
+    case 'lark':
+      return [
+        { edit: 'brightnessContrast', brightness: 0.06, contrast: -0.08 },
+        { edit: 'hueSaturation', saturation: -0.12 },
+        { edit: 'warmth', amount: -0.15 },
+      ];
+    case 'boldCool':
+      return [
+        { edit: 'brightnessContrast', brightness: -0.02, contrast: 0.25 },
+        { edit: 'warmth', amount: -0.2 },
+        { edit: 'shadows', amount: -0.08 },
+      ];
+    case 'gingham':
+      return [
+        { edit: 'brightnessContrast', brightness: 0.06, contrast: -0.15 },
+        { edit: 'hueSaturation', saturation: -0.2 },
+        { edit: 'warmth', amount: -0.08 },
+        { edit: 'highlights', amount: 0.08 },
       ];
     case 'mono':
       return [{ edit: 'grayscale' }];
     case 'noir':
       return [{ edit: 'grayscale' }, { edit: 'brightnessContrast', brightness: -0.03, contrast: 0.3 }];
+    case 'silvertone':
+      return [{ edit: 'grayscale' }, { edit: 'brightnessContrast', brightness: 0.07, contrast: -0.12 }];
+    case 'inkwell':
+      return [{ edit: 'grayscale' }, { edit: 'brightnessContrast', brightness: -0.02, contrast: 0.35 }];
+    case 'fade':
+      return [
+        { edit: 'brightnessContrast', brightness: 0.08, contrast: -0.22 },
+        { edit: 'hueSaturation', saturation: -0.3 },
+      ];
+    case 'invert':
+      return [{ edit: 'invert' }];
     default:
       return [];
   }
