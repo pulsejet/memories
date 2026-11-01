@@ -47,5 +47,7 @@ export async function loadThumbnailCues(vttUrl: string, signal?: AbortSignal): P
 
 /** Active storyboard cue for a playback time, if any. */
 export function findThumbnailCue(cues: ThumbnailCue[], time: number): ThumbnailCue | undefined {
+  const last = cues.at(-1);
+  if (last && time >= last.endTime) return last;
   return cues.find((c) => time >= c.startTime && time < c.endTime);
 }
