@@ -612,7 +612,7 @@ final class ImageController extends ApiController
         } catch (\Throwable $e) {
             $msg = $e->getMessage();
             // Edit validation errors come from the vips edits parser.
-            if (str_contains($msg, 'edits')) {
+            if (str_contains($msg, 'edits[')) {
                 throw Exceptions::BadRequest($msg);
             }
 
