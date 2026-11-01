@@ -124,7 +124,7 @@ class VideoContentSetup {
     // Drags starting on player UI (controls, sliders, menus) belong to the
     // player; keep PhotoSwipe from dragging the slide underneath.
     pswp.on('pointerDown', (e) => {
-      if (!isVideoContent(pswp.currSlide)) return;
+      if (!this.getCurrVideoContent(pswp)) return;
       const target = e.originalEvent?.target as HTMLElement | null;
       if (target?.closest?.(PLAYER_UI_SELECTOR)) {
         e.preventDefault();
@@ -132,11 +132,13 @@ class VideoContentSetup {
     });
 
     pswp.on('close', () => {
-      this.destroyPlayer(pswp.currSlide?.content as VideoContent);
+      const content = this.getCurrVideoContent(pswp);
+      if (content) this.destroyPlayer(content);
     });
 
     // Prevent closing when video fullscreen is active
     pswp.on('pointerMove', (e) => {
+      if (!this.getCurrVideoContent(pswp)) return;
       const fs = document.fullscreenElement as HTMLElement | null;
       if (fs && (fs.classList.contains('video-container') || fs.querySelector('video'))) {
         e.preventDefault();
@@ -145,8 +147,7 @@ class VideoContentSetup {
 
     // Space toggles playback unless a focused control handles it
     pswp.on('keydown', (e) => {
-      const content = pswp.currSlide?.content;
-      const player = isVideoContent(content) ? content.videoPlayer : null;
+      const player = this.getCurrVideoContent(pswp)?.videoPlayer;
       if (!player) return;
 
       const { key, target, repeat } = e.originalEvent;
@@ -160,6 +161,11 @@ class VideoContentSetup {
         player.pause();
       }
     });
+  }
+
+  getCurrVideoContent(pswp: PsPhotoSwipe): VideoContent | null {
+    const content = pswp.currSlide?.content;
+    return isVideoContent(content) ? content : null;
   }
 
   getDirectSrc(content: VideoContent): VideoSource {
