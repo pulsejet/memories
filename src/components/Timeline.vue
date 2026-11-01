@@ -307,7 +307,7 @@ onBeforeUnmount(() => {
   resetState();
 });
 
-utils.useBus('files:file:created', softRefresh);
+utils.useBus('files:file:created', onFileCreated);
 utils.useBus('memories:timeline:fetch-day', fetchDay);
 utils.useBus('memories:timeline:deleted', deleteFromViewWithAnimation);
 utils.useBus('memories:timeline:soft-refresh', softRefresh);
@@ -592,6 +592,14 @@ async function _softRefreshInternal(
       void dtm.value?.refresh();
     }, 30);
   }
+}
+
+/** Refresh for a new file, loading its day when known so the viewer can show it. */
+async function onFileCreated({ fileid, dayid }: { fileid: number; dayid?: number }) {
+  if (dayid === undefined) return softRefresh();
+  await ignoreAbort(softRefreshSync());
+  await ignoreAbort(fetchDay(dayid, { now: true }));
+  utils.bus.emit('memories:timeline:file-loaded', { fileid, dayid });
 }
 
 /** Do resize after some time */

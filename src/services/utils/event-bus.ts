@@ -7,7 +7,7 @@ export type BusEvent = {
   /** Open/close the navigation drawer */
   'toggle-navigation': { open: boolean };
   /** File was created */
-  'files:file:created': { fileid: number };
+  'files:file:created': { fileid: number; dayid?: number };
   /** File was updated */
   'files:file:updated': { fileid: number };
 
@@ -31,6 +31,8 @@ export type BusEvent = {
   'memories:timeline:soft-refresh': null;
   /** Hard-refresh the timeline */
   'memories:timeline:hard-refresh': null;
+  /** Timeline finished loading the day of a newly created file */
+  'memories:timeline:file-loaded': { fileid: number; dayid: number };
   /** Timeline recycler scrolling */
   'memories.recycler.scroll': {
     current: number;

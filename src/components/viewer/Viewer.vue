@@ -288,6 +288,7 @@ utils.useBus('memories:sidebar:opened', handleAppSidebarOpen);
 utils.useBus('memories:sidebar:closed', handleAppSidebarClose);
 utils.useBus('files:file:created', handleFileUpdated);
 utils.useBus('files:file:updated', handleFileUpdated);
+utils.useBus('memories:timeline:file-loaded', (file) => showNewFile(file));
 utils.useBus('memories:fragment:pop:viewer', close);
 
 /** Number of top bar buttons to show inline */
@@ -822,6 +823,7 @@ async function createBase(args: PhotoSwipeOptions) {
     list.value = [];
     globalCount.value = 0;
     globalAnchor.value = -1;
+    showNewFile = () => {};
     clearTimeout(slideshowTimer.value);
     slideshowTimer.value = 0;
   });
@@ -890,6 +892,9 @@ function setFragment(photo: IPhoto | null) {
     return fragment.pop(fragment.types.viewer);
   }
 }
+
+/** Moves to a new file if it landed in a listed day; only set for dynamic lists. */
+let showNewFile: (file: { fileid: number; dayid: number }) => void = () => {};
 
 /** Open using start photo and rows list */
 async function openDynamic(anchorPhoto: IPhoto, timeline: TimelineState) {
@@ -1058,6 +1063,32 @@ async function openDynamic(anchorPhoto: IPhoto, timeline: TimelineState) {
       }
     }
   });
+
+  showNewFile = ({ dayid, fileid }) => {
+    const pswp = photoswipe.value;
+
+    // Nothing to do unless the file is in this view and its day is in the list
+    const detail = timeline.heads.get(dayid)?.day.detail ?? [];
+    const dayIdx = detail.findIndex((p) => p.fileid === fileid);
+    const start = list.value.findIndex((p) => p.dayid === dayid);
+    if (!pswp || dayIdx < 0 || start < 0) return;
+
+    // Replace the stale photos of this day with the fetched ones
+    const prevCount = list.value.filter((p) => p.dayid === dayid).length;
+    list.value.splice(start, prevCount, ...detail);
+
+    // The refresh may have changed other days too, so recompute fully
+    globals = computeGlobals();
+    globalCount.value = globals.count;
+    globalAnchor.value = globals.anchor;
+
+    // Slides around both positions hold stale photos for their indices
+    const [from, to] = [pswp.currIndex, globals.anchor + start + dayIdx];
+    pswp.goTo(to);
+    for (let i = Math.min(from, to) - 3; i <= Math.max(from, to) + 3; i++) {
+      pswp.refreshSlideContent(i);
+    }
+  };
 
   pswp!.init();
 }

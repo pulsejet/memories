@@ -244,10 +244,12 @@ async function onSave() {
     });
     const info = res.data;
     const isCopy = info.fileid !== props.photo.fileid;
-    if (!isCopy) {
+    if (isCopy) {
+      utils.bus.emit('files:file:created', { fileid: info.fileid, dayid: info.dayid });
+    } else {
       utils.updatePhotoFromImageInfo(props.photo, info);
+      utils.bus.emit('files:file:updated', { fileid: info.fileid });
     }
-    utils.bus.emit(isCopy ? 'files:file:created' : 'files:file:updated', { fileid: info.fileid });
     emit('saved', info, isCopy);
   } catch (e: any) {
     const msg = e?.response?.data?.message ?? e?.message ?? t('memories', 'Unknown error while saving image');
