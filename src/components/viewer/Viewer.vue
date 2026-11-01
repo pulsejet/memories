@@ -151,7 +151,7 @@ import PsLivePhoto from './PsLivePhoto';
 import PsPhotoSphere from './PsPhotoSphere';
 import PsNativeHole from './PsNativeHole';
 
-import type { IImageInfo, IPhoto, TimelineState } from '@typings';
+import type { IImageInfo, IPhoto, TimelineState, VideoControllerElement } from '@typings';
 import type { PsContent, PsPhotoSwipe } from './types';
 
 import LivePhotoIcon from '@components/icons/LivePhoto.vue';
@@ -1543,7 +1543,9 @@ function slideshowTimerFired() {
   // If this is a video, wait for it to finish
   if (isVideo.value) {
     // Get active player element
-    const player = photoswipe.value?.element?.querySelector<HTMLVideoElement>('.pswp__item.active video');
+    const player = photoswipe.value?.element?.querySelector<VideoControllerElement>(
+      '.pswp__item.active :is(video, viewer-video-native-hole)',
+    );
 
     // If no player is found by now, something likely went wrong. Just skip ahead.
     // Otherwise check if video is not ended yet.
