@@ -111,6 +111,24 @@
       />
     </div>
 
+    <div>
+      {{
+        t(
+          'memories',
+          'You can optionally exclude specific file types from being indexed, for example screenshots or scanned documents.',
+        )
+      }}
+      <br />
+
+      <NcTextField
+        class="regex-field"
+        :label="t('memories', 'Excluded file extensions (comma-separated)')"
+        :label-visible="true"
+        v-model="extBlocklistText"
+        @change="update('memories.index.file.blocklist')"
+      />
+    </div>
+
     <br />
 
     <div>
@@ -163,6 +181,19 @@ const blocklistText = computed({
   set(value: string) {
     if (!systemConfig.value) return;
     systemConfig.value['memories.index.folder.blocklist'] = value
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s !== '');
+  },
+});
+
+const extBlocklistText = computed({
+  get(): string {
+    return (systemConfig.value?.['memories.index.file.blocklist'] ?? []).join(', ');
+  },
+  set(value: string) {
+    if (!systemConfig.value) return;
+    systemConfig.value['memories.index.file.blocklist'] = value
       .split(',')
       .map((s) => s.trim())
       .filter((s) => s !== '');

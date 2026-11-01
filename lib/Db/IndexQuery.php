@@ -40,8 +40,12 @@ final class IndexQuery
         /** @var string[] $blocklist */
         $blocklist = $this->systemConfig->get('memories.index.folder.blocklist');
 
+        /** @var string[] $rawExtBlocklist */
+        $rawExtBlocklist = $this->systemConfig->get('memories.index.file.blocklist');
+        $extBlocklist = MIME::normalizeExtensions($rawExtBlocklist);
+
         while (true) {
-            $batch = $this->fetchCandidateBatch($topFolderIds, $mimes, $blocklist, $batchSize);
+            $batch = $this->fetchCandidateBatch($topFolderIds, $mimes, $blocklist, $extBlocklist, $batchSize);
             if ([] === $batch) {
                 return;
             }
@@ -77,6 +81,10 @@ final class IndexQuery
         /** @var string[] $blocklist */
         $blocklist = $this->systemConfig->get('memories.index.folder.blocklist');
 
+        /** @var string[] $rawExtBlocklist */
+        $rawExtBlocklist = $this->systemConfig->get('memories.index.file.blocklist');
+        $extBlocklist = MIME::normalizeExtensions($rawExtBlocklist);
+
         $query = $this->connection->getQueryBuilder();
 
         // Keep the two probes separate: a single IN probe plans as
@@ -96,11 +104,13 @@ final class IndexQuery
             ->where(SQL::exists($query, $hasFile('.nomedia')))
             ->orWhere(SQL::exists($query, $hasFile('.nomemories')))
             ->orWhere($query->createFunction($this->tq->folderBlocklistedClause(\count($blocklist), 'c')))
+            ->orWhere($query->createFunction($this->tq->fileExtensionBlocklistedSelfClause(\count($extBlocklist), 'c')))
             ->setMaxResults(1)
         ;
 
         CTEParams::setFileId($query, $fileId);
         CTEParams::setFolderNameBlocklist($query, $blocklist);
+        CTEParams::setFileExtensionBlocklist($query, $extBlocklist);
 
         return false === $this->tq->executeQueryWithCTEs($query)->fetchOne();
     }
@@ -111,6 +121,7 @@ final class IndexQuery
      * @param int[]    $topFolderIds top folder fileids
      * @param string[] $mimes        supported mimetypes
      * @param string[] $blocklist    folder name LIKE patterns to prune
+     * @param string[] $extBlocklist file extensions to exclude
      *
      * @return int[] fileids in no particular order
      */
@@ -118,6 +129,7 @@ final class IndexQuery
         array $topFolderIds,
         array $mimes,
         array $blocklist,
+        array $extBlocklist,
         int $batchSize,
     ): array {
         $query = $this->connection->getQueryBuilder();
@@ -143,6 +155,14 @@ final class IndexQuery
         ;
         $query->andWhere(SQL::exists($query, $inFolders));
 
+        // Exclude files with blocklisted extensions
+        $extCount = \count($extBlocklist);
+        if ($extCount > 0) {
+            $query->andWhere($query->createFunction(
+                'NOT ('.$this->tq->fileExtensionBlocklistedClause($extCount, 'f').')',
+            ));
+        }
+
         // Filter out files that are already indexed or failed
         $this->filterNonIndexed($query);
 
@@ -153,6 +173,7 @@ final class IndexQuery
         CTEParams::setTopFolderIds($query, $topFolderIds);
         CTEParams::setIncludeHidden($query, true);
         CTEParams::setFolderNameBlocklist($query, $blocklist);
+        CTEParams::setFileExtensionBlocklist($query, $extBlocklist);
 
         $batch = [];
         foreach ($this->tq->executeQueryWithCTEs($query)->fetchFirstColumn() as $fileid) {

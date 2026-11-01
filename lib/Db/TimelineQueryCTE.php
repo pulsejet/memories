@@ -58,6 +58,45 @@ trait TimelineQueryCTE
     }
 
     /**
+     * Clause matching file names with a blocklisted extension.
+     *
+     * @param int    $count number of bound :fextBlocklistN patterns
+     * @param string $alias table alias holding the file name column
+     */
+    public function fileExtensionBlocklistedClause(int $count, string $alias): string
+    {
+        if (0 === $count) {
+            return '1 = 0';
+        }
+
+        $parts = [];
+        for ($i = 0; $i < $count; ++$i) {
+            $parts[] = "({$alias}.name LIKE :fextBlocklist{$i} ESCAPE :fextBlocklistEscape)";
+        }
+
+        return implode(' OR ', $parts);
+    }
+
+    /**
+     * Clause matching the file itself (not its ancestors) with a blocklisted extension.
+     *
+     * The cte_file_parents rows also contain the names of the parent
+     * folders, so the depth must be checked to avoid matching a folder
+     * that happens to have a blocked extension.
+     *
+     * @param int    $count number of bound :fextBlocklistN patterns
+     * @param string $alias table alias holding the file name column
+     */
+    public function fileExtensionBlocklistedSelfClause(int $count, string $alias): string
+    {
+        if (0 === $count) {
+            return '1 = 0';
+        }
+
+        return "({$alias}.depth = 0 AND ".$this->fileExtensionBlocklistedClause($count, $alias).')';
+    }
+
+    /**
      * CTE to get all files recursively in the given top folders
      * :topFolderIds - The top folders to get files from.
      * :fnBlocklistN - Folder name LIKE patterns to prune.

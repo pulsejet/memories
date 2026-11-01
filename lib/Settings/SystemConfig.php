@@ -47,6 +47,10 @@ final class SystemConfig
         // % and _ are wildcards, \ escapes
         'memories.index.folder.blocklist' => ['@Recycle', '@eaDir', '.trashed-%'],
 
+        // Blocklist file extensions by name suffix.
+        // Entries are lowercase and have no leading dot, e.g. ['png', 'gif']
+        'memories.index.file.blocklist' => [],
+
         // Places database type identifier
         'memories.gis_type' => -1,
 

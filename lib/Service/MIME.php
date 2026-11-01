@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Service;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\Files\Node;
 use OCP\IPreview;
 
@@ -34,6 +35,7 @@ final class MIME
 
     public function __construct(
         private IPreview $preview,
+        private SystemConfig $systemConfig,
     ) {}
 
     /**
@@ -84,5 +86,61 @@ final class MIME
     public function isVideo(Node $file): bool
     {
         return \in_array($file->getMimeType(), Application::VIDEO_MIMES, true);
+    }
+
+    /**
+     * Check if a file is excluded by the extension blocklist.
+     *
+     * @param Node $file file to check
+     */
+    public function isBlocklisted(Node $file): bool
+    {
+        /** @var string[] $raw */
+        $raw = $this->systemConfig->get('memories.index.file.blocklist');
+
+        $blocklist = self::normalizeExtensions($raw);
+        if ([] === $blocklist) {
+            return false;
+        }
+
+        return \in_array(self::getExtension($file->getName()), $blocklist, true);
+    }
+
+    /**
+     * Get the lowercase extension of a file name, without the leading dot.
+     *
+     * Returns an empty string if the name has no extension.
+     */
+    public static function getExtension(string $name): string
+    {
+        $pos = strrpos($name, '.');
+        if (false === $pos || 0 === $pos) {
+            return '';
+        }
+
+        return strtolower(substr($name, $pos + 1));
+    }
+
+    /**
+     * Normalize a list of extensions: lowercase, strip leading dots and
+     * wildcard prefixes, drop empty entries.
+     *
+     * @param string[] $extensions
+     *
+     * @return string[]
+     */
+    public static function normalizeExtensions(array $extensions): array
+    {
+        $out = [];
+        foreach ($extensions as $extension) {
+            $extension = strtolower(trim((string) $extension));
+            $extension = ltrim($extension, '*');
+            $extension = ltrim($extension, '.');
+            if ('' !== $extension) {
+                $out[] = $extension;
+            }
+        }
+
+        return array_values(array_unique($out));
     }
 }

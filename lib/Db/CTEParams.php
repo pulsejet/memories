@@ -18,6 +18,11 @@ final class CTEParams
     private const FOLDER_NAME_BLOCKLIST_ESCAPE = 'fnBlocklistEscape';
     private const FOLDER_NAME_BLOCKLIST_ESCAPE_CHAR = '\\';
 
+    private const FILE_EXT_BLOCKLIST = 'fextBlocklist';
+    private const FILE_EXT_BLOCKLIST_COUNT = 'fextBlocklistCount';
+    private const FILE_EXT_BLOCKLIST_ESCAPE = 'fextBlocklistEscape';
+    private const FILE_EXT_BLOCKLIST_ESCAPE_CHAR = '\\';
+
     public static function setTopFolderIds(IQueryBuilder &$query, array $ids): void
     {
         $query->setParameter(self::TOP_FOLDER_IDS, array_values($ids), IQueryBuilder::PARAM_INT_ARRAY);
@@ -82,5 +87,51 @@ final class CTEParams
     public static function getFolderNameBlocklistCount(IQueryBuilder $query): int
     {
         return (int) ($query->getParameters()[self::FOLDER_NAME_BLOCKLIST_COUNT] ?? 0);
+    }
+
+    /**
+     * @param string[] $extensions lowercase extensions without leading dot
+     */
+    public static function setFileExtensionBlocklist(IQueryBuilder &$query, array $extensions): void
+    {
+        $extensions = array_values($extensions);
+
+        if ([] !== $extensions) {
+            $query->setParameter(
+                self::FILE_EXT_BLOCKLIST_COUNT,
+                \count($extensions),
+                IQueryBuilder::PARAM_INT,
+            );
+            $query->setParameter(
+                self::FILE_EXT_BLOCKLIST_ESCAPE,
+                self::FILE_EXT_BLOCKLIST_ESCAPE_CHAR,
+                IQueryBuilder::PARAM_STR,
+            );
+        }
+
+        foreach ($extensions as $i => $extension) {
+            $query->setParameter(
+                self::FILE_EXT_BLOCKLIST."{$i}",
+                '%.'.self::escapeLikePattern($extension),
+                IQueryBuilder::PARAM_STR,
+            );
+        }
+    }
+
+    public static function getFileExtensionBlocklistCount(IQueryBuilder $query): int
+    {
+        return (int) ($query->getParameters()[self::FILE_EXT_BLOCKLIST_COUNT] ?? 0);
+    }
+
+    /**
+     * Escape the LIKE wildcards in a pattern so they match literally.
+     */
+    public static function escapeLikePattern(string $pattern): string
+    {
+        return str_replace(
+            [self::FILE_EXT_BLOCKLIST_ESCAPE_CHAR, '%', '_'],
+            [self::FILE_EXT_BLOCKLIST_ESCAPE_CHAR.self::FILE_EXT_BLOCKLIST_ESCAPE_CHAR, self::FILE_EXT_BLOCKLIST_ESCAPE_CHAR.'%', self::FILE_EXT_BLOCKLIST_ESCAPE_CHAR.'_'],
+            $pattern,
+        );
     }
 }
