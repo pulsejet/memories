@@ -21,6 +21,9 @@ class PhotoMapper(private val ctx: Context) {
 
         /** Seconds per day; dayId is the epoch day index shared with the server. */
         private const val SECONDS_PER_DAY = 86400
+
+        /** Same precedence as Exif::parseExifDate on the server; ModifyDate must stay out. */
+        private val EXIF_DATE_TAGS = listOf(ExifInterface.TAG_DATETIME_ORIGINAL, ExifInterface.TAG_DATETIME_DIGITIZED)
     }
 
     /**
@@ -70,26 +73,27 @@ class PhotoMapper(private val ctx: Context) {
         return null
     }
 
-    /** EXIF capture time (UTC) falling back to MediaStore time shifted into UTC. */
+    /**
+     * EXIF capture time (UTC) falling back to MediaStore time shifted into UTC.
+     * DATE_TAKEN is null for files with no capture date, so use mtime like the server.
+     */
     fun utcDate(image: SystemImage, exif: ExifInterface?): Long {
-        if (exif != null) {
-            val exifDate = try {
-                exif.getAttribute(ExifInterface.TAG_DATETIME)
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to read EXIF datetime: ${e.message}")
-                null
+        exif?.let { exifDate(it) }?.let { return it }
+        val time = if (image.dateTaken != 0L) image.dateTaken else image.mtime * 1000
+        return (time + TimeZone.getDefault().getOffset(time).toLong()) / 1000
+    }
+
+    private fun exifDate(exif: ExifInterface): Long? = try {
+        EXIF_DATE_TAGS
+            .firstNotNullOfOrNull { tag -> exif.getAttribute(tag)?.takeUnless { it.startsWith("0000:00:00") } }
+            ?.let { date ->
+                val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
+                sdf.timeZone = TimeZone.GMT_ZONE
+                sdf.parse(date)?.let { it.time / 1000 }
             }
-            if (exifDate != null) {
-                try {
-                    val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
-                    sdf.timeZone = TimeZone.GMT_ZONE
-                    sdf.parse(exifDate)?.let { return it.time / 1000 }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to parse EXIF datetime: ${e.message}")
-                }
-            }
-        }
-        return (image.dateTaken + TimeZone.getDefault().getOffset(image.dateTaken).toLong()) / 1000
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to read EXIF datetime: ${e.message}")
+        null
     }
 
     /** Content ID: identical file bytes share an auid wherever they appear. */
@@ -123,7 +127,7 @@ class PhotoMapper(private val ctx: Context) {
             buid = buid(image, exif),
             mtime = image.mtime,
             dateTaken = taken,
-            dayId = taken / SECONDS_PER_DAY,
+            dayId = taken.floorDiv(SECONDS_PER_DAY),
             baseName = image.baseName,
             bucketId = image.bucketId,
             bucketName = image.bucketName,
