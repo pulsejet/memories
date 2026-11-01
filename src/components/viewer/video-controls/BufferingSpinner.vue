@@ -5,7 +5,8 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useEventListener } from '@vueuse/core';
 
 import type { VideoController } from '@typings';
 
@@ -15,79 +16,39 @@ const props = defineProps<{
 
 const isBuffering = ref(true);
 
-function onPlay() {
-  isBuffering.value = false;
-}
+useEventListener(
+  () => props.video,
+  ['waiting', 'seeking', 'emptied'],
+  () => {
+    isBuffering.value = true;
+  },
+);
 
-function onPlaying() {
-  isBuffering.value = false;
-}
+useEventListener(
+  () => props.video,
+  ['play', 'playing', 'pause', 'ended', 'canplay', 'error'],
+  () => {
+    isBuffering.value = false;
+  },
+);
 
-function onPause() {
-  isBuffering.value = false;
-}
+useEventListener(
+  () => props.video,
+  'seeked',
+  () => {
+    // Seek done; still buffering until enough data (waiting re-fires if not).
+    isBuffering.value = (props.video?.readyState ?? 0) < 3;
+  },
+);
 
-function onEnded() {
-  isBuffering.value = false;
-}
-
-function onWaiting() {
-  isBuffering.value = true;
-}
-
-function onSeeking() {
-  isBuffering.value = true;
-}
-
-function onSeeked() {
-  // Seek done; still buffering until enough data (waiting re-fires if not).
-  isBuffering.value = (props.video?.readyState ?? 0) < 3;
-}
-
-function onCanPlay() {
-  isBuffering.value = false;
-}
-
-function onEmptied() {
-  isBuffering.value = true;
-}
-
-function onError() {
-  isBuffering.value = false;
-}
-
-function attachVideo() {
-  if (!props.video) return;
+onMounted(() => {
   const v = props.video;
+  if (!v) return;
+
   // Preload none + untouched: nothing is loading, no spinner.
-  isBuffering.value = v.readyState < 3 && !(v.preload === 'none' && v.paused && v.readyState === 0 && !v.autoplay);
-  v.addEventListener('play', onPlay);
-  v.addEventListener('playing', onPlaying);
-  v.addEventListener('pause', onPause);
-  v.addEventListener('ended', onEnded);
-  v.addEventListener('waiting', onWaiting);
-  v.addEventListener('seeking', onSeeking);
-  v.addEventListener('seeked', onSeeked);
-  v.addEventListener('canplay', onCanPlay);
-  v.addEventListener('emptied', onEmptied);
-  v.addEventListener('error', onError);
-}
-
-function detachVideo(el: VideoController | null | undefined = props.video) {
-  el?.removeEventListener('play', onPlay);
-  el?.removeEventListener('playing', onPlaying);
-  el?.removeEventListener('pause', onPause);
-  el?.removeEventListener('ended', onEnded);
-  el?.removeEventListener('waiting', onWaiting);
-  el?.removeEventListener('seeking', onSeeking);
-  el?.removeEventListener('seeked', onSeeked);
-  el?.removeEventListener('canplay', onCanPlay);
-  el?.removeEventListener('emptied', onEmptied);
-  el?.removeEventListener('error', onError);
-}
-
-onMounted(attachVideo);
-onBeforeUnmount(detachVideo);
+  const untouched = v.preload === 'none' && v.paused && v.readyState === 0 && !v.autoplay;
+  isBuffering.value = v.readyState < 3 && !untouched;
+});
 </script>
 
 <style lang="scss" scoped>

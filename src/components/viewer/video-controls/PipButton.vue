@@ -14,6 +14,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { useEventListener } from '@vueuse/core';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 import PictureInPictureBottomRightIcon from 'vue-material-design-icons/PictureInPictureBottomRight.vue';
@@ -119,24 +120,19 @@ async function togglePip() {
   }
 }
 
-function attachVideo() {
+useEventListener(() => props.video, 'enterpictureinpicture', onEnterPip);
+useEventListener(() => props.video, 'leavepictureinpicture', onLeavePip);
+useEventListener(() => props.video, 'webkitpresentationmodechanged', onWebkitModeChange);
+
+onMounted(() => {
   updateSupport();
   if (!props.video) return;
   isPip.value =
     document.pictureInPictureElement === (props.video as unknown as Element) ||
     props.video.webkitPresentationMode === 'picture-in-picture';
-  props.video.addEventListener('enterpictureinpicture', onEnterPip);
-  props.video.addEventListener('leavepictureinpicture', onLeavePip);
-  props.video.addEventListener('webkitpresentationmodechanged', onWebkitModeChange);
-}
+});
 
-function detachVideo(el: VideoController | null | undefined = props.video) {
-  if (isPip.value) void exitPip(el).catch(() => {});
-  el?.removeEventListener('enterpictureinpicture', onEnterPip);
-  el?.removeEventListener('leavepictureinpicture', onLeavePip);
-  el?.removeEventListener('webkitpresentationmodechanged', onWebkitModeChange);
-}
-
-onMounted(attachVideo);
-onBeforeUnmount(detachVideo);
+onBeforeUnmount(() => {
+  if (isPip.value) void exitPip().catch(() => {});
+});
 </script>

@@ -14,7 +14,8 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useEventListener } from '@vueuse/core';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 import FullscreenIcon from 'vue-material-design-icons/Fullscreen.vue';
@@ -115,21 +116,9 @@ async function toggleFullscreen() {
   }
 }
 
-function attachVideo() {
-  document.addEventListener('fullscreenchange', onFullscreenChange);
-  document.addEventListener('webkitfullscreenchange', onFullscreenChange);
-  props.video?.addEventListener('webkitbeginfullscreen', onNativeBegin);
-  props.video?.addEventListener('webkitendfullscreen', onNativeEnd);
-  isFullscreen.value = isFullscreenActive();
-}
+useEventListener(document, ['fullscreenchange', 'webkitfullscreenchange'], onFullscreenChange);
+useEventListener(() => props.video, 'webkitbeginfullscreen', onNativeBegin);
+useEventListener(() => props.video, 'webkitendfullscreen', onNativeEnd);
 
-function detachVideo(el: VideoController | null | undefined = props.video) {
-  document.removeEventListener('fullscreenchange', onFullscreenChange);
-  document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
-  el?.removeEventListener('webkitbeginfullscreen', onNativeBegin);
-  el?.removeEventListener('webkitendfullscreen', onNativeEnd);
-}
-
-onMounted(attachVideo);
-onBeforeUnmount(detachVideo);
+onMounted(onFullscreenChange);
 </script>

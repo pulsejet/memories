@@ -33,7 +33,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useEventListener } from '@vueuse/core';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 import VolumeHighIcon from 'vue-material-design-icons/VolumeHigh.vue';
@@ -93,19 +94,9 @@ function onSliderKeyDown(event: KeyboardEvent) {
   }
 }
 
-function attachVideo() {
-  if (!props.video) return;
-  volume.value = props.video.volume;
-  muted.value = props.video.muted;
-  props.video.addEventListener('volumechange', onVolumeChange);
-}
+useEventListener(() => props.video, 'volumechange', onVolumeChange);
 
-function detachVideo(el: VideoController | null | undefined = props.video) {
-  el?.removeEventListener('volumechange', onVolumeChange);
-}
-
-onMounted(attachVideo);
-onBeforeUnmount(detachVideo);
+onMounted(onVolumeChange);
 </script>
 
 <style lang="scss" scoped>

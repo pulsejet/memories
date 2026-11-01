@@ -14,7 +14,8 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useEventListener } from '@vueuse/core';
 
 import PlayIcon from 'vue-material-design-icons/Play.vue';
 
@@ -28,21 +29,25 @@ const props = defineProps<{
 
 const isPlaying = ref(false);
 
-function onPlay() {
-  isPlaying.value = true;
-}
+useEventListener(
+  () => props.video,
+  ['play', 'playing'],
+  () => {
+    isPlaying.value = true;
+  },
+);
 
-function onPlaying() {
-  isPlaying.value = true;
-}
+useEventListener(
+  () => props.video,
+  ['pause', 'ended'],
+  () => {
+    isPlaying.value = false;
+  },
+);
 
-function onPause() {
-  isPlaying.value = false;
-}
-
-function onEnded() {
-  isPlaying.value = false;
-}
+onMounted(() => {
+  isPlaying.value = props.video?.paused === false;
+});
 
 async function playVideo() {
   try {
@@ -51,25 +56,6 @@ async function playVideo() {
     // Ignore - user can retry from the bottom bar
   }
 }
-
-function attachVideo() {
-  if (!props.video) return;
-  isPlaying.value = !props.video.paused;
-  props.video.addEventListener('play', onPlay);
-  props.video.addEventListener('playing', onPlaying);
-  props.video.addEventListener('pause', onPause);
-  props.video.addEventListener('ended', onEnded);
-}
-
-function detachVideo(el: VideoController | null | undefined = props.video) {
-  el?.removeEventListener('play', onPlay);
-  el?.removeEventListener('playing', onPlaying);
-  el?.removeEventListener('pause', onPause);
-  el?.removeEventListener('ended', onEnded);
-}
-
-onMounted(attachVideo);
-onBeforeUnmount(detachVideo);
 </script>
 
 <style lang="scss" scoped>

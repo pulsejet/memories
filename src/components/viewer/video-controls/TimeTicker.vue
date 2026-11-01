@@ -6,7 +6,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useEventListener } from '@vueuse/core';
 
 import { t } from '@services/l10n';
 import * as vutils from './utils';
@@ -39,25 +40,13 @@ function onVideoDurationChange() {
   }
 }
 
-function attachVideo() {
-  if (!props.video) return;
-  currentTime.value = props.video.currentTime || 0;
-  if (Number.isFinite(props.video.duration)) {
-    duration.value = props.video.duration;
-  }
-  props.video.addEventListener('timeupdate', onVideoTimeUpdate);
-  props.video.addEventListener('durationchange', onVideoDurationChange);
-  props.video.addEventListener('loadedmetadata', onVideoDurationChange);
-}
+useEventListener(() => props.video, 'timeupdate', onVideoTimeUpdate);
+useEventListener(() => props.video, ['durationchange', 'loadedmetadata'], onVideoDurationChange);
 
-function detachVideo(el: VideoController | null | undefined = props.video) {
-  el?.removeEventListener('timeupdate', onVideoTimeUpdate);
-  el?.removeEventListener('durationchange', onVideoDurationChange);
-  el?.removeEventListener('loadedmetadata', onVideoDurationChange);
-}
-
-onMounted(attachVideo);
-onBeforeUnmount(detachVideo);
+onMounted(() => {
+  onVideoTimeUpdate();
+  onVideoDurationChange();
+});
 </script>
 
 <style lang="scss" scoped>

@@ -13,7 +13,8 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useEventListener } from '@vueuse/core';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 import PlayIcon from 'vue-material-design-icons/Play.vue';
@@ -29,21 +30,25 @@ const props = defineProps<{
 
 const isPlaying = ref(false);
 
-function onVideoPlay() {
-  isPlaying.value = true;
-}
+useEventListener(
+  () => props.video,
+  ['play', 'playing'],
+  () => {
+    isPlaying.value = true;
+  },
+);
 
-function onVideoPlaying() {
-  isPlaying.value = true;
-}
+useEventListener(
+  () => props.video,
+  ['pause', 'ended'],
+  () => {
+    isPlaying.value = false;
+  },
+);
 
-function onVideoPause() {
-  isPlaying.value = false;
-}
-
-function onVideoEnded() {
-  isPlaying.value = false;
-}
+onMounted(() => {
+  isPlaying.value = props.video?.paused === false;
+});
 
 async function togglePlay() {
   if (!props.video) return;
@@ -57,24 +62,4 @@ async function togglePlay() {
     console.warn('Failed to toggle play/pause', e);
   }
 }
-
-function attachVideo() {
-  if (!props.video) return;
-  isPlaying.value = !props.video.paused;
-  props.video.addEventListener('play', onVideoPlay);
-  props.video.addEventListener('playing', onVideoPlaying);
-  props.video.addEventListener('pause', onVideoPause);
-  props.video.addEventListener('ended', onVideoEnded);
-}
-
-function detachVideo(el: VideoController | null | undefined = props.video) {
-  el?.removeEventListener('play', onVideoPlay);
-  el?.removeEventListener('playing', onVideoPlaying);
-  el?.removeEventListener('pause', onVideoPause);
-  el?.removeEventListener('ended', onVideoEnded);
-  isPlaying.value = false;
-}
-
-onMounted(attachVideo);
-onBeforeUnmount(detachVideo);
 </script>

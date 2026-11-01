@@ -99,7 +99,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useEventListener } from '@vueuse/core';
 
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import NcActionCaption from '@nextcloud/vue/components/NcActionCaption';
@@ -186,21 +187,9 @@ function onQualitySelected() {
   }
 }
 
-function attachVideo() {
-  if (!props.video) return;
-  onRateChange();
-  onQualityList();
-  onQualitySelected();
-  props.video.addEventListener('ratechange', onRateChange);
-  props.video.addEventListener('quality-list', onQualityList);
-  props.video.addEventListener('quality-selected', onQualitySelected);
-}
-
-function detachVideo(el: VideoController | null | undefined = props.video) {
-  el?.removeEventListener('ratechange', onRateChange);
-  el?.removeEventListener('quality-list', onQualityList);
-  el?.removeEventListener('quality-selected', onQualitySelected);
-}
+useEventListener(() => props.video, 'ratechange', onRateChange);
+useEventListener(() => props.video, 'quality-list', onQualityList);
+useEventListener(() => props.video, 'quality-selected', onQualitySelected);
 
 watch(quality, (value) => {
   if (props.video && props.video.currentQuality !== undefined) {
@@ -214,6 +203,9 @@ watch(speed, (value) => {
   }
 });
 
-onMounted(attachVideo);
-onBeforeUnmount(detachVideo);
+onMounted(() => {
+  onRateChange();
+  onQualityList();
+  onQualitySelected();
+});
 </script>

@@ -4,6 +4,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useEventListener } from '@vueuse/core';
 
 import * as vutils from './utils';
 import * as thumbUtils from './thumbnails';
@@ -96,21 +97,15 @@ function abortThumbLoad() {
   thumbAbort = null;
 }
 
-function attachVideo() {
-  if (!props.video) return;
-  props.video.addEventListener('canplay', onCanPlay, { once: true });
-  if (props.video.readyState >= 3) {
+useEventListener(() => props.video, 'canplay', onCanPlay, { once: true });
+
+onMounted(() => {
+  if ((props.video?.readyState ?? 0) >= 3) {
     loadStarted.value = true;
   }
-}
+});
 
-function detachVideo(el: VideoController | null | undefined = props.video) {
-  el?.removeEventListener('canplay', onCanPlay);
-  abortThumbLoad();
-}
-
-onMounted(attachVideo);
-onBeforeUnmount(detachVideo);
+onBeforeUnmount(abortThumbLoad);
 </script>
 
 <style lang="scss" scoped>

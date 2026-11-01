@@ -42,7 +42,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useEventListener } from '@vueuse/core';
 
 import { t } from '@services/l10n';
 import TrackThumbnail from './TrackThumbnail.vue';
@@ -198,30 +199,14 @@ function onVideoProgress() {
   buffered.value = ranges;
 }
 
-function attachVideo() {
-  if (!props.video) return;
-  currentTime.value = props.video.currentTime || 0;
-  if (Number.isFinite(props.video.duration)) {
-    duration.value = props.video.duration;
-  }
-  onVideoProgress();
-  props.video.addEventListener('timeupdate', onVideoTimeUpdate);
-  props.video.addEventListener('durationchange', onVideoDurationChange);
-  props.video.addEventListener('loadedmetadata', onVideoDurationChange);
-  props.video.addEventListener('progress', onVideoProgress);
-  props.video.addEventListener('emptied', onVideoProgress);
-}
+useEventListener(() => props.video, 'timeupdate', onVideoTimeUpdate);
+useEventListener(() => props.video, ['durationchange', 'loadedmetadata'], onVideoDurationChange);
+useEventListener(() => props.video, ['progress', 'emptied'], onVideoProgress);
 
-function detachVideo(el: VideoController | null | undefined = props.video) {
-  el?.removeEventListener('timeupdate', onVideoTimeUpdate);
-  el?.removeEventListener('durationchange', onVideoDurationChange);
-  el?.removeEventListener('loadedmetadata', onVideoDurationChange);
-  el?.removeEventListener('progress', onVideoProgress);
-  el?.removeEventListener('emptied', onVideoProgress);
-}
-
-onMounted(attachVideo);
-onBeforeUnmount(detachVideo);
+onMounted(() => {
+  onVideoTimeUpdate();
+  onVideoDurationChange();
+});
 </script>
 
 <style lang="scss" scoped>
