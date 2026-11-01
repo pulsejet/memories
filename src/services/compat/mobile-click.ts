@@ -53,7 +53,7 @@ export function makeTapPatch({ selectors, slopPx = 12, timeoutMs = 600 }: TapCli
   const onTouchEnd = (e: TouchEvent) => {
     const tap = pendingTap;
     pendingTap = null;
-    if (!tap || e.touches.length !== 0 || !document.contains(tap.button)) return;
+    if (!tap || e.touches.length !== 0 || !tap.button.isConnected) return;
     const touch = e.changedTouches[0];
     if (!touch || performance.now() - tap.startTime > timeoutMs) return;
     if (Math.hypot(touch.clientX - tap.startX, touch.clientY - tap.startY) > slopPx) return;
