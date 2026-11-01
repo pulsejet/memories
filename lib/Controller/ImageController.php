@@ -49,6 +49,15 @@ const IMAGICK_SAFE = '/^image\/(x-)?(png|jpeg|gif|bmp|tiff|webp|hei(f|c)|avif|dc
 
 final class ImageController extends ApiController
 {
+    /** Output extension to normalized extension. */
+    private const EDIT_EXTENSION_MAP = [
+        'jpg' => 'jpg',
+        'jpeg' => 'jpg',
+        'png' => 'png',
+        'webp' => 'webp',
+        'avif' => 'avif',
+    ];
+
     public function __construct(
         IRequest $request,
         protected FsManager $fs,
@@ -504,7 +513,7 @@ final class ImageController extends ApiController
                 throw Exceptions::BadRequest('Invalid file name');
             }
             $extLower = strtolower($extension);
-            if (!\in_array($extLower, ['jpeg', 'jpg', 'png', 'webp', 'avif'], true)) {
+            if (!isset(self::EDIT_EXTENSION_MAP[$extLower])) {
                 throw Exceptions::BadRequest('Invalid image format');
             }
             if ($quality < 10 || $quality > 100) {
@@ -591,20 +600,14 @@ final class ImageController extends ApiController
         }
 
         // Saver is picked from the output extension.
-        $outputMap = [
-            'jpeg' => 'output.jpg',
-            'jpg' => 'output.jpg',
-            'png' => 'output.png',
-            'webp' => 'output.webp',
-            'avif' => 'output.avif',
-        ];
-        $output = $outputMap[$extension] ?? null;
-        if (null === $output) {
+        $normalized = self::EDIT_EXTENSION_MAP[$extension] ?? null;
+        if (null === $normalized) {
             throw Exceptions::BadRequest('Invalid image format');
         }
+        $output = 'output.'.$normalized;
 
         try {
-            $blob = $this->vips->convertFormat($path, $output, $quality, array_values($edits));
+            $blob = $this->vips->convertFormat($path, $output, $quality, $edits);
         } catch (\Throwable $e) {
             $msg = $e->getMessage();
             // Edit validation errors come from the vips edits parser.
