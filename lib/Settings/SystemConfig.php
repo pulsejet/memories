@@ -47,6 +47,9 @@ final class SystemConfig
         // % and _ are wildcards, \ escapes
         'memories.index.folder.blocklist' => ['@Recycle', '@eaDir', '.trashed-%'],
 
+        // Blocklist MIME types from indexing, e.g. ['image/png', 'image/gif']
+        'memories.index.mime.blocklist' => [],
+
         // Places database type identifier
         'memories.gis_type' => -1,
 

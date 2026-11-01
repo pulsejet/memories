@@ -109,6 +109,14 @@
         v-model="blocklistText"
         @change="update('memories.index.folder.blocklist')"
       />
+
+      <NcTextField
+        class="regex-field"
+        :label="t('memories', 'Excluded MIME types (comma-separated)')"
+        :label-visible="true"
+        v-model="mimeBlocklistText"
+        @change="update('memories.index.mime.blocklist')"
+      />
     </div>
 
     <br />
@@ -163,6 +171,19 @@ const blocklistText = computed({
   set(value: string) {
     if (!systemConfig.value) return;
     systemConfig.value['memories.index.folder.blocklist'] = value
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s !== '');
+  },
+});
+
+const mimeBlocklistText = computed({
+  get(): string {
+    return (systemConfig.value?.['memories.index.mime.blocklist'] ?? []).join(', ');
+  },
+  set(value: string) {
+    if (!systemConfig.value) return;
+    systemConfig.value['memories.index.mime.blocklist'] = value
       .split(',')
       .map((s) => s.trim())
       .filter((s) => s !== '');

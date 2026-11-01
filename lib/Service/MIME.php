@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Service;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\Files\Node;
 use OCP\IPreview;
 
@@ -34,6 +35,7 @@ final class MIME
 
     public function __construct(
         private IPreview $preview,
+        private SystemConfig $systemConfig,
     ) {}
 
     /**
@@ -41,10 +43,13 @@ final class MIME
      */
     public function getMimeList(): array
     {
-        return $this->mimeList ??= array_merge(
-            $this->getPreviewMimes(Application::IMAGE_MIMES),
-            Application::VIDEO_MIMES,
-        );
+        return $this->mimeList ??= array_values(array_diff(
+            array_merge(
+                $this->getPreviewMimes(Application::IMAGE_MIMES),
+                Application::VIDEO_MIMES,
+            ),
+            $this->getBlockedMimes(),
+        ));
     }
 
     /**
@@ -60,10 +65,13 @@ final class MIME
      */
     public function getAllMimes(): array
     {
-        return array_merge(
-            Application::IMAGE_MIMES,
-            Application::VIDEO_MIMES,
-        );
+        return array_values(array_diff(
+            array_merge(
+                Application::IMAGE_MIMES,
+                Application::VIDEO_MIMES,
+            ),
+            $this->getBlockedMimes(),
+        ));
     }
 
     /**
@@ -84,5 +92,15 @@ final class MIME
     public function isVideo(Node $file): bool
     {
         return \in_array($file->getMimeType(), Application::VIDEO_MIMES, true);
+    }
+
+    /**
+     * Get blocklisted MIME types.
+     *
+     * @return string[]
+     */
+    public function getBlockedMimes(): array
+    {
+        return $this->systemConfig->get('memories.index.mime.blocklist');
     }
 }

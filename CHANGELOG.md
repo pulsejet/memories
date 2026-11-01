@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Option to skip delete confirmation in viewer ([#1687](https://github.com/pulsejet/memories/issues/1687), [#1689](https://github.com/pulsejet/memories/issues/1689), [#1246](https://github.com/pulsejet/memories/issues/1246))
 - **Feature**: GPU HDR tone mapping for NVENC with Jellyfin FFmpeg ([#1656](https://github.com/pulsejet/memories/issues/1656), [#1767](https://github.com/pulsejet/memories/pull/1767))
 - **Feature**: Directly scroll to a date in timeline by adding `#day/yyyy-mm-dd` to the URL.
+- **Feature**: Option to exclude MIME types from indexing (`memories.index.mime.blocklist`).
 
 ## [v10.2.0] - 2026-10-23
 

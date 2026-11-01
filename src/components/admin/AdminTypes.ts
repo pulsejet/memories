@@ -7,6 +7,7 @@ export type ISystemConfig = {
   'memories.index.mode': string;
   'memories.index.path': string;
   'memories.index.folder.blocklist': string[];
+  'memories.index.mime.blocklist': string[];
 
   'memories.gis_type': number;
   'memories.places.search.url': string;
