@@ -60,11 +60,19 @@ function selectHlsQuality(video: HTMLVideoElement, id: string) {
     if (!hls.autoLevelEnabled) {
       hls.currentLevel = -1;
     }
+    hooks._qualitySelected = 'auto';
     return;
   }
 
   const option = buildHlsQualityList(hls).find((o) => o.id === id);
-  if (option && hls.currentLevel !== option.index) {
+  if (!option) return;
+
+  if (hls.currentLevel === option.index) {
+    // If the selected level is already playing, just pin it
+    // without flushing the current playing buffer.
+    hls.nextLevel = option.index;
+    hooks._qualitySelected = id;
+  } else {
     hls.currentLevel = option.index;
   }
 }
