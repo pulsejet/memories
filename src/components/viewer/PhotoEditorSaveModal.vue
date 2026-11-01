@@ -105,7 +105,7 @@ import { stateToSaveEdits } from '@components/viewer/editor-controls/stateToEdit
 import { API } from '@services/API';
 import { t } from '@services/l10n';
 import * as utils from '@services/utils/common';
-import { showError, showSuccess } from '@services/utils/dialog';
+import { showError } from '@services/utils/dialog';
 
 import type { EditorState } from '@components/viewer/editor-controls/types';
 import type { IImageInfo, IPhoto } from '@typings';
@@ -221,11 +221,8 @@ const finalName = computed(() => {
 
 const willCopy = computed(() => props.isLivePhoto || saveAsCopy.value || finalName.value !== originalName.value);
 
-const canSave = computed(() => {
-  if (!finalName.value.trim()) return false;
-  // Copies with a colliding name are auto-renamed backend-side.
-  return true;
-});
+// Copies with a colliding name are auto-renamed backend-side.
+const canSave = computed(() => Boolean(finalName.value.trim()));
 
 function onCancel() {
   if (saving.value) return;

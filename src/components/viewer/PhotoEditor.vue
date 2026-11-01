@@ -48,7 +48,7 @@ import { t } from '@services/l10n';
 import * as utils from '@services/utils/common';
 import { confirmDestructive, showError } from '@services/utils/dialog';
 
-import type { IImageInfo, IPhoto } from '@typings';
+import type { IPhoto } from '@typings';
 import { INITIAL_STATE, FILTERS, type EditorState, type EditorSection } from '@components/viewer/editor-controls/types';
 
 const props = defineProps<{
@@ -223,7 +223,7 @@ function closeSaveModal() {
   pendingState.value = null;
 }
 
-function onSaved(_info: IImageInfo, _isCopy: boolean) {
+function onSaved() {
   closeSaveModal();
   close();
 }
