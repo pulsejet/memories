@@ -142,10 +142,10 @@ defineExpose({ close });
     }
 
     :deep(.modal-wrapper > .modal-container) {
-      max-height: calc(99% - env(keyboard-inset-height, 0px));
+      max-height: calc(99% - var(--keyboard-inset-height, env(keyboard-inset-height, 0px)));
       height: unset;
       top: unset;
-      bottom: env(keyboard-inset-height, 0px);
+      bottom: var(--keyboard-inset-height, env(keyboard-inset-height, 0px));
 
       // Hide scrollbar
       scrollbar-width: none;

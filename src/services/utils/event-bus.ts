@@ -45,6 +45,9 @@ export type BusEvent = {
   /** NativeX database was updated */
   'nativex:db:updated': null;
 
+  /** Height of the native keyboard over the page in CSS px */
+  'nativex:keyboard:height': number;
+
   /** Native hole video player snapshot */
   'nativex:video:state': NativeXVideoState;
 } & {

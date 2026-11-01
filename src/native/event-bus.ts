@@ -22,5 +22,10 @@ export function initEventBus() {
     }
   };
 
+  // WebView never sets env(keyboard-inset-height).
+  bus.on('nativex:keyboard:height', (height) => {
+    document.documentElement.style.setProperty('--keyboard-inset-height', `${height}px`);
+  });
+
   nxAsync('setupEventBus')?.();
 }
