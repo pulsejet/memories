@@ -334,6 +334,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', onBeforeUnload);
   loadGen++;
   thumbGen++;
+  pipeline?.dispose();
   pipeline = null;
   smallPreview?.dispose();
   smallPreview = null;
