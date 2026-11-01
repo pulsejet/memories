@@ -87,7 +87,7 @@ defineProps<{
     }
   }
 
-  :deep(.button-vue) {
+  :deep(.button-vue:not(.action-button)) {
     background-color: transparent !important;
     color: #fff !important;
   }

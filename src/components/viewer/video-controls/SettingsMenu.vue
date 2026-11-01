@@ -1,91 +1,100 @@
 <template>
-  <NcActions
-    v-model:open="menuOpen"
-    :aria-label="t('memories', 'Settings')"
-    placement="top"
-    force-menu
-    @open="view = 'main'"
-  >
-    <template #icon>
-      <CogIcon :size="24" />
-    </template>
+  <NcThemeProvider dark>
+    <NcActions
+      v-model:open="menuOpen"
+      :aria-label="t('memories', 'Settings')"
+      :container="false"
+      placement="top"
+      force-menu
+      @open="view = 'main'"
+    >
+      <template #icon>
+        <CogIcon :size="24" />
+      </template>
 
-    <template v-if="view === 'main'">
-      <NcActionButton
-        v-if="qualityList.length > 1"
-        key="m-vc-nav-quality"
-        is-menu
-        :close-after-click="false"
-        :name="qualityRow"
-        @click="view = 'quality'"
-      >
-        <template #icon>
-          <TuneIcon :size="20" />
-        </template>
-      </NcActionButton>
-      <NcActionButton key="m-vc-nav-speed" is-menu :close-after-click="false" :name="speedRow" @click="view = 'speed'">
-        <template #icon>
-          <SpeedometerIcon :size="20" />
-        </template>
-      </NcActionButton>
-    </template>
+      <template v-if="view === 'main'">
+        <NcActionButton
+          v-if="qualityList.length > 1"
+          key="m-vc-nav-quality"
+          is-menu
+          :close-after-click="false"
+          :name="qualityRow"
+          @click="view = 'quality'"
+        >
+          <template #icon>
+            <TuneIcon :size="20" />
+          </template>
+        </NcActionButton>
+        <NcActionButton
+          key="m-vc-nav-speed"
+          is-menu
+          :close-after-click="false"
+          :name="speedRow"
+          @click="view = 'speed'"
+        >
+          <template #icon>
+            <SpeedometerIcon :size="20" />
+          </template>
+        </NcActionButton>
+      </template>
 
-    <template v-else-if="view === 'quality'">
-      <NcActionButton
-        key="m-vc-back-quality"
-        :is-menu="false"
-        :close-after-click="false"
-        :name="t('memories', 'Back')"
-        @click="view = 'main'"
-      >
-        <template #icon>
-          <ArrowLeftIcon :size="20" />
-        </template>
-      </NcActionButton>
-      <NcActionCaption :name="t('memories', 'Quality')" />
-      <NcActionButton
-        v-for="option in qualityList"
-        :key="option.id"
-        type="radio"
-        v-model="quality"
-        :value="option.id"
-        :name="qualityLabel(option)"
-        @click="menuOpen = false"
-      >
-        <template #icon>
-          <component :is="qualityIcon(option.size)" :size="20" />
-        </template>
-      </NcActionButton>
-    </template>
+      <template v-else-if="view === 'quality'">
+        <NcActionButton
+          key="m-vc-back-quality"
+          :is-menu="false"
+          :close-after-click="false"
+          :name="t('memories', 'Back')"
+          @click="view = 'main'"
+        >
+          <template #icon>
+            <ArrowLeftIcon :size="20" />
+          </template>
+        </NcActionButton>
+        <NcActionCaption :name="t('memories', 'Quality')" />
+        <NcActionButton
+          v-for="option in qualityList"
+          :key="option.id"
+          type="radio"
+          v-model="quality"
+          :value="option.id"
+          :name="qualityLabel(option)"
+          @click="menuOpen = false"
+        >
+          <template #icon>
+            <component :is="qualityIcon(option.size)" :size="20" />
+          </template>
+        </NcActionButton>
+      </template>
 
-    <template v-else>
-      <NcActionButton
-        key="m-vc-back-speed"
-        :is-menu="false"
-        :close-after-click="false"
-        :name="t('memories', 'Back')"
-        @click="view = 'main'"
-      >
-        <template #icon>
-          <ArrowLeftIcon :size="20" />
-        </template>
-      </NcActionButton>
-      <NcActionCaption :name="t('memories', 'Speed')" />
-      <NcActionButton
-        v-for="option in speedOptions"
-        :key="option"
-        type="radio"
-        v-model="speed"
-        :value="option"
-        :name="speedLabel(option)"
-        @click="menuOpen = false"
-      >
-        <template v-if="option === '1'" #icon>
-          <PlayIcon :size="20" />
-        </template>
-      </NcActionButton>
-    </template>
-  </NcActions>
+      <template v-else>
+        <NcActionButton
+          key="m-vc-back-speed"
+          :is-menu="false"
+          :close-after-click="false"
+          :name="t('memories', 'Back')"
+          @click="view = 'main'"
+        >
+          <template #icon>
+            <ArrowLeftIcon :size="20" />
+          </template>
+        </NcActionButton>
+        <NcActionCaption :name="t('memories', 'Speed')" />
+        <NcActionButton
+          v-for="option in speedOptions"
+          :key="option"
+          type="radio"
+          v-model="speed"
+          :value="option"
+          :name="speedLabel(option)"
+          @click="menuOpen = false"
+        >
+          <template v-if="option === '1'" #icon>
+            <PlayIcon :size="20" />
+          </template>
+        </NcActionButton>
+      </template>
+    </NcActions>
+  </NcThemeProvider>
 </template>
 
 <script setup lang="ts">
@@ -94,6 +103,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import NcActionCaption from '@nextcloud/vue/components/NcActionCaption';
 import NcActions from '@nextcloud/vue/components/NcActions';
+import NcThemeProvider from '@nextcloud/vue/components/NcThemeProvider';
 import ArrowLeftIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import AutoFixIcon from 'vue-material-design-icons/AutoFix.vue';
 import CogIcon from 'vue-material-design-icons/Cog.vue';
