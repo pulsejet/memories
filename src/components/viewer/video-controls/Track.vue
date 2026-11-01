@@ -175,6 +175,7 @@ function onKeyDown(e: KeyboardEvent) {
 function onVideoTimeUpdate() {
   if (props.video) {
     currentTime.value = props.video.currentTime;
+    onVideoProgress();
   }
 }
 
@@ -208,6 +209,7 @@ function attachVideo() {
   props.video.addEventListener('durationchange', onVideoDurationChange);
   props.video.addEventListener('loadedmetadata', onVideoDurationChange);
   props.video.addEventListener('progress', onVideoProgress);
+  props.video.addEventListener('emptied', onVideoProgress);
 }
 
 function detachVideo(el: VideoController | null | undefined = props.video) {
@@ -215,6 +217,7 @@ function detachVideo(el: VideoController | null | undefined = props.video) {
   el?.removeEventListener('durationchange', onVideoDurationChange);
   el?.removeEventListener('loadedmetadata', onVideoDurationChange);
   el?.removeEventListener('progress', onVideoProgress);
+  el?.removeEventListener('emptied', onVideoProgress);
 }
 
 onMounted(attachVideo);
