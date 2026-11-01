@@ -8,6 +8,7 @@
           :section="section"
           :image-width="imageWidth"
           :image-height="imageHeight"
+          :bottom-inset="mobileBarInset"
         >
           <slot name="preview" />
         </EditorCropStage>
@@ -20,6 +21,7 @@
           :mobile-key="mobileKey"
           @update:section="setSection"
           @update:mobile-key="(k) => (mobileKey = k === mobileKey ? null : k)"
+          @update:inset="(h) => (mobileBarInset = h)"
           @update:param="setParam"
           @reset:param="resetParam"
           @update:preset="(id) => (state.preset = id)"
@@ -93,6 +95,8 @@ const defaults = reactive<EditorParams>({ ...DEFAULT_PARAMS });
 const section = ref<EditorSection>('crop');
 /** Slider currently loaded in the mobile ruler pill. Null = nothing selected. */
 const mobileKey = ref<MobileKey | null>(null);
+/** Space taken by the mobile control stack, 0 when it is hidden. */
+const mobileBarInset = ref(0);
 
 /** Whether the state differs from the pristine defaults (drives the save button). */
 const hasEdits = computed(() => {

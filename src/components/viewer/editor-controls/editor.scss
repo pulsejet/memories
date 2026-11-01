@@ -436,11 +436,20 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     --h-thick: 4.5px;
 
     &.is-crop-mode {
-      inset: 68px 80px;
+      padding: 68px 80px;
       cursor: grab;
     }
     &.is-crop-mode.is-interacting {
       cursor: grabbing;
+    }
+  }
+
+  .me-crop-shift {
+    position: absolute;
+    inset: 0;
+
+    &.is-animated {
+      transition: transform 0.26s cubic-bezier(0.2, 0, 0, 1);
     }
   }
 
@@ -1203,9 +1212,12 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     --h-arm: 26px;
     --h-bar: 30px;
     --h-thick: 4px;
+    // Keeps the image centered on the same line as the crop box.
+    --me-bar-overlap: 52px;
   }
   .me-root .me-crop-stage.is-crop-mode {
-    inset: 65px 28px 180px;
+    --me-bar-overlap: 0;
+    padding: 66px 28px 14px;
   }
   .me-root .me-mobile-ui {
     display: flex;

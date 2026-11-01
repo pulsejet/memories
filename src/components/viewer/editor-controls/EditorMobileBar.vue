@@ -1,5 +1,5 @@
 <template>
-  <div class="me-mobile-ui" :aria-label="t('memories', 'Mobile editor controls')">
+  <div ref="rootEl" class="me-mobile-ui" :aria-label="t('memories', 'Mobile editor controls')">
     <div class="me-slider-pill me-glass" :class="{ 'is-on': showRuler }">
       <button
         class="me-s-pill-icon button-vue"
@@ -162,6 +162,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:section': [s: EditorSection];
   'update:mobile-key': [k: MobileKey | null];
+  'update:inset': [h: number];
   'update:param': [key: ParamKey, v: number];
   'reset:param': [key: ParamKey];
   'update:preset': [id: string];
@@ -211,6 +212,7 @@ const RULER_GRADIENTS: Record<string, string> = {
   'grad-sat': 'linear-gradient(to right,#4c4c52,#8a8a90 35%,#ff7847 75%,#ff3d2e)',
 };
 
+const rootEl = ref<HTMLElement | null>(null);
 const rulerEl = ref<HTMLElement | null>(null);
 const scrollerEl = ref<HTMLElement | null>(null);
 const trackEl = ref<HTMLElement | null>(null);
@@ -225,6 +227,7 @@ let fromScroll = false;
 let inSession = false;
 let snapTimer: ReturnType<typeof setTimeout> | null = null;
 let ro: ResizeObserver | null = null;
+let rootRo: ResizeObserver | null = null;
 let lastVibrateValue = 0;
 
 function buildRuler() {
@@ -435,6 +438,13 @@ watch(
   { deep: true },
 );
 
+function measureInset() {
+  const el = rootEl.value;
+  if (!el) return;
+  const h = el.offsetHeight;
+  emit('update:inset', h > 0 ? h + parseFloat(getComputedStyle(el).bottom) : 0);
+}
+
 onMounted(() => {
   buildRuler();
   scrollerEl.value?.addEventListener('scroll', onScroll, { passive: true });
@@ -444,6 +454,10 @@ onMounted(() => {
     ro = new ResizeObserver(() => layoutRuler());
     ro.observe(rulerEl.value);
   }
+  if (window.ResizeObserver && rootEl.value) {
+    rootRo = new ResizeObserver(measureInset);
+    rootRo.observe(rootEl.value);
+  }
 });
 
 onBeforeUnmount(() => {
@@ -451,6 +465,7 @@ onBeforeUnmount(() => {
   scrollerEl.value?.removeEventListener('scrollend', onScrollEnd);
   scrollerEl.value?.removeEventListener('wheel', onWheel);
   ro?.disconnect();
+  rootRo?.disconnect();
   if (snapTimer) clearTimeout(snapTimer);
 });
 </script>

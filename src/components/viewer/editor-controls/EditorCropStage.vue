@@ -8,28 +8,30 @@
     }"
     @pointerdown="onPanStart"
   >
-    <div
-      ref="turntableEl"
-      class="me-crop-turntable"
-      :class="{ 'is-animated': turntableAnimated }"
-      :style="turntableStyle"
-    >
-      <div ref="mediaEl" class="me-crop-media" :class="{ 'is-animated': animateTransform }" :style="mediaStyle">
-        <slot />
-      </div>
+    <div class="me-crop-shift" :class="{ 'is-animated': animateTransform }" :style="shiftStyle">
+      <div
+        ref="turntableEl"
+        class="me-crop-turntable"
+        :class="{ 'is-animated': turntableAnimated }"
+        :style="turntableStyle"
+      >
+        <div ref="mediaEl" class="me-crop-media" :class="{ 'is-animated': animateTransform }" :style="mediaStyle">
+          <slot />
+        </div>
 
-      <EditorCropHandles
-        :width="boxRect.w"
-        :height="boxRect.h"
-        :offset-x="boxRect.x"
-        :offset-y="boxRect.y"
-        :crop-mode="isCropMode"
-        :active="interacting"
-        :dragging="draggingHandle"
-        :straightening="straightening"
-        :animated="animateTransform"
-        @handle-down="onHandleStart"
-      />
+        <EditorCropHandles
+          :width="boxRect.w"
+          :height="boxRect.h"
+          :offset-x="boxRect.x"
+          :offset-y="boxRect.y"
+          :crop-mode="isCropMode"
+          :active="interacting"
+          :dragging="draggingHandle"
+          :straightening="straightening"
+          :animated="animateTransform"
+          @handle-down="onHandleStart"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -55,8 +57,10 @@ const props = withDefaults(
     section: EditorSection;
     imageWidth?: number;
     imageHeight?: number;
+    /** Height covered by overlaid controls at the bottom of the stage. */
+    bottomInset?: number;
   }>(),
-  { imageWidth: 0, imageHeight: 0 },
+  { imageWidth: 0, imageHeight: 0, bottomInset: 0 },
 );
 
 const stageEl = ref<HTMLElement | null>(null);
@@ -68,8 +72,13 @@ const detectedH = ref(750);
 const natW = computed(() => (props.imageWidth > 0 ? props.imageWidth : detectedW.value));
 const natH = computed(() => (props.imageHeight > 0 ? props.imageHeight : detectedH.value));
 
-const stageW = ref(600);
-const stageH = ref(450);
+// The stage element is a fixed layer; its padding only declares the usable area.
+const stageBox = ref({ w: 600, h: 450, top: 0, right: 0, bottom: 0, left: 0, barOverlap: 0 });
+const barInset = computed(() => Math.max(0, props.bottomInset - stageBox.value.barOverlap));
+const stageW = computed(() => Math.max(1, stageBox.value.w - stageBox.value.left - stageBox.value.right));
+const stageH = computed(() =>
+  Math.max(1, stageBox.value.h - stageBox.value.top - stageBox.value.bottom - barInset.value),
+);
 
 const ratioInverted = ref(false);
 const interacting = ref(false);
@@ -128,6 +137,11 @@ const boxRect = computed(() => {
   };
 });
 
+const shiftStyle = computed(() => {
+  const { top, right, bottom, left } = stageBox.value;
+  return { transform: `translate3d(${(left - right) / 2}px, ${(top - bottom - barInset.value) / 2}px, 0)` };
+});
+
 const turntableStyle = computed(() => ({
   transform: turntableTransform.value,
 }));
@@ -182,6 +196,13 @@ watch(
   () => {
     settle();
     nextTick(measureStage);
+  },
+);
+
+watch(
+  () => props.bottomInset,
+  (_, prev) => {
+    if (prev > 0 && activePointerId === null) settle();
   },
 );
 
@@ -462,8 +483,16 @@ function measureStage() {
   const w = el.clientWidth;
   const h = el.clientHeight;
   if (w > 0 && h > 0) {
-    stageW.value = w;
-    stageH.value = h;
+    const cs = getComputedStyle(el);
+    stageBox.value = {
+      w,
+      h,
+      top: parseFloat(cs.paddingTop),
+      right: parseFloat(cs.paddingRight),
+      bottom: parseFloat(cs.paddingBottom),
+      left: parseFloat(cs.paddingLeft),
+      barOverlap: parseFloat(cs.getPropertyValue('--me-bar-overlap')) || 0,
+    };
   }
 }
 
