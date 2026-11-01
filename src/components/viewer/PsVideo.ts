@@ -297,6 +297,10 @@ class VideoContentSetup {
     player.poster = this.getPosterSrc(content);
     player.playsInline = true;
     player.controls = false;
+    player.volume = config.video_volume;
+    player.muted = config.video_muted;
+    player.defaultPlaybackRate = config.video_speed;
+    player.playbackRate = config.video_speed;
     return player;
   }
 

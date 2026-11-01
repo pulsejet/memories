@@ -6,6 +6,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 
+import { config } from '@services/user-config';
 import { bus } from '@services/utils/event-bus';
 import { windowDims } from '@services/viewport';
 import { videoCommand } from '@native/video-hole';
@@ -60,9 +61,9 @@ const state = reactive({
   seeking: false,
   time: 0,
   duration: NaN,
-  volume: 1,
-  muted: false,
-  rate: 1,
+  volume: config.video_volume,
+  muted: config.video_muted,
+  rate: config.video_speed,
   readyState: 0,
   bufferedEnd: 0,
   videoW: 0,
@@ -138,6 +139,11 @@ async function play(): Promise<void> {
   if (!src) throw new Error('ViewerVideoNativeHole: missing src');
   state.lastError = null;
   videoCommand({ action: 'play', url: src, loop: props.loop });
+
+  // Native ignores these until the play command has loaded this url.
+  setVolumeCommand(config.video_volume);
+  setMutedCommand(config.video_muted);
+  setRateCommand(config.video_speed);
 }
 
 function pause(): void {

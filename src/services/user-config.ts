@@ -52,6 +52,9 @@ const localSettings: (keyof IConfig)[] = [
   'high_res_cond',
   'show_face_rect',
   'skip_viewer_delete_confirm',
+  'video_volume',
+  'video_muted',
+  'video_speed',
 ];
 
 /** Namespaced browser storage for cached config values. Cleared on logout. */
@@ -190,6 +193,9 @@ function loadCached(): IConfig {
     high_res_cond: null,
     show_face_rect: false,
     skip_viewer_delete_confirm: false,
+    video_volume: 1,
+    video_muted: false,
+    video_speed: 1,
   };
 
   /**

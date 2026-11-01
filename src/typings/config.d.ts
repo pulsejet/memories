@@ -64,6 +64,9 @@ declare module '@typings' {
     show_face_rect: boolean;
     album_list_sort: number;
     skip_viewer_delete_confirm: boolean;
+    video_volume: number;
+    video_muted: boolean;
+    video_speed: number;
   };
 
   export type IMapTileServer = {

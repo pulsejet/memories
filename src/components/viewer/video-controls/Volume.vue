@@ -42,6 +42,7 @@ import VolumeLowIcon from 'vue-material-design-icons/VolumeLow.vue';
 import VolumeOffIcon from 'vue-material-design-icons/VolumeOff.vue';
 
 import { t } from '@services/l10n';
+import { setConfig } from '@services/user-config';
 
 import type { VideoController } from '@typings';
 
@@ -63,14 +64,19 @@ function onVolumeChange() {
 
 function toggleMute() {
   if (props.video) {
-    props.video.muted = !props.video.muted;
+    const value = !props.video.muted;
+    props.video.muted = value;
+    setConfig('video_muted', value);
   }
 }
 
 function onSliderInput(event: Event) {
   if (props.video) {
-    props.video.volume = Number((event.target as HTMLInputElement).value) / 100;
+    const value = Number((event.target as HTMLInputElement).value) / 100;
+    props.video.volume = value;
     props.video.muted = false;
+    setConfig('video_volume', value);
+    setConfig('video_muted', false);
   }
 }
 

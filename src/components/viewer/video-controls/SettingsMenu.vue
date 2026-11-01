@@ -83,9 +83,10 @@
           v-for="option in speedOptions"
           :key="option"
           type="radio"
-          v-model="speed"
+          :model-value="speed"
           :value="option"
           :name="speedLabel(option)"
+          @update:model-value="selectSpeed(option)"
           @click="menuOpen = false"
         >
           <template v-if="option === '1'" #icon>
@@ -118,6 +119,7 @@ import StandardDefinitionIcon from 'vue-material-design-icons/StandardDefinition
 import type { QualityOption, VideoController } from '@typings';
 
 import { t } from '@services/l10n';
+import { setConfig } from '@services/user-config';
 
 const props = defineProps<{
   video?: VideoController | null;
@@ -162,6 +164,11 @@ const qualityRow = computed(() => {
   return current ? `${t('memories', 'Quality')} \u00B7 ${qualityLabel(current, false)}` : t('memories', 'Quality');
 });
 const speedRow = computed(() => `${t('memories', 'Speed')} \u00B7 ${speedLabel(speed.value)}`);
+
+function selectSpeed(option: string) {
+  speed.value = option;
+  setConfig('video_speed', parseFloat(option));
+}
 
 function onRateChange() {
   if (!props.video) return;
