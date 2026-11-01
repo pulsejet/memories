@@ -44,7 +44,6 @@ To build the app from source, you need to have [node.js](https://nodejs.org/) in
 
 1. Clone the repository to the `apps` or `custom_apps` directory of Nextcloud.
 1. Run `make dev-setup` to install the dependencies.
-1. Run `make patch-external` to apply patches to external dependencies.
 1. Run `make build-js-production` to build the JavaScript files.
 1. Enable the app in the Nextcloud app settings page.
 

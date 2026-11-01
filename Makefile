@@ -25,6 +25,7 @@ php-test:
 # 3. Vue
 js-init:
 	npm ci
+	bash scripts/patch-external.sh
 
 js-lint:
 	npx vue-tsc --noEmit --skipLibCheck

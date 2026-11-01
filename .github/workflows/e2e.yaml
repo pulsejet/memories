@@ -37,8 +37,7 @@ jobs:
 
       - name: Build vue app
         run: |
-          npm ci
-          make patch-external
+          make js-init
           make build-js-production
           ./scripts/verify-js-manifest.ts
           zip -r vue.zip js/

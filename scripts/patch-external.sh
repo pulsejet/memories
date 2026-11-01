@@ -21,6 +21,11 @@ fi
 # Apply all patches.
 HAS_ERROR=0
 for patch in patches/*.patch; do
+    if patch -p1 -R -f -s --dry-run < $patch > /dev/null 2>&1; then
+        echo -e "\n\033[0;32mAlready applied: $patch\033[0m"
+        continue
+    fi
+
     echo -e "\n\033[0;32mApplying patch: $patch\033[0m"
     patch -p1 -N < $patch
     if [ $? -ne 0 ]; then
