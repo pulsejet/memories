@@ -13,8 +13,8 @@
   >
     <PhotoEditor
       v-if="editorOpen && currentPhoto"
-      v-show="editorReady"
       :photo="currentPhoto"
+      :get-slide-rect="getSlideRect"
       @ready="onEditorReady"
       @close="closeEditor"
     />
@@ -1250,6 +1250,10 @@ async function openEditor() {
   // Open editor
   editorReady.value = false;
   editorOpen.value = true;
+}
+
+function getSlideRect() {
+  return photoswipe.value?.currSlide?.content?.element?.getBoundingClientRect() ?? null;
 }
 
 function onEditorReady() {

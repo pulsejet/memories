@@ -1,5 +1,10 @@
 <template>
-  <div class="me-photo-editor" @keydown.stop>
+  <div
+    ref="rootEl"
+    class="me-photo-editor"
+    :class="{ morphing, revealed, 'controls-hidden': controlsHidden }"
+    @keydown.stop
+  >
     <EditorControls
       ref="editor"
       :key="props.photo.fileid"
@@ -53,6 +58,7 @@ import { INITIAL_STATE, FILTERS, type EditorState, type EditorSection } from '@c
 
 const props = defineProps<{
   photo: IPhoto;
+  getSlideRect: () => DOMRect | null;
 }>();
 
 const emit = defineEmits<{
@@ -60,6 +66,9 @@ const emit = defineEmits<{
   ready: [];
 }>();
 
+const MORPH_TIMING = { duration: 200, easing: 'cubic-bezier(0.2, 0, 0, 1)' };
+
+const rootEl = useTemplateRef<HTMLElement>('rootEl');
 const editor = useTemplateRef('editor');
 const canvasRef = useTemplateRef<HTMLCanvasElement>('canvasRef');
 
@@ -77,6 +86,19 @@ const filterPreviews = ref<Record<string, string>>({});
 
 /** True once the source image is on the GPU and the canvas takes over. */
 const ready = ref(false);
+
+/** Kept laid out but invisible until the first load, so the stage measures correctly. */
+const revealed = ref(false);
+
+/** True while the image morphs to or from the viewer slide. */
+const morphing = ref(true);
+
+/** Controls fade in as the opening morph starts and out as the closing one does. */
+const controlsHidden = ref(true);
+
+/** On-screen rect of the viewer slide when the editor opened, including zoom and pan. */
+let slideRect: DOMRect | null = null;
+let closing = false;
 
 const imgW = ref(props.photo.w || 0);
 const imgH = ref(props.photo.h || 0);
@@ -110,7 +132,14 @@ let previewsForUrl: string | null = null;
 /** EditorControls section mirror (starts on 'crop'); drives lazy thumb builds. */
 let currentSection: EditorSection = 'crop';
 
-function close() {
+/** Morph back to the viewer slide unless edited, then close. */
+async function close() {
+  if (closing) return;
+  closing = true;
+  if (slideRect?.width && !isDirty()) {
+    controlsHidden.value = true;
+    await animateStage([{ transformOrigin: '0 0', transform: 'none' }, morphFrame(slideRect)], 'forwards');
+  }
   emit('close');
 }
 
@@ -288,13 +317,42 @@ async function loadSource(url: string) {
     imgH.value = pipeline.height || img.naturalHeight;
     lastEditsJson = '';
     if (editor.value) onChange({ ...editor.value.state });
+    if (morphing.value) slideRect = props.getSlideRect();
     ready.value = true;
+    revealed.value = true;
     emit('ready');
+    await nextTick();
+    if (morphing.value) await morphFromSlide();
   } catch (e) {
     console.error('Photo editor preview failed', e);
     showError(t('memories', 'Could not load image for editing'));
     close();
   }
+}
+
+/** Stage transform that places the image exactly over the target rect. */
+function morphFrame(target: DOMRect): Keyframe {
+  const stage = rootEl.value!.querySelector('.me-crop-stage')!.getBoundingClientRect();
+  const media = rootEl.value!.querySelector('.me-crop-media')!.getBoundingClientRect();
+  const k = target.width / media.width;
+  const x = target.left - stage.left - k * (media.left - stage.left);
+  const y = target.top - stage.top - k * (media.top - stage.top);
+  return { transformOrigin: '0 0', transform: `translate(${x}px, ${y}px) scale(${k})` };
+}
+
+async function animateStage(keyframes: Keyframe[], fill: FillMode) {
+  morphing.value = true;
+  const stage = rootEl.value!.querySelector('.me-crop-stage')!;
+  await stage.animate(keyframes, { ...MORPH_TIMING, fill }).finished.catch(() => undefined);
+}
+
+/** Grow the image out of the viewer slide. */
+async function morphFromSlide() {
+  controlsHidden.value = false;
+  if (slideRect?.width) {
+    await animateStage([morphFrame(slideRect), { transformOrigin: '0 0', transform: 'none' }], 'none');
+  }
+  morphing.value = false;
 }
 
 /** Capture Escape / Ctrl+S while the editor is open (mirrors PhotoSwipe) */
@@ -364,6 +422,47 @@ utils.useBus('memories:fragment:pop:editor', onFragmentPop);
   left: 0;
   z-index: 10100;
   background-color: black;
+  visibility: hidden;
+
+  &.revealed {
+    visibility: visible;
+  }
+
+  :deep(.me-sidebar),
+  :deep(.me-mobile-ui),
+  :deep(.me-float-close),
+  :deep(.me-float-save),
+  :deep(.me-crop-handle) {
+    transition:
+      opacity 0.15s,
+      filter 0.15s;
+  }
+
+  &.controls-hidden {
+    :deep(.me-sidebar),
+    :deep(.me-mobile-ui),
+    :deep(.me-float-close),
+    :deep(.me-float-save),
+    :deep(.me-crop-handle) {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+
+  &.morphing {
+    :deep(.me-root) {
+      background: transparent;
+    }
+
+    :deep(.me-side) {
+      overflow: visible;
+    }
+
+    :deep(.me-crop-box) {
+      box-shadow: none;
+      outline: none;
+    }
+  }
 }
 
 .me-photo-preview,
