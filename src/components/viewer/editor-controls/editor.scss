@@ -482,6 +482,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     z-index: 3;
     pointer-events: none;
     box-shadow: 0 0 0 9999px var(--me-bg);
+    outline: 1.5px solid transparent;
     transition:
       box-shadow 0.2s ease,
       outline-color 0.15s;
@@ -499,7 +500,6 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
       pointer-events: auto;
       cursor: grab;
       box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65);
-      outline: 1.5px solid transparent;
     }
 
     &.is-crop-mode.is-grid-visible {
