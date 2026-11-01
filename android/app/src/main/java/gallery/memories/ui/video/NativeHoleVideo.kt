@@ -199,9 +199,12 @@ class NativeHoleVideo(
         if (url.isNotEmpty() && (url != currentUrl || player == null || player?.playbackState == Player.STATE_IDLE)) {
             setVideoUrlLocked(url)
         } else {
-            ensurePlayer()
-            player?.repeatMode = if (loop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
-            player?.playWhenReady = true
+            val exo = ensurePlayer()
+            exo.repeatMode = if (loop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+            if (exo.playbackState == Player.STATE_ENDED) {
+                exo.seekTo(0)
+            }
+            exo.playWhenReady = true
         }
         emitVideoState()
     }
@@ -314,8 +317,13 @@ class NativeHoleVideo(
     }
 
     private fun setVideoUrlLocked(url: String) {
-        if (url == currentUrl && player != null) {
-            if (wantShow && !userPaused) player?.playWhenReady = true
+        if (url == currentUrl && player != null && player?.playbackState != Player.STATE_IDLE) {
+            val exo = ensurePlayer()
+            exo.repeatMode = if (repeatLoop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+            if (exo.playbackState == Player.STATE_ENDED) {
+                exo.seekTo(0)
+            }
+            if (wantShow && !userPaused) exo.playWhenReady = true
             return
         }
         currentUrl = url
@@ -328,6 +336,7 @@ class NativeHoleVideo(
         setVisible(false)
         resetViewTransform()
         val exo = ensurePlayer()
+        exo.repeatMode = if (repeatLoop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
         val uri = Uri.parse(url)
         val mediaItem = MediaItem.fromUri(uri)
         if (isRemote(uri)) {
