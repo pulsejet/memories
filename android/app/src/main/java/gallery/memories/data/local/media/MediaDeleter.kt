@@ -25,8 +25,19 @@ class MediaDeleter(private val activity: MainActivity) {
     private var deleteCallback: ((ActivityResult?) -> Unit)? = null
     private val deleteLauncher: ActivityResultLauncher<IntentSenderRequest> =
         activity.registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-            synchronized(this) { deleteCallback?.invoke(result) }
+            finish(result)
         }
+
+    /** Takes the callback once, so a late result can't overwrite the first. */
+    private fun finish(result: ActivityResult?) {
+        synchronized(this) {
+            deleteCallback?.invoke(result)
+            deleteCallback = null
+        }
+    }
+
+    /** Fails a pending delete; its result can't reach this activity anymore. */
+    fun destroy() = finish(null)
 
     /** Deletes [uris]. Throws when already deleting or when the user cancels. */
     @Throws(Exception::class)
@@ -40,15 +51,14 @@ class MediaDeleter(private val activity: MainActivity) {
             val intent = MediaStore.createTrashRequest(activity.contentResolver, uris, true)
             val latch = CountDownLatch(1)
             var res: ActivityResult? = null
-            deleteCallback = { r -> res = r; latch.countDown() }
+            synchronized(this) { deleteCallback = { r -> res = r; latch.countDown() } }
             try {
                 deleteLauncher.launch(IntentSenderRequest.Builder(intent.intentSender).build())
             } catch (e: Exception) {
-                deleteCallback = null
+                finish(null)
                 throw e
             }
             latch.await()
-            deleteCallback = null
             val resultCode = res?.resultCode
             if (resultCode == null || resultCode != Activity.RESULT_OK) {
                 throw Exception("Delete canceled or failed")

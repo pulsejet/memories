@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.MediaStore
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -33,12 +34,13 @@ class PermissionsManager(
     private val prefs: PreferencesStore,
 ) {
     private var isGranted: Boolean = false
-    private var latch: CountDownLatch? = null
-    private var notifLatch: CountDownLatch? = null
+    private val mediaRequest = SharedRequest()
+    private val notifRequest = SharedRequest()
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var requestNotificationLauncher: ActivityResultLauncher<String>
 
     companion object {
+        private val TAG = PermissionsManager::class.java.simpleName
         private const val LOCATION_PERM = Manifest.permission.ACCESS_MEDIA_LOCATION
         private const val NOTIF_PERM = Manifest.permission.POST_NOTIFICATIONS
     }
@@ -54,12 +56,12 @@ class PermissionsManager(
                 isGranted = media.all { it.value }
                 prefs.hasMediaPermission = isGranted
             }
-            latch?.countDown()
+            mediaRequest.finish()
         }
         requestNotificationLauncher = activity.registerForActivityResult(
             ActivityResultContracts.RequestPermission(),
         ) {
-            notifLatch?.countDown()
+            notifRequest.finish()
         }
         return this
     }
@@ -80,9 +82,7 @@ class PermissionsManager(
             prefs.hasMediaPermission = true
             return true
         }
-        latch = CountDownLatch(1)
-        requestPermissionLauncher.launch(perms.toTypedArray())
-        latch?.await()
+        mediaRequest.await { requestPermissionLauncher.launch(perms.toTypedArray()) }
         // Reconcile with the live grant: covers location-only requests,
         // where the callback leaves isGranted untouched.
         if (hasMediaPermissionLive()) {
@@ -108,10 +108,14 @@ class PermissionsManager(
      */
     fun requestNotificationsPermissionSync(): Boolean {
         if (hasNotificationPermission()) return true
-        notifLatch = CountDownLatch(1)
-        requestNotificationLauncher.launch(NOTIF_PERM)
-        notifLatch?.await()
+        notifRequest.await { requestNotificationLauncher.launch(NOTIF_PERM) }
         return hasNotificationPermission()
+    }
+
+    /** Releases blocked requesters; the dialog's result can't reach this activity anymore. */
+    fun destroy() {
+        mediaRequest.destroy()
+        notifRequest.destroy()
     }
 
     /** Live OS grant for location EXIF. Always true below Android 10 (no redaction there). */
@@ -154,4 +158,43 @@ class PermissionsManager(
         mediaPerms().all {
             ContextCompat.checkSelfPermission(activity, it) == PackageManager.PERMISSION_GRANTED
         }
+
+    /** One in-flight OS dialog: concurrent callers wait on it instead of launching their own. */
+    private class SharedRequest {
+        private var pending: CountDownLatch? = null
+        private var destroyed = false
+
+        /** Blocks until [finish] or [destroy]. Callers re-read the live grant afterwards. */
+        fun await(launch: () -> Unit) {
+            var isNew = false
+            val latch = synchronized(this) {
+                if (destroyed) return
+                pending ?: CountDownLatch(1).also {
+                    pending = it
+                    isNew = true
+                }
+            }
+            if (isNew) {
+                try {
+                    launch()
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to request permission: ${e.message}")
+                    finish()
+                }
+            }
+            latch.await()
+        }
+
+        @Synchronized
+        fun finish() {
+            pending?.countDown()
+            pending = null
+        }
+
+        @Synchronized
+        fun destroy() {
+            destroyed = true
+            finish()
+        }
+    }
 }

@@ -60,6 +60,8 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     fun destroy() {
+        permissions.destroy()
+        container.deleter.destroy()
         detachAsyncMessages()
         shareManager = null
         account.onDestroy()
