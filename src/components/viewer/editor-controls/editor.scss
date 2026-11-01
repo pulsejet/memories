@@ -430,9 +430,10 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     -webkit-tap-highlight-color: transparent;
     --h-out: 20px;
     --h-in: 16px;
-    --h-arm: 18px;
-    --h-bar: 22px;
-    --h-thick: 3px;
+    --h-gap: 4px;
+    --h-arm: 22px;
+    --h-bar: 26px;
+    --h-thick: 4.5px;
 
     &.is-crop-mode {
       inset: 68px 80px;
@@ -512,6 +513,12 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     inset: 0;
     pointer-events: none;
     overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .me-crop-box.is-grid-visible .me-crop-grid {
+    opacity: 1;
   }
 
   .me-grid-line {
@@ -523,14 +530,14 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     &.is-v {
       top: 0;
       bottom: 0;
-      width: 1px;
-      transform: translateX(-0.5px);
+      width: 2px;
+      transform: translateX(-1px);
     }
     &.is-h {
       left: 0;
       right: 0;
-      height: 1px;
-      transform: translateY(-0.5px);
+      height: 2px;
+      transform: translateY(-1px);
     }
     &.is-fine {
       background: rgba(255, 255, 255, 0.16);
@@ -547,14 +554,15 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     z-index: 4;
     touch-action: none;
     -webkit-tap-highlight-color: transparent;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
+    --h-inset: calc(var(--h-out) - var(--h-thick) - var(--h-gap));
 
     &::before,
     &::after {
       content: '';
       position: absolute;
       background: #fff;
-      border-radius: 1.5px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+      border-radius: calc(var(--h-thick) / 2);
     }
 
     &.is-nw,
@@ -578,7 +586,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
       top: calc(-1 * var(--h-out));
       &::before,
       &::after {
-        top: calc(var(--h-out) - var(--h-thick));
+        top: var(--h-inset);
       }
     }
     &.is-sw,
@@ -586,7 +594,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
       bottom: calc(-1 * var(--h-out));
       &::before,
       &::after {
-        bottom: calc(var(--h-out) - var(--h-thick));
+        bottom: var(--h-inset);
       }
     }
     &.is-nw,
@@ -594,7 +602,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
       left: calc(-1 * var(--h-out));
       &::before,
       &::after {
-        left: calc(var(--h-out) - var(--h-thick));
+        left: var(--h-inset);
       }
     }
     &.is-ne,
@@ -602,8 +610,24 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
       right: calc(-1 * var(--h-out));
       &::before,
       &::after {
-        right: calc(var(--h-out) - var(--h-thick));
+        right: var(--h-inset);
       }
+    }
+    &.is-nw::before,
+    &.is-nw::after {
+      border-top-left-radius: var(--h-thick);
+    }
+    &.is-ne::before,
+    &.is-ne::after {
+      border-top-right-radius: var(--h-thick);
+    }
+    &.is-se::before,
+    &.is-se::after {
+      border-bottom-right-radius: var(--h-thick);
+    }
+    &.is-sw::before,
+    &.is-sw::after {
+      border-bottom-left-radius: var(--h-thick);
     }
     &.is-nw,
     &.is-se {
@@ -633,13 +657,13 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     &.is-n {
       top: calc(-1 * var(--h-out));
       &::before {
-        top: calc(var(--h-out) - var(--h-thick));
+        top: var(--h-inset);
       }
     }
     &.is-s {
       bottom: calc(-1 * var(--h-out));
       &::before {
-        bottom: calc(var(--h-out) - var(--h-thick));
+        bottom: var(--h-inset);
       }
     }
 
@@ -662,13 +686,13 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     &.is-w {
       left: calc(-1 * var(--h-out));
       &::before {
-        left: calc(var(--h-out) - var(--h-thick));
+        left: var(--h-inset);
       }
     }
     &.is-e {
       right: calc(-1 * var(--h-out));
       &::before {
-        right: calc(var(--h-out) - var(--h-thick));
+        right: var(--h-inset);
       }
     }
   }
@@ -1154,9 +1178,10 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   .me-root .me-crop-stage {
     --h-out: 30px;
     --h-in: 22px;
-    --h-arm: 22px;
-    --h-bar: 26px;
-    --h-thick: 3.5px;
+    --h-gap: 5px;
+    --h-arm: 26px;
+    --h-bar: 30px;
+    --h-thick: 4px;
   }
 }
 
@@ -1174,9 +1199,10 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   .me-root .me-crop-stage {
     --h-out: 30px;
     --h-in: 22px;
-    --h-arm: 22px;
-    --h-bar: 26px;
-    --h-thick: 3.5px;
+    --h-gap: 5px;
+    --h-arm: 26px;
+    --h-bar: 30px;
+    --h-thick: 4px;
   }
   .me-root .me-crop-stage.is-crop-mode {
     inset: 65px 28px 180px;

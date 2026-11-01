@@ -25,6 +25,7 @@
         :offset-y="boxRect.y"
         :crop-mode="isCropMode"
         :active="interacting"
+        :dragging="draggingHandle"
         :straightening="straightening"
         :animated="animateTransform"
         @handle-down="onHandleStart"
@@ -72,6 +73,7 @@ const stageH = ref(450);
 
 const ratioInverted = ref(false);
 const interacting = ref(false);
+const draggingHandle = ref(false);
 const straightening = ref(false);
 const animateTransform = ref(false);
 const turntableAnimated = ref(false);
@@ -267,6 +269,7 @@ function onHandleStart(handle: CropHandle, e: PointerEvent) {
   if (settleTimer) clearTimeout(settleTimer);
   animateTransform.value = false;
   interacting.value = true;
+  draggingHandle.value = true;
   const pointerId = e.pointerId;
   activePointerId = pointerId;
 
@@ -382,6 +385,7 @@ function onHandleStart(handle: CropHandle, e: PointerEvent) {
     activePointerId = null;
     handleDragView.value = null;
     interacting.value = false;
+    draggingHandle.value = false;
     cleanupDrag = null;
   };
 

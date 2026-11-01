@@ -4,6 +4,7 @@
     :class="{
       'is-crop-mode': cropMode,
       'is-active': active,
+      'is-grid-visible': dragging || straightening,
       'is-animated': animated,
     }"
     :style="boxStyle"
@@ -55,6 +56,7 @@ const props = withDefaults(
     offsetY?: number;
     cropMode?: boolean;
     active?: boolean;
+    dragging?: boolean;
     straightening?: boolean;
     animated?: boolean;
   }>(),
@@ -63,6 +65,7 @@ const props = withDefaults(
     offsetY: 0,
     cropMode: true,
     active: false,
+    dragging: false,
     straightening: false,
     animated: false,
   },
