@@ -41,8 +41,8 @@ class AccountManager(
 
     /** Validates the server, starts a non-blocking asset sync, then hands off to the browser login flow. */
     fun login(url: String, trustAll: Boolean) {
+        val gen = ++loginGeneration
         try {
-            loginGeneration++
             auth.build(url, trustAll)
             clients.rebuild()
             val res = api.getApiDescriptionManifest()
@@ -61,6 +61,7 @@ class AccountManager(
             }
             loginFlow(body.getString("baseUrl"), body.getString("loginFlowUrl"))
         } catch (e: Exception) {
+            if (gen == loginGeneration) resetPendingLogin()
             toast("Error: ${e.message}")
             throw Exception("Failed to connect to server: ${e.message}")
         }
@@ -83,10 +84,18 @@ class AccountManager(
         tabs.open(loginUrl) {
             if (gen != loginGeneration) return@open
             loginGeneration++
+            resetPendingLogin()
             toast("Error: failed to open browser")
             activity.loadDefaultUrl()
         }
         Thread { pollLogin(pollUrl, pollToken, baseUrl, gen) }.start()
+    }
+
+    /** Drops the server set by an unfinished [login], returning to the stored account if any. */
+    private fun resetPendingLogin() {
+        auth.build(null, false)
+        clients.rebuild()
+        refreshCredentials()
     }
 
     /** Polls every 2s for up to 5min. Success boots into setup; timeout resets to welcome. Stale generations do nothing. */
@@ -133,6 +142,7 @@ class AccountManager(
         activity.runOnUiThread {
             if (gen != loginGeneration) return@runOnUiThread
             tabs.close()
+            resetPendingLogin()
             toast(activity.getString(R.string.err_login_timeout))
             activity.loadDefaultUrl()
         }

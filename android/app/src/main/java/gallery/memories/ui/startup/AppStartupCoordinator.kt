@@ -33,7 +33,7 @@ class AppStartupCoordinator(
      * True when the app (not welcome) was started.
      */
     fun loadDefaultUrl(): Boolean {
-        if (auth.baseUrl() != null) {
+        if (auth.isLoggedIn()) {
             startLocalApp()
             return true
         }
