@@ -135,7 +135,8 @@ onBeforeUnmount(detachVideo);
   transition:
     max-width 0.2s ease-in-out,
     opacity 0.2s ease-in-out,
-    margin 0.2s ease-in-out;
+    margin 0.2s ease-in-out,
+    padding 0.2s ease-in-out;
 
   input {
     display: block;
@@ -198,6 +199,7 @@ onBeforeUnmount(detachVideo);
   .m-vc-volume:focus-within & {
     max-width: 96px;
     opacity: 1;
+    padding: 6px; // Room for the focus outline inside overflow: hidden
   }
 
   &:hover {
