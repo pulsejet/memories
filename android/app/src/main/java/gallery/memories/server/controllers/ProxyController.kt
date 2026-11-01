@@ -21,7 +21,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 /** Forwards non-local requests to Nextcloud with stored basic auth, streaming both ways. */
 class ProxyController(
     private val auth: AuthState,
-    clients: HttpClients,
+    private val clients: HttpClients,
     private val originProvider: () -> String,
 ) {
     companion object {
@@ -38,8 +38,6 @@ class ProxyController(
             "connection", "keep-alive", "set-cookie",
         )
     }
-
-    private val client by lazy { clients.newProxyClient() }
 
     /**
      * Proxies one request upstream with basic auth. The OCS-APIREQUEST header
@@ -71,7 +69,7 @@ class ProxyController(
         builder.method(method, body)
         val response =
             try {
-                withContext(Dispatchers.IO) { client.newCall(builder.build()).execute() }
+                withContext(Dispatchers.IO) { clients.proxyClient().newCall(builder.build()).execute() }
             } catch (e: IOException) {
                 throw UpstreamNetworkException(e)
             }

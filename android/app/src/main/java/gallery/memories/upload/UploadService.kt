@@ -23,13 +23,8 @@ class UploadService(
     private val ctx: Context,
     private val timeline: TimelineRepository,
     private val auth: AuthState,
-    clients: HttpClients,
+    private val clients: HttpClients,
 ) {
-    // No write timeout: big uploads on slow links must not be cut off.
-    private val client = clients.newProxyClient().newBuilder()
-        .writeTimeout(0, TimeUnit.SECONDS)
-        .build()
-
     /**
      * PUTs the device file behind [auid] to [destPath] (e.g. /Photos/IMG.jpg).
      * @returns {"fileid"} of the uploaded file.
@@ -58,6 +53,8 @@ class UploadService(
             .header("OCS-APIREQUEST", "true")
             .put(body)
             .build()
+        // No write timeout: big uploads on slow links must not be cut off.
+        val client = clients.proxyClient().newBuilder().writeTimeout(0, TimeUnit.SECONDS).build()
         client.newCall(request).execute().use { res ->
             if (res.code !in 200..299) throw Exception("Upload failed: HTTP ${res.code}")
             // oc-fileid is the DAV ID (zero-padded ID + instance ID);
