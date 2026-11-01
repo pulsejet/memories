@@ -3,6 +3,7 @@ package gallery.memories.data.local.media
 import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.icu.util.TimeZone
+import android.icu.util.ULocale
 import android.media.MediaMetadataRetriever
 import android.os.Build
 import android.provider.MediaStore
@@ -87,7 +88,7 @@ class PhotoMapper(private val ctx: Context) {
         EXIF_DATE_TAGS
             .firstNotNullOfOrNull { tag -> exif.getAttribute(tag)?.takeUnless { it.startsWith("0000:00:00") } }
             ?.let { date ->
-                val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
+                val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss", ULocale.ROOT)
                 sdf.timeZone = TimeZone.GMT_ZONE
                 sdf.parse(date)?.let { it.time / 1000 }
             }
