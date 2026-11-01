@@ -35,7 +35,8 @@
 // Mobile drill-in forward (e.g. list -> album):
 // new slides in from right over old shifting left
 .route-push-enter-active,
-.route-push-leave-active {
+.route-push-leave-active,
+.mobile-nav-route-push-leave-active {
   transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
   will-change: transform;
   background: var(--color-main-background);
@@ -56,19 +57,22 @@
 .route-push-leave-from {
   transform: translateX(0);
 }
-.route-push-leave-to {
+.route-push-leave-to,
+.mobile-nav-route-push-leave-to {
   transform: translateX(-25%);
 }
 
 // Mobile drill-in back (e.g. album -> list):
 // top view slides out to right revealing previous view
 .route-pop-enter-active,
-.route-pop-leave-active {
+.route-pop-leave-active,
+.mobile-nav-route-pop-enter-active {
   transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
   will-change: transform;
   background: var(--color-main-background);
 }
-.route-pop-enter-from {
+.route-pop-enter-from,
+.mobile-nav-route-pop-enter-from {
   transform: translateX(-25%);
 }
 .route-pop-enter-active {
@@ -96,7 +100,9 @@
   .route-push-enter-active,
   .route-push-leave-active,
   .route-pop-enter-active,
-  .route-pop-leave-active {
+  .route-pop-leave-active,
+  .mobile-nav-route-push-leave-active,
+  .mobile-nav-route-pop-enter-active {
     transition: none !important;
     transform: none !important;
   }

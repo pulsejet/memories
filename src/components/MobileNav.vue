@@ -65,8 +65,8 @@ function beep() {
     display: flex;
   }
 
-  // Make space for the nav
-  #app-content-vue > .router-outlet.has-nav {
+  // Reserve space per view so its height is stable when the nav slides away
+  #app-content-vue > .router-outlet > .route-view.has-nav {
     height: calc(100% - var(--mobile-nav-height));
   }
 }
@@ -74,6 +74,11 @@ function beep() {
 
 <style lang="scss" scoped>
 #mobile-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1; // above the leaving tab, below the sliding view
   background-color: var(--color-main-background);
   color: var(--color-main-text);
   height: var(--mobile-nav-height);

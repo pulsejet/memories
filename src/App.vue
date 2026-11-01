@@ -57,7 +57,6 @@
           :class="{
             'app-outer': true,
             'router-outlet': true,
-            'has-nav': showNavigation,
             'is-native': native,
           }"
         >
@@ -67,6 +66,7 @@
                 :class="{
                   'route-view': true,
                   'route-view--map': slotRoute.name === 'map',
+                  'has-nav': showNavigation,
                 }"
                 :key="slotRoute.path"
               >
@@ -76,7 +76,9 @@
           </router-view>
         </div>
 
-        <MobileNav v-if="showNavigation" />
+        <RouteTransition :route-transition="`mobile-nav-${routeTransition}`">
+          <MobileNav v-if="showNavigation" />
+        </RouteTransition>
       </NcAppContent>
 
       <Settings v-model:open="settingsOpen" />
@@ -419,6 +421,7 @@ function syncSharingToken(token?: string) {
   margin: 0;
 
   .route-view {
+    position: relative;
     height: 100%;
     width: 100%;
     box-sizing: border-box;
