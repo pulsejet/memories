@@ -107,7 +107,7 @@ class VideoContentSetup {
     });
   }
 
-  initLightboxEvents(lightbox: PsPhotoSwipe) {
+  private initLightboxEvents(lightbox: PsPhotoSwipe) {
     lightbox.on('contentLoad', (e) => this.onContentLoad(e as unknown as PsVideoEvent));
     lightbox.on('contentDestroy', (e) => this.onContentDestroy(e as unknown as PsVideoEvent));
     lightbox.on('contentActivate', (e) => this.onContentActivate(e as unknown as PsVideoEvent));
@@ -120,7 +120,7 @@ class VideoContentSetup {
     lightbox.addFilter('useContentPlaceholder', (u, c) => this.useContentPlaceholder(u, c as unknown as PsContent));
   }
 
-  initPswpEvents(pswp: PsPhotoSwipe) {
+  private initPswpEvents(pswp: PsPhotoSwipe) {
     // Drags starting on player UI (controls, sliders, menus) belong to the
     // player; keep PhotoSwipe from dragging the slide underneath.
     pswp.on('pointerDown', (e) => {
@@ -163,19 +163,19 @@ class VideoContentSetup {
     });
   }
 
-  getCurrVideoContent(pswp: PsPhotoSwipe): VideoContent | null {
+  private getCurrVideoContent(pswp: PsPhotoSwipe): VideoContent | null {
     const content = pswp.currSlide?.content;
     return isVideoContent(content) ? content : null;
   }
 
-  getDirectSrc(content: VideoContent): VideoSource {
+  private getDirectSrc(content: VideoContent): VideoSource {
     return {
       src: content.data.src,
       type: 'video/mp4', // chrome refuses to play video/quicktime, so fool it
     };
   }
 
-  getHLSsrc(content: VideoContent, codecs?: string[]): VideoSource {
+  private getHLSsrc(content: VideoContent, codecs?: string[]): VideoSource {
     const fileid = content.data.photo.fileid;
     return {
       src: API.VIDEO_TRANSCODE(fileid, 'index.m3u8', codecs),
@@ -183,7 +183,7 @@ class VideoContentSetup {
     };
   }
 
-  getLocalSrc(content: VideoContent): VideoSource | null {
+  private getLocalSrc(content: VideoContent): VideoSource | null {
     const url = nativex.getLocalVideoUrl(content.data.photo);
     if (!url) return null;
     return {
@@ -193,7 +193,7 @@ class VideoContentSetup {
   }
 
   /** Initial source: HLS unless transcoding is disabled */
-  getPreferredSrc(content: VideoContent, codecs?: string[]): { src: VideoSource; videoIsHls: boolean } {
+  private getPreferredSrc(content: VideoContent, codecs?: string[]): { src: VideoSource; videoIsHls: boolean } {
     // Trash has no transcoding, play the file directly.
     if (content.data.photo.trashInfo) {
       return { src: this.getDirectSrc(content), videoIsHls: false };
@@ -210,26 +210,26 @@ class VideoContentSetup {
     }
   }
 
-  getPosterSrc(content: PsContent): string {
+  private getPosterSrc(content: PsContent): string {
     return utils.getPreviewUrl({
       photo: content.data.photo,
       msize: 1024,
     });
   }
 
-  getStoryboardUrl(content: VideoContent): string | null {
+  private getStoryboardUrl(content: VideoContent): string | null {
     if (utils.isLocalPhoto(content.data.photo)) return null;
     const api = API.VIDEO_STORYBOARD(content.data.photo.fileid, 'storyboard.vtt');
     return utils.runCatching(() => new URL(api, window.location.href).href);
   }
 
   /** Native HLS support, Safari-only (Chrome's native HLS has bugs). */
-  canPlayHls(player: HTMLVideoElement): boolean {
+  private canPlayHls(player: HTMLVideoElement): boolean {
     if (!player.canPlayType('application/vnd.apple.mpegurl')) return false;
     return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   }
 
-  async initPlayer(content: VideoContent) {
+  private async initPlayer(content: VideoContent) {
     // Slide may have been destroyed while waiting for activation
     if (!isVideoContent(content) || content.videoPlayer || !content.element || !content.slide?.isActive) {
       return;
@@ -359,7 +359,7 @@ class VideoContentSetup {
     return player.tagName === 'VIEWER-VIDEO-NATIVE-HOLE';
   }
 
-  attachDirectSource(player: HTMLVideoElement, src: VideoSource) {
+  private attachDirectSource(player: HTMLVideoElement, src: VideoSource) {
     // <source type> preserves the mp4 masquerade for quicktime.
     player.removeAttribute('src');
     player.innerHTML = '';
@@ -373,7 +373,7 @@ class VideoContentSetup {
     }
   }
 
-  async attachHlsSource(content: VideoContent, player: HTMLVideoElement, url: string, signal: AbortSignal) {
+  private async attachHlsSource(content: VideoContent, player: HTMLVideoElement, url: string, signal: AbortSignal) {
     // Clear any previous source (e.g. direct failover) so it can't win.
     player.removeAttribute('src');
     player.innerHTML = '';
@@ -425,7 +425,7 @@ class VideoContentSetup {
    * Fall back between HLS and direct on initial load failure.
    * Mid-playback errors are left to hls.js recovery.
    */
-  async tryFailover(content: VideoContent) {
+  private async tryFailover(content: VideoContent) {
     if (!isVideoContent(content) || content.videoFailedOver || content.videoHasPlayed) return;
     if (utils.isLocalPhoto(content.data.photo)) return; // local-only
     if (content.data.photo.trashInfo) return; // trash
@@ -484,7 +484,7 @@ class VideoContentSetup {
     utils.runCatching(() => player.play());
   }
 
-  destroyPlayer(content: VideoContent) {
+  private destroyPlayer(content: VideoContent) {
     if (!isVideoContent(content)) return;
     content.videoAbort?.abort();
 
@@ -514,11 +514,11 @@ class VideoContentSetup {
     content.videoHasPlayed = false;
   }
 
-  onContentDestroy({ content }: PsVideoEvent) {
+  private onContentDestroy({ content }: PsVideoEvent) {
     this.destroyPlayer(content);
   }
 
-  onContentResize(e: PsVideoEvent & { width: number; height: number }) {
+  private onContentResize(e: PsVideoEvent & { width: number; height: number }) {
     if (isVideoContent(e.content)) {
       e.preventDefault();
 
@@ -538,19 +538,19 @@ class VideoContentSetup {
     }
   }
 
-  isContentZoomable(isZoomable: boolean, content: PsContent) {
+  private isContentZoomable(isZoomable: boolean, content: PsContent) {
     return isVideoContent(content) || isZoomable;
   }
 
-  isKeepingPlaceholder(keep: boolean, content: PsContent) {
+  private isKeepingPlaceholder(keep: boolean, content: PsContent) {
     return isVideoContent(content) || keep;
   }
 
-  onContentActivate({ content }: PsVideoEvent) {
+  private onContentActivate({ content }: PsVideoEvent) {
     this.initPlayer(content).catch((e) => console.error('PsVideo: failed to init player', e));
   }
 
-  onContentDeactivate({ content }: PsVideoEvent) {
+  private onContentDeactivate({ content }: PsVideoEvent) {
     this.destroyPlayer(content);
   }
 
@@ -559,7 +559,7 @@ class VideoContentSetup {
    * Maps the target picture rect back to the viewport-aspect box that
    * contains it centered; identity at rest, so settled visuals are pure CSS.
    */
-  onZoomPanUpdate({ slide }: { slide: PsSlide }) {
+  private onZoomPanUpdate({ slide }: { slide: PsSlide }) {
     const content = slide?.content as VideoContent | undefined;
     if (!content || !isVideoContent(content)) return;
 
@@ -594,7 +594,7 @@ class VideoContentSetup {
     stage.style.transform = settled ? '' : `translate3d(${bx}px, ${by}px, 0) scale(${s})`;
   }
 
-  onContentLoad(e: PsVideoEvent) {
+  private onContentLoad(e: PsVideoEvent) {
     const content: PsContent = e.content;
     if (!isVideoContent(content)) return;
 
@@ -611,11 +611,11 @@ class VideoContentSetup {
     content.onLoaded();
   }
 
-  useContentPlaceholder(usePlaceholder: boolean, content: PsContent) {
+  private useContentPlaceholder(usePlaceholder: boolean, content: PsContent) {
     return isVideoContent(content) || usePlaceholder;
   }
 
-  async getWakeLock() {
+  private async getWakeLock() {
     try {
       await this.releaseWakeLock();
       this.wakeLock = await navigator.wakeLock?.request('screen');
@@ -624,7 +624,7 @@ class VideoContentSetup {
     }
   }
 
-  async releaseWakeLock() {
+  private async releaseWakeLock() {
     try {
       await this.wakeLock?.release();
     } finally {
@@ -633,7 +633,7 @@ class VideoContentSetup {
   }
 
   /** Start at the admin default quality ('-1' = original). */
-  pickInitialLevel(hls: Hls) {
+  private pickInitialLevel(hls: Hls) {
     const spec = config.video_default_quality;
     if (!spec || spec === '0') return;
 

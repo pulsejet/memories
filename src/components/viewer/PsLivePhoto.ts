@@ -27,7 +27,7 @@ class LivePhotoContentSetup {
     lightbox.on('contentDestroy', (e) => this.onContentDestroy(e as unknown as PsEvent));
   }
 
-  async play(content: PsContent) {
+  public async play(content: PsContent) {
     const video = content.element?.querySelector('video');
     if (!video) return;
 
@@ -47,7 +47,7 @@ class LivePhotoContentSetup {
     }
   }
 
-  onContentLoad(e: PsEvent) {
+  private onContentLoad(e: PsEvent) {
     const content: PsContent = e.content;
     if (!isLiveContent(content)) return;
 
@@ -74,7 +74,7 @@ class LivePhotoContentSetup {
     void this.psImage.createPreviewElement(content);
   }
 
-  onContentActivate({ content }: { content: PsContent }) {
+  private onContentActivate({ content }: { content: PsContent }) {
     if (!isLiveContent(content)) return;
 
     if (config.livephoto_autoplay) {
@@ -82,13 +82,13 @@ class LivePhotoContentSetup {
     }
   }
 
-  onContentDeactivate({ content }: PsEvent) {
+  private onContentDeactivate({ content }: PsEvent) {
     if (isLiveContent(content)) {
       content.element?.querySelector('video')?.pause();
     }
   }
 
-  onContentDestroy({ content }: PsEvent) {
+  private onContentDestroy({ content }: PsEvent) {
     if (isLiveContent(content)) {
       content.element?.remove();
     }
