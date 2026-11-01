@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 import FullscreenIcon from 'vue-material-design-icons/Fullscreen.vue';
@@ -41,10 +41,7 @@ const isFullscreen = ref(false);
 const nativeFullscreen = ref(false);
 
 function containerEl() {
-  const fromVideo = props.video?.closest?.('.video-container') as HTMLElement | null;
-  if (fromVideo) return fromVideo;
-  const el = getCurrentInstance()?.proxy?.$el as HTMLElement | null;
-  return (el?.closest?.('.video-container') as HTMLElement | null) ?? null;
+  return props.video?.closest?.('.video-container') as HTMLElement | null | undefined;
 }
 
 function isFullscreenActive() {
