@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - **Feature**: Bundled VIPS image decoder with Ultra-HDR, Samsung HDR and ICC profile support ([#1110](https://github.com/pulsejet/memories/issues/1110), [#1645](https://github.com/pulsejet/memories/issues/1645)).
-- **Feature**: Support for AVIF format via VIPS.
+- **Feature**: Support for AVIF format via VIPS ([#1714](https://github.com/pulsejet/memories/issues/1714)).
 - **Feature**: Support for camera RAW formats via VIPS.
 - **Feature**: Fully redesigned image editor backed by VIPS.
 - **Feature**: Image straightener in photo editor ([#1629](https://github.com/pulsejet/memories/issues/1629), [#1075](https://github.com/pulsejet/memories/issues/1075))
