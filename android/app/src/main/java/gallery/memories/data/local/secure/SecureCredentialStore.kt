@@ -35,6 +35,7 @@ class SecureCredentialStore(private val context: Context) {
             .putString("url", cred.url)
             .putBoolean("trustAll", cred.trustAll)
             .putString("username", cred.username)
+            .putString("uid", cred.uid)
             .putString("encryptedToken", Base64.encodeToString(encryptedToken, Base64.DEFAULT))
             .putString("iv", Base64.encodeToString(cipher.iv, Base64.DEFAULT))
             .apply()
@@ -57,7 +58,7 @@ class SecureCredentialStore(private val context: Context) {
                 val cipher = getCipher()
                 cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), IvParameterSpec(Base64.decode(ivStr, Base64.DEFAULT)))
                 val token = String(cipher.doFinal(Base64.decode(encryptedToken, Base64.DEFAULT)))
-                Credential(url, trustAll, username, token)
+                Credential(url, trustAll, username, token, prefs.getString("uid", null))
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to decrypt stored credentials", e)
                 null
@@ -66,9 +67,14 @@ class SecureCredentialStore(private val context: Context) {
         return null
     }
 
+    fun saveUid(uid: String) {
+        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+            .putString("uid", uid).apply()
+    }
+
     fun deleteCredentials() {
         context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
-            .remove("url").remove("trustAll").remove("username")
+            .remove("url").remove("trustAll").remove("username").remove("uid")
             .remove("encryptedToken").remove("iv").apply()
     }
 

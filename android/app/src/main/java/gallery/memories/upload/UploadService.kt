@@ -35,7 +35,7 @@ class UploadService(
         if (sysImgs.isEmpty()) throw Exception("Image not found")
         val img = sysImgs[0]
         val base = auth.baseUrl() ?: throw Exception("Not logged in")
-        val uid = auth.credentials()?.first ?: throw Exception("Not logged in")
+        val uid = auth.uid() ?: throw Exception("Not logged in")
         val url = davUrl(base, uid, destPath)
         val mime = img.mimeType.ifEmpty { "application/octet-stream" }
         val body = object : RequestBody() {

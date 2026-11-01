@@ -150,6 +150,6 @@ class ServerRouter(
      */
     private suspend fun serveShell(config: ServerConfig, call: ApplicationCall): Boolean {
         val describe = withContext(Dispatchers.IO) { assets.readDescribe(config.assetDir) } ?: return false
-        return ShellController.serveShell(config, call, describe, auth.credentials()?.first)
+        return ShellController.serveShell(config, call, describe, auth.uid())
     }
 }

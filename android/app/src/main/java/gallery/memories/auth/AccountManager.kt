@@ -125,10 +125,11 @@ class AccountManager(
                 val body = api.bodyJson(response) ?: throw Exception("Failed to parse login flow response")
                 val loginName = body.getString("loginName")
                 val appPassword = body.getString("appPassword")
+                val uid = fetchUid(baseUrl, loginName, appPassword)
                 activity.runOnUiThread {
                     if (gen != loginGeneration) return@runOnUiThread
                     tabs.close()
-                    storeCredentials(baseUrl, loginName, appPassword)
+                    storeCredentials(baseUrl, loginName, appPassword, uid)
                     activity.startLocalApp(toNxSetup = true)
                 }
                 return
@@ -148,9 +149,17 @@ class AccountManager(
         }
     }
 
+    /** The login flow's poll token is single-use, so a failure here must not fail the login. */
+    private fun fetchUid(baseUrl: String, loginName: String, appPassword: String): String? = try {
+        api.getUid(baseUrl, loginName, appPassword)
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to fetch uid: ${e.message}")
+        null
+    }
+
     /**
      * Revalidates stored credentials against describeApi: 401 clears them,
-     * an old server warns, anything else is silently kept.
+     * an old server warns, anything else is silently kept. Also corrects the stored uid.
      */
     fun checkCredentialsAndVersion() {
         if (!auth.isLoggedIn()) return
@@ -165,12 +174,19 @@ class AccountManager(
             }
             val version = body.getString("version")
             if (body.isNull("uid")) return loggedOut()
+            updateUid(body.getString("uid"))
             if (Version(version) < Version(activity.getString(R.string.min_server_version))) {
                 return toast(activity.getString(R.string.err_no_ver))
             }
         } catch (e: Exception) {
             Log.w(TAG, "checkCredentialsAndVersion: ", e)
         }
+    }
+
+    private fun updateUid(uid: String) {
+        if (!auth.isLoggedIn() || uid == auth.uid()) return
+        auth.setUid(uid)
+        store.saveUid(uid)
     }
 
     /** Clears credentials and returns to the welcome page. Safe to call from any thread. */
@@ -183,8 +199,8 @@ class AccountManager(
     }
 
     /** Persists new credentials and applies them to the HTTP clients. */
-    fun storeCredentials(url: String, user: String, password: String) {
-        store.saveCredentials(Credential(url = url, trustAll = auth.isTrustingAllCertificates, username = user, token = password))
+    fun storeCredentials(url: String, user: String, password: String, uid: String?) {
+        store.saveCredentials(Credential(url = url, trustAll = auth.isTrustingAllCertificates, username = user, token = password, uid = uid))
         refreshCredentials()
     }
 
@@ -202,7 +218,7 @@ class AccountManager(
         val cred = store.getCredentials() ?: return
         auth.build(cred.url, cred.trustAll)
         clients.rebuild()
-        auth.setAuthHeader(cred.username to cred.token)
+        auth.setAuthHeader(cred.username to cred.token, cred.uid)
     }
 
     private fun toast(message: String) {

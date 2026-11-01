@@ -1,5 +1,6 @@
 package gallery.memories.data.remote.http
 
+import okhttp3.Credentials
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -62,6 +63,16 @@ class NextcloudApi(
             Request.Builder().url(pollUrl)
                 .post("token=$pollToken".toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())).build(),
         ).execute()
+    }
+
+    /** Server user ID for a fresh app password, before it is stored. Null when not authenticated. */
+    @Throws(Exception::class)
+    fun getUid(baseUrl: String, loginName: String, appPassword: String): String? {
+        val response = clients.client().newCall(
+            Request.Builder().url(baseUrl + "api/describe").header("User-Agent", "Memories")
+                .header("Authorization", Credentials.basic(loginName, appPassword, Charsets.UTF_8)).get().build(),
+        ).execute()
+        return bodyJson(response)?.takeUnless { it.isNull("uid") }?.getString("uid")
     }
 
     private fun buildGet(path: String, withAuth: Boolean = true): Request {
