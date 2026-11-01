@@ -15,8 +15,13 @@ import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MediaType
 import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okio.BufferedSink
+import okio.source
+import java.io.InputStream
 
 /** Forwards non-local requests to Nextcloud with stored basic auth, streaming both ways. */
 class ProxyController(
@@ -37,6 +42,9 @@ class ProxyController(
             "content-length", "content-type",
             "connection", "keep-alive", "set-cookie",
         )
+
+        /** Bodies up to this size are buffered so OkHttp can retry them on a stale connection. */
+        private const val MAX_BUFFERED_BYTES = 1024 * 1024L
     }
 
     /**
@@ -56,17 +64,7 @@ class ProxyController(
         }
         auth.authHeader()?.let { builder.header("Authorization", it) }
         builder.header("OCS-APIREQUEST", "true")
-        val mediaType = call.request.headers["Content-Type"]?.toMediaTypeOrNull()
-        val sentBytes = withContext(Dispatchers.IO) { call.receiveStream().readBytes() }
-        val body =
-            if (sentBytes.isNotEmpty()) {
-                sentBytes.toRequestBody(mediaType)
-            } else if (requiresBody(method)) {
-                ByteArray(0).toRequestBody(mediaType)
-            } else {
-                null
-            }
-        builder.method(method, body)
+        builder.method(method, requestBody(call, method))
         val response =
             try {
                 withContext(Dispatchers.IO) { clients.proxyClient().newCall(builder.build()).execute() }
@@ -74,6 +72,33 @@ class ProxyController(
                 throw UpstreamNetworkException(e)
             }
         response.use { res -> streamResponse(call, res, config) }
+    }
+
+    /** Buffers small bodies and streams the rest; null when there is no body to send. */
+    private suspend fun requestBody(call: ApplicationCall, method: String): RequestBody? {
+        val mediaType = call.request.headers["Content-Type"]?.toMediaTypeOrNull()
+        val length = call.request.headers["Content-Length"]?.toLongOrNull()
+        val hasBody = (length ?: 0L) > 0 || call.request.headers["Transfer-Encoding"] != null
+        return when {
+            !hasBody -> if (requiresBody(method)) ByteArray(0).toRequestBody(mediaType) else null
+            length != null && length <= MAX_BUFFERED_BYTES ->
+                withContext(Dispatchers.IO) { call.receiveStream().readBytes() }.toRequestBody(mediaType)
+            else -> StreamedBody(call.receiveStream(), mediaType, length ?: -1)
+        }
+    }
+
+    /** One-shot: the stream can't rewind, so OkHttp must not retry it. */
+    private class StreamedBody(
+        private val stream: InputStream,
+        private val mediaType: MediaType?,
+        private val length: Long,
+    ) : RequestBody() {
+        override fun contentType() = mediaType
+        override fun contentLength() = length
+        override fun isOneShot() = true
+        override fun writeTo(sink: BufferedSink) {
+            stream.source().use { sink.writeAll(it) }
+        }
     }
 
     private suspend fun streamResponse(call: ApplicationCall, res: okhttp3.Response, config: ServerConfig) {

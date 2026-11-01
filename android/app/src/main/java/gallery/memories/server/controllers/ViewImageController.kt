@@ -13,6 +13,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 
 /**
  * Receives images for the hole image below the WebView.
@@ -66,18 +68,35 @@ object ViewImageController {
             KtorRespond.plain(call, HttpStatusCode.MethodNotAllowed, "method")
             return
         }
+        val declared = call.request.headers["Content-Length"]?.toLongOrNull() ?: 0
+        if (declared > MAX_BYTES) {
+            KtorRespond.plain(call, HttpStatusCode.BadRequest, "size: $declared")
+            return
+        }
         val bytes = try {
-            withContext(Dispatchers.IO) { call.receiveStream().readBytes() }
+            withContext(Dispatchers.IO) { readCapped(call.receiveStream()) }
         } catch (e: Exception) {
             Log.w(TAG, "View image read failed", e)
             KtorRespond.plain(call, HttpStatusCode.BadRequest, "read: ${e.message}")
             return
         }
-        if (bytes.isEmpty() || bytes.size > MAX_BYTES) {
-            KtorRespond.plain(call, HttpStatusCode.BadRequest, "size: ${bytes.size}")
+        if (bytes == null || bytes.isEmpty()) {
+            KtorRespond.plain(call, HttpStatusCode.BadRequest, "size: ${bytes?.size ?: "over limit"}")
             return
         }
         renderAndRespond(call) { seq -> holeImage.setImageBytes(bytes, seq) }
+    }
+
+    /** Reads [input], giving up with null past [MAX_BYTES] (chunked bodies declare no length). */
+    private fun readCapped(input: InputStream): ByteArray? {
+        val out = ByteArrayOutputStream()
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) return out.toByteArray()
+            out.write(buffer, 0, read)
+            if (out.size() > MAX_BYTES) return null
+        }
     }
 
     /** Await render for the query seq and answer {"ok": ...}. */
