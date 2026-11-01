@@ -196,7 +196,11 @@ class NativeHoleVideo(
         lastError = null
         userPaused = false
         repeatLoop = loop
-        if (url.isNotEmpty() && (url != currentUrl || player == null || player?.playbackState == Player.STATE_IDLE)) {
+        val needsLoad = url != currentUrl ||
+            player == null ||
+            player?.playbackState == Player.STATE_IDLE ||
+            player?.playerError != null
+        if (url.isNotEmpty() && needsLoad) {
             setVideoUrlLocked(url)
         } else {
             val exo = ensurePlayer()
@@ -317,7 +321,7 @@ class NativeHoleVideo(
     }
 
     private fun setVideoUrlLocked(url: String) {
-        if (url == currentUrl && player != null && player?.playbackState != Player.STATE_IDLE) {
+        if (url == currentUrl && player != null && player?.playbackState != Player.STATE_IDLE && player?.playerError == null) {
             val exo = ensurePlayer()
             exo.repeatMode = if (repeatLoop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
             if (exo.playbackState == Player.STATE_ENDED) {
