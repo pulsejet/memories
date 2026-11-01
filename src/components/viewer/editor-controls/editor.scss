@@ -494,21 +494,28 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     z-index: 3;
     pointer-events: none;
     box-shadow: 0 0 0 9999px var(--me-bg);
-    transition: box-shadow 0.2s ease;
+    transition:
+      box-shadow 0.2s ease,
+      outline-color 0.15s;
 
     &.is-animated {
       transition:
         width 0.26s cubic-bezier(0.2, 0, 0, 1),
         height 0.26s cubic-bezier(0.2, 0, 0, 1),
         transform 0.26s cubic-bezier(0.2, 0, 0, 1),
-        box-shadow 0.2s ease;
+        box-shadow 0.2s ease,
+        outline-color 0.15s;
     }
 
     &.is-crop-mode {
       pointer-events: auto;
       cursor: grab;
       box-shadow: 0 0 0 9999px rgba(10, 10, 11, 0.65);
-      outline: 1.5px solid rgba(255, 255, 255, 0.88);
+      outline: 1.5px solid transparent;
+    }
+
+    &.is-crop-mode.is-grid-visible {
+      outline-color: rgba(255, 255, 255, 0.88);
     }
 
     &.is-crop-mode.is-active {

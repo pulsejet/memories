@@ -460,7 +460,6 @@ utils.useBus('memories:fragment:pop:editor', onFragmentPop);
 
     :deep(.me-crop-box) {
       box-shadow: none;
-      outline: none;
     }
   }
 }
