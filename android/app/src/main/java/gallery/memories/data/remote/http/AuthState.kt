@@ -1,6 +1,8 @@
 package gallery.memories.data.remote.http
 
 import android.util.Base64
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 /**
  * Current server, credentials, and TLS mode. Rebuilt from storage on
@@ -19,6 +21,12 @@ class AuthState {
 
     /** Canonical server URL (the describeApi baseUrl), null when logged out. */
     fun baseUrl(): String? = baseUrl
+
+    /** Whether [url] is on the configured server: same scheme, host and port. */
+    fun isServer(url: HttpUrl?): Boolean {
+        val server = baseUrl?.toHttpUrlOrNull() ?: return false
+        return url != null && url.scheme == server.scheme && url.host == server.host && url.port == server.port
+    }
 
     /** Basic auth header value, null when logged out. */
     fun authHeader(): String? = authHeader

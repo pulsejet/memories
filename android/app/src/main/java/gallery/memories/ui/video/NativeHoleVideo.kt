@@ -20,8 +20,6 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import gallery.memories.MainActivity
-import gallery.memories.data.remote.http.AuthState
-import gallery.memories.data.remote.http.TlsTrust
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -36,7 +34,6 @@ import org.json.JSONObject
  */
 class NativeHoleVideo(
     private val mCtx: MainActivity,
-    private val auth: AuthState,
 ) {
     companion object {
         private val TAG = NativeHoleVideo::class.java.simpleName
@@ -344,7 +341,6 @@ class NativeHoleVideo(
         val uri = Uri.parse(url)
         val mediaItem = MediaItem.fromUri(uri)
         if (isRemote(uri)) {
-            if (auth.isTrustingAllCertificates) TlsTrust.setDefaultInsecureTLS()
             val httpFactory = DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true)
             CookieManager.getInstance().getCookie(url)?.let { cookies ->
                 httpFactory.setDefaultRequestProperties(mapOf("Cookie" to cookies))

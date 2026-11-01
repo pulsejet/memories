@@ -12,6 +12,7 @@ import androidx.core.content.FileProvider
 import gallery.memories.R
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.HttpClients
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
 import okhttp3.Response
 import java.io.File
@@ -32,8 +33,9 @@ import java.util.zip.ZipFile
  *
  * URLs are fetched as-given: local `http://127.0.0.1/...` URLs go through the
  * localhost proxy (CookieManager supplies the `local-auth` cookie, the proxy
- * adds basic auth upstream), while absolute upstream URLs use the stored
- * basic auth directly. Both carry `OCS-APIREQUEST` to exempt CSRF checks.
+ * adds basic auth upstream), while URLs on the configured server use the stored
+ * basic auth directly. Any other URL gets no credentials.
+ * All carry `OCS-APIREQUEST` to exempt CSRF checks.
  * Bodies always stream to disk, never fully into memory.
  */
 class InAppDownloader(
@@ -156,12 +158,13 @@ class InAppDownloader(
     }
 
     private fun buildRequest(url: String): Request {
-        val builder = Request.Builder().url(url)
+        val httpUrl = url.toHttpUrl()
+        val builder = Request.Builder().url(httpUrl)
             .header("User-Agent", "Memories")
             .header("OCS-APIREQUEST", "true")
-        auth.authHeader()?.let { builder.header("Authorization", it) }
+        if (auth.isServer(httpUrl)) auth.authHeader()?.let { builder.header("Authorization", it) }
         try {
-            if (Uri.parse(url).host == "127.0.0.1") {
+            if (httpUrl.host == "127.0.0.1") {
                 CookieManager.getInstance().getCookie(url)?.let { cookies ->
                     if (cookies.isNotEmpty()) builder.header("Cookie", cookies)
                 }

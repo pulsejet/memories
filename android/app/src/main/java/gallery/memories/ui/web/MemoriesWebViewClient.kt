@@ -17,6 +17,7 @@ import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import androidx.core.net.toUri
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 @UnstableApi
 /** Only loopback pages load inside; everything else goes to the browser or is blocked. */
@@ -114,12 +115,13 @@ class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient(
     }
 
     /**
-     * Proceeds on SSL errors only when the user explicitly trusts all
-     * certificates for this server; otherwise surfaces a toast.
+     * Proceeds on SSL errors only for the configured server when the user
+     * explicitly trusts all its certificates; otherwise surfaces a toast.
      */
     @SuppressLint("WebViewClientOnReceivedSslError")
     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
-        if (activity.nativex.auth.isTrustingAllCertificates) {
+        val auth = activity.nativex.auth
+        if (auth.isTrustingAllCertificates && auth.isServer(error?.url?.toHttpUrlOrNull())) {
             handler?.proceed()
         } else {
             activity.clearHistoryOnLoad = false

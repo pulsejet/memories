@@ -5,7 +5,6 @@ import android.graphics.Canvas
 import android.net.Uri
 import android.util.Log
 import android.webkit.ConsoleMessage
-import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
@@ -16,8 +15,7 @@ import gallery.memories.MainActivity
 @UnstableApi
 /**
  * Chrome client: delegates upload pickers, mirrors console errors to logcat.
- * Grants all page permission requests: the WebView only ever loads the
- * first-party app shell and localhost, never third-party content.
+ * Page permission requests stay denied (the default): the app uses none.
  */
 class MemoriesWebChromeClient(
     private val activity: MainActivity,
@@ -25,10 +23,6 @@ class MemoriesWebChromeClient(
 ) : WebChromeClient() {
     companion object {
         private val TAG = MemoriesWebChromeClient::class.java.simpleName
-    }
-
-    override fun onPermissionRequest(request: PermissionRequest) {
-        request.grant(request.resources)
     }
 
     /** Transparent 1x1 poster so videos never flash the default gray/white placeholder. */

@@ -70,7 +70,7 @@ class AppContainer(
     val deleter = MediaDeleter(activity)
     val permissions = PermissionsManager(activity, prefs).register()
     val holeImage = NativeHoleImage(activity)
-    val holeVideo = NativeHoleVideo(activity, auth)
+    val holeVideo = NativeHoleVideo(activity)
 
     val timeline: TimelineRepository
     val observer: MediaObserver
