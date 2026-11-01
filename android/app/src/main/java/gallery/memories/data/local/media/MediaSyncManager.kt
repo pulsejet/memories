@@ -19,9 +19,13 @@ class MediaSyncManager(
     private val dataSource: MediaStoreDataSource,
     private val mapper: PhotoMapper,
     private val prefs: PreferencesStore,
+    private val isAlive: () -> Boolean,
 ) {
     companion object {
         private val TAG = MediaSyncManager::class.java.simpleName
+
+        /** Process-wide: a reopened activity gets a new instance while the old one winds down. */
+        private val RUN_LOCK = Any()
     }
 
     /** Files indexed so far, or -1 when idle. Doubles as a re-entrancy guard. */
@@ -29,45 +33,24 @@ class MediaSyncManager(
         private set
 
     /** Index only files changed since the last sync. Returns the indexed count. */
-    fun syncDeltaDb(): Int {
-        synchronized(this) {
-            if (syncStatus != -1) return 0
-            syncStatus = 0
-        }
-        return try {
-            syncDb(prefs.lastSyncTime)
-        } finally {
-            releaseSync()
-        }
-    }
+    fun syncDeltaDb(): Int = exclusive(0) { syncDb(prefs.lastSyncTime) }
 
     /** Reindex everything; files missing from the device are pruned via the flag sweep. */
-    fun syncFullDb() {
-        synchronized(this) {
-            if (syncStatus != -1) return
-            syncStatus = 0
-        }
+    fun syncFullDb(): Unit = exclusive(Unit) {
         try {
             dao.flagAll()
             syncDb(0L, onComplete = dao::deleteFlagged)
         } catch (e: Exception) {
             Log.e(TAG, "Error starting full sync", e)
-        } finally {
-            releaseSync()
         }
     }
 
     /** Evicts index rows whose device files are gone. Returns the pruned count. */
-    fun pruneDeleted(): Int {
-        synchronized(this) {
-            if (syncStatus != -1) return 0
-            syncStatus = 0
-        }
+    fun pruneDeleted(): Int = exclusive(0) {
         try {
-            val ids = dao.getAllLocalIds()
-            if (ids.isEmpty()) return 0
             var deleted = 0
-            for (chunk in ids.chunked(500)) {
+            for (chunk in dao.getAllLocalIds().chunked(500)) {
+                if (!isAlive()) break
                 val found = dataSource.getByIds(chunk).map { it.fileId }.toSet()
                 if (found.size == chunk.size) continue
                 val missing = chunk.filter { it !in found }
@@ -76,20 +59,27 @@ class MediaSyncManager(
                     deleted += missing.size
                 }
             }
-            return deleted
+            deleted
         } catch (e: Exception) {
             Log.e(TAG, "Error pruning database", e)
-            return 0
-        } finally {
-            releaseSync()
+            0
         }
     }
 
-    private fun releaseSync() {
-        synchronized(this) { syncStatus = -1 }
+    /** Skips [block] when this instance is busy; otherwise queues behind any other instance's run. */
+    private inline fun <T> exclusive(busy: T, block: () -> T): T {
+        synchronized(this) {
+            if (syncStatus != -1) return busy
+            syncStatus = 0
+        }
+        try {
+            return synchronized(RUN_LOCK) { block() }
+        } finally {
+            synchronized(this) { syncStatus = -1 }
+        }
     }
 
-    /** Runs [onComplete] only if every row was read; a failed sync reports what it indexed. */
+    /** Runs [onComplete] only if every row was read; a failed or abandoned sync reports what it indexed. */
     private fun syncDb(startTime: Long, onComplete: () -> Unit = {}): Int {
         val syncTime = Instant.now().toEpochMilli() / 1000
         var selection: String? = null
@@ -100,16 +90,14 @@ class MediaSyncManager(
         }
         var updates = 0
         try {
-            for (image in dataSource.cursor(SystemImage.IMAGE_URI, selection, selectionArgs, null)) {
-                insertItem(image)
-                updates++
-                syncStatus = updates
+            for (collection in listOf(SystemImage.IMAGE_URI, SystemImage.VIDEO_URI)) {
+                for (item in dataSource.cursor(collection, selection, selectionArgs, null, isAlive)) {
+                    insertItem(item)
+                    updates++
+                    syncStatus = updates
+                }
             }
-            for (video in dataSource.cursor(SystemImage.VIDEO_URI, selection, selectionArgs, null)) {
-                insertItem(video)
-                updates++
-                syncStatus = updates
-            }
+            if (!isAlive()) return updates
             onComplete()
             prefs.lastSyncTime = syncTime
         } catch (e: Exception) {

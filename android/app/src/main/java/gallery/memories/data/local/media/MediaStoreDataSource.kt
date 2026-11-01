@@ -12,12 +12,14 @@ class MediaStoreDataSource(private val ctx: Context) {
     /**
      * Lazily yields device media rows; swaps w/h for portrait-orientation photos.
      * A failed query throws: callers treat missing rows as deleted files.
+     * Stops early once [keepGoing] is false, closing the cursor either way.
      */
     fun cursor(
         collection: Uri,
         selection: String?,
         selectionArgs: Array<String>?,
         sortOrder: String?,
+        keepGoing: () -> Boolean = { true },
     ): Sequence<SystemImage> = sequence {
         val projection = arrayListOf(
             MediaStore.Images.Media._ID,
@@ -52,7 +54,7 @@ class MediaStoreDataSource(private val ctx: Context) {
 
         resolver.query(collection, projection.toTypedArray(), selection, selectionArgs, sortOrder).use { c ->
             if (c == null) throw IOException("MediaStore query failed: $collection")
-            while (c.moveToNext()) {
+            while (keepGoing() && c.moveToNext()) {
                 val img = SystemImage()
                 img.fileId = c.getLong(idCol)
                 img.baseName = c.getString(nameCol) ?: ""

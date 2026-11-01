@@ -27,7 +27,6 @@ class TimelineRepositoryImpl(
     private val folders: FolderSettings,
     private val observer: MediaObserver,
     private val onDatabaseChanged: () -> Unit,
-    private val isAlive: () -> Boolean,
 ) : TimelineRepository {
     companion object {
         private val TAG = TimelineRepositoryImpl::class.java.simpleName
@@ -35,13 +34,24 @@ class TimelineRepositoryImpl(
 
     override val syncStatus: Int get() = syncManager.syncStatus
 
+    private var destroyed = false
+
     override fun initialize() {
         dao.ping()
-        if (syncManager.syncDeltaDb() + syncManager.pruneDeleted() > 0) onDatabaseChanged()
-        observer.register()
+        val changed = syncManager.syncDeltaDb() + syncManager.pruneDeleted() > 0
+        synchronized(this) {
+            if (destroyed) return
+            observer.register()
+        }
+        if (changed) onDatabaseChanged()
     }
 
-    override fun destroy() = observer.unregister()
+    override fun destroy() {
+        synchronized(this) {
+            destroyed = true
+            observer.unregister()
+        }
+    }
 
     override fun syncDeltaDb(): Int = syncManager.syncDeltaDb()
 

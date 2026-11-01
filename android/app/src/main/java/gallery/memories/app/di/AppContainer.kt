@@ -64,7 +64,8 @@ class AppContainer(
     val dao = db.photoDao()
     val dataSource = MediaStoreDataSource(activity)
     val mapper = PhotoMapper(activity)
-    val syncManager = MediaSyncManager(activity, dao, dataSource, mapper, prefs)
+    val syncManager = MediaSyncManager(activity, dao, dataSource, mapper, prefs,
+     isAlive = { !activity.isDestroyed && !activity.isFinishing })
     val folders = FolderSettings(dao, prefs)
     val deleter = MediaDeleter(activity)
     val permissions = PermissionsManager(activity, prefs).register()
@@ -90,7 +91,6 @@ class AppContainer(
         timeline = TimelineRepositoryImpl(
             dao, dataSource, mapper, prefs, syncManager, deleter, folders, observer,
             onDatabaseChanged = { activity.refreshTimeline() },
-            isAlive = { !activity.isDestroyed && !activity.isFinishing },
         )
         image = ImageService(activity, timeline)
         upload = UploadService(activity, timeline, auth, clients)
