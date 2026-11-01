@@ -74,7 +74,7 @@ declare module '@typings' {
     id: number;
     center: [number, number];
     count: number;
-    preview: IPhoto;
+    preview: IPhoto | null;
     dummy?: boolean;
   }
 }

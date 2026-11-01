@@ -24,7 +24,7 @@
               :src="clusterPreviewUrl(cluster)"
               :class="{
                 'memories-thumb-important': true,
-                [`memories-thumb-${cluster.preview.key}`]: lastClick === cluster.preview.fileid,
+                [`memories-thumb-${cluster.preview!.key}`]: lastClick === cluster.preview?.fileid,
               }"
             />
           </div>
@@ -259,6 +259,7 @@ function setBoundsFromQuery() {
 }
 
 function clusterPreviewUrl(cluster: IMapCluster) {
+  if (!cluster.preview) return String();
   return utils.getPreviewUrl({
     photo: cluster.preview,
     msize: 256,
