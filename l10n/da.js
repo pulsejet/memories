@@ -608,7 +608,7 @@ OC.L10N.register(
     "Stroke" : "Streg",
     "Save image as" : "Gem billede som",
     "Extension" : "Filtypenavn",
-    "Name is required." : "Navnet er påkrævet.",
+    "Name is required." : "Navnet er obligatorisk.",
     "Quality" : "Kvalitet",
     "Saved image size (width x height)" : "Størrelse på gemt billede (bredde x højde)",
     "Note that the selected crop area is lower than the applied resize which might cause quality decrease" : "Bemærk, at det valgte beskæringsområde er mindre end den anvendte størrelsesændring, hvilket kan forringe kvaliteten",

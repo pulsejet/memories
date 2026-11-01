@@ -248,6 +248,7 @@ OC.L10N.register(
     "No automated tests are available for NVIDIA acceleration." : "未提供 NVIDIA 加速的自動化測試",
     "Enable acceleration with NVENC" : "啟用 NVENC 加速",
     "Enable NVENC Temporal AQ" : "啟用 NVENC 臨時 AQ",
+    "Enable HDR tonemap_cuda (Jellyfin FFmpeg)" : "啟用 HDR tonemap_cuda (Jellyfin FFmpeg)",
     "CUDA scaler" : "CUDA scaler",
     "NPP scaler" : "NPP scaler",
     "Due to a bug in certain hardware drivers, videos may appear in incorrect orientations when streaming. This can be resolved in some cases by rotating the video on the accelerator." : "由於某些硬件驅動程序中的錯誤，視頻在流式傳輸時可能會出現錯誤的方向。在某些情況下，可以通過在加速器上旋轉視頻來解決此問題。",

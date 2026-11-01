@@ -248,6 +248,7 @@ OC.L10N.register(
     "No automated tests are available for NVIDIA acceleration." : "Níl aon tástálacha uathoibrithe ar fáil le haghaidh luasghéarú NVIDIA.",
     "Enable acceleration with NVENC" : "Cumasaigh luasghéarú le NVENC",
     "Enable NVENC Temporal AQ" : "Cumasaigh NVENC Temporal AQ",
+    "Enable HDR tonemap_cuda (Jellyfin FFmpeg)" : "Cumasaigh mapáil tonanna HDR (tonemap_cuda) (Jellyfin FFmpeg)",
     "CUDA scaler" : "Scórálaí CUDA",
     "NPP scaler" : "Scórálaí NPP",
     "Due to a bug in certain hardware drivers, videos may appear in incorrect orientations when streaming. This can be resolved in some cases by rotating the video on the accelerator." : "De bharr fabht i dtiománaithe crua-earraí áirithe, d’fhéadfadh físeáin a bheith le feiceáil i dtreoshuímh míchearta agus iad ag sruthú. Is féidir é seo a réiteach i gcásanna áirithe tríd an bhfíseán a rothlú ar an luasaire.",
