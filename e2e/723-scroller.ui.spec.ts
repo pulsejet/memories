@@ -32,17 +32,17 @@ test.describe('@ui Timeline scroller', () => {
     const box = (await scroller.boundingBox())!;
     const x = box.x + box.width / 2;
 
-    await test.step('Hover below 2019 shows Jun 2019', async () => {
+    await test.step('Hover above 2019 shows Jun 2019', async () => {
       const tick2019 = page.locator('.scroller .tick', { hasText: '2019' });
       const tickBox = (await tick2019.boundingBox())!;
-      await page.mouse.move(x, tickBox.y + tickBox.height + 8);
+      await page.mouse.move(x, tickBox.y - 8);
       await expect(page.locator('.scroller .cursor.hv .text')).toHaveText('Jun 2019');
     });
 
-    await test.step('Click below 2019 jumps to 2019 images', async () => {
+    await test.step('Click above 2019 jumps to 2019 images', async () => {
       const tick2019 = page.locator('.scroller .tick', { hasText: '2019' });
       const tickBox = (await tick2019.boundingBox())!;
-      await page.mouse.click(x, tickBox.y + tickBox.height + 8);
+      await page.mouse.click(x, tickBox.y - 8);
       await expect(page.locator(`.p-outer--${id021}`)).toBeInViewport({ timeout: 15000 });
     });
 
