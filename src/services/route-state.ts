@@ -22,6 +22,8 @@ type RouteState<T extends InnerState> = {
   state?: T;
   /** Named shallow template refs whose scroll offsets are saved and restored after the state. */
   scroll?: Record<string, ShallowRef<ScrollTarget>>;
+  /** Called synchronously before the state and scroll offsets are captured. */
+  beforePreserve?: () => void;
 };
 
 /** The shared cache holds snapshots from composable instances with different T types. */
@@ -91,6 +93,9 @@ export function useRouteState<T extends InnerState>(options: RouteState<T>) {
   function preserve(routeKey: string) {
     // Check if explicitly disabled.
     if (routeKey.includes(FLAG_DISABLE)) return;
+
+    // Let the owner settle pending state before capture.
+    options.beforePreserve?.();
 
     // Preserve old offsets for gone targets (v-if).
     const scroll = states.get(routeKey)?.scroll ?? {};

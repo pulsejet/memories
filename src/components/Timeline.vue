@@ -375,6 +375,8 @@ const routeState = useRouteState({
   key: timelineRouteKey,
   state: { savedView, beforeHeight },
   scroll: { recycler },
+  // The saved scrollTop is only valid without a pending start offset.
+  beforePreserve: () => void flushStartOffset(),
 });
 
 /** Show skeleton placeholder rows on initial load */
