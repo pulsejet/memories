@@ -252,8 +252,7 @@ onMounted(() => {
 
   // Set theme color to default
   // Skip on nxsetup and firststart to avoid flashing white on initial setup.
-  // For some reason route is not properly read here during init.
-  if (!routeIs.NxSetup && !isFirstStart.value && !window.location.href.includes('/nxsetup')) {
+  if (!routeIs.NxSetup && !isFirstStart.value) {
     nativex.setTheme();
 
     // One-time prompt for media management grant.
@@ -274,8 +273,7 @@ onMounted(() => {
 
 onBeforeMount(async () => {
   if ('serviceWorker' in navigator && !nativex.has()) {
-    // Use the window load event to keep the page load performant
-    window.addEventListener('load', async () => {
+    utils.onDOMLoaded(async () => {
       try {
         const url = generateUrl('/apps/memories/static/service-worker.js');
         const registration = await navigator.serviceWorker.register(url, {

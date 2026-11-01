@@ -6,7 +6,7 @@ export function onDOMLoaded(callback: () => void) {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', callback);
   } else {
-    setTimeout(callback, 0);
+    window.queueMicrotask(callback);
   }
 }
 
