@@ -69,8 +69,9 @@ class ApiRouter(
             path.matches(NativeX.API.SHARE_URL) -> BridgeResponses.json(share.shareUrl(decode(parts[4])))
             path.matches(NativeX.API.SHARE_BLOB) -> BridgeResponses.json(share.shareBlobs())
             path.matches(NativeX.API.CONFIG_ALLOW_MEDIA) -> {
-                permissions.setAllowMedia(true)
-                if (permissions.requestMediaPermissionSync()) onAllowMedia()
+                val allow = parts[4] != "0"
+                permissions.setAllowMedia(allow)
+                if (allow && permissions.requestMediaPermissionSync()) onAllowMedia()
                 BridgeResponses.json("done")
             }
             path.matches(NativeX.API.CONFIG_ALLOW_MANAGE_MEDIA) -> {

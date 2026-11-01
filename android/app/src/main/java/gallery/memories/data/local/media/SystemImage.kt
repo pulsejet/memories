@@ -6,8 +6,9 @@ import android.provider.MediaStore
 
 /**
  * One MediaStore row plus derived IDs; uri/epoch are computed, not stored.
- * Times are MediaStore units: [dateTaken] and [mtime] are milliseconds,
- * [videoDuration] is milliseconds, [epoch] is seconds.
+ * Times are MediaStore units: [dateTaken] is milliseconds (DATE_TAKEN),
+ * [mtime] is seconds (DATE_MODIFIED), [videoDuration] is milliseconds,
+ * [epoch] is seconds.
  */
 class SystemImage {
     var fileId = 0L

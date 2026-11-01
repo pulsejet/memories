@@ -34,7 +34,7 @@ class PreferencesStore(private val ctx: Context) {
         get() = prefs.getStringSet(ctx.getString(R.string.preferences_enabled_local_folders), null)?.toList() ?: listOf()
         set(v) = prefs.edit().putStringSet(ctx.getString(R.string.preferences_enabled_local_folders), v.toSet()).apply()
 
-    /** Lower bound (seconds) for the next delta sync. Advanced on every sync, even partial ones. */
+    /** Lower bound (seconds) for the next delta sync. Advanced only when a sync completes; failures keep the old baseline. */
     var lastSyncTime: Long
         get() = prefs.getLong(ctx.getString(R.string.preferences_last_sync_time), 0L)
         set(v) = prefs.edit().putLong(ctx.getString(R.string.preferences_last_sync_time), v).apply()

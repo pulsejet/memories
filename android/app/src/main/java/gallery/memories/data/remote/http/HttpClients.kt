@@ -30,7 +30,8 @@ class HttpClients(private val auth: AuthState, private val cookies: SessionCooki
     /** Shared client for short API calls. */
     fun client(): OkHttpClient = client
 
-    /** Proxy client with streaming-friendly timeouts and isolated pools. */
+    /** Proxy client with streaming-friendly timeouts and isolated pools.
+     *  Redirects are not followed so Location stays rewritable. */
     fun newProxyClient(cookieJar: CookieJar? = null): OkHttpClient {
         val builder = client.newBuilder()
             .dispatcher(Dispatcher(Executors.newCachedThreadPool()))
@@ -38,6 +39,8 @@ class HttpClients(private val auth: AuthState, private val cookies: SessionCooki
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
+            .followRedirects(false)
+            .followSslRedirects(false)
         if (cookieJar != null) builder.cookieJar(cookieJar)
         return builder.build()
     }

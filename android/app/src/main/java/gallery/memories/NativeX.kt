@@ -52,8 +52,8 @@ class NativeX(private val mCtx: MainActivity) {
 
     companion object {
         /**
-         * Latest live [ShareManager], for the manifest-registered download receiver
-         * which cannot receive it via intent. Nulled in [destroy].
+         * Latest live [ShareManager] for in-process downloads via [downloadFromUrl].
+         * Nulled in [destroy].
          */
         var shareManager: ShareManager? = null
         val TAG: String = NativeX::class.java.simpleName

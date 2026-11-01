@@ -48,9 +48,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.8.0'
     implementation 'com.google.android.material:material:1.14.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.10.2'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.10.2'
 
     implementation 'androidx.exifinterface:exifinterface:1.4.2'
     implementation 'androidx.browser:browser:1.10.0'

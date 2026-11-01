@@ -365,10 +365,11 @@
           // Trust all certificates
           const trustAll = document.getElementById("trust-all").checked ? "1" : "0";
 
-          await fetch(`/api/login/${encUrl}?trustAll=${trustAll}`, {
+          const res = await fetch(`/api/login/${encUrl}?trustAll=${trustAll}`, {
             method: "GET",
             signal: controller.signal,
           });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
           // API is fine, redirect to login page
           clearTimeout(timeoutId);
