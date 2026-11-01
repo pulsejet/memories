@@ -1,4 +1,4 @@
-![Screenshot](appinfo/screenshot.jpg)
+![Screenshot](appinfo/screenshot.png)
 
 # Memories: Photo Management for Nextcloud
 

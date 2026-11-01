@@ -42,7 +42,7 @@ Memories is a *batteries-included* photo management solution for Nextcloud with 
     <website>https://memories.gallery</website>
     <bugs>https://github.com/pulsejet/memories/issues</bugs>
     <repository>https://github.com/pulsejet/memories</repository>
-    <screenshot>https://raw.githubusercontent.com/pulsejet/memories/master/appinfo/screenshot.jpg</screenshot>
+    <screenshot>https://raw.githubusercontent.com/pulsejet/memories/master/appinfo/screenshot.png</screenshot>
     <donation>https://github.com/sponsors/pulsejet</donation>
     <dependencies>
         <php min-version="8.3"/>
