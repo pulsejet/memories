@@ -749,6 +749,14 @@ async function createBase(args: PhotoSwipeOptions) {
       return;
     }
 
+    // Leaving the slide would empty the fullscreen video container.
+    const wouldDestroy = ['ArrowLeft', 'ArrowRight', 'Delete'].includes(e.originalEvent.key);
+    const isFullscreenVideo = () => document.fullscreenElement?.classList.contains('video-container');
+    if (wouldDestroy && isFullscreenVideo()) {
+      e.preventDefault();
+      return;
+    }
+
     // Check if someone else is trapping focus.
     // For the sidebar, however, we want to continue executing our actions.
     // https://github.com/pulsejet/memories/issues/1414
