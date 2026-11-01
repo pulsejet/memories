@@ -3,6 +3,7 @@ package gallery.memories.data.local.media
 import android.content.Context
 import android.database.ContentObserver
 import android.net.Uri
+import android.util.Log
 
 /**
  * Watches MediaStore for device media changes and debounces bursts into one
@@ -13,6 +14,10 @@ class MediaObserver(
     private val ctx: Context,
     private val onChange: (uris: List<Uri>) -> Unit,
 ) {
+    private companion object {
+        val TAG = MediaObserver::class.java.simpleName
+    }
+
     private var imageObserver: ContentObserver? = null
     private var videoObserver: ContentObserver? = null
     private var refreshPending = false
@@ -62,7 +67,11 @@ class MediaObserver(
                 uris = pendingUris.toList()
                 pendingUris.clear()
             }
-            onChange(uris)
+            try {
+                onChange(uris)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to handle media change: ${e.message}")
+            }
         }.start()
     }
 }

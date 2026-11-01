@@ -34,7 +34,11 @@ class MediaSyncManager(
             if (syncStatus != -1) return 0
             syncStatus = 0
         }
-        return syncDb(prefs.lastSyncTime)
+        return try {
+            syncDb(prefs.lastSyncTime)
+        } finally {
+            releaseSync()
+        }
     }
 
     /** Reindex everything; files missing from the device are pruned via the flag sweep. */
@@ -43,9 +47,14 @@ class MediaSyncManager(
             if (syncStatus != -1) return
             syncStatus = 0
         }
-        dao.flagAll()
-        syncDb(0L)
-        dao.deleteFlagged()
+        try {
+            dao.flagAll()
+            syncDb(0L, onComplete = dao::deleteFlagged)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error starting full sync", e)
+        } finally {
+            releaseSync()
+        }
     }
 
     /** Evicts index rows whose device files are gone. Returns the pruned count. */
@@ -72,11 +81,16 @@ class MediaSyncManager(
             Log.e(TAG, "Error pruning database", e)
             return 0
         } finally {
-            synchronized(this) { syncStatus = -1 }
+            releaseSync()
         }
     }
 
-    private fun syncDb(startTime: Long): Int {
+    private fun releaseSync() {
+        synchronized(this) { syncStatus = -1 }
+    }
+
+    /** Runs [onComplete] only if every row was read; a failed sync reports what it indexed. */
+    private fun syncDb(startTime: Long, onComplete: () -> Unit = {}): Int {
         val syncTime = Instant.now().toEpochMilli() / 1000
         var selection: String? = null
         var selectionArgs: Array<String>? = null
@@ -96,11 +110,11 @@ class MediaSyncManager(
                 updates++
                 syncStatus = updates
             }
+            onComplete()
             prefs.lastSyncTime = syncTime
         } catch (e: Exception) {
             Log.e(TAG, "Error syncing database", e)
         }
-        synchronized(this) { syncStatus = -1 }
         return updates
     }
 

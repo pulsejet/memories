@@ -3,12 +3,16 @@ package gallery.memories.data.local.media
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import java.io.IOException
 
 /** Reads device media rows from the ContentResolver as lazy sequences. */
 class MediaStoreDataSource(private val ctx: Context) {
     private val resolver get() = ctx.applicationContext.contentResolver
 
-    /** Lazily yields device media rows; swaps w/h for portrait-orientation photos. */
+    /**
+     * Lazily yields device media rows; swaps w/h for portrait-orientation photos.
+     * A failed query throws: callers treat missing rows as deleted files.
+     */
     fun cursor(
         collection: Uri,
         selection: String?,
@@ -47,7 +51,7 @@ class MediaStoreDataSource(private val ctx: Context) {
         val durCol = projection.indexOf(MediaStore.Video.Media.DURATION)
 
         resolver.query(collection, projection.toTypedArray(), selection, selectionArgs, sortOrder).use { c ->
-            if (c == null) return@sequence
+            if (c == null) throw IOException("MediaStore query failed: $collection")
             while (c.moveToNext()) {
                 val img = SystemImage()
                 img.fileId = c.getLong(idCol)
