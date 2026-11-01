@@ -12,31 +12,43 @@ import kotlin.math.max
 @UnstableApi
 /** Renders device photos for the web timeline, always as JPEG. */
 class ImageService(private val ctx: Context, private val timeline: TimelineRepository) {
-    /** Thumbnail aspect-fitted into x/y; x/y omitted means native size. */
+    private companion object {
+        /** Thumbnail request when neither MediaStore nor the caller gives a size. */
+        const val UNKNOWN_SIZE = 1024
+    }
+
+    /** Thumbnail aspect-fitted into x/y; x/y omitted means native size. Missing MediaStore dimensions come from the thumbnail. */
     @Throws(Exception::class)
     fun getPreview(id: Long, x: Int?, y: Int?): ByteArray {
         val dataSource = MediaStoreDataSource(ctx.applicationContext)
         val sysImgs = dataSource.getByIds(listOf(id))
         if (sysImgs.isEmpty()) throw Exception("Image not found")
-        var h = sysImgs[0].height.toInt()
-        var w = sysImgs[0].width.toInt()
-        if (w <= 0 || h <= 0) throw Exception("Invalid image dimensions")
-        if (x != null && y != null && x > 0 && y > 0) {
-            val aspect = w.toFloat() / h.toFloat()
-            if (x.toFloat() / y.toFloat() < aspect) {
-                w = x
-                h = (x.toFloat() / aspect).toInt()
-            } else {
-                w = (y.toFloat() * aspect).toInt()
-                h = y
-            }
+        val img = sysImgs[0]
+        val w = img.width.toInt()
+        val h = img.height.toInt()
+        val known = w > 0 && h > 0
+        val request = when {
+            known -> fit(w, h, x, y)
+            x != null && y != null && x > 0 && y > 0 -> Size(x, y)
+            else -> Size(UNKNOWN_SIZE, UNKNOWN_SIZE)
         }
-        if (w <= 0 || h <= 0) throw Exception("Invalid preview dimensions")
-        var bitmap = ctx.applicationContext.contentResolver.loadThumbnail(sysImgs[0].uri, Size(w, h), null)
+        val thumb = ctx.applicationContext.contentResolver.loadThumbnail(img.uri, request, null)
+        val size = if (known) request else fit(thumb.width, thumb.height, x, y)
         val stream = ByteArrayOutputStream()
-        bitmap = Bitmap.createScaledBitmap(bitmap, w, h, true)
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+        Bitmap.createScaledBitmap(thumb, size.width, size.height, true)
+            .compress(Bitmap.CompressFormat.JPEG, 90, stream)
         return stream.toByteArray()
+    }
+
+    /** Aspect-fits w/h into x/y, keeping both sides at least 1px; x/y omitted means w/h. */
+    private fun fit(w: Int, h: Int, x: Int?, y: Int?): Size {
+        if (x == null || y == null || x <= 0 || y <= 0) return Size(w, h)
+        val aspect = w.toFloat() / h.toFloat()
+        return if (x.toFloat() / y.toFloat() < aspect) {
+            Size(x, (x.toFloat() / aspect).toInt().coerceAtLeast(1))
+        } else {
+            Size((y.toFloat() * aspect).toInt().coerceAtLeast(1), y)
+        }
     }
 
     /** Full image, downscaled only (never upscaled) to fit size on the long edge. */
