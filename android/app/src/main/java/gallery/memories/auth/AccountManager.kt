@@ -1,6 +1,7 @@
 package gallery.memories.auth
 
 import android.util.Log
+import android.webkit.WebStorage
 import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
@@ -189,13 +190,21 @@ class AccountManager(
         store.saveUid(uid)
     }
 
-    /** Clears credentials and returns to the welcome page. Safe to call from any thread. */
+    /**
+     * Clears credentials and the account's WebView data, then returns to the welcome page.
+     * WebView cookies stay: the only one is the local server's auth cookie.
+     * Safe to call from any thread.
+     */
     fun loggedOut() {
         loginGeneration++
         tabs.close()
         toast(activity.getString(R.string.err_logged_out))
         deleteCredentials()
-        activity.runOnUiThread { activity.loadDefaultUrl() }
+        activity.runOnUiThread {
+            activity.binding.webview.clearCache(true)
+            WebStorage.getInstance().deleteAllData()
+            activity.loadDefaultUrl()
+        }
     }
 
     /** Persists new credentials and applies them to the HTTP clients. */

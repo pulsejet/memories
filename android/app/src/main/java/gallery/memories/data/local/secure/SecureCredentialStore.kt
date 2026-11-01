@@ -11,7 +11,7 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 
-/** Keystore-backed credential storage. Only the token is encrypted; the rest is plaintext prefs. */
+/** Keystore-backed credential storage. Only the token is encrypted; the rest is plaintext prefs. Also seals other secrets. */
 class SecureCredentialStore(private val context: Context) {
     companion object {
         private val TAG = SecureCredentialStore::class.java.simpleName
@@ -76,6 +76,25 @@ class SecureCredentialStore(private val context: Context) {
         context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
             .remove("url").remove("trustAll").remove("username").remove("uid")
             .remove("encryptedToken").remove("iv").apply()
+    }
+
+    /** Encrypts [plain] into an opaque string for [decrypt]. */
+    fun encrypt(plain: String): String {
+        val cipher = getCipher()
+        cipher.init(Cipher.ENCRYPT_MODE, getSecretKey())
+        val data = cipher.doFinal(plain.toByteArray())
+        return Base64.encodeToString(cipher.iv, Base64.NO_WRAP) + ":" + Base64.encodeToString(data, Base64.NO_WRAP)
+    }
+
+    /** Reverses [encrypt]. Null when [sealed] is unreadable, e.g. the Keystore key changed. */
+    fun decrypt(sealed: String): String? = try {
+        val (iv, data) = sealed.split(":", limit = 2)
+        val cipher = getCipher()
+        cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), IvParameterSpec(Base64.decode(iv, Base64.NO_WRAP)))
+        String(cipher.doFinal(Base64.decode(data, Base64.NO_WRAP)))
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to decrypt stored secret", e)
+        null
     }
 
     private fun generateNewKey() {
