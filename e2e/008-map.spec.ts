@@ -50,7 +50,7 @@ test.describe('@api Map', () => {
         expect(cluster.count).toBeGreaterThan(0);
         expect(cluster.center).toHaveLength(2);
         expect(cluster.preview).toBeDefined();
-        expect(typeof cluster.preview.fileid).toBe('number');
+        expect(typeof cluster.preview?.fileid).toBe('number');
 
         const dSM = distance(cluster.center, SANTA_MONICA_CENTER);
         const dVenice = distance(cluster.center, VENICE_CENTER);
@@ -68,7 +68,7 @@ test.describe('@api Map', () => {
         expect(expectedCity).not.toBeNull();
 
         // Verify the preview photo belongs to the expected city.
-        const info = await dav.imageInfo(cluster.preview.fileid, { basic: '1' });
+        const info = await dav.imageInfo(cluster.preview!.fileid, { basic: '1' });
         expect(info.basename).toBeDefined();
 
         const entry = DATASET[`primary/for-geo/${info.basename!}`];
