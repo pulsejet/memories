@@ -141,6 +141,7 @@ import ViewerBottomSheet from './ViewerBottomSheet.vue';
 import ViewerSheetGestures from './ViewerSheetGestures.vue';
 import MobileBottomBar from '@components/MobileBottomBar.vue';
 import XLoadingIcon from '@components/XLoadingIcon.vue';
+import * as ximg from '@components/frame/XImgCache';
 
 import PhotoSwipe, { type PhotoSwipeOptions } from 'photoswipe';
 import 'photoswipe/style.css';
@@ -1064,14 +1065,27 @@ async function openDynamic(anchorPhoto: IPhoto, timeline: TimelineState) {
     }
   });
 
-  showNewFile = ({ dayid, fileid }) => {
-    const pswp = photoswipe.value;
-
-    // Nothing to do unless the file is in this view and its day is in the list
+  showNewFile = async ({ dayid, fileid }) => {
+    // Nothing to do unless the file is in this view
     const detail = timeline.heads.get(dayid)?.day.detail ?? [];
     const dayIdx = detail.findIndex((p) => p.fileid === fileid);
+    if (dayIdx < 0) return;
+
+    // Cache the preview first so the slide is never blank.
+    try {
+      await ximg.fetchImage(
+        utils.getPreviewUrl({
+          photo: detail[dayIdx],
+          size: 'screen',
+        }),
+      );
+    } catch {
+      // pass
+    }
+
+    const pswp = photoswipe.value;
     const start = list.value.findIndex((p) => p.dayid === dayid);
-    if (!pswp || dayIdx < 0 || start < 0) return;
+    if (!pswp || start < 0) return;
 
     // Replace the stale photos of this day with the fetched ones
     const prevCount = list.value.filter((p) => p.dayid === dayid).length;
@@ -1082,12 +1096,15 @@ async function openDynamic(anchorPhoto: IPhoto, timeline: TimelineState) {
     globalCount.value = globals.count;
     globalAnchor.value = globals.anchor;
 
-    // Slides around both positions hold stale photos for their indices
+    // Slides around both positions hold stale photos for their indices.
     const [from, to] = [pswp.currIndex, globals.anchor + start + dayIdx];
-    pswp.goTo(to);
     for (let i = Math.min(from, to) - 3; i <= Math.max(from, to) + 3; i++) {
-      pswp.refreshSlideContent(i);
+      if (i !== from) {
+        pswp.refreshSlideContent(i);
+      }
     }
+    pswp.goTo(to);
+    pswp.refreshSlideContent(from);
   };
 
   pswp!.init();
