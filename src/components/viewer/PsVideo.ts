@@ -338,6 +338,7 @@ class VideoContentSetup {
     const source = document.createElement('source');
     source.src = src.src;
     source.type = src.type;
+    source.addEventListener('error', () => player.dispatchEvent(new Event('error')));
     player.appendChild(source);
     if (config.video_autoplay === 'true') {
       player.load();
@@ -387,7 +388,7 @@ class VideoContentSetup {
 
     hls.on(Hls.Events.ERROR, (_event, data) => {
       if (data?.fatal) {
-        void this.tryFailover(content);
+        player.dispatchEvent(new Event('error'));
       }
     });
   }

@@ -52,6 +52,10 @@ function onEmptied() {
   isBuffering.value = true;
 }
 
+function onError() {
+  isBuffering.value = false;
+}
+
 function attachVideo() {
   if (!props.video) return;
   const v = props.video;
@@ -66,6 +70,7 @@ function attachVideo() {
   v.addEventListener('seeked', onSeeked);
   v.addEventListener('canplay', onCanPlay);
   v.addEventListener('emptied', onEmptied);
+  v.addEventListener('error', onError);
 }
 
 function detachVideo(el: VideoController | null | undefined = props.video) {
@@ -78,6 +83,7 @@ function detachVideo(el: VideoController | null | undefined = props.video) {
   el?.removeEventListener('seeked', onSeeked);
   el?.removeEventListener('canplay', onCanPlay);
   el?.removeEventListener('emptied', onEmptied);
+  el?.removeEventListener('error', onError);
 }
 
 onMounted(attachVideo);
