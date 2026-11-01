@@ -63,8 +63,10 @@ const display = computed(() => formatParamValue(props.paramKey, props.modelValue
 function paint() {
   const el = inputEl.value;
   if (!el) return;
-  const p = ((props.modelValue - props.min) / (props.max - props.min)) * 100;
-  el.style.setProperty('--me-p', `${p}%`);
+  const percent = (v: number) => ((v - props.min) / (props.max - props.min)) * 100;
+  const [from, to] = [percent(props.defaultValue), percent(props.modelValue)].sort((a, b) => a - b);
+  el.style.setProperty('--me-from', `${from}%`);
+  el.style.setProperty('--me-to', `${to}%`);
 }
 
 function onInput(e: Event) {
@@ -92,6 +94,6 @@ function onIconKey() {
   }
 }
 
-watch(() => props.modelValue, paint);
+watch(() => [props.modelValue, props.defaultValue], paint);
 onMounted(paint);
 </script>

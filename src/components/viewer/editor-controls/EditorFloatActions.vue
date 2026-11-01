@@ -5,7 +5,7 @@
     :title="t('memories', 'Close')"
     @click="onClose"
   >
-    <Close :size="20" />
+    <Close :size="24" />
   </button>
   <button class="me-float-save me-glass me-clickable button-vue" :disabled="disabled" @click="onSave">
     {{ t('memories', 'Save') }}

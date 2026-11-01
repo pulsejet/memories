@@ -9,10 +9,10 @@
 
 // ---------------------------------------------------------------------------
 // Tokens. Only --me-accent is set from outside (Editor `accent` prop);
-// --me-accent-dim derives from it via color-mix, with a static fallback
-// for browsers without color-mix support.
+// --me-accent-dim and --me-accent-fg derive from it via color-mix, with
+// static fallbacks for browsers without color-mix support.
 // ---------------------------------------------------------------------------
-$me-bg: #0a0a0b;
+$me-bg: #000;
 $me-bg-2: #111113;
 $me-bg-3: #17171a;
 $me-bg-4: #1f1f23;
@@ -20,7 +20,7 @@ $me-line: rgba(255, 255, 255, 0.08);
 $me-line-2: rgba(255, 255, 255, 0.14);
 $me-text: #f2f2f3;
 $me-text-2: #a7a7ad;
-$me-text-3: #6d6d74;
+$me-text-3: #8e8e96;
 $me-accent: #4a9eff;
 $me-btn-grey: #3e3e46;
 $me-btn-grey-text: #ededf0;
@@ -48,6 +48,9 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   // accent color passed via the Editor prop gets a matching dim variant.
   --me-accent-dim: rgba(74, 158, 255, 0.18);
   --me-accent-dim: color-mix(in srgb, var(--me-accent) 18%, transparent);
+  // Theme accents are tuned for light surfaces; lift them for use on dark ones.
+  --me-accent-fg: #{$me-accent};
+  --me-accent-fg: color-mix(in srgb, var(--me-accent) 55%, white);
   --me-btn-grey: #{$me-btn-grey};
   --me-btn-grey-text: #{$me-btn-grey-text};
   --me-track: #{$me-track};
@@ -103,7 +106,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   }
 
   :focus-visible {
-    outline: 2px solid var(--me-accent);
+    outline: 2px solid var(--me-accent-fg);
     outline-offset: 2px;
     border-radius: 6px;
   }
@@ -214,12 +217,19 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     background: transparent;
     cursor: pointer;
     margin: 0;
-    --me-p: 50%;
+    --me-from: 0%;
+    --me-to: 0%;
+    --me-fill: linear-gradient(
+      to right,
+      var(--me-track) var(--me-from),
+      var(--me-accent-fg) var(--me-from) var(--me-to),
+      var(--me-track) var(--me-to)
+    );
 
     &::-webkit-slider-runnable-track {
       height: 3px;
       border-radius: 2px;
-      background: linear-gradient(to right, var(--me-accent) var(--me-p), var(--me-track) var(--me-p));
+      background: var(--me-fill);
     }
     &::-webkit-slider-thumb {
       -webkit-appearance: none;
@@ -247,12 +257,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     &::-moz-range-track {
       height: 3px;
       border-radius: 2px;
-      background: var(--me-track);
-    }
-    &::-moz-range-progress {
-      height: 3px;
-      border-radius: 2px;
-      background: var(--me-accent);
+      background: var(--me-fill);
     }
     &::-moz-range-thumb {
       width: 7px;
@@ -278,26 +283,17 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     &.me-grad-warm::-moz-range-track {
       background: linear-gradient(to right, #5b8def, #3a3a3f 48%, #ffb03a);
     }
-    &.me-grad-warm::-moz-range-progress {
-      background: transparent;
-    }
     &.me-grad-tint::-webkit-slider-runnable-track {
       background: linear-gradient(to right, #69c24a, #3a3a3f 48%, #d95fb0);
     }
     &.me-grad-tint::-moz-range-track {
       background: linear-gradient(to right, #69c24a, #3a3a3f 48%, #d95fb0);
     }
-    &.me-grad-tint::-moz-range-progress {
-      background: transparent;
-    }
     &.me-grad-sat::-webkit-slider-runnable-track {
       background: linear-gradient(to right, #4c4c52, #8a8a90 35%, #ff7847 75%, #ff3d2e);
     }
     &.me-grad-sat::-moz-range-track {
       background: linear-gradient(to right, #4c4c52, #8a8a90 35%, #ff7847 75%, #ff3d2e);
-    }
-    &.me-grad-sat::-moz-range-progress {
-      background: transparent;
     }
     &.me-grad-hue::-webkit-slider-runnable-track {
       background: linear-gradient(
@@ -327,9 +323,6 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
         hsl(360, 100%, 55%)
       );
     }
-    &.me-grad-hue::-moz-range-progress {
-      background: transparent;
-    }
   }
 
   // --- group label ------------------------------------------------------------
@@ -337,12 +330,10 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 10.5px;
-    font-weight: 500;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--me-text-3);
-    margin: 20px 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--me-text-2);
+    margin: 20px 0 8px;
 
     &:first-child {
       margin-top: 0;
@@ -358,23 +349,20 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   // --- option tiles ------------------------------------------------------------
   .me-ratio-btn,
   .me-tool-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 7px;
-    padding: 10px 2px 7px;
+    display: grid;
+    grid-template-rows: 24px auto;
+    place-items: center;
+    gap: 6px;
+    padding: 10px 2px 8px;
     background: var(--me-bg-3);
     border: 1px solid var(--me-line);
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--me-text-2);
-    font-size: 10.5px;
+    font-size: 12px;
     transition:
       border-color 0.15s,
       color 0.15s,
       background 0.15s;
-  }
-  .me-tool-btn {
-    gap: 6px;
   }
   .me-ratio-btn:hover,
   .me-tool-btn:hover {
@@ -383,8 +371,8 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   }
   .me-ratio-btn.is-active,
   .me-tool-btn.is-active {
-    color: var(--me-accent);
-    border-color: var(--me-accent);
+    color: var(--me-accent-fg);
+    border-color: var(--me-accent-fg);
     background: var(--me-accent-dim);
   }
   .me-ratio-btn .me-box {
@@ -510,7 +498,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     &.is-crop-mode {
       pointer-events: auto;
       cursor: grab;
-      box-shadow: 0 0 0 9999px rgba(10, 10, 11, 0.65);
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65);
       outline: 1.5px solid transparent;
     }
 
@@ -520,7 +508,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
 
     &.is-crop-mode.is-active {
       cursor: grabbing;
-      box-shadow: 0 0 0 9999px rgba(10, 10, 11, 0.55);
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
     }
   }
 
@@ -714,10 +702,13 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   }
 
   // --- floating actions (close + save replace the old top bar) ------------------
+  // Sized and placed to line up with the viewer's top bar.
   .me-float-close {
     position: absolute;
-    top: 14px;
-    left: 14px;
+    top: 8px;
+    left: 8px;
+    width: 44px;
+    height: 44px;
     z-index: 6;
     background: none;
     border: 0;
@@ -729,7 +720,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
   }
   .me-float-save {
     position: absolute;
-    top: 14px;
+    top: 11px;
     right: 14px;
     z-index: 6;
     display: flex;
@@ -741,7 +732,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     background: var(--me-glass-bg);
     color: var(--me-text);
     font-weight: 500;
-    font-size: 13px;
+    font-size: 14px;
     transition: filter 0.15s;
 
     &:hover {
@@ -780,9 +771,8 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     gap: 3px;
     padding: 11px 2px 9px;
     color: var(--me-text-2);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.01em;
     transition: color 0.18s;
     position: relative;
     border-radius: 8px 8px 0 0;
@@ -795,7 +785,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
       color: var(--me-text);
     }
     &.is-active svg {
-      color: var(--me-accent);
+      color: var(--me-accent-fg);
     }
   }
   .me-tab-indicator {
@@ -803,7 +793,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     bottom: -1px;
     height: 3px;
     border-radius: 3px 3px 0 0;
-    background: var(--me-accent);
+    background: var(--me-accent-fg);
     transition:
       left 0.28s cubic-bezier(0.2, 0, 0, 1),
       width 0.28s cubic-bezier(0.2, 0, 0, 1);
@@ -855,7 +845,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
       aspect-ratio: 4 / 3;
       max-height: 120px;
       padding: 0;
-      border-radius: 0;
+      border-radius: 8px;
       overflow: hidden;
       border: 2px solid transparent;
       transition: border-color 0.15s;
@@ -871,7 +861,7 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
     }
     .me-filter-name {
       display: block;
-      font-size: 11px;
+      font-size: 12px;
       color: var(--me-text-2);
       padding: 6px 0 2px;
       transition: color 0.15s;
@@ -880,10 +870,10 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
       color: var(--me-text);
     }
     &.is-active .me-thumb {
-      border-color: var(--me-accent);
+      border-color: var(--me-accent-fg);
     }
     &.is-active .me-filter-name {
-      color: var(--me-accent);
+      color: var(--me-accent-fg);
       font-weight: 500;
     }
   }
@@ -1118,11 +1108,11 @@ $me-changed-bg-hover: rgba(255, 255, 255, 0.2);
       background: rgba(255, 255, 255, 0.58);
     }
     &.is-hl {
-      background: var(--me-accent);
+      background: var(--me-accent-fg);
       opacity: 1;
     }
     &.is-major.is-hl {
-      background: var(--me-accent);
+      background: var(--me-accent-fg);
     }
     &.is-def::after {
       content: '';
