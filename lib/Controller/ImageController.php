@@ -488,7 +488,7 @@ final class ImageController extends ApiController
             // Get the file
             $file = $this->fs->getUserFile($id);
 
-            // Only images may be edited (restores the old getImagick IMAGICK_SAFE gate).
+            // Only images may be edited.
             $mime = $file->getMimeType();
             if (!\in_array($mime, Application::IMAGE_MIMES, true)) {
                 throw Exceptions::Forbidden('Not an image');

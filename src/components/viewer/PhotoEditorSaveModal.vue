@@ -187,7 +187,7 @@ watch(forceCopy, (forced) => {
 });
 
 // When the user opts into a copy but the name still matches the original,
-// suggest a distinct name so the backend "target exists" check does not fire.
+// suggest a distinct name so the backend does not auto-rename it.
 watch(saveAsCopy, (copy) => {
   if (copy && !props.isLivePhoto && name.value === originalName.value) {
     name.value = suggestCopyName(originalName.value, format.value);
