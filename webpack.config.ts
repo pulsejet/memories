@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -32,7 +33,15 @@ export default {
   target: 'web',
   mode: buildMode,
   devtool: 'source-map',
-  cache: isDev ? { type: 'filesystem' } : false,
+  cache: isDev
+    ? {
+        type: 'filesystem',
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+        buildDependencies: {
+          config: fs.globSync(path.resolve(__dirname, 'webpack*.ts')),
+        },
+      }
+    : false,
 
   context: path.resolve(__dirname, 'src'),
 
