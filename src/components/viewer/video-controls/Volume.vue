@@ -26,6 +26,7 @@
         :style="{ '--m-vc-fill': `${sliderValue}%` }"
         :aria-label="t('memories', 'Volume')"
         @input="onSliderInput"
+        @keydown="onSliderKeyDown"
       />
     </div>
   </div>
@@ -70,6 +71,12 @@ function onSliderInput(event: Event) {
   if (props.video) {
     props.video.volume = Number((event.target as HTMLInputElement).value) / 100;
     props.video.muted = false;
+  }
+}
+
+function onSliderKeyDown(event: KeyboardEvent) {
+  if (event.key.startsWith('Arrow')) {
+    event.stopPropagation();
   }
 }
 
