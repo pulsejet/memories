@@ -617,8 +617,9 @@ function touchMoveSelect(touch: Touch, rowIdx: number) {
   );
 
   // Which photo is the cursor over, if any
-  const elem: any = document
-    .elementsFromPoint(touch.clientX, clampedY)
+  const elementRoot = props.recycler?.getRootNode() as DocumentOrShadowRoot | undefined;
+  const elem: any = elementRoot
+    ?.elementsFromPoint(touch.clientX, clampedY)
     .find((e) => e.classList.contains('p-outer-super'));
   let overPhoto: IPhoto | null = elem?.__photo;
   if ((overPhoto?.flag ?? 0) & constants.FLAG_PLACEHOLDER) overPhoto = null;
