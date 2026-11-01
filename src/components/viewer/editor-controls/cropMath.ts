@@ -24,6 +24,19 @@ export interface HandleDragContext {
   ratio: number | null;
 }
 
+export interface PinchContext {
+  startFocalX: number;
+  startFocalY: number;
+  startScale: number;
+  startPx: number;
+  startPy: number;
+  startW: number;
+  startH: number;
+  W: number;
+  H: number;
+  straightenDeg: number;
+}
+
 export interface HandleDragResult {
   cropX: number;
   cropY: number;
@@ -43,6 +56,8 @@ export interface HandleDragResult {
   canExpandX: boolean;
   canExpandY: boolean;
 }
+
+const MIN_CROP = 0.02;
 
 function clamp(v: number, lo: number, hi: number): number {
   return Math.min(hi, Math.max(lo, v));
@@ -96,8 +111,8 @@ export function tiltZoom(
 }
 
 export function effectiveCrop(state: EditorState, W: number, H: number): CropGeometry {
-  const w0 = clamp(state.cropW, 0.02, 1) * W;
-  const h0 = clamp(state.cropH, 0.02, 1) * H;
+  const w0 = clamp(state.cropW, MIN_CROP, 1) * W;
+  const h0 = clamp(state.cropH, MIN_CROP, 1) * H;
   const maxPx0 = Math.max(0, W / 2 - 1);
   const maxPy0 = Math.max(0, H / 2 - 1);
   const px = clamp(state.cropX * W, -maxPx0, maxPx0);
@@ -137,8 +152,8 @@ export function commitVisibleCrop(
   return {
     cropX: clamp(px / W, -0.5, 0.5),
     cropY: clamp(py / H, -0.5, 0.5),
-    cropW: clamp((w * m) / W, 0.02, 1),
-    cropH: clamp((h * m) / H, 0.02, 1),
+    cropW: clamp((w * m) / W, MIN_CROP, 1),
+    cropH: clamp((h * m) / H, MIN_CROP, 1),
   };
 }
 
@@ -180,6 +195,32 @@ export function applyPanDelta(
   const s = Math.sin(rad);
   const rawPx = startPx + du * c + dv * s;
   const rawPy = -du * s + dv * c + startPy;
+  const clamped = clampPan(rawPx, rawPy, w, h, W, H, straightenDeg);
+  return commitVisibleCrop(clamped.px, clamped.py, w, h, W, H, straightenDeg);
+}
+
+/** Scales the crop by `1 / zoom`, keeping the image point under the fingers at the focal offset from the box center. */
+export function solvePinch(
+  ctx: PinchContext,
+  zoom: number,
+  focalX: number,
+  focalY: number,
+): Pick<EditorState, 'cropX' | 'cropY' | 'cropW' | 'cropH'> {
+  const { startFocalX, startFocalY, startScale, startPx, startPy, startW, startH, W, H, straightenDeg } = ctx;
+  const rad = (straightenDeg * Math.PI) / 180;
+  const c = Math.cos(rad);
+  const s = Math.sin(rad);
+  const { dx, dy } = projectedHalfExtents(startW, startH, Math.abs(c), Math.abs(s));
+
+  const zMin = Math.min(1, Math.max((2 * dx) / W, (2 * dy) / H));
+  const zMax = Math.max(1, Math.min(startW / (MIN_CROP * W), startH / (MIN_CROP * H)));
+  const z = clamp(zoom, zMin, zMax);
+  const w = startW / z;
+  const h = startH / z;
+
+  const scale = startScale * z;
+  const rawPx = startPx + (startFocalX * c + startFocalY * s) / startScale - (focalX * c + focalY * s) / scale;
+  const rawPy = startPy + (-startFocalX * s + startFocalY * c) / startScale - (-focalX * s + focalY * c) / scale;
   const clamped = clampPan(rawPx, rawPy, w, h, W, H, straightenDeg);
   return commitVisibleCrop(clamped.px, clamped.py, w, h, W, H, straightenDeg);
 }

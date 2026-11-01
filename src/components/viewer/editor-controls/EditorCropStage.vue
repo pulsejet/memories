@@ -47,8 +47,9 @@ import {
   parseRatio,
   rotateCrop90,
   solveHandleDrag,
+  solvePinch,
 } from './cropMath';
-import type { HandleDragContext, HandleDragResult } from './cropMath';
+import type { HandleDragContext, HandleDragResult, PinchContext } from './cropMath';
 import type { CropHandle, EditorSection, EditorState } from './types';
 
 const props = withDefaults(
@@ -106,6 +107,8 @@ let stageRo: ResizeObserver | null = null;
 let mediaMo: MutationObserver | null = null;
 let activePointerId: number | null = null;
 let cleanupDrag: (() => void) | null = null;
+let hammer: HammerManager | null = null;
+let pinch: { ctx: PinchContext; startZoom: number } | null = null;
 
 const isCropMode = computed(() => props.section === 'crop' && !props.state.comparing);
 const dims = computed(() => orientedDims(natW.value, natH.value, props.state.rotate));
@@ -137,10 +140,14 @@ const boxRect = computed(() => {
   };
 });
 
-const shiftStyle = computed(() => {
+const shift = computed(() => {
   const { top, right, bottom, left } = stageBox.value;
-  return { transform: `translate3d(${(left - right) / 2}px, ${(top - bottom - barInset.value) / 2}px, 0)` };
+  return { x: (left - right) / 2, y: (top - bottom - barInset.value) / 2 };
 });
+
+const shiftStyle = computed(() => ({
+  transform: `translate3d(${shift.value.x}px, ${shift.value.y}px, 0)`,
+}));
 
 const turntableStyle = computed(() => ({
   transform: turntableTransform.value,
@@ -477,6 +484,65 @@ function onPanStart(e: PointerEvent) {
   window.addEventListener('pointercancel', onUp);
 }
 
+/** Offset of a client point from the crop box center. */
+function boxOffset(p: HammerPoint) {
+  const rect = stageEl.value!.getBoundingClientRect();
+  return {
+    x: p.x - rect.left - rect.width / 2 - shift.value.x,
+    y: p.y - rect.top - rect.height / 2 - shift.value.y,
+  };
+}
+
+function onPinchStart(e: HammerInput) {
+  if (!isCropMode.value) return;
+  cleanupDrag?.();
+  if (settleTimer) clearTimeout(settleTimer);
+  animateTransform.value = false;
+  interacting.value = true;
+  cleanupDrag = onPinchEnd;
+
+  const focal = boxOffset(e.center);
+  const g = geom.value;
+  pinch = {
+    startZoom: e.scale,
+    ctx: {
+      startFocalX: focal.x,
+      startFocalY: focal.y,
+      startScale: scaleSettled.value,
+      startPx: g.px,
+      startPy: g.py,
+      startW: g.w,
+      startH: g.h,
+      W: dims.value.W,
+      H: dims.value.H,
+      straightenDeg: props.state.straighten,
+    },
+  };
+}
+
+function onPinchMove(e: HammerInput) {
+  if (!pinch) return;
+  const focal = boxOffset(e.center);
+  Object.assign(props.state, solvePinch(pinch.ctx, e.scale / pinch.startZoom, focal.x, focal.y));
+}
+
+function onPinchEnd() {
+  pinch = null;
+  interacting.value = false;
+  cleanupDrag = null;
+}
+
+async function setupHammer() {
+  const { default: Hammer } = await import('hammerjs');
+  if (!stageEl.value || hammer) return;
+
+  hammer = new Hammer.Manager(stageEl.value, { inputClass: Hammer.TouchInput, touchAction: 'none' });
+  hammer.add(new Hammer.Pinch());
+  hammer.on('pinchstart', onPinchStart);
+  hammer.on('pinchmove', onPinchMove);
+  hammer.on('pinchend pinchcancel', onPinchEnd);
+}
+
 function measureStage() {
   const el = stageEl.value;
   if (!el) return;
@@ -518,6 +584,7 @@ function detectMediaSize() {
 }
 
 onMounted(() => {
+  void setupHammer();
   measureStage();
   detectMediaSize();
   if (window.ResizeObserver && stageEl.value) {
@@ -542,6 +609,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   cleanupDrag?.();
+  hammer?.destroy();
   stageRo?.disconnect();
   mediaMo?.disconnect();
   window.removeEventListener('resize', measureStage);
