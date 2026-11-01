@@ -324,6 +324,8 @@ function onHandleStart(handle: CropHandle, e: PointerEvent) {
     H,
     straightenDeg: props.state.straighten,
     ratio: parseRatio(props.state.ratio, W, H, ratioInverted.value),
+    stageW: stageW.value,
+    stageH: stageH.value,
   };
 
   let lastClientX = e.clientX;

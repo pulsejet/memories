@@ -22,6 +22,8 @@ export interface HandleDragContext {
   H: number;
   straightenDeg: number;
   ratio: number | null;
+  stageW: number;
+  stageH: number;
 }
 
 export interface PinchContext {
@@ -279,6 +281,8 @@ export function solveHandleDrag(
     H,
     straightenDeg,
     ratio,
+    stageW,
+    stageH,
   } = ctx;
 
   const screenDx = clientX - startClientX;
@@ -286,11 +290,17 @@ export function solveHandleDrag(
   const su = handle.includes('e') ? 1 : handle.includes('w') ? -1 : 0;
   const sv = handle.includes('s') ? 1 : handle.includes('n') ? -1 : 0;
 
-  const outX = su * screenDx;
-  const outY = sv * screenDy;
+  const rawOutX = su * screenDx;
+  const rawOutY = sv * screenDy;
 
   const sw0 = startW * startScale;
   const sh0 = startH * startScale;
+
+  // The box edge stops at the stage boundary; the raw distance still drives the boost.
+  const roomX = Math.max(0, su !== 0 ? 0.5 * (stageW - sw0) : stageW - sw0);
+  const roomY = Math.max(0, sv !== 0 ? 0.5 * (stageH - sh0) : stageH - sh0);
+  const outX = Math.min(rawOutX, roomX);
+  const outY = Math.min(rawOutY, roomY);
   const minScreen = Math.max(24, Math.min(sw0, sh0) * 0.08);
 
   const rad = (straightenDeg * Math.PI) / 180;
@@ -333,7 +343,8 @@ export function solveHandleDrag(
   let zY = Math.max(1, boostZoomY);
 
   if (ratio !== null) {
-    const effOutX = su !== 0 && sv !== 0 ? 0.5 * (outX + outY * ratio) : su !== 0 ? outX : outY * ratio;
+    const rawEffOutX = su !== 0 && sv !== 0 ? 0.5 * (rawOutX + rawOutY * ratio) : su !== 0 ? rawOutX : rawOutY * ratio;
+    const effOutX = Math.min(rawEffOutX, roomX, roomY * ratio);
 
     let maxDh = Infinity;
     for (let i = 0; i < 4; i++) {
@@ -356,11 +367,16 @@ export function solveHandleDrag(
     const maxZ = Math.max(1, wMax / Math.max(1, startW + effOutX / startScale));
     maxBoostZoomX = maxZ;
     maxBoostZoomY = maxZ;
-    boostDistX = effOutX;
-    boostDistY = effOutX / ratio;
-    canExpandX = effOutX > 2 && z < maxZ - 1e-4 && w < wMax - 1e-3;
+    boostDistX = rawEffOutX;
+    boostDistY = rawEffOutX / ratio;
+    canExpandX = rawEffOutX > 2 && z < maxZ - 1e-4 && w < wMax - 1e-3;
     canExpandY = canExpandX;
   } else {
+    // Corners share one zoom so both dragged edges stay under the finger.
+    if (su !== 0 && sv !== 0) {
+      zX = Math.max(zX, zY);
+      zY = zX;
+    }
     scaleDrag = startScale / Math.max(zX, zY);
     const minW = minScreen / scaleDrag;
     const minH = minScreen / scaleDrag;
@@ -416,10 +432,10 @@ export function solveHandleDrag(
 
     maxBoostZoomX = su !== 0 ? maxBoostFor(wMax, startW, actOutX, zY) : 1;
     maxBoostZoomY = sv !== 0 ? maxBoostFor(hMax, startH, actOutY, zX) : 1;
-    boostDistX = actOutX;
-    boostDistY = actOutY;
-    canExpandX = su !== 0 && actOutX > 2 && zX < maxBoostZoomX - 1e-4 && w < wMax - 1e-3;
-    canExpandY = sv !== 0 && actOutY > 2 && zY < maxBoostZoomY - 1e-4 && h < hMax - 1e-3;
+    boostDistX = su !== 0 ? rawOutX : 0;
+    boostDistY = sv !== 0 ? rawOutY : 0;
+    canExpandX = su !== 0 && rawOutX > 2 && zX < maxBoostZoomX - 1e-4 && w < wMax - 1e-3;
+    canExpandY = sv !== 0 && rawOutY > 2 && zY < maxBoostZoomY - 1e-4 && h < hMax - 1e-3;
   }
 
   const uc = su > 0 ? uMin0 + w / 2 : su < 0 ? uMax0 - w / 2 : uc0;
@@ -431,8 +447,8 @@ export function solveHandleDrag(
 
   const boxW = w * scaleDrag;
   const boxH = h * scaleDrag;
-  const boxX = su * (0.5 * boxW + 0.5 * sw0 - startW * zX * scaleDrag);
-  const boxY = sv * (0.5 * boxH + 0.5 * sh0 - startH * zY * scaleDrag);
+  const boxX = (su * (boxW - sw0)) / 2;
+  const boxY = (sv * (boxH - sh0)) / 2;
 
   const committed = commitVisibleCrop(clamped.px, clamped.py, w, h, W, H, straightenDeg);
   return {
