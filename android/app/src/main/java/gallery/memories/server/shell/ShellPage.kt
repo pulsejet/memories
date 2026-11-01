@@ -30,7 +30,7 @@ object ShellPage {
         "media-src 'self' blob: data:",
         "connect-src 'self' https: http: wss: ws: data: blob:",
         "font-src 'self' data:",
-        "frame-src 'self' https://www.openstreetmap.org",
+        "frame-src 'none'",
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",

@@ -35,7 +35,10 @@ class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient(
     }
 
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-        if (!request.isForMainFrame) return false
+        if (!request.isForMainFrame) {
+            Log.w(TAG, "Blocked subframe navigation to ${request.url}")
+            return true
+        }
         return handleMainFrame(view, request.url)
     }
 
