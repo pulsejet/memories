@@ -66,7 +66,7 @@ import EditorMobileBar from './EditorMobileBar.vue';
 import EditorSidebar from './EditorSidebar.vue';
 import EditorFloatActions from './EditorFloatActions.vue';
 import { DEFAULT_PARAMS, INITIAL_STATE } from './types';
-import type { EditorSection, EditorState } from './types';
+import type { EditorParams, EditorSection, EditorState, MobileKey, ParamKey } from './types';
 
 const props = withDefaults(
   defineProps<{
@@ -88,11 +88,11 @@ const emit = defineEmits<{
 // Single source of truth: ALL editor state lives here. Every mutation is
 // forwarded to the host as a full snapshot via `change`.
 const state = reactive<EditorState>({ ...INITIAL_STATE });
-const defaults = reactive<Record<string, number>>({ ...DEFAULT_PARAMS });
+const defaults = reactive<EditorParams>({ ...DEFAULT_PARAMS });
 
 const section = ref<EditorSection>('crop');
 /** Slider currently loaded in the mobile ruler pill. Null = nothing selected. */
-const mobileKey = ref<string | null>(null);
+const mobileKey = ref<MobileKey | null>(null);
 
 /** Whether the state differs from the pristine defaults (drives the save button). */
 const hasEdits = computed(() => {
@@ -105,19 +105,17 @@ const hasEdits = computed(() => {
 
 const cropStage = useTemplateRef('cropStage');
 
-function setParam(key: string, v: number) {
-  (state as any)[key] = v;
+function setParam(key: ParamKey, v: number) {
+  state[key] = v;
 }
 
-function resetParam(key: string) {
-  if (defaults[key] !== undefined) {
-    if (key === 'straighten') cropStage.value?.settle();
-    (state as any)[key] = defaults[key];
-  }
+function resetParam(key: ParamKey) {
+  if (key === 'straighten') cropStage.value?.settle();
+  state[key] = defaults[key];
 }
 
 function resetAll() {
-  for (const k of Object.keys(defaults)) (state as any)[k] = defaults[k];
+  for (const k of Object.keys(defaults) as ParamKey[]) state[k] = defaults[k];
   state.rotate = 0;
   state.flipH = 1;
   state.flipV = 1;

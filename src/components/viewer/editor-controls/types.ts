@@ -35,6 +35,14 @@ export interface EditorParams {
 /** Key of any adjustable numeric parameter (slider). */
 export type ParamKey = keyof EditorParams;
 
+/** Mobile ruler selection: a slider key or the ratio pill (which has no slider). */
+export type MobileKey = ParamKey | 'ratio';
+
+/** Narrow a mobile selection to a slider key (excludes the ratio pill). */
+export function isParamKey(key: MobileKey | null | undefined): key is ParamKey {
+  return !!key && key !== 'ratio';
+}
+
 export interface SliderDef {
   key: ParamKey;
   min: number;
@@ -63,7 +71,10 @@ export const SLIDER_DEFS: SliderDef[] = [
   { key: 'straighten', min: -45, max: 45, val: 0, step: 0.5, group: 'crop' },
 ];
 
-export const PARAM_DEFS: Record<string, SliderDef> = Object.fromEntries(SLIDER_DEFS.map((d) => [d.key, d]));
+export const PARAM_DEFS: Record<ParamKey, SliderDef> = Object.fromEntries(SLIDER_DEFS.map((d) => [d.key, d])) as Record<
+  ParamKey,
+  SliderDef
+>;
 
 /** Display name per adjust slider key. */
 export const PARAM_NAMES: Record<ParamKey, string> = {
@@ -235,7 +246,7 @@ export const INITIAL_STATE: EditorState = {
 
 // --- Helpers ---
 
-export function formatParamValue(key: string, v: number): string {
+export function formatParamValue(key: ParamKey, v: number): string {
   if (key === 'straighten') return `${v > 0 ? '+' : ''}${v}°`;
   return `${Math.round(v)}`;
 }

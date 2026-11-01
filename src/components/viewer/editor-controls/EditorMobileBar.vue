@@ -60,7 +60,7 @@
         >
           <span class="me-chip-icon"><component :is="iconFor(k)" :size="17" /></span>
           <span>{{ PARAM_NAMES[k] }}</span>
-          <span class="me-chip-val">{{ formatParamValue(k, state[k as keyof EditorParams]) }}</span>
+          <span class="me-chip-val">{{ formatParamValue(k, state[k]) }}</span>
         </button>
       </template>
       <template v-else-if="section === 'crop'">
@@ -140,21 +140,30 @@ import Tune from 'vue-material-design-icons/Tune.vue';
 import { iconFor } from './paramIcons';
 import * as nativex from '@native';
 import { t } from '@services/l10n';
-import { ADJUST_KEYS, FILTER_GROUPS, PARAM_DEFS, PARAM_NAMES, RATIOS, formatParamValue, filtersInGroup } from './types';
-import type { EditorParams, EditorSection, EditorState, ParamKey } from './types';
+import {
+  ADJUST_KEYS,
+  FILTER_GROUPS,
+  PARAM_DEFS,
+  PARAM_NAMES,
+  RATIOS,
+  formatParamValue,
+  filtersInGroup,
+  isParamKey,
+} from './types';
+import type { EditorParams, EditorSection, EditorState, MobileKey, ParamKey } from './types';
 
 const props = defineProps<{
   state: EditorState;
-  defaults: Record<string, number>;
+  defaults: EditorParams;
   section: EditorSection;
-  mobileKey: string | null;
+  mobileKey: MobileKey | null;
 }>();
 
 const emit = defineEmits<{
   'update:section': [s: EditorSection];
-  'update:mobile-key': [k: string | null];
-  'update:param': [key: string, v: number];
-  'reset:param': [key: string];
+  'update:mobile-key': [k: MobileKey | null];
+  'update:param': [key: ParamKey, v: number];
+  'reset:param': [key: ParamKey];
   'update:preset': [id: string];
   'update:ratio': [id: string];
   'rotate-left': [];
@@ -172,20 +181,19 @@ const tabs = [
 const showRuler = computed(() => props.section !== 'filters' && !!rulerDef.value);
 const showRatioPill = computed(() => props.section === 'crop' && props.mobileKey === 'ratio');
 const ratioLabel = computed(() => RATIOS.find((r) => r.id === props.state.ratio)?.label ?? '');
-const rulerDef = computed(() => (props.mobileKey ? PARAM_DEFS[props.mobileKey] : undefined));
-const rulerValue = computed(() => (props.mobileKey ? (props.state as any)[props.mobileKey] : 0));
-const rulerText = computed(() => (props.mobileKey ? formatParamValue(props.mobileKey, rulerValue.value) : ''));
-const rulerLabel = computed(() => (props.mobileKey ? PARAM_NAMES[props.mobileKey as ParamKey] : ''));
+const rulerDef = computed(() => (isParamKey(props.mobileKey) ? PARAM_DEFS[props.mobileKey] : undefined));
+const rulerValue = computed(() => (isParamKey(props.mobileKey) ? props.state[props.mobileKey] : 0));
+const rulerText = computed(() =>
+  isParamKey(props.mobileKey) ? formatParamValue(props.mobileKey, rulerValue.value) : '',
+);
+const rulerLabel = computed(() => (isParamKey(props.mobileKey) ? PARAM_NAMES[props.mobileKey] : ''));
 const rulerIcon = computed(() => (props.mobileKey ? iconFor(props.mobileKey) : ''));
 const rulerChanged = computed(
-  () =>
-    !!props.mobileKey &&
-    props.defaults[props.mobileKey] !== undefined &&
-    (props.state as any)[props.mobileKey] !== props.defaults[props.mobileKey],
+  () => isParamKey(props.mobileKey) && props.state[props.mobileKey] !== props.defaults[props.mobileKey],
 );
 
-function isChanged(k: string): boolean {
-  return props.defaults[k] !== undefined && (props.state as any)[k] !== props.defaults[k];
+function isChanged(k: ParamKey): boolean {
+  return props.state[k] !== props.defaults[k];
 }
 
 // ---------------------------------------------------------------------------
@@ -221,15 +229,15 @@ let lastVibrateValue = 0;
 
 function buildRuler() {
   const key = props.mobileKey;
-  const def = key ? PARAM_DEFS[key] : undefined;
-  if (!key || !def) {
+  if (!isParamKey(key)) {
     rulerHtml.value = '';
     return;
   }
+  const def = PARAM_DEFS[key];
   const step = def.step ?? 1;
   rulerSteps = Math.round((def.max - def.min) / step);
   rulerHalf = -1; // force tick repositioning for the new range
-  lastVibrateValue = (props.state as any)[key] ?? 0;
+  lastVibrateValue = props.state[key];
   let html = '';
   if (def.cls && RULER_GRADIENTS[def.cls]) {
     html += `<span class="me-ruler-grad" style="background:${RULER_GRADIENTS[def.cls]}"></span>`;
@@ -251,8 +259,8 @@ function ticks(): NodeListOf<HTMLElement> {
 
 function layoutRuler() {
   const key = props.mobileKey;
-  const def = key ? PARAM_DEFS[key] : undefined;
-  if (!key || !def || !trackEl.value || !rulerEl.value) return;
+  if (!isParamKey(key) || !trackEl.value || !rulerEl.value) return;
+  const def = PARAM_DEFS[key];
   const step = def.step ?? 1;
   const half = rulerEl.value.clientWidth / 2;
   if (half > 0 && Math.abs(half - rulerHalf) > 0.5) {
@@ -269,13 +277,13 @@ function layoutRuler() {
   }
   // Never fight the user's scroll: skip writes mid-session or when the
   // change itself came from scrolling.
-  const idx = ((props.state as any)[key] - def.min) / step;
+  const idx = (props.state[key] - def.min) / step;
   if (!fromScroll && !inSession && scrollerEl.value) {
     const target = idx * SPACING;
     if (Math.abs(scrollerEl.value.scrollLeft - target) > 0.5) scrollerEl.value.scrollLeft = target;
   }
   // Range highlight: ticks from clamped 0-anchor out to current value.
-  const cur = parseFloat((props.state as any)[key]);
+  const cur = props.state[key];
   const anchor = Math.min(def.max, Math.max(def.min, 0));
   const lo = Math.min(anchor, cur);
   const hi = Math.max(anchor, cur);
@@ -287,12 +295,12 @@ function layoutRuler() {
 
 function rulerSet(v: number) {
   const key = props.mobileKey;
-  const def = key ? PARAM_DEFS[key] : undefined;
-  if (!key || !def) return;
+  if (!isParamKey(key)) return;
+  const def = PARAM_DEFS[key];
   const step = def.step ?? 1;
   v = Math.min(def.max, Math.max(def.min, v));
   v = Math.round(v / step) * step;
-  if (Math.abs(v - (props.state as any)[key]) > 1e-9) {
+  if (Math.abs(v - props.state[key]) > 1e-9) {
     if (Math.abs(v - lastVibrateValue) >= VIBRATE_EVERY) {
       lastVibrateValue = v;
       nativex.vibrate(VIBRATE_MS);
@@ -305,17 +313,17 @@ function endRulerScroll() {
   inSession = false;
   scrolling.value = false;
   const key = props.mobileKey;
-  const def = key ? PARAM_DEFS[key] : undefined;
-  if (!key || !def || !scrollerEl.value) return;
+  if (!isParamKey(key) || !scrollerEl.value) return;
+  const def = PARAM_DEFS[key];
   const step = def.step ?? 1;
-  const target = (((props.state as any)[key] - def.min) / step) * SPACING;
+  const target = ((props.state[key] - def.min) / step) * SPACING;
   if (Math.abs(scrollerEl.value.scrollLeft - target) > 0.5) scrollerEl.value.scrollLeft = target;
 }
 
 function onScroll() {
   const key = props.mobileKey;
-  const def = key ? PARAM_DEFS[key] : undefined;
-  if (!key || !def || !scrollerEl.value) return;
+  if (!isParamKey(key) || !scrollerEl.value) return;
+  const def = PARAM_DEFS[key];
   inSession = true;
   scrolling.value = true;
   const step = def.step ?? 1;
@@ -344,11 +352,11 @@ function onWheel(e: WheelEvent) {
 
 function onRulerKey(e: KeyboardEvent) {
   const key = props.mobileKey;
-  const def = key ? PARAM_DEFS[key] : undefined;
-  if (!key || !def) return;
+  if (!isParamKey(key)) return;
+  const def = PARAM_DEFS[key];
   const step = def.step ?? 1;
   const big = e.shiftKey ? step * 10 : step;
-  const cur = (props.state as any)[key];
+  const cur = props.state[key];
   if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
     e.preventDefault();
     rulerSet(cur - big);
@@ -366,7 +374,7 @@ function onRulerKey(e: KeyboardEvent) {
 
 function onRulerReset() {
   nativex.playTouchSound();
-  if (props.mobileKey && rulerChanged.value) emit('reset:param', props.mobileKey);
+  if (isParamKey(props.mobileKey) && rulerChanged.value) emit('reset:param', props.mobileKey);
 }
 
 function onPickRatio(id: string) {
@@ -380,7 +388,7 @@ function onSection(s: EditorSection) {
   emit('update:section', s);
 }
 
-function onMobileKey(k: string | null) {
+function onMobileKey(k: MobileKey | null) {
   nativex.playTouchSound();
   emit('update:mobile-key', k);
 }

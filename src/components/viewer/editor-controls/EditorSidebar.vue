@@ -24,7 +24,7 @@
           v-for="d in lightSliders"
           :key="d.key"
           :param-key="d.key"
-          :model-value="state[d.key as keyof EditorParams]"
+          :model-value="state[d.key]"
           :default-value="defaults[d.key] ?? d.val"
           :min="d.min"
           :max="d.max"
@@ -39,7 +39,7 @@
           v-for="d in colorSliders"
           :key="d.key"
           :param-key="d.key"
-          :model-value="state[d.key as keyof EditorParams]"
+          :model-value="state[d.key]"
           :default-value="defaults[d.key] ?? d.val"
           :min="d.min"
           :max="d.max"
@@ -54,7 +54,7 @@
           v-for="d in detailSliders"
           :key="d.key"
           :param-key="d.key"
-          :model-value="state[d.key as keyof EditorParams]"
+          :model-value="state[d.key]"
           :default-value="defaults[d.key] ?? d.val"
           :min="d.min"
           :max="d.max"
@@ -155,11 +155,11 @@ import * as nativex from '@native';
 import { t } from '@services/l10n';
 import { iconFor } from './paramIcons';
 import { FILTER_GROUPS, RATIOS, SLIDER_DEFS, filtersInGroup } from './types';
-import type { EditorParams, EditorSection, EditorState } from './types';
+import type { EditorParams, EditorSection, EditorState, ParamKey } from './types';
 
 const props = defineProps<{
   state: EditorState;
-  defaults: Record<string, number>;
+  defaults: EditorParams;
   section: EditorSection;
   imageWidth?: number;
   imageHeight?: number;
@@ -167,8 +167,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:section': [s: EditorSection];
-  'update:param': [key: string, v: number];
-  'reset:param': [key: string];
+  'update:param': [key: ParamKey, v: number];
+  'reset:param': [key: ParamKey];
   'update:preset': [id: string];
   'update:ratio': [id: string];
   'rotate-left': [];

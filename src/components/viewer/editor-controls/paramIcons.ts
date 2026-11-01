@@ -13,12 +13,14 @@ import PaletteSwatch from 'vue-material-design-icons/PaletteSwatch.vue';
 import Shadows from 'vue-material-design-icons/WeatherNight.vue';
 import Thermometer from 'vue-material-design-icons/Thermometer.vue';
 
+import type { ParamKey } from './types';
+
 /**
  * Param key → Material Design icon component.
  * Used by the data-driven slider loops (sidebar + mobile strip) so new
  * sliders only touch `types.ts` plus one entry here.
  */
-export const PARAM_ICONS: Record<string, Component> = {
+export const PARAM_ICONS: Record<ParamKey, Component> = {
   brightness: Brightness,
   exposure: CameraIris,
   contrast: Contrast,
@@ -35,5 +37,5 @@ export const PARAM_ICONS: Record<string, Component> = {
 };
 
 export function iconFor(key: string): Component | undefined {
-  return PARAM_ICONS[key];
+  return (PARAM_ICONS as Partial<Record<string, Component>>)[key];
 }
