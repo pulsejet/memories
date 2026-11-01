@@ -1,7 +1,9 @@
 <template>
-  <div v-if="shown" class="search-overlay" :class="{ visible }" @click.stop="close">
-    <Searchbar :auto-focus="true" @select="close" />
-  </div>
+  <Teleport to="body">
+    <div v-if="shown" class="search-overlay" :class="{ visible }" @click.stop="close">
+      <Searchbar :auto-focus="true" @select="close" />
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -64,7 +66,7 @@ function close($event?: any) {
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.7);
-  z-index: 1000;
+  z-index: var(--m-z-index-search-overlay);
   backdrop-filter: blur(2px);
   padding-top: 20px;
   transition: opacity 0.15s ease-out;

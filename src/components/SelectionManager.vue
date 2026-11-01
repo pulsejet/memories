@@ -1132,7 +1132,7 @@ defineExpose({
   opacity: 0.97;
   display: flex;
   vertical-align: middle;
-  z-index: 300; // above top-matter and scroller
+  z-index: var(--m-z-index-top-bar); // above content and nc-header
   box-sizing: border-box;
 
   > .text {

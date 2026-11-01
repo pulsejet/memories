@@ -1,11 +1,12 @@
-// Top bar is above everything else on mobile
-body:has(.memories-top-bar) > header {
-  @media (max-width: 1024px) {
-    z-index: 0 !important;
+html {
+  --m-z-index-header: 2000;
+  --m-z-index-viewer: 2010;
+  --m-z-index-top-bar: 2020;
+  --m-z-index-search-overlay: 2030;
+
+  header#header {
+    z-index: var(--m-z-index-header) !important;
   }
-}
-body:has(.memories-viewer, .search-overlay) > header {
-  z-index: 0 !important;
 }
 
 // Allow hiding app name (PublicShareHeader)

@@ -1619,7 +1619,7 @@ function updateAlbums() {
 
 <style lang="scss" scoped>
 .viewer-outer {
-  z-index: 2020;
+  z-index: var(--m-z-index-viewer); // above nc-header
   width: v-bind(outerWidth) !important;
   height: 100vh;
   height: 100dvh;
