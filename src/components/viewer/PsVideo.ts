@@ -142,6 +142,24 @@ class VideoContentSetup {
         e.preventDefault();
       }
     });
+
+    // Space toggles playback unless a focused control handles it
+    pswp.on('keydown', (e) => {
+      const content = pswp.currSlide?.content;
+      const player = isVideoContent(content) ? content.videoPlayer : null;
+      if (!player) return;
+
+      const { key, target, repeat } = e.originalEvent;
+      if (e.defaultPrevented || key !== ' ' || repeat) return;
+      if (target !== document.body && target !== pswp.element) return;
+
+      e.originalEvent.preventDefault();
+      if (player.paused) {
+        utils.runCatching(() => player.play());
+      } else {
+        player.pause();
+      }
+    });
   }
 
   getDirectSrc(content: VideoContent): VideoSource {
