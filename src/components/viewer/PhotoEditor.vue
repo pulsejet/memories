@@ -299,16 +299,18 @@ async function loadSource(url: string) {
 
 /** Capture Escape / Ctrl+S while the editor is open (mirrors PhotoSwipe) */
 function onKeydown(e: KeyboardEvent) {
-  if (confirmingDiscard) return;
   if (e.key === 'Escape') {
     e.preventDefault();
     e.stopImmediatePropagation();
-    onBack();
+    if (!confirmingDiscard) {
+      onBack();
+    }
   } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-    if (!ready.value || saveModalOpen.value || !isDirty()) return;
     e.preventDefault();
     e.stopImmediatePropagation();
-    if (editor.value) onSave({ ...editor.value.state });
+    if (!confirmingDiscard && ready.value && !saveModalOpen.value && isDirty() && editor.value) {
+      onSave({ ...editor.value.state });
+    }
   }
 }
 
