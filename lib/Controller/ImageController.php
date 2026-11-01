@@ -507,7 +507,7 @@ final class ImageController extends ApiController
             if (!\in_array($extLower, ['jpeg', 'jpg', 'png', 'webp', 'avif'], true)) {
                 throw Exceptions::BadRequest('Invalid image format');
             }
-            if ($quality < 1 || $quality > 100) {
+            if ($quality < 10 || $quality > 100) {
                 throw Exceptions::BadRequest('Invalid quality');
             }
 
@@ -603,12 +603,8 @@ final class ImageController extends ApiController
             throw Exceptions::BadRequest('Invalid image format');
         }
 
-        // Vips convert quality for lossy formats (JPEG/WebP/AVIF).
-        // PNG is lossless and ignores it.
-        $qualityInt = min(100, max(1, $quality));
-
         try {
-            $blob = $this->vips->convertFormat($path, $output, $qualityInt, array_values($edits));
+            $blob = $this->vips->convertFormat($path, $output, $quality, array_values($edits));
         } catch (\Throwable $e) {
             $msg = $e->getMessage();
             // Edit validation errors come from the vips edits parser.
