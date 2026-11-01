@@ -54,8 +54,8 @@ test.describe('@ui Timeline scroller', () => {
       const sel041 = `.p-outer--${id041}`;
       for (let i = 0; i < 60; i++) {
         if ((await page.locator(sel041).count()) > 0) break;
-        await page.evaluate(() => {
-          document.querySelector('.recycler')!.scrollTop -= 500;
+        await page.locator('.recycler').evaluate((el) => {
+          el.scrollTop -= 500;
         });
         await page.waitForTimeout(100);
       }

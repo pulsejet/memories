@@ -173,7 +173,7 @@ test.describe('@ui Photo selection', () => {
     // the recycler and detaches them again.
     const selectors = ids.map((id) => `.p-outer--${id}`);
     await page.locator(selectors[2]).scrollIntoViewIfNeeded();
-    await page.waitForFunction((sels) => sels.every((s) => !!document.querySelector(s)), selectors);
+    await expect(page.locator(selectors.join(', '))).toHaveCount(selectors.length, { timeout: 30000 });
     for (const selector of selectors) {
       await expect(page.locator(selector)).toBeVisible();
     }
@@ -314,8 +314,8 @@ test.describe('@ui Photo selection touch', () => {
       // every row and reuse its DOM elements for other photos.
       // for-geo-097 renders at the top; it must still be selected,
       // proving selection lives on the photo objects, not the elements.
-      await page.evaluate(() => {
-        document.querySelector('.recycler')!.scrollTop = 0;
+      await page.locator('.recycler').evaluate((el) => {
+        el.scrollTop = 0;
       });
       const sel097 = `.p-outer--${id097}`;
       await expect(page.locator(sel097)).toBeVisible();
