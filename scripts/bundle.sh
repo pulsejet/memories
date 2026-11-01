@@ -6,6 +6,9 @@ set -e
 # Source directory
 src=`pwd`
 
+# Sign with the newest supported server branch
+NC_VER=$(sed -n 's/.*<nextcloud .*max-version="\([0-9]*\)".*/\1/p' appinfo/info.xml)
+
 # Copy source files to temp
 rm -rf /tmp/memories
 mkdir -p /tmp/memories
@@ -25,7 +28,8 @@ wget -O memories.crt https://raw.githubusercontent.com/nextcloud/app-certificate
 echo -e "$APP_PRIVATE_KEY" > memories.key
 
 # Sign app
-git clone --recurse-submodules --depth 1 --branch stable33 https://github.com/nextcloud/server nextcloud
+git clone --recurse-submodules --shallow-submodules --depth 1 \
+    --branch "stable$NC_VER" https://github.com/nextcloud/server nextcloud
 php nextcloud/occ integrity:sign-app \
     --privateKey=/tmp/memories.key \
     --certificate=/tmp/memories.crt \
