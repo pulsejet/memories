@@ -275,7 +275,7 @@ class NativeX(private val mCtx: MainActivity) {
         }
     }
 
-    /** Serves one bridge request. GET-only; failures become 500, images get week-long caching. */
+    /** Serves one bridge request. GET-only; failures become 500, successful images get week-long caching. */
     fun handleBridge(method: String, url: Uri): WebResourceResponse {
         val path = url.path ?: return BridgeResponses.error()
         val response = try {
@@ -295,7 +295,7 @@ class NativeX(private val mCtx: MainActivity) {
         headers["Access-Control-Allow-Origin"] = "*"
         headers["Access-Control-Allow-Headers"] = "*"
         response.responseHeaders = headers
-        if (path.matches(API.IMAGE_PREVIEW) || path.matches(API.IMAGE_FULL)) {
+        if (response.statusCode == 200 && (path.matches(API.IMAGE_PREVIEW) || path.matches(API.IMAGE_FULL))) {
             response.responseHeaders["Cache-Control"] = "max-age=604800"
         }
         return response
