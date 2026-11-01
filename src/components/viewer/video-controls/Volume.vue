@@ -2,13 +2,13 @@
   <div class="m-vc-volume">
     <NcButton
       variant="tertiary-no-background"
-      :aria-label="muted ? t('memories', 'Unmute') : t('memories', 'Mute')"
-      :title="muted ? t('memories', 'Unmute') : t('memories', 'Mute')"
+      :aria-label="isSilent ? t('memories', 'Unmute') : t('memories', 'Mute')"
+      :title="isSilent ? t('memories', 'Unmute') : t('memories', 'Mute')"
       @click="toggleMute"
     >
       <template #icon>
         <span class="m-vc-volume-icon">
-          <VolumeOffIcon v-if="muted || volume === 0" :size="24" class="m-vc-volume-icon--off" />
+          <VolumeOffIcon v-if="isSilent" :size="24" class="m-vc-volume-icon--off" />
           <VolumeLowIcon v-else-if="volume < 0.34" :size="24" class="m-vc-volume-icon--low" />
           <VolumeMediumIcon v-else-if="volume < 0.67" :size="24" class="m-vc-volume-icon--medium" />
           <VolumeHighIcon v-else :size="24" class="m-vc-volume-icon--high" />
@@ -46,6 +46,8 @@ import { setConfig } from '@services/user-config';
 
 import type { VideoController } from '@typings';
 
+const DEFAULT_UNMUTE_VOLUME = 0.5;
+
 const props = defineProps<{
   video?: VideoController | null;
 }>();
@@ -53,6 +55,7 @@ const props = defineProps<{
 const volume = ref(1);
 const muted = ref(false);
 
+const isSilent = computed(() => muted.value || volume.value === 0);
 const sliderValue = computed(() => (muted.value ? 0 : Math.round(volume.value * 100)));
 
 function onVolumeChange() {
@@ -64,7 +67,11 @@ function onVolumeChange() {
 
 function toggleMute() {
   if (props.video) {
-    const value = !props.video.muted;
+    const value = !isSilent.value;
+    if (!value && props.video.volume === 0) {
+      props.video.volume = DEFAULT_UNMUTE_VOLUME;
+      setConfig('video_volume', DEFAULT_UNMUTE_VOLUME);
+    }
     props.video.muted = value;
     setConfig('video_muted', value);
   }
