@@ -4,6 +4,7 @@ import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import android.util.Log
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -13,6 +14,7 @@ import javax.crypto.spec.IvParameterSpec
 /** Keystore-backed credential storage. Only the token is encrypted; the rest is plaintext prefs. */
 class SecureCredentialStore(private val context: Context) {
     companion object {
+        private val TAG = SecureCredentialStore::class.java.simpleName
         private const val KEY_ALIAS = "MemoriesKey"
         private const val PREFS_NAME = "credentials"
     }
@@ -38,7 +40,11 @@ class SecureCredentialStore(private val context: Context) {
             .apply()
     }
 
-    /** Decrypted credentials, or null when logged out. Runs crypto on the caller thread. */
+    /**
+     * Decrypted credentials, or null when logged out. Runs crypto on the caller thread.
+     * An undecryptable token also reads as logged out; it stays stored so a transient
+     * Keystore error can't erase a login, and the next login overwrites it.
+     */
     fun getCredentials(): Credential? {
         val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val url = prefs.getString("url", null)
@@ -47,10 +53,15 @@ class SecureCredentialStore(private val context: Context) {
         val encryptedToken = prefs.getString("encryptedToken", null)
         val ivStr = prefs.getString("iv", null)
         if (url != null && username != null && encryptedToken != null && ivStr != null) {
-            val cipher = getCipher()
-            cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), IvParameterSpec(Base64.decode(ivStr, Base64.DEFAULT)))
-            val token = String(cipher.doFinal(Base64.decode(encryptedToken, Base64.DEFAULT)))
-            return Credential(url, trustAll, username, token)
+            return try {
+                val cipher = getCipher()
+                cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), IvParameterSpec(Base64.decode(ivStr, Base64.DEFAULT)))
+                val token = String(cipher.doFinal(Base64.decode(encryptedToken, Base64.DEFAULT)))
+                Credential(url, trustAll, username, token)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to decrypt stored credentials", e)
+                null
+            }
         }
         return null
     }

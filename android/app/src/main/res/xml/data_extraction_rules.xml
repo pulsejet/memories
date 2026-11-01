@@ -1,19 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
--->
+<?xml version="1.0" encoding="utf-8"?>
+<!-- allowBackup="false" disables cloud backup but not device-to-device transfer. -->
 <data-extraction-rules>
-    <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
-    </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <!-- The token's Keystore key can't leave the device; session cookies are live credentials. -->
+        <exclude domain="sharedpref" path="credentials.xml" />
+        <exclude domain="sharedpref" path="session_cookies.xml" />
     </device-transfer>
-    -->
 </data-extraction-rules>
