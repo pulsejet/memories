@@ -42,6 +42,11 @@ class ServerRouter(
 ) {
     companion object {
         private val TAG = ServerRouter::class.java.simpleName
+
+        /** Sec-Fetch-Dest values that execute what they load. */
+        private val SCRIPT_DESTS = setOf(
+            "script", "worker", "sharedworker", "serviceworker", "audioworklet", "paintworklet",
+        )
     }
 
     /**
@@ -122,6 +127,12 @@ class ServerRouter(
                 (call.request.headers["Accept"]?.contains("text/html") == true ||
                     call.request.headers["Sec-Fetch-Dest"] == "document")
             ) {
+                KtorRespond.plain(call, HttpStatusCode.NotFound, "not found")
+                return
+            }
+            // Scripts run with full nativex access, so they must come from the signed
+            // snapshot: 'self' in the CSP also covers everything proxied from the server.
+            if (call.request.headers["Sec-Fetch-Dest"] in SCRIPT_DESTS) {
                 KtorRespond.plain(call, HttpStatusCode.NotFound, "not found")
                 return
             }
