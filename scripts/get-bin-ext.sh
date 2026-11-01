@@ -38,8 +38,10 @@ wget -q "https://github.com/pulsejet/exiftool-bin/releases/download/$EXIFTOOL_VE
 ( # Get exiftool source for direct perl invocation.
     wget -q "https://github.com/exiftool/exiftool/archive/refs/tags/$EXIFTOOL_VER.zip"
     unzip -qq "$EXIFTOOL_VER.zip"
-    mv "exiftool-$EXIFTOOL_VER" exiftool
-    rm -rf "$EXIFTOOL_VER.zip" exiftool/t exiftool/html exiftool/windows_exiftool
+    mkdir exiftool
+    mv "exiftool-$EXIFTOOL_VER/exiftool" "exiftool-$EXIFTOOL_VER/lib" "exiftool-$EXIFTOOL_VER/LICENSE" exiftool/
+    rm -rf "$EXIFTOOL_VER.zip" "exiftool-$EXIFTOOL_VER"
+    find exiftool/lib \( -name '*.pod' -o -name README \) -delete
     chmod 755 exiftool/exiftool
 ) & pid_et_src=$!
 
@@ -83,5 +85,11 @@ if [ "$(./vips-$(arch) --version)" != "$VIPS_UPSTREAM" ]; then
     echo "[BUG] vips binary version mismatch"
     exit 1
 fi
+
+# GitHub regenerates tag archives, so hash the extracted tree instead of the zip.
+find exiftool ! -type d -exec sha256sum {} + | LC_ALL=C sort > exiftool.tree
+
+# Verify integrity of all binaries.
+sha256sum -c "$SCRIPT_PATH/bin-ext.sha256"
 
 cd ..
