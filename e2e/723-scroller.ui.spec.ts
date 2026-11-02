@@ -83,8 +83,10 @@ test.describe('@ui Timeline top matter', () => {
     await expect.poll(() => recycler.evaluate((el) => el.scrollTop)).toBe(beforeHeight + 100);
 
     // Pick a visible row to track through the resizes.
-    const photo = page.locator('.p-outer:visible').nth(2);
-    await photo.waitFor();
+    const row = page.locator('.p-outer:not(.placeholder):visible').nth(2);
+    await row.waitFor();
+    const key = await row.evaluate((el) => [...el.classList].find((c) => c.startsWith('p-outer--')));
+    const photo = page.locator(`.${key}:visible`);
     const rowY = async () => (await photo.boundingBox())!.y;
     const y = await rowY();
 
