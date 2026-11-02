@@ -174,11 +174,13 @@ func StoryboardArgs(input, headers string, interval float64, thumbW, thumbH, col
 		// packet through the (frame-threaded) decoder, ~25x slower.
 		"-discard", "nokey",
 		"-skip_frame", "nokey",
-		"-multiple_requests", "1",
-		"-seekable", "1",
 	}
-	// Same bounded http reconnects as transcodes; ignored for file inputs.
-	args = append(args, reconnectArgs()...)
+	// Same persistent connection and bounded reconnects as transcodes. Only
+	// for http: the file protocol rejects -seekable 1.
+	if strings.HasPrefix(input, "http://") || strings.HasPrefix(input, "https://") {
+		args = append(args, "-multiple_requests", "1", "-seekable", "1")
+		args = append(args, reconnectArgs()...)
+	}
 	if headers != "" {
 		args = append(args, "-headers", headers)
 	}

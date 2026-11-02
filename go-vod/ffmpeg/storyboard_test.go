@@ -102,4 +102,8 @@ func TestStoryboardArgs(t *testing.T) {
 	require.Equal(t, "http://nc/file/7", args[slices.Index(args, "-i")+1])
 	require.Equal(t, "Authorization: Basic eA==\r\n", args[slices.Index(args, "-headers")+1])
 	require.Less(t, slices.Index(args, "-headers"), slices.Index(args, "-i"))
+
+	args = StoryboardArgs("/tmp/input.mp4", "", 5, 160, 90, 10, 2, 1, "storyboard-%d.jpg")
+	require.NotContains(t, args, "-seekable")
+	require.NotContains(t, args, "-reconnect")
 }
