@@ -151,7 +151,7 @@ export const fragment = {
    */
   async clear() {
     if (_m.mode !== 'user') return;
-    router.replace({
+    await router.replace({
       path: router.currentRoute.value.path,
       query: router.currentRoute.value.query,
     });
@@ -272,29 +272,37 @@ async function popCore(type: FragmentType) {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-onDOMLoaded(() => {
-  // Skip unless in user mode
-  if (_m.mode !== 'user') return;
-
+async function keepOnlyContextualFragments() {
   // On first load, we must remove any fragments and
   // push them back in, so that history.back() works.
   // The back button will still take the user back to
   // the previous page but this is fine.
-  if (fragment.list.length) {
-    const contextual = fragment.list.filter((frag) => [FragmentType.viewer, FragmentType.day].includes(frag.type));
+  if (!fragment.list.length) return;
 
-    // Remove the currently present fragments
-    fragment.clear();
+  // These fragments should be kept on page reload.
+  const contextual = fragment.list.filter((frag) => [FragmentType.viewer, FragmentType.day].includes(frag.type));
 
-    // Only contextual fragments should be present on page load
-    if (contextual.length) {
-      router.push({
-        path: router.currentRoute.value.path,
-        query: router.currentRoute.value.query,
-        hash: encodeFragment(contextual),
-      });
-    }
+  // Remove all fragments and push back only the contextual ones
+  await fragment.clear();
+
+  if (contextual.length) {
+    await router.push({
+      path: router.currentRoute.value.path,
+      query: router.currentRoute.value.query,
+      hash: encodeFragment(contextual),
+    });
   }
+}
+
+onDOMLoaded(async () => {
+  // Skip unless in user mode
+  if (_m.mode !== 'user') return;
+
+  // Wait for router to be ready before initializing the fragment service.
+  await serialized(async () => {
+    await router.isReady().catch(() => {});
+    await keepOnlyContextualFragments();
+  });
 
   /**
    * Trigger when route changes; notify listeners of popped fragments.

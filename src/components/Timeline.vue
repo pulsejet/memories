@@ -477,7 +477,7 @@ async function routeChange(to: RouteLocationNormalized, from?: RouteLocationNorm
         },
       });
     } else if (fragment.day) {
-      fragment.clear();
+      void fragment.clear();
     }
   }
 }
