@@ -31,3 +31,11 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+
+  - package-ecosystem: gomod
+    directory: /go-vod
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
