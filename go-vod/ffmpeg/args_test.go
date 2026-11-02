@@ -228,16 +228,19 @@ func TestBuildArgsTonemapDepth(t *testing.T) {
 	require.Contains(t, transposedCmd, "format=nv12,transpose=2,format=nv12|vaapi,hwupload")
 	require.NotContains(t, transposedCmd, "hwupload,hwdownload")
 
-	// But 10-bit SDR skips tonemapping, so the transpose download keeps depth.
-	sdr := baseSpec()
-	sdr.BitDepth, sdr.NVENC, sdr.NVENCScale = 10, true, "cuda"
-	sdr.UseTranspose, sdr.Rotation = true, 90
-	require.Contains(t, cmd(sdr, BuildArgs(sdr)), "hwdownload,format=p010le,transpose=2")
+	// Deep SDR is converted to nv12 by the hardware scaler, so the
+	// transpose download must pin nv12, not the source depth.
+	for _, depth := range []int{10, 12} {
+		sdr := baseSpec()
+		sdr.BitDepth, sdr.NVENC, sdr.NVENCScale = depth, true, "cuda"
+		sdr.UseTranspose, sdr.Rotation = true, 90
+		require.Contains(t, cmd(sdr, BuildArgs(sdr)), "format=nv12:passthrough=0:w=1280:h=1280,hwdownload,format=nv12,transpose=2")
 
-	sdr12 := baseSpec()
-	sdr12.BitDepth, sdr12.NVENC, sdr12.NVENCScale = 12, true, "cuda"
-	sdr12.UseTranspose, sdr12.Rotation = true, 90
-	require.Contains(t, cmd(sdr12, BuildArgs(sdr12)), "hwdownload,format=p012le,transpose=2")
+		vaapi := baseSpec()
+		vaapi.BitDepth, vaapi.VAAPI = depth, true
+		vaapi.UseTranspose, vaapi.ForceSwTranspose, vaapi.Rotation = true, true, 90
+		require.Contains(t, cmd(vaapi, BuildArgs(vaapi)), "format=nv12:w=1280:h=1280,hwdownload,format=nv12,transpose=2")
+	}
 }
 
 func TestBuildArgsNoAudio(t *testing.T) {

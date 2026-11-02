@@ -114,6 +114,10 @@ func (b *FilterBuilder) scaleEncode(format string) {
 	// scaler must preserve source depth (e.g. HDR before tonemap).
 	if b.cv != EncoderX264 {
 		args = append(args, fmt.Sprintf("format=%s", format))
+		b.bitDepth = 8
+		if strings.HasPrefix(format, "p010") {
+			b.bitDepth = 10
+		}
 	}
 
 	// The CUDA scaler needs an explicit passthrough opt-out.
