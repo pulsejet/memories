@@ -23,3 +23,11 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+
+  - package-ecosystem: gradle
+    directory: /android
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
