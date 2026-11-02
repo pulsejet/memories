@@ -5,17 +5,15 @@ import { imageSize } from 'image-size';
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
 
-// We need to run this test serially so that previews are
-// always generated for the last multipreview test.
-test.describe.serial('@api Image preview', () => {
+test.describe('@api Image preview', () => {
   let fileid1: number;
   let fileid2: number;
 
   test.beforeAll(async ({ request }) => {
     const dav = new DavClient(request);
-    // JPEG 640x360 test image
+    // JPEG 1280x720 test image
     fileid1 = await dav.fileid('/for-default/Nested 1/test_01.jpg');
-    // JPEG 640x480 test image
+    // JPEG 1280x960 test image
     fileid2 = await dav.fileid('/for-default/Nested 1/test_02.jpg');
   });
 
@@ -67,6 +65,13 @@ test.describe.serial('@api Image preview', () => {
   });
 
   test('Get multipreview for two images', async ({ request }) => {
+    // Multipreview skips files whose max preview hasn't been generated.
+    const generated = await Promise.all([
+      request.get(`${appUrl}/api/image/preview/${fileid1}`, { params: { x: 32, y: 32, a: 1 } }),
+      request.get(`${appUrl}/api/image/preview/${fileid2}`, { params: { x: 32, y: 32 } }),
+    ]);
+    generated.forEach((r) => expect(r.ok()).toBeTruthy());
+
     const res = await request.post(`${appUrl}/api/image/multipreview`, {
       data: {
         files: [
@@ -101,14 +106,14 @@ test.describe.serial('@api Image preview', () => {
 
     expect(previews).toHaveLength(2);
 
-    // test_01.jpg (a=1, non-square): 640x360 -> crop to 32x32
+    // test_01.jpg (a=1): 1280x720 -> keeps aspect ratio
     const p1 = previews.find((p) => p.reqid === 'f1');
     expect(p1).toBeDefined();
     expect(p1!.height).toBeLessThanOrEqual(128);
     expect(p1!.height).toBeGreaterThanOrEqual(8);
     expect(p1!.width).toBeGreaterThan(p1!.height);
 
-    // test_02.jpg (a=0, square crop): 640x480 -> fill to 32x32
+    // test_02.jpg (a=0): 1280x960 -> square crop
     const p2 = previews.find((p) => p.reqid === 'f2');
     expect(p2).toBeDefined();
     expect(p2!.height).toBeLessThanOrEqual(128);

@@ -33,7 +33,7 @@ test.describe('@api Image Info', () => {
     expect(data.mtime).toBeGreaterThan(0);
     data.mtime = 0;
 
-    // These depend on reverse geocoding, not setup yet.
+    // Fields that depend on the places database or aren't in the golden data.
     delete data.address;
     delete data.address_short;
     delete data.exif?.DateTimeEpoch;
