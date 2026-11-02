@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap, teardown } from './navigation';
+import { appUrl, bootstrap, teardown, openViewer } from './navigation';
 import { DavClient } from './utils';
 
 test.beforeEach(bootstrap);
@@ -22,8 +22,7 @@ test.describe('@ui Timeline feed and photo preview', () => {
 
   test('Open one image', async ({ page }) => {
     await page.goto(appUrl);
-    await page.locator(`.p-outer--${fileid1}`).click();
-    await page.waitForSelector('.memories-viewer.fully-opened');
+    await openViewer(page, fileid1);
     await page.keyboard.press('Escape');
     await page.locator('.memories-viewer').waitFor({ state: 'detached' });
   });

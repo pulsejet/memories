@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
+import { appUrl, e2eHeaders, bootstrap, teardown, selectPhoto, openViewer } from './navigation';
 import { DavClient } from './utils';
 
 test.beforeEach(bootstrap);
@@ -29,10 +29,8 @@ test.describe('@ui Timeline photo deletion', () => {
     await page.goto(appUrl);
 
     await test.step('Select two images', async () => {
-      await page.hover(`.p-outer--${fileid1}`);
-      await page.locator(`.p-outer--${fileid1} > div.select`).click();
-      await page.hover(`.p-outer--${fileid2}`);
-      await page.locator(`.p-outer--${fileid2} > div.select`).click();
+      await selectPhoto(page, fileid1);
+      await selectPhoto(page, fileid2);
     });
 
     await test.step('Submit delete', async () => {
@@ -57,8 +55,7 @@ test.describe('@ui Timeline photo deletion', () => {
 
     await test.step('Open viewer', async () => {
       await page.goto(appUrl);
-      await page.locator(`.p-outer--${fileid3}`).click();
-      await page.waitForSelector('.memories-viewer.fully-opened');
+      await openViewer(page, fileid3);
     });
 
     // Get the the current active image so we can recheck.

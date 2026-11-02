@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { bootstrap, teardown, appUrl, e2eHeaders, psub } from './navigation';
+import { bootstrap, teardown, appUrl, e2eHeaders, psub, selectPhoto } from './navigation';
 import { DavClient } from './utils';
 
 import type { IPhoto } from '@typings';
@@ -107,10 +107,8 @@ test.describe('Archive', () => {
       await test.step('Archive files', async () => {
         await page.goto(appUrl);
 
-        await page.hover(`.p-outer--${fileid1}`);
-        await page.locator(`.p-outer--${fileid1} > div.select`).click();
-        await page.hover(`.p-outer--${fileid2}`);
-        await page.locator(`.p-outer--${fileid2} > div.select`).click();
+        await selectPhoto(page, fileid1);
+        await selectPhoto(page, fileid2);
 
         await page.getByRole('button', { name: 'Actions' }).click();
         await page.getByRole('menuitem', { name: 'Archive' }).click();
@@ -133,10 +131,8 @@ test.describe('Archive', () => {
       await test.step('Submit', async () => {
         await page.goto(`${appUrl}/archive`);
 
-        await page.hover(`.p-outer--${fileid1}`);
-        await page.locator(`.p-outer--${fileid1} > div.select`).click();
-        await page.hover(`.p-outer--${fileid2}`);
-        await page.locator(`.p-outer--${fileid2} > div.select`).click();
+        await selectPhoto(page, fileid1);
+        await selectPhoto(page, fileid2);
 
         await page.getByRole('button', { name: 'Actions' }).click();
         await page.getByRole('menuitem', { name: 'Unarchive' }).click();

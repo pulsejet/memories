@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap, psub, teardown } from './navigation';
+import { appUrl, e2eHeaders, bootstrap, psub, teardown, selectPhoto } from './navigation';
 import { DavClient } from './utils';
 
 test.beforeEach(bootstrap);
@@ -28,10 +28,8 @@ test.describe('@ui Folder file operations', () => {
     await test.step('Select src files', async () => {
       await page.getByRole('link', { name: 'source' }).click();
 
-      await page.hover(`.p-outer--${fileid1}`);
-      await page.locator(`.p-outer--${fileid1} > div.select`).click();
-      await page.hover(`.p-outer--${fileid2}`);
-      await page.locator(`.p-outer--${fileid2} > div.select`).click();
+      await selectPhoto(page, fileid1);
+      await selectPhoto(page, fileid2);
     });
 
     await test.step('Move files to dest folder', async () => {

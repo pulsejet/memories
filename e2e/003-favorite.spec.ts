@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
+import { appUrl, e2eHeaders, bootstrap, teardown, buildUrl, selectPhoto, openViewer } from './navigation';
 import { DavClient } from './utils';
 import { snap } from './screenshots';
 
@@ -33,8 +33,7 @@ test.describe.serial('@ui Favorites', () => {
 
     await test.step('Favorite', async () => {
       await page.goto(appUrl);
-      await page.locator(`.p-outer--${fileid3} > .img-outer`).click();
-      await page.waitForSelector('.memories-viewer.fully-opened');
+      await openViewer(page, fileid3);
       const favBtn = page.getByRole('button', { name: 'Favorite' });
       await expect(favBtn.locator('.star-outline-icon')).toBeVisible();
       await favBtn.click();
@@ -45,8 +44,7 @@ test.describe.serial('@ui Favorites', () => {
     await test.step('Unfavorite', async () => {
       await page.goto(appUrl);
       await expect(page.locator(`.p-outer--${fileid3} .flag.bottom-right > .star-icon`)).toBeVisible();
-      await page.locator(`.p-outer--${fileid3} > .img-outer`).click();
-      await page.waitForSelector('.memories-viewer.fully-opened');
+      await openViewer(page, fileid3);
       const favBtn = page.getByRole('button', { name: 'Favorite' });
       await expect(favBtn.locator('.star-icon')).toBeVisible();
       await favBtn.click();
@@ -63,10 +61,8 @@ test.describe.serial('@ui Favorites', () => {
     await test.step('Favorite', async () => {
       await page.goto(appUrl);
 
-      await page.hover(`.p-outer--${fileid1}`);
-      await page.locator(`.p-outer--${fileid1} > div.select`).click();
-      await page.hover(`.p-outer--${fileid2}`);
-      await page.locator(`.p-outer--${fileid2} > div.select`).click();
+      await selectPhoto(page, fileid1);
+      await selectPhoto(page, fileid2);
 
       await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).not.toBeVisible();
       await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).not.toBeVisible();
@@ -86,15 +82,12 @@ test.describe.serial('@ui Favorites', () => {
     });
 
     await test.step('Check favorites API filter', async () => {
-      const daysUrl = new URL(`${appUrl}/api/days`);
-      daysUrl.searchParams.set('nopreload', '1');
-      daysUrl.searchParams.set('fav', '1');
-      const days: IDay[] = await (await request.get(daysUrl.toString())).json();
+      const daysUrl = buildUrl('/api/days', { nopreload: '1', fav: '1' });
+      const days: IDay[] = await (await request.get(daysUrl)).json();
 
-      const detailUrl = new URL(`${appUrl}/api/days`);
-      detailUrl.searchParams.set('fav', '1');
+      const detailUrl = buildUrl('/api/days', { fav: '1' });
       const photos: IPhoto[] = await (
-        await request.post(detailUrl.toString(), { data: { dayIds: days.map((d) => d.dayid) } })
+        await request.post(detailUrl, { data: { dayIds: days.map((d) => d.dayid) } })
       ).json();
       expect(photos.map((p) => p.fileid)).toStrictEqual(expect.arrayContaining([fileid1, fileid2]));
       for (const p of photos) {
@@ -108,10 +101,8 @@ test.describe.serial('@ui Favorites', () => {
       await expect(page.locator(`.p-outer--${fileid1} .flag.bottom-right > .star-icon`)).toBeVisible();
       await expect(page.locator(`.p-outer--${fileid2} .flag.bottom-right > .star-icon`)).toBeVisible();
 
-      await page.hover(`.p-outer--${fileid1}`);
-      await page.locator(`.p-outer--${fileid1} > div.select`).click();
-      await page.hover(`.p-outer--${fileid2}`);
-      await page.locator(`.p-outer--${fileid2} > div.select`).click();
+      await selectPhoto(page, fileid1);
+      await selectPhoto(page, fileid2);
 
       await page.getByRole('button', { name: 'Actions' }).click();
       await page.getByRole('menuitem', { name: 'Favorite' }).click();

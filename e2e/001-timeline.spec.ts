@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders } from './navigation';
+import { appUrl, e2eHeaders, buildUrl } from './navigation';
 import { goldDays, goldDayPhotos } from './dataset-measurements';
 
 import type { IDay, IPhoto } from '@typings';
@@ -85,10 +85,8 @@ test.describe('@api Timeline', () => {
 
   test('Filter by video', async ({ request }) => {
     await test.step('Image-only timeline has no videos', async () => {
-      const url = new URL(`${appUrl}/api/days`);
-      url.searchParams.set('nopreload', '1');
-      url.searchParams.set('vid', '1');
-      const res = await request.get(url.toString());
+      const url = buildUrl('/api/days', { nopreload: '1', vid: '1' });
+      const res = await request.get(url);
       expect(res.ok()).toBeTruthy();
       expect(await res.json()).toStrictEqual([]);
     });
@@ -97,25 +95,21 @@ test.describe('@api Timeline', () => {
     const headers = e2eHeaders({ timelinePath: '/for-vid' });
 
     const total: IDay[] = await test.step('Video timeline days', async () => {
-      const totalUrl = new URL(`${appUrl}/api/days`);
-      totalUrl.searchParams.set('nopreload', '1');
-      const total: IDay[] = await (await request.get(totalUrl.toString(), { headers })).json();
+      const totalUrl = buildUrl('/api/days', { nopreload: '1' });
+      const total: IDay[] = await (await request.get(totalUrl, { headers })).json();
       expect(total).toHaveLength(1);
       expect(total[0].count).toBe(1);
 
-      const vidUrl = new URL(`${appUrl}/api/days`);
-      vidUrl.searchParams.set('nopreload', '1');
-      vidUrl.searchParams.set('vid', '1');
-      const vidDays: IDay[] = await (await request.get(vidUrl.toString(), { headers })).json();
+      const vidUrl = buildUrl('/api/days', { nopreload: '1', vid: '1' });
+      const vidDays: IDay[] = await (await request.get(vidUrl, { headers })).json();
       expect(vidDays).toStrictEqual(total);
       return total;
     });
 
     await test.step('Video day photos', async () => {
-      const detailUrl = new URL(`${appUrl}/api/days`);
-      detailUrl.searchParams.set('vid', '1');
+      const detailUrl = buildUrl('/api/days', { vid: '1' });
       const photos: IPhoto[] = await (
-        await request.post(detailUrl.toString(), {
+        await request.post(detailUrl, {
           headers,
           data: { dayIds: total.map((d) => d.dayid) },
         })
@@ -130,10 +124,8 @@ test.describe('@api Timeline', () => {
     // /for-default/Nested 1 directly holds test_01.jpg (2023-06-24) and test_02.jpg (2023-04-21),
     // with test_04.jpg and test_05.jpg nested one level deeper (2023-01-18).
     await test.step('Folder view lists immediate children', async () => {
-      const url = new URL(`${appUrl}/api/days`);
-      url.searchParams.set('nopreload', '1');
-      url.searchParams.set('folder', '/for-default/Nested 1');
-      const days: IDay[] = await (await request.get(url.toString())).json();
+      const url = buildUrl('/api/days', { nopreload: '1', folder: '/for-default/Nested 1' });
+      const days: IDay[] = await (await request.get(url)).json();
       expect(days).toStrictEqual([
         { dayid: 19532, count: 1 },
         { dayid: 19468, count: 1 },
@@ -141,11 +133,8 @@ test.describe('@api Timeline', () => {
     });
 
     await test.step('Flat view includes nested photos', async () => {
-      const url = new URL(`${appUrl}/api/days`);
-      url.searchParams.set('nopreload', '1');
-      url.searchParams.set('folder', '/for-default/Nested 1');
-      url.searchParams.set('recursive', '1');
-      const days: IDay[] = await (await request.get(url.toString())).json();
+      const url = buildUrl('/api/days', { nopreload: '1', folder: '/for-default/Nested 1', recursive: '1' });
+      const days: IDay[] = await (await request.get(url)).json();
       expect(days).toStrictEqual([
         { dayid: 19532, count: 1 },
         { dayid: 19468, count: 1 },
@@ -158,16 +147,13 @@ test.describe('@api Timeline', () => {
     const gold = goldDays(TIMELINE_PATH);
     expect(gold.length).toBeGreaterThan(1);
 
-    const revUrl = new URL(`${appUrl}/api/days`);
-    revUrl.searchParams.set('nopreload', '1');
-    revUrl.searchParams.set('reverse', '1');
-    const rev: IDay[] = await (await request.get(revUrl.toString())).json();
+    const revUrl = buildUrl('/api/days', { nopreload: '1', reverse: '1' });
+    const rev: IDay[] = await (await request.get(revUrl)).json();
     expect(rev).toStrictEqual([...gold].reverse());
 
     const dayId = gold[0].dayid;
-    const revDayUrl = new URL(`${appUrl}/api/days/${dayId}`);
-    revDayUrl.searchParams.set('reverse', '1');
-    const revDay: IPhoto[] = await (await request.get(revDayUrl.toString())).json();
+    const revDayUrl = buildUrl(`/api/days/${dayId}`, { reverse: '1' });
+    const revDay: IPhoto[] = await (await request.get(revDayUrl)).json();
     expect(revDay.map((p) => p.basename)).toStrictEqual(
       goldDayPhotos(TIMELINE_PATH, dayId)
         .map((p) => p.basename)
@@ -182,14 +168,12 @@ test.describe('@api Timeline', () => {
     const expected = dayIds.reduce((n, id) => n + goldDayPhotos(TIMELINE_PATH, id).length, 0);
     expect(expected).toBeGreaterThan(1);
 
-    const oneUrl = new URL(`${appUrl}/api/days`);
-    oneUrl.searchParams.set('limit', '1');
-    const one: IPhoto[] = await (await request.post(oneUrl.toString(), { data: { dayIds } })).json();
+    const oneUrl = buildUrl('/api/days', { limit: '1' });
+    const one: IPhoto[] = await (await request.post(oneUrl, { data: { dayIds } })).json();
     expect(one).toHaveLength(1);
 
-    const bigUrl = new URL(`${appUrl}/api/days`);
-    bigUrl.searchParams.set('limit', '200');
-    const big: IPhoto[] = await (await request.post(bigUrl.toString(), { data: { dayIds } })).json();
+    const bigUrl = buildUrl('/api/days', { limit: '200' });
+    const big: IPhoto[] = await (await request.post(bigUrl, { data: { dayIds } })).json();
     expect(big.length).toBe(expected);
   });
 
@@ -197,10 +181,8 @@ test.describe('@api Timeline', () => {
     const days = goldDays('primary/for-default/');
     expect(days.length).toBeGreaterThan(0);
 
-    const url = new URL(`${appUrl}/api/days`);
-    url.searchParams.set('nopreload', '1');
-    url.searchParams.set('monthView', '1');
-    const months: IDay[] = await (await request.get(url.toString())).json();
+    const url = buildUrl('/api/days', { nopreload: '1', monthView: '1' });
+    const months: IDay[] = await (await request.get(url)).json();
 
     const expected = new Map<number, number>();
     for (const d of days) {
@@ -214,9 +196,8 @@ test.describe('@api Timeline', () => {
   });
 
   test('Month view day detail', async ({ request }) => {
-    const url = new URL(`${appUrl}/api/days`);
-    url.searchParams.set('monthView', '1');
-    const res = await request.post(url.toString(), { data: { dayIds: [20666] } });
+    const url = buildUrl('/api/days', { monthView: '1' });
+    const res = await request.post(url, { data: { dayIds: [20666] } });
     expect(res.ok()).toBeTruthy();
 
     const data: IPhoto[] = await res.json();

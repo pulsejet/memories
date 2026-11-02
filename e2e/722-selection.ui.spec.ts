@@ -1,6 +1,6 @@
 import { test, expect, devices } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
-import { appUrl, bootstrap, e2eHeaders, teardown } from './navigation';
+import { appUrl, bootstrap, e2eHeaders, selectPhoto, teardown } from './navigation';
 import { DavClient } from './utils';
 import { snap } from './screenshots';
 
@@ -185,8 +185,7 @@ test.describe('@ui Photo selection', () => {
 
   async function checkIcon(page: Page, i: number) {
     // The check icon is only displayed on hover, like for a real user.
-    await page.locator(`.p-outer--${ids[i]}`).hover();
-    await page.locator(`.p-outer--${ids[i]} .select`).click();
+    await selectPhoto(page, ids[i]);
   }
 });
 

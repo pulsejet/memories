@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { fileURLToPath } from 'node:url';
 import { test, expect } from '@playwright/test';
-import { appUrl, baseUrl, e2eHeaders, psub } from './navigation';
+import { appUrl, baseUrl, e2eHeaders, psub, buildUrl, openViewer } from './navigation';
 import { DavClient, withPublicAPI, withPublicPage } from './utils';
 
 import type { APIRequestContext, APIResponse } from '@playwright/test';
@@ -85,9 +85,8 @@ test.describe('Public folder share', () => {
 
   test('@api Public folder day photos', async () => {
     await withPublicAPI(async (request) => {
-      const url = new URL(`${appUrl}/api/days/${folderDayId}`);
-      url.searchParams.set('token', folderToken);
-      const res = await request.get(url.toString());
+      const url = buildUrl(`/api/days/${folderDayId}`, { token: folderToken });
+      const res = await request.get(url);
       expect(res.ok()).toBeTruthy();
 
       const data: IPhoto[] = await res.json();
@@ -99,9 +98,8 @@ test.describe('Public folder share', () => {
   test('@api Public folder image info and access control', async () => {
     await withPublicAPI(async (request) => {
       await test.step('Image in share loads with token', async () => {
-        const url = new URL(`${appUrl}/api/image/info/${folderFileids[0]}`);
-        url.searchParams.set('token', folderToken);
-        const res = await request.get(url.toString());
+        const url = buildUrl(`/api/image/info/${folderFileids[0]}`, { token: folderToken });
+        const res = await request.get(url);
         expect(res.ok()).toBeTruthy();
 
         const data = await res.json();
@@ -116,9 +114,8 @@ test.describe('Public folder share', () => {
       });
 
       await test.step('Image outside share is not found', async () => {
-        const url = new URL(`${appUrl}/api/image/info/${outsideFileid}`);
-        url.searchParams.set('token', folderToken);
-        const res = await request.get(url.toString());
+        const url = buildUrl(`/api/image/info/${outsideFileid}`, { token: folderToken });
+        const res = await request.get(url);
         expect(res.ok()).toBe(false);
         expect(res.status()).toBe(404);
       });
@@ -128,11 +125,8 @@ test.describe('Public folder share', () => {
   test('@api Public folder preview and access control', async () => {
     await withPublicAPI(async (request) => {
       await test.step('Preview in share loads with token', async () => {
-        const url = new URL(`${appUrl}/api/image/preview/${folderFileids[0]}`);
-        url.searchParams.set('token', folderToken);
-        url.searchParams.set('x', '64');
-        url.searchParams.set('y', '64');
-        const res = await request.get(url.toString());
+        const url = buildUrl(`/api/image/preview/${folderFileids[0]}`, { token: folderToken, x: '64', y: '64' });
+        const res = await request.get(url);
         expect(res.ok()).toBeTruthy();
         expect(res.headers()['content-type']).toContain('image/');
 
@@ -141,10 +135,8 @@ test.describe('Public folder share', () => {
       });
 
       await test.step('Preview without token is not found', async () => {
-        const url = new URL(`${appUrl}/api/image/preview/${folderFileids[0]}`);
-        url.searchParams.set('x', '64');
-        url.searchParams.set('y', '64');
-        const res = await request.get(url.toString());
+        const url = buildUrl(`/api/image/preview/${folderFileids[0]}`, { x: '64', y: '64' });
+        const res = await request.get(url);
         expect(res.ok()).toBe(false);
         expect(res.status()).toBe(404);
       });
@@ -176,8 +168,7 @@ test.describe('Public folder share', () => {
       await page.goto(`${appUrl}/s/${folderToken}`);
       await expect(page.locator(`.p-outer--${folderFileids[0]}`)).toBeVisible();
 
-      await page.locator(`.p-outer--${folderFileids[0]} > .img-outer`).click();
-      await page.waitForSelector('.memories-viewer.fully-opened');
+      await openViewer(page, folderFileids[0]);
     });
   });
 
@@ -378,9 +369,8 @@ class FolderShareAPI {
   }
 
   async list(path: string): Promise<IShare[]> {
-    const url = new URL(`${appUrl}/api/share/links`);
-    url.searchParams.set('path', path);
-    const res = await this.request.get(url.toString());
+    const url = buildUrl('/api/share/links', { path: path });
+    const res = await this.request.get(url);
     expect(res.ok()).toBeTruthy();
     return res.json();
   }
@@ -413,9 +403,7 @@ class FolderShareAPI {
   }
 
   async days(token: string): Promise<APIResponse> {
-    const url = new URL(`${appUrl}/api/days`);
-    url.searchParams.set('nopreload', '1');
-    url.searchParams.set('token', token);
-    return this.request.get(url.toString());
+    const url = buildUrl('/api/days', { nopreload: '1', token: token });
+    return this.request.get(url);
   }
 }

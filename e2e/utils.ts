@@ -3,7 +3,7 @@ import XMLBuilder from 'fast-xml-builder';
 import { request } from '@playwright/test';
 import type { APIRequestContext, Browser, Page } from '@playwright/test';
 import type { IImageInfo } from '@typings';
-import { appUrl, baseUrl, bootstrap, e2eHeaders, teardown, username, psub } from './navigation';
+import { baseUrl, bootstrap, buildUrl, e2eHeaders, teardown, username, psub } from './navigation';
 
 const xmlParser = new XMLParser({
   removeNSPrefix: true,
@@ -278,11 +278,7 @@ export class DavClient {
       clusters?: string;
     },
   ): Promise<IImageInfo> {
-    const url = new URL(`${appUrl}/api/image/info/${fileid}?`);
-    for (const [k, v] of Object.entries(params || {})) {
-      url.searchParams.set(k, v);
-    }
-    const res = await this.request.get(url.toString(), {
+    const res = await this.request.get(buildUrl(`/api/image/info/${fileid}`, params), {
       headers: e2eHeaders(),
     });
     if (!res.ok()) throw new Error(`imageInfo failed: ${res.status()}`);

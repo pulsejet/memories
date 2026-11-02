@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap, e2eHeaders, teardown } from './navigation';
+import { appUrl, bootstrap, e2eHeaders, teardown, openViewer } from './navigation';
 import { DavClient } from './utils';
 
 test.beforeEach(bootstrap);
@@ -22,8 +22,7 @@ test.describe('@ui Viewer panorama sphere', () => {
     await test.step('Open viewer', async () => {
       await page.goto(appUrl);
       await page.waitForSelector(`.p-outer--${fileid}`);
-      await page.locator(`.p-outer--${fileid} > .img-outer`).click();
-      await page.waitForSelector('.memories-viewer.fully-opened');
+      await openViewer(page, fileid);
     });
 
     await test.step('PhotoSphere loads', async () => {

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { imageSize } from 'image-size';
-import { appUrl, e2eHeaders, psub, username } from './navigation';
+import { appUrl, e2eHeaders, psub, username, buildUrl } from './navigation';
 import { DavClient } from './utils';
 import { goldImageInfo } from './dataset-measurements';
 
@@ -48,9 +48,8 @@ test.describe('@api Image Info', () => {
     const dav = new DavClient(request);
     const fileid = await dav.fileid('/for-default/Nested 1/test_01.jpg');
 
-    const url = new URL(`${appUrl}/api/image/info/${fileid}`);
-    url.searchParams.set('current', '1');
-    const res = await request.get(url.toString());
+    const url = buildUrl(`/api/image/info/${fileid}`, { current: '1' });
+    const res = await request.get(url);
     expect(res.ok()).toBeTruthy();
 
     const data: IImageInfo & { current?: Record<string, unknown> } = await res.json();
@@ -65,13 +64,12 @@ test.describe('@api Image Info', () => {
     const fileid = await dav.fileid('/for-default/Nested 1/test_01.jpg');
 
     // Only albums supports file filtering (tags/places throw); mirrors sidebar usage.
-    const url = new URL(`${appUrl}/api/image/info/${fileid}`);
-    url.searchParams.set('clusters', 'albums');
+    const url = buildUrl(`/api/image/info/${fileid}`, { clusters: 'albums' });
 
     const albumName = psub('E2E Info Album %wid');
     const albumPath = `photos/${username}/albums/${albumName}`;
     const albumNames = async () => {
-      const res = await request.get(url.toString());
+      const res = await request.get(url);
       expect(res.ok()).toBeTruthy();
       const data: IImageInfo = await res.json();
       return data.clusters!.albums!.map((a) => a.name);

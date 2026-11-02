@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap, teardown } from './navigation';
+import { appUrl, e2eHeaders, bootstrap, teardown, openViewer } from './navigation';
 import { DavClient } from './utils';
 
 test.beforeEach(bootstrap);
@@ -21,7 +21,7 @@ test.describe('Metadata', () => {
 
     await test.step('Open dialog', async () => {
       await page.goto(appUrl);
-      await page.locator(`.p-outer.fill-block.p-outer--${fileid1} > .img-outer`).click();
+      await openViewer(page, fileid1);
 
       await page.getByRole('button', { name: 'Actions' }).click();
       await page.getByRole('menuitem', { name: 'Edit metadata' }).click();

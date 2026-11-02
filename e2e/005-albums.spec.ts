@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap, username, teardown } from './navigation';
+import { appUrl, e2eHeaders, bootstrap, username, teardown, buildUrl, selectPhoto, openViewer } from './navigation';
 import { DavClient } from './utils';
 import { snap } from './screenshots';
 
@@ -41,12 +41,9 @@ test.describe.serial('Albums', () => {
   test('@ui Create album with selected photos', async ({ page }) => {
     await page.goto(appUrl);
 
-    await page.hover(`.p-outer--${fileid1}`);
-    await page.locator(`.p-outer--${fileid1} > div.select`).click();
-    await page.hover(`.p-outer--${fileid2}`);
-    await page.locator(`.p-outer--${fileid2} > div.select`).click();
-    await page.hover(`.p-outer--${fileid3}`);
-    await page.locator(`.p-outer--${fileid3} > div.select`).click();
+    await selectPhoto(page, fileid1);
+    await selectPhoto(page, fileid2);
+    await selectPhoto(page, fileid3);
 
     await page.getByRole('button', { name: 'Actions' }).click();
     await page.getByRole('menuitem', { name: 'Add to album' }).click();
@@ -73,18 +70,15 @@ test.describe.serial('Albums', () => {
     await expect(page.locator(`.p-outer--${fileid2}`)).toBeVisible();
     await expect(page.locator(`.p-outer--${fileid3}`)).toBeVisible();
 
-    await page.locator(`.p-outer--${fileid1} > .img-outer`).click();
-    await page.waitForSelector('.memories-viewer.fully-opened');
+    await openViewer(page, fileid1);
   });
 
   test('@ui Add image to existing album', async ({ request, page }) => {
     await test.step('Add image via UI', async () => {
       await page.goto(appUrl);
 
-      await page.hover(`.p-outer--${fileid1}`);
-      await page.locator(`.p-outer--${fileid1} > div.select`).click();
-      await page.hover(`.p-outer--${fileid4}`);
-      await page.locator(`.p-outer--${fileid4} > div.select`).click();
+      await selectPhoto(page, fileid1);
+      await selectPhoto(page, fileid4);
 
       await page.getByRole('button', { name: 'Actions' }).click();
       await page.getByRole('menuitem', { name: 'Add to album' }).click();
@@ -114,8 +108,7 @@ test.describe.serial('Albums', () => {
   test('@ui Set cover image on album', async ({ request, page }) => {
     await test.step('Set cover image via UI', async () => {
       await page.goto(uiUrl(albumName));
-      await page.hover(`.p-outer--${fileid1}`);
-      await page.locator(`.p-outer--${fileid1} > div.select`).click();
+      await selectPhoto(page, fileid1);
 
       const setCoverPromise = page.waitForResponse((r) => r.url().includes('/albums/set-cover') && r.status() === 200);
       await page.getByRole('button', { name: 'Actions' }).click();
@@ -138,8 +131,7 @@ test.describe.serial('Albums', () => {
   test('@ui Remove image from album', async ({ request, page }) => {
     await test.step('Remove image via UI', async () => {
       await page.goto(uiUrl(albumName));
-      await page.hover(`.p-outer--${fileid1}`);
-      await page.locator(`.p-outer--${fileid1} > div.select`).click();
+      await selectPhoto(page, fileid1);
 
       await page.getByRole('button', { name: 'Remove from album' }).click();
       await page.getByRole('button', { name: 'Yes' }).click();
@@ -173,19 +165,19 @@ test.describe.serial('Albums', () => {
   });
 
   test('@api Download album returns handle', async ({ request }) => {
-    const url = new URL(`${appUrl}/api/clusters/albums/download`);
-    url.searchParams.set('name', `${username}/${renamedAlbumName}`);
-    const res = await request.post(url.toString());
+    const url = buildUrl('/api/clusters/albums/download', { name: `${username}/${renamedAlbumName}` });
+    const res = await request.post(url);
     expect(res.ok()).toBeTruthy();
     expect(typeof (await res.json()).handle).toBe('string');
   });
 
   test('@api Preview missing album is rejected', async ({ request }) => {
-    const url = new URL(`${appUrl}/api/clusters/albums/preview`);
-    url.searchParams.set('name', `${username}/no-such-album-xyz`);
-    url.searchParams.set('cover', '1');
-    url.searchParams.set('cover_etag', 'null');
-    expect((await request.get(url.toString())).status()).toBe(404);
+    const url = buildUrl('/api/clusters/albums/preview', {
+      name: `${username}/no-such-album-xyz`,
+      cover: '1',
+      cover_etag: 'null',
+    });
+    expect((await request.get(url)).status()).toBe(404);
   });
 
   test('@api Set cover for photo outside album is rejected', async ({ request }) => {

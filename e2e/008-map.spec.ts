@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap, e2eHeaders, osmTileHits, teardown } from './navigation';
+import { appUrl, bootstrap, e2eHeaders, osmTileHits, teardown, buildUrl } from './navigation';
 import { DavClient } from './utils';
 import { snap } from './screenshots';
 
@@ -26,11 +26,9 @@ test.describe('@api Map', () => {
   // Query map clusters for the Santa Monica + Venice bounding box at zoom level 13.
   test('Query map clusters for Santa Monica and Venice', async ({ request }) => {
     const dav = new DavClient(request);
-    const url = new URL(`${appUrl}/api/map/clusters`);
-    url.searchParams.set('bounds', SM_BOUNDS);
-    url.searchParams.set('zoom', '13');
+    const url = buildUrl('/api/map/clusters', { bounds: SM_BOUNDS, zoom: '13' });
 
-    const res = await request.get(url.toString());
+    const res = await request.get(url);
     expect(res.ok()).toBeTruthy();
 
     const clusters: IMapCluster[] = await res.json();
@@ -84,11 +82,9 @@ test.describe('@api Map', () => {
 
   // Query zoomed-out map clusters covering California (zoom level 6).
   test('Query zoomed-out map clusters for California', async ({ request }) => {
-    const url = new URL(`${appUrl}/api/map/clusters`);
-    url.searchParams.set('bounds', '24.199194,44.871665,-129.699097,-111.406860');
-    url.searchParams.set('zoom', '6');
+    const url = buildUrl('/api/map/clusters', { bounds: '24.199194,44.871665,-129.699097,-111.406860', zoom: '6' });
 
-    const res = await request.get(url.toString());
+    const res = await request.get(url);
     expect(res.ok()).toBeTruthy();
 
     // At zoom 6, California photos are grouped into 2 clusters.
@@ -121,11 +117,9 @@ test.describe('@api Map', () => {
   test('Query timeline days filtered by map bounds', async ({ request }) => {
     // Match the test data from the New York area
     const mapbounds = '40.621510,40.820565,-74.106216,-73.915672';
-    const url = new URL(`${appUrl}/api/days`);
-    url.searchParams.set('mapbounds', mapbounds);
-    url.searchParams.set('nopreload', '1');
+    const url = buildUrl('/api/days', { mapbounds: mapbounds, nopreload: '1' });
 
-    const res = await request.get(url.toString());
+    const res = await request.get(url);
     expect(res.ok()).toBeTruthy();
 
     const days: IDay[] = await res.json();
@@ -136,10 +130,9 @@ test.describe('@api Map', () => {
     ]);
 
     // Query single day details filtered by the same map bounds.
-    const dayUrl = new URL(`${appUrl}/api/days/18455`);
-    dayUrl.searchParams.set('mapbounds', mapbounds);
+    const dayUrl = buildUrl('/api/days/18455', { mapbounds: mapbounds });
 
-    const dayRes = await request.get(dayUrl.toString());
+    const dayRes = await request.get(dayUrl);
     expect(dayRes.ok()).toBeTruthy();
 
     const photos: IPhoto[] = await dayRes.json();
@@ -171,10 +164,8 @@ test.describe('@ui Map', () => {
     const dav = new DavClient(request);
 
     await test.step('Open Santa Monica viewport', async (step) => {
-      const mapPage = new URL(`${appUrl}/map`);
-      mapPage.searchParams.set('b', SM_BOUNDS);
-      mapPage.searchParams.set('z', '13');
-      await page.goto(mapPage.toString());
+      const mapPage = buildUrl('/map', { b: SM_BOUNDS, z: '13' });
+      await page.goto(mapPage);
       await expect(page.locator('.split-container')).toBeVisible();
       await expect(page.locator('.map-matter .leaflet-container')).toBeVisible();
       await expect(page.locator('.leaflet-marker-icon .preview')).toHaveCount(3);

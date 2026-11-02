@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap, teardown, username, psub } from './navigation';
+import { appUrl, bootstrap, teardown, username, psub, selectPhoto, openViewer } from './navigation';
 import { DavClient } from './utils';
 
 test.beforeEach(bootstrap);
@@ -55,8 +55,7 @@ test.describe('Trash', () => {
     const trashId = trashIds[FILES.listRestore];
     await page.goto(`${appUrl}/trash`);
     await expect(page.locator(`.p-outer--trash-${trashId}:visible`)).toHaveCount(1);
-    await page.hover(`.p-outer--trash-${trashId}`);
-    await page.locator(`.p-outer--trash-${trashId} > div.select`).click();
+    await selectPhoto(page, `trash-${trashId}`);
 
     await page.getByRole('button', { name: 'Restore' }).click();
     await expect(page.locator(`.p-outer--trash-${trashId}:visible`)).toHaveCount(0);
@@ -68,8 +67,7 @@ test.describe('Trash', () => {
     const trashId = trashIds[FILES.listDelete];
     await page.goto(`${appUrl}/trash`);
     await expect(page.locator(`.p-outer--trash-${trashId}:visible`)).toHaveCount(1);
-    await page.hover(`.p-outer--trash-${trashId}`);
-    await page.locator(`.p-outer--trash-${trashId} > div.select`).click();
+    await selectPhoto(page, `trash-${trashId}`);
 
     await page.getByRole('button', { name: 'Delete permanently' }).first().click();
 
@@ -87,8 +85,7 @@ test.describe('Trash', () => {
     await page.goto(`${appUrl}/trash`);
     await expect(page.locator(`.p-outer--trash-${trashId}:visible`)).toHaveCount(1);
 
-    await page.locator(`.p-outer--trash-${trashId}`).click();
-    await page.waitForSelector('.memories-viewer.fully-opened');
+    await openViewer(page, `trash-${trashId}`);
 
     const viewer = page.locator('.memories-viewer');
     await viewer.getByRole('button', { name: 'Restore' }).click();
@@ -102,8 +99,7 @@ test.describe('Trash', () => {
     await page.goto(`${appUrl}/trash`);
     await expect(page.locator(`.p-outer--trash-${deleteId}:visible`)).toHaveCount(1);
 
-    await page.locator(`.p-outer--trash-${deleteId}`).click();
-    await page.waitForSelector('.memories-viewer.fully-opened');
+    await openViewer(page, `trash-${deleteId}`);
 
     const viewer = page.locator('.memories-viewer');
     await viewer.getByRole('button', { name: 'Delete', exact: true }).click();

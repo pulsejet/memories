@@ -68,3 +68,26 @@ export function e2eHeaders(params?: { timelinePath?: string }): Record<string, s
 export function psub(input: string): string {
   return input.replace(/%wid/g, process.env.TEST_WORKER_INDEX || '0');
 }
+
+// Build an app URL from a path relative to appUrl, skipping null params.
+export function buildUrl(path: string, params: Record<string, string | number | null | undefined> = {}): string {
+  const url = new URL(`${appUrl}${path}`);
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== null && v !== undefined) {
+      url.searchParams.set(k, String(v));
+    }
+  }
+  return url.toString();
+}
+
+// Select a photo with its hover check icon.
+export async function selectPhoto(page: Page, key: number | string) {
+  await page.hover(`.p-outer--${key}`);
+  await page.locator(`.p-outer--${key} > div.select`).click();
+}
+
+// Open a photo in the viewer and wait for it to settle.
+export async function openViewer(page: Page, key: number | string) {
+  await page.locator(`.p-outer--${key} > .img-outer`).click();
+  await page.waitForSelector('.memories-viewer.fully-opened');
+}

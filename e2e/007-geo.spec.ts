@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders } from './navigation';
+import { appUrl, e2eHeaders, buildUrl } from './navigation';
 import { DavClient } from './utils';
 import { imageSize } from 'image-size';
 
@@ -59,11 +59,12 @@ test.describe('@api Geo', () => {
       const random = Math.floor(Math.random() * 1000000);
       const previewResponses = await Promise.all(
         initialClusters.map((cluster) => {
-          const url = new URL(`${appUrl}/api/clusters/places/preview`);
-          url.searchParams.set('name', String(cluster.cluster_id));
-          url.searchParams.set('cover', String(random));
-          url.searchParams.set('cover_etag', 'null');
-          return request.get(url.toString());
+          const url = buildUrl('/api/clusters/places/preview', {
+            name: String(cluster.cluster_id),
+            cover: String(random),
+            cover_etag: 'null',
+          });
+          return request.get(url);
         }),
       );
       for (const res of previewResponses) {
@@ -136,9 +137,8 @@ test.describe('@api Geo', () => {
 
     let days: IDay[];
     await test.step('Query days filtered by cluster', async () => {
-      const url = new URL(`${appUrl}/api/days`);
-      url.searchParams.set('places', String(targetCluster.cluster_id));
-      const daysRes = await request.get(url.toString());
+      const url = buildUrl('/api/days', { places: String(targetCluster.cluster_id) });
+      const daysRes = await request.get(url);
       expect(daysRes.ok()).toBeTruthy();
 
       // Verify the result matches the test dataset.

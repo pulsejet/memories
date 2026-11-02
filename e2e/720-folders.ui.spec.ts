@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap, e2eHeaders, teardown } from './navigation';
+import { appUrl, bootstrap, e2eHeaders, teardown, buildUrl } from './navigation';
 import { DavClient } from './utils';
 import { snap } from './screenshots';
 
@@ -78,9 +78,8 @@ test.describe('@ui Folder view and navigation', () => {
 
 test.describe('@api Folders sub', () => {
   test('List root subfolders', async ({ request }) => {
-    const url = new URL(`${appUrl}/api/folders/sub`);
-    url.searchParams.set('folder', '/');
-    const res = await request.get(url.toString());
+    const url = buildUrl('/api/folders/sub', { folder: '/' });
+    const res = await request.get(url);
     expect(res.ok()).toBeTruthy();
 
     const data: { fileid: number; name: string; previews: { fileid: number }[] }[] = await res.json();
@@ -98,9 +97,8 @@ test.describe('@api Folders sub', () => {
   });
 
   test('List nested subfolders', async ({ request }) => {
-    const url = new URL(`${appUrl}/api/folders/sub`);
-    url.searchParams.set('folder', '/for-default');
-    const res = await request.get(url.toString());
+    const url = buildUrl('/api/folders/sub', { folder: '/for-default' });
+    const res = await request.get(url);
     expect(res.ok()).toBeTruthy();
 
     const data: { fileid: number; name: string }[] = await res.json();
@@ -110,15 +108,13 @@ test.describe('@api Folders sub', () => {
   });
 
   test('Invalid folder errors', async ({ request }) => {
-    const missingUrl = new URL(`${appUrl}/api/folders/sub`);
-    missingUrl.searchParams.set('folder', '/no-such-folder-xyz');
-    const missing = await request.get(missingUrl.toString());
+    const missingUrl = buildUrl('/api/folders/sub', { folder: '/no-such-folder-xyz' });
+    const missing = await request.get(missingUrl);
     expect(missing.ok()).toBeFalsy();
     expect(missing.status()).toBe(404);
 
-    const fileUrl = new URL(`${appUrl}/api/folders/sub`);
-    fileUrl.searchParams.set('folder', '/for-default/Nested 1/test_01.jpg');
-    const file = await request.get(fileUrl.toString());
+    const fileUrl = buildUrl('/api/folders/sub', { folder: '/for-default/Nested 1/test_01.jpg' });
+    const file = await request.get(fileUrl);
     expect(file.ok()).toBeFalsy();
     expect(file.status()).toBe(400);
   });

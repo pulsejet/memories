@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { imageSize } from 'image-size';
-import { appUrl, baseUrl, e2eHeaders, bootstrap, teardown, psub } from './navigation';
+import { appUrl, baseUrl, e2eHeaders, bootstrap, teardown, psub, buildUrl } from './navigation';
 import { DavClient } from './utils';
 
 import type { APIRequestContext } from '@playwright/test';
@@ -209,20 +209,16 @@ class TagAPI {
 
   /** Fetch a tag preview, generating its cover as a side effect. */
   async preview(name: string, cover: number) {
-    const url = new URL(`${appUrl}/api/clusters/tags/preview`);
-    url.searchParams.set('name', name);
-    url.searchParams.set('cover', String(cover));
-    url.searchParams.set('cover_etag', 'null');
-    const res = await this.request.get(url.toString());
+    const url = buildUrl('/api/clusters/tags/preview', { name: name, cover: String(cover), cover_etag: 'null' });
+    const res = await this.request.get(url);
     expect(res.ok()).toBeTruthy();
     return res;
   }
 
   /** Get fileids of all timeline photos carrying the given tag. */
   async taggedFileids(tag: string): Promise<number[]> {
-    const url = new URL(`${appUrl}/api/days`);
-    url.searchParams.set('tags', tag);
-    const res = await this.request.get(url.toString());
+    const url = buildUrl('/api/days', { tags: tag });
+    const res = await this.request.get(url);
     expect(res.ok()).toBeTruthy();
 
     const days: IDay[] = await res.json();
