@@ -538,3 +538,15 @@ func TestCopySegments(t *testing.T) {
 	require.Nil(t, CopySegments(nil, 11*time.Second))
 	require.Nil(t, CopySegments([]float64{0}, 0))
 }
+
+func TestHWProbeKey(t *testing.T) {
+	base := Spec{Bin: "ffmpeg", Width: 1280, Height: 720, VAAPI: true, HDR: true, CodecName: "hevc"}
+	other := base
+	other.Input, other.Headers, other.StartAt, other.HLS = "http://x/b.mov", "X: y\r\n", 42, true
+	other.QF, other.FrameRate, other.ChunkSize, other.Audio = 30, 60, 3, AudioInfo{CodecName: "aac"}
+	require.Equal(t, HWProbeKey(base), HWProbeKey(other))
+
+	other = base
+	other.Width = 1920
+	require.NotEqual(t, HWProbeKey(base), HWProbeKey(other))
+}

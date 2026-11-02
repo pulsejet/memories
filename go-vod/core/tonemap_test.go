@@ -147,3 +147,24 @@ func TestCUDATonemapProbeSkipped(t *testing.T) {
 		require.NoFileExists(t, count)
 	}
 }
+
+func TestTonemapProbeShared(t *testing.T) {
+	for _, fail := range []bool{false, true} {
+		s, count := tonemapStream(t, fail)
+		m := &Manager{
+			c: s.c, url: "http://localhost/other.mov", tc: s.m.tc,
+			probe: &ProbeVideoData{HDR: true, Rotation: -90, FrameRate: 60},
+		}
+		other := &Stream{c: s.c, m: m, quality: s.quality, width: s.width, height: s.height}
+
+		require.Equal(t, !fail, s.transcodeSpec(0, true).VAAPIOpenCL)
+		require.Equal(t, !fail, other.transcodeSpec(30, false).VAAPIOpenCL)
+		data, err := os.ReadFile(count)
+		require.NoError(t, err)
+		if fail {
+			require.Equal(t, "call\ncall\n", string(data), "failures are not shared")
+		} else {
+			require.Equal(t, "call\n", string(data))
+		}
+	}
+}

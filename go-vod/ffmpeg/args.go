@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"slices"
 	"strconv"
@@ -18,10 +19,13 @@ import (
 //
 // The zero value selects software x264. Set VAAPI or NVENC (never both;
 // VAAPI wins) for hardware.
+//
+// Fields tagged `hwprobe:"key"` can decide whether an encode graph works
+// on this host; see HWProbeKey.
 type Spec struct {
 	// Bin is the ffmpeg executable. Informational only (callers prepend it
 	// via exec.Command); kept so tests render complete command lines.
-	Bin string
+	Bin string `hwprobe:"key"`
 	// Input is the Nextcloud file URL handed to "-i".
 	Input string
 	// Headers is the ffmpeg "-headers" block.
@@ -34,10 +38,10 @@ type Spec struct {
 
 	// Quality is the rendition label ("480p", …, QualityMax). Anything but
 	// QualityMax enables the downscale filter.
-	Quality string
+	Quality string `hwprobe:"key"`
 	// Width is always the larger source dimension, scaled proportionally
 	// (callers swap axes for portrait sources).
-	Width, Height int
+	Width, Height int `hwprobe:"key"`
 	// QF is the quality factor: CRF (x264), global_quality (VA-API), CQ (NVENC).
 	QF int
 	// FrameRate is the probed source fps, truncated to int. Only sizes the
@@ -45,11 +49,11 @@ type Spec struct {
 	FrameRate int
 	// Rotation is the probed source rotation (-90, 90, ±180, 0), applied as
 	// an explicit transpose filter when UseTranspose is set.
-	Rotation int
+	Rotation int `hwprobe:"key"`
 	// HDR marks sources needing SDR tonemapping.
-	HDR bool
+	HDR bool `hwprobe:"key"`
 	// BitDepth is the source sample depth, 8 when unknown.
-	BitDepth int
+	BitDepth int `hwprobe:"key"`
 	// Audio is the first audio stream; empty when silent.
 	Audio AudioInfo
 	// ChunkSize is the target segment length in whole seconds. Drives
@@ -58,15 +62,15 @@ type Spec struct {
 
 	// VAAPI selects h264_vaapi on VAAPIDevice; VAAPILowPower adds
 	// "-low_power 1" for fixed-function encode blocks.
-	VAAPI, VAAPILowPower bool
+	VAAPI, VAAPILowPower bool `hwprobe:"key"`
 	// VAAPIDevice is the VA-API render node; empty selects /dev/dri/renderD128.
-	VAAPIDevice string
+	VAAPIDevice string `hwprobe:"key"`
 	// VAAPIOpenCL enables GPU HDR tonemapping after a successful interop probe.
 	VAAPIOpenCL bool
 	// NVENC selects h264_nvenc with CUDA offload. NVENCScale picks the scaler
 	// ("cuda" or "npp"); NVENCTemporalAQ enables temporal AQ.
-	NVENC, NVENCTemporalAQ bool
-	NVENCScale             string
+	NVENC, NVENCTemporalAQ bool   `hwprobe:"key"`
+	NVENCScale             string `hwprobe:"key"`
 	// NVENCCUDA enables GPU HDR tonemapping after a successful pipeline probe.
 	NVENCCUDA bool
 
@@ -74,11 +78,11 @@ type Spec struct {
 	// manually instead. Autorotation fails silently on some hardware paths
 	// and never applies to HLS segments; see
 	// https://trac.ffmpeg.org/ticket/8329.
-	UseTranspose bool
+	UseTranspose bool `hwprobe:"key"`
 	// ForceSwTranspose rotates on the CPU (hwdownload → transpose → hwupload)
 	// to dodge broken hardware transpose filters. Always on for
 	// transpose_cuda, which is not trusted at all.
-	ForceSwTranspose bool
+	ForceSwTranspose bool `hwprobe:"key"`
 	// UseGopSize uses a fixed GOP (ChunkSize*FrameRate) instead of forced
 	// keyframes, for encoders whose forced keyframes drift (notably NVENC).
 	UseGopSize bool
@@ -87,7 +91,19 @@ type Spec struct {
 	Copy bool
 	// CodecName is the source video codec_name; HEVC copies are tagged hvc1,
 	// since Safari rejects hev1 in MP4.
-	CodecName string
+	CodecName string `hwprobe:"key"`
+}
+
+// HWProbeKey keeps only the `hwprobe:"key"` fields, so hardware
+// probes (e.g. GPU tonemap) can share results across files and requests.
+func HWProbeKey(s Spec) Spec {
+	v := reflect.ValueOf(&s).Elem()
+	for i := range v.NumField() {
+		if v.Type().Field(i).Tag.Get("hwprobe") != "key" {
+			v.Field(i).SetZero()
+		}
+	}
+	return s
 }
 
 // Encoder resolves the video encoder: stream copy, then VAAPI, then NVENC,
