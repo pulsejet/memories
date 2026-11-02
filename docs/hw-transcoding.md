@@ -144,11 +144,6 @@ The internal transcoder connects back to Nextcloud over HTTP. The URL it uses is
     In most cases, it is easier to use an external transcoder when you need hardware acceleration.
     The internal transcoder is only suitable for CPU transcoding or if you do not use Docker.
 
-!!! tip "NVENC"
-
-    These instructions mostly focus on VA-API. For NVENC, you may find further useful
-    pointers in [this](https://github.com/pulsejet/memories/blob/master/go-vod/build-ffmpeg-nvidia.sh) build script.
-
 ### Bare Metal
 
 If you are running Nextcloud on bare metal, you can install the drivers and ffmpeg directly on the host. If you are running nextcloud in a Virtual Magine or LXC container configuration, you will also need to pass through the hardware resource to the nextcloud machine. Some helpful guides can be found for [Proxmox VM](https://pve.proxmox.com/wiki/PCI_Passthrough) / [LXC Container](https://gist.github.com/packerdl/a4887c30c38a0225204f451103d82ac5?permalink_comment_id=4471564). 
@@ -213,7 +208,7 @@ sudo -u www-data \
 
 !!! warning "Beware of old ffmpeg and driver versions"
 
-    Some package repositories distribute old ffmpeg versions that do not support some modern hardware. (e.g., the VA-API driver installed by `apt` in the current debian image used by Nextcloud only supports up to 10th generation Intel Ice Lake CPUs). To ensure you have a compatible version, you may want to remove your existing ffmpeg version and build the drivers and ffmpeg from source.  [This script](https://github.com/pulsejet/memories/blob/master/go-vod/build-ffmpeg.sh) for VA-API or [this one](https://github.com/pulsejet/memories/blob/master/go-vod/build-ffmpeg-nvidia.sh) for NVENC might be useful.
+    Some package repositories distribute old ffmpeg versions that do not support some modern hardware. (e.g., the VA-API driver installed by `apt` in the current debian image used by Nextcloud only supports up to 10th generation Intel Ice Lake CPUs). To ensure you have a compatible version, you may want to remove your existing ffmpeg version and build the drivers and ffmpeg from source.
 
 ### Unraid
 
