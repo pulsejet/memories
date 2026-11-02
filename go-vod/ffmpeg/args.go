@@ -297,6 +297,11 @@ func BuildArgs(s Spec) []string {
 	return args
 }
 
+// copyHLSTime is shorter than any GOP, so the muxer cuts at every keyframe.
+// Longer times count from the first packet, so a seek restart would cut at
+// different keyframes than the playlist lists.
+const copyHLSTime = "0.001"
+
 // SegmentArgs extends BuildArgs with the HLS muxer tail that chops one
 // rendition into servable MPEG-TS segments:
 //
@@ -314,15 +319,20 @@ func BuildArgs(s Spec) []string {
 //   - Keyframes are forced every ChunkSize seconds — fixed GOP when
 //     UseGopSize is set, "-force_key_frames expr:…" otherwise — so each
 //     boundary lands near a keyframe. Stream copy (Copy) cannot create
-//     keyframes, so nothing is forced: the muxer cuts at the next source
-//     keyframe past each -hls_time boundary, matching CopySegments.
+//     keyframes, so nothing is forced. Instead copyHLSTime makes the muxer
+//     cut at every source keyframe, matching CopySegments.
 func SegmentArgs(s Spec, startID int, pattern string) []string {
+	hlsTime := fmt.Sprintf("%d", s.ChunkSize)
+	if s.Copy {
+		hlsTime = copyHLSTime
+	}
+
 	args := BuildArgs(s)
 	args = append(args,
 		"-start_number", fmt.Sprintf("%d", startID),
 		"-avoid_negative_ts", "disabled",
 		"-f", "hls",
-		"-hls_time", fmt.Sprintf("%d", s.ChunkSize),
+		"-hls_time", hlsTime,
 		"-hls_segment_type", "mpegts",
 		"-hls_segment_filename", pattern,
 	)
@@ -373,21 +383,19 @@ type Segment struct {
 	Start, Duration float64
 }
 
-// CopySegments groups keyframes into HLS-sized segments, mirroring the
-// muxer's stream-copy splitting. Nil when no grid can be derived.
-func CopySegments(keyframes []float64, duration time.Duration, chunkSize int) []Segment {
+// CopySegments makes one segment per keyframe, mirroring the muxer's
+// copyHLSTime splitting. The first keyframe opens segment 0 wherever it lands,
+// since the muxer never cuts there. Nil when no grid can be derived.
+func CopySegments(keyframes []float64, duration time.Duration) []Segment {
 	total := duration.Seconds()
-	if len(keyframes) == 0 || total <= 0 || chunkSize <= 0 {
+	if len(keyframes) == 0 || total <= 0 {
 		return nil
 	}
 
-	size := float64(chunkSize)
+	keys := slices.Sorted(slices.Values(keyframes))
 	bounds := []float64{0}
-	for _, k := range slices.Sorted(slices.Values(keyframes)) {
-		if k < 0 || k >= total {
-			continue
-		}
-		if k-bounds[len(bounds)-1] >= size {
+	for _, k := range slices.Compact(keys)[1:] {
+		if k > 0 && k < total {
 			bounds = append(bounds, k)
 		}
 	}

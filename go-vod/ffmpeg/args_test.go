@@ -452,7 +452,7 @@ func TestSegmentArgsCopy(t *testing.T) {
 	s.Copy = true
 	c := cmd(s, SegmentArgs(s, 2, SegmentPattern("/tmp/vod", "direct")))
 	require.NotContains(t, c, "-fps_mode")
-	require.Contains(t, c, "-hls_time 3")
+	require.Contains(t, c, "-hls_time "+copyHLSTime)
 	require.NotContains(t, c, "force_key_frames")
 	require.NotContains(t, c, " -g ")
 	require.NotContains(t, c, "split_by_time")
@@ -484,26 +484,22 @@ func TestSegmentTimestamps(t *testing.T) {
 }
 
 func TestCopySegments(t *testing.T) {
-	segs := CopySegments([]float64{0, 2, 4, 6, 8, 10}, 11*time.Second, 3)
+	segs := CopySegments([]float64{0, 2, 6, 10}, 11*time.Second)
 	require.Equal(t, []Segment{
-		{Start: 0, Duration: 4},
-		{Start: 4, Duration: 4},
-		{Start: 8, Duration: 3},
+		{Start: 0, Duration: 2},
+		{Start: 2, Duration: 4},
+		{Start: 6, Duration: 4},
+		{Start: 10, Duration: 1},
 	}, segs)
 
-	segs = CopySegments([]float64{0, 10}, 12*time.Second, 3)
-	require.Equal(t, []Segment{
-		{Start: 0, Duration: 10},
-		{Start: 10, Duration: 2},
-	}, segs)
+	// A late first keyframe opens segment 0 instead of a tiny cut.
+	segs = CopySegments([]float64{0.067, 4}, 8*time.Second)
+	require.Equal(t, []Segment{{Start: 0, Duration: 4}, {Start: 4, Duration: 4}}, segs)
 
-	segs = CopySegments([]float64{8, 0, 4, 2, 10, 6}, 11*time.Second, 3)
-	require.Len(t, segs, 3)
+	// Out of order, duplicate and out of range keyframes.
+	segs = CopySegments([]float64{4, 0, 4, 2, 12}, 12*time.Second)
+	require.Equal(t, []Segment{{Start: 0, Duration: 2}, {Start: 2, Duration: 2}, {Start: 4, Duration: 8}}, segs)
 
-	segs = CopySegments([]float64{0, 12}, 12*time.Second, 3)
-	require.Equal(t, []Segment{{Start: 0, Duration: 12}}, segs)
-
-	require.Nil(t, CopySegments(nil, 11*time.Second, 3))
-	require.Nil(t, CopySegments([]float64{0}, 0, 3))
-	require.Nil(t, CopySegments([]float64{0}, 11*time.Second, 0))
+	require.Nil(t, CopySegments(nil, 11*time.Second))
+	require.Nil(t, CopySegments([]float64{0}, 0))
 }
