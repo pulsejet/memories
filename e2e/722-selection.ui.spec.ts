@@ -254,8 +254,6 @@ test.describe('@ui Photo selection touch', () => {
         await touch('touchMove', x, height - 30);
         await expect(countText).toHaveText('94 selected', { timeout: 400 });
       }).toPass({ intervals: [0], timeout: 60_000 });
-      await page.waitForTimeout(200); // animation
-      await snap(page, 'selection-touch-drag', step);
     });
 
     await test.step('Move up without lifting deselects in between', async (step) => {
@@ -271,11 +269,11 @@ test.describe('@ui Photo selection touch', () => {
         await touch('touchMove', x, target.y + target.height / 2);
         await expect(countText).toHaveText('91 selected', { timeout: 300 });
       }).toPass({ intervals: [0], timeout: 15_000 });
-      await page.waitForTimeout(200); // animation
-      await snap(page, 'selection-touch-shrink', step);
 
       await touch('touchEnd', 0, 0);
       await expect(countText).toHaveText('91 selected');
+      await page.waitForTimeout(200); // animation
+      await snap(page, 'selection-touch-shrink', step);
     });
 
     await test.step('Tap toggles single photos', async (step) => {
