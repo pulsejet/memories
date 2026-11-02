@@ -39,7 +39,7 @@ const router = useRouter();
 const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
 
-const album = ref<any>(null);
+const album = ref<dav.IDavAlbum | null>(null);
 const abort = useAbort();
 
 /**
@@ -70,7 +70,7 @@ function cleanup() {
   show.value = false;
 }
 
-async function done({ album: newAlbum }: { album: { basename: string; filename: string } }) {
+async function done({ album: newAlbum }: { album: dav.IDavAlbum }) {
   // close modal first to pop fragments
   await close();
 

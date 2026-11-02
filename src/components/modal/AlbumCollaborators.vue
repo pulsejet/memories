@@ -382,16 +382,7 @@ async function updateAlbumCollaborators(collaborators?: Collaborator[], signal?:
     loadingAlbum.value = true;
     const album = await dav.getAlbum(utils.uid, props.albumName, { signal });
     signal.throwIfAborted();
-    await dav.updateAlbum(
-      album,
-      {
-        albumName: props.albumName,
-        properties: {
-          collaborators,
-        },
-      },
-      { signal },
-    );
+    await dav.updateAlbum(album, { collaborators }, { signal });
     signal.throwIfAborted();
     return true;
   } catch (error) {

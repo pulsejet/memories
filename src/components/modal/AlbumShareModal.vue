@@ -24,7 +24,6 @@
       ref="collaborators"
       :album-name="album.basename"
       :collaborators="album.collaborators"
-      :public-link="album.publicLink"
       :allow-public-link="true"
       v-slot="{ collaborators }"
     >
@@ -76,7 +75,7 @@ const modal = useTemplateRef('modal');
 const { show, close } = useModal(modal);
 const collaborators = useTemplateRef<InstanceType<typeof AlbumCollaborators>>('collaborators');
 
-const album = ref<any>(null);
+const album = ref<dav.IDavAlbum | null>(null);
 const albumName = ref(String());
 const loadingAddCollaborators = ref(false);
 const abort = useAbort();
@@ -121,24 +120,19 @@ function cleanup() {
 }
 
 async function save(collaboratorsIn: any[]) {
+  if (!album.value) return;
+  const { basename } = album.value;
   const signal = abort.renew();
   try {
     loadingAddCollaborators.value = true;
 
     // Update album collaborators
-    await dav.updateAlbum(
-      album.value,
-      {
-        albumName: album.value.basename,
-        properties: { collaborators: collaboratorsIn },
-      },
-      { signal },
-    );
+    await dav.updateAlbum(album.value, { collaborators: collaboratorsIn }, { signal });
     signal.throwIfAborted();
 
     // Update album name if changed
-    if (album.value.basename !== albumName.value) {
-      await dav.renameAlbum(album.value, album.value.basename, albumName.value, { signal });
+    if (basename !== albumName.value) {
+      album.value = await dav.renameAlbum(album.value, basename, albumName.value, { signal });
       signal.throwIfAborted();
 
       // Change route to new album name if we're on album page

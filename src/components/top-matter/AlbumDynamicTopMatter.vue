@@ -95,6 +95,8 @@ async function refresh(): Promise<void> {
   } finally {
     if (!signal.aborted) {
       album.value ??= {
+        basename: name,
+        filename: dav.getAlbumPath(user, name),
         collaborators: [],
         location: '',
       };

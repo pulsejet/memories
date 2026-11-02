@@ -111,12 +111,12 @@ defineOptions({
 });
 
 const props = defineProps<{
-  album?: any;
+  album?: dav.IDavAlbum | null;
   displayBackButton?: boolean;
 }>();
 
 const emit = defineEmits<{
-  (e: 'done', data: { album: any }): void;
+  (e: 'done', data: { album: dav.IDavAlbum }): void;
   (e: 'back'): void;
 }>();
 
@@ -136,7 +136,7 @@ const saveText = computed(() => (editMode.value ? t('memories', 'Save') : t('mem
 const sharingEnabled = computed(() => true); // todo
 
 onMounted(() => {
-  if (editMode.value) {
+  if (props.album) {
     albumName.value = props.album.basename;
     albumLocation.value = props.album.location;
   }
@@ -167,7 +167,7 @@ async function handleCreateAlbum(collaborators: any[] = []) {
   const signal = abort.renew();
   try {
     loading.value = true;
-    let album = {
+    const album = {
       basename: albumName.value,
       filename: `/photos/${utils.uid}/albums/${albumName.value}`,
       nbItems: 0,
@@ -180,17 +180,7 @@ async function handleCreateAlbum(collaborators: any[] = []) {
     signal.throwIfAborted();
 
     if (albumLocation.value !== '' || collaborators.length !== 0) {
-      album = await dav.updateAlbum(
-        album,
-        {
-          albumName: albumName.value,
-          properties: {
-            location: albumLocation.value,
-            collaborators,
-          },
-        },
-        { signal },
-      );
+      await dav.updateAlbum(album, { location: albumLocation.value, collaborators }, { signal });
       signal.throwIfAborted();
     }
 
@@ -208,21 +198,15 @@ async function handleUpdateAlbum() {
   const signal = abort.renew();
   try {
     loading.value = true;
-    let album = { ...props.album };
+    let album = { ...props.album! };
     if (album.basename !== albumName.value) {
       album = await dav.renameAlbum(album, album.basename, albumName.value, { signal });
       signal.throwIfAborted();
     }
     if (album.location !== albumLocation.value) {
-      album.location = await dav.updateAlbum(
-        album,
-        {
-          albumName: album.basename,
-          properties: { location: albumLocation.value },
-        },
-        { signal },
-      );
+      await dav.updateAlbum(album, { location: albumLocation.value }, { signal });
       signal.throwIfAborted();
+      album.location = albumLocation.value;
     }
     emit('done', { album });
   } catch (error) {

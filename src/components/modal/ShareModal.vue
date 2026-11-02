@@ -233,7 +233,7 @@ async function shareLink() {
       // Create album using WebDAV
       try {
         signal.throwIfAborted();
-        await dav.createAlbum(name, { rethrow: true, signal });
+        await dav.createAlbum(name, { signal });
       } catch (e) {
         if (isAbortError(e)) return null;
         showError(t('memories', 'Failed to create album for public link'));
