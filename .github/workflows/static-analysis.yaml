@@ -2,6 +2,7 @@
 name: static analysis
 on:
   push:
+    branches: [master, development]
     paths-ignore:
       - 'docs/**'
       - 'go-vod/**'
@@ -16,6 +17,10 @@ on:
       - 'mkdocs.yml'
       - '**.md'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   php-lint:
     name: PHP Lint
@@ -29,14 +34,14 @@ jobs:
 
     steps:
       - name: Checkout server
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           submodules: true
           repository: nextcloud/server
           ref: ${{ matrix.server-versions }}
 
       - name: Checkout the app
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           path: apps/memories
 
@@ -44,6 +49,18 @@ jobs:
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
         with:
           php-version: ${{ matrix.php-versions }}
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        working-directory: apps/memories
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer downloads
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ hashFiles('apps/memories/composer.lock') }}
+          restore-keys: composer-
 
       - name: Install dependencies
         working-directory: apps/memories
@@ -67,10 +84,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the app
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Use Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24.x
           cache: npm

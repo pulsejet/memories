@@ -2,6 +2,7 @@ name: e2e
 
 on:
   push:
+    branches: [master, development]
     paths-ignore:
       - 'docs/**'
       - 'go-vod/**'
@@ -21,15 +22,19 @@ env:
   NODE_VERSION: 24.x
   PHP_CLI_SERVER_WORKERS: 12
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   vue:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the app
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Use Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -42,7 +47,7 @@ jobs:
           ./scripts/verify-js-manifest.ts
           zip -r vue.zip js/
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: vue.zip
           path: vue.zip
@@ -54,9 +59,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        databases: ['mysql', 'mariadb', 'pgsql', 'sqlite']
+        databases: ${{ fromJSON(github.event_name == 'pull_request' && '["mysql","pgsql"]' || '["mysql","mariadb","pgsql","sqlite"]') }}
         php-versions: ['8.4']
-        server-versions: ['stable34', 'stable35']
+        server-versions: ${{ fromJSON(github.event_name == 'pull_request' && '["stable35"]' || '["stable34","stable35"]') }}
 
     services:
       mysql:
@@ -118,39 +123,39 @@ jobs:
 
     steps:
       - name: Checkout server
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           submodules: true
           repository: nextcloud/server
           ref: ${{ matrix.server-versions }}
 
       - name: Checkout the app
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           path: apps/${{ env.APP_NAME }}
 
       - parallel:
         - name: Download WebUI bundle
-          uses: actions/download-artifact@v8
+          uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
           with:
             name: vue.zip
 
         - name: Checkout Nextcloud Photos app
-          uses: actions/checkout@v6
+          uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
           with:
             path: apps/photos
             repository: nextcloud/photos
             ref: ${{ matrix.server-versions }}
 
         - name: Checkout Nextcloud Viewer app
-          uses: actions/checkout@v6
+          uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
           with:
             path: apps/viewer
             repository: nextcloud/viewer
             ref: ${{ matrix.server-versions }}
 
         - name: Use Node.js
-          uses: actions/setup-node@v6
+          uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
           with:
             node-version: ${{ env.NODE_VERSION }}
             cache: npm
@@ -168,6 +173,18 @@ jobs:
               opcache.jit=tracing,
               opcache.jit_buffer_size=64M
 
+      - name: Get Composer cache directory
+        id: composer-cache
+        working-directory: apps/memories
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer downloads
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-e2e-${{ hashFiles('apps/photos/composer.lock', 'apps/viewer/composer.lock') }}
+          restore-keys: composer-e2e-
+
       - name: Run tests
         env:
           NC_DB_TYPE: ${{ matrix.databases }}
@@ -182,7 +199,7 @@ jobs:
           make -C apps/${{ env.APP_NAME }} e2e
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ always() && github.event_name != 'pull_request' }}
         with:
           name: report-${{ matrix.databases }}-${{ matrix.php-versions }}-${{ matrix.server-versions }}

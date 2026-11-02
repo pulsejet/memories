@@ -2,6 +2,7 @@
 name: unit test
 on:
   push:
+    branches: [master, development]
     paths-ignore:
       - 'docs/**'
       - 'go-vod/**'
@@ -15,6 +16,10 @@ on:
       - 'android/**'
       - 'mkdocs.yml'
       - '**.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   unit-test:
@@ -32,14 +37,14 @@ jobs:
 
     steps:
       - name: Checkout server
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           submodules: true
           repository: nextcloud/server
           ref: ${{ matrix.server-versions }}
 
       - name: Checkout the app
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           path: apps/memories
 
@@ -64,6 +69,18 @@ jobs:
             --admin-user admin \
             --admin-pass password
           php occ app:enable memories
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        working-directory: apps/memories
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer downloads
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ hashFiles('apps/memories/composer.lock') }}
+          restore-keys: composer-
 
       - name: Install dependencies
         working-directory: apps/memories
