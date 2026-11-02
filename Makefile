@@ -28,7 +28,7 @@ js-init:
 	bash scripts/patch-external.sh
 
 js-lint:
-	npx vue-tsc --noEmit --skipLibCheck
+	npx vue-tsc --noEmit
 
 PRETTIER_PATHS = src e2e scripts/*.ts webpack*.ts playwright.config.ts
 
