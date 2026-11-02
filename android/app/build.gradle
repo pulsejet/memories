@@ -41,7 +41,7 @@ kotlin {
 dependencies {
     def media_version = "1.11.1"
     def room_version = "2.8.5"
-    def ktor_version = "3.6.0"
+    def ktor_version = "3.6.1"
     def coroutines_version = "1.11.0"
 
     implementation 'androidx.core:core-ktx:1.19.1'
