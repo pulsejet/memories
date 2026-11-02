@@ -1,4 +1,5 @@
 import * as base from './base';
+import * as xml from './xml';
 
 import axios from '@nextcloud/axios';
 import { showError } from '@services/utils/dialog';
@@ -158,28 +159,15 @@ export async function updateAlbum(
   properties: Partial<Pick<IDavAlbum, 'location' | 'collaborators'>>,
   opts?: AbortOpts,
 ): Promise<void> {
-  const stringifiedProperties = Object.entries(properties)
-    .filter(([, value]) => value !== undefined)
-    .map(([name, value]) => {
-      const text = typeof value === 'string' ? value : JSON.stringify(value);
-      return `<nc:${name}>${utils.escapeXml(text)}</nc:${name}>`;
-    })
-    .join('');
+  const { location, collaborators } = properties;
 
   opts?.signal?.throwIfAborted();
   await client.customRequest(album.filename, {
     method: 'PROPPATCH',
-    data: `<?xml version="1.0"?>
-                        <d:propertyupdate xmlns:d="DAV:"
-                            xmlns:oc="http://owncloud.org/ns"
-                            xmlns:nc="http://nextcloud.org/ns"
-                            xmlns:ocs="http://open-collaboration-services.org/ns">
-                        <d:set>
-                            <d:prop>
-                                ${stringifiedProperties}
-                            </d:prop>
-                        </d:set>
-                        </d:propertyupdate>`,
+    data: xml.propertyUpdate({
+      'nc:location': location,
+      'nc:collaborators': collaborators && JSON.stringify(collaborators),
+    }),
     signal: opts?.signal,
   });
 }
@@ -190,18 +178,8 @@ export async function updateAlbum(
  * @param name Name of album (or ID)
  */
 export async function getAlbum(user: string, name: string, opts?: AbortOpts): Promise<IDavAlbum> {
-  const req = `<?xml version="1.0"?>
-        <d:propfind xmlns:d="DAV:"
-            xmlns:oc="http://owncloud.org/ns"
-            xmlns:nc="http://nextcloud.org/ns"
-            xmlns:ocs="http://open-collaboration-services.org/ns">
-            <d:prop>
-                <nc:location />
-                <nc:collaborators />
-            </d:prop>
-        </d:propfind>`;
   let album = (await client.stat(getAlbumPath(user, name), {
-    data: req,
+    data: xml.propfind(['nc:location', 'nc:collaborators']),
     details: true,
     signal: opts?.signal,
   })) as any;
@@ -238,10 +216,7 @@ export async function renameAlbum<T extends object>(
 
 /** Get fileinfo objects from album photos */
 export function getAlbumFileInfos(photos: IPhoto[], albumUser: string, albumName: string): IFileInfo[] {
-  const collection =
-    albumUser === utils.uid
-      ? `/photos/${utils.uid}/albums/${albumName}`
-      : `/photos/${utils.uid}/sharedalbums/${albumName} (${albumUser})`;
+  const collection = getAlbumPath(albumUser, albumName);
 
   return photos.map((photo) => {
     const basename = `${photo.fileid}-${photo.basename}`;

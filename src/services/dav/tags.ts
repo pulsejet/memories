@@ -83,18 +83,5 @@ export async function createTag(tag: ITag): Promise<ITag> {
  * https://github.com/nextcloud/server/blob/9a7e2b15580578b4de3eb36808dc466a9fd6b976/apps/systemtags/src/utils.ts#L36C1-L55C2
  */
 function parseIdFromLocation(url: string): number {
-  const queryPos = url.indexOf('?');
-  if (queryPos > 0) {
-    url = url.slice(0, queryPos);
-  }
-
-  const parts: string[] = url.split('/');
-  let result: string | undefined;
-  do {
-    result = parts.pop();
-    // note: first result can be empty when there is a trailing slash,
-    // so we take the part before that
-  } while (!result && parts.length > 0);
-
-  return Number(result);
+  return Number(url.split('?')[0].replace(/\/+$/, '').split('/').pop());
 }

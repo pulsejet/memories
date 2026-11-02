@@ -1,4 +1,3 @@
-import { getDefaultPropfind } from '@nextcloud/files/dav';
 import { generateUrl } from '@nextcloud/router';
 import { showError, showSuccess } from '@services/utils/dialog';
 import axios from '@nextcloud/axios';
@@ -8,6 +7,7 @@ import { translate as t } from '@services/l10n';
 import { routes } from '@services/router';
 import { getFiles } from '@services/dav/base';
 import client from '@services/dav/client';
+import * as xml from '@services/dav/xml';
 import * as utils from '@services/utils/common';
 
 import type { RouteLocationNormalized } from 'vue-router';
@@ -20,7 +20,7 @@ import type { AbortOpts } from '@services/utils/abort';
  */
 export async function getFileId(path: string, opts?: AbortOpts): Promise<number> {
   const res = (await client.stat(`/files/${utils.uid}/${path.replace(/^\/+/, '')}`, {
-    data: getDefaultPropfind(),
+    data: xml.propfind(['oc:fileid']),
     details: true,
     signal: opts?.signal,
   })) as ResponseDataDetailed<FileStat>;

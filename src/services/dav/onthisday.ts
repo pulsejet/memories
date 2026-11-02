@@ -20,7 +20,7 @@ export async function getOnThisDayRaw(opts?: AbortOpts) {
 
   // Populate dayIds
   for (let i = 1; i <= 120; i++) {
-    // +- 3 days from this day
+    // +- dayRange days from this day
     for (let j = -dayRange; j <= dayRange; j++) {
       const d = new Date(nowUTC);
       d.setUTCFullYear(d.getUTCFullYear() - i);

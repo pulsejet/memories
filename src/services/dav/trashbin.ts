@@ -1,5 +1,4 @@
 import axios from '@nextcloud/axios';
-import { generateRemoteUrl } from '@nextcloud/router';
 
 import client from '@services/dav/client';
 import { runInParallel } from '@services/dav/base';
@@ -98,7 +97,7 @@ export async function* restoreTrashPhotos(photos: IPhoto[], opts?: AbortOpts) {
       opts?.signal?.throwIfAborted();
       const trashPath = p.trashInfo!.trashPath;
       const rawBasename = trashPath.split('/').pop()!;
-      await client.moveFile(trashPath, `${restoreRoot}/${rawBasename}`, { signal: opts?.signal } as any);
+      await client.moveFile(trashPath, `${restoreRoot}/${rawBasename}`, { signal: opts?.signal });
       return p.fileid;
     } catch (e) {
       if (isAbortError(e)) throw e;
@@ -120,7 +119,7 @@ export async function* deleteTrashPhotos(photos: IPhoto[], opts?: AbortOpts) {
   const calls = photos.map((p) => async () => {
     try {
       opts?.signal?.throwIfAborted();
-      await client.deleteFile(p.trashInfo!.trashPath, { signal: opts?.signal } as any);
+      await client.deleteFile(p.trashInfo!.trashPath, { signal: opts?.signal });
       return p.fileid;
     } catch (e) {
       if (isAbortError(e)) throw e;
@@ -141,8 +140,7 @@ export function getTrashDownloadLink(photo: IPhoto): string {
 /** Empty entire trashbin */
 export async function emptyTrashbin(opts?: AbortOpts): Promise<boolean> {
   try {
-    const url = generateRemoteUrl(`dav${getTrashRoot()}`);
-    await axios.delete(url, { signal: opts?.signal });
+    await client.deleteFile(getTrashRoot(), { signal: opts?.signal });
     showSuccess(t('memories', 'Trash emptied'));
     return true;
   } catch (e) {

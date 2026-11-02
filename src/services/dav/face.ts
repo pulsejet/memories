@@ -28,15 +28,10 @@ export async function getFaceList(app: 'recognize' | 'facerecognition', opts?: A
  * @param params Parameters to update
  */
 export async function faceRecognitionUpdatePerson(name: string, params: object, opts?: AbortOpts) {
-  if (Number.isInteger(Number(name))) {
-    return await axios.put(generateUrl(`/apps/facerecognition/api/2.0/cluster/${name}`), params, {
-      signal: opts?.signal,
-    });
-  } else {
-    return await axios.put(generateUrl(`/apps/facerecognition/api/2.0/person/${name}`), params, {
-      signal: opts?.signal,
-    });
-  }
+  const type = Number.isInteger(Number(name)) ? 'cluster' : 'person';
+  return await axios.put(generateUrl(`/apps/facerecognition/api/2.0/${type}/${name}`), params, {
+    signal: opts?.signal,
+  });
 }
 
 /**
@@ -105,7 +100,7 @@ export async function* recognizeMoveFaceImages(
   photos: IPhoto[],
   opts?: AbortOpts,
 ) {
-  // Remove each file
+  // Move each file
   const calls = photos.map((p) => async () => {
     try {
       opts?.signal?.throwIfAborted();
