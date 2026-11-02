@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, buildUrl } from './navigation';
+import { expect } from '@playwright/test';
+import { test, appUrl, e2eHeaders, buildUrl } from './navigation';
 import { goldDays, goldDayPhotos } from './dataset-measurements';
 
 import type { IDay, IPhoto } from '@typings';

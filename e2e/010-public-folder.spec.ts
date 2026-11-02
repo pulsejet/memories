@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { fileURLToPath } from 'node:url';
-import { test, expect } from '@playwright/test';
-import { appUrl, baseUrl, e2eHeaders, psub, buildUrl, openViewer } from './navigation';
+import { expect } from '@playwright/test';
+import { test, appUrl, baseUrl, e2eHeaders, psub, buildUrl, openViewer } from './navigation';
 import { DavClient, withPublicAPI, withPublicPage } from './utils';
 
 import type { APIRequestContext, APIResponse } from '@playwright/test';

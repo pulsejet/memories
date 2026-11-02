@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { appUrl, baseUrl, e2eHeaders, username } from './navigation';
+import { expect } from '@playwright/test';
+import { test, appUrl, baseUrl, e2eHeaders, username } from './navigation';
 
 import type { IConfig } from '@typings';
 

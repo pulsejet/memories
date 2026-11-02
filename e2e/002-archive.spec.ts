@@ -1,11 +1,8 @@
-import { test, expect } from '@playwright/test';
-import { bootstrap, teardown, appUrl, e2eHeaders, psub, selectPhoto } from './navigation';
+import { expect } from '@playwright/test';
+import { test, appUrl, e2eHeaders, psub, selectPhoto } from './navigation';
 import { DavClient } from './utils';
 
 import type { IPhoto } from '@typings';
-
-test.beforeEach(bootstrap);
-test.afterEach(teardown);
 
 test.use({
   extraHTTPHeaders: e2eHeaders({

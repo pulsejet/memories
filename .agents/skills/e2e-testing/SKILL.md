@@ -21,6 +21,7 @@ Never run e2e unless the user explicitly asks.
 
 ## Writing specs
 - Specs run over HTTP only; assume a remote runner. Never run `occ`.
+- Import `test` from `./navigation`, not `@playwright/test`; its `page` is bootstrapped automatically.
 - Derive expected API responses with `goldXXX()` from `e2e/dataset-measurements.ts`, never hardcode.
 - Strip non-deterministic fields before asserting.
 - File changes index reactively; never wait/poll for indexing.

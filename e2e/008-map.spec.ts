@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap, e2eHeaders, osmTileHits, teardown, buildUrl } from './navigation';
+import { expect } from '@playwright/test';
+import { test, appUrl, e2eHeaders, osmTileHits, buildUrl } from './navigation';
 import { DavClient } from './utils';
 import { snap } from './screenshots';
 
@@ -157,9 +157,6 @@ test.describe('@api Map', () => {
 });
 
 test.describe('@ui Map', () => {
-  test.beforeEach(bootstrap);
-  test.afterEach(teardown);
-
   test('Map clusters at Santa Monica then pan past Los Angeles', async ({ page, request }) => {
     const dav = new DavClient(request);
 

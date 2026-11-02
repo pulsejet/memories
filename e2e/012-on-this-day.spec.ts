@@ -1,8 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap, e2eHeaders, teardown } from './navigation';
-
-test.beforeEach(bootstrap);
-test.afterEach(teardown);
+import { expect } from '@playwright/test';
+import { test, appUrl, e2eHeaders } from './navigation';
 
 test.use({
   extraHTTPHeaders: e2eHeaders({

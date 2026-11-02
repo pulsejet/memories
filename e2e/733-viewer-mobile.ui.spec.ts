@@ -1,10 +1,7 @@
-import { test, expect, devices } from '@playwright/test';
-import { appUrl, bootstrap, e2eHeaders, teardown } from './navigation';
+import { expect, devices } from '@playwright/test';
+import { test, appUrl, e2eHeaders } from './navigation';
 import { DavClient } from './utils';
 import { snap } from './screenshots';
-
-test.beforeEach(bootstrap);
-test.afterEach(teardown);
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
 

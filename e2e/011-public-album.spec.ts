@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, psub, username, buildUrl, openViewer } from './navigation';
+import { expect } from '@playwright/test';
+import { test, appUrl, e2eHeaders, psub, username, buildUrl, openViewer } from './navigation';
 import { DavClient, withPublicAPI, withPublicPage } from './utils';
 
 import type { APIRequestContext, APIResponse } from '@playwright/test';

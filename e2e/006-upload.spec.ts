@@ -1,14 +1,11 @@
 import * as path from 'path';
 import { fileURLToPath } from 'node:url';
-import { test, expect } from '@playwright/test';
-import { appUrl, e2eHeaders, bootstrap, psub, teardown } from './navigation';
+import { expect } from '@playwright/test';
+import { test, appUrl, e2eHeaders, psub } from './navigation';
 import { DavClient } from './utils';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-test.beforeEach(bootstrap);
-test.afterEach(teardown);
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
 

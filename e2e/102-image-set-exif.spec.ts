@@ -1,6 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { randomBytes } from 'crypto';
-import { appUrl, e2eHeaders } from './navigation';
+import { test, appUrl, e2eHeaders } from './navigation';
 import { DavClient } from './utils';
 
 test.use({

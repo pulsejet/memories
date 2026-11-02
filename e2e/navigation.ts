@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test as base } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 export const username = process.env.E2E_USER || process.env.TEST_USER || 'admin';
@@ -40,12 +40,21 @@ export async function bootstrap({ page }: { page: Page }) {
 
 export async function teardown({}: {}) {
   if (logBuffer.length > 0) {
-    await test.info().attach('js-console.log', {
+    await base.info().attach('js-console.log', {
       body: logBuffer.join('\n'),
     });
     logBuffer = [];
   }
 }
+
+// Bootstraps the page only when a test asks for one, so API tests skip the browser.
+export const test = base.extend({
+  page: async ({ page }, use) => {
+    await bootstrap({ page });
+    await use(page);
+    await teardown({});
+  },
+});
 
 export function e2eHeaders(params?: { timelinePath?: string }): Record<string, string> {
   const entries = Object.entries({

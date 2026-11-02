@@ -1,11 +1,8 @@
 import * as fs from 'fs';
-import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap, e2eHeaders, teardown, openViewer } from './navigation';
+import { expect } from '@playwright/test';
+import { test, appUrl, e2eHeaders, openViewer } from './navigation';
 import { DavClient } from './utils';
 import { snap } from './screenshots';
-
-test.beforeEach(bootstrap);
-test.afterEach(teardown);
 
 test.use({ extraHTTPHeaders: e2eHeaders() });
 

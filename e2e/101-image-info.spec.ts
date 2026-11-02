@@ -1,6 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { imageSize } from 'image-size';
-import { appUrl, e2eHeaders, psub, username, buildUrl } from './navigation';
+import { test, appUrl, e2eHeaders, psub, username, buildUrl } from './navigation';
 import { DavClient } from './utils';
 import { goldImageInfo } from './dataset-measurements';
 

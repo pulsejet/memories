@@ -1,9 +1,6 @@
-import { test, expect } from '@playwright/test';
-import { appUrl, bootstrap, teardown, username, psub, selectPhoto, openViewer } from './navigation';
+import { expect } from '@playwright/test';
+import { test, appUrl, username, psub, selectPhoto, openViewer } from './navigation';
 import { DavClient } from './utils';
-
-test.beforeEach(bootstrap);
-test.afterEach(teardown);
 
 test.describe('Trash', () => {
   const FOLDER = psub('/for-trash-%wid');

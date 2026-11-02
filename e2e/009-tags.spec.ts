@@ -1,13 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { imageSize } from 'image-size';
-import { appUrl, baseUrl, e2eHeaders, bootstrap, teardown, psub, buildUrl } from './navigation';
+import { test, appUrl, baseUrl, e2eHeaders, psub, buildUrl } from './navigation';
 import { DavClient } from './utils';
 
 import type { APIRequestContext } from '@playwright/test';
 import type { ICluster, IDay, IPhoto } from '@typings';
-
-test.beforeEach(bootstrap);
-test.afterEach(teardown);
 
 test.use({
   extraHTTPHeaders: e2eHeaders({
