@@ -155,22 +155,14 @@ export async function createAlbum(albumName: string, opts?: AbortOpts) {
  */
 export async function updateAlbum(
   album: { filename: string },
-  properties: Record<string, unknown>,
+  properties: Partial<Pick<IDavAlbum, 'location' | 'collaborators'>>,
   opts?: AbortOpts,
 ): Promise<void> {
   const stringifiedProperties = Object.entries(properties)
-    .map(([name, valueRaw]) => {
-      let value: string;
-      switch (typeof valueRaw) {
-        case 'string':
-          value = utils.escapeXml(valueRaw);
-          return `<nc:${name}>${value}</nc:${name}>`;
-        case 'object':
-          value = utils.escapeXml(JSON.stringify(valueRaw));
-          return `<nc:${name}>${value}</nc:${name}>`;
-        default:
-          return String();
-      }
+    .filter(([, value]) => value !== undefined)
+    .map(([name, value]) => {
+      const text = typeof value === 'string' ? value : JSON.stringify(value);
+      return `<nc:${name}>${utils.escapeXml(text)}</nc:${name}>`;
     })
     .join('');
 
