@@ -23,7 +23,7 @@ const config: PlaywrightTestConfig = {
   ],
   use: {
     actionTimeout: 30000,
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     screenshot: 'on',
     video: {
       mode: process.env.E2E_VIDEO === '1' ? 'on' : 'off',
