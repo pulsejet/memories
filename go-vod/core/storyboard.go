@@ -105,7 +105,6 @@ func (s *storyboardService) Serve(w http.ResponseWriter, r *http.Request, in Sto
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	w.Header().Set("Cache-Control", "max-age=86400, public")
 	if leaf == StoryboardVTTFile {
 		file, err := LoadStoryboardPlan(in.CacheDir, in.FileID, in.Etag)
 		if err != nil {
@@ -113,12 +112,27 @@ func (s *storyboardService) Serve(w http.ResponseWriter, r *http.Request, in Sto
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
+		w.Header().Set("Cache-Control", "max-age=86400, public")
 		w.Header().Set("Content-Type", "text/vtt")
 		w.Write([]byte(file.Plan.VTT(query)))
 		return
 	}
+
+	// Errors must not carry the cache header, or they're cached for a day.
+	f, err := os.Open(filepath.Join(dir, leaf))
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	defer f.Close()
+	st, err := f.Stat()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Cache-Control", "max-age=86400, public")
 	w.Header().Set("Content-Type", "image/jpeg")
-	http.ServeFile(w, r, filepath.Join(dir, leaf))
+	http.ServeContent(w, r, leaf, st.ModTime(), f)
 }
 
 // Ensure builds the storyboard once and returns its dir.

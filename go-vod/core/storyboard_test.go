@@ -2,6 +2,7 @@ package core
 
 import (
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
@@ -198,4 +199,24 @@ func TestStoryboardSurvivesManagerDestroy(t *testing.T) {
 	sharedStoryboards.Serve(w, httptest.NewRequest("GET", "/x", nil), in, StoryboardVTTFile, "")
 	require.Equal(t, 200, w.Code)
 	require.Contains(t, w.Body.String(), "storyboard-0.jpg#xywh=")
+}
+
+func TestStoryboardMissingSpriteNotCached(t *testing.T) {
+	cacheDir := t.TempDir()
+	dir := FileCacheDir(cacheDir, 7)
+	require.NoError(t, os.MkdirAll(dir, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, StoryboardPlanFile), []byte(`{"etag":"e","plan":{"Count":1}}`), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "storyboard-0.jpg"), []byte("jpg"), 0644))
+	in := StoryboardInput{CacheDir: cacheDir, FileID: 7, Etag: "e"}
+
+	w := httptest.NewRecorder()
+	sharedStoryboards.Serve(w, httptest.NewRequest("POST", "/vod", nil), in, "storyboard-9.jpg", "")
+	require.Equal(t, http.StatusNotFound, w.Code)
+	require.Empty(t, w.Header().Get("Cache-Control"))
+
+	w = httptest.NewRecorder()
+	sharedStoryboards.Serve(w, httptest.NewRequest("POST", "/vod", nil), in, "storyboard-0.jpg", "")
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Equal(t, "max-age=86400, public", w.Header().Get("Cache-Control"))
+	require.Equal(t, "jpg", w.Body.String())
 }
