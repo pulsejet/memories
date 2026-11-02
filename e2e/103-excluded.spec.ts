@@ -26,7 +26,7 @@ test.describe('@api Excluded folders are not indexed', () => {
       const fileid = await dav.fileid(filePath);
 
       const res = await request.get(`${appUrl}/api/image/info/${fileid}`);
-      expect(res.ok()).toBeFalsy();
+      expect(res.status()).toBe(404);
     });
   }
 });
@@ -65,7 +65,7 @@ test.describe('@api Excluded folders upload', () => {
       const fileid = await dav.fileid(filePath);
 
       const res = await request.get(`${appUrl}/api/image/info/${fileid}`);
-      expect(res.ok()).toBeFalsy();
+      expect(res.status()).toBe(404);
     });
   }
 

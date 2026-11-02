@@ -109,7 +109,7 @@ test.describe('@api Image delete via API', () => {
     expect((await delRes.json()).deleted).toBe(true);
 
     const infoRes = await request.get(`${appUrl}/api/image/info/${fileid}`);
-    expect(infoRes.ok()).toBeFalsy();
+    expect(infoRes.status()).toBe(404);
   });
 });
 
