@@ -67,3 +67,38 @@ test.describe('@ui Timeline scroller', () => {
     });
   });
 });
+
+test.describe('@ui Timeline top matter', () => {
+  test('Top matter resize keeps rows in place when scrolled past it', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 400 });
+    await page.goto(appUrl);
+    await page.locator('.p-outer').first().waitFor();
+
+    const recycler = page.locator('.recycler');
+    const before = page.locator('.recycler-before');
+
+    // Scroll past the top matter, and let the start offset flush.
+    const beforeHeight = (await before.boundingBox())!.height;
+    await recycler.evaluate((el, top) => (el.scrollTop = top), beforeHeight + 100);
+    await expect.poll(() => recycler.evaluate((el) => el.scrollTop)).toBe(beforeHeight + 100);
+
+    // Pick a visible row to track through the resizes.
+    const photo = page.locator('.p-outer:visible').nth(2);
+    await photo.waitFor();
+    const rowY = async () => (await photo.boundingBox())!.y;
+    const y = await rowY();
+
+    await test.step('Growing keeps the row in place', async () => {
+      await before.evaluate((el) => (el.style.paddingBottom = '60px'));
+      await expect.poll(async () => (await before.boundingBox())!.height - beforeHeight).toBe(60);
+      await page.waitForTimeout(100);
+      expect(await rowY()).toBeCloseTo(y, 0);
+    });
+
+    await test.step('Shrinking keeps the row in place', async () => {
+      await before.evaluate((el) => (el.style.paddingBottom = ''));
+      await page.waitForTimeout(100);
+      expect(await rowY()).toBeCloseTo(y, 0);
+    });
+  });
+});

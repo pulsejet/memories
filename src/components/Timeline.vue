@@ -283,7 +283,13 @@ onMounted(() => {
       for (const entry of entries) {
         if (entry.target === recyclerBefore.value) {
           // Cache the height for row scroll compensation.
+          const prevHeight = beforeHeight.value;
           beforeHeight.value = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+
+          // During restoration, createState compensates after the scroll is applied.
+          if (!routeState.restoring.value) {
+            compensateBeforeHeight(prevHeight);
+          }
           scrollerManager.value?.adjust();
         } else {
           // Recalculate photo layout debounced.
@@ -501,14 +507,8 @@ async function createState(signal: AbortSignal) {
   await raceWithAbort(signal, until(routeState.restoring).toBe(false));
   signal.throwIfAborted();
 
-  // If we stored the scroll position and the beforeHeight changed, we
-  // need to compensate the scroll position to keep the same viewport.
-  if (restoredBeforeHeight && restoredBeforeHeight !== beforeHeight.value) {
-    const element = recycler.value?.$el;
-    if (element && element.scrollTop > restoredBeforeHeight) {
-      recyclerState.startOffset -= beforeHeight.value - restoredBeforeHeight;
-    }
-  }
+  // The saved scroll position assumes the saved beforeHeight.
+  compensateBeforeHeight(restoredBeforeHeight);
 
   // Initialize scrollbar ticks for the restored rows.
   scrollerManager.value?.reflow();
@@ -520,6 +520,17 @@ async function createState(signal: AbortSignal) {
   // could remove days, shrink the timeline and clamp the restored scroll.
   const noCache = routeState.hasState.value || list.value.length > 0;
   await fetchDays({ noCache, signal });
+}
+
+/**
+ * Keep the same rows in the viewport after the before slot changes height.
+ * @param prevHeight Height of the before slot that the scroll position assumes
+ */
+function compensateBeforeHeight(prevHeight: number) {
+  const element = recycler.value?.$el;
+  if (element && element.scrollTop - recyclerState.startOffset > prevHeight) {
+    recyclerState.startOffset -= beforeHeight.value - prevHeight;
+  }
 }
 
 /** Reset all state */
@@ -1937,6 +1948,8 @@ async function fetchFakeDays({
 .recycler {
   will-change: scroll-position;
   contain: strict;
+  // Row shifts are compensated through the start offset.
+  overflow-anchor: none;
   height: 300px;
   width: 100%;
   transition: opacity 0.2s ease-in-out;
