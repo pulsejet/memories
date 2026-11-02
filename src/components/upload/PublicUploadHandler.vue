@@ -27,7 +27,7 @@ const processing = ref(false);
 const progress = ref(0);
 const progressNote = ref(String());
 const hasError = ref(false);
-const currentUploads = ref<{ cancel(): void }[]>([]);
+const currentUploads = ref<AbortController[]>([]);
 const existingFiles = ref(new Set<string>()); // Track existing files in current directory
 
 onBeforeUnmount(() => {
@@ -97,7 +97,16 @@ async function fetchExistingFiles(): Promise<Set<string>> {
  * @param files Array of files to upload
  */
 async function uploadFiles(files: File[]) {
+  // The uploader needs this to chunk through the public endpoint. Kept to the upload,
+  // since it would also switch the @nextcloud/files DAV root for the rest of the page.
+  const isPublicInput = document.createElement('input');
+  isPublicInput.id = 'isPublic';
+  isPublicInput.type = 'hidden';
+  isPublicInput.name = 'isPublic';
+  isPublicInput.value = '1';
+
   try {
+    document.body.appendChild(isPublicInput);
     processing.value = true;
     progress.value = 0;
     hasError.value = false;
@@ -145,10 +154,8 @@ async function uploadFiles(files: File[]) {
       owner: null,
       permissions: Permission.CREATE,
     });
-    // @nextcloud/upload bundles its own copy of @nextcloud/files,
-    // so its Folder type differs from ours despite identical shape.
-    const { Uploader } = await import('@nextcloud/upload');
-    const uploader = new Uploader(true, <any>destination);
+    const { Uploader, uploadFile } = await import('@services/utils/upload');
+    const uploader = new Uploader(true, destination);
 
     // Track upload progress
     const totalSize = filesToUpload.reduce((sum, file) => sum + file.size, 0);
@@ -168,9 +175,9 @@ async function uploadFiles(files: File[]) {
           total: filesToUpload.length,
         });
 
-        const uploadPromise = uploader.upload(file.name, file);
-        currentUploads.value.push(uploadPromise);
-        await uploadPromise;
+        const abort = new AbortController();
+        currentUploads.value.push(abort);
+        await uploadFile(uploader, file.name, file, abort.signal);
 
         successful.push(file.name);
         uploadedSize += file.size;
@@ -196,6 +203,8 @@ async function uploadFiles(files: File[]) {
     showError(t('memories', 'Upload failed'));
     hasError.value = true;
   } finally {
+    isPublicInput.remove();
+
     // Clear upload state after showing results briefly
     setTimeout(() => {
       processing.value = false;
@@ -254,11 +263,7 @@ function getCurrentPath(): string {
  * Cancels all ongoing uploads and resets state
  */
 function cancelAllUploads() {
-  currentUploads.value.forEach((upload) => {
-    try {
-      upload.cancel();
-    } catch (error) {}
-  });
+  currentUploads.value.forEach((upload) => upload.abort());
   currentUploads.value = [];
   processing.value = false;
 }

@@ -87,7 +87,6 @@ import * as nativex from '@native';
 import { API } from '@services/API';
 
 import type { IAlbum, IPhoto, IUploadNativeX } from '@typings';
-import type PCancelable from 'p-cancelable';
 
 defineOptions({
   name: 'UploadModal',
@@ -108,7 +107,7 @@ const tagsShown = ref(false);
 const processing = ref(false);
 const progress = ref(0);
 const progressNote = ref(String());
-const currentUpload = ref<null | PCancelable<any>>(null);
+const currentUpload = ref<null | AbortController>(null);
 const locals = ref<IUploadNativeX[]>([]);
 
 const fileCount = computed(() => files.value.length + locals.value.length);
@@ -190,7 +189,7 @@ function cleanup() {
   files.value = [];
   locals.value = [];
   processing.value = false;
-  currentUpload.value?.cancel('Modal closed');
+  currentUpload.value?.abort();
 }
 
 async function chooseUploadPath() {
@@ -279,7 +278,7 @@ async function uploadI() {
   const remaining = [] as UploadSource[];
 
   // Start upload process
-  const { getUploader } = await import('@nextcloud/upload');
+  const { getUploader, uploadFile } = await import('@services/utils/upload');
   const uploader = getUploader();
   for (const source of queue) {
     guardOpen();
@@ -310,12 +309,12 @@ async function uploadI() {
         progressNote.value = t('memories', 'Uploading {file}', { file: file.name });
 
         const filename = path + file.name;
-        const promise = (currentUpload.value = uploader.upload(filename, file));
-        const res = await promise;
+        const abort = (currentUpload.value = new AbortController());
+        await uploadFile(uploader, filename, file, abort.signal);
         currentUpload.value = null;
 
-        const fileid = parseInt(res.response?.headers?.['oc-fileid'] ?? 0);
-        if (!fileid) throw new Error('No fileid header in response');
+        const fileid = await dav.getFileId(filename);
+        if (!fileid) throw new Error('No fileid for uploaded file');
 
         uploaded.push({ fileid, filename, name: file.name });
       } catch (e) {
