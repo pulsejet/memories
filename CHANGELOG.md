@@ -4,12 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- **Update**: MySQL setups must run `occ memories:places-setup --force` again after this update.
-  - **Feature**: 2x faster reverse geocoding on MySQL.
+- **Feature**: 2x faster reverse geocoding on MySQL.
+  - **Update**: MySQL setups must run `occ memories:places-setup --force` after update.
 - **Feature**: Bundled VIPS image decoder with Ultra-HDR, Samsung HDR and ICC profile support ([#1110](https://github.com/pulsejet/memories/issues/1110), [#1645](https://github.com/pulsejet/memories/issues/1645)).
+  - VIPS provider is enabled by default, and takes priority over Imagick/Imaginary.
 - **Feature**: Support for AVIF format via VIPS ([#1714](https://github.com/pulsejet/memories/issues/1714)).
+  - Existing AVIF and RAW files may need `occ maintenance:mimetype:update-db --repair-filecache` followed by `occ memories:index`.
 - **Feature**: Support for camera RAW formats via VIPS.
+  - RAW support is enabled by default.
 - **Feature**: Fully redesigned image editor backed by VIPS.
+  - VIPS is *required* for image editing support.
 - **Feature**: Image straightener in photo editor ([#1629](https://github.com/pulsejet/memories/issues/1629), [#1075](https://github.com/pulsejet/memories/issues/1075))
 - **Feature**: Support editing metadata of RAW files including stacked JPEG+RAW pairs ([#1222](https://github.com/pulsejet/memories/issues/1222)).
 - **Feature**: High precision map markers setting ([#1701](https://github.com/pulsejet/memories/issues/1701))
