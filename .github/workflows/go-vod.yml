@@ -1,16 +1,27 @@
 name: go-vod
 
 on:
+  workflow_dispatch:
   push:
+    branches: [master, development]
     tags:
       - "go-vod/*"
-  workflow_dispatch:
+    paths:
+      - "go-vod/**"
+      - ".github/workflows/go-vod.yml"
+  pull_request:
+    paths:
+      - "go-vod/**"
+      - ".github/workflows/go-vod.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   binary:
     name: Binary
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/go-vod/')
 
     container:
       image: golang:1.27-bookworm
@@ -25,7 +36,12 @@ jobs:
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -buildvcs=false -ldflags="-s -w" -o go-vod-amd64
           CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -buildvcs=false -ldflags="-s -w" -o go-vod-aarch64
 
+      - name: Test
+        working-directory: go-vod
+        run: go vet ./... && go test ./...
+
       - name: Upload to releases
+        if: startsWith(github.ref, 'refs/tags/go-vod/')
         uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
         id: attach_to_release
         with:
@@ -38,8 +54,8 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
-
     name: Docker
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/go-vod/')
 
     steps:
       - name: Check out the repo
