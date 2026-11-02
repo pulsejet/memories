@@ -155,20 +155,24 @@ func FormatVTTTime(s float64) string {
 }
 
 // StoryboardArgs renders one argv element per entry (bin excluded, same
-// convention as BuildArgs). A single pass decodes keyframes only
-// (-skip_frame nokey), picks frames at the planned interval, scales
+// convention as BuildArgs). A single pass decodes keyframes only, picks frames at the planned interval, scales
 // exactly to the planned tile size and tiles them into sprite sheets
 // at pattern (printf-style, e.g. storyboard-%d.jpg).
 func StoryboardArgs(input, headers string, interval float64, thumbW, thumbH, cols, rows, sprites int, pattern string) []string {
+	// out_range=full: mjpeg rejects limited range (most camera videos are
+	// tagged tv), and JPEG is full range anyway.
 	// format=yuv420p keeps 10-bit/HDR sources away from the mjpeg encoder;
 	// eof_action=pass flushes the last frame so clips shorter than the
 	// interval still yield a sprite instead of no filtered frames.
 	// No pad: tiles match the source aspect.
-	filter := fmt.Sprintf("fps=1/%.6f:eof_action=pass,scale=%d:%d,format=yuv420p,tile=%dx%d",
+	filter := fmt.Sprintf("fps=1/%.6f:eof_action=pass,scale=%d:%d:out_range=full,format=yuv420p,tile=%dx%d",
 		interval, thumbW, thumbH,
 		cols, rows)
 	args := []string{
 		"-hide_banner", "-loglevel", "warning",
+		// The demuxer drops non-keyframes; -skip_frame alone still feeds every
+		// packet through the (frame-threaded) decoder, ~25x slower.
+		"-discard", "nokey",
 		"-skip_frame", "nokey",
 		"-multiple_requests", "1",
 		"-seekable", "1",

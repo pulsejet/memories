@@ -76,6 +76,7 @@ func TestStoryboardArgs(t *testing.T) {
 	args := StoryboardArgs("http://nc/file/7", "", 5, 160, 90, 10, 2, 1, "storyboard-%d.jpg")
 	require.Equal(t, []string{
 		"-hide_banner", "-loglevel", "warning",
+		"-discard", "nokey",
 		"-skip_frame", "nokey",
 		"-multiple_requests", "1",
 		"-seekable", "1",
@@ -89,7 +90,7 @@ func TestStoryboardArgs(t *testing.T) {
 		"-respect_retry_after", "1",
 		"-i", "http://nc/file/7",
 		"-an",
-		"-vf", "fps=1/5.000000:eof_action=pass,scale=160:90,format=yuv420p,tile=10x2",
+		"-vf", "fps=1/5.000000:eof_action=pass,scale=160:90:out_range=full,format=yuv420p,tile=10x2",
 		"-start_number", "0",
 		"-frames:v", "1",
 		"-q:v", "4",
