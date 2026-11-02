@@ -71,9 +71,9 @@ export class L10nBundlePlugin {
           // (`hashFunction: sha256`, `hashDigestLength: 64`): the `?v=<hash>`
           // suffix is what WebpackManifestPlugin splits off as the entry hash.
           const hash = nodeCrypto.createHash('sha256').update(code).digest('hex').slice(0, 64);
-          const path = `${this.appName}-l10n.js?v=${hash}`;
+          const asset = `${this.appName}-l10n.js?v=${hash}`;
           const src = new compiler.webpack.sources.RawSource(code);
-          compilation.emitAsset(path, src, { minimized: true });
+          compilation.emitAsset(asset, src, { minimized: true });
         },
       );
     });

@@ -155,15 +155,11 @@ export default {
       },
       {
         test: /\.tsx?$/,
-        use: [
-          {
-            loader: 'ts-loader',
-            options: {
-              appendTsSuffixTo: [/\.vue$/],
-              transpileOnly: true,
-            },
-          },
-        ],
+        loader: 'esbuild-loader',
+        options: {
+          loader: 'ts',
+          target: 'es2022',
+        },
         exclude: /node_modules/,
       },
       {
