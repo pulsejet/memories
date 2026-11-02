@@ -220,3 +220,16 @@ func TestIsValidStreamID(t *testing.T) {
 		require.False(t, IsValidStreamID(id), id)
 	}
 }
+
+func TestManagerKeepsOddWidthRenditions(t *testing.T) {
+	// 1918x1080 scales 720p to 1279 wide; the scaler rounds it to even.
+	m := newCopyManager(t, `{"streams":[{"codec_type":"video","codec_name":"h264","width":1918,"height":1080,"avg_frame_rate":"30/1","duration":"10","bit_rate":"20000000"}],"format":{}}`, "", false, nil)
+	require.True(t, m.HasStream("480p"))
+	require.True(t, m.HasStream("720p"))
+}
+
+func TestIdleTicks(t *testing.T) {
+	require.Equal(t, 1, idleTicks(0))
+	require.Equal(t, 1, idleTicks(4))
+	require.Equal(t, 12, idleTicks(60))
+}

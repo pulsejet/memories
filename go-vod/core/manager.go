@@ -217,9 +217,9 @@ func NewManager(a NewManagerArgs) (*Manager, error) {
 		stream.width = int(math.Ceil(float64(lgDim) * float64(stream.height) / float64(smDim)))
 
 		// remove invalid streams
+		// Odd dimensions are fine: the scaler rounds to even (force_divisible_by).
 		if (stream.height > smDim || stream.width > lgDim) || // no upscaling; we're not AI
-			(float64(stream.bitrate) > float64(m.probe.BitRate)*0.8) || // no more than 80% of original bitrate
-			(stream.height%2 != 0 || stream.width%2 != 0) { // no odd dimensions
+			(float64(stream.bitrate) > float64(m.probe.BitRate)*0.8) { // no more than 80% of original bitrate
 
 			// remove stream
 			delete(m.streams, k)
@@ -283,8 +283,8 @@ func NewManager(a NewManagerArgs) (*Manager, error) {
 				}
 			}
 
-			// Nothing done for 5 minutes
-			if m.inactive.Load() >= int32(m.c.ManagerIdleTime/5) {
+			// Nothing done for ManagerIdleTime
+			if m.inactive.Load() >= int32(idleTicks(m.c.ManagerIdleTime)) {
 				t.Stop()
 				m.Destroy()
 				m.idle <- IdleEvent{ID: m.id, Generation: m.generation}
@@ -321,6 +321,17 @@ func (m *Manager) Renditions() []Rendition {
 		})
 	}
 	return out
+}
+
+// idleTicks converts an idle time in seconds to 5s ticks, at least one, so
+// a short idle time can't tear down on the first tick.
+func idleTicks(seconds int) int {
+	return max(1, seconds/5)
+}
+
+// ChunkSize is the segment length the streams were created with.
+func (m *Manager) ChunkSize() int {
+	return m.tc.ChunkSize
 }
 
 func (m *Manager) Duration() time.Duration {

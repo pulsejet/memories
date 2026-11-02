@@ -15,10 +15,10 @@ CGO_ENABLED=0 go build -ldflags="-s -w"
 NEXTCLOUD_HOST=http://localhost CACHE_DIR=/tmp/go-vod-cache CGO_ENABLED=0  go run -ldflags="-s -w" .
 ```
 
-The server exposes all files as HLS streams, at the URL
-```
-http://localhost:47788/player-id/path/to/file/index.m3u8
-```
+Nextcloud proxies every request as `POST /vod` with a JSON body naming the
+client, file id and profile (e.g. `index.m3u8`, `720p-000003.ts`,
+`storyboard.vtt`). go-vod fetches the file back from Nextcloud.
+`GET /health` reports whether Nextcloud is reachable.
 
 ## How it works
 

@@ -96,7 +96,7 @@ func stubVariantManager(t *testing.T, keyFail bool) *core.Manager {
 func TestVariantPlaylistLazyDirect(t *testing.T) {
 	m := stubVariantManager(t, false)
 
-	got, err := VariantPlaylist(m, config.TCfg{ChunkSize: 4}, "480p", "")
+	got, err := VariantPlaylist(m, "480p", "")
 	require.NoError(t, err)
 	require.Contains(t, got, "480p-000000.ts")
 	require.False(t, m.CopyProbed())
@@ -105,7 +105,7 @@ func TestVariantPlaylistLazyDirect(t *testing.T) {
 
 	_, ok = m.EnsureCopySegments()
 	require.True(t, ok)
-	got, err = VariantPlaylist(m, config.TCfg{ChunkSize: 4}, "direct", "")
+	got, err = VariantPlaylist(m, "direct", "")
 	require.NoError(t, err)
 	require.Contains(t, got, "direct-000000.ts")
 }
@@ -113,12 +113,12 @@ func TestVariantPlaylistLazyDirect(t *testing.T) {
 func TestVariantPlaylistDirectPending(t *testing.T) {
 	m := stubVariantManager(t, false)
 
-	_, err := VariantPlaylist(m, config.TCfg{ChunkSize: 4}, "direct", "")
+	_, err := VariantPlaylist(m, "direct", "")
 	require.ErrorIs(t, err, core.ErrCopyPending)
 
 	deadline := time.Now().Add(10 * time.Second)
 	for {
-		got, err := VariantPlaylist(m, config.TCfg{ChunkSize: 4}, "direct", "")
+		got, err := VariantPlaylist(m, "direct", "")
 		if err == nil {
 			require.Contains(t, got, "direct-000000.ts")
 			return
@@ -134,16 +134,16 @@ func TestVariantPlaylistDirectPending(t *testing.T) {
 func TestVariantPlaylistDirectFallback(t *testing.T) {
 	m := stubVariantManager(t, true)
 
-	_, err := VariantPlaylist(m, config.TCfg{ChunkSize: 4}, "direct", "")
+	_, err := VariantPlaylist(m, "direct", "")
 	require.ErrorIs(t, err, core.ErrCopyPending)
 
 	deadline := time.Now().Add(10 * time.Second)
 	for {
-		got, err := VariantPlaylist(m, config.TCfg{ChunkSize: 4}, "direct", "")
+		got, err := VariantPlaylist(m, "direct", "")
 		if err == nil {
 			require.Contains(t, got, "direct-000000.ts")
 			require.NotContains(t, got, "max-")
-			require.Contains(t, got, "#EXT-X-TARGETDURATION:4")
+			require.Contains(t, got, "#EXT-X-TARGETDURATION:3")
 			break
 		}
 		require.ErrorIs(t, err, core.ErrCopyPending)
@@ -154,6 +154,6 @@ func TestVariantPlaylistDirectFallback(t *testing.T) {
 	}
 
 	// Lower renditions still serve.
-	_, err = VariantPlaylist(m, config.TCfg{ChunkSize: 4}, "480p", "")
+	_, err = VariantPlaylist(m, "480p", "")
 	require.NoError(t, err)
 }

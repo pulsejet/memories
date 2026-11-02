@@ -143,12 +143,12 @@ func reconnectArgs() []string {
 // HDR tonemap when needed (GPU interop or CPU zscale/hable, always after
 // the downscale so it runs on fewer pixels), then transpose for rotated
 // sources (software transpose drops to CPU and re-uploads after),
-// fixed mapping (first video re-encoded, optional first audio normalized
-// to stereo 48kHz AAC), and
+// fixed mapping (first video re-encoded, optional first audio), and
 // constant-quality rate control per encoder (crf / global_quality / cq).
-// Audio is always normalized to stereo 48kHz AAC: passthrough channel
-// counts and sample rates (notably multichannel) yield segments that
-// Chrome's MSE audio SourceBuffer rejects with bufferAppendingError.
+// Mono or stereo AAC audio is copied; anything else is normalized to stereo
+// 48kHz AAC: passthrough channel counts (notably multichannel) yield
+// segments that Chrome's MSE audio SourceBuffer rejects with
+// bufferAppendingError.
 // Ladder bitrates appear only in playlists, never here. With Copy set, the
 // offload, filter graph and rate control collapse to "-c:v copy".
 func BuildArgs(s Spec) []string {

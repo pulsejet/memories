@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/grafov/m3u8"
-	"github.com/pulsejet/memories/go-vod/config"
 	"github.com/pulsejet/memories/go-vod/core"
 	"github.com/pulsejet/memories/go-vod/ffmpeg"
 )
@@ -35,18 +34,18 @@ func MasterPlaylist(renditions []core.Rendition, frameRate int, query string) (s
 // VariantPlaylist serves a rendition's playlist. direct.m3u8 never blocks:
 // cache hits serve copy, a finished probe without a grid serves uniform
 // re-encoded segments, and a pending probe answers ErrCopyPending (409).
-func VariantPlaylist(m *core.Manager, tc config.TCfg, quality string, query string) (string, error) {
+func VariantPlaylist(m *core.Manager, quality string, query string) (string, error) {
 	if quality == core.QUALITY_DIRECT {
 		if segs, ok := m.TryCacheCopySegments(); ok {
 			return CopyVariantPlaylist(quality, segs, query)
 		}
 		if m.CopyProbed() {
-			return TranscodeVariantPlaylist(quality, m.Duration(), tc.ChunkSize, query)
+			return TranscodeVariantPlaylist(quality, m.Duration(), m.ChunkSize(), query)
 		}
 		m.StartCopyProbeAsync()
 		return "", core.ErrCopyPending
 	}
-	return TranscodeVariantPlaylist(quality, m.Duration(), tc.ChunkSize, query)
+	return TranscodeVariantPlaylist(quality, m.Duration(), m.ChunkSize(), query)
 }
 
 // TranscodeVariantPlaylist renders the variant playlist for a re-encoded

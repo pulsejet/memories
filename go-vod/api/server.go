@@ -136,7 +136,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		body, err := VariantPlaylist(manager, req.TConfig, quality, query)
+		body, err := VariantPlaylist(manager, quality, query)
 		if errors.Is(err, core.ErrCopyPending) {
 			w.WriteHeader(http.StatusConflict)
 			return

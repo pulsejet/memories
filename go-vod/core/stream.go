@@ -81,8 +81,8 @@ func (s *Stream) Run() {
 
 			s.inactive++
 
-			// Nothing done for 2 minutes
-			if s.inactive >= s.c.StreamIdleTime/5 && s.coder != nil {
+			// Nothing done for StreamIdleTime
+			if s.inactive >= idleTicks(s.c.StreamIdleTime) && s.coder != nil {
 				s.clear()
 			}
 			s.mutex.Unlock()
