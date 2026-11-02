@@ -7,6 +7,10 @@ import { onRecognizeApiKeyUpdate } from './recognize';
 const remote = generateRemoteUrl('dav');
 const client = createClient(remote);
 
+// webdav coerces numeric-looking values, e.g. the user ID '1e5' to 100000
+const STRING_PROPS = ['prop.location', 'prop.collaborators.collaborator.id', 'prop.collaborators.collaborator.label'];
+client.registerTagParser((path, value) => (STRING_PROPS.some((prop) => path.endsWith(prop)) ? undefined : value));
+
 // Cached header values
 const headerState: {
   token?: string;
