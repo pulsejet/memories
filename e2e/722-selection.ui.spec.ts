@@ -28,11 +28,12 @@ test.describe('@ui Photo selection', () => {
     'for-geo-096.jpg',
     'for-geo-095.jpg',
   ];
-  const ids: number[] = [];
+  let ids: number[];
   let lastId: number;
 
   test.beforeAll(async ({ request }) => {
     const dav = new DavClient(request);
+    ids = [];
     for (const name of ordered) {
       ids.push(await dav.fileid(`/for-geo/${name}`));
     }
