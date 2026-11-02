@@ -78,9 +78,7 @@ func Probe(ctx context.Context, bin, fileURL, headers string) (VideoInfo, error)
 	args := []string{
 		"-v", "error",
 	}
-	if headers != "" {
-		args = append(args, "-headers", headers)
-	}
+	args = append(args, remoteInputArgs(headers)...)
 	args = append(args,
 		"-show_entries", "format:stream",
 		"-of", "json",
@@ -230,9 +228,7 @@ func Keyframes(ctx context.Context, bin, fileURL, headers string) ([]float64, er
 	args := []string{
 		"-v", "error",
 	}
-	if headers != "" {
-		args = append(args, "-headers", headers)
-	}
+	args = append(args, remoteInputArgs(headers)...)
 	args = append(args,
 		"-select_streams", "v:0",
 		"-show_entries", "packet=pts_time,flags",

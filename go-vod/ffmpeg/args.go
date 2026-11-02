@@ -122,6 +122,18 @@ func Encoder(s Spec) string {
 	}
 }
 
+// remoteInputArgs are the options for an authenticated http input: one
+// persistent seekable connection with bounded reconnects. Empty for local
+// inputs (no headers).
+func remoteInputArgs(headers string) []string {
+	if headers == "" {
+		return nil
+	}
+	args := []string{"-multiple_requests", "1", "-seekable", "1"}
+	args = append(args, reconnectArgs()...)
+	return append(args, "-headers", headers)
+}
+
 // reconnectArgs are the http input reconnect flags shared by transcode and
 // storyboard inputs: transient network/server failures are ridden out inside
 // ffmpeg instead of failing the job. Retries stay bounded (count and total
@@ -223,13 +235,7 @@ func BuildArgs(s Spec) []string {
 		args = append(args, "-noautorotate")
 	}
 
-	if s.Headers != "" {
-		args = append(args,
-			"-multiple_requests", "1",
-			"-seekable", "1")
-		args = append(args, reconnectArgs()...)
-		args = append(args, "-headers", s.Headers)
-	}
+	args = append(args, remoteInputArgs(s.Headers)...)
 
 	args = append(args,
 		"-i", s.Input,
