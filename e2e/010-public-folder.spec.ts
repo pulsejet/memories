@@ -281,6 +281,8 @@ test.describe('Password protected folder share', () => {
       await page.getByRole('textbox', { name: 'Password' }).fill('definitely-wrong');
       await page.getByRole('button', { name: 'Submit' }).click();
 
+      // The form is visible before the POST returns; only the error proves the rejection.
+      await expect(page.getByText(/password is wrong/i)).toBeVisible();
       await expect(page.getByRole('textbox', { name: 'Password' })).toBeVisible();
       await expect(page.locator('.p-outer')).toHaveCount(0);
     });
