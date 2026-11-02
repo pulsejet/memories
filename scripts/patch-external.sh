@@ -18,7 +18,8 @@ if [ ! -d "node_modules" ]; then
     exit 1
 fi
 
-# Apply all patches.
+# Apply all patches; an empty or missing patches folder is not an error.
+shopt -s nullglob
 HAS_ERROR=0
 for patch in patches/*.patch; do
     if patch -p1 -R -f -s --dry-run < $patch > /dev/null 2>&1; then

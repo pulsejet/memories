@@ -57,6 +57,10 @@ function beep() {
 }
 
 @media (max-width: 768px) {
+  :root {
+    --toast-offset-block-end: var(--mobile-nav-height);
+  }
+
   #content-vue > .app-navigation {
     display: none;
   }
