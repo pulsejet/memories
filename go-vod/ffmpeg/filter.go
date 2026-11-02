@@ -63,7 +63,9 @@ func (b *FilterBuilder) hwdownload() {
 
 // normalize enters the encode domain: 8-bit convert plus hardware upload.
 // Emitted without checking isInHw: it also covers decoders that fell back
-// to software frames.
+// to software frames. Software stays yuv420p: older ffmpeg swscale zeroes
+// chroma on same-size nv12->nv12 conversions (e.g. untagged range -> tv),
+// turning max-size renditions green.
 func (b *FilterBuilder) normalize() {
 	switch b.cv {
 	case EncoderVAAPI:
@@ -71,7 +73,7 @@ func (b *FilterBuilder) normalize() {
 	case EncoderNVENC:
 		b.append("format=nv12|cuda", "hwupload")
 	default:
-		b.append("format=nv12")
+		b.append("format=yuv420p")
 	}
 }
 

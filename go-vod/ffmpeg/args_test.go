@@ -37,7 +37,7 @@ func TestEncoder(t *testing.T) {
 func TestBuildArgsSoftware(t *testing.T) {
 	c := cmd(baseSpec(), BuildArgs(baseSpec()))
 	require.Contains(t, c, `"-c:v" libx264 -preset faster -crf 25`)
-	require.Contains(t, c, "scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280")
+	require.Contains(t, c, `-vf "format=yuv420p,scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280"`)
 	require.NotContains(t, c, "-hwaccel")
 	require.NotContains(t, c, "-ss")
 	require.NotContains(t, c, "-noautorotate")
