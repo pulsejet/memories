@@ -165,7 +165,7 @@ async function shareLowRes() {
     photos.value!.map((photo) => ({
       auid: String(), // no local
       href: utils.isVideo(photo)
-        ? API.VIDEO_TRANSCODE(photo.fileid, '480p.mp4')
+        ? API.VIDEO_TRANSCODE(photo.fileid, '480p.mp4', [])
         : utils.getPreviewUrl({ photo, size: 2048 }),
     })),
   );
@@ -176,7 +176,7 @@ async function shareHighRes() {
     photos.value!.map((photo) => ({
       auid: String(), // no local
       href: utils.isVideo(photo)
-        ? API.VIDEO_TRANSCODE(photo.fileid, '1080p.mp4')
+        ? API.VIDEO_TRANSCODE(photo.fileid, '1080p.mp4', [])
         : API.IMAGE_DECODABLE(photo.fileid, photo.etag),
     })),
   );

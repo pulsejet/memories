@@ -175,10 +175,10 @@ class VideoContentSetup {
     };
   }
 
-  private getHLSsrc(content: VideoContent, codecs?: string[]): VideoSource {
+  private getHLSsrc(content: VideoContent, player: HTMLElement): VideoSource {
     const fileid = content.data.photo.fileid;
     return {
-      src: API.VIDEO_TRANSCODE(fileid, 'index.m3u8', codecs),
+      src: API.VIDEO_TRANSCODE(fileid, 'index.m3u8', this.getPlayableCodecs(player)),
       type: 'application/x-mpegurl',
     };
   }
@@ -193,7 +193,7 @@ class VideoContentSetup {
   }
 
   /** Initial source: HLS unless transcoding is disabled */
-  private getPreferredSrc(content: VideoContent, codecs?: string[]): { src: VideoSource; videoIsHls: boolean } {
+  private getPreferredSrc(content: VideoContent, player: HTMLElement): { src: VideoSource; videoIsHls: boolean } {
     // Trash has no transcoding, play the file directly.
     if (content.data.photo.trashInfo) {
       return { src: this.getDirectSrc(content), videoIsHls: false };
@@ -204,7 +204,7 @@ class VideoContentSetup {
     if (local) {
       return { src: local, videoIsHls: false };
     } else if (!config.vod_disable) {
-      return { src: this.getHLSsrc(content, codecs), videoIsHls: true };
+      return { src: this.getHLSsrc(content, player), videoIsHls: true };
     } else {
       return { src: this.getDirectSrc(content), videoIsHls: false };
     }
@@ -217,9 +217,9 @@ class VideoContentSetup {
     });
   }
 
-  private getStoryboardUrl(content: VideoContent): string | null {
+  private getStoryboardUrl(content: VideoContent, player: HTMLElement): string | null {
     if (utils.isLocalPhoto(content.data.photo)) return null;
-    const api = API.VIDEO_STORYBOARD(content.data.photo.fileid, 'storyboard.vtt');
+    const api = API.VIDEO_STORYBOARD(content.data.photo.fileid, 'storyboard.vtt', this.getPlayableCodecs(player));
     return utils.runCatching(() => new URL(api, window.location.href).href);
   }
 
@@ -305,7 +305,7 @@ class VideoContentSetup {
     // Native controls (Vue custom element, registered globally).
     const viewerControls = document.createElement('viewer-controls') as ViewerControlsCE;
     viewerControls.video = player;
-    viewerControls.thumbnails = this.getStoryboardUrl(content);
+    viewerControls.thumbnails = this.getStoryboardUrl(content, player);
     content.element.appendChild(viewerControls);
 
     // Attempt autoplay (may be blocked until user gesture).
@@ -338,10 +338,7 @@ class VideoContentSetup {
   /** Attach the preferred source: element src for the native hole, HLS/direct for web. */
   private async attachPlayerSource(content: VideoContent, player: VideoControllerElement, signal: AbortSignal) {
     // Late mount: media loads since the slide is active.
-    const codecs = this.isNativeHolePlayer(player)
-      ? nativex.getNativePlayableCodecsSync()
-      : getPlayableVideoCodecsSync();
-    const { src, videoIsHls } = this.getPreferredSrc(content, codecs);
+    const { src, videoIsHls } = this.getPreferredSrc(content, player);
     content.videoIsHls = videoIsHls;
 
     if (player instanceof HTMLVideoElement) {
@@ -357,6 +354,12 @@ class VideoContentSetup {
 
   private isNativeHolePlayer(player: HTMLElement): player is NativeHolePlayer {
     return player.tagName === 'VIEWER-VIDEO-NATIVE-HOLE';
+  }
+
+  private getPlayableCodecs(player: HTMLElement): string[] {
+    return this.isNativeHolePlayer(player)
+      ? nativex.getNativePlayableCodecsSync()
+      : (getPlayableVideoCodecsSync() ?? []);
   }
 
   private attachDirectSource(player: HTMLVideoElement, src: VideoSource) {
@@ -459,7 +462,7 @@ class VideoContentSetup {
       this.attachDirectSource(player, this.getDirectSrc(content));
     } else {
       console.warn('PsVideo: Direct video stream could not be opened, trying HLS');
-      await this.attachHlsSource(content, player, this.getHLSsrc(content, getPlayableVideoCodecsSync()).src, signal);
+      await this.attachHlsSource(content, player, this.getHLSsrc(content, player).src, signal);
     }
 
     if (signal.aborted) return;
@@ -473,8 +476,7 @@ class VideoContentSetup {
     const wasHLS = content.videoIsHls;
     content.videoIsHls = !wasHLS;
 
-    const codecs = nativex.getNativePlayableCodecsSync();
-    const src = wasHLS ? this.getDirectSrc(content).src : this.getHLSsrc(content, codecs).src;
+    const src = wasHLS ? this.getDirectSrc(content).src : this.getHLSsrc(content, player).src;
     if (wasHLS) {
       console.warn('PsVideo: Native hole HLS stream failed, falling back to direct');
     } else {

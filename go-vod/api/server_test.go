@@ -217,8 +217,11 @@ func TestVodCodecsQueryParam(t *testing.T) {
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Contains(t, w.Body.String(), "direct.m3u8")
 	require.NotContains(t, w.Body.String(), "max.m3u8")
-	require.Contains(t, w.Body.String(), "direct.m3u8?token=abc")
-	require.NotContains(t, w.Body.String(), "codecs=")
+	require.Contains(t, w.Body.String(), "direct.m3u8?codecs=h264%2Chevc&token=abc")
+
+	// A Manager recreated from a baked URL keeps the direct rendition.
+	w = postVod(s, `{"client":"f00dcafe","fileid":7,"profile":"direct.m3u8","query":{"token":"abc","codecs":"h264,hevc"},"config":{"chunkSize":3}}`)
+	require.NotEqual(t, http.StatusNotFound, w.Code)
 }
 
 func TestVodLivephotoFullVideo(t *testing.T) {
@@ -250,8 +253,8 @@ func TestVodLivephotoFullVideo(t *testing.T) {
 
 func TestVodQueryEncode(t *testing.T) {
 	require.Equal(t, "", VodQuery{}.Encode())
-	require.Equal(t, "?token=abc", VodQuery{Token: "abc", Codecs: "h264,hevc"}.Encode())
-	require.Equal(t, "?albums=xyz&token=abc", VodQuery{Albums: "xyz", Token: "abc", Codecs: "h264"}.Encode())
+	require.Equal(t, "?codecs=h264%2Chevc&token=abc", VodQuery{Token: "abc", Codecs: "h264,hevc"}.Encode())
+	require.Equal(t, "?albums=xyz&codecs=h264&token=abc", VodQuery{Albums: "xyz", Token: "abc", Codecs: "h264"}.Encode())
 }
 
 func TestNullQueryValues(t *testing.T) {

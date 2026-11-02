@@ -166,7 +166,7 @@ export class API {
     return tok(gen(`${BASE}/image/delete/{id}`, { id }));
   }
 
-  static VIDEO_TRANSCODE(fileid: number, file = 'index.m3u8', codecs?: string[]) {
+  static VIDEO_TRANSCODE(fileid: number, file: string, codecs: string[]) {
     return tok(
       API.Q(
         gen(`${BASE}/video/transcode/{client}/{fileid}/{file}`, {
@@ -174,18 +174,21 @@ export class API {
           fileid,
           file,
         }),
-        { codecs: codecs?.join(',') },
+        { codecs: codecs.length ? codecs.join(',') : undefined },
       ),
     );
   }
 
-  static VIDEO_STORYBOARD(fileid: number, file: string) {
+  static VIDEO_STORYBOARD(fileid: number, file: string, codecs: string[]) {
     return tok(
-      gen(`${BASE}/video/storyboard/{client}/{fileid}/{file}`, {
-        client: _m.video.clientId,
-        fileid,
-        file,
-      }),
+      API.Q(
+        gen(`${BASE}/video/storyboard/{client}/{fileid}/{file}`, {
+          client: _m.video.clientId,
+          fileid,
+          file,
+        }),
+        { codecs: codecs.length ? codecs.join(',') : undefined },
+      ),
     );
   }
 
