@@ -32,6 +32,12 @@ test.describe.serial('Albums', () => {
     fileid4 = await dav.fileid('/for-default/ipZPm7u6aPA.jpg');
   });
 
+  test.afterAll(async ({ request }) => {
+    const dav = new DavClient(request);
+    await dav.del(`photos/${username}/albums/${albumName}`, true);
+    await dav.del(`photos/${username}/albums/${renamedAlbumName}`, true);
+  });
+
   test('@ui Create album with selected photos', async ({ page }) => {
     await page.goto(appUrl);
 
@@ -210,10 +216,14 @@ test.describe.serial('Albums', () => {
 test.describe('@ui Empty album', () => {
   const random = Math.floor(Math.random() * 1000000);
   const emptyAlbumName = `E2E Empty Album ${random}`;
+  const albumPath = `photos/${username}/albums/${emptyAlbumName}`;
+
+  test.afterAll(async ({ request }) => {
+    await new DavClient(request).del(albumPath, true);
+  });
 
   test('Empty album shows empty view', async ({ request, page }) => {
     const dav = new DavClient(request);
-    const albumPath = `photos/${username}/albums/${emptyAlbumName}`;
 
     await test.step('Create empty album via WebDAV', async () => {
       await dav.mkcol(albumPath);
@@ -227,10 +237,6 @@ test.describe('@ui Empty album', () => {
       await expect(page.locator('.p-outer:visible')).toHaveCount(0);
       await expect(page.getByText('Nothing to show here')).toBeVisible();
       await expect(page.getByText('Add photos to albums by selecting them on your timeline.')).toBeVisible();
-    });
-
-    await test.step('Delete empty album via WebDAV', async () => {
-      await dav.del(albumPath);
     });
   });
 });
