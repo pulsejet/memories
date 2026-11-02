@@ -321,19 +321,23 @@ export async function extendWithStack(photos: IPhoto[], opts?: AbortOpts): Promi
  * @param opts.route current route for file info handling
  * @returns list of file ids that were deleted
  */
-export async function* deletePhotos(photos: IPhoto[], opts: { confirm?: boolean; route: RouteLocationNormalized }) {
+export async function* deletePhotos(
+  photos: IPhoto[],
+  opts: { confirm?: boolean; route: RouteLocationNormalized } & AbortOpts,
+) {
   if (photos.length === 0) return;
 
   // Use user selected count for confirmation
   const confirmationCount = photos.length;
   let confirm = opts.confirm ?? true;
   const route = opts.route;
+  const signal = opts.signal;
 
   // Extend with stack unless this is an album
   const isAlbum = routeIs(opts.route).Albums;
   let livePhotoVideoFileIds = new Set<number>();
   if (!isAlbum) {
-    const extended = await extendWithStack(photos);
+    const extended = await extendWithStack(photos, opts);
     photos = extended.photos;
     livePhotoVideoFileIds = extended.livePhotoVideoFileIds;
   }
@@ -342,7 +346,7 @@ export async function* deletePhotos(photos: IPhoto[], opts: { confirm?: boolean;
   const fileIdsSet = new Set(photos.map((p) => p.fileid));
 
   // Get files data. The double filter ensures we never delete something accidentally.
-  const fileInfos = (await getFiles(photos, { route })).filter((f) => fileIdsSet.has(f.fileid));
+  const fileInfos = (await getFiles(photos, { route, signal })).filter((f) => fileIdsSet.has(f.fileid));
   const regularFileInfos = fileInfos.filter((f) => !livePhotoVideoFileIds.has(f.fileid));
   const livePhotoFileInfos = fileInfos.filter((f) => livePhotoVideoFileIds.has(f.fileid));
 
@@ -369,6 +373,7 @@ export async function* deletePhotos(photos: IPhoto[], opts: { confirm?: boolean;
   }
 
   // Delete local files.
+  signal?.throwIfAborted();
   if (hasNative) {
     // Delete local files.
     await nativex.deleteLocalPhotos(photos);
@@ -385,15 +390,17 @@ export async function* deletePhotos(photos: IPhoto[], opts: { confirm?: boolean;
   /** Delete a server file. */
   const _delete_file = async (fileInfo: IFileInfo, silenceErrors: boolean = false) => {
     try {
+      signal?.throwIfAborted();
       if (!utils.uid) {
         // Public share: use API endpoint which supports token authentication
-        await axios.delete(API.IMAGE_DELETE(fileInfo.fileid));
+        await axios.delete(API.IMAGE_DELETE(fileInfo.fileid), { signal });
       } else {
         // Authenticated user: use WebDAV
-        await client.deleteFile(fileInfo.originalFilename);
+        await client.deleteFile(fileInfo.originalFilename, { signal });
       }
       return fileInfo.fileid;
     } catch (error) {
+      if (isAbortError(error)) throw error;
       if (silenceErrors) return 0;
       console.error('Failed to delete', fileInfo, error);
       showError(
@@ -406,10 +413,10 @@ export async function* deletePhotos(photos: IPhoto[], opts: { confirm?: boolean;
   };
 
   const calls = regularFileInfos.map((fileInfo) => async () => _delete_file(fileInfo));
-  yield* runInParallel(calls, 10);
+  yield* runInParallel(calls, 10, opts);
   // Try to delete the live photo video parts but silently ignore errors
   const livePhotoVideoCalls = livePhotoFileInfos.map((fileInfo) => () => _delete_file(fileInfo, true));
-  for await (const _ of runInParallel(livePhotoVideoCalls, 10)) {
+  for await (const _ of runInParallel(livePhotoVideoCalls, 10, opts)) {
     // ignore results for live photo video operations
   }
 }
@@ -426,7 +433,7 @@ export async function* copyPhotos(
   photos: IPhoto[],
   destination: string,
   overwrite: boolean,
-  opts: { route: RouteLocationNormalized },
+  opts: { route: RouteLocationNormalized } & AbortOpts,
 ) {
   if (photos.length === 0) {
     return;
@@ -440,7 +447,7 @@ export async function* copyPhotos(
   }
 
   // Also copy the stack files
-  const extended = await extendWithStack(photos);
+  const extended = await extendWithStack(photos, opts);
   photos = extended.photos;
   const livePhotoVideoFileIds = extended.livePhotoVideoFileIds;
   const fileIdsSet = new Set(photos.map((p) => p.fileid));
@@ -448,8 +455,9 @@ export async function* copyPhotos(
   // Get files data
   let fileInfos: IFileInfo[] = [];
   try {
-    fileInfos = await getFiles(photos, { route: opts.route });
+    fileInfos = await getFiles(photos, { route: opts.route, signal: opts.signal });
   } catch (e) {
+    if (isAbortError(e)) throw e;
     console.error('Failed to get file info for files to copy', photos, e);
     showError(t('memories', 'Failed to copy files.'));
     return;
@@ -461,14 +469,14 @@ export async function* copyPhotos(
   /** Copy a server file */
   const _copy_file = async (fileInfo: IFileInfo, silenceErrors: boolean = false) => {
     try {
-      await client.copyFile(
-        fileInfo.originalFilename,
-        targetPath + fileInfo.basename,
-        // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
-        { headers: { Overwrite: overwrite ? 'T' : 'F' } },
-      );
+      opts.signal?.throwIfAborted();
+      await client.copyFile(fileInfo.originalFilename, targetPath + fileInfo.basename, {
+        overwrite,
+        signal: opts.signal,
+      });
       return fileInfo.fileid;
     } catch (error: any) {
+      if (isAbortError(error)) throw error;
       if (silenceErrors) return 0;
       console.error('Failed to copy', fileInfo, error);
       if (error.response?.status === 412) {
@@ -491,9 +499,9 @@ export async function* copyPhotos(
   };
 
   const calls = regularFileInfos.map((fileInfo) => () => _copy_file(fileInfo));
-  yield* runInParallel(calls, 10);
+  yield* runInParallel(calls, 10, opts);
   const livePhotoVideoCalls = livePhotoVideoFileInfos.map((fileInfo) => () => _copy_file(fileInfo, true));
-  for await (const _ of runInParallel(livePhotoVideoCalls, 10)) {
+  for await (const _ of runInParallel(livePhotoVideoCalls, 10, opts)) {
     // ignore results for live photo video operations
   }
 }
@@ -510,7 +518,7 @@ export async function* movePhotos(
   photos: IPhoto[],
   destination: string,
   overwrite: boolean,
-  opts: { route: RouteLocationNormalized },
+  opts: { route: RouteLocationNormalized } & AbortOpts,
 ) {
   if (photos.length === 0) {
     return;
@@ -524,7 +532,7 @@ export async function* movePhotos(
   }
 
   // Also move the stack files
-  const extended = await extendWithStack(photos);
+  const extended = await extendWithStack(photos, opts);
   photos = extended.photos;
   const livePhotoVideoFileIds = extended.livePhotoVideoFileIds;
   const fileIdsSet = new Set(photos.map((p) => p.fileid));
@@ -532,8 +540,9 @@ export async function* movePhotos(
   // Get files data
   let fileInfos: IFileInfo[] = [];
   try {
-    fileInfos = await getFiles(photos, { route: opts.route });
+    fileInfos = await getFiles(photos, { route: opts.route, signal: opts.signal });
   } catch (e) {
+    if (isAbortError(e)) throw e;
     console.error('Failed to get file info for files to move', photos, e);
     showError(t('memories', 'Failed to move files.'));
     return;
@@ -545,14 +554,14 @@ export async function* movePhotos(
   /** Move a server file */
   const _move_file = async (fileInfo: IFileInfo, silenceErrors: boolean = false) => {
     try {
-      await client.moveFile(
-        fileInfo.originalFilename,
-        targetPath + fileInfo.basename,
-        // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
-        { headers: { Overwrite: overwrite ? 'T' : 'F' } },
-      );
+      opts.signal?.throwIfAborted();
+      await client.moveFile(fileInfo.originalFilename, targetPath + fileInfo.basename, {
+        overwrite,
+        signal: opts.signal,
+      });
       return fileInfo.fileid;
     } catch (error: any) {
+      if (isAbortError(error)) throw error;
       if (silenceErrors) return 0;
       console.error('Failed to move', fileInfo, error);
       if (error.response?.status === 412) {
@@ -575,9 +584,9 @@ export async function* movePhotos(
   };
 
   const calls = regularFileInfos.map((fileInfo) => () => _move_file(fileInfo));
-  yield* runInParallel(calls, 10);
+  yield* runInParallel(calls, 10, opts);
   const livePhotoVideoCalls = livePhotoVideoFileInfos.map((fileInfo) => () => _move_file(fileInfo, true));
-  for await (const _ of runInParallel(livePhotoVideoCalls, 10)) {
+  for await (const _ of runInParallel(livePhotoVideoCalls, 10, opts)) {
     // ignore results for live photo video operations
   }
 }
@@ -594,7 +603,7 @@ export async function* movePhotosByDate(
   photos: IPhoto[],
   destination: string,
   overwrite: boolean,
-  opts: { route: RouteLocationNormalized },
+  opts: { route: RouteLocationNormalized } & AbortOpts,
 ) {
   if (photos.length === 0) {
     return;
@@ -604,15 +613,16 @@ export async function* movePhotosByDate(
   destination = `files/${utils.uid}/${destination}`;
 
   // Add the stacked photos
-  const extended = await extendWithStack(photos);
+  const extended = await extendWithStack(photos, opts);
   photos = extended.photos;
   const livePhotoVideoFileIds = extended.livePhotoVideoFileIds;
   const photosMap = new Map(photos.map((p) => [p.fileid, p]));
 
   let fileInfos: IFileInfo[] = [];
   try {
-    fileInfos = await getFiles(photos, { route: opts.route });
+    fileInfos = await getFiles(photos, { route: opts.route, signal: opts.signal });
   } catch (e) {
+    if (isAbortError(e)) throw e;
     console.error('Failed to get file info for files to move', photos, e);
     showError(t('memories', 'Failed to move files.'));
     return;
@@ -642,7 +652,7 @@ export async function* movePhotosByDate(
       const createPaths = new Array<string>();
 
       while (folderPath !== destination && folderPath.includes('/')) {
-        if (existingDirCache.has(folderPath) || (await client.exists(folderPath))) {
+        if (existingDirCache.has(folderPath) || (await client.exists(folderPath, { signal: opts.signal }))) {
           // No need to check further up. Go to creation.
           existingDirCache.add(folderPath);
           break;
@@ -654,11 +664,12 @@ export async function* movePhotosByDate(
 
       // Create from top to bottom
       for (const path of createPaths.reverse()) {
-        await client.createDirectory(path);
+        await client.createDirectory(path, { signal: opts.signal });
         existingDirCache.add(path);
       }
     }
   } catch (e) {
+    if (isAbortError(e)) throw e;
     console.error('Failed to create folders for files to move', e);
     showError(t('memories', 'Failed to move files.'));
     return;
@@ -667,14 +678,14 @@ export async function* movePhotosByDate(
   /** Move server file */
   const _move_file = async (targetPath: string, fileInfo: IFileInfo, silenceErrors: boolean = false) => {
     try {
-      await client.moveFile(
-        fileInfo.originalFilename,
-        `${targetPath}/${fileInfo.basename}`,
-        // @ts-ignore - https://github.com/perry-mitchell/webdav-client/issues/329
-        { headers: { Overwrite: overwrite ? 'T' : 'F' } },
-      );
+      opts.signal?.throwIfAborted();
+      await client.moveFile(fileInfo.originalFilename, `${targetPath}/${fileInfo.basename}`, {
+        overwrite,
+        signal: opts.signal,
+      });
       return fileInfo.fileid;
     } catch (error: any) {
+      if (isAbortError(error)) throw error;
       if (silenceErrors) return 0;
       console.error('Failed to move', fileInfo, error);
       if (error.response?.status === 412) {
@@ -705,9 +716,9 @@ export async function* movePhotosByDate(
   );
 
   const calls = nonLivePhotoOperations.map((operation) => () => _move_file(...operation));
-  yield* runInParallel(calls, 10);
+  yield* runInParallel(calls, 10, opts);
   const livePhotoVideoCalls = livePhotoVideoOperations.map((operation) => () => _move_file(...operation, true));
-  for await (const _ of runInParallel(livePhotoVideoCalls, 10)) {
+  for await (const _ of runInParallel(livePhotoVideoCalls, 10, opts)) {
     // ignore results for live photo video operations
   }
 }

@@ -311,9 +311,8 @@ async function uploadI() {
         const filename = path + file.name;
         const abort = (currentUpload.value = new AbortController());
         await uploadFile(uploader, filename, file, abort.signal);
-        currentUpload.value = null;
 
-        const fileid = await dav.getFileId(filename);
+        const fileid = await dav.getFileId(filename, { signal: abort.signal });
         if (!fileid) throw new Error('No fileid for uploaded file');
 
         uploaded.push({ fileid, filename, name: file.name });

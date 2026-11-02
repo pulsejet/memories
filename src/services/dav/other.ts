@@ -13,14 +13,16 @@ import * as utils from '@services/utils/common';
 import type { RouteLocationNormalized } from 'vue-router';
 import type { ClusterTypes, IPhoto } from '@typings';
 import type { FileStat, ResponseDataDetailed } from 'webdav';
+import type { AbortOpts } from '@services/utils/abort';
 
 /**
  * Get the file ID of a path relative to the user's root folder.
  */
-export async function getFileId(path: string): Promise<number> {
+export async function getFileId(path: string, opts?: AbortOpts): Promise<number> {
   const res = (await client.stat(`/files/${utils.uid}/${path.replace(/^\/+/, '')}`, {
     data: getDefaultPropfind(),
     details: true,
+    signal: opts?.signal,
   })) as ResponseDataDetailed<FileStat>;
   return Number(res.data.props?.fileid ?? 0);
 }

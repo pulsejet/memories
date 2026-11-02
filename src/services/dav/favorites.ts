@@ -5,9 +5,11 @@ import * as base from './base';
 
 import { translate as t } from '@services/l10n';
 import { constants } from '@services/constants';
+import { isAbortError } from '@services/utils/abort';
 
 import type { RouteLocationNormalized } from 'vue-router';
 import type { IFileInfo, IPhoto } from '@typings';
+import type { AbortOpts } from '@services/utils/abort';
 
 /**
  * Favorite a file
@@ -16,7 +18,7 @@ import type { IFileInfo, IPhoto } from '@typings';
  * @param fileName - The file's name
  * @param favoriteState - The new favorite state
  */
-export function favoriteFile(fileName: string, favoriteState: boolean) {
+function favoriteFile(fileName: string, favoriteState: boolean, opts?: AbortOpts) {
   return client.customRequest(fileName, {
     method: 'PROPPATCH',
     data: `<?xml version="1.0"?>
@@ -30,6 +32,7 @@ export function favoriteFile(fileName: string, favoriteState: boolean) {
               </d:prop>
             </d:set>
             </d:propertyupdate>`,
+    signal: opts?.signal,
   });
 }
 
@@ -43,7 +46,7 @@ export function favoriteFile(fileName: string, favoriteState: boolean) {
 export async function* favoritePhotos(
   photos: IPhoto[],
   favoriteState: boolean,
-  opts: { route: RouteLocationNormalized },
+  opts: { route: RouteLocationNormalized } & AbortOpts,
 ) {
   if (photos.length === 0) {
     return;
@@ -52,8 +55,9 @@ export async function* favoritePhotos(
   // Get files data
   let fileInfos: IFileInfo[] = [];
   try {
-    fileInfos = await base.getFiles(photos, { route: opts.route });
+    fileInfos = await base.getFiles(photos, { route: opts.route, signal: opts.signal });
   } catch (e) {
+    if (isAbortError(e)) throw e;
     console.error('Failed to get file info', photos, e);
     showError(t('memories', 'Failed to favorite files.'));
     return;
@@ -66,11 +70,13 @@ export async function* favoritePhotos(
   // Favorite each file
   const calls = fileInfos.map((fileInfo) => async () => {
     try {
-      await favoriteFile(fileInfo.originalFilename, favoriteState);
+      opts.signal?.throwIfAborted();
+      await favoriteFile(fileInfo.originalFilename, favoriteState, opts);
       const photo = photos.find((p) => p.fileid === fileInfo.fileid)!;
       favoriteSetFlag(photo, favoriteState);
       return fileInfo.fileid as number;
     } catch (error) {
+      if (isAbortError(error)) throw error;
       console.error('Failed to favorite', fileInfo, error);
       showError(
         t('memories', 'Failed to favorite {fileName}.', {
@@ -81,7 +87,7 @@ export async function* favoritePhotos(
     }
   });
 
-  yield* base.runInParallel(calls, 10);
+  yield* base.runInParallel(calls, 10, opts);
 }
 
 /**
