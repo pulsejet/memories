@@ -42,7 +42,10 @@ type Stream struct {
 	mutex  sync.Mutex
 	chunks map[int]*Chunk
 
-	coder *exec.Cmd
+	// coder is the current transcode. It stays set after exiting, which
+	// keeps the Manager alive until the stream idles out; exited marks that.
+	coder  *exec.Cmd
+	exited bool
 
 	tonemapOnce sync.Once
 	vaapiOpenCL bool
@@ -101,7 +104,7 @@ func (s *Stream) clear() {
 	s.chunks = make(map[int]*Chunk)
 	s.goal = 0
 
-	// monitorExit is the only waiter; it reaps the killed process.
+	// supervise is the only waiter; it reaps the killed process.
 	if s.coder != nil {
 		s.coder.Process.Kill()
 		s.coder = nil
@@ -124,7 +127,7 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 	if !ok {
 		// Restart unless a live transcode is close: a nearby chunk exists
 		restart := true
-		for i := id - 1; s.coder != nil && i >= id-s.c.LookBehind && i >= 0; i-- {
+		for i := id - 1; s.coder != nil && !s.exited && i >= id-s.c.LookBehind && i >= 0; i-- {
 			if _, ok := s.chunks[i]; ok {
 				restart = false
 				break
@@ -171,7 +174,11 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 		w.WriteHeader(http.StatusInternalServerError)
 		return err
 	}
-	go s.monitorStderr(cmdStdErr)
+	stderrDone := make(chan struct{})
+	go func() {
+		s.monitorStderr(cmdStdErr)
+		close(stderrDone)
+	}()
 
 	// Write to response
 	defer cmdStdOut.Close()
@@ -201,10 +208,9 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 		w.(http.Flusher).Flush()
 	}
 
-	// Terminate ffmpeg process
-	if coder.Process != nil {
-		coder.Process.Kill()
-	}
+	// Terminate ffmpeg; Wait closes the pipes, so drain stderr first
+	coder.Process.Kill()
+	<-stderrDone
 	coder.Wait()
 
 	return nil
@@ -270,7 +276,7 @@ func (s *Stream) waitForChunk(w http.ResponseWriter, chunk *Chunk) {
 		return
 	}
 
-	// Check if coder was replaced; a failed coder is cleared, not replaced
+	// Check if coder was replaced, not merely exited or cleared
 	if restarted {
 		w.WriteHeader(http.StatusConflict)
 		return
@@ -365,10 +371,9 @@ func (s *Stream) transcode(startId int) {
 		return
 	}
 	s.coder = coder
+	s.exited = false
 
-	go s.monitorTranscodeOutput(coder, cmdStdOut)
-	go s.monitorStderr(cmdStdErr)
-	go s.monitorExit(coder)
+	go s.supervise(coder, cmdStdOut, cmdStdErr)
 }
 
 // startCoder starts the command with stdout and stderr piped.
@@ -400,7 +405,7 @@ func (s *Stream) checkGoal(id int) {
 		s.goal = id + s.c.GoalBufferMax
 
 		// resume encoding
-		if s.coder != nil {
+		if s.coder != nil && !s.exited {
 			log.Printf("%s-%s: resuming transcoding", s.m.id, s.quality)
 			s.coder.Process.Signal(syscall.SIGCONT)
 		}
@@ -487,20 +492,31 @@ func (s *Stream) monitorStderr(cmdStdErr io.ReadCloser) {
 	}
 }
 
-func (s *Stream) monitorExit(coder *exec.Cmd) {
+// supervise reads the coder's output to EOF before reaping it, since Wait
+// closes the pipes and would drop the final segment lines.
+func (s *Stream) supervise(coder *exec.Cmd, stdout, stderr io.ReadCloser) {
+	stderrDone := make(chan struct{})
+	go func() {
+		s.monitorStderr(stderr)
+		close(stderrDone)
+	}()
+	s.monitorTranscodeOutput(coder, stdout)
+	<-stderrDone
 	err := coder.Wait()
-	if err == nil {
-		return
-	}
 
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	// Our own kills clear or replace s.coder first, so this is a failure.
-	// Clear it so the next request restarts the transcode.
-	if s.coder == coder {
-		log.Printf("%s-%s: ffmpeg exited: %v", s.m.id, s.quality, err)
-		s.coder = nil
-		s.failChunks()
+	// Our own kills clear or replace s.coder first; nothing to do then.
+	if s.coder != coder {
+		return
 	}
+	if err != nil {
+		log.Printf("%s-%s: ffmpeg exited: %v", s.m.id, s.quality, err)
+	}
+
+	// Chunks still pending will never be produced, even on a clean exit
+	// (e.g. past EOF). Wake them, and let the next request restart.
+	s.exited = true
+	s.failChunks()
 }

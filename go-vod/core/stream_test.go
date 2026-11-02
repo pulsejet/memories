@@ -49,8 +49,44 @@ func TestStreamFailureRestartsOnRetry(t *testing.T) {
 			s := m.streams[QUALITY_MAX]
 			s.mutex.Lock()
 			defer s.mutex.Unlock()
-			return s.coder == nil
+			return s.exited
 		}, time.Second, 10*time.Millisecond)
+	}
+}
+
+// segmentFFmpeg writes and announces only segment 0, then exits cleanly.
+const segmentFFmpeg = `while [ $# -gt 0 ]; do [ "$1" = -hls_segment_filename ] && p="$2"; shift; done
+f=$(printf "$p" 0); echo data > "$f"; basename "$f"`
+
+func TestStreamCleanExitWakesWaiters(t *testing.T) {
+	m := newCopyManager(t, hevcProbeJSON, "", false, nil)
+	bin, runs := stubFFmpeg(t, segmentFFmpeg)
+	m.c.FFmpeg = bin
+
+	old := chunkWait
+	chunkWait = 2 * time.Second
+	defer func() { chunkWait = old }()
+
+	w := httptest.NewRecorder()
+	require.True(t, m.ServeChunk(w, QUALITY_MAX, 0))
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Equal(t, "data\n", w.Body.String())
+
+	// Chunk 1 is never produced, e.g. a playlist entry past EOF. The exited
+	// coder no longer counts as close: a retry restarts and fails fast.
+	require.Eventually(t, func() bool {
+		s := m.streams[QUALITY_MAX]
+		s.mutex.Lock()
+		defer s.mutex.Unlock()
+		return s.exited
+	}, time.Second, 10*time.Millisecond)
+	for i := 2; i <= 3; i++ {
+		w = httptest.NewRecorder()
+		start := time.Now()
+		require.True(t, m.ServeChunk(w, QUALITY_MAX, 1))
+		require.Equal(t, http.StatusRequestTimeout, w.Code)
+		require.Less(t, time.Since(start), chunkWait)
+		require.Equal(t, i, countRuns(t, runs))
 	}
 }
 
