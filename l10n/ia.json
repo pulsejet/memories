@@ -37,8 +37,6 @@
     "Home" : "Initio",
     "Previous" : "Previe",
     "Next" : "Proxime",
-    "Undo" : "Disfacer",
-    "Custom" : "Personalisate",
-    "Size" : "Dimension"
+    "Fullscreen" : "Schermo plen"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

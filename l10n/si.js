@@ -36,10 +36,8 @@ OC.L10N.register(
     "OK" : "OK",
     "Home" : "මුල් පිටුව",
     "Upload files" : "ගොනු උඩුගත කරන්න",
+    "File name" : "ගොනුවේ නම",
     "Previous" : "පෙර",
-    "Undo" : "පෙරසේ",
-    "Value" : "අගය",
-    "Size" : "ප්‍රමාණය",
     "No" : "නැහැ",
     "Choose" : "තෝරන්න"
 },

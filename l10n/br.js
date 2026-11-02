@@ -51,9 +51,8 @@ OC.L10N.register(
     "Upload failed" : "Pellkasaden c'hwitet",
     "Unsaved changes" : "Kemmoù n'int ket bet enrollet",
     "Next" : "War-lerc'h",
+    "Free" : "Digoust",
     "Original" : "Orin",
-    "Text" : "Testenn",
-    "Size" : "Ment",
     "Setup" : "Neuziadur",
     "No" : "Nann",
     "Choose" : "Dibab"

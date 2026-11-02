@@ -37,7 +37,6 @@ OC.L10N.register(
     "Upload failed" : "আপলোড হয়নি",
     "Download {ext}" : "ডাউনলোড  {ext}",
     "Previous" : "পূর্ববর্তী",
-    "Size" : "আকার",
     "Setup" : "সেট-আপ",
     "Yes" : "হ্যাঁ",
     "No" : "না",

@@ -32,6 +32,8 @@ OC.L10N.register(
     "Newest first" : "Täze ilkinji",
     "Home" : "Baş sahypa",
     "Upload files" : "Faýllary ýükläň",
+    "Light" : "Ýagtylyk",
+    "None" : "Hiç",
     "Setup" : "Gurmak",
     "Yes" : "Hawa",
     "No" : "Ýok",

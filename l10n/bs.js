@@ -37,10 +37,6 @@ OC.L10N.register(
     "Home" : "Početna stranica",
     "Previous" : "Prethodno",
     "Next" : "Sljedeće",
-    "Value" : "Vrijednost",
-    "Line" : "Linija",
-    "Text" : "Tekst",
-    "Size" : "Veličina",
     "Yes" : "Da",
     "No" : "Ne",
     "Choose" : "Izaberite"

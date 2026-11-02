@@ -40,7 +40,6 @@ OC.L10N.register(
     "Download {ext}" : "Endir {ext}",
     "Slideshow" : "Slayd şou",
     "Previous" : "Əvvələ",
-    "Size" : "Həcm",
     "Setup" : "Qurulum",
     "Yes" : "Bəli",
     "No" : "Xeyir",

@@ -56,12 +56,7 @@ OC.L10N.register(
     "Unsaved changes" : "Cambios no guardados",
     "Download {ext}" : "Descargar {ext}",
     "Previous" : "Previo",
-    "Undo" : "Deshacer",
-    "Custom" : "Personalizado",
-    "Value" : "Valor",
-    "Text" : "Texto",
-    "Size" : "Tamaño",
-    "Position" : "Posición",
+    "Fullscreen" : "Pantalla completa",
     "Not now" : "No ahora",
     "Setup" : "Ajustes",
     "Choose" : "Seleccionar"

@@ -31,7 +31,7 @@ OC.L10N.register(
     "Home" : "Dachaigh",
     "Upload files" : "Luchdaich suas faidhlichean",
     "Upload failed" : "Dh'fhàillig leis an luchdadh suas",
-    "Undo" : "Neo-dhèan",
+    "Fullscreen" : "Làn-sgrìn",
     "Setup" : "Suidhich",
     "Yes" : "Tha",
     "No" : "Chan eil",

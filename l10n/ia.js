@@ -39,8 +39,6 @@ OC.L10N.register(
     "Home" : "Initio",
     "Previous" : "Previe",
     "Next" : "Proxime",
-    "Undo" : "Disfacer",
-    "Custom" : "Personalisate",
-    "Size" : "Dimension"
+    "Fullscreen" : "Schermo plen"
 },
 "nplurals=2; plural=(n != 1);");
