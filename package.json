@@ -73,7 +73,7 @@
     "npm": ">=8.0.0"
   },
   "devDependencies": {
-    "@napi-rs/canvas": "^1.0.13",
+    "@napi-rs/canvas": "^1.1.0",
     "@playwright/test": "^1.64.1",
     "@sigstore/core": "^4.0.1",
     "@sigstore/protobuf-specs": "^0.5.2",
@@ -91,7 +91,7 @@
     "node-polyfill-webpack-plugin": "^4.1.0",
     "playwright": "^1.64.1",
     "prettier": "^3.9.10",
-    "sass": "^1.107.0",
+    "sass": "^1.107.1",
     "sass-loader": "^17.1.0",
     "source-map-loader": "^5.0.0",
     "style-loader": "^4.0.0",
@@ -101,7 +101,7 @@
     "vue-loader": "^17.4.2",
     "vue-tsc": "^3.3.14",
     "webpack": "^5.112.2",
-    "webpack-cli": "^7.2.3",
+    "webpack-cli": "^7.3.1",
     "workbox-webpack-plugin": "^7.4.1"
   },
   "allowScripts": {
