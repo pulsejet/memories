@@ -71,7 +71,7 @@ jobs:
         if: ${{ ! cancelled() }}
         working-directory: apps/memories
         run: |
-          vendor/bin/php-cs-fixer fix --dry-run --diff
+          make php-format-check
 
       - name: Run Psalm
         if: ${{ ! cancelled() }}
@@ -100,4 +100,4 @@ jobs:
         run: make js-lint
 
       - name: Run Prettier
-        run: make format-check
+        run: make js-format-check
