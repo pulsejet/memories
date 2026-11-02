@@ -8,14 +8,28 @@ import type { IDay, IPhoto } from '@typings';
 test.beforeEach(bootstrap);
 test.afterEach(teardown);
 
-test.use({ extraHTTPHeaders: e2eHeaders() });
+test.use({
+  extraHTTPHeaders: e2eHeaders({
+    timelinePath: '/for-favorite-%wid',
+  }),
+});
 
 test.describe.serial('@ui Favorites', () => {
+  test.beforeAll(async ({ request }) => {
+    const dav = new DavClient(request);
+    await dav.deleteFile('/for-favorite-%wid', true);
+    await dav.copyFile('/for-other', '/for-favorite-%wid');
+  });
+
+  test.afterAll(async ({ request }) => {
+    await new DavClient(request).deleteFile('/for-favorite-%wid', true);
+  });
+
   // Due to a bug in Nextcloud, a single file must be marked favorite to create
   // the internal categories, before multiple can be done simultaneously.
   test('Favorite from Viewer', async ({ request, page }) => {
     const dav = new DavClient(request);
-    const fileid3 = await dav.fileid('/for-default/3fUXeoW5Sso.jpg');
+    const fileid3 = await dav.fileid('/for-favorite-%wid/RmjH76vMWrI.jpg');
 
     await test.step('Favorite', async () => {
       await page.goto(appUrl);
@@ -43,8 +57,8 @@ test.describe.serial('@ui Favorites', () => {
 
   test('Favorite from Timeline', async ({ request, page }) => {
     const dav = new DavClient(request);
-    const fileid1 = await dav.fileid('/for-default/CbBbaNTmsAc.jpg');
-    const fileid2 = await dav.fileid('/for-default/NDPmLyPXnZU.jpg');
+    const fileid1 = await dav.fileid('/for-favorite-%wid/dHLhDeEgxsg.jpg');
+    const fileid2 = await dav.fileid('/for-favorite-%wid/kvRlouf0RTs.jpg');
 
     await test.step('Favorite', async () => {
       await page.goto(appUrl);
