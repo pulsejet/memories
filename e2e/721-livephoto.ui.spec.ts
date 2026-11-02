@@ -31,7 +31,7 @@ test.describe('@ui Live photo', () => {
       await page.goto(appUrl);
       await page.waitForSelector(`.p-outer--${fileid}`);
 
-      pOuter = page.locator('.p-outer');
+      pOuter = page.locator('.p-outer:visible');
       await expect(pOuter).toHaveCount(1);
       await expect(page.locator(`.p-outer--${fileid}`)).toBeVisible();
 

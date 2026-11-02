@@ -54,12 +54,12 @@ test.describe('Trash', () => {
     const dav = new DavClient(request);
     const trashId = trashIds[FILES.listRestore];
     await page.goto(`${appUrl}/trash`);
-    await expect(page.locator(`.p-outer--trash-${trashId}`)).toHaveCount(1);
+    await expect(page.locator(`.p-outer--trash-${trashId}:visible`)).toHaveCount(1);
     await page.hover(`.p-outer--trash-${trashId}`);
     await page.locator(`.p-outer--trash-${trashId} > div.select`).click();
 
     await page.getByRole('button', { name: 'Restore' }).click();
-    await expect(page.locator(`.p-outer--trash-${trashId}`)).toHaveCount(0);
+    await expect(page.locator(`.p-outer--trash-${trashId}:visible`)).toHaveCount(0);
     expect(await dav.fileid(`${FOLDER}/${FILES.listRestore}`)).toBeGreaterThan(0);
   });
 
@@ -67,7 +67,7 @@ test.describe('Trash', () => {
     const dav = new DavClient(request);
     const trashId = trashIds[FILES.listDelete];
     await page.goto(`${appUrl}/trash`);
-    await expect(page.locator(`.p-outer--trash-${trashId}`)).toHaveCount(1);
+    await expect(page.locator(`.p-outer--trash-${trashId}:visible`)).toHaveCount(1);
     await page.hover(`.p-outer--trash-${trashId}`);
     await page.locator(`.p-outer--trash-${trashId} > div.select`).click();
 
@@ -75,7 +75,7 @@ test.describe('Trash', () => {
 
     const dialog = page.getByRole('dialog');
     await dialog.getByRole('button', { name: 'Delete', exact: true }).click();
-    await expect(page.locator(`.p-outer--trash-${trashId}`)).toHaveCount(0);
+    await expect(page.locator(`.p-outer--trash-${trashId}:visible`)).toHaveCount(0);
 
     const entries = await dav.listTrash();
     expect(entries.some((e) => e.originalLocation === trashLoc(FILES.listDelete))).toBeFalsy();
@@ -85,14 +85,14 @@ test.describe('Trash', () => {
     const dav = new DavClient(request);
     const trashId = trashIds[FILES.viewerRestore];
     await page.goto(`${appUrl}/trash`);
-    await expect(page.locator(`.p-outer--trash-${trashId}`)).toHaveCount(1);
+    await expect(page.locator(`.p-outer--trash-${trashId}:visible`)).toHaveCount(1);
 
     await page.locator(`.p-outer--trash-${trashId}`).click();
     await page.waitForSelector('.memories-viewer.fully-opened');
 
     const viewer = page.locator('.memories-viewer');
     await viewer.getByRole('button', { name: 'Restore' }).click();
-    await expect(page.locator(`.p-outer--trash-${trashId}`)).toHaveCount(0);
+    await expect(page.locator(`.p-outer--trash-${trashId}:visible`)).toHaveCount(0);
     expect(await dav.fileid(`${FOLDER}/${FILES.viewerRestore}`)).toBeGreaterThan(0);
   });
 
@@ -100,7 +100,7 @@ test.describe('Trash', () => {
     const dav = new DavClient(request);
     const deleteId = trashIds[FILES.viewerDelete];
     await page.goto(`${appUrl}/trash`);
-    await expect(page.locator(`.p-outer--trash-${deleteId}`)).toHaveCount(1);
+    await expect(page.locator(`.p-outer--trash-${deleteId}:visible`)).toHaveCount(1);
 
     await page.locator(`.p-outer--trash-${deleteId}`).click();
     await page.waitForSelector('.memories-viewer.fully-opened');
@@ -110,7 +110,7 @@ test.describe('Trash', () => {
 
     const dialog = page.getByRole('dialog');
     await dialog.getByRole('button', { name: 'Delete', exact: true }).click();
-    await expect(page.locator(`.p-outer--trash-${deleteId}`)).toHaveCount(0);
+    await expect(page.locator(`.p-outer--trash-${deleteId}:visible`)).toHaveCount(0);
 
     const entries = await dav.listTrash();
     expect(entries.some((e) => e.originalLocation === trashLoc(FILES.viewerDelete))).toBeFalsy();

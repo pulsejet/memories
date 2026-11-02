@@ -157,7 +157,7 @@ test.describe('Public album share', () => {
 
       await expect(page).toHaveURL(`${appUrl}/a/${albumToken}`);
       await expect(page.locator('.dtm-container .header')).toHaveText(albumName);
-      await expect(page.locator('.p-outer')).toHaveCount(albumFiles.length);
+      await expect(page.locator('.p-outer:visible')).toHaveCount(albumFiles.length);
       for (const fileid of albumFileids) {
         await expect(page.locator(`.p-outer--${fileid}`)).toBeVisible();
       }

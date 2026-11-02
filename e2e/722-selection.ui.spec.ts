@@ -156,7 +156,7 @@ test.describe('@ui Photo selection', () => {
         await expect(photo).not.toHaveClass(/selected/);
       }
     }
-    await expect(page.locator('.p-outer.selected')).toHaveCount(selected.filter(Boolean).length);
+    await expect(page.locator('.p-outer.selected:visible')).toHaveCount(selected.filter(Boolean).length);
 
     const count = selected.filter(Boolean).length;
     if (count > 0) {

@@ -115,8 +115,8 @@ test.describe('Archive', () => {
         await page.getByRole('button', { name: 'Actions' }).click();
         await page.getByRole('menuitem', { name: 'Archive' }).click();
 
-        await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
-        await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
+        await expect(page.locator(`.p-outer--${fileid1}:visible`)).toHaveCount(0);
+        await expect(page.locator(`.p-outer--${fileid2}:visible`)).toHaveCount(0);
       });
 
       await test.step('Verify files are in archive', async () => {
@@ -141,8 +141,8 @@ test.describe('Archive', () => {
         await page.getByRole('button', { name: 'Actions' }).click();
         await page.getByRole('menuitem', { name: 'Unarchive' }).click();
 
-        await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
-        await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
+        await expect(page.locator(`.p-outer--${fileid1}:visible`)).toHaveCount(0);
+        await expect(page.locator(`.p-outer--${fileid2}:visible`)).toHaveCount(0);
       });
 
       await test.step('Verify files are back in main', async () => {

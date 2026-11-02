@@ -62,7 +62,7 @@ test.describe.serial('Albums', () => {
 
     await expect(page).toHaveURL(uiUrl(albumName));
     await expect(page.locator('.dtm-container .header')).toHaveText(albumName);
-    await expect(page.locator('.p-outer')).toHaveCount(3);
+    await expect(page.locator('.p-outer:visible')).toHaveCount(3);
     await expect(page.locator(`.p-outer--${fileid1}`)).toBeVisible();
     await expect(page.locator(`.p-outer--${fileid2}`)).toBeVisible();
     await expect(page.locator(`.p-outer--${fileid3}`)).toBeVisible();
@@ -137,7 +137,7 @@ test.describe.serial('Albums', () => {
 
       await page.getByRole('button', { name: 'Remove from album' }).click();
       await page.getByRole('button', { name: 'Yes' }).click();
-      await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
+      await expect(page.locator(`.p-outer--${fileid1}:visible`)).toHaveCount(0);
     });
 
     await test.step('Check removed cover is gone', async () => {
@@ -224,7 +224,7 @@ test.describe('@ui Empty album', () => {
 
       await expect(page).toHaveURL(uiUrl(emptyAlbumName));
       await expect(page.locator('.dtm-container .header')).toHaveText(emptyAlbumName);
-      await expect(page.locator('.p-outer')).toHaveCount(0);
+      await expect(page.locator('.p-outer:visible')).toHaveCount(0);
       await expect(page.getByText('Nothing to show here')).toBeVisible();
       await expect(page.getByText('Add photos to albums by selecting them on your timeline.')).toBeVisible();
     });

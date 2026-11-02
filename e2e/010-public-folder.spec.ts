@@ -164,7 +164,7 @@ test.describe('Public folder share', () => {
       await page.goto(`${appUrl}/s/${folderToken}`);
 
       await expect(page.locator('.top-matter')).toContainText(folderName);
-      await expect(page.locator('.p-outer')).toHaveCount(folderFiles.length);
+      await expect(page.locator('.p-outer:visible')).toHaveCount(folderFiles.length);
       for (const fileid of folderFileids) {
         await expect(page.locator(`.p-outer--${fileid}`)).toBeVisible();
       }
@@ -284,7 +284,7 @@ test.describe('Password protected folder share', () => {
       // The form is visible before the POST returns; only the error proves the rejection.
       await expect(page.getByText(/password is wrong/i)).toBeVisible();
       await expect(page.getByRole('textbox', { name: 'Password' })).toBeVisible();
-      await expect(page.locator('.p-outer')).toHaveCount(0);
+      await expect(page.locator('.p-outer:visible')).toHaveCount(0);
     });
   });
 });

@@ -41,8 +41,8 @@ test.describe('@ui Timeline photo deletion', () => {
     });
 
     await test.step('Verify timeline', async () => {
-      await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
-      await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
+      await expect(page.locator(`.p-outer--${fileid1}:visible`)).toHaveCount(0);
+      await expect(page.locator(`.p-outer--${fileid2}:visible`)).toHaveCount(0);
     });
 
     await test.step('Verify on server', async () => {

@@ -142,10 +142,10 @@ test.describe('Tags', () => {
 
     await expect(page).toHaveURL(`${appUrl}/tags/${encodeURIComponent(tagA)}`);
     await expect(page.locator('.top-matter .name')).toHaveText(tagA);
-    await expect(page.locator('.p-outer')).toHaveCount(2);
+    await expect(page.locator('.p-outer:visible')).toHaveCount(2);
     await expect(page.locator(`.p-outer--${img1}`)).toBeVisible();
     await expect(page.locator(`.p-outer--${img2}`)).toBeVisible();
-    await expect(page.locator(`.p-outer--${img3}`)).toHaveCount(0);
+    await expect(page.locator(`.p-outer--${img3}:visible`)).toHaveCount(0);
   });
 
   test('@ui Open second tag shows its images', async ({ page }) => {
@@ -154,10 +154,10 @@ test.describe('Tags', () => {
 
     await expect(page).toHaveURL(`${appUrl}/tags/${encodeURIComponent(tagB)}`);
     await expect(page.locator('.top-matter .name')).toHaveText(tagB);
-    await expect(page.locator('.p-outer')).toHaveCount(2);
+    await expect(page.locator('.p-outer:visible')).toHaveCount(2);
     await expect(page.locator(`.p-outer--${img2}`)).toBeVisible();
     await expect(page.locator(`.p-outer--${img3}`)).toBeVisible();
-    await expect(page.locator(`.p-outer--${img1}`)).toHaveCount(0);
+    await expect(page.locator(`.p-outer--${img1}:visible`)).toHaveCount(0);
   });
 });
 

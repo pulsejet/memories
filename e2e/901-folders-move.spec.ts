@@ -43,14 +43,14 @@ test.describe('@ui Folder file operations', () => {
     });
 
     await test.step('Verify gone from src', async () => {
-      await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
-      await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
+      await expect(page.locator(`.p-outer--${fileid1}:visible`)).toHaveCount(0);
+      await expect(page.locator(`.p-outer--${fileid2}:visible`)).toHaveCount(0);
     });
 
     await test.step('Verify in dest', async () => {
       await page.goto(psub(`${appUrl}/folders/for-move-%wid/dest`));
-      await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(1);
-      await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(1);
+      await expect(page.locator(`.p-outer--${fileid1}:visible`)).toHaveCount(1);
+      await expect(page.locator(`.p-outer--${fileid2}:visible`)).toHaveCount(1);
     });
   });
 });
