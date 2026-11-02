@@ -37,5 +37,11 @@ test.describe('Metadata', () => {
       await expect(page.locator('.memories-viewer .exif.title')).toHaveText(testTitle);
       await expect(page.locator('.memories-viewer .exif.description')).toHaveText(testDescription);
     });
+
+    await test.step('Verify on server', async () => {
+      const { exif } = await dav.imageInfo(fileid1);
+      expect(exif?.Title).toBe(testTitle);
+      expect(exif?.Description).toBe(testDescription);
+    });
   });
 });

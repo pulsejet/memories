@@ -44,6 +44,11 @@ test.describe('@ui Timeline photo deletion', () => {
       await expect(page.locator(`.p-outer--${fileid1}`)).toHaveCount(0);
       await expect(page.locator(`.p-outer--${fileid2}`)).toHaveCount(0);
     });
+
+    await test.step('Verify on server', async () => {
+      expect((await request.get(`${appUrl}/api/image/info/${fileid1}`)).status()).toBe(404);
+      expect((await request.get(`${appUrl}/api/image/info/${fileid2}`)).status()).toBe(404);
+    });
   });
 
   test('Delete image from viewer', async ({ request, page }) => {
@@ -88,6 +93,10 @@ test.describe('@ui Timeline photo deletion', () => {
 
     await test.step('Verify timeline', async () => {
       await expect(page.locator(`.p-outer--${fileid3}`)).not.toBeVisible();
+    });
+
+    await test.step('Verify on server', async () => {
+      expect((await request.get(`${appUrl}/api/image/info/${fileid3}`)).status()).toBe(404);
     });
   });
 });

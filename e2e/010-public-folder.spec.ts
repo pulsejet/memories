@@ -327,6 +327,10 @@ test.describe('Public folder upload', () => {
     ];
 
     await withPublicPage(browser, async (page) => {
+      const chunkRequest = page.waitForRequest(
+        (r) => r.method() === 'PUT' && r.url().includes(`/public.php/dav/uploads/${folderToken}/`),
+      );
+
       await test.step('Select files', async () => {
         await page.goto(`${appUrl}/s/${folderToken}`);
         await expect(page.getByRole('button', { name: 'Upload files' })).toBeVisible();
@@ -338,7 +342,7 @@ test.describe('Public folder upload', () => {
         });
         expect(typeof maxChunkSize).toBe('number');
         await page.evaluate(() => {
-          window.OC.appConfig.files.max_chunk_size = 1024 * 1024;
+          window.OC.appConfig.files.max_chunk_size = 5 * 1024 * 1024; // library minimum
         });
 
         const fileChooserPromise = page.waitForEvent('filechooser');
@@ -350,6 +354,7 @@ test.describe('Public folder upload', () => {
       await test.step('Verify upload', async () => {
         // Video uses chunked upload (see #1634); toast confirms both files landed.
         await expect(page.getByText('Successfully uploaded 2 files', { exact: true })).toBeVisible({ timeout: 120000 });
+        await chunkRequest;
 
         const imageId = await dav.fileid(`${folderDir}/apple_h264_boy_01.jpg`);
         const videoId = await dav.fileid(`${folderDir}/samsung_s21_03.mp4`);
