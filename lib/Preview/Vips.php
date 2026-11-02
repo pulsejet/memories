@@ -118,7 +118,9 @@ final class Vips implements IProviderV2
                 throw new \Exception('failed to get local file for '.$file->getPath());
             }
 
-            return $this->getThumbnailFromPath($path, $maxX, $maxY);
+            $mimeType = $file->getMimeType();
+
+            return $this->getThumbnailFromPath($path, $maxX, $maxY, $mimeType);
         } catch (\Throwable $e) {
             $this->logger->warning('vips preview failed: '.$e->getMessage(), ['app' => 'memories']);
         }
@@ -130,18 +132,23 @@ final class Vips implements IProviderV2
      * Thumbnail an image at a local path. The only vips entry point.
      * Throws on any failure; callers catch.
      */
-    public function getThumbnailFromPath(string $inputPath, int $width, int $height): IImage
+    public function getThumbnailFromPath(string $inputPath, int $width, int $height, string $mimeType): IImage
     {
         $vips = $this->binExt->getVipsBin();
 
         // Same key as the core providers (canonically an int)
         $quality = min(100, max(10, $this->appConfig->getValueInt('preview', 'jpeg_quality', 80)));
 
+        // Prevent transparent PNG flattened to JPEG.
+        $isPng = 'image/png' === strtolower($mimeType);
+        $outputPath = $isPng ? 'output.png' : 'output.jpg';
+        $outputMime = $isPng ? 'image/png' : 'image/jpeg';
+
         // JSON on stdin; OUTPUT picks the format, stdout:true streams the bytes.
         $stdin = json_encode([
             'cmd' => 'thumbnail',
             'input' => $inputPath,
-            'output' => 'output.jpg',
+            'output' => $outputPath,
             'stdout' => true,
             'width' => max(1, $width),
             'height' => max(1, $height),
@@ -177,7 +184,7 @@ final class Vips implements IProviderV2
 
         // StreamImage ensures that the file is written without re-encode,
         // preserving U-HDR and ICC profiles.
-        return new StreamImage($out, 'image/jpeg', $width, $height);
+        return new StreamImage($out, $outputMime, $width, $height);
     }
 
     /**
