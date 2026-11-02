@@ -159,8 +159,11 @@ func BuildArgs(s Spec) []string {
 	}
 
 	cv := Encoder(s)
+
+	var hwaccel string
 	switch cv {
 	case EncoderVAAPI:
+		hwaccel = "vaapi"
 		dev := s.VAAPIDevice
 		if dev == "" {
 			dev = "/dev/dri/renderD128"
@@ -168,7 +171,6 @@ func BuildArgs(s Spec) []string {
 		args = append(args,
 			"-hwaccel", "vaapi",
 			"-hwaccel_device", dev,
-			"-hwaccel_output_format", "vaapi",
 			"-init_hw_device", "vaapi=memories:"+dev,
 		)
 		if s.HDR && s.VAAPIOpenCL {
@@ -180,12 +182,22 @@ func BuildArgs(s Spec) []string {
 			args = append(args, "-filter_hw_device", "memories")
 		}
 	case EncoderNVENC:
+		hwaccel = "cuda"
 		args = append(args,
 			"-hwaccel", "cuda",
-			"-hwaccel_output_format", "cuda",
 			"-init_hw_device", "cuda=memories",
 			"-filter_hw_device", "memories",
 		)
+	}
+
+	// CPU tonemapping wants system frames.
+	cpuTonemap := s.HDR && cv != EncoderCopy &&
+		!(cv == EncoderVAAPI && s.VAAPIOpenCL) &&
+		!(cv == EncoderNVENC && s.NVENCCUDA)
+
+	// Keep decoded frames on the device, except for CPU tonemapping.
+	if hwaccel != "" && !cpuTonemap {
+		args = append(args, "-hwaccel_output_format", hwaccel)
 	}
 
 	if s.UseTranspose {
@@ -208,6 +220,9 @@ func BuildArgs(s Spec) []string {
 
 	if cv != EncoderCopy {
 		b := NewFilterBuilder(s, cv)
+		if cpuTonemap {
+			b.isInHw = false
+		}
 
 		switch {
 		case s.HDR && cv == EncoderVAAPI && s.VAAPIOpenCL:
@@ -220,11 +235,9 @@ func BuildArgs(s Spec) []string {
 			b.scaleEncode("p010le")
 			b.tonemapCUDA()
 			b.bitDepth = 8
-		case s.HDR:
-			// CPU tonemap between decode and encode; the download
-			// pin matches the surface depth and no-ops on SW frames.
+		case cpuTonemap:
+			// CPU tonemap between decode and encode, on system frames.
 			// https://github.com/pulsejet/memories/issues/1726
-			b.hwdownload()
 			b.scaleCpu()
 			b.tonemapCpu()
 			b.append("format=nv12")

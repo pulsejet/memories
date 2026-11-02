@@ -1,6 +1,7 @@
 package ffmpeg
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -169,7 +170,8 @@ func TestBuildArgsTonemap(t *testing.T) {
 	vaapi := baseSpec()
 	vaapi.HDR, vaapi.VAAPI = true, true
 	c = cmd(vaapi, BuildArgs(vaapi))
-	require.Contains(t, c, "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=")
+	require.Contains(t, c, `-vf "scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=`)
+	require.NotContains(t, c, "hwdownload")
 	require.Contains(t, c, "tonemap=hable:desat=0,")
 	require.Contains(t, c, "format=nv12|vaapi,hwupload")
 	require.NotContains(t, c, "hwupload,scale_vaapi=")
@@ -177,7 +179,8 @@ func TestBuildArgsTonemap(t *testing.T) {
 	nvenc := baseSpec()
 	nvenc.HDR, nvenc.NVENC, nvenc.NVENCScale = true, true, "cuda"
 	c = cmd(nvenc, BuildArgs(nvenc))
-	require.Contains(t, c, "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=")
+	require.Contains(t, c, `-vf "scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=`)
+	require.NotContains(t, c, "hwdownload")
 	require.Contains(t, c, "tonemap=hable:desat=0,")
 	require.Contains(t, c, "format=nv12|cuda,hwupload")
 	require.NotContains(t, c, "hwupload,scale_cuda=")
@@ -188,31 +191,33 @@ func TestBuildArgsTonemap(t *testing.T) {
 }
 
 func TestBuildArgsTonemapDepth(t *testing.T) {
-	// The download pin must match the surface depth; the encoder still
-	// receives nv12 either way.
+	// CPU tonemapping takes system frames straight from the decoder, so no
+	// hwdownload (which fails on software-decoded frames) and no depth pin.
+	hdrs := map[string]Spec{}
 	for _, scale := range []string{"cuda", "npp"} {
-		deep := baseSpec()
-		deep.HDR, deep.BitDepth, deep.NVENC, deep.NVENCScale = true, 10, true, scale
-		c := cmd(deep, BuildArgs(deep))
-		require.Contains(t, c, "hwdownload,format=p010le,scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=")
-		require.Contains(t, c, "format=nv12|cuda,hwupload")
-		require.NotContains(t, c, "hwupload,scale_"+scale)
-
-		deep12 := baseSpec()
-		deep12.HDR, deep12.BitDepth, deep12.NVENC, deep12.NVENCScale = true, 12, true, scale
-		require.Contains(t, cmd(deep12, BuildArgs(deep12)), "hwdownload,format=p012le,scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=")
-
-		shallow := baseSpec()
-		shallow.HDR, shallow.NVENC, shallow.NVENCScale = true, true, scale
-		require.Contains(t, cmd(shallow, BuildArgs(shallow)), "hwdownload,format=nv12,scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=")
+		for _, depth := range []int{8, 10, 12} {
+			s := baseSpec()
+			s.HDR, s.BitDepth, s.NVENC, s.NVENCScale = true, depth, true, scale
+			hdrs[fmt.Sprintf("nvenc-%s-%d", scale, depth)] = s
+		}
+	}
+	for _, depth := range []int{8, 10} {
+		s := baseSpec()
+		s.HDR, s.BitDepth, s.VAAPI = true, depth, true
+		hdrs[fmt.Sprintf("vaapi-%d", depth)] = s
+	}
+	for name, s := range hdrs {
+		c := cmd(s, BuildArgs(s))
+		require.NotContains(t, c, "hwdownload", name)
+		require.NotContains(t, c, "hwaccel_output_format", name)
+		require.Contains(t, c, `-vf "scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=`, name)
+		require.Regexp(t, `format=nv12\|(cuda|vaapi),hwupload"`, c, name)
 	}
 
-	vaapi := baseSpec()
-	vaapi.HDR, vaapi.BitDepth, vaapi.VAAPI = true, 10, true
-	c := cmd(vaapi, BuildArgs(vaapi))
-	require.Contains(t, c, "hwdownload,format=p010le,scale=force_original_aspect_ratio=decrease:force_divisible_by=2:w=1280:h=1280,zscale=")
-	require.Contains(t, c, "format=nv12|vaapi,hwupload")
-	require.NotContains(t, c, "hwupload,scale_vaapi")
+	// GPU tonemapping keeps hardware frames.
+	gpu := baseSpec()
+	gpu.HDR, gpu.BitDepth, gpu.NVENC, gpu.NVENCScale, gpu.NVENCCUDA = true, 10, true, "cuda", true
+	require.Contains(t, cmd(gpu, BuildArgs(gpu)), "-hwaccel_output_format cuda")
 
 	// Software transpose after tonemapping stays on the CPU: no
 	// upload/download roundtrip around rotation.

@@ -43,7 +43,8 @@ func TestTonemapSelection(t *testing.T) {
 			require.Equal(t, !fail, spec.VAAPIOpenCL)
 			args := strings.Join(ffmpeg.BuildArgs(spec), " ")
 			if fail {
-				require.Contains(t, args, "hwdownload,format=nv12,scale=")
+				require.Contains(t, args, "-vf scale=")
+				require.NotContains(t, args, "hwaccel_output_format")
 				require.Contains(t, args, "zscale=")
 				require.NotContains(t, args, "opencl")
 			} else {
@@ -107,7 +108,8 @@ func TestCUDATonemapSelection(t *testing.T) {
 				args := strings.Join(ffmpeg.BuildArgs(spec), " ")
 				require.Contains(t, args, "h264_nvenc")
 				if fail {
-					require.Contains(t, args, "hwdownload,format=p010le,scale=")
+					require.Contains(t, args, "-vf scale=")
+					require.NotContains(t, args, "hwaccel_output_format")
 					require.Contains(t, args, "zscale=")
 					require.NotContains(t, args, "tonemap_cuda")
 				} else {
