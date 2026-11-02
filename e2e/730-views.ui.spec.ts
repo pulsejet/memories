@@ -52,8 +52,8 @@ test.describe('@ui Places view', () => {
   test('Place timeline survives refresh', async ({ page }) => {
     await page.goto(`${appUrl}/places`);
     await page.locator('.cluster:not(.placeholder)').first().click();
-    await page.waitForSelector('.p-outer');
+    await page.waitForSelector('.p-outer:not(.placeholder)');
     await page.reload();
-    await page.waitForSelector('.p-outer');
+    await page.waitForSelector('.p-outer:not(.placeholder)');
   });
 });

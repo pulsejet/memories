@@ -60,7 +60,7 @@ test.describe('@ui Sidebar', () => {
 
   test('Album viewer opens reduced sidebar', async ({ page }) => {
     await page.goto(`${appUrl}/albums/${username}/${encodeURIComponent(albumName)}`);
-    await page.locator('.p-outer > .img-outer').first().click();
+    await page.locator('.p-outer:not(.placeholder) > .img-outer').first().click();
     await page.waitForSelector('.memories-viewer.fully-opened');
 
     await page.getByRole('button', { name: 'Info', exact: true }).click();

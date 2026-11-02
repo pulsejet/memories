@@ -25,7 +25,7 @@ test.describe('@ui Timeline scroller', () => {
 
   test('Hover, click and follow the scroller', async ({ page }) => {
     await page.goto(appUrl);
-    await page.locator('.p-outer').first().waitFor();
+    await page.locator('.p-outer:not(.placeholder)').first().waitFor();
     await expect(page.locator('.scroller .tick', { hasText: '2019' })).toBeVisible();
 
     const scroller = page.locator('.scroller');
@@ -72,7 +72,7 @@ test.describe('@ui Timeline top matter', () => {
   test('Top matter resize keeps rows in place when scrolled past it', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 400 });
     await page.goto(appUrl);
-    await page.locator('.p-outer').first().waitFor();
+    await page.locator('.p-outer:not(.placeholder)').first().waitFor();
 
     const recycler = page.locator('.recycler');
     const before = page.locator('.recycler-before');
