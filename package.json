@@ -104,5 +104,10 @@
     "webpack": "^5.112.2",
     "webpack-cli": "^7.2.3",
     "workbox-webpack-plugin": "^7.4.1"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "@parcel/watcher@2.6.0": true,
+    "core-js@3.51.0": true
   }
 }
