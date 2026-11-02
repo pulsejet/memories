@@ -35,9 +35,15 @@ func TestParseProbeJSONHDR(t *testing.T) {
 		`"color_space":"bt2020nc"}`))
 	require.False(t, probe(`{"codec_type":"video","codec_name":"h264","pix_fmt":"nv12",`+
 		`"color_space":"bt2020nc"}`))
-	require.True(t, probe(`{"codec_type":"video","codec_name":"dvhe","pix_fmt":"yuv420p10le"}`))
-	require.True(t, probe(`{"codec_type":"video","codec_name":"hevc","pix_fmt":"yuv420p10le",`+
-		`"color_transfer":"bt709","side_data_list":[{"side_data_type":"Dolby Vision RPU data"}]}`))
+	// Dolby Vision as ffprobe reports it: codec_name stays hevc, and the
+	// stream carries a DOVI configuration record.
+	dovi := func(compat string) string {
+		return `{"codec_type":"video","codec_name":"hevc","pix_fmt":"yuv420p10le",` +
+			`"side_data_list":[{"side_data_type":"DOVI configuration record","dv_profile":5` + compat + `}]}`
+	}
+	require.True(t, probe(dovi(`,"dv_bl_signal_compatibility_id":0`)))
+	require.True(t, probe(dovi(``)))
+	require.False(t, probe(dovi(`,"dv_bl_signal_compatibility_id":2`)))
 	require.False(t, probe(`{"codec_type":"video","codec_name":"dvvideo","pix_fmt":"yuv411p"}`))
 }
 

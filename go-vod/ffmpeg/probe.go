@@ -55,6 +55,7 @@ type AudioInfo struct {
 type sideData struct {
 	SideDataType string `json:"side_data_type"`
 	Rotation     int    `json:"rotation"`
+	DVCompatID   *int   `json:"dv_bl_signal_compatibility_id"`
 }
 
 type videoStream struct {
@@ -208,16 +209,11 @@ func probeHDR(s videoStream) bool {
 	case "smpte2084", "arib-std-b67":
 		return true
 	}
-	// Dolby Vision by codec or RPU side data, including profile 8 tucked
-	// into HEVC streams whose transfer tags look SDR alone. Explicit names
-	// only: prefix-matching "dv" would catch SDR dvvideo.
-	switch s.CodecName {
-	case "dvav", "dva1", "dvhe", "dvh1", "dvh2", "dvh3", "dvc1", "dav1":
-		return true
-	}
+	// Dolby Vision, notably profile 5 whose base layer has no SDR or HDR10
+	// transfer tags at all. An SDR-compatible base layer stays SDR.
 	for _, sd := range s.SideDataList {
-		if strings.Contains(strings.ToLower(sd.SideDataType), "dolby vision") {
-			return true
+		if sd.SideDataType == "DOVI configuration record" {
+			return sd.DVCompatID == nil || *sd.DVCompatID != 2 // 2: SDR base layer
 		}
 	}
 	if s.ColorSpace == "bt2020nc" || s.ColorSpace == "bt2020c" || s.ColorPrimaries == "bt2020" {
