@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -95,7 +94,7 @@ func Probe(ctx context.Context, bin, fileURL, headers string) (VideoInfo, error)
 
 // runFFprobe executes the binary, capturing stdout and stderr.
 func runFFprobe(ctx context.Context, bin string, args ...string) (stdout, stderr []byte, err error) {
-	cmd := exec.CommandContext(ctx, bin, args...)
+	cmd := Command(ctx, bin, args...)
 	var out, serr bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &serr

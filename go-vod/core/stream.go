@@ -2,6 +2,7 @@ package core
 
 import (
 	"bufio"
+	"context"
 	"io"
 	"log"
 	"net/http"
@@ -46,6 +47,8 @@ type Stream struct {
 	// keeps the Manager alive until the stream idles out; exited marks that.
 	coder  *exec.Cmd
 	exited bool
+	// closed is set by Stop; a stopped stream never starts another coder.
+	closed bool
 
 	tonemapOnce sync.Once
 	vaapiOpenCL bool
@@ -85,10 +88,6 @@ func (s *Stream) Run() {
 			s.mutex.Unlock()
 
 		case <-s.stop:
-			t.Stop()
-			s.mutex.Lock()
-			s.clear()
-			s.mutex.Unlock()
 			return
 		}
 	}
@@ -111,7 +110,13 @@ func (s *Stream) clear() {
 	}
 }
 
+// Stop kills the transcode right away, so it can't outlive the Manager.
 func (s *Stream) Stop() {
+	s.mutex.Lock()
+	s.closed = true
+	s.clear()
+	s.mutex.Unlock()
+
 	select {
 	case s.stop <- true:
 	default:
@@ -165,7 +170,7 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 	}
 	args := ffmpeg.MP4Args(s.transcodeSpec(0, false))
 
-	coder := exec.Command(s.c.FFmpeg, args...)
+	coder := ffmpeg.Command(context.Background(), s.c.FFmpeg, args...)
 	log.Printf("%s-%s: %s", s.m.id, s.quality, strings.Join(ffmpeg.RedactArgs(coder.Args), " "))
 
 	cmdStdOut, cmdStdErr, err := startCoder(coder)
@@ -288,6 +293,14 @@ func (s *Stream) waitForChunk(w http.ResponseWriter, chunk *Chunk) {
 
 func (s *Stream) restartAtChunk(w http.ResponseWriter, id int) {
 	s.mutex.Lock()
+
+	// A request raced Manager teardown; the retry reaches a new Manager.
+	if s.closed {
+		s.mutex.Unlock()
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
+
 	// Stop current transcoder
 	s.clear()
 
@@ -359,7 +372,7 @@ func (s *Stream) transcode(startId int) {
 	}
 
 	args := ffmpeg.SegmentArgs(s.transcodeSpec(startAt, true), startNumber, s.getTsPath(-1))
-	coder := exec.Command(s.c.FFmpeg, args...)
+	coder := ffmpeg.Command(context.Background(), s.c.FFmpeg, args...)
 
 	// Log command, quoting the args as needed
 	log.Printf("%s-%s: %s", s.m.id, s.quality, ffmpeg.QuoteForLog(ffmpeg.RedactArgs(coder.Args)))

@@ -94,12 +94,14 @@ func (r *Registry) create(p ManagerParams) (*Manager, error) {
 	}
 
 	r.mu.Lock()
-	defer r.mu.Unlock()
+	old := r.members[p.StreamID]
+	r.members[p.StreamID] = manager
+	r.mu.Unlock()
 
-	if old := r.members[p.StreamID]; old != nil {
+	// Outside the lock: Destroy waits on each stream's mutex.
+	if old != nil {
 		old.Destroy()
 	}
-	r.members[p.StreamID] = manager
 	return manager, nil
 }
 

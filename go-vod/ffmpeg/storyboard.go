@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"os/exec"
 	"strings"
 	"time"
 )
@@ -200,7 +199,7 @@ func BuildStoryboard(ctx context.Context, bin, input, headers string, plan Story
 	defer cancel()
 
 	// StoryboardArgs excludes bin (same convention as BuildArgs).
-	cmd := exec.CommandContext(ctx, bin, StoryboardArgs(input, headers, plan.Interval, plan.ThumbW, plan.ThumbH, plan.Cols, plan.GridRows, plan.Sprites, pattern)...)
+	cmd := Command(ctx, bin, StoryboardArgs(input, headers, plan.Interval, plan.ThumbW, plan.ThumbH, plan.Cols, plan.GridRows, plan.Sprites, pattern)...)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("storyboard %s: %w: %s", input, err, strings.TrimSpace(string(out)))
 	}

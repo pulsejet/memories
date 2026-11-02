@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -119,4 +120,35 @@ func TestServeFullVideoStartFailure(t *testing.T) {
 	w := httptest.NewRecorder()
 	m.ServeFullVideo(w, httptest.NewRequest("GET", "/", nil), QUALITY_MAX)
 	require.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func TestStreamStopKillsCoder(t *testing.T) {
+	m := newCopyManager(t, hevcProbeJSON, "", false, nil)
+	bin, runs := stubFFmpeg(t, "exec sleep 30")
+	m.c.FFmpeg = bin
+
+	old := chunkWait
+	chunkWait = 50 * time.Millisecond
+	defer func() { chunkWait = old }()
+
+	w := httptest.NewRecorder()
+	require.True(t, m.ServeChunk(w, QUALITY_MAX, 0))
+	require.Equal(t, http.StatusRequestTimeout, w.Code)
+
+	s := m.streams[QUALITY_MAX]
+	s.mutex.Lock()
+	pid := s.coder.Process.Pid
+	s.mutex.Unlock()
+
+	// Destroy kills the transcode synchronously, not via the Run loop.
+	m.Destroy()
+	require.Eventually(t, func() bool {
+		return syscall.Kill(pid, 0) == syscall.ESRCH
+	}, 5*time.Second, 20*time.Millisecond)
+
+	// A request racing teardown can't start an unsupervised ffmpeg.
+	w = httptest.NewRecorder()
+	require.True(t, m.ServeChunk(w, QUALITY_MAX, 5))
+	require.Equal(t, http.StatusConflict, w.Code)
+	require.Equal(t, 1, countRuns(t, runs))
 }
