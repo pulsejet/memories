@@ -12,7 +12,7 @@ php-init:
 	composer install
 
 php-format:
-	vendor/bin/php-cs-fixer fix
+	vendor/bin/php-cs-fixer fix --quiet
 
 php-format-check:
 	vendor/bin/php-cs-fixer fix --dry-run --diff
@@ -36,7 +36,7 @@ js-lint:
 PRETTIER_PATHS = src e2e scripts/*.ts webpack*.ts playwright.config.ts
 
 js-format:
-	npx prettier --write $(PRETTIER_PATHS)
+	npx prettier --write --log-level=warn $(PRETTIER_PATHS)
 
 js-format-check:
 	npx prettier --check $(PRETTIER_PATHS)

@@ -11,6 +11,7 @@ Keep it concise, short bullets, no wrapping.
 - Never read built JS in `js/`; exclude it from grep etc.
 - Never install new deps without explicit user consent.
 - Never patch non-first-party code without user consent.
+- Before committing, run `make js-lint` and `make js-format` for JS changes, `make psalm` and `make php-format` for PHP changes.
 
 ## Code Style
 Very important.
