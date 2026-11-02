@@ -81,7 +81,7 @@ final class AlbumsBackend extends Backend
 
         // Check permission
         if (null === $album) {
-            throw new \Exception("Album {$albumId} not found");
+            throw Exceptions::NotFound("Album {$albumId}");
         }
 
         // WHERE these are items with this album

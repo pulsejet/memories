@@ -133,7 +133,7 @@ test.describe('Public album share', () => {
     await withPublicAPI(async (request) => {
       const albums = new AlbumShareAPI(request);
       const res = await albums.days('invalid-token');
-      expect(res.ok()).toBe(false);
+      expect(res.status()).toBe(404);
     });
   });
 
