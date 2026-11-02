@@ -36,7 +36,7 @@ jobs:
 
       - name: Build
         run: |
-          make dev-setup
+          make js-init
           make js-lint
           make build-js-production
           ./scripts/verify-js-manifest.ts --prod
