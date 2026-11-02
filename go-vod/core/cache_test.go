@@ -151,3 +151,25 @@ func TestManagerProbeCache(t *testing.T) {
 	t.Cleanup(m2.Destroy)
 	require.Equal(t, m1.probe, m2.probe)
 }
+
+func TestCacheWritesAreAtomic(t *testing.T) {
+	cacheDir := t.TempDir()
+	path := KeyframeCachePath(cacheDir, 7)
+	require.NoError(t, StoreCachedKeyframes(cacheDir, 7, "e", []float64{0, 4}))
+	before, err := os.Stat(path)
+	require.NoError(t, err)
+
+	// A rewrite installs a new file by rename instead of truncating the old
+	// one, so a concurrent reader never sees partial JSON (which evicts).
+	require.NoError(t, StoreCachedKeyframes(cacheDir, 7, "e", []float64{0, 4, 8}))
+	after, err := os.Stat(path)
+	require.NoError(t, err)
+	require.False(t, os.SameFile(before, after))
+	require.Equal(t, os.FileMode(0644), after.Mode().Perm())
+
+	keys, ok := LoadCachedKeyframes(cacheDir, 7, "e")
+	require.True(t, ok)
+	require.Equal(t, []float64{0, 4, 8}, keys)
+	parts, _ := filepath.Glob(filepath.Join(FileCacheDir(cacheDir, 7), "*.part"))
+	require.Empty(t, parts)
+}

@@ -82,7 +82,7 @@ func StoreCachedKeyframes(cacheDir string, fileid int64, etag string, keys []flo
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(path, data, 0644)
+	return writeFileAtomic(path, data)
 }
 
 func ProbeCachePath(cacheDir string, fileid int64) string {
@@ -140,5 +140,28 @@ func StoreCachedProbe(cacheDir string, fileid int64, etag string, probe *ProbeVi
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(path, data, 0644)
+	return writeFileAtomic(path, data)
+}
+
+// writeFileAtomic replaces path in one rename, so readers never see a
+// partial file. A corrupt read evicts the whole file cache, storyboards
+// included. The temp name is unique, so concurrent writers can't collide.
+func writeFileAtomic(path string, data []byte) error {
+	f, err := os.CreateTemp(filepath.Dir(path), filepath.Base(path)+".*.part")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(f.Name())
+	if _, err := f.Write(data); err != nil {
+		f.Close()
+		return err
+	}
+	if err := f.Chmod(0644); err != nil {
+		f.Close()
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
+	}
+	return os.Rename(f.Name(), path)
 }

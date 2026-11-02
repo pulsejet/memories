@@ -226,10 +226,7 @@ func (s *storyboardService) build(dir string, in StoryboardInput) error {
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(filepath.Join(dir, StoryboardPlanFile+".part"), data, 0644); err != nil {
-		return err
-	}
-	return os.Rename(filepath.Join(dir, StoryboardPlanFile+".part"), filepath.Join(dir, StoryboardPlanFile))
+	return writeFileAtomic(filepath.Join(dir, StoryboardPlanFile), data)
 }
 
 func glob(pattern string) []string {
