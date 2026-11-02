@@ -20,8 +20,6 @@ import type { AbortOpts } from '@services/utils/abort';
 const GET_FILE_CHUNK_SIZE = 50;
 
 type GetFilesOpts = {
-  /** Attempt to use some cached value to get filename (default true) */
-  cache?: boolean;
   /** Get original route-independent filename for current user only (default false) */
   ignoreRoute?: boolean;
   /** Current route for album and public share handling (not needed with ignoreRoute) */
@@ -32,7 +30,7 @@ type GetFilesOpts = {
  * Get file infos for list of files given Ids
  * @param photos list of photos
  * @param opts options
- * @details This tries to use the cached filename in the photo object (imageInfo.filename)
+ * @details This uses the cached filename in the photo object (imageInfo.filename)
  * If none was found, then it will fetch the file info from the server.
  */
 export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<IFileInfo[]> {
@@ -51,31 +49,29 @@ export async function getFiles(photos: IPhoto[], opts?: GetFilesOpts): Promise<I
   const rest: IPhoto[] = [];
 
   // Partition photos with and without cache
-  if (opts?.cache !== false) {
-    for (const photo of photos) {
-      const filename = photo.imageInfo?.filename;
-      if (filename) {
-        // For public shares, use files/{token} path (WebDAV path for public shares)
-        // For logged in users, use files/{uid} path
-        let originalFilename: string;
-        if (utils.uid) {
-          originalFilename = `/files/${utils.uid}${filename}`;
-        } else {
-          // Public share: use token-based WebDAV path
-          const token = opts?.route?.params.token?.toString();
-          originalFilename = `/files/${token}${filename}`;
-        }
-
-        cache.push({
-          id: photo.fileid,
-          fileid: photo.fileid,
-          basename: photo.basename ?? filename.split('/').pop() ?? '',
-          originalFilename: originalFilename,
-          filename: filename,
-        });
+  for (const photo of photos) {
+    const filename = photo.imageInfo?.filename;
+    if (filename) {
+      // For public shares, use files/{token} path (WebDAV path for public shares)
+      // For logged in users, use files/{uid} path
+      let originalFilename: string;
+      if (utils.uid) {
+        originalFilename = `/files/${utils.uid}${filename}`;
       } else {
-        rest.push(photo);
+        // Public share: use token-based WebDAV path
+        const token = opts?.route?.params.token?.toString();
+        originalFilename = `/files/${token}${filename}`;
       }
+
+      cache.push({
+        id: photo.fileid,
+        fileid: photo.fileid,
+        basename: photo.basename ?? filename.split('/').pop() ?? '',
+        originalFilename: originalFilename,
+        filename: filename,
+      });
+    } else {
+      rest.push(photo);
     }
   }
 
