@@ -104,6 +104,10 @@ func TestRegistryEtagMismatch(t *testing.T) {
 	defer m2.Destroy()
 	require.NotSame(t, m1, m2)
 
+	// Destroying the replaced manager keeps the new manager's temp dir.
+	require.NotEqual(t, m1.tempDir, m2.tempDir)
+	require.DirExists(t, m2.tempDir)
+
 	// Same session and etag, moved URL: fresh manager.
 	m3, err := reg.GetOrCreate(ManagerParams{URL: "http://localhost/moved.mp4", StreamID: "s", FileID: 7, Etag: "etag-2"})
 	require.NoError(t, err)

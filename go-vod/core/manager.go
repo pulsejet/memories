@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"hash/fnv"
 	"io"
 	"log"
 	"math"
@@ -141,12 +140,9 @@ func NewManager(a NewManagerArgs) (*Manager, error) {
 	}
 	m.streams = make(map[string]*Stream)
 
-	h := fnv.New32a()
-	h.Write([]byte(m.url))
-	ph := fmt.Sprint(h.Sum32())
-	m.tempDir = fmt.Sprintf("%s/%s-%s", m.c.TempDir, m.id, ph)
-
-	// Delete temp dir if exists
+	// Unique per Manager: a replaced Manager's Destroy must not delete
+	// the temp dir of the Manager replacing it.
+	m.tempDir = filepath.Join(m.c.TempDir, fmt.Sprintf("%s-%d", m.id, m.generation))
 	os.RemoveAll(m.tempDir)
 	os.MkdirAll(m.tempDir, 0755)
 
@@ -159,9 +155,7 @@ func NewManager(a NewManagerArgs) (*Manager, error) {
 	}
 
 	if err := m.ffprobe(); err != nil {
-		if m.usesTemp {
-			os.RemoveAll(m.tempDir)
-		}
+		os.RemoveAll(m.tempDir)
 		return nil, err
 	}
 
