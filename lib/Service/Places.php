@@ -50,7 +50,7 @@ final class Places
         if (IDBConnection::PLATFORM_MYSQL === $provider
         || IDBConnection::PLATFORM_MARIADB === $provider) {
             try {
-                $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)', 4326)")->fetchAssociative();
+                $res = $this->connection->executeQuery("SELECT ST_GeomFromText('POINT(1 1)', 0)")->fetchAssociative();
                 if (0 === \count($res)) {
                     throw new \Exception('Invalid result');
                 }
@@ -101,7 +101,7 @@ final class Places
         // Construct WHERE clause depending on GIS type
         $where = null;
         if (GIS_TYPE_MYSQL === $gisType) {
-            $where = "ST_Contains(geometry, ST_GeomFromText('POINT({$lat} {$lon})', 4326))";
+            $where = "ST_Contains(geometry, ST_GeomFromText('POINT({$lat} {$lon})', 0))";
         } elseif (GIS_TYPE_POSTGRES === $gisType) {
             // Postgres does not support using an index with POINT <@ POLYGON
             // https://www.postgresql.org/docs/current/gist-builtin-opclasses.html
@@ -290,7 +290,7 @@ final class Places
             if (GIS_TYPE_MYSQL === $gis) {
                 $pdo = SQL::getMysqlPdo($this->connection, $this->config);
                 SQL::mysqlCopyFromFile($pdo, $prefix.'memories_planet', $planetFile, 'osm_id, admin_level, name, other_names');
-                SQL::mysqlCopyFromFile($pdo, 'memories_planet_geometry', $geomFile, 'id, poly_id, type_id, osm_id, @geom', 'geometry = ST_GeomFromText(@geom, 4326)');
+                SQL::mysqlCopyFromFile($pdo, 'memories_planet_geometry', $geomFile, 'id, poly_id, type_id, osm_id, @geom', 'geometry = ST_GeomFromText(@geom, 0)');
             } elseif (GIS_TYPE_POSTGRES === $gis) {
                 $pdo = SQL::getPgsqlPdo($this->connection, $this->config);
                 SQL::pgsqlCopyFromFile($pdo, $prefix.'memories_planet', $planetFile, 'osm_id, admin_level, name, other_names');
@@ -349,9 +349,9 @@ final class Places
             // Detect database type to select the right syntax and geometry types.
             $platform = $this->connection->getDatabaseProvider(true);
 
-            // MySQL requires an SRID definition
+            // MySQL requires an SRID definition to use the spatial index
             // https://github.com/pulsejet/memories/issues/1067
-            $srid = IDBConnection::PLATFORM_MYSQL === $platform ? 'SRID 4326' : '';
+            $srid = IDBConnection::PLATFORM_MYSQL === $platform ? 'SRID 0' : '';
 
             // Create table
             $sql = "CREATE TABLE memories_planet_geometry (

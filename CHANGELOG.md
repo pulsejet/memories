@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- **Update**: MySQL setups must run `occ memories:places-setup --force` again after this update.
+  - **Feature**: 2x faster reverse geocoding on MySQL.
 - **Feature**: Bundled VIPS image decoder with Ultra-HDR, Samsung HDR and ICC profile support ([#1110](https://github.com/pulsejet/memories/issues/1110), [#1645](https://github.com/pulsejet/memories/issues/1645)).
 - **Feature**: Support for AVIF format via VIPS ([#1714](https://github.com/pulsejet/memories/issues/1714)).
 - **Feature**: Support for camera RAW formats via VIPS.
