@@ -52,13 +52,15 @@ test.describe('@ui Timeline scroller', () => {
 
       // 2021 was jumped over, so scroll up until it renders.
       const sel041 = `.p-outer--${id041}`;
-      for (let i = 0; i < 60; i++) {
-        if ((await page.locator(sel041).count()) > 0) break;
-        await page.locator('.recycler').evaluate((el) => {
-          el.scrollTop -= 500;
-        });
-        await page.waitForTimeout(100);
-      }
+      await expect(async () => {
+        const count = await page.locator(sel041).count();
+        if (count === 0) {
+          await page.locator('.recycler').evaluate((el) => {
+            el.scrollTop -= 500;
+          });
+        }
+        expect(count).toBeGreaterThan(0);
+      }).toPass({ intervals: [100], timeout: 15_000 });
       await page.locator(sel041).scrollIntoViewIfNeeded();
       await expect(page.locator(sel041)).toBeInViewport();
       await expect(page.locator('.scroller .cursor.hv .text')).toContainText('Aug 2021', {
