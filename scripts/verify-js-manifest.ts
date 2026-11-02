@@ -70,7 +70,11 @@ if (envelope.payloadType !== 'application/vnd.tuf+json') {
   console.error(`[ERROR] unexpected DSSE payloadType: ${envelope.payloadType}`);
   process.exit(1);
 }
-if (!Array.isArray(envelope.signatures) || envelope.signatures.length !== 1 || envelope.signatures[0].sig.length === 0) {
+if (
+  !Array.isArray(envelope.signatures) ||
+  envelope.signatures.length !== 1 ||
+  envelope.signatures[0].sig.length === 0
+) {
   console.error('[ERROR] DSSE envelope must carry exactly one signature');
   process.exit(1);
 }

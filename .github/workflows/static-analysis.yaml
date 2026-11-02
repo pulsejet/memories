@@ -89,7 +89,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
-          node-version: 24.x
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: package-lock.json
 
@@ -97,7 +97,7 @@ jobs:
         run: npm ci
 
       - name: Run vue-tsc
-        run: npx vue-tsc --noEmit --skipLibCheck
+        run: make js-lint
 
       - name: Run Prettier
-        run: npx prettier src --check
+        run: make format-check

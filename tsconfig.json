@@ -5,11 +5,7 @@
     "module": "ES2022",
     "moduleResolution": "Bundler",
     "sourceMap": true,
-    "noImplicitThis": true,
-    "noImplicitAny": true,
     "esModuleInterop": true,
-    "strictNullChecks": true,
-    "alwaysStrict": true,
     "incremental": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
@@ -27,10 +23,5 @@
   },
   "vueCompilerOptions": {
     "target": 3
-  },
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS"
-    }
   }
 }

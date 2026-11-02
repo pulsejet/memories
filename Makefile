@@ -30,19 +30,27 @@ js-init:
 js-lint:
 	npx vue-tsc --noEmit --skipLibCheck
 
+PRETTIER_PATHS = src e2e scripts/*.ts webpack*.ts playwright.config.ts
+
+format:
+	npx prettier --write $(PRETTIER_PATHS)
+
+format-check:
+	npx prettier --check $(PRETTIER_PATHS)
+
 build-js:
 	npm run dev
 
 build-js-production:
-	rm -f js/* && npm run build
+	npm run build
 
 watch-js:
 	npm run watch
 
-.PHONY: js-lint build-js build-js-production watch-js
+.PHONY: js-lint format format-check build-js build-js-production watch-js
 
 # 4. Lint
-lint: php-lint psalm js-lint
+lint: php-lint psalm js-lint format-check
 
 .PHONY: lint
 

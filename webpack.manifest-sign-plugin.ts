@@ -132,11 +132,7 @@ export class ManifestSignPlugin {
         // Sign the DSSE pre-auth encoding of the canonical targets.
         const keyId = manifestKeyID();
         const canonical = Buffer.from(canonicalize(targets.toJSON()), 'utf8');
-        const rawSig = nodeCrypto.sign(
-          null,
-          dsse.preAuthEncoding(TUF_DSSE_PAYLOAD_TYPE, canonical),
-          privateKey(),
-        );
+        const rawSig = nodeCrypto.sign(null, dsse.preAuthEncoding(TUF_DSSE_PAYLOAD_TYPE, canonical), privateKey());
 
         // Emit the signature as a DSSE envelope (sigstore type);
         // the manifest itself stays unsigned.

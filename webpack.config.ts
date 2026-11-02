@@ -20,8 +20,9 @@ import { ManifestPlugin, ManifestSignPlugin } from './webpack.manifest-sign-plug
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const MiB = 1024 * 1024;
-const appName = process.env.npm_package_name!;
-const appVersion = process.env.npm_package_version!;
+const { name: appName, version: appVersion } = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf8'),
+);
 const buildMode = process.env.NODE_ENV;
 const isDev = buildMode === 'development';
 console.info('Building', appName, appVersion, '\n');
