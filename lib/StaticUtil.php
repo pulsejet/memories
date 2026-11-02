@@ -267,8 +267,9 @@ class StaticUtil
         }
 
         if (null !== $stdin) {
-            fwrite($pipes[0], $stdin);
-            fclose($pipes[0]);
+            $in = $pipes[0];
+            fwrite($in, $stdin);
+            fclose($in);
         }
 
         try {
@@ -280,7 +281,8 @@ class StaticUtil
             return $output;
         } finally {
             foreach ($capture as $fd) {
-                fclose($pipes[$fd]);
+                $pipe = $pipes[$fd];
+                fclose($pipe);
             }
             proc_terminate($proc);
             proc_close($proc);

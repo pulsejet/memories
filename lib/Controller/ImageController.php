@@ -674,7 +674,7 @@ final class ImageController extends ApiController
         }
 
         // Get the tag ids for this file
-        $tagIds = $this->tagObjectMapper->getTagIdsForObjects([(string) $fileId], 'files')[(string) $fileId];
+        $tagIds = current($this->tagObjectMapper->getTagIdsForObjects([(string) $fileId], 'files')) ?: [];
 
         // Get all matching tag objects
         $tags = $this->tagManager->getTagsByIds($tagIds);

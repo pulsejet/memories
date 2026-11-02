@@ -50,11 +50,11 @@ final class Exif
     {
         try {
             // Close I/O pipes
-            if ($this->staticPipes) {
-                fclose($this->staticPipes[0]);
-                fclose($this->staticPipes[1]);
-                fclose($this->staticPipes[2]);
+            if ($pipes = $this->staticPipes) {
                 $this->staticPipes = null;
+                foreach ($pipes as $pipe) {
+                    fclose($pipe);
+                }
             }
 
             // Close process
