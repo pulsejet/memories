@@ -101,11 +101,9 @@ func (s *Stream) clear() {
 	s.chunks = make(map[int]*Chunk)
 	s.goal = 0
 
+	// monitorExit is the only waiter; it reaps the killed process.
 	if s.coder != nil {
-		if s.coder.Process != nil {
-			s.coder.Process.Kill()
-		}
-		s.coder.Wait()
+		s.coder.Process.Kill()
 		s.coder = nil
 	}
 }
@@ -124,9 +122,9 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 
 	chunk, ok := s.chunks[id]
 	if !ok {
-		// Restart unless a nearby chunk shows the transcode is close
+		// Restart unless a live transcode is close: a nearby chunk exists
 		restart := true
-		for i := id - 1; i >= id-s.c.LookBehind && i >= 0; i-- {
+		for i := id - 1; s.coder != nil && i >= id-s.c.LookBehind && i >= 0; i-- {
 			if _, ok := s.chunks[i]; ok {
 				restart = false
 				break
@@ -167,19 +165,11 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 	coder := exec.Command(s.c.FFmpeg, args...)
 	log.Printf("%s-%s: %s", s.m.id, s.quality, strings.Join(ffmpeg.RedactArgs(coder.Args), " "))
 
-	cmdStdOut, err := coder.StdoutPipe()
+	cmdStdOut, cmdStdErr, err := startCoder(coder)
 	if err != nil {
-		log.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
-	}
-
-	cmdStdErr, err := coder.StderrPipe()
-	if err != nil {
-		log.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
-	}
-
-	err = coder.Start()
-	if err != nil {
-		log.Printf("FATAL: ffmpeg command failed with %s\n", err)
+		log.Printf("%s-%s: ffmpeg failed to start: %v", s.m.id, s.quality, err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
 	}
 	go s.monitorStderr(cmdStdErr)
 
@@ -187,13 +177,6 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 	defer cmdStdOut.Close()
 	stdoutReader := bufio.NewReader(cmdStdOut)
 
-	// Write mov headers
-	flusher, ok := w.(http.Flusher)
-	if !ok {
-		http.Error(w, "Server does not support Flusher!",
-			http.StatusInternalServerError)
-		return nil
-	}
 	w.Header().Set("Content-Type", "video/mp4")
 	w.WriteHeader(http.StatusOK)
 
@@ -215,7 +198,7 @@ func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
 			log.Println(err)
 			break
 		}
-		flusher.Flush()
+		w.(http.Flusher).Flush()
 	}
 
 	// Terminate ffmpeg process
@@ -279,7 +262,7 @@ func (s *Stream) waitForChunk(w http.ResponseWriter, chunk *Chunk) {
 	s.mutex.Lock()
 	current, ok := s.chunks[chunk.id]
 	finished := ok && current.done
-	restarted := coder != s.coder
+	restarted := coder != s.coder && s.coder != nil
 	s.mutex.Unlock()
 
 	if finished {
@@ -287,7 +270,7 @@ func (s *Stream) waitForChunk(w http.ResponseWriter, chunk *Chunk) {
 		return
 	}
 
-	// Check if coder was changed
+	// Check if coder was replaced; a failed coder is cleared, not replaced
 	if restarted {
 		w.WriteHeader(http.StatusConflict)
 		return
@@ -370,31 +353,45 @@ func (s *Stream) transcode(startId int) {
 	}
 
 	args := ffmpeg.SegmentArgs(s.transcodeSpec(startAt, true), startNumber, s.getTsPath(-1))
-
-	// Start the process
-	s.coder = exec.Command(s.c.FFmpeg, args...)
+	coder := exec.Command(s.c.FFmpeg, args...)
 
 	// Log command, quoting the args as needed
-	log.Printf("%s-%s: %s", s.m.id, s.quality, ffmpeg.QuoteForLog(ffmpeg.RedactArgs(s.coder.Args)))
+	log.Printf("%s-%s: %s", s.m.id, s.quality, ffmpeg.QuoteForLog(ffmpeg.RedactArgs(coder.Args)))
 
-	cmdStdOut, err := s.coder.StdoutPipe()
+	cmdStdOut, cmdStdErr, err := startCoder(coder)
 	if err != nil {
-		log.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
+		log.Printf("%s-%s: ffmpeg failed to start: %v", s.m.id, s.quality, err)
+		s.failChunks()
+		return
 	}
+	s.coder = coder
 
-	cmdStdErr, err := s.coder.StderrPipe()
-	if err != nil {
-		log.Printf("FATAL: ffmpeg command stdout failed with %s\n", err)
-	}
-
-	err = s.coder.Start()
-	if err != nil {
-		log.Printf("FATAL: ffmpeg command failed with %s\n", err)
-	}
-
-	go s.monitorTranscodeOutput(cmdStdOut)
+	go s.monitorTranscodeOutput(coder, cmdStdOut)
 	go s.monitorStderr(cmdStdErr)
-	go s.monitorExit()
+	go s.monitorExit(coder)
+}
+
+// startCoder starts the command with stdout and stderr piped.
+func startCoder(cmd *exec.Cmd) (stdout, stderr io.ReadCloser, err error) {
+	if stdout, err = cmd.StdoutPipe(); err != nil {
+		return nil, nil, err
+	}
+	if stderr, err = cmd.StderrPipe(); err != nil {
+		return nil, nil, err
+	}
+	return stdout, stderr, cmd.Start()
+}
+
+// failChunks wakes and drops unfinished chunks, so waiters fail fast and
+// retries restart the transcode instead of waiting on a dead one.
+// Caller must hold s.mutex.
+func (s *Stream) failChunks() {
+	for id, chunk := range s.chunks {
+		if !chunk.done {
+			chunk.signal(false)
+			delete(s.chunks, id)
+		}
+	}
 }
 
 func (s *Stream) checkGoal(id int) {
@@ -418,11 +415,7 @@ func (s *Stream) getTsPath(id int) string {
 }
 
 // Separate goroutine
-func (s *Stream) monitorTranscodeOutput(cmdStdOut io.ReadCloser) {
-	s.mutex.Lock()
-	coder := s.coder
-	s.mutex.Unlock()
-
+func (s *Stream) monitorTranscodeOutput(coder *exec.Cmd, cmdStdOut io.ReadCloser) {
 	defer cmdStdOut.Close()
 	stdoutReader := bufio.NewReader(cmdStdOut)
 	seen := make(map[int]bool)
@@ -494,32 +487,20 @@ func (s *Stream) monitorStderr(cmdStdErr io.ReadCloser) {
 	}
 }
 
-func (s *Stream) monitorExit() {
-	// Join the process
-	s.mutex.Lock()
-	coder := s.coder
-	s.mutex.Unlock()
-	if coder == nil {
+func (s *Stream) monitorExit(coder *exec.Cmd) {
+	err := coder.Wait()
+	if err == nil {
 		return
 	}
 
-	err := coder.Wait()
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
-	// Try to get exit status
-	if exitError, ok := err.(*exec.ExitError); ok {
-		exitcode := exitError.ExitCode()
-		log.Printf("%s-%s: ffmpeg exited with status: %d", s.m.id, s.quality, exitcode)
-
-		s.mutex.Lock()
-		defer s.mutex.Unlock()
-
-		// If error code is >0, there was an error in transcoding
-		if exitcode > 0 && s.coder == coder {
-			// Wake all outstanding chunks; they re-evaluate
-			// (409 on coder change, else 408) instead of waiting out
-			for _, chunk := range s.chunks {
-				chunk.signal(false)
-			}
-		}
+	// Our own kills clear or replace s.coder first, so this is a failure.
+	// Clear it so the next request restarts the transcode.
+	if s.coder == coder {
+		log.Printf("%s-%s: ffmpeg exited: %v", s.m.id, s.quality, err)
+		s.coder = nil
+		s.failChunks()
 	}
 }
