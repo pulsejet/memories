@@ -123,31 +123,35 @@ async function getFilesInternal1(photos: IPhoto[], opts?: AbortOpts & { token?: 
  * This is needed because WebDAV SEARCH requires user authentication
  */
 async function getFilesViaAPI(photos: IPhoto[], opts?: AbortOpts & { token?: string }): Promise<IFileInfo[]> {
-  const fileInfos: IFileInfo[] = [];
   const signal = opts?.signal;
   const token = opts?.token;
 
-  for (const photo of photos) {
+  const calls = photos.map((photo) => async (): Promise<IFileInfo | null> => {
     try {
       signal?.throwIfAborted();
       const url = API.IMAGE_INFO(photo.fileid);
       const res = await axios.get<IImageInfo>(url, { signal });
       const filename = res.data.filename;
+      if (!filename) return null;
 
-      if (filename) {
-        // Use token-based WebDAV path for public shares
-        fileInfos.push({
-          id: photo.fileid,
-          fileid: photo.fileid,
-          basename: photo.basename ?? filename.split('/').pop() ?? '',
-          originalFilename: `/files/${token}${filename}`,
-          filename: filename,
-        });
-      }
+      // Use token-based WebDAV path for public shares
+      return {
+        id: photo.fileid,
+        fileid: photo.fileid,
+        basename: photo.basename ?? filename.split('/').pop() ?? '',
+        originalFilename: `/files/${token}${filename}`,
+        filename: filename,
+      };
     } catch (error) {
       if (isAbortError(error)) throw error;
       console.error('Failed to get file info via API', photo.fileid, error);
+      return null;
     }
+  });
+
+  const fileInfos: IFileInfo[] = [];
+  for await (const res of runInParallel(calls, 8, opts)) {
+    fileInfos.push(...res.filter(utils.truthy));
   }
 
   return fileInfos;
