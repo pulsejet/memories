@@ -4,7 +4,7 @@ import { cpus } from 'os';
 
 const config: PlaywrightTestConfig = {
   testDir: './e2e',
-  timeout: 600 * 1000,
+  timeout: 120 * 1000,
   expect: {
     timeout: 10000,
     toHaveScreenshot: {
