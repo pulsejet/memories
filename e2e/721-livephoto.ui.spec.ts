@@ -123,7 +123,6 @@ test.describe('@api Live photo', () => {
     const photo = photos.find((p) => p.liveid);
     expect(photo).toBeDefined();
 
-    const dav = new DavClient(request);
     const liveFileid = photo!.fileid;
     const liveid = photo!.liveid!;
 
@@ -140,7 +139,5 @@ test.describe('@api Live photo', () => {
     expect(blobRes.ok()).toBeTruthy();
     expect(blobRes.headers()['content-type']).toContain('video/');
     expect((await blobRes.body()).length).toBeGreaterThan(0);
-
-    expect((await dav.imageInfo(liveFileid)).fileid).toBe(liveFileid);
   });
 });

@@ -120,8 +120,12 @@ test.describe('Archive', () => {
       });
 
       await test.step('Verify files are in archive', async () => {
-        expect((await dav.imageInfo(fileid1, { basic: '1' })).filename?.includes('.archive/')).toBeTruthy();
-        expect((await dav.imageInfo(fileid2, { basic: '1' })).filename?.includes('.archive/')).toBeTruthy();
+        expect((await dav.imageInfo(fileid1, { basic: '1' })).filename).toBe(
+          psub('/for-archive-%wid/.archive/ui_test_01.jpg'),
+        );
+        expect((await dav.imageInfo(fileid2, { basic: '1' })).filename).toBe(
+          psub('/for-archive-%wid/.archive/ui_test_02.jpg'),
+        );
       });
     });
 
@@ -142,8 +146,8 @@ test.describe('Archive', () => {
       });
 
       await test.step('Verify files are back in main', async () => {
-        expect((await dav.imageInfo(fileid1, { basic: '1' })).filename?.includes('.archive/')).toBeFalsy();
-        expect((await dav.imageInfo(fileid2, { basic: '1' })).filename?.includes('.archive/')).toBeFalsy();
+        expect((await dav.imageInfo(fileid1, { basic: '1' })).filename).toBe(psub('/for-archive-%wid/ui_test_01.jpg'));
+        expect((await dav.imageInfo(fileid2, { basic: '1' })).filename).toBe(psub('/for-archive-%wid/ui_test_02.jpg'));
       });
     });
   });

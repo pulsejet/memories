@@ -54,8 +54,10 @@ test.describe('@api Image Info', () => {
     expect(res.ok()).toBeTruthy();
 
     const data: IImageInfo & { current?: Record<string, unknown> } = await res.json();
+    const gold = goldImageInfo('primary/for-default/Nested 1/test_01.jpg');
     expect(data.fileid).toBe(fileid);
-    expect(data.current).toBeDefined();
+    expect(data.current?.ImageWidth).toBe(gold.w);
+    expect(data.current?.DateTimeOriginal).toBe(gold.exif?.DateTimeOriginal);
   });
 
   test('Info with clusters', async ({ request }) => {
@@ -65,12 +67,25 @@ test.describe('@api Image Info', () => {
     // Only albums supports file filtering (tags/places throw); mirrors sidebar usage.
     const url = new URL(`${appUrl}/api/image/info/${fileid}`);
     url.searchParams.set('clusters', 'albums');
-    const res = await request.get(url.toString());
-    expect(res.ok()).toBeTruthy();
 
-    const data: IImageInfo & { clusters?: Record<string, unknown[]> } = await res.json();
-    expect(data.clusters).toBeDefined();
-    expect(Array.isArray(data.clusters!.albums)).toBeTruthy();
+    const albumName = psub('E2E Info Album %wid');
+    const albumPath = `photos/${username}/albums/${albumName}`;
+    const albumNames = async () => {
+      const res = await request.get(url.toString());
+      expect(res.ok()).toBeTruthy();
+      const data: IImageInfo = await res.json();
+      return data.clusters!.albums!.map((a) => a.name);
+    };
+
+    await dav.del(albumPath, true);
+    await dav.mkcol(albumPath);
+    try {
+      expect(await albumNames()).not.toContain(albumName);
+      await dav.copy(`files/${username}/for-default/Nested 1/test_01.jpg`, `${albumPath}/test_01.jpg`);
+      expect(await albumNames()).toContain(albumName);
+    } finally {
+      await dav.del(albumPath, true);
+    }
   });
 });
 

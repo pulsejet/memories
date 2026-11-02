@@ -23,11 +23,6 @@ test.describe('@api Image setExif', () => {
     const randomDesc = randomBytes(16).toString('hex');
     const randomTitle = randomBytes(16).toString('hex');
 
-    // Get info and verify description doesn't match our random value
-    const before = await dav.imageInfo(fileid);
-    expect(before.exif?.Description).not.toBe(randomDesc);
-    expect(before.exif?.Title).not.toBe(randomTitle);
-
     // Set description and title using setExif
     const setRes = await request.patch(`${appUrl}/api/image/set-exif/${fileid}`, {
       data: {

@@ -41,9 +41,9 @@ test.describe('@api Download and stream', () => {
     expect(res.ok()).toBeTruthy();
     expect(res.headers()['content-type']).toContain('zip');
     const body = await res.body();
-    expect(body.length).toBeGreaterThan(0);
-    expect(body[0]).toBe(0x50);
-    expect(body[1]).toBe(0x4b);
+    expect(body.subarray(0, 2).toString()).toBe('PK');
+    expect(body.includes('test_01.jpg')).toBe(true);
+    expect(body.includes('test_02.jpg')).toBe(true);
   });
 
   test('Download invalid handle is rejected', async ({ request }) => {

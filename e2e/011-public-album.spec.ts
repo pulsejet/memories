@@ -144,7 +144,10 @@ test.describe('Public album share', () => {
       expect(res.ok()).toBeTruthy();
 
       const body = await res.body();
-      expect(body.length).toBeGreaterThan(0);
+      expect(body.subarray(0, 2).toString()).toBe('PK');
+      for (const file of albumFiles) {
+        expect(body.includes(file)).toBe(true);
+      }
     });
   });
 
