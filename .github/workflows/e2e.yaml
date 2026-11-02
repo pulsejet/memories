@@ -30,10 +30,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the app
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Use Node.js
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -122,14 +122,14 @@ jobs:
 
     steps:
       - name: Checkout server
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
           repository: nextcloud/server
           ref: ${{ matrix.server-versions }}
 
       - name: Checkout the app
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: apps/${{ env.APP_NAME }}
 
@@ -140,21 +140,21 @@ jobs:
             name: vue.zip
 
         - name: Checkout Nextcloud Photos app
-          uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+          uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
           with:
             path: apps/photos
             repository: nextcloud/photos
             ref: ${{ matrix.server-versions }}
 
         - name: Checkout Nextcloud Viewer app
-          uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+          uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
           with:
             path: apps/viewer
             repository: nextcloud/viewer
             ref: ${{ matrix.server-versions }}
 
         - name: Use Node.js
-          uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+          uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
           with:
             node-version-file: apps/${{ env.APP_NAME }}/.nvmrc
             cache: npm
@@ -178,7 +178,7 @@ jobs:
         run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Composer downloads
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: composer-e2e-${{ hashFiles('apps/photos/composer.lock', 'apps/viewer/composer.lock') }}
