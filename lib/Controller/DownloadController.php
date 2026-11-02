@@ -322,6 +322,9 @@ final class DownloadController extends ApiController
             // Create a zip file
             $streamer->sendHeaders("{$name}.zip");
 
+            // ZipStreamer advertises ranges, but this stream is not seekable
+            $out->setHeader('Accept-Ranges: none');
+
             // Quit if HEAD request
             if ('HEAD' === $this->request->getMethod()) {
                 return;
