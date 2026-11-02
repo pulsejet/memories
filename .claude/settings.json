@@ -1,0 +1,6 @@
+{
+  "claudeMdExcludes": [
+    "**/!(.claude)/CLAUDE.md",
+    "**/!(memories)/AGENTS.md"
+  ]
+}

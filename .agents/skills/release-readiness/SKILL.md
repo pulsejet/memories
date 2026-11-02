@@ -1,6 +1,7 @@
 ---
 name: release-readiness
 description: Check prod release readiness from commits and open issues
+disable-model-invocation: true
 metadata:
   opencode/autoinvoke: false
 ---
