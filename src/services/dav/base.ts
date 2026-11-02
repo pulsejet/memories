@@ -636,25 +636,32 @@ export async function* movePhotosByDate(
   const existingDirCache = new Set<string>();
 
   // Create all the folders first
-  for (const op of operations) {
-    let folderPath = op[0];
-    const createPaths = new Array<string>();
+  try {
+    for (const op of operations) {
+      let folderPath = op[0];
+      const createPaths = new Array<string>();
 
-    while (folderPath !== destination && folderPath.includes('/')) {
-      if (existingDirCache.has(folderPath) || (await client.exists(folderPath))) {
-        // No need to check further up. Go to creation.
-        existingDirCache.add(folderPath);
-        break;
+      while (folderPath !== destination && folderPath.includes('/')) {
+        if (existingDirCache.has(folderPath) || (await client.exists(folderPath))) {
+          // No need to check further up. Go to creation.
+          existingDirCache.add(folderPath);
+          break;
+        }
+
+        createPaths.push(folderPath);
+        folderPath = folderPath.slice(0, folderPath.lastIndexOf('/'));
       }
 
-      createPaths.push(folderPath);
-      folderPath = folderPath.slice(0, folderPath.lastIndexOf('/'));
+      // Create from top to bottom
+      for (const path of createPaths.reverse()) {
+        await client.createDirectory(path);
+        existingDirCache.add(path);
+      }
     }
-
-    // Create from top to bottom
-    for (const path of createPaths.reverse()) {
-      await client.createDirectory(path);
-    }
+  } catch (e) {
+    console.error('Failed to create folders for files to move', e);
+    showError(t('memories', 'Failed to move files.'));
+    return;
   }
 
   /** Move server file */
