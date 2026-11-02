@@ -123,7 +123,7 @@ test.describe('@ui Photo selection', () => {
 
       // Everything from the 2nd image down to the last: 99 photos.
       // Detached rows are not in the DOM, so only the top bar count is asserted.
-      await expect(page.locator('.memories-top-bar .text')).toContainText('99 selected');
+      await expect(page.locator('.memories-top-bar .text')).toHaveText('99 selected');
       await page.waitForTimeout(200); // animation
       await snap(page, 'selection-all', step);
     });
@@ -161,7 +161,7 @@ test.describe('@ui Photo selection', () => {
 
     const count = selected.filter(Boolean).length;
     if (count > 0) {
-      await expect(page.locator('.memories-top-bar .text')).toContainText(`${count} selected`);
+      await expect(page.locator('.memories-top-bar .text')).toHaveText(`${count} selected`);
     } else {
       await expect(page.locator('.memories-top-bar')).toHaveCount(0);
     }
@@ -243,7 +243,7 @@ test.describe('@ui Photo selection touch', () => {
 
     await test.step('Touch and hold selects one image', async (step) => {
       await touch('touchStart', x, rect.y + rect.height / 2);
-      await expect(countText).toContainText('1 selected', { timeout: 15000 });
+      await expect(countText).toHaveText('1 selected', { timeout: 15000 });
       await page.waitForTimeout(200); // animation
       await snap(page, 'selection-touch-hold', step);
     });
@@ -255,14 +255,14 @@ test.describe('@ui Photo selection touch', () => {
 
       for (let i = 0; i < 120; i++) {
         const text = await countText.textContent();
-        if (text?.includes('94 selected')) break;
+        if (text === '94 selected') break;
         if (i === 5) {
           await snap(page, 'selection-touch-mid', step);
         }
         await touch('touchMove', x, height - 30);
         await page.waitForTimeout(400);
       }
-      await expect(countText).toContainText('94 selected');
+      await expect(countText).toHaveText('94 selected');
       await page.waitForTimeout(200); // animation
       await snap(page, 'selection-touch-drag', step);
     });
@@ -285,19 +285,19 @@ test.describe('@ui Photo selection touch', () => {
       }
 
       // for-geo-007/008/009 above for-geo-010 are deselected again.
-      await expect(countText).toContainText('91 selected');
+      await expect(countText).toHaveText('91 selected');
       await page.waitForTimeout(200); // animation
       await snap(page, 'selection-touch-shrink', step);
 
       await touch('touchEnd', 0, 0);
-      await expect(countText).toContainText('91 selected');
+      await expect(countText).toHaveText('91 selected');
     });
 
     await test.step('Tap toggles single photos', async (step) => {
       // for-geo-006 is outside the range: tapping selects it.
       await tapPhoto(page, id006);
       await expect(page.locator(`.p-outer--${id006}`)).toHaveClass(/selected/);
-      await expect(countText).toContainText('92 selected');
+      await expect(countText).toHaveText('92 selected');
       await page.waitForTimeout(200); // animation
       await snap(page, 'selection-touch-tap-on', step);
 
@@ -305,7 +305,7 @@ test.describe('@ui Photo selection touch', () => {
       await tapPhoto(page, id010);
       await expect(page.locator(`.p-outer--${id010}`)).not.toHaveClass(/selected/);
       await expect(page.locator(`.p-outer--${id006}`)).toHaveClass(/selected/);
-      await expect(countText).toContainText('91 selected');
+      await expect(countText).toHaveText('91 selected');
       await page.waitForTimeout(200); // animation
       await snap(page, 'selection-touch-tap-off', step);
     });
@@ -321,7 +321,7 @@ test.describe('@ui Photo selection touch', () => {
       const sel097 = `.p-outer--${id097}`;
       await expect(page.locator(sel097)).toBeVisible();
       await expect(page.locator(sel097)).toHaveClass(/selected/);
-      await expect(countText).toContainText('91 selected');
+      await expect(countText).toHaveText('91 selected');
       await page.waitForTimeout(200); // animation
       await snap(page, 'selection-touch-recycled', step);
     });
