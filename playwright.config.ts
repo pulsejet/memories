@@ -7,11 +7,7 @@ const config: PlaywrightTestConfig = {
   timeout: 120 * 1000,
   expect: {
     timeout: 10000,
-    toHaveScreenshot: {
-      maxDiffPixelRatio: 1.0,
-    },
   },
-  snapshotPathTemplate: '{testDir}/screenshots/{testFilePath}/{arg}{ext}',
   fullyParallel: true,
   workers: Math.max(2, Math.min(16, Math.floor(cpus().length / 2))),
   forbidOnly: !!process.env.CI,
