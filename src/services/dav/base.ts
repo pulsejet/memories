@@ -18,6 +18,7 @@ import type { ResponseDataDetailed, SearchResult } from 'webdav';
 import type { AbortOpts } from '@services/utils/abort';
 
 const GET_FILE_CHUNK_SIZE = 50;
+const GET_FILE_CONCURRENCY = 5;
 
 type GetFilesOpts = {
   /** Get original route-independent filename for current user only (default false) */
@@ -97,7 +98,24 @@ async function getFilesInternal1(photos: IPhoto[], opts?: AbortOpts & { token?: 
   }
 
   // Get file infos for each chunk
-  return (await Promise.all(chunks.map((c) => getFilesInternal2(c, opts)))).flat();
+  const errors: unknown[] = [];
+  const calls = chunks.map((c) => async () => {
+    try {
+      return await getFilesInternal2(c, opts);
+    } catch (e) {
+      if (isAbortError(e)) throw e;
+      errors.push(e);
+      return [];
+    }
+  });
+
+  const fileInfos: IFileInfo[] = [];
+  for await (const res of runInParallel(calls, GET_FILE_CONCURRENCY, opts)) {
+    fileInfos.push(...res.flat());
+  }
+
+  if (errors.length) throw errors[0];
+  return fileInfos;
 }
 
 /**
