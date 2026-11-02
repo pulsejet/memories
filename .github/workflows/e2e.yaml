@@ -199,7 +199,7 @@ jobs:
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: ${{ always() && github.event_name != 'pull_request' }}
+        if: ${{ always() && (github.event_name != 'pull_request' || failure()) }}
         with:
           name: report-${{ matrix.databases }}-${{ matrix.php-versions }}-${{ matrix.server-versions }}
           path: apps/${{ env.APP_NAME }}/playwright-report
