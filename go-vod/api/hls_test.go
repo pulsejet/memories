@@ -24,15 +24,18 @@ func TestMasterPlaylist(t *testing.T) {
 	require.Less(t, strings.Index(got, "1080p.m3u8"), strings.Index(got, "max.m3u8"))
 	require.Contains(t, got, "BANDWIDTH=400,RESOLUTION=854x480")
 	require.Contains(t, got, "480p.m3u8?t=123")
+	require.Contains(t, got, "#EXT-X-INDEPENDENT-SEGMENTS")
 }
 
 func TestTranscodeVariantPlaylist(t *testing.T) {
 	got, err := TranscodeVariantPlaylist("720p", 62*time.Second+500*time.Millisecond, 3, "?t=123")
 	require.NoError(t, err)
 	require.Equal(t, 21, strings.Count(got, "#EXTINF"))
-	require.Contains(t, got, "#EXTINF:2.500,nodesc\n720p-000020.ts?t=123")
+	require.Contains(t, got, "#EXTINF:2.500,nodesc\n720p-000020.m4s?t=123")
 	require.Contains(t, got, "#EXT-X-TARGETDURATION:3")
 	require.Contains(t, got, "#EXT-X-PLAYLIST-TYPE:VOD")
+	require.Contains(t, got, "#EXT-X-VERSION:7")
+	require.Contains(t, got, `#EXT-X-MAP:URI="720p-init.m4s?t=123"`)
 	require.True(t, strings.HasSuffix(strings.TrimSpace(got), "#EXT-X-ENDLIST"))
 }
 
@@ -55,8 +58,9 @@ func TestCopyVariantPlaylist(t *testing.T) {
 	require.Contains(t, got, "8.5")
 	require.Contains(t, got, "2.25")
 	require.Contains(t, got, "#EXT-X-TARGETDURATION:9")
-	require.Contains(t, got, "direct-000000.ts?t=123")
-	require.Contains(t, got, "direct-000002.ts?t=123")
+	require.Contains(t, got, "direct-000000.m4s?t=123")
+	require.Contains(t, got, "direct-000002.m4s?t=123")
+	require.Contains(t, got, `#EXT-X-MAP:URI="direct-init.m4s?t=123"`)
 	require.True(t, strings.HasSuffix(strings.TrimSpace(got), "#EXT-X-ENDLIST"))
 }
 
@@ -98,7 +102,7 @@ func TestVariantPlaylistLazyDirect(t *testing.T) {
 
 	got, err := VariantPlaylist(m, "480p", "")
 	require.NoError(t, err)
-	require.Contains(t, got, "480p-000000.ts")
+	require.Contains(t, got, "480p-000000.m4s")
 	require.False(t, m.CopyProbed())
 	_, ok := m.CopySegments()
 	require.False(t, ok)
@@ -107,7 +111,7 @@ func TestVariantPlaylistLazyDirect(t *testing.T) {
 	require.True(t, ok)
 	got, err = VariantPlaylist(m, "direct", "")
 	require.NoError(t, err)
-	require.Contains(t, got, "direct-000000.ts")
+	require.Contains(t, got, "direct-000000.m4s")
 }
 
 func TestVariantPlaylistDirectPending(t *testing.T) {
@@ -120,7 +124,7 @@ func TestVariantPlaylistDirectPending(t *testing.T) {
 	for {
 		got, err := VariantPlaylist(m, "direct", "")
 		if err == nil {
-			require.Contains(t, got, "direct-000000.ts")
+			require.Contains(t, got, "direct-000000.m4s")
 			return
 		}
 		require.ErrorIs(t, err, core.ErrCopyPending)
@@ -141,7 +145,7 @@ func TestVariantPlaylistDirectFallback(t *testing.T) {
 	for {
 		got, err := VariantPlaylist(m, "direct", "")
 		if err == nil {
-			require.Contains(t, got, "direct-000000.ts")
+			require.Contains(t, got, "direct-000000.m4s")
 			require.NotContains(t, got, "max-")
 			require.Contains(t, got, "#EXT-X-TARGETDURATION:3")
 			break

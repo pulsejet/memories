@@ -16,7 +16,7 @@ NEXTCLOUD_HOST=http://localhost CACHE_DIR=/tmp/go-vod-cache CGO_ENABLED=0  go ru
 ```
 
 Nextcloud proxies every request as `POST /vod` with a JSON body naming the
-client, file id and profile (e.g. `index.m3u8`, `720p-000003.ts`,
+client, file id and profile (e.g. `index.m3u8`, `720p-000003.m4s`,
 `storyboard.vtt`). go-vod fetches the file back from Nextcloud.
 `GET /health` reports whether Nextcloud is reachable.
 

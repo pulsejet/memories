@@ -50,6 +50,13 @@ type Stream struct {
 	// closed is set by Stop; a stopped stream never starts another coder.
 	closed bool
 
+	// run numbers transcode runs; each writes its own init file.
+	run int
+	// initPath is the first init a run finished; runs write identical inits.
+	initPath string
+	// initChunk signals the current run's init, like a segment chunk.
+	initChunk *Chunk
+
 	tonemapOnce sync.Once
 	vaapiOpenCL bool
 	nvencCUDA   bool
@@ -97,11 +104,16 @@ func (s *Stream) clear() {
 	log.Printf("%s-%s: stopping stream", s.m.id, s.quality)
 
 	for _, chunk := range s.chunks {
-		os.Remove(s.getTsPath(chunk.id))
+		os.Remove(s.getSegmentPath(chunk.id))
 	}
 
 	s.chunks = make(map[int]*Chunk)
 	s.goal = 0
+
+	// Wake init waiters of the killed run; the init files stay.
+	if s.initChunk != nil {
+		s.initChunk.signal(false)
+	}
 
 	// supervise is the only waiter; it reaps the killed process.
 	if s.coder != nil {
@@ -149,6 +161,52 @@ func (s *Stream) ServeChunk(w http.ResponseWriter, id int) error {
 
 	s.waitForChunk(w, chunk)
 	return nil
+}
+
+// ServeInit serves the init segment, starting a run when none can write it.
+// Runs write identical inits, so a waiter follows restarts instead of failing.
+func (s *Stream) ServeInit(w http.ResponseWriter) {
+	deadline := time.After(chunkWait)
+	for {
+		s.mutex.Lock()
+		s.inactive = 0
+		if s.initPath == "" && (s.coder == nil || s.exited) {
+			if s.closed {
+				s.mutex.Unlock()
+				w.WriteHeader(http.StatusConflict)
+				return
+			}
+			// Register chunk 0 like restartAtChunk, so its request
+			// waits on this run instead of restarting it.
+			s.clear()
+			s.createChunk(0)
+			s.goal = s.c.GoalBufferMax
+			s.transcode(0)
+		}
+		path, init := s.initPath, s.initChunk
+		s.mutex.Unlock()
+
+		if path != "" {
+			s.serveFile(w, path)
+			return
+		}
+
+		select {
+		case <-init.doneCh:
+		case <-deadline:
+			w.WriteHeader(http.StatusRequestTimeout)
+			return
+		}
+
+		// Our run died without writing an init and nothing replaced it.
+		s.mutex.Lock()
+		failed := s.initPath == "" && s.initChunk == init
+		s.mutex.Unlock()
+		if failed {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
 }
 
 func (s *Stream) ServeFullVideo(w http.ResponseWriter, r *http.Request) error {
@@ -234,12 +292,15 @@ func (s *Stream) pruneChunk(id int) {
 	delete(s.chunks, id)
 
 	// Remove file
-	filename := s.getTsPath(id)
+	filename := s.getSegmentPath(id)
 	os.Remove(filename)
 }
 
 func (s *Stream) returnChunk(w http.ResponseWriter, id int) {
-	filename := s.getTsPath(id)
+	s.serveFile(w, s.getSegmentPath(id))
+}
+
+func (s *Stream) serveFile(w http.ResponseWriter, filename string) {
 	f, err := os.Open(filename)
 	if err != nil {
 		log.Println(err)
@@ -247,7 +308,7 @@ func (s *Stream) returnChunk(w http.ResponseWriter, id int) {
 		return
 	}
 	defer f.Close()
-	w.Header().Set("Content-Type", "video/MP2T")
+	w.Header().Set("Content-Type", "video/mp4")
 	io.Copy(w, f)
 }
 
@@ -337,6 +398,7 @@ func (s *Stream) spec(startAt float64, isHls bool) ffmpeg.Spec {
 		Audio:     s.m.probe.Audio,
 		ChunkSize: s.m.tc.ChunkSize,
 		Copy:      s.quality == QUALITY_DIRECT && (!isHls || grid),
+		CodecName: s.m.probe.CodecName,
 
 		VAAPI:           s.m.tc.VAAPI,
 		VAAPILowPower:   s.m.tc.VAAPILowPower,
@@ -371,7 +433,11 @@ func (s *Stream) transcode(startId int) {
 		startAt = float64(startNumber * s.m.tc.ChunkSize)
 	}
 
-	args := ffmpeg.SegmentArgs(s.transcodeSpec(startAt, true), startNumber, s.getTsPath(-1))
+	s.run++
+	initPath := ffmpeg.InitPath(s.m.tempDir, s.quality, s.run)
+	s.initChunk = NewChunk(-1)
+
+	args := ffmpeg.SegmentArgs(s.transcodeSpec(startAt, true), startNumber, s.getSegmentPath(-1), initPath)
 	coder := ffmpeg.Command(context.Background(), s.c.FFmpeg, args...)
 
 	// Log command, quoting the args as needed
@@ -386,7 +452,7 @@ func (s *Stream) transcode(startId int) {
 	s.coder = coder
 	s.exited = false
 
-	go s.supervise(coder, cmdStdOut, cmdStdErr)
+	go s.supervise(coder, initPath, cmdStdOut, cmdStdErr)
 }
 
 // startCoder starts the command with stdout and stderr piped.
@@ -404,6 +470,9 @@ func startCoder(cmd *exec.Cmd) (stdout, stderr io.ReadCloser, err error) {
 // retries restart the transcode instead of waiting on a dead one.
 // Caller must hold s.mutex.
 func (s *Stream) failChunks() {
+	if s.initChunk != nil {
+		s.initChunk.signal(false)
+	}
 	for id, chunk := range s.chunks {
 		if !chunk.done {
 			chunk.signal(false)
@@ -425,7 +494,7 @@ func (s *Stream) checkGoal(id int) {
 	}
 }
 
-func (s *Stream) getTsPath(id int) string {
+func (s *Stream) getSegmentPath(id int) string {
 	if id == -1 {
 		return ffmpeg.SegmentPattern(s.m.tempDir, s.quality)
 	}
@@ -433,10 +502,11 @@ func (s *Stream) getTsPath(id int) string {
 }
 
 // Separate goroutine
-func (s *Stream) monitorTranscodeOutput(coder *exec.Cmd, cmdStdOut io.ReadCloser) {
+func (s *Stream) monitorTranscodeOutput(coder *exec.Cmd, initPath string, cmdStdOut io.ReadCloser) {
 	defer cmdStdOut.Close()
 	stdoutReader := bufio.NewReader(cmdStdOut)
 	seen := make(map[int]bool)
+	initSeen := false
 
 	for {
 		s.mutex.Lock()
@@ -473,6 +543,18 @@ func (s *Stream) monitorTranscodeOutput(coder *exec.Cmd, cmdStdOut io.ReadCloser
 			s.mutex.Lock()
 			// The coder has changed; do nothing
 			if s.coder == coder {
+				// The muxer writes the init before listing any segment. Runs
+				// write identical inits, so keep the first: replacing it could
+				// delete a file ServeInit is about to open.
+				if !initSeen {
+					initSeen = true
+					if s.initPath == "" {
+						s.initPath = initPath
+					} else {
+						os.Remove(initPath)
+					}
+					s.initChunk.signal(true)
+				}
 				s.createChunk(id).signal(true)
 
 				// Check goal satisfied
@@ -507,13 +589,13 @@ func (s *Stream) monitorStderr(cmdStdErr io.ReadCloser) {
 
 // supervise reads the coder's output to EOF before reaping it, since Wait
 // closes the pipes and would drop the final segment lines.
-func (s *Stream) supervise(coder *exec.Cmd, stdout, stderr io.ReadCloser) {
+func (s *Stream) supervise(coder *exec.Cmd, initPath string, stdout, stderr io.ReadCloser) {
 	stderrDone := make(chan struct{})
 	go func() {
 		s.monitorStderr(stderr)
 		close(stderrDone)
 	}()
-	s.monitorTranscodeOutput(coder, stdout)
+	s.monitorTranscodeOutput(coder, initPath, stdout)
 	<-stderrDone
 	err := coder.Wait()
 

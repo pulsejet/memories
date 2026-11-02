@@ -30,3 +30,11 @@ func TestIsCodecPlayable(t *testing.T) {
 	require.True(t, IsCodecPlayable("hevc", playable))
 	require.False(t, IsCodecPlayable("vp9", playable))
 }
+
+func TestIsCodecFMP4(t *testing.T) {
+	for _, c := range []string{"h264", "hevc", "av1", "vp9"} {
+		require.True(t, IsCodecFMP4(c), c)
+	}
+	require.False(t, IsCodecFMP4("vp8"))
+	require.False(t, IsCodecFMP4("mpeg4"))
+}

@@ -21,6 +21,7 @@ func MasterPlaylist(renditions []core.Rendition, frameRate int, query string) (s
 	})
 
 	m := m3u8.NewMasterPlaylist()
+	m.SetIndependentSegments(true)
 	for _, r := range sorted {
 		m.Append(r.Quality+".m3u8"+query, nil, m3u8.VariantParams{
 			Bandwidth:  uint32(r.Bitrate),
@@ -60,8 +61,7 @@ func TranscodeVariantPlaylist(quality string, total time.Duration, chunkSize int
 	if err != nil {
 		return "", err
 	}
-	p.SetVersion(4)
-	p.MediaType = m3u8.VOD
+	initVariant(p, quality, query)
 	p.TargetDuration = float64(chunkSize)
 
 	remaining := total.Seconds()
@@ -70,7 +70,7 @@ func TranscodeVariantPlaylist(quality string, total time.Duration, chunkSize int
 		if remaining < size {
 			size = remaining
 		}
-		if err := p.Append(fmt.Sprintf("%s-%06d.ts%s", quality, i, query), size, "nodesc"); err != nil {
+		if err := p.Append(fmt.Sprintf("%s-%06d.m4s%s", quality, i, query), size, "nodesc"); err != nil {
 			return "", err
 		}
 		remaining -= float64(chunkSize)
@@ -87,8 +87,7 @@ func CopyVariantPlaylist(quality string, segments []ffmpeg.Segment, query string
 	if err != nil {
 		return "", err
 	}
-	p.SetVersion(4)
-	p.MediaType = m3u8.VOD
+	initVariant(p, quality, query)
 
 	longest := 0.0
 	for _, s := range segments {
@@ -97,12 +96,19 @@ func CopyVariantPlaylist(quality string, segments []ffmpeg.Segment, query string
 	p.TargetDuration = math.Ceil(longest)
 
 	for i, s := range segments {
-		if err := p.Append(fmt.Sprintf("%s-%06d.ts%s", quality, i, query), s.Duration, "nodesc"); err != nil {
+		if err := p.Append(fmt.Sprintf("%s-%06d.m4s%s", quality, i, query), s.Duration, "nodesc"); err != nil {
 			return "", err
 		}
 	}
 	p.Close()
 	return p.Encode().String(), nil
+}
+
+// initVariant sets up a VOD fMP4 playlist; EXT-X-MAP needs version 6.
+func initVariant(p *m3u8.MediaPlaylist, quality string, query string) {
+	p.SetVersion(7)
+	p.MediaType = m3u8.VOD
+	p.SetDefaultMap(ffmpeg.InitName(quality)+query, 0, 0)
 }
 
 func WriteM3U8(w http.ResponseWriter, body string) {

@@ -54,7 +54,7 @@ func testStream(t *testing.T) (*Stream, string) {
 
 func TestWaitForChunkDone(t *testing.T) {
 	s, dir := testStream(t)
-	require.NoError(t, os.WriteFile(filepath.Join(dir, "480p-000000.ts"), []byte("segment"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "480p-000000.m4s"), []byte("segment"), 0644))
 
 	chunk := NewChunk(0)
 	chunk.signal(true)
@@ -99,4 +99,104 @@ func TestWaitForChunkTimeout(t *testing.T) {
 	w := httptest.NewRecorder()
 	s.waitForChunk(w, chunk)
 	require.Equal(t, http.StatusRequestTimeout, w.Code)
+}
+
+func TestServeInitReady(t *testing.T) {
+	s, dir := testStream(t)
+	s.initPath = filepath.Join(dir, "480p-init-1.m4s")
+	require.NoError(t, os.WriteFile(s.initPath, []byte("init"), 0644))
+
+	w := httptest.NewRecorder()
+	s.ServeInit(w)
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Equal(t, "video/mp4", w.Header().Get("Content-Type"))
+	require.Equal(t, "init", w.Body.String())
+}
+
+func TestServeInitWaitsForRun(t *testing.T) {
+	s, dir := testStream(t)
+	s.coder = &exec.Cmd{}
+	s.initChunk = NewChunk(-1)
+	path := filepath.Join(dir, "480p-init-1.m4s")
+	require.NoError(t, os.WriteFile(path, []byte("init"), 0644))
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		s.mutex.Lock()
+		s.initPath = path
+		s.initChunk.signal(true)
+		s.mutex.Unlock()
+	}()
+
+	w := httptest.NewRecorder()
+	s.ServeInit(w)
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Equal(t, "init", w.Body.String())
+}
+
+func TestServeInitFollowsRestart(t *testing.T) {
+	s, dir := testStream(t)
+	s.coder = &exec.Cmd{}
+	s.initChunk = NewChunk(-1)
+	path := filepath.Join(dir, "480p-init-2.m4s")
+	require.NoError(t, os.WriteFile(path, []byte("init"), 0644))
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		s.mutex.Lock()
+		old := s.initChunk
+		s.coder = &exec.Cmd{}
+		s.initChunk = NewChunk(-1)
+		old.signal(false)
+		next := s.initChunk
+		s.mutex.Unlock()
+
+		time.Sleep(10 * time.Millisecond)
+		s.mutex.Lock()
+		s.initPath = path
+		next.signal(true)
+		s.mutex.Unlock()
+	}()
+
+	w := httptest.NewRecorder()
+	s.ServeInit(w)
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Equal(t, "init", w.Body.String())
+}
+
+func TestServeInitRunFailed(t *testing.T) {
+	s, _ := testStream(t)
+	s.coder = &exec.Cmd{}
+	s.initChunk = NewChunk(-1)
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		s.mutex.Lock()
+		s.exited = true
+		s.failChunks()
+		s.mutex.Unlock()
+	}()
+
+	w := httptest.NewRecorder()
+	s.ServeInit(w)
+	require.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func TestServeInitTimeout(t *testing.T) {
+	s, _ := testStream(t)
+	oldWait := chunkWait
+	chunkWait = 20 * time.Millisecond
+	defer func() { chunkWait = oldWait }()
+	s.coder = &exec.Cmd{}
+	s.initChunk = NewChunk(-1)
+
+	w := httptest.NewRecorder()
+	s.ServeInit(w)
+	require.Equal(t, http.StatusRequestTimeout, w.Code)
+}
+
+func TestServeInitClosed(t *testing.T) {
+	s, _ := testStream(t)
+	s.closed = true
+
+	w := httptest.NewRecorder()
+	s.ServeInit(w)
+	require.Equal(t, http.StatusConflict, w.Code)
 }

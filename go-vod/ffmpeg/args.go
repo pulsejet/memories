@@ -85,6 +85,9 @@ type Spec struct {
 	// Copy stream-copies the video (-c:v copy) instead of re-encoding it,
 	// for copy-eligible sources.
 	Copy bool
+	// CodecName is the source video codec_name; HEVC copies are tagged hvc1,
+	// since Safari rejects hev1 in MP4.
+	CodecName string
 }
 
 // Encoder resolves the video encoder: stream copy, then VAAPI, then NVENC,
@@ -270,6 +273,10 @@ func BuildArgs(s Spec) []string {
 	args = append(args, "-map", "0:v:0", "-c:v", cv)
 
 	switch cv {
+	case EncoderCopy:
+		if s.CodecName == "hevc" {
+			args = append(args, "-tag:v", "hvc1")
+		}
 	case EncoderVAAPI:
 		args = append(args, "-global_quality", fmt.Sprintf("%d", s.QF))
 		if s.VAAPILowPower {
@@ -282,6 +289,7 @@ func BuildArgs(s Spec) []string {
 			"-rc", "vbr",
 			"-rc-lookahead", "30",
 			"-cq", fmt.Sprintf("%d", s.QF),
+			"-forced-idr", "1",
 		)
 		if s.NVENCTemporalAQ {
 			args = append(args, "-temporal-aq", "1")
@@ -316,25 +324,31 @@ func BuildArgs(s Spec) []string {
 const copyHLSTime = "0.001"
 
 // SegmentArgs extends BuildArgs with the HLS muxer tail that chops one
-// rendition into servable MPEG-TS segments:
+// rendition into fMP4 segments plus an init segment:
 //
 //   - "-start_number" numbers the first segment. Callers pass the chunk id
 //     decremented by one (starting a frame early keeps keyframes aligned), so
-//     on-disk segment N is always "<quality>-NNNNNN.ts".
+//     on-disk segment N is always "<quality>-NNNNNN.m4s".
 //   - "-avoid_negative_ts disabled" preserves post-seek timestamps instead of
 //     shifting them to zero, matching the "-copyts" input side.
-//   - Time-based splitting (-hls_flags split_by_time) cuts strictly by the
-//     clock so segments stay uniformly sized even when keyframes drift; see
-//     the inline comment and https://github.com/videojs/mux.js/pull/138 for
-//     why players must tolerate segments that open without a keyframe.
-//   - Segments go to SegmentPattern(dir, quality) files; the playlist itself
-//     goes to stdout ("-"), where the segment watcher reads names from it.
-//   - Keyframes are forced every ChunkSize seconds — fixed GOP when
-//     UseGopSize is set, "-force_key_frames expr:…" otherwise — so each
-//     boundary lands near a keyframe. Stream copy (Copy) cannot create
-//     keyframes, so nothing is forced. Instead copyHLSTime makes the muxer
-//     cut at every source keyframe, matching CopySegments.
-func SegmentArgs(s Spec, startID int, pattern string) []string {
+//   - "movflags=+frag_discont" keeps tfdt absolute. Otherwise movenc rebases
+//     every run to zero and moves the offset into the init's edit list, so a
+//     seek restart's segments would not fit the init the player cached. With
+//     it, every run writes a byte-identical init.
+//   - No edit list: hls.js ignores it while MSE applies it, so B-frame delay
+//     put them 1-2 frames apart and a one-frame tail segment never counted as
+//     buffered, stalling playback. Negative cts offsets replace it.
+//   - The init path must be absolute: with the playlist on stdout, a relative
+//     one resolves against the working directory.
+//   - Segments cut on keyframes only; fMP4 passthrough needs each segment to
+//     open on one. Keyframes are forced every ChunkSize seconds (fixed GOP
+//     when UseGopSize is set). With -copyts, t is the source time, so the
+//     grid survives seek restarts. Stream copy cannot create keyframes;
+//     copyHLSTime makes the muxer cut at every source keyframe instead,
+//     matching CopySegments.
+//   - The playlist goes to stdout ("-"), where the segment watcher reads
+//     finished segment names from it.
+func SegmentArgs(s Spec, startID int, pattern, init string) []string {
 	hlsTime := fmt.Sprintf("%d", s.ChunkSize)
 	if s.Copy {
 		hlsTime = copyHLSTime
@@ -346,7 +360,9 @@ func SegmentArgs(s Spec, startID int, pattern string) []string {
 		"-avoid_negative_ts", "disabled",
 		"-f", "hls",
 		"-hls_time", hlsTime,
-		"-hls_segment_type", "mpegts",
+		"-hls_segment_type", "fmp4",
+		"-hls_fmp4_init_filename", init,
+		"-hls_segment_options", "movflags=+frag_discont+negative_cts_offsets:use_editlist=0",
 		"-hls_segment_filename", pattern,
 	)
 
@@ -354,20 +370,10 @@ func SegmentArgs(s Spec, startID int, pattern string) []string {
 		// HLS may otherwise duplicate VFR frames to match the probed r_frame_rate.
 		args = append(args, "-fps_mode", "passthrough")
 
-		// We force a keyframe at the start of each segment.
-		// By default, ffmpeg will split only on keyframes, so
-		// theoretically we should have perfectly sized chunks.
-		//
-		// However, the keyframes can be misaligned with the
-		// segment start even after forcing. To get around this,
-		// we chop the segments by time instead of keyframes.
-		//
-		// Technically this doesn't work with MSE (at least on Chrome),
-		// but video.js can work around this by fusing the
-		// segment with the previous GOP if no keyframe is found
-		// at the start of the segment.
-		// https://github.com/videojs/mux.js/pull/138
-		args = append(args, "-hls_flags", "split_by_time")
+		// No B-frames: their delay shifts video two frames after the audio cut,
+		// so the buffer ends short of the segment boundary and hls.js refetches
+		// the same segment on every level switch.
+		args = append(args, "-bf", "0")
 
 		if s.UseGopSize && s.FrameRate > 0 {
 			gop := fmt.Sprintf("%d", s.ChunkSize*s.FrameRate)
@@ -431,22 +437,43 @@ func CopySegments(keyframes []float64, duration time.Duration) []Segment {
 }
 
 // SegmentPattern is the "-hls_segment_filename" template for one rendition:
-// "<dir>/<quality>-%06d.ts", expanded by the HLS muxer into zero-padded
+// "<dir>/<quality>-%06d.m4s", expanded by the HLS muxer into zero-padded
 // segment numbers honoring "-start_number".
 func SegmentPattern(dir, quality string) string {
-	return filepath.Join(dir, quality+"-%06d.ts")
+	return filepath.Join(dir, quality+"-%06d.m4s")
 }
 
 // SegmentPath resolves one concrete segment file; the inverse of
 // ParseSegmentName for well-formed names.
 func SegmentPath(dir, quality string, id int) string {
-	return filepath.Join(dir, fmt.Sprintf("%s-%06d.ts", quality, id))
+	return filepath.Join(dir, fmt.Sprintf("%s-%06d.m4s", quality, id))
+}
+
+// InitName is the init segment's public name for one rendition.
+func InitName(quality string) string {
+	return quality + "-init.m4s"
+}
+
+// InitPath is the on-disk init segment of one transcode run. Runs write
+// separate files, so a restart never truncates an init being served.
+func InitPath(dir, quality string, run int) string {
+	return filepath.Join(dir, fmt.Sprintf("%s-init-%d.m4s", quality, run))
+}
+
+// ParseInitName extracts the rendition from an InitName.
+func ParseInitName(name string) (quality string, ok bool) {
+	quality, ok = strings.CutSuffix(name, "-init.m4s")
+	return quality, ok && qualityRe.MatchString(quality)
 }
 
 // segmentNameRe is the single definition of a segment file name: rendition
-// label, dash, decimal number, ".ts". Labels never contain dashes, so the
+// label, dash, decimal number, ".m4s". Labels never contain dashes, so the
 // first dash always separates label from number.
-var segmentNameRe = regexp.MustCompile(`^([A-Za-z0-9]+)-(\d+)\.ts$`)
+var segmentNameRe = regexp.MustCompile(`^([A-Za-z0-9]+)-(\d+)\.m4s$`)
+
+// qualityRe is a bare rendition label, as in segment names; it keeps
+// ParseInitName from accepting paths or dashed names.
+var qualityRe = regexp.MustCompile(`^[A-Za-z0-9]+$`)
 
 // ParseSegmentName splits a segment name into label and number. It matches on
 // the base name only, so temp directories containing dashes can't throw off

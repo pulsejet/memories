@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
   - VIPS is *required* for image editing support.
 - **Feature**: Image straightener in photo editor ([#1629](https://github.com/pulsejet/memories/issues/1629), [#1075](https://github.com/pulsejet/memories/issues/1075))
 - **Feature**: Support editing metadata of RAW files including stacked JPEG+RAW pairs ([#1222](https://github.com/pulsejet/memories/issues/1222)).
+- **Feature**: Direct streaming for HEVC / AV1 / VP9 videos with HLS-fMP4.
 - **Feature**: High precision map markers setting ([#1701](https://github.com/pulsejet/memories/issues/1701))
 - **Feature**: Media management grant for silent local file operations on Android ([#1033](https://github.com/pulsejet/memories/pull/1033))
 - **Feature**: Option to skip delete confirmation in viewer ([#1687](https://github.com/pulsejet/memories/issues/1687), [#1689](https://github.com/pulsejet/memories/issues/1689), [#1246](https://github.com/pulsejet/memories/issues/1246))

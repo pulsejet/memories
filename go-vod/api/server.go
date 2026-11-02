@@ -146,7 +146,16 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 			return
 		}
 		WriteM3U8(w, body)
-	case strings.HasSuffix(leaf, ".ts"):
+	case strings.HasSuffix(leaf, "-init.m4s"):
+		quality, ok := ffmpeg.ParseInitName(leaf)
+		if !ok {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if !manager.ServeInit(w, quality) {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	case strings.HasSuffix(leaf, ".m4s"):
 		quality, id, err := ffmpeg.ParseSegmentName(leaf)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -170,7 +179,7 @@ func validProfile(leaf string) bool {
 	case leaf == "ignore" || leaf == "index.m3u8":
 		return true
 	case strings.HasSuffix(leaf, ".m3u8"),
-		strings.HasSuffix(leaf, ".ts"),
+		strings.HasSuffix(leaf, ".m4s"),
 		strings.HasSuffix(leaf, ".mp4"):
 		return true
 	case core.IsStoryboardLeaf(leaf):

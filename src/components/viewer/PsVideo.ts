@@ -12,7 +12,7 @@ import type { ViewerControlsCE, ViewerVideoNativeHoleCE } from '@components/cust
 import type { VideoController, VideoControllerElement } from '@typings';
 import type { PsContent, PsEvent, PsPhotoSwipe, PsSlide } from './types';
 import type Hls from 'hls.js';
-import type { HlsConfig } from 'hls.js';
+import type { FragmentLoaderConstructor, FragmentLoaderContext, HlsConfig } from 'hls.js';
 
 type VideoSource = {
   src: string;
@@ -53,39 +53,53 @@ const PLAYER_UI_SELECTOR = [
 
 // Cap buffer to avoid overloading go-vod while
 // processing requests from multiple users.
-const HLS_LIVE_CONFIG: Partial<HlsConfig> = {
-  /** Forward buffer target in seconds. */
-  maxBufferLength: 30,
-  /** Hard cap for forward buffer growth. */
-  maxMaxBufferLength: 30,
-  /** Backward buffer kept for seeking back. */
-  backBufferLength: 30,
-  /** Fetch the first segment while the manifest is still parsing. */
-  startFragPrefetch: true,
-  /** Tolerate segments not opening on a keyframe (split_by_time). */
-  maxBufferHole: 0.5,
-  /** direct.m3u8 409s while probing; fail over fast, retry upgrade. */
-  playlistLoadPolicy: {
-    default: {
-      maxTimeToFirstByteMs: 3000,
-      maxLoadTimeMs: 3000,
-      timeoutRetry: { maxNumRetry: 100, retryDelayMs: 0, maxRetryDelayMs: 0 },
-      errorRetry: { maxNumRetry: 100, retryDelayMs: 1000, maxRetryDelayMs: 8000 },
+function getHlsConfig(HlsClass: typeof Hls): Partial<HlsConfig> {
+  return {
+    /** Forward buffer target in seconds. */
+    maxBufferLength: 30,
+    /** Hard cap for forward buffer growth. */
+    maxMaxBufferLength: 30,
+    /** Backward buffer kept for seeking back. */
+    backBufferLength: 30,
+    /** Fetch the first segment while the manifest is still parsing. */
+    startFragPrefetch: true,
+    /** direct.m3u8 409s while probing; fail over fast, retry upgrade. */
+    playlistLoadPolicy: {
+      default: {
+        maxTimeToFirstByteMs: 3000,
+        maxLoadTimeMs: 3000,
+        timeoutRetry: { maxNumRetry: 100, retryDelayMs: 0, maxRetryDelayMs: 0 },
+        errorRetry: { maxNumRetry: 100, retryDelayMs: 1000, maxRetryDelayMs: 8000 },
+      },
     },
-  },
-  errorPenaltyExpireMs: 3000,
-  /** Smooth estimate: cold transcode latency is not low bandwidth. */
-  abrEwmaFastVoD: 10,
-  abrEwmaSlowVoD: 15,
-  abrEwmaDefaultEstimate: 8000000,
-  abrMaxWithRealBitrate: true,
-  /** Down fast, up only on sustained headroom. */
-  abrBandWidthFactor: 0.8,
-  abrBandWidthUpFactor: 0.5,
-  /** Keep abandon responsive; slow transcode must downswitch, not stall. */
-  maxStarvationDelay: 4,
-  maxLoadingDelay: 4,
-};
+    errorPenaltyExpireMs: 3000,
+    /** Smooth estimate: cold transcode latency is not low bandwidth. */
+    abrEwmaFastVoD: 10,
+    abrEwmaSlowVoD: 15,
+    abrEwmaDefaultEstimate: 8000000,
+    abrMaxWithRealBitrate: true,
+    /** Down fast, up only on sustained headroom. */
+    abrBandWidthFactor: 0.8,
+    abrBandWidthUpFactor: 0.5,
+    /** Keep abandon responsive; slow transcode must downswitch, not stall. */
+    maxStarvationDelay: 4,
+    maxLoadingDelay: 4,
+    /**
+     * Cancel init segment loads silently. hls.js aborts an in-flight init on every
+     * fragment retry, and that init's abort handler then aborts the retry's
+     * fragment, so an init slower than one retry tick (cold transcode) loops forever.
+     */
+    fLoader: class extends HlsClass.DefaultConfig.loader {
+      abort() {
+        if ((this.context as FragmentLoaderContext | null)?.frag?.sn === 'initSegment') {
+          this.destroy();
+        } else {
+          super.abort();
+        }
+      }
+    } as FragmentLoaderConstructor,
+  };
+}
 
 /**
  * Check if slide has video content
@@ -406,7 +420,7 @@ class VideoContentSetup {
       return;
     }
 
-    const hls = new Hls({ ...HLS_LIVE_CONFIG });
+    const hls = new Hls(getHlsConfig(Hls));
     content.videoHls = hls;
     hls.attachMedia(player);
     if (config.video_autoplay === 'true') {

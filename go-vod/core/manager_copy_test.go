@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -98,6 +99,12 @@ func TestManagerCopyPlayableCodecs(t *testing.T) {
 	m = newCopyManager(t, copyProbeJSON, keys, false, []string{"av1"})
 	require.True(t, m.IsCopyEligible())
 	require.True(t, m.HasStream(QUALITY_DIRECT))
+
+	// Playable but not muxable into fMP4.
+	vp8 := strings.Replace(copyProbeJSON, `"h264"`, `"vp8"`, 1)
+	m = newCopyManager(t, vp8, keys, false, []string{"vp8"})
+	require.False(t, m.IsCopyEligible())
+	require.True(t, m.HasStream(QUALITY_MAX))
 }
 
 func TestServeFullVideoPlayableCodec(t *testing.T) {
@@ -245,7 +252,7 @@ func TestKeyframeProbeDoesNotBlockTranscodes(t *testing.T) {
 		time.Sleep(20 * time.Millisecond)
 	}
 
-	// Everything 1080p.ts needs (CopySegments in transcode/spec) must
+	// Everything a 1080p segment needs (CopySegments in transcode/spec) must
 	// stay fast while direct.m3u8 sits in the probe.
 	fast := make(chan bool, 1)
 	go func() {

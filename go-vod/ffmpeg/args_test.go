@@ -137,6 +137,7 @@ func TestBuildArgsNVENC(t *testing.T) {
 	require.Contains(t, c, "scale_cuda=force_original_aspect_ratio=decrease:force_divisible_by=2:format=nv12:passthrough=0")
 	require.Contains(t, c, "-preset p6 -tune ll -rc vbr")
 	require.Contains(t, c, "-temporal-aq 1")
+	require.Contains(t, c, "-forced-idr 1")
 
 	// 10-bit SDR converts in the scaler instead of reaching h264_nvenc.
 	for _, scale := range []string{"cuda", "npp"} {
@@ -366,15 +367,19 @@ func TestBuildArgsAudioCopy(t *testing.T) {
 
 func TestSegmentArgs(t *testing.T) {
 	s := baseSpec()
-	c := cmd(s, SegmentArgs(s, 4, SegmentPattern("/tmp/vod", "720p")))
-	require.Contains(t, c, "-fps_mode passthrough")
+	c := cmd(s, SegmentArgs(s, 4, SegmentPattern("/tmp/vod", "720p"), InitPath("/tmp/vod", "720p", 2)))
+	require.Contains(t, c, "-fps_mode passthrough -bf 0")
 	require.Contains(t, c, "-start_number 4")
-	require.Contains(t, c, "-hls_segment_filename /tmp/vod/720p-%06d.ts")
+	require.Contains(t, c, "-hls_segment_type fmp4")
+	require.Contains(t, c, "-hls_fmp4_init_filename /tmp/vod/720p-init-2.m4s")
+	require.Contains(t, c, `-hls_segment_options "movflags=+frag_discont+negative_cts_offsets:use_editlist=0"`)
+	require.Contains(t, c, "-hls_segment_filename /tmp/vod/720p-%06d.m4s")
 	require.Contains(t, c, `"expr:gte(t,n_forced*3)" -`)
+	require.NotContains(t, c, "split_by_time")
 
 	gop := baseSpec()
 	gop.UseGopSize = true
-	g := cmd(gop, SegmentArgs(gop, 0, SegmentPattern("/tmp/vod", "720p")))
+	g := cmd(gop, SegmentArgs(gop, 0, SegmentPattern("/tmp/vod", "720p"), InitPath("/tmp/vod", "720p", 1)))
 	require.Contains(t, g, "-g 90 -keyint_min 90")
 	require.NotContains(t, g, "force_key_frames")
 }
@@ -382,38 +387,55 @@ func TestSegmentArgs(t *testing.T) {
 func TestMP4Args(t *testing.T) {
 	c := cmd(baseSpec(), MP4Args(baseSpec()))
 	require.NotContains(t, c, "-fps_mode")
+	require.NotContains(t, c, "-bf")
 	require.Contains(t, c, `-movflags frag_keyframe+empty_moov+faststart -f mp4 "pipe:1"`)
 }
 
 func TestSegmentPaths(t *testing.T) {
-	require.Equal(t, "/tmp/vod/720p-%06d.ts", SegmentPattern("/tmp/vod", "720p"))
-	require.Equal(t, "/tmp/vod/720p-000003.ts", SegmentPath("/tmp/vod", "720p", 3))
+	require.Equal(t, "/tmp/vod/720p-%06d.m4s", SegmentPattern("/tmp/vod", "720p"))
+	require.Equal(t, "/tmp/vod/720p-000003.m4s", SegmentPath("/tmp/vod", "720p", 3))
+	require.Equal(t, "/tmp/vod/720p-init-3.m4s", InitPath("/tmp/vod", "720p", 3))
+	require.Equal(t, "720p-init.m4s", InitName("720p"))
+}
+
+func TestParseInitName(t *testing.T) {
+	q, ok := ParseInitName("direct-init.m4s")
+	require.True(t, ok)
+	require.Equal(t, "direct", q)
+
+	for _, bad := range []string{"-init.m4s", "a/b-init.m4s", "720p-init.mp4", "720p-000001.m4s"} {
+		_, ok := ParseInitName(bad)
+		require.False(t, ok, bad)
+	}
 }
 
 func TestParseSegmentName(t *testing.T) {
-	q, id, err := ParseSegmentName("720p-000003.ts")
+	q, id, err := ParseSegmentName("720p-000003.m4s")
 	require.NoError(t, err)
 	require.Equal(t, "720p", q)
 	require.Equal(t, 3, id)
 
-	q, id, err = ParseSegmentName("/tmp/go-vod/my-id-1/max-000042.ts")
+	q, id, err = ParseSegmentName("/tmp/go-vod/my-id-1/max-000042.m4s")
 	require.NoError(t, err)
 	require.Equal(t, "max", q)
 	require.Equal(t, 42, id)
 
-	for _, bad := range []string{"", "720p.ts", "720p-abc.ts", "720p-000003.mp4", "a-b-c.ts"} {
+	for _, bad := range []string{"", "720p.m4s", "720p-abc.m4s", "720p-000003.ts", "a-b-c.m4s", "720p-init-1.m4s"} {
 		_, _, err := ParseSegmentName(bad)
 		require.Error(t, err, bad)
 	}
 }
 
 func TestParseSegmentLine(t *testing.T) {
-	q, id, ok := ParseSegmentLine("  1080p-000003.ts\n")
+	q, id, ok := ParseSegmentLine("  1080p-000003.m4s\n")
 	require.True(t, ok)
 	require.Equal(t, "1080p", q)
 	require.Equal(t, 3, id)
 
 	_, _, ok = ParseSegmentLine("frame=  100 fps=30")
+	require.False(t, ok)
+
+	_, _, ok = ParseSegmentLine(`#EXT-X-MAP:URI="/tmp/vod/1080p-init-1.m4s"`)
 	require.False(t, ok)
 }
 
@@ -453,13 +475,18 @@ func TestBuildArgsCopy(t *testing.T) {
 	require.NotContains(t, c, "-vf")
 	require.NotContains(t, c, "-hwaccel")
 	require.NotContains(t, c, "-crf")
+	require.NotContains(t, c, "-tag:v")
+
+	s.CodecName = "hevc"
+	require.Contains(t, cmd(s, BuildArgs(s)), `"-c:v" copy "-tag:v" hvc1`)
 }
 
 func TestSegmentArgsCopy(t *testing.T) {
 	s := baseSpec()
 	s.Copy = true
-	c := cmd(s, SegmentArgs(s, 2, SegmentPattern("/tmp/vod", "direct")))
+	c := cmd(s, SegmentArgs(s, 2, SegmentPattern("/tmp/vod", "direct"), InitPath("/tmp/vod", "direct", 1)))
 	require.NotContains(t, c, "-fps_mode")
+	require.NotContains(t, c, "-bf")
 	require.Contains(t, c, "-hls_time "+copyHLSTime)
 	require.NotContains(t, c, "force_key_frames")
 	require.NotContains(t, c, " -g ")
@@ -473,7 +500,7 @@ func TestSegmentTimestamps(t *testing.T) {
 			s.VAAPI, s.NVENC, s.NVENCScale = backend == EncoderVAAPI, backend == EncoderNVENC, "cuda"
 			s.Copy, s.StartAt, s.FrameRate = copy, 9, 120
 			s.UseGopSize = s.NVENC
-			args := SegmentArgs(s, 3, SegmentPattern("/tmp/vod", s.Quality))
+			args := SegmentArgs(s, 3, SegmentPattern("/tmp/vod", s.Quality), InitPath("/tmp/vod", s.Quality, 1))
 			i := slices.Index(args, "-fps_mode")
 			if copy {
 				require.Equal(t, -1, i)

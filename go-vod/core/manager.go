@@ -471,6 +471,19 @@ func (m *Manager) ServeChunk(w http.ResponseWriter, quality string, id int) bool
 	return true
 }
 
+func (m *Manager) ServeInit(w http.ResponseWriter, quality string) bool {
+	stream, ok := m.streams[quality]
+	if !ok {
+		return false
+	}
+	if quality == QUALITY_DIRECT {
+		// Copy and re-encode inits differ; settle the grid first.
+		m.EnsureCopySegments()
+	}
+	stream.ServeInit(w)
+	return true
+}
+
 func (m *Manager) ServeFullVideo(w http.ResponseWriter, r *http.Request, quality string) {
 	if stream, ok := m.streams[quality]; ok {
 		stream.ServeFullVideo(w, r)
@@ -519,7 +532,8 @@ func (m *Manager) ffprobe() error {
 
 	// Copy eligibility is cheap (codec + rotation); keyframes come later
 	// via EnsureCopySegments on direct.m3u8, so creation stays fast.
-	m.copyEligible = m.probe.Rotation == 0 && IsCodecPlayable(m.probe.CodecName, m.playableCodecs)
+	m.copyEligible = m.probe.Rotation == 0 && IsCodecPlayable(m.probe.CodecName, m.playableCodecs) &&
+		IsCodecFMP4(m.probe.CodecName)
 
 	return nil
 }
