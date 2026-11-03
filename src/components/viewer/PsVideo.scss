@@ -107,4 +107,12 @@
     opacity: 0;
     visibility: hidden;
   }
+
+  // Native video is paused while hidden for pinch/drag to close.
+  .nativex-fading .video-container {
+    .m-vc-buffering,
+    .m-vc-center {
+      display: none;
+    }
+  }
 }

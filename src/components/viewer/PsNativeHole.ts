@@ -54,7 +54,11 @@ export default class PsNativeHole {
       this.opened = true;
       this.bgElement = this.lightbox.bg ?? null;
       this.contentElement = document.querySelector<HTMLElement>('body > #content');
-      this.setClip(this.lastClip ?? 'none');
+      if (this.lastClip === 'full') {
+        this.setFullClip(true);
+      } else {
+        this.setClip(this.lastClip ?? 'none');
+      }
     });
 
     // Toggling HDR reconfigures the window surface; slow.
@@ -68,6 +72,11 @@ export default class PsNativeHole {
     if (this.contentElement) this.contentElement.style.clipPath = clip;
   }
 
+  private setFullClip(full: boolean) {
+    if (this.bgElement) this.bgElement.style.background = full ? 'transparent' : '';
+    if (this.contentElement) this.contentElement.style.opacity = full ? '0' : '';
+  }
+
   private reset() {
     this.opened = false;
     if (this.clipRaf) {
@@ -79,6 +88,7 @@ export default class PsNativeHole {
 
   private hide() {
     this.holderElement?.classList.remove('nativex-hole');
+    this.holderElement?.classList.remove('nativex-fading');
     this.holderElement = null;
     this.revealTimer.clear();
 
@@ -87,6 +97,7 @@ export default class PsNativeHole {
     this.lastNative = null;
     this.lastType = null;
     this.setClip('none');
+    this.setFullClip(false);
 
     if (!this.hideRaf) {
       this.hideRaf = requestAnimationFrame(() => {
@@ -115,6 +126,16 @@ export default class PsNativeHole {
     if (!this.opened) return;
     const slide = this.lightbox.currSlide as unknown as PsSlide | undefined;
     const slideType = slide?.data.type;
+
+    // Pinch/drag to close fades the bg to show the timeline.
+    if (this.lightbox.bgOpacity < 1) {
+      this.hide(); // resets nativex-fading
+      slide?.holderElement?.classList.add('nativex-fading');
+      return;
+    } else {
+      slide?.holderElement?.classList.remove('nativex-fading');
+    }
+
     if (!slide || !slideType) {
       return this.hide();
     } else if (slideType === 'image') {
@@ -156,15 +177,14 @@ export default class PsNativeHole {
 
     if (cx2 <= cx1 || cy2 <= cy1) return this.hide();
 
-    // Add 1px additionally on each side to avoid clipping issues.
-    const clip = `path(evenodd, 'M-1 -1 H${W + 1} V${H + 1} H-1 Z M${cx1} ${cy1} H${cx2} V${cy2} H${cx1} Z')`;
-    if (clip !== this.lastClip) {
-      this.lastClip = clip;
-      this.setClip(clip);
+    if (this.lastClip !== 'full') {
+      this.lastClip = 'full';
+      this.setFullClip(true);
     }
 
     if (this.holderElement !== holderElement) {
       this.holderElement?.classList.remove('nativex-hole');
+      this.holderElement?.classList.remove('nativex-fading');
       this.holderElement = holderElement;
 
       // Unfortunately there's no way to know when the native image has actually
@@ -205,5 +225,10 @@ export default class PsNativeHole {
     const dpr = window.devicePixelRatio || 1;
     const devicePx = Math.round(v * dpr);
     return Math.round(devicePx * (1000 / dpr)) / 1000;
+  }
+
+  /** Viewport minus the hole, for {@link setClip}. */
+  private static _holeClipPath(W: number, H: number, x1: number, y1: number, x2: number, y2: number) {
+    return `path(evenodd, 'M-1 -1 H${W + 1} V${H + 1} H-1 Z M${x1} ${y1} H${x2} V${y2} H${x1} Z')`;
   }
 }

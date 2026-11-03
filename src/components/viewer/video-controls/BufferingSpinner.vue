@@ -58,6 +58,7 @@ onMounted(() => {
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
+  animation: m-vc-fade-in 100ms ease-in 300ms both;
 }
 
 .m-vc-spinner {
@@ -69,6 +70,15 @@ onMounted(() => {
   animation: m-vc-spin 1s linear infinite;
   @media (prefers-reduced-motion) {
     animation-duration: 8s;
+  }
+}
+
+@keyframes m-vc-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
