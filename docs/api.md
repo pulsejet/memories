@@ -144,6 +144,7 @@ Allowed EXIF keys for `set-exif` include dates, orientation, title/description/l
 | `GET` | `/api/video/transcode/{client}/{fileid}/{profile}` | Public | HLS / transcode proxy via go-vod (`codecs` query optional). |
 | `GET` | `/api/video/storyboard/{client}/{fileid}/{profile}` | Public | Storyboard assets for seeking UI. |
 | `GET` | `/api/video/livephoto/{fileid}` | Public | Motion-photo companion video (or metadata). |
+| `GET` | `/api/video/bridge/{fileid}` | Service | go-vod file bridge (`nonce`, `server`, optional `ttl`); requires service token. |
 
 `{client}` is a client-chosen id used to correlate transcoder sessions. Video playback requires [transcoding](hw-transcoding.md) to be configured.
 
