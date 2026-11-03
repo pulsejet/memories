@@ -808,7 +808,7 @@ async function createBase(args: PhotoSwipeOptions) {
     hideSidebar();
     setFragment(null);
     updateTitle(undefined);
-    requestAnimationFrame(() => nativex.setTheme()); // reset
+    requestAnimationFrame(() => setTimeout(nativex.setTheme, 20)); // reset
   });
   pswp.on('destroy', () => {
     navElem?.style.setProperty('z-index', '');
