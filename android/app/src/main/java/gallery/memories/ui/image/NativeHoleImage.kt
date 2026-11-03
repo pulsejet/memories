@@ -104,6 +104,14 @@ class NativeHoleImage(private val mCtx: MainActivity) {
         // fitted size so they crop instead of shrinking with the hole.
         view.setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_CUSTOM)
         view.setMinScale(0.01f)
+        // Region decodes are serialized by the decoder; one thread per view lets queued tiles
+        // re-check visibility right before decoding, so tiles of levels zoomed past are skipped.
+        view.setExecutor(java.util.concurrent.Executors.newSingleThreadExecutor())
+        // Default tiles are ~1.5 screens each (~30MB in F16); every upload/free of one stalls the
+        // RenderThread for a frame or more. Small tiles spread that cost across frames.
+        view.setMaxTileSize(512)
+        // Default 320dpi loads tiles below screen resolution on denser displays; clamps to the screen dpi.
+        view.setMinimumTileDpi(Int.MAX_VALUE)
     }
 
     private val configured = mutableSetOf<SubsamplingScaleImageView>()
@@ -256,6 +264,11 @@ class NativeHoleImage(private val mCtx: MainActivity) {
                             target.visibility = View.INVISIBLE
                             if (cont.isActive) cont.resumeWithException(e)
                         }
+
+                        // A failed base tile never becomes ready; fail fast instead of timing out.
+                        override fun onTileLoadError(e: Exception) {
+                            if (!target.isReady) onImageLoadError(e)
+                        }
                     })
                     // Orientation before source so EXIF tiles load correctly.
                     target.setOrientation(orientation)
@@ -313,7 +326,7 @@ class NativeHoleImage(private val mCtx: MainActivity) {
     private fun Context.shouldUseTiling(
         imageWidth: Int,
         imageHeight: Int,
-        bytesPerPixel: Int = 4,
+        bytesPerPixel: Int = if (useF16) 8 else 4,
     ): Boolean {
         // Single draw call cannot exceed the GPU texture size.
         val maxTextureSize = Canvas().maximumBitmapWidth.coerceAtLeast(4096)
@@ -321,7 +334,7 @@ class NativeHoleImage(private val mCtx: MainActivity) {
 
         // Single bitmap must fit under the memory ceiling.
         val bitmapBytes = imageWidth.toLong() * imageHeight * bytesPerPixel
-        if (bitmapBytes > 80L * 1024 * 1024) return true
+        if (bitmapBytes > 60L * 1024 * 1024) return true
         return false
     }
 }

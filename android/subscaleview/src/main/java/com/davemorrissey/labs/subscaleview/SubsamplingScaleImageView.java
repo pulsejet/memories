@@ -272,6 +272,14 @@ public class SubsamplingScaleImageView extends View {
 
     // Volatile fields used to reduce object creation
     private ScaleAndTranslate satTemp;
+
+    // MEMORIES: deferred tile load once an external zoom-out settles.
+    private static final long ZOOM_OUT_SETTLE_MS = 150;
+    private final Runnable settleRefresh = () -> {
+        refreshRequiredTiles(true);
+        invalidate();
+    };
+
     private Matrix matrix;
     private RectF sRect;
     private final float[] srcArray = new float[8];
@@ -478,6 +486,7 @@ public class SubsamplingScaleImageView extends View {
      */
     private void reset(boolean newImage) {
         debug("reset newImage=" + newImage);
+        removeCallbacks(settleRefresh);
         scale = 0f;
         scaleStart = 0f;
         vTranslate = null;
@@ -1249,15 +1258,12 @@ public class SubsamplingScaleImageView extends View {
     private synchronized void initialiseBaseLayer(@NonNull Point maxTileDimensions) {
         debug("initialiseBaseLayer maxTileDimensions=%dx%d", maxTileDimensions.x, maxTileDimensions.y);
 
-        satTemp = new ScaleAndTranslate(0f, new PointF(0, 0));
-        fitToBounds(true, satTemp);
-
-        // Load double resolution - next level will be split into four tiles and at the center all four are required,
-        // so don't bother with tiling until the next level 16 tiles are needed.
-        fullImageSampleSize = calculateInSampleSize(satTemp.scale);
-        if (fullImageSampleSize > 1) {
-            fullImageSampleSize /= 2;
-        }
+        // MEMORIES: size the base layer for the fitted scale, not minScale(). A tiny custom minimum
+        // scale made the base layer (the fallback while tiles load) very low resolution, and the
+        // double-resolution base loaded most photos as one full-size bitmap. Rounding down to a
+        // power of two already keeps the base layer at least screen resolution.
+        float fitScale = Math.min(getWidth() / (float) sWidth(), getHeight() / (float) sHeight());
+        fullImageSampleSize = calculateInSampleSize(fitScale);
 
         if (fullImageSampleSize == 1 && sRegion == null && sWidth() < maxTileDimensions.x && sHeight() < maxTileDimensions.y) {
 
@@ -1293,13 +1299,26 @@ public class SubsamplingScaleImageView extends View {
 
         int sampleSize = Math.min(fullImageSampleSize, calculateInSampleSize(scale));
 
+        // MEMORIES: keep on-screen tiles of other levels as a fallback until every visible tile of
+        // the current level is loaded, so a level change never drops back to the base layer.
+        boolean levelReady = true;
+        List<Tile> level = tileMap.get(sampleSize);
+        if (level != null) {
+            for (Tile tile : level) {
+                if (tileVisible(tile) && (tile.loading || tile.bitmap == null)) {
+                    levelReady = false;
+                    break;
+                }
+            }
+        }
+
         // Load tiles of the correct sample size that are on screen. Discard tiles off screen, and those that are higher
         // resolution than required, or lower res than required but not the base layer, so the base layer is always present.
         for (Map.Entry<Integer, List<Tile>> tileMapEntry : tileMap.entrySet()) {
             for (Tile tile : tileMapEntry.getValue()) {
                 if (tile.sampleSize < sampleSize || (tile.sampleSize > sampleSize && tile.sampleSize != fullImageSampleSize)) {
                     tile.visible = false;
-                    if (tile.bitmap != null) {
+                    if (tile.bitmap != null && (levelReady || !tileVisible(tile))) {
                         tile.bitmap.recycle();
                         tile.bitmap = null;
                     }
@@ -1347,6 +1366,9 @@ public class SubsamplingScaleImageView extends View {
 
         // If waiting to translate to new center position, set translate now
         if (sPendingCenter != null && pendingScale != null) {
+            // MEMORIES: while zooming out, finer tiles and the base layer already cover the view;
+            // loading each coarser level mid-gesture decodes and uploads many short-lived tiles.
+            boolean zoomingOut = pendingScale < scale;
             scale = pendingScale;
             if (vTranslate == null) {
                 vTranslate = new PointF();
@@ -1356,7 +1378,11 @@ public class SubsamplingScaleImageView extends View {
             sPendingCenter = null;
             pendingScale = null;
             fitToBounds(true);
-            refreshRequiredTiles(true);
+            refreshRequiredTiles(!zoomingOut);
+            removeCallbacks(settleRefresh);
+            if (zoomingOut) {
+                postDelayed(settleRefresh, ZOOM_OUT_SETTLE_MS);
+            }
         }
 
         // On first display of base image set up position, and in other cases make sure scale is correct.
@@ -1708,6 +1734,8 @@ public class SubsamplingScaleImageView extends View {
             bitmapIsPreview = false;
             bitmapIsCached = false;
         }
+        // MEMORIES: release fallback tiles once the current level is complete.
+        refreshRequiredTiles(false);
         invalidate();
     }
 
