@@ -31,11 +31,13 @@ class AssetCache(private val ctx: Context) {
             return "${uri.scheme}://${uri.host}$port"
         }
 
-        /** Nextcloud web root (path prefix before index.php), "" for domain roots. */
+        /** Nextcloud web root (path prefix before index.php or pretty /apps/), "" for domain roots. */
         fun webrootOf(baseUrl: String): String {
             val path = Uri.parse(baseUrl).path ?: ""
-            return path.substringBefore("/index.php/")
+            return WEBROOT_RE.find(path)?.groupValues?.get(1) ?: path.trimEnd('/')
         }
+
+        private val WEBROOT_RE = Regex("^(.*?)(?:/index\\.php)?/apps/memories(?:/.*)?$")
     }
 
     /** Snapshot dir for one manifest [key] (see [snapshotKey]). */
