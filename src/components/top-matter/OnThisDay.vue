@@ -37,6 +37,7 @@ import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 
 import { cacheData, getCachedData } from '@services/cache';
+import { constants } from '@services/constants';
 import { t } from '@services/l10n';
 import { config } from '@services/user-config';
 import { useRouteState } from '@services/route-state';
@@ -129,6 +130,10 @@ function process(photos: IPhoto[]): IYear[] {
     if (!photo.dayid) continue;
     if (photo.ishidden) continue;
     if (photo.basename?.startsWith('.')) continue;
+
+    // Skip videos, playback is broken UX.
+    if ((photo.flag ?? 0) & constants.FLAG_IS_VIDEO) continue;
+    if (photo.isvideo) continue;
 
     photo.key = `${photo.fileid}`;
 
