@@ -7,6 +7,7 @@ import type { PsPhotoSwipe, PsSlide } from './types';
 export default class PsNativeHole {
   private clipRaf = 0;
   private hideRaf = 0;
+  private opened = false;
   private revealTimer = new RenewingTimeout();
   private lastClip: string | null = null;
   private lastNative: string | null = null;
@@ -48,7 +49,9 @@ export default class PsNativeHole {
 
     // Get the elements to put a hole in after fully opened.
     // Do not use tricks like CSS vars to prevent style invalidation.
+    // Revealing mid-animation hides the zooming img and flips HDR (surface reconfigure).
     lightbox.on('openingAnimationEnd', () => {
+      this.opened = true;
       this.bgElement = this.lightbox.bg ?? null;
       this.contentElement = document.querySelector<HTMLElement>('body > #content');
       this.setClip(this.lastClip ?? 'none');
@@ -61,6 +64,7 @@ export default class PsNativeHole {
   }
 
   private reset() {
+    this.opened = false;
     if (this.clipRaf) {
       cancelAnimationFrame(this.clipRaf);
       this.clipRaf = 0;
@@ -104,6 +108,7 @@ export default class PsNativeHole {
   }
 
   private updateClip() {
+    if (!this.opened) return;
     const slide = this.lightbox.currSlide as unknown as PsSlide | undefined;
     const slideType = slide?.data.type;
     if (!slide || !slideType) {
