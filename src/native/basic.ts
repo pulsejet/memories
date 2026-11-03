@@ -108,7 +108,7 @@ export async function logout() {
  * Add current origin to URL if doesn't have any protocol or origin.
  */
 export function addOrigin(url: string) {
-  return url.match(/^(https?:)?\/\//)
+  return url.match(/^((https?:)?\/\/|content:\/\/)/)
     ? url
     : url.startsWith('/')
       ? `${location.origin}${url}`

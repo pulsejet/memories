@@ -197,8 +197,8 @@ class VideoContentSetup {
     };
   }
 
-  private getLocalSrc(content: VideoContent): VideoSource | null {
-    const url = nativex.getLocalVideoUrl(content.data.photo);
+  private getLocalSrc(content: VideoContent, player: HTMLElement): VideoSource | null {
+    const url = nativex.getLocalVideoUrl(content.data.photo, this.isNativeHolePlayer(player));
     if (!url) return null;
     return {
       src: url,
@@ -214,7 +214,7 @@ class VideoContentSetup {
     }
 
     // Check if a local file is available (NativeX).
-    const local = this.getLocalSrc(content);
+    const local = this.getLocalSrc(content, player);
     if (local) {
       return { src: local, videoIsHls: false };
     } else if (!config.vod_disable) {
