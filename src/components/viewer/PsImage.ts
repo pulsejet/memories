@@ -142,12 +142,7 @@ export default class ImageContentSetup {
 
   public async slideActivate(slide: PsSlide) {
     if (nativex.viewImageIsEnabled() && !slide.data.nxImageState && !isVideoContent(slide.content)) {
-      const photo = slide.data.photo;
-      let localUri = photo.local_uri;
-      if (!localUri && isLikelySamePhoto(photo, photo.local_photo)) {
-        localUri = photo.local_photo.local_uri;
-      }
-      await this.nxViewImageUpload(slide, slide.data.src, localUri);
+      await this.nxViewImageUpload(slide, slide.data.src, undefined);
       if (!slide.data.nxImageState) return; // deactivated
     }
 
@@ -177,6 +172,16 @@ export default class ImageContentSetup {
 
     // Don't load again
     slide.data.highSrcCond = 'never';
+
+    // Prefer the on-device original if available.
+    if (nativex.viewImageIsEnabled()) {
+      const photo = slide.data.photo;
+      let localUri = photo.local_uri;
+      if (!localUri && isLikelySamePhoto(photo, photo.local_photo)) {
+        localUri = photo.local_photo.local_uri;
+      }
+      if (localUri && (await this.nxViewImageUpload(slide, undefined, localUri))) return;
+    }
 
     this.loading++;
     this.lightbox.ui?.updatePreloaderVisibility();
@@ -241,7 +246,7 @@ export default class ImageContentSetup {
   }
 
   /** Fetch the preview blob and POST it. */
-  private async nxViewImageUpload(slide: PsSlide, remote: string, local: string | undefined) {
+  private async nxViewImageUpload(slide: PsSlide, remote: string | undefined, local: string | undefined) {
     if (slide.data.nxImageState !== 'loaded') {
       slide.data.nxImageState = 'loading';
     }
@@ -261,6 +266,7 @@ export default class ImageContentSetup {
         console.warn('Failed to view image locally.', e);
       }
     }
+    if (!remote) return false;
 
     try {
       const blobUrl = await ximg.fetchImage(remote);
