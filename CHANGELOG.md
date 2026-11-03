@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
   - **Update**: MySQL setups must run `occ memories:places-setup --force` after update.
 - **Feature**: Bundled VIPS image decoder with Ultra-HDR, Samsung HDR and ICC profile support ([#1110](https://github.com/pulsejet/memories/issues/1110), [#1645](https://github.com/pulsejet/memories/issues/1645)).
   - VIPS provider is enabled by default, and takes priority over Imagick/Imaginary.
+  - To update previews of existing photos, you can use "Refresh Metadata" after selecting photos from the UI.
 - **Feature**: Support for AVIF format via VIPS ([#1714](https://github.com/pulsejet/memories/issues/1714)).
   - Existing AVIF and RAW files may need `occ maintenance:mimetype:update-db --repair-filecache` followed by `occ memories:index`.
 - **Feature**: Support for camera RAW formats via VIPS.
