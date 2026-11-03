@@ -70,6 +70,7 @@ class NativeHoleImage(private val mCtx: MainActivity) {
      */
     fun setRect(x: Float, y: Float, w: Float, h: Float) {
         if (!x.isFinite() || !y.isFinite() || !w.isFinite() || !h.isFinite()) {
+            lastRect = null
             viewA.visibility = View.INVISIBLE
             viewB.visibility = View.INVISIBLE
             return
@@ -81,6 +82,7 @@ class NativeHoleImage(private val mCtx: MainActivity) {
         val cw = w.coerceIn(0f, 1000000f)
         val ch = h.coerceIn(0f, 1000000f)
         if (cw <= 0 || ch <= 0) {
+            lastRect = null
             viewA.visibility = View.INVISIBLE
             viewB.visibility = View.INVISIBLE
             return
@@ -254,8 +256,11 @@ class NativeHoleImage(private val mCtx: MainActivity) {
                     target.setOnImageEventListener(object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
                         override fun onReady() {
                             if (!cont.isActive) return
-                            lastRect?.let { r -> applyRect(target, r[0], r[1], r[2], r[3]) }
                             if (pingPong) promote(target)
+                            // No hole box yet: stay hidden until setRect places it.
+                            val r = lastRect
+                            if (r != null) applyRect(target, r[0], r[1], r[2], r[3])
+                            else target.visibility = View.INVISIBLE
                             cont.resume(Unit)
                         }
 

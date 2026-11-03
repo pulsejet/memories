@@ -253,7 +253,7 @@ export default class ImageContentSetup {
 
     if (local) {
       try {
-        await nativex.viewImageLocal(local);
+        if (!(await nativex.viewImageLocal(local))) return true; // superseded
         slide.data.highSrcCond = 'never'; // already max-res
         onload();
         return true;
@@ -266,8 +266,7 @@ export default class ImageContentSetup {
       const blobUrl = await ximg.fetchImage(remote);
       const res = await fetch(blobUrl);
       const blob = await res.blob();
-      await nativex.viewImageUpload(blob);
-      onload();
+      if (await nativex.viewImageUpload(blob)) onload();
       return true;
     } catch (e) {
       console.error('Error uploading image to native viewer:', e);
