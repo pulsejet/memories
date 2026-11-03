@@ -205,6 +205,7 @@ class AssetSyncCoordinator(
     @Throws(Exception::class)
     private fun syncBlocking(describe: JSONObject, baseUrl: String, dir: File) {
         val origin = AssetCache.originOf(baseUrl)
+        val webRoot = AssetCache.webrootOf(baseUrl)
         val appsPath = AssetCache.appsPathOf(describe)
         val js = parseJsAssets(describe)
         val css = parseCssAssets(describe)
@@ -236,7 +237,7 @@ class AssetSyncCoordinator(
                 prevFile.copyTo(File(jsDir, asset.name), overwrite = true)
                 reused++
             } else {
-                tasks.add(DownloadTask(jsDir, asset.name, absUrls(origin, asset.href, appsPath), asset.hash))
+                tasks.add(DownloadTask(jsDir, asset.name, absUrls(origin, webRoot, asset.href, appsPath), asset.hash))
             }
         }
         for (asset in css) {
@@ -246,7 +247,7 @@ class AssetSyncCoordinator(
                 prevFile.copyTo(File(cssDir, asset.name), overwrite = true)
                 reused++
             } else {
-                tasks.add(DownloadTask(cssDir, asset.name, absUrls(origin, asset.href, appsPath), null))
+                tasks.add(DownloadTask(cssDir, asset.name, absUrls(origin, webRoot, asset.href, appsPath), null))
             }
         }
         total = tasks.size
@@ -305,14 +306,22 @@ class AssetSyncCoordinator(
     /**
      * Candidate URLs for a manifest href joined onto the server origin; absolute hrefs pass through.
      * Hrefs are pinned to /apps/memories/, so [appsPath] (the real install path) is tried first.
+     * The server may live under a subpath (webroot, e.g. /nextcloud): manifest hrefs do not
+     * include it, so [webRoot] is prepended unless the href already carries it.
      */
-    private fun absUrls(origin: String, href: String, appsPath: String?): List<String> {
+    private fun absUrls(origin: String, webRoot: String, href: String, appsPath: String?): List<String> {
         if (href.startsWith("http://") || href.startsWith("https://")) return listOf(href)
-        if (appsPath != null && href.startsWith(APPS_PREFIX)) {
-            return listOf("$origin$appsPath/${href.removePrefix(APPS_PREFIX)}", origin + href).distinct()
+        val fullAppsPath = appsPath?.let {
+            if (webRoot.isNotEmpty() && !it.startsWith("$webRoot/")) "$webRoot$it" else it
         }
-        val urls = mutableListOf(origin + href)
-        if (href.startsWith(APPS_PREFIX)) urls.add(origin + CUSTOM_APPS_PREFIX + href.removePrefix(APPS_PREFIX))
-        return urls
+        val bare = if (webRoot.isNotEmpty() && href.startsWith("$webRoot/")) href.removePrefix(webRoot) else href
+        if (fullAppsPath != null && bare.startsWith(APPS_PREFIX)) {
+            val suffix = bare.removePrefix(APPS_PREFIX)
+            return listOf("$origin$fullAppsPath/$suffix", "$origin$webRoot$bare").distinct()
+        }
+        val full = if (webRoot.isNotEmpty() && !href.startsWith("$webRoot/")) "$origin$webRoot$href" else "$origin$href"
+        val urls = mutableListOf(full)
+        if (bare.startsWith(APPS_PREFIX)) urls.add("$origin$webRoot$CUSTOM_APPS_PREFIX${bare.removePrefix(APPS_PREFIX)}")
+        return urls.distinct()
     }
 }
