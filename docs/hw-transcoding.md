@@ -217,7 +217,7 @@ sudo -u www-data \
 
 ### Unraid
 
-On Unraid, you can follow [these steps](https://github.com/pulsejet/memories/issues/936) to set up hardware transcoding with an external trancoder.
+On Unraid, you can follow [these steps](https://github.com/pulsejet/memories/issues/936) to set up hardware transcoding with an external transcoder.
 
 1. Search for `go-vod` in community apps and click the link in the upper right to get results from DockerHub
 1. Select the option from `radialapps` and do a test install to generate a template
@@ -325,7 +325,7 @@ environment:
 
 ### Basic Steps
 
-If you have trouble with trancoding, try the following steps:
+If you have trouble with transcoding, try the following steps:
 
 1. Check the admin panel for any errors. It may be possible that Memories cannot connect to the transcoder or you have a go-vod version mismatch.
 
