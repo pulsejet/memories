@@ -24,6 +24,10 @@ Confirm each step with the user before running it.
    - Alpha/beta/rc: add `--prerelease`.
    - Wrong base: regenerate with `gh api .../generate-notes -f previous_tag_name=<prev>`, then `gh release edit --notes-file`.
 
+## Hotfix release
+
+For hotfix releases, just update the latest entry in the CHANGELOG.md to point to the new version rather than creating a new entry. Then follow the main release steps. In the gh release changelog, just say "Hotfix release for vX.X.X" and link to the previous release and changelog.
+
 ## go-vod release (two phases)
 
 `VERSION`, `GOVOD_VER` and the tag must agree (enforced by `get-bin-ext.sh` and `testGoVod`).
