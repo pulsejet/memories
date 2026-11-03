@@ -99,6 +99,7 @@ OC.L10N.register(
     "Volume" : "Volùmene",
     "Exposure" : "Espositzione",
     "Temperature" : "Temperadura",
+    "None" : "Perunu",
     "Bold" : "Grassetu",
     "Negative" : "Negativu",
     "Free" : "Lìberu",

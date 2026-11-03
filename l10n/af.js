@@ -46,7 +46,13 @@ OC.L10N.register(
     "Home" : "Tuis",
     "Unsaved changes" : "Onbewaarde veranderinge",
     "Quality" : "Kwaliteit",
+    "Saving …" : "Bewaar tans…",
     "Previous" : "Vorige",
+    "Color" : "Kleur",
+    "Temperature" : "Temperatuur",
+    "None" : "Geen",
+    "Bold" : "Vet",
+    "Negative" : "Negatief",
     "Original" : "Oorspronklik",
     "Setup" : "Opstelling",
     "Choose" : "Kies"

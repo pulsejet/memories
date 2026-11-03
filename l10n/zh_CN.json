@@ -504,8 +504,6 @@
     "Not now" : "以后再说",
     "Failed to add {filename} to album." : "新增 {filename} 至相册失败。",
     "Failed to remove {filename}." : "删除 {filename} 失败。",
-    "Failed to create {albumName}." : "创建{albumName}失败",
-    "Failed to rename {currentAlbumName} to {newAlbumName}." : "重命名{currentAlbumName}为{newAlbumName}失败。",
     "No items" : "没有项目",
     "_{n} item_::_{n} items_" : ["{n} 个项目"],
     "Shared by {user}" : "由{user} 共享",

@@ -37,6 +37,9 @@
     "Home" : "Initio",
     "Previous" : "Previe",
     "Next" : "Proxime",
-    "Fullscreen" : "Schermo plen"
+    "Play" : "Reproducer",
+    "Fullscreen" : "Schermo plen",
+    "Pause" : "Pausar",
+    "None" : "Nulle"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

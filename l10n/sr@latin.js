@@ -45,6 +45,7 @@ OC.L10N.register(
     "Options" : "Izbori",
     "Light" : "Svetla",
     "Normal" : "Normalna",
+    "None" : "Ništa",
     "Bold" : "Podebljano",
     "Setup" : "Podesi",
     "Yes" : "Da",

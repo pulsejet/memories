@@ -74,6 +74,7 @@ OC.L10N.register(
     "Normal" : "Normal",
     "Finish" : "Përfundo",
     "Temperature" : "Temperatura",
+    "None" : "Asnjë",
     "Bold" : "I theksuar",
     "Negative" : "Negative",
     "Not now" : "Jo tani",
