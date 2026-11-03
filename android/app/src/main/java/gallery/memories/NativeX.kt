@@ -290,7 +290,7 @@ class NativeX(private val mCtx: MainActivity) {
             }
         } catch (e: Exception) {
             Log.w(TAG, "handleBridge: $method $path failed", e)
-            BridgeResponses.error()
+            BridgeResponses.error(e.message)
         }
         // Merge CORS headers so any headers set by the route survive.
         val headers = (response.responseHeaders ?: emptyMap()).toMutableMap()

@@ -1,6 +1,7 @@
 package gallery.memories.bridge
 
 import android.webkit.WebResourceResponse
+import org.json.JSONObject
 import java.io.ByteArrayInputStream
 
 /** Builds bridge responses. Status must be set explicitly: the 3-arg constructor leaves it 0, which the socket server would write raw onto the wire. */
@@ -16,8 +17,10 @@ object BridgeResponses {
         }
     }
 
-    fun error(): WebResourceResponse {
-        return WebResourceResponse("application/json", "UTF-8", ByteArrayInputStream("{}".toByteArray())).apply {
+    /** 500 with `{"message": message}`, or `{}` when there is no message. */
+    fun error(message: String? = null): WebResourceResponse {
+        val body = if (message == null) JSONObject() else JSONObject(mapOf("message" to message))
+        return WebResourceResponse("application/json", "UTF-8", ByteArrayInputStream(body.toString().toByteArray())).apply {
             setStatusCodeAndReasonPhrase(500, "Internal Server Error")
         }
     }

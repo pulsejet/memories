@@ -209,6 +209,8 @@
         border: 1px solid rgba(255,255,255,0.25);
         padding: 10px 12px;
         border-radius: 12px;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
       }
       .shake { animation: shake 0.3s ease; }
       @keyframes shake {
@@ -369,14 +371,17 @@
             method: "GET",
             signal: controller.signal,
           });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body.message || `HTTP ${res.status}`);
+          }
 
           // API is fine, redirect to login page
           clearTimeout(timeoutId);
           loginText.textContent = "Redirecting";
         } catch (e) {
-          // unreachable? native side will toast; show inline hint too
-          showError("Could not reach that server. Check the address and try again.");
+          const reason = e.name === "AbortError" ? "Timed out" : e.message;
+          showError(`Could not reach that server. Check the address and try again.\n${reason}`);
         } finally {
           urlBox.disabled = false;
           loginButton.classList.remove("loading");
