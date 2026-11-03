@@ -235,6 +235,7 @@ final class AdminController extends ApiController
                         'healthy' => true,
                         'detail' => $result['version'],
                         'latencyMs' => $result['latencyMs'],
+                        'pingMs' => $result['pingMs'],
                     ];
                 } catch (\Exception $e) {
                     $govods[] = [

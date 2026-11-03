@@ -44,6 +44,7 @@ func NewServer(cfg *config.Config) *Server {
 func (s *Server) routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", s.handleHealth)
+	mux.HandleFunc("GET /ping", s.handlePing)
 	mux.HandleFunc("POST /vod", s.handleVod)
 	if s.bridge != nil {
 		mux.Handle("GET /bridge", s.bridge)
@@ -61,6 +62,14 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 		"status":    status,
 		"version":   s.cfg.Version,
 		"latencyMs": latencyMs,
+	})
+}
+
+func (s *Server) handlePing(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"status":  "healthy",
+		"version": s.cfg.Version,
 	})
 }
 

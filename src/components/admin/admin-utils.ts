@@ -41,23 +41,21 @@ export function binaryStatusOk(status: IBinaryStatus): boolean {
 
 /** Human-readable status text for a go-vod server, including latency when known. */
 export function serviceStatus(s: IServiceStatus): string {
-  if (s.healthy) {
-    if (s.latencyMs !== undefined && s.latencyMs !== null) {
-      return t('memories', '{srv} - Healthy ({version}, latency={latency}ms).', {
-        srv: s.server,
-        version: s.detail,
-        latency: s.latencyMs,
-      });
-    }
-    return t('memories', '{srv} - Healthy ({version}).', {
-      srv: s.server,
-      version: s.detail,
-    });
+  const status = s.healthy ? t('memories', 'Healthy') : t('memories', 'Unhealthy');
+
+  const info = s.detail ? [s.detail] : [];
+  if (s.latencyMs !== undefined && s.latencyMs !== null) {
+    info.push(`latency=${s.latencyMs}ms`);
   }
-  return t('memories', '{srv} - Unhealthy ({info}).', {
-    srv: s.server,
-    info: s.detail,
-  });
+  if (s.pingMs !== undefined && s.pingMs !== null) {
+    info.push(`ping=${s.pingMs}ms`);
+  }
+
+  let str = `${s.server} - ${status}`;
+  if (info.length) {
+    str += ` (${info.join(', ')})`;
+  }
+  return str + '.';
 }
 
 /** NoteCard severity for a go-vod server. */

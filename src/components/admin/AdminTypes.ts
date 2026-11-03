@@ -60,6 +60,7 @@ export type IServiceStatus = {
   healthy: boolean;
   detail: string;
   latencyMs?: number | null;
+  pingMs?: number | null;
 };
 
 export type ISystemStatus = {

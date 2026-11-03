@@ -364,12 +364,19 @@ final class BinExt
         // Ensure transcoder is running
         $this->ensureGoVod();
 
+        $client = $this->clientService->newClient();
+        $options = [
+            'timeout' => 1,
+            'connect_timeout' => 1,
+            'nextcloud' => ['allow_local_address' => true],
+        ];
+
         try {
-            $res = $this->clientService->newClient()->get("http://{$server}/health", [
-                'timeout' => 1,
-                'connect_timeout' => 1,
-                'nextcloud' => ['allow_local_address' => true],
-            ]);
+            $start = hrtime(true);
+            $client->get("http://{$server}/ping", $options);
+            $pingMs = round((float) (hrtime(true) - $start) / 1e6, 1);
+
+            $res = $client->get("http://{$server}/health", $options);
         } catch (\Exception $e) {
             throw new \Exception('failed to connect: '.$e->getMessage());
         }
@@ -390,6 +397,7 @@ final class BinExt
         return [
             'version' => $version,
             'latencyMs' => isset($json['latencyMs']) ? (int) $json['latencyMs'] : null,
+            'pingMs' => $pingMs,
         ];
     }
 
