@@ -15,14 +15,21 @@ class AssetDownloader(private val api: NextcloudApi) {
     fun reset() { progress.set(0) }
 
     /**
-     * Downloads [url] into [dir]/[name], verifying [expectedSha256] first.
+     * Downloads the first of [urls] that succeeds into [dir]/[name], verifying [expectedSha256].
      * Writes atomically via a temp file so interrupted downloads never
      * leave a partial file behind.
      */
     @Throws(Exception::class)
-    fun downloadTo(dir: File, name: String, url: String, expectedSha256: String? = null) {
-        val bytes = api.downloadBytes(url)
-        if (expectedSha256 != null) verifySha256(bytes, expectedSha256, name)
+    fun downloadTo(dir: File, name: String, urls: List<String>, expectedSha256: String? = null) {
+        var error: Exception? = null
+        val bytes = urls.firstNotNullOfOrNull { url ->
+            try {
+                api.downloadBytes(url).also { if (expectedSha256 != null) verifySha256(it, expectedSha256, name) }
+            } catch (e: Exception) {
+                error = e
+                null
+            }
+        } ?: throw error ?: Exception("No URL for $name")
         val tmp = File.createTempFile(name, ".part", dir)
         try {
             tmp.writeBytes(bytes)

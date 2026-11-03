@@ -27,6 +27,8 @@ class AssetSyncCoordinator(
     companion object {
         private val TAG = AssetSyncCoordinator::class.java.simpleName
         const val MAX_PARALLEL = 8
+        private const val APPS_PREFIX = "/apps/memories/"
+        private const val CUSTOM_APPS_PREFIX = "/custom_apps/memories/"
     }
 
     /** One downloadable web asset: remote [href], verified against [hash] for JS. */
@@ -36,7 +38,7 @@ class AssetSyncCoordinator(
     data class CssAsset(val name: String, val href: String)
 
     /** One queued file download within [syncBlocking]. */
-    private data class DownloadTask(val dir: File, val name: String, val url: String, val hash: String?)
+    private data class DownloadTask(val dir: File, val name: String, val urls: List<String>, val hash: String?)
 
     /** Lifecycle: idle → downloading → ready | error. */
     @Volatile var status = "idle"
@@ -233,7 +235,7 @@ class AssetSyncCoordinator(
                 prevFile.copyTo(File(jsDir, asset.name), overwrite = true)
                 reused++
             } else {
-                tasks.add(DownloadTask(jsDir, asset.name, absUrl(origin, asset.href), asset.hash))
+                tasks.add(DownloadTask(jsDir, asset.name, absUrls(origin, asset.href), asset.hash))
             }
         }
         for (asset in css) {
@@ -243,7 +245,7 @@ class AssetSyncCoordinator(
                 prevFile.copyTo(File(cssDir, asset.name), overwrite = true)
                 reused++
             } else {
-                tasks.add(DownloadTask(cssDir, asset.name, absUrl(origin, asset.href), null))
+                tasks.add(DownloadTask(cssDir, asset.name, absUrls(origin, asset.href), null))
             }
         }
         total = tasks.size
@@ -252,7 +254,7 @@ class AssetSyncCoordinator(
             val pool = Executors.newFixedThreadPool(minOf(tasks.size, MAX_PARALLEL))
             try {
                 val futures = tasks.map { t ->
-                    pool.submit { downloader.downloadTo(t.dir, t.name, t.url, t.hash) }
+                    pool.submit { downloader.downloadTo(t.dir, t.name, t.urls, t.hash) }
                 }
                 try {
                     for (f in futures) f.get()
@@ -299,7 +301,14 @@ class AssetSyncCoordinator(
         }
     }
 
-    /** Joins a manifest href onto the server origin; absolute hrefs pass through. */
-    private fun absUrl(origin: String, href: String): String =
-        if (href.startsWith("http://") || href.startsWith("https://")) href else origin + href
+    /**
+     * Candidate URLs for a manifest href joined onto the server origin; absolute hrefs pass through.
+     * Hrefs are pinned to /apps/memories/, but the app may be installed under /custom_apps/.
+     */
+    private fun absUrls(origin: String, href: String): List<String> {
+        if (href.startsWith("http://") || href.startsWith("https://")) return listOf(href)
+        val urls = mutableListOf(origin + href)
+        if (href.startsWith(APPS_PREFIX)) urls.add(origin + CUSTOM_APPS_PREFIX + href.removePrefix(APPS_PREFIX))
+        return urls
+    }
 }
