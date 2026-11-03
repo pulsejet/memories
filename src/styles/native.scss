@@ -24,11 +24,13 @@ html.native {
 
   > body > .memories-viewer .nativex-hole {
     .pswp__img--placeholder {
-      display: none;
+      opacity: 0 !important;
+      pointer-events: none !important;
     }
     .pswp__img {
       > img {
-        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
       }
     }
   }
