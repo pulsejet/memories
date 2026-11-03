@@ -24,7 +24,7 @@ export default class ImageContentSetup {
     lightbox.on('contentDestroy', (e) => this.onContentDestroy(e as unknown as PsEvent));
     lightbox.on('destroy', () => this.onDestroy());
     lightbox.on('zoomPanUpdate', (e) => this.zoomPanUpdate(e as unknown as { slide: PsSlide }));
-    lightbox.on('slideActivate', (e) => this.slideActivate(e.slide as unknown as PsSlide));
+    lightbox.on('slideActivate', (e) => void this.slideActivate(e.slide as unknown as PsSlide));
     lightbox.on('slideDeactivate', (e) => this.slideDeactivate(e.slide as unknown as PsSlide));
     lightbox.addFilter('isContentLoading', (l, c) => this.isContentLoading(l, c as unknown as PsContent));
     lightbox.addFilter('placeholderSrc', (s, c) => this.placeholderSrc(s, c as unknown as PsContent));
@@ -140,14 +140,15 @@ export default class ImageContentSetup {
     }
   }
 
-  public slideActivate(slide: PsSlide) {
+  public async slideActivate(slide: PsSlide) {
     if (nativex.viewImageIsEnabled() && !slide.data.nxImageState && !isVideoContent(slide.content)) {
       const photo = slide.data.photo;
       let localUri = photo.local_uri;
       if (!localUri && isLikelySamePhoto(photo, photo.local_photo)) {
         localUri = photo.local_photo.local_uri;
       }
-      void this.nxViewImageUpload(slide, slide.data.src, localUri);
+      await this.nxViewImageUpload(slide, slide.data.src, localUri);
+      if (!slide.data.nxImageState) return; // deactivated
     }
 
     if (slide.data.highSrcCond === 'always') {
