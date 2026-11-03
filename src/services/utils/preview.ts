@@ -4,7 +4,7 @@ import type { RouteLocationNormalized } from 'vue-router';
 import { API } from '@services/API';
 import { NAPI } from '@native/api';
 
-import { isLikelySamePhoto, isLocalPhoto } from './photo';
+import { isLocalPhoto } from './photo';
 
 import type { IConfig, IPhoto } from '@typings';
 
@@ -61,8 +61,6 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
     // Use capped full image if NativeX is used
     if (isLocalPhoto(photo)) {
       return API.Q(NAPI.IMAGE_FULL(photo.auid!), { size: longEdge });
-    } else if (photo.local_photo?.auid && isLikelySamePhoto(photo, photo.local_photo)) {
-      return API.Q(NAPI.IMAGE_FULL(photo.local_photo.auid), { size: longEdge });
     }
   }
 
@@ -85,8 +83,6 @@ export function getPreviewUrl(opts: PreviewOptsSize | PreviewOptsMsize | Preview
   // Special previews
   if (isLocalPhoto(photo)) {
     return API.Q(NAPI.IMAGE_PREVIEW(photo.fileid), { c, x, y });
-  } else if (isLikelySamePhoto(photo, photo.local_photo)) {
-    return API.Q(NAPI.IMAGE_PREVIEW(photo.local_photo.fileid), { c, x, y });
   } else if (photo.trashInfo) {
     return API.TRASH_PREVIEW(photo.fileid, x, y, a);
   }
