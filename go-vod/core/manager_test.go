@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/pulsejet/memories/go-vod/config"
 	"github.com/stretchr/testify/require"
@@ -55,11 +56,17 @@ func TestRegistryRefreshesToken(t *testing.T) {
 	defer m1.Destroy()
 	require.Equal(t, "tok-1", m1.getServiceToken())
 
-	// Same file, new short-lived token: same manager, refreshed token.
+	// Same file, new token: same manager, token kept so PHP reuses open files.
 	m2, err := reg.GetOrCreate(ManagerParams{URL: "http://localhost/input.mp4", StreamID: "s", FileID: 7, Etag: "etag-1", ServiceToken: "tok-2"})
 	require.NoError(t, err)
 	require.Same(t, m1, m2)
-	require.Equal(t, "tok-2", m2.getServiceToken())
+	require.Equal(t, "tok-1", m2.getServiceToken())
+
+	// Refreshed once the token is old.
+	m1.tokenAt = time.Now().Add(-time.Hour)
+	_, err = reg.GetOrCreate(ManagerParams{URL: "http://localhost/input.mp4", StreamID: "s", FileID: 7, Etag: "etag-1", ServiceToken: "tok-3"})
+	require.NoError(t, err)
+	require.Equal(t, "tok-3", m1.getServiceToken())
 }
 
 func TestRegistryStaleRemove(t *testing.T) {

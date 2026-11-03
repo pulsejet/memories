@@ -41,9 +41,31 @@ func TestNextcloudEnvPriority(t *testing.T) {
 	c.NextcloudURL = "http://file"
 
 	t.Setenv("NEXTCLOUD_HOST", "http://env")
+	t.Setenv("GO_VOD_FFMPEG_PATH", "/env/ffmpeg")
+	t.Setenv("GO_VOD_FFPROBE_PATH", "/env/ffprobe")
+	t.Setenv("GO_VOD_TEMP_DIR", "/env/tmp")
 	require.NoError(t, c.AutoDetect())
 	require.Equal(t, "http://env", c.NextcloudURL)
+	require.Equal(t, "/env/ffmpeg", c.FFmpeg)
+	require.Equal(t, "/env/ffprobe", c.FFprobe)
+	require.Equal(t, "/env/tmp", c.TempDir)
 	require.NoError(t, c.Validate())
+}
+
+func TestBridgeEnv(t *testing.T) {
+	c := Defaults("test")
+	c.FFmpeg, c.FFprobe, c.TempDir = "/bin/ffmpeg", "/bin/ffprobe", t.TempDir()
+
+	t.Setenv("GO_VOD_BRIDGE_ENABLED", "0")
+	t.Setenv("GO_VOD_BRIDGE_MAX_WORKERS", "8")
+	t.Setenv("GO_VOD_BRIDGE_MIN_WORKERS", "2")
+	t.Setenv("GO_VOD_BRIDGE_WORKER_TTL", "45")
+	t.Setenv("GO_VOD_BRIDGE_IDLE_TIME", "")
+	require.NoError(t, c.AutoDetect())
+	require.Equal(t, Bridge{Enabled: false, MaxWorkers: 8, MinWorkers: 2, WorkerTTL: 45, IdleTime: 5}, c.Bridge)
+
+	t.Setenv("GO_VOD_BRIDGE_MAX_WORKERS", "many")
+	require.ErrorContains(t, c.AutoDetect(), "GO_VOD_BRIDGE_MAX_WORKERS")
 }
 
 func TestLoadFile(t *testing.T) {

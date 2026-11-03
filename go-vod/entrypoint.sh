@@ -41,7 +41,7 @@ URL="$HOST/index.php/apps/memories/static/go-vod?arch=$ARCH"
 
 # set the -k option in curl if allow_insecure is set
 EXTRA_CURL_ARGS=""
-if [[ $ALLOW_INSECURE == true ]]; then
+if [[ $ALLOW_INSECURE == 1 || $ALLOW_INSECURE == true ]]; then
     EXTRA_CURL_ARGS="$EXTRA_CURL_ARGS -k"
 fi
 

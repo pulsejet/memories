@@ -51,9 +51,11 @@ type Manager struct {
 	// usesTemp marks inputs served from a temp file download.
 	usesTemp bool
 	// serviceToken is the short-lived provisioned token sent back upstream.
-	// Refreshed on every request since each carries a new token.
+	// Kept stable for an hour so PHP can reuse open files, then replaced
+	// by the next request's token.
 	tokenMu      sync.RWMutex
 	serviceToken string
+	tokenAt      time.Time
 	// fileid keys the on-disk cache; etag validates it.
 	fileid int64
 	etag   string
@@ -73,6 +75,9 @@ type Manager struct {
 
 	// playableCodecs lists browser-playable codecs; immutable after creation.
 	playableCodecs []string
+
+	// closeBridgeFile releases the file in bridge workers on Destroy.
+	closeBridgeFile func()
 
 	// copyEligible is set from the base probe (playable codec, no rotation)
 	// and is immutable after creation. It only says keyframes are worth trying.
@@ -125,18 +130,20 @@ type NewManagerArgs struct {
 
 func NewManager(a NewManagerArgs) (*Manager, error) {
 	m := &Manager{
-		c:              a.C,
-		tc:             a.TConfig,
-		url:            a.URL,
-		input:          a.URL,
-		usesTemp:       a.UsesTemp,
-		serviceToken:   a.ServiceToken,
-		id:             a.StreamID,
-		fileid:         a.FileID,
-		etag:           a.Etag,
-		generation:     a.Generation,
-		idle:           a.Idle,
-		playableCodecs: a.PlayableCodecs,
+		c:               a.C,
+		tc:              a.TConfig,
+		url:             a.URL,
+		input:           a.URL,
+		usesTemp:        a.UsesTemp,
+		serviceToken:    a.ServiceToken,
+		tokenAt:         time.Now(),
+		id:              a.StreamID,
+		fileid:          a.FileID,
+		etag:            a.Etag,
+		generation:      a.Generation,
+		idle:            a.Idle,
+		playableCodecs:  a.PlayableCodecs,
+		closeBridgeFile: a.CloseBridgeFile,
 	}
 	m.streams = make(map[string]*Stream)
 
@@ -307,6 +314,10 @@ func (m *Manager) Destroy() {
 
 	// Delete temp dir
 	os.RemoveAll(m.tempDir)
+
+	if m.closeBridgeFile != nil {
+		m.closeBridgeFile()
+	}
 }
 
 func (m *Manager) Renditions() []Rendition {
@@ -344,11 +355,14 @@ func (m *Manager) getServiceToken() string {
 	return m.serviceToken
 }
 
+// refreshServiceToken replaces the token once it is an hour old, well
+// within the 12 hours PHP tokens are valid.
 func (m *Manager) refreshServiceToken(serviceToken string) {
-	if serviceToken != "" {
-		m.tokenMu.Lock()
-		defer m.tokenMu.Unlock()
+	m.tokenMu.Lock()
+	defer m.tokenMu.Unlock()
+	if serviceToken != "" && time.Since(m.tokenAt) >= time.Hour {
 		m.serviceToken = serviceToken
+		m.tokenAt = time.Now()
 	}
 }
 
@@ -576,7 +590,11 @@ func (m *Manager) downloadTemp() error {
 		req.Header.Set(ServiceTokenHeader, token)
 	}
 
-	res, err := UpstreamClient.Do(req)
+	client := &http.Client{
+		Timeout:   10 * time.Second,
+		Transport: m.c.Transport(),
+	}
+	res, err := client.Do(req)
 	if err != nil {
 		return err
 	}

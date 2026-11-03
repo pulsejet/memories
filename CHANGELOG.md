@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Support editing metadata of RAW files including stacked JPEG+RAW pairs ([#1222](https://github.com/pulsejet/memories/issues/1222)).
 - **Feature**: Direct streaming for HEVC / AV1 / VP9 videos with HLS-fMP4.
 - **Feature**: 25x faster storyboard rendering for video timeline previews.
+- **Feature**: 2x faster video start and seek with persistent file reads for the transcoder ([config options](https://memories.gallery/system-config/)).
 - **Feature**: High precision map markers setting ([#1701](https://github.com/pulsejet/memories/issues/1701))
 - **Feature**: Media management grant for silent local file operations on Android ([#1033](https://github.com/pulsejet/memories/pull/1033))
 - **Feature**: Option to skip delete confirmation in viewer ([#1687](https://github.com/pulsejet/memories/issues/1687), [#1689](https://github.com/pulsejet/memories/issues/1689), [#1246](https://github.com/pulsejet/memories/issues/1246))

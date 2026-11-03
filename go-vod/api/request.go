@@ -22,6 +22,9 @@ type VodRequest struct {
 	ServiceToken string `json:"serviceToken"`
 	// Profile is the transcoding profile for this request.
 	Profile string `json:"profile"`
+	// GoVodAddress is this go-vod's address as Nextcloud reaches it, passed back
+	// on bridge callbacks so PHP dials this same instance.
+	GoVodAddress string `json:"goVodAddress"`
 	// Query are passthrough parameters, e.g. auth tokens.
 	Query VodQuery `json:"query"`
 	// TConfig is the config for this request.

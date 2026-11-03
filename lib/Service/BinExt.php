@@ -196,15 +196,13 @@ final class BinExt
         return $this->systemConfig->get('memories.vod.connect') ?: [$bind];
     }
 
-    /** Get the upstream URL for a go-vod API (vod, create). */
-    public function getGoVodEndpoint(string $client, string $endpoint): string
+    /** Get the go-vod server (host:port) for a client. */
+    public function getGoVodServer(string $client): string
     {
         $servers = $this->getGoVodServers();
 
         // Sticky-route each client to one server so go-vod state stays local
-        $srv = $servers[(crc32($client) & 0xFFFFFFFF) % \count($servers)];
-
-        return "http://{$srv}/{$endpoint}";
+        return $servers[(crc32($client) & 0xFFFFFFFF) % \count($servers)];
     }
 
     public function goVodTConfig(): array
@@ -243,6 +241,13 @@ final class BinExt
             'tempdir' => $dir('memories.vod.tempdir', sys_get_temp_dir().'/go-vod/'),
             'cacheDir' => $dir('memories.vod.cachedir', sys_get_temp_dir().'/go-vod-cache'),
             'nextcloudUrl' => rtrim($this->systemConfig->get('memories.vod.nc_url'), '/'),
+            'bridge' => [
+                'enabled' => $this->systemConfig->get('memories.vod.bridge.enabled'),
+                'maxWorkers' => $this->systemConfig->get('memories.vod.bridge.max_workers'),
+                'minWorkers' => $this->systemConfig->get('memories.vod.bridge.min_workers'),
+                'workerTTL' => $this->systemConfig->get('memories.vod.bridge.worker_ttl'),
+                'idleTime' => $this->systemConfig->get('memories.vod.bridge.idle_time'),
+            ],
         ];
     }
 

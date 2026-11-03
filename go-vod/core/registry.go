@@ -26,14 +26,15 @@ type IdleEvent struct {
 // ManagerParams identifies a manager for a file and client. Token is
 // per-request auth material, refreshed on hits, never identity.
 type ManagerParams struct {
-	URL            string
-	StreamID       string
-	FileID         int64
-	Etag           string
-	ServiceToken   string
-	PlayableCodecs []string
-	TConfig        config.TCfg
-	UsesTemp       bool
+	URL             string
+	StreamID        string
+	FileID          int64
+	Etag            string
+	ServiceToken    string
+	PlayableCodecs  []string
+	TConfig         config.TCfg
+	UsesTemp        bool
+	CloseBridgeFile func()
 }
 
 func NewRegistry(cfg *config.Config, idle chan IdleEvent) *Registry {

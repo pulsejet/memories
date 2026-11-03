@@ -130,6 +130,24 @@ final class SystemConfig
         // start go-vod if it is not running already.
         'memories.vod.external' => false,
 
+        // Serve go-vod file reads over persistent PHP workers.
+        // Only used by the internal transcoder; an external transcoder
+        // should use the env var GO_VOD_BRIDGE_ENABLED instead.
+        'memories.vod.bridge.enabled' => true,
+        // Max concurrent bridge workers; reads wait when all are busy.
+        // External transcoder: GO_VOD_BRIDGE_MAX_WORKERS.
+        'memories.vod.bridge.max_workers' => 4,
+        // Bridge workers kept warm when idle.
+        // External transcoder: GO_VOD_BRIDGE_MIN_WORKERS.
+        'memories.vod.bridge.min_workers' => 1,
+        // Max lifetime of a bridge worker in seconds (at most 300).
+        // Keep it below web server timeouts (e.g. fastcgi_read_timeout).
+        // External transcoder: GO_VOD_BRIDGE_WORKER_TTL.
+        'memories.vod.bridge.worker_ttl' => 30,
+        // Seconds that bridge workers above min_workers stay idle.
+        // External transcoder: GO_VOD_BRIDGE_IDLE_TIME.
+        'memories.vod.bridge.idle_time' => 5,
+
         // Quality Factor used for transcoding
         // This corresponds to CRF for x264 and global_quality for VA-API
         'memories.vod.qf' => 24,

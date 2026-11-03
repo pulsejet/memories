@@ -60,6 +60,11 @@ NVIDIA GPUs support hardware transcoding using NVENC.
           - NEXTCLOUD_ALLOW_INSECURE=1 # (self-signed certs or no HTTPS)
           - NVIDIA_VISIBLE_DEVICES=all
           - CACHE_DIR=/cache
+          - GO_VOD_BRIDGE_ENABLED=true # (options: https://memories.gallery/system-config/)
+          - GO_VOD_BRIDGE_MAX_WORKERS=4
+          - GO_VOD_BRIDGE_MIN_WORKERS=1
+          - GO_VOD_BRIDGE_WORKER_TTL=30
+          - GO_VOD_BRIDGE_IDLE_TIME=5
         links:
           - web:your-nextcloud-host.com # (reach Nextcloud container directly)
         devices:

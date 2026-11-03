@@ -31,6 +31,7 @@ use OCA\Memories\Exif;
 use OCA\Memories\HttpResponseException;
 use OCA\Memories\Service\BinExt;
 use OCA\Memories\Service\ServiceManager;
+use OCA\Memories\Service\VodBridge;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\ApiController;
@@ -44,6 +45,7 @@ use OCP\AppFramework\Http\RedirectResponse;
 use OCP\Files\File;
 use OCP\Http\Client\IClientService;
 use OCP\IRequest;
+use OCP\ISession;
 use OCP\IURLGenerator;
 use Psr\Log\LoggerInterface;
 
@@ -61,6 +63,8 @@ final class VideoController extends ApiController
         protected ServiceManager $serviceManager,
         protected Util $util,
         protected IURLGenerator $urlGenerator,
+        protected ISession $session,
+        protected VodBridge $vodBridge,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -210,6 +214,50 @@ final class VideoController extends ApiController
         });
     }
 
+    /**
+     * Serve go-vod file reads over a persistent dial-back connection.
+     *
+     * Authorized by a service token for the file. Only dials configured
+     * go-vod servers, which only accept their own nonce.
+     */
+    #[PublicPage]
+    #[NoCSRFRequired]
+    public function bridge(int $fileid, string $nonce, string $server, int $ttl = 30): Http\Response
+    {
+        return $this->util->guardEx(function () use ($fileid, $nonce, $server, $ttl) {
+            if ($this->systemConfig->get('memories.vod.disable')) {
+                throw Exceptions::Forbidden('Transcoding disabled');
+            }
+
+            $this->serviceManager->verifyServiceToken(
+                $this->request->getHeader(ServiceManager::SERVICE_TOKEN_HEADER),
+                $fileid,
+            );
+
+            if (1 !== preg_match('/^[A-Z2-7]{26}$/', $nonce)) {
+                throw Exceptions::BadRequest('Invalid nonce');
+            }
+            if (!\in_array($server, $this->binExt->getGoVodServers(), true)) {
+                throw Exceptions::Forbidden('Unknown go-vod server');
+            }
+
+            // Release the session lock while serving
+            try {
+                $this->session->close();
+            } catch (\Throwable) {
+                // best effort; serving must not fail on this
+            }
+
+            // The worker TTL bounds this request instead
+            @set_time_limit(0);
+
+            $ttl = max(1, min($ttl, VodBridge::MAX_TTL));
+            $reads = $this->vodBridge->serve($server, $nonce, $ttl);
+
+            return new JSONResponse(['reads' => $reads]);
+        });
+    }
+
     private function proxyUpstream(string $client, int $fileid, string $profile, string $liveid = ''): Http\Response
     {
         return $this->util->guardEx(function () use ($client, $fileid, $profile, $liveid) {
@@ -273,7 +321,8 @@ final class VideoController extends ApiController
     ): int {
         $this->binExt->ensureGoVod();
 
-        $url = $this->binExt->getGoVodEndpoint($client, 'vod');
+        $server = $this->binExt->getGoVodServer($client);
+        $url = "http://{$server}/vod";
 
         $data = [
             'client' => $client,
@@ -281,6 +330,7 @@ final class VideoController extends ApiController
             'etag' => $etag,
             'serviceToken' => $this->serviceManager->mintServiceToken($fileid),
             'profile' => $profile,
+            'goVodAddress' => $server,
             'query' => [
                 'albums' => $this->request->getParam('albums'),
                 'token' => $this->request->getParam('token'),

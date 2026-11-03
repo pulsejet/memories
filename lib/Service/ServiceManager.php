@@ -98,11 +98,21 @@ final class ServiceManager
 
     /**
      * Resolve a file from a provisioned service token.
+     */
+    public function getServiceTokenFile(string $token, int $fileid): File
+    {
+        $this->verifyServiceToken($token, $fileid);
+
+        return $this->getServiceFile($fileid);
+    }
+
+    /**
+     * Check that a provisioned service token grants access to a file.
      *
      * All failures share one status without revealing file existence,
      * with a distinct message per cause.
      */
-    public function getServiceTokenFile(string $token, int $fileid): File
+    public function verifyServiceToken(string $token, int $fileid): void
     {
         try {
             $data = json_decode($this->crypto->decrypt($token), true);
@@ -121,8 +131,6 @@ final class ServiceManager
         if ((int) ($data['fileid'] ?? 0) !== $fileid) {
             throw Exceptions::Forbidden('service token fileid mismatch');
         }
-
-        return $this->getServiceFile($fileid);
     }
 
     public function getServiceFile(int $fileid): File

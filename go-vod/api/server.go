@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/pulsejet/memories/go-vod/bridge"
 	"github.com/pulsejet/memories/go-vod/config"
 	"github.com/pulsejet/memories/go-vod/core"
 	"github.com/pulsejet/memories/go-vod/ffmpeg"
@@ -23,6 +24,7 @@ type Server struct {
 	cfg      *config.Config
 	server   *http.Server
 	reg      *core.Registry
+	bridge   *bridge.Bridge
 	idle     chan core.IdleEvent
 	exitCode int
 }
@@ -33,6 +35,9 @@ func NewServer(cfg *config.Config) *Server {
 
 	s := &Server{cfg: cfg, idle: make(chan core.IdleEvent)}
 	s.reg = core.NewRegistry(cfg, s.idle)
+	if cfg.Bridge.Enabled {
+		s.bridge = bridge.New(cfg)
+	}
 	return s
 }
 
@@ -40,6 +45,9 @@ func (s *Server) routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", s.handleHealth)
 	mux.HandleFunc("POST /vod", s.handleVod)
+	if s.bridge != nil {
+		mux.Handle("GET /bridge", s.bridge)
+	}
 	return mux
 }
 
@@ -94,9 +102,17 @@ func (s *Server) handleVod(w http.ResponseWriter, r *http.Request) {
 func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 	leaf := req.Profile
 
+	var closeBridgeFile func()
 	fileURL := s.cfg.FileURL(req.FileID)
-	if req.Query.Liveid != "" {
+	switch {
+	case req.Query.Liveid != "":
 		fileURL = s.cfg.LiveURL(req.FileID, req.Query.Liveid)
+	case s.bridge != nil && req.GoVodAddress != "":
+		s.bridge.SetServer(req.GoVodAddress)
+		fileURL = s.bridge.FileURL(req.FileID)
+		closeBridgeFile = func() {
+			s.bridge.CloseFile(req.FileID)
+		}
 	}
 
 	if !validProfile(leaf) {
@@ -105,14 +121,15 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, req VodRequest) {
 	}
 
 	manager, err := s.reg.GetOrCreate(core.ManagerParams{
-		URL:            fileURL,
-		StreamID:       req.Client,
-		FileID:         req.FileID,
-		Etag:           req.Etag,
-		ServiceToken:   req.ServiceToken,
-		PlayableCodecs: core.ParseCodecs(req.Query.Codecs),
-		TConfig:        req.TConfig,
-		UsesTemp:       req.Query.Liveid != "",
+		URL:             fileURL,
+		StreamID:        req.Client,
+		FileID:          req.FileID,
+		Etag:            req.Etag,
+		ServiceToken:    req.ServiceToken,
+		PlayableCodecs:  core.ParseCodecs(req.Query.Codecs),
+		TConfig:         req.TConfig,
+		UsesTemp:        req.Query.Liveid != "",
+		CloseBridgeFile: closeBridgeFile,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -201,7 +218,10 @@ func (s *Server) describeStatus() (string, int64) {
 		return err.Error(), elapsedMs()
 	}
 
-	client := &http.Client{Timeout: 2 * time.Second}
+	client := &http.Client{
+		Timeout:   2 * time.Second,
+		Transport: s.cfg.Transport(),
+	}
 	res, err := client.Do(req)
 	if err != nil {
 		log.Println("Error testing describe URL", err)
@@ -266,6 +286,9 @@ func (s *Server) Start() int {
 	ctx, cancel := context.WithDeadline(context.TODO(), time.Now().Add(5*time.Second))
 	defer cancel()
 	s.server.Shutdown(ctx)
+	if s.bridge != nil {
+		s.bridge.Close()
+	}
 
 	return s.exitCode
 }

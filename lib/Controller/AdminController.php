@@ -104,6 +104,11 @@ final class AdminController extends ApiController
                 'memories.vod.ffprobe',
                 'memories.vod.external',
                 'memories.vod.disable',
+                'memories.vod.bridge.enabled',
+                'memories.vod.bridge.max_workers',
+                'memories.vod.bridge.min_workers',
+                'memories.vod.bridge.worker_ttl',
+                'memories.vod.bridge.idle_time',
             ], true)) {
                 try {
                     $this->binExt->pkill('go-vod');
