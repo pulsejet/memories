@@ -231,16 +231,16 @@ const hasBottomText = computed((): boolean => {
 
 /** Get url of the photo */
 function url() {
-  let base: 256 | 512 = 256;
+  let base: 256 | 1024 = 256;
 
   // Check if displayed size is larger than the image
   if (props.data.dispH! > base * 0.9 && props.data.dispW! > base * 0.9) {
     // Get a bigger image
     // 1. No trickery here, just get one size bigger. This is to
     //    ensure that the images can be cached even after reflow.
-    // 2. Nextcloud only allows 4**x sized images, so technically
-    //    this ends up being equivalent to 1024x1024.
-    base = 512;
+    // 2. Nextcloud only allows 4**x sized images, so 512 would end up
+    //    as 1024 anyway; native previews are exact, so ask for it directly.
+    base = 1024;
   }
 
   return utils.getPreviewUrl({
