@@ -67,8 +67,8 @@ class LocalHttpServer(
     fun authCookie(): String = guard.cookieHeader()
 
     /** Points the server at an upstream origin and its offline snapshot. */
-    fun configure(serverOrigin: String, webRoot: String, assetDir: File) {
-        cfg = ServerConfig(serverOrigin, webRoot, assetDir)
+    fun configure(serverOrigin: String, webRoot: String, assetDir: File, appsPath: String? = null) {
+        cfg = ServerConfig(serverOrigin, webRoot, assetDir, appsPath)
     }
 
     /**
@@ -123,6 +123,7 @@ class LocalHttpServer(
         if (p == appPrefix || p == "$appPrefix/" || p.startsWith("$appPrefix/")) return null
         val prettyPrefix = config.webRoot + "/apps/memories"
         if (p == prettyPrefix || p == "$prettyPrefix/" || p.startsWith("$prettyPrefix/")) return null
+        config.appsPath?.let { if (p == it || p.startsWith("$it/")) return null }
         return config.serverOrigin + p + (query?.let { "?$it" } ?: "")
     }
 

@@ -78,7 +78,8 @@ object ShellPage {
                     attributes["nonce"] = nonce
                     unsafe {
                         val root = webRoot.jsString()
-                        raw("window._oc_webroot = $root; window._oc_appswebroots = {'memories': $root + '/apps/memories'};")
+                        val appRoot = AssetCache.appsPathOf(describe)?.jsString() ?: "$root + '/apps/memories'"
+                        raw("window._oc_webroot = $root; window._oc_appswebroots = {'memories': $appRoot};")
                         raw(
                             """
                             window._oc_capabilities = {

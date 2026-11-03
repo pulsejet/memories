@@ -110,7 +110,10 @@ class ServerRouter(
             }
             val jsPrefix1 = config.webRoot + "/index.php/apps/memories/js/"
             val jsPrefix2 = config.webRoot + "/apps/memories/js/"
-            if (method == "GET" && (rawPath.startsWith(jsPrefix1) || rawPath.startsWith(jsPrefix2))) {
+            val jsPrefix3 = config.appsPath?.let { "$it/js/" }
+            val isJs = rawPath.startsWith(jsPrefix1) || rawPath.startsWith(jsPrefix2) ||
+                (jsPrefix3 != null && rawPath.startsWith(jsPrefix3))
+            if (method == "GET" && isJs) {
                 StaticController.serveFile(call, File(config.assetDir, "js"), "text/javascript; charset=utf-8")
                 return
             }

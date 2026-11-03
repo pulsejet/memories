@@ -29,6 +29,7 @@ use OCA\Memories\Preview\Vips;
 use OCA\Memories\Service\Lens;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
+use OCP\App\AppPathNotFoundException;
 use OCP\App\IAppManager;
 use OCP\AppFramework\ApiController;
 use OCP\AppFramework\Http;
@@ -167,6 +168,12 @@ final class OtherController extends ApiController
                 'baseUrl' => $this->urlGenerator->linkToRouteAbsolute('memories.Page.main'),
                 'loginFlowUrl' => $this->urlGenerator->linkToRouteAbsolute('core.ClientFlowLoginV2.init'),
             ];
+
+            try {
+                $info['appsPath'] = $this->appManager->getAppWebPath(Application::APPNAME);
+            } catch (AppPathNotFoundException) {
+                $info['appsPath'] = null;
+            }
 
             try {
                 $info['uid'] = $this->util->getUID();

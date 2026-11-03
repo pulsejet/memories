@@ -205,6 +205,7 @@ class AssetSyncCoordinator(
     @Throws(Exception::class)
     private fun syncBlocking(describe: JSONObject, baseUrl: String, dir: File) {
         val origin = AssetCache.originOf(baseUrl)
+        val appsPath = AssetCache.appsPathOf(describe)
         val js = parseJsAssets(describe)
         val css = parseCssAssets(describe)
 
@@ -235,7 +236,7 @@ class AssetSyncCoordinator(
                 prevFile.copyTo(File(jsDir, asset.name), overwrite = true)
                 reused++
             } else {
-                tasks.add(DownloadTask(jsDir, asset.name, absUrls(origin, asset.href), asset.hash))
+                tasks.add(DownloadTask(jsDir, asset.name, absUrls(origin, asset.href, appsPath), asset.hash))
             }
         }
         for (asset in css) {
@@ -245,7 +246,7 @@ class AssetSyncCoordinator(
                 prevFile.copyTo(File(cssDir, asset.name), overwrite = true)
                 reused++
             } else {
-                tasks.add(DownloadTask(cssDir, asset.name, absUrls(origin, asset.href), null))
+                tasks.add(DownloadTask(cssDir, asset.name, absUrls(origin, asset.href, appsPath), null))
             }
         }
         total = tasks.size
@@ -303,10 +304,13 @@ class AssetSyncCoordinator(
 
     /**
      * Candidate URLs for a manifest href joined onto the server origin; absolute hrefs pass through.
-     * Hrefs are pinned to /apps/memories/, but the app may be installed under /custom_apps/.
+     * Hrefs are pinned to /apps/memories/, so [appsPath] (the real install path) is tried first.
      */
-    private fun absUrls(origin: String, href: String): List<String> {
+    private fun absUrls(origin: String, href: String, appsPath: String?): List<String> {
         if (href.startsWith("http://") || href.startsWith("https://")) return listOf(href)
+        if (appsPath != null && href.startsWith(APPS_PREFIX)) {
+            return listOf("$origin$appsPath/${href.removePrefix(APPS_PREFIX)}", origin + href).distinct()
+        }
         val urls = mutableListOf(origin + href)
         if (href.startsWith(APPS_PREFIX)) urls.add(origin + CUSTOM_APPS_PREFIX + href.removePrefix(APPS_PREFIX))
         return urls

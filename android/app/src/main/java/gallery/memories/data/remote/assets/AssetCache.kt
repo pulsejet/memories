@@ -37,6 +37,10 @@ class AssetCache(private val ctx: Context) {
             return WEBROOT_RE.find(path)?.groupValues?.get(1) ?: path.trimEnd('/')
         }
 
+        /** Web path the server installed the app under, e.g. /nc/custom_apps/memories; null if unknown. */
+        fun appsPathOf(describe: JSONObject): String? =
+            if (describe.isNull("appsPath")) null else describe.optString("appsPath").trimEnd('/').ifEmpty { null }
+
         private val WEBROOT_RE = Regex("^(.*?)(?:/index\\.php)?/apps/memories(?:/.*)?$")
     }
 

@@ -48,10 +48,13 @@ test.describe('@api Config and describe', () => {
     const res = await request.get(`${appUrl}/api/describe`);
     expect(res.ok()).toBeTruthy();
 
-    const data: { version: string; baseUrl: string; loginFlowUrl: string; uid: string | null } = await res.json();
+    const data: { version: string; baseUrl: string; loginFlowUrl: string; uid: string | null; appsPath: string } =
+      await res.json();
     expect(typeof data.version).toBe('string');
     expect(data.baseUrl).toContain('/apps/memories');
     expect(data.baseUrl.startsWith(baseUrl)).toBeTruthy();
+    expect(typeof data.appsPath).toBe('string');
+    expect(data.appsPath).toMatch(/^\/.+\/memories$/);
     expect(data.uid).toBe(username);
     expect(res.headers()['access-control-allow-origin']).toBe('*');
   });
