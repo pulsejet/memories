@@ -42,5 +42,6 @@ Independent of app versions. `release.yaml` ignores `android/*` tags, so the APK
 5. Verify with `apksigner verify --print-certs`: the cert must match the previous release's APK (`gh release download android/1.<N-1>`), or updates fail.
 6. Create the GitHub release, with the APK named `memories-1.N.apk`:
    ```sh
-   gh release create android/1.N memories-1.N.apk --title android/1.N --generate-notes --notes-start-tag android/1.<N-1> --latest=false --verify-tag
+   gh release create android/1.N memories-1.N.apk --title android/1.N --notes '**Full Changelog**: https://github.com/pulsejet/memories/compare/<prev>...android/1.N' --latest=false --verify-tag
    ```
+   - Notes are only the compare link, no generated notes. `<prev>` is the last `android/*` release tag.
