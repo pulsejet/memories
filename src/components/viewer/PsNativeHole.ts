@@ -56,6 +56,11 @@ export default class PsNativeHole {
       this.contentElement = document.querySelector<HTMLElement>('body > #content');
       this.setClip(this.lastClip ?? 'none');
     });
+
+    // Toggling HDR reconfigures the window surface; slow.
+    lightbox.on('destroy', () => {
+      nativex.nxAsync('setHdrColorMode')?.(false);
+    });
   }
 
   private setClip(clip: string) {
@@ -86,7 +91,6 @@ export default class PsNativeHole {
     if (!this.hideRaf) {
       this.hideRaf = requestAnimationFrame(() => {
         this.hideRaf = 0;
-        nativex.nxAsync('setHdrColorMode')?.(false);
         this.clearNative();
       });
     }

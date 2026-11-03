@@ -133,9 +133,11 @@ class NativeX(private val mCtx: MainActivity) {
     @JavascriptInterface
     fun setHdrColorMode(enabled: Boolean) {
         mCtx.runOnUiThread {
-            mCtx.window.colorMode =
-                if (enabled) ActivityInfo.COLOR_MODE_HDR
+            val mode = if (enabled) ActivityInfo.COLOR_MODE_HDR
                 else ActivityInfo.COLOR_MODE_DEFAULT
+            if (mCtx.window.colorMode != mode) {
+                mCtx.window.colorMode = mode
+            }
         }
     }
 
