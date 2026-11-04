@@ -178,6 +178,9 @@ func (c *Config) AutoDetect() error {
 	if c.TempDir == "" {
 		c.TempDir = os.TempDir() + "/go-vod"
 	}
+	if c.CacheDir() == "" {
+		c.CacheDir_ = os.TempDir() + "/go-vod-cache"
+	}
 
 	return nil
 }

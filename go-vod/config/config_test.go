@@ -52,6 +52,21 @@ func TestNextcloudEnvPriority(t *testing.T) {
 	require.NoError(t, c.Validate())
 }
 
+func TestCacheDirDefault(t *testing.T) {
+	c := Defaults("test")
+	c.FFmpeg, c.FFprobe = "/bin/ffmpeg", "/bin/ffprobe"
+	c.NextcloudURL = "http://localhost"
+
+	t.Setenv("CACHE_DIR", "")
+	require.NoError(t, c.AutoDetect())
+	require.Equal(t, os.TempDir()+"/go-vod-cache", c.CacheDir())
+	require.NoError(t, c.Validate())
+
+	c.CacheDir_ = "/file/cache"
+	require.NoError(t, c.AutoDetect())
+	require.Equal(t, "/file/cache", c.CacheDir())
+}
+
 func TestBridgeEnv(t *testing.T) {
 	c := Defaults("test")
 	c.FFmpeg, c.FFprobe, c.TempDir = "/bin/ffmpeg", "/bin/ffprobe", t.TempDir()
