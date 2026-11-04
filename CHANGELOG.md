@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v11.0.1] - 2026-11-03
+## [v11.0.2] - 2026-11-04
 
 - **Feature**: 2x faster reverse geocoding on MySQL.
   - **Update**: MySQL setups must run `occ memories:places-setup --force` after update.
