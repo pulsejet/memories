@@ -36,6 +36,9 @@ class SecureCredentialStore(private val context: Context) {
             .putBoolean("trustAll", cred.trustAll)
             .putString("username", cred.username)
             .putString("uid", cred.uid)
+            .putString("clientCertificateAlias", cred.clientCertificate?.alias)
+            .putString("clientCertificateHost", cred.clientCertificate?.host)
+            .putInt("clientCertificatePort", cred.clientCertificate?.port ?: -1)
             .putString("encryptedToken", Base64.encodeToString(encryptedToken, Base64.DEFAULT))
             .putString("iv", Base64.encodeToString(cipher.iv, Base64.DEFAULT))
             .apply()
@@ -58,7 +61,13 @@ class SecureCredentialStore(private val context: Context) {
                 val cipher = getCipher()
                 cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), IvParameterSpec(Base64.decode(ivStr, Base64.DEFAULT)))
                 val token = String(cipher.doFinal(Base64.decode(encryptedToken, Base64.DEFAULT)))
-                Credential(url, trustAll, username, token, prefs.getString("uid", null))
+                val alias = prefs.getString("clientCertificateAlias", null)
+                val host = prefs.getString("clientCertificateHost", null)
+                val port = prefs.getInt("clientCertificatePort", -1)
+                val certificate = if (alias != null && host != null && port in 1..65535) {
+                    ClientCertificate(alias, host, port)
+                } else null
+                Credential(url, trustAll, username, token, prefs.getString("uid", null), certificate)
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to decrypt stored credentials", e)
                 null
@@ -75,6 +84,7 @@ class SecureCredentialStore(private val context: Context) {
     fun deleteCredentials() {
         context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
             .remove("url").remove("trustAll").remove("username").remove("uid")
+            .remove("clientCertificateAlias").remove("clientCertificateHost").remove("clientCertificatePort")
             .remove("encryptedToken").remove("iv").apply()
     }
 

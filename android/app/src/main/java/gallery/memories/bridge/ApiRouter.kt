@@ -43,7 +43,10 @@ class ApiRouter(
         val parts = path.split("/")
         return when {
             path.matches(NativeX.API.LOGIN) -> {
-                account.login(decode(parts[3]), url.getBooleanQueryParameter("trustAll", false))
+                account.login(
+                    decode(parts[3]), url.getBooleanQueryParameter("trustAll", false),
+                    url.getBooleanQueryParameter("clientCertificate", false),
+                )
                 BridgeResponses.json(JSONObject(mapOf("message" to "ok")))
             }
             path.matches(NativeX.API.DAYS) -> BridgeResponses.json(timeline.getDays())
