@@ -1,6 +1,6 @@
 plugins {
     id 'com.android.application'
-    id 'com.google.devtools.ksp' version '2.3.12'
+    id 'com.google.devtools.ksp' version '2.3.13'
 }
 
 android {
