@@ -1,11 +1,9 @@
 package gallery.memories.data.remote.http
 
 import android.content.Context
-import android.security.KeyChain
 import okhttp3.ConnectionPool
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
-import java.io.IOException
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -33,34 +31,18 @@ class HttpClients(context: Context, private val auth: AuthState, private val coo
 
     private fun newClient(): OkHttpClient {
         val builder = OkHttpClient.Builder().cookieJar(cookies)
-        val selection = auth.clientCertificate
-        if (auth.isTrustingAllCertificates || selection != null) {
-            val keyManager = selection?.let { certificate ->
-                ClientCertificateKeyManager(
-                    certificate,
-                    readPrivateKey = { readKeyChain { KeyChain.getPrivateKey(appContext, certificate.alias) } },
-                    readCertificateChain = { readKeyChain { KeyChain.getCertificateChain(appContext, certificate.alias) } },
-                )
-            }
+        val keyManager = ClientCertificateKeyManager.forServer(appContext, auth.baseUrl())
+        if (auth.isTrustingAllCertificates || keyManager != null) {
             val (sc, tm) = TlsTrust.context(auth.isTrustingAllCertificates, keyManager)
             builder.sslSocketFactory(sc.socketFactory, tm)
             if (auth.isTrustingAllCertificates) builder.hostnameVerifier { _, _ -> true }
-            else if (selection != null) {
+            else if (keyManager != null) {
                 // A wrapper keeps normal hostname verification and disables cross-host HTTP/2 coalescing.
                 val verifier = builder.build().hostnameVerifier
                 builder.hostnameVerifier { host, session -> verifier.verify(host, session) }
             }
         }
         return builder.build()
-    }
-
-    private fun <T> readKeyChain(read: () -> T?): T = try {
-        checkNotNull(read()) { "KeyChain permission was revoked or the certificate was removed" }
-    } catch (e: InterruptedException) {
-        Thread.currentThread().interrupt()
-        throw IOException("Client certificate access interrupted", e)
-    } catch (e: Exception) {
-        throw IOException("Cannot access client certificate. Sign in again to select a certificate.", e)
     }
 
     private fun newProxyClient(): OkHttpClient = client.newBuilder()

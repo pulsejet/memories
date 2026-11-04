@@ -11,5 +11,4 @@ data class Credential(
     val username: String,
     val token: String,
     val uid: String? = null,
-    val clientCertificate: ClientCertificate? = null,
 )

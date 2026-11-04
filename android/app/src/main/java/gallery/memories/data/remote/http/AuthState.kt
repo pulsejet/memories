@@ -1,7 +1,6 @@
 package gallery.memories.data.remote.http
 
 import android.util.Base64
-import gallery.memories.data.local.secure.ClientCertificate
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
@@ -14,8 +13,6 @@ class AuthState {
     private var uid: String? = null
     private var baseUrl: String? = null
     private var trustAll = false
-    var clientCertificate: ClientCertificate? = null
-        private set
 
     /** Whether self-signed certificates are accepted (user opt-in per server). */
     val isTrustingAllCertificates: Boolean get() = trustAll
@@ -42,10 +39,9 @@ class AuthState {
     }
 
     /** Points at a server. Clears with a null url (see AccountManager.deleteCredentials). */
-    fun build(url: String?, trustAll: Boolean, clientCertificate: ClientCertificate? = null) {
+    fun build(url: String?, trustAll: Boolean) {
         baseUrl = url
         this.trustAll = trustAll
-        this.clientCertificate = clientCertificate.takeIf { url?.toHttpUrlOrNull()?.isHttps == true }
     }
 
     /** Sets credentials, or clears them with null. */

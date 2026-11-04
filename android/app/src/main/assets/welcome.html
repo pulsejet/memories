@@ -261,14 +261,7 @@
         </label>
       </div>
 
-      <div class="trust">
-        <label for="client-certificate">
-          <input type="checkbox" id="client-certificate" class="m-checkbox" />
-          <span class="trust-text">Use a client certificate
-            <span class="trust-sub">Select a certificate installed in Android Settings when you continue</span>
-          </span>
-        </label>
-      </div>
+      <button class="m-button" id="client-cert">Select client certificate</button>
 
       <button class="m-button login-button" id="login">
         <span class="btn-spinner" aria-hidden="true"></span>
@@ -293,9 +286,8 @@
     <script>
       const urlBox = document.getElementById("server-url");
       const loginButton = document.getElementById("login");
+      const clientCertButton = document.getElementById("client-cert");
       const loginText = document.getElementById("login-text");
-      const clientCertificate = document.getElementById("client-certificate");
-      const trustAllCheckbox = document.getElementById("trust-all");
       const card = document.getElementById("main");
       const err = document.getElementById("err");
 
@@ -321,8 +313,7 @@
       function updateLoginEnabled() {
         const valid = validateUrl(getUrl());
         loginButton.disabled = !valid;
-        clientCertificate.disabled = !valid || new URL(getUrl()).protocol !== "https:";
-        if (clientCertificate.disabled) clientCertificate.checked = false;
+        clientCertButton.disabled = !valid || new URL(getUrl()).protocol !== "https:";
       }
 
       function getMemoriesUrl() {
@@ -362,30 +353,31 @@
       });
       updateLoginEnabled();
 
+      clientCertButton.addEventListener("click", () => {
+        globalThis.nativex?.requestClientCertFor(getUrl());
+      });
+
       // Login button click handler
       loginButton.addEventListener("click", async () => {
-        let timeoutId;
         try {
           urlBox.disabled = true;
-          clientCertificate.disabled = true;
-          trustAllCheckbox.disabled = true;
+          clientCertButton.disabled = true;
           loginButton.disabled = true;
           loginButton.classList.add("loading");
-          loginText.textContent = clientCertificate.checked ? "Select a certificate" : "Connecting";
+          loginText.textContent = "Connecting";
           err.style.display = "none";
 
-          // Allow time for Android's certificate picker before the connection starts.
+          // Abort request after 5 seconds
           const controller = new AbortController();
-          timeoutId = setTimeout(() => controller.abort(), clientCertificate.checked ? 180000 : 5000);
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
 
           // Login signal
           const encUrl = encodeURIComponent(encodeURIComponent(getMemoriesUrl().toString()));
 
           // Trust all certificates
-          const trustAll = trustAllCheckbox.checked ? "1" : "0";
-          const useClientCertificate = clientCertificate.checked ? "1" : "0";
+          const trustAll = document.getElementById("trust-all").checked ? "1" : "0";
 
-          const res = await fetch(`/api/login/${encUrl}?trustAll=${trustAll}&clientCertificate=${useClientCertificate}`, {
+          const res = await fetch(`/api/login/${encUrl}?trustAll=${trustAll}`, {
             method: "GET",
             signal: controller.signal,
           });
@@ -395,14 +387,13 @@
           }
 
           // API is fine, redirect to login page
+          clearTimeout(timeoutId);
           loginText.textContent = "Redirecting";
         } catch (e) {
           const reason = e.name === "AbortError" ? "Timed out" : e.message;
           showError(`Could not reach that server. Check the address and try again.\n${reason}`);
         } finally {
-          clearTimeout(timeoutId);
           urlBox.disabled = false;
-          trustAllCheckbox.disabled = false;
           loginButton.classList.remove("loading");
           loginText.textContent = "Continue to Login";
           updateLoginEnabled();

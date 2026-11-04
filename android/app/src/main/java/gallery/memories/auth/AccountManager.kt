@@ -15,7 +15,6 @@ import gallery.memories.data.remote.http.HttpClients
 import gallery.memories.data.remote.http.NextcloudApi
 import gallery.memories.ui.theme.ThemeManager
 import io.github.g00fy2.versioncompare.Version
-import okhttp3.HttpUrl.Companion.toHttpUrl
 
 @UnstableApi
 /**
@@ -40,15 +39,12 @@ class AccountManager(
     @Volatile private var loginGeneration = 0
 
     private val tabs = LoginCustomTab(activity)
-    private val certificates = ClientCertificateSelector(activity)
 
     /** Validates the server, starts a non-blocking asset sync, then hands off to the browser login flow. */
-    fun login(url: String, trustAll: Boolean, useClientCertificate: Boolean = false) {
+    fun login(url: String, trustAll: Boolean) {
         val gen = ++loginGeneration
         try {
-            val certificate = if (useClientCertificate) certificates.select(url.toHttpUrl()) else null
-            if (gen != loginGeneration) return
-            auth.build(url, trustAll, certificate)
+            auth.build(url, trustAll)
             clients.rebuild()
             val res = api.getApiDescriptionManifest()
             if (res.code != 200) {
@@ -66,10 +62,8 @@ class AccountManager(
             }
             loginFlow(body.getString("baseUrl"), body.getString("loginFlowUrl"))
         } catch (e: Exception) {
-            if (gen == loginGeneration) {
-                resetPendingLogin()
-                toast("Error: ${e.message}")
-            }
+            if (gen == loginGeneration) resetPendingLogin()
+            toast("Error: ${e.message}")
             throw Exception("Failed to connect to server: ${e.message}")
         }
     }
@@ -203,7 +197,6 @@ class AccountManager(
      */
     fun loggedOut() {
         loginGeneration++
-        certificates.cancel()
         tabs.close()
         toast(activity.getString(R.string.err_logged_out))
         deleteCredentials()
@@ -216,10 +209,7 @@ class AccountManager(
 
     /** Persists new credentials and applies them to the HTTP clients. */
     fun storeCredentials(url: String, user: String, password: String, uid: String?) {
-        store.saveCredentials(Credential(
-            url = url, trustAll = auth.isTrustingAllCertificates, username = user, token = password,
-            uid = uid, clientCertificate = auth.clientCertificate,
-        ))
+        store.saveCredentials(Credential(url = url, trustAll = auth.isTrustingAllCertificates, username = user, token = password, uid = uid))
         refreshCredentials()
     }
 
@@ -235,7 +225,7 @@ class AccountManager(
     /** Reloads stored credentials into the HTTP clients. No-op when logged out. */
     fun refreshCredentials() {
         val cred = store.getCredentials() ?: return
-        auth.build(cred.url, cred.trustAll, cred.clientCertificate)
+        auth.build(cred.url, cred.trustAll)
         clients.rebuild()
         auth.setAuthHeader(cred.username to cred.token, cred.uid)
     }
@@ -244,9 +234,5 @@ class AccountManager(
         activity.runOnUiThread { Toast.makeText(activity, message, Toast.LENGTH_LONG).show() }
     }
 
-    fun onDestroy() {
-        loginGeneration++
-        certificates.cancel()
-        tabs.unbind()
-    }
+    fun onDestroy() = tabs.unbind()
 }

@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.app.di.AppContainer
 import gallery.memories.bridge.BridgeResponses
+import gallery.memories.data.remote.http.ClientCertificateKeyManager
 import gallery.memories.share.DownloadNotifier
 import gallery.memories.share.ShareManager
 import org.json.JSONArray
@@ -96,6 +97,9 @@ class NativeX(private val mCtx: MainActivity) {
 
     @JavascriptInterface
     fun isNative(): Boolean = true
+
+    @JavascriptInterface
+    fun requestClientCertFor(url: String) = ClientCertificateKeyManager.select(mCtx, url)
 
     @JavascriptInterface
     fun getPlatform(): String = "android"
