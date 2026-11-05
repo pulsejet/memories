@@ -580,6 +580,8 @@ OC.L10N.register(
     "{name} failed test: {info}." : "{name} bestod ikke testen: {info}.",
     "{name} binary exists and is usable ({info})." : "Programfilen {name} findes og kan bruges ({info}).",
     "{name} binary status: {status}." : "Status for programfilen {name}: {status}.",
+    "Healthy" : "Fungerer",
+    "Unhealthy" : "Fungerer ikke",
     "Transcoding failed, check Nextcloud logs." : "Transkodningen mislykkedes. Tjek logfilerne i Nextcloud.",
     "Brightness" : "Lysstyrke",
     "Exposure" : "Eksponering",

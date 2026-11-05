@@ -578,6 +578,8 @@
     "{name} failed test: {info}." : "{name} sınamayı geçemedi: {info}.",
     "{name} binary exists and is usable ({info})." : "{name} dosyası var ve kullanılabilir ({info}).",
     "{name} binary status: {status}." : "{name} dosyasının durumu: {status}.",
+    "Healthy" : "Sağlıklı",
+    "Unhealthy" : "Sağlıksız",
     "Transcoding failed, check Nextcloud logs." : "Dönüşüm yapılamadı. Nextcloud günlüklerini denetleyin.",
     "Brightness" : "Parlaklık",
     "Exposure" : "Pozlama",

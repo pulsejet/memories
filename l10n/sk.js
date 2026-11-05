@@ -580,6 +580,8 @@ OC.L10N.register(
     "{name} failed test: {info}." : "{name} neúspešný test: {info}.",
     "{name} binary exists and is usable ({info})." : "Binárny súbor {name} existuje a je použiteľný ({info}).",
     "{name} binary status: {status}." : "Binárny stav {name}: {status}.",
+    "Healthy" : "Zdravý",
+    "Unhealthy" : "Nezdravý",
     "Transcoding failed, check Nextcloud logs." : "Prekódovanie zlyhalo, skontrolujte denníky Nextcloud.",
     "Brightness" : "Jas",
     "Exposure" : "Expozícia",

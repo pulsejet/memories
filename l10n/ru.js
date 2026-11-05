@@ -580,6 +580,8 @@ OC.L10N.register(
     "{name} failed test: {info}." : "{name}: тест не пройден ({info}).",
     "{name} binary exists and is usable ({info})." : "Двоичный файл {name} найден и пригоден к использованию ({info}).",
     "{name} binary status: {status}." : "Состояние двоичного файла {name}: {status}.",
+    "Healthy" : "Работает",
+    "Unhealthy" : "Не работает",
     "Transcoding failed, check Nextcloud logs." : "Не удалось перекодировать, проверьте журналы Nextcloud.",
     "Brightness" : "Яркость",
     "Exposure" : "Экспозиция",
