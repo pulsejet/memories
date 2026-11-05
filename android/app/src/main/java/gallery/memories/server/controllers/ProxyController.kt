@@ -15,6 +15,7 @@ import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.Call
 import okhttp3.MediaType
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -22,6 +23,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
 import okio.source
 import java.io.InputStream
+import java.util.concurrent.ConcurrentHashMap
 
 /** Forwards non-local requests to Nextcloud with stored basic auth, streaming both ways. */
 class ProxyController(
@@ -47,6 +49,8 @@ class ProxyController(
         private const val MAX_BUFFERED_BYTES = 1024 * 1024L
     }
 
+    private val inFlight: MutableSet<Call> = ConcurrentHashMap.newKeySet()
+
     /**
      * Proxies one request upstream with basic auth. The OCS-APIREQUEST header
      * exempts the call from CSRF checks, so no cookie session is needed.
@@ -65,14 +69,23 @@ class ProxyController(
         auth.authHeader()?.let { builder.header("Authorization", it) }
         builder.header("OCS-APIREQUEST", "true")
         builder.method(method, requestBody(call, method))
-        val response =
-            try {
-                withContext(Dispatchers.IO) { clients.proxyClient().newCall(builder.build()).execute() }
-            } catch (e: IOException) {
-                throw UpstreamNetworkException(e)
-            }
-        response.use { res -> streamResponse(call, res, config) }
+        val upstream = clients.proxyClient().newCall(builder.build())
+        inFlight.add(upstream)
+        try {
+            val response =
+                try {
+                    withContext(Dispatchers.IO) { upstream.execute() }
+                } catch (e: IOException) {
+                    throw UpstreamNetworkException(e)
+                }
+            response.use { res -> streamResponse(call, res, config) }
+        } finally {
+            inFlight.remove(upstream)
+        }
     }
+
+    /** Aborts in-flight upstream calls; blocked reads and writes then fail fast. */
+    fun cancelAll() = inFlight.forEach { it.cancel() }
 
     /** Buffers small bodies and streams the rest; null when there is no body to send. */
     private suspend fun requestBody(call: ApplicationCall, method: String): RequestBody? {

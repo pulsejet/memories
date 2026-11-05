@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 /**
  * Dispatches local-server requests to the bridge, static files, the
  * offline shell, or the upstream proxy. See [handle] for the order.
+ * Requests reach it already authorized by [LocalEngine].
  *
  * Paths are matched against the raw request target (as before), since routing
  * here is prefix-based and must not depend on percent-decoding.
@@ -33,7 +34,6 @@ class ServerRouter(
     private val appCtx: Context,
     private val auth: AuthState,
     private val assets: AssetSyncCoordinator,
-    private val guard: AuthGuard,
     private val bridge: BridgeController,
     private val proxy: ProxyController,
     private val dataSource: MediaStoreDataSource,
@@ -56,10 +56,6 @@ class ServerRouter(
      */
     suspend fun handle(call: ApplicationCall) {
         val config = configProvider()
-        if (!guard.authorized(call)) {
-            KtorRespond.plain(call, HttpStatusCode.Forbidden, "forbidden")
-            return
-        }
         val method = call.request.httpMethod.value.uppercase()
         val rawPath = call.request.uri.substringBefore("?")
         try {

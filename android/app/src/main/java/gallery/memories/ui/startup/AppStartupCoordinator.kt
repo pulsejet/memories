@@ -59,23 +59,23 @@ class AppStartupCoordinator(
             val fresh = assets.fetchDescribe() ?: return
             if (assets.isCurrent(fresh)) return
             Log.i(TAG, "Assets changed, updating in foreground")
-            activity.runOnUiThread {
+            activity.runOnUiIfAlive {
                 activity.applyTheme(ThemeManager.ENTRY_THEME_COLOR, true)
                 activity.binding.webview.loadUrl(localStaticUrl("waiting.html"))
             }
             if (!assets.syncAndAwait(fresh, SYNC_TIMEOUT_MS)) {
-                activity.runOnUiThread { toast("Update failed", true) }
+                activity.runOnUiIfAlive { toast("Update failed", true) }
                 return
             }
             val subpath = if (toNxSetup) "nxsetup" else ""
-            activity.runOnUiThread {
+            activity.runOnUiIfAlive {
                 if (!loadLocalApp(subpath)) {
                     toast("Update failed", true)
                 }
             }
         } catch (e: Exception) {
             Log.w(TAG, "Update check failed", e)
-            activity.runOnUiThread { toast("Update check failed", true) }
+            activity.runOnUiIfAlive { toast("Update check failed", true) }
         }
     }
 
@@ -87,7 +87,7 @@ class AppStartupCoordinator(
             try {
                 val ok = assets.ensureFreshAndWait()
                 Log.i(TAG, "Offline ensure done: $ok")
-                activity.runOnUiThread {
+                activity.runOnUiIfAlive {
                     if (ok) {
                         if (!loadLocalApp(if (toNxSetup) "nxsetup" else "")) {
                             Log.w(TAG, "Offline ensure ok but load failed")
@@ -99,7 +99,7 @@ class AppStartupCoordinator(
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "Offline ensure failed", e)
-                activity.runOnUiThread { toast("Could not load offline files", true) }
+                activity.runOnUiIfAlive { toast("Could not load offline files", true) }
             }
         }.start()
     }

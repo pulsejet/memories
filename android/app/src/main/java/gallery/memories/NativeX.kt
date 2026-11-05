@@ -60,13 +60,13 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     fun destroy() {
+        local.stop()
         permissions.destroy()
         container.deleter.destroy()
         detachAsyncMessages()
         shareManager = null
         account.onDestroy()
         container.holeVideo.release()
-        local.stop()
         timeline.destroy()
     }
 
@@ -197,7 +197,7 @@ class NativeX(private val mCtx: MainActivity) {
     /** Reloads whatever [MainActivity.loadDefaultUrl] resolves to (app or welcome). */
     @JavascriptInterface
     fun reload() {
-        mCtx.runOnUiThread { mCtx.loadDefaultUrl() }
+        mCtx.runOnUiIfAlive { mCtx.loadDefaultUrl() }
     }
 
     /** Downloads a file in-process with the app's own client. Notifies on completion. Nulls are ignored. */
@@ -280,6 +280,7 @@ class NativeX(private val mCtx: MainActivity) {
     /** Serves one bridge request. GET-only; failures become 500, successful images get week-long caching. */
     fun handleBridge(method: String, url: Uri): WebResourceResponse {
         val path = url.path ?: return BridgeResponses.error()
+        if (mCtx.isDestroyed) return BridgeResponses.error("activity destroyed")
         val response = try {
             when (method) {
                 "GET" -> router.routerGet(url)

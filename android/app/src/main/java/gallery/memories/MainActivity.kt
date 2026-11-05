@@ -48,6 +48,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var chooser: FileChooserHandler
     private lateinit var startup: AppStartupCoordinator
 
+    /** False until the local server is up and the first page load is scheduled; retried on resume. */
+    private var booted = false
+
     /** One-shot: cleared by the web client after the main page loads so Back skips entry pages. */
     var clearHistoryOnLoad = false
 
@@ -112,6 +115,7 @@ class MainActivity : AppCompatActivity() {
         binding.webview.invalidate()
         eventBus.onResumeRefresh()
         runCatching { nativex.container.holeVideo.resume() }
+        if (booted) nativex.local.attach() else bootLocalServer()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -129,6 +133,10 @@ class MainActivity : AppCompatActivity() {
         val userAgent = getString(R.string.ua_app_prefix) + BuildConfig.VERSION_NAME + " " + WebSettings.getDefaultUserAgent(this)
         WebViewSetup.setup(binding.webview, userAgent, nativex, BuildConfig.DEBUG)
         nativex.account.refreshCredentials()
+    }
+
+    /** Starts (or reattaches to) the process-wide local server, then loads the first page. */
+    private fun bootLocalServer() {
         try {
             nativex.local.ensureStarted()
         } catch (e: Exception) {
@@ -136,10 +144,11 @@ class MainActivity : AppCompatActivity() {
             nativex.toast("Local server failed to start", true)
             return
         }
+        booted = true
         nativex.attachAsyncMessages()
         // Per-process secret as HttpOnly cookie: without it the local server rejects everything. Load only after it lands.
         CookieManager.getInstance().setCookie("http://127.0.0.1/", nativex.local.authCookie()) {
-            runOnUiThread { startup.onLocalCookieReady() }
+            runOnUiIfAlive { startup.onLocalCookieReady() }
         }
         CookieManager.getInstance().flush()
     }
@@ -155,6 +164,11 @@ class MainActivity : AppCompatActivity() {
     fun syncBackCallback(view: WebView) {
         backCallback.isEnabled = view.copyBackForwardList().currentIndex > 0
     }
+
+    val isAlive: Boolean get() = !isFinishing && !isDestroyed
+
+    /** Like [runOnUiThread], but drops [block] once the activity is finishing or destroyed. */
+    fun runOnUiIfAlive(block: () -> Unit) = runOnUiThread { if (isAlive) block() }
 
     fun loadDefaultUrl(): Boolean = startup.loadDefaultUrl()
 

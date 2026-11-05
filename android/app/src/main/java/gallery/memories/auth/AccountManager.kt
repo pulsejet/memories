@@ -101,14 +101,14 @@ class AccountManager(
 
     /** Polls every 2s for up to 5min. Success boots into setup; timeout resets to welcome. Stale generations do nothing. */
     private fun pollLogin(pollUrl: String, pollToken: String, baseUrl: String, gen: Int) {
-        activity.binding.webview.post {
-            if (gen != loginGeneration) return@post
+        activity.runOnUiIfAlive {
+            if (gen != loginGeneration) return@runOnUiIfAlive
             activity.applyTheme(ThemeManager.ENTRY_THEME_COLOR, true)
             activity.binding.webview.loadUrl(activity.localStaticUrl("waiting.html") + "?login=1")
         }
         // Counts elapsed seconds, not polls: incremented by the 2s sleep below.
         var polledSeconds = 0
-        while (polledSeconds < 5 * 60 && gen == loginGeneration) {
+        while (polledSeconds < 5 * 60 && gen == loginGeneration && activity.isAlive) {
             polledSeconds += 2
             Thread.sleep(2000)
             try {
@@ -127,8 +127,8 @@ class AccountManager(
                 val loginName = body.getString("loginName")
                 val appPassword = body.getString("appPassword")
                 val uid = fetchUid(baseUrl, loginName, appPassword)
-                activity.runOnUiThread {
-                    if (gen != loginGeneration) return@runOnUiThread
+                activity.runOnUiIfAlive {
+                    if (gen != loginGeneration) return@runOnUiIfAlive
                     tabs.close()
                     storeCredentials(baseUrl, loginName, appPassword, uid)
                     activity.startLocalApp(toNxSetup = true)
@@ -141,8 +141,8 @@ class AccountManager(
             }
         }
         if (gen != loginGeneration) return
-        activity.runOnUiThread {
-            if (gen != loginGeneration) return@runOnUiThread
+        activity.runOnUiIfAlive {
+            if (gen != loginGeneration) return@runOnUiIfAlive
             tabs.close()
             resetPendingLogin()
             toast(activity.getString(R.string.err_login_timeout))
@@ -201,8 +201,9 @@ class AccountManager(
         toast(activity.getString(R.string.err_logged_out))
         deleteCredentials()
         activity.runOnUiThread {
-            activity.binding.webview.clearCache(true)
             WebStorage.getInstance().deleteAllData()
+            if (!activity.isAlive) return@runOnUiThread
+            activity.binding.webview.clearCache(true)
             activity.loadDefaultUrl()
         }
     }
