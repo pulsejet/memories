@@ -35,6 +35,7 @@ use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
 use OCP\Files\Node;
+use OCP\Files\NotFoundException;
 use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
 use OCP\ICache;
@@ -108,8 +109,8 @@ final class FsManager
                 // Get subnode from share
                 try {
                     $share = $share->get($sanitized);
-                } catch (\OCP\Files\NotFoundException $e) {
-                    throw new \Exception("Folder not found: {$e->getMessage()}");
+                } catch (NotFoundException $e) {
+                    throw Exceptions::NotFound('Folder not found: '.$e->getMessage());
                 }
             }
 
@@ -153,8 +154,8 @@ final class FsManager
                     throw new \Exception("invalid path {$path}");
                 }
             }
-        } catch (\Exception $e) {
-            throw new \Exception("Folder not found: {$e->getMessage()}");
+        } catch (NotFoundException $e) {
+            throw Exceptions::NotFound('Timeline root folder not found: '.$e->getMessage());
         }
 
         // Add shares or external stores inside the current folders

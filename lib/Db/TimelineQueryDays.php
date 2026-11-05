@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Db;
 
 use OCA\Memories\ClustersBackend;
+use OCA\Memories\Exceptions;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
 /**
@@ -224,7 +225,7 @@ trait TimelineQueryDays
             // This is illegal in most cases except albums,
             // which don't have a folder associated.
             if (!$this->_rootEmptyAllowed) {
-                throw new \Exception('No valid root folder found (.nomedia?)');
+                throw Exceptions::NotFound('No valid root folder found');
             }
 
             // Nothing to do here
