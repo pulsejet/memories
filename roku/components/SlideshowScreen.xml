@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="SlideshowScreen" extends="Group" focusable="true">
+  <interface>
+    <field id="mode" type="string" value="newest" />
+    <field id="seedPhotos" type="array" />
+    <field id="dayLabel" type="string" value="" />
+    <field id="start" type="bool" value="false" alwaysNotify="true" />
+    <field id="backToMenu" type="bool" value="false" alwaysNotify="true" />
+    <field id="changeShare" type="bool" value="false" alwaysNotify="true" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/config.brs" />
+  <script type="text/brightscript" uri="pkg:/source/api.brs" />
+  <script type="text/brightscript" uri="pkg:/components/SlideshowScreen.brs" />
+
+  <children>
+    <Rectangle id="bg" width="1920" height="1080" color="0x000000FF" />
+
+    <!-- loadSync=false: never block render thread (timers must keep firing).
+         Keep tmp files until the next image is ready (OS 12+). -->
+    <Poster
+      id="photo"
+      width="1920"
+      height="1080"
+      loadDisplayMode="scaleToFit"
+      loadWidth="1920"
+      loadHeight="1080"
+      loadSync="false"
+      translation="[0, 0]"
+    />
+
+    <Rectangle id="overlay" width="1920" height="96" color="0x00000099" translation="[0, 984]">
+      <Label
+        id="caption"
+        width="1800"
+        height="40"
+        translation="[60, 16]"
+        color="0xFFFFFFFF"
+        font="font:SmallSystemFont"
+        text=""
+      />
+      <Label
+        id="hint"
+        width="1800"
+        height="32"
+        translation="[60, 52]"
+        color="0xA8B0C0FF"
+        font="font:SmallestSystemFont"
+        text="Left/Right · Back: modes  ·  *: change connection"
+      />
+    </Rectangle>
+
+    <Label
+      id="status"
+      width="1700"
+      height="160"
+      translation="[110, 440]"
+      horizAlign="center"
+      vertAlign="center"
+      color="0xFFEE58FF"
+      font="font:LargeBoldSystemFont"
+      text="Loading photos…"
+      wrap="true"
+    />
+
+    <Timer id="advanceTimer" repeat="false" duration="8" />
+    <!-- Fail-safe after sync GetToFile + normalize (account can take ~20s) -->
+    <Timer id="loadWatchdog" repeat="false" duration="30" />
+    <Timer id="failSkipTimer" repeat="false" duration="1.2" />
+    <!-- Poll loadStatus — observeField often misses ready on local tmp -->
+    <Timer id="decodePoll" repeat="true" duration="0.4" />
+  </children>
+</component>

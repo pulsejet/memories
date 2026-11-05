@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="FileCleanupTask" extends="Task">
+  <interface>
+    <field id="paths" type="array" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/components/FileCleanupTask.brs" />
+</component>

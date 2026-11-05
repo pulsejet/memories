@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="SetupScreen" extends="Group" focusable="true">
+  <interface>
+    <field id="done" type="bool" value="false" alwaysNotify="true" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/config.brs" />
+  <script type="text/brightscript" uri="pkg:/source/api.brs" />
+  <script type="text/brightscript" uri="pkg:/components/SetupScreen.brs" />
+
+  <children>
+    <Group id="formRoot">
+      <Label
+        id="title"
+        text="Memories"
+        width="1920"
+        height="80"
+        horizAlign="center"
+        translation="[0, 80]"
+        font="font:LargeBoldSystemFont"
+        color="0xFFEE58FF"
+      />
+      <Label
+        id="subtitle"
+        text="Connect with a share link or your account"
+        width="1920"
+        height="40"
+        horizAlign="center"
+        translation="[0, 160]"
+        font="font:SmallSystemFont"
+        color="0xA8B0C0FF"
+      />
+      <Label
+        id="hint"
+        text="Use Up/Down · OK to edit or connect"
+        width="1920"
+        height="36"
+        horizAlign="center"
+        translation="[0, 200]"
+        font="font:SmallestSystemFont"
+        color="0x7A8494FF"
+      />
+
+      <LayoutGroup
+        id="modeRow"
+        layoutDirection="horiz"
+        itemSpacings="[24]"
+        translation="[660, 260]"
+      >
+        <Rectangle id="shareModeBg" width="280" height="56" color="0x3D6BF5FF">
+          <Label
+            id="shareModeLabel"
+            width="280"
+            height="56"
+            text="Share link"
+            horizAlign="center"
+            vertAlign="center"
+            color="0xFFFFFFFF"
+            font="font:SmallBoldSystemFont"
+          />
+        </Rectangle>
+        <Rectangle id="accountModeBg" width="280" height="56" color="0x2A3140FF">
+          <Label
+            id="accountModeLabel"
+            width="280"
+            height="56"
+            text="Account"
+            horizAlign="center"
+            vertAlign="center"
+            color="0xFFFFFFFF"
+            font="font:SmallBoldSystemFont"
+          />
+        </Rectangle>
+      </LayoutGroup>
+
+      <Group id="sharePanel" translation="[360, 360]" visible="true">
+        <Label text="Share URL" width="1200" height="32" color="0xC8D0DCFF" font="font:SmallSystemFont" />
+        <Rectangle id="shareUrlBox" width="1200" height="72" color="0x1C2230FF" translation="[0, 40]">
+          <Label
+            id="shareUrl"
+            width="1160"
+            height="72"
+            translation="[20, 0]"
+            vertAlign="center"
+            color="0xFFFFFFFF"
+            font="font:SmallSystemFont"
+            text=""
+            wrap="true"
+            maxLines="2"
+          />
+        </Rectangle>
+      </Group>
+
+      <Group id="accountPanel" translation="[360, 360]" visible="false">
+        <Label text="Nextcloud URL" width="1200" height="32" color="0xC8D0DCFF" font="font:SmallSystemFont" />
+        <Rectangle id="serverUrlBox" width="1200" height="64" color="0x1C2230FF" translation="[0, 36]">
+          <Label id="serverUrl" width="1160" height="64" translation="[20, 0]" vertAlign="center" color="0xFFFFFFFF" font="font:SmallSystemFont" text="" />
+        </Rectangle>
+        <Label text="Username" width="1200" height="32" color="0xC8D0DCFF" font="font:SmallSystemFont" translation="[0, 120]" />
+        <Rectangle id="usernameBox" width="1200" height="64" color="0x1C2230FF" translation="[0, 156]">
+          <Label id="username" width="1160" height="64" translation="[20, 0]" vertAlign="center" color="0xFFFFFFFF" font="font:SmallSystemFont" text="" />
+        </Rectangle>
+        <Label text="App password" width="1200" height="32" color="0xC8D0DCFF" font="font:SmallSystemFont" translation="[0, 240]" />
+        <Rectangle id="passwordBox" width="1200" height="64" color="0x1C2230FF" translation="[0, 276]">
+          <Label id="password" width="1160" height="64" translation="[20, 0]" vertAlign="center" color="0xFFFFFFFF" font="font:SmallSystemFont" text="" />
+        </Rectangle>
+      </Group>
+
+      <Rectangle id="saveBg" width="280" height="64" color="0x3D6BF5FF" translation="[820, 820]">
+        <Label
+          id="saveLabel"
+          width="280"
+          height="64"
+          text="Connect"
+          horizAlign="center"
+          vertAlign="center"
+          color="0xFFFFFFFF"
+          font="font:SmallBoldSystemFont"
+        />
+      </Rectangle>
+
+      <Label
+        id="status"
+        text=""
+        width="1400"
+        height="60"
+        horizAlign="center"
+        translation="[260, 920]"
+        font="font:SmallSystemFont"
+        color="0xE8A05AFF"
+        wrap="true"
+      />
+    </Group>
+  </children>
+</component>

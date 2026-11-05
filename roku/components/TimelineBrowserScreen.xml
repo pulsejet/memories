@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="TimelineBrowserScreen" extends="Group" focusable="true">
+  <interface>
+    <field id="backToMenu" type="bool" value="false" alwaysNotify="true" />
+    <field id="openDay" type="assocarray" alwaysNotify="true" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/config.brs" />
+  <script type="text/brightscript" uri="pkg:/source/api.brs" />
+  <script type="text/brightscript" uri="pkg:/components/TimelineBrowserScreen.brs" />
+
+  <children>
+    <Rectangle width="1920" height="1080" color="0x12151CFF" />
+
+    <Label
+      id="title"
+      text="Timeline"
+      width="1920"
+      height="64"
+      horizAlign="center"
+      translation="[0, 60]"
+      font="font:LargeBoldSystemFont"
+      color="0xFFFFFFFF"
+    />
+    <Label
+      id="hint"
+      text="Up/Down · OK: view day  ·  Back: modes"
+      width="1920"
+      height="36"
+      horizAlign="center"
+      translation="[0, 130]"
+      font="font:SmallestSystemFont"
+      color="0x7A8494FF"
+    />
+    <Label
+      id="status"
+      text="Loading days…"
+      width="1600"
+      height="60"
+      horizAlign="center"
+      translation="[160, 500]"
+      font="font:MediumSystemFont"
+      color="0xFFFFFFFF"
+      wrap="true"
+    />
+
+    <LabelList
+      id="dayList"
+      translation="[460, 200]"
+      itemSize="[1000, 64]"
+      numRows="11"
+      color="0xA8B0C0FF"
+      focusedColor="0xFFFFFFFF"
+      font="font:SmallSystemFont"
+      focusedFont="font:SmallBoldSystemFont"
+      drawFocusFeedback="true"
+      visible="false"
+    />
+  </children>
+</component>

@@ -77,6 +77,7 @@ This monorepo is organized into the following packages:
 - [src](src): Frontend for all platforms (Vue)
 - [go-vod](go-vod): On-demand video transcoder (Go)
 - [android](android): Android implementation of NativeX (Kotlin)
+- [roku](roku): Roku BrightScript client (sideload; see `roku/README.md`)
 - [l10n](l10n): Translations (Transifex)
 
 Releases are organized with these tags:

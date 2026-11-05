@@ -1,0 +1,15 @@
+title=Memories
+subtitle=Nextcloud Memories photos
+major_version=1
+minor_version=0
+build_version=14
+mm_icon_focus_hd=pkg:/images/icon_focus_hd.png
+mm_icon_focus_sd=pkg:/images/icon_focus_sd.png
+splash_screen_hd=pkg:/images/splash_hd.png
+splash_screen_sd=pkg:/images/splash_sd.png
+splash_screen_fhd=pkg:/images/splash_fhd.png
+splash_color=#202430
+splash_min_time=1000
+ui_resolutions=fhd
+supports_input_launch=1
+rsg_version=1.2

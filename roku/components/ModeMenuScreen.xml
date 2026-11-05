@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="ModeMenuScreen" extends="Group" focusable="true">
+  <interface>
+    <field id="choice" type="string" value="" alwaysNotify="true" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/config.brs" />
+  <script type="text/brightscript" uri="pkg:/components/ModeMenuScreen.brs" />
+
+  <children>
+    <Rectangle width="1920" height="1080" color="0x1A2338FF" />
+
+    <Label
+      id="title"
+      text="Memories"
+      width="1920"
+      height="100"
+      horizAlign="center"
+      translation="[0, 100]"
+      font="font:LargeBoldSystemFont"
+      color="0xFFEE58FF"
+    />
+    <Label
+      id="subtitle"
+      text="Choose how to browse"
+      width="1920"
+      height="40"
+      horizAlign="center"
+      translation="[0, 200]"
+      font="font:SmallSystemFont"
+      color="0xE8EEF8FF"
+    />
+    <Label
+      id="hint"
+      text="Up/Down · OK to start  ·  does not auto-start slideshow"
+      width="1920"
+      height="36"
+      horizAlign="center"
+      translation="[0, 244]"
+      font="font:SmallestSystemFont"
+      color="0xB0BBCFFF"
+    />
+
+    <Rectangle id="row0" width="800" height="80" color="0x2A3548FF" translation="[560, 330]">
+      <Label id="label0" width="800" height="80" horizAlign="center" vertAlign="center" color="0xFFFFFFFF" font="font:SmallBoldSystemFont" text="Slideshow (newest first)" />
+    </Rectangle>
+    <Rectangle id="row1" width="800" height="80" color="0x2A3548FF" translation="[560, 430]">
+      <Label id="label1" width="800" height="80" horizAlign="center" vertAlign="center" color="0xFFFFFFFF" font="font:SmallBoldSystemFont" text="Random slideshow" />
+    </Rectangle>
+    <Rectangle id="row2" width="800" height="80" color="0x2A3548FF" translation="[560, 530]">
+      <Label id="label2" width="800" height="80" horizAlign="center" vertAlign="center" color="0xFFFFFFFF" font="font:SmallBoldSystemFont" text="Timeline browser" />
+    </Rectangle>
+    <Rectangle id="row3" width="800" height="80" color="0x2A3548FF" translation="[560, 650]">
+      <Label id="label3" width="800" height="80" horizAlign="center" vertAlign="center" color="0xFFFFFFFF" font="font:SmallSystemFont" text="Change connection" />
+    </Rectangle>
+  </children>
+</component>
