@@ -204,9 +204,9 @@ final class TimelineWrite
     public function deleteFile(File $file): void
     {
         $this->util->transaction(function () use ($file): void {
-            // Get full record
+            // Get map cluster of the record
             $query = $this->connection->getQueryBuilder();
-            $record = $query->select('*')
+            $record = $query->select('mapcluster', 'lat', 'lon')
                 ->from('memories')
                 ->where($query->expr()->eq('fileid', $query->createNamedParameter($file->getId(), IQueryBuilder::PARAM_INT)))
                 ->executeQuery()
