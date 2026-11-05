@@ -31,7 +31,7 @@ services:
       - 8080:8080
 
   db:
-    image: mariadb:11
+    image: mariadb:lts
     restart: always
     pull_policy: always
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --log_bin_trust_function_creators=1
@@ -48,6 +48,7 @@ services:
   adminer:
     image: adminer
     restart: always
+    pull_policy: always
     network_mode: service:nextcloud
 
   redis:

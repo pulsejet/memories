@@ -1,14 +1,16 @@
-# Use the official Nextcloud image as the base image
-FROM nextcloud:apache
+# Keep the Nextcloud version in sync with appinfo/info.xml
+# (max-version) and Node.js in sync with .nvmrc / package.json engines.
+FROM nextcloud:35-apache
 
-# Install Node.js 20 and npm
-# Also install common development tools
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs && \
-    apt-get install -y sudo git wget make unzip vim ffmpeg && \
+# Install Node.js and common development tools
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates curl gnupg && \
+    curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
+    apt-get install -y --no-install-recommends nodejs sudo git wget make unzip vim ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 # Install PHP Composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-    php composer-setup.php --install-dir=/usr/local/bin --filename=composer  && \
+    php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
     php -r "unlink('composer-setup.php');"

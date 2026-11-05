@@ -9,7 +9,16 @@ After the container starts up, follow these steps:
    - Username: `admin`
    - Password: `admin`
 
-Note: MariaDB is set up automatically (db=`nextcloud`, user=`nextcloud`, password=`nextcloud`); Adminer for graphical database management is available on port 8080.
+Note: MariaDB is set up automatically (db=`nextcloud`, user=`nextcloud`, password=`nextcloud`); Adminer for graphical database management is available on port 8080 (Nextcloud itself is on port 80).
+
+The setup script is idempotent, so rebuilding the container keeps your
+Nextcloud data and config (stored in named volumes) and just upgrades if needed.
+
+After adding photos, index them with:
+
+```bash
+sudo -E -u www-data php /var/www/html/occ memories:index
+```
 
 To run OCC commands in the container, use the following command:
 

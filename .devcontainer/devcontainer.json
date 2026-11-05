@@ -9,7 +9,17 @@
   "features": {},
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  "forwardPorts": [80,8080],
+  "forwardPorts": [80, 8080],
+  "portsAttributes": {
+    "80": {
+      "label": "Nextcloud",
+      "onAutoForward": "openPreview"
+    },
+    "8080": {
+      "label": "Adminer (database)"
+    }
+  },
+  "shutdownAction": "stopCompose",
   "postCreateCommand": "bash .devcontainer/postCreate.sh",
   // "postStartCommand": "make watch-js",
   // Configure tool-specific properties.
