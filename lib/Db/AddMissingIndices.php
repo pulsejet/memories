@@ -47,6 +47,16 @@ final class AddMissingIndices
             }
         }
 
+        // Speed up album lookups by file (e.g. shared album files)
+        if ($schema->hasTable('photos_albums_files')) {
+            $table = $schema->getTable('photos_albums_files');
+
+            if (!$table->hasIndex('memories_paf_file_id')) {
+                $table->addIndex(['file_id'], 'memories_paf_file_id');
+                $ops[] = 'photos_albums_files::memories_paf_file_id';
+            }
+        }
+
         // Migrate
         if (\count($ops) > 0) {
             $output->info('Updating external table schema: '.implode(', ', $ops));
