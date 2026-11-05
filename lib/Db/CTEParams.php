@@ -13,10 +13,10 @@ final class CTEParams
     private const INCLUDE_HIDDEN = 'cteIncludeHidden';
     private const FILE_ID = 'cteFileId';
 
-    private const FOLDER_NAME_BLOCKLIST = 'fnBlocklist';
-    private const FOLDER_NAME_BLOCKLIST_COUNT = 'fnBlocklistCount';
-    private const FOLDER_NAME_BLOCKLIST_ESCAPE = 'fnBlocklistEscape';
-    private const FOLDER_NAME_BLOCKLIST_ESCAPE_CHAR = '\\';
+    private const BLOCKLIST = 'fnBlocklist';
+    private const BLOCKLIST_COUNT = 'fnBlocklistCount';
+    private const BLOCKLIST_ESCAPE = 'fnBlocklistEscape';
+    private const BLOCKLIST_ESCAPE_CHAR = '\\';
 
     public static function setTopFolderIds(IQueryBuilder &$query, array $ids): void
     {
@@ -53,34 +53,34 @@ final class CTEParams
     }
 
     /** @param string[] $patterns */
-    public static function setFolderNameBlocklist(IQueryBuilder &$query, array $patterns): void
+    public static function setBlocklist(IQueryBuilder &$query, array $patterns): void
     {
         $patterns = array_values($patterns);
 
         if ([] !== $patterns) {
             $query->setParameter(
-                self::FOLDER_NAME_BLOCKLIST_COUNT,
+                self::BLOCKLIST_COUNT,
                 \count($patterns),
                 IQueryBuilder::PARAM_INT,
             );
             $query->setParameter(
-                self::FOLDER_NAME_BLOCKLIST_ESCAPE,
-                self::FOLDER_NAME_BLOCKLIST_ESCAPE_CHAR,
+                self::BLOCKLIST_ESCAPE,
+                self::BLOCKLIST_ESCAPE_CHAR,
                 IQueryBuilder::PARAM_STR,
             );
         }
 
         foreach ($patterns as $i => $pattern) {
             $query->setParameter(
-                self::FOLDER_NAME_BLOCKLIST."{$i}",
+                self::BLOCKLIST."{$i}",
                 $pattern,
                 IQueryBuilder::PARAM_STR,
             );
         }
     }
 
-    public static function getFolderNameBlocklistCount(IQueryBuilder $query): int
+    public static function getBlocklistCount(IQueryBuilder $query): int
     {
-        return (int) ($query->getParameters()[self::FOLDER_NAME_BLOCKLIST_COUNT] ?? 0);
+        return (int) ($query->getParameters()[self::BLOCKLIST_COUNT] ?? 0);
     }
 }

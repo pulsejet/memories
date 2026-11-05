@@ -28,7 +28,7 @@ trait TimelineQueryCTE
                 ? $this->CTE_FOLDERS_ARCHIVE()
                 : $this->CTE_FOLDERS(
                     CTEParams::isIncludeHidden($query),
-                    CTEParams::getFolderNameBlocklistCount($query),
+                    CTEParams::getBlocklistCount($query),
                 );
             $sql = $CTE_SQL.' '.$sql;
         } elseif (str_contains($sql, 'cte_file_parents')) {
@@ -41,9 +41,9 @@ trait TimelineQueryCTE
 
     /**
      * @param int    $count number of bound :fnBlocklistN patterns
-     * @param string $alias table alias holding the folder name column
+     * @param string $alias table alias holding the name column
      */
-    public function folderBlocklistedClause(int $count, string $alias): string
+    public function blocklistClause(int $count, string $alias): string
     {
         if (0 === $count) {
             return '1 = 0';
@@ -60,14 +60,14 @@ trait TimelineQueryCTE
     /**
      * CTE to get all files recursively in the given top folders
      * :topFolderIds - The top folders to get files from.
-     * :fnBlocklistN - Folder name LIKE patterns to prune.
+     * :fnBlocklistN - File or folder name LIKE patterns to prune.
      *
-     * @param bool $hidden   Whether to include files in hidden folders
-     *                       If the top folder is hidden, the files in it will still be returned
-     *                       Hidden files are marked as such in the "hidden" field
-     * @param int  $fnBlockN Number of folder blocklist patterns
+     * @param bool $hidden         Whether to include files in hidden folders
+     *                             If the top folder is hidden, the files in it will still be returned
+     *                             Hidden files are marked as such in the "hidden" field
+     * @param int  $blocklistCount Number of blocklist patterns
      */
-    protected function CTE_FOLDERS_ALL(bool $hidden, int $fnBlockN): string
+    protected function CTE_FOLDERS_ALL(bool $hidden, int $blocklistCount): string
     {
         $provider = $this->connection->getDatabaseProvider();
 
@@ -88,8 +88,8 @@ trait TimelineQueryCTE
         // Whether to filter out hidden folders
         $CLS_HIDDEN_JOIN = $hidden ? '1 = 1' : "f.name NOT LIKE '.%'";
 
-        // Blocklisted folder names prune the whole subtree
-        $CLS_BLOCKLIST = $this->folderBlocklistedClause($fnBlockN, 'f');
+        // Blocklisted names prune the whole subtree
+        $CLS_BLOCKLIST = $this->blocklistClause($blocklistCount, 'f');
 
         // On MySQL or MariaDB, provide the hint to use the index
         // The index is not used sometimes since the table is unbalanced
@@ -131,10 +131,10 @@ trait TimelineQueryCTE
     /**
      * CTE to get all folders recursively in the given top folders.
      *
-     * @param bool $hidden   Whether to include files in hidden folders
-     * @param int  $fnBlockN Number of folder blocklist patterns
+     * @param bool $hidden         Whether to include files in hidden folders
+     * @param int  $blocklistCount Number of blocklist patterns
      */
-    protected function CTE_FOLDERS(bool $hidden, int $fnBlockN): string
+    protected function CTE_FOLDERS(bool $hidden, int $blocklistCount): string
     {
         $CLS_HIDDEN = $hidden ? 'MIN(hidden)' : '0';
 
@@ -147,7 +147,7 @@ trait TimelineQueryCTE
                 fileid
         )";
 
-        return self::bundleCTEs([$this->CTE_FOLDERS_ALL($hidden, $fnBlockN), $cte]);
+        return self::bundleCTEs([$this->CTE_FOLDERS_ALL($hidden, $blocklistCount), $cte]);
     }
 
     /**
