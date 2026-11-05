@@ -26,7 +26,6 @@ namespace OCA\Memories\Service;
 use OC\Files\SetupManager;
 use OCA\Memories\Db\FsManager;
 use OCA\Memories\Db\IndexQuery;
-use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineRoot;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Settings\SystemConfig;
@@ -236,7 +235,7 @@ final class Index
     public function getIndexedCount(): int
     {
         $query = $this->db->getQueryBuilder();
-        $query->select($query->func()->count(SQL::distinct($query, 'fileid')))
+        $query->select($query->func()->count())
             ->from('memories')
         ;
 
