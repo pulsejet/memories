@@ -43,7 +43,7 @@ final class SystemConfig
         // Path to index (only used if indexing mode is 3)
         'memories.index.path' => '/',
 
-        // Blocklist folder names by SQL LIKE pattern.
+        // Blocklist file or folder names by SQL LIKE pattern.
         // % and _ are wildcards, \ escapes
         'memories.index.folder.blocklist' => ['@Recycle', '@eaDir', '.trashed-%'],
 

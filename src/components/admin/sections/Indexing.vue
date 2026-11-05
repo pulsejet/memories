@@ -99,12 +99,12 @@
 
     <div>
       {{ t('memories', 'Folders with a ".nomedia" or a ".nomemories" file are always excluded from indexing.') }}
-      {{ t('memories', 'You can optionally exclude specific folder names from being indexed.') }}
+      {{ t('memories', 'You can optionally exclude specific file or folder names from being indexed.') }}
       <br />
 
       <NcTextField
         class="regex-field"
-        :label="t('memories', 'Excluded folder names (comma-separated)')"
+        :label="t('memories', 'Excluded file or folder names (comma-separated)')"
         :label-visible="true"
         v-model="blocklistText"
         @change="update('memories.index.folder.blocklist')"

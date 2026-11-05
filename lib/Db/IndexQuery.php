@@ -21,7 +21,8 @@ final class IndexQuery
     /**
      * Stream candidate fileids under the given top folder ids in batches.
      *
-     * Crawls hidden folders; blocklisted folders prune whole subtrees.
+     * Crawls hidden folders; blocklisted folders prune whole subtrees
+     * and blocklisted file names are skipped.
      * Only unindexed files with supported mimetypes and nonzero size qualify.
      *
      * @param int[] $topFolderIds top folder fileids
@@ -145,6 +146,10 @@ final class IndexQuery
 
         // Filter out files that are already indexed or failed
         $this->filterNonIndexed($query);
+
+        // Blocklisted file names; last so already indexed rows skip the LIKEs
+        $blocklisted = $this->tq->folderBlocklistedClause(\count($blocklist), 'f');
+        $query->andWhere($query->createFunction("NOT ({$blocklisted})"));
 
         // Unordered fetch: indexed rows drop out via NOT EXISTS,
         // so refetching makes progress until an empty batch
