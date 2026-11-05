@@ -98,10 +98,12 @@ services:
       - NEXTCLOUD_HOST=http://your-nextcloud-host.com
       - NEXTCLOUD_ALLOW_INSECURE=1 # (self-signed certs or no HTTPS)
       - NVIDIA_VISIBLE_DEVICES=all
+      - CACHE_DIR=/cache
     links:
       - web:your-nextcloud-host.com # (reach Nextcloud container directly)
     volumes:
       - /hdd/nextcloud_data:/var/www/html/data:ro
+      - /ssd/go-vod-cache:/cache
 
     # Uncomment the following lines for QSV / VA-API:
     # devices:
