@@ -31,7 +31,7 @@ final class IndexQuery
      */
     public function getCandidateBatches(
         array $topFolderIds,
-        int $batchSize = 200,
+        int $batchSize = 5000,
     ): \Generator {
         $mimes = $this->mime->getMimeList();
         if ([] === $topFolderIds || [] === $mimes) {
