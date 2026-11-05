@@ -22,10 +22,18 @@
 
 services:
   db:
-    image: mariadb:11
+    image: mariadb:lts
     restart: always
     pull_policy: always
-    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --log_bin_trust_function_creators=1
+    command: >-
+      --transaction-isolation=READ-COMMITTED
+      --binlog-format=ROW
+      --log_bin_trust_function_creators=true
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh --connect --innodb_initialized"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
     volumes:
       - /ssd/nextcloud_mariadb:/var/lib/mysql
     environment:
