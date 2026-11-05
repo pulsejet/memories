@@ -4,9 +4,10 @@
     :class="{
       'dynamic-visible': dynamicVisible,
     }"
-    v-if="currentmatter"
+    v-if="currentmatter || route.query.searchPlaces"
   >
-    <component :is="currentmatter" />
+    <component v-if="currentmatter" :is="currentmatter" />
+    <SearchPlacesFilter />
   </div>
 </template>
 
@@ -20,6 +21,7 @@ import FaceTopMatter from './FaceTopMatter.vue';
 import AlbumTopMatter from './AlbumTopMatter.vue';
 import PlacesTopMatter from './PlacesTopMatter.vue';
 import TrashTopMatter from './TrashTopMatter.vue';
+import SearchPlacesFilter from './SearchPlacesFilter.vue';
 
 import initstate from '@services/init-state';
 import { routes } from '@services/router';
