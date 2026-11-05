@@ -47,27 +47,6 @@ final class AddMissingIndices
             }
         }
 
-        // Add missing name index on filecache
-        // https://github.com/nextcloud/server/pull/44586
-        if ($schema->hasTable('filecache')) {
-            $table = $schema->getTable('filecache');
-
-            // If the PR is merged, remove the index we created
-            // In that case remove this block after some time
-            $hasOwn = $table->hasIndex('fs_name_hash');
-            $hasOur = $table->hasIndex('memories_name_hash');
-
-            if (!$hasOwn && !$hasOur) {
-                // Add our index because none exists
-                $table->addIndex(['name'], 'memories_name_hash');
-                $ops[] = 'filecache::memories_name_hash';
-            } elseif ($hasOwn && $hasOur) {
-                // Remove our index because filecache has one
-                $table->dropIndex('memories_name_hash');
-                $ops[] = '-filecache::memories_name_hash';
-            }
-        }
-
         // Migrate
         if (\count($ops) > 0) {
             $output->info('Updating external table schema: '.implode(', ', $ops));
