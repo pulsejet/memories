@@ -64,7 +64,7 @@ class AppContainer(
     val mapper = PhotoMapper(activity)
     val syncManager = MediaSyncManager(activity, dao, dataSource, mapper, prefs,
      isAlive = { !activity.isDestroyed && !activity.isFinishing })
-    val folders = FolderSettings(dao, prefs)
+    val folders = FolderSettings(dao, dataSource, prefs)
     val deleter = MediaDeleter(activity)
     val permissions = PermissionsManager(activity, prefs).register()
     val holeImage = NativeHoleImage(activity)
