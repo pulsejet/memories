@@ -357,9 +357,13 @@
           loginText.textContent = "Connecting";
           err.style.display = "none";
 
-          // Abort request after 5 seconds
+          // Abort request after 5 seconds, unless a client certificate was asked for meanwhile
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          const certPrompts = () => globalThis.nativex?.getClientCertPrompts?.() ?? 0;
+          const prompts = certPrompts();
+          const timeoutId = setTimeout(() => {
+            if (certPrompts() === prompts) controller.abort();
+          }, 5000);
 
           // Login signal
           const encUrl = encodeURIComponent(encodeURIComponent(getMemoriesUrl().toString()));

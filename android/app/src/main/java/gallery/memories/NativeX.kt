@@ -11,6 +11,7 @@ import android.webkit.WebResourceResponse
 import android.widget.Toast
 import gallery.memories.app.di.AppContainer
 import gallery.memories.bridge.BridgeResponses
+import gallery.memories.data.remote.http.ClientCertificateKeyManager
 import gallery.memories.share.DownloadNotifier
 import gallery.memories.share.ShareManager
 import org.json.JSONArray
@@ -94,6 +95,9 @@ class NativeX(private val mCtx: MainActivity) {
 
     @JavascriptInterface
     fun isNative(): Boolean = true
+
+    @JavascriptInterface
+    fun getClientCertPrompts(): Int = ClientCertificateKeyManager.prompts
 
     @JavascriptInterface
     fun getPlatform(): String = "android"

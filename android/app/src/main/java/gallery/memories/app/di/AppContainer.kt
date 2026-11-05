@@ -50,7 +50,7 @@ class AppContainer(
     val secure = SecureCredentialStore(activity)
     val auth = AuthState()
     val cookies = SessionCookieJar(activity, secure)
-    val clients = HttpClients(auth, cookies)
+    val clients = HttpClients(activity, auth, cookies)
     val api = NextcloudApi(auth, clients)
     val cache = AssetCache(activity)
     val downloader = AssetDownloader(api)

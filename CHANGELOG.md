@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Feature**: TLS client certificate (mTLS) support on Android ([#1169](https://github.com/pulsejet/memories/issues/1169))
+
 ## [v11.0.2] - 2026-11-04
 
 - **Feature**: 2x faster reverse geocoding on MySQL.

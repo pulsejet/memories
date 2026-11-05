@@ -10,10 +10,12 @@ import gallery.memories.data.local.secure.SecureCredentialStore
 import gallery.memories.data.remote.assets.AssetSyncCoordinator
 import gallery.memories.data.remote.assets.ManifestVerifier
 import gallery.memories.data.remote.http.AuthState
+import gallery.memories.data.remote.http.ClientCertificateKeyManager
 import gallery.memories.data.remote.http.HttpClients
 import gallery.memories.data.remote.http.NextcloudApi
 import gallery.memories.ui.theme.ThemeManager
 import io.github.g00fy2.versioncompare.Version
+import org.json.JSONObject
 
 /**
  * Login, credential storage, and server version checks.
@@ -31,6 +33,7 @@ class AccountManager(
 ) {
     companion object {
         private val TAG = AccountManager::class.java.simpleName
+        private const val MAX_CERT_PROMPTS = 2
     }
 
     /** Invalidates in-flight login polls on retry/logout so only the latest can transition UI. */
@@ -43,13 +46,7 @@ class AccountManager(
         val gen = ++loginGeneration
         try {
             auth.build(url, trustAll)
-            clients.rebuild()
-            val res = api.getApiDescriptionManifest()
-            if (res.code != 200) {
-                res.close()
-                throw Exception("$url/api/describe (status ${res.code})")
-            }
-            val body = api.bodyJson(res) ?: throw Exception("Failed to parse API description")
+            val body = describe(url)
             if (!ManifestVerifier.verifyDescribe(body)) {
                 throw Exception("Asset manifest signature verification failed")
             }
@@ -58,11 +55,41 @@ class AccountManager(
             } catch (e: Exception) {
                 Log.w(TAG, "Asset sync did not start: ${e.message}")
             }
-            loginFlow(body.getString("baseUrl"), body.getString("loginFlowUrl"))
+            val baseUrl = body.getString("baseUrl")
+            if (ClientCertificateKeyManager.follow(activity, url, baseUrl)) {
+                auth.build(baseUrl, trustAll)
+                clients.rebuild()
+            }
+            loginFlow(baseUrl, body.getString("loginFlowUrl"))
         } catch (e: Exception) {
             if (gen == loginGeneration) resetPendingLogin()
             toast("Error: ${e.message}")
             throw Exception("Failed to connect to server: ${e.message}")
+        }
+    }
+
+    /**
+     * Fetches describeApi, prompting for a client certificate when the server asked for one
+     * and we sent none, or the handshake failed with ours (e.g. a wrong pick).
+     */
+    private fun describe(url: String): JSONObject {
+        var prompts = 0
+        while (true) {
+            clients.rebuild(detectClientCert = true)
+            val result = runCatching { api.getApiDescriptionManifest() }
+            val res = result.getOrNull()
+            if (res?.code == 200) {
+                return api.bodyJson(res) ?: throw Exception("Failed to parse API description")
+            }
+            res?.close()
+
+            val certRequest = clients.clientCertRequest()?.takeIf { !it.presented || result.isFailure }
+            if (certRequest == null || prompts++ == MAX_CERT_PROMPTS) {
+                throw result.exceptionOrNull() ?: Exception("$url/api/describe (status ${res?.code})")
+            }
+            if (!ClientCertificateKeyManager.prompt(activity, url, certRequest)) {
+                throw Exception("This server requires a client certificate. Install one in Settings › Security.")
+            }
         }
     }
 
@@ -216,6 +243,7 @@ class AccountManager(
     fun deleteCredentials() {
         store.deleteCredentials()
         clients.clearCookies()
+        ClientCertificateKeyManager.clear(activity)
         auth.setAuthHeader(null)
         auth.build(null, false)
         clients.rebuild()
