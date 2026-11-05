@@ -68,9 +68,6 @@ final class AlbumsQuery
         // WHERE these items are memories indexed photos
         $query->leftJoin('paf', 'memories', 'm', $query->expr()->eq('m.fileid', 'paf.file_id'));
 
-        // WHERE these photos are in the filecache
-        $query->leftJoin('m', 'filecache', 'f', $query->expr()->eq('m.fileid', 'f.fileid'));
-
         // GROUP and ORDER by
         $query->addGroupBy('pa.album_id');
 
