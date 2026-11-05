@@ -80,11 +80,13 @@ class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient(
     override fun onPageFinished(view: WebView, url: String) {
         super.onPageFinished(view, url)
         activity.consumeClearHistoryFlag(view)
+        activity.syncBackCallback(view)
     }
 
     override fun doUpdateVisitedHistory(view: WebView, url: String?, isReload: Boolean) {
         super.doUpdateVisitedHistory(view, url, isReload)
         if (!isReload) activity.consumeClearHistoryFlag(view)
+        activity.syncBackCallback(view)
     }
 
     override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {

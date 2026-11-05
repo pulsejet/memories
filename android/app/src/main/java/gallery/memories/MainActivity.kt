@@ -1,14 +1,11 @@
 package gallery.memories
 
-import android.annotation.SuppressLint
-import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
 import android.webkit.CookieManager
 import android.webkit.WebSettings
 import android.webkit.WebView
-import android.window.OnBackInvokedDispatcher
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
 import gallery.memories.data.local.prefs.PreferencesStore
@@ -54,6 +51,17 @@ class MainActivity : AppCompatActivity() {
     /** One-shot: cleared by the web client after the main page loads so Back skips entry pages. */
     var clearHistoryOnLoad = false
 
+    /**
+     * Enabled only while the page has history; otherwise the system default
+     * (background the task) applies. Uses the page's own history.back() since
+     * WebView's goBack() skips entries pushed without a user gesture.
+     */
+    private val backCallback = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            binding.webview.evaluateJavascript("history.back()", null)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -68,11 +76,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         edges.setupInsets()
-        if (SDK_INT >= 36) {
-            onBackInvokedDispatcher.registerOnBackInvokedCallback(
-                OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-            ) { onGoBack() }
-        }
+        onBackPressedDispatcher.addCallback(this, backCallback)
         edges.applyOrientation(resources.configuration.orientation)
         restoreTheme()
 
@@ -119,19 +123,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("GestureBackNavigation")
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (SDK_INT < 36 && event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK) {
-            onGoBack()
-            return true
-        }
-        return super.onKeyDown(keyCode, event)
-    }
-
-    private fun onGoBack() {
-        if (binding.webview.canGoBack()) binding.webview.goBack() else finish()
-    }
-
     private fun initializeWebView() {
         binding.webview.webViewClient = MemoriesWebViewClient(this)
         binding.webview.webChromeClient = MemoriesWebChromeClient(this, chooser)
@@ -159,6 +150,10 @@ class MainActivity : AppCompatActivity() {
             clearHistoryOnLoad = false
             view.clearHistory()
         }
+    }
+
+    fun syncBackCallback(view: WebView) {
+        backCallback.isEnabled = view.copyBackForwardList().currentIndex > 0
     }
 
     fun loadDefaultUrl(): Boolean = startup.loadDefaultUrl()
