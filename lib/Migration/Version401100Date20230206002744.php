@@ -64,8 +64,9 @@ final class Version401100Date20230206002744 extends SimpleMigrationStep
             ]);
 
             $table->setPrimaryKey(['id']);
-            $table->addIndex(['fileid'], 'memories_places_fileid_index');
-            $table->addIndex(['osm_id'], 'memories_places_osm_id_index');
+            // Redundant, dropped in Version900008Date20261104000000
+            // $table->addIndex(['fileid'], 'memories_places_fileid_index');
+            // $table->addIndex(['osm_id'], 'memories_places_osm_id_index');
         }
 
         // Create planet table
