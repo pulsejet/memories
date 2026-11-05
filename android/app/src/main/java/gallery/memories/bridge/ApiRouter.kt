@@ -2,7 +2,6 @@ package gallery.memories.bridge
 
 import android.net.Uri
 import android.webkit.WebResourceResponse
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.NativeX
 import gallery.memories.auth.AccountManager
 import gallery.memories.data.local.media.ImageService
@@ -13,9 +12,7 @@ import gallery.memories.ui.permissions.PermissionsManager
 import gallery.memories.upload.UploadService
 import org.json.JSONObject
 import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
 
-@UnstableApi
 /**
  * Maps localhost bridge paths (/api/…, /image/…) to app services.
  * GET-only; the caller handles method gating and error mapping.
@@ -83,5 +80,5 @@ class ApiRouter(
         }
     }
 
-    private fun decode(segment: String): String = URLDecoder.decode(segment, StandardCharsets.UTF_8)
+    private fun decode(segment: String): String = URLDecoder.decode(segment, "UTF-8")
 }

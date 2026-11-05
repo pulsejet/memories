@@ -1,19 +1,19 @@
 package gallery.memories.data.local.media
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.icu.util.TimeZone
 import android.icu.util.ULocale
 import android.media.MediaMetadataRetriever
-import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import androidx.exifinterface.media.ExifInterface
 import gallery.memories.data.local.db.PhotoEntity
 import gallery.memories.timeline.TimelineJson
-import org.json.JSONObject
 import java.math.BigInteger
 import java.security.MessageDigest
+import org.json.JSONObject
 
 /** Maps MediaStore rows to index entities and timeline JSON, deriving content IDs. */
 class PhotoMapper(private val ctx: Context) {
@@ -35,18 +35,16 @@ class PhotoMapper(private val ctx: Context) {
      */
     fun exifOf(image: SystemImage): ExifInterface? {
         if (image.isVideo) return null
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            try {
-                ctx.applicationContext.contentResolver.openInputStream(
-                    MediaStore.setRequireOriginal(image.uri),
-                )?.use { return ExifInterface(it) }
-            } catch (e: SecurityException) {
-                Log.w(TAG, "Location permission missing, EXIF redacted (${image.baseName})")
-            } catch (e: UnsupportedOperationException) {
-                Log.w(TAG, "setRequireOriginal unsupported (${image.baseName}): ${e.message}")
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to read original EXIF (${image.baseName}): ${e.message}")
-            }
+        try {
+            ctx.applicationContext.contentResolver.openInputStream(
+                MediaStore.setRequireOriginal(image.uri),
+            )?.use { return ExifInterface(it) }
+        } catch (e: SecurityException) {
+            Log.w(TAG, "Location permission missing, EXIF redacted (${image.baseName})")
+        } catch (e: UnsupportedOperationException) {
+            Log.w(TAG, "setRequireOriginal unsupported (${image.baseName}): ${e.message}")
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to read original EXIF (${image.baseName}): ${e.message}")
         }
         try {
             ctx.applicationContext.contentResolver.openInputStream(image.uri)?.use { return ExifInterface(it) }
@@ -88,6 +86,7 @@ class PhotoMapper(private val ctx: Context) {
         EXIF_DATE_TAGS
             .firstNotNullOfOrNull { tag -> exif.getAttribute(tag)?.takeUnless { it.startsWith("0000:00:00") } }
             ?.let { date ->
+                @SuppressLint("SimpleDateFormat") // Fixed EXIF format with ULocale.ROOT
                 val sdf = SimpleDateFormat("yyyy:MM:dd HH:mm:ss", ULocale.ROOT)
                 sdf.timeZone = TimeZone.GMT_ZONE
                 sdf.parse(date)?.let { it.time / 1000 }
@@ -158,11 +157,7 @@ class PhotoMapper(private val ctx: Context) {
 
     /** Container location (e.g. "+37.421998-122.084000/"), tried unredacted first. */
     private fun videoLatLong(image: SystemImage): DoubleArray? {
-        val uris = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            listOf(MediaStore.setRequireOriginal(image.uri), image.uri)
-        } else {
-            listOf(image.uri)
-        }
+        val uris = listOf(MediaStore.setRequireOriginal(image.uri), image.uri)
         for (uri in uris) {
             val retriever = MediaMetadataRetriever()
             try {

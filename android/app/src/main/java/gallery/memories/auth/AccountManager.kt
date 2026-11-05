@@ -3,7 +3,6 @@ package gallery.memories.auth
 import android.util.Log
 import android.webkit.WebStorage
 import android.widget.Toast
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.R
 import gallery.memories.data.local.secure.Credential
@@ -16,7 +15,6 @@ import gallery.memories.data.remote.http.NextcloudApi
 import gallery.memories.ui.theme.ThemeManager
 import io.github.g00fy2.versioncompare.Version
 
-@UnstableApi
 /**
  * Login, credential storage, and server version checks.
  *

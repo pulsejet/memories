@@ -9,6 +9,7 @@ import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsServiceConnection
 import androidx.browser.customtabs.CustomTabsSession
+import androidx.core.net.toUri
 import gallery.memories.MainActivity
 
 /**
@@ -35,7 +36,7 @@ class LoginCustomTab(private val activity: MainActivity) {
      * could be launched, so callers can stop waiting instead of polling blindly.
      */
     fun open(url: String, onFailure: (Exception) -> Unit = {}) {
-        val uri = Uri.parse(url)
+        val uri = url.toUri()
         activity.runOnUiThread {
             unbind()
             val pkg = CustomTabsClient.getPackageName(activity, null)

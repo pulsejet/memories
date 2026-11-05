@@ -5,6 +5,7 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.util.Log
+import androidx.core.content.edit
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -31,14 +32,14 @@ class SecureCredentialStore(private val context: Context) {
         val cipher = getCipher()
         cipher.init(Cipher.ENCRYPT_MODE, getSecretKey())
         val encryptedToken = cipher.doFinal(cred.token.toByteArray())
-        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
-            .putString("url", cred.url)
-            .putBoolean("trustAll", cred.trustAll)
-            .putString("username", cred.username)
-            .putString("uid", cred.uid)
-            .putString("encryptedToken", Base64.encodeToString(encryptedToken, Base64.DEFAULT))
-            .putString("iv", Base64.encodeToString(cipher.iv, Base64.DEFAULT))
-            .apply()
+        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit {
+            putString("url", cred.url)
+            putBoolean("trustAll", cred.trustAll)
+            putString("username", cred.username)
+            putString("uid", cred.uid)
+            putString("encryptedToken", Base64.encodeToString(encryptedToken, Base64.DEFAULT))
+            putString("iv", Base64.encodeToString(cipher.iv, Base64.DEFAULT))
+        }
     }
 
     /**
@@ -68,14 +69,13 @@ class SecureCredentialStore(private val context: Context) {
     }
 
     fun saveUid(uid: String) {
-        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
-            .putString("uid", uid).apply()
+        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit { putString("uid", uid) }
     }
 
     fun deleteCredentials() {
-        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
-            .remove("url").remove("trustAll").remove("username").remove("uid")
-            .remove("encryptedToken").remove("iv").apply()
+        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit {
+            listOf("url", "trustAll", "username", "uid", "encryptedToken", "iv").forEach(::remove)
+        }
     }
 
     /** Encrypts [plain] into an opaque string for [decrypt]. */

@@ -9,7 +9,6 @@ import android.view.SoundEffectConstants
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceResponse
 import android.widget.Toast
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.app.di.AppContainer
 import gallery.memories.bridge.BridgeResponses
 import gallery.memories.share.DownloadNotifier
@@ -17,7 +16,6 @@ import gallery.memories.share.ShareManager
 import org.json.JSONArray
 import java.io.ByteArrayInputStream
 
-@UnstableApi
 /**
  * Injected into the WebView as `nativex`: sync calls below plus the localhost
  * bridge (fetch /api/… and /image/… against 127.0.0.1).

@@ -7,7 +7,6 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.data.local.prefs.PreferencesStore
 import gallery.memories.databinding.ActivityMainBinding
 import gallery.memories.ui.startup.AppStartupCoordinator
@@ -21,7 +20,6 @@ import gallery.memories.ui.web.WebViewSetup
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-@UnstableApi
 /**
  * Single-activity host: owns the WebView and UI components, delegating
  * business logic to them. All [NativeX] bridge entry points funnel through here.

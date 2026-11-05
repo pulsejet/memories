@@ -3,6 +3,7 @@ package gallery.memories.server.controllers
 import android.net.Uri
 import android.util.Log
 import android.webkit.WebResourceResponse
+import androidx.core.net.toUri
 import gallery.memories.server.KtorRespond
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -37,7 +38,7 @@ class BridgeController(
     suspend fun handle(call: ApplicationCall) {
         // Same construction as before: raw target on a dummy origin, so the
         // bridge keeps seeing exactly the paths it used to.
-        val uri = Uri.parse("http://127.0.0.1" + call.request.uri)
+        val uri = ("http://127.0.0.1" + call.request.uri).toUri()
         val res = try {
             withContext(Dispatchers.IO) { bridge(call.request.httpMethod.value.uppercase(), uri) }
         } catch (e: Exception) {

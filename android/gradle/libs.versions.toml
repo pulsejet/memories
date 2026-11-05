@@ -2,6 +2,7 @@
 compileSdk = "37"
 compileSdkMinor = "2"
 minSdk = "31"
+#noinspection OldTargetApi: 37 needs ACCESS_LOCAL_NETWORK handling (#1789)
 targetSdk = "36"
 java = "21"
 

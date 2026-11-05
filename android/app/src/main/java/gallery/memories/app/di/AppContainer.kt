@@ -3,7 +3,6 @@ package gallery.memories.app.di
 import android.net.Uri
 import android.webkit.WebResourceResponse
 import android.widget.Toast
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.auth.AccountManager
 import gallery.memories.bridge.ApiRouter
@@ -34,7 +33,6 @@ import gallery.memories.ui.video.NativeHoleVideo
 import gallery.memories.ui.permissions.PermissionsManager
 import gallery.memories.upload.UploadService
 
-@UnstableApi
 /**
  * Owns every app-scoped service and wires their dependencies.
  * Lives as long as the activity; [timeline] is late-initialized so the

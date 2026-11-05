@@ -1,6 +1,7 @@
 package gallery.memories.data.remote.http
 
 import android.content.Context
+import androidx.core.content.edit
 import gallery.memories.data.local.secure.SecureCredentialStore
 import okhttp3.Cookie
 import okhttp3.CookieJar
@@ -62,7 +63,7 @@ class SessionCookieJar(context: Context, private val secure: SecureCredentialSto
     @Synchronized
     fun clear() {
         cookies.clear()
-        prefs.edit().remove(KEY).apply()
+        prefs.edit { remove(KEY) }
     }
 
     private fun load(): List<Cookie> = try {
@@ -86,7 +87,7 @@ class SessionCookieJar(context: Context, private val secure: SecureCredentialSto
                 .put("secure", c.secure).put("httpOnly", c.httpOnly)
                 .put("hostOnly", c.hostOnly))
         }
-        prefs.edit().putString(KEY, secure.encrypt(arr.toString())).apply()
+        prefs.edit { putString(KEY, secure.encrypt(arr.toString())) }
     } catch (_: Exception) {}
 
     private fun parse(o: JSONObject): Cookie? = try {

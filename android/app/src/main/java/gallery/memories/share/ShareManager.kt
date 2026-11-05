@@ -3,14 +3,12 @@ package gallery.memories.share
 import android.content.ClipData
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.R
 import gallery.memories.timeline.TimelineJson
 import gallery.memories.timeline.TimelineRepository
 import org.json.JSONArray
 import org.json.JSONObject
 
-@UnstableApi
 /**
  * Shares URLs/files with other apps. Remote files are downloaded in-process
  * first (see [InAppDownloader]: the system DownloadManager cannot reach LAN

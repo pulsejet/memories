@@ -9,10 +9,8 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import androidx.core.graphics.createBitmap
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 
-@UnstableApi
 /**
  * Chrome client: delegates upload pickers, mirrors console errors to logcat.
  * Page permission requests stay denied (the default): the app uses none.

@@ -1,6 +1,7 @@
 package gallery.memories.ui.permissions
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -10,12 +11,10 @@ import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.data.local.prefs.PreferencesStore
 import java.util.concurrent.CountDownLatch
 
-@UnstableApi
 /**
  * Media permission plus the user's opt-in to show device files. The sync
  * variant blocks on a latch, so it must be called off the UI thread.
@@ -42,6 +41,7 @@ class PermissionsManager(
     companion object {
         private val TAG = PermissionsManager::class.java.simpleName
         private const val LOCATION_PERM = Manifest.permission.ACCESS_MEDIA_LOCATION
+        @SuppressLint("InlinedApi") // Only requested on 33+, see hasNotificationPermission
         private const val NOTIF_PERM = Manifest.permission.POST_NOTIFICATIONS
     }
 
@@ -74,7 +74,7 @@ class PermissionsManager(
     fun requestMediaPermissionSync(): Boolean {
         val perms = mutableListOf<String>()
         if (!isGranted && !hasMediaPermissionLive()) perms.addAll(mediaPerms())
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !hasLocationPermission()) {
+        if (!hasLocationPermission()) {
             perms.add(LOCATION_PERM)
         }
         if (perms.isEmpty()) {
@@ -118,9 +118,8 @@ class PermissionsManager(
         notifRequest.destroy()
     }
 
-    /** Live OS grant for location EXIF. Always true below Android 10 (no redaction there). */
+    /** Live OS grant for location EXIF. */
     fun hasLocationPermission(): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return true
         return ContextCompat.checkSelfPermission(activity, LOCATION_PERM) == PackageManager.PERMISSION_GRANTED
     }
 

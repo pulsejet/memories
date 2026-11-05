@@ -7,6 +7,8 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.webkit.CookieManager
+import androidx.annotation.OptIn
+import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
@@ -23,7 +25,6 @@ import gallery.memories.MainActivity
 import org.json.JSONArray
 import org.json.JSONObject
 
-@UnstableApi
 /**
  * Native video shown through the WebView hole, mirroring PhotoSwipe zoom/pan.
  * The web side drives playback through control commands; the URL loads on
@@ -317,6 +318,7 @@ class NativeHoleVideo(
         else -> 0
     }
 
+    @OptIn(UnstableApi::class)
     private fun setVideoUrlLocked(url: String) {
         if (url == currentUrl && player != null && player?.playbackState != Player.STATE_IDLE && player?.playerError == null) {
             val exo = ensurePlayer()
@@ -338,7 +340,7 @@ class NativeHoleVideo(
         resetViewTransform()
         val exo = ensurePlayer()
         exo.repeatMode = if (repeatLoop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
-        val uri = Uri.parse(url)
+        val uri = url.toUri()
         val mediaItem = MediaItem.fromUri(uri)
         if (isRemote(uri)) {
             val httpFactory = DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true)
@@ -360,6 +362,7 @@ class NativeHoleVideo(
         exo.prepare()
     }
 
+    @OptIn(UnstableApi::class)
     private fun ensurePlayer(): ExoPlayer {
         player?.let { return it }
         return ExoPlayer.Builder(mCtx).build().also { exo ->

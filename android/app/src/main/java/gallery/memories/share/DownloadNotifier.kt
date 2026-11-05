@@ -2,6 +2,7 @@ package gallery.memories.share
 
 import android.Manifest
 import android.app.DownloadManager
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -49,7 +50,7 @@ class DownloadNotifier(private val ctx: Context) {
             .setOngoing(false)
             .setAutoCancel(true)
             .build()
-        NotificationManagerCompat.from(ctx).notify(notifyId, n)
+        post(notifyId, n)
     }
 
     fun successMany(count: Int, label: String? = null, id: Int? = null) {
@@ -75,7 +76,7 @@ class DownloadNotifier(private val ctx: Context) {
             .setOngoing(false)
             .setAutoCancel(true)
             .build()
-        NotificationManagerCompat.from(ctx).notify(notifyId, n)
+        post(notifyId, n)
     }
 
     fun failure(detail: String, label: String? = null, id: Int? = null) {
@@ -94,7 +95,7 @@ class DownloadNotifier(private val ctx: Context) {
             .setOngoing(false)
             .setAutoCancel(true)
             .build()
-        NotificationManagerCompat.from(ctx).notify(id ?: ids.getAndIncrement(), n)
+        post(id ?: ids.getAndIncrement(), n)
     }
 
     /** Starts an ongoing indeterminate progress notification; null when blocked. */
@@ -109,7 +110,7 @@ class DownloadNotifier(private val ctx: Context) {
             .setOngoing(true)
             .setSilent(true)
             .build()
-        NotificationManagerCompat.from(ctx).notify(id, n)
+        post(id, n)
         return id
     }
 
@@ -118,6 +119,14 @@ class DownloadNotifier(private val ctx: Context) {
             ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) return false
         return NotificationManagerCompat.from(ctx).areNotificationsEnabled()
+    }
+
+    /** Callers gate on [canNotify]; the catch covers a revoke in between. */
+    private fun post(id: Int, n: Notification) {
+        try {
+            NotificationManagerCompat.from(ctx).notify(id, n)
+        } catch (_: SecurityException) {
+        }
     }
 
     /** Toasts must post on the main thread; callers run on a worker pool. */

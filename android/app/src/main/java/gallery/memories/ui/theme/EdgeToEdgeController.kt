@@ -9,11 +9,9 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.core.view.updateLayoutParams
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import kotlin.math.roundToInt
 
-@UnstableApi
 /** System bars and cutout handling. */
 class EdgeToEdgeController(private val activity: MainActivity) {
     /** Last value sent to the page, in CSS px. */

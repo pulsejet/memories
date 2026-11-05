@@ -2,7 +2,6 @@ package gallery.memories.timeline
 
 import android.net.Uri
 import android.util.Log
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.data.local.db.PhotoDao
 import gallery.memories.data.local.media.MediaDeleter
 import gallery.memories.data.local.media.MediaObserver
@@ -15,7 +14,6 @@ import gallery.memories.data.local.prefs.PreferencesStore
 import org.json.JSONArray
 import org.json.JSONObject
 
-@UnstableApi
 /** Local-media timeline: Room index joined with MediaStore rows, shaped as server-API JSON. */
 class TimelineRepositoryImpl(
     private val dao: PhotoDao,

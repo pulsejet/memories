@@ -4,11 +4,9 @@ import android.os.Build.VERSION.SDK_INT
 import android.util.Log
 import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowCompat
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.data.local.prefs.PreferencesStore
 
-@UnstableApi
 /** Server-driven theme (persisted). Entry pages use the main blue. */
 class ThemeManager(
     private val activity: MainActivity,

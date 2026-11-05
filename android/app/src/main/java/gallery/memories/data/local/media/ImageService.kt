@@ -4,12 +4,11 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.util.Size
-import androidx.media3.common.util.UnstableApi
+import androidx.core.graphics.scale
 import gallery.memories.timeline.TimelineRepository
 import java.io.ByteArrayOutputStream
 import kotlin.math.max
 
-@UnstableApi
 /** Renders device photos for the web timeline, always as JPEG. */
 class ImageService(private val ctx: Context, private val timeline: TimelineRepository) {
     private companion object {
@@ -35,7 +34,7 @@ class ImageService(private val ctx: Context, private val timeline: TimelineRepos
         val thumb = ctx.applicationContext.contentResolver.loadThumbnail(img.uri, request, null)
         val size = if (known) request else fit(thumb.width, thumb.height, x, y)
         val stream = ByteArrayOutputStream()
-        Bitmap.createScaledBitmap(thumb, size.width, size.height, true)
+        thumb.scale(size.width, size.height)
             .compress(Bitmap.CompressFormat.JPEG, 90, stream)
         return stream.toByteArray()
     }
@@ -62,7 +61,7 @@ class ImageService(private val ctx: Context, private val timeline: TimelineRepos
         if (size != null) {
             val scale = size.toFloat() / max(bitmap.width, bitmap.height)
             if (scale < 1) {
-                bitmap = Bitmap.createScaledBitmap(bitmap, (bitmap.width * scale).toInt(), (bitmap.height * scale).toInt(), true)
+                bitmap = bitmap.scale((bitmap.width * scale).toInt(), (bitmap.height * scale).toInt())
             }
         }
         bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)

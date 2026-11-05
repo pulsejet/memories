@@ -7,11 +7,9 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import java.util.concurrent.CountDownLatch
 
-@UnstableApi
 /**
  * Deletes device files via system trash request. Without media management
  * grant this shows an OS confirmation; with it the same call succeeds

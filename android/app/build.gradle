@@ -37,7 +37,8 @@ android {
         includeInApk = false
     }
     lint {
-        baseline = file("lint-baseline.xml")
+        // A gallery needs the full library; this check ignores tools:ignore.
+        disable += "SelectedPhotoAccess"
     }
 }
 

@@ -14,12 +14,10 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import androidx.core.net.toUri
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
-@UnstableApi
 /** Only loopback pages load inside; everything else goes to the browser or is blocked. */
 class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient() {
     companion object {

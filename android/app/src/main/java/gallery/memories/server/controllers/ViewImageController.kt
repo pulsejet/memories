@@ -1,6 +1,7 @@
 package gallery.memories.server.controllers
 
 import android.util.Log
+import androidx.core.net.toUri
 import gallery.memories.server.KtorRespond
 import gallery.memories.ui.image.NativeHoleImage
 import io.ktor.http.ContentType
@@ -9,12 +10,12 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.receiveStream
 import io.ktor.server.response.respondText
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.json.JSONObject
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
 
 /**
  * Receives images for the hole image below the WebView.
@@ -53,7 +54,7 @@ object ViewImageController {
             return
         }
         val uriStr = runCatching { JSONObject(body).optString("uri") }.getOrNull().orEmpty()
-        val uri = runCatching { android.net.Uri.parse(uriStr) }.getOrNull()
+        val uri = runCatching { uriStr.toUri() }.getOrNull()
         if (uri == null || uri.scheme != android.content.ContentResolver.SCHEME_CONTENT ||
             uri.authority != android.provider.MediaStore.AUTHORITY
         ) {

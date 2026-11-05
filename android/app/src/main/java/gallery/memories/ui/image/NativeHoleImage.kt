@@ -6,17 +6,18 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.PointF
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.exifinterface.media.ExifInterface
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import gallery.memories.MainActivity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 /**
  * Native image shown through the WebView hole, mirroring PhotoSwipe zoom/pan.
@@ -122,8 +123,7 @@ class NativeHoleImage(private val mCtx: MainActivity) {
     private val useF16: Boolean by lazy {
         val configuration = mCtx.resources.configuration
         val wideColor = configuration.isScreenWideColorGamut ||
-            (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R &&
-                configuration.isScreenHdr)
+            configuration.isScreenHdr
         val lowRam =
             mCtx.getSystemService(android.app.ActivityManager::class.java)?.isLowRamDevice ?: true
         wideColor && !lowRam
@@ -243,7 +243,7 @@ class NativeHoleImage(private val mCtx: MainActivity) {
                 // otherwise load straight into it. Selection stays on the
                 // UI thread so readiness/visibility reads are safe.
                 val front = activeView()
-                val pingPong = front.isReady && front.visibility == View.VISIBLE
+                val pingPong = front.isReady && front.isVisible
                 val target = if (pingPong) idleView() else front
                 targetView = target
                 try {

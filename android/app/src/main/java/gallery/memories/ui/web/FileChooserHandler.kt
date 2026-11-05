@@ -7,10 +7,8 @@ import android.webkit.WebChromeClient
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 
-@UnstableApi
 /** Upload file picker. A text MIME entry is mixed in so the system picker opens instead of the metadata-stripping photo picker. */
 class FileChooserHandler(private val activity: MainActivity) {
     private var chooseFileCallback: ValueCallback<Array<Uri>>? = null

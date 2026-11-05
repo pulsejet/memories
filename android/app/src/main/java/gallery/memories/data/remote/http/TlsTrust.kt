@@ -17,6 +17,7 @@ object TlsTrust {
         return sc to tm
     }
 
+    @SuppressLint("CustomX509TrustManager") // Deliberate opt-in trust-all, see class docs
     private fun insecureTrustManager(): X509TrustManager {
         return object : X509TrustManager {
             @SuppressLint("TrustAllX509TrustManager")

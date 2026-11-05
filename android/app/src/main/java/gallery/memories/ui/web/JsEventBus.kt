@@ -1,13 +1,12 @@
 package gallery.memories.ui.web
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.lifecycle.Lifecycle
-import androidx.media3.common.util.UnstableApi
 import androidx.webkit.JavaScriptReplyProxy
 import gallery.memories.MainActivity
 import org.json.JSONObject
 
-@UnstableApi
 /** Emits events into the web page's bus. Deferred while paused so no refresh is lost. */
 class JsEventBus(private val activity: MainActivity) {
     companion object {
@@ -45,6 +44,7 @@ class JsEventBus(private val activity: MainActivity) {
     }
 
     /** Emits one bus event. Caller must already be on the UI thread. */
+    @SuppressLint("RequiresFeature") // replyProxy only exists when WEB_MESSAGE_LISTENER does
     private fun emitNow(event: String, data: Any? = null) {
         if (activity.binding.webview.url == null) return
         val inner = JSONObject()

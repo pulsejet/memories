@@ -1,9 +1,9 @@
 package gallery.memories
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.util.Log
 import android.webkit.WebView
-import androidx.media3.common.util.UnstableApi
 import androidx.webkit.JavaScriptReplyProxy
 import androidx.webkit.WebMessageCompat
 import androidx.webkit.WebViewCompat
@@ -12,7 +12,6 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-@UnstableApi
 /**
  * Fire-and-forget async bridge, exposed to the page as `window.nativex_async`.
  * Takes JSON postMessages; replies go back over the reply proxy for the event bus.
@@ -29,6 +28,7 @@ class NativeXAsync(private val mCtx: MainActivity, private val nativex: NativeX)
     /**
      * Exposes `window.nativex_async` to the page.
      */
+    @SuppressLint("RequiresFeature") // Checked with an early return below
     fun attach() {
         val webview: WebView = mCtx.binding.webview
         if (!WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {

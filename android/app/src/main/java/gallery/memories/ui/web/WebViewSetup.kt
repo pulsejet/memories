@@ -5,8 +5,6 @@ import android.os.Build
 import android.view.View
 import android.webkit.WebView
 import android.widget.Toast
-import androidx.annotation.OptIn
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.NativeX
 
 /**
@@ -20,7 +18,6 @@ object WebViewSetup {
      * `nativex`. [debug] additionally clears the cache and enables remote
      * debugging with a toast; release builds pass false.
      */
-    @OptIn(UnstableApi::class)
     @SuppressLint("SetJavaScriptEnabled")
     fun setup(webview: WebView, userAgent: String, jsInterface: NativeX, debug: Boolean) {
         val s = webview.settings

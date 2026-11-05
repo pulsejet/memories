@@ -1,7 +1,6 @@
 package gallery.memories.ui.startup
 
 import android.util.Log
-import androidx.media3.common.util.UnstableApi
 import gallery.memories.MainActivity
 import gallery.memories.data.remote.assets.AssetCache
 import gallery.memories.data.remote.assets.AssetSyncCoordinator
@@ -9,7 +8,6 @@ import gallery.memories.data.remote.http.AuthState
 import gallery.memories.server.LocalHttpServer
 import gallery.memories.ui.theme.ThemeManager
 
-@UnstableApi
 /** Boots the WebView: welcome when logged out, snapshot immediately when cached, waiting page while downloading. */
 class AppStartupCoordinator(
     private val activity: MainActivity,
