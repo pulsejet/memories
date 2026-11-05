@@ -47,9 +47,16 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug assembleRelease lintRelease --console=plain
 
-      - name: Upload APKs
+      - name: Upload release APK
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: apk
-          path: android/app/build/outputs/apk/**/*.apk
+          path: android/app/build/outputs/apk/release/*.apk
+          archive: false
+          if-no-files-found: error
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: android/app/build/outputs/apk/debug/*.apk
+          archive: false
           if-no-files-found: error
