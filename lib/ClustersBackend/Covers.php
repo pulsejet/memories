@@ -31,6 +31,7 @@ final class Covers
      * @param bool          $validateCluster      Whether to validate the cluster
      * @param bool          $validateFilecache    Whether to validate the filecache
      * @param mixed         $user                 Query expression for user ID to use for the covers
+     * @param bool          $stringObjectId       Whether the object ID column is a string
      */
     public function selectCover(
         IQueryBuilder &$query,
@@ -44,6 +45,7 @@ final class Covers
         bool $validateFilecache = true,
         string $field = 'cover',
         mixed $user = null,
+        bool $stringObjectId = false,
     ): void {
         // Clauses for the WHERE
         $clauses = [
@@ -54,10 +56,14 @@ final class Covers
 
         // Subquery if the preview is still valid for this cluster
         if ($validateCluster) {
+            $objectIdEqClause = $stringObjectId
+                ? $query->expr()->eq("cov_objs.{$objectTableObjectId}", $query->expr()->castColumn('mcov.objectid', IQueryBuilder::PARAM_STR))
+                : $query->expr()->eq($query->expr()->castColumn("cov_objs.{$objectTableObjectId}", IQueryBuilder::PARAM_INT), 'mcov.objectid');
+
             $validSq = $query->getConnection()->getQueryBuilder();
             $validSq->select($validSq->expr()->literal(1))
                 ->from($objectTable, 'cov_objs')
-                ->where($validSq->expr()->eq($query->expr()->castColumn("cov_objs.{$objectTableObjectId}", IQueryBuilder::PARAM_INT), 'mcov.objectid'))
+                ->where($objectIdEqClause)
                 ->andWhere($validSq->expr()->eq("cov_objs.{$objectTableClusterId}", "{$clusterTable}.{$clusterTableId}"))
             ;
 
@@ -99,6 +105,7 @@ final class Covers
      * @param string        $objectTable          Table name for the object mapping
      * @param string        $objectTableObjectId  Column name for the object ID in objectTable
      * @param string        $objectTableClusterId Column name for the cluster ID in objectTable
+     * @param bool          $stringObjectId       Whether the object ID column is a string
      */
     public function filterCover(
         IQueryBuilder &$query,
@@ -106,12 +113,17 @@ final class Covers
         string $objectTable,
         string $objectTableObjectId,
         string $objectTableClusterId,
+        bool $stringObjectId = false,
     ): void {
+        $objectIdEqClause = $stringObjectId
+            ? $query->expr()->eq("{$objectTable}.{$objectTableObjectId}", $query->expr()->castColumn('m_cov.objectid', IQueryBuilder::PARAM_STR))
+            : $query->expr()->eq('m_cov.objectid', $query->expr()->castColumn("{$objectTable}.{$objectTableObjectId}", IQueryBuilder::PARAM_INT));
+
         $query->innerJoin($objectTable, 'memories_covers', 'm_cov', $query->expr()->andX(
             $query->expr()->eq('m_cov.uid', $query->expr()->literal($this->util->getUser()->getUID())),
             $query->expr()->eq('m_cov.clustertype', $query->expr()->literal($type)),
             $query->expr()->eq('m_cov.clusterid', "{$objectTable}.{$objectTableClusterId}"),
-            $query->expr()->eq('m_cov.objectid', $query->expr()->castColumn("{$objectTable}.{$objectTableObjectId}", IQueryBuilder::PARAM_INT)),
+            $objectIdEqClause,
         ));
     }
 

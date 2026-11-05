@@ -123,6 +123,7 @@ final class TagsBackend extends Backend
             objectTable: 'systemtag_object_mapping',
             objectTableObjectId: 'objectid',
             objectTableClusterId: 'systemtagid',
+            stringObjectId: true,
         );
 
         // SELECT etag for the cover
@@ -173,7 +174,14 @@ final class TagsBackend extends Backend
 
         // MAX number of files
         if (-6 === $limit) {
-            $this->covers->filterCover($query, self::clusterType(), 'stom', 'objectid', 'systemtagid');
+            $this->covers->filterCover(
+                query: $query,
+                type: self::clusterType(),
+                objectTable: 'stom',
+                objectTableObjectId: 'objectid',
+                objectTableClusterId: 'systemtagid',
+                stringObjectId: true,
+            );
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
