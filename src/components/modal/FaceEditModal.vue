@@ -37,6 +37,7 @@ import Modal from './Modal.vue';
 
 import { useModal } from '@services/modal';
 import { t } from '@services/l10n';
+import { constants } from '@services/constants';
 import { useRouteIs } from '@services/route-is';
 import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as utils from '@services/utils/common';
@@ -65,7 +66,12 @@ const input = computed(() => {
 });
 
 const canSave = computed(
-  () => input.value && name.value !== input.value && isNaN(Number(input.value)) && !saving.value,
+  () =>
+    input.value &&
+    name.value !== input.value &&
+    isNaN(Number(input.value)) &&
+    input.value.toUpperCase() !== constants.FACE_NULL &&
+    !saving.value,
 );
 
 function open() {
