@@ -33,13 +33,11 @@ trait TimelineWritePlaces
         }
 
         // Delete previous records
-        $this->util->transaction(function () use ($fileId): void {
-            $query = $this->connection->getQueryBuilder();
-            $query->delete('memories_places')
-                ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
-                ->executeStatement()
-            ;
-        });
+        $query = $this->connection->getQueryBuilder();
+        $query->delete('memories_places')
+            ->where($query->expr()->eq('fileid', $query->createNamedParameter($fileId, IQueryBuilder::PARAM_INT)))
+            ->executeStatement()
+        ;
 
         // Just remove from places if the point is no longer valid
         if (null === $lat || null === $lon) {
