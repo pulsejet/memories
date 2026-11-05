@@ -1,23 +1,24 @@
 // Vendored from https://github.com/davemorrissey/subsampling-scale-image-view v3.10.0 (Apache-2.0).
 plugins {
-    id 'com.android.library'
+    alias(libs.plugins.android.library)
 }
 
 android {
     namespace = "com.davemorrissey.labs.subscaleview"
-    compileSdk = 37
+    compileSdk = libs.versions.compileSdk.get().toInteger()
+    compileSdkMinor = libs.versions.compileSdkMinor.get().toInteger()
 
     defaultConfig {
-        minSdk = 31
+        minSdk = libs.versions.minSdk.get().toInteger()
         consumerProguardFiles 'proguard-rules.txt'
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.toVersion(libs.versions.java.get())
+        targetCompatibility = JavaVersion.toVersion(libs.versions.java.get())
     }
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation:1.11.0'
-    implementation 'androidx.exifinterface:exifinterface:1.4.2'
+    implementation libs.androidx.annotation
+    implementation libs.androidx.exifinterface
 }

@@ -43,6 +43,6 @@ jobs:
         run: |
           sdkmanager "platforms;android-37.2" "build-tools;36.0.0"
 
-      - name: Build debug and release
+      - name: Build and lint
         working-directory: android
-        run: ./gradlew assembleDebug assembleRelease --console=plain
+        run: ./gradlew assembleDebug assembleRelease lintRelease --console=plain
