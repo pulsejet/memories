@@ -470,7 +470,7 @@ function touchendPhoto(photo: IPhoto, event: TouchEvent) {
   if (photo.flag & constants.FLAG_PLACEHOLDER) return;
   delete touchAnchorRow?.virtualSticky;
 
-  if (touchTimer && !touchMoved) {
+  if (touchTimer && !touchMoved && event.type !== 'touchcancel') {
     // Register a single tap, only if the touch hadn't moved at all
     clickPhoto(photo, null, touchAnchorRowIdx.value);
   }
