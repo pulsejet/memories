@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /** Helper function to add a wildcard parameter to the route */
-function w($base, $param)
+function w(array $base, string $param): array
 {
     return array_merge($base, [
         'requirements' => [$param => '.*'],
