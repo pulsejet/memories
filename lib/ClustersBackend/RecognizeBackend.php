@@ -255,7 +255,13 @@ final class RecognizeBackend extends Backend
 
         // LIMIT results
         if (-6 === $limit) {
-            $this->covers->filterCover($query, self::clusterType(), 'rfd', 'id', 'cluster_id');
+            $this->covers->filterCover(
+                query: $query,
+                type: self::clusterType(),
+                objectTable: 'rfd',
+                objectTableObjectId: 'id',
+                objectTableClusterId: 'cluster_id',
+            );
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }

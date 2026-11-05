@@ -232,7 +232,13 @@ final class PlacesBackend extends Backend
 
         // MAX number of photos
         if (-6 === $limit) {
-            $this->covers->filterCover($query, self::clusterType(), 'mp', 'fileid', 'osm_id');
+            $this->covers->filterCover(
+                query: $query,
+                type: self::clusterType(),
+                objectTable: 'mp',
+                objectTableObjectId: 'fileid',
+                objectTableClusterId: 'osm_id',
+            );
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }

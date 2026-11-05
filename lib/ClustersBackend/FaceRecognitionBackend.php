@@ -192,7 +192,13 @@ final class FaceRecognitionBackend extends Backend
 
         // LIMIT results
         if (-6 === $limit) {
-            $this->covers->filterCover($query, self::clusterType(), 'frf', 'id', 'person');
+            $this->covers->filterCover(
+                query: $query,
+                type: self::clusterType(),
+                objectTable: 'frf',
+                objectTableObjectId: 'id',
+                objectTableClusterId: 'person',
+            );
         } elseif (null !== $limit) {
             $query->setMaxResults($limit);
         }
