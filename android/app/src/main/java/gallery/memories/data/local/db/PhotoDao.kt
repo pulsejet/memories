@@ -48,8 +48,8 @@ interface PhotoDao {
     @Insert
     fun insert(vararg photos: PhotoEntity)
 
-    /** All media folders known to the index, for the folder picker. */
-    @Query("SELECT bucket_id, bucket_name FROM photos GROUP BY bucket_id")
+    /** All media folders known to the index, largest first, for the folder picker. */
+    @Query("SELECT bucket_id, bucket_name FROM photos GROUP BY bucket_id ORDER BY COUNT(*) DESC")
     fun getBuckets(): List<BucketDto>
 
     /**
