@@ -1,4 +1,5 @@
 import * as nativex from '@native';
+import { config } from '@services/user-config';
 import { windowDims } from '@services/viewport';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 
@@ -191,7 +192,9 @@ export default class PsNativeHole {
       // finished tiled rendering, so we just wait a bit before revealing it.
       this.revealTimer.set(() => {
         this.holderElement?.classList.add('nativex-hole');
-        nativex.nxAsync('setHdrColorMode')?.(true);
+        if (config.native_hdr) {
+          nativex.nxAsync('setHdrColorMode')?.(true);
+        }
       }, 50);
     }
 

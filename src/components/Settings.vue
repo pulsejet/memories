@@ -179,6 +179,15 @@
           >{{ t('memories', 'Never load high resolution image') }}
         </NcCheckboxRadioSwitch>
       </div>
+
+      <NcCheckboxRadioSwitch
+        v-if="isNative"
+        :model-value="config.native_hdr"
+        @update:model-value="updateNativeHdr"
+        type="switch"
+      >
+        {{ t('memories', 'Enable HDR display') }}
+      </NcCheckboxRadioSwitch>
     </NcAppSettingsSection>
 
     <NcAppSettingsSection id="account-settings" :name="names.account" v-if="isNative">
@@ -492,6 +501,10 @@ async function updateShowExifOnMobile(val: boolean) {
 
 async function updateMetadataInSlideshow(val: boolean) {
   await setConfig('metadata_in_slideshow', val);
+}
+
+async function updateNativeHdr(val: boolean) {
+  await setConfig('native_hdr', val);
 }
 
 async function updateSkipViewerDeleteConfirm(val: boolean) {

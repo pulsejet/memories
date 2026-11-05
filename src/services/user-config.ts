@@ -55,6 +55,7 @@ const localSettings: (keyof IConfig)[] = [
   'video_volume',
   'video_muted',
   'video_speed',
+  'native_hdr',
 ];
 
 /** Namespaced browser storage for cached config values. Cleared on logout. */
@@ -196,6 +197,7 @@ function loadCached(): IConfig {
     video_volume: 1,
     video_muted: false,
     video_speed: 1,
+    native_hdr: true,
   };
 
   /**

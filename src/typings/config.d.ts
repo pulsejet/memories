@@ -67,6 +67,7 @@ declare module '@typings' {
     video_volume: number;
     video_muted: boolean;
     video_speed: number;
+    native_hdr: boolean;
   };
 
   export type IMapTileServer = {
