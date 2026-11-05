@@ -193,22 +193,44 @@ final class Places
         }
 
         $fp = fopen($zipFile, 'w+');
+        if (false === $fp) {
+            throw new \Exception("Failed to open planet zip file for writing: {$zipFile}");
+        }
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_FILE, $fp);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_FAILONERROR, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 3600);
-        curl_exec($ch);
+        $result = curl_exec($ch);
+        $curlErrno = curl_errno($ch);
+        $curlError = curl_error($ch);
+        $httpCode = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         curl_close($ch);
 
         fclose($fp);
 
-        $this->logToStdout('Verifying planet data checksum...');
-        if ($checksum !== hash_file('sha256', $zipFile)) {
+        if (false === $result || 0 !== $curlErrno) {
             @unlink($zipFile);
 
-            throw new \Exception('Failed to verify checksum for planet data file');
+            throw new \Exception(
+                "Failed to download planet data file (HTTP {$httpCode}, "
+                ."curl error {$curlErrno}: {$curlError})",
+            );
+        }
+
+        $this->logToStdout('Verifying planet data checksum...');
+        $actualChecksum = hash_file('sha256', $zipFile);
+        if ($checksum !== $actualChecksum) {
+            $actualSize = filesize($zipFile);
+            @unlink($zipFile);
+
+            throw new \Exception(
+                "Failed to verify checksum for planet data file (expected {$checksum}, got {$actualChecksum}, "
+                ."HTTP {$httpCode}, size {$actualSize} bytes). "
+                .'The download may be incomplete or blocked, e.g. by a proxy, firewall, or full disk.',
+            );
         }
         $this->logToStdout('Planet data checksum verified successfully');
 
