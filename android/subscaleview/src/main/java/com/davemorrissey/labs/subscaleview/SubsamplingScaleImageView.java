@@ -1555,6 +1555,43 @@ public class SubsamplingScaleImageView extends View {
     }
 
     /**
+     * MEMORIES: move a decoded bitmap into GPU memory on the calling worker thread. A software
+     * bitmap is uploaded by the RenderThread while the UI thread is blocked in frame sync, so
+     * every new tile or full image could drop a frame. Hardware bitmaps cannot be drawn on a
+     * software canvas; the host app is always hardware accelerated. Without hardware buffer
+     * support for the format (or memory for the copy), keeps the software bitmap and hints an
+     * early upload instead.
+     */
+    @Nullable
+    private static Bitmap toHardware(@Nullable Bitmap bitmap) {
+        if (bitmap == null || bitmap.getConfig() == Bitmap.Config.HARDWARE) { return bitmap; }
+        Bitmap hw = null;
+        try {
+            hw = bitmap.copy(Bitmap.Config.HARDWARE, false);
+        } catch (Exception | OutOfMemoryError e) {
+            Log.w(TAG, "Hardware bitmap copy failed", e);
+        }
+        if (hw == null) {
+            try {
+                bitmap.prepareToDraw();
+            } catch (Exception | OutOfMemoryError e) {
+                Log.w(TAG, "prepareToDraw failed", e);
+            }
+            return bitmap;
+        }
+        // Copies may drop the HDR gainmap; it is a separate object, so recycling the source keeps it.
+        if (android.os.Build.VERSION.SDK_INT >= 34 && bitmap.hasGainmap() && !hw.hasGainmap()) {
+            try {
+                hw.setGainmap(bitmap.getGainmap());
+            } catch (Exception | OutOfMemoryError e) {
+                Log.w(TAG, "Gainmap transfer failed", e);
+            }
+        }
+        bitmap.recycle();
+        return hw;
+    }
+
+    /**
      * Async task used to get image details without blocking the UI thread.
      */
     private static class TilesInitTask extends AsyncTask<Void, Void, int[]> {
@@ -1672,6 +1709,7 @@ public class SubsamplingScaleImageView extends View {
                 Tile tile = tileRef.get();
                 if (decoder != null && tile != null && view != null && decoder.isReady() && tile.visible) {
                     view.debug("TileLoadTask.doInBackground, tile.sRect=%s, tile.sampleSize=%d", tile.sRect, tile.sampleSize);
+                    Bitmap decoded = null;
                     view.decoderLock.readLock().lock();
                     try {
                         if (decoder.isReady()) {
@@ -1680,13 +1718,14 @@ public class SubsamplingScaleImageView extends View {
                             if (view.sRegion != null) {
                                 tile.fileSRect.offset(view.sRegion.left, view.sRegion.top);
                             }
-                            return decoder.decodeRegion(tile.fileSRect, tile.sampleSize);
+                            decoded = decoder.decodeRegion(tile.fileSRect, tile.sampleSize);
                         } else {
                             tile.loading = false;
                         }
                     } finally {
                         view.decoderLock.readLock().unlock();
                     }
+                    if (decoded != null) { return toHardware(decoded); }
                 } else if (tile != null) {
                     tile.loading = false;
                 }
@@ -1769,6 +1808,7 @@ public class SubsamplingScaleImageView extends View {
                 if (context != null && decoderFactory != null && view != null) {
                     view.debug("BitmapLoadTask.doInBackground");
                     bitmap = decoderFactory.make().decode(context, source);
+                    if (!preview) { bitmap = toHardware(bitmap); }
                     return view.getExifOrientation(context, sourceUri);
                 }
             } catch (Exception e) {
