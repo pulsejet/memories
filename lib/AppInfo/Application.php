@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\AppInfo;
 
+use OCA\Memories\Listeners\AddMissingIndicesListener;
 use OCA\Memories\Listeners\BeforeTemplateListener;
 use OCA\Memories\Listeners\PostDeleteListener;
 use OCA\Memories\Listeners\PostLogoutListener;
@@ -34,6 +35,7 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Http\Events\BeforeTemplateRenderedEvent;
+use OCP\DB\Events\AddMissingIndicesEvent;
 use OCP\Files\Events\Node\NodeCopiedEvent;
 use OCP\Files\Events\Node\NodeDeletedEvent;
 use OCP\Files\Events\Node\NodeTouchedEvent;
@@ -93,6 +95,7 @@ final class Application extends App implements IBootstrap
         // Register other global hooks
         $context->registerEventListener(BeforeTemplateRenderedEvent::class, BeforeTemplateListener::class);
         $context->registerEventListener(UserLoggedOutEvent::class, PostLogoutListener::class);
+        $context->registerEventListener(AddMissingIndicesEvent::class, AddMissingIndicesListener::class);
 
         // Extra hooks for native extension calls
         if (Util::callerIsNative()) {

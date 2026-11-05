@@ -4,75 +4,21 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Db;
 
-use OC\DB\Connection;
-use OC\DB\SchemaWrapper;
 use OCA\Memories\Settings\SystemConfig;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 
-final class AddMissingIndices
+final class FilecacheTriggers
 {
     public function __construct(
-        private Connection $connection,
+        private IDBConnection $connection,
         private SystemConfig $systemConfig,
     ) {}
 
     /**
-     * Add missing indices to the database schema.
-     */
-    public function run(IOutput $output): void
-    {
-        $schema = new SchemaWrapper($this->connection);
-
-        // Should migrate at end
-        $ops = [];
-
-        // Speed up CTE lookup for subdirectories
-        if ($schema->hasTable('filecache')) {
-            $table = $schema->getTable('filecache');
-
-            if (!$table->hasIndex('memories_parent_mimetype')) {
-                $table->addIndex(['parent', 'mimetype'], 'memories_parent_mimetype');
-                $ops[] = 'filecache::memories_parent_mimetype';
-            }
-        }
-
-        // Add index on systemtag_object_mapping to speed up the query
-        if ($schema->hasTable('systemtag_object_mapping')) {
-            $table = $schema->getTable('systemtag_object_mapping');
-
-            if (!$table->hasIndex('memories_type_tagid')) {
-                $table->addIndex(['objecttype', 'systemtagid'], 'memories_type_tagid');
-                $ops[] = 'systemtag_object_mapping::memories_type_tagid';
-            }
-        }
-
-        // Speed up album lookups by file (e.g. shared album files)
-        if ($schema->hasTable('photos_albums_files')) {
-            $table = $schema->getTable('photos_albums_files');
-
-            if (!$table->hasIndex('memories_paf_file_id')) {
-                $table->addIndex(['file_id'], 'memories_paf_file_id');
-                $ops[] = 'photos_albums_files::memories_paf_file_id';
-            }
-        }
-
-        // Migrate
-        if (\count($ops) > 0) {
-            $output->info('Updating external table schema: '.implode(', ', $ops));
-            $this->connection->migrateToSchema($schema->getWrappedSchema());
-        } else {
-            $output->info('External table schema seems up to date');
-        }
-
-        // Create triggers in this step too
-        $this->createFilecacheTriggers($output);
-    }
-
-    /**
      * Create filecache triggers.
      */
-    public function createFilecacheTriggers(IOutput $output): void
+    public function create(IOutput $output): void
     {
         $provider = $this->connection->getDatabaseProvider(true);
 

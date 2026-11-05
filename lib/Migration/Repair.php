@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Migration;
 
-use OCA\Memories\Db\AddMissingIndices;
+use OCA\Memories\Db\FilecacheTriggers;
+use OCA\Memories\Listeners\AddMissingIndicesListener;
 use OCA\Memories\Service\BinExt;
 use OCP\IConfig;
 use OCP\Migration\IOutput;
@@ -14,7 +15,8 @@ final class Repair implements IRepairStep
 {
     public function __construct(
         private IConfig $config,
-        private AddMissingIndices $indices,
+        private AddMissingIndicesListener $indices,
+        private FilecacheTriggers $triggers,
         private BinExt $binExt,
     ) {}
 
@@ -27,7 +29,8 @@ final class Repair implements IRepairStep
     #[\Override]
     public function run(IOutput $output): void
     {
-        $this->indices->run($output);
+        $this->indices->addRequired($output);
+        $this->triggers->create($output);
         $this->configureBinExt($output);
         $this->fixSystemConfigTypes($output);
     }

@@ -44,7 +44,7 @@ final class Version400308Date20221026151748 extends SimpleMigrationStep
     #[\Override]
     public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options): ?ISchemaWrapper
     {
-        // Addition of memories_parent_mimetype moved to AddMissingIndices
+        // Addition of memories_parent_mimetype moved to AddMissingIndicesListener
         // since this is on an external table (filecache)
         return null;
     }

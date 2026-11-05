@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Migration;
 
-use OCA\Memories\Db\AddMissingIndices;
 use OCP\DB\ISchemaWrapper;
 use OCP\DB\Types;
 use OCP\IDBConnection;
@@ -34,7 +33,6 @@ final class Version800000Date20240329060325 extends SimpleMigrationStep
 {
     public function __construct(
         private IDBConnection $dbc,
-        private AddMissingIndices $indices,
     ) {}
 
     /**
@@ -79,9 +77,6 @@ final class Version800000Date20240329060325 extends SimpleMigrationStep
     #[\Override]
     public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options): void
     {
-        // create database triggers; this will never throw
-        $this->indices->createFilecacheTriggers($output);
-
         // migrate parent values from filecache
         try {
             $output->info('Migrating values for parent from filecache');

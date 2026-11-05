@@ -131,6 +131,9 @@ e2e_setup_ci() {
     # Run repair steps.
     occ maintenance:repair
 
+    # Add missing database indices.
+    occ db:add-missing-indices
+
     # Assert that we are running with full compatibility.
     if [ "$(occ config:system:get memories.db.triggers.fcu)" != "true" ]; then
         echo "ERROR: filecache trigger creation failed" >&2
