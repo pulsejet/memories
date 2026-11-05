@@ -170,7 +170,13 @@ trait TimelineQueryCTE
             FROM
                 *PREFIX*filecache f
             INNER JOIN *PREFIX*cte_folders c
-                ON (f.parent = c.fileid)
+                ON (
+                    f.parent = c.fileid AND
+                    f.mimetype = (
+                        SELECT MAX(id) FROM *PREFIX*mimetypes
+                        WHERE mimetype = 'httpd/unix-directory'
+                    )
+                )
         )";
 
         return self::bundleCTEs([$this->CTE_FOLDERS_ALL(true, 0), $cte]);
