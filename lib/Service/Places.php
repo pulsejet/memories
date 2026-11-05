@@ -7,6 +7,7 @@ namespace OCA\Memories\Service;
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Db\TimelineWrite;
 use OCA\Memories\Settings\SystemConfig;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IConfig;
 use OCP\IDBConnection;
 
@@ -334,7 +335,13 @@ final class Places
             if (0 === $count % 500) {
                 $this->logToStdout("Updated places data for {$count} files");
             }
+        }, static function (IQueryBuilder $query): void {
+            $query->andWhere($query->expr()->isNotNull('lat'))
+                ->andWhere($query->expr()->isNotNull('lon'))
+            ;
         });
+
+        $this->logToStdout("Updated places data for {$count} files");
     }
 
     /**

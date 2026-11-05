@@ -182,7 +182,7 @@ final class Index extends Command
         }
 
         $this->output->writeln('Forcing refresh of existing index entries');
-        $this->tw->orphanAll();
+        $this->tw->orphanAll(value: true);
     }
 
     /**

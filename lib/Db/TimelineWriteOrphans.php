@@ -14,14 +14,19 @@ trait TimelineWriteOrphans
     /**
      * Mark all or some files in the table as (un)orphaned.
      *
-     * @param bool  $value     True to mark as orphaned, false to mark as un-orphaned
-     * @param int[] $fileIds   List of file IDs to mark, or empty to mark all files
-     * @param bool  $livephoto Also include live photos in the update
+     * @param bool                           $value     True to mark as orphaned, false to mark as un-orphaned
+     * @param int[]                          $fileIds   List of file IDs to mark, or empty to mark all files
+     * @param bool                           $livephoto Also include live photos in the update
+     * @param ?\Closure(IQueryBuilder): void $filter    Transform the update query of each table
      */
-    public function orphanAll(bool $value = true, ?array $fileIds = null, bool $livephoto = true): void
-    {
+    public function orphanAll(
+        bool $value = true,
+        ?array $fileIds = null,
+        bool $livephoto = true,
+        ?\Closure $filter = null,
+    ): void {
         // Helper function to update a table.
-        $update = fn (string $table): int => $this->util->transaction(function () use ($table, $value, $fileIds): int {
+        $update = fn (string $table): int => $this->util->transaction(function () use ($table, $value, $fileIds, $filter): int {
             $query = $this->connection->getQueryBuilder();
             $query->update($table)
                 ->set('orphan', $query->createNamedParameter($value, IQueryBuilder::PARAM_BOOL))
@@ -29,6 +34,10 @@ trait TimelineWriteOrphans
 
             if ($fileIds) {
                 $query->where($query->expr()->in('fileid', $query->createNamedParameter($fileIds, IQueryBuilder::PARAM_INT_ARRAY)));
+            }
+
+            if ($filter) {
+                $filter($query);
             }
 
             return $query->executeStatement();
@@ -51,7 +60,7 @@ trait TimelineWriteOrphans
                 }
 
                 // Unorphan all files.
-                $this->orphanAll(false);
+                $this->orphanAll(value: false);
             });
         }
     }
@@ -59,17 +68,24 @@ trait TimelineWriteOrphans
     /**
      * Orphan and run an update on all files.
      *
-     * @param array                 $fields   list of fields to select
-     * @param int                   $txnSize  number of rows to process in a single transaction
-     * @param \Closure(array): void $callback will be passed each row
+     * @param array                          $fields   list of fields to select
+     * @param int                            $txnSize  number of rows to process in a single transaction
+     * @param \Closure(array): void          $callback will be passed each row
+     * @param ?\Closure(IQueryBuilder): void $filter   transform the orphaning query
      */
-    public function orphanAndRun(array $fields, int $txnSize, \Closure $callback): void
-    {
+    public function orphanAndRun(
+        array $fields,
+        int $txnSize,
+        \Closure $callback,
+        ?\Closure $filter = null,
+    ): void {
         // Orphan all files. This means if we are interrupted,
         // it will lead to a re-index of the whole library!
-        $this->orphanAll(true, null, false);
+        $this->orphanAll(value: true, livephoto: false, filter: $filter);
 
-        while (\count($orphans = $this->getSomeOrphans($txnSize, $fields))) {
+        $cursor = 0;
+        while (\count($orphans = $this->getSomeOrphans($cursor, $txnSize, $fields))) {
+            $cursor = (int) end($orphans)['fileid'];
             $this->util->transaction(function () use ($callback, $orphans): void {
                 foreach ($orphans as $row) {
                     $callback($row);
@@ -77,7 +93,7 @@ trait TimelineWriteOrphans
 
                 // Mark all files as not orphaned.
                 $fileIds = array_map(static fn ($row): int => (int) $row['fileid'], $orphans);
-                $this->orphanAll(false, $fileIds, false);
+                $this->orphanAll(value: false, fileIds: $fileIds, livephoto: false);
             });
         }
     }
@@ -85,17 +101,22 @@ trait TimelineWriteOrphans
     /**
      * Get a list of orphaned files.
      *
+     * @param int      $cursor fileid to continue after
      * @param int      $count  max number of rows to return
      * @param string[] $fields list of fields to select
      */
-    private function getSomeOrphans(int $count, array $fields): array
+    private function getSomeOrphans(int $cursor, int $count, array $fields): array
     {
-        return $this->util->transaction(function () use ($count, $fields): array {
+        $fields = array_unique(['fileid', ...$fields]);
+
+        return $this->util->transaction(function () use ($cursor, $count, $fields): array {
             $query = $this->connection->getQueryBuilder();
 
             return $query->select(...$fields)
                 ->from('memories')
-                ->where($query->expr()->eq('orphan', $query->expr()->literal(1)))
+                ->where($query->expr()->gt('fileid', $query->createNamedParameter($cursor, IQueryBuilder::PARAM_INT)))
+                ->andWhere($query->expr()->eq('orphan', $query->expr()->literal(1)))
+                ->orderBy('fileid', 'ASC')
                 ->setMaxResults($count)
                 ->executeQuery()
                 ->fetchAllAssociative()
