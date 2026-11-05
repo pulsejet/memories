@@ -16,7 +16,7 @@ If you have any questions, feel free to reach out at
 
 **How is it different from the default Nextcloud Photos app?**
 
-You can find a full comparison [here](../memories-vs-photos).
+You can find a full comparison [here](./memories-vs-photos.md).
 
 **What apps does Memories compete against?**
 
@@ -47,7 +47,7 @@ Yes. All photos are stored in a folder structure, and only displayed as a flat t
 
 **Does it have a mobile app?**
 
-The Android app is available in early access on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories) or [GitHub Releases](https://github.com/pulsejet/memories/releases?q=android). The web app is very responsive on mobile and can be used on Android and iOS. You can use the official Nextcloud app to auto-upload photos and videos from your device.
+The Android app is available on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories), [F-Droid](https://f-droid.org/packages/gallery.memories/) and [GitHub Releases](https://github.com/pulsejet/memories/releases?q=android). The web app is very responsive on mobile and can be used on Android and iOS. You can use the official Nextcloud app to auto-upload photos and videos from your device.
 
 **How is it better than the `Y` FOSS photo manager?**
 
@@ -55,12 +55,12 @@ UX and performance. The devil is in the details.
 
 **It's slow or doesn't work**
 
-Make sure you follow the [troubleshooting steps](../troubleshooting/#performance). Unless you have hundreds of thousands of photos on a Raspberry Pi, Memories should be very fast. File an issue otherwise.
+Make sure you follow the [troubleshooting steps](./troubleshooting.md#performance). Unless you have hundreds of thousands of photos on a Raspberry Pi, Memories should be very fast. File an issue otherwise.
 
 **It says "nothing to show here" on startup?**
 
 Indexing is performed in the background, and can take a while depending on the number of photos. Follow
-the [configuration steps](../config) and be patient.
+the [configuration steps](./config.md) and be patient.
 
 **Will it run on my system?**
 

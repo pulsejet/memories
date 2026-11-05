@@ -16,7 +16,11 @@ This is the basic command for indexing metadata in files. You don't need to run 
 
 !!! tip "Indexing in parallel"
 
-    You can run multiple processes of indexing in parallel, e.g. `for i in {1..4}; do (occ memories:index &); done`. This will speed up indexing significantly.
+    You can run multiple processes of indexing in parallel. This will speed up indexing significantly.
+
+    ```bash
+    for i in {1..4}; do occ memories:index & done; wait
+    ```
 
 ```
 Usage:
@@ -39,7 +43,7 @@ Options:
 
 ## `occ memories:places-setup`
 
-Download and index the planet database. The planet database is the border map of the entire world and is used for reverse geocoding (not for the map). To use reverse geocoding, MySQL or Postgres is required.
+Download and import the planet database. The planet database is the border map of the entire world and is used for reverse geocoding (not for the map). To use reverse geocoding, MySQL/MariaDB or Postgres is required.
 
 ```
 Usage:
@@ -51,7 +55,7 @@ Options:
       --planet-file=FILE     Path to custom planet zip file
 ```
 
-## `memories:migrate-google-takeout`
+## `occ memories:migrate-google-takeout`
 
 Migrate Google Takeout JSON metadata to the files as EXIF data.
 

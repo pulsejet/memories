@@ -45,7 +45,7 @@ Memories is a _batteries-included_ photo management solution for Nextcloud with 
 
 ## 📱 Mobile Apps
 
-- An Android client for Memories is available in early access on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories), [F-Droid](https://f-droid.org/packages/gallery.memories/) or [GitHub Releases](https://github.com/pulsejet/memories/releases?q=android).
+- An Android client for Memories is available on [Google Play](https://play.google.com/store/apps/details?id=gallery.memories), [F-Droid](https://f-droid.org/packages/gallery.memories/) or [GitHub Releases](https://github.com/pulsejet/memories/releases?q=android).
 - For automatic uploads, you can use the official Nextcloud mobile apps. 
    - Android: [Google Play](https://play.google.com/store/apps/details?id=com.nextcloud.client), [F-Droid](https://f-droid.org/en/packages/com.nextcloud.client/)
    - iOS: [App Store](https://apps.apple.com/us/app/nextcloud/id1125420102).
@@ -60,7 +60,7 @@ See [`.devcontainer/README.md`](.devcontainer/README.md) for more information.
 To set up a development instance manually, follow these steps:
 
 1. ☁ Clone this monorepo into the `custom_apps` folder of your Nextcloud.
-1. 📥 Install [Composer](https://getcomposer.org/) and [Node.js 18](https://nodejs.org)
+1. 📥 Install [Composer](https://getcomposer.org/) and [Node.js](https://nodejs.org)
 1. 👩‍💻 In a terminal, run the command `make dev-setup` to install the dependencies.
 1. 🏗 To build/watch the UI, run `make watch-js`.
 1. ✅ Enable the app through the app management of your Nextcloud.
@@ -102,7 +102,7 @@ For the full changelog, see [CHANGELOG.md](CHANGELOG.md).
 
 To the great folks building Nextcloud, PHP, Vue and all the other dependencies that make this project possible.
 
-Thanks to [GitHub](https://github.com), [CircleCI](https://circleci.com/) and [BrowserStack](https://www.browserstack.com) for sponsorship for Open Source projects for CI / testing on different devices.
+Thanks to [GitHub](https://github.com) and [BrowserStack](https://www.browserstack.com) for sponsorship for Open Source projects for CI / testing on different devices.
 
 ## 📄 License
 

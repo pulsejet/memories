@@ -16,7 +16,7 @@ Memories is very fast, but its performance largely depends on how well the Nextc
 
 - Make sure you are running the latest stable version of Nextcloud and Memories.
 - Follow the steps in the [server tuning](https://docs.nextcloud.com/server/latest/admin_manual/installation/server_tuning.html) documentation.
-- Follow all configuration steps in the [configuration](../config) documentation.
+- Follow all configuration steps in the [configuration](./config.md) documentation.
 
       - Disable video transcoding if your server is not powerful enough.
       - Reduce the maximum size of previews to be generated.
@@ -31,7 +31,7 @@ Memories is very fast, but its performance largely depends on how well the Nextc
 
 ## No photos are shown
 
-This means that Memories is unable to find any indexed photos in your Nextcloud instance. Make sure you have followed the [configuration steps](../config). Note that Memories indexes photos in the background, so it may take a while for the photos to show up. Ensure that Nextcloud's cron system is properly configured and running.
+This means that Memories is unable to find any indexed photos in your Nextcloud instance. Make sure you have followed the [configuration steps](./config.md). Note that Memories indexes photos in the background, so it may take a while for the photos to show up. Ensure that Nextcloud's cron system is properly configured and running.
 
 ## Downloads fail with 404
 
@@ -77,7 +77,7 @@ app:
     - /tmp:exec
 ```
 
-`tpmfs` is automatically configured when using Nextcloud AIO v7.0.0.
+`tmpfs` is automatically configured when using Nextcloud AIO.
 
 !!! tip "Changing the binary temp directory"
     
@@ -94,8 +94,7 @@ Memories utilizes database triggers for certain functionality and if these trigg
 If your admin panel shows that Memories is running in trigger compatibility mode, try the following steps.
 
 1. Run `occ maintenance:repair` to attempt to create the triggers. This will print any errors that occur.
-2. Restart the PHP server.
-3. If you are using MySQL / MariaDB, set the `log_bin_trust_function_creators` option is set to `1` in your `my.cnf` file. If you are using docker, you can add `--log_bin_trust_function_creators=true` to your database container's command line. Restart the database after this and repeat steps 1 and 2.
+1. If you are using MySQL / MariaDB, make sure the `log_bin_trust_function_creators` option is set to `1` in your database configuration. Restart the database after this and repeat step 1.
 
 If none of the above work or are applicable, file a bug at the repository including the output of `occ maintenance:repair`.
 
@@ -106,7 +105,7 @@ If none of the above work or are applicable, file a bug at the repository includ
 When using the NixOS modules system for installation the indexer may fail on execution. In case the error is either `perl not found` or `failed to run exiftool: ...` it might be that the created `nextcloud-cron` services does not have access to a perl interpreter.
 
 In that case adding perl to the path of the `nextcloud-cron` service might solve the issue.
-It can be archived by adding the following snippet to the `configuration.nix`
+It can be achieved by adding the following snippet to the `configuration.nix`
 
 ```nix
 systemd.services.nextcloud-cron = {
@@ -141,15 +140,7 @@ occ memories:places-setup
 
 ### Error: Incorrect string value
 
-If you get this error (or an `Incorrect datetime value` error), it is likely that your database is not using the `utf8mb4` character set. Since the reverse geocoding database contains characters in various languages, it is necessary to use `utf8mb4` to store them. To fix this, you need to convert your database to use `utf8mb4`.
-
-You can also try changing `/etc/myt.cnf` in your MySQL/MariaDB server to use `utf8mb4` by default:
-
-```ini
-init_connect='SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci'
-```
-
-Restart your database server after making this change.
+If you get this error (or an `Incorrect datetime value` error), it is likely that your database is not using the `utf8mb4` character set. Since the reverse geocoding database contains characters in various languages, it is necessary to use `utf8mb4` to store them. To fix this, convert your database to `utf8mb4` (e.g. `occ db:convert-mysql-charset` for Nextcloud; have backups first).
 
 
 ### Database table prefix
@@ -170,7 +161,7 @@ After this, run `occ memories:places-setup` again. More discussion on this issue
 
 ## Transcoding
 
-Memories transcodes videos on the fly per-user. This saves space, but requires reasonably good hardware, preferably with hardware acceleration. Check the troubleshooting section [here](/hw-transcoding/#troubleshooting).
+Memories can transcode videos on the fly per-user. This saves space, but requires reasonably good hardware, preferably with hardware acceleration. Check the troubleshooting section [here](./hw-transcoding.md#troubleshooting).
 
 ## Reset
 
