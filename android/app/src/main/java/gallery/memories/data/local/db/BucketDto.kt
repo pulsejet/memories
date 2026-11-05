@@ -10,4 +10,5 @@ data class BucketDto(
     @ColumnInfo(name = "bucket_id") val id: String,
     @ColumnInfo(name = "bucket_name") val name: String,
     @ColumnInfo(name = "sample_id") val sampleId: Long,
+    @ColumnInfo(name = "count") val count: Int,
 )

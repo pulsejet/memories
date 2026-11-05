@@ -9,7 +9,7 @@ import org.json.JSONObject
 
 /**
  * Device folders for the setup/timeline UI, derived live from indexed buckets.
- * Shape per entry: {id, name, enabled}; likely-camera folders first, then by size.
+ * Shape per entry: {id, name, enabled, count}; likely-camera folders first, then by size.
  * Must be touched off the main thread: the getter queries Room and MediaStore synchronously.
  */
 class FolderSettings(
@@ -23,6 +23,7 @@ class FolderSettings(
                 .put(TimelineJson.Bucket.ID, it.id)
                 .put(TimelineJson.Bucket.NAME, it.name)
                 .put(TimelineJson.Bucket.ENABLED, prefs.enabledBucketIds.contains(it.id))
+                .put(TimelineJson.Bucket.COUNT, it.count)
         }.let { JSONArray(it) }
         set(value) {
             val enabled = mutableListOf<String>()

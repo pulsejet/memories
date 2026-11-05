@@ -201,9 +201,10 @@
 
     <NcAppSettingsSection id="device-settings" :name="t('memories', 'Device Folders')" v-if="isNative">
       <div class="radio-group">
-        {{ t('memories', 'Local folders to include in the timeline view') }}
+        {{ t('memories', 'Local folders to include in the timeline view.') }}
+        {{ t('memories', 'Run initial device setup to see all folders.') }}
         <NcCheckboxRadioSwitch
-          v-for="folder in localFolders"
+          v-for="folder in topLocalFolders"
           :key="folder.id"
           v-model="folder.enabled"
           @update:model-value="updateDeviceFolders"
@@ -351,6 +352,11 @@ const emit = defineEmits<{
 const router = useRouter();
 
 const localFolders = ref<nativex.LocalFolderConfig[]>([]);
+const topLocalFolders = computed(() => {
+  // Older native apps don't report counts or sort by them
+  if (localFolders.value.some((f) => f.count === undefined)) return localFolders.value;
+  return localFolders.value.filter((f) => f.count! > 10).slice(0, 10);
+});
 const names = {
   header: t('memories', 'Settings'),
   general: t('memories', 'General'),

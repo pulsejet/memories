@@ -60,6 +60,7 @@ object TimelineJson {
         const val ID = "id"
         const val NAME = "name"
         const val ENABLED = "enabled"
+        const val COUNT = "count"
     }
 
     object Other {

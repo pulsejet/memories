@@ -5,6 +5,7 @@ export type LocalFolderConfig = {
   id: string;
   name: string;
   enabled: boolean;
+  count?: number;
 };
 
 /**
