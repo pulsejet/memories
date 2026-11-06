@@ -91,7 +91,6 @@ OC.L10N.register(
     "Never load high resolution image" : "Niekada neįkelti didelės raiškos vaizdo",
     "Logged in as {user}" : "Prisijungęs kaip {user}",
     "Device Folders" : "Įrenginio aplankai",
-    "Local folders to include in the timeline view" : "Vietiniai aplankai, kurie bus įtraukti į laiko skalės rodinį",
     "Run initial device setup" : "Paleiskite pradinę įrenginio sąranką",
     "Folders Path" : "Aplankų kelias",
     "Show hidden folders" : "Rodyti paslėptus aplankus",

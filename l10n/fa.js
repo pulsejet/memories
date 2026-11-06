@@ -91,7 +91,6 @@ OC.L10N.register(
     "Never load high resolution image" : "هرگز تصویر با وضوح بالا را بارگذاری نکن",
     "Logged in as {user}" : "ورود به عنوان {user}",
     "Device Folders" : "پوشه‌های دستگاه",
-    "Local folders to include in the timeline view" : "پوشه‌های محلی برای نمایش در نمای زمانی",
     "Run initial device setup" : "اجرای راه‌اندازی اولیه دستگاه",
     "Folders Path" : "مسیر پوشه‌ها",
     "Show hidden folders" : "نمایش پوشه‌های مخفی",

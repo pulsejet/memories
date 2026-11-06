@@ -89,7 +89,6 @@ OC.L10N.register(
     "Never load high resolution image" : "ບໍ່ຕ້ອງໂຫຼດຮູບພາບຄວາມລະອຽດສູງ",
     "Logged in as {user}" : "ເຂົ້າສູ່ລະບົບໃນຊື່ {user}",
     "Device Folders" : "ໂຟນເດີອຸປະກອນ",
-    "Local folders to include in the timeline view" : "ໂຟນເດີໃນເຄື່ອງທີ່ຈະລວມໃນມຸມມອງໄລຍະເວລາ",
     "Run initial device setup" : "ດຳເນີນການຕັ້ງຄ່າອຸປະກອນເບື້ອງຕົ້ນ",
     "Folders Path" : "ເສັ້ນທາງໂຟນເດີ",
     "Show hidden folders" : "ສະແດງໂຟນເດີທີ່ເຊື່ອງໄວ້",

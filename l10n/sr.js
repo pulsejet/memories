@@ -90,7 +90,6 @@ OC.L10N.register(
     "Never load high resolution image" : "Никада не учитавај слику високе резолуције",
     "Logged in as {user}" : "Пријављени сте као {user}",
     "Device Folders" : "Фолдери уређаја",
-    "Local folders to include in the timeline view" : "Локални фолдери који су део погледа временске линије",
     "Run initial device setup" : "Покрени почетно подешавање уређаја",
     "Folders Path" : "Путања до фолдера",
     "Show hidden folders" : "Прикажи скривене фолдере",

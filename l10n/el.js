@@ -90,7 +90,6 @@ OC.L10N.register(
     "Never load high resolution image" : "Ποτέ φόρτωση εικόνας υψηλής ανάλυσης",
     "Logged in as {user}" : "Συνδεδεμένος ως {user}",
     "Device Folders" : "Φάκελοι Συσκευής",
-    "Local folders to include in the timeline view" : "Τοπικοί φάκελοι για συμπερίληψη στην προβολή χρονολογίου",
     "Run initial device setup" : "Εκτέλεση αρχικής ρύθμισης συσκευής",
     "Folders Path" : "Διαδρομή Φακέλων",
     "Show hidden folders" : "Εμφάνιση κρυφών φακέλων",

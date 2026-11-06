@@ -84,7 +84,6 @@
     "Never load high resolution image" : "어떤 경우에도 고해상도 이미지를 불러오지 않기",
     "Logged in as {user}" : "{user}(으)로 로그인함",
     "Device Folders" : "장치 폴더",
-    "Local folders to include in the timeline view" : "타임라인에 포함할 로컬 폴더",
     "Run initial device setup" : "초기 장치 설정 실행",
     "Folders Path" : "폴더 경로",
     "Show hidden folders" : "숨겨진 폴더 표시",

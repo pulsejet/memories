@@ -83,7 +83,6 @@ OC.L10N.register(
     "Never load high resolution image" : "Nigdy nie ładuj obrazu w wysokiej rozdzielczości",
     "Logged in as {user}" : "Zalogowano jako {user}",
     "Device Folders" : "Katalogi urządzenia",
-    "Local folders to include in the timeline view" : "Lokalne katalogi do załączenia w osi czasu",
     "Folders Path" : "Ścieżka katalogów",
     "Show hidden folders" : "Pokaż ukryte katalogi",
     "Sort folders oldest-first" : "Sortuj katalogi, najpierw starsze",

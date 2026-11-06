@@ -87,7 +87,6 @@
     "Always load high resolution image (not recommended)" : "Винаги зареждай изображение с висока резолюция (не се препоръчва)",
     "Never load high resolution image" : "Никога не зареждай изображение с висока резолюция",
     "Logged in as {user}" : "Влезли сте като {user}",
-    "Local folders to include in the timeline view" : "Локални папки за включване в изгледа на хронологията",
     "Folders Path" : "Път на папките",
     "Show hidden folders" : "Показване на скрити папки",
     "Sort folders oldest-first" : "Сортиране на папки, първо най-старите",

@@ -88,7 +88,6 @@ OC.L10N.register(
     "Never load high resolution image" : "Last aldri inn bilder med høy oppløsning",
     "Logged in as {user}" : "Logget på som {user}",
     "Device Folders" : "Enhetsmapper",
-    "Local folders to include in the timeline view" : "Lokale mapper som skal inkluderes i tidslinjevisningen",
     "Run initial device setup" : "Kjør første enhetsoppsett",
     "Folders Path" : "Mappebane",
     "Show hidden folders" : "Vis skjulte mapper",

@@ -88,7 +88,6 @@ OC.L10N.register(
     "Never load high resolution image" : "لا تقُم أبداً بتحميل الصِّوَر عالية الدِّقّة",
     "Logged in as {user}" : "تسجيل الدخول بصفته {مستخدم}",
     "Device Folders" : "مجلدات الجهاز",
-    "Local folders to include in the timeline view" : "المجلدات المحلية التي يتم تضمينها في عرض الجدول الزمني",
     "Run initial device setup" : "قم بتشغيل الإعداد المبدئي للجهاز",
     "Folders Path" : "مسار المجلدات",
     "Show hidden folders" : "أظهِر المجلدات المَخفِيّة",

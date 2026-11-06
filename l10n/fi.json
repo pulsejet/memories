@@ -77,7 +77,6 @@
     "Show full file path in sidebar" : "Näytä tiedoston koko polku sivupalkissa",
     "Logged in as {user}" : "Kirjauduttu käyttäjänä {user}",
     "Device Folders" : "Laitekansiot",
-    "Local folders to include in the timeline view" : "Paikalliset kansiot, joiden kuvat näytetään aikajanalla",
     "Folders Path" : "Kansioiden polku",
     "Show hidden folders" : "Näytä piilotetut kansiot",
     "Sort folders oldest-first" : "Järjestä kansiot vanhimmasta uusimpaan",

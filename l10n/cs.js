@@ -91,7 +91,6 @@ OC.L10N.register(
     "Never load high resolution image" : "Nikdy nenačítat obrázek ve vysokém rozlišení",
     "Logged in as {user}" : "Přihlášeni jako {user}",
     "Device Folders" : "Složky na zařízení",
-    "Local folders to include in the timeline view" : "Místní složky, které budou obsahovat zobrazení časové osy",
     "Run initial device setup" : "Spustit prvotní nastavení zařízení",
     "Folders Path" : "Popis umístění složek",
     "Show hidden folders" : "Zobrazit skryté složky",

@@ -90,7 +90,6 @@ OC.L10N.register(
     "Never load high resolution image" : "Nikoli ne naloži slike z visoko ločljivostjo",
     "Logged in as {user}" : "Prijavljen kot {user}",
     "Device Folders" : "Mape naprave",
-    "Local folders to include in the timeline view" : "Krajevne mape, ki naj bodo vključene v pogled časovnice",
     "Run initial device setup" : "Zaženi začetno nastavitev naprave",
     "Folders Path" : "Pot map",
     "Show hidden folders" : "Pokaži skrite mape",

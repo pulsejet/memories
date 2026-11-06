@@ -82,7 +82,6 @@ OC.L10N.register(
     "Never load high resolution image" : "Sose töltse be a nagy felbontású képet",
     "Logged in as {user}" : "Bejelentkezve mint {user}",
     "Device Folders" : "Eszközmappák",
-    "Local folders to include in the timeline view" : "Az idővonal nézetbe beleveendő helyi mappák",
     "Run initial device setup" : "Kezdeti eszközbeállítás futtatása",
     "Folders Path" : "Mappák útvonala",
     "Show hidden folders" : "Rejtett mappák megjelenítése",
