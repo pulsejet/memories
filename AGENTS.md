@@ -24,10 +24,13 @@ Very important.
   - Include refs to issues / PRs like Closes #... or Fixes #...
 
 ## Git
-- Always work on `development`; keep it checked out locally.
+- Work directly on `master`; keep it checked out locally.
+- Use a feature branch only if the user asks; name it `<user>/<feat>`.
 - Linear history only: rebase, never merge commits.
-- Ship to master: `git fetch origin`, rebase `development` on `origin/master`, fast-forward `master`, push `master`.
-- Never force-push unless explicitly asked.
+- Before pushing: `git fetch origin`, rebase on `origin/master`.
+- Ship a feature branch: rebase on `origin/master`, fast-forward `master`, push `master`.
+- `master` is protected: never force-push it.
+- Never force-push other branches unless explicitly asked.
 
 ## Releases
 - For any release, load the `release` skill first and follow it exactly.
