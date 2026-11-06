@@ -203,8 +203,10 @@ class NativeX(private val mCtx: MainActivity) {
     }
 
     /** Downloads a file in-process with the app's own client. Notifies on completion. Nulls are ignored. */
+    // Server versions before notification titles call the bridge with two arguments.
+    @JvmOverloads
     @JavascriptInterface
-    fun downloadFromUrl(url: String?, filename: String?, title: String?) {
+    fun downloadFromUrl(url: String?, filename: String?, title: String? = null) {
         if (url == null) return
         mCtx.threadPool.submit {
             try {
