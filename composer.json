@@ -2,12 +2,15 @@
     "name": "radialapps/memories",
     "description": "Fast and advanced photo management for Nextcloud",
     "type": "project",
-    "license": "AGPL",
+    "license": "AGPL-3.0-or-later",
     "authors": [
         {
             "name": "Varun Patil"
         }
     ],
+    "require": {
+        "php": ">=8.3"
+    },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.94",
         "phpunit/phpunit": "^13.1",
