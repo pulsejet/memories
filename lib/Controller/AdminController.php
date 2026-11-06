@@ -41,6 +41,7 @@ use OCP\IAppConfig;
 use OCP\IDBConnection;
 use OCP\IRequest;
 use OCP\ISession;
+use Psr\Log\LoggerInterface;
 
 final class AdminController extends ApiController
 {
@@ -56,6 +57,7 @@ final class AdminController extends ApiController
         protected SystemConfig $systemConfig,
         protected BinExt $binExt,
         protected Util $util,
+        protected LoggerInterface $logger,
     ) {
         parent::__construct(Application::APPNAME, $request);
     }
@@ -114,7 +116,7 @@ final class AdminController extends ApiController
                     $this->binExt->pkill('go-vod');
                     $this->binExt->ensureGoVod();
                 } catch (\Exception $e) {
-                    error_log('Failed to start go-vod: '.$e->getMessage());
+                    $this->logger->error('Failed to start go-vod: '.$e->getMessage(), ['app' => Application::APPNAME]);
                 }
             }
 

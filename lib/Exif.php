@@ -10,6 +10,7 @@ use OCA\Memories\Settings\SystemConfig;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\Events\Node\NodeWrittenEvent;
 use OCP\Files\File;
+use Psr\Log\LoggerInterface;
 
 final class Exif
 {
@@ -44,6 +45,7 @@ final class Exif
         private BinExt $binExt,
         private SystemConfig $systemConfig,
         private IEventDispatcher $eventDispatcher,
+        private LoggerInterface $logger,
     ) {}
 
     public function closeStaticExiftoolProc(): void
@@ -84,7 +86,7 @@ final class Exif
             usleep(500000); // wait if error
 
             if ($this->staticProc && !proc_get_status($this->staticProc)['running']) {
-                error_log('WARN: Failed to create stay_open exiftool process');
+                $this->logger->warning('Failed to create stay_open exiftool process', ['app' => Application::APPNAME]);
                 $this->noProc = true;
                 $this->staticProc = null;
                 $this->staticPipes = null;
@@ -390,19 +392,19 @@ final class Exif
             $stdout = $output[1];
             $stderr = $output[2];
         } catch (\Exception $ex) {
-            error_log("Timeout reading from exiftool: [{$path}]");
+            $this->logger->error("Timeout reading from exiftool: [{$path}]", ['app' => Application::APPNAME]);
 
             throw $ex;
         }
 
         if (null !== $stderr && str_contains($stderr, 'Error')) {
-            error_log("Exiftool error: {$stderr}");
+            $this->logger->error("Exiftool error: {$stderr}", ['app' => Application::APPNAME]);
 
             throw new \Exception('Could not set exif data: '.$stderr);
         }
         if (null === $stdout || str_contains($stdout, 'Error')) {
             $stdout ??= $stderr ?? 'Error: Unknown cmd fail';
-            error_log("Exiftool error: {$stdout}");
+            $this->logger->error("Exiftool error: {$stdout}", ['app' => Application::APPNAME]);
 
             throw new \Exception('Could not set exif data: '.$stdout);
         }
@@ -479,7 +481,7 @@ final class Exif
         try {
             return Util::execSafe($cmd, self::EXIFTOOL_TIMEOUT) ?? '';
         } catch (\Exception $ex) {
-            error_log("Timeout reading from exiftool: [{$path}]");
+            $this->logger->error("Timeout reading from exiftool: [{$path}]", ['app' => Application::APPNAME]);
 
             throw $ex;
         }
@@ -537,7 +539,7 @@ final class Exif
 
             return $this->processStdout($buf);
         } catch (\Exception) {
-            error_log("ERROR: Exiftool may have crashed, restarting process [{$path}]");
+            $this->logger->error("Exiftool may have crashed, restarting process [{$path}]", ['app' => Application::APPNAME]);
             $this->restartStaticExiftoolProc();
 
             throw new \Exception('Nothing to read from Exiftool');
@@ -555,7 +557,7 @@ final class Exif
         try {
             $stdout = Util::execSafe($cmd, self::EXIFTOOL_TIMEOUT) ?? '';
         } catch (\Exception $ex) {
-            error_log("Timeout reading from exiftool: [{$path}]");
+            $this->logger->error("Timeout reading from exiftool: [{$path}]", ['app' => Application::APPNAME]);
 
             throw $ex;
         }
