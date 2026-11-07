@@ -73,46 +73,55 @@ export const config: DeepReadonly<IConfig> = readonly(currentConfig);
 /** Whether the server reported a different app version than the cache. */
 let versionChanged = false;
 
+/** Mutable state of the server fetch. @see configStatus */
+const status = reactive({ settled: false, error: null as Error | null });
+
+/** Reactive state of the server fetch: settled once done, with the error if it failed. */
+export const configStatus = readonly(status);
+
 /** Resolves once the server copy has landed (or failed). @see waitForConfig */
 const serverPromise = fetchServer();
 
 /** Fetch the server copy and propagate it into the live config. */
 async function fetchServer() {
-  let server: IConfig;
   try {
-    server = (await axios.get<IConfig>(API.CONFIG_GET())).data;
+    const server = (await axios.get<IConfig>(API.CONFIG_GET())).data;
+    if (typeof server?.timeline_path !== 'string') {
+      throw new Error('Server provided invalid configuration');
+    }
+
+    // Snapshot of cached config for diffing
+    const old = { ...currentConfig } as IConfig;
+
+    // Check if version changed
+    if (old.version !== server.version) {
+      versionChanged = true;
+
+      // Let the user know they might need a page refresh to get a new version.
+      // None of the callers know about the old version, so we need to do this here.
+      if (!hasNative() && old.version) {
+        notifyVersionChanged(server.version);
+      }
+
+      // Clear page cache, keep other caches
+      window.caches?.delete('memories-pages');
+    }
+
+    // Update cached copy and storage.
+    // Keys missing from the server (e.g. local settings) are skipped,
+    // so the cached values are kept as is.
+    for (const k in server) {
+      const key = k as keyof IConfig;
+      propagate(key, server[key]);
+    }
   } catch (e) {
+    // Offline or fail, continue with cached configuration
+    status.error = e instanceof Error ? e : new Error(String(e));
     if (!isNetworkError(e)) {
       showError('Failed to load configuration');
     }
-
-    // Offline or fail, continue with cached configuration
-    return;
-  }
-
-  // Snapshot of cached config for diffing
-  const old = { ...currentConfig } as IConfig;
-
-  // Check if version changed
-  if (old.version !== server.version) {
-    versionChanged = true;
-
-    // Let the user know they might need a page refresh to get a new version.
-    // None of the callers know about the old version, so we need to do this here.
-    if (!hasNative() && old.version) {
-      notifyVersionChanged(server.version);
-    }
-
-    // Clear page cache, keep other caches
-    window.caches?.delete('memories-pages');
-  }
-
-  // Update cached copy and storage.
-  // Keys missing from the server (e.g. local settings) are skipped,
-  // so the cached values are kept as is.
-  for (const k in server) {
-    const key = k as keyof IConfig;
-    propagate(key, server[key]);
+  } finally {
+    status.settled = true;
   }
 }
 

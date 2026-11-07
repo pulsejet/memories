@@ -89,6 +89,17 @@
       </Teleport>
     </template>
 
+    <!-- Server config failed to load and nothing is cached -->
+    <NcEmptyContent
+      v-else-if="configStatus.settled"
+      :name="t('memories', 'Failed to load configuration')"
+      :description="configStatus.error?.message"
+    >
+      <template #action>
+        <NcButton @click="reload">{{ t('memories', 'Reload') }}</NcButton>
+      </template>
+    </NcEmptyContent>
+
     <EditMetadataModal />
     <AddToAlbumModal />
     <NodeShareModal />
@@ -111,6 +122,8 @@ import NcContent from '@nextcloud/vue/components/NcContent';
 import NcAppContent from '@nextcloud/vue/components/NcAppContent';
 import NcAppNavigation from '@nextcloud/vue/components/NcAppNavigation';
 import NcAppNavigationItem from '@nextcloud/vue/components/NcAppNavigationItem';
+import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent';
+import NcButton from '@nextcloud/vue/components/NcButton';
 
 import { generateUrl } from '@nextcloud/router';
 import { useRouteIs } from '@services/route-is';
@@ -137,7 +150,7 @@ import SearchModal from '@components/modal/SearchModal.vue';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 import { translate as t } from '@services/l10n';
-import { config, hasVersionChanged } from '@services/user-config';
+import { config, configStatus, hasVersionChanged } from '@services/user-config';
 import { windowDims } from '@services/viewport';
 import { getPlayableVideoCodecs } from '@services/video/codec';
 
@@ -216,6 +229,8 @@ const isFirstStart = computed((): boolean => {
 const isConfigUnknown = computed((): boolean => {
   return config.timeline_path === '_unknown_';
 });
+
+const reload = () => window.location.reload();
 
 const showAlbums = computed((): boolean => {
   return config.albums_enabled;
