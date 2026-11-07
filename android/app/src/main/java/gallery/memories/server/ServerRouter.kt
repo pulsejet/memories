@@ -116,16 +116,13 @@ class ServerRouter(
             val appPrefix = config.webRoot + "/index.php/apps/memories"
             val isEntry = rawPath == "/" || rawPath == config.webRoot || rawPath == config.webRoot + "/"
             val isAppRoute = rawPath == appPrefix || rawPath == "$appPrefix/" || rawPath.startsWith("$appPrefix/")
-            if (method == "GET" && (isEntry || isAppRoute) &&
-                (isEntry || call.request.headers["Accept"]?.contains("text/html") == true) &&
-                serveShell(config, call)
-            ) return
+            val isDocument = call.request.headers["Accept"]?.contains("text/html") == true ||
+                call.request.headers["Sec-Fetch-Dest"] == "document"
+            if (method == "GET" && (isEntry || isAppRoute) && isDocument && serveShell(config, call)) return
             // Only local code serves documents (shell/static above): never forward a
             // page navigation upstream, or remote content would render as a local page.
-            if (method == "GET" &&
-                (call.request.headers["Accept"]?.contains("text/html") == true ||
-                    call.request.headers["Sec-Fetch-Dest"] == "document")
-            ) {
+            // The entry is never an API: an XHR here (e.g. a followed redirect) must not get the shell.
+            if (method == "GET" && (isDocument || isEntry)) {
                 KtorRespond.plain(call, HttpStatusCode.NotFound, "not found")
                 return
             }
