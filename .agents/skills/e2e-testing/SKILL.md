@@ -40,4 +40,5 @@ Never run e2e unless the user explicitly asks.
 - Check: `curl -sI http://localhost/ | grep -i location`.
 - Fix: temporary Node HTTPS forwarder on 443 (listen on `::`, dual-stack) → `127.0.0.1:80` with a self-signed cert.
 - `playwright.config.ts` already sets `ignoreHTTPSErrors`; ad hoc scripts must set it themselves.
+- Run e2e with `E2E_BASE_URL=https://localhost` so it matches the server's canonical URL.
 - Afterwards, stop the forwarder and delete the key.
