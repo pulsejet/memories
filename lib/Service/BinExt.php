@@ -326,9 +326,9 @@ final class BinExt
 
             $pipes = [];
             $proc = proc_open(['sh', '-c', $shell], [
-                0 => ['file', '/dev/null', 'r'],
+                0 => ['null'],
                 1 => ['pipe', 'w'],
-                2 => ['file', '/dev/null', 'w'],
+                2 => ['null'],
             ], $pipes);
 
             $childPid = 0;

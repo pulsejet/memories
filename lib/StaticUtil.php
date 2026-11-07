@@ -250,7 +250,7 @@ class StaticUtil
 
         foreach ([1, 2] as $fd) {
             if (!isset($config[$fd])) {
-                $config[$fd] = ['file', '/dev/null', 'w'];
+                $config[$fd] = ['null'];
             }
         }
         if (null !== $stdin) {
