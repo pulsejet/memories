@@ -42,7 +42,7 @@ class ProxyController(
         private val SKIPPED_RESPONSE_HEADERS = setOf(
             "content-encoding", "transfer-encoding",
             "content-length", "content-type",
-            "connection", "keep-alive", "set-cookie",
+            "connection", "keep-alive", "set-cookie", "upgrade",
         )
 
         /** Bodies up to this size are buffered so OkHttp can retry them on a stale connection. */
