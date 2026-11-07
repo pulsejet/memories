@@ -174,6 +174,12 @@ export const routes = {
     name: 'nxsetup',
     props: (route: RouteLocationNormalized) => ({ rootTitle: t('memories', 'Setup') }),
   },
+
+  NotFound: {
+    path: '/:pathMatch(.*)*',
+    component: () => import('@components/NotFound.vue'),
+    name: 'not-found',
+  },
 } as const satisfies Record<string, RouteRecordRaw>;
 
 // If index.php is in the url AND we got this far, then it's working:
