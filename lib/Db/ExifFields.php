@@ -73,6 +73,7 @@ final class ExifFields
         'CircleOfConfusion' => true,
         'DOF' => true,
         'FOV' => true,
+        'TagsList' => true,
 
         // Currently unused fields
         'ExifVersion' => true,
