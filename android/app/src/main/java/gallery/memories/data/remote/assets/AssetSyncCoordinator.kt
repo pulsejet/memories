@@ -185,13 +185,12 @@ class AssetSyncCoordinator(
             val key = cache.snapshotKey(describe)
             val dir = cache.dirFor(baseUrl, key)
             val existing = cache.readDescribe(dir)?.takeIf { File(dir, ".ready").exists() }
-            if (existing != null && !cache.jsChanged(existing, describe) && !cache.cssChanged(existing, describe)) {
-                cache.pruneExcept(baseUrl, key)
-                status = "ready"
-                return true
+            if (existing == null || cache.jsChanged(existing, describe) || cache.cssChanged(existing, describe)) {
+                syncBlocking(describe, baseUrl, dir)
             }
-            syncBlocking(describe, baseUrl, dir)
+            // Pruning deletes any older snapshot, so it must not stay current.
             cache.pruneExcept(baseUrl, key)
+            current = key to dir
             status = "ready"
             return true
         } catch (e: Exception) {
