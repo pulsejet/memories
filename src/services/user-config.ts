@@ -74,7 +74,7 @@ export const config: DeepReadonly<IConfig> = readonly(currentConfig);
 let versionChanged = false;
 
 /** Mutable state of the server fetch. @see configStatus */
-const status = reactive({ settled: false, error: null as Error | null });
+const status = reactive({ settled: false, error: null as string | null });
 
 /** Reactive state of the server fetch: settled once done, with the error if it failed. */
 export const configStatus = readonly(status);
@@ -116,7 +116,7 @@ async function fetchServer() {
     }
   } catch (e) {
     // Offline or fail, continue with cached configuration
-    status.error = e instanceof Error ? e : new Error(String(e));
+    status.error = e instanceof Error ? e.message : String(e);
     if (!isNetworkError(e)) {
       showError('Failed to load configuration');
     }

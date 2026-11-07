@@ -93,10 +93,10 @@
     <NcEmptyContent
       v-else-if="configStatus.settled"
       :name="t('memories', 'Failed to load configuration')"
-      :description="configStatus.error?.message"
+      :description="configStatus.error ?? undefined"
     >
       <template #action>
-        <NcButton @click="reload">{{ t('memories', 'Reload') }}</NcButton>
+        <NcButton @click="reloadWindow">{{ t('memories', 'Reload') }}</NcButton>
       </template>
     </NcEmptyContent>
 
@@ -229,8 +229,6 @@ const isFirstStart = computed((): boolean => {
 const isConfigUnknown = computed((): boolean => {
   return config.timeline_path === '_unknown_';
 });
-
-const reload = () => window.location.reload();
 
 const showAlbums = computed((): boolean => {
   return config.albums_enabled;
@@ -413,6 +411,10 @@ function linkClick() {
 
 function showSettings() {
   settingsOpen.value = true;
+}
+
+function reloadWindow() {
+  window.location.reload();
 }
 
 // https://github.com/pulsejet/memories/issues/1634
