@@ -150,6 +150,7 @@ import SearchModal from '@components/modal/SearchModal.vue';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 import { translate as t } from '@services/l10n';
+import { uid } from '@services/utils/auth';
 import { config, configStatus, hasVersionChanged } from '@services/user-config';
 import { windowDims } from '@services/viewport';
 import { getPlayableVideoCodecs } from '@services/video/codec';
@@ -223,7 +224,7 @@ const facerecognition = computed((): string | false => {
 });
 
 const isFirstStart = computed((): boolean => {
-  return config.timeline_path === '_empty_' && !routeIs.Public && !route.query.noinit;
+  return !!uid && config.timeline_path === '_empty_' && !routeIs.Public && !route.query.noinit;
 });
 
 const isConfigUnknown = computed((): boolean => {
@@ -235,7 +236,7 @@ const showAlbums = computed((): boolean => {
 });
 
 const showNavigation = computed((): boolean => {
-  if (routeIs.Public || isFirstStart.value) {
+  if (!uid || routeIs.Public || isFirstStart.value) {
     return false;
   }
 
