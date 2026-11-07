@@ -3,7 +3,7 @@ name: go-vod
 on:
   workflow_dispatch:
   push:
-    branches: [master, development]
+    branches: [master]
     tags:
       - "go-vod/*"
     paths:

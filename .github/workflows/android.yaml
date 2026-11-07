@@ -2,7 +2,7 @@
 name: android
 on:
   push:
-    branches: [master, development]
+    branches: [master]
     paths:
       - 'android/**'
       - '.github/workflows/android.yaml'

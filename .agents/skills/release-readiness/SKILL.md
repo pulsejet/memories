@@ -13,18 +13,18 @@ Read-only. DO NOT bump versions, tag, comment on issues, rebuild JS, or run e2e/
 ## Baseline
 - Run `git fetch origin --tags`, `git branch --show-current`, `git status --porcelain`.
 - `<tag>`: newest `vX.Y.Z`, excluding `alpha/beta/rc/nightly` and `go-vod/*`.
-- Compare against `origin/development`; also check `origin/master`.
+- Compare against `origin/master`.
 
 ## Checks
 Run 3-4 subagents in parallel, in one block. Each returns a verdict + evidence.
 
 1. Scope
-   - `git log --oneline <tag>..origin/development`, with full messages for significant commits.
-   - `git diff --name-only --stat <tag>..origin/development`.
+   - `git log --oneline <tag>..origin/master`, with full messages for significant commits.
+   - `git diff --name-only --stat <tag>..origin/master`.
    - Categorize as features/fixes/perf/chore. Flag breaking and high blast radius changes.
 2. go-vod
    - Read `VERSION` in `go-vod/main.go`, `GOVOD_VER` in `lib/Service/BinExt.php`, and the latest `go-vod/*` tag.
-   - `git log --oneline <go-vod-tag>..origin/development -- go-vod/` plus diff.
+   - `git log --oneline <go-vod-tag>..origin/master -- go-vod/` plus diff.
    - Verdict Y/N: no functional change means no release.
    - Agreement is enforced by `scripts/get-bin-ext.sh` and `BinExt::testGoVod`.
 3. GitHub (read-only)

@@ -2,7 +2,7 @@
 name: static analysis
 on:
   push:
-    branches: [master, development]
+    branches: [master]
     paths-ignore:
       - 'docs/**'
       - 'go-vod/**'
