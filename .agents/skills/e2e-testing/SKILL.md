@@ -36,6 +36,8 @@ Never run e2e unless the user explicitly asks.
 ### Login redirects to 443
 - Cause: `overwriteprotocol => https` in `config.php`; nothing listens on 443. Never edit `config.php`.
 - Symptom: `chrome-error://chromewebdata/` or `ERR_CONNECTION_REFUSED` after login.
+- Also breaks e2e runs: `auth.setup.ts` fails with `ECONNREFUSED ::1:443`.
 - Check: `curl -sI http://localhost/ | grep -i location`.
-- Fix: temporary Node HTTPS forwarder `127.0.0.1:443` → `127.0.0.1:80` with a self-signed cert, plus `ignoreHTTPSErrors: true`.
+- Fix: temporary Node HTTPS forwarder on 443 (listen on `::`, dual-stack) → `127.0.0.1:80` with a self-signed cert.
+- `playwright.config.ts` already sets `ignoreHTTPSErrors`; ad hoc scripts must set it themselves.
 - Afterwards, stop the forwarder and delete the key.

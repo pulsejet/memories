@@ -27,6 +27,8 @@ const config: PlaywrightTestConfig = {
     },
     viewport: { width: 1280, height: 720 },
     timezoneId: 'America/Los_Angeles',
+    // Local instances may redirect to https behind a self-signed forwarder
+    ignoreHTTPSErrors: true,
   },
   projects: [
     {
