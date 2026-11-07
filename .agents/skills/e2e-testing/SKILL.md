@@ -38,7 +38,11 @@ Never run e2e unless the user explicitly asks.
 - Symptom: `chrome-error://chromewebdata/` or `ERR_CONNECTION_REFUSED` after login.
 - Also breaks e2e runs: `auth.setup.ts` fails with `ECONNREFUSED ::1:443`.
 - Check: `curl -sI http://localhost/ | grep -i location`.
-- Fix: temporary Node HTTPS forwarder on 443 (listen on `::`, dual-stack) → `127.0.0.1:80` with a self-signed cert.
+- Fix: forward 443 → 80 with a throwaway self-signed cert, in the background:
+  ```bash
+  pem="$(openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj /CN=localhost -keyout - -out - 2>/dev/null)"
+  exec socat OPENSSL-LISTEN:443,fork,reuseaddr,pf=ip6,ipv6only=0,verify=0,cert=<(echo "$pem"),key=<(echo "$pem") TCP:127.0.0.1:80
+  ```
 - `playwright.config.ts` already sets `ignoreHTTPSErrors`; ad hoc scripts must set it themselves.
 - Run e2e with `E2E_BASE_URL=https://localhost` so it matches the server's canonical URL.
-- Afterwards, stop the forwarder and delete the key.
+- Afterwards, kill `socat`.
