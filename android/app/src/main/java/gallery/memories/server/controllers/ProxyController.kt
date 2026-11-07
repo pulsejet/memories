@@ -1,5 +1,6 @@
 package gallery.memories.server.controllers
 
+import android.util.Log
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.data.remote.http.HttpClients
 import gallery.memories.server.KtorRespond
@@ -32,6 +33,8 @@ class ProxyController(
     private val originProvider: () -> String,
 ) {
     companion object {
+        private val TAG = ProxyController::class.java.simpleName
+
         /** Hop-by-hop and client-specific headers that must not be forwarded upstream. */
         private val SKIPPED_REQUEST_HEADERS = setOf(
             "host", "content-length", "transfer-encoding",
@@ -115,15 +118,18 @@ class ProxyController(
     }
 
     private suspend fun streamResponse(call: ApplicationCall, res: okhttp3.Response, config: ServerConfig) {
+        if (res.code >= 400) Log.w(TAG, "Upstream ${res.code} for ${call.request.httpMethod.value} ${res.request.url.encodedPath}")
         for (i in 0 until res.headers.size) {
             val name = res.headers.name(i)
             val lower = name.lowercase()
             if (lower in SKIPPED_RESPONSE_HEADERS) continue
-            if (lower == "location") {
-                call.response.headers.append("Location", rewriteLocation(res.headers.value(i), config))
-                continue
+            val value = if (lower == "location") rewriteLocation(res.headers.value(i), config) else res.headers.value(i)
+            // A header Ktor refuses must not fail the whole response.
+            try {
+                call.response.headers.append(name, value)
+            } catch (e: Exception) {
+                Log.w(TAG, "Dropped upstream header $name: ${e.message}")
             }
-            call.response.headers.append(name, res.headers.value(i))
         }
         val contentType = KtorRespond.contentType(res.body.contentType()?.toString())
         val status = KtorRespond.status(res.code)
