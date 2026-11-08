@@ -324,12 +324,16 @@ final class BinExt
                 escapeshellarg($logFile),
             );
 
+            // Generic env vars read by go-vod would override the config file
+            $procEnv = getenv();
+            unset($procEnv['NEXTCLOUD_HOST'], $procEnv['NEXTCLOUD_ALLOW_INSECURE'], $procEnv['CACHE_DIR']);
+
             $pipes = [];
             $proc = proc_open(['sh', '-c', $shell], [
                 0 => ['null'],
                 1 => ['pipe', 'w'],
                 2 => ['null'],
-            ], $pipes);
+            ], $pipes, null, $procEnv);
 
             $childPid = 0;
             if (\is_resource($proc)) {
