@@ -144,6 +144,7 @@ function loadCached(): IConfig {
   const defaults: IConfig = {
     // general stuff
     version: String(),
+    base_url: String(),
     vod_disable: false,
     video_default_quality: '0',
     places_gis: -1,

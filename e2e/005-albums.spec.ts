@@ -161,6 +161,20 @@ test.describe.serial('Albums', () => {
     await expect(page.locator('.dtm-container .header')).toHaveText(renamedAlbumName);
   });
 
+  test('@ui Copy public link uses server base url', async ({ context, page }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    await page.goto(uiUrl(renamedAlbumName));
+    await page.getByRole('button', { name: 'Share album' }).click();
+    await page.getByRole('button', { name: 'Share via public link' }).click();
+    await page.getByRole('button', { name: 'Copy the public link' }).click();
+    await expect(page.getByText('Public link copied!')).toBeVisible();
+
+    const link = await page.evaluate(() => navigator.clipboard.readText());
+    const token = link.split('/').pop();
+    expect(token).toMatch(/^[A-Za-z0-9]{32}$/);
+    expect(link).toBe(`${appUrl}/a/${token}`);
+  });
+
   test('@api Download album returns handle', async ({ request }) => {
     const url = buildUrl('/api/clusters/albums/download', { name: `${username}/${renamedAlbumName}` });
     const res = await request.post(url);

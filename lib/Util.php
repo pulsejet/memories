@@ -141,6 +141,14 @@ final class Util extends StaticUtil
     }
 
     /**
+     * Get the absolute URL of the main page with a trailing slash.
+     */
+    public function getBaseUrl(): string
+    {
+        return rtrim($this->urlGenerator->linkToRouteAbsolute('memories.Page.main'), '/').'/';
+    }
+
+    /**
      * Add OG metadata to a page for a node.
      *
      * @param Node   $node        Node to get metadata from

@@ -157,7 +157,7 @@ import XLoadingIcon from '@components/XLoadingIcon.vue';
 import axios from '@nextcloud/axios';
 import { getCapabilities } from '@nextcloud/capabilities';
 import { showError } from '@services/utils/dialog';
-import { generateOcsUrl, generateUrl } from '@nextcloud/router';
+import { generateOcsUrl } from '@nextcloud/router';
 
 import NcButton from '@nextcloud/vue/components/NcButton';
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent';
@@ -168,6 +168,7 @@ const NcListItemIcon = defineAsyncComponent(() => import('@nextcloud/vue/compone
 import { t } from '@services/l10n';
 import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import * as dav from '@services/dav';
+import { config } from '@services/user-config';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 
@@ -207,9 +208,7 @@ const { copy: webCopy, copied: publicLinkCopied } = useClipboard({ copiedDuring:
 const searchAbort = useAbort();
 const albumAbort = useAbort();
 const capabilities = getCapabilities() as any;
-const config = {
-  minSearchStringLength: Number(capabilities?.files_sharing?.sharee?.minSearchStringLength ?? 0) || 0,
-};
+const minSearchStringLength = Number(capabilities?.files_sharing?.sharee?.minSearchStringLength ?? 0) || 0;
 
 const searchResults = computed(() =>
   currentSearchResults.value
@@ -251,7 +250,7 @@ async function searchCollaborators() {
 
   const signal = searchAbort.renew();
   try {
-    if (searchText.value.length < config.minSearchStringLength) {
+    if (searchText.value.length < minSearchStringLength) {
       return;
     }
 
@@ -395,8 +394,7 @@ async function updateAlbumCollaborators(collaborators?: Collaborator[], signal?:
 }
 
 async function copyPublicLink() {
-  const url = generateUrl(`apps/memories/a/${publicLink.value.id}`);
-  const link = `${location.origin}${url}`;
+  const link = `${config.base_url}a/${publicLink.value.id}`;
   if (nativex.has()) {
     return await nativex.shareUrl(link);
   }

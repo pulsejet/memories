@@ -100,6 +100,7 @@ final class OtherController extends ApiController
             return new JSONResponse([
                 // general stuff
                 'version' => $version,
+                'base_url' => $this->util->getBaseUrl(),
                 'vod_disable' => $this->systemConfig->get('memories.vod.disable'),
                 'video_default_quality' => $this->systemConfig->get('memories.video_default_quality'),
                 'places_gis' => $this->systemConfig->get('memories.gis_type'),
@@ -165,7 +166,7 @@ final class OtherController extends ApiController
         return $this->util->guardEx(function () use ($pageController) {
             $info = [
                 'version' => $this->appManager->getAppVersion('memories'),
-                'baseUrl' => $this->urlGenerator->linkToRouteAbsolute('memories.Page.main'),
+                'baseUrl' => $this->util->getBaseUrl(),
                 'loginFlowUrl' => $this->urlGenerator->linkToRouteAbsolute('core.ClientFlowLoginV2.init'),
             ];
 

@@ -5,6 +5,7 @@ declare module '@typings' {
   export type IConfig = {
     // general stuff
     version: string;
+    base_url: string;
     vod_disable: boolean;
     video_default_quality: string;
     places_gis: number;
