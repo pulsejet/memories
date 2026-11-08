@@ -1,5 +1,6 @@
 package gallery.memories.server
 
+import android.os.Process
 import android.util.Log
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
@@ -10,6 +11,9 @@ import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import java.net.BindException
 import java.util.UUID
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 
@@ -25,8 +29,9 @@ import kotlinx.coroutines.withTimeout
 object LocalEngine {
     private val TAG = LocalEngine::class.java.simpleName
     const val HOST = "127.0.0.1"
-    // Fixed port so the WebView origin stays identical across restarts.
-    const val PORT = 62079
+    // Fixed so the WebView origin stays identical across restarts; offset per
+    // Android user since profiles (e.g. Secure Folder) share loopback.
+    val PORT = 62079 + Process.myUid() / 100_000 % 1000
 
     /** Per-process secret; the port alone is not one, since any on-device app can connect. */
     val guard = AuthGuard(UUID.randomUUID().toString())
@@ -49,7 +54,9 @@ object LocalEngine {
         try {
             server = startServer(PORT)
             port = PORT
-        } catch (e: BindException) {
+        } catch (e: Exception) {
+            // CIO surfaces bind failures wrapped in a CancellationException.
+            if (generateSequence<Throwable>(e) { it.cause }.none { it is BindException }) throw e
             Log.w(TAG, "Fixed port $PORT busy, falling back to ephemeral", e)
             val fallback = startServer(0)
             server = fallback
@@ -79,8 +86,11 @@ object LocalEngine {
      * constraints, so WebDAV methods unknown to Ktor's constants still arrive.
      * Not calling proceed() ends the pipeline.
      */
+    @OptIn(DelicateCoroutinesApi::class)
     private fun startServer(port: Int): EmbeddedServer<*, *> {
-        val s = embeddedServer(CIO, host = HOST, port = port) {
+        // Without a handler, a failed bind is uncaught on the engine job and kills the process.
+        val handler = CoroutineExceptionHandler { _, e -> Log.w(TAG, "Engine job failed", e) }
+        val s = GlobalScope.embeddedServer(CIO, host = HOST, port = port, parentCoroutineContext = handler) {
             intercept(ApplicationCallPipeline.Call) { handle(call) }
         }
         try {
