@@ -6,6 +6,7 @@ OC.L10N.register(
     "Tags" : "Oznake",
     "Navigation" : "Navigacija",
     "Settings" : "Поставке",
+    "Reload" : "Ponovo učitaj",
     "Videos" : "Video",
     "Panoramas" : "Panorame",
     "Edit" : "Izmeni",

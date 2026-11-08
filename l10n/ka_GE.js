@@ -12,6 +12,7 @@ OC.L10N.register(
     "Videos" : "ვიდეოები",
     "Edit" : "შეცვლა",
     "Photos" : "სურათები",
+    "Page not found" : "გვერდი არაა ნაპოვნი",
     "Delete" : "წაშლა",
     "Share" : "გაზიარება",
     "Favorite" : "რჩეული",

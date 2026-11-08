@@ -6,6 +6,7 @@ OC.L10N.register(
     "Tags" : "ស្លាក",
     "Trash" : "ធុង​សំរាម",
     "Settings" : "ការកំណត់",
+    "Reload" : "ផ្ទុកឡើងវិញ",
     "Edit" : "កែប្រែ",
     "Delete" : "លុប",
     "Share" : "ចែក​រំលែក",

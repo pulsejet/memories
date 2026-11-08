@@ -12,6 +12,7 @@ OC.L10N.register(
     "Videos" : "Video's ",
     "Shared By" : "Gedeel Deur",
     "Edit" : "Wysig",
+    "Page not found" : "Blad nie gevind nie",
     "Delete" : "Skrap",
     "Share" : "Deel",
     "Favorite" : "Gunsteling",

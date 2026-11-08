@@ -12,6 +12,7 @@ OC.L10N.register(
     "Videos" : "Videos",
     "Edit" : "Editar",
     "Photos" : "Fotos",
+    "Page not found" : "Página no encontrada",
     "Delete" : "Borrar",
     "Share" : "Compartir",
     "Favorite" : "Favorito",

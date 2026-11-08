@@ -11,6 +11,7 @@ OC.L10N.register(
     "Videos" : "Fideos",
     "Edit" : "Golygu",
     "Photos" : "Lluniau",
+    "Page not found" : "Heb ganfod y dudalen",
     "Delete" : "Dileu",
     "Share" : "Rhannu",
     "Favorite" : "Ffefryn",

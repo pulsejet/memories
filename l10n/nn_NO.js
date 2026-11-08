@@ -14,6 +14,7 @@ OC.L10N.register(
     "Panoramas" : "Panorama",
     "Edit" : "Rediger",
     "Photos" : "Foto",
+    "Page not found" : "Fann ikkje sida",
     "Delete" : "Slett",
     "Share" : "Del",
     "Favorite" : "Favoritt",

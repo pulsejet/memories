@@ -5,6 +5,7 @@ OC.L10N.register(
     "Favorites" : "প্রিয়জন",
     "Tags" : "ট্যাগ",
     "Settings" : "সেটিংস",
+    "Reload" : "পূনরায় লোড কর",
     "Edit" : "সম্পাদনা",
     "Delete" : "মুছে",
     "Share" : "ভাগাভাগি কর",

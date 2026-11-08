@@ -11,6 +11,7 @@ OC.L10N.register(
     "Settings" : "Configuraciones ",
     "Videos" : "Videos",
     "Edit" : "Editar",
+    "Page not found" : "Página no encontrada",
     "Delete" : "Borrar",
     "Share" : "Compartir",
     "Favorite" : "Hacer favorito",

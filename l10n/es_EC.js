@@ -43,6 +43,7 @@ OC.L10N.register(
     "Metadata" : "Metadatos",
     "Edit" : "Editar",
     "Photos" : "Fotos",
+    "Page not found" : "Página no encontrada",
     "Delete" : "Borrar",
     "Remove from album" : "Eliminar del álbum",
     "Share" : "Compartir",

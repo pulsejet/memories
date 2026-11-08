@@ -6,6 +6,7 @@ OC.L10N.register(
     "Favorites" : "Pennrolloù",
     "Tags" : "Klavioù",
     "Settings" : "Arventennoù",
+    "Reload" : "Adkargañ",
     "Videos" : "Videoioù",
     "Edit" : "Cheñch",
     "Photos" : "Fotoioù",

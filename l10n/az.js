@@ -7,6 +7,7 @@ OC.L10N.register(
     "Tags" : "Işarələr",
     "Trash" : "Zibil",
     "Settings" : "Quraşdırmalar",
+    "Reload" : "Yenidən yüklə",
     "Edit" : "Dəyişiklik et",
     "Delete" : "Sil",
     "Share" : "Paylaş",

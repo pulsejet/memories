@@ -46,6 +46,7 @@ OC.L10N.register(
     "Edit" : "Уреди",
     "Failed to load metadata" : "Неуспешно вчитување на метаподатоците",
     "Photos" : "Фотографии",
+    "Page not found" : "Страницата не е пронајдена",
     "Delete" : "Избриши",
     "Remove from album" : "Избриши од албум",
     "Share" : "Сподели",

@@ -25,6 +25,7 @@ OC.L10N.register(
     "Metadata" : "Metadati",
     "Edit" : "Labot",
     "Photos" : "Fotoattēli",
+    "Page not found" : "Lapa nav atrasta",
     "Delete" : "Izdzēst",
     "Share" : "Koplietot",
     "Favorite" : "Izlasē",
