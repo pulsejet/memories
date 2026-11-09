@@ -49,8 +49,8 @@ class MainActivity : AppCompatActivity() {
     /** False until the local server is up and the first page load is scheduled; retried on resume. */
     private var booted = false
 
-    /** One-shot: cleared by the web client after the main page loads so Back skips entry pages. */
-    var clearHistoryOnLoad = false
+    /** One-shot URL prefix: history is cleared once a page under it commits, so Back skips entry pages. */
+    var clearHistoryOnLoad: String? = null
 
     /**
      * Enabled only while the page has history; otherwise the system default
@@ -157,9 +157,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Clears back history once the main page lands; clearHistory() before loadUrl() alone does not. */
-    fun consumeClearHistoryFlag(view: WebView) {
-        if (clearHistoryOnLoad) {
-            clearHistoryOnLoad = false
+    fun consumeClearHistoryFlag(view: WebView, url: String?) {
+        val prefix = clearHistoryOnLoad ?: return
+        if (url?.startsWith(prefix) == true) {
+            clearHistoryOnLoad = null
             view.clearHistory()
         }
     }

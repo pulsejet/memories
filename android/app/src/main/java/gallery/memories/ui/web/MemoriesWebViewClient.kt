@@ -77,19 +77,19 @@ class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient(
 
     override fun onPageFinished(view: WebView, url: String) {
         super.onPageFinished(view, url)
-        activity.consumeClearHistoryFlag(view)
+        activity.consumeClearHistoryFlag(view, url)
         activity.syncBackCallback(view)
     }
 
     override fun doUpdateVisitedHistory(view: WebView, url: String?, isReload: Boolean) {
         super.doUpdateVisitedHistory(view, url, isReload)
-        if (!isReload) activity.consumeClearHistoryFlag(view)
+        if (!isReload) activity.consumeClearHistoryFlag(view, url)
         activity.syncBackCallback(view)
     }
 
     override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
         Log.w(TAG, "Renderer gone (crashed=${detail.didCrash()}), reloading ${view.url}")
-        activity.clearHistoryOnLoad = false
+        activity.clearHistoryOnLoad = null
         if (!activity.isFinishing && !activity.isDestroyed) {
             view.reload()
         }
@@ -99,7 +99,7 @@ class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient(
     /** Main-frame network failures otherwise render as a silent blank page. */
     override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
         if (request.isForMainFrame) {
-            activity.clearHistoryOnLoad = false
+            activity.clearHistoryOnLoad = null
             Log.w(TAG, "Page failed: ${request.url} code=${error.errorCode} ${error.description}")
             Toast.makeText(view.context, "Failed to load page: ${error.description}", Toast.LENGTH_LONG).show()
         }
@@ -108,7 +108,7 @@ class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient(
     /** HTTP 4xx/5xx on the main frame otherwise renders as a blank page with no log. */
     override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, errorResponse: WebResourceResponse) {
         if (request.isForMainFrame) {
-            activity.clearHistoryOnLoad = false
+            activity.clearHistoryOnLoad = null
             Log.w(TAG, "Page HTTP error: ${request.url} code=${errorResponse.statusCode} ${errorResponse.reasonPhrase}")
             Toast.makeText(view.context, "Failed to load page: HTTP ${errorResponse.statusCode}", Toast.LENGTH_LONG).show()
         }
@@ -124,7 +124,7 @@ class MemoriesWebViewClient(private val activity: MainActivity) : WebViewClient(
         if (auth.isTrustingAllCertificates && auth.isServer(error?.url?.toHttpUrlOrNull())) {
             handler?.proceed()
         } else {
-            activity.clearHistoryOnLoad = false
+            activity.clearHistoryOnLoad = null
             activity.nativex.toast("Failed to load due to SSL error: ${error?.primaryError}", true)
             super.onReceivedSslError(view, handler, error)
         }

@@ -130,10 +130,10 @@ class AppStartupCoordinator(
         val describe = assets.readDescribe(dir) ?: return false
         val webRoot = AssetCache.webrootOf(base)
         local.configure(AssetCache.originOf(base), webRoot, dir, AssetCache.appsPathOf(describe))
+        val appUrl = local.origin() + "$webRoot/index.php/apps/memories/"
         activity.binding.webview.clearHistory()
-        activity.clearHistoryOnLoad = true
-        val url = local.origin() + "$webRoot/index.php/apps/memories/$subpath"
-        activity.binding.webview.loadUrl(url)
+        activity.clearHistoryOnLoad = appUrl
+        activity.binding.webview.loadUrl(appUrl + subpath)
         return true
     }
 
