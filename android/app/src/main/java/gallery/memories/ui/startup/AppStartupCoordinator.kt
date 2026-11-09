@@ -64,12 +64,15 @@ class AppStartupCoordinator(
         }
     }
 
-    /** Foreground update over the running app; keeps the setup subpath on first launch. */
-    private fun backgroundUpdateCheck(toNxSetup: Boolean = false) {
-        if (!isUpdating.compareAndSet(false, true)) return
+    /**
+     * Foreground update over the running app; keeps the setup subpath on first launch.
+     * False when the check was skipped or could not reach the server.
+     */
+    private fun backgroundUpdateCheck(toNxSetup: Boolean = false): Boolean {
+        if (!isUpdating.compareAndSet(false, true)) return false
         try {
-            val fresh = assets.fetchDescribe() ?: return
-            if (assets.isCurrent(fresh)) return
+            val fresh = assets.fetchDescribe() ?: return false
+            if (assets.isCurrent(fresh)) return true
             Log.i(TAG, "Assets changed, updating in foreground")
             activity.runOnUiIfAlive {
                 activity.applyTheme(ThemeManager.ENTRY_THEME_COLOR, true)
@@ -77,7 +80,7 @@ class AppStartupCoordinator(
             }
             if (!assets.syncAndAwait(fresh, SYNC_TIMEOUT_MS)) {
                 activity.runOnUiIfAlive { toast("Update failed", true) }
-                return
+                return true
             }
             val subpath = if (toNxSetup) "nxsetup" else ""
             activity.runOnUiIfAlive {
@@ -85,9 +88,11 @@ class AppStartupCoordinator(
                     toast("Update failed", true)
                 }
             }
+            return true
         } catch (e: Exception) {
             Log.w(TAG, "Update check failed", e)
             activity.runOnUiIfAlive { toast("Update check failed", true) }
+            return false
         } finally {
             isUpdating.set(false)
         }
@@ -143,9 +148,14 @@ class AppStartupCoordinator(
 
     /** Triggers an update when the server version differs from the last one seen. */
     private fun onServerVersion(version: String) {
+        if (isUpdating.get()) return
         val known = serverVersion.getAndSet(version)
         if (known == null || known == version) return
         Log.i(TAG, "Server version changed: $known -> $version")
-        Thread { backgroundUpdateCheck() }.start()
+        Thread {
+            if (!backgroundUpdateCheck()) {
+                serverVersion.compareAndSet(version, known)
+            }
+        }.start()
     }
 }
