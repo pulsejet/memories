@@ -640,9 +640,20 @@ function setUiVisible(event: PointerEvent | false) {
     const isPointer = event instanceof PointerEvent;
     const isMouse = isPointer && event.pointerType !== 'touch';
     if (isOpen.value && (!isPointer || isMouse)) {
+      const targetElem = event.target as Element | null;
       photoswipe.value?.template?.classList.add('pswp--ui-visible');
 
-      if (isMouse) {
+      // Do not hide the UI if the user is over a control element.
+      const controls = [
+        'div.top-bar',
+        'div.top-bar-left',
+        'div.bottom-bar',
+        'div.m-vc-controls',
+        '.pswp__button',
+        '.action-item__popper',
+      ];
+
+      if (isMouse && !targetElem?.closest?.(controls.join(','))) {
         activityTimer = window.setTimeout(() => {
           if (isOpen.value) {
             photoswipe.value?.template?.classList.remove('pswp--ui-visible');
