@@ -21,7 +21,20 @@ android {
         versionName = "1.18"
     }
 
+    signingConfigs {
+        debug {
+            storeFile = file("debug.keystore")
+            storeType = "pkcs12"
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.debug
+        }
         release {
             minifyEnabled = true
             shrinkResources = true
