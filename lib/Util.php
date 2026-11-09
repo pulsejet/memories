@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\Memories;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\Settings\SystemConfig;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
@@ -28,6 +29,7 @@ final class Util extends StaticUtil
         private IURLGenerator $urlGenerator,
         private IRequest $request,
         private IAppManager $appManager,
+        private SystemConfig $systemConfig,
     ) {}
 
     /**
@@ -157,6 +159,29 @@ final class Util extends StaticUtil
     public function getMemoriesVersion(): string
     {
         return $this->appManager->getAppVersion(Application::APPNAME);
+    }
+
+    /**
+     * Get the version of the JS build.
+     * In debug mode, this is the manifest build time.
+     */
+    public function getManifestVersion(): string
+    {
+        if (!$this->systemConfig->get('debug')) {
+            return $this->getMemoriesVersion();
+        }
+
+        $manifest = @file_get_contents(__DIR__.'/../js/memories-manifest.json');
+        if (false === $manifest) {
+            return self::MANIFEST_VERSION_UNKNOWN;
+        }
+
+        $decoded = json_decode($manifest, true);
+        if (!\is_array($decoded) || !isset($decoded['version'])) {
+            return self::MANIFEST_VERSION_UNKNOWN;
+        }
+
+        return (string) $decoded['version'];
     }
 
     /**

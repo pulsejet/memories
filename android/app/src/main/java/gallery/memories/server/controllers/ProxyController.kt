@@ -49,8 +49,8 @@ class ProxyController(
             "connection", "keep-alive", "set-cookie", "upgrade",
         )
 
-        /** Upstream header carrying the server's Memories version. */
-        private const val MEMORIES_VERSION_HEADER = "X-Memories-Version"
+        /** Upstream header carrying the server (prod) or JS manifest (dev) version. */
+        private const val MEMORIES_MANIFEST_VERSION = "X-Memories-Manifest-Version"
 
         /** Bodies up to this size are buffered so OkHttp can retry them on a stale connection. */
         private const val MAX_BUFFERED_BYTES = 1024 * 1024L
@@ -123,7 +123,7 @@ class ProxyController(
 
     private suspend fun streamResponse(call: ApplicationCall, res: okhttp3.Response, config: ServerConfig) {
         if (res.code >= 400) Log.w(TAG, "Upstream ${res.code} for ${call.request.httpMethod.value} ${res.request.url.encodedPath}")
-        res.header(MEMORIES_VERSION_HEADER)?.takeIf { it.isNotBlank() }?.let(onServerVersion)
+        res.header(MEMORIES_MANIFEST_VERSION)?.takeIf { it.isNotBlank() }?.let(onServerVersion)
         for (i in 0 until res.headers.size) {
             val name = res.headers.name(i)
             val lower = name.lowercase()

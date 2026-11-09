@@ -65,7 +65,7 @@ final class DaysController extends ApiController
             $this->preloadDays($list);
 
             $response = new JSONResponse($list, Http::STATUS_OK);
-            $response->addHeader(Util::MEMORIES_VERSION_HEADER, $this->util->getMemoriesVersion());
+            $response->addHeader(Util::MEMORIES_MANIFEST_VERSION, $this->util->getManifestVersion());
 
             return $response;
         });
@@ -91,7 +91,7 @@ final class DaysController extends ApiController
             );
 
             $response = new JSONResponse($list, Http::STATUS_OK);
-            $response->addHeader(Util::MEMORIES_VERSION_HEADER, $this->util->getMemoriesVersion());
+            $response->addHeader(Util::MEMORIES_MANIFEST_VERSION, $this->util->getManifestVersion());
 
             return $response;
         });
