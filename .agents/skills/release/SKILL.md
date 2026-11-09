@@ -40,10 +40,13 @@ For hotfix releases, just update the latest entry in the CHANGELOG.md to point t
 Independent of app versions. `release.yaml` ignores `android/*` tags, so the APK is built and uploaded by hand.
 
 1. Commit (`git commit -s`) `chore(android): bump to 1.N`, changing only `android/app/build.gradle`: `versionCode = N`, `versionName = "1.N"`.
-2. Ship to master as in the main release. Check the `android` workflow is green.
-3. Tag: check the tag is absent, `git tag android/1.N`, `git push origin android/1.N`, verify with `ls-remote`.
-4. Ask the user to build the AAB from the tag in Android Studio, upload it to Google Play (which signs it), and download the signed APK.
-5. Verify with `apksigner verify --print-certs`: the cert must match the previous release's APK (`gh release download android/1.<N-1>`), or updates fail.
+2. Ask the user to build the AAB from the commit in Android Studio, upload it to Google Play (which signs it), and download the signed APK.
+3. Verify the APK:
+   - `aapt dump badging` shows `versionCode='N'`.
+   - `apksigner verify --print-certs`: the cert must match the previous release's APK (`gh release download android/1.<N-1>`), or updates fail.
+   - Tools are in `~/Library/Android/sdk/build-tools/<ver>/`; apksigner needs `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
+4. Ship to master as in the main release. Make sure the rebase pulled in nothing new, or the tag won't match the build.
+5. Tag: check the tag is absent, `git tag android/1.N`, `git push origin android/1.N`, verify with `ls-remote`.
 6. Create the GitHub release, with the APK named `memories-1.N.apk`:
    ```sh
    gh release create android/1.N memories-1.N.apk --title android/1.N --notes '**Full Changelog**: https://github.com/pulsejet/memories/compare/<prev>...android/1.N' --latest=false --verify-tag
