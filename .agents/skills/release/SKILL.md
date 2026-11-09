@@ -33,7 +33,10 @@ For hotfix releases, just update the latest entry in the CHANGELOG.md to point t
 `VERSION`, `GOVOD_VER` and the tag must agree (enforced by `get-bin-ext.sh` and `testGoVod`).
 
 1. Phase 1: bump `VERSION` in `go-vod/main.go` only, leaving `GOVOD_VER` untouched. Push master, tag `go-vod/X.Y.Z`. CI builds the binaries.
-2. Phase 2, once binaries exist: bump `GOVOD_VER` in `lib/Service/BinExt.php` in a separate commit, then `make bin-ext` to refresh the dev env.
+2. Phase 2, once binaries exist, in a separate commit:
+   - Bump `GOVOD_VER` in `lib/Service/BinExt.php`.
+   - Update the `go-vod-*` hashes in `scripts/bin-ext.sha256` (`gh release view go-vod/X.Y.Z --json assets -q '.assets[] | "\(.name) \(.digest)"'`).
+   - `make bin-ext` to refresh the dev env and verify the hashes.
 
 ## Android release
 
