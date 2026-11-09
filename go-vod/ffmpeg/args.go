@@ -122,38 +122,6 @@ func Encoder(s Spec) string {
 	}
 }
 
-// remoteInputArgs are the options for an authenticated http input: one
-// persistent seekable connection with bounded reconnects. Empty for local
-// inputs (no headers).
-func remoteInputArgs(headers string) []string {
-	if headers == "" {
-		return nil
-	}
-	args := []string{"-multiple_requests", "1", "-seekable", "1"}
-	args = append(args, reconnectArgs()...)
-	return append(args, "-headers", headers)
-}
-
-// reconnectArgs are the http input reconnect flags shared by transcode and
-// storyboard inputs: transient network/server failures are ridden out inside
-// ffmpeg instead of failing the job. Retries stay bounded (count and total
-// delay) so a dead upstream still surfaces as an error. Only 429 and 5xx
-// reconnect; other 4xx (bad token, missing file) fail fast. No
-// reconnect_at_eof: inputs are finite files, so clean EOF must end the job
-// instead of looping reconnects at the last byte.
-func reconnectArgs() []string {
-	return []string{
-		"-reconnect", "1",
-		"-reconnect_on_network_error", "1",
-		"-reconnect_on_http_error", "429,5xx",
-		"-reconnect_streamed", "1",
-		"-reconnect_delay_max", "5",
-		"-reconnect_max_retries", "10",
-		"-reconnect_delay_total_max", "30",
-		"-respect_retry_after", "1",
-	}
-}
-
 // BuildArgs renders the shared ffmpeg prefix for one rendition: input,
 // timestamp handling, filter graph, mapping and encoder quality. It returns
 // one argv element per slice entry — flags are appended individually, never

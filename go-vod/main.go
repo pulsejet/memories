@@ -7,6 +7,7 @@ import (
 
 	"github.com/pulsejet/memories/go-vod/api"
 	"github.com/pulsejet/memories/go-vod/config"
+	"github.com/pulsejet/memories/go-vod/ffmpeg"
 )
 
 const VERSION = "0.7.0"
@@ -35,6 +36,8 @@ func main() {
 	if err := c.Validate(); err != nil {
 		log.Fatal("Invalid config: ", err)
 	}
+
+	ffmpeg.DetectHTTPOptions(c.FFprobe)
 
 	code := api.NewServer(c).Start()
 

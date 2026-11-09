@@ -179,7 +179,7 @@ func StoryboardArgs(input, headers string, interval float64, thumbW, thumbH, col
 	// for http: the file protocol rejects -seekable 1.
 	if strings.HasPrefix(input, "http://") || strings.HasPrefix(input, "https://") {
 		args = append(args, "-multiple_requests", "1", "-seekable", "1")
-		args = append(args, reconnectArgs()...)
+		args = append(args, reconnectArgs...)
 	}
 	if headers != "" {
 		args = append(args, "-headers", headers)
