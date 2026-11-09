@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [v11.1.0] - 2026-11-08
 
 - **Feature**: TLS client certificate (mTLS) support on Android ([#1169](https://github.com/pulsejet/memories/issues/1169))
 - **Feature**: Option to disable HDR display on Android ([#1796](https://github.com/pulsejet/memories/issues/1796))
