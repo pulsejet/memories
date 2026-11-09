@@ -13,13 +13,14 @@
     height: 100%;
     display: block;
     z-index: 10;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  video {
     transition:
       transform 0.3s ease-in-out,
       visibility 0.3s ease-in-out,
       opacity 0.3s ease-in-out;
-  }
-
-  video {
     opacity: 0;
     z-index: 50;
     visibility: hidden;
