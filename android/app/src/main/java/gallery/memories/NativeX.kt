@@ -161,6 +161,12 @@ class NativeX(private val mCtx: MainActivity) {
         mCtx.runOnUiThread { container.holeImage.setRect(x, y, w, h) }
     }
 
+    /** Animate the native image to the hole box over [duration] ms. */
+    @JavascriptInterface
+    fun setNativeImageRectTransition(x: Float, y: Float, w: Float, h: Float, duration: Long) {
+        mCtx.runOnUiThread { container.holeImage.setRect(x, y, w, h, duration) }
+    }
+
     /** Show/hide the native video below the WebView. */
     @JavascriptInterface
     fun showNativeVideo(show: Boolean) {

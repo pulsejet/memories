@@ -290,6 +290,16 @@ export type NativeX = {
   setNativeImageRect?: (x: number, y: number, w: number, h: number) => void;
 
   /**
+   * Animate the native dummy image to the hole rect.
+   * @param x Left in CSS px
+   * @param y Top in CSS px
+   * @param w Width in CSS px
+   * @param h Height in CSS px
+   * @param duration Duration in ms
+   */
+  setNativeImageRectTransition?: (x: number, y: number, w: number, h: number, duration: number) => void;
+
+  /**
    * Move/resize the native hole video to the hole rect.
    * @param x Left in CSS px
    * @param y Top in CSS px
@@ -321,6 +331,7 @@ export type NativeXAsync = Pick<
   | 'setHasRemote'
   | 'showNativeImage'
   | 'setNativeImageRect'
+  | 'setNativeImageRectTransition'
   | 'showNativeVideo'
   | 'setNativeVideoRect'
   | 'nativeVideoCommand'

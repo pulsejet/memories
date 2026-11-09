@@ -67,9 +67,9 @@ class NativeHoleImage(private val mCtx: MainActivity) {
     /**
      * Move/resize the image to the hole box (CSS px, unclamped). Uniform cover
      * scale, so zooming never distorts. Drops not-ready rects; the caller
-     * re-sends after render.
+     * re-sends after render. Animates when [duration] (ms) is positive.
      */
-    fun setRect(x: Float, y: Float, w: Float, h: Float) {
+    fun setRect(x: Float, y: Float, w: Float, h: Float, duration: Long = 0) {
         if (!x.isFinite() || !y.isFinite() || !w.isFinite() || !h.isFinite()) {
             lastRect = null
             viewA.visibility = View.INVISIBLE
@@ -90,7 +90,7 @@ class NativeHoleImage(private val mCtx: MainActivity) {
         }
         lastRect = floatArrayOf(cx, cy, cw, ch)
         val active = activeView()
-        if (active.isReady) applyRect(active, cx, cy, cw, ch)
+        if (active.isReady) applyRect(active, cx, cy, cw, ch, duration)
     }
 
     private fun ensureConfigured(view: SubsamplingScaleImageView) {
@@ -297,7 +297,7 @@ class NativeHoleImage(private val mCtx: MainActivity) {
     }
 
     /** Mirror a hole box (CSS px) onto the view with cover scale + center. */
-    private fun applyRect(img: SubsamplingScaleImageView, x: Float, y: Float, w: Float, h: Float) {
+    private fun applyRect(img: SubsamplingScaleImageView, x: Float, y: Float, w: Float, h: Float, duration: Long = 0) {
         // sWidth/sHeight ignore rotation; swap for the displayed dims.
         val swap = img.appliedOrientation == SubsamplingScaleImageView.ORIENTATION_90 ||
             img.appliedOrientation == SubsamplingScaleImageView.ORIENTATION_270
@@ -324,7 +324,14 @@ class NativeHoleImage(private val mCtx: MainActivity) {
             sh / 2f + (vh / 2f - hcy) / scale,
         )
         if (!center.x.isFinite() || !center.y.isFinite()) return
-        img.setScaleAndCenter(scale, center)
+        val anim = if (duration > 0) img.animateScaleAndCenter(scale, center) else null
+        if (anim != null) {
+            anim.withDuration(duration)
+                .withEasing(SubsamplingScaleImageView.EASE_OUT_QUAD)
+                .start()
+        } else {
+            img.setScaleAndCenter(scale, center)
+        }
         img.visibility = View.VISIBLE
     }
 

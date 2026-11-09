@@ -44,6 +44,13 @@ export default class PsNativeHole {
       this.scheduleClipUpdate();
     });
 
+    // zoomTo animates via CSS transition without per-frame events; animate natively instead.
+    lightbox.on('beforeZoomTo', ({ transitionDuration }) => {
+      if (transitionDuration) {
+        queueMicrotask(() => this.animateZoom(transitionDuration));
+      }
+    });
+
     const resetEvents = ['close', 'closingAnimationStart', 'destroy'] as const;
     for (const e of resetEvents) {
       lightbox.on(e, () => this.reset());
@@ -222,6 +229,27 @@ export default class PsNativeHole {
       cancelAnimationFrame(this.hideRaf);
       this.hideRaf = 0;
     }
+  }
+
+  /** Animate the native image to the zoomTo destination; runs after zoomTo set it. */
+  private animateZoom(duration: number) {
+    const slide = this.lightbox.currSlide;
+    const holder = slide?.holderElement;
+    const transition = nativex.nxAsync('setNativeImageRectTransition');
+    if (!slide || !holder || holder !== this.holderElement || this.lastType !== 'image' || !transition) return;
+
+    const { left, top } = holder.getBoundingClientRect();
+    const z = slide.currZoomLevel;
+    const x1 = PsNativeHole.snapPx(left + slide.pan.x);
+    const y1 = PsNativeHole.snapPx(top + slide.pan.y);
+    const x2 = PsNativeHole.snapPx(left + slide.pan.x + slide.width * z);
+    const y2 = PsNativeHole.snapPx(top + slide.pan.y + slide.height * z);
+    if (x2 <= x1 || y2 <= y1) return;
+
+    cancelAnimationFrame(this.clipRaf);
+    this.clipRaf = 0;
+    this.lastNative = `image:${x1},${y1},${x2 - x1},${y2 - y1}`;
+    transition(x1, y1, x2 - x1, y2 - y1, duration);
   }
 
   /**
