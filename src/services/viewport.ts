@@ -25,6 +25,15 @@ window.addEventListener('resize', () => {
   }, 100);
 });
 
+/** Primary input is a coarse (touch) pointer */
+const coarsePointerQuery = window.matchMedia('(pointer: coarse)');
+export const pointerType = reactive({
+  isCoarse: coarsePointerQuery.matches,
+});
+coarsePointerQuery.addEventListener('change', (e) => {
+  pointerType.isCoarse = e.matches;
+});
+
 /**
  * Check if a element is at least partially in the viewport.
  * @param el Element to check

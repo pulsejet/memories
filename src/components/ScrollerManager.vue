@@ -54,7 +54,7 @@ import { ref, computed, shallowRef, nextTick, useTemplateRef, toRaw, watch } fro
 import { useThrottleFn } from '@vueuse/core';
 
 import { vFastText } from '@directives/vFastText';
-import { windowDims } from '@services/viewport';
+import { pointerType } from '@services/viewport';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
 import * as utils from '@services/utils/common';
 import * as lens from '@services/lens';
@@ -136,7 +136,7 @@ const height = computed(() => props.recyclerState.scrollerHeight - topPadding.va
 
 /** Position of hover cursor */
 const hoverCursorTransform = computed(() => {
-  const mob = windowDims.isMobile;
+  const mob = pointerType.isCoarse;
   const min = topPadding.value + (mob ? 2 : 0); // padding for curvature
   const max = props.recyclerState.scrollerHeight - (mob ? 6 : 0); // padding for shadow
   const val = hoverCursorY.value;
@@ -215,7 +215,7 @@ function updateFromRecyclerScroll() {
 
   // Move hover cursor to same position unless hovering
   // Regardless, we need this call because the internal mapping might have changed
-  if (!windowDims.isMobile && scroller.value?.matches(':hover')) {
+  if (!pointerType.isCoarse && scroller.value?.matches(':hover')) {
     moveHoverCursor(hoverCursorY.value);
   } else {
     moveHoverCursor(rtop);
@@ -393,7 +393,7 @@ function computeVisibleTicks() {
   // This is not as bad as it looks, it's actually 12*O(n)
   // because there are only 12 months in a year
   const fontSizePx = parseFloat(getComputedStyle(cursorSt.value!).fontSize);
-  const minGap = fontSizePx + (windowDims.isMobile ? 5 : 2);
+  const minGap = fontSizePx + (pointerType.isCoarse ? 5 : 2);
   let prevShow = -9999;
   for (const [idx, tick] of ticks.entries()) {
     // Conservative
@@ -460,7 +460,7 @@ function updateVisibleTicks() {
 function setTicksTop(total: number) {
   // On mobile, move the ticks up by half the height of the cursor
   // so that the cursor is centered on the tick instead (on desktop, it's at the bottom)
-  const displayPadding = windowDims.isMobile ? -MOBILE_CURSOR_HH : 0;
+  const displayPadding = pointerType.isCoarse ? -MOBILE_CURSOR_HH : 0;
 
   // Set topF (float) and top (rounded) values
   for (const tick of ticks) {
@@ -626,7 +626,7 @@ function handleScroll() {
 
 /** Tiny haptic tick while dragging the handle on mobile */
 const vibrateTick = useThrottleFn(() => {
-  if (windowDims.isMobile) nativex.vibrate(VIBRATE_MS);
+  if (pointerType.isCoarse) nativex.vibrate(VIBRATE_MS);
 }, VIBRATE_THROTTLE_MS);
 
 defineExpose({
@@ -640,12 +640,6 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-@mixin phone {
-  @media (max-width: 768px) {
-    @content;
-  }
-}
-
 .scroller {
   contain: layout style;
   overflow-y: clip;
@@ -670,7 +664,7 @@ defineExpose({
   }
 
   // On phone, there is no point of hover, so just hide it when not scrolling
-  @include phone {
+  @media (pointer: coarse) {
     visibility: hidden;
   }
 
@@ -697,12 +691,12 @@ defineExpose({
       background-color: var(--color-main-text);
       opacity: 0.15;
       display: block;
-      @include phone {
+      @media (pointer: coarse) {
         display: none;
       }
     }
 
-    @include phone {
+    @media (pointer: coarse) {
       background-color: var(--color-main-background);
       padding: 5px;
       border-radius: 4px;
@@ -762,7 +756,7 @@ defineExpose({
   }
 
   // Hide ticks on mobile unless hovering
-  @include phone {
+  @media (pointer: coarse) {
     // Shift pointer events to hover cursor
     pointer-events: none;
     .cursor.hv {
