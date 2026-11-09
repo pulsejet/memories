@@ -47,6 +47,9 @@ export type BusEvent = {
   /** NativeX database was updated */
   'nativex:db:updated': null;
 
+  /** Native app resumed from background */
+  'nativex:resume': null;
+
   /** Height of the native keyboard over the page in CSS px */
   'nativex:keyboard:height': number;
 

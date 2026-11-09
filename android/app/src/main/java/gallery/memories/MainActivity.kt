@@ -116,6 +116,7 @@ class MainActivity : AppCompatActivity() {
         binding.webview.resumeTimers()
         binding.webview.invalidate()
         eventBus.onResumeRefresh()
+        eventBus.busEmit("nativex:resume")
         runCatching { nativex.container.holeVideo.resume() }
         if (booted) nativex.local.attach() else bootLocalServer()
     }

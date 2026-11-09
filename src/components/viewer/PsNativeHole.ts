@@ -2,6 +2,7 @@ import * as nativex from '@native';
 import { config } from '@services/user-config';
 import { windowDims } from '@services/viewport';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
+import { bus } from '@services/utils/event-bus';
 
 import type { PsPhotoSwipe, PsSlide } from './types';
 
@@ -62,8 +63,12 @@ export default class PsNativeHole {
       }
     });
 
+    // WebView drops hidden texture when paused; re-decode on resume.
+    bus.on('nativex:resume', this.decodeHolderImages);
+
     // Toggling HDR reconfigures the window surface; slow.
     lightbox.on('destroy', () => {
+      bus.off('nativex:resume', this.decodeHolderImages);
       nativex.nxAsync('setHdrColorMode')?.(false);
     });
   }
@@ -229,6 +234,14 @@ export default class PsNativeHole {
     const devicePx = Math.round(v * dpr);
     return Math.round(devicePx * (1000 / dpr)) / 1000;
   }
+
+  /** Decode all images in the active holder element. */
+  private readonly decodeHolderImages = async () => {
+    if (!this.holderElement) return;
+    const imgs = Array.from(this.holderElement.querySelectorAll('img'));
+    const promises = imgs.map((img) => img.decode());
+    await Promise.allSettled(promises);
+  };
 
   /** Viewport minus the hole, for {@link setClip}. */
   private static _holeClipPath(W: number, H: number, x1: number, y1: number, x2: number, y2: number) {
