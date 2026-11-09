@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - **Feature**: TLS client certificate (mTLS) support on Android ([#1169](https://github.com/pulsejet/memories/issues/1169))
+- **Feature**: Option to disable HDR display on Android ([#1796](https://github.com/pulsejet/memories/issues/1796))
+- **Fix**: Black or white screen on startup on Android ([#1796](https://github.com/pulsejet/memories/issues/1796))
+- **Fix**: System back button exiting the app on Android ([#1797](https://github.com/pulsejet/memories/issues/1797))
+- **Fix**: Name blocklist now applies to files as well as folders ([#1800](https://github.com/pulsejet/memories/issues/1800))
+- **Fix**: Failures with `open_basedir` restrictions ([#1806](https://github.com/pulsejet/memories/issues/1806))
+- Performance improvements for timeline, indexing, albums, tags and places.
 
 ## [v11.0.2] - 2026-11-04
 
