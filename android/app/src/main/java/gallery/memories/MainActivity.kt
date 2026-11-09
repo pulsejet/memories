@@ -72,9 +72,13 @@ class MainActivity : AppCompatActivity() {
         themes = ThemeManager(this, nativex.container.prefs)
         edges = EdgeToEdgeController(this)
         chooser = FileChooserHandler(this).also { it.register() }
-        startup = AppStartupCoordinator(this, nativex.auth, nativex.assets, nativex.local) { msg, long ->
-            nativex.toast(msg, long)
-        }
+        startup = AppStartupCoordinator(
+            activity = this,
+            auth = nativex.auth,
+            assets = nativex.assets,
+            local = nativex.local,
+            toast = { msg, long -> nativex.toast(msg, long) },
+        )
 
         edges.setupInsets()
         onBackPressedDispatcher.addCallback(this, backCallback)

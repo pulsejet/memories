@@ -17,6 +17,8 @@ class StaticUtil
 {
     public const string ARCHIVE_FOLDER = '.archive';
 
+    public const string MEMORIES_VERSION_HEADER = 'X-Memories-Version';
+
     public const string DISPOSITION_INLINE = 'inline';
     public const string DISPOSITION_ATTACHMENT = 'attachment';
 

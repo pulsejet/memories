@@ -30,19 +30,39 @@ class LocalHttpServer(
 ) {
     @Volatile private var cfg: ServerConfig? = null
 
-    private val proxy = ProxyController(auth, clients) { origin() }
+    private val proxy = ProxyController(
+        auth = auth,
+        clients = clients,
+        originProvider = { origin() },
+        onServerVersion = { onServerVersion?.invoke(it) },
+    )
     private val router = ServerRouter(
-        appCtx.applicationContext, auth, assets, BridgeController(bridge),
-        proxy, dataSource, holeImage) { cfg }
+        appCtx = appCtx.applicationContext,
+        auth = auth,
+        assets = assets,
+        bridge = BridgeController(bridge),
+        proxy = proxy,
+        dataSource = dataSource,
+        holeImage = holeImage,
+        configProvider = { cfg },
+    )
 
     val port: Int get() = LocalEngine.port
+
+    /** Called with the server version header of each proxied response. */
+    @Volatile var onServerVersion: ((String) -> Unit)? = null
 
     /** HttpOnly cookie value the WebView must present; see [AuthGuard]. */
     fun authCookie(): String = LocalEngine.guard.cookieHeader()
 
     /** Points the server at an upstream origin and its offline snapshot. */
     fun configure(serverOrigin: String, webRoot: String, assetDir: File, appsPath: String? = null) {
-        cfg = ServerConfig(serverOrigin, webRoot, assetDir, appsPath)
+        cfg = ServerConfig(
+            serverOrigin = serverOrigin,
+            webRoot = webRoot,
+            assetDir = assetDir,
+            appsPath = appsPath,
+        )
     }
 
     /** Starts the shared engine if needed and routes it to this activity. */

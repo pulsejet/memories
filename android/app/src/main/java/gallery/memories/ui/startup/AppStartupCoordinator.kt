@@ -7,6 +7,8 @@ import gallery.memories.data.remote.assets.AssetSyncCoordinator
 import gallery.memories.data.remote.http.AuthState
 import gallery.memories.server.LocalHttpServer
 import gallery.memories.ui.theme.ThemeManager
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 /** Boots the WebView: welcome when logged out, snapshot immediately when cached, waiting page while downloading. */
 class AppStartupCoordinator(
@@ -21,6 +23,16 @@ class AppStartupCoordinator(
 
         /** Upper bound for a foreground asset sync before giving up with a toast. */
         private const val SYNC_TIMEOUT_MS = 15 * 60 * 1000L
+    }
+
+    /** Last server version seen; the first is trusted, a change triggers an update. */
+    private val serverVersion = AtomicReference<String?>(null)
+
+    /** Set while an update check runs, so checks never overlap. */
+    private val isUpdating = AtomicBoolean(false)
+
+    init {
+        local.onServerVersion = ::onServerVersion
     }
 
     /** URL of a static entry page (welcome/waiting) bundled in the APK. */
@@ -43,6 +55,7 @@ class AppStartupCoordinator(
     /** Cached snapshot loads at once with a background update; otherwise the waiting page blocks. */
     fun startLocalApp(toNxSetup: Boolean = false) {
         val base = auth.baseUrl() ?: return
+        serverVersion.set(null)
         val subpath = if (toNxSetup) "nxsetup" else ""
         if (assets.hasSnapshot(base) && loadLocalApp(subpath)) {
             Thread { backgroundUpdateCheck(toNxSetup) }.start()
@@ -53,6 +66,7 @@ class AppStartupCoordinator(
 
     /** Foreground update over the running app; keeps the setup subpath on first launch. */
     private fun backgroundUpdateCheck(toNxSetup: Boolean = false) {
+        if (!isUpdating.compareAndSet(false, true)) return
         try {
             val fresh = assets.fetchDescribe() ?: return
             if (assets.isCurrent(fresh)) return
@@ -74,6 +88,8 @@ class AppStartupCoordinator(
         } catch (e: Exception) {
             Log.w(TAG, "Update check failed", e)
             activity.runOnUiIfAlive { toast("Update check failed", true) }
+        } finally {
+            isUpdating.set(false)
         }
     }
 
@@ -123,5 +139,13 @@ class AppStartupCoordinator(
     fun onLocalCookieReady() {
         val isApp = loadDefaultUrl()
         if (isApp) Thread { activity.nativex.account.checkCredentialsAndVersion() }.start()
+    }
+
+    /** Triggers an update when the server version differs from the last one seen. */
+    private fun onServerVersion(version: String) {
+        val known = serverVersion.getAndSet(version)
+        if (known == null || known == version) return
+        Log.i(TAG, "Server version changed: $known -> $version")
+        Thread { backgroundUpdateCheck() }.start()
     }
 }

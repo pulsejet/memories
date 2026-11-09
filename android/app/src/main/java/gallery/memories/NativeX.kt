@@ -25,11 +25,11 @@ class NativeX(private val mCtx: MainActivity) {
     private var themeStored = false
 
     /** Application container to bridge API calls. */
-    val container = AppContainer(mCtx, bridge = {
-        method, url -> handleBridge(method, url)
-    }, onAllowMedia = {
-        doMediaSync(true)
-    })
+    val container = AppContainer(
+        activity = mCtx,
+        bridge = { method, url -> handleBridge(method, url) },
+        onAllowMedia = { doMediaSync(true) },
+    )
 
     /** Expose various services from the container. */
     val timeline get() = container.timeline

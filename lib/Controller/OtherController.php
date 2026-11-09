@@ -91,7 +91,7 @@ final class OtherController extends ApiController
     {
         return $this->util->guardEx(function () {
             // get memories version
-            $version = $this->appManager->getAppVersion('memories');
+            $version = $this->util->getMemoriesVersion();
 
             // user language and locale for native clients
             $language = $this->l10nFactory->findLanguage();
@@ -165,7 +165,7 @@ final class OtherController extends ApiController
     {
         return $this->util->guardEx(function () use ($pageController) {
             $info = [
-                'version' => $this->appManager->getAppVersion('memories'),
+                'version' => $this->util->getMemoriesVersion(),
                 'baseUrl' => $this->util->getBaseUrl(),
                 'loginFlowUrl' => $this->urlGenerator->linkToRouteAbsolute('core.ClientFlowLoginV2.init'),
             ];

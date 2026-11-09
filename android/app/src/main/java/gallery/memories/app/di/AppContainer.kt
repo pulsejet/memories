@@ -54,16 +54,30 @@ class AppContainer(
     val api = NextcloudApi(auth, clients)
     val cache = AssetCache(activity)
     val downloader = AssetDownloader(api)
-    val assets = AssetSyncCoordinator(auth, api, cache, downloader, onError = { msg ->
-        activity.runOnUiThread { Toast.makeText(activity, msg, Toast.LENGTH_LONG).show() }
-    })
+    val assets = AssetSyncCoordinator(
+        auth = auth,
+        api = api,
+        cache = cache,
+        downloader = downloader,
+        onError = { msg ->
+            activity.runOnUiThread {
+                Toast.makeText(activity, msg, Toast.LENGTH_LONG).show()
+            }
+        },
+    )
 
     private val db = AppDatabase.get(activity)
     val dao = db.photoDao()
     val dataSource = MediaStoreDataSource(activity)
     val mapper = PhotoMapper(activity)
-    val syncManager = MediaSyncManager(activity, dao, dataSource, mapper, prefs,
-     isAlive = { !activity.isDestroyed && !activity.isFinishing })
+    val syncManager = MediaSyncManager(
+        ctx = activity,
+        dao = dao,
+        dataSource = dataSource,
+        mapper = mapper,
+        prefs = prefs,
+        isAlive = { !activity.isDestroyed && !activity.isFinishing },
+    )
     val folders = FolderSettings(dao, dataSource, prefs)
     val deleter = MediaDeleter(activity)
     val permissions = PermissionsManager(activity, prefs).register()
@@ -77,8 +91,23 @@ class AppContainer(
     val downloads = InAppDownloader(activity.applicationContext, auth, clients)
     val upload: UploadService
     val share: ShareManager
-    val account = AccountManager(activity, auth, clients, api, assets, secure)
-    val local = LocalHttpServer(activity, auth, clients, assets, dataSource, holeImage, bridge)
+    val account = AccountManager(
+        activity = activity,
+        auth = auth,
+        clients = clients,
+        api = api,
+        assets = assets,
+        store = secure,
+    )
+    val local = LocalHttpServer(
+        appCtx = activity,
+        auth = auth,
+        clients = clients,
+        assets = assets,
+        dataSource = dataSource,
+        holeImage = holeImage,
+        bridge = bridge,
+    )
     val router: ApiRouter
 
     init {
@@ -87,12 +116,33 @@ class AppContainer(
             if (timeline.syncDeltaDb() + timeline.evictUris(uris) > 0) activity.refreshTimeline()
         }
         timeline = TimelineRepositoryImpl(
-            dao, dataSource, mapper, prefs, syncManager, deleter, folders, observer,
+            dao = dao,
+            dataSource = dataSource,
+            mapper = mapper,
+            prefs = prefs,
+            syncManager = syncManager,
+            deleter = deleter,
+            folders = folders,
+            observer = observer,
             onDatabaseChanged = { activity.refreshTimeline() },
         )
         image = ImageService(activity, timeline)
-        upload = UploadService(activity, timeline, auth, clients)
+        upload = UploadService(
+            ctx = activity,
+            timeline = timeline,
+            auth = auth,
+            clients = clients,
+        )
         share = ShareManager(activity, timeline, downloads)
-        router = ApiRouter(account, timeline, image, upload, share, permissions, assets, onAllowMedia)
+        router = ApiRouter(
+            account = account,
+            timeline = timeline,
+            image = image,
+            upload = upload,
+            share = share,
+            permissions = permissions,
+            assets = assets,
+            onAllowMedia = onAllowMedia,
+        )
     }
 }

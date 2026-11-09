@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OCA\Memories;
 
+use OCA\Memories\AppInfo\Application;
+use OCP\App\IAppManager;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\Files\Folder;
@@ -25,6 +27,7 @@ final class Util extends StaticUtil
         private IDBConnection $connection,
         private IURLGenerator $urlGenerator,
         private IRequest $request,
+        private IAppManager $appManager,
     ) {}
 
     /**
@@ -146,6 +149,14 @@ final class Util extends StaticUtil
     public function getBaseUrl(): string
     {
         return rtrim($this->urlGenerator->linkToRouteAbsolute('memories.Page.main'), '/').'/';
+    }
+
+    /**
+     * Get the installed version of the Memories app.
+     */
+    public function getMemoriesVersion(): string
+    {
+        return $this->appManager->getAppVersion(Application::APPNAME);
     }
 
     /**
