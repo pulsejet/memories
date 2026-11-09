@@ -50,7 +50,7 @@ final class PageController extends Controller
             \OCP\Util::addTranslations('recognize');
         }
 
-        $response = new TemplateResponsePatch(Application::APPNAME, 'main', self::getMainParams());
+        $response = new TemplateResponsePatch(Application::APPNAME, 'main');
         $response->setContentSecurityPolicy($this->systemConfig->getCSP());
         $response->cacheFor(0);
 
@@ -60,16 +60,6 @@ final class PageController extends Controller
         }
 
         return $response;
-    }
-
-    /**
-     * Get params for main.php template.
-     */
-    public static function getMainParams(): array
-    {
-        return [
-            'native' => Util::callerIsNative(),
-        ];
     }
 
     #[NoAdminRequired]

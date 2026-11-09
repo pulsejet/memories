@@ -92,7 +92,7 @@ final class PublicAlbumController extends Controller
         $this->initialState->provideInitialState('share_type', 'album');
 
         // Render main template
-        $response = new PublicTemplateResponse(Application::APPNAME, 'main', PageController::getMainParams());
+        $response = new PublicTemplateResponse(Application::APPNAME, 'main');
         $response->setHeaderTitle($title);
         $response->setFooterVisible(false); // wth is that anyway?
         $response->setContentSecurityPolicy($this->systemConfig->getCSP());

@@ -139,7 +139,7 @@ final class PublicController extends AuthPublicShareController
         $this->util->addOgMetadata($node, $node->getName(), $url, $params);
 
         // Render the template
-        $response = new PublicTemplateResponse($this->appName, 'main', PageController::getMainParams());
+        $response = new PublicTemplateResponse($this->appName, 'main');
         $response->setHeaderTitle($node->getName());
         $response->setFooterVisible(false); // wth is that anyway?
         $response->setContentSecurityPolicy($this->systemConfig->getCSP());

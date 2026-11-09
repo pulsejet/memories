@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OCA\Memories\Settings;
 
 use OCA\Memories\AppInfo\Application;
-use OCA\Memories\Controller\PageController;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\Settings\ISettings;
 
@@ -21,7 +20,7 @@ final class Admin implements ISettings
     {
         \OCP\Util::addScript(Application::APPNAME, 'memories-admin');
 
-        return new TemplateResponse('memories', 'main', PageController::getMainParams());
+        return new TemplateResponse('memories', 'main');
     }
 
     /**
