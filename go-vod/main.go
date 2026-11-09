@@ -10,7 +10,7 @@ import (
 	"github.com/pulsejet/memories/go-vod/ffmpeg"
 )
 
-const VERSION = "0.7.0"
+const VERSION = "0.7.1"
 
 func main() {
 	c := config.Defaults(VERSION)
