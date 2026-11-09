@@ -2,6 +2,7 @@ package gallery.memories
 
 import android.content.pm.ActivityInfo
 import android.net.Uri
+import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
@@ -131,11 +132,16 @@ class NativeX(private val mCtx: MainActivity) {
         mCtx.runOnUiThread { mCtx.binding.webview.playSoundEffect(SoundEffectConstants.CLICK) }
     }
 
-    /** Toggle HDR rendering for the activity window; off restores the default. */
+    /**
+     * Toggle HDR rendering for the activity window; off restores the default.
+     * Only on Ultra HDR displays (API 34+); the legacy FP16 path breaks some HWCs (#1796).
+     */
     @JavascriptInterface
     fun setHdrColorMode(enabled: Boolean) {
+        val hasHdr = Build.VERSION.SDK_INT >= 34
+            && mCtx.display?.isHdrSdrRatioAvailable == true
         mCtx.runOnUiThread {
-            val mode = if (enabled) ActivityInfo.COLOR_MODE_HDR
+            val mode = if (hasHdr && enabled) ActivityInfo.COLOR_MODE_HDR
                 else ActivityInfo.COLOR_MODE_DEFAULT
             if (mCtx.window.colorMode != mode) {
                 mCtx.window.colorMode = mode
