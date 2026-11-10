@@ -6,7 +6,6 @@ namespace OCA\Memories\Tests\Unit;
 
 use OCA\Memories\Tests\TestCase;
 use OCA\Memories\Util;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * @internal
@@ -41,22 +40,14 @@ final class UtilHelpersTest extends TestCase
         self::assertContains(Util::getLibc(), ['glibc', 'musl']);
     }
 
-    #[DataProvider('provideGetLibcParseCases')]
-    public function testGetLibcParse(string $ldd, string $getconf, ?string $expected): void
+    public function testGetLibcParse(): void
     {
-        self::assertSame($expected, Util::getLibc($ldd, $getconf));
-    }
-
-    public static function provideGetLibcParseCases(): iterable
-    {
-        return [
-            'debian' => ['ldd (Debian GLIBC 2.36) 2.36', '', 'glibc'],
-            'arch' => ['ldd (GNU libc) 2.40', '', 'glibc'],
-            'alpine' => ['musl libc (x86_64)', '', 'musl'],
-            'gentoo getconf' => ['ldd (Gentoo 2.38) 2.38', 'glibc 2.38', 'glibc'],
-            'ldd wins over getconf' => ['musl libc (x86_64)', 'glibc 2.41', 'musl'],
-            'unknown' => ['ldd (Gentoo 2.38) 2.38', '', null],
-            'no partial match' => ['muslim glibcx', 'notglibc', null],
-        ];
+        self::assertSame('glibc', Util::getLibc('ldd (Debian GLIBC 2.36) 2.36', ''));
+        self::assertSame('glibc', Util::getLibc('ldd (GNU libc) 2.40', ''));
+        self::assertSame('musl', Util::getLibc('musl libc (x86_64)', ''));
+        self::assertSame('glibc', Util::getLibc('ldd (Gentoo 2.38) 2.38', 'glibc 2.38'));
+        self::assertSame('musl', Util::getLibc('musl libc (x86_64)', 'glibc 2.41'));
+        self::assertNull(Util::getLibc('ldd (Gentoo 2.38) 2.38', ''));
+        self::assertNull(Util::getLibc('muslim glibcx', 'notglibc'));
     }
 }
