@@ -600,7 +600,7 @@ final class ExifExtractTest extends TestCase
     public function testSetExif(): void
     {
         // Copy non-motion Samsung S21 photo to a temporary file
-        $tmpFile = (string) tempnam(sys_get_temp_dir(), 'memories_exif_test_').'.jpg';
+        $tmpFile = sys_get_temp_dir().'/memories_exif_test_'.bin2hex(random_bytes(8)).'.jpg';
         copy(__DIR__.'/../assets/samsung_s21_01.jpg', $tmpFile);
 
         try {
@@ -665,7 +665,7 @@ final class ExifExtractTest extends TestCase
         // Legacy 3GP LocationInformation blocks coordinate updates on videos.
         // Sample from https://github.com/exiftool/exiftool/issues/391, which
         // only stores its location in LocationInformation (no GPSCoordinates).
-        $tmpFile = (string) tempnam(sys_get_temp_dir(), 'memories_exif_test_').'.mp4';
+        $tmpFile = sys_get_temp_dir().'/memories_exif_test_'.bin2hex(random_bytes(8)).'.mp4';
         copy(__DIR__.'/../assets/unknown_02.mp4', $tmpFile);
 
         try {
