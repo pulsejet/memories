@@ -239,11 +239,11 @@ class NativeHoleImage(private val mCtx: MainActivity) {
             }
             mCtx.runOnUiThread {
                 if (!cont.isActive) return@runOnUiThread
-                // Ping-pong only when the active view is already showing;
-                // otherwise load straight into it. Selection stays on the
-                // UI thread so readiness/visibility reads are safe.
+                // Ping-pong whenever the active view holds an image, even while hidden:
+                // the hole may be revealed before this load is ready. Selection stays
+                // on the UI thread so readiness reads are safe.
                 val front = activeView()
-                val pingPong = front.isReady && front.isVisible
+                val pingPong = front.isReady
                 val target = if (pingPong) idleView() else front
                 targetView = target
                 try {
