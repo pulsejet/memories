@@ -46,20 +46,34 @@ class StaticUtil
      *
      * @psalm-return 'glibc'|'musl'|null
      */
-    public static function getLibc(): ?string
-    {
-        // glibc -> stdout, musl -> stderr
-        $output = self::execSafe2(['ldd', '--version'], 3000, null, [1, 2]);
+    public static function getLibc(
+        ?string $lddVersion = null,
+        ?string $gnuLibcGetconf = null,
+    ): ?string {
+        $muslRe = '/\b(musl)\b/i';
+        $glibcRe = '/\b(glibc|gnu libc)\b/i';
 
-        // check in either
-        $ldd = strtolower($output[1] ?? '')
-            .strtolower($output[2] ?? '');
+        try {
+            $lddVersion ??= implode(' ', self::execSafe2(['ldd', '--version'], 3000, null, [1, 2]));
 
-        if (str_contains($ldd, 'musl')) {
-            return 'musl';
+            if (preg_match($muslRe, $lddVersion)) {
+                return 'musl';
+            }
+            if (preg_match($glibcRe, $lddVersion)) {
+                return 'glibc';
+            }
+        } catch (\Exception) {
+            // ldd missing or failed, try getconf
         }
-        if (str_contains($ldd, 'glibc') || str_contains($ldd, 'gnu libc')) {
-            return 'glibc';
+
+        try {
+            $gnuLibcGetconf ??= implode(' ', self::execSafe2(['getconf', 'GNU_LIBC_VERSION'], 3000, null, [1]));
+
+            if (preg_match($glibcRe, $gnuLibcGetconf)) {
+                return 'glibc';
+            }
+        } catch (\Exception) {
+            // getconf missing or failed, libc unknown
         }
 
         return null;
