@@ -32,6 +32,7 @@ final class VipsPreviewTest extends TestCase
 
     private static bool $origVipsEnabled = true;
 
+    #[\Override]
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
@@ -39,6 +40,7 @@ final class VipsPreviewTest extends TestCase
         self::$config->setSystemValue('memories.vips.enabled', true);
     }
 
+    #[\Override]
     public static function tearDownAfterClass(): void
     {
         self::$config->setSystemValue('memories.vips.enabled', self::$origVipsEnabled);

@@ -48,6 +48,7 @@ final class ExifExtractTest extends TestCase
     #[Injected]
     private LivePhoto $livePhoto;
 
+    #[\Override]
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
@@ -55,6 +56,7 @@ final class ExifExtractTest extends TestCase
         self::$exif->ensureStaticExiftoolProc();
     }
 
+    #[\Override]
     public static function tearDownAfterClass(): void
     {
         self::$exif->closeStaticExiftoolProc();
@@ -303,7 +305,7 @@ final class ExifExtractTest extends TestCase
 
         // CreateDate has no timezone info, but the epoch should stay the same.
         // '2021:07:10 16:51:26-07:00' (local timezone)
-        $createDate = \DateTime::createFromFormat('Y:m:d H:i:sO', $res->exif['CreateDate'] ?? null);
+        $createDate = \DateTime::createFromFormat('Y:m:d H:i:sO', (string) ($res->exif['CreateDate'] ?? ''));
         self::assertSame(1625961086, $createDate->getTimestamp());
 
         // Geolocation (Redlands, CA)
@@ -385,7 +387,7 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__traileroffset=4347622', $res->livePhotoId);
 
-        $video = file_get_contents($res->path, false, null, 4347622);
+        $video = (string) file_get_contents($res->path, false, null, 4347622);
         self::assertSame('ftyp', substr($video, 4, 4));
 
         $dt = self::$exif->parseExifDate($res->exif);
@@ -398,7 +400,7 @@ final class ExifExtractTest extends TestCase
         self::assertSame('image/jpeg', $res->exif['MIMEType'] ?? null);
         self::assertSame('self__traileroffset=3534847', $res->livePhotoId);
 
-        $video = file_get_contents($res->path, false, null, 3534847);
+        $video = (string) file_get_contents($res->path, false, null, 3534847);
         self::assertSame('ftyp', substr($video, 4, 4));
 
         $dt = self::$exif->parseExifDate($res->exif);
@@ -473,7 +475,7 @@ final class ExifExtractTest extends TestCase
         self::assertSame('self__traileroffset=2825042', $res->livePhotoId);
 
         // Trailer video extraction & moov atom
-        $video = file_get_contents($res->path, false, null, 2825042);
+        $video = (string) file_get_contents($res->path, false, null, 2825042);
         self::assertSame('ftyp', substr($video, 4, 4));
 
         // EXIF Fields
@@ -598,7 +600,7 @@ final class ExifExtractTest extends TestCase
     public function testSetExif(): void
     {
         // Copy non-motion Samsung S21 photo to a temporary file
-        $tmpFile = tempnam(sys_get_temp_dir(), 'memories_exif_test_').'.jpg';
+        $tmpFile = (string) tempnam(sys_get_temp_dir(), 'memories_exif_test_').'.jpg';
         copy(__DIR__.'/../assets/samsung_s21_01.jpg', $tmpFile);
 
         try {
@@ -663,7 +665,7 @@ final class ExifExtractTest extends TestCase
         // Legacy 3GP LocationInformation blocks coordinate updates on videos.
         // Sample from https://github.com/exiftool/exiftool/issues/391, which
         // only stores its location in LocationInformation (no GPSCoordinates).
-        $tmpFile = tempnam(sys_get_temp_dir(), 'memories_exif_test_').'.mp4';
+        $tmpFile = (string) tempnam(sys_get_temp_dir(), 'memories_exif_test_').'.mp4';
         copy(__DIR__.'/../assets/unknown_02.mp4', $tmpFile);
 
         try {

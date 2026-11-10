@@ -19,6 +19,7 @@
     -->
     <projectFiles>
         <directory name="lib" />
+        <directory name="tests" />
         <directory name="../../lib" />
         <directory name="../../apps/files/lib/Event" />
         <directory name="../../apps/files_sharing" />

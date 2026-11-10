@@ -21,6 +21,7 @@ final class BinExtTempBinTest extends TestCase
     public function testGetTempBinCopiesAndCaches(): void
     {
         $src = tempnam(sys_get_temp_dir(), 'memories-src-');
+        self::assertIsString($src);
         file_put_contents($src, "#!/bin/sh\necho hi\n");
         $name = 'testbin-'.bin2hex(random_bytes(4));
 
@@ -36,6 +37,7 @@ final class BinExtTempBinTest extends TestCase
     public function testGetTempBinNeedsNoWritability(): void
     {
         $src = tempnam(sys_get_temp_dir(), 'memories-src-');
+        self::assertIsString($src);
         file_put_contents($src, 'data');
         $name = 'testbin-'.bin2hex(random_bytes(4));
 

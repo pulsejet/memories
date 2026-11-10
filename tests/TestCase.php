@@ -6,12 +6,14 @@ namespace OCA\Memories\Tests;
 
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
+    #[\Override]
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
         static::injectStatic();
     }
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
