@@ -131,8 +131,8 @@ func Encoder(s Spec) string {
 // In order: quiet logging, hidden banner, input seek (-ss, only when StartAt > 0),
 // hardware decode offload on a named "memories" device (explicit
 // -init_hw_device/-filter_hw_device, required since ffmpeg 8), -noautorotate
-// when transposing manually, persistent http connections with bounded
-// reconnects, service auth
+// with -display_rotation 0 when transposing manually, persistent http
+// connections with bounded reconnects, service auth
 // headers for the http input, input with -copyts/+genpts (post-seek timing
 // still refers to source timestamps), the -vf graph as a staged pipeline:
 // normalize into the encode domain (8-bit convert, plus hardware upload
@@ -200,7 +200,7 @@ func BuildArgs(s Spec) []string {
 	}
 
 	if s.UseTranspose {
-		args = append(args, "-noautorotate")
+		args = append(args, "-noautorotate", "-display_rotation", "0")
 	}
 
 	args = append(args, remoteInputArgs(s.Headers)...)

@@ -102,7 +102,7 @@ func TestBuildArgsTranspose(t *testing.T) {
 	s := baseSpec()
 	s.VAAPI, s.UseTranspose, s.HLS, s.Rotation = true, true, true, -90
 	c := cmd(s, BuildArgs(s))
-	require.Contains(t, c, "-noautorotate")
+	require.Contains(t, c, "-noautorotate -display_rotation 0")
 	require.Contains(t, c, "transpose_vaapi=1")
 
 	sw := baseSpec()
@@ -111,7 +111,9 @@ func TestBuildArgsTranspose(t *testing.T) {
 
 	off := baseSpec()
 	off.Rotation = 90
-	require.NotContains(t, cmd(off, BuildArgs(off)), "transpose")
+	c = cmd(off, BuildArgs(off))
+	require.NotContains(t, c, "transpose")
+	require.NotContains(t, c, "-display_rotation")
 }
 
 func TestMP4Transpose(t *testing.T) {
