@@ -58,7 +58,7 @@ class StaticUtil
         if (str_contains($ldd, 'musl')) {
             return 'musl';
         }
-        if (str_contains($ldd, 'glibc')) {
+        if (str_contains($ldd, 'glibc') || str_contains($ldd, 'gnu libc')) {
             return 'glibc';
         }
 
