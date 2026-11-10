@@ -32,6 +32,7 @@ final class BinExtTempBinTest extends TestCase
         self::assertSame($target, $this->binExt->getTempBin($src, $name));
 
         unlink($src);
+        unlink($target);
     }
 
     public function testGetTempBinNeedsNoWritability(): void
@@ -47,5 +48,6 @@ final class BinExtTempBinTest extends TestCase
         self::assertSame($target, $this->binExt->getTempBin($src, $name));
 
         unlink($src);
+        unlink($target);
     }
 }

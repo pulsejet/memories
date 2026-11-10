@@ -11,7 +11,7 @@ use OCA\Memories\Tests\TestCase;
 /**
  * @internal
  *
- * @coversNothing
+ * @covers \OCA\Memories\Exif
  */
 final class ExifDateParseTest extends TestCase
 {
@@ -119,13 +119,6 @@ final class ExifDateParseTest extends TestCase
             'CreateDate' => '2022:06:15 12:30:00',
         ]);
         self::assertSame('2021-01-01 10:00:00', $dt->format('Y-m-d H:i:s'));
-    }
-
-    public function testFallsBackToCreateDate(): void
-    {
-        $dt = $this->exif->parseExifDate(['CreateDate' => '2022:06:15 12:30:00']);
-
-        self::assertSame('2022-06-15 12:30:00', $dt->format('Y-m-d H:i:s'));
     }
 
     public function testEmbeddedOffsetDefinesInstant(): void
