@@ -183,6 +183,7 @@
     "Disable background indexing" : "Désactiver l'indexation en arrière-plan",
     "Indexing path (relative, all users)" : "Chemin d'indexation (relatif, pour tous les utilisateur·trice·s)",
     "Folders with a \".nomedia\" or a \".nomemories\" file are always excluded from indexing." : "Les dossiers contenant un fichier « .nomedia » ou « .nomemories » sont toujours exclus de l'indexation.",
+    "You can optionally exclude specific file or folder names from being indexed." : "Vous pouvez éventuellement exclure des noms de dossiers ou de fichiers spécifiques de l'indexation.",
     "Excluded file or folder names (comma-separated)" : "Noms des dossiers et fichiers exclus (séparés par des virgules)",
     "Excluded MIME types (comma-separated)" : "Types MIME exclus (séparés par des virgules)",
     "For advanced usage, perform a run of indexing by running:" : "Pour une utilisation avancée, effectuez une indexation en exécutant :",
