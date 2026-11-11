@@ -6,7 +6,7 @@ minSdk = "31"
 targetSdk = "36"
 java = "21"
 
-agp = "9.5.0"
+agp = "9.5.1"
 kotlin = "2.4.21"
 ksp = "2.3.13"
 media3 = "1.11.1"
