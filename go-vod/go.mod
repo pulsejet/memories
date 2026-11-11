@@ -7,7 +7,7 @@ require (
 	github.com/grafov/m3u8 v0.12.1
 	github.com/stretchr/testify v1.12.1
 	github.com/vansante/go-ffprobe v1.1.0
-	golang.org/x/sync v0.24.0
+	golang.org/x/sync v0.25.0
 )
 
 require (
