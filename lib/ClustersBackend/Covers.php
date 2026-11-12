@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\Memories\ClustersBackend;
 
+use OCA\Memories\Db\CTEParams;
 use OCA\Memories\Db\SQL;
 use OCA\Memories\Util;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -81,6 +82,9 @@ final class Covers
                 ))
                 ->where($treeSq->expr()->eq('cov_f.fileid', 'mcov.fileid'))
             ;
+            if (CTEParams::hasAcl($query)) {
+                $treeSq->andWhere($treeSq->createFunction(CTEParams::aclReadableClause('cov_cte_f.readable', 'cov_f.fileid')));
+            }
 
             $clauses[] = SQL::exists($query, $treeSq);
         }

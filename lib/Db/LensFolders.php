@@ -24,24 +24,55 @@ final class LensFolders
     ) {}
 
     /**
-     * Get all nested folder fileids under the given top folder ids.
+     * Get all nested folder fileids under the top folders of the root.
      *
      * Hidden folders are excluded; .nomedia/.nomemories respected by the CTE.
-     *
-     * @param int[] $topFolderIds top folder fileids
+     * Folders the user cannot read are left out.
      *
      * @return int[] folder fileids including the top folders
      */
-    public function getFolderIds(array $topFolderIds): array
+    public function getFolderIds(TimelineRoot $root): array
     {
-        if ([] === $topFolderIds) {
+        if ($root->isEmpty()) {
             return [];
         }
 
         $query = $this->connection->getQueryBuilder();
         $query->select('cte_f.fileid')->from('cte_folders', 'cte_f');
-        CTEParams::setTopFolderIds($query, $topFolderIds);
+        CTEParams::setTopFolderIds($query, $root->getIds());
+        CTEParams::setAcl($query, $root->getAclMappings(), $root->getAclDeniedTops());
+        if (CTEParams::hasAcl($query)) {
+            $query->where($query->expr()->eq('cte_f.readable', SQL::literal($query, 1, \PDO::PARAM_INT)));
+        }
 
+        $ids = $this->tq->executeQueryWithCTEs($query)->fetchFirstColumn();
+
+        return array_map(static fn (mixed $id) => (int) $id, $ids);
+    }
+
+    /**
+     * Get which of these files are hidden from the user of the root
+     * on their own, i.e. not by the folder they are in.
+     *
+     * @param int[] $fileIds fileids to check
+     *
+     * @return int[] fileids that must not be shown
+     */
+    public function getHiddenFileIds(TimelineRoot $root, array $fileIds): array
+    {
+        $query = $this->connection->getQueryBuilder();
+        CTEParams::setAcl($query, $root->getAclMappings(), $root->getAclDeniedTops());
+        if ([] === $fileIds || !CTEParams::hasAcl($query)) {
+            return [];
+        }
+
+        // Files with a rule of their own that denies reading
+        $query->select('acl_r.fileid')
+            ->from('cte_acl', 'acl_r')
+            ->where($query->expr()->eq('acl_r.rmask', SQL::literal($query, 1, \PDO::PARAM_INT)))
+            ->andWhere($query->expr()->eq('acl_r.rperm', SQL::literal($query, 0, \PDO::PARAM_INT)))
+            ->andWhere($query->expr()->in('acl_r.fileid', $query->createNamedParameter($fileIds, IQueryBuilder::PARAM_INT_ARRAY)))
+        ;
         $ids = $this->tq->executeQueryWithCTEs($query)->fetchFirstColumn();
 
         return array_map(static fn (mixed $id) => (int) $id, $ids);

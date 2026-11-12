@@ -23,16 +23,23 @@ trait TimelineQueryCTE
         $types = $query->getParameterTypes();
 
         // Add WITH clause if needed
+        $acl = CTEParams::hasAcl($query) ? CTEParams::aclMappingClause($query, 'acl_a') : null;
         if (str_contains($sql, 'cte_folders')) {
+            $aclTops = CTEParams::hasAclDeniedTops($query);
             $CTE_SQL = CTEParams::isFoldersArchive($query)
-                ? $this->CTE_FOLDERS_ARCHIVE()
+                ? $this->CTE_FOLDERS_ARCHIVE($acl, $aclTops)
                 : $this->CTE_FOLDERS(
                     CTEParams::isIncludeHidden($query),
                     CTEParams::getBlocklistCount($query),
+                    $acl,
+                    $aclTops,
                 );
             $sql = $CTE_SQL.' '.$sql;
         } elseif (str_contains($sql, 'cte_file_parents')) {
             $CTE_SQL = $this->CTE_FILE_PARENTS();
+            $sql = $CTE_SQL.' '.$sql;
+        } elseif (null !== $acl && str_contains($sql, 'cte_acl')) {
+            $CTE_SQL = self::bundleCTEs([$this->CTE_ACL($acl)]);
             $sql = $CTE_SQL.' '.$sql;
         }
 
@@ -62,12 +69,14 @@ trait TimelineQueryCTE
      * :topFolderIds - The top folders to get files from.
      * :fnBlocklistN - File or folder name LIKE patterns to prune.
      *
-     * @param bool $hidden         Whether to include files in hidden folders
-     *                             If the top folder is hidden, the files in it will still be returned
-     *                             Hidden files are marked as such in the "hidden" field
-     * @param int  $blocklistCount Number of blocklist patterns
+     * @param bool        $hidden         Whether to include files in hidden folders
+     *                                    If the top folder is hidden, the files in it will still be returned
+     *                                    Hidden files are marked as such in the "hidden" field
+     * @param int         $blocklistCount Number of blocklist patterns
+     * @param null|string $acl            Clause matching the ACL rules of the user, if any apply
+     * @param bool        $aclTops        Whether some top folders are not readable (:cteAclDeniedTops)
      */
-    protected function CTE_FOLDERS_ALL(bool $hidden, int $blocklistCount): string
+    protected function CTE_FOLDERS_ALL(bool $hidden, int $blocklistCount, ?string $acl, bool $aclTops): string
     {
         $provider = $this->connection->getDatabaseProvider();
 
@@ -98,10 +107,23 @@ trait TimelineQueryCTE
             ? 'USE INDEX (memories_parent_mimetype)'
             : '';
 
+        // ACL: a folder is readable by its own rule, or else if its parent is.
+        // Unreadable folders are still walked, a rule further down can allow again.
+        $CLS_READABLE_TOP = null !== $acl && $aclTops
+            ? 'CASE WHEN f.fileid IN (:cteAclDeniedTops) THEN 0 ELSE 1 END'
+            : '1';
+        $CLS_READABLE = null !== $acl
+            ? 'COALESCE(CASE WHEN acl.rmask = 1 THEN acl.rperm END, c.readable)'
+            : '1';
+        $ACL_JOIN = null !== $acl
+            ? 'LEFT JOIN *PREFIX*cte_acl acl ON (acl.fileid = f.fileid)'
+            : '';
+
         return
-        "*PREFIX*cte_folders_all(fileid, name, hidden) AS (
+        "*PREFIX*cte_folders_all(fileid, name, hidden, readable) AS (
             SELECT f.fileid, f.name,
-                (0) AS hidden
+                (0) AS hidden,
+                ({$CLS_READABLE_TOP}) AS readable
             FROM *PREFIX*filecache f
             WHERE (
                 (f.fileid IN (:topFolderIds)) AND
@@ -112,7 +134,8 @@ trait TimelineQueryCTE
             UNION ALL
 
             SELECT f.fileid, f.name,
-                (CASE WHEN c.hidden = 1 OR f.name LIKE '.%' THEN 1 ELSE 0 END) AS hidden
+                (CASE WHEN c.hidden = 1 OR f.name LIKE '.%' THEN 1 ELSE 0 END) AS hidden,
+                ({$CLS_READABLE}) AS readable
             FROM *PREFIX*filecache f
             {$UNION_INDEX_HINT}
             INNER JOIN *PREFIX*cte_folders_all c
@@ -121,6 +144,7 @@ trait TimelineQueryCTE
                     f.mimetype = ({$FOLDER_MIME_QUERY}) AND
                     ({$CLS_HIDDEN_JOIN})
                 )
+            {$ACL_JOIN}
             WHERE (
                 ({$CLS_NOMEDIA}) AND
                 (NOT ({$CLS_BLOCKLIST}))
@@ -131,33 +155,75 @@ trait TimelineQueryCTE
     /**
      * CTE to get all folders recursively in the given top folders.
      *
-     * @param bool $hidden         Whether to include files in hidden folders
-     * @param int  $blocklistCount Number of blocklist patterns
+     * @param bool        $hidden         Whether to include files in hidden folders
+     * @param int         $blocklistCount Number of blocklist patterns
+     * @param null|string $acl            Clause matching the ACL rules of the user, if any apply
+     * @param bool        $aclTops        Whether some top folders are not readable
      */
-    protected function CTE_FOLDERS(bool $hidden, int $blocklistCount): string
+    protected function CTE_FOLDERS(bool $hidden, int $blocklistCount, ?string $acl, bool $aclTops): string
     {
         $CLS_HIDDEN = $hidden ? 'MIN(hidden)' : '0';
 
         $cte = "*PREFIX*cte_folders AS (
             SELECT
-                fileid, ({$CLS_HIDDEN}) AS hidden
+                fileid, ({$CLS_HIDDEN}) AS hidden, MAX(readable) AS readable
             FROM
                 *PREFIX*cte_folders_all
             GROUP BY
                 fileid
         )";
 
-        return self::bundleCTEs([$this->CTE_FOLDERS_ALL($hidden, $blocklistCount), $cte]);
+        return self::bundleCTEs([
+            ...(null !== $acl ? [$this->CTE_ACL($acl)] : []),
+            $this->CTE_FOLDERS_ALL($hidden, $blocklistCount, $acl, $aclTops),
+            $cte,
+        ]);
+    }
+
+    /**
+     * CTE with the read permission the group folder ACL rules give the user,
+     * for each file and folder with a rule that applies to them.
+     *
+     * Rules on the same path merge with allow winning over deny. rmask is 1
+     * if any rule sets the read bit, and rperm is then whether reading is
+     * allowed; otherwise it is inherited.
+     *
+     * @param string $acl Clause matching the ACL rules of the user
+     */
+    protected function CTE_ACL(string $acl): string
+    {
+        return "*PREFIX*cte_acl(fileid, rmask, rperm) AS (
+            SELECT
+                acl_a.fileid,
+                MAX(acl_a.mask & 1),
+                MAX(acl_a.permissions & acl_a.mask & 1)
+            FROM
+                *PREFIX*group_folders_acl acl_a
+            WHERE
+                {$acl}
+            GROUP BY
+                acl_a.fileid
+        )";
     }
 
     /**
      * CTE to get all archive folders recursively in the given top folders.
+     *
+     * @param null|string $acl     Clause matching the ACL rules of the user, if any apply
+     * @param bool        $aclTops Whether some top folders are not readable
      */
-    protected function CTE_FOLDERS_ARCHIVE(): string
+    protected function CTE_FOLDERS_ARCHIVE(?string $acl, bool $aclTops): string
     {
-        $cte = "*PREFIX*cte_folders(fileid) AS (
+        $CLS_READABLE = null !== $acl
+            ? 'COALESCE(CASE WHEN acl.rmask = 1 THEN acl.rperm END, c.readable)'
+            : '1';
+        $ACL_JOIN = null !== $acl
+            ? 'LEFT JOIN *PREFIX*cte_acl acl ON (acl.fileid = f.fileid)'
+            : '';
+
+        $cte = "*PREFIX*cte_folders(fileid, readable) AS (
             SELECT
-                cfa.fileid
+                cfa.fileid, MAX(cfa.readable)
             FROM
                 *PREFIX*cte_folders_all cfa
             WHERE
@@ -166,7 +232,7 @@ trait TimelineQueryCTE
                 cfa.fileid
             UNION ALL
             SELECT
-                f.fileid
+                f.fileid, ({$CLS_READABLE})
             FROM
                 *PREFIX*filecache f
             INNER JOIN *PREFIX*cte_folders c
@@ -177,9 +243,14 @@ trait TimelineQueryCTE
                         WHERE mimetype = 'httpd/unix-directory'
                     )
                 )
+            {$ACL_JOIN}
         )";
 
-        return self::bundleCTEs([$this->CTE_FOLDERS_ALL(true, 0), $cte]);
+        return self::bundleCTEs([
+            ...(null !== $acl ? [$this->CTE_ACL($acl)] : []),
+            $this->CTE_FOLDERS_ALL(true, 0, $acl, $aclTops),
+            $cte,
+        ]);
     }
 
     /**

@@ -26,11 +26,14 @@ namespace OCA\Memories\Db;
 use OC\Files\Search\SearchBinaryOperator;
 use OC\Files\Search\SearchComparison;
 use OC\Files\Search\SearchQuery;
+use OCA\GroupFolders\ACL\ACLStorageWrapper;
+use OCA\GroupFolders\ACL\UserMapping\IUserMappingManager;
 use OCA\Memories\ClustersBackend;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\PublicShareController;
+use OCP\Constants;
 use OCP\Files\File;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
@@ -162,7 +165,12 @@ final class FsManager
         // if this is a recursive query (e.g. timeline)
         if ($recursive) {
             $root->addMountPoints();
+        }
 
+        // Hide anything that group folder ACLs deny
+        $this->applyGroupFolderAcl($root, $user);
+
+        if ($recursive) {
             // Exclude .nomedia folders
             //
             // This is needed to be done despite the exclusion in the CTE to account
@@ -443,6 +451,69 @@ final class FsManager
         }
 
         return true;
+    }
+
+    /**
+     * Hide files and folders that group folder ACLs deny to the user.
+     * The query applies the rules, see CTEParams::setAcl.
+     *
+     * https://github.com/pulsejet/memories/issues/1301
+     */
+    private function applyGroupFolderAcl(TimelineRoot $root, IUser $user): void
+    {
+        foreach ($root->getMounts() as $mount) {
+            $storage = $mount->getStorage();
+            if (null === $storage || !$storage->instanceOfStorage(ACLStorageWrapper::class)) {
+                continue;
+            }
+
+            // Only in the user's own group folders do the user's rules apply
+            if ('group' !== $mount->getMountType() || null === ($mappings = $this->getAclMappings($user))) {
+                continue;
+            }
+
+            $root->addAclMappings($mappings);
+
+            // The mount root is listed even when it is not readable
+            $cache = $storage->getCache();
+            $rootId = $mount->getStorageRootId();
+            $rootPath = $cache->getPathById($rootId);
+            $rootEntry = null === $rootPath ? false : $cache->get($rootPath);
+            if (false === $rootEntry || !($rootEntry->getPermissions() & Constants::PERMISSION_READ)) {
+                $root->addAclDeniedTop($rootId);
+            }
+        }
+    }
+
+    /**
+     * Get what the group folder ACL rules of a user are matched against.
+     *
+     * @return null|list<array{string, string}> pairs of mapping type and id,
+     *                                          or null if the query cannot apply the rules
+     */
+    private function getAclMappings(IUser $user): ?array
+    {
+        try {
+            // Rules are then merged per mapping first, which the query does not do
+            $config = \OCP\Server::get(\OCP\IAppConfig::class);
+            if ('true' === $config->getValueString('groupfolders', 'acl-inherit-per-user', 'false')) {
+                return null;
+            }
+
+            $manager = \OCP\Server::get(IUserMappingManager::class);
+            $mappings = [];
+            foreach ($manager->getMappingsForUser($user) as $mapping) {
+                // A kind of mapping the query does not know about
+                if (!\in_array($mapping->getType(), ['user', 'group', 'circle'], true)) {
+                    return null;
+                }
+                $mappings[] = [$mapping->getType(), $mapping->getId()];
+            }
+
+            return $mappings;
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /**
