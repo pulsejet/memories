@@ -71,6 +71,13 @@ final class RecognizeBackend extends Backend
             throw \OCA\Memories\Exceptions::NotEnabled('Recognize');
         }
 
+        RecognizePeopleFilter::apply(
+            $query,
+            $this->tq->getBuilder(...),
+            $this->util->getUID(),
+            $this->request->getParam('recognizePeople'),
+        );
+
         // Note: all of this is duplicated in nameToClusterId since we want to avoid
         // making two queries for getting the cluster_id and the actual clusters
         $faceStr = (string) $this->request->getParam('recognize');
