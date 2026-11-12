@@ -103,6 +103,10 @@ final class SystemConfig
         // Path to VIPS binary
         'memories.vips.path' => '',
 
+        // Execute the VIPS binary in place instead of copying it to the temp dir
+        // Useful e.g. with SELinux, where the copy loses its file label
+        'memories.vips.direct' => false,
+
         // Use the built-in VIPS binary for previews
         'memories.vips.enabled' => true,
 

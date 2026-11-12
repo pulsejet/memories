@@ -451,13 +451,17 @@ final class BinExt
     }
 
     /**
-     * Get temp binary for vips.
+     * Get path to vips binary for execution.
      */
     public function getVipsBin(): string
     {
         $path = $this->systemConfig->get('memories.vips.path');
         if (empty($path)) {
             throw new \Exception('vips binary is not configured (run occ maintenance:repair)');
+        }
+
+        if ($this->systemConfig->get('memories.vips.direct')) {
+            return $path;
         }
 
         return $this->getTempBin($path, $this->getName('vips', self::VIPS_VER));
