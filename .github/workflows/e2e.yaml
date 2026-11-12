@@ -121,6 +121,11 @@ jobs:
           --health-retries 5
 
     steps:
+      - name: Disable needrestart
+        run: |
+          sudo mkdir -p /etc/needrestart/conf.d
+          echo '$nrconf{restart} = "l";' | sudo tee /etc/needrestart/conf.d/ci.conf
+
       - name: Checkout server
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -160,17 +165,17 @@ jobs:
             cache: npm
             cache-dependency-path: apps/${{ env.APP_NAME }}/package-lock.json
 
-        - name: Set up php ${{ matrix.php-versions }}
-          uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
-          with:
-            php-version: ${{ matrix.php-versions }}
-            tools: phpunit
-            extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
-            coverage: none
-            ini-values: >-
-              opcache.enable_cli=1,
-              opcache.jit=tracing,
-              opcache.jit_buffer_size=64M
+      - name: Set up php ${{ matrix.php-versions }}
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          tools: phpunit
+          extensions: mbstring, iconv, fileinfo, intl, mysql, pdo_mysql
+          coverage: none
+          ini-values: >-
+            opcache.enable_cli=1,
+            opcache.jit=tracing,
+            opcache.jit_buffer_size=64M
 
       - name: Get Composer cache directory
         id: composer-cache
