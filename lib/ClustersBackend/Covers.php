@@ -85,6 +85,9 @@ final class Covers
             if (CTEParams::hasAcl($query)) {
                 $treeSq->andWhere($treeSq->createFunction(CTEParams::aclReadableClause('cov_cte_f.readable', 'cov_f.fileid')));
             }
+            if (CTEParams::hasExcludedIds($query)) {
+                $treeSq->andWhere($treeSq->createFunction(CTEParams::notExcludedClause($query, 'cov_f.fileid')));
+            }
 
             $clauses[] = SQL::exists($query, $treeSq);
         }

@@ -15,6 +15,7 @@ final class CTEParams
     private const ACL_MAPPINGS = 'cteAcl';
     private const ACL_MAPPING_TYPES = ['user', 'group', 'circle'];
     private const ACL_DENIED_TOPS = 'cteAclDeniedTops';
+    private const EXCLUDED_IDS = 'cteExcludedIds';
 
     private const BLOCKLIST = 'fnBlocklist';
     private const BLOCKLIST_COUNT = 'fnBlocklistCount';
@@ -53,6 +54,29 @@ final class CTEParams
     public static function setFileId(IQueryBuilder &$query, int $id): void
     {
         $query->setParameter(self::FILE_ID, $id, IQueryBuilder::PARAM_INT);
+    }
+
+    /** @param int[] $ids files and folders to exclude, folders with everything in them */
+    public static function setExcludedIds(IQueryBuilder &$query, array $ids): void
+    {
+        if ([] !== $ids) {
+            $query->setParameter(self::EXCLUDED_IDS, array_values($ids), IQueryBuilder::PARAM_INT_ARRAY);
+        }
+    }
+
+    public static function hasExcludedIds(IQueryBuilder $query): bool
+    {
+        return \array_key_exists(self::EXCLUDED_IDS, $query->getParameters());
+    }
+
+    /**
+     * SQL clause matching fileids in column that are not excluded.
+     */
+    public static function notExcludedClause(IQueryBuilder $query, string $column): string
+    {
+        return self::hasExcludedIds($query)
+            ? "({$column} NOT IN (:".self::EXCLUDED_IDS.'))'
+            : '1 = 1';
     }
 
     /**

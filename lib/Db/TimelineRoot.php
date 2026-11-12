@@ -20,6 +20,9 @@ final class TimelineRoot
     /** @var array<int, true> */
     private array $aclDeniedTops = [];
 
+    /** @var array<int, true> */
+    private array $excludedIds = [];
+
     /**
      * Add a folder to the root.
      *
@@ -62,6 +65,43 @@ final class TimelineRoot
                 $this->setFolder($id, null, $path);
             }
         }
+    }
+
+    /**
+     * Add a folder by ID if it is inside one of the folders in the root.
+     */
+    public function addSubfolder(int $id, string $path): void
+    {
+        // Same as mounts, skip anything in hidden folders
+        if (str_contains($path, '/.')) {
+            return;
+        }
+
+        foreach ($this->folderPaths as $folderPath) {
+            if (str_starts_with($path.'/', $folderPath.'/')) {
+                $this->setFolder($id, null, $path);
+
+                return;
+            }
+        }
+    }
+
+    /**
+     * Exclude files and folders (with their subtrees) by ID.
+     *
+     * @param int[] $ids
+     */
+    public function excludeIds(array $ids): void
+    {
+        foreach ($ids as $id) {
+            $this->excludedIds[$id] = true;
+        }
+    }
+
+    /** @return int[] */
+    public function getExcludedIds(): array
+    {
+        return array_keys($this->excludedIds);
     }
 
     /**

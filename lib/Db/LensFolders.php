@@ -41,6 +41,7 @@ final class LensFolders
         $query->select('cte_f.fileid')->from('cte_folders', 'cte_f');
         CTEParams::setTopFolderIds($query, $root->getIds());
         CTEParams::setAcl($query, $root->getAclMappings(), $root->getAclDeniedTops());
+        CTEParams::setExcludedIds($query, $root->getExcludedIds());
         if (CTEParams::hasAcl($query)) {
             $query->where($query->expr()->eq('cte_f.readable', SQL::literal($query, 1, \PDO::PARAM_INT)));
         }
@@ -60,10 +61,12 @@ final class LensFolders
      */
     public function getHiddenFileIds(TimelineRoot $root, array $fileIds): array
     {
+        $excluded = array_values(array_intersect($root->getExcludedIds(), $fileIds));
+
         $query = $this->connection->getQueryBuilder();
         CTEParams::setAcl($query, $root->getAclMappings(), $root->getAclDeniedTops());
         if ([] === $fileIds || !CTEParams::hasAcl($query)) {
-            return [];
+            return $excluded;
         }
 
         // Files with a rule of their own that denies reading
@@ -75,7 +78,7 @@ final class LensFolders
         ;
         $ids = $this->tq->executeQueryWithCTEs($query)->fetchFirstColumn();
 
-        return array_map(static fn (mixed $id) => (int) $id, $ids);
+        return [...$excluded, ...array_map(static fn (mixed $id) => (int) $id, $ids)];
     }
 
     /**

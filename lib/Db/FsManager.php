@@ -34,15 +34,19 @@ use OCA\Memories\Settings\SystemConfig;
 use OCA\Memories\Util;
 use OCP\AppFramework\PublicShareController;
 use OCP\Constants;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Files\File;
+use OCP\Files\FileInfo;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
+use OCP\Files\Mount\IMountPoint;
 use OCP\Files\Node;
 use OCP\Files\NotFoundException;
 use OCP\Files\Search\ISearchBinaryOperator;
 use OCP\Files\Search\ISearchComparison;
 use OCP\ICache;
 use OCP\ICacheFactory;
+use OCP\IDBConnection;
 use OCP\IRequest;
 use OCP\ISession;
 use OCP\IUser;
@@ -65,6 +69,7 @@ final class FsManager
         private IUserManager $userManager,
         private ISession $session,
         private SystemConfig $systemConfig,
+        private IDBConnection $connection,
         ICacheFactory $cacheFactory,
     ) {
         $this->nomediaCache = $cacheFactory->createDistributed('memories:nomedia');
@@ -168,7 +173,7 @@ final class FsManager
         }
 
         // Hide anything that group folder ACLs deny
-        $this->applyGroupFolderAcl($root, $user);
+        $this->applyGroupFolderAcl($root, $recursive, $user);
 
         if ($recursive) {
             // Exclude .nomedia folders
@@ -455,11 +460,11 @@ final class FsManager
 
     /**
      * Hide files and folders that group folder ACLs deny to the user.
-     * The query applies the rules, see CTEParams::setAcl.
+     * The query applies the rules where it can, see CTEParams::setAcl.
      *
      * https://github.com/pulsejet/memories/issues/1301
      */
-    private function applyGroupFolderAcl(TimelineRoot $root, IUser $user): void
+    private function applyGroupFolderAcl(TimelineRoot $root, bool $recursive, IUser $user): void
     {
         foreach ($root->getMounts() as $mount) {
             $storage = $mount->getStorage();
@@ -467,20 +472,89 @@ final class FsManager
                 continue;
             }
 
+            $cache = $storage->getCache();
+
             // Only in the user's own group folders do the user's rules apply
             if ('group' !== $mount->getMountType() || null === ($mappings = $this->getAclMappings($user))) {
+                $this->excludeAclDenied($root, $mount, $cache, $recursive);
+
                 continue;
             }
 
             $root->addAclMappings($mappings);
 
             // The mount root is listed even when it is not readable
-            $cache = $storage->getCache();
             $rootId = $mount->getStorageRootId();
             $rootPath = $cache->getPathById($rootId);
             $rootEntry = null === $rootPath ? false : $cache->get($rootPath);
             if (false === $rootEntry || !($rootEntry->getPermissions() & Constants::PERMISSION_READ)) {
                 $root->addAclDeniedTop($rootId);
+            }
+        }
+    }
+
+    /**
+     * Exclude what the ACLs deny in a mount where the query cannot apply
+     * the rules, e.g. a share from inside a group folder.
+     *
+     * Permissions only change at paths that carry a rule, so only those
+     * and the mount root are checked, through the mount's ACL-aware cache
+     * (the same check getUserFile goes through). Readable folders below
+     * a denied one are added as top folders, since the CTE cannot reach them.
+     */
+    private function excludeAclDenied(TimelineRoot $root, IMountPoint $mount, \OCP\Files\Cache\ICache $cache, bool $recursive): void
+    {
+        $rootId = $mount->getStorageRootId();
+
+        // Paths at or below the mount root with a rule for anyone
+        $query = $this->connection->getQueryBuilder();
+        $ruleIds = $query->selectDistinct('a.fileid')
+            ->from('group_folders_acl', 'a')
+            ->innerJoin('a', 'filecache', 'f', $query->expr()->eq('a.fileid', 'f.fileid'))
+            ->innerJoin('f', 'filecache', 'r', $query->expr()->eq('f.storage', 'r.storage'))
+            ->where($query->expr()->eq('r.fileid', $query->createNamedParameter($rootId, IQueryBuilder::PARAM_INT)))
+            ->andWhere($query->expr()->orX(
+                $query->expr()->eq('f.fileid', 'r.fileid'),
+                $query->expr()->eq('r.path', $query->expr()->literal('')),
+                $query->expr()->like('f.path', $query->func()->concat('r.path', $query->expr()->literal('/%'))),
+            ))
+            ->executeQuery()
+            ->fetchFirstColumn()
+        ;
+
+        // Pairs of [path, fileid]; numeric paths would break as array keys
+        $denied = [];
+        $folders = [];
+
+        foreach ([$rootId, ...$ruleIds] as $id) {
+            $id = (int) $id;
+            if (null === ($path = $cache->getPathById($id))) {
+                continue;
+            }
+
+            // The mount root is listed even when it is not readable
+            $entry = $cache->get($path);
+            if (false === $entry || !($entry->getPermissions() & Constants::PERMISSION_READ)) {
+                $denied[] = [$path, $id];
+            } elseif (FileInfo::MIMETYPE_FOLDER === $entry->getMimeType()) {
+                $folders[] = [$path, $id];
+            }
+        }
+
+        $root->excludeIds(array_column($denied, 1));
+
+        if (!$recursive || [] === $denied) {
+            return;
+        }
+
+        $base = rtrim($mount->getMountPoint(), '/');
+        foreach ($folders as [$path, $id]) {
+            foreach ($denied as [$deniedPath]) {
+                if ('' === $deniedPath || str_starts_with($path, "{$deniedPath}/")) {
+                    $root->addSubfolder($id, "{$base}/{$path}");
+
+                    break;
+                }
             }
         }
     }

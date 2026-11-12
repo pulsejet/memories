@@ -26,13 +26,15 @@ trait TimelineQueryCTE
         $acl = CTEParams::hasAcl($query) ? CTEParams::aclMappingClause($query, 'acl_a') : null;
         if (str_contains($sql, 'cte_folders')) {
             $aclTops = CTEParams::hasAclDeniedTops($query);
+            $excluded = CTEParams::notExcludedClause($query, 'f.fileid');
             $CTE_SQL = CTEParams::isFoldersArchive($query)
-                ? $this->CTE_FOLDERS_ARCHIVE($acl, $aclTops)
+                ? $this->CTE_FOLDERS_ARCHIVE($acl, $aclTops, $excluded)
                 : $this->CTE_FOLDERS(
                     CTEParams::isIncludeHidden($query),
                     CTEParams::getBlocklistCount($query),
                     $acl,
                     $aclTops,
+                    $excluded,
                 );
             $sql = $CTE_SQL.' '.$sql;
         } elseif (str_contains($sql, 'cte_file_parents')) {
@@ -75,8 +77,9 @@ trait TimelineQueryCTE
      * @param int         $blocklistCount Number of blocklist patterns
      * @param null|string $acl            Clause matching the ACL rules of the user, if any apply
      * @param bool        $aclTops        Whether some top folders are not readable (:cteAclDeniedTops)
+     * @param string      $excluded       Clause matching folders that are not excluded
      */
-    protected function CTE_FOLDERS_ALL(bool $hidden, int $blocklistCount, ?string $acl, bool $aclTops): string
+    protected function CTE_FOLDERS_ALL(bool $hidden, int $blocklistCount, ?string $acl, bool $aclTops, string $excluded): string
     {
         $provider = $this->connection->getDatabaseProvider();
 
@@ -128,7 +131,8 @@ trait TimelineQueryCTE
             WHERE (
                 (f.fileid IN (:topFolderIds)) AND
                 ({$CLS_NOMEDIA}) AND
-                (NOT ({$CLS_BLOCKLIST}))
+                (NOT ({$CLS_BLOCKLIST})) AND
+                {$excluded}
             )
 
             UNION ALL
@@ -147,7 +151,8 @@ trait TimelineQueryCTE
             {$ACL_JOIN}
             WHERE (
                 ({$CLS_NOMEDIA}) AND
-                (NOT ({$CLS_BLOCKLIST}))
+                (NOT ({$CLS_BLOCKLIST})) AND
+                {$excluded}
             )
         )";
     }
@@ -159,8 +164,9 @@ trait TimelineQueryCTE
      * @param int         $blocklistCount Number of blocklist patterns
      * @param null|string $acl            Clause matching the ACL rules of the user, if any apply
      * @param bool        $aclTops        Whether some top folders are not readable
+     * @param string      $excluded       Clause matching folders that are not excluded
      */
-    protected function CTE_FOLDERS(bool $hidden, int $blocklistCount, ?string $acl, bool $aclTops): string
+    protected function CTE_FOLDERS(bool $hidden, int $blocklistCount, ?string $acl, bool $aclTops, string $excluded): string
     {
         $CLS_HIDDEN = $hidden ? 'MIN(hidden)' : '0';
 
@@ -175,7 +181,7 @@ trait TimelineQueryCTE
 
         return self::bundleCTEs([
             ...(null !== $acl ? [$this->CTE_ACL($acl)] : []),
-            $this->CTE_FOLDERS_ALL($hidden, $blocklistCount, $acl, $aclTops),
+            $this->CTE_FOLDERS_ALL($hidden, $blocklistCount, $acl, $aclTops, $excluded),
             $cte,
         ]);
     }
@@ -209,10 +215,11 @@ trait TimelineQueryCTE
     /**
      * CTE to get all archive folders recursively in the given top folders.
      *
-     * @param null|string $acl     Clause matching the ACL rules of the user, if any apply
-     * @param bool        $aclTops Whether some top folders are not readable
+     * @param null|string $acl      Clause matching the ACL rules of the user, if any apply
+     * @param bool        $aclTops  Whether some top folders are not readable
+     * @param string      $excluded Clause matching folders that are not excluded
      */
-    protected function CTE_FOLDERS_ARCHIVE(?string $acl, bool $aclTops): string
+    protected function CTE_FOLDERS_ARCHIVE(?string $acl, bool $aclTops, string $excluded): string
     {
         $CLS_READABLE = null !== $acl
             ? 'COALESCE(CASE WHEN acl.rmask = 1 THEN acl.rperm END, c.readable)'
@@ -244,11 +251,12 @@ trait TimelineQueryCTE
                     )
                 )
             {$ACL_JOIN}
+            WHERE {$excluded}
         )";
 
         return self::bundleCTEs([
             ...(null !== $acl ? [$this->CTE_ACL($acl)] : []),
-            $this->CTE_FOLDERS_ALL(true, 0, $acl, $aclTops),
+            $this->CTE_FOLDERS_ALL(true, 0, $acl, $aclTops, $excluded),
             $cte,
         ]);
     }

@@ -245,6 +245,12 @@ trait TimelineQueryDays
         // Group folder ACL rules, applied by the query
         CTEParams::setAcl($query, $root->getAclMappings(), $root->getAclDeniedTops());
 
+        // Files and folders hidden from the user in some other way
+        CTEParams::setExcludedIds($query, $root->getExcludedIds());
+        if (CTEParams::hasExcludedIds($query)) {
+            $query->andWhere($query->createFunction(CTEParams::notExcludedClause($query, 'm.fileid')));
+        }
+
         // Filter by folder (recursive or otherwise)
         if ($recursive) {
             // These are used later by the execution function
