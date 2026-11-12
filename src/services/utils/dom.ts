@@ -36,3 +36,15 @@ export function customEventDetail<T>(event: Event): T | undefined {
   const detail = (event as CustomEvent<T | T[]>).detail;
   return Array.isArray(detail) ? detail[0] : detail;
 }
+
+let _hasWebGL: boolean | undefined;
+
+/** Whether a WebGL context can be created. */
+export function hasWebGL(): boolean {
+  if (_hasWebGL === undefined) {
+    const gl = document.createElement('canvas').getContext('webgl');
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    _hasWebGL = !!gl;
+  }
+  return _hasWebGL;
+}

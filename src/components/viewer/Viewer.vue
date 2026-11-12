@@ -127,7 +127,8 @@ import { t } from '@services/l10n';
 import { constants } from '@services/constants';
 import initstate from '@services/init-state';
 import { makeTapPatch } from '@services/compat/mobile-click';
-import { confirmDestructive } from '@services/utils/dialog';
+import { confirmDestructive, showError } from '@services/utils/dialog';
+import { hasWebGL } from '@services/utils/dom';
 import { cacheData, getCachedData } from '@services/cache';
 import { isAbortError, useAbort } from '@services/utils/abort-vue';
 import { RenewingTimeout } from '@services/utils/renewing-timeout';
@@ -1294,6 +1295,12 @@ async function loadMetadata(photo: IPhoto) {
 async function openEditor() {
   // The editor runs entirely through vips; hide it when unavailable.
   if (!canEdit.value || !config.vips_enabled) return;
+
+  // Make sure WebGL is available.
+  if (!hasWebGL()) {
+    showError(t('memories', 'WebGL is disabled or unsupported in this browser.'));
+    return;
+  }
 
   // Warn before editing Live Photos
   if (isLivePhoto.value) {
