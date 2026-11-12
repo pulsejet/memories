@@ -85,7 +85,7 @@ final class Exif
             $this->initializeStaticExiftoolProc();
             usleep(500000); // wait if error
 
-            if ($this->staticProc && !proc_get_status($this->staticProc)['running']) {
+            if (!$this->staticProc || !proc_get_status($this->staticProc)['running']) {
                 $this->logger->warning('Failed to create stay_open exiftool process', ['app' => Application::APPNAME]);
                 $this->noProc = true;
                 $this->staticProc = null;
@@ -503,9 +503,16 @@ final class Exif
         $proc = proc_open(array_merge($this->getExiftool(), ['-stay_open', 'true', '-@', '-']), [
             0 => ['pipe', 'r'],
             1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
+            2 => ['null'], // undrained pipe would block exiftool
         ], $this->staticPipes);
-        $this->staticProc = \is_resource($proc) ? $proc : null;
+
+        if (!\is_resource($proc)) {
+            $this->staticPipes = null;
+
+            return;
+        }
+
+        $this->staticProc = $proc;
         stream_set_blocking($this->staticPipes[1], false);
     }
 

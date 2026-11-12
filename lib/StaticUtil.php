@@ -346,9 +346,7 @@ class StaticUtil
             }
 
             // Append to buffer
-            if ($contents = stream_get_contents($handle)) {
-                $buffer .= $contents;
-            }
+            $buffer .= (string) stream_get_contents($handle);
         }
 
         throw new \Exception('Timeout');
