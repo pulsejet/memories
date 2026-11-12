@@ -164,7 +164,7 @@ final class LensController extends ApiController
             }
 
             try {
-                $res = $this->clientService->newClient()->post($base.'/v1/search', [
+                $options = $this->lens->daemonOptions([
                     'json' => [
                         'text' => $text,
                         'folders' => $folders,
@@ -173,6 +173,14 @@ final class LensController extends ApiController
                     'timeout' => 10,
                     'nextcloud' => ['allow_local_address' => true],
                 ]);
+            } catch (\RuntimeException) {
+                throw new HttpResponseException(new DataResponse([
+                    'message' => 'Lens daemon token is not configured',
+                ], Http::STATUS_SERVICE_UNAVAILABLE));
+            }
+
+            try {
+                $res = $this->clientService->newClient()->post($base.'/v1/search', $options);
 
                 $body = json_decode((string) $res->getBody(), true);
                 $hits = $body['hits'] ?? [];

@@ -37,11 +37,38 @@ final class Lens
     ) {}
 
     /**
+     * Shared daemon bearer. Same rule as the daemon: 16+ characters, no whitespace.
+     */
+    public static function daemonToken(mixed $token): string
+    {
+        if (!\is_string($token) || \strlen($token) < 16 || 1 === preg_match('/\s/', $token)) {
+            throw new \RuntimeException('memories.lens.token is missing or invalid');
+        }
+
+        return $token;
+    }
+
+    /**
      * Base URL of the Lens daemon with no trailing slash (empty = disabled).
      */
     public function daemonUrl(): string
     {
         return rtrim($this->systemConfig->get('memories.lens.daemon_url'), '/');
+    }
+
+    /**
+     * Add the shared daemon bearer token. Refuses a missing or malformed token.
+     *
+     * @param array<string, mixed> $options
+     *
+     * @return array<string, mixed>
+     */
+    public function daemonOptions(array $options): array
+    {
+        $token = self::daemonToken($this->systemConfig->get('memories.lens.token'));
+        $options['headers']['Authorization'] = 'Bearer '.$token;
+
+        return $options;
     }
 
     /**
@@ -61,14 +88,14 @@ final class Lens
                 return;
             }
 
-            $this->clientService->newClient()->post($base.'/v1/index', [
+            $this->clientService->newClient()->post($base.'/v1/index', $this->daemonOptions([
                 'json' => [
                     'fileid' => $file->getId(),
                     'parent_id' => $file->getParent()->getId(),
                 ],
                 'timeout' => 2,
                 'nextcloud' => ['allow_local_address' => true],
-            ]);
+            ]));
         } catch (\Exception $e) {
             $this->logger->warning('Lens enqueue failed: '.$e->getMessage());
         }
@@ -85,10 +112,13 @@ final class Lens
                 return;
             }
 
-            $this->clientService->newClient()->delete($base.'/v1/index/'.$file->getId().'?async=true', [
-                'timeout' => 2,
-                'nextcloud' => ['allow_local_address' => true],
-            ]);
+            $this->clientService->newClient()->delete(
+                $base.'/v1/index/'.$file->getId().'?async=true',
+                $this->daemonOptions([
+                    'timeout' => 2,
+                    'nextcloud' => ['allow_local_address' => true],
+                ]),
+            );
         } catch (\Exception $e) {
             $this->logger->warning('Lens delete failed: '.$e->getMessage());
         }
