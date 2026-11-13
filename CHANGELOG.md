@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
 - **Feature**: Option to run bundled VIPS in place for SELinux (`memories.vips.direct`) ([#1824](https://github.com/pulsejet/memories/issues/1824))
 - **Fix**: Video quality selector on Safari ([#1826](https://github.com/pulsejet/memories/issues/1826))
 - **Fix**: Sideways portrait videos with transpose enabled.
+- **Fix**: Direct streaming for rotated videos.
+- **Fix**: Auto video quality starts on the direct stream when available.
 - **Fix**: Exiftool timeouts and detection on some glibc systems ([#1814](https://github.com/pulsejet/memories/issues/1814))
 
 ## [v11.1.2] - 2026-11-09
