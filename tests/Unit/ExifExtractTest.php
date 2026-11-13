@@ -568,6 +568,20 @@ final class ExifExtractTest extends TestCase
         self::assertSame(Exif::PANO_SPHERE, self::$exif->getPanoType($res->exif, $w, $h));
     }
 
+    public function testUnknownPano01Video(): void
+    {
+        // Synthetic equirectangular video with Google spherical video metadata (V1)
+        $res = $this->extract('unknown_pano_01.mp4');
+        self::assertSame('video/mp4', $res->exif['MIMEType'] ?? null);
+        self::assertSame('equirectangular', $res->exif['ProjectionType'] ?? null);
+
+        [$w, $h] = self::$exif->getDimensions($res->exif);
+        self::assertSame(640, $w);
+        self::assertSame(320, $h);
+
+        self::assertSame(Exif::PANO_SPHERE, self::$exif->getPanoType($res->exif, $w, $h));
+    }
+
     public function testSonyE566301(): void
     {
         // Sony Xperia M5 photo with no coordinates and local time only (no timezone info).
