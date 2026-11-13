@@ -534,10 +534,6 @@ class VideoContentSetup {
 
       const { width, height, content } = e;
 
-      // Video size as CSS vars (used until fully-opened goes full viewport)
-      content.element?.style.setProperty('--vw', `${width}px`);
-      content.element?.style.setProperty('--vh', `${height}px`);
-
       // override placeholder size, so it more accurately matches the video
       const phStyle = content.placeholder?.element?.style;
       if (phStyle) {

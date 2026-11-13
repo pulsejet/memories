@@ -3,11 +3,7 @@
 .memories-viewer {
   .video-container {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: var(--vw, 100%);
-    height: var(--vh, 100%);
+    inset: 0;
     align-items: center;
     justify-content: center;
     display: none;
@@ -45,15 +41,9 @@
     }
   }
 
-  // Full-viewport player once fully opened; the opening transition
-  // uses the video-sized box. The mirror transform assumes this layout.
+  // Player is only shown once fully opened.
   &.fully-opened {
     .video-container {
-      left: 0;
-      top: 0;
-      transform: none;
-      width: 100%;
-      height: 100%;
       display: flex;
 
       // Bottom gradient for videos. Lives in the slide above video,
