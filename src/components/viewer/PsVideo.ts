@@ -638,14 +638,20 @@ class VideoContentSetup {
     }
   }
 
-  /** Start at the admin default quality ('-1' = original). */
+  /** Pin the admin default quality ('-1' = original); auto starts on the stream copy. */
   private pickInitialLevel(hls: Hls) {
-    const spec = config.video_default_quality;
-    if (!spec || spec === '0') return;
+    const spec = config.video_default_quality || '0';
 
     const applyLevel = () => {
       const levels = hls.levels;
       if (!levels?.length) return;
+
+      // ABR stays on to switch down, but rarely climbs to the copy.
+      if (spec === '0') {
+        const direct = levels.findIndex((l) => /\/direct\.m3u8(\?|$)/.test(l.uri));
+        if (direct !== -1) hls.startLevel = direct;
+        return;
+      }
 
       let idx = levels.length - 1;
       if (spec !== '-1') {
