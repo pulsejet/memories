@@ -7,12 +7,12 @@ namespace OCA\Memories\Tests\Unit;
 use OCA\Memories\Exif;
 use OCA\Memories\Tests\Injected;
 use OCA\Memories\Tests\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * @internal
- *
- * @covers \OCA\Memories\Exif
  */
+#[CoversClass(Exif::class)]
 final class ExifDateParseTest extends TestCase
 {
     #[Injected]

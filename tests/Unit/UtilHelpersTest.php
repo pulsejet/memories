@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace OCA\Memories\Tests\Unit;
 
+use OCA\Memories\StaticUtil;
 use OCA\Memories\Tests\TestCase;
 use OCA\Memories\Util;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * @internal
- *
- * @covers \OCA\Memories\StaticUtil
  */
+#[CoversClass(StaticUtil::class)]
 final class UtilHelpersTest extends TestCase
 {
     public function testSanitizePath(): void

@@ -6,12 +6,12 @@ namespace OCA\Memories\Tests\Unit;
 
 use OCA\Memories\Command\MigrateGoogleTakeout;
 use OCA\Memories\Tests\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * @internal
- *
- * @covers \OCA\Memories\Command\MigrateGoogleTakeout
  */
+#[CoversClass(MigrateGoogleTakeout::class)]
 final class MigrateGoogleTakeoutTest extends TestCase
 {
     public function testFullMetadata(): void

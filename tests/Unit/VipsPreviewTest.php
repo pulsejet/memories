@@ -12,13 +12,13 @@ use OCP\Files\File;
 use OCP\Files\Storage\IStorage;
 use OCP\IConfig;
 use OCP\Image;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * @internal
- *
- * @covers \OCA\Memories\Preview\Vips
- * @covers \OCA\Memories\Service\BinExt
  */
+#[CoversClass(Vips::class)]
+#[CoversClass(BinExt::class)]
 final class VipsPreviewTest extends TestCase
 {
     #[Injected]

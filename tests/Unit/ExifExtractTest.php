@@ -9,6 +9,7 @@ use OCA\Memories\Exif;
 use OCA\Memories\Service\BinExt;
 use OCA\Memories\Tests\Injected;
 use OCA\Memories\Tests\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * @internal
@@ -35,10 +36,9 @@ final class ExtractResult
  *   to ensure compatibility across different manufacturers and metadata formats.
  *
  * @internal
- *
- * @covers \OCA\Memories\Db\LivePhoto
- * @covers \OCA\Memories\Exif
  */
+#[CoversClass(LivePhoto::class)]
+#[CoversClass(Exif::class)]
 final class ExifExtractTest extends TestCase
 {
     #[Injected]
