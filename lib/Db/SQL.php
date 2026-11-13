@@ -291,6 +291,8 @@ final class SQL
 
     /**
      * Copy data from a file into a PostgreSQL table using PDO.
+     *
+     * @psalm-suppress RedundantCondition
      */
     public static function pgsqlCopyFromFile(\PDO $pdo, string $table, string $file, string $fields = ''): void
     {
