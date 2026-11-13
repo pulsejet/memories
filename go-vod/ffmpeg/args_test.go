@@ -481,6 +481,10 @@ func TestBuildArgsCopy(t *testing.T) {
 
 	s.CodecName = "hevc"
 	require.Contains(t, cmd(s, BuildArgs(s)), `"-c:v" copy "-tag:v" hvc1`)
+
+	// Copies keep the source display matrix.
+	s.UseTranspose, s.Rotation = true, 90
+	require.NotContains(t, cmd(s, BuildArgs(s)), "-display_rotation")
 }
 
 func TestSegmentArgsCopy(t *testing.T) {

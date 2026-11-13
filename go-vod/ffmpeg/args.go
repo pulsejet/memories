@@ -199,7 +199,7 @@ func BuildArgs(s Spec) []string {
 		args = append(args, "-hwaccel_output_format", hwaccel)
 	}
 
-	if s.UseTranspose {
+	if s.UseTranspose && cv != EncoderCopy {
 		args = append(args, "-noautorotate", "-display_rotation", "0")
 	}
 

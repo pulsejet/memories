@@ -108,10 +108,9 @@ func TestManagerCopyPlayableCodecs(t *testing.T) {
 }
 
 func TestServeFullVideoPlayableCodec(t *testing.T) {
-	probe := `{"streams":[{"codec_type":"video","codec_name":"hevc","width":1280,"height":720,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000","side_data_list":[{"side_data_type":"Display Matrix","rotation":90}]}],"format":{}}`
 	cfg := config.Defaults("test")
 	cfg.TempDir = t.TempDir()
-	cfg.FFprobe = stubCopyProbe(t, probe, "", false)
+	cfg.FFprobe = stubCopyProbe(t, hevcProbeJSON, "", false)
 
 	m, err := NewManager(NewManagerArgs{
 		C:             cfg,
@@ -122,24 +121,25 @@ func TestServeFullVideoPlayableCodec(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(m.Destroy)
 
-	// Rotated HEVC is not copy-eligible for HLS, but a playable codec
-	// signals PHP to stream the original for progressive MP4: 204 with
-	// the header, no body, and no upstream fetch.
-	require.True(t, m.HasStream(QUALITY_MAX))
+	// A playable codec signals PHP to stream the original for
+	// progressive MP4: 204 with the header, no body, and no upstream fetch.
+	require.True(t, m.HasStream(QUALITY_DIRECT))
 	w := httptest.NewRecorder()
-	m.ServeFullVideo(w, httptest.NewRequest("GET", "/max.mp4", nil), QUALITY_MAX)
+	m.ServeFullVideo(w, httptest.NewRequest("GET", "/direct.mp4", nil), QUALITY_DIRECT)
 	require.Equal(t, http.StatusNoContent, w.Code)
 	require.Equal(t, "1", w.Header().Get(StreamOriginalHeader))
 	require.Empty(t, w.Body.String())
 }
 
-func TestManagerCopyDisabledRotation(t *testing.T) {
+func TestManagerCopyRotated(t *testing.T) {
 	probe := `{"streams":[{"codec_type":"video","codec_name":"h264","width":720,"height":1280,"avg_frame_rate":"30/1","duration":"10","bit_rate":"1000000","side_data_list":[{"side_data_type":"Display Matrix","rotation":90}]}],"format":{}}`
 	m := newCopyManager(t, probe, "0.000000,K__\n4.000000,K__\n8.000000,K__\n", false, nil)
 
-	_, ok := m.CopySegments()
-	require.False(t, ok)
-	require.False(t, m.HasStream(QUALITY_DIRECT))
+	require.True(t, m.IsCopyEligible())
+	require.True(t, m.HasStream(QUALITY_DIRECT))
+	segs, ok := m.EnsureCopySegments()
+	require.True(t, ok)
+	require.Equal(t, 3, len(segs))
 }
 
 func TestManagerCopyKeyframeFailure(t *testing.T) {

@@ -79,7 +79,7 @@ type Manager struct {
 	// closeBridgeFile releases the file in bridge workers on Destroy.
 	closeBridgeFile func()
 
-	// copyEligible is set from the base probe (playable codec, no rotation)
+	// copyEligible is set from the base probe (playable fMP4 codec)
 	// and is immutable after creation. It only says keyframes are worth trying.
 	copyEligible bool
 
@@ -544,10 +544,10 @@ func (m *Manager) ffprobe() error {
 		StoreCachedProbe(m.c.CacheDir(), m.fileid, m.etag, m.probe)
 	}
 
-	// Copy eligibility is cheap (codec + rotation); keyframes come later
+	// Copy eligibility is cheap (codec only); keyframes come later
 	// via EnsureCopySegments on direct.m3u8, so creation stays fast.
-	m.copyEligible = m.probe.Rotation == 0 && IsCodecPlayable(m.probe.CodecName, m.playableCodecs) &&
-		IsCodecFMP4(m.probe.CodecName)
+	// fMP4 keeps the display matrix, so rotated sources copy too.
+	m.copyEligible = IsCodecPlayable(m.probe.CodecName, m.playableCodecs) && IsCodecFMP4(m.probe.CodecName)
 
 	return nil
 }
