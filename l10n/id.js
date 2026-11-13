@@ -116,6 +116,7 @@ OC.L10N.register(
     "Ascending" : "Naik",
     "Newest first" : "Terbaru",
     "Descending" : "Menurun",
+    "Share album" : "Bagikan album",
     "Unassigned faces" : "Wajah yang belum ditetapkan",
     "Merge with different person" : "Gabungkan dengan orang yang berbeda",
     "Home" : "Beranda",

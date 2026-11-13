@@ -80,6 +80,7 @@
     "Setup" : "Configuracion",
     "Yes" : "Òc",
     "No" : "Non",
+    "Choose {file}" : "Causir {file}",
     "Choose" : "Causir"
 },"pluralForm" :"nplurals=2; plural=(n > 1);"
 }

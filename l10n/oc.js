@@ -82,6 +82,7 @@ OC.L10N.register(
     "Setup" : "Configuracion",
     "Yes" : "Òc",
     "No" : "Non",
+    "Choose {file}" : "Causir {file}",
     "Choose" : "Causir"
 },
 "nplurals=2; plural=(n > 1);");
