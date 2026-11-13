@@ -1,13 +1,17 @@
 import { API } from '@services/API';
 import { translate as t } from '@services/l10n';
+import { config } from '@services/user-config';
+import { getWebPlayer } from './PsVideo';
 
-import type { Viewer as PhotoSphereViewer } from '@photo-sphere-viewer/core';
+import type { Viewer as PhotoSphereViewer, ViewerConfig } from '@photo-sphere-viewer/core';
+import type PsVideo from './PsVideo';
 import type { PsContent, PsPhotoSwipe } from './types';
 
 export default class PhotoSphereContentSetup {
   private viewer: PhotoSphereViewer | null = null;
   private container: HTMLElement | null = null;
   private content: PsContent | null = null;
+  private video: HTMLVideoElement | null = null;
 
   /** Photos the user explicitly closed the sphere for */
   private dismissed = new Set<number>();
@@ -17,7 +21,13 @@ export default class PhotoSphereContentSetup {
   private tapY = 0;
   private tapT = 0;
 
-  constructor(private lightbox: PsPhotoSwipe) {
+  constructor(
+    private lightbox: PsPhotoSwipe,
+    psVideo: PsVideo,
+  ) {
+    // Videos open once their player is mounted, since the sphere draws from it.
+    psVideo.onWebPlayerMount = (content) => this.autoOpen(content);
+
     lightbox.on('contentActivate', (e) => this.onContentActivate((e as unknown as { content: PsContent }).content));
     lightbox.on('contentDeactivate', (e) => this.onContentEnd((e as unknown as { content: PsContent }).content));
     lightbox.on('contentDestroy', (e) => this.onContentEnd((e as unknown as { content: PsContent }).content));
@@ -33,7 +43,7 @@ export default class PhotoSphereContentSetup {
     }
 
     const content = this.lightbox.currSlide?.content as unknown as PsContent | undefined;
-    if (!content || content.data?.type === 'video') return;
+    if (!content) return;
     if ((content.data?.photo?.pano ?? 0) <= 0) return;
 
     this.dismissed.delete(content.data.photo.fileid);
@@ -42,7 +52,10 @@ export default class PhotoSphereContentSetup {
 
   private onContentActivate(content: PsContent): void {
     if (this.content && this.content !== content) this.close();
-    if (content.data?.type === 'video') return;
+    if (content.data?.type !== 'video') this.autoOpen(content);
+  }
+
+  private autoOpen(content: PsContent): void {
     const photo = content.data?.photo;
     if (!photo || photo.pano !== 2) return;
     if (this.dismissed.has(photo.fileid)) return;
@@ -61,17 +74,25 @@ export default class PhotoSphereContentSetup {
     const photo = content.data?.photo;
     if (!holder || !photo) return;
 
+    // A video is drawn from its web player, mounted with the controls above the sphere.
+    const isVideo = content.data.type === 'video';
+    const video = isVideo ? getWebPlayer(content) : null;
+    const parent = isVideo ? content.element : holder;
+    if (isVideo && !video) return;
+
     try {
-      const { Viewer, VisibleRangePlugin } = await import('./PsPhotoSphereLib');
+      const { Viewer, VisibleRangePlugin, EquirectangularVideoAdapter, VideoPlugin } =
+        await import('./PsPhotoSphereLib');
 
       if (this.viewer) return;
       if (this.dismissed.has(photo.fileid)) return;
       if (content.slide !== this.lightbox.currSlide || !holder.isConnected) return;
+      if (!parent?.isConnected || (isVideo && getWebPlayer(content) !== video)) return;
       this.close();
 
       // Create the photosphere container.
       const container = document.createElement('div');
-      container.className = 'memories-photosphere';
+      container.className = video ? 'memories-photosphere memories-photosphere--video' : 'memories-photosphere';
 
       // Hide sphere gestures from PhotoSwipe so drags can't navigate;
       // taps are reimplemented in onTapEnd for control toggling.
@@ -80,28 +101,65 @@ export default class PhotoSphereContentSetup {
       container.addEventListener('pointercancel', this.onTapCancel.bind(this));
       container.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
 
-      // Add the container to the slide holder.
-      holder.appendChild(container);
+      // Add the container to the slide.
+      parent.appendChild(container);
+
+      const source: Partial<ViewerConfig> = video
+        ? {
+            adapter: [EquirectangularVideoAdapter, { muted: video.muted }],
+            panorama: { source: video },
+            // Memories' own controls drive the player.
+            plugins: [[VideoPlugin, { progressbar: false, bigbutton: false }]],
+          }
+        : {
+            panorama: API.IMAGE_DECODABLE(photo.fileid, photo.etag),
+            // A partial panorama covers only part of the sphere, and the default
+            // view may be outside it; keep the view on the image.
+            plugins: [[VisibleRangePlugin, { usePanoData: true }]],
+            // The plugin's left/right range ignores the GPano compass heading,
+            // which turns the sphere, so a crop narrower than 360° with a heading
+            // would be limited to the wrong part of it. Drop the heading there;
+            // without a compass it only decides which way the view starts.
+            panoData: (_image, xmpData) => {
+              const narrow = !!xmpData?.croppedWidth && xmpData.croppedWidth < xmpData.fullWidth;
+              return narrow ? { ...xmpData, poseHeading: 0 } : xmpData!;
+            },
+          };
 
       this.viewer = new Viewer({
         container,
-        panorama: API.IMAGE_DECODABLE(photo.fileid, photo.etag),
         loadingTxt: t('memories', 'Loading …'),
         navbar: false,
-        // A partial panorama covers only part of the sphere, and the default
-        // view may be outside it; keep the view on the image.
-        plugins: [[VisibleRangePlugin, { usePanoData: true }]],
-        // The plugin's left/right range ignores the GPano compass heading,
-        // which turns the sphere, so a crop narrower than 360° with a heading
-        // would be limited to the wrong part of it. Drop the heading there;
-        // without a compass it only decides which way the view starts.
-        panoData: (_image, xmpData) => {
-          const narrow = !!xmpData?.croppedWidth && xmpData.croppedWidth < xmpData.fullWidth;
-          return narrow ? { ...xmpData, poseHeading: 0 } : xmpData!;
-        },
+        ...source,
       });
       this.container = container;
       this.content = content;
+      this.video = video;
+
+      if (video) {
+        // The adapter waits for loadedmetadata, which a loaded player has
+        // already fired; it starts listening in the constructor, so repeat it.
+        if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+          video.dispatchEvent(new Event('loadedmetadata'));
+        }
+
+        // The adapter sets full volume when it takes the player; restore the user's.
+        // The texture updates only when a new frame is presented, which a paused
+        // player never does; seeking in place presents the current one.
+        this.viewer.addEventListener(
+          'panorama-loaded',
+          () => {
+            video.volume = config.video_volume;
+            video.muted = config.video_muted;
+            if (video.paused) video.currentTime = video.currentTime;
+          },
+          { once: true },
+        );
+
+        // PsVideo handles Space; the plugin sees every key and would toggle it back.
+        const plugin = this.viewer.getPlugin(VideoPlugin) as unknown as EventListenerObject;
+        this.viewer.removeEventListener('key-press', plugin);
+      }
 
       // Disable the native image when sphere is active.
       if (content.slide) {
@@ -115,6 +173,12 @@ export default class PhotoSphereContentSetup {
   }
 
   public close(): void {
+    // The adapter removes the player it was given; put it back for the flat view.
+    const video = this.video;
+    const videoParent = video?.parentNode;
+    const videoNext = video?.nextSibling ?? null;
+    const playing = !!video && !video.paused;
+
     try {
       this.viewer?.destroy();
     } catch {
@@ -123,6 +187,12 @@ export default class PhotoSphereContentSetup {
     this.container?.remove();
     this.viewer = null;
     this.container = null;
+    this.video = null;
+
+    if (video && videoParent && video.parentNode !== videoParent) {
+      videoParent.insertBefore(video, videoNext);
+      if (playing) video.play().catch(() => {});
+    }
 
     // Re-enable the native image when sphere is closed.
     if (this.content) {

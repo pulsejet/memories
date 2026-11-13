@@ -28,5 +28,10 @@
     .psv-loader-text {
       color: #fff;
     }
+
+    // The video controls above show their own play button and spinner.
+    &--video .psv-loader {
+      display: none;
+    }
   }
 }
