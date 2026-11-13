@@ -189,7 +189,8 @@ onMounted(onVolumeChange);
 
     &:focus-visible {
       outline: 2px solid #fff;
-      outline-offset: 4px;
+      outline-offset: 0;
+      border-radius: 6px;
     }
   }
 
@@ -197,7 +198,6 @@ onMounted(onVolumeChange);
   .m-vc-volume:focus-within & {
     max-width: 96px;
     opacity: 1;
-    padding: 6px; // Room for the focus outline inside overflow: hidden
   }
 
   &:hover {
