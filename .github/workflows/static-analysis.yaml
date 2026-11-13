@@ -77,7 +77,7 @@ jobs:
         if: ${{ ! cancelled() }}
         working-directory: apps/memories
         run: |
-          vendor/bin/psalm --no-cache --shepherd --stats --threads=max lib
+          vendor/bin/psalm --no-cache --shepherd --stats --threads=max --show-info=true
 
   vue-lint:
     name: Vue Lint
