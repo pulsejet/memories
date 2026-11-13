@@ -133,7 +133,7 @@ func Encoder(s Spec) string {
 // -init_hw_device/-filter_hw_device, required since ffmpeg 8), -noautorotate
 // with -display_rotation 0 when transposing manually, persistent http
 // connections with bounded reconnects, service auth
-// headers for the http input, input with -copyts/+genpts (post-seek timing
+// headers for the http input, input with -copyts (post-seek timing
 // still refers to source timestamps), the -vf graph as a staged pipeline:
 // normalize into the encode domain (8-bit convert, plus hardware upload
 // on HW backends),
@@ -208,7 +208,6 @@ func BuildArgs(s Spec) []string {
 	args = append(args,
 		"-i", s.Input,
 		"-copyts",
-		"-fflags", "+genpts",
 	)
 
 	if cv != EncoderCopy {

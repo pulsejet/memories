@@ -518,7 +518,6 @@ func TestSegmentTimestamps(t *testing.T) {
 			require.Equal(t, "9.000000", args[slices.Index(args, "-ss")+1])
 			require.Equal(t, "3", args[slices.Index(args, "-start_number")+1])
 			require.Contains(t, args, "-copyts")
-			require.Equal(t, "+genpts", args[slices.Index(args, "-fflags")+1])
 			require.Equal(t, "disabled", args[slices.Index(args, "-avoid_negative_ts")+1])
 		}
 	}
