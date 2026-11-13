@@ -38,6 +38,7 @@ import NcTextField from '@nextcloud/vue/components/NcTextField';
 import ClusterGrid from '@components/ClusterGrid.vue';
 
 import { t } from '@services/l10n';
+import { useRouteIs } from '@services/route-is';
 import * as dav from '@services/dav';
 import * as utils from '@services/utils/common';
 
@@ -51,6 +52,10 @@ defineOptions({
 
 const props = defineProps<{
   plus?: boolean;
+  /** User whose faces to list (defaults to the current route) */
+  user?: string;
+  /** Face names to hide (defaults to the current route) */
+  exclude?: string[];
 }>();
 
 const emit = defineEmits<{
@@ -63,9 +68,10 @@ const list = ref<IFace[] | null>(null);
 const fuse = ref<Fuse<IFace> | null>(null);
 const search = ref(String());
 
-const user = computed(() => route.params.user?.toString());
-const name = computed(() => route.params.name?.toString());
-const backend = computed(() => route.name as 'recognize' | 'facerecognition');
+const routeIs = useRouteIs();
+const user = computed(() => props.user ?? route.params.user?.toString());
+const exclude = computed(() => props.exclude ?? [route.params.name?.toString()]);
+const backend = computed(() => (routeIs.FaceRecognition ? 'facerecognition' : 'recognize'));
 
 const filteredList = computed(() => {
   if (!list.value || !search.value || !fuse.value) return list.value ?? [];
@@ -80,7 +86,9 @@ async function refresh() {
   try {
     list.value = null;
     const faces = await dav.getFaceList(backend.value);
-    list.value = faces.filter((c: IFace) => c.user_id === user.value && String(c.name || c.cluster_id) !== name.value);
+    list.value = faces.filter(
+      (c: IFace) => c.user_id === user.value && !exclude.value.includes(String(c.name || c.cluster_id)),
+    );
     fuse.value = markRaw(new Fuse(list.value, { keys: ['name'] }));
   } catch (e) {
     showError(t('memories', 'Failed to load faces'));

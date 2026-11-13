@@ -1,60 +1,88 @@
 <template>
   <div class="face-top-matter">
-    <NcActions v-if="name">
-      <NcActionButton :aria-label="t('memories', 'Back')" @click="back()">
-        {{ t('memories', 'Back') }}
-        <template #icon> <BackIcon :size="20" /> </template>
-      </NcActionButton>
-    </NcActions>
+    <template v-if="selected.length">
+      <NcActions>
+        <NcActionButton :aria-label="t('memories', 'Cancel')" @click="selected = []">
+          {{ t('memories', 'Cancel') }}
+          <template #icon> <CloseIcon :size="20" /> </template>
+        </NcActionButton>
+      </NcActions>
 
-    <div class="name">
-      <div :class="{ 'rename-hover': isReal }" @click="rename">
-        {{ displayName }}
+      <div class="name">
+        {{ n('memories', '{n} selected', '{n} selected', selected.length, { n: selected.length }) }}
       </div>
-    </div>
 
-    <div class="right-actions">
-      <NcActions :inline="0">
-        <!-- root view (not cluster or unassigned) -->
-        <template v-if="!name && routeIs.Recognize && !routeIs.RecognizeUnassigned">
-          <NcActionButton :aria-label="t('memories', 'Unassigned faces')" @click="openUnassigned" close-after-click>
-            {{ t('memories', 'Unassigned faces') }}
-            <template #icon> <UnassignedIcon :size="20" /> </template>
-          </NcActionButton>
-        </template>
-
-        <!-- real cluster -->
-        <template v-if="isReal">
-          <NcActionButton :aria-label="t('memories', 'Rename person')" @click="rename" close-after-click>
-            {{ t('memories', 'Rename person') }}
-            <template #icon> <EditIcon :size="20" /> </template>
-          </NcActionButton>
+      <div class="right-actions">
+        <NcActions :inline="1">
           <NcActionButton
             :aria-label="t('memories', 'Merge with different person')"
-            @click="mergeModal?.open()"
+            @click="mergeModal?.open(selected as IFace[])"
             close-after-click
           >
             {{ t('memories', 'Merge with different person') }}
             <template #icon> <MergeIcon :size="20" /> </template>
           </NcActionButton>
-          <NcActionCheckbox
-            :aria-label="t('memories', 'Mark person in preview')"
-            :model-value="config.show_face_rect"
-            @change="changeShowFaceRect"
-          >
-            {{ t('memories', 'Mark person in preview') }}
-          </NcActionCheckbox>
-          <NcActionButton :aria-label="t('memories', 'Remove person')" @click="deleteModal?.open()" close-after-click>
-            {{ t('memories', 'Remove person') }}
-            <template #icon> <DeleteIcon :size="20" /> </template>
-          </NcActionButton>
-        </template>
+        </NcActions>
+      </div>
+    </template>
+
+    <template v-else>
+      <NcActions v-if="name">
+        <NcActionButton :aria-label="t('memories', 'Back')" @click="back()">
+          {{ t('memories', 'Back') }}
+          <template #icon> <BackIcon :size="20" /> </template>
+        </NcActionButton>
       </NcActions>
-    </div>
+
+      <div class="name">
+        <div :class="{ 'rename-hover': isReal }" @click="rename">
+          {{ displayName }}
+        </div>
+      </div>
+
+      <div class="right-actions">
+        <NcActions :inline="0">
+          <!-- root view (not cluster or unassigned) -->
+          <template v-if="!name && routeIs.Recognize && !routeIs.RecognizeUnassigned">
+            <NcActionButton :aria-label="t('memories', 'Unassigned faces')" @click="openUnassigned" close-after-click>
+              {{ t('memories', 'Unassigned faces') }}
+              <template #icon> <UnassignedIcon :size="20" /> </template>
+            </NcActionButton>
+          </template>
+
+          <!-- real cluster -->
+          <template v-if="isReal">
+            <NcActionButton :aria-label="t('memories', 'Rename person')" @click="rename" close-after-click>
+              {{ t('memories', 'Rename person') }}
+              <template #icon> <EditIcon :size="20" /> </template>
+            </NcActionButton>
+            <NcActionButton
+              :aria-label="t('memories', 'Merge with different person')"
+              @click="mergeModal?.open()"
+              close-after-click
+            >
+              {{ t('memories', 'Merge with different person') }}
+              <template #icon> <MergeIcon :size="20" /> </template>
+            </NcActionButton>
+            <NcActionCheckbox
+              :aria-label="t('memories', 'Mark person in preview')"
+              :model-value="config.show_face_rect"
+              @change="changeShowFaceRect"
+            >
+              {{ t('memories', 'Mark person in preview') }}
+            </NcActionCheckbox>
+            <NcActionButton :aria-label="t('memories', 'Remove person')" @click="deleteModal?.open()" close-after-click>
+              {{ t('memories', 'Remove person') }}
+              <template #icon> <DeleteIcon :size="20" /> </template>
+            </NcActionButton>
+          </template>
+        </NcActions>
+      </div>
+    </template>
 
     <FaceEditModal ref="editModal" />
     <FaceDeleteModal ref="deleteModal" />
-    <FaceMergeModal ref="mergeModal" />
+    <FaceMergeModal ref="mergeModal" @merged="selection?.refresh()" />
   </div>
 </template>
 
@@ -69,19 +97,23 @@ import NcActionCheckbox from '@nextcloud/vue/components/NcActionCheckbox';
 import FaceEditModal from '@components/modal/FaceEditModal.vue';
 import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';
 import FaceMergeModal from '@components/modal/FaceMergeModal.vue';
+import { useClusterSelection } from '@components/cluster-selection';
 
 import { useRouteIs } from '@services/route-is';
 import { routes } from '@services/router';
 import { config, setConfig } from '@services/user-config';
 import * as utils from '@services/utils/common';
 import { constants } from '@services/constants';
-import { t } from '@services/l10n';
+import { t, n } from '@services/l10n';
 
 import BackIcon from 'vue-material-design-icons/ArrowLeft.vue';
 import EditIcon from 'vue-material-design-icons/Pencil.vue';
 import DeleteIcon from 'vue-material-design-icons/Close.vue';
 import MergeIcon from 'vue-material-design-icons/Merge.vue';
 import UnassignedIcon from 'vue-material-design-icons/AccountQuestion.vue';
+import CloseIcon from 'vue-material-design-icons/Close.vue';
+
+import type { IFace } from '@typings';
 
 defineOptions({
   name: 'FaceTopMatter',
@@ -93,6 +125,12 @@ const routeIs = useRouteIs();
 const editModal = useTemplateRef<InstanceType<typeof FaceEditModal>>('editModal');
 const deleteModal = useTemplateRef<InstanceType<typeof FaceDeleteModal>>('deleteModal');
 const mergeModal = useTemplateRef<InstanceType<typeof FaceMergeModal>>('mergeModal');
+const selection = useClusterSelection();
+
+const selected = computed({
+  get: () => selection?.items.value ?? [],
+  set: (value) => selection && (selection.items.value = value),
+});
 
 const name = computed(() => {
   return route.params.name?.toString() || '';

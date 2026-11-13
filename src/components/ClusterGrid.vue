@@ -21,7 +21,16 @@
 
     <template v-slot="{ item }">
       <div class="grid-item fill-block">
-        <Cluster :data="item" :link="link" :counters="counters" @click="click(item)" />
+        <Cluster
+          :data="item"
+          :link="link"
+          :counters="counters"
+          :selectable="!!selection"
+          :selecting="!!selection?.length"
+          :selected="!!selection?.some((s) => s.cluster_id === item.cluster_id)"
+          @click="click(item)"
+          @select="emit('select', item)"
+        />
       </div>
     </template>
   </RecycleScroller>
@@ -49,6 +58,8 @@ const props = withDefaults(
     plus?: boolean;
     focus?: boolean;
     loading?: boolean;
+    /** Selected clusters; enables selection if set */
+    selection?: ICluster[];
   }>(),
   {
     maxSize: 180,
@@ -62,6 +73,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   click: [item: ICluster];
+  select: [item: ICluster];
   plus: [];
 }>();
 const recycler = useTemplateRef<VueRecyclerType>('recycler');
