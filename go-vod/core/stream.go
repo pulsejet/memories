@@ -421,10 +421,10 @@ func (s *Stream) transcode(startId int) {
 		if startId >= len(segs) {
 			startId = len(segs) - 1
 		}
-		startNumber = startId
+		startNumber = max(startId-1, 0)
 		startAt = 0
-		if startId > 0 {
-			startAt = segs[startId].Start + copySeekEpsilon
+		if startNumber > 0 {
+			startAt = segs[startNumber].Start + copySeekEpsilon
 		}
 	} else if startId > 0 {
 		// Start one frame before.
