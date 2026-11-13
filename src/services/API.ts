@@ -21,6 +21,7 @@ function tok(url: string) {
 export const enum DaysFilterType {
   FAVORITES = 'fav',
   VIDEOS = 'vid',
+  IMAGES = 'img',
   PANO = 'pano',
   FOLDER = 'folder',
   ARCHIVE = 'archive',
@@ -102,8 +103,8 @@ export class API {
     return gen(`${BASE}/clusters/places`);
   }
 
-  static TAG_LIST() {
-    return gen(`${BASE}/clusters/tags`);
+  static TAG_LIST(folder?: string) {
+    return API.Q(gen(`${BASE}/clusters/tags`), { folder });
   }
 
   static TAG_SET(fileid: string | number) {

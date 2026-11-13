@@ -38,6 +38,11 @@ trait TimelineQueryFilters
         $query->andWhere($query->expr()->eq('m.isvideo', $query->expr()->literal(1)));
     }
 
+    public function transformImageFilter(IQueryBuilder &$query, bool $aggregate): void
+    {
+        $query->andWhere($query->expr()->eq('m.isvideo', $query->expr()->literal(0)));
+    }
+
     public function transformPanoFilter(IQueryBuilder &$query, bool $aggregate): void
     {
         $query->andWhere($query->expr()->neq('m.pano', $query->expr()->literal(0)));
