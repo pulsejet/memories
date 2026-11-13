@@ -237,12 +237,6 @@ class VideoContentSetup {
     return utils.runCatching(() => new URL(api, window.location.href).href);
   }
 
-  /** Native HLS support, Safari-only (Chrome's native HLS has bugs). */
-  private canPlayHls(player: HTMLVideoElement): boolean {
-    if (!player.canPlayType('application/vnd.apple.mpegurl')) return false;
-    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  }
-
   private async initPlayer(content: VideoContent) {
     // Slide may have been destroyed while waiting for activation
     if (!isVideoContent(content) || content.videoPlayer || !content.element || !content.slide?.isActive) {
@@ -395,16 +389,7 @@ class VideoContentSetup {
     player.removeAttribute('src');
     player.innerHTML = '';
 
-    // Native HLS (Safari): no hls.js needed.
-    if (this.canPlayHls(player)) {
-      player.src = url;
-      if (config.video_autoplay === 'true') {
-        player.load();
-      }
-      return;
-    }
-
-    // Ge the hls.js module (async chunk load).
+    // Get the hls.js module (async chunk load).
     const mod = await this.hls;
 
     // Slide may have been destroyed while loading hls.js
@@ -414,6 +399,15 @@ class VideoContentSetup {
 
     const Hls = mod.default;
     if (!Hls.isSupported()) {
+      // Fall back to native HLS if available (e.g. iOS <17.1)
+      if (player.canPlayType('application/vnd.apple.mpegurl')) {
+        player.src = url;
+        if (config.video_autoplay === 'true') {
+          player.load();
+        }
+        return;
+      }
+
       console.warn('PsVideo: HLS not supported, falling back to direct');
       content.videoIsHls = false;
       this.attachDirectSource(player, this.getDirectSrc(content));
