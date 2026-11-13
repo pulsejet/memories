@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v11.1.3] - 2026-11-12
+## [v11.1.4] - 2026-11-12
 
 - **Feature**: Option to run bundled VIPS in place for SELinux (`memories.vips.direct`) ([#1824](https://github.com/pulsejet/memories/issues/1824))
 - **Fix**: Video quality selector on Safari ([#1826](https://github.com/pulsejet/memories/issues/1826))
