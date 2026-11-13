@@ -11,7 +11,7 @@ use OCP\Http\Client\IClientService;
 final class BinExt
 {
     public const EXIFTOOL_VER = '13.59';
-    public const GOVOD_VER = '0.7.2';
+    public const GOVOD_VER = '0.7.3';
     public const VIPS_VER = 'v8.18.7-17';
     public const NX_VER_MIN = '1.1';
 
