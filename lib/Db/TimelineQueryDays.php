@@ -242,6 +242,15 @@ trait TimelineQueryDays
             $parent = 'ff_f.parent';
         }
 
+        // Group folder ACL rules, applied by the query
+        CTEParams::setAcl($query, $root->getAclMappings(), $root->getAclDeniedTops());
+
+        // Files and folders hidden from the user in some other way
+        CTEParams::setExcludedIds($query, $root->getExcludedIds());
+        if (CTEParams::hasExcludedIds($query)) {
+            $query->andWhere($query->createFunction(CTEParams::notExcludedClause($query, 'm.fileid')));
+        }
+
         // Filter by folder (recursive or otherwise)
         if ($recursive) {
             // These are used later by the execution function
@@ -255,12 +264,20 @@ trait TimelineQueryDays
                 ->from('cte_folders', 'cte_f')
                 ->where($sq->expr()->eq($parent, 'cte_f.fileid'))
             ;
+            if (CTEParams::hasAcl($query)) {
+                $sq->andWhere($sq->createFunction(CTEParams::aclReadableClause('cte_f.readable', 'm.fileid')));
+            }
 
             // Filter files in one of the timeline folders
             $query->andWhere(SQL::exists($query, $sq));
         } else {
             // If getting non-recursively folder only check for parent
             $query->andWhere($query->expr()->eq($parent, $query->createNamedParameter($root->getOneId(), IQueryBuilder::PARAM_INT)));
+
+            // The folder is readable, but files in it can have rules of their own
+            if (CTEParams::hasAcl($query)) {
+                $query->andWhere($query->createFunction(CTEParams::aclReadableClause('1', 'm.fileid')));
+            }
         }
 
         return $query;

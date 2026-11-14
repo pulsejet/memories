@@ -12,6 +12,10 @@ final class CTEParams
     private const FOLDERS_ARCHIVE = 'cteFoldersArchive';
     private const INCLUDE_HIDDEN = 'cteIncludeHidden';
     private const FILE_ID = 'cteFileId';
+    private const ACL_MAPPINGS = 'cteAcl';
+    private const ACL_MAPPING_TYPES = ['user', 'group', 'circle'];
+    private const ACL_DENIED_TOPS = 'cteAclDeniedTops';
+    private const EXCLUDED_IDS = 'cteExcludedIds';
 
     private const BLOCKLIST = 'fnBlocklist';
     private const BLOCKLIST_COUNT = 'fnBlocklistCount';
@@ -50,6 +54,95 @@ final class CTEParams
     public static function setFileId(IQueryBuilder &$query, int $id): void
     {
         $query->setParameter(self::FILE_ID, $id, IQueryBuilder::PARAM_INT);
+    }
+
+    /** @param int[] $ids files and folders to exclude, folders with everything in them */
+    public static function setExcludedIds(IQueryBuilder &$query, array $ids): void
+    {
+        if ([] !== $ids) {
+            $query->setParameter(self::EXCLUDED_IDS, array_values($ids), IQueryBuilder::PARAM_INT_ARRAY);
+        }
+    }
+
+    public static function hasExcludedIds(IQueryBuilder $query): bool
+    {
+        return \array_key_exists(self::EXCLUDED_IDS, $query->getParameters());
+    }
+
+    /**
+     * SQL clause matching fileids in column that are not excluded.
+     */
+    public static function notExcludedClause(IQueryBuilder $query, string $column): string
+    {
+        return self::hasExcludedIds($query)
+            ? "({$column} NOT IN (:".self::EXCLUDED_IDS.'))'
+            : '1 = 1';
+    }
+
+    /**
+     * Apply the group folder ACL rules matching these mappings.
+     *
+     * @param array<string, string[]> $mappings   mapping ids by type (user, group, circle)
+     * @param int[]                   $deniedTops top folders that are not readable themselves
+     */
+    public static function setAcl(IQueryBuilder &$query, array $mappings, array $deniedTops): void
+    {
+        foreach (self::ACL_MAPPING_TYPES as $type) {
+            $ids = array_values($mappings[$type] ?? []);
+            if ([] !== $ids) {
+                $query->setParameter(self::ACL_MAPPINGS.ucfirst($type), $ids, IQueryBuilder::PARAM_STR_ARRAY);
+            }
+        }
+
+        if ([] !== $deniedTops && self::hasAcl($query)) {
+            $query->setParameter(self::ACL_DENIED_TOPS, array_values($deniedTops), IQueryBuilder::PARAM_INT_ARRAY);
+        }
+    }
+
+    public static function hasAcl(IQueryBuilder $query): bool
+    {
+        foreach (self::ACL_MAPPING_TYPES as $type) {
+            if (\array_key_exists(self::ACL_MAPPINGS.ucfirst($type), $query->getParameters())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static function hasAclDeniedTops(IQueryBuilder $query): bool
+    {
+        return \array_key_exists(self::ACL_DENIED_TOPS, $query->getParameters());
+    }
+
+    /**
+     * SQL clause matching the ACL rules in alias that apply to the user.
+     */
+    public static function aclMappingClause(IQueryBuilder $query, string $alias): string
+    {
+        $parts = [];
+        foreach (self::ACL_MAPPING_TYPES as $type) {
+            $param = self::ACL_MAPPINGS.ucfirst($type);
+            if (\array_key_exists($param, $query->getParameters())) {
+                $parts[] = "({$alias}.mapping_type = '{$type}' AND {$alias}.mapping_id IN (:{$param}))";
+            }
+        }
+
+        return implode(' OR ', $parts);
+    }
+
+    /**
+     * SQL clause matching files the ACL rules let the user read; needs cte_acl.
+     * A rule on the file itself wins over its folder.
+     *
+     * @param string $folderReadable expression that is 1 if the folder of the file is readable
+     * @param string $fileid         column with the fileid
+     */
+    public static function aclReadableClause(string $folderReadable, string $fileid): string
+    {
+        $rule = 'SELECT acl_r.fileid FROM *PREFIX*cte_acl acl_r WHERE acl_r.rmask = 1 AND acl_r.rperm = ';
+
+        return "(({$folderReadable} = 1 AND {$fileid} NOT IN ({$rule}0)) OR {$fileid} IN ({$rule}1))";
     }
 
     /** @param string[] $patterns */

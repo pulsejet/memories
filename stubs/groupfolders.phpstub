@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace OCA\GroupFolders\ACL {
+    class ACLStorageWrapper extends \OC\Files\Storage\Wrapper\Wrapper {}
+}
+
+namespace OCA\GroupFolders\ACL\UserMapping {
+    interface IUserMapping {
+        public function getType(): string;
+
+        public function getId(): string;
+    }
+
+    interface IUserMappingManager {
+        /** @return IUserMapping[] */
+        public function getMappingsForUser(\OCP\IUser $user): array;
+    }
+}

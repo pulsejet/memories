@@ -158,7 +158,7 @@ final class LensController extends ApiController
                 return new DataResponse([]);
             }
 
-            $folders = $this->lensFolders->getFolderIds($root->getIds());
+            $folders = $this->lensFolders->getFolderIds($root);
             if ([] === $folders) {
                 return new DataResponse([]);
             }
@@ -184,6 +184,11 @@ final class LensController extends ApiController
                     'message' => 'Lens daemon unreachable',
                 ], Http::STATUS_SERVICE_UNAVAILABLE));
             }
+
+            // Drop files hidden from the user on their own, e.g. by ACLs
+            $hitIds = array_map(static fn ($hit) => (int) ($hit['fileid'] ?? 0), $hits);
+            $hidden = array_flip($this->lensFolders->getHiddenFileIds($root, $hitIds));
+            $hits = array_values(array_filter($hits, static fn ($hit) => !isset($hidden[(int) ($hit['fileid'] ?? 0)])));
 
             // Missing keys map to null, never fatal on old points.
             return new DataResponse(array_map(static fn ($hit) => [
