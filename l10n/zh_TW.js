@@ -525,6 +525,7 @@ OC.L10N.register(
     "Slideshow" : "幻燈片",
     "Previous" : "上一步",
     "Next" : "下一步",
+    "WebGL is disabled or unsupported in this browser." : "此瀏覽器已停用或不支援 WebGL。",
     "Edit Live Photo" : "編輯原況照片",
     "Live Photo will be turned off and edits will apply to the still photo only" : "將會關閉原況照片，編輯僅會套用至靜態照片",
     "Collapse details" : "折疊詳細資訊",

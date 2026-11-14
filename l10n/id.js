@@ -102,6 +102,7 @@ OC.L10N.register(
     "Choose a folder" : "Pilih folder",
     "Password protected" : "Kata sandi dilindungi",
     "Expires" : "Kedaluwarsa",
+    "Editable" : "Dapat diedit",
     "Read only" : "Hanya baca",
     "Link copied to clipboard" : "Tautan disalin ke papan klip",
     "Share link" : "Bagikan tautan",

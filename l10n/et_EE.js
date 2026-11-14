@@ -525,6 +525,7 @@ OC.L10N.register(
     "Slideshow" : "Slaidiesitlus",
     "Previous" : "Eelmine",
     "Next" : "Järgmine",
+    "WebGL is disabled or unsupported in this browser." : "WebGL on kas lülitatud välja või pole selles veebibrauseris toetatud",
     "Edit Live Photo" : "Muuda „Live Photo“ meediumit (videoklipp+foto)",
     "Live Photo will be turned off and edits will apply to the still photo only" : "„Live Photo“ meedium (videoklipp+foto) lülitatakse välja ning muutmine käib vaid foto kohta",
     "Collapse details" : "Sulge üksikasjad",

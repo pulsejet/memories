@@ -523,6 +523,7 @@
     "Slideshow" : "Слайд-шоу",
     "Previous" : "Назад",
     "Next" : "Далее",
+    "WebGL is disabled or unsupported in this browser." : "WebGL отключён или не поддерживается в этом браузере.",
     "Edit Live Photo" : "Редактировать живое фото",
     "Live Photo will be turned off and edits will apply to the still photo only" : "Живое фото будет отключено, а правки применятся только к статичному снимку",
     "Collapse details" : "Свернуть сведения",

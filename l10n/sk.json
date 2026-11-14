@@ -523,6 +523,7 @@
     "Slideshow" : "Prezentácia",
     "Previous" : "Predchádzajúce",
     "Next" : "Ďalšie",
+    "WebGL is disabled or unsupported in this browser." : "WebGL je v tomto prehliadači vypnuté alebo nepodporované.",
     "Edit Live Photo" : "Upraviť Live Photo",
     "Live Photo will be turned off and edits will apply to the still photo only" : "Live Photo bude vypnuté a úpravy sa aplikujú iba na statickú fotografiu",
     "Collapse details" : "Zbaliť podrobnosti",
