@@ -34,4 +34,9 @@
       display: none;
     }
   }
+
+  // The flat player stays mounted under a video sphere, but is not painted.
+  .video-container.memories-video--sphere .memories-video-stage {
+    visibility: hidden;
+  }
 }

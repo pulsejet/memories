@@ -80,6 +80,13 @@ export default class PhotoSphereContentSetup {
     const parent = isVideo ? content.element : holder;
     if (isVideo && !video) return;
 
+    // Hide the flat player before it is first painted. Firefox on Android gives a
+    // video's frames to a single consumer (Mozilla bug 1842735), and a painted
+    // player starves the sphere.
+    const flat = isVideo ? content.element : null;
+    flat?.classList.add('memories-video--sphere');
+    let opened = false;
+
     try {
       const { Viewer, VisibleRangePlugin, EquirectangularVideoAdapter, VideoPlugin } =
         await import('./PsPhotoSphereLib');
@@ -135,6 +142,7 @@ export default class PhotoSphereContentSetup {
       this.container = container;
       this.content = content;
       this.video = video;
+      opened = true;
 
       if (video) {
         // The adapter waits for loadedmetadata, which a loaded player has
@@ -169,6 +177,8 @@ export default class PhotoSphereContentSetup {
       }
     } catch (e) {
       console.error('PsPhotoSphere: failed to show panorama', e);
+    } finally {
+      if (!opened && this.content !== content) flat?.classList.remove('memories-video--sphere');
     }
   }
 
@@ -189,9 +199,16 @@ export default class PhotoSphereContentSetup {
     this.container = null;
     this.video = null;
 
-    if (video && videoParent && video.parentNode !== videoParent) {
-      videoParent.insertBefore(video, videoNext);
-      if (playing) video.play().catch(() => {});
+    if (video) {
+      if (videoParent && video.parentNode !== videoParent) videoParent.insertBefore(video, videoNext);
+      this.content?.element?.classList.remove('memories-video--sphere');
+
+      // A paused player shows nothing until it presents a frame (Firefox on Android).
+      if (playing) {
+        video.play().catch(() => {});
+      } else if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+        video.currentTime = video.currentTime;
+      }
     }
 
     // Re-enable the native image when sphere is closed.
