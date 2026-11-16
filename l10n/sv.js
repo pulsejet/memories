@@ -525,6 +525,7 @@ OC.L10N.register(
     "Slideshow" : "Bildspel",
     "Previous" : "Föregående",
     "Next" : "Nästa",
+    "WebGL is disabled or unsupported in this browser." : "WebGL är inaktiverat eller stöds inte i den här webbläsaren.",
     "Edit Live Photo" : "Redigera Live Photo",
     "Live Photo will be turned off and edits will apply to the still photo only" : "Live Photo-funktionen stängs av och ändringarna gäller endast stillbilden",
     "Collapse details" : "Dölj detaljer",
