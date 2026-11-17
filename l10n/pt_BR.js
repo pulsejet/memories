@@ -621,6 +621,7 @@ OC.L10N.register(
     "Noir" : "Noir",
     "Silvertone" : "Prata",
     "Willow" : "Salgueiro",
+    "Fade" : "Desvanecer",
     "Negative" : "Negativo",
     "Free" : "Livre",
     "Original" : "Original",

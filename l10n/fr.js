@@ -518,6 +518,7 @@ OC.L10N.register(
     "Slideshow" : "Diaporama",
     "Previous" : "Précédent",
     "Next" : "Suivant",
+    "WebGL is disabled or unsupported in this browser." : "WebGL est désactivé ou non pris en charge par ce navigateur.",
     "Edit Live Photo" : "Modifier la Live Photo",
     "Live Photo will be turned off and edits will apply to the still photo only" : "Les Live Photos seront désactivées et les modifications ne seront appliquées qu'à la photo fixe",
     "Collapse details" : "Masquer les détails",
