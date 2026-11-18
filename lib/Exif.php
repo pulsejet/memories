@@ -580,7 +580,7 @@ final class Exif
             throw new \Exception('Failed to parse exiftool output as JSON');
         }
 
-        if (!\is_array($json) || !\count($json)) {
+        if (!\is_array($json)) {
             throw new \Exception('Exiftool output is not an array with at least one element');
         }
 

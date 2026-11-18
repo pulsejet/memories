@@ -306,6 +306,7 @@ final class ExifExtractTest extends TestCase
         // CreateDate has no timezone info, but the epoch should stay the same.
         // '2021:07:10 16:51:26-07:00' (local timezone)
         $createDate = \DateTime::createFromFormat('Y:m:d H:i:sO', (string) ($res->exif['CreateDate'] ?? ''));
+        self::assertNotFalse($createDate);
         self::assertSame(1625961086, $createDate->getTimestamp());
 
         // Geolocation (Redlands, CA)
