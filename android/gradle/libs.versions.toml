@@ -8,7 +8,7 @@ java = "21"
 
 agp = "9.5.1"
 kotlin = "2.4.21"
-ksp = "2.3.13"
+ksp = "2.3.14"
 media3 = "1.11.1"
 room = "2.8.5"
 ktor = "3.6.1"
@@ -37,7 +37,7 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 versioncompare = "io.github.g00fy2:versioncompare:1.5.0"
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
-bouncycastle = "org.bouncycastle:bcprov-jdk18on:1.86"
+bouncycastle = "org.bouncycastle:bcprov-jdk18on:1.87"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
