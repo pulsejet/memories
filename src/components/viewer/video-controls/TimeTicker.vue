@@ -1,7 +1,6 @@
 <template>
   <div class="m-vc-time-ticker" role="timer" :title="tickerText" :aria-label="tickerText">
-    <span>{{ elapsedStr }}</span
-    ><span aria-hidden="true"> / </span><span>{{ totalStr }}</span>
+    <span>{{ elapsedStr }}</span><span aria-hidden="true"> / </span><span>{{ totalStr }}</span>
   </div>
 </template>
 
