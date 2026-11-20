@@ -5,10 +5,19 @@
     :tabindex="placeholder ? -1 : 1"
     :aria-label="title"
     class="cluster fill-block"
-    :class="{ error, placeholder }"
+    :class="{ error, placeholder, selectable, selected }"
     :to="target"
+    @click.capture="clickCapture"
     @click="click"
+    @touchstart.passive="touchstart"
+    @touchmove.passive="touchmove"
+    @touchend.passive="touchend"
+    @touchcancel.passive="touchend"
+    @contextmenu="contextmenu"
   >
+    <div class="select" v-if="selectable && !placeholder" @click.prevent.stop="select">
+      <CheckCircleIcon :size="22" />
+    </div>
     <div class="count-bubble" v-if="counters && data.count">
       <NcCounterBubble :count="data.count" />
     </div>
@@ -39,6 +48,7 @@ import { computed } from 'vue';
 
 import NcCounterBubble from '@nextcloud/vue/components/NcCounterBubble';
 import XImg from '@components/frame/XImg.vue';
+import CheckCircleIcon from 'vue-material-design-icons/CheckCircle.vue';
 
 import errorsvg from '@assets/error.svg';
 import plussvg from '@assets/plus.svg';
@@ -57,16 +67,27 @@ const props = withDefaults(
     data: ICluster;
     link?: boolean;
     counters?: boolean;
+    selectable?: boolean;
+    selected?: boolean;
+    selecting?: boolean;
   }>(),
   {
     link: true,
     counters: true,
+    selectable: false,
+    selected: false,
+    selecting: false,
   },
 );
 
 const emit = defineEmits<{
   click: [item: ICluster];
+  select: [item: ICluster];
 }>();
+
+let touchStart: Touch | null = null;
+let touchTimer = 0;
+let longPressed = false;
 
 const previewUrl = computed(() => {
   if (placeholder.value) return String();
@@ -118,6 +139,55 @@ function click() {
   emit('click', props.data);
 }
 
+function select() {
+  emit('select', props.data);
+}
+
+/** Toggle selection instead of opening while selecting */
+function clickCapture(e: MouseEvent) {
+  if (!props.selectable || placeholder.value) return;
+  if (!longPressed && !props.selecting && !e.ctrlKey && !e.metaKey) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+  if (!longPressed) select();
+  longPressed = false;
+}
+
+function touchstart(e: TouchEvent) {
+  longPressed = false;
+  if (!props.selectable || placeholder.value) return;
+  touchStart = e.touches[0];
+  touchTimer = window.setTimeout(longPress, 600);
+}
+
+function touchmove(e: TouchEvent) {
+  const touch = e.touches[0];
+  if (!touchStart || !touch) return;
+  if (Math.abs(touch.clientX - touchStart.clientX) > 10 || Math.abs(touch.clientY - touchStart.clientY) > 10) {
+    touchend();
+  }
+}
+
+function touchend() {
+  window.clearTimeout(touchTimer);
+  touchTimer = 0;
+  touchStart = null;
+}
+
+function longPress() {
+  touchend();
+  longPressed = true;
+  select();
+}
+
+/** Suppress the native link menu on long press */
+function contextmenu(e: Event) {
+  if (!props.selectable) return;
+  if (touchTimer) longPress();
+  if (longPressed) e.preventDefault();
+}
+
 function clickPreview() {
   nativex.playTouchSound();
 }
@@ -139,6 +209,37 @@ img {
   // Move focus outline inwards
   &:focus {
     outline-offset: -1px;
+  }
+
+  &.selectable {
+    -webkit-touch-callout: none;
+  }
+
+  &.selected {
+    background-color: var(--color-primary-select-light);
+  }
+}
+
+.select {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 100;
+  display: none;
+  color: white;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+
+  @media (hover: hover) and (pointer: fine) {
+    .cluster:hover > & {
+      display: flex;
+    }
+  }
+
+  .cluster.selected > & {
+    display: flex;
+    filter: none;
+    background: radial-gradient(circle, white 50%, transparent 50%);
+    color: var(--color-primary);
   }
 }
 
@@ -259,6 +360,11 @@ $namemargin: 10px;
     overflow: hidden;
     display: inline-block;
     cursor: pointer;
+    transition: transform 0.15s ease;
+
+    .cluster.selected & {
+      transform: scale(0.88);
+    }
 
     .cluster--rounded &,
     .cluster--album & {
