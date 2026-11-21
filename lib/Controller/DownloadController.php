@@ -25,6 +25,7 @@ namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
 use OCA\Memories\Db\FsManager;
+use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Service\ServiceManager;
 use OCA\Memories\Util;
@@ -48,6 +49,7 @@ final class DownloadController extends ApiController
     public function __construct(
         IRequest $request,
         protected FsManager $fs,
+        protected TimelineQuery $tq,
         protected ICacheFactory $cacheFactory,
         protected ISecureRandom $secureRandom,
         protected ITempManager $tempManager,
@@ -334,75 +336,113 @@ final class DownloadController extends ApiController
             // So we need to add a number to the end of the name
             $nameCounts = [];
 
+            // Live videos already requested explicitly are not added twice
+            $seen = array_flip($fileIds);
+
             // Send each file
             foreach ($fileIds as $fileId) {
                 if (connection_aborted()) {
                     break;
                 }
 
-                /** @var false|resource */
-                $handle = false;
+                $file = $this->addZipFile($streamer, $fileId, $nameCounts);
 
-                /** @var ?\OCP\Files\File */
-                $file = null;
+                if (null === $file) {
+                    continue;
+                }
 
-                /** @var ?string */
-                $name = (string) $fileId;
-
+                // Add the live video next to its photo
                 try {
-                    // This checks permissions
-                    $file = $this->fs->getUserFile($fileId);
-                    $name = $file->getName();
-
-                    // Check if we're allowed to download the file
-                    if (!$this->fs->canDownload($file)) {
-                        throw new \Exception("Download forbidden: {$file->getName()}");
-                    }
-
-                    // Open file
-                    $handle = $file->fopen('rb');
-                    if (false === $handle) {
-                        throw new \Exception('Failed to open file');
-                    }
-
-                    // Handle duplicate names
-                    $name = $this->uniqueZipName($name, $nameCounts);
-
-                    // Add file to zip
-                    if (!$streamer->addFileFromStream($handle, $name, ['timestamp' => $file->getMTime()])) {
-                        throw new \Exception('Failed to add file to zip');
-                    }
+                    $live = $this->tq->getClosestLiveVideo($file);
                 } catch (\Exception $e) {
-                    // create a dummy memory file with the error message
-                    $dummy = fopen('php://memory', 'rw+');
-                    if (false === $dummy) {
-                        throw new \Exception('Failed to add file to zip');
-                    }
+                    $this->addZipError($streamer, "{$file->getName()}_live", $e, $nameCounts);
 
-                    try {
-                        fwrite($dummy, $e->getMessage());
-                        rewind($dummy);
+                    continue;
+                }
 
-                        $errorName = $this->uniqueZipName("{$name}_error.txt", $nameCounts);
-                        if (!$streamer->addFileFromStream($dummy, $errorName, [])) {
-                            throw new \Exception('Failed to add file to zip');
-                        }
-                    } finally {
-                        fclose($dummy);
-                    }
-                } finally {
-                    if (false !== $handle) {
-                        fclose($handle);
-                    }
-
-                    // Clear any temp files
-                    $this->tempManager->clean();
+                if ($live && !isset($seen[$live->getId()])) {
+                    $seen[$live->getId()] = true;
+                    $this->addZipFile($streamer, $live->getId(), $nameCounts);
                 }
             }
 
             // Done
             $streamer->finalize();
         });
+    }
+
+    /**
+     * Add one file to the zip, or an error file in its place.
+     *
+     * @return ?\OCP\Files\File the added file or null on failure
+     */
+    private function addZipFile(\ZipStreamer\ZipStreamer $streamer, int $fileId, array &$nameCounts): ?\OCP\Files\File
+    {
+        /** @var false|resource */
+        $handle = false;
+
+        $name = (string) $fileId;
+
+        try {
+            // This checks permissions
+            $file = $this->fs->getUserFile($fileId);
+            $name = $file->getName();
+
+            // Check if we're allowed to download the file
+            if (!$this->fs->canDownload($file)) {
+                throw new \Exception("Download forbidden: {$file->getName()}");
+            }
+
+            // Open file
+            $handle = $file->fopen('rb');
+            if (false === $handle) {
+                throw new \Exception('Failed to open file');
+            }
+
+            // Handle duplicate names
+            $name = $this->uniqueZipName($name, $nameCounts);
+
+            // Add file to zip
+            if (!$streamer->addFileFromStream($handle, $name, ['timestamp' => $file->getMTime()])) {
+                throw new \Exception('Failed to add file to zip');
+            }
+
+            return $file;
+        } catch (\Exception $e) {
+            $this->addZipError($streamer, $name, $e, $nameCounts);
+
+            return null;
+        } finally {
+            if (false !== $handle) {
+                fclose($handle);
+            }
+
+            // Clear any temp files
+            $this->tempManager->clean();
+        }
+    }
+
+    /**
+     * Add a dummy file with the error message to the zip.
+     */
+    private function addZipError(\ZipStreamer\ZipStreamer $streamer, string $name, \Exception $e, array &$nameCounts): void
+    {
+        $dummy = fopen('php://memory', 'rw+');
+        if (false === $dummy) {
+            throw new \Exception('Failed to add file to zip');
+        }
+
+        try {
+            fwrite($dummy, $e->getMessage());
+            rewind($dummy);
+
+            $errorName = $this->uniqueZipName("{$name}_error.txt", $nameCounts);
+            if (!$streamer->addFileFromStream($dummy, $errorName, [])) {
+                throw new \Exception('Failed to add file to zip');
+            }
+        } finally {
+            fclose($dummy);
+        }
     }
 
     private function uniqueZipName(string $name, array &$nameCounts): string
