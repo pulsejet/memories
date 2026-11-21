@@ -369,7 +369,7 @@ final class DownloadController extends ApiController
                     $name = $this->uniqueZipName($name, $nameCounts);
 
                     // Add file to zip
-                    if (!$streamer->addFileFromStream($handle, $name, [])) {
+                    if (!$streamer->addFileFromStream($handle, $name, ['timestamp' => $file->getMTime()])) {
                         throw new \Exception('Failed to add file to zip');
                     }
                 } catch (\Exception $e) {
