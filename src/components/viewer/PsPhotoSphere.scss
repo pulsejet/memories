@@ -28,5 +28,15 @@
     .psv-loader-text {
       color: #fff;
     }
+
+    // The video controls above show their own play button and spinner.
+    &--video .psv-loader {
+      display: none;
+    }
+  }
+
+  // The flat player stays mounted under a video sphere, but is not painted.
+  .video-container.memories-video--sphere .memories-video-stage {
+    visibility: hidden;
   }
 }

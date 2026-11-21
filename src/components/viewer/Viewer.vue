@@ -444,7 +444,7 @@ const actions = computed((): IViewerAction[] => {
       name: t('memories', 'View panorama'),
       icon: currentPhoto.value?.pano === 2 ? markRaw(PanoramaSphereIcon) : markRaw(PanoramaHorizontalOutlineIcon),
       callback: toggleSphere,
-      if: isPanorama.value && !isVideo.value,
+      if: isPanorama.value,
     },
     {
       id: 'info',
@@ -866,7 +866,7 @@ async function createBase(args: PhotoSwipeOptions) {
   psVideo = new PsVideo(pswp);
 
   // Panorama sphere support
-  psPhotoSphere = new PsPhotoSphere(pswp);
+  psPhotoSphere = new PsPhotoSphere(pswp, psVideo);
 
   // Patch the close button to stop the slideshow
   const _close = pswp.close.bind(pswp);
