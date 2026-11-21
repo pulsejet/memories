@@ -81,7 +81,7 @@ export default class ImageContentSetup {
 
   public async createPreviewElement(content: PsContent) {
     const img = document.createElement('img');
-    img.classList.add('ximg', 'ximg--preview');
+    img.classList.add('pswp__img', 'ximg', 'ximg--preview');
 
     try {
       // Fetch with Axios
@@ -116,7 +116,7 @@ export default class ImageContentSetup {
     try {
       const thumbImg = document.createElement('img');
       thumbImg.src = content.data.msrc;
-      thumbImg.classList.add('ximg', 'ximg--thumbnail');
+      thumbImg.classList.add('pswp__img', 'ximg', 'ximg--thumbnail');
       await thumbImg.decode();
 
       if (!content.element) return;
@@ -205,7 +205,7 @@ export default class ImageContentSetup {
         // Create HTML image and pre-decode.
         const image = new Image();
         image.src = blobSrc;
-        image.classList.add('ximg', 'ximg--full');
+        image.classList.add('pswp__img', 'ximg', 'ximg--full');
         await image.decode();
 
         // Check if destroyed already
