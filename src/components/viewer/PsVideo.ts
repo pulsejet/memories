@@ -169,12 +169,24 @@ class VideoContentSetup {
       if (target !== document.body && target !== pswp.element) return;
 
       e.originalEvent.preventDefault();
-      if (player.paused) {
-        utils.runCatching(() => player.play());
-      } else {
-        player.pause();
-      }
+      this.togglePlayback(player);
     });
+
+    // Mouse click on the video toggles playback; touch taps toggle the UI
+    pswp.on('pointerUp', ({ originalEvent: e }) => {
+      const content = this.getCurrVideoContent(pswp);
+      if (!content?.videoPlayer || e.pointerType !== 'mouse' || e.target !== content.element) return;
+      if (pswp.gestures.isDragging || pswp.gestures.isMultitouch || pswp.mainScroll.isShifted()) return;
+      this.togglePlayback(content.videoPlayer);
+    });
+  }
+
+  private togglePlayback(player: VideoControllerElement) {
+    if (player.paused) {
+      utils.runCatching(() => player.play());
+    } else {
+      player.pause();
+    }
   }
 
   private getCurrVideoContent(pswp: PsPhotoSwipe): VideoContent | null {
