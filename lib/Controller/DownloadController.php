@@ -35,6 +35,7 @@ use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\Files\File;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IRequest;
@@ -152,8 +153,7 @@ final class DownloadController extends ApiController
         bool $resumable = true,
         bool $attachment = false,
     ): Http\Response {
-        return $this->util->guardExDirect(function (Http\IOutput $out) use ($fileid, $resumable, $attachment): void {
-            /** @var \OCP\Files\File $file */
+        return $this->util->guardEx(function () use ($fileid, $resumable, $attachment) {
             if ($token = $this->request->getHeader(ServiceManager::SERVICE_TOKEN_HEADER)) {
                 $file = $this->serviceManager->getServiceTokenFile($token, $fileid);
             } else {
@@ -165,6 +165,16 @@ final class DownloadController extends ApiController
                 }
             }
 
+            return $this->streamFile($file, $resumable, $attachment);
+        });
+    }
+
+    /**
+     * Stream a single resolved file, with optional range support.
+     */
+    public function streamFile(File $file, bool $resumable = true, bool $attachment = false): Http\Response
+    {
+        return $this->util->guardExDirect(function (Http\IOutput $out) use ($file, $resumable, $attachment): void {
             // Release the PHP session lock BEFORE streaming.
             // Prevents a deadlock on simultaneous connections.
             $this->closeSession();
