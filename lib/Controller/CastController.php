@@ -14,15 +14,11 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\PublicPage;
-use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Http\TemplateResponse;
-use OCP\App\IAppManager;
 use OCP\Files\File;
 use OCP\Files\IRootFolder;
 use OCP\IPreview;
 use OCP\IRequest;
-use OCP\IURLGenerator;
 use OCP\Security\ICrypto;
 
 /**
@@ -35,7 +31,6 @@ final class CastController extends ApiController
 {
     private const TOKEN_TTL = 12 * 60 * 60;
     private const MAX_FILES = 100;
-    private const RECEIVER_JS = 'js/memories-cast-receiver.js';
 
     public function __construct(
         IRequest $request,
@@ -43,8 +38,6 @@ final class CastController extends ApiController
         protected IRootFolder $rootFolder,
         protected IPreview $preview,
         protected ICrypto $crypto,
-        protected IURLGenerator $urlGenerator,
-        protected IAppManager $appManager,
         protected DownloadController $download,
         protected ServiceManager $serviceManager,
         protected Util $util,
@@ -88,16 +81,15 @@ final class CastController extends ApiController
     /**
      * Serve a file to the cast receiver.
      *
-     * Images are sent as a preview fitting the receiver screen; videos are streamed as-is.
-     *
-     * @param int $size Long edge of the receiver screen in CSS pixels
+     * Images are sent as a 1024px preview, which all cast devices can render quickly.
+     * Videos are streamed as-is.
      */
     #[NoAdminRequired]
     #[NoCSRFRequired]
     #[PublicPage]
-    public function file(int $fileid, string $t, int $size = 0): Http\Response
+    public function file(int $fileid, string $t): Http\Response
     {
-        return $this->util->guardEx(function () use ($fileid, $t, $size) {
+        return $this->util->guardEx(function () use ($fileid, $t) {
             $file = $this->getTokenFile($fileid, $t);
 
             if (str_starts_with($file->getMimeType(), 'video/')) {
@@ -105,10 +97,7 @@ final class CastController extends ApiController
             }
 
             try {
-                // Nextcloud rounds preview sizes up to powers of 4 (1024, then max).
-                // Most cast devices render at 720p, where the max preview is too heavy.
-                $px = $size > 0 && $size <= 1280 ? 1024 : 4096;
-                $preview = $this->preview->getPreview($file, $px, $px, false);
+                $preview = $this->preview->getPreview($file, 1024, 1024, false);
             } catch (\OCP\Files\NotFoundException $e) {
                 throw Exceptions::NotFound($e->getMessage());
             }
@@ -120,33 +109,6 @@ final class CastController extends ApiController
 
             return $response;
         });
-    }
-
-    /**
-     * Page loaded by the cast device as a custom receiver.
-     */
-    #[NoAdminRequired]
-    #[NoCSRFRequired]
-    #[PublicPage]
-    public function receiver(): Http\Response
-    {
-        $response = new TemplateResponse(Application::APPNAME, 'cast-receiver', [
-            'script' => $this->urlGenerator->linkTo(Application::APPNAME, self::RECEIVER_JS)
-                .'?v='.(string) @filemtime($this->appManager->getAppPath(Application::APPNAME).'/'.self::RECEIVER_JS),
-        ], TemplateResponse::RENDER_AS_BLANK);
-
-        $policy = new ContentSecurityPolicy();
-        $policy->addAllowedScriptDomain('https://www.gstatic.com');
-        $policy->addAllowedStyleDomain('https://www.gstatic.com');
-        $policy->addAllowedFontDomain('https://www.gstatic.com');
-        $policy->addAllowedConnectDomain('https://www.gstatic.com');
-        $policy->addAllowedConnectDomain('ws://localhost:8008');
-        $policy->addAllowedMediaDomain("'self'");
-        $policy->addAllowedImageDomain("'self'");
-        $response->setContentSecurityPolicy($policy);
-        $response->cacheFor(0);
-
-        return $response;
     }
 
     private function getTokenFile(int $fileid, string $token): File

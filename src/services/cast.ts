@@ -2,24 +2,13 @@ import { reactive, readonly } from 'vue';
 import axios from '@nextcloud/axios';
 
 import { API } from '@services/API';
-import { config, waitForConfig } from '@services/user-config';
+import { waitForConfig } from '@services/user-config';
 import * as nativex from '@native';
-
-import {
-  CAST_NAMESPACE,
-  CAST_PROTOCOL_VERSION,
-  type CastReceiverMessage,
-  type CastSenderMessage,
-  type Versioned,
-} from '../cast/protocol';
 
 const SDK_URL = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
 
 /** Refresh tokens this many seconds before they expire */
 const TOKEN_MARGIN_S = 60 * 60;
-
-/** Screen size sent to the server per quality; it picks a 1024px or full preview */
-const QUALITY_SIZE = { standard: 1280, high: 3840 };
 
 export type CastItem = {
   fileid: number;
@@ -43,19 +32,10 @@ let loading: Promise<void> | null = null;
 let showSeq = 0;
 /** Key of the last video the receiver finished */
 let endedKey: string | null = null;
-/** Last item loaded on Google's default receiver */
-let lastDefault: { key: string; date?: string; place?: string } | null = null;
+/** Last item loaded on the receiver */
+let last: { key: string; date?: string; place?: string } | null = null;
 const tokens = new Map<number, { token: string; expiry: number }>();
 const endedWaiters = new Map<string, () => void>();
-
-/**
- * Use our own receiver if an app ID is configured.
- * Otherwise fall back to Google's default media receiver,
- * which needs no registration but cannot be customized.
- */
-function isCustom() {
-  return !!config.cast_app_id;
-}
 
 /**
  * Load the Cast sender SDK once.
@@ -85,7 +65,7 @@ function setup() {
   const fw = cast.framework;
   const ctx = fw.CastContext.getInstance();
   ctx.setOptions({
-    receiverApplicationId: config.cast_app_id || chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+    receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
     autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
   });
 
@@ -99,11 +79,8 @@ function setup() {
 
   ctx.addEventListener(fw.CastContextEventType.CAST_STATE_CHANGED, update);
   ctx.addEventListener(fw.CastContextEventType.SESSION_STATE_CHANGED, (event) => {
-    const { SESSION_STARTED, SESSION_RESUMED, SESSION_ENDED } = fw.SessionState;
-    if (event.sessionState === SESSION_STARTED || event.sessionState === SESSION_RESUMED) {
-      if (isCustom()) event.session.addMessageListener(CAST_NAMESPACE, onMessage);
-    } else if (event.sessionState === SESSION_ENDED) {
-      lastDefault = null;
+    if (event.sessionState === fw.SessionState.SESSION_ENDED) {
+      last = null;
       endedWaiters.forEach((resolve) => resolve());
       endedWaiters.clear();
     }
@@ -117,26 +94,10 @@ function session() {
   return window.cast?.framework?.CastContext.getInstance().getCurrentSession() ?? null;
 }
 
-function onMessage(_ns: string, data: string) {
-  let msg: Versioned<CastReceiverMessage>;
-  try {
-    msg = JSON.parse(data);
-  } catch {
-    return;
-  }
-
-  if (msg.type === 'ended') markEnded(msg.key);
-}
-
 function markEnded(key: string) {
   endedKey = key;
   endedWaiters.get(key)?.();
   endedWaiters.delete(key);
-}
-
-async function send(msg: CastSenderMessage) {
-  const data: Versioned<CastSenderMessage> = { v: CAST_PROTOCOL_VERSION, ...msg };
-  await session()?.sendMessage(CAST_NAMESPACE, data);
 }
 
 /** Open the device picker and start a session */
@@ -154,6 +115,15 @@ export function disconnect() {
   window.cast?.framework?.CastContext.getInstance().endCurrentSession(true);
 }
 
+/** Start or stop casting */
+export function toggle() {
+  if (_state.connected) {
+    disconnect();
+  } else {
+    connect();
+  }
+}
+
 /** Make sure we have valid tokens for these files */
 async function ensureTokens(fileids: number[]) {
   const now = Date.now() / 1000;
@@ -168,30 +138,17 @@ async function ensureTokens(fileids: number[]) {
   }
 }
 
-function fileUrl(fileid: number): string | null {
-  const token = tokens.get(fileid)?.token;
-  if (!token) return null;
-
-  // Automatic: our receiver appends its own screen size
-  let quality = config.cast_quality;
-  if (quality === 'auto' && !isCustom()) quality = 'standard';
-  const size = quality === 'auto' ? undefined : QUALITY_SIZE[quality];
-
-  return new URL(API.CAST_FILE(fileid, token, size), window.location.href).toString();
-}
-
 /**
  * Show a photo or video on the TV.
  * @param item item to show now
- * @param upcoming file IDs the receiver should preload
  * @param nearby file IDs to fetch tokens for in the background
  */
-export async function show(item: CastItem, upcoming: number[] = [], nearby: number[] = []) {
+export async function show(item: CastItem, nearby: number[] = []) {
   if (!session()) return;
   const seq = ++showSeq;
 
   try {
-    await ensureTokens([item.fileid, ...upcoming]);
+    await ensureTokens([item.fileid]);
   } catch (e) {
     console.error('Failed to get cast tokens', e);
     return;
@@ -203,31 +160,16 @@ export async function show(item: CastItem, upcoming: number[] = [], nearby: numb
   // Another item was requested in the meantime
   if (seq !== showSeq) return;
 
-  const url = fileUrl(item.fileid);
-  if (!url) return;
+  const token = tokens.get(item.fileid)?.token;
+  if (!token) return;
+  const url = new URL(API.CAST_FILE(item.fileid, token), window.location.href).toString();
 
   const key = String(item.fileid);
   if (key !== endedKey) endedKey = null;
 
-  if (!isCustom()) return showDefault(key, url, item);
-
-  await send({
-    type: 'show',
-    key,
-    url,
-    video: item.video,
-    date: item.date,
-    place: item.place,
-    preload: upcoming.map(fileUrl).filter((u): u is string => !!u),
-  });
-}
-
-/** Load an item on Google's default media receiver */
-async function showDefault(key: string, url: string, item: CastItem) {
   // Reloading shows a spinner; only reload images when metadata arrived late
-  const last = lastDefault;
   if (last?.key === key && (item.video || (last.date === item.date && last.place === item.place))) return;
-  lastDefault = { key, date: item.date, place: item.place };
+  last = { key, date: item.date, place: item.place };
 
   const { media } = chrome.cast;
   let info: chrome.cast.media.MediaInfo;

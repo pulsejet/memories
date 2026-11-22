@@ -287,8 +287,6 @@ onMounted(() => {
       return currentPhoto.value;
     },
   };
-
-  cast.init();
 });
 
 utils.useBus('memories:sidebar:opened', handleAppSidebarOpen);
@@ -406,15 +404,6 @@ const actions = computed((): IViewerAction[] => {
   // Filter out the available actions for this image.
   return [
     {
-      id: 'cast',
-      name: cast.state.connected
-        ? t('memories', 'Stop casting to {device}', { device: cast.state.device })
-        : t('memories', 'Cast to TV'),
-      icon: cast.state.connected ? markRaw(CastConnectedIcon) : markRaw(CastIcon),
-      callback: toggleCast,
-      if: (cast.state.available || cast.state.connected) && !routeIs.Public && !isLocal.value,
-    },
-    {
       id: 'favorite',
       name: t('memories', 'Favorite'),
       icon: isFavorite.value ? markRaw(StarIcon) : markRaw(StarOutlineIcon),
@@ -502,6 +491,15 @@ const actions = computed((): IViewerAction[] => {
       callback: () => downloadByFileId(raw.fileid),
       if: canDownload.value,
     })),
+    {
+      id: 'cast',
+      name: cast.state.connected
+        ? t('memories', 'Stop casting to {device}', { device: cast.state.device })
+        : t('memories', 'Cast to TV'),
+      icon: cast.state.connected ? markRaw(CastConnectedIcon) : markRaw(CastIcon),
+      callback: cast.toggle,
+      if: (cast.state.available || cast.state.connected) && !routeIs.Public && !isLocal.value,
+    },
     {
       id: 'view-in-folder',
       name: t('memories', 'View in folder'),
@@ -1699,17 +1697,6 @@ function stopSlideshow() {
 }
 
 /**
- * Start or stop casting to a TV
- */
-function toggleCast() {
-  if (cast.state.connected) {
-    cast.disconnect();
-  } else {
-    cast.connect();
-  }
-}
-
-/**
  * Mirror the current photo on the TV
  */
 function castCurrent() {
@@ -1721,16 +1708,10 @@ function castCurrent() {
     ? `${utils.getDateStr(new Date(datetaken * 1000))}, ${utils.getTimeStr(new Date(datetaken * 1000))}`
     : undefined;
 
-  // Preload the next few images on the TV
   const idx = currIndex.value - globalAnchor.value;
-  const castable = (p: IPhoto) => !utils.isLocalPhoto(p);
-  const upcoming = list.value
-    .slice(idx + 1, idx + 4)
-    .filter((p) => castable(p) && !(p.flag & constants.FLAG_IS_VIDEO))
-    .map((p) => p.fileid);
   const nearby = list.value
     .slice(Math.max(0, idx - 5), idx + 15)
-    .filter(castable)
+    .filter((p) => !utils.isLocalPhoto(p))
     .map((p) => p.fileid);
 
   cast.show(
@@ -1741,7 +1722,6 @@ function castCurrent() {
       date,
       place: photo.imageInfo?.address_short ?? photo.imageInfo?.address,
     },
-    upcoming,
     nearby,
   );
 }

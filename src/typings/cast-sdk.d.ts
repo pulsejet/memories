@@ -1,7 +1,6 @@
 /**
- * Minimal typings for the parts of the Google Cast SDKs we use.
- * Sender: https://developers.google.com/cast/docs/reference/web_sender
- * Receiver: https://developers.google.com/cast/docs/reference/web_receiver
+ * Minimal typings for the parts of the Google Cast sender SDK we use.
+ * https://developers.google.com/cast/docs/reference/web_sender
  */
 
 interface Window {
@@ -55,8 +54,6 @@ declare namespace chrome.cast.media {
 }
 
 declare namespace cast.framework {
-  // Sender
-
   enum CastState {
     NO_DEVICES_AVAILABLE = 'NO_DEVICES_AVAILABLE',
     NOT_CONNECTED = 'NOT_CONNECTED',
@@ -83,8 +80,6 @@ declare namespace cast.framework {
 
   class CastSession {
     getCastDevice(): { friendlyName: string };
-    sendMessage(namespace: string, data: object | string): Promise<void>;
-    addMessageListener(namespace: string, listener: (namespace: string, message: string) => void): void;
     loadMedia(request: chrome.cast.media.LoadRequest): Promise<void>;
     getMediaSession(): chrome.cast.media.Media | null;
   }
@@ -101,37 +96,5 @@ declare namespace cast.framework {
       type: CastContextEventType.SESSION_STATE_CHANGED,
       handler: (event: SessionStateEventData) => void,
     ): void;
-  }
-
-  // Receiver
-
-  namespace system {
-    enum MessageType {
-      STRING = 'STRING',
-      JSON = 'JSON',
-    }
-
-    enum EventType {
-      SENDER_CONNECTED = 'senderconnected',
-      SENDER_DISCONNECTED = 'senderdisconnected',
-    }
-
-    type CustomMessageEvent = { senderId: string; data: unknown };
-  }
-
-  type CastReceiverOptions = {
-    disableIdleTimeout?: boolean;
-    skipPlayersLoad?: boolean;
-    customNamespaces?: Record<string, system.MessageType>;
-  };
-
-  class CastReceiverContext {
-    static getInstance(): CastReceiverContext;
-    start(options?: CastReceiverOptions): CastReceiverContext;
-    stop(): void;
-    getSenders(): unknown[];
-    addEventListener(type: system.EventType, handler: () => void): void;
-    addCustomMessageListener(namespace: string, listener: (event: system.CustomMessageEvent) => void): void;
-    sendCustomMessage(namespace: string, senderId: string | undefined, message: object): void;
   }
 }

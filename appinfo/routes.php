@@ -79,7 +79,6 @@ return [
         ['name' => 'Download#file', 'url' => '/api/download/{handle}', 'verb' => 'GET'],
         ['name' => 'Download#one', 'url' => '/api/stream/{fileid}', 'verb' => 'GET'],
 
-        ['name' => 'Cast#receiver', 'url' => '/cast/receiver', 'verb' => 'GET'],
         ['name' => 'Cast#tokens', 'url' => '/api/cast/tokens', 'verb' => 'POST'],
         ['name' => 'Cast#file', 'url' => '/api/cast/file/{fileid}', 'verb' => 'GET'],
 

@@ -216,8 +216,8 @@ export class API {
     return gen(`${BASE}/cast/tokens`);
   }
 
-  static CAST_FILE(fileid: number, token: string, size?: number) {
-    return API.Q(gen(`${BASE}/cast/file/{fileid}`, { fileid }), { t: token, size });
+  static CAST_FILE(fileid: number, token: string) {
+    return API.Q(gen(`${BASE}/cast/file/{fileid}`, { fileid }), { t: token });
   }
 
   static SHARE_LINKS() {

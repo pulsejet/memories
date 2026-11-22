@@ -49,7 +49,6 @@ export default {
   entry: {
     main: './main',
     admin: './admin',
-    'cast-receiver': './cast/receiver',
     'hooks-clear-cache': './hooks/clear-cache',
   },
 

@@ -74,10 +74,6 @@ final class SystemConfig
         // Valid values: 'true' | 'false' | 'disallow'
         'memories.viewer.video.autoplay' => 'true',
 
-        // Google Cast receiver application ID for the custom receiver at /apps/memories/cast/receiver.
-        // Empty to use Google's default media receiver (no registration, no custom UI).
-        'memories.cast.app_id' => '',
-
         // Disable transcoding
         'memories.vod.disable' => true,
 
