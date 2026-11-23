@@ -86,6 +86,10 @@ export async function* addToAlbum(user: string, name: string, photos: IPhoto[], 
   const fileInfos = await base.getFiles(photos, { ignoreRoute: true, signal: opts?.signal });
   const albumPath = getAlbumPath(user, name);
 
+  if (photos.length && !fileInfos.length) {
+    showError(t('memories', 'Failed to get file information for the selected photos.'));
+  }
+
   // Add each file
   const calls = fileInfos.map((f) => async () => {
     try {
