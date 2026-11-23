@@ -48,6 +48,7 @@ final class AlbumsQuery
 
         $query->selectAlias($query->func()->count(SQL::distinct($query, 'm.fileid')), 'count')
             ->selectAlias($query->func()->max('paf.album_file_id'), 'update_id')
+            ->selectAlias($query->func()->max('m.datetaken'), 'date_max')
         ;
 
         if ($shared) {
@@ -98,6 +99,7 @@ final class AlbumsQuery
             $row['album_id'] = (int) $row['album_id'];
             $row['created'] = (int) $row['created'];
             $row['last_added_photo'] = (int) $row['last_added_photo'];
+            $row['date_max'] = (int) $row['date_max'];
         }
 
         return $albums;

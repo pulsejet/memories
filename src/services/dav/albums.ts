@@ -58,6 +58,8 @@ export async function getAlbums(opts?: { fileid?: number } & AbortOpts) {
   const sort = config.album_list_sort;
   if (sort & constants.ALBUM_SORT_FLAGS.NAME) {
     data.sort((a, b) => a.name.localeCompare(b.name, getLanguage(), { numeric: true }));
+  } else if (sort & constants.ALBUM_SORT_FLAGS.DATE_TAKEN) {
+    data.sort((a, b) => (a.date_max ?? 0) - (b.date_max ?? 0));
   } else if (sort & constants.ALBUM_SORT_FLAGS.LAST_UPDATE) {
     data.sort((a, b) => (a.update_id ?? Number.MAX_SAFE_INTEGER) - (b.update_id ?? Number.MAX_SAFE_INTEGER));
   } else {

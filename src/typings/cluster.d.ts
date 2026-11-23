@@ -46,6 +46,8 @@ declare module '@typings' {
     last_added_photo_etag: string;
     /** Record ID of the latest update */
     update_id: number;
+    /** Timestamp of the most recent photo in the album */
+    date_max: number;
     /** Album is shared with other users */
     shared: boolean;
   }
