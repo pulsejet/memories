@@ -322,6 +322,12 @@ final class SystemConfig
         return $default;
     }
 
+    /** Set a user config value for the app. */
+    public function setUserConfigValue(string $uid, string $key, string $value): void
+    {
+        $this->userConfig->setValueString($uid, Application::APPNAME, $key, $value);
+    }
+
     /** Get the user's selected map tile server URL. */
     public function getUserMapTileServerUrl(): string
     {

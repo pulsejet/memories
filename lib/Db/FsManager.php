@@ -129,12 +129,14 @@ final class FsManager
         $uid = $user->getUID();
         $userFolder = $this->rootFolder->getUserFolder($uid);
 
+        $configuredPaths = false;
         if (null === $paths) {
             /** @var string[] $paths List of paths to add to root */
             if ($path = $this->getRequestFolder()) {
                 $paths = [$path];
             } else {
                 $paths = $this->systemConfig->getTimelinePaths($uid);
+                $configuredPaths = true;
             }
         }
 
@@ -144,10 +146,21 @@ final class FsManager
         // outside the timeline path; rely on expiration for that.
         $etag = $uid;
 
+        // Configured timeline paths may vanish when their folders are
+        // deleted; skip those so other configured paths still work.
+        $missing = 0;
         try {
             foreach ($paths as $path) {
                 if ($sanitized = Util::sanitizePath($path)) {
-                    $node = $userFolder->get($sanitized);
+                    try {
+                        $node = $userFolder->get($sanitized);
+                    } catch (NotFoundException $e) {
+                        if (!$configuredPaths) {
+                            throw $e;
+                        }
+                        ++$missing;
+                        continue;
+                    }
                     $root->addFolder($node);
                     $etag .= $node->getEtag();
                 } else {
@@ -156,6 +169,14 @@ final class FsManager
             }
         } catch (NotFoundException $e) {
             throw Exceptions::NotFound('Timeline root folder not found: '.$e->getMessage());
+        }
+
+        // Every configured timeline folder is gone; reset the setting so
+        // the user is asked to pick a new one instead of seeing errors.
+        if ($missing && $missing === \count($paths)) {
+            $this->systemConfig->setUserConfigValue($uid, 'timelinePath', '_empty_');
+
+            throw Exceptions::NotFound('Timeline root folder not found');
         }
 
         // Add shares or external stores inside the current folders
