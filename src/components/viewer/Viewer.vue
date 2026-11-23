@@ -1202,7 +1202,12 @@ function getItemData(photo: IPhoto): PsContent['data'] {
   }
 
   // Condition of loading full resolution image
-  const highSrcCond = config.high_res_cond || config.high_res_cond_default || 'zoom';
+  let highSrcCond = config.high_res_cond || config.high_res_cond_default || 'zoom';
+
+  // Never load the full image for RAW files
+  if (config.high_res_skip_raw && photo.mimetype === constants.MIME_RAW) {
+    highSrcCond = 'never';
+  }
 
   return {
     src: previewUrl,

@@ -181,6 +181,14 @@
       </div>
 
       <NcCheckboxRadioSwitch
+        :model-value="config.high_res_skip_raw"
+        @update:model-value="updateHighResSkipRaw"
+        type="switch"
+      >
+        {{ t('memories', 'Skip high resolution image for RAW files') }}
+      </NcCheckboxRadioSwitch>
+
+      <NcCheckboxRadioSwitch
         v-if="isNative"
         :model-value="config.native_hdr"
         @update:model-value="updateNativeHdr"
@@ -479,6 +487,10 @@ async function updateShowPhotoBasename(val: boolean) {
 // Viewer settings
 async function updateHighResCond(val: IConfig['high_res_cond']) {
   await setConfig('high_res_cond', val);
+}
+
+async function updateHighResSkipRaw(val: boolean) {
+  await setConfig('high_res_skip_raw', val);
 }
 
 async function updateLivephotoAutoplay(val: boolean) {
