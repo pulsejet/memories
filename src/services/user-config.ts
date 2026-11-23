@@ -50,6 +50,7 @@ const remoteNames: Partial<Record<keyof IConfig, string>> = {
 const localSettings: (keyof IConfig)[] = [
   'square_thumbs',
   'high_res_cond',
+  'high_res_skip_raw',
   'show_face_rect',
   'skip_viewer_delete_confirm',
   'video_volume',
@@ -203,6 +204,7 @@ function loadCached(): IConfig {
     // local settings
     square_thumbs: false,
     high_res_cond: null,
+    high_res_skip_raw: false,
     show_face_rect: false,
     skip_viewer_delete_confirm: false,
     video_volume: 1,

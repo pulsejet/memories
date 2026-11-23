@@ -62,6 +62,7 @@ declare module '@typings' {
     // local settings
     square_thumbs: boolean;
     high_res_cond: HighResCond | null;
+    high_res_skip_raw: boolean;
     show_face_rect: boolean;
     album_list_sort: number;
     skip_viewer_delete_confirm: boolean;
