@@ -6,6 +6,9 @@ namespace OCA\Memories\Db;
 
 use OCP\DB\QueryBuilder\IQueryBuilder;
 
+/**
+ * @psalm-import-type QueryTransform from TimelineQuery
+ */
 trait TimelineQueryMap
 {
     use TimelineQueryBase;
@@ -31,7 +34,10 @@ trait TimelineQueryMap
         );
     }
 
-    public function getMapClusters(float $gridLen, string $bounds): array
+    /**
+     * @param list<QueryTransform> $queryTransforms The query transformations to apply
+     */
+    public function getMapClusters(float $gridLen, string $bounds, array $queryTransforms = []): array
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -51,6 +57,11 @@ trait TimelineQueryMap
 
         // JOIN with memories for files from the current user
         $query->innerJoin('c', 'memories', 'm', $query->expr()->eq('c.id', 'm.mapcluster'));
+
+        // Apply all transformations (e.g. albums)
+        foreach ($queryTransforms as $transform) {
+            $transform($query, true);
+        }
 
         // JOIN with filecache for existing files
         $query = $this->filterFilecache($query);
@@ -75,9 +86,10 @@ trait TimelineQueryMap
     /**
      * Gets previews for a list of map clusters.
      *
-     * @param int[] $clusterIds
+     * @param int[]                $clusterIds
+     * @param list<QueryTransform> $queryTransforms The query transformations to apply
      */
-    public function getMapClusterPreviews(array $clusterIds): array
+    public function getMapClusterPreviews(array $clusterIds, array $queryTransforms = []): array
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -89,6 +101,11 @@ trait TimelineQueryMap
                 IQueryBuilder::PARAM_INT_ARRAY,
             )))
         ;
+
+        // Apply all transformations (e.g. albums)
+        foreach ($queryTransforms as $transform) {
+            $transform($query, false);
+        }
 
         // WHERE these photos are in the user's requested folder recursively
         $query = $this->filterFilecache($query);
@@ -127,9 +144,11 @@ trait TimelineQueryMap
      * Gets the suggested initial coordinates for the map.
      * Uses the coordinates of the newest photo (by date).
      *
+     * @param list<QueryTransform> $queryTransforms The query transformations to apply
+     *
      * @psalm-return array{lat: float, lon: float}|null
      */
-    public function getMapInitialPosition(): ?array
+    public function getMapInitialPosition(array $queryTransforms = []): ?array
     {
         $query = $this->connection->getQueryBuilder();
 
@@ -137,6 +156,11 @@ trait TimelineQueryMap
         $query->select('m.lat', 'm.lon')
             ->from('memories', 'm')
         ;
+
+        // Apply all transformations (e.g. albums)
+        foreach ($queryTransforms as $transform) {
+            $transform($query, false);
+        }
 
         // WHERE this photo is in the user's requested folder recursively
         $query = $this->filterFilecache($query);

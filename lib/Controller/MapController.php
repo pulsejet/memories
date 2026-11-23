@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\Memories\Controller;
 
 use OCA\Memories\AppInfo\Application;
+use OCA\Memories\ClustersBackend;
 use OCA\Memories\Db\TimelineQuery;
 use OCA\Memories\Exceptions;
 use OCA\Memories\Settings\SystemConfig;
@@ -60,11 +61,12 @@ final class MapController extends ApiController
             $clusterDensity = $this->systemConfig->getUserMapClusterDensity();
             $gridLen = 180.0 / (2.0 ** (float) $zoom * (float) $clusterDensity);
 
-            $clusters = $this->tq->getMapClusters($gridLen, $bounds);
+            $transforms = ClustersBackend\Manager::getTransforms($this->request);
+            $clusters = $this->tq->getMapClusters($gridLen, $bounds, $transforms);
 
             // Get previews for each cluster
             $clusterIds = array_map(static fn ($cluster) => (int) $cluster['id'], $clusters);
-            $previews = $this->tq->getMapClusterPreviews($clusterIds);
+            $previews = $this->tq->getMapClusterPreviews($clusterIds, $transforms);
 
             // Merge the responses
             $fileMap = [];
@@ -84,7 +86,7 @@ final class MapController extends ApiController
     {
         return $this->util->guardEx(function () {
             return new JSONResponse([
-                'pos' => $this->tq->getMapInitialPosition(),
+                'pos' => $this->tq->getMapInitialPosition(ClustersBackend\Manager::getTransforms($this->request)),
             ]);
         });
     }
