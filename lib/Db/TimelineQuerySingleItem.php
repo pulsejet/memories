@@ -100,7 +100,7 @@ trait TimelineQuerySingleItem
         }
 
         // Get address from places
-        $names = array_column($this->getPlacesById($id), 'name');
+        $names = array_values(array_unique(array_column($this->getPlacesById($id), 'name')));
 
         if (\count($names)) {
             // Get translated address
