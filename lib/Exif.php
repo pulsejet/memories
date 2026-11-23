@@ -472,6 +472,29 @@ final class Exif
             ?: throw new \Exception('Failed to strip live photo tags');
     }
 
+    /**
+     * Strip the embedded EXIF thumbnail from an image blob.
+     * The thumbnail still shows the pre-edit image after edits,
+     * which makes generated previews stale.
+     *
+     * @param string $blob image data
+     *
+     * @return string cleaned image data
+     */
+    public function stripEmbeddedThumbnail(string $blob): string
+    {
+        $cmd = array_merge($this->getExiftool(), [
+            '-IFD1:all=',
+            '-ThumbnailImage=',
+            '-PreviewImage=',
+            '-o', '-',
+            '-',
+        ]);
+
+        return Util::execSafe($cmd, self::EXIFTOOL_TIMEOUT, $blob)
+            ?: throw new \Exception('Failed to strip embedded thumbnail');
+    }
+
     public function getBinaryExifProp(string $path, string $prop): string
     {
         $this->assertValidLocalFile($path);

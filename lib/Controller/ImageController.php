@@ -536,6 +536,11 @@ final class ImageController extends ApiController
                 $blob = $this->exif->stripLivePhotoTags($blob);
             }
 
+            // Drop the embedded EXIF thumbnail so it cannot go stale.
+            if ('jpg' === $extLower || 'jpeg' === $extLower) {
+                $blob = $this->exif->stripEmbeddedThumbnail($blob);
+            }
+
             // Save the file
             if ($copy) {
                 $file = $file->getParent()->newFile($name, $blob);
