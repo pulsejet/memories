@@ -63,6 +63,8 @@ function getHlsConfig(HlsClass: typeof Hls): Partial<HlsConfig> {
     backBufferLength: 30,
     /** Fetch the first segment while the manifest is still parsing. */
     startFragPrefetch: true,
+    /** pickInitialLevel chooses the first level before loading starts. */
+    autoStartLoad: false,
     /** direct.m3u8 409s while probing; fail over fast, retry upgrade. */
     playlistLoadPolicy: {
       default: {
@@ -656,19 +658,27 @@ class VideoContentSetup {
 
     const applyLevel = () => {
       const levels = hls.levels;
-      if (!levels?.length) return;
+      const start = () => utils.runCatching(() => hls.startLoad());
+      if (!levels?.length) {
+        start();
+        return;
+      }
 
       // ABR stays on to switch down, but rarely climbs to the copy.
       if (spec === '0') {
         const direct = levels.findIndex((l) => /\/direct\.m3u8(\?|$)/.test(l.uri));
         if (direct !== -1) hls.startLevel = direct;
+        start();
         return;
       }
 
       let idx = levels.length - 1;
       if (spec !== '-1') {
         const target = Number.parseInt(spec, 10);
-        if (!Number.isFinite(target) || target <= 0) return;
+        if (!Number.isFinite(target) || target <= 0) {
+          start();
+          return;
+        }
         const best =
           levels.filter((l) => (l.height ?? 0) <= target).sort((a, b) => (b.height ?? 0) - (a.height ?? 0))[0] ??
           levels[0];
@@ -676,7 +686,9 @@ class VideoContentSetup {
       }
 
       // Player may be gone by the time the manifest parses.
-      utils.runCatching(() => (hls.nextLevel = idx));
+      // loadLevel pins the level and fetches only its playlist.
+      utils.runCatching(() => (hls.loadLevel = idx));
+      start();
     };
 
     if (hls.levels?.length) {
