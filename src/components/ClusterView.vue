@@ -4,7 +4,16 @@
 
     <EmptyContent v-if="!items.length && !loading" />
 
-    <ClusterGrid ref="grid" :items="items" :minCols="minCols" :maxSize="maxSize" :focus="true" :loading="!!loading">
+    <ClusterGrid
+      ref="grid"
+      :items="items"
+      :minCols="minCols"
+      :maxSize="maxSize"
+      :focus="true"
+      :loading="!!loading"
+      :selection="selectable ? selection : undefined"
+      @select="toggleSelect"
+    >
       <template #before>
         <DynamicTopMatter class="cv-dtm" ref="dtm" />
       </template>
@@ -24,9 +33,12 @@ import TopMatter from '@components/top-matter/TopMatter.vue';
 import ClusterGrid from '@components/ClusterGrid.vue';
 import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
+import { provideClusterSelection } from '@components/cluster-selection';
 
 import { config } from '@services/user-config';
+import { fragment } from '@services/route-fragment';
 import * as dav from '@services/dav';
+import * as utils from '@services/utils/common';
 
 import type { ICluster } from '@typings';
 
@@ -37,6 +49,7 @@ const gridRef = useTemplateRef<VueHTMLComponent>('grid');
 const items = ref<ICluster[]>([]);
 const loading = ref(0);
 const abort = useAbort();
+const selection = provideClusterSelection(refresh);
 
 useRouteState({
   state: { items },
@@ -45,6 +58,18 @@ useRouteState({
 
 const minCols = computed(() => (routeIs.Albums ? 2 : 3));
 const maxSize = computed(() => (routeIs.Albums ? 250 : 180));
+const selectable = computed(() => routeIs.Recognize || routeIs.FaceRecognition);
+
+function toggleSelect(item: ICluster) {
+  const rest = selection.value.filter((c) => c.cluster_id !== item.cluster_id);
+  selection.value = rest.length === selection.value.length ? [...rest, item] : rest;
+}
+
+utils.useBus('memories:fragment:pop:selection', () => (selection.value = []));
+watch(
+  () => selection.value.length > 0,
+  (value) => fragment.if(value, fragment.types.selection),
+);
 
 async function fetchClusters(signal: AbortSignal): Promise<ICluster[]> {
   if (routeIs.Albums) {
@@ -76,6 +101,7 @@ async function refresh() {
     ]);
     signal.throwIfAborted();
     items.value = newItems;
+    selection.value = [];
   } catch (e) {
     if (isAbortError(e)) return;
     console.error(e);
