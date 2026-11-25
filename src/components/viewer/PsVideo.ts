@@ -3,7 +3,7 @@ import { showError } from '@services/utils/dialog';
 import { translate as t } from '@services/l10n';
 import { config } from '@services/user-config';
 import { getPlayableVideoCodecsSync } from '@services/video/codec';
-import { attachVideoQualityHlsJs, detachVideoQuality } from './PsVideoQuality';
+import { attachVideoQualityHlsJs, detachVideoQuality, preferredHlsLevel } from './PsVideoQuality';
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
 import { API } from '@services/API';
@@ -657,6 +657,12 @@ class VideoContentSetup {
     const applyLevel = () => {
       const levels = hls.levels;
       if (!levels?.length) return;
+
+      const preferred = preferredHlsLevel(hls);
+      if (preferred !== -1) {
+        utils.runCatching(() => (hls.nextLevel = preferred));
+        return;
+      }
 
       // ABR stays on to switch down, but rarely climbs to the copy.
       if (spec === '0') {

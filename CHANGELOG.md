@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- **Feature**: Remember the selected video quality across playbacks ([#1856](https://github.com/pulsejet/memories/issues/1856))
+
 ## [v11.1.4] - 2026-11-12
 
 - **Feature**: Option to run bundled VIPS in place for SELinux (`memories.vips.direct`) ([#1824](https://github.com/pulsejet/memories/issues/1824))

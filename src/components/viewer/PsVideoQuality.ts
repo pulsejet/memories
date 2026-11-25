@@ -1,4 +1,5 @@
 import type Hls from 'hls.js';
+import { config, setConfig } from '@services/user-config';
 import type { QualityOption, VideoController } from '@typings';
 
 /** Internal quality hooks stored directly on the video element. */
@@ -57,6 +58,7 @@ function selectHlsQuality(video: HTMLVideoElement, id: string) {
   if (!hls) return;
 
   if (id === 'auto') {
+    setConfig('video_quality_pixels', 0);
     if (!hls.autoLevelEnabled) {
       hls.currentLevel = -1;
     }
@@ -67,14 +69,25 @@ function selectHlsQuality(video: HTMLVideoElement, id: string) {
   const option = buildHlsQualityList(hls).find((o) => o.id === id);
   if (!option) return;
 
+  const level = hls.levels[option.index];
+  setConfig('video_quality_pixels', level.width * level.height);
+
   if (hls.currentLevel === option.index) {
     // If the selected level is already playing, just pin it
     // without flushing the current playing buffer.
     hls.nextLevel = option.index;
-    hooks._qualitySelected = id;
   } else {
     hls.currentLevel = option.index;
   }
+  hooks._qualitySelected = id;
+}
+
+/** Level index closest in pixel count to the user's last pinned quality, or -1. */
+export function preferredHlsLevel(hls: Hls) {
+  const target = config.video_quality_pixels;
+  if (target <= 0) return -1;
+  const diff = (i: number) => Math.abs(hls.levels[i].width * hls.levels[i].height - target);
+  return hls.levels.reduce((best, _, i) => (diff(i) < diff(best) ? i : best), 0);
 }
 
 export function attachVideoQualityHlsJs(video: HTMLVideoElement | null, hls: Hls) {

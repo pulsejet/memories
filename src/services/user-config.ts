@@ -55,6 +55,7 @@ const localSettings: (keyof IConfig)[] = [
   'video_volume',
   'video_muted',
   'video_speed',
+  'video_quality_pixels',
   'native_hdr',
 ];
 
@@ -207,6 +208,7 @@ function loadCached(): IConfig {
     video_volume: 1,
     video_muted: false,
     video_speed: 1,
+    video_quality_pixels: 0,
     native_hdr: true,
   };
 

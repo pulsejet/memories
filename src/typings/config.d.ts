@@ -68,6 +68,7 @@ declare module '@typings' {
     video_volume: number;
     video_muted: boolean;
     video_speed: number;
+    video_quality_pixels: number;
     native_hdr: boolean;
   };
 

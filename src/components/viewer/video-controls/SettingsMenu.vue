@@ -192,7 +192,7 @@ useEventListener(() => props.video, 'quality-list', onQualityList);
 useEventListener(() => props.video, 'quality-selected', onQualitySelected);
 
 watch(quality, (value) => {
-  if (props.video && props.video.currentQuality !== undefined) {
+  if (props.video && props.video.currentQuality !== undefined && props.video.currentQuality !== value) {
     props.video.currentQuality = value;
   }
 });
