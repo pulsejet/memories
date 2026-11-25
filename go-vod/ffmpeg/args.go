@@ -327,6 +327,8 @@ const copyHLSTime = "0.001"
 //   - No edit list: hls.js ignores it while MSE applies it, so B-frame delay
 //     put them 1-2 frames apart and a one-frame tail segment never counted as
 //     buffered, stalling playback. Negative cts offsets replace it.
+//   - No timecode track: movenc cannot derive its rate inside the HLS muxer
+//     and logs an error for every timecoded source (e.g. GoPro).
 //   - The init path must be absolute: with the playlist on stdout, a relative
 //     one resolves against the working directory.
 //   - Segments cut on keyframes only; fMP4 passthrough needs each segment to
@@ -351,7 +353,7 @@ func SegmentArgs(s Spec, startID int, pattern, init string) []string {
 		"-hls_time", hlsTime,
 		"-hls_segment_type", "fmp4",
 		"-hls_fmp4_init_filename", init,
-		"-hls_segment_options", "movflags=+frag_discont+negative_cts_offsets:use_editlist=0",
+		"-hls_segment_options", "movflags=+frag_discont+negative_cts_offsets:use_editlist=0:write_tmcd=off",
 		"-hls_segment_filename", pattern,
 	)
 

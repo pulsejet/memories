@@ -374,7 +374,7 @@ func TestSegmentArgs(t *testing.T) {
 	require.Contains(t, c, "-start_number 4")
 	require.Contains(t, c, "-hls_segment_type fmp4")
 	require.Contains(t, c, "-hls_fmp4_init_filename /tmp/vod/720p-init-2.m4s")
-	require.Contains(t, c, `-hls_segment_options "movflags=+frag_discont+negative_cts_offsets:use_editlist=0"`)
+	require.Contains(t, c, `-hls_segment_options "movflags=+frag_discont+negative_cts_offsets:use_editlist=0:write_tmcd=off"`)
 	require.Contains(t, c, "-hls_segment_filename /tmp/vod/720p-%06d.m4s")
 	require.Contains(t, c, `"expr:gte(t,n_forced*3)" -`)
 	require.NotContains(t, c, "split_by_time")
