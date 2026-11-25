@@ -52,6 +52,8 @@
       </NcActions>
     </div>
 
+    <RecognizePeopleFilter v-if="isReal && routeIs.Recognize" />
+
     <FaceEditModal ref="editModal" />
     <FaceDeleteModal ref="deleteModal" />
     <FaceMergeModal ref="mergeModal" />
@@ -65,6 +67,8 @@ import { useRoute, useRouter } from 'vue-router';
 import NcActions from '@nextcloud/vue/components/NcActions';
 import NcActionButton from '@nextcloud/vue/components/NcActionButton';
 import NcActionCheckbox from '@nextcloud/vue/components/NcActionCheckbox';
+
+import RecognizePeopleFilter from './RecognizePeopleFilter.vue';
 
 import FaceEditModal from '@components/modal/FaceEditModal.vue';
 import FaceDeleteModal from '@components/modal/FaceDeleteModal.vue';
@@ -136,3 +140,9 @@ function changeShowFaceRect() {
   utils.bus.emit('memories:timeline:hard-refresh', null);
 }
 </script>
+
+<style scoped>
+.face-top-matter {
+  flex-wrap: wrap;
+}
+</style>

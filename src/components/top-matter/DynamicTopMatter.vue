@@ -53,7 +53,7 @@ const currentmatter = computed((): Component | null => {
     return markRaw(PlacesDynamicTopMatterVue);
   } else if (routeIs.Albums) {
     return markRaw(AlbumDynamicTopMatter);
-  } else if (routeIs.Base && config.enable_top_memories) {
+  } else if (routeIs.Base && config.enable_top_memories && !route.query.searchPlaces) {
     return markRaw(OnThisDay);
   }
 
