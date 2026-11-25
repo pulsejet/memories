@@ -11,6 +11,7 @@ REQUIRED = (
     "NEXTCLOUD_URL",
     "NC_USER",
     "NC_TOKEN",
+    "LENS_TOKEN",
     "QDRANT_URL",
     "EMBEDDING_MODEL_REVISION",
     "SENTENCE_MODEL_REVISION",
@@ -104,6 +105,7 @@ class Config:
     nextcloud_url: str
     nc_user: str
     nc_token: str
+    daemon_token: str
     qdrant_url: str
     embedding: EmbeddingConfig
     sentence_model: SentenceConfig
@@ -173,9 +175,18 @@ def _face_config() -> FaceConfig:
     )
 
 
+def _daemon_token() -> str:
+    """Shared bearer secret. Whitespace would break the Authorization header."""
+
+    token = os.environ["LENS_TOKEN"]
+    if len(token) < 16 or any(ch.isspace() for ch in token):
+        raise RuntimeError("LENS_TOKEN must be at least 16 characters and contain no whitespace")
+
+    return token
+
+
 def load_config() -> Config:
     """Build Config from env; raise on missing required or locked values."""
-
     missing = [v for v in REQUIRED if not os.environ.get(v)]
     if missing:
         raise RuntimeError(f"missing required env vars: {', '.join(missing)}")
@@ -237,6 +248,7 @@ def load_config() -> Config:
         nextcloud_url=os.environ["NEXTCLOUD_URL"],
         nc_user=os.environ["NC_USER"],
         nc_token=os.environ["NC_TOKEN"],
+        daemon_token=_daemon_token(),
         qdrant_url=os.environ["QDRANT_URL"],
         embedding=embedding,
         sentence_model=sentence_model,
