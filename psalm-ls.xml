@@ -37,6 +37,7 @@
     </projectFiles>
     <stubs>
         <file name="stubs/recognize.phpstub" />
+        <file name="stubs/groupfolders.phpstub" />
     </stubs>
     <issueHandlers>
         <PossiblyFalseArgument>
