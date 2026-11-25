@@ -108,8 +108,17 @@ export function isVideoContent(content: unknown): content is VideoContent {
   return typeof content === 'object' && (<VideoContent>content)?.data?.type === 'video';
 }
 
+/** The slide's web video element, once mounted */
+export function getWebPlayer(content: unknown): HTMLVideoElement | null {
+  const player = isVideoContent(content) ? content.videoPlayer : null;
+  return player instanceof HTMLVideoElement ? player : null;
+}
+
 class VideoContentSetup {
   wakeLock: WakeLockSentinel | null = null;
+
+  /** Called when a web player is mounted on the active slide */
+  public onWebPlayerMount: ((content: PsContent) => void) | null = null;
 
   /** hls.js chunk, prefetched so the player mounts fast on activation */
   private hls = import('hls.js');
@@ -269,9 +278,10 @@ class VideoContentSetup {
     stage.className = 'memories-video-stage';
 
     // Backing player: native hole view when available, else the web video tag.
-    const player: VideoControllerElement = nativex.viewVideoIsEnabled()
-      ? this.initPlayerNativeHole(content)
-      : this.initPlayerWeb(content);
+    // Panoramas always use the web player, which the sphere can draw from.
+    const isPanorama = (content.data.photo.pano ?? 0) > 0;
+    const player: VideoControllerElement =
+      nativex.viewVideoIsEnabled() && !isPanorama ? this.initPlayerNativeHole(content) : this.initPlayerWeb(content);
     if (!player || signal.aborted) return;
 
     player.addEventListener(
@@ -327,6 +337,10 @@ class VideoContentSetup {
     viewerControls.video = player;
     viewerControls.thumbnails = this.getStoryboardUrl(content, player);
     content.element.appendChild(viewerControls);
+
+    if (player instanceof HTMLVideoElement) {
+      this.onWebPlayerMount?.(content);
+    }
 
     // Attempt autoplay (may be blocked until user gesture).
     if (config.video_autoplay === 'true') {
