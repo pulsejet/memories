@@ -292,7 +292,7 @@ async function fetchImage(url: string, abortToken?: number): Promise<Blob> {
 }
 
 /** Abort a request by abortToken */
-function abortImageSrc(abortToken: number) {
+function abortImage(abortToken: number) {
   abortTokens.abort(abortToken);
   return true;
 }
@@ -356,10 +356,5 @@ function configure(_config: typeof config) {
   config = _config;
 }
 
-/** Get BLOB url for image */
-async function fetchImageSrc(url: string, abortToken?: number) {
-  return URL.createObjectURL(await fetchImage(url, abortToken));
-}
-
 // Exports to main thread
-export default exportWorker({ fetchImageSrc, abortImageSrc, configure });
+export default exportWorker({ fetchImage, abortImage, configure });
