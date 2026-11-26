@@ -356,10 +356,5 @@ function configure(_config: typeof config) {
   config = _config;
 }
 
-/** Get BLOB url for image */
-async function fetchImageSrc(url: string, abortToken?: number) {
-  return URL.createObjectURL(await fetchImage(url, abortToken));
-}
-
 // Exports to main thread
-export default exportWorker({ fetchImageSrc, abortImageSrc, configure });
+export default exportWorker({ fetchImage, abortImageSrc, configure });

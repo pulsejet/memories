@@ -2,7 +2,7 @@ import { importWorker } from 'webworker-typed';
 
 import { API } from '@services/API';
 import { onDOMLoaded } from '@services/utils/common';
-import { isAbortError, runWithAbortToken } from '@services/utils/abort';
+import { runWithAbortToken } from '@services/utils/abort';
 
 import type XImgWorker from '@components/frame/XImgWorker';
 import type { AbortOpts } from '@services/utils/abort';
@@ -72,28 +72,18 @@ export async function fetchImage(url: string, opts?: AbortOpts) {
   if (entry) return entry[1];
 
   // Fetch image
-  let blobUrl: string | undefined;
-  try {
-    blobUrl = await runWithAbortToken(
-      opts?.signal,
-      (token) => worker.fetchImageSrc(url, token),
-      (token) => void worker.abortImageSrc(token),
-    );
-    opts?.signal?.throwIfAborted();
-  } catch (error) {
-    if (blobUrl && isAbortError(error)) {
-      URL.revokeObjectURL(blobUrl);
-    }
-    throw error;
-  }
+  const blob = await runWithAbortToken(
+    opts?.signal,
+    (token) => worker.fetchImage(url, token),
+    (token) => void worker.abortImageSrc(token),
+  );
+  opts?.signal?.throwIfAborted();
 
   // Check memcache entry again and revoke if it was added in the meantime
-  if ((entry = BLOB_CACHE.get(url))) {
-    URL.revokeObjectURL(blobUrl);
-    return entry[1];
-  }
+  if ((entry = BLOB_CACHE.get(url))) return entry[1];
 
   // Create new memecache entry
+  const blobUrl = URL.createObjectURL(blob);
   BLOB_CACHE.set(url, [BLOB_CACHE_LIFETIME, blobUrl]); // 30s expiration
   return blobUrl;
 }
