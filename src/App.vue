@@ -114,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, markRaw, onBeforeMount, onMounted, ref, watch } from 'vue';
+import { computed, createApp, markRaw, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { defineAsyncComponent } from 'vue';
 
@@ -134,6 +134,7 @@ import Settings from '@components/Settings.vue';
 import Viewer from '@components/viewer/Viewer.vue';
 import Sidebar from '@components/Sidebar.vue';
 import MobileNav from '@components/MobileNav.vue';
+import CastMenuItem from '@components/header/CastMenuItem.vue';
 import RouteTransition from '@components/RouteTransition.vue';
 
 import EditMetadataModal from '@components/modal/EditMetadataModal.vue';
@@ -149,6 +150,7 @@ import SearchModal from '@components/modal/SearchModal.vue';
 
 import * as utils from '@services/utils/common';
 import * as nativex from '@native';
+import * as cast from '@services/cast';
 import { translate as t } from '@services/l10n';
 import { uid } from '@services/utils/auth';
 import { config, configStatus, hasVersionChanged } from '@services/user-config';
@@ -278,6 +280,17 @@ onMounted(() => {
   // Check for native interface
   if (native.value) {
     document.documentElement.classList.add('native');
+  }
+
+  // Casting stays connected across the app; every photo opened is shown on the TV
+  if (uid && !native.value && !routeIs.Public) {
+    void cast.init();
+    const header = document.querySelector<HTMLDivElement>('.header-right, .header-end');
+    if (header) {
+      const div = document.createElement('div');
+      header.prepend(div);
+      createApp(CastMenuItem).mount(div);
+    }
   }
 
   // Close navigation by default if init is disabled

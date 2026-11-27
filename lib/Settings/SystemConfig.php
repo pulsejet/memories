@@ -494,6 +494,9 @@ final class SystemConfig
         // Native communication
         $addImageDomain('http://127.0.0.1');
 
+        // Google Cast sender SDK
+        $policy->addAllowedScriptDomain('https://www.gstatic.com');
+
         // Allow configured location search provider
         $searchHost = parse_url((string) $this->get('memories.places.search.url'), PHP_URL_HOST);
         if (\is_string($searchHost) && '' !== $searchHost) {

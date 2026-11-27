@@ -2,6 +2,7 @@ import { showError } from '@services/utils/dialog';
 
 import { translate as t } from '@services/l10n';
 import { config } from '@services/user-config';
+import { state as castState } from '@services/cast';
 import { getPlayableVideoCodecsSync } from '@services/video/codec';
 import { attachVideoQualityHlsJs, detachVideoQuality, preferredHlsLevel } from './PsVideoQuality';
 import * as utils from '@services/utils/common';
@@ -299,7 +300,8 @@ class VideoContentSetup {
       { signal },
     );
 
-    if (config.video_autoplay === 'true') {
+    // Don't play along locally while the TV plays the video
+    if (config.video_autoplay === 'true' && !castState.connected) {
       player.preload = 'metadata';
       player.autoplay = true;
     } else {
