@@ -106,6 +106,7 @@ OC.L10N.register(
     "Load high resolution image on zoom" : "Hochauflösendes Bild beim Zoomen laden",
     "Always load high resolution image (not recommended)" : "Immer hochauflösende Bilder laden (nicht empfohlen)",
     "Never load high resolution image" : "Niemals hochauflösende Bilder laden",
+    "Skip high resolution image for RAW files" : "Hochauflösendes Bild für RAW-Dateien überspringen",
     "Enable HDR display" : "HDR-Anzeige aktivieren",
     "Logged in as {user}" : "Angemeldet als {user}",
     "Device Folders" : "Geräteordner",

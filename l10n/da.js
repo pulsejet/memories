@@ -106,6 +106,7 @@ OC.L10N.register(
     "Load high resolution image on zoom" : "Indlæs billede i høj opløsning ved zoom",
     "Always load high resolution image (not recommended)" : "Indlæs altid billeder i høj opløsning (anbefales ikke)",
     "Never load high resolution image" : "Indlæs aldrig billeder i høj opløsning",
+    "Skip high resolution image for RAW files" : "Spring billeder i høj opløsning over for RAW-filer",
     "Enable HDR display" : "Aktivér HDR-visning",
     "Logged in as {user}" : "Logget ind som {user}",
     "Device Folders" : "Enhedsmapper",

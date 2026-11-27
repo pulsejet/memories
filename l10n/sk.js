@@ -106,6 +106,7 @@ OC.L10N.register(
     "Load high resolution image on zoom" : "Načítať obrázok s vysokým rozlíšením pri priblížení",
     "Always load high resolution image (not recommended)" : "Vždy načítať obrázok s vysokým rozlíšením (neodporúča sa)",
     "Never load high resolution image" : "Nikdy nenačítavať obrázok s vysokým rozlíšením",
+    "Skip high resolution image for RAW files" : "Preskočiť obrázok s vysokým rozlíšením pri súboroch RAW",
     "Enable HDR display" : "Povoliť zobrazenie HDR",
     "Logged in as {user}" : "Prihlásený ako {user}",
     "Device Folders" : "Priečinky zariadenia",

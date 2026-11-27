@@ -106,6 +106,7 @@ OC.L10N.register(
     "Load high resolution image on zoom" : "在縮放時載入高解析度影像",
     "Always load high resolution image (not recommended)" : "一律載入高解析度影像（不建議）",
     "Never load high resolution image" : "永不載入高解析度影像",
+    "Skip high resolution image for RAW files" : "略過 RAW 檔案的高解析度影像",
     "Enable HDR display" : "啟用 HDR 顯示",
     "Logged in as {user}" : "登入為 {user}",
     "Device Folders" : "裝置資料夾",

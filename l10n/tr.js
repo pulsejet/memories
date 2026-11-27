@@ -106,6 +106,7 @@ OC.L10N.register(
     "Load high resolution image on zoom" : "Yakınlaştırıldığında yüksek çözünürlüklü görsel yüklensin",
     "Always load high resolution image (not recommended)" : "Her zaman yüksek çözünürlüklü görsel yüklensin (önerilmez)",
     "Never load high resolution image" : "Hiçbir zaman yüksek çözünürlüklü görsel yüklenmesin",
+    "Skip high resolution image for RAW files" : "RAW dosyaları için yüksek çözünürlüklü görsel atlansın",
     "Enable HDR display" : "HDR görünümünü aç",
     "Logged in as {user}" : "{user} olarak oturum açıldı",
     "Device Folders" : "Aygıt klasörleri",
