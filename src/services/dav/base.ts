@@ -112,6 +112,16 @@ async function getFilesInternal1(photos: IPhoto[], opts?: AbortOpts & { token?: 
   }
 
   if (errors.length) throw errors[0];
+
+  // Some setups silently drop files from DAV SEARCH results
+  // (e.g. certain external storages). Fall back to fetching
+  // the file infos one by one for anything missing.
+  const foundIds = new Set(fileInfos.map((f) => f.fileid));
+  const missing = photos.filter((p) => !foundIds.has(p.fileid));
+  if (missing.length) {
+    fileInfos.push(...(await getFilesViaAPI(missing, { ...opts, token: utils.uid })));
+  }
+
   return fileInfos;
 }
 
