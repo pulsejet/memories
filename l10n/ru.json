@@ -104,6 +104,7 @@
     "Load high resolution image on zoom" : "Загружать изображение в высоком разрешении при приближении",
     "Always load high resolution image (not recommended)" : "Всегда загружать изображение в высоком разрешении (не рекомендуется)",
     "Never load high resolution image" : "Не загружать изображения в высоком разрешении",
+    "Skip high resolution image for RAW files" : "Пропускать изображение в высоком разрешении для файлов RAW",
     "Enable HDR display" : "Показывать в HDR",
     "Logged in as {user}" : "Вошёл как {user}",
     "Device Folders" : "Папки устройства",

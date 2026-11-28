@@ -106,6 +106,7 @@ OC.L10N.register(
     "Load high resolution image on zoom" : "Laadi kõrgresolutsiooniga pilt vaid suumides",
     "Always load high resolution image (not recommended)" : "Alati laadi kõrgresolutsiooniga pilt (pole soovitatav)",
     "Never load high resolution image" : "Ära kunagi laadi kõrgresolutsiooniga pilte",
+    "Skip high resolution image for RAW files" : "Jäta RAW-failide kõrgresolutsiooniga pilt vahele",
     "Enable HDR display" : "Lülita HDR-ekraan sisse",
     "Logged in as {user}" : "Sisse logitud kui {user}",
     "Device Folders" : "Seadmete kaustad",
