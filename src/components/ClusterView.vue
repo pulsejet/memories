@@ -2,9 +2,38 @@
   <div class="container no-user-select cluster-view">
     <TopMatter />
 
+    <NcTextField
+      v-if="routeIs.Albums && items.length"
+      class="cv-filter"
+      v-model="filter"
+      :label="t('memories', 'Filter albums by name')"
+      :labelVisible="false"
+      :placeholder="t('memories', 'Filter albums by name')"
+      :showTrailingButton="!!filter"
+      :trailingButtonLabel="t('memories', 'Clear')"
+      @trailing-button-click="filter = String()"
+    >
+      <template #icon>
+        <MagnifyIcon :size="20" />
+      </template>
+    </NcTextField>
+
     <EmptyContent v-if="!items.length && !loading" />
 
-    <ClusterGrid ref="grid" :items="items" :minCols="minCols" :maxSize="maxSize" :focus="true" :loading="!!loading">
+    <NcEmptyContent v-else-if="!filteredItems.length && !loading" :name="t('memories', 'No albums match your filter')">
+      <template #icon>
+        <MagnifyIcon />
+      </template>
+    </NcEmptyContent>
+
+    <ClusterGrid
+      ref="grid"
+      :items="filteredItems"
+      :minCols="minCols"
+      :maxSize="maxSize"
+      :focus="true"
+      :loading="!!loading"
+    >
       <template #before>
         <DynamicTopMatter class="cv-dtm" ref="dtm" />
       </template>
@@ -20,13 +49,18 @@ import { until } from '@vueuse/core';
 import { useRouteIs } from '@services/route-is';
 import { useRouteState } from '@services/route-state';
 import { isAbortError, raceWithAbort, useAbort } from '@services/utils/abort-vue';
+import NcTextField from '@nextcloud/vue/components/NcTextField';
+import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent';
 import TopMatter from '@components/top-matter/TopMatter.vue';
 import ClusterGrid from '@components/ClusterGrid.vue';
 import EmptyContent from '@components/top-matter/EmptyContent.vue';
 import DynamicTopMatter from '@components/top-matter/DynamicTopMatter.vue';
 
+import { t } from '@services/l10n';
 import { config } from '@services/user-config';
 import * as dav from '@services/dav';
+
+import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
 
 import type { ICluster } from '@typings';
 
@@ -35,12 +69,28 @@ const routeIs = useRouteIs();
 const dtmRef = useTemplateRef<InstanceType<typeof DynamicTopMatter>>('dtm');
 const gridRef = useTemplateRef<VueHTMLComponent>('grid');
 const items = ref<ICluster[]>([]);
+const filter = ref('');
 const loading = ref(0);
 const abort = useAbort();
 
 useRouteState({
-  state: { items },
+  state: { items, filter },
   scroll: { gridRef },
+});
+
+/** Normalize text for case and accent insensitive matching */
+function normalize(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase();
+}
+
+/** Items matching the album name filter */
+const filteredItems = computed((): ICluster[] => {
+  const query = normalize(filter.value.trim());
+  if (!routeIs.Albums || !query) return items.value;
+  return items.value.filter((item) => normalize(item.display_name || item.name).includes(query));
 });
 
 const minCols = computed(() => (routeIs.Albums ? 2 : 3));
@@ -96,6 +146,11 @@ watch(config, refresh);
   display: flex;
   flex-direction: column;
   position: relative;
+
+  .cv-filter {
+    margin: 5px 60px 5px 10px;
+    width: auto;
+  }
 
   .cv-dtm {
     margin-bottom: 5px;
