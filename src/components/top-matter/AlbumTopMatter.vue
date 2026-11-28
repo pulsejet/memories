@@ -49,6 +49,17 @@
 
         <NcActionRadio
           name="sort"
+          :aria-label="t('memories', 'Photo date')"
+          :model-value="sortField"
+          value="date_taken"
+          @change="changeSort(constants.ALBUM_SORT_FLAGS.DATE_TAKEN)"
+          close-after-click
+        >
+          {{ t('memories', 'Photo date') }}
+        </NcActionRadio>
+
+        <NcActionRadio
+          name="sort"
           :aria-label="t('memories', 'Album name')"
           :model-value="sortField"
           value="name"
@@ -202,6 +213,7 @@ const name = computed((): string => {
 const isDateSort = computed((): boolean => {
   return (
     !!(config.album_list_sort & constants.ALBUM_SORT_FLAGS.CREATED) ||
+    !!(config.album_list_sort & constants.ALBUM_SORT_FLAGS.DATE_TAKEN) ||
     !!(config.album_list_sort & constants.ALBUM_SORT_FLAGS.LAST_UPDATE)
   );
 });
@@ -212,6 +224,7 @@ const isDescending = computed((): boolean => {
 
 const sortField = computed((): string => {
   if (config.album_list_sort & constants.ALBUM_SORT_FLAGS.CREATED) return 'created';
+  if (config.album_list_sort & constants.ALBUM_SORT_FLAGS.DATE_TAKEN) return 'date_taken';
   if (config.album_list_sort & constants.ALBUM_SORT_FLAGS.NAME) return 'name';
   return 'last_update';
 });

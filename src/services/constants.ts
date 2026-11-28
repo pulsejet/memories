@@ -59,6 +59,7 @@ export const constants = Object.freeze({
     LAST_UPDATE: 1 << 1, // default
     CREATED: 1 << 2,
     NAME: 1 << 3,
+    DATE_TAKEN: 1 << 4,
   },
 });
 

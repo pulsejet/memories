@@ -4,19 +4,39 @@
 
     <EmptyContent v-if="!items.length && !loading" />
 
-    <ClusterGrid ref="grid" :items="items" :minCols="minCols" :maxSize="maxSize" :focus="true" :loading="!!loading">
+    <ClusterGrid
+      ref="grid"
+      :items="filteredItems"
+      :minCols="minCols"
+      :maxSize="maxSize"
+      :focus="true"
+      :loading="!!loading"
+    >
       <template #before>
         <DynamicTopMatter class="cv-dtm" ref="dtm" />
+        <NcTextField
+          v-if="routeIs.Albums"
+          v-model="search"
+          class="cv-search"
+          :label="t('memories', 'Filter albums')"
+          :placeholder="t('memories', 'Filter albums')"
+        >
+          <MagnifyIcon :size="16" />
+        </NcTextField>
       </template>
     </ClusterGrid>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, useTemplateRef, computed, watch, onMounted } from 'vue';
+import { ref, useTemplateRef, computed, watch, onMounted, markRaw } from 'vue';
 import { useRoute } from 'vue-router';
 import { until } from '@vueuse/core';
+import Fuse from 'fuse.js';
 
+import NcTextField from '@nextcloud/vue/components/NcTextField';
+
+import { t } from '@services/l10n';
 import { useRouteIs } from '@services/route-is';
 import { useRouteState } from '@services/route-state';
 import { isAbortError, raceWithAbort, useAbort } from '@services/utils/abort-vue';
@@ -30,6 +50,8 @@ import * as dav from '@services/dav';
 
 import type { ICluster } from '@typings';
 
+import MagnifyIcon from 'vue-material-design-icons/Magnify.vue';
+
 const route = useRoute();
 const routeIs = useRouteIs();
 const dtmRef = useTemplateRef<InstanceType<typeof DynamicTopMatter>>('dtm');
@@ -37,6 +59,13 @@ const gridRef = useTemplateRef<VueHTMLComponent>('grid');
 const items = ref<ICluster[]>([]);
 const loading = ref(0);
 const abort = useAbort();
+const search = ref(String());
+const fuse = ref<Fuse<ICluster> | null>(null);
+
+const filteredItems = computed((): ICluster[] => {
+  if (!search.value || !fuse.value) return items.value;
+  return fuse.value.search(search.value).map((r) => r.item);
+});
 
 useRouteState({
   state: { items },
@@ -76,6 +105,7 @@ async function refresh() {
     ]);
     signal.throwIfAborted();
     items.value = newItems;
+    fuse.value = markRaw(new Fuse(newItems, { keys: ['name'] }));
   } catch (e) {
     if (isAbortError(e)) return;
     console.error(e);
@@ -99,6 +129,10 @@ watch(config, refresh);
 
   .cv-dtm {
     margin-bottom: 5px;
+  }
+
+  .cv-search {
+    margin-bottom: 8px;
   }
 }
 </style>
